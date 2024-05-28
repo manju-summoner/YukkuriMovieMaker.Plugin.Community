@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+	<UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="YukkuriMovieMaker.Controls">
+      <HintPath>D:\repos\YukkuriMovieMaker\YukkuriMovieMaker\bin\Debug\net8.0-windows10.0.19041.0\YukkuriMovieMaker.Controls.dll</HintPath>
+    </Reference>
+    <Reference Include="YukkuriMovieMaker.Plugin">
+      <HintPath>D:\repos\YukkuriMovieMaker\YukkuriMovieMaker\bin\Debug\net8.0-windows10.0.19041.0\YukkuriMovieMaker.Plugin.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Effect\Audio\" />
+    <Folder Include="Effect\Video\" />
+    <Folder Include="Voice\" />
+    <Folder Include="Brush\" />
+    <Folder Include="FileSource\" />
+    <Folder Include="FileWriter\" />
+    <Folder Include="Shape\" />
+    <Folder Include="Tachie\" />
+    <Folder Include="TextCompletion\" />
+    <Folder Include="Transition\" />
+  </ItemGroup>
+
+</Project>
