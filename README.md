@@ -1,1 +1,4 @@
-# YukkuriMovieMaker.Plugin.Community
+# YukkuriMovieMaker4コミュニティプラグイン
+YMM4コミュニティで開発するYMM4プラグインです。  
+プラグインのサンプルも兼ねています。  
+ここで開発されたプラグインはYMM4にデフォルトで組み込まれます。
