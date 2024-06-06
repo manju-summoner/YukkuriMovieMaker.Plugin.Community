@@ -13,5 +13,8 @@ YMM v4.30.0.0以降が必要です。
 ※ パスの末尾は必ず`\`で終わる必要があります。（例: `D:\YMM4\`）
 1. `YukkuriMovieMaker.Plugin.Community.sln`を開き、ビルドします。
 
-# 使用方法
-YMM4フォルダ内の`YukkuriMovieMaker.Plugin.Community.dll`を置き換えてください。
+# 使用方法（一般ユーザー向け）
+YMM4にデフォルトで組み込まれます。YMM4のアップデートをお待ち下さい。
+
+# 使用方法（開発者向け）
+ビルド後、YMM4フォルダ内の`YukkuriMovieMaker.Plugin.Community.dll`を置き換えてください。
