@@ -10,10 +10,16 @@
 
   <ItemGroup>
     <Reference Include="YukkuriMovieMaker.Controls">
-      <HintPath>D:\repos\YukkuriMovieMaker\YukkuriMovieMaker\bin\Debug\net8.0-windows10.0.19041.0\YukkuriMovieMaker.Controls.dll</HintPath>
+      <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Controls.dll</HintPath>
     </Reference>
     <Reference Include="YukkuriMovieMaker.Plugin">
-      <HintPath>D:\repos\YukkuriMovieMaker\YukkuriMovieMaker\bin\Debug\net8.0-windows10.0.19041.0\YukkuriMovieMaker.Plugin.dll</HintPath>
+      <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
+    </Reference>
+	<Reference Include="SharpGen.Runtime">
+	  <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
+	</Reference>
+	<Reference Include="Vortice.Direct2D1">
+	  <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
     </Reference>
   </ItemGroup>
 
