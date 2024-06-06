@@ -16,7 +16,7 @@ using YukkuriMovieMaker.UndoRedo;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeTrimming
 {
-    [VideoEffect(nameof(Texts.EdgeTrimmingEffectName), [nameof(VideoEffectCategories.Filtering)], ["edge trimming"], IsEffectItemSupported = false, IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.EdgeTrimmingEffectName), [VideoEffectCategories.Filtering], ["edge trimming"], IsEffectItemSupported = false, IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     internal class EdgeTrimmingEffect : VideoEffectBase
     {
         public override string Label => Texts.EdgeTrimmingEffectName;
