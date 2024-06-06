@@ -9,23 +9,28 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="YukkuriMovieMaker.Controls">
-      <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Controls.dll</HintPath>
-    </Reference>
-    <Reference Include="YukkuriMovieMaker.Plugin">
-      <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
-    </Reference>
-	<Reference Include="SharpGen.Runtime">
-	  <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
-	</Reference>
-	<Reference Include="Vortice.Direct2D1">
-	  <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
-    </Reference>
+	  <Reference Include="YukkuriMovieMaker.Controls">
+		  <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Controls.dll</HintPath>
+	  </Reference>
+	  <Reference Include="YukkuriMovieMaker.Plugin">
+		  <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
+	  </Reference>
+	  <Reference Include="SharpGen.Runtime">
+		  <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Vortice.DirectX">
+		  <HintPath>$(YMM4DirPath)Vortice.DirectX.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Vortice.Direct2D1">
+		  <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Vortice.Mathematics">
+		  <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
+	  </Reference>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Effect\Audio\" />
-    <Folder Include="Effect\Video\" />
     <Folder Include="Voice\" />
     <Folder Include="Brush\" />
     <Folder Include="FileSource\" />
@@ -39,6 +44,14 @@
   <ItemGroup>
     <ProjectReference Include="..\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <AdditionalFiles Include="**/*.csv" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <None Remove="Effect\Video\EdgeTrimming\Texts.csv" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <Resource Include="..\Release\EdgeTrimming.cso" Link="Resources\Shader\EdgeTrimming.cso" />
   </ItemGroup>
 
 </Project>
