@@ -48,10 +48,12 @@
 	
   <ItemGroup>
     <None Remove="Effect\Video\EdgeTrimming\Texts.csv" />
+    <None Remove="Effect\Video\LuminanceKey\Texts.csv" />
   </ItemGroup>
 	
   <ItemGroup>
     <Resource Include="..\Release\EdgeTrimming.cso" Link="Resources\Shader\EdgeTrimming.cso" />
+    <Resource Include="..\Release\LuminanceKey.cso" Link="Resources\Shader\LuminanceKey.cso" />
   </ItemGroup>
 
 </Project>

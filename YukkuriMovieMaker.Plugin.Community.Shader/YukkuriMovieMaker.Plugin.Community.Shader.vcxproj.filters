@@ -18,5 +18,8 @@
     <FxCompile Include="EdgeTrimming.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="LuminanceKey.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
