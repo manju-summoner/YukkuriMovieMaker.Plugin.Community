@@ -71,4 +71,5 @@
 <data name="Brightness" xml:space="preserve"><value>Brightness</value></data>
 <data name="Extend" xml:space="preserve"><value>Extend</value></data>
 <data name="ColorSpace" xml:space="preserve"><value>Color space</value></data>
+<data name="Offset" xml:space="preserve"><value>Offset</value></data>
 </root>

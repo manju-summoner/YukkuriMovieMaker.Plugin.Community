@@ -40,7 +40,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear
                 if (stopCollection != null)
                     disposer.RemoveAndDispose(ref stopCollection);
                 stopCollection = devices.DeviceContext.CreateGradientStopCollection(
-                    RainbowStopsGenerator.Create(saturation/100, brightness/100, colorSpace),
+                    RainbowStopsGenerator.Create(0, saturation/100, brightness/100, colorSpace),
                     Gamma.StandardRgb,
                     extendMode);
                 disposer.Collect(stopCollection);

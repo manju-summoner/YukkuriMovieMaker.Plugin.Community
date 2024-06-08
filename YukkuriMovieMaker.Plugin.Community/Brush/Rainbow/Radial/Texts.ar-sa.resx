@@ -71,4 +71,5 @@
 <data name="Brightness" xml:space="preserve"><value>السطوع</value></data>
 <data name="Extend" xml:space="preserve"><value>تكرار</value></data>
 <data name="ColorSpace" xml:space="preserve"><value>فضاء الألوان</value></data>
+<data name="Offset" xml:space="preserve"><value>الإزاحة</value></data>
 </root>

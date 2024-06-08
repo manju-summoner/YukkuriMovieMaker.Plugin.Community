@@ -71,4 +71,5 @@
 <data name="Brightness" xml:space="preserve"><value>Brillo</value></data>
 <data name="Extend" xml:space="preserve"><value>Repetir</value></data>
 <data name="ColorSpace" xml:space="preserve"><value>Espacio de color</value></data>
+<data name="Offset" xml:space="preserve"><value>Desplazamiento</value></data>
 </root>

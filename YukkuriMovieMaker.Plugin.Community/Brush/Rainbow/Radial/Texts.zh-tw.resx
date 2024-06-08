@@ -71,4 +71,5 @@
 <data name="Brightness" xml:space="preserve"><value>亮度</value></data>
 <data name="Extend" xml:space="preserve"><value>重複</value></data>
 <data name="ColorSpace" xml:space="preserve"><value>色彩空間</value></data>
+<data name="Offset" xml:space="preserve"><value>偏移</value></data>
 </root>

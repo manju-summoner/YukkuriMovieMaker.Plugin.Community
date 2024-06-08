@@ -8,6 +8,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Radial
 {
     internal class RainbowRadialGradientBrushParameter : BrushParameterBase
     {
+        [Display(Name = nameof(Texts.Offset), ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", -100, 100)]
+        public Animation Offset { get; } = new Animation(0);
+
         [Display(Name = nameof(Texts.CenterX), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
         public Animation CenterX { get; } = new Animation(0);
@@ -61,6 +65,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Radial
             return new RainbowRadialGradientBrushSource(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [CenterX, CenterY, OriginX, OriginY, RadiusX, RadiusY, Zoom, Saturation, Brightness];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [Offset, CenterX, CenterY, OriginX, OriginY, RadiusX, RadiusY, Zoom, Saturation, Brightness];
     }
 }

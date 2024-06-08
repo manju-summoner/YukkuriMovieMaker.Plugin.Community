@@ -12,7 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow
 {
     internal class RainbowStopsGenerator
     {
-        public static GradientStop[] Create(double saturate, double value, RainbowColorSpace colorSpace)
+        public static GradientStop[] Create(double hueOffset, double saturate, double value, RainbowColorSpace colorSpace)
         {
             var delta = 30;
             var count = 360 / delta;
@@ -20,7 +20,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow
             for (int i = 0; i <= count; i++)
             {
                 
-                var h = (double)i / count;
+                var h = (hueOffset + (double)i / count) % 1;
                 var s = saturate;
                 var v = value;
                 Color4 color;

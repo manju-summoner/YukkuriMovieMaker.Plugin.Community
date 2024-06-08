@@ -13,7 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Radial
         readonly DisposeCollector disposer = new();
 
         bool isFirst = true;
-        double centerX, centerY, radiusX, radiusY, originX, originY, saturation, brightness;
+        double offset, centerX, centerY, radiusX, radiusY, originX, originY, saturation, brightness;
         RainbowColorSpace colorSpace;
         Vortice.Direct2D1.ExtendMode extendMode;
 
@@ -27,6 +27,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Radial
             var length = desc.ItemDuration.Frame;
             var fps = desc.FPS;
 
+            var offset = rainbowBrushParameter.Offset.GetValue(frame, length, fps);
             var zoom = rainbowBrushParameter.Zoom.GetValue(frame, length, fps);
             var centerX = rainbowBrushParameter.CenterX.GetValue(frame, length, fps);
             var centerY = rainbowBrushParameter.CenterY.GetValue(frame, length, fps);
@@ -39,12 +40,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Radial
             var colorSpace = rainbowBrushParameter.ColorSpace;
             var extendMode = rainbowBrushParameter.ExtendMode.ToD2DExtendMode();
 
-            if (isFirst || this.saturation != saturation || this.brightness != brightness || this.colorSpace != colorSpace || this.extendMode != extendMode)
+            if (isFirst || this.offset != offset || this.saturation != saturation || this.brightness != brightness || this.colorSpace != colorSpace || this.extendMode != extendMode)
             {
                 if (stopCollection != null)
                     disposer.RemoveAndDispose(ref stopCollection);
                 stopCollection = devices.DeviceContext.CreateGradientStopCollection(
-                    RainbowStopsGenerator.Create(saturation/100, brightness/100, colorSpace),
+                    RainbowStopsGenerator.Create(-offset / 100, saturation/100, brightness/100, colorSpace),
                     Gamma.StandardRgb,
                     extendMode);
                 disposer.Collect(stopCollection);
@@ -79,6 +80,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Radial
             }
 
             isFirst = false;
+            this.offset = offset;
             this.centerX = centerX;
             this.centerY = centerY;
             this.radiusX = radiusX;
