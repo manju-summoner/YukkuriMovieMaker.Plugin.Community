@@ -47,6 +47,7 @@
 	
   <ItemGroup>
     <None Remove="Brush\Rainbow\Linear\Texts.csv" />
+    <None Remove="Brush\Rainbow\Radial\Texts.csv" />
     <None Remove="Effect\Video\EdgeTrimming\Texts.csv" />
     <None Remove="Effect\Video\LuminanceKey\Texts.csv" />
   </ItemGroup>
