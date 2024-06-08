@@ -32,7 +32,6 @@
   <ItemGroup>
     <Folder Include="Effect\Audio\" />
     <Folder Include="Voice\" />
-    <Folder Include="Brush\" />
     <Folder Include="FileSource\" />
     <Folder Include="FileWriter\" />
     <Folder Include="Shape\" />
@@ -47,6 +46,7 @@
   </ItemGroup>
 	
   <ItemGroup>
+    <None Remove="Brush\Rainbow\Linear\Texts.csv" />
     <None Remove="Effect\Video\EdgeTrimming\Texts.csv" />
     <None Remove="Effect\Video\LuminanceKey\Texts.csv" />
   </ItemGroup>
