@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YukkuriMovieMaker.Generator;
 
-namespace YukkuriMovieMaker.Plugin.Community.Brush.RainbowLinearGradient
+namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear
 {
     [AutoGenLocalizer]
     partial class Texts

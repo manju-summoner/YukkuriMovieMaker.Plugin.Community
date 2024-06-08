@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YukkuriMovieMaker.Plugin.Brush;
-using YukkuriMovieMaker.Plugin.Community.Brush.RainbowLinearGradient;
 
 namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear
 {

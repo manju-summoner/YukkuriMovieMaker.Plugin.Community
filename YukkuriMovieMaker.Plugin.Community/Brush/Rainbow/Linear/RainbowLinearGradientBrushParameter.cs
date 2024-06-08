@@ -3,9 +3,7 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Plugin.Brush;
 using YukkuriMovieMaker.Plugin.Community.Brush.Commons;
-using YukkuriMovieMaker.Plugin.Community.Brush.RainbowLinearGradient;
 using YukkuriMovieMaker.Plugin.Community.Commons;
-using Texts = YukkuriMovieMaker.Plugin.Community.Brush.RainbowLinearGradient.Texts;
 
 namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear
 {
