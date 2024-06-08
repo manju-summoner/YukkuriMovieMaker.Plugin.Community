@@ -1,0 +1,4 @@
+﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,
+DecibelVolumeEffect,,音量（dB）,Volume (dB),音量（dB）,音量（dB）,볼륨 (dB),Volumen (dB),مستوى الصوت (ديسيبل),
+DecibelName,,デシベル,Decibel,分贝,分貝,데시벨,Decibel,ديسيبل,
+DecibelDesc,,10dB増えるごとに音の強さが10倍になります。,The volume increases tenfold for every 10dB increase.,每增加10dB，音量增加10倍。,每增加10dB，音量增加10倍。,10dB 증가할 때마다 볼륨이 10배 증가합니다.,El volumen aumenta diez veces por cada aumento de 10 dB.,يزداد الصوت بمقدار عشر مرات لكل زيادة بمقدار 10 ديسيبل.,
