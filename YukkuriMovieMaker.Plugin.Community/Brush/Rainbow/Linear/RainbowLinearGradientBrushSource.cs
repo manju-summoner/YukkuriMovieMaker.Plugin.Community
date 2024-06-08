@@ -7,13 +7,10 @@ using YukkuriMovieMaker.Plugin.Community.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear
 {
-    internal class RainbowLinearGradientBrushSource : IBrushSource
+    internal class RainbowLinearGradientBrushSource(IGraphicsDevicesAndContext devices, RainbowLinearGradientBrushParameter rainbowBrushParameter) : IBrushSource
     {
         public ID2D1Brush Brush => brush ?? throw new NullReferenceException(nameof(brush));
-
         readonly DisposeCollector disposer = new();
-        private IGraphicsDevicesAndContext devices;
-        private RainbowLinearGradientBrushParameter rainbowBrushParameter;
 
         bool isFirst = true;
         double width, offset, saturation, brightness, angle;
@@ -22,13 +19,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear
 
         ID2D1GradientStopCollection? stopCollection;
         ID2D1LinearGradientBrush? brush;
-
-        public RainbowLinearGradientBrushSource(IGraphicsDevicesAndContext devices, RainbowLinearGradientBrushParameter rainbowBrushParameter)
-        {
-            this.devices = devices;
-            this.rainbowBrushParameter = rainbowBrushParameter;
-        }
-
 
         public bool Update(TimelineItemSourceDescription desc)
         {
