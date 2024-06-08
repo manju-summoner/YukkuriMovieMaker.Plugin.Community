@@ -13,10 +13,10 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DecibelVolume
 {
-    [AudioEffect(nameof(Texts.DecibelVolumeEffect), [AudioEffectCategories.Basic], ["gain","volume","ゲイン", "ボリューム"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [AudioEffect(nameof(Texts.DecibelVolumeEffect), [AudioEffectCategories.Basic], ["gain", "volume", "ゲイン", "ボリューム"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     internal class DecibelVolumeEffect : AudioEffectBase
     {
-        public override string Label => Texts.DecibelVolumeEffect;
+        public override string Label => $"{Texts.DecibelVolumeEffect} {Decibel.GetValue(0, 1, 30):+0.0;-0.0;}dB";
 
         [Display(GroupName = nameof(Texts.DecibelVolumeEffect), Name = nameof(Texts.DecibelName), Description = nameof(Texts.DecibelDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -10, 10)]
