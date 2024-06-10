@@ -48,6 +48,7 @@
     <None Remove="Brush\Rainbow\Linear\Texts.csv" />
     <None Remove="Brush\Rainbow\Radial\Texts.csv" />
     <None Remove="Effect\Audio\DecibelVolume\Texts.csv" />
+    <None Remove="Effect\Video\EdgeDetection\Texts.csv" />
     <None Remove="Effect\Video\EdgeTrimming\Texts.csv" />
     <None Remove="Effect\Video\LuminanceKey\Texts.csv" />
   </ItemGroup>
