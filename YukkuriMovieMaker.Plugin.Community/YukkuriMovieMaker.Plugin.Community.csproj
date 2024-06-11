@@ -40,7 +40,7 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <ProjectReference Include="..\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(GeneratorDirPath)YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <AdditionalFiles Include="**/*.csv" />
   </ItemGroup>
 	
@@ -54,8 +54,8 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <Resource Include="..\Release\EdgeTrimming.cso" Link="Resources\Shader\EdgeTrimming.cso" />
-    <Resource Include="..\Release\LuminanceKey.cso" Link="Resources\Shader\LuminanceKey.cso" />
+    <Resource Include="$(ShaderDirPath)EdgeTrimming.cso" Link="Resources\Shader\EdgeTrimming.cso" />
+    <Resource Include="$(ShaderDirPath)LuminanceKey.cso" Link="Resources\Shader\LuminanceKey.cso" />
   </ItemGroup>
 
 </Project>
