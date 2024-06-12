@@ -1,5 +1,4 @@
-﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,
-EdgeTrimmingEffectName,,縁削り,Edge Trimming,边缘裁剪,邊緣裁剪,가장자리 자르기,Recorte de borde,الحافة القص,
-ThicknessName,,太さ,Thickness,厚度,厚度,두께,Grosor,سمك,
-ThicknessDesc,,縁を削る太さを指定します。,Specify the thickness of the edge to be trimmed.,指定要裁剪的边缘的厚度。,指定要裁剪的邊緣的厚度。,자를 가장자리의 두께를 지정합니다.,Especifique el grosor del borde que se recortará.,حدد سمك الحافة التي سيتم قصها.,
-
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
+EdgeTrimmingEffectName,,縁削り,Edge Trimming,边缘裁剪,邊緣裁剪,가장자리 자르기,Recorte de borde,الحافة القص,Pemangkasan Tepi,
+ThicknessName,,太さ,Thickness,厚度,厚度,두께,Grosor,سمك,Ketebalan,
+ThicknessDesc,,縁を削る太さを指定します。,Specify the thickness of the edge to be trimmed.,指定要裁剪的边缘的厚度。,指定要裁剪的邊緣的厚度。,자를 가장자리의 두께를 지정합니다.,Especifique el grosor del borde que se recortará.,حدد سمك الحافة التي سيتم قصها.,Tentukan ketebalan tepi yang akan dipangkas.,
