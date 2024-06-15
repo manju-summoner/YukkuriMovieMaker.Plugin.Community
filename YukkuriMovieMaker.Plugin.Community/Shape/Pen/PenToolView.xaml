@@ -1,0 +1,148 @@
+﻿<Window x:Class="YukkuriMovieMaker.Plugin.Community.Shape.Pen.PenToolView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Shape.Pen"
+        xmlns:controls="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        mc:Ignorable="d"
+        Title="{x:Static local:Texts.PenToolWindowTitle}" Height="450" Width="800"
+        d:DataContext="{d:DesignInstance Type={x:Type local:PenToolViewModel}}">
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Ctrl" Key="Z" Command="{Binding UndoCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="Y" Command="{Binding RedoCommand}"/>
+        <KeyBinding Modifiers="Ctrl+Shift" Key="Z" Command="{Binding RedoCommand}"/>
+    </Window.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="26"/>
+            <RowDefinition/>
+            <RowDefinition Height="26"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.Resources>
+                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                    <Setter Property="Padding" Value="4"/>
+                </Style>
+                <ContextMenu x:Key="EraserContextMenu" DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}" d:DataContext="{d:DesignInstance Type={x:Type local:PenToolViewModel}}" Placement="Bottom">
+                    <MenuItem Header="{x:Static local:Texts.EraserByPoint}" Command="{Binding SelectEraserByPointCommand}">
+                        <MenuItem.Style>
+                            <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                <Setter Property="IsChecked" Value="False"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=EraserStyle.Mode}" Value="Point">
+                                        <Setter Property="IsChecked" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
+                    <MenuItem Header="{x:Static local:Texts.EraserByStroke}" Command="{Binding SelectEraserByStrokeCommand}">
+                        <MenuItem.Style>
+                            <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                <Setter Property="IsChecked" Value="False"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=EraserStyle.Mode}" Value="Line">
+                                        <Setter Property="IsChecked" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
+                </ContextMenu>
+                <ContextMenu x:Key="PenContextMenu" DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}" d:DataContext="{d:DesignInstance Type={x:Type local:PenToolViewModel}}" Placement="Bottom">
+                    <MenuItem Header="{x:Static local:Texts.Pressure}" Command="{Binding TogglePenPressure}" IsChecked="{Binding Source={x:Static local:PenSettings.Default},Path=PenStyle.IsPressure}"/>
+                </ContextMenu>
+                <ContextMenu x:Key="HighlighterContextMenu" DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}" d:DataContext="{d:DesignInstance Type={x:Type local:PenToolViewModel}}" Placement="Bottom">
+                    <MenuItem Header="{x:Static local:Texts.Pressure}" Command="{Binding ToggleHighlighterPressure}" IsChecked="{Binding Source={x:Static local:PenSettings.Default},Path=HighlighterStyle.IsPressure}"/>
+                </ContextMenu>
+            </Grid.Resources>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition MaxWidth="100" MinWidth="26"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="26"/>
+                <ColumnDefinition Width="26"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="{DynamicResource pen}" ToolTip="{x:Static local:Texts.BallPen}" Grid.Column="0" Command="{Binding SelectPenCommand}" ContextMenu="{StaticResource PenContextMenu}"/>
+            <controls:DropDownButton Content="▼" Grid.Column="1" Padding="0" FontSize="5" ContextMenu="{StaticResource PenContextMenu}">
+                <controls:DropDownButton.Style>
+                    <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                </controls:DropDownButton.Style>
+            </controls:DropDownButton>
+            <Button Content="{DynamicResource marker}" ToolTip="{x:Static local:Texts.Highlighter}" Grid.Column="2" Command="{Binding SelectHighlighterCommand}" ContextMenu="{StaticResource HighlighterContextMenu}"/>
+            <controls:DropDownButton Content="▼" Grid.Column="3" Padding="0" FontSize="5" ContextMenu="{StaticResource HighlighterContextMenu}">
+                <controls:DropDownButton.Style>
+                    <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                </controls:DropDownButton.Style>
+            </controls:DropDownButton>
+            <Button Content="{DynamicResource eraser}" ToolTip="{x:Static local:Texts.Eraser}" Grid.Column="4" Command="{Binding SelectEraserCommand}" ContextMenu="{StaticResource EraserContextMenu}"/>
+            <controls:DropDownButton Content="▼" Grid.Column="5" Padding="0" FontSize="5" ContextMenu="{StaticResource EraserContextMenu}">
+                <controls:DropDownButton.Style>
+                    <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                </controls:DropDownButton.Style>
+            </controls:DropDownButton>
+            <Button Content="{DynamicResource lasso}" ToolTip="{x:Static local:Texts.Select}" Grid.Column="6" Command="{Binding EnableSelectionMode}"/>
+            <RepeatButton Content="{DynamicResource Undo}" ToolTip="{x:Static local:Texts.Undo}" Grid.Column="7" Command="{Binding UndoCommand}"/>
+            <RepeatButton Content="{DynamicResource Redo}" ToolTip="{x:Static local:Texts.Redo}" Grid.Column="8" Command="{Binding RedoCommand}"/>
+            <controls:ColorPicker Grid.Column="9" Value="{Binding StrokeColor,Mode=TwoWay}">
+                <controls:ColorPicker.Style>
+                    <Style TargetType="controls:ColorPicker" BasedOn="{StaticResource {x:Type controls:ColorPicker}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding EditingMode}" Value="EraserByPoint">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding EditingMode}" Value="EraserByLine">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </controls:ColorPicker.Style>
+            </controls:ColorPicker>
+            <controls:TextBoxSlider Grid.Column="10" Value="{Binding StrokeThickness, Mode=TwoWay}" Min="0.1" Max="1024" DefaultMin="0.1" DefaultMax="10"/>
+            <Button Content="{DynamicResource import}" ToolTip="{x:Static local:Texts.Import}" Command="{Binding ImportIsfCommand}" Grid.Column="11"/>
+            <controls:DropDownButton Content="{DynamicResource export}" ToolTip="{x:Static local:Texts.Export}" Grid.Column="12" Padding="4">
+                <controls:DropDownButton.Style>
+                    <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                </controls:DropDownButton.Style>
+                <controls:DropDownButton.ContextMenu>
+                    <ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}" d:DataContext="{d:DesignInstance Type={x:Type local:PenToolViewModel}}">
+                        <MenuItem Header="{x:Static local:Texts.SaveImage}" Command="{Binding SaveImageCommand}"/>
+                        <MenuItem Header="{x:Static local:Texts.ExportAsIsf}" Command="{Binding ExportIsfCommand}" />
+                    </ContextMenu>
+                </controls:DropDownButton.ContextMenu>
+            </controls:DropDownButton>
+        </Grid>
+        <Viewbox StretchDirection="Both" Grid.Row="1">
+            <Grid>
+                <Image Source="{Binding Bitmap}" Name="image"/>
+                <InkCanvas 
+                    Name="inkCanvas" 
+                    DefaultDrawingAttributes="{Binding Pen,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
+                    EditingMode="{Binding EditingMode}"
+                    Width="{Binding ElementName=image,Path=ActualWidth}"
+                    Height="{Binding ElementName=image,Path=ActualHeight}"
+                    Background="Transparent"
+                    local:InkCanvasEraser.Size="{Binding Source={x:Static local:PenSettings.Default},Path=EraserStyle.StrokeThickness,Mode=OneWay}"
+                    Strokes="{Binding Strokes}"
+                    >
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="PreviewMouseWheel">
+                            <i:InvokeCommandAction Command="{Binding MouseWheelCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </InkCanvas>
+            </Grid>
+        </Viewbox>
+        <Button Grid.Row="2" Content="{x:Static local:Texts.Close}" Width="100" HorizontalAlignment="Right" Click="Button_Click"/>
+    </Grid>
+</Window>
