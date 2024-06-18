@@ -26,7 +26,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
 
         [Display(GroupName = nameof(Texts.Diffuse), Name = nameof(Texts.Color), Description = nameof(Texts.Color), ResourceType = typeof(Texts))]
         [ColorPicker]
-        public Color DiffuseColor { get => color; set => Set(ref color, value); }
+        public Color DiffuseColor { get => diffuseColor; set => Set(ref diffuseColor, value); }
+        Color diffuseColor = Colors.White;
 
         [Display(GroupName = nameof(Texts.Diffuse), Name = nameof(Texts.BlendModeName), Description = nameof(Texts.BlendModeDesc), ResourceType = typeof(Texts))]
         [EnumComboBox]
@@ -45,8 +46,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
 
         [Display(GroupName = nameof(Texts.Specular), Name = nameof(Texts.Color), Description = nameof(Texts.Color), ResourceType = typeof(Texts))]
         [ColorPicker]
-        public Color SpecularColor { get => color; set => Set(ref color, value); }
-        Color color = Colors.White;
+        public Color SpecularColor { get => specularColor; set => Set(ref specularColor, value); }
+        Color specularColor = Colors.White;
 
         [Display(GroupName = nameof(Texts.Specular), Name = nameof(Texts.BlendModeName), Description = nameof(Texts.BlendModeDesc), ResourceType = typeof(Texts))]
         [EnumComboBox]
