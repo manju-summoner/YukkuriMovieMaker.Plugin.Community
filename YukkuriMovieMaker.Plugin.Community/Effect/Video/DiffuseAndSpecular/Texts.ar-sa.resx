@@ -85,4 +85,5 @@
 <data name="Elevation" xml:space="preserve"><value>زاوية الارتفاع</value></data>
 <data name="DistantLight" xml:space="preserve"><value>الانتشار/الانعكاس السطحي (ضوء بعيد)</value></data>
 <data name="BlurRadius" xml:space="preserve"><value>نصف قطر الضبابية</value></data>
+<data name="Invert" xml:space="preserve"><value>عكس</value></data>
 </root>

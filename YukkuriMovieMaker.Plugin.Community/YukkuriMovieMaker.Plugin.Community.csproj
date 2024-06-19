@@ -65,6 +65,7 @@
     <Resource Include="$(ShaderDirPath)EdgeTrimming.cso" Link="Resources\Shader\EdgeTrimming.cso" />
 	  <Resource Include="$(ShaderDirPath)LuminanceKey.cso" Link="Resources\Shader\LuminanceKey.cso" />
 	  <Resource Include="$(ShaderDirPath)DiffuseAlpha.cso" Link="Resources\Shader\DiffuseAlpha.cso" />
+	  <Resource Include="$(ShaderDirPath)InvertAlpha.cso" Link="Resources\Shader\InvertAlpha.cso" />
   </ItemGroup>
 
 </Project>

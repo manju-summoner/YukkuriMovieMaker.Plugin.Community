@@ -85,4 +85,5 @@
 <data name="Elevation" xml:space="preserve"><value>Elevasi</value></data>
 <data name="DistantLight" xml:space="preserve"><value>Diffuse/Specular (Cahaya Jauh)</value></data>
 <data name="BlurRadius" xml:space="preserve"><value>Radius Kabur</value></data>
+<data name="Invert" xml:space="preserve"><value>Invers</value></data>
 </root>

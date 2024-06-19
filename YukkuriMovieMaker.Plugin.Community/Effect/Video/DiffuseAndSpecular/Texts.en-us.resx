@@ -85,4 +85,5 @@
 <data name="Elevation" xml:space="preserve"><value>Elevation</value></data>
 <data name="DistantLight" xml:space="preserve"><value>Diffuse/Specular (Distant Light)</value></data>
 <data name="BlurRadius" xml:space="preserve"><value>Blur</value></data>
+<data name="Invert" xml:space="preserve"><value>Invert</value></data>
 </root>

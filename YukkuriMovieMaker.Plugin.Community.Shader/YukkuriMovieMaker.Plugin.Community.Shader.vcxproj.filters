@@ -24,5 +24,8 @@
     <FxCompile Include="DiffuseAlpha.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="InvertAlpha.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

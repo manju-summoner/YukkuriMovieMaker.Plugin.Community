@@ -73,6 +73,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         [AnimationSlider("F1", "px", 0, 10)]
         public Animation Blur { get; } = new Animation(10, 0, 250 * 3);
 
+        [Display(GroupName = nameof(Texts.Hightmap), Name = nameof(Texts.Invert), Description = nameof(Texts.Invert), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool IsInvert { get => isInvert; set => Set(ref isInvert, value); }
+        bool isInvert = false;
+
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
             var fps = exoOutputDescription.VideoInfo.FPS;
@@ -89,6 +94,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
                     $"local diffuseColor={DiffuseColor.R:X2}{DiffuseColor.G:X2}{DiffuseColor.B:X2};" +
                     $"local specularBlend={(int)SpecularBlend};" +
                     $"local diffuseBlend={(int)DiffuseBlend};" +
+                    $"local invert={(IsInvert ? 0 : 1)};" +
                     $"\r\n";
 
             yield return $"_name=アニメーション効果\r\n" +

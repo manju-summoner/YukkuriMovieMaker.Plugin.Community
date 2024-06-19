@@ -18,6 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         IVideoFileSource? videoSource;
         IImageFileSource? imageSource;
         LuminanceToAlpha? luminanceToAlpha;
+        InvertAlphaCustomEffect? invertAlpha;
         AffineTransform2D? hightTransform;
 
         protected TSpecular? specular;
@@ -35,7 +36,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         AffineTransform2D? wrap;
 
         /*
-         image/video or flat -> luminanceToAlpha -> transform -> hightOutput
+         image/video or flat -> luminanceToAlpha -> invertAlpha -> transform -> hightOutput
 
                                                           hightOutput -> specular -> specularBlur -+
          hightOutput -> diffuse -> diffuseAlpha -> diffuseBlur -> composite or blend -> composite or blend -> alphaMask -> wrap -> output
@@ -52,10 +53,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         string? filePath;
         double heightmapWidth, heightmapHeight;
         Matrix3x2 heightmapMatrix;
+        bool isInvert;
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
-            if (flat is null || luminanceToAlpha is null || hightTransform is null
+            if (flat is null || luminanceToAlpha is null || invertAlpha is null || hightTransform is null
                 || specular is null || specularComposite is null || specularBlur is null || specularBlendEffect is null
                 || diffuse is null || diffuseAlpha is null || diffuseBlur is null || diffuseComposite is null || diffuseBlendEffect is null
                 || alphaMask is null || wrap is null)
@@ -78,6 +80,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
             var surfaceScale = diffuseAndSpecularEffect.SurfaceScale.GetValue(frame, length, fps);
             var zoom = diffuseAndSpecularEffect.Zoom.GetValue(frame, length, fps) / 100;
             var blur = diffuseAndSpecularEffect.Blur.GetValue(frame, length, fps) / 3;
+            var isInvert = diffuseAndSpecularEffect.IsInvert;
 
             if (isFirst || this.specularConstant != specularConstant)
                 specular.SpecularConstant = (float)specularConstant;
@@ -203,6 +206,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
             if (isFirst || this.heightmapMatrix != heightmapMatrix)
                 hightTransform.TransformMatrix = heightmapMatrix;
 
+            if(isFirst || this.isInvert != isInvert)
+                invertAlpha.Invert = isInvert ? 1 : 0;
+
             videoSource?.Update(effectDescription.ItemPosition.Time);
 
 
@@ -221,6 +227,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
             this.surfaceScale = surfaceScale;
             this.blur = blur;
             this.heightmapMatrix = heightmapMatrix;
+            this.isInvert = isInvert;
 
             return effectDescription.DrawDescription;
         }
@@ -228,6 +235,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         protected override void ClearEffectChain()
         {
             luminanceToAlpha?.SetInput(0, null, true);
+            invertAlpha?.SetInput(0, null, true);
             hightTransform?.SetInput(0, null, true);
 
             specular?.SetInput(0, null, true);
@@ -256,13 +264,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
             diffuseAlpha = new DiffuseAlphaCustomEffect(devices);
-            if(!diffuseAlpha.IsEnabled)
+            invertAlpha = new(devices);
+            if (!diffuseAlpha.IsEnabled || !invertAlpha.IsEnabled)
             {
                 diffuseAlpha.Dispose();
+                invertAlpha.Dispose();
                 diffuseAlpha = null;
+                invertAlpha = null;
                 return null;
             }
             disposer.Collect(diffuseAlpha);
+            disposer.Collect(invertAlpha);
 
             flat = new(devices.DeviceContext) { Color = new Vector4(1f, 1f, 1f, 1f) };
             disposer.Collect(flat);
@@ -304,6 +316,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
             disposer.Collect(wrap);
 
             using (var image = luminanceToAlpha.Output)
+                invertAlpha.SetInput(0, image, true);
+            using (var image = invertAlpha.Output)
                 hightTransform.SetInput(0, image, true);
 
             using (var image = hightTransform.Output)
