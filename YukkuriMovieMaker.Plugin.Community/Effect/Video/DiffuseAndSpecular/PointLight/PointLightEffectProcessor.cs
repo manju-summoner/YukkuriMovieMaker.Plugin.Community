@@ -15,12 +15,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular.Poi
         double x, y, z;
         protected override PointDiffuseWrapper CreateDiffuseEffect(IGraphicsDevicesAndContext devices)
         {
-            return new PointDiffuseWrapper(new PointDiffuse(devices.DeviceContext));
+            return new PointDiffuseWrapper(new PointDiffuse(devices.DeviceContext) { ScaleMode = Vortice.Direct2D1.PointDiffuseScaleMode.HighQualityCubic });
         }
 
         protected override PointSpecularWrapper CreateSpecularEffect(IGraphicsDevicesAndContext devices)
         {
-            return new PointSpecularWrapper(new PointSpecular(devices.DeviceContext));
+            return new PointSpecularWrapper(new PointSpecular(devices.DeviceContext) { ScaleMode = Vortice.Direct2D1.PointSpecularScaleMode.HighQualityCubic });
         }
 
         public override DrawDescription Update(EffectDescription effectDescription)

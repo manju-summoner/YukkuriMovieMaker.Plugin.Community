@@ -15,12 +15,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular.Dis
         double azimuth,elevation;
         protected override DistantDiffuseWrapper CreateDiffuseEffect(IGraphicsDevicesAndContext devices)
         {
-            return new DistantDiffuseWrapper(new DistantDiffuse(devices.DeviceContext));
+            return new DistantDiffuseWrapper(new DistantDiffuse(devices.DeviceContext) { ScaleMode = Vortice.Direct2D1.DistantDiffuseScaleMode.HighQualityCubic });
         }
 
         protected override DistantSpecularWrapper CreateSpecularEffect(IGraphicsDevicesAndContext devices)
         {
-            return new DistantSpecularWrapper(new DistantSpecular(devices.DeviceContext));
+            return new DistantSpecularWrapper(new DistantSpecular(devices.DeviceContext) { ScaleMode = Vortice.Direct2D1.DistantSpecularScaleMode.HighQualityCubic });
         }
 
         public override DrawDescription Update(EffectDescription effectDescription)
