@@ -25,6 +25,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         Blend? specularBlendEffect;
 
         protected TDiffuse? diffuse;
+        DiffuseAlphaCustomEffect? diffuseAlpha;
         Composite? diffuseComposite;
         Blend? diffuseBlendEffect;
 
@@ -34,9 +35,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         /*
          image/video or flat -> luminanceToAlpha -> transform -> hightOutput
 
-                                          hightOutput -> pointDiffuse -+
-         hightOutput -> pointSpecular -> composite or blend -> composite or blend -> alphaMask -> wrap -> output
-                                              input -+                            input-+
+                                                          hightOutput -> specular -+
+         hightOutput -> diffuse -> diffuseAlpha -> composite or blend -> composite or blend -> alphaMask -> wrap -> output
+                                                      input -+                              input-+
          */
 
         protected bool isFirst = true;
@@ -54,7 +55,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         {
             if (flat is null || luminanceToAlpha is null || hightTransform is null
                 || specular is null || specularComposite is null || specularBlendEffect is null
-                || diffuse is null || diffuseComposite is null || diffuseBlendEffect is null
+                || diffuse is null || diffuseAlpha is null || diffuseComposite is null || diffuseBlendEffect is null
                 || alphaMask is null || wrap is null)
                 return effectDescription.DrawDescription;
 
@@ -227,6 +228,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
             specularBlendEffect?.SetInput(1, null, true);
 
             diffuse?.SetInput(0, null, true);
+            diffuseAlpha?.SetInput(0, null, true);
             diffuseComposite?.SetInput(0, null, true);
             diffuseComposite?.SetInput(1, null, true);
             diffuseBlendEffect?.SetInput(0, null, true);
@@ -242,6 +244,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
+            diffuseAlpha = new DiffuseAlphaCustomEffect(devices);
+            if(!diffuseAlpha.IsEnabled)
+            {
+                diffuseAlpha.Dispose();
+                diffuseAlpha = null;
+                return null;
+            }
+            disposer.Collect(diffuseAlpha);
+
             flat = new(devices.DeviceContext) { Color = new Vector4(1f, 1f, 1f, 1f) };
             disposer.Collect(flat);
 
@@ -291,6 +302,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
             }
 
             using (var image = diffuse.Output)
+                diffuseAlpha.SetInput(0, image, true);
+            using (var image = diffuseAlpha.Output)
             {
                 diffuseComposite.SetInput(1, image, true);
                 diffuseBlendEffect.SetInput(1, image, true);
