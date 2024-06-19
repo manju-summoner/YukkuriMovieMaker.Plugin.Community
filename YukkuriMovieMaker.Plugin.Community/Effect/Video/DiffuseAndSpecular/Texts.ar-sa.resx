@@ -84,4 +84,5 @@
 <data name="Azimuth" xml:space="preserve"><value>زاوية السمت</value></data>
 <data name="Elevation" xml:space="preserve"><value>زاوية الارتفاع</value></data>
 <data name="DistantLight" xml:space="preserve"><value>الانتشار/الانعكاس السطحي (ضوء بعيد)</value></data>
+<data name="BlurRadius" xml:space="preserve"><value>نصف قطر الضبابية</value></data>
 </root>

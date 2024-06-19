@@ -69,6 +69,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         [AnimationSlider("F1", "%", 0, 400)]
         public Animation Zoom { get; } = new Animation(100, 1, 5000);
 
+        [Display(GroupName = nameof(Texts.Hightmap), Name = nameof(Texts.BlurRadius), Description = nameof(Texts.BlurRadius), ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "px", 0, 10)]
+        public Animation Blur { get; } = new Animation(10, 0, 250 * 3);
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
@@ -92,12 +95,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
                 $"track0={SurfaceScale.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
                 $"track1={Zoom.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track2={Blur.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
                 $"name=拡散鏡面反射（設定2）@YMM4-未実装\r\n" +
                 $"param=" +
                     $"local file={FilePath};" +
                     $"\r\n";
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [SpecularConstant, SpecularExponent, DiffuseConstant, SurfaceScale, Zoom];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [SpecularConstant, SpecularExponent, DiffuseConstant, SurfaceScale, Zoom, Blur];
     }
 }

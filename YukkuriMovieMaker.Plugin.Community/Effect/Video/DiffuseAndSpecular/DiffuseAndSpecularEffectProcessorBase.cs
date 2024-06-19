@@ -21,11 +21,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         AffineTransform2D? hightTransform;
 
         protected TSpecular? specular;
+        GaussianBlur? specularBlur;
         Composite? specularComposite;
         Blend? specularBlendEffect;
 
         protected TDiffuse? diffuse;
         DiffuseAlphaCustomEffect? diffuseAlpha;
+        GaussianBlur? diffuseBlur;
         Composite? diffuseComposite;
         Blend? diffuseBlendEffect;
 
@@ -35,16 +37,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         /*
          image/video or flat -> luminanceToAlpha -> transform -> hightOutput
 
-                                                          hightOutput -> specular -+
-         hightOutput -> diffuse -> diffuseAlpha -> composite or blend -> composite or blend -> alphaMask -> wrap -> output
-                                                      input -+                              input-+
+                                                          hightOutput -> specular -> specularBlur -+
+         hightOutput -> diffuse -> diffuseAlpha -> diffuseBlur -> composite or blend -> composite or blend -> alphaMask -> wrap -> output
+                                                                     input -+                              input-+
          */
 
         protected bool isFirst = true;
         double
             specularConstant, specularExponent,
             diffuseConstant,
-            surfaceScale, zoom;
+            surfaceScale, blur;
         Color specularColor, diffuseColor;
         Project.Blend specularBlend, diffuseBlend;
         string? filePath;
@@ -54,8 +56,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
         public override DrawDescription Update(EffectDescription effectDescription)
         {
             if (flat is null || luminanceToAlpha is null || hightTransform is null
-                || specular is null || specularComposite is null || specularBlendEffect is null
-                || diffuse is null || diffuseAlpha is null || diffuseComposite is null || diffuseBlendEffect is null
+                || specular is null || specularComposite is null || specularBlur is null || specularBlendEffect is null
+                || diffuse is null || diffuseAlpha is null || diffuseBlur is null || diffuseComposite is null || diffuseBlendEffect is null
                 || alphaMask is null || wrap is null)
                 return effectDescription.DrawDescription;
 
@@ -75,6 +77,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
             var filePath = diffuseAndSpecularEffect.FilePath;
             var surfaceScale = diffuseAndSpecularEffect.SurfaceScale.GetValue(frame, length, fps);
             var zoom = diffuseAndSpecularEffect.Zoom.GetValue(frame, length, fps) / 100;
+            var blur = diffuseAndSpecularEffect.Blur.GetValue(frame, length, fps) / 3;
 
             if (isFirst || this.specularConstant != specularConstant)
                 specular.SpecularConstant = (float)specularConstant;
@@ -87,6 +90,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
                 diffuse.DiffuseConstant = (float)diffuseConstant;
             if (isFirst || this.diffuseColor != diffuseColor)
                 diffuse.Color = diffuseColor.ToVector3();
+
+            if (isFirst || this.blur != blur)
+            {
+                diffuseBlur.StandardDeviation = (float)blur;
+                specularBlur.StandardDeviation = (float)blur;
+            }
 
             if (isFirst || this.specularBlend != specularBlend || this.diffuseBlend != diffuseBlend)
             {
@@ -210,7 +219,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
 
             this.filePath = filePath;
             this.surfaceScale = surfaceScale;
-            this.zoom = zoom;
+            this.blur = blur;
             this.heightmapMatrix = heightmapMatrix;
 
             return effectDescription.DrawDescription;
@@ -222,6 +231,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
             hightTransform?.SetInput(0, null, true);
 
             specular?.SetInput(0, null, true);
+            specularBlur?.SetInput(0, null, true);
             specularComposite?.SetInput(0, null, true);
             specularComposite?.SetInput(1, null, true);
             specularBlendEffect?.SetInput(0, null, true);
@@ -229,6 +239,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
 
             diffuse?.SetInput(0, null, true);
             diffuseAlpha?.SetInput(0, null, true);
+            diffuseBlur?.SetInput(0, null, true);
             diffuseComposite?.SetInput(0, null, true);
             diffuseComposite?.SetInput(1, null, true);
             diffuseBlendEffect?.SetInput(0, null, true);
@@ -265,6 +276,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
             specular = CreateSpecularEffect(devices);
             disposer.Collect(specular);
 
+            specularBlur = new(devices.DeviceContext);
+            disposer.Collect(specularBlur);
+
             specularComposite = new(devices.DeviceContext);
             disposer.Collect(specularComposite);
 
@@ -273,6 +287,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
 
             diffuse = CreateDiffuseEffect(devices);
             disposer.Collect(diffuse);
+
+            diffuseBlur = new(devices.DeviceContext);
+            disposer.Collect(diffuseBlur);
 
             diffuseComposite = new(devices.DeviceContext);
             disposer.Collect(diffuseComposite);
@@ -296,6 +313,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
             }
 
             using (var image = specular.Output)
+                specularBlur.SetInput(0, image, true);
+            using (var image = specularBlur.Output)
             {
                 specularComposite.SetInput(1, image, true);
                 specularBlendEffect.SetInput(1, image, true);
@@ -303,7 +322,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DiffuseAndSpecular
 
             using (var image = diffuse.Output)
                 diffuseAlpha.SetInput(0, image, true);
-            using (var image = diffuseAlpha.Output)
+            using(var image = diffuseAlpha.Output)
+                diffuseBlur.SetInput(0, image, true);
+            using (var image = diffuseBlur.Output)
             {
                 diffuseComposite.SetInput(1, image, true);
                 diffuseBlendEffect.SetInput(1, image, true);

@@ -84,4 +84,5 @@
 <data name="Azimuth" xml:space="preserve"><value>Azimut</value></data>
 <data name="Elevation" xml:space="preserve"><value>Inclinación</value></data>
 <data name="DistantLight" xml:space="preserve"><value>Difuso/Especular (Luz distante)</value></data>
+<data name="BlurRadius" xml:space="preserve"><value>Desenfoque</value></data>
 </root>
