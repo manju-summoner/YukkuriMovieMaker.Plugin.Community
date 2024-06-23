@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
+<data name="XName" xml:space="preserve"><value>X</value></data>
+<data name="XDesc" xml:space="preserve"><value>Coordenada X de la fuente de luz</value></data>
+<data name="YName" xml:space="preserve"><value>Y</value></data>
+<data name="YDesc" xml:space="preserve"><value>Coordenada Y de la fuente de luz</value></data>
+<data name="ZName" xml:space="preserve"><value>Z</value></data>
+<data name="ZDesc" xml:space="preserve"><value>Coordenada Z de la fuente de luz</value></data>
+<data name="ConstantName" xml:space="preserve"><value>Intensidad</value></data>
+<data name="ConstantDesc" xml:space="preserve"><value>Intensidad de la luz</value></data>
+<data name="ExponentName" xml:space="preserve"><value>Atenuación</value></data>
+<data name="ExponentDesc" xml:space="preserve"><value>값이 클수록 감쇠가 커집니다.</value></data>
+<data name="SurfaceScale" xml:space="preserve"><value>Altura</value></data>
+<data name="Color" xml:space="preserve"><value>Color</value></data>
+<data name="Light" xml:space="preserve"><value>Luz</value></data>
+<data name="Heightmap" xml:space="preserve"><value>Mapa de altura</value></data>
+<data name="Zoom" xml:space="preserve"><value>Zoom</value></data>
+<data name="FileName" xml:space="preserve"><value>Archivo</value></data>
+<data name="FileDesc" xml:space="preserve"><value>Archivo de mapa de altura</value></data>
+<data name="BlendModeName" xml:space="preserve"><value>Modo compuesto</value></data>
+<data name="BlendModeDesc" xml:space="preserve"><value>Modo compuesto</value></data>
+<data name="Azimuth" xml:space="preserve"><value>Azimut</value></data>
+<data name="Elevation" xml:space="preserve"><value>Inclinación</value></data>
+<data name="BlurRadius" xml:space="preserve"><value>Desenfoque</value></data>
+<data name="Invert" xml:space="preserve"><value>Invertir</value></data>
+<data name="PointDiffuse" xml:space="preserve"><value>Difuso (Punto de luz)</value></data>
+<data name="PointSpecular" xml:space="preserve"><value>Reflejo especular (Punto de luz)</value></data>
+<data name="DistantDiffuse" xml:space="preserve"><value>Difuso (Luz distante)</value></data>
+<data name="DistantSpecular" xml:space="preserve"><value>Reflejo especular (Luz distante)</value></data>
+<data name="Rotation" xml:space="preserve"><value>Rotación</value></data>
+<data name="Mode" xml:space="preserve"><value>Modo</value></data>
+<data name="Highlight" xml:space="preserve"><value>Resaltar</value></data>
+<data name="Reflection" xml:space="preserve"><value>Reflejo</value></data>
+<data name="Bevel" xml:space="preserve"><value>Chaflán</value></data>
+<data name="Thickness" xml:space="preserve"><value>Grosor</value></data>
+<data name="ReflectionAndExtrusion" xml:space="preserve"><value>Reflejo y extrusión</value></data>
+<data name="Extrusion" xml:space="preserve"><value>Extrusión</value></data>
+</root>
