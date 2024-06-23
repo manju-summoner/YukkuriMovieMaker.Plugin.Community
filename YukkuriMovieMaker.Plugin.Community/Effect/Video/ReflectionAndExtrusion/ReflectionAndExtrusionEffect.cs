@@ -44,11 +44,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         public HeightmapParameterBase Heightmap { get => heightmap; set => Set(ref heightmap, value); }
         HeightmapParameterBase heightmap = new HeightmapFileParameter();
 
-        [Display(GroupName = nameof(Texts.Extrusion), Name = nameof(Texts.BlurRadius), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Extrusion), Name = nameof(Texts.BlurRadius), ResourceType = typeof(Texts), Order = 20)]
         [AnimationSlider("F1", "px", 0, 10)]
         public Animation Blur { get; } = new(0, 0, 250 * 3);
 
-        [Display(GroupName = nameof(Texts.Extrusion), Name = nameof(Texts.Invert), Description = nameof(Texts.Invert), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Extrusion), Name = nameof(Texts.Invert), Description = nameof(Texts.Invert), ResourceType = typeof(Texts), Order = 30)]
         [ToggleSlider]
         public bool IsInvert { get => isInvert; set => Set(ref isInvert, value); }
         bool isInvert = false;
