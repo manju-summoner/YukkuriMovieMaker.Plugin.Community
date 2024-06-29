@@ -36,7 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Effect\Video\PointLight\" />
     <Folder Include="Voice\" />
     <Folder Include="FileSource\" />
     <Folder Include="FileWriter\" />
@@ -57,7 +56,6 @@
     <None Remove="Effect\Video\EdgeDetection\Texts.csv" />
     <None Remove="Effect\Video\EdgeTrimming\Texts.csv" />
     <None Remove="Effect\Video\LuminanceKey\Texts.csv" />
-    <None Remove="Effect\Video\PointLight\Texts.csv" />
     <None Remove="Shape\Pen\Texts.csv" />
   </ItemGroup>
 	
