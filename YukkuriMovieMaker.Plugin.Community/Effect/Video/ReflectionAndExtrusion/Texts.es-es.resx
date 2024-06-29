@@ -94,4 +94,11 @@
 <data name="Thickness" xml:space="preserve"><value>Grosor</value></data>
 <data name="ReflectionAndExtrusion" xml:space="preserve"><value>Reflejo y extrusión</value></data>
 <data name="Extrusion" xml:space="preserve"><value>Extrusión</value></data>
+<data name="StraightBevel" xml:space="preserve"><value>Recto</value></data>
+<data name="RoundBevel" xml:space="preserve"><value>Redondo</value></data>
+<data name="InvertedRoundBevel" xml:space="preserve"><value>Redondo invertido</value></data>
+<data name="StepBevel" xml:space="preserve"><value>Escalón</value></data>
+<data name="StringBevel" xml:space="preserve"><value>Redondear</value></data>
+<data name="HeadCollerBevel" xml:space="preserve"><value>Chaflán de cabeza</value></data>
+<data name="BevelMode" xml:space="preserve"><value>Modo de chaflán</value></data>
 </root>

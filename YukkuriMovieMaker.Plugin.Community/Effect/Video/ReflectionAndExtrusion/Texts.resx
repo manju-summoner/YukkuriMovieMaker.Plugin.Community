@@ -94,4 +94,11 @@
 <data name="Thickness" xml:space="preserve"><value>太さ</value></data>
 <data name="ReflectionAndExtrusion" xml:space="preserve"><value>反射と立体化</value></data>
 <data name="Extrusion" xml:space="preserve"><value>立体化</value></data>
+<data name="StraightBevel" xml:space="preserve"><value>直線</value></data>
+<data name="RoundBevel" xml:space="preserve"><value>凸丸</value></data>
+<data name="InvertedRoundBevel" xml:space="preserve"><value>凹丸</value></data>
+<data name="StepBevel" xml:space="preserve"><value>段差</value></data>
+<data name="StringBevel" xml:space="preserve"><value>丸縁取り</value></data>
+<data name="HeadCollerBevel" xml:space="preserve"><value>角縁取り</value></data>
+<data name="BevelMode" xml:space="preserve"><value>面取り種類</value></data>
 </root>

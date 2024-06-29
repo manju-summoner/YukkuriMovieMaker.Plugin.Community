@@ -11,7 +11,7 @@ using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Heightmap;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Heightmap.BevelHeightmap;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Heightmap.Bevel;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Lighting;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Lighting.DistantDiffuse;
 using YukkuriMovieMaker.Plugin.Effects;

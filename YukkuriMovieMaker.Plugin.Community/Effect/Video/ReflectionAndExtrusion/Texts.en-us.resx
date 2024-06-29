@@ -94,4 +94,11 @@
 <data name="Thickness" xml:space="preserve"><value>Thickness</value></data>
 <data name="ReflectionAndExtrusion" xml:space="preserve"><value>Reflection and Extrusion</value></data>
 <data name="Extrusion" xml:space="preserve"><value>Extrusion</value></data>
+<data name="StraightBevel" xml:space="preserve"><value>Straight</value></data>
+<data name="RoundBevel" xml:space="preserve"><value>Round</value></data>
+<data name="InvertedRoundBevel" xml:space="preserve"><value>Inverted Round</value></data>
+<data name="StepBevel" xml:space="preserve"><value>Step</value></data>
+<data name="StringBevel" xml:space="preserve"><value>String</value></data>
+<data name="HeadCollerBevel" xml:space="preserve"><value>Head Coller</value></data>
+<data name="BevelMode" xml:space="preserve"><value>Bevel Mode</value></data>
 </root>

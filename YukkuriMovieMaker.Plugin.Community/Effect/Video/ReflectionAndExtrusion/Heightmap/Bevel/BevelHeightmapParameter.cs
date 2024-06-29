@@ -10,10 +10,15 @@ using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Project;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Heightmap.BevelHeightmap
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Heightmap.Bevel
 {
     internal class BevelHeightmapParameter : HeightmapParameterBase
     {
+        [Display(Name = nameof(Texts.BevelMode), Description = nameof(Texts.BevelMode), ResourceType = typeof(Texts))]
+        [EnumComboBox]
+        public BevelMode BevelMode { get => bevelMode; set => Set(ref bevelMode, value); }
+        BevelMode bevelMode = BevelMode.Straight;
+
         [Display(Name = nameof(Texts.Thickness), Description = nameof(Texts.Thickness), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0, 10)]
         public Animation Thickness { get; } = new Animation(10, 0, 500);
@@ -52,6 +57,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
                 $"track0={Thickness.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
                 $"name=ベベルハイトマップ@YMM4-未実装\r\n" +
                 $"param=" +
+                    $"local mode={(int)BevelMode};" +
                     $"\r\n";
         }
 

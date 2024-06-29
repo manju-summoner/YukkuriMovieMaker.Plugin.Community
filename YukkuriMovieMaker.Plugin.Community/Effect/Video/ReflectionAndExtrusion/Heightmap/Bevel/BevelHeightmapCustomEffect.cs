@@ -4,8 +4,9 @@ using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Community.Commons;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Heightmap.Bevel;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Heightmap.BevelHeightmap
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Heightmap.Bevel
 {
     internal class BevelHeightmapCustomEffect(IGraphicsDevicesAndContext devices) : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices))
     {
@@ -13,6 +14,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         {
             get=>GetFloatValue((int)EffectImpl.Properties.Thickness);
             set=>SetValue((int)EffectImpl.Properties.Thickness, value);
+        }
+        public BevelMode Mode
+        {
+            get=>(BevelMode)GetIntValue((int)EffectImpl.Properties.Mode);
+            set=>SetValue((int)EffectImpl.Properties.Mode, (int)value);
         }
 
         [CustomEffect(1)]
@@ -30,6 +36,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
                 set
                 {
                     constants.Thickness = value;
+                    UpdateConstants();
+                }
+            }
+
+            [CustomEffectProperty(PropertyType.Int32, (int)Properties.Mode)]
+            public int Mode
+            {
+                get
+                {
+                    return constants.Mode;
+                }
+                set
+                {
+                    constants.Mode = value;
                     UpdateConstants();
                 }
             }
@@ -58,10 +78,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             struct ConstantBuffer
             {
                 public float Thickness;
+                public int Mode;
             }
             public enum Properties : int
             {
                 Thickness,
+                Mode,
             }
         }
     }

@@ -94,4 +94,11 @@
 <data name="Thickness" xml:space="preserve"><value>두께</value></data>
 <data name="ReflectionAndExtrusion" xml:space="preserve"><value>반사 및 입체화</value></data>
 <data name="Extrusion" xml:space="preserve"><value>입체화</value></data>
+<data name="StraightBevel" xml:space="preserve"><value>직선</value></data>
+<data name="RoundBevel" xml:space="preserve"><value>둥근</value></data>
+<data name="InvertedRoundBevel" xml:space="preserve"><value>역 둥근</value></data>
+<data name="StepBevel" xml:space="preserve"><value>단계</value></data>
+<data name="StringBevel" xml:space="preserve"><value>스트링</value></data>
+<data name="HeadCollerBevel" xml:space="preserve"><value>헤드 콜러</value></data>
+<data name="BevelMode" xml:space="preserve"><value>면 모드</value></data>
 </root>

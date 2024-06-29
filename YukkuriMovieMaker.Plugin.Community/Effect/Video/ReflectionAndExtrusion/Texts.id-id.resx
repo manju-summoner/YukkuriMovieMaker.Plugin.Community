@@ -94,4 +94,11 @@
 <data name="Thickness" xml:space="preserve"><value>Teblh</value></data>
 <data name="ReflectionAndExtrusion" xml:space="preserve"><value>Refleksi dan Extrusi</value></data>
 <data name="Extrusion" xml:space="preserve"><value>Ekstrusi</value></data>
+<data name="StraightBevel" xml:space="preserve"><value>Straight</value></data>
+<data name="RoundBevel" xml:space="preserve"><value>Putaran</value></data>
+<data name="InvertedRoundBevel" xml:space="preserve"><value>Putaran Terbalik</value></data>
+<data name="StepBevel" xml:space="preserve"><value>Langkah</value></data>
+<data name="StringBevel" xml:space="preserve"><value>Putaran</value></data>
+<data name="HeadCollerBevel" xml:space="preserve"><value>Head Coller</value></data>
+<data name="BevelMode" xml:space="preserve"><value>Mode Bevel</value></data>
 </root>

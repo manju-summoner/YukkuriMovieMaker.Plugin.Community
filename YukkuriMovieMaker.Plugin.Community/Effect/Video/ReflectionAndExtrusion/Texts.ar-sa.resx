@@ -94,4 +94,11 @@
 <data name="Thickness" xml:space="preserve"><value>سمك</value></data>
 <data name="ReflectionAndExtrusion" xml:space="preserve"><value>انعكاس وتشكيل</value></data>
 <data name="Extrusion" xml:space="preserve"><value>تشكيل</value></data>
+<data name="StraightBevel" xml:space="preserve"><value>مستقيم</value></data>
+<data name="RoundBevel" xml:space="preserve"><value>مستدير</value></data>
+<data name="InvertedRoundBevel" xml:space="preserve"><value>مستدير مقلوب</value></data>
+<data name="StepBevel" xml:space="preserve"><value>خطوة</value></data>
+<data name="StringBevel" xml:space="preserve"><value>مستدير</value></data>
+<data name="HeadCollerBevel" xml:space="preserve"><value>حافة الرأس</value></data>
+<data name="BevelMode" xml:space="preserve"><value>وضع المائل</value></data>
 </root>

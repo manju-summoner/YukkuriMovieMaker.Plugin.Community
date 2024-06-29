@@ -4,6 +4,7 @@ SamplerState InputSampler : register(s0);
 cbuffer constants : register(b0)
 {
 	float thickness : packoffset(c0.x);
+	int mode : packoffset(c0.y);
 };
 
 float CalculateHeight(float4 uv0)
@@ -41,6 +42,37 @@ float CalculateHeight(float4 uv0)
 	else
 		height = distance == 0 ? 0 : 1;
 	
+	if (mode == 0) 
+	{
+		//äpñ 
+		return height;
+	}
+	else if (mode == 1)
+	{
+		//ä€ñ 
+		return sin(acos(1 - height));
+	}
+	else if (mode == 2)
+	{
+		//ç˙ñ 
+		return 1 - sin(acos(height));
+
+	}
+	else if (mode == 3)
+	{
+		//ÇµÇ·Ç≠ÇËñ 
+		return step(1, height);
+	}
+	else if (mode == 4)
+	{
+		//Ç∆Ç´ÇÒñ 
+		return 1 - abs(height * 2 - 1);
+	}
+	else if (mode == 5)
+	{
+		//ïRñ 
+		return sin(acos(1 - height * 2));
+	}
 	return height;
 }
 
