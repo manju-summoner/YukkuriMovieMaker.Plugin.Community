@@ -16,7 +16,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
     {
         [Display(Name = nameof(Texts.Thickness), Description = nameof(Texts.Thickness), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0, 10)]
-        public Animation Thickness { get; } = new Animation(3, 0, 500);
+        public Animation Thickness { get; } = new Animation(10, 0, 500);
 
         public BevelHeightmapParameter()
         {

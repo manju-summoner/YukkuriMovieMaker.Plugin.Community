@@ -76,7 +76,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             var length = desc.ItemDuration.Frame;
 
             var azimuth = lightParameter.Azimuth.GetValue(frame, length, fps) + offset;
-            var elevation = lightParameter.Elevation.GetValue(frame, length, fps) + offset;
+            var elevation = lightParameter.Elevation.GetValue(frame, length, fps);
             var constant = reflectionParameter.Constant.GetValue(frame, length, fps) / 100;
             var exponent = reflectionParameter.Exponent.GetValue(frame, length, fps);
             var color = reflectionParameter.Color;

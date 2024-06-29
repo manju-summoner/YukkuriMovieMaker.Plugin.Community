@@ -30,5 +30,8 @@
     <FxCompile Include="BevelHeightmap.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="BevelAndFlatComposite.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

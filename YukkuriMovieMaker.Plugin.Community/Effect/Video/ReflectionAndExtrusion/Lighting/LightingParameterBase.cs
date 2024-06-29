@@ -17,8 +17,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
     internal abstract class LightingParameterBase : SharedParameterBase
     {
         [Display(GroupName = nameof(Texts.Extrusion), Name = nameof(Texts.SurfaceScale), ResourceType = typeof(Texts), Order = 10)]
-        [AnimationSlider("F1", "px", 0, 100)]
-        public Animation SurfaceScale { get; } = new(100, 0, 10000);
+        [AnimationSlider("F1", "px", 0, 10)]
+        public Animation SurfaceScale { get; } = new(10, 0, 10000);
 
         public LightingParameterBase() : base()
         {

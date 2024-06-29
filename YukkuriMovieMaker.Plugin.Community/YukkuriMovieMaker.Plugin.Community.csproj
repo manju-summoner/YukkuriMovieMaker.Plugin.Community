@@ -65,6 +65,7 @@
 	  <Resource Include="$(ShaderDirPath)DiffuseAlpha.cso" Link="Resources\Shader\DiffuseAlpha.cso" />
 	  <Resource Include="$(ShaderDirPath)InvertAlpha.cso" Link="Resources\Shader\InvertAlpha.cso" />
 	  <Resource Include="$(ShaderDirPath)BevelHeightmap.cso" Link="Resources\Shader\BevelHeightmap.cso" />
+	  <Resource Include="$(ShaderDirPath)BevelAndFlatComposite.cso" Link="Resources\Shader\BevelAndFlatComposite.cso" />
   </ItemGroup>
 
 </Project>

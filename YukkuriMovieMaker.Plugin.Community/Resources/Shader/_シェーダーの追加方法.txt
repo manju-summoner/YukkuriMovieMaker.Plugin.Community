@@ -1,8 +1,0 @@
-﻿# シェーダーの追加方法
-1. YukkuriMovieMaker.Plugin.Community.Shaderでシェーダーを作成し、ビルドする
-2. YukkuriMovieMaker.Plugin.Community\Resources\Shaderを右クリックし、「追加(D)」→「既存の項目(G)」を選択する
-3. YukkuriMovieMaker.Plugin.Community\Releaseにアクセスし、ファイルの種類を「すべてのファイル(*.*)」に変更する
-4. 作成したシェーダー.csoを選択する
-5. 「追加(A)」ボタン右側の「▼」ボタンをクリックし、「リンクとして追加(L)」をクリックする
-6. 追加した.csoフィアルを右クリックし、「プロパティ」を選択する
-7. 「ビルドアクション」を「リソース」に変更する  

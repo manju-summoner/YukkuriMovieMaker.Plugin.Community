@@ -25,6 +25,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
         ILightingProcessor? highlight;
         GaussianBlur? highlightBlur;
+        BevelAndFlatCompositeCustomEffect? bevelAndFlatComposite;
         Composite? highlightComposite;
         Blend? highlightBlendEffect;
 
@@ -33,8 +34,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         /*
          heightmap -> luminanceToAlpha -> invertAlpha -> hightOutput
 
-         hightOutput -> highlight -> highlightBlur -+        input-+
-                                input -> composite or blend -> alphaMask -> output
+                                                  heightOutput -+
+         hightOutput -> highlight -> highlightBlur -> bevelAndFlatComposite -> composite or blend -> alphaMask -> output
+                            +-----------------------------------+                 input -+        input-+
          */
 
         protected bool isFirst = true;
@@ -74,11 +76,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
                 disposer.Collect(highlight);
                 highlight.SetInput(heightOutput);
                 highlightBlur?.SetInput(0, highlight.Output, true);
+                bevelAndFlatComposite?.SetInput(1, highlight.Output, true);
             }
 
             if (IsPassThroughEffect
                 || heightmap is null || luminanceToAlpha is null || invertAlpha is null || heightOutput is null
-                || highlight is null || highlightBlur is null || highlightComposite is null || highlightBlendEffect is null
+                || highlight is null || highlightBlur is null || bevelAndFlatComposite is null || highlightComposite is null || highlightBlendEffect is null
                 || alphaMask is null)
                 return effectDescription.DrawDescription;
 
@@ -129,6 +132,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
             highlight?.SetInput(null);
             highlightBlur?.SetInput(0, null, true);
+            bevelAndFlatComposite?.SetInput(0, null, true);
+            bevelAndFlatComposite?.SetInput(1, null, true);
+            bevelAndFlatComposite?.SetInput(2, null, true);
             highlightComposite?.SetInput(0, null, true);
             highlightComposite?.SetInput(1, null, true);
             highlightBlendEffect?.SetInput(0, null, true);
@@ -145,12 +151,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             disposer.Collect(luminanceToAlpha);
 
             invertAlpha = new(devices);
-            if(!invertAlpha.IsEnabled)
-            {
-                invertAlpha.Dispose();
-                invertAlpha = null;
-                return null;
-            }
             disposer.Collect(invertAlpha);
 
             //ハイライト
@@ -160,11 +160,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             highlightBlur = new(devices.DeviceContext);
             disposer.Collect(highlightBlur);
 
+            bevelAndFlatComposite = new(devices);
+            disposer.Collect(bevelAndFlatComposite);
+
             highlightComposite = new(devices.DeviceContext);
             disposer.Collect(highlightComposite);
 
             highlightBlendEffect = new(devices.DeviceContext);
             disposer.Collect(highlightBlendEffect);
+
+            if (!invertAlpha.IsEnabled || !bevelAndFlatComposite.IsEnabled)
+            {
+                luminanceToAlpha?.Dispose();
+                invertAlpha?.Dispose();
+                highlight?.Dispose();
+                highlightBlur?.Dispose();
+                bevelAndFlatComposite?.Dispose();
+                highlightComposite?.Dispose();
+                highlightBlendEffect?.Dispose();
+
+                luminanceToAlpha = null;
+                invertAlpha = null;
+                highlight = null;
+                highlightBlur = null;
+                bevelAndFlatComposite = null;
+                highlightComposite = null;
+                highlightBlendEffect = null;
+                return null;
+            }
 
             //後処理
             alphaMask = new(devices.DeviceContext);
@@ -177,7 +200,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             disposer.Collect(heightOutput);
 
             //接続（ハイライト）
+            bevelAndFlatComposite.SetInput(0, heightOutput, true);
             using (var image = highlightBlur.Output)
+                bevelAndFlatComposite.SetInput(2, image, true);
+            using (var image = bevelAndFlatComposite.Output)
             {
                 highlightComposite.SetInput(1, image, true);
                 highlightBlendEffect.SetInput(1, image, true);

@@ -10,11 +10,10 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
-using YukkuriMovieMaker.Plugin.Community.Brush.Commons;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Heightmap;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Heightmap.HeightmapFile;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Heightmap.BevelHeightmap;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Lighting;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Lighting.PointDiffuse;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Lighting.DistantDiffuse;
 using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
@@ -28,25 +27,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         [Display(GroupName = nameof(Texts.Reflection), Name = nameof(Texts.Mode), Description = nameof(Texts.Mode), ResourceType = typeof(Texts))]
         [EnumComboBox]
         public LightingMode LightingMode { get => lightingMode; set => Set(ref lightingMode, value); }
-        LightingMode lightingMode = LightingMode.PointDiffuse;
+        LightingMode lightingMode = LightingMode.DistantDiffuse;
 
         [Display(AutoGenerateField = true)]
         public LightingParameterBase Lighting { get=> lighting; set => Set(ref lighting, value); }
-        LightingParameterBase lighting = new PointDiffuseLightingParameter();
+        LightingParameterBase lighting = new DistantDiffuseLightingParameter();
 
 
         [Display(GroupName = nameof(Texts.Extrusion), Name = nameof(Texts.Mode), Description = nameof(Texts.Mode), ResourceType = typeof(Texts))]
         [EnumComboBox]
         public HeightmapMode HeightmapMode { get => heightmapMode; set => Set(ref heightmapMode, value); }
-        HeightmapMode heightmapMode = HeightmapMode.HeightmapFile;
+        HeightmapMode heightmapMode = HeightmapMode.Bevel;
 
         [Display(GroupName = nameof(Texts.Extrusion), AutoGenerateField = true, ResourceType = typeof(Texts))]
         public HeightmapParameterBase Heightmap { get => heightmap; set => Set(ref heightmap, value); }
-        HeightmapParameterBase heightmap = new HeightmapFileParameter();
+        HeightmapParameterBase heightmap = new BevelHeightmapParameter();
 
         [Display(GroupName = nameof(Texts.Extrusion), Name = nameof(Texts.BlurRadius), ResourceType = typeof(Texts), Order = 20)]
         [AnimationSlider("F1", "px", 0, 10)]
-        public Animation Blur { get; } = new(0, 0, 250 * 3);
+        public Animation Blur { get; } = new(10
+            , 0, 250 * 3);
 
         [Display(GroupName = nameof(Texts.Extrusion), Name = nameof(Texts.Invert), Description = nameof(Texts.Invert), ResourceType = typeof(Texts), Order = 30)]
         [ToggleSlider]
