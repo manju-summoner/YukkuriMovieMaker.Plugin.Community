@@ -8,7 +8,12 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(YMM4Proj)' != ''">
+    <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Commons\YukkuriMovieMaker.Plugin.csproj" />
+    <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Controls\YukkuriMovieMaker.Controls.csproj" />
+  </ItemGroup>
+	  
+  <ItemGroup Condition="'$(YMM4Proj)' == ''">
 	  <Reference Include="YukkuriMovieMaker.Controls">
 		  <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Controls.dll</HintPath>
 	  </Reference>
