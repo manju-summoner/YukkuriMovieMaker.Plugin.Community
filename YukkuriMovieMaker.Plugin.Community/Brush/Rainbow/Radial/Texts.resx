@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
-<data name="RainbowRadialGradient" xml:space="preserve"><value>虹色円形グラデーション</value></data>
+<data name="RainbowRadialGradient" xml:space="preserve"><value>虹色放射グラデーション</value></data>
 <data name="CenterX" xml:space="preserve"><value>中心X</value></data>
 <data name="CenterY" xml:space="preserve"><value>中心Y</value></data>
 <data name="OriginX" xml:space="preserve"><value>原点X</value></data>
