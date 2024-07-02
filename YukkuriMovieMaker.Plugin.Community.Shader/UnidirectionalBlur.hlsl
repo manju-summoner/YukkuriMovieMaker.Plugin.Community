@@ -22,21 +22,15 @@ float4 main(
     float2 v = float2(cos(angle), sin(angle));
 
 	float sigma = length / 2.0;
-	float weights[2000];
-	[loop]
-	for (int i = 0; i < length; i++)
-	{
-		weights[i] = Gaussian(i, sigma);
-	}
-	
 	float4 result;
 	float totalWeight;
 	[loop]
 	for (int i = 0; i < length; i++)
 	{
 		float4 color = InputTexture.Sample(InputSampler, uv0.xy - v * i * uv0.zw);
-		result += color * weights[i];
-		totalWeight += weights[i];
+		float weight = Gaussian(i, sigma);
+		result += color * weight;
+		totalWeight += weight;
 	}
 	result /= totalWeight;
 
