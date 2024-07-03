@@ -40,7 +40,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.UnidirectionalBlur
                     UpdateConstants();
                 }
             }
-            [CustomEffectProperty(PropertyType.Float, (int)Properties.Length)]
+            [CustomEffectProperty(PropertyType.Int32, (int)Properties.Length)]
             public int Length
             {
                 get
