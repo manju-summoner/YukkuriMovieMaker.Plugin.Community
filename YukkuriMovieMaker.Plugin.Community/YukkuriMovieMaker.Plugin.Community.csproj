@@ -60,6 +60,7 @@
     <None Remove="Effect\Audio\DecibelVolume\Texts.csv" />
     <None Remove="Effect\Video\EdgeDetection\Texts.csv" />
     <None Remove="Effect\Video\EdgeTrimming\Texts.csv" />
+    <None Remove="Effect\Video\LensBlur\Texts.csv" />
     <None Remove="Effect\Video\LuminanceKey\Texts.csv" />
     <None Remove="Effect\Video\UnidirectionalBlur\Texts.csv" />
     <None Remove="Shape\Pen\Texts.csv" />
@@ -73,6 +74,7 @@
 	  <Resource Include="$(ShaderDirPath)BevelHeightmap.cso" Link="Resources\Shader\BevelHeightmap.cso" />
 	  <Resource Include="$(ShaderDirPath)BevelAndFlatComposite.cso" Link="Resources\Shader\BevelAndFlatComposite.cso" />
 	  <Resource Include="$(ShaderDirPath)UnidirectionalBlur.cso" Link="Resources\Shader\UnidirectionalBlur.cso" />
+	  <Resource Include="$(ShaderDirPath)LensBlur.cso" Link="Resources\Shader\LensBlur.cso" />
   </ItemGroup>
 
 </Project>
