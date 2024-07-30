@@ -15,7 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
     internal class HeightmapFileParameter : HeightmapParameterBase
     {
         [Display(Name = nameof(Texts.FileName), Description = nameof(Texts.FileDesc), ResourceType = typeof(Texts))]
-        [FileSelector(Settings.FileGroupType.Texture)]
+        [FileSelector(Settings.FileGroupType.Texture, ShowThumbnail = true)]
         public string? File { get => file; set => Set(ref file, value); }
         private string? file;
 
