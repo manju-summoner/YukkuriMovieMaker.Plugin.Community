@@ -23,7 +23,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         [AnimationSlider("F1", "px", -500, 500)]
         public Animation X { get; } = new Animation(0, -100000, 100000);
 
-        [Display(Name = nameof(Texts.XName), Description = nameof(Texts.XName), ResourceType = typeof(Texts))]
+        [Display(Name = nameof(Texts.YName), Description = nameof(Texts.YName), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
         public Animation Y { get; } = new Animation(0, -100000, 100000);
 
