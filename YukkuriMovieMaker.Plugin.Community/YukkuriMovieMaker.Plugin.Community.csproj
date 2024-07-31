@@ -45,7 +45,6 @@
     <Folder Include="FileSource\" />
     <Folder Include="FileWriter\" />
     <Folder Include="Tachie\" />
-    <Folder Include="TextCompletion\" />
     <Folder Include="Transition\" />
   </ItemGroup>
 	
@@ -64,6 +63,7 @@
     <None Remove="Effect\Video\LuminanceKey\Texts.csv" />
     <None Remove="Effect\Video\UnidirectionalBlur\Texts.csv" />
     <None Remove="Shape\Pen\Texts.csv" />
+    <None Remove="TextCompletion\GoogleAI\Texts.csv" />
   </ItemGroup>
 	
   <ItemGroup>
