@@ -1,0 +1,26 @@
+﻿<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI.GeminiTextCompletionSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Expander Header="Gemini" IsExpanded="True">
+        <StackPanel>
+            <Grid>
+                <Label Content="{x:Static local:Texts.APIKey}"/>
+                <TextBox Text="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=APIKey}" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
+            </Grid>
+            <Grid>
+                <Label Content="{x:Static local:Texts.Model}"/>
+                <ComboBox IsEditable="True" ItemsSource="{x:Static local:GeminiModels.Models}" Text="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=Model}" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
+            </Grid>
+            <Grid>
+                <Label Content="{x:Static local:Texts.IsSendImageEnabledTitle}"/>
+                <c:ToggleSlider Value="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=IsSendImageEnabled}" HorizontalAlignment="Right"/>
+            </Grid>
+        </StackPanel>
+    </Expander>
+</UserControl>
