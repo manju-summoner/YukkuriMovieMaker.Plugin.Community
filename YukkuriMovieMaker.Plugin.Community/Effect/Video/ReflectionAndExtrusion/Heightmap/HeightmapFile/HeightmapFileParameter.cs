@@ -12,7 +12,7 @@ using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Heightmap.HeightmapFile
 {
-    internal class HeightmapFileParameter : HeightmapParameterBase
+    internal class HeightmapFileParameter : HeightmapParameterBase, IFileItem, IResourceItem
     {
         [Display(Name = nameof(Texts.FileName), Description = nameof(Texts.FileDesc), ResourceType = typeof(Texts))]
         [FileSelector(Settings.FileGroupType.Texture, ShowThumbnail = true)]
@@ -74,6 +74,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
                 $"param=" +
                     $"file={File};" +
                     $"\r\n";
+        }
+
+        public IEnumerable<TimelineResource> GetResources()
+        {
+            if (TimelineResource.TryParseFromPath(File, TimelineResourceType.Image, out var resource))
+                yield return resource;
+        }
+
+        public IEnumerable<string> GetFiles()
+        {
+            if(!string.IsNullOrEmpty(File))
+                yield return File;
+        }
+
+        public void ReplaceFile(string from, string to)
+        {
+            if (File == from)
+                File = to;
         }
 
         class SharedData

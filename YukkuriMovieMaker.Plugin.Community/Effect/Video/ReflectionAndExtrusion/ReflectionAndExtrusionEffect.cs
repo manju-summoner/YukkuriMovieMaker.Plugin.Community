@@ -15,11 +15,12 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Hei
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Lighting;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Lighting.DistantDiffuse;
 using YukkuriMovieMaker.Plugin.Effects;
+using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 {
-    [VideoEffect(nameof(Texts.ReflectionAndExtrusion), [VideoEffectCategories.Decoration], ["鏡面","拡散", "スペキュラ", "ディフューズ", "specular", "diffuse", "反射", "リフレクト", "リフレクション", "reflection", "光源", "ライト", "ライティング", "lighting", "平行光源", "ディスタントライト", "distant light", "点光源", "ポイントライト", "point light", "高さ場", "ハイトマップ", "heightmap", "面取り", "ベベル", "bevel", "バンプマップ", "バンプマッピング", "bump mapping"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
-    internal class ReflectionAndExtrusionEffect : VideoEffectBase
+    [VideoEffect(nameof(Texts.ReflectionAndExtrusion), [VideoEffectCategories.Decoration], ["鏡面", "拡散", "スペキュラ", "ディフューズ", "specular", "diffuse", "反射", "リフレクト", "リフレクション", "reflection", "光源", "ライト", "ライティング", "lighting", "平行光源", "ディスタントライト", "distant light", "点光源", "ポイントライト", "point light", "高さ場", "ハイトマップ", "heightmap", "面取り", "ベベル", "bevel", "バンプマップ", "バンプマッピング", "bump mapping"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    internal class ReflectionAndExtrusionEffect : VideoEffectBase, IFileItem
     {
         public override string Label => Texts.ReflectionAndExtrusion;
 
@@ -90,6 +91,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
         {
             return new ReflectionAndExtrusionEffectProcessor(devices, this);
+        }
+
+        public override IEnumerable<TimelineResource> GetResources()
+        {
+            foreach(var resource in base.GetResources())
+                yield return resource;
+            if(Heightmap is IResourceItem heightmapResourceItem)
+                foreach(var resource in heightmapResourceItem.GetResources())
+                    yield return resource;
+        }
+
+        public override IEnumerable<string> GetFiles()
+        {
+            foreach(var file in base.GetFiles())
+                yield return file;
+            if(Heightmap is IFileItem heightmapFileItem)
+                foreach(var file in heightmapFileItem.GetFiles())
+                    yield return file;
+        }
+
+        public override void ReplaceFile(string from, string to)
+        {
+            base.ReplaceFile(from, to);
+            if(Heightmap is IFileItem heightmapFileItem)
+                heightmapFileItem.ReplaceFile(from, to);
         }
     }
 }
