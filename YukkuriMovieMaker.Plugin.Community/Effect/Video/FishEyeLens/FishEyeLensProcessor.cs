@@ -8,6 +8,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FishEyeLens
 {
     internal class FishEyeLensProcessor(IGraphicsDevicesAndContext devices, FishEyeLensEffect fisyEyeLensEffect) : VideoEffectProcessorBase(devices)
     {
+        readonly IGraphicsDevicesAndContext devices = devices;
         FishEyeLensCustomEffect? effect;
 
         bool isFirst = true;
