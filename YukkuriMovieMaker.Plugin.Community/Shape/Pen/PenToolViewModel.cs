@@ -315,7 +315,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
         [MemberNotNull(nameof(bitmap))]
         void Render()
         {
-            source.Update(info.TimelinePosition.Time, Player.Video.TimelineSourceUsage.Paused);
+            TimeSpan time;
+            if (info.ItemPosition.Time < TimeSpan.Zero)
+                time = info.ItemPosition.Time;
+            else if (info.ItemDuration.Time < info.ItemPosition.Time)
+                time = info.VideoInfo.GetTimeFrom(info.ItemPosition.Frame + info.ItemDuration.Frame - 1);
+            else
+                time = info.TimelinePosition.Time;
+
+            source.Update(time, Player.Video.TimelineSourceUsage.Paused);
             bitmap = Bitmap = source.RenderBitmapSource();
         }
 
