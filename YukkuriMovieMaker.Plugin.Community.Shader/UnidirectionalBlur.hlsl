@@ -18,7 +18,6 @@ float4 main(
 	float4 uv0 : TEXCOORD0
 ) : SV_Target
 {
-	float2 e = float2(1.0, 0);
     float2 v = float2(cos(angle), sin(angle));
 
 	float sigma = length / 2.0;
