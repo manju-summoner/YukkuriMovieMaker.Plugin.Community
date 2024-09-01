@@ -43,7 +43,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
                 var roundWidth = Math.Round(width);
                 var roundHeight = Math.Round(height);
 
-                using (var geometry = dc.Factory.CreatePathGeometry())
+                using (var geometry = devices.D2D.Factory.CreatePathGeometry())
                 {
                     using (var sink = geometry.Open())
                     {
