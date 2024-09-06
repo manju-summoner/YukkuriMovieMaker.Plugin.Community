@@ -1,0 +1,27 @@
+Key,Parameter,ja_jp,en_us,zh_cn,zh_tw,ko_kr,es_es,ar_sa,id_id
+EffectCategoryDecorationName,,装飾,Decoration,装饰,裝飾,장식,Decoración,زخرفة,Dekorasi
+ThreeDimensionalEffectName,,立体化,Three dimensional,立体化,Three dimensional,입체화,Solidificación,تأثير ثلاثي الأبعاد,Tiga dimensi
+ThreeDimensionalEffectXName,,消失点X,Vanishing x,消失点X,Vanishing x,소실점 X,Punto de fuga X,نقطة التلاشي X,Titik hilang X
+ThreeDimensionalEffectXDesc,,消失点X,Vanishing x,消失点X,Vanishing x,소실점 X,Punto de fuga X,نقطة التلاشي X,Titik hilang X
+ThreeDimensionalEffectYName,,消失点Y,Vanishing y,消失点Y,Vanishing y,소실점 Y,Punto de fuga Y,نقطة التلاشي Y,Titik hilang Y
+ThreeDimensionalEffectYDesc,,消失点Y,Vanishing y,消失点Y,Vanishing y,소실점 Y,Punto de fuga Y,نقطة اختفاء Y,Titik hilang Y
+ThreeDimensionalEffectLengthName,,長さ,Length,长度,Length,길이,Longitud,الطول,Panjang
+ThreeDimensionalEffectLengthDesc,,長さ,Length,长度,Length,길이,Longitud,الطول,Panjang
+ThreeDimensionalEffectOpacityName,,不透明度,Opacity,不透明度,Opacity,불투명도,Opacidad,عتامة,Opasitas
+ThreeDimensionalEffectOpacityDesc,,不透明度,Opacity,不透明度,Opacity,불투명도,Opacidad,التعتيم,Opasitas
+ThreeDimensionalEffectAttenuationName,,減衰,Attenuation,衰减,Attenuation,감쇠,Atenuación,توهين,Atenuasi
+ThreeDimensionalEffectAttenuationDesc,,減衰,Attenuation,衰减,Attenuation,감쇠,Atenuación,التوهين,Atenuasi
+ThreeDimensionalEffectColor1Name,,色1,Color 1,颜色 1,Color 1,색상 1,Color 1,اللون 1,Warna 1
+ThreeDimensionalEffectColor1Desc,,色1,Color 1,颜色 1,Color 1,색상 1,Color 1,لون 1,Warna 1
+ThreeDimensionalEffectColor2Name,,色2,Color 2,颜色 2,Color 2,색상2,Color 2,لون 2,Warna 2
+ThreeDimensionalEffectColor2Desc,,色2,Color 2,颜色 1,Color 2,색상 2,Color 2,لون 2,Warna 2
+ThreeDimensionalEffectShadowTypeName,,影の種類,Shadow type,阴影类型,Shadow type,그림자 종류,Tipo de sombra,نوع الظل,Jenis bayangan
+ThreeDimensionalEffectShadowTypeDesc,,影の種類,Shadow type,阴影类型,Shadow type,그림자 종류,Tipo de sombra,نوع الظل,Jenis bayangan
+ThreeDimensionalTypeImageName,,画像,Image,图片,Image,이미지,Imagen,صورة,Gambar
+ThreeDimensionalTypeSolidName,,単色,Solid color,纯色,Solid color,단색,Monocromo,لون صلب,Warna solid
+ThreeDimensionalTypeGradientName,,グラデーション,Gradient color,渐变,Gradient color,그라데이션,Gradiente,تدرج اللون,Warna gradasi
+ThreeDimensionalTypeImageDesc,,画像,Image,图片,Image,이미지,Imagen,صورة,Gambar
+ThreeDimensionalTypeSolidDesc,,単色,Solid color,纯色,Solid color,단색,Monocromo,لون صلب,Warna solid
+ThreeDimensionalTypeGradientDesc,,グラデーション,Gradient color,渐变,Gradient color,그라데이션,Gradiente,تدرج الألوان,Warna gradasi
+ThreeDimensionalEffectIsAbsolutePointName,,絶対座標,Absolute coordinate,绝对坐标,Absolute coordinate,절대 좌표,Coordenadas absolutas,إحداثيات مطلقة,Koordinat absolut
+ThreeDimensionalEffectIsAbsolutePointDesc,,絶対座標,Absolute coordinate,绝对坐标,Absolute coordinate,절대 좌표,Coordenadas absolutas,الإحداثيات المطلقة,Koordinat absolut

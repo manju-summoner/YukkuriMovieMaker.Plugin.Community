@@ -1,0 +1,23 @@
+Key,Parameter,ja_jp,en_us,zh_cn,zh_tw,ko_kr,es_es,ar_sa,id_id
+EffectCategoryAnimationName,,アニメーション,Animation,动画,動畫,애니메이션,Animación,الحركة,Animasi
+UnitCount,,個,units,单元个数,个,개,unidades,وحدات,Unit
+StripeGlitchNoiseEffectName,,グリッチノイズ（帯）,Glitch noise (stripe),故障噪波（条纹）,故障噪聲（條紋）,그리치 노이즈 (줄무늬),Ruido de falla (raya),ضجيج العطل (شريط),Noise glitch (garis)
+StripeGlitchNoiseEffectStripeCountName,,帯の数,Stripes,条纹数,條紋數,줄무늬 수,Rayas,عدد الشرائط,Jumlah garis
+StripeGlitchNoiseEffectStripeCountDesc,,帯の数,Number of stripes,条纹数,條紋數,줄무늬 수,Número de rayas,عدد الشرائط,Jumlah garis
+StripeGlitchNoiseEffectStripeMaxWidthName,,帯の幅,Stripe width,条纹宽度,條紋寬度,줄무늬 폭,Ancho de raya,عرض الشريط,Lebar garis
+StripeGlitchNoiseEffectStripeMaxWidthDesc,,帯の幅,Stripe width,条纹宽度,條紋寬度,줄무늬 폭,Ancho de raya,عرض الشريط,Lebar garis
+StripeGlitchNoiseEffectStripeMaxShiftName,,帯ずれ,Stripe shift,条纹偏移,條紋偏移,줄무늬 이동,Desplazamiento de la raya,إزاحة الشريط,Pergeseran garis
+StripeGlitchNoiseEffectStripeMaxShiftDesc,,帯のずれ,Stripe shift,条纹偏移,條紋偏移,줄무늬 이동,Desplazamiento de la raya,إزاحة الشريط,Pergeseran garis
+StripeGlitchNoiseEffectRepeatName,,繰り返し,Repeat,重复,重複,반복,Repetir,تكرار,Ulangi
+StripeGlitchNoiseEffectRepeatDesc,,繰り返し,Repeat,重复,重複,반복,Repetir,كرر,Ulangi
+StripeGlitchNoiseEffectColorMaxShiftName,,色ずれ,Color shift,色彩偏移,顏色偏移,색상 이동,Desplazamiento de color,انزياح اللون,Pergeseran warna
+StripeGlitchNoiseEffectColorMaxShiftDesc,,色のずれ,Color shift,色彩偏移,顏色偏移,색상 이동,Desplazamiento de color,بيرلن,Pergeseran warna
+StripeGlitchNoiseEffectIsHardBorderModeName,,サイズを固定,Fixed size,固定大小,固定大小,크기 고정,Tamaño fijo,بيرلن,Ukuran tetap
+StripeGlitchNoiseEffectIsHardBorderModeDesc,,サイズを固定,Fixed size,固定大小,固定大小,크기 고정,Tamaño fijo,حجم ثابت,Ukuran tetap
+StripeGlitchNoiseEffectStripeMaxWidthAttenuationName,,幅減衰,Width attenuation,宽度衰减,寬度衰減,폭 감쇠,Atenuación de ancho,توهين عرض القطاع,Attenuasi lebar
+StripeGlitchNoiseEffectStripeMaxWidthAttenuationDesc,,幅減衰,Width attenuation,宽度衰减,寬度衰減,폭 감쇠,Atenuación de ancho,توهين العرض,Attenuasi lebar
+StripeGlitchNoiseEffectStripeMaxShiftAttenuationName,,ずれ減衰,Shift attenuation,偏移衰减,偏移衰減,이동 감쇠,Atenuación de desplazamiento,خلوي,Attenuasi perpindahan
+StripeGlitchNoiseEffectStripeMaxShiftAttenuationDesc,,ずれ減衰,Shift attenuation,偏移衰减,偏移衰減,이동 감쇠,Atenuación de desplazamiento,التوهين الأقصى لانحراف شريط تأثير الضوضاء الشريطية,Attenuasi perpindahan
+StripeGlitchNoiseEffectComplicationGroupName,,複雑化,Complication,复杂化,複雜化,복잡화,Complicación,التعقيد,Komplikasi
+StripeGlitchNoiseEffectPlaybackRateName,,再生速度,Playback rate,播放速度,播放速度,재생 속도,Velocidad de reproducción,"معدل تشغيل الضوضاء المتموجة",Kecepatan pemutaran
+StripeGlitchNoiseEffectPlaybackRateDesc,,再生速度,Playback rate,播放速度,播放速度,재생 속도,Velocidad de reproducción,معدل تشغيل تأثير ضوضاء خطأ الشريط,Kecepatan pemutaran

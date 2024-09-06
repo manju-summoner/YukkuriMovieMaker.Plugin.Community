@@ -1,0 +1,17 @@
+Key,Parameter,ja_jp,en_us,zh_cn,zh_tw,ko_kr,es_es,ar_sa,id_id
+EffectCategoryAnimationName,,アニメーション,Animation,动画,動畫,애니메이션,Animación,الحركة,Animasi
+WaveDirectionHorizontalName,,左右,Horizontal,左右,左右,좌우,izquierda/derecha,أفقياً,Horizontal
+WaveDirectionHorizontalDesc,,左右,Horizontal,左右,左右,좌우,izquierda/derecha,أفقي,Horizontal
+WaveEffectPeriodName,,周期,Period,周期,週期,주기,Período,دورة,Periode
+WaveEffectPeriodDesc,,周期,Period,周期,週期,주기,Período,دورة,Periode
+WaveDirectionVerticalName,,上下,Vertical,上下,上下,위아래,Arriba y abajo,أعلى وأسفل,Vertikal
+WaveDirectionVerticalDesc,,上下,Vertical,上下,上下,위아래,Subir y bajar,عمودي,Vertikal
+WaveEffectAmplitudeName,,振幅,Amplitude,振幅,振幅,진폭,Amplitud,السعة,Amplitudo
+WaveEffectAmplitudeDesc,,振幅,Amplitude,振幅,振幅,진폭,Amplitud.,السعة,Amplitudo
+WaveEffectName,,波打ち,Waving,波浪,波浪,물결치다,Formas de onda,تموج,Bergelombang
+WaveGroupName,,波打ち,Waving,波浪,波浪,물결치다,Ondulación,التلويح,Bergelombang
+WaveEffectWaveLengthName,,波長,Wavelength,波长,波長,파장,Longitud de onda,الطول الموجي,Panjang gelombang
+WaveEffectWaveLengthDesc,,波長,Wavelength,波长,波長,파장,Longitud de onda,الطول الموجي,Panjang gelombang
+SecUnit,,秒,sec,秒,秒,초,Segundos,ثانية,dtk
+WaveEffectWaveAngle1,,波打ち方向,waving direction,波动方向,波動方向,파도 방향,la dirección de la onda,اتجاه الموجة,Arah gelombang
+WaveEffectWaveAngle2,,変形方向,deformation direction,变形方向,變形方向,변형 방향,dirección de deformación,اتجاه التشويه,Arah deformasi

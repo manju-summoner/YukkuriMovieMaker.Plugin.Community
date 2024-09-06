@@ -1,0 +1,7 @@
+Key,Parameter,ja_jp,en_us,zh_cn,zh_tw,ko_kr,es_es,ar_sa,id_id
+EffectCategoryFilteringName,,加工,Processing,处理,加工,가공,Procesamiento,معالجة,Memproses
+SpiralTransformEffectName,,渦巻き,Spiral,螺旋,螺旋,나선,Spiral,لولبي,Spiral
+SpiralTransformEffectAngleName,,角度,Angle,角度,角度,각도,Ángulo,زاوية,Sudut
+SpiralTransformEffectAngleDesc,,渦巻きの角度,Angle of spiral,螺旋的角度,螺旋的角度,나선의 각도,Ángulo de espiral,زاوية اللولب,Sudut spiral
+SpiralTransformEffectIsRotateOuterName,,外側を回転,Rotate outer,旋转外侧,旋轉外側,외부 회전,Rotar exterior,تدوير الخارجي,Rotasi bagian luar
+SpiralTransformEffectIsRotateOuterDesc,,外側を回転,Rotate outer,旋转外侧,旋轉外側,외부 회전,Rotar exterior,تدوير الخارج,Rotasi bagian luar
