@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.StripeGlitchNoise
 {
-    [VideoEffect(nameof(Texts.StripeGlitchNoiseEffectName), [nameof(Texts.EffectCategoryAnimationName)], ["glitch noise"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.StripeGlitchNoiseEffectName), [VideoEffectCategories.Animation], ["glitch noise"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public class StripeGlitchNoiseEffect : VideoEffectBase
     {
         public override string Label => Texts.StripeGlitchNoiseEffectName;

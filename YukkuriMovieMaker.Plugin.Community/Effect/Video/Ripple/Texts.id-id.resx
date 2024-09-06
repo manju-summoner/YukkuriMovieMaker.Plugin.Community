@@ -61,7 +61,6 @@
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="RippleEffectXName" xml:space="preserve"><value>X</value></data>
 <data name="RippleEffectYName" xml:space="preserve"><value>Y</value></data>
-<data name="EffectCategoryAnimationName" xml:space="preserve"><value>Animasi</value></data>
 <data name="RippleEffectPeriodName" xml:space="preserve"><value>Periode</value></data>
 <data name="RippleEffectPeriodDesc" xml:space="preserve"><value>Periode</value></data>
 <data name="RippleEffectAmplitudeName" xml:space="preserve"><value>Amplitudo</value></data>

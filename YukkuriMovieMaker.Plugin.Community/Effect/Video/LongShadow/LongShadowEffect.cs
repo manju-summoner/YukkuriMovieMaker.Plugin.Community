@@ -8,7 +8,7 @@ using YukkuriMovieMaker.ItemEditor.CustomVisibilityAttributes;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LongShadow
 {
-    [VideoEffect(nameof(Texts.LongShadowEffectName), [nameof(Texts.EffectCategoryDecorationName),], ["伸びる影", "ロングシャドー", "フラットシャドー", "long shadow", "flat shadow"], false, IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.LongShadowEffectName), [VideoEffectCategories.Decoration], ["伸びる影", "ロングシャドー", "フラットシャドー", "long shadow", "flat shadow"], false, IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public class LongShadowEffect : VideoEffectBase
     {
         public override string Label => $"{Texts.LongShadowEffectName}";

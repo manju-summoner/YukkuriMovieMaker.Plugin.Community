@@ -62,7 +62,6 @@
 <data name="CircularBlurEffectIsHardBorderModeName" xml:space="preserve"><value>Tamaño fijo</value></data>
 <data name="CircularBlurEffectIsHardBorderModeDesc" xml:space="preserve"><value>Tamaño fijo</value></data>
 <data name="CircularBlurEffectAngleDesc" xml:space="preserve"><value>Ángulo de desenfoque</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>Procesamiento</value></data>
 <data name="CircularBlurEffectName" xml:space="preserve"><value>Desenfoque de rotación</value></data>
 <data name="CircularBlurGroupName" xml:space="preserve"><value>Desenfoque de rotación</value></data>
 <data name="CircularBlurEffectAngleName" xml:space="preserve"><value>Ángulo</value></data>

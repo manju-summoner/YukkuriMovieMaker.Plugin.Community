@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.SpiralTransform
 {
-    [VideoEffect(nameof(Texts.SpiralTransformEffectName), [nameof(Texts.EffectCategoryFilteringName)], ["渦巻き", "螺旋", "spiral"], true, false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.SpiralTransformEffectName), [VideoEffectCategories.Filtering], ["渦巻き", "螺旋", "spiral"], true, false, ResourceType = typeof(Texts))]
     public class SpiralTransformEffect : VideoEffectBase
     {
         public override string Label => Texts.SpiralTransformEffectName;

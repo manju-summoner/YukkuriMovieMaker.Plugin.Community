@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Ripple
 {
-    [VideoEffect(nameof(Texts.RippleEffectName), [nameof(Texts.EffectCategoryAnimationName),], ["リップル", "ripple"], ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.RippleEffectName), [VideoEffectCategories.Animation,], ["リップル", "ripple"], ResourceType = typeof(Texts))]
     public class RippleEffect : VideoEffectBase
     {
         public override string Label => Texts.RippleEffectName;

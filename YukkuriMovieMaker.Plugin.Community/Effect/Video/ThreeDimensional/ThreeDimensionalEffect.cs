@@ -8,7 +8,7 @@ using YukkuriMovieMaker.ItemEditor.CustomVisibilityAttributes;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ThreeDimensional
 {
-    [VideoEffect(nameof(Texts.ThreeDimensionalEffectName), [nameof(Texts.EffectCategoryDecorationName),], ["立体化", "three dimensional"], false, IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.ThreeDimensionalEffectName), [VideoEffectCategories.Decoration], ["立体化", "three dimensional"], false, IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public class ThreeDimensionalEffect : VideoEffectBase
     {
         public override string Label => $"{Texts.ThreeDimensionalEffectName}";

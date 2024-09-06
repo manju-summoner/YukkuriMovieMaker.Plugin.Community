@@ -59,7 +59,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>Memproses</value></data>
 <data name="BinarizationEffectName" xml:space="preserve"><value>Binarisasi</value></data>
 <data name="BinarizationEffectThresholdName" xml:space="preserve"><value>Ambang batas</value></data>
 <data name="BinarizationEffectThresholdDesc" xml:space="preserve"><value>Membuat biner dengan angka yang ditentukan sebagai batas</value></data>

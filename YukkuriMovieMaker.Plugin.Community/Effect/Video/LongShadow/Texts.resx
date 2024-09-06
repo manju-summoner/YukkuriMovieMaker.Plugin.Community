@@ -59,7 +59,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
-<data name="EffectCategoryDecorationName" xml:space="preserve"><value>装飾</value></data>
 <data name="LongShadowEffectName" xml:space="preserve"><value>伸びる影</value></data>
 <data name="LongShadowEffectAngleName" xml:space="preserve"><value>角度</value></data>
 <data name="LongShadowEffectAngleDesc" xml:space="preserve"><value>角度</value></data>

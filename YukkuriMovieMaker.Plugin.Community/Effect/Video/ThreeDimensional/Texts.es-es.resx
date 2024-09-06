@@ -59,7 +59,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
-<data name="EffectCategoryDecorationName" xml:space="preserve"><value>Decoración</value></data>
 <data name="ThreeDimensionalEffectName" xml:space="preserve"><value>Solidificación</value></data>
 <data name="ThreeDimensionalEffectXName" xml:space="preserve"><value>Punto de fuga X</value></data>
 <data name="ThreeDimensionalEffectXDesc" xml:space="preserve"><value>Punto de fuga X</value></data>

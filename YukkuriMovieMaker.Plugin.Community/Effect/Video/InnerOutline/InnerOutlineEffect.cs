@@ -8,7 +8,7 @@ using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
 {
-    [VideoEffect(nameof(Texts.InnerOutlineEffectName), [nameof(Texts.EffectCategoryDecorationName)], ["インナーアウトライン", "インナーボーダー", "inner outline", "inner border"], ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.InnerOutlineEffectName), [VideoEffectCategories.Decoration], ["インナーアウトライン", "インナーボーダー", "inner outline", "inner border"], ResourceType = typeof(Texts))]
     public class InnerOutlineEffect : VideoEffectBase, IFileItem
     {
         public override string Label => $"{Texts.InnerOutlineEffectName} {Thickness.GetValue(0, 1, 30):F0}px";

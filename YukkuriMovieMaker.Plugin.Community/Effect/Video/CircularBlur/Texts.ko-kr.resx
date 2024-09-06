@@ -62,7 +62,6 @@
 <data name="CircularBlurEffectIsHardBorderModeName" xml:space="preserve"><value>크기 고정</value></data>
 <data name="CircularBlurEffectIsHardBorderModeDesc" xml:space="preserve"><value>크기 고정</value></data>
 <data name="CircularBlurEffectAngleDesc" xml:space="preserve"><value>블러 각도</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>가공</value></data>
 <data name="CircularBlurEffectName" xml:space="preserve"><value>회전 블러</value></data>
 <data name="CircularBlurGroupName" xml:space="preserve"><value>회전 블러</value></data>
 <data name="CircularBlurEffectAngleName" xml:space="preserve"><value>각도</value></data>

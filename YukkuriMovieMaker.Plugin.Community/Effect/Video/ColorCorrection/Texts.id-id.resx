@@ -60,7 +60,6 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="ColorCorrectionEffectContrastName" xml:space="preserve"><value>Kontras</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>Memproses</value></data>
 <data name="ColorCorrectionEffectBrightnessName" xml:space="preserve"><value>Pencahayaan</value></data>
 <data name="ColorCorrectionEffectBrightnessDesc" xml:space="preserve"><value>Pencahayaan</value></data>
 <data name="ColorCorrectionEffectSaturationName" xml:space="preserve"><value>Saturasi</value></data>

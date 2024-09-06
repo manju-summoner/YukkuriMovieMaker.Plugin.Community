@@ -60,7 +60,6 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
 <data name="ColorCorrectionEffectContrastName" xml:space="preserve"><value>コントラスト</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>加工</value></data>
 <data name="ColorCorrectionEffectBrightnessName" xml:space="preserve"><value>輝度</value></data>
 <data name="ColorCorrectionEffectBrightnessDesc" xml:space="preserve"><value>輝度</value></data>
 <data name="ColorCorrectionEffectSaturationName" xml:space="preserve"><value>彩度</value></data>

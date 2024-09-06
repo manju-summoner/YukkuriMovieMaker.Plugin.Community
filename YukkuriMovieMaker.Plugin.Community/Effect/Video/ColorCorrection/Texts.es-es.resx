@@ -60,7 +60,6 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
 <data name="ColorCorrectionEffectContrastName" xml:space="preserve"><value>Contraste</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>Procesamiento</value></data>
 <data name="ColorCorrectionEffectBrightnessName" xml:space="preserve"><value>Luminosidad</value></data>
 <data name="ColorCorrectionEffectBrightnessDesc" xml:space="preserve"><value>Luminancia</value></data>
 <data name="ColorCorrectionEffectSaturationName" xml:space="preserve"><value>Saturación.</value></data>

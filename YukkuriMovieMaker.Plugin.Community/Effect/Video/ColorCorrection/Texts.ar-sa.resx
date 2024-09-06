@@ -60,7 +60,6 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
 <data name="ColorCorrectionEffectContrastName" xml:space="preserve"><value>تباين</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>معالجة</value></data>
 <data name="ColorCorrectionEffectBrightnessName" xml:space="preserve"><value>السطوع</value></data>
 <data name="ColorCorrectionEffectBrightnessDesc" xml:space="preserve"><value>سطوع</value></data>
 <data name="ColorCorrectionEffectSaturationName" xml:space="preserve"><value>التشبع</value></data>

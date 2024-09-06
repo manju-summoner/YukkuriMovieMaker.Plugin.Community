@@ -62,7 +62,6 @@
 <data name="CircularBlurEffectIsHardBorderModeName" xml:space="preserve"><value>حجم ثابت</value></data>
 <data name="CircularBlurEffectIsHardBorderModeDesc" xml:space="preserve"><value>حجم ثابت</value></data>
 <data name="CircularBlurEffectAngleDesc" xml:space="preserve"><value>زاوية التمويه</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>معالجة</value></data>
 <data name="CircularBlurEffectName" xml:space="preserve"><value>التشويش الدائري</value></data>
 <data name="CircularBlurGroupName" xml:space="preserve"><value>التشويش الدائري</value></data>
 <data name="CircularBlurEffectAngleName" xml:space="preserve"><value>زاوية</value></data>

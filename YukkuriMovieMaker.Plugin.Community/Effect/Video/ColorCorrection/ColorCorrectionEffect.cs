@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Exo;
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorCorrection
 {
 
-    [VideoEffect(nameof(Texts.ColorCorrectionEffectName), [nameof(Texts.EffectCategoryFilteringName)], ["Color adjustment", "明るさ", "コントラスト", "色相", "輝度", "彩度", "lightness", "contrast", "hue", "brightness", "saturation"], ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.ColorCorrectionEffectName), [VideoEffectCategories.Filtering], ["Color adjustment", "明るさ", "コントラスト", "色相", "輝度", "彩度", "lightness", "contrast", "hue", "brightness", "saturation"], ResourceType = typeof(Texts))]
     public class ColorCorrectionEffect : VideoEffectBase
     {
         public override string Label => $"{Texts.ColorCorrectionEffectName} L{Lightness.GetValue(0, 1, 30):F0}, C{Contrast.GetValue(0, 1, 30):F0}, H{HueRotation.GetValue(0, 1, 30):F0}, B{Brightness.GetValue(0, 1, 30):F0}, S{Saturation.GetValue(0, 1, 30):F0}";

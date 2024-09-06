@@ -60,7 +60,6 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
 <data name="ColorCorrectionEffectContrastName" xml:space="preserve"><value>명도대비</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>가공</value></data>
 <data name="ColorCorrectionEffectBrightnessName" xml:space="preserve"><value>밝기</value></data>
 <data name="ColorCorrectionEffectBrightnessDesc" xml:space="preserve"><value>밝기</value></data>
 <data name="ColorCorrectionEffectSaturationName" xml:space="preserve"><value>채도</value></data>

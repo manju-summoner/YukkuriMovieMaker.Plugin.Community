@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorShift
 {
-    [VideoEffect(nameof(Texts.ColorShiftEffectName), [nameof(Texts.EffectCategoryFilteringName),], ["color shift", "color draft", "color registration error", "out of color registration", "色ずらし", "版ズレ", "版ずらし", "RGBズレ", "RGBずらし"], ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.ColorShiftEffectName), [VideoEffectCategories.Filtering], ["color shift", "color draft", "color registration error", "out of color registration", "色ずらし", "版ズレ", "版ずらし", "RGBズレ", "RGBずらし"], ResourceType = typeof(Texts))]
 
     public class ColorShiftEffect : VideoEffectBase
     {

@@ -60,7 +60,6 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="ColorCorrectionEffectContrastName" xml:space="preserve"><value>对比</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>处理</value></data>
 <data name="ColorCorrectionEffectBrightnessName" xml:space="preserve"><value>亮度</value></data>
 <data name="ColorCorrectionEffectBrightnessDesc" xml:space="preserve"><value>亮度</value></data>
 <data name="ColorCorrectionEffectSaturationName" xml:space="preserve"><value>饱和度</value></data>

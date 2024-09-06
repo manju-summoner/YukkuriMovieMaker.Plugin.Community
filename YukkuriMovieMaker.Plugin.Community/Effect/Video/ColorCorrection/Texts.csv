@@ -1,6 +1,5 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
 ColorCorrectionEffectContrastName,,コントラスト,Contrast,对比,對比,명도대비,Contraste,تباين,Kontras
-EffectCategoryFilteringName,,加工,Processing,处理,加工,가공,Procesamiento,معالجة,Memproses
 ColorCorrectionEffectBrightnessName,,輝度,Luminance,亮度,亮度,밝기,Luminosidad,السطوع,Pencahayaan
 ColorCorrectionEffectBrightnessDesc,,輝度,Luminance,亮度,亮度,밝기,Luminancia,سطوع,Pencahayaan
 ColorCorrectionEffectSaturationName,,彩度,Saturation,饱和度,飽和度,채도,Saturación.,التشبع,Saturasi

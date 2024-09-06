@@ -59,7 +59,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
-<data name="EffectCategoryAnimationName" xml:space="preserve"><value>Animasi</value></data>
 <data name="WaveDirectionHorizontalName" xml:space="preserve"><value>Horizontal</value></data>
 <data name="WaveDirectionHorizontalDesc" xml:space="preserve"><value>Horizontal</value></data>
 <data name="WaveEffectPeriodName" xml:space="preserve"><value>Periode</value></data>

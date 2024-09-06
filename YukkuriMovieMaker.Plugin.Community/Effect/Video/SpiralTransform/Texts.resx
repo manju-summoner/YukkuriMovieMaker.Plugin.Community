@@ -59,7 +59,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>加工</value></data>
 <data name="SpiralTransformEffectName" xml:space="preserve"><value>渦巻き</value></data>
 <data name="SpiralTransformEffectAngleName" xml:space="preserve"><value>角度</value></data>
 <data name="SpiralTransformEffectAngleDesc" xml:space="preserve"><value>渦巻きの角度</value></data>

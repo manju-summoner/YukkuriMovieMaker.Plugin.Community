@@ -62,7 +62,6 @@
 <data name="CircularBlurEffectIsHardBorderModeName" xml:space="preserve"><value>固定大小</value></data>
 <data name="CircularBlurEffectIsHardBorderModeDesc" xml:space="preserve"><value>固定大小</value></data>
 <data name="CircularBlurEffectAngleDesc" xml:space="preserve"><value>模糊角度</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>处理</value></data>
 <data name="CircularBlurEffectName" xml:space="preserve"><value>旋转模糊</value></data>
 <data name="CircularBlurGroupName" xml:space="preserve"><value>旋转模糊</value></data>
 <data name="CircularBlurEffectAngleName" xml:space="preserve"><value>角度</value></data>

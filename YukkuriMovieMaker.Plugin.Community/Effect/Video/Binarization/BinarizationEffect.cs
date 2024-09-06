@@ -12,7 +12,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Binarization
 {
-    [VideoEffect(nameof(Texts.BinarizationEffectName), [nameof(Texts.EffectCategoryFilteringName)], ["二値化", "2値化", "Binarization", "threshold", "しきい値", "いき値", "閾値", "スレッショルド", "スレショルド"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.BinarizationEffectName), [VideoEffectCategories.Filtering], ["二値化", "2値化", "Binarization", "threshold", "しきい値", "いき値", "閾値", "スレッショルド", "スレショルド"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public class BinarizationEffect : VideoEffectBase
     {
         public override string Label => Texts.BinarizationEffectName;

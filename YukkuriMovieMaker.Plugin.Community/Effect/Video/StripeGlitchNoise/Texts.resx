@@ -59,7 +59,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
-<data name="EffectCategoryAnimationName" xml:space="preserve"><value>アニメーション</value></data>
 <data name="UnitCount" xml:space="preserve"><value>個</value></data>
 <data name="StripeGlitchNoiseEffectName" xml:space="preserve"><value>グリッチノイズ（帯）</value></data>
 <data name="StripeGlitchNoiseEffectStripeCountName" xml:space="preserve"><value>帯の数</value></data>

@@ -59,7 +59,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>가공</value></data>
 <data name="BinarizationEffectName" xml:space="preserve"><value>이진화</value></data>
 <data name="BinarizationEffectThresholdName" xml:space="preserve"><value>임계 값</value></data>
 <data name="BinarizationEffectThresholdDesc" xml:space="preserve"><value>지정한 숫자를 경계로 이진화합니다</value></data>

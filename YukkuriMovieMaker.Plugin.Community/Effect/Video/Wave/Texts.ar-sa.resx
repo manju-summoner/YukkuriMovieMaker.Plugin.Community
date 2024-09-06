@@ -59,7 +59,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
-<data name="EffectCategoryAnimationName" xml:space="preserve"><value>الحركة</value></data>
 <data name="WaveDirectionHorizontalName" xml:space="preserve"><value>أفقياً</value></data>
 <data name="WaveDirectionHorizontalDesc" xml:space="preserve"><value>أفقي</value></data>
 <data name="WaveEffectPeriodName" xml:space="preserve"><value>دورة</value></data>

@@ -62,7 +62,6 @@
 <data name="CircularBlurEffectIsHardBorderModeName" xml:space="preserve"><value>Fixed size</value></data>
 <data name="CircularBlurEffectIsHardBorderModeDesc" xml:space="preserve"><value>Fixed size</value></data>
 <data name="CircularBlurEffectAngleDesc" xml:space="preserve"><value>Angle of the blur</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>Processing</value></data>
 <data name="CircularBlurEffectName" xml:space="preserve"><value>Rotation blur</value></data>
 <data name="CircularBlurGroupName" xml:space="preserve"><value>Rotation blur</value></data>
 <data name="CircularBlurEffectAngleName" xml:space="preserve"><value>Angle</value></data>

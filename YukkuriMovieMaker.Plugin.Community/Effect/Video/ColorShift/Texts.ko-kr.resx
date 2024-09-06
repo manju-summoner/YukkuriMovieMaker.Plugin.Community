@@ -59,7 +59,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>가공</value></data>
 <data name="ColorShiftEffectAngleName" xml:space="preserve"><value>각도</value></data>
 <data name="ColorShiftEffectAngleDesc" xml:space="preserve"><value>각도</value></data>
 <data name="ColorShiftEffectShiftName" xml:space="preserve"><value>거리</value></data>

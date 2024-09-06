@@ -59,7 +59,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
-<data name="EffectCategoryAnimationName" xml:space="preserve"><value>動畫</value></data>
 <data name="UnitCount" xml:space="preserve"><value>个</value></data>
 <data name="StripeGlitchNoiseEffectName" xml:space="preserve"><value>故障噪聲（條紋）</value></data>
 <data name="StripeGlitchNoiseEffectStripeCountName" xml:space="preserve"><value>條紋數</value></data>

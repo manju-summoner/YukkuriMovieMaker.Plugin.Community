@@ -61,7 +61,6 @@
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="RippleEffectXName" xml:space="preserve"><value>X</value></data>
 <data name="RippleEffectYName" xml:space="preserve"><value>Y</value></data>
-<data name="EffectCategoryAnimationName" xml:space="preserve"><value>动画</value></data>
 <data name="RippleEffectPeriodName" xml:space="preserve"><value>周期</value></data>
 <data name="RippleEffectPeriodDesc" xml:space="preserve"><value>周期</value></data>
 <data name="RippleEffectAmplitudeName" xml:space="preserve"><value>振幅</value></data>

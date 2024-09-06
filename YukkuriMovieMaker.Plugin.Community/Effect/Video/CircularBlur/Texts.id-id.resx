@@ -62,7 +62,6 @@
 <data name="CircularBlurEffectIsHardBorderModeName" xml:space="preserve"><value>Ukuran tetap</value></data>
 <data name="CircularBlurEffectIsHardBorderModeDesc" xml:space="preserve"><value>Ukuran tetap</value></data>
 <data name="CircularBlurEffectAngleDesc" xml:space="preserve"><value>Sudut buram</value></data>
-<data name="EffectCategoryFilteringName" xml:space="preserve"><value>Memproses</value></data>
 <data name="CircularBlurEffectName" xml:space="preserve"><value>Keburaman rotasi</value></data>
 <data name="CircularBlurGroupName" xml:space="preserve"><value>Keburaman rotasi</value></data>
 <data name="CircularBlurEffectAngleName" xml:space="preserve"><value>Sudut</value></data>

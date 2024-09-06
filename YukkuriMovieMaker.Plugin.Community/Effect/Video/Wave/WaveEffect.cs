@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Wave
 {
-    [VideoEffect(nameof(Texts.WaveEffectName), [nameof(Texts.EffectCategoryAnimationName),], ["raster scroll", "ラスター", "縦波", "横波", "vertical wave", "horizontal wave", "波打つ"], ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.WaveEffectName), [VideoEffectCategories.Animation], ["raster scroll", "ラスター", "縦波", "横波", "vertical wave", "horizontal wave", "波打つ"], ResourceType = typeof(Texts))]
     public class WaveEffect : VideoEffectBase
     {
         public override string Label => $"{Texts.WaveEffectName}";

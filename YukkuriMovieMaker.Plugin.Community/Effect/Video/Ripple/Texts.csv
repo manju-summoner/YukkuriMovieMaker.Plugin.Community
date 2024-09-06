@@ -1,7 +1,6 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
 RippleEffectXName,,X,X,X,X,X,X,X,X
 RippleEffectYName,,Y,Y,Y,Y,Y,Y,تأثير التموج Y,Y
-EffectCategoryAnimationName,,アニメーション,Animation,动画,動畫,애니메이션,Animación,الحركة,Animasi
 RippleEffectPeriodName,,周期,Period,周期,週期,주기,Período,الدورة,Periode
 RippleEffectPeriodDesc,,周期,Period,周期,週期,주기,Período,دورة,Periode
 RippleEffectAmplitudeName,,振幅,Amplitude,振幅,振幅,진폭,Amplitud,السعة,Amplitudo

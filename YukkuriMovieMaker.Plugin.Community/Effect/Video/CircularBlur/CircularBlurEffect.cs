@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CircularBlur
 {
-    [VideoEffect(nameof(Texts.CircularBlurEffectName), [nameof(Texts.EffectCategoryFilteringName),], ["circular blur"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.CircularBlurEffectName), [VideoEffectCategories.Filtering], ["circular blur"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public class CircularBlurEffect : VideoEffectBase
     {
         public override string Label => $"{Texts.CircularBlurEffectName} {Angle.GetValue(0, 1, 30):F0}°";
