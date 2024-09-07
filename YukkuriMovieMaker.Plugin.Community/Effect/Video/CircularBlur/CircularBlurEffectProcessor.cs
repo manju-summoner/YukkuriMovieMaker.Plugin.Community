@@ -37,13 +37,33 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CircularBlur
             if (isFirst || this.isHardBorder != isHardBorder)
                 effect.IsHardBorder = isHardBorder;
 
+            var control =
+                new VideoEffectController(
+                    item,
+                    [
+                        new ControllerPoint(
+                            new((float)x, (float)y, 0f),
+                            x=>
+                            {
+                                item.X.AddToEachValues(x.Delta.X);
+                                item.Y.AddToEachValues(x.Delta.Y);
+                            })
+                    ]);
+
             isFirst = false;
             this.angle = angle;
             this.x = x;
             this.y = y;
             this.isHardBorder = isHardBorder;
 
-            return effectDescription.DrawDescription;
+            return effectDescription.DrawDescription with 
+            { 
+                Controllers = 
+                [
+                    ..effectDescription.DrawDescription.Controllers,
+                    control
+                ],
+            };
         }
 
         protected override void ClearEffectChain() => effect?.SetInput(0, null, true);
