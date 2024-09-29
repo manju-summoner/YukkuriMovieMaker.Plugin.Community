@@ -132,6 +132,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow
                 isChanged = true;
             }
 
+            isFirst = false;
             this.color = color;
             this.backgroundColor = backgroundColor;
             this.featherWidth = featherWidth;

@@ -106,6 +106,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
                 isChanged = true;
             }
 
+            isFirst = false;
             this.color = color;
             this.backgroundColor = backgroundColor;
             this.width = width;
