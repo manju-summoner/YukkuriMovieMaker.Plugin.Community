@@ -202,18 +202,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.StripeGlitchNoise
             {
                 var inputRect = inputRects[0];
 
-                if (IsHardBorder)
-                {
-                    outputRect = inputRect;
-                }
-                else
-                {
-                    outputRect = new RawRect(
+                outputRect = IsHardBorder
+                    ? inputRect
+                    : new RawRect(
                         inputRect.Left - (int)StripeMaxShift - (int)ColorMaxShift,
                         inputRect.Top - (int)ColorMaxShift,
                         inputRect.Right + (int)StripeMaxShift + (int)ColorMaxShift,
                         inputRect.Bottom + (int)ColorMaxShift);
-                }
                 outputOpaqueSubRect = default;
             }
 
