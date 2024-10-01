@@ -69,6 +69,11 @@
   </ItemGroup>
 	
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.8" />
+  </ItemGroup>
+	
+  <ItemGroup>
     <Resource Include="$(ShaderDirPath)EdgeTrimming.cso" Link="Resources\Shader\EdgeTrimming.cso" />
 	  <Resource Include="$(ShaderDirPath)LuminanceKey.cso" Link="Resources\Shader\LuminanceKey.cso" />
 	  <Resource Include="$(ShaderDirPath)DiffuseAlpha.cso" Link="Resources\Shader\DiffuseAlpha.cso" />

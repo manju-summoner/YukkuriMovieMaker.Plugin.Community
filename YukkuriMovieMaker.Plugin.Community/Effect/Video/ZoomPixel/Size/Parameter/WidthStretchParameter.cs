@@ -15,7 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ZoomPixel.Size.Paramet
         [AnimationSlider("F1", "px", 0, 500)]
         public Animation Width { get; } = new Animation(100, 0, 5000);
 
-        public override string Label => String.Format("幅{0:0.0}px", Width.Values[0].Value);
+        public override string Label => String.Format(Texts.Width + "{0:0.0}px", Width.Values[0].Value);
 
         public WidthStretchParameter() 
         {
