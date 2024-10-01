@@ -1,0 +1,14 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+RippleEffectXName,,X,X,X,X,X,X,X,X
+RippleEffectYName,,Y,Y,Y,Y,Y,Y,تأثير التموج Y,Y
+RippleEffectPeriodName,,周期,Period,周期,週期,주기,Período,الدورة,Periode
+RippleEffectPeriodDesc,,周期,Period,周期,週期,주기,Período,دورة,Periode
+RippleEffectAmplitudeName,,振幅,Amplitude,振幅,振幅,진폭,Amplitud,السعة,Amplitudo
+RippleEffectAmplitudeDesc,,振幅,Amplitude,振幅,振幅,진폭,Amplitud,السعة,Amplitudo
+RippleEffectWaveLengthName,,波長,Wavelength,波长,波長,파장,Longitud de onda,الطول الموجي,Panjang gelombang
+RippleEffectWaveLengthDesc,,波長,Wavelength,波长,波長,파장,Longitud de onda,الطول الموجي,Panjang gelombang
+RippleEffectName,,波紋,Ripple,波纹,波紋,파문,Ondulación,تموج,Efek riak
+RippleGroupName,,波紋,Ripple,波纹,波紋,파문,Ondulación,تموج,Riak
+RippleEffectXDesc,,波紋の中心座標（横方向）,Ripple center coordinates (horizontal),波纹中心坐标（水平）,波紋中心座標（水平）,파문 중심 좌표(가로 방향),Coordenadas centrales de la ondulación (horizontales),إحداثيات مركز التموج (أفقياً),Koordinat pusat riak (horizontal)
+RippleEffectYDesc,,波紋の中心座標（縦方向）,Ripple center coordinates (vertical),波纹中心坐标（垂直）,波紋中心座標（垂直）,파문 중심 좌표(세로 방향),Coordenadas del centro de la ondulación (longitudinales),إحداثيات مركز التموج (عمودي),Koordinat pusat riak (vertikal)
+SecUnit,,秒,sec,秒,秒,초,Segundos,ثانية,dtk

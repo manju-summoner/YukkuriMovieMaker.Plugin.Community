@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
+<data name="ThreeDimensionalEffectName" xml:space="preserve"><value>입체화</value></data>
+<data name="ThreeDimensionalEffectXName" xml:space="preserve"><value>소실점 X</value></data>
+<data name="ThreeDimensionalEffectXDesc" xml:space="preserve"><value>소실점 X</value></data>
+<data name="ThreeDimensionalEffectYName" xml:space="preserve"><value>소실점 Y</value></data>
+<data name="ThreeDimensionalEffectYDesc" xml:space="preserve"><value>소실점 Y</value></data>
+<data name="ThreeDimensionalEffectLengthName" xml:space="preserve"><value>길이</value></data>
+<data name="ThreeDimensionalEffectLengthDesc" xml:space="preserve"><value>길이</value></data>
+<data name="ThreeDimensionalEffectOpacityName" xml:space="preserve"><value>불투명도</value></data>
+<data name="ThreeDimensionalEffectOpacityDesc" xml:space="preserve"><value>불투명도</value></data>
+<data name="ThreeDimensionalEffectAttenuationName" xml:space="preserve"><value>감쇠</value></data>
+<data name="ThreeDimensionalEffectAttenuationDesc" xml:space="preserve"><value>감쇠</value></data>
+<data name="ThreeDimensionalEffectColor1Name" xml:space="preserve"><value>색상 1</value></data>
+<data name="ThreeDimensionalEffectColor1Desc" xml:space="preserve"><value>색상 1</value></data>
+<data name="ThreeDimensionalEffectColor2Name" xml:space="preserve"><value>색상2</value></data>
+<data name="ThreeDimensionalEffectColor2Desc" xml:space="preserve"><value>색상 2</value></data>
+<data name="ThreeDimensionalEffectShadowTypeName" xml:space="preserve"><value>그림자 종류</value></data>
+<data name="ThreeDimensionalEffectShadowTypeDesc" xml:space="preserve"><value>그림자 종류</value></data>
+<data name="ThreeDimensionalTypeImageName" xml:space="preserve"><value>이미지</value></data>
+<data name="ThreeDimensionalTypeSolidName" xml:space="preserve"><value>단색</value></data>
+<data name="ThreeDimensionalTypeGradientName" xml:space="preserve"><value>그라데이션</value></data>
+<data name="ThreeDimensionalTypeImageDesc" xml:space="preserve"><value>이미지</value></data>
+<data name="ThreeDimensionalTypeSolidDesc" xml:space="preserve"><value>단색</value></data>
+<data name="ThreeDimensionalTypeGradientDesc" xml:space="preserve"><value>그라데이션</value></data>
+<data name="ThreeDimensionalEffectIsAbsolutePointName" xml:space="preserve"><value>절대 좌표</value></data>
+<data name="ThreeDimensionalEffectIsAbsolutePointDesc" xml:space="preserve"><value>절대 좌표</value></data>
+</root>

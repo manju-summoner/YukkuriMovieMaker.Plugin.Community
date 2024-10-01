@@ -1,0 +1,8 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+BinarizationEffectName,,二値化,Binarization,二值化,二值化,이진화,Binarización,ثنائي الجزء,Binarisasi
+BinarizationEffectThresholdName,,しきい値,Threshold,阈值,閾值,임계 값,Umbral,العتبة,Ambang batas
+BinarizationEffectThresholdDesc,,指定した数値を境に二値化します,Binarize with the specified number as the boundary,用指定的数值二值化边缘,以指定的數字為邊界進行二值化,지정한 숫자를 경계로 이진화합니다,Binarizar con el número especificado como límite,ثنّي الثنائية بالقيمة المحددة كحد فاصل,Membuat biner dengan angka yang ditentukan sebagai batas
+BinarizationEffectIsInvertedName,,反転,Reverse,反转,反轉,반전,Reverso,عكس,Terbalik
+BinarizationEffectIsInvertedDesc,,しきい値の処理を反転させます,Invert the threshold processing,反转阈值处理,反轉閾值處理,임계 값 처리를 반전시킵니다,Invertir el procesamiento de umbral,اعكس معالجة العتبة,Membalikkan pemrosesan ambang batas
+BinarizationEffectKeepColorName,,色を保持,Keep color,保持颜色,保持顏色,색상 유지,Mantener el color,الاحتفاظ باللون,Pertahankan warna
+BinarizationEffectKeepColorDesc,,色を保持します,Keep color,保持颜色,保持顏色,색상을 유지합니다,Mantener el color,الحفاظ على اللون,Pertahankan warna

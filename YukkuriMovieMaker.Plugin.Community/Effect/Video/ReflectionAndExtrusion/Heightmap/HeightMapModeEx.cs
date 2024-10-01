@@ -13,9 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
                 HeightmapMode.HeightmapFile => new HeightmapFileParameter(current.GetSharedData()),
                 _ => throw new ArgumentOutOfRangeException(nameof(mode)),
             };
-            if (param.GetType() != current.GetType())
-                return param;
-            return current;
+            return param.GetType() != current.GetType() ? param : current;
         }
     }
 }

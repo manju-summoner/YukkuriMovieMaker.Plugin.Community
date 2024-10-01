@@ -23,15 +23,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow
                 var h = (hueOffset + (double)i / count) % 1;
                 var s = saturate;
                 var v = value;
-                Color4 color;
-                if(colorSpace is RainbowColorSpace.HSV)
-                {
-                    color = ColorEx.FromHSV(h, s, v, 1d).ToColor4();
-                }
-                else
-                {
-                    color = ColorEx.FromLch(v, s, h, 1d).ToColor4();
-                }
+                Color4 color = colorSpace is RainbowColorSpace.HSV ? ColorEx.FromHSV(h, s, v, 1d).ToColor4() : ColorEx.FromLch(v, s, h, 1d).ToColor4();
                 stops[i] = new GradientStop
                 {
                     Position = (float)i / count,

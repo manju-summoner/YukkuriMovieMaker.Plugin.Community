@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
+<data name="UnitCount" xml:space="preserve"><value>units</value></data>
+<data name="StripeGlitchNoiseEffectName" xml:space="preserve"><value>Glitch noise (stripe)</value></data>
+<data name="StripeGlitchNoiseEffectStripeCountName" xml:space="preserve"><value>Stripes</value></data>
+<data name="StripeGlitchNoiseEffectStripeCountDesc" xml:space="preserve"><value>Number of stripes</value></data>
+<data name="StripeGlitchNoiseEffectStripeMaxWidthName" xml:space="preserve"><value>Stripe width</value></data>
+<data name="StripeGlitchNoiseEffectStripeMaxWidthDesc" xml:space="preserve"><value>Stripe width</value></data>
+<data name="StripeGlitchNoiseEffectStripeMaxShiftName" xml:space="preserve"><value>Stripe shift</value></data>
+<data name="StripeGlitchNoiseEffectStripeMaxShiftDesc" xml:space="preserve"><value>Stripe shift</value></data>
+<data name="StripeGlitchNoiseEffectRepeatName" xml:space="preserve"><value>Repeat</value></data>
+<data name="StripeGlitchNoiseEffectRepeatDesc" xml:space="preserve"><value>Repeat</value></data>
+<data name="StripeGlitchNoiseEffectColorMaxShiftName" xml:space="preserve"><value>Color shift</value></data>
+<data name="StripeGlitchNoiseEffectColorMaxShiftDesc" xml:space="preserve"><value>Color shift</value></data>
+<data name="StripeGlitchNoiseEffectIsHardBorderModeName" xml:space="preserve"><value>Fixed size</value></data>
+<data name="StripeGlitchNoiseEffectIsHardBorderModeDesc" xml:space="preserve"><value>Fixed size</value></data>
+<data name="StripeGlitchNoiseEffectStripeMaxWidthAttenuationName" xml:space="preserve"><value>Width attenuation</value></data>
+<data name="StripeGlitchNoiseEffectStripeMaxWidthAttenuationDesc" xml:space="preserve"><value>Width attenuation</value></data>
+<data name="StripeGlitchNoiseEffectStripeMaxShiftAttenuationName" xml:space="preserve"><value>Shift attenuation</value></data>
+<data name="StripeGlitchNoiseEffectStripeMaxShiftAttenuationDesc" xml:space="preserve"><value>Shift attenuation</value></data>
+<data name="StripeGlitchNoiseEffectComplicationGroupName" xml:space="preserve"><value>Complication</value></data>
+<data name="StripeGlitchNoiseEffectPlaybackRateName" xml:space="preserve"><value>Playback rate</value></data>
+<data name="StripeGlitchNoiseEffectPlaybackRateDesc" xml:space="preserve"><value>Playback rate</value></data>
+</root>

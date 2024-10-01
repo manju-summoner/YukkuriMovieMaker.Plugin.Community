@@ -1,0 +1,22 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+LongShadowEffectName,,伸びる影,Long shadow,长阴影,Long shadow,늘어나는 그림자,Sombra alargada,ظل طويل,Bayangan panjang
+LongShadowEffectAngleName,,角度,Angle,角度,Angle,각도,Ángulo,زاوية,Sudut
+LongShadowEffectAngleDesc,,角度,Angle,角度,Angle,각도,Ángulo,زاوية,Sudut
+LongShadowEffectLengthName,,長さ,Length,长度,Length,길이,Longitud,الطول,Panjang
+LongShadowEffectLengthDesc,,長さ,Length,角度,Length,길이,Longitud,طول,Panjang
+LongShadowEffectOpacityName,,不透明度,Opacity,不透明度,Opacity,불투명도,Opacidad,العتامة,Opasitas
+LongShadowEffectOpacityDesc,,不透明度,Opacity,不透明度,Opacity,불투명도,Opacidad,عتامة,Opasitas
+LongShadowEffectAttenuationName,,減衰,Attenuation,衰减,Attenuation,감쇠,Atenuación,التوهين,Atenuasi
+LongShadowEffectAttenuationDesc,,減衰,Attenuation,衰减,Attenuation,감쇠,Atenuación,التوهين,Atenuasi
+LongShadowEffectColor1Name,,色1,Color 1,颜色 1,Color 1,색상 1,Color 1,لون 1,Warna 1
+LongShadowEffectColor1Desc,,色1,Color 1,颜色 1,Color 1,색상 1,Color 1,لون 1,Warna 1
+LongShadowEffectColor2Name,,色2,Color 2,颜色 2,Color 2,색상2,Color 2,اللون 2,Warna 2
+LongShadowEffectColor2Desc,,色2,Color 2,颜色 1,Color 2,색상 2,Color 2,اللون 2,Warna 2
+LongShadowEffectShadowTypeName,,影の種類,Shadow type,阴影类型,Shadow type,그림자 종류,Tipo de sombra,نوع الظل,Jenis bayangan
+LongShadowEffectShadowTypeDesc,,影の種類,Shadow type,阴影类型,Shadow type,그림자 종류,Tipo de sombra,نوع الظل,Jenis bayangan
+LongShadowTypeImageName,,画像,Image,图片,Image,이미지,Imagen,صورة,Gambar
+LongShadowTypeSolidName,,単色,Solid color,纯色,Solid color,단색,Monocromo,لون صلب,Warna solid
+LongShadowTypeGradientName,,グラデーション,Gradient color,渐变,Gradient color,그라데이션,Gradiente,لون التدرج,Warna gradasi
+LongShadowTypeImageDesc,,画像,Image,图片,Image,이미지,Imagen,صورة,Gambar
+LongShadowTypeSolidDesc,,単色,Solid color,纯色,Solid color,단색,Monocromo,لون صلب,Warna solid
+LongShadowTypeGradientDesc,,グラデーション,Gradient color,渐变,Gradient color,그라데이션,Gradiente,لون التدرج,Warna gradasi

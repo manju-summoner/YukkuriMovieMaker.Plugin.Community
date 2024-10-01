@@ -17,11 +17,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.UnidirectionalBlur
     {
         public override string Label => Texts.UnidirectionalBlur;
 
-        [Display(Name = nameof(Texts.Angle), Description = nameof(Texts.Angle), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.UnidirectionalBlur), Name = nameof(Texts.Angle), Description = nameof(Texts.Angle), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
         public Animation Angle { get; } = new(0, -36000,36000);
 
-        [Display(Name = nameof(Texts.Length), Description = nameof(Texts.Length), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.UnidirectionalBlur), Name = nameof(Texts.Length), Description = nameof(Texts.Length), ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "px", 0, 500)]
         public Animation Length { get; } = new Animation(10, 0, 2000);
 

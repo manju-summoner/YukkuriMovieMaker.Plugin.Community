@@ -57,6 +57,7 @@
     <None Remove="Brush\Rainbow\Linear\Texts.csv" />
     <None Remove="Brush\Rainbow\Radial\Texts.csv" />
     <None Remove="Effect\Audio\DecibelVolume\Texts.csv" />
+    <None Remove="Effect\Video\ColorBlindness\Texts.csv" />
     <None Remove="Effect\Video\EdgeDetection\Texts.csv" />
     <None Remove="Effect\Video\EdgeTrimming\Texts.csv" />
     <None Remove="Effect\Video\FishEyeLens\Texts.csv" />
@@ -77,6 +78,18 @@
 	  <Resource Include="$(ShaderDirPath)UnidirectionalBlur.cso" Link="Resources\Shader\UnidirectionalBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)LensBlur.cso" Link="Resources\Shader\LensBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)FishEyeLens.cso" Link="Resources\Shader\FishEyeLens.cso" />
+	  <Resource Include="$(ShaderDirPath)Binarization.cso" Link="Resources\Shader\Binarization.cso" />
+	  <Resource Include="$(ShaderDirPath)CircularBlur.cso" Link="Resources\Shader\CircularBlur.cso" />
+	  <Resource Include="$(ShaderDirPath)ColorCorrection.cso" Link="Resources\Shader\ColorCorrection.cso" />
+	  <Resource Include="$(ShaderDirPath)ColorShift.cso" Link="Resources\Shader\ColorShift.cso" />
+	  <Resource Include="$(ShaderDirPath)InnerOutline.cso" Link="Resources\Shader\InnerOutline.cso" />
+	  <Resource Include="$(ShaderDirPath)LongShadow.cso" Link="Resources\Shader\LongShadow.cso" />
+	  <Resource Include="$(ShaderDirPath)Ripple.cso" Link="Resources\Shader\Ripple.cso" />
+	  <Resource Include="$(ShaderDirPath)SpiralTransform.cso" Link="Resources\Shader\SpiralTransform.cso" />
+	  <Resource Include="$(ShaderDirPath)StripeGlitchNoise.cso" Link="Resources\Shader\StripeGlitchNoise.cso" />
+	  <Resource Include="$(ShaderDirPath)ThreeDimensional.cso" Link="Resources\Shader\ThreeDimensional.cso" />
+	  <Resource Include="$(ShaderDirPath)Wave.cso" Link="Resources\Shader\Wave.cso" />
+	  <Resource Include="$(ShaderDirPath)ColorBlindness.cso" Link="Resources\Shader\ColorBlindness.cso" />
   </ItemGroup>
 
 </Project>
