@@ -1,0 +1,7 @@
+<Project>
+	<PropertyGroup>
+		<YMM4DirPath>D:\YMM4\</YMM4DirPath>
+		<GeneratorDirPath>..\YukkuriMovieMaker.Generator\</GeneratorDirPath>
+		<ShaderDirPath>..\Release\</ShaderDirPath>
+	</PropertyGroup>
+</Project>
