@@ -63,4 +63,16 @@
 <data name="Model" xml:space="preserve"><value>Model</value></data>
 <data name="IsSendImageEnabledTitle" xml:space="preserve"><value>Generate lines based on the image of the playback position</value></data>
 <data name="IsSendImageEnabledHint" xml:space="preserve"><value>You need to specify a multimodal model</value></data>
+<data name="Details" xml:space="preserve"><value>Details</value></data>
+<data name="Safety" xml:space="preserve"><value>Safety</value></data>
+<data name="Harassment" xml:space="preserve"><value>Harassment</value></data>
+<data name="HateSpeech" xml:space="preserve"><value>Hate Speech</value></data>
+<data name="SexuallyExplicit" xml:space="preserve"><value>Sexually Explicit</value></data>
+<data name="DangerousContent" xml:space="preserve"><value>Dangerous Content</value></data>
+<data name="CivicIntegrity" xml:space="preserve"><value>Civic Integrity</value></data>
+<data name="BlockNone" xml:space="preserve"><value>Block None</value></data>
+<data name="BlockFew" xml:space="preserve"><value>Block Few</value></data>
+<data name="BlockSome" xml:space="preserve"><value>Block Some</value></data>
+<data name="BlockMost" xml:space="preserve"><value>Block Most</value></data>
+<data name="UsePreviewModel" xml:space="preserve"><value>Use the preview version of the model</value></data>
 </root>

@@ -61,4 +61,5 @@
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="Model" xml:space="preserve"><value>Model</value></data>
 <data name="IsSendImageEnabledHint" xml:space="preserve"><value>Yang perlu Anda lakukan adalah menentukan model multimodal</value></data>
+<data name="Harassment" xml:space="preserve"><value>Pelecehan</value></data>
 </root>

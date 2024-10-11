@@ -63,4 +63,16 @@
 <data name="Model" xml:space="preserve"><value>モデル</value></data>
 <data name="IsSendImageEnabledTitle" xml:space="preserve"><value>再生位置の画像を元にセリフを生成</value></data>
 <data name="IsSendImageEnabledHint" xml:space="preserve"><value>マルチモーダルモデルを指定する必要があります</value></data>
+<data name="Details" xml:space="preserve"><value>詳細</value></data>
+<data name="Safety" xml:space="preserve"><value>セーフティ</value></data>
+<data name="Harassment" xml:space="preserve"><value>ハラスメント</value></data>
+<data name="HateSpeech" xml:space="preserve"><value>ヘイトスピーチ</value></data>
+<data name="SexuallyExplicit" xml:space="preserve"><value>性的表現</value></data>
+<data name="DangerousContent" xml:space="preserve"><value>危険なコンテンツ</value></data>
+<data name="CivicIntegrity" xml:space="preserve"><value>市民活動の阻害</value></data>
+<data name="BlockNone" xml:space="preserve"><value>ブロックなし</value></data>
+<data name="BlockFew" xml:space="preserve"><value>少量をブロック</value></data>
+<data name="BlockSome" xml:space="preserve"><value>一部をブロック</value></data>
+<data name="BlockMost" xml:space="preserve"><value>ほとんどをブロック</value></data>
+<data name="UsePreviewModel" xml:space="preserve"><value>プレビュー版のモデルを使用</value></data>
 </root>

@@ -63,4 +63,16 @@
 <data name="Model" xml:space="preserve"><value>모델</value></data>
 <data name="IsSendImageEnabledTitle" xml:space="preserve"><value>Generar líneas basadas en la imagen de la posición de reproducción</value></data>
 <data name="IsSendImageEnabledHint" xml:space="preserve"><value>Debe especificar un modelo multimodal</value></data>
+<data name="Details" xml:space="preserve"><value>Detalles</value></data>
+<data name="Safety" xml:space="preserve"><value>Seguridad</value></data>
+<data name="Harassment" xml:space="preserve"><value>폭행</value></data>
+<data name="HateSpeech" xml:space="preserve"><value>Discurso de odio</value></data>
+<data name="SexuallyExplicit" xml:space="preserve"><value>Contenido sexual</value></data>
+<data name="DangerousContent" xml:space="preserve"><value>Contenido peligroso</value></data>
+<data name="CivicIntegrity" xml:space="preserve"><value>Integridad cívica</value></data>
+<data name="BlockNone" xml:space="preserve"><value>Bloquear Ninguno</value></data>
+<data name="BlockFew" xml:space="preserve"><value>Bloquear Algunos</value></data>
+<data name="BlockSome" xml:space="preserve"><value>Bloquear Algunos</value></data>
+<data name="BlockMost" xml:space="preserve"><value>Bloquear la mayoría</value></data>
+<data name="UsePreviewModel" xml:space="preserve"><value>Usar la versión de vista previa del modelo</value></data>
 </root>

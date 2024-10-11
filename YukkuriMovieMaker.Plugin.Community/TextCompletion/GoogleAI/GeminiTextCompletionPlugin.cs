@@ -27,7 +27,8 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
             var jsonContent = new StringContent(jsonText, Encoding.UTF8, "application/json");
 
             var model = GeminiTextCompletionSettings.Default.Model;
-            var endpoint = $"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent";
+            var suffix = GeminiTextCompletionSettings.Default.IsPreviewModel ? "beta" : "";
+            var endpoint = $"https://generativelanguage.googleapis.com/v1{suffix}/models/{model}:generateContent";
 
             using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
             request.Headers.Add("x-goog-api-key", GeminiTextCompletionSettings.Default.APIKey);
@@ -37,7 +38,8 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
-            var responseJson = JObject.Parse(await response.Content.ReadAsStringAsync());
+            var responseText = await response.Content.ReadAsStringAsync();
+            var responseJson = JObject.Parse(responseText);
             return
                 responseJson["candidates"]
                 ?.FirstOrDefault()
@@ -83,10 +85,54 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
                     {
                         ["parts"] = parts
                     }
-                }
+                },
+                ["generationConfig"] = new JObject()
+                {
+                    ["temperature"] = GeminiTextCompletionSettings.Default.Temperature,
+                    ["topK"] = GeminiTextCompletionSettings.Default.TopK,
+                    ["topP"] = GeminiTextCompletionSettings.Default.TopP,
+                },
+                ["safety_settings"] = new JArray()
+                {
+                    new JObject()
+                    {
+                        ["category"] = "HARM_CATEGORY_HARASSMENT",
+                        ["threshold"] = GetString(GeminiTextCompletionSettings.Default.Harassment),
+                    },
+                    new JObject()
+                    {
+                        ["category"] = "HARM_CATEGORY_HATE_SPEECH",
+                        ["threshold"] = GetString(GeminiTextCompletionSettings.Default.HateSpeech),
+                    },
+                    new JObject()
+                    {
+                        ["category"] = "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        ["threshold"] = GetString(GeminiTextCompletionSettings.Default.SexuallyExplicit),
+                    },
+                    new JObject()
+                    {
+                        ["category"] = "HARM_CATEGORY_DANGEROUS_CONTENT",
+                        ["threshold"] = GetString(GeminiTextCompletionSettings.Default.DangerousContent),
+                    },
+                    new JObject()
+                    {
+                        ["category"] = "HARM_CATEGORY_CIVIC_INTEGRITY",
+                        ["threshold"] = GetString(GeminiTextCompletionSettings.Default.CivicIntegrity),
+                    },
+                },
             };
             return json;
         }
+
+        static string GetString(SafetyLevel safetyLevel) => 
+            safetyLevel switch 
+            { 
+                SafetyLevel.BlockNone => "BLOCK_NONE",
+                SafetyLevel.BlockFew => "BLOCK_ONLY_HIGH",
+                SafetyLevel.BlockSome => "BLOCK_MEDIUM_AND_ABOVE",
+                SafetyLevel.BlockMost => "BLOCK_LOW_AND_ABOVE",
+                _=>throw new NotImplementedException(),
+            };
 
         static string BitmapToBase64(Bitmap bitmap)
         {

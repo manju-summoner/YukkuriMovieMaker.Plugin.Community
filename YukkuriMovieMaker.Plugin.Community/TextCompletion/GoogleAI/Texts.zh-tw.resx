@@ -63,4 +63,16 @@
 <data name="Model" xml:space="preserve"><value>模型</value></data>
 <data name="IsSendImageEnabledTitle" xml:space="preserve"><value>재생 위치의 이미지를 기반으로 대사 생성</value></data>
 <data name="IsSendImageEnabledHint" xml:space="preserve"><value>다중 모델을 지정해야 합니다</value></data>
+<data name="Details" xml:space="preserve"><value>세부 정보</value></data>
+<data name="Safety" xml:space="preserve"><value>안전</value></data>
+<data name="Harassment" xml:space="preserve"><value>騷擾</value></data>
+<data name="HateSpeech" xml:space="preserve"><value>혐오 발언</value></data>
+<data name="SexuallyExplicit" xml:space="preserve"><value>성적 표현</value></data>
+<data name="DangerousContent" xml:space="preserve"><value>위험한 콘텐츠</value></data>
+<data name="CivicIntegrity" xml:space="preserve"><value>시민의 진실성</value></data>
+<data name="BlockNone" xml:space="preserve"><value>차단 없음</value></data>
+<data name="BlockFew" xml:space="preserve"><value>일부 차단</value></data>
+<data name="BlockSome" xml:space="preserve"><value>일부 차단</value></data>
+<data name="BlockMost" xml:space="preserve"><value>대부분 차단</value></data>
+<data name="UsePreviewModel" xml:space="preserve"><value>미리보기 버전 모델 사용</value></data>
 </root>

@@ -63,4 +63,15 @@
 <data name="Model" xml:space="preserve"><value>Modelo</value></data>
 <data name="IsSendImageEnabledTitle" xml:space="preserve"><value>توليد الخطوط بناءً على صورة موضع التشغيل</value></data>
 <data name="IsSendImageEnabledHint" xml:space="preserve"><value>يجب عليك تحديد نموذج متعدد الوسائط</value></data>
+<data name="Details" xml:space="preserve"><value>تفاصيل</value></data>
+<data name="Safety" xml:space="preserve"><value>سلامة</value></data>
+<data name="Harassment" xml:space="preserve"><value>Hostigamiento</value></data>
+<data name="HateSpeech" xml:space="preserve"><value>خطاب الكراهية</value></data>
+<data name="DangerousContent" xml:space="preserve"><value>محتوى خطير</value></data>
+<data name="CivicIntegrity" xml:space="preserve"><value>نزاهة المواطن</value></data>
+<data name="BlockNone" xml:space="preserve"><value>منع لا</value></data>
+<data name="BlockFew" xml:space="preserve"><value>منع بعض</value></data>
+<data name="BlockSome" xml:space="preserve"><value>منع بعض</value></data>
+<data name="BlockMost" xml:space="preserve"><value>منع معظم</value></data>
+<data name="UsePreviewModel" xml:space="preserve"><value>استخدام الإصدار المعاينة من النموذج</value></data>
 </root>

@@ -63,4 +63,15 @@
 <data name="Model" xml:space="preserve"><value>نموذج</value></data>
 <data name="IsSendImageEnabledTitle" xml:space="preserve"><value>Generate lines based on the image of the playback position</value></data>
 <data name="IsSendImageEnabledHint" xml:space="preserve"><value>يجب عليك تحديد نموذج متعدد الوسائط</value></data>
+<data name="Details" xml:space="preserve"><value>Detail</value></data>
+<data name="Safety" xml:space="preserve"><value>Keamanan</value></data>
+<data name="Harassment" xml:space="preserve"><value>تحرش</value></data>
+<data name="HateSpeech" xml:space="preserve"><value>Ujaran kebencian</value></data>
+<data name="DangerousContent" xml:space="preserve"><value>Konten berbahaya</value></data>
+<data name="CivicIntegrity" xml:space="preserve"><value>Integritas warga negara</value></data>
+<data name="BlockNone" xml:space="preserve"><value>Block Tidak Ada</value></data>
+<data name="BlockFew" xml:space="preserve"><value>Block Beberapa</value></data>
+<data name="BlockSome" xml:space="preserve"><value>Block Beberapa</value></data>
+<data name="BlockMost" xml:space="preserve"><value>Block Sebagian Besar</value></data>
+<data name="UsePreviewModel" xml:space="preserve"><value>Gunakan versi pratinjau model</value></data>
 </root>
