@@ -56,11 +56,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.RectangleGlitchNoise
 
         [Display(GroupName = nameof(Texts.ComplicationGroupName), Name = nameof(Texts.RectangleMaxWidthAttenuation), Description = nameof(Texts.RectangleMaxWidthAttenuation), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
-        public Animation RectangleMaxWidthAttenuation { get; } = new Animation(10, 0, int.MaxValue);
+        public Animation RectangleMaxWidthAttenuation { get; } = new Animation(30, 0, int.MaxValue);
 
         [Display(GroupName = nameof(Texts.ComplicationGroupName), Name = nameof(Texts.RectangleMaxHeightAttenuation), Description = nameof(Texts.RectangleMaxHeightAttenuation), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
-        public Animation RectangleMaxHeightAttenuation { get; } = new Animation(10, 0, int.MaxValue);
+        public Animation RectangleMaxHeightAttenuation { get; } = new Animation(30, 0, int.MaxValue);
 
         [Display(GroupName = nameof(Texts.ComplicationGroupName), Name = nameof(Texts.RectangleMaxXShiftAttenuation), Description = nameof(Texts.RectangleMaxXShiftAttenuation), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
