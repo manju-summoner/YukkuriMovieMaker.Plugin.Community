@@ -1,20 +1,27 @@
-# YukkuriMovieMaker4�R�~���j�e�B�v���O�C��
-YMM4�R�~���j�e�B�ŊJ������YMM4�v���O�C���ł��B  
-�v���O�C���̃T���v�������˂Ă��܂��B  
-�����ŊJ�����ꂽ�v���O�C����YMM4�Ƀf�t�H���g�őg�ݍ��܂�܂��B
+﻿# YukkuriMovieMaker4コミュニティプラグイン
+YMM4コミュニティで開発するYMM4プラグインです。  
+プラグインのサンプルも兼ねています。  
+ここで開発されたプラグインはYMM4にデフォルトで組み込まれます。
 
-# �r���h���@
-YMM v4.30.0.0�ȍ~���K�v�ł��B
+# ビルド方法
+YMM v4.30.0.0以降が必要です。
 
-1. ���̃��|�W�g�����N���[�����܂��B
-1. `Directory.Build.props.sample`���R�s�[����`Directory.Build.props`���쐬���܂��B
-1. `Directory.Build.props`��ҏW���āA`YMM4DirPath`��YMM4���C���X�g�[�����Ă���t�H���_�̃p�X���w��i�܂��͂����ɋL�ڂ���Ă���t�H���_��YMM4���C���X�g�[���j���܂��B  
-�� `Directory.Build.props`��VisualStudio��ł͕\������Ȃ����߁A�G�N�X�v���[���[���烁�������ŊJ���A�ҏW���Ă��������B  
-�� �p�X�̖����͕K��`\`�ŏI���K�v������܂��B�i��: `D:\YMM4\`�j
-1. `YukkuriMovieMaker.Plugin.Community.sln`���J���A�r���h���܂��B
+1. このリポジトリをクローンします。
+1. `Directory.Build.props.sample`をコピーして`Directory.Build.props`を作成します。
+1. `Directory.Build.props`を編集して、`YMM4DirPath`にYMM4をインストールしているフォルダのパスを指定（またはそこに記載されているフォルダにYMM4をインストール）します。  
+※ 普段使いしているYMM4とは別に、開発専用のYMM4を用意することをお勧めします。
+※ `Directory.Build.props`はVisualStudio上では表示されないため、エクスプローラーからメモ帳等で開き、編集してください。  
+※ パスの末尾は必ず`\`で終わる必要があります。（例: `D:\YMM4\`）
+1. `YukkuriMovieMaker.Plugin.Community.sln`を開き、ビルドします。
+※ビルドを実行すると、`YMM4DirPath`に指定したフォルダ内に`YukkuriMovieMaker.Plugin.Community.dll`がコピーされます。`
 
-# �g�p���@�i��ʃ��[�U�[�����j
-YMM4�Ƀf�t�H���g�őg�ݍ��܂�܂��BYMM4�̃A�b�v�f�[�g�����҂��������B
+# デバッグ方法
+1. `YukkuriMovieMaker.Plugin.Community`プロジェクトを右クリックし、`スタートアッププロジェクトに設定`を選択する
+1. `デバッグ(D)`→`YukkuriMovieMaker.Plugin.Community のデバッグ プロパティ`を選択する
+1. ウィンドウ左上の`新しいプロファイルを作成します`ボタン→`実行可能ファイル`をクリックする
+1. `実行可能ファイル`欄に、`Directory.Build.props`に設定しているYMM4フォルダ内の`YukkuriMovieMaker.exe`を指定する
+1. デバッグ開始ボタン`▶ YukkuriMovieMaker.Plugin.Community`右側の`▼`ボタンをクリックし、`3.`で作成したプロファイル`プロファイル 1`を選択する
+1. デバッグ開始ボタンが`▶ プロファイル 1`に変わるので、ボタンをクリックしてデバッグを開始する
 
-# �g�p���@�i�J���Ҍ����j
-�r���h��AYMM4�t�H���_����`YukkuriMovieMaker.Plugin.Community.dll`��u�������Ă��������B
+# 使用方法（一般ユーザー向け）
+YMM4にデフォルトで組み込まれます。YMM4のアップデートをお待ち下さい。
