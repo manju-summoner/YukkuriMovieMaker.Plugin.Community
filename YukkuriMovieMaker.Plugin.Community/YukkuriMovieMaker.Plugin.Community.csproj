@@ -86,6 +86,7 @@
 	  <Resource Include="$(ShaderDirPath)LongShadow.cso" Link="Resources\Shader\LongShadow.cso" />
 	  <Resource Include="$(ShaderDirPath)Ripple.cso" Link="Resources\Shader\Ripple.cso" />
 	  <Resource Include="$(ShaderDirPath)SpiralTransform.cso" Link="Resources\Shader\SpiralTransform.cso" />
+	  <Resource Include="$(ShaderDirPath)RectangleGlitchNoise.cso" Link="Resources\Shader\RectangleGlitchNoise.cso" />
 	  <Resource Include="$(ShaderDirPath)StripeGlitchNoise.cso" Link="Resources\Shader\StripeGlitchNoise.cso" />
 	  <Resource Include="$(ShaderDirPath)ThreeDimensional.cso" Link="Resources\Shader\ThreeDimensional.cso" />
 	  <Resource Include="$(ShaderDirPath)Wave.cso" Link="Resources\Shader\Wave.cso" />
