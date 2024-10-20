@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
+<data name="UnitCount" xml:space="preserve"><value>Unit</value></data>
+<data name="RectangleGlitchNoise" xml:space="preserve"><value>Kebisingan Glitch (Persegi Panjang)</value></data>
+<data name="RectangleCount" xml:space="preserve"><value>Jumlah Persegi Panjang</value></data>
+<data name="RectangleMaxWidth" xml:space="preserve"><value>Lebar Persegi Panjang</value></data>
+<data name="RectangleMaxHeight" xml:space="preserve"><value>Tinggi Persegi Panjang</value></data>
+<data name="RectangleMaxXShift" xml:space="preserve"><value>Perpindahan Horizontal Persegi Panjang</value></data>
+<data name="RectangleMaxYShift" xml:space="preserve"><value>Perpindahan Vertikal Persegi Panjang</value></data>
+<data name="ColorMaxShift" xml:space="preserve"><value>Pergeseran warna</value></data>
+<data name="PlaybackRate" xml:space="preserve"><value>Kecepatan pemutaran</value></data>
+<data name="IsClipping" xml:space="preserve"><value>Crop</value></data>
+<data name="IsHardBorderMode" xml:space="preserve"><value>Ukuran tetap</value></data>
+<data name="ComplicationGroupName" xml:space="preserve"><value>Komplikasi</value></data>
+<data name="Repeat" xml:space="preserve"><value>Pengulangan</value></data>
+<data name="RectangleMaxWidthAttenuation" xml:space="preserve"><value>Attenuasi Lebar</value></data>
+<data name="RectangleMaxHeightAttenuation" xml:space="preserve"><value>Attenuasi Tinggi</value></data>
+<data name="RectangleMaxXShiftAttenuation" xml:space="preserve"><value>Attenuasi Perpindahan Horizontal</value></data>
+<data name="RectangleMaxYShiftAttenuation" xml:space="preserve"><value>Attenuasi Perpindahan Vertikal</value></data>
+</root>
