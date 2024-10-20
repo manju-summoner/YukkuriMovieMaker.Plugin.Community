@@ -38,6 +38,12 @@
 	  <Reference Include="MathNet.Numerics">
 		  <HintPath>$(YMM4DirPath)MathNet.Numerics.dll</HintPath>
 	  </Reference>
+	  <Reference Include="System.Drawing.Common">
+		  <HintPath>$(YMM4DirPath)System.Drawing.Common.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Newtonsoft.Json">
+		  <HintPath>$(YMM4DirPath)Newtonsoft.Json.dll</HintPath>
+	  </Reference>
   </ItemGroup>
 
   <ItemGroup>
