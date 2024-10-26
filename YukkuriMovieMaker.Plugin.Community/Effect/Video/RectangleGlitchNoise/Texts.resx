@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
+<data name="UnitCount" xml:space="preserve"><value>個</value></data>
+<data name="RectangleGlitchNoise" xml:space="preserve"><value>グリッチノイズ（四角形）</value></data>
+<data name="RectangleCount" xml:space="preserve"><value>四角形の数</value></data>
+<data name="RectangleMaxWidth" xml:space="preserve"><value>四角形の幅</value></data>
+<data name="RectangleMaxHeight" xml:space="preserve"><value>四角形の高さ</value></data>
+<data name="RectangleMaxXShift" xml:space="preserve"><value>四角形横ずれ</value></data>
+<data name="RectangleMaxYShift" xml:space="preserve"><value>四角形縦ずれ</value></data>
+<data name="ColorMaxShift" xml:space="preserve"><value>色ずれ</value></data>
+<data name="PlaybackRate" xml:space="preserve"><value>再生速度</value></data>
+<data name="IsClipping" xml:space="preserve"><value>切り抜き</value></data>
+<data name="IsHardBorderMode" xml:space="preserve"><value>サイズを固定</value></data>
+<data name="ComplicationGroupName" xml:space="preserve"><value>複雑化</value></data>
+<data name="Repeat" xml:space="preserve"><value>繰り返し</value></data>
+<data name="RectangleMaxWidthAttenuation" xml:space="preserve"><value>幅減衰</value></data>
+<data name="RectangleMaxHeightAttenuation" xml:space="preserve"><value>高さ減衰</value></data>
+<data name="RectangleMaxXShiftAttenuation" xml:space="preserve"><value>横ずれ減衰</value></data>
+<data name="RectangleMaxYShiftAttenuation" xml:space="preserve"><value>縦ずれ減衰</value></data>
+</root>
