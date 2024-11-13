@@ -47,6 +47,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
             return new ArrowPatternBrush2Source(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => new[] { Width, Height, Point, X, Y, Angle };
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [Width, Height, Point, X, Y, Angle];
     }
 }
