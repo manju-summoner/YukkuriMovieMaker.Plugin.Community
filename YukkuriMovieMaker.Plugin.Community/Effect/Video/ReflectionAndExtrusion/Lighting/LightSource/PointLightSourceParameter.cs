@@ -30,9 +30,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             var fps = exoOutputDescription.VideoInfo.FPS;
             yield return $"_name=アニメーション効果\r\n" +
                 $"_disable={(isEnabled ? 0 : 1)}\r\n" +
-                $"track0={X.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"track1={Y.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"track2={Z.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track0={X.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track1={Y.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track2={Z.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=点光源@YMM4-未実装\r\n" +
                 $"param=" +
                     $"\r\n";

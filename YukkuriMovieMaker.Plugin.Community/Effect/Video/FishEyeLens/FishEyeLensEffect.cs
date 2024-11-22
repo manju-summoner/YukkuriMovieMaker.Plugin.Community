@@ -35,8 +35,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FishEyeLens
             var fps = exoOutputDescription.VideoInfo.FPS;
             yield return $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
-                $"track0={Angle.ToExoString(keyFrameIndex, "F0", fps)}\r\n" +
-                $"track1={Zoom.ToExoString(keyFrameIndex, "F0", fps)}\r\n" +
+                $"track0={Angle.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track1={Zoom.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=レンズ歪み@YMM4-未実装\r\n" +
                 $"param=";
         }

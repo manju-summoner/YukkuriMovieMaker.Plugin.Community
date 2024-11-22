@@ -63,16 +63,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ThreeDimensional
             yield return
                 $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
-                $"track0={X.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"track1={Y.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"track2={Length.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"track2={Opacity.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track0={X.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track1={Y.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track2={Length.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track2={Opacity.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=立体化（設定）@YMM4-未実装\r\n" +
                 $"param=\r\n";
             yield return
                 $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
-                $"track0={Attenuation.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track0={Attenuation.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=立体化（描画）@YMM4-未実装\r\n" +
                 $"param=" +
                     $"local shadowType={(int)ShadowType};" +

@@ -33,8 +33,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ZoomPixel.Size.Paramet
             var fps = exoOutputDescription.VideoInfo.FPS;
             yield return $"_name=アニメーション効果\r\n" +
                 $"_disable={(isEnabled ? 0 : 1)}\r\n" +
-                $"_track0={Width.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"_track1={Height.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"_track0={Width.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"_track1={Height.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=拡大縮小（ピクセル）@YMM4-未実装\r\n" +
                 $"param=" +
                     $"local mode=3;" +

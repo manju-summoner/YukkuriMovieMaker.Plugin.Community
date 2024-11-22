@@ -30,8 +30,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.UnidirectionalBlur
             var fps = exoOutputDescription.VideoInfo.FPS;
             yield return $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
-                $"track0={Angle.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"track1={Length.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track0={Angle.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track1={Length.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=片方向ブラー@YMM4-未実装\r\n" +
                 $"param=" +
                     $"\r\n";

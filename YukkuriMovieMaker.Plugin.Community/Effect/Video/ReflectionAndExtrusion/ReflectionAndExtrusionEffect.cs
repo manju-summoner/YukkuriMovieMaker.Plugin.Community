@@ -66,7 +66,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
             yield return $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
-                $"track0={Blur.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track0={Blur.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=反射と立体化@YMM4-未実装\r\n" +
                 $"param=" +
                     $"local invert={(IsInvert ? 0 : 1)};" +

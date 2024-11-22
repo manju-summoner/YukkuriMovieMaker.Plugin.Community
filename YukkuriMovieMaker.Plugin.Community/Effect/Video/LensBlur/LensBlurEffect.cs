@@ -38,10 +38,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LensBlur
             var fps = exoOutputDescription.VideoInfo.FPS;
             yield return $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
-                $"track0={BlurRadius.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"track1={Brightness.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"track2={EdgeStrength.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"track3={Quality.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track0={BlurRadius.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track1={Brightness.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track2={EdgeStrength.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track3={Quality.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=レンズぼかし@YMM4-未実装\r\n" +
                 $"param=" +
                     $"\r\n";

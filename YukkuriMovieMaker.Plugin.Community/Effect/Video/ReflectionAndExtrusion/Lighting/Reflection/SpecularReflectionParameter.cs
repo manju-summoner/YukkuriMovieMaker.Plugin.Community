@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             var fps = exoOutputDescription.VideoInfo.FPS;
             yield return $"_name=アニメーション効果\r\n" +
                 $"_disable={(isEnabled ? 0 : 1)}\r\n" +
-                $"track0={Constant.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track0={Constant.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"track1={Exponent.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=鏡面反射@YMM4-未実装\r\n" +
                 $"param=" +

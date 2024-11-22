@@ -54,7 +54,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             var fps = exoOutputDescription.VideoInfo.FPS;
             yield return $"_name=アニメーション効果\r\n" +
                 $"_disable={(isEnabled ? 0 : 1)}\r\n" +
-                $"track0={Thickness.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track0={Thickness.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=ベベルハイトマップ@YMM4-未実装\r\n" +
                 $"param=" +
                     $"local mode={(int)BevelMode};" +

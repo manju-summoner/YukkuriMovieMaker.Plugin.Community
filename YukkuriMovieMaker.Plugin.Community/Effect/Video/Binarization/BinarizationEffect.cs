@@ -37,7 +37,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Binarization
             yield return
                 $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
-                $"track0={Threshold.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track0={Threshold.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=二値化@YMM4\r\n" +
                 $"param=" +
                     $"local isInverted={(IsInverted ? 1 : 0):F0};" +

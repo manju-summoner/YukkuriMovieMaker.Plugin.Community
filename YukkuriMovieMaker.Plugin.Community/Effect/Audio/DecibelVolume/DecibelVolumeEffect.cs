@@ -32,7 +32,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DecibelVolume
             var fps = exoOutputDescription.VideoInfo.FPS;
             yield return $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
-                $"track0={Decibel.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track0={Decibel.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=音量dB@YMM4-未実装\r\n" +
                 $"param=\r\n";
         }

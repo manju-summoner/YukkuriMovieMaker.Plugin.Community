@@ -53,10 +53,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LongShadow
             yield return
                 $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
-                $"track0={Angle.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"track1={Length.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"track2={Opacity.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"track3={Attenuation.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track0={Angle.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track1={Length.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track2={Opacity.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track3={Attenuation.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=伸びる影@YMM4-未実装\r\n" +
                 $"param=" +
                     $"local shadowType={(int)shadowType};" +

@@ -31,7 +31,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeTrimming
             var fps = exoOutputDescription.VideoInfo.FPS;
             yield return $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
-                $"track0={Thickness.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
+                $"track0={Thickness.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=縁削り@YMM4-未実装\r\n" +
                 $"param=\r\n";
         }
