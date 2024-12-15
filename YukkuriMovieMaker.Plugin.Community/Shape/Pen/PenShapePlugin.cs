@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
 
         public IShapeParameter CreateShapeParameter(SharedDataStore? sharedData)
         {
-            return new PenShapeParameter();
+            return new PenShapeParameter(sharedData);
         }
     }
 }
