@@ -12,3 +12,6 @@ Brightness,,明度,Brightness,亮度,亮度,밝기,Brillo,السطوع,Kecerahan
 Extend,,繰り返し,Extend,重复,重複,반복,Repetir,تكرار,Perpanjang,
 ColorSpace,,色空間,Color space,色彩空间,色彩空間,색 공간,Espacio de color,فضاء الألوان,Ruang warna,
 Offset,,位置,Offset,偏移,偏移,오프셋,Desplazamiento,الإزاحة,Offset,
+Angle,,回転角,Angle,旋转角度,旋轉角度,회전 각도,Ángulo,زاوية,Angle,
+Aspect,,縦横比,Aspect ratio,宽高比,寬高比,비율,Relación de aspecto,نسبة العرض إلى الارتفاع,Aspek,
+IsInverted,,左右反転,Flip horizontally,水平翻转,水平翻轉,수평 뒤집기,Voltear horizontalmente,قلب أفقيًا,Putar horizontal,
