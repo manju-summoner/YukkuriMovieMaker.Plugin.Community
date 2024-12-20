@@ -68,4 +68,5 @@
 <data name="X" xml:space="preserve"><value>X</value></data>
 <data name="Y" xml:space="preserve"><value>Y</value></data>
 <data name="Angle" xml:space="preserve"><value>각도</value></data>
+<data name="Zoom" xml:space="preserve"><value>확대</value></data>
 </root>

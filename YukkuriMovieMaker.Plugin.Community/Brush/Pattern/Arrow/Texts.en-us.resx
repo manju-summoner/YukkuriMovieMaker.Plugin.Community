@@ -66,7 +66,5 @@
 <data name="ShaftWidth" xml:space="preserve"><value>Arrow Shaft Width</value></data>
 <data name="Height" xml:space="preserve"><value>Height</value></data>
 <data name="Point" xml:space="preserve"><value>Point</value></data>
-<data name="X" xml:space="preserve"><value>X</value></data>
-<data name="Y" xml:space="preserve"><value>Y</value></data>
-<data name="Angle" xml:space="preserve"><value>Angle</value></data>
+<data name="Zoom" xml:space="preserve"><value>Zoom</value></data>
 </root>

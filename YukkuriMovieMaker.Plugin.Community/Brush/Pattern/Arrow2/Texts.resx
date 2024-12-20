@@ -68,4 +68,5 @@
 <data name="X" xml:space="preserve"><value>X</value></data>
 <data name="Y" xml:space="preserve"><value>Y</value></data>
 <data name="Angle" xml:space="preserve"><value>回転角</value></data>
+<data name="Zoom" xml:space="preserve"><value>拡大率</value></data>
 </root>

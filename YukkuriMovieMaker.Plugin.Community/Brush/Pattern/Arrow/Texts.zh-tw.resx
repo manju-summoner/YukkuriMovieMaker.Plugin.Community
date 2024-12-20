@@ -66,7 +66,5 @@
 <data name="ShaftWidth" xml:space="preserve"><value>箭幹寬度</value></data>
 <data name="Height" xml:space="preserve"><value>高度</value></data>
 <data name="Point" xml:space="preserve"><value>尖端</value></data>
-<data name="X" xml:space="preserve"><value>X</value></data>
-<data name="Y" xml:space="preserve"><value>Y</value></data>
-<data name="Angle" xml:space="preserve"><value>角度</value></data>
+<data name="Zoom" xml:space="preserve"><value>縮放</value></data>
 </root>

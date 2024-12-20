@@ -66,7 +66,5 @@
 <data name="ShaftWidth" xml:space="preserve"><value>عرض السهم</value></data>
 <data name="Height" xml:space="preserve"><value>ارتفاع</value></data>
 <data name="Point" xml:space="preserve"><value>نقطة</value></data>
-<data name="X" xml:space="preserve"><value>X</value></data>
-<data name="Y" xml:space="preserve"><value>Y</value></data>
-<data name="Angle" xml:space="preserve"><value>زاوية</value></data>
+<data name="Zoom" xml:space="preserve"><value>تكبير</value></data>
 </root>

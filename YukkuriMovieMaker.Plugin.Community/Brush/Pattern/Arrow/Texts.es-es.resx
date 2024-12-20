@@ -66,7 +66,5 @@
 <data name="ShaftWidth" xml:space="preserve"><value>Ancho del eje de la flecha</value></data>
 <data name="Height" xml:space="preserve"><value>Altura</value></data>
 <data name="Point" xml:space="preserve"><value>La punta</value></data>
-<data name="X" xml:space="preserve"><value>X</value></data>
-<data name="Y" xml:space="preserve"><value>Y</value></data>
-<data name="Angle" xml:space="preserve"><value>Ángulo</value></data>
+<data name="Zoom" xml:space="preserve"><value>Zoom</value></data>
 </root>
