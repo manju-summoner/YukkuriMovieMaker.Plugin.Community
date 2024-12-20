@@ -74,8 +74,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Scene
                 }
                 else
                 {
-                    width = (int)(bounds.Right - bounds.Left);
-                    height = (int)(bounds.Bottom - bounds.Top);
+                    width = Math.Max(1,(int)(bounds.Right - bounds.Left));
+                    height = Math.Max(1, (int)(bounds.Bottom - bounds.Top));
                     offset = new Vector2(-bounds.Left, -bounds.Top);
                     if(isRemoveBoudalyEnabled)
                     {
