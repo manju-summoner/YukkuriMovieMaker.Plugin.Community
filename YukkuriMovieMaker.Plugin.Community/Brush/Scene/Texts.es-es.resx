@@ -60,13 +60,8 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
 <data name="Scene" xml:space="preserve"><value>Escena</value></data>
-<data name="X" xml:space="preserve"><value>X</value></data>
-<data name="Y" xml:space="preserve"><value>Y</value></data>
-<data name="Zoom" xml:space="preserve"><value>Zoom</value></data>
-<data name="Angle" xml:space="preserve"><value>Ángulo</value></data>
 <data name="PlaybackRate" xml:space="preserve"><value>Velocidad de reproducción</value></data>
 <data name="ContentOffset" xml:space="preserve"><value>Desplazamiento de contenido</value></data>
-<data name="IsInverted" xml:space="preserve"><value>Voltear horizontalmente</value></data>
 <data name="ExtendModeX" xml:space="preserve"><value>Envolver X</value></data>
 <data name="ExtendModeY" xml:space="preserve"><value>Envolver Y</value></data>
 <data name="RemoveBoundary" xml:space="preserve"><value>Eliminar límites</value></data>

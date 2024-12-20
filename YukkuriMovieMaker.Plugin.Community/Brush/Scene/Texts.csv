@@ -1,12 +1,7 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
 Scene,,シーン,Scene,场景,場景,장면,Escena,مشهد,Scene,
-X,,X,X,X,X,X,X,X,X,X,
-Y,,Y,Y,Y,Y,Y,Y,Y,Y,Y,
-Zoom,,拡大率,Zoom,缩放,縮放,줌,Zoom,تكبير,Zoom,
-Angle,,回転角,Angle,角度,角度,각도,Ángulo,زاوية,Angle,
 PlaybackRate,,再生速度,Playback Rate,播放速度,播放速度,재생 속도,Velocidad de reproducción,معدل التشغيل,Playback Rate,
 ContentOffset,,再生開始位置,Content Offset,内容偏移,内容偏移,콘텐츠 오프셋,Desplazamiento de contenido,إزاحة المحتوى,Content Offset,
-IsInverted,,左右反転,Flip horizontally,左右翻转,左右翻轉,좌우 반전,Voltear horizontalmente,انعكاس أفقي,Balik secara horizontal
 ExtendModeX,,繰り返しX,Wrap X,重复X,重複X,반복 X,Envolver X,تكرار X,Bungkus X
 ExtendModeY,,繰り返しY,Wrap Y,重复Y,重複Y,반복 Y,Envolver Y,تكرار Y,Bungkus Y
 RemoveBoundary,,境界を削除,Remove Boundary,删除边界,刪除邊界,경계 제거,Eliminar límites,إزالة الحدود,Hapus Batas

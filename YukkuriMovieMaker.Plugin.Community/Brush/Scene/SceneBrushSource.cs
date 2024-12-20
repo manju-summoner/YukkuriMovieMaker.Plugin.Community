@@ -34,15 +34,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Scene
             var dc = devices.DeviceContext;
 
             var sceneId = parameter.SceneId;
-            var x = parameter.X.GetValue(frame, length, fps);
-            var y = parameter.Y.GetValue(frame, length, fps);
-            var zoom = parameter.Zoom.GetValue(frame, length, fps);
-            var angle = parameter.Angle.GetValue(frame, length, fps);
+
             var playbackRate = parameter.PlaybackRate;
             var contentOffset = parameter.ContentOffset;
+            var matrix = parameter.CreateBrushMatrix(desc);
             var extendModeX = parameter.ExtendModeX.ToD2DExtendMode();
             var extendModeY = parameter.ExtendModeY.ToD2DExtendMode();
-            var isInverted = parameter.IsInverted;
             var isRemoveBoudalyEnabled = parameter.IsRemoveBoundaryEnabled;
             var isFixSizeEnabled = parameter.IsFixSizeEnabled;
 
@@ -127,10 +124,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Scene
                 new BrushProperties(
                     1f,
                     Matrix3x2.CreateTranslation(-sourceBitmap.PixelSize.Width / 2, -sourceBitmap.PixelSize.Height / 2)
-                    * Matrix3x2.CreateRotation((float)angle / 180 * MathF.PI)
-                                * Matrix3x2.CreateScale((float)zoom / 100)
-                                * Matrix3x2.CreateScale(isInverted ? -1 : 1, 1)
-                                * Matrix3x2.CreateTranslation((float)x, (float)y)));
+                    * matrix));
             disposer.Collect(brush);
 
             this.sceneId = sceneId;

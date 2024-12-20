@@ -60,13 +60,8 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
 <data name="Scene" xml:space="preserve"><value>シーン</value></data>
-<data name="X" xml:space="preserve"><value>X</value></data>
-<data name="Y" xml:space="preserve"><value>Y</value></data>
-<data name="Zoom" xml:space="preserve"><value>拡大率</value></data>
-<data name="Angle" xml:space="preserve"><value>回転角</value></data>
 <data name="PlaybackRate" xml:space="preserve"><value>再生速度</value></data>
 <data name="ContentOffset" xml:space="preserve"><value>再生開始位置</value></data>
-<data name="IsInverted" xml:space="preserve"><value>左右反転</value></data>
 <data name="ExtendModeX" xml:space="preserve"><value>繰り返しX</value></data>
 <data name="ExtendModeY" xml:space="preserve"><value>繰り返しY</value></data>
 <data name="RemoveBoundary" xml:space="preserve"><value>境界を削除</value></data>
