@@ -1,10 +1,6 @@
-﻿using System.Drawing;
-using System.Numerics;
-using System.Windows;
-using System.Windows.Media.Media3D;
+﻿using System.Numerics;
 using Vortice;
 using Vortice.Direct2D1;
-using Windows.Win32.UI.Input.Ime;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Brush;
