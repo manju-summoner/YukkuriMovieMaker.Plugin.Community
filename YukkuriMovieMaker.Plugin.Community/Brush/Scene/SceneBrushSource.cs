@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Numerics;
 using System.Windows;
+using System.Windows.Media.Media3D;
 using Vortice;
 using Vortice.Direct2D1;
 using Windows.Win32.UI.Input.Ime;
@@ -23,8 +24,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Scene
         RawRectF bounds;
 
         ITimelineSource? source;
-        ID2D1Bitmap? sourceBitmap;
-        ID2D1BitmapBrush? brush;
+        ID2D1Brush? brush;
 
         public bool Update(TimelineItemSourceDescription desc)
         {
@@ -58,33 +58,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Scene
             source?.Update(time, desc.Usage);
 
             //描画先の画像サイズを取得
-            int width, height;
-            Vector2 offset;
             if (source?.Output != null && targetScene != null)
             {
-                bounds = dc.GetImageLocalBounds(source.Output);
                 if (isFixSizeEnabled)
                 {
-                    width = targetScene.Width;
-                    height = targetScene.Height;
-                    offset = new Vector2(width/2f, height/2f);
+                    var width = targetScene.Width;
+                    var height = targetScene.Height;
+                    bounds = new RawRectF(-width / 2f, -height / 2f, width / 2f, height / 2f);
                 }
                 else
                 {
-                    width = Math.Max(1,(int)(bounds.Right - bounds.Left));
-                    height = Math.Max(1, (int)(bounds.Bottom - bounds.Top));
-                    offset = new Vector2(-bounds.Left, -bounds.Top);
+                    bounds = dc.GetImageLocalBounds(source.Output);
                     if(isRemoveBoudalyEnabled)
                     {
-                        if (3 < width)
+                        if (3 < bounds.Right - bounds.Left)
                         {
-                            width -= 2;
-                            offset = offset + new Vector2(-1, 0);
+                            bounds = new RawRectF(bounds.Left + 1, bounds.Top, bounds.Right - 1, bounds.Bottom);
                         }
-                        if (3 < height)
+                        if (3 < bounds.Bottom - bounds.Top)
                         {
-                            height -= 2;
-                            offset = offset + new Vector2(0, -1);
+                            bounds = new RawRectF(bounds.Left, bounds.Top + 1, bounds.Right, bounds.Bottom - 1);
                         }
                     }
                 }
@@ -92,39 +85,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Scene
             else
             {
                 bounds = new RawRectF(0, 0, 0, 0);
-                width = 10;
-                height = 10;
-                offset = new Vector2(5, 5);
             }
-
-            //描画先の画像を作り直す
-            if (sourceBitmap is null || sourceBitmap.PixelSize.Width != width || sourceBitmap.PixelSize.Height != height)
-            {
-                if(sourceBitmap != null)
-                    disposer.RemoveAndDispose(ref sourceBitmap);
-                sourceBitmap = dc.CreateEmptyBitmap(width, height);
-                disposer.Collect(sourceBitmap);
-            }
-
-            //描画先の画像に描画
-            dc.Target = sourceBitmap;
-            dc.BeginDraw();
-            dc.Clear(null);
-            if(source != null)
-                dc.DrawImage(source.Output, offset);
-            dc.EndDraw();
-            dc.Target = null;
 
             //ブラシを作り直す
             if (brush != null)
                 disposer.RemoveAndDispose(ref brush);
-            brush = dc.CreateBitmapBrush(
-                sourceBitmap,
-                new BitmapBrushProperties1(extendModeX, extendModeY, InterpolationMode.MultiSampleLinear),
-                new BrushProperties(
-                    1f,
-                    Matrix3x2.CreateTranslation(-sourceBitmap.PixelSize.Width / 2, -sourceBitmap.PixelSize.Height / 2)
-                    * matrix));
+            if (source?.Output != null)
+            {
+                brush = dc.CreateImageBrush(
+                    source.Output,
+                    new ImageBrushProperties(bounds, extendModeX, extendModeY, InterpolationMode.MultiSampleLinear),
+                    new BrushProperties(
+                        1f,
+                        Matrix3x2.CreateTranslation(bounds.Left,bounds.Top) * matrix));
+            }
+            else
+            {
+                brush = dc.CreateSolidColorBrush(new Vortice.Mathematics.Color4(0f, 0f, 0f, 0f));
+            }
             disposer.Collect(brush);
 
             this.sceneId = sceneId;
