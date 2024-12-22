@@ -48,7 +48,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorCorrection
                 }
                 set
                 {
-                    constants.Lightness = Vortice.Mathematics.MathHelper.Clamp(value, 0f, 2f);
+                    constants.Lightness = value;
                     UpdateConstants();
                 }
             }
@@ -62,7 +62,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorCorrection
                 }
                 set
                 {
-                    constants.Contrast = Vortice.Mathematics.MathHelper.Clamp(value, 0f, 2f);
+                    constants.Contrast = value;
                     UpdateConstants();
                 }
             }
@@ -76,7 +76,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorCorrection
                 }
                 set
                 {
-                    constants.Hue = Vortice.Mathematics.MathHelper.Clamp(value, 0f, 1f);
+                    constants.Hue = value;
                     UpdateConstants();
                 }
             }
@@ -90,7 +90,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorCorrection
                 }
                 set
                 {
-                    constants.Brightness = Vortice.Mathematics.MathHelper.Clamp(value, 0f, 2f);
+                    constants.Brightness = value;
                     UpdateConstants();
                 }
             }
@@ -104,7 +104,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorCorrection
                 }
                 set
                 {
-                    constants.Saturation = Vortice.Mathematics.MathHelper.Clamp(value, 0f, 2f);
+                    constants.Saturation = value;
                     UpdateConstants();
                 }
             }
