@@ -20,13 +20,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Ripple
         [AnimationSlider("F1", "px", -500d, 500d)]
         public Animation Y { get; } = new Animation(0, -99999, 99999);
 
-        [Display(GroupName = nameof(Texts.RippleGroupName), Name = nameof(Texts.RippleEffectWaveLengthName), Description = nameof(Texts.RippleEffectWaveLengthDesc), Order = 100, ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "px", -100d, 100d)]
-        public Animation WaveLength { get; } = new Animation(60, -99999, 99999);
-
         [Display(GroupName = nameof(Texts.RippleGroupName), Name = nameof(Texts.RippleEffectAmplitudeName), Description = nameof(Texts.RippleEffectAmplitudeDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -100d, 100d)]
         public Animation Amplitude { get; } = new Animation(15, -99999, 99999);
+
+        [Display(GroupName = nameof(Texts.RippleGroupName), Name = nameof(Texts.RippleEffectWaveLengthName), Description = nameof(Texts.RippleEffectWaveLengthDesc), Order = 100, ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "px", -100d, 100d)]
+        public Animation WaveLength { get; } = new Animation(60, -99999, 99999);
 
         [Display(GroupName = nameof(Texts.RippleGroupName), Name = nameof(Texts.RippleEffectPeriodName), Description = nameof(Texts.RippleEffectPeriodDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F2", nameof(Texts.SecUnit), -1d, 1d, ResourceType = typeof(Texts))]
@@ -61,8 +61,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Ripple
         [
             X,
             Y,
-            WaveLength,
             Amplitude,
+            WaveLength,
             Period
         ];
     }
