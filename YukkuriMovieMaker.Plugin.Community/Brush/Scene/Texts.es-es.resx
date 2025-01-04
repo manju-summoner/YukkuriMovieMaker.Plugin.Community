@@ -58,13 +58,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
-<data name="ArrowPattern" xml:space="preserve"><value>Arrow Feather Pattern</value></data>
-<data name="Color" xml:space="preserve"><value>Color</value></data>
-<data name="BackgroundColor" xml:space="preserve"><value>Background Color</value></data>
-<data name="FeatherWidth" xml:space="preserve"><value>Feather Width</value></data>
-<data name="ShaftWidth" xml:space="preserve"><value>Arrow Shaft Width</value></data>
-<data name="Height" xml:space="preserve"><value>Height</value></data>
-<data name="Point" xml:space="preserve"><value>Point</value></data>
-<data name="Zoom" xml:space="preserve"><value>Zoom</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
+<data name="Scene" xml:space="preserve"><value>Escena</value></data>
+<data name="PlaybackRate" xml:space="preserve"><value>Velocidad de reproducción</value></data>
+<data name="ContentOffset" xml:space="preserve"><value>Desplazamiento de contenido</value></data>
+<data name="ExtendModeX" xml:space="preserve"><value>Envolver X</value></data>
+<data name="ExtendModeY" xml:space="preserve"><value>Envolver Y</value></data>
+<data name="RemoveBoundary" xml:space="preserve"><value>Eliminar límites</value></data>
+<data name="FixSize" xml:space="preserve"><value>Tamaño fijo</value></data>
 </root>

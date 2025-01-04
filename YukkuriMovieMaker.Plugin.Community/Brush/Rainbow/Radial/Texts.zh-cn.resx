@@ -72,4 +72,7 @@
 <data name="Extend" xml:space="preserve"><value>重复</value></data>
 <data name="ColorSpace" xml:space="preserve"><value>色彩空间</value></data>
 <data name="Offset" xml:space="preserve"><value>偏移</value></data>
+<data name="Angle" xml:space="preserve"><value>旋转角度</value></data>
+<data name="Aspect" xml:space="preserve"><value>宽高比</value></data>
+<data name="IsInverted" xml:space="preserve"><value>水平翻转</value></data>
 </root>

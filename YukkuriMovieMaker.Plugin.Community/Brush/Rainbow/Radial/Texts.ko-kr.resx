@@ -72,4 +72,7 @@
 <data name="Extend" xml:space="preserve"><value>반복</value></data>
 <data name="ColorSpace" xml:space="preserve"><value>색 공간</value></data>
 <data name="Offset" xml:space="preserve"><value>오프셋</value></data>
+<data name="Angle" xml:space="preserve"><value>회전 각도</value></data>
+<data name="Aspect" xml:space="preserve"><value>비율</value></data>
+<data name="IsInverted" xml:space="preserve"><value>수평 뒤집기</value></data>
 </root>

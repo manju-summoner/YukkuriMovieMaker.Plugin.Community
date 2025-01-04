@@ -6,7 +6,7 @@ using YukkuriMovieMaker.Plugin.Brush;
 
 namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow
 {
-    internal class ArrowPatternBrushParameter : BrushParameterBase
+    internal class ArrowPatternBrushParameter : DrawingBrushParameterBase
     {
         [Display(Name = nameof(Texts.Color), ResourceType = typeof(Texts))]
         [ColorPicker]
@@ -34,23 +34,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow
         [AnimationSlider("F0", "px", 0, 500)]
         public Animation Point { get; } = new Animation(50, 0, 99999);
 
-        [Display(Name = nameof(Texts.X), ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "px", -500, 500)]
-        public Animation X { get; } = new Animation(0);
-
-        [Display(Name = nameof(Texts.Y), ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "px", -500, 500)]
-        public Animation Y { get; } = new Animation(0);
-
-        [Display(Name = nameof(Texts.Angle), ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Angle { get; } = new Animation(0, -36000, 36000);
+        [Display(Name = nameof(Texts.Zoom), ResourceType = typeof(Texts), Order = 250)]
+        [AnimationSlider("F1", "%", 0, 400)]
+        public Animation Zoom { get; } = new Animation(100, 0, 5000);
 
         public override IBrushSource CreateBrush(IGraphicsDevicesAndContext devices)
         {
             return new ArrowPatternBrushSource(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [FeatherWidth, ShaftWidth, Height, Point, X, Y, Angle];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => base.GetAnimatables().Concat([FeatherWidth, ShaftWidth, Height, Point, Zoom]);
     }
 }

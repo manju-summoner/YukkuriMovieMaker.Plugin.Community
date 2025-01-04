@@ -72,4 +72,7 @@
 <data name="Extend" xml:space="preserve"><value>Perpanjang</value></data>
 <data name="ColorSpace" xml:space="preserve"><value>Ruang warna</value></data>
 <data name="Offset" xml:space="preserve"><value>Offset</value></data>
+<data name="Angle" xml:space="preserve"><value>Angle</value></data>
+<data name="Aspect" xml:space="preserve"><value>Aspek</value></data>
+<data name="IsInverted" xml:space="preserve"><value>Putar horizontal</value></data>
 </root>

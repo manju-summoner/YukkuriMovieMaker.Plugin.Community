@@ -6,12 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	
-	<!--Pdb内にソースコードのフルパスを含めない-->
-	<RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\'))</RepoRoot>
-	<PathMap>$(RepoRoot)=.</PathMap>
   </PropertyGroup>
-
+  <PropertyGroup Condition="'$(Configuration)'=='ReleaseLite' OR '$(Configuration)'=='Release'">
+    <!--Pdb内にソースコードのフルパスを含めない-->
+    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\'))</RepoRoot>
+    <PathMap>$(RepoRoot)=.</PathMap>
+  </PropertyGroup>
+	
   <ItemGroup Condition="'$(YMM4Proj)' != ''">
     <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Commons\YukkuriMovieMaker.Plugin.csproj" />
     <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Controls\YukkuriMovieMaker.Controls.csproj" />

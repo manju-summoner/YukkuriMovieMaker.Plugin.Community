@@ -40,6 +40,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Radial
         [AnimationSlider("F1", "%", 0, 500)]
         public Animation Zoom { get; } = new Animation(100);
 
+        [Display(Name = nameof(Texts.Angle), ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "°", -360, 360)]
+        public Animation Angle { get; } = new Animation(0, -36000, 36000);
+
+        [Display(Name = nameof(Texts.Aspect), ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "", -100, 100)]
+        public Animation Aspect { get; } = new Animation(0, -100, 100);
+
         [Display(Name = nameof(Texts.Extend), ResourceType = typeof(Texts))]
         [EnumComboBox]
         public ExtendMode ExtendMode { get => extendMode; set => Set(ref extendMode, value); }
@@ -58,13 +66,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Radial
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation Brightness { get; } = new Animation(100, 0, 100);
 
-
+        [Display(Name = nameof(Texts.IsInverted), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool IsInverted { get => isInverted; set => Set(ref isInverted, value); }
+        bool isInverted = false;
 
         public override IBrushSource CreateBrush(IGraphicsDevicesAndContext devices)
         {
             return new RainbowRadialGradientBrushSource(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [Offset, CenterX, CenterY, OriginX, OriginY, RadiusX, RadiusY, Zoom, Saturation, Brightness];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [Offset, CenterX, CenterY, OriginX, OriginY, RadiusX, RadiusY, Zoom, Saturation, Brightness, Angle, Aspect];
     }
 }

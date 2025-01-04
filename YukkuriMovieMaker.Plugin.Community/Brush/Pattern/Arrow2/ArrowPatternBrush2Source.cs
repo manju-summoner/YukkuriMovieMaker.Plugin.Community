@@ -4,6 +4,7 @@ using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Brush;
+using YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow;
 
 namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
 {
@@ -14,7 +15,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
 
         bool isFirst = true;
         System.Windows.Media.Color color, backgroundColor;
-        double width, height, point, x, y, angle;
+        double width, height, point;
+        Matrix3x2 matrix;
 
         ID2D1Bitmap? bitmap;
         ID2D1BitmapBrush? brush;
@@ -28,12 +30,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
 
             var color = arrowPatternBrush2Parameter.Color;
             var backgroundColor = arrowPatternBrush2Parameter.BackgroundColor;
-            var width = arrowPatternBrush2Parameter.Width.GetValue(frame, length, fps);
-            var height = arrowPatternBrush2Parameter.Height.GetValue(frame, length, fps);
-            var point = arrowPatternBrush2Parameter.Point.GetValue(frame, length, fps);
-            var x = arrowPatternBrush2Parameter.X.GetValue(frame, length, fps);
-            var y = arrowPatternBrush2Parameter.Y.GetValue(frame, length, fps);
-            var angle = arrowPatternBrush2Parameter.Angle.GetValue(frame, length, fps);
+            var zoom = arrowPatternBrush2Parameter.Zoom.GetValue(frame, length, fps) / 100f;
+            var width = arrowPatternBrush2Parameter.Width.GetValue(frame, length, fps) * zoom;
+            var height = arrowPatternBrush2Parameter.Height.GetValue(frame, length, fps) * zoom;
+            var point = arrowPatternBrush2Parameter.Point.GetValue(frame, length, fps) * zoom;
+            var matrix = arrowPatternBrush2Parameter.CreateBrushMatrix(desc);
 
             var dc = devices.DeviceContext;
 
@@ -72,7 +73,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
                         disposer.RemoveAndDispose(ref bitmap);
                     using (var solidColorBrush = dc.CreateSolidColorBrush(new Color(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f)))
                     {
-                        bitmap = dc.CreateNotInitializedBitmap((int)roundWidth * 2, (int)roundHeight * 2);
+                        bitmap = dc.CreateNotInitializedBitmap(Math.Max(1, (int)roundWidth * 2), Math.Max(1, (int)roundHeight * 2));
                         dc.Target = bitmap;
                         dc.BeginDraw();
                         dc.Clear(new Color(backgroundColor.R / 255.0f, backgroundColor.G / 255.0f, backgroundColor.B / 255.0f, backgroundColor.A / 255.0f));
@@ -86,7 +87,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
                 isChanged = true;
             }
 
-            if (isFirst || isChanged || this.x != x || this.y != y || this.angle != angle)
+            if (isFirst || isChanged || !this.matrix.Equals(matrix))
             {
                 if (brush != null)
                     disposer.RemoveAndDispose(ref brush);
@@ -99,7 +100,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
                         ExtendModeY = ExtendMode.Wrap,
                         InterpolationMode = InterpolationMode.MultiSampleLinear
                     },
-                    new BrushProperties(1f, Matrix3x2.CreateRotation((float)(angle / 180.0 * Math.PI)) * Matrix3x2.CreateTranslation(new Vector2((float)x, (float)y))));
+                    new BrushProperties(1f, matrix));
 
                 disposer.Collect(brush);
 
@@ -112,9 +113,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
             this.width = width;
             this.height = height;
             this.point = point;
-            this.x = x;
-            this.y = y;
-            this.angle = angle;
+            this.matrix = matrix;
 
             return isChanged;
         }

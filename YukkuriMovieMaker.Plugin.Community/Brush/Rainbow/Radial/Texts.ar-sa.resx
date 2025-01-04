@@ -72,4 +72,7 @@
 <data name="Extend" xml:space="preserve"><value>تكرار</value></data>
 <data name="ColorSpace" xml:space="preserve"><value>فضاء الألوان</value></data>
 <data name="Offset" xml:space="preserve"><value>الإزاحة</value></data>
+<data name="Angle" xml:space="preserve"><value>زاوية</value></data>
+<data name="Aspect" xml:space="preserve"><value>نسبة العرض إلى الارتفاع</value></data>
+<data name="IsInverted" xml:space="preserve"><value>قلب أفقيًا</value></data>
 </root>

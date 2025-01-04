@@ -14,7 +14,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow
 
         bool isFirst = true;
         System.Windows.Media.Color color, backgroundColor;
-        double featherWidth, shaftWidth, height, point, x, y, angle;
+        double featherWidth, shaftWidth, height, point;
+        Matrix3x2 matrix;
 
         ID2D1Bitmap? bitmap;
         ID2D1BitmapBrush? brush;
@@ -28,13 +29,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow
 
             var color = arrowPatternBrushParameter.Color;
             var backgroundColor = arrowPatternBrushParameter.BackgroundColor;
-            var featherWidth = arrowPatternBrushParameter.FeatherWidth.GetValue(frame, length, fps);
-            var shaftWidth = arrowPatternBrushParameter.ShaftWidth.GetValue(frame, length, fps);
-            var height = arrowPatternBrushParameter.Height.GetValue(frame, length, fps);
-            var point = arrowPatternBrushParameter.Point.GetValue(frame, length, fps);
-            var x = arrowPatternBrushParameter.X.GetValue(frame, length, fps);
-            var y = arrowPatternBrushParameter.Y.GetValue(frame, length, fps);
-            var angle = arrowPatternBrushParameter.Angle.GetValue(frame, length, fps);
+            var zoom = arrowPatternBrushParameter.Zoom.GetValue(frame, length, fps) / 100f;
+            var featherWidth = arrowPatternBrushParameter.FeatherWidth.GetValue(frame, length, fps) * zoom;
+            var shaftWidth = arrowPatternBrushParameter.ShaftWidth.GetValue(frame, length, fps) * zoom;
+            var height = arrowPatternBrushParameter.Height.GetValue(frame, length, fps) * zoom;
+            var point = arrowPatternBrushParameter.Point.GetValue(frame, length, fps) * zoom;
+            var matrix = arrowPatternBrushParameter.CreateBrushMatrix(desc);
 
             var dc = devices.DeviceContext;
 
@@ -98,7 +98,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow
                         disposer.RemoveAndDispose(ref bitmap);
                     using (var solidColorBrush = dc.CreateSolidColorBrush(new Color(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f)))
                     {
-                        bitmap = dc.CreateNotInitializedBitmap((int)roundFeatherWidth * 4 + (int)roundShaftWidth * 2, (int)roundHeight * 2);
+                        bitmap = dc.CreateNotInitializedBitmap(
+                            Math.Max(1, (int)roundFeatherWidth * 4 + (int)roundShaftWidth * 2),
+                            Math.Max(1, (int)roundHeight * 2));
                         dc.Target = bitmap;
                         dc.BeginDraw();
                         dc.Clear(new Color(backgroundColor.R / 255.0f, backgroundColor.G / 255.0f, backgroundColor.B / 255.0f, backgroundColor.A / 255.0f));
@@ -112,7 +114,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow
                 isChanged = true;
             }
 
-            if (isFirst || isChanged || this.x != x || this.y != y || this.angle != angle)
+            if (isFirst || isChanged || !this.matrix.Equals(matrix))
             {
                 if(brush != null)
                     disposer.RemoveAndDispose(ref brush);
@@ -125,7 +127,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow
                         ExtendModeY = ExtendMode.Wrap,
                         InterpolationMode = InterpolationMode.MultiSampleLinear
                     },
-                    new BrushProperties(1f, Matrix3x2.CreateRotation((float)(angle / 180.0 * Math.PI)) * Matrix3x2.CreateTranslation(new Vector2((float)x, (float)y))));
+                    new BrushProperties(1f, matrix));
 
                 disposer.Collect(brush);
 
@@ -139,9 +141,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow
             this.height = height;
             this.point = point;
             this.shaftWidth = shaftWidth;
-            this.x = x;
-            this.y = y;
-            this.angle = angle;
+            this.matrix = matrix;
 
             return isChanged;
         }
