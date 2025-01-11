@@ -17,16 +17,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Binarization
     {
         public override string Label => Texts.BinarizationEffectName;
 
-        [Display(Name = nameof(Texts.BinarizationEffectThresholdName), Description = nameof(Texts.BinarizationEffectThresholdDesc), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.BinarizationEffectName), Name = nameof(Texts.BinarizationEffectThresholdName), Description = nameof(Texts.BinarizationEffectThresholdDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation Threshold { get; } = new Animation(50, 0, 100);
 
-        [Display(Name = nameof(Texts.BinarizationEffectIsInvertedName), Description = nameof(Texts.BinarizationEffectIsInvertedDesc), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.BinarizationEffectName), Name = nameof(Texts.BinarizationEffectIsInvertedName), Description = nameof(Texts.BinarizationEffectIsInvertedDesc), ResourceType = typeof(Texts))]
         [ToggleSlider]
         public bool IsInverted { get => isInverted; set => Set(ref isInverted, value, nameof(IsInverted)); }
         bool isInverted = false;
 
-        [Display(Name = nameof(Texts.BinarizationEffectKeepColorName), Description = nameof(Texts.BinarizationEffectKeepColorDesc), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.BinarizationEffectName), Name = nameof(Texts.BinarizationEffectKeepColorName), Description = nameof(Texts.BinarizationEffectKeepColorDesc), ResourceType = typeof(Texts))]
         [ToggleSlider]
         public bool KeepColor { get => keepColor; set => Set(ref keepColor, value, nameof(KeepColor)); }
         bool keepColor = false;
