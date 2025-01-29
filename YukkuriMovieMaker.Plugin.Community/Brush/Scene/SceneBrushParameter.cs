@@ -22,7 +22,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Scene
         double playbackRate = 100;
 
         [Display(Name = nameof(Texts.ContentOffset), Description = nameof(Texts.ContentOffset), ResourceType = typeof(Texts))]
-        [TimeSpanTextEditor]
+        [TimeSpanRange]
+        [TimeSpanDefaultValue]
+        [TimeSpanEditor]
         public TimeSpan ContentOffset { get => contentOffset; set=>Set(ref contentOffset,value); }
         TimeSpan contentOffset = TimeSpan.Zero;
 
