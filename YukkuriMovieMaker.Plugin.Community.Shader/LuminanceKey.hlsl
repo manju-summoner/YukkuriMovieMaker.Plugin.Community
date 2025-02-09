@@ -17,7 +17,7 @@ float4 main(
 {
 	float4 color = InputTexture.Sample(InputSampler, uv0.xy);
 	float3 rgb = color.a == 0 ? float3(0, 0, 0) : color.rgb / color.a;
-	float luminance = dot(rgb, float3(0.299, 0.587, 0.114));
+	float luminance = dot(rgb, float3(0.2126, 0.7152, 0.0722));
 
 	float alpha;
 	if (mode == 0)
