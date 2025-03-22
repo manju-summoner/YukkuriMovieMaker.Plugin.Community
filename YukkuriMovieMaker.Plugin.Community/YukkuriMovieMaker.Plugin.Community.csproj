@@ -34,21 +34,16 @@
 	  <Reference Include="Vortice.Direct2D1">
 		  <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
 	  </Reference>
-	  <Reference Include="Vortice.Mathematics">
-		  <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
-	  </Reference>
-	  <Reference Include="Microsoft.Xaml.Behaviors">
-		  <HintPath>$(YMM4DirPath)Microsoft.Xaml.Behaviors.dll</HintPath>
-	  </Reference>
-	  <Reference Include="MathNet.Numerics">
-		  <HintPath>$(YMM4DirPath)MathNet.Numerics.dll</HintPath>
-	  </Reference>
 	  <Reference Include="System.Drawing.Common">
 		  <HintPath>$(YMM4DirPath)System.Drawing.Common.dll</HintPath>
 	  </Reference>
-	  <Reference Include="Newtonsoft.Json">
-		  <HintPath>$(YMM4DirPath)Newtonsoft.Json.dll</HintPath>
-	  </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
   </ItemGroup>
 
   <!--ビルド後、YMM4フォルダに関連ファイルをコピーする-->
