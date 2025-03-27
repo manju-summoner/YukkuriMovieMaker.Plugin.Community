@@ -18,43 +18,43 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Equalizer
     {
         public override string Label => Texts.Equalizer;
 
-        [Display(Name = "32Hz")]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = "32Hz", ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B32 { get; } = new Animation(0, -12, 12);
 
-        [Display(Name = "64Hz")]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = "64Hz", ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B64 { get; } = new Animation(0, -12, 12);
 
-        [Display(Name = "125Hz")]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = "125Hz", ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B125 { get; } = new Animation(0, -12, 12);
 
-        [Display(Name = "250Hz")]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = "250Hz", ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B250 { get; } = new Animation(0, -12, 12);
 
-        [Display(Name = "500Hz")]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = "500Hz", ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B500 { get; } = new Animation(0, -12, 12);
 
-        [Display(Name = "1kHz")]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = "1kHz", ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B1k { get; } = new Animation(0, -12, 12);
 
-        [Display(Name = "2kHz")]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = "2kHz", ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B2k { get; } = new Animation(0, -12, 12);
 
-        [Display(Name = "4kHz")]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = "4kHz", ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B4k { get; } = new Animation(0, -12, 12);
 
-        [Display(Name = "8kHz")]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = "8kHz", ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B8k { get; } = new Animation(0, -12, 12);
 
-        [Display(Name = "16kHz")]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = "16kHz", ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B16k { get; } = new Animation(0, -12, 12);
 
