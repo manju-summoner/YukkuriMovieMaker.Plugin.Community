@@ -60,4 +60,14 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="Equalizer" xml:space="preserve"><value>均衡器</value></data>
+<data name="B32" xml:space="preserve"><value>32Hz</value></data>
+<data name="B64" xml:space="preserve"><value>64Hz</value></data>
+<data name="B125" xml:space="preserve"><value>125Hz</value></data>
+<data name="B250" xml:space="preserve"><value>250Hz</value></data>
+<data name="B500" xml:space="preserve"><value>500Hz</value></data>
+<data name="B1k" xml:space="preserve"><value>1kHz</value></data>
+<data name="B2k" xml:space="preserve"><value>2kHz</value></data>
+<data name="B4k" xml:space="preserve"><value>4kHz</value></data>
+<data name="B8k" xml:space="preserve"><value>8kHz</value></data>
+<data name="B16k" xml:space="preserve"><value>16kHz</value></data>
 </root>

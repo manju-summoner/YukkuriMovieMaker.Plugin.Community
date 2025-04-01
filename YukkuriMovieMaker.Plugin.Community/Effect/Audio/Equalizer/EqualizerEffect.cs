@@ -18,43 +18,43 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Equalizer
     {
         public override string Label => Texts.Equalizer;
 
-        [Display(GroupName = nameof(Texts.Equalizer), Name = "32Hz", ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = nameof(Texts.B32), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B32 { get; } = new Animation(0, -12, 12);
 
-        [Display(GroupName = nameof(Texts.Equalizer), Name = "64Hz", ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = nameof(Texts.B64), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B64 { get; } = new Animation(0, -12, 12);
 
-        [Display(GroupName = nameof(Texts.Equalizer), Name = "125Hz", ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = nameof(Texts.B125), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B125 { get; } = new Animation(0, -12, 12);
 
-        [Display(GroupName = nameof(Texts.Equalizer), Name = "250Hz", ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = nameof(Texts.B250), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B250 { get; } = new Animation(0, -12, 12);
 
-        [Display(GroupName = nameof(Texts.Equalizer), Name = "500Hz", ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = nameof(Texts.B500), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B500 { get; } = new Animation(0, -12, 12);
 
-        [Display(GroupName = nameof(Texts.Equalizer), Name = "1kHz", ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = nameof(Texts.B1k), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B1k { get; } = new Animation(0, -12, 12);
 
-        [Display(GroupName = nameof(Texts.Equalizer), Name = "2kHz", ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = nameof(Texts.B2k), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B2k { get; } = new Animation(0, -12, 12);
 
-        [Display(GroupName = nameof(Texts.Equalizer), Name = "4kHz", ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = nameof(Texts.B4k), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B4k { get; } = new Animation(0, -12, 12);
 
-        [Display(GroupName = nameof(Texts.Equalizer), Name = "8kHz", ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = nameof(Texts.B8k), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B8k { get; } = new Animation(0, -12, 12);
 
-        [Display(GroupName = nameof(Texts.Equalizer), Name = "16kHz", ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Equalizer), Name = nameof(Texts.B16k), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", -12, 12)]
         public Animation B16k { get; } = new Animation(0, -12, 12);
 
