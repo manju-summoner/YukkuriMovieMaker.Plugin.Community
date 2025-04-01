@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
+<data name="InOutCropEffectName" xml:space="preserve"><value>釋放夾子時進入和退出</value></data>
+<data name="InOutCropEffectGroupName" xml:space="preserve"><value>登場退場</value></data>
+<data name="InOutCropEffectInCropDirectionName" xml:space="preserve"><value>登場時</value></data>
+<data name="InOutCropEffectInCropDirectionDesc" xml:space="preserve"><value>剪裁方向</value></data>
+<data name="InOutCropEffectOutCropDirectionName" xml:space="preserve"><value>退場時</value></data>
+<data name="InOutCropEffectOutCropDirectionDesc" xml:space="preserve"><value>剪裁方向</value></data>
+<data name="InOutCropEffectIsCenteringName" xml:space="preserve"><value>置中對齊</value></data>
+<data name="InOutCropEffectIsCenteringDesc" xml:space="preserve"><value>置中對齊</value></data>
+<data name="InOutCropEffectEffectDurationName" xml:space="preserve"><value>效果時間</value></data>
+<data name="InOutCropEffectEffectDurationDesc" xml:space="preserve"><value>效果持續秒數</value></data>
+<data name="InOutCropEffectEasingTypeName" xml:space="preserve"><value>種類</value></data>
+<data name="InOutCropEffectEasingTypeDesc" xml:space="preserve"><value>動畫的種類</value></data>
+<data name="InOutCropEffectEasingModeName" xml:space="preserve"><value>加減速</value></data>
+<data name="InOutCropEffectEasingModeDesc" xml:space="preserve"><value>動畫的加減速</value></data>
+<data name="InOutCropEffectSecUnit" xml:space="preserve"><value>秒</value></data>
+<data name="InOutCropEffectCropDirectionTopName" xml:space="preserve"><value>上</value></data>
+<data name="InOutCropEffectCropDirectionTopDesc" xml:space="preserve"><value>上</value></data>
+<data name="InOutCropEffectCropDirectionBottomName" xml:space="preserve"><value>下</value></data>
+<data name="InOutCropEffectCropDirectionBottomDesc" xml:space="preserve"><value>下</value></data>
+<data name="InOutCropEffectCropDirectionLeftName" xml:space="preserve"><value>左</value></data>
+<data name="InOutCropEffectCropDirectionLeftDesc" xml:space="preserve"><value>左</value></data>
+<data name="InOutCropEffectCropDirectionRightName" xml:space="preserve"><value>右</value></data>
+<data name="InOutCropEffectCropDirectionRightDesc" xml:space="preserve"><value>右</value></data>
+<data name="InOutCropEffectCropDirectionNoneName" xml:space="preserve"><value>沒有任何</value></data>
+<data name="InOutCropEffectCropDirectionNoneDesc" xml:space="preserve"><value>沒有任何</value></data>
+</root>
