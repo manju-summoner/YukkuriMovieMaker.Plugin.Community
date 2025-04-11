@@ -85,7 +85,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
                 using var brush = devices.DeviceContext.CreateSolidColorBrush(new Color(R, G, B, A), null);
 
                 var text = "";
-                var interval = item.Inverval.GetValue(frame, length, fps) * fps;
+                var interval = item.Interval.GetValue(frame, length, fps) * fps;
                 var offset = item.Gap ? 73856093 ^ textIndex * 19349663 : 1;
 
                 var seed = 0;

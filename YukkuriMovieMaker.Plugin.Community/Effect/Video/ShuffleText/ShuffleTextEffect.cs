@@ -56,7 +56,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
 
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_Interval), Description = nameof(Texts.ShuffleTextEffectDiscription_Interval), ResourceType = typeof(Texts))]
         [AnimationSlider("F2", nameof(Texts.ShuffleTextEffectUnit_Seconds), 0, 0.25, ResourceType = typeof(Texts))]
-        public Animation Inverval { get; } = new Animation(0, 0, 1000.00);
+        public Animation Interval { get; } = new Animation(0, 0, 1000.00);
 
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_Delay), Description = nameof(Texts.ShuffleTextEffectDiscription_Delay), ResourceType = typeof(Texts))]
         [ToggleSlider]
@@ -166,6 +166,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
             return new ShuffleTextEffectProcessor(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [FontSize];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [Interval, FontSize];
     }
 }
