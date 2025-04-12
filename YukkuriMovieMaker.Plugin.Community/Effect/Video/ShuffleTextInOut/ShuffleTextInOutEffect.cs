@@ -1,28 +1,86 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.ItemEditor.CustomVisibilityAttributes;
 using YukkuriMovieMaker.Player.Video;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText.ShffleText_Enum;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleTextInOut.ShffleTextInOut_Enum;
 using YukkuriMovieMaker.Plugin.Effects;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleTextInOut
 {
-    [VideoEffect(nameof(Texts.ShuffleTextEffectDefaultName), [VideoEffectCategories.Animation], ["Shuffle Text", "シャッフル", "Shuffle Letters"], isAviUtlSupported: false, ResourceType = typeof(Texts))]
-    internal class ShuffleTextEffect : VideoEffectBase
+    [VideoEffect(nameof(Texts.ShuffleTextEffectDefaultName), [VideoEffectCategories.Transition], ["Shuffle Text InOut","シャッフル", "Shuffle Letters InOut"], isAviUtlSupported: false, ResourceType =typeof(Texts))]
+    internal class ShuffleTextInOutEffect : VideoEffectBase
     {
-        public override string Label => Texts.ShuffleTextEffectDefaultName;
+        public override string Label
+        {
+            get
+            {
+                if (EffectEnter && !EffectExit)
+                    return Texts.ShuffleTextEffectEnterName;
+                if (!EffectEnter && EffectExit)
+                    return Texts.ShuffleTextEffectExitName;
+                if (!EffectEnter && !EffectExit)
+                    return Texts.ShuffleTextEffectName;
+                return Texts.ShuffleTextEffectDefaultName;
+            }
+        }
 
-        [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_ShuffleText), Name = nameof(Texts.ShuffleTextEffectDisplayName_Interval), Description = nameof(Texts.ShuffleTextEffectDiscription_Interval), ResourceType = typeof(Texts))]
+        //登場退場
+        [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_Appearing), Description = nameof(Texts.ShuffleTextEffectDiscription_Appearing), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool EffectEnter
+        {
+            get => effectEnter;
+            set => Set(ref effectEnter, value, nameof(EffectEnter), nameof(Label));
+        }
+        bool effectEnter = true;
+
+        [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_Exit), Description = nameof(Texts.ShuffleTextEffectDiscription_Exit), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool EffectExit
+        {
+            get => effectExit;
+            set => Set(ref effectExit, value, nameof(EffectExit), nameof(Label));
+        }
+        bool effectExit = true;
+
+        [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_Duration), Description = nameof(Texts.ShuffleTextEffectDiscription_Duration), ResourceType = typeof(Texts))]
+        [TextBoxSlider("F2", nameof(Texts.ShuffleTextEffectUnit_Seconds), 0, 0.5, ResourceType = typeof(Texts))]
+        [DefaultValue(0d)]
+        [Range(0, 99999d)]
+        public double T { get => time; set => Set(ref time, value); }
+        double time = 0.30;
+
+        [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_Interval), Description = nameof(Texts.ShuffleTextEffectDiscription_Interval), ResourceType = typeof(Texts))]
         [AnimationSlider("F2", nameof(Texts.ShuffleTextEffectUnit_Seconds), 0, 0.25, ResourceType = typeof(Texts))]
         public Animation Interval { get; } = new Animation(0, 0, 1000.00);
 
-        [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_ShuffleText), Name = nameof(Texts.ShuffleTextEffectDisplayName_Delay), Description = nameof(Texts.ShuffleTextEffectDiscription_Delay), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_Delay), Description = nameof(Texts.ShuffleTextEffectDiscription_Delay), ResourceType = typeof(Texts))]
         [ToggleSlider]
         public bool Delay { get => delay; set => Set(ref delay, value); }
         bool delay = true;
+
+        [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_DisplayMode), Description = nameof(Texts.ShuffleTextEffectDiscription_DisplayMode), ResourceType = typeof(Texts))]
+        [EnumComboBox]
+        public DisplayMode Enum_DisplayMode { get => mode_displayEnum; set => Set(ref mode_displayEnum, value); }
+        DisplayMode mode_displayEnum = DisplayMode.Nomal;
+
+        [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_StartTime), Description = nameof(Texts.ShuffleTextEffectDiscription_StartTime), ResourceType = typeof(Texts))]
+        [TextBoxSlider("F2", nameof(Texts.ShuffleTextEffectUnit_Seconds), 0, 0.5, ResourceType = typeof(Texts))]
+        [DefaultValue(0d)]
+        [Range(0, 99999d)]
+        [ShowPropertyEditorWhen(nameof(Enum_DisplayMode), DisplayMode.Order)]
+        public double DisplayStartTime { get => startTime; set => Set(ref startTime, value); }
+        double startTime = 0.30;
+
+        [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_FromBack), Description = nameof(Texts.ShuffleTextEffectDiscription_FromBack), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        [ShowPropertyEditorWhen(nameof(Enum_DisplayMode), DisplayMode.Order)]
+        public bool Back { get => back; set => Set(ref back, value); }
+        bool back = false;
 
         //アニメーションテキスト
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AnimationText), Name = nameof(Texts.ShuffleTextEffectDisplayName_DisplayText), Description = nameof(Texts.ShuffleTextEffectDiscription_DisplayText), ResourceType = typeof(Texts))]
@@ -105,7 +163,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
 
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
         {
-            return new ShuffleTextEffectProcessor(devices, this);
+            return new ShuffleTextInOutEffectProcessor(devices, this);
         }
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => [Interval, FontSize];

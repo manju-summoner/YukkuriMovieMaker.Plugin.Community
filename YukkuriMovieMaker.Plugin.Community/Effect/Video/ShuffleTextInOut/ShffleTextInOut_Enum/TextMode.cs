@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText.ShffleTextEnum
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleTextInOut.ShffleTextInOut_Enum
 {
-    public enum Mode
+    public enum TextMode
     {
         [Display(Name = nameof(Texts.ShuffleTextEffectEnum_Mode_Alphabet), Description = nameof(Texts.ShuffleTextEffectEnum_Mode_Discription_Alphabet), ResourceType = typeof(Texts))]
         Alphabet = 1,

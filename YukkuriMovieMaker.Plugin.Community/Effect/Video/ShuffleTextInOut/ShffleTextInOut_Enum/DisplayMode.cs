@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText.ShffleTextEnum
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleTextInOut.ShffleTextInOut_Enum
 {
     public enum DisplayMode
     {
