@@ -77,7 +77,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
 
             if (Enum.TryParse<CharType>(item.Enum_Mode.ToString(), out var textType))
             {
-                text = RandomText.Generate(textType, new Random(seed & int.MaxValue), item);
+                text = RandomText.Generate(textType, new Random(seed % int.MaxValue), item);
             }
             else
             {
