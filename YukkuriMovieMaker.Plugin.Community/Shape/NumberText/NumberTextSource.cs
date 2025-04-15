@@ -13,7 +13,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.NumberText;
 internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, NumberTextParameter numberTextParameter)
     : IShapeSource
 {
-    private const double Tolerance = 0.001;
     private System.Windows.Media.Color _color;
 
     private ID2D1CommandList? _commandList;
@@ -50,10 +49,10 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
         var isItalic = numberTextParameter.IsItalic;
 
         if (fontSize == 0) fontSize = 1;
-        if (_commandList != null && Math.Abs(_number - number) < Tolerance &&
+        if (_commandList != null && _number == number &&
             _integerDigits == integerDigits &&
             _decimalDigits == decimalDigits &&
-            Math.Abs(_fontSize - fontSize) < Tolerance && _font == font && _textAlignment == textAlignment &&
+            _fontSize == fontSize && _font == font && _textAlignment == textAlignment &&
             _color == color && _separate == separate && _isBold == isBold && _isItalic == isItalic)
             return;
 
