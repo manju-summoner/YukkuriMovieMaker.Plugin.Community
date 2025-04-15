@@ -12,7 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.NumberText;
 internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameterBase(sharedData)
 {
     private Color _color = Colors.White;
-    private Animation _decimalPlaces = new(0);
+    private Animation _decimalPlaces = new(0, 0, 16);
     private string _font = "MS UI Gothic";
     private bool _isBold;
     private bool _isItalic;
@@ -31,7 +31,6 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
 
     [Display(Name = nameof(Texts.DecimalDigits), ResourceType = typeof(Texts))]
     [AnimationSlider("F0", "", 0, 4)]
-    [Range(0, 16)]
     public Animation DecimalPlaces
     {
         get => _decimalPlaces;
@@ -56,8 +55,7 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
 
     [Display(Name = nameof(Texts.Size), Description = nameof(Texts.SizeOfCharacters), ResourceType = typeof(Texts))]
     [AnimationSlider("F1", "px", 1, 100)]
-    [Range(1.0, 100000.0)]
-    public Animation FontSize { get; } = new(32);
+    public Animation FontSize { get; } = new(32, 1, 100000);
 
     [Display(Name = nameof(Texts.Justification), ResourceType = typeof(Texts))]
     [EnumComboBox]
