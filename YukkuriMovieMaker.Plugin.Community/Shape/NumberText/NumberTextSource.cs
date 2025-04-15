@@ -17,8 +17,8 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
     private System.Windows.Media.Color _color;
 
     private ID2D1CommandList? _commandList;
-    private double _integerDigits;
-    private double _decimalDigits;
+    private int _integerDigits;
+    private int _decimalDigits;
 
     private bool _disposedValue;
     private string _font;
@@ -39,8 +39,8 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
         var length = timelineItemSourceDescription.ItemDuration.Frame;
 
         var number = numberTextParameter.Number.GetValue(frame, length, fps);
-        var integerDigits = numberTextParameter.IntegerDigits.GetValue(frame, length, fps);
-        var decimalDigits = numberTextParameter.DecimalDigits.GetValue(frame, length, fps);
+        var integerDigits = (int)numberTextParameter.IntegerDigits.GetValue(frame, length, fps);
+        var decimalDigits = (int)numberTextParameter.DecimalDigits.GetValue(frame, length, fps);
         var font = numberTextParameter.Font;
         var fontSize = (float)numberTextParameter.FontSize.GetValue(frame, length, fps);
         var textAlignment = numberTextParameter.Alignment;
@@ -51,8 +51,8 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
 
         if (fontSize == 0) fontSize = 1;
         if (_commandList != null && Math.Abs(_number - number) < Tolerance &&
-            Math.Abs(_integerDigits - integerDigits) < Tolerance &&
-            Math.Abs(_decimalDigits - decimalDigits) < Tolerance &&
+            _integerDigits == integerDigits &&
+            _decimalDigits == decimalDigits &&
             Math.Abs(_fontSize - fontSize) < Tolerance && _font == font && _textAlignment == textAlignment &&
             _color == color && _separate == separate && _isBold == isBold && _isItalic == isItalic)
             return;
@@ -149,14 +149,14 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
         _isItalic = isItalic;
     }
 
-    private static string CreateStringFormat(double integerDigits, double decimalDigits, bool separate)
+    private static string CreateStringFormat(int integerDigits, int decimalDigits, bool separate)
     {
         string text = string.Empty;
         if (separate)
             text = "#,";
-        text += new string('0', (int)integerDigits);
+        text += new string('0', integerDigits);
         if (decimalDigits > 0)
-            text += "." + new string('0', (int)decimalDigits);
+            text += "." + new string('0', decimalDigits);
         return text;
     }
 
