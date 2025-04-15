@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
+<data name="ShuffleTextEffectDefaultName" xml:space="preserve"><value>シャッフルテキスト</value></data>
+<data name="ShuffleTextEffectGroupName_ShuffleText" xml:space="preserve"><value>シャッフルテキスト</value></data>
+<data name="ShuffleTextEffectGroupName_AnimationText" xml:space="preserve"><value>アニメーションテキスト</value></data>
+<data name="ShuffleTextEffectDisplayName_Interval" xml:space="preserve"><value>間隔</value></data>
+<data name="ShuffleTextEffectDisplayName_Delay" xml:space="preserve"><value>ずれ</value></data>
+<data name="ShuffleTextEffectDisplayName_DisplayText" xml:space="preserve"><value>表示テキスト</value></data>
+<data name="ShuffleTextEffectDisplayName_Alphabet_Upper" xml:space="preserve"><value>A-Z</value></data>
+<data name="ShuffleTextEffectDisplayName_Alphabet_Lower" xml:space="preserve"><value>a-z</value></data>
+<data name="ShuffleTextEffectDisplayName_Hirakana" xml:space="preserve"><value>ひらがな</value></data>
+<data name="ShuffleTextEffectDisplayName_Katakana" xml:space="preserve"><value>カタカナ</value></data>
+<data name="ShuffleTextEffectDisplayName_Kanji" xml:space="preserve"><value>漢字</value></data>
+<data name="ShuffleTextEffectDisplayName_Number" xml:space="preserve"><value>数字</value></data>
+<data name="ShuffleTextEffectDisplayName_Symbol" xml:space="preserve"><value>記号</value></data>
+<data name="ShuffleTextEffectDisplayName_Text" xml:space="preserve"><value>テキスト</value></data>
+<data name="ShuffleTextEffectDisplayName_Font" xml:space="preserve"><value>フォント</value></data>
+<data name="ShuffleTextEffectDisplayName_Size" xml:space="preserve"><value>サイズ</value></data>
+<data name="ShuffleTextEffectDisplayName_Color" xml:space="preserve"><value>文字色</value></data>
+<data name="ShuffleTextEffectDisplayName_Bold" xml:space="preserve"><value>太字</value></data>
+<data name="ShuffleTextEffectDisplayName_Italic" xml:space="preserve"><value>イタリック</value></data>
+<data name="ShuffleTextEffectDiscription_Interval" xml:space="preserve"><value>アニメーションテキストが変化する間隔</value></data>
+<data name="ShuffleTextEffectDiscription_Delay" xml:space="preserve"><value>アニメーションテキストの文字ごとのずれ</value></data>
+<data name="ShuffleTextEffectDiscription_DisplayText" xml:space="preserve"><value>アニメーションテキストの表示内容</value></data>
+<data name="ShuffleTextEffectDiscription_Alphabet_Upper" xml:space="preserve"><value>アルファベット大文字</value></data>
+<data name="ShuffleTextEffectDiscription_Alphabet_Lower" xml:space="preserve"><value>アルファベット小文字</value></data>
+<data name="ShuffleTextEffectDiscription_Hirakana" xml:space="preserve"><value>ひらがな</value></data>
+<data name="ShuffleTextEffectDiscription_Katakana" xml:space="preserve"><value>カタカナ</value></data>
+<data name="ShuffleTextEffectDiscription_Kanji" xml:space="preserve"><value>漢字</value></data>
+<data name="ShuffleTextEffectDiscription_Number" xml:space="preserve"><value>数字</value></data>
+<data name="ShuffleTextEffectDiscription_Symbol" xml:space="preserve"><value>記号</value></data>
+<data name="ShuffleTextEffectDiscription_Text" xml:space="preserve"><value>シャッフルするテキスト</value></data>
+<data name="ShuffleTextEffectDiscription_Font" xml:space="preserve"><value>フォント</value></data>
+<data name="ShuffleTextEffectDiscription_Size" xml:space="preserve"><value>文字の大きさ</value></data>
+<data name="ShuffleTextEffectDiscription_Color" xml:space="preserve"><value>文字の色</value></data>
+<data name="ShuffleTextEffectDiscription_Bold" xml:space="preserve"><value>太字</value></data>
+<data name="ShuffleTextEffectDiscription_Italic" xml:space="preserve"><value>斜体・イタリック</value></data>
+<data name="ShuffleTextEffectUnit_Seconds" xml:space="preserve"><value>秒</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Alphabet" xml:space="preserve"><value>アルファベット（A-z）</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Number" xml:space="preserve"><value>数字（0-9）</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Symbol" xml:space="preserve"><value>記号</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Custom" xml:space="preserve"><value>カスタム</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Discription_Alphabet" xml:space="preserve"><value>アルファベット（大文字・小文字）</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Discription_Number" xml:space="preserve"><value>数字（0-9）</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Discription_Symbol" xml:space="preserve"><value>記号</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Discription_Custom" xml:space="preserve"><value>カスタム</value></data>
+</root>
