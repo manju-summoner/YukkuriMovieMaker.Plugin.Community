@@ -12,7 +12,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
     {
         readonly DisposeCollector disposer = new();
         ID2D1CommandList? commandList;
-        ID2D1Image? input;
         readonly AffineTransform2D wrap;
         readonly private IGraphicsDevicesAndContext devices;
         readonly ShuffleTextEffect item;
@@ -102,7 +101,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
 
         public void SetInput(ID2D1Image? input)
         {
-            this.input = input;
+
         }
 
         public void Dispose()
