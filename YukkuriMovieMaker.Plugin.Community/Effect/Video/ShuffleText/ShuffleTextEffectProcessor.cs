@@ -5,7 +5,7 @@ using Vortice.DirectWrite;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
-
+using MathNet.Numerics.Random;
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
 {
     internal class ShuffleTextEffectProcessor : IVideoEffectProcessor
@@ -62,11 +62,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
             else
                 section = frame / (int)interval;
             int num = (item.Delay ? ((section + textIndex) * (section + textIndex)) + textIndex : section * section);
-            var seed = new Random(num).Next();
 
             if (Enum.TryParse<CharType>(item.Enum_Mode.ToString(), out var textType))
             {
-                text = RandomText.Generate(textType, new Random(seed % int.MaxValue), item);
+                text = RandomText.Generate(textType, new MersenneTwister(num), item);
             }
             else
             {
