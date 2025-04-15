@@ -142,10 +142,10 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
             FontSize.CopyFrom(param.FontSize);
         }
 
-        private Animation Number { get; } = new(100, 0, 1000);
-        private Animation IntegerDigits { get; } = new(100, 0, 1000);
-        private Animation DecimalPlaces { get; } = new(100, 0, 1000);
-        private Animation FontSize { get; } = new(100, 0, 1000);
+        private Animation Number { get; } = new(0);
+        private Animation IntegerDigits { get; } = new(0, 0, 16);
+        private Animation DecimalPlaces { get; } = new(0, 0, 16);
+        private Animation FontSize { get; } = new(32, 1, 100000);
 
         public void CopyTo(NumberTextParameter param)
         {
