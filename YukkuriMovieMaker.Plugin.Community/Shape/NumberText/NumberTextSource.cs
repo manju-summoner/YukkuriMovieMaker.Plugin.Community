@@ -60,8 +60,12 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
         var dc = devices.DeviceContext;
 
         using var formatFactory = DWriteCreateFactory<IDWriteFactory>();
-        var textFormat = formatFactory.CreateTextFormat(font, isBold ? FontWeight.Bold : FontWeight.Normal,
-            isItalic ? FontStyle.Italic : FontStyle.Normal, fontSize);
+        using var textFormat = 
+            formatFactory.CreateTextFormat(
+                font, 
+                isBold ? FontWeight.Bold : FontWeight.Normal,
+                isItalic ? FontStyle.Italic : FontStyle.Normal, 
+                fontSize);
 
         textFormat.WordWrapping = WordWrapping.NoWrap;
 
@@ -69,7 +73,7 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
         var text = number.ToString(stringFormat);
 
         using var layoutFactory = DWriteCreateFactory<IDWriteFactory>();
-        var textLayout = layoutFactory.CreateTextLayout(text, textFormat, fontSize * (text.Length + 1), fontSize);
+        using var textLayout = layoutFactory.CreateTextLayout(text, textFormat, fontSize * (text.Length + 1), fontSize);
 
         var width = textLayout.Metrics.Width;
         var height = textLayout.Metrics.Height;
@@ -117,7 +121,7 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
                 throw new ArgumentOutOfRangeException(nameof(textAlignment), textAlignment, @"不正な値です。");
         }
 
-        var brush = devices.DeviceContext.CreateSolidColorBrush(new Color(color.R / 255.0f, color.G / 255.0f,
+        using var brush = devices.DeviceContext.CreateSolidColorBrush(new Color(color.R / 255.0f, color.G / 255.0f,
             color.B / 255.0f, color.A / 255.0f));
 
         _commandList?.Dispose();
@@ -143,8 +147,6 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
         _separate = separate;
         _isBold = isBold;
         _isItalic = isItalic;
-
-        brush.Dispose();
     }
 
     private static string CreateStringFormat(double integerDigits, double decimalDigits, bool separate)
