@@ -81,4 +81,5 @@
 <data name="BasePointCenterBottom" xml:space="preserve"><value>Rata tengah [bawah]</value></data>
 <data name="BasePointCenterTop" xml:space="preserve"><value>Rata tengah [atas]</value></data>
 <data name="BasePointCenterCenter" xml:space="preserve"><value>Rata tengah [tengah]</value></data>
+<data name="Text" xml:space="preserve"><value>Teks</value></data>
 </root>

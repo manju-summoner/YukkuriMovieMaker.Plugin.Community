@@ -39,7 +39,7 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
         set => Set(ref _separate, value);
     }
 
-    [Display(Name = nameof(Texts.Font), ResourceType = typeof(Texts))]
+    [Display(GroupName = nameof(Texts.Text), Name = nameof(Texts.Font), ResourceType = typeof(Texts))]
     [FontComboBox]
     public string Font
     {
@@ -47,11 +47,11 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
         set => Set(ref _font, value);
     }
 
-    [Display(Name = nameof(Texts.Size), Description = nameof(Texts.SizeOfCharacters), ResourceType = typeof(Texts))]
+    [Display(GroupName = nameof(Texts.Text), Name = nameof(Texts.Size), Description = nameof(Texts.SizeOfCharacters), ResourceType = typeof(Texts))]
     [AnimationSlider("F1", "px", 1, 100)]
     public Animation FontSize { get; } = new(32, 1, 100000);
 
-    [Display(Name = nameof(Texts.Justification), ResourceType = typeof(Texts))]
+    [Display(GroupName = nameof(Texts.Text), Name = nameof(Texts.Justification), ResourceType = typeof(Texts))]
     [EnumComboBox]
     public TextAlignment Alignment
     {
@@ -59,7 +59,7 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
         set => Set(ref _textAlignment, value);
     }
 
-    [Display(Name = nameof(Texts.ColorOfCharacters), ResourceType = typeof(Texts))]
+    [Display(GroupName = nameof(Texts.Text), Name = nameof(Texts.ColorOfCharacters), ResourceType = typeof(Texts))]
     [ColorPicker]
     public Color Color
     {
@@ -67,7 +67,7 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
         set => Set(ref _color, value);
     }
 
-    [Display(Name = nameof(Texts.Bold), ResourceType = typeof(Texts))]
+    [Display(GroupName = nameof(Texts.Text), Name = nameof(Texts.Bold), ResourceType = typeof(Texts))]
     [ToggleSlider]
     public bool IsBold
     {
@@ -75,7 +75,7 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
         set => Set(ref _isBold, value);
     }
 
-    [Display(Name = nameof(Texts.Italic), ResourceType = typeof(Texts))]
+    [Display(GroupName = nameof(Texts.Text), Name = nameof(Texts.Italic), ResourceType = typeof(Texts))]
     [ToggleSlider]
     public bool IsItalic
     {

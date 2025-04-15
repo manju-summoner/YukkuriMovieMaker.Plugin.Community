@@ -81,4 +81,5 @@
 <data name="BasePointCenterBottom" xml:space="preserve"><value>Align center [bottom]</value></data>
 <data name="BasePointCenterTop" xml:space="preserve"><value>Align center [top]</value></data>
 <data name="BasePointCenterCenter" xml:space="preserve"><value>Align center [middle]</value></data>
+<data name="Text" xml:space="preserve"><value>Text</value></data>
 </root>

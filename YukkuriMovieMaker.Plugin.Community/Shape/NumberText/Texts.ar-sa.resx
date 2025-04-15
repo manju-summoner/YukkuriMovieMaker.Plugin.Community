@@ -81,4 +81,5 @@
 <data name="BasePointCenterBottom" xml:space="preserve"><value>محاذاة المركز [أسفل]</value></data>
 <data name="BasePointCenterTop" xml:space="preserve"><value>محاذاة المنتصف [أعلى]</value></data>
 <data name="BasePointCenterCenter" xml:space="preserve"><value>محاذاة للوسط [منتصف]</value></data>
+<data name="Text" xml:space="preserve"><value>نص</value></data>
 </root>

@@ -81,4 +81,5 @@
 <data name="BasePointCenterBottom" xml:space="preserve"><value>置中對齊[下]</value></data>
 <data name="BasePointCenterTop" xml:space="preserve"><value>置中對齊[上]</value></data>
 <data name="BasePointCenterCenter" xml:space="preserve"><value>置中對齊[中]</value></data>
+<data name="Text" xml:space="preserve"><value>文本</value></data>
 </root>

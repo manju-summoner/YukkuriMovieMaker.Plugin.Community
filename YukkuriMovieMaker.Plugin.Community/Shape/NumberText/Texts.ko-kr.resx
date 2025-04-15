@@ -81,4 +81,5 @@
 <data name="BasePointCenterBottom" xml:space="preserve"><value>중앙 정렬[아래]</value></data>
 <data name="BasePointCenterTop" xml:space="preserve"><value>중앙 정렬[위]</value></data>
 <data name="BasePointCenterCenter" xml:space="preserve"><value>중앙 정렬[가운데]</value></data>
+<data name="Text" xml:space="preserve"><value>텍스트</value></data>
 </root>
