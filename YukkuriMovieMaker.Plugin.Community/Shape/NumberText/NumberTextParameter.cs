@@ -12,30 +12,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.NumberText;
 internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameterBase(sharedData)
 {
     private Color _color = Colors.White;
-    private Animation _decimalPlaces = new(0, 0, 16);
     private string _font = "MS UI Gothic";
     private bool _isBold;
     private bool _isItalic;
-    private Animation _number = new(0);
     private bool _separate;
 
     private TextAlignment _textAlignment = TextAlignment.LeftTop;
 
     [Display(Name = nameof(Texts.Value), Description = nameof(Texts.ValueToDisplay), ResourceType = typeof(Texts))]
     [AnimationSlider("F4", "", -100, 100)]
-    public Animation Number
-    {
-        get => _number;
-        set => Set(ref _number, value);
-    }
+    public Animation Number { get; } = new(0);
 
     [Display(Name = nameof(Texts.DecimalDigits), ResourceType = typeof(Texts))]
     [AnimationSlider("F0", "", 0, 4)]
-    public Animation DecimalPlaces
-    {
-        get => _decimalPlaces;
-        set => Set(ref _decimalPlaces, value);
-    }
+    public Animation DecimalPlaces { get; } = new (0, 0, 16);
 
     [Display(Name = nameof(Texts.ThousandsSeparator), ResourceType = typeof(Texts))]
     [ToggleSlider]
