@@ -12,6 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
     {
         readonly DisposeCollector disposer = new();
         ID2D1CommandList? commandList;
+        readonly IDWriteFactory7 factory;
         readonly AffineTransform2D wrap;
         readonly private IGraphicsDevicesAndContext devices;
         readonly ShuffleTextEffect item;
@@ -22,6 +23,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
         {
             this.devices = devices;
             this.item = item;
+
+            factory = DWrite.DWriteCreateFactory<IDWriteFactory7>();
+            disposer.Collect(factory);
 
             wrap = new AffineTransform2D(devices.DeviceContext);
             disposer.Collect(wrap);
@@ -37,8 +41,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
             var fps = effectDescription.FPS;
 
             var textIndex = effectDescription.InputIndex;
-
-            using IDWriteFactory7 factory = DWrite.DWriteCreateFactory<IDWriteFactory7>();
             var fontSize = item.FontSize.GetValue(frame, length, fps);
             var fontWeight = item.Bold ? FontWeight.Bold : FontWeight.Normal;
             var fontStyle = item.Italic ? FontStyle.Italic : FontStyle.Normal;
