@@ -62,6 +62,7 @@
 <data name="Number" xml:space="preserve"><value>数値</value></data>
 <data name="Value" xml:space="preserve"><value>値</value></data>
 <data name="ValueToDisplay" xml:space="preserve"><value>表示する値</value></data>
+<data name="IntegerDigits" xml:space="preserve"><value>整数桁数</value></data>
 <data name="DecimalDigits" xml:space="preserve"><value>小数桁数</value></data>
 <data name="ThousandsSeparator" xml:space="preserve"><value>千位区切り</value></data>
 <data name="Font" xml:space="preserve"><value>フォント</value></data>

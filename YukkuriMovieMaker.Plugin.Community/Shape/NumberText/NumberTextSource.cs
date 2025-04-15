@@ -17,7 +17,8 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
     private System.Windows.Media.Color _color;
 
     private ID2D1CommandList? _commandList;
-    private double _decimalPlaces;
+    private double _integerDigits;
+    private double _decimalDigits;
 
     private bool _disposedValue;
     private string _font;
@@ -38,7 +39,8 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
         var length = timelineItemSourceDescription.ItemDuration.Frame;
 
         var number = numberTextParameter.Number.GetValue(frame, length, fps);
-        var decimalPlaces = numberTextParameter.DecimalPlaces.GetValue(frame, length, fps);
+        var integerDigits = numberTextParameter.IntegerDigits.GetValue(frame, length, fps);
+        var decimalDigits = numberTextParameter.DecimalDigits.GetValue(frame, length, fps);
         var font = numberTextParameter.Font;
         var fontSize = (float)numberTextParameter.FontSize.GetValue(frame, length, fps);
         var textAlignment = numberTextParameter.Alignment;
@@ -49,7 +51,8 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
 
         if (fontSize == 0) fontSize = 1;
         if (_commandList != null && Math.Abs(_number - number) < Tolerance &&
-            Math.Abs(_decimalPlaces - decimalPlaces) < Tolerance &&
+            Math.Abs(_integerDigits - integerDigits) < Tolerance &&
+            Math.Abs(_decimalDigits - decimalDigits) < Tolerance &&
             Math.Abs(_fontSize - fontSize) < Tolerance && _font == font && _textAlignment == textAlignment &&
             _color == color && _separate == separate && _isBold == isBold && _isItalic == isItalic)
             return;
@@ -62,11 +65,8 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
 
         textFormat.WordWrapping = WordWrapping.NoWrap;
 
-        string text;
-        if (separate)
-            text = decimalPlaces == 0 ? ((int)number).ToString("N0") : number.ToString("N" + decimalPlaces);
-        else
-            text = number.ToString("F" + decimalPlaces);
+        var stringFormat = CreateStringFormat(integerDigits, decimalDigits, separate);
+        var text = number.ToString(stringFormat);
 
         using var layoutFactory = DWriteCreateFactory<IDWriteFactory>();
         var textLayout = layoutFactory.CreateTextLayout(text, textFormat, fontSize * (text.Length + 1), fontSize);
@@ -134,7 +134,8 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
         _commandList.Close();
 
         _number = number;
-        _decimalPlaces = decimalPlaces;
+        _integerDigits = integerDigits;
+        _decimalDigits = decimalDigits;
         _font = font;
         _fontSize = fontSize;
         _textAlignment = textAlignment;
@@ -144,6 +145,17 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
         _isItalic = isItalic;
 
         brush.Dispose();
+    }
+
+    private static string CreateStringFormat(double integerDigits, double decimalDigits, bool separate)
+    {
+        string text = string.Empty;
+        if (separate)
+            text = "#,";
+        text += new string('0', (int)integerDigits);
+        if (decimalDigits > 0)
+            text += "." + new string('0', (int)decimalDigits);
+        return text;
     }
 
     public void Dispose()

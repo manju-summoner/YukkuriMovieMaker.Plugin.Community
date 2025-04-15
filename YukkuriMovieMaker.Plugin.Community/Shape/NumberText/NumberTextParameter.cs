@@ -23,9 +23,13 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
     [AnimationSlider("F4", "", -100, 100)]
     public Animation Number { get; } = new(0);
 
+    [Display(Name = nameof(Texts.IntegerDigits), ResourceType = typeof(Texts))]
+    [AnimationSlider("F0", "", 0, 4)]
+    public Animation IntegerDigits { get; } = new(0, 0, 16);
+
     [Display(Name = nameof(Texts.DecimalDigits), ResourceType = typeof(Texts))]
     [AnimationSlider("F0", "", 0, 4)]
-    public Animation DecimalPlaces { get; } = new (0, 0, 16);
+    public Animation DecimalDigits { get; } = new (0, 0, 16);
 
     [Display(Name = nameof(Texts.ThousandsSeparator), ResourceType = typeof(Texts))]
     [ToggleSlider]
@@ -113,7 +117,7 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
 
     protected override IEnumerable<IAnimatable> GetAnimatables()
     {
-        return [Number, DecimalPlaces, FontSize];
+        return [Number, IntegerDigits, DecimalDigits, FontSize];
     }
 
     protected override void LoadSharedData(SharedDataStore store)
@@ -133,18 +137,21 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
         public SharedData(NumberTextParameter param)
         {
             Number.CopyFrom(param.Number);
-            DecimalPlaces.CopyFrom(param.DecimalPlaces);
+            IntegerDigits.CopyFrom(param.IntegerDigits);
+            DecimalPlaces.CopyFrom(param.DecimalDigits);
             FontSize.CopyFrom(param.FontSize);
         }
 
         private Animation Number { get; } = new(100, 0, 1000);
+        private Animation IntegerDigits { get; } = new(100, 0, 1000);
         private Animation DecimalPlaces { get; } = new(100, 0, 1000);
         private Animation FontSize { get; } = new(100, 0, 1000);
 
         public void CopyTo(NumberTextParameter param)
         {
             param.Number.CopyFrom(Number);
-            param.DecimalPlaces.CopyFrom(DecimalPlaces);
+            param.IntegerDigits.CopyFrom(IntegerDigits);
+            param.DecimalDigits.CopyFrom(DecimalPlaces);
             param.FontSize.CopyFrom(FontSize);
         }
     }
