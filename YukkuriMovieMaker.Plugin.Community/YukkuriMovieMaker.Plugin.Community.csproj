@@ -34,6 +34,9 @@
 	  <Reference Include="Vortice.Direct2D1">
 		  <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
 	  </Reference>
+      <Reference Include="Vortice.Mathematics">
+          <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
+      </Reference>
 	  <Reference Include="System.Drawing.Common">
 		  <HintPath>$(YMM4DirPath)System.Drawing.Common.dll</HintPath>
 	  </Reference>
