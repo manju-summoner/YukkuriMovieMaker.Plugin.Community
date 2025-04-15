@@ -103,7 +103,7 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
 
     public override IEnumerable<string> CreateShapeItemExoFilter(int keyFrameIndex, ExoOutputDescription desc)
     {
-        return [""];
+        return [];
     }
 
     public override IShapeSource CreateShapeSource(IGraphicsDevicesAndContext devices)
