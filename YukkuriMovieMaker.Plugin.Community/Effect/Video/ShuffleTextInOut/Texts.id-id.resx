@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
+<data name="ShuffleTextEffectDefaultName" xml:space="preserve"><value>Tampilan dan keluar saat mengacak teks</value></data>
+<data name="ShuffleTextEffectEnterName" xml:space="preserve"><value>Tampilan saat mengacak teks</value></data>
+<data name="ShuffleTextEffectExitName" xml:space="preserve"><value>Keluar saat mengacak teks</value></data>
+<data name="ShuffleTextEffectName" xml:space="preserve"><value>saat mengacak teks</value></data>
+<data name="ShuffleTextEffectGroupName_AppearanceAndExit" xml:space="preserve"><value>Penampilan dan keluar</value></data>
+<data name="ShuffleTextEffectGroupName_AnimationText" xml:space="preserve"><value>teks animasi</value></data>
+<data name="ShuffleTextEffectDisplayName_Appearing" xml:space="preserve"><value>Penampilan</value></data>
+<data name="ShuffleTextEffectDisplayName_Exit" xml:space="preserve"><value>Keluar</value></data>
+<data name="ShuffleTextEffectDisplayName_Duration" xml:space="preserve"><value>Durasi</value></data>
+<data name="ShuffleTextEffectDisplayName_Interval" xml:space="preserve"><value>Interval</value></data>
+<data name="ShuffleTextEffectDisplayName_Delay" xml:space="preserve"><value>Jarak</value></data>
+<data name="ShuffleTextEffectDisplayName_DisplayMode" xml:space="preserve"><value>Cara menampilkan</value></data>
+<data name="ShuffleTextEffectDisplayName_StartTime" xml:space="preserve"><value>Waktu mulai</value></data>
+<data name="ShuffleTextEffectDisplayName_FromBack" xml:space="preserve"><value>Dari belakang</value></data>
+<data name="ShuffleTextEffectDisplayName_DisplayText" xml:space="preserve"><value>Teks tampilan</value></data>
+<data name="ShuffleTextEffectDisplayName_Alphabet_Upper" xml:space="preserve"><value>A-Z</value></data>
+<data name="ShuffleTextEffectDisplayName_Alphabet_Lower" xml:space="preserve"><value>a-z</value></data>
+<data name="ShuffleTextEffectDisplayName_Hirakana" xml:space="preserve"><value>Hiragana</value></data>
+<data name="ShuffleTextEffectDisplayName_Katakana" xml:space="preserve"><value>Katakana</value></data>
+<data name="ShuffleTextEffectDisplayName_Kanji" xml:space="preserve"><value>Kanji</value></data>
+<data name="ShuffleTextEffectDisplayName_Number" xml:space="preserve"><value>angka</value></data>
+<data name="ShuffleTextEffectDisplayName_Symbol" xml:space="preserve"><value>simbol</value></data>
+<data name="ShuffleTextEffectDisplayName_Text" xml:space="preserve"><value>teks</value></data>
+<data name="ShuffleTextEffectDisplayName_Font" xml:space="preserve"><value>Font</value></data>
+<data name="ShuffleTextEffectDisplayName_Size" xml:space="preserve"><value>Ukuran</value></data>
+<data name="ShuffleTextEffectDisplayName_Color" xml:space="preserve"><value>Warna teks</value></data>
+<data name="ShuffleTextEffectDisplayName_Bold" xml:space="preserve"><value>Bold</value></data>
+<data name="ShuffleTextEffectDisplayName_Italic" xml:space="preserve"><value>Miring</value></data>
+<data name="ShuffleTextEffectDiscription_Appearing" xml:space="preserve"><value>Terapan efek saat item muncul</value></data>
+<data name="ShuffleTextEffectDiscription_Exit" xml:space="preserve"><value>Terapkan efek saat item keluar</value></data>
+<data name="ShuffleTextEffectDiscription_Duration" xml:space="preserve"><value>Detik efek diputar</value></data>
+<data name="ShuffleTextEffectDiscription_Interval" xml:space="preserve"><value>Interval</value></data>
+<data name="ShuffleTextEffectDiscription_Delay" xml:space="preserve"><value>Jarak</value></data>
+<data name="ShuffleTextEffectDiscription_DisplayMode" xml:space="preserve"><value>Cara menampilkan</value></data>
+<data name="ShuffleTextEffectDiscription_StartTime" xml:space="preserve"><value>Waktu mulai</value></data>
+<data name="ShuffleTextEffectDiscription_FromBack" xml:space="preserve"><value>Dari belakang</value></data>
+<data name="ShuffleTextEffectDiscription_DisplayText" xml:space="preserve"><value>Teks tampilan</value></data>
+<data name="ShuffleTextEffectDiscription_Alphabet_Upper" xml:space="preserve"><value>A-Z</value></data>
+<data name="ShuffleTextEffectDiscription_Alphabet_Lower" xml:space="preserve"><value>a-z</value></data>
+<data name="ShuffleTextEffectDiscription_Hirakana" xml:space="preserve"><value>Hiragana</value></data>
+<data name="ShuffleTextEffectDiscription_Katakana" xml:space="preserve"><value>Katakana</value></data>
+<data name="ShuffleTextEffectDiscription_Kanji" xml:space="preserve"><value>Kanji</value></data>
+<data name="ShuffleTextEffectDiscription_Number" xml:space="preserve"><value>angka</value></data>
+<data name="ShuffleTextEffectDiscription_Symbol" xml:space="preserve"><value>simbol</value></data>
+<data name="ShuffleTextEffectDiscription_Text" xml:space="preserve"><value>teks</value></data>
+<data name="ShuffleTextEffectDiscription_Font" xml:space="preserve"><value>Font</value></data>
+<data name="ShuffleTextEffectDiscription_Size" xml:space="preserve"><value>Ukuran font</value></data>
+<data name="ShuffleTextEffectDiscription_Color" xml:space="preserve"><value>Warna teks</value></data>
+<data name="ShuffleTextEffectDiscription_Bold" xml:space="preserve"><value>Bold</value></data>
+<data name="ShuffleTextEffectDiscription_Italic" xml:space="preserve"><value>Miring</value></data>
+<data name="ShuffleTextEffectUnit_Seconds" xml:space="preserve"><value>dtk</value></data>
+<data name="ShuffleTextEffectEnum_DisplayMode_Simultaneous" xml:space="preserve"><value>pada saat yang sama</value></data>
+<data name="ShuffleTextEffectEnum_DisplayMode_Order" xml:space="preserve"><value>Urutan</value></data>
+<data name="ShuffleTextEffectEnum_DisplayMode_Discription_Simultaneous" xml:space="preserve"><value>Tampilkan teks animasi pada saat yang sama</value></data>
+<data name="ShuffleTextEffectEnum_DisplayMode_Discription_Order" xml:space="preserve"><value>Tampilkan teks animasi secara berurutan</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Alphabet" xml:space="preserve"><value>Alfabet (A-z)</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Number" xml:space="preserve"><value>Angka (0-9)</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Symbol" xml:space="preserve"><value>Simbol</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Custom" xml:space="preserve"><value>Kustom</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Discription_Alphabet" xml:space="preserve"><value>Alfabet (huruf besar dan kecil)</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Discription_Number" xml:space="preserve"><value>Angka (0-9)</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Discription_Symbol" xml:space="preserve"><value>Simbol</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Discription_Custom" xml:space="preserve"><value>Kustom</value></data>
+</root>

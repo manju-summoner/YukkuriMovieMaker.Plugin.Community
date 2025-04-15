@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
+<data name="ShuffleTextEffectDefaultName" xml:space="preserve"><value>텍스트 셔플 중 등장 및 종료</value></data>
+<data name="ShuffleTextEffectEnterName" xml:space="preserve"><value>텍스트 셔플 중 등장</value></data>
+<data name="ShuffleTextEffectExitName" xml:space="preserve"><value>텍스트 셔플 중 종료</value></data>
+<data name="ShuffleTextEffectName" xml:space="preserve"><value>텍스트 셔플 중</value></data>
+<data name="ShuffleTextEffectGroupName_AppearanceAndExit" xml:space="preserve"><value>등장 및 종료</value></data>
+<data name="ShuffleTextEffectGroupName_AnimationText" xml:space="preserve"><value>애니메이션 텍스트</value></data>
+<data name="ShuffleTextEffectDisplayName_Appearing" xml:space="preserve"><value>등장 시</value></data>
+<data name="ShuffleTextEffectDisplayName_Exit" xml:space="preserve"><value>종료 시</value></data>
+<data name="ShuffleTextEffectDisplayName_Duration" xml:space="preserve"><value>지속 시간</value></data>
+<data name="ShuffleTextEffectDisplayName_Interval" xml:space="preserve"><value>간격</value></data>
+<data name="ShuffleTextEffectDisplayName_Delay" xml:space="preserve"><value>오차</value></data>
+<data name="ShuffleTextEffectDisplayName_DisplayMode" xml:space="preserve"><value>표시 방법</value></data>
+<data name="ShuffleTextEffectDisplayName_StartTime" xml:space="preserve"><value>시작 시간</value></data>
+<data name="ShuffleTextEffectDisplayName_FromBack" xml:space="preserve"><value>뒤에서</value></data>
+<data name="ShuffleTextEffectDisplayName_DisplayText" xml:space="preserve"><value>표시 텍스트</value></data>
+<data name="ShuffleTextEffectDisplayName_Alphabet_Upper" xml:space="preserve"><value>A-Z</value></data>
+<data name="ShuffleTextEffectDisplayName_Alphabet_Lower" xml:space="preserve"><value>a-z</value></data>
+<data name="ShuffleTextEffectDisplayName_Hirakana" xml:space="preserve"><value>히라가나</value></data>
+<data name="ShuffleTextEffectDisplayName_Katakana" xml:space="preserve"><value>가타카나</value></data>
+<data name="ShuffleTextEffectDisplayName_Kanji" xml:space="preserve"><value>한자</value></data>
+<data name="ShuffleTextEffectDisplayName_Number" xml:space="preserve"><value>숫자</value></data>
+<data name="ShuffleTextEffectDisplayName_Symbol" xml:space="preserve"><value>기호</value></data>
+<data name="ShuffleTextEffectDisplayName_Text" xml:space="preserve"><value>텍스트</value></data>
+<data name="ShuffleTextEffectDisplayName_Font" xml:space="preserve"><value>글꼴</value></data>
+<data name="ShuffleTextEffectDisplayName_Size" xml:space="preserve"><value>크기</value></data>
+<data name="ShuffleTextEffectDisplayName_Color" xml:space="preserve"><value>글자 색상</value></data>
+<data name="ShuffleTextEffectDisplayName_Bold" xml:space="preserve"><value>굵은 글씨</value></data>
+<data name="ShuffleTextEffectDisplayName_Italic" xml:space="preserve"><value>이탤릭체</value></data>
+<data name="ShuffleTextEffectDiscription_Appearing" xml:space="preserve"><value>항목이 나타날 때 효과 적용</value></data>
+<data name="ShuffleTextEffectDiscription_Exit" xml:space="preserve"><value>항목이 종료될 때 효과 적용</value></data>
+<data name="ShuffleTextEffectDiscription_Duration" xml:space="preserve"><value>효과 재생 초</value></data>
+<data name="ShuffleTextEffectDiscription_Interval" xml:space="preserve"><value>간격</value></data>
+<data name="ShuffleTextEffectDiscription_Delay" xml:space="preserve"><value>오차</value></data>
+<data name="ShuffleTextEffectDiscription_DisplayMode" xml:space="preserve"><value>표시 방법</value></data>
+<data name="ShuffleTextEffectDiscription_StartTime" xml:space="preserve"><value>시작 시간</value></data>
+<data name="ShuffleTextEffectDiscription_FromBack" xml:space="preserve"><value>뒤에서</value></data>
+<data name="ShuffleTextEffectDiscription_DisplayText" xml:space="preserve"><value>표시 텍스트</value></data>
+<data name="ShuffleTextEffectDiscription_Alphabet_Upper" xml:space="preserve"><value>A-Z</value></data>
+<data name="ShuffleTextEffectDiscription_Alphabet_Lower" xml:space="preserve"><value>a-z</value></data>
+<data name="ShuffleTextEffectDiscription_Hirakana" xml:space="preserve"><value>히라가나</value></data>
+<data name="ShuffleTextEffectDiscription_Katakana" xml:space="preserve"><value>가타카나</value></data>
+<data name="ShuffleTextEffectDiscription_Kanji" xml:space="preserve"><value>한자</value></data>
+<data name="ShuffleTextEffectDiscription_Number" xml:space="preserve"><value>숫자</value></data>
+<data name="ShuffleTextEffectDiscription_Symbol" xml:space="preserve"><value>기호</value></data>
+<data name="ShuffleTextEffectDiscription_Text" xml:space="preserve"><value>텍스트</value></data>
+<data name="ShuffleTextEffectDiscription_Font" xml:space="preserve"><value>글꼴</value></data>
+<data name="ShuffleTextEffectDiscription_Size" xml:space="preserve"><value>글꼴 크기</value></data>
+<data name="ShuffleTextEffectDiscription_Color" xml:space="preserve"><value>글자 색상</value></data>
+<data name="ShuffleTextEffectDiscription_Bold" xml:space="preserve"><value>굵은 글씨</value></data>
+<data name="ShuffleTextEffectDiscription_Italic" xml:space="preserve"><value>이탤릭체</value></data>
+<data name="ShuffleTextEffectUnit_Seconds" xml:space="preserve"><value>초</value></data>
+<data name="ShuffleTextEffectEnum_DisplayMode_Simultaneous" xml:space="preserve"><value>동시</value></data>
+<data name="ShuffleTextEffectEnum_DisplayMode_Order" xml:space="preserve"><value>순서</value></data>
+<data name="ShuffleTextEffectEnum_DisplayMode_Discription_Simultaneous" xml:space="preserve"><value>애니메이션 텍스트를 동시에 표시</value></data>
+<data name="ShuffleTextEffectEnum_DisplayMode_Discription_Order" xml:space="preserve"><value>애니메이션 텍스트를 순서대로 표시</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Alphabet" xml:space="preserve"><value>알파벳 (A-z)</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Number" xml:space="preserve"><value>숫자 (0-9)</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Symbol" xml:space="preserve"><value>기호</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Custom" xml:space="preserve"><value>사용자 정의</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Discription_Alphabet" xml:space="preserve"><value>알파벳 (대문자 및 소문자)</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Discription_Number" xml:space="preserve"><value>숫자 (0-9)</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Discription_Symbol" xml:space="preserve"><value>기호</value></data>
+<data name="ShuffleTextEffectEnum_Mode_Discription_Custom" xml:space="preserve"><value>사용자 정의</value></data>
+</root>
