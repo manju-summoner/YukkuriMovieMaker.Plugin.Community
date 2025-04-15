@@ -127,6 +127,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleTextInOut
             }
             else
             {
+                if (commandList != null)
+                    disposer.RemoveAndDispose(ref commandList);
                 wrap.TransformMatrix = Matrix3x2.Identity;
                 wrap.SetInput(0, input, true);
             }
