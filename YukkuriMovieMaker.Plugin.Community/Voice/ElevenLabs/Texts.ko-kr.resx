@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
+<data name="SpeedName" xml:space="preserve"><value>속도</value></data>
+<data name="SpeedDesc" xml:space="preserve"><value>낮은 값은 느리고 차분한 음성을 생성하고, 높은 값은 빠른 속도의 음성을 생성합니다. 극단적인 값은 음성 품질에 영향을 줄 수 있습니다。</value></data>
+<data name="StabilityName" xml:space="preserve"><value>안정성</value></data>
+<data name="StabilityDesc" xml:space="preserve"><value>음성의 안정성과 각 생성 간의 무작위성을 결정합니다. 낮은 값은 더 넓은 감정 표현 범위를 제공하며, 높은 값은 제한된 감정 표현의 단조로운 음성을 생성할 수 있습니다。</value></data>
+<data name="SimilarityBoostName" xml:space="preserve"><value>유사성</value></data>
+<data name="SimilarityBoostDesc" xml:space="preserve"><value>AI가 원래 음성을 복제할 때 원본 음성을 얼마나 충실히 따를지를 결정합니다。</value></data>
+<data name="StyleName" xml:space="preserve"><value>스타일</value></data>
+<data name="StyleDesc" xml:space="preserve"><value>음성 스타일의 과장 정도를 결정합니다. 이 설정은 원래 화자의 스타일을 증폭하려고 합니다. 추가 연산 자원이 소모되며, 0 이외의 값으로 설정할 경우 지연 시간이 증가할 수 있습니다。</value></data>
+<data name="UseSpeakerBoostName" xml:space="preserve"><value>스타일 강조</value></data>
+<data name="UseSpeakerBoostDesc" xml:space="preserve"><value>이 설정은 원래 화자와의 유사성을 높입니다. 이 설정을 사용하면 계산 부하가 약간 증가하고 지연 시간이 늘어납니다。</value></data>
+<data name="APIKey" xml:space="preserve"><value>API 키</value></data>
+<data name="Speakers" xml:space="preserve"><value>화자 목록</value></data>
+<data name="SpeakerName" xml:space="preserve"><value>이름</value></data>
+<data name="ID" xml:space="preserve"><value>아이디</value></data>
+<data name="Delete" xml:space="preserve"><value>삭제</value></data>
+<data name="TTSModel" xml:space="preserve"><value>TTS 모델</value></data>
+<data name="AboutElevenLabs" xml:space="preserve"><value>ElevenLabs에 대하여</value></data>
+<data name="HowToUseElevenLabs" xml:space="preserve"><value>도움말: ElevenLabs 설정 방법</value></data>
+</root>
