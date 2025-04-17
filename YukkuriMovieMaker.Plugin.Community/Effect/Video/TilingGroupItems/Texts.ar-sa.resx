@@ -60,5 +60,10 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
 <data name="TilingGroupItemsEffectName" xml:space="preserve"><value>توزيع العناصر في التحكم في المجموعة</value></data>
-<data name="Columns" xml:space="preserve"><value>أعمدة</value></data>
+<data name="Wrap" xml:space="preserve"><value>تغليف</value></data>
+<data name="WrapDesc" xml:space="preserve"><value>التفاف عند العدد المحدد</value></data>
+<data name="Vertical" xml:space="preserve"><value>عمودي</value></data>
+<data name="VerticalDesc" xml:space="preserve"><value>ترتيب العناصر عموديًا</value></data>
+<data name="EndAligned" xml:space="preserve"><value>محاذاة النهاية</value></data>
+<data name="EndAlignedDesc" xml:space="preserve"><value>Alinea los elementos al final</value></data>
 </root>

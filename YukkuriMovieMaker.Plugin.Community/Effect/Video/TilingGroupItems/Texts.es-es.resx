@@ -60,5 +60,10 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
 <data name="TilingGroupItemsEffectName" xml:space="preserve"><value>Colocar elementos en el control de grupo</value></data>
-<data name="Columns" xml:space="preserve"><value>Columnas</value></data>
+<data name="Wrap" xml:space="preserve"><value>Envolver</value></data>
+<data name="WrapDesc" xml:space="preserve"><value>Envolver en el número especificado</value></data>
+<data name="Vertical" xml:space="preserve"><value>Vertical</value></data>
+<data name="VerticalDesc" xml:space="preserve"><value>Coloca los elementos en vertical</value></data>
+<data name="EndAligned" xml:space="preserve"><value>Justificado al final</value></data>
+<data name="EndAlignedDesc" xml:space="preserve"><value>Coloca los elementos alineados al final</value></data>
 </root>

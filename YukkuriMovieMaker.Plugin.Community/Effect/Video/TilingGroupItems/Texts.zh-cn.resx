@@ -60,5 +60,10 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="TilingGroupItemsEffectName" xml:space="preserve"><value>在组控件中平铺项目</value></data>
-<data name="Columns" xml:space="preserve"><value>折行</value></data>
+<data name="Wrap" xml:space="preserve"><value>换行</value></data>
+<data name="WrapDesc" xml:space="preserve"><value>在指定的数量处换行</value></data>
+<data name="Vertical" xml:space="preserve"><value>垂直</value></data>
+<data name="VerticalDesc" xml:space="preserve"><value>垂直排列项目</value></data>
+<data name="EndAligned" xml:space="preserve"><value>末尾对齐</value></data>
+<data name="EndAlignedDesc" xml:space="preserve"><value>将项目对齐到末尾</value></data>
 </root>

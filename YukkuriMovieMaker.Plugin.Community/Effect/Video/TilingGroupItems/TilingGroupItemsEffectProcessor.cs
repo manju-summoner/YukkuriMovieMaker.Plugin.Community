@@ -22,18 +22,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TilingGroupItems
             var groupIndex = effectDescription.GroupIndex;
             var groupCount = effectDescription.GroupCount;
 
-            var columns = (int)item.Columns.GetValue(frame, length, fps);
+            float reverse = 1;
+            if (item.IsEndAligned)
+            {
+                groupIndex = groupCount - groupIndex - 1;
+                reverse = -1;
+            }
+
+            var columns = (int)item.Wrap.GetValue(frame, length, fps);
             var rows = (int)Math.Ceiling((double)groupCount / columns);
             var columnIndex = groupIndex % columns;
             var rowIndex = groupIndex / columns;
             if (rowIndex == rows - 1)
                 columns -= columns * rows - groupCount;
 
+            if (item.IsVertical)
+                (columns, rows, columnIndex, rowIndex) = (rows, columns, rowIndex, columnIndex);
+
             var screen = effectDescription.ScreenSize;
             var cwllWidth = (double)screen.Width / columns;
             var cwllHeight = (double)screen.Height / rows;
-            var dx = (float)(cwllWidth * columnIndex + cwllWidth / 2 - (double)screen.Width / 2);
-            var dy = (float)(cwllHeight * rowIndex + cwllHeight / 2 - (double)screen.Height / 2);
+            var dx = (float)(cwllWidth * columnIndex + cwllWidth / 2 - (double)screen.Width / 2) * reverse;
+            var dy = (float)(cwllHeight * rowIndex + cwllHeight / 2 - (double)screen.Height / 2) * reverse;
 
             var bounds = devices.DeviceContext.GetImageLocalBounds(input);
             double scale = 1;

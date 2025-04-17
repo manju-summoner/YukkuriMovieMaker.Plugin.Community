@@ -60,5 +60,10 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="TilingGroupItemsEffectName" xml:space="preserve"><value>Menempatkan item dalam kontrol grup</value></data>
-<data name="Columns" xml:space="preserve"><value>Kolom</value></data>
+<data name="Wrap" xml:space="preserve"><value>Membungkus</value></data>
+<data name="WrapDesc" xml:space="preserve"><value>Membungkus pada jumlah yang ditentukan</value></data>
+<data name="Vertical" xml:space="preserve"><value>Arah vertikal</value></data>
+<data name="VerticalDesc" xml:space="preserve"><value>Menyusun item secara vertikal</value></data>
+<data name="EndAligned" xml:space="preserve"><value>Rata kanan</value></data>
+<data name="EndAlignedDesc" xml:space="preserve"><value>Menyusun item yang disejajarkan ke akhir</value></data>
 </root>

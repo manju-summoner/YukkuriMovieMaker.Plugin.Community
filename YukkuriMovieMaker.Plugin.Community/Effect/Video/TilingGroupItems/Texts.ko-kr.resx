@@ -60,5 +60,10 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
 <data name="TilingGroupItemsEffectName" xml:space="preserve"><value>그룹 컨트롤에서 항목을 타일로 배치합니다</value></data>
-<data name="Columns" xml:space="preserve"><value>열</value></data>
+<data name="Wrap" xml:space="preserve"><value>줄 바꿈</value></data>
+<data name="WrapDesc" xml:space="preserve"><value>지정된 수의 항목에서 줄 바꿈</value></data>
+<data name="Vertical" xml:space="preserve"><value>세로 방향</value></data>
+<data name="VerticalDesc" xml:space="preserve"><value>항목을 세로로 정렬합니다</value></data>
+<data name="EndAligned" xml:space="preserve"><value>끝 정렬</value></data>
+<data name="EndAlignedDesc" xml:space="preserve"><value>항목을 끝에 정렬합니다</value></data>
 </root>

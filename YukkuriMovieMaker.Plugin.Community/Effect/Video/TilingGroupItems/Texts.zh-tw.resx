@@ -60,5 +60,10 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
 <data name="TilingGroupItemsEffectName" xml:space="preserve"><value>在組控件中平鋪項目</value></data>
-<data name="Columns" xml:space="preserve"><value>折行</value></data>
+<data name="Wrap" xml:space="preserve"><value>換行</value></data>
+<data name="WrapDesc" xml:space="preserve"><value>在指定的數量處換行</value></data>
+<data name="Vertical" xml:space="preserve"><value>垂直</value></data>
+<data name="VerticalDesc" xml:space="preserve"><value>垂直排列項目</value></data>
+<data name="EndAligned" xml:space="preserve"><value>末尾對齊</value></data>
+<data name="EndAlignedDesc" xml:space="preserve"><value>將項目對齊到末尾</value></data>
 </root>

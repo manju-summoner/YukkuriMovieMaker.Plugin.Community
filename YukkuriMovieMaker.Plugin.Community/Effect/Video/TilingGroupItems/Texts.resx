@@ -60,5 +60,10 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
 <data name="TilingGroupItemsEffectName" xml:space="preserve"><value>グループ制御中のアイテムで画面分割</value></data>
-<data name="Columns" xml:space="preserve"><value>折り返し</value></data>
+<data name="Wrap" xml:space="preserve"><value>折り返し</value></data>
+<data name="WrapDesc" xml:space="preserve"><value>指定した個数で折り返します</value></data>
+<data name="Vertical" xml:space="preserve"><value>縦方向</value></data>
+<data name="VerticalDesc" xml:space="preserve"><value>縦方向に並べます</value></data>
+<data name="EndAligned" xml:space="preserve"><value>末尾寄せ</value></data>
+<data name="EndAlignedDesc" xml:space="preserve"><value>末尾に寄せて配置します</value></data>
 </root>

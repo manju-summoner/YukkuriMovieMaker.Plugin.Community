@@ -18,9 +18,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TilingGroupItems
     {
         public override string Label => Texts.TilingGroupItemsEffectName;
 
-        [Display(GroupName = nameof(Texts.TilingGroupItemsEffectName), Name = nameof(Texts.Columns), Description = nameof(Texts.Columns), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.TilingGroupItemsEffectName), Name = nameof(Texts.Wrap), Description = nameof(Texts.WrapDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "", 1, 5)]
-        public Animation Columns { get; } = new Animation(1, 1, 100000);
+        public Animation Wrap { get; } = new Animation(1, 1, 100000);
+
+        [Display(GroupName = nameof(Texts.TilingGroupItemsEffectName), Name = nameof(Texts.Vertical), Description = nameof(Texts.VerticalDesc), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool IsVertical { get => isVertical; set=>Set(ref isVertical, value); }
+        bool isVertical;
+
+        [Display(GroupName = nameof(Texts.TilingGroupItemsEffectName), Name = nameof(Texts.EndAligned), Description = nameof(Texts.EndAlignedDesc), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool IsEndAligned { get => isEndAligned; set => Set(ref isEndAligned, value); }
+        bool isEndAligned;
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
@@ -29,9 +39,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TilingGroupItems
             yield return
                 $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
-                $"track0={Columns.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track0={Wrap.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=グループ制御中のアイテムで画面分割@YMM4\r\n" +
                 $"param=" +
+                    "local isVertical=" + (IsVertical ? 1 : 0) + ";\r\n" +
+                    "local isEndAligned=" + (IsEndAligned ? 1 : 0) + ";\r\n" +
                     $"\r\n";
         }
 
@@ -40,6 +52,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TilingGroupItems
             return new TilingGroupItemsEffectProcessor(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [Columns];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [Wrap];
     }
 }
