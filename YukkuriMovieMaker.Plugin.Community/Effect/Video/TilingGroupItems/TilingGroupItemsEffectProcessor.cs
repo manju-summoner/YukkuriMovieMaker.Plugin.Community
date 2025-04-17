@@ -21,6 +21,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TilingGroupItems
 
             var groupIndex = effectDescription.GroupIndex;
             var groupCount = effectDescription.GroupCount;
+            if(groupCount == 0)
+                return effectDescription.DrawDescription;
 
             float reverse = 1;
             if (item.IsEndAligned)
@@ -29,8 +31,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TilingGroupItems
                 reverse = -1;
             }
 
-            var columns = (int)item.Wrap.GetValue(frame, length, fps);
-            var rows = (int)Math.Ceiling((double)groupCount / columns);
+            var columns = Math.Max(1, (int)item.Wrap.GetValue(frame, length, fps));
+            var rows = Math.Max(1, (int)Math.Ceiling((double)groupCount / columns));
             var columnIndex = groupIndex % columns;
             var rowIndex = groupIndex / columns;
             if (rowIndex == rows - 1)

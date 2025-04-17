@@ -22,6 +22,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.RadialArrangeGroupItem
 
             var groupIndex = effectDescription.GroupIndex;
             var groupCount = effectDescription.GroupCount;
+            if (groupCount == 0)
+                return effectDescription.DrawDescription;
             var angle = (float)(2 * Math.PI * groupIndex / groupCount);
 
             var matrix = Matrix4x4.CreateRotationZ(angle);
