@@ -58,12 +58,17 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
 
         var dc = devices.DeviceContext;
 
+        var f = 
+            Settings.FontSettings.Default.SystemFonts.Concat(Settings.FontSettings.Default.CustomFonts)
+            .Where(f => f.FontName == font)
+            .FirstOrDefault(new Settings.Font());
+
         using var formatFactory = DWriteCreateFactory<IDWriteFactory>();
         using var textFormat = 
             formatFactory.CreateTextFormat(
                 font, 
-                isBold ? FontWeight.Bold : FontWeight.Normal,
-                isItalic ? FontStyle.Italic : FontStyle.Normal, 
+                isBold && f.CanonicalFontWeight < Settings.FontWeight.Bold ? FontWeight.Bold : (FontWeight)f.CanonicalFontWeight,
+                isItalic ? FontStyle.Italic : (FontStyle)f.CanonicalFontStyle, 
                 fontSize);
 
         textFormat.WordWrapping = WordWrapping.NoWrap;
