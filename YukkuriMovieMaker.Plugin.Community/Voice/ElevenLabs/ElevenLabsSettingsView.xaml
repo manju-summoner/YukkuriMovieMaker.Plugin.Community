@@ -1,0 +1,49 @@
+﻿<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs.ElevenLabsSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs"
+             xmlns:s="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:commons="clr-namespace:YukkuriMovieMaker.Commons;assembly=YukkuriMovieMaker.Plugin"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Expander Grid.Row="0" Header="ElevenLabs" IsExpanded="True">
+            <StackPanel>
+                <Grid>
+                    <Label Content="{x:Static local:Texts.APIKey}"/>
+                    <TextBox Width="200" HorizontalAlignment="Right" Height="26" Text="{Binding Source={x:Static local:ElevenLabsSettings.Default},Path=APIKey,Delay=1,UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"/>
+                </Grid>
+                <Grid>
+                    <Label Content="{x:Static local:Texts.TTSModel}"/>
+                    <ComboBox Width="200" HorizontalAlignment="Right" Height="26" IsEditable="True" VerticalContentAlignment="Center" ItemsSource="{Binding Source={x:Static local:ElevenLabsTTSModels.Models}}" Text="{Binding Source={x:Static local:ElevenLabsSettings.Default},Path=TTSModel,UpdateSourceTrigger=PropertyChanged,Delay=1}"/>
+                </Grid>
+                <Grid>
+                    <TextBlock HorizontalAlignment="Right" Margin="6">
+                        <Hyperlink Command="{Binding Source={x:Static s:CommandSettings.Default},Path=[OpenUri]}" CommandParameter="https://manjubox.net/ymm4/faq/%E3%82%86%E3%81%A3%E3%81%8F%E3%82%8A%E3%83%9C%E3%82%A4%E3%82%B9/ElevenLabs/"><Run Text="{x:Static local:Texts.HowToUseElevenLabs}"/></Hyperlink>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
+        </Expander>
+        <Expander Grid.Row="1" Header="{x:Static local:Texts.Speakers}" IsExpanded="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="26"/>
+                </Grid.RowDefinitions>
+                <DataGrid x:Name="dataGrid" ItemsSource="{Binding Source={x:Static local:ElevenLabsSettings.Default},Path=Voices}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" CanUserReorderColumns="True" commons:DataGridHelper.CommitOnUnload="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="{x:Static local:Texts.SpeakerName}" Binding="{Binding Name}" Width="*"/>
+                        <DataGridTextColumn Header="{x:Static local:Texts.ID}" Binding="{Binding Id}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Button Grid.Row="1" Width="100" Height="26" HorizontalAlignment="Right" Content="{x:Static local:Texts.Delete}" Command="{Binding Source={x:Static local:ElevenLabsSettingsViewCommands.DeleteVoice}}" CommandParameter="{Binding ElementName=dataGrid,Path=SelectedValue}"/>
+            </Grid>
+        </Expander>
+    </Grid>
+</UserControl>

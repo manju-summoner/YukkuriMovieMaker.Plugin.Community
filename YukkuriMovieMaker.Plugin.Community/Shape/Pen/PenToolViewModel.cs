@@ -292,6 +292,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
 
             foreach(var stroke in strokes)
                 Strokes.Add(stroke.Clone());
+            currentHistory = [.. strokes];
             
             Strokes.StrokesChanged += (_, _) => 
             {

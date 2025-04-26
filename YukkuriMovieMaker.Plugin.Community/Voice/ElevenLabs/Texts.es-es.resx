@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
+<data name="SpeedName" xml:space="preserve"><value>Velocidad</value></data>
+<data name="SpeedDesc" xml:space="preserve"><value>Los valores bajos generan una voz más lenta y pausada, mientras que los valores altos producen una voz con un ritmo más rápido. Valores extremos pueden afectar la calidad del habla generada.</value></data>
+<data name="StabilityName" xml:space="preserve"><value>Estabilidad</value></data>
+<data name="StabilityDesc" xml:space="preserve"><value>Determina la estabilidad de la voz y la aleatoriedad entre cada generación. Valores bajos permiten una gama emocional más amplia, mientras que valores altos pueden producir una voz monótona con emociones limitadas.</value></data>
+<data name="SimilarityBoostName" xml:space="preserve"><value>Similitud</value></data>
+<data name="SimilarityBoostDesc" xml:space="preserve"><value>Determina cuán fielmente debe seguir la IA la voz original al intentar replicarla.</value></data>
+<data name="StyleName" xml:space="preserve"><value>Estilo</value></data>
+<data name="StyleDesc" xml:space="preserve"><value>Determina el grado de exageración del estilo de la voz. Esta configuración intenta amplificar el estilo del hablante original. Consume recursos computacionales adicionales y puede aumentar la latencia si se establece un valor distinto de 0.</value></data>
+<data name="UseSpeakerBoostName" xml:space="preserve"><value>Estilo de Estilo</value></data>
+<data name="UseSpeakerBoostDesc" xml:space="preserve"><value>Esta configuración aumenta la similitud con el hablante original. Usarla implica una carga computacional ligeramente mayor, lo que aumenta la latencia.</value></data>
+<data name="APIKey" xml:space="preserve"><value>Clave API</value></data>
+<data name="Speakers" xml:space="preserve"><value>Lista de hablantes</value></data>
+<data name="SpeakerName" xml:space="preserve"><value>Nombre</value></data>
+<data name="ID" xml:space="preserve"><value>ID</value></data>
+<data name="Delete" xml:space="preserve"><value>Eliminar</value></data>
+<data name="TTSModel" xml:space="preserve"><value>Modelo TTS</value></data>
+<data name="AboutElevenLabs" xml:space="preserve"><value>Acerca de ElevenLabs</value></data>
+<data name="HowToUseElevenLabs" xml:space="preserve"><value>Ayuda: Cómo configurar ElevenLabs</value></data>
+</root>

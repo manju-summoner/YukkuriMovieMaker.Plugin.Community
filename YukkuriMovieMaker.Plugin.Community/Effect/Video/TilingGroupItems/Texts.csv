@@ -1,0 +1,8 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+TilingGroupItemsEffectName,,グループ制御中のアイテムで画面分割,Tiling items in group control,在组控件中平铺项目,在組控件中平鋪項目,그룹 컨트롤에서 항목을 타일로 배치합니다,Colocar elementos en el control de grupo,توزيع العناصر في التحكم في المجموعة,Menempatkan item dalam kontrol grup
+Wrap,,折り返し,Wrap,换行,換行,줄 바꿈,Envolver,تغليف,Membungkus
+WrapDesc,,指定した個数で折り返します,Wraps at the specified number of items.,在指定的数量处换行,在指定的數量處換行,지정된 수의 항목에서 줄 바꿈,Envolver en el número especificado,التفاف عند العدد المحدد,Membungkus pada jumlah yang ditentukan
+Vertical,,縦方向,Vertical,垂直,垂直,세로 방향,Vertical,عمودي,Arah vertikal
+VerticalDesc,,縦方向に並べます,Arranges items vertically.,垂直排列项目,垂直排列項目,항목을 세로로 정렬합니다,Coloca los elementos en vertical,ترتيب العناصر عموديًا,Menyusun item secara vertikal
+EndAligned,,末尾寄せ,End aligned,末尾对齐,末尾對齊,끝 정렬,Justificado al final,محاذاة النهاية,Rata kanan
+EndAlignedDesc,,末尾に寄せて配置します,Arranges items aligned to the end.,将项目对齐到末尾,將項目對齊到末尾,항목을 끝에 정렬합니다,Coloca los elementos alineados al final,Alinea los elementos al final,Menyusun item yang disejajarkan ke akhir
