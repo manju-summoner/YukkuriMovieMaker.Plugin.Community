@@ -4,8 +4,10 @@ using Vortice.Direct2D1.Effects;
 using Vortice.DirectWrite;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Settings;
 using YukkuriMovieMaker.Player.Video;
 using MathNet.Numerics.Random;
+
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
 {
     internal class ShuffleTextEffectProcessor : IVideoEffectProcessor
@@ -41,10 +43,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
             var fps = effectDescription.FPS;
 
             var textIndex = effectDescription.InputIndex;
-            var fontSize = item.FontSize.GetValue(frame, length, fps);
-            var fontWeight = item.Bold ? FontWeight.Bold : FontWeight.Normal;
-            var fontStyle = item.Italic ? FontStyle.Italic : FontStyle.Normal;
-            using var textFormat = factory.CreateTextFormat(item.Font, fontWeight, fontStyle, FontStretch.Normal, (float)fontSize);
+            var font =
+                FontSettings.Default.SystemFonts.Concat(FontSettings.Default.CustomFonts)
+                .Where(f=>f.FontName == item.Font)
+                .DefaultIfEmpty(new Font())
+                .First();
+
+            var fontSize = (float)item.FontSize.GetValue(frame, length, fps);
+            var fontWeight = (Vortice.DirectWrite.FontWeight)((item.Bold && font.CanonicalFontWeight < Settings.FontWeight.Bold) ? Settings.FontWeight.Bold : font.CanonicalFontWeight);
+            var fontStyle = (Vortice.DirectWrite.FontStyle)(item.Italic ? Settings.FontStyle.Italic : font.CanonicalFontStyle);
+
+            using var textFormat = factory.CreateTextFormat(font.CanonicalFontName, fontWeight, fontStyle, (Vortice.DirectWrite.FontStretch)font.CanonicalFontStretch, fontSize);
 
             var color = item.Color;
             var R = color.R / 255f;
