@@ -83,6 +83,14 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
         set => Set(ref _isItalic, value);
     }
 
+    /// <summary>
+    /// コンストラクタ（JsonSerizlier用）
+    /// </summary>
+    public NumberTextParameter() : this(null)
+    {
+
+    }
+
     public override IEnumerable<string> CreateMaskExoFilter(int keyFrameIndex, ExoOutputDescription desc,
         ShapeMaskExoOutputDescription shapeMaskDesc)
     {
@@ -123,7 +131,6 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
     protected override void LoadSharedData(SharedDataStore store)
     {
         var sharedData = store.Load<SharedData>();
-
         sharedData?.CopyTo(this);
     }
 
