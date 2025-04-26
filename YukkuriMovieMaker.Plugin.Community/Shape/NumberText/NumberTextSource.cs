@@ -158,7 +158,8 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
         string text = string.Empty;
         if (separate)
             text = "#,";
-        text += new string('0', integerDigits);
+
+        text += new string('0', Math.Max(1, integerDigits));
         if (decimalDigits > 0)
             text += "." + new string('0', decimalDigits);
         return text;

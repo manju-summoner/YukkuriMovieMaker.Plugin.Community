@@ -24,8 +24,8 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
     public Animation Number { get; } = new(0);
 
     [Display(Name = nameof(Texts.IntegerDigits), ResourceType = typeof(Texts))]
-    [AnimationSlider("F0", "", 0, 4)]
-    public Animation IntegerDigits { get; } = new(0, 0, 16);
+    [AnimationSlider("F0", "", 1, 4)]
+    public Animation IntegerDigits { get; } = new(1, 1, 16);
 
     [Display(Name = nameof(Texts.DecimalDigits), ResourceType = typeof(Texts))]
     [AnimationSlider("F0", "", 0, 4)]
