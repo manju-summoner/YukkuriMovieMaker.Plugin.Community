@@ -50,7 +50,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Binarization
         {
             effect = new BinarizationCustomEffect(devices);
             if (!effect.IsEnabled)
+            {
+                effect.Dispose();
+                effect = null;
                 return null;
+            }
             disposer.Collect(effect);
 
             var output = effect.Output;
