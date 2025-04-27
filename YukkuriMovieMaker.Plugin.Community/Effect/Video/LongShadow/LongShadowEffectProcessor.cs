@@ -78,6 +78,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LongShadow
             if (!effect.IsEnabled)
             {
                 effect.Dispose();
+                effect = null;
                 return null;
             }
             disposer.Collect(effect);
