@@ -85,6 +85,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ThreeDimensional
             if (!effect.IsEnabled)
             {
                 effect.Dispose();
+                effect = null;
                 return null;
             }
             disposer.Collect(effect);
