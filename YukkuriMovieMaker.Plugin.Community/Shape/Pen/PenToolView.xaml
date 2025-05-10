@@ -122,27 +122,35 @@
                 </controls:DropDownButton.ContextMenu>
             </controls:DropDownButton>
         </Grid>
-        <Viewbox StretchDirection="Both" Grid.Row="1">
-            <Grid>
-                <Image Source="{Binding Bitmap}" Name="image"/>
-                <InkCanvas 
+        <Grid Grid.Row="1">
+            <Image Source="{Binding Bitmap}" Name="image">
+                <i:Interaction.Triggers>
+                    <!-- <i:EventTrigger EventName="SizeChanged"> だと何故かWindow表示時の初回イベントが呼ばれない。自作Triggerだと取得できる。 -->
+                    <local:SizeChangedTrigger>
+                        <i:InvokeCommandAction Command="{Binding UpdateInkCanvasScaleCommand}" PassEventArgsToCommand="True"/>
+                    </local:SizeChangedTrigger>
+                </i:Interaction.Triggers>
+            </Image>
+            <InkCanvas 
                     Name="inkCanvas" 
                     DefaultDrawingAttributes="{Binding Pen,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
                     EditingMode="{Binding EditingMode}"
-                    Width="{Binding ElementName=image,Path=ActualWidth}"
-                    Height="{Binding ElementName=image,Path=ActualHeight}"
+                    Width="{Binding CanvasSize.Width}"
+                    Height="{Binding CanvasSize.Height}"
                     Background="Transparent"
                     local:InkCanvasEraser.Size="{Binding Source={x:Static local:PenSettings.Default},Path=EraserStyle.StrokeThickness,Mode=OneWay}"
                     Strokes="{Binding Strokes}"
-                    >
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="PreviewMouseWheel">
-                            <i:InvokeCommandAction Command="{Binding MouseWheelCommand}" PassEventArgsToCommand="True"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </InkCanvas>
-            </Grid>
-        </Viewbox>
+                >
+                <InkCanvas.LayoutTransform>
+                    <ScaleTransform ScaleX="{Binding InkCanvasScale}" ScaleY="{Binding InkCanvasScale}"/>
+                </InkCanvas.LayoutTransform>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="PreviewMouseWheel">
+                        <i:InvokeCommandAction Command="{Binding MouseWheelCommand}" PassEventArgsToCommand="True"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </InkCanvas>
+        </Grid>
         <Button Grid.Row="2" Content="{x:Static local:Texts.Close}" Width="100" HorizontalAlignment="Right" Click="Button_Click"/>
     </Grid>
 </Window>
