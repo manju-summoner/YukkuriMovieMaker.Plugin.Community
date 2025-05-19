@@ -50,6 +50,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+    <PackageReference Include="Whisper.net.AllRuntimes" Version="1.8.1" />
   </ItemGroup>
 
   <!--ビルド後、YMM4フォルダに関連ファイルをコピーする-->

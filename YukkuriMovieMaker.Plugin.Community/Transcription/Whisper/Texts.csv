@@ -1,0 +1,38 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
+Whisper,,Whisper（ローカル）,Whisper (Local),Whisper（本地）,Whisper（本地）,Whisper（로컬）,Susurro (local),همس (محلي),Bisikan (lokal),
+CreatingAudioStreamMessage,,解析対象を準備中,Preparing to parse target,准备解析目标,准备解析目标,대상 준비 중,Preparando el objetivo,التحضير للهدف,Menyiapkan target,
+LoadingWhisperModelMessage,,Whisperモデルを読み込み中,Loading Whisper model,加载 Whisper 模型,加载 Whisper 模型,Whisper 모델 로드 중,Cargando el modelo de susurro,تحميل نموذج الهمس,Memuat model bisikan,
+ProcessingAudioMessage,0: current 1:total 2:last text,音声を解析中 {0} / {1} {2},Processing audio {0} / {1} {2},正在解析音频 {0} / {1} {2},正在解析音频 {0} / {1} {2},오디오 처리 중 {0} / {1} {2},Procesando audio {0} / {1} {2},معالجة الصوت {0} / {1} {2},Memproses audio {0} / {1} {2},
+Model,,モデル,模型,模型,모델,Modelo,النموذج,Model,
+Language,,言語,Language,语言,语言,언어,Idioma,اللغة,Bahasa,
+DownloadingProgressMessage,0: name 1:current 2:total,{0}をダウンロード中 {1} / {2},Downloading {0} {1} / {2},正在下载 {0} {1} / {2},正在下载 {0} {1} / {2},다운로드 중 {0} {1} / {2},Descargando {0} {1} / {2},تنزيل {0} {1} / {2},Mengunduh {0} {1} / {2},
+VisualCppRuntimeNotInstalledTitle,, "Visual C++ ランタイムが必要です","Visual C++ Runtime Required","需要 Visual C++ 运行时","需要 Visual C++ 執行階段","Visual C++ 런타임이 필요합니다","Se requiere el Runtime de Visual C++","مطلوب حزمة وقت تشغيل ‎Visual C++‎","Runtime Visual C++ diperlukan",
+VisualCppRuntimeNotInstalledMessage,0: architecture,"必要なランタイムがインストールされていません。
+この機能を利用するためには、「Microsoft Visual C++ 2015–2022 再頒布可能パッケージ（{0}）」をインストールする必要があります。
+
+インストーラーをダウンロードし、実行しますか？","The required runtime is not installed.
+To use this feature, you need to install the “Microsoft Visual C++ 2015–2022 Redistributable ({0})”.
+
+Would you like to download and run the installer now?","未安装所需的运行时。
+要使用此功能，必须安装“Microsoft Visual C++ 2015–2022 可再发行组件包（{0}）”。
+
+是否立即下载并运行安装程序？","尚未安裝所需的執行階段。
+若要使用此功能，必須安裝「Microsoft Visual C++ 2015–2022 可轉散發套件（{0}）」。
+
+是否要立即下載並執行安裝程式？","필요한 런타임이 설치되어 있지 않습니다.
+이 기능을 사용하려면 'Microsoft Visual C++ 2015–2022 재배포 패키지({0})'를 설치해야 합니다.
+
+설치 프로그램을 지금 다운로드하여 실행하시겠습니까?","No se ha instalado el runtime necesario.
+Para utilizar esta función debes instalar el “Paquete redistribuible de Microsoft Visual C++ 2015–2022 ({0})”.
+
+¿Deseas descargar y ejecutar el instalador ahora?","لم يتم تثبيت حزمة وقت التشغيل المطلوبة.
+لاستخدام هذه الميزة يلزم تثبيت «حزمة ‎Microsoft Visual C++‎ القابلة لإعادة التوزيع 2015–2022 ({0})».
+
+هل تريد تنزيل مُثبّت الحزمة وتشغيله الآن؟","Runtime yang diperlukan belum diinstal.
+Untuk menggunakan fitur ini, Anda harus memasang Microsoft Visual C++ 2015–2022 Redistributable ({0}).
+
+Apakah Anda ingin mengunduh dan menjalankan pemasang sekarang？",
+VisualCppRuntimeNotInstalledErrorMessage,0: architecture,"「Microsoft Visual C++ 2015–2022 再頒布可能パッケージ（{0}）」がインストールされていません。","The “Microsoft Visual C++ 2015–2022 Redistributable ({0})” is not installed.","未安装 “Microsoft Visual C++ 2015–2022 可再发行组件包（{0}）”。","尚未安裝「Microsoft Visual C++ 2015–2022 可轉散發套件（{0}）」。","'Microsoft Visual C++ 2015–2022 재배포 패키지({0})'가 설치되어 있지 않습니다。","No está instalado el “Paquete redistribuible de Microsoft Visual C++ 2015–2022 ({0})”.","لم يتم تثبيت «حزمة ‎Microsoft Visual C++‎ القابلة لإعادة التوزيع 2015–2022 ({0})».","“Microsoft Visual C++ 2015–2022 Redistributable ({0})” belum terpasang。",
+InstallerNotFoundMessage,0: filePath,"インストーラーが見つかりません: {0}","Installer not found: {0}","未找到安装程序: {0}","找不到安裝程式: {0}","설치 프로그램을 찾을 수 없습니다: {0}","Instalador no encontrado: {0}","لم يتم العثور على المثبّت: {0}","Instalasi tidak ditemukan: {0}",
+InstallerStartFailedMessage,,インストーラーの起動に失敗しました。,"Failed to start the installer.","启动安装程序失败。","啟動安裝程式失敗。","설치 프로그램 실행에 실패했습니다.","No se pudo iniciar el instalador.","فشل بدء تشغيل المثبّت.","Gagal menjalankan installer。",
+InstallerExitFailureMessage,0: exitCode,"インストールに失敗しました。ExitCode = {0}","Installation failed. ExitCode = {0}","安装失败。退出代码 = {0}","安裝失敗。結束代碼 = {0}","설치에 실패했습니다. 종료 코드 = {0}","La instalación falló. ExitCode = {0}","فشلت عملية التثبيت. رمز الخروج = {0}","Instalasi gagal. Kode keluar = {0}",
