@@ -30,7 +30,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
                 if (res is MessageBoxResult.Yes)
                 {
                     var installerPath = await VisualCppRuntime.DownloadRuntimeAsync(progress, token);
-                    await VisualCppRuntime.RunInstallerAsync(installerPath);
+                    try
+                    {
+                        await VisualCppRuntime.RunInstallerAsync(installerPath);
+                    }
+                    finally
+                    {
+                        if (File.Exists(installerPath))
+                            File.Delete(installerPath);
+                    }
                 }
             }
 
