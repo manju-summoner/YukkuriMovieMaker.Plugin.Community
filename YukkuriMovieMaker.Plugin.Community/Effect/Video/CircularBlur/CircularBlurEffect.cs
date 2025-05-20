@@ -18,11 +18,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CircularBlur
 
         [Display(GroupName = nameof(Texts.CircularBlurGroupName), Name = nameof(Texts.CircularBlurEffectXName), Description = nameof(Texts.CircularBlurEffectXDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500d, 500d)]
-        public Animation X { get; } = new Animation(0, -99999, 99999);
+        public Animation X { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.CircularBlurGroupName), Name = nameof(Texts.CircularBlurEffectYName), Description = nameof(Texts.CircularBlurEffectYDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500d, 500d)]
-        public Animation Y { get; } = new Animation(0, -99999, 99999);
+        public Animation Y { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.CircularBlurGroupName), Name = nameof(Texts.CircularBlurEffectIsHardBorderModeName), Description = nameof(Texts.CircularBlurEffectIsHardBorderModeDesc), Order = 100, ResourceType = typeof(Texts))]
         [ToggleSlider]

@@ -36,7 +36,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
             using var source = await Task.Run(args.CreateAudioStream, token);
 
             progress.Report(-1, Texts.LoadingWhisperModelMessage);
-            using var factory = await Task.Run(() => WhisperFactory.FromPath(modelPath), token);
+            using var factory = await Task.Run(()=> WhisperFactory.FromPath(modelPath), token);
             var whisperBuider =
                 factory
                 .CreateBuilder()
@@ -58,7 +58,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
             var sourceDuration = TimeSpan.FromSeconds((double)totalSamples / sampleRate);
 
             //音声データ全体を処理するとメモリを使用量が爆増するため、30秒ごとのブロックに分けて処理する
-            while ((readCount = await Task.Run(() => source.Read(blockBuffer, 0, blockBuffer.Length), token)) > 0)
+            while ((readCount = await Task.Run(()=> source.Read(blockBuffer, 0, blockBuffer.Length), token)) > 0)
             {
                 var blockTime = TimeSpan.FromSeconds((double)blockPosition / sampleRate);
                 string message = CreateProgressMessage(lastText, sourceDuration, blockTime);

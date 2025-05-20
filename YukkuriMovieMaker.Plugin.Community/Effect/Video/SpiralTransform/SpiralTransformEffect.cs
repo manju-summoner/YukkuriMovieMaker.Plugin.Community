@@ -14,7 +14,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.SpiralTransform
 
         [Display(GroupName = nameof(Texts.SpiralTransformEffectName), Name = nameof(Texts.SpiralTransformEffectAngleName), Description = nameof(Texts.SpiralTransformEffectAngleDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Angle { get; } = new Animation(360, int.MinValue, int.MaxValue);
+        public Animation Angle { get; } = new Animation(360, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.SpiralTransformEffectName), Name = nameof(Texts.SpiralTransformEffectIsRotateOuterName), Description = nameof(Texts.SpiralTransformEffectIsRotateOuterDesc), Order = 100, ResourceType = typeof(Texts))]
         [ToggleSlider]

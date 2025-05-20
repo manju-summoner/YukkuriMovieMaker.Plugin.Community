@@ -20,11 +20,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ArrangeGroupItems
 
         [Display(GroupName = nameof(Texts.ArrangeGroupItemsEffectName), Name = nameof(Texts.Interval), Description = nameof(Texts.Interval), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -100, 100)]
-        public Animation Interval { get; } = new Animation(0, -100000, 100000);
+        public Animation Interval { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ArrangeGroupItemsEffectName), Name = nameof(Texts.Angle), Description = nameof(Texts.Angle), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Angle { get; } = new Animation(0, -100000, 100000);
+        public Animation Angle { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {

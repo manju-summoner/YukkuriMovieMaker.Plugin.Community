@@ -12,7 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ZoomPixel.Size.Paramet
     {
         [Display(GroupName = nameof(Texts.ZoomPixel), Name = nameof(Texts.Width), Description = nameof(Texts.Width), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0, 500)]
-        public Animation Width { get; } = new Animation(100, 0, 5000);
+        public Animation Width { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
         public override string Label => $"{Texts.Width}{Width.Values[0].Value:F1}px";
 

@@ -11,15 +11,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear
     {
         [Display(Name = nameof(Texts.Width), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0, 500)]
-        public Animation Width { get; } = new Animation(100);
+        public Animation Width { get; } = new Animation(100, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Offset), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation Offset { get; } = new Animation(0);
+        public Animation Offset { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Angle), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Angle { get; } = new Animation(0, -36000, 36000);
+        public Animation Angle { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Extend), ResourceType = typeof(Texts))]
         [EnumComboBox]

@@ -21,19 +21,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
         [Display(Name = nameof(Texts.XName), Description = nameof(Texts.XName), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation X { get; } = new Animation(0, -100000, 100000);
+        public Animation X { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.YName), Description = nameof(Texts.YName), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation Y { get; } = new Animation(0, -100000, 100000);
+        public Animation Y { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Zoom), Description = nameof(Texts.Zoom), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 400)]
-        public Animation Zoom { get; } = new Animation(100, 1, 5000);
+        public Animation Zoom { get; } = new Animation(100, 1, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Rotation), Description = nameof(Texts.Rotation), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Rotation { get; } = new Animation(0, -36000, 36000, 360);
+        public Animation Rotation { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         public HeightmapFileParameter()
         {
@@ -97,10 +97,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         class SharedData
         {
             public string? File { get; set; }
-            public Animation X { get; } = new Animation(0, -100000, 100000);
-            public Animation Y { get; } = new Animation(0, -100000, 100000);
-            public Animation Zoom { get; } = new Animation(100, 1, 5000);
-            public Animation Rotation { get; } = new Animation(0, -36000, 36000, 360);
+            public Animation X { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
+            public Animation Y { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
+            public Animation Zoom { get; } = new Animation(100, 1, YMM4Constants.VeryLargeValue);
+            public Animation Rotation { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue, 360);
 
             public SharedData()
             {

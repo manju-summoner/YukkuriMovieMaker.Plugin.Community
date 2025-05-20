@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
     {
         [Display(GroupName = nameof(Texts.Extrusion), Name = nameof(Texts.SurfaceScale), ResourceType = typeof(Texts), Order = 10)]
         [AnimationSlider("F1", "px", 0, 10)]
-        public Animation SurfaceScale { get; } = new(10, 0, 10000);
+        public Animation SurfaceScale { get; } = new(10, 0, YMM4Constants.VeryLargeValue);
 
         public LightingParameterBase() : base()
         {

@@ -20,7 +20,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TilingGroupItems
 
         [Display(GroupName = nameof(Texts.TilingGroupItemsEffectName), Name = nameof(Texts.Wrap), Description = nameof(Texts.WrapDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "", 1, 5)]
-        public Animation Wrap { get; } = new Animation(1, 1, 100000);
+        public Animation Wrap { get; } = new Animation(1, 1, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.TilingGroupItemsEffectName), Name = nameof(Texts.Vertical), Description = nameof(Texts.VerticalDesc), ResourceType = typeof(Texts))]
         [ToggleSlider]

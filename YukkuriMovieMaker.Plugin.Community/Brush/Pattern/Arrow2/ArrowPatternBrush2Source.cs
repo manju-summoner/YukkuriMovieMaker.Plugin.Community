@@ -38,11 +38,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
 
             var dc = devices.DeviceContext;
 
+            var roundWidth = Math.Round(width);
+            var roundHeight = Math.Round(height);
+
+            //テクスチャがBitmapの最大サイズを超える場合、Bitmap内に収まるように比率を保って縮小し、縮小分だけmatrixで引き延ばす
+            var maximumBitmapSize = dc.MaximumBitmapSize;
+            var bitmapWidth = Math.Max(1, (int)roundWidth * 2);
+            var bitmapHeight = Math.Max(1, (int)roundHeight * 2);
+            var bitmapScale = Math.Min(1, (double)maximumBitmapSize / Math.Max(bitmapWidth, bitmapHeight));
+            if (bitmapScale < 1)
+            {
+                roundWidth = Math.Round(roundWidth * bitmapScale);
+                roundHeight = Math.Round(roundHeight * bitmapScale);
+                bitmapWidth = Math.Clamp((int)(bitmapWidth * bitmapScale), 1, maximumBitmapSize);
+                bitmapHeight = Math.Clamp((int)(bitmapHeight * bitmapScale), 1, maximumBitmapSize);
+                point *= bitmapScale;
+                matrix *= Matrix3x2.CreateScale((float)(1 / bitmapScale));
+            }
+
             if (isFirst || !this.color.Equals(color) || !this.backgroundColor.Equals(backgroundColor)
                 || this.width != width || this.height != height || this.point != point)
             {
-                var roundWidth = Math.Round(width);
-                var roundHeight = Math.Round(height);
 
                 using (var geometry = devices.D2D.Factory.CreatePathGeometry())
                 {
@@ -73,7 +89,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
                         disposer.RemoveAndDispose(ref bitmap);
                     using (var solidColorBrush = dc.CreateSolidColorBrush(new Color(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f)))
                     {
-                        bitmap = dc.CreateNotInitializedBitmap(Math.Max(1, (int)roundWidth * 2), Math.Max(1, (int)roundHeight * 2));
+                        bitmap = dc.CreateNotInitializedBitmap(bitmapWidth, bitmapHeight);
                         dc.Target = bitmap;
                         dc.BeginDraw();
                         dc.Clear(new Color(backgroundColor.R / 255.0f, backgroundColor.G / 255.0f, backgroundColor.B / 255.0f, backgroundColor.A / 255.0f));

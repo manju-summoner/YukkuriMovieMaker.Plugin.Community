@@ -43,11 +43,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.StripeGlitchNoise
 
         [Display(GroupName = nameof(Texts.StripeGlitchNoiseEffectComplicationGroupName), Name = nameof(Texts.StripeGlitchNoiseEffectStripeMaxWidthAttenuationName), Description = nameof(Texts.StripeGlitchNoiseEffectStripeMaxWidthAttenuationDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
-        public Animation StripeMaxWidthAttenuation { get; } = new Animation(10, 0, int.MaxValue);
+        public Animation StripeMaxWidthAttenuation { get; } = new Animation(10, 0, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.StripeGlitchNoiseEffectComplicationGroupName), Name = nameof(Texts.StripeGlitchNoiseEffectStripeMaxShiftAttenuationName), Description = nameof(Texts.StripeGlitchNoiseEffectStripeMaxShiftAttenuationDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
-        public Animation StripeMaxShiftAttenuation { get; } = new Animation(50, 0, int.MaxValue);
+        public Animation StripeMaxShiftAttenuation { get; } = new Animation(50, 0, YMM4Constants.VeryLargeValue);
 
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)

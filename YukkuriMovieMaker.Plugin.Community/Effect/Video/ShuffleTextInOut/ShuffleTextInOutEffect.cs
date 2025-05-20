@@ -50,13 +50,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleTextInOut
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_Duration), Description = nameof(Texts.ShuffleTextEffectDiscription_Duration), ResourceType = typeof(Texts))]
         [TextBoxSlider("F2", nameof(Texts.ShuffleTextEffectUnit_Seconds), 0, 0.5, ResourceType = typeof(Texts))]
         [DefaultValue(0d)]
-        [Range(0, 99999d)]
+        [Range(0d, YMM4Constants.VeryLargeValue)]
         public double T { get => time; set => Set(ref time, value); }
         double time = 0.30;
 
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_Interval), Description = nameof(Texts.ShuffleTextEffectDiscription_Interval), ResourceType = typeof(Texts))]
         [AnimationSlider("F2", nameof(Texts.ShuffleTextEffectUnit_Seconds), 0, 0.25, ResourceType = typeof(Texts))]
-        public Animation Interval { get; } = new Animation(0, 0, 1000.00);
+        public Animation Interval { get; } = new Animation(0, 0, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_Delay), Description = nameof(Texts.ShuffleTextEffectDiscription_Delay), ResourceType = typeof(Texts))]
         [ToggleSlider]
@@ -71,7 +71,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleTextInOut
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AppearanceAndExit), Name = nameof(Texts.ShuffleTextEffectDisplayName_StartTime), Description = nameof(Texts.ShuffleTextEffectDiscription_StartTime), ResourceType = typeof(Texts))]
         [TextBoxSlider("F2", nameof(Texts.ShuffleTextEffectUnit_Seconds), 0, 0.5, ResourceType = typeof(Texts))]
         [DefaultValue(0d)]
-        [Range(0, 99999d)]
+        [Range(0d, YMM4Constants.VeryLargeValue)]
         [ShowPropertyEditorWhen(nameof(Enum_DisplayMode), DisplayMode.Order)]
         public double DisplayStartTime { get => startTime; set => Set(ref startTime, value); }
         double startTime = 0.30;
@@ -139,7 +139,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleTextInOut
 
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AnimationText), Name = nameof(Texts.ShuffleTextEffectDisplayName_Size), Description = nameof(Texts.ShuffleTextEffectDiscription_Size), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 1.0, 50.0)]
-        public Animation FontSize { get; } = new Animation(34.0, 1, 100000.0);
+        public Animation FontSize { get; } = new Animation(34.0, 1, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AnimationText), Name = nameof(Texts.ShuffleTextEffectDisplayName_Color), Description = nameof(Texts.ShuffleTextEffectDiscription_Color), ResourceType = typeof(Texts))]
         [ColorPicker]

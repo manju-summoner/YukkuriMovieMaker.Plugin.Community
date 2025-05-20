@@ -14,24 +14,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorCorrection
 
         [Display(GroupName = nameof(Texts.ColorCorrectionGroupName), Name = nameof(Texts.ColorCorrectionEffectLightnessName), Description = nameof(Texts.ColorCorrectionEffectLightnessDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0d, 200d)]
-        public Animation Lightness { get; } = new Animation(100, 0, 1600);
+        public Animation Lightness { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ColorCorrectionGroupName), Name = nameof(Texts.ColorCorrectionEffectContrastName), Description = nameof(Texts.ColorCorrectionEffectContrastDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0d, 200d)]
-        public Animation Contrast { get; } = new Animation(100, 0, 1600);
+        public Animation Contrast { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
 
         [Display(GroupName = nameof(Texts.ColorCorrectionGroupName), Name = nameof(Texts.ColorCorrectionEffectHueRotationName), Description = nameof(Texts.ColorCorrectionEffectHueRotationDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360d, 360d)]
-        public Animation HueRotation { get; } = new Animation(0, -3600, 3600);
+        public Animation HueRotation { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ColorCorrectionGroupName), Name = nameof(Texts.ColorCorrectionEffectBrightnessName), Description = nameof(Texts.ColorCorrectionEffectBrightnessDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0d, 200d)]
-        public Animation Brightness { get; } = new Animation(100, 0, 1600);
+        public Animation Brightness { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ColorCorrectionGroupName), Name = nameof(Texts.ColorCorrectionEffectSaturationName), Description = nameof(Texts.ColorCorrectionEffectSaturationDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0d, 200d)]
-        public Animation Saturation { get; } = new Animation(100, 0, 1600);
+        public Animation Saturation { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => [Lightness, Contrast, HueRotation, Brightness, Saturation];
 

@@ -13,7 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush
     {
         [Display(Name = nameof(Texts.BrushParameterZoom), Description = nameof(Texts.BrushParameterZoom), Order = 250, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 400)]
-        public Animation Zoom { get; } = new Animation(100, 0, 5000);
+        public Animation Zoom { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
         public override Matrix3x2 CreateBrushMatrix(TimelineItemSourceDescription desc)
         {

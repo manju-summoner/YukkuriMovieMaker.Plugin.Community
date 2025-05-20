@@ -15,11 +15,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LongShadow
 
         [Display(GroupName = nameof(Texts.LongShadowEffectName), Name = nameof(Texts.LongShadowEffectAngleName), Description = nameof(Texts.LongShadowEffectAngleDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Angle { get; } = new Animation(135, -3600, 3600, 360);
+        public Animation Angle { get; } = new Animation(135, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.LongShadowEffectName), Name = nameof(Texts.LongShadowEffectLengthName), Description = nameof(Texts.LongShadowEffectLengthDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0, 100)]
-        public Animation Length { get; } = new Animation(50, 0, 99999);
+        public Animation Length { get; } = new Animation(50, 0, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.LongShadowEffectName), Name = nameof(Texts.LongShadowEffectOpacityName), Description = nameof(Texts.LongShadowEffectOpacityDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]

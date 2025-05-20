@@ -14,15 +14,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush
     {
         [Display(Name = nameof(Texts.BrushParameterX), Description = nameof(Texts.BrushParameterX), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation X { get; } = new Animation(0);
+        public Animation X { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.BrushParameterY), Description = nameof(Texts.BrushParameterY), Order = 200, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation Y { get; } = new Animation(0);
+        public Animation Y { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.BrushParameterAngle), Description = nameof(Texts.BrushParameterAngle), Order = 300, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Angle { get; } = new Animation(0, -36000, 36000);
+        public Animation Angle { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.BrushParameterAspect), Description = nameof(Texts.BrushParameterAspect), Order = 400, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "", -100, 100)]

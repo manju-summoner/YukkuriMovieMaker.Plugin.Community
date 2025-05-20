@@ -14,24 +14,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Wave
 
         [Display(GroupName = nameof(Texts.WaveGroupName), Name = nameof(Texts.WaveEffectWaveAngle1), Description = nameof(Texts.WaveEffectWaveAngle1), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Angle1 { get; } = new Animation(0, -36000, 36000);
+        public Animation Angle1 { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.WaveGroupName), Name = nameof(Texts.WaveEffectWaveAngle2), Description = nameof(Texts.WaveEffectWaveAngle2), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Angle2 { get; } = new Animation(90, -36000, 36000);
+        public Animation Angle2 { get; } = new Animation(90, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
 
         [Display(GroupName = nameof(Texts.WaveGroupName), Name = nameof(Texts.WaveEffectAmplitudeName), Description = nameof(Texts.WaveEffectAmplitudeDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0d, 500d)]
-        public Animation Amplitude { get; } = new Animation(100, 0, 99999);
+        public Animation Amplitude { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.WaveGroupName), Name = nameof(Texts.WaveEffectWaveLengthName), Description = nameof(Texts.WaveEffectWaveLengthDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0d, 500d)]
-        public Animation WaveLength { get; } = new Animation(100, 0, 99999);
+        public Animation WaveLength { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.WaveGroupName), Name = nameof(Texts.WaveEffectPeriodName), Description = nameof(Texts.WaveEffectPeriodDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F2", nameof(Texts.SecUnit), -1d, 1d, ResourceType = typeof(Texts))]
-        public Animation Period { get; } = new Animation(0.5, -1000, 1000);
+        public Animation Period { get; } = new Animation(0.5, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)

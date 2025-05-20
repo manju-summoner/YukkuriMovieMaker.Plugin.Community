@@ -4,7 +4,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ZoomPixel.Size
 {
     internal class HeightSharedData
     {
-        public Animation Height { get; } = new Animation(100, 0, 5000);
+        public Animation Height { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
         public HeightSharedData()
         {

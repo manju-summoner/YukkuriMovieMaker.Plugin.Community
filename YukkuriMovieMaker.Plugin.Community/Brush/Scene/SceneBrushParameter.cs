@@ -17,7 +17,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Scene
         [Display(Name = nameof(Texts.PlaybackRate), Description = nameof(Texts.PlaybackRate), ResourceType = typeof(Texts))]
         [TextBoxSlider("F1", "%", -400, 400)]
         [DefaultValue(100)]
-        [Range(int.MinValue, int.MaxValue)]
+        [Range((double)YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue)]
         public double PlaybackRate { get => playbackRate; set => Set(ref playbackRate, value); }
         double playbackRate = 100;
 
