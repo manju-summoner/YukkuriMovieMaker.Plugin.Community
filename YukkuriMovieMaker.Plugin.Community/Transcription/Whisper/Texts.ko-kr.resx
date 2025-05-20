@@ -66,13 +66,15 @@
 <data name="Model" xml:space="preserve"><value>Modelo</value></data>
 <data name="Language" xml:space="preserve"><value>언어</value></data>
 <data name="DownloadingProgressMessage" xml:space="preserve"><value>다운로드 중 {0} {1} / {2}</value></data>
-<data name="VisualCppRuntimeNotInstalledTitle" xml:space="preserve"><value>Visual C++ 런타임이 필요합니다</value></data>
-<data name="VisualCppRuntimeNotInstalledMessage" xml:space="preserve"><value>필요한 런타임이 설치되어 있지 않습니다.
-이 기능을 사용하려면 'Microsoft Visual C++ 2015–2022 재배포 패키지({0})'를 설치해야 합니다.
+<data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>{0}가 필요합니다</value></data>
+<data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>필요한 런타임이 설치되어 있지 않습니다.
+이 기능을 사용하려면 '{0}'을(를) 설치해야 합니다.
 
 설치 프로그램을 지금 다운로드하여 실행하시겠습니까?</value></data>
-<data name="VisualCppRuntimeNotInstalledErrorMessage" xml:space="preserve"><value>'Microsoft Visual C++ 2015–2022 재배포 패키지({0})'가 설치되어 있지 않습니다。</value></data>
+<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>'{0}'가 설치되어 있지 않습니다.</value></data>
 <data name="InstallerNotFoundMessage" xml:space="preserve"><value>설치 프로그램을 찾을 수 없습니다: {0}</value></data>
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>설치 프로그램 실행에 실패했습니다.</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>설치에 실패했습니다. 종료 코드 = {0}</value></data>
+<data name="NotSupportedMessage" xml:space="preserve"><value>您的環境不支援此功能</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>正在安裝 {0}。請稍候。安裝期間取消按鈕將無法工作。</value></data>
 </root>

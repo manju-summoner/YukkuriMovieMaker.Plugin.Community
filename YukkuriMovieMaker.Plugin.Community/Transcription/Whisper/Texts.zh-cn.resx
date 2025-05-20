@@ -66,13 +66,15 @@
 <data name="Model" xml:space="preserve"><value>模型</value></data>
 <data name="Language" xml:space="preserve"><value>语言</value></data>
 <data name="DownloadingProgressMessage" xml:space="preserve"><value>正在下载 {0} {1} / {2}</value></data>
-<data name="VisualCppRuntimeNotInstalledTitle" xml:space="preserve"><value>需要 Visual C++ 运行时</value></data>
-<data name="VisualCppRuntimeNotInstalledMessage" xml:space="preserve"><value>未安装所需的运行时。
-要使用此功能，必须安装“Microsoft Visual C++ 2015–2022 可再发行组件包（{0}）”。
+<data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>需要 {0}</value></data>
+<data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>未安装所需的运行时。
+要使用此功能，必须安装“{0}”。
 
 是否立即下载并运行安装程序？</value></data>
-<data name="VisualCppRuntimeNotInstalledErrorMessage" xml:space="preserve"><value>未安装 “Microsoft Visual C++ 2015–2022 可再发行组件包（{0}）”。</value></data>
+<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>未安装 “{0}”。</value></data>
 <data name="InstallerNotFoundMessage" xml:space="preserve"><value>未找到安装程序: {0}</value></data>
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>启动安装程序失败。</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>安装失败。退出代码 = {0}</value></data>
+<data name="NotSupportedMessage" xml:space="preserve"><value>Your environment does not support this feature</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>Installing {0}. Please wait. The cancel button will not work during installation.</value></data>
 </root>

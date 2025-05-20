@@ -66,13 +66,15 @@
 <data name="Model" xml:space="preserve"><value>Model</value></data>
 <data name="Language" xml:space="preserve"><value>اللغة</value></data>
 <data name="DownloadingProgressMessage" xml:space="preserve"><value>تنزيل {0} {1} / {2}</value></data>
-<data name="VisualCppRuntimeNotInstalledTitle" xml:space="preserve"><value>مطلوب حزمة وقت تشغيل ‎Visual C++‎</value></data>
-<data name="VisualCppRuntimeNotInstalledMessage" xml:space="preserve"><value>لم يتم تثبيت حزمة وقت التشغيل المطلوبة.
-لاستخدام هذه الميزة يلزم تثبيت «حزمة ‎Microsoft Visual C++‎ القابلة لإعادة التوزيع 2015–2022 ({0})».
+<data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>مطلوب ‎{0}‎</value></data>
+<data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>لم يتم تثبيت حزمة وقت التشغيل المطلوبة.
+لاستخدام هذه الميزة يلزم تثبيت «{0}».
 
 هل تريد تنزيل مُثبّت الحزمة وتشغيله الآن؟</value></data>
-<data name="VisualCppRuntimeNotInstalledErrorMessage" xml:space="preserve"><value>لم يتم تثبيت «حزمة ‎Microsoft Visual C++‎ القابلة لإعادة التوزيع 2015–2022 ({0})».</value></data>
+<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>لم يتم تثبيت «{0}».</value></data>
 <data name="InstallerNotFoundMessage" xml:space="preserve"><value>لم يتم العثور على المثبّت: {0}</value></data>
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>فشل بدء تشغيل المثبّت.</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>فشلت عملية التثبيت. رمز الخروج = {0}</value></data>
+<data name="NotSupportedMessage" xml:space="preserve"><value>Esta función no es compatible con su entorno</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>Instalando {0}. Por favor espera. El botón de cancelar no funcionará durante la instalación.</value></data>
 </root>

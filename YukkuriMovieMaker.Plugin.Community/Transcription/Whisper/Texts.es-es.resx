@@ -66,13 +66,15 @@
 <data name="Model" xml:space="preserve"><value>النموذج</value></data>
 <data name="Language" xml:space="preserve"><value>Idioma</value></data>
 <data name="DownloadingProgressMessage" xml:space="preserve"><value>Descargando {0} {1} / {2}</value></data>
-<data name="VisualCppRuntimeNotInstalledTitle" xml:space="preserve"><value>Se requiere el Runtime de Visual C++</value></data>
-<data name="VisualCppRuntimeNotInstalledMessage" xml:space="preserve"><value>No se ha instalado el runtime necesario.
-Para utilizar esta función debes instalar el “Paquete redistribuible de Microsoft Visual C++ 2015–2022 ({0})”.
+<data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>Se requiere {0}</value></data>
+<data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>No se ha instalado el runtime necesario.
+Para utilizar esta función debes instalar “{0}”.
 
 ¿Deseas descargar y ejecutar el instalador ahora?</value></data>
-<data name="VisualCppRuntimeNotInstalledErrorMessage" xml:space="preserve"><value>No está instalado el “Paquete redistribuible de Microsoft Visual C++ 2015–2022 ({0})”.</value></data>
+<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>No está instalado “{0}”.</value></data>
 <data name="InstallerNotFoundMessage" xml:space="preserve"><value>Instalador no encontrado: {0}</value></data>
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>No se pudo iniciar el instalador.</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>La instalación falló. ExitCode = {0}</value></data>
+<data name="NotSupportedMessage" xml:space="preserve"><value>이 기능은 귀하의 환경에서 지원되지 않습니다</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>설치 중입니다 {0}. 잠시만 기다려 주십시오. 설치 중에는 취소 버튼이 작동하지 않습니다.</value></data>
 </root>

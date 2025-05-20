@@ -66,13 +66,15 @@
 <data name="Model" xml:space="preserve"><value>モデル</value></data>
 <data name="Language" xml:space="preserve"><value>言語</value></data>
 <data name="DownloadingProgressMessage" xml:space="preserve"><value>{0}をダウンロード中 {1} / {2}</value></data>
-<data name="VisualCppRuntimeNotInstalledTitle" xml:space="preserve"><value>Visual C++ ランタイムが必要です</value></data>
-<data name="VisualCppRuntimeNotInstalledMessage" xml:space="preserve"><value>必要なランタイムがインストールされていません。
-この機能を利用するためには、「Microsoft Visual C++ 2015–2022 再頒布可能パッケージ（{0}）」をインストールする必要があります。
+<data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>{0} が必要です</value></data>
+<data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>必要なランタイムがインストールされていません。
+この機能を利用するためには「{0}」をインストールする必要があります。
 
 インストーラーをダウンロードし、実行しますか？</value></data>
-<data name="VisualCppRuntimeNotInstalledErrorMessage" xml:space="preserve"><value>「Microsoft Visual C++ 2015–2022 再頒布可能パッケージ（{0}）」がインストールされていません。</value></data>
+<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>「{0}」がインストールされていません。</value></data>
 <data name="InstallerNotFoundMessage" xml:space="preserve"><value>インストーラーが見つかりません: {0}</value></data>
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>インストーラーの起動に失敗しました。</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>インストールに失敗しました。ExitCode = {0}</value></data>
+<data name="NotSupportedMessage" xml:space="preserve"><value>お使いの環境ではこの機能を使用することは出来ません</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>{0}をインストール中。しばらくお待ちください。インストール中はキャンセルボタンが動作しません。</value></data>
 </root>

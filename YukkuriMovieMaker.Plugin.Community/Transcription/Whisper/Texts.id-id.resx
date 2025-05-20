@@ -65,13 +65,15 @@
 <data name="ProcessingAudioMessage" xml:space="preserve"><value>Memproses audio {0} / {1} {2}</value></data>
 <data name="Language" xml:space="preserve"><value>Bahasa</value></data>
 <data name="DownloadingProgressMessage" xml:space="preserve"><value>Mengunduh {0} {1} / {2}</value></data>
-<data name="VisualCppRuntimeNotInstalledTitle" xml:space="preserve"><value>Runtime Visual C++ diperlukan</value></data>
-<data name="VisualCppRuntimeNotInstalledMessage" xml:space="preserve"><value>Runtime yang diperlukan belum diinstal.
-Untuk menggunakan fitur ini, Anda harus memasang Microsoft Visual C++ 2015–2022 Redistributable ({0}).
+<data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>{0} diperlukan</value></data>
+<data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>Runtime yang diperlukan belum terpasang.
+Untuk menggunakan fitur ini, Anda harus memasang {0}.
 
 Apakah Anda ingin mengunduh dan menjalankan pemasang sekarang？</value></data>
-<data name="VisualCppRuntimeNotInstalledErrorMessage" xml:space="preserve"><value>“Microsoft Visual C++ 2015–2022 Redistributable ({0})” belum terpasang。</value></data>
+<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>“{0}” belum terpasang。</value></data>
 <data name="InstallerNotFoundMessage" xml:space="preserve"><value>Instalasi tidak ditemukan: {0}</value></data>
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>Gagal menjalankan installer。</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>Instalasi gagal. Kode keluar = {0}</value></data>
+<data name="NotSupportedMessage" xml:space="preserve"><value>لا تدعم بيئتك هذه الميزة</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>正在安装 {0}。请稍候。安装期间取消按钮将无法工作。</value></data>
 </root>

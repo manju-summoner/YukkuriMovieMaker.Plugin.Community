@@ -66,13 +66,15 @@
 <data name="Model" xml:space="preserve"><value>模型</value></data>
 <data name="Language" xml:space="preserve"><value>Language</value></data>
 <data name="DownloadingProgressMessage" xml:space="preserve"><value>Downloading {0} {1} / {2}</value></data>
-<data name="VisualCppRuntimeNotInstalledTitle" xml:space="preserve"><value>Visual C++ Runtime Required</value></data>
-<data name="VisualCppRuntimeNotInstalledMessage" xml:space="preserve"><value>The required runtime is not installed.
-To use this feature, you need to install the “Microsoft Visual C++ 2015–2022 Redistributable ({0})”.
+<data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>{0} Required</value></data>
+<data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>The required runtime is not installed.
+To use this feature, you need to install “{0}”.
 
 Would you like to download and run the installer now?</value></data>
-<data name="VisualCppRuntimeNotInstalledErrorMessage" xml:space="preserve"><value>The “Microsoft Visual C++ 2015–2022 Redistributable ({0})” is not installed.</value></data>
+<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>“{0}” is not installed.</value></data>
 <data name="InstallerNotFoundMessage" xml:space="preserve"><value>Installer not found: {0}</value></data>
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>Failed to start the installer.</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>Installation failed. ExitCode = {0}</value></data>
+<data name="NotSupportedMessage" xml:space="preserve"><value>This feature is not supported in your environment</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>Installing {0}. Please wait. The cancel button will not work during installation.</value></data>
 </root>

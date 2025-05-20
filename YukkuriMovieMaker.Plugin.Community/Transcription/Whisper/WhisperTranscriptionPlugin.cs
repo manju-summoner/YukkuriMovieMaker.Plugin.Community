@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 using Whisper.net;
+using YukkuriMovieMaker.Plugin.Community.Transcription.Whisper.Installers;
 using YukkuriMovieMaker.Plugin.Transcription;
 
 namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
@@ -22,25 +23,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
         public async IAsyncEnumerable<TranscriptionSegment> ProcessAsync(ITranscriptionProcessArgs args, [EnumeratorCancellation] CancellationToken token)
         {
             var progress = args.ProgressMessage;
-            if (!VisualCppRuntime.IsVc2019OrLaterInstalled())
-            {
-                var res = MessageBox.Show(string.Format(Texts.VisualCppRuntimeNotInstalledMessage, RuntimeInformation.ProcessArchitecture), Texts.VisualCppRuntimeNotInstalledTitle, MessageBoxButton.YesNoCancel);
-                if(res is MessageBoxResult.Cancel)
-                    throw new OperationCanceledException();
-                if (res is MessageBoxResult.Yes)
-                {
-                    var installerPath = await VisualCppRuntime.DownloadRuntimeAsync(progress, token);
-                    try
-                    {
-                        await VisualCppRuntime.RunInstallerAsync(installerPath);
-                    }
-                    finally
-                    {
-                        if (File.Exists(installerPath))
-                            File.Delete(installerPath);
-                    }
-                }
-            }
+            await CheckRuntime(progress, token);
 
             var model = WhisperTranscriptionSettings.Default.Model;
             var modelPath = model.GetFilePath(WhisperModels.ModelDirectory);
@@ -53,7 +36,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
             using var source = await Task.Run(args.CreateAudioStream, token);
 
             progress.Report(-1, Texts.LoadingWhisperModelMessage);
-            using var factory = await Task.Run(()=> WhisperFactory.FromPath(modelPath), token);
+            using var factory = await Task.Run(() => WhisperFactory.FromPath(modelPath), token);
             var whisperBuider =
                 factory
                 .CreateBuilder()
@@ -75,7 +58,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
             var sourceDuration = TimeSpan.FromSeconds((double)totalSamples / sampleRate);
 
             //音声データ全体を処理するとメモリを使用量が爆増するため、30秒ごとのブロックに分けて処理する
-            while ((readCount = await Task.Run(()=> source.Read(blockBuffer, 0, blockBuffer.Length), token)) > 0)
+            while ((readCount = await Task.Run(() => source.Read(blockBuffer, 0, blockBuffer.Length), token)) > 0)
             {
                 var blockTime = TimeSpan.FromSeconds((double)blockPosition / sampleRate);
                 string message = CreateProgressMessage(lastText, sourceDuration, blockTime);
@@ -111,6 +94,52 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
 
                 Array.Clear(blockBuffer);
                 blockPosition = source.Position;
+            }
+        }
+
+        private static async Task CheckRuntime(YukkuriMovieMaker.Commons.ProgressMessage progress, CancellationToken token)
+        {
+            var isCudaRuntimeInstalled = CUDAToolkit.IsInstalled();
+            var isVulkanRuntimeInstalled = VulkanRuntime.IsInstalled();
+            if (isCudaRuntimeInstalled || isVulkanRuntimeInstalled)
+                return;
+
+            var vendor = GpuVendorDetector.GetGpuVendor();
+            if (CUDAToolkit.IsSupported(vendor))
+            {
+                var res = MessageBox.Show(string.Format(Texts.RuntimeNotInstalledMessage, $"CUDA Toolkit ({RuntimeInformation.ProcessArchitecture})"), Texts.RuntimeNotInstalledTitle, MessageBoxButton.YesNoCancel);
+                if (res is MessageBoxResult.Cancel)
+                    throw new OperationCanceledException();
+                if (res is MessageBoxResult.Yes)
+                {
+                    await new CUDAToolkit().InstallAsync(progress, token);
+                    return;
+                }
+            }
+            else if (VulkanRuntime.IsSupported(vendor))
+            {
+                var res = MessageBox.Show(string.Format(Texts.RuntimeNotInstalledMessage, $"Vulkan Runtime ({RuntimeInformation.ProcessArchitecture})"), Texts.RuntimeNotInstalledTitle, MessageBoxButton.YesNoCancel);
+                if (res is MessageBoxResult.Cancel)
+                    throw new OperationCanceledException();
+                if (res is MessageBoxResult.Yes)
+                {
+                    await new VulkanRuntime().InstallAsync(progress, token);
+                    return;
+                }
+            }
+
+            if (!VisualCppRuntime.IsSupported())
+                throw new NotSupportedException(Texts.NotSupportedMessage);
+
+            if (!VisualCppRuntime.IsInstalled())
+            {
+                var res = MessageBox.Show(string.Format(Texts.RuntimeNotInstalledMessage, $"Microsoft Visual C++ 2015–2022 Redistributable ({RuntimeInformation.ProcessArchitecture})"), Texts.RuntimeNotInstalledTitle, MessageBoxButton.YesNoCancel);
+                if (res is MessageBoxResult.Cancel)
+                    throw new OperationCanceledException();
+                if (res is MessageBoxResult.Yes)
+                {
+                    await new VisualCppRuntime().InstallAsync(progress, token);
+                }
             }
         }
 
