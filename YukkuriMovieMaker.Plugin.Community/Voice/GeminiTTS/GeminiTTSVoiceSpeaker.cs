@@ -7,6 +7,7 @@ using YukkuriMovieMaker.Plugin.Voice;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
 {
+    //https://ai.google.dev/gemini-api/docs/speech-generation
     internal class GeminiTTSVoiceSpeaker(string voice) : IVoiceSpeaker
     {
         public string EngineName => API;
