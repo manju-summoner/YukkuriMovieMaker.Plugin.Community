@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS.GeminiTTSSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Expander Header="GeminiTTS" IsExpanded="True">
+        <StackPanel>
+            <Grid>
+                <Label Content="{x:Static local:Texts.APIKey}"/>
+                <TextBox Text="{Binding Source={x:Static local:GeminiTTSSettings.Default},Path=ApiKey,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
+            </Grid>
+            <Grid>
+                <Label Content="{x:Static local:Texts.Model}"/>
+                <ComboBox Text="{Binding Source={x:Static local:GeminiTTSSettings.Default},Path=Model,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}" IsEditable="True" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
+            </Grid>
+        </StackPanel>
+    </Expander>
+</UserControl>
