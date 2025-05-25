@@ -10,6 +10,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
     //https://ai.google.dev/gemini-api/docs/speech-generation
     internal class GeminiTTSVoiceSpeaker(string voice) : IVoiceSpeaker
     {
+        static readonly SemaphoreSlim semaphore = new(1);
+        static DateTime lastRequest = DateTime.MinValue;
         public string EngineName => API;
 
         public string SpeakerName => voice;
@@ -36,68 +38,92 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
             if(parameter is not GeminiTTSVoiceParameter geminiTTSParameter)
                 geminiTTSParameter = new GeminiTTSVoiceParameter();
 
-            var prompt = geminiTTSParameter.Prompt;
-
-            var model = GeminiTTSSettings.Default.Model;
-            var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent";
-
-
-            var content = new StringContent(CreateJson(model, text, prompt), Encoding.UTF8, "application/json");
-            var request = new HttpRequestMessage(HttpMethod.Post, url);
-            request.Headers.Add("x-goog-api-key", GeminiTTSSettings.Default.ApiKey);
-            request.Content = content;
-
-            var client = HttpClientFactory.Client;
-            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-            if(response.StatusCode is not System.Net.HttpStatusCode.OK)
+            await semaphore.WaitAsync();
+            try
             {
-                var errorText = await response.Content.ReadAsStringAsync();
-                var error = JObject.Parse(errorText);
-                var message = error["error"]?["message"]?.Value<string>();
-                if (!string.IsNullOrEmpty(message))
-                    throw new Exception(message);
+                await WaitRateLimitAsync();
+                var prompt = geminiTTSParameter.Prompt;
+
+                var model = GeminiTTSSettings.Default.Model;
+                var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent";
+
+
+                var content = new StringContent(CreateJson(model, text, prompt), Encoding.UTF8, "application/json");
+                var request = new HttpRequestMessage(HttpMethod.Post, url);
+                request.Headers.Add("x-goog-api-key", GeminiTTSSettings.Default.ApiKey);
+                request.Content = content;
+
+                var client = HttpClientFactory.Client;
+                using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                if (response.StatusCode is not System.Net.HttpStatusCode.OK)
+                {
+                    var errorText = await response.Content.ReadAsStringAsync();
+                    var error = JObject.Parse(errorText);
+                    var message = error["error"]?["message"]?.Value<string>();
+                    if (!string.IsNullOrEmpty(message))
+                        throw new Exception(message);
+                }
+                response.EnsureSuccessStatusCode();
+
+                var responseJsonText = await response.Content.ReadAsStringAsync();
+                var responseJson = JObject.Parse(responseJsonText);
+                var audioBase64 =
+                    responseJson
+                    ["candidates"]
+                    ?.FirstOrDefault()
+                    ?["content"]
+                    ?["parts"]
+                    ?.FirstOrDefault()
+                    ?["inlineData"]
+                    ?["data"]
+                    ?.Value<string>()
+                    ?? string.Empty;
+                if (string.IsNullOrEmpty(audioBase64))
+                    throw new Exception("音声データを取得できませんでした。");
+                var mimeType =
+                    responseJson
+                    ["candidates"]
+                    ?.FirstOrDefault()
+                    ?["content"]
+                    ?["parts"]
+                    ?.FirstOrDefault()
+                    ?["inlineData"]
+                    ?["mimeType"]
+                    ?.Value<string>()
+                    ?? string.Empty;
+
+                var audioBytes = Convert.FromBase64String(audioBase64);
+                var supportedAudioFileMimeTypes = new[] { "audio/wav", "audio/ogg", "audio/mpeg" };
+
+                if (mimeType.StartsWith("audio/L16"))
+                    SavePCMData(filePath, mimeType, audioBytes);
+                else if (supportedAudioFileMimeTypes.Any(mimeType.StartsWith))
+                    File.WriteAllBytes(filePath, audioBytes);
+                else
+                    throw new NotSupportedException($"Unsupported audio format: {mimeType}");
             }
-            response.EnsureSuccessStatusCode();
-
-            var responseJsonText = await response.Content.ReadAsStringAsync();
-            var responseJson = JObject.Parse(responseJsonText);
-            var audioBase64 = 
-                responseJson
-                ["candidates"]
-                ?.FirstOrDefault()
-                ?["content"]
-                ?["parts"]
-                ?.FirstOrDefault()
-                ?["inlineData"]
-                ?["data"]
-                ?.Value<string>()
-                ?? string.Empty;
-            if (string.IsNullOrEmpty(audioBase64))
-                throw new Exception("音声データを取得できませんでした。");
-            var mimeType = 
-                responseJson
-                ["candidates"]
-                ?.FirstOrDefault()
-                ?["content"]
-                ?["parts"]
-                ?.FirstOrDefault()
-                ?["inlineData"]
-                ?["mimeType"]
-                ?.Value<string>()
-                ?? string.Empty;
-
-            var audioBytes = Convert.FromBase64String(audioBase64);
-            var supportedAudioFileMimeTypes = new[] { "audio/wav", "audio/ogg", "audio/mpeg" };
-
-            if (mimeType.StartsWith("audio/L16"))
-                SavePCMData(filePath, mimeType, audioBytes);
-            else if(supportedAudioFileMimeTypes.Any(mimeType.StartsWith))
-                File.WriteAllBytes(filePath, audioBytes);
-            else
-                throw new NotSupportedException($"Unsupported audio format: {mimeType}");
-
+            finally
+            {
+                semaphore.Release();
+            }
             return null;
         }
+
+        static async Task WaitRateLimitAsync()
+        {
+            var model = GeminiTTSModel.GetModel(GeminiTTSSettings.Default.Model) ?? GeminiTTSModel.DefaultModel;
+            var tier = GeminiTTSSettings.Default.Tier;
+            var rpm = model.RPM.GetRateLimit(tier);
+            var intervalPerRequest = TimeSpan.FromMinutes(1d / rpm);
+            var elapsed = DateTime.Now - lastRequest;
+
+            var requiredWait = intervalPerRequest - elapsed;
+            if(requiredWait > TimeSpan.Zero)
+                await Task.Delay(requiredWait);
+
+            lastRequest = DateTime.Now;
+        }
+
         static void SavePCMData(string filePath, string mimeType, byte[] audioBytes)
         {
             var sampleRate = 

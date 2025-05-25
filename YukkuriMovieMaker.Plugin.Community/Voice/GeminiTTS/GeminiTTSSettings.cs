@@ -20,10 +20,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
 
         string 
             apiKey = string.Empty,
-            model = GeminiTTSModels.DefaultModel;
-        
+            model = GeminiTTSModel.DefaultModelName;
+        int tier = 1;
+
         public string ApiKey { get => apiKey; set => Set(ref apiKey, value); }
         public string Model { get => model; set => Set(ref model, value); }
+        public int Tier { get => tier; set => Set(ref tier, value); }
 
 
         public override void Initialize()
