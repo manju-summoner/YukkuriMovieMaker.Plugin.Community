@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
                 "Leda",
                 "Orus",
                 "Aoede",
-                "Callirhoe",
+                "Callirrhoe",
                 "Autonoe",
                 "Enceladus",
                 "Iapetus",
@@ -39,7 +39,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
                 "Vindemiatrix",
                 "Sadachbia",
                 "Sadaltager",
-                "Sulafar",
+                "Sulafat",
             ];
     }
 }
