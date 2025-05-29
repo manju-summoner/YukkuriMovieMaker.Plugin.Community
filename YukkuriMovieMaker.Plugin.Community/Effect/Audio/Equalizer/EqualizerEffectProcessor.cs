@@ -66,7 +66,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Equalizer
 
         float[] GetCurrentGains(long position)
         {
-            return [.. new[] { effect.B32, effect.B64, effect.B125, effect.B250, effect.B500, effect.B1k, effect.B2k, effect.B4k, effect.B8k, effect.B16k }.Select(a => (float)a.GetValue(position, Duration, Hz))];
+            var current = position / 2;
+            var total = Duration / 2;
+            return [.. new[] { effect.B32, effect.B64, effect.B125, effect.B250, effect.B500, effect.B1k, effect.B2k, effect.B4k, effect.B8k, effect.B16k }.Select(a => (float)a.GetValue(current, total, Hz))];
         }
 
         protected override void seek(long position)
