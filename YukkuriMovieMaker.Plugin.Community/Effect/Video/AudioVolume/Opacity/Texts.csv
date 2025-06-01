@@ -1,0 +1,5 @@
+﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+AudioVolumeOpacityEffect,,音量に合わせて透過,Transparency According to Volume,根据音量透明,根據音量透明,음량에 따라 투명도 조절,Transparencia según el volumen,الشفافية حسب مستوى الصوت,Transparansi Sesuai Volume
+Opacity,,不透明度,Opacity,不透明度,不透明度,불투명도,Opacidad,العتامة,Opasitas
+Invert,,反転,Inversion,反转,反轉,반전,Inversión,عكس,Pembalikan
+InvertDesc,,音量が上がるにつれて不透明度が上がるようにする,Increase Opacity as Volume Increases,音量增加时提高不透明度,音量增加時提高不透明度,음량이 증가할수록 불투명도 증가,Aumentar la opacidad a medida que sube el volumen,زيادة العتامة مع ارتفاع مستوى الصوت,Meningkatkan Opasitas Seiring Bertambahnya Volume
