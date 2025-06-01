@@ -6,8 +6,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
     internal readonly record struct WhisperLanguage
     {
         public static WhisperLanguage Auto { get; } = new("auto");
-        public static IReadOnlyList<WhisperLanguage> SupportedLanguages { get; } = [Auto, .. GetSupportedLanguagesSafe().Select(x => new WhisperLanguage(x))];
-
+        
         public string Code { get; }
         public bool IsAuto => this == Auto;
 
@@ -35,12 +34,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
             try
             {
                 var systemLanguage = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
-                return SupportedLanguages.DefaultIfEmpty(Auto).First(x => x.EqualsCode(systemLanguage));
+                return GetSupportedLanguages().DefaultIfEmpty(Auto).First(x => x.EqualsCode(systemLanguage));
             }
             catch
             {
                 return Auto;
             }
         }
+        public static IReadOnlyList<WhisperLanguage> GetSupportedLanguages() => [Auto, .. GetSupportedLanguagesSafe().Select(x => new WhisperLanguage(x))];
+
     }
 }

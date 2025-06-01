@@ -14,7 +14,7 @@
         WhisperModel model = WhisperModels.GetDefaultModel();
 
         public WhisperLanguage Language { get => language; set => Set(ref language, value); }
-        WhisperLanguage language = WhisperLanguage.GetSystemLanguageOrAuto();
+        WhisperLanguage language = WhisperLanguage.Auto;
 
         public override void Initialize()
         {

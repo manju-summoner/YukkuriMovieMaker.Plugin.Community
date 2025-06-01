@@ -8,6 +8,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <ObjectDataProvider x:Key="Models" ObjectType="{x:Type local:WhisperModels}" MethodName="GetDefaultAndUserModels"/>
+        <ObjectDataProvider x:Key="Languages" ObjectType="{x:Type local:WhisperLanguage}" MethodName="GetSupportedLanguages"/>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -22,6 +23,6 @@
         <ComboBox Grid.Column="1" ItemsSource="{Binding Source={StaticResource Models}}" SelectedValue="{Binding Source={x:Static local:WhisperTranscriptionSettings.Default},Path=Model,Mode=TwoWay}" DisplayMemberPath="DisplayText" VerticalContentAlignment="Center"/>
 
         <Label Grid.Row="1" Grid.Column="0" Content="{x:Static local:Texts.Language}"/>
-        <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Source={x:Static local:WhisperLanguage.SupportedLanguages}}" SelectedValue="{Binding Source={x:Static local:WhisperTranscriptionSettings.Default},Path=Language,Mode=TwoWay}" DisplayMemberPath="Code" VerticalContentAlignment="Center"/>
+        <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Source={StaticResource Languages}}" SelectedValue="{Binding Source={x:Static local:WhisperTranscriptionSettings.Default},Path=Language,Mode=TwoWay}" DisplayMemberPath="Code" VerticalContentAlignment="Center"/>
     </Grid>
 </UserControl>
