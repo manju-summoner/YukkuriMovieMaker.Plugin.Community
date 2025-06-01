@@ -1,0 +1,10 @@
+﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+AudioVolumeRotateEffect,,音量に合わせて回転,Rotate According to Volume,根据音量旋转,根據音量旋轉,음량에 따라 회전,Rotar según el volumen,الدوران حسب مستوى الصوت,Berputar Sesuai Volume
+X,,X軸,X Axis,X轴,X軸,X축,Eje X,المحور X,Sumbu X
+XDesc,,縦方向、X軸に対する回転角,Vertical Rotation Angle around X Axis,绕X轴的垂直旋转角,繞X軸的垂直旋轉角,X축 기준 수직 회전 각도,Ángulo de rotación vertical alrededor del eje X,زاوية الدوران الرأسية حول المحور X,Sudut Rotasi Vertikal terhadap Sumbu X
+Y,,Y軸,Y Axis,Y轴,Y軸,Y축,Eje Y,المحور Y,Sumbu Y
+YDesc,,横方向、Y軸に対する回転角,Horizontal Rotation Angle around Y Axis,绕Y轴的水平旋转角,繞Y軸的水平旋轉角,Y축 기준 수평 회전 각도,Ángulo de rotación horizontal alrededor del eje Y,زاوية الدوران الأفقية حول المحور Y,Sudut Rotasi Horizontal terhadap Sumbu Y
+Z,,Z軸,Z Axis,Z轴,Z軸,Z축,Eje Z,المحور Z,Sumbu Z
+ZDesc,,平面方向、Z軸に対する回転角,Planar Rotation Angle around Z Axis,绕Z轴的平面旋转角,繞Z軸的平面旋轉角,Z축 기준 평면 회전 각도,Ángulo de rotación en el plano alrededor del eje Z,زاوية الدوران في المستوى حول المحور Z,Sudut Rotasi Datar terhadap Sumbu Z
+Is3D,,三次元配置,3D Arrangement,三维布置,三維配置,3차원 배치,Disposición 3D,ترتيب ثلاثي الأبعاد,Penataan 3D
+Is3DDesc,,3次元空間上に配置します,Place in 3D Space,放置在三维空间中,放置在三維空間中,3차원 공간에 배치합니다,Colocar en espacio 3D,وضع في الفضاء ثلاثي الأبعاد,Tempatkan di Ruang 3D

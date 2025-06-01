@@ -1,0 +1,10 @@
+﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+AudioSourceType,,音声,Audio,音频,音訊,오디오,Audio,الصوت,Audio
+Power,,音量,Volume,音量,音量,볼륨,Volumen,مستوى الصوت,Volume
+Smooth,,なめらかさ,Smoothness,平滑度,平滑度,부드러움,Suavidad,نعومة,Kelembutan
+Playback,,再生位置,Playback Position,播放位置,播放位置,재생 위치,Posición de reproducción,موقع التشغيل,Posisi Pemutaran
+AudioSourceTypeFile,,ファイル,File,文件,文件,파일,Archivo,ملف,Berkas
+AudioSourceTypeScene,,シーン,Scene,场景,場景,장면,Escena,مشهد,Adegan
+AudioSourceTypeTimeline,,タイムライン,Timeline,时间轴,時間軸,타임라인,Línea de tiempo,الجدول الزمني,Garis Waktu
+File,,ファイル,File,文件,文件,파일,Archivo,ملف,Berkas
+Scene,,シーン,Scene,场景,場景,장면,Escena,مشهد,Adegan
