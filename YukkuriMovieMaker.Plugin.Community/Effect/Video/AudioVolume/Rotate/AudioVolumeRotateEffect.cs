@@ -14,16 +14,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Rotate
         public override string Label => $"{Texts.AudioVolumeRotateEffect} X{X.GetValue(0, 1, 30):F1}°, Y{X.GetValue(0, 1, 30):F1}°, Z{X.GetValue(0, 1, 30):F1}";
 
         [Display(GroupName = nameof(Texts.AudioVolumeRotateEffect), Name = nameof(Texts.X), Description = nameof(Texts.XDesc), ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "°", 0.0, 360.0)]
-        public Animation X { get; } = new Animation(0.0, 0.0, YMM4Constants.VeryLargeValue);
+        [AnimationSlider("F1", "°", -360.0, 360.0)]
+        public Animation X { get; } = new Animation(0.0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.AudioVolumeRotateEffect), Name = nameof(Texts.Y), Description = nameof(Texts.YDesc), ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "°", 0.0, 360.0)]
-        public Animation Y { get; } = new Animation(0.0, 0.0, YMM4Constants.VeryLargeValue);
+        [AnimationSlider("F1", "°", -360.0, 360.0)]
+        public Animation Y { get; } = new Animation(0.0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.AudioVolumeRotateEffect), Name = nameof(Texts.Z), Description = nameof(Texts.ZDesc), ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "°", 0.0, 360.0)]
-        public Animation Z { get; } = new Animation(30.0, 0.0, YMM4Constants.VeryLargeValue);
+        [AnimationSlider("F1", "°", -360.0, 360.0)]
+        public Animation Z { get; } = new Animation(30.0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.AudioVolumeRotateEffect), Name = nameof(Texts.Is3D), Description = nameof(Texts.Is3DDesc), ResourceType = typeof(Texts))]
         [ToggleSlider]
