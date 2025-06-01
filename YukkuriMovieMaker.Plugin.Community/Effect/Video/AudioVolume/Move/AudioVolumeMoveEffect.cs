@@ -15,15 +15,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Move
 
         [Display(GroupName = nameof(Texts.AudioVolumeMoveEffect), Name = nameof(Texts.X), Description = nameof(Texts.XDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation X { get; } = new Animation(0, -99999, 99999);
+        public Animation X { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.AudioVolumeMoveEffect), Name = nameof(Texts.Y), Description = nameof(Texts.YDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation Y { get; } = new Animation(-100, -99999, 99999);
+        public Animation Y { get; } = new Animation(-100, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.AudioVolumeMoveEffect), Name = nameof(Texts.Z), Description = nameof(Texts.ZDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation Z { get; } = new Animation(0, -99999, 99999);
+        public Animation Z { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {

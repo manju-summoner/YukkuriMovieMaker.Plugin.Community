@@ -15,11 +15,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Skew
 
         [Display(GroupName = nameof(Texts.AudioVolumeSkewEffect), Name = nameof(Texts.AngleX), Description = nameof(Texts.AngleXDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -90.0, 90.0)]
-        public Animation AngleX { get; } = new Animation(0.0, -3600.0, 3600.0, 360.0);
+        public Animation AngleX { get; } = new Animation(0.0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.AudioVolumeSkewEffect), Name = nameof(Texts.AngleY), Description = nameof(Texts.AngleYDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -90.0, 90.0)]
-        public Animation AngleY { get; } = new Animation(0.0, -3600.0, 3600.0, 360.0);
+        public Animation AngleY { get; } = new Animation(0.0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.AudioVolumeSkewEffect), Name = nameof(Texts.CenterPoint), Description = nameof(Texts.CenterPointDesc), ResourceType = typeof(Texts))]
         [EnumComboBox]
@@ -29,12 +29,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Skew
         [Display(GroupName = nameof(Texts.AudioVolumeSkewEffect), Name = nameof(CenterX), Description = nameof(Texts.CenterXDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500.0, 500.0)]
         [SkewCenterPointCustomVisible]
-        public Animation CenterX { get; } = new Animation(0.0, -99999.0, 99999.0);
+        public Animation CenterX { get; } = new Animation(0.0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.AudioVolumeSkewEffect), Name = nameof(CenterY), Description = nameof(Texts.CenterYDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500.0, 500.0)]
         [SkewCenterPointCustomVisible]
-        public Animation CenterY { get; } = new Animation(0.0, -99999.0, 99999.0);
+        public Animation CenterY { get; } = new Animation(0.0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
