@@ -10,7 +10,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Commons.Ca
         [Display(Name = nameof(Texts.File), Description = nameof(Texts.File), ResourceType = typeof(Texts))]
         [FileSelector(Settings.FileGroupType.AudioItem)]
         public string File { get => file; set => Set(ref file, value); }
-        string file = "";
+        string file = string.Empty;
 
         public FileAudioSourceReaderParameter() : base() { }
 
@@ -45,7 +45,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Commons.Ca
 
         public IEnumerable<string> GetFiles()
         {
-            if (File != "")
+            if (!string.IsNullOrEmpty(File))
                 yield return File;
         }
 
@@ -58,7 +58,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Commons.Ca
         private class SharedData
         {
             public string File { get => file; set => file = value; }
-            string file = "";
+            string file = string.Empty;
 
             public SharedData(FileAudioSourceReaderParameter param)
             {

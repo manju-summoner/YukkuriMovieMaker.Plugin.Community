@@ -55,7 +55,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Rotate
                 matrix3D = Matrix4x4.CreateRotationZ(z / 180f * MathF.PI) 
                     * Matrix4x4.CreateRotationY(-y / 180f * MathF.PI) 
                     * Matrix4x4.CreateRotationX(-x / 180f * MathF.PI) 
-                    * new Matrix4x4(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, -0.001f, 0f, 0f, 0f, 1f);
+                    * new Matrix4x4(
+                        1f, 0f, 0f, 0f,
+                        0f, 1f, 0f, 0f,
+                        0f, 0f, 1f, -0.001f,
+                        0f, 0f, 0f, 1f);
             }
 
             if (isFirst || this.matrix2D != matrix2D)
@@ -71,7 +75,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Rotate
             RawRectF imageLocalBounds = devices.DeviceContext.GetImageLocalBounds(renderOutput);
             if ((double)imageLocalBounds.Left == (double)int.MinValue || (double)imageLocalBounds.Top == (double)int.MinValue || (double)imageLocalBounds.Right == 2147483648.0 || (double)imageLocalBounds.Bottom == 2147483648.0)
                 cropEffect.Rectangle = new(-2048f, -2048f, 2048f, 2048f);
-
+            
             isFirst = false;
             this.matrix2D = matrix2D;
             this.matrix3D = matrix3D;

@@ -18,10 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Commons.Ca
             if (isSourceChanged)
             {
                 if (source is not null)
-                {
                     disposer.RemoveAndDispose(ref source);
-                    source = null;
-                }
                 timelineItemSourceDescription.Scenes.FirstOrDefault(x => x.ID == sceneId)?.TryCreateAudioSource(out source);
                 if (source is not null)
                     disposer.Collect(source);

@@ -8,7 +8,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Commons.Ef
     public abstract class AudioVolumeVideoEffectProcessorBase : VideoEffectProcessorBase
     {
         protected readonly AudioVolumeCalculaterSource calculaterSource;
-
+        
         public AudioVolumeVideoEffectProcessorBase(IGraphicsDevicesAndContext devices, AudioVolumeVideoEffectBase item) : base(devices)
         {
             calculaterSource = item.Calculater.CreateSource();
