@@ -11,11 +11,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
     {
         [Display(Name = nameof(Texts.Azimuth), Description = nameof(Texts.Azimuth), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Azimuth { get; } = new Animation(0, -36000, 36000);
+        public Animation Azimuth { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Elevation), Description = nameof(Texts.Elevation), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Elevation { get; } = new Animation(0, -36000, 36000);
+        public Animation Elevation { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         public override IEnumerable<string> CreateExoVideoFilters(bool isEnabled, int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
@@ -32,8 +32,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
         public class SharedData
         {
-            public Animation Azimuth { get; } = new Animation(0, -36000, 36000);
-            public Animation Elevation { get; } = new Animation(0, -36000, 36000);
+            public Animation Azimuth { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
+            public Animation Elevation { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
             public SharedData()
             {
 

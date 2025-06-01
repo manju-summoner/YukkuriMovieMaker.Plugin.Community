@@ -11,7 +11,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
     {
         [Display(Name = nameof(Texts.ConstantName), Description = nameof(Texts.ConstantDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
-        public Animation Constant { get; } = new Animation(50, 0, 1000000);
+        public Animation Constant { get; } = new Animation(50, 0, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Color), Description = nameof(Texts.Color), ResourceType = typeof(Texts))]
         [ColorPicker]
@@ -29,7 +29,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
         public class ReflectionParameterBaseSharedData
         {
-            public Animation Constant { get; } = new Animation(50, 0, 1000000);
+            public Animation Constant { get; } = new Animation(50, 0, YMM4Constants.VeryLargeValue);
             public Color Color { get; set; }
             public Blend Blend { get; set; }
             public ReflectionParameterBaseSharedData()

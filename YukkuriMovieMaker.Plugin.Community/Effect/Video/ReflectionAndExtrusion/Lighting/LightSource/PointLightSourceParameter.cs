@@ -13,15 +13,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
     {
         [Display(Name = nameof(Texts.XName), Description = nameof(Texts.XDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation X { get; } = new Animation(0, -100000, 100000);
+        public Animation X { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.YName), Description = nameof(Texts.YDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation Y { get; } = new Animation(0, -100000, 100000);
+        public Animation Y { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.ZName), Description = nameof(Texts.ZDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation Z { get; } = new Animation(0, -100000, 100000);
+        public Animation Z { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => [X, Y, Z];
 
@@ -73,9 +73,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
         public class SharedData
         {
-            public Animation X { get; } = new Animation(0, -100000, 100000);
-            public Animation Y { get; } = new Animation(0, -100000, 100000);
-            public Animation Z { get; } = new Animation(0, -100000, 100000);
+            public Animation X { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
+            public Animation Y { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
+            public Animation Z { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
             public SharedData()
             {

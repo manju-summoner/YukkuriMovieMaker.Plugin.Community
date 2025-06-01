@@ -17,7 +17,7 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
         public override object? SettingView => throw new NotImplementedException();
 
         public string APIKey { get; set; } = string.Empty;
-        public string Model { get; set; } = "gemini-1.5-flash-002";
+        public string Model { get; set; } = GeminiModels.DefaultModel;
         
         bool isPreviewModel = false;
         public bool IsPreviewModel { get => isPreviewModel; set => Set(ref isPreviewModel, value); }

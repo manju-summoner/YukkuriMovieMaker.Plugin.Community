@@ -15,11 +15,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ThreeDimensional
 
         [Display(GroupName = nameof(Texts.ThreeDimensionalEffectName), Name = nameof(Texts.ThreeDimensionalEffectXName), Description = nameof(Texts.ThreeDimensionalEffectXDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation X { get; } = new Animation(0, -99999, 99999);
+        public Animation X { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ThreeDimensionalEffectName), Name = nameof(Texts.ThreeDimensionalEffectYName), Description = nameof(Texts.ThreeDimensionalEffectYDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation Y { get; } = new Animation(0, -99999, 99999);
+        public Animation Y { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ThreeDimensionalEffectName), Name = nameof(Texts.ThreeDimensionalEffectLengthName), Description = nameof(Texts.ThreeDimensionalEffectLengthDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 50)]

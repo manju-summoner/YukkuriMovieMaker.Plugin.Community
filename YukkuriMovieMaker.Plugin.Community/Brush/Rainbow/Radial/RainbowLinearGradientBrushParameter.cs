@@ -10,39 +10,39 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Radial
     {
         [Display(Name = nameof(Texts.Offset), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", -100, 100)]
-        public Animation Offset { get; } = new Animation(0);
+        public Animation Offset { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.CenterX), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation CenterX { get; } = new Animation(0);
+        public Animation CenterX { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.CenterY), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation CenterY { get; } = new Animation(0);
+        public Animation CenterY { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.OriginX), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation OriginX { get; } = new Animation(0);
+        public Animation OriginX { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.OriginY), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
-        public Animation OriginY { get; } = new Animation(0);
+        public Animation OriginY { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.RadiusX), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0, 500)]
-        public Animation RadiusX { get; } = new Animation(100);
+        public Animation RadiusX { get; } = new Animation(100, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.RadiusY), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0, 500)]
-        public Animation RadiusY { get; } = new Animation(100);
+        public Animation RadiusY { get; } = new Animation(100, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Zoom), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 500)]
-        public Animation Zoom { get; } = new Animation(100);
+        public Animation Zoom { get; } = new Animation(100, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Angle), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Angle { get; } = new Animation(0, -36000, 36000);
+        public Animation Angle { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Aspect), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "", -100, 100)]

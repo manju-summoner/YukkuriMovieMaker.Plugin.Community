@@ -49,7 +49,7 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
 
     [Display(GroupName = nameof(Texts.Text), Name = nameof(Texts.Size), Description = nameof(Texts.SizeOfCharacters), ResourceType = typeof(Texts))]
     [AnimationSlider("F1", "px", 1, 100)]
-    public Animation FontSize { get; } = new(32, 1, 100000);
+    public Animation FontSize { get; } = new(32, 1, YMM4Constants.VeryLargeValue);
 
     [Display(GroupName = nameof(Texts.Text), Name = nameof(Texts.Justification), ResourceType = typeof(Texts))]
     [EnumComboBox]
@@ -152,7 +152,7 @@ internal class NumberTextParameter(SharedDataStore? sharedData) : ShapeParameter
         private Animation Number { get; } = new(0);
         private Animation IntegerDigits { get; } = new(0, 0, 16);
         private Animation DecimalPlaces { get; } = new(0, 0, 16);
-        private Animation FontSize { get; } = new(32, 1, 100000);
+        private Animation FontSize { get; } = new(32, 1, YMM4Constants.VeryLargeValue);
 
         public void CopyTo(NumberTextParameter param)
         {

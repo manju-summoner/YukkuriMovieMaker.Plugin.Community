@@ -56,19 +56,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.RectangleGlitchNoise
 
         [Display(GroupName = nameof(Texts.ComplicationGroupName), Name = nameof(Texts.RectangleMaxWidthAttenuation), Description = nameof(Texts.RectangleMaxWidthAttenuation), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
-        public Animation RectangleMaxWidthAttenuation { get; } = new Animation(30, 0, int.MaxValue);
+        public Animation RectangleMaxWidthAttenuation { get; } = new Animation(30, 0, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ComplicationGroupName), Name = nameof(Texts.RectangleMaxHeightAttenuation), Description = nameof(Texts.RectangleMaxHeightAttenuation), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
-        public Animation RectangleMaxHeightAttenuation { get; } = new Animation(30, 0, int.MaxValue);
+        public Animation RectangleMaxHeightAttenuation { get; } = new Animation(30, 0, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ComplicationGroupName), Name = nameof(Texts.RectangleMaxXShiftAttenuation), Description = nameof(Texts.RectangleMaxXShiftAttenuation), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
-        public Animation RectangleMaxXShiftAttenuation { get; } = new Animation(50, 0, int.MaxValue);
+        public Animation RectangleMaxXShiftAttenuation { get; } = new Animation(50, 0, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ComplicationGroupName), Name = nameof(Texts.RectangleMaxYShiftAttenuation), Description = nameof(Texts.RectangleMaxYShiftAttenuation), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
-        public Animation RectangleMaxYShiftAttenuation { get; } = new Animation(50, 0, int.MaxValue);
+        public Animation RectangleMaxYShiftAttenuation { get; } = new Animation(50, 0, YMM4Constants.VeryLargeValue);
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {

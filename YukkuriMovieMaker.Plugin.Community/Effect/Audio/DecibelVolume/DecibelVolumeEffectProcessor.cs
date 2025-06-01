@@ -17,7 +17,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DecibelVolume
             var read = Input.Read(destBuffer, offset, count);
             for (int i = 0; i < read; i++)
             {
-                var dB = item.Decibel.GetValue((currentPosition + i) % 2, Duration % 2, Hz);
+                var dB = item.Decibel.GetValue((currentPosition + i) / 2, Duration / 2, Hz);
                 var gain = dB <= -60 ? 0 : (float)Math.Pow(10, dB / 20);
                 destBuffer[offset + i] *= gain;
             }

@@ -1,0 +1,6 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
+APIKey,,APIキー,API Key,API密钥,API 키,Clave de API,مفتاح API,Kunci API,
+Model,,モデル,Model,模型,模型,모델,Modelo,نموذج,Model,
+IsSendImageEnabledTitle,,再生位置の画像を元にセリフを生成,Generate lines based on the image of the playback position,根据播放位置的图像生成台词,재생 위치의 이미지를 기반으로 대사 생성,Generar líneas basadas en la imagen de la posición de reproducción,توليد الخطوط بناءً على صورة موضع التشغيل,Generate lines based on the image of the playback position,
+IsSendImageEnabledHint,,マルチモーダルモデルを指定する必要があります,You need to specify a multimodal model,您需要指定一个多模型,다중 모델을 지정해야 합니다,Debe especificar un modelo multimodal,يجب عليك تحديد نموذج متعدد الوسائط,يجب عليك تحديد نموذج متعدد الوسائط,Yang perlu Anda lakukan adalah menentukan model multimodal,
+Details,,詳細,Details,细节,세부 정보,Detalles,تفاصيل,Detail,

@@ -22,7 +22,7 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
 
         public async Task<string> ProcessAsync(string systemPrompt, string text, Bitmap? image)
         {
-            var json = CreateJson(systemPrompt, text, ref image);
+            var json = CreateJson(systemPrompt, text, image);
             var jsonText = json.ToString();
             var jsonContent = new StringContent(jsonText, Encoding.UTF8, "application/json");
 
@@ -51,7 +51,7 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
                 ?? string.Empty;
         }
 
-        private static JObject CreateJson(string systemPrompt, string text, ref Bitmap? image)
+        private static JObject CreateJson(string systemPrompt, string text, Bitmap? image)
         {
             if (image != null)
             {

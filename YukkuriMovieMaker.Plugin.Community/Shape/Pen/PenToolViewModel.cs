@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
@@ -131,6 +132,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
 
         public BitmapSource Bitmap { get => bitmap; set => Set(ref bitmap, value); }
         BitmapSource bitmap;
+
+        public Size CanvasSize { get; }
+        public ICommand UpdateInkCanvasScaleCommand { get; }
+        public double InkCanvasScale { get => inkCanvasScale; set => Set(ref inkCanvasScale, value); }
+        double inkCanvasScale = 1;
 
         readonly IEditorInfo info;
         readonly ITimelineSourceAndDevices source;
@@ -309,8 +315,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
                 UndoCommand?.RaiseCanExecuteChanged();
                 RedoCommand?.RaiseCanExecuteChanged();
             };
+            
+            CanvasSize = new Size(info.VideoInfo.Width, info.VideoInfo.Height);
+
+            UpdateInkCanvasScaleCommand = new ActionCommand(
+                _ => true,
+                x =>
+                {
+                    if (x is not SizeChangedEventArgs arg)
+                        return;
+                    UpdateInkCanvasScale(arg.NewSize.Width, arg.NewSize.Height);
+                });
 
             Render();
+        }
+
+        void UpdateInkCanvasScale(double actualWidth, double actualHeight)
+        {
+            var scale = Math.Min(actualWidth / CanvasSize.Width, actualHeight / CanvasSize.Height);
+            InkCanvasScale = scale;
         }
 
         [MemberNotNull(nameof(bitmap))]

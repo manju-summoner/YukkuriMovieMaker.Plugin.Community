@@ -20,7 +20,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.RadialArrangeGroupItem
 
         [Display(GroupName = nameof(Texts.RadialArrangeGroupItemsEffectName), Name = nameof(Texts.Radius), Description = nameof(Texts.Radius), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -100, 100)]
-        public Animation Radius { get; } = new Animation(0, -100000, 100000);
+        public Animation Radius { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.RadialArrangeGroupItemsEffectName), Name = nameof(Texts.SyncAngle), Description = nameof(Texts.SyncAngle), ResourceType = typeof(Texts))]
         [ToggleSlider]

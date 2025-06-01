@@ -19,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
 
         [Display(Name = nameof(Texts.Thickness), Description = nameof(Texts.Thickness), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0.1d, 200)]
-        public Animation Thickness { get; } = new Animation(100, 0.1, 100000);
+        public Animation Thickness { get; } = new Animation(100, 0.1, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Length), Description = nameof(Texts.Length), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
@@ -27,7 +27,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
 
         [Display(Name = nameof(Texts.Offset), Description = nameof(Texts.Offset), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", -100, 100)]
-        public Animation Offset { get; } = new Animation(0, -1000000, 1000000);
+        public Animation Offset { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
 
         public bool IsEditing { get => isEditing; set => Set(ref isEditing, value); }
@@ -73,9 +73,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
         {
             public ImmutableList<SerializableStroke> Strokes { get; set; } = [];
 
-            public Animation Thickness { get; } = new Animation(100, 0.1, 100000);
+            public Animation Thickness { get; } = new Animation(100, 0.1, YMM4Constants.VeryLargeValue);
             public Animation Length { get; } = new Animation(100, 0, 100);
-            public Animation Offset { get; } = new Animation(0, -1000000, 1000000);
+            public Animation Offset { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
             public SharedData() { }
             public SharedData(PenShapeParameter parameter)

@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
+<data name="Whisper" xml:space="preserve"><value>Whisper (Local)</value></data>
+<data name="CreatingAudioStreamMessage" xml:space="preserve"><value>Preparing to parse target</value></data>
+<data name="LoadingWhisperModelMessage" xml:space="preserve"><value>Loading Whisper model</value></data>
+<data name="ProcessingAudioMessage" xml:space="preserve"><value>Processing audio {0} / {1} {2}</value></data>
+<data name="Model" xml:space="preserve"><value>模型</value></data>
+<data name="Language" xml:space="preserve"><value>Language</value></data>
+<data name="DownloadingProgressMessage" xml:space="preserve"><value>Downloading {0} {1} / {2}</value></data>
+<data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>{0} Required</value></data>
+<data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>The required runtime is not installed.
+To use this feature, you need to install “{0}”.
+
+Would you like to download and run the installer now?</value></data>
+<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>“{0}” is not installed.</value></data>
+<data name="InstallerNotFoundMessage" xml:space="preserve"><value>Installer not found: {0}</value></data>
+<data name="InstallerStartFailedMessage" xml:space="preserve"><value>Failed to start the installer.</value></data>
+<data name="InstallerExitFailureMessage" xml:space="preserve"><value>Installation failed. ExitCode = {0}</value></data>
+<data name="NotSupportedMessage" xml:space="preserve"><value>This feature is not supported in your environment</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>Installing {0}. Please wait. The cancel button will not work during installation.</value></data>
+</root>

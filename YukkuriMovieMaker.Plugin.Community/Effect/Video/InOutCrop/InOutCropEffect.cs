@@ -37,7 +37,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InOutCrop
         [Display(GroupName = nameof(Texts.InOutCropEffectGroupName), Name = nameof(Texts.InOutCropEffectEffectDurationName), Description = nameof(Texts.InOutCropEffectEffectDurationDesc), ResourceType = typeof(Texts))]
         [TextBoxSlider("F2", nameof(Texts.InOutCropEffectSecUnit), 0, 0.5, ResourceType = typeof(Texts))]
         [DefaultValue(0.3)]
-        [Range(0, 99999)]
+        [Range(0d, YMM4Constants.VeryLargeValue)]
         public double EffectDuration { get => effectDuration; set => Set(ref effectDuration, value); }
         double effectDuration = 0.3;
 

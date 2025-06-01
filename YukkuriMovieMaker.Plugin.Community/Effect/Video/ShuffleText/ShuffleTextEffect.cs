@@ -17,7 +17,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
 
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_ShuffleText), Name = nameof(Texts.ShuffleTextEffectDisplayName_Interval), Description = nameof(Texts.ShuffleTextEffectDiscription_Interval), ResourceType = typeof(Texts))]
         [AnimationSlider("F2", nameof(Texts.ShuffleTextEffectUnit_Seconds), 0, 0.25, ResourceType = typeof(Texts))]
-        public Animation Interval { get; } = new Animation(0, 0, 1000.00);
+        public Animation Interval { get; } = new Animation(0, 0, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_ShuffleText), Name = nameof(Texts.ShuffleTextEffectDisplayName_Delay), Description = nameof(Texts.ShuffleTextEffectDiscription_Delay), ResourceType = typeof(Texts))]
         [ToggleSlider]
@@ -81,7 +81,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
 
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AnimationText), Name = nameof(Texts.ShuffleTextEffectDisplayName_Size), Description = nameof(Texts.ShuffleTextEffectDiscription_Size), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 1.0, 50.0)]
-        public Animation FontSize { get; } = new Animation(34.0, 1, 100000.0);
+        public Animation FontSize { get; } = new Animation(34.0, 1, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ShuffleTextEffectGroupName_AnimationText), Name = nameof(Texts.ShuffleTextEffectDisplayName_Color), Description = nameof(Texts.ShuffleTextEffectDiscription_Color), ResourceType = typeof(Texts))]
         [ColorPicker]

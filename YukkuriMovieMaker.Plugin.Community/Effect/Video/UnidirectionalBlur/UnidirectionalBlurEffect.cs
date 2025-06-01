@@ -19,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.UnidirectionalBlur
 
         [Display(GroupName = nameof(Texts.UnidirectionalBlur), Name = nameof(Texts.Angle), Description = nameof(Texts.Angle), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Angle { get; } = new(0, -36000,36000);
+        public Animation Angle { get; } = new(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.UnidirectionalBlur), Name = nameof(Texts.Length), Description = nameof(Texts.Length), ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "px", 0, 500)]

@@ -20,19 +20,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
 
         [Display(Name = nameof(Texts.Width), ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "px", 0, 500)]
-        public Animation Width { get; } = new Animation(50, 1, 99999);
+        public Animation Width { get; } = new Animation(50, 1, YMM4Constants.MaximumBitmapSize / 2);
 
         [Display(Name = nameof(Texts.Height), ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "px", 0, 500)]
-        public Animation Height { get; } = new Animation(100, 1, 99999);
+        public Animation Height { get; } = new Animation(100, 1, YMM4Constants.MaximumBitmapSize / 2);
 
         [Display(Name = nameof(Texts.Point), ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "px", 0, 500)]
-        public Animation Point { get; } = new Animation(50, 0, 99999);
+        public Animation Point { get; } = new Animation(50, 0, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Zoom), ResourceType = typeof(Texts), Order = 250)]
         [AnimationSlider("F1", "%", 0, 400)]
-        public Animation Zoom { get; } = new Animation(100, 0, 5000);
+        public Animation Zoom { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
         public override IBrushSource CreateBrush(IGraphicsDevicesAndContext devices)
         {

@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
+<data name="Whisper" xml:space="preserve"><value>Whisper（本地）</value></data>
+<data name="CreatingAudioStreamMessage" xml:space="preserve"><value>准备解析目标</value></data>
+<data name="LoadingWhisperModelMessage" xml:space="preserve"><value>加载 Whisper 模型</value></data>
+<data name="ProcessingAudioMessage" xml:space="preserve"><value>正在解析音频 {0} / {1} {2}</value></data>
+<data name="Model" xml:space="preserve"><value>모델</value></data>
+<data name="Language" xml:space="preserve"><value>语言</value></data>
+<data name="DownloadingProgressMessage" xml:space="preserve"><value>正在下载 {0} {1} / {2}</value></data>
+<data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>需要 {0}</value></data>
+<data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>尚未安裝所需的執行階段。
+若要使用此功能，必須安裝「{0}」。
+
+是否要立即下載並執行安裝程式？</value></data>
+<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>尚未安裝「{0}」。</value></data>
+<data name="InstallerNotFoundMessage" xml:space="preserve"><value>找不到安裝程式: {0}</value></data>
+<data name="InstallerStartFailedMessage" xml:space="preserve"><value>啟動安裝程式失敗。</value></data>
+<data name="InstallerExitFailureMessage" xml:space="preserve"><value>安裝失敗。結束代碼 = {0}</value></data>
+<data name="NotSupportedMessage" xml:space="preserve"><value>您的环境不支持此功能</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>正在安装 {0}。请稍候。安装期间取消按钮将无法工作。</value></data>
+</root>
