@@ -19,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorShift
 
         [Display(GroupName = nameof(Texts.ColorShiftGroupName), Name = nameof(Texts.ColorShiftEffectAngleName), Description = nameof(Texts.ColorShiftEffectAngleDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -360d, 360d)]
-        public Animation Angle { get; } = new Animation(90, -YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
+        public Animation Angle { get; } = new Animation(90, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.ColorShiftGroupName), Name = nameof(Texts.ColorShiftEffectStrengthName), Description = nameof(Texts.ColorShiftEffectStrengthDesc), Order = 100, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0d, 100d)]
