@@ -77,4 +77,6 @@
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>فشلت عملية التثبيت. رمز الخروج = {0}</value></data>
 <data name="NotSupportedMessage" xml:space="preserve"><value>Esta función no es compatible con su entorno</value></data>
 <data name="InstallingMessage" xml:space="preserve"><value>Instalando {0}. Por favor espera. El botón de cancelar no funcionará durante la instalación.</value></data>
+<data name="FileSizeLimitMessage" xml:space="preserve"><value>نظرًا لأن YMM4 موجود في مسار يحتوي على أحرف متعددة البايت، فلا يمكنه تحميل النماذج التي يتجاوز حجمها 2 جيجابايت.
+عليك إما التبديل إلى نموذج بحجم أقل من ‎2‎ جيجابايت، أو نقل YMM4 إلى مسار لا يحتوي على أحرف متعددة البايت.</value></data>
 </root>

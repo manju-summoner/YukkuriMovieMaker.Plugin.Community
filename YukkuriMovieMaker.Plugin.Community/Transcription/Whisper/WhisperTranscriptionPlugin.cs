@@ -10,7 +10,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
 {
     internal class WhisperTranscriptionPlugin : ITranscriptionPlugin
     {
-        readonly HashSet<string> ngWords = [ "あ", "ん", "ご視聴ありがとうございました" ];
+        readonly HashSet<string> ngWords = ["あ", "ん", "ご視聴ありがとうございました"];
         const int blockSeconds = 30;
         const int sampleRate = 16000;
 
@@ -36,7 +36,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
             using var source = await Task.Run(args.CreateAudioStream, token);
 
             progress.Report(-1, Texts.LoadingWhisperModelMessage);
-            using var factory = await Task.Run(()=> WhisperFactory.FromPath(modelPath), token);
+            using var factory = await CreateFactoryAsync(modelPath, token);
             var whisperBuider =
                 factory
                 .CreateBuilder()
@@ -58,7 +58,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
             var sourceDuration = TimeSpan.FromSeconds((double)totalSamples / sampleRate);
 
             //音声データ全体を処理するとメモリを使用量が爆増するため、30秒ごとのブロックに分けて処理する
-            while ((readCount = await Task.Run(()=> source.Read(blockBuffer, 0, blockBuffer.Length), token)) > 0)
+            while ((readCount = await Task.Run(() => source.Read(blockBuffer, 0, blockBuffer.Length), token)) > 0)
             {
                 var blockTime = TimeSpan.FromSeconds((double)blockPosition / sampleRate);
                 string message = CreateProgressMessage(lastText, sourceDuration, blockTime);
@@ -94,6 +94,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
 
                 Array.Clear(blockBuffer);
                 blockPosition = source.Position;
+            }
+        }
+
+        static async Task<WhisperFactory> CreateFactoryAsync(string filePath, CancellationToken token)
+        {
+            //ファイルパスにマルチバイト文字が含まれているかどうかをチェック
+            if (filePath.Any(c => c > 127))
+            {
+                //マルチバイト文字を含むファイルはWhisperFactory.FromPath()で読み込むことが出来ない
+                //MemoryMappedFile経由でMemory化してからWhisperFactory.FromBuffer()で読み込む
+                var fileInfo = new FileInfo(filePath);
+                if (fileInfo.Length > int.MaxValue)
+                    throw new NotSupportedException(Texts.FileSizeLimitMessage);
+                using var mm = new MemoryMappedFileMemoryManager(filePath);
+                var factory = await Task.Run(() => WhisperFactory.FromBuffer(mm.Memory), token);
+                return factory;
+            }
+            else
+            {
+                //マルチバイト文字を含まないファイルはWhisperFactory.FromPath()で直接読み込む
+                return await Task.Run(() => WhisperFactory.FromPath(filePath), token);
             }
         }
 
@@ -147,8 +168,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
         {
             var timeSpanFormat = @"hh\:mm\:ss\.ff";
             return string.Format(
-                Texts.ProcessingAudioMessage, 
-                blockTime.ToString(timeSpanFormat), 
+                Texts.ProcessingAudioMessage,
+                blockTime.ToString(timeSpanFormat),
                 totalTime.ToString(timeSpanFormat),
                 lastText);
         }

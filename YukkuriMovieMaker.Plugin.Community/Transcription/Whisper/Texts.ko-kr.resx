@@ -77,4 +77,6 @@
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>설치에 실패했습니다. 종료 코드 = {0}</value></data>
 <data name="NotSupportedMessage" xml:space="preserve"><value>您的環境不支援此功能</value></data>
 <data name="InstallingMessage" xml:space="preserve"><value>正在安裝 {0}。請稍候。安裝期間取消按鈕將無法工作。</value></data>
+<data name="FileSizeLimitMessage" xml:space="preserve"><value>YMM4가 다바이트 문자가 포함된 경로에 위치해 있기 때문에 파일 크기가 2GB를 초과하는 모델을 불러올 수 없습니다.
+2GB 이하의 모델로 변경하거나 YMM4를 다바이트 문자가 포함되지 않은 경로로 이동해야 합니다.</value></data>
 </root>

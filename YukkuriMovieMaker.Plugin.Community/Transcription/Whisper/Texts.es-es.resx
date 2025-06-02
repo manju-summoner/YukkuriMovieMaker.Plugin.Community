@@ -77,4 +77,6 @@ Para utilizar esta función debes instalar “{0}”.
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>La instalación falló. ExitCode = {0}</value></data>
 <data name="NotSupportedMessage" xml:space="preserve"><value>이 기능은 귀하의 환경에서 지원되지 않습니다</value></data>
 <data name="InstallingMessage" xml:space="preserve"><value>설치 중입니다 {0}. 잠시만 기다려 주십시오. 설치 중에는 취소 버튼이 작동하지 않습니다.</value></data>
+<data name="FileSizeLimitMessage" xml:space="preserve"><value>YMM4 está ubicado en una ruta que contiene caracteres multibyte, por lo que no puede cargar modelos cuyo tamaño de archivo supere los 2 GB.
+Cambia a un modelo de menos de 2 GB o mueve YMM4 a una ruta que no contenga caracteres multibyte.</value></data>
 </root>

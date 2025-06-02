@@ -77,4 +77,6 @@
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>インストールに失敗しました。ExitCode = {0}</value></data>
 <data name="NotSupportedMessage" xml:space="preserve"><value>お使いの環境ではこの機能を使用することは出来ません</value></data>
 <data name="InstallingMessage" xml:space="preserve"><value>{0}をインストール中。しばらくお待ちください。インストール中はキャンセルボタンが動作しません。</value></data>
+<data name="FileSizeLimitMessage" xml:space="preserve"><value>YMM4がマルチバイト文字を含むパスに配置されているため、ファイルサイズが2GBを超えるモデルを読み込むことが出来ません。
+2GB以下のモデルに切り替えるか、YMM4をマルチバイト文字を含まないパスへ移動させる必要があります。</value></data>
 </root>

@@ -77,4 +77,6 @@ Would you like to download and run the installer now?</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>Installation failed. ExitCode = {0}</value></data>
 <data name="NotSupportedMessage" xml:space="preserve"><value>This feature is not supported in your environment</value></data>
 <data name="InstallingMessage" xml:space="preserve"><value>Installing {0}. Please wait. The cancel button will not work during installation.</value></data>
+<data name="FileSizeLimitMessage" xml:space="preserve"><value>Because YMM4 is located in a path that contains multibyte characters, it cannot load models whose file size exceeds 2 GB.
+You need to either switch to a model under 2 GB or move YMM4 to a path that does not include multibyte characters.</value></data>
 </root>

@@ -77,4 +77,6 @@
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>安装失败。退出代码 = {0}</value></data>
 <data name="NotSupportedMessage" xml:space="preserve"><value>Your environment does not support this feature</value></data>
 <data name="InstallingMessage" xml:space="preserve"><value>Installing {0}. Please wait. The cancel button will not work during installation.</value></data>
+<data name="FileSizeLimitMessage" xml:space="preserve"><value>由于 YMM4 位于包含多字节字符的路径中，无法加载文件大小超过 2 GB 的模型。
+请切换到 2 GB 以下的模型，或将 YMM4 移动到不包含多字节字符的路径。</value></data>
 </root>
