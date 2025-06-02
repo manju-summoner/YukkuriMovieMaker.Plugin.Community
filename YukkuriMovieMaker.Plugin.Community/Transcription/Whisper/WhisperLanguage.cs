@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using Whisper.net;
+using YukkuriMovieMaker.Plugin.Community.Transcription.Whisper.Installers;
 
 namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
 {
@@ -17,11 +18,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
 
         public bool EqualsCode(string code) => Code.Equals(code, StringComparison.OrdinalIgnoreCase);
 
-        static IEnumerable<string> GetSupportedLanguagesSafe() 
-        {            
+        static List<string> GetSupportedLanguagesSafe() 
+        {
+            // Whisperの実行可能なランタイムが存在しない場合、空を返して抜ける。
+            // WhisperFactory.GetSupportedLanguages()呼び出しによるライブラリの読み込みを回避し、WhisperFactory.libraryLoadedが読み込み失敗状態で固定されるのを防ぐ。
+            if (!CUDAToolkit.IsInstalled() && !VulkanRuntime.IsInstalled() && !VisualCppRuntime.IsInstalled())
+                return [];
             try
             {
-                return WhisperFactory.GetSupportedLanguages();
+                // 実行可能なランタイムが存在しない場合、WhisperFactory.GetSupportedLanguages()で返されるIEnumerableの列挙中に例外が発生する。
+                // IEnumerableをそのまま返すと、この関数を抜けた後の列挙中に例外が発生する。そのため、ここでListに変換して返す。
+                return [.. WhisperFactory.GetSupportedLanguages()];
             }
             catch
             {
