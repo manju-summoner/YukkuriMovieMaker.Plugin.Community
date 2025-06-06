@@ -62,4 +62,7 @@
 <data name="RadialArrangeGroupItemsEffectName" xml:space="preserve"><value>Radial arrange items in group control at equal intervals</value></data>
 <data name="Radius" xml:space="preserve"><value>Radius</value></data>
 <data name="SyncAngle" xml:space="preserve"><value>Sync angle</value></data>
+<data name="Arc" xml:space="preserve"><value>Arc</value></data>
+<data name="Direction" xml:space="preserve"><value>Direction</value></data>
+<data name="Centering" xml:space="preserve"><value>Centering</value></data>
 </root>

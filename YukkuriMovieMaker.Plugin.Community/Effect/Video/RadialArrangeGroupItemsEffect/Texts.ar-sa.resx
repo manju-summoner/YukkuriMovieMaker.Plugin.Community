@@ -62,4 +62,7 @@
 <data name="RadialArrangeGroupItemsEffectName" xml:space="preserve"><value>توزيع العناصر في التحكم في المجموعة على فترات متساوية</value></data>
 <data name="Radius" xml:space="preserve"><value>نصف القطر</value></data>
 <data name="SyncAngle" xml:space="preserve"><value>زاوية التزامن</value></data>
+<data name="Arc" xml:space="preserve"><value>قوس</value></data>
+<data name="Direction" xml:space="preserve"><value>Dirección</value></data>
+<data name="Centering" xml:space="preserve"><value>Centrado</value></data>
 </root>

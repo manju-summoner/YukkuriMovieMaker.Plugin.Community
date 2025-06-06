@@ -62,4 +62,7 @@
 <data name="RadialArrangeGroupItemsEffectName" xml:space="preserve"><value>그룹 컨트롤에서 항목을 균등 간격으로 배치합니다</value></data>
 <data name="Radius" xml:space="preserve"><value>반지름</value></data>
 <data name="SyncAngle" xml:space="preserve"><value>동기 각도</value></data>
+<data name="Arc" xml:space="preserve"><value>호</value></data>
+<data name="Direction" xml:space="preserve"><value>방향</value></data>
+<data name="Centering" xml:space="preserve"><value>중앙 정렬</value></data>
 </root>

@@ -62,4 +62,7 @@
 <data name="RadialArrangeGroupItemsEffectName" xml:space="preserve"><value>在組控件中均勻排列項目</value></data>
 <data name="Radius" xml:space="preserve"><value>半徑</value></data>
 <data name="SyncAngle" xml:space="preserve"><value>同步角度</value></data>
+<data name="Arc" xml:space="preserve"><value>圓弧</value></data>
+<data name="Direction" xml:space="preserve"><value>方向</value></data>
+<data name="Centering" xml:space="preserve"><value>中心對齊</value></data>
 </root>

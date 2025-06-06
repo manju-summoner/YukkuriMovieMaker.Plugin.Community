@@ -62,4 +62,7 @@
 <data name="RadialArrangeGroupItemsEffectName" xml:space="preserve"><value>Menyusun item dalam kontrol grup pada interval yang sama</value></data>
 <data name="Radius" xml:space="preserve"><value>Jari-jari</value></data>
 <data name="SyncAngle" xml:space="preserve"><value>Sudut sinkronisasi</value></data>
+<data name="Arc" xml:space="preserve"><value>Busur</value></data>
+<data name="Direction" xml:space="preserve"><value>Arah</value></data>
+<data name="Centering" xml:space="preserve"><value>Pemusatan</value></data>
 </root>

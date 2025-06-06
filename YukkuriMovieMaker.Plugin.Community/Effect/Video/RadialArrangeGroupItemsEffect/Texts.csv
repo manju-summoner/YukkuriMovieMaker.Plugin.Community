@@ -2,3 +2,6 @@ Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
 RadialArrangeGroupItemsEffectName,,グループ制御中のアイテムを円周上に均等配置,Radial arrange items in group control at equal intervals,在组控件中均匀排列项目,在組控件中均勻排列項目,그룹 컨트롤에서 항목을 균등 간격으로 배치합니다,Colocar elementos en el control de grupo a intervalos iguales,توزيع العناصر في التحكم في المجموعة على فترات متساوية,Menyusun item dalam kontrol grup pada interval yang sama
 Radius,,半径,Radius,半径,半徑,반지름,Radián,نصف القطر,Jari-jari
 SyncAngle,,回転を同期,Sync angle,同步角度,同步角度,동기 각도,Ángulo de sincronización,زاوية التزامن,Sudut sinkronisasi
+Arc,,円弧,Arc,圆弧,圓弧,호,Arco,قوس,Busur
+Direction,,方向,Direction,方向,方向,방향,Dirección,Dirección,Arah
+Centering,,中心寄せ,Centering,中心对齐,中心對齊,중앙 정렬,Centrado,Centrado,Pemusatan
