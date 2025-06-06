@@ -62,4 +62,5 @@
 <data name="ArrangeGroupItemsEffectName" xml:space="preserve"><value>在組控件中均勻排列項目</value></data>
 <data name="Interval" xml:space="preserve"><value>間隔</value></data>
 <data name="Angle" xml:space="preserve"><value>角度</value></data>
+<data name="Centering" xml:space="preserve"><value>中心對齊</value></data>
 </root>

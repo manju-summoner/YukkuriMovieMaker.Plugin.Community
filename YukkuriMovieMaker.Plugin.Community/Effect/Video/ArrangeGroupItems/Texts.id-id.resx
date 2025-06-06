@@ -62,4 +62,5 @@
 <data name="ArrangeGroupItemsEffectName" xml:space="preserve"><value>Menyusun item dalam kontrol grup pada interval yang sama</value></data>
 <data name="Interval" xml:space="preserve"><value>Interval</value></data>
 <data name="Angle" xml:space="preserve"><value>Sudut</value></data>
+<data name="Centering" xml:space="preserve"><value>Pemusatan</value></data>
 </root>

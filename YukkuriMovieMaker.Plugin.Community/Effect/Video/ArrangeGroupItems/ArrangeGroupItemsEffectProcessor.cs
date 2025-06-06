@@ -19,8 +19,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ArrangeGroupItems
 
             var interval = item.Interval.GetValue(frame, length, fps);
             var angle = item.Angle.GetValue(frame, length, fps);
+            var isCentering = item.IsCentering;
 
-            var offset = interval * effectDescription.GroupIndex - (interval * (effectDescription.GroupCount - 1)) / 2;
+            var offset = interval * effectDescription.GroupIndex ;
+            if(isCentering)
+                offset -= (interval * (effectDescription.GroupCount - 1)) / 2;
+
             var matrix = Matrix4x4.CreateRotationZ((float)(angle * Math.PI / 180));
             var v = Vector3.Transform(new Vector3((float)offset,0,0), matrix);
             var desc = effectDescription.DrawDescription;

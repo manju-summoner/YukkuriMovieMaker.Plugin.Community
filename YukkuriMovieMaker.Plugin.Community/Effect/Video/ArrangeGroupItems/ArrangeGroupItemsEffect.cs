@@ -26,6 +26,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ArrangeGroupItems
         [AnimationSlider("F1", "°", -360, 360)]
         public Animation Angle { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
+        [Display(GroupName = nameof(Texts.ArrangeGroupItemsEffectName), Name = nameof(Texts.Centering), Description = nameof(Texts.Centering), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool IsCentering { get => isCentering; set=> Set(ref isCentering, value); }
+        bool isCentering = true;
+
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
 

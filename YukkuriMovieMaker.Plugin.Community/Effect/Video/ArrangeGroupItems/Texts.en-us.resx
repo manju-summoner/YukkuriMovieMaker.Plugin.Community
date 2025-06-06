@@ -62,4 +62,5 @@
 <data name="ArrangeGroupItemsEffectName" xml:space="preserve"><value>Arrange items in group control at equal intervals</value></data>
 <data name="Interval" xml:space="preserve"><value>Interval</value></data>
 <data name="Angle" xml:space="preserve"><value>Angle</value></data>
+<data name="Centering" xml:space="preserve"><value>Centering</value></data>
 </root>

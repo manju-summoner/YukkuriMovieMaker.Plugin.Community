@@ -62,4 +62,5 @@
 <data name="ArrangeGroupItemsEffectName" xml:space="preserve"><value>グループ制御中のアイテムを等間隔に配置</value></data>
 <data name="Interval" xml:space="preserve"><value>間隔</value></data>
 <data name="Angle" xml:space="preserve"><value>角度</value></data>
+<data name="Centering" xml:space="preserve"><value>中心寄せ</value></data>
 </root>
