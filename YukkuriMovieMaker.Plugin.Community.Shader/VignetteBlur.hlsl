@@ -55,6 +55,16 @@ float4 GetColor(int index, float4 uv0, float4 uv1, float4 uv2, float4 uv3, float
     }
 }
 
+float4 GetShiftColor(int index, float4 uv0, float4 uv1, float4 uv2, float4 uv3, float4 uv4, float4 uv5, float4 uv6, float4 uv7, float4 uv8, float4 uv9, float4 uv10, float4 uv11, float2 shift)
+{
+    float4 colorR = GetColor(index, uv0, uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9, uv10, uv11, -shift);
+    float4 colorG = GetColor(index, uv0, uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9, uv10, uv11, float2(0, 0));
+    float4 colorB = GetColor(index, uv0, uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9, uv10, uv11, shift);
+	float a = max(max(colorR.a, colorG.a), colorB.a);
+    float4 color = float4(colorR.r, colorG.g, colorB.b, a);
+    return color;
+}
+
 float4 main(
     float4 pos : SV_POSITION,
     float4 posScene : SCENE_POSITION,
@@ -87,15 +97,9 @@ float4 main(
 
     float2 shift = dv / max(dist, 1e-6) * blurPx * shiftRate;
 
-    float4 col0r = GetColor(lod0, uv0, uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9, uv10, uv11, -shift);
-    float4 col0g = GetColor(lod0, uv0, uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9, uv10, uv11, float2(0, 0));
-    float4 col0b = GetColor(lod0, uv0, uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9, uv10, uv11, shift);
-	float4 col0 = float4(col0r.r, col0g.g, col0b.b, max(max(col0r.a, col0g.a), col0b.a));
-    float4 col1r = GetColor(lod1, uv0, uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9, uv10, uv11, -shift);
-    float4 col1g = GetColor(lod1, uv0, uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9, uv10, uv11, float2(0, 0));
-    float4 col1b = GetColor(lod1, uv0, uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9, uv10, uv11, shift);
-	float4 col1 = float4(col1r.r, col1g.g, col1b.b, max(max(col1r.a, col1g.a), col1b.a));
-    float4 result = lerp(col0, col1, w);
+    float4 color0 = GetShiftColor(lod0, uv0, uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9, uv10, uv11, shift);
+    float4 color1 = GetShiftColor(lod1, uv0, uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8, uv9, uv10, uv11, shift);
+    float4 result = lerp(color0, color1, w);
     
     if (lightness < 1.0)
     {
