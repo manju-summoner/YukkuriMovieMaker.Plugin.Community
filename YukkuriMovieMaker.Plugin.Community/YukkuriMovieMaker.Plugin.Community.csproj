@@ -115,6 +115,7 @@
 	  <Resource Include="$(ShaderDirPath)Wave.cso" Link="Resources\Shader\Wave.cso" />
 	  <Resource Include="$(ShaderDirPath)ColorBlindness.cso" Link="Resources\Shader\ColorBlindness.cso" />
 	  <Resource Include="$(ShaderDirPath)VignetteBlur.cso" Link="Resources\Shader\VignetteBlur.cso" />
+	  <Resource Include="$(ShaderDirPath)BlurMap.cso" Link="Resources\Shader\BlurMap.cso" />
   </ItemGroup>
 
 </Project>
