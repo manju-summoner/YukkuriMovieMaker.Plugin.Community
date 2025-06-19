@@ -10,8 +10,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Bloom
 {
     internal class BloomEffectProcessor(IGraphicsDevicesAndContext devices, BloomEffect item) : VideoEffectProcessorBase(devices)
     {
-        readonly IGraphicsDevicesAndContext devices = devices;
-
         LuminanceKey.LuminanceKeyCustomEffect? luminanceKey;
         ColorMatrix? colorize;
         GaussianBlur? blur;
