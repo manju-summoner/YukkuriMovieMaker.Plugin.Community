@@ -12,7 +12,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AlphaMask
 {
-    [VideoEffect(nameof(Texts.AlphaMask), [VideoEffectCategories.Layout], ["alpha mask"], IsEffectItemSupported = false, IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.AlphaMask), [VideoEffectCategories.Layout], ["不透明度マスク", "アルファマスク", "オパシティマスク", "alpha mask", "opacity mask"], IsEffectItemSupported = false, IsAviUtlSupported = false, ResourceType = typeof(Texts))]
 
     internal class AlphaMaskEffect : VideoEffectBase
     {
