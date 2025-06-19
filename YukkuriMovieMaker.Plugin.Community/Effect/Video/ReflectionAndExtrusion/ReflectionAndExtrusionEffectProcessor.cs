@@ -14,6 +14,7 @@ using Blend = Vortice.Direct2D1.Effects.Blend;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 {
+    using AlphaMask = Vortice.Direct2D1.Effects.AlphaMask;
     internal class ReflectionAndExtrusionEffectProcessor(IGraphicsDevicesAndContext devices, ReflectionAndExtrusionEffect item) : VideoEffectProcessorBase(devices)
     {
         readonly IGraphicsDevicesAndContext devices = devices;

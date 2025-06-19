@@ -10,6 +10,7 @@ using YukkuriMovieMaker.Plugin.Brush;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
 {
+    using AlphaMask = Vortice.Direct2D1.Effects.AlphaMask;
     public class InnerOutlineEffectProcessor : VideoEffectProcessorBase
     {
         readonly IGraphicsDevicesAndContext devices;

@@ -11,6 +11,7 @@ using D2D = Vortice.Direct2D1;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Lighting.PointSpecular
 {
+    using AlphaMask = D2D.Effects.AlphaMask;
     internal class PointSpecularLightingProcessor : ILightingProcessor
     {
         readonly DisposeCollector disposer = new();

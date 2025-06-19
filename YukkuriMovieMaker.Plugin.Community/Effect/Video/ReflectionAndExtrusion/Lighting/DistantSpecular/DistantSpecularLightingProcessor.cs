@@ -11,6 +11,7 @@ using D2D = Vortice.Direct2D1;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Lighting.DistantSpecular
 {
+    using AlphaMask = D2D.Effects.AlphaMask;
     internal class DistantSpecularLightingProcessor : ILightingProcessor
     {
         readonly DisposeCollector disposer = new();
