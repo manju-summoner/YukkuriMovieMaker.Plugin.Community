@@ -142,6 +142,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AlphaMask
 
         protected override void ClearEffectChain()
         {
+            colorMatrixEffect?.SetInput(0, null, true);
+            blurEffect?.SetInput(0, null, true);
             alphaMaskEffect?.SetInput(0, null, true);
             alphaMaskEffect?.SetInput(1, null, true);
         }

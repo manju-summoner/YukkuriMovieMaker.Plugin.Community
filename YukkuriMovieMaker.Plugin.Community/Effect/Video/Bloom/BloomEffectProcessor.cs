@@ -127,7 +127,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Bloom
         protected override void ClearEffectChain()
         {
             luminanceKey?.SetInput(0, null, true);
+            colorize?.SetInput(0, null, true);
             blur?.SetInput(0, null, true);
+            opacity?.SetInput(0, null, true);
             composite?.SetInput(0, null, true);
             composite?.SetInput(1, null, true);
         }
