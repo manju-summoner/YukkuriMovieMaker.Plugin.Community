@@ -20,7 +20,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AlphaMask
 
         [Display(GroupName = nameof(Texts.AlphaMask), Name = nameof(Texts.Blur), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0, 100)]
-        public Animation Blur { get; } = new Animation(50, 0, 750);
+        public Animation Blur { get; } = new Animation(0, 0, 750);
 
         [Display(GroupName = nameof(Texts.AlphaMask), Name = nameof(Texts.InvertArea), ResourceType = typeof(Texts))]
         [ToggleSlider]
