@@ -23,12 +23,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CameraShake
             var pitch = (float)(item.Pitch.GetValue(frame, length, fps) / 180 * Math.PI * GetCenteringRandomValue(span, frame, fps, 4));
             var roll = (float)(item.Roll.GetValue(frame, length, fps) / 180 * Math.PI * GetCenteringRandomValue(span, frame, fps, 5));
 
-            var camera = Matrix4x4.CreateTranslation(x, y, z) * Matrix4x4.CreateTranslation(0, 0, -1000) * Matrix4x4.CreateFromYawPitchRoll(yaw, pitch, roll) * Matrix4x4.CreateTranslation(0, 0, 1000);
+            var drawDescription = effectDescription.DrawDescription;
+            var camera = drawDescription.Camera * Matrix4x4.CreateTranslation(x, y, z) * Matrix4x4.CreateRotationY(yaw, new(0, 0, 1000)) * Matrix4x4.CreateRotationX(pitch, new(0, 0, 1000)) * Matrix4x4.CreateRotationZ(roll, new(0, 0, 1000));
 
-            return effectDescription.DrawDescription with
-            {
-                Camera = effectDescription.DrawDescription.Camera * camera
-            };
+            return drawDescription with { Camera = camera };
         }
 
         private double GetCenteringRandomValue(double span, int frame, int fps, int parameterID)
