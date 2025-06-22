@@ -73,4 +73,5 @@
 <data name="Roll" xml:space="preserve"><value>Inclinación</value></data>
 <data name="RollDesc" xml:space="preserve"><value>Inclinación de la cámara</value></data>
 <data name="Span" xml:space="preserve"><value>Intervalo</value></data>
+<data name="SecUnit" xml:space="preserve"><value>Segundo</value></data>
 </root>

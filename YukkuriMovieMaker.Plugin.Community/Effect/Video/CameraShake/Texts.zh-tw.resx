@@ -73,4 +73,5 @@
 <data name="Roll" xml:space="preserve"><value>傾斜</value></data>
 <data name="RollDesc" xml:space="preserve"><value>相機傾斜</value></data>
 <data name="Span" xml:space="preserve"><value>間隔</value></data>
+<data name="SecUnit" xml:space="preserve"><value>秒</value></data>
 </root>

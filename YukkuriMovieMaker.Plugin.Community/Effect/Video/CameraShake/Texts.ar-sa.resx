@@ -73,4 +73,5 @@
 <data name="Roll" xml:space="preserve"><value>ميل</value></data>
 <data name="RollDesc" xml:space="preserve"><value>ميل الكاميرا</value></data>
 <data name="Span" xml:space="preserve"><value>فاصل</value></data>
+<data name="SecUnit" xml:space="preserve"><value>ثانية</value></data>
 </root>

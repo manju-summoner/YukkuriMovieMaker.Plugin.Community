@@ -73,4 +73,5 @@
 <data name="Roll" xml:space="preserve"><value>Tilt</value></data>
 <data name="RollDesc" xml:space="preserve"><value>Camera Tilt</value></data>
 <data name="Span" xml:space="preserve"><value>Interval</value></data>
+<data name="SecUnit" xml:space="preserve"><value>Second</value></data>
 </root>

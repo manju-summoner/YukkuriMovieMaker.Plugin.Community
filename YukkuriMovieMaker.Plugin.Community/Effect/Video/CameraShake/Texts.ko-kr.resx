@@ -73,4 +73,5 @@
 <data name="Roll" xml:space="preserve"><value>기울기</value></data>
 <data name="RollDesc" xml:space="preserve"><value>카메라 기울기</value></data>
 <data name="Span" xml:space="preserve"><value>간격</value></data>
+<data name="SecUnit" xml:space="preserve"><value>초</value></data>
 </root>

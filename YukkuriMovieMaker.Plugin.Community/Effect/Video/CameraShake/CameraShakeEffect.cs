@@ -37,7 +37,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CameraShake
         public Animation Roll { get; } = new Animation(5, 0, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.CameraShakeEffect), Name = nameof(Texts.Span), Description = nameof(Texts.Span), ResourceType = typeof(Texts))]
-        [AnimationSlider("F2", "秒", 0, 0.25)]
+        [AnimationSlider("F2", nameof(Texts.SecUnit), 0, 0.25, ResourceType = typeof(Texts))]
         public Animation Span { get; } = new Animation(0.5, 0, YMM4Constants.VeryLargeValue);
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
