@@ -27,7 +27,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ZoomPixel
             return effectDescription.DrawDescription with
             {
                 Zoom = item.Size.GetZoom(width, height, effectDescription),
-                ZoomInterpolationMode = item.Dot ? InterpolationMode.NearestNeighbor : effectDescription.DrawDescription.ZoomInterpolationMode,
+                ZoomInterpolationMode = item.Dot ? InterpolationMode.NearestNeighbor : InterpolationMode.HighQualityCubic,
             };
         }
 
