@@ -9,7 +9,7 @@ using YukkuriMovieMaker.Plugin.Community.Commons;
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VignetteBlur
 {
 
-    internal class VignetteBlurCustomEffect(IGraphicsDevicesAndContext devices) : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices)), IVignetteBlurEffect
+    internal class VignetteRadialBlurCustomEffect(IGraphicsDevicesAndContext devices) : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices)), IVignetteBlurEffect
     {
         public Vector2 Center
         {
@@ -59,10 +59,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VignetteBlur
             set => SetValue((int)EffectImpl.Properties.ColorShift, value);
         }
 
-        //ガウスぼかしエフェクトの最大標準偏差が250、半径が750
-        //半径[2^0, ... , 2^9, 750]の11段階のぼかしを想定
-        //ぼかし無し画像とあわせて12の入力を受け付ける
-        [CustomEffect(12)]
+        [CustomEffect(1)]
         class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
             bool isFixedSize;
@@ -179,7 +176,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VignetteBlur
                 }
             }
 
-            public EffectImpl() : base(ShaderResourceUri.Get("VignetteBlur"))
+            public EffectImpl() : base(ShaderResourceUri.Get("VignetteRadialBlur"))
             {
 
             }
@@ -191,38 +188,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VignetteBlur
 
             public override void MapInputRectsToOutputRect(RawRect[] inputRects, RawRect[] inputOpaqueSubRects, out RawRect outputRect, out RawRect outputOpaqueSubRect)
             {
-                if(isFixedSize)
+                var rect = inputRects[0];
+
+                if (IsFixedSize)
                 {
-                    outputRect = inputRects[0];
-                    outputOpaqueSubRect = default;
+                    outputRect = rect;
                 }
                 else
                 {
-                    var margin = Math.Max(Math.Abs(ColorShift), 1) * Blur;
-                    var rect = inputRects[0];
+                    var margin = (int)Math.Ceiling(Blur * (1 + Math.Abs(ColorShift)));
                     outputRect = new RawRect(
-                        rect.Left - (int)margin - 1,
-                        rect.Top - (int)margin - 1,
-                        rect.Right + (int)margin + 1,
-                        rect.Bottom + (int)margin + 1
-                    );
-                    outputOpaqueSubRect = default;
+                        rect.Left - margin,
+                        rect.Top - margin,
+                        rect.Right + margin,
+                        rect.Bottom + margin);
                 }
+                outputOpaqueSubRect = default;
             }
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
-                var margin = Math.Abs(ColorShift) * Blur;
-                var rect = new RawRect(
-                    outputRect.Left - (int)margin - 1,
-                    outputRect.Top - (int)margin - 1,
-                    outputRect.Right + (int)margin + 1,
-                    outputRect.Bottom + (int)margin + 1
-                );
-                for (int i=0; i < inputRects.Length; i++)
-                {
-                    inputRects[i] = rect;
-                }
+                var margin = (int)Math.Ceiling(Blur * (1 + Math.Abs(ColorShift)));
+                inputRects[0] = new RawRect(
+                        outputRect.Left - margin,
+                        outputRect.Top - margin,
+                        outputRect.Right + margin,
+                        outputRect.Bottom + margin);
             }
 
             [StructLayout(LayoutKind.Sequential)]

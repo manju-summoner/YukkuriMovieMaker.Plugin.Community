@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
+using YukkuriMovieMaker.ItemEditor.CustomVisibilityAttributes;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VignetteBlur
 {
-    [VideoEffect(nameof(Texts.VignetteBlur), [VideoEffectCategories.Filtering], ["周辺ぼかし", "周辺減光", "周辺増光", "周辺色ずれ", "色収差", "チルトシフト", "ビネット", "ブラー", "Tilt Shift", "Vignette", "Blur", "Color Shift", "Chromatic Aberration"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.VignetteBlur), [VideoEffectCategories.Filtering], ["周辺ぼかし", "周辺減光", "周辺増光", "周辺色ずれ", "色収差", "ガウスぼかし", "ガウスブラー", "ガウシアンブラー", "回転ぼかし", "回転ブラー", "放射ぼかし", "放射ブラー", "チルトシフト", "ビネット", "ブラー", "Tilt Shift", "Vignette", "Blur", "Color Shift", "Chromatic Aberration", "Gaussian Blur", "Radial Blur", "Circular Blur"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     internal class VignetteBlurEffect : VideoEffectBase
     {
         public override string Label => Texts.VignetteBlur;
@@ -42,9 +43,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VignetteBlur
         public bool IsFixedSize { get => isFixedSize; set => Set(ref isFixedSize, value); }
         private bool isFixedSize = false;
 
+
+        [Display(GroupName = nameof(Texts.VignetteBlur), Name = nameof(Texts.BlurMode), ResourceType = typeof(Texts))]
+        [EnumComboBox]
+        public VignetBlurMode Mode { get => mode; set => Set(ref mode, value); }
+        VignetBlurMode mode = VignetBlurMode.Gaussian;
+
         [Display(GroupName = nameof(Texts.VignetteBlur), Name = nameof(Texts.Blur), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0, 100)]
+        [ShowPropertyEditorWhen(nameof(Mode), VignetBlurMode.Gaussian | VignetBlurMode.Radial)]
         public Animation Blur { get; } = new Animation(50, 0, 750);//ガウスぼかしのStandardDeviationの最大値250 * 3 = 750
+
+        [Display(GroupName = nameof(Texts.VignetteBlur), Name = nameof(Texts.Blur), ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "°", 0, 360)]
+        [ShowPropertyEditorWhen(nameof(Mode), VignetBlurMode.Circular)]
+        public Animation BlurAngle { get; } = new Animation(10, 0, 750);
 
         [Display(GroupName = nameof(Texts.VignetteBlur), Name = nameof(Texts.Lightness), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
@@ -71,11 +84,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VignetteBlur
             yield return $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
                 $"track0={Softness.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
-                $"track1={Blur.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
+                $"track1={(mode is VignetBlurMode.Circular ? BlurAngle.ToExoString(keyFrameIndex, "F2", fps) : Blur.ToExoString(keyFrameIndex, "F2", fps))}\r\n" +
                 $"track2={Lightness.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"track3={ColorShift.ToExoString(keyFrameIndex, "F2", fps)}\r\n" +
                 $"name=周辺ぼけ減光2@YMM4-未実装\r\n" +
                 $"param=" +
+                    $"local mode = {Mode};" +
                     $"\r\n";
         }
 
@@ -84,6 +98,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VignetteBlur
             return new VignetteBlurProcessor(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [X, Y, Radius, Aspect, Softness, Blur, Lightness, ColorShift];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [X, Y, Radius, Aspect, Softness, Blur, BlurAngle, Lightness, ColorShift];
     }
 }
