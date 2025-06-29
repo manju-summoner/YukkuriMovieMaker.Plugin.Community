@@ -72,6 +72,6 @@
 <data name="FixedSize" xml:space="preserve"><value>サイズを固定</value></data>
 <data name="GaussianBlur" xml:space="preserve"><value>ガウスぼかし</value></data>
 <data name="RadialBlur" xml:space="preserve"><value>放射ブラー</value></data>
-<data name="CircularBlur" xml:space="preserve"><value>円形ブラー</value></data>
+<data name="CircularBlur" xml:space="preserve"><value>回転ブラー</value></data>
 <data name="BlurMode" xml:space="preserve"><value>種類</value></data>
 </root>
