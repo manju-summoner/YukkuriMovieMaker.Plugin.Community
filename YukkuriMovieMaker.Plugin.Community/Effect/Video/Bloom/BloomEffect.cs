@@ -23,11 +23,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Bloom
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation Strength { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
-        [Display(GroupName = nameof(Texts.Bloom), Name = nameof(Texts.Threshold), Description = nameof(Texts.StrengthDesc), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Bloom), Name = nameof(Texts.Threshold), Description = nameof(Texts.ThresholdDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation Threshold { get; } = new Animation(50, 0, 100);
 
-        [Display(GroupName = nameof(Texts.Bloom), Name = nameof(Texts.Blur), Description = nameof(Texts.StrengthDesc), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Bloom), Name = nameof(Texts.Blur), Description = nameof(Texts.BlurDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0, 250)]
         public Animation Blur { get; } = new Animation(50, 0, 250);
 
@@ -36,12 +36,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Bloom
         public bool IsFixedSizeEnabled { get => isFiexedSizeEnabled; set => Set(ref isFiexedSizeEnabled, value); }
         bool isFiexedSizeEnabled = false;
 
-        [Display(GroupName = nameof(Texts.Bloom), Name = nameof(Texts.IsColorizationEnabled), Description = nameof(Texts.StrengthDesc), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Bloom), Name = nameof(Texts.IsColorizationEnabled), Description = nameof(Texts.IsColorizationEnabledDesc), ResourceType = typeof(Texts))]
         [ToggleSlider]
         public bool IsColorizationEnabled { get=> isColorizationEnabled; set => Set(ref isColorizationEnabled, value); }
         bool isColorizationEnabled = false;
 
-        [Display(GroupName = nameof(Texts.Bloom), Name = nameof(Texts.Color), Description = nameof(Texts.StrengthDesc), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.Bloom), Name = nameof(Texts.Color), Description = nameof(Texts.ColorDesc), ResourceType = typeof(Texts))]
         [ColorPicker]
         [ShowPropertyEditorWhen(nameof(IsColorizationEnabled), true)]
         public Color Color { get=> color; set => Set(ref color, value); }
