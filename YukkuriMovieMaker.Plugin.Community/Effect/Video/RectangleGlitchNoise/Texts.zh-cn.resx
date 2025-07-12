@@ -76,4 +76,6 @@
 <data name="RectangleMaxHeightAttenuation" xml:space="preserve"><value>高度衰减</value></data>
 <data name="RectangleMaxXShiftAttenuation" xml:space="preserve"><value>横向偏移衰减</value></data>
 <data name="RectangleMaxYShiftAttenuation" xml:space="preserve"><value>纵向偏移衰减</value></data>
+<data name="Probability" xml:space="preserve"><value>发生率</value></data>
+<data name="ProbabilityDesc" xml:space="preserve"><value>故障噪音发生的概率</value></data>
 </root>

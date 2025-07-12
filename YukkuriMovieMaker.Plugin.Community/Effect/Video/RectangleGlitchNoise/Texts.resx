@@ -76,4 +76,6 @@
 <data name="RectangleMaxHeightAttenuation" xml:space="preserve"><value>高さ減衰</value></data>
 <data name="RectangleMaxXShiftAttenuation" xml:space="preserve"><value>横ずれ減衰</value></data>
 <data name="RectangleMaxYShiftAttenuation" xml:space="preserve"><value>縦ずれ減衰</value></data>
+<data name="Probability" xml:space="preserve"><value>発生率</value></data>
+<data name="ProbabilityDesc" xml:space="preserve"><value>グリッチノイズが発生する確率</value></data>
 </root>

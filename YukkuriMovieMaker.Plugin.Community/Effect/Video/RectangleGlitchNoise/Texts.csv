@@ -16,3 +16,5 @@ RectangleMaxWidthAttenuation,,幅減衰,Width Attenuation,宽度衰减,寬度衰
 RectangleMaxHeightAttenuation,,高さ減衰,Height Attenuation,高度衰减,高度衰減,높이 감쇠,Atenuación de altura,تخفيف الارتفاع,Attenuasi Tinggi,
 RectangleMaxXShiftAttenuation,,横ずれ減衰,Horizontal Shift Attenuation,横向偏移衰减,橫向偏移衰減,가로 이동 감쇠,Atenuación del desplazamiento horizontal,تخفيف الانحراف الأفقي,Attenuasi Perpindahan Horizontal,
 RectangleMaxYShiftAttenuation,,縦ずれ減衰,Vertical Shift Attenuation,纵向偏移衰减,縱向偏移衰減,세로 이동 감쇠,Atenuación del desplazamiento vertical,تخفيف الانحراف العمودي,Attenuasi Perpindahan Vertikal,
+Probability,,発生率,Occurrence Rate,发生率,發生率,발생률,Tasa de ocurrencia,معدل الحدوث,Laju Kejadian
+ProbabilityDesc,,グリッチノイズが発生する確率,Probability of Glitch Noise Occurrence,故障噪音发生的概率,故障噪音發生的機率,글리치 노이즈 발생 확률,Probabilidad de que ocurra ruido de falla,احتمالية حدوث ضوضاء خلل,Kemungkinan Terjadinya Glitch Noise

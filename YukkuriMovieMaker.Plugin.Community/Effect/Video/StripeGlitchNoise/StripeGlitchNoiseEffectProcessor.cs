@@ -1,4 +1,5 @@
-﻿using Vortice.Direct2D1;
+﻿using MathNet.Numerics.Random;
+using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
@@ -24,19 +25,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.StripeGlitchNoise
             var fps = effectDescription.FPS;
 
             var playbackRate = item.PlaybackRate.GetValue(frame, length, fps);
+            var probability = item.Probability.GetValue(frame, length, fps);
             var seed = item.GetHashCode() % 1000 + (int)(frame * playbackRate / 100);
+
+            bool isEnable = new MersenneTwister(seed).NextDouble() <= probability / 100;
+
             var bounds = devices.DeviceContext.GetImageLocalBounds(input);
             var inputTop = bounds.Top;
             var inputHeight = bounds.Bottom - bounds.Top;
-            var stripeCount = (int)item.StripeCount.GetValue(frame, length, fps);
-            var stripeMaxWidth = (float)item.StripeMaxWidth.GetValue(frame, length, fps);
-            var stripeMaxShift = (float)item.StripeMaxShift.GetValue(frame, length, fps);
-            var colorMaxShift = (float)item.ColorMaxShift.GetValue(frame, length, fps);
+            var stripeCount = isEnable ? (int)item.StripeCount.GetValue(frame, length, fps) : 0;
+            var stripeMaxWidth = isEnable ? (float)item.StripeMaxWidth.GetValue(frame, length, fps) : 0;
+            var stripeMaxShift = isEnable ? (float)item.StripeMaxShift.GetValue(frame, length, fps) : 0;
+            var colorMaxShift = isEnable ? (float)item.ColorMaxShift.GetValue(frame, length, fps) : 0;
             var isHardBorder = item.IsHardBorderMode;
 
-            var repeat = (int)item.Repeat.GetValue(frame, length, fps);
-            var stripeMaxWidthAttenuation = (float)item.StripeMaxWidthAttenuation.GetValue(frame, length, fps) / 100;
-            var stripeMaxShiftAttenuation = (float)item.StripeMaxShiftAttenuation.GetValue(frame, length, fps) / 100;
+            var repeat = isEnable ? (int)item.Repeat.GetValue(frame, length, fps) : 0;
+            var stripeMaxWidthAttenuation = isEnable ? (float)item.StripeMaxWidthAttenuation.GetValue(frame, length, fps) / 100 : 0;
+            var stripeMaxShiftAttenuation = isEnable ? (float)item.StripeMaxShiftAttenuation.GetValue(frame, length, fps) / 100 : 0;
 
             if (isFirst || this.seed != seed)
                 effect.Seed = seed;

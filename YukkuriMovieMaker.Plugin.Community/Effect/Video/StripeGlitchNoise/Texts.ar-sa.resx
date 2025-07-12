@@ -80,4 +80,6 @@
 <data name="StripeGlitchNoiseEffectComplicationGroupName" xml:space="preserve"><value>التعقيد</value></data>
 <data name="StripeGlitchNoiseEffectPlaybackRateName" xml:space="preserve"><value>معدل تشغيل الضوضاء المتموجة</value></data>
 <data name="StripeGlitchNoiseEffectPlaybackRateDesc" xml:space="preserve"><value>معدل تشغيل تأثير ضوضاء خطأ الشريط</value></data>
+<data name="StripeGlitchNoiseEffectProbability" xml:space="preserve"><value>معدل الحدوث</value></data>
+<data name="StripeGlitchNoiseEffectProbabilityDesc" xml:space="preserve"><value>احتمالية حدوث ضوضاء خلل</value></data>
 </root>

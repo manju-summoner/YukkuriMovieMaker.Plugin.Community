@@ -80,4 +80,6 @@
 <data name="StripeGlitchNoiseEffectComplicationGroupName" xml:space="preserve"><value>Complicación</value></data>
 <data name="StripeGlitchNoiseEffectPlaybackRateName" xml:space="preserve"><value>Velocidad de reproducción</value></data>
 <data name="StripeGlitchNoiseEffectPlaybackRateDesc" xml:space="preserve"><value>Velocidad de reproducción</value></data>
+<data name="StripeGlitchNoiseEffectProbability" xml:space="preserve"><value>Tasa de ocurrencia</value></data>
+<data name="StripeGlitchNoiseEffectProbabilityDesc" xml:space="preserve"><value>Probabilidad de que ocurra ruido de falla</value></data>
 </root>

@@ -76,4 +76,6 @@
 <data name="RectangleMaxHeightAttenuation" xml:space="preserve"><value>تخفيف الارتفاع</value></data>
 <data name="RectangleMaxXShiftAttenuation" xml:space="preserve"><value>تخفيف الانحراف الأفقي</value></data>
 <data name="RectangleMaxYShiftAttenuation" xml:space="preserve"><value>تخفيف الانحراف العمودي</value></data>
+<data name="Probability" xml:space="preserve"><value>معدل الحدوث</value></data>
+<data name="ProbabilityDesc" xml:space="preserve"><value>احتمالية حدوث ضوضاء خلل</value></data>
 </root>

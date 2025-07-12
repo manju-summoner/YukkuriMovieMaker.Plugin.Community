@@ -1,4 +1,5 @@
-﻿using Vortice.Direct2D1;
+﻿using MathNet.Numerics.Random;
+using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
@@ -24,26 +25,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.RectangleGlitchNoise
             var fps = effectDescription.FPS;
 
             var playbackRate = item.PlaybackRate.GetValue(frame, length, fps);
+            var probability = item.Probability.GetValue(frame, length, fps);
             var seed = item.GetHashCode() % 1000 + (int)(frame * playbackRate / 100);
+
+            bool isEnable = new MersenneTwister(seed).NextDouble() <= probability / 100;
+
             var bounds = devices.DeviceContext.GetImageLocalBounds(input);
             var inputTop = bounds.Top;
             var inputLeft = bounds.Left;
             var inputWidth = bounds.Right - bounds.Left;
             var inputHeight = bounds.Bottom - bounds.Top;
-            var rectangleCount = (int)item.RectangleCount.GetValue(frame, length, fps);
-            var rectangleMaxWidth = (float)item.RectangleMaxWidth.GetValue(frame, length, fps);
-            var rectangleMaxHeight = (float)item.RectangleMaxHeight.GetValue(frame, length, fps);
-            var rectangleMaxXShift = (float)item.RectangleMaxXShift.GetValue(frame, length, fps);
-            var rectangleMaxYShift = (float)item.RectangleMaxYShift.GetValue(frame, length, fps);
-            var colorMaxShift = (float)item.ColorMaxShift.GetValue(frame, length, fps);
+            var rectangleCount = isEnable ? (int)item.RectangleCount.GetValue(frame, length, fps) : 0;
+            var rectangleMaxWidth = isEnable ? (float)item.RectangleMaxWidth.GetValue(frame, length, fps) : 0;
+            var rectangleMaxHeight = isEnable ? (float)item.RectangleMaxHeight.GetValue(frame, length, fps) : 0;
+            var rectangleMaxXShift = isEnable ? (float)item.RectangleMaxXShift.GetValue(frame, length, fps) : 0;
+            var rectangleMaxYShift = isEnable ? (float)item.RectangleMaxYShift.GetValue(frame, length, fps) : 0;
+            var colorMaxShift = isEnable ? (float)item.ColorMaxShift.GetValue(frame, length, fps) : 0;
             var isClipping = item.IsClipping;
             var isHardBorder = item.IsHardBorderMode;
 
-            var repeat = (int)item.Repeat.GetValue(frame, length, fps);
-            var rectangleMaxWidthAttenuation = (float)item.RectangleMaxWidthAttenuation.GetValue(frame, length, fps) / 100;
-            var rectangleMaxHeightAttenuation = (float)item.RectangleMaxHeightAttenuation.GetValue(frame, length, fps) / 100;
-            var rectangleMaxXShiftAttenuation = (float)item.RectangleMaxXShiftAttenuation.GetValue(frame, length, fps) / 100;
-            var rectangleMaxYShiftAttenuation = (float)item.RectangleMaxYShiftAttenuation.GetValue(frame, length, fps) / 100;
+            var repeat = isEnable ? (int)item.Repeat.GetValue(frame, length, fps) : 0;
+            var rectangleMaxWidthAttenuation = isEnable ? (float)item.RectangleMaxWidthAttenuation.GetValue(frame, length, fps) / 100 : 0;
+            var rectangleMaxHeightAttenuation = isEnable ? (float)item.RectangleMaxHeightAttenuation.GetValue(frame, length, fps) / 100 : 0;
+            var rectangleMaxXShiftAttenuation = isEnable ? (float)item.RectangleMaxXShiftAttenuation.GetValue(frame, length, fps) / 100 : 0;
+            var rectangleMaxYShiftAttenuation = isEnable ? (float)item.RectangleMaxYShiftAttenuation.GetValue(frame, length, fps) / 100 : 0;
 
             if (isFirst || this.seed != seed)
                 effect.Seed = seed;
