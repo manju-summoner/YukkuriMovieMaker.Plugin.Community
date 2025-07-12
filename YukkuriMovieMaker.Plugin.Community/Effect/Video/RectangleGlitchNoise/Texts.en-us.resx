@@ -76,4 +76,6 @@
 <data name="RectangleMaxHeightAttenuation" xml:space="preserve"><value>Height Attenuation</value></data>
 <data name="RectangleMaxXShiftAttenuation" xml:space="preserve"><value>Horizontal Shift Attenuation</value></data>
 <data name="RectangleMaxYShiftAttenuation" xml:space="preserve"><value>Vertical Shift Attenuation</value></data>
+<data name="Probability" xml:space="preserve"><value>Occurrence Rate</value></data>
+<data name="ProbabilityDesc" xml:space="preserve"><value>Probability of Glitch Noise Occurrence</value></data>
 </root>

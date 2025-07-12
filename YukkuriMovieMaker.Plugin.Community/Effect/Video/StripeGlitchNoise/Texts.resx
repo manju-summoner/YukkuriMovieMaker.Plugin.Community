@@ -80,4 +80,6 @@
 <data name="StripeGlitchNoiseEffectComplicationGroupName" xml:space="preserve"><value>複雑化</value></data>
 <data name="StripeGlitchNoiseEffectPlaybackRateName" xml:space="preserve"><value>再生速度</value></data>
 <data name="StripeGlitchNoiseEffectPlaybackRateDesc" xml:space="preserve"><value>再生速度</value></data>
+<data name="StripeGlitchNoiseEffectProbability" xml:space="preserve"><value>発生率</value></data>
+<data name="StripeGlitchNoiseEffectProbabilityDesc" xml:space="preserve"><value>グリッチノイズが発生する確率</value></data>
 </root>
