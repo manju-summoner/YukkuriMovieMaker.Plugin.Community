@@ -80,4 +80,6 @@
 <data name="StripeGlitchNoiseEffectComplicationGroupName" xml:space="preserve"><value>Komplikasi</value></data>
 <data name="StripeGlitchNoiseEffectPlaybackRateName" xml:space="preserve"><value>Kecepatan pemutaran</value></data>
 <data name="StripeGlitchNoiseEffectPlaybackRateDesc" xml:space="preserve"><value>Kecepatan pemutaran</value></data>
+<data name="StripeGlitchNoiseEffectProbability" xml:space="preserve"><value>Laju Kejadian</value></data>
+<data name="StripeGlitchNoiseEffectProbabilityDesc" xml:space="preserve"><value>Kemungkinan Terjadinya Glitch Noise</value></data>
 </root>

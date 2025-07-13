@@ -32,6 +32,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.StripeGlitchNoise
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation PlaybackRate { get; } = new Animation(30, 0, 100);
 
+        [Display(GroupName = nameof(Texts.StripeGlitchNoiseEffectName), Name = nameof(Texts.StripeGlitchNoiseEffectProbability), Description = nameof(Texts.StripeGlitchNoiseEffectProbabilityDesc), Order = 100, ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 0, 100)]
+        public Animation Probability { get; } = new Animation(100, 0, 100);
+
         [Display(GroupName = nameof(Texts.StripeGlitchNoiseEffectName), Name = nameof(Texts.StripeGlitchNoiseEffectIsHardBorderModeName), Description = nameof(Texts.StripeGlitchNoiseEffectIsHardBorderModeDesc), Order = 100, ResourceType = typeof(Texts))]
         [ToggleSlider]
         public bool IsHardBorderMode { get => isHardBorderMode; set => Set(ref isHardBorderMode, value); }
@@ -76,6 +80,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.StripeGlitchNoise
             return new StripeGlitchNoiseEffectProcessor(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [StripeCount, StripeMaxWidth, StripeMaxShift, ColorMaxShift, PlaybackRate, Repeat, StripeMaxWidthAttenuation, StripeMaxShiftAttenuation];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [StripeCount, StripeMaxWidth, StripeMaxShift, ColorMaxShift, PlaybackRate, Probability, Repeat, StripeMaxWidthAttenuation, StripeMaxShiftAttenuation];
     }
 }

@@ -76,4 +76,6 @@
 <data name="RectangleMaxHeightAttenuation" xml:space="preserve"><value>Attenuasi Tinggi</value></data>
 <data name="RectangleMaxXShiftAttenuation" xml:space="preserve"><value>Attenuasi Perpindahan Horizontal</value></data>
 <data name="RectangleMaxYShiftAttenuation" xml:space="preserve"><value>Attenuasi Perpindahan Vertikal</value></data>
+<data name="Probability" xml:space="preserve"><value>Laju Kejadian</value></data>
+<data name="ProbabilityDesc" xml:space="preserve"><value>Kemungkinan Terjadinya Glitch Noise</value></data>
 </root>
