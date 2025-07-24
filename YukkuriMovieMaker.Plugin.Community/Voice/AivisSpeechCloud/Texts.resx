@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
+<data name="Speed" xml:space="preserve"><value>読み上げ速度</value></data>
+<data name="Style" xml:space="preserve"><value>スタイル</value></data>
+<data name="EmotionalIntensity" xml:space="preserve"><value>スタイルの強さ</value></data>
+<data name="EmotionalIntensityDesc" xml:space="preserve"><value>選択した話者スタイルの感情表現の強弱。
+数値が大きいほど、選択した話者スタイルに近い感情表現が込められた声になります。
+例えば話者スタイルが「上機嫌」なら、数値が大きいほどより嬉しそうな明るい話し方になります。
+
+一方で、話者やスタイルによっては、数値を上げすぎると発声がおかしくなったり、棒読みで不自然な声になる場合もあります。
+正しく発声できる上限値は話者やスタイルごとに異なります。必要に応じて最適な値を見つけて調整してください。</value></data>
+<data name="TempoDynamics" xml:space="preserve"><value>テンポの緩急</value></data>
+<data name="TempoDynamicsDesc" xml:space="preserve"><value>話す速さの緩急の強弱。数値が大きいほど、より早口で生っぽい抑揚がついた声になります。</value></data>
+<data name="Pitch" xml:space="preserve"><value>ピッチ</value></data>
+<data name="PitchDesc" xml:space="preserve"><value>声のピッチの高さ。
+数値が大きいほど、より高いピッチの声になります。
+
+この値を 0.0 から変更すると、合成音声の品質が劣化する場合があります。
+また、生成速度が大幅に低下します。</value></data>
+<data name="LeadingSilenceSeconds" xml:space="preserve"><value>開始無音</value></data>
+<data name="LeadingSilenceSecondsDesc" xml:space="preserve"><value>音声先頭の無音時間の長さ</value></data>
+<data name="TrailingSilenceSeconds" xml:space="preserve"><value>終了無音</value></data>
+<data name="TrailingSilenceSecondsDesc" xml:space="preserve"><value>音声末尾の無音時間の長さ</value></data>
+<data name="LineBreakSilenceSeconds" xml:space="preserve"><value>改行無音</value></data>
+<data name="LineBreakSilenceSecondsDesc" xml:space="preserve"><value>改行時の無音時間の長さ</value></data>
+<data name="SecUnit" xml:space="preserve"><value>秒</value></data>
+<data name="ApiKey" xml:space="preserve"><value>APIキー</value></data>
+<data name="SpeakerList" xml:space="preserve"><value>話者一覧</value></data>
+<data name="ModelUuid" xml:space="preserve"><value>モデルUUID</value></data>
+<data name="NameHeader" xml:space="preserve"><value>名前</value></data>
+<data name="Description" xml:space="preserve"><value>説明</value></data>
+<data name="Add" xml:space="preserve"><value>追加</value></data>
+<data name="Delete" xml:space="preserve"><value>削除</value></data>
+<data name="MissingUuidMessage" xml:space="preserve"><value>モデルUUIDまたはAivisHubのモデルページURLを入力してください。</value></data>
+<data name="Error" xml:space="preserve"><value>エラー</value></data>
+<data name="FetchingModelInfo" xml:space="preserve"><value>モデル情報を取得中</value></data>
+<data name="ErrorFetchingModelInfo" xml:space="preserve"><value>モデル情報の取得に失敗しました。</value></data>
+</root>

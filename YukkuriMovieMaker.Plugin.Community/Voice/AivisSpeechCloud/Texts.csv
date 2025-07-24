@@ -1,0 +1,94 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
+Speed,,読み上げ速度,Speed,速度,速度,속도,Velocidad,سرعة,Kecepatan,
+Style,,スタイル,Style,风格,風格,스타일,Estilo,أسلوب,Gaya,
+EmotionalIntensity,,スタイルの強さ,Emotional Intensity,情感强度,情感強度,감정 강도,Intensidad emocional,شدة العاطفة,Intensitas Emosional,
+EmotionalIntensityDesc,,"選択した話者スタイルの感情表現の強弱。
+数値が大きいほど、選択した話者スタイルに近い感情表現が込められた声になります。
+例えば話者スタイルが「上機嫌」なら、数値が大きいほどより嬉しそうな明るい話し方になります。
+
+一方で、話者やスタイルによっては、数値を上げすぎると発声がおかしくなったり、棒読みで不自然な声になる場合もあります。
+正しく発声できる上限値は話者やスタイルごとに異なります。必要に応じて最適な値を見つけて調整してください。","Emotional Intensity of the selected speaker style.
+The higher the value, the closer the voice will be to the emotional expression of the selected speaker style.
+For example, if the speaker style is 'Cheerful', a higher value will result in a happier and brighter way of speaking.
+
+However, for some speakers or styles, setting the value too high may result in unnatural speech or a robotic tone.
+The maximum value for correct speech varies by speaker and style. Adjust as needed to find the optimal value.","所選說話者風格的情感強度。
+數值越大，語音越接近所選說話者風格的情感表達。
+例如，如果說話者風格是「愉快」，則數值越大，語音聽起來就越開心和明亮。
+
+另一方面，對於某些說話者或風格，將數值設置得過高可能會導致語音不自然或機械化。
+正確發聲的最大值因說話者和風格而異。根據需要調整以找到最佳值。","선택한 화자 스타일의 감정 강도입니다.
+값이 높을수록 선택한 화자 스타일의 감정 표현에 가까운 음성이 됩니다.
+예를 들어 화자 스타일이 '쾌활'이라면, 값이 높을수록 더 행복하고 밝은 말투가 됩니다.
+
+그러나 일부 화자나 스타일의 경우, 값을 너무 높게 설정하면 발음이 이상해지거나 로봇 같은 목소리가 될 수 있습니다.
+정확한 발음이 가능한 최대값은 화자와 스타일에 따라 다릅니다. 필요에 따라 최적의 값을 찾아 조정하세요.","Intensidad emocional del estilo de hablante seleccionado.
+Cuanto mayor sea el valor, más cercana será la voz a la expresión emocional del estilo de hablante seleccionado.
+Por ejemplo, si el estilo de hablante es 'Alegre', un valor más alto resultará en una forma de hablar más feliz y brillante.
+
+Sin embargo, para algunos hablantes o estilos, establecer el valor demasiado alto puede resultar en un habla poco natural o un tono robótico.
+El valor máximo para un habla correcta varía según el hablante y el estilo. Ajusta según sea necesario para encontrar el valor óptimo.","شدة العاطفة لنمط المتحدث المحدد.
+كلما زادت القيمة، كانت الصوت أقرب إلى التعبير العاطفي لنمط المتحدث المحدد.
+على سبيل المثال، إذا كان نمط المتحدث هو 'مبتهج'، فإن القيمة الأعلى ستؤدي إلى طريقة حديث أكثر سعادة وإشراقًا.
+
+ومع ذلك، بالنسبة لبعض المتحدثين أو الأنماط، قد يؤدي ضبط القيمة على مستوى عالٍ جدًا إلى خطاب غير طبيعي أو نغمة آلية.
+القيمة القصوى للنطق الصحيح تختلف حسب المتحدث والنمط. اضبط حسب الحاجة للعثور على القيمة المثلى.","Intensitas Emosional dari gaya pembicara yang dipilih.
+Semakin tinggi nilainya, semakin dekat suara dengan ekspresi emosional dari gaya pembicara yang dipilih.
+Misalnya, jika gaya pembicara adalah 'Ceriah', nilai yang lebih tinggi akan menghasilkan cara berbicara yang lebih bahagia dan cerah.
+
+Namun, untuk beberapa pembicara atau gaya, mengatur nilai terlalu tinggi dapat menghasilkan ucapan yang tidak alami atau nada robotik.
+Nilai maksimum untuk ucapan yang benar bervariasi tergantung pada pembicara dan gaya. Sesuaikan sesuai kebutuhan untuk menemukan nilai optimal.",
+TempoDynamics,,テンポの緩急,Tempo Dynamics,节奏动态,節奏動態,템포 다이내믹스,Dinámica de tempo,ديناميات الإيقاع,Dinamika Tempo,
+TempoDynamicsDesc,,話す速さの緩急の強弱。数値が大きいほど、より早口で生っぽい抑揚がついた声になります。,"Tempo Dynamics of the speech. The higher the value, the faster and more natural the speech will be.","语速的起伏强度。数值越大，语速越快，语调越自然。","說話速度的起伏強度。數值越大，語速越快，語調越自然。",말하는 속도의 완급 조절 강도. 값이 높을수록 말이 더 빠르고 자연스러워집니다.,"Intensidad de las variaciones en la velocidad del habla. Cuanto mayor sea el valor, más rápida y natural será la voz.",شدة تقلبات سرعة الكلام. كلما زادت القيمة، كانت السرعة أكثر طبيعية وسرعة.,"Intensitas variasi kecepatan bicara. Semakin tinggi nilainya, semakin cepat dan alami suaranya。",
+Pitch,,ピッチ,Pitch,音调,音調,피치,Tono,طبقة الصوت,Nada,
+PitchDesc,,"声のピッチの高さ。
+数値が大きいほど、より高いピッチの声になります。
+
+この値を 0.0 から変更すると、合成音声の品質が劣化する場合があります。
+また、生成速度が大幅に低下します。","Height of the voice pitch.
+The higher the value, the higher the pitch of the voice.
+
+Changing this value from 0.0 can degrade the quality of the synthesized speech.
+It can also significantly reduce the generation speed.","语音音调的高度。
+数值越大，语音的音调越高。
+
+更改此值从 0.0 开始可能会降低合成语音的质量。
+生成速度也可能显著降低。","語音音調的高度。
+數值越大，語音的音調越高。
+
+更改此值從 0.0 開始可能會降低合成語音的品質。
+生成速度也可能顯著降低。","음성 피치의 높이입니다.
+값이 높을수록 음성의 피치가 더 높아집니다.
+
+이 값을 0.0에서 변경하면 합성 음성의 품질이 저하될 수 있습니다.
+생성 속도도 크게 감소할 수 있습니다.","Altura del tono de voz.
+Cuanto mayor sea el valor, más alto será el tono de la voz.
+
+Cambiar este valor desde 0.0 puede degradar la calidad del habla sintetizada.
+También puede reducir significativamente la velocidad de generación.","ارتفاع نغمة الصوت.
+كلما زادت القيمة، كانت نغمة الصوت أعلى.
+
+تغيير هذه القيمة من 0.0 قد يؤدي إلى تدهور جودة الكلام المُركب.
+También puede reducir بشكل كبير سرعة التوليد.","Tinggi nada suara.
+Semakin tinggi nilainya, semakin tinggi nada suaranya.
+
+Mengubah nilai ini dari 0.0 dapat menurunkan kualitas ucapan yang disintesis.
+Kecepatan generasi juga dapat berkurang secara signifikan.",
+LeadingSilenceSeconds,,開始無音,Leading Silence Seconds,开始静音秒数,開始靜音秒數,시작 무음 초,Segundos de silencio inicial,ثواني الصمت الأولية,Detik Keheningan Awal,
+LeadingSilenceSecondsDesc,,音声先頭の無音時間の長さ,Length of silence at the beginning of the speech,开始语音前的静音时间长度,開始語音前的靜音時間長度,음성 시작 부분의 무음 시간 길이,Longitud del silencio al inicio del habla,طول الصمت في بداية الكلام,Panjang keheningan di awal ucapan,
+TrailingSilenceSeconds,,終了無音,Trailing Silence Seconds,结束静音秒数,結束靜音秒數,종료 무음 초,Segundos de silencio final,ثواني الصمت النهائية,Detik Keheningan Akhir,
+TrailingSilenceSecondsDesc,,音声末尾の無音時間の長さ,Length of silence at the end of the speech,结束语音后的静音时间长度,結束語音後的靜音時間長度,음성 끝 부분의 무음 시간 길이,Longitud del silencio al final del habla,طول الصمت في نهاية الكلام,Panjang keheningan di akhir ucapan,
+LineBreakSilenceSeconds,,改行無音,Line Break Silence Seconds,换行静音秒数,換行靜音秒數,줄 바꿈 무음 초,Segundos de silencio de salto de línea,ثواني الصمت عند فواصل الأسطر,Detik Keheningan Baris Baru,
+LineBreakSilenceSecondsDesc,,改行時の無音時間の長さ,Length of silence at line breaks,换行时的静音时间长度,換行時的靜音時間長度,줄 바꿈 시의 무음 시간 길이,Longitud del silencio en saltos de línea,طول الصمت عند فواصل الأسطر,Panjang keheningan pada jeda baris,
+SecUnit,,秒,sec,秒,秒,초,Segundos,ثانية,dtk,
+ApiKey,,APIキー,API Key,API密钥,API金鑰,API 키,Clave API,مفتاح API,Kunci API,
+SpeakerList,,話者一覧,Speakers,说话者列表,說話者列表,화자 목록,Lista de hablantes,قائمة المتحدثين,Daftar Pembicara,
+ModelUuid,,モデルUUID,Model UUID,模型UUID,模型UUID,모델 UUID,Modelo UUID,نموذج UUID,Model UUID,
+NameHeader,,名前,Name,名称,名稱,이름,Nombre,اسم,Nama,
+Description,,説明,Description,描述,描述,설명,Descripción,وصف,Deskripsi,
+Add,,追加,Add,添加,新增,추가,Agregar,إضافة,Tambah,
+Delete,,削除,Delete,删除,刪除,삭제,Eliminar,حذف,Hapus,
+MissingUuidMessage,,モデルUUIDまたはAivisHubのモデルページURLを入力してください。,Please enter the Model UUID or the AivisHub model page URL.,请输入模型UUID或AivisHub模型页面URL。,請輸入模型UUID或AivisHub模型頁面URL。,모델 UUID 또는 AivisHub 모델 페이지 URL을 입력하세요.,Por favor, ingrese el UUID del modelo o la URL de la página del modelo de AivisHub.,الرجاء إدخال UUID النموذج أو عنوان URL لصفحة نموذج AivisHub.,Silakan masukkan UUID model atau URL halaman model AivisHub.,
+Error,,エラー,Error,错误,錯誤,오류,Error,خطأ,Kesalahan,
+FetchingModelInfo,,モデル情報を取得中,Fetching Model Info,正在获取模型信息,正在獲取模型資訊,모델 정보 가져오는 중,Obteniendo información del modelo,جاري الحصول على معلومات النموذج,Mendapatkan informasi model,
+ErrorFetchingModelInfo,,モデル情報の取得に失敗しました。,Failed to fetch model info,获取模型信息失败,獲取模型資訊失敗,모델 정보 가져오기 실패,Error al obtener información del modelo,Fallo al obtener información del modelo,Gagal mendapatkan informasi model,

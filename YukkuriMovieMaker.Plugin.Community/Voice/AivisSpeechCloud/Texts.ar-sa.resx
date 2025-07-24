@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
+<data name="Speed" xml:space="preserve"><value>سرعة</value></data>
+<data name="Style" xml:space="preserve"><value>أسلوب</value></data>
+<data name="EmotionalIntensity" xml:space="preserve"><value>شدة العاطفة</value></data>
+<data name="EmotionalIntensityDesc" xml:space="preserve"><value>Intensitas Emosional dari gaya pembicara yang dipilih.
+Semakin tinggi nilainya, semakin dekat suara dengan ekspresi emosional dari gaya pembicara yang dipilih.
+Misalnya, jika gaya pembicara adalah 'Ceriah', nilai yang lebih tinggi akan menghasilkan cara berbicara yang lebih bahagia dan cerah.
+
+Namun, untuk beberapa pembicara atau gaya, mengatur nilai terlalu tinggi dapat menghasilkan ucapan yang tidak alami atau nada robotik.
+Nilai maksimum untuk ucapan yang benar bervariasi tergantung pada pembicara dan gaya. Sesuaikan sesuai kebutuhan untuk menemukan nilai optimal.</value></data>
+<data name="TempoDynamics" xml:space="preserve"><value>ديناميات الإيقاع</value></data>
+<data name="TempoDynamicsDesc" xml:space="preserve"><value>شدة تقلبات سرعة الكلام. كلما زادت القيمة، كانت السرعة أكثر طبيعية وسرعة.</value></data>
+<data name="Pitch" xml:space="preserve"><value>طبقة الصوت</value></data>
+<data name="PitchDesc" xml:space="preserve"><value>ارتفاع نغمة الصوت.
+كلما زادت القيمة، كانت نغمة الصوت أعلى.
+
+تغيير هذه القيمة من 0.0 قد يؤدي إلى تدهور جودة الكلام المُركب.
+También puede reducir بشكل كبير سرعة التوليد.</value></data>
+<data name="LeadingSilenceSeconds" xml:space="preserve"><value>ثواني الصمت الأولية</value></data>
+<data name="LeadingSilenceSecondsDesc" xml:space="preserve"><value>طول الصمت في بداية الكلام</value></data>
+<data name="TrailingSilenceSeconds" xml:space="preserve"><value>ثواني الصمت النهائية</value></data>
+<data name="TrailingSilenceSecondsDesc" xml:space="preserve"><value>طول الصمت في نهاية الكلام</value></data>
+<data name="LineBreakSilenceSeconds" xml:space="preserve"><value>ثواني الصمت عند فواصل الأسطر</value></data>
+<data name="LineBreakSilenceSecondsDesc" xml:space="preserve"><value>طول الصمت عند فواصل الأسطر</value></data>
+<data name="SecUnit" xml:space="preserve"><value>ثانية</value></data>
+<data name="ApiKey" xml:space="preserve"><value>مفتاح API</value></data>
+<data name="SpeakerList" xml:space="preserve"><value>قائمة المتحدثين</value></data>
+<data name="ModelUuid" xml:space="preserve"><value>نموذج UUID</value></data>
+<data name="NameHeader" xml:space="preserve"><value>اسم</value></data>
+<data name="Description" xml:space="preserve"><value>وصف</value></data>
+<data name="Add" xml:space="preserve"><value>إضافة</value></data>
+<data name="Delete" xml:space="preserve"><value>حذف</value></data>
+<data name="MissingUuidMessage" xml:space="preserve"><value>ingrese el UUID del modelo o la URL de la página del modelo de AivisHub.</value></data>
+<data name="Error" xml:space="preserve"><value>خطأ</value></data>
+<data name="FetchingModelInfo" xml:space="preserve"><value>جاري الحصول على معلومات النموذج</value></data>
+<data name="ErrorFetchingModelInfo" xml:space="preserve"><value>Fallo al obtener información del modelo</value></data>
+</root>
