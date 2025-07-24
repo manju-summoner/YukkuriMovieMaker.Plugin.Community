@@ -14,7 +14,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API
         static readonly string url = "https://api.aivis-project.com/v1";
         readonly string apiKey = apiKey;
 
-        public async Task<bool> SynthesizeAsync(AivisSpeechCloudAPISynthesisParameters param, string filePath)
+        public async Task<int> SynthesizeAsync(AivisSpeechCloudAPISynthesisParameters param, string filePath)
         {
             var client = HttpClientFactory.Client;
 
@@ -44,12 +44,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API
             using var fileStream = System.IO.File.Create(filePath);
             await stream.CopyToAsync(fileStream);
 
-            if (response.Headers.TryGetValues("X-Aivis-Rate-Limit-Remaining", out var values2))
+            if (response.Headers.TryGetValues("X-Aivis-Rate-Limit-Remaining", out var values))
             {
-                //月額課金モードの場合はtrue
-                return true;
+                //月額課金モード
+                if (int.TryParse(values.FirstOrDefault(), out var remaining) && remaining > 0)
+                    return remaining;
             }
-            return false;
+            return -1;
         }
         public static async Task<AivisSpeechCloudAPIModelInfo> GetModelInfoAsync(string modelUuid)
         {

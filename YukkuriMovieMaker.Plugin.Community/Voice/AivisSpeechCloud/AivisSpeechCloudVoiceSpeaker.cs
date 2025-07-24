@@ -10,7 +10,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
 {
     internal class AivisSpeechCloudVoiceSpeaker(string ModelUuid, string SpeakerUuid) : IVoiceSpeaker
     {
-        const int rateLimitPerMinute = 10;
+        static int rateLimitPerMinute = 1;
         static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
         static bool isMonthlyBilling = true;
         static DateTime nextAllowedRequestAt = DateTime.MinValue;
@@ -91,9 +91,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
                     null,
                     null
                     );
-                isMonthlyBilling = await api.SynthesizeAsync(param, filePath);
-                if (isMonthlyBilling)
+                var remaining = await api.SynthesizeAsync(param, filePath);
+                // 月額課金制の場合、APIのレスポンスに1分あたりの呼び出し可能残りリクエスト回数が含まれる。
+                if (remaining != -1)
+                {
+                    isMonthlyBilling = true;
+                    //レートリミットはサービスの運用状況によって変化する可能性があるため、動的に拡張する。
+                    rateLimitPerMinute = Math.Max(rateLimitPerMinute, remaining + 1);
                     nextAllowedRequestAt = DateTime.Now.AddMinutes(1d / rateLimitPerMinute);
+                }
             }
             finally
             {
