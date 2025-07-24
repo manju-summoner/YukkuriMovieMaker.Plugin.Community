@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -28,8 +29,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API
                 Encoding.UTF8,
                 "application/json");
 
-            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            using HttpResponseMessage? response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var errorJson = JObject.Parse(errorContent);
+                var message = errorJson["detail"]?.Value<string>();
+                if (string.IsNullOrEmpty(message))
             response.EnsureSuccessStatusCode();
+                throw new Exception(message);
+            }
 
             using var stream = await response.Content.ReadAsStreamAsync();
             using var fileStream = System.IO.File.Create(filePath);
