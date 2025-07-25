@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
+namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
 {
-    internal class AivisSpeechCloudSettings : SettingsBase<AivisSpeechCloudSettings>
+    internal class AivisCloudAPISettings : SettingsBase<AivisCloudAPISettings>
     {
         public string ApiKey { get; set; } = string.Empty;
 
@@ -17,15 +17,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
 
         public override bool HasSettingView => true;
 
-        public override object? SettingView => new AivisSpeechCloudSettingsView();
+        public override object? SettingView => new AivisCloudAPISettingsView();
 
-        public ObservableCollection<API.AivisSpeechCloudAPIModelInfo> Models { get; } = [];
+        public ObservableCollection<API.ModelInfoContract> Models { get; } = [];
 
         public override void Initialize()
         {
             if(Models.Count is 0)
             {
-                foreach(var model in API.AivisSpeechCloudAPIModelInfo.GetDefaultModels())
+                foreach(var model in API.ModelInfoContract.GetDefaultModels())
                     Models.Add(model);
             }
         }

@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Plugin.Voice;
 
-namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
+namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
 {
-    internal class AivisSpeechCloudVoiceParameter : VoiceParameterBase
+    internal class AivisCloudAPIVoiceParameter : VoiceParameterBase
     {
         double
             speed = 100, 
@@ -29,7 +29,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
         public double Speed { get => speed; set => Set(ref speed, value); }
 
         [Display(Name = nameof(Texts.Style), Description = nameof(Texts.Style), ResourceType = typeof(Texts))]
-        [AivisSpeechCloudStyleComboBox]
+        [AivisCloudAPIStyleComboBox]
         public int Style { get => style; set => Set(ref style, value); }
 
         [Display(Name = nameof(Texts.EmotionalIntensity), Description = nameof(Texts.EmotionalIntensityDesc), ResourceType = typeof(Texts))]

@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
-namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API
+namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI.API
 {
-    public record AivisSpeechCloudAPIModelFileInfo(
+    public record ModelFileInfoContract(
         [property: JsonProperty("aivm_model_uuid")] string AivmModelUuid,
         [property: JsonProperty("manifest_version")] string ManifestVersion,
         [property: JsonProperty("name")] string Name,

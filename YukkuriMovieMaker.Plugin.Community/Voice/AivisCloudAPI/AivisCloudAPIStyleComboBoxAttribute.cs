@@ -4,13 +4,13 @@ using System.Windows;
 using System.Windows.Data;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
-using YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API;
+using YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI.API;
 using YukkuriMovieMaker.Plugin.Voice;
 using YukkuriMovieMaker.Views.Converters;
 
-namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
+namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
 {
-    internal class AivisSpeechCloudStyleComboBoxAttribute : PropertyEditorAttribute2, IPropertyEditorForVoiceParameterAttribute
+    internal class AivisCloudAPIStyleComboBoxAttribute : PropertyEditorAttribute2, IPropertyEditorForVoiceParameterAttribute
     {
         public VoiceDescription? VoiceDescription { get; set; }
 
@@ -24,12 +24,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
         {
             if(control is not CommonComboBox comboBox)
                 throw new InvalidOperationException("Control must be of type CommonComboBox.");
-            if (VoiceDescription?.Speaker is not AivisSpeechCloudVoiceSpeaker speaker)
+            if (VoiceDescription?.Speaker is not AivisCloudAPIVoiceSpeaker speaker)
                 throw new InvalidOperationException("VoiceDescription must have a valid AivisSpeechVoiceSpeaker.");
 
             comboBox.ItemsSource = speaker.Styles;
-            comboBox.DisplayMemberPath = nameof(AivisSpeechCloudAPIStyle.Name);
-            comboBox.SelectedValuePath = nameof(AivisSpeechCloudAPIStyle.LocalId);
+            comboBox.DisplayMemberPath = nameof(StyleContract.Name);
+            comboBox.SelectedValuePath = nameof(StyleContract.LocalId);
             comboBox.SetBinding(CommonComboBox.ValueProperty, ItemPropertiesBinding.Create(itemProperties));
         }
 

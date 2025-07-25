@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API
+namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI.API
 {
     /*
 {
@@ -85,9 +85,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API
   "updated_at": "2019-08-24T14:15:22Z"
 }
     */
-    public record AivisSpeechCloudAPIModelInfo(
+    public record ModelInfoContract(
         [property: JsonProperty("aivm_model_uuid")] string AivmModelUuid,
-        [property: JsonProperty("user")] AivisSpeechCloudAPIUserInfo User,
+        [property: JsonProperty("user")] UserInfoContract User,
         [property: JsonProperty("name")] string Name,
         [property: JsonProperty("description")] string Description,
         [property: JsonProperty("detailed_description")] string DetailedDescription,
@@ -96,11 +96,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API
         [property: JsonProperty("visibility")] string Visibility,
         [property: JsonProperty("is_tag_locked")] bool IsTagLocked,
         [property: JsonProperty("total_download_count")] int TotalDownloadCount,
-        [property: JsonProperty("model_files")] List<AivisSpeechCloudAPIModelFileInfo> ModelFiles,
-        [property: JsonProperty("tags")] List<AivisSpeechCloudAPITag> Tags,
+        [property: JsonProperty("model_files")] List<ModelFileInfoContract> ModelFiles,
+        [property: JsonProperty("tags")] List<TagContract> Tags,
         [property: JsonProperty("like_count")] int LikeCount,
         [property: JsonProperty("is_liked")] bool IsLiked,
-        [property: JsonProperty("speakers")] List<AivisSpeechCloudAPISpeaker> Speakers,
+        [property: JsonProperty("speakers")] List<SpeakerContract> Speakers,
         [property: JsonProperty("created_at")] DateTime CreatedAt,
         [property: JsonProperty("updated_at")] DateTime UpdatedAt
         )
@@ -114,9 +114,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API
             "{\"aivm_model_uuid\":\"47e53151-a378-46f3-abee-ce13aa07feb1\",\"user\":{\"handle\":\"khirio\",\"name\":\"古山キリヲ\",\"description\":\"狂気のデータサイエンティスト\",\"icon_url\":\"https://assets.aivis-project.com/account-icons/6d46593e-e93e-44d4-a27f-93175e0189ce.jpg\",\"account_type\":\"User\",\"account_status\":\"Active\",\"social_links\":[{\"type\":\"Website\",\"url\":\"https://sites.google.com/view/khirio-altenberg/home\"},{\"type\":\"Twitter\",\"url\":\"https://x.com/kuwa0611\"}]},\"name\":\"阿井田 茂\",\"description\":\"阿井田 茂（あいだ しげる）　\\nCV：古山キリヲ\\n\\n通称：モアイさん\\nバリトンボイスの朗らかおじさん\",\"detailed_description\":\"\",\"category\":\"OriginalCharacter\",\"voice_timbre\":\"MiddleAgedMale\",\"visibility\":\"Public\",\"is_tag_locked\":false,\"total_download_count\":5528,\"model_files\":[{\"aivm_model_uuid\":\"47e53151-a378-46f3-abee-ce13aa07feb1\",\"manifest_version\":\"1.0\",\"name\":\"阿井田 茂\",\"description\":\"阿井田 茂（あいだ しげる）　\\nCV：古山キリヲ\\n\\n通称：モアイさん\\nバリトンボイスの朗らかおじさん\",\"creators\":[\"古山キリヲ\"],\"license_type\":\"ACML 1.0\",\"license_text\":null,\"model_type\":\"AIVM\",\"model_architecture\":\"Style-Bert-VITS2 (JP-Extra)\",\"model_format\":\"Safetensors\",\"training_epochs\":300,\"training_steps\":3600,\"version\":\"1.0.0\",\"file_size\":252870536,\"checksum\":\"799cbe0ebbf79e13756f0c95395afa07db0fd9c6e0c078ce632331a3e5c14557\",\"download_count\":5,\"created_at\":\"2025-04-02T00:53:01.442551+09:00\",\"updated_at\":\"2025-06-08T08:18:11.196196+09:00\"},{\"aivm_model_uuid\":\"47e53151-a378-46f3-abee-ce13aa07feb1\",\"manifest_version\":\"1.0\",\"name\":\"阿井田 茂\",\"description\":\"阿井田 茂（あいだ しげる）　\\nCV：古山キリヲ\\n\\n通称：モアイさん\\nバリトンボイスの朗らかおじさん\",\"creators\":[\"古山キリヲ\"],\"license_type\":\"ACML 1.0\",\"license_text\":null,\"model_type\":\"AIVMX\",\"model_architecture\":\"Style-Bert-VITS2 (JP-Extra)\",\"model_format\":\"ONNX\",\"training_epochs\":300,\"training_steps\":3600,\"version\":\"1.0.0\",\"file_size\":251137086,\"checksum\":\"6dabe29de5ec2c1715e12a430805e1bff6ec64a315cccec2d26fad029df83243\",\"download_count\":5523,\"created_at\":\"2025-04-02T00:53:11.664557+09:00\",\"updated_at\":\"2025-07-24T13:31:29.391597+09:00\"}],\"tags\":[{\"name\":\"文化系心臓部\"}],\"like_count\":37,\"is_liked\":false,\"speakers\":[{\"aivm_speaker_uuid\":\"561e4e59-3bc9-4726-9028-44a3c12a6f1d\",\"name\":\"阿井田 茂\",\"icon_url\":\"https://assets.aivis-project.com/aivm-models/d799f1c0-59f3-4b6b-9a65-56715776fc69/speakers/50880d3a-d63e-4a31-ae3f-ab14e0c0b3cb/icon.jpg\",\"supported_languages\":[\"ja\"],\"local_id\":0,\"styles\":[{\"name\":\"ノーマル\",\"icon_url\":null,\"local_id\":0,\"voice_samples\":[{\"audio_url\":\"https://assets.aivis-project.com/aivm-models/d799f1c0-59f3-4b6b-9a65-56715776fc69/speakers/50880d3a-d63e-4a31-ae3f-ab14e0c0b3cb/styles/1d5aedb4-26c9-4412-b76a-80a4ff5f5b2d/voice-samples/0.wav\",\"transcript\":\"そのグルガン族の男は、静かに語った。\"},{\"audio_url\":\"https://assets.aivis-project.com/aivm-models/d799f1c0-59f3-4b6b-9a65-56715776fc69/speakers/50880d3a-d63e-4a31-ae3f-ab14e0c0b3cb/styles/1d5aedb4-26c9-4412-b76a-80a4ff5f5b2d/voice-samples/1.wav\",\"transcript\":\"合成音声で、推しとのボイスドラマが、合法的に、簡単に作れる！いい時代になったものだ…\"},{\"audio_url\":\"https://assets.aivis-project.com/aivm-models/d799f1c0-59f3-4b6b-9a65-56715776fc69/speakers/50880d3a-d63e-4a31-ae3f-ab14e0c0b3cb/styles/1d5aedb4-26c9-4412-b76a-80a4ff5f5b2d/voice-samples/2.wav\",\"transcript\":\"流石の私も…そればっかりはどうかと思うなあ～！？\"}]},{\"name\":\"Calm\",\"icon_url\":null,\"local_id\":1,\"voice_samples\":[]},{\"name\":\"Far\",\"icon_url\":null,\"local_id\":2,\"voice_samples\":[]},{\"name\":\"Heavy\",\"icon_url\":null,\"local_id\":3,\"voice_samples\":[]},{\"name\":\"Mid\",\"icon_url\":null,\"local_id\":4,\"voice_samples\":[]},{\"name\":\"Shout\",\"icon_url\":null,\"local_id\":5,\"voice_samples\":[]},{\"name\":\"Surprise\",\"icon_url\":null,\"local_id\":6,\"voice_samples\":[]}]}],\"created_at\":\"2025-04-02T00:53:01.440467+09:00\",\"updated_at\":\"2025-07-24T13:31:29.395713+09:00\"}",
             ];
 
-        public static AivisSpeechCloudAPIModelInfo[] GetDefaultModels()
+        public static ModelInfoContract[] GetDefaultModels()
         {
-            return [.. DefaultModels.Select(Json.Json.LoadFromText<AivisSpeechCloudAPIModelInfo>).OfType<AivisSpeechCloudAPIModelInfo>()];
+            return [.. DefaultModels.Select(Json.Json.LoadFromText<ModelInfoContract>).OfType<ModelInfoContract>()];
         }
     }
 }

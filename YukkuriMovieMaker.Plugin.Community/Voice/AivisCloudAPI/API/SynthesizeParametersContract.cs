@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API
+namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI.API
 {
     /*
     {
@@ -26,7 +26,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API
     "output_audio_channels": "mono"
     }
     */
-    internal record AivisSpeechCloudAPISynthesisParameters(
+    internal record SynthesizeParametersContract(
         [property: JsonProperty("model_uuid")] string ModelUuid, //required
         [property: JsonProperty("speaker_uuid")] string? SpeakerUuid,
         [property: JsonProperty("style_id")] int? StyleId,

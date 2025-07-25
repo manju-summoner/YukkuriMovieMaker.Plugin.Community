@@ -13,16 +13,16 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API;
+using YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI.API;
 
-namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
+namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
 {
     /// <summary>
     /// AivisSpeechSettingsView.xaml の相互作用ロジック
     /// </summary>
-    public partial class AivisSpeechCloudSettingsView : UserControl
+    public partial class AivisCloudAPISettingsView : UserControl
     {
-        public AivisSpeechCloudSettingsView()
+        public AivisCloudAPISettingsView()
         {
             InitializeComponent();
         }
@@ -44,11 +44,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
 
                 var uuid = match.Value;
 
-                var info = await AivisSpeechCloudAPI.GetModelInfoAsync(uuid);
-                var existingModel = AivisSpeechCloudSettings.Default.Models.FirstOrDefault(x => x.AivmModelUuid == uuid);
+                var info = await API.AivisCloudAPI.GetModelInfoAsync(uuid);
+                var existingModel = AivisCloudAPISettings.Default.Models.FirstOrDefault(x => x.AivmModelUuid == uuid);
                 if(existingModel != null)
-                    AivisSpeechCloudSettings.Default.Models.Remove(existingModel);
-                AivisSpeechCloudSettings.Default.Models.Add(info);
+                    AivisCloudAPISettings.Default.Models.Remove(existingModel);
+                AivisCloudAPISettings.Default.Models.Add(info);
 
                 AddModelUuidTextBox.Text = string.Empty;
             }
@@ -65,10 +65,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var item = (AivisSpeechCloudAPIModelInfo)ModelUuidDataGrid.SelectedItem;
+            var item = (ModelInfoContract)ModelUuidDataGrid.SelectedItem;
             if (item is null)
                 return;
-            AivisSpeechCloudSettings.Default.Models.Remove(item);
+            AivisCloudAPISettings.Default.Models.Remove(item);
         }
 
         [GeneratedRegex(@"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")]

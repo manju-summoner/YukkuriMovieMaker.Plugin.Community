@@ -3,29 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API;
+using YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI.API;
 using YukkuriMovieMaker.Plugin.Voice;
 
-namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
+namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
 {
-    internal class AivisSpeechCloudVoiceSpeaker(string ModelUuid, string SpeakerUuid) : IVoiceSpeaker
+    internal class AivisCloudAPIVoiceSpeaker(string ModelUuid, string SpeakerUuid) : IVoiceSpeaker
     {
         static int rateLimitPerMinute = 1;
-        static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
+        static readonly SemaphoreSlim semaphore = new(1);
         static bool isMonthlyBilling = true;
         static DateTime nextAllowedRequestAt = DateTime.MinValue;
 
-        public string EngineName => "AivisSpeech Cloud";
+        public string EngineName => "Aivis Cloud API";
 
         public string SpeakerName => 
-            AivisSpeechCloudSettings.Default.Models
+            AivisCloudAPISettings.Default.Models
             .FirstOrDefault(m => m.AivmModelUuid == ModelUuid)
             ?.Speakers
             .FirstOrDefault(s => s.AivmSpeakerUuid == SpeakerUuid)
             ?.Name
             ?? string.Empty;
 
-        public string API => "AivisSpeechCloud";
+        public string API => "AivisCloudAPI";
 
         public string ID => $"{ModelUuid}:{SpeakerUuid}";
 
@@ -37,8 +37,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
 
         public IVoiceResource? Resource => null;
 
-        public IEnumerable<AivisSpeechCloudAPIStyle> Styles =>
-            AivisSpeechCloudSettings.Default
+        public IEnumerable<StyleContract> Styles =>
+            AivisCloudAPISettings.Default
             .Models
             .FirstOrDefault(m => m.AivmModelUuid == ModelUuid)
             ?.Speakers
@@ -52,7 +52,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
 
         public async Task<IVoicePronounce?> CreateVoiceAsync(string text, IVoicePronounce? pronounce, IVoiceParameter? parameter, string filePath)
         {
-            if (parameter is not AivisSpeechCloudVoiceParameter ap)
+            if (parameter is not AivisCloudAPIVoiceParameter ap)
                 return null;
 
             var shouldReleaseSemaphore = isMonthlyBilling;
@@ -68,8 +68,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
                 if (delay > TimeSpan.Zero)
                     await Task.Delay(delay);
 
-                var api = new API.AivisSpeechCloudAPI(AivisSpeechCloudSettings.Default.ApiKey);
-                var param = new API.AivisSpeechCloudAPISynthesisParameters(
+                var api = new API.AivisCloudAPI(AivisCloudAPISettings.Default.ApiKey);
+                var param = new API.SynthesizeParametersContract(
                     ModelUuid,
                     SpeakerUuid,
                     ap.Style,
@@ -111,7 +111,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
 
         public IVoiceParameter CreateVoiceParameter()
         {
-            return new AivisSpeechCloudVoiceParameter()
+            return new AivisCloudAPIVoiceParameter()
             {
                 Style = Styles.Select(s => s.LocalId).FirstOrDefault()
             };
@@ -124,7 +124,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud
 
         public IVoiceParameter MigrateParameter(IVoiceParameter currentParameter)
         {
-            if (currentParameter is not AivisSpeechCloudVoiceParameter aivisSpeechParameter)
+            if (currentParameter is not AivisCloudAPIVoiceParameter aivisSpeechParameter)
                 return CreateVoiceParameter();
 
             var styleIds = Styles.Select(x => x.LocalId).ToList();

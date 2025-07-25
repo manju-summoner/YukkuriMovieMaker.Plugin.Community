@@ -7,14 +7,14 @@ using System.Text;
 using System.Threading.Tasks;
 using YukkuriMovieMaker.Commons;
 
-namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API
+namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI.API
 {
-    internal class AivisSpeechCloudAPI(string apiKey)
+    internal class AivisCloudAPI(string apiKey)
     {
         static readonly string url = "https://api.aivis-project.com/v1";
         readonly string apiKey = apiKey;
 
-        public async Task<int> SynthesizeAsync(AivisSpeechCloudAPISynthesisParameters param, string filePath)
+        public async Task<int> SynthesizeAsync(SynthesizeParametersContract param, string filePath)
         {
             var client = HttpClientFactory.Client;
 
@@ -52,14 +52,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisSpeechCloud.API
             }
             return -1;
         }
-        public static async Task<AivisSpeechCloudAPIModelInfo> GetModelInfoAsync(string modelUuid)
+        public static async Task<ModelInfoContract> GetModelInfoAsync(string modelUuid)
         {
             var client = HttpClientFactory.Client;
             using var request = new HttpRequestMessage(HttpMethod.Get, $"{url}/aivm-models/{modelUuid}");
             using var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
-            return Json.Json.LoadFromText<AivisSpeechCloudAPIModelInfo>(json) ?? throw new NullReferenceException();
+            return Json.Json.LoadFromText<ModelInfoContract>(json) ?? throw new NullReferenceException();
         }
     }
 }
