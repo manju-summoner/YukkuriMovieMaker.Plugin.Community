@@ -68,6 +68,8 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.Grok
         {
             var imageUrl = GrokSettings.Default.IsSendImageEnabled ? CreateBase64ImageUrl(image) : null;
 
+            var isReasoningModel = GrokModels.FindModel(GrokSettings.Default.RequestSettings.Model)?.IsReasoningOnly ?? false;
+
             object messages;
             if(imageUrl is not null)
             {
@@ -124,11 +126,11 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.Grok
                 messages,
                 temperature = GrokSettings.Default.RequestSettings.Temperature,
                 top_p = GrokSettings.Default.RequestSettings.TopP,
-                presence_penalty = GrokSettings.Default.RequestSettings.PresencePenalty,
-                frequency_penalty = GrokSettings.Default.RequestSettings.FrequencyPenalty,
+                presence_penalty = isReasoningModel ? (double?)null : GrokSettings.Default.RequestSettings.PresencePenalty,
+                frequency_penalty = isReasoningModel ? (double?)null : GrokSettings.Default.RequestSettings.FrequencyPenalty,
             };
             
-            var json = Json.Json.GetJsonText(request, new Newtonsoft.Json.JsonSerializerSettings() { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.None });
+            var json = Json.Json.GetJsonText(request, new Newtonsoft.Json.JsonSerializerSettings() { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.None, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
             return json;
         }
 

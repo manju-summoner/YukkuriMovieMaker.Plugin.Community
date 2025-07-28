@@ -10,13 +10,19 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.Grok
     {
         public static string DefaultModel = "grok-3-mini-fast";
 
-        public static string[] Models =
+        public static GrokModel[] Models =
         [
-            "grok-3",
-            "grok-3-fast",
-            "grok-3-mini",
-            "grok-3-mini-fast",
-            "grok-2-vision",
+            new GrokModel("grok-4", true),
+            new GrokModel("grok-3", false),
+            new GrokModel("grok-3-fast", false),
+            new GrokModel("grok-3-mini", true),
+            new GrokModel("grok-3-mini-fast", true),
+            new GrokModel("grok-2-vision", false),
         ];
+
+        internal static GrokModel? FindModel(string? model)
+        {
+            return Models.FirstOrDefault(x => x.Key.Equals(model, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

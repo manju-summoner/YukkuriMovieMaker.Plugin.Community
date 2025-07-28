@@ -16,7 +16,7 @@
                 </Grid>
                 <Grid>
                     <Label Content="{x:Static local:Texts.Model}"/>
-                    <ComboBox Text="{Binding Source={x:Static local:GrokSettings.Default},Path=RequestSettings.Model,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}" ItemsSource="{x:Static local:GrokModels.Models}" IsEditable="True" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
+                    <ComboBox Text="{Binding Source={x:Static local:GrokSettings.Default},Path=RequestSettings.Model,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}" ItemsSource="{x:Static local:GrokModels.Models}" DisplayMemberPath="Key" SelectedValuePath="Key" IsEditable="True" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
                 </Grid>
                 <Grid>
                     <Label Content="{x:Static local:Texts.IsSendImageEnabledTitle}"/>
