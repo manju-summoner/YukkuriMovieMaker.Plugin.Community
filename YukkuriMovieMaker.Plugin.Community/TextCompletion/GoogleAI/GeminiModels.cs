@@ -8,14 +8,20 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
 {
     internal class GeminiModels
     {
-        public static string DefaultModel => "gemini-2.0-flash";
+        public static string DefaultModel => "gemini-2.5-flash";
 
-        public static string[] Models =>
+        public static GeminiModel[] Models =>
             [
-                "gemini-2.0-flash",
-                "gemini-2.0-flash-lite",
-                "gemini-1.5-pro",
-                "gemini-1.5-flash",
+                new GeminiModel("gemini-2.5-pro", true, 128),
+                new GeminiModel("gemini-2.5-flash", true, 0),
+                new GeminiModel("gemini-2.5-flash-lite", true, 0),
+
+                new GeminiModel("gemini-2.0-flash", false, null),
+                new GeminiModel("gemini-2.0-flash-lite", false, null),
             ];
+        public static GeminiModel? FindModel(string key)
+        {
+            return Models.FirstOrDefault(x => x.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

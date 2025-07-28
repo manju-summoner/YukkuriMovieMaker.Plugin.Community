@@ -74,4 +74,5 @@
 <data name="BlockSome" xml:space="preserve"><value>منع بعض</value></data>
 <data name="BlockMost" xml:space="preserve"><value>منع معظم</value></data>
 <data name="UsePreviewModel" xml:space="preserve"><value>استخدام الإصدار المعاينة من النموذج</value></data>
+<data name="SkipReasoningProcess" xml:space="preserve"><value>تخطي عملية الاستدلال</value></data>
 </root>

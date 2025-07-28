@@ -20,9 +20,12 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
         public string Model { get; set; } = GeminiModels.DefaultModel;
         
         bool isPreviewModel = false;
-        public bool IsPreviewModel { get => isPreviewModel; set => Set(ref isPreviewModel, value); }
+        bool isSkipReasoningProcess = true;
+        bool isSendImageEnabled = false;
 
-        public bool IsSendImageEnabled { get; set; } = false;
+        public bool IsPreviewModel { get => isPreviewModel; set => Set(ref isPreviewModel, value); }
+        public bool IsSkipReasoningProcess { get => isSkipReasoningProcess; set => Set(ref isSkipReasoningProcess, value); }
+        public bool IsSendImageEnabled { get => isSendImageEnabled; set => Set(ref isSendImageEnabled, value); }
 
         double temperature = 1, topP = 0.95;
         int topK = 40;

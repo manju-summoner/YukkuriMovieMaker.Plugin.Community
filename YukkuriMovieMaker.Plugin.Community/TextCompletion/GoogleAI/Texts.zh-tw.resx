@@ -75,4 +75,5 @@
 <data name="BlockSome" xml:space="preserve"><value>일부 차단</value></data>
 <data name="BlockMost" xml:space="preserve"><value>대부분 차단</value></data>
 <data name="UsePreviewModel" xml:space="preserve"><value>미리보기 버전 모델 사용</value></data>
+<data name="SkipReasoningProcess" xml:space="preserve"><value>추론 프로세스 건너뛰기</value></data>
 </root>

@@ -75,4 +75,5 @@
 <data name="BlockSome" xml:space="preserve"><value>一部をブロック</value></data>
 <data name="BlockMost" xml:space="preserve"><value>ほとんどをブロック</value></data>
 <data name="UsePreviewModel" xml:space="preserve"><value>プレビュー版のモデルを使用</value></data>
+<data name="SkipReasoningProcess" xml:space="preserve"><value>推論プロセスをスキップ</value></data>
 </root>

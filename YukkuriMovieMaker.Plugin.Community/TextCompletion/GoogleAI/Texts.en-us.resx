@@ -75,4 +75,5 @@
 <data name="BlockSome" xml:space="preserve"><value>Block Some</value></data>
 <data name="BlockMost" xml:space="preserve"><value>Block Most</value></data>
 <data name="UsePreviewModel" xml:space="preserve"><value>Use the preview version of the model</value></data>
+<data name="SkipReasoningProcess" xml:space="preserve"><value>Skip Reasoning Process</value></data>
 </root>

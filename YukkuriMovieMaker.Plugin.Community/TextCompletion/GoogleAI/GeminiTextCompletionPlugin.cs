@@ -22,13 +22,20 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
 
         public async Task<string> ProcessAsync(string systemPrompt, string text, Bitmap? image)
         {
-            var json = CreateJson(systemPrompt, text, image);
+            var model = GeminiModels.FindModel(GeminiTextCompletionSettings.Default.Model); 
+            
+            var modelName = model?.Key ?? GeminiTextCompletionSettings.Default.Model;
+            var suffix = (model != null && model.IsBeta) || (model is null && GeminiTextCompletionSettings.Default.IsPreviewModel) ? "beta" : "";
+            int? thinkingBudget = 
+                model is null && GeminiTextCompletionSettings.Default.IsSkipReasoningProcess ? 0 : 
+                model != null && GeminiTextCompletionSettings.Default.IsSkipReasoningProcess ? model.ThinkingBudgetOnSkipReasoning : 
+                null;
+
+            var json = CreateJson(systemPrompt, text, image, thinkingBudget);
             var jsonText = json.ToString();
             var jsonContent = new StringContent(jsonText, Encoding.UTF8, "application/json");
 
-            var model = GeminiTextCompletionSettings.Default.Model;
-            var suffix = GeminiTextCompletionSettings.Default.IsPreviewModel ? "beta" : "";
-            var endpoint = $"https://generativelanguage.googleapis.com/v1{suffix}/models/{model}:generateContent";
+            var endpoint = $"https://generativelanguage.googleapis.com/v1{suffix}/models/{modelName}:generateContent";
 
             using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
             request.Headers.Add("x-goog-api-key", GeminiTextCompletionSettings.Default.APIKey);
@@ -36,10 +43,16 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
 
             var client = HttpClientFactory.Client;
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-            response.EnsureSuccessStatusCode();
-
             var responseText = await response.Content.ReadAsStringAsync();
             var responseJson = JObject.Parse(responseText);
+            if (!response.IsSuccessStatusCode)
+            {
+                var token = responseJson["error"]?["message"];
+                if (token != null)
+                    throw new Exception(token.Value<string>());
+            }
+            response.EnsureSuccessStatusCode();
+
             return
                 responseJson["candidates"]
                 ?.FirstOrDefault()
@@ -51,7 +64,7 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
                 ?? string.Empty;
         }
 
-        private static JObject CreateJson(string systemPrompt, string text, Bitmap? image)
+        private static JObject CreateJson(string systemPrompt, string text, Bitmap? image, int? thinkingBudget)
         {
             if (image != null)
             {
@@ -121,6 +134,13 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
                     },
                 },
             };
+            if(thinkingBudget != null)
+            {
+                json!["generationConfig"]!["thinkingConfig"] = new JObject()
+                {
+                    ["thinkingBudget"] = thinkingBudget,
+                };
+            }
             return json;
         }
 

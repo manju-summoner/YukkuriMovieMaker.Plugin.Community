@@ -75,4 +75,5 @@
 <data name="BlockSome" xml:space="preserve"><value>部分阻止</value></data>
 <data name="BlockMost" xml:space="preserve"><value>大部分阻止</value></data>
 <data name="UsePreviewModel" xml:space="preserve"><value>使用预览版模型</value></data>
+<data name="SkipReasoningProcess" xml:space="preserve"><value>跳过推理过程</value></data>
 </root>

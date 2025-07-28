@@ -74,4 +74,5 @@
 <data name="BlockSome" xml:space="preserve"><value>Block Beberapa</value></data>
 <data name="BlockMost" xml:space="preserve"><value>Block Sebagian Besar</value></data>
 <data name="UsePreviewModel" xml:space="preserve"><value>Gunakan versi pratinjau model</value></data>
+<data name="SkipReasoningProcess" xml:space="preserve"><value>Lewati Proses Penalaran</value></data>
 </root>

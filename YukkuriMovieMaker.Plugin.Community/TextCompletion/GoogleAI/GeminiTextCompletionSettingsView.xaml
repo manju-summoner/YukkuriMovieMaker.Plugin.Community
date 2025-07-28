@@ -16,11 +16,15 @@
                 </Grid>
                 <Grid>
                     <Label Content="{x:Static local:Texts.Model}"/>
-                    <ComboBox IsEditable="True" ItemsSource="{x:Static local:GeminiModels.Models}" Text="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=Model}" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
+                    <ComboBox IsEditable="True" ItemsSource="{x:Static local:GeminiModels.Models}" DisplayMemberPath="Key" SelectedValuePath="Key" Text="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=Model}" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
                 </Grid>
                 <Grid>
                     <Label Content="{x:Static local:Texts.UsePreviewModel}"/>
                     <c:ToggleSlider Value="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=IsPreviewModel}" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
+                    <Label Content="{x:Static local:Texts.SkipReasoningProcess}"/>
+                    <c:ToggleSlider Value="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=IsSkipReasoningProcess}" HorizontalAlignment="Right"/>
                 </Grid>
                 <Grid>
                     <Label Content="{x:Static local:Texts.IsSendImageEnabledTitle}"/>
