@@ -51,19 +51,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
         public double Pitch { get => pitch; set => Set(ref pitch, value); }
 
         [Display(Name = nameof(Texts.LeadingSilenceSeconds), Description = nameof(Texts.LeadingSilenceSecondsDesc), ResourceType = typeof(Texts))]
-        [Range(0d, 10d)]
+        [Range(0d, 60d)]
         [DefaultValue(0.1d)]
         [TextBoxSlider("F2", nameof(Texts.SecUnit), 0, 1, ResourceType = typeof(Texts))]
         public double LeadingSilenceSeconds { get => leadingSilenceSeconds; set => Set(ref leadingSilenceSeconds, value); }
 
         [Display(Name = nameof(Texts.TrailingSilenceSeconds), Description = nameof(Texts.TrailingSilenceSecondsDesc), ResourceType = typeof(Texts))]
-        [Range(0d, 10d)]
+        [Range(0d, 60d)]
         [DefaultValue(0.1d)]
         [TextBoxSlider("F2", nameof(Texts.SecUnit), 0, 1, ResourceType = typeof(Texts))]
         public double TrailingSilenceSeconds { get => trailingSilenceSeconds; set => Set(ref trailingSilenceSeconds, value); }
 
         [Display(Name = nameof(Texts.LineBreakSilenceSeconds), Description = nameof(Texts.LineBreakSilenceSecondsDesc), ResourceType = typeof(Texts))]
-        [Range(0d, 10d)]
+        [Range(0d, 60d)]
         [DefaultValue(0.1d)]
         [TextBoxSlider("F2", nameof(Texts.SecUnit), 0, 1, ResourceType = typeof(Texts))]
         public double LineBreakSilenceSeconds { get => lineBreakSilenceSeconds; set => Set(ref lineBreakSilenceSeconds, value); }
