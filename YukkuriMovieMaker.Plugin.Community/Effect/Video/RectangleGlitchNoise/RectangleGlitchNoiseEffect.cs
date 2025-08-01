@@ -40,6 +40,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.RectangleGlitchNoise
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation PlaybackRate { get; } = new Animation(30, 0, 100);
 
+        [Display(GroupName = nameof(Texts.RectangleGlitchNoise), Name = nameof(Texts.Probability), Description = nameof(Texts.ProbabilityDesc), ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 0, 100)]
+        public Animation Probability { get; } = new Animation(100, 0, 100);
+
         [Display(GroupName = nameof(Texts.RectangleGlitchNoise), Name = nameof(Texts.IsClipping), Description = nameof(Texts.IsClipping), ResourceType = typeof(Texts))]
         [ToggleSlider]
         public bool IsClipping { get => isClipping; set => Set(ref isClipping, value); }
@@ -109,6 +113,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.RectangleGlitchNoise
             return new RectangleGlitchNoiseEffectProcessor(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [RectangleCount, RectangleMaxWidth, RectangleMaxHeight, RectangleMaxXShift, RectangleMaxYShift, ColorMaxShift, PlaybackRate, Repeat, RectangleMaxWidthAttenuation, RectangleMaxHeightAttenuation, RectangleMaxXShiftAttenuation, RectangleMaxYShiftAttenuation];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [RectangleCount, RectangleMaxWidth, RectangleMaxHeight, RectangleMaxXShift, RectangleMaxYShift, ColorMaxShift, PlaybackRate, Probability, Repeat, RectangleMaxWidthAttenuation, RectangleMaxHeightAttenuation, RectangleMaxXShiftAttenuation, RectangleMaxYShiftAttenuation];
     }
 }

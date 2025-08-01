@@ -76,4 +76,6 @@
 <data name="RectangleMaxHeightAttenuation" xml:space="preserve"><value>Atenuación de altura</value></data>
 <data name="RectangleMaxXShiftAttenuation" xml:space="preserve"><value>Atenuación del desplazamiento horizontal</value></data>
 <data name="RectangleMaxYShiftAttenuation" xml:space="preserve"><value>Atenuación del desplazamiento vertical</value></data>
+<data name="Probability" xml:space="preserve"><value>Tasa de ocurrencia</value></data>
+<data name="ProbabilityDesc" xml:space="preserve"><value>Probabilidad de que ocurra ruido de falla</value></data>
 </root>

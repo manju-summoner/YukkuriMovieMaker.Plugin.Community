@@ -76,4 +76,6 @@
 <data name="RectangleMaxHeightAttenuation" xml:space="preserve"><value>높이 감쇠</value></data>
 <data name="RectangleMaxXShiftAttenuation" xml:space="preserve"><value>가로 이동 감쇠</value></data>
 <data name="RectangleMaxYShiftAttenuation" xml:space="preserve"><value>세로 이동 감쇠</value></data>
+<data name="Probability" xml:space="preserve"><value>발생률</value></data>
+<data name="ProbabilityDesc" xml:space="preserve"><value>글리치 노이즈 발생 확률</value></data>
 </root>

@@ -80,4 +80,6 @@
 <data name="StripeGlitchNoiseEffectComplicationGroupName" xml:space="preserve"><value>複雜化</value></data>
 <data name="StripeGlitchNoiseEffectPlaybackRateName" xml:space="preserve"><value>播放速度</value></data>
 <data name="StripeGlitchNoiseEffectPlaybackRateDesc" xml:space="preserve"><value>播放速度</value></data>
+<data name="StripeGlitchNoiseEffectProbability" xml:space="preserve"><value>發生率</value></data>
+<data name="StripeGlitchNoiseEffectProbabilityDesc" xml:space="preserve"><value>故障噪音發生的機率</value></data>
 </root>
