@@ -94,4 +94,5 @@
 <data name="Error" xml:space="preserve"><value>錯誤</value></data>
 <data name="FetchingModelInfo" xml:space="preserve"><value>正在獲取模型資訊</value></data>
 <data name="ErrorFetchingModelInfo" xml:space="preserve"><value>獲取模型資訊失敗</value></data>
+<data name="HowToUseAivisCloudApi" xml:space="preserve"><value>如何设置AivisCloudAPI的帮助</value></data>
 </root>

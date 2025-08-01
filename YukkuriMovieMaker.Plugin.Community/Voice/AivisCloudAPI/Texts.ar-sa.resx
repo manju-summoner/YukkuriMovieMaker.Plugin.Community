@@ -94,4 +94,5 @@ También puede reducir بشكل كبير سرعة التوليد.</value></data>
 <data name="Error" xml:space="preserve"><value>خطأ</value></data>
 <data name="FetchingModelInfo" xml:space="preserve"><value>جاري الحصول على معلومات النموذج</value></data>
 <data name="ErrorFetchingModelInfo" xml:space="preserve"><value>Fallo al obtener información del modelo</value></data>
+<data name="HowToUseAivisCloudApi" xml:space="preserve"><value>مساعدة: كيفية إعداد AivisCloudAPI</value></data>
 </root>

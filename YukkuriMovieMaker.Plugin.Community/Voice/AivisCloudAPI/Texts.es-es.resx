@@ -94,4 +94,5 @@ También puede reducir significativamente la velocidad de generación.</value></
 <data name="Error" xml:space="preserve"><value>Error</value></data>
 <data name="FetchingModelInfo" xml:space="preserve"><value>Obteniendo información del modelo</value></data>
 <data name="ErrorFetchingModelInfo" xml:space="preserve"><value>Error al obtener información del modelo</value></data>
+<data name="HowToUseAivisCloudApi" xml:space="preserve"><value>Ayuda: Cómo configurar AivisCloudAPI</value></data>
 </root>

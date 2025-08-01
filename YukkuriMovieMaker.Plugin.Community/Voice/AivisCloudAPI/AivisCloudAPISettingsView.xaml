@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI"
+             xmlns:s="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
@@ -12,10 +13,17 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Expander Header="Aivis Cloud API" IsExpanded="True" Grid.Row="0">
-            <Grid>
-                <Label Content="{x:Static local:Texts.ApiKey}"/>
-                <TextBox Text="{Binding Source={x:Static local:AivisCloudAPISettings.Default},Path=ApiKey,UpdateSourceTrigger=PropertyChanged}" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
-            </Grid>
+            <StackPanel>
+                <Grid>
+                    <Label Content="{x:Static local:Texts.ApiKey}"/>
+                    <TextBox Text="{Binding Source={x:Static local:AivisCloudAPISettings.Default},Path=ApiKey,UpdateSourceTrigger=PropertyChanged}" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
+                </Grid>
+                <Grid>
+                    <TextBlock HorizontalAlignment="Right" Margin="6">
+                        <Hyperlink Command="{Binding Source={x:Static s:CommandSettings.Default},Path=[OpenUri]}" CommandParameter="https://manjubox.net/ymm4/faq/%E3%82%86%E3%81%A3%E3%81%8F%E3%82%8A%E3%83%9C%E3%82%A4%E3%82%B9/AivisCloudAPI/"><Run Text="{x:Static local:Texts.HowToUseAivisCloudApi}"/></Hyperlink>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
         </Expander>
         <Expander Header="{x:Static local:Texts.SpeakerList}" IsExpanded="True" Grid.Row="1">
             <Grid>
