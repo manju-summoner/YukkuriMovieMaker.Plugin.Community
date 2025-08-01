@@ -13,7 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
 
         public override SettingsCategory Category => SettingsCategory.Voice;
 
-        public override string Name => "AivisSpeech Cloud";
+        public override string Name => "Aivis Cloud API";
 
         public override bool HasSettingView => true;
 
