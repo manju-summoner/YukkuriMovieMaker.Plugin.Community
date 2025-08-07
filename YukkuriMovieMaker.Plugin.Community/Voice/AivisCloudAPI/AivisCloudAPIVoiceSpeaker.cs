@@ -10,9 +10,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
 {
     internal class AivisCloudAPIVoiceSpeaker(string ModelUuid, string SpeakerUuid) : IVoiceSpeaker
     {
-        static int rateLimitPerMinute = 1;
         static readonly SemaphoreSlim semaphore = new(1);
-        static bool isMonthlyBilling = true;
+        static bool isSubscription = true;
         static DateTime nextAllowedRequestAt = DateTime.MinValue;
 
         public string EngineName => "Aivis Cloud API";
@@ -55,7 +54,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
             if (parameter is not AivisCloudAPIVoiceParameter ap)
                 return null;
 
-            var shouldReleaseSemaphore = isMonthlyBilling;
+            var shouldReleaseSemaphore = isSubscription;
             if (shouldReleaseSemaphore)
             {
                 //月額課金制の場合のみ、同時接続数を1に制限する。
@@ -91,14 +90,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
                     null,
                     null
                     );
-                var remaining = await api.SynthesizeAsync(param, filePath);
-                // 月額課金制の場合、APIのレスポンスに1分あたりの呼び出し可能残りリクエスト回数が含まれる。
-                if (remaining != -1)
+                var response = await api.SynthesizeAsync(param, filePath);
+                isSubscription = response.BillingMode is BillingMode.Subscription;
+                if (isSubscription && response.Subscription != null)
                 {
-                    isMonthlyBilling = true;
-                    //レートリミットはサービスの運用状況によって変化する可能性があるため、動的に拡張する。
-                    rateLimitPerMinute = Math.Max(rateLimitPerMinute, remaining + 1);
-                    nextAllowedRequestAt = DateTime.Now.AddMinutes(1d / rateLimitPerMinute);
+                    // 月額課金制の場合、レート制限を考慮して次のリクエスト可能時間を設定する。
+                    // 一気に残り回数を使い切ってしまうと最大1分程度の待機時間が発生してしまうため、
+                    // リクエスト間隔を「リセットまでの残り時間/残り回数」分開け、リクエスト間隔を平準化する。
+                    nextAllowedRequestAt = DateTime.Now + response.Subscription.RequestsReset / Math.Max(1, response.Subscription.RequestsRemaining);
                 }
             }
             finally
