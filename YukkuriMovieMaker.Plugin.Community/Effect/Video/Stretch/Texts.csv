@@ -1,0 +1,14 @@
+﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+StretchEffect,,引き伸ばし,Stretch,拉伸,拉伸,늘리기,Estiramiento,تمديد,Peregangan
+X,,中心X,Center X,中心X,中心X,중심 X,Centro X,المركز X,Pusat X
+XDesc,,中心座標X,Center coordinate X,中心坐标X,中心座標X,중심 좌표 X,Coordenada central X,الإحداثي المركزي X,Koordinat pusat X
+Y,,中心Y,Center Y,中心Y,中心Y,중심 Y,Centro Y,المركز Y,Pusat Y
+YDesc,,中心座標Y,Center coordinate Y,中心坐标Y,中心座標Y,중심 좌표 Y,Coordenada central Y,الإحداثي المركزي Y,Koordinat pusat Y
+Angle,,角度,Angle,角度,角度,각도,Ángulo,زاوية,Sudut
+AngleDesc,,引き伸ばしの方向,Stretch Direction,拉伸方向,拉伸方向,늘림 방향,Dirección de estiramiento,اتجاه التمديد,Arah Peregangan
+StretchLength,,長さ,Length,长度,長度,길이,Longitud,الطول,Panjang
+StretchLengthDesc,,引き伸ばしの長さ,Stretch Length,拉伸长度,拉伸長度,늘린 길이,Longitud de estiramiento,طول التمدد,Panjang peregangan
+Range,,範囲,Range,范围,範圍,범위,Rango,نطاق,Rentang
+RangeDesc,,引き伸ばす範囲,Stretch Range,拉伸范围,拉伸範圍,늘릴 범위,Rango de estiramiento,نطاق التمدد,Rentang peregangan
+IsCentering,,中央寄せ,Center Alignment,居中对齐,置中對齊,중앙 정렬,Alineación centrada,محاذاة للوسط,Perataan Tengah
+IsCenteringDesc,,中心から両方向に引き伸ばす,Stretch in Both Directions from Center,从中心向两侧拉伸,從中心向兩側拉伸,중앙에서 양쪽으로 늘리기,Estirar en ambas direcciones desde el centro,تمديد في كلا الاتجاهين من المركز,Membentangkan ke Dua Arah dari Pusat
