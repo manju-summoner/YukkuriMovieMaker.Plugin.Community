@@ -6,7 +6,7 @@ using YukkuriMovieMaker.Plugin.Community.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuminanceKey
 {
-    internal class LuminanceKeyCustomEffect(IGraphicsDevicesAndContext devices) : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices))
+    public class LuminanceKeyCustomEffect(IGraphicsDevicesAndContext devices) : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices))
     {
         public float Threshold
         {
