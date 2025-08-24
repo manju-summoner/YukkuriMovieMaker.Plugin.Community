@@ -118,6 +118,7 @@
 	  <Resource Include="$(ShaderDirPath)VignetteRadialBlur.cso" Link="Resources\Shader\VignetteRadialBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)VignetteCircularBlur.cso" Link="Resources\Shader\VignetteCircularBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)BlurMap.cso" Link="Resources\Shader\BlurMap.cso" />
+	  <Resource Include="$(ShaderDirPath)Stretch.cso" Link="Resources\Shader\Stretch.cso" />
   </ItemGroup>
 
 </Project>
