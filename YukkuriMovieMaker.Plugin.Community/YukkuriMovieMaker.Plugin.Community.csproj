@@ -92,15 +92,6 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <Reference Include="Parlot">
-      <HintPath>..\..\..\YukkuriMovieMaker_v4_Lite_Plugin\Parlot.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Management">
-      <HintPath>..\..\..\YukkuriMovieMaker_v4_Lite_Plugin\System.Management.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-	
-  <ItemGroup>
     <Resource Include="$(ShaderDirPath)EdgeTrimming.cso" Link="Resources\Shader\EdgeTrimming.cso" />
 	  <Resource Include="$(ShaderDirPath)LuminanceKey.cso" Link="Resources\Shader\LuminanceKey.cso" />
 	  <Resource Include="$(ShaderDirPath)DiffuseAlpha.cso" Link="Resources\Shader\DiffuseAlpha.cso" />
