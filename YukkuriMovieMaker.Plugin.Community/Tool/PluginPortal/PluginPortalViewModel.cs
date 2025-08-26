@@ -1,19 +1,31 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Input;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 {
     internal class PluginPortalViewModel : INotifyPropertyChanged
     {
         private const string YamlUrl = "https://manjubox.net/ymm4plugins.yml";
+        private static readonly HttpClient httpClient = new();
+
+        readonly string ymmesDir = @"user\ymmes";
 
         private List<PluginInfo> _allPlugins = [];
 
         private PluginInfo? _selectedPlugin;
         private string? _searchText;
+        private string _statusMessage = "";
 
         public ObservableCollection<PluginInfo> Plugins { get; } = [];
         public ObservableCollection<TypeFilterItem> TypeFilters { get; } = [];
@@ -27,6 +39,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                 {
                     _selectedPlugin = value;
                     OnPropertyChanged(nameof(SelectedPlugin));
+                    ((ActionCommand)DownloadCommand).RaiseCanExecuteChanged();
                 }
             }
         }
@@ -45,16 +58,42 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             }
         }
 
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            set
+            {
+                if (_statusMessage != value)
+                {
+                    _statusMessage = value;
+                    OnPropertyChanged(nameof(StatusMessage));
+                }
+            }
+        }
+
+        public ICommand DownloadCommand { get; }
+        public ICommand InstallLocalCommand { get; }
+
         public PluginPortalViewModel()
         {
+            // GitHub APIはUser-Agentヘッダーが必須のよう
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("YukkuriMovieMaker4PluginPortal", "1.0"));
+
             Task.Run(LoadPluginsAsync);
+
+            DownloadCommand = new ActionCommand(
+                _ => SelectedPlugin?.Url?.Contains("github.com") ?? false,
+                async _ => await DownloadPluginAsync());
+
+            InstallLocalCommand = new ActionCommand(
+                _ => CanInstallLocalPlugins(),
+                _ => InstallLocalPlugins());
         }
 
         private async Task LoadPluginsAsync()
         {
             try
             {
-                using var httpClient = new System.Net.Http.HttpClient();
                 var yamlContent = await httpClient.GetStringAsync(YamlUrl);
                 var deserializer = new DeserializerBuilder()
                     .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -86,7 +125,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading plugins: {ex.Message}");
+                Debug.WriteLine($"Error loading plugins: {ex.Message}");
             }
         }
 
@@ -133,6 +172,139 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             {
                 SelectedPlugin = Plugins.FirstOrDefault();
             }
+        }
+
+        private async Task DownloadPluginAsync()
+        {
+            if (SelectedPlugin?.Url is null) return;
+
+            var match = Regex.Match(SelectedPlugin.Url, @"github\.com/([^/]+)/([^/]+)");
+            if (!match.Success)
+            {
+                StatusMessage = Texts.InvalidGitHubURL;
+                return;
+            }
+
+            var owner = match.Groups[1].Value;
+            var repo = match.Groups[2].Value;
+
+            StatusMessage = Texts.FetchingLatestRelease;
+
+            try
+            {
+                var apiUrl = $"https://api.github.com/repos/{owner}/{repo}/releases/latest";
+                var response = await httpClient.GetAsync(apiUrl);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var release = JsonSerializer.Deserialize<GitHubRelease>(json);
+
+                if (release is null)
+                {
+                    StatusMessage = Texts.FailedToParseReleaseInfo;
+                    return;
+                }
+
+                var ymmeAsset = release.Assets.FirstOrDefault(a => a.Name.EndsWith(".ymme", StringComparison.OrdinalIgnoreCase));
+                if (ymmeAsset is null)
+                {
+                    StatusMessage = Texts.NoYmmeFileFoundInTheLatestRelease;
+                    return;
+                }
+
+                StatusMessage = string.Format(Texts.DownloadingFile, ymmeAsset.Name);
+                var fileBytes = await httpClient.GetByteArrayAsync(ymmeAsset.BrowserDownloadUrl);
+
+                //一時的にymmeを保存する場所
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string pluginsDir = Path.Combine(baseDir, ymmesDir);
+                Directory.CreateDirectory(pluginsDir);
+                var savePath = Path.Combine(pluginsDir, ymmeAsset.Name);
+
+                await File.WriteAllBytesAsync(savePath, fileBytes);
+
+                ((ActionCommand)InstallLocalCommand).RaiseCanExecuteChanged();
+                StatusMessage = string.Format(Texts.DownloadCompleted, ymmeAsset.Name);
+            }
+            catch (HttpRequestException ex)
+            {
+                if (ex.StatusCode is System.Net.HttpStatusCode code)
+                {
+                    StatusMessage = string.Format(Texts.FailedToFetchReleaseInfo, (int)code); ;
+                }
+                else
+                {
+                    StatusMessage = Texts.NetworkError;
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = string.Format(Texts.ErrorMessage, ex.Message);
+            }
+        }
+
+        private void InstallPlugin(string ymmeFilePath)
+        {
+            try
+            {
+                var installerPath = Path.Combine(
+                    AppDirectories.ResourceDirectory,
+                    "bin",
+                    "Installer",
+                    "YukkuriMovieMaker.Plugin.Installer.exe");
+
+                Process.Start(installerPath, $"\"{ymmeFilePath}\"");
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = string.Format(Texts.FailedToLaunchInstaller, ex.Message);
+            }
+        }
+
+        private bool CanInstallLocalPlugins()
+        {
+            try
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string pluginsDir = Path.Combine(baseDir, ymmesDir);
+                if (!Directory.Exists(pluginsDir)) return false;
+                var ymmeFiles = Directory.GetFiles(pluginsDir, "*.ymme");
+                return ymmeFiles.Length > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void InstallLocalPlugins()
+        {
+            string baseDir = AppContext.BaseDirectory;
+            string pluginsDir = Path.Combine(baseDir, ymmesDir);
+
+            if (!CanInstallLocalPlugins())
+            {
+                MessageBox.Show(Texts.NoDownloadablePlugins, Texts.PluginPortal, MessageBoxButton.OK);
+                return;
+            }
+
+            var ymmeFiles = Directory.GetFiles(pluginsDir, "*.ymme");
+
+            var message = string.Format(Texts.InstallAllMessage, ymmeFiles.Length).Replace("\\n", Environment.NewLine);
+            var result = MessageBox.Show(message, Texts.InstallAllPlugins, MessageBoxButton.YesNo);
+
+            if (result != MessageBoxResult.Yes)
+            {
+                StatusMessage = Texts.CancelBulkInstallation;
+                return;
+            }
+
+            foreach (var filePath in ymmeFiles)
+            {
+                InstallPlugin(filePath);
+            }
+
+            Application.Current.Shutdown();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

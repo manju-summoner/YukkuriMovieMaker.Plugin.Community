@@ -66,4 +66,21 @@
 <data name="URL" xml:space="preserve"><value>URL</value></data>
 <data name="Description" xml:space="preserve"><value>Deskripsi</value></data>
 <data name="IsEnabled" xml:space="preserve"><value>Dihentikan</value></data>
+<data name="DownloadFromGitHub" xml:space="preserve"><value>Unduh dari GitHub</value></data>
+<data name="Search" xml:space="preserve"><value>Tutup</value></data>
+<data name="InstallDownloaded" xml:space="preserve"><value>Pasang yang diunduh</value></data>
+<data name="InvalidGitHubURL" xml:space="preserve"><value>URL GitHub tidak valid</value></data>
+<data name="FetchingLatestRelease" xml:space="preserve"><value>Mengambil rilis terbaru...</value></data>
+<data name="FailedToParseReleaseInfo" xml:space="preserve"><value>Gagal mengurai info rilis.</value></data>
+<data name="NoYmmeFileFoundInTheLatestRelease" xml:space="preserve"><value>Tidak ditemukan file .ymme di rilis terbaru.</value></data>
+<data name="DownloadingFile" xml:space="preserve"><value>Mengunduh {0}...</value></data>
+<data name="DownloadCompleted" xml:space="preserve"><value>Unduhan selesai: {0}</value></data>
+<data name="FailedToFetchReleaseInfo" xml:space="preserve"><value>Kesalahan: Gagal mengambil info rilis. ({0})</value></data>
+<data name="NetworkError" xml:space="preserve"><value>Kesalahan: Mungkin ada masalah dengan koneksi jaringan Anda.</value></data>
+<data name="ErrorMessage" xml:space="preserve"><value>Kesalahan: {0}</value></data>
+<data name="FailedToLaunchInstaller" xml:space="preserve"><value>Kesalahan: Gagal meluncurkan penginstal. {0}</value></data>
+<data name="NoDownloadablePlugins" xml:space="preserve"><value>Tidak ada plugin yang dapat diunduh untuk diinstal</value></data>
+<data name="InstallAllMessage" xml:space="preserve"><value>Pasang semua {0} plugin yang diunduh.\nAnda perlu menutup YMM4 untuk memulai instalasi.\n\nApakah Anda ingin melanjutkan?</value></data>
+<data name="InstallAllPlugins" xml:space="preserve"><value>Pasang Semua Plugin</value></data>
+<data name="CancelBulkInstallation" xml:space="preserve"><value>Instalasi batch telah dibatalkan.</value></data>
 </root>

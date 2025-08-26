@@ -66,4 +66,21 @@
 <data name="URL" xml:space="preserve"><value>URL</value></data>
 <data name="Description" xml:space="preserve"><value>Descripción</value></data>
 <data name="IsEnabled" xml:space="preserve"><value>Descontinuado</value></data>
+<data name="DownloadFromGitHub" xml:space="preserve"><value>Descargar desde GitHub</value></data>
+<data name="Search" xml:space="preserve"><value>Cerrar</value></data>
+<data name="InstallDownloaded" xml:space="preserve"><value>Instalar descargado</value></data>
+<data name="InvalidGitHubURL" xml:space="preserve"><value>URL de GitHub no válido</value></data>
+<data name="FetchingLatestRelease" xml:space="preserve"><value>Obteniendo la última versión...</value></data>
+<data name="FailedToParseReleaseInfo" xml:space="preserve"><value>No se pudo analizar la información de la versión.</value></data>
+<data name="NoYmmeFileFoundInTheLatestRelease" xml:space="preserve"><value>No se encontró el archivo .ymme en la última versión.</value></data>
+<data name="DownloadingFile" xml:space="preserve"><value>Descargando {0}...</value></data>
+<data name="DownloadCompleted" xml:space="preserve"><value>Descarga completada: {0}</value></data>
+<data name="FailedToFetchReleaseInfo" xml:space="preserve"><value>Error: No se pudo obtener la información de la versión. ({0})</value></data>
+<data name="NetworkError" xml:space="preserve"><value>Error: Puede haber un problema con su conexión de red.</value></data>
+<data name="ErrorMessage" xml:space="preserve"><value>Error: {0}</value></data>
+<data name="FailedToLaunchInstaller" xml:space="preserve"><value>Error: No se pudo iniciar el instalador. {0}</value></data>
+<data name="NoDownloadablePlugins" xml:space="preserve"><value>No hay complementos descargables disponibles para la instalación</value></data>
+<data name="InstallAllMessage" xml:space="preserve"><value>Instalar todos los {0} complementos descargados.\nNecesita cerrar YMM4 para iniciar la instalación.\n\n¿Desea continuar?</value></data>
+<data name="InstallAllPlugins" xml:space="preserve"><value>Instalar todos los complementos</value></data>
+<data name="CancelBulkInstallation" xml:space="preserve"><value>La instalación por lotes ha sido cancelada.</value></data>
 </root>

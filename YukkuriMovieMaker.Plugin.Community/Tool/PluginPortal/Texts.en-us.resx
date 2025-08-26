@@ -66,4 +66,21 @@
 <data name="URL" xml:space="preserve"><value>URL</value></data>
 <data name="Description" xml:space="preserve"><value>Description</value></data>
 <data name="IsEnabled" xml:space="preserve"><value>Discontinued</value></data>
+<data name="DownloadFromGitHub" xml:space="preserve"><value>Download from GitHub</value></data>
+<data name="Search" xml:space="preserve"><value>Search</value></data>
+<data name="InstallDownloaded" xml:space="preserve"><value>Install downloaded</value></data>
+<data name="InvalidGitHubURL" xml:space="preserve"><value>Invalid GitHub URL</value></data>
+<data name="FetchingLatestRelease" xml:space="preserve"><value>Fetching latest release...</value></data>
+<data name="FailedToParseReleaseInfo" xml:space="preserve"><value>Failed to parse release info.</value></data>
+<data name="NoYmmeFileFoundInTheLatestRelease" xml:space="preserve"><value>No .ymme file found in the latest release.</value></data>
+<data name="DownloadingFile" xml:space="preserve"><value>Downloading {0}...</value></data>
+<data name="DownloadCompleted" xml:space="preserve"><value>Download completed: {0}</value></data>
+<data name="FailedToFetchReleaseInfo" xml:space="preserve"><value>Error: Failed to fetch release info. ({0})</value></data>
+<data name="NetworkError" xml:space="preserve"><value>Error: There may be a problem with your network connection.</value></data>
+<data name="ErrorMessage" xml:space="preserve"><value>Error: {0}</value></data>
+<data name="FailedToLaunchInstaller" xml:space="preserve"><value>Error: Failed to launch installer. {0}</value></data>
+<data name="NoDownloadablePlugins" xml:space="preserve"><value>No downloadable plugins available for installation</value></data>
+<data name="InstallAllMessage" xml:space="preserve"><value>Install all {0} downloaded plugins.\nYou need to close YMM4 to start the installation.\n\nDo you want to proceed?</value></data>
+<data name="InstallAllPlugins" xml:space="preserve"><value>Install All Plugins</value></data>
+<data name="CancelBulkInstallation" xml:space="preserve"><value>Batch installation has been canceled.</value></data>
 </root>

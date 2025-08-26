@@ -66,4 +66,21 @@
 <data name="URL" xml:space="preserve"><value>URL</value></data>
 <data name="Description" xml:space="preserve"><value>説明</value></data>
 <data name="IsEnabled" xml:space="preserve"><value>配布終了</value></data>
+<data name="DownloadFromGitHub" xml:space="preserve"><value>GitHubからダウンロード</value></data>
+<data name="Search" xml:space="preserve"><value>検索</value></data>
+<data name="InstallDownloaded" xml:space="preserve"><value>ダウンロード済みをインストール</value></data>
+<data name="InvalidGitHubURL" xml:space="preserve"><value>無効なGitHub URLです。</value></data>
+<data name="FetchingLatestRelease" xml:space="preserve"><value>最新のリリースを取得中...</value></data>
+<data name="FailedToParseReleaseInfo" xml:space="preserve"><value>リリース情報の解析に失敗しました。</value></data>
+<data name="NoYmmeFileFoundInTheLatestRelease" xml:space="preserve"><value>最新リリースに .ymme ファイルが見つかりませんでした。</value></data>
+<data name="DownloadingFile" xml:space="preserve"><value>{0} をダウンロード中...</value></data>
+<data name="DownloadCompleted" xml:space="preserve"><value>ダウンロード完了: {0}</value></data>
+<data name="FailedToFetchReleaseInfo" xml:space="preserve"><value>エラー: リリース情報の取得に失敗しました。 ({0})</value></data>
+<data name="NetworkError" xml:space="preserve"><value>エラー: ネットワーク接続に問題がある可能性があります。</value></data>
+<data name="ErrorMessage" xml:space="preserve"><value>エラー: {0}</value></data>
+<data name="FailedToLaunchInstaller" xml:space="preserve"><value>エラー: インストーラーの起動に失敗しました。 {0}</value></data>
+<data name="NoDownloadablePlugins" xml:space="preserve"><value>インストール可能なダウンロード済みプラグインがありません</value></data>
+<data name="InstallAllMessage" xml:space="preserve"><value>ダウンロード済みのプラグイン {0} 件をすべてインストールします。\nインストールを開始するにはゆっくりMovieMaker4を終了する必要があります。\n\n実行しますか？</value></data>
+<data name="InstallAllPlugins" xml:space="preserve"><value>プラグイン一括インストール</value></data>
+<data name="CancelBulkInstallation" xml:space="preserve"><value>一括インストールはキャンセルされました。</value></data>
 </root>

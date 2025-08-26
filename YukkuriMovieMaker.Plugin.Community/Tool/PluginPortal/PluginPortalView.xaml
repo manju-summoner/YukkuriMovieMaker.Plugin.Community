@@ -19,6 +19,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
@@ -31,8 +32,8 @@
                     <TextBox x:Name="SearchBox" VerticalContentAlignment="Center"
                              Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              Background="Transparent" />
-                    
-                    <TextBlock Text="検索" Foreground="Gray" VerticalAlignment="Center" Margin="5,0,0,0" IsHitTestVisible="False">
+
+                    <TextBlock Text="{x:Static local:Texts.Search}" Foreground="Gray" VerticalAlignment="Center" Margin="5,0,0,0" IsHitTestVisible="False">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -52,9 +53,7 @@
                     
                 </Grid>
 
-                <Button x:Name="FilterButton" Grid.Column="1" Content="≡" Width="20"
-                            Click="FilterButton_Click">
-
+                <Button x:Name="FilterButton" Grid.Column="1" Content="≡" Width="20" Click="FilterButton_Click">
                     <Button.ContextMenu>
                         <ContextMenu ItemsSource="{Binding TypeFilters}">
                             <ContextMenu.ItemContainerStyle>
@@ -67,7 +66,6 @@
                             </ContextMenu.ItemContainerStyle>
                         </ContextMenu>
                     </Button.ContextMenu>
-
                 </Button>
             </Grid>
 
@@ -82,9 +80,15 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+
+            <Button Grid.Row="2" Content="{x:Static local:Texts.InstallDownloaded}" Command="{Binding InstallLocalCommand}" Height="25"/>
         </Grid>
 
-        <Grid Grid.Column="1" Margin="10,0,0,0" DataContext="{Binding SelectedPlugin}">
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Setter Property="Visibility" Value="Visible" />
@@ -96,10 +100,9 @@
                 </Style>
             </Grid.Style>
 
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="10">
+            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Margin="10">
                 <StackPanel>
-                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="22" 
-                           TextWrapping="Wrap" Margin="0,0,0,15"/>
+                    <TextBlock Text="{Binding SelectedPlugin.Name}" FontWeight="Bold" FontSize="22" Margin="0,0,0,15"/>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -114,28 +117,33 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static local:Texts.Author}" FontWeight="SemiBold" Margin="0,0,10,8" HorizontalAlignment="Right"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Author}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedPlugin.Author}" Margin="0,0,0,8"/>
 
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static local:Texts.Type}" FontWeight="SemiBold" Margin="0,0,10,8" HorizontalAlignment="Right"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Type}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedPlugin.Type}" Margin="0,0,0,8"/>
 
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static local:Texts.Date}" FontWeight="SemiBold" Margin="0,0,10,8" HorizontalAlignment="Right"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Date, StringFormat='yyyy/MM/dd'}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedPlugin.Date, StringFormat='yyyy/MM/dd'}" Margin="0,0,0,8"/>
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static local:Texts.URL}" FontWeight="SemiBold" Margin="0,0,10,8" HorizontalAlignment="Right"/>
                         <TextBlock Grid.Row="3" Grid.Column="1">
-                        <Hyperlink NavigateUri="{Binding Url}" RequestNavigate="Hyperlink_RequestNavigate">
-                            <TextBlock Text="{Binding Url}" TextWrapping="Wrap"/>
+                        <Hyperlink NavigateUri="{Binding SelectedPlugin.Url}" RequestNavigate="Hyperlink_RequestNavigate">
+                            <TextBlock Text="{Binding SelectedPlugin.Url}" />
                         </Hyperlink>
                     </TextBlock>
                     </Grid>
 
                     <TextBlock Text="{x:Static local:Texts.Description}" FontWeight="Bold" Margin="0,20,0,5"/>
                     <Separator/>
-                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,5,0,0"/>
+                    <TextBlock Text="{Binding SelectedPlugin.Description}" Margin="0,5,0,0"/>
 
                 </StackPanel>
             </ScrollViewer>
+
+            <StackPanel Grid.Row="1">
+                <TextBlock Text="{Binding StatusMessage}" Margin="10,0"/>
+                <Button Content="{x:Static local:Texts.DownloadFromGitHub}" Command="{Binding DownloadCommand}" Height="25" />
+            </StackPanel>
         </Grid>
     </Grid>
 </UserControl>
