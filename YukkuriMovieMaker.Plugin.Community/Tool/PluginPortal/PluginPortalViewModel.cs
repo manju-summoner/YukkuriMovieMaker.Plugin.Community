@@ -19,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
         private const string YamlUrl = "https://manjubox.net/ymm4plugins.yml";
         private static readonly HttpClient httpClient = new();
 
-        readonly string ymmesDir = @"user\ymmes";
+        readonly string _tempPluginsDir;
 
         private List<PluginInfo> _allPlugins = [];
 
@@ -73,12 +73,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 
         public ICommand DownloadCommand { get; }
         public ICommand InstallLocalCommand { get; }
-        public ICommand ClearCommand { get; }
 
         public PluginPortalViewModel()
         {
-            // GitHub APIはUser-Agentヘッダーが必須のよう
-            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("YukkuriMovieMaker4PluginPortal", "1.0"));
+            _tempPluginsDir = Path.Combine(AppDirectories.TemporaryDirectory, "plugins");
+            Directory.CreateDirectory(_tempPluginsDir);
+
+            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("user-agent", $"YukkuriMovieMaker_v{AppVersion.Current}"));
 
             Task.Run(LoadPluginsAsync);
 
@@ -89,10 +90,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             InstallLocalCommand = new ActionCommand(
                 _ => CanInstallLocalPlugins(),
                 _ => InstallLocalPlugins());
-
-            ClearCommand = new ActionCommand(
-                _ => CanInstallLocalPlugins(),
-                _ => ClearLocalPlugins());
         }
 
         private async Task LoadPluginsAsync()
@@ -220,16 +217,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                 StatusMessage = string.Format(Texts.DownloadingFile, ymmeAsset.Name);
                 var fileBytes = await httpClient.GetByteArrayAsync(ymmeAsset.BrowserDownloadUrl);
 
-                //一時的にymmeを保存する場所
-                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                string pluginsDir = Path.Combine(baseDir, ymmesDir);
-                Directory.CreateDirectory(pluginsDir);
-                var savePath = Path.Combine(pluginsDir, ymmeAsset.Name);
-
+                //一時的にymmeを保存する
+                var savePath = Path.Combine(_tempPluginsDir, ymmeAsset.Name);
                 await File.WriteAllBytesAsync(savePath, fileBytes);
 
                 ((ActionCommand)InstallLocalCommand).RaiseCanExecuteChanged();
-                ((ActionCommand)ClearCommand).RaiseCanExecuteChanged();
                 StatusMessage = string.Format(Texts.DownloadCompleted, ymmeAsset.Name);
             }
             catch (HttpRequestException ex)
@@ -249,7 +241,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             }
         }
 
-        private void InstallPlugin(string ymmeFilePath)
+        private void LaunchInstaller(string path, bool isDirectory, bool cleanAfterInstall)
         {
             try
             {
@@ -259,7 +251,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                     "Installer",
                     "YukkuriMovieMaker.Plugin.Installer.exe");
 
-                Process.Start(installerPath, $"\"{ymmeFilePath}\"");
+                var arguments = new List<string>();
+                if (isDirectory)
+                {
+                    arguments.Add($"--dir \"{path}\"");
+                }
+                else
+                {
+                    arguments.Add($"\"{path}\"");
+                }
+
+                if (cleanAfterInstall)
+                {
+                    arguments.Add("--clean");
+                }
+
+                Process.Start(installerPath, string.Join(" ", arguments));
             }
             catch (Exception ex)
             {
@@ -271,10 +278,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
         {
             try
             {
-                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                string pluginsDir = Path.Combine(baseDir, ymmesDir);
-                if (!Directory.Exists(pluginsDir)) return false;
-                var ymmeFiles = Directory.GetFiles(pluginsDir, "*.ymme");
+                if (!Directory.Exists(_tempPluginsDir)) return false;
+                var ymmeFiles = Directory.GetFiles(_tempPluginsDir, "*.ymme");
                 return ymmeFiles.Length > 0;
             }
             catch
@@ -285,19 +290,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 
         private void InstallLocalPlugins()
         {
-            string baseDir = AppContext.BaseDirectory;
-            string pluginsDir = Path.Combine(baseDir, ymmesDir);
-
             if (!CanInstallLocalPlugins())
             {
                 MessageBox.Show(Texts.NoDownloadablePlugins, Texts.PluginPortal, MessageBoxButton.OK);
                 return;
             }
 
-            var ymmeFiles = Directory.GetFiles(pluginsDir, "*.ymme");
+            var ymmeFiles = Directory.GetFiles(_tempPluginsDir, "*.ymme");
+            var fileNames = ymmeFiles.Select(Path.GetFileName);
 
-            var message = string.Format(Texts.InstallAllMessage, ymmeFiles.Length).Replace("\\n", Environment.NewLine);
-            var result = MessageBox.Show(message, Texts.InstallAllPlugins, MessageBoxButton.YesNo);
+            var messageBuilder = new System.Text.StringBuilder();
+            messageBuilder.AppendLine(Texts.InstallPluginsMessage);
+            messageBuilder.AppendLine();
+            foreach (var name in fileNames)
+            {
+                messageBuilder.AppendLine($" - {name}");
+            }
+
+            var result = MessageBox.Show(messageBuilder.ToString(), Texts.InstallAllPlugins, MessageBoxButton.YesNo);
 
             if (result != MessageBoxResult.Yes)
             {
@@ -305,56 +315,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                 return;
             }
 
-            foreach (var filePath in ymmeFiles)
+            LaunchInstaller(_tempPluginsDir, true, PluginPortalSettings.Default.IsCleanYmmeFile);
+
+            if (!PluginPortalSettings.Default.IsCleanYmmeFile)
             {
-                InstallPlugin(filePath);
+                if (!string.IsNullOrWhiteSpace(PluginPortalSettings.Default.YmmeFilePath))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(PluginPortalSettings.Default.YmmeFilePath);
+
+                        foreach (var sourceFile in ymmeFiles)
+                        {
+                            string fileName = Path.GetFileName(sourceFile);
+                            string destinationFile = Path.Combine(PluginPortalSettings.Default.YmmeFilePath, fileName);
+
+                            File.Move(sourceFile, destinationFile, true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(string.Format(Texts.ErrorMessage, ex.Message), Texts.PluginPortal, MessageBoxButton.OK);
+                    }
+                }
             }
 
             Application.Current.Shutdown();
-        }
-
-        private void ClearLocalPlugins()
-        {
-            try
-            {
-                string baseDir = AppContext.BaseDirectory;
-                string pluginsDir = Path.Combine(baseDir, ymmesDir);
-
-                if (!Directory.Exists(pluginsDir)) return;
-
-                var ymmeFiles = Directory.GetFiles(pluginsDir, "*.ymme");
-
-                if (ymmeFiles.Length == 0)
-                {
-                    StatusMessage = Texts.NoFilesToClear;
-                    return;
-                }
-
-                var result = MessageBox.Show(
-                    string.Format(Texts.ClearAllPlugins, ymmeFiles.Length).Replace("\\n", Environment.NewLine),
-                    Texts.PluginPortal,
-                    MessageBoxButton.YesNo);
-
-                if (result != MessageBoxResult.Yes)
-                {
-                    StatusMessage =Texts.CancelClear;
-                    return;
-                }
-
-                foreach (var filePath in ymmeFiles)
-                {
-                    File.Delete(filePath);
-                }
-
-                StatusMessage = string.Format(Texts.DeletedFiles, ymmeFiles.Length);
-
-                ((ActionCommand)InstallLocalCommand).RaiseCanExecuteChanged();
-                ((ActionCommand)ClearCommand).RaiseCanExecuteChanged();
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = string.Format(Texts.ErrorMessage,ex.Message);
-            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

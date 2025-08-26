@@ -69,7 +69,6 @@
 <data name="DownloadFromGitHub" xml:space="preserve"><value>從GitHub下載</value></data>
 <data name="Search" xml:space="preserve"><value>搜尋</value></data>
 <data name="InstallDownloaded" xml:space="preserve"><value>安裝已下載</value></data>
-<data name="Clear" xml:space="preserve"><value>清除</value></data>
 <data name="InvalidGitHubURL" xml:space="preserve"><value>無效的GitHub URL</value></data>
 <data name="FetchingLatestRelease" xml:space="preserve"><value>正在取得最新版本...</value></data>
 <data name="FailedToParseReleaseInfo" xml:space="preserve"><value>無法解析版本資訊。</value></data>
@@ -84,8 +83,7 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>安裝所有 {0} 個下載的外掛程式。\n您需要關閉 YMM4 以開始安裝。\n\n要繼續嗎？</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>批量安裝外掛程式</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>批量安裝已取消。</value></data>
-<data name="NoFilesToClear" xml:space="preserve"><value>沒有要清除的檔案。</value></data>
-<data name="ClearAllPlugins" xml:space="preserve"><value>這將刪除所有 {0} 個下載的檔案。 \n\n要繼續嗎？</value></data>
-<data name="CancelClear" xml:space="preserve"><value>清除操作已取消。</value></data>
-<data name="DeletedFiles" xml:space="preserve"><value>已刪除 {0} 個檔案。</value></data>
+<data name="InstallPluginsMessage" xml:space="preserve"><value>是否要安裝以下外掛程式？</value></data>
+<data name="IsCleanYmmeFile" xml:space="preserve"><value>.ymme 檔案安裝後刪除</value></data>
+<data name="YmmeFilePath" xml:space="preserve"><value>.ymme 檔案路徑</value></data>
 </root>

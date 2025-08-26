@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
+using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 {
@@ -11,11 +8,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
         public override SettingsCategory Category => SettingsCategory.None;
         public override string Name => Texts.PluginPortal;
 
-        public override bool HasSettingView => false;
-        public override object? SettingView => throw new NotImplementedException();
+        public override bool HasSettingView => true;
+        public override object? SettingView => new PluginPortalSettingsView();
 
-        public List<string> InstalledPlugins { get=> installedPlugins; set => Set(ref installedPlugins, value); }
-        private List<string> installedPlugins = [];
+        public bool IsCleanYmmeFile { get=> isCleanYmmeFile; set => Set(ref isCleanYmmeFile, value); }
+        private bool isCleanYmmeFile = true;
+
+        public string YmmeFilePath { get => ymmeFilePath; set => Set(ref ymmeFilePath, value); }
+        private string ymmeFilePath = Path.Combine(AppDirectories.AppDirectory, @"user\ymmes");
 
         public override void Initialize()
         {

@@ -69,7 +69,6 @@
 <data name="DownloadFromGitHub" xml:space="preserve"><value>GitHub에서 다운로드</value></data>
 <data name="Search" xml:space="preserve"><value>검색</value></data>
 <data name="InstallDownloaded" xml:space="preserve"><value>다운로드한 항목 설치</value></data>
-<data name="Clear" xml:space="preserve"><value>지우기</value></data>
 <data name="InvalidGitHubURL" xml:space="preserve"><value>잘못된 GitHub URL</value></data>
 <data name="FetchingLatestRelease" xml:space="preserve"><value>최신 릴리스 가져오는 중...</value></data>
 <data name="FailedToParseReleaseInfo" xml:space="preserve"><value>릴리스 정보 구문 분석 실패.</value></data>
@@ -84,8 +83,7 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>다운로드한 플러그인 {0}개를 모두 설치합니다.\n설치를 시작하려면 YMM4를 종료해야 합니다.\n\n실행하시겠습니까?</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>플러그인 일괄 설치</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>일괄 설치가 취소되었습니다.</value></data>
-<data name="NoFilesToClear" xml:space="preserve"><value>지울 파일이 없습니다.</value></data>
-<data name="ClearAllPlugins" xml:space="preserve"><value>이 작업은 다운로드한 {0}개의 모든 파일을 삭제합니다. \n\n실행하시겠습니까?</value></data>
-<data name="CancelClear" xml:space="preserve"><value>지우기 작업이 취소되었습니다.</value></data>
-<data name="DeletedFiles" xml:space="preserve"><value>{0}개의 파일이 삭제되었습니다.</value></data>
+<data name="InstallPluginsMessage" xml:space="preserve"><value>다음 플러그인을 설치하시겠습니까?</value></data>
+<data name="IsCleanYmmeFile" xml:space="preserve"><value>설치 후 .ymme 파일 삭제</value></data>
+<data name="YmmeFilePath" xml:space="preserve"><value>.ymme 파일 경로</value></data>
 </root>

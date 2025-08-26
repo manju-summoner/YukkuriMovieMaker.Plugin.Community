@@ -69,7 +69,6 @@
 <data name="DownloadFromGitHub" xml:space="preserve"><value>التنزيل من GitHub</value></data>
 <data name="Search" xml:space="preserve"><value>إغلاق</value></data>
 <data name="InstallDownloaded" xml:space="preserve"><value>تثبيت الذي تم تنزيله</value></data>
-<data name="Clear" xml:space="preserve"><value>مسح</value></data>
 <data name="InvalidGitHubURL" xml:space="preserve"><value>رابط GitHub غير صالح</value></data>
 <data name="FetchingLatestRelease" xml:space="preserve"><value>جاري جلب الإصدار الأخير...</value></data>
 <data name="FailedToParseReleaseInfo" xml:space="preserve"><value>فشل في تحليل معلومات الإصدار.</value></data>
@@ -84,8 +83,7 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>تثبيت جميع الإضافات التي تم تنزيلها وعددها {0}.\nتحتاج إلى إغلاق YMM4 لبدء التثبيت.\n\nهل تريد المتابعة؟</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>تثبيت جميع الإضافات</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>تم إلغاء التثبيت بالجملة.</value></data>
-<data name="NoFilesToClear" xml:space="preserve"><value>لا توجد ملفات للمسح.</value></data>
-<data name="ClearAllPlugins" xml:space="preserve"><value>سيؤدي هذا إلى حذف جميع الملفات التي تم تنزيلها وعددها {0}. \n\nهل تريد المتابعة؟</value></data>
-<data name="CancelClear" xml:space="preserve"><value>تم إلغاء عملية المسح.</value></data>
-<data name="DeletedFiles" xml:space="preserve"><value>تم حذف {0} ملف.</value></data>
+<data name="InstallPluginsMessage" xml:space="preserve"><value>هل تريد تثبيت الإضافات التالية؟</value></data>
+<data name="IsCleanYmmeFile" xml:space="preserve"><value>حذف ملف .ymme بعد التثبيت</value></data>
+<data name="YmmeFilePath" xml:space="preserve"><value>مسار ملف .ymme</value></data>
 </root>
