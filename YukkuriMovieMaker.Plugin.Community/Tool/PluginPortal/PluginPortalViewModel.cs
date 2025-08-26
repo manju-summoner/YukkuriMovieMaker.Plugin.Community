@@ -73,6 +73,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 
         public ICommand DownloadCommand { get; }
         public ICommand InstallLocalCommand { get; }
+        public ICommand ClearCommand { get; }
 
         public PluginPortalViewModel()
         {
@@ -88,6 +89,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             InstallLocalCommand = new ActionCommand(
                 _ => CanInstallLocalPlugins(),
                 _ => InstallLocalPlugins());
+
+            ClearCommand = new ActionCommand(
+                _ => CanInstallLocalPlugins(),
+                _ => ClearLocalPlugins());
         }
 
         private async Task LoadPluginsAsync()
@@ -224,6 +229,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                 await File.WriteAllBytesAsync(savePath, fileBytes);
 
                 ((ActionCommand)InstallLocalCommand).RaiseCanExecuteChanged();
+                ((ActionCommand)ClearCommand).RaiseCanExecuteChanged();
                 StatusMessage = string.Format(Texts.DownloadCompleted, ymmeAsset.Name);
             }
             catch (HttpRequestException ex)
@@ -305,6 +311,50 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             }
 
             Application.Current.Shutdown();
+        }
+
+        private void ClearLocalPlugins()
+        {
+            try
+            {
+                string baseDir = AppContext.BaseDirectory;
+                string pluginsDir = Path.Combine(baseDir, ymmesDir);
+
+                if (!Directory.Exists(pluginsDir)) return;
+
+                var ymmeFiles = Directory.GetFiles(pluginsDir, "*.ymme");
+
+                if (ymmeFiles.Length == 0)
+                {
+                    StatusMessage = Texts.NoFilesToClear;
+                    return;
+                }
+
+                var result = MessageBox.Show(
+                    string.Format(Texts.ClearAllPlugins, ymmeFiles.Length).Replace("\\n", Environment.NewLine),
+                    Texts.PluginPortal,
+                    MessageBoxButton.YesNo);
+
+                if (result != MessageBoxResult.Yes)
+                {
+                    StatusMessage =Texts.CancelClear;
+                    return;
+                }
+
+                foreach (var filePath in ymmeFiles)
+                {
+                    File.Delete(filePath);
+                }
+
+                StatusMessage = string.Format(Texts.DeletedFiles, ymmeFiles.Length);
+
+                ((ActionCommand)InstallLocalCommand).RaiseCanExecuteChanged();
+                ((ActionCommand)ClearCommand).RaiseCanExecuteChanged();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = string.Format(Texts.ErrorMessage,ex.Message);
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

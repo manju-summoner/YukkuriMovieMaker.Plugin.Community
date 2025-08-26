@@ -69,6 +69,7 @@
 <data name="DownloadFromGitHub" xml:space="preserve"><value>Download from GitHub</value></data>
 <data name="Search" xml:space="preserve"><value>Search</value></data>
 <data name="InstallDownloaded" xml:space="preserve"><value>Install downloaded</value></data>
+<data name="Clear" xml:space="preserve"><value>Clear</value></data>
 <data name="InvalidGitHubURL" xml:space="preserve"><value>Invalid GitHub URL</value></data>
 <data name="FetchingLatestRelease" xml:space="preserve"><value>Fetching latest release...</value></data>
 <data name="FailedToParseReleaseInfo" xml:space="preserve"><value>Failed to parse release info.</value></data>
@@ -83,4 +84,8 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>Install all {0} downloaded plugins.\nYou need to close YMM4 to start the installation.\n\nDo you want to proceed?</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>Install All Plugins</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>Batch installation has been canceled.</value></data>
+<data name="NoFilesToClear" xml:space="preserve"><value>No files to clear.</value></data>
+<data name="ClearAllPlugins" xml:space="preserve"><value>This will delete all {0} downloaded files. \n\nDo you want to proceed?</value></data>
+<data name="CancelClear" xml:space="preserve"><value>Clear operation has been canceled.</value></data>
+<data name="DeletedFiles" xml:space="preserve"><value>{0} files have been deleted.</value></data>
 </root>

@@ -69,6 +69,7 @@
 <data name="DownloadFromGitHub" xml:space="preserve"><value>GitHubからダウンロード</value></data>
 <data name="Search" xml:space="preserve"><value>検索</value></data>
 <data name="InstallDownloaded" xml:space="preserve"><value>ダウンロード済みをインストール</value></data>
+<data name="Clear" xml:space="preserve"><value>クリア</value></data>
 <data name="InvalidGitHubURL" xml:space="preserve"><value>無効なGitHub URLです。</value></data>
 <data name="FetchingLatestRelease" xml:space="preserve"><value>最新のリリースを取得中...</value></data>
 <data name="FailedToParseReleaseInfo" xml:space="preserve"><value>リリース情報の解析に失敗しました。</value></data>
@@ -83,4 +84,8 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>ダウンロード済みのプラグイン {0} 件をすべてインストールします。\nインストールを開始するにはゆっくりMovieMaker4を終了する必要があります。\n\n実行しますか？</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>プラグイン一括インストール</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>一括インストールはキャンセルされました。</value></data>
+<data name="NoFilesToClear" xml:space="preserve"><value>クリア対象のファイルがありません。</value></data>
+<data name="ClearAllPlugins" xml:space="preserve"><value>ダウンロード済みの {0} 件のファイルをすべて削除します。 \n\n実行しますか？</value></data>
+<data name="CancelClear" xml:space="preserve"><value>クリア処理をキャンセルしました。</value></data>
+<data name="DeletedFiles" xml:space="preserve"><value>{0} 件のファイルを削除しました。</value></data>
 </root>

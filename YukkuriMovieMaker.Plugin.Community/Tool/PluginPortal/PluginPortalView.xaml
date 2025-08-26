@@ -81,7 +81,15 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <Button Grid.Row="2" Content="{x:Static local:Texts.InstallDownloaded}" Command="{Binding InstallLocalCommand}" Height="25"/>
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Content="{x:Static local:Texts.InstallDownloaded}" Command="{Binding InstallLocalCommand}" Grid.Column="0" Height="25"/>
+                <Button Content="{x:Static local:Texts.Clear}" Command="{Binding ClearCommand}" Grid.Column="1" Height="25"/>
+            </Grid>
+            
         </Grid>
 
         <Grid Grid.Column="1">
