@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal"
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             xmlns:s="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type={x:Type local:PluginPortalViewModel}}"
@@ -128,7 +129,7 @@
 
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static local:Texts.URL}" FontWeight="SemiBold" Margin="0,0,10,8" HorizontalAlignment="Right"/>
                         <TextBlock Grid.Row="3" Grid.Column="1">
-                        <Hyperlink NavigateUri="{Binding SelectedPlugin.Url}" RequestNavigate="Hyperlink_RequestNavigate">
+                        <Hyperlink Command="{Binding Source={x:Static s:CommandSettings.Default},Path=[OpenUri]}" CommandParameter="{Binding SelectedPlugin.Url}">
                             <TextBlock Text="{Binding SelectedPlugin.Url}" />
                         </Hyperlink>
                     </TextBlock>
