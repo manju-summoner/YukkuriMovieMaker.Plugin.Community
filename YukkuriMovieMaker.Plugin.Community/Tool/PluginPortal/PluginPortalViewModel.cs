@@ -107,8 +107,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     var types = _allPlugins
-                       .Where(p => !string.IsNullOrEmpty(p.Type))   // Typeが空でないものだけを対象
-                       .SelectMany(p => p.Type.Split(','))          // カンマで分割し、リストをフラット化
+                       .SelectMany(p => p.Type?.Split(',') ?? [])          // カンマで分割し、リストをフラット化
                        .Select(t => t.Trim())                       // 前後の空白を削除
                        .Where(t => !string.IsNullOrEmpty(t))        // 空になった項目を除外
                        .Distinct()                                  // 重複を削除
