@@ -14,7 +14,7 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 {
-    internal class PluginPortalViewModel : INotifyPropertyChanged
+    internal partial class PluginPortalViewModel : INotifyPropertyChanged
     {
         private const string YamlUrl = "https://manjubox.net/ymm4plugins.yml";
         private static readonly HttpClient httpClient = new();
@@ -179,7 +179,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
         {
             if (SelectedPlugin?.Url is null) return;
 
-            var match = Regex.Match(SelectedPlugin.Url, @"github\.com/([^/]+)/([^/]+)");
+            var match = GitHubRepositoryUrlRegex().Match(SelectedPlugin.Url);
             if (!match.Success)
             {
                 StatusMessage = Texts.InvalidGitHubURL;
@@ -347,5 +347,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        [GeneratedRegex(@"github\.com/([^/]+)/([^/]+)")]
+        private static partial Regex GitHubRepositoryUrlRegex();
     }
 }
