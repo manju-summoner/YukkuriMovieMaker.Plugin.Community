@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using YamlDotNet.Serialization;
+﻿using YamlDotNet.Serialization;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 {
@@ -31,21 +30,5 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 
         [YamlMember(Alias = "isEnabled")]
         public bool IsEnabled { get; set; } = true;
-    }
-
-
-    internal class GitHubRelease
-    {
-        [JsonPropertyName("assets")]
-        public List<GitHubAsset> Assets { get; set; } = [];
-    }
-
-    internal class GitHubAsset
-    {
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = "";
-
-        [JsonPropertyName("browser_download_url")]
-        public string BrowserDownloadUrl { get; set; } = "";
     }
 }
