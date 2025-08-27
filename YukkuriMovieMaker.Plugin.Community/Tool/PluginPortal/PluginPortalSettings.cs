@@ -15,7 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
         private bool isCleanYmmeFile = true;
 
         public string YmmeFilePath { get => ymmeFilePath; set => Set(ref ymmeFilePath, value); }
-        private string ymmeFilePath = Path.Combine(AppDirectories.AppDirectory, @"user\ymmes");
+        private string ymmeFilePath = Path.Combine(AppDirectories.UserDirectory, @"ymmes");
 
         public override void Initialize()
         {
