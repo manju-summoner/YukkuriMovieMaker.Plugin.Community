@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
+<data name="PluginPortal" xml:space="preserve"><value>플러그인 포털</value></data>
+<data name="Author" xml:space="preserve"><value>작성자</value></data>
+<data name="Type" xml:space="preserve"><value>유형</value></data>
+<data name="Date" xml:space="preserve"><value>날짜</value></data>
+<data name="URL" xml:space="preserve"><value>URL</value></data>
+<data name="Description" xml:space="preserve"><value>설명</value></data>
+<data name="IsEnabled" xml:space="preserve"><value>배포 종료</value></data>
+<data name="DownloadFromGitHub" xml:space="preserve"><value>GitHub에서 다운로드</value></data>
+<data name="Search" xml:space="preserve"><value>검색</value></data>
+<data name="InstallDownloaded" xml:space="preserve"><value>다운로드한 항목 설치</value></data>
+<data name="InvalidGitHubURL" xml:space="preserve"><value>잘못된 GitHub URL</value></data>
+<data name="FetchingLatestRelease" xml:space="preserve"><value>최신 릴리스 가져오는 중...</value></data>
+<data name="FailedToParseReleaseInfo" xml:space="preserve"><value>릴리스 정보 구문 분석 실패.</value></data>
+<data name="NoYmmeFileFoundInTheLatestRelease" xml:space="preserve"><value>최신 릴리스에 .ymme 파일이 없습니다.</value></data>
+<data name="DownloadingFile" xml:space="preserve"><value>{0} 다운로드 중...</value></data>
+<data name="DownloadCompleted" xml:space="preserve"><value>다운로드 완료: {0}</value></data>
+<data name="FailedToFetchReleaseInfo" xml:space="preserve"><value>오류: 릴리스 정보를 가져오지 못했습니다. ({0})</value></data>
+<data name="NetworkError" xml:space="preserve"><value>오류: 네트워크 연결에 문제가 있을 수 있습니다.</value></data>
+<data name="ErrorMessage" xml:space="preserve"><value>오류: {0}</value></data>
+<data name="FailedToLaunchInstaller" xml:space="preserve"><value>오류: 설치 프로그램을 시작하지 못했습니다. {0}</value></data>
+<data name="NoDownloadablePlugins" xml:space="preserve"><value>설치할 수 있는 다운로드 가능한 플러그인이 없습니다.</value></data>
+<data name="InstallAllMessage" xml:space="preserve"><value>다운로드한 플러그인 {0}개를 모두 설치합니다.\n설치를 시작하려면 YMM4를 종료해야 합니다.\n\n실행하시겠습니까?</value></data>
+<data name="InstallAllPlugins" xml:space="preserve"><value>플러그인 일괄 설치</value></data>
+<data name="CancelBulkInstallation" xml:space="preserve"><value>일괄 설치가 취소되었습니다.</value></data>
+<data name="InstallPluginsMessage" xml:space="preserve"><value>다음 플러그인을 설치하시겠습니까?</value></data>
+<data name="IsCleanYmmeFile" xml:space="preserve"><value>설치 후 .ymme 파일 삭제</value></data>
+<data name="YmmeFilePath" xml:space="preserve"><value>.ymme 파일 경로</value></data>
+</root>

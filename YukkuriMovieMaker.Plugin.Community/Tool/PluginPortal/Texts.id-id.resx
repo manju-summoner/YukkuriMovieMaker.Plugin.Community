@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
+<data name="PluginPortal" xml:space="preserve"><value>Portal Plugin</value></data>
+<data name="Author" xml:space="preserve"><value>Penulis</value></data>
+<data name="Type" xml:space="preserve"><value>Jenis</value></data>
+<data name="Date" xml:space="preserve"><value>Tanggal</value></data>
+<data name="URL" xml:space="preserve"><value>URL</value></data>
+<data name="Description" xml:space="preserve"><value>Deskripsi</value></data>
+<data name="IsEnabled" xml:space="preserve"><value>Dihentikan</value></data>
+<data name="DownloadFromGitHub" xml:space="preserve"><value>Unduh dari GitHub</value></data>
+<data name="Search" xml:space="preserve"><value>Tutup</value></data>
+<data name="InstallDownloaded" xml:space="preserve"><value>Pasang yang diunduh</value></data>
+<data name="InvalidGitHubURL" xml:space="preserve"><value>URL GitHub tidak valid</value></data>
+<data name="FetchingLatestRelease" xml:space="preserve"><value>Mengambil rilis terbaru...</value></data>
+<data name="FailedToParseReleaseInfo" xml:space="preserve"><value>Gagal mengurai info rilis.</value></data>
+<data name="NoYmmeFileFoundInTheLatestRelease" xml:space="preserve"><value>Tidak ditemukan file .ymme di rilis terbaru.</value></data>
+<data name="DownloadingFile" xml:space="preserve"><value>Mengunduh {0}...</value></data>
+<data name="DownloadCompleted" xml:space="preserve"><value>Unduhan selesai: {0}</value></data>
+<data name="FailedToFetchReleaseInfo" xml:space="preserve"><value>Kesalahan: Gagal mengambil info rilis. ({0})</value></data>
+<data name="NetworkError" xml:space="preserve"><value>Kesalahan: Mungkin ada masalah dengan koneksi jaringan Anda.</value></data>
+<data name="ErrorMessage" xml:space="preserve"><value>Kesalahan: {0}</value></data>
+<data name="FailedToLaunchInstaller" xml:space="preserve"><value>Kesalahan: Gagal meluncurkan penginstal. {0}</value></data>
+<data name="NoDownloadablePlugins" xml:space="preserve"><value>Tidak ada plugin yang dapat diunduh untuk diinstal</value></data>
+<data name="InstallAllMessage" xml:space="preserve"><value>Pasang semua {0} plugin yang diunduh.\nAnda perlu menutup YMM4 untuk memulai instalasi.\n\nApakah Anda ingin melanjutkan?</value></data>
+<data name="InstallAllPlugins" xml:space="preserve"><value>Pasang Semua Plugin</value></data>
+<data name="CancelBulkInstallation" xml:space="preserve"><value>Instalasi batch telah dibatalkan.</value></data>
+<data name="InstallPluginsMessage" xml:space="preserve"><value>Apakah Anda ingin menginstal plugin berikut?</value></data>
+<data name="IsCleanYmmeFile" xml:space="preserve"><value>Hapus file .ymme setelah instalasi</value></data>
+<data name="YmmeFilePath" xml:space="preserve"><value>Path file .ymme</value></data>
+</root>

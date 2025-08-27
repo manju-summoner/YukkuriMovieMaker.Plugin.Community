@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
+<data name="PluginPortal" xml:space="preserve"><value>插件入口</value></data>
+<data name="Author" xml:space="preserve"><value>作者</value></data>
+<data name="Type" xml:space="preserve"><value>類型</value></data>
+<data name="Date" xml:space="preserve"><value>發布日期</value></data>
+<data name="URL" xml:space="preserve"><value>URL</value></data>
+<data name="Description" xml:space="preserve"><value>描述</value></data>
+<data name="IsEnabled" xml:space="preserve"><value>已停止發佈</value></data>
+<data name="DownloadFromGitHub" xml:space="preserve"><value>從GitHub下載</value></data>
+<data name="Search" xml:space="preserve"><value>搜尋</value></data>
+<data name="InstallDownloaded" xml:space="preserve"><value>安裝已下載</value></data>
+<data name="InvalidGitHubURL" xml:space="preserve"><value>無效的GitHub URL</value></data>
+<data name="FetchingLatestRelease" xml:space="preserve"><value>正在取得最新版本...</value></data>
+<data name="FailedToParseReleaseInfo" xml:space="preserve"><value>無法解析版本資訊。</value></data>
+<data name="NoYmmeFileFoundInTheLatestRelease" xml:space="preserve"><value>在最新版本中未找到 .ymme 檔案.</value></data>
+<data name="DownloadingFile" xml:space="preserve"><value>正在下載 {0}...</value></data>
+<data name="DownloadCompleted" xml:space="preserve"><value>下載完成: {0}</value></data>
+<data name="FailedToFetchReleaseInfo" xml:space="preserve"><value>錯誤: 取得版本資訊失敗。 ({0})</value></data>
+<data name="NetworkError" xml:space="preserve"><value>錯誤: 可能有網路連線問題。</value></data>
+<data name="ErrorMessage" xml:space="preserve"><value>錯誤: {0}</value></data>
+<data name="FailedToLaunchInstaller" xml:space="preserve"><value>錯誤: 啟動安裝程式失敗。 {0}</value></data>
+<data name="NoDownloadablePlugins" xml:space="preserve"><value>沒有可供安裝的可下載外掛程式</value></data>
+<data name="InstallAllMessage" xml:space="preserve"><value>安裝所有 {0} 個下載的外掛程式。\n您需要關閉 YMM4 以開始安裝。\n\n要繼續嗎？</value></data>
+<data name="InstallAllPlugins" xml:space="preserve"><value>批量安裝外掛程式</value></data>
+<data name="CancelBulkInstallation" xml:space="preserve"><value>批量安裝已取消。</value></data>
+<data name="InstallPluginsMessage" xml:space="preserve"><value>是否要安裝以下外掛程式？</value></data>
+<data name="IsCleanYmmeFile" xml:space="preserve"><value>.ymme 檔案安裝後刪除</value></data>
+<data name="YmmeFilePath" xml:space="preserve"><value>.ymme 檔案路徑</value></data>
+</root>

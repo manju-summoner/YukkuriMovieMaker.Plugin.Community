@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
+<data name="PluginPortal" xml:space="preserve"><value>بوابة الإضافات</value></data>
+<data name="Author" xml:space="preserve"><value>المؤلف</value></data>
+<data name="Type" xml:space="preserve"><value>النوع</value></data>
+<data name="Date" xml:space="preserve"><value>التاريخ</value></data>
+<data name="URL" xml:space="preserve"><value>URL</value></data>
+<data name="Description" xml:space="preserve"><value>الوصف</value></data>
+<data name="IsEnabled" xml:space="preserve"><value>تم إيقاف التوزيع</value></data>
+<data name="DownloadFromGitHub" xml:space="preserve"><value>التنزيل من GitHub</value></data>
+<data name="Search" xml:space="preserve"><value>إغلاق</value></data>
+<data name="InstallDownloaded" xml:space="preserve"><value>تثبيت الذي تم تنزيله</value></data>
+<data name="InvalidGitHubURL" xml:space="preserve"><value>رابط GitHub غير صالح</value></data>
+<data name="FetchingLatestRelease" xml:space="preserve"><value>جاري جلب الإصدار الأخير...</value></data>
+<data name="FailedToParseReleaseInfo" xml:space="preserve"><value>فشل في تحليل معلومات الإصدار.</value></data>
+<data name="NoYmmeFileFoundInTheLatestRelease" xml:space="preserve"><value>لم يتم العثور على ملف .ymme في الإصدار الأخير.</value></data>
+<data name="DownloadingFile" xml:space="preserve"><value>جارٍ تنزيل {0}...</value></data>
+<data name="DownloadCompleted" xml:space="preserve"><value>اكتمل التنزيل: {0}</value></data>
+<data name="FailedToFetchReleaseInfo" xml:space="preserve"><value>خطأ: فشل في جلب معلومات الإصدار. ({0})</value></data>
+<data name="NetworkError" xml:space="preserve"><value>خطأ: قد تكون هناك مشكلة في اتصال الشبكة لديك.</value></data>
+<data name="ErrorMessage" xml:space="preserve"><value>خطأ: {0}</value></data>
+<data name="FailedToLaunchInstaller" xml:space="preserve"><value>خطأ: فشل في تشغيل المثبت. {0}</value></data>
+<data name="NoDownloadablePlugins" xml:space="preserve"><value>لا توجد إضافات قابلة للتنزيل متاحة للتثبيت</value></data>
+<data name="InstallAllMessage" xml:space="preserve"><value>تثبيت جميع الإضافات التي تم تنزيلها وعددها {0}.\nتحتاج إلى إغلاق YMM4 لبدء التثبيت.\n\nهل تريد المتابعة؟</value></data>
+<data name="InstallAllPlugins" xml:space="preserve"><value>تثبيت جميع الإضافات</value></data>
+<data name="CancelBulkInstallation" xml:space="preserve"><value>تم إلغاء التثبيت بالجملة.</value></data>
+<data name="InstallPluginsMessage" xml:space="preserve"><value>هل تريد تثبيت الإضافات التالية؟</value></data>
+<data name="IsCleanYmmeFile" xml:space="preserve"><value>حذف ملف .ymme بعد التثبيت</value></data>
+<data name="YmmeFilePath" xml:space="preserve"><value>مسار ملف .ymme</value></data>
+</root>
