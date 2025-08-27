@@ -54,8 +54,11 @@
                     
                 </Grid>
 
-                <Button x:Name="FilterButton" Grid.Column="1" Content="≡" Width="20" Click="FilterButton_Click">
-                    <Button.ContextMenu>
+                <c:DropDownButton Grid.Column="1" Content="{DynamicResource menu}" Padding="2" Width="20">
+                    <c:DropDownButton.Style>
+                        <Style TargetType="c:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                    </c:DropDownButton.Style>
+                    <c:DropDownButton.ContextMenu>
                         <ContextMenu ItemsSource="{Binding TypeFilters}">
                             <ContextMenu.ItemContainerStyle>
                                 <Style TargetType="MenuItem">
@@ -66,8 +69,8 @@
                                 </Style>
                             </ContextMenu.ItemContainerStyle>
                         </ContextMenu>
-                    </Button.ContextMenu>
-                </Button>
+                    </c:DropDownButton.ContextMenu>
+                </c:DropDownButton>
             </Grid>
 
             <ListBox Grid.Row="1" BorderThickness="0,0,1,0"
