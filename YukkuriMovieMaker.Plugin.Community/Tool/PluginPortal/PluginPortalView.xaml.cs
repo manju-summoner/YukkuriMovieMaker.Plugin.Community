@@ -16,15 +16,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             this.DataContext = new PluginPortalViewModel();
         }
 
-        private void PluginPortalView_Loaded(object sender, RoutedEventArgs e)
-        {
-            var parentWindow = Window.GetWindow(this);
-            if (parentWindow is not null)
-            {
-                parentWindow.Title = Texts.PluginPortal;
-            }
-        }
-
         private void FilterButton_Click(object sender, RoutedEventArgs e)
         {
             var contextMenu = (sender as Button)?.ContextMenu;
