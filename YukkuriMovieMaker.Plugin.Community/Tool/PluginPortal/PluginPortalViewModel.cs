@@ -49,7 +49,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             get => _searchText;
             set
             {
-                if(_searchText != value)
+                if (_searchText != value)
                 {
                     _searchText = value;
                     OnPropertyChanged(nameof(SearchText));
@@ -251,19 +251,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                     "YukkuriMovieMaker.Plugin.Installer.exe");
 
                 var arguments = new List<string>();
+
                 if (isDirectory)
                 {
-                    arguments.Add($"--dir \"{path}\"");
-                }
-                else
-                {
-                    arguments.Add($"\"{path}\"");
+                    arguments.Add($"--dir");
                 }
 
                 if (cleanAfterInstall)
                 {
                     arguments.Add("--clean");
                 }
+
+                arguments.Add($"\"{path}\"");
 
                 Process.Start(installerPath, string.Join(" ", arguments));
             }
@@ -296,25 +295,38 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             }
 
             var ymmeFiles = Directory.GetFiles(_tempPluginsDir, "*.ymme");
+
             var fileNames = ymmeFiles.Select(Path.GetFileName);
 
-            var messageBuilder = new System.Text.StringBuilder();
-            messageBuilder.AppendLine(Texts.InstallPluginsMessage);
-            messageBuilder.AppendLine();
-            foreach (var name in fileNames)
-            {
-                messageBuilder.AppendLine($" - {name}");
-            }
+            var selectionWindow = new PluginSelectionWindow(ymmeFiles);
+            var dialogResult = selectionWindow.ShowDialog();
 
-            var result = MessageBox.Show(messageBuilder.ToString(), Texts.InstallAllPlugins, MessageBoxButton.YesNo);
+            ((ActionCommand)InstallLocalCommand).RaiseCanExecuteChanged();
 
-            if (result != MessageBoxResult.Yes)
+            if (dialogResult != true)
             {
                 StatusMessage = Texts.CancelBulkInstallation;
                 return;
             }
 
-            LaunchInstaller(_tempPluginsDir, true, PluginPortalSettings.Default.IsCleanYmmeFile);
+            var selectedFiles = selectionWindow.SelectedFiles.ToList();
+            if (selectedFiles.Count == 0)
+            {
+                StatusMessage = Texts.NoPluginsSelected;
+                return;
+            }
+            else if (selectedFiles.Count < ymmeFiles.Length)
+            {
+                foreach (var file in selectedFiles)
+                {
+                    LaunchInstaller(file, false, PluginPortalSettings.Default.IsCleanYmmeFile);
+                }
+            }
+            else
+            {
+                LaunchInstaller(_tempPluginsDir, true, PluginPortalSettings.Default.IsCleanYmmeFile);
+            }
+
 
             if (!PluginPortalSettings.Default.IsCleanYmmeFile)
             {

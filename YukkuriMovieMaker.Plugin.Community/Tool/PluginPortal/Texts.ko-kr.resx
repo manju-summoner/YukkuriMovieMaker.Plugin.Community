@@ -83,7 +83,12 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>다운로드한 플러그인 {0}개를 모두 설치합니다.\n설치를 시작하려면 YMM4를 종료해야 합니다.\n\n실행하시겠습니까?</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>플러그인 일괄 설치</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>일괄 설치가 취소되었습니다.</value></data>
-<data name="InstallPluginsMessage" xml:space="preserve"><value>다음 플러그인을 설치하시겠습니까?</value></data>
+<data name="NoPluginsSelected" xml:space="preserve"><value>설치할 플러그인이 선택되지 않았습니다.</value></data>
+<data name="PluginsToInstall" xml:space="preserve"><value>설치할 플러그인</value></data>
+<data name="Delete" xml:space="preserve"><value>삭제</value></data>
+<data name="Install" xml:space="preserve"><value>설치</value></data>
+<data name="FileName" xml:space="preserve"><value>파일 이름</value></data>
+<data name="Cancel" xml:space="preserve"><value>취소</value></data>
 <data name="IsCleanYmmeFile" xml:space="preserve"><value>설치 후 .ymme 파일 삭제</value></data>
 <data name="YmmeFilePath" xml:space="preserve"><value>.ymme 파일 경로</value></data>
 </root>

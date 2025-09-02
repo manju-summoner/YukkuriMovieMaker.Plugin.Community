@@ -83,7 +83,12 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>تثبيت جميع الإضافات التي تم تنزيلها وعددها {0}.\nتحتاج إلى إغلاق YMM4 لبدء التثبيت.\n\nهل تريد المتابعة؟</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>تثبيت جميع الإضافات</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>تم إلغاء التثبيت بالجملة.</value></data>
-<data name="InstallPluginsMessage" xml:space="preserve"><value>هل تريد تثبيت الإضافات التالية؟</value></data>
+<data name="NoPluginsSelected" xml:space="preserve"><value>لم يتم تحديد أي إضافات للتثبيت.</value></data>
+<data name="PluginsToInstall" xml:space="preserve"><value>الإضافات للتثبيت</value></data>
+<data name="Delete" xml:space="preserve"><value>حذف</value></data>
+<data name="Install" xml:space="preserve"><value>تثبيت</value></data>
+<data name="FileName" xml:space="preserve"><value>اسم الملف</value></data>
+<data name="Cancel" xml:space="preserve"><value>إلغاء</value></data>
 <data name="IsCleanYmmeFile" xml:space="preserve"><value>حذف ملف .ymme بعد التثبيت</value></data>
 <data name="YmmeFilePath" xml:space="preserve"><value>مسار ملف .ymme</value></data>
 </root>
