@@ -251,19 +251,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                     "YukkuriMovieMaker.Plugin.Installer.exe");
 
                 var arguments = new List<string>();
+
                 if (isDirectory)
                 {
-                    arguments.Add($"--dir \"{path}\"");
-                }
-                else
-                {
-                    arguments.Add($"\"{path}\"");
+                    arguments.Add($"--dir");
                 }
 
                 if (cleanAfterInstall)
                 {
                     arguments.Add("--clean");
                 }
+
+                arguments.Add($"\"{path}\"");
 
                 Process.Start(installerPath, string.Join(" ", arguments));
             }
