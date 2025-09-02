@@ -83,7 +83,12 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>安装所有 {0} 个下载的插件。\n您需要关闭 YMM4 以开始安装。\n\n要继续吗？</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>批量安装插件</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>批量安装已取消。</value></data>
-<data name="InstallPluginsMessage" xml:space="preserve"><value>是否要安装以下插件？</value></data>
+<data name="NoPluginsSelected" xml:space="preserve"><value>未选择要安装的插件。</value></data>
+<data name="PluginsToInstall" xml:space="preserve"><value>要安装的插件</value></data>
+<data name="Delete" xml:space="preserve"><value>删除</value></data>
+<data name="Install" xml:space="preserve"><value>安装</value></data>
+<data name="FileName" xml:space="preserve"><value>文件名</value></data>
+<data name="Cancel" xml:space="preserve"><value>取消</value></data>
 <data name="IsCleanYmmeFile" xml:space="preserve"><value>.ymme 文件安装后删除</value></data>
 <data name="YmmeFilePath" xml:space="preserve"><value>.ymme 文件路径</value></data>
 </root>

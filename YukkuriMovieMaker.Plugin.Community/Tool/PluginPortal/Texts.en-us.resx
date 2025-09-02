@@ -68,7 +68,7 @@
 <data name="IsEnabled" xml:space="preserve"><value>Discontinued</value></data>
 <data name="DownloadFromGitHub" xml:space="preserve"><value>Download from GitHub</value></data>
 <data name="Search" xml:space="preserve"><value>Search</value></data>
-<data name="InstallDownloaded" xml:space="preserve"><value>Install downloaded</value></data>
+<data name="InstallDownloaded" xml:space="preserve"><value>Install Downloaded</value></data>
 <data name="InvalidGitHubURL" xml:space="preserve"><value>Invalid GitHub URL</value></data>
 <data name="FetchingLatestRelease" xml:space="preserve"><value>Fetching latest release...</value></data>
 <data name="FailedToParseReleaseInfo" xml:space="preserve"><value>Failed to parse release info.</value></data>
@@ -83,7 +83,12 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>Install all {0} downloaded plugins.\nYou need to close YMM4 to start the installation.\n\nDo you want to proceed?</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>Install All Plugins</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>Batch installation has been canceled.</value></data>
-<data name="InstallPluginsMessage" xml:space="preserve"><value>Do you want to install the following plugins?</value></data>
+<data name="NoPluginsSelected" xml:space="preserve"><value>No plugins selected for installation.</value></data>
+<data name="PluginsToInstall" xml:space="preserve"><value>Plugins to Install</value></data>
+<data name="Delete" xml:space="preserve"><value>Delete</value></data>
+<data name="Install" xml:space="preserve"><value>Install</value></data>
+<data name="FileName" xml:space="preserve"><value>File Name</value></data>
+<data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
 <data name="IsCleanYmmeFile" xml:space="preserve"><value>Delete .ymme file after installation</value></data>
 <data name="YmmeFilePath" xml:space="preserve"><value>.ymme file path</value></data>
 </root>

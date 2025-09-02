@@ -83,7 +83,12 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>安裝所有 {0} 個下載的外掛程式。\n您需要關閉 YMM4 以開始安裝。\n\n要繼續嗎？</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>批量安裝外掛程式</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>批量安裝已取消。</value></data>
-<data name="InstallPluginsMessage" xml:space="preserve"><value>是否要安裝以下外掛程式？</value></data>
+<data name="NoPluginsSelected" xml:space="preserve"><value>未選擇要安裝的外掛程式。</value></data>
+<data name="PluginsToInstall" xml:space="preserve"><value>要安裝的外掛程式</value></data>
+<data name="Delete" xml:space="preserve"><value>刪除</value></data>
+<data name="Install" xml:space="preserve"><value>安裝</value></data>
+<data name="FileName" xml:space="preserve"><value>檔案名稱</value></data>
+<data name="Cancel" xml:space="preserve"><value>取消</value></data>
 <data name="IsCleanYmmeFile" xml:space="preserve"><value>.ymme 檔案安裝後刪除</value></data>
 <data name="YmmeFilePath" xml:space="preserve"><value>.ymme 檔案路徑</value></data>
 </root>

@@ -83,7 +83,12 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>Instalar todos los {0} complementos descargados.\nNecesita cerrar YMM4 para iniciar la instalación.\n\n¿Desea continuar?</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>Instalar todos los complementos</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>La instalación por lotes ha sido cancelada.</value></data>
-<data name="InstallPluginsMessage" xml:space="preserve"><value>¿Desea instalar los siguientes complementos?</value></data>
+<data name="NoPluginsSelected" xml:space="preserve"><value>No se seleccionaron complementos para la instalación.</value></data>
+<data name="PluginsToInstall" xml:space="preserve"><value>Complementos para instalar</value></data>
+<data name="Delete" xml:space="preserve"><value>Eliminar</value></data>
+<data name="Install" xml:space="preserve"><value>Instalar</value></data>
+<data name="FileName" xml:space="preserve"><value>Nombre de archivo</value></data>
+<data name="Cancel" xml:space="preserve"><value>Cancelar</value></data>
 <data name="IsCleanYmmeFile" xml:space="preserve"><value>Eliminar archivo .ymme después de la instalación</value></data>
 <data name="YmmeFilePath" xml:space="preserve"><value>Ruta del archivo .ymme</value></data>
 </root>

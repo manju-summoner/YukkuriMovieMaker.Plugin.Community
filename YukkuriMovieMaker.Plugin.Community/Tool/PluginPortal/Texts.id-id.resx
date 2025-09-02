@@ -68,7 +68,7 @@
 <data name="IsEnabled" xml:space="preserve"><value>Dihentikan</value></data>
 <data name="DownloadFromGitHub" xml:space="preserve"><value>Unduh dari GitHub</value></data>
 <data name="Search" xml:space="preserve"><value>Tutup</value></data>
-<data name="InstallDownloaded" xml:space="preserve"><value>Pasang yang diunduh</value></data>
+<data name="InstallDownloaded" xml:space="preserve"><value>Pasang yang Diunduh</value></data>
 <data name="InvalidGitHubURL" xml:space="preserve"><value>URL GitHub tidak valid</value></data>
 <data name="FetchingLatestRelease" xml:space="preserve"><value>Mengambil rilis terbaru...</value></data>
 <data name="FailedToParseReleaseInfo" xml:space="preserve"><value>Gagal mengurai info rilis.</value></data>
@@ -83,7 +83,12 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>Pasang semua {0} plugin yang diunduh.\nAnda perlu menutup YMM4 untuk memulai instalasi.\n\nApakah Anda ingin melanjutkan?</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>Pasang Semua Plugin</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>Instalasi batch telah dibatalkan.</value></data>
-<data name="InstallPluginsMessage" xml:space="preserve"><value>Apakah Anda ingin menginstal plugin berikut?</value></data>
+<data name="NoPluginsSelected" xml:space="preserve"><value>Tidak ada plugin yang dipilih untuk diinstal.</value></data>
+<data name="PluginsToInstall" xml:space="preserve"><value>Plugin untuk Dipasang</value></data>
+<data name="Delete" xml:space="preserve"><value>Hapus</value></data>
+<data name="Install" xml:space="preserve"><value>Pasang</value></data>
+<data name="FileName" xml:space="preserve"><value>Nama File</value></data>
+<data name="Cancel" xml:space="preserve"><value>Batalkan</value></data>
 <data name="IsCleanYmmeFile" xml:space="preserve"><value>Hapus file .ymme setelah instalasi</value></data>
 <data name="YmmeFilePath" xml:space="preserve"><value>Path file .ymme</value></data>
 </root>

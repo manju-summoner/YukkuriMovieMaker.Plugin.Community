@@ -83,7 +83,12 @@
 <data name="InstallAllMessage" xml:space="preserve"><value>ダウンロード済みのプラグイン {0} 件をすべてインストールします。\nインストールを開始するにはゆっくりMovieMaker4を終了する必要があります。\n\n実行しますか？</value></data>
 <data name="InstallAllPlugins" xml:space="preserve"><value>プラグイン一括インストール</value></data>
 <data name="CancelBulkInstallation" xml:space="preserve"><value>一括インストールはキャンセルされました。</value></data>
-<data name="InstallPluginsMessage" xml:space="preserve"><value>以下のプラグインをインストールしますか？</value></data>
+<data name="NoPluginsSelected" xml:space="preserve"><value>インストールするプラグインが選択されませんでした。</value></data>
+<data name="PluginsToInstall" xml:space="preserve"><value>インストールするプラグイン</value></data>
+<data name="Delete" xml:space="preserve"><value>削除</value></data>
+<data name="Install" xml:space="preserve"><value>インストール</value></data>
+<data name="FileName" xml:space="preserve"><value>ファイル名</value></data>
+<data name="Cancel" xml:space="preserve"><value>キャンセル</value></data>
 <data name="IsCleanYmmeFile" xml:space="preserve"><value>インストール後に .ymme を削除する</value></data>
 <data name="YmmeFilePath" xml:space="preserve"><value>.ymme の保存先</value></data>
 </root>
