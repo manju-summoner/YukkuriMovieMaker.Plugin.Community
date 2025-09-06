@@ -350,8 +350,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                     }
                 }
             }
-
-            Application.Current.Shutdown();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
