@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI.API;
 using YukkuriMovieMaker.Plugin.Voice;
 
@@ -53,6 +54,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
         {
             if (parameter is not AivisCloudAPIVoiceParameter ap)
                 return null;
+
+            var speakerUuid = Guid.Parse(SpeakerUuid);
+            var modelUuid = Guid.Parse(ModelUuid);
+            if (await BlockedSpeakerUuids.IsBlockedAsync(speakerUuid) || await BlockedSpeakerUuids.IsBlockedAsync(modelUuid))
+            {
+                if (BlockedSpeakerUuids.IsAnneli(speakerUuid) || BlockedSpeakerUuids.IsAnneli(modelUuid))
+                    throw new InvalidOperationException(string.Format(Texts.AnnielBlockedMessage, "https://manjubox.net/info/2025-09-10/"));
+                else
+                    throw new InvalidOperationException(Texts.SpeakerBlockedMessage);
+            }
 
             var shouldReleaseSemaphore = isSubscription;
             if (shouldReleaseSemaphore)

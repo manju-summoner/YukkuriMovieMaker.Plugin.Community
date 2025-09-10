@@ -95,4 +95,7 @@ It can also significantly reduce the generation speed.</value></data>
 <data name="FetchingModelInfo" xml:space="preserve"><value>Fetching Model Info</value></data>
 <data name="ErrorFetchingModelInfo" xml:space="preserve"><value>Failed to fetch model info</value></data>
 <data name="HowToUseAivisCloudApi" xml:space="preserve"><value>Help: How to set up AivisCloudAPI</value></data>
+<data name="AnnielBlockedMessage" xml:space="preserve"><value>This model is not available.
+Details: {0}</value></data>
+<data name="SpeakerBlockedMessage" xml:space="preserve"><value>This model is not available due to development policy violations.</value></data>
 </root>

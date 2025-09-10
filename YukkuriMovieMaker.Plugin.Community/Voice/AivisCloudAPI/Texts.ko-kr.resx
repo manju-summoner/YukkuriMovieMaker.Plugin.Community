@@ -95,4 +95,7 @@ El valor máximo para un habla correcta varía según el hablante y el estilo. A
 <data name="FetchingModelInfo" xml:space="preserve"><value>모델 정보 가져오는 중</value></data>
 <data name="ErrorFetchingModelInfo" xml:space="preserve"><value>모델 정보 가져오기 실패</value></data>
 <data name="HowToUseAivisCloudApi" xml:space="preserve"><value>도움말: AivisCloudAPI 설정 방법</value></data>
+<data name="AnnielBlockedMessage" xml:space="preserve"><value>이 모델은 사용할 수 없습니다.
+세부 정보: {0}</value></data>
+<data name="SpeakerBlockedMessage" xml:space="preserve"><value>이 모델은 개발 정책 위반으로 인해 사용할 수 없습니다.</value></data>
 </root>

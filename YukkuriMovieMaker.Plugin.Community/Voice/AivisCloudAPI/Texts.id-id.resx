@@ -89,4 +89,7 @@ Kecepatan generasi juga dapat berkurang secara signifikan.</value></data>
 <data name="FetchingModelInfo" xml:space="preserve"><value>Mendapatkan informasi model</value></data>
 <data name="ErrorFetchingModelInfo" xml:space="preserve"><value>Gagal mendapatkan informasi model</value></data>
 <data name="HowToUseAivisCloudApi" xml:space="preserve"><value>Bantuan: Cara mengatur AivisCloudAPI</value></data>
+<data name="AnnielBlockedMessage" xml:space="preserve"><value>Model ini tidak tersedia.
+Detail: {0}</value></data>
+<data name="SpeakerBlockedMessage" xml:space="preserve"><value>Model ini tidak tersedia karena pelanggaran kebijakan pengembangan.</value></data>
 </root>
