@@ -22,10 +22,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
 
         public override void SetBindings(FrameworkElement control, ItemProperty[] itemProperties)
         {
-            if(control is not CommonComboBox comboBox)
-                throw new InvalidOperationException("Control must be of type CommonComboBox.");
+            if (control is not CommonComboBox comboBox)
+                return;
             if (VoiceDescription?.Speaker is not AivisCloudAPIVoiceSpeaker speaker)
-                throw new InvalidOperationException("VoiceDescription must have a valid AivisSpeechVoiceSpeaker.");
+                return;
 
             comboBox.ItemsSource = speaker.Styles;
             comboBox.DisplayMemberPath = nameof(StyleContract.Name);
@@ -36,7 +36,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
         public override void ClearBindings(FrameworkElement control)
         {
             if (control is not CommonComboBox comboBox)
-                throw new InvalidOperationException("Control must be of type CommonComboBox.");
+                return;
             BindingOperations.ClearBinding(comboBox, CommonComboBox.ValueProperty);
             comboBox.ItemsSource = null;
             comboBox.DisplayMemberPath = null;
