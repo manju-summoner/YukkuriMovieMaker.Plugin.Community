@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 {

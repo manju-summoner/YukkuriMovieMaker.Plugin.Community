@@ -9,7 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
     /// </summary>
     public partial class PluginSelectionWindow : Window
     {
-        public IEnumerable<string> SelectedFiles { get; private set; } = new List<string>();
+        public IEnumerable<string> SelectedFiles { get; private set; } = [];
 
         public PluginSelectionWindow(IEnumerable<string> filePaths)
         {

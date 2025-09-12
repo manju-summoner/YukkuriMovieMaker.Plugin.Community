@@ -1,6 +1,6 @@
 ﻿using YamlDotNet.Serialization;
 
-namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
+namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
 {
     internal class PluginInfo
     {

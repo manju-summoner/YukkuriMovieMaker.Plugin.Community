@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -11,21 +10,23 @@ using System.Windows.Input;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 {
-    internal partial class PluginPortalViewModel : INotifyPropertyChanged
+    internal partial class PluginPortalViewModel : Bindable
     {
         private const string YamlUrl = "https://manjubox.net/ymm4plugins.yml";
+        private const string ManjuboxApiUrl = "https://manjubox.net/api/ymm4plugins/github/list";
         private static readonly HttpClient httpClient = new();
 
         readonly string _tempPluginsDir;
 
         private List<PluginInfo> _allPlugins = [];
+        private List<ManjuboxReleaseInfo> _allReleases = [];
 
         private PluginInfo? _selectedPlugin;
         private string? _searchText;
-        private string _statusMessage = "";
 
         public ObservableCollection<PluginInfo> Plugins { get; } = [];
         public ObservableCollection<TypeFilterItem> TypeFilters { get; } = [];
@@ -35,10 +36,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             get => _selectedPlugin;
             set
             {
-                if (_selectedPlugin != value)
+                if (Set(ref _selectedPlugin, value))
                 {
-                    _selectedPlugin = value;
-                    OnPropertyChanged(nameof(SelectedPlugin));
                     ((ActionCommand)DownloadCommand).RaiseCanExecuteChanged();
                 }
             }
@@ -49,24 +48,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             get => _searchText;
             set
             {
-                if (_searchText != value)
+                if (Set(ref _searchText, value))
                 {
-                    _searchText = value;
-                    OnPropertyChanged(nameof(SearchText));
                     ApplyFilter();
                 }
             }
         }
 
-        public string StatusMessage
+        private string _statusMessage = "";
+        public string StatusMessage { get => _statusMessage; set => Set(ref _statusMessage, value); }
+
+        private bool _isInstallReady;
+        public bool IsInstallReady
         {
-            get => _statusMessage;
+            get => _isInstallReady;
             set
             {
-                if (_statusMessage != value)
+                if (Set(ref _isInstallReady, value))
                 {
-                    _statusMessage = value;
-                    OnPropertyChanged(nameof(StatusMessage));
+                    ((ActionCommand)InstallLocalCommand).RaiseCanExecuteChanged();
                 }
             }
         }
@@ -84,12 +84,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             Task.Run(LoadPluginsAsync);
 
             DownloadCommand = new ActionCommand(
-                _ => SelectedPlugin?.Url?.Contains("github.com") ?? false,
+                _ => FindGitHubRepositoryUrl(SelectedPlugin) is not null,
                 async _ => await DownloadPluginAsync());
 
             InstallLocalCommand = new ActionCommand(
-                _ => CanInstallLocalPlugins(),
+                _ => IsInstallReady,
                 _ => InstallLocalPlugins());
+
+            UpdateInstallReadyState();
+        }
+
+        private static string? FindGitHubRepositoryUrl(PluginInfo? plugin)
+        {
+            if (plugin is null) return null;
+
+            if (plugin.Url is not null && plugin.Url.Contains("github.com"))
+            {
+                return plugin.Url;
+            }
+
+            if (plugin.Links is not null)
+            {
+                return plugin.Links.FirstOrDefault(link => link?.Contains("github.com") ?? false);
+            }
+
+            return null;
         }
 
         private async Task LoadPluginsAsync()
@@ -101,8 +120,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                     .WithNamingConvention(CamelCaseNamingConvention.Instance)
                     .IgnoreUnmatchedProperties()
                     .Build();
-
                 _allPlugins = deserializer.Deserialize<List<PluginInfo>>(yamlContent);
+
+                // GitHubのリリース一覧を取得
+                var githubList = await httpClient.GetAsync(ManjuboxApiUrl);
+                githubList.EnsureSuccessStatusCode();
+                var json = await githubList.Content.ReadAsStringAsync();
+                _allReleases = JsonSerializer.Deserialize<List<ManjuboxReleaseInfo>>(json) ?? [];
+
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -111,7 +136,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                        .Select(t => t.Trim())                       // 前後の空白を削除
                        .Where(t => !string.IsNullOrEmpty(t))        // 空になった項目を除外
                        .Distinct()                                  // 重複を削除
-                       .OrderBy(t => t == "その他")                 // その他を最後に
+                       .OrderBy(t => t == "その他")                 // 「その他」を最後に
                        .ThenBy(t => t);                             // それ以外を並べ替え
 
                     TypeFilters.Clear();
@@ -177,9 +202,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 
         private async Task DownloadPluginAsync()
         {
-            if (SelectedPlugin?.Url is null) return;
+            var githubUrl = FindGitHubRepositoryUrl(SelectedPlugin);
+            if (githubUrl is null) return;
 
-            var match = GitHubRepositoryUrlRegex().Match(SelectedPlugin.Url);
+            var match = GitHubRepositoryUrlRegex().Match(githubUrl);
             if (!match.Success)
             {
                 StatusMessage = Texts.InvalidGitHubURL;
@@ -193,35 +219,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 
             try
             {
-                var apiUrl = $"https://api.github.com/repos/{owner}/{repo}/releases/latest";
-                var response = await httpClient.GetAsync(apiUrl);
-                response.EnsureSuccessStatusCode();
-
-                var json = await response.Content.ReadAsStringAsync();
-                var release = JsonSerializer.Deserialize<GitHubRelease>(json);
-
-                if (release is null)
-                {
-                    StatusMessage = Texts.FailedToParseReleaseInfo;
-                    return;
-                }
-
-                var ymmeAsset = release.Assets.FirstOrDefault(a => a.Name.EndsWith(".ymme", StringComparison.OrdinalIgnoreCase));
-                if (ymmeAsset is null)
+                var latestRelease = _allReleases
+                    .Where(r => !r.Prerelease &&                                            // プレリリースは含めない
+                        r.User.Equals(owner, StringComparison.OrdinalIgnoreCase) && 
+                        r.Repo.Equals(repo, StringComparison.OrdinalIgnoreCase))
+                    .OrderByDescending(r => r.PublishedAt)
+                    .FirstOrDefault();
+                
+                if (latestRelease is null)
                 {
                     StatusMessage = Texts.NoYmmeFileFoundInTheLatestRelease;
                     return;
                 }
 
-                StatusMessage = string.Format(Texts.DownloadingFile, ymmeAsset.Name);
-                var fileBytes = await httpClient.GetByteArrayAsync(ymmeAsset.BrowserDownloadUrl);
+                StatusMessage = string.Format(Texts.DownloadingFile, latestRelease.FileName);
+                var fileBytes = await httpClient.GetByteArrayAsync(latestRelease.BrowserDownloadUrl);
 
                 //一時的にymmeを保存する
-                var savePath = Path.Combine(_tempPluginsDir, ymmeAsset.Name);
+                var savePath = Path.Combine(_tempPluginsDir, latestRelease.FileName);
                 await File.WriteAllBytesAsync(savePath, fileBytes);
 
-                ((ActionCommand)InstallLocalCommand).RaiseCanExecuteChanged();
-                StatusMessage = string.Format(Texts.DownloadCompleted, ymmeAsset.Name);
+                UpdateInstallReadyState();
+                StatusMessage = string.Format(Texts.DownloadCompleted, latestRelease.FileName);
             }
             catch (HttpRequestException ex)
             {
@@ -272,23 +291,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             }
         }
 
-        private bool CanInstallLocalPlugins()
+        private void UpdateInstallReadyState()
         {
             try
             {
-                if (!Directory.Exists(_tempPluginsDir)) return false;
+                if (!Directory.Exists(_tempPluginsDir))
+                {
+                    IsInstallReady = false;
+                    return;
+                }
                 var ymmeFiles = Directory.GetFiles(_tempPluginsDir, "*.ymme");
-                return ymmeFiles.Length > 0;
+                IsInstallReady = ymmeFiles.Length > 0;
             }
             catch
             {
-                return false;
+                IsInstallReady = false;
             }
         }
 
         private void InstallLocalPlugins()
         {
-            if (!CanInstallLocalPlugins())
+            if (!IsInstallReady)
             {
                 MessageBox.Show(Texts.NoDownloadablePlugins, Texts.PluginPortal, MessageBoxButton.OK);
                 return;
@@ -301,7 +324,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             var selectionWindow = new PluginSelectionWindow(ymmeFiles);
             var dialogResult = selectionWindow.ShowDialog();
 
-            ((ActionCommand)InstallLocalCommand).RaiseCanExecuteChanged();
+            UpdateInstallReadyState();
 
             if (dialogResult != true)
             {
@@ -350,12 +373,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                     }
                 }
             }
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         [GeneratedRegex(@"github\.com/([^/]+)/([^/]+)")]
