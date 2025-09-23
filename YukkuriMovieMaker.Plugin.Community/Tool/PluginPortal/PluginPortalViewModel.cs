@@ -229,8 +229,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                 {
                     //一時的にymmeを保存する
                     using var contentStream = await response.Content.ReadAsStreamAsync();
-                    using var fileStream = File.Create(tmpPath);
-                    await contentStream.CopyToAsync(fileStream);
+                    using (var fileStream = File.Create(tmpPath))
+                        await contentStream.CopyToAsync(fileStream);
+                    File.Copy(tmpPath, savePath, true);
                 }
                 finally
                 {
