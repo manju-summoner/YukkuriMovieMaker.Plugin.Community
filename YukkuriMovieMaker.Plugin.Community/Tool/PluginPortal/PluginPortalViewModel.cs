@@ -15,13 +15,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 {
     internal partial class PluginPortalViewModel : Bindable
     {
-        private const string ManjuboxApiUrl = "https://manjubox.net/api/ymm4plugins/github/list";
-        private static readonly HttpClient httpClient = new();
-
         readonly string _tempPluginsDir;
 
         private PluginCatalog? _catalog;
-        private List<ManjuboxReleaseInfo> _allReleases = [];
+        private GitHubReleasesPluginSummary[] _allReleases = [];
 
         private PluginCatalogItem? _selectedPlugin;
         private string? _searchText;
@@ -77,8 +74,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             _tempPluginsDir = Path.Combine(AppDirectories.TemporaryDirectory, "plugins");
             Directory.CreateDirectory(_tempPluginsDir);
 
-            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("user-agent", $"YukkuriMovieMaker_v{AppVersion.Current}"));
-
             Task.Run(LoadPluginsAsync);
 
             DownloadCommand = new ActionCommand(
@@ -116,11 +111,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                 _catalog = await PluginCatalog.GetPluginCatalogAsync();
 
                 // GitHubのリリース一覧を取得
-                var githubList = await httpClient.GetAsync(ManjuboxApiUrl);
-                githubList.EnsureSuccessStatusCode();
-                var json = await githubList.Content.ReadAsStringAsync();
-                _allReleases = JsonSerializer.Deserialize<List<ManjuboxReleaseInfo>>(json) ?? [];
-
+                var githubList = await GitHubReleasesPluginSummaries.GetSummariesAsync(false);
+                _allReleases = githubList;
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -224,11 +216,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                 }
 
                 StatusMessage = string.Format(Texts.DownloadingFile, latestRelease.FileName);
-                var fileBytes = await httpClient.GetByteArrayAsync(latestRelease.BrowserDownloadUrl);
 
-                //一時的にymmeを保存する
+                var client = HttpClientFactory.Client;
+                using var request = new HttpRequestMessage(HttpMethod.Get, latestRelease.BrowserDownloadUrl);
+                request.Headers.UserAgent.ParseAdd($"YukkuriMovieMaker v{AppVersion.Current}");
+                using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+
                 var savePath = Path.Combine(_tempPluginsDir, latestRelease.FileName);
-                await File.WriteAllBytesAsync(savePath, fileBytes);
+                var tmpPath = Path.Combine(_tempPluginsDir, latestRelease.FileName+".tmp");
+                try
+                {
+                    //一時的にymmeを保存する
+                    using var contentStream = await response.Content.ReadAsStreamAsync();
+                    using var fileStream = File.Create(tmpPath);
+                    await contentStream.CopyToAsync(fileStream);
+                }
+                finally
+                {
+                    if (File.Exists(tmpPath))
+                        File.Delete(tmpPath);
+                }
 
                 UpdateInstallReadyState();
                 StatusMessage = string.Format(Texts.DownloadCompleted, latestRelease.FileName);
