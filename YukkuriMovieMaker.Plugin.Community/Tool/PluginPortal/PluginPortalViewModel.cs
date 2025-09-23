@@ -7,31 +7,29 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model;
+using YukkuriMovieMaker.Plugin.Update;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 {
     internal partial class PluginPortalViewModel : Bindable
     {
-        private const string YamlUrl = "https://manjubox.net/ymm4plugins.yml";
         private const string ManjuboxApiUrl = "https://manjubox.net/api/ymm4plugins/github/list";
         private static readonly HttpClient httpClient = new();
 
         readonly string _tempPluginsDir;
 
-        private List<PluginInfo> _allPlugins = [];
+        private PluginCatalog? _catalog;
         private List<ManjuboxReleaseInfo> _allReleases = [];
 
-        private PluginInfo? _selectedPlugin;
+        private PluginCatalogItem? _selectedPlugin;
         private string? _searchText;
 
-        public ObservableCollection<PluginInfo> Plugins { get; } = [];
-        public ObservableCollection<TypeFilterItem> TypeFilters { get; } = [];
+        public ObservableCollection<PluginCatalogItem> Plugins { get; } = [];
+        public ObservableCollection<IFilterItem> TypeFilters { get; } = [];
 
-        public PluginInfo? SelectedPlugin
+        public PluginCatalogItem? SelectedPlugin
         {
             get => _selectedPlugin;
             set
@@ -94,7 +92,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             UpdateInstallReadyState();
         }
 
-        private static string? FindGitHubRepositoryUrl(PluginInfo? plugin)
+        private static string? FindGitHubRepositoryUrl(PluginCatalogItem? plugin)
         {
             if (plugin is null) return null;
 
@@ -115,12 +113,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
         {
             try
             {
-                var yamlContent = await httpClient.GetStringAsync(YamlUrl);
-                var deserializer = new DeserializerBuilder()
-                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                    .IgnoreUnmatchedProperties()
-                    .Build();
-                _allPlugins = deserializer.Deserialize<List<PluginInfo>>(yamlContent);
+                _catalog = await PluginCatalog.GetPluginCatalogAsync();
 
                 // GitHubのリリース一覧を取得
                 var githubList = await httpClient.GetAsync(ManjuboxApiUrl);
@@ -131,20 +124,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    var types = _allPlugins
-                       .SelectMany(p => p.Type?.Split(',') ?? [])          // カンマで分割し、リストをフラット化
-                       .Select(t => t.Trim())                       // 前後の空白を削除
-                       .Where(t => !string.IsNullOrEmpty(t))        // 空になった項目を除外
-                       .Distinct()                                  // 重複を削除
-                       .OrderBy(t => t == "その他")                 // 「その他」を最後に
-                       .ThenBy(t => t);                             // それ以外を並べ替え
-
+                    foreach(var filter in TypeFilters)
+                        filter.PropertyChanged -= FilterItem_PropertyChanged;
                     TypeFilters.Clear();
-                    foreach (var type in types)
+
+                    foreach (var type in Enum.GetValues<PluginType>())
                     {
-                        TypeFilters.Add(new TypeFilterItem(type, true, ApplyFilter));
+                        var typeCount = _catalog.Plugins.Count(p => p.Type.HasFlag(type));
+                        if (typeCount == 0)
+                            continue;
+                        var typeFilter = new TypeFilterItem(type, typeCount);
+                        typeFilter.PropertyChanged += FilterItem_PropertyChanged;
+                        TypeFilters.Add(typeFilter);
                     }
-                    TypeFilters.Add(new TypeFilterItem(Texts.IsEnabled, false, ApplyFilter));
+
+                    var disabledPluginCount = _catalog.Plugins.Count(p => !p.IsEnabled);
+                    var isEnabledFilter =  new DisabledPluginFilterItem(disabledPluginCount);
+                    isEnabledFilter.PropertyChanged += FilterItem_PropertyChanged;
+                    TypeFilters.Add(isEnabledFilter);
 
                     ApplyFilter();
                 });
@@ -155,34 +152,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             }
         }
 
+        private void FilterItem_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(TypeFilterItem.IsChecked))
+                ApplyFilter();
+        }
+
         private void ApplyFilter()
         {
             var previouslySelected = _selectedPlugin;
-            IEnumerable<PluginInfo> filteredPlugins = _allPlugins;
 
-            var checkedTypes = TypeFilters.Where(f => f.IsChecked && f.Name != Texts.IsEnabled).Select(f => f.Name).ToList();
-            if (checkedTypes.Count != 0)
-            {
-                filteredPlugins = filteredPlugins.Where(p =>
-                    !string.IsNullOrEmpty(p.Type) &&
-                    p.Type.Split(',').Select(t => t.Trim()).Any(t => checkedTypes.Contains(t))
-                );
-            }
-
-            if (!string.IsNullOrEmpty(SearchText))
-            {
-                filteredPlugins = filteredPlugins.Where(p =>
-                    (p.Name?.IndexOf(SearchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                    (p.Author?.IndexOf(SearchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                    (p.Description?.IndexOf(SearchText, StringComparison.OrdinalIgnoreCase) >= 0)
-                );
-            }
-
-            var showDistributedEnded = TypeFilters.FirstOrDefault(f => f.Name == Texts.IsEnabled)?.IsChecked ?? false;
-            if (!showDistributedEnded)
-            {
-                filteredPlugins = filteredPlugins.Where(p => p.IsEnabled);
-            }
+            var activeFilters = TypeFilters.Where(f => f.IsEnabled);
+            var filteredPlugins = 
+                (_catalog?.Plugins ?? [])
+                .Where(p => activeFilters.Where(x => x.FilterType is FilterType.Any).Any(f => f.ApplyFilter(p)))
+                .Where(p => activeFilters.Where(x => x.FilterType is FilterType.All).All(f => f.ApplyFilter(p)))
+                .Where(p => 
+                {
+                    if(string.IsNullOrEmpty(SearchText))
+                        return true;
+                    var targets = new[] { p.Name, p.Author, p.Description };
+                    return targets.OfType<string>().Any(text => text.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+                });
 
             Plugins.Clear();
             foreach (var plugin in filteredPlugins)
