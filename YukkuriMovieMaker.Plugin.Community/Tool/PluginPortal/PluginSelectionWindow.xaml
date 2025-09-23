@@ -30,7 +30,7 @@
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
                   CanUserDeleteRows="False"
-                  Margin="0">
+                  CanUserResizeRows="False">
             <DataGrid.Columns>
                 <DataGridCheckBoxColumn Header="{x:Static local:Texts.Install}" Binding="{Binding IsSelected}" Width="Auto" />
                 <DataGridTextColumn Header="{x:Static local:Texts.FileName}" Binding="{Binding FileName}" Width="*" IsReadOnly="True" />

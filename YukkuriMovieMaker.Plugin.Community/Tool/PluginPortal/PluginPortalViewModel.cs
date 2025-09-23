@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -8,37 +7,32 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model;
+using YukkuriMovieMaker.Plugin.Update;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 {
-    internal partial class PluginPortalViewModel : INotifyPropertyChanged
+    internal partial class PluginPortalViewModel : Bindable
     {
-        private const string YamlUrl = "https://manjubox.net/ymm4plugins.yml";
-        private static readonly HttpClient httpClient = new();
-
         readonly string _tempPluginsDir;
 
-        private List<PluginInfo> _allPlugins = [];
+        private PluginCatalog? _catalog;
+        private GitHubReleasesPluginSummary[] _allReleases = [];
 
-        private PluginInfo? _selectedPlugin;
+        private PluginCatalogItem? _selectedPlugin;
         private string? _searchText;
-        private string _statusMessage = "";
 
-        public ObservableCollection<PluginInfo> Plugins { get; } = [];
-        public ObservableCollection<TypeFilterItem> TypeFilters { get; } = [];
+        public ObservableCollection<PluginCatalogItem> Plugins { get; } = [];
+        public ObservableCollection<IFilterItem> TypeFilters { get; } = [];
 
-        public PluginInfo? SelectedPlugin
+        public PluginCatalogItem? SelectedPlugin
         {
             get => _selectedPlugin;
             set
             {
-                if (_selectedPlugin != value)
+                if (Set(ref _selectedPlugin, value))
                 {
-                    _selectedPlugin = value;
-                    OnPropertyChanged(nameof(SelectedPlugin));
                     ((ActionCommand)DownloadCommand).RaiseCanExecuteChanged();
                 }
             }
@@ -49,24 +43,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             get => _searchText;
             set
             {
-                if (_searchText != value)
+                if (Set(ref _searchText, value))
                 {
-                    _searchText = value;
-                    OnPropertyChanged(nameof(SearchText));
                     ApplyFilter();
                 }
             }
         }
 
-        public string StatusMessage
+        private string _statusMessage = "";
+        public string StatusMessage { get => _statusMessage; set => Set(ref _statusMessage, value); }
+
+        private bool _isInstallReady;
+        public bool IsInstallReady
         {
-            get => _statusMessage;
+            get => _isInstallReady;
             set
             {
-                if (_statusMessage != value)
+                if (Set(ref _isInstallReady, value))
                 {
-                    _statusMessage = value;
-                    OnPropertyChanged(nameof(StatusMessage));
+                    ((ActionCommand)InstallLocalCommand).RaiseCanExecuteChanged();
                 }
             }
         }
@@ -79,47 +74,66 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             _tempPluginsDir = Path.Combine(AppDirectories.TemporaryDirectory, "plugins");
             Directory.CreateDirectory(_tempPluginsDir);
 
-            httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("user-agent", $"YukkuriMovieMaker_v{AppVersion.Current}"));
-
             Task.Run(LoadPluginsAsync);
 
             DownloadCommand = new ActionCommand(
-                _ => SelectedPlugin?.Url?.Contains("github.com") ?? false,
+                _ => FindGitHubRepositoryUrl(SelectedPlugin) is not null,
                 async _ => await DownloadPluginAsync());
 
             InstallLocalCommand = new ActionCommand(
-                _ => CanInstallLocalPlugins(),
+                _ => IsInstallReady,
                 _ => InstallLocalPlugins());
+
+            UpdateInstallReadyState();
+        }
+
+        private static string? FindGitHubRepositoryUrl(PluginCatalogItem? plugin)
+        {
+            if (plugin is null) return null;
+
+            if (plugin.Url is not null && plugin.Url.Contains("github.com"))
+            {
+                return plugin.Url;
+            }
+
+            if (plugin.Links is not null)
+            {
+                return plugin.Links.FirstOrDefault(link => link?.Contains("github.com") ?? false);
+            }
+
+            return null;
         }
 
         private async Task LoadPluginsAsync()
         {
             try
             {
-                var yamlContent = await httpClient.GetStringAsync(YamlUrl);
-                var deserializer = new DeserializerBuilder()
-                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                    .IgnoreUnmatchedProperties()
-                    .Build();
+                _catalog = await PluginCatalog.GetPluginCatalogAsync();
 
-                _allPlugins = deserializer.Deserialize<List<PluginInfo>>(yamlContent);
+                // GitHubのリリース一覧を取得
+                var githubList = await GitHubReleasesPluginSummaries.GetSummariesAsync(false);
+                _allReleases = githubList;
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    var types = _allPlugins
-                       .SelectMany(p => p.Type?.Split(',') ?? [])          // カンマで分割し、リストをフラット化
-                       .Select(t => t.Trim())                       // 前後の空白を削除
-                       .Where(t => !string.IsNullOrEmpty(t))        // 空になった項目を除外
-                       .Distinct()                                  // 重複を削除
-                       .OrderBy(t => t == "その他")                 // その他を最後に
-                       .ThenBy(t => t);                             // それ以外を並べ替え
-
+                    foreach(var filter in TypeFilters)
+                        filter.PropertyChanged -= FilterItem_PropertyChanged;
                     TypeFilters.Clear();
-                    foreach (var type in types)
+
+                    foreach (var type in Enum.GetValues<PluginType>())
                     {
-                        TypeFilters.Add(new TypeFilterItem(type, true, ApplyFilter));
+                        var typeCount = _catalog.Plugins.Count(p => p.Type.HasFlag(type));
+                        if (typeCount == 0)
+                            continue;
+                        var typeFilter = new TypeFilterItem(type, typeCount);
+                        typeFilter.PropertyChanged += FilterItem_PropertyChanged;
+                        TypeFilters.Add(typeFilter);
                     }
-                    TypeFilters.Add(new TypeFilterItem(Texts.IsEnabled, false, ApplyFilter));
+
+                    var disabledPluginCount = _catalog.Plugins.Count(p => !p.IsEnabled);
+                    var isEnabledFilter =  new DisabledPluginFilterItem(disabledPluginCount);
+                    isEnabledFilter.PropertyChanged += FilterItem_PropertyChanged;
+                    TypeFilters.Add(isEnabledFilter);
 
                     ApplyFilter();
                 });
@@ -130,34 +144,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             }
         }
 
+        private void FilterItem_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(TypeFilterItem.IsChecked))
+                ApplyFilter();
+        }
+
         private void ApplyFilter()
         {
             var previouslySelected = _selectedPlugin;
-            IEnumerable<PluginInfo> filteredPlugins = _allPlugins;
 
-            var checkedTypes = TypeFilters.Where(f => f.IsChecked && f.Name != Texts.IsEnabled).Select(f => f.Name).ToList();
-            if (checkedTypes.Count != 0)
-            {
-                filteredPlugins = filteredPlugins.Where(p =>
-                    !string.IsNullOrEmpty(p.Type) &&
-                    p.Type.Split(',').Select(t => t.Trim()).Any(t => checkedTypes.Contains(t))
-                );
-            }
-
-            if (!string.IsNullOrEmpty(SearchText))
-            {
-                filteredPlugins = filteredPlugins.Where(p =>
-                    (p.Name?.IndexOf(SearchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                    (p.Author?.IndexOf(SearchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                    (p.Description?.IndexOf(SearchText, StringComparison.OrdinalIgnoreCase) >= 0)
-                );
-            }
-
-            var showDistributedEnded = TypeFilters.FirstOrDefault(f => f.Name == Texts.IsEnabled)?.IsChecked ?? false;
-            if (!showDistributedEnded)
-            {
-                filteredPlugins = filteredPlugins.Where(p => p.IsEnabled);
-            }
+            var activeFilters = TypeFilters.Where(f => f.IsEnabled);
+            var filteredPlugins = 
+                (_catalog?.Plugins ?? [])
+                .Where(p => activeFilters.Where(x => x.FilterType is FilterType.Any).Any(f => f.ApplyFilter(p)))
+                .Where(p => activeFilters.Where(x => x.FilterType is FilterType.All).All(f => f.ApplyFilter(p)))
+                .Where(p => 
+                {
+                    if(string.IsNullOrEmpty(SearchText))
+                        return true;
+                    var targets = new[] { p.Name, p.Author, p.Description };
+                    return targets.OfType<string>().Any(text => text.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+                });
 
             Plugins.Clear();
             foreach (var plugin in filteredPlugins)
@@ -177,9 +185,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 
         private async Task DownloadPluginAsync()
         {
-            if (SelectedPlugin?.Url is null) return;
+            var githubUrl = FindGitHubRepositoryUrl(SelectedPlugin);
+            if (githubUrl is null) return;
 
-            var match = GitHubRepositoryUrlRegex().Match(SelectedPlugin.Url);
+            var match = GitHubRepositoryUrlRegex().Match(githubUrl);
             if (!match.Success)
             {
                 StatusMessage = Texts.InvalidGitHubURL;
@@ -193,35 +202,44 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 
             try
             {
-                var apiUrl = $"https://api.github.com/repos/{owner}/{repo}/releases/latest";
-                var response = await httpClient.GetAsync(apiUrl);
-                response.EnsureSuccessStatusCode();
-
-                var json = await response.Content.ReadAsStringAsync();
-                var release = JsonSerializer.Deserialize<GitHubRelease>(json);
-
-                if (release is null)
-                {
-                    StatusMessage = Texts.FailedToParseReleaseInfo;
-                    return;
-                }
-
-                var ymmeAsset = release.Assets.FirstOrDefault(a => a.Name.EndsWith(".ymme", StringComparison.OrdinalIgnoreCase));
-                if (ymmeAsset is null)
+                var latestRelease = _allReleases
+                    .Where(r => !r.Prerelease &&                                            // プレリリースは含めない
+                        r.User.Equals(owner, StringComparison.OrdinalIgnoreCase) && 
+                        r.Repo.Equals(repo, StringComparison.OrdinalIgnoreCase))
+                    .OrderByDescending(r => r.PublishedAt)
+                    .FirstOrDefault();
+                
+                if (latestRelease is null)
                 {
                     StatusMessage = Texts.NoYmmeFileFoundInTheLatestRelease;
                     return;
                 }
 
-                StatusMessage = string.Format(Texts.DownloadingFile, ymmeAsset.Name);
-                var fileBytes = await httpClient.GetByteArrayAsync(ymmeAsset.BrowserDownloadUrl);
+                StatusMessage = string.Format(Texts.DownloadingFile, latestRelease.FileName);
 
-                //一時的にymmeを保存する
-                var savePath = Path.Combine(_tempPluginsDir, ymmeAsset.Name);
-                await File.WriteAllBytesAsync(savePath, fileBytes);
+                var client = HttpClientFactory.Client;
+                using var request = new HttpRequestMessage(HttpMethod.Get, latestRelease.BrowserDownloadUrl);
+                request.Headers.UserAgent.ParseAdd($"YukkuriMovieMaker v{AppVersion.Current}");
+                using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
 
-                ((ActionCommand)InstallLocalCommand).RaiseCanExecuteChanged();
-                StatusMessage = string.Format(Texts.DownloadCompleted, ymmeAsset.Name);
+                var savePath = Path.Combine(_tempPluginsDir, latestRelease.FileName);
+                var tmpPath = Path.Combine(_tempPluginsDir, latestRelease.FileName+".tmp");
+                try
+                {
+                    //一時的にymmeを保存する
+                    using var contentStream = await response.Content.ReadAsStreamAsync();
+                    using var fileStream = File.Create(tmpPath);
+                    await contentStream.CopyToAsync(fileStream);
+                }
+                finally
+                {
+                    if (File.Exists(tmpPath))
+                        File.Delete(tmpPath);
+                }
+
+                UpdateInstallReadyState();
+                StatusMessage = string.Format(Texts.DownloadCompleted, latestRelease.FileName);
             }
             catch (HttpRequestException ex)
             {
@@ -272,23 +290,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             }
         }
 
-        private bool CanInstallLocalPlugins()
+        private void UpdateInstallReadyState()
         {
             try
             {
-                if (!Directory.Exists(_tempPluginsDir)) return false;
+                if (!Directory.Exists(_tempPluginsDir))
+                {
+                    IsInstallReady = false;
+                    return;
+                }
                 var ymmeFiles = Directory.GetFiles(_tempPluginsDir, "*.ymme");
-                return ymmeFiles.Length > 0;
+                IsInstallReady = ymmeFiles.Length > 0;
             }
             catch
             {
-                return false;
+                IsInstallReady = false;
             }
         }
 
         private void InstallLocalPlugins()
         {
-            if (!CanInstallLocalPlugins())
+            if (!IsInstallReady)
             {
                 MessageBox.Show(Texts.NoDownloadablePlugins, Texts.PluginPortal, MessageBoxButton.OK);
                 return;
@@ -301,7 +323,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             var selectionWindow = new PluginSelectionWindow(ymmeFiles);
             var dialogResult = selectionWindow.ShowDialog();
 
-            ((ActionCommand)InstallLocalCommand).RaiseCanExecuteChanged();
+            UpdateInstallReadyState();
 
             if (dialogResult != true)
             {
@@ -350,14 +372,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                     }
                 }
             }
-
-            Application.Current.Shutdown();
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         [GeneratedRegex(@"github\.com/([^/]+)/([^/]+)")]
