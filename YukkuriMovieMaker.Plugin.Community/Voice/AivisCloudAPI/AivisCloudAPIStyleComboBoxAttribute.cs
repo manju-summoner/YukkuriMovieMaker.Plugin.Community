@@ -1,6 +1,4 @@
-﻿
-using System.Reflection;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Data;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
@@ -12,8 +10,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
 {
     internal class AivisCloudAPIStyleComboBoxAttribute : PropertyEditorAttribute2, IPropertyEditorForVoiceParameterAttribute
     {
-        public VoiceDescription? VoiceDescription { get; set; }
-
+        VoiceDescription? voiceDescription;
+        public VoiceDescription? VoiceDescription
+        {
+            get => voiceDescription;
+            set => Set(ref voiceDescription, value);
+        }
 
         public override FrameworkElement Create()
         {
