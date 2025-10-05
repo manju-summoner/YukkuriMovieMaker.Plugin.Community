@@ -66,9 +66,10 @@ internal sealed class NumberTextSource(IGraphicsDevicesAndContext devices, Numbe
         using var formatFactory = DWriteCreateFactory<IDWriteFactory>();
         using var textFormat = 
             formatFactory.CreateTextFormat(
-                font, 
+                f.CanonicalFontName, 
                 isBold && f.CanonicalFontWeight < Settings.FontWeight.Bold ? FontWeight.Bold : (FontWeight)f.CanonicalFontWeight,
                 isItalic ? FontStyle.Italic : (FontStyle)f.CanonicalFontStyle, 
+                (FontStretch)f.CanonicalFontStretch,
                 fontSize);
 
         textFormat.WordWrapping = WordWrapping.NoWrap;
