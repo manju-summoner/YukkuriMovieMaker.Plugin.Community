@@ -65,7 +65,6 @@
 <data name="ProcessingAudioMessage" xml:space="preserve"><value>معالجة الصوت {0} / {1} {2}</value></data>
 <data name="Model" xml:space="preserve"><value>Model</value></data>
 <data name="Language" xml:space="preserve"><value>اللغة</value></data>
-<data name="DownloadingProgressMessage" xml:space="preserve"><value>تنزيل {0} {1} / {2}</value></data>
 <data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>مطلوب ‎{0}‎</value></data>
 <data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>لم يتم تثبيت حزمة وقت التشغيل المطلوبة.
 لاستخدام هذه الميزة يلزم تثبيت «{0}».
@@ -79,4 +78,5 @@
 <data name="InstallingMessage" xml:space="preserve"><value>Instalando {0}. Por favor espera. El botón de cancelar no funcionará durante la instalación.</value></data>
 <data name="FileSizeLimitMessage" xml:space="preserve"><value>نظرًا لأن YMM4 موجود في مسار يحتوي على أحرف متعددة البايت، فلا يمكنه تحميل النماذج التي يتجاوز حجمها 2 جيجابايت.
 عليك إما التبديل إلى نموذج بحجم أقل من ‎2‎ جيجابايت، أو نقل YMM4 إلى مسار لا يحتوي على أحرف متعددة البايت.</value></data>
+<data name="VoiceActivityDetection" xml:space="preserve"><value>كشف نشاط الصوت</value></data>
 </root>

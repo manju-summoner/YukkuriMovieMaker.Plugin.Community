@@ -65,7 +65,6 @@
 <data name="ProcessingAudioMessage" xml:space="preserve"><value>正在解析音频 {0} / {1} {2}</value></data>
 <data name="Model" xml:space="preserve"><value>모델</value></data>
 <data name="Language" xml:space="preserve"><value>语言</value></data>
-<data name="DownloadingProgressMessage" xml:space="preserve"><value>正在下载 {0} {1} / {2}</value></data>
 <data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>需要 {0}</value></data>
 <data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>尚未安裝所需的執行階段。
 若要使用此功能，必須安裝「{0}」。
@@ -79,4 +78,5 @@
 <data name="InstallingMessage" xml:space="preserve"><value>正在安装 {0}。请稍候。安装期间取消按钮将无法工作。</value></data>
 <data name="FileSizeLimitMessage" xml:space="preserve"><value>由於 YMM4 位於含有多位元字元的路徑，因此無法載入大小超過 2 GB 的模型。
 請切換為 2 GB 以下的模型，或將 YMM4 移動到不含多位元字元的路徑。</value></data>
+<data name="VoiceActivityDetection" xml:space="preserve"><value>語音檢測</value></data>
 </root>

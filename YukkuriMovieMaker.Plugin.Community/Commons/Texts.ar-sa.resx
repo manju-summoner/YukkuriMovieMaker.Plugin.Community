@@ -62,4 +62,5 @@
 <data name="ExtendModeClampName" xml:space="preserve"><value>التثبيت</value></data>
 <data name="ExtendModeWrapName" xml:space="preserve"><value>التفاف</value></data>
 <data name="ExtendModeMirrorName" xml:space="preserve"><value>انعكاس</value></data>
+<data name="DownloadingProgressMessage" xml:space="preserve"><value>تنزيل {0} {1} / {2}</value></data>
 </root>

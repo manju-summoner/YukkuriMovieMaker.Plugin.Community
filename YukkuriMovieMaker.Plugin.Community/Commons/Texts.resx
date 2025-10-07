@@ -62,4 +62,5 @@
 <data name="ExtendModeClampName" xml:space="preserve"><value>なし</value></data>
 <data name="ExtendModeWrapName" xml:space="preserve"><value>あり</value></data>
 <data name="ExtendModeMirrorName" xml:space="preserve"><value>反転</value></data>
+<data name="DownloadingProgressMessage" xml:space="preserve"><value>{0}をダウンロード中 {1} / {2}</value></data>
 </root>

@@ -59,8 +59,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
-<data name="ExtendModeClampName" xml:space="preserve"><value>없음</value></data>
-<data name="ExtendModeWrapName" xml:space="preserve"><value>있음</value></data>
-<data name="ExtendModeMirrorName" xml:space="preserve"><value>반전</value></data>
-<data name="DownloadingProgressMessage" xml:space="preserve"><value>다운로드 중 {0} {1} / {2}</value></data>
+<data name="Threshold" xml:space="preserve"><value>임계값</value></data>
+<data name="ThresholdDesc" xml:space="preserve"><value>检测声音的阈值。值越小，检测越容易，但误报也会增加。</value></data>
+<data name="MinSpeechDurationMs" xml:space="preserve"><value>최소 음성 지속 시간</value></data>
+<data name="MinSpeechDurationMsDesc" xml:space="preserve"><value>이 시간 이상 음성이 지속되면 음성으로 간주됩니다.</value></data>
+<data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>최대 음성 지속 시간</value></data>
+<data name="MaxSpeechDurationSecondsDesc" xml:space="preserve"><value>이 시간 이상 음성이 지속되면 음성 종료로 간주됩니다.</value></data>
+<data name="MinSilenceDurationMs" xml:space="preserve"><value>최소 무음 지속 시간</value></data>
+<data name="MinSilenceDurationMsDesc" xml:space="preserve"><value>이 시간 이상 무음이 지속되면 음성 종료로 간주됩니다.</value></data>
+<data name="SpeechPadMs" xml:space="preserve"><value>음성 구간 확장</value></data>
+<data name="SpeechPadMsDesc" xml:space="preserve"><value>이 시간만큼 음성 구간을 앞뒤로 확장합니다.</value></data>
+<data name="SecUnit" xml:space="preserve"><value>초</value></data>
+<data name="MilliSecUnit" xml:space="preserve"><value>초</value></data>
 </root>

@@ -58,9 +58,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
-<data name="ExtendModeClampName" xml:space="preserve"><value>없음</value></data>
-<data name="ExtendModeWrapName" xml:space="preserve"><value>있음</value></data>
-<data name="ExtendModeMirrorName" xml:space="preserve"><value>반전</value></data>
-<data name="DownloadingProgressMessage" xml:space="preserve"><value>다운로드 중 {0} {1} / {2}</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
+<data name="Threshold" xml:space="preserve"><value>Ambang</value></data>
+<data name="ThresholdDesc" xml:space="preserve"><value>El umbral para detectar la voz. Cuanto menor sea el valor</value></data>
+<data name="MinSpeechDurationMs" xml:space="preserve"><value>Durasi Bicara Minimum</value></data>
+<data name="MinSpeechDurationMsDesc" xml:space="preserve"><value>Dianggap sebagai bicara jika suara berlanjut lebih dari waktu ini.</value></data>
+<data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>Durasi Bicara Maksimum</value></data>
+<data name="MaxSpeechDurationSecondsDesc" xml:space="preserve"><value>Dianggap sebagai akhir bicara jika suara berlanjut lebih dari waktu ini.</value></data>
+<data name="MinSilenceDurationMs" xml:space="preserve"><value>Durasi Diam Minimum</value></data>
+<data name="MinSilenceDurationMsDesc" xml:space="preserve"><value>Dianggap sebagai akhir bicara jika keheningan berlanjut lebih dari waktu ini.</value></data>
+<data name="SpeechPadMs" xml:space="preserve"><value>Jeda Bicara</value></data>
+<data name="SpeechPadMsDesc" xml:space="preserve"><value>Memperluas interval bicara bolak-balik selama waktu ini.</value></data>
+<data name="SecUnit" xml:space="preserve"><value>Detik</value></data>
+<data name="MilliSecUnit" xml:space="preserve"><value>milidetik</value></data>
 </root>

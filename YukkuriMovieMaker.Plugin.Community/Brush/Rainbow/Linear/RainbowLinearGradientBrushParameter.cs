@@ -2,7 +2,6 @@
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Plugin.Brush;
-using YukkuriMovieMaker.Plugin.Community.Brush.Commons;
 using YukkuriMovieMaker.Plugin.Community.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear

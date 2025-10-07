@@ -65,7 +65,6 @@
 <data name="ProcessingAudioMessage" xml:space="preserve"><value>오디오 처리 중 {0} / {1} {2}</value></data>
 <data name="Model" xml:space="preserve"><value>Modelo</value></data>
 <data name="Language" xml:space="preserve"><value>언어</value></data>
-<data name="DownloadingProgressMessage" xml:space="preserve"><value>다운로드 중 {0} {1} / {2}</value></data>
 <data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>{0}가 필요합니다</value></data>
 <data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>필요한 런타임이 설치되어 있지 않습니다.
 이 기능을 사용하려면 '{0}'을(를) 설치해야 합니다.
@@ -79,4 +78,5 @@
 <data name="InstallingMessage" xml:space="preserve"><value>正在安裝 {0}。請稍候。安裝期間取消按鈕將無法工作。</value></data>
 <data name="FileSizeLimitMessage" xml:space="preserve"><value>YMM4가 다바이트 문자가 포함된 경로에 위치해 있기 때문에 파일 크기가 2GB를 초과하는 모델을 불러올 수 없습니다.
 2GB 이하의 모델로 변경하거나 YMM4를 다바이트 문자가 포함되지 않은 경로로 이동해야 합니다.</value></data>
+<data name="VoiceActivityDetection" xml:space="preserve"><value>음성 감지</value></data>
 </root>

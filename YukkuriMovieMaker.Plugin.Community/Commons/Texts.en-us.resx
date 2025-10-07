@@ -62,4 +62,5 @@
 <data name="ExtendModeClampName" xml:space="preserve"><value>Clamp</value></data>
 <data name="ExtendModeWrapName" xml:space="preserve"><value>Wrap</value></data>
 <data name="ExtendModeMirrorName" xml:space="preserve"><value>Mirror</value></data>
+<data name="DownloadingProgressMessage" xml:space="preserve"><value>Downloading {0} {1} / {2}</value></data>
 </root>

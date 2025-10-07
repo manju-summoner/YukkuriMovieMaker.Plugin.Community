@@ -62,4 +62,5 @@
 <data name="ExtendModeClampName" xml:space="preserve"><value>無</value></data>
 <data name="ExtendModeWrapName" xml:space="preserve"><value>有</value></data>
 <data name="ExtendModeMirrorName" xml:space="preserve"><value>反轉</value></data>
+<data name="DownloadingProgressMessage" xml:space="preserve"><value>正在下载 {0} {1} / {2}</value></data>
 </root>

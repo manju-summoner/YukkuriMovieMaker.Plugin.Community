@@ -2,7 +2,7 @@
 using System.Net.Http;
 using YukkuriMovieMaker.Commons;
 
-namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
+namespace YukkuriMovieMaker.Plugin.Community.Commons
 {
     class Downloader
     {
@@ -16,6 +16,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
             ReportDownloadProgress(progress, fileName, 0, 0);
 
             using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Add("User-Agent", $"YukkuriMovieMaker v{AppVersion.Current}");
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
             response.EnsureSuccessStatusCode();
 

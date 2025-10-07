@@ -58,9 +58,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
-<data name="ExtendModeClampName" xml:space="preserve"><value>없음</value></data>
-<data name="ExtendModeWrapName" xml:space="preserve"><value>있음</value></data>
-<data name="ExtendModeMirrorName" xml:space="preserve"><value>반전</value></data>
-<data name="DownloadingProgressMessage" xml:space="preserve"><value>다운로드 중 {0} {1} / {2}</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
+<data name="Threshold" xml:space="preserve"><value>عتبة</value></data>
+<data name="ThresholdDesc" xml:space="preserve"><value>음성을 감지하는 임계값입니다. 값을 낮추면 감지가 더 쉬워지지만 오탐지도 증가합니다.</value></data>
+<data name="MinSpeechDurationMs" xml:space="preserve"><value>الحد الأدنى لمدة الكلام</value></data>
+<data name="MinSpeechDurationMsDesc" xml:space="preserve"><value>يُعتبر كلامًا إذا استمر الصوت لأكثر من هذا الوقت.</value></data>
+<data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>الحد الأقصى لمدة الكلام</value></data>
+<data name="MaxSpeechDurationSecondsDesc" xml:space="preserve"><value>يُعتبر نهاية الكلام إذا استمر الصوت لأكثر من هذا الوقت.</value></data>
+<data name="MinSilenceDurationMs" xml:space="preserve"><value>الحد الأدنى لمدة الصمت</value></data>
+<data name="MinSilenceDurationMsDesc" xml:space="preserve"><value>يُعتبر نهاية الكلام إذا استمر الصمت لأكثر من هذا الوقت.</value></data>
+<data name="SpeechPadMs" xml:space="preserve"><value>توسيع الكلام</value></data>
+<data name="SpeechPadMsDesc" xml:space="preserve"><value>يمدد فترة الكلام ذهابًا وإيابًا بهذا الوقت.</value></data>
+<data name="SecUnit" xml:space="preserve"><value>ثانية</value></data>
+<data name="MilliSecUnit" xml:space="preserve"><value>مللي ثانية</value></data>
 </root>

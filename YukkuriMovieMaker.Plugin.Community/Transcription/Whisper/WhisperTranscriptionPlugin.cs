@@ -25,16 +25,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
             var progress = args.ProgressMessage;
             await CheckRuntime(progress, token);
 
+            // Whisperモデルのダウンロード
             var model = WhisperTranscriptionSettings.Default.Model;
             var modelPath = model.GetFilePath(WhisperModels.ModelDirectory);
             if (!File.Exists(modelPath) && !string.IsNullOrEmpty(model.URL))
                 await model.DownloadAsync(WhisperModels.ModelDirectory, args.ProgressMessage, token);
 
-            var language = WhisperTranscriptionSettings.Default.Language;
-
-            progress.Report(-1, Texts.CreatingAudioStreamMessage);
-            using var source = await Task.Run(args.CreateAudioStream, token);
-
+            // Whisperの初期化
             progress.Report(-1, Texts.LoadingWhisperModelMessage);
             using var factory = await CreateFactoryAsync(modelPath, token);
             var whisperBuider =
@@ -42,14 +39,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
                 .CreateBuilder()
                 .WithThreads(Environment.ProcessorCount)
                 .WithPrintTimestamps();
+            var language = WhisperTranscriptionSettings.Default.Language;
             if (language.IsAuto)
                 whisperBuider.WithLanguageDetection();
             else
                 whisperBuider.WithLanguage(language.Code);
             await using var whisper = whisperBuider.Build();
 
-            var blockBuffer = new float[sampleRate * blockSeconds];
+            // VADモデルのダウンロードと初期化
+            var currentVADType = WhisperTranscriptionSettings.Default.CurrentVADType;
+            using var vad = WhisperTranscriptionSettings.Default.VADs[currentVADType].CreateDetector();
+            await vad.DownloadResourcesAsync(progress, token);
+            await vad.InitializeAsync(token);
 
+            // オーディオソースを作成
+            progress.Report(-1, Texts.CreatingAudioStreamMessage);
+            using var source = await Task.Run(args.CreateAudioStream, token);
+
+            var blockBuffer = new float[sampleRate * blockSeconds];
             var lastText = string.Empty;
             var readCount = 0;
             long blockPosition = source.Position;
@@ -63,17 +70,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
                 var blockTime = TimeSpan.FromSeconds((double)blockPosition / sampleRate);
                 string message = CreateProgressMessage(lastText, sourceDuration, blockTime);
                 progress.Report((double)blockPosition / totalSamples, message);
-
                 List<SegmentData> segments = [];
-                await foreach (var segment in whisper.ProcessAsync(blockBuffer[0..readCount], token))
+                await foreach (var r in vad.ProcessAsync(blockBuffer.AsMemory()[0..readCount], token))
                 {
-                    if (ngWords.Contains(segment.Text))
-                        continue;
-                    segments.Add(segment);
+                    await foreach (var segment in whisper.ProcessAsync(blockBuffer[r.Start..r.End], token))
+                    {
+                        if (ngWords.Contains(segment.Text))
+                            continue;
+                        var segment2 = new SegmentData(
+                            segment.Text,
+                            segment.Start + TimeSpan.FromSeconds((double)r.Start / sampleRate),
+                            segment.End + TimeSpan.FromSeconds((double)r.Start / sampleRate),
+                            segment.MinProbability,
+                            segment.MaxProbability,
+                            segment.Probability,
+                            segment.NoSpeechProbability,
+                            segment.Language,
+                            segment.Tokens);
+                        segments.Add(segment2);
 
-                    lastText = segment.Text;
-                    message = CreateProgressMessage(lastText, sourceDuration, blockTime);
-                    progress.Report((double)blockPosition / totalSamples, message);
+                        lastText = segment.Text;
+                        message = CreateProgressMessage(lastText, sourceDuration, blockTime);
+                        progress.Report((double)blockPosition / totalSamples, message);
+                    }
                 }
 
                 //ブロックの末尾にセグメントの末尾がある場合、セグメントの途中にブロックの切り替えが発生したと見なし、削除する

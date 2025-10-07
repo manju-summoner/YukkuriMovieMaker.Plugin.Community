@@ -62,4 +62,5 @@
 <data name="ExtendModeClampName" xml:space="preserve"><value>Penjepit</value></data>
 <data name="ExtendModeWrapName" xml:space="preserve"><value>Membungkus</value></data>
 <data name="ExtendModeMirrorName" xml:space="preserve"><value>Cermin</value></data>
+<data name="DownloadingProgressMessage" xml:space="preserve"><value>Mengunduh {0} {1} / {2}</value></data>
 </root>

@@ -58,9 +58,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
-<data name="ExtendModeClampName" xml:space="preserve"><value>없음</value></data>
-<data name="ExtendModeWrapName" xml:space="preserve"><value>있음</value></data>
-<data name="ExtendModeMirrorName" xml:space="preserve"><value>반전</value></data>
-<data name="DownloadingProgressMessage" xml:space="preserve"><value>다운로드 중 {0} {1} / {2}</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
+<data name="Threshold" xml:space="preserve"><value>閾値</value></data>
+<data name="ThresholdDesc" xml:space="preserve"><value>音声を検出する閾値。小さくするほど検出しやすくなりますが、誤検出も増えます。</value></data>
+<data name="MinSpeechDurationMs" xml:space="preserve"><value>最短発話時間</value></data>
+<data name="MinSpeechDurationMsDesc" xml:space="preserve"><value>この時間以上音声が続いた場合に発話とみなします。</value></data>
+<data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>最長発話時間</value></data>
+<data name="MaxSpeechDurationSecondsDesc" xml:space="preserve"><value>この時間以上音声が続いた場合に発話終了とみなします。</value></data>
+<data name="MinSilenceDurationMs" xml:space="preserve"><value>最短無音時間</value></data>
+<data name="MinSilenceDurationMsDesc" xml:space="preserve"><value>この時間以上無音が続いた場合に発話終了とみなします。</value></data>
+<data name="SpeechPadMs" xml:space="preserve"><value>発話区間拡張</value></data>
+<data name="SpeechPadMsDesc" xml:space="preserve"><value>この時間だけ発話区間を前後に拡張します。</value></data>
+<data name="SecUnit" xml:space="preserve"><value>秒</value></data>
+<data name="MilliSecUnit" xml:space="preserve"><value>㍉秒</value></data>
 </root>

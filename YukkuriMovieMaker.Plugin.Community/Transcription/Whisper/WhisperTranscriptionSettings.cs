@@ -1,4 +1,7 @@
-﻿namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
+﻿using YukkuriMovieMaker.Plugin.Community.VoiceActivityDetector.SileroVad;
+using YukkuriMovieMaker.Plugin.VoiceActivityDetector;
+
+namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
 {
     internal class WhisperTranscriptionSettings : SettingsBase<WhisperTranscriptionSettings>
     {
@@ -16,6 +19,10 @@
         public WhisperLanguage Language { get => language; set => Set(ref language, value); }
         WhisperLanguage language = WhisperLanguage.Auto;
 
+        public string CurrentVADType { get => currentVADType; set => Set(ref currentVADType, value); }
+        string currentVADType = typeof(SileroVoiceDetectorPlugin)?.FullName ?? string.Empty;
+        public Dictionary<string, IVoiceActivityDetectorParameter> VADs { get; } = [];
+
         public override void Initialize()
         {
             var models = WhisperModels.GetDefaultAndUserModels();
@@ -23,6 +30,13 @@
             {
                 //モデルが存在しない場合、同名モデル or デフォルトモデルにする
                 model = models.Where(x => x.Name == model.Name).DefaultIfEmpty(WhisperModels.GetDefaultModel()).First();
+            }
+
+            foreach(var vad in PluginLoader.VoiceActivityDetectorPlugins)
+            {
+                var vadType = vad.GetType().FullName ?? string.Empty;
+                if (!VADs.ContainsKey(vadType))
+                    VADs[vadType] = vad.CreateParameter();
             }
         }
     }

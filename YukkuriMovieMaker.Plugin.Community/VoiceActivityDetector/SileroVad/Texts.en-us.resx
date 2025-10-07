@@ -58,9 +58,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
-<data name="ExtendModeClampName" xml:space="preserve"><value>없음</value></data>
-<data name="ExtendModeWrapName" xml:space="preserve"><value>있음</value></data>
-<data name="ExtendModeMirrorName" xml:space="preserve"><value>반전</value></data>
-<data name="DownloadingProgressMessage" xml:space="preserve"><value>다운로드 중 {0} {1} / {2}</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
+<data name="Threshold" xml:space="preserve"><value>Threshold</value></data>
+<data name="ThresholdDesc" xml:space="preserve"><value>The threshold for detecting voice. The lower the value</value></data>
+<data name="MinSpeechDurationMs" xml:space="preserve"><value>Min Speech Duration</value></data>
+<data name="MinSpeechDurationMsDesc" xml:space="preserve"><value>Considered speech if the voice continues for more than this time.</value></data>
+<data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>Max Speech Duration</value></data>
+<data name="MaxSpeechDurationSecondsDesc" xml:space="preserve"><value>Considered the end of speech if the voice continues for more than this time.</value></data>
+<data name="MinSilenceDurationMs" xml:space="preserve"><value>Min Silence Duration</value></data>
+<data name="MinSilenceDurationMsDesc" xml:space="preserve"><value>Considered the end of speech if silence continues for more than this time.</value></data>
+<data name="SpeechPadMs" xml:space="preserve"><value>Speech Padding</value></data>
+<data name="SpeechPadMsDesc" xml:space="preserve"><value>Extends the speech interval back and forth by this time.</value></data>
+<data name="SecUnit" xml:space="preserve"><value>s</value></data>
+<data name="MilliSecUnit" xml:space="preserve"><value>ms</value></data>
 </root>

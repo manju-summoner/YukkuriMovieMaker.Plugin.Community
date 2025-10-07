@@ -5,7 +5,6 @@ LoadingWhisperModelMessage,,Whisperモデルを読み込み中,Loading Whisper m
 ProcessingAudioMessage,0: current 1:total 2:last text,音声を解析中 {0} / {1} {2},Processing audio {0} / {1} {2},正在解析音频 {0} / {1} {2},正在解析音频 {0} / {1} {2},오디오 처리 중 {0} / {1} {2},Procesando audio {0} / {1} {2},معالجة الصوت {0} / {1} {2},Memproses audio {0} / {1} {2},
 Model,,モデル,模型,模型,모델,Modelo,النموذج,Model,
 Language,,言語,Language,语言,语言,언어,Idioma,اللغة,Bahasa,
-DownloadingProgressMessage,0: name 1:current 2:total,{0}をダウンロード中 {1} / {2},Downloading {0} {1} / {2},正在下载 {0} {1} / {2},正在下载 {0} {1} / {2},다운로드 중 {0} {1} / {2},Descargando {0} {1} / {2},تنزيل {0} {1} / {2},Mengunduh {0} {1} / {2},
 RuntimeNotInstalledTitle,, "{0} が必要です","{0} Required","需要 {0}","需要 {0}","{0}가 필요합니다","Se requiere {0}","مطلوب ‎{0}‎","{0} diperlukan",
 RuntimeNotInstalledMessage,0: runtimeName,"必要なランタイムがインストールされていません。
 この機能を利用するためには「{0}」をインストールする必要があります。
@@ -47,3 +46,4 @@ You need to either switch to a model under 2 GB or move YMM4 to a path that does
 Cambia a un modelo de menos de 2 GB o mueve YMM4 a una ruta que no contenga caracteres multibyte.","نظرًا لأن YMM4 موجود في مسار يحتوي على أحرف متعددة البايت، فلا يمكنه تحميل النماذج التي يتجاوز حجمها 2 جيجابايت.
 عليك إما التبديل إلى نموذج بحجم أقل من ‎2‎ جيجابايت، أو نقل YMM4 إلى مسار لا يحتوي على أحرف متعددة البايت.","Karena YMM4 berada di jalur yang mengandung karakter multibyte, YMM4 tidak dapat memuat model dengan ukuran file melebihi 2 GB.
 Silakan beralih ke model berukuran di bawah 2 GB atau pindahkan YMM4 ke jalur yang tidak berisi karakter multibyte。",
+VoiceActivityDetection,,発話区間検出,Voice Activity Detection,语音检测,語音檢測,음성 감지,Detección de actividad de voz,كشف نشاط الصوت,Deteksi Aktivitas Suara,

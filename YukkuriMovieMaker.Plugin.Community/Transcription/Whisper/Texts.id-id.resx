@@ -64,7 +64,6 @@
 <data name="LoadingWhisperModelMessage" xml:space="preserve"><value>Memuat model bisikan</value></data>
 <data name="ProcessingAudioMessage" xml:space="preserve"><value>Memproses audio {0} / {1} {2}</value></data>
 <data name="Language" xml:space="preserve"><value>Bahasa</value></data>
-<data name="DownloadingProgressMessage" xml:space="preserve"><value>Mengunduh {0} {1} / {2}</value></data>
 <data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>{0} diperlukan</value></data>
 <data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>Runtime yang diperlukan belum terpasang.
 Untuk menggunakan fitur ini, Anda harus memasang {0}.
@@ -78,4 +77,5 @@ Apakah Anda ingin mengunduh dan menjalankan pemasang sekarang？</value></data>
 <data name="InstallingMessage" xml:space="preserve"><value>正在安装 {0}。请稍候。安装期间取消按钮将无法工作。</value></data>
 <data name="FileSizeLimitMessage" xml:space="preserve"><value>Karena YMM4 berada di jalur yang mengandung karakter multibyte, YMM4 tidak dapat memuat model dengan ukuran file melebihi 2 GB.
 Silakan beralih ke model berukuran di bawah 2 GB atau pindahkan YMM4 ke jalur yang tidak berisi karakter multibyte。</value></data>
+<data name="VoiceActivityDetection" xml:space="preserve"><value>Deteksi Aktivitas Suara</value></data>
 </root>

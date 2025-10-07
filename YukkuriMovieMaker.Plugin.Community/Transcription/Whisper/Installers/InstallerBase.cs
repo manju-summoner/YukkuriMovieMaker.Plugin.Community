@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Plugin.Community.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper.Installers
 {

@@ -58,9 +58,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
-<data name="ExtendModeClampName" xml:space="preserve"><value>없음</value></data>
-<data name="ExtendModeWrapName" xml:space="preserve"><value>있음</value></data>
-<data name="ExtendModeMirrorName" xml:space="preserve"><value>반전</value></data>
-<data name="DownloadingProgressMessage" xml:space="preserve"><value>다운로드 중 {0} {1} / {2}</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
+<data name="Threshold" xml:space="preserve"><value>Umbral</value></data>
+<data name="ThresholdDesc" xml:space="preserve"><value>檢測聲音的閾值。值越小，檢測越容易，但誤報也會增加。</value></data>
+<data name="MinSpeechDurationMs" xml:space="preserve"><value>Duración mínima del habla</value></data>
+<data name="MinSpeechDurationMsDesc" xml:space="preserve"><value>Se considera habla si la voz continúa durante más de este tiempo.</value></data>
+<data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>Duración máxima del habla</value></data>
+<data name="MaxSpeechDurationSecondsDesc" xml:space="preserve"><value>Se considera el final del habla si la voz continúa durante más de este tiempo.</value></data>
+<data name="MinSilenceDurationMs" xml:space="preserve"><value>Duración mínima de silencio</value></data>
+<data name="MinSilenceDurationMsDesc" xml:space="preserve"><value>Se considera el final del habla si el silencio continúa durante más de este tiempo.</value></data>
+<data name="SpeechPadMs" xml:space="preserve"><value>Espaciado de habla</value></data>
+<data name="SpeechPadMsDesc" xml:space="preserve"><value>Extiende el intervalo de habla hacia adelante y hacia atrás por este tiempo.</value></data>
+<data name="SecUnit" xml:space="preserve"><value>Seg</value></data>
+<data name="MilliSecUnit" xml:space="preserve"><value>1 milisegundo</value></data>
 </root>
