@@ -12,6 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
 
         public static readonly IReadOnlyList<WhisperModel> DefaultModels =
             [
+                new WhisperModel("ggml-large-v3.bin","3.1 GB", whisperCppBaseURL + "ggml-large-v3.bin"),
                 new WhisperModel("ggml-large-v3-turbo.bin","1.62 GB", whisperCppBaseURL + "ggml-large-v3-turbo.bin"),
                 new WhisperModel("ggml-large-v3-turbo-q8_0.bin","874 MB", whisperCppBaseURL + "ggml-large-v3-turbo-q8_0.bin"),
                 new WhisperModel("ggml-large-v3-turbo-q5_0.bin","574 MB", whisperCppBaseURL + "ggml-large-v3-turbo-q5_0.bin"),
