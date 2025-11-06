@@ -32,7 +32,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
             comboBox.ItemsSource = speaker.Styles;
             comboBox.DisplayMemberPath = nameof(StyleContract.Name);
             comboBox.SelectedValuePath = nameof(StyleContract.LocalId);
-            comboBox.SetBinding(CommonComboBox.ValueProperty, ItemPropertiesBinding.Create(itemProperties));
+            comboBox.SetBinding(CommonComboBox.ValueProperty, ItemPropertiesBinding.Create2(itemProperties));
         }
 
         public override void ClearBindings(FrameworkElement control)
