@@ -5,7 +5,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
 {
     public class WhisperModels
     {
-        public static string ModelDirectory => Path.Combine(AppDirectories.ResourceDirectory, "models", "whisper");
+        public static string ModelDirectory => Path.Combine(AppDirectories.UserDirectory, "resources", "models", "whisper");
 
         const string whisperCppBaseURL = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/";
         const string kotobaWhisper2BaseURL = "https://huggingface.co/kotoba-tech/kotoba-whisper-v2.0-ggml/resolve/main/";
