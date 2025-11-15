@@ -7,6 +7,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
 {
     internal class VoiSonaTalkVoiceSpeaker(string voiceName) : IVoiceSpeaker
     {
+        static readonly SemaphoreSlim semaphore = new(1);
         public string EngineName => "VoiSona Talk";
 
         public string SpeakerName => VoiSonaTalkAPIHelper.GetVoicesByVoiceName(voiceName).FirstOrDefault()?.GetDisplayName(CultureInfo.CurrentUICulture) ?? string.Empty;
@@ -53,48 +54,57 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
             if (string.IsNullOrEmpty(lang))
                 return null;
 
-            // 発音情報を取得
-            if (pronounce is not VoiSonaTalkVoicePronounce pron || pron.TSML is null)
+            await semaphore.WaitAsync();
+            try
             {
-                var textInfo = await VoiSonaTalkAPIHelper.AnalyzeTextAsync(text, lang);
-                if (textInfo is null || textInfo.Text is null)
+
+                // 発音情報を取得
+                if (pronounce is not VoiSonaTalkVoicePronounce pron || pron.TSML is null)
+                {
+                    var textInfo = await VoiSonaTalkAPIHelper.AnalyzeTextAsync(text, lang);
+                    if (textInfo is null || textInfo.Text is null)
+                        return null;
+                    pron = new VoiSonaTalkVoicePronounce() { TSML = textInfo?.AnalyzedText };
+                }
+                if (pron.TSML is null)
                     return null;
-                pron = new VoiSonaTalkVoicePronounce() { TSML = textInfo?.AnalyzedText };
-            }
-            if (pron.TSML is null)
-                return null;
 
-            // スタイルを確定
-            double[] styleWeights = [.. voiceInfo.DefaultStyleWeights];
-            foreach(var sw in param.StyleWeights)
+                // スタイルを確定
+                double[] styleWeights = [.. voiceInfo.DefaultStyleWeights];
+                foreach (var sw in param.StyleWeights)
+                {
+                    int index = Array.IndexOf(voiceInfo.StyleNames, sw.Name);
+                    if (index >= 0 && index < styleWeights.Length)
+                        styleWeights[index] = sw.Weight;
+                }
+
+                var request = new SpeechSynthesisRequest(
+                    pron.TSML,
+                    true,
+                    SpeechSynthesisDestination.File,
+                    true,
+                    new SpeechSynthesisGlobalParameters(
+                        param.Alp,
+                        param.Huskiness,
+                        param.Intonation,
+                        param.Pitch,
+                        param.Speed,
+                        styleWeights,
+                        0),
+                    lang,
+                    filePath,
+                    voiceName,
+                    version);
+                var speechInfo = await VoiSonaTalkAPIHelper.SpeechSynthesisAsync(request);
+                if (speechInfo is null)
+                    return null;
+
+                return pron;
+            }
+            finally
             {
-                int index = Array.IndexOf(voiceInfo.StyleNames, sw.Name);
-                if (index >= 0 && index < styleWeights.Length)
-                    styleWeights[index] = sw.Weight;
+                semaphore.Release();
             }
-
-            var request = new SpeechSynthesisRequest(
-                pron.TSML,
-                true,
-                SpeechSynthesisDestination.File,
-                true,
-                new SpeechSynthesisGlobalParameters(
-                    param.Alp, 
-                    param.Huskiness,
-                    param.Intonation,
-                    param.Pitch, 
-                    param.Speed,
-                    styleWeights,
-                    0),
-                lang,
-                filePath,
-                voiceName,
-                version);
-            var speechInfo = await VoiSonaTalkAPIHelper.SpeechSynthesisAsync(request);
-            if (speechInfo is null)
-                return null;
-
-            return pron;
         }
 
         public IVoiceParameter CreateVoiceParameter()
