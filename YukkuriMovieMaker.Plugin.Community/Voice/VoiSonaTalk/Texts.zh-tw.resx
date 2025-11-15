@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
+<data name="Language" xml:space="preserve"><value>語言</value></data>
+<data name="Version" xml:space="preserve"><value>版本</value></data>
+<data name="Alp" xml:space="preserve"><value>年齡</value></data>
+<data name="Huskiness" xml:space="preserve"><value>沙啞</value></data>
+<data name="Intonation" xml:space="preserve"><value>語調</value></data>
+<data name="Pitch" xml:space="preserve"><value>音高</value></data>
+<data name="Speed" xml:space="preserve"><value>語速</value></data>
+<data name="UserName" xml:space="preserve"><value>用戶名</value></data>
+<data name="Password" xml:space="preserve"><value>密碼</value></data>
+<data name="Port" xml:space="preserve"><value>端口號</value></data>
+<data name="HowToSetUp" xml:space="preserve"><value>設定方法</value></data>
+<data name="HowToSetUpText" xml:space="preserve"><value>1. 打開 VoiSona Talk 應用程式選單 → 編輯 → 偏好設定 → API
+2. 設定用於 API 存取的密碼（不是 VoiSona 帳戶密碼）
+3. 勾選「啟用 REST API」
+4. 將步驟 1 中設定的值輸入到此畫面上的「使用者名稱」、「密碼」和「連接埠號碼」中</value></data>
+<data name="HowToSetUpLink" xml:space="preserve"><value>說明：VoiSona Talk 的設定方法</value></data>
+<data name="AboutVoiSonaTalk" xml:space="preserve"><value>關於 VoiSona Talk</value></data>
+<data name="AboutVoiSonaTalkText" xml:space="preserve"><value>VoiSona Talk 是 TechnoSpeech Inc. 提供的語音合成軟體。
+要使用它，您需要另外安裝 VoiSona Talk v1.3.4 或更高版本並啟用 API 功能。</value></data>
+<data name="Refresh" xml:space="preserve"><value>重新整理</value></data>
+<data name="CharacterCount" xml:space="preserve"><value>字元數</value></data>
+<data name="CharacterCountText" xml:space="preserve"><value>{0}個字元</value></data>
+<data name="Loading" xml:space="preserve"><value>載入中</value></data>
+<data name="UnauthorizedMessage" xml:space="preserve"><value>驗證失敗。
+使用者名稱或密碼不正確。</value></data>
+</root>

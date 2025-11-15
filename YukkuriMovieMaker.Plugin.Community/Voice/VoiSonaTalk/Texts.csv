@@ -1,0 +1,61 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
+Language,,言語,Language,语言,語言,언어,Idioma,لغة,Bahasa,
+Version,,バージョン,Version,版本,版本,버전,Versión,الإصدار,Versi,
+Alp,,年齢,Age,年龄,年齡,나이,Edad,العمر,Usia,
+Huskiness,,擦れ,Huskiness,沙哑,沙啞,허스키함,Ronquera,خشونة,Serak,
+Intonation,,抑揚,Intonation,语调,語調,억양,Entonación,تنغيم,Intonasi,
+Pitch,,ピッチ,Pitch,音高,音高,피치,Tono,درجة الصوت,Pitch,
+Speed,,話速,Speed,语速,語速,속도,Velocidad,السرعة,Kecepatan,
+UserName,,ユーザー名,User Name,用户名,用戶名,사용자 이름,Nombre de usuario,اسم المستخدم,Nama Pengguna,
+Password,,パスワード,Password,密码,密碼,비밀번호,Contraseña,كلمة المرور,Kata Sandi,
+Port,,ポート番号,Port Number,端口号,端口號,포트 번호,Número de puerto,رقم المنفذ,Nomor Port,
+HowToSetUp,,設定方法,How to set up,设置方法,設定方法,설정 방법,Cómo configurar,كيفية الإعداد,Cara mengatur,
+HowToSetUpText,,"1. VoiSona Talkアプリのメニュー → 編集 → 環境設定 →　APIを開く
+2. APIアクセス用のパスワードを設定する（VoiSonaアカウントのパスワードではありません）
+3. 「REST APIを有効にする」にチェックを入れる
+4. この画面の「ユーザー名」「パスワード」「ポート番号」に1.の画面で設定した値を入力する","1. Open the VoiSona Talk app menu → Edit → Preferences → API
+2. Set a password for API access (not the VoiSona account password)
+3. Check ""Enable REST API""
+4. Enter the values set in step 1 into ""User Name"", ""Password"", and ""Port Number"" on this screen","1. 打开 VoiSona Talk 应用程序菜单 → 编辑 → 首选项 → API
+2. 设置用于 API 访问的密码（不是 VoiSona 帐户密码）
+3. 选中“启用 REST API”
+4. 将步骤 1 中设置的值输入到此屏幕上的“用户名”、“密码”和“端口号”中","1. 打開 VoiSona Talk 應用程式選單 → 編輯 → 偏好設定 → API
+2. 設定用於 API 存取的密碼（不是 VoiSona 帳戶密碼）
+3. 勾選「啟用 REST API」
+4. 將步驟 1 中設定的值輸入到此畫面上的「使用者名稱」、「密碼」和「連接埠號碼」中","1. VoiSona Talk 앱 메뉴 → 편집 → 환경설정 → API 열기
+2. API 액세스용 비밀번호 설정(VoiSona 계정 비밀번호 아님)
+3. 'REST API 사용'에 체크
+4. 1단계에서 설정한 값을 이 화면의 '사용자 이름', '비밀번호', '포트 번호'에 입력","1. Abra el menú de la aplicación VoiSona Talk → Editar → Preferencias → API
+2. Establezca una contraseña para el acceso a la API (no la contraseña de la cuenta de VoiSona)
+3. Marque ""Habilitar REST API""
+4. Ingrese los valores establecidos en el paso 1 en ""Nombre de usuario"", ""Contraseña"" y ""Número de puerto"" en esta pantalla","1. افتح قائمة تطبيق VoiSona Talk → تحرير → التفضيلات → API
+2. قم بتعيين كلمة مرور للوصول إلى API (ليست كلمة مرور حساب VoiSona)
+3. تحقق من ""تمكين REST API""
+4. أدخل القيم التي تم تعيينها في الخطوة 1 في ""اسم المستخدم"" و ""كلمة المرور"" و ""رقم المنفذ"" في هذه الشاشة","1. Buka menu aplikasi VoiSona Talk → Edit → Preferensi → API
+2. Atur kata sandi untuk akses API (bukan kata sandi akun VoiSona)
+3. Centang ""Aktifkan REST API""
+4. Masukkan nilai yang diatur pada langkah 1 ke dalam ""Nama Pengguna"", ""Kata Sandi"", dan ""Nomor Port"" di layar ini",
+HowToSetUpLink,,ヘルプ：VoiSonaTalkの設定方法,Help: How to set up VoiSona Talk,帮助：VoiSona Talk 的设置方法,說明：VoiSona Talk 的設定方法,도움말: VoiSona Talk 설정 방법,Ayuda: Cómo configurar VoiSona Talk,مساعدة: كيفية إعداد VoiSona Talk,Bantuan: Cara mengatur VoiSona Talk,
+AboutVoiSonaTalk,,VoiSona Talkについて,About VoiSona Talk,关于 VoiSona Talk,關於 VoiSona Talk,VoiSona Talk 정보,Acerca de VoiSona Talk,حول VoiSona Talk,Tentang VoiSona Talk,
+AboutVoiSonaTalkText,,"VoiSona Talkは、株式会社テクノスピーチが提供する音声合成ソフトです。
+利用には別途VoiSona Talk v1.3.4以降のインストールおよびAPI機能の有効化が必要です。","VoiSona Talk is a speech synthesis software provided by TechnoSpeech Inc.
+To use it, you need to install VoiSona Talk v1.3.4 or later and enable the API function separately.","VoiSona Talk 是 TechnoSpeech Inc. 提供的语音合成软件。
+要使用它，您需要另外安装 VoiSona Talk v1.3.4 或更高版本并启用 API 功能。","VoiSona Talk 是 TechnoSpeech Inc. 提供的語音合成軟體。
+要使用它，您需要另外安裝 VoiSona Talk v1.3.4 或更高版本並啟用 API 功能。","VoiSona Talk은 TechnoSpeech Inc.에서 제공하는 음성 합성 소프트웨어입니다.
+사용하려면 VoiSona Talk v1.3.4 이상을 설치하고 API 기능을 별도로 활성화해야 합니다.","VoiSona Talk es un software de síntesis de voz proporcionado por TechnoSpeech Inc.
+Para usarlo, debe instalar VoiSona Talk v1.3.4 o posterior y habilitar la función API por separado.","VoiSona Talk هو برنامج تركيب صوتي تقدمه TechnoSpeech Inc.
+لاستخدامه، تحتاج إلى تثبيت VoiSona Talk v1.3.4 أو إصدار أحدث وتمكين وظيفة API بشكل منفصل.","VoiSona Talk adalah perangkat lunak sintesis suara yang disediakan oleh TechnoSpeech Inc.
+Untuk menggunakannya, Anda perlu menginstal VoiSona Talk v1.3.4 atau yang lebih baru dan mengaktifkan fungsi API secara terpisah.",
+Refresh,,更新,Refresh,刷新,重新整理,새로 고침,Actualizar,تحديث,Muat Ulang,
+CharacterCount,,キャラクター数,Character Count,字符数,字元數,문자 수,Recuento de caracteres,عدد الأحرف,Jumlah Karakter,
+CharacterCountText,0: count,{0}名,{0} characters,{0}个字符,{0}個字元,{0}자,{0} caracteres,{0} حرف,{0} karakter,
+Loading,,読み込み中,Loading,加载中,載入中,로딩 중,Cargando,جارٍ التحميل,Muat,
+UnauthorizedMessage,,"認証に失敗しました。
+ユーザー名またはパスワードが間違っています。","Authentication failed.
+The user name or password is incorrect.","身份验证失败。
+用户名或密码不正确。","驗證失敗。
+使用者名稱或密碼不正確。","인증에 실패했습니다.
+사용자 이름 또는 비밀번호가 올바르지 않습니다.","La autenticación ha fallado.
+El nombre de usuario o la contraseña son incorrectos.","فشل المصادقة.
+اسم المستخدم أو كلمة المرور غير صحيحة.","Otentikasi gagal.
+Nama pengguna atau kata sandi salah.",
