@@ -84,4 +84,7 @@
 <data name="Loading" xml:space="preserve"><value>加载中</value></data>
 <data name="UnauthorizedMessage" xml:space="preserve"><value>身份验证失败。
 用户名或密码不正确。</value></data>
+<data name="EditIntonation" xml:space="preserve"><value>编辑语调</value></data>
+<data name="Join" xml:space="preserve"><value>连接</value></data>
+<data name="Split" xml:space="preserve"><value>拆分</value></data>
 </root>

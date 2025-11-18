@@ -96,6 +96,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
                     voiceName,
                     version);
                 var speechInfo = await VoiSonaTalkAPIHelper.SpeechSynthesisAsync(request);
+                pron.TSML = speechInfo?.AnalyzedText;
                 if (speechInfo is null)
                     return null;
 

@@ -27,6 +27,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
         public int Port { get => port; set => Set(ref port, value); }
         public VoiceInformation[] Voices { get => voices; set => Set(ref voices, value); }
         public bool IsVoicesCached { get => isVoicesCahced;set => Set(ref isVoicesCahced, value); }
+        public VoiSonaTalkEditorSettings Editor { get; } = new();
 
         public override void Initialize()
         {

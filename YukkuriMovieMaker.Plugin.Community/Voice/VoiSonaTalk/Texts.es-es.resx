@@ -84,4 +84,7 @@ Para usarlo, debe instalar VoiSona Talk v1.3.4 o posterior y habilitar la funci�
 <data name="Loading" xml:space="preserve"><value>Cargando</value></data>
 <data name="UnauthorizedMessage" xml:space="preserve"><value>La autenticación ha fallado.
 El nombre de usuario o la contraseña son incorrectos.</value></data>
+<data name="EditIntonation" xml:space="preserve"><value>Editar entonación</value></data>
+<data name="Join" xml:space="preserve"><value>Unir</value></data>
+<data name="Split" xml:space="preserve"><value>Dividir</value></data>
 </root>
