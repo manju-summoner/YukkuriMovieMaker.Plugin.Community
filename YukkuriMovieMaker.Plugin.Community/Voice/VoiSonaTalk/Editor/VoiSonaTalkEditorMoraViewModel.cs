@@ -7,26 +7,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
     internal class VoiSonaTalkEditorMoraViewModel(XElement word, int moraIndex) : Bindable
     {
         public event EventHandler? Changed;
-        static readonly char[] youonFirsts = [ 'き', 'ぎ', 'し', 'じ', 'ち', 'に', 'ひ', 'び', 'ぴ', 'み', 'り',
-                                                     'キ', 'ギ', 'シ', 'ジ', 'チ', 'ニ', 'ヒ', 'ビ', 'ピ', 'ミ', 'リ' ];
-        static readonly char[] youonSeconds = [ 'ぇ', 'ゃ', 'ゅ', 'ょ', 
-                                                      'ェ', 'ャ', 'ュ', 'ョ'];
+        static readonly char[] youonFirsts = [ 'キ', 'ギ', 'シ', 'ジ', 'チ', 'ニ', 'ヒ', 'ビ', 'ピ', 'ミ', 'リ' ];
+        static readonly char[] youonSeconds = [ 'ェ', 'ャ', 'ュ', 'ョ'];
         static readonly string[] extraYouonPairs = [
-            "いぇ","イェ",
-                   "うぃ","うぇ","うぉ",        "ウィ","ウェ","ウォ",
-            "ゔぁ","ゔぃ","ゔぇ","ゔぉ", "ヴァ","ヴィ","ヴェ","ヴォ",
-            "ゔゃ","ゔゅ","ゔょ", "ヴャ","ヴュ","ヴョ",
-            "すぃ","スィ",
-            "ずぃ","ズィ",
-            "つぁ","つぃ","つぇ","つぉ", "ツァ","ツィ","ツェ","ツォ",
-            "てぃ","ティ",
-            "でぃ","ディ",
-            "てゃ","てゅ","てょ", "テャ","テュ","テョ",
-            "でゃ","でゅ","でょ", "デャ","デュ","デョ",
-            "とぅ","トゥ",
-            "どぅ","ドゥ",
-            "ふぁ","ふぃ","ふぇ","ふぉ", "ファ","フィ","フェ","フォ",
-            "ふゃ","ふゅ","ふょ", "フャ","フュ","フョ"
+            "イェ",
+                   "ウィ","ウェ","ウォ",
+            "ヴァ","ヴィ","ヴェ","ヴォ",
+            "ヴャ","ヴュ","ヴョ",
+            "スィ",
+            "ズィ",
+            "ツァ","ツィ","ツェ","ツォ",
+            "ティ",
+            "ディ",
+            "テャ","テュ","テョ",
+            "デャ","デュ","デョ",
+            "トゥ",
+            "ドゥ",
+            "ファ","フィ","フェ","フォ",
+            "フャ","フュ","フョ"
         ];
 
         public string Text => GetMoraList(word).Skip(moraIndex).FirstOrDefault() ?? string.Empty;
