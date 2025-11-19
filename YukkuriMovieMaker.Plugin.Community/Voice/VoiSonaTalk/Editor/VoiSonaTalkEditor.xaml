@@ -8,7 +8,6 @@
              xmlns:vt="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" 
-             DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=Pronounce,Converter={local:VoiSonaTalkEditorViewModelConverter}}"
              d:DataContext="{d:DesignInstance Type={x:Type local:VoiSonaTalkEditorViewModel}}">
     <c:PopupButton Content="{x:Static vt:Texts.EditIntonation}"
                    PopupWidth="{Binding Source={x:Static vt:VoiSonaTalkSettings.Default}, Path=Editor.Width}"
@@ -19,6 +18,10 @@
                    >
         <c:PopupButton.PopupContent>
             <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="26"/>
+                </Grid.ColumnDefinitions>
                 <!-- 句読点毎の塊 -->
                 <ItemsControl ItemsSource="{Binding AcousticPhrases}">
                     <ItemsControl.Template>
@@ -245,6 +248,21 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+                <Button Command="{Binding TogglePlayCommand}" Grid.Column="1">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Setter Property="Content" Value="{DynamicResource Play}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                    <Setter Property="Content" Value="{DynamicResource Stop}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                    <Setter Property="Content" Value="{DynamicResource loading}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </Grid>
         </c:PopupButton.PopupContent>
     </c:PopupButton>
