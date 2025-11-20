@@ -73,7 +73,7 @@
                     </Hyperlink>
                     <LineBreak/>
                     <LineBreak/>
-                    <Run Text="Copyright © 2022-2024 Techno-Speech, Inc. All Right Reserved."/>
+                    <Run Text="Copyright (c) 2023 Techno-Speech, Inc."/>
                 </TextBlock>
             </GroupBox>
         </StackPanel>
