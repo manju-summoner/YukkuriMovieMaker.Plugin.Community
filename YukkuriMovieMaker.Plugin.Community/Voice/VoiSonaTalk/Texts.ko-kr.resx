@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
+<data name="Language" xml:space="preserve"><value>언어</value></data>
+<data name="Version" xml:space="preserve"><value>버전</value></data>
+<data name="Alp" xml:space="preserve"><value>나이</value></data>
+<data name="Huskiness" xml:space="preserve"><value>허스키함</value></data>
+<data name="Intonation" xml:space="preserve"><value>억양</value></data>
+<data name="Pitch" xml:space="preserve"><value>피치</value></data>
+<data name="Speed" xml:space="preserve"><value>속도</value></data>
+<data name="UserName" xml:space="preserve"><value>사용자 이름</value></data>
+<data name="Password" xml:space="preserve"><value>비밀번호</value></data>
+<data name="Port" xml:space="preserve"><value>포트 번호</value></data>
+<data name="HowToSetUp" xml:space="preserve"><value>설정 방법</value></data>
+<data name="HowToSetUpText" xml:space="preserve"><value>1. VoiSona Talk 앱 메뉴 → 편집 → 환경설정 → API 열기
+2. API 액세스용 비밀번호 설정(VoiSona 계정 비밀번호 아님)
+3. 'REST API 사용'에 체크
+4. 1단계에서 설정한 값을 이 화면의 '사용자 이름', '비밀번호', '포트 번호'에 입력</value></data>
+<data name="HowToSetUpLink" xml:space="preserve"><value>도움말: VoiSona Talk 설정 방법</value></data>
+<data name="AboutVoiSonaTalk" xml:space="preserve"><value>VoiSona Talk 정보</value></data>
+<data name="AboutVoiSonaTalkText" xml:space="preserve"><value>VoiSona Talk은 TechnoSpeech Inc.에서 제공하는 음성 합성 소프트웨어입니다.
+사용하려면 VoiSona Talk v1.3.4 이상을 설치하고 API 기능을 별도로 활성화해야 합니다.</value></data>
+<data name="Refresh" xml:space="preserve"><value>새로 고침</value></data>
+<data name="CharacterCount" xml:space="preserve"><value>문자 수</value></data>
+<data name="CharacterCountText" xml:space="preserve"><value>{0}자</value></data>
+<data name="Loading" xml:space="preserve"><value>로딩 중</value></data>
+<data name="UnauthorizedMessage" xml:space="preserve"><value>인증에 실패했습니다.
+사용자 이름 또는 비밀번호가 올바르지 않습니다.</value></data>
+<data name="EditIntonation" xml:space="preserve"><value>억양 편집</value></data>
+<data name="Join" xml:space="preserve"><value>합치기</value></data>
+<data name="Split" xml:space="preserve"><value>분할</value></data>
+</root>

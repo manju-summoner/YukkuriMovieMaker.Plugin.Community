@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
+<data name="Language" xml:space="preserve"><value>Idioma</value></data>
+<data name="Version" xml:space="preserve"><value>Versión</value></data>
+<data name="Alp" xml:space="preserve"><value>Edad</value></data>
+<data name="Huskiness" xml:space="preserve"><value>Ronquera</value></data>
+<data name="Intonation" xml:space="preserve"><value>Entonación</value></data>
+<data name="Pitch" xml:space="preserve"><value>Tono</value></data>
+<data name="Speed" xml:space="preserve"><value>Velocidad</value></data>
+<data name="UserName" xml:space="preserve"><value>Nombre de usuario</value></data>
+<data name="Password" xml:space="preserve"><value>Contraseña</value></data>
+<data name="Port" xml:space="preserve"><value>Número de puerto</value></data>
+<data name="HowToSetUp" xml:space="preserve"><value>Cómo configurar</value></data>
+<data name="HowToSetUpText" xml:space="preserve"><value>1. Abra el menú de la aplicación VoiSona Talk → Editar → Preferencias → API
+2. Establezca una contraseña para el acceso a la API (no la contraseña de la cuenta de VoiSona)
+3. Marque "Habilitar REST API"
+4. Ingrese los valores establecidos en el paso 1 en "Nombre de usuario", "Contraseña" y "Número de puerto" en esta pantalla</value></data>
+<data name="HowToSetUpLink" xml:space="preserve"><value>Ayuda: Cómo configurar VoiSona Talk</value></data>
+<data name="AboutVoiSonaTalk" xml:space="preserve"><value>Acerca de VoiSona Talk</value></data>
+<data name="AboutVoiSonaTalkText" xml:space="preserve"><value>VoiSona Talk es un software de síntesis de voz proporcionado por TechnoSpeech Inc.
+Para usarlo, debe instalar VoiSona Talk v1.3.4 o posterior y habilitar la función API por separado.</value></data>
+<data name="Refresh" xml:space="preserve"><value>Actualizar</value></data>
+<data name="CharacterCount" xml:space="preserve"><value>Recuento de caracteres</value></data>
+<data name="CharacterCountText" xml:space="preserve"><value>{0} caracteres</value></data>
+<data name="Loading" xml:space="preserve"><value>Cargando</value></data>
+<data name="UnauthorizedMessage" xml:space="preserve"><value>La autenticación ha fallado.
+El nombre de usuario o la contraseña son incorrectos.</value></data>
+<data name="EditIntonation" xml:space="preserve"><value>Editar entonación</value></data>
+<data name="Join" xml:space="preserve"><value>Unir</value></data>
+<data name="Split" xml:space="preserve"><value>Dividir</value></data>
+</root>
