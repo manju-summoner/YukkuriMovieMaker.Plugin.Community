@@ -60,7 +60,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
             if (await BlockedSpeakerUuids.IsBlockedAsync(speakerUuid) || await BlockedSpeakerUuids.IsBlockedAsync(modelUuid))
             {
                 if (BlockedSpeakerUuids.IsAnneli(speakerUuid) || BlockedSpeakerUuids.IsAnneli(modelUuid))
-                    throw new InvalidOperationException(string.Format(Texts.AnnielBlockedMessage, "https://manjubox.net/info/2025-09-10/"));
+                {
+                    // Anneliモデルは現在別のモデルに置き換えられている
+                }
                 else
                     throw new InvalidOperationException(Texts.SpeakerBlockedMessage);
             }
