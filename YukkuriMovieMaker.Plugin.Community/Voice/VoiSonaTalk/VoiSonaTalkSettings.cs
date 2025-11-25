@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.API;
@@ -16,7 +17,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
 
         public override object? SettingView => new VoiSonaTalkSettingsView();
         
-        string? userName, password, appPath = @"C:\Program Files\Techno-Speech\VoiSona Talk\VoiSona Talk.exe";
+        string? userName, password, appPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Techno-Speech","VoiSona Talk","VoiSona Talk.exe");
         int port = 32766;
         bool isVoicesCahced = false;
         VoiceInformation[] voices = [];
