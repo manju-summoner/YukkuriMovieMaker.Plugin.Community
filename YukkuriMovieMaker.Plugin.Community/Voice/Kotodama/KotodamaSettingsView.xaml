@@ -62,6 +62,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="26"/>
                                     <RowDefinition Height="26"/>
+                                    <RowDefinition Height="52"/>
                                     <RowDefinition/>
                                     <RowDefinition Height="26"/>
                                 </Grid.RowDefinitions>
@@ -76,8 +77,11 @@
                                 <Label Grid.Row="1" Grid.Column="0" Content="{x:Static local:Texts.SpeakerId}"/>
                                 <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=SpeakerId}" VerticalContentAlignment="Center"/>
 
-                                <ListBox Grid.Row="2" Name="DecorationListBox"  ItemsSource="{Binding Decorations}" DisplayMemberPath="Name" SelectedIndex="0"/>
-                                <Grid Grid.Row="3">
+                                <Label Grid.Row="2" Grid.Column="0" Content="{x:Static local:Texts.ContentRestrictions}"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Path=ContentRestrictions}" AcceptsReturn="True"/>
+
+                                <ListBox Grid.Row="3" Name="DecorationListBox"  ItemsSource="{Binding Decorations}" DisplayMemberPath="Name" SelectedIndex="0"/>
+                                <Grid Grid.Row="4">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition/>
                                         <ColumnDefinition/>
@@ -86,7 +90,7 @@
                                     <Button Grid.Column="1" Content="{x:Static local:Texts.Delete}" ToolTip="{x:Static local:Texts.Delete}" Click="DeleteDecorationButton_Click_3" IsEnabled="{Binding ElementName=DecorationListBox,Path=ItemsSource,Converter={local:EmptyToFalseConverter}}"/>
                                 </Grid>
                                 
-                                <ContentControl Name="DecorationContentControl" Grid.Row="2" Grid.Column="1" Content="{Binding ElementName=DecorationListBox, Path=SelectedItem}">
+                                <ContentControl Name="DecorationContentControl" Grid.Row="3" Grid.Column="1" Content="{Binding ElementName=DecorationListBox, Path=SelectedItem}">
                                     <ContentControl.Resources>
                                         <DataTemplate DataType="{x:Type local:KotodamaDecorationSettings}">
                                             <Grid>
