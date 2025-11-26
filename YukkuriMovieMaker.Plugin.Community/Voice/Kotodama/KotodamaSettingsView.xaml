@@ -1,0 +1,119 @@
+﻿<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Voice.Kotodama.KotodamaSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.Kotodama"
+             xmlns:ps="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Expander Grid.Row="0" Header="Kotodama" IsExpanded="True">
+            <StackPanel>
+                <Grid>
+                    <Label Content="{x:Static local:Texts.APIKey}"/>
+                    <TextBox Text="{Binding Source={x:Static local:KotodamaSettings.Default},Path=ApiKey}" Width="200" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
+                </Grid>
+                <GroupBox Header="{x:Static local:Texts.AboutKotodama}" Margin="6">
+                    <TextBlock Margin="6" TextWrapping="Wrap">
+                        <Run Text="{x:Static local:Texts.AboutKotodamaMessage}"/>
+                        <LineBreak/>
+                        <LineBreak/>
+                        <Hyperlink Command="{Binding Source={x:Static ps:CommandSettings.Default},Path=[OpenUri]}" CommandParameter="https://manjubox.net/ymm4/faq/%E3%82%86%E3%81%A3%E3%81%8F%E3%82%8A%E3%83%9C%E3%82%A4%E3%82%B9/Kotodama/">
+                            <Run Text="{x:Static local:Texts.HelpLinkText}"/>
+                        </Hyperlink>
+                        <LineBreak/>
+                        <LineBreak/>
+                        <Run Text="©2025 SpiralAI"/>
+                    </TextBlock>
+                </GroupBox>
+            </StackPanel>
+        </Expander>
+        <Expander Grid.Row="1" Header="{x:Static local:Texts.SpeakerSettings}" IsExpanded="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="26"/>
+                    </Grid.RowDefinitions>
+                    <ListBox Grid.Row="0" Name="SpeakersListBox" ItemsSource="{Binding Source={x:Static local:KotodamaSettings.Default},Path=Speakers}" DisplayMemberPath="Name" SelectedIndex="0" SelectionChanged="SpeakersListBox_SelectionChanged"/>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="{x:Static local:Texts.AddSpeaker}" ToolTip="{x:Static local:Texts.AddSpeaker}" Click="AddSpeakerButton_Click" IsEnabled="{Binding ElementName=SpeakersListBox,Path=SelectedValue,Converter={local:NullToFalseConverter}}"/>
+                        <Button Grid.Column="1" Content="{x:Static local:Texts.Delete}" ToolTip="{x:Static local:Texts.Delete}" Click="DeleteSpeakerButton_Click_1" IsEnabled="{Binding ElementName=SpeakersListBox,Path=ItemsSource,Converter={local:EmptyToFalseConverter}}"/>
+                    </Grid>
+                </Grid>
+                
+                <ContentControl Name="SpeakerContentControl"  Grid.Column="1" Content="{Binding ElementName=SpeakersListBox, Path=SelectedValue}">
+                    <ContentControl.Resources>
+                        <DataTemplate DataType="{x:Type local:KotodamaSpeakerSettings}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="26"/>
+                                    <RowDefinition Height="26"/>
+                                    <RowDefinition/>
+                                    <RowDefinition Height="26"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="150"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <Label Grid.Row="0" Grid.Column="0" Content="{x:Static local:Texts.SpeakerName}"/>
+                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}" VerticalContentAlignment="Center"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Content="{x:Static local:Texts.SpeakerId}"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=SpeakerId}" VerticalContentAlignment="Center"/>
+
+                                <ListBox Grid.Row="2" Name="DecorationListBox"  ItemsSource="{Binding Decorations}" DisplayMemberPath="Name" SelectedIndex="0"/>
+                                <Grid Grid.Row="3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" Content="{x:Static local:Texts.AddDecoration}" ToolTip="{x:Static local:Texts.AddDecoration}" Click="AddDecorationButton_Click_2" IsEnabled="{Binding ElementName=DecorationListBox,Path=SelectedValue,Converter={local:NullToFalseConverter}}"/>
+                                    <Button Grid.Column="1" Content="{x:Static local:Texts.Delete}" ToolTip="{x:Static local:Texts.Delete}" Click="DeleteDecorationButton_Click_3" IsEnabled="{Binding ElementName=DecorationListBox,Path=ItemsSource,Converter={local:EmptyToFalseConverter}}"/>
+                                </Grid>
+                                
+                                <ContentControl Name="DecorationContentControl" Grid.Row="2" Grid.Column="1" Content="{Binding ElementName=DecorationListBox, Path=SelectedItem}">
+                                    <ContentControl.Resources>
+                                        <DataTemplate DataType="{x:Type local:KotodamaDecorationSettings}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="26"/>
+                                                    <RowDefinition Height="26"/>
+                                                    <RowDefinition/>
+                                                </Grid.RowDefinitions>
+                                                
+                                                <Label Grid.Row="0" Grid.Column="0" Content="{x:Static local:Texts.DecorationName}"/>
+                                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Path=Name}" VerticalContentAlignment="Center"/>
+
+                                                <Label Grid.Row="1" Grid.Column="0" Content="{x:Static local:Texts.DecorationId}"/>
+                                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=DecorationId}" VerticalContentAlignment="Center"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ContentControl.Resources>
+                                </ContentControl>
+                            </Grid>
+                        </DataTemplate>
+                    </ContentControl.Resources>
+                </ContentControl>
+            </Grid>
+        </Expander>
+    </Grid>
+</UserControl>

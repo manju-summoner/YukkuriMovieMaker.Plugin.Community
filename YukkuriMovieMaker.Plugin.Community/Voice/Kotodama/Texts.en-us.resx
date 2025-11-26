@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
+<data name="APIKey" xml:space="preserve"><value>API Key</value></data>
+<data name="Decoration" xml:space="preserve"><value>Emotion</value></data>
+<data name="AboutKotodama" xml:space="preserve"><value>About Kotodama</value></data>
+<data name="AboutKotodamaMessage" xml:space="preserve"><value>Kotodama is a cloud-based text-to-speech service operated by SpiralAI Inc.
+An API key is required for use.</value></data>
+<data name="SpeakerName" xml:space="preserve"><value>Speaker Name</value></data>
+<data name="SpeakerId" xml:space="preserve"><value>Speaker ID</value></data>
+<data name="DecorationName" xml:space="preserve"><value>Emotion Name</value></data>
+<data name="DecorationId" xml:space="preserve"><value>Emotion ID</value></data>
+<data name="ContentRestrictions" xml:space="preserve"><value>Content Restrictions</value></data>
+<data name="AddSpeaker" xml:space="preserve"><value>Add Speaker</value></data>
+<data name="AddDecoration" xml:space="preserve"><value>Add Emotion</value></data>
+<data name="Delete" xml:space="preserve"><value>Delete</value></data>
+<data name="SpeakerSettings" xml:space="preserve"><value>Speaker Settings</value></data>
+<data name="NewCharacter" xml:space="preserve"><value>New Character</value></data>
+<data name="NewDecoration" xml:space="preserve"><value>New Emotion</value></data>
+<data name="HelpLinkText" xml:space="preserve"><value>Help: How to set up Kotodama</value></data>
+</root>

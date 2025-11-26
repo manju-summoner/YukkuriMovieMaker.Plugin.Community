@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
+<data name="APIKey" xml:space="preserve"><value>API 키</value></data>
+<data name="Decoration" xml:space="preserve"><value>감정</value></data>
+<data name="AboutKotodama" xml:space="preserve"><value>Kotodama 소개</value></data>
+<data name="AboutKotodamaMessage" xml:space="preserve"><value>Kotodama는 SpiralAI 주식회사가 운영하는 클라우드 음성 합성 서비스입니다.
+사용하려면 별도의 API 키를 발급받아야 합니다.</value></data>
+<data name="SpeakerName" xml:space="preserve"><value>화자 이름</value></data>
+<data name="SpeakerId" xml:space="preserve"><value>화자 ID</value></data>
+<data name="DecorationName" xml:space="preserve"><value>감정 이름</value></data>
+<data name="DecorationId" xml:space="preserve"><value>감정 ID</value></data>
+<data name="ContentRestrictions" xml:space="preserve"><value>콘텐츠 제한</value></data>
+<data name="AddSpeaker" xml:space="preserve"><value>화자 추가</value></data>
+<data name="AddDecoration" xml:space="preserve"><value>감정 추가</value></data>
+<data name="Delete" xml:space="preserve"><value>삭제</value></data>
+<data name="SpeakerSettings" xml:space="preserve"><value>화자 설정</value></data>
+<data name="NewCharacter" xml:space="preserve"><value>새 캐릭터</value></data>
+<data name="NewDecoration" xml:space="preserve"><value>새 감정</value></data>
+<data name="HelpLinkText" xml:space="preserve"><value>도움말: Kotodama 설정 방법</value></data>
+</root>

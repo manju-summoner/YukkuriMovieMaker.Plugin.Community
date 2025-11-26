@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
+<data name="APIKey" xml:space="preserve"><value>Clave API</value></data>
+<data name="Decoration" xml:space="preserve"><value>Emoción</value></data>
+<data name="AboutKotodama" xml:space="preserve"><value>Acerca de Kotodama</value></data>
+<data name="AboutKotodamaMessage" xml:space="preserve"><value>Kotodama es un servicio de síntesis de voz basado en la nube operado por SpiralAI Inc.
+Se requiere una clave API para su uso.</value></data>
+<data name="SpeakerName" xml:space="preserve"><value>Nombre del orador</value></data>
+<data name="SpeakerId" xml:space="preserve"><value>ID del orador</value></data>
+<data name="DecorationName" xml:space="preserve"><value>Nombre de la emoción</value></data>
+<data name="DecorationId" xml:space="preserve"><value>ID de la emoción</value></data>
+<data name="ContentRestrictions" xml:space="preserve"><value>Restricciones de contenido</value></data>
+<data name="AddSpeaker" xml:space="preserve"><value>Agregar orador</value></data>
+<data name="AddDecoration" xml:space="preserve"><value>Agregar emoción</value></data>
+<data name="Delete" xml:space="preserve"><value>Eliminar</value></data>
+<data name="SpeakerSettings" xml:space="preserve"><value>Configuración del orador</value></data>
+<data name="NewCharacter" xml:space="preserve"><value>Nuevo personaje</value></data>
+<data name="NewDecoration" xml:space="preserve"><value>Nueva emoción</value></data>
+<data name="HelpLinkText" xml:space="preserve"><value>Ayuda: Cómo configurar Kotodama</value></data>
+</root>
