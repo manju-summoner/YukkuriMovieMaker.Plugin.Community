@@ -95,7 +95,7 @@
                                         <DataTemplate DataType="{x:Type local:KotodamaDecorationSettings}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="100"/>
                                                     <ColumnDefinition/>
                                                 </Grid.ColumnDefinitions>
                                                 <Grid.RowDefinitions>
