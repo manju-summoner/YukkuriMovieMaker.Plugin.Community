@@ -58,10 +58,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
-<data name="APIKey" xml:space="preserve"><value>Clave de API</value></data>
-<data name="Model" xml:space="preserve"><value>모델</value></data>
-<data name="IsSendImageEnabledTitle" xml:space="preserve"><value>Generar líneas basadas en la imagen de la posición de reproducción</value></data>
-<data name="IsSendImageEnabledHint" xml:space="preserve"><value>Debe especificar un modelo multimodal</value></data>
-<data name="Details" xml:space="preserve"><value>Detalles</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
+<data name="Others" xml:space="preserve"><value>Lainnya</value></data>
+<data name="ServiceProvider" xml:space="preserve"><value>Penyedia Layanan</value></data>
+<data name="ServerUri" xml:space="preserve"><value>URI Server</value></data>
+<data name="APIKeyIsNotSetMessage" xml:space="preserve"><value>Kunci API untuk {0} tidak diatur.</value></data>
 </root>

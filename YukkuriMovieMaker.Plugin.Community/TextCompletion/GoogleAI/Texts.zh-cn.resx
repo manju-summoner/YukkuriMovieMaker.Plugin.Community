@@ -59,21 +59,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
-<data name="APIKey" xml:space="preserve"><value>API密钥</value></data>
-<data name="Model" xml:space="preserve"><value>模型</value></data>
-<data name="IsSendImageEnabledTitle" xml:space="preserve"><value>根据播放位置的图像生成台词</value></data>
-<data name="IsSendImageEnabledHint" xml:space="preserve"><value>您需要指定一个多模型</value></data>
-<data name="Details" xml:space="preserve"><value>细节</value></data>
 <data name="Safety" xml:space="preserve"><value>安全</value></data>
 <data name="Harassment" xml:space="preserve"><value>骚扰</value></data>
 <data name="HateSpeech" xml:space="preserve"><value>仇恨言论</value></data>
 <data name="SexuallyExplicit" xml:space="preserve"><value>性暴力</value></data>
 <data name="DangerousContent" xml:space="preserve"><value>危险内容</value></data>
-<data name="CivicIntegrity" xml:space="preserve"><value>公民诚信</value></data>
 <data name="BlockNone" xml:space="preserve"><value>无阻止</value></data>
 <data name="BlockFew" xml:space="preserve"><value>少量阻止</value></data>
 <data name="BlockSome" xml:space="preserve"><value>部分阻止</value></data>
 <data name="BlockMost" xml:space="preserve"><value>大部分阻止</value></data>
-<data name="UsePreviewModel" xml:space="preserve"><value>使用预览版模型</value></data>
-<data name="SkipReasoningProcess" xml:space="preserve"><value>跳过推理过程</value></data>
 </root>

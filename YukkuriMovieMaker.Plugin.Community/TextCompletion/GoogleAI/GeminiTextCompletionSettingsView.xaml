@@ -5,48 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI"
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             xmlns:tc="clr-namespace:YukkuriMovieMaker.Plugin.TextCompletion;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
         <Expander Header="Gemini" IsExpanded="True">
-            <StackPanel>
-                <Grid>
-                    <Label Content="{x:Static local:Texts.APIKey}"/>
-                    <TextBox Text="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=APIKey}" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
-                </Grid>
-                <Grid>
-                    <Label Content="{x:Static local:Texts.Model}"/>
-                    <ComboBox IsEditable="True" ItemsSource="{x:Static local:GeminiModels.Models}" DisplayMemberPath="Key" SelectedValuePath="Key" Text="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=Model}" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
-                </Grid>
-                <Grid>
-                    <Label Content="{x:Static local:Texts.UsePreviewModel}"/>
-                    <c:ToggleSlider Value="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=IsPreviewModel}" HorizontalAlignment="Right"/>
-                </Grid>
-                <Grid>
-                    <Label Content="{x:Static local:Texts.SkipReasoningProcess}"/>
-                    <c:ToggleSlider Value="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=IsSkipReasoningProcess}" HorizontalAlignment="Right"/>
-                </Grid>
-                <Grid>
-                    <Label Content="{x:Static local:Texts.IsSendImageEnabledTitle}"/>
-                    <c:ToggleSlider Value="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=IsSendImageEnabled}" HorizontalAlignment="Right"/>
-                </Grid>
-            </StackPanel>
-        </Expander>
-        <Expander Header="{x:Static local:Texts.Details}" IsExpanded="True">
-            <StackPanel>
-                <Grid>
-                    <Label Content="Temperature"/>
-                    <c:TextBoxSlider Value="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=Temperature}" Min="0" Max="2" DefaultMin="0" DefaultMax="2" Unit="" Delta="0.01" StringFormat="F2" Width="200" HorizontalAlignment="Right"/>
-                </Grid>
-                <Grid>
-                    <Label Content="TopK"/>
-                    <c:TextBoxSlider Value="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=TopK}" Min="1" Max="256" DefaultMin="1" DefaultMax="64" Unit="" Delta="1" StringFormat="F0" Width="200" HorizontalAlignment="Right"/>
-                </Grid>
-                <Grid>
-                    <Label Content="TopP"/>
-                    <c:TextBoxSlider Value="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=TopP}" Min="0" Max="1" DefaultMin="0" DefaultMax="1" Unit="" Delta="0.01" StringFormat="F2" Width="200" HorizontalAlignment="Right"/>
-                </Grid>
-            </StackPanel>
+            <tc:LlmTornadoTextCompletionGeneralSettingsView Settings="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=GeneralSettings}" Provider="Google"/>
         </Expander>
         <Expander Header="{x:Static local:Texts.Safety}" IsExpanded="True">
             <StackPanel>
@@ -65,10 +29,6 @@
                 <Grid>
                     <Label Content="{x:Static local:Texts.DangerousContent}"/>
                     <c:EnumComboBox Value="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=DangerousContent}" EnumType="{x:Type local:SafetyLevel}" Width="200" HorizontalAlignment="Right"/>
-                </Grid>
-                <Grid>
-                    <Label Content="{x:Static local:Texts.CivicIntegrity}"/>
-                    <c:EnumComboBox Value="{Binding Source={x:Static local:GeminiTextCompletionSettings.Default},Path=CivicIntegrity}" EnumType="{x:Type local:SafetyLevel}" Width="200" HorizontalAlignment="Right"/>
                 </Grid>
             </StackPanel>
         </Expander>

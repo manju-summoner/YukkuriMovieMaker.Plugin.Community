@@ -58,10 +58,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
-<data name="APIKey" xml:space="preserve"><value>Kunci API</value></data>
-<data name="Model" xml:space="preserve"><value>نموذج</value></data>
-<data name="IsSendImageEnabledTitle" xml:space="preserve"><value>Generate lines based on the image of the playback position</value></data>
-<data name="IsSendImageEnabledHint" xml:space="preserve"><value>يجب عليك تحديد نموذج متعدد الوسائط</value></data>
-<data name="Details" xml:space="preserve"><value>Detail</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
+<data name="Others" xml:space="preserve"><value>기타</value></data>
+<data name="ServiceProvider" xml:space="preserve"><value>서비스 제공자</value></data>
+<data name="ServerUri" xml:space="preserve"><value>서버 URI</value></data>
+<data name="APIKeyIsNotSetMessage" xml:space="preserve"><value>{0}의 API 키가 설정되지 않았습니다.</value></data>
 </root>

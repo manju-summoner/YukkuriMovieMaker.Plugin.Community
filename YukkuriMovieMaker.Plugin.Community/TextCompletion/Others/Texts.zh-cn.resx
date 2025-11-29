@@ -58,10 +58,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
-<data name="APIKey" xml:space="preserve"><value>APIキー</value></data>
-<data name="Model" xml:space="preserve"><value>モデル</value></data>
-<data name="IsSendImageEnabledTitle" xml:space="preserve"><value>再生位置の画像を元にセリフを生成</value></data>
-<data name="IsSendImageEnabledHint" xml:space="preserve"><value>マルチモーダルモデルを指定する必要があります</value></data>
-<data name="Details" xml:space="preserve"><value>詳細</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
+<data name="Others" xml:space="preserve"><value>其他</value></data>
+<data name="ServiceProvider" xml:space="preserve"><value>服务提供商</value></data>
+<data name="ServerUri" xml:space="preserve"><value>服务器URI</value></data>
+<data name="APIKeyIsNotSetMessage" xml:space="preserve"><value>未设置{0}的API密钥。</value></data>
 </root>

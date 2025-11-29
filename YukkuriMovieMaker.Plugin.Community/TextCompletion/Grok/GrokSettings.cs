@@ -16,18 +16,19 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.Grok
 
         public override object? SettingView => throw new NotImplementedException();
 
-        string? apiKey;
-        bool isSendImageEnabled = false;
-
-        public string? ApiKey { get => apiKey; set => Set(ref apiKey, value); }
-        public bool IsSendImageEnabled { get => isSendImageEnabled; set => Set(ref isSendImageEnabled, value); }
-
-
         public GrokRequestSettings RequestSettings { get; } = new GrokRequestSettings();
 
         public override void Initialize()
         {
 
         }
+
+        #region 古いAPI
+        [Obsolete]
+
+        public string? ApiKey { set => RequestSettings.GeneralSettings.ApiKey = value ?? string.Empty; }
+        [Obsolete]
+        public bool IsSendImageEnabled { set => RequestSettings.GeneralSettings.IsSendImageEnabled = value; }
+        #endregion
     }
 }

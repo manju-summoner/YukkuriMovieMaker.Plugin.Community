@@ -1,8 +1,10 @@
-﻿using System;
+﻿using LlmTornado.Chat.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YukkuriMovieMaker.Plugin.TextCompletion;
 
 namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
 {
@@ -16,41 +18,45 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
 
         public override object? SettingView => throw new NotImplementedException();
 
-        public string APIKey { get; set; } = string.Empty;
-        public string Model { get; set; } = GeminiModels.DefaultModel;
-        
-        bool isPreviewModel = false;
-        bool isSkipReasoningProcess = true;
-        bool isSendImageEnabled = false;
+        public LlmTornadoTextCompletionGeneralSettings GeneralSettings { get; } = new LlmTornadoTextCompletionGeneralSettings(ChatModelGoogleGemini.ModelGemini25Flash);
 
-        public bool IsPreviewModel { get => isPreviewModel; set => Set(ref isPreviewModel, value); }
-        public bool IsSkipReasoningProcess { get => isSkipReasoningProcess; set => Set(ref isSkipReasoningProcess, value); }
-        public bool IsSendImageEnabled { get => isSendImageEnabled; set => Set(ref isSendImageEnabled, value); }
-
-        double temperature = 1, topP = 0.95;
-        int topK = 40;
-
-        public double Temperature { get => temperature; set => Set(ref temperature, value); }
-        public double TopP { get => topP; set => Set(ref topP, value); }
-        public int TopK { get => topK; set => Set(ref topK, value); }
-
-        SafetyLevel
-            harassment = SafetyLevel.BlockSome,
-            hateSpeech = SafetyLevel.BlockSome,
-            sexuallyExplicit = SafetyLevel.BlockSome,
-            dangerousContent = SafetyLevel.BlockSome,
-            civicIntegrity = SafetyLevel.BlockSome;
-
-        public SafetyLevel Harassment { get => harassment; set => Set(ref harassment, value); }
-        public SafetyLevel HateSpeech { get => hateSpeech; set => Set(ref hateSpeech, value); }
-        public SafetyLevel SexuallyExplicit { get => sexuallyExplicit; set => Set(ref sexuallyExplicit, value); }
-        public SafetyLevel DangerousContent { get => dangerousContent; set => Set(ref dangerousContent, value); }
-        public SafetyLevel CivicIntegrity { get => civicIntegrity; set => Set(ref civicIntegrity, value); }
+        public SafetyLevel Harassment { get; set => Set(ref field, value); } = SafetyLevel.BlockSome;
+        public SafetyLevel HateSpeech { get; set => Set(ref field, value); } = SafetyLevel.BlockSome;
+        public SafetyLevel SexuallyExplicit { get; set => Set(ref field, value); } = SafetyLevel.BlockSome;
+        public SafetyLevel DangerousContent { get; set => Set(ref field, value); } = SafetyLevel.BlockSome;
 
 
         public override void Initialize()
         {
 
         }
+
+        #region 古いAPI
+        [Obsolete]
+        public string APIKey
+        {
+            set => GeneralSettings.ApiKey = value;
+        }
+        [Obsolete]
+        public string Model 
+        {
+            set => GeneralSettings.ModelName = value;
+        }
+        [Obsolete]
+        public bool IsSkipReasoningProcess
+        {
+            set => GeneralSettings.IsSkipReasoningProcess = value;
+        }
+        [Obsolete]
+        public bool IsSendImageEnabled
+        {
+            set => GeneralSettings.IsSendImageEnabled = value;
+        }
+        [Obsolete]
+        public double Temperature
+        {
+            set => GeneralSettings.Temperature = value;
+        }
+        #endregion
     }
 }

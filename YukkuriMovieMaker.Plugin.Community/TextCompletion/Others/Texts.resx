@@ -58,10 +58,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
-<data name="APIKey" xml:space="preserve"><value>API Key</value></data>
-<data name="Model" xml:space="preserve"><value>Model</value></data>
-<data name="IsSendImageEnabledTitle" xml:space="preserve"><value>Generate lines based on the image of the playback position</value></data>
-<data name="IsSendImageEnabledHint" xml:space="preserve"><value>You need to specify a multimodal model</value></data>
-<data name="Details" xml:space="preserve"><value>Details</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
+<data name="Others" xml:space="preserve"><value>その他</value></data>
+<data name="ServiceProvider" xml:space="preserve"><value>サービスプロバイダー</value></data>
+<data name="ServerUri" xml:space="preserve"><value>サーバーURI</value></data>
+<data name="APIKeyIsNotSetMessage" xml:space="preserve"><value>{0}のAPIキーが設定されていません。</value></data>
 </root>

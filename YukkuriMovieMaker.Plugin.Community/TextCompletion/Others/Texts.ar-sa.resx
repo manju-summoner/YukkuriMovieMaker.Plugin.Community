@@ -58,7 +58,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
-<data name="Model" xml:space="preserve"><value>Model</value></data>
-<data name="IsSendImageEnabledHint" xml:space="preserve"><value>Yang perlu Anda lakukan adalah menentukan model multimodal</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
+<data name="Others" xml:space="preserve"><value>أخرى</value></data>
+<data name="ServiceProvider" xml:space="preserve"><value>مزود الخدمة</value></data>
+<data name="ServerUri" xml:space="preserve"><value>معرف مورد الخادم</value></data>
+<data name="APIKeyIsNotSetMessage" xml:space="preserve"><value>لم يتم تعيين مفتاح API لـ {0}.</value></data>
 </root>

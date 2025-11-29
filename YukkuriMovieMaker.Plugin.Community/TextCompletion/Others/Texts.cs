@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YukkuriMovieMaker.Generator;
 
-namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.Grok
+namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.Others
 {
     [AutoGenLocalizer]
     partial class Texts

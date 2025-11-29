@@ -58,10 +58,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
-<data name="APIKey" xml:space="preserve"><value>مفتاح API</value></data>
-<data name="Model" xml:space="preserve"><value>Modelo</value></data>
-<data name="IsSendImageEnabledTitle" xml:space="preserve"><value>توليد الخطوط بناءً على صورة موضع التشغيل</value></data>
-<data name="IsSendImageEnabledHint" xml:space="preserve"><value>يجب عليك تحديد نموذج متعدد الوسائط</value></data>
-<data name="Details" xml:space="preserve"><value>تفاصيل</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
+<data name="Others" xml:space="preserve"><value>Others</value></data>
+<data name="ServiceProvider" xml:space="preserve"><value>Service Provider</value></data>
+<data name="ServerUri" xml:space="preserve"><value>Server URI</value></data>
+<data name="APIKeyIsNotSetMessage" xml:space="preserve"><value>The API key for {0} is not set.</value></data>
 </root>

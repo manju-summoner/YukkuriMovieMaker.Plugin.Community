@@ -58,10 +58,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-<data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
-<data name="APIKey" xml:space="preserve"><value>API密钥</value></data>
-<data name="Model" xml:space="preserve"><value>模型</value></data>
-<data name="IsSendImageEnabledTitle" xml:space="preserve"><value>根据播放位置的图像生成台词</value></data>
-<data name="IsSendImageEnabledHint" xml:space="preserve"><value>您需要指定一个多模型</value></data>
-<data name="Details" xml:space="preserve"><value>细节</value></data>
+<data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
+<data name="Others" xml:space="preserve"><value>其他</value></data>
+<data name="ServiceProvider" xml:space="preserve"><value>服務提供商</value></data>
+<data name="ServerUri" xml:space="preserve"><value>伺服器URI</value></data>
+<data name="APIKeyIsNotSetMessage" xml:space="preserve"><value>未設定{0}的API金鑰。</value></data>
 </root>

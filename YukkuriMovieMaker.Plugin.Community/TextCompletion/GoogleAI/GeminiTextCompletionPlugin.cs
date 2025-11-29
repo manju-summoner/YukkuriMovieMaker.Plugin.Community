@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using LlmTornado.Chat;
+using LlmTornado.Chat.Vendors.Google;
+using LlmTornado.Code;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,155 +15,43 @@ using YukkuriMovieMaker.Plugin.TextCompletion;
 
 namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
 {
-    internal class GeminiTextCompletionPlugin : ITextCompletionPlugin2
+    internal class GeminiTextCompletionPlugin : LlmTornadoTextCompletionPluginBase
     {
-        public object? SettingsView => new GeminiTextCompletionSettingsView();
 
-        public string Name => "Gemini";
+        public override object? SettingsView => new GeminiTextCompletionSettingsView();
 
-        public Task<string> ProcessAsync(string systemPrompt, string text) => ProcessAsync(systemPrompt, text, null);
+        public override string Name => "Gemini";
 
-        public async Task<string> ProcessAsync(string systemPrompt, string text, Bitmap? image)
+        protected override LlmTornadoTextCompletionGeneralSettings GetGeneralSettings() => GeminiTextCompletionSettings.Default.GeneralSettings;
+
+        protected override ChatRequestVendorExtensions? CreateVendorExtensions()
         {
-            var model = GeminiModels.FindModel(GeminiTextCompletionSettings.Default.Model); 
-            
-            var modelName = model?.Key ?? GeminiTextCompletionSettings.Default.Model;
-            var suffix = (model != null && model.IsBeta) || (model is null && GeminiTextCompletionSettings.Default.IsPreviewModel) ? "beta" : "";
-            int? thinkingBudget = 
-                model is null && GeminiTextCompletionSettings.Default.IsSkipReasoningProcess ? 0 : 
-                model != null && GeminiTextCompletionSettings.Default.IsSkipReasoningProcess ? model.ThinkingBudgetOnSkipReasoning : 
-                null;
-
-            var json = CreateJson(systemPrompt, text, image, thinkingBudget);
-            var jsonText = json.ToString();
-            var jsonContent = new StringContent(jsonText, Encoding.UTF8, "application/json");
-
-            var endpoint = $"https://generativelanguage.googleapis.com/v1{suffix}/models/{modelName}:generateContent";
-
-            using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
-            request.Headers.Add("x-goog-api-key", GeminiTextCompletionSettings.Default.APIKey);
-            request.Content = jsonContent;
-
-            var client = HttpClientFactory.Client;
-            using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-            var responseText = await response.Content.ReadAsStringAsync();
-            var responseJson = JObject.Parse(responseText);
-            if (!response.IsSuccessStatusCode)
-            {
-                var token = responseJson["error"]?["message"];
-                if (token != null)
-                    throw new Exception(token.Value<string>());
-            }
-            response.EnsureSuccessStatusCode();
-
-            return
-                responseJson["candidates"]
-                ?.FirstOrDefault()
-                ?["content"]
-                ?["parts"]
-                ?.FirstOrDefault()
-                ?["text"]
-                ?.Value<string>()
-                ?? string.Empty;
+            return new ChatRequestVendorExtensions(
+                new ChatRequestVendorGoogleExtensions() 
+                {
+                    SafetyFilters = new ChatRequestVendorGoogleSafetyFilters()
+                    {
+                        Harassment = ConvertToGoogleSafetyFilterType(GeminiTextCompletionSettings.Default.Harassment),
+                        HateSpeech = ConvertToGoogleSafetyFilterType(GeminiTextCompletionSettings.Default.HateSpeech),
+                        SexuallyExplicit = ConvertToGoogleSafetyFilterType(GeminiTextCompletionSettings.Default.SexuallyExplicit),
+                        DangerousContent = ConvertToGoogleSafetyFilterType(GeminiTextCompletionSettings.Default.DangerousContent),
+                    },
+                    IncludeThoughts = false,
+                });
         }
 
-        private static JObject CreateJson(string systemPrompt, string text, Bitmap? image, int? thinkingBudget)
+        static GoogleSafetyFilterTypes ConvertToGoogleSafetyFilterType(SafetyLevel level)
         {
-            if (image != null)
+            return level switch
             {
-                var maxSize = 512;
-                var scale = Math.Min(maxSize / (double)image.Width, maxSize / (double)image.Height);
-                if (scale < 1)
-                {
-                    image = new Bitmap(image, new Size((int)(image.Width * scale), (int)(image.Height * scale)));
-                }
-            }
-
-            var messagePart = new JObject()
-            {
-                ["text"] = systemPrompt + "\r\n" + text,
+                SafetyLevel.BlockNone => GoogleSafetyFilterTypes.BlockNone,
+                SafetyLevel.BlockFew => GoogleSafetyFilterTypes.BlockFew,
+                SafetyLevel.BlockSome => GoogleSafetyFilterTypes.BlockSome,
+                SafetyLevel.BlockMost => GoogleSafetyFilterTypes.BlockMost,
+                _ => GoogleSafetyFilterTypes.BlockSome,
             };
-            var imagePart = image != null ? new JObject()
-            {
-                ["inline_data"] = new JObject()
-                {
-                    ["mime_type"] = "image/jpeg",
-                    ["data"] = BitmapToBase64(image),
-                }
-            } : null;
-            JArray parts = imagePart is null ? [messagePart] : [messagePart, imagePart];
-
-            var json = new JObject()
-            {
-                ["contents"] = new JArray
-                {
-                    new JObject
-                    {
-                        ["parts"] = parts
-                    }
-                },
-                ["generationConfig"] = new JObject()
-                {
-                    ["temperature"] = GeminiTextCompletionSettings.Default.Temperature,
-                    ["topK"] = GeminiTextCompletionSettings.Default.TopK,
-                    ["topP"] = GeminiTextCompletionSettings.Default.TopP,
-                },
-                ["safety_settings"] = new JArray()
-                {
-                    new JObject()
-                    {
-                        ["category"] = "HARM_CATEGORY_HARASSMENT",
-                        ["threshold"] = GetString(GeminiTextCompletionSettings.Default.Harassment),
-                    },
-                    new JObject()
-                    {
-                        ["category"] = "HARM_CATEGORY_HATE_SPEECH",
-                        ["threshold"] = GetString(GeminiTextCompletionSettings.Default.HateSpeech),
-                    },
-                    new JObject()
-                    {
-                        ["category"] = "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                        ["threshold"] = GetString(GeminiTextCompletionSettings.Default.SexuallyExplicit),
-                    },
-                    new JObject()
-                    {
-                        ["category"] = "HARM_CATEGORY_DANGEROUS_CONTENT",
-                        ["threshold"] = GetString(GeminiTextCompletionSettings.Default.DangerousContent),
-                    },
-                    new JObject()
-                    {
-                        ["category"] = "HARM_CATEGORY_CIVIC_INTEGRITY",
-                        ["threshold"] = GetString(GeminiTextCompletionSettings.Default.CivicIntegrity),
-                    },
-                },
-            };
-            if(thinkingBudget != null)
-            {
-                json!["generationConfig"]!["thinkingConfig"] = new JObject()
-                {
-                    ["thinkingBudget"] = thinkingBudget,
-                };
-            }
-            return json;
         }
 
-        static string GetString(SafetyLevel safetyLevel) => 
-            safetyLevel switch 
-            { 
-                SafetyLevel.BlockNone => "BLOCK_NONE",
-                SafetyLevel.BlockFew => "BLOCK_ONLY_HIGH",
-                SafetyLevel.BlockSome => "BLOCK_MEDIUM_AND_ABOVE",
-                SafetyLevel.BlockMost => "BLOCK_LOW_AND_ABOVE",
-                _=>throw new NotImplementedException(),
-            };
-
-        static string BitmapToBase64(Bitmap bitmap)
-        {
-            using var stream = new MemoryStream();
-            bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Jpeg);
-            stream.Flush();
-            stream.Position = 0;
-            return Convert.ToBase64String(stream.ToArray());
-        }
+        protected override LLmProviders GetProvider() => LLmProviders.Google;
     }
 }
