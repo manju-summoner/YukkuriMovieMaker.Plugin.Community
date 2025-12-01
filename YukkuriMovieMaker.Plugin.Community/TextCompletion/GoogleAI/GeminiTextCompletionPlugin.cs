@@ -53,5 +53,11 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.GoogleAI
         }
 
         protected override LLmProviders GetProvider() => LLmProviders.Google;
+
+        protected override string EncodeImageToDataUrl(Bitmap bitmap)
+        {
+            var base64Content = base.EncodeImageToDataUrl(bitmap).Split(',').Last();
+            return base64Content;
+        }
     }
 }
