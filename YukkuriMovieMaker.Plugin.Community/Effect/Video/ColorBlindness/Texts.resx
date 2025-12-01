@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
-<data name="ColorBlindness" xml:space="preserve"><value>色覚異常</value></data>
+<data name="ColorBlindness" xml:space="preserve"><value>色覚特性シミュレーション</value></data>
 <data name="ColorBlindnessType" xml:space="preserve"><value>種類</value></data>
 <data name="ColorBlindnessTypeP" xml:space="preserve"><value>1型色覚（P型）</value></data>
 <data name="ColorBlindnessTypeD" xml:space="preserve"><value>2型色覚（D型）</value></data>

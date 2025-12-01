@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
-<data name="ColorBlindness" xml:space="preserve"><value>색맹</value></data>
+<data name="ColorBlindness" xml:space="preserve"><value>색각 특성 시뮬레이션</value></data>
 <data name="ColorBlindnessType" xml:space="preserve"><value>유형</value></data>
 <data name="ColorBlindnessTypeP" xml:space="preserve"><value>적색맹</value></data>
 <data name="ColorBlindnessTypeD" xml:space="preserve"><value>녹색맹</value></data>
