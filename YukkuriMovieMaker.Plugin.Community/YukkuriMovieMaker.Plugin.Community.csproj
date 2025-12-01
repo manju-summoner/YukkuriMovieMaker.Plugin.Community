@@ -48,17 +48,17 @@
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.23.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
-    <PackageReference Include="Whisper.net" Version="1.8.1" />
-    <PackageReference Include="Whisper.net.Runtime" Version="1.8.1" />
-    <PackageReference Include="Whisper.net.Runtime.Cuda.Windows" Version="1.8.1" />
-    <PackageReference Include="Whisper.net.Runtime.NoAvx" Version="1.8.1" />
-    <PackageReference Include="Whisper.net.Runtime.OpenVino" Version="1.8.1" />
-    <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.8.1" />
+    <PackageReference Include="Whisper.net" Version="1.9.0" />
+    <PackageReference Include="Whisper.net.Runtime" Version="1.9.0" />
+    <PackageReference Include="Whisper.net.Runtime.Cuda.Windows" Version="1.9.0" />
+    <PackageReference Include="Whisper.net.Runtime.NoAvx" Version="1.9.0" />
+    <PackageReference Include="Whisper.net.Runtime.OpenVino" Version="1.9.0" />
+    <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.0" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
-	<PackageReference Include="System.Management" Version="9.0.5" />
+	<PackageReference Include="System.Management" Version="10.0.0" />
   </ItemGroup>
 
   <!--ビルド後、YMM4フォルダに関連ファイルをコピーする-->
