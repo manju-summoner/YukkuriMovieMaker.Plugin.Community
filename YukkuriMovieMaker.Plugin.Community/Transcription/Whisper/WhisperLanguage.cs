@@ -20,20 +20,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
 
         static List<string> GetSupportedLanguagesSafe() 
         {
-            // Whisperの実行可能なランタイムが存在しない場合、空を返して抜ける。
-            // WhisperFactory.GetSupportedLanguages()呼び出しによるライブラリの読み込みを回避し、WhisperFactory.libraryLoadedが読み込み失敗状態で固定されるのを防ぐ。
-            if (!CUDAToolkit.IsInstalled() && !VulkanRuntime.IsInstalled() && !VisualCppRuntime.IsInstalled())
-                return [];
-            try
-            {
-                // 実行可能なランタイムが存在しない場合、WhisperFactory.GetSupportedLanguages()で返されるIEnumerableの列挙中に例外が発生する。
-                // IEnumerableをそのまま返すと、この関数を抜けた後の列挙中に例外が発生する。そのため、ここでListに変換して返す。
-                return [.. WhisperFactory.GetSupportedLanguages()];
-            }
-            catch
-            {
-                return [];
-            }
+            //環境によってはGetSupportedLanguagesに失敗して文字起こしツール自体が開けなくなる（？）みたいなので、固定値を返す。
+            //そうそう頻繁に変わるような物でもなく、既に列挙されている言語でほとんどのケースをカバー出来るため、問題にならないはず。
+            return [
+                "en","zh","de","es","ru","ko","fr","ja","pt","tr",
+                "pl","ca","nl","ar","sv","it","id","hi","fi","vi",
+                "he","uk","el","ms","cs","ro","da","hu","ta","no",
+                "th","ur","hr","bg","lt","la","mi","ml","cy","sk",
+                "te","fa","lv","bn","sr","az","sl","kn","et","mk",
+                "br","eu","is","hy","ne","mn","bs","kk","sq","sw",
+                "gl","mr","pa","si","km","sn","yo","so","af","oc",
+                "ka","be","tg","sd","gu","am","yi","lo","uz","fo",
+                "ht","ps","tk","nn","mt","sa","lb","my","bo","tl",
+                "mg","as","tt","haw","ln","ha","ba","jw","su",];
         }
 
         public static WhisperLanguage GetSystemLanguageOrAuto()
