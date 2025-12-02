@@ -24,7 +24,7 @@ ShuffleTextEffectDisplayName_Symbol,,記号,Symbol,符号,象徵,기호,symbol,�
 ShuffleTextEffectDisplayName_Text,,テキスト,Text,文本,文本,텍스트,text,نص,teks,
 ShuffleTextEffectDisplayName_Font,,フォント,Font,字体,字體,글꼴,fuente,خط,Font,
 ShuffleTextEffectDisplayName_Size,,サイズ,Size,大小,大小,크기,tamaño,حجم,Ukuran,
-ShuffleTextEffectDisplayName_Color,,文字色,Text color,文字顏色,文字顏色,글자 색상,color de texto,لون النص,Warna teks,
+ShuffleTextEffectDisplayName_Color,,文字色,Text color,文字颜色,文字顏色,글자 색상,color de texto,لون النص,Warna teks,
 ShuffleTextEffectDisplayName_Bold,,太字,Bold,粗体,粗體,굵은 글씨,bold,خط عريض,Bold,
 ShuffleTextEffectDisplayName_Italic,,イタリック,Italic,斜体,斜體,이탤릭체,Itálico,خط مائل,Miring,
 
@@ -47,7 +47,7 @@ ShuffleTextEffectDiscription_Symbol,,記号,Symbol,复活,象徵,기호,symbol,�
 ShuffleTextEffectDiscription_Text,,シャッフルするテキスト,Text,文本,文本,텍스트,text,نص,teks,
 ShuffleTextEffectDiscription_Font,,フォント,Font,字体,字體,글꼴,fuente,خط,Font,
 ShuffleTextEffectDiscription_Size,,文字の大きさ,Font size,字体大小,字體大小,글꼴 크기,tamaño de fuente,حجم الخط,Ukuran font,
-ShuffleTextEffectDiscription_Color,,文字の色,Text color,文字顏色,文字顏色,글자 색상,color de texto,لون النص,Warna teks,
+ShuffleTextEffectDiscription_Color,,文字の色,Text color,文字颜色,文字顏色,글자 색상,color de texto,لون النص,Warna teks,
 ShuffleTextEffectDiscription_Bold,,太字,Bold,粗体,粗體,굵은 글씨,bold,خط عريض,Bold,
 ShuffleTextEffectDiscription_Italic,,斜体・イタリック,Italic,斜体,斜體,이탤릭체,Itálico,خط مائل,Miring,
 
