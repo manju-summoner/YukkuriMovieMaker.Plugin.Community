@@ -1,16 +1,16 @@
 ﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
-CameraShakeEffect,,手ぶれカメラ,Camera Shake,相机抖动,相機抖動,카메라 흔들림,Temblores de cámara,اهتزاز الكاميرا,Guncangan Kamera
+CameraShakeEffect,,手ぶれカメラ,Camera Shake,手持摇动,相機抖動,카메라 흔들림,Temblores de cámara,اهتزاز الكاميرا,Guncangan Kamera
 X,,X,X,X,X,X,X,X,X
-XDesc,,カメラの位置（横方向）,Camera Position (Horizontal),相机位置（横向）,相機位置（橫向）,카메라 위치 (수평),Posición de la cámara (horizontal),موضع الكاميرا (أفقي),Posisi Kamera (Horizontal)
+XDesc,,カメラの位置（横方向）,Camera Position (Horizontal),摄像机位置（水平）,相機位置（橫向）,카메라 위치 (수평),Posición de la cámara (horizontal),موضع الكاميرا (أفقي),Posisi Kamera (Horizontal)
 Y,,Y,Y,Y,Y,Y,Y,Y,Y
-YDesc,,カメラの位置（縦方向）,Camera Position (Vertical),相机位置（纵向）,相機位置（縱向）,카메라 위치 (수직),Posición de la cámara (vertical),موضع الكاميرا (عمودي),Posisi Kamera (Vertikal)
+YDesc,,カメラの位置（縦方向）,Camera Position (Vertical),摄像机位置（垂直）,相機位置（縱向）,카메라 위치 (수직),Posición de la cámara (vertical),موضع الكاميرا (عمودي),Posisi Kamera (Vertikal)
 Z,,Z,Z,Z,Z,Z,Z,Z,Z
-ZDesc,,カメラの位置（奥行き）,Camera Position (Depth),相机位置（深度）,相機位置（深度）,카메라 위치 (깊이),Posición de la cámara (profundidad),موضع الكاميرا (العمق),Posisi Kamera (Kedalaman)
+ZDesc,,カメラの位置（奥行き）,Camera Position (Depth),摄像机位置（深度）,相機位置（深度）,카메라 위치 (깊이),Posición de la cámara (profundidad),موضع الكاميرا (العمق),Posisi Kamera (Kedalaman)
 Yaw,,水平回転,Horizontal Rotation,水平旋转,水平旋轉,수평 회전,Rotación horizontal,دوران أفقي,Rotasi Horizontal
 YawDesc,,カメラの水平回転,Camera Horizontal Rotation,相机水平旋转,相機水平旋轉,카메라 수평 회전,Rotación horizontal de la cámara,الدوران الأفقي للكاميرا,Rotasi Horizontal Kamera
 Pitch,,垂直回転,Vertical Rotation,垂直旋转,垂直旋轉,수직 회전,Rotación vertical,دوران عمودي,Rotasi Vertikal
-PitchDesc,,カメラの垂直回転,Camera Vertical Rotation,相机垂直旋转,相機垂直旋轉,카메라 수직 회전,Rotación vertical de la cámara,الدوران العمودي للكاميرا,Rotasi Vertikal Kamera
+PitchDesc,,カメラの垂直回転,Camera Vertical Rotation,摄像机垂直旋转,相機垂直旋轉,카메라 수직 회전,Rotación vertical de la cámara,الدوران العمودي للكاميرا,Rotasi Vertikal Kamera
 Roll,,傾き,Tilt,倾斜,傾斜,기울기,Inclinación,ميل,Tilt
-RollDesc,,カメラの傾き,Camera Tilt,相机倾斜,相機傾斜,카메라 기울기,Inclinación de la cámara,ميل الكاميرا,Tilt Kamera
+RollDesc,,カメラの傾き,Camera Tilt,摄像机倾斜,相機傾斜,카메라 기울기,Inclinación de la cámara,ميل الكاميرا,Tilt Kamera
 Span,,間隔,Interval,间隔,間隔,간격,Intervalo,فاصل,Jarak
 SecUnit,,秒,Second,秒,秒,초,Segundo,ثانية,Detik
