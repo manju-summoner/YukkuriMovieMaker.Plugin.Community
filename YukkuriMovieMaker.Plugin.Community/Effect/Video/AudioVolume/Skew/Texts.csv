@@ -1,9 +1,9 @@
 ﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
-AudioVolumeSkewEffect,,音量に合わせて傾斜変形,Skew Transformation According to Volume,根据音量进行倾斜变形,根據音量進行傾斜變形,음량에 따라 기울기 변형,Transformación de sesgado según el volumen,تحويل الميلان حسب مستوى الصوت,Transformasi Miring Sesuai Volume
+AudioVolumeSkewEffect,,音量に合わせて傾斜変形,Skew Transformation According to Volume,根据音量倾斜变形,根據音量進行傾斜變形,음량에 따라 기울기 변형,Transformación de sesgado según el volumen,تحويل الميلان حسب مستوى الصوت,Transformasi Miring Sesuai Volume
 AngleX,,X方向,X Direction,X方向,X方向,X 방향,Dirección X,الاتجاه X,Arah X
-AngleXDesc,,X方向の角度,Angle in X Direction,X方向的角度,X方向的角度,X 방향의 각도,Ángulo en la dirección X,زاوية الاتجاه X,Sudut Arah X
+AngleXDesc,,X方向の角度,Angle in X Direction,X方向角度,X方向的角度,X 방향의 각도,Ángulo en la dirección X,زاوية الاتجاه X,Sudut Arah X
 AngleY,,Y方向,Y Direction,Y方向,Y方向,Y 방향,Dirección Y,الاتجاه Y,Arah Y
-AngleYDesc,,Y方向の角度,Angle in Y Direction,Y方向的角度,Y方向的角度,Y 방향의 각도,Ángulo en la dirección Y,زاوية الاتجاه Y,Sudut Arah Y
+AngleYDesc,,Y方向の角度,Angle in Y Direction,Y方向角度,Y方向的角度,Y 방향의 각도,Ángulo en la dirección Y,زاوية الاتجاه Y,Sudut Arah Y
 CenterPoint,,中心,Center,中心,中心,중심,Centro,المركز,Pusat
 CenterPointDesc,,変形の中心,Center of Transformation,变形中心,變形中心,변형의 중심,Centro de transformación,مركز التحويل,Pusat Transformasi
 SkewCenterPointCenter,,中央,Middle,中央,中央,중앙,Centro,المنتصف,Tengah
