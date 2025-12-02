@@ -38,12 +38,12 @@ ShuffleTextEffectDiscription_Italic,,斜体・イタリック,Italic,斜体,斜�
 
 ShuffleTextEffectUnit_Seconds,,秒,sec,秒,秒,초,Segundos,ثانية,dtk,
 
-ShuffleTextEffectEnum_Mode_Alphabet,,アルファベット（A-z）, Alphabet (A-z),字母表（A-z）,字母（A-z）,알파벳 (A-z),Alfabeto (A-z),الأبجدية (A-z),Alfabet (A-z),
+ShuffleTextEffectEnum_Mode_Alphabet,,アルファベット（A-z）, Alphabet (A-z),字母（A-z）,字母（A-z）,알파벳 (A-z),Alfabeto (A-z),الأبجدية (A-z),Alfabet (A-z),
 ShuffleTextEffectEnum_Mode_Number,,数字（0-9）, Number (0-9),数字（0-9）,數字（0-9）,숫자 (0-9),Número (0-9),رقم (0-9),Angka (0-9),
 ShuffleTextEffectEnum_Mode_Symbol,,記号, Symbol,符号,象徵,기호, símbolo,رمز,Simbol,
 ShuffleTextEffectEnum_Mode_Custom,,カスタム, Custom,自定义,自定義,사용자 정의,Personalizado,مخصص,Kustom,
 
-ShuffleTextEffectEnum_Mode_Discription_Alphabet,,アルファベット（大文字・小文字）, Alphabet (uppercase and lowercase),字母（大寫和小寫）,字母（大寫和小寫）,알파벳 (대문자 및 소문자),Alfabeto (mayúsculas y minúsculas),الأبجدية (حروف كبيرة وصغيرة),Alfabet (huruf besar dan kecil),
+ShuffleTextEffectEnum_Mode_Discription_Alphabet,,アルファベット（大文字・小文字）, Alphabet (uppercase and lowercase),字母（大小写）,字母（大寫和小寫）,알파벳 (대문자 및 소문자),Alfabeto (mayúsculas y minúsculas),الأبجدية (حروف كبيرة وصغيرة),Alfabet (huruf besar dan kecil),
 ShuffleTextEffectEnum_Mode_Discription_Number,,数字（0-9）, Number (0-9),数字（0-9）,數字（0-9）,숫자 (0-9),Número (0-9),رقم (0-9),Angka (0-9),
-ShuffleTextEffectEnum_Mode_Discription_Symbol,,記号, Symbol,符號,象徵,기호, símbolo,رمز,Simbol,
-ShuffleTextEffectEnum_Mode_Discription_Custom,,カスタム, Custom,自定義,自定義,사용자 정의,Personalizado,مخصص,Kustom,
+ShuffleTextEffectEnum_Mode_Discription_Symbol,,記号, Symbol,符号,象徵,기호, símbolo,رمز,Simbol,
+ShuffleTextEffectEnum_Mode_Discription_Custom,,カスタム, Custom,自定义,自定義,사용자 정의,Personalizado,مخصص,Kustom,
