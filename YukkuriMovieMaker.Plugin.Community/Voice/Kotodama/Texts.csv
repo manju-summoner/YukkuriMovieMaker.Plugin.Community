@@ -1,25 +1,25 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
 APIKey,,APIキー,API Key,API密钥,API 金鑰,API 키,Clave API,مفتاح API,Kunci API,
-Decoration,,感情,Emotion,情感,情感,감정,Emoción,العاطفة,Emosi,
+Decoration,,感情,Emotion,感情,情感,감정,Emoción,العاطفة,Emosi,
 AboutKotodama,,Kotodamaについて,About Kotodama,关于言灵,關於言靈,Kotodama 소개,Acerca de Kotodama,حول كوتوداما,Tentang Kotodama,
 AboutKotodamaMessage,,"KotodamaはSpiralAI株式会社によって運営されているクラウド音声合成サービスです。
 利用には別途APIキーの取得が必要です。","Kotodama is a cloud-based text-to-speech service operated by SpiralAI Inc.
 An API key is required for use.","Kotodama是由SpiralAI株式会社运营的云端语音合成服务。
-使用需要单独获取API密钥。","Kotodama是由SpiralAI株式会社運營的雲端語音合成服務。
+使用时需自行获取API密钥。","Kotodama是由SpiralAI株式会社運營的雲端語音合成服務。
 使用需要單獨取得API密鑰。","Kotodama는 SpiralAI 주식회사가 운영하는 클라우드 음성 합성 서비스입니다.
 사용하려면 별도의 API 키를 발급받아야 합니다.","Kotodama es un servicio de síntesis de voz basado en la nube operado por SpiralAI Inc.
 Se requiere una clave API para su uso.","Kotodama هو خدمة تحويل النص إلى كلام قائمة على السحابة تديرها SpiralAI Inc.
 يتطلب الاستخدام مفتاح API.","Kotodama adalah layanan sintesis suara berbasis cloud yang dioperasikan oleh SpiralAI Inc.
 Diperlukan kunci API untuk digunakan.",
-SpeakerName,,話者名,Speaker Name,说话人名称,說話人名稱,화자 이름,Nombre del orador,اسم المتحدث,Nama Pembicara,
-SpeakerId,,話者ID,Speaker ID,说话人ID,說話人ID,화자 ID,ID del orador,معرف المتحدث,ID Pembicara,
-DecorationName,,感情名,Emotion Name,情感名称,情感名稱,감정 이름,Nombre de la emoción,اسم العاطفة,Nama Emosi,
-DecorationId,,感情ID,Emotion ID,情感ID,情感ID,감정 ID,ID de la emoción,معرف العاطفة,ID Emosi,
-ContentRestrictions,,制限事項,Content Restrictions,内容限制,內容限制,콘텐츠 제한,Restricciones de contenido,قيود المحتوى,Pembatasan Konten,
-AddSpeaker,,話者を追加,Add Speaker,添加说话人,添加說話人,화자 추가,Agregar orador,إضافة متحدث,Tambah Pembicara,
-AddDecoration,,感情を追加,Add Emotion,添加情感,添加情感,감정 추가,Agregar emoción,إضافة عاطفة,Tambah Emosi,
+SpeakerName,,話者名,Speaker Name,说话者名称,說話人名稱,화자 이름,Nombre del orador,اسم المتحدث,Nama Pembicara,
+SpeakerId,,話者ID,Speaker ID,说话者ID,說話人ID,화자 ID,ID del orador,معرف المتحدث,ID Pembicara,
+DecorationName,,感情名,Emotion Name,感情名称,情感名稱,감정 이름,Nombre de la emoción,اسم العاطفة,Nama Emosi,
+DecorationId,,感情ID,Emotion ID,感情ID,情感ID,감정 ID,ID de la emoción,معرف العاطفة,ID Emosi,
+ContentRestrictions,,制限事項,Content Restrictions,限制条款,內容限制,콘텐츠 제한,Restricciones de contenido,قيود المحتوى,Pembatasan Konten,
+AddSpeaker,,話者を追加,Add Speaker,添加说话者,添加說話人,화자 추가,Agregar orador,إضافة متحدث,Tambah Pembicara,
+AddDecoration,,感情を追加,Add Emotion,添加感情,添加情感,감정 추가,Agregar emoción,إضافة عاطفة,Tambah Emosi,
 Delete,,削除,Delete,删除,刪除,삭제,Eliminar,حذف,Hapus,
-SpeakerSettings,,話者設定,Speaker Settings,说话人设置,說話人設定,화자 설정,Configuración del orador,إعدادات المتحدث,Pengaturan Pembicara,
+SpeakerSettings,,話者設定,Speaker Settings,说话者设置,說話人設定,화자 설정,Configuración del orador,إعدادات المتحدث,Pengaturan Pembicara,
 NewCharacter,,新規キャラクター,New Character,新角色,新角色,새 캐릭터,Nuevo personaje,شخصية جديدة,Karakter Baru,
-NewDecoration,,新規感情,New Emotion,新情感,新情感,새 감정,Nueva emoción,عاطفة جديدة,Emosi Baru,
+NewDecoration,,新規感情,New Emotion,新感情,新情感,새 감정,Nueva emoción,عاطفة جديدة,Emosi Baru,
 HelpLinkText,,ヘルプ: Kotodamaの設定方法,Help: How to set up Kotodama,帮助：如何设置Kotodama,說明：如何設定Kotodama,도움말: Kotodama 설정 방법,Ayuda: Cómo configurar Kotodama,مساعدة: كيفية إعداد كوتوداما,Bantuan: Cara mengatur Kotodama,
