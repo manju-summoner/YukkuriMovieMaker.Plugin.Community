@@ -87,4 +87,5 @@
 <data name="EditIntonation" xml:space="preserve"><value>억양 편집</value></data>
 <data name="Join" xml:space="preserve"><value>합치기</value></data>
 <data name="Split" xml:space="preserve"><value>분할</value></data>
+<data name="FailedToGetDisplayNameMessage" xml:space="preserve"><value>표시 이름을 가져오지 못했습니다. VoiSona Talk을(를) 업데이트한 후 음성 목록을 다시 로드하십시오.</value></data>
 </root>

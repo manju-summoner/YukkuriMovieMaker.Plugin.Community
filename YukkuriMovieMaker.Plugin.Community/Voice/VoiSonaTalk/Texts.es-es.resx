@@ -87,4 +87,5 @@ El nombre de usuario o la contraseña son incorrectos.</value></data>
 <data name="EditIntonation" xml:space="preserve"><value>Editar entonación</value></data>
 <data name="Join" xml:space="preserve"><value>Unir</value></data>
 <data name="Split" xml:space="preserve"><value>Dividir</value></data>
+<data name="FailedToGetDisplayNameMessage" xml:space="preserve"><value>No se pudo obtener el nombre para mostrar. Actualice VoiSona Talk y vuelva a cargar la lista de voces.</value></data>
 </root>

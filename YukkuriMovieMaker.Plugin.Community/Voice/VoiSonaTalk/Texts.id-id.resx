@@ -87,4 +87,5 @@ Nama pengguna atau kata sandi salah.</value></data>
 <data name="EditIntonation" xml:space="preserve"><value>Sunting Intonasi</value></data>
 <data name="Join" xml:space="preserve"><value>Gabung</value></data>
 <data name="Split" xml:space="preserve"><value>Pisah</value></data>
+<data name="FailedToGetDisplayNameMessage" xml:space="preserve"><value>Gagal mendapatkan nama tampilan. Silakan perbarui VoiSona Talk dan muat ulang daftar suara.</value></data>
 </root>

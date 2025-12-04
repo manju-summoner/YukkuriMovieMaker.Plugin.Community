@@ -87,4 +87,5 @@
 <data name="EditIntonation" xml:space="preserve"><value>تحرير التنغيم</value></data>
 <data name="Join" xml:space="preserve"><value>انضمام</value></data>
 <data name="Split" xml:space="preserve"><value>تقسيم</value></data>
+<data name="FailedToGetDisplayNameMessage" xml:space="preserve"><value>فشل في الحصول على اسم العرض. يرجى تحديث VoiSona Talk وإعادة تحميل قائمة الأصوات.</value></data>
 </root>

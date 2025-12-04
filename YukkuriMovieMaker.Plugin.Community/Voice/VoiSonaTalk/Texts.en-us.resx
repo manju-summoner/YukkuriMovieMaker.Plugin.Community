@@ -87,4 +87,5 @@ The user name or password is incorrect.</value></data>
 <data name="EditIntonation" xml:space="preserve"><value>Edit Intonation</value></data>
 <data name="Join" xml:space="preserve"><value>Join</value></data>
 <data name="Split" xml:space="preserve"><value>Split</value></data>
+<data name="FailedToGetDisplayNameMessage" xml:space="preserve"><value>Failed to get display name. Please update VoiSona Talk and reload the voice list.</value></data>
 </root>

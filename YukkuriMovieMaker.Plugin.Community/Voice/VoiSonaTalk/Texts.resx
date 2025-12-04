@@ -87,4 +87,5 @@
 <data name="EditIntonation" xml:space="preserve"><value>抑揚を編集</value></data>
 <data name="Join" xml:space="preserve"><value>結合</value></data>
 <data name="Split" xml:space="preserve"><value>分割</value></data>
+<data name="FailedToGetDisplayNameMessage" xml:space="preserve"><value>表示名の取得に失敗しました。VoiSonaTalkをアップデート後、声質一覧を再読み込みしてください。</value></data>
 </root>

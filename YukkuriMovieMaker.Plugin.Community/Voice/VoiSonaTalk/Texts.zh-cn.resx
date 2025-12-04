@@ -87,4 +87,5 @@
 <data name="EditIntonation" xml:space="preserve"><value>编辑语调</value></data>
 <data name="Join" xml:space="preserve"><value>连接</value></data>
 <data name="Split" xml:space="preserve"><value>拆分</value></data>
+<data name="FailedToGetDisplayNameMessage" xml:space="preserve"><value>获取显示名称失败。请更新 VoiSona Talk 并重新加载声音列表。</value></data>
 </root>
