@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
-<data name="ArrangeGroupItemsEffectName" xml:space="preserve"><value>在组控件中均匀排列项目</value></data>
+<data name="ArrangeGroupItemsEffectName" xml:space="preserve"><value>组控制下等距分布</value></data>
 <data name="Interval" xml:space="preserve"><value>间隔</value></data>
 <data name="Angle" xml:space="preserve"><value>角度</value></data>
 <data name="Centering" xml:space="preserve"><value>中心对齐</value></data>

@@ -63,6 +63,6 @@
 <data name="BlurRadius" xml:space="preserve"><value>模糊半径</value></data>
 <data name="Brightness" xml:space="preserve"><value>亮度</value></data>
 <data name="Quality" xml:space="preserve"><value>质量</value></data>
-<data name="QualityDesc" xml:space="preserve"><value>数字越大，质量越高。</value></data>
+<data name="QualityDesc" xml:space="preserve"><value>数值越大，质量越高。</value></data>
 <data name="EdgeStrength" xml:space="preserve"><value>边缘强度</value></data>
 </root>

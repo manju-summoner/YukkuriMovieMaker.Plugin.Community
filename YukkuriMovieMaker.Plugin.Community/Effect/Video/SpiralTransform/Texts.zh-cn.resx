@@ -61,7 +61,7 @@
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="SpiralTransformEffectName" xml:space="preserve"><value>螺旋</value></data>
 <data name="SpiralTransformEffectAngleName" xml:space="preserve"><value>角度</value></data>
-<data name="SpiralTransformEffectAngleDesc" xml:space="preserve"><value>螺旋的角度</value></data>
+<data name="SpiralTransformEffectAngleDesc" xml:space="preserve"><value>螺旋角度</value></data>
 <data name="SpiralTransformEffectIsRotateOuterName" xml:space="preserve"><value>旋转外侧</value></data>
 <data name="SpiralTransformEffectIsRotateOuterDesc" xml:space="preserve"><value>旋转外侧</value></data>
 </root>

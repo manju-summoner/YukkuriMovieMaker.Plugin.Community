@@ -59,9 +59,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
-<data name="RainbowLinearGradient" xml:space="preserve"><value>彩虹线性渐变</value></data>
+<data name="RainbowLinearGradient" xml:space="preserve"><value>彩虹色线性渐变</value></data>
 <data name="Width" xml:space="preserve"><value>宽度</value></data>
-<data name="Offset" xml:space="preserve"><value>偏移</value></data>
+<data name="Offset" xml:space="preserve"><value>位置</value></data>
 <data name="Saturation" xml:space="preserve"><value>饱和度</value></data>
 <data name="Brightness" xml:space="preserve"><value>亮度</value></data>
 <data name="Angle" xml:space="preserve"><value>角度</value></data>

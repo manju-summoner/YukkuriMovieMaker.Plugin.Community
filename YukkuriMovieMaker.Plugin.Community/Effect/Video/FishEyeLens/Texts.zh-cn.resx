@@ -64,8 +64,8 @@
 <data name="AngleOfView" xml:space="preserve"><value>视角</value></data>
 <data name="Zoom" xml:space="preserve"><value>缩放</value></data>
 <data name="Projection" xml:space="preserve"><value>投影</value></data>
-<data name="OrthographicProjection" xml:space="preserve"><value>正射投影</value></data>
+<data name="OrthographicProjection" xml:space="preserve"><value>正投影</value></data>
 <data name="StereographicProjection" xml:space="preserve"><value>立体投影</value></data>
 <data name="EquidistantProjection" xml:space="preserve"><value>等距投影</value></data>
-<data name="EquisolidProjection" xml:space="preserve"><value>等面积投影</value></data>
+<data name="EquisolidProjection" xml:space="preserve"><value>等积投影</value></data>
 </root>

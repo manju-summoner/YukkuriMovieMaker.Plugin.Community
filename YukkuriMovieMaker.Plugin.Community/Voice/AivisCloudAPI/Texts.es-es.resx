@@ -62,12 +62,12 @@
 <data name="Speed" xml:space="preserve"><value>Velocidad</value></data>
 <data name="Style" xml:space="preserve"><value>Estilo</value></data>
 <data name="EmotionalIntensity" xml:space="preserve"><value>Intensidad emocional</value></data>
-<data name="EmotionalIntensityDesc" xml:space="preserve"><value>شدة العاطفة لنمط المتحدث المحدد.
-كلما زادت القيمة، كانت الصوت أقرب إلى التعبير العاطفي لنمط المتحدث المحدد.
-على سبيل المثال، إذا كان نمط المتحدث هو 'مبتهج'، فإن القيمة الأعلى ستؤدي إلى طريقة حديث أكثر سعادة وإشراقًا.
+<data name="EmotionalIntensityDesc" xml:space="preserve"><value>Intensidad emocional del estilo de hablante seleccionado.
+Cuanto mayor sea el valor, más cercana será la voz a la expresión emocional del estilo de hablante seleccionado.
+Por ejemplo, si el estilo de hablante es 'Alegre', un valor más alto resultará en una forma de hablar más feliz y brillante.
 
-ومع ذلك، بالنسبة لبعض المتحدثين أو الأنماط، قد يؤدي ضبط القيمة على مستوى عالٍ جدًا إلى خطاب غير طبيعي أو نغمة آلية.
-القيمة القصوى للنطق الصحيح تختلف حسب المتحدث والنمط. اضبط حسب الحاجة للعثور على القيمة المثلى.</value></data>
+Sin embargo, para algunos hablantes o estilos, establecer el valor demasiado alto puede resultar en un habla poco natural o un tono robótico.
+El valor máximo para un habla correcta varía según el hablante y el estilo. Ajusta según sea necesario para encontrar el valor óptimo.</value></data>
 <data name="TempoDynamics" xml:space="preserve"><value>Dinámica de tempo</value></data>
 <data name="TempoDynamicsDesc" xml:space="preserve"><value>Intensidad de las variaciones en la velocidad del habla. Cuanto mayor sea el valor, más rápida y natural será la voz.</value></data>
 <data name="Pitch" xml:space="preserve"><value>Tono</value></data>

@@ -62,12 +62,12 @@
 <data name="Speed" xml:space="preserve"><value>سرعة</value></data>
 <data name="Style" xml:space="preserve"><value>أسلوب</value></data>
 <data name="EmotionalIntensity" xml:space="preserve"><value>شدة العاطفة</value></data>
-<data name="EmotionalIntensityDesc" xml:space="preserve"><value>Intensitas Emosional dari gaya pembicara yang dipilih.
-Semakin tinggi nilainya, semakin dekat suara dengan ekspresi emosional dari gaya pembicara yang dipilih.
-Misalnya, jika gaya pembicara adalah 'Ceriah', nilai yang lebih tinggi akan menghasilkan cara berbicara yang lebih bahagia dan cerah.
+<data name="EmotionalIntensityDesc" xml:space="preserve"><value>شدة العاطفة لنمط المتحدث المحدد.
+كلما زادت القيمة، كانت الصوت أقرب إلى التعبير العاطفي لنمط المتحدث المحدد.
+على سبيل المثال، إذا كان نمط المتحدث هو 'مبتهج'، فإن القيمة الأعلى ستؤدي إلى طريقة حديث أكثر سعادة وإشراقًا.
 
-Namun, untuk beberapa pembicara atau gaya, mengatur nilai terlalu tinggi dapat menghasilkan ucapan yang tidak alami atau nada robotik.
-Nilai maksimum untuk ucapan yang benar bervariasi tergantung pada pembicara dan gaya. Sesuaikan sesuai kebutuhan untuk menemukan nilai optimal.</value></data>
+ومع ذلك، بالنسبة لبعض المتحدثين أو الأنماط، قد يؤدي ضبط القيمة على مستوى عالٍ جدًا إلى خطاب غير طبيعي أو نغمة آلية.
+القيمة القصوى للنطق الصحيح تختلف حسب المتحدث والنمط. اضبط حسب الحاجة للعثور على القيمة المثلى.</value></data>
 <data name="TempoDynamics" xml:space="preserve"><value>ديناميات الإيقاع</value></data>
 <data name="TempoDynamicsDesc" xml:space="preserve"><value>شدة تقلبات سرعة الكلام. كلما زادت القيمة، كانت السرعة أكثر طبيعية وسرعة.</value></data>
 <data name="Pitch" xml:space="preserve"><value>طبقة الصوت</value></data>

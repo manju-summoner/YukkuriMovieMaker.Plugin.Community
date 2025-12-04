@@ -64,8 +64,8 @@
 <data name="Smooth" xml:space="preserve"><value>平滑度</value></data>
 <data name="Playback" xml:space="preserve"><value>播放位置</value></data>
 <data name="AudioSourceTypeFile" xml:space="preserve"><value>文件</value></data>
-<data name="AudioSourceTypeScene" xml:space="preserve"><value>场景</value></data>
+<data name="AudioSourceTypeScene" xml:space="preserve"><value>次合成</value></data>
 <data name="AudioSourceTypeTimeline" xml:space="preserve"><value>时间轴</value></data>
 <data name="File" xml:space="preserve"><value>文件</value></data>
-<data name="Scene" xml:space="preserve"><value>场景</value></data>
+<data name="Scene" xml:space="preserve"><value>次合成</value></data>
 </root>

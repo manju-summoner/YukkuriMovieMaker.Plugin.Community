@@ -59,16 +59,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
-<data name="InOutCropEffectName" xml:space="preserve"><value>释放夹子时进入和退出</value></data>
-<data name="InOutCropEffectGroupName" xml:space="preserve"><value>入/ 出场</value></data>
+<data name="InOutCropEffectName" xml:space="preserve"><value>取消裁剪时入/出场</value></data>
+<data name="InOutCropEffectGroupName" xml:space="preserve"><value>入/出场</value></data>
 <data name="InOutCropEffectInCropDirectionName" xml:space="preserve"><value>入场时</value></data>
-<data name="InOutCropEffectInCropDirectionDesc" xml:space="preserve"><value>剪裁方向</value></data>
+<data name="InOutCropEffectInCropDirectionDesc" xml:space="preserve"><value>裁剪方向</value></data>
 <data name="InOutCropEffectOutCropDirectionName" xml:space="preserve"><value>出场时</value></data>
-<data name="InOutCropEffectOutCropDirectionDesc" xml:space="preserve"><value>剪裁方向</value></data>
+<data name="InOutCropEffectOutCropDirectionDesc" xml:space="preserve"><value>裁剪方向</value></data>
 <data name="InOutCropEffectIsCenteringName" xml:space="preserve"><value>居中</value></data>
 <data name="InOutCropEffectIsCenteringDesc" xml:space="preserve"><value>居中</value></data>
 <data name="InOutCropEffectEffectDurationName" xml:space="preserve"><value>效果时间</value></data>
-<data name="InOutCropEffectEffectDurationDesc" xml:space="preserve"><value>效果播放的秒数</value></data>
+<data name="InOutCropEffectEffectDurationDesc" xml:space="preserve"><value>效果播放秒数</value></data>
 <data name="InOutCropEffectEasingTypeName" xml:space="preserve"><value>类型</value></data>
 <data name="InOutCropEffectEasingTypeDesc" xml:space="preserve"><value>动画类型</value></data>
 <data name="InOutCropEffectEasingModeName" xml:space="preserve"><value>缓动</value></data>
@@ -82,6 +82,6 @@
 <data name="InOutCropEffectCropDirectionLeftDesc" xml:space="preserve"><value>左</value></data>
 <data name="InOutCropEffectCropDirectionRightName" xml:space="preserve"><value>右</value></data>
 <data name="InOutCropEffectCropDirectionRightDesc" xml:space="preserve"><value>右</value></data>
-<data name="InOutCropEffectCropDirectionNoneName" xml:space="preserve"><value>没有任何</value></data>
+<data name="InOutCropEffectCropDirectionNoneName" xml:space="preserve"><value>无</value></data>
 <data name="InOutCropEffectCropDirectionNoneDesc" xml:space="preserve"><value>没有任何</value></data>
 </root>

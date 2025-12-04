@@ -60,23 +60,23 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="Whisper" xml:space="preserve"><value>Whisper（本地）</value></data>
-<data name="CreatingAudioStreamMessage" xml:space="preserve"><value>准备解析目标</value></data>
-<data name="LoadingWhisperModelMessage" xml:space="preserve"><value>加载 Whisper 模型</value></data>
-<data name="ProcessingAudioMessage" xml:space="preserve"><value>正在解析音频 {0} / {1} {2}</value></data>
+<data name="CreatingAudioStreamMessage" xml:space="preserve"><value>解析目标准备中</value></data>
+<data name="LoadingWhisperModelMessage" xml:space="preserve"><value>Whisper模型加载中</value></data>
+<data name="ProcessingAudioMessage" xml:space="preserve"><value>音频解析中 {0} / {1} {2}</value></data>
 <data name="Model" xml:space="preserve"><value>模型</value></data>
 <data name="Language" xml:space="preserve"><value>语言</value></data>
-<data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>需要 {0}</value></data>
+<data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>需要{0}</value></data>
 <data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>未安装所需的运行时。
 要使用此功能，必须安装“{0}”。
 
 是否立即下载并运行安装程序？</value></data>
 <data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>未安装 “{0}”。</value></data>
-<data name="InstallerNotFoundMessage" xml:space="preserve"><value>未找到安装程序: {0}</value></data>
-<data name="InstallerStartFailedMessage" xml:space="preserve"><value>启动安装程序失败。</value></data>
+<data name="InstallerNotFoundMessage" xml:space="preserve"><value>找不到安装程序: {0}</value></data>
+<data name="InstallerStartFailedMessage" xml:space="preserve"><value>安装程序启动失败。</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>安装失败。退出代码 = {0}</value></data>
 <data name="NotSupportedMessage" xml:space="preserve"><value>Your environment does not support this feature</value></data>
 <data name="InstallingMessage" xml:space="preserve"><value>Installing {0}. Please wait. The cancel button will not work during installation.</value></data>
-<data name="FileSizeLimitMessage" xml:space="preserve"><value>由于 YMM4 位于包含多字节字符的路径中，无法加载文件大小超过 2 GB 的模型。
-请切换到 2 GB 以下的模型，或将 YMM4 移动到不包含多字节字符的路径。</value></data>
+<data name="FileSizeLimitMessage" xml:space="preserve"><value>YMM4位于包含多字节字符的路径中，因此无法加载文件大小超过2 GB的模型。
+请切换为2 GB以下的模型，或将YMM4移动到不包含多字节字符的路径下。</value></data>
 <data name="VoiceActivityDetection" xml:space="preserve"><value>语音检测</value></data>
 </root>

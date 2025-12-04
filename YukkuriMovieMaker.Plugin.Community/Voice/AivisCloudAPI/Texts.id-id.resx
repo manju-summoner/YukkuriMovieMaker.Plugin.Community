@@ -62,6 +62,12 @@
 <data name="Speed" xml:space="preserve"><value>Kecepatan</value></data>
 <data name="Style" xml:space="preserve"><value>Gaya</value></data>
 <data name="EmotionalIntensity" xml:space="preserve"><value>Intensitas Emosional</value></data>
+<data name="EmotionalIntensityDesc" xml:space="preserve"><value>Intensitas Emosional dari gaya pembicara yang dipilih.
+Semakin tinggi nilainya, semakin dekat suara dengan ekspresi emosional dari gaya pembicara yang dipilih.
+Misalnya, jika gaya pembicara adalah 'Ceriah', nilai yang lebih tinggi akan menghasilkan cara berbicara yang lebih bahagia dan cerah.
+
+Namun, untuk beberapa pembicara atau gaya, mengatur nilai terlalu tinggi dapat menghasilkan ucapan yang tidak alami atau nada robotik.
+Nilai maksimum untuk ucapan yang benar bervariasi tergantung pada pembicara dan gaya. Sesuaikan sesuai kebutuhan untuk menemukan nilai optimal.</value></data>
 <data name="TempoDynamics" xml:space="preserve"><value>Dinamika Tempo</value></data>
 <data name="TempoDynamicsDesc" xml:space="preserve"><value>Intensitas variasi kecepatan bicara. Semakin tinggi nilainya, semakin cepat dan alami suaranya。</value></data>
 <data name="Pitch" xml:space="preserve"><value>Nada</value></data>

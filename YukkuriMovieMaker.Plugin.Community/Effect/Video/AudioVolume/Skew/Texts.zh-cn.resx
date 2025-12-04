@@ -59,11 +59,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
-<data name="AudioVolumeSkewEffect" xml:space="preserve"><value>根据音量进行倾斜变形</value></data>
+<data name="AudioVolumeSkewEffect" xml:space="preserve"><value>根据音量倾斜变形</value></data>
 <data name="AngleX" xml:space="preserve"><value>X方向</value></data>
-<data name="AngleXDesc" xml:space="preserve"><value>X方向的角度</value></data>
+<data name="AngleXDesc" xml:space="preserve"><value>X方向角度</value></data>
 <data name="AngleY" xml:space="preserve"><value>Y方向</value></data>
-<data name="AngleYDesc" xml:space="preserve"><value>Y方向的角度</value></data>
+<data name="AngleYDesc" xml:space="preserve"><value>Y方向角度</value></data>
 <data name="CenterPoint" xml:space="preserve"><value>中心</value></data>
 <data name="CenterPointDesc" xml:space="preserve"><value>变形中心</value></data>
 <data name="SkewCenterPointCenter" xml:space="preserve"><value>中央</value></data>

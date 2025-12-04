@@ -64,7 +64,7 @@
 <data name="Smoothness" xml:space="preserve"><value>平滑度</value></data>
 <data name="Mode" xml:space="preserve"><value>透明模式</value></data>
 <data name="LuminanceKeyEffectModeDark" xml:space="preserve"><value>低于阈值的部分透明</value></data>
-<data name="LuminanceKeyEffectModeThreshold" xml:space="preserve"><value>在阈值处透明</value></data>
-<data name="LuminanceKeyEffectModeThresholdRange" xml:space="preserve"><value>在阈值范围内透明</value></data>
+<data name="LuminanceKeyEffectModeThreshold" xml:space="preserve"><value>阈值部分透明</value></data>
+<data name="LuminanceKeyEffectModeThresholdRange" xml:space="preserve"><value>阈值范围内的部分透明</value></data>
 <data name="IsInvert" xml:space="preserve"><value>反转</value></data>
 </root>

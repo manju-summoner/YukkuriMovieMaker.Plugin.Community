@@ -61,5 +61,5 @@
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="AlphaMask" xml:space="preserve"><value>不透明遮罩</value></data>
 <data name="Blur" xml:space="preserve"><value>模糊</value></data>
-<data name="InvertArea" xml:space="preserve"><value>反转区域</value></data>
+<data name="InvertArea" xml:space="preserve"><value>区域反转</value></data>
 </root>

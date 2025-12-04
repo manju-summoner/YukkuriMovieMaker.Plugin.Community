@@ -59,8 +59,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
-<data name="CircularBlurEffectIsHardBorderModeName" xml:space="preserve"><value>固定大小</value></data>
-<data name="CircularBlurEffectIsHardBorderModeDesc" xml:space="preserve"><value>固定大小</value></data>
+<data name="CircularBlurEffectIsHardBorderModeName" xml:space="preserve"><value>固定尺寸</value></data>
+<data name="CircularBlurEffectIsHardBorderModeDesc" xml:space="preserve"><value>固定尺寸</value></data>
 <data name="CircularBlurEffectAngleDesc" xml:space="preserve"><value>模糊角度</value></data>
 <data name="CircularBlurEffectName" xml:space="preserve"><value>旋转模糊</value></data>
 <data name="CircularBlurGroupName" xml:space="preserve"><value>旋转模糊</value></data>

@@ -66,6 +66,6 @@
 <data name="YDesc" xml:space="preserve"><value>绕Y轴的水平旋转角</value></data>
 <data name="Z" xml:space="preserve"><value>Z轴</value></data>
 <data name="ZDesc" xml:space="preserve"><value>绕Z轴的平面旋转角</value></data>
-<data name="Is3D" xml:space="preserve"><value>三维布置</value></data>
+<data name="Is3D" xml:space="preserve"><value>三维分布</value></data>
 <data name="Is3DDesc" xml:space="preserve"><value>放置在三维空间中</value></data>
 </root>

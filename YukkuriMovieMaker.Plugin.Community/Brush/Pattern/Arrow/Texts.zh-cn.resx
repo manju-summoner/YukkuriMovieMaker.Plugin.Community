@@ -62,9 +62,9 @@
 <data name="ArrowPattern" xml:space="preserve"><value>箭羽图案</value></data>
 <data name="Color" xml:space="preserve"><value>颜色</value></data>
 <data name="BackgroundColor" xml:space="preserve"><value>背景色</value></data>
-<data name="FeatherWidth" xml:space="preserve"><value>羽宽</value></data>
-<data name="ShaftWidth" xml:space="preserve"><value>箭干宽度</value></data>
+<data name="FeatherWidth" xml:space="preserve"><value>箭羽宽度</value></data>
+<data name="ShaftWidth" xml:space="preserve"><value>箭杆宽度</value></data>
 <data name="Height" xml:space="preserve"><value>高度</value></data>
 <data name="Point" xml:space="preserve"><value>尖端</value></data>
-<data name="Zoom" xml:space="preserve"><value>缩放</value></data>
+<data name="Zoom" xml:space="preserve"><value>缩放率</value></data>
 </root>

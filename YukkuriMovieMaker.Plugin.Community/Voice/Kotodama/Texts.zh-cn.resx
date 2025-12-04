@@ -63,17 +63,17 @@
 <data name="Decoration" xml:space="preserve"><value>情感</value></data>
 <data name="AboutKotodama" xml:space="preserve"><value>关于言灵</value></data>
 <data name="AboutKotodamaMessage" xml:space="preserve"><value>Kotodama是由SpiralAI株式会社运营的云端语音合成服务。
-使用需要单独获取API密钥。</value></data>
-<data name="SpeakerName" xml:space="preserve"><value>说话人名称</value></data>
-<data name="SpeakerId" xml:space="preserve"><value>说话人ID</value></data>
+使用时需自行获取API密钥。</value></data>
+<data name="SpeakerName" xml:space="preserve"><value>说话者名称</value></data>
+<data name="SpeakerId" xml:space="preserve"><value>说话者ID</value></data>
 <data name="DecorationName" xml:space="preserve"><value>情感名称</value></data>
 <data name="DecorationId" xml:space="preserve"><value>情感ID</value></data>
-<data name="ContentRestrictions" xml:space="preserve"><value>内容限制</value></data>
-<data name="AddSpeaker" xml:space="preserve"><value>添加说话人</value></data>
+<data name="ContentRestrictions" xml:space="preserve"><value>限制条款</value></data>
+<data name="AddSpeaker" xml:space="preserve"><value>添加说话者</value></data>
 <data name="AddDecoration" xml:space="preserve"><value>添加情感</value></data>
 <data name="Delete" xml:space="preserve"><value>删除</value></data>
-<data name="SpeakerSettings" xml:space="preserve"><value>说话人设置</value></data>
+<data name="SpeakerSettings" xml:space="preserve"><value>说话者设置</value></data>
 <data name="NewCharacter" xml:space="preserve"><value>新角色</value></data>
 <data name="NewDecoration" xml:space="preserve"><value>新情感</value></data>
-<data name="HelpLinkText" xml:space="preserve"><value>帮助：如何设置Kotodama</value></data>
+<data name="HelpLinkText" xml:space="preserve"><value>帮助：Kotodama设置方法</value></data>
 </root>

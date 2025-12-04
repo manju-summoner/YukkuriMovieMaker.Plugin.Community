@@ -61,9 +61,9 @@
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="AudioVolumeMoveEffect" xml:space="preserve"><value>根据音量移动</value></data>
 <data name="X" xml:space="preserve"><value>X</value></data>
-<data name="XDesc" xml:space="preserve"><value>X轴移动距离</value></data>
+<data name="XDesc" xml:space="preserve"><value>X轴方向移动距离</value></data>
 <data name="Y" xml:space="preserve"><value>Y</value></data>
-<data name="YDesc" xml:space="preserve"><value>Y轴移动距离</value></data>
+<data name="YDesc" xml:space="preserve"><value>Y轴方向移动距离</value></data>
 <data name="Z" xml:space="preserve"><value>Z</value></data>
-<data name="ZDesc" xml:space="preserve"><value>Z轴移动距离</value></data>
+<data name="ZDesc" xml:space="preserve"><value>Z轴方向移动距离</value></data>
 </root>

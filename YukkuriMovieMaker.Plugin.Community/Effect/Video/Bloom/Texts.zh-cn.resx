@@ -61,15 +61,15 @@
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="Bloom" xml:space="preserve"><value>发光</value></data>
 <data name="Threshold" xml:space="preserve"><value>阈值</value></data>
-<data name="ThresholdDesc" xml:space="preserve"><value>亮度超过阈值的部分会发光。</value></data>
+<data name="ThresholdDesc" xml:space="preserve"><value>超过亮度阈值的部分会发光。</value></data>
 <data name="IsColorizationEnabled" xml:space="preserve"><value>给光着色</value></data>
-<data name="IsColorizationEnabledDesc" xml:space="preserve"><value>给光添加颜色。</value></data>
+<data name="IsColorizationEnabledDesc" xml:space="preserve"><value>为光添加颜色。</value></data>
 <data name="Color" xml:space="preserve"><value>色彩</value></data>
-<data name="ColorDesc" xml:space="preserve"><value>光的颜色</value></data>
+<data name="ColorDesc" xml:space="preserve"><value>发光颜色</value></data>
 <data name="Strength" xml:space="preserve"><value>强度</value></data>
-<data name="StrengthDesc" xml:space="preserve"><value>光的强度</value></data>
+<data name="StrengthDesc" xml:space="preserve"><value>发光强度</value></data>
 <data name="Blur" xml:space="preserve"><value>模糊</value></data>
-<data name="BlurDesc" xml:space="preserve"><value>光的模糊</value></data>
-<data name="IsFixedSizeEnabled" xml:space="preserve"><value>固定大小</value></data>
-<data name="IsFixedSizeEnabledDesc" xml:space="preserve"><value>保持原图大小。</value></data>
+<data name="BlurDesc" xml:space="preserve"><value>发光模糊</value></data>
+<data name="IsFixedSizeEnabled" xml:space="preserve"><value>固定尺寸</value></data>
+<data name="IsFixedSizeEnabledDesc" xml:space="preserve"><value>保持源图像尺寸。</value></data>
 </root>

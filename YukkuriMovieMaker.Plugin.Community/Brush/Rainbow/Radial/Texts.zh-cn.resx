@@ -59,20 +59,20 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
-<data name="RainbowRadialGradient" xml:space="preserve"><value>彩虹径向渐变</value></data>
+<data name="RainbowRadialGradient" xml:space="preserve"><value>彩虹色径向渐变</value></data>
 <data name="CenterX" xml:space="preserve"><value>中心X</value></data>
 <data name="CenterY" xml:space="preserve"><value>中心Y</value></data>
 <data name="OriginX" xml:space="preserve"><value>原点X</value></data>
 <data name="OriginY" xml:space="preserve"><value>原点Y</value></data>
 <data name="RadiusX" xml:space="preserve"><value>半径X</value></data>
 <data name="RadiusY" xml:space="preserve"><value>半径Y</value></data>
-<data name="Zoom" xml:space="preserve"><value>缩放</value></data>
+<data name="Zoom" xml:space="preserve"><value>缩放率</value></data>
 <data name="Saturation" xml:space="preserve"><value>饱和度</value></data>
 <data name="Brightness" xml:space="preserve"><value>亮度</value></data>
 <data name="Extend" xml:space="preserve"><value>重复</value></data>
 <data name="ColorSpace" xml:space="preserve"><value>色彩空间</value></data>
-<data name="Offset" xml:space="preserve"><value>偏移</value></data>
-<data name="Angle" xml:space="preserve"><value>旋转角度</value></data>
-<data name="Aspect" xml:space="preserve"><value>宽高比</value></data>
+<data name="Offset" xml:space="preserve"><value>位置</value></data>
+<data name="Angle" xml:space="preserve"><value>旋转角</value></data>
+<data name="Aspect" xml:space="preserve"><value>长宽比</value></data>
 <data name="IsInverted" xml:space="preserve"><value>水平翻转</value></data>
 </root>

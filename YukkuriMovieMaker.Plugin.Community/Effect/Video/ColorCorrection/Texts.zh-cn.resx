@@ -59,16 +59,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
-<data name="ColorCorrectionEffectContrastName" xml:space="preserve"><value>对比</value></data>
+<data name="ColorCorrectionEffectContrastName" xml:space="preserve"><value>对比度</value></data>
 <data name="ColorCorrectionEffectBrightnessName" xml:space="preserve"><value>亮度</value></data>
 <data name="ColorCorrectionEffectBrightnessDesc" xml:space="preserve"><value>亮度</value></data>
 <data name="ColorCorrectionEffectSaturationName" xml:space="preserve"><value>饱和度</value></data>
-<data name="ColorCorrectionEffectSaturationDesc" xml:space="preserve"><value>颜色鲜艳度</value></data>
+<data name="ColorCorrectionEffectSaturationDesc" xml:space="preserve"><value>色彩鲜艳度</value></data>
 <data name="ColorCorrectionEffectHueRotationName" xml:space="preserve"><value>色相</value></data>
 <data name="ColorCorrectionEffectHueRotationDesc" xml:space="preserve"><value>色相偏移</value></data>
 <data name="ColorCorrectionEffectName" xml:space="preserve"><value>色调修正</value></data>
 <data name="ColorCorrectionGroupName" xml:space="preserve"><value>色调修正</value></data>
 <data name="ColorCorrectionEffectLightnessName" xml:space="preserve"><value>亮度</value></data>
 <data name="ColorCorrectionEffectLightnessDesc" xml:space="preserve"><value>亮度</value></data>
-<data name="ColorCorrectionEffectContrastDesc" xml:space="preserve"><value>明暗的强调度</value></data>
+<data name="ColorCorrectionEffectContrastDesc" xml:space="preserve"><value>明暗强调度</value></data>
 </root>

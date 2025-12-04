@@ -59,19 +59,19 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
-<data name="VignetteBlur" xml:space="preserve"><value>周边模糊光量</value></data>
+<data name="VignetteBlur" xml:space="preserve"><value>朦胧光晕</value></data>
 <data name="X" xml:space="preserve"><value>X</value></data>
 <data name="Y" xml:space="preserve"><value>Y</value></data>
 <data name="Radius" xml:space="preserve"><value>半径</value></data>
-<data name="Aspect" xml:space="preserve"><value>宽高比</value></data>
-<data name="Softness" xml:space="preserve"><value>柔和度</value></data>
+<data name="Aspect" xml:space="preserve"><value>长宽比</value></data>
+<data name="Softness" xml:space="preserve"><value>边缘宽度</value></data>
 <data name="Blur" xml:space="preserve"><value>模糊</value></data>
 <data name="Lightness" xml:space="preserve"><value>亮度</value></data>
-<data name="ColorShift" xml:space="preserve"><value>色偏移</value></data>
-<data name="Area" xml:space="preserve"><value>区域</value></data>
-<data name="FixedSize" xml:space="preserve"><value>固定大小</value></data>
+<data name="ColorShift" xml:space="preserve"><value>RGB分离</value></data>
+<data name="Area" xml:space="preserve"><value>范围</value></data>
+<data name="FixedSize" xml:space="preserve"><value>固定尺寸</value></data>
 <data name="GaussianBlur" xml:space="preserve"><value>高斯模糊</value></data>
 <data name="RadialBlur" xml:space="preserve"><value>径向模糊</value></data>
-<data name="CircularBlur" xml:space="preserve"><value>圆形模糊</value></data>
-<data name="BlurMode" xml:space="preserve"><value>模式</value></data>
+<data name="CircularBlur" xml:space="preserve"><value>旋转模糊</value></data>
+<data name="BlurMode" xml:space="preserve"><value>种类</value></data>
 </root>

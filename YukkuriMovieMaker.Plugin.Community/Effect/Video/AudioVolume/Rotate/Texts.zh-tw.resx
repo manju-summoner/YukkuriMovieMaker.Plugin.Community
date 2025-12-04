@@ -67,5 +67,5 @@
 <data name="Z" xml:space="preserve"><value>Z軸</value></data>
 <data name="ZDesc" xml:space="preserve"><value>繞Z軸的平面旋轉角</value></data>
 <data name="Is3D" xml:space="preserve"><value>三維配置</value></data>
-<data name="Is3DDesc" xml:space="preserve"><value>放置在三維空間中</value></data>
+<data name="Is3DDesc" xml:space="preserve"><value>分布在三維空間中</value></data>
 </root>

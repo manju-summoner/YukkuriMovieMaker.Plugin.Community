@@ -62,12 +62,12 @@
 <data name="Speed" xml:space="preserve"><value>速度</value></data>
 <data name="Style" xml:space="preserve"><value>風格</value></data>
 <data name="EmotionalIntensity" xml:space="preserve"><value>情感強度</value></data>
-<data name="EmotionalIntensityDesc" xml:space="preserve"><value>선택한 화자 스타일의 감정 강도입니다.
-값이 높을수록 선택한 화자 스타일의 감정 표현에 가까운 음성이 됩니다.
-예를 들어 화자 스타일이 '쾌활'이라면, 값이 높을수록 더 행복하고 밝은 말투가 됩니다.
+<data name="EmotionalIntensityDesc" xml:space="preserve"><value>所選說話者風格的情感強度。
+數值越大，語音越接近所選說話者風格的情感表達。
+例如，如果說話者風格是「愉快」，則數值越大，語音聽起來就越開心和明亮。
 
-그러나 일부 화자나 스타일의 경우, 값을 너무 높게 설정하면 발음이 이상해지거나 로봇 같은 목소리가 될 수 있습니다.
-정확한 발음이 가능한 최대값은 화자와 스타일에 따라 다릅니다. 필요에 따라 최적의 값을 찾아 조정하세요.</value></data>
+另一方面，對於某些說話者或風格，將數值設置得過高可能會導致語音不自然或機械化。
+正確發聲的最大值因說話者和風格而異。根據需要調整以找到最佳值。</value></data>
 <data name="TempoDynamics" xml:space="preserve"><value>節奏動態</value></data>
 <data name="TempoDynamicsDesc" xml:space="preserve"><value>說話速度的起伏強度。數值越大，語速越快，語調越自然。</value></data>
 <data name="Pitch" xml:space="preserve"><value>音調</value></data>

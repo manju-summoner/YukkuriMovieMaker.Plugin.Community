@@ -70,14 +70,14 @@
 <data name="Password" xml:space="preserve"><value>密码</value></data>
 <data name="Port" xml:space="preserve"><value>端口号</value></data>
 <data name="HowToSetUp" xml:space="preserve"><value>设置方法</value></data>
-<data name="HowToSetUpText" xml:space="preserve"><value>1. 打开 VoiSona Talk 应用程序菜单 → 编辑 → 首选项 → API
-2. 设置用于 API 访问的密码（不是 VoiSona 帐户密码）
-3. 选中“启用 REST API”
-4. 将步骤 1 中设置的值输入到此屏幕上的“用户名”、“密码”和“端口号”中</value></data>
-<data name="HowToSetUpLink" xml:space="preserve"><value>帮助：VoiSona Talk 的设置方法</value></data>
+<data name="HowToSetUpText" xml:space="preserve"><value>1. 打开VoiSona Talk应用程序菜单 → 编辑 → 首选项 → API
+2. 设置API访问用的密码（不是VoiSona帐户密码）
+3. 选中“启用REST API”
+4. 将步骤1中设置的值输入到此界面上的“用户名”、“密码”和“端口号”中</value></data>
+<data name="HowToSetUpLink" xml:space="preserve"><value>帮助：VoiSona Talk设置方法</value></data>
 <data name="AboutVoiSonaTalk" xml:space="preserve"><value>关于 VoiSona Talk</value></data>
-<data name="AboutVoiSonaTalkText" xml:space="preserve"><value>VoiSona Talk 是 TechnoSpeech Inc. 提供的语音合成软件。
-要使用它，您需要另外安装 VoiSona Talk v1.3.4 或更高版本并启用 API 功能。</value></data>
+<data name="AboutVoiSonaTalkText" xml:space="preserve"><value>VoiSona Talk是由TechnoSpeech Inc.提供的语音合成软件。
+使用时需单独安装VoiSona Talk v1.3.4或更高版本并启用API功能。</value></data>
 <data name="Refresh" xml:space="preserve"><value>刷新</value></data>
 <data name="CharacterCount" xml:space="preserve"><value>字符数</value></data>
 <data name="CharacterCountText" xml:space="preserve"><value>{0}个字符</value></data>

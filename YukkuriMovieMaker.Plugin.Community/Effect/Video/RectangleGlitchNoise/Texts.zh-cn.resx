@@ -60,22 +60,22 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="UnitCount" xml:space="preserve"><value>单元个数</value></data>
-<data name="RectangleGlitchNoise" xml:space="preserve"><value>故障噪音（矩形）</value></data>
-<data name="RectangleCount" xml:space="preserve"><value>矩形的数量</value></data>
-<data name="RectangleMaxWidth" xml:space="preserve"><value>矩形的宽度</value></data>
-<data name="RectangleMaxHeight" xml:space="preserve"><value>矩形的高度</value></data>
+<data name="RectangleGlitchNoise" xml:space="preserve"><value>故障噪波（矩形）</value></data>
+<data name="RectangleCount" xml:space="preserve"><value>矩形数</value></data>
+<data name="RectangleMaxWidth" xml:space="preserve"><value>矩形宽度</value></data>
+<data name="RectangleMaxHeight" xml:space="preserve"><value>矩形高度</value></data>
 <data name="RectangleMaxXShift" xml:space="preserve"><value>矩形水平偏移</value></data>
 <data name="RectangleMaxYShift" xml:space="preserve"><value>矩形垂直偏移</value></data>
-<data name="ColorMaxShift" xml:space="preserve"><value>色彩偏移</value></data>
+<data name="ColorMaxShift" xml:space="preserve"><value>RGB分离</value></data>
 <data name="PlaybackRate" xml:space="preserve"><value>播放速度</value></data>
 <data name="IsClipping" xml:space="preserve"><value>裁剪</value></data>
-<data name="IsHardBorderMode" xml:space="preserve"><value>固定大小</value></data>
+<data name="IsHardBorderMode" xml:space="preserve"><value>固定尺寸</value></data>
 <data name="ComplicationGroupName" xml:space="preserve"><value>复杂化</value></data>
 <data name="Repeat" xml:space="preserve"><value>重复</value></data>
 <data name="RectangleMaxWidthAttenuation" xml:space="preserve"><value>宽度衰减</value></data>
 <data name="RectangleMaxHeightAttenuation" xml:space="preserve"><value>高度衰减</value></data>
-<data name="RectangleMaxXShiftAttenuation" xml:space="preserve"><value>横向偏移衰减</value></data>
-<data name="RectangleMaxYShiftAttenuation" xml:space="preserve"><value>纵向偏移衰减</value></data>
+<data name="RectangleMaxXShiftAttenuation" xml:space="preserve"><value>水平偏移衰减</value></data>
+<data name="RectangleMaxYShiftAttenuation" xml:space="preserve"><value>垂直偏移衰减</value></data>
 <data name="Probability" xml:space="preserve"><value>发生率</value></data>
-<data name="ProbabilityDesc" xml:space="preserve"><value>故障噪音发生的概率</value></data>
+<data name="ProbabilityDesc" xml:space="preserve"><value>故障噪波发生概率</value></data>
 </root>

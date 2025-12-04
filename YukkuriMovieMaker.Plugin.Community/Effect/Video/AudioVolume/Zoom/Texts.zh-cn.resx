@@ -63,7 +63,7 @@
 <data name="Zoom" xml:space="preserve"><value>整体</value></data>
 <data name="ZoomDesc" xml:space="preserve"><value>整体缩放率</value></data>
 <data name="ZoomX" xml:space="preserve"><value>水平方向</value></data>
-<data name="ZoomXDesc" xml:space="preserve"><value>X轴方向的缩放率</value></data>
+<data name="ZoomXDesc" xml:space="preserve"><value>X轴方向缩放率</value></data>
 <data name="ZoomY" xml:space="preserve"><value>垂直方向</value></data>
-<data name="ZoomYDesc" xml:space="preserve"><value>Y轴方向的缩放率</value></data>
+<data name="ZoomYDesc" xml:space="preserve"><value>Y轴方向缩放率</value></data>
 </root>

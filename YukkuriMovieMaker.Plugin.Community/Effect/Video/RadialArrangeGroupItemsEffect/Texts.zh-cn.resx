@@ -59,9 +59,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
-<data name="RadialArrangeGroupItemsEffectName" xml:space="preserve"><value>在组控件中均匀排列项目</value></data>
+<data name="RadialArrangeGroupItemsEffectName" xml:space="preserve"><value>组控制下圆形等距排列</value></data>
 <data name="Radius" xml:space="preserve"><value>半径</value></data>
-<data name="SyncAngle" xml:space="preserve"><value>同步角度</value></data>
+<data name="SyncAngle" xml:space="preserve"><value>同步旋转</value></data>
 <data name="Arc" xml:space="preserve"><value>圆弧</value></data>
 <data name="Direction" xml:space="preserve"><value>方向</value></data>
 <data name="Centering" xml:space="preserve"><value>中心对齐</value></data>

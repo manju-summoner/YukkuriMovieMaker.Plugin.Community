@@ -60,7 +60,7 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
 <data name="Threshold" xml:space="preserve"><value>임계값</value></data>
-<data name="ThresholdDesc" xml:space="preserve"><value>检测声音的阈值。值越小，检测越容易，但误报也会增加。</value></data>
+<data name="ThresholdDesc" xml:space="preserve"><value>检测声音的阈值。数值越小，检测越容易，但误报也会增加。</value></data>
 <data name="MinSpeechDurationMs" xml:space="preserve"><value>최소 음성 지속 시간</value></data>
 <data name="MinSpeechDurationMsDesc" xml:space="preserve"><value>이 시간 이상 음성이 지속되면 음성으로 간주됩니다.</value></data>
 <data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>최대 음성 지속 시간</value></data>

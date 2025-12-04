@@ -61,8 +61,8 @@
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="ColorBlindness" xml:space="preserve"><value>色觉特性模拟</value></data>
 <data name="ColorBlindnessType" xml:space="preserve"><value>类型</value></data>
-<data name="ColorBlindnessTypeP" xml:space="preserve"><value>紅色盲</value></data>
-<data name="ColorBlindnessTypeD" xml:space="preserve"><value>緑色盲</value></data>
-<data name="ColorBlindnessTypeT" xml:space="preserve"><value>青色盲</value></data>
+<data name="ColorBlindnessTypeP" xml:space="preserve"><value>红色盲</value></data>
+<data name="ColorBlindnessTypeD" xml:space="preserve"><value>绿色盲</value></data>
+<data name="ColorBlindnessTypeT" xml:space="preserve"><value>蓝色盲</value></data>
 <data name="Strength" xml:space="preserve"><value>强度</value></data>
 </root>

@@ -63,5 +63,5 @@
 <data name="Speed" xml:space="preserve"><value>语速</value></data>
 <data name="About" xml:space="preserve"><value>关于Livetoon TTS</value></data>
 <data name="AboutMessage" xml:space="preserve"><value>Livetoon TTS是由Livetoon公司提供的云端文本转语音服务。
-使用此服务需要单独的API密钥。</value></data>
+使用该服务需要额外的API密钥。</value></data>
 </root>

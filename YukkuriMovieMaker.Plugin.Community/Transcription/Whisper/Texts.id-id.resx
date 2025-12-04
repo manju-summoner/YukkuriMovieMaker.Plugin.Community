@@ -74,7 +74,7 @@ Apakah Anda ingin mengunduh dan menjalankan pemasang sekarang？</value></data>
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>Gagal menjalankan installer。</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>Instalasi gagal. Kode keluar = {0}</value></data>
 <data name="NotSupportedMessage" xml:space="preserve"><value>لا تدعم بيئتك هذه الميزة</value></data>
-<data name="InstallingMessage" xml:space="preserve"><value>正在安装 {0}。请稍候。安装期间取消按钮将无法工作。</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>Sedang menginstal {0}。Silakan tunggu。Tombol batal tidak akan berfungsi selama instalasi。</value></data>
 <data name="FileSizeLimitMessage" xml:space="preserve"><value>Karena YMM4 berada di jalur yang mengandung karakter multibyte, YMM4 tidak dapat memuat model dengan ukuran file melebihi 2 GB.
 Silakan beralih ke model berukuran di bawah 2 GB atau pindahkan YMM4 ke jalur yang tidak berisi karakter multibyte。</value></data>
 <data name="VoiceActivityDetection" xml:space="preserve"><value>Deteksi Aktivitas Suara</value></data>
