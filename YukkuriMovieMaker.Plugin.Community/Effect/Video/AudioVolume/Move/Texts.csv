@@ -1,8 +1,8 @@
 ﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
 AudioVolumeMoveEffect,,音量に合わせて移動,Move According to Volume,根据音量移动,根據音量移動,음량에 따라 이동,Mover según el volumen,التحرك حسب مستوى الصوت,Bergerak Sesuai Volume
 X,,X,X,X,X,X,X,X,X
-XDesc,,X軸方向に移動する距離,Distance to Move in X Direction,X轴移动距离,X軸移動距離,X축 이동 거리,Distancia a mover en la dirección X,المسافة للتحرك في اتجاه المحور X,Jarak Pergerakan ke Arah Sumbu X
+XDesc,,X軸方向に移動する距離,Distance to Move in X Direction,X轴方向移动距离,X軸移動距離,X축 이동 거리,Distancia a mover en la dirección X,المسافة للتحرك في اتجاه المحور X,Jarak Pergerakan ke Arah Sumbu X
 Y,,Y,Y,Y,Y,Y,Y,Y,Y
-YDesc,,Y軸方向に移動する距離,Distance to Move in Y Direction,Y轴移动距离,Y軸移動距離,Y축 이동 거리,Distancia a mover en la dirección Y,المسافة للتحرك في اتجاه المحور Y,Jarak Pergerakan ke Arah Sumbu Y
+YDesc,,Y軸方向に移動する距離,Distance to Move in Y Direction,Y轴方向移动距离,Y軸移動距離,Y축 이동 거리,Distancia a mover en la dirección Y,المسافة للتحرك في اتجاه المحور Y,Jarak Pergerakan ke Arah Sumbu Y
 Z,,Z,Z,Z,Z,Z,Z,Z,Z
-ZDesc,,Z軸方向に移動する距離,Distance to Move in Z Direction,Z轴移动距离,Z軸移動距離,Z축 이동 거리,Distancia a mover en la dirección Z,المسافة للتحرك في اتجاه المحور Z,Jarak Pergerakan ke Arah Sumbu Z
+ZDesc,,Z軸方向に移動する距離,Distance to Move in Z Direction,Z轴方向移动距离,Z軸移動距離,Z축 이동 거리,Distancia a mover en la dirección Z,المسافة للتحرك في اتجاه المحور Z,Jarak Pergerakan ke Arah Sumbu Z

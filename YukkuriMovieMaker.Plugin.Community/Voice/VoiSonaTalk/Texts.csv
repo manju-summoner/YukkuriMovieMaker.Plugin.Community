@@ -16,10 +16,10 @@ HowToSetUpText,,"1. VoiSona Talkアプリのメニュー → 編集 → 環境�
 4. この画面の「ユーザー名」「パスワード」「ポート番号」に1.の画面で設定した値を入力する","1. Open the VoiSona Talk app menu → Edit → Preferences → API
 2. Set a password for API access (not the VoiSona account password)
 3. Check ""Enable REST API""
-4. Enter the values set in step 1 into ""User Name"", ""Password"", and ""Port Number"" on this screen","1. 打开 VoiSona Talk 应用程序菜单 → 编辑 → 首选项 → API
-2. 设置用于 API 访问的密码（不是 VoiSona 帐户密码）
-3. 选中“启用 REST API”
-4. 将步骤 1 中设置的值输入到此屏幕上的“用户名”、“密码”和“端口号”中","1. 打開 VoiSona Talk 應用程式選單 → 編輯 → 偏好設定 → API
+4. Enter the values set in step 1 into ""User Name"", ""Password"", and ""Port Number"" on this screen","1. 打开VoiSona Talk应用程序菜单 → 编辑 → 首选项 → API
+2. 设置API访问用的密码（不是VoiSona帐户密码）
+3. 选中“启用REST API”
+4. 将步骤1中设置的值输入到此界面上的“用户名”、“密码”和“端口号”中","1. 打開 VoiSona Talk 應用程式選單 → 編輯 → 偏好設定 → API
 2. 設定用於 API 存取的密碼（不是 VoiSona 帳戶密碼）
 3. 勾選「啟用 REST API」
 4. 將步驟 1 中設定的值輸入到此畫面上的「使用者名稱」、「密碼」和「連接埠號碼」中","1. VoiSona Talk 앱 메뉴 → 편집 → 환경설정 → API 열기
@@ -35,12 +35,12 @@ HowToSetUpText,,"1. VoiSona Talkアプリのメニュー → 編集 → 環境�
 2. Atur kata sandi untuk akses API (bukan kata sandi akun VoiSona)
 3. Centang ""Aktifkan REST API""
 4. Masukkan nilai yang diatur pada langkah 1 ke dalam ""Nama Pengguna"", ""Kata Sandi"", dan ""Nomor Port"" di layar ini",
-HowToSetUpLink,,ヘルプ：VoiSonaTalkの設定方法,Help: How to set up VoiSona Talk,帮助：VoiSona Talk 的设置方法,說明：VoiSona Talk 的設定方法,도움말: VoiSona Talk 설정 방법,Ayuda: Cómo configurar VoiSona Talk,مساعدة: كيفية إعداد VoiSona Talk,Bantuan: Cara mengatur VoiSona Talk,
+HowToSetUpLink,,ヘルプ：VoiSonaTalkの設定方法,Help: How to set up VoiSona Talk,帮助：VoiSona Talk设置方法,說明：VoiSona Talk 的設定方法,도움말: VoiSona Talk 설정 방법,Ayuda: Cómo configurar VoiSona Talk,مساعدة: كيفية إعداد VoiSona Talk,Bantuan: Cara mengatur VoiSona Talk,
 AboutVoiSonaTalk,,VoiSona Talkについて,About VoiSona Talk,关于 VoiSona Talk,關於 VoiSona Talk,VoiSona Talk 정보,Acerca de VoiSona Talk,حول VoiSona Talk,Tentang VoiSona Talk,
 AboutVoiSonaTalkText,,"VoiSona Talkは、株式会社テクノスピーチが提供する音声合成ソフトです。
 利用には別途VoiSona Talk v1.3.4以降のインストールおよびAPI機能の有効化が必要です。","VoiSona Talk is a speech synthesis software provided by TechnoSpeech Inc.
-To use it, you need to install VoiSona Talk v1.3.4 or later and enable the API function separately.","VoiSona Talk 是 TechnoSpeech Inc. 提供的语音合成软件。
-要使用它，您需要另外安装 VoiSona Talk v1.3.4 或更高版本并启用 API 功能。","VoiSona Talk 是 TechnoSpeech Inc. 提供的語音合成軟體。
+To use it, you need to install VoiSona Talk v1.3.4 or later and enable the API function separately.","VoiSona Talk是由TechnoSpeech Inc.提供的语音合成软件。
+使用时需单独安装VoiSona Talk v1.3.4或更高版本并启用API功能。","VoiSona Talk 是 TechnoSpeech Inc. 提供的語音合成軟體。
 要使用它，您需要另外安裝 VoiSona Talk v1.3.4 或更高版本並啟用 API 功能。","VoiSona Talk은 TechnoSpeech Inc.에서 제공하는 음성 합성 소프트웨어입니다.
 사용하려면 VoiSona Talk v1.3.4 이상을 설치하고 API 기능을 별도로 활성화해야 합니다.","VoiSona Talk es un software de síntesis de voz proporcionado por TechnoSpeech Inc.
 Para usarlo, debe instalar VoiSona Talk v1.3.4 o posterior y habilitar la función API por separado.","VoiSona Talk هو برنامج تركيب صوتي تقدمه TechnoSpeech Inc.

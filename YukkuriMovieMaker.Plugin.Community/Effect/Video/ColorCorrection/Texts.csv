@@ -1,13 +1,13 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
-ColorCorrectionEffectContrastName,,コントラスト,Contrast,对比,對比,명도대비,Contraste,تباين,Kontras
+ColorCorrectionEffectContrastName,,コントラスト,Contrast,对比度,對比,명도대비,Contraste,تباين,Kontras
 ColorCorrectionEffectBrightnessName,,輝度,Luminance,亮度,亮度,밝기,Luminosidad,السطوع,Pencahayaan
 ColorCorrectionEffectBrightnessDesc,,輝度,Luminance,亮度,亮度,밝기,Luminancia,سطوع,Pencahayaan
 ColorCorrectionEffectSaturationName,,彩度,Saturation,饱和度,飽和度,채도,Saturación.,التشبع,Saturasi
-ColorCorrectionEffectSaturationDesc,,色の鮮やかさ,Color Vibrancy,颜色鲜艳度,顏色鮮豔度,색의 선명도,Vibración del color,حيوية اللون,Kecerahan warna
+ColorCorrectionEffectSaturationDesc,,色の鮮やかさ,Color Vibrancy,色彩鲜艳度,顏色鮮豔度,색의 선명도,Vibración del color,حيوية اللون,Kecerahan warna
 ColorCorrectionEffectHueRotationName,,色相,Hue,色相,色相,Hue색상,Matiz,التدرج اللوني,Hue
 ColorCorrectionEffectHueRotationDesc,,色相をずらす,Shift hue,色相偏移,色相偏移,Hue 조정,Desplazamiento del tono,تدوير درجة اللون,Koreksi warna
 ColorCorrectionEffectName,,色調補正,Color Correction,色调修正,色調補償,색조 보정,Corrección del matiz,تصحيح الألوان,Koreksi warna
 ColorCorrectionGroupName,,色調補正,Color Correction,色调修正,色調補償,색조 보정,Corrección del matiz,تصحيح اللون,Koreksi warna
 ColorCorrectionEffectLightnessName,,明るさ,Brightness,亮度,亮度,밝기,Brillo,السطوع,Kecerahan
 ColorCorrectionEffectLightnessDesc,,明るさ,Brightness,亮度,亮度,밝기,Brillo,السطوع,Kecerahan
-ColorCorrectionEffectContrastDesc,,明暗の強調度,Emphasis on light and dark,明暗的强调度,明暗的強調度,명암 강조도,Grado de énfasis de claridad/oscuridad,درجة وضوح الضوء والظلام,Penekanan pada terang dan gelap
+ColorCorrectionEffectContrastDesc,,明暗の強調度,Emphasis on light and dark,明暗强调度,明暗的強調度,명암 강조도,Grado de énfasis de claridad/oscuridad,درجة وضوح الضوء والظلام,Penekanan pada terang dan gelap

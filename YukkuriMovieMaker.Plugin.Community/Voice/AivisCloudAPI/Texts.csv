@@ -12,7 +12,12 @@ The higher the value, the closer the voice will be to the emotional expression o
 For example, if the speaker style is 'Cheerful', a higher value will result in a happier and brighter way of speaking.
 
 However, for some speakers or styles, setting the value too high may result in unnatural speech or a robotic tone.
-The maximum value for correct speech varies by speaker and style. Adjust as needed to find the optimal value.","所選說話者風格的情感強度。
+The maximum value for correct speech varies by speaker and style. Adjust as needed to find the optimal value.","所选说话者风格的情感强弱。
+数值越大，声音的情感表达越接近所选说话者风格。
+例如，如果说话者风格为“愉快”，则数值越大，说话方式就会显得越开心明亮。
+
+然而，根据说话者和风格的不同，如果数值过高，可能会导致声音变得奇怪或不自然。
+正常发音的上限值因说话者和风格而异。请按需摸索合适的数值进行调整。","所選說話者風格的情感強度。
 數值越大，語音越接近所選說話者風格的情感表達。
 例如，如果說話者風格是「愉快」，則數值越大，語音聽起來就越開心和明亮。
 
@@ -38,9 +43,9 @@ Misalnya, jika gaya pembicara adalah 'Ceriah', nilai yang lebih tinggi akan meng
 
 Namun, untuk beberapa pembicara atau gaya, mengatur nilai terlalu tinggi dapat menghasilkan ucapan yang tidak alami atau nada robotik.
 Nilai maksimum untuk ucapan yang benar bervariasi tergantung pada pembicara dan gaya. Sesuaikan sesuai kebutuhan untuk menemukan nilai optimal.",
-TempoDynamics,,テンポの緩急,Tempo Dynamics,节奏动态,節奏動態,템포 다이내믹스,Dinámica de tempo,ديناميات الإيقاع,Dinamika Tempo,
-TempoDynamicsDesc,,話す速さの緩急の強弱。数値が大きいほど、より早口で生っぽい抑揚がついた声になります。,"Tempo Dynamics of the speech. The higher the value, the faster and more natural the speech will be.","语速的起伏强度。数值越大，语速越快，语调越自然。","說話速度的起伏強度。數值越大，語速越快，語調越自然。",말하는 속도의 완급 조절 강도. 값이 높을수록 말이 더 빠르고 자연스러워집니다.,"Intensidad de las variaciones en la velocidad del habla. Cuanto mayor sea el valor, más rápida y natural será la voz.",شدة تقلبات سرعة الكلام. كلما زادت القيمة، كانت السرعة أكثر طبيعية وسرعة.,"Intensitas variasi kecepatan bicara. Semakin tinggi nilainya, semakin cepat dan alami suaranya。",
-Pitch,,ピッチ,Pitch,音调,音調,피치,Tono,طبقة الصوت,Nada,
+TempoDynamics,,テンポの緩急,Tempo Dynamics,节奏缓急,節奏動態,템포 다이내믹스,Dinámica de tempo,ديناميات الإيقاع,Dinamika Tempo,
+TempoDynamicsDesc,,話す速さの緩急の強弱。数値が大きいほど、より早口で生っぽい抑揚がついた声になります。,"Tempo Dynamics of the speech. The higher the value, the faster and more natural the speech will be.","语速缓急的强度。数值越大，语速越快，语调越自然。","說話速度的起伏強度。數值越大，語速越快，語調越自然。",말하는 속도의 완급 조절 강도. 값이 높을수록 말이 더 빠르고 자연스러워집니다.,"Intensidad de las variaciones en la velocidad del habla. Cuanto mayor sea el valor, más rápida y natural será la voz.",شدة تقلبات سرعة الكلام. كلما زادت القيمة، كانت السرعة أكثر طبيعية وسرعة.,"Intensitas variasi kecepatan bicara. Semakin tinggi nilainya, semakin cepat dan alami suaranya。",
+Pitch,,ピッチ,Pitch,音高,音調,피치,Tono,طبقة الصوت,Nada,
 PitchDesc,,"声のピッチの高さ。
 数値が大きいほど、より高いピッチの声になります。
 
@@ -49,11 +54,11 @@ PitchDesc,,"声のピッチの高さ。
 The higher the value, the higher the pitch of the voice.
 
 Changing this value from 0.0 can degrade the quality of the synthesized speech.
-It can also significantly reduce the generation speed.","语音音调的高度。
+It can also significantly reduce the generation speed.","语音的音高。
 数值越大，语音的音调越高。
 
-更改此值从 0.0 开始可能会降低合成语音的质量。
-生成速度也可能显著降低。","語音音調的高度。
+如果从0.0开始更改此值，可能会降低语音的合成质量。
+生成速度也可能会显著降低。","語音音調的高度。
 數值越大，語音的音調越高。
 
 更改此值從 0.0 開始可能會降低合成語音的品質。
@@ -74,12 +79,12 @@ Semakin tinggi nilainya, semakin tinggi nada suaranya.
 
 Mengubah nilai ini dari 0.0 dapat menurunkan kualitas ucapan yang disintesis.
 Kecepatan generasi juga dapat berkurang secara signifikan.",
-LeadingSilenceSeconds,,開始無音,Leading Silence Seconds,开始静音秒数,開始靜音秒數,시작 무음 초,Segundos de silencio inicial,ثواني الصمت الأولية,Detik Keheningan Awal,
-LeadingSilenceSecondsDesc,,音声先頭の無音時間の長さ,Length of silence at the beginning of the speech,开始语音前的静音时间长度,開始語音前的靜音時間長度,음성 시작 부분의 무음 시간 길이,Longitud del silencio al inicio del habla,طول الصمت في بداية الكلام,Panjang keheningan di awal ucapan,
-TrailingSilenceSeconds,,終了無音,Trailing Silence Seconds,结束静音秒数,結束靜音秒數,종료 무음 초,Segundos de silencio final,ثواني الصمت النهائية,Detik Keheningan Akhir,
-TrailingSilenceSecondsDesc,,音声末尾の無音時間の長さ,Length of silence at the end of the speech,结束语音后的静音时间长度,結束語音後的靜音時間長度,음성 끝 부분의 무음 시간 길이,Longitud del silencio al final del habla,طول الصمت في نهاية الكلام,Panjang keheningan di akhir ucapan,
-LineBreakSilenceSeconds,,改行無音,Line Break Silence Seconds,换行静音秒数,換行靜音秒數,줄 바꿈 무음 초,Segundos de silencio de salto de línea,ثواني الصمت عند فواصل الأسطر,Detik Keheningan Baris Baru,
-LineBreakSilenceSecondsDesc,,改行時の無音時間の長さ,Length of silence at line breaks,换行时的静音时间长度,換行時的靜音時間長度,줄 바꿈 시의 무음 시간 길이,Longitud del silencio en saltos de línea,طول الصمت عند فواصل الأسطر,Panjang keheningan pada jeda baris,
+LeadingSilenceSeconds,,開始無音,Leading Silence Seconds,起始静默,開始靜音秒數,시작 무음 초,Segundos de silencio inicial,ثواني الصمت الأولية,Detik Keheningan Awal,
+LeadingSilenceSecondsDesc,,音声先頭の無音時間の長さ,Length of silence at the beginning of the speech,语音起始前的静默时长,開始語音前的靜音時間長度,음성 시작 부분의 무음 시간 길이,Longitud del silencio al inicio del habla,طول الصمت في بداية الكلام,Panjang keheningan di awal ucapan,
+TrailingSilenceSeconds,,終了無音,Trailing Silence Seconds,结束静默,結束靜音秒數,종료 무음 초,Segundos de silencio final,ثواني الصمت النهائية,Detik Keheningan Akhir,
+TrailingSilenceSecondsDesc,,音声末尾の無音時間の長さ,Length of silence at the end of the speech,语音结束后的静默时长,結束語音後的靜音時間長度,음성 끝 부분의 무음 시간 길이,Longitud del silencio al final del habla,طول الصمت في نهاية الكلام,Panjang keheningan di akhir ucapan,
+LineBreakSilenceSeconds,,改行無音,Line Break Silence Seconds,换行静默,換行靜音秒數,줄 바꿈 무음 초,Segundos de silencio de salto de línea,ثواني الصمت عند فواصل الأسطر,Detik Keheningan Baris Baru,
+LineBreakSilenceSecondsDesc,,改行時の無音時間の長さ,Length of silence at line breaks,换行时的静默时长,換行時的靜音時間長度,줄 바꿈 시의 무음 시간 길이,Longitud del silencio en saltos de línea,طول الصمت عند فواصل الأسطر,Panjang keheningan pada jeda baris,
 SecUnit,,秒,sec,秒,秒,초,Segundos,ثانية,dtk,
 ApiKey,,APIキー,API Key,API密钥,API金鑰,API 키,Clave API,مفتاح API,Kunci API,
 SpeakerList,,話者一覧,Speakers,说话者列表,說話者列表,화자 목록,Lista de hablantes,قائمة المتحدثين,Daftar Pembicara,
@@ -90,9 +95,9 @@ Add,,追加,Add,添加,新增,추가,Agregar,إضافة,Tambah,
 Delete,,削除,Delete,删除,刪除,삭제,Eliminar,حذف,Hapus,
 MissingUuidMessage,,モデルUUIDまたはAivisHubのモデルページURLを入力してください。,Please enter the Model UUID or the AivisHub model page URL.,请输入模型UUID或AivisHub模型页面URL。,請輸入模型UUID或AivisHub模型頁面URL。,모델 UUID 또는 AivisHub 모델 페이지 URL을 입력하세요.,Por favor, ingrese el UUID del modelo o la URL de la página del modelo de AivisHub.,الرجاء إدخال UUID النموذج أو عنوان URL لصفحة نموذج AivisHub.,Silakan masukkan UUID model atau URL halaman model AivisHub.,
 Error,,エラー,Error,错误,錯誤,오류,Error,خطأ,Kesalahan,
-FetchingModelInfo,,モデル情報を取得中,Fetching Model Info,正在获取模型信息,正在獲取模型資訊,모델 정보 가져오는 중,Obteniendo información del modelo,جاري الحصول على معلومات النموذج,Mendapatkan informasi model,
-ErrorFetchingModelInfo,,モデル情報の取得に失敗しました。,Failed to fetch model info,获取模型信息失败,獲取模型資訊失敗,모델 정보 가져오기 실패,Error al obtener información del modelo,Fallo al obtener información del modelo,Gagal mendapatkan informasi model,
-HowToUseAivisCloudApi,,ヘルプ: AivisCloudAPIの設定方法,Help: How to set up AivisCloudAPI,AivisCloudAPI的设置方法帮助,如何设置AivisCloudAPI的帮助,도움말: AivisCloudAPI 설정 방법,Ayuda: Cómo configurar AivisCloudAPI,مساعدة: كيفية إعداد AivisCloudAPI,Bantuan: Cara mengatur AivisCloudAPI,
+FetchingModelInfo,,モデル情報を取得中,Fetching Model Info,模型信息获取中,正在獲取模型資訊,모델 정보 가져오는 중,Obteniendo información del modelo,جاري الحصول على معلومات النموذج,Mendapatkan informasi model,
+ErrorFetchingModelInfo,,モデル情報の取得に失敗しました。,Failed to fetch model info,模型信息获取失败,獲取模型資訊失敗,모델 정보 가져오기 실패,Error al obtener información del modelo,Fallo al obtener información del modelo,Gagal mendapatkan informasi model,
+HowToUseAivisCloudApi,,ヘルプ: AivisCloudAPIの設定方法,Help: How to set up AivisCloudAPI,帮助：AivisCloudAPI设置方法,如何设置AivisCloudAPI的帮助,도움말: AivisCloudAPI 설정 방법,Ayuda: Cómo configurar AivisCloudAPI,مساعدة: كيفية إعداد AivisCloudAPI,Bantuan: Cara mengatur AivisCloudAPI,
 AnnielBlockedMessage,0: url,"このモデルは使用できません。
 詳細: {0}","This model is not available.
 Details: {0}","该模型不可用。
