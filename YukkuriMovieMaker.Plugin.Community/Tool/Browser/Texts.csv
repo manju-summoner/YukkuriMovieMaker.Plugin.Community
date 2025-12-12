@@ -1,0 +1,34 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
+Browser,,ブラウザ,Browser,浏览器,浏览器,브라우저,Navegador,متصفح,Peramban,
+Back,,戻る,Back,返回,返回,뒤로,Regresar,رجوع,Kembali,
+Forward,,進む,Forward,前进,前進,앞으로,Adelante,تقدم,Maju,
+Refresh,,更新,Refresh,刷新,刷新,새로 고침,Actualizar,تحديث,Muat ulang,
+Stop,,停止,Stop,停止,停止,중지,Detener,إيقاف,Menghentikan,
+AddFavorite,,お気に入りに追加,Add Favorite,添加收藏夹,加入最愛,즐겨찾기 추가,Agregar a favoritos,إضافة إلى المفضلة,Tambah Favorit,
+Menu,,メニュー,Menu,菜单,選單,메뉴,Menú,قائمة,Menu,
+NewTab,,新しいタブ,New Tab,新标签页,新分頁,새 탭,Pestaña nueva,علامة تبويب جديدة,Tab Baru,
+FailedToInitializeBrowser,,"ブラウザの初期化に失敗しました。
+この機能を実行するためには、WebView2 ランタイム（エバーグリーン ブートストラップ）をインストールする必要があります。","Failed to initialize the browser.
+To use this feature, you need to install the WebView2 Runtime (Evergreen Bootstrapper).","浏览器初始化失败。
+要使用此功能，您需要安装 WebView2 运行时（Evergreen Bootstrapper）。","瀏覽器初始化失敗。
+要使用此功能，您需要安裝 WebView2 執行階段（Evergreen Bootstrapper）。","브라우저를 초기화하지 못했습니다.
+이 기능을 사용하려면 WebView2 런타임(에버그린 부트스트래퍼)을 설치해야 합니다.","No se pudo inicializar el navegador.
+Para usar esta función, debe instalar el tiempo de ejecución de WebView2 (Evergreen Bootstrapper).","فشل في تهيئة المتصفح.
+لاستخدام هذه الميزة، تحتاج إلى تثبيت وقت تشغيل WebView2 (Evergreen Bootstrapper).","Gagal menginisialisasi browser.
+Untuk menggunakan fitur ini, Anda perlu menginstal WebView2 Runtime (Evergreen Bootstrapper).",
+NameLabel,,名前,Name,名称,名稱,이름,Nombre,اسم,Nama,
+Directory,,ディレクトリ,Directory,目录,目錄,디렉터리,Directorio,دليل,Direktori,
+DirectoryDesc,,"「/」で区切るとサブフォルダを作成できます。
+例: フォルダ名/サブフォルダ名","You can create subfolders by separating them with “/”.
+Example: FolderName/SubfolderName","您可以通过“/”分隔来创建子文件夹。
+例如：文件夹名/子文件夹名","您可以透過“/”分隔來建立子資料夾。
+例如：資料夾名/子資料夾名","“/”로 구분하여 하위 폴더를 만들 수 있습니다.
+예: 폴더명/하위폴더명","Puede crear subcarpetas separándolas con “/”.
+Ejemplo: NombreCarpeta/SubcarpetaNombre","يمكنك إنشاء مجلدات فرعية بفصلها بـ “/”.
+مثال: اسمالمجلد/اسمالمجلدالفرعي","Anda dapat membuat subfolder dengan memisahkannya dengan “/”.
+Contoh: NamaFolder/NamaSubfolder",
+Delete,,削除,Delete,删除,刪除,삭제,Eliminar,حذف,Hapus,
+Done,,完了,Done,完成,完成,완료,Hecho,تم, Selesai,
+EditFavorite,,お気に入りの編集,Edit Favorite,编辑收藏夹,編輯最愛,즐겨찾기 편집,Editar favorito,تحرير المفضلة,Sunting Favorit,
+Favorite,,お気に入り,Favorite,收藏夹,收藏夾,즐겨찾기,Favorito,المفضلة,Favorit,
+AlwaysShowToolBar,,ツールバーを常に表示,Always show toolbar,始终显示工具栏,始終顯示工具列,툴바 항상 표시,Mostrar siempre la barra de herramientas,إظهار شريط الأدوات دائمًا,Tampilkan selalu bilah alat,

@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
+<data name="Browser" xml:space="preserve"><value>ブラウザ</value></data>
+<data name="Back" xml:space="preserve"><value>戻る</value></data>
+<data name="Forward" xml:space="preserve"><value>進む</value></data>
+<data name="Refresh" xml:space="preserve"><value>更新</value></data>
+<data name="Stop" xml:space="preserve"><value>停止</value></data>
+<data name="AddFavorite" xml:space="preserve"><value>お気に入りに追加</value></data>
+<data name="Menu" xml:space="preserve"><value>メニュー</value></data>
+<data name="NewTab" xml:space="preserve"><value>新しいタブ</value></data>
+<data name="FailedToInitializeBrowser" xml:space="preserve"><value>ブラウザの初期化に失敗しました。
+この機能を実行するためには、WebView2 ランタイム（エバーグリーン ブートストラップ）をインストールする必要があります。</value></data>
+<data name="NameLabel" xml:space="preserve"><value>名前</value></data>
+<data name="Directory" xml:space="preserve"><value>ディレクトリ</value></data>
+<data name="DirectoryDesc" xml:space="preserve"><value>「/」で区切るとサブフォルダを作成できます。
+例: フォルダ名/サブフォルダ名</value></data>
+<data name="Delete" xml:space="preserve"><value>削除</value></data>
+<data name="Done" xml:space="preserve"><value>完了</value></data>
+<data name="EditFavorite" xml:space="preserve"><value>お気に入りの編集</value></data>
+<data name="Favorite" xml:space="preserve"><value>お気に入り</value></data>
+<data name="AlwaysShowToolBar" xml:space="preserve"><value>ツールバーを常に表示</value></data>
+</root>

@@ -1,0 +1,264 @@
+﻿<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Tool.Browser.BrowserView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Tool.Browser"
+             xmlns:webview2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:pc="clr-namespace:YukkuriMovieMaker.Views.Converters;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:pa="clr-namespace:YukkuriMovieMaker.Views.Actions;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:ps="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance Type=local:BrowserViewModel}">
+    <UserControl.Resources>
+        <webview2:CoreWebView2CreationProperties x:Key="DummyWebViewCreationProperties" BrowserExecutableFolder="C:\dummy"/>
+    </UserControl.Resources>
+    <i:Interaction.Behaviors>
+        <pb:DialogBehavior Content="{Binding FavoriteEditorViewModel}" IsModal="True">
+            <pb:DialogBehavior.Style>
+                <Style TargetType="Window">
+                    <Setter Property="Title" Value="{x:Static local:Texts.EditFavorite}"/>
+                    <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+                </Style>
+            </pb:DialogBehavior.Style>
+            <pb:DialogBehavior.ContentTemplate>
+                <DataTemplate>
+                    <local:BrowserFavoriteEditorView/>
+                </DataTemplate>
+            </pb:DialogBehavior.ContentTemplate>
+        </pb:DialogBehavior>
+    </i:Interaction.Behaviors>
+    <Grid>
+        <Grid.Resources>
+            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Width" Value="26"/>
+                <Setter Property="Padding" Value="3"/>
+            </Style>
+            <Style x:Key="HideOnDisabledButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Style.Triggers>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="MiniToolBarGridStyle" TargetType="Grid">
+                <Setter Property="IsHitTestVisible" Value="False"/>
+                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                <Style.Triggers>
+                    <DataTrigger Value="True">
+                        <DataTrigger.Binding>
+                            <MultiBinding Converter="{pc:AnyMultiValueConverter}">
+                                <Binding ElementName="toolBar" Path="IsMouseOver" />
+                                <Binding ElementName="toolBar" Path="IsKeyboardFocusWithin"/>
+                                <Binding Path="IsMenuOpened"/>
+                                <Binding Source="{x:Static local:BrowserSettings.Default}" Path="IsAlwaysShowToolBar"/>
+                            </MultiBinding>
+                        </DataTrigger.Binding>
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="0"
+                                            Duration="0:0:0.15"
+                                            DecelerationRatio="0.5" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
+                        <DataTrigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1"
+                                            Duration="0:0:0.15"
+                                            AccelerationRatio="0.5" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.ExitActions>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="LargeToolBarGridStyle" TargetType="Grid">
+                <Setter Property="Height" Value="12"/>
+                <Style.Triggers>
+                    <DataTrigger Value="True">
+                        <DataTrigger.Binding>
+                            <MultiBinding Converter="{pc:AnyMultiValueConverter}">
+                                <Binding ElementName="toolBar" Path="IsMouseOver"/>
+                                <Binding ElementName="toolBar" Path="IsKeyboardFocusWithin"/>
+                                <Binding Path="IsMenuOpened"/>
+                                <Binding Source="{x:Static local:BrowserSettings.Default}" Path="IsAlwaysShowToolBar"/>
+                            </MultiBinding>
+                        </DataTrigger.Binding>
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                                            Storyboard.TargetProperty="Height"
+                                            To="26"
+                                            Duration="0:0:0.15"
+                                            DecelerationRatio="0.5" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
+                        <DataTrigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                                            Storyboard.TargetProperty="Height"
+                                            To="12"
+                                            Duration="0:0:0.15"
+                                            AccelerationRatio="0.5" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.ExitActions>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0" Name="toolBar" Style="{DynamicResource LargeToolBarGridStyle}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="{DynamicResource arrow-left}" Grid.Column="0" Command="{Binding GoBackCommand}" ToolTip="{x:Static local:Texts.Back}"/>
+            <Button Content="{DynamicResource arrow-right}" Grid.Column="1" Command="{Binding GoForwardCommand}" ToolTip="{x:Static local:Texts.Forward}" Style="{StaticResource HideOnDisabledButtonStyle}"/>
+            <Button Content="{DynamicResource ReloadMonochrome}" Grid.Column="2" Command="{Binding RefreshCommand}" ToolTip="{x:Static local:Texts.Refresh}"/>
+            <Button Content="{DynamicResource close}" Grid.Column="2" Command="{Binding StopCommand}" ToolTip="{x:Static local:Texts.Stop}" Style="{StaticResource HideOnDisabledButtonStyle}"/>
+            <TextBox Grid.Column="3" Text="{Binding Location,Mode=OneWay}" VerticalContentAlignment="Center" Padding="3,0,0,0">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="GotFocus">
+                        <local:SelectAllTextAction/>
+                    </i:EventTrigger>
+                    <i:KeyTrigger Key="Enter">
+                        <pa:ClearFocusAction/>
+                    </i:KeyTrigger>
+                    <i:EventTrigger EventName="LostFocus">
+                        <i:InvokeCommandAction Command="{Binding NavigateCommand}" 
+                                               CommandParameter="{Binding Text, RelativeSource={RelativeSource AncestorType=TextBox}}"
+                                               PassEventArgsToCommand="False"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </TextBox>
+            <Button Grid.Column="4" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.AddFavorite}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Content" Value="{DynamicResource star-outline}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                <Setter Property="Content" Value="{DynamicResource star}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button Content="{DynamicResource Plus}" Grid.Column="5" Command="{Binding CreateNewWindowCommand}" ToolTip="{x:Static local:Texts.NewTab}"/>
+            <c:DropDownButton Content="{DynamicResource menu}" Grid.Column="6" ToolTip="{x:Static local:Texts.Menu}" IsChecked="{Binding IsMenuOpened,Mode=TwoWay}">
+                <c:DropDownButton.Style>
+                    <Style TargetType="{x:Type c:DropDownButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                        
+                    </Style>
+                </c:DropDownButton.Style>
+                <c:DropDownButton.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="{x:Static local:Texts.NewTab}" Command="{Binding CreateNewWindowCommand}"/>
+                        <MenuItem Header="{x:Static local:Texts.Favorite}" ItemsSource="{Binding FavoriteDirectoryViewModel.Items}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Style.Triggers>
+                                        <Trigger Property="HasItems" Value="False">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                            <MenuItem.Resources>
+                                <Style TargetType="MenuItem">
+                                    <Setter Property="Header" Value="{Binding Display}"/>
+                                    <Setter Property="ItemsSource" Value="{Binding Items,FallbackValue={x:Null}}"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="HasItems" Value="False">
+                                            <Setter Property="Header" Value="{Binding}"/>
+                                            <Setter Property="Command" Value="{Binding DataContext.NavigateCommand,RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <Setter Property="CommandParameter" Value="{Binding Url}"/>
+                                            <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
+                                            <Setter Property="HeaderTemplate">
+                                                <Setter.Value>
+                                                    <DataTemplate>
+                                                        <Grid Height="22">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition/>
+                                                                <ColumnDefinition/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock Text="{Binding Display}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
+                                                            <Button Content="{DynamicResource pencil}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="ToolTip" Value="{Binding Url}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Resources>
+                        </MenuItem>
+                        <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.AlwaysShowToolBar}" IsCheckable="True" IsChecked="{Binding Source={x:Static local:BrowserSettings.Default},Path=IsAlwaysShowToolBar}"/>
+                    </ContextMenu>
+                </c:DropDownButton.ContextMenu>
+            </c:DropDownButton>
+
+            <!-- ツールバーの縮小表示 -->
+            <Grid  Grid.Column="0" Grid.ColumnSpan="7"  Style="{DynamicResource MiniToolBarGridStyle}">
+                <TextBlock Text="{Binding Location}" Margin="6,0,6,0" VerticalAlignment="Center" FontSize="12"/>
+            </Grid>
+        </Grid>
+        
+        <webview2:WebView2 Grid.Row="1" x:Name="webView">
+            <webview2:WebView2.Style>
+                <Style TargetType="webview2:WebView2">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsFailedToInitializeWebView2}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </webview2:WebView2.Style>
+        </webview2:WebView2>
+
+        <!-- WebView2 初期化失敗時用メッセージ -->
+        <Grid Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" Grid.RowSpan="2">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsFailedToInitializeWebView2}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="12" TextWrapping="Wrap">
+                <Hyperlink Command="{Binding Source={x:Static ps:CommandSettings.Default},Path=[OpenUri]}" CommandParameter="https://developer.microsoft.com/ja-jp/microsoft-edge/webview2">
+                    <Run Text="{Binding Path=FailedToInitializeWebView2Message,Mode=OneWay}"/>
+                </Hyperlink>
+            </TextBlock>
+        </Grid>
+    </Grid>
+</UserControl>
