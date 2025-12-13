@@ -116,7 +116,7 @@
                 </Button>
             </ToolBar>
         </ToolBarTray>
-        <TextBox Grid.Row="1" Text="{Binding Text,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}" FontSize="{Binding FontSize}">
+        <TextBox Grid.Row="1" Text="{Binding Text,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}" FontSize="{Binding FontSize}" Padding="3">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="PreviewMouseWheel">
                     <i:InvokeCommandAction Command="{Binding ChangeFontSizeCommand}" PassEventArgsToCommand="True"/>
