@@ -19,7 +19,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         public bool IsFailedToInitializeWebView2 { get; private set; }
         public string FailedToInitializeWebView2Message { get; private set; } = string.Empty;
 
+        public string Title { get; private set => Set(ref field, value); } = Texts.Browser;
         public string Location { get; private set => Set(ref field, value, nameof(Location), nameof(IsFavorite)); } = string.Empty;
+
         public bool IsFavorite => BrowserSettings.Default.Favorites.Any(x => x.Url == Location);
         public bool IsMenuOpened { get; set => Set(ref field, value); } = false;
         public ActionCommand CreateNewWindowCommand { get; }
@@ -103,9 +105,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             webView2.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
             webView2.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
             webView2.CoreWebView2.SourceChanged += CoreWebView2_SourceChanged;
+            webView2.CoreWebView2.DocumentTitleChanged += CoreWebView2_DocumentTitleChanged;
 
             ApplyState();
-            Location = NormalizeUrl(webView2.CoreWebView2.Source);
 
             webView2TCS?.SetResult(webView2Service);
             webView2TCS = null;
@@ -117,6 +119,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             webView2?.CoreWebView2.NavigationStarting -= CoreWebView2_NavigationStarting;
             webView2?.CoreWebView2.NavigationCompleted -= CoreWebView2_NavigationCompleted;
             webView2?.CoreWebView2.SourceChanged -= CoreWebView2_SourceChanged;
+            webView2?.CoreWebView2.DocumentTitleChanged -= CoreWebView2_DocumentTitleChanged;
 
             webView2 = null;
         }
@@ -167,6 +170,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             OnPropertyChanged(nameof(IsFavorite));
             RefreshCommandCanExecutions();
         }
+
+        private void CoreWebView2_DocumentTitleChanged(object? sender, object e)
+        {
+            Title = webView2?.CoreWebView2.DocumentTitle ?? Texts.Browser;
+        }
         public void FailToInitializeWebView2(string message)
         {
             IsFailedToInitializeWebView2 = true;
@@ -202,12 +210,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             if (NormalizeUrl(webView2?.CoreWebView2.Source ?? string.Empty) != url)
                 webView2?.CoreWebView2.Navigate(url);
             webView2?.ZoomFactor = state.Zoom;
+
+            Title = webView2?.CoreWebView2.DocumentTitle ?? Texts.Browser;
+            Location = NormalizeUrl(webView2?.CoreWebView2.Source ?? string.Empty);
         }
 
         public ToolState SaveState()
         {
             return new ToolState
             {
+                Title = Title,
                 SavedState = Json.Json.GetJsonText(new WebBrowserSavedState(
                     Location: this.Location,
                     Zoom: webView2?.ZoomFactor ?? 1.0
