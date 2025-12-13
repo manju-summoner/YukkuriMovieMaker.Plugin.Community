@@ -16,6 +16,7 @@
              d:DataContext="{d:DesignInstance Type=local:BrowserViewModel}">
     <UserControl.Resources>
         <webview2:CoreWebView2CreationProperties x:Key="DummyWebViewCreationProperties" BrowserExecutableFolder="C:\dummy"/>
+        <webview2:CoreWebView2CreationProperties x:Key="WebViewCreationProperties" UserDataFolder="{x:Static local:BrowserViewModel.UserDataFolderPath}"/>
     </UserControl.Resources>
     <i:Interaction.Behaviors>
         <pb:DialogBehavior Content="{Binding FavoriteEditorViewModel}" IsModal="True">
@@ -229,8 +230,8 @@
                 <TextBlock Text="{Binding Location}" Margin="6,0,6,0" VerticalAlignment="Center" FontSize="12"/>
             </Grid>
         </Grid>
-        
-        <webview2:WebView2 Grid.Row="1" x:Name="webView">
+
+        <webview2:WebView2 Grid.Row="1" x:Name="webView" CreationProperties="{StaticResource WebViewCreationProperties}">
             <webview2:WebView2.Style>
                 <Style TargetType="webview2:WebView2">
                     <Style.Triggers>

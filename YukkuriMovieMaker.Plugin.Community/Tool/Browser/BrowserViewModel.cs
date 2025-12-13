@@ -1,6 +1,7 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Text.RegularExpressions;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Settings;
@@ -9,6 +10,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 {
     internal partial class BrowserViewModel : Bindable, IToolViewModel
     {
+        public static string UserDataFolderPath { get; } = Path.Combine(AppDirectories.UserDirectory, "WebView2");
+
         TaskCompletionSource<WebView2>? webView2TCS;
         WebView2? webView2;
         bool isLoading;
