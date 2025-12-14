@@ -8,6 +8,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
 {
     internal class ElevenLabsTTSModels
     {
-        public static string[] Models { get; } = ["eleven_multilingual_v2", "eleven_flash_v2_5"];
+        public static string[] Models { get; } = ["eleven_v3", "eleven_multilingual_v2", "eleven_flash_v2_5"];
     }
 }
