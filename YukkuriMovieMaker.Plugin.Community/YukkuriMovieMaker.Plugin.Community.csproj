@@ -59,7 +59,7 @@
     <PackageReference Include="Whisper.net.Runtime.OpenVino" Version="1.9.0" />
     <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.0" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
-	<PackageReference Include="System.Management" Version="10.0.0" />
+	<PackageReference Include="System.Management" Version="10.0.1" />
   </ItemGroup>
 
   <!--ビルド後、YMM4フォルダに関連ファイルをコピーする-->
