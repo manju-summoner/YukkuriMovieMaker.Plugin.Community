@@ -382,7 +382,7 @@
                 <pc:DropDownButton.ContextMenu>
                     <ContextMenu>
                         <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource Plus}"/>
-                        <MenuItem Header="{x:Static local:Texts.Favorite}" ItemsSource="{Binding FavoriteDirectoryViewModel.Items}">
+                        <MenuItem Header="{x:Static local:Texts.Favorite}" ItemsSource="{Binding FavoriteDirectoryViewModel.Items}" Icon="{DynamicResource star}">
                             <MenuItem.Style>
                                 <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                     <Style.Triggers>

@@ -104,7 +104,7 @@
                 <c:DropDownButton.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="{x:Static local:Texts.NewTab}" Command="{Binding CreateNewWindowCommand}"/>
-                        <MenuItem Header="{x:Static local:Texts.Favorite}" ItemsSource="{Binding FavoriteDirectoryViewModel.Items}">
+                        <MenuItem Header="{x:Static local:Texts.Favorite}" ItemsSource="{Binding FavoriteDirectoryViewModel.Items}" Icon="{DynamicResource star}">
                             <MenuItem.Style>
                                 <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                     <Style.Triggers>
