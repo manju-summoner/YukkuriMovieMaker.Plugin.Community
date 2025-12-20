@@ -77,5 +77,4 @@
 <data name="Done" xml:space="preserve"><value>完成</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>编辑收藏夹</value></data>
 <data name="Favorite" xml:space="preserve"><value>收藏夹</value></data>
-<data name="AlwaysShowToolBar" xml:space="preserve"><value>始终显示工具栏</value></data>
 </root>

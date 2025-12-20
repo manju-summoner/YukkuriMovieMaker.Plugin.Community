@@ -68,7 +68,5 @@
 <data name="FailedToSaveFile" xml:space="preserve"><value>파일 저장에 실패했습니다.</value></data>
 <data name="Error" xml:space="preserve"><value>오류</value></data>
 <data name="Untitled" xml:space="preserve"><value>제목 없음</value></data>
-<data name="AlwaysShowToolBar" xml:space="preserve"><value>툴바 항상 표시</value></data>
-<data name="AutoHideToolBar" xml:space="preserve"><value>툴바 자동 숨기기</value></data>
 <data name="OpenNewTab" xml:space="preserve"><value>새 탭 열기</value></data>
 </root>

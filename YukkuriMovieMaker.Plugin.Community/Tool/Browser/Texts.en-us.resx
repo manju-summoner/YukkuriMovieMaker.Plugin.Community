@@ -77,5 +77,4 @@ Example: FolderName/SubfolderName</value></data>
 <data name="Done" xml:space="preserve"><value>Done</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>Edit Favorite</value></data>
 <data name="Favorite" xml:space="preserve"><value>Favorite</value></data>
-<data name="AlwaysShowToolBar" xml:space="preserve"><value>Always show toolbar</value></data>
 </root>

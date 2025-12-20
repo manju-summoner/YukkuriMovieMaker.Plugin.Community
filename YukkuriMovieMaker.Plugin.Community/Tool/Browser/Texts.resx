@@ -77,5 +77,4 @@
 <data name="Done" xml:space="preserve"><value>完了</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>お気に入りの編集</value></data>
 <data name="Favorite" xml:space="preserve"><value>お気に入り</value></data>
-<data name="AlwaysShowToolBar" xml:space="preserve"><value>ツールバーを常に表示</value></data>
 </root>

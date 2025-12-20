@@ -77,5 +77,4 @@ Ejemplo: NombreCarpeta/SubcarpetaNombre</value></data>
 <data name="Done" xml:space="preserve"><value>Hecho</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>Editar favorito</value></data>
 <data name="Favorite" xml:space="preserve"><value>Favorito</value></data>
-<data name="AlwaysShowToolBar" xml:space="preserve"><value>Mostrar siempre la barra de herramientas</value></data>
 </root>

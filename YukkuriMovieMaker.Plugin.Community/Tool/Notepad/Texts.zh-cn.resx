@@ -68,7 +68,5 @@
 <data name="FailedToSaveFile" xml:space="preserve"><value>无法保存文件。</value></data>
 <data name="Error" xml:space="preserve"><value>错误</value></data>
 <data name="Untitled" xml:space="preserve"><value>未命名</value></data>
-<data name="AlwaysShowToolBar" xml:space="preserve"><value>始终显示工具栏</value></data>
-<data name="AutoHideToolBar" xml:space="preserve"><value>自动隐藏工具栏</value></data>
 <data name="OpenNewTab" xml:space="preserve"><value>打开新标签页</value></data>
 </root>

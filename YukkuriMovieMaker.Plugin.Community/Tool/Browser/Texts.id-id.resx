@@ -77,5 +77,4 @@ Contoh: NamaFolder/NamaSubfolder</value></data>
 <data name="Done" xml:space="preserve"><value>Selesai</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>Sunting Favorit</value></data>
 <data name="Favorite" xml:space="preserve"><value>Favorit</value></data>
-<data name="AlwaysShowToolBar" xml:space="preserve"><value>Tampilkan selalu bilah alat</value></data>
 </root>

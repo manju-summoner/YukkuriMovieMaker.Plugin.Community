@@ -39,7 +39,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public ICommand ChangeFontSizeCommand { get; }
         public ICommand OpenCommand { get; }
         public ICommand SaveCommand { get; }
-        public ICommand TogglePinCommand { get; }
         public ICommand OpenNewTabCommand { get; }
 
         public NotepadViewModel()
@@ -98,12 +97,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                         Log.Default.Write(message, ex);
                         MessageBox.Show($"{Texts.FailedToSaveFile}\r\n{ex.Message}", Texts.Error, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
-                });
-            TogglePinCommand = new ActionCommand(
-                _ => true,
-                _ =>
-                {
-                    NotepadSettings.Default.IsAlwaysShowToolBar = !NotepadSettings.Default.IsAlwaysShowToolBar;
                 });
             OpenNewTabCommand = new ActionCommand(
                 _ => true,

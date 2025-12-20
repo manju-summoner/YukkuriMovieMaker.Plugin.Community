@@ -47,88 +47,13 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
-            <Style x:Key="MiniToolBarGridStyle" TargetType="Grid">
-                <Setter Property="IsHitTestVisible" Value="False"/>
-                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
-                <Style.Triggers>
-                    <DataTrigger Value="True">
-                        <DataTrigger.Binding>
-                            <MultiBinding Converter="{pc:AnyMultiValueConverter}">
-                                <Binding ElementName="toolBar" Path="IsMouseOver" />
-                                <Binding ElementName="toolBar" Path="IsKeyboardFocusWithin"/>
-                                <Binding Path="IsMenuOpened"/>
-                                <Binding Source="{x:Static local:BrowserSettings.Default}" Path="IsAlwaysShowToolBar"/>
-                            </MultiBinding>
-                        </DataTrigger.Binding>
-                        <DataTrigger.EnterActions>
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation
-                                            Storyboard.TargetProperty="Opacity"
-                                            To="0"
-                                            Duration="0:0:0.15"
-                                            DecelerationRatio="0.5" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </DataTrigger.EnterActions>
-                        <DataTrigger.ExitActions>
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation
-                                            Storyboard.TargetProperty="Opacity"
-                                            To="1"
-                                            Duration="0:0:0.15"
-                                            AccelerationRatio="0.5" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </DataTrigger.ExitActions>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-            <Style x:Key="LargeToolBarGridStyle" TargetType="Grid">
-                <Setter Property="Height" Value="12"/>
-                <Style.Triggers>
-                    <DataTrigger Value="True">
-                        <DataTrigger.Binding>
-                            <MultiBinding Converter="{pc:AnyMultiValueConverter}">
-                                <Binding ElementName="toolBar" Path="IsMouseOver"/>
-                                <Binding ElementName="toolBar" Path="IsKeyboardFocusWithin"/>
-                                <Binding Path="IsMenuOpened"/>
-                                <Binding Source="{x:Static local:BrowserSettings.Default}" Path="IsAlwaysShowToolBar"/>
-                            </MultiBinding>
-                        </DataTrigger.Binding>
-                        <DataTrigger.EnterActions>
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation
-                                            Storyboard.TargetProperty="Height"
-                                            To="26"
-                                            Duration="0:0:0.15"
-                                            DecelerationRatio="0.5" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </DataTrigger.EnterActions>
-                        <DataTrigger.ExitActions>
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation
-                                            Storyboard.TargetProperty="Height"
-                                            To="12"
-                                            Duration="0:0:0.15"
-                                            AccelerationRatio="0.5" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </DataTrigger.ExitActions>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
-        <Grid Grid.Row="0" Name="toolBar" Style="{DynamicResource LargeToolBarGridStyle}">
+        <Grid Grid.Row="0" Name="toolBar" Height="26">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -173,7 +98,7 @@
             <c:DropDownButton Content="{DynamicResource menu}" Grid.Column="6" ToolTip="{x:Static local:Texts.Menu}" IsChecked="{Binding IsMenuOpened,Mode=TwoWay}">
                 <c:DropDownButton.Style>
                     <Style TargetType="{x:Type c:DropDownButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
-                        
+
                     </Style>
                 </c:DropDownButton.Style>
                 <c:DropDownButton.ContextMenu>
@@ -219,16 +144,9 @@
                                 </Style>
                             </MenuItem.Resources>
                         </MenuItem>
-                        <Separator/>
-                        <MenuItem Header="{x:Static local:Texts.AlwaysShowToolBar}" IsCheckable="True" IsChecked="{Binding Source={x:Static local:BrowserSettings.Default},Path=IsAlwaysShowToolBar}"/>
                     </ContextMenu>
                 </c:DropDownButton.ContextMenu>
             </c:DropDownButton>
-
-            <!-- ツールバーの縮小表示 -->
-            <Grid  Grid.Column="0" Grid.ColumnSpan="7"  Style="{DynamicResource MiniToolBarGridStyle}">
-                <TextBlock Text="{Binding Location}" Margin="6,0,6,0" VerticalAlignment="Center" FontSize="12"/>
-            </Grid>
         </Grid>
 
         <webview2:WebView2 Grid.Row="1" x:Name="webView" CreationProperties="{StaticResource WebViewCreationProperties}">

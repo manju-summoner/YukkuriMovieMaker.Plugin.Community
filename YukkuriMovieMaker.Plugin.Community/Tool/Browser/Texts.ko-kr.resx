@@ -77,5 +77,4 @@
 <data name="Done" xml:space="preserve"><value>완료</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>즐겨찾기 편집</value></data>
 <data name="Favorite" xml:space="preserve"><value>즐겨찾기</value></data>
-<data name="AlwaysShowToolBar" xml:space="preserve"><value>툴바 항상 표시</value></data>
 </root>

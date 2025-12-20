@@ -7,8 +7,6 @@
         public override bool HasSettingView => false;
         public override object? SettingView => throw new NotImplementedException();
 
-        public bool IsAlwaysShowToolBar { get; set => Set(ref field, value); } = true;
-
         public override void Initialize()
         {
         }

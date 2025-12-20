@@ -68,7 +68,5 @@
 <data name="FailedToSaveFile" xml:space="preserve"><value>Failed to save file.</value></data>
 <data name="Error" xml:space="preserve"><value>Error</value></data>
 <data name="Untitled" xml:space="preserve"><value>Untitled</value></data>
-<data name="AlwaysShowToolBar" xml:space="preserve"><value>Always show toolbar</value></data>
-<data name="AutoHideToolBar" xml:space="preserve"><value>Auto-hide toolbar</value></data>
 <data name="OpenNewTab" xml:space="preserve"><value>Open New Tab</value></data>
 </root>

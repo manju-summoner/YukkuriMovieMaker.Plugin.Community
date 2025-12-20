@@ -22,66 +22,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid.Resources>
-            <Style TargetType="ToolBar" BasedOn="{StaticResource {x:Type ToolBar}}">
-                <Setter Property="Tag">
-                    <Setter.Value>
-                        <sys:Double>0</sys:Double>
-                    </Setter.Value>
-                </Setter>
-                <Setter Property="Opacity" Value="0"/>
-                <Setter Property="Height">
-                    <Setter.Value>
-                        <MultiBinding Converter="{local:ToolBarHeightConverter}">
-                            <Binding RelativeSource="{RelativeSource Mode=Self}" Path="Tag"/>
-                            <Binding Source="{x:Static ps:YMMSettings.Default}" Path="ToolBarHeight"/>
-                        </MultiBinding>
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <DataTrigger Value="True">
-                        <DataTrigger.Binding>
-                            <MultiBinding Converter="{pc:AnyMultiValueConverter}">
-                                <Binding ElementName="ToolBar" Path="IsMouseOver"/>
-                                <Binding Source="{x:Static local:NotepadSettings.Default}" Path="IsAlwaysShowToolBar"/>
-                            </MultiBinding>
-                        </DataTrigger.Binding>
-                        <DataTrigger.EnterActions>
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation
-                                            Storyboard.TargetProperty="Tag"
-                                            To="1"
-                                            Duration="0:0:0.15"
-                                            DecelerationRatio="0.5" />
-                                    <DoubleAnimation
-                                            Storyboard.TargetProperty="Opacity"
-                                            To="1"
-                                            Duration="0:0:0.15"
-                                            DecelerationRatio="0.5" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </DataTrigger.EnterActions>
-                        <DataTrigger.ExitActions>
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation
-                                            Storyboard.TargetProperty="Tag"
-                                            To="0"
-                                            Duration="0:0:0.15"
-                                            AccelerationRatio="0.5" />
-                                    <DoubleAnimation
-                                            Storyboard.TargetProperty="Opacity"
-                                            To="0"
-                                            Duration="0:0:0.15"
-                                            AccelerationRatio="0.5" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </DataTrigger.ExitActions>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-        </Grid.Resources>
         <ToolBarTray Grid.Row="0" Name="ToolBar">
             <i:Interaction.Triggers>
                 <pt:PreviewMouseWheelEventTrigger ModifierKeys="Ctrl" DeltaMode="Down" Handled="True">
@@ -91,29 +31,12 @@
                     <i:InvokeCommandAction Command="{Binding Source={x:Static ps:CommandSettings.Default},Path=[SizeUpToolBar]}" PassEventArgsToCommand="True"/>
                 </pt:PreviewMouseWheelEventTrigger>
             </i:Interaction.Triggers>
-            <ToolBar>
+            <ToolBar Height="{Binding Source={x:Static ps:YMMSettings.Default},Path=ToolBarHeight}">
                 <Button Content="{DynamicResource Plus}" Command="{Binding OpenNewTabCommand}" ToolTip="{x:Static local:Texts.OpenNewTab}"/>
                 <Button Content="{DynamicResource Folder}" Command="{Binding OpenCommand}" ToolTip="{x:Static local:Texts.Open}"/>
                 <Separator/>
                 <Button Content="{DynamicResource Save}" Command="{Binding SaveCommand}" CommandParameter="{Binding FilePath}" ToolTip="{x:Static local:Texts.Save}"/>
                 <Button Content="{DynamicResource content-save-edit}" Command="{Binding SaveCommand}" ToolTip="{x:Static local:Texts.SaveAs}"/>
-                <Separator/>
-                <Button Grid.Column="1" Padding="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" BorderBrush="Transparent" Command="{Binding TogglePinCommand}" Background="Transparent">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Source={x:Static local:NotepadSettings.Default},Path=IsAlwaysShowToolBar}" Value="True">
-                                    <Setter Property="Content" Value="{DynamicResource pin}"/>
-                                    <Setter Property="ToolTip" Value="{x:Static local:Texts.AutoHideToolBar}"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Source={x:Static local:NotepadSettings.Default},Path=IsAlwaysShowToolBar}" Value="False">
-                                    <Setter Property="Content" Value="{DynamicResource pin-off}"/>
-                                    <Setter Property="ToolTip" Value="{x:Static local:Texts.AlwaysShowToolBar}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
             </ToolBar>
         </ToolBarTray>
         <TextBox Grid.Row="1" Text="{Binding Text,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}" FontSize="{Binding FontSize}" Padding="3">

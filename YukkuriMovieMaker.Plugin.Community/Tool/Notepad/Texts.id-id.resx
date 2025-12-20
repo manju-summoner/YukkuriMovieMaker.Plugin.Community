@@ -68,7 +68,5 @@
 <data name="FailedToSaveFile" xml:space="preserve"><value>Gagal menyimpan file.</value></data>
 <data name="Error" xml:space="preserve"><value>Kesalahan</value></data>
 <data name="Untitled" xml:space="preserve"><value>Tanpa judul</value></data>
-<data name="AlwaysShowToolBar" xml:space="preserve"><value>Tampilkan selalu bilah alat</value></data>
-<data name="AutoHideToolBar" xml:space="preserve"><value>Sembunyikan bilah alat secara otomatis</value></data>
 <data name="OpenNewTab" xml:space="preserve"><value>Buka Tab Baru</value></data>
 </root>
