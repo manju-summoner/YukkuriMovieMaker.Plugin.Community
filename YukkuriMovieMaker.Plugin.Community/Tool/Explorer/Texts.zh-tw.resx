@@ -93,4 +93,10 @@
 <data name="Folder" xml:space="preserve"><value>資料夾</value></data>
 <data name="Other" xml:space="preserve"><value>其他</value></data>
 <data name="Filter" xml:space="preserve"><value>篩選器</value></data>
+<data name="SwitchViewMenuHeader" xml:space="preserve"><value>切換檢視 (_V)</value></data>
+<data name="ListView" xml:space="preserve"><value>列表檢視</value></data>
+<data name="WrapListView" xml:space="preserve"><value>換行列表檢視</value></data>
+<data name="ThumbnailView" xml:space="preserve"><value>縮圖檢視</value></data>
+<data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>放大檢視</value></data>
+<data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>縮小檢視</value></data>
 </root>

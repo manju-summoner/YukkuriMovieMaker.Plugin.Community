@@ -93,4 +93,10 @@
 <data name="Folder" xml:space="preserve"><value>مجلد</value></data>
 <data name="Other" xml:space="preserve"><value>آخر</value></data>
 <data name="Filter" xml:space="preserve"><value>مرشح</value></data>
+<data name="SwitchViewMenuHeader" xml:space="preserve"><value>تبديل العرض (_V)</value></data>
+<data name="ListView" xml:space="preserve"><value>عرض القائمة</value></data>
+<data name="WrapListView" xml:space="preserve"><value>عرض القائمة مع التف</value></data>
+<data name="ThumbnailView" xml:space="preserve"><value>عرض الصور المصغرة</value></data>
+<data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>تكبير العرض</value></data>
+<data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>تصغير العرض</value></data>
 </root>

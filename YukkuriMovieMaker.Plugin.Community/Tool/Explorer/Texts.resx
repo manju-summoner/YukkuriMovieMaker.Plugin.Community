@@ -93,4 +93,10 @@
 <data name="Folder" xml:space="preserve"><value>フォルダ</value></data>
 <data name="Other" xml:space="preserve"><value>その他</value></data>
 <data name="Filter" xml:space="preserve"><value>フィルター</value></data>
+<data name="SwitchViewMenuHeader" xml:space="preserve"><value>ビューの切り替え (_V)</value></data>
+<data name="ListView" xml:space="preserve"><value>リスト</value></data>
+<data name="WrapListView" xml:space="preserve"><value>一覧</value></data>
+<data name="ThumbnailView" xml:space="preserve"><value>サムネイル</value></data>
+<data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>ビューを拡大</value></data>
+<data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>ビューを縮小</value></data>
 </root>

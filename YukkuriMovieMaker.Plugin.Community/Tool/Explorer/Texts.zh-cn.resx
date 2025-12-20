@@ -92,4 +92,10 @@
 <data name="Folder" xml:space="preserve"><value>文件夹</value></data>
 <data name="Other" xml:space="preserve"><value>其他</value></data>
 <data name="Filter" xml:space="preserve"><value>筛选器</value></data>
+<data name="SwitchViewMenuHeader" xml:space="preserve"><value>切换视图 (_V)</value></data>
+<data name="ListView" xml:space="preserve"><value>列表视图</value></data>
+<data name="WrapListView" xml:space="preserve"><value>换行列表视图</value></data>
+<data name="ThumbnailView" xml:space="preserve"><value>缩略图视图</value></data>
+<data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>放大视图</value></data>
+<data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>缩小视图</value></data>
 </root>

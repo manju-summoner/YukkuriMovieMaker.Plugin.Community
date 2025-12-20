@@ -93,4 +93,9 @@ Contoh: NamaFolder/NamaSubfolder</value></data>
 <data name="Folder" xml:space="preserve"><value>Folde</value></data>
 <data name="Other" xml:space="preserve"><value>Lainnya</value></data>
 <data name="Filter" xml:space="preserve"><value>Filter</value></data>
+<data name="SwitchViewMenuHeader" xml:space="preserve"><value>Beralih Tampilan (_V)</value></data>
+<data name="ListView" xml:space="preserve"><value>Tampilan Daftar</value></data>
+<data name="ThumbnailView" xml:space="preserve"><value>Tampilan Thumbnail</value></data>
+<data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>Perbesar Ukuran Tampilan</value></data>
+<data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>Perkecil Ukuran Tampilan</value></data>
 </root>

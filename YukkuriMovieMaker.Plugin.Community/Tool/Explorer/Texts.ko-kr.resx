@@ -93,4 +93,10 @@
 <data name="Folder" xml:space="preserve"><value>폴더</value></data>
 <data name="Other" xml:space="preserve"><value>기타</value></data>
 <data name="Filter" xml:space="preserve"><value>필터</value></data>
+<data name="SwitchViewMenuHeader" xml:space="preserve"><value>뷰 전환 (_V)</value></data>
+<data name="ListView" xml:space="preserve"><value>목록 보기</value></data>
+<data name="WrapListView" xml:space="preserve"><value>목록 보기(줄 바꿈)</value></data>
+<data name="ThumbnailView" xml:space="preserve"><value>썸네일 뷰</value></data>
+<data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>뷰 크기 확대</value></data>
+<data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>뷰 크기 축소</value></data>
 </root>

@@ -54,6 +54,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         public ActionCommand UnselectAllCommand { get; }
         public ActionCommand SelectItemAfterCommand { get; }
         public ActionCommand OpenFavoriteEditorCommand { get; }
+        public ActionCommand SwitchViewCommand { get; }
 
         public IEnumerable<ActionCommand> Commands => [
             BackCommand,
@@ -79,6 +80,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             SelectAllCommand,
             UnselectAllCommand,
             OpenFavoriteEditorCommand,
+            SwitchViewCommand,
         ];
 
 
@@ -472,6 +474,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     FavoriteEditorViewModel = null;
                     OnPropertyChanged(nameof(IsFavorite));
                     OnPropertyChanged(nameof(FavoriteDirectoryViewModel));
+                });
+            SwitchViewCommand = new ActionCommand(
+                _ => true,
+                x => 
+                {
+                    if (x is not ExplorerViewMode mode)
+                        return;
+                    var spec = ExplorerLayoutSpec.All.FirstOrDefault(x => x.Mode == mode);
+                    if (spec is null)
+                        return;
+                    Layout.Mode = spec.Mode;
+                    Layout.IconSize = spec.MinimumIconSize;
                 });
 
 

@@ -93,4 +93,10 @@ Ejemplo: NombreCarpeta/SubcarpetaNombre</value></data>
 <data name="Folder" xml:space="preserve"><value>Carpeta</value></data>
 <data name="Other" xml:space="preserve"><value>Otro</value></data>
 <data name="Filter" xml:space="preserve"><value>Filtro</value></data>
+<data name="SwitchViewMenuHeader" xml:space="preserve"><value>Cambiar vista (_V)</value></data>
+<data name="ListView" xml:space="preserve"><value>Vista de lista</value></data>
+<data name="WrapListView" xml:space="preserve"><value>Vista de lista con ajuste de línea</value></data>
+<data name="ThumbnailView" xml:space="preserve"><value>Vista de miniaturas</value></data>
+<data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>Aumentar tamaño de vista</value></data>
+<data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>Disminuir tamaño de vista</value></data>
 </root>
