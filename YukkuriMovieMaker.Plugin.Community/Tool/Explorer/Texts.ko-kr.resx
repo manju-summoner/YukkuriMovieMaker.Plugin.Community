@@ -86,4 +86,11 @@
 예: 폴더명/하위폴더명</value></data>
 <data name="Delete" xml:space="preserve"><value>삭제</value></data>
 <data name="Done" xml:space="preserve"><value>완료</value></data>
+<data name="Video" xml:space="preserve"><value>비디오</value></data>
+<data name="Audio" xml:space="preserve"><value>오디오</value></data>
+<data name="Image" xml:space="preserve"><value>이미지</value></data>
+<data name="Text" xml:space="preserve"><value>텍스트</value></data>
+<data name="Folder" xml:space="preserve"><value>폴더</value></data>
+<data name="Other" xml:space="preserve"><value>기타</value></data>
+<data name="Filter" xml:space="preserve"><value>필터</value></data>
 </root>

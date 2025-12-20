@@ -86,4 +86,11 @@
 Example: FolderName/SubfolderName</value></data>
 <data name="Delete" xml:space="preserve"><value>Delete</value></data>
 <data name="Done" xml:space="preserve"><value>Done</value></data>
+<data name="Video" xml:space="preserve"><value>Video</value></data>
+<data name="Audio" xml:space="preserve"><value>Audio</value></data>
+<data name="Image" xml:space="preserve"><value>Image</value></data>
+<data name="Text" xml:space="preserve"><value>Text</value></data>
+<data name="Folder" xml:space="preserve"><value>Folder</value></data>
+<data name="Other" xml:space="preserve"><value>Other</value></data>
+<data name="Filter" xml:space="preserve"><value>Filter</value></data>
 </root>

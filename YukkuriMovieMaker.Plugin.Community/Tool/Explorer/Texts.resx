@@ -86,4 +86,11 @@
 例: フォルダ名/サブフォルダ名</value></data>
 <data name="Delete" xml:space="preserve"><value>削除</value></data>
 <data name="Done" xml:space="preserve"><value>完了</value></data>
+<data name="Video" xml:space="preserve"><value>動画</value></data>
+<data name="Audio" xml:space="preserve"><value>音声</value></data>
+<data name="Image" xml:space="preserve"><value>画像</value></data>
+<data name="Text" xml:space="preserve"><value>テキスト</value></data>
+<data name="Folder" xml:space="preserve"><value>フォルダ</value></data>
+<data name="Other" xml:space="preserve"><value>その他</value></data>
+<data name="Filter" xml:space="preserve"><value>フィルター</value></data>
 </root>

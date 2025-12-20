@@ -86,4 +86,11 @@
 Ejemplo: NombreCarpeta/SubcarpetaNombre</value></data>
 <data name="Delete" xml:space="preserve"><value>Eliminar</value></data>
 <data name="Done" xml:space="preserve"><value>Hecho</value></data>
+<data name="Video" xml:space="preserve"><value>Video</value></data>
+<data name="Audio" xml:space="preserve"><value>Audio</value></data>
+<data name="Image" xml:space="preserve"><value>Imagen</value></data>
+<data name="Text" xml:space="preserve"><value>Texto</value></data>
+<data name="Folder" xml:space="preserve"><value>Carpeta</value></data>
+<data name="Other" xml:space="preserve"><value>Otro</value></data>
+<data name="Filter" xml:space="preserve"><value>Filtro</value></data>
 </root>

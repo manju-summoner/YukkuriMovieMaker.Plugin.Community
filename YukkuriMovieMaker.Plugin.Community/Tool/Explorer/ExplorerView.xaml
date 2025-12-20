@@ -284,6 +284,7 @@
                 <ColumnDefinition/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition MaxWidth="150"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
@@ -313,9 +314,50 @@
                 </Button.Style>
             </Button>
             <Button Grid.Column="6" Content="{DynamicResource Plus}" Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.OpenNewTabMenuHeader}"/>
-            <TextBox x:Name="searchTextBox" Grid.Column="7" Padding="3,0,3,0" VerticalContentAlignment="Center"
-                     Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=100}" />
-            <TextBlock Grid.Column="7" Text="{x:Static local:Texts.Search}" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" VerticalAlignment="Center" Margin="6,0,3,0" IsHitTestVisible="False">
+            <pc:PopupButton Grid.Column="7" PopupWidth="300" PopupHeight="100" ResizeMode="None" Padding="3" Height="26" ToolTip="{x:Static local:Texts.Filter}">
+                <pc:PopupButton.Style>
+                    <Style TargetType="{x:Type pc:PopupButton}">
+                        <Setter Property="Content" Value="{DynamicResource filter-off}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Filter.IsFilteredByExtension}" Value="True">
+                                <Setter Property="Content" Value="{DynamicResource filter}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </pc:PopupButton.Style>
+                <pc:PopupButton.PopupContent>
+                    <Grid>
+                        <Grid.Resources>
+                            <ResourceDictionary>
+                                <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                                    <Setter Property="Height" Value="26"/>
+                                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                    <Setter Property="Margin" Value="6,0"/>
+                                </Style>
+                            </ResourceDictionary>
+                        </Grid.Resources>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <CheckBox Grid.Row="0" Grid.Column="0" Content="{x:Static local:Texts.Video}" IsChecked="{Binding Filter.IsVideoVisible,Mode=TwoWay}"/>
+                        <CheckBox Grid.Row="1" Grid.Column="0" Content="{x:Static local:Texts.Audio}" IsChecked="{Binding Filter.IsAudioVisible,Mode=TwoWay}"/>
+                        <CheckBox Grid.Row="2" Grid.Column="0" Content="{x:Static local:Texts.Image}" IsChecked="{Binding Filter.IsImageVisible,Mode=TwoWay}"/>
+                        <CheckBox Grid.Row="0" Grid.Column="1" Content="{x:Static local:Texts.Text}" IsChecked="{Binding Filter.IsTextVisible,Mode=TwoWay}"/>
+                        <CheckBox Grid.Row="1" Grid.Column="1" Content="{x:Static local:Texts.Folder}" IsChecked="{Binding Filter.IsDirectoryVisible,Mode=TwoWay}"/>
+                        <CheckBox Grid.Row="2" Grid.Column="1" Content="{x:Static local:Texts.Other}" IsChecked="{Binding Filter.IsOtherVisible,Mode=TwoWay}"/>
+                    </Grid>
+                </pc:PopupButton.PopupContent>
+            </pc:PopupButton>
+            <TextBox x:Name="searchTextBox" Grid.Column="8" Padding="3,0,3,0" VerticalContentAlignment="Center"
+                     Text="{Binding Filter.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=100}" />
+            <TextBlock Grid.Column="8" Text="{x:Static local:Texts.Search}" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" VerticalAlignment="Center" Margin="6,0,3,0" IsHitTestVisible="False">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -330,7 +372,7 @@
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
-            <pc:DropDownButton Grid.Column="8" Content="{DynamicResource menu}">
+            <pc:DropDownButton Grid.Column="9" Content="{DynamicResource menu}">
                 <pc:DropDownButton.Style>
                     <Style TargetType="{x:Type pc:DropDownButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
                         <Setter Property="Padding" Value="3"/>

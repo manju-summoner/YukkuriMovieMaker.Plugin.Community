@@ -86,4 +86,11 @@
 Contoh: NamaFolder/NamaSubfolder</value></data>
 <data name="Delete" xml:space="preserve"><value>Hapus</value></data>
 <data name="Done" xml:space="preserve"><value>Selesai</value></data>
+<data name="Video" xml:space="preserve"><value>Video</value></data>
+<data name="Audio" xml:space="preserve"><value>Audio</value></data>
+<data name="Image" xml:space="preserve"><value>Gambar</value></data>
+<data name="Text" xml:space="preserve"><value>Teks</value></data>
+<data name="Folder" xml:space="preserve"><value>Folde</value></data>
+<data name="Other" xml:space="preserve"><value>Lainnya</value></data>
+<data name="Filter" xml:space="preserve"><value>Filter</value></data>
 </root>

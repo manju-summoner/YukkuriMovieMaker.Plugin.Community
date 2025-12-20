@@ -86,4 +86,11 @@
 例如：資料夾名/子資料夾名</value></data>
 <data name="Delete" xml:space="preserve"><value>刪除</value></data>
 <data name="Done" xml:space="preserve"><value>完成</value></data>
+<data name="Video" xml:space="preserve"><value>影片</value></data>
+<data name="Audio" xml:space="preserve"><value>音訊</value></data>
+<data name="Image" xml:space="preserve"><value>圖像</value></data>
+<data name="Text" xml:space="preserve"><value>文字</value></data>
+<data name="Folder" xml:space="preserve"><value>資料夾</value></data>
+<data name="Other" xml:space="preserve"><value>其他</value></data>
+<data name="Filter" xml:space="preserve"><value>篩選器</value></data>
 </root>

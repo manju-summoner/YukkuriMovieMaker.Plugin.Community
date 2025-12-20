@@ -85,4 +85,11 @@
 例如：文件夹名/子文件夹名</value></data>
 <data name="Delete" xml:space="preserve"><value>删除</value></data>
 <data name="Done" xml:space="preserve"><value>完成</value></data>
+<data name="Video" xml:space="preserve"><value>视频</value></data>
+<data name="Audio" xml:space="preserve"><value>音频</value></data>
+<data name="Image" xml:space="preserve"><value>图像</value></data>
+<data name="Text" xml:space="preserve"><value>文本</value></data>
+<data name="Folder" xml:space="preserve"><value>文件夹</value></data>
+<data name="Other" xml:space="preserve"><value>其他</value></data>
+<data name="Filter" xml:space="preserve"><value>筛选器</value></data>
 </root>

@@ -86,4 +86,11 @@
 مثال: اسمالمجلد/اسمالمجلدالفرعي</value></data>
 <data name="Delete" xml:space="preserve"><value>حذف</value></data>
 <data name="Done" xml:space="preserve"><value>تم</value></data>
+<data name="Video" xml:space="preserve"><value>فيديو</value></data>
+<data name="Audio" xml:space="preserve"><value>صوت</value></data>
+<data name="Image" xml:space="preserve"><value>صورة</value></data>
+<data name="Text" xml:space="preserve"><value>نص</value></data>
+<data name="Folder" xml:space="preserve"><value>مجلد</value></data>
+<data name="Other" xml:space="preserve"><value>آخر</value></data>
+<data name="Filter" xml:space="preserve"><value>مرشح</value></data>
 </root>

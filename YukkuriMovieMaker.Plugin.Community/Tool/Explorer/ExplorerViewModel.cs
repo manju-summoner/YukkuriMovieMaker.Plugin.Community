@@ -88,7 +88,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         public string[] SelectedPaths { get; private set => Set(ref field, value); } = [];
         public IExplorerItemViewModel? ReadOnlyLastSelectedValue { get; set => Set(ref field, value); }
 
-        public string SearchText { get; set => Set(ref field, value ?? string.Empty); } = "";
+        public ExplorerFilter Filter { get; } = new ExplorerFilter();
 
         public ExplorerLayout Layout { get; private set => Set(ref field, value); } = new ExplorerLayout();
 
@@ -160,7 +160,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                         return;
                     var toolState = new ToolState()
                     {
-                        SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), ""))
+                        SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()))
                     };
                     var args = new CreateNewToolViewRequestedEventArgs(toolState);
                     CreateNewToolViewRequested?.Invoke(this, args);
@@ -174,7 +174,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     {
                         var toolState = new ToolState()
                         {
-                            SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), ""))
+                            SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()))
                         };
                         var args = new CreateNewToolViewRequestedEventArgs(toolState);
                         CreateNewToolViewRequested?.Invoke(this, args);
@@ -484,8 +484,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             });
 
             this.PropertyChanged += ExplorerViewModel_PropertyChanged;
+            this.Filter.FilterChanged += Filter_FilterChanged;
 
             RequestRefresh();
+        }
+
+        private void Filter_FilterChanged(object? sender, EventArgs e)
+        {
+            UpdateFilteredItems();
         }
 
         private void UpdateImageSize()
@@ -499,7 +505,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         private void ExplorerViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName is nameof(Items) or nameof(SearchText))
+            if (e.PropertyName is nameof(Items))
                 UpdateFilteredItems();
             else if (e.PropertyName is nameof(FilteredItems))
                 UpdateSelectedItems();
@@ -509,12 +515,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         private void UpdateFilteredItems()
         {
-            if (string.IsNullOrEmpty(SearchText))
+            if (!Filter.IsFiltered)
             {
                 FilteredItems = Items;
                 return;
             }
-            var filteredItems = Items.Where(item => item.Name.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase));
+            var filteredItems = Items.Where(item => Filter.IsMatch(item.Path));
             FilteredItems = [.. filteredItems];
         }
 
@@ -649,7 +655,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 return;
             Location = state.Location;
             Layout = state.Layout;
-            SearchText = state.SearchText;
+            Filter.CopyFrom(state.Filter);
             Refresh();
         }
 
@@ -657,7 +663,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         {
             return new ToolState() 
             {
-                SavedState = Json.Json.GetJsonText(new ExplorerState(Location, Layout.Clone(), SearchText))
+                SavedState = Json.Json.GetJsonText(new ExplorerState(Location, Layout.Clone(), Filter))
             };
         }
 
