@@ -52,6 +52,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+    <PackageReference Include="VirtualizingWrapPanel" Version="2.3.2" />
     <PackageReference Include="Whisper.net" Version="1.9.0" />
     <PackageReference Include="Whisper.net.Runtime" Version="1.9.0" />
     <PackageReference Include="Whisper.net.Runtime.Cuda.Windows" Version="1.9.0" />

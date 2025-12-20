@@ -1,0 +1,35 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
+Explorer,,エクスプローラー,Explorer,资源管理器,檔案總管,탐색기,Explorador,المستكشف,Penjelajah,
+Back,,戻る,Back,返回,返回,뒤로,Regresar,رجوع,Kembali,
+Forward,,進む,Forward,前进,前進,앞으로,Adelante,تقدم,Maju,
+Refresh,,更新,Refresh,刷新,刷新,새로 고침,Actualizar,تحديث,Muat ulang,
+MoveToParentDirectory,,親ディレクトリへ移動,Move to parent directory,移动到上级目录,移動到上層目錄,상위 디렉터리로 이동,Ir al directorio padre,الانتقال إلى الدليل الرئيسي,Pindah ke direktori induk,
+Search,,検索,Search,搜索,搜尋,검색,Buscar,بحث,Cari,
+OpenNewTab,,新しいタブを開く,Open New Tab,打开新标签页,開啟新分頁,새 탭 열기,Abrir pestaña nueva,فتح علامة تبويب جديدة,Buka Tab Baru,
+OpenNewTabMenuHeader,,新しいタブを開く(_N),Open New Tab(_N),打开新标签页(_N),開啟新分頁(_N),새 탭 열기(_N),Abrir pestaña nueva(_N),فتح علامة تبويب جديدة(_N),Buka Tab Baru(_N),
+AddFileToTimeline,,ファイルをタイムラインに追加,Add File to Timeline,,将文件添加到时间轴,將檔案新增至時間軸,타임라인에 파일 추가,Agregar archivo a la línea de tiempo,إضافة ملف إلى الجدول الزمني,Tambahkan File ke Garis Waktu,
+CopyMenuHeader,,コピー(_C),Copy(_C),复制(_C),複製(_C),복사(_C),Copiar(_C),نسخ(_C),Salin(_C),
+CutMenuHeader,,切り取り(_T),Cut(_T),剪切(_T),剪下(_T),잘라내기(_T),Cortar(_T),قص(_T),Potong(_T),
+PasteMenuHeader,,貼り付け(_P),Paste(_P),粘贴(_P),貼上(_P),붙여넣기(_P),Pegar(_P),لصق(_P),Tempel(_P),
+DeleteMenuHeader,,削除(_D),Delete(_D),删除(_D),刪除(_D),삭제(_D),Eliminar(_D),حذف(_D),Hapus(_D),
+OpenInNewTabMenuHeader,,新しいタブで開く(_N),Open in New Tab(_N),在新标签页中打开(_N),在新分頁中開啟(_N),새 탭에서 열기(_N),Abrir en pestaña nueva(_N),فتح في علامة تبويب جديدة(_N),Buka di Tab Baru(_N),
+OpenInWindowsExplorerMenuHeader,,Windows エクスプローラーで開く(_W),Open in Windows Explorer(_W),在Windows资源管理器中打开(_W),在Windows檔案總管中開啟(_W),Windows 탐색기에서 열기(_W),Abrir en el Explorador de Windows(_W),فتح في مستكشف Windows(_W),Buka di Penjelajah Windows(_W),
+OpenWithDefaultAppMenuHeader,,既定のアプリで開く(_O),Open with Default App(_O),使用默认应用打开(_O),使用預設應用程式開啟(_O),기본 앱으로 열기(_O),Abrir con la aplicación predeterminada(_O),الفتح بالتطبيق الافتراضي(_O),Buka dengan Aplikasi Default(_O),
+PropertiesMenuHeader,,プロパティ(_R),Properties(_R),属性(_R),內容(_R),속성(_R),Propiedades(_R),الخصائص(_R),Properti(_R),
+SelectAllMenuHeader,,すべて選択(_A),Select All(_A),全选(_A),全選取(_A),모두 선택(_A),Seleccionar todo(_A),تحديد الكل(_A),Pilih Semua(_A),
+AddFavorite,,お気に入りに追加,Add Favorite,添加收藏夹,加入最愛,즐겨찾기 추가,Agregar a favoritos,إضافة إلى المفضلة,Tambah Favorit,
+EditFavorite,,お気に入りの編集,Edit Favorite,编辑收藏夹,編輯最愛,즐겨찾기 편집,Editar favorito,تحرير المفضلة,Sunting Favorit,
+Favorite,,お気に入り,Favorite,收藏夹,收藏夾,즐겨찾기,Favorito,المفضلة,Favorit,
+NameLabel,,名前,Name,名称,名稱,이름,Nombre,اسم,Nama,
+Directory,,ディレクトリ,Directory,目录,目錄,디렉터리,Directorio,دليل,Direktori,
+DirectoryDesc,,"「/」で区切るとサブフォルダを作成できます。
+例: フォルダ名/サブフォルダ名","You can create subfolders by separating them with “/”.
+Example: FolderName/SubfolderName","您可以通过“/”分隔来创建子文件夹。
+例如：文件夹名/子文件夹名","您可以透過“/”分隔來建立子資料夾。
+例如：資料夾名/子資料夾名","“/”로 구분하여 하위 폴더를 만들 수 있습니다.
+예: 폴더명/하위폴더명","Puede crear subcarpetas separándolas con “/”.
+Ejemplo: NombreCarpeta/SubcarpetaNombre","يمكنك إنشاء مجلدات فرعية بفصلها بـ “/”.
+مثال: اسمالمجلد/اسمالمجلدالفرعي","Anda dapat membuat subfolder dengan memisahkannya dengan “/”.
+Contoh: NamaFolder/NamaSubfolder",
+Delete,,削除,Delete,删除,刪除,삭제,Eliminar,حذف,Hapus,
+Done,,完了,Done,完成,完成,완료,Hecho,تم, Selesai,
