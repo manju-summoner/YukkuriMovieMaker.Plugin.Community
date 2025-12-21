@@ -191,7 +191,7 @@
                     <Setter.Value>
                         <pb:StyleBehaviorCollection>
                             <local:DragFileBehavior Paths="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.SelectedPaths}"/>
-                            <local:DropFileBehavior Path="{Binding Path}" IsEnabled="{Binding Converter={pconv:InstanceTypeEqualityConverter},ConverterParameter={x:Type local:ExplorerDirectoryItemViewModel}}"/>
+                            <local:DropFileBehavior Path="{Binding Path}" IsEnabled="{Binding Converter={pconv:TypeEqualsConverter},ConverterParameter={x:Type local:ExplorerDirectoryItemViewModel}}"/>
                         </pb:StyleBehaviorCollection>
                     </Setter.Value>
                 </Setter>
