@@ -196,7 +196,7 @@
                     </Setter.Value>
                 </Setter>
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding Converter={pconv:InstanceTypeEqualityConverter}, ConverterParameter={x:Type local:ExplorerFileItemViewModel}}" Value="True">
+                    <DataTrigger Binding="{Binding Converter={pconv:TypeEqualsConverter}, ConverterParameter={x:Type local:ExplorerFileItemViewModel}}" Value="True">
                         <Setter Property="ContextMenu" Value="{StaticResource FileItemContextMenu}"/>
                         <Setter Property="pt:StyleTriggerCollection.StyleTriggers">
                             <Setter.Value>
@@ -219,7 +219,7 @@
                             </Setter.Value>
                         </Setter>
                     </DataTrigger>
-                    <DataTrigger Binding="{Binding Converter={pconv:InstanceTypeEqualityConverter}, ConverterParameter={x:Type local:ExplorerDirectoryItemViewModel}}" Value="True">
+                    <DataTrigger Binding="{Binding Converter={pconv:TypeEqualsConverter}, ConverterParameter={x:Type local:ExplorerDirectoryItemViewModel}}" Value="True">
                         <Setter Property="ContextMenu" Value="{StaticResource FolderItemContextMenu}"/>
                         <Setter Property="pt:StyleTriggerCollection.StyleTriggers">
                             <Setter.Value>
