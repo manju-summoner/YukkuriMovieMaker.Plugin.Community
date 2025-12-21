@@ -99,4 +99,5 @@ Ejemplo: NombreCarpeta/SubcarpetaNombre</value></data>
 <data name="ThumbnailView" xml:space="preserve"><value>Vista de miniaturas</value></data>
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>Aumentar tamaño de vista</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>Disminuir tamaño de vista</value></data>
+<data name="AutoPlay" xml:space="preserve"><value>Reproducción automática</value></data>
 </root>

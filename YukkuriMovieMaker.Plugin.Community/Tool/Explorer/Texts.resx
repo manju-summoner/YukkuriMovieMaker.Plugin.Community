@@ -99,4 +99,5 @@
 <data name="ThumbnailView" xml:space="preserve"><value>サムネイル</value></data>
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>ビューを拡大</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>ビューを縮小</value></data>
+<data name="AutoPlay" xml:space="preserve"><value>自動再生</value></data>
 </root>

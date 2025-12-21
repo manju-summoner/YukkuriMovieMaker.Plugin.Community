@@ -98,4 +98,5 @@ Contoh: NamaFolder/NamaSubfolder</value></data>
 <data name="ThumbnailView" xml:space="preserve"><value>Tampilan Thumbnail</value></data>
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>Perbesar Ukuran Tampilan</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>Perkecil Ukuran Tampilan</value></data>
+<data name="AutoPlay" xml:space="preserve"><value>Putar Otomatis</value></data>
 </root>

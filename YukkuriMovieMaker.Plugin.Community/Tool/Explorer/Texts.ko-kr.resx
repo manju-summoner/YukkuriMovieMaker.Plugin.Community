@@ -99,4 +99,5 @@
 <data name="ThumbnailView" xml:space="preserve"><value>썸네일 뷰</value></data>
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>뷰 크기 확대</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>뷰 크기 축소</value></data>
+<data name="AutoPlay" xml:space="preserve"><value>자동 재생</value></data>
 </root>

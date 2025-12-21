@@ -31,7 +31,32 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Image Grid.Row="0" Source="{Binding Thumbnail}" MaxWidth="300" MaxHeight="300"/>
+                    <Control>
+                        <Control.Style>
+                            <Style TargetType="Control">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsAutoPlay}" Value="True">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <MediaElement Grid.Row="0" Source="{Binding Path}" LoadedBehavior="Play" MaxWidth="300" MaxHeight="300" Volume="{Binding Source={x:Static ps:YMMSettings.Default},Path=Volume,Converter={pc:PercentToScaleConverter}}"/>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsAutoPlay}" Value="False">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <Image Grid.Row="0" Source="{Binding Thumbnail}" MaxWidth="300" MaxHeight="300"/>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Control.Style>
+                    </Control>
                     <TextBlock Grid.Row="1" Text="{Binding Path}" TextWrapping="Wrap" MaxWidth="300"/>
                 </Grid>
             </DataTemplate>
@@ -466,6 +491,8 @@
                         </MenuItem>
                         <MenuItem Header="{x:Static local:Texts.IncreaseViewSizeMenuHeader}" Command="{Binding DataContext.IncreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                         <MenuItem Header="{x:Static local:Texts.DecreaseViewSizeMenuHeader}" Command="{Binding DataContext.DecreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                        <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.AutoPlay}" IsCheckable="True" IsChecked="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsAutoPlay,Mode=TwoWay}"/>
                     </ContextMenu>
                 </c:DropDownButton.ContextMenu>
             </c:DropDownButton>

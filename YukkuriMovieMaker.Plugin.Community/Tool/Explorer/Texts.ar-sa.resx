@@ -99,4 +99,5 @@
 <data name="ThumbnailView" xml:space="preserve"><value>عرض الصور المصغرة</value></data>
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>تكبير العرض</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>تصغير العرض</value></data>
+<data name="AutoPlay" xml:space="preserve"><value>التشغيل التلقائي</value></data>
 </root>

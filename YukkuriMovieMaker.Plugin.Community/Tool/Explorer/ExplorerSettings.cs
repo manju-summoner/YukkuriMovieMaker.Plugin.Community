@@ -14,6 +14,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         public bool IsAlwaysShowToolBar { get; set => Set(ref field, value); } = true;
 
+        public bool IsAutoPlay { get; set => Set(ref field, value); } = true;
+
         public ObservableCollection<ExplorerFavorite> Favorites { get; } = [];
 
         public override void Initialize()

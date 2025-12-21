@@ -22,5 +22,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         {
             InitializeComponent();
         }
+
+        private void MediaElement_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

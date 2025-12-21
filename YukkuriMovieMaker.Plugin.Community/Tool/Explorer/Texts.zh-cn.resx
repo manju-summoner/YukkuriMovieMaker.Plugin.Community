@@ -98,4 +98,5 @@
 <data name="ThumbnailView" xml:space="preserve"><value>缩略图视图</value></data>
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>放大视图</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>缩小视图</value></data>
+<data name="AutoPlay" xml:space="preserve"><value>自动播放</value></data>
 </root>
