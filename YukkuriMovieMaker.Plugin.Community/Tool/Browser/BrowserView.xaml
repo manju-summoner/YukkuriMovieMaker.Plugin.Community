@@ -82,18 +82,54 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </TextBox>
-            <Button Grid.Column="4" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.AddFavorite}">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <c:SplitButton Grid.Column="4" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.AddFavorite}" Padding="4" Height="26">
+                <c:SplitButton.Style>
+                    <Style TargetType="c:SplitButton" BasedOn="{StaticResource {x:Type c:SplitButton}}">
                         <Setter Property="Content" Value="{DynamicResource star-outline}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsFavorite}" Value="True">
                                 <Setter Property="Content" Value="{DynamicResource star}"/>
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding  FavoriteDirectoryViewModel.Items.Count}" Value="0">
+                                <Setter Property="IsDropDownButtonVisible" Value="False"/>
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </Button.Style>
-            </Button>
+                </c:SplitButton.Style>
+                <c:SplitButton.ContextMenu>
+                    <ContextMenu ItemsSource="{Binding FavoriteDirectoryViewModel.Items}">
+                        <ContextMenu.Resources>
+                            <Style TargetType="MenuItem">
+                                <Setter Property="Header" Value="{Binding Display}"/>
+                                <Setter Property="ItemsSource" Value="{Binding Items,FallbackValue={x:Null}}"/>
+                                <Style.Triggers>
+                                    <Trigger Property="HasItems" Value="False">
+                                        <Setter Property="Header" Value="{Binding}"/>
+                                        <Setter Property="Command" Value="{Binding DataContext.NavigateCommand,RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                        <Setter Property="CommandParameter" Value="{Binding Url}"/>
+                                        <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
+                                        <Setter Property="HeaderTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <Grid Height="22">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition/>
+                                                            <ColumnDefinition/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding Display}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
+                                                        <Button Content="{DynamicResource pencil}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="ToolTip" Value="{Binding Url}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContextMenu.Resources>
+                    </ContextMenu>
+                </c:SplitButton.ContextMenu>
+            </c:SplitButton>
             <Button Content="{DynamicResource Plus}" Grid.Column="5" Command="{Binding CreateNewWindowCommand}" ToolTip="{x:Static local:Texts.NewTab}"/>
             <c:DropDownButton Content="{DynamicResource menu}" Grid.Column="6" ToolTip="{x:Static local:Texts.Menu}" IsChecked="{Binding IsMenuOpened,Mode=TwoWay}">
                 <c:DropDownButton.Style>

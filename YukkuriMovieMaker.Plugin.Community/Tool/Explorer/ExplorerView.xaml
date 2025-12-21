@@ -8,10 +8,10 @@
              xmlns:pt="clr-namespace:YukkuriMovieMaker.Views.Triggers;assembly=YukkuriMovieMaker.Plugin"
              xmlns:pa="clr-namespace:YukkuriMovieMaker.Views.Actions;assembly=YukkuriMovieMaker.Plugin"
              xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
-             xmlns:pc="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
              xmlns:pap="clr-namespace:YukkuriMovieMaker.Views.AttachedProperties;assembly=YukkuriMovieMaker.Plugin"
              xmlns:wtkc="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
-             xmlns:pconv="clr-namespace:YukkuriMovieMaker.Views.Converters;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:pc="clr-namespace:YukkuriMovieMaker.Views.Converters;assembly=YukkuriMovieMaker.Plugin"
              xmlns:ps="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
@@ -191,12 +191,12 @@
                     <Setter.Value>
                         <pb:StyleBehaviorCollection>
                             <local:DragFileBehavior Paths="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.SelectedPaths}"/>
-                            <local:DropFileBehavior Path="{Binding Path}" IsEnabled="{Binding Converter={pconv:TypeEqualsConverter},ConverterParameter={x:Type local:ExplorerDirectoryItemViewModel}}"/>
+                            <local:DropFileBehavior Path="{Binding Path}" IsEnabled="{Binding Converter={pc:TypeEqualsConverter},ConverterParameter={x:Type local:ExplorerDirectoryItemViewModel}}"/>
                         </pb:StyleBehaviorCollection>
                     </Setter.Value>
                 </Setter>
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding Converter={pconv:TypeEqualsConverter}, ConverterParameter={x:Type local:ExplorerFileItemViewModel}}" Value="True">
+                    <DataTrigger Binding="{Binding Converter={pc:TypeEqualsConverter}, ConverterParameter={x:Type local:ExplorerFileItemViewModel}}" Value="True">
                         <Setter Property="ContextMenu" Value="{StaticResource FileItemContextMenu}"/>
                         <Setter Property="pt:StyleTriggerCollection.StyleTriggers">
                             <Setter.Value>
@@ -210,7 +210,7 @@
                                         </pt:DoubleClickTrigger.Actions>
                                     </pt:DoubleClickTrigger>
                                     <i:EventTrigger EventName="PreviewMouseDown">
-                                        <i:InvokeCommandAction Command="{Binding DataContext.SelectItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" EventArgsConverter="{pconv:PassThroughConverter}"/>
+                                        <i:InvokeCommandAction Command="{Binding DataContext.SelectItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" EventArgsConverter="{pc:PassThroughConverter}"/>
                                     </i:EventTrigger>
                                     <i:EventTrigger EventName="PreviewMouseUp">
                                         <i:InvokeCommandAction Command="{Binding DataContext.SelectItemAfterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" CommandParameter="{Binding}"/>
@@ -219,7 +219,7 @@
                             </Setter.Value>
                         </Setter>
                     </DataTrigger>
-                    <DataTrigger Binding="{Binding Converter={pconv:TypeEqualsConverter}, ConverterParameter={x:Type local:ExplorerDirectoryItemViewModel}}" Value="True">
+                    <DataTrigger Binding="{Binding Converter={pc:TypeEqualsConverter}, ConverterParameter={x:Type local:ExplorerDirectoryItemViewModel}}" Value="True">
                         <Setter Property="ContextMenu" Value="{StaticResource FolderItemContextMenu}"/>
                         <Setter Property="pt:StyleTriggerCollection.StyleTriggers">
                             <Setter.Value>
@@ -236,7 +236,7 @@
                                         <i:InvokeCommandAction Command="{Binding DataContext.CreateNewViewFromPathCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" CommandParameter="{Binding Path}"/>
                                     </pt:PreviewMiddleButtonDownTrigger>
                                     <i:EventTrigger EventName="PreviewMouseDown">
-                                        <i:InvokeCommandAction Command="{Binding DataContext.SelectItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" EventArgsConverter="{pconv:PassThroughConverter}"/>
+                                        <i:InvokeCommandAction Command="{Binding DataContext.SelectItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" EventArgsConverter="{pc:PassThroughConverter}"/>
                                     </i:EventTrigger>
                                     <i:EventTrigger EventName="PreviewMouseUp">
                                         <i:InvokeCommandAction Command="{Binding DataContext.SelectItemAfterCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" CommandParameter="{Binding}"/>
@@ -301,22 +301,58 @@
                     </pt:PreviewKeyDownTrigger>
                 </i:Interaction.Triggers>
             </TextBox>
-            <Button Grid.Column="5" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.AddFavorite}">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <c:SplitButton Grid.Column="5" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.AddFavorite}" Padding="4" Height="26">
+                <c:SplitButton.Style>
+                    <Style TargetType="c:SplitButton" BasedOn="{StaticResource {x:Type c:SplitButton}}">
                         <Setter Property="Content" Value="{DynamicResource star-outline}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsFavorite}" Value="True">
                                 <Setter Property="Content" Value="{DynamicResource star}"/>
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding  FavoriteDirectoryViewModel.Items.Count}" Value="0">
+                                <Setter Property="IsDropDownButtonVisible" Value="False"/>
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </Button.Style>
-            </Button>
+                </c:SplitButton.Style>
+                <c:SplitButton.ContextMenu>
+                    <ContextMenu ItemsSource="{Binding FavoriteDirectoryViewModel.Items}">
+                        <ContextMenu.Resources>
+                            <Style TargetType="MenuItem">
+                                <Setter Property="Header" Value="{Binding Display}"/>
+                                <Setter Property="ItemsSource" Value="{Binding Items,FallbackValue={x:Null}}"/>
+                                <Style.Triggers>
+                                    <Trigger Property="HasItems" Value="False">
+                                        <Setter Property="Header" Value="{Binding}"/>
+                                        <Setter Property="Command" Value="{Binding DataContext.NavigateCommand,RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                        <Setter Property="CommandParameter" Value="{Binding Url}"/>
+                                        <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
+                                        <Setter Property="HeaderTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <Grid Height="22">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition/>
+                                                            <ColumnDefinition/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding Display}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
+                                                        <Button Content="{DynamicResource pencil}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="ToolTip" Value="{Binding Url}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContextMenu.Resources>
+                    </ContextMenu>
+                </c:SplitButton.ContextMenu>
+            </c:SplitButton>
             <Button Grid.Column="6" Content="{DynamicResource Plus}" Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.OpenNewTabMenuHeader}"/>
-            <pc:PopupButton Grid.Column="7" PopupWidth="300" PopupHeight="100" ResizeMode="None" Padding="3" Height="26" ToolTip="{x:Static local:Texts.Filter}">
-                <pc:PopupButton.Style>
-                    <Style TargetType="{x:Type pc:PopupButton}">
+            <c:PopupButton Grid.Column="7" PopupWidth="300" PopupHeight="100" ResizeMode="None" Padding="3" Height="26" ToolTip="{x:Static local:Texts.Filter}">
+                <c:PopupButton.Style>
+                    <Style TargetType="{x:Type c:PopupButton}">
                         <Setter Property="Content" Value="{DynamicResource filter-off}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Filter.IsFilteredByExtension}" Value="True">
@@ -324,8 +360,8 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </pc:PopupButton.Style>
-                <pc:PopupButton.PopupContent>
+                </c:PopupButton.Style>
+                <c:PopupButton.PopupContent>
                     <Grid>
                         <Grid.Resources>
                             <ResourceDictionary>
@@ -353,8 +389,8 @@
                         <CheckBox Grid.Row="1" Grid.Column="1" Content="{x:Static local:Texts.Folder}" IsChecked="{Binding Filter.IsDirectoryVisible,Mode=TwoWay}"/>
                         <CheckBox Grid.Row="2" Grid.Column="1" Content="{x:Static local:Texts.Other}" IsChecked="{Binding Filter.IsOtherVisible,Mode=TwoWay}"/>
                     </Grid>
-                </pc:PopupButton.PopupContent>
-            </pc:PopupButton>
+                </c:PopupButton.PopupContent>
+            </c:PopupButton>
             <TextBox x:Name="searchTextBox" Grid.Column="8" Padding="3,0,3,0" VerticalContentAlignment="Center"
                      Text="{Binding Filter.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=100}" />
             <TextBlock Grid.Column="8" Text="{x:Static local:Texts.Search}" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" VerticalAlignment="Center" Margin="6,0,3,0" IsHitTestVisible="False">
@@ -372,14 +408,14 @@
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
-            <pc:DropDownButton Grid.Column="9" Content="{DynamicResource menu}">
-                <pc:DropDownButton.Style>
-                    <Style TargetType="{x:Type pc:DropDownButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
+            <c:DropDownButton Grid.Column="9" Content="{DynamicResource menu}">
+                <c:DropDownButton.Style>
+                    <Style TargetType="{x:Type c:DropDownButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
                         <Setter Property="Padding" Value="3"/>
                         <Setter Property="Width" Value="26"/>
                     </Style>
-                </pc:DropDownButton.Style>
-                <pc:DropDownButton.ContextMenu>
+                </c:DropDownButton.Style>
+                <c:DropDownButton.ContextMenu>
                     <ContextMenu>
                         <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource Plus}"/>
                         <MenuItem Header="{x:Static local:Texts.Favorite}" ItemsSource="{Binding FavoriteDirectoryViewModel.Items}" Icon="{DynamicResource star}">
@@ -431,8 +467,8 @@
                         <MenuItem Header="{x:Static local:Texts.IncreaseViewSizeMenuHeader}" Command="{Binding DataContext.IncreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                         <MenuItem Header="{x:Static local:Texts.DecreaseViewSizeMenuHeader}" Command="{Binding DataContext.DecreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                     </ContextMenu>
-                </pc:DropDownButton.ContextMenu>
-            </pc:DropDownButton>
+                </c:DropDownButton.ContextMenu>
+            </c:DropDownButton>
         </Grid>
         <ListBox Grid.Row="1"
                  SelectedValue="{Binding ReadOnlyLastSelectedValue, Mode=OneWayToSource}"
