@@ -7,6 +7,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
     public class ExplorerFileItemViewModel : Bindable, IExplorerItemViewModel
     {
+        static readonly SemaphoreSlim semaphore = new(1);
         int iconSize = 24, thumbnailSize = 300;
         Task? loadIconTask, loadThumbnailTask;
         CancellationTokenSource? loadIconCts, loadThumbnailCts;
@@ -50,13 +51,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     return thumbnail;
                 loadThumbnailCts = new CancellationTokenSource();
                 var token = loadThumbnailCts.Token;
-                loadThumbnailTask ??= Task.Run(() =>
+                loadThumbnailTask ??= Task.Run(async () =>
                 {
+                    BitmapSource? loadedThumbnail = null;
+                    await semaphore.WaitAsync();
+                    try
+                    {
                     if (token.IsCancellationRequested)
                         return;
                     var loadedThumbnail = ShellThumbnail.GetThumbnail(Path, thumbnailSize, thumbnailSize);
                     loadedThumbnail?.Freeze();
-                    if(loadedThumbnail is null)
+                        if (loadedThumbnail is null)
                     {
                         isFailedToLoadThumbnail = true;
                         return;
@@ -64,7 +69,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
                     if (token.IsCancellationRequested)
                         return;
-
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
                     thumbnail = loadedThumbnail;
                     OnPropertyChanged(nameof(Thumbnail));
                 });
