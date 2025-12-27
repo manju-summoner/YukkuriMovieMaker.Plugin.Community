@@ -143,7 +143,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 _ => true,
                 _ => RequestRefresh());
             NavigateCommand = new ActionCommand(
-                _ => !string.IsNullOrEmpty(Location) && Directory.Exists(Location),
+                x => x is string location && !string.IsNullOrEmpty(location) && Directory.Exists(location),
                 x =>
                 {
                     var location = x as string;
