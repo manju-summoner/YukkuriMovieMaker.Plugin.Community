@@ -50,7 +50,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             e.Handled = ItemsControl.ItemsControlFromItemContainer(AssociatedObject) is ListBox listBox
                 && e.ChangedButton is MouseButton.Left
                 && AssociatedObject.IsSelected
-                && listBox.SelectedItems.Count > 1
+                && listBox.SelectedItems.OfType<IExplorerItemViewModel>().Where(x=>x.IsSelected).Count() > 1
                 && Keyboard.Modifiers is ModifierKeys.None;
         }
 
