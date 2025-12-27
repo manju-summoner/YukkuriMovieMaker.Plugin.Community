@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
@@ -57,18 +58,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     await semaphore.WaitAsync();
                     try
                     {
-                    if (token.IsCancellationRequested)
-                        return;
-                    var loadedThumbnail = ShellThumbnail.GetThumbnail(Path, thumbnailSize, thumbnailSize);
-                    loadedThumbnail?.Freeze();
+                        if (token.IsCancellationRequested)
+                            return;
+                        loadedThumbnail = ShellThumbnail.GetThumbnailFromFactory(Path, thumbnailSize, thumbnailSize);
+                        loadedThumbnail?.Freeze();
                         if (loadedThumbnail is null)
-                    {
-                        isFailedToLoadThumbnail = true;
-                        return;
-                    }
+                        {
+                            isFailedToLoadThumbnail = true;
+                            return;
+                        }
 
-                    if (token.IsCancellationRequested)
-                        return;
+                        if (token.IsCancellationRequested)
+                            return;
                     }
                     finally
                     {
