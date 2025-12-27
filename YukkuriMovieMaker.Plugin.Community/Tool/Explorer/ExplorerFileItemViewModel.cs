@@ -33,11 +33,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     var loadedIcon = ShellIcon.GetIcon(Path, ShellIcon.GetIconSize(iconSize), isDirectory: false);
                     if (token.IsCancellationRequested)
                         return;
-                    System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
-                    {
-                        icon = loadedIcon;
-                        OnPropertyChanged(nameof(Icon));
-                    });
+                    icon = loadedIcon;
+                    OnPropertyChanged(nameof(Icon));
                 });
                 return icon;
             }
