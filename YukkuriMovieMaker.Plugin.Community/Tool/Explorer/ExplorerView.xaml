@@ -39,7 +39,19 @@
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate>
-                                                    <MediaElement Grid.Row="0" Source="{Binding Path}" LoadedBehavior="Play" MaxWidth="300" MaxHeight="300" Volume="{Binding Source={x:Static ps:YMMSettings.Default},Path=Volume,Converter={pc:PercentToScaleConverter}}"/>
+                                                    <MediaElement Grid.Row="0" MaxWidth="300" MaxHeight="300" Volume="{Binding Source={x:Static ps:YMMSettings.Default},Path=Volume,Converter={pc:PercentToScaleConverter}}">
+                                                        <MediaElement.Triggers>
+                                                            <EventTrigger RoutedEvent="Loaded">
+                                                                <EventTrigger.Actions>
+                                                                    <BeginStoryboard>
+                                                                        <Storyboard>
+                                                                            <MediaTimeline Source="{Binding Path}" RepeatBehavior="Forever"/>
+                                                                        </Storyboard>
+                                                                    </BeginStoryboard>
+                                                                </EventTrigger.Actions>
+                                                            </EventTrigger>
+                                                        </MediaElement.Triggers>
+                                                    </MediaElement>
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
