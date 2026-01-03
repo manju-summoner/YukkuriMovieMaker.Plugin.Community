@@ -8,7 +8,7 @@ using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 {
-    internal partial class BrowserViewModel : Bindable, IToolViewModel
+    internal partial class BrowserViewModel : Bindable, IToolViewModel, IDisposable
     {
         public static string UserDataFolderPath { get; } = Path.Combine(AppDirectories.UserDirectory, "WebView2");
 
@@ -123,6 +123,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             webView2?.CoreWebView2.NavigationCompleted -= CoreWebView2_NavigationCompleted;
             webView2?.CoreWebView2.SourceChanged -= CoreWebView2_SourceChanged;
             webView2?.CoreWebView2.DocumentTitleChanged -= CoreWebView2_DocumentTitleChanged;
+
+            //ブラウザ非表示後も表示中ページの音声が再生され続けるのを避けるため、空白ページに待避する
+            webView2?.CoreWebView2.Navigate("about:blank");
 
             webView2 = null;
         }
@@ -306,5 +309,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         [GeneratedRegex(@"^(localhost|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})(:[0-9]+)?$")]
         private static partial Regex LocalhostOrIPAddressWithPortRegex();
+
+        public void Dispose()
+        {
+            DetachWebView2();
+        }
     }
 }
