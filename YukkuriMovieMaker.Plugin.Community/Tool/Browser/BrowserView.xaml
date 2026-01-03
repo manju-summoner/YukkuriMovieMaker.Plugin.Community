@@ -11,6 +11,7 @@
              xmlns:ps="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
              xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:pt="clr-namespace:YukkuriMovieMaker.Views.Triggers;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type=local:BrowserViewModel}">
@@ -72,9 +73,9 @@
                     <i:EventTrigger EventName="GotFocus">
                         <local:SelectAllTextAction/>
                     </i:EventTrigger>
-                    <i:KeyTrigger Key="Enter">
+                    <pt:PreviewKeyDownTrigger Key="Enter">
                         <pa:ClearFocusAction/>
-                    </i:KeyTrigger>
+                    </pt:PreviewKeyDownTrigger>
                     <i:EventTrigger EventName="LostFocus">
                         <i:InvokeCommandAction Command="{Binding NavigateCommand}" 
                                                CommandParameter="{Binding Text, RelativeSource={RelativeSource AncestorType=TextBox}}"
