@@ -217,12 +217,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         private void ApplyState()
         {
             var url = NormalizeOrCreateSearchUrl(state.Location);
-            if (NormalizeUrl(webView2?.CoreWebView2.Source ?? string.Empty) != url)
-                webView2?.CoreWebView2.Navigate(url);
+            webView2?.CoreWebView2.Navigate(url);
             webView2?.ZoomFactor = state.Zoom;
-
-            Title = webView2?.CoreWebView2.DocumentTitle ?? Texts.Browser;
-            Location = NormalizeUrl(webView2?.CoreWebView2.Source ?? string.Empty);
         }
 
         public ToolState SaveState()
