@@ -39,7 +39,14 @@
                 <Button Content="{DynamicResource content-save-edit}" Command="{Binding SaveCommand}" ToolTip="{x:Static local:Texts.SaveAs}"/>
             </ToolBar>
         </ToolBarTray>
-        <TextBox Grid.Row="1" Text="{Binding Text,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}" FontSize="{Binding FontSize}" Padding="3">
+        <TextBox Grid.Row="1" 
+                 Text="{Binding Text,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}"
+                 FontSize="{Binding FontSize}" 
+                 Padding="3"
+                 AcceptsReturn="True" 
+                 AcceptsTab="True" 
+                 VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Auto">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="PreviewMouseWheel">
                     <i:InvokeCommandAction Command="{Binding ChangeFontSizeCommand}" PassEventArgsToCommand="True"/>
