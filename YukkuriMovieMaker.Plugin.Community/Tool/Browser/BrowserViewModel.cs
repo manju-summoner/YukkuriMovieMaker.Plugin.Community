@@ -205,7 +205,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             var savedState = Json.Json.LoadFromText<WebBrowserSavedState>(stateData.SavedState);
             if (savedState is null)
                 return;
+
             state = savedState;
+            Location = state.Location;
+            Title = stateData.Title ?? Texts.Browser;
+
             if (webView2 != null)
                 ApplyState();
         }
