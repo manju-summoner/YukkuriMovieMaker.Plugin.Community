@@ -75,12 +75,10 @@
                     </i:EventTrigger>
                     <pt:PreviewKeyDownTrigger Key="Enter">
                         <pa:ClearFocusAction/>
-                    </pt:PreviewKeyDownTrigger>
-                    <i:EventTrigger EventName="LostFocus">
                         <i:InvokeCommandAction Command="{Binding NavigateCommand}" 
                                                CommandParameter="{Binding Text, RelativeSource={RelativeSource AncestorType=TextBox}}"
                                                PassEventArgsToCommand="False"/>
-                    </i:EventTrigger>
+                    </pt:PreviewKeyDownTrigger>
                 </i:Interaction.Triggers>
             </TextBox>
             <c:SplitButton Grid.Column="4" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.AddFavorite}" Padding="4" Height="26">
