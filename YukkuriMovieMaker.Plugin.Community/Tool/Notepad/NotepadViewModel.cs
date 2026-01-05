@@ -61,7 +61,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                         return;
                     try
                     {
-                        var bytes = File.ReadAllBytes(FilePath);
+                        var bytes = File.ReadAllBytes(filePath);
                         var encoding = EncodingChecker.GetAvailableEncodings(bytes).FirstOrDefault() ?? Encoding.UTF8;
                         Text = encoding.GetString(bytes);
                         FilePath = filePath;
