@@ -1,7 +1,7 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
-ColorBlindness,,色覚特性シミュレーション,Color Vision Simulation,色觉特性模拟,色覺特性模擬,색각 특성 시뮬레이션,Simulación de la visión del color,محاكاة رؤية الألوان,Simulasi penglihatan warna
-ColorBlindnessType,,種類,Type,类型,類型,유형,Tipo,نوع,Type
+ColorBlindness,,色覚特性シミュレーション,Color Vision Simulation,色觉特性模拟,色覺特性模擬,색각 특성 시뮬레이션,Simulación de la visión del color,محاكاة رؤية الألوان,Simulasi Buta Warna
+ColorBlindnessType,,種類,Type,类型,類型,유형,Tipo,نوع,Tipe
 ColorBlindnessTypeP,,1型色覚（P型）,Protanope,红色盲,红色盲,적색맹,Protanopia,بروتانوبيا,Protanopia
 ColorBlindnessTypeD,,2型色覚（D型）,Deuteranope,绿色盲,绿色盲,녹색맹,Deuteranopia,ديوتيرانوبيا,Deuteranopia
 ColorBlindnessTypeT,,3型色覚（T型）,Tritanope,蓝色盲,蓝色盲,청색맹,Tritanopia,تريتانوبيا,Tritanopia
-Strength,,強度,Strength,强度,強度,강도,Intensidad,قوة,Strength
+Strength,,強度,Strength,强度,強度,강도,Intensidad,قوة,Kekuatan
