@@ -102,4 +102,11 @@
 <data name="AutoPlay" xml:space="preserve"><value>자동 재생</value></data>
 <data name="OmittedFolders" xml:space="preserve"><value>생략된 폴더</value></data>
 <data name="DriveList" xml:space="preserve"><value>드라이브 목록</value></data>
+<data name="Sort" xml:space="preserve"><value>정렬</value></data>
+<data name="SortByName" xml:space="preserve"><value>이름</value></data>
+<data name="SortByLastWriteTime" xml:space="preserve"><value>수정한 날짜</value></data>
+<data name="SortByExtension" xml:space="preserve"><value>확장자</value></data>
+<data name="SortAscending" xml:space="preserve"><value>오름차순</value></data>
+<data name="SortDescending" xml:space="preserve"><value>내림차순</value></data>
+<data name="SortOrder" xml:space="preserve"><value>정렬 순서</value></data>
 </root>

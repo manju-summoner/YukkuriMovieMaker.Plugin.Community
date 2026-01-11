@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -57,6 +58,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         public ActionCommand SelectItemAfterCommand { get; }
         public ActionCommand OpenFavoriteEditorCommand { get; }
         public ActionCommand SwitchViewCommand { get; }
+        public ActionCommand SwitchSortKeyCommand { get; }
+        public ActionCommand SwitchSortOrderCommand { get; }
 
         public IEnumerable<ActionCommand> Commands => [
             BackCommand,
@@ -83,6 +86,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             UnselectAllCommand,
             OpenFavoriteEditorCommand,
             SwitchViewCommand,
+            SwitchSortKeyCommand,
+            SwitchSortOrderCommand,
         ];
 
 
@@ -95,6 +100,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         public ExplorerFilter Filter { get; } = new ExplorerFilter();
 
         public ExplorerLayout Layout { get; private set => Set(ref field, value); } = new ExplorerLayout();
+
+        public ExplorerSortKey SortKey { get => field; set => Set(ref field, value, nameof(SortKey), nameof(IsSortByName), nameof(IsSortByLastWriteTime), nameof(IsSortByExtension)); } = ExplorerSortKey.Name;
+        public ExplorerSortOrder SortOrder { get => field; set => Set(ref field, value, nameof(SortOrder), nameof(IsSortAscending), nameof(IsSortDescending)); } = ExplorerSortOrder.Ascending;
+
+        public bool IsSortByName => SortKey == ExplorerSortKey.Name;
+        public bool IsSortByLastWriteTime => SortKey == ExplorerSortKey.LastWriteTime;
+        public bool IsSortByExtension => SortKey == ExplorerSortKey.Extension;
+        public bool IsSortAscending => SortOrder == ExplorerSortOrder.Ascending;
+        public bool IsSortDescending => SortOrder == ExplorerSortOrder.Descending;
 
         readonly LeadingTrailingDebouncer<object> refreshDebouncer;
         FileSystemWatcher? watcher;
@@ -166,7 +180,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                         return;
                     var toolState = new ToolState()
                     {
-                        SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()))
+                        SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder })
                     };
                     var args = new CreateNewToolViewRequestedEventArgs(toolState);
                     CreateNewToolViewRequested?.Invoke(this, args);
@@ -180,7 +194,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     {
                         var toolState = new ToolState()
                         {
-                            SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()))
+                            SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder })
                         };
                         var args = new CreateNewToolViewRequestedEventArgs(toolState);
                         CreateNewToolViewRequested?.Invoke(this, args);
@@ -491,7 +505,42 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     Layout.Mode = spec.Mode;
                     Layout.IconSize = spec.MinimumIconSize;
                 });
-
+            SwitchSortKeyCommand = new ActionCommand(
+                _ => true,
+                x =>
+                {
+                    if (x is ExplorerSortKey key)
+                    {
+                        SortKey = key;
+                        ApplySorting();
+                    }
+                    else if (x is string s)
+                    {
+                        if (Enum.TryParse<ExplorerSortKey>(s, out var parsed))
+                        {
+                            SortKey = parsed;
+                            ApplySorting();
+                        }
+                    }
+                });
+            SwitchSortOrderCommand = new ActionCommand(
+                _ => true,
+                x =>
+                {
+                    if (x is ExplorerSortOrder order)
+                    {
+                        SortOrder = order;
+                        ApplySorting();
+                    }
+                    else if (x is string s)
+                    {
+                        if (Enum.TryParse<ExplorerSortOrder>(s, out var parsed))
+                        {
+                            SortOrder = parsed;
+                            ApplySorting();
+                        }
+                    }
+                });
 
             refreshDebouncer = new(args =>
             {
@@ -572,10 +621,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             if (!Filter.IsFiltered)
             {
                 FilteredItems = Items;
+                ApplySorting();
                 return;
             }
             var filteredItems = Items.Where(item => Filter.IsMatch(item.Path));
             FilteredItems = [.. filteredItems];
+            ApplySorting();
+        }
+
+        void ApplySorting()
+        {
+            // 現在の設定で再ソートを行う
+            FilteredItems = [.. FilteredItems.OrderBy(x => x, new ExplorerItemComparer(SortKey, SortOrder))];
         }
 
         bool isSkipUpdateSelection = false;
@@ -710,14 +767,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             Location = state.Location;
             Layout = state.Layout;
             Filter.CopyFrom(state.Filter);
+            SortKey = state.SortKey;
+            SortOrder = state.SortOrder;
             Refresh();
+            ApplySorting();
         }
 
         public ToolState SaveState()
         {
             return new ToolState() 
             {
-                SavedState = Json.Json.GetJsonText(new ExplorerState(Location, Layout.Clone(), Filter))
+                SavedState = Json.Json.GetJsonText(new ExplorerState(Location, Layout.Clone(), Filter) { SortKey = SortKey, SortOrder = SortOrder })
             };
         }
 

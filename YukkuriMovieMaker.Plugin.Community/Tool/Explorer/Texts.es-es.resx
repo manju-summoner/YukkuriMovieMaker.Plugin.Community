@@ -102,4 +102,11 @@ Ejemplo: NombreCarpeta/SubcarpetaNombre</value></data>
 <data name="AutoPlay" xml:space="preserve"><value>Reproducción automática</value></data>
 <data name="OmittedFolders" xml:space="preserve"><value>Carpetas omitidas</value></data>
 <data name="DriveList" xml:space="preserve"><value>Lista de unidades</value></data>
+<data name="Sort" xml:space="preserve"><value>Ordenar</value></data>
+<data name="SortByName" xml:space="preserve"><value>Nombre</value></data>
+<data name="SortByLastWriteTime" xml:space="preserve"><value>Fecha de modificación</value></data>
+<data name="SortByExtension" xml:space="preserve"><value>Extensión</value></data>
+<data name="SortAscending" xml:space="preserve"><value>Ascendente</value></data>
+<data name="SortDescending" xml:space="preserve"><value>Descendente</value></data>
+<data name="SortOrder" xml:space="preserve"><value>Orden de clasificación</value></data>
 </root>

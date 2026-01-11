@@ -102,4 +102,11 @@
 <data name="AutoPlay" xml:space="preserve"><value>自動再生</value></data>
 <data name="OmittedFolders" xml:space="preserve"><value>省略されたフォルダ</value></data>
 <data name="DriveList" xml:space="preserve"><value>ドライブ一覧</value></data>
+<data name="Sort" xml:space="preserve"><value>並べ替え</value></data>
+<data name="SortByName" xml:space="preserve"><value>名前</value></data>
+<data name="SortByLastWriteTime" xml:space="preserve"><value>更新日時</value></data>
+<data name="SortByExtension" xml:space="preserve"><value>拡張子</value></data>
+<data name="SortAscending" xml:space="preserve"><value>昇順</value></data>
+<data name="SortDescending" xml:space="preserve"><value>降順</value></data>
+<data name="SortOrder" xml:space="preserve"><value>並べ替え順</value></data>
 </root>

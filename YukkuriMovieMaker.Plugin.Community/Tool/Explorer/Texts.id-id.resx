@@ -101,4 +101,11 @@ Contoh: NamaFolder/NamaSubfolder</value></data>
 <data name="AutoPlay" xml:space="preserve"><value>Putar Otomatis</value></data>
 <data name="OmittedFolders" xml:space="preserve"><value>Gabungan Folder</value></data>
 <data name="DriveList" xml:space="preserve"><value>Daftar Drive</value></data>
+<data name="Sort" xml:space="preserve"><value>Urutkan</value></data>
+<data name="SortByName" xml:space="preserve"><value>Nama</value></data>
+<data name="SortByLastWriteTime" xml:space="preserve"><value>Waktu diubah</value></data>
+<data name="SortByExtension" xml:space="preserve"><value>Ekstensi</value></data>
+<data name="SortAscending" xml:space="preserve"><value>Naik</value></data>
+<data name="SortDescending" xml:space="preserve"><value>Turun</value></data>
+<data name="SortOrder" xml:space="preserve"><value>Urutan pengurutan</value></data>
 </root>

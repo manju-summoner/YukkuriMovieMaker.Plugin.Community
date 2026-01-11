@@ -176,6 +176,15 @@
                 <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource Plus}"/>
                 <MenuItem Command="{Binding OpenCurrentLocationInWindowsExplorerCommand}" Header="{x:Static local:Texts.OpenInWindowsExplorerMenuHeader}"/>
                 <Separator/>
+                <MenuItem Header="{x:Static local:Texts.Sort}" Icon="{DynamicResource sort}">
+                    <MenuItem Header="{x:Static local:Texts.SortByName}" IsCheckable="True" IsChecked="{Binding IsSortByName, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Name"/>
+                    <MenuItem Header="{x:Static local:Texts.SortByLastWriteTime}" IsCheckable="True" IsChecked="{Binding IsSortByLastWriteTime, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="LastWriteTime"/>
+                    <MenuItem Header="{x:Static local:Texts.SortByExtension}" IsCheckable="True" IsChecked="{Binding IsSortByExtension, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Extension"/>
+                    <Separator/>
+                    <MenuItem Header="{x:Static local:Texts.SortAscending}" IsCheckable="True" IsChecked="{Binding IsSortAscending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Ascending" Icon="{DynamicResource sort-ascending}"/>
+                    <MenuItem Header="{x:Static local:Texts.SortDescending}" IsCheckable="True" IsChecked="{Binding IsSortDescending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Descending" Icon="{DynamicResource sort-descending}"/>
+                </MenuItem>
+                <Separator/>
                 <MenuItem Command="{Binding PasteCommand}" Header="{x:Static local:Texts.PasteMenuHeader}" Icon="{DynamicResource Paste}"/>
                 <Separator/>
                 <MenuItem Command="{Binding SelectAllCommand}" Header="{x:Static local:Texts.SelectAllMenuHeader}" Icon="{DynamicResource SelectAll}"/>
@@ -322,6 +331,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition MaxWidth="150"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
@@ -387,7 +397,21 @@
                 </c:SplitButton.ContextMenu>
             </c:SplitButton>
             <Button Grid.Column="6" Content="{DynamicResource Plus}" Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.OpenNewTabMenuHeader}" Style="{StaticResource ToolBarButtonStyle}"/>
-            <c:PopupButton Grid.Column="7" PopupWidth="300" PopupHeight="100" ResizeMode="None" Padding="3" Height="26" ToolTip="{x:Static local:Texts.Filter}">
+
+            <c:DropDownButton Grid.Column="7" Content="{DynamicResource sort}" ToolTip="{x:Static local:Texts.Sort}" Padding="3" Height="26">
+                <c:DropDownButton.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="{x:Static local:Texts.SortByName}" IsCheckable="True" IsChecked="{Binding IsSortByName, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Name"/>
+                        <MenuItem Header="{x:Static local:Texts.SortByLastWriteTime}" IsCheckable="True" IsChecked="{Binding IsSortByLastWriteTime, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="LastWriteTime"/>
+                        <MenuItem Header="{x:Static local:Texts.SortByExtension}" IsCheckable="True" IsChecked="{Binding IsSortByExtension, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Extension"/>
+                        <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.SortAscending}" IsCheckable="True" IsChecked="{Binding IsSortAscending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Ascending" Icon="{DynamicResource sort-ascending}"/>
+                        <MenuItem Header="{x:Static local:Texts.SortDescending}" IsCheckable="True" IsChecked="{Binding IsSortDescending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Descending" Icon="{DynamicResource sort-descending}"/>
+                    </ContextMenu>
+                </c:DropDownButton.ContextMenu>
+            </c:DropDownButton>
+            
+            <c:PopupButton Grid.Column="8" PopupWidth="300" PopupHeight="100" ResizeMode="None" Padding="3" Height="26" ToolTip="{x:Static local:Texts.Filter}">
                 <c:PopupButton.Style>
                     <Style TargetType="{x:Type c:PopupButton}">
                         <Setter Property="Content" Value="{DynamicResource filter-off}"/>
@@ -428,9 +452,9 @@
                     </Grid>
                 </c:PopupButton.PopupContent>
             </c:PopupButton>
-            <TextBox x:Name="searchTextBox" Grid.Column="8" Padding="3,0,3,0" VerticalContentAlignment="Center"
+            <TextBox x:Name="searchTextBox" Grid.Column="9" Padding="3,0,3,0" VerticalContentAlignment="Center"
                      Text="{Binding Filter.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=100}" />
-            <TextBlock Grid.Column="8" Text="{x:Static local:Texts.Search}" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" VerticalAlignment="Center" Margin="6,0,3,0" IsHitTestVisible="False">
+            <TextBlock Grid.Column="9" Text="{x:Static local:Texts.Search}" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" VerticalAlignment="Center" Margin="6,0,3,0" IsHitTestVisible="False">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -445,7 +469,7 @@
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
-            <c:DropDownButton Grid.Column="9" Content="{DynamicResource menu}">
+            <c:DropDownButton Grid.Column="10" Content="{DynamicResource menu}">
                 <c:DropDownButton.Style>
                     <Style TargetType="{x:Type c:DropDownButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
                         <Setter Property="Padding" Value="3"/>
@@ -496,6 +520,14 @@
                             </MenuItem.Resources>
                         </MenuItem>
                         <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.Sort}" Icon="{DynamicResource sort}">
+                            <MenuItem Header="{x:Static local:Texts.SortByName}" IsCheckable="True" IsChecked="{Binding IsSortByName, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Name"/>
+                            <MenuItem Header="{x:Static local:Texts.SortByLastWriteTime}" IsCheckable="True" IsChecked="{Binding IsSortByLastWriteTime, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="LastWriteTime"/>
+                            <MenuItem Header="{x:Static local:Texts.SortByExtension}" IsCheckable="True" IsChecked="{Binding IsSortByExtension, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Extension"/>
+                            <Separator/>
+                            <MenuItem Header="{x:Static local:Texts.SortAscending}" IsCheckable="True" IsChecked="{Binding IsSortAscending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Ascending" Icon="{DynamicResource sort-ascending}"/>
+                            <MenuItem Header="{x:Static local:Texts.SortDescending}" IsCheckable="True" IsChecked="{Binding IsSortDescending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Descending" Icon="{DynamicResource sort-descending}"/>
+                        </MenuItem>
                         <MenuItem Header="{x:Static local:Texts.SwitchViewMenuHeader}">
                             <MenuItem Header="{x:Static local:Texts.ListView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.List}"/>
                             <MenuItem Header="{x:Static local:Texts.WrapListView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.WrapList}"/>
