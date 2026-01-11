@@ -7,8 +7,8 @@ ColorShiftEffectStrengthDesc,,強さ,Strength,强度,強度,강도,Fuerza,قوة
 ColorShiftEffectIsPremultipliedAlphaName,,事前乗算アルファ,Pre-multiply alpha,预乘alpha,預乘alpha,사전 곱셈 알파,Premultiplicar alfa,ألفا المضاعفة مسبقًا,Premultiply alpha
 ColorShiftEffectIsPremultipliedAlphaDesc,,事前乗算アルファ,Pre-multiply alpha,预乘alpha,預乘alpha,사전 곱셈 알파,Premultiplicar alfa,ألفا مسبقة الضرب,Premultiply alpha
 ColorShiftEffectModeName,,種類,Type,类型,種類,종류,Tipo,نوع,Tipe
-ColorShiftEffectName,,色ズレ,Color shift,RGB分离,色偏,색상 차이,Desviación del color,تأثير الإزاحة اللونية,Perubahan warna
-ColorShiftGroupName,,色ズレ,Color shift,RGB分离,色偏,글리치 효과,Desviación del color,تغيير اللون,Perubahan warna
+ColorShiftEffectName,,色ズレ,Color shift,RGB分离,色偏,색상 차이,Desviación del color,تأثير الإزاحة اللونية,Pergeseran warna
+ColorShiftGroupName,,色ズレ,Color shift,RGB分离,色偏,글리치 효과,Desviación del color,تغيير اللون,Pergeseran warna
 ColorShiftEffectModeDesc,,色ズレの種類,Type of color shift,分离类型,色偏種類,글리치 효과 종류,Tipo de desviación del color,نوع انحراف اللون,Jenis pergeseran warna
 ColorShiftEffectShiftDesc,,色をずらす距離,Distance to color shift,分离距离,色偏距離,글리치 효과 거리,Distancia del cambio de color,مسافة تغيير اللون,Jarak untuk pergeseran warna
 ColorShiftModeRBGName,,赤青緑,Red Blue Green,红蓝绿,紅藍綠,빨강 파랑 초록,Rojo Azul Verde,أحمر أزرق أخضر,Merah Biru Hijau
