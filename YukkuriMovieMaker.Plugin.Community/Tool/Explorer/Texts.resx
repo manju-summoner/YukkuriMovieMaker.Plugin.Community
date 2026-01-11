@@ -100,4 +100,6 @@
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>ビューを拡大</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>ビューを縮小</value></data>
 <data name="AutoPlay" xml:space="preserve"><value>自動再生</value></data>
+<data name="OmittedFolders" xml:space="preserve"><value>省略されたフォルダ</value></data>
+<data name="DriveList" xml:space="preserve"><value>ドライブ一覧</value></data>
 </root>

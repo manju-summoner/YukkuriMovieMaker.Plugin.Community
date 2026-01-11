@@ -100,4 +100,6 @@
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>تكبير العرض</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>تصغير العرض</value></data>
 <data name="AutoPlay" xml:space="preserve"><value>التشغيل التلقائي</value></data>
+<data name="OmittedFolders" xml:space="preserve"><value>المجلدات المحذوفة</value></data>
+<data name="DriveList" xml:space="preserve"><value>قائمة محركات الأقراص</value></data>
 </root>

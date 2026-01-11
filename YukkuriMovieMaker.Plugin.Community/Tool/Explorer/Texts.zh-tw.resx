@@ -100,4 +100,6 @@
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>放大檢視</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>縮小檢視</value></data>
 <data name="AutoPlay" xml:space="preserve"><value>自動播放</value></data>
+<data name="OmittedFolders" xml:space="preserve"><value>省略的資料夾</value></data>
+<data name="DriveList" xml:space="preserve"><value>磁碟機清單</value></data>
 </root>

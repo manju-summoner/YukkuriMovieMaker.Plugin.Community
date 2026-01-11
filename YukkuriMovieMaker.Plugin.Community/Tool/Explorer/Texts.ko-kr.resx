@@ -100,4 +100,6 @@
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>뷰 크기 확대</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>뷰 크기 축소</value></data>
 <data name="AutoPlay" xml:space="preserve"><value>자동 재생</value></data>
+<data name="OmittedFolders" xml:space="preserve"><value>생략된 폴더</value></data>
+<data name="DriveList" xml:space="preserve"><value>드라이브 목록</value></data>
 </root>

@@ -329,15 +329,15 @@
             <Button Grid.Column="1" Content="{DynamicResource arrow-right}" Command="{Binding ForwardCommand}" ToolTip="{x:Static local:Texts.Forward}"/>
             <Button Grid.Column="2" Content="{DynamicResource arrow-up}" Command="{Binding MoveToParentDirectoryCommand}" ToolTip="{x:Static local:Texts.MoveToParentDirectory}"/>
             <Button Grid.Column="3" Content="{DynamicResource ReloadMonochrome}" Command="{Binding RefreshCommand}" ToolTip="{x:Static local:Texts.Refresh}"/>
-            <TextBox Grid.Column="4" Padding="3,0,3,0" VerticalContentAlignment="Center"
-                     Text="{Binding Location, Mode=OneWay}">
+
+            <local:ExplorerAddressBar Grid.Column="4" Value="{Binding Location,Mode=OneWay}" ExternalSuggestions="{Binding FavoriteUrls}">
                 <i:Interaction.Triggers>
-                    <pt:PreviewKeyDownTrigger Key="Enter">
-                        <i:InvokeCommandAction Command="{Binding NavigateCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=TextBox},Path=Text}"/>
+                    <i:EventTrigger EventName="Navigated">
+                        <i:InvokeCommandAction Command="{Binding NavigateCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=local:ExplorerAddressBar},Path=Value}"/>
                         <pa:ClearFocusAction/>
-                    </pt:PreviewKeyDownTrigger>
+                    </i:EventTrigger>
                 </i:Interaction.Triggers>
-            </TextBox>
+            </local:ExplorerAddressBar>
             <c:SplitButton Grid.Column="5" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.AddFavorite}" Padding="4" Height="26">
                 <c:SplitButton.Style>
                     <Style TargetType="c:SplitButton" BasedOn="{StaticResource {x:Type c:SplitButton}}">

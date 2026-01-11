@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xaml.Behaviors;
 using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
@@ -104,6 +106,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         [SuppressMessage("Performance", "CA1822:メンバーを static に設定します", Justification = "")]
         public ExplorerFavoriteDirectoryViewModel FavoriteDirectoryViewModel => ExplorerFavoriteDirectoryViewModel.CreateExplorerFavoriteRoot();
+
+        public ObservableCollection<AddressBarSuggestion> FavoriteUrls { get; } = [];
 
         public ExplorerViewModel()
         {
@@ -501,6 +505,42 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             this.Filter.FilterChanged += Filter_FilterChanged;
 
             RequestRefresh();
+            RefreshFavoriteUrls();
+
+            ExplorerSettings.Default.Favorites.CollectionChanged += Favorites_CollectionChanged;
+        }
+
+        private void Favorites_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if(e.OldItems is not null)
+            {
+                foreach(ExplorerFavorite item in e.OldItems)
+                {
+                    item.PropertyChanged -= Favorite_PropertyChanged;
+                }
+            }
+            if (e.NewItems is not null)
+            {
+                foreach(ExplorerFavorite item in e.NewItems)
+                {
+                    item.PropertyChanged += Favorite_PropertyChanged;
+                }
+            }
+            RefreshFavoriteUrls();
+        }
+
+        private void Favorite_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            RefreshFavoriteUrls();
+        }
+
+        private void RefreshFavoriteUrls()
+        {
+            FavoriteUrls.Clear();
+            foreach (var fav in ExplorerSettings.Default.Favorites)
+            {
+                FavoriteUrls.Add(new AddressBarSuggestion(fav.Name, fav.Url, fav.Url, AddressBarSuggestionSource.External));
+            }
         }
 
         private void Filter_FilterChanged(object? sender, EventArgs e)

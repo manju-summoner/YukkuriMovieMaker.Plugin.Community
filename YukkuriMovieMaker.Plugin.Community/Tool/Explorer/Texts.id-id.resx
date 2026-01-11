@@ -99,4 +99,6 @@ Contoh: NamaFolder/NamaSubfolder</value></data>
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>Perbesar Ukuran Tampilan</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>Perkecil Ukuran Tampilan</value></data>
 <data name="AutoPlay" xml:space="preserve"><value>Putar Otomatis</value></data>
+<data name="OmittedFolders" xml:space="preserve"><value>Gabungan Folder</value></data>
+<data name="DriveList" xml:space="preserve"><value>Daftar Drive</value></data>
 </root>
