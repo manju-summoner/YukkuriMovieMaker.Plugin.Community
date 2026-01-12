@@ -100,4 +100,13 @@ Example: FolderName/SubfolderName</value></data>
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>Increase View Size</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>Decrease View Size</value></data>
 <data name="AutoPlay" xml:space="preserve"><value>Auto Play</value></data>
+<data name="OmittedFolders" xml:space="preserve"><value>Omitted Folders</value></data>
+<data name="DriveList" xml:space="preserve"><value>Drive List</value></data>
+<data name="Sort" xml:space="preserve"><value>Sort</value></data>
+<data name="SortByName" xml:space="preserve"><value>Name</value></data>
+<data name="SortByLastWriteTime" xml:space="preserve"><value>Last write time</value></data>
+<data name="SortByExtension" xml:space="preserve"><value>Extension</value></data>
+<data name="SortAscending" xml:space="preserve"><value>Ascending</value></data>
+<data name="SortDescending" xml:space="preserve"><value>Descending</value></data>
+<data name="SortOrder" xml:space="preserve"><value>Sort order</value></data>
 </root>

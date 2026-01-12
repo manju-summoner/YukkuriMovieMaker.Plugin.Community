@@ -99,4 +99,13 @@
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>放大视图</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>缩小视图</value></data>
 <data name="AutoPlay" xml:space="preserve"><value>自动播放</value></data>
+<data name="OmittedFolders" xml:space="preserve"><value>省略的文件夹</value></data>
+<data name="DriveList" xml:space="preserve"><value>驱动器列表</value></data>
+<data name="Sort" xml:space="preserve"><value>排序</value></data>
+<data name="SortByName" xml:space="preserve"><value>名称</value></data>
+<data name="SortByLastWriteTime" xml:space="preserve"><value>修改时间</value></data>
+<data name="SortByExtension" xml:space="preserve"><value>扩展名</value></data>
+<data name="SortAscending" xml:space="preserve"><value>升序</value></data>
+<data name="SortDescending" xml:space="preserve"><value>降序</value></data>
+<data name="SortOrder" xml:space="preserve"><value>排序顺序</value></data>
 </root>

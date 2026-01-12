@@ -100,4 +100,13 @@
 <data name="IncreaseViewSizeMenuHeader" xml:space="preserve"><value>放大檢視</value></data>
 <data name="DecreaseViewSizeMenuHeader" xml:space="preserve"><value>縮小檢視</value></data>
 <data name="AutoPlay" xml:space="preserve"><value>自動播放</value></data>
+<data name="OmittedFolders" xml:space="preserve"><value>省略的資料夾</value></data>
+<data name="DriveList" xml:space="preserve"><value>磁碟機清單</value></data>
+<data name="Sort" xml:space="preserve"><value>排序</value></data>
+<data name="SortByName" xml:space="preserve"><value>名稱</value></data>
+<data name="SortByLastWriteTime" xml:space="preserve"><value>修改時間</value></data>
+<data name="SortByExtension" xml:space="preserve"><value>副檔名</value></data>
+<data name="SortAscending" xml:space="preserve"><value>升冪</value></data>
+<data name="SortDescending" xml:space="preserve"><value>降冪</value></data>
+<data name="SortOrder" xml:space="preserve"><value>排序順序</value></data>
 </root>
