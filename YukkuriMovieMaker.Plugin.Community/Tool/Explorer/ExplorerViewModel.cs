@@ -161,7 +161,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 _ => true,
                 _ => RequestRefresh());
             NavigateCommand = new ActionCommand(
-                x => x is string location && !string.IsNullOrEmpty(location) && Directory.Exists(location),
+                x => true,//不正なURLを弾くと存在しないアドレスを保存したお気に入りメニューの削除ボタンをクリックできなくなるため、常にtrueにする
                 x =>
                 {
                     var location = x as string;
