@@ -12,6 +12,7 @@
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
              xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
              xmlns:pt="clr-namespace:YukkuriMovieMaker.Views.Triggers;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type=local:BrowserViewModel}">
@@ -64,10 +65,10 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Content="{DynamicResource arrow-left}" Grid.Column="0" Command="{Binding GoBackCommand}" ToolTip="{x:Static local:Texts.Back}"/>
-            <Button Content="{DynamicResource arrow-right}" Grid.Column="1" Command="{Binding GoForwardCommand}" ToolTip="{x:Static local:Texts.Forward}" Style="{StaticResource HideOnDisabledButtonStyle}"/>
-            <Button Content="{DynamicResource ReloadMonochrome}" Grid.Column="2" Command="{Binding RefreshCommand}" ToolTip="{x:Static local:Texts.Refresh}"/>
-            <Button Content="{DynamicResource close}" Grid.Column="2" Command="{Binding StopCommand}" ToolTip="{x:Static local:Texts.Stop}" Style="{StaticResource HideOnDisabledButtonStyle}"/>
+            <Button Content="{DynamicResource {x:Static icons:IconKeys.ArrowLeft}}" Grid.Column="0" Command="{Binding GoBackCommand}" ToolTip="{x:Static local:Texts.Back}"/>
+            <Button Content="{DynamicResource {x:Static icons:IconKeys.ArrowRight}}" Grid.Column="1" Command="{Binding GoForwardCommand}" ToolTip="{x:Static local:Texts.Forward}" Style="{StaticResource HideOnDisabledButtonStyle}"/>
+            <Button Content="{DynamicResource {x:Static icons:IconKeys.Refresh}}" Grid.Column="2" Command="{Binding RefreshCommand}" ToolTip="{x:Static local:Texts.Refresh}"/>
+            <Button Content="{DynamicResource {x:Static icons:IconKeys.Close}}" Grid.Column="2" Command="{Binding StopCommand}" ToolTip="{x:Static local:Texts.Stop}" Style="{StaticResource HideOnDisabledButtonStyle}"/>
             <TextBox Grid.Column="3" Text="{Binding Location,Mode=OneWay}" VerticalContentAlignment="Center" Padding="3,0,0,0">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="GotFocus">
@@ -84,10 +85,10 @@
             <c:SplitButton Grid.Column="4" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.AddFavorite}" Padding="4" Height="26">
                 <c:SplitButton.Style>
                     <Style TargetType="c:SplitButton" BasedOn="{StaticResource {x:Type c:SplitButton}}">
-                        <Setter Property="Content" Value="{DynamicResource star-outline}"/>
+                        <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.StarOutline}}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsFavorite}" Value="True">
-                                <Setter Property="Content" Value="{DynamicResource star}"/>
+                                <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Star}}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding  FavoriteDirectoryViewModel.Items.Count}" Value="0">
                                 <Setter Property="IsDropDownButtonVisible" Value="False"/>
@@ -116,7 +117,7 @@
                                                             <ColumnDefinition/>
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Text="{Binding Display}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
-                                                        <Button Content="{DynamicResource pencil}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
+                                                        <Button Content="{DynamicResource {x:Static icons:IconKeys.Pencil}}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
                                                     </Grid>
                                                 </DataTemplate>
                                             </Setter.Value>
@@ -129,8 +130,8 @@
                     </ContextMenu>
                 </c:SplitButton.ContextMenu>
             </c:SplitButton>
-            <Button Content="{DynamicResource Plus}" Grid.Column="5" Command="{Binding CreateNewWindowCommand}" ToolTip="{x:Static local:Texts.NewTab}"/>
-            <c:DropDownButton Content="{DynamicResource menu}" Grid.Column="6" ToolTip="{x:Static local:Texts.Menu}" IsChecked="{Binding IsMenuOpened,Mode=TwoWay}">
+            <Button Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Grid.Column="5" Command="{Binding CreateNewWindowCommand}" ToolTip="{x:Static local:Texts.NewTab}"/>
+            <c:DropDownButton Content="{DynamicResource {x:Static icons:IconKeys.Menu}}" Grid.Column="6" ToolTip="{x:Static local:Texts.Menu}" IsChecked="{Binding IsMenuOpened,Mode=TwoWay}">
                 <c:DropDownButton.Style>
                     <Style TargetType="{x:Type c:DropDownButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
 
@@ -139,7 +140,7 @@
                 <c:DropDownButton.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="{x:Static local:Texts.NewTab}" Command="{Binding CreateNewWindowCommand}"/>
-                        <MenuItem Header="{x:Static local:Texts.Favorite}" ItemsSource="{Binding FavoriteDirectoryViewModel.Items}" Icon="{DynamicResource star}">
+                        <MenuItem Header="{x:Static local:Texts.Favorite}" ItemsSource="{Binding FavoriteDirectoryViewModel.Items}" Icon="{DynamicResource {x:Static icons:IconKeys.Star}}">
                             <MenuItem.Style>
                                 <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                     <Style.Triggers>
@@ -168,7 +169,7 @@
                                                                 <ColumnDefinition/>
                                                             </Grid.ColumnDefinitions>
                                                             <TextBlock Text="{Binding Display}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
-                                                            <Button Content="{DynamicResource pencil}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
+                                                            <Button Content="{DynamicResource {x:Static icons:IconKeys.Pencil}}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
                                                         </Grid>
                                                     </DataTemplate>
                                                 </Setter.Value>
