@@ -23,17 +23,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             {
                 if (icon is not null && icon.Width == iconSize)
                     return icon;
+                if (loadIconTask is not null)
+                    return icon;
+
                 loadIconCts = new CancellationTokenSource();
                 var token = loadIconCts.Token;
                 loadIconTask ??= Task.Run(() =>
                     {
-                        if (token.IsCancellationRequested)
-                            return;
-                        var loadedIcon = ShellIcon.GetIcon(dir, ShellIcon.GetIconSize(iconSize), isDirectory: true);
-                        if (token.IsCancellationRequested)
-                            return;
-                        icon = loadedIcon;
-                        OnPropertyChanged(nameof(Icon));
+                        try
+                        {
+                            if (token.IsCancellationRequested)
+                                return;
+                            var loadedIcon = ShellIcon.GetIcon(dir, ShellIcon.GetIconSize(iconSize), isDirectory: true);
+                            if (token.IsCancellationRequested)
+                                return;
+                            icon = loadedIcon;
+                            OnPropertyChanged(nameof(Icon));
+                        }
+                        finally
+                        {
+                            loadIconCts = null;
+                            loadIconTask = null;
+                        }
                     });
                 return icon;
             }

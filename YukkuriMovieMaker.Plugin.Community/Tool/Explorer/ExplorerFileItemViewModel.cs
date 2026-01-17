@@ -24,17 +24,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             {
                 if (icon is not null && icon.Width == iconSize)
                     return icon;
+                if(loadIconTask is not null)
+                    return icon;
                 loadIconCts = new CancellationTokenSource();
                 var token = loadIconCts.Token;
                 loadIconTask ??= Task.Run(() =>
                 {
-                    if (token.IsCancellationRequested)
-                        return;
-                    var loadedIcon = ShellIcon.GetIcon(Path, ShellIcon.GetIconSize(iconSize), isDirectory: false);
-                    if (token.IsCancellationRequested)
-                        return;
-                    icon = loadedIcon;
-                    OnPropertyChanged(nameof(Icon));
+                    try
+                    {
+                        if (token.IsCancellationRequested)
+                            return;
+                        var loadedIcon = ShellIcon.GetIcon(Path, ShellIcon.GetIconSize(iconSize), isDirectory: false);
+                        if (token.IsCancellationRequested)
+                            return;
+                        icon = loadedIcon;
+                        OnPropertyChanged(nameof(Icon));
+                    }
+                    finally
+                    {
+                        loadIconCts = null;
+                        loadIconTask = null;
+                    }
                 });
                 return icon;
             }
@@ -45,19 +55,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             {
                 if (isFailedToLoadThumbnail)
                     return null;
-                if (thumbnail is not null && thumbnail.Width == thumbnailSize)
+                if (thumbnail is not null)
                     return thumbnail;
+                if(loadThumbnailTask is not null)
+                    return thumbnail;
+
                 loadThumbnailCts = new CancellationTokenSource();
                 var token = loadThumbnailCts.Token;
                 loadThumbnailTask ??= Task.Run(async () =>
                 {
-                    BitmapSource? loadedThumbnail = null;
                     await semaphore.WaitAsync();
                     try
                     {
                         if (token.IsCancellationRequested)
                             return;
-                        loadedThumbnail = ShellThumbnail.GetThumbnailFromFactory(Path, thumbnailSize, thumbnailSize);
+                        var loadedThumbnail = ShellThumbnail.GetThumbnailFromFactory(Path, thumbnailSize, thumbnailSize);
                         loadedThumbnail?.Freeze();
                         if (loadedThumbnail is null)
                         {
@@ -67,13 +79,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
                         if (token.IsCancellationRequested)
                             return;
+
+                        thumbnail = loadedThumbnail;
+                        OnPropertyChanged(nameof(Thumbnail));
                     }
                     finally
                     {
+                        loadThumbnailCts = null;
+                        loadThumbnailTask = null;
                         semaphore.Release();
                     }
-                    thumbnail = loadedThumbnail;
-                    OnPropertyChanged(nameof(Thumbnail));
                 });
                 return thumbnail;
             }
@@ -94,16 +109,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 });
         }
 
-        public void SetImageSize(int icon, int thumbnail)
+        public void SetImageSize(int iconSize, int thumbnailSize)
         {
-            if (iconSize != icon)
+            if (this.iconSize != iconSize)
             {
-                iconSize = icon;
+                this.iconSize = iconSize;
                 OnPropertyChanged(nameof(Icon));
             }
-            if (thumbnailSize != thumbnail)
+            if (this.thumbnailSize != thumbnailSize)
             {
-                thumbnailSize = thumbnail;
+                this.thumbnailSize = thumbnailSize;
+                thumbnail = null;
                 OnPropertyChanged(nameof(Thumbnail));
             }
         }
