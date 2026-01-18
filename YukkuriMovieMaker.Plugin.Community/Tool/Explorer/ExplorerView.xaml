@@ -554,9 +554,6 @@
                 <pt:PreviewMouseWheelEventTrigger DeltaMode="Down" ModifierKeys="Ctrl" Handled="True">
                     <i:InvokeCommandAction Command="{Binding DecreaseLayoutSizeCommand}"/>
                 </pt:PreviewMouseWheelEventTrigger>
-                <pt:DoubleClickTrigger>
-                    <i:InvokeCommandAction Command="{Binding MoveToParentDirectoryCommand}"/>
-                </pt:DoubleClickTrigger>
             </i:Interaction.Triggers>
         </ListBox>
     </Grid>
