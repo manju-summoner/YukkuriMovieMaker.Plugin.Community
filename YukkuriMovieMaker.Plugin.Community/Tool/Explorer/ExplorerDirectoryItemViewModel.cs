@@ -21,20 +21,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         {
             get
             {
-                if (icon is not null && icon.Width == iconSize)
+                if (icon is not null)
+                    return icon;
+                if (loadIconTask is not null)
                     return icon;
                 loadIconCts = new CancellationTokenSource();
                 var token = loadIconCts.Token;
                 loadIconTask ??= Task.Run(() =>
+                {
+                    try
                     {
                         if (token.IsCancellationRequested)
                             return;
-                        var loadedIcon = ShellIcon.GetIcon(dir, ShellIcon.GetIconSize(iconSize), isDirectory: true);
+                        var loadedIcon = ShellIcon.GetIcon(Path, ShellIcon.GetIconSize(iconSize), isDirectory: false);
                         if (token.IsCancellationRequested)
                             return;
                         icon = loadedIcon;
                         OnPropertyChanged(nameof(Icon));
-                    });
+                    }
+                    finally
+                    {
+                        loadIconCts = null;
+                        loadIconTask = null;
+                    }
+                });
                 return icon;
             }
         }
@@ -51,11 +61,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 _=> ClearIcon());
         }
 
-        public void SetImageSize(int icon, int thumbnail)
+        public void SetImageSize(int iconSize, int thumbnailSize)
         {
-            if (iconSize != icon)
+            if (this.iconSize != iconSize)
             {
-                this.iconSize = icon;
+                this.iconSize = iconSize;
+                icon = null;
                 OnPropertyChanged(nameof(Icon));
             }
 
