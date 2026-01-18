@@ -21,7 +21,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         {
             get
             {
-                if (icon is not null && icon.Width == iconSize)
+                if (icon is not null)
                     return icon;
                 if (loadIconTask is not null)
                     return icon;
@@ -62,11 +62,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 _=> ClearIcon());
         }
 
-        public void SetImageSize(int icon, int thumbnail)
+        public void SetImageSize(int iconSize, int thumbnailSize)
         {
-            if (iconSize != icon)
+            if (this.iconSize != iconSize)
             {
-                this.iconSize = icon;
+                this.iconSize = iconSize;
+                icon = null;
                 OnPropertyChanged(nameof(Icon));
             }
 
