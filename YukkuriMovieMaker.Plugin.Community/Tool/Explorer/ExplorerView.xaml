@@ -545,8 +545,8 @@
                             <MenuItem Header="{x:Static local:Texts.WrapListView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.WrapList}"/>
                             <MenuItem Header="{x:Static local:Texts.ThumbnailView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.Tiles}"/>
                         </MenuItem>
-                        <MenuItem Header="{x:Static local:Texts.IncreaseViewSizeMenuHeader}" Command="{Binding DataContext.IncreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                        <MenuItem Header="{x:Static local:Texts.DecreaseViewSizeMenuHeader}" Command="{Binding DataContext.DecreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                        <MenuItem Header="{x:Static local:Texts.IncreaseViewSizeMenuHeader}" Command="{Binding DataContext.IncreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyPlus}}"/>
+                        <MenuItem Header="{x:Static local:Texts.DecreaseViewSizeMenuHeader}" Command="{Binding DataContext.DecreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyMinus}}"/>
                         <Separator/>
                         <MenuItem Header="{x:Static local:Texts.AutoPlay}" IsCheckable="True" IsChecked="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsAutoPlay,Mode=TwoWay}"/>
                     </ContextMenu>
