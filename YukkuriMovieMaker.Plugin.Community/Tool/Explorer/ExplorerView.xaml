@@ -393,7 +393,7 @@
             </c:SplitButton>
             <Button Grid.Column="6" Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.OpenNewTabMenuHeader}" Style="{StaticResource ToolBarButtonStyle}"/>
 
-            <c:DropDownButton Grid.Column="7" Content="{DynamicResource {x:Static icons:IconKeys.Sort}}" ToolTip="{x:Static local:Texts.Sort}" Padding="3" Height="26">
+            <c:DropDownButton Grid.Column="7" Content="{DynamicResource {x:Static icons:IconKeys.Sort}}" ToolTip="{x:Static local:Texts.Sort}" Padding="3" Height="26" Style="{DynamicResource {x:Type ToggleButton}}">
                 <c:DropDownButton.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="{x:Static local:Texts.SortByName}" IsCheckable="True" IsChecked="{Binding IsSortByName, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Name"/>
