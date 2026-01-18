@@ -471,6 +471,7 @@
                 <c:DropDownButton.ContextMenu>
                     <ContextMenu>
                         <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Plus}}"/>
+                        <MenuItem Command="{Binding OpenCurrentLocationInWindowsExplorerCommand}" Header="{x:Static local:Texts.OpenInWindowsExplorerMenuHeader}"/>
                         <Separator/>
                         <MenuItem Header="{x:Static local:Texts.Refresh}" Icon="{DynamicResource {x:Static icons:IconKeys.Refresh}}" Command="{Binding RefreshCommand}"/>
                         <Separator/>
