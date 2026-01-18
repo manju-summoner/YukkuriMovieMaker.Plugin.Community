@@ -181,6 +181,13 @@
                     <MenuItem Header="{x:Static local:Texts.SortAscending}" IsCheckable="True" IsChecked="{Binding IsSortAscending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Ascending" Icon="{DynamicResource {x:Static icons:IconKeys.SortAscending}}"/>
                     <MenuItem Header="{x:Static local:Texts.SortDescending}" IsCheckable="True" IsChecked="{Binding IsSortDescending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Descending" Icon="{DynamicResource {x:Static icons:IconKeys.SortDescending}}"/>
                 </MenuItem>
+                <MenuItem Header="{x:Static local:Texts.SwitchViewMenuHeader}">
+                    <MenuItem Header="{x:Static local:Texts.ListView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.List}"/>
+                    <MenuItem Header="{x:Static local:Texts.WrapListView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.WrapList}"/>
+                    <MenuItem Header="{x:Static local:Texts.ThumbnailView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.Tiles}"/>
+                </MenuItem>
+                <MenuItem Header="{x:Static local:Texts.IncreaseViewSizeMenuHeader}" Command="{Binding DataContext.IncreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyPlus}}"/>
+                <MenuItem Header="{x:Static local:Texts.DecreaseViewSizeMenuHeader}" Command="{Binding DataContext.DecreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyMinus}}"/>
                 <Separator/>
                 <MenuItem Command="{Binding PasteCommand}" Header="{x:Static local:Texts.PasteMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>
                 <Separator/>
