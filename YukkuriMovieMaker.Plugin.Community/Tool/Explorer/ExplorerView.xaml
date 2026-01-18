@@ -171,6 +171,8 @@
                 <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Plus}}"/>
                 <MenuItem Command="{Binding OpenCurrentLocationInWindowsExplorerCommand}" Header="{x:Static local:Texts.OpenInWindowsExplorerMenuHeader}"/>
                 <Separator/>
+                <MenuItem Header="{x:Static local:Texts.Refresh}" Icon="{DynamicResource {x:Static icons:IconKeys.Refresh}}" Command="{Binding RefreshCommand}"/>
+                <Separator/>
                 <MenuItem Header="{x:Static local:Texts.Sort}" Icon="{DynamicResource {x:Static icons:IconKeys.Sort}}">
                     <MenuItem Header="{x:Static local:Texts.SortByName}" IsCheckable="True" IsChecked="{Binding IsSortByName, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Name"/>
                     <MenuItem Header="{x:Static local:Texts.SortByLastWriteTime}" IsCheckable="True" IsChecked="{Binding IsSortByLastWriteTime, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="LastWriteTime"/>
@@ -333,7 +335,6 @@
             <Button Grid.Column="0" Content="{DynamicResource {x:Static icons:IconKeys.ArrowLeft}}" Command="{Binding BackCommand}" ToolTip="{x:Static local:Texts.Back}" Style="{StaticResource ToolBarButtonStyle}"/>
             <Button Grid.Column="1" Content="{DynamicResource {x:Static icons:IconKeys.ArrowRight}}" Command="{Binding ForwardCommand}" ToolTip="{x:Static local:Texts.Forward}" Style="{StaticResource ToolBarButtonStyle}"/>
             <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.ArrowUp}}" Command="{Binding MoveToParentDirectoryCommand}" ToolTip="{x:Static local:Texts.MoveToParentDirectory}" Style="{StaticResource ToolBarButtonStyle}"/>
-            <Button Grid.Column="3" Content="{DynamicResource {x:Static icons:IconKeys.Refresh}}" Command="{Binding RefreshCommand}" ToolTip="{x:Static local:Texts.Refresh}" Style="{StaticResource ToolBarButtonStyle}"/>
 
             <local:ExplorerAddressBar Grid.Column="4" Value="{Binding Location,Mode=OneWay}" ExternalSuggestions="{Binding FavoriteUrls}">
                 <i:Interaction.Triggers>
@@ -476,6 +477,8 @@
                 <c:DropDownButton.ContextMenu>
                     <ContextMenu>
                         <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Plus}}"/>
+                        <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.Refresh}" Icon="{DynamicResource {x:Static icons:IconKeys.Refresh}}" Command="{Binding RefreshCommand}"/>
                         <Separator/>
                         <MenuItem Header="{x:Static local:Texts.EditFavorite}" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}">
                             <MenuItem.Style>
