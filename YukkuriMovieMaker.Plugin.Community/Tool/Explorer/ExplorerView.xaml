@@ -332,7 +332,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition MaxWidth="150"/>
+                <ColumnDefinition MaxWidth="125"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" Content="{DynamicResource arrow-left}" Command="{Binding BackCommand}" ToolTip="{x:Static local:Texts.Back}" Style="{StaticResource ToolBarButtonStyle}"/>
