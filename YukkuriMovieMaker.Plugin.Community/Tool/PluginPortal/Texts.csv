@@ -1,6 +1,6 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
 PluginPortal,,プラグインポータル,Plugin Portal,插件门户站,插件入口,플러그인 포털,Portal de complementos,بوابة الإضافات,Portal Plugin,
-Author,,作者,Author,作者,作者,작성자,Autor,المؤلف,Penulis,
+Author,,作者,Author,作者,作者,작성자,Autor,المؤلف,Pembuat,
 Type,,種類,Type,类型,類型,유형,Tipo,النوع,Jenis,
 Date, ,公開日,Date,发布日期,發布日期,날짜,Fecha,التاريخ,Tanggal,
 URL,,URL,URL,URL,URL,URL,URL,URL,URL,
@@ -8,7 +8,7 @@ Description,,説明,Description,描述,描述,설명,Descripción,الوصف,Des
 IsEnabled,,配布終了,Discontinued,已停止分发,已停止發佈,배포 종료,Descontinuado,تم إيقاف التوزيع,Dihentikan,
 DownloadFromGitHub,,GitHubからダウンロード,Download from GitHub,从GitHub下载,從GitHub下載,GitHub에서 다운로드,Descargar desde GitHub,التنزيل من GitHub,Unduh dari GitHub,
 Search,,検索,Search,搜索,搜尋,검색,Cerrar,إغلاق,Tutup,
-InstallDownloaded,,ダウンロード済みをインストール,Install Downloaded,安装已下载,安裝已下載,다운로드한 항목 설치,Instalar descargado,تثبيت الذي تم تنزيله,Pasang yang Diunduh,
+InstallDownloaded,,ダウンロード済みをインストール,Install Downloaded,安装已下载,安裝已下載,다운로드한 항목 설치,Instalar descargado,تثبيت الذي تم تنزيله,Pasang yang sudah Diunduh,
 
 InvalidGitHubURL,,無効なGitHub URLです。,Invalid GitHub URL,无效的GitHub URL,無效的GitHub URL,잘못된 GitHub URL,URL de GitHub no válido,رابط GitHub غير صالح,URL GitHub tidak valid,
 FetchingLatestRelease,,最新のリリースを取得中...,Fetching latest release...,最新版本获取中……,正在取得最新版本...,최신 릴리스 가져오는 중...,Obteniendo la última versión...,جاري جلب الإصدار الأخير...,Mengambil rilis terbaru...,
@@ -29,8 +29,8 @@ NoPluginsSelected,,インストールするプラグインが選択されませ�
 PluginsToInstall,,インストールするプラグイン,Plugins to Install,要安装的插件,要安裝的外掛程式,설치할 플러그인,Complementos para instalar,الإضافات للتثبيت,Plugin untuk Dipasang,
 Delete,,削除,Delete,删除,刪除,삭제,Eliminar,حذف,Hapus,
 Install,,インストール,Install,安装,安裝,설치,Instalar,تثبيت,Pasang,
-FileName,,ファイル名,File Name,文件名,檔案名稱,파일 이름,Nombre de archivo,اسم الملف,Nama File,
+FileName,,ファイル名,File Name,文件名,檔案名稱,파일 이름,Nombre de archivo,اسم الملف,Nama Berkas,
 Cancel,,キャンセル,Cancel,取消,取消,취소,Cancelar,إلغاء,Batalkan,
 
 IsCleanYmmeFile,,インストール後に .ymme を削除する,Delete .ymme file after installation,安装后删除 .ymme 文件,.ymme 檔案安裝後刪除,설치 후 .ymme 파일 삭제,Eliminar archivo .ymme después de la instalación,حذف ملف .ymme بعد التثبيت,Hapus file .ymme setelah instalasi,
-YmmeFilePath,,.ymme の保存先,.ymme file path,.ymme文件保存位置,.ymme 檔案路徑,.ymme 파일 경로,Ruta del archivo .ymme,مسار ملف .ymme,Path file .ymme,
+YmmeFilePath,,.ymme の保存先,.ymme file path,.ymme文件保存位置,.ymme 檔案路徑,.ymme 파일 경로,Ruta del archivo .ymme,مسار ملف .ymme,Jalur berkas .ymme,
