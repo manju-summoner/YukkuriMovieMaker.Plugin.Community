@@ -59,10 +59,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
-<data name="Pen" xml:space="preserve"><value>Pena tulisan tangan</value></data>
-<data name="OpenPenTool" xml:space="preserve"><value>Alat pena terbuka</value></data>
-<data name="Undo" xml:space="preserve"><value>Undo</value></data>
-<data name="Redo" xml:space="preserve"><value>Redo</value></data>
+<data name="Pen" xml:space="preserve"><value>Pena</value></data>
+<data name="OpenPenTool" xml:space="preserve"><value>Buka pena</value></data>
+<data name="Undo" xml:space="preserve"><value>Urung</value></data>
+<data name="Redo" xml:space="preserve"><value>Ulang</value></data>
 <data name="BallPen" xml:space="preserve"><value>Bola pena</value></data>
 <data name="Highlighter" xml:space="preserve"><value>Stabilo</value></data>
 <data name="Eraser" xml:space="preserve"><value>Penghapus</value></data>
@@ -70,13 +70,13 @@
 <data name="EraserByPoint" xml:space="preserve"><value>Penghapus (Titik)</value></data>
 <data name="EraserByStroke" xml:space="preserve"><value>Penghapus (Goresan)</value></data>
 <data name="Import" xml:space="preserve"><value>Impor</value></data>
-<data name="Export" xml:space="preserve"><value>Eksport</value></data>
+<data name="Export" xml:space="preserve"><value>Ekspor</value></data>
 <data name="SaveImage" xml:space="preserve"><value>Simpan file gambar</value></data>
-<data name="ExportAsIsf" xml:space="preserve"><value>Eksport sebagai .isf</value></data>
+<data name="ExportAsIsf" xml:space="preserve"><value>Ekspor sebagai .isf</value></data>
 <data name="PenToolWindowTitle" xml:space="preserve"><value>Alat pena</value></data>
 <data name="Close" xml:space="preserve"><value>Tutup</value></data>
 <data name="Thickness" xml:space="preserve"><value>Kepekatan</value></data>
-<data name="Offset" xml:space="preserve"><value>Offset</value></data>
+<data name="Offset" xml:space="preserve"><value>Pergeseran</value></data>
 <data name="Length" xml:space="preserve"><value>Panjang</value></data>
 <data name="Pressure" xml:space="preserve"><value>Tekanan</value></data>
 </root>

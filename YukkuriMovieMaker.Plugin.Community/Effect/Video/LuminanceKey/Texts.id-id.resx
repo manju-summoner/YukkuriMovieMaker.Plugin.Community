@@ -61,10 +61,10 @@
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="LuminanceKeyEffectName" xml:space="preserve"><value>Efek Kunci Luminansi</value></data>
 <data name="Threshold" xml:space="preserve"><value>Ambang batas</value></data>
-<data name="Smoothness" xml:space="preserve"><value>Kelancaran</value></data>
+<data name="Smoothness" xml:space="preserve"><value>Kehalusan</value></data>
 <data name="Mode" xml:space="preserve"><value>Mode Transparansi</value></data>
 <data name="LuminanceKeyEffectModeDark" xml:space="preserve"><value>Transparan di bawah ambang batas</value></data>
-<data name="LuminanceKeyEffectModeThreshold" xml:space="preserve"><value>Transparan pada ambang batas</value></data>
+<data name="LuminanceKeyEffectModeThreshold" xml:space="preserve"><value>Transparan di ambang batas</value></data>
 <data name="LuminanceKeyEffectModeThresholdRange" xml:space="preserve"><value>Transparan dalam rentang ambang batas</value></data>
-<data name="IsInvert" xml:space="preserve"><value>Membalikkan</value></data>
+<data name="IsInvert" xml:space="preserve"><value>Balik</value></data>
 </root>

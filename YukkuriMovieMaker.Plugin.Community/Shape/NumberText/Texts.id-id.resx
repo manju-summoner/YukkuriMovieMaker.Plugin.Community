@@ -70,8 +70,8 @@
 <data name="SizeOfCharacters" xml:space="preserve"><value>Ukuran karakter</value></data>
 <data name="Justification" xml:space="preserve"><value>Penyelarasan</value></data>
 <data name="ColorOfCharacters" xml:space="preserve"><value>Warna karakter</value></data>
-<data name="Bold" xml:space="preserve"><value>Nebold</value></data>
-<data name="Italic" xml:space="preserve"><value>Numer Italic</value></data>
+<data name="Bold" xml:space="preserve"><value>Tebal</value></data>
+<data name="Italic" xml:space="preserve"><value>Miring</value></data>
 <data name="BasePointRightBottom" xml:space="preserve"><value>Rata kanan [bawah]</value></data>
 <data name="BasePointRightTop" xml:space="preserve"><value>Rata kanan [atas]</value></data>
 <data name="BasePointRightCenter" xml:space="preserve"><value>Rata kanan [tengah]</value></data>

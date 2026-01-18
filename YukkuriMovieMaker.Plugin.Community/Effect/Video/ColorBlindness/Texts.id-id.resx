@@ -59,10 +59,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
-<data name="ColorBlindness" xml:space="preserve"><value>Simulasi penglihatan warna</value></data>
-<data name="ColorBlindnessType" xml:space="preserve"><value>Type</value></data>
+<data name="ColorBlindness" xml:space="preserve"><value>Simulasi Buta Warna</value></data>
+<data name="ColorBlindnessType" xml:space="preserve"><value>Tipe</value></data>
 <data name="ColorBlindnessTypeP" xml:space="preserve"><value>Protanopia</value></data>
 <data name="ColorBlindnessTypeD" xml:space="preserve"><value>Deuteranopia</value></data>
 <data name="ColorBlindnessTypeT" xml:space="preserve"><value>Tritanopia</value></data>
-<data name="Strength" xml:space="preserve"><value>Strength</value></data>
+<data name="Strength" xml:space="preserve"><value>Kekuatan</value></data>
 </root>

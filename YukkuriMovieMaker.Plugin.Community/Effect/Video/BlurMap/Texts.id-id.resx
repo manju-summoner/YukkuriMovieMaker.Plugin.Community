@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
-<data name="BlurMap" xml:space="preserve"><value>Map Kabur</value></data>
-<data name="Blur" xml:space="preserve"><value>Kabur</value></data>
+<data name="BlurMap" xml:space="preserve"><value>Map Buram</value></data>
+<data name="Blur" xml:space="preserve"><value>Keburaman</value></data>
 <data name="IsFixedSize" xml:space="preserve"><value>Ukuran Tetap</value></data>
 </root>

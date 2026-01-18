@@ -60,7 +60,7 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="UnitCount" xml:space="preserve"><value>Unit</value></data>
-<data name="StripeGlitchNoiseEffectName" xml:space="preserve"><value>Noise glitch (garis)</value></data>
+<data name="StripeGlitchNoiseEffectName" xml:space="preserve"><value>Gangguan glitch (garis)</value></data>
 <data name="StripeGlitchNoiseEffectStripeCountName" xml:space="preserve"><value>Jumlah garis</value></data>
 <data name="StripeGlitchNoiseEffectStripeCountDesc" xml:space="preserve"><value>Jumlah garis</value></data>
 <data name="StripeGlitchNoiseEffectStripeMaxWidthName" xml:space="preserve"><value>Lebar garis</value></data>
@@ -81,5 +81,5 @@
 <data name="StripeGlitchNoiseEffectPlaybackRateName" xml:space="preserve"><value>Kecepatan pemutaran</value></data>
 <data name="StripeGlitchNoiseEffectPlaybackRateDesc" xml:space="preserve"><value>Kecepatan pemutaran</value></data>
 <data name="StripeGlitchNoiseEffectProbability" xml:space="preserve"><value>Laju Kejadian</value></data>
-<data name="StripeGlitchNoiseEffectProbabilityDesc" xml:space="preserve"><value>Kemungkinan Terjadinya Glitch Noise</value></data>
+<data name="StripeGlitchNoiseEffectProbabilityDesc" xml:space="preserve"><value>Kemungkinan Terjadinya Glitch</value></data>
 </root>

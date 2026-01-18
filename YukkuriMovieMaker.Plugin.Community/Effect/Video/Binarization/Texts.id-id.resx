@@ -62,7 +62,7 @@
 <data name="BinarizationEffectName" xml:space="preserve"><value>Binarisasi</value></data>
 <data name="BinarizationEffectThresholdName" xml:space="preserve"><value>Ambang batas</value></data>
 <data name="BinarizationEffectThresholdDesc" xml:space="preserve"><value>Membuat biner dengan angka yang ditentukan sebagai batas</value></data>
-<data name="BinarizationEffectIsInvertedName" xml:space="preserve"><value>Terbalik</value></data>
+<data name="BinarizationEffectIsInvertedName" xml:space="preserve"><value>Balik</value></data>
 <data name="BinarizationEffectIsInvertedDesc" xml:space="preserve"><value>Membalikkan pemrosesan ambang batas</value></data>
 <data name="BinarizationEffectKeepColorName" xml:space="preserve"><value>Pertahankan warna</value></data>
 <data name="BinarizationEffectKeepColorDesc" xml:space="preserve"><value>Pertahankan warna</value></data>

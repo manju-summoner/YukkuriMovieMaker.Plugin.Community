@@ -60,16 +60,16 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="Bloom" xml:space="preserve"><value>Bloom</value></data>
-<data name="Threshold" xml:space="preserve"><value>Ambang</value></data>
+<data name="Threshold" xml:space="preserve"><value>Ambang batas</value></data>
 <data name="ThresholdDesc" xml:space="preserve"><value>Kecerahan di atas ambang akan bersinar.</value></data>
-<data name="IsColorizationEnabled" xml:space="preserve"><value>Warnai cahaya</value></data>
+<data name="IsColorizationEnabled" xml:space="preserve"><value>Cahaya Berwarna</value></data>
 <data name="IsColorizationEnabledDesc" xml:space="preserve"><value>Menambahkan warna pada cahaya.</value></data>
-<data name="Color" xml:space="preserve"><value>Color</value></data>
+<data name="Color" xml:space="preserve"><value>Warna</value></data>
 <data name="ColorDesc" xml:space="preserve"><value>Warna cahaya</value></data>
 <data name="Strength" xml:space="preserve"><value>قوة</value></data>
 <data name="StrengthDesc" xml:space="preserve"><value>Kekuatan cahaya</value></data>
 <data name="Blur" xml:space="preserve"><value>تشويش</value></data>
-<data name="BlurDesc" xml:space="preserve"><value>Blur cahaya</value></data>
-<data name="IsFixedSizeEnabled" xml:space="preserve"><value>Tamaño tetap</value></data>
-<data name="IsFixedSizeEnabledDesc" xml:space="preserve"><value>Mempertahankan ukuran gambar asli.</value></data>
+<data name="BlurDesc" xml:space="preserve"><value>Keburaman cahaya</value></data>
+<data name="IsFixedSizeEnabled" xml:space="preserve"><value>Ukuran tetap</value></data>
+<data name="IsFixedSizeEnabledDesc" xml:space="preserve"><value>Pertahankan ukuran gambar asli.</value></data>
 </root>

@@ -59,9 +59,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
-<data name="Whisper" xml:space="preserve"><value>Bisikan (lokal)</value></data>
+<data name="Whisper" xml:space="preserve"><value>Whisper (lokal)</value></data>
 <data name="CreatingAudioStreamMessage" xml:space="preserve"><value>Menyiapkan target</value></data>
-<data name="LoadingWhisperModelMessage" xml:space="preserve"><value>Memuat model bisikan</value></data>
+<data name="LoadingWhisperModelMessage" xml:space="preserve"><value>Memuat model Whisper</value></data>
 <data name="ProcessingAudioMessage" xml:space="preserve"><value>Memproses audio {0} / {1} {2}</value></data>
 <data name="Language" xml:space="preserve"><value>Bahasa</value></data>
 <data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>{0} diperlukan</value></data>
@@ -72,7 +72,7 @@ Apakah Anda ingin mengunduh dan menjalankan pemasang sekarang？</value></data>
 <data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>“{0}” belum terpasang。</value></data>
 <data name="InstallerNotFoundMessage" xml:space="preserve"><value>Instalasi tidak ditemukan: {0}</value></data>
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>Gagal menjalankan installer。</value></data>
-<data name="InstallerExitFailureMessage" xml:space="preserve"><value>Instalasi gagal. Kode keluar = {0}</value></data>
+<data name="InstallerExitFailureMessage" xml:space="preserve"><value>Instalasi gagal. ExitCode = {0}</value></data>
 <data name="NotSupportedMessage" xml:space="preserve"><value>لا تدعم بيئتك هذه الميزة</value></data>
 <data name="InstallingMessage" xml:space="preserve"><value>Sedang menginstal {0}。Silakan tunggu。Tombol batal tidak akan berfungsi selama instalasi。</value></data>
 <data name="FileSizeLimitMessage" xml:space="preserve"><value>Karena YMM4 berada di jalur yang mengandung karakter multibyte, YMM4 tidak dapat memuat model dengan ukuran file melebihi 2 GB.

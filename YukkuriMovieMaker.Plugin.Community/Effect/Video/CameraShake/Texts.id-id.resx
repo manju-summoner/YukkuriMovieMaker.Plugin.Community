@@ -70,8 +70,8 @@
 <data name="YawDesc" xml:space="preserve"><value>Rotasi Horizontal Kamera</value></data>
 <data name="Pitch" xml:space="preserve"><value>Rotasi Vertikal</value></data>
 <data name="PitchDesc" xml:space="preserve"><value>Rotasi Vertikal Kamera</value></data>
-<data name="Roll" xml:space="preserve"><value>Tilt</value></data>
-<data name="RollDesc" xml:space="preserve"><value>Tilt Kamera</value></data>
+<data name="Roll" xml:space="preserve"><value>Kemiringan</value></data>
+<data name="RollDesc" xml:space="preserve"><value>Kemiringan Kamera</value></data>
 <data name="Span" xml:space="preserve"><value>Jarak</value></data>
 <data name="SecUnit" xml:space="preserve"><value>Detik</value></data>
 </root>
