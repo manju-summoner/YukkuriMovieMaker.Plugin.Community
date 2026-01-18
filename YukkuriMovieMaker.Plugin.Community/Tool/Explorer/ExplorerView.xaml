@@ -343,13 +343,15 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </local:ExplorerAddressBar>
-            <c:SplitButton Grid.Column="5" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.AddFavorite}" Padding="4" Height="26">
+            <c:SplitButton Grid.Column="5" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" Padding="4" Height="26">
                 <c:SplitButton.Style>
                     <Style TargetType="c:SplitButton" BasedOn="{StaticResource {x:Type c:SplitButton}}">
                         <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.StarOutline}}"/>
+                        <Setter Property="ToolTip" Value="{x:Static local:Texts.AddFavorite}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsFavorite}" Value="True">
                                 <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Star}}"/>
+                                <Setter Property="ToolTip" Value="{x:Static local:Texts.EditFavorite}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding  FavoriteDirectoryViewModel.Items.Count}" Value="0">
                                 <Setter Property="IsDropDownButtonVisible" Value="False"/>
