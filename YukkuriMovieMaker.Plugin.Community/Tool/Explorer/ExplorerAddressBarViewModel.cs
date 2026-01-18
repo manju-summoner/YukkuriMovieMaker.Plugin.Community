@@ -749,33 +749,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             return width;
         }
 
-        static double MeasurePcBlockWidth()
+        double MeasurePcBlockWidth()
         {
             // XAMLと一致させる
-            const double iconWidth = 18;
-            const double driveButtonWidth = 18;
+            const double iconWidth = 15;
+            double driveButtonWidth = MeasureSeparatorWidth();
             return iconWidth + driveButtonWidth;
         }
 
-        static double MeasureSeparatorWidth()
+        double MeasureSeparatorWidth()
         {
+            const double borderPadding = 2; // StrokeThickness="1"
             // XAMLと一致させる
-            const double separatorButtonWidth = 18;
-            return separatorButtonWidth;
+            return MeasureTextWidth(">") + borderPadding;
         }
 
         double MeasureSegmentWidth(AddressBarBreadcrumbSegment segment)
         {
+            const double borderPadding = 2;   // StrokeThickness="1"
             if (segment.Kind == AddressBarBreadcrumbSegmentKind.Ellipsis)
             {
                 var ellipsisWidth = MeasureTextWidth("...");
-                const double ellipsisPadding = 12; // XAML Padding="6,0"
-                return ellipsisWidth + ellipsisPadding;
+                const double ellipsisPadding = 2; // XAML Padding="1,0"
+                return ellipsisWidth + ellipsisPadding + borderPadding;
             }
 
             var textWidth = MeasureTextWidth(segment.DisplayText);
-            const double paddingLeftRight = 12; // XAML Padding="6,0"
-            return textWidth + paddingLeftRight;
+            const double paddingLeftRight = 6; // XAML Padding="3,0"
+            return textWidth + paddingLeftRight + borderPadding;
         }
 
         double MeasureTextWidth(string text)

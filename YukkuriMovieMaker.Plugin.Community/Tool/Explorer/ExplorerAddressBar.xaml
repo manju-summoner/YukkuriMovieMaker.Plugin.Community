@@ -12,7 +12,7 @@
 
         <!-- BreadcrumbToken 表示用 -->
         <DataTemplate x:Key="BreadcrumbSegmentTemplate">
-            <Button Padding="6,0"
+            <Button Padding="3,0"
                     Width="Auto"
                     Height="Auto"
                     MinWidth="0"
@@ -25,7 +25,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="BreadcrumbEllipsisTemplate">
-            <Button Padding="6,0"
+            <Button Padding="1,0"
                     Width="Auto"
                     Height="Auto"
                     Background="Transparent"
@@ -37,7 +37,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="BreadcrumbSeparatorTemplate">
-            <Button Width="18"
+            <Button Width="Auto"
                     Height="Auto"
                     Background="Transparent"
                     BorderBrush="Transparent"
@@ -112,12 +112,12 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- PCアイコン -->
-                <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Monitor}}" Width="12" Margin="0,0,6,0"/>
+                <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Monitor}}" Width="12" Margin="0,0,3,0"/>
 
                 <!-- PC右の ">"（ドライブ一覧） -->
                 <Button x:Name="DriveMenuButton"
                         Grid.Column="1"
-                        Width="18"
+                        Width="Auto"
                         Height="Auto"
                         Padding="0"
                         Background="Transparent"
