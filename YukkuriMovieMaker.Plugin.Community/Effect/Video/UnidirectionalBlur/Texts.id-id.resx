@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
-<data name="UnidirectionalBlur" xml:space="preserve"><value>Unidirectional Blur</value></data>
+<data name="UnidirectionalBlur" xml:space="preserve"><value>Buram searah</value></data>
 <data name="Angle" xml:space="preserve"><value>زاوية</value></data>
 <data name="Length" xml:space="preserve"><value>الطول</value></data>
 </root>

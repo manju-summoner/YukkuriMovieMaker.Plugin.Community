@@ -59,14 +59,14 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
-<data name="Notepad" xml:space="preserve"><value>Notepad</value></data>
+<data name="Notepad" xml:space="preserve"><value>Catatan</value></data>
 <data name="Open" xml:space="preserve"><value>Buka</value></data>
 <data name="Save" xml:space="preserve"><value>Simpan</value></data>
 <data name="SaveAs" xml:space="preserve"><value>Simpan Sebagai</value></data>
 <data name="TextFile" xml:space="preserve"><value>Berkas Teks</value></data>
-<data name="FailedToOpenFile" xml:space="preserve"><value>Gagal membuka file.</value></data>
-<data name="FailedToSaveFile" xml:space="preserve"><value>Gagal menyimpan file.</value></data>
-<data name="Error" xml:space="preserve"><value>Kesalahan</value></data>
+<data name="FailedToOpenFile" xml:space="preserve"><value>Gagal membuka berkas.</value></data>
+<data name="FailedToSaveFile" xml:space="preserve"><value>Gagal menyimpan berkas.</value></data>
+<data name="Error" xml:space="preserve"><value>Error</value></data>
 <data name="Untitled" xml:space="preserve"><value>Tanpa judul</value></data>
 <data name="OpenNewTab" xml:space="preserve"><value>Buka Tab Baru</value></data>
 </root>

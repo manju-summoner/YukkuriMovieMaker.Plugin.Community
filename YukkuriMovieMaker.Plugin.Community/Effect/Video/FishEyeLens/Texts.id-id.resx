@@ -60,7 +60,7 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="FishEyeLens" xml:space="preserve"><value>Lensa ikan</value></data>
-<data name="Angle" xml:space="preserve"><value>Angle</value></data>
+<data name="Angle" xml:space="preserve"><value>Sudut</value></data>
 <data name="AngleOfView" xml:space="preserve"><value>Sudut pandang</value></data>
 <data name="Zoom" xml:space="preserve"><value>Zoom</value></data>
 <data name="Projection" xml:space="preserve"><value>Proyeksi</value></data>

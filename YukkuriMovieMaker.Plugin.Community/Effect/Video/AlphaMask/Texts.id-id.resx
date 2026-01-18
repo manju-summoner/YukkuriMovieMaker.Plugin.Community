@@ -60,6 +60,6 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="AlphaMask" xml:space="preserve"><value>Topeng Alfa</value></data>
-<data name="Blur" xml:space="preserve"><value>Kabur</value></data>
-<data name="InvertArea" xml:space="preserve"><value>Area Terbalik</value></data>
+<data name="Blur" xml:space="preserve"><value>Buram</value></data>
+<data name="InvertArea" xml:space="preserve"><value>Balik Area</value></data>
 </root>

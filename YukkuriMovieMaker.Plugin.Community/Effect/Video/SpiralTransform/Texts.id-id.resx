@@ -62,6 +62,6 @@
 <data name="SpiralTransformEffectName" xml:space="preserve"><value>Spiral</value></data>
 <data name="SpiralTransformEffectAngleName" xml:space="preserve"><value>Sudut</value></data>
 <data name="SpiralTransformEffectAngleDesc" xml:space="preserve"><value>Sudut spiral</value></data>
-<data name="SpiralTransformEffectIsRotateOuterName" xml:space="preserve"><value>Rotasi bagian luar</value></data>
+<data name="SpiralTransformEffectIsRotateOuterName" xml:space="preserve"><value>Rotasi luar</value></data>
 <data name="SpiralTransformEffectIsRotateOuterDesc" xml:space="preserve"><value>Rotasi bagian luar</value></data>
 </root>

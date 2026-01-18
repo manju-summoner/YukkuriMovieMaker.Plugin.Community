@@ -60,7 +60,7 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="PluginPortal" xml:space="preserve"><value>Portal Plugin</value></data>
-<data name="Author" xml:space="preserve"><value>Penulis</value></data>
+<data name="Author" xml:space="preserve"><value>Pembuat</value></data>
 <data name="Type" xml:space="preserve"><value>Jenis</value></data>
 <data name="Date" xml:space="preserve"><value>Tanggal</value></data>
 <data name="URL" xml:space="preserve"><value>URL</value></data>
@@ -68,7 +68,7 @@
 <data name="IsEnabled" xml:space="preserve"><value>Dihentikan</value></data>
 <data name="DownloadFromGitHub" xml:space="preserve"><value>Unduh dari GitHub</value></data>
 <data name="Search" xml:space="preserve"><value>Tutup</value></data>
-<data name="InstallDownloaded" xml:space="preserve"><value>Pasang yang Diunduh</value></data>
+<data name="InstallDownloaded" xml:space="preserve"><value>Pasang yang sudah Diunduh</value></data>
 <data name="InvalidGitHubURL" xml:space="preserve"><value>URL GitHub tidak valid</value></data>
 <data name="FetchingLatestRelease" xml:space="preserve"><value>Mengambil rilis terbaru...</value></data>
 <data name="FailedToParseReleaseInfo" xml:space="preserve"><value>Gagal mengurai info rilis.</value></data>
@@ -87,8 +87,8 @@
 <data name="PluginsToInstall" xml:space="preserve"><value>Plugin untuk Dipasang</value></data>
 <data name="Delete" xml:space="preserve"><value>Hapus</value></data>
 <data name="Install" xml:space="preserve"><value>Pasang</value></data>
-<data name="FileName" xml:space="preserve"><value>Nama File</value></data>
+<data name="FileName" xml:space="preserve"><value>Nama Berkas</value></data>
 <data name="Cancel" xml:space="preserve"><value>Batalkan</value></data>
 <data name="IsCleanYmmeFile" xml:space="preserve"><value>Hapus file .ymme setelah instalasi</value></data>
-<data name="YmmeFilePath" xml:space="preserve"><value>Path file .ymme</value></data>
+<data name="YmmeFilePath" xml:space="preserve"><value>Jalur berkas .ymme</value></data>
 </root>

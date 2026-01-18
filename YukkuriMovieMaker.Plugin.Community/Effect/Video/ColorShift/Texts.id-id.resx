@@ -67,8 +67,8 @@
 <data name="ColorShiftEffectIsPremultipliedAlphaName" xml:space="preserve"><value>Premultiply alpha</value></data>
 <data name="ColorShiftEffectIsPremultipliedAlphaDesc" xml:space="preserve"><value>Premultiply alpha</value></data>
 <data name="ColorShiftEffectModeName" xml:space="preserve"><value>Tipe</value></data>
-<data name="ColorShiftEffectName" xml:space="preserve"><value>Perubahan warna</value></data>
-<data name="ColorShiftGroupName" xml:space="preserve"><value>Perubahan warna</value></data>
+<data name="ColorShiftEffectName" xml:space="preserve"><value>Pergeseran warna</value></data>
+<data name="ColorShiftGroupName" xml:space="preserve"><value>Pergeseran warna</value></data>
 <data name="ColorShiftEffectModeDesc" xml:space="preserve"><value>Jenis pergeseran warna</value></data>
 <data name="ColorShiftEffectShiftDesc" xml:space="preserve"><value>Jarak untuk pergeseran warna</value></data>
 <data name="ColorShiftModeRBGName" xml:space="preserve"><value>Merah Biru Hijau</value></data>

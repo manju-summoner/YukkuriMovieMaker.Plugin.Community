@@ -59,8 +59,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
-<data name="ExtendModeClampName" xml:space="preserve"><value>Penjepit</value></data>
-<data name="ExtendModeWrapName" xml:space="preserve"><value>Membungkus</value></data>
+<data name="ExtendModeClampName" xml:space="preserve"><value>Jepit</value></data>
+<data name="ExtendModeWrapName" xml:space="preserve"><value>Bungkus</value></data>
 <data name="ExtendModeMirrorName" xml:space="preserve"><value>Cermin</value></data>
 <data name="DownloadingProgressMessage" xml:space="preserve"><value>Mengunduh {0} {1} / {2}</value></data>
 </root>

@@ -64,10 +64,10 @@
 <data name="ColorCorrectionEffectBrightnessDesc" xml:space="preserve"><value>Pencahayaan</value></data>
 <data name="ColorCorrectionEffectSaturationName" xml:space="preserve"><value>Saturasi</value></data>
 <data name="ColorCorrectionEffectSaturationDesc" xml:space="preserve"><value>Kecerahan warna</value></data>
-<data name="ColorCorrectionEffectHueRotationName" xml:space="preserve"><value>Hue</value></data>
-<data name="ColorCorrectionEffectHueRotationDesc" xml:space="preserve"><value>Koreksi warna</value></data>
-<data name="ColorCorrectionEffectName" xml:space="preserve"><value>Koreksi warna</value></data>
-<data name="ColorCorrectionGroupName" xml:space="preserve"><value>Koreksi warna</value></data>
+<data name="ColorCorrectionEffectHueRotationName" xml:space="preserve"><value>Rona</value></data>
+<data name="ColorCorrectionEffectHueRotationDesc" xml:space="preserve"><value>Mengubah rona warna (hue)</value></data>
+<data name="ColorCorrectionEffectName" xml:space="preserve"><value>Koreksi Warna</value></data>
+<data name="ColorCorrectionGroupName" xml:space="preserve"><value>Koreksi Warna</value></data>
 <data name="ColorCorrectionEffectLightnessName" xml:space="preserve"><value>Kecerahan</value></data>
 <data name="ColorCorrectionEffectLightnessDesc" xml:space="preserve"><value>Kecerahan</value></data>
 <data name="ColorCorrectionEffectContrastDesc" xml:space="preserve"><value>Penekanan pada terang dan gelap</value></data>

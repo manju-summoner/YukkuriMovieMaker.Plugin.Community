@@ -59,10 +59,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
-<data name="LensBlur" xml:space="preserve"><value>Bokeh Lens</value></data>
-<data name="BlurRadius" xml:space="preserve"><value>Radius Bokeh</value></data>
-<data name="Brightness" xml:space="preserve"><value>Brightness</value></data>
-<data name="Quality" xml:space="preserve"><value>Quality</value></data>
+<data name="LensBlur" xml:space="preserve"><value>Lensa Buram</value></data>
+<data name="BlurRadius" xml:space="preserve"><value>Radius Buram</value></data>
+<data name="Brightness" xml:space="preserve"><value>Kecerahan</value></data>
+<data name="Quality" xml:space="preserve"><value>Kualitas</value></data>
 <data name="QualityDesc" xml:space="preserve"><value>Semakin besar angka, semakin tinggi kualitas.</value></data>
-<data name="EdgeStrength" xml:space="preserve"><value>Edge Strength</value></data>
+<data name="EdgeStrength" xml:space="preserve"><value>Kekuatan tepi</value></data>
 </root>
