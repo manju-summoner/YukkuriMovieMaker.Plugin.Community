@@ -1,6 +1,6 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
 UnitCount,,個,units,单元数,个,개,unidades,وحدات,Unit
-StripeGlitchNoiseEffectName,,グリッチノイズ（帯）,Glitch noise (stripe),故障噪波（条纹）,故障噪聲（條紋）,그리치 노이즈 (줄무늬),Ruido de falla (raya),ضجيج العطل (شريط),Noise glitch (garis)
+StripeGlitchNoiseEffectName,,グリッチノイズ（帯）,Glitch noise (stripe),故障噪波（条纹）,故障噪聲（條紋）,그리치 노이즈 (줄무늬),Ruido de falla (raya),ضجيج العطل (شريط),Gangguan glitch (garis)
 StripeGlitchNoiseEffectStripeCountName,,帯の数,Stripes,条纹数,條紋數,줄무늬 수,Rayas,عدد الشرائط,Jumlah garis
 StripeGlitchNoiseEffectStripeCountDesc,,帯の数,Number of stripes,条纹数量,條紋數,줄무늬 수,Número de rayas,عدد الشرائط,Jumlah garis
 StripeGlitchNoiseEffectStripeMaxWidthName,,帯の幅,Stripe width,条纹宽度,條紋寬度,줄무늬 폭,Ancho de raya,عرض الشريط,Lebar garis
@@ -21,4 +21,4 @@ StripeGlitchNoiseEffectComplicationGroupName,,複雑化,Complication,复杂化,�
 StripeGlitchNoiseEffectPlaybackRateName,,再生速度,Playback rate,播放速度,播放速度,재생 속도,Velocidad de reproducción,"معدل تشغيل الضوضاء المتموجة",Kecepatan pemutaran
 StripeGlitchNoiseEffectPlaybackRateDesc,,再生速度,Playback rate,播放速度,播放速度,재생 속도,Velocidad de reproducción,معدل تشغيل تأثير ضوضاء خطأ الشريط,Kecepatan pemutaran
 StripeGlitchNoiseEffectProbability,,発生率,Occurrence Rate,发生率,發生率,발생률,Tasa de ocurrencia,معدل الحدوث,Laju Kejadian
-StripeGlitchNoiseEffectProbabilityDesc,,グリッチノイズが発生する確率,Probability of Glitch Noise Occurrence,故障噪波发生概率,故障噪音發生的機率,글리치 노이즈 발생 확률,Probabilidad de que ocurra ruido de falla,احتمالية حدوث ضوضاء خلل,Kemungkinan Terjadinya Glitch Noise
+StripeGlitchNoiseEffectProbabilityDesc,,グリッチノイズが発生する確率,Probability of Glitch Noise Occurrence,故障噪波发生概率,故障噪音發生的機率,글리치 노이즈 발생 확률,Probabilidad de que ocurra ruido de falla,احتمالية حدوث ضوضاء خلل,Kemungkinan Terjadinya Glitch

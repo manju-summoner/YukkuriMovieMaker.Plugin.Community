@@ -1,14 +1,14 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
 Bloom,,発光,Bloom,发光,發光,발광,Bloom,توهج,Bloom
-Threshold,,閾値,Threshold,阈值,閾值,임계값,Threshold,عتبة,Ambang
+Threshold,,閾値,Threshold,阈值,閾值,임계값,Threshold,عتبة,Ambang batas
 ThresholdDesc,,明るさが閾値を超えた部分が発光します。,Brightness above the threshold will bloom.,超过亮度阈值的部分会发光。,亮度超過閾值的部分會發光。,임계값을 초과하는 밝기가 발광합니다.,El brillo por encima del umbral brillará.,السطوع الذي يتجاوز العتبة سيتوهج.,Kecerahan di atas ambang akan bersinar.
-IsColorizationEnabled,,光に着色,Colorize light,给光着色,給光著色,빛에 색상 추가,Colorizar luz,تلوين الضوء,Warnai cahaya
+IsColorizationEnabled,,光に着色,Colorize light,给光着色,給光著色,빛에 색상 추가,Colorizar luz,تلوين الضوء,Cahaya Berwarna
 IsColorizationEnabledDesc,,光に色を付けます。,Adds color to the light.,为光添加颜色。,給光添加顏色。,빛에 색상을 추가합니다.,Añade color a la luz.,يضيف لونًا للضوء.,Menambahkan warna pada cahaya.
-Color,,色,Color,色彩,色彩,색상,Color,لون,Color
+Color,,色,Color,色彩,色彩,색상,Color,لون,Warna
 ColorDesc,,光の色,Color of light,发光颜色,光的顏色,빛의 색상,Color de luz,لون الضوء,Warna cahaya
 Strength,,強度,Strength,强度,強度,강도,Strength,Fuerza,قوة,Kekuatan
 StrengthDesc,,光の強さ,Strength of light,发光强度,光的強度,빛의 강도,Intensidad de luz,شدة الضوء,Kekuatan cahaya
-Blur,,ぼかし,Blur,模糊,模糊,블러,Blur,Desenfoque,تشويش,Blur
-BlurDesc,,光のぼかし,Blur of light,发光模糊,光的模糊,빛의 블러,Desenfoque de luz,تشويش الضوء,Blur cahaya
-IsFixedSizeEnabled,,サイズを固定,Fixed size,固定尺寸,固定大小,고정 크기,Tamaño fijo,Tamaño fijo,Tamaño tetap
-IsFixedSizeEnabledDesc,,元の画像サイズを維持します。,Maintains the original image size.,保持源图像尺寸。,保持原圖大小。,원본 이미지 크기를 유지합니다.,Mantiene el tamaño original de la imagen.,Mantiene el tamaño original de la imagen.,Mempertahankan ukuran gambar asli.
+Blur,,ぼかし,Blur,模糊,模糊,블러,Blur,Desenfoque,تشويش,Keburaman
+BlurDesc,,光のぼかし,Blur of light,发光模糊,光的模糊,빛의 블러,Desenfoque de luz,تشويش الضوء,Keburaman cahaya
+IsFixedSizeEnabled,,サイズを固定,Fixed size,固定尺寸,固定大小,고정 크기,Tamaño fijo,Tamaño fijo,Ukuran tetap
+IsFixedSizeEnabledDesc,,元の画像サイズを維持します。,Maintains the original image size.,保持源图像尺寸。,保持原圖大小。,원본 이미지 크기를 유지합니다.,Mantiene el tamaño original de la imagen.,Mantiene el tamaño original de la imagen.,Pertahankan ukuran gambar asli.
