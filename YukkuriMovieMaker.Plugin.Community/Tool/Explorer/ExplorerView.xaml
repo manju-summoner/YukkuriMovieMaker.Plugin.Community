@@ -476,6 +476,21 @@
                 <c:DropDownButton.ContextMenu>
                     <ContextMenu>
                         <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Plus}}"/>
+                        <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.EditFavorite}" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="Icon" Value="{DynamicResource {x:Static icons:IconKeys.StarOutline}}"/>
+                                    <Setter Property="ToolTip" Value="{x:Static local:Texts.AddFavorite}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                            <Setter Property="Icon" Value="{DynamicResource {x:Static icons:IconKeys.Star}}"/>
+                                            <Setter Property="ToolTip" Value="{x:Static local:Texts.EditFavorite}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
                         <MenuItem Header="{x:Static local:Texts.Favorite}" ItemsSource="{Binding FavoriteDirectoryViewModel.Items}" Icon="{DynamicResource {x:Static icons:IconKeys.Star}}">
                             <MenuItem.Style>
                                 <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
