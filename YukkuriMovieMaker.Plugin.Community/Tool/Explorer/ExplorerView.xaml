@@ -403,19 +403,6 @@
             </c:SplitButton>
             <Button Grid.Column="6" Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.OpenNewTabMenuHeader}" Style="{StaticResource ToolBarButtonStyle}"/>
 
-            <c:DropDownButton Grid.Column="7" Content="{DynamicResource {x:Static icons:IconKeys.Sort}}" ToolTip="{x:Static local:Texts.Sort}" Padding="3" Height="26" Style="{DynamicResource {x:Type ToggleButton}}">
-                <c:DropDownButton.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="{x:Static local:Texts.SortByName}" IsCheckable="True" IsChecked="{Binding IsSortByName, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Name"/>
-                        <MenuItem Header="{x:Static local:Texts.SortByLastWriteTime}" IsCheckable="True" IsChecked="{Binding IsSortByLastWriteTime, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="LastWriteTime"/>
-                        <MenuItem Header="{x:Static local:Texts.SortByExtension}" IsCheckable="True" IsChecked="{Binding IsSortByExtension, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Extension"/>
-                        <Separator/>
-                        <MenuItem Header="{x:Static local:Texts.SortAscending}" IsCheckable="True" IsChecked="{Binding IsSortAscending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Ascending" Icon="{DynamicResource {x:Static icons:IconKeys.SortAscending}}"/>
-                        <MenuItem Header="{x:Static local:Texts.SortDescending}" IsCheckable="True" IsChecked="{Binding IsSortDescending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Descending" Icon="{DynamicResource {x:Static icons:IconKeys.SortDescending}}"/>
-                    </ContextMenu>
-                </c:DropDownButton.ContextMenu>
-            </c:DropDownButton>
-            
             <c:PopupButton Grid.Column="8" PopupWidth="300" PopupHeight="100" ResizeMode="None" Padding="3" Height="26" ToolTip="{x:Static local:Texts.Filter}">
                 <c:PopupButton.Style>
                     <Style TargetType="{x:Type c:PopupButton}">
