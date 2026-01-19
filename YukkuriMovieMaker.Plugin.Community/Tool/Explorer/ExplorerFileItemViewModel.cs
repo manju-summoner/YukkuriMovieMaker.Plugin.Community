@@ -24,7 +24,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             {
                 if (icon is not null)
                     return icon;
-                if(loadIconTask is not null)
+                if (loadIconTask is not null)
                     return icon;
                 loadIconCts = new CancellationTokenSource();
                 var token = loadIconCts.Token;
@@ -57,7 +57,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     return null;
                 if (thumbnail is not null)
                     return thumbnail;
-                if(loadThumbnailTask is not null)
+                if (loadThumbnailTask is not null)
                     return thumbnail;
 
                 loadThumbnailCts = new CancellationTokenSource();
