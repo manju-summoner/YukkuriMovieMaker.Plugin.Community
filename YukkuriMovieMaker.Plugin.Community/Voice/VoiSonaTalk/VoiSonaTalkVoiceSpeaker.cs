@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.API;
 using YukkuriMovieMaker.Plugin.Voice;
 
@@ -97,6 +98,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
                     version);
                 var speechInfo = await VoiSonaTalkAPIHelper.SpeechSynthesisAsync(request);
                 pron.TSML = speechInfo?.AnalyzedText;
+                pron.LipSyncFrames = CreateLipSyncFrames(speechInfo);
                 if (speechInfo is null)
                     return null;
 
@@ -106,6 +108,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
             {
                 semaphore.Release();
             }
+        }
+
+        private LipSyncFrame[]? CreateLipSyncFrames(SpeechSynthesisInformation? speechInfo)
+        {
+            if(speechInfo is null || speechInfo.Phonemes is null || speechInfo.PhonemeDurations is null)
+                return null;
+            var labFrames = new List<LabFrame>();
+            var currentTime = TimeSpan.Zero;
+            for (int i = 0; i < speechInfo.Phonemes.Length; i++)
+            {
+                var phoneme = speechInfo.Phonemes[i];
+                var duration = speechInfo.PhonemeDurations[i];
+                var endTime = currentTime + TimeSpan.FromSeconds(duration);
+                labFrames.Add(new LabFrame(currentTime, endTime, phoneme));
+                currentTime = endTime;
+            }
+
+            return LipSyncFrame.FromLabFrames(labFrames);
         }
 
         public IVoiceParameter CreateVoiceParameter()
