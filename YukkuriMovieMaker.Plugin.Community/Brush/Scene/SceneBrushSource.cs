@@ -38,6 +38,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Scene
             var extendModeY = parameter.ExtendModeY.ToD2DExtendMode();
             var isRemoveBoudalyEnabled = parameter.IsRemoveBoundaryEnabled;
             var isFixSizeEnabled = parameter.IsFixSizeEnabled;
+            var itemPosition = desc.ItemPosition.Time * playbackRate;
 
             //シーンが変わったらソースを作り直す
             var targetScene = desc.Scenes.FirstOrDefault(x => x.ID == sceneId);
@@ -50,7 +51,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Scene
             }
 
             //シーンを更新する
-            var time = targetScene != null ? TimeSpan.FromTicks((contentOffset.Ticks + desc.ItemPosition.Time.Ticks) % targetScene.Duration.Time.Ticks) : TimeSpan.Zero;
+            var time = targetScene != null ? TimeSpan.FromTicks((contentOffset.Ticks + itemPosition.Ticks) % targetScene.Duration.Time.Ticks) : TimeSpan.Zero;
             source?.Update(time, desc.Usage);
 
             //描画先の画像サイズを取得
