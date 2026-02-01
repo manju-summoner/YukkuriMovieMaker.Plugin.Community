@@ -5,8 +5,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
     internal class ExplorerLayout : Bindable
     {
-        public ExplorerViewMode Mode { get; set => Set(ref field, value, nameof(Mode), nameof(MaxTextHeight)); } = ExplorerViewMode.List;
-        public int IconSize { get; set => Set(ref field, value); } = 16;
+        public ExplorerViewMode Mode { get; set => Set(ref field, value, nameof(Mode), nameof(MaxTextHeight), nameof(ItemWidth), nameof(ItemHeight)); } = ExplorerViewMode.List;
+        public int IconSize { get; set => Set(ref field, value, nameof(IconSize), nameof(ItemWidth), nameof(ItemHeight)); } = 16;
+
+        public double ItemWidth => Mode switch
+        {
+            ExplorerViewMode.List => double.NaN,
+            ExplorerViewMode.WrapList => IconSize + 4 + 200,
+            ExplorerViewMode.Tiles => Math.Max(50, IconSize),
+            _ => throw new NotImplementedException(),
+        };
+        public double ItemHeight => Mode switch
+        {
+            ExplorerViewMode.List => Math.Max(16, IconSize),
+            ExplorerViewMode.WrapList => Math.Max(16, IconSize),
+            ExplorerViewMode.Tiles => ItemWidth + MaxTextHeight,
+            _ => throw new NotImplementedException(),
+        };
 
         public double MaxTextHeight => SystemFonts.MessageFontSize * (Mode switch
         {

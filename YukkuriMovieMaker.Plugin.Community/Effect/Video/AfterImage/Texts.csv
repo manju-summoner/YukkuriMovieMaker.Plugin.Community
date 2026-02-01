@@ -1,0 +1,9 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+AfterImage,,残像,After Image,残影,殘影,잔상,Imagen posterior,الصورة بعد,After Image
+Strength,,強度,Strength,强度,強度,강도,Fuerza,القوة,Kekuatan
+StrengthDesc,,残像の強さを調整します。,Adjust the strength of the after image.,调整残影的强度。,調整殘影的強度。,잔상의 강도를 조절합니다.,Ajusta la fuerza de la imagen posterior.,اضبط قوة الصورة بعد.,Sesuaikan kekuatan after image.
+AfterImagePosition,,残像位置,Position,残影位置,殘影位置,잔상 위치,Posición,الموضع,Kedudukan
+AfterImagePositionDesc,,残像の位置を調整します。,Adjust the position of the after image.,调整残影的位置。,調整殘影的位置。,잔상의 위치를 조절합니다.,Ajusta la posición de la imagen posterior.,اضبط موضع الصورة بعد.,Sesuaikan posisi after image.
+AfterImagePositionFront,,手前,Front,前端,前端,앞쪽,Frente,الأمام,Depan
+AfterImagePositionBack,,後ろ（透過素材用）,Back (for transparent materials),后端（用于透明素材）,後端（用於透明素材）,뒤쪽(투명 소재용),Atrás (para materiales transparentes),الخلف (للمواد الشفافة),Belakang (untuk bahan transparan)
+AfterImagePositionAfterImageOnly,,残像のみ（透過素材用）,After Image Only (for transparent materials),仅残影（用于透明素材）,僅殘影（用於透明素材）,잔상만(투명 소재용),Solo imagen posterior (para materiales transparentes),فقط الصورة بعد (للمواد الشفافة),Hanya after image (untuk bahan transparan)

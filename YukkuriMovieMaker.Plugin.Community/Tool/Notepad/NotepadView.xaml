@@ -10,6 +10,7 @@
              xmlns:pt="clr-namespace:YukkuriMovieMaker.Views.Triggers;assembly=YukkuriMovieMaker.Plugin"
              xmlns:pc="clr-namespace:YukkuriMovieMaker.Views.Converters;assembly=YukkuriMovieMaker.Plugin"
              xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type={x:Type local:NotepadViewModel}}">
@@ -32,11 +33,11 @@
                 </pt:PreviewMouseWheelEventTrigger>
             </i:Interaction.Triggers>
             <ToolBar Height="{Binding Source={x:Static ps:YMMSettings.Default},Path=ToolBarHeight}">
-                <Button Content="{DynamicResource Plus}" Command="{Binding OpenNewTabCommand}" ToolTip="{x:Static local:Texts.OpenNewTab}"/>
-                <Button Content="{DynamicResource Folder}" Command="{Binding OpenCommand}" ToolTip="{x:Static local:Texts.Open}"/>
+                <Button Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Command="{Binding OpenNewTabCommand}" ToolTip="{x:Static local:Texts.OpenNewTab}"/>
+                <Button Content="{DynamicResource {x:Static icons:IconKeys.Folder}}" Command="{Binding OpenCommand}" ToolTip="{x:Static local:Texts.Open}"/>
                 <Separator/>
-                <Button Content="{DynamicResource Save}" Command="{Binding SaveCommand}" CommandParameter="{Binding FilePath}" ToolTip="{x:Static local:Texts.Save}"/>
-                <Button Content="{DynamicResource content-save-edit}" Command="{Binding SaveCommand}" ToolTip="{x:Static local:Texts.SaveAs}"/>
+                <Button Content="{DynamicResource {x:Static icons:IconKeys.ContentSave}}" Command="{Binding SaveCommand}" CommandParameter="{Binding FilePath}" ToolTip="{x:Static local:Texts.Save}"/>
+                <Button Content="{DynamicResource {x:Static icons:IconKeys.ContentSaveEdit}}" Command="{Binding SaveCommand}" ToolTip="{x:Static local:Texts.SaveAs}"/>
             </ToolBar>
         </ToolBarTray>
         <TextBox Grid.Row="1" 

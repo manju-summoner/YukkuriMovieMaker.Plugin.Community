@@ -5,9 +5,11 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
+using Windows.Win32;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
@@ -749,33 +751,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             return width;
         }
 
-        static double MeasurePcBlockWidth()
+        double MeasurePcBlockWidth()
         {
             // XAMLと一致させる
-            const double iconWidth = 18;
-            const double driveButtonWidth = 18;
+            const double iconWidth = 15;
+            double driveButtonWidth = MeasureSeparatorWidth();
             return iconWidth + driveButtonWidth;
         }
 
-        static double MeasureSeparatorWidth()
+        double MeasureSeparatorWidth()
         {
+            const double borderPadding = 2; // StrokeThickness="1"
             // XAMLと一致させる
-            const double separatorButtonWidth = 18;
-            return separatorButtonWidth;
+            return MeasureTextWidth(">") + borderPadding;
         }
 
         double MeasureSegmentWidth(AddressBarBreadcrumbSegment segment)
         {
+            const double borderPadding = 2;   // StrokeThickness="1"
             if (segment.Kind == AddressBarBreadcrumbSegmentKind.Ellipsis)
             {
                 var ellipsisWidth = MeasureTextWidth("...");
-                const double ellipsisPadding = 12; // XAML Padding="6,0"
-                return ellipsisWidth + ellipsisPadding;
+                const double ellipsisPadding = 2; // XAML Padding="1,0"
+                return ellipsisWidth + ellipsisPadding + borderPadding;
             }
 
             var textWidth = MeasureTextWidth(segment.DisplayText);
-            const double paddingLeftRight = 12; // XAML Padding="6,0"
-            return textWidth + paddingLeftRight;
+            const double paddingLeftRight = 6; // XAML Padding="3,0"
+            return textWidth + paddingLeftRight + borderPadding;
         }
 
         double MeasureTextWidth(string text)
@@ -823,6 +826,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
             var list = new List<AddressBarMenuEntry>();
 
+            // ドライブ一覧を取得
             foreach (var drive in drives)
             {
                 if (token.IsCancellationRequested)
@@ -838,11 +842,94 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 var display = string.IsNullOrWhiteSpace(label) ? driveLetter : $"{label} ({driveLetter})";
                 list.Add(new AddressBarMenuEntry(display, driveRoot));
             }
-            var entries = list
+            var driveEntries = list
                 .OrderBy(x => GetDriveLetterSortKey(x.FullPath))
                 .ThenBy(x => x.DisplayText, StringComparer.OrdinalIgnoreCase);
-            return [.. entries];
+
+            // ライブラリ一覧を取得
+            var libraryEntries = new List<AddressBarMenuEntry>();
+            var libraryGuids = new[]
+            {
+                PInvoke.FOLDERID_Desktop,
+                PInvoke.FOLDERID_Downloads,
+                PInvoke.FOLDERID_Documents,
+                PInvoke.FOLDERID_Pictures,
+                PInvoke.FOLDERID_Videos,
+                PInvoke.FOLDERID_Music,
+                PInvoke.FOLDERID_Screenshots,
+                PInvoke.FOLDERID_SkyDrive,
+            };
+            foreach (var guid in libraryGuids)
+            {
+                if (token.IsCancellationRequested)
+                    break;
+                try
+                {
+                    var entry = GetKnownFolderMenuEntry(guid);
+                    if(!Directory.Exists(entry.FullPath))
+                        continue;
+                    libraryEntries.Add(entry);
+                }
+                catch
+                {
+
+                }
+            }
+
+            return [.. driveEntries, .. libraryEntries];
         }
+        public static AddressBarMenuEntry GetKnownFolderMenuEntry(Guid knownFolderId)
+        {
+            var displayName = GetKnownFolderDisplayName(knownFolderId);
+            var folderPath = GetKnownFolderPath(knownFolderId);
+            return new AddressBarMenuEntry(displayName, folderPath);
+        }
+
+        public unsafe static string GetKnownFolderDisplayName(Guid knownFolderId)
+        {
+            var hr = PInvoke.SHGetKnownFolderIDList(knownFolderId, (int)global::Windows.Win32.UI.Shell.KNOWN_FOLDER_FLAG.KF_FLAG_DEFAULT, null, out var pidl);
+            hr.ThrowOnFailure();
+            
+            try
+            {
+                hr = PInvoke.SHGetNameFromIDList(*pidl, global::Windows.Win32.UI.Shell.SIGDN.SIGDN_NORMALDISPLAY, out var pszName);
+                hr.ThrowOnFailure();
+
+                try
+                {
+                    if(pszName.Value is null)
+                        throw new Exception("Failed to get folder name.");
+
+                    return new string(pszName.Value);
+                }
+                finally
+                {
+                    Marshal.FreeCoTaskMem((nint)pszName.Value);
+                }
+            }
+            finally
+            {
+                if (pidl != null)
+                    PInvoke.ILFree(pidl);
+            }
+        }
+
+        public unsafe static string GetKnownFolderPath(Guid knownFolderId)
+        {
+            var hr = PInvoke.SHGetKnownFolderPath(knownFolderId, (int)global::Windows.Win32.UI.Shell.KNOWN_FOLDER_FLAG.KF_FLAG_DEFAULT, null, out var pszPath);
+            hr.ThrowOnFailure();
+            try
+            {
+                if(pszPath.Value is null)
+                    throw new Exception("Failed to get folder path.");
+                return new string(pszPath);
+            }
+            finally
+            {
+                Marshal.FreeCoTaskMem((nint)pszPath.Value);
+            }
+        }
+
         static int GetDriveLetterSortKey(string fullPath)
         {
             if (string.IsNullOrWhiteSpace(fullPath))

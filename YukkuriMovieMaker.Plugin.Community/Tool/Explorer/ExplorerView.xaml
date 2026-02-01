@@ -10,9 +10,9 @@
              xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
              xmlns:pap="clr-namespace:YukkuriMovieMaker.Views.AttachedProperties;assembly=YukkuriMovieMaker.Plugin"
-             xmlns:wtkc="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
              xmlns:pc="clr-namespace:YukkuriMovieMaker.Views.Converters;assembly=YukkuriMovieMaker.Plugin"
              xmlns:ps="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type={x:Type local:ExplorerViewModel}}">
@@ -22,7 +22,7 @@
                 <VirtualizingStackPanel IsItemsHost="True" Orientation="Vertical" Margin="3"/>
             </ItemsPanelTemplate>
             <ItemsPanelTemplate x:Key="VirtualizedWrapPanelItemsPanelTemplate">
-                <wtkc:VirtualizingWrapPanel IsItemsHost="True" Orientation="Horizontal" SpacingMode="None" HorizontalAlignment="Left" ItemAlignment="Stretch" Margin="3"/>
+                <c:VirtualizingWrapPanel ItemWidth="{Binding Layout.ItemWidth}" ItemHeight="{Binding Layout.ItemHeight}" CacheRows="2" Margin="3"/>
             </ItemsPanelTemplate>
 
             <DataTemplate x:Key="ToolTipTemplate">
@@ -87,7 +87,7 @@
                            Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.Layout.IconSize, FallbackValue=16}" 
                            Margin="0,0,4,0"
                            Stretch="Uniform"/>
-                    <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center"/>
                 </Grid>
             </DataTemplate>
             <DataTemplate x:Key="WrapListViewItemTemplate">
@@ -97,7 +97,7 @@
                     </Grid.ToolTip>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Image Grid.Column="0" 
                            Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.Layout.IconSize, FallbackValue=16}" 
@@ -115,25 +115,20 @@
                             </Style>
                         </Image.Style>
                     </Image>
-                    <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center"/>
                 </Grid>
             </DataTemplate>
             <DataTemplate x:Key="IconsViewItemTemplate">
                 <Grid Background="Transparent" 
-                      ToolTipService.Placement="Right" 
-                      Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.Layout.IconSize}"
-                      MinWidth="50">
+                      ToolTipService.Placement="Right">
                     <Grid.ToolTip>
                         <ToolTip ContentTemplate="{StaticResource ToolTipTemplate}" Content="{Binding}"/>
                     </Grid.ToolTip>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.Layout.IconSize, FallbackValue=16}"/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <Image Grid.Row="0" 
-                           Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.Layout.IconSize, FallbackValue=16}" 
-                           Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.Layout.IconSize, FallbackValue=16}"
-                           Stretch="Uniform">
+                    <Image Grid.Row="0" Stretch="Uniform">
                         <Image.Style>
                             <Style TargetType="Image">
                                 <Setter Property="Source" Value="{Binding Thumbnail}"/>
@@ -145,18 +140,18 @@
                             </Style>
                         </Image.Style>
                     </Image>
-                    <TextBlock Grid.Row="1" Text="{Binding Name}" VerticalAlignment="Top" HorizontalAlignment="Center" TextWrapping="Wrap"  Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.Layout.MaxTextHeight}" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Grid.Row="1" Text="{Binding Name}" VerticalAlignment="Top" HorizontalAlignment="Center" TextWrapping="Wrap"/>
                 </Grid>
             </DataTemplate>
 
             <ContextMenu x:Key="FolderItemContextMenu" d:DataContext="{d:DesignInstance Type={x:Type local:ExplorerDirectoryItemViewModel}}">
-                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CreateNewViewCommand}" Header="{x:Static local:Texts.OpenInNewTabMenuHeader}" Icon="{DynamicResource Plus}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CreateNewViewCommand}" Header="{x:Static local:Texts.OpenInNewTabMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Plus}}"/>
                 <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.OpenInWindowsExplorerCommand}" Header="{x:Static local:Texts.OpenInWindowsExplorerMenuHeader}"/>
                 <Separator/>
-                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CutCommand}" Header="{x:Static local:Texts.CutMenuHeader}" Icon="{DynamicResource Cut}"/>
-                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CopyCommand}" Header="{x:Static local:Texts.CopyMenuHeader}" Icon="{DynamicResource Copy}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CutCommand}" Header="{x:Static local:Texts.CutMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentCut}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CopyCommand}" Header="{x:Static local:Texts.CopyMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
                 <Separator/>
-                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.DeleteCommand}" Header="{x:Static local:Texts.DeleteMenuHeader}" Icon="{DynamicResource Delete}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.DeleteCommand}" Header="{x:Static local:Texts.DeleteMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Delete}}"/>
                 <Separator/>
                 <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.OpenPropertiesCommand}" Header="{x:Static local:Texts.PropertiesMenuHeader}"/>
             </ContextMenu>
@@ -165,29 +160,38 @@
                 <Separator/>
                 <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.OpenWithDefaultAppCommand}" Header="{x:Static local:Texts.OpenWithDefaultAppMenuHeader}"/>
                 <Separator/>
-                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CutCommand}" Header="{x:Static local:Texts.CutMenuHeader}" Icon="{DynamicResource Cut}"/>
-                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CopyCommand}" Header="{x:Static local:Texts.CopyMenuHeader}" Icon="{DynamicResource Copy}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CutCommand}" Header="{x:Static local:Texts.CutMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentCut}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CopyCommand}" Header="{x:Static local:Texts.CopyMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
                 <Separator/>
-                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.DeleteCommand}" Header="{x:Static local:Texts.DeleteMenuHeader}" Icon="{DynamicResource Delete}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.DeleteCommand}" Header="{x:Static local:Texts.DeleteMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Delete}}"/>
                 <Separator/>
                 <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.OpenPropertiesCommand}" Header="{x:Static local:Texts.PropertiesMenuHeader}"/>
             </ContextMenu>
             <ContextMenu x:Key="FileListBoxContextMenu" d:DataContext="{d:DesignInstance Type={x:Type local:ExplorerViewModel}}">
-                <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource Plus}"/>
+                <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Plus}}"/>
                 <MenuItem Command="{Binding OpenCurrentLocationInWindowsExplorerCommand}" Header="{x:Static local:Texts.OpenInWindowsExplorerMenuHeader}"/>
                 <Separator/>
-                <MenuItem Header="{x:Static local:Texts.Sort}" Icon="{DynamicResource sort}">
+                <MenuItem Header="{x:Static local:Texts.Refresh}" Icon="{DynamicResource {x:Static icons:IconKeys.Refresh}}" Command="{Binding RefreshCommand}"/>
+                <Separator/>
+                <MenuItem Header="{x:Static local:Texts.Sort}" Icon="{DynamicResource {x:Static icons:IconKeys.Sort}}">
                     <MenuItem Header="{x:Static local:Texts.SortByName}" IsCheckable="True" IsChecked="{Binding IsSortByName, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Name"/>
                     <MenuItem Header="{x:Static local:Texts.SortByLastWriteTime}" IsCheckable="True" IsChecked="{Binding IsSortByLastWriteTime, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="LastWriteTime"/>
                     <MenuItem Header="{x:Static local:Texts.SortByExtension}" IsCheckable="True" IsChecked="{Binding IsSortByExtension, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Extension"/>
                     <Separator/>
-                    <MenuItem Header="{x:Static local:Texts.SortAscending}" IsCheckable="True" IsChecked="{Binding IsSortAscending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Ascending" Icon="{DynamicResource sort-ascending}"/>
-                    <MenuItem Header="{x:Static local:Texts.SortDescending}" IsCheckable="True" IsChecked="{Binding IsSortDescending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Descending" Icon="{DynamicResource sort-descending}"/>
+                    <MenuItem Header="{x:Static local:Texts.SortAscending}" IsCheckable="True" IsChecked="{Binding IsSortAscending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Ascending" Icon="{DynamicResource {x:Static icons:IconKeys.SortAscending}}"/>
+                    <MenuItem Header="{x:Static local:Texts.SortDescending}" IsCheckable="True" IsChecked="{Binding IsSortDescending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Descending" Icon="{DynamicResource {x:Static icons:IconKeys.SortDescending}}"/>
                 </MenuItem>
+                <MenuItem Header="{x:Static local:Texts.SwitchViewMenuHeader}">
+                    <MenuItem Header="{x:Static local:Texts.ListView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.List}"/>
+                    <MenuItem Header="{x:Static local:Texts.WrapListView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.WrapList}"/>
+                    <MenuItem Header="{x:Static local:Texts.ThumbnailView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.Tiles}"/>
+                </MenuItem>
+                <MenuItem Header="{x:Static local:Texts.IncreaseViewSizeMenuHeader}" Command="{Binding DataContext.IncreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyPlus}}"/>
+                <MenuItem Header="{x:Static local:Texts.DecreaseViewSizeMenuHeader}" Command="{Binding DataContext.DecreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyMinus}}"/>
                 <Separator/>
-                <MenuItem Command="{Binding PasteCommand}" Header="{x:Static local:Texts.PasteMenuHeader}" Icon="{DynamicResource Paste}"/>
+                <MenuItem Command="{Binding PasteCommand}" Header="{x:Static local:Texts.PasteMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>
                 <Separator/>
-                <MenuItem Command="{Binding SelectAllCommand}" Header="{x:Static local:Texts.SelectAllMenuHeader}" Icon="{DynamicResource SelectAll}"/>
+                <MenuItem Command="{Binding SelectAllCommand}" Header="{x:Static local:Texts.SelectAllMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.SelectAll}}"/>
             </ContextMenu>
 
             <Style x:Key="FileListBoxStyle" TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
@@ -335,10 +339,9 @@
                 <ColumnDefinition MaxWidth="125"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Content="{DynamicResource arrow-left}" Command="{Binding BackCommand}" ToolTip="{x:Static local:Texts.Back}" Style="{StaticResource ToolBarButtonStyle}"/>
-            <Button Grid.Column="1" Content="{DynamicResource arrow-right}" Command="{Binding ForwardCommand}" ToolTip="{x:Static local:Texts.Forward}" Style="{StaticResource ToolBarButtonStyle}"/>
-            <Button Grid.Column="2" Content="{DynamicResource arrow-up}" Command="{Binding MoveToParentDirectoryCommand}" ToolTip="{x:Static local:Texts.MoveToParentDirectory}" Style="{StaticResource ToolBarButtonStyle}"/>
-            <Button Grid.Column="3" Content="{DynamicResource ReloadMonochrome}" Command="{Binding RefreshCommand}" ToolTip="{x:Static local:Texts.Refresh}" Style="{StaticResource ToolBarButtonStyle}"/>
+            <Button Grid.Column="0" Content="{DynamicResource {x:Static icons:IconKeys.ArrowLeft}}" Command="{Binding BackCommand}" ToolTip="{x:Static local:Texts.Back}" Style="{StaticResource ToolBarButtonStyle}"/>
+            <Button Grid.Column="1" Content="{DynamicResource {x:Static icons:IconKeys.ArrowRight}}" Command="{Binding ForwardCommand}" ToolTip="{x:Static local:Texts.Forward}" Style="{StaticResource ToolBarButtonStyle}"/>
+            <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.ArrowUp}}" Command="{Binding MoveToParentDirectoryCommand}" ToolTip="{x:Static local:Texts.MoveToParentDirectory}" Style="{StaticResource ToolBarButtonStyle}"/>
 
             <local:ExplorerAddressBar Grid.Column="4" Value="{Binding Location,Mode=OneWay}" ExternalSuggestions="{Binding FavoriteUrls}">
                 <i:Interaction.Triggers>
@@ -348,13 +351,15 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </local:ExplorerAddressBar>
-            <c:SplitButton Grid.Column="5" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.AddFavorite}" Padding="4" Height="26">
+            <c:SplitButton Grid.Column="5" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" Padding="4" Height="26">
                 <c:SplitButton.Style>
                     <Style TargetType="c:SplitButton" BasedOn="{StaticResource {x:Type c:SplitButton}}">
-                        <Setter Property="Content" Value="{DynamicResource star-outline}"/>
+                        <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.StarOutline}}"/>
+                        <Setter Property="ToolTip" Value="{x:Static local:Texts.AddFavorite}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsFavorite}" Value="True">
-                                <Setter Property="Content" Value="{DynamicResource star}"/>
+                                <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Star}}"/>
+                                <Setter Property="ToolTip" Value="{x:Static local:Texts.EditFavorite}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding  FavoriteDirectoryViewModel.Items.Count}" Value="0">
                                 <Setter Property="IsDropDownButtonVisible" Value="False"/>
@@ -383,7 +388,7 @@
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Text="{Binding Display}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
-                                                        <Button Content="{DynamicResource pencil}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
+                                                        <Button Content="{DynamicResource {x:Static icons:IconKeys.Pencil}}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
                                                     </Grid>
                                                 </DataTemplate>
                                             </Setter.Value>
@@ -396,28 +401,15 @@
                     </ContextMenu>
                 </c:SplitButton.ContextMenu>
             </c:SplitButton>
-            <Button Grid.Column="6" Content="{DynamicResource Plus}" Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.OpenNewTabMenuHeader}" Style="{StaticResource ToolBarButtonStyle}"/>
+            <Button Grid.Column="6" Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.OpenNewTabMenuHeader}" Style="{StaticResource ToolBarButtonStyle}"/>
 
-            <c:DropDownButton Grid.Column="7" Content="{DynamicResource sort}" ToolTip="{x:Static local:Texts.Sort}" Padding="3" Height="26" Style="{StaticResource {x:Type ToggleButton}}">
-                <c:DropDownButton.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="{x:Static local:Texts.SortByName}" IsCheckable="True" IsChecked="{Binding IsSortByName, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Name"/>
-                        <MenuItem Header="{x:Static local:Texts.SortByLastWriteTime}" IsCheckable="True" IsChecked="{Binding IsSortByLastWriteTime, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="LastWriteTime"/>
-                        <MenuItem Header="{x:Static local:Texts.SortByExtension}" IsCheckable="True" IsChecked="{Binding IsSortByExtension, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Extension"/>
-                        <Separator/>
-                        <MenuItem Header="{x:Static local:Texts.SortAscending}" IsCheckable="True" IsChecked="{Binding IsSortAscending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Ascending" Icon="{DynamicResource sort-ascending}"/>
-                        <MenuItem Header="{x:Static local:Texts.SortDescending}" IsCheckable="True" IsChecked="{Binding IsSortDescending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Descending" Icon="{DynamicResource sort-descending}"/>
-                    </ContextMenu>
-                </c:DropDownButton.ContextMenu>
-            </c:DropDownButton>
-            
             <c:PopupButton Grid.Column="8" PopupWidth="300" PopupHeight="100" ResizeMode="None" Padding="3" Height="26" ToolTip="{x:Static local:Texts.Filter}">
                 <c:PopupButton.Style>
                     <Style TargetType="{x:Type c:PopupButton}">
-                        <Setter Property="Content" Value="{DynamicResource filter-off}"/>
+                        <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.FilterOff}}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Filter.IsFilteredByExtension}" Value="True">
-                                <Setter Property="Content" Value="{DynamicResource filter}"/>
+                                <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Filter}}"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -469,7 +461,7 @@
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
-            <c:DropDownButton Grid.Column="10" Content="{DynamicResource menu}">
+            <c:DropDownButton Grid.Column="10" Content="{DynamicResource {x:Static icons:IconKeys.Menu}}">
                 <c:DropDownButton.Style>
                     <Style TargetType="{x:Type c:DropDownButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
                         <Setter Property="Padding" Value="3"/>
@@ -478,8 +470,12 @@
                 </c:DropDownButton.Style>
                 <c:DropDownButton.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource Plus}"/>
-                        <MenuItem Header="{x:Static local:Texts.Favorite}" ItemsSource="{Binding FavoriteDirectoryViewModel.Items}" Icon="{DynamicResource star}">
+                        <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Plus}}"/>
+                        <MenuItem Command="{Binding OpenCurrentLocationInWindowsExplorerCommand}" Header="{x:Static local:Texts.OpenInWindowsExplorerMenuHeader}"/>
+                        <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.Refresh}" Icon="{DynamicResource {x:Static icons:IconKeys.Refresh}}" Command="{Binding RefreshCommand}"/>
+                        <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.Favorite}" ItemsSource="{Binding FavoriteDirectoryViewModel.Items}" Icon="{DynamicResource {x:Static icons:IconKeys.Star}}">
                             <MenuItem.Style>
                                 <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                     <Style.Triggers>
@@ -508,7 +504,7 @@
                                                                 <ColumnDefinition Width="Auto"/>
                                                             </Grid.ColumnDefinitions>
                                                             <TextBlock Text="{Binding Display}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
-                                                            <Button Content="{DynamicResource pencil}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
+                                                            <Button Content="{DynamicResource {x:Static icons:IconKeys.Pencil}}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
                                                         </Grid>
                                                     </DataTemplate>
                                                 </Setter.Value>
@@ -520,21 +516,21 @@
                             </MenuItem.Resources>
                         </MenuItem>
                         <Separator/>
-                        <MenuItem Header="{x:Static local:Texts.Sort}" Icon="{DynamicResource sort}">
+                        <MenuItem Header="{x:Static local:Texts.Sort}" Icon="{DynamicResource {x:Static icons:IconKeys.Sort}}">
                             <MenuItem Header="{x:Static local:Texts.SortByName}" IsCheckable="True" IsChecked="{Binding IsSortByName, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Name"/>
                             <MenuItem Header="{x:Static local:Texts.SortByLastWriteTime}" IsCheckable="True" IsChecked="{Binding IsSortByLastWriteTime, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="LastWriteTime"/>
                             <MenuItem Header="{x:Static local:Texts.SortByExtension}" IsCheckable="True" IsChecked="{Binding IsSortByExtension, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Extension"/>
                             <Separator/>
-                            <MenuItem Header="{x:Static local:Texts.SortAscending}" IsCheckable="True" IsChecked="{Binding IsSortAscending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Ascending" Icon="{DynamicResource sort-ascending}"/>
-                            <MenuItem Header="{x:Static local:Texts.SortDescending}" IsCheckable="True" IsChecked="{Binding IsSortDescending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Descending" Icon="{DynamicResource sort-descending}"/>
+                            <MenuItem Header="{x:Static local:Texts.SortAscending}" IsCheckable="True" IsChecked="{Binding IsSortAscending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Ascending" Icon="{DynamicResource {x:Static icons:IconKeys.SortAscending}}"/>
+                            <MenuItem Header="{x:Static local:Texts.SortDescending}" IsCheckable="True" IsChecked="{Binding IsSortDescending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Descending" Icon="{DynamicResource {x:Static icons:IconKeys.SortDescending}}"/>
                         </MenuItem>
                         <MenuItem Header="{x:Static local:Texts.SwitchViewMenuHeader}">
                             <MenuItem Header="{x:Static local:Texts.ListView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.List}"/>
                             <MenuItem Header="{x:Static local:Texts.WrapListView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.WrapList}"/>
                             <MenuItem Header="{x:Static local:Texts.ThumbnailView}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.Tiles}"/>
                         </MenuItem>
-                        <MenuItem Header="{x:Static local:Texts.IncreaseViewSizeMenuHeader}" Command="{Binding DataContext.IncreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                        <MenuItem Header="{x:Static local:Texts.DecreaseViewSizeMenuHeader}" Command="{Binding DataContext.DecreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                        <MenuItem Header="{x:Static local:Texts.IncreaseViewSizeMenuHeader}" Command="{Binding DataContext.IncreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyPlus}}"/>
+                        <MenuItem Header="{x:Static local:Texts.DecreaseViewSizeMenuHeader}" Command="{Binding DataContext.DecreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyMinus}}"/>
                         <Separator/>
                         <MenuItem Header="{x:Static local:Texts.AutoPlay}" IsCheckable="True" IsChecked="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsAutoPlay,Mode=TwoWay}"/>
                     </ContextMenu>

@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor"
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
              xmlns:vt="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" 
              d:DataContext="{d:DesignInstance Type={x:Type local:VoiSonaTalkEditorViewModel}}">
@@ -201,7 +202,7 @@
                                                         <Button.Template>
                                                             <ControlTemplate>
                                                                 <Grid Background="Transparent">
-                                                                    <ContentControl Content="{DynamicResource Cut}"/>
+                                                                    <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.ContentCut}}"/>
                                                                 </Grid>
                                                             </ControlTemplate>
                                                         </Button.Template>
@@ -226,8 +227,8 @@
                                                             </Style.Triggers>
                                                         </Style>
                                                     </Grid.Style>
-                                                    <ContentControl Content="{DynamicResource link-variant}" Margin="6" Opacity="0.3"/>
-                                                    <Button Content="{DynamicResource link-variant}" Padding="5" Command="{Binding JoinCommand}" ToolTip="{x:Static vt:Texts.Join}">
+                                                    <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.LinkVariant}}" Margin="6" Opacity="0.3"/>
+                                                    <Button Content="{DynamicResource {x:Static icons:IconKeys.LinkVariant}}" Padding="5" Command="{Binding JoinCommand}" ToolTip="{x:Static vt:Texts.Join}">
                                                         <Button.Style>
                                                             <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                                                 <Setter Property="Opacity" Value="0"/>
@@ -251,13 +252,13 @@
                 <Button Command="{Binding TogglePlayCommand}" Grid.Column="1">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                            <Setter Property="Content" Value="{DynamicResource Play}"/>
+                            <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Play}}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsPlaying}" Value="True">
-                                    <Setter Property="Content" Value="{DynamicResource Stop}"/>
+                                    <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Stop}}"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding IsBusy}" Value="True">
-                                    <Setter Property="Content" Value="{DynamicResource loading}"/>
+                                    <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.LoadingAnimation}}"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>

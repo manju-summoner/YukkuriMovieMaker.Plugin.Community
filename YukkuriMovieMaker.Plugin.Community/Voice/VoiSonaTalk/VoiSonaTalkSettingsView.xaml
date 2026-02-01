@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk"
              xmlns:ps="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.DataContext>
@@ -49,13 +50,13 @@
                         <ColumnDefinition Width="26"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="{Binding CharacterCountText}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,0"/>
-                    <Button Grid.Column="1" Content="{DynamicResource ReloadMonochrome}" Command="{Binding RefreshCommand}">
+                    <Button Grid.Column="1" Content="{DynamicResource {x:Static icons:IconKeys.Refresh}}" Command="{Binding RefreshCommand}">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                <Setter Property="Content" Value="{DynamicResource ReloadMonochrome}"/>
+                                <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Refresh}}"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsLoading}" Value="True">
-                                        <Setter Property="Content" Value="{DynamicResource loading}"/>
+                                        <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.LoadingAnimation}}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
