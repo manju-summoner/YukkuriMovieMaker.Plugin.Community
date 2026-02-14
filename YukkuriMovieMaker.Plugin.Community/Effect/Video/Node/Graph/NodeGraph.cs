@@ -35,6 +35,11 @@ public sealed class NodeGraph
         return await node.Outputs[outputName].GetValue();
     }
 
+    public void InvalidateAll()
+    {
+        foreach (var node in _nodes.Values) node.Invalidate();
+    }
+
     public void Connect(
         Guid from, string outputName,
         Guid to, string inputName)
@@ -53,8 +58,11 @@ public sealed class NodeGraph
         var output = _nodes[from].Outputs[outputName];
         var input = _nodes[to].Inputs[inputName];
         input.DisConnect(output);
-        Connections.Remove(
-            new NodeConnection { FromId = from, FromPort = outputName, ToId = to, ToPort = inputName });
+        Connections.RemoveAll(c =>
+            c.FromId == from &&
+            c.FromPort == outputName &&
+            c.ToId == to &&
+            c.ToPort == inputName);
     }
 
     public void SetInputValue(Guid id, string inputName, object? value)
