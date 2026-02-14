@@ -1,126 +1,138 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-	<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
-	<UseWPF>true</UseWPF>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='ReleaseLite' OR '$(Configuration)'=='Release'">
-    <!--Pdb内にソースコードのフルパスを含めない-->
-    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\'))</RepoRoot>
-    <PathMap>$(RepoRoot)=.</PathMap>
-  </PropertyGroup>
-	
-  <ItemGroup Condition="'$(YMM4Proj)' != ''">
-    <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Commons\YukkuriMovieMaker.Plugin.csproj" />
-    <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Controls\YukkuriMovieMaker.Controls.csproj" />
-  </ItemGroup>
-	  
-  <ItemGroup Condition="'$(YMM4Proj)' == ''">
-	  <Reference Include="YukkuriMovieMaker.Controls">
-		  <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Controls.dll</HintPath>
-	  </Reference>
-	  <Reference Include="YukkuriMovieMaker.Plugin">
-		  <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
-	  </Reference>
-	  <Reference Include="SharpGen.Runtime">
-		  <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
-	  </Reference>
-	  <Reference Include="Vortice.DirectX">
-		  <HintPath>$(YMM4DirPath)Vortice.DirectX.dll</HintPath>
-	  </Reference>
-	  <Reference Include="Vortice.Direct2D1">
-		  <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
-	  </Reference>
-      <Reference Include="Vortice.Mathematics">
-          <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
-      </Reference>
-	  <Reference Include="System.Drawing.Common">
-		  <HintPath>$(YMM4DirPath)System.Drawing.Common.dll</HintPath>
-	  </Reference>
-	  <Reference Include="Vortice.Mathematics">
-		  <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
-	  </Reference>
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)'=='ReleaseLite' OR '$(Configuration)'=='Release'">
+        <!--Pdb内にソースコードのフルパスを含めない-->
+        <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\'))</RepoRoot>
+        <PathMap>$(RepoRoot)=.</PathMap>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-    <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.23.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="NAudio" Version="2.2.1" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
-    <PackageReference Include="Whisper.net" Version="1.9.0" />
-    <PackageReference Include="Whisper.net.Runtime" Version="1.9.0" />
-    <PackageReference Include="Whisper.net.Runtime.Cuda.Windows" Version="1.9.0" />
-    <PackageReference Include="Whisper.net.Runtime.NoAvx" Version="1.9.0" />
-    <PackageReference Include="Whisper.net.Runtime.OpenVino" Version="1.9.0" />
-    <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.0" />
-    <PackageReference Include="YamlDotNet" Version="16.3.0" />
-	<PackageReference Include="System.Management" Version="10.0.0" />
-  </ItemGroup>
+    <ItemGroup Condition="'$(YMM4Proj)' != ''">
+        <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Commons\YukkuriMovieMaker.Plugin.csproj"/>
+        <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Controls\YukkuriMovieMaker.Controls.csproj"/>
+    </ItemGroup>
 
-  <!--ビルド後、YMM4フォルダに関連ファイルをコピーする-->
-  <Target Condition="'$(YMM4Proj)' == ''" Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(TargetDir)&quot; &quot;$(YMM4DirPath)&quot; /y" />
-  </Target>
+    <ItemGroup Condition="'$(YMM4Proj)' == ''">
+        <Reference Include="AvalonDock">
+            <HintPath>$(YMM4DirPath)AvalonDock.dll</HintPath>
+        </Reference>
+        <Reference Include="YukkuriMovieMaker">
+            <HintPath>$(YMM4DirPath)YukkuriMovieMaker.dll</HintPath>
+        </Reference>
+        <Reference Include="YukkuriMovieMaker.Controls">
+            <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Controls.dll</HintPath>
+        </Reference>
+        <Reference Include="YukkuriMovieMaker.Plugin">
+            <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
+        </Reference>
+        <Reference Include="SharpGen.Runtime">
+            <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
+        </Reference>
+        <Reference Include="Vortice.DirectX">
+            <HintPath>$(YMM4DirPath)Vortice.DirectX.dll</HintPath>
+        </Reference>
+        <Reference Include="Vortice.Direct2D1">
+            <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
+        </Reference>
+        <Reference Include="Vortice.Mathematics">
+            <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
+        </Reference>
+        <Reference Include="System.Drawing.Common">
+            <HintPath>$(YMM4DirPath)System.Drawing.Common.dll</HintPath>
+        </Reference>
+        <Reference Include="Vortice.Mathematics">
+            <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
+        </Reference>
+        <Reference Include="LlmTornado">
+            <HintPath>$(YMM4DirPath)LlmTornado.dll</HintPath>
+        </Reference>
+        <Reference Include="Vortice.Direct3D11">
+            <HintPath>$(YMM4DirPath)Vortice.Direct3D11.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="FileSource\" />
-    <Folder Include="FileWriter\" />
-    <Folder Include="Tachie\" />
-    <Folder Include="Transition\" />
-  </ItemGroup>
-	
-  <ItemGroup>
-    <ProjectReference Include="$(GeneratorDirPath)YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <AdditionalFiles Include="**/*.csv" />
-  </ItemGroup>
-	
-  <ItemGroup>
-    <None Remove="Brush\Rainbow\Linear\Texts.csv" />
-    <None Remove="Brush\Rainbow\Radial\Texts.csv" />
-    <None Remove="Effect\Audio\DecibelVolume\Texts.csv" />
-    <None Remove="Effect\Video\ColorBlindness\Texts.csv" />
-    <None Remove="Effect\Video\EdgeDetection\Texts.csv" />
-    <None Remove="Effect\Video\EdgeTrimming\Texts.csv" />
-    <None Remove="Effect\Video\FishEyeLens\Texts.csv" />
-    <None Remove="Effect\Video\LensBlur\Texts.csv" />
-    <None Remove="Effect\Video\LuminanceKey\Texts.csv" />
-    <None Remove="Effect\Video\UnidirectionalBlur\Texts.csv" />
-    <None Remove="Shape\Pen\Texts.csv" />
-    <None Remove="TextCompletion\GoogleAI\Texts.csv" />
-  </ItemGroup>
-	
-  <ItemGroup>
-    <Resource Include="$(ShaderDirPath)EdgeTrimming.cso" Link="Resources\Shader\EdgeTrimming.cso" />
-	  <Resource Include="$(ShaderDirPath)LuminanceKey.cso" Link="Resources\Shader\LuminanceKey.cso" />
-	  <Resource Include="$(ShaderDirPath)DiffuseAlpha.cso" Link="Resources\Shader\DiffuseAlpha.cso" />
-	  <Resource Include="$(ShaderDirPath)InvertAlpha.cso" Link="Resources\Shader\InvertAlpha.cso" />
-	  <Resource Include="$(ShaderDirPath)BevelHeightmap.cso" Link="Resources\Shader\BevelHeightmap.cso" />
-	  <Resource Include="$(ShaderDirPath)BevelAndFlatComposite.cso" Link="Resources\Shader\BevelAndFlatComposite.cso" />
-	  <Resource Include="$(ShaderDirPath)UnidirectionalBlur.cso" Link="Resources\Shader\UnidirectionalBlur.cso" />
-	  <Resource Include="$(ShaderDirPath)LensBlur.cso" Link="Resources\Shader\LensBlur.cso" />
-	  <Resource Include="$(ShaderDirPath)FishEyeLens.cso" Link="Resources\Shader\FishEyeLens.cso" />
-	  <Resource Include="$(ShaderDirPath)Binarization.cso" Link="Resources\Shader\Binarization.cso" />
-	  <Resource Include="$(ShaderDirPath)CircularBlur.cso" Link="Resources\Shader\CircularBlur.cso" />
-	  <Resource Include="$(ShaderDirPath)ColorCorrection.cso" Link="Resources\Shader\ColorCorrection.cso" />
-	  <Resource Include="$(ShaderDirPath)ColorShift.cso" Link="Resources\Shader\ColorShift.cso" />
-	  <Resource Include="$(ShaderDirPath)InnerOutline.cso" Link="Resources\Shader\InnerOutline.cso" />
-	  <Resource Include="$(ShaderDirPath)LongShadow.cso" Link="Resources\Shader\LongShadow.cso" />
-	  <Resource Include="$(ShaderDirPath)Ripple.cso" Link="Resources\Shader\Ripple.cso" />
-	  <Resource Include="$(ShaderDirPath)SpiralTransform.cso" Link="Resources\Shader\SpiralTransform.cso" />
-	  <Resource Include="$(ShaderDirPath)RectangleGlitchNoise.cso" Link="Resources\Shader\RectangleGlitchNoise.cso" />
-	  <Resource Include="$(ShaderDirPath)StripeGlitchNoise.cso" Link="Resources\Shader\StripeGlitchNoise.cso" />
-	  <Resource Include="$(ShaderDirPath)ThreeDimensional.cso" Link="Resources\Shader\ThreeDimensional.cso" />
-	  <Resource Include="$(ShaderDirPath)Wave.cso" Link="Resources\Shader\Wave.cso" />
-	  <Resource Include="$(ShaderDirPath)ColorBlindness.cso" Link="Resources\Shader\ColorBlindness.cso" />
-	  <Resource Include="$(ShaderDirPath)VignetteBlur.cso" Link="Resources\Shader\VignetteBlur.cso" />
-	  <Resource Include="$(ShaderDirPath)VignetteRadialBlur.cso" Link="Resources\Shader\VignetteRadialBlur.cso" />
-	  <Resource Include="$(ShaderDirPath)VignetteCircularBlur.cso" Link="Resources\Shader\VignetteCircularBlur.cso" />
-	  <Resource Include="$(ShaderDirPath)BlurMap.cso" Link="Resources\Shader\BlurMap.cso" />
-	  <Resource Include="$(ShaderDirPath)Stretch.cso" Link="Resources\Shader\Stretch.cso" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="MathNet.Numerics" Version="5.0.0"/>
+        <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.23.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
+        <PackageReference Include="NAudio" Version="2.2.1"/>
+        <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135"/>
+        <PackageReference Include="Whisper.net" Version="1.9.0"/>
+        <PackageReference Include="Whisper.net.Runtime" Version="1.9.0"/>
+        <PackageReference Include="Whisper.net.Runtime.Cuda.Windows" Version="1.9.0"/>
+        <PackageReference Include="Whisper.net.Runtime.NoAvx" Version="1.9.0"/>
+        <PackageReference Include="Whisper.net.Runtime.OpenVino" Version="1.9.0"/>
+        <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.0"/>
+        <PackageReference Include="YamlDotNet" Version="16.3.0"/>
+        <PackageReference Include="System.Management" Version="10.0.0"/>
+    </ItemGroup>
+
+    <!--ビルド後、YMM4フォルダに関連ファイルをコピーする-->
+    <Target Condition="'$(YMM4Proj)' == ''" Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="xcopy &quot;$(TargetDir)&quot; &quot;$(YMM4DirPath)&quot; /y"/>
+    </Target>
+
+    <ItemGroup>
+        <Folder Include="FileSource\"/>
+        <Folder Include="FileWriter\"/>
+        <Folder Include="Tachie\"/>
+        <Folder Include="Transition\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="$(GeneratorDirPath)YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <AdditionalFiles Include="**/*.csv"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Brush\Rainbow\Linear\Texts.csv"/>
+        <None Remove="Brush\Rainbow\Radial\Texts.csv"/>
+        <None Remove="Effect\Audio\DecibelVolume\Texts.csv"/>
+        <None Remove="Effect\Video\ColorBlindness\Texts.csv"/>
+        <None Remove="Effect\Video\EdgeDetection\Texts.csv"/>
+        <None Remove="Effect\Video\EdgeTrimming\Texts.csv"/>
+        <None Remove="Effect\Video\FishEyeLens\Texts.csv"/>
+        <None Remove="Effect\Video\LensBlur\Texts.csv"/>
+        <None Remove="Effect\Video\LuminanceKey\Texts.csv"/>
+        <None Remove="Effect\Video\UnidirectionalBlur\Texts.csv"/>
+        <None Remove="Shape\Pen\Texts.csv"/>
+        <None Remove="TextCompletion\GoogleAI\Texts.csv"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Resource Include="$(ShaderDirPath)EdgeTrimming.cso" Link="Resources\Shader\EdgeTrimming.cso"/>
+        <Resource Include="$(ShaderDirPath)LuminanceKey.cso" Link="Resources\Shader\LuminanceKey.cso"/>
+        <Resource Include="$(ShaderDirPath)DiffuseAlpha.cso" Link="Resources\Shader\DiffuseAlpha.cso"/>
+        <Resource Include="$(ShaderDirPath)InvertAlpha.cso" Link="Resources\Shader\InvertAlpha.cso"/>
+        <Resource Include="$(ShaderDirPath)BevelHeightmap.cso" Link="Resources\Shader\BevelHeightmap.cso"/>
+        <Resource Include="$(ShaderDirPath)BevelAndFlatComposite.cso" Link="Resources\Shader\BevelAndFlatComposite.cso"/>
+        <Resource Include="$(ShaderDirPath)UnidirectionalBlur.cso" Link="Resources\Shader\UnidirectionalBlur.cso"/>
+        <Resource Include="$(ShaderDirPath)LensBlur.cso" Link="Resources\Shader\LensBlur.cso"/>
+        <Resource Include="$(ShaderDirPath)FishEyeLens.cso" Link="Resources\Shader\FishEyeLens.cso"/>
+        <Resource Include="$(ShaderDirPath)Binarization.cso" Link="Resources\Shader\Binarization.cso"/>
+        <Resource Include="$(ShaderDirPath)CircularBlur.cso" Link="Resources\Shader\CircularBlur.cso"/>
+        <Resource Include="$(ShaderDirPath)ColorCorrection.cso" Link="Resources\Shader\ColorCorrection.cso"/>
+        <Resource Include="$(ShaderDirPath)ColorShift.cso" Link="Resources\Shader\ColorShift.cso"/>
+        <Resource Include="$(ShaderDirPath)InnerOutline.cso" Link="Resources\Shader\InnerOutline.cso"/>
+        <Resource Include="$(ShaderDirPath)LongShadow.cso" Link="Resources\Shader\LongShadow.cso"/>
+        <Resource Include="$(ShaderDirPath)Ripple.cso" Link="Resources\Shader\Ripple.cso"/>
+        <Resource Include="$(ShaderDirPath)SpiralTransform.cso" Link="Resources\Shader\SpiralTransform.cso"/>
+        <Resource Include="$(ShaderDirPath)RectangleGlitchNoise.cso" Link="Resources\Shader\RectangleGlitchNoise.cso"/>
+        <Resource Include="$(ShaderDirPath)StripeGlitchNoise.cso" Link="Resources\Shader\StripeGlitchNoise.cso"/>
+        <Resource Include="$(ShaderDirPath)ThreeDimensional.cso" Link="Resources\Shader\ThreeDimensional.cso"/>
+        <Resource Include="$(ShaderDirPath)Wave.cso" Link="Resources\Shader\Wave.cso"/>
+        <Resource Include="$(ShaderDirPath)ColorBlindness.cso" Link="Resources\Shader\ColorBlindness.cso"/>
+        <Resource Include="$(ShaderDirPath)VignetteBlur.cso" Link="Resources\Shader\VignetteBlur.cso"/>
+        <Resource Include="$(ShaderDirPath)VignetteRadialBlur.cso" Link="Resources\Shader\VignetteRadialBlur.cso"/>
+        <Resource Include="$(ShaderDirPath)VignetteCircularBlur.cso" Link="Resources\Shader\VignetteCircularBlur.cso"/>
+        <Resource Include="$(ShaderDirPath)BlurMap.cso" Link="Resources\Shader\BlurMap.cso"/>
+        <Resource Include="$(ShaderDirPath)Stretch.cso" Link="Resources\Shader\Stretch.cso"/>
+    </ItemGroup>
 
 </Project>
