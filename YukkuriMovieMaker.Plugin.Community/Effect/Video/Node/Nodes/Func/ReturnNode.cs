@@ -5,13 +5,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 
 public class ReturnNode : NodeLogic
 {
-    public ReturnNode(params PortDefinition[] returnPorts)
+    private PortDefinition[] _portDefinitions = Array.Empty<PortDefinition>();
+
+    public ReturnNode()
     {
-        InitializeReturnPorts(returnPorts);
     }
 
-    private void InitializeReturnPorts(PortDefinition[] returnPorts)
+    public ReturnNode(params PortDefinition[] returnPorts)
     {
+        Initialize(returnPorts);
+    }
+
+    public void Initialize(PortDefinition[] returnPorts)
+    {
+        _portDefinitions = returnPorts;
+        Inputs.Clear();
+
         foreach (var portDef in returnPorts)
         {
             var port = new InputPort(this, portDef.ValueType);
@@ -19,6 +28,11 @@ public class ReturnNode : NodeLogic
 
             if (portDef.DefaultValue != null) port.SetValue(portDef.DefaultValue);
         }
+    }
+
+    public PortDefinition[] GetPortDefinitions()
+    {
+        return _portDefinitions;
     }
 
     public async Task<Dictionary<string, object?>> ExtractReturns()

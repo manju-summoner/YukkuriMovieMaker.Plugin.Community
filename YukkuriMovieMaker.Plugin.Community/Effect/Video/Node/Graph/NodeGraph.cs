@@ -70,4 +70,14 @@ public sealed class NodeGraph
         var input = _nodes[id].Inputs[inputName];
         input.SetValue(value);
     }
+
+    public void SetSubgraph(Guid nodeId, string propertyName, NodeGraph subGraph)
+    {
+        if (!_nodes.TryGetValue(nodeId, out var node)) return;
+
+        var prop = node.GetType().GetProperty(propertyName);
+        if (prop != null && prop.PropertyType == typeof(NodeGraph)) prop.SetValue(node, subGraph);
+
+        node.SubGraphs[propertyName] = subGraph;
+    }
 }

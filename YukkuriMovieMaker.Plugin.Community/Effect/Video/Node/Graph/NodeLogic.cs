@@ -8,6 +8,7 @@ public abstract class NodeLogic
 {
     public readonly Dictionary<string, InputPort> Inputs = new();
     public readonly Dictionary<string, OutputPort> Outputs = new();
+    public readonly Dictionary<string, NodeGraph> SubGraphs = new();
 
     private bool _isEvaluated;
 
@@ -32,7 +33,25 @@ public abstract class NodeLogic
 
             if (Attribute.IsDefined(prop, typeof(OutputPortAttribute)))
                 Outputs.Add(prop.Name, new OutputPort(this, prop.PropertyType));
+
+            if (Attribute.IsDefined(prop, typeof(SubGraphAttribute)) && prop.GetValue(this) is NodeGraph subGraph)
+                SubGraphs.Add(prop.Name, subGraph);
         }
+    }
+
+    public void UpdateSubGraphs()
+    {
+        var props = GetType().GetProperties();
+
+        foreach (var prop in props)
+            if (Attribute.IsDefined(prop, typeof(SubGraphAttribute)) &&
+                prop.PropertyType == typeof(NodeGraph))
+            {
+                if (prop.GetValue(this) is NodeGraph subGraph)
+                    SubGraphs[prop.Name] = subGraph;
+                else
+                    SubGraphs.Remove(prop.Name);
+            }
     }
 
     public async Task EvaluateInternal()
@@ -56,12 +75,14 @@ public abstract class NodeLogic
     protected async Task<T?> GetInputAsync<T>([CallerMemberName] string name = null!)
     {
         var value = await Inputs[name].GetValue();
+        if (value is null) return default;
         return (T?)value;
     }
 
     protected T? GetInput<T>([CallerMemberName] string name = null!)
     {
         var value = Task.Run(() => Inputs[name].GetValue()).GetAwaiter().GetResult();
+        if (value is null) return default;
         return (T?)value;
     }
 
@@ -78,12 +99,15 @@ public abstract class NodeLogic
     protected async Task<T?> GetOutputAsync<T>([CallerMemberName] string name = null!)
     {
         var value = await Outputs[name].GetValue();
+        if (value is null) return default;
         return (T?)value;
     }
 
     protected T? GetOutput<T>([CallerMemberName] string name = null!)
     {
-        return (T?)Task.Run(() => Outputs[name].GetValue()).GetAwaiter().GetResult();
+        var value = Task.Run(() => Outputs[name].GetValue()).GetAwaiter().GetResult();
+        if (value is null) return default;
+        return (T?)value;
     }
 
     protected abstract Task Calculate();

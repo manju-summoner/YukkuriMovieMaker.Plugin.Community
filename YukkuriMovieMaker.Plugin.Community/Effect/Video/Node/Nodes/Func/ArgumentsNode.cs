@@ -5,13 +5,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 
 public class ArgumentsNode : NodeLogic
 {
-    public ArgumentsNode(params PortDefinition[] argumentPorts)
+    private PortDefinition[] _portDefinitions = Array.Empty<PortDefinition>();
+
+    public ArgumentsNode()
     {
-        InitializeArgumentPorts(argumentPorts);
     }
 
-    private void InitializeArgumentPorts(PortDefinition[] argumentPorts)
+    public ArgumentsNode(params PortDefinition[] argumentPorts)
     {
+        Initialize(argumentPorts);
+    }
+
+    public void Initialize(PortDefinition[] argumentPorts)
+    {
+        _portDefinitions = argumentPorts;
+        Outputs.Clear();
+
         foreach (var portDef in argumentPorts)
         {
             var port = new OutputPort(this, portDef.ValueType);
@@ -19,6 +28,11 @@ public class ArgumentsNode : NodeLogic
 
             if (portDef.DefaultValue != null) port.SetValue(portDef.DefaultValue);
         }
+    }
+
+    public PortDefinition[] GetPortDefinitions()
+    {
+        return _portDefinitions;
     }
 
     public void InjectArguments(Dictionary<string, object?> arguments)
