@@ -2,7 +2,7 @@ using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
-using YukkuriMovieMaker.Player.Video.Effects;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Effects;
 
@@ -10,7 +10,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
 
 public class NodeEffect : VideoEffectBase
 {
-    public override string Label => TextUi.Node;
+    public override string Label => $"{TextUi.Node} {Graph.Nodes.Count}Nodes";
+
+    public GraphSnapshot Graph
+    {
+        get;
+        set => Set(ref field, value);
+    } = new();
 
     protected override IEnumerable<IAnimatable> GetAnimatables()
     {
@@ -29,34 +35,51 @@ public class NodeEffect : VideoEffectBase
     }
 }
 
-public class Processor : VideoEffectProcessorBase
+public sealed class Processor : IVideoEffectProcessor
 {
-    private IGraphicsDevicesAndContext _devices;
-    private NodeEffect _effect;
+    private readonly NodeEffect _nodeEffect;
 
-    public Processor(IGraphicsDevicesAndContext devices, NodeEffect effect) : base(devices)
+    public Processor(IGraphicsDevicesAndContext devices, NodeEffect effect)
     {
-        _effect = effect;
-        _devices = devices;
+        _nodeEffect = effect;
     }
 
-    protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
+    public ID2D1Image Output { get; }
+
+    public DrawDescription Update(EffectDescription effectDescription)
     {
         throw new NotImplementedException();
     }
 
-    protected override void setInput(ID2D1Image? input)
+    public void SetInput(ID2D1Image? input)
     {
         throw new NotImplementedException();
     }
 
-    protected override void ClearEffectChain()
+    public void ClearInput()
     {
         throw new NotImplementedException();
     }
 
-    public override DrawDescription Update(EffectDescription effectDescription)
+    public void Dispose()
     {
-        throw new NotImplementedException();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void ReleaseUnmanagedResources()
+    {
+        // TODO アンマネージリソースをここで解放します
+    }
+
+    private void Dispose(bool disposing)
+    {
+        ReleaseUnmanagedResources();
+        if (disposing) Output.Dispose();
+    }
+
+    ~Processor()
+    {
+        Dispose(false);
     }
 }
