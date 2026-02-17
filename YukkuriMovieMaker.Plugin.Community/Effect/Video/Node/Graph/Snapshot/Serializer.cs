@@ -81,7 +81,6 @@ public static class Serializer
             if (type == null) continue;
             var node = (NodeLogic)Activator.CreateInstance(type)!;
             node.Id = nodeSnap.Id;
-            node.Label = "";
 
             nodeMap[node.Id] = node;
 

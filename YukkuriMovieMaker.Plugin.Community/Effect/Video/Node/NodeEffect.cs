@@ -185,16 +185,14 @@ public sealed class Processor : IVideoEffectProcessor
                              new PortDefinition("FrameIndex", typeof(int))
                          )
                          {
-                             Id = Guid.NewGuid(),
-                             Label = "Input"
+                             Id = Guid.NewGuid()
                          };
             _outputNode = _graph.Nodes.Values.OfType<ReturnNode>().FirstOrDefault() ??
                           new ReturnNode(
                               new PortDefinition("OutputImage", typeof(ID2D1Image))
                           )
                           {
-                              Id = Guid.NewGuid(),
-                              Label = "Output"
+                              Id = Guid.NewGuid()
                           };
         }
         else
@@ -206,16 +204,14 @@ public sealed class Processor : IVideoEffectProcessor
                 new PortDefinition("FrameIndex", typeof(int))
             )
             {
-                Id = Guid.NewGuid(),
-                Label = "Input"
+                Id = Guid.NewGuid()
             };
 
             _outputNode = new ReturnNode(
                 new PortDefinition("OutputImage", typeof(ID2D1Image))
             )
             {
-                Id = Guid.NewGuid(),
-                Label = "Output"
+                Id = Guid.NewGuid()
             };
 
             _graph.AddNode(_inputNode);

@@ -19,9 +19,6 @@ public abstract class NodeLogic
 
     public Guid Id { get; set; }
 
-    public required string Label { get; set; }
-    public string Description { get; set; } = "";
-
     protected EvaluationContext? EvaluationContext { get; private set; }
 
     private void InitializePorts()

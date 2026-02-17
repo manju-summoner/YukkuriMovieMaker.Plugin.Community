@@ -1,8 +1,10 @@
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 
+[Node($"{"Function"}", "戻値", "ノードのグラフの計算結果を受け取ります。")]
 public class ReturnNode : NodeLogic
 {
     private PortDefinition[] _portDefinitions = Array.Empty<PortDefinition>();
