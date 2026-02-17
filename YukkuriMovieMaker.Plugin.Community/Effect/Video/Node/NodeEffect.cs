@@ -1,16 +1,28 @@
+using System.Diagnostics;
+using System.Numerics;
+using Vortice.DCommon;
 using Vortice.Direct2D1;
+using Vortice.Direct2D1.Effects;
+using Vortice.DXGI;
+using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
 
-public class NodeEffect : VideoEffectBase
+[VideoEffect(nameof(TextUi.Node), [VideoEffectCategories.Filtering], ["Node"], IsAviUtlSupported = false,
+    ResourceType = typeof(TextUi))]
+public sealed class NodeEffect : VideoEffectBase
 {
-    public override string Label => $"{TextUi.Node} {Graph.Nodes.Count}Nodes";
+    public override string Label => TextUi.Node;
 
     public GraphSnapshot Graph
     {
@@ -37,49 +49,240 @@ public class NodeEffect : VideoEffectBase
 
 public sealed class Processor : IVideoEffectProcessor
 {
+    private readonly IGraphicsDevicesAndContext _devices;
+    private readonly Lock _lock = new();
     private readonly NodeEffect _nodeEffect;
+
+    private AffineTransform2D? _affineTransform;
+    private ID2D1Bitmap1? _blankBitmap;
+
+    private ID2D1Image? _currentInputImage;
+
+    private NodeGraph _graph = null!;
+
+    private bool _hasError;
+    private ArgumentsNode _inputNode = null!;
+    private bool _isEvaluating;
+    private ID2D1Image? _outputImage;
+    private ReturnNode _outputNode = null!;
 
     public Processor(IGraphicsDevicesAndContext devices, NodeEffect effect)
     {
+        _devices = devices;
         _nodeEffect = effect;
+
+        InitializeGraph();
+        CreateBlankBitmap();
+
+        if (_graph != null!) _graph.Committed += OnGraphCommitted;
     }
 
-    public ID2D1Image Output { get; }
+    public ID2D1Image Output => _outputImage ?? _blankBitmap!;
 
     public DrawDescription Update(EffectDescription effectDescription)
     {
-        throw new NotImplementedException();
+        lock (_lock)
+        {
+            try
+            {
+                if (_isEvaluating)
+                    return effectDescription.DrawDescription;
+
+                _isEvaluating = true;
+
+                if (_graph == null! || _inputNode == null! || _outputNode == null!) InitializeGraph();
+
+                // 評価開始
+                var context = new EvaluationContext(_devices, effectDescription);
+
+                _inputNode!.InjectArguments(new Dictionary<string, object?>
+                {
+                    ["InputImage"] = _currentInputImage,
+                    ["FrameIndex"] = effectDescription.ItemPosition.Frame
+                });
+
+                var outputDict = _outputNode!.ExtractReturns(context).GetAwaiter().GetResult();
+                var outputImage = outputDict["OutputImage"] as ID2D1Image;
+
+                if (outputImage == null || outputImage.NativePointer == IntPtr.Zero)
+                    throw new InvalidOperationException(TextUi.OutputImageIsNull);
+
+                _outputImage = outputImage;
+                _hasError = false;
+
+                ApplyAffineTransform(outputImage);
+
+                return effectDescription.DrawDescription;
+            }
+            catch (Exception ex)
+            {
+                if (!_hasError) Debug.WriteLine($"[Processor] Error: {ex.Message}");
+
+                _hasError = true;
+
+                SetBlankImage();
+                ApplyAffineTransform(_blankBitmap!);
+
+                return effectDescription.DrawDescription;
+            }
+            finally
+            {
+                _isEvaluating = false;
+            }
+        }
     }
 
     public void SetInput(ID2D1Image? input)
     {
-        throw new NotImplementedException();
+        lock (_lock)
+        {
+            _currentInputImage = input;
+        }
     }
 
     public void ClearInput()
     {
-        throw new NotImplementedException();
+        lock (_lock)
+        {
+            _currentInputImage = null;
+        }
     }
 
     public void Dispose()
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
+        lock (_lock)
+        {
+            if (_graph != null!) _graph.Committed -= OnGraphCommitted;
+
+            ClearInput();
+
+            _affineTransform?.SetInput(0, null, true);
+            _affineTransform?.Dispose();
+            _affineTransform = null;
+
+            _blankBitmap?.Dispose();
+            _blankBitmap = null;
+
+            _outputImage = null;
+
+            GC.SuppressFinalize(this);
+        }
     }
 
-    private void ReleaseUnmanagedResources()
+    /// <summary>
+    ///     グラフの初期化
+    /// </summary>
+    private void InitializeGraph()
     {
-        // TODO アンマネージリソースをここで解放します
+        // スナップショットから復元
+        if (_nodeEffect.Graph.Nodes.Count > 0)
+        {
+            _graph = Serializer.Restore(_nodeEffect.Graph);
+
+            _inputNode = _graph.Nodes.Values.OfType<ArgumentsNode>().FirstOrDefault() ??
+                         new ArgumentsNode(
+                             new PortDefinition("InputImage", typeof(ID2D1Image)),
+                             new PortDefinition("FrameIndex", typeof(int))
+                         )
+                         {
+                             Id = Guid.NewGuid(),
+                             Label = "Input"
+                         };
+            _outputNode = _graph.Nodes.Values.OfType<ReturnNode>().FirstOrDefault() ??
+                          new ReturnNode(
+                              new PortDefinition("OutputImage", typeof(ID2D1Image))
+                          )
+                          {
+                              Id = Guid.NewGuid(),
+                              Label = "Output"
+                          };
+        }
+        else
+        {
+            _graph = new NodeGraph();
+
+            _inputNode = new ArgumentsNode(
+                new PortDefinition("InputImage", typeof(ID2D1Image)),
+                new PortDefinition("FrameIndex", typeof(int))
+            )
+            {
+                Id = Guid.NewGuid(),
+                Label = "Input"
+            };
+
+            _outputNode = new ReturnNode(
+                new PortDefinition("OutputImage", typeof(ID2D1Image))
+            )
+            {
+                Id = Guid.NewGuid(),
+                Label = "Output"
+            };
+
+            _graph.AddNode(_inputNode);
+            _graph.AddNode(_outputNode);
+
+            _graph.Connect(_inputNode.Id, "InputImage", _outputNode.Id, "OutputImage");
+
+            _nodeEffect.Graph = Serializer.Create(_graph);
+        }
     }
 
-    private void Dispose(bool disposing)
+    private void OnGraphCommitted(object? sender, CommittedEventArgs e)
     {
-        ReleaseUnmanagedResources();
-        if (disposing) Output.Dispose();
+        if (_graph == null!) return;
+
+        lock (_lock)
+        {
+            _graph.InvalidateAll();
+
+            _nodeEffect.Graph = Serializer.Create(_graph);
+        }
+    }
+
+    private void CreateBlankBitmap()
+    {
+        var bitmapProperties = new BitmapProperties1(
+            new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
+            96,
+            96,
+            BitmapOptions.Target
+        );
+
+        _blankBitmap = _devices.DeviceContext.CreateBitmap(
+            new SizeI(1, 1),
+            IntPtr.Zero,
+            0,
+            bitmapProperties
+        );
+    }
+
+    private void SetBlankImage()
+    {
+        if (_blankBitmap == null) CreateBlankBitmap();
+
+        var deviceContext = _devices.DeviceContext;
+        deviceContext.Target = _blankBitmap;
+        deviceContext.BeginDraw();
+        deviceContext.Clear(new Color(0, 0, 0, 0));
+        deviceContext.EndDraw();
+
+        _outputImage = _blankBitmap;
+    }
+
+    private void ApplyAffineTransform(ID2D1Image input)
+    {
+        _affineTransform ??= new AffineTransform2D(_devices.DeviceContext)
+        {
+            BorderMode = BorderMode.Soft,
+            TransformMatrix = Matrix3x2.Identity
+        };
+
+        _affineTransform.SetInput(0, input, true);
+        _outputImage = _affineTransform.Output;
     }
 
     ~Processor()
     {
-        Dispose(false);
+        Dispose();
     }
 }

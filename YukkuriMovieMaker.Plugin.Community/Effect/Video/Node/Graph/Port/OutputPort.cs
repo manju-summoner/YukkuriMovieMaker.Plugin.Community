@@ -22,6 +22,12 @@ public class OutputPort : Port
         return _cachedValue;
     }
 
+    public async Task<object?> GetValue(EvaluationContext? context)
+    {
+        if (!_isCached) await Owner.EvaluateInternal(context);
+        return _cachedValue;
+    }
+
     internal void RegisterConnection(InputPort inputPort)
     {
         _connection.Add(inputPort);

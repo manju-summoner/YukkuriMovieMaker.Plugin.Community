@@ -1,2 +1,4 @@
 Key,Comment,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa
 Node,ノード,ノード,Node,节点,節點,노드,Nodo,العقد
+
+OutputImageIsNull,出力画像が null の場合のエラーメッセージ,出力画像が null です,Output image is null.,输出图像为空,輸出影像為空,출력 이미지가 null입니다,La imagen de salida es nula,صورة الإخراج فارغة

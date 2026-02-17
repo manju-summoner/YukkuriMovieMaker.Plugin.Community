@@ -35,16 +35,23 @@ public class ReturnNode : NodeLogic
         return _portDefinitions;
     }
 
-    public async Task<Dictionary<string, object?>> ExtractReturns()
+    public async Task<Dictionary<string, object?>> ExtractReturns(EvaluationContext? context = null)
     {
         var results = new Dictionary<string, object?>();
         foreach (var (name, port) in Inputs)
         {
-            var value = await port.GetValue();
+            var value = await port.GetValue(context);
             results[name] = value;
         }
 
         return results;
+    }
+
+    public async Task<object?> ExtractReturn(string name, EvaluationContext? context = null)
+    {
+        if (Inputs.TryGetValue(name, out var port)) return await port.GetValue(context);
+
+        return null;
     }
 
     protected override Task Calculate()

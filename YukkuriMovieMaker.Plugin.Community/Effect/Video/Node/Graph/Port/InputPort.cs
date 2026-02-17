@@ -35,4 +35,10 @@ public sealed class InputPort : Port
 
         return await _outputPort.GetValue();
     }
+
+    public async Task<object?> GetValue(EvaluationContext? context)
+    {
+        if (_outputPort is null) return _value;
+        return await _outputPort.GetValue(context);
+    }
 }

@@ -44,6 +44,15 @@ public class ArgumentsNode : NodeLogic
         Invalidate();
     }
 
+    public void InjectArgument(string name, object? value)
+    {
+        if (Outputs.TryGetValue(name, out var port))
+        {
+            port.SetValue(value);
+            Invalidate();
+        }
+    }
+
     protected override Task Calculate()
     {
         return Task.CompletedTask;

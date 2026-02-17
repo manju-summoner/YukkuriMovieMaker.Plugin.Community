@@ -22,6 +22,8 @@ public abstract class NodeLogic
     public required string Label { get; set; }
     public string Description { get; set; } = "";
 
+    protected EvaluationContext? EvaluationContext { get; private set; }
+
     private void InitializePorts()
     {
         var props = GetType().GetProperties();
@@ -54,11 +56,18 @@ public abstract class NodeLogic
             }
     }
 
-    public async Task EvaluateInternal()
+    public async Task EvaluateInternal(EvaluationContext? context = null)
     {
         if (_isEvaluated) return;
-
-        await Calculate();
+        EvaluationContext = context;
+        try
+        {
+            await Calculate();
+        }
+        finally
+        {
+            EvaluationContext = null;
+        }
 
         _isEvaluated = true;
     }
