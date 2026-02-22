@@ -56,6 +56,7 @@ public sealed class NodeGraph
         VisualStates[nodeId] = visual;
 
         GraphChanged?.Invoke(this, new VisualStateChangedEventArgs(nodeId, visual));
+        Committed?.Invoke(this, new CommittedEventArgs());
     }
 
     /// <summary>

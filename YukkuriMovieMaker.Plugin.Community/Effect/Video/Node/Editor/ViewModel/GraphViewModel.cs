@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows;
 using System.Windows.Input;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
@@ -9,7 +8,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
-public class GraphViewModel : INotifyPropertyChanged
+public sealed class GraphViewModel : INotifyPropertyChanged
 {
     private readonly NodeGraph _graph;
 
@@ -72,28 +71,25 @@ public class GraphViewModel : INotifyPropertyChanged
 
     private void OnGraphChanged(object? sender, GraphChangedEventArgs e)
     {
-        Application.Current?.Dispatcher.InvokeAsync(() =>
+        switch (e)
         {
-            switch (e)
-            {
-                case NodeAddedEventArgs added:
-                    var vm = new NodeViewModel(added.Node, _graph);
-                    Nodes.Add(vm);
-                    break;
+            case NodeAddedEventArgs added:
+                var vm = new NodeViewModel(added.Node, _graph);
+                Nodes.Add(vm);
+                break;
 
-                case NodeRemovedEventArgs removed:
-                    var node = Nodes.FirstOrDefault(n => n.Id == removed.NodeId);
-                    if (node != null) Nodes.Remove(node);
-                    break;
+            case NodeRemovedEventArgs removed:
+                var node = Nodes.FirstOrDefault(n => n.Id == removed.NodeId);
+                if (node != null) Nodes.Remove(node);
+                break;
 
-                case ConnectionChangedEventArgs connChanged:
-                    break;
+            case ConnectionChangedEventArgs connChanged:
+                break;
 
-                case ValueChangedEventArgs valueChanged:
-                    UpdatePortValue(valueChanged);
-                    break;
-            }
-        });
+            case ValueChangedEventArgs valueChanged:
+                UpdatePortValue(valueChanged);
+                break;
+        }
     }
 
     private void AddNode(Type nodeType)
@@ -126,8 +122,8 @@ public class GraphViewModel : INotifyPropertyChanged
 
         _graph.BeginEdit();
         _graph.Connect(
-            ports.From._nodeId, ports.From.Name,
-            ports.To._nodeId, ports.To.Name
+            ports.From.NodeId, ports.From.Name,
+            ports.To.NodeId, ports.To.Name
         );
         _graph.EndEdit();
     }
@@ -142,12 +138,12 @@ public class GraphViewModel : INotifyPropertyChanged
         _graph.EndEdit();
     }
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value)) return false;
         field = value;

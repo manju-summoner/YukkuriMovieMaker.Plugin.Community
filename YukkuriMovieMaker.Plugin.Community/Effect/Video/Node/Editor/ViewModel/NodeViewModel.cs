@@ -9,7 +9,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
-public class NodeViewModel : INotifyPropertyChanged
+public sealed class NodeViewModel : INotifyPropertyChanged
 {
     private readonly NodeGraph _graph;
 
@@ -62,12 +62,10 @@ public class NodeViewModel : INotifyPropertyChanged
         get => _x;
         set
         {
-            if (Math.Abs(_x - value) > 0)
+            if (Math.Abs(_x - value) > 0.0001)
             {
                 _x = value;
                 OnPropertyChanged();
-
-                _graph.SetVisualState(Id, value, _y);
             }
         }
     }
@@ -77,17 +75,20 @@ public class NodeViewModel : INotifyPropertyChanged
         get => _y;
         set
         {
-            if (Math.Abs(_y - value) > 0)
+            if (Math.Abs(_y - value) > 0.0001)
             {
                 _y = value;
                 OnPropertyChanged();
-
-                _graph.SetVisualState(Id, _x, value);
             }
         }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    public void CommitPosition()
+    {
+        _graph.SetVisualState(Id, _x, _y);
+    }
 
     private IEnumerable<PortViewModel> CreateInputPorts(NodeLogic node, NodeGraph graph)
     {
@@ -130,12 +131,12 @@ public class NodeViewModel : INotifyPropertyChanged
         }
     }
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value)) return false;
         field = value;

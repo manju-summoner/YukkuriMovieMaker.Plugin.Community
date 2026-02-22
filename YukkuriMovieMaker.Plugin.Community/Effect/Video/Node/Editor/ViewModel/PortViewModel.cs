@@ -6,10 +6,10 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
-public class PortViewModel : INotifyPropertyChanged
+public sealed class PortViewModel : INotifyPropertyChanged
 {
     private readonly NodeGraph _graph;
-    internal readonly Guid _nodeId;
+    internal readonly Guid NodeId;
 
     private object? _currentValue;
 
@@ -30,7 +30,7 @@ public class PortViewModel : INotifyPropertyChanged
         Direction = direction;
         ControlAttribute = controlAttribute;
         _graph = graph;
-        _nodeId = nodeId;
+        NodeId = nodeId;
 
         // 初期値を取得
         if (direction == PortDirection.Input)
@@ -56,7 +56,7 @@ public class PortViewModel : INotifyPropertyChanged
                 _currentValue = value;
                 OnPropertyChanged();
 
-                if (Direction == PortDirection.Input) _graph.SetInputValue(_nodeId, Name, value);
+                if (Direction == PortDirection.Input) _graph.SetInputValue(NodeId, Name, value);
             }
         }
     }
@@ -79,12 +79,12 @@ public class PortViewModel : INotifyPropertyChanged
         }
     }
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value)) return false;
         field = value;
