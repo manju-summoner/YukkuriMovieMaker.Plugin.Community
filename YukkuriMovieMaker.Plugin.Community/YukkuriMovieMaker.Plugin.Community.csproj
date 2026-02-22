@@ -79,7 +79,6 @@
     </Target>
 
     <ItemGroup>
-        <Folder Include="Effect\Video\Node\Editor\Attributes\"/>
         <Folder Include="FileSource\"/>
         <Folder Include="FileWriter\"/>
         <Folder Include="Tachie\"/>

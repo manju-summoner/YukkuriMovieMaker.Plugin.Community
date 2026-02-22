@@ -26,7 +26,7 @@ public sealed class NodeGraph
     ///     指定したIDの管理対象のノードを削除します
     /// </summary>
     /// <param name="nodeId">削除するノードのID</param>
-    public void AddNode(Guid nodeId)
+    public void RemoveNode(Guid nodeId)
     {
         _nodes[nodeId].Invalidate();
         _nodes.Remove(nodeId);
