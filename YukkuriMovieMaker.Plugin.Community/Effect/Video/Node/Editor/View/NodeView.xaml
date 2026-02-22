@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:viewModel="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel"
              xmlns:converters="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters"
+             xmlns:view="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View"
              mc:Ignorable="d"
              MinWidth="200"
              d:DataContext="{d:DesignInstance viewModel:NodeViewModel}"
@@ -41,9 +42,7 @@
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal" Margin="0,2">
                             <!-- ポート端子（左） -->
-                            <Ellipse Width="10" Height="10"
-                                     Fill="LightGreen"
-                                     Margin="0,0,4,0" />
+                            <view:PortView DataContext="{Binding}" />
 
                             <!-- ラベル -->
                             <TextBlock Text="{Binding Label}"
@@ -97,9 +96,7 @@
                                        VerticalAlignment="Center" />
 
                             <!-- ポート端子（右） -->
-                            <Ellipse Width="10" Height="10"
-                                     Fill="LightBlue"
-                                     Margin="4,0,0,0" />
+                            <view:PortView DataContext="{Binding}" />
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

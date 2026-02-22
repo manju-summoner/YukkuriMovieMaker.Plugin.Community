@@ -9,7 +9,7 @@
              d:DesignHeight="600" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance viewModel:GraphViewModel}">
 
-    <Grid Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+    <Grid x:Name="RootGrid" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
         <ItemsControl ItemsSource="{Binding Nodes}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
