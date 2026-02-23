@@ -9,6 +9,8 @@
         <Ellipse x:Name="PortCircle"
                  Width="10"
                  Height="10"
-                 Fill="LightGreen" />
+                 Fill="LightGreen"
+                 MouseLeftButtonDown="OnMouseLeftButtonDown"
+                 MouseLeftButtonUp="OnMouseLeftButtonUp" />
     </Grid>
 </UserControl>

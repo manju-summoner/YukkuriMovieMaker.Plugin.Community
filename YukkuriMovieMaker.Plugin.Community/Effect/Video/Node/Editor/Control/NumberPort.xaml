@@ -3,8 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             mc:Ignorable="d"
-             MinHeight="30" Width="auto" MinWidth="100" MaxWidth="220">
+             xmlns:control="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control"
+             mc:Ignorable="d" Width="auto" MinWidth="100" MaxWidth="220"
+             d:DataContext="{d:DesignInstance control:NumberPort}">
     <UserControl.Resources>
         <ResourceDictionary
             Source="pack://application:,,,/YukkuriMovieMaker.Plugin.Community;component/Effect/Video/Node/Editor/View/Style/Style.xaml" />

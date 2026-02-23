@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Input;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
@@ -29,6 +30,18 @@ public sealed class GraphViewModel : INotifyPropertyChanged
     public ObservableCollection<NodeViewModel> Nodes { get; } = [];
     public ObservableCollection<ConnectionViewModel> Connections { get; } = [];
 
+    public PortViewModel? DraggingFromPort
+    {
+        get;
+        set => SetField(ref field, value);
+    }
+
+    public Point? TemporaryEndPoint
+    {
+        get;
+        set => SetField(ref field, value);
+    }
+
     public ICommand AddNodeCommand { get; }
     public ICommand DeleteNodeCommand { get; }
     public ICommand ConnectPortsCommand { get; }
@@ -54,6 +67,10 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         var nodeViewModels = new Dictionary<Guid, NodeViewModel>();
 
         Nodes.Clear();
+        foreach (var node in Nodes)
+        foreach (var port in node.InputPorts)
+            port.IsConnected = false;
+
         foreach (var node in _graph.Nodes.Values)
         {
             var vm = new NodeViewModel(node, _graph);
@@ -83,7 +100,8 @@ public sealed class GraphViewModel : INotifyPropertyChanged
                 if (node != null) Nodes.Remove(node);
                 break;
 
-            case ConnectionChangedEventArgs connChanged:
+            case ConnectionChangedEventArgs:
+                SyncFromGraph();
                 break;
 
             case ValueChangedEventArgs valueChanged:
@@ -114,16 +132,21 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         _graph.EndEdit();
     }
 
-    private void ConnectPorts((PortViewModel From, PortViewModel To) ports)
+    private void ConnectPorts((PortViewModel A, PortViewModel B) ports)
     {
-        if (ports.From.Direction != PortDirection.Output ||
-            ports.To.Direction != PortDirection.Input)
+        var p1 = ports.A;
+        var p2 = ports.B;
+
+        if (p1.Direction == p2.Direction)
             return;
+
+        var from = p1.Direction == PortDirection.Output ? p1 : p2;
+        var to = p1.Direction == PortDirection.Input ? p1 : p2;
 
         _graph.BeginEdit();
         _graph.Connect(
-            ports.From.NodeId, ports.From.Name,
-            ports.To.NodeId, ports.To.Name
+            from.NodeId, from.Name,
+            to.NodeId, to.Name
         );
         _graph.EndEdit();
     }

@@ -64,7 +64,11 @@ public sealed class PortViewModel : INotifyPropertyChanged
     public PropertyControlBaseAttribute? ControlAttribute { get; }
     public bool HasControl => ControlAttribute != null && Direction == PortDirection.Input;
 
-    public bool IsConnected { get; set; }
+    public bool IsConnected
+    {
+        get;
+        set => SetField(ref field, value);
+    }
 
     public Point Position { get; set; }
 

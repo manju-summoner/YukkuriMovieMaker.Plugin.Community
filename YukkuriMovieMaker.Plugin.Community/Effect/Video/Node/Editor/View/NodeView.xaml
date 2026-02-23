@@ -71,7 +71,7 @@
 
                                             <!-- 接続されている場合はコントロールを非表示 -->
                                             <DataTrigger Binding="{Binding IsConnected}" Value="True">
-                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Setter Property="Visibility" Value="Hidden" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>

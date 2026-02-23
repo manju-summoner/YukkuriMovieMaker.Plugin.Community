@@ -4,7 +4,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
-public class ConnectionViewModel : INotifyPropertyChanged
+public sealed class ConnectionViewModel : INotifyPropertyChanged
 {
     public ConnectionViewModel(
         NodeConnection connection,
@@ -35,12 +35,12 @@ public class ConnectionViewModel : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value)) return false;
         field = value;

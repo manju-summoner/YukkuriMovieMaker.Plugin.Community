@@ -19,7 +19,6 @@ public class ConnectionAdorner : Adorner
 
         if (DataContext is not GraphViewModel vm)
             return;
-
         var pen = new Pen(Brushes.LightGray, 2);
 
         foreach (var conn in vm.Connections)
@@ -32,6 +31,13 @@ public class ConnectionAdorner : Adorner
             var p2 = conn.ToPort.Position;
 
             dc.DrawLine(pen, p1, p2);
+        }
+
+        if (vm is { DraggingFromPort: not null, TemporaryEndPoint: not null })
+        {
+            var start = vm.DraggingFromPort.Position;
+            var end = vm.TemporaryEndPoint.Value;
+            dc.DrawLine(new Pen(Brushes.Orange, 2), start, end);
         }
     }
 }
