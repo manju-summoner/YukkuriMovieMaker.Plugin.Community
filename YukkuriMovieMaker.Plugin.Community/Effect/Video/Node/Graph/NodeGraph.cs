@@ -28,6 +28,13 @@ public sealed class NodeGraph
     /// <param name="nodeId">削除するノードのID</param>
     public void RemoveNode(Guid nodeId)
     {
+        var related = Connections
+            .Where(c => c.FromId == nodeId || c.ToId == nodeId)
+            .ToList();
+
+        foreach (var c in related)
+            Disconnect(c.FromId, c.FromPort, c.ToId, c.ToPort);
+
         _nodes[nodeId].Invalidate();
         _nodes.Remove(nodeId);
 
@@ -135,6 +142,14 @@ public sealed class NodeGraph
     {
         var output = _nodes[from].Outputs[outputName];
         var input = _nodes[to].Inputs[inputName];
+
+        var existing = Connections
+            .Where(c => c.ToId == to && c.ToPort == inputName)
+            .ToList();
+
+        foreach (var c in existing)
+            Disconnect(c.FromId, c.FromPort, c.ToId, c.ToPort);
+
         input.Connect(output);
         Connections.Add(
             new NodeConnection { FromId = from, FromPort = outputName, ToId = to, ToPort = inputName });
