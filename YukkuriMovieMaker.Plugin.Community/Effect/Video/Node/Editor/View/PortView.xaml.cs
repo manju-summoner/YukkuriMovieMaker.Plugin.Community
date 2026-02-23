@@ -32,10 +32,28 @@ public partial class PortView
 
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (DataContext is not PortViewModel port) return;
-
         var graph = FindAncestor<GraphView>(this)?.DataContext as GraphViewModel;
         if (graph == null) return;
+        if (e.ClickCount == 2)
+        {
+            graph.DraggingFromPort = null;
+            graph.TemporaryEndPoint = null;
+            if (DataContext is not PortViewModel vm) return;
+
+            var related = graph.Connections
+                .Where(c =>
+                    (c.FromNodeId == vm.NodeId && c.FromPortName == vm.Name) ||
+                    (c.ToNodeId == vm.NodeId && c.ToPortName == vm.Name))
+                .ToList();
+
+            foreach (var c in related)
+                graph.DisconnectCommand.Execute(c);
+
+            e.Handled = true;
+            return;
+        }
+
+        if (DataContext is not PortViewModel port) return;
 
         graph.DraggingFromPort = port;
         e.Handled = true;
