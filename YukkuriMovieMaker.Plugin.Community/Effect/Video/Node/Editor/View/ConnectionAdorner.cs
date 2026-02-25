@@ -21,18 +21,6 @@ public class ConnectionAdorner : Adorner
             return;
         var pen = new Pen(Brushes.LightGray, 2);
 
-        foreach (var conn in vm.Connections)
-        {
-            if (conn.FromPort?.Position == null ||
-                conn.ToPort?.Position == null)
-                continue;
-
-            var p1 = conn.FromPort.Position;
-            var p2 = conn.ToPort.Position;
-
-            dc.DrawLine(pen, p1, p2);
-        }
-
         if (vm is { DraggingFromPort: not null, TemporaryEndPoint: not null })
         {
             var start = vm.DraggingFromPort.Position;

@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View;
@@ -19,15 +20,25 @@ public partial class PortView
         if (DataContext is not PortViewModel vm)
             return;
 
-        var graphView = FindAncestor<GraphView>(this);
-        if (graphView == null)
-            return;
+        Dispatcher.BeginInvoke(() =>
+        {
+            var graphView = FindAncestor<GraphView>(this);
+            if (graphView == null)
+                return;
 
-        var transform = TransformToAncestor(graphView);
-        var center = transform.Transform(
-            new Point(ActualWidth / 2, ActualHeight / 2));
+            var root = graphView.FindName("RootGrid") as UIElement;
+            if (root == null)
+                return;
 
-        vm.Position = center;
+            if (ActualWidth == 0 || ActualHeight == 0)
+                return;
+
+            var transform = TransformToAncestor(root);
+            var center = transform.Transform(
+                new Point(ActualWidth / 2, ActualHeight / 2));
+
+            vm.Position = center;
+        }, DispatcherPriority.Render);
     }
 
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

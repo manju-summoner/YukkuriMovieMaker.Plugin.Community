@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -33,15 +32,6 @@ public partial class GraphView
     {
         if (e.NewValue is GraphViewModel vm)
         {
-            foreach (var node in vm.Nodes) node.PropertyChanged += Node_PropertyChanged;
-
-            vm.Nodes.CollectionChanged += (_, args) =>
-            {
-                if (args.NewItems != null)
-                    foreach (NodeViewModel n in args.NewItems)
-                        n.PropertyChanged += Node_PropertyChanged;
-            };
-
             vm.Connections.CollectionChanged += (_, _) =>
             {
                 Dispatcher.BeginInvoke(new Action(() => { _connectionAdorner?.InvalidateVisual(); }),
@@ -67,12 +57,5 @@ public partial class GraphView
         vm.DraggingFromPort = null;
         vm.TemporaryEndPoint = null;
         _connectionAdorner?.InvalidateVisual();
-    }
-
-    private void Node_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(NodeViewModel.X) ||
-            e.PropertyName == nameof(NodeViewModel.Y))
-            _connectionAdorner?.InvalidateVisual();
     }
 }

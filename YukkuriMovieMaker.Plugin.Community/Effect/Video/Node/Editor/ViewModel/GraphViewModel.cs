@@ -67,9 +67,6 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         var nodeViewModels = new Dictionary<Guid, NodeViewModel>();
 
         Nodes.Clear();
-        foreach (var node in Nodes)
-        foreach (var port in node.InputPorts)
-            port.IsConnected = false;
 
         foreach (var node in _graph.Nodes.Values)
         {
@@ -77,6 +74,10 @@ public sealed class GraphViewModel : INotifyPropertyChanged
             Nodes.Add(vm);
             nodeViewModels[node.Id] = vm;
         }
+
+        foreach (var node in Nodes)
+        foreach (var port in node.InputPorts)
+            port.IsConnected = false;
 
         Connections.Clear();
         foreach (var conn in _graph.Connections)

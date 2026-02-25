@@ -7,8 +7,9 @@
              xmlns:converters="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters"
              xmlns:view="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View"
              mc:Ignorable="d"
-             MinWidth="200"
+             MinWidth="220"
              d:DataContext="{d:DesignInstance viewModel:NodeViewModel}"
+             Background="Transparent"
              MouseLeftButtonDown="OnMouseLeftButtonDown"
              MouseMove="OnMouseMove"
              MouseLeftButtonUp="OnMouseLeftButtonUp">
@@ -23,91 +24,101 @@
             <converters:PortControlTemplateSelector x:Key="PortControlTemplateSelector" />
         </ResourceDictionary>
     </UserControl.Resources>
-    <Border Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
-            BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-            BorderThickness="1"
-            CornerRadius="4"
-            Padding="8">
-        <StackPanel>
-            <!-- ヘッダー -->
-            <TextBlock Text="{Binding DisplayName}"
-                       Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
-                       FontWeight="Bold"
-                       FontSize="12"
-                       Margin="0,0,0,8" />
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="5" MaxWidth="5" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition MinWidth="5" MaxWidth="5" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-            <!-- 入力ポート -->
-            <ItemsControl ItemsSource="{Binding InputPorts}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Margin="0,2">
-                            <!-- ポート端子（左） -->
-                            <view:PortView DataContext="{Binding}" />
+        <Border Grid.Row="0" Grid.RowSpan="4" Grid.Column="1"
+                Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                BorderThickness="1" />
+        <!-- ヘッダー -->
+        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DisplayName}"
+                   Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                   FontWeight="Bold"
+                   FontSize="12"
+                   Margin="0,0,0,8" />
 
-                            <!-- ラベル -->
-                            <TextBlock Text="{Binding Label}"
-                                       Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
-                                       FontSize="10"
-                                       VerticalAlignment="Center" />
+        <!-- 入力ポート -->
+        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding InputPorts}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                        <!-- ポート端子（左） -->
+                        <view:PortView DataContext="{Binding}" />
 
-                            <!-- 値 -->
-                            <ContentControl Content="{Binding}"
-                                            ContentTemplateSelector="{StaticResource PortControlTemplateSelector}"
-                                            HorizontalAlignment="Right"
-                                            VerticalAlignment="Center"
-                                            Margin="4,0,0,0">
-                                <!-- コントロールがない場合のフォールバック -->
-                                <ContentControl.Style>
-                                    <Style TargetType="ContentControl">
-                                        <Style.Triggers>
-                                            <!-- コントロールがない、または接続されている場合は値を表示 -->
-                                            <DataTrigger Binding="{Binding HasControl}" Value="False">
-                                                <Setter Property="ContentTemplate">
-                                                    <Setter.Value>
-                                                        <DataTemplate />
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </DataTrigger>
+                        <!-- ラベル -->
+                        <TextBlock Text="{Binding Label}"
+                                   Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                                   FontSize="10"
+                                   VerticalAlignment="Center" />
 
-                                            <!-- 接続されている場合はコントロールを非表示 -->
-                                            <DataTrigger Binding="{Binding IsConnected}" Value="True">
-                                                <Setter Property="Visibility" Value="Hidden" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ContentControl.Style>
-                            </ContentControl>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                        <!-- 値 -->
+                        <ContentControl Content="{Binding}"
+                                        ContentTemplateSelector="{StaticResource PortControlTemplateSelector}"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Margin="4,0,0,0">
+                            <!-- コントロールがない場合のフォールバック -->
+                            <ContentControl.Style>
+                                <Style TargetType="ContentControl">
+                                    <Style.Triggers>
+                                        <!-- コントロールがない、または接続されている場合は値を表示 -->
+                                        <DataTrigger Binding="{Binding HasControl}" Value="False">
+                                            <Setter Property="ContentTemplate">
+                                                <Setter.Value>
+                                                    <DataTemplate />
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
 
-            <!-- 出力ポート -->
-            <ItemsControl ItemsSource="{Binding OutputPorts}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal"
-                                    HorizontalAlignment="Right"
-                                    Margin="0,2">
-                            <!-- ラベル -->
-                            <TextBlock Text="{Binding Label}"
-                                       Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
-                                       FontSize="10"
-                                       VerticalAlignment="Center" />
+                                        <!-- 接続されている場合はコントロールを非表示 -->
+                                        <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                            <Setter Property="Visibility" Value="Hidden" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ContentControl.Style>
+                        </ContentControl>
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
-                            <!-- ポート端子（右） -->
-                            <view:PortView DataContext="{Binding}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+        <!-- 出力ポート -->
+        <ItemsControl Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding OutputPorts}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                Margin="0,2">
+                        <!-- ラベル -->
+                        <TextBlock Text="{Binding Label}"
+                                   Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                                   FontSize="10"
+                                   VerticalAlignment="Center" />
 
-            <!-- サブグラフボタン -->
-            <Button Content="Open SubGraph"
-                    Command="{Binding OpenSubGraphCommand}"
-                    HorizontalAlignment="Left"
-                    Margin="0,4,0,0"
-                    Visibility="{Binding HasSubGraph, Converter={StaticResource BoolToVisibilityConverter}}" />
-        </StackPanel>
-    </Border>
+                        <!-- ポート端子（右） -->
+                        <view:PortView DataContext="{Binding}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- サブグラフボタン -->
+        <Button Grid.Row="3" Grid.Column="1" Content="Open SubGraph"
+                Command="{Binding OpenSubGraphCommand}"
+                HorizontalAlignment="Left"
+                Margin="0,4,0,0"
+                Visibility="{Binding HasSubGraph, Converter={StaticResource BoolToVisibilityConverter}}" />
+    </Grid>
 </UserControl>

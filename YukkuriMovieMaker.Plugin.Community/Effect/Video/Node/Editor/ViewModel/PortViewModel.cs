@@ -70,7 +70,11 @@ public sealed class PortViewModel : INotifyPropertyChanged
         set => SetField(ref field, value);
     }
 
-    public Point Position { get; set; }
+    public Point Position
+    {
+        get;
+        set => SetField(ref field, value);
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
