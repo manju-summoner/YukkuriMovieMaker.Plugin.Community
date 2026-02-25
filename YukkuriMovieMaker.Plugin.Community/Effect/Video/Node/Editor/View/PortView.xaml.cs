@@ -22,7 +22,7 @@ public partial class PortView
 
         Dispatcher.BeginInvoke(() =>
         {
-            var graphView = FindAncestor<GraphView>(this);
+            var graphView = FindParent<GraphView>(this);
             if (graphView == null)
                 return;
 
@@ -43,8 +43,7 @@ public partial class PortView
 
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        var graph = FindAncestor<GraphView>(this)?.DataContext as GraphViewModel;
-        if (graph == null) return;
+        if (FindParent<GraphView>(this)?.DataContext is not GraphViewModel graph) return;
         if (e.ClickCount == 2)
         {
             graph.DraggingFromPort = null;
@@ -74,7 +73,7 @@ public partial class PortView
     {
         if (DataContext is not PortViewModel target) return;
 
-        var graph = FindAncestor<GraphView>(this)?.DataContext as GraphViewModel;
+        var graph = FindParent<GraphView>(this)?.DataContext as GraphViewModel;
         if (graph == null) return;
         if (graph.DraggingFromPort == null) return;
 
@@ -86,15 +85,17 @@ public partial class PortView
         e.Handled = true;
     }
 
-    private static T? FindAncestor<T>(DependencyObject? obj)
-        where T : DependencyObject
+    private static T? FindParent<T>(DependencyObject? child) where T : DependencyObject
     {
-        while (obj != null)
-        {
-            if (obj is T t) return t;
-            obj = VisualTreeHelper.GetParent(obj);
-        }
+        if (child == null)
+            return null;
+        var parentObject = VisualTreeHelper.GetParent(child);
 
-        return null;
+        return parentObject switch
+        {
+            null => null,
+            T parent => parent,
+            _ => FindParent<T>(parentObject)
+        };
     }
 }

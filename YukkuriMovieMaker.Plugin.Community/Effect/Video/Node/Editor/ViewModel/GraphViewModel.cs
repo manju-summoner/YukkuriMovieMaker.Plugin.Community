@@ -47,7 +47,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged
     public ICommand ConnectPortsCommand { get; }
     public ICommand DisconnectCommand { get; }
 
-    public NodeViewModel? SelectedNode { get; set; }
+    public ObservableCollection<NodeViewModel> SelectedNodes { get; } = [];
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -111,7 +111,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         }
     }
 
-    private void AddNode(Type nodeType)
+    private void AddNode(Type? nodeType)
     {
         if (nodeType == null!) return;
 
@@ -152,14 +152,38 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         _graph.EndEdit();
     }
 
-    private void Disconnect(ConnectionViewModel connection)
+    private void Disconnect(ConnectionViewModel? connection)
     {
+        if (connection == null) return;
         _graph.BeginEdit();
         _graph.Disconnect(
             connection.FromNodeId, connection.FromPortName,
             connection.ToNodeId, connection.ToPortName
         );
         _graph.EndEdit();
+    }
+
+    public void ClearSelection()
+    {
+        foreach (var n in SelectedNodes)
+            n.IsSelected = false;
+
+        SelectedNodes.Clear();
+    }
+
+    public void AddToSelection(NodeViewModel node)
+    {
+        if (SelectedNodes.Contains(node))
+            return;
+
+        SelectedNodes.Add(node);
+        node.IsSelected = true;
+    }
+
+    public void SelectSingle(NodeViewModel node)
+    {
+        ClearSelection();
+        AddToSelection(node);
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

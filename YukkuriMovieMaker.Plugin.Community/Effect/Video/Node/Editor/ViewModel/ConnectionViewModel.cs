@@ -60,10 +60,6 @@ public sealed class ConnectionViewModel : INotifyPropertyChanged
             var c1 = start with { X = start.X + dx };
             var c2 = end with { X = end.X - dx };
 
-            Console.WriteLine(c1);
-            Console.WriteLine(c2);
-            Console.WriteLine();
-
             var fig = new PathFigure { StartPoint = start };
             fig.Segments.Add(new BezierSegment(c1, c2, end, true));
 

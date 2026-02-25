@@ -12,11 +12,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 public sealed class NodeViewModel : INotifyPropertyChanged
 {
     private readonly NodeGraph _graph;
-
     private readonly NodeLogic _nodeLogic;
 
     private double _x;
-
     private double _y;
 
     public NodeViewModel(NodeLogic nodeLogic, NodeGraph graph)
@@ -43,6 +41,12 @@ public sealed class NodeViewModel : INotifyPropertyChanged
         var visualState = graph.GetVisualState(Id);
         _x = visualState?.X ?? 0;
         _y = visualState?.Y ?? 0;
+    }
+
+    public bool IsSelected
+    {
+        get;
+        internal set => SetField(ref field, value);
     }
 
     public string DisplayName { get; }

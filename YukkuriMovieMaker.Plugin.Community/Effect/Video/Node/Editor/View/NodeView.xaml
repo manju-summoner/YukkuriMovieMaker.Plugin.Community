@@ -31,25 +31,40 @@
             <ColumnDefinition MinWidth="5" MaxWidth="5" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="8" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="8" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Grid.RowSpan="4" Grid.Column="1"
-                Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
-                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                BorderThickness="1" />
+        <Border Grid.Row="0" Grid.RowSpan="6" Grid.Column="1"
+                Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="BorderBrush"
+                            Value="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" />
+                    <Setter Property="BorderThickness" Value="1" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                            <Setter Property="BorderBrush"
+                                    Value="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}" />
+                            <Setter Property="BorderThickness" Value="2" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+        </Border>
         <!-- ヘッダー -->
-        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DisplayName}"
+        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DisplayName}"
                    Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
                    FontWeight="Bold"
                    FontSize="12"
-                   Margin="0,0,0,8" />
+                   Margin="12,0,0,8" />
 
         <!-- 入力ポート -->
-        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding InputPorts}">
+        <ItemsControl Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding InputPorts}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" Margin="0,2">
@@ -60,14 +75,15 @@
                         <TextBlock Text="{Binding Label}"
                                    Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
                                    FontSize="10"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,0,0" />
 
                         <!-- 値 -->
                         <ContentControl Content="{Binding}"
                                         ContentTemplateSelector="{StaticResource PortControlTemplateSelector}"
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Center"
-                                        Margin="4,0,0,0">
+                                        Margin="8,0,0,0">
                             <!-- コントロールがない場合のフォールバック -->
                             <ContentControl.Style>
                                 <Style TargetType="ContentControl">
@@ -95,7 +111,7 @@
         </ItemsControl>
 
         <!-- 出力ポート -->
-        <ItemsControl Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding OutputPorts}">
+        <ItemsControl Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding OutputPorts}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal"
@@ -105,7 +121,8 @@
                         <TextBlock Text="{Binding Label}"
                                    Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
                                    FontSize="10"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0" />
 
                         <!-- ポート端子（右） -->
                         <view:PortView DataContext="{Binding}" />
@@ -115,10 +132,10 @@
         </ItemsControl>
 
         <!-- サブグラフボタン -->
-        <Button Grid.Row="3" Grid.Column="1" Content="Open SubGraph"
+        <Button Grid.Row="4" Grid.Column="1" Content="Open SubGraph"
                 Command="{Binding OpenSubGraphCommand}"
                 HorizontalAlignment="Left"
-                Margin="0,4,0,0"
+                Margin="8,4,0, 0"
                 Visibility="{Binding HasSubGraph, Converter={StaticResource BoolToVisibilityConverter}}" />
     </Grid>
 </UserControl>
