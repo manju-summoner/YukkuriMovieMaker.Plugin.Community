@@ -186,6 +186,26 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         AddToSelection(node);
     }
 
+    public void BeginNodeDrag(NodeViewModel origin)
+    {
+        if (!SelectedNodes.Contains(origin)) SelectSingle(origin);
+    }
+
+    public void UpdateNodeDrag(Vector delta)
+    {
+        foreach (var nodeVm in SelectedNodes)
+        {
+            nodeVm.X += delta.X;
+            nodeVm.Y += delta.Y;
+        }
+    }
+
+    public void EndNodeDrag()
+    {
+        foreach (var nodeVm in SelectedNodes)
+            nodeVm.CommitPosition();
+    }
+
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

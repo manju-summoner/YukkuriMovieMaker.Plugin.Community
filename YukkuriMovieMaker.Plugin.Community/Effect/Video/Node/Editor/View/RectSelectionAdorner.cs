@@ -39,8 +39,8 @@ public class RectSelectionAdorner : Adorner
         var rect = new Rect(_start, _end);
 
         dc.DrawRectangle(
-            new SolidColorBrush(Color.FromArgb(40, 0, 120, 215)),
-            new Pen(Brushes.DodgerBlue, 1),
+            new SolidColorBrush(SystemColors.HighlightColor with { A = 40 }),
+            new Pen(SystemColors.HighlightBrush, 0.5),
             rect);
     }
 }

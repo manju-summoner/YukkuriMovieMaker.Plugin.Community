@@ -15,27 +15,21 @@ public partial class NodeView
     private bool _isMouseDown;
     private Point _mouseDownPos;
     private Canvas? _rootCanvas;
-    private double _startX;
-    private double _startY;
 
     public NodeView()
     {
         InitializeComponent();
 
         Loaded += (_, _) => _rootCanvas = FindParent<Canvas>(this);
+        SizeChanged += OnSizeChanged;
     }
 
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (DataContext is not NodeViewModel vm) return;
-
         _isMouseDown = true;
         _isDragging = false;
 
         _mouseDownPos = e.GetPosition(_rootCanvas);
-
-        _startX = vm.X;
-        _startY = vm.Y;
 
         e.Handled = true;
         Focus();
@@ -46,6 +40,7 @@ public partial class NodeView
     {
         if (!_isMouseDown) return;
         if (DataContext is not NodeViewModel vm) return;
+        if (FindParent<GraphView>(this)?.DataContext is not GraphViewModel graphVm) return;
 
         var currentPos = e.GetPosition(_rootCanvas);
         var delta = currentPos - _mouseDownPos;
@@ -53,12 +48,17 @@ public partial class NodeView
         if (!_isDragging)
         {
             if (Math.Abs(delta.X) > DragThreshold || Math.Abs(delta.Y) > DragThreshold)
+            {
                 _isDragging = true;
+
+                graphVm.BeginNodeDrag(vm);
+            }
             else return;
         }
 
-        vm.X = _startX + delta.X;
-        vm.Y = _startY + delta.Y;
+        graphVm.UpdateNodeDrag(delta);
+
+        _mouseDownPos = currentPos;
 
         e.Handled = true;
     }
@@ -71,19 +71,45 @@ public partial class NodeView
 
         if (_isDragging)
         {
-            if (DataContext is NodeViewModel vm)
-                vm.CommitPosition();
+            if (FindParent<GraphView>(this)?.DataContext is GraphViewModel graphVm)
+                graphVm.EndNodeDrag();
         }
         else
         {
-            if (DataContext is NodeViewModel vm && FindParent<GraphView>(this)?.DataContext is GraphViewModel graphVm)
-                graphVm.SelectSingle(vm);
+            if (DataContext is NodeViewModel vm &&
+                FindParent<GraphView>(this)?.DataContext is GraphViewModel graphVm)
+            {
+                if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                {
+                    if (graphVm.SelectedNodes.Contains(vm))
+                    {
+                        graphVm.SelectedNodes.Remove(vm);
+                        vm.IsSelected = false;
+                    }
+                    else
+                    {
+                        graphVm.AddToSelection(vm);
+                    }
+                }
+                else
+                {
+                    graphVm.SelectSingle(vm);
+                }
+            }
         }
 
         _isMouseDown = false;
         _isDragging = false;
-
         e.Handled = true;
+    }
+
+    private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (DataContext is NodeViewModel vm)
+        {
+            vm.Width = ActualWidth;
+            vm.Height = ActualHeight;
+        }
     }
 
     private static T? FindParent<T>(DependencyObject? child) where T : DependencyObject

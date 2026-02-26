@@ -87,6 +87,18 @@ public sealed class NodeViewModel : INotifyPropertyChanged
         }
     }
 
+    public double Width
+    {
+        get;
+        internal set => SetField(ref field, value);
+    }
+
+    public double Height
+    {
+        get;
+        internal set => SetField(ref field, value);
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public void CommitPosition()

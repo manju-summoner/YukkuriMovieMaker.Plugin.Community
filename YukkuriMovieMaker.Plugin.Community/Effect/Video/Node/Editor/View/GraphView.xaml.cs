@@ -99,7 +99,7 @@ public partial class GraphView
 
             foreach (var node in vm.Nodes)
             {
-                var nodeRect = new Rect(node.X, node.Y, 220, 120);
+                var nodeRect = new Rect(node.X, node.Y, node.Width, node.Height);
 
                 if (rect.IntersectsWith(nodeRect))
                     vm.AddToSelection(node);
