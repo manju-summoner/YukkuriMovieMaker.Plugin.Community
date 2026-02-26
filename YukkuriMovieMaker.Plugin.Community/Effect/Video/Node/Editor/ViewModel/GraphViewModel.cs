@@ -171,6 +171,60 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         SelectedNodes.Clear();
     }
 
+    public void ApplyRectSelection(Rect rect, bool additive)
+    {
+        if (!additive)
+            ClearSelection();
+
+        foreach (var node in Nodes)
+        {
+            var nodeRect = new Rect(node.X, node.Y, node.Width, node.Height);
+
+            if (rect.IntersectsWith(nodeRect))
+                AddToSelection(node);
+        }
+    }
+
+    public void ApplyLassoSelection(IReadOnlyList<Point> polygon, bool additive)
+    {
+        if (polygon.Count < 3) return;
+
+        if (!additive)
+            ClearSelection();
+
+        foreach (var node in Nodes)
+        {
+            var center = new Point(
+                node.X + node.Width / 2,
+                node.Y + node.Height / 2);
+
+            if (IsPointInPolygon(center))
+                AddToSelection(node);
+        }
+
+        return;
+
+        bool IsPointInPolygon(Point p)
+        {
+            var inside = false;
+
+            for (int i = 0, j = polygon.Count - 1; i < polygon.Count; j = i++)
+            {
+                var pi = polygon[i];
+                var pj = polygon[j];
+
+                var intersect =
+                    pi.Y > p.Y != pj.Y > p.Y &&
+                    p.X < (pj.X - pi.X) * (p.Y - pi.Y) / (pj.Y - pi.Y) + pi.X;
+
+                if (intersect)
+                    inside = !inside;
+            }
+
+            return inside;
+        }
+    }
+
     public void AddToSelection(NodeViewModel node)
     {
         if (SelectedNodes.Contains(node))

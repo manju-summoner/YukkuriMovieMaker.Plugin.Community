@@ -1,10 +1,9 @@
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Media;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View;
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View.Adorners;
 
-public class RectSelectionAdorner : Adorner
+public class RectSelectionAdorner : SelectionAdornerBase
 {
     private Point _end;
     private Point _start;
@@ -26,7 +25,7 @@ public class RectSelectionAdorner : Adorner
         InvalidateVisual();
     }
 
-    public void Clear()
+    public override void Clear()
     {
         _visible = false;
         InvalidateVisual();
