@@ -25,7 +25,7 @@ public static class ControlRegistrations
         {
             var numberAttr = (NumberPortControlAttribute)attr;
 
-            var wrapper = new NumberPortWrapper
+            var wrapper = new NumberPort
             {
                 Min = numberAttr.Min,
                 Max = numberAttr.Max,
@@ -41,7 +41,7 @@ public static class ControlRegistrations
                 UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             };
 
-            wrapper.SetBinding(NumberPortWrapper.ValueProperty, binding);
+            wrapper.SetBinding(NumberPort.ValueProperty, binding);
 
             return wrapper;
         });

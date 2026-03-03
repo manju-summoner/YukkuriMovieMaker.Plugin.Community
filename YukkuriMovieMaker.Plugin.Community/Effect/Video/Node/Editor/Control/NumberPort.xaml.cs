@@ -11,34 +11,64 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
 /// <summary>
 ///     Interaction logic for NumberPort.xaml
 /// </summary>
-public sealed partial class NumberPort
+public sealed partial class NumberPort : INotifyPropertyChanged
 {
-    private readonly float _def;
-    private int _dig;
+    public static readonly DependencyProperty ValueProperty =
+        DependencyProperty.Register(
+            nameof(Value),
+            typeof(float),
+            typeof(NumberPort),
+            new FrameworkPropertyMetadata(
+                0.0f,
+                FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnValueChanged));
+
+    public static readonly DependencyProperty MinProperty =
+        DependencyProperty.Register(
+            nameof(Min),
+            typeof(float),
+            typeof(NumberPort),
+            new PropertyMetadata(float.NaN, OnConfigChanged));
+
+    public static readonly DependencyProperty MaxProperty =
+        DependencyProperty.Register(
+            nameof(Max),
+            typeof(float),
+            typeof(NumberPort),
+            new PropertyMetadata(float.NaN, OnConfigChanged));
+
+    public static readonly DependencyProperty DigitsProperty =
+        DependencyProperty.Register(
+            nameof(Digits),
+            typeof(int),
+            typeof(NumberPort),
+            new PropertyMetadata(2, OnConfigChanged));
+
+    public static readonly DependencyProperty UnitProperty =
+        DependencyProperty.Register(
+            nameof(Unit),
+            typeof(string),
+            typeof(NumberPort),
+            new PropertyMetadata("", OnUnitChanged));
+
+    public static readonly DependencyProperty DefaultProperty =
+        DependencyProperty.Register(
+            nameof(Default),
+            typeof(float),
+            typeof(NumberPort),
+            new PropertyMetadata(0f));
 
     private bool _isClicking;
     private bool _isDragging;
     private bool _isEditing;
-    private float _max;
-    private float _min;
     private Point _startPoint;
-    private string _text = "";
 
-    private float _value;
-
-    public NumberPort(float def, float value, float min, float max, int dig, string unit)
+    public NumberPort()
     {
         InitializeComponent();
-
-        _def = def;
-        _value = value;
-        _min = min;
-        _max = max;
-        _dig = dig;
-        Text = Math.Round(_value, _dig).ToString("F" + _dig);
-        Unit = unit;
-
         DataContext = this;
+
+        Loaded += (_, _) => { Text = Value.ToString("F" + Digits); };
     }
 
     public bool IsFocusable
@@ -53,67 +83,82 @@ public sealed partial class NumberPort
 
     public string Text
     {
-        get => _text;
-        set
-        {
-            _text = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string Unit
-    {
-        get => field;
+        get;
         set
         {
             field = value;
             OnPropertyChanged();
         }
-    }
+    } = "";
 
-    public object? Value
+    public float Value
     {
-        get => _value;
-        set => Update((float?)value ?? _def);
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-
-    public void UpdateValueSilently(object? value)
-    {
-        try
+        get => (float)GetValue(ValueProperty);
+        set
         {
-            var floatValue = (float?)value ?? _def;
-            var v = floatValue;
-            if (!float.IsNaN(_min) && floatValue < _min) v = _min;
-            if (!float.IsNaN(_max) && floatValue > _max) v = _max;
-            _value = (float)Math.Round(v, _dig);
-
-            _text = _value.ToString("F" + _dig);
-
-            OnPropertyChanged(nameof(Text));
+            SetValue(ValueProperty, value);
+            Text = Value.ToString("F" + Digits);
         }
-        catch
+    }
+
+    public float Min
+    {
+        get => (float)GetValue(MinProperty);
+        init => SetValue(MinProperty, value);
+    }
+
+    public float Max
+    {
+        get => (float)GetValue(MaxProperty);
+        init => SetValue(MaxProperty, value);
+    }
+
+    public int Digits
+    {
+        get => (int)GetValue(DigitsProperty);
+        init => SetValue(DigitsProperty, value);
+    }
+
+    public string Unit
+    {
+        get => (string)GetValue(UnitProperty);
+        init => SetValue(UnitProperty, value);
+    }
+
+    public float Default
+    {
+        get => (float)GetValue(DefaultProperty);
+        init
         {
+            SetValue(DefaultProperty, value);
             Value = value;
         }
     }
 
-    public void ChangeSetting(float? min, float? max, int? digits, string? unit)
-    {
-        if (min != null)
-            _min = (float)min;
-        if (max != null)
-            _max = (float)max;
-        if (digits != null)
-        {
-            _dig = (int)digits;
-            Text = Math.Round(_value, _dig).ToString("F" + _dig);
-        }
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-        if (unit != null)
-            Unit = unit;
+    private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (NumberPort)d;
+        control.ApplyExternalValue(e.NewValue);
+    }
+
+    private static void OnConfigChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (NumberPort)d;
+        control.Update(control.Value);
+    }
+
+    private static void OnUnitChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (NumberPort)d;
+        control.OnPropertyChanged(nameof(Unit));
+    }
+
+    private void ApplyExternalValue(object? value)
+    {
+        var v = (float?)value ?? Default;
+        Update(v);
     }
 
     [DllImport("User32.dll")]
@@ -128,7 +173,7 @@ public sealed partial class NumberPort
     {
         float v;
         if (Text == "")
-            v = _def;
+            v = Default;
         else
             try
             {
@@ -136,7 +181,7 @@ public sealed partial class NumberPort
             }
             catch (Exception)
             {
-                v = _value;
+                v = Value;
             }
 
         Update(v);
@@ -145,20 +190,12 @@ public sealed partial class NumberPort
     private void Update(float value)
     {
         var v = value;
-        if (!float.IsNaN(_min) && value < _min) v = _min;
-        if (!float.IsNaN(_max) && value > _max) v = _max;
-        var newValue = (float)Math.Round(v, _dig);
-        if (Math.Abs(_value - newValue) > 1e-8)
+        if (!float.IsNaN(Min) && value < Min) v = Min;
+        if (!float.IsNaN(Max) && value > Max) v = Max;
+        var newValue = (float)Math.Round(v, Digits);
+        if (Math.Abs(Value - newValue) > 1e-8)
         {
-            _value = newValue;
-            _text = _value.ToString("F" + _dig);
-            OnPropertyChanged(nameof(Text));
-            OnPropertyChanged(nameof(Value));
-        }
-        else
-        {
-            _text = _value.ToString("F" + _dig);
-            OnPropertyChanged(nameof(Text));
+            Value = newValue;
         }
 
         Keyboard.ClearFocus();
@@ -198,7 +235,7 @@ public sealed partial class NumberPort
                 _isDragging = true;
 
                 const float sensitivity = 0.01f;
-                Update(_value + (float)delta * sensitivity);
+                Update(Value + (float)delta * sensitivity);
                 SetCursorPos((int)_startPoint.X, (int)_startPoint.Y);
             }
 
