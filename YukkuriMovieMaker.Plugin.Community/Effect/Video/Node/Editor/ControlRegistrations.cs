@@ -34,7 +34,7 @@ public static class ControlRegistrations
                 Default = numberAttr.Default
             };
 
-            var binding = new Binding("CurrentValue")
+            var binding = new Binding(nameof(NumberPort.Value))
             {
                 Source = port,
                 Mode = BindingMode.TwoWay,
@@ -42,6 +42,113 @@ public static class ControlRegistrations
             };
 
             wrapper.SetBinding(NumberPort.ValueProperty, binding);
+
+            return wrapper;
+        });
+        ControlRegistry.Register(typeof(TextPort), (attr, port) =>
+        {
+            var textAttr = (TextPortControlAttribute)attr;
+
+            var wrapper = new TextPort
+            {
+                Default = textAttr.Default
+            };
+
+            var binding = new Binding(nameof(TextPort.Value))
+            {
+                Source = port,
+                Mode = BindingMode.TwoWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+
+            wrapper.SetBinding(TextPort.ValueProperty, binding);
+
+            return wrapper;
+        });
+        ControlRegistry.Register(typeof(BoolPort), (attr, port) =>
+        {
+            var boolAttr = (BoolPortControlAttribute)attr;
+
+            var wrapper = new BoolPort();
+
+            var binding = new Binding(nameof(BoolPort.Value))
+            {
+                Source = port,
+                Mode = BindingMode.TwoWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+
+            wrapper.SetBinding(BoolPort.ValueProperty, binding);
+
+            if (boolAttr.Default)
+                port.CurrentValue = boolAttr.Default;
+
+            return wrapper;
+        });
+        ControlRegistry.Register(typeof(EnumPort), (attr, port) =>
+        {
+            var enumAttr = (EnumPortControlAttribute)attr;
+
+            var wrapper = new EnumPort
+            {
+                Items = enumAttr.Items,
+                IsEditable = enumAttr.IsEditable
+            };
+
+            var binding = new Binding(nameof(EnumPort.Value))
+            {
+                Source = port,
+                Mode = BindingMode.TwoWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+
+            wrapper.SetBinding(EnumPort.ValueProperty, binding);
+
+            port.CurrentValue ??= enumAttr.Default;
+
+            return wrapper;
+        });
+        ControlRegistry.Register(typeof(FilePathPort), (attr, port) =>
+        {
+            var fileAttr = (FilePathPortControlAttribute)attr;
+
+            var wrapper = new FilePathPort
+            {
+                AllowExtension = fileAttr.AllowExtension
+            };
+
+            var binding = new Binding(nameof(FilePathPort.Value))
+            {
+                Source = port,
+                Mode = BindingMode.TwoWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+
+            wrapper.SetBinding(FilePathPort.ValueProperty, binding);
+
+            port.CurrentValue ??= fileAttr.Default;
+
+            return wrapper;
+        });
+        ControlRegistry.Register(typeof(ColorPort), (attr, port) =>
+        {
+            var colorAttr = (ColorPortControlAttribute)attr;
+
+            var wrapper = new ColorPort
+            {
+                DefaultColor = colorAttr.DefaultColor
+            };
+
+            var binding = new Binding(nameof(ColorPort.SelectedColor))
+            {
+                Source = port,
+                Mode = BindingMode.TwoWay,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+
+            wrapper.SetBinding(ColorPort.SelectedColorProperty, binding);
+
+            port.CurrentValue ??= colorAttr.DefaultColor;
 
             return wrapper;
         });
