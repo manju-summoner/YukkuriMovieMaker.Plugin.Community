@@ -36,7 +36,7 @@ public static class ControlRegistrations
 
             var binding = new Binding(nameof(NumberPort.Value))
             {
-                Source = port,
+                Source = port.CurrentValue,
                 Mode = BindingMode.TwoWay,
                 UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             };
@@ -56,7 +56,7 @@ public static class ControlRegistrations
 
             var binding = new Binding(nameof(TextPort.Value))
             {
-                Source = port,
+                Source = port.CurrentValue,
                 Mode = BindingMode.TwoWay,
                 UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             };
@@ -73,7 +73,7 @@ public static class ControlRegistrations
 
             var binding = new Binding(nameof(BoolPort.Value))
             {
-                Source = port,
+                Source = port.CurrentValue,
                 Mode = BindingMode.TwoWay,
                 UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             };
@@ -97,7 +97,7 @@ public static class ControlRegistrations
 
             var binding = new Binding(nameof(EnumPort.Value))
             {
-                Source = port,
+                Source = port.CurrentValue,
                 Mode = BindingMode.TwoWay,
                 UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             };
@@ -119,7 +119,7 @@ public static class ControlRegistrations
 
             var binding = new Binding(nameof(FilePathPort.Value))
             {
-                Source = port,
+                Source = port.CurrentValue,
                 Mode = BindingMode.TwoWay,
                 UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             };
@@ -141,7 +141,7 @@ public static class ControlRegistrations
 
             var binding = new Binding(nameof(ColorPort.SelectedColor))
             {
-                Source = port,
+                Source = port.CurrentValue,
                 Mode = BindingMode.TwoWay,
                 UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
             };
