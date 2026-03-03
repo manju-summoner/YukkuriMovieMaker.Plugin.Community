@@ -14,19 +14,16 @@ public delegate FrameworkElement ControlFactory(PropertyControlBaseAttribute att
 /// </summary>
 public static class ControlRegistry
 {
-    private static readonly Dictionary<string, ControlFactory> Factories = new();
+    private static readonly Dictionary<Type, ControlFactory> Factories = new();
     private static readonly Lock Lock = new();
 
     /// <summary>
     ///     コントロールファクトリを登録
     /// </summary>
-    public static void Register(string controlType, ControlFactory factory)
+    public static void Register(Type controlType, ControlFactory factory)
     {
-        if (string.IsNullOrEmpty(controlType))
-            throw new ArgumentNullException(nameof(controlType));
-
-        if (factory == null)
-            throw new ArgumentNullException(nameof(factory));
+        ArgumentNullException.ThrowIfNull(controlType);
+        ArgumentNullException.ThrowIfNull(factory);
 
         lock (Lock)
         {
@@ -37,7 +34,7 @@ public static class ControlRegistry
     /// <summary>
     ///     コントロールファクトリを登録解除
     /// </summary>
-    public static void Unregister(string controlType)
+    public static void Unregister(Type controlType)
     {
         lock (Lock)
         {
@@ -77,7 +74,7 @@ public static class ControlRegistry
     /// <summary>
     ///     指定されたコントロールタイプが登録されているか確認
     /// </summary>
-    public static bool IsRegistered(string controlType)
+    public static bool IsRegistered(Type controlType)
     {
         lock (Lock)
         {
@@ -88,7 +85,7 @@ public static class ControlRegistry
     /// <summary>
     ///     登録されているすべてのコントロールタイプを取得
     /// </summary>
-    public static IEnumerable<string> GetRegisteredTypes()
+    public static IEnumerable<Type> GetRegisteredTypes()
     {
         lock (Lock)
         {

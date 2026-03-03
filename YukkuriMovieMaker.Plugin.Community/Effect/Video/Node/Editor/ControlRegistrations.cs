@@ -21,7 +21,7 @@ public static class ControlRegistrations
 
         _initialized = true;
 
-        ControlRegistry.Register("NumberPort", (attr, port) =>
+        ControlRegistry.Register(typeof(NumberPort), (attr, port) =>
         {
             var numberAttr = (NumberPortControlAttribute)attr;
 

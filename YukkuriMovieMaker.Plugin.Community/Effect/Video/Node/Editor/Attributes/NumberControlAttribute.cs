@@ -1,8 +1,10 @@
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
+
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 
 public class NumberPortControlAttribute : PropertyControlBaseAttribute
 {
-    public override string ControlType => "NumberPort";
+    public override Type ControlType => typeof(NumberPort);
 
     /// <summary>
     ///     最小値
