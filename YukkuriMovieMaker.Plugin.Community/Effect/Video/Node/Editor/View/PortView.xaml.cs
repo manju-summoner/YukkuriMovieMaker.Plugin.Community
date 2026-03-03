@@ -37,7 +37,7 @@ public partial class PortView
             var center = transform.Transform(
                 new Point(ActualWidth / 2, ActualHeight / 2));
 
-            vm.Position = center;
+            vm.Position = ((GraphViewModel)graphView.DataContext).TransformToCanvas(center);
         }, DispatcherPriority.Render);
     }
 

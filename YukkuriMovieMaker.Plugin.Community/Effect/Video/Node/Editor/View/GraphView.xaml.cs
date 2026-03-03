@@ -10,7 +10,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View;
 public partial class GraphView
 {
     private ConnectionAdorner? _connectionAdorner;
+
+    private bool _isPanning;
     private bool _isSelecting;
+    private Point _panStart;
     private SelectionAdornerBase? _selectionAdorner;
     private Point _selectionStart;
 
@@ -91,7 +94,7 @@ public partial class GraphView
         if (vm.DraggingFromPort != null) return;
 
         _isSelecting = true;
-        _selectionStart = e.GetPosition(RootGrid);
+        _selectionStart = e.GetPosition(this);
 
         vm.ClearSelection();
         if (Mode is GraphControlMode.RectSelection && _selectionAdorner is RectSelectionAdorner rectSelectionAdorner)
@@ -107,16 +110,28 @@ public partial class GraphView
     {
         if (DataContext is not GraphViewModel vm) return;
 
+        if (_isPanning)
+        {
+            var current = e.GetPosition(RootGrid);
+            var delta = current - _panStart;
+
+            vm.PanX += delta.X;
+            vm.PanY += delta.Y;
+
+            _panStart = current;
+            return;
+        }
+
         if (vm.DraggingFromPort != null)
         {
-            vm.TemporaryEndPoint = e.GetPosition(RootGrid);
+            vm.TemporaryEndPoint = e.GetPosition(this);
             _connectionAdorner?.InvalidateVisual();
             return;
         }
 
         if (_isSelecting)
         {
-            var current = e.GetPosition(RootGrid);
+            var current = e.GetPosition(this);
             if (Mode is GraphControlMode.RectSelection &&
                 _selectionAdorner is RectSelectionAdorner rectSelectionAdorner)
                 rectSelectionAdorner.Update(_selectionStart, current);
@@ -157,6 +172,52 @@ public partial class GraphView
 
             _selectionAdorner?.Clear();
         }
+    }
+
+    private void OnMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (DataContext is not GraphViewModel vm) return;
+
+        var mousePos = e.GetPosition(RootGrid);
+        var oldZoom = vm.Zoom;
+
+        var zoomFactor = Keyboard.Modifiers.HasFlag(ModifierKeys.Control) ? 1.05 : 1.1;
+        var delta = e.Delta > 0 ? zoomFactor : 1.0 / zoomFactor;
+        var newZoom = oldZoom * delta;
+
+        if (newZoom < 0.1) newZoom = 0.1;
+        if (newZoom > 5.0) newZoom = 5.0;
+
+        vm.Zoom = newZoom;
+
+        vm.PanX = mousePos.X - (mousePos.X - vm.PanX) * (newZoom / oldZoom);
+        vm.PanY = mousePos.Y - (mousePos.Y - vm.PanY) * (newZoom / oldZoom);
+
+        e.Handled = true;
+    }
+
+    private void OnMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Middle) return;
+
+        _isPanning = true;
+        _panStart = e.GetPosition(RootGrid);
+        CaptureMouse();
+
+        e.Handled = true;
+    }
+
+    private void OnMouseUp(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Middle) return;
+
+        if (_isPanning)
+        {
+            _isPanning = false;
+            ReleaseMouseCapture();
+        }
+
+        e.Handled = true;
     }
 }
 

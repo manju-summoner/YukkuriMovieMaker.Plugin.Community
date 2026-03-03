@@ -23,8 +23,8 @@ public class ConnectionAdorner : Adorner
 
         if (vm is { DraggingFromPort: not null, TemporaryEndPoint: not null })
         {
-            var start = vm.DraggingFromPort.Position;
-            var end = vm.TemporaryEndPoint.Value;
+            var start = vm.TransformToScreen(vm.DraggingFromPort.Position);
+            var end = vm.TransformToScreen(vm.TemporaryEndPoint.Value);
             dc.DrawLine(new Pen(Brushes.Orange, 2), start, end);
         }
     }

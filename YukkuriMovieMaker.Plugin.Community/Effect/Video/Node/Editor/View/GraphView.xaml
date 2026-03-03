@@ -10,53 +10,64 @@
              d:DataContext="{d:DesignInstance viewModel:GraphViewModel}"
              MouseLeftButtonDown="OnMouseLeftButtonDown"
              MouseMove="OnMouseMove"
-             MouseLeftButtonUp="OnMouseLeftButtonUp">
+             MouseLeftButtonUp="OnMouseLeftButtonUp"
+             MouseWheel="OnMouseWheel"
+             MouseDown="OnMouseDown"
+             MouseUp="OnMouseUp">
 
     <Grid x:Name="RootGrid" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
-        <ItemsControl ItemsSource="{Binding Connections, UpdateSourceTrigger=PropertyChanged}"
-                      IsHitTestVisible="False">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Canvas />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemContainerStyle>
-                <Style TargetType="ContentPresenter">
-                    <Setter Property="Canvas.Left" Value="0" />
-                    <Setter Property="Canvas.Top" Value="0" />
-                    <Setter Property="Width"
-                            Value="{Binding ElementName=RootGrid, Path=ActualWidth}" />
-                    <Setter Property="Height"
-                            Value="{Binding ElementName=RootGrid, Path=ActualHeight}" />
-                </Style>
-            </ItemsControl.ItemContainerStyle>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Path Stroke="LightGray"
-                          StrokeThickness="2"
-                          Data="{Binding Geometry}" />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-        <ItemsControl ItemsSource="{Binding Nodes}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Canvas ClipToBounds="True" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+        <Canvas>
+            <Canvas.LayoutTransform>
+                <ScaleTransform ScaleX="{Binding Zoom}" ScaleY="{Binding Zoom}" />
+            </Canvas.LayoutTransform>
+            <Canvas.RenderTransform>
+                <TranslateTransform X="{Binding PanX}" Y="{Binding PanY}" />
+            </Canvas.RenderTransform>
+            <ItemsControl ItemsSource="{Binding Connections, UpdateSourceTrigger=PropertyChanged}"
+                          IsHitTestVisible="False">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="Canvas.Left" Value="0" />
+                        <Setter Property="Canvas.Top" Value="0" />
+                        <Setter Property="Width"
+                                Value="{Binding ElementName=RootGrid, Path=ActualWidth}" />
+                        <Setter Property="Height"
+                                Value="{Binding ElementName=RootGrid, Path=ActualHeight}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Path Stroke="LightGray"
+                              StrokeThickness="2"
+                              Data="{Binding Geometry}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ItemsControl ItemsSource="{Binding Nodes}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
 
-            <ItemsControl.ItemContainerStyle>
-                <Style TargetType="ContentPresenter">
-                    <Setter Property="Canvas.Left" Value="{Binding X}" />
-                    <Setter Property="Canvas.Top" Value="{Binding Y}" />
-                </Style>
-            </ItemsControl.ItemContainerStyle>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="Canvas.Left" Value="{Binding X}" />
+                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <local:NodeView />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <local:NodeView />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Canvas>
     </Grid>
 </UserControl>

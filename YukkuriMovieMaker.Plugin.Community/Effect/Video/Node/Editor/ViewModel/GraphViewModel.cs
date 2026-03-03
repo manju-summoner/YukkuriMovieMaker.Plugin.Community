@@ -49,6 +49,24 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 
     public ObservableCollection<NodeViewModel> SelectedNodes { get; } = [];
 
+    public double Zoom
+    {
+        get;
+        set => SetField(ref field, value);
+    } = 1.0;
+
+    public double PanX
+    {
+        get;
+        set => SetField(ref field, value);
+    } = 0.0;
+
+    public double PanY
+    {
+        get;
+        set => SetField(ref field, value);
+    } = 0.0;
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private void UpdatePortValue(ValueChangedEventArgs e)
@@ -178,7 +196,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 
         foreach (var node in Nodes)
         {
-            var nodeRect = new Rect(node.X, node.Y, node.Width, node.Height);
+            var nodeRect = new Rect(node.X * Zoom + PanX, node.Y * Zoom + PanY, node.Width * Zoom, node.Height * Zoom);
 
             if (rect.IntersectsWith(nodeRect))
                 AddToSelection(node);
@@ -194,9 +212,9 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 
         foreach (var node in Nodes)
         {
-            var center = new Point(
+            var center = TransformToScreen(new Point(
                 node.X + node.Width / 2,
-                node.Y + node.Height / 2);
+                node.Y + node.Height / 2));
 
             if (IsPointInPolygon(center))
                 AddToSelection(node);
@@ -258,6 +276,22 @@ public sealed class GraphViewModel : INotifyPropertyChanged
     {
         foreach (var nodeVm in SelectedNodes)
             nodeVm.CommitPosition();
+    }
+
+    public Point TransformToCanvas(Point screenPoint)
+    {
+        return new Point(
+            (screenPoint.X - PanX) / Zoom,
+            (screenPoint.Y - PanY) / Zoom
+        );
+    }
+
+    public Point TransformToScreen(Point canvasPoint)
+    {
+        return new Point(
+            canvasPoint.X * Zoom + PanX,
+            canvasPoint.Y * Zoom + PanY
+        );
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
