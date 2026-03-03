@@ -56,7 +56,12 @@ public sealed class PortViewModel : INotifyPropertyChanged
                 _currentValue = value;
                 OnPropertyChanged();
 
-                if (Direction == PortDirection.Input) _graph.SetInputValue(NodeId, Name, value);
+                if (Direction == PortDirection.Input)
+                {
+                    _graph.BeginEdit();
+                    _graph.SetInputValue(NodeId, Name, value);
+                    _graph.EndEdit();
+                }
             }
         }
     }

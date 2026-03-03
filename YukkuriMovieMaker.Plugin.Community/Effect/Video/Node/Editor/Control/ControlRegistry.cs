@@ -1,13 +1,12 @@
 using System.Windows;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
 
 /// <summary>
 ///     コントロール生成ファクトリのデリゲート
 /// </summary>
-public delegate FrameworkElement ControlFactory(PropertyControlBaseAttribute attribute, PortViewModel port);
+public delegate DataTemplate ControlFactory(PropertyControlBaseAttribute attribute);
 
 /// <summary>
 ///     属性とコントロールのマッピングを管理
@@ -56,16 +55,14 @@ public static class ControlRegistry
     /// <summary>
     ///     属性からコントロールを作成
     /// </summary>
-    public static FrameworkElement? CreateControl(
-        PropertyControlBaseAttribute attribute,
-        PortViewModel port)
+    public static DataTemplate? CreateControl(PropertyControlBaseAttribute attribute)
     {
-        if (attribute == null! || port == null!)
+        if (attribute == null!)
             return null;
 
         lock (Lock)
         {
-            if (Factories.TryGetValue(attribute.ControlType, out var factory)) return factory(attribute, port);
+            if (Factories.TryGetValue(attribute.ControlType, out var factory)) return factory(attribute);
         }
 
         return null;

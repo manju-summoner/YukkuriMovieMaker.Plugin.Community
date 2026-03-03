@@ -18,24 +18,6 @@ public class PortControlTemplateSelector : DataTemplateSelector
         if (!port.HasControl || port.ControlAttribute == null)
             return null;
 
-        var control = ControlRegistry.CreateControl(port.ControlAttribute, port);
-        if (control == null)
-            return null;
-
-        return CreateDataTemplate(control, port);
-    }
-
-    /// <summary>
-    ///     コントロールをラップするDataTemplateを生成
-    /// </summary>
-    private DataTemplate CreateDataTemplate(FrameworkElement control, PortViewModel port)
-    {
-        var template = new DataTemplate();
-
-        var factory = new FrameworkElementFactory(control.GetType());
-        factory.SetValue(FrameworkElement.DataContextProperty, port);
-
-        template.VisualTree = factory;
-        return template;
+        return ControlRegistry.CreateControl(port.ControlAttribute);
     }
 }

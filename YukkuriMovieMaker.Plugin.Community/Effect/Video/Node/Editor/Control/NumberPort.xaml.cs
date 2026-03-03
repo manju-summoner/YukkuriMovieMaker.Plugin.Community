@@ -62,11 +62,11 @@ public sealed partial class NumberPort : INotifyPropertyChanged
     private bool _isDragging;
     private bool _isEditing;
     private Point _startPoint;
+    private float _value;
 
     public NumberPort()
     {
         InitializeComponent();
-        DataContext = this;
 
         Loaded += (_, _) => { Text = Value.ToString("F" + Digits); };
     }
@@ -187,7 +187,7 @@ public sealed partial class NumberPort : INotifyPropertyChanged
         Update(v);
     }
 
-    private void Update(float value)
+    private void Update(float value, bool isSet = true)
     {
         var v = value;
         if (!float.IsNaN(Min) && value < Min) v = Min;
@@ -195,7 +195,8 @@ public sealed partial class NumberPort : INotifyPropertyChanged
         var newValue = (float)Math.Round(v, Digits);
         if (Math.Abs(Value - newValue) > 1e-8)
         {
-            Value = newValue;
+            if (isSet) Value = newValue;
+            else _value = newValue;
         }
 
         Keyboard.ClearFocus();
@@ -235,7 +236,7 @@ public sealed partial class NumberPort : INotifyPropertyChanged
                 _isDragging = true;
 
                 const float sensitivity = 0.01f;
-                Update(Value + (float)delta * sensitivity);
+                Update(Value + (float)delta * sensitivity, false);
                 SetCursorPos((int)_startPoint.X, (int)_startPoint.Y);
             }
 
@@ -259,6 +260,7 @@ public sealed partial class NumberPort : INotifyPropertyChanged
         if (_isDragging)
         {
             _isDragging = false;
+            Update(_value);
             SetCursorPos((int)_startPoint.X, (int)_startPoint.Y);
             e.Handled = true;
         }

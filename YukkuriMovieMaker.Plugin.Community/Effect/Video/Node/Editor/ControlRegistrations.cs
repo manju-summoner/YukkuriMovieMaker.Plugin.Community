@@ -1,6 +1,9 @@
+using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor;
 
@@ -21,136 +24,130 @@ public static class ControlRegistrations
 
         _initialized = true;
 
-        ControlRegistry.Register(typeof(NumberPort), (attr, port) =>
+        ControlRegistry.Register(typeof(NumberPort), attr =>
         {
             var numberAttr = (NumberPortControlAttribute)attr;
+            var template = new DataTemplate();
+            var factory = new FrameworkElementFactory(typeof(NumberPort));
 
-            var wrapper = new NumberPort
-            {
-                Min = numberAttr.Min,
-                Max = numberAttr.Max,
-                Digits = numberAttr.Digits,
-                Unit = numberAttr.Unit,
-                Default = numberAttr.Default
-            };
+            factory.SetValue(NumberPort.MinProperty, numberAttr.Min);
+            factory.SetValue(NumberPort.MaxProperty, numberAttr.Max);
+            factory.SetValue(NumberPort.DigitsProperty, numberAttr.Digits);
+            factory.SetValue(NumberPort.UnitProperty, numberAttr.Unit);
+            factory.SetValue(NumberPort.DefaultProperty, numberAttr.Default);
 
-            var binding = new Binding(nameof(NumberPort.Value))
+            var binding = new Binding(nameof(PortViewModel.CurrentValue))
             {
-                Source = port.CurrentValue,
                 Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                TargetNullValue = 0f,
+                FallbackValue = 0f
             };
+            factory.SetBinding(NumberPort.ValueProperty, binding);
 
-            wrapper.SetBinding(NumberPort.ValueProperty, binding);
-
-            return wrapper;
+            template.VisualTree = factory;
+            return template;
         });
-        ControlRegistry.Register(typeof(TextPort), (attr, port) =>
+        ControlRegistry.Register(typeof(TextPort), attr =>
         {
             var textAttr = (TextPortControlAttribute)attr;
+            var template = new DataTemplate();
+            var factory = new FrameworkElementFactory(typeof(TextPort));
 
-            var wrapper = new TextPort
-            {
-                Default = textAttr.Default
-            };
+            factory.SetValue(TextPort.DefaultProperty, textAttr.Default);
 
-            var binding = new Binding(nameof(TextPort.Value))
+            var binding = new Binding(nameof(PortViewModel.CurrentValue))
             {
-                Source = port.CurrentValue,
                 Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                TargetNullValue = "",
+                FallbackValue = ""
             };
+            factory.SetBinding(TextPort.ValueProperty, binding);
 
-            wrapper.SetBinding(TextPort.ValueProperty, binding);
-
-            return wrapper;
+            template.VisualTree = factory;
+            return template;
         });
-        ControlRegistry.Register(typeof(BoolPort), (attr, port) =>
+        ControlRegistry.Register(typeof(BoolPort), attr =>
         {
             var boolAttr = (BoolPortControlAttribute)attr;
+            var template = new DataTemplate();
+            var factory = new FrameworkElementFactory(typeof(BoolPort));
 
-            var wrapper = new BoolPort();
+            factory.SetValue(BoolPort.ValueProperty, boolAttr.Default);
 
-            var binding = new Binding(nameof(BoolPort.Value))
+            var binding = new Binding(nameof(PortViewModel.CurrentValue))
             {
-                Source = port.CurrentValue,
                 Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                TargetNullValue = false,
+                FallbackValue = false
             };
+            factory.SetBinding(BoolPort.ValueProperty, binding);
 
-            wrapper.SetBinding(BoolPort.ValueProperty, binding);
-
-            if (boolAttr.Default)
-                port.CurrentValue = boolAttr.Default;
-
-            return wrapper;
+            template.VisualTree = factory;
+            return template;
         });
-        ControlRegistry.Register(typeof(EnumPort), (attr, port) =>
+        ControlRegistry.Register(typeof(EnumPort), attr =>
         {
             var enumAttr = (EnumPortControlAttribute)attr;
+            var template = new DataTemplate();
+            var factory = new FrameworkElementFactory(typeof(EnumPort));
 
-            var wrapper = new EnumPort
-            {
-                Items = enumAttr.Items,
-                IsEditable = enumAttr.IsEditable
-            };
+            factory.SetValue(EnumPort.ItemsProperty, enumAttr.Items);
+            factory.SetValue(EnumPort.IsEditableProperty, enumAttr.IsEditable);
 
-            var binding = new Binding(nameof(EnumPort.Value))
+            var binding = new Binding(nameof(PortViewModel.CurrentValue))
             {
-                Source = port.CurrentValue,
                 Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                TargetNullValue = 0,
+                FallbackValue = 0
             };
+            factory.SetBinding(EnumPort.ValueProperty, binding);
 
-            wrapper.SetBinding(EnumPort.ValueProperty, binding);
-
-            port.CurrentValue ??= enumAttr.Default;
-
-            return wrapper;
+            template.VisualTree = factory;
+            return template;
         });
-        ControlRegistry.Register(typeof(FilePathPort), (attr, port) =>
+        ControlRegistry.Register(typeof(FilePathPort), attr =>
         {
             var fileAttr = (FilePathPortControlAttribute)attr;
+            var template = new DataTemplate();
+            var factory = new FrameworkElementFactory(typeof(FilePathPort));
 
-            var wrapper = new FilePathPort
-            {
-                AllowExtension = fileAttr.AllowExtension
-            };
+            factory.SetValue(FilePathPort.AllowExtensionProperty, fileAttr.AllowExtension);
 
-            var binding = new Binding(nameof(FilePathPort.Value))
+            var binding = new Binding(nameof(PortViewModel.CurrentValue))
             {
-                Source = port.CurrentValue,
                 Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                TargetNullValue = "",
+                FallbackValue = ""
             };
+            factory.SetBinding(FilePathPort.ValueProperty, binding);
 
-            wrapper.SetBinding(FilePathPort.ValueProperty, binding);
-
-            port.CurrentValue ??= fileAttr.Default;
-
-            return wrapper;
+            template.VisualTree = factory;
+            return template;
         });
-        ControlRegistry.Register(typeof(ColorPort), (attr, port) =>
+        ControlRegistry.Register(typeof(ColorPort), attr =>
         {
             var colorAttr = (ColorPortControlAttribute)attr;
+            var template = new DataTemplate();
+            var factory = new FrameworkElementFactory(typeof(ColorPort));
 
-            var wrapper = new ColorPort
-            {
-                DefaultColor = colorAttr.DefaultColor
-            };
+            factory.SetValue(ColorPort.DefaultColorProperty, colorAttr.DefaultColor);
 
-            var binding = new Binding(nameof(ColorPort.SelectedColor))
+            var binding = new Binding(nameof(PortViewModel.CurrentValue))
             {
-                Source = port.CurrentValue,
                 Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                TargetNullValue = Colors.White,
+                FallbackValue = Colors.White
             };
+            factory.SetBinding(ColorPort.SelectedColorProperty, binding);
 
-            wrapper.SetBinding(ColorPort.SelectedColorProperty, binding);
-
-            port.CurrentValue ??= colorAttr.DefaultColor;
-
-            return wrapper;
+            template.VisualTree = factory;
+            return template;
         });
     }
 }
