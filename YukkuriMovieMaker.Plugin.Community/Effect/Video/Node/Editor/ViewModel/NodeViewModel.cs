@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Windows.Input;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
@@ -35,6 +34,9 @@ public sealed class NodeViewModel : INotifyPropertyChanged
         OutputPorts = new ObservableCollection<PortViewModel>(
             CreateOutputPorts(nodeLogic, graph)
         );
+        SubGraphs = new ObservableCollection<SubGraphViewModel>(
+            CreateSubGraphs(nodeLogic)
+        );
 
         HasSubGraph = nodeLogic.SubGraphs.Count > 0;
 
@@ -57,9 +59,9 @@ public sealed class NodeViewModel : INotifyPropertyChanged
 
     public ObservableCollection<PortViewModel> InputPorts { get; }
     public ObservableCollection<PortViewModel> OutputPorts { get; }
+    public ObservableCollection<SubGraphViewModel> SubGraphs { get; }
 
     public bool HasSubGraph { get; }
-    public ICommand? OpenSubGraphCommand { get; }
 
     public double X
     {
@@ -143,6 +145,22 @@ public sealed class NodeViewModel : INotifyPropertyChanged
                 null,
                 graph,
                 node.Id
+            );
+        }
+    }
+
+    private IEnumerable<SubGraphViewModel> CreateSubGraphs(NodeLogic node)
+    {
+        foreach (var (name, subGraph) in node.SubGraphs)
+        {
+            var prop = node.GetType().GetProperty(name);
+            var portAttr = prop?.GetCustomAttribute<SubGraphAttribute>();
+
+            yield return new SubGraphViewModel(
+                name,
+                portAttr?.Label ?? name,
+                portAttr?.Description ?? "",
+                subGraph
             );
         }
     }
