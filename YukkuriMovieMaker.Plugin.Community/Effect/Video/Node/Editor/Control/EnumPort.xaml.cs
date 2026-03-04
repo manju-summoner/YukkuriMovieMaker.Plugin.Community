@@ -33,7 +33,6 @@ public partial class EnumPort : INotifyPropertyChanged
     public EnumPort()
     {
         InitializeComponent();
-        DataContext = this;
     }
 
     public int Value

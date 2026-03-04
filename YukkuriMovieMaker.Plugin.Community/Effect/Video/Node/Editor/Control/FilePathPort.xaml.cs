@@ -30,7 +30,6 @@ public partial class FilePathPort : INotifyPropertyChanged
     public FilePathPort()
     {
         InitializeComponent();
-        DataContext = this;
         OpenFileCommand = new RelayCommand(OpenFileDialog);
     }
 

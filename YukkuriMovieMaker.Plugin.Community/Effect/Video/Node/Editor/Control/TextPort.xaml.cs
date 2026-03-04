@@ -26,7 +26,6 @@ public partial class TextPort : INotifyPropertyChanged
     public TextPort()
     {
         InitializeComponent();
-        DataContext = this;
     }
 
     public string Default

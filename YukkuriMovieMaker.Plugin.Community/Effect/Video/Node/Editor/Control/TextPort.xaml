@@ -3,15 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:control="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300"
-             d:DataContext="{d:DesignInstance control:TextPort}">
+             d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <ResourceDictionary Source="/Effect/Video/Node/Editor/View/Style/Style.xaml" />
     </UserControl.Resources>
     <Grid>
-        <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 VerticalAlignment="Center" VerticalContentAlignment="Center" />
+        <TextBox
+            Text="{Binding Value, RelativeSource={RelativeSource AncestorType=local:TextPort}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            VerticalAlignment="Center" VerticalContentAlignment="Center" />
     </Grid>
 </UserControl>

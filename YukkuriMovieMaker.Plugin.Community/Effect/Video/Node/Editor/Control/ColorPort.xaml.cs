@@ -66,7 +66,6 @@ public partial class ColorPort : INotifyPropertyChanged
     public ColorPort()
     {
         InitializeComponent();
-        DataContext = this;
 
         ApplyColor(DefaultColor);
 
