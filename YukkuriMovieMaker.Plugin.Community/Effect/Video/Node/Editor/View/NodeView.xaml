@@ -135,7 +135,7 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Right"
+                                HorizontalAlignment="Left"
                                 Margin="8,4, 0, 0">
                         <!-- ラベル -->
                         <TextBlock Text="{Binding Label}"

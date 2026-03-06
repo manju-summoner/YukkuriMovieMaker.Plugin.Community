@@ -3,7 +3,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
-public class SubGraphViewModel
+public sealed class SubGraphViewModel
 {
     private readonly NodeGraph _graph;
 
@@ -23,5 +23,5 @@ public class SubGraphViewModel
     public string Label { get; }
     public string Description { get; }
 
-    public ICommand? OpenSubGraphCommand { get; }
+    public ICommand? OpenSubGraphCommand { get; init; }
 }

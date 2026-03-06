@@ -9,6 +9,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View;
 
 public partial class GraphView
 {
+    public static readonly DependencyProperty ModeProperty =
+        DependencyProperty.Register(
+            nameof(Mode),
+            typeof(GraphControlMode),
+            typeof(GraphView),
+            new PropertyMetadata(GraphControlMode.RectSelection, OnModeChanged));
+
     private ConnectionAdorner? _connectionAdorner;
 
     private bool _isPanning;
@@ -22,34 +29,35 @@ public partial class GraphView
         InitializeComponent();
         Loaded += OnLoaded;
         DataContextChanged += OnDataContextChanged;
+        SizeChanged += OnSizeChanged;
     }
 
     public GraphControlMode Mode
     {
-        get;
-        set
+        get => (GraphControlMode)GetValue(ModeProperty);
+        set => SetValue(ModeProperty, value);
+    }
+
+    private static void OnModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (GraphView)d;
+        var layer = AdornerLayer.GetAdornerLayer(control.RootGrid);
+        if (layer is null) return;
+        if (control._selectionAdorner != null)
+            layer.Remove(control._selectionAdorner);
+
+        switch ((GraphControlMode)e.NewValue)
         {
-            if (field == value) return;
-            field = value;
-
-            var layer = AdornerLayer.GetAdornerLayer(RootGrid);
-            if (layer is null) return;
-            if (_selectionAdorner != null)
-                layer.Remove(_selectionAdorner);
-
-            switch (value)
-            {
-                case GraphControlMode.RectSelection:
-                    _selectionAdorner = new RectSelectionAdorner(RootGrid);
-                    layer.Add(_selectionAdorner);
-                    break;
-                case GraphControlMode.LassoSelection:
-                    _selectionAdorner = new LassoSelectionAdorner(RootGrid);
-                    layer.Add(_selectionAdorner);
-                    break;
-            }
+            case GraphControlMode.RectSelection:
+                control._selectionAdorner = new RectSelectionAdorner(control.RootGrid);
+                layer.Add(control._selectionAdorner);
+                break;
+            case GraphControlMode.LassoSelection:
+                control._selectionAdorner = new LassoSelectionAdorner(control.RootGrid);
+                layer.Add(control._selectionAdorner);
+                break;
         }
-    } = GraphControlMode.LassoSelection;
+    }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
@@ -218,6 +226,15 @@ public partial class GraphView
         }
 
         e.Handled = true;
+    }
+
+    private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (DataContext is GraphViewModel vm)
+        {
+            vm.Width = ActualWidth;
+            vm.Height = ActualHeight;
+        }
     }
 }
 

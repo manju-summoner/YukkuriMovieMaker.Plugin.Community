@@ -3,7 +3,94 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewModel="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel"
+             xmlns:view="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View"
+             xmlns:converters="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid />
+             d:DesignHeight="600" d:DesignWidth="850"
+             d:DataContext="{d:DesignInstance viewModel:NodeEditorViewModel}">
+    <UserControl.Resources>
+        <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="20" />
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0">
+            <MenuItem Header="Edit">
+                <MenuItem Header="Copy" />
+                <MenuItem Header="Cut" />
+                <MenuItem Header="Paste" />
+                <Separator />
+                <MenuItem Header="Mode">
+                    <MenuItem Header="Rect Selection"
+                              IsCheckable="True"
+                              IsChecked="{Binding CurrentMode, 
+                                  Converter={StaticResource EnumToBoolConverter}, 
+                                  ConverterParameter=RectSelection}" />
+                    <MenuItem Header="Lasso Selection"
+                              IsCheckable="True"
+                              IsChecked="{Binding CurrentMode, 
+                                  Converter={StaticResource EnumToBoolConverter}, 
+                                  ConverterParameter=LassoSelection}" />
+                    <MenuItem Header="Pan"
+                              IsCheckable="True"
+                              IsChecked="{Binding CurrentMode, 
+                                  Converter={StaticResource EnumToBoolConverter}, 
+                                  ConverterParameter=Pan}" />
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="View">
+                <MenuItem Header="Zoom -" />
+                <MenuItem Header="Zoom +" />
+                <MenuItem Header="Reset Zoom" Command="{Binding ResetZoomCommand}" />
+                <Separator />
+                <MenuItem Header="Fit" Command="{Binding FitToScreenCommand}" />
+            </MenuItem>
+        </Menu>
+        <TabControl Grid.Row="1" ItemsSource="{Binding Tabs}"
+                    SelectedItem="{Binding SelectedTab}"
+                    Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Title}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0" />
+                        <Button Command="{Binding CloseCommand}"
+                                Content="×"
+                                FontSize="14"
+                                Width="20"
+                                Height="20"
+                                Padding="0"
+                                VerticalAlignment="Center"
+                                ToolTip="Close Tab">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <view:GraphView DataContext="{Binding GraphViewModel}"
+                                    Mode="{Binding DataContext.CurrentMode, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock>
+                    <Run Text="Mode:" />
+                    <Run Text="{Binding CurrentMode}" />
+                </TextBlock>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
 </UserControl>

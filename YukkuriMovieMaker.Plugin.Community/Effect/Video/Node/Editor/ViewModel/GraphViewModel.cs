@@ -13,9 +13,10 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 {
     private readonly NodeGraph _graph;
 
-    public GraphViewModel(NodeGraph graph)
+    public GraphViewModel(NodeGraph graph, NodeEditorViewModel nodeEditorViewModel)
     {
         _graph = graph;
+        ParentEditor = nodeEditorViewModel;
 
         _graph.GraphChanged += OnGraphChanged;
 
@@ -27,6 +28,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         DisconnectCommand = new RelayCommand<ConnectionViewModel>(Disconnect);
     }
 
+    public NodeEditorViewModel ParentEditor { get; }
     public ObservableCollection<NodeViewModel> Nodes { get; } = [];
     public ObservableCollection<ConnectionViewModel> Connections { get; } = [];
 
@@ -67,6 +69,10 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         set => SetField(ref field, value);
     } = 0.0;
 
+    public double Width { get; set; }
+
+    public double Height { get; set; }
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private void UpdatePortValue(ValueChangedEventArgs e)
@@ -76,7 +82,6 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 
         var port = node.InputPorts.FirstOrDefault(p => p.Name == e.PortName);
         if (port != null)
-            // CurrentValue の setter を経由せずに直接更新（無限ループ回避）
             port.UpdateValueFromGraph(e.NewValue);
     }
 
@@ -88,7 +93,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 
         foreach (var node in _graph.Nodes.Values)
         {
-            var vm = new NodeViewModel(node, _graph);
+            var vm = new NodeViewModel(node, _graph, ParentEditor);
             Nodes.Add(vm);
             nodeViewModels[node.Id] = vm;
         }
@@ -110,7 +115,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         switch (e)
         {
             case NodeAddedEventArgs added:
-                var vm = new NodeViewModel(added.Node, _graph);
+                var vm = new NodeViewModel(added.Node, _graph, ParentEditor);
                 Nodes.Add(vm);
                 break;
 

@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 
@@ -16,10 +17,11 @@ public sealed class NodeViewModel : INotifyPropertyChanged
     private double _x;
     private double _y;
 
-    public NodeViewModel(NodeLogic nodeLogic, NodeGraph graph)
+    public NodeViewModel(NodeLogic nodeLogic, NodeGraph graph, NodeEditorViewModel nodeEditorViewModel)
     {
         _nodeLogic = nodeLogic;
         _graph = graph;
+        ParentEditor = nodeEditorViewModel;
 
         Id = nodeLogic.Id;
 
@@ -44,6 +46,8 @@ public sealed class NodeViewModel : INotifyPropertyChanged
         _x = visualState?.X ?? 0;
         _y = visualState?.Y ?? 0;
     }
+
+    public NodeEditorViewModel ParentEditor { get; }
 
     public bool IsSelected
     {
@@ -161,7 +165,10 @@ public sealed class NodeViewModel : INotifyPropertyChanged
                 portAttr?.Label ?? name,
                 portAttr?.Description ?? "",
                 subGraph
-            );
+            )
+            {
+                OpenSubGraphCommand = new RelayCommand(() => { ParentEditor?.OpenGraph(subGraph, name); })
+            };
         }
     }
 
