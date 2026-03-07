@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -11,7 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
 /// <summary>
 ///     Interaction logic for NumberPort.xaml
 /// </summary>
-public sealed partial class NumberPort : INotifyPropertyChanged
+public sealed partial class NumberPort
 {
     public static readonly DependencyProperty ValueProperty =
         DependencyProperty.Register(
@@ -62,7 +60,6 @@ public sealed partial class NumberPort : INotifyPropertyChanged
     private bool _isDragging;
     private bool _isEditing;
     private Point _startPoint;
-    private float _value;
 
     public NumberPort()
     {
@@ -135,8 +132,6 @@ public sealed partial class NumberPort : INotifyPropertyChanged
         }
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (NumberPort)d;
@@ -164,11 +159,6 @@ public sealed partial class NumberPort : INotifyPropertyChanged
     [DllImport("User32.dll")]
     private static extern bool SetCursorPos(int x, int y);
 
-    private void OnPropertyChanged([CallerMemberName] string propertyName = "")
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
     private void Update()
     {
         float v;
@@ -187,7 +177,7 @@ public sealed partial class NumberPort : INotifyPropertyChanged
         Update(v);
     }
 
-    private void Update(float value, bool isSet = true)
+    private void Update(float value)
     {
         var v = value;
         if (!float.IsNaN(Min) && value < Min) v = Min;
@@ -195,8 +185,7 @@ public sealed partial class NumberPort : INotifyPropertyChanged
         var newValue = (float)Math.Round(v, Digits);
         if (Math.Abs(Value - newValue) > 1e-8)
         {
-            if (isSet) Value = newValue;
-            else _value = newValue;
+            Value = newValue;
         }
 
         Keyboard.ClearFocus();
@@ -219,6 +208,7 @@ public sealed partial class NumberPort : INotifyPropertyChanged
         e.Handled = true;
         IsFocusable = false;
         Mouse.OverrideCursor = Cursors.None;
+        BeginEditCommand?.Execute(null);
         box.CaptureMouse();
     }
 
@@ -236,7 +226,7 @@ public sealed partial class NumberPort : INotifyPropertyChanged
                 _isDragging = true;
 
                 const float sensitivity = 0.01f;
-                Update(Value + (float)delta * sensitivity, false);
+                Update(Value + (float)delta * sensitivity);
                 SetCursorPos((int)_startPoint.X, (int)_startPoint.Y);
             }
 
@@ -246,6 +236,7 @@ public sealed partial class NumberPort : INotifyPropertyChanged
         {
             Mouse.OverrideCursor = null;
             box.ReleaseMouseCapture();
+            EndEditCommand?.Execute(null);
             Console.Error.WriteLine(ex);
         }
     }
@@ -260,8 +251,9 @@ public sealed partial class NumberPort : INotifyPropertyChanged
         if (_isDragging)
         {
             _isDragging = false;
-            Update(_value);
+            Update(Value);
             SetCursorPos((int)_startPoint.X, (int)_startPoint.Y);
+            EndEditCommand?.Execute(null);
             e.Handled = true;
         }
         else
@@ -276,6 +268,7 @@ public sealed partial class NumberPort : INotifyPropertyChanged
     {
         _isEditing = false;
         Update();
+        EndEditCommand?.Execute(null);
     }
 
     private new void PreviewTextInput(object sender, TextCompositionEventArgs e)

@@ -6,6 +6,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
@@ -167,7 +168,12 @@ public sealed class NodeViewModel : INotifyPropertyChanged
                 subGraph
             )
             {
-                OpenSubGraphCommand = new RelayCommand(() => { ParentEditor?.OpenGraph(subGraph, name); })
+                OpenSubGraphCommand = new RelayCommand(() => { ParentEditor.OpenGraph(subGraph, name); }),
+                OnGraphChangedCommand = new RelayCommand<GraphChangedEventArgs>(args =>
+                {
+                    if (args != null) _graph.OnGraphChanged(args);
+                }),
+                OnGraphCommitedCommand = new RelayCommand(() => _graph.Commit())
             };
         }
     }

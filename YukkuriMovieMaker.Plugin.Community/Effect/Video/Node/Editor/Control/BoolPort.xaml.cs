@@ -1,12 +1,10 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
 
-public partial class BoolPort : INotifyPropertyChanged
+public partial class BoolPort
 {
     public static readonly DependencyProperty ValueProperty =
         DependencyProperty.Register(
@@ -44,8 +42,6 @@ public partial class BoolPort : INotifyPropertyChanged
         }
     } = SystemColors.GrayTextBrush;
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     private void Toggle()
     {
         Value = !Value;
@@ -55,11 +51,8 @@ public partial class BoolPort : INotifyPropertyChanged
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (BoolPort)d;
+        control.BeginEditCommand?.Execute(null);
         control.OnPropertyChanged(nameof(Value));
-    }
-
-    protected void OnPropertyChanged([CallerMemberName] string? name = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        control.EndEditCommand?.Execute(null);
     }
 }

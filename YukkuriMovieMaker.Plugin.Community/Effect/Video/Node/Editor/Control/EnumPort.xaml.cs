@@ -1,10 +1,8 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
 
-public partial class EnumPort : INotifyPropertyChanged
+public partial class EnumPort
 {
     public static readonly DependencyProperty ValueProperty =
         DependencyProperty.Register(
@@ -53,16 +51,11 @@ public partial class EnumPort : INotifyPropertyChanged
         init => SetValue(IsEditableProperty, value);
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (EnumPort)d;
+        control.BeginEditCommand?.Execute(null);
         control.OnPropertyChanged(nameof(Value));
-    }
-
-    protected void OnPropertyChanged([CallerMemberName] string? name = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        control.EndEditCommand?.Execute(null);
     }
 }

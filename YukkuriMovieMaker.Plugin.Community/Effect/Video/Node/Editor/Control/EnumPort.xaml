@@ -1,11 +1,11 @@
-<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.EnumPort"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control"
-             mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
+<local:PortControlBase x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.EnumPort"
+                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                       xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control"
+                       mc:Ignorable="d"
+                       d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <ComboBox ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
                   SelectedIndex="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
@@ -13,4 +13,4 @@
                   IsEditable="{Binding IsEditable, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
                   FontSize="10" />
     </Grid>
-</UserControl>
+</local:PortControlBase>

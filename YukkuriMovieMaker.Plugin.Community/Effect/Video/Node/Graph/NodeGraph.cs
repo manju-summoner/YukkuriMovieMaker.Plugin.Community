@@ -19,7 +19,7 @@ public sealed class NodeGraph
     {
         _nodes[node.Id] = node;
 
-        GraphChanged?.Invoke(this, new NodeAddedEventArgs(node.Id, node));
+        OnGraphChanged(new NodeAddedEventArgs(node.Id, node));
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public sealed class NodeGraph
         _nodes[nodeId].Invalidate();
         _nodes.Remove(nodeId);
 
-        GraphChanged?.Invoke(this, new NodeRemovedEventArgs(nodeId));
+        OnGraphChanged(new NodeRemovedEventArgs(nodeId));
     }
 
     /// <summary>
@@ -62,8 +62,8 @@ public sealed class NodeGraph
         var visual = new NodeVisualState { Id = nodeId, X = x, Y = y };
         VisualStates[nodeId] = visual;
 
-        GraphChanged?.Invoke(this, new VisualStateChangedEventArgs(nodeId, visual));
-        Committed?.Invoke(this, new CommittedEventArgs());
+        OnGraphChanged(new VisualStateChangedEventArgs(nodeId, visual));
+        Commit();
     }
 
     /// <summary>
@@ -100,7 +100,7 @@ public sealed class NodeGraph
         var input = _nodes[nodeId].Inputs[inputName];
         input.SetValue(value);
 
-        GraphChanged?.Invoke(this, new ValueChangedEventArgs(nodeId, inputName, value));
+        OnGraphChanged(new ValueChangedEventArgs(nodeId, inputName, value));
     }
 
     /// <summary>
@@ -118,7 +118,7 @@ public sealed class NodeGraph
 
         node.SubGraphs[subGraphName] = subGraph;
 
-        GraphChanged?.Invoke(this, new ValueChangedEventArgs(nodeId, subGraphName, subGraph));
+        OnGraphChanged(new ValueChangedEventArgs(nodeId, subGraphName, subGraph));
     }
 
     /// <summary>
@@ -154,7 +154,7 @@ public sealed class NodeGraph
         Connections.Add(
             new NodeConnection { FromId = from, FromPort = outputName, ToId = to, ToPort = inputName });
 
-        GraphChanged?.Invoke(this, new ConnectionChangedEventArgs(from, outputName, to, inputName));
+        OnGraphChanged(new ConnectionChangedEventArgs(from, outputName, to, inputName));
     }
 
     /// <summary>
@@ -177,8 +177,8 @@ public sealed class NodeGraph
             c.ToId == to &&
             c.ToPort == inputName);
 
-        GraphChanged?.Invoke(this, new ConnectionChangedEventArgs(from, outputName, null, null));
-        GraphChanged?.Invoke(this, new ConnectionChangedEventArgs(null, null, to, inputName));
+        OnGraphChanged(new ConnectionChangedEventArgs(from, outputName, null, null));
+        OnGraphChanged(new ConnectionChangedEventArgs(null, null, to, inputName));
     }
 
     /// <summary>
@@ -190,6 +190,16 @@ public sealed class NodeGraph
     ///     このグラフに対し行われた変更操作が内部から確定されたことを通知します
     /// </summary>
     public event EventHandler<CommittedEventArgs>? Committed;
+
+    public void OnGraphChanged(GraphChangedEventArgs args)
+    {
+        GraphChanged?.Invoke(this, args);
+    }
+
+    public void Commit()
+    {
+        Committed?.Invoke(this, new CommittedEventArgs());
+    }
 
     /// <summary>
     ///     このグラフに対して何らかの編集操作が開始することを通達します
@@ -207,7 +217,7 @@ public sealed class NodeGraph
         if (!_isInTransaction) return;
         _isInTransaction = false;
 
-        Committed?.Invoke(this, new CommittedEventArgs());
+        Commit();
         InvalidateAll();
     }
 }

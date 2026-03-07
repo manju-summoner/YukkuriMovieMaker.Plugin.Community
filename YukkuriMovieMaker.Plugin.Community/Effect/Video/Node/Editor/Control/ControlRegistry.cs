@@ -19,14 +19,14 @@ public static class ControlRegistry
     /// <summary>
     ///     コントロールファクトリを登録
     /// </summary>
-    public static void Register(Type controlType, ControlFactory factory)
+    public static void Register<T>(ControlFactory factory) where T : PortControlBase
     {
-        ArgumentNullException.ThrowIfNull(controlType);
+        ArgumentNullException.ThrowIfNull(typeof(T));
         ArgumentNullException.ThrowIfNull(factory);
 
         lock (Lock)
         {
-            Factories[controlType] = factory;
+            Factories[typeof(T)] = factory;
         }
     }
 

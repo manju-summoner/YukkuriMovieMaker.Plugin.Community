@@ -24,7 +24,7 @@ public static class ControlRegistrations
 
         _initialized = true;
 
-        ControlRegistry.Register(typeof(NumberPort), attr =>
+        ControlRegistry.Register<NumberPort>(attr =>
         {
             var numberAttr = (NumberPortControlAttribute)attr;
             var template = new DataTemplate();
@@ -36,19 +36,26 @@ public static class ControlRegistrations
             factory.SetValue(NumberPort.UnitProperty, numberAttr.Unit);
             factory.SetValue(NumberPort.DefaultProperty, numberAttr.Default);
 
-            var binding = new Binding(nameof(PortViewModel.CurrentValue))
-            {
-                Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                TargetNullValue = 0f,
-                FallbackValue = 0f
-            };
-            factory.SetBinding(NumberPort.ValueProperty, binding);
+            factory.SetBinding(NumberPort.ValueProperty,
+                new Binding(nameof(PortViewModel.CurrentValue))
+                {
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    TargetNullValue = 0f,
+                    FallbackValue = 0f
+                });
+            factory.SetBinding(
+                PortControlBase.BeginEditCommandProperty,
+                new Binding(nameof(PortViewModel.BeginEditCommand)));
+
+            factory.SetBinding(
+                PortControlBase.EndEditCommandProperty,
+                new Binding(nameof(PortViewModel.EndEditCommand)));
 
             template.VisualTree = factory;
             return template;
         });
-        ControlRegistry.Register(typeof(TextPort), attr =>
+        ControlRegistry.Register<TextPort>(attr =>
         {
             var textAttr = (TextPortControlAttribute)attr;
             var template = new DataTemplate();
@@ -56,19 +63,26 @@ public static class ControlRegistrations
 
             factory.SetValue(TextPort.DefaultProperty, textAttr.Default);
 
-            var binding = new Binding(nameof(PortViewModel.CurrentValue))
-            {
-                Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                TargetNullValue = "",
-                FallbackValue = ""
-            };
-            factory.SetBinding(TextPort.ValueProperty, binding);
+            factory.SetBinding(TextPort.ValueProperty,
+                new Binding(nameof(PortViewModel.CurrentValue))
+                {
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    TargetNullValue = "",
+                    FallbackValue = ""
+                });
+            factory.SetBinding(
+                PortControlBase.BeginEditCommandProperty,
+                new Binding(nameof(PortViewModel.BeginEditCommand)));
+
+            factory.SetBinding(
+                PortControlBase.EndEditCommandProperty,
+                new Binding(nameof(PortViewModel.EndEditCommand)));
 
             template.VisualTree = factory;
             return template;
         });
-        ControlRegistry.Register(typeof(BoolPort), attr =>
+        ControlRegistry.Register<BoolPort>(attr =>
         {
             var boolAttr = (BoolPortControlAttribute)attr;
             var template = new DataTemplate();
@@ -76,19 +90,26 @@ public static class ControlRegistrations
 
             factory.SetValue(BoolPort.ValueProperty, boolAttr.Default);
 
-            var binding = new Binding(nameof(PortViewModel.CurrentValue))
-            {
-                Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                TargetNullValue = false,
-                FallbackValue = false
-            };
-            factory.SetBinding(BoolPort.ValueProperty, binding);
+            factory.SetBinding(BoolPort.ValueProperty,
+                new Binding(nameof(PortViewModel.CurrentValue))
+                {
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    TargetNullValue = false,
+                    FallbackValue = false
+                });
+            factory.SetBinding(
+                PortControlBase.BeginEditCommandProperty,
+                new Binding(nameof(PortViewModel.BeginEditCommand)));
+
+            factory.SetBinding(
+                PortControlBase.EndEditCommandProperty,
+                new Binding(nameof(PortViewModel.EndEditCommand)));
 
             template.VisualTree = factory;
             return template;
         });
-        ControlRegistry.Register(typeof(EnumPort), attr =>
+        ControlRegistry.Register<EnumPort>(attr =>
         {
             var enumAttr = (EnumPortControlAttribute)attr;
             var template = new DataTemplate();
@@ -97,19 +118,26 @@ public static class ControlRegistrations
             factory.SetValue(EnumPort.ItemsProperty, enumAttr.Items);
             factory.SetValue(EnumPort.IsEditableProperty, enumAttr.IsEditable);
 
-            var binding = new Binding(nameof(PortViewModel.CurrentValue))
-            {
-                Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                TargetNullValue = 0,
-                FallbackValue = 0
-            };
-            factory.SetBinding(EnumPort.ValueProperty, binding);
+            factory.SetBinding(EnumPort.ValueProperty,
+                new Binding(nameof(PortViewModel.CurrentValue))
+                {
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    TargetNullValue = 0,
+                    FallbackValue = 0
+                });
+            factory.SetBinding(
+                PortControlBase.BeginEditCommandProperty,
+                new Binding(nameof(PortViewModel.BeginEditCommand)));
+
+            factory.SetBinding(
+                PortControlBase.EndEditCommandProperty,
+                new Binding(nameof(PortViewModel.EndEditCommand)));
 
             template.VisualTree = factory;
             return template;
         });
-        ControlRegistry.Register(typeof(FilePathPort), attr =>
+        ControlRegistry.Register<FilePathPort>(attr =>
         {
             var fileAttr = (FilePathPortControlAttribute)attr;
             var template = new DataTemplate();
@@ -117,19 +145,26 @@ public static class ControlRegistrations
 
             factory.SetValue(FilePathPort.AllowExtensionProperty, fileAttr.AllowExtension);
 
-            var binding = new Binding(nameof(PortViewModel.CurrentValue))
-            {
-                Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                TargetNullValue = "",
-                FallbackValue = ""
-            };
-            factory.SetBinding(FilePathPort.ValueProperty, binding);
+            factory.SetBinding(FilePathPort.ValueProperty,
+                new Binding(nameof(PortViewModel.CurrentValue))
+                {
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    TargetNullValue = "",
+                    FallbackValue = ""
+                });
+            factory.SetBinding(
+                PortControlBase.BeginEditCommandProperty,
+                new Binding(nameof(PortViewModel.BeginEditCommand)));
+
+            factory.SetBinding(
+                PortControlBase.EndEditCommandProperty,
+                new Binding(nameof(PortViewModel.EndEditCommand)));
 
             template.VisualTree = factory;
             return template;
         });
-        ControlRegistry.Register(typeof(ColorPort), attr =>
+        ControlRegistry.Register<ColorPort>(attr =>
         {
             var colorAttr = (ColorPortControlAttribute)attr;
             var template = new DataTemplate();
@@ -137,14 +172,21 @@ public static class ControlRegistrations
 
             factory.SetValue(ColorPort.DefaultColorProperty, colorAttr.DefaultColor);
 
-            var binding = new Binding(nameof(PortViewModel.CurrentValue))
-            {
-                Mode = BindingMode.TwoWay,
-                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                TargetNullValue = Colors.White,
-                FallbackValue = Colors.White
-            };
-            factory.SetBinding(ColorPort.SelectedColorProperty, binding);
+            factory.SetBinding(ColorPort.SelectedColorProperty,
+                new Binding(nameof(PortViewModel.CurrentValue))
+                {
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    TargetNullValue = Colors.White,
+                    FallbackValue = Colors.White
+                });
+            factory.SetBinding(
+                PortControlBase.BeginEditCommandProperty,
+                new Binding(nameof(PortViewModel.BeginEditCommand)));
+
+            factory.SetBinding(
+                PortControlBase.EndEditCommandProperty,
+                new Binding(nameof(PortViewModel.EndEditCommand)));
 
             template.VisualTree = factory;
             return template;

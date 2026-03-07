@@ -17,6 +17,8 @@ public sealed class SubGraphViewModel
         Label = label;
         Description = description;
         _graph = graph;
+        _graph.GraphChanged += (_, args) => OnGraphChangedCommand?.Execute(args);
+        _graph.Committed += (_, _) => OnGraphCommitedCommand?.Execute(null);
     }
 
     public string Name { get; }
@@ -24,4 +26,6 @@ public sealed class SubGraphViewModel
     public string Description { get; }
 
     public ICommand? OpenSubGraphCommand { get; init; }
+    public ICommand? OnGraphChangedCommand { get; init; }
+    public ICommand? OnGraphCommitedCommand { get; init; }
 }

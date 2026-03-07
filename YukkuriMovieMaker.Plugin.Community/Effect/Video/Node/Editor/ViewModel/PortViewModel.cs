@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Input;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
@@ -38,6 +40,9 @@ public sealed class PortViewModel : INotifyPropertyChanged
             var port = graph.Nodes[nodeId].Inputs[name];
             _currentValue = port.GetValue().GetAwaiter().GetResult();
         }
+
+        BeginEditCommand = new RelayCommand(() => _graph.BeginEdit());
+        EndEditCommand = new RelayCommand(() => _graph.EndEdit());
     }
 
     public string Name { get; }
@@ -58,9 +63,7 @@ public sealed class PortViewModel : INotifyPropertyChanged
 
                 if (Direction == PortDirection.Input)
                 {
-                    _graph.BeginEdit();
                     _graph.SetInputValue(NodeId, Name, value);
-                    _graph.EndEdit();
                 }
             }
         }
@@ -68,6 +71,9 @@ public sealed class PortViewModel : INotifyPropertyChanged
 
     public PropertyControlBaseAttribute? ControlAttribute { get; }
     public bool HasControl => ControlAttribute != null && Direction == PortDirection.Input;
+
+    public ICommand BeginEditCommand { get; }
+    public ICommand EndEditCommand { get; }
 
     public bool IsConnected
     {

@@ -1,6 +1,4 @@
-using System.ComponentModel;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.Win32;
@@ -8,7 +6,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
 
-public partial class FilePathPort : INotifyPropertyChanged
+public partial class FilePathPort
 {
     public static readonly DependencyProperty ValueProperty =
         DependencyProperty.Register(
@@ -52,13 +50,13 @@ public partial class FilePathPort : INotifyPropertyChanged
             ? ""
             : Path.GetFileName(Value);
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (FilePathPort)d;
+        control.BeginEditCommand?.Execute(null);
         control.OnPropertyChanged(nameof(Value));
         control.OnPropertyChanged(nameof(PathFileText));
+        control.EndEditCommand?.Execute(null);
     }
 
     private void OpenFileDialog()
@@ -76,10 +74,5 @@ public partial class FilePathPort : INotifyPropertyChanged
 
         if (dialog.ShowDialog() == true)
             Value = dialog.FileName;
-    }
-
-    protected void OnPropertyChanged([CallerMemberName] string? name = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

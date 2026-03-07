@@ -1,10 +1,8 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
 
-public partial class TextPort : INotifyPropertyChanged
+public partial class TextPort
 {
     public static readonly DependencyProperty ValueProperty =
         DependencyProperty.Register(
@@ -40,12 +38,12 @@ public partial class TextPort : INotifyPropertyChanged
         set => SetValue(ValueProperty, value);
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (TextPort)d;
+        control.BeginEditCommand?.Execute(null);
         control.OnPropertyChanged(nameof(Value));
+        control.EndEditCommand?.Execute(null);
     }
 
     private static void OnDefaultChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -53,10 +51,5 @@ public partial class TextPort : INotifyPropertyChanged
         var control = (TextPort)d;
         if (string.IsNullOrEmpty(control.Value))
             control.Value = (string)e.NewValue;
-    }
-
-    protected void OnPropertyChanged([CallerMemberName] string? name = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
@@ -7,7 +6,7 @@ using System.Windows.Media;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
 
-public partial class ColorPort : INotifyPropertyChanged
+public partial class ColorPort
 {
     public static readonly DependencyProperty SelectedColorProperty =
         DependencyProperty.Register(
@@ -126,8 +125,6 @@ public partial class ColorPort : INotifyPropertyChanged
         set => SetValue(BValueProperty, value);
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     private void ApplyColor(Color color)
     {
         _suppress = true;
@@ -189,7 +186,7 @@ public partial class ColorPort : INotifyPropertyChanged
         cp.SelectedColor = Color.FromArgb(cp.Alpha, cp.Red, cp.Green, cp.Blue);
         cp._suppress = false;
 
-        cp.PropertyChanged?.Invoke(cp, new PropertyChangedEventArgs(nameof(SelectedColor)));
+        cp.OnPropertyChanged(nameof(SelectedColor));
     }
 
     private static void OnSelectedColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -203,7 +200,9 @@ public partial class ColorPort : INotifyPropertyChanged
         cp.UpdateAllPropertiesFromColor(newColor);
         cp._suppress = false;
 
-        cp.PropertyChanged?.Invoke(cp, new PropertyChangedEventArgs(nameof(SelectedColor)));
+        cp.BeginEditCommand?.Execute(null);
+        cp.OnPropertyChanged(nameof(SelectedColor));
+        cp.EndEditCommand?.Execute(null);
     }
 
     private void UpdateAllPropertiesFromColor(Color color)
@@ -296,7 +295,7 @@ public partial class ColorPort : INotifyPropertyChanged
 
     private void Popup_OnClosed(object? sender, EventArgs e)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedColor)));
+        OnPropertyChanged(nameof(SelectedColor));
     }
 
     private void UIElement_OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
