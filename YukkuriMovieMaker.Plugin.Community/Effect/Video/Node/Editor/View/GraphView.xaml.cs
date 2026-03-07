@@ -110,6 +110,11 @@ public partial class GraphView
         else if (Mode is GraphControlMode.LassoSelection &&
                  _selectionAdorner is LassoSelectionAdorner lassoSelectionAdorner)
             lassoSelectionAdorner.Begin(_selectionStart);
+        else if (Mode is GraphControlMode.Pan)
+        {
+            _isPanning = true;
+            _panStart = e.GetPosition(RootGrid);
+        }
 
         CaptureMouse();
     }
@@ -146,12 +151,20 @@ public partial class GraphView
             else if (Mode is GraphControlMode.LassoSelection &&
                      _selectionAdorner is LassoSelectionAdorner lassoSelectionAdorner)
                 lassoSelectionAdorner.AddPoint(current);
+
+            e.Handled = true;
         }
     }
 
     private void OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         if (DataContext is not GraphViewModel vm) return;
+
+        if (Mode == GraphControlMode.Pan && _isPanning)
+        {
+            _isPanning = false;
+            ReleaseMouseCapture();
+        }
 
         if (vm.DraggingFromPort != null)
         {
