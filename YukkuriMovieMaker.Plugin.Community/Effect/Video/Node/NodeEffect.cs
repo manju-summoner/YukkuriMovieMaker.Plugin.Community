@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Numerics;
 using Vortice.DCommon;
@@ -22,8 +23,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
     ResourceType = typeof(TextUi))]
 public sealed class NodeEffect : VideoEffectBase
 {
+    internal NodeGraph? InternalGraph;
     public override string Label => TextUi.Node;
 
+    [Display(Name = nameof(TextUi.NodeEditor), GroupName = nameof(TextUi.Node),
+        ResourceType = typeof(TextUi))]
+    [OpenNodeEditor]
     public GraphSnapshot Graph
     {
         get;
@@ -58,8 +63,6 @@ public sealed class Processor : IVideoEffectProcessor
 
     private ID2D1Image? _currentInputImage;
 
-    private NodeGraph _graph = null!;
-
     private bool _hasError;
     private ArgumentsNode _inputNode = null!;
     private bool _isEvaluating;
@@ -74,7 +77,7 @@ public sealed class Processor : IVideoEffectProcessor
         InitializeGraph();
         CreateBlankBitmap();
 
-        if (_graph != null!) _graph.Committed += OnGraphCommitted;
+        if (_nodeEffect.InternalGraph != null!) _nodeEffect.InternalGraph.Committed += OnGraphCommitted;
     }
 
     public ID2D1Image Output => _outputImage ?? _blankBitmap!;
@@ -90,7 +93,8 @@ public sealed class Processor : IVideoEffectProcessor
 
                 _isEvaluating = true;
 
-                if (_graph == null! || _inputNode == null! || _outputNode == null!) InitializeGraph();
+                if (_nodeEffect.InternalGraph == null! || _inputNode == null! || _outputNode == null!)
+                    InitializeGraph();
 
                 // 評価開始
                 var context = new EvaluationContext(_devices, effectDescription);
@@ -152,7 +156,7 @@ public sealed class Processor : IVideoEffectProcessor
     {
         lock (_lock)
         {
-            if (_graph != null!) _graph.Committed -= OnGraphCommitted;
+            if (_nodeEffect.InternalGraph != null!) _nodeEffect.InternalGraph.Committed -= OnGraphCommitted;
 
             ClearInput();
 
@@ -177,9 +181,9 @@ public sealed class Processor : IVideoEffectProcessor
         // スナップショットから復元
         if (_nodeEffect.Graph.Nodes.Count > 0)
         {
-            _graph = Serializer.Restore(_nodeEffect.Graph);
+            _nodeEffect.InternalGraph = Serializer.Restore(_nodeEffect.Graph);
 
-            _inputNode = _graph.Nodes.Values.OfType<ArgumentsNode>().FirstOrDefault() ??
+            _inputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ArgumentsNode>().FirstOrDefault() ??
                          new ArgumentsNode(
                              new PortDefinition("InputImage", typeof(ID2D1Image)),
                              new PortDefinition("FrameIndex", typeof(int))
@@ -187,7 +191,7 @@ public sealed class Processor : IVideoEffectProcessor
                          {
                              Id = Guid.NewGuid()
                          };
-            _outputNode = _graph.Nodes.Values.OfType<ReturnNode>().FirstOrDefault() ??
+            _outputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ReturnNode>().FirstOrDefault() ??
                           new ReturnNode(
                               new PortDefinition("OutputImage", typeof(ID2D1Image))
                           )
@@ -197,7 +201,7 @@ public sealed class Processor : IVideoEffectProcessor
         }
         else
         {
-            _graph = new NodeGraph();
+            _nodeEffect.InternalGraph = new NodeGraph();
 
             _inputNode = new ArgumentsNode(
                 new PortDefinition("InputImage", typeof(ID2D1Image)),
@@ -214,24 +218,24 @@ public sealed class Processor : IVideoEffectProcessor
                 Id = Guid.NewGuid()
             };
 
-            _graph.AddNode(_inputNode);
-            _graph.AddNode(_outputNode);
+            _nodeEffect.InternalGraph.AddNode(_inputNode);
+            _nodeEffect.InternalGraph.AddNode(_outputNode);
 
-            _graph.Connect(_inputNode.Id, "InputImage", _outputNode.Id, "OutputImage");
+            _nodeEffect.InternalGraph.Connect(_inputNode.Id, "InputImage", _outputNode.Id, "OutputImage");
 
-            _nodeEffect.Graph = Serializer.Create(_graph);
+            _nodeEffect.Graph = Serializer.Create(_nodeEffect.InternalGraph);
         }
     }
 
     private void OnGraphCommitted(object? sender, CommittedEventArgs e)
     {
-        if (_graph == null!) return;
+        if (_nodeEffect.InternalGraph == null!) return;
 
         lock (_lock)
         {
-            _graph.InvalidateAll();
+            _nodeEffect.InternalGraph.InvalidateAll();
 
-            _nodeEffect.Graph = Serializer.Create(_graph);
+            _nodeEffect.Graph = Serializer.Create(_nodeEffect.InternalGraph);
         }
     }
 
