@@ -59,9 +59,11 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         pluginItem.InternalGraph!.Committed += async (_, _) =>
         {
             BeginEdit?.Invoke(this, EventArgs.Empty);
-            pluginItem.Graph = await Serializer.CreateAsync(pluginItem.InternalGraph);
+            pluginItem.InternalGraphSnapshot = await Serializer.CreateAsync(pluginItem.InternalGraph);
             EndEdit?.Invoke(this, EventArgs.Empty);
         };
+
+        pluginItem.GraphUpdated += (_, _) => { vm?.OnGraphUpdated(); };
 
         layout?.IsSelectedChanged += (_, _) =>
         {

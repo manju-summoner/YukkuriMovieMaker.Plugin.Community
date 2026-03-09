@@ -19,6 +19,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         ParentEditor = nodeEditorViewModel;
 
         _graph.GraphChanged += OnGraphChanged;
+        nodeEditorViewModel.GraphUpdated += (_, _) => SyncFromGraph();
 
         SyncFromGraph();
 

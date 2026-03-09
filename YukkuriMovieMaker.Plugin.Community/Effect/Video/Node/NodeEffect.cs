@@ -23,6 +23,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
     ResourceType = typeof(TextUi))]
 public sealed class NodeEffect : VideoEffectBase
 {
+    private GraphSnapshot _graph = new();
     internal NodeGraph? InternalGraph;
     public override string Label => TextUi.Node;
 
@@ -31,9 +32,24 @@ public sealed class NodeEffect : VideoEffectBase
     [OpenNodeEditor]
     public GraphSnapshot Graph
     {
-        get;
-        set => Set(ref field, value);
-    } = new();
+        get => _graph;
+        set
+        {
+            Set(ref _graph, value);
+            if (InternalGraph is null) return;
+            var tempGraph = Serializer.Restore(value);
+            InternalGraph.UpdateGraph(tempGraph);
+            GraphUpdated?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public GraphSnapshot InternalGraphSnapshot
+    {
+        get => _graph;
+        set => Set(ref _graph, value, nameof(Graph));
+    }
+
+    public event EventHandler? GraphUpdated;
 
     protected override IEnumerable<IAnimatable> GetAnimatables()
     {
@@ -238,7 +254,7 @@ public sealed class Processor : IVideoEffectProcessor
         {
             _nodeEffect.InternalGraph.InvalidateAll();
 
-            _nodeEffect.Graph = Serializer.Create(_nodeEffect.InternalGraph);
+            _nodeEffect.InternalGraphSnapshot = Serializer.Create(_nodeEffect.InternalGraph);
         }
     }
 

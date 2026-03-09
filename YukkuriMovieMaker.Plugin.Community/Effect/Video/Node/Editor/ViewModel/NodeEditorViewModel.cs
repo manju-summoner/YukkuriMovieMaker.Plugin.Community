@@ -43,6 +43,13 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    public event EventHandler? GraphUpdated;
+
+    public void OnGraphUpdated()
+    {
+        GraphUpdated?.Invoke(this, EventArgs.Empty);
+    }
+
     public void OpenGraph(NodeGraph graph, string title = "Main")
     {
         if (Tabs.Any(tab => tab.Graph == graph))

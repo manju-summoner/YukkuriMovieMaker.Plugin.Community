@@ -11,6 +11,19 @@ public sealed class NodeGraph
     private bool _isInTransaction;
     public IReadOnlyDictionary<Guid, NodeLogic> Nodes => _nodes;
 
+    public void UpdateGraph(NodeGraph graph)
+    {
+        _nodes.Clear();
+        foreach (var node in graph.Nodes) _nodes.Add(node.Key, node.Value);
+
+        Connections.Clear();
+        foreach (var connection in graph.Connections) Connections.Add(connection);
+
+        VisualStates.Clear();
+        foreach (var graphVisualState in graph.VisualStates)
+            VisualStates.Add(graphVisualState.Key, graphVisualState.Value);
+    }
+
     /// <summary>
     ///     作成済みのノードを管理下に配置します
     /// </summary>
