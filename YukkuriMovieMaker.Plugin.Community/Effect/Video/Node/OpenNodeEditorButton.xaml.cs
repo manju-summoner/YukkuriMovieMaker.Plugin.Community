@@ -1,5 +1,8 @@
 using System.Collections;
+using System.ComponentModel;
 using System.Windows;
+using AvalonDock;
+using AvalonDock.Layout;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
@@ -30,20 +33,42 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
 
         var parentWindow = Window.GetWindow(this)!;
         var mainViewModel = parentWindow.DataContext!;
+
         var toolAreaViewModels =
             mainViewModel.GetType().GetProperty("AnchorableAreaViewModels")!.GetValue(mainViewModel) as IEnumerable;
         var toolAreaViewModel =
             toolAreaViewModels
-                ?.Cast<object>()
-                .FirstOrDefault(x => (string)x.GetType().GetProperty("Title")?.GetValue(x)! == TextUi.Node);
+                    ?.Cast<object>()
+                    .FirstOrDefault(x => (string)x.GetType().GetProperty("Title")?.GetValue(x)! == TextUi.Node) as
+                INotifyPropertyChanged;
+
+        var layoutService = mainViewModel.GetType().GetProperty("LayoutService")!.GetValue(mainViewModel);
+        var dockingManager = layoutService?.GetType().GetProperty("Manager")!.GetValue(layoutService) as DockingManager;
+        var layout = dockingManager!.Layout.Descendents().OfType<LayoutAnchorable>().FirstOrDefault(anchorable =>
+        {
+            var id = toolAreaViewModel?.GetType().GetProperty("Id")!.GetValue(toolAreaViewModel) as string;
+            return anchorable.ContentId == id;
+        });
+
         toolAreaViewModel?.GetType().GetProperty("IsVisible")?.SetValue(toolAreaViewModel, true);
-        (toolAreaViewModel?.GetType().GetProperty("ViewModel")?.GetValue(toolAreaViewModel) as NodeEditorViewModel)
-            ?.OpenGraph(pluginItem.InternalGraph!);
+        toolAreaViewModel?.GetType().GetProperty("IsSelected")?.SetValue(toolAreaViewModel, true);
+        toolAreaViewModel?.GetType().GetProperty("IsActive")?.SetValue(toolAreaViewModel, true);
+        var vm =
+            toolAreaViewModel?.GetType().GetProperty("ViewModel")?.GetValue(toolAreaViewModel) as NodeEditorViewModel;
+
+        vm?.OpenGraph(pluginItem.InternalGraph!);
+
         pluginItem.InternalGraph!.Committed += async (_, _) =>
         {
             BeginEdit?.Invoke(this, EventArgs.Empty);
             pluginItem.Graph = await Serializer.CreateAsync(pluginItem.InternalGraph);
             EndEdit?.Invoke(this, EventArgs.Empty);
+        };
+
+        layout?.IsSelectedChanged += (_, _) =>
+        {
+            if (!layout.IsSelected)
+                toolAreaViewModel?.GetType().GetProperty("ViewModel")?.SetValue(toolAreaViewModel, vm);
         };
     }
 }

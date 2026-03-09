@@ -16,6 +16,7 @@ public sealed class TabViewModel : INotifyPropertyChanged
         NodeEditorViewModel nodeEditorViewModel,
         Action<TabViewModel>? closeAction = null)
     {
+        Graph = graph;
         Title = title;
         GraphViewModel = new GraphViewModel(graph, nodeEditorViewModel);
         _closeAction = closeAction;
@@ -26,6 +27,7 @@ public sealed class TabViewModel : INotifyPropertyChanged
     public string Title { get; }
     public GraphViewModel GraphViewModel { get; }
     public ICommand CloseCommand { get; }
+    public NodeGraph Graph { get; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

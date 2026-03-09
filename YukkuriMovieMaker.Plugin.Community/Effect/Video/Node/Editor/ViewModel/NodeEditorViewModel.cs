@@ -5,6 +5,7 @@ using System.Windows.Input;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
@@ -28,9 +29,9 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
         set => SetField(ref field, value);
     }
 
-    public ICommand AddNodeCommand { get; }
-    public ICommand FitToScreenCommand { get; }
-    public ICommand ResetZoomCommand { get; }
+    public ICommand AddNodeCommand { get; private set; }
+    public ICommand FitToScreenCommand { get; private set; }
+    public ICommand ResetZoomCommand { get; private set; }
 
     public GraphControlMode CurrentMode
     {
@@ -38,17 +39,19 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
         set => SetField(ref field, value);
     } = GraphControlMode.RectSelection;
 
+    public string? Title => TextUi.Node;
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public void OpenGraph(NodeGraph graph, string title = "Main")
     {
-        var mainTab = new TabViewModel(graph, title, this, CloseTab);
-        if (Tabs.Contains(mainTab))
+        if (Tabs.Any(tab => tab.Graph == graph))
         {
-            SelectedTab = mainTab;
+            SelectedTab = Tabs.First(tab => tab.Graph == graph);
             return;
         }
 
+        var mainTab = new TabViewModel(graph, title, this, CloseTab);
         Tabs.Add(mainTab);
         SelectedTab = mainTab;
     }
@@ -142,5 +145,55 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
         field = value;
         OnPropertyChanged(propertyName);
         return true;
+    }
+
+    public ToolState SaveState()
+    {
+        return new NodeEditorState
+        {
+            Tabs = Tabs,
+            SelectedTab = SelectedTab,
+            AddNodeCommand = AddNodeCommand,
+            FitToScreenCommand = FitToScreenCommand,
+            ResetZoomCommand = ResetZoomCommand,
+            CurrentMode = CurrentMode
+        };
+    }
+
+    public void LoadState(ToolState stateData)
+    {
+        var state = (NodeEditorState)stateData;
+        Tabs.Clear();
+        foreach (var tab in state.Tabs) Tabs.Add(tab);
+
+        SelectedTab = state.SelectedTab;
+        AddNodeCommand = state.AddNodeCommand;
+        FitToScreenCommand = state.FitToScreenCommand;
+        ResetZoomCommand = state.ResetZoomCommand;
+        CurrentMode = state.CurrentMode;
+    }
+
+    public event EventHandler<CreateNewToolViewRequestedEventArgs>? CreateNewToolViewRequested;
+
+    private record NodeEditorState : ToolState
+    {
+        public NodeEditorState()
+        {
+        }
+
+        public NodeEditorState(SerializableToolState state)
+            : base(state)
+        {
+        }
+
+        public required ObservableCollection<TabViewModel> Tabs { get; init; }
+
+        public required TabViewModel? SelectedTab { get; init; }
+
+        public required ICommand AddNodeCommand { get; init; }
+        public required ICommand FitToScreenCommand { get; init; }
+        public required ICommand ResetZoomCommand { get; init; }
+
+        public GraphControlMode CurrentMode { get; init; }
     }
 }
