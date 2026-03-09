@@ -1,5 +1,4 @@
 using System.Collections;
-using System.ComponentModel;
 using System.Windows;
 using AvalonDock;
 using AvalonDock.Layout;
@@ -38,9 +37,8 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
             mainViewModel.GetType().GetProperty("AnchorableAreaViewModels")!.GetValue(mainViewModel) as IEnumerable;
         var toolAreaViewModel =
             toolAreaViewModels
-                    ?.Cast<object>()
-                    .FirstOrDefault(x => (string)x.GetType().GetProperty("Title")?.GetValue(x)! == TextUi.Node) as
-                INotifyPropertyChanged;
+                ?.Cast<object>()
+                .FirstOrDefault(x => (string)x.GetType().GetProperty("Title")?.GetValue(x)! == TextUi.Node);
 
         var layoutService = mainViewModel.GetType().GetProperty("LayoutService")!.GetValue(mainViewModel);
         var dockingManager = layoutService?.GetType().GetProperty("Manager")!.GetValue(layoutService) as DockingManager;

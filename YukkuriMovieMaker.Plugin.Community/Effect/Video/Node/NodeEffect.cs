@@ -221,6 +221,9 @@ public sealed class Processor : IVideoEffectProcessor
             _nodeEffect.InternalGraph.AddNode(_inputNode);
             _nodeEffect.InternalGraph.AddNode(_outputNode);
 
+            _nodeEffect.InternalGraph.SetVisualState(_inputNode.Id, 100, 100);
+            _nodeEffect.InternalGraph.SetVisualState(_outputNode.Id, 500, 100);
+
             _nodeEffect.InternalGraph.Connect(_inputNode.Id, "InputImage", _outputNode.Id, "OutputImage");
 
             _nodeEffect.Graph = Serializer.Create(_nodeEffect.InternalGraph);
