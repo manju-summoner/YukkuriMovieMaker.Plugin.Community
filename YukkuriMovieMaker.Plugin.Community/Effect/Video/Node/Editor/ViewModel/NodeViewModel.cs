@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
@@ -30,6 +31,7 @@ public sealed class NodeViewModel : INotifyPropertyChanged
         DisplayName = nodeAttr?.Label ?? nodeLogic.GetType().Name;
         Category = nodeAttr?.Category ?? "Misc";
         Description = nodeAttr?.Description ?? "";
+        Color = nodeAttr?.Color ?? nameof(Colors.SlateGray);
 
         InputPorts = new ObservableCollection<PortViewModel>(
             CreateInputPorts(nodeLogic, graph)
@@ -59,6 +61,7 @@ public sealed class NodeViewModel : INotifyPropertyChanged
     public string DisplayName { get; }
     public string Category { get; }
     public string Description { get; }
+    public string Color { get; }
 
     public Guid Id { get; }
 
@@ -125,6 +128,7 @@ public sealed class NodeViewModel : INotifyPropertyChanged
                 name,
                 portAttr?.Label ?? name,
                 portAttr?.Description ?? "",
+                portAttr?.Color ?? nameof(Colors.SlateGray),
                 port.ValueType,
                 PortDirection.Input,
                 controlAttr,
@@ -145,6 +149,7 @@ public sealed class NodeViewModel : INotifyPropertyChanged
                 name,
                 portAttr?.Label ?? name,
                 portAttr?.Description ?? "",
+                portAttr?.Color ?? nameof(Colors.SlateGray),
                 port.ValueType,
                 PortDirection.Output,
                 null,

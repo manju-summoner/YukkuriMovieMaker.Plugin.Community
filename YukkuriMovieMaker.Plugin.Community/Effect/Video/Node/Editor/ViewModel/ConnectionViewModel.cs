@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Media;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
@@ -64,6 +65,31 @@ public sealed class ConnectionViewModel : INotifyPropertyChanged
             fig.Segments.Add(new BezierSegment(c1, c2, end, true));
 
             return new PathGeometry([fig]);
+        }
+    }
+
+    public System.Windows.Media.Brush Brush
+    {
+        get
+        {
+            if (FromPort is null || ToPort is null) return new SolidColorBrush(Colors.SlateGray);
+            var brush = new LinearGradientBrush
+            {
+                StartPoint = new Point(0, 0),
+                EndPoint = new Point(1, 0),
+                MappingMode = BrushMappingMode.Absolute
+            };
+            var fromColor = (Color)(FromPort.Color.StartsWith('#')
+                ? ColorConverter.ConvertFromString(FromPort.Color)
+                : typeof(Colors).GetProperty(FromPort.Color)?.GetValue(null) ??
+                  throw new InvalidOperationException($"Unknown color: {FromPort.Color}"));
+            var toColor = (Color)(ToPort.Color.StartsWith('#')
+                ? ColorConverter.ConvertFromString(ToPort.Color)
+                : typeof(Colors).GetProperty(ToPort.Color)?.GetValue(null) ??
+                  throw new InvalidOperationException($"Unknown color: {ToPort.Color}"));
+            brush.GradientStops.Add(new GradientStop(fromColor, 0.2));
+            brush.GradientStops.Add(new GradientStop(toColor, 0.8));
+            return brush;
         }
     }
 

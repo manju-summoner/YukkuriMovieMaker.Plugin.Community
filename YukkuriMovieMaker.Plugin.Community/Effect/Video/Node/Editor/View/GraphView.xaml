@@ -42,7 +42,7 @@
                 </ItemsControl.ItemContainerStyle>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Path Stroke="LightGray"
+                        <Path Stroke="{Binding Brush}"
                               StrokeThickness="2"
                               Data="{Binding Geometry}" />
                     </DataTemplate>

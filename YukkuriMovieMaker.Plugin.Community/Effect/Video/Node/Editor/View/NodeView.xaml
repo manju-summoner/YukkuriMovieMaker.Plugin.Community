@@ -12,7 +12,8 @@
              Background="Transparent"
              MouseLeftButtonDown="OnMouseLeftButtonDown"
              MouseMove="OnMouseMove"
-             MouseLeftButtonUp="OnMouseLeftButtonUp">
+             MouseLeftButtonUp="OnMouseLeftButtonUp"
+             ToolTip="{Binding Description}">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -22,6 +23,7 @@
 
             <BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
             <converters:PortControlTemplateSelector x:Key="PortControlTemplateSelector" />
+            <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -57,17 +59,22 @@
             </Border.Style>
         </Border>
         <!-- ヘッダー -->
-        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DisplayName}"
-                   Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
-                   FontWeight="Bold"
-                   FontSize="12"
-                   Margin="12,0,0,8" />
+        <StackPanel Grid.Row="1" Grid.Column="1"
+                    Margin="12,0,0,8" Orientation="Horizontal" VerticalAlignment="Center">
+            <Ellipse Width="10" Height="10"
+                     Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                     Fill="{Binding Color, Converter={StaticResource ColorToBrushConverter}}" Margin="0 0 5 0" />
+            <TextBlock Text="{Binding DisplayName}"
+                       Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                       FontWeight="Bold"
+                       FontSize="12" />
+        </StackPanel>
 
         <!-- 入力ポート -->
         <ItemsControl Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding InputPorts}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                    <StackPanel Orientation="Horizontal" Margin="0,2" ToolTip="{Binding Description}">
                         <!-- ポート端子（左） -->
                         <view:PortView DataContext="{Binding}" />
 
@@ -113,7 +120,8 @@
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Right"
-                                Margin="0,2">
+                                Margin="0,2"
+                                ToolTip="{Binding Description}">
                         <!-- ラベル -->
                         <TextBlock Text="{Binding Label}"
                                    Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
@@ -136,7 +144,7 @@
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Left"
-                                Margin="8,4, 0, 0">
+                                Margin="12,4, 0, 0">
                         <!-- ラベル -->
                         <TextBlock Text="{Binding Label}"
                                    Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"

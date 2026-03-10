@@ -19,6 +19,7 @@ public sealed class PortViewModel : INotifyPropertyChanged
         string name,
         string label,
         string description,
+        string color,
         Type valueType,
         PortDirection direction,
         PropertyControlBaseAttribute? controlAttribute,
@@ -28,6 +29,7 @@ public sealed class PortViewModel : INotifyPropertyChanged
         Name = name;
         Label = label;
         Description = description;
+        Color = color;
         ValueType = valueType;
         Direction = direction;
         ControlAttribute = controlAttribute;
@@ -48,6 +50,7 @@ public sealed class PortViewModel : INotifyPropertyChanged
     public string Name { get; }
     public string Label { get; }
     public string Description { get; }
+    public string Color { get; }
     public Type ValueType { get; }
     public PortDirection Direction { get; }
 
