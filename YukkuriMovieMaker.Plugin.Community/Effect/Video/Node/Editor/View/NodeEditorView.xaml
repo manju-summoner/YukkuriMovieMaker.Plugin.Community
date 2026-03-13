@@ -43,9 +43,9 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="View">
-                <MenuItem Header="Zoom -" />
-                <MenuItem Header="Zoom +" />
-                <MenuItem Header="Reset Zoom" Command="{Binding ResetZoomCommand}" />
+                <MenuItem Header="Zoom +" Command="{Binding ZoomUpCommand}" InputGestureText="Ctrl++" />
+                <MenuItem Header="Zoom -" Command="{Binding ZoomDownCommand}" InputGestureText="Ctrl+-" />
+                <MenuItem Header="Reset Zoom" Command="{Binding ResetZoomCommand}" InputGestureText="Ctrl+0" />
                 <Separator />
                 <MenuItem Header="Fit" Command="{Binding FitToScreenCommand}" />
             </MenuItem>
@@ -80,7 +80,8 @@
             <TabControl.ContentTemplate>
                 <DataTemplate>
                     <view:GraphView DataContext="{Binding GraphViewModel}"
-                                    Mode="{Binding DataContext.CurrentMode, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                    Mode="{Binding DataContext.CurrentMode, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    ClipToBounds="True" />
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>

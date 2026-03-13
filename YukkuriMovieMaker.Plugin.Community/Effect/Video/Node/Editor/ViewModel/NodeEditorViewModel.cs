@@ -19,6 +19,8 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
         AddNodeCommand = new RelayCommand(ShowAddNodeMenu, () => SelectedTab != null);
         FitToScreenCommand = new RelayCommand(FitToScreen, () => SelectedTab != null);
         ResetZoomCommand = new RelayCommand(ResetZoom, () => SelectedTab != null);
+        ZoomUpCommand = new RelayCommand(ZoomUp, () => SelectedTab != null);
+        ZoomDownCommand = new RelayCommand(ZoomDown, () => SelectedTab != null);
     }
 
     public ObservableCollection<TabViewModel> Tabs { get; }
@@ -32,6 +34,8 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
     public ICommand AddNodeCommand { get; private set; }
     public ICommand FitToScreenCommand { get; private set; }
     public ICommand ResetZoomCommand { get; private set; }
+    public ICommand ZoomUpCommand { get; private set; }
+    public ICommand ZoomDownCommand { get; private set; }
 
     public GraphControlMode CurrentMode
     {
@@ -139,6 +143,46 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
         graphVm.Zoom = 1.0;
         graphVm.PanX = 0;
         graphVm.PanY = 0;
+    }
+
+    private void ZoomUp()
+    {
+        if (SelectedTab == null)
+            return;
+
+        var graphVm = SelectedTab.GraphViewModel;
+        var oldZoom = graphVm.Zoom;
+        var newZoom = oldZoom * 1.1;
+
+        if (newZoom < 0.1) newZoom = 0.1;
+        if (newZoom > 5.0) newZoom = 5.0;
+
+        var cx = graphVm.Width / 2;
+        var cy = graphVm.Height / 2;
+
+        graphVm.Zoom = newZoom;
+        graphVm.PanX = cx - (cx - graphVm.PanX) * (newZoom / oldZoom);
+        graphVm.PanY = cy - (cy - graphVm.PanY) * (newZoom / oldZoom);
+    }
+
+    private void ZoomDown()
+    {
+        if (SelectedTab == null)
+            return;
+
+        var graphVm = SelectedTab.GraphViewModel;
+        var oldZoom = graphVm.Zoom;
+        var newZoom = oldZoom / 1.1;
+
+        if (newZoom < 0.1) newZoom = 0.1;
+        if (newZoom > 5.0) newZoom = 5.0;
+
+        var cx = graphVm.Width / 2;
+        var cy = graphVm.Height / 2;
+
+        graphVm.Zoom = newZoom;
+        graphVm.PanX = cx - (cx - graphVm.PanX) * (newZoom / oldZoom);
+        graphVm.PanY = cy - (cy - graphVm.PanY) * (newZoom / oldZoom);
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

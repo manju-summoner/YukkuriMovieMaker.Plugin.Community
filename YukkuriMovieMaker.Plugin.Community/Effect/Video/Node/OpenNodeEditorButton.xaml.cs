@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Windows;
+using System.Windows.Input;
 using AvalonDock;
 using AvalonDock.Layout;
 using YukkuriMovieMaker.Commons;
@@ -69,6 +70,28 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         {
             if (!layout.IsSelected)
                 toolAreaViewModel?.GetType().GetProperty("ViewModel")?.SetValue(toolAreaViewModel, vm);
+        };
+
+        if (vm is null) return;
+        if (layout is null) return;
+
+        var nodeBindings = new[]
+        {
+            new KeyBinding(vm.ZoomUpCommand, Key.Add, ModifierKeys.Control),
+            new KeyBinding(vm.ZoomUpCommand, Key.OemPlus, ModifierKeys.Control),
+            new KeyBinding(vm.ZoomDownCommand, Key.Subtract, ModifierKeys.Control),
+            new KeyBinding(vm.ZoomDownCommand, Key.OemMinus, ModifierKeys.Control),
+            new KeyBinding(vm.ResetZoomCommand, Key.D0, ModifierKeys.Control)
+        };
+
+        layout.IsActiveChanged += (_, _) =>
+        {
+            if (layout.IsActive)
+                foreach (var kb in nodeBindings)
+                    parentWindow.InputBindings.Add(kb);
+            else
+                foreach (var kb in nodeBindings)
+                    parentWindow.InputBindings.Remove(kb);
         };
     }
 }
