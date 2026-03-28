@@ -20,9 +20,9 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0">
             <MenuItem Header="Edit">
-                <MenuItem Header="Copy" />
-                <MenuItem Header="Cut" />
-                <MenuItem Header="Paste" />
+                <MenuItem Header="Copy" Command="{Binding CopyCommand}" InputGestureText="Ctrl+C" />
+                <MenuItem Header="Cut" Command="{Binding CutCommand}" InputGestureText="Ctrl+X" />
+                <MenuItem Header="Paste" Command="{Binding PasteCommand}" InputGestureText="Ctrl+V" />
                 <Separator />
                 <MenuItem Header="Mode">
                     <MenuItem Header="Rect Selection"

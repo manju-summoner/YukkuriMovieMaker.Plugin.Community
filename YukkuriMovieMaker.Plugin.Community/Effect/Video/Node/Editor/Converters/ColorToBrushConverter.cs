@@ -11,12 +11,7 @@ public class ColorToBrushConverter : IValueConverter
         if (value is not string colorName)
             return false;
 
-        var color = (Color)(colorName.StartsWith('#')
-            ? ColorConverter.ConvertFromString(colorName)
-            : typeof(Colors).GetProperty(colorName)?.GetValue(null) ??
-              throw new InvalidOperationException($"Unknown color: {colorName}"));
-
-        return new SolidColorBrush(color);
+        return Convert(colorName);
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -25,6 +20,21 @@ public class ColorToBrushConverter : IValueConverter
             return false;
         return value is not SolidColorBrush brush
             ? nameof(Colors.SlateGray)
-            : $"#{brush.Color.A:x2}{brush.Color.R:x2}{brush.Color.G:x2}{brush.Color.B:x2}";
+            : ConvertBack(brush);
+    }
+
+    public static SolidColorBrush Convert(string colorName)
+    {
+        var color = (Color)(colorName.StartsWith('#')
+            ? ColorConverter.ConvertFromString(colorName)
+            : typeof(Colors).GetProperty(colorName)?.GetValue(null) ??
+              throw new InvalidOperationException($"Unknown color: {colorName}"));
+
+        return new SolidColorBrush(color);
+    }
+
+    public static string ConvertBack(SolidColorBrush brush)
+    {
+        return $"#{brush.Color.A:x2}{brush.Color.R:x2}{brush.Color.G:x2}{brush.Color.B:x2}";
     }
 }

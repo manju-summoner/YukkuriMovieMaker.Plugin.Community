@@ -81,7 +81,12 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
             new KeyBinding(vm.ZoomUpCommand, Key.OemPlus, ModifierKeys.Control),
             new KeyBinding(vm.ZoomDownCommand, Key.Subtract, ModifierKeys.Control),
             new KeyBinding(vm.ZoomDownCommand, Key.OemMinus, ModifierKeys.Control),
-            new KeyBinding(vm.ResetZoomCommand, Key.D0, ModifierKeys.Control)
+            new KeyBinding(vm.ResetZoomCommand, Key.D0, ModifierKeys.Control),
+            new KeyBinding(vm.DeleteSelectedCommand, Key.Delete, ModifierKeys.None),
+            new KeyBinding(vm.DeleteSelectedCommand, Key.Back, ModifierKeys.None),
+            new KeyBinding(vm.CopyCommand, Key.C, ModifierKeys.Control),
+            new KeyBinding(vm.CutCommand, Key.X, ModifierKeys.Control),
+            new KeyBinding(vm.PasteCommand, Key.V, ModifierKeys.Control)
         };
 
         layout.IsActiveChanged += (_, _) =>

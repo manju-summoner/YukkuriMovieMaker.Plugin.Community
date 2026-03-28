@@ -13,8 +13,18 @@
              MouseLeftButtonUp="OnMouseLeftButtonUp"
              MouseWheel="OnMouseWheel"
              MouseDown="OnMouseDown"
-             MouseUp="OnMouseUp">
-
+             MouseUp="OnMouseUp"
+             ContextMenuOpening="OnContextMenuOpening">
+    <UserControl.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="Add Node" Command="{Binding ParentEditor.AddNodeCommand}" />
+            <Separator />
+            <MenuItem Header="Copy" Command="{Binding ParentEditor.CopyCommand}" InputGestureText="Ctrl+C" />
+            <MenuItem Header="Cut" Command="{Binding ParentEditor.CutCommand}" InputGestureText="Ctrl+X" />
+            <MenuItem Header="Paste" Command="{Binding ParentEditor.PasteCommand}" InputGestureText="Ctrl+V" />
+            <MenuItem Header="Delete" Command="{Binding ParentEditor.DeleteSelectedCommand}" InputGestureText="Delete" />
+        </ContextMenu>
+    </UserControl.ContextMenu>
     <Grid x:Name="RootGrid" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
         <Canvas>
             <Canvas.LayoutTransform>

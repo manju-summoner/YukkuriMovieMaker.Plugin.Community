@@ -6,6 +6,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor;
 
 public class NodeEditor : IToolPlugin
 {
+    public NodeEditor()
+    {
+        ControlRegistrations.Initialize();
+    }
+
     public string Name => TextUi.Node;
     public Type ViewModelType => typeof(NodeEditorViewModel);
     public Type ViewType => typeof(NodeEditorView);

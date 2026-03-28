@@ -6,6 +6,10 @@ using System.Windows.Input;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
+using VisualStateChangedEventArgs =
+    YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events.VisualStateChangedEventArgs;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
@@ -40,6 +44,12 @@ public sealed class GraphViewModel : INotifyPropertyChanged
     }
 
     public Point? TemporaryEndPoint
+    {
+        get;
+        set => SetField(ref field, value);
+    }
+
+    public Point? PendingContextPoint
     {
         get;
         set => SetField(ref field, value);
@@ -116,28 +126,45 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         switch (e)
         {
             case NodeAddedEventArgs added:
+            {
                 var vm = new NodeViewModel(added.Node, _graph, ParentEditor);
                 Nodes.Add(vm);
                 break;
+            }
 
             case NodeRemovedEventArgs removed:
+            {
                 var node = Nodes.FirstOrDefault(n => n.Id == removed.NodeId);
                 if (node != null) Nodes.Remove(node);
                 break;
+            }
 
             case ConnectionChangedEventArgs:
+            {
                 SyncFromGraph();
                 break;
+            }
 
             case ValueChangedEventArgs valueChanged:
+            {
                 UpdatePortValue(valueChanged);
                 break;
+            }
+
+            case VisualStateChangedEventArgs visualStateChanged:
+            {
+                var node = Nodes.FirstOrDefault(nodeViewModel => nodeViewModel.Id == visualStateChanged.NodeId);
+                if (node == null) break;
+                node.X = visualStateChanged.NewState.X;
+                node.Y = visualStateChanged.NewState.Y;
+                break;
+            }
         }
     }
 
     private void AddNode(Type? nodeType)
     {
-        if (nodeType == null!) return;
+        if (nodeType == null) return;
 
         _graph.BeginEdit();
 
@@ -145,9 +172,21 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         node.Id = Guid.NewGuid();
 
         _graph.AddNode(node);
-        _graph.SetVisualState(node.Id, 100, 100);
+
+        var pos = PendingContextPoint ?? new Point(100, 100);
+        _graph.SetVisualState(node.Id, pos.X, pos.Y);
 
         _graph.EndEdit();
+    }
+
+    internal void DeleteSelectedNode()
+    {
+        foreach (var guid in SelectedNodes
+                     .Where(nodeVm =>
+                         nodeVm.NodeLogic.GetType() != typeof(ArgumentsNode) &&
+                         nodeVm.NodeLogic.GetType() != typeof(ReturnNode))
+                     .Select(vm => vm.Id))
+            DeleteNodeCommand.Execute(guid);
     }
 
     private void DeleteNode(Guid nodeId)
@@ -298,6 +337,92 @@ public sealed class GraphViewModel : INotifyPropertyChanged
             canvasPoint.X * Zoom + PanX,
             canvasPoint.Y * Zoom + PanY
         );
+    }
+
+    internal void Copy(out GraphSnapshot? clipboard)
+    {
+        if (SelectedNodes.Count == 0)
+        {
+            clipboard = null;
+            return;
+        }
+
+        var selectedIds = SelectedNodes.Where(nodeVm =>
+                nodeVm.NodeLogic.GetType() != typeof(ArgumentsNode) && nodeVm.NodeLogic.GetType() != typeof(ReturnNode))
+            .Select(n => n.Id)
+            .ToHashSet();
+        var tempGraph = new NodeGraph();
+
+        foreach (var id in selectedIds)
+        {
+            var node = _graph.GetNode(id);
+            if (node != null)
+            {
+                tempGraph.AddNode(node);
+                if (_graph.VisualStates.TryGetValue(id, out var visualState)) tempGraph.VisualStates[id] = visualState;
+            }
+        }
+
+        foreach (var conn in _graph.Connections)
+            if (selectedIds.Contains(conn.FromId) && selectedIds.Contains(conn.ToId))
+                tempGraph.Connections.Add(conn);
+
+        clipboard = Serializer.Create(tempGraph);
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    internal void Paste(GraphSnapshot? clipboard)
+    {
+        if (clipboard == null)
+            return;
+
+        var tempGraph = Serializer.Restore(clipboard);
+
+        foreach (var kv in tempGraph.Nodes.ToList())
+            if (kv.Value.GetType() == typeof(ArgumentsNode) || kv.Value.GetType() == typeof(ReturnNode))
+                tempGraph.RemoveNode(kv.Key);
+
+        var nodes = tempGraph.Nodes.Values.ToList();
+        if (nodes.Count == 0)
+            return;
+
+        var positions = nodes.Select(n =>
+        {
+            if (tempGraph.VisualStates.TryGetValue(n.Id, out var vs))
+                return new Point(vs.X, vs.Y);
+
+            return new Point(0, 0);
+        }).ToList();
+
+        var minX = positions.Min(p => p.X);
+        var minY = positions.Min(p => p.Y);
+
+        var anchor = PendingContextPoint ?? new Point(minX + 50, minY + 50);
+        var dx = anchor.X - minX;
+        var dy = anchor.Y - minY;
+
+        var idMapping = new Dictionary<Guid, Guid>();
+
+        foreach (var node in nodes)
+        {
+            var oldId = node.Id;
+            var newId = Guid.NewGuid();
+
+            idMapping[oldId] = newId;
+            node.Id = newId;
+
+            _graph.AddNode(node);
+
+            if (tempGraph.VisualStates.TryGetValue(oldId, out var oldVisualState))
+                _graph.SetVisualState(newId, oldVisualState.X + dx, oldVisualState.Y + dy);
+        }
+
+        foreach (var conn in tempGraph.Connections)
+            if (idMapping.TryGetValue(conn.FromId, out var newFromId) &&
+                idMapping.TryGetValue(conn.ToId, out var newToId))
+                _graph.Connect(newFromId, conn.FromPort, newToId, conn.ToPort);
+
+        _graph.Commit();
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

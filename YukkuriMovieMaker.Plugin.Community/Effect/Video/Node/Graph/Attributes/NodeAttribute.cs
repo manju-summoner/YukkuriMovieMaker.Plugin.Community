@@ -1,16 +1,12 @@
-using System.Windows.Media;
-
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class NodeAttribute(
-    string category,
+    Type categoryType,
     string label,
-    string description,
-    string color = nameof(Colors.SlateGray)) : Attribute
+    string description) : Attribute
 {
-    public string Category { get; } = category;
+    public Type CategoryType { get; } = categoryType;
     public string Label { get; } = label;
     public string Description { get; } = description;
-    public string Color { get; } = color;
 }

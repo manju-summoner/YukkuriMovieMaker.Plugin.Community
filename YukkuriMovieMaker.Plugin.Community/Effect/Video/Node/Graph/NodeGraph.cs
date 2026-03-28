@@ -41,14 +41,14 @@ public sealed class NodeGraph
     /// <param name="nodeId">削除するノードのID</param>
     public void RemoveNode(Guid nodeId)
     {
+        if (!_nodes.TryGetValue(nodeId, out var node)) return;
         var related = Connections
             .Where(c => c.FromId == nodeId || c.ToId == nodeId)
             .ToList();
 
         foreach (var c in related)
             Disconnect(c.FromId, c.FromPort, c.ToId, c.ToPort);
-
-        _nodes[nodeId].Invalidate();
+        node.Invalidate();
         _nodes.Remove(nodeId);
 
         OnGraphChanged(new NodeRemovedEventArgs(nodeId));

@@ -14,24 +14,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 public sealed class NodeViewModel : INotifyPropertyChanged
 {
     private readonly NodeGraph _graph;
-    private readonly NodeLogic _nodeLogic;
+    internal readonly NodeLogic NodeLogic;
 
     private double _x;
     private double _y;
 
     public NodeViewModel(NodeLogic nodeLogic, NodeGraph graph, NodeEditorViewModel nodeEditorViewModel)
     {
-        _nodeLogic = nodeLogic;
+        NodeLogic = nodeLogic;
         _graph = graph;
         ParentEditor = nodeEditorViewModel;
 
         Id = nodeLogic.Id;
 
         var nodeAttr = nodeLogic.GetType().GetCustomAttribute<NodeAttribute>();
-        DisplayName = nodeAttr?.Label ?? nodeLogic.GetType().Name;
-        Category = nodeAttr?.Category ?? "Misc";
-        Description = nodeAttr?.Description ?? "";
-        Color = nodeAttr?.Color ?? nameof(Colors.SlateGray);
+        if (nodeAttr == null) throw new InvalidOperationException();
+        DisplayName = nodeAttr.Label;
+        var instance = (INodeCategory)Activator.CreateInstance(nodeAttr.CategoryType)!;
+        Category = instance.Category;
+        Description = nodeAttr.Description;
+        Color = instance.Color;
 
         InputPorts = new ObservableCollection<PortViewModel>(
             CreateInputPorts(nodeLogic, graph)

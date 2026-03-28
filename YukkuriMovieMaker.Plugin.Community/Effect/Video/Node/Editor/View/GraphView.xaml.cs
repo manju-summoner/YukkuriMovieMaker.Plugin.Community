@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -219,13 +220,26 @@ public partial class GraphView
 
     private void OnMouseDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ChangedButton != MouseButton.Middle) return;
+        switch (e.ChangedButton)
+        {
+            case MouseButton.Right:
+            {
+                if (DataContext is not GraphViewModel vm) return;
+                var screen = e.GetPosition(this);
+                var canvas = vm.TransformToCanvas(screen);
+                vm.PendingContextPoint = canvas;
+                break;
+            }
+            case MouseButton.Middle:
+            {
+                _isPanning = true;
+                _panStart = e.GetPosition(RootGrid);
+                CaptureMouse();
 
-        _isPanning = true;
-        _panStart = e.GetPosition(RootGrid);
-        CaptureMouse();
-
-        e.Handled = true;
+                e.Handled = true;
+                break;
+            }
+        }
     }
 
     private void OnMouseUp(object sender, MouseButtonEventArgs e)
@@ -247,6 +261,15 @@ public partial class GraphView
         {
             vm.Width = ActualWidth;
             vm.Height = ActualHeight;
+        }
+    }
+
+    private void OnContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        if (DataContext is GraphViewModel vm)
+        {
+            var pos = Mouse.GetPosition(this);
+            vm.PendingContextPoint = vm.TransformToCanvas(pos);
         }
     }
 }
