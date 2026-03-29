@@ -8,8 +8,7 @@
              d:DesignHeight="10" d:DesignWidth="10"
              d:DataContext="{d:DesignInstance viewModel:PortViewModel}">
     <Grid>
-        <Ellipse x:Name="PortCircle"
-                 Width="10"
+        <Ellipse Width="10"
                  Height="10"
                  Fill="{Binding Color}"
                  MouseLeftButtonDown="OnMouseLeftButtonDown"

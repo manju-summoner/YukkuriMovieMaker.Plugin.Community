@@ -33,6 +33,7 @@
             <Canvas.RenderTransform>
                 <TranslateTransform X="{Binding PanX}" Y="{Binding PanY}" />
             </Canvas.RenderTransform>
+
             <ItemsControl ItemsSource="{Binding Connections, UpdateSourceTrigger=PropertyChanged}"
                           IsHitTestVisible="False">
                 <ItemsControl.ItemsPanel>
@@ -40,16 +41,7 @@
                         <Canvas />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemContainerStyle>
-                    <Style TargetType="ContentPresenter">
-                        <Setter Property="Canvas.Left" Value="0" />
-                        <Setter Property="Canvas.Top" Value="0" />
-                        <Setter Property="Width"
-                                Value="{Binding ElementName=RootGrid, Path=ActualWidth}" />
-                        <Setter Property="Height"
-                                Value="{Binding ElementName=RootGrid, Path=ActualHeight}" />
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
+
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Path Stroke="{Binding Brush}"
@@ -58,6 +50,7 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+
             <ItemsControl ItemsSource="{Binding Nodes}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

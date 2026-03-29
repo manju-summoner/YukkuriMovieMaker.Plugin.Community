@@ -30,14 +30,20 @@ public sealed class ConnectionViewModel : INotifyPropertyChanged
             FromPort.PropertyChanged += (_, e) =>
             {
                 if (e.PropertyName == nameof(PortViewModel.Position))
+                {
                     OnPropertyChanged(nameof(Geometry));
+                    OnPropertyChanged(nameof(Brush));
+                }
             };
 
         if (ToPort != null)
             ToPort.PropertyChanged += (_, e) =>
             {
                 if (e.PropertyName == nameof(PortViewModel.Position))
+                {
                     OnPropertyChanged(nameof(Geometry));
+                    OnPropertyChanged(nameof(Brush));
+                }
             };
     }
 
@@ -72,13 +78,19 @@ public sealed class ConnectionViewModel : INotifyPropertyChanged
     {
         get
         {
-            if (FromPort is null || ToPort is null) return new SolidColorBrush(Colors.SlateGray);
+            if (FromPort is null || ToPort is null)
+                return new SolidColorBrush(Colors.SlateGray);
+
+            var reverseX = ToPort.Position.X < FromPort.Position.X;
+            var reverseY = ToPort.Position.Y < FromPort.Position.Y;
             var brush = new LinearGradientBrush
             {
-                StartPoint = new Point(0, 0),
-                EndPoint = new Point(1, 0),
-                MappingMode = BrushMappingMode.Absolute
+                StartPoint = reverseX ? reverseY ? new Point(1, 1) : new Point(1, 0)
+                    : reverseY ? new Point(0, 1) : new Point(0, 0),
+                EndPoint = reverseX ? reverseY ? new Point(0, 1) : new Point(0, 0)
+                    : reverseY ? new Point(1, 1) : new Point(1, 0)
             };
+
             var fromColor = (Color)(FromPort.Color.StartsWith('#')
                 ? ColorConverter.ConvertFromString(FromPort.Color)
                 : typeof(Colors).GetProperty(FromPort.Color)?.GetValue(null) ??
@@ -87,8 +99,8 @@ public sealed class ConnectionViewModel : INotifyPropertyChanged
                 ? ColorConverter.ConvertFromString(ToPort.Color)
                 : typeof(Colors).GetProperty(ToPort.Color)?.GetValue(null) ??
                   throw new InvalidOperationException($"Unknown color: {ToPort.Color}"));
-            brush.GradientStops.Add(new GradientStop(fromColor, 0.2));
-            brush.GradientStops.Add(new GradientStop(toColor, 0.8));
+            brush.GradientStops.Add(new GradientStop(fromColor, 0.4));
+            brush.GradientStops.Add(new GradientStop(toColor, 0.6));
             return brush;
         }
     }

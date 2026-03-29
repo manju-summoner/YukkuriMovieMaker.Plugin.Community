@@ -124,13 +124,14 @@ public sealed class NodeViewModel : INotifyPropertyChanged
         {
             var prop = node.GetType().GetProperty(name);
             var portAttr = prop?.GetCustomAttribute<InputPortAttribute>();
+            var portColorAttr = prop?.GetCustomAttribute<PortColorSettingAttribute>();
             var controlAttr = prop?.GetCustomAttribute<PropertyControlBaseAttribute>();
 
             yield return new PortViewModel(
                 name,
                 portAttr?.Label ?? name,
                 portAttr?.Description ?? "",
-                portAttr?.Color ?? nameof(Colors.SlateGray),
+                portColorAttr?.Color ?? nameof(Colors.SlateGray),
                 port.ValueType,
                 PortDirection.Input,
                 controlAttr,
@@ -146,12 +147,13 @@ public sealed class NodeViewModel : INotifyPropertyChanged
         {
             var prop = node.GetType().GetProperty(name);
             var portAttr = prop?.GetCustomAttribute<OutputPortAttribute>();
+            var portColorAttr = prop?.GetCustomAttribute<PortColorSettingAttribute>();
 
             yield return new PortViewModel(
                 name,
                 portAttr?.Label ?? name,
                 portAttr?.Description ?? "",
-                portAttr?.Color ?? nameof(Colors.SlateGray),
+                portColorAttr?.Color ?? nameof(Colors.SlateGray),
                 port.ValueType,
                 PortDirection.Output,
                 null,

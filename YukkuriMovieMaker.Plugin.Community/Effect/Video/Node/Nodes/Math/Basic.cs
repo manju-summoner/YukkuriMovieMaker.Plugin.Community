@@ -1,3 +1,4 @@
+using Vortice.Mathematics;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
@@ -9,6 +10,7 @@ public class AddNode : NodeLogic
 {
     [InputPort("左項", "Left operand")]
     [NumberPortControl(Min = -40000, Max = 40000)]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Left
     {
         get => GetInput<float>();
@@ -17,6 +19,7 @@ public class AddNode : NodeLogic
 
     [InputPort("右項", "Right operand")]
     [NumberPortControl(Min = -40000, Max = 40000)]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Right
     {
         get => GetInput<float>();
@@ -24,6 +27,7 @@ public class AddNode : NodeLogic
     }
 
     [OutputPort("結果", "Sum")]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Result
     {
         get => GetOutput<float>();
@@ -42,6 +46,7 @@ public class SubtractNode : NodeLogic
 {
     [InputPort("左項", "Left operand")]
     [NumberPortControl(Min = -40000, Max = 40000)]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Left
     {
         get => GetInput<float>();
@@ -50,13 +55,16 @@ public class SubtractNode : NodeLogic
 
     [InputPort("右項", "Right operand")]
     [NumberPortControl(Min = -40000, Max = 40000)]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Right
     {
         get => GetInput<float>();
         set => SetInput(value);
     }
 
-    [OutputPort("結果", "A minus B")] public float Result { get; set; }
+    [OutputPort("結果", "A minus B")]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
+    public float Result { get; set; }
 
     protected override Task Calculate()
     {
@@ -70,6 +78,7 @@ public class MultiplyNode : NodeLogic
 {
     [InputPort("左項", "Left operand")]
     [NumberPortControl(Min = -40000, Max = 40000)]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Left
     {
         get => GetInput<float>();
@@ -78,6 +87,7 @@ public class MultiplyNode : NodeLogic
 
     [InputPort("右項", "Right operand")]
     [NumberPortControl(Min = -40000, Max = 40000)]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Right
     {
         get => GetInput<float>();
@@ -85,6 +95,7 @@ public class MultiplyNode : NodeLogic
     }
 
     [OutputPort("結果", "Product")]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Result
     {
         get => GetOutput<float>();
@@ -103,6 +114,7 @@ public class DivideNode : NodeLogic
 {
     [InputPort("左項", "Left operand")]
     [NumberPortControl(Min = -40000, Max = 40000)]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Left
     {
         get => GetOutput<float>();
@@ -111,6 +123,7 @@ public class DivideNode : NodeLogic
 
     [InputPort("右項", "Right operand")]
     [NumberPortControl(Min = -40000, Max = 40000)]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Right
     {
         get => GetInput<float>();
@@ -118,6 +131,7 @@ public class DivideNode : NodeLogic
     }
 
     [OutputPort("結果", "Quotient of A divided by B")]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Result { get; set; }
 
     protected override Task Calculate()
