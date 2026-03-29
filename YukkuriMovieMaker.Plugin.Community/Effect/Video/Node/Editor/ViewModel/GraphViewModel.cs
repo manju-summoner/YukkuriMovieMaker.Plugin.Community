@@ -186,7 +186,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged
                          nodeVm.NodeLogic.GetType() != typeof(ArgumentsNode) &&
                          nodeVm.NodeLogic.GetType() != typeof(ReturnNode))
                      .Select(vm => vm.Id))
-            DeleteNodeCommand.Execute(guid);
+            _graph.RemoveNode(guid);
     }
 
     private void DeleteNode(Guid nodeId)
