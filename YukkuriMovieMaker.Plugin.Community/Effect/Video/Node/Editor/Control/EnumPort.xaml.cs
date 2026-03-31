@@ -17,9 +17,8 @@ public partial class EnumPort
     public static readonly DependencyProperty ItemsProperty =
         DependencyProperty.Register(
             nameof(Items),
-            typeof(List<string>),
-            typeof(EnumPort),
-            new PropertyMetadata(new List<string>()));
+            typeof(Type),
+            typeof(EnumPort));
 
     public static readonly DependencyProperty IsEditableProperty =
         DependencyProperty.Register(
@@ -39,9 +38,9 @@ public partial class EnumPort
         set => SetValue(ValueProperty, value);
     }
 
-    public List<string> Items
+    public Type Items
     {
-        get => (List<string>)GetValue(ItemsProperty);
+        get => (Type)GetValue(ItemsProperty);
         init => SetValue(ItemsProperty, value);
     }
 

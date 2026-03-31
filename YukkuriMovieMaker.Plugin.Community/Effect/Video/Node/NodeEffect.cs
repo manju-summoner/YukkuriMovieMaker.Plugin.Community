@@ -15,6 +15,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
@@ -94,6 +95,7 @@ public sealed class Processor : IVideoEffectProcessor
         CreateBlankBitmap();
 
         if (_nodeEffect.InternalGraph != null!) _nodeEffect.InternalGraph.Committed += OnGraphCommitted;
+        _nodeEffect.GraphUpdated += OnGraphUpdated;
     }
 
     public ID2D1Image Output => _outputImage ?? _blankBitmap!;
@@ -117,12 +119,12 @@ public sealed class Processor : IVideoEffectProcessor
 
                 _inputNode!.InjectArguments(new Dictionary<string, object?>
                 {
-                    ["InputImage"] = _currentInputImage,
+                    ["InputImage"] = new ImageWrapper { Image = _currentInputImage },
                     ["FrameIndex"] = effectDescription.ItemPosition.Frame
                 });
 
                 var outputDict = _outputNode!.ExtractReturns(context).GetAwaiter().GetResult();
-                var outputImage = outputDict["OutputImage"] as ID2D1Image;
+                var outputImage = (outputDict["OutputImage"] as ImageWrapper)?.Image;
 
                 if (outputImage == null || outputImage.NativePointer == IntPtr.Zero)
                     throw new InvalidOperationException(TextUi.OutputImageIsNull);
@@ -173,6 +175,7 @@ public sealed class Processor : IVideoEffectProcessor
         lock (_lock)
         {
             if (_nodeEffect.InternalGraph != null!) _nodeEffect.InternalGraph.Committed -= OnGraphCommitted;
+            _nodeEffect.GraphUpdated -= OnGraphUpdated;
 
             ClearInput();
 
@@ -201,7 +204,7 @@ public sealed class Processor : IVideoEffectProcessor
 
             _inputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ArgumentsNode>().FirstOrDefault() ??
                          new ArgumentsNode(
-                             new PortDefinition("InputImage", typeof(ID2D1Image)),
+                             new PortDefinition("InputImage", typeof(ImageWrapper)),
                              new PortDefinition("FrameIndex", typeof(int))
                          )
                          {
@@ -209,7 +212,7 @@ public sealed class Processor : IVideoEffectProcessor
                          };
             _outputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ReturnNode>().FirstOrDefault() ??
                           new ReturnNode(
-                              new PortDefinition("OutputImage", typeof(ID2D1Image))
+                              new PortDefinition("OutputImage", typeof(ImageWrapper))
                           )
                           {
                               Id = Guid.NewGuid()
@@ -220,7 +223,7 @@ public sealed class Processor : IVideoEffectProcessor
             _nodeEffect.InternalGraph = new NodeGraph();
 
             _inputNode = new ArgumentsNode(
-                new PortDefinition("InputImage", typeof(ID2D1Image)),
+                new PortDefinition("InputImage", typeof(ImageWrapper)),
                 new PortDefinition("FrameIndex", typeof(int))
             )
             {
@@ -228,7 +231,7 @@ public sealed class Processor : IVideoEffectProcessor
             };
 
             _outputNode = new ReturnNode(
-                new PortDefinition("OutputImage", typeof(ID2D1Image))
+                new PortDefinition("OutputImage", typeof(ImageWrapper))
             )
             {
                 Id = Guid.NewGuid()
@@ -243,6 +246,25 @@ public sealed class Processor : IVideoEffectProcessor
             _nodeEffect.InternalGraph.Connect(_inputNode.Id, "InputImage", _outputNode.Id, "OutputImage");
 
             _nodeEffect.Graph = Serializer.Create(_nodeEffect.InternalGraph);
+
+            _inputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ArgumentsNode>().First();
+            _outputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ReturnNode>().First();
+        }
+    }
+
+    private void OnGraphUpdated(object? sender, EventArgs e)
+    {
+        lock (_lock)
+        {
+            if (_nodeEffect.InternalGraph == null!) return;
+
+            _nodeEffect.InternalGraph.Committed -= OnGraphCommitted;
+            _nodeEffect.InternalGraph.Committed += OnGraphCommitted;
+
+            _inputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ArgumentsNode>().FirstOrDefault()
+                         ?? _inputNode;
+            _outputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ReturnNode>().FirstOrDefault()
+                          ?? _outputNode;
         }
     }
 

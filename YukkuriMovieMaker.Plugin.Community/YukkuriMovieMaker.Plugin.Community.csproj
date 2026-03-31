@@ -133,6 +133,9 @@
         <Resource Include="$(ShaderDirPath)VignetteCircularBlur.cso" Link="Resources\Shader\VignetteCircularBlur.cso"/>
         <Resource Include="$(ShaderDirPath)BlurMap.cso" Link="Resources\Shader\BlurMap.cso"/>
         <Resource Include="$(ShaderDirPath)Stretch.cso" Link="Resources\Shader\Stretch.cso"/>
+        <Resource Include="$(ShaderDirPath)MaskClip.cso" Link="Resources\Shader\MaskClip.cso"/>
+        <Resource Include="$(ShaderDirPath)MaskCreate.cso" Link="Resources\Shader\MaskCreate.cso"/>
+        <Resource Include="$(ShaderDirPath)MaskThreshold.cso" Link="Resources\Shader\MaskThreshold.cso"/>
     </ItemGroup>
 
 </Project>

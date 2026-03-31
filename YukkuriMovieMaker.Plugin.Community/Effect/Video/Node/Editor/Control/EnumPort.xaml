@@ -4,13 +4,18 @@
                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                        xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control"
+                       xmlns:converters="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters"
                        mc:Ignorable="d"
                        d:DesignHeight="300" d:DesignWidth="300">
+    <local:PortControlBase.Resources>
+        <converters:EnumTypeToStringList x:Key="EnumTypeToStringListConverter" />
+    </local:PortControlBase.Resources>
     <Grid>
-        <ComboBox ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
-                  SelectedIndex="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
-                  VerticalContentAlignment="Center"
-                  IsEditable="{Binding IsEditable, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
-                  FontSize="10" />
+        <ComboBox
+            ItemsSource="{Binding Items, Converter={StaticResource EnumTypeToStringListConverter}, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
+            SelectedIndex="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
+            VerticalContentAlignment="Center"
+            IsEditable="{Binding IsEditable, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
+            FontSize="10" />
     </Grid>
 </local:PortControlBase>

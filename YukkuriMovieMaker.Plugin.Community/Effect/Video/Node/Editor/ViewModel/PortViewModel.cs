@@ -40,7 +40,14 @@ public sealed class PortViewModel : INotifyPropertyChanged
         if (direction == PortDirection.Input)
         {
             var port = graph.Nodes[nodeId].Inputs[name];
-            _currentValue = port.GetValue().GetAwaiter().GetResult();
+            try
+            {
+                _currentValue = port.GetValue().GetAwaiter().GetResult();
+            }
+            catch (NullReferenceException)
+            {
+                // ignore
+            }
         }
 
         BeginEditCommand = new RelayCommand(() => _graph.BeginEdit());

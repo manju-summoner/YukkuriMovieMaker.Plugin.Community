@@ -9,6 +9,8 @@ public sealed class InputPort : Port
     {
     }
 
+    public bool IsConnected => _outputPort is not null;
+
     public void Connect(OutputPort outputPort)
     {
         outputPort.RegisterConnection(this);

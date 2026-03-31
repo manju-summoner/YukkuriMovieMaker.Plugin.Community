@@ -57,16 +57,21 @@ public abstract class NodeLogic
     {
         if (_isEvaluated) return;
         EvaluationContext = context;
+        var success = false;
         try
         {
             await Calculate();
+            success = true;
+        }
+        catch (NullReferenceException)
+        {
+            if (context != null) throw;
         }
         finally
         {
             EvaluationContext = null;
+            if (success) _isEvaluated = true;
         }
-
-        _isEvaluated = true;
     }
 
     public void Invalidate()
@@ -80,16 +85,17 @@ public abstract class NodeLogic
 
     protected async Task<T?> GetInputAsync<T>([CallerMemberName] string name = null!)
     {
-        var value = await Inputs[name].GetValue();
+        var value = await Inputs[name].GetValue(EvaluationContext);
         if (value is null) return default;
-        return (T?)value;
+        return (T?)Convert.ChangeType(value, typeof(T));
     }
 
     protected T? GetInput<T>([CallerMemberName] string name = null!)
     {
-        var value = Task.Run(() => Inputs[name].GetValue()).GetAwaiter().GetResult();
+        var context = EvaluationContext;
+        var value = Task.Run(() => Inputs[name].GetValue(context)).GetAwaiter().GetResult();
         if (value is null) return default;
-        return (T?)value;
+        return (T?)Convert.ChangeType(value, typeof(T));
     }
 
     protected void SetInput<T>(T value, [CallerMemberName] string name = null!)
@@ -106,14 +112,14 @@ public abstract class NodeLogic
     {
         var value = await Outputs[name].GetValue();
         if (value is null) return default;
-        return (T?)value;
+        return (T?)Convert.ChangeType(value, typeof(T));
     }
 
     protected T? GetOutput<T>([CallerMemberName] string name = null!)
     {
         var value = Task.Run(() => Outputs[name].GetValue()).GetAwaiter().GetResult();
         if (value is null) return default;
-        return (T?)value;
+        return (T?)Convert.ChangeType(value, typeof(T));
     }
 
     protected abstract Task Calculate();

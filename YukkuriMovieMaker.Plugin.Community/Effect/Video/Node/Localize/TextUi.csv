@@ -4,3 +4,15 @@ NodeEditor,ノードエディタ,ノードエディタ,Node Editor,节点编辑�
 
 OutputImageIsNull,出力画像が null の場合のエラーメッセージ,出力画像が null です,Output image is null.,输出图像为空,輸出影像為空,출력 이미지가 null입니다,La imagen de salida es nula,صورة الإخراج فارغة
 ItemPropertiesNotSet,アイテムプロパティが設定されていないエラーメッセージ,アイテムプロパティが設定されていません,Item Properties is not set.,未设置项目属性。,未設定項目屬性。,아이템 속성이 설정되지 않았습니다.,Las propiedades del elemento no están establecidas.,خصائص العنصر غير محددة.
+UnableLoadEffect,エフェクト読み込み失敗のエラーメッセージ,エフェクトを読み込めません,Unable load effect,无法加载效果,無法加載效果,효과를 로드할 수 없습니다,No se puede cargar el efecto,غير قادر على تحميل التأثير
+UnableGenerateEffect,エフェクト生成失敗のエラーメッセージ,エフェクトを生成できません,Unable generate effect,无法生成效果,無法生成效果,효과를 생성할 수 없습니다,No se puede generar el efecto,غير قادر على إنشاء التأثير
+PropertyNotFound,指定プロパティが存在しないエラー,指定されたプロパティ {0} が見つかりません,The specified property {0} was not found.,未找到指定属性 {0},未找到指定屬性 {0},지정된 속성 {0}을(를) 찾을 수 없습니다,No se encontró la propiedad {0},لم يتم العثور على الخاصية {0} المحددة
+PropertyReadOnly,読み取り専用プロパティエラー,プロパティ {0} は読み取り専用です,The property {0} is read-only.,属性 {0} 是只读的,屬性 {0} 是只讀,속성 {0}은(는) 읽기 전용입니다,La propiedad {0} es de solo lectura,الخاصية {0} للقراءة فقط
+UnableCreateAnimationInstance,アニメーション型インスタンス生成失敗,アニメーション型のインスタンスを作成できません,Unable to create an instance of Animation type.,无法创建动画类型的实例,無法建立動畫類型的實例,애니메이션 타입의 인스턴스를 생성할 수 없습니다,No se puede crear una instancia del tipo de animación,تعذر إنشاء نسخة من نوع Animation
+AnimationValuesPropertyError,アニメーションの Values プロパティ関連エラー,Animation オブジェクトの Values プロパティが見つからないか読み取り専用です,The Values property of the Animation object was not found or is read-only.,未找到动画对象的 Values 属性或为只读,找不到 Animation 对象的 Values 屬性或為只讀,Animation 객체의 Values 속성을 찾을 수 없거나 읽기 전용입니다,La propiedad Values del objeto Animation no se encontró o es de solo lectura,خاصية Values لكائن Animation غير موجودة أو للقراءة فقط
+ShaderResourceIdEmpty,シェーダリソース ID が空のエラー,シェーダリソース ID が空です,Shader resource id is empty.,着色器资源 ID 为空,著色器資源 ID 為空,셰이더 리소스 ID가 비어 있습니다,El ID del recurso del shader está vacío,معرّف مورد الشادر فارغ
+ShaderResourceNotFound,シェーダリソース未検出エラー,シェーダリソース *.{0} が見つかりません,The shader resource *.{0} not found.,未找到着色器资源 *.{0},找不到著色器資源 *.{0},셰이더 리소스 *.{0}를 찾을 수 없습니다,No se encontró el recurso del shader *.{0},لم يتم العثور على مورد الشادر *.{0}
+CannotCreateEffectInstance,エフェクトインスタンス生成失敗,エフェクトインスタンスを作成できません,Cannot create effect instance,无法创建效果实例,無法建立效果實例,효과 인스턴스를 생성할 수 없습니다,No se puede crear la instancia del efecto,تعذر إنشاء نسخة التأثير
+CannotCastToShaderEffect,ShaderEffect 型変換失敗,ShaderEffect にキャストできません,Cannot cast to ShaderEffect,无法转换为 ShaderEffect,無法轉換為 ShaderEffect,ShaderEffect로 캐스팅할 수 없습니다,No se puede convertir a ShaderEffect,لا يمكن التحويل إلى ShaderEffect
+IndexOutOfRange,インデックス範囲外エラー,指定されたインデックスが範囲外です,The specified index is out of range.,指定索引超出范围,指定索引超出範圍,지정된 인덱스가 범위를 벗어났습니다,El índice especificado está fuera de rango,الفهرس المحدد خارج النطاق
+CannotCreateType,型生成失敗,型を作成できません,Cannot create the type,无法创建类型,無法建立類型,타입을 생성할 수 없습니다,No se puede crear el tipo,تعذر إنشاء النوع

@@ -29,7 +29,9 @@ public static class Serializer
                 CustomData = (node as ISerializableNode)?.SerializeCustomData() ?? new Dictionary<string, object?>()
             };
 
-            foreach (var input in node.Inputs) snap.InputsValues[input.Key] = await input.Value.GetValue();
+            foreach (var input in node.Inputs)
+                if (!input.Value.IsConnected)
+                    snap.InputsValues[input.Key] = await input.Value.GetValue();
             foreach (var subGraph in node.SubGraphs) snap.SubGraphs[subGraph.Key] = await CreateAsync(subGraph.Value);
 
             switch (node)
