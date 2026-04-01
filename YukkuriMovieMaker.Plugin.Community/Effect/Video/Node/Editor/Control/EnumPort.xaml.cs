@@ -1,4 +1,6 @@
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
 
@@ -27,6 +29,8 @@ public partial class EnumPort
             typeof(EnumPort),
             new PropertyMetadata(false));
 
+    private bool _isUserInteraction;
+
     public EnumPort()
     {
         InitializeComponent();
@@ -53,8 +57,20 @@ public partial class EnumPort
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (EnumPort)d;
-        control.BeginEditCommand?.Execute(null);
         control.OnPropertyChanged(nameof(Value));
-        control.EndEditCommand?.Execute(null);
+    }
+
+    private void ComboBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        _isUserInteraction = true;
+    }
+
+    private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_isUserInteraction) return;
+        _isUserInteraction = false;
+
+        BeginEditCommand?.Execute(null);
+        EndEditCommand?.Execute(null);
     }
 }

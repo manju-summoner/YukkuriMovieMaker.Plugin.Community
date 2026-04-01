@@ -12,10 +12,11 @@
         <Ellipse Width="8"
                  Height="8"
                  Cursor="Hand"
-                 Fill="{Binding Brush}">
+                 Fill="{Binding Brush, RelativeSource={RelativeSource AncestorType=local:BoolPort}}">
             <b:Interaction.Triggers>
                 <b:EventTrigger EventName="PreviewMouseLeftButtonDown">
-                    <b:InvokeCommandAction Command="{Binding ToggleCommand}" />
+                    <b:InvokeCommandAction
+                        Command="{Binding ToggleCommand, RelativeSource={RelativeSource AncestorType=local:BoolPort}}" />
                 </b:EventTrigger>
             </b:Interaction.Triggers>
         </Ellipse>

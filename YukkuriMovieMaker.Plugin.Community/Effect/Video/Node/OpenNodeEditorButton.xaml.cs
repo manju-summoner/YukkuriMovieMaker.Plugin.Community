@@ -1,10 +1,12 @@
 using System.Collections;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using AvalonDock;
 using AvalonDock.Layout;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 
@@ -12,6 +14,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
 
 public partial class OpenNodeEditorButton : IPropertyEditorControl2
 {
+    private EventHandler<CommittedEventArgs>? _committedHandler;
+    private EventHandler? _graphUpdatedHandler;
+
     public OpenNodeEditorButton()
     {
         InitializeComponent();
@@ -57,14 +62,51 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
 
         vm?.OpenGraph(pluginItem.InternalGraph!);
 
-        pluginItem.InternalGraph!.Committed += async (_, _) =>
+        if (_committedHandler != null)
+            pluginItem.InternalGraph!.Committed -= _committedHandler;
+        if (_graphUpdatedHandler != null)
+            pluginItem.GraphUpdated -= _graphUpdatedHandler;
+
+        _committedHandler = async void (_, _) =>
         {
-            BeginEdit?.Invoke(this, EventArgs.Empty);
-            pluginItem.InternalGraphSnapshot = await Serializer.CreateAsync(pluginItem.InternalGraph);
-            EndEdit?.Invoke(this, EventArgs.Empty);
+            try
+            {
+                if (pluginItem.InternalGraph == null) return;
+                BeginEdit?.Invoke(this, EventArgs.Empty);
+                pluginItem.InternalGraphSnapshot = await Serializer.CreateAsync(pluginItem.InternalGraph);
+                EndEdit?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception.Message);
+            }
         };
 
-        pluginItem.GraphUpdated += (_, _) => { vm?.OnGraphUpdated(); };
+        var previousGraph = pluginItem.InternalGraph;
+        _graphUpdatedHandler = (_, _) =>
+        {
+            var newGraph = pluginItem.InternalGraph;
+            if (newGraph == null!) return;
+
+            if (_committedHandler != null)
+            {
+                newGraph.Committed -= _committedHandler;
+                newGraph.Committed += _committedHandler;
+            }
+
+            if (!ReferenceEquals(previousGraph, newGraph))
+            {
+                if (previousGraph != null)
+                    vm?.CloseGraphTab(previousGraph);
+                previousGraph = newGraph;
+            }
+
+            vm?.OnGraphUpdated();
+            vm?.OpenGraph(newGraph);
+        };
+
+        pluginItem.InternalGraph!.Committed += _committedHandler;
+        pluginItem.GraphUpdated += _graphUpdatedHandler;
 
         layout?.IsSelectedChanged += (_, _) =>
         {

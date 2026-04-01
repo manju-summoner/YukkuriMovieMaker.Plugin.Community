@@ -36,17 +36,19 @@ public sealed class PortViewModel : INotifyPropertyChanged
         _graph = graph;
         NodeId = nodeId;
 
-        // 初期値を取得
         if (direction == PortDirection.Input)
         {
             var port = graph.Nodes[nodeId].Inputs[name];
-            try
+            if (!port.IsConnected)
             {
-                _currentValue = port.GetValue().GetAwaiter().GetResult();
-            }
-            catch (NullReferenceException)
-            {
-                // ignore
+                try
+                {
+                    _currentValue = port.GetValue().GetAwaiter().GetResult();
+                }
+                catch (NullReferenceException)
+                {
+                    // ignore
+                }
             }
         }
 
@@ -66,7 +68,7 @@ public sealed class PortViewModel : INotifyPropertyChanged
         get => _currentValue;
         set
         {
-            if (_currentValue != value)
+            if (!Equals(_currentValue, value))
             {
                 _currentValue = value;
                 OnPropertyChanged();
@@ -101,7 +103,7 @@ public sealed class PortViewModel : INotifyPropertyChanged
 
     public void UpdateValueFromGraph(object? value)
     {
-        if (_currentValue != value)
+        if (!Equals(_currentValue, value))
         {
             _currentValue = value;
             OnPropertyChanged(nameof(CurrentValue));

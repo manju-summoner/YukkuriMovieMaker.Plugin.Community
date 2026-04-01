@@ -12,6 +12,8 @@
     <Grid>
         <TextBox
             Text="{Binding Value, RelativeSource={RelativeSource AncestorType=local:TextPort}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            VerticalAlignment="Center" VerticalContentAlignment="Center" />
+            VerticalAlignment="Center" VerticalContentAlignment="Center"
+            LostFocus="OnTextBoxLostFocus"
+            KeyDown="OnTextBoxKeyDown" />
     </Grid>
 </local:PortControlBase>

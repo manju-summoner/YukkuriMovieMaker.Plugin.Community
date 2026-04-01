@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Input;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
 
@@ -41,9 +42,7 @@ public partial class TextPort
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (TextPort)d;
-        control.BeginEditCommand?.Execute(null);
         control.OnPropertyChanged(nameof(Value));
-        control.EndEditCommand?.Execute(null);
     }
 
     private static void OnDefaultChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -51,5 +50,20 @@ public partial class TextPort
         var control = (TextPort)d;
         if (string.IsNullOrEmpty(control.Value))
             control.Value = (string)e.NewValue;
+    }
+
+    internal void OnTextBoxLostFocus(object sender, RoutedEventArgs e)
+    {
+        BeginEditCommand?.Execute(null);
+        EndEditCommand?.Execute(null);
+    }
+
+    internal void OnTextBoxKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Return)
+        {
+            BeginEditCommand?.Execute(null);
+            EndEditCommand?.Execute(null);
+        }
     }
 }

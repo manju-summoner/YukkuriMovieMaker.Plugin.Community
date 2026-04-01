@@ -19,7 +19,6 @@ public partial class BoolPort
     public BoolPort()
     {
         InitializeComponent();
-        DataContext = this;
         ToggleCommand = new RelayCommand(Toggle);
     }
 
@@ -44,15 +43,14 @@ public partial class BoolPort
 
     private void Toggle()
     {
+        BeginEditCommand?.Execute(null);
         Value = !Value;
-        Brush = Value ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush;
+        EndEditCommand?.Execute(null);
     }
 
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (BoolPort)d;
-        control.BeginEditCommand?.Execute(null);
-        control.OnPropertyChanged(nameof(Value));
-        control.EndEditCommand?.Execute(null);
+        control.Brush = (bool)e.NewValue ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush;
     }
 }

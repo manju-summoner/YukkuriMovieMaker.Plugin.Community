@@ -87,6 +87,13 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
         SelectedTab = mainTab;
     }
 
+    public void CloseGraphTab(NodeGraph graph)
+    {
+        var tab = Tabs.FirstOrDefault(t => t.Graph == graph);
+        if (tab != null)
+            CloseTab(tab);
+    }
+
     private void ShowAddNodeMenu(Point? mousePosition)
     {
         if (SelectedTab == null)

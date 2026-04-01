@@ -53,10 +53,8 @@ public partial class FilePathPort
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (FilePathPort)d;
-        control.BeginEditCommand?.Execute(null);
         control.OnPropertyChanged(nameof(Value));
         control.OnPropertyChanged(nameof(PathFileText));
-        control.EndEditCommand?.Execute(null);
     }
 
     private void OpenFileDialog()
@@ -73,6 +71,10 @@ public partial class FilePathPort
         };
 
         if (dialog.ShowDialog() == true)
+        {
+            BeginEditCommand?.Execute(null);
             Value = dialog.FileName;
+            EndEditCommand?.Execute(null);
+        }
     }
 }

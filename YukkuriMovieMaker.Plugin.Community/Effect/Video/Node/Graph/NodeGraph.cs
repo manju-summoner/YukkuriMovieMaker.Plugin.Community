@@ -76,7 +76,9 @@ public sealed class NodeGraph
         VisualStates[nodeId] = visual;
 
         OnGraphChanged(new VisualStateChangedEventArgs(nodeId, visual));
-        Commit();
+
+        if (!_isInTransaction)
+            Commit();
     }
 
     /// <summary>

@@ -91,11 +91,7 @@ public sealed partial class NumberPort
     public float Value
     {
         get => (float)GetValue(ValueProperty);
-        set
-        {
-            SetValue(ValueProperty, value);
-            Text = Value.ToString("F" + Digits);
-        }
+        set => SetValue(ValueProperty, value);
     }
 
     public float Min
@@ -135,25 +131,20 @@ public sealed partial class NumberPort
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (NumberPort)d;
-        control.ApplyExternalValue(e.NewValue);
+        if (!control._isEditing)
+            control.Text = ((float)e.NewValue).ToString("F" + control.Digits);
     }
 
     private static void OnConfigChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (NumberPort)d;
-        control.Update(control.Value);
+        control.Text = control.Value.ToString("F" + control.Digits);
     }
 
     private static void OnUnitChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (NumberPort)d;
         control.OnPropertyChanged(nameof(Unit));
-    }
-
-    private void ApplyExternalValue(object? value)
-    {
-        var v = (float?)value ?? Default;
-        Update(v);
     }
 
     [DllImport("User32.dll")]
@@ -186,6 +177,10 @@ public sealed partial class NumberPort
         if (Math.Abs(Value - newValue) > 1e-8)
         {
             Value = newValue;
+        }
+        else
+        {
+            Text = newValue.ToString("F" + Digits);
         }
 
         Keyboard.ClearFocus();

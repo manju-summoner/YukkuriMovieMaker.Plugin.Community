@@ -16,6 +16,8 @@
             SelectedIndex="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
             VerticalContentAlignment="Center"
             IsEditable="{Binding IsEditable, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
+            PreviewMouseDown="ComboBox_PreviewMouseDown"
+            SelectionChanged="ComboBox_SelectionChanged"
             FontSize="10" />
     </Grid>
 </local:PortControlBase>

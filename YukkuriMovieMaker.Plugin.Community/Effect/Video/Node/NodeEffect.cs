@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Numerics;
+using System.Windows;
+using System.Windows.Threading;
 using Vortice.DCommon;
 using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
@@ -24,6 +26,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
     ResourceType = typeof(TextUi))]
 public sealed class NodeEffect : VideoEffectBase
 {
+    private readonly Dispatcher _uiDispatcher = Application.Current.Dispatcher;
     private GraphSnapshot _graph = new();
     internal NodeGraph? InternalGraph;
     public override string Label => TextUi.Node;
@@ -51,6 +54,14 @@ public sealed class NodeEffect : VideoEffectBase
     }
 
     public event EventHandler? GraphUpdated;
+
+    internal void InvokeGraphUpdated()
+    {
+        if (_uiDispatcher.CheckAccess())
+            GraphUpdated?.Invoke(this, EventArgs.Empty);
+        else
+            _uiDispatcher.Invoke(() => GraphUpdated?.Invoke(this, EventArgs.Empty));
+    }
 
     protected override IEnumerable<IAnimatable> GetAnimatables()
     {
@@ -94,7 +105,6 @@ public sealed class Processor : IVideoEffectProcessor
         InitializeGraph();
         CreateBlankBitmap();
 
-        if (_nodeEffect.InternalGraph != null!) _nodeEffect.InternalGraph.Committed += OnGraphCommitted;
         _nodeEffect.GraphUpdated += OnGraphUpdated;
     }
 
@@ -250,6 +260,14 @@ public sealed class Processor : IVideoEffectProcessor
             _inputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ArgumentsNode>().First();
             _outputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ReturnNode>().First();
         }
+
+        if (_nodeEffect.InternalGraph != null!)
+        {
+            _nodeEffect.InternalGraph.Committed -= OnGraphCommitted;
+            _nodeEffect.InternalGraph.Committed += OnGraphCommitted;
+        }
+
+        _nodeEffect.InvokeGraphUpdated();
     }
 
     private void OnGraphUpdated(object? sender, EventArgs e)
