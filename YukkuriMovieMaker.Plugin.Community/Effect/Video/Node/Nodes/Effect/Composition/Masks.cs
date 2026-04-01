@@ -112,8 +112,8 @@ public class MaskClipNode : NodeLogic
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public MaskWrapper? Mask
     {
-        get => GetOutput<MaskWrapper>();
-        set => SetOutput(value);
+        get => GetInput<MaskWrapper>();
+        set => SetInput(value);
     }
 
     [InputPort("反転", "Invert")]
@@ -168,8 +168,8 @@ public class MaskThresholdNode : NodeLogic
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public MaskWrapper? InputMask
     {
-        get => GetOutput<MaskWrapper>();
-        set => SetOutput(value);
+        get => GetInput<MaskWrapper>();
+        set => SetInput(value);
     }
 
     [InputPort("最小値", "Min")]

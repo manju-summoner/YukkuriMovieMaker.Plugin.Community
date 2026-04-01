@@ -64,7 +64,11 @@ public class SubtractNode : NodeLogic
 
     [OutputPort("結果", "A minus B")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
-    public float Result { get; set; }
+    public float Result
+    {
+        get => GetOutput<float>();
+        set => SetOutput(value);
+    }
 
     protected override Task Calculate()
     {
@@ -117,8 +121,8 @@ public class DivideNode : NodeLogic
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Left
     {
-        get => GetOutput<float>();
-        set => SetOutput(value);
+        get => GetInput<float>();
+        set => SetInput(value);
     }
 
     [InputPort("右項", "Right operand")]
@@ -132,7 +136,11 @@ public class DivideNode : NodeLogic
 
     [OutputPort("結果", "Quotient of A divided by B")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
-    public float Result { get; set; }
+    public float Result
+    {
+        get => GetOutput<float>();
+        set => SetOutput(value);
+    }
 
     protected override Task Calculate()
     {

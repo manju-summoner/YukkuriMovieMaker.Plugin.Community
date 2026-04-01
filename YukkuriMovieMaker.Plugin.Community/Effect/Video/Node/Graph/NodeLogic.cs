@@ -87,7 +87,15 @@ public abstract class NodeLogic
     {
         var value = await Inputs[name].GetValue(EvaluationContext);
         if (value is null) return default;
-        return (T?)Convert.ChangeType(value, typeof(T));
+        if (value is T typed) return typed;
+        try
+        {
+            return (T?)Convert.ChangeType(value, typeof(T));
+        }
+        catch
+        {
+            return default;
+        }
     }
 
     protected T? GetInput<T>([CallerMemberName] string name = null!)
@@ -95,7 +103,15 @@ public abstract class NodeLogic
         var context = EvaluationContext;
         var value = Task.Run(() => Inputs[name].GetValue(context)).GetAwaiter().GetResult();
         if (value is null) return default;
-        return (T?)Convert.ChangeType(value, typeof(T));
+        if (value is T typed) return typed;
+        try
+        {
+            return (T?)Convert.ChangeType(value, typeof(T));
+        }
+        catch
+        {
+            return default;
+        }
     }
 
     protected void SetInput<T>(T value, [CallerMemberName] string name = null!)
@@ -112,14 +128,30 @@ public abstract class NodeLogic
     {
         var value = await Outputs[name].GetValue();
         if (value is null) return default;
-        return (T?)Convert.ChangeType(value, typeof(T));
+        if (value is T typed) return typed;
+        try
+        {
+            return (T?)Convert.ChangeType(value, typeof(T));
+        }
+        catch
+        {
+            return default;
+        }
     }
 
     protected T? GetOutput<T>([CallerMemberName] string name = null!)
     {
         var value = Task.Run(() => Outputs[name].GetValue()).GetAwaiter().GetResult();
         if (value is null) return default;
-        return (T?)Convert.ChangeType(value, typeof(T));
+        if (value is T typed) return typed;
+        try
+        {
+            return (T?)Convert.ChangeType(value, typeof(T));
+        }
+        catch
+        {
+            return default;
+        }
     }
 
     protected abstract Task Calculate();

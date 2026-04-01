@@ -197,8 +197,6 @@ public sealed class Processor : IVideoEffectProcessor
             _blankBitmap = null;
 
             _outputImage = null;
-
-            GC.SuppressFinalize(this);
         }
     }
 
@@ -286,15 +284,22 @@ public sealed class Processor : IVideoEffectProcessor
         }
     }
 
-    private void OnGraphCommitted(object? sender, CommittedEventArgs e)
+    private async void OnGraphCommitted(object? sender, CommittedEventArgs e)
     {
-        if (_nodeEffect.InternalGraph == null!) return;
-
-        lock (_lock)
+        try
         {
-            _nodeEffect.InternalGraph.InvalidateAll();
+            if (_nodeEffect.InternalGraph == null!) return;
 
-            _nodeEffect.InternalGraphSnapshot = Serializer.Create(_nodeEffect.InternalGraph);
+            lock (_lock)
+            {
+                _nodeEffect.InternalGraph.InvalidateAll();
+            }
+
+            _nodeEffect.InternalGraphSnapshot = await Serializer.CreateAsync(_nodeEffect.InternalGraph);
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine(exception.Message);
         }
     }
 
@@ -338,10 +343,5 @@ public sealed class Processor : IVideoEffectProcessor
 
         _affineTransform.SetInput(0, input, true);
         _outputImage = _affineTransform.Output;
-    }
-
-    ~Processor()
-    {
-        Dispose();
     }
 }
