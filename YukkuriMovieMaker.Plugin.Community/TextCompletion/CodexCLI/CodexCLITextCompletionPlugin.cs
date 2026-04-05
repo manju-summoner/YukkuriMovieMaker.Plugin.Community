@@ -116,10 +116,10 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.CodexCLI
         static string BuildPrompt(string systemPrompt, string text)
         {
             var builder = new StringBuilder();
-            builder.AppendLine("### システム指示");
+            builder.AppendLine("# システム指示");
             builder.AppendLine(systemPrompt);
             builder.AppendLine();
-            builder.AppendLine("### 入力済みテキスト");
+            builder.AppendLine("# 入力済みテキスト");
             builder.AppendLine(text);
             return builder.ToString();
         }
