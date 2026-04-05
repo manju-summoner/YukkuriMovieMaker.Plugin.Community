@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
+<data name="ClaudeCode" xml:space="preserve"><value>Claude Code</value></data>
+<data name="Setup" xml:space="preserve"><value>Acerca de la preparación</value></data>
+<data name="SetupDescription" xml:space="preserve"><value>Instala Claude Code con antelación y completa su configuración inicial en PowerShell o Command Prompt.</value></data>
+<data name="ApiKey" xml:space="preserve"><value>Clave API (opcional)</value></data>
+<data name="Model" xml:space="preserve"><value>Nombre del modelo (opcional)</value></data>
+<data name="TimeoutSeconds" xml:space="preserve"><value>Tiempo de espera (segundos)</value></data>
+<data name="SendCurrentFrame" xml:space="preserve"><value>Enviar fotograma actual</value></data>
+<data name="ClaudeCodeProcessStartFailedMessage" xml:space="preserve"><value>No se pudo iniciar Claude Code.</value></data>
+<data name="ClaudeCodeTimeoutMessage" xml:space="preserve"><value>Claude Code no respondió dentro de {0} segundos.</value></data>
+<data name="ClaudeCodeProcessFailedMessage" xml:space="preserve"><value>Claude Code finalizó con un error. (Código de salida: {0}) {1}</value></data>
+<data name="ClaudeCodeEmptyResponseMessage" xml:space="preserve"><value>No se recibió respuesta de Claude Code.</value></data>
+<data name="NoDetails" xml:space="preserve"><value>No hay detalles.</value></data>
+</root>
