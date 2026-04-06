@@ -83,6 +83,13 @@ public abstract class NodeLogic
         foreach (var output in Outputs.Values) output.Invalidate();
     }
 
+    protected void InvalidateForce()
+    {
+        _isEvaluated = false;
+
+        foreach (var output in Outputs.Values) output.Invalidate();
+    }
+
     protected async Task<T?> GetInputAsync<T>([CallerMemberName] string name = null!)
     {
         var value = await Inputs[name].GetValue(EvaluationContext);
@@ -100,8 +107,7 @@ public abstract class NodeLogic
 
     protected T? GetInput<T>([CallerMemberName] string name = null!)
     {
-        var context = EvaluationContext;
-        var value = Task.Run(() => Inputs[name].GetValue(context)).GetAwaiter().GetResult();
+        var value = Inputs[name].GetValue(EvaluationContext).GetAwaiter().GetResult();
         if (value is null) return default;
         if (value is T typed) return typed;
         try
@@ -141,7 +147,7 @@ public abstract class NodeLogic
 
     protected T? GetOutput<T>([CallerMemberName] string name = null!)
     {
-        var value = Task.Run(() => Outputs[name].GetValue()).GetAwaiter().GetResult();
+        var value = Outputs[name].GetValue().GetAwaiter().GetResult();
         if (value is null) return default;
         if (value is T typed) return typed;
         try

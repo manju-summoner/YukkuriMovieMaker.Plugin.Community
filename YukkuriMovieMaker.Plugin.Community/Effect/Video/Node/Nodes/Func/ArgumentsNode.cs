@@ -43,7 +43,7 @@ public class ArgumentsNode : NodeLogic
             if (Outputs.TryGetValue(name, out var port))
                 port.SetValue(value);
 
-        Invalidate();
+        InvalidateForce();
     }
 
     public void InjectArgument(string name, object? value)
@@ -51,7 +51,7 @@ public class ArgumentsNode : NodeLogic
         if (Outputs.TryGetValue(name, out var port))
         {
             port.SetValue(value);
-            Invalidate();
+            InvalidateForce();
         }
     }
 

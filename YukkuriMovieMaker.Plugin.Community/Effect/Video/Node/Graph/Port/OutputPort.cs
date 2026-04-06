@@ -2,7 +2,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
 
 public class OutputPort : Port
 {
-    private readonly List<InputPort> _connection = [];
+    private readonly HashSet<InputPort> _connection = [];
     private object? _cachedValue;
     private bool _isCached;
 

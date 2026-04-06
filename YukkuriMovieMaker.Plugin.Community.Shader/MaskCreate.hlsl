@@ -18,7 +18,7 @@ float3 RGBtoHSL(float3 color)
     float maxc = max(r, max(g, b));
     float minc = min(r, min(g, b));
 
-    float h = 0.0;
+    float h;
     if (minc == b)
         h = 60 * (g - r) / maxc - minc + 60;
     else if (minc == r)
@@ -71,8 +71,7 @@ float4 main(float4 pos : SV_POSITION, float4 posScene : SCENE_POSITION, float4 u
         value = color.a;
     }
 
-    value = value + _offset;
-    if (value > 1) value = value - 1;
+    value = saturate(value + _offset);
     if (_isInvert == 1) value = 1 - value;
 
     return float4(value, value, value, 1.0);

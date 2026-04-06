@@ -43,7 +43,7 @@ public sealed class NodeEffect : VideoEffectBase
             if (InternalGraph is null) return;
             var tempGraph = Serializer.Restore(value);
             InternalGraph.UpdateGraph(tempGraph);
-            GraphUpdated?.Invoke(this, EventArgs.Empty);
+            InvokeGraphUpdated();
         }
     }
 
@@ -60,7 +60,7 @@ public sealed class NodeEffect : VideoEffectBase
         if (_uiDispatcher.CheckAccess())
             GraphUpdated?.Invoke(this, EventArgs.Empty);
         else
-            _uiDispatcher.Invoke(() => GraphUpdated?.Invoke(this, EventArgs.Empty));
+            _uiDispatcher.BeginInvoke(() => GraphUpdated?.Invoke(this, EventArgs.Empty));
     }
 
     protected override IEnumerable<IAnimatable> GetAnimatables()
@@ -92,10 +92,11 @@ public sealed class Processor : IVideoEffectProcessor
     private ID2D1Image? _currentInputImage;
 
     private bool _hasError;
-    private ArgumentsNode _inputNode = null!;
+
+    private volatile ArgumentsNode _inputNode = null!;
     private bool _isEvaluating;
     private ID2D1Image? _outputImage;
-    private ReturnNode _outputNode = null!;
+    private volatile ReturnNode _outputNode = null!;
 
     public Processor(IGraphicsDevicesAndContext devices, NodeEffect effect)
     {
@@ -122,18 +123,18 @@ public sealed class Processor : IVideoEffectProcessor
                 _isEvaluating = true;
 
                 if (_nodeEffect.InternalGraph == null! || _inputNode == null! || _outputNode == null!)
-                    InitializeGraph();
+                    return effectDescription.DrawDescription;
 
                 // 評価開始
                 var context = new EvaluationContext(_devices, effectDescription);
 
-                _inputNode!.InjectArguments(new Dictionary<string, object?>
+                _inputNode.InjectArguments(new Dictionary<string, object?>
                 {
                     ["InputImage"] = new ImageWrapper { Image = _currentInputImage },
                     ["FrameIndex"] = effectDescription.ItemPosition.Frame
                 });
 
-                var outputDict = _outputNode!.ExtractReturns(context).GetAwaiter().GetResult();
+                var outputDict = _outputNode.ExtractReturns(context).GetAwaiter().GetResult();
                 var outputImage = (outputDict["OutputImage"] as ImageWrapper)?.Image;
 
                 if (outputImage == null || outputImage.NativePointer == IntPtr.Zero)
@@ -205,7 +206,6 @@ public sealed class Processor : IVideoEffectProcessor
     /// </summary>
     private void InitializeGraph()
     {
-        // スナップショットから復元
         if (_nodeEffect.Graph.Nodes.Count > 0)
         {
             _nodeEffect.InternalGraph = Serializer.Restore(_nodeEffect.Graph);
@@ -270,18 +270,15 @@ public sealed class Processor : IVideoEffectProcessor
 
     private void OnGraphUpdated(object? sender, EventArgs e)
     {
-        lock (_lock)
-        {
-            if (_nodeEffect.InternalGraph == null!) return;
+        if (_nodeEffect.InternalGraph == null!) return;
 
-            _nodeEffect.InternalGraph.Committed -= OnGraphCommitted;
-            _nodeEffect.InternalGraph.Committed += OnGraphCommitted;
+        _nodeEffect.InternalGraph.Committed -= OnGraphCommitted;
+        _nodeEffect.InternalGraph.Committed += OnGraphCommitted;
 
-            _inputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ArgumentsNode>().FirstOrDefault()
-                         ?? _inputNode;
-            _outputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ReturnNode>().FirstOrDefault()
-                          ?? _outputNode;
-        }
+        _inputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ArgumentsNode>().FirstOrDefault()
+                     ?? _inputNode;
+        _outputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ReturnNode>().FirstOrDefault()
+                      ?? _outputNode;
     }
 
     private async void OnGraphCommitted(object? sender, CommittedEventArgs e)
