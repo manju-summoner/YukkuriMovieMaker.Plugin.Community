@@ -23,7 +23,7 @@ public partial class ColorPort
             nameof(DefaultColor),
             typeof(Color),
             typeof(ColorPort),
-            new PropertyMetadata(Colors.White, OnDefaultColorChanged));
+            new PropertyMetadata(Colors.White));
 
     public static readonly DependencyProperty RedProperty =
         DependencyProperty.Register(nameof(Red), typeof(byte), typeof(ColorPort),
@@ -65,8 +65,6 @@ public partial class ColorPort
     public ColorPort()
     {
         InitializeComponent();
-
-        ApplyColor(DefaultColor);
 
         Popup.Opened += Popup_Opened;
     }
@@ -125,29 +123,6 @@ public partial class ColorPort
         set => SetValue(BValueProperty, value);
     }
 
-    private void ApplyColor(Color color)
-    {
-        _suppress = true;
-
-        SelectedColor = color;
-        Red = color.R;
-        Green = color.G;
-        Blue = color.B;
-        Alpha = color.A;
-
-        UpdateHsvFromColor(color);
-
-        _suppress = false;
-    }
-
-    private void UpdateHsvFromColor(Color color)
-    {
-        HsvFromColor(color, out var h, out var s, out var v);
-        Hue = h;
-        Saturation = s;
-        BValue = v;
-    }
-
     private static object CoerceHue(DependencyObject d, object value)
     {
         var hue = (double)value;
@@ -166,13 +141,6 @@ public partial class ColorPort
     {
         var val = (double)value;
         return Math.Clamp(val, 0.0, 1.0);
-    }
-
-    private static void OnDefaultColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        var cp = (ColorPort)d;
-        if (cp.SelectedColor == default)
-            cp.ApplyColor((Color)e.NewValue);
     }
 
     private static void OnComponentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

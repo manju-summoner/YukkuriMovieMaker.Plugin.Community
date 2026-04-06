@@ -20,7 +20,7 @@ public partial class TextPort
             nameof(Default),
             typeof(string),
             typeof(TextPort),
-            new PropertyMetadata("", OnDefaultChanged));
+            new PropertyMetadata(""));
 
     public TextPort()
     {
@@ -43,13 +43,6 @@ public partial class TextPort
     {
         var control = (TextPort)d;
         control.OnPropertyChanged(nameof(Value));
-    }
-
-    private static void OnDefaultChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        var control = (TextPort)d;
-        if (string.IsNullOrEmpty(control.Value))
-            control.Value = (string)e.NewValue;
     }
 
     internal void OnTextBoxLostFocus(object sender, RoutedEventArgs e)

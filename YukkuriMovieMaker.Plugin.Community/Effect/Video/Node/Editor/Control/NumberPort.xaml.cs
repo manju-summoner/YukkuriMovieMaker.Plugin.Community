@@ -64,8 +64,6 @@ public sealed partial class NumberPort
     public NumberPort()
     {
         InitializeComponent();
-
-        Loaded += (_, _) => { Text = Value.ToString("F" + Digits); };
     }
 
     public bool IsFocusable
@@ -121,11 +119,7 @@ public sealed partial class NumberPort
     public float Default
     {
         get => (float)GetValue(DefaultProperty);
-        init
-        {
-            SetValue(DefaultProperty, value);
-            Value = value;
-        }
+        init => SetValue(DefaultProperty, value);
     }
 
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

@@ -3,6 +3,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor;
@@ -42,7 +43,8 @@ public static class ControlRegistrations
                     Mode = BindingMode.TwoWay,
                     UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
                     TargetNullValue = 0f,
-                    FallbackValue = 0f
+                    FallbackValue = 0f,
+                    Converter = new ObjectToFloatConverter()
                 });
             factory.SetBinding(
                 PortControlBase.BeginEditCommandProperty,
@@ -88,8 +90,7 @@ public static class ControlRegistrations
             var template = new DataTemplate();
             var factory = new FrameworkElementFactory(typeof(BoolPort));
 
-            factory.SetValue(BoolPort.ValueProperty, boolAttr.Default);
-
+            factory.SetValue(BoolPort.DefaultProperty, boolAttr.Default);
             factory.SetBinding(BoolPort.ValueProperty,
                 new Binding(nameof(PortViewModel.CurrentValue))
                 {
@@ -124,7 +125,8 @@ public static class ControlRegistrations
                     Mode = BindingMode.TwoWay,
                     UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
                     TargetNullValue = 0,
-                    FallbackValue = 0
+                    FallbackValue = 0,
+                    Converter = new EnumOrIntToIntConverter()
                 });
             factory.SetBinding(
                 PortControlBase.BeginEditCommandProperty,

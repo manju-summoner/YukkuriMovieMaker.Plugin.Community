@@ -16,6 +16,13 @@ public partial class BoolPort
                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                 OnValueChanged));
 
+    public static readonly DependencyProperty DefaultProperty =
+        DependencyProperty.Register(
+            nameof(Default),
+            typeof(bool),
+            typeof(BoolPort),
+            new PropertyMetadata(false));
+
     public BoolPort()
     {
         InitializeComponent();
@@ -28,6 +35,12 @@ public partial class BoolPort
     {
         get => (bool)GetValue(ValueProperty);
         set => SetValue(ValueProperty, value);
+    }
+
+    public bool Default
+    {
+        get => (bool)GetValue(DefaultProperty);
+        init => SetValue(DefaultProperty, value);
     }
 
     public System.Windows.Media.Brush Brush
