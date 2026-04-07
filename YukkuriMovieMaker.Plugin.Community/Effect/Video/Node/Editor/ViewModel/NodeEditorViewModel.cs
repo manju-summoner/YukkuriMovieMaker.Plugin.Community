@@ -180,8 +180,8 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
             {
                 Type = x.Type,
                 Category = x.CtgrInst.Category,
-                Label = x.Attr!.Label,
-                Description = x.Attr!.Description,
+                Label = x.Attr!.GetLabel(),
+                Description = x.Attr!.GetDescription(),
                 Color = x.CtgrInst.Color
             });
 

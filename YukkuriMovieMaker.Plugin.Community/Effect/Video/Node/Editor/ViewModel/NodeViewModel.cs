@@ -29,10 +29,10 @@ public sealed class NodeViewModel : INotifyPropertyChanged
 
         var nodeAttr = nodeLogic.GetType().GetCustomAttribute<NodeAttribute>();
         if (nodeAttr == null) throw new InvalidOperationException();
-        DisplayName = nodeAttr.Label;
+        DisplayName = nodeAttr.GetLabel();
         var instance = (INodeCategory)Activator.CreateInstance(nodeAttr.CategoryType)!;
         Category = instance.Category;
-        Description = nodeAttr.Description;
+        Description = nodeAttr.GetDescription();
         Color = instance.Color;
 
         InputPorts = new ObservableCollection<PortViewModel>(
@@ -129,8 +129,8 @@ public sealed class NodeViewModel : INotifyPropertyChanged
 
             yield return new PortViewModel(
                 name,
-                portAttr?.Label ?? name,
-                portAttr?.Description ?? "",
+                portAttr?.GetLabel() ?? name,
+                portAttr?.GetDescription() ?? "",
                 portColorAttr?.Color ?? nameof(Colors.SlateGray),
                 port.ValueType,
                 PortDirection.Input,
@@ -151,8 +151,8 @@ public sealed class NodeViewModel : INotifyPropertyChanged
 
             yield return new PortViewModel(
                 name,
-                portAttr?.Label ?? name,
-                portAttr?.Description ?? "",
+                portAttr?.GetLabel() ?? name,
+                portAttr?.GetDescription() ?? "",
                 portColorAttr?.Color ?? nameof(Colors.SlateGray),
                 port.ValueType,
                 PortDirection.Output,
@@ -172,8 +172,8 @@ public sealed class NodeViewModel : INotifyPropertyChanged
 
             yield return new SubGraphViewModel(
                 name,
-                portAttr?.Label ?? name,
-                portAttr?.Description ?? "",
+                portAttr?.GetLabel() ?? name,
+                portAttr?.GetDescription() ?? "",
                 subGraph
             )
             {
