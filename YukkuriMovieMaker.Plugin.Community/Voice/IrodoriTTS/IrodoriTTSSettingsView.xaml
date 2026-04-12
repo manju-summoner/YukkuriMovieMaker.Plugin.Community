@@ -24,6 +24,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <Label Grid.Row="0" Grid.Column="0" Content="{x:Static local:Texts.GradioAppPath}" VerticalContentAlignment="Center"/>
@@ -36,6 +37,10 @@
                     <TextBox Grid.Row="1" Grid.Column="1"
                              Text="{Binding Source={x:Static local:IrodoriTTSSettings.Default}, Path=ServerPort, UpdateSourceTrigger=PropertyChanged, Delay=1}"
                              VerticalContentAlignment="Center" Width="200" HorizontalAlignment="Right"/>
+
+                    <Label Grid.Row="2" Grid.Column="0" Content="{x:Static local:Texts.ShowConsoleWindow}" VerticalContentAlignment="Center"/>
+                    <c:ToggleSlider Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right"
+                                    Value="{Binding Source={x:Static local:IrodoriTTSSettings.Default}, Path=ShowConsoleWindow}"/>
                 </Grid>
                 <GroupBox Header="{x:Static local:Texts.AboutIrodoriTTS}" Margin="6">
                     <TextBlock Margin="6" TextWrapping="Wrap">
