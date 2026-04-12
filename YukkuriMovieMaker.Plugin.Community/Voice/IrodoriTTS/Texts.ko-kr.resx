@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
+<data name="NumStepsName" xml:space="preserve"><value>스텝 수</value></data>
+<data name="NumStepsDesc" xml:space="preserve"><value>확산 스텝 수. 높을수록 품질이 좋아지지만 생성 시간이 길어집니다.</value></data>
+<data name="CfgScaleTextName" xml:space="preserve"><value>텍스트 강도</value></data>
+<data name="CfgScaleTextDesc" xml:space="preserve"><value>텍스트에 대한 CFG 가이던스 강도. 높을수록 텍스트에 충실하지만 너무 높으면 부자연스러워집니다.</value></data>
+<data name="CfgScaleSpeakerName" xml:space="preserve"><value>화자 강도</value></data>
+<data name="CfgScaleSpeakerDesc" xml:space="preserve"><value>화자에 대한 CFG 가이던스 강도. 높을수록 참조 음성에 가까워지지만 너무 높으면 음질이 저하됩니다.</value></data>
+<data name="LocalSettings" xml:space="preserve"><value>Irodori-TTS 설정 (로컬)</value></data>
+<data name="ServerSettings" xml:space="preserve"><value>접속 URL (선택)</value></data>
+<data name="TTSUrl" xml:space="preserve"><value>TTS URL</value></data>
+<data name="VoiceDesignUrl" xml:space="preserve"><value>VoiceDesign URL</value></data>
+<data name="GradioAppPath" xml:space="preserve"><value>gradio_app.py</value></data>
+<data name="ServerPort" xml:space="preserve"><value>포트 번호</value></data>
+<data name="VoiceDesignSection" xml:space="preserve"><value>VoiceDesign</value></data>
+<data name="Caption" xml:space="preserve"><value>음성 특징</value></data>
+<data name="CaptionDesc" xml:space="preserve"><value>음성 설명을 입력합니다 (예: 밝고 활기찬 젊은 여성의 목소리)</value></data>
+<data name="SpeechText" xml:space="preserve"><value>대사 내용</value></data>
+<data name="SpeechTextDesc" xml:space="preserve"><value>참조 음성의 대사 내용을 입력합니다</value></data>
+<data name="Seed" xml:space="preserve"><value>시드값 (선택)</value></data>
+<data name="SpeakerName" xml:space="preserve"><value>화자 이름</value></data>
+<data name="Generate" xml:space="preserve"><value>생성</value></data>
+<data name="Preview" xml:space="preserve"><value>미리보기</value></data>
+<data name="Save" xml:space="preserve"><value>저장</value></data>
+<data name="CreateNew" xml:space="preserve"><value>새로 만들기</value></data>
+<data name="Delete" xml:space="preserve"><value>삭제</value></data>
+<data name="SourceApp" xml:space="preserve"><value>소스 앱</value></data>
+<data name="NameColumn" xml:space="preserve"><value>이름</value></data>
+<data name="CaptionColumn" xml:space="preserve"><value>캡션</value></data>
+<data name="RefVoiceManagement" xml:space="preserve"><value>참조 음성 관리</value></data>
+<data name="Generating" xml:space="preserve"><value>생성 중...</value></data>
+<data name="ServerStarting" xml:space="preserve"><value>서버 시작 중...</value></data>
+<data name="ServerNotConfigured" xml:space="preserve"><value>uv 경로 또는 Irodori-TTS 경로가 설정되지 않았습니다</value></data>
+<data name="FailedToGenerate" xml:space="preserve"><value>음성 생성에 실패했습니다</value></data>
+<data name="FailedToConnect" xml:space="preserve"><value>서버에 연결할 수 없습니다</value></data>
+<data name="AboutIrodoriTTS" xml:space="preserve"><value>Irodori-TTS 정보</value></data>
+<data name="HelpLinkText" xml:space="preserve"><value>도움말: Irodori-TTS 설정 방법</value></data>
+<data name="AboutIrodoriTTSMessage" xml:space="preserve"><value>Irodori-TTS는 Aratako가 개발한 텍스트 음성 변환 소프트웨어입니다. 이 기능을 사용하려면 Irodori-TTS를 별도로 설치해야 합니다.</value></data>
+<data name="DeleteConfirmMessage" xml:space="preserve"><value>참조 음성을 삭제하시겠습니까?</value></data>
+<data name="SpeakerNamePlaceholder" xml:space="preserve"><value>화자 이름</value></data>
+<data name="CaptionPlaceholder" xml:space="preserve"><value>차분한 젊은 여성의 목소리</value></data>
+<data name="SpeechTextPlaceholder" xml:space="preserve"><value>안녕하세요, 처음 뵙겠습니다.</value></data>
+<data name="Stop" xml:space="preserve"><value>정지</value></data>
+<data name="OverwriteConfirmMessage" xml:space="preserve"><value>같은 이름의 참조 음성 "{0}"이(가) 이미 존재합니다. 덮어쓰시겠습니까?</value></data>
+<data name="Saving" xml:space="preserve"><value>저장 중...</value></data>
+<data name="Checkpoint" xml:space="preserve"><value>모델 (선택)</value></data>
+<data name="CheckpointDesc" xml:space="preserve"><value>미선택 시 기본 모델을 사용합니다</value></data>
+</root>

@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
+<data name="NumStepsName" xml:space="preserve"><value>Num Steps</value></data>
+<data name="NumStepsDesc" xml:space="preserve"><value>Number of diffusion steps. Higher values produce better quality but take longer to generate.</value></data>
+<data name="CfgScaleTextName" xml:space="preserve"><value>Text Strength</value></data>
+<data name="CfgScaleTextDesc" xml:space="preserve"><value>CFG guidance strength for text. Higher values follow text more closely but may sound unnatural if too high.</value></data>
+<data name="CfgScaleSpeakerName" xml:space="preserve"><value>Speaker Strength</value></data>
+<data name="CfgScaleSpeakerDesc" xml:space="preserve"><value>CFG guidance strength for speaker. Higher values match the reference voice more closely but may degrade quality if too high.</value></data>
+<data name="LocalSettings" xml:space="preserve"><value>Irodori-TTS Settings (Local)</value></data>
+<data name="ServerSettings" xml:space="preserve"><value>Connection URL (Optional)</value></data>
+<data name="TTSUrl" xml:space="preserve"><value>TTS URL</value></data>
+<data name="VoiceDesignUrl" xml:space="preserve"><value>VoiceDesign URL</value></data>
+<data name="GradioAppPath" xml:space="preserve"><value>gradio_app.py</value></data>
+<data name="ServerPort" xml:space="preserve"><value>Port Number</value></data>
+<data name="VoiceDesignSection" xml:space="preserve"><value>VoiceDesign</value></data>
+<data name="Caption" xml:space="preserve"><value>Voice Characteristics</value></data>
+<data name="CaptionDesc" xml:space="preserve"><value>Enter a voice description (e.g., a bright and cheerful young woman's voice)</value></data>
+<data name="SpeechText" xml:space="preserve"><value>Speech Text</value></data>
+<data name="SpeechTextDesc" xml:space="preserve"><value>Enter the speech text for the reference voice</value></data>
+<data name="Seed" xml:space="preserve"><value>Seed (Optional)</value></data>
+<data name="SpeakerName" xml:space="preserve"><value>Speaker Name</value></data>
+<data name="Generate" xml:space="preserve"><value>Generate</value></data>
+<data name="Preview" xml:space="preserve"><value>Preview</value></data>
+<data name="Save" xml:space="preserve"><value>Save</value></data>
+<data name="CreateNew" xml:space="preserve"><value>Create New</value></data>
+<data name="Delete" xml:space="preserve"><value>Delete</value></data>
+<data name="SourceApp" xml:space="preserve"><value>Source App</value></data>
+<data name="NameColumn" xml:space="preserve"><value>Name</value></data>
+<data name="CaptionColumn" xml:space="preserve"><value>Caption</value></data>
+<data name="RefVoiceManagement" xml:space="preserve"><value>Reference Voice Management</value></data>
+<data name="Generating" xml:space="preserve"><value>Generating...</value></data>
+<data name="ServerStarting" xml:space="preserve"><value>Starting server...</value></data>
+<data name="ServerNotConfigured" xml:space="preserve"><value>uv path or Irodori-TTS path is not configured</value></data>
+<data name="FailedToGenerate" xml:space="preserve"><value>Failed to generate voice</value></data>
+<data name="FailedToConnect" xml:space="preserve"><value>Failed to connect to server</value></data>
+<data name="AboutIrodoriTTS" xml:space="preserve"><value>About Irodori-TTS</value></data>
+<data name="HelpLinkText" xml:space="preserve"><value>Help: How to set up Irodori-TTS</value></data>
+<data name="AboutIrodoriTTSMessage" xml:space="preserve"><value>Irodori-TTS is a text-to-speech software developed by Aratako. A separate installation of Irodori-TTS is required to use this feature.</value></data>
+<data name="DeleteConfirmMessage" xml:space="preserve"><value>Delete this reference voice?</value></data>
+<data name="SpeakerNamePlaceholder" xml:space="preserve"><value>Speaker name</value></data>
+<data name="CaptionPlaceholder" xml:space="preserve"><value>A calm young woman's voice</value></data>
+<data name="SpeechTextPlaceholder" xml:space="preserve"><value>Hello, nice to meet you.</value></data>
+<data name="Stop" xml:space="preserve"><value>Stop</value></data>
+<data name="OverwriteConfirmMessage" xml:space="preserve"><value>A reference voice "{0}" already exists. Overwrite?</value></data>
+<data name="Saving" xml:space="preserve"><value>Saving...</value></data>
+<data name="Checkpoint" xml:space="preserve"><value>Model (Optional)</value></data>
+<data name="CheckpointDesc" xml:space="preserve"><value>Uses default model when not selected</value></data>
+</root>

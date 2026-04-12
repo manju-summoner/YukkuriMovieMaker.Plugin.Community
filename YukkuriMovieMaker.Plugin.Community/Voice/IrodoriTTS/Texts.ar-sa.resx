@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
+<data name="NumStepsName" xml:space="preserve"><value>عدد الخطوات</value></data>
+<data name="NumStepsDesc" xml:space="preserve"><value>عدد خطوات الانتشار. القيم الأعلى تنتج جودة أفضل لكن تستغرق وقتًا أطول.</value></data>
+<data name="CfgScaleTextName" xml:space="preserve"><value>قوة النص</value></data>
+<data name="CfgScaleTextDesc" xml:space="preserve"><value>قوة توجيه CFG للنص. القيم الأعلى تتبع النص بدقة أكبر لكنها قد تبدو غير طبيعية إذا كانت عالية جداً.</value></data>
+<data name="CfgScaleSpeakerName" xml:space="preserve"><value>قوة المتحدث</value></data>
+<data name="CfgScaleSpeakerDesc" xml:space="preserve"><value>قوة توجيه CFG للمتحدث. القيم الأعلى تقترب أكثر من الصوت المرجعي لكنها قد تقلل الجودة إذا كانت عالية جداً.</value></data>
+<data name="LocalSettings" xml:space="preserve"><value>إعدادات Irodori-TTS (محلي)</value></data>
+<data name="ServerSettings" xml:space="preserve"><value>عنوان الاتصال (اختياري)</value></data>
+<data name="TTSUrl" xml:space="preserve"><value>عنوان TTS</value></data>
+<data name="VoiceDesignUrl" xml:space="preserve"><value>عنوان VoiceDesign</value></data>
+<data name="GradioAppPath" xml:space="preserve"><value>gradio_app.py</value></data>
+<data name="ServerPort" xml:space="preserve"><value>رقم المنفذ</value></data>
+<data name="VoiceDesignSection" xml:space="preserve"><value>VoiceDesign</value></data>
+<data name="Caption" xml:space="preserve"><value>خصائص الصوت</value></data>
+<data name="CaptionDesc" xml:space="preserve"><value>أدخل وصفاً للصوت (مثال: صوت امرأة شابة مبهجة ومرحة)</value></data>
+<data name="SpeechText" xml:space="preserve"><value>نص الكلام</value></data>
+<data name="SpeechTextDesc" xml:space="preserve"><value>أدخل نص الكلام للصوت المرجعي</value></data>
+<data name="Seed" xml:space="preserve"><value>البذرة (اختياري)</value></data>
+<data name="SpeakerName" xml:space="preserve"><value>اسم المتحدث</value></data>
+<data name="Generate" xml:space="preserve"><value>توليد</value></data>
+<data name="Preview" xml:space="preserve"><value>معاينة</value></data>
+<data name="Save" xml:space="preserve"><value>حفظ</value></data>
+<data name="CreateNew" xml:space="preserve"><value>إنشاء جديد</value></data>
+<data name="Delete" xml:space="preserve"><value>حذف</value></data>
+<data name="SourceApp" xml:space="preserve"><value>التطبيق المصدر</value></data>
+<data name="NameColumn" xml:space="preserve"><value>الاسم</value></data>
+<data name="CaptionColumn" xml:space="preserve"><value>الوصف</value></data>
+<data name="RefVoiceManagement" xml:space="preserve"><value>إدارة الأصوات المرجعية</value></data>
+<data name="Generating" xml:space="preserve"><value>جارٍ التوليد...</value></data>
+<data name="ServerStarting" xml:space="preserve"><value>جارٍ تشغيل الخادم...</value></data>
+<data name="ServerNotConfigured" xml:space="preserve"><value>لم يتم تعيين مسار uv أو Irodori-TTS</value></data>
+<data name="FailedToGenerate" xml:space="preserve"><value>فشل في توليد الصوت</value></data>
+<data name="FailedToConnect" xml:space="preserve"><value>فشل الاتصال بالخادم</value></data>
+<data name="AboutIrodoriTTS" xml:space="preserve"><value>حول Irodori-TTS</value></data>
+<data name="HelpLinkText" xml:space="preserve"><value>مساعدة: كيفية إعداد Irodori-TTS</value></data>
+<data name="AboutIrodoriTTSMessage" xml:space="preserve"><value>Irodori-TTS هو برنامج تحويل النص إلى كلام طوّره Aratako. يتطلب استخدام هذه الميزة تثبيت Irodori-TTS بشكل منفصل.</value></data>
+<data name="DeleteConfirmMessage" xml:space="preserve"><value>هل تريد حذف الصوت المرجعي؟</value></data>
+<data name="SpeakerNamePlaceholder" xml:space="preserve"><value>اسم المتحدث</value></data>
+<data name="CaptionPlaceholder" xml:space="preserve"><value>صوت امرأة شابة هادئة</value></data>
+<data name="SpeechTextPlaceholder" xml:space="preserve"><value>مرحباً، تشرفت بمعرفتك.</value></data>
+<data name="Stop" xml:space="preserve"><value>إيقاف</value></data>
+<data name="OverwriteConfirmMessage" xml:space="preserve"><value>يوجد صوت مرجعي بنفس الاسم "{0}" بالفعل. هل تريد الكتابة فوقه؟</value></data>
+<data name="Saving" xml:space="preserve"><value>جارٍ الحفظ...</value></data>
+<data name="Checkpoint" xml:space="preserve"><value>النموذج (اختياري)</value></data>
+<data name="CheckpointDesc" xml:space="preserve"><value>يستخدم النموذج الافتراضي عند عدم التحديد</value></data>
+</root>
