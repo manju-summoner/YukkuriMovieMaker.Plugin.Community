@@ -86,13 +86,14 @@
 <data name="Delete" xml:space="preserve"><value>删除</value></data>
 <data name="SourceApp" xml:space="preserve"><value>来源应用</value></data>
 <data name="NameColumn" xml:space="preserve"><value>名称</value></data>
-<data name="CaptionColumn" xml:space="preserve"><value>描述</value></data>
+<data name="CaptionColumn" xml:space="preserve"><value>声音特征</value></data>
 <data name="RefVoiceManagement" xml:space="preserve"><value>参考音频管理</value></data>
 <data name="Generating" xml:space="preserve"><value>生成中...</value></data>
 <data name="ServerStarting" xml:space="preserve"><value>服务器启动中...</value></data>
 <data name="ServerNotConfigured" xml:space="preserve"><value>未设置uv路径或Irodori-TTS路径</value></data>
 <data name="FailedToGenerate" xml:space="preserve"><value>语音生成失败</value></data>
 <data name="FailedToConnect" xml:space="preserve"><value>无法连接到服务器</value></data>
+<data name="FirstGenerationNotice" xml:space="preserve"><value>首次运行时由于模型下载（约2GB）和加载生成需要一些时间。</value></data>
 <data name="AboutIrodoriTTS" xml:space="preserve"><value>关于Irodori-TTS</value></data>
 <data name="HelpLinkText" xml:space="preserve"><value>帮助：Irodori-TTS设置方法</value></data>
 <data name="AboutIrodoriTTSMessage" xml:space="preserve"><value>Irodori-TTS是由Aratako开发的文本转语音软件。使用此功能需要另外安装Irodori-TTS。</value></data>

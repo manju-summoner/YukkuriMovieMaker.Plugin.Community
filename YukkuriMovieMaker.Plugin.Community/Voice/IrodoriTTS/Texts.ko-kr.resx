@@ -86,13 +86,14 @@
 <data name="Delete" xml:space="preserve"><value>삭제</value></data>
 <data name="SourceApp" xml:space="preserve"><value>소스 앱</value></data>
 <data name="NameColumn" xml:space="preserve"><value>이름</value></data>
-<data name="CaptionColumn" xml:space="preserve"><value>캡션</value></data>
+<data name="CaptionColumn" xml:space="preserve"><value>음성 특징</value></data>
 <data name="RefVoiceManagement" xml:space="preserve"><value>참조 음성 관리</value></data>
 <data name="Generating" xml:space="preserve"><value>생성 중...</value></data>
 <data name="ServerStarting" xml:space="preserve"><value>서버 시작 중...</value></data>
 <data name="ServerNotConfigured" xml:space="preserve"><value>uv 경로 또는 Irodori-TTS 경로가 설정되지 않았습니다</value></data>
 <data name="FailedToGenerate" xml:space="preserve"><value>음성 생성에 실패했습니다</value></data>
 <data name="FailedToConnect" xml:space="preserve"><value>서버에 연결할 수 없습니다</value></data>
+<data name="FirstGenerationNotice" xml:space="preserve"><value>첫 실행 시 모델 다운로드(약 2GB)와 로딩으로 생성에 시간이 걸립니다.</value></data>
 <data name="AboutIrodoriTTS" xml:space="preserve"><value>Irodori-TTS 정보</value></data>
 <data name="HelpLinkText" xml:space="preserve"><value>도움말: Irodori-TTS 설정 방법</value></data>
 <data name="AboutIrodoriTTSMessage" xml:space="preserve"><value>Irodori-TTS는 Aratako가 개발한 텍스트 음성 변환 소프트웨어입니다. 이 기능을 사용하려면 Irodori-TTS를 별도로 설치해야 합니다.</value></data>

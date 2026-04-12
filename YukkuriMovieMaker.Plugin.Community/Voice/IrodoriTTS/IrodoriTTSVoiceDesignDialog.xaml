@@ -22,6 +22,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="26"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -110,10 +111,14 @@
                         Value="{Binding Checkpoint}"
                         Width="200" HorizontalAlignment="Right"/>
 
-        <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding ErrorText}" Foreground="Red"
+        <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                   Text="{x:Static local:Texts.FirstGenerationNotice}" Foreground="Gray"
+                   Margin="6,4" TextWrapping="Wrap" FontSize="11"/>
+
+        <TextBlock Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding ErrorText}" Foreground="Red"
                    HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6" TextWrapping="Wrap"/>
 
-        <StackPanel Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Height="26">
+        <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Height="26">
             <Button Command="{Binding GenerateCommand}" Width="100">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">

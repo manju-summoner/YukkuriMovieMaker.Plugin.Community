@@ -86,13 +86,14 @@
 <data name="Delete" xml:space="preserve"><value>Eliminar</value></data>
 <data name="SourceApp" xml:space="preserve"><value>Aplicación origen</value></data>
 <data name="NameColumn" xml:space="preserve"><value>Nombre</value></data>
-<data name="CaptionColumn" xml:space="preserve"><value>Subtítulo</value></data>
+<data name="CaptionColumn" xml:space="preserve"><value>Características de voz</value></data>
 <data name="RefVoiceManagement" xml:space="preserve"><value>Gestión de voces de referencia</value></data>
 <data name="Generating" xml:space="preserve"><value>Generando...</value></data>
 <data name="ServerStarting" xml:space="preserve"><value>Iniciando servidor...</value></data>
 <data name="ServerNotConfigured" xml:space="preserve"><value>La ruta de uv o Irodori-TTS no está configurada</value></data>
 <data name="FailedToGenerate" xml:space="preserve"><value>Error al generar voz</value></data>
 <data name="FailedToConnect" xml:space="preserve"><value>No se pudo conectar al servidor</value></data>
+<data name="FirstGenerationNotice" xml:space="preserve"><value>La primera ejecución tarda en generar debido a la descarga (~2GB) y carga del modelo.</value></data>
 <data name="AboutIrodoriTTS" xml:space="preserve"><value>Acerca de Irodori-TTS</value></data>
 <data name="HelpLinkText" xml:space="preserve"><value>Ayuda: Cómo configurar Irodori-TTS</value></data>
 <data name="AboutIrodoriTTSMessage" xml:space="preserve"><value>Irodori-TTS es un software de texto a voz desarrollado por Aratako. Se requiere una instalación separada de Irodori-TTS para usar esta función.</value></data>

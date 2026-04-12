@@ -86,13 +86,14 @@
 <data name="Delete" xml:space="preserve"><value>Hapus</value></data>
 <data name="SourceApp" xml:space="preserve"><value>Aplikasi Sumber</value></data>
 <data name="NameColumn" xml:space="preserve"><value>Nama</value></data>
-<data name="CaptionColumn" xml:space="preserve"><value>Keterangan</value></data>
+<data name="CaptionColumn" xml:space="preserve"><value>Karakteristik Suara</value></data>
 <data name="RefVoiceManagement" xml:space="preserve"><value>Manajemen Suara Referensi</value></data>
 <data name="Generating" xml:space="preserve"><value>Sedang menghasilkan...</value></data>
 <data name="ServerStarting" xml:space="preserve"><value>Memulai server...</value></data>
 <data name="ServerNotConfigured" xml:space="preserve"><value>Path uv atau Irodori-TTS belum dikonfigurasi</value></data>
 <data name="FailedToGenerate" xml:space="preserve"><value>Gagal menghasilkan suara</value></data>
 <data name="FailedToConnect" xml:space="preserve"><value>Gagal terhubung ke server</value></data>
+<data name="FirstGenerationNotice" xml:space="preserve"><value>Saat pertama kali dijalankan pembuatan membutuhkan waktu karena unduhan model (~2GB) dan pemuatan.</value></data>
 <data name="AboutIrodoriTTS" xml:space="preserve"><value>Tentang Irodori-TTS</value></data>
 <data name="HelpLinkText" xml:space="preserve"><value>Bantuan: Cara mengatur Irodori-TTS</value></data>
 <data name="AboutIrodoriTTSMessage" xml:space="preserve"><value>Irodori-TTS adalah perangkat lunak text-to-speech yang dikembangkan oleh Aratako. Instalasi Irodori-TTS secara terpisah diperlukan untuk menggunakan fitur ini.</value></data>

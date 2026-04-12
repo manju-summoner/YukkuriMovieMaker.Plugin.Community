@@ -86,13 +86,14 @@
 <data name="Delete" xml:space="preserve"><value>Delete</value></data>
 <data name="SourceApp" xml:space="preserve"><value>Source App</value></data>
 <data name="NameColumn" xml:space="preserve"><value>Name</value></data>
-<data name="CaptionColumn" xml:space="preserve"><value>Caption</value></data>
+<data name="CaptionColumn" xml:space="preserve"><value>Voice Characteristics</value></data>
 <data name="RefVoiceManagement" xml:space="preserve"><value>Reference Voice Management</value></data>
 <data name="Generating" xml:space="preserve"><value>Generating...</value></data>
 <data name="ServerStarting" xml:space="preserve"><value>Starting server...</value></data>
 <data name="ServerNotConfigured" xml:space="preserve"><value>uv path or Irodori-TTS path is not configured</value></data>
 <data name="FailedToGenerate" xml:space="preserve"><value>Failed to generate voice</value></data>
 <data name="FailedToConnect" xml:space="preserve"><value>Failed to connect to server</value></data>
+<data name="FirstGenerationNotice" xml:space="preserve"><value>The first run takes time to generate due to model download (~2GB) and loading.</value></data>
 <data name="AboutIrodoriTTS" xml:space="preserve"><value>About Irodori-TTS</value></data>
 <data name="HelpLinkText" xml:space="preserve"><value>Help: How to set up Irodori-TTS</value></data>
 <data name="AboutIrodoriTTSMessage" xml:space="preserve"><value>Irodori-TTS is a text-to-speech software developed by Aratako. A separate installation of Irodori-TTS is required to use this feature.</value></data>

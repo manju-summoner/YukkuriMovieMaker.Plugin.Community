@@ -86,13 +86,14 @@
 <data name="Delete" xml:space="preserve"><value>削除</value></data>
 <data name="SourceApp" xml:space="preserve"><value>ソースアプリ</value></data>
 <data name="NameColumn" xml:space="preserve"><value>名前</value></data>
-<data name="CaptionColumn" xml:space="preserve"><value>キャプション</value></data>
+<data name="CaptionColumn" xml:space="preserve"><value>声の特徴</value></data>
 <data name="RefVoiceManagement" xml:space="preserve"><value>参照音声管理</value></data>
 <data name="Generating" xml:space="preserve"><value>生成中...</value></data>
 <data name="ServerStarting" xml:space="preserve"><value>サーバー起動中...</value></data>
 <data name="ServerNotConfigured" xml:space="preserve"><value>uvパスまたはIrodori-TTSパスが設定されていません</value></data>
 <data name="FailedToGenerate" xml:space="preserve"><value>音声の生成に失敗しました</value></data>
 <data name="FailedToConnect" xml:space="preserve"><value>サーバーに接続できませんでした</value></data>
+<data name="FirstGenerationNotice" xml:space="preserve"><value>初回実行時はモデルのダウンロード（約2GB）とモデルの読み込みが行われるため、生成に時間がかかります。</value></data>
 <data name="AboutIrodoriTTS" xml:space="preserve"><value>Irodori-TTSについて</value></data>
 <data name="HelpLinkText" xml:space="preserve"><value>ヘルプ: Irodori-TTSの設定方法</value></data>
 <data name="AboutIrodoriTTSMessage" xml:space="preserve"><value>Irodori-TTSはAratako氏が開発しているテキスト読み上げソフトウェアです。利用するには別途Irodori-TTSのインストールが必要です。</value></data>

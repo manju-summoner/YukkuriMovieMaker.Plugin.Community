@@ -86,13 +86,14 @@
 <data name="Delete" xml:space="preserve"><value>حذف</value></data>
 <data name="SourceApp" xml:space="preserve"><value>التطبيق المصدر</value></data>
 <data name="NameColumn" xml:space="preserve"><value>الاسم</value></data>
-<data name="CaptionColumn" xml:space="preserve"><value>الوصف</value></data>
+<data name="CaptionColumn" xml:space="preserve"><value>خصائص الصوت</value></data>
 <data name="RefVoiceManagement" xml:space="preserve"><value>إدارة الأصوات المرجعية</value></data>
 <data name="Generating" xml:space="preserve"><value>جارٍ التوليد...</value></data>
 <data name="ServerStarting" xml:space="preserve"><value>جارٍ تشغيل الخادم...</value></data>
 <data name="ServerNotConfigured" xml:space="preserve"><value>لم يتم تعيين مسار uv أو Irodori-TTS</value></data>
 <data name="FailedToGenerate" xml:space="preserve"><value>فشل في توليد الصوت</value></data>
 <data name="FailedToConnect" xml:space="preserve"><value>فشل الاتصال بالخادم</value></data>
+<data name="FirstGenerationNotice" xml:space="preserve"><value>يستغرق التشغيل الأول وقتاً في التوليد بسبب تنزيل النموذج (~2GB) وتحميله.</value></data>
 <data name="AboutIrodoriTTS" xml:space="preserve"><value>حول Irodori-TTS</value></data>
 <data name="HelpLinkText" xml:space="preserve"><value>مساعدة: كيفية إعداد Irodori-TTS</value></data>
 <data name="AboutIrodoriTTSMessage" xml:space="preserve"><value>Irodori-TTS هو برنامج تحويل النص إلى كلام طوّره Aratako. يتطلب استخدام هذه الميزة تثبيت Irodori-TTS بشكل منفصل.</value></data>
