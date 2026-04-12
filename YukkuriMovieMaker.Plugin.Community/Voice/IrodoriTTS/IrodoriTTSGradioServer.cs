@@ -96,8 +96,8 @@ internal static class IrodoriTTSGradioServer
             FileName = "uv",
             Arguments = args,
             WorkingDirectory = workingDirectory,
-            CreateNoWindow = false,
-            UseShellExecute = true,
+            CreateNoWindow = true,
+            UseShellExecute = false,
         }) ?? throw new InvalidOperationException(Texts.FailedToConnect);
 
         // JobObject に登録: YMM4終了時に自動Kill
