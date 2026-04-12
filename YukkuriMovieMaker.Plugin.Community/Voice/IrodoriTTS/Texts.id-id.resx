@@ -71,6 +71,7 @@
 <data name="VoiceDesignUrl" xml:space="preserve"><value>URL VoiceDesign</value></data>
 <data name="GradioAppPath" xml:space="preserve"><value>gradio_app.py</value></data>
 <data name="ServerPort" xml:space="preserve"><value>Nomor Port</value></data>
+<data name="ShowConsoleWindow" xml:space="preserve"><value>Tampilkan Jendela Konsol</value></data>
 <data name="VoiceDesignSection" xml:space="preserve"><value>VoiceDesign</value></data>
 <data name="Caption" xml:space="preserve"><value>Karakteristik Suara</value></data>
 <data name="CaptionDesc" xml:space="preserve"><value>Masukkan deskripsi suara (contoh: suara wanita muda yang ceria dan semangat)</value></data>

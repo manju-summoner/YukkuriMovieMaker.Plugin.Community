@@ -11,6 +11,7 @@ TTSUrl,,TTS用URL,TTS URL,TTS URL,TTS URL,TTS URL,URL de TTS,عنوان TTS,URL 
 VoiceDesignUrl,,VoiceDesign用URL,VoiceDesign URL,VoiceDesign URL,VoiceDesign URL,VoiceDesign URL,URL de VoiceDesign,عنوان VoiceDesign,URL VoiceDesign,
 GradioAppPath,,gradio_app.py,gradio_app.py,gradio_app.py,gradio_app.py,gradio_app.py,gradio_app.py,gradio_app.py,gradio_app.py,
 ServerPort,,ポート番号,Port Number,端口号,埠號,포트 번호,Número de puerto,رقم المنفذ,Nomor Port,
+ShowConsoleWindow,,コンソール画面を表示,Show Console Window,显示控制台窗口,顯示主控台視窗,콘솔 창 표시,Mostrar ventana de consola,إظهار نافذة وحدة التحكم,Tampilkan Jendela Konsol,
 VoiceDesignSection,,VoiceDesign,VoiceDesign,VoiceDesign,VoiceDesign,VoiceDesign,VoiceDesign,VoiceDesign,VoiceDesign,
 Caption,,声の特徴,Voice Characteristics,声音特征,聲音特徵,음성 특징,Características de voz,خصائص الصوت,Karakteristik Suara,
 CaptionDesc,,声質の説明を入力します（例：明るく元気な若い女性の声）,"Enter a voice description (e.g., a bright and cheerful young woman's voice)","输入声音描述（如：开朗活泼的年轻女性声音）","輸入聲音描述（如：開朗活潑的年輕女性聲音）","음성 설명을 입력합니다 (예: 밝고 활기찬 젊은 여성의 목소리)","Ingrese una descripción de voz (ej: voz brillante y alegre de mujer joven)","أدخل وصفاً للصوت (مثال: صوت امرأة شابة مبهجة ومرحة)","Masukkan deskripsi suara (contoh: suara wanita muda yang ceria dan semangat)",

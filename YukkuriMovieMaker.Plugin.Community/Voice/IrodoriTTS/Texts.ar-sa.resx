@@ -71,6 +71,7 @@
 <data name="VoiceDesignUrl" xml:space="preserve"><value>عنوان VoiceDesign</value></data>
 <data name="GradioAppPath" xml:space="preserve"><value>gradio_app.py</value></data>
 <data name="ServerPort" xml:space="preserve"><value>رقم المنفذ</value></data>
+<data name="ShowConsoleWindow" xml:space="preserve"><value>إظهار نافذة وحدة التحكم</value></data>
 <data name="VoiceDesignSection" xml:space="preserve"><value>VoiceDesign</value></data>
 <data name="Caption" xml:space="preserve"><value>خصائص الصوت</value></data>
 <data name="CaptionDesc" xml:space="preserve"><value>أدخل وصفاً للصوت (مثال: صوت امرأة شابة مبهجة ومرحة)</value></data>

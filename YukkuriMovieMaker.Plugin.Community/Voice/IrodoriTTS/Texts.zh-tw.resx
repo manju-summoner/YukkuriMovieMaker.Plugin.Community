@@ -71,6 +71,7 @@
 <data name="VoiceDesignUrl" xml:space="preserve"><value>VoiceDesign URL</value></data>
 <data name="GradioAppPath" xml:space="preserve"><value>gradio_app.py</value></data>
 <data name="ServerPort" xml:space="preserve"><value>埠號</value></data>
+<data name="ShowConsoleWindow" xml:space="preserve"><value>顯示主控台視窗</value></data>
 <data name="VoiceDesignSection" xml:space="preserve"><value>VoiceDesign</value></data>
 <data name="Caption" xml:space="preserve"><value>聲音特徵</value></data>
 <data name="CaptionDesc" xml:space="preserve"><value>輸入聲音描述（如：開朗活潑的年輕女性聲音）</value></data>

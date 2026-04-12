@@ -13,6 +13,7 @@ internal class IrodoriTTSSettings : SettingsBase<IrodoriTTSSettings>
     public string VoiceDesignUrl { get => field; set => Set(ref field, value); } = string.Empty;
     public string GradioAppPath { get => field; set => Set(ref field, value); } = string.Empty;
     public int ServerPort { get => field; set => Set(ref field, value); } = 7860;
+    public bool ShowConsoleWindow { get => field; set => Set(ref field, value); } = true;
 
     // VoiceDesign の前回設定（話者名以外）
     public string LastCaption { get => field; set => Set(ref field, value); } = string.Empty;

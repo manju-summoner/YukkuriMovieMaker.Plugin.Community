@@ -91,13 +91,14 @@ internal static class IrodoriTTSGradioServer
         var scriptFileName = Path.GetFileName(gradioAppFullPath);
         var args = $"run python {scriptFileName} --server-name 127.0.0.1 --server-port {settings.ServerPort}";
 
+        var showConsole = settings.ShowConsoleWindow;
         managedProcess = Process.Start(new ProcessStartInfo
         {
             FileName = "uv",
             Arguments = args,
             WorkingDirectory = workingDirectory,
-            CreateNoWindow = true,
-            UseShellExecute = false,
+            CreateNoWindow = !showConsole,
+            UseShellExecute = showConsole,
         }) ?? throw new InvalidOperationException(Texts.FailedToConnect);
 
         // JobObject に登録: YMM4終了時に自動Kill
