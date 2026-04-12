@@ -113,6 +113,7 @@
 <data name="Checkpoint" xml:space="preserve"><value>Modelo (Opcional)</value></data>
 <data name="CheckpointDesc" xml:space="preserve"><value>Usa el modelo predeterminado cuando no se selecciona</value></data>
 <data name="EmojiPaletteButton" xml:space="preserve"><value>Emoji</value></data>
+<data name="Regenerate" xml:space="preserve"><value>Regenerar</value></data>
 <data name="Emoji_Whisper" xml:space="preserve"><value>Susurro / ASMR</value></data>
 <data name="Emoji_Sigh" xml:space="preserve"><value>Suspiro / Respiración</value></data>
 <data name="Emoji_Pause" xml:space="preserve"><value>Pausa / Silencio</value></data>

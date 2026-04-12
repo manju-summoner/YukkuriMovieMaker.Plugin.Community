@@ -113,6 +113,7 @@
 <data name="Checkpoint" xml:space="preserve"><value>모델 (선택)</value></data>
 <data name="CheckpointDesc" xml:space="preserve"><value>미선택 시 기본 모델을 사용합니다</value></data>
 <data name="EmojiPaletteButton" xml:space="preserve"><value>이모지</value></data>
+<data name="Regenerate" xml:space="preserve"><value>재생성</value></data>
 <data name="Emoji_Whisper" xml:space="preserve"><value>속삭임・귀 옆 소리</value></data>
 <data name="Emoji_Sigh" xml:space="preserve"><value>한숨・숨소리</value></data>
 <data name="Emoji_Pause" xml:space="preserve"><value>쉼・침묵</value></data>

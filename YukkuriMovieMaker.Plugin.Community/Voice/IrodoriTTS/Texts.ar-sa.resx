@@ -113,6 +113,7 @@
 <data name="Checkpoint" xml:space="preserve"><value>النموذج (اختياري)</value></data>
 <data name="CheckpointDesc" xml:space="preserve"><value>يستخدم النموذج الافتراضي عند عدم التحديد</value></data>
 <data name="EmojiPaletteButton" xml:space="preserve"><value>إيموجي</value></data>
+<data name="Regenerate" xml:space="preserve"><value>إعادة التوليد</value></data>
 <data name="Emoji_Whisper" xml:space="preserve"><value>همس / أصوات قريبة من الأذن</value></data>
 <data name="Emoji_Sigh" xml:space="preserve"><value>تنفس / تنهيد</value></data>
 <data name="Emoji_Pause" xml:space="preserve"><value>توقف / صمت</value></data>

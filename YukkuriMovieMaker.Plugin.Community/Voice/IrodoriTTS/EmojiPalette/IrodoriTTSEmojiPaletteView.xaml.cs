@@ -16,7 +16,14 @@ public partial class IrodoriTTSEmojiPaletteView : UserControl, IPropertyEditorCo
 
     public void SetEditorInfo(IEditorInfo? info)
     {
-        DataContext = new IrodoriTTSEmojiPaletteViewModel(info?.VoiceItemEdit);
+        var vm = new IrodoriTTSEmojiPaletteViewModel(info?.VoiceItemEdit, info);
+        vm.GetCaretIndex = () => HatsuonTextBox.CaretIndex;
+        vm.SetCaretIndex = index =>
+        {
+            HatsuonTextBox.CaretIndex = index;
+            HatsuonTextBox.Focus();
+        };
+        DataContext = vm;
     }
 
     public void ClearViewModel()

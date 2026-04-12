@@ -113,6 +113,7 @@
 <data name="Checkpoint" xml:space="preserve"><value>モデル（任意）</value></data>
 <data name="CheckpointDesc" xml:space="preserve"><value>未選択時はデフォルトのモデルを使用します</value></data>
 <data name="EmojiPaletteButton" xml:space="preserve"><value>絵文字</value></data>
+<data name="Regenerate" xml:space="preserve"><value>再生成</value></data>
 <data name="Emoji_Whisper" xml:space="preserve"><value>囁き・耳元の音</value></data>
 <data name="Emoji_Sigh" xml:space="preserve"><value>吐息・溜息・寝息</value></data>
 <data name="Emoji_Pause" xml:space="preserve"><value>間・沈黙</value></data>

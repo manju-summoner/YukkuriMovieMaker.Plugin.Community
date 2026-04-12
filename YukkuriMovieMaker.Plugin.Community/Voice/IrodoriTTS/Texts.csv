@@ -53,6 +53,7 @@ Saving,,保存中...,Saving...,保存中...,儲存中...,저장 중...,Guardando
 Checkpoint,,モデル（任意）,Model (Optional),模型（可选）,模型（可選）,모델 (선택),Modelo (Opcional),النموذج (اختياري),Model (Opsional),
 CheckpointDesc,,未選択時はデフォルトのモデルを使用します,Uses default model when not selected,未选择时使用默认模型,未選擇時使用預設模型,미선택 시 기본 모델을 사용합니다,Usa el modelo predeterminado cuando no se selecciona,يستخدم النموذج الافتراضي عند عدم التحديد,Menggunakan model default jika tidak dipilih,
 EmojiPaletteButton,,絵文字,Emoji,表情,表情,이모지,Emoji,إيموجي,Emoji,
+Regenerate,,再生成,Regenerate,重新生成,重新生成,재생성,Regenerar,إعادة التوليد,Regenerasi,
 Emoji_Whisper,,囁き・耳元の音,Whisper / ASMR,耳语・耳边声,耳語・耳邊聲,속삭임・귀 옆 소리,Susurro / ASMR,همس / أصوات قريبة من الأذن,Bisikan / ASMR,
 Emoji_Sigh,,吐息・溜息・寝息,Breath / Sigh,叹气・呼吸声,嘆氣・呼吸聲,한숨・숨소리,Suspiro / Respiración,تنفس / تنهيد,Napas / Desahan,
 Emoji_Pause,,間・沈黙,Pause / Silence,停顿・沉默,停頓・沉默,쉼・침묵,Pausa / Silencio,توقف / صمت,Jeda / Keheningan,

@@ -113,6 +113,7 @@
 <data name="Checkpoint" xml:space="preserve"><value>Model (Opsional)</value></data>
 <data name="CheckpointDesc" xml:space="preserve"><value>Menggunakan model default jika tidak dipilih</value></data>
 <data name="EmojiPaletteButton" xml:space="preserve"><value>Emoji</value></data>
+<data name="Regenerate" xml:space="preserve"><value>Regenerasi</value></data>
 <data name="Emoji_Whisper" xml:space="preserve"><value>Bisikan / ASMR</value></data>
 <data name="Emoji_Sigh" xml:space="preserve"><value>Napas / Desahan</value></data>
 <data name="Emoji_Pause" xml:space="preserve"><value>Jeda / Keheningan</value></data>

@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.IrodoriTTS.EmojiPalette"
              xmlns:irodori="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.IrodoriTTS"
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
              d:DesignHeight="30" d:DesignWidth="400"
              d:DataContext="{d:DesignInstance Type={x:Type local:IrodoriTTSEmojiPaletteViewModel}}">
@@ -14,27 +15,72 @@
                    BeginEdit="PopupButton_BeginEdit"
                    EndEdit="PopupButton_EndEdit">
         <c:PopupButton.PopupContent>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="300">
-                <ItemsControl ItemsSource="{Binding Emojis}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type local:EmojiItem}">
-                            <Button Command="{Binding DataContext.InsertEmojiCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    CommandParameter="{Binding}" FontFamily="Segoe UI Emoji"
-                                    Height="26" Margin="1" Padding="4,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <Image Source="{Binding Image}" Width="18" Height="18" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding Description}" FontSize="12" VerticalAlignment="Center" Margin="4,0,0,0"/>
-                                </StackPanel>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+            <StackPanel>
+                <!-- 発音編集欄 + ボタン -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="HatsuonTextBox" Grid.Column="0"
+                             Text="{Binding Hatsuon, UpdateSourceTrigger=PropertyChanged}"
+                             VerticalContentAlignment="Center" Padding="4,2"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Command="{Binding TogglePlayCommand}" Width="26" Height="26">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Play}}"/>
+                                    <Setter Property="ToolTip" Value="{x:Static irodori:Texts.Preview}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                            <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Pause}}"/>
+                                            <Setter Property="ToolTip" Value="{x:Static irodori:Texts.Stop}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                            <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.LoadingAnimation}}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Command="{Binding RegenerateCommand}" Width="26" Height="26"
+                                ToolTip="{x:Static irodori:Texts.Regenerate}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Refresh}}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                            <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.LoadingAnimation}}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+                <!-- 絵文字パレット -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="250">
+                    <ItemsControl ItemsSource="{Binding Emojis}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:EmojiItem}">
+                                <Button Command="{Binding DataContext.InsertEmojiCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}" FontFamily="Segoe UI Emoji"
+                                        Height="26" Margin="1" Padding="4,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="{Binding Image}" Width="18" Height="18" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Description}" FontSize="12" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
         </c:PopupButton.PopupContent>
     </c:PopupButton>
 </UserControl>
