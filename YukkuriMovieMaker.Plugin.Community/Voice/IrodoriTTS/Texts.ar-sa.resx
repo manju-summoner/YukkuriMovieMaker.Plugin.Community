@@ -104,4 +104,44 @@
 <data name="Saving" xml:space="preserve"><value>جارٍ الحفظ...</value></data>
 <data name="Checkpoint" xml:space="preserve"><value>النموذج (اختياري)</value></data>
 <data name="CheckpointDesc" xml:space="preserve"><value>يستخدم النموذج الافتراضي عند عدم التحديد</value></data>
+<data name="EmojiPaletteButton" xml:space="preserve"><value>إيموجي</value></data>
+<data name="Emoji_Whisper" xml:space="preserve"><value>همس / أصوات قريبة من الأذن</value></data>
+<data name="Emoji_Sigh" xml:space="preserve"><value>تنفس / تنهيد</value></data>
+<data name="Emoji_Pause" xml:space="preserve"><value>توقف / صمت</value></data>
+<data name="Emoji_Laugh" xml:space="preserve"><value>ضحك</value></data>
+<data name="Emoji_Panting" xml:space="preserve"><value>لهاث / أنين</value></data>
+<data name="Emoji_Echo" xml:space="preserve"><value>صدى / ترددصوتي</value></data>
+<data name="Emoji_Teasing" xml:space="preserve"><value>مداعبة / تدلل</value></data>
+<data name="Emoji_Trembling" xml:space="preserve"><value>صوت مرتجف</value></data>
+<data name="Emoji_HeavyBreathing" xml:space="preserve"><value>تنفس ثقيل</value></data>
+<data name="Emoji_Gasp" xml:space="preserve"><value>شهقة</value></data>
+<data name="Emoji_Licking" xml:space="preserve"><value>صوت لعق / صوت مائي</value></data>
+<data name="Emoji_LipNoise" xml:space="preserve"><value>صوت الشفاه</value></data>
+<data name="Emoji_Gently" xml:space="preserve"><value>بلطف</value></data>
+<data name="Emoji_Crying" xml:space="preserve"><value>بكا�� / نحيب</value></data>
+<data name="Emoji_Scream" xml:space="preserve"><value>صراخ</value></data>
+<data name="Emoji_Sleepy" xml:space="preserve"><value>بنعاس</value></data>
+<data name="Emoji_FastSpeaking" xml:space="preserve"><value>كلام سريع</value></data>
+<data name="Emoji_Phone" xml:space="preserve"><value>عبر الهاتف</value></data>
+<data name="Emoji_Slowly" xml:space="preserve"><value>ببطء</value></data>
+<data name="Emoji_Gulp" xml:space="preserve"><value>صوت بلع</value></data>
+<data name="Emoji_Coughing" xml:space="preserve"><value>سعال / عطس</value></data>
+<data name="Emoji_Tutting" xml:space="preserve"><value>طقطقة اللسان</value></data>
+<data name="Emoji_Panicked" xml:space="preserve"><value>ارتباك / تلعثم</value></data>
+<data name="Emoji_Joyful" xml:space="preserve"><value>بفرح</value></data>
+<data name="Emoji_Angry" xml:space="preserve"><value>غضب</value></data>
+<data name="Emoji_Surprise" xml:space="preserve"><value>مفاجأة</value></data>
+<data name="Emoji_Yawn" xml:space="preserve"><value>تثاؤب</value></data>
+<data name="Emoji_Painful" xml:space="preserve"><value>بألم</value></data>
+<data name="Emoji_Worried" xml:space="preserve"><value>بقلق</value></data>
+<data name="Emoji_Shy" xml:space="preserve"><value>بخجل</value></data>
+<data name="Emoji_Exasperated" xml:space="preserve"><value>باستياء</value></data>
+<data name="Emoji_Cheerful" xml:space="preserve"><value>بمرح</value></data>
+<data name="Emoji_Agreement" xml:space="preserve"><value>موافقة</value></data>
+<data name="Emoji_Pleading" xml:space="preserve"><value>بتوسل</value></data>
+<data name="Emoji_Drunk" xml:space="preserve"><value>بسكر</value></data>
+<data name="Emoji_Humming" xml:space="preserve"><value>همهمة</value></data>
+<data name="Emoji_Muffled" xml:space="preserve"><value>مكتوم</value></data>
+<data name="Emoji_Relieved" xml:space="preserve"><value>مرتاح</value></data>
+<data name="Emoji_Questioning" xml:space="preserve"><value>صوت استفهام</value></data>
 </root>

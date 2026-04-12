@@ -104,4 +104,44 @@
 <data name="Saving" xml:space="preserve"><value>저장 중...</value></data>
 <data name="Checkpoint" xml:space="preserve"><value>모델 (선택)</value></data>
 <data name="CheckpointDesc" xml:space="preserve"><value>미선택 시 기본 모델을 사용합니다</value></data>
+<data name="EmojiPaletteButton" xml:space="preserve"><value>이모지</value></data>
+<data name="Emoji_Whisper" xml:space="preserve"><value>속삭임・귀 옆 소리</value></data>
+<data name="Emoji_Sigh" xml:space="preserve"><value>한숨・숨소리</value></data>
+<data name="Emoji_Pause" xml:space="preserve"><value>쉼・침묵</value></data>
+<data name="Emoji_Laugh" xml:space="preserve"><value>웃음</value></data>
+<data name="Emoji_Panting" xml:space="preserve"><value>헐떡임・신음</value></data>
+<data name="Emoji_Echo" xml:space="preserve"><value>에코・리버브</value></data>
+<data name="Emoji_Teasing" xml:space="preserve"><value>놀리기・애교</value></data>
+<data name="Emoji_Trembling" xml:space="preserve"><value>떨리는 목소리</value></data>
+<data name="Emoji_HeavyBreathing" xml:space="preserve"><value>거친 숨</value></data>
+<data name="Emoji_Gasp" xml:space="preserve"><value>숨을 삼키다</value></data>
+<data name="Emoji_Licking" xml:space="preserve"><value>핥는 소리・물소리</value></data>
+<data name="Emoji_LipNoise" xml:space="preserve"><value>입술 소리</value></data>
+<data name="Emoji_Gently" xml:space="preserve"><value>부드럽게</value></data>
+<data name="Emoji_Crying" xml:space="preserve"><value>흐느낌・울음</value></data>
+<data name="Emoji_Scream" xml:space="preserve"><value>비명・외침</value></data>
+<data name="Emoji_Sleepy" xml:space="preserve"><value>졸린 듯이</value></data>
+<data name="Emoji_FastSpeaking" xml:space="preserve"><value>빠른 말</value></data>
+<data name="Emoji_Phone" xml:space="preserve"><value>전화 너머</value></data>
+<data name="Emoji_Slowly" xml:space="preserve"><value>천천히</value></data>
+<data name="Emoji_Gulp" xml:space="preserve"><value>삼키는 소리</value></data>
+<data name="Emoji_Coughing" xml:space="preserve"><value>기침・재채기</value></data>
+<data name="Emoji_Tutting" xml:space="preserve"><value>혀 차기</value></data>
+<data name="Emoji_Panicked" xml:space="preserve"><value>당황・말더듬</value></data>
+<data name="Emoji_Joyful" xml:space="preserve"><value>기쁘게</value></data>
+<data name="Emoji_Angry" xml:space="preserve"><value>화남</value></data>
+<data name="Emoji_Surprise" xml:space="preserve"><value>놀람</value></data>
+<data name="Emoji_Yawn" xml:space="preserve"><value>하품</value></data>
+<data name="Emoji_Painful" xml:space="preserve"><value>괴롭게</value></data>
+<data name="Emoji_Worried" xml:space="preserve"><value>걱정스럽게</value></data>
+<data name="Emoji_Shy" xml:space="preserve"><value>수줍게</value></data>
+<data name="Emoji_Exasperated" xml:space="preserve"><value>어이없게</value></data>
+<data name="Emoji_Cheerful" xml:space="preserve"><value>즐겁게</value></data>
+<data name="Emoji_Agreement" xml:space="preserve"><value>맞장구</value></data>
+<data name="Emoji_Pleading" xml:space="preserve"><value>간청하듯</value></data>
+<data name="Emoji_Drunk" xml:space="preserve"><value>취해서</value></data>
+<data name="Emoji_Humming" xml:space="preserve"><value>콧노래</value></data>
+<data name="Emoji_Muffled" xml:space="preserve"><value>입이 막혀서</value></data>
+<data name="Emoji_Relieved" xml:space="preserve"><value>안도・만족</value></data>
+<data name="Emoji_Questioning" xml:space="preserve"><value>의문의 소리</value></data>
 </root>

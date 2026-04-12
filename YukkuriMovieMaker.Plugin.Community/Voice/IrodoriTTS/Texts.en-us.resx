@@ -104,4 +104,44 @@
 <data name="Saving" xml:space="preserve"><value>Saving...</value></data>
 <data name="Checkpoint" xml:space="preserve"><value>Model (Optional)</value></data>
 <data name="CheckpointDesc" xml:space="preserve"><value>Uses default model when not selected</value></data>
+<data name="EmojiPaletteButton" xml:space="preserve"><value>Emoji</value></data>
+<data name="Emoji_Whisper" xml:space="preserve"><value>Whisper / ASMR</value></data>
+<data name="Emoji_Sigh" xml:space="preserve"><value>Breath / Sigh</value></data>
+<data name="Emoji_Pause" xml:space="preserve"><value>Pause / Silence</value></data>
+<data name="Emoji_Laugh" xml:space="preserve"><value>Chuckle / Giggle</value></data>
+<data name="Emoji_Panting" xml:space="preserve"><value>Panting / Moan</value></data>
+<data name="Emoji_Echo" xml:space="preserve"><value>Echo / Reverb</value></data>
+<data name="Emoji_Teasing" xml:space="preserve"><value>Teasing / Coaxing</value></data>
+<data name="Emoji_Trembling" xml:space="preserve"><value>Trembling voice / Timidly</value></data>
+<data name="Emoji_HeavyBreathing" xml:space="preserve"><value>Heavy breathing</value></data>
+<data name="Emoji_Gasp" xml:space="preserve"><value>Gasp</value></data>
+<data name="Emoji_Licking" xml:space="preserve"><value>Licking / Wet sound</value></data>
+<data name="Emoji_LipNoise" xml:space="preserve"><value>Lip noise</value></data>
+<data name="Emoji_Gently" xml:space="preserve"><value>Gently / Tenderly</value></data>
+<data name="Emoji_Crying" xml:space="preserve"><value>Sobbing / Crying</value></data>
+<data name="Emoji_Scream" xml:space="preserve"><value>Scream / Shout</value></data>
+<data name="Emoji_Sleepy" xml:space="preserve"><value>Sleepily / Languidly</value></data>
+<data name="Emoji_FastSpeaking" xml:space="preserve"><value>Fast-speaking</value></data>
+<data name="Emoji_Phone" xml:space="preserve"><value>Over the phone</value></data>
+<data name="Emoji_Slowly" xml:space="preserve"><value>Slowly</value></data>
+<data name="Emoji_Gulp" xml:space="preserve"><value>Gulp / Swallowing</value></data>
+<data name="Emoji_Coughing" xml:space="preserve"><value>Coughing / Sneezing</value></data>
+<data name="Emoji_Tutting" xml:space="preserve"><value>Tutting / Clicking tongue</value></data>
+<data name="Emoji_Panicked" xml:space="preserve"><value>Panicked / Stuttering</value></data>
+<data name="Emoji_Joyful" xml:space="preserve"><value>Joyfully</value></data>
+<data name="Emoji_Angry" xml:space="preserve"><value>Angry / Displeased</value></data>
+<data name="Emoji_Surprise" xml:space="preserve"><value>Surprise / Awe</value></data>
+<data name="Emoji_Yawn" xml:space="preserve"><value>Yawn</value></data>
+<data name="Emoji_Painful" xml:space="preserve"><value>Painfully</value></data>
+<data name="Emoji_Worried" xml:space="preserve"><value>Worriedly</value></data>
+<data name="Emoji_Shy" xml:space="preserve"><value>Shyly / Bashfully</value></data>
+<data name="Emoji_Exasperated" xml:space="preserve"><value>Exasperatedly</value></data>
+<data name="Emoji_Cheerful" xml:space="preserve"><value>Cheerfully</value></data>
+<data name="Emoji_Agreement" xml:space="preserve"><value>Agreement / Nodding</value></data>
+<data name="Emoji_Pleading" xml:space="preserve"><value>Pleadingly</value></data>
+<data name="Emoji_Drunk" xml:space="preserve"><value>Drunkenly</value></data>
+<data name="Emoji_Humming" xml:space="preserve"><value>Humming</value></data>
+<data name="Emoji_Muffled" xml:space="preserve"><value>Muffled</value></data>
+<data name="Emoji_Relieved" xml:space="preserve"><value>Relieved / Contented</value></data>
+<data name="Emoji_Questioning" xml:space="preserve"><value>Questioning</value></data>
 </root>

@@ -79,6 +79,10 @@
     <ProjectReference Include="$(GeneratorDirPath)YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <AdditionalFiles Include="**/*.csv" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Voice\IrodoriTTS\EmojiPalette\Emoji\*.png" />
+  </ItemGroup>
 	
   <ItemGroup>
     <None Remove="Brush\Rainbow\Linear\Texts.csv" />

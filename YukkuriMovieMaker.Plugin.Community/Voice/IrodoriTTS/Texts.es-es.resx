@@ -104,4 +104,44 @@
 <data name="Saving" xml:space="preserve"><value>Guardando...</value></data>
 <data name="Checkpoint" xml:space="preserve"><value>Modelo (Opcional)</value></data>
 <data name="CheckpointDesc" xml:space="preserve"><value>Usa el modelo predeterminado cuando no se selecciona</value></data>
+<data name="EmojiPaletteButton" xml:space="preserve"><value>Emoji</value></data>
+<data name="Emoji_Whisper" xml:space="preserve"><value>Susurro / ASMR</value></data>
+<data name="Emoji_Sigh" xml:space="preserve"><value>Suspiro / Respiración</value></data>
+<data name="Emoji_Pause" xml:space="preserve"><value>Pausa / Silencio</value></data>
+<data name="Emoji_Laugh" xml:space="preserve"><value>Risa</value></data>
+<data name="Emoji_Panting" xml:space="preserve"><value>Jadeo / Gemido</value></data>
+<data name="Emoji_Echo" xml:space="preserve"><value>Eco / Reverberación</value></data>
+<data name="Emoji_Teasing" xml:space="preserve"><value>Burlón / Coqueto</value></data>
+<data name="Emoji_Trembling" xml:space="preserve"><value>Voz temblorosa</value></data>
+<data name="Emoji_HeavyBreathing" xml:space="preserve"><value>Respiración pesada</value></data>
+<data name="Emoji_Gasp" xml:space="preserve"><value>Jadeo</value></data>
+<data name="Emoji_Licking" xml:space="preserve"><value>Sonido de lamer</value></data>
+<data name="Emoji_LipNoise" xml:space="preserve"><value>Ruido de labios</value></data>
+<data name="Emoji_Gently" xml:space="preserve"><value>Suavemente</value></data>
+<data name="Emoji_Crying" xml:space="preserve"><value>Sollozo / Llanto</value></data>
+<data name="Emoji_Scream" xml:space="preserve"><value>Grito</value></data>
+<data name="Emoji_Sleepy" xml:space="preserve"><value>Somnoliento</value></data>
+<data name="Emoji_FastSpeaking" xml:space="preserve"><value>Hablar rápido</value></data>
+<data name="Emoji_Phone" xml:space="preserve"><value>Por teléfono</value></data>
+<data name="Emoji_Slowly" xml:space="preserve"><value>Lentamente</value></data>
+<data name="Emoji_Gulp" xml:space="preserve"><value>Tragar</value></data>
+<data name="Emoji_Coughing" xml:space="preserve"><value>Tos / Estornudo</value></data>
+<data name="Emoji_Tutting" xml:space="preserve"><value>Chasquido de lengua</value></data>
+<data name="Emoji_Panicked" xml:space="preserve"><value>Pánico / Tartamudeo</value></data>
+<data name="Emoji_Joyful" xml:space="preserve"><value>Alegremente</value></data>
+<data name="Emoji_Angry" xml:space="preserve"><value>Enojado</value></data>
+<data name="Emoji_Surprise" xml:space="preserve"><value>Sorpresa</value></data>
+<data name="Emoji_Yawn" xml:space="preserve"><value>Bostezo</value></data>
+<data name="Emoji_Painful" xml:space="preserve"><value>Dolorosamente</value></data>
+<data name="Emoji_Worried" xml:space="preserve"><value>Preocupado</value></data>
+<data name="Emoji_Shy" xml:space="preserve"><value>Tímidamente</value></data>
+<data name="Emoji_Exasperated" xml:space="preserve"><value>Exasperado</value></data>
+<data name="Emoji_Cheerful" xml:space="preserve"><value>Alegremente</value></data>
+<data name="Emoji_Agreement" xml:space="preserve"><value>Asentimiento</value></data>
+<data name="Emoji_Pleading" xml:space="preserve"><value>Suplicante</value></data>
+<data name="Emoji_Drunk" xml:space="preserve"><value>Borracho</value></data>
+<data name="Emoji_Humming" xml:space="preserve"><value>Tarareo</value></data>
+<data name="Emoji_Muffled" xml:space="preserve"><value>Amortiguado</value></data>
+<data name="Emoji_Relieved" xml:space="preserve"><value>Aliviado</value></data>
+<data name="Emoji_Questioning" xml:space="preserve"><value>Cuestionando</value></data>
 </root>

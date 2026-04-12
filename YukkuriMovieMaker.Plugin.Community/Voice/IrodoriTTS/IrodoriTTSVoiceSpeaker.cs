@@ -50,7 +50,7 @@ internal class IrodoriTTSVoiceSpeaker(string refVoiceFilePath, string speakerNam
             semaphore.Release();
         }
 
-        return null;
+        return pronounce as IrodoriTTSVoicePronounce ?? new IrodoriTTSVoicePronounce();
     }
 
     public IVoiceParameter CreateVoiceParameter() => new IrodoriTTSVoiceParameter();

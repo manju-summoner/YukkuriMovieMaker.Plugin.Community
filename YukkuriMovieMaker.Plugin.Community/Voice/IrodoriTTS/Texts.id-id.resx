@@ -104,4 +104,44 @@
 <data name="Saving" xml:space="preserve"><value>Menyimpan...</value></data>
 <data name="Checkpoint" xml:space="preserve"><value>Model (Opsional)</value></data>
 <data name="CheckpointDesc" xml:space="preserve"><value>Menggunakan model default jika tidak dipilih</value></data>
+<data name="EmojiPaletteButton" xml:space="preserve"><value>Emoji</value></data>
+<data name="Emoji_Whisper" xml:space="preserve"><value>Bisikan / ASMR</value></data>
+<data name="Emoji_Sigh" xml:space="preserve"><value>Napas / Desahan</value></data>
+<data name="Emoji_Pause" xml:space="preserve"><value>Jeda / Keheningan</value></data>
+<data name="Emoji_Laugh" xml:space="preserve"><value>Tawa</value></data>
+<data name="Emoji_Panting" xml:space="preserve"><value>Terengah / Erangan</value></data>
+<data name="Emoji_Echo" xml:space="preserve"><value>Gema / Reverb</value></data>
+<data name="Emoji_Teasing" xml:space="preserve"><value>Menggoda / Manja</value></data>
+<data name="Emoji_Trembling" xml:space="preserve"><value>Suara gemetar</value></data>
+<data name="Emoji_HeavyBreathing" xml:space="preserve"><value>Napas berat</value></data>
+<data name="Emoji_Gasp" xml:space="preserve"><value>Terkesiap</value></data>
+<data name="Emoji_Licking" xml:space="preserve"><value>Suara menjilat</value></data>
+<data name="Emoji_LipNoise" xml:space="preserve"><value>Suara bibir</value></data>
+<data name="Emoji_Gently" xml:space="preserve"><value>Dengan lembut</value></data>
+<data name="Emoji_Crying" xml:space="preserve"><value>Isak tangis</value></data>
+<data name="Emoji_Scream" xml:space="preserve"><value>Jeritan</value></data>
+<data name="Emoji_Sleepy" xml:space="preserve"><value>Mengantuk</value></data>
+<data name="Emoji_FastSpeaking" xml:space="preserve"><value>Bicara cepat</value></data>
+<data name="Emoji_Phone" xml:space="preserve"><value>Melalui telepon</value></data>
+<data name="Emoji_Slowly" xml:space="preserve"><value>Perlahan</value></data>
+<data name="Emoji_Gulp" xml:space="preserve"><value>Suara menelan</value></data>
+<data name="Emoji_Coughing" xml:space="preserve"><value>Batuk / Bersin</value></data>
+<data name="Emoji_Tutting" xml:space="preserve"><value>Decak lidah</value></data>
+<data name="Emoji_Panicked" xml:space="preserve"><value>Panik / Gagap</value></data>
+<data name="Emoji_Joyful" xml:space="preserve"><value>Dengan gembira</value></data>
+<data name="Emoji_Angry" xml:space="preserve"><value>Marah</value></data>
+<data name="Emoji_Surprise" xml:space="preserve"><value>Terkejut</value></data>
+<data name="Emoji_Yawn" xml:space="preserve"><value>Menguap</value></data>
+<data name="Emoji_Painful" xml:space="preserve"><value>Dengan menyakitkan</value></data>
+<data name="Emoji_Worried" xml:space="preserve"><value>Dengan khawatir</value></data>
+<data name="Emoji_Shy" xml:space="preserve"><value>Dengan malu</value></data>
+<data name="Emoji_Exasperated" xml:space="preserve"><value>Dengan jengkel</value></data>
+<data name="Emoji_Cheerful" xml:space="preserve"><value>Dengan riang</value></data>
+<data name="Emoji_Agreement" xml:space="preserve"><value>Anggukan</value></data>
+<data name="Emoji_Pleading" xml:space="preserve"><value>Dengan memohon</value></data>
+<data name="Emoji_Drunk" xml:space="preserve"><value>Mabuk</value></data>
+<data name="Emoji_Humming" xml:space="preserve"><value>Bersenandung</value></data>
+<data name="Emoji_Muffled" xml:space="preserve"><value>Teredam</value></data>
+<data name="Emoji_Relieved" xml:space="preserve"><value>Lega</value></data>
+<data name="Emoji_Questioning" xml:space="preserve"><value>Suara bertanya</value></data>
 </root>
