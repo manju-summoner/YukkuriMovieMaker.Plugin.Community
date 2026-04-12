@@ -72,6 +72,12 @@
 <data name="GradioAppPath" xml:space="preserve"><value>gradio_app.py</value></data>
 <data name="ServerPort" xml:space="preserve"><value>端口号</value></data>
 <data name="ShowConsoleWindow" xml:space="preserve"><value>显示控制台窗口</value></data>
+<data name="ServerStatus" xml:space="preserve"><value>服务器状态</value></data>
+<data name="ServerStatusUnknown" xml:space="preserve"><value>未知</value></data>
+<data name="ServerStatusStopped" xml:space="preserve"><value>已停止</value></data>
+<data name="ServerStatusRunning" xml:space="preserve"><value>运行中（{0}）</value></data>
+<data name="ServerStatusCheck" xml:space="preserve"><value>检查</value></data>
+<data name="ServerShutdown" xml:space="preserve"><value>停止</value></data>
 <data name="VoiceDesignSection" xml:space="preserve"><value>VoiceDesign</value></data>
 <data name="Caption" xml:space="preserve"><value>声音特征</value></data>
 <data name="CaptionDesc" xml:space="preserve"><value>输入声音描述（如：开朗活泼的年轻女性声音）</value></data>

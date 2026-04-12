@@ -53,6 +53,16 @@ internal static class IrodoriTTSGradioServer
         KillManagedProcess();
     }
 
+    /// <summary>
+    /// YMM4管理プロセスが実行中かどうか
+    /// </summary>
+    public static bool IsRunning => managedProcess != null && !managedProcess.HasExited;
+
+    /// <summary>
+    /// 現在起動中のアプリのファイル名（実行中でない場合は null）
+    /// </summary>
+    public static string? CurrentAppName => IsRunning && currentApp != null ? Path.GetFileName(currentApp) : null;
+
     static string LocalServerUrl =>
         $"http://127.0.0.1:{IrodoriTTSSettings.Default.ServerPort}";
 

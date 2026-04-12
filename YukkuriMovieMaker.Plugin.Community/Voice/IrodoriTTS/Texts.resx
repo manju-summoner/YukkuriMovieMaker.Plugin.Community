@@ -72,6 +72,12 @@
 <data name="GradioAppPath" xml:space="preserve"><value>gradio_app.py</value></data>
 <data name="ServerPort" xml:space="preserve"><value>ポート番号</value></data>
 <data name="ShowConsoleWindow" xml:space="preserve"><value>コンソール画面を表示</value></data>
+<data name="ServerStatus" xml:space="preserve"><value>サーバーステータス</value></data>
+<data name="ServerStatusUnknown" xml:space="preserve"><value>不明</value></data>
+<data name="ServerStatusStopped" xml:space="preserve"><value>停止中</value></data>
+<data name="ServerStatusRunning" xml:space="preserve"><value>実行中（{0}）</value></data>
+<data name="ServerStatusCheck" xml:space="preserve"><value>更新</value></data>
+<data name="ServerShutdown" xml:space="preserve"><value>終了</value></data>
 <data name="VoiceDesignSection" xml:space="preserve"><value>VoiceDesign</value></data>
 <data name="Caption" xml:space="preserve"><value>声の特徴</value></data>
 <data name="CaptionDesc" xml:space="preserve"><value>声質の説明を入力します（例：明るく元気な若い女性の声）</value></data>

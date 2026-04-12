@@ -72,6 +72,12 @@
 <data name="GradioAppPath" xml:space="preserve"><value>gradio_app.py</value></data>
 <data name="ServerPort" xml:space="preserve"><value>포트 번호</value></data>
 <data name="ShowConsoleWindow" xml:space="preserve"><value>콘솔 창 표시</value></data>
+<data name="ServerStatus" xml:space="preserve"><value>서버 상태</value></data>
+<data name="ServerStatusUnknown" xml:space="preserve"><value>알 수 없음</value></data>
+<data name="ServerStatusStopped" xml:space="preserve"><value>중지됨</value></data>
+<data name="ServerStatusRunning" xml:space="preserve"><value>실행 중 ({0})</value></data>
+<data name="ServerStatusCheck" xml:space="preserve"><value>확인</value></data>
+<data name="ServerShutdown" xml:space="preserve"><value>중지</value></data>
 <data name="VoiceDesignSection" xml:space="preserve"><value>VoiceDesign</value></data>
 <data name="Caption" xml:space="preserve"><value>음성 특징</value></data>
 <data name="CaptionDesc" xml:space="preserve"><value>음성 설명을 입력합니다 (예: 밝고 활기찬 젊은 여성의 목소리)</value></data>

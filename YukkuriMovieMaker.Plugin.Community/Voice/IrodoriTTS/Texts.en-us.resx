@@ -72,6 +72,12 @@
 <data name="GradioAppPath" xml:space="preserve"><value>gradio_app.py</value></data>
 <data name="ServerPort" xml:space="preserve"><value>Port Number</value></data>
 <data name="ShowConsoleWindow" xml:space="preserve"><value>Show Console Window</value></data>
+<data name="ServerStatus" xml:space="preserve"><value>Server Status</value></data>
+<data name="ServerStatusUnknown" xml:space="preserve"><value>Unknown</value></data>
+<data name="ServerStatusStopped" xml:space="preserve"><value>Stopped</value></data>
+<data name="ServerStatusRunning" xml:space="preserve"><value>Running ({0})</value></data>
+<data name="ServerStatusCheck" xml:space="preserve"><value>Check</value></data>
+<data name="ServerShutdown" xml:space="preserve"><value>Stop</value></data>
 <data name="VoiceDesignSection" xml:space="preserve"><value>VoiceDesign</value></data>
 <data name="Caption" xml:space="preserve"><value>Voice Characteristics</value></data>
 <data name="CaptionDesc" xml:space="preserve"><value>Enter a voice description (e.g., a bright and cheerful young woman's voice)</value></data>

@@ -26,10 +26,15 @@ internal class IrodoriTTSSettingsViewModel : Bindable
     }
     public bool IsPlaying { get => field; set => Set(ref field, value); }
 
+    // サーバーステータス
+    public string ServerStatusText { get => field; set => Set(ref field, value); } = Texts.ServerStatusUnknown;
+
     // コマンド
     public ICommand CreateNewCommand { get; }
     public ICommand DeleteRefVoiceCommand { get; }
     public ICommand PreviewRefVoiceCommand { get; }
+    public ICommand CheckServerStatusCommand { get; }
+    public ICommand ShutdownServerCommand { get; }
 
     AudioFileReader? audioFileReader;
     AudioPlayer? audioPlayer;
@@ -48,6 +53,14 @@ internal class IrodoriTTSSettingsViewModel : Bindable
         PreviewRefVoiceCommand = new ActionCommand(
             _ => SelectedRefVoice != null,
             _ => TogglePreviewRefVoice());
+
+        CheckServerStatusCommand = new ActionCommand(
+            _ => true,
+            _ => CheckServerStatus());
+
+        ShutdownServerCommand = new ActionCommand(
+            _ => true,
+            _ => ShutdownServer());
 
         LoadRefVoiceList();
     }
@@ -149,6 +162,25 @@ internal class IrodoriTTSSettingsViewModel : Bindable
     {
         (DeleteRefVoiceCommand as ActionCommand)?.RaiseCanExecuteChanged();
         (PreviewRefVoiceCommand as ActionCommand)?.RaiseCanExecuteChanged();
+    }
+
+    void CheckServerStatus()
+    {
+        if (IrodoriTTSGradioServer.IsRunning)
+        {
+            var appName = IrodoriTTSGradioServer.CurrentAppName ?? "???";
+            ServerStatusText = string.Format(Texts.ServerStatusRunning, appName);
+        }
+        else
+        {
+            ServerStatusText = Texts.ServerStatusStopped;
+        }
+    }
+
+    void ShutdownServer()
+    {
+        IrodoriTTSGradioServer.Shutdown();
+        ServerStatusText = Texts.ServerStatusStopped;
     }
 
     void DeleteSelectedRefVoice()
