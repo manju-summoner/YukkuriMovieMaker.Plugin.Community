@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
+<data name="GeminiCLI" xml:space="preserve"><value>Gemini CLI</value></data>
+<data name="Setup" xml:space="preserve"><value>關於準備工作</value></data>
+<data name="SetupDescription" xml:space="preserve"><value>請預先安裝 Gemini CLI，並在 PowerShell 或命令提示字元中完成 Gemini CLI 的首次設定。</value></data>
+<data name="ApiKey" xml:space="preserve"><value>API 金鑰（選填）</value></data>
+<data name="Model" xml:space="preserve"><value>模型名稱（選填）</value></data>
+<data name="TimeoutSeconds" xml:space="preserve"><value>逾時（秒）</value></data>
+<data name="SendCurrentFrame" xml:space="preserve"><value>傳送目前影格</value></data>
+<data name="GeminiCLIProcessStartFailedMessage" xml:space="preserve"><value>啟動 Gemini CLI 失敗。</value></data>
+<data name="GeminiCLITimeoutMessage" xml:space="preserve"><value>Gemini CLI 未在 {0} 秒內回應。</value></data>
+<data name="GeminiCLIProcessFailedMessage" xml:space="preserve"><value>Gemini CLI 錯誤結束。（結束代碼: {0}）{1}</value></data>
+<data name="GeminiCLIEmptyResponseMessage" xml:space="preserve"><value>無法從 Gemini CLI 取得回應。</value></data>
+<data name="NoDetails" xml:space="preserve"><value>沒有詳細資訊。</value></data>
+</root>
