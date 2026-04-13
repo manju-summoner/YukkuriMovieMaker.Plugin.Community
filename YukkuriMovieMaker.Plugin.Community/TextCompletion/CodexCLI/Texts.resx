@@ -71,4 +71,8 @@
 <data name="CodexCLIProcessFailedMessage" xml:space="preserve"><value>Codex CLIがエラーで終了しました。(終了コード: {0}) {1}</value></data>
 <data name="CodexCLIEmptyResponseMessage" xml:space="preserve"><value>Codex CLIから応答を取得できませんでした。</value></data>
 <data name="NoDetails" xml:space="preserve"><value>詳細はありません。</value></data>
+<data name="ReasoningEffort" xml:space="preserve"><value>思考レベル</value></data>
+<data name="ReasoningEffortLow" xml:space="preserve"><value>低（高速）</value></data>
+<data name="ReasoningEffortMedium" xml:space="preserve"><value>中</value></data>
+<data name="ReasoningEffortHigh" xml:space="preserve"><value>高</value></data>
 </root>

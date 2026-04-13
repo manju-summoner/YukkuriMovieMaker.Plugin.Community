@@ -71,4 +71,8 @@
 <data name="CodexCLIProcessFailedMessage" xml:space="preserve"><value>Codex CLI berhenti dengan kesalahan. (Kode keluar: {0}) {1}</value></data>
 <data name="CodexCLIEmptyResponseMessage" xml:space="preserve"><value>Tidak ada respons yang diterima dari Codex CLI.</value></data>
 <data name="NoDetails" xml:space="preserve"><value>Tidak ada detail.</value></data>
+<data name="ReasoningEffort" xml:space="preserve"><value>Tingkat penalaran</value></data>
+<data name="ReasoningEffortLow" xml:space="preserve"><value>Rendah (cepat)</value></data>
+<data name="ReasoningEffortMedium" xml:space="preserve"><value>Sedang</value></data>
+<data name="ReasoningEffortHigh" xml:space="preserve"><value>Tinggi</value></data>
 </root>

@@ -71,4 +71,8 @@
 <data name="CodexCLIProcessFailedMessage" xml:space="preserve"><value>انتهى Codex CLI بخطأ. (رمز الخروج: {0}) {1}</value></data>
 <data name="CodexCLIEmptyResponseMessage" xml:space="preserve"><value>لم يتم تلقي استجابة من Codex CLI.</value></data>
 <data name="NoDetails" xml:space="preserve"><value>لا توجد تفاصيل.</value></data>
+<data name="ReasoningEffort" xml:space="preserve"><value>مستوى التفكير</value></data>
+<data name="ReasoningEffortLow" xml:space="preserve"><value>منخفض (سريع)</value></data>
+<data name="ReasoningEffortMedium" xml:space="preserve"><value>متوسط</value></data>
+<data name="ReasoningEffortHigh" xml:space="preserve"><value>عالي</value></data>
 </root>

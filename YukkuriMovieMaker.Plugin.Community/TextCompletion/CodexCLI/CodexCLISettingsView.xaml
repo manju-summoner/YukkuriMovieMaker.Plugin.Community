@@ -23,6 +23,10 @@
                     <TextBox Text="{Binding Source={x:Static local:CodexCLISettings.Default},Path=TimeoutSeconds}" Width="260" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
                 </Grid>
                 <Grid>
+                    <Label Content="{x:Static local:Texts.ReasoningEffort}"/>
+                    <controls:EnumComboBox Value="{Binding Source={x:Static local:CodexCLISettings.Default},Path=ReasoningEffort}" EnumType="{x:Type local:ReasoningEffort}" Width="200" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
                     <Label Content="{x:Static local:Texts.SendCurrentFrame}"/>
                     <controls:ToggleSlider Value="{Binding Source={x:Static local:CodexCLISettings.Default},Path=IsSendImageEnabled}" HorizontalAlignment="Right"/>
                 </Grid>

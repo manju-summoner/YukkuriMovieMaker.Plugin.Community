@@ -71,4 +71,8 @@
 <data name="CodexCLIProcessFailedMessage" xml:space="preserve"><value>Codex CLI가 오류와 함께 종료되었습니다. (종료 코드: {0}) {1}</value></data>
 <data name="CodexCLIEmptyResponseMessage" xml:space="preserve"><value>Codex CLI로부터 응답을 받지 못했습니다.</value></data>
 <data name="NoDetails" xml:space="preserve"><value>자세한 내용이 없습니다.</value></data>
+<data name="ReasoningEffort" xml:space="preserve"><value>사고 수준</value></data>
+<data name="ReasoningEffortLow" xml:space="preserve"><value>낮음(빠름)</value></data>
+<data name="ReasoningEffortMedium" xml:space="preserve"><value>중간</value></data>
+<data name="ReasoningEffortHigh" xml:space="preserve"><value>높음</value></data>
 </root>

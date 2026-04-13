@@ -71,4 +71,8 @@
 <data name="CodexCLIProcessFailedMessage" xml:space="preserve"><value>Codex CLI finalizó con un error. (Código de salida: {0}) {1}</value></data>
 <data name="CodexCLIEmptyResponseMessage" xml:space="preserve"><value>No se recibió respuesta de Codex CLI.</value></data>
 <data name="NoDetails" xml:space="preserve"><value>No hay detalles.</value></data>
+<data name="ReasoningEffort" xml:space="preserve"><value>Nivel de razonamiento</value></data>
+<data name="ReasoningEffortLow" xml:space="preserve"><value>Bajo (rápido)</value></data>
+<data name="ReasoningEffortMedium" xml:space="preserve"><value>Medio</value></data>
+<data name="ReasoningEffortHigh" xml:space="preserve"><value>Alto</value></data>
 </root>

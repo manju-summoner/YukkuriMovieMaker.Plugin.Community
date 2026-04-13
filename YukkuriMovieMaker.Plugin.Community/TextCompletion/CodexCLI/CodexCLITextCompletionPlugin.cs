@@ -55,6 +55,11 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.CodexCLI
             startInfo.ArgumentList.Add("--skip-git-repo-check");
             startInfo.ArgumentList.Add("--sandbox");
             startInfo.ArgumentList.Add("read-only");
+            startInfo.ArgumentList.Add("--ephemeral");
+            startInfo.ArgumentList.Add("-c");
+            startInfo.ArgumentList.Add($"model_reasoning_effort=\"{settings.ReasoningEffort.ToString().ToLowerInvariant()}\"");
+            startInfo.ArgumentList.Add("-c");
+            startInfo.ArgumentList.Add("model_reasoning_summary=\"none\"");
 
             if (!string.IsNullOrWhiteSpace(settings.Model))
             {

@@ -71,4 +71,8 @@
 <data name="CodexCLIProcessFailedMessage" xml:space="preserve"><value>Codex CLI 错误退出。（退出代码: {0}）{1}</value></data>
 <data name="CodexCLIEmptyResponseMessage" xml:space="preserve"><value>未能从 Codex CLI 获取响应。</value></data>
 <data name="NoDetails" xml:space="preserve"><value>没有详细信息。</value></data>
+<data name="ReasoningEffort" xml:space="preserve"><value>思考级别</value></data>
+<data name="ReasoningEffortLow" xml:space="preserve"><value>低（快速）</value></data>
+<data name="ReasoningEffortMedium" xml:space="preserve"><value>中</value></data>
+<data name="ReasoningEffortHigh" xml:space="preserve"><value>高</value></data>
 </root>

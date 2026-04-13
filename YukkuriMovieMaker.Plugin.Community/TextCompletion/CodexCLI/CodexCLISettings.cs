@@ -18,6 +18,8 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.CodexCLI
 
         public bool IsSendImageEnabled { get; set => Set(ref field, value); } = true;
 
+        public ReasoningEffort ReasoningEffort { get; set => Set(ref field, value); } = ReasoningEffort.Low;
+
         public override void Initialize()
         {
             if (TimeoutSeconds <= 0)
