@@ -52,8 +52,12 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.ClaudeCode
             startInfo.ArgumentList.Add("--print");
             startInfo.ArgumentList.Add("--output-format");
             startInfo.ArgumentList.Add("text");
+            startInfo.ArgumentList.Add("--no-session-persistence");
             startInfo.ArgumentList.Add("--permission-mode");
             startInfo.ArgumentList.Add("default");
+            startInfo.ArgumentList.Add("--effort");
+            startInfo.ArgumentList.Add(settings.Effort.ToString().ToLowerInvariant());
+
             startInfo.ArgumentList.Add("--allowedTools");
             startInfo.ArgumentList.Add("Read");
 

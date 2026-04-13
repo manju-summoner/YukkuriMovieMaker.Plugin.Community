@@ -23,6 +23,10 @@
                     <TextBox Text="{Binding Source={x:Static local:ClaudeCodeSettings.Default},Path=TimeoutSeconds}" Width="260" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
                 </Grid>
                 <Grid>
+                    <Label Content="{x:Static local:Texts.Effort}"/>
+                    <controls:EnumComboBox Value="{Binding Source={x:Static local:ClaudeCodeSettings.Default},Path=Effort}" EnumType="{x:Type local:EffortLevel}" Width="200" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
                     <Label Content="{x:Static local:Texts.SendCurrentFrame}"/>
                     <controls:ToggleSlider Value="{Binding Source={x:Static local:ClaudeCodeSettings.Default},Path=IsSendImageEnabled}" HorizontalAlignment="Right"/>
                 </Grid>

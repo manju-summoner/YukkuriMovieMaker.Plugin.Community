@@ -71,4 +71,9 @@
 <data name="ClaudeCodeProcessFailedMessage" xml:space="preserve"><value>انتهى Claude Code بخطأ. (رمز الخروج: {0}) {1}</value></data>
 <data name="ClaudeCodeEmptyResponseMessage" xml:space="preserve"><value>لم يتم تلقي استجابة من Claude Code.</value></data>
 <data name="NoDetails" xml:space="preserve"><value>لا توجد تفاصيل.</value></data>
+<data name="Effort" xml:space="preserve"><value>مستوى الجهد</value></data>
+<data name="EffortLow" xml:space="preserve"><value>منخفض (سريع)</value></data>
+<data name="EffortMedium" xml:space="preserve"><value>متوسط</value></data>
+<data name="EffortHigh" xml:space="preserve"><value>عالي</value></data>
+<data name="EffortMax" xml:space="preserve"><value>الحد الأقصى</value></data>
 </root>

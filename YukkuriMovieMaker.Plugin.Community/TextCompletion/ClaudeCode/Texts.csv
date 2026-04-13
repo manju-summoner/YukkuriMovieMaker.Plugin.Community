@@ -11,4 +11,9 @@ ClaudeCodeTimeoutMessage,0: seconds,Claude Codeが{0}秒以内に応答しませ
 ClaudeCodeProcessFailedMessage,0: exit code 1: details,Claude Codeがエラーで終了しました。(終了コード: {0}) {1},Claude Code exited with an error. (Exit code: {0}) {1},Claude Code 错误退出。（退出代码: {0}）{1},Claude Code 錯誤結束。（結束代碼: {0}）{1},Claude Code가 오류와 함께 종료되었습니다. (종료 코드: {0}) {1},Claude Code finalizó con un error. (Código de salida: {0}) {1},انتهى Claude Code بخطأ. (رمز الخروج: {0}) {1},Claude Code berhenti dengan kesalahan. (Kode keluar: {0}) {1},
 ClaudeCodeEmptyResponseMessage,,Claude Codeから応答を取得できませんでした。,No response was received from Claude Code.,未能从 Claude Code 获取响应。,無法從 Claude Code 取得回應。,Claude Code로부터 응답을 받지 못했습니다.,No se recibió respuesta de Claude Code.,لم يتم تلقي استجابة من Claude Code.,Tidak ada respons yang diterima dari Claude Code.,
 NoDetails,,詳細はありません。,No details.,没有详细信息。,沒有詳細資訊。,자세한 내용이 없습니다.,No hay detalles.,لا توجد تفاصيل.,Tidak ada detail.,
+Effort,,思考レベル,Effort level,思考级别,思考層級,사고 수준,Nivel de esfuerzo,مستوى الجهد,Tingkat usaha,
+EffortLow,,低（高速）,Low (fast),低（快速）,低（快速）,낮음(빠름),Bajo (rápido),منخفض (سريع),Rendah (cepat),
+EffortMedium,,中,Medium,中,中,중간,Medio,متوسط,Sedang,
+EffortHigh,,高,High,高,高,높음,Alto,عالي,Tinggi,
+EffortMax,,最大,Max,最大,最大,최대,Máximo,الحد الأقصى,Maksimum,
 

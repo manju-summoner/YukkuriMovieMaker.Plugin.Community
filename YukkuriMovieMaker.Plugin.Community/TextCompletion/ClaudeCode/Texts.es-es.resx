@@ -71,4 +71,9 @@
 <data name="ClaudeCodeProcessFailedMessage" xml:space="preserve"><value>Claude Code finalizó con un error. (Código de salida: {0}) {1}</value></data>
 <data name="ClaudeCodeEmptyResponseMessage" xml:space="preserve"><value>No se recibió respuesta de Claude Code.</value></data>
 <data name="NoDetails" xml:space="preserve"><value>No hay detalles.</value></data>
+<data name="Effort" xml:space="preserve"><value>Nivel de esfuerzo</value></data>
+<data name="EffortLow" xml:space="preserve"><value>Bajo (rápido)</value></data>
+<data name="EffortMedium" xml:space="preserve"><value>Medio</value></data>
+<data name="EffortHigh" xml:space="preserve"><value>Alto</value></data>
+<data name="EffortMax" xml:space="preserve"><value>Máximo</value></data>
 </root>

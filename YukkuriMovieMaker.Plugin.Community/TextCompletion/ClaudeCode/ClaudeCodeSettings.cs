@@ -18,6 +18,8 @@ namespace YukkuriMovieMaker.Plugin.Community.TextCompletion.ClaudeCode
 
         public bool IsSendImageEnabled { get; set => Set(ref field, value); } = true;
 
+        public EffortLevel Effort { get; set => Set(ref field, value); } = EffortLevel.Low;
+
         public override void Initialize()
         {
             if (TimeoutSeconds <= 0)

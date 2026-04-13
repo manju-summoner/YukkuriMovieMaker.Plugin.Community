@@ -71,4 +71,9 @@
 <data name="ClaudeCodeProcessFailedMessage" xml:space="preserve"><value>Claude Code가 오류와 함께 종료되었습니다. (종료 코드: {0}) {1}</value></data>
 <data name="ClaudeCodeEmptyResponseMessage" xml:space="preserve"><value>Claude Code로부터 응답을 받지 못했습니다.</value></data>
 <data name="NoDetails" xml:space="preserve"><value>자세한 내용이 없습니다.</value></data>
+<data name="Effort" xml:space="preserve"><value>사고 수준</value></data>
+<data name="EffortLow" xml:space="preserve"><value>낮음(빠름)</value></data>
+<data name="EffortMedium" xml:space="preserve"><value>중간</value></data>
+<data name="EffortHigh" xml:space="preserve"><value>높음</value></data>
+<data name="EffortMax" xml:space="preserve"><value>최대</value></data>
 </root>

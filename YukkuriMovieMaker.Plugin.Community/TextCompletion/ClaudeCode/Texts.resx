@@ -71,4 +71,9 @@
 <data name="ClaudeCodeProcessFailedMessage" xml:space="preserve"><value>Claude Codeがエラーで終了しました。(終了コード: {0}) {1}</value></data>
 <data name="ClaudeCodeEmptyResponseMessage" xml:space="preserve"><value>Claude Codeから応答を取得できませんでした。</value></data>
 <data name="NoDetails" xml:space="preserve"><value>詳細はありません。</value></data>
+<data name="Effort" xml:space="preserve"><value>思考レベル</value></data>
+<data name="EffortLow" xml:space="preserve"><value>低（高速）</value></data>
+<data name="EffortMedium" xml:space="preserve"><value>中</value></data>
+<data name="EffortHigh" xml:space="preserve"><value>高</value></data>
+<data name="EffortMax" xml:space="preserve"><value>最大</value></data>
 </root>

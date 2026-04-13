@@ -71,4 +71,9 @@
 <data name="ClaudeCodeProcessFailedMessage" xml:space="preserve"><value>Claude Code 错误退出。（退出代码: {0}）{1}</value></data>
 <data name="ClaudeCodeEmptyResponseMessage" xml:space="preserve"><value>未能从 Claude Code 获取响应。</value></data>
 <data name="NoDetails" xml:space="preserve"><value>没有详细信息。</value></data>
+<data name="Effort" xml:space="preserve"><value>思考级别</value></data>
+<data name="EffortLow" xml:space="preserve"><value>低（快速）</value></data>
+<data name="EffortMedium" xml:space="preserve"><value>中</value></data>
+<data name="EffortHigh" xml:space="preserve"><value>高</value></data>
+<data name="EffortMax" xml:space="preserve"><value>最大</value></data>
 </root>

@@ -71,4 +71,9 @@
 <data name="ClaudeCodeProcessFailedMessage" xml:space="preserve"><value>Claude Code berhenti dengan kesalahan. (Kode keluar: {0}) {1}</value></data>
 <data name="ClaudeCodeEmptyResponseMessage" xml:space="preserve"><value>Tidak ada respons yang diterima dari Claude Code.</value></data>
 <data name="NoDetails" xml:space="preserve"><value>Tidak ada detail.</value></data>
+<data name="Effort" xml:space="preserve"><value>Tingkat usaha</value></data>
+<data name="EffortLow" xml:space="preserve"><value>Rendah (cepat)</value></data>
+<data name="EffortMedium" xml:space="preserve"><value>Sedang</value></data>
+<data name="EffortHigh" xml:space="preserve"><value>Tinggi</value></data>
+<data name="EffortMax" xml:space="preserve"><value>Maksimum</value></data>
 </root>
