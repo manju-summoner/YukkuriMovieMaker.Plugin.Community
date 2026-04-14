@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Plugin.Brush;
@@ -37,7 +37,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Radial
         public Animation RadiusY { get; } = new Animation(100, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Zoom), ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "%", 0, 500)]
+        [AnimationSlider("F1", "%", 0, 100)]
         public Animation Zoom { get; } = new Animation(100, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Angle), ResourceType = typeof(Texts))]

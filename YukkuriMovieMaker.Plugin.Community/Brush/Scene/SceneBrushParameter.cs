@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
@@ -15,7 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Scene
         Guid sceneId;
 
         [Display(Name = nameof(Texts.PlaybackRate), Description = nameof(Texts.PlaybackRate), ResourceType = typeof(Texts))]
-        [TextBoxSlider("F1", "%", -400, 400)]
+        [TextBoxSlider("F1", "%", -100, 100)]
         [DefaultValue(100)]
         [Range((double)YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue)]
         public double PlaybackRate { get => playbackRate; set => Set(ref playbackRate, value); }
