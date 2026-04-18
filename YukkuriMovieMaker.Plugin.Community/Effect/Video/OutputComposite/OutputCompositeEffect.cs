@@ -13,7 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
     [VideoEffect(nameof(Texts.OutputCompositeEffectName), [VideoEffectCategories.Composition], ["合成", "composite", "blend", "output", "出力", "CustomValue"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public class OutputCompositeEffect : VideoEffectBase
     {
-        public override string Label => Texts.OutputCompositeEffectName;
+        public override string Label => $"{Texts.OutputCompositeEffectName} {TargetIndex}";
 
         [Display(GroupName = nameof(Texts.OutputCompositeEffectName), Name = nameof(Texts.OutputCompositeTargetIndexName), Description = nameof(Texts.OutputCompositeTargetIndexDesc), ResourceType = typeof(Texts))]
         [TextBoxSlider("F0", "", 0, 16)]

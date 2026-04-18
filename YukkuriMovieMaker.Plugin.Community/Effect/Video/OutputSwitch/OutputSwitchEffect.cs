@@ -12,7 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputSwitch
     [VideoEffect(nameof(Texts.OutputSwitchEffectName), [VideoEffectCategories.Composition], ["切替", "switch", "output", "出力", "CustomValue"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public class OutputSwitchEffect : VideoEffectBase
     {
-        public override string Label => Texts.OutputSwitchEffectName;
+        public override string Label => $"{Texts.OutputSwitchEffectName} {TargetIndex}";
 
         [Display(GroupName = nameof(Texts.OutputSwitchEffectName), Name = nameof(Texts.OutputSwitchTargetIndexName), Description = nameof(Texts.OutputSwitchTargetIndexDesc), ResourceType = typeof(Texts))]
         [TextBoxSlider("F0", "", 0, 16)]
