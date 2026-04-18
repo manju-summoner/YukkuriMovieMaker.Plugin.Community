@@ -19,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
         [TextBoxSlider("F0", "", 0, 16)]
         [Range(0, 1024)]
         [DefaultValue(1)]
-        public int TargetIndex { get => targetIndex; set => Set(ref targetIndex, value); }
+        public int TargetIndex { get => targetIndex; set => Set(ref targetIndex, value, nameof(TargetIndex), nameof(Label)); }
         int targetIndex = 1;
 
         [Display(GroupName = nameof(Texts.OutputCompositeEffectName), Name = nameof(Texts.OutputCompositeBlendModeName), Description = nameof(Texts.OutputCompositeBlendModeDesc), ResourceType = typeof(Texts))]
