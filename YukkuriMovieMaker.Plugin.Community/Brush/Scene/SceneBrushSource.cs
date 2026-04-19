@@ -31,7 +31,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Scene
 
             var sceneId = parameter.SceneId;
 
-            var playbackRate = parameter.PlaybackRate;
+            var playbackRate = parameter.PlaybackRate / 100;
             var contentOffset = parameter.ContentOffset;
             var matrix = parameter.CreateBrushMatrix(desc);
             var extendModeX = parameter.ExtendModeX.ToD2DExtendMode();
