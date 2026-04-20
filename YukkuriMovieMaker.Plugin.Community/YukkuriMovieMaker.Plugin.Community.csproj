@@ -113,7 +113,6 @@
 	  <Resource Include="$(ShaderDirPath)CircularBlur.cso" Link="Resources\Shader\CircularBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)ColorCorrection.cso" Link="Resources\Shader\ColorCorrection.cso" />
 	  <Resource Include="$(ShaderDirPath)ColorShift.cso" Link="Resources\Shader\ColorShift.cso" />
-	  <Resource Include="$(ShaderDirPath)InnerOutline.cso" Link="Resources\Shader\InnerOutline.cso" />
 	  <Resource Include="$(ShaderDirPath)LongShadow.cso" Link="Resources\Shader\LongShadow.cso" />
 	  <Resource Include="$(ShaderDirPath)Ripple.cso" Link="Resources\Shader\Ripple.cso" />
 	  <Resource Include="$(ShaderDirPath)SpiralTransform.cso" Link="Resources\Shader\SpiralTransform.cso" />
