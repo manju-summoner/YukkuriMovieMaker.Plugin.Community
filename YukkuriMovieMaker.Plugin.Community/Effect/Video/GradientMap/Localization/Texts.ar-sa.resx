@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
+<data name="EffectName" xml:space="preserve"><value>خريطة التدرج</value></data>
+<data name="GroupName" xml:space="preserve"><value>خريطة التدرج</value></data>
+<data name="GradientFilePathName" xml:space="preserve"><value>ملف</value></data>
+<data name="GradientFilePathDesc" xml:space="preserve"><value>مسار ملف صورة خريطة التدرج</value></data>
+<data name="GradientIndexName" xml:space="preserve"><value>تحديد</value></data>
+<data name="GradientIndexDesc" xml:space="preserve"><value>تحديد حسب الفهرس من تدرجات متعددة داخل الملف</value></data>
+<data name="OpacityName" xml:space="preserve"><value>التعتيم</value></data>
+<data name="OpacityDesc" xml:space="preserve"><value>قوة تطبيق خريطة التدرج</value></data>
+<data name="BlendModeName" xml:space="preserve"><value>وضع المزج</value></data>
+<data name="BlendModeDesc" xml:space="preserve"><value>وضع مزج خريطة التدرج</value></data>
+<data name="IsHorizontalName" xml:space="preserve"><value>أخذ العينات الأفقي</value></data>
+<data name="IsHorizontalDesc" xml:space="preserve"><value>عند التفعيل يأخذ عينات أفقياً من صورة التدرج</value></data>
+<data name="BlendModeNormalName" xml:space="preserve"><value>عادي</value></data>
+<data name="BlendModeNormalDesc" xml:space="preserve"><value>يطبق ألوان خريطة التدرج مباشرة</value></data>
+<data name="BlendModeLuminosityName" xml:space="preserve"><value>السطوع</value></data>
+<data name="BlendModeLuminosityDesc" xml:space="preserve"><value>يطبق سطوع التدرج مع الحفاظ على الصبغة والتشبع الأصليين</value></data>
+<data name="BlendModeHueName" xml:space="preserve"><value>الصبغة</value></data>
+<data name="BlendModeHueDesc" xml:space="preserve"><value>يطبق السطوع الأصلي في اتجاه صبغة التدرج</value></data>
+<data name="GrdFileTooltip" xml:space="preserve"><value>ملف متوافق مع Photoshop</value></data>
+<data name="BlendModeDarkenName" xml:space="preserve"><value>مقارنة (أغمق)</value></data>
+<data name="BlendModeDarkenDesc" xml:space="preserve"><value>يختار القيمة الأغمق لكل قناة</value></data>
+<data name="BlendModeMultiplyName" xml:space="preserve"><value>الضرب</value></data>
+<data name="BlendModeMultiplyDesc" xml:space="preserve"><value>يضرب اللون الأصلي في لون التدرج</value></data>
+<data name="BlendModeColorBurnName" xml:space="preserve"><value>حرق الألوان</value></data>
+<data name="BlendModeColorBurnDesc" xml:space="preserve"><value>يزيد التباين ليجعل الصورة أكثر قتامة بناءً على قيمة التدرج</value></data>
+<data name="BlendModeLinearBurnName" xml:space="preserve"><value>حرق خطي</value></data>
+<data name="BlendModeLinearBurnDesc" xml:space="preserve"><value>يجمع اللون الأصلي والتدرج ثم يطرح 1</value></data>
+<data name="BlendModeSubtractName" xml:space="preserve"><value>الطرح</value></data>
+<data name="BlendModeSubtractDesc" xml:space="preserve"><value>يطرح لون التدرج من اللون الأصلي</value></data>
+<data name="BlendModeLightenName" xml:space="preserve"><value>مقارنة (أفتح)</value></data>
+<data name="BlendModeLightenDesc" xml:space="preserve"><value>يختار القيمة الأفتح لكل قناة</value></data>
+<data name="BlendModeScreenName" xml:space="preserve"><value>الشاشة</value></data>
+<data name="BlendModeScreenDesc" xml:space="preserve"><value>يعكس كلا اللونين يضربهما ثم يعكس النتيجة</value></data>
+<data name="BlendModeColorDodgeName" xml:space="preserve"><value>تفتيح الألوان</value></data>
+<data name="BlendModeColorDodgeDesc" xml:space="preserve"><value>يقلل التباين ليجعل الصورة أكثر إضاءةً بناءً على قيمة التدرج</value></data>
+<data name="BlendModeLinearDodgeName" xml:space="preserve"><value>تفتيح خطي (إضافة)</value></data>
+<data name="BlendModeLinearDodgeDesc" xml:space="preserve"><value>يجمع اللونين ثم يضبط النتيجة ضمن النطاق المسموح</value></data>
+<data name="BlendModeAddGlowName" xml:space="preserve"><value>إضافة (توهج)</value></data>
+<data name="BlendModeAddGlowDesc" xml:space="preserve"><value>يجمع اللونين مع تقييد النتيجة بحد أقصى 1</value></data>
+<data name="BlendModeOverlayName" xml:space="preserve"><value>تراكب</value></data>
+<data name="BlendModeOverlayDesc" xml:space="preserve"><value>يطبق الضرب على الأجزاء الداكنة والشاشة على الأجزاء الفاتحة</value></data>
+<data name="BlendModeSoftLightName" xml:space="preserve"><value>ضوء ناعم</value></data>
+<data name="BlendModeSoftLightDesc" xml:space="preserve"><value>مشابه للتراكب لكن بتباين أكثر نعومة</value></data>
+<data name="BlendModeHardLightName" xml:space="preserve"><value>ضوء قوي</value></data>
+<data name="BlendModeHardLightDesc" xml:space="preserve"><value>يطبق التراكب بناءً على قيم التدرج</value></data>
+<data name="BlendModeDifferenceName" xml:space="preserve"><value>الفرق</value></data>
+<data name="BlendModeDifferenceDesc" xml:space="preserve"><value>يُعيد القيمة المطلقة للفرق بين اللون الأصلي والتدرج</value></data>
+<data name="BlendModeVividLightName" xml:space="preserve"><value>ضوء نابض</value></data>
+<data name="BlendModeVividLightDesc" xml:space="preserve"><value>يطبق الحرق أو التفتيح بناءً على قيمة التدرج</value></data>
+<data name="BlendModeLinearLightName" xml:space="preserve"><value>ضوء خطي</value></data>
+<data name="BlendModeLinearLightDesc" xml:space="preserve"><value>يطبق الحرق الخطي أو التفتيح الخطي بناءً على قيمة التدرج</value></data>
+<data name="BlendModePinLightName" xml:space="preserve"><value>ضوء ثابت</value></data>
+<data name="BlendModePinLightDesc" xml:space="preserve"><value>يستبدل الإضاءة أو الظلال بناءً على قيمة التدرج</value></data>
+<data name="BlendModeHardMixName" xml:space="preserve"><value>مزج قوي</value></data>
+<data name="BlendModeHardMixDesc" xml:space="preserve"><value>يضبط كل قناة على الأبيض أو الأسود بناءً على ما إذا كان المجموع يتجاوز 1</value></data>
+<data name="BlendModeExclusionName" xml:space="preserve"><value>استبعاد</value></data>
+<data name="BlendModeExclusionDesc" xml:space="preserve"><value>مشابه للفرق لكن بتباين أقل</value></data>
+<data name="BlendModeDarkerColorName" xml:space="preserve"><value>لون أغمق</value></data>
+<data name="BlendModeDarkerColorDesc" xml:space="preserve"><value>يختار اللون الذي يملك إضاءة أقل</value></data>
+<data name="BlendModeLighterColorName" xml:space="preserve"><value>لون أفتح</value></data>
+<data name="BlendModeLighterColorDesc" xml:space="preserve"><value>يختار اللون الذي يملك إضاءة أعلى</value></data>
+<data name="BlendModeDivideName" xml:space="preserve"><value>القسمة</value></data>
+<data name="BlendModeDivideDesc" xml:space="preserve"><value>يقسم اللون الأصلي على لون التدرج</value></data>
+<data name="BlendModeSaturationName" xml:space="preserve"><value>تشبع</value></data>
+<data name="BlendModeSaturationDesc" xml:space="preserve"><value>يطبق تشبع التدرج مع الحفاظ على الصبغة والإضاءة الأصليتين</value></data>
+<data name="BlendModeColorName" xml:space="preserve"><value>لون</value></data>
+<data name="BlendModeColorDesc" xml:space="preserve"><value>يطبق صبغة التدرج وتشبعه مع الحفاظ على الإضاءة الأصلية</value></data>
+<data name="CustomGradientName" xml:space="preserve"><value>تدرج</value></data>
+<data name="CustomGradientDesc" xml:space="preserve"><value>يعرّف التدرج بشكل مضمّن. عند الفراغ يُستخدم ملف التدرج.</value></data>
+<data name="DeleteStopName" xml:space="preserve"><value>حذف نقطة اللون</value></data>
+<data name="ExportAsGrdName" xml:space="preserve"><value>تصدير بصيغة GRD</value></data>
+<data name="ExportAsPngName" xml:space="preserve"><value>تصدير بصيغة PNG</value></data>
+<data name="ExportGrdFilterName" xml:space="preserve"><value>ملفات التدرج (*.grd)|*.grd</value></data>
+<data name="ExportPngFilterName" xml:space="preserve"><value>صورة PNG (*.png)|*.png</value></data>
+<data name="NoFileSelected" xml:space="preserve"><value>غير محدد</value></data>
+</root>

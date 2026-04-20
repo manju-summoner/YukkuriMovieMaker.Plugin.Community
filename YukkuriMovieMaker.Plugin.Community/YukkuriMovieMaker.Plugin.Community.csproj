@@ -125,6 +125,7 @@
 	  <Resource Include="$(ShaderDirPath)Stretch.cso" Link="Resources\Shader\Stretch.cso" />
 	  <Resource Include="$(ShaderDirPath)AfterImage.cso" Link="Resources\Shader\AfterImage.cso" />
 	  <Resource Include="$(ShaderDirPath)WaveClipping.cso" Link="Resources\Shader\WaveClipping.cso" />
+	  <Resource Include="$(ShaderDirPath)GradientMap.cso" Link="Resources\Shader\GradientMap.cso" />
   </ItemGroup>
 
 </Project>
