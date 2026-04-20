@@ -71,4 +71,10 @@
 <data name="InnerOutlineEffectBlendDesc" xml:space="preserve"><value>Mode campuran</value></data>
 <data name="InnerOutlineEffectIsOutlineOnlyName" xml:space="preserve"><value>Hanya garis tepi</value></data>
 <data name="InnerOutlineEffectIsOutlineOnlyDesc" xml:space="preserve"><value>Hanya garis tepi</value></data>
+<data name="InnerOutlineEffectQualityName" xml:space="preserve"><value>Kualitas</value></data>
+<data name="InnerOutlineEffectQualityDesc" xml:space="preserve"><value>Kualitas</value></data>
+<data name="InnerOutlineEffectSmoothnessName" xml:space="preserve"><value>Kehalusan</value></data>
+<data name="InnerOutlineEffectSmoothnessDesc" xml:space="preserve"><value>Kehalusan</value></data>
+<data name="InnerOutlineEffectIsAngularName" xml:space="preserve"><value>Garis tepi bersudut</value></data>
+<data name="InnerOutlineEffectIsAngularDesc" xml:space="preserve"><value>Garis tepi bersudut</value></data>
 </root>

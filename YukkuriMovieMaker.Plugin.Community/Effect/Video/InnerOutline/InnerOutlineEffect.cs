@@ -2,6 +2,7 @@
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
+using YukkuriMovieMaker.ItemEditor;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Effects;
 using YukkuriMovieMaker.Project;
@@ -25,6 +26,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
         [AnimationSlider("F1", "px", 0, 5)]
         public Animation Blur { get; } = new Animation(0, 0, 1000);
 
+        [Display(GroupName = nameof(Texts.InnerOutlineEffectName), Name = nameof(Texts.InnerOutlineEffectQualityName), Description = nameof(Texts.InnerOutlineEffectQualityDesc), ResourceType = typeof(Texts))]
+        [AnimationSlider("F0", "", 3, 64)]
+        public Animation Quality { get; } = new Animation(64, 3, 256);
+
+        [Display(GroupName = nameof(Texts.InnerOutlineEffectName), Name = nameof(Texts.InnerOutlineEffectSmoothnessName), Description = nameof(Texts.InnerOutlineEffectSmoothnessDesc), ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 0, 100)]
+        public Animation Smoothness { get; } = new Animation(100, 0, 100);
+
         [Display(GroupName = nameof(Texts.InnerOutlineEffectName), Name = nameof(Texts.InnerOutlineEffectBlendName), Description = nameof(Texts.InnerOutlineEffectBlendDesc), ResourceType = typeof(Texts))]
         [EnumComboBox]
         public Blend Blend { get => blend; set => Set(ref blend, value); }
@@ -34,6 +43,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
         [ToggleSlider]
         public bool IsOutlineOnly { get => isOutlineOnly; set => Set(ref isOutlineOnly, value); }
         bool isOutlineOnly = false;
+
+        [Display(GroupName = nameof(Texts.InnerOutlineEffectName), Name = nameof(Texts.InnerOutlineEffectIsAngularName), Description = nameof(Texts.InnerOutlineEffectIsAngularDesc), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        [YMM4Only]
+        public bool IsAngular { get => isAngular; set => Set(ref isAngular, value); }
+        bool isAngular = false;
 
         [Display(GroupName = nameof(Texts.InnerOutlineEffectBrushGroupName), ResourceType = typeof(Texts), AutoGenerateField = true)]
         public Plugin.Brush.Brush Brush { get; } = new Plugin.Brush.Brush();
@@ -48,7 +63,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
             return new InnerOutlineEffectProcessor(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [Thickness, Opacity, Blur, Brush];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [Thickness, Opacity, Blur, Brush, Quality, Smoothness];
 
         public override IEnumerable<string> GetFiles()
         {

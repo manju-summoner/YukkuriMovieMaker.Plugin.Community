@@ -71,4 +71,10 @@
 <data name="InnerOutlineEffectBlendDesc" xml:space="preserve"><value>합성 방법</value></data>
 <data name="InnerOutlineEffectIsOutlineOnlyName" xml:space="preserve"><value>테두리만</value></data>
 <data name="InnerOutlineEffectIsOutlineOnlyDesc" xml:space="preserve"><value>테두리만</value></data>
+<data name="InnerOutlineEffectQualityName" xml:space="preserve"><value>품질</value></data>
+<data name="InnerOutlineEffectQualityDesc" xml:space="preserve"><value>품질</value></data>
+<data name="InnerOutlineEffectSmoothnessName" xml:space="preserve"><value>부드러움</value></data>
+<data name="InnerOutlineEffectSmoothnessDesc" xml:space="preserve"><value>부드러움</value></data>
+<data name="InnerOutlineEffectIsAngularName" xml:space="preserve"><value>각진 테두리</value></data>
+<data name="InnerOutlineEffectIsAngularDesc" xml:space="preserve"><value>각진 테두리</value></data>
 </root>

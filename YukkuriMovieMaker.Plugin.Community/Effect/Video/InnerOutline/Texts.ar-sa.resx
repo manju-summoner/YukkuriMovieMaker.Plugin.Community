@@ -71,4 +71,10 @@
 <data name="InnerOutlineEffectBlendDesc" xml:space="preserve"><value>وضع المزج</value></data>
 <data name="InnerOutlineEffectIsOutlineOnlyName" xml:space="preserve"><value>الخط الخارجي فقط</value></data>
 <data name="InnerOutlineEffectIsOutlineOnlyDesc" xml:space="preserve"><value>تحديد الحدود فقط</value></data>
+<data name="InnerOutlineEffectQualityName" xml:space="preserve"><value>الجودة</value></data>
+<data name="InnerOutlineEffectQualityDesc" xml:space="preserve"><value>الجودة</value></data>
+<data name="InnerOutlineEffectSmoothnessName" xml:space="preserve"><value>النعومة</value></data>
+<data name="InnerOutlineEffectSmoothnessDesc" xml:space="preserve"><value>النعومة</value></data>
+<data name="InnerOutlineEffectIsAngularName" xml:space="preserve"><value>تحديد بزوايا حادة</value></data>
+<data name="InnerOutlineEffectIsAngularDesc" xml:space="preserve"><value>تحديد بزوايا حادة</value></data>
 </root>

@@ -71,4 +71,10 @@
 <data name="InnerOutlineEffectBlendDesc" xml:space="preserve"><value>合成モード</value></data>
 <data name="InnerOutlineEffectIsOutlineOnlyName" xml:space="preserve"><value>縁のみ</value></data>
 <data name="InnerOutlineEffectIsOutlineOnlyDesc" xml:space="preserve"><value>縁のみ</value></data>
+<data name="InnerOutlineEffectQualityName" xml:space="preserve"><value>品質</value></data>
+<data name="InnerOutlineEffectQualityDesc" xml:space="preserve"><value>品質</value></data>
+<data name="InnerOutlineEffectSmoothnessName" xml:space="preserve"><value>なめらかさ</value></data>
+<data name="InnerOutlineEffectSmoothnessDesc" xml:space="preserve"><value>なめらかさ</value></data>
+<data name="InnerOutlineEffectIsAngularName" xml:space="preserve"><value>角縁取り</value></data>
+<data name="InnerOutlineEffectIsAngularDesc" xml:space="preserve"><value>角縁取り</value></data>
 </root>

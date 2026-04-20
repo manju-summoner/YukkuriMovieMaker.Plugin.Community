@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 using Vortice;
 using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
@@ -7,33 +9,45 @@ using YukkuriMovieMaker.Player;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
 using YukkuriMovieMaker.Plugin.Brush;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
 {
     using AlphaMask = Vortice.Direct2D1.Effects.AlphaMask;
+
     public class InnerOutlineEffectProcessor : VideoEffectProcessorBase
     {
         readonly IGraphicsDevicesAndContext devices;
         readonly InnerOutlineEffect item;
 
         bool isFirst = true;
+        bool isInputChanged = false;
         double thickness, blur, opacity;
+        int quality;
+        double smoothness;
+        Project.Blend blend;
+        bool isOutlineOnly;
+        bool isAngular;
         RawRectF bounds;
-        int width, height;
+        RawRectF expandedInputBounds;
+        double expandPadding;
 
         readonly IBrushSource brushSource;
+        readonly ID2D1SolidColorBrush transparentBrush;
         ID2D1CommandList? brushCommandList;
+        ID2D1CommandList? expandedInputCommandList;
 
-        InnerOutlineCustomEffect? outlineEffect;
+        InvertAlphaCustomEffect? invertAlphaEffect;
+        ID2D1Image? invertAlphaOutput;
+        readonly List<InnerOutlineCustomEffect> dilationEffects = [];
         ID2D1Image? outlineOutput;
-        AffineTransform2D? centeringEffect;
+        FeatherAlphaCustomEffect? featherAlphaEffect;
         AlphaMask? alphaMaskEffect;
         GaussianBlur? blurEffect;
         Opacity? opacityEffect;
-        ID2D1Image? opacityOutput;
-        ID2D1Bitmap1? commandList;
-        AffineTransform2D? centeringEffect2;
         AlphaMask? alphaMaskEffect2;
+        ID2D1Image? opacityOutput;
+        ID2D1CommandList? commandList;
 
         public InnerOutlineEffectProcessor(IGraphicsDevicesAndContext devices, InnerOutlineEffect item) : base(devices)
         {
@@ -41,17 +55,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
             this.item = item;
             brushSource = item.Brush.CreateBrush(devices);
             disposer.Collect(brushSource);
+            transparentBrush = devices.DeviceContext.CreateSolidColorBrush(new Vortice.Mathematics.Color4(0, 0, 0, 0));
+            disposer.Collect(transparentBrush);
         }
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
             if (IsPassThroughEffect
-                || outlineEffect is null 
-                || opacityEffect is null 
+                || invertAlphaEffect is null
+                || outlineOutput is null
+                || featherAlphaEffect is null
+                || alphaMaskEffect is null
                 || blurEffect is null
-                || outlineEffect is null
-                || centeringEffect is null
-                || centeringEffect2 is null
+                || opacityEffect is null
+                || alphaMaskEffect2 is null
                 || opacityOutput is null
                 || input is null)
                 return effectDescription.DrawDescription;
@@ -60,35 +77,55 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
             var length = effectDescription.ItemDuration.Frame;
             var fps = effectDescription.FPS;
 
-            var thickness = item.Thickness.GetValue(frame, length, fps);
+            var thickness = System.Math.Round(item.Thickness.GetValue(frame, length, fps), 1);
             var blur = item.Blur.GetValue(frame, length, fps);
             var opacity = item.Opacity.GetValue(frame, length, fps);
-            var isOutlineOnly = item.IsOutlineOnly;
+            var quality = (int)item.Quality.GetValue(frame, length, fps);
+            var smoothness = item.Smoothness.GetValue(frame, length, fps) / 100;
             var blend = item.Blend;
+            var isOutlineOnly = item.IsOutlineOnly;
+            var isAngular = item.IsAngular;
 
-            if (isFirst || this.thickness != thickness)
-                outlineEffect.Thickness = (float)thickness;
+            if (isFirst || this.thickness != thickness || this.quality != quality || this.isAngular != isAngular)
+                ApplyDilationPasses(thickness, quality, isAngular);
+            if (isFirst || this.blur != blur)
+                blurEffect.StandardDeviation = (float)blur;
             if (isFirst || this.opacity != opacity)
                 opacityEffect.Value = (float)opacity / 100f;
-            if (isFirst || this.blur != blur)
-            {
-                blurEffect.StandardDeviation = (float)blur;
-                outlineEffect.Margin = (float)blur * 3;
-            }
+            if (isFirst || this.smoothness != smoothness)
+                featherAlphaEffect.Smoothness = (float)smoothness;
 
             var dc = devices.DeviceContext;
-            //boundsはeffectにthicknessを設定したあとに計算する必要がある
-            var bounds = dc.GetImageLocalBounds(outlineOutput);
-            if (isFirst || !this.bounds.Equals(bounds))
+            var inputBounds = dc.GetImageLocalBounds(input);
+            var expandPadding = System.Math.Max(thickness, blur * 3);
+            var expandedBounds = new RawRectF(
+                inputBounds.Left - (float)expandPadding,
+                inputBounds.Top - (float)expandPadding,
+                inputBounds.Right + (float)expandPadding,
+                inputBounds.Bottom + (float)expandPadding);
+
+            if (isFirst || isInputChanged || !this.expandedInputBounds.Equals(expandedBounds) || this.expandPadding != expandPadding)
             {
-                centeringEffect.TransformMatrix = Matrix3x2.CreateTranslation(bounds.Left, bounds.Top);
-                centeringEffect2.TransformMatrix = Matrix3x2.CreateTranslation(bounds.Left, bounds.Top);
+                if (expandedInputCommandList != null)
+                    disposer.RemoveAndDispose(ref expandedInputCommandList);
+                expandedInputCommandList = dc.CreateCommandList();
+                disposer.Collect(expandedInputCommandList);
+
+                dc.Target = expandedInputCommandList;
+                dc.BeginDraw();
+                dc.Clear(null);
+                dc.DrawRectangle(expandedBounds, transparentBrush);
+                dc.DrawImage(input);
+                dc.EndDraw();
+                dc.Target = null;
+                expandedInputCommandList.Close();
+
+                invertAlphaEffect.SetInput(0, expandedInputCommandList, true);
             }
 
-            var width = Math.Clamp((int)Math.Ceiling(bounds.Right - bounds.Left), 1, devices.DeviceContext.MaximumBitmapSize);
-            var height = Math.Clamp((int)Math.Ceiling(bounds.Bottom - bounds.Top), 1, devices.DeviceContext.MaximumBitmapSize);
+            var bounds = dc.GetImageLocalBounds(outlineOutput);
             var isBrushChanged = brushSource.Update(effectDescription);
-            if (isFirst || isBrushChanged || !this.bounds.Equals(bounds) || this.width != width || this.height != height)
+            if (isFirst || isBrushChanged || !this.bounds.Equals(bounds))
             {
                 if (brushCommandList != null)
                     disposer.RemoveAndDispose(ref brushCommandList);
@@ -98,64 +135,77 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
                 dc.Target = brushCommandList;
                 dc.BeginDraw();
                 dc.Clear(null);
-
-                dc.FillRectangle(new RawRectF(0, 0, width, height), brushSource.Brush);
-
+                dc.FillRectangle(bounds, brushSource.Brush);
                 dc.EndDraw();
                 dc.Target = null;
                 brushCommandList.Close();
 
-                centeringEffect.SetInput(0, brushCommandList, true);
+                alphaMaskEffect.SetInput(0, brushCommandList, true);
             }
 
-            if (isFirst || this.width != width || this.height != height)
-            {
-                if (commandList != null)
-                    disposer.RemoveAndDispose(ref commandList);
-                commandList = devices.DeviceContext.CreateEmptyBitmap(width, height);
-                disposer.Collect(commandList);
-            }
-            var offset = new Vector2(-bounds.Left + (bounds.Right - bounds.Left - width) / 2f, -bounds.Top + (bounds.Bottom - bounds.Top - height) / 2f);
+            if (commandList != null)
+                disposer.RemoveAndDispose(ref commandList);
+            commandList = devices.DeviceContext.CreateCommandList();
+            disposer.Collect(commandList);
 
-            //立ち絵等、大きな画像に対してエフェクトを適用するとなぜか上手く動作しないため、一度Bitmapに描画する
             dc.Target = commandList;
             dc.BeginDraw();
             dc.Clear(null);
             if (!isOutlineOnly)
-                dc.DrawImage(input, offset);
+                dc.DrawImage(input);
             if (blend.IsCompositionEffect())
-                dc.DrawImage(opacityOutput, offset, compositeMode: blend.ToD2DCompositionMode());
+                dc.DrawImage(opacityOutput, compositeMode: blend.ToD2DCompositionMode());
             else
-                dc.BlendImage(opacityOutput, blend.ToD2DBlendMode(), offset, null, InterpolationMode.HighQualityCubic);
+                dc.BlendImage(opacityOutput, blend.ToD2DBlendMode(), Vector2.Zero, null, InterpolationMode.HighQualityCubic);
             dc.EndDraw();
             dc.Target = null;
-
-            centeringEffect2.SetInput(0, commandList, true);
+            commandList.Close();
+            alphaMaskEffect2.SetInput(0, commandList, true);
 
             isFirst = false;
+            isInputChanged = false;
             this.thickness = thickness;
             this.blur = blur;
             this.opacity = opacity;
+            this.quality = quality;
+            this.smoothness = smoothness;
+            this.blend = blend;
+            this.isOutlineOnly = isOutlineOnly;
+            this.isAngular = isAngular;
             this.bounds = bounds;
-            this.width = width;
-            this.height = height;
+            this.expandedInputBounds = expandedBounds;
+            this.expandPadding = expandPadding;
 
             return effectDescription.DrawDescription;
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            outlineEffect = new InnerOutlineCustomEffect(devices);
-            if (!outlineEffect.IsEnabled)
+            invertAlphaEffect = new InvertAlphaCustomEffect(devices)
             {
-                outlineEffect.Dispose();
-                outlineEffect = null;
+                Invert = 1,
+            };
+            if (!invertAlphaEffect.IsEnabled)
+            {
+                invertAlphaEffect.Dispose();
+                invertAlphaEffect = null;
                 return null;
             }
-            disposer.Collect(outlineEffect);
+            disposer.Collect(invertAlphaEffect);
 
-            centeringEffect = new AffineTransform2D(devices.DeviceContext);
-            disposer.Collect(centeringEffect);
+            invertAlphaOutput = invertAlphaEffect.Output;
+            disposer.Collect(invertAlphaOutput);
+
+            EnsureDilationCapacity(devices, 1);
+
+            featherAlphaEffect = new FeatherAlphaCustomEffect(devices);
+            if (!featherAlphaEffect.IsEnabled)
+            {
+                featherAlphaEffect.Dispose();
+                featherAlphaEffect = null;
+                return null;
+            }
+            disposer.Collect(featherAlphaEffect);
 
             alphaMaskEffect = new AlphaMask(devices.DeviceContext);
             disposer.Collect(alphaMaskEffect);
@@ -166,29 +216,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
             opacityEffect = new Opacity(devices.DeviceContext);
             disposer.Collect(opacityEffect);
 
-            centeringEffect2 = new AffineTransform2D(devices.DeviceContext);
-            disposer.Collect(centeringEffect2);
-
             alphaMaskEffect2 = new AlphaMask(devices.DeviceContext);
             disposer.Collect(alphaMaskEffect2);
 
-
-            outlineOutput = outlineEffect.Output;
-            disposer.Collect(outlineOutput);
-
-            using (var output = centeringEffect.Output)
-                alphaMaskEffect.SetInput(0, output, true);
-            using (var output = outlineEffect.Output)
+            featherAlphaEffect.SetInput(0, outlineOutput, true);
+            using (var output = featherAlphaEffect.Output)
                 alphaMaskEffect.SetInput(1, output, true);
             using (var output = alphaMaskEffect.Output)
                 blurEffect.SetInput(0, output, true);
             using (var output = blurEffect.Output)
                 opacityEffect.SetInput(0, output, true);
+
             opacityOutput = opacityEffect.Output;
             disposer.Collect(opacityOutput);
 
-            using (var output = centeringEffect2.Output)
-                alphaMaskEffect2.SetInput(0, output, true);
             var result = alphaMaskEffect2.Output;
             disposer.Collect(result);
             return result;
@@ -196,21 +237,104 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
 
         protected override void setInput(ID2D1Image? input)
         {
-            outlineEffect?.SetInput(0, input, true);
+            isInputChanged = true;
+            if (dilationEffects.Count > 0 && invertAlphaOutput is not null)
+                dilationEffects[0].SetInput(0, invertAlphaOutput, true);
             alphaMaskEffect2?.SetInput(1, input, true);
         }
 
         protected override void ClearEffectChain()
         {
-            outlineEffect?.SetInput(0, null, true);
-            centeringEffect?.SetInput(0, null, true);
+            invertAlphaEffect?.SetInput(0, null, true);
+            for (int i = 0; i < dilationEffects.Count; i++)
+                dilationEffects[i].SetInput(0, null, true);
+            featherAlphaEffect?.SetInput(0, null, true);
             alphaMaskEffect?.SetInput(0, null, true);
             alphaMaskEffect?.SetInput(1, null, true);
             blurEffect?.SetInput(0, null, true);
             opacityEffect?.SetInput(0, null, true);
-            centeringEffect2?.SetInput(0, null, true);
             alphaMaskEffect2?.SetInput(0, null, true);
             alphaMaskEffect2?.SetInput(1, null, true);
+        }
+
+        void ApplyDilationPasses(double thickness, int samples, bool isAngular)
+        {
+            var steps = DecomposeThicknessToSteps(thickness);
+            var requiredCount = System.Math.Max(1, steps.Count);
+
+            if (dilationEffects.Count != requiredCount)
+                EnsureDilationCapacity(devices, requiredCount);
+
+            for (int i = 0; i < dilationEffects.Count; i++)
+            {
+                var step = steps[i];
+                dilationEffects[i].Samples = System.Math.Min(samples, (int)System.Math.Pow(step * 2, 2) + 1);
+                dilationEffects[i].StepPx = step;
+                dilationEffects[i].IsAngular = isAngular;
+            }
+        }
+
+        void EnsureDilationCapacity(IGraphicsDevicesAndContext devices, int count)
+        {
+            while (dilationEffects.Count < count)
+            {
+                var effect = new InnerOutlineCustomEffect(devices);
+                if (!effect.IsEnabled)
+                {
+                    effect.Dispose();
+                    break;
+                }
+                dilationEffects.Add(effect);
+                disposer.Collect(effect);
+            }
+            while (dilationEffects.Count > count)
+            {
+                var effect = dilationEffects[^1];
+                effect.SetInput(0, null, true);
+                disposer.RemoveAndDispose(ref effect);
+                dilationEffects.RemoveAt(dilationEffects.Count - 1);
+            }
+
+            for (int i = 0; i < dilationEffects.Count; i++)
+                dilationEffects[i].Cached = i == dilationEffects.Count - 1;
+
+            for (int i = 1; i < dilationEffects.Count; i++)
+                dilationEffects[i].SetInput(0, null, true);
+
+            if (dilationEffects.Count == 0 || invertAlphaOutput is null)
+                return;
+
+            dilationEffects[0].SetInput(0, invertAlphaOutput, true);
+            for (int i = 1; i < dilationEffects.Count; i++)
+            {
+                using var prev = dilationEffects[i - 1].Output;
+                dilationEffects[i].SetInput(0, prev, true);
+            }
+
+            if (outlineOutput != null)
+                disposer.RemoveAndDispose(ref outlineOutput);
+
+            outlineOutput = dilationEffects[^1].Output;
+            disposer.Collect(outlineOutput);
+
+            featherAlphaEffect?.SetInput(0, outlineOutput, true);
+        }
+
+        static List<float> DecomposeThicknessToSteps(double thickness)
+        {
+            var steps = new List<float>();
+            for (int i = 0; ; i++)
+            {
+                var step = System.Math.Min(thickness, System.Math.Pow(2, i));
+                if (step <= 0)
+                    break;
+                steps.Add((float)step);
+                thickness -= step;
+            }
+            if (steps.Count is 0)
+                steps.Add(0f);
+
+            return [.. steps.OrderByDescending(x => x)];
         }
     }
 }

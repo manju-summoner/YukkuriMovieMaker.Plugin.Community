@@ -71,4 +71,10 @@
 <data name="InnerOutlineEffectBlendDesc" xml:space="preserve"><value>混合模式</value></data>
 <data name="InnerOutlineEffectIsOutlineOnlyName" xml:space="preserve"><value>仅描边</value></data>
 <data name="InnerOutlineEffectIsOutlineOnlyDesc" xml:space="preserve"><value>仅描边</value></data>
+<data name="InnerOutlineEffectQualityName" xml:space="preserve"><value>质量</value></data>
+<data name="InnerOutlineEffectQualityDesc" xml:space="preserve"><value>质量</value></data>
+<data name="InnerOutlineEffectSmoothnessName" xml:space="preserve"><value>平滑度</value></data>
+<data name="InnerOutlineEffectSmoothnessDesc" xml:space="preserve"><value>平滑度</value></data>
+<data name="InnerOutlineEffectIsAngularName" xml:space="preserve"><value>直角描边</value></data>
+<data name="InnerOutlineEffectIsAngularDesc" xml:space="preserve"><value>直角描边</value></data>
 </root>
