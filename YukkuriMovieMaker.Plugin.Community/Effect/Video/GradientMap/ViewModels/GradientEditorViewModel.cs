@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Core;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Models;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Services;
@@ -18,21 +19,21 @@ public sealed class GradientEditorViewModel : INotifyPropertyChanged, IDisposabl
     private bool _serializationSuspended;
     private bool _disposed;
 
-    private readonly DelegateCommand _deleteStopCommand;
-    private readonly DelegateCommand _exportAsGrdCommand;
-    private readonly DelegateCommand _exportAsPngCommand;
+    private readonly ActionCommand _deleteStopCommand;
+    private readonly ActionCommand _exportAsGrdCommand;
+    private readonly ActionCommand _exportAsPngCommand;
 
     public GradientEditorViewModel()
     {
         Stops = new ReadOnlyObservableCollection<GradientColorStopViewModel>(_stops);
         _gradientBrush = BuildDefaultBrush();
 
-        _deleteStopCommand = new DelegateCommand(
-            p => { if (p is GradientColorStopViewModel vm) RemoveStop(vm); },
-            p => p is GradientColorStopViewModel && _stops.Count > 2);
+        _deleteStopCommand = new ActionCommand(
+            p => p is GradientColorStopViewModel && _stops.Count > 2,
+            p => { if (p is GradientColorStopViewModel vm) RemoveStop(vm); });
 
-        _exportAsGrdCommand = new DelegateCommand(_ => ExportAsGrd(), _ => CanExport);
-        _exportAsPngCommand = new DelegateCommand(_ => ExportAsPng(), _ => CanExport);
+        _exportAsGrdCommand = new ActionCommand(_ => CanExport, _ => ExportAsGrd());
+        _exportAsPngCommand = new ActionCommand(_ => CanExport, _ => ExportAsPng());
 
         DeleteStopCommand = _deleteStopCommand;
         ExportAsGrdCommand = _exportAsGrdCommand;
