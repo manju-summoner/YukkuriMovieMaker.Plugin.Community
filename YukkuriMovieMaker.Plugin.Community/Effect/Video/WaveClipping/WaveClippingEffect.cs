@@ -61,7 +61,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             ExoOutputDescription exoOutputDescription) => [];
 
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
-            => ServiceRegistry.Instance.CreateProcessor(devices, this);
+            => new WaveClippingEffectProcessor(devices, this);
 
         protected override IEnumerable<IAnimatable> GetAnimatables()
             => _animatables ??= [ClipPosition, BandWidth, Amplitude, Frequency, Phase, Softness];
