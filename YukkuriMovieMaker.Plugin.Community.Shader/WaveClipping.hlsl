@@ -33,8 +33,9 @@ float4 main(float4 pos : SV_POSITION, float4 posScene : SCENE_POSITION, float4 u
     float ny = (posScene.y - inputTop) / safeHeight;
 
     float wave = ComputeWave(nx);
-    float e1 = edgePosition + wave;
-    float e2 = edgePosition + bandWidth + wave;
+    float halfBand = (mode == 0) ? 0.0f : bandWidth * 0.5f;
+    float e1 = edgePosition - halfBand + wave;
+    float e2 = edgePosition + halfBand + wave;
     float eps = max(softness, 1e-6f);
 
     float mask;
