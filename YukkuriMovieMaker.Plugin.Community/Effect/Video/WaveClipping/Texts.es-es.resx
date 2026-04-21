@@ -85,4 +85,6 @@
 <data name="ModeBidirectionalDescription" xml:space="preserve"><value>Forma una banda con dos límites de onda.</value></data>
 <data name="ModeBidirectionalInverted" xml:space="preserve"><value>Bidireccional (Invertido)</value></data>
 <data name="ModeBidirectionalInvertedDescription" xml:space="preserve"><value>Invierte el recorte para mostrar el exterior de la banda.</value></data>
+<data name="Rotation" xml:space="preserve"><value>Rotación</value></data>
+<data name="RotationDescription" xml:space="preserve"><value>Ángulo de rotación de la dirección de la onda (grados).</value></data>
 </root>

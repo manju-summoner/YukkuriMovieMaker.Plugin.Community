@@ -85,4 +85,6 @@
 <data name="ModeBidirectionalDescription" xml:space="preserve"><value>두 개의 웨이브 경계로 밴드를 형성합니다.</value></data>
 <data name="ModeBidirectionalInverted" xml:space="preserve"><value>양방향 (반전)</value></data>
 <data name="ModeBidirectionalInvertedDescription" xml:space="preserve"><value>대역 외부를 표시하도록 반전 클리핑합니다.</value></data>
+<data name="Rotation" xml:space="preserve"><value>회전</value></data>
+<data name="RotationDescription" xml:space="preserve"><value>웨이브 방향의 회전 각도 (도).</value></data>
 </root>

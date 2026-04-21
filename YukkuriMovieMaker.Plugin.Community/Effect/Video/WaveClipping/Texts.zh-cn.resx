@@ -85,4 +85,6 @@
 <data name="ModeBidirectionalDescription" xml:space="preserve"><value>用两个波浪边界形成一个带。</value></data>
 <data name="ModeBidirectionalInverted" xml:space="preserve"><value>双向（反转）</value></data>
 <data name="ModeBidirectionalInvertedDescription" xml:space="preserve"><value>反转裁剪以显示带外侧。</value></data>
+<data name="Rotation" xml:space="preserve"><value>旋转</value></data>
+<data name="RotationDescription" xml:space="preserve"><value>波浪方向的旋转角度（度）。</value></data>
 </root>

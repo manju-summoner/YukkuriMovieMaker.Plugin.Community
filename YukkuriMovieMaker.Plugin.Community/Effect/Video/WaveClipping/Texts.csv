@@ -25,3 +25,5 @@ ModeBidirectional,,双方向,Bidirectional,双向,雙向,양방향,Bidireccional
 ModeBidirectionalDescription,,2つのウェーブ境界でバンドを形成します,Forms a band with two wave boundaries.,用两个波浪边界形成一个带。,用兩個波浪邊界形成一個帶。,두 개의 웨이브 경계로 밴드를 형성합니다.,Forma una banda con dos límites de onda.,يشكل نطاقًا بحدين للموجة.,Membentuk pita dengan dua batas gelombang.,
 ModeBidirectionalInverted,,双方向(反転),Bidirectional (Inverted),双向（反转）,雙向（反轉）,양방향 (반전),Bidireccional (Invertido),ثنائي الاتجاه (مقلوب),Dua Arah (Terbalik),
 ModeBidirectionalInvertedDescription,,バンド外側を表示するよう反転クリッピングします,Invert clipping to display the outside of the band.,反转裁剪以显示带外侧。,反轉裁剪以顯示帶外側。,대역 외부를 표시하도록 반전 클리핑합니다.,Invierte el recorte para mostrar el exterior de la banda.,يعكس القص لعرض الجزء الخارجي من النطاق.,Membalikkan kliping untuk menampilkan bagian luar pita.,
+Rotation,,回転,Rotation,旋转,旋轉,회전,Rotación,تدوير,Rotasi,
+RotationDescription,,波の向きの回転角 (度),Rotation angle of the wave direction (degrees).,波浪方向的旋转角度（度）。,波浪方向的旋轉角度（度）。,웨이브 방향의 회전 각도 (도).,Ángulo de rotación de la dirección de la onda (grados).,زاوية دوران اتجاه الموجة (بالدرجات).,Sudut rotasi arah gelombang (derajat).,

@@ -42,6 +42,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         [AnimationSlider("F3", "rad", -6.2832, 6.2832)]
         public Animation Phase { get; } = new Animation(0, -314.159, 314.159);
 
+        [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.Rotation), Description = nameof(Texts.RotationDescription), ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "°", -180, 180)]
+        public Animation Rotation { get; } = new Animation(0, -360, 360);
+
         [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.Softness), Description = nameof(Texts.SoftnessDescription), ResourceType = typeof(Texts))]
         [AnimationSlider("F4", "", 0, 0.02)]
         public Animation Softness { get; } = new Animation(0.002, 0, 1);
@@ -65,6 +69,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             => new WaveClippingEffectProcessor(devices, this);
 
         protected override IEnumerable<IAnimatable> GetAnimatables()
-            => _animatables ??= [ClipPosition, BandWidth, Amplitude, Frequency, Phase, Softness];
+            => _animatables ??= [ClipPosition, BandWidth, Amplitude, Frequency, Phase, Rotation, Softness];
     }
 }

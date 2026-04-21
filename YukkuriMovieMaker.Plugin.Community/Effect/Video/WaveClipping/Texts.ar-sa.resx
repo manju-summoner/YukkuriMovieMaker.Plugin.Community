@@ -85,4 +85,6 @@
 <data name="ModeBidirectionalDescription" xml:space="preserve"><value>يشكل نطاقًا بحدين للموجة.</value></data>
 <data name="ModeBidirectionalInverted" xml:space="preserve"><value>ثنائي الاتجاه (مقلوب)</value></data>
 <data name="ModeBidirectionalInvertedDescription" xml:space="preserve"><value>يعكس القص لعرض الجزء الخارجي من النطاق.</value></data>
+<data name="Rotation" xml:space="preserve"><value>تدوير</value></data>
+<data name="RotationDescription" xml:space="preserve"><value>زاوية دوران اتجاه الموجة (بالدرجات).</value></data>
 </root>

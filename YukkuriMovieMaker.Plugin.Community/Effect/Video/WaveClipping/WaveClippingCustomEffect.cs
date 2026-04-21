@@ -22,6 +22,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             Softness,
             Mode,
             IsInverted,
+            Rotation,
         }
 
         public float InputLeft { set => SetValue((int)PropertyIndex.InputLeft, value); }
@@ -36,6 +37,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         public float Softness { set => SetValue((int)PropertyIndex.Softness, value); }
         public int Mode { set => SetValue((int)PropertyIndex.Mode, value); }
         public float IsInverted { set => SetValue((int)PropertyIndex.IsInverted, value); }
+        public float Rotation { set => SetValue((int)PropertyIndex.Rotation, value); }
         internal void ClearInput() => SetInput(0, null, true);
 
         public WaveClippingCustomEffect(IGraphicsDevicesAndContext devices)
@@ -82,6 +84,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.IsInverted)]
             public float IsInverted { get => _cb.IsInverted; set { _cb.IsInverted = value; UpdateConstants(); } }
 
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Rotation)]
+            public float Rotation { get => _cb.Rotation; set { _cb.Rotation = value; UpdateConstants(); } }
+
             public EffectImpl() : base(ShaderResourceUri.Get("WaveClipping")) { }
 
             protected override void UpdateConstants()
@@ -123,6 +128,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
                 public float Softness;
                 public int Mode;
                 public float IsInverted;
+                public float Rotation;
+                public float Pad0;
+                public float Pad1;
+                public float Pad2;
             }
         }
     }
