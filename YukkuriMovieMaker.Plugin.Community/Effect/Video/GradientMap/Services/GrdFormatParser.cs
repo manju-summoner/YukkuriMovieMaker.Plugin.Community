@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.IO;
 using Vortice.Direct2D1;
@@ -9,7 +8,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Services;
 
 public sealed class GrdFormatParser : IGradientFormatParser
 {
-    private readonly ConcurrentDictionary<string, GrdManifest> _manifestCache =
+    private const int MaxManifestCacheSize = 32;
+
+    private readonly Lock _cacheLock = new();
+    private readonly LinkedList<KeyValuePair<string, GrdManifest>> _cacheOrder = new();
+    private readonly Dictionary<string, LinkedListNode<KeyValuePair<string, GrdManifest>>> _cacheMap =
         new(StringComparer.OrdinalIgnoreCase);
 
     public bool CanParse(string filePath) =>
@@ -30,8 +33,15 @@ public sealed class GrdFormatParser : IGradientFormatParser
         if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
             return GrdManifest.Empty;
 
-        if (_manifestCache.TryGetValue(filePath, out var cached))
-            return cached;
+        lock (_cacheLock)
+        {
+            if (_cacheMap.TryGetValue(filePath, out var cached))
+            {
+                _cacheOrder.Remove(cached);
+                _cacheOrder.AddFirst(cached);
+                return cached.Value.Value;
+            }
+        }
 
         var manifest = GrdParser.ReadManifest(filePath);
         if (manifest == GrdManifest.Empty)
@@ -43,9 +53,30 @@ public sealed class GrdFormatParser : IGradientFormatParser
             var e = manifest.Gradients[i];
             builder.Add(new GrdGradientEntry(e.Index, e.Name, filePath));
         }
-
         var hydrated = new GrdManifest(filePath, builder.MoveToImmutable());
-        _manifestCache[filePath] = hydrated;
+
+        lock (_cacheLock)
+        {
+            if (_cacheMap.TryGetValue(filePath, out var existing))
+            {
+                _cacheOrder.Remove(existing);
+                _cacheOrder.AddFirst(existing);
+                return existing.Value.Value;
+            }
+
+            var node = new LinkedListNode<KeyValuePair<string, GrdManifest>>(
+                new KeyValuePair<string, GrdManifest>(filePath, hydrated));
+            _cacheOrder.AddFirst(node);
+            _cacheMap[filePath] = node;
+
+            if (_cacheMap.Count > MaxManifestCacheSize)
+            {
+                var oldest = _cacheOrder.Last!;
+                _cacheOrder.RemoveLast();
+                _cacheMap.Remove(oldest.Value.Key);
+            }
+        }
+
         return hydrated;
     }
 }
