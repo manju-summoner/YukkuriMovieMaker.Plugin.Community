@@ -27,6 +27,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
 
         [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.BandWidth), Description = nameof(Texts.BandWidthDescription), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
+        [BandWidthVisible]
         public Animation BandWidth { get; } = new Animation(20, 0, 100);
 
         [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.Amplitude), Description = nameof(Texts.AmplitudeDescription), ResourceType = typeof(Texts))]
