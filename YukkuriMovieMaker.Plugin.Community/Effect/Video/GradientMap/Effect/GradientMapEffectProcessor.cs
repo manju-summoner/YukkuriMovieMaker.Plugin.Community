@@ -46,15 +46,18 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
             return null;
         }
 
-        _effect = effect;
-        disposer.Collect(_effect);
-
-        _fallbackBitmap = CreateFallbackBitmap(devices);
-        if (_fallbackBitmap is not null)
+        var fallback = CreateFallbackBitmap(devices);
+        if (fallback is null)
         {
-            disposer.Collect(_fallbackBitmap);
-            _effect.SetGradientInput(_fallbackBitmap);
+            effect.Dispose();
+            return null;
         }
+
+        _effect = effect;
+        _fallbackBitmap = fallback;
+        disposer.Collect(_effect);
+        disposer.Collect(_fallbackBitmap);
+        _effect.SetGradientInput(_fallbackBitmap);
 
         var output = _effect.Output;
         disposer.Collect(output);
