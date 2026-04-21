@@ -2,23 +2,22 @@ using System.Runtime.InteropServices;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Player.Video.Effects;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Interfaces;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Models;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Services;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Effect;
 
-public sealed class GradientMapEffectProcessor : IVideoEffectProcessor
+internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
 {
     private readonly IGraphicsDevicesAndContext _devices;
     private readonly GradientMapEffect _item;
-    private readonly IResourceRegistry _registry;
     private readonly IGradientTextureFactory _textureFactory;
 
     private GradientMapCustomEffect? _effect;
     private ID2D1Bitmap? _gradientBitmap;
     private ID2D1Bitmap? _fallbackBitmap;
-    private ID2D1Image? _sourceInput;
 
     private string _loadedPath = string.Empty;
     private int _loadedIndex = -1;
@@ -28,100 +27,54 @@ public sealed class GradientMapEffectProcessor : IVideoEffectProcessor
     private int _blendMode;
     private int _isHorizontal;
 
-    public ID2D1Image Output
+    public GradientMapEffectProcessor(
+        IGraphicsDevicesAndContext devices,
+        GradientMapEffect item)
+        : base(devices)
     {
-        get
-        {
-            if (_effect is not null && _effect.IsEnabled)
-                return _effect.Output;
-            return _sourceInput
-                ?? throw new InvalidOperationException(
-                            "SetInput must be called before accessing Output.");
-                        }
-                    }
+        _devices = devices;
+        _item = item;
+        _textureFactory = GradientMapServices.Container.Resolve<IGradientTextureFactory>();
+    }
 
-                    public GradientMapEffectProcessor(
-                        IGraphicsDevicesAndContext devices,
-                        GradientMapEffect item)
-                    {
-                        _devices = devices;
-                        _item = item;
-                        _registry = GradientMapServices.Container.Resolve<IResourceRegistry>();
-                        _textureFactory = GradientMapServices.Container.Resolve<IGradientTextureFactory>();
-
-                        InitializeEffect();
-                    }
-
-    private void InitializeEffect()
+    protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
     {
-        var effect = new GradientMapCustomEffect(_devices);
+        var effect = new GradientMapCustomEffect(devices);
         if (!effect.IsEnabled)
         {
             effect.Dispose();
-            return;
+            return null;
         }
 
         _effect = effect;
-        _fallbackBitmap = CreateFallbackBitmap();
+        disposer.Collect(_effect);
+
+        _fallbackBitmap = CreateFallbackBitmap(devices);
         if (_fallbackBitmap is not null)
+        {
+            disposer.Collect(_fallbackBitmap);
             _effect.SetGradientInput(_fallbackBitmap);
+        }
+
+        var output = _effect.Output;
+        disposer.Collect(output);
+        return output;
     }
 
-    private ID2D1Bitmap? CreateFallbackBitmap()
+    protected override void setInput(ID2D1Image? input)
     {
-        try
-        {
-            var stops = new GradientColorStop[]
-            {
-                new(0f, 0, 0, 0, 255),
-                new(1f, 255, 255, 255, 255),
-            };
-            var pixels = GradientExportService.RasterizeGradient(stops);
-            return CreateD2DBitmap(pixels, GradientExportService.GradientResolution);
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private ID2D1Bitmap CreateD2DBitmap(byte[] pixels, int width)
-    {
-        var handle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
-        try
-        {
-            var size = new Vortice.Mathematics.SizeI(width, 1);
-            var props = new BitmapProperties1(
-                new Vortice.DCommon.PixelFormat(
-                    Vortice.DXGI.Format.B8G8R8A8_UNorm,
-                    Vortice.DCommon.AlphaMode.Premultiplied),
-                96f, 96f, BitmapOptions.None);
-            return ((ID2D1DeviceContext1)_devices.DeviceContext).CreateBitmap(
-                size, handle.AddrOfPinnedObject(), width * 4, props);
-        }
-        finally
-        {
-            handle.Free();
-        }
-    }
-
-    public void SetInput(ID2D1Image? input)
-    {
-        _sourceInput = input;
         _effect?.SetSourceInput(input);
     }
 
-    public void ClearInput()
+    protected override void ClearEffectChain()
     {
-        _sourceInput = null;
         _effect?.SetSourceInput(null);
-        if (_fallbackBitmap is not null)
-            _effect?.SetGradientInput(_fallbackBitmap);
+        _effect?.SetGradientInput(null);
     }
 
-    public DrawDescription Update(EffectDescription effectDescription)
+    public override DrawDescription Update(EffectDescription effectDescription)
     {
-        if (_effect is null)
+        if (IsPassThroughEffect || _effect is null)
             return effectDescription.DrawDescription;
 
         var frame = effectDescription.ItemPosition.Frame;
@@ -188,7 +141,8 @@ public sealed class GradientMapEffectProcessor : IVideoEffectProcessor
             return;
         }
 
-        _gradientBitmap = _registry.Track(bitmap);
+        _gradientBitmap = bitmap;
+        disposer.Collect(_gradientBitmap);
         _effect?.SetGradientInput(bitmap);
     }
 
@@ -206,7 +160,8 @@ public sealed class GradientMapEffectProcessor : IVideoEffectProcessor
             return;
         }
 
-        _gradientBitmap = _registry.Track(bitmap);
+        _gradientBitmap = bitmap;
+        disposer.Collect(_gradientBitmap);
         _effect?.SetGradientInput(bitmap);
     }
 
@@ -214,19 +169,44 @@ public sealed class GradientMapEffectProcessor : IVideoEffectProcessor
     {
         if (_gradientBitmap is null) return;
         _effect?.SetGradientInput(_fallbackBitmap);
-        _registry.Untrack(_gradientBitmap);
-        _gradientBitmap.Dispose();
-        _gradientBitmap = null;
+        disposer.RemoveAndDispose(ref _gradientBitmap);
     }
 
-    public void Dispose()
+    private static ID2D1Bitmap? CreateFallbackBitmap(IGraphicsDevicesAndContext devices)
     {
-        ReleaseBitmap();
-        _effect?.SetSourceInput(null);
-        _effect?.Dispose();
-        _effect = null;
-        _fallbackBitmap?.Dispose();
-        _fallbackBitmap = null;
-        _registry.Dispose();
+        try
+        {
+            var stops = new GradientColorStop[]
+            {
+                new(0f, 0, 0, 0, 255),
+                new(1f, 255, 255, 255, 255),
+            };
+            var pixels = GradientExportService.RasterizeGradient(stops);
+            return CreateD2DBitmap(devices, pixels, GradientExportService.GradientResolution);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static ID2D1Bitmap CreateD2DBitmap(IGraphicsDevicesAndContext devices, byte[] pixels, int width)
+    {
+        var handle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
+        try
+        {
+            var size = new Vortice.Mathematics.SizeI(width, 1);
+            var props = new BitmapProperties1(
+                new Vortice.DCommon.PixelFormat(
+                    Vortice.DXGI.Format.B8G8R8A8_UNorm,
+                    Vortice.DCommon.AlphaMode.Premultiplied),
+                96f, 96f, BitmapOptions.None);
+            return ((ID2D1DeviceContext1)devices.DeviceContext).CreateBitmap(
+                size, handle.AddrOfPinnedObject(), width * 4, props);
+        }
+        finally
+        {
+            handle.Free();
+        }
     }
 }

@@ -12,7 +12,6 @@ internal static class GradientMapServices
         var registry = new ServiceRegistry();
         registry.RegisterSingleton<IGradientTextureFactory>(new GradientTextureFactory());
         registry.RegisterSingleton<IGrdManifestReader>(new GrdManifestReader());
-        registry.RegisterFactory<IResourceRegistry>(() => new ResourceRegistry());
         return registry;
     }
 }
