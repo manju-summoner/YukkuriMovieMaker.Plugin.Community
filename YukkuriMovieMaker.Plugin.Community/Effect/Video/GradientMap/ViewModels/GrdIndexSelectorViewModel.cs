@@ -1,9 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
 using System.Runtime.CompilerServices;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Core;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Interfaces;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Models;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Services;
 
@@ -11,14 +9,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.ViewModels
 
 public sealed class GrdIndexSelectorViewModel : INotifyPropertyChanged
 {
-    private readonly IGrdManifestReader _manifestReader;
     private bool _suppressSync;
     private GrdManifest _manifest = GrdManifest.Empty;
-
-    public GrdIndexSelectorViewModel()
-    {
-        _manifestReader = GradientMapServices.Container.Resolve<IGrdManifestReader>();
-    }
 
     public ObservableCollection<GrdGradientEntry> Entries { get; } = [];
 
@@ -73,11 +65,7 @@ public sealed class GrdIndexSelectorViewModel : INotifyPropertyChanged
 
     private void RefreshManifest()
     {
-        _manifest = string.IsNullOrWhiteSpace(FilePath) ||
-                    !File.Exists(FilePath) ||
-                    !string.Equals(Path.GetExtension(FilePath), ".grd", StringComparison.OrdinalIgnoreCase)
-            ? GrdManifest.Empty
-            : _manifestReader.Read(FilePath);
+        _manifest = GradientTextureFactory.ReadManifest(FilePath);
 
         Entries.Clear();
         for (var i = 0; i < _manifest.Gradients.Length; i++)

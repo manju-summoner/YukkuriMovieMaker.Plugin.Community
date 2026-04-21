@@ -3,7 +3,6 @@ using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Interfaces;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Models;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Services;
 
@@ -13,7 +12,6 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
 {
     private readonly IGraphicsDevicesAndContext _devices;
     private readonly GradientMapEffect _item;
-    private readonly IGradientTextureFactory _textureFactory;
 
     private GradientMapCustomEffect? _effect;
     private ID2D1Bitmap? _gradientBitmap;
@@ -34,7 +32,6 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
     {
         _devices = devices;
         _item = item;
-        _textureFactory = GradientMapServices.Container.Resolve<IGradientTextureFactory>();
     }
 
     protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
@@ -137,7 +134,7 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
         _loadedPath = path;
         _loadedIndex = gradientIndex;
 
-        var bitmap = _textureFactory.CreateGradientBitmapFromJson(_devices.DeviceContext, json);
+        var bitmap = GradientTextureFactory.CreateGradientBitmapFromJson(_devices.DeviceContext, json);
         if (bitmap is null)
         {
             _effect?.SetGradientInput(_fallbackBitmap);
@@ -156,7 +153,7 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
         _loadedIndex = gradientIndex;
         _loadedJson = json;
 
-        var bitmap = _textureFactory.CreateGradientBitmap(_devices.DeviceContext, path, gradientIndex);
+        var bitmap = GradientTextureFactory.CreateGradientBitmap(_devices.DeviceContext, path, gradientIndex);
         if (bitmap is null)
         {
             _effect?.SetGradientInput(_fallbackBitmap);
