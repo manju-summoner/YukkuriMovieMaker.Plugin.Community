@@ -92,8 +92,4 @@ public partial class CustomFileSelector : UserControl, IPropertyEditorControl
         if (!string.Equals(selector._viewModel.FilePath, newPath, StringComparison.OrdinalIgnoreCase))
             selector._viewModel.FilePath = newPath;
     }
-
-    private void OnDropDownOpened(object? sender, EventArgs e)
-    {
-    }
 }

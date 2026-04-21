@@ -112,8 +112,7 @@
                   SelectedItem="{Binding SelectedFile, Mode=TwoWay}"
                   ItemTemplateSelector="{StaticResource TemplateSelector}"
                   VerticalContentAlignment="Center"
-                  MaxDropDownHeight="320"
-                  DropDownOpened="OnDropDownOpened">
+                  MaxDropDownHeight="320">
             <ComboBox.Style>
                 <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
                     <Style.Triggers>

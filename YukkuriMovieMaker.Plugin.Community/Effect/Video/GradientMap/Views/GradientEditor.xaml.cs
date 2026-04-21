@@ -79,16 +79,11 @@ public partial class GradientEditor : UserControl, IPropertyEditorControl, IDisp
 
         GradientCanvas.SizeChanged += OnCanvasSizeChanged;
         Loaded += OnLoaded;
-        Unloaded += OnUnloaded;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         RebuildMarkers();
-    }
-
-    private void OnUnloaded(object sender, RoutedEventArgs e)
-    {
     }
 
     private static void OnGradientJsonChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -317,6 +312,5 @@ public partial class GradientEditor : UserControl, IPropertyEditorControl, IDisp
 
         GradientCanvas.SizeChanged -= OnCanvasSizeChanged;
         Loaded -= OnLoaded;
-        Unloaded -= OnUnloaded;
     }
 }
