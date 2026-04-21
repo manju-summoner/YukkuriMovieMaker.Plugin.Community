@@ -33,7 +33,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             _effect.EdgePosition = (float)(_item.ClipPosition.GetValue(frame, length, fps) / 100.0);
             _effect.BandWidth = (float)(_item.BandWidth.GetValue(frame, length, fps) / 100.0);
             _effect.Softness = (float)_item.Softness.GetValue(frame, length, fps);
-            _effect.Mode = (float)(int)_item.Mode;
+            _effect.Mode = (int)_item.Mode;
             _effect.IsInverted = _item.IsInverted ? 1.0f : 0.0f;
 
             return effectDescription.DrawDescription;

@@ -34,7 +34,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         public float EdgePosition { set => SetValue((int)PropertyIndex.EdgePosition, value); }
         public float BandWidth { set => SetValue((int)PropertyIndex.BandWidth, value); }
         public float Softness { set => SetValue((int)PropertyIndex.Softness, value); }
-        public float Mode { set => SetValue((int)PropertyIndex.Mode, value); }
+        public int Mode { set => SetValue((int)PropertyIndex.Mode, value); }
         public float IsInverted { set => SetValue((int)PropertyIndex.IsInverted, value); }
         internal void ClearInput() => SetInput(0, null, true);
 
@@ -76,8 +76,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Softness)]
             public float Softness { get => _cb.Softness; set { _cb.Softness = value; UpdateConstants(); } }
 
-            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Mode)]
-            public float Mode { get => _cb.Mode; set { _cb.Mode = value; UpdateConstants(); } }
+            [CustomEffectProperty(PropertyType.Int32, (int)PropertyIndex.Mode)]
+            public int Mode { get => _cb.Mode; set { _cb.Mode = value; UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.IsInverted)]
             public float IsInverted { get => _cb.IsInverted; set { _cb.IsInverted = value; UpdateConstants(); } }
@@ -121,7 +121,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
                 public float EdgePosition;
                 public float BandWidth;
                 public float Softness;
-                public float Mode;
+                public int Mode;
                 public float IsInverted;
             }
         }

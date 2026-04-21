@@ -13,7 +13,7 @@ cbuffer Constants : register(b0)
     float edgePosition;
     float bandWidth;
     float softness;
-    float mode;
+    int mode;
     float isInverted;
 };
 
@@ -40,11 +40,11 @@ float4 main(float4 pos : SV_POSITION, float4 posScene : SCENE_POSITION, float4 u
     float mask;
 
     [branch]
-    if (mode < 0.5f)
+    if (mode == 0)
     {
         mask = 1.0f - smoothstep(e1 - eps, e1 + eps, ny);
     }
-    else if (mode < 1.5f)
+    else if (mode == 1)
     {
         float above = smoothstep(e1 - eps, e1 + eps, ny);
         float below = 1.0f - smoothstep(e2 - eps, e2 + eps, ny);
