@@ -61,4 +61,5 @@
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="Model" xml:space="preserve"><value>Model</value></data>
 <data name="Prompt" xml:space="preserve"><value>Petunjuk</value></data>
+<data name="HowToUseGeminiTTS" xml:space="preserve"><value>Bantuan: Cara mengatur Gemini TTS</value></data>
 </root>

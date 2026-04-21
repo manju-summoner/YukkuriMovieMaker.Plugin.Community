@@ -62,4 +62,5 @@
 <data name="APIKey" xml:space="preserve"><value>Clave de API</value></data>
 <data name="Model" xml:space="preserve"><value>모델</value></data>
 <data name="Prompt" xml:space="preserve"><value>프롬프트</value></data>
+<data name="HowToUseGeminiTTS" xml:space="preserve"><value>도움말: Gemini TTS 설정 방법</value></data>
 </root>

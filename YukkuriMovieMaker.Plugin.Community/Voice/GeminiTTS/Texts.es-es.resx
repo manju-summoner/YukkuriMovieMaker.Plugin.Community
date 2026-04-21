@@ -62,4 +62,5 @@
 <data name="APIKey" xml:space="preserve"><value>مفتاح API</value></data>
 <data name="Model" xml:space="preserve"><value>Modelo</value></data>
 <data name="Prompt" xml:space="preserve"><value>Indicaciones</value></data>
+<data name="HowToUseGeminiTTS" xml:space="preserve"><value>Ayuda: Cómo configurar Gemini TTS</value></data>
 </root>
