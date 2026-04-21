@@ -96,52 +96,115 @@ float4 main(
     float3 g = (gs.a > 1e-6f) ? gs.rgb / gs.a : float3(0.0f, 0.0f, 0.0f);
 
     float3 safeInvG = 1.0f / max(g, 1e-6f);
-    float3 safeInvS = 1.0f / max(s, 1e-6f);
 
-    float3 results[27];
+    float3 blended;
+    [branch] switch (blendMode)
+    {
+        case 0:
+            blended = g;
+            break;
+        case 1:
+            blended = saturate(s + (GetLuminance(g) - lum));
+            break;
+        case 2:
+        {
+            float gl = length(g);
+            blended = (gl > 1e-6f) ? saturate(normalize(g) * lum) : s;
+            break;
+        }
+        case 3:
+            blended = min(s, g);
+            break;
+        case 4:
+            blended = s * g;
+            break;
+        case 5:
+            blended = saturate(1.0f - (1.0f - s) * safeInvG);
+            break;
+        case 6:
+            blended = saturate(s + g - 1.0f);
+            break;
+        case 7:
+            blended = saturate(s - g);
+            break;
+        case 8:
+            blended = max(s, g);
+            break;
+        case 9:
+            blended = 1.0f - (1.0f - s) * (1.0f - g);
+            break;
+        case 10:
+            blended = saturate(s * safeInvG / max(1.0f - g, 1e-6f));
+            break;
+        case 11:
+            blended = saturate(s + g);
+            break;
+        case 12:
+            blended = min(s + g, 1.0f);
+            break;
+        case 13:
+            blended = (s < 0.5f) ? 2.0f * s * g : 1.0f - 2.0f * (1.0f - s) * (1.0f - g);
+            break;
+        case 14:
+            blended = saturate(SoftLightPerChannel(s, g));
+            break;
+        case 15:
+            blended = (g < 0.5f) ? 2.0f * g * s : 1.0f - 2.0f * (1.0f - g) * (1.0f - s);
+            break;
+        case 16:
+            blended = abs(s - g);
+            break;
+        case 17:
+        {
+            float3 burn = saturate(1.0f - (1.0f - s) / max(2.0f * g, 1e-6f));
+            float3 dodge = saturate(s / max(2.0f * (1.0f - g), 1e-6f));
+            blended = (g <= 0.5f) ? burn : dodge;
+            break;
+        }
+        case 18:
+            blended = saturate(2.0f * g + s - 1.0f);
+            break;
+        case 19:
+            blended = (g > 0.5f) ? max(s, 2.0f * (g - 0.5f)) : min(s, 2.0f * g);
+            break;
+        case 20:
+            blended = step(1.0f, s + g);
+            break;
+        case 21:
+            blended = s + g - 2.0f * s * g;
+            break;
+        case 22:
+        {
+            float lumS = GetLuminance(s), lumG = GetLuminance(g);
+            blended = (lumG <= lumS) ? g : s;
+            break;
+        }
+        case 23:
+        {
+            float lumS = GetLuminance(s), lumG = GetLuminance(g);
+            blended = (lumG >= lumS) ? g : s;
+            break;
+        }
+        case 24:
+            blended = saturate(s * safeInvG);
+            break;
+        case 25:
+        {
+            float3 hslS = RgbToHsl(s), hslG = RgbToHsl(g);
+            blended = saturate(HslToRgb(float3(hslS.x, hslG.y, hslS.z)));
+            break;
+        }
+        case 26:
+        {
+            float3 hslS = RgbToHsl(s), hslG = RgbToHsl(g);
+            blended = saturate(HslToRgb(float3(hslG.x, hslG.y, hslS.z)));
+            break;
+        }
+        default:
+            blended = g;
+            break;
+    }
 
-    results[0] = g;
-    results[1] = saturate(s + (GetLuminance(g) - lum));
-    {
-        float gl = length(g);
-        results[2] = (gl > 1e-6f) ? saturate(normalize(g) * lum) : s;
-    }
-    results[3] = min(s, g);
-    results[4] = s * g;
-    results[5] = saturate(1.0f - (1.0f - s) * safeInvG);
-    results[6] = saturate(s + g - 1.0f);
-    results[7] = saturate(s - g);
-    results[8] = max(s, g);
-    results[9] = 1.0f - (1.0f - s) * (1.0f - g);
-    results[10] = saturate(s * safeInvG / max(1.0f - g, 1e-6f));
-    results[11] = saturate(s + g);
-    results[12] = min(s + g, 1.0f);
-    results[13] = (s < 0.5f) ? 2.0f * s * g : 1.0f - 2.0f * (1.0f - s) * (1.0f - g);
-    results[14] = saturate(SoftLightPerChannel(s, g));
-    results[15] = (g < 0.5f) ? 2.0f * g * s : 1.0f - 2.0f * (1.0f - g) * (1.0f - s);
-    results[16] = abs(s - g);
-    {
-        float3 burn = saturate(1.0f - (1.0f - s) / max(2.0f * g, 1e-6f));
-        float3 dodge = saturate(s / max(2.0f * (1.0f - g), 1e-6f));
-        results[17] = (g <= 0.5f) ? burn : dodge;
-    }
-    results[18] = saturate(2.0f * g + s - 1.0f);
-    results[19] = (g > 0.5f) ? max(s, 2.0f * (g - 0.5f)) : min(s, 2.0f * g);
-    results[20] = step(1.0f, s + g);
-    results[21] = s + g - 2.0f * s * g;
-    {
-        float lumS = GetLuminance(s), lumG = GetLuminance(g);
-        results[22] = (lumG <= lumS) ? g : s;
-        results[23] = (lumG >= lumS) ? g : s;
-    }
-    results[24] = saturate(s * safeInvG);
-    {
-        float3 hslS = RgbToHsl(s), hslG = RgbToHsl(g);
-        results[25] = saturate(HslToRgb(float3(hslS.x, hslG.y, hslS.z)));
-        results[26] = saturate(HslToRgb(float3(hslG.x, hslG.y, hslS.z)));
-    }
-
-    float3 blended = results[clamp(blendMode, 0, 26)];
     float3 result = lerp(s, blended, opacity);
     return saturate(float4(result * src.a, src.a));
 }
