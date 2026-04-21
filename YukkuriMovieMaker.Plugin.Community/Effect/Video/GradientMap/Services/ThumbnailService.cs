@@ -1,5 +1,4 @@
 using System.IO;
-using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -50,64 +49,32 @@ internal static class ThumbnailService
             }
         }
 
-        BitmapSource? result = null;
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is not null && !dispatcher.CheckAccess())
-        {
-            dispatcher.Invoke(() =>
-            {
-                var bitmap = BitmapSource.Create(
-                    ThumbnailWidth, ThumbnailHeight, 96, 96,
-                    PixelFormats.Pbgra32, null,
-                    thumbPixels, ThumbnailWidth * 4);
-                bitmap.Freeze();
-                result = bitmap;
-            });
-        }
-        else
-        {
-            var bitmap = BitmapSource.Create(
-                ThumbnailWidth, ThumbnailHeight, 96, 96,
-                PixelFormats.Pbgra32, null,
-                thumbPixels, ThumbnailWidth * 4);
-            bitmap.Freeze();
-            result = bitmap;
-        }
-
-        return result;
+        var bitmap = BitmapSource.Create(
+            ThumbnailWidth, ThumbnailHeight, 96, 96,
+            PixelFormats.Pbgra32, null,
+            thumbPixels, ThumbnailWidth * 4);
+        bitmap.Freeze();
+        return bitmap;
     }
 
-    private static BitmapSource? CreateImageThumbnail(string filePath)
+    private static BitmapSource CreateImageThumbnail(string filePath)
     {
-        BitmapSource? result = null;
+        using var stream = File.OpenRead(filePath);
+        var decoder = BitmapDecoder.Create(
+            stream,
+            BitmapCreateOptions.None,
+            BitmapCacheOption.OnLoad);
 
-        void Load()
-        {
-            using var stream = File.OpenRead(filePath);
-            var decoder = BitmapDecoder.Create(
-                stream,
-                BitmapCreateOptions.None,
-                BitmapCacheOption.OnLoad);
+        var frame = decoder.Frames[0];
+        var scale = Math.Min(
+            (double)ThumbnailWidth / frame.PixelWidth,
+            (double)ThumbnailHeight / frame.PixelHeight);
+        var transformed = new TransformedBitmap(
+            frame,
+            new ScaleTransform(scale, scale));
 
-            var frame = decoder.Frames[0];
-            var scale = Math.Min(
-                (double)ThumbnailWidth / frame.PixelWidth,
-                (double)ThumbnailHeight / frame.PixelHeight);
-            var transformed = new TransformedBitmap(
-                frame,
-                new ScaleTransform(scale, scale));
-
-            var frozen = BitmapFrame.Create(transformed);
-            frozen.Freeze();
-            result = frozen;
-        }
-
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is not null && !dispatcher.CheckAccess())
-            dispatcher.Invoke(Load);
-        else
-            Load();
-
-        return result;
+        var frozen = BitmapFrame.Create(transformed);
+        frozen.Freeze();
+        return frozen;
     }
 }

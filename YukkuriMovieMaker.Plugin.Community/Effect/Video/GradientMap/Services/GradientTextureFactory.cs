@@ -117,30 +117,17 @@ public sealed class GradientTextureFactory : IGradientTextureFactory
 
     private static BitmapSource LoadBitmapSource(string filePath)
     {
-        BitmapSource? result = null;
-
-        void Load()
-        {
-            using var stream = File.OpenRead(filePath);
-            var decoder = BitmapDecoder.Create(
-                stream,
-                BitmapCreateOptions.None,
-                BitmapCacheOption.OnLoad);
-            var converted = new FormatConvertedBitmap(
-                decoder.Frames[0],
-                PixelFormats.Pbgra32,
-                null,
-                0.0);
-            converted.Freeze();
-            result = converted;
-        }
-
-        var dispatcher = System.Windows.Application.Current?.Dispatcher;
-        if (dispatcher is not null && !dispatcher.CheckAccess())
-            dispatcher.Invoke(Load);
-        else
-            Load();
-
-        return result ?? throw new InvalidOperationException("Bitmap load returned null.");
+        using var stream = File.OpenRead(filePath);
+        var decoder = BitmapDecoder.Create(
+            stream,
+            BitmapCreateOptions.None,
+            BitmapCacheOption.OnLoad);
+        var converted = new FormatConvertedBitmap(
+            decoder.Frames[0],
+            PixelFormats.Pbgra32,
+            null,
+            0.0);
+        converted.Freeze();
+        return converted;
     }
 }

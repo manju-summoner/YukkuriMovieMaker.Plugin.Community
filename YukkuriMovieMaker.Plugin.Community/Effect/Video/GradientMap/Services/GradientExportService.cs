@@ -1,5 +1,4 @@
 using System.IO;
-using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Models;
@@ -20,27 +19,15 @@ public static class GradientExportService
     public static void ExportAsPng(string filePath, GradientColorStop[] stops)
     {
         var pixels = RasterizeGradient(stops);
-        BitmapSource? frozen = null;
-
-        void CreateSource()
-        {
-            var src = BitmapSource.Create(
-                GradientResolution, 1, 96, 96,
-                PixelFormats.Pbgra32, null,
-                pixels, GradientResolution * 4);
-            src.Freeze();
-            frozen = src;
-        }
-
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is not null && !dispatcher.CheckAccess())
-            dispatcher.Invoke(CreateSource);
-        else
-            CreateSource();
+        var source = BitmapSource.Create(
+            GradientResolution, 1, 96, 96,
+            PixelFormats.Pbgra32, null,
+            pixels, GradientResolution * 4);
+        source.Freeze();
 
         using var stream = File.Create(filePath);
         var encoder = new PngBitmapEncoder();
-        encoder.Frames.Add(BitmapFrame.Create(frozen!));
+        encoder.Frames.Add(BitmapFrame.Create(source));
         encoder.Save(stream);
     }
 
