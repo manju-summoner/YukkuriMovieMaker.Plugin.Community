@@ -43,12 +43,7 @@ public sealed class GradientMapEffect : VideoEffectBase
         Description = nameof(Texts.GradientFilePathDesc),
         ResourceType = typeof(Texts),
         Order = 0)]
-    [CustomFileSelector(
-        ".grd,.png,.jpg,.jpeg,.bmp,.gif,.tiff",
-        "Gradient Files (*.grd;*.png;*.jpg)|*.grd;*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tiff,All Files (*.*)|*.*",
-        SpecialExtensions = ".grd",
-        SpecialTooltipKey = nameof(Texts.GrdFileTooltip),
-        ResourceType = typeof(Texts))]
+    [GradientMapFileSelector]
     public string GradientFilePath
     {
         get => _gradientFilePath;
