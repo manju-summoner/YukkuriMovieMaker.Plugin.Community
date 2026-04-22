@@ -20,7 +20,7 @@ internal static class ThumbnailService
             {
                 return string.Equals(
                     Path.GetExtension(filePath), ".grd", StringComparison.OrdinalIgnoreCase)
-                    ? CreateGrdThumbnail(filePath)
+                    ? CreateGrdThumbnail(filePath, gradientIndex)
                     : CreateImageThumbnail(filePath);
             }
             catch
