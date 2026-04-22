@@ -8,8 +8,8 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Models;
 using YukkuriMovieMaker.Plugin.Effects;
+using YukkuriMovieMaker.Project;
 using GradientStop = YukkuriMovieMaker.Brush.GradientStop;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Effect;
@@ -82,12 +82,12 @@ public sealed class GradientMapEffect : VideoEffectBase
         ResourceType = typeof(Texts),
         Order = 3)]
     [EnumComboBox]
-    public GradientBlendMode BlendMode
+    public Blend BlendMode
     {
         get => _blendMode;
         set => Set(ref _blendMode, value);
     }
-    private GradientBlendMode _blendMode = GradientBlendMode.Normal;
+    private Blend _blendMode = Blend.Normal;
 
     [Display(
         GroupName = nameof(Texts.GroupName),

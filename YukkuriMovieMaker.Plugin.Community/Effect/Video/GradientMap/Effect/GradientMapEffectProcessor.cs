@@ -1,12 +1,15 @@
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using Vortice.Direct2D1;
+using D2DEffects = Vortice.Direct2D1.Effects;
 using YukkuriMovieMaker.Brush;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Player;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Models;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Services;
+using YukkuriMovieMaker.Project;
 using GradientStop = YukkuriMovieMaker.Brush.GradientStop;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Effect;
@@ -18,7 +21,10 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
     private readonly IGraphicsDevicesAndContext _devices;
     private readonly GradientMapEffect _item;
 
-    private GradientMapCustomEffect? _effect;
+    private GradientMapCustomEffect? _gradMapEffect;
+    private D2DEffects.Composite? _compositeEffect;
+    private D2DEffects.Blend? _blendEffect;
+    private D2DEffects.CrossFade? _crossFadeEffect;
     private ID2D1Bitmap? _gradientBitmap;
     private ID2D1Bitmap? _fallbackBitmap;
 
@@ -27,7 +33,7 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
     private ImmutableList<GradientStop> _loadedStops = [];
     private bool _isFirst = true;
     private float _opacity;
-    private int _blendMode;
+    private Project.Blend _blendMode;
     private int _isHorizontal;
 
     public GradientMapEffectProcessor(
@@ -41,45 +47,71 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
 
     protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
     {
-        var effect = new GradientMapCustomEffect(devices);
-        if (!effect.IsEnabled)
+        var gradMap = new GradientMapCustomEffect(devices);
+        if (!gradMap.IsEnabled)
         {
-            effect.Dispose();
+            gradMap.Dispose();
             return null;
         }
 
         var fallback = CreateFallbackBitmap(devices);
         if (fallback is null)
         {
-            effect.Dispose();
+            gradMap.Dispose();
             return null;
         }
 
-        _effect = effect;
+        _gradMapEffect = gradMap;
         _fallbackBitmap = fallback;
-        disposer.Collect(_effect);
+        disposer.Collect(_gradMapEffect);
         disposer.Collect(_fallbackBitmap);
-        _effect.SetGradientInput(_fallbackBitmap);
+        _gradMapEffect.SetGradientInput(_fallbackBitmap);
 
-        var output = _effect.Output;
+        _compositeEffect = new D2DEffects.Composite(devices.DeviceContext) { InputCount = 2 };
+        disposer.Collect(_compositeEffect);
+        using (var gradMapOutput = _gradMapEffect.Output)
+            _compositeEffect.SetInput(1, gradMapOutput, true);
+
+        _blendEffect = new D2DEffects.Blend(devices.DeviceContext);
+        disposer.Collect(_blendEffect);
+        using (var gradMapOutput = _gradMapEffect.Output)
+            _blendEffect.SetInput(1, gradMapOutput, true);
+
+        _crossFadeEffect = new D2DEffects.CrossFade(devices.DeviceContext);
+        disposer.Collect(_crossFadeEffect);
+
+        var output = _crossFadeEffect.Output;
         disposer.Collect(output);
         return output;
     }
 
     protected override void setInput(ID2D1Image? input)
     {
-        _effect?.SetSourceInput(input);
+        _gradMapEffect?.SetSourceInput(input);
+        _compositeEffect?.SetInput(0, input, true);
+        _blendEffect?.SetInput(0, input, true);
+        _crossFadeEffect?.SetInput(1, input, true);
     }
 
     protected override void ClearEffectChain()
     {
-        _effect?.SetSourceInput(null);
-        _effect?.SetGradientInput(null);
+        _gradMapEffect?.SetSourceInput(null);
+        _gradMapEffect?.SetGradientInput(null);
+        _compositeEffect?.SetInput(0, null, true);
+        _compositeEffect?.SetInput(1, null, true);
+        _blendEffect?.SetInput(0, null, true);
+        _blendEffect?.SetInput(1, null, true);
+        _crossFadeEffect?.SetInput(0, null, true);
+        _crossFadeEffect?.SetInput(1, null, true);
     }
 
     public override DrawDescription Update(EffectDescription effectDescription)
     {
-        if (IsPassThroughEffect || _effect is null)
+        if (IsPassThroughEffect
+            || _gradMapEffect is null
+            || _compositeEffect is null
+            || _blendEffect is null
+            || _crossFadeEffect is null)
             return effectDescription.DrawDescription;
 
         var frame = effectDescription.ItemPosition.Frame;
@@ -87,7 +119,7 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
         var fps = effectDescription.FPS;
 
         var opacity = (float)(_item.Opacity.GetValue(frame, length, fps) / 100d);
-        var blendMode = (int)_item.BlendMode;
+        var blendMode = _item.BlendMode;
         var stops = _item.CustomGradientStops ?? [];
         var path = _item.GradientFilePath ?? string.Empty;
         var gradientIndex = _item.GradientIndex;
@@ -119,14 +151,27 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
                 RefreshGradientBitmapFromFile(path, gradientIndex, stops);
         }
 
-        if (_isFirst || _opacity != opacity)
-            _effect.Opacity = opacity;
+        if (_isFirst || _isHorizontal != isHorizontal)
+            _gradMapEffect.IsHorizontal = isHorizontal;
 
         if (_isFirst || _blendMode != blendMode)
-            _effect.BlendMode = blendMode;
+        {
+            if (blendMode.IsCompositionEffect())
+            {
+                _compositeEffect.Mode = blendMode.ToD2DCompositionMode();
+                using var composited = _compositeEffect.Output;
+                _crossFadeEffect.SetInput(0, composited, true);
+            }
+            else
+            {
+                _blendEffect.Mode = blendMode.ToD2DBlendMode();
+                using var blended = _blendEffect.Output;
+                _crossFadeEffect.SetInput(0, blended, true);
+            }
+        }
 
-        if (_isFirst || _isHorizontal != isHorizontal)
-            _effect.IsHorizontal = isHorizontal;
+        if (_isFirst || _opacity != opacity)
+            _crossFadeEffect.Weight = opacity;
 
         _isFirst = false;
         _opacity = opacity;
@@ -146,13 +191,13 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
         var bitmap = GradientTextureFactory.CreateGradientBitmapFromStops(_devices.DeviceContext, stops);
         if (bitmap is null)
         {
-            _effect?.SetGradientInput(_fallbackBitmap);
+            _gradMapEffect?.SetGradientInput(_fallbackBitmap);
             return;
         }
 
         _gradientBitmap = bitmap;
         disposer.Collect(_gradientBitmap);
-        _effect?.SetGradientInput(bitmap);
+        _gradMapEffect?.SetGradientInput(bitmap);
     }
 
     private void RefreshGradientBitmapFromFile(string path, int gradientIndex, ImmutableList<GradientStop> stops)
@@ -165,19 +210,19 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
         var bitmap = GradientTextureFactory.CreateGradientBitmap(_devices.DeviceContext, path, gradientIndex);
         if (bitmap is null)
         {
-            _effect?.SetGradientInput(_fallbackBitmap);
+            _gradMapEffect?.SetGradientInput(_fallbackBitmap);
             return;
         }
 
         _gradientBitmap = bitmap;
         disposer.Collect(_gradientBitmap);
-        _effect?.SetGradientInput(bitmap);
+        _gradMapEffect?.SetGradientInput(bitmap);
     }
 
     private void ReleaseBitmap()
     {
         if (_gradientBitmap is null) return;
-        _effect?.SetGradientInput(_fallbackBitmap);
+        _gradMapEffect?.SetGradientInput(_fallbackBitmap);
         disposer.RemoveAndDispose(ref _gradientBitmap);
     }
 

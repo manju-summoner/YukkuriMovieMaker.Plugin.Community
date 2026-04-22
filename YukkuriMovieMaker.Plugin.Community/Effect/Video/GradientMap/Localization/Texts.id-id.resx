@@ -71,61 +71,7 @@
 <data name="BlendModeDesc" xml:space="preserve"><value>Mode blend peta gradien</value></data>
 <data name="IsHorizontalName" xml:space="preserve"><value>Sampling Horizontal</value></data>
 <data name="IsHorizontalDesc" xml:space="preserve"><value>Saat diaktifkan mengambil sampel gambar gradien secara horizontal</value></data>
-<data name="BlendModeNormalName" xml:space="preserve"><value>Normal</value></data>
-<data name="BlendModeNormalDesc" xml:space="preserve"><value>Menerapkan warna peta gradien secara langsung</value></data>
-<data name="BlendModeLuminosityName" xml:space="preserve"><value>Luminositas</value></data>
-<data name="BlendModeLuminosityDesc" xml:space="preserve"><value>Menerapkan luminositas gradien sambil mempertahankan hue dan saturasi asli</value></data>
-<data name="BlendModeHueName" xml:space="preserve"><value>Hue</value></data>
-<data name="BlendModeHueDesc" xml:space="preserve"><value>Menerapkan luminositas asli sepanjang arah hue gradien</value></data>
 <data name="GrdFileTooltip" xml:space="preserve"><value>File Kompatibel Photoshop</value></data>
-<data name="BlendModeDarkenName" xml:space="preserve"><value>Perbandingkan (Gelap)</value></data>
-<data name="BlendModeDarkenDesc" xml:space="preserve"><value>Memilih nilai lebih gelap di setiap saluran</value></data>
-<data name="BlendModeMultiplyName" xml:space="preserve"><value>Multiply</value></data>
-<data name="BlendModeMultiplyDesc" xml:space="preserve"><value>Mengalikan warna sumber dengan warna gradien</value></data>
-<data name="BlendModeColorBurnName" xml:space="preserve"><value>Bakar Warna</value></data>
-<data name="BlendModeColorBurnDesc" xml:space="preserve"><value>Menggelapkan dengan meningkatkan kontras berdasarkan nilai gradien</value></data>
-<data name="BlendModeLinearBurnName" xml:space="preserve"><value>Bakar Linear</value></data>
-<data name="BlendModeLinearBurnDesc" xml:space="preserve"><value>Menjumlahkan sumber dan gradien lalu mengurangi 1</value></data>
-<data name="BlendModeSubtractName" xml:space="preserve"><value>Subtract</value></data>
-<data name="BlendModeSubtractDesc" xml:space="preserve"><value>Mengurangi warna gradien dari warna sumber</value></data>
-<data name="BlendModeLightenName" xml:space="preserve"><value>Perbandingkan (Terang)</value></data>
-<data name="BlendModeLightenDesc" xml:space="preserve"><value>Memilih nilai lebih terang di setiap saluran</value></data>
-<data name="BlendModeScreenName" xml:space="preserve"><value>Screen</value></data>
-<data name="BlendModeScreenDesc" xml:space="preserve"><value>Membalik kedua warna mengalikan lalu membalik hasilnya</value></data>
-<data name="BlendModeColorDodgeName" xml:space="preserve"><value>Dodge Warna</value></data>
-<data name="BlendModeColorDodgeDesc" xml:space="preserve"><value>Mencerahkan dengan mengurangi kontras berdasarkan nilai gradien</value></data>
-<data name="BlendModeLinearDodgeName" xml:space="preserve"><value>Dodge Linear (Tambah)</value></data>
-<data name="BlendModeLinearDodgeDesc" xml:space="preserve"><value>Menjumlahkan warna sumber dan gradien lalu membatasi hasilnya</value></data>
-<data name="BlendModeAddGlowName" xml:space="preserve"><value>Tambah (Cahaya)</value></data>
-<data name="BlendModeAddGlowDesc" xml:space="preserve"><value>Menjumlahkan warna sumber dan gradien dibatasi hingga 1</value></data>
-<data name="BlendModeOverlayName" xml:space="preserve"><value>Overlay</value></data>
-<data name="BlendModeOverlayDesc" xml:space="preserve"><value>Menerapkan multiply pada area gelap dan screen pada area terang</value></data>
-<data name="BlendModeSoftLightName" xml:space="preserve"><value>Soft Light</value></data>
-<data name="BlendModeSoftLightDesc" xml:space="preserve"><value>Mirip overlay tetapi dengan kontras yang lebih lembut</value></data>
-<data name="BlendModeHardLightName" xml:space="preserve"><value>Hard Light</value></data>
-<data name="BlendModeHardLightDesc" xml:space="preserve"><value>Menerapkan overlay berdasarkan nilai gradien</value></data>
-<data name="BlendModeDifferenceName" xml:space="preserve"><value>Difference</value></data>
-<data name="BlendModeDifferenceDesc" xml:space="preserve"><value>Mengembalikan selisih absolut antara sumber dan gradien</value></data>
-<data name="BlendModeVividLightName" xml:space="preserve"><value>Vivid Light</value></data>
-<data name="BlendModeVividLightDesc" xml:space="preserve"><value>Menerapkan burn atau dodge tergantung nilai gradien</value></data>
-<data name="BlendModeLinearLightName" xml:space="preserve"><value>Linear Light</value></data>
-<data name="BlendModeLinearLightDesc" xml:space="preserve"><value>Menerapkan linear burn atau dodge tergantung nilai gradien</value></data>
-<data name="BlendModePinLightName" xml:space="preserve"><value>Pin Light</value></data>
-<data name="BlendModePinLightDesc" xml:space="preserve"><value>Menggantikan highlight atau shadow berdasarkan nilai gradien</value></data>
-<data name="BlendModeHardMixName" xml:space="preserve"><value>Hard Mix</value></data>
-<data name="BlendModeHardMixDesc" xml:space="preserve"><value>Menetapkan setiap saluran ke putih atau hitam berdasarkan apakah jumlahnya melebihi 1</value></data>
-<data name="BlendModeExclusionName" xml:space="preserve"><value>Exclusion</value></data>
-<data name="BlendModeExclusionDesc" xml:space="preserve"><value>Mirip difference tetapi dengan kontras lebih rendah</value></data>
-<data name="BlendModeDarkerColorName" xml:space="preserve"><value>Warna Lebih Gelap</value></data>
-<data name="BlendModeDarkerColorDesc" xml:space="preserve"><value>Memilih warna penuh yang memiliki luminance lebih rendah</value></data>
-<data name="BlendModeLighterColorName" xml:space="preserve"><value>Warna Lebih Terang</value></data>
-<data name="BlendModeLighterColorDesc" xml:space="preserve"><value>Memilih warna penuh yang memiliki luminance lebih tinggi</value></data>
-<data name="BlendModeDivideName" xml:space="preserve"><value>Divide</value></data>
-<data name="BlendModeDivideDesc" xml:space="preserve"><value>Membagi warna sumber dengan warna gradien</value></data>
-<data name="BlendModeSaturationName" xml:space="preserve"><value>Saturasi</value></data>
-<data name="BlendModeSaturationDesc" xml:space="preserve"><value>Menerapkan saturasi gradien sambil mempertahankan hue dan luminance asli</value></data>
-<data name="BlendModeColorName" xml:space="preserve"><value>Warna</value></data>
-<data name="BlendModeColorDesc" xml:space="preserve"><value>Menerapkan hue dan saturasi gradien sambil mempertahankan luminance asli</value></data>
 <data name="CustomGradientName" xml:space="preserve"><value>Gradien</value></data>
 <data name="CustomGradientDesc" xml:space="preserve"><value>Mendefinisikan gradien secara langsung. Jika kosong file gradien digunakan.</value></data>
 <data name="ExportAsGrdName" xml:space="preserve"><value>Ekspor sebagai GRD</value></data>
