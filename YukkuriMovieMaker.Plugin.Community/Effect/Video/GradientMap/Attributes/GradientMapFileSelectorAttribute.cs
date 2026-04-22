@@ -31,6 +31,24 @@ public sealed class GradientMapFileSelectorAttribute : PropertyEditorAttribute2
     static readonly Lock registerLock = new();
     static bool registered;
 
+    static readonly Lazy<DataTemplate?> grdBadgeTemplate = new(() =>
+    {
+        try
+        {
+            var dict = new ResourceDictionary
+            {
+                Source = new Uri(
+                    "pack://application:,,,/YukkuriMovieMaker.Plugin.Community;component/Effect/Video/GradientMap/Resources/GradientMapFileSelectorResources.xaml",
+                    UriKind.Absolute),
+            };
+            return dict["GrdBadgeTemplate"] as DataTemplate;
+        }
+        catch
+        {
+            return null;
+        }
+    });
+
     public GradientMapFileSelectorAttribute()
     {
         PropertyEditorSize = PropertyEditorSize.FullWidth;
@@ -52,6 +70,7 @@ public sealed class GradientMapFileSelectorAttribute : PropertyEditorAttribute2
         editor.ThumbnailLoaders = thumbnailLoaders;
         editor.Filter = FilterPattern;
         editor.FilterName = FilterName;
+        editor.TrailingContentTemplate = grdBadgeTemplate.Value;
 
         var currentItemProperty = itemProperties[0];
         var file = (string?)currentItemProperty.PropertyInfo.GetValue(currentItemProperty.PropertyOwner);
