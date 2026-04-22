@@ -22,6 +22,7 @@ public sealed class GradientMapEffect : VideoEffectBase
         ResourceType = typeof(Texts),
         Order = -1)]
     [GradientEditor]
+    [CustomGradientJsonVisible]
     public string CustomGradientJson
     {
         get => _customGradientJson;
@@ -55,6 +56,7 @@ public sealed class GradientMapEffect : VideoEffectBase
         ResourceType = typeof(Texts),
         Order = 1)]
     [GrdIndexSelector]
+    [GradientIndexVisible]
     public int GradientIndex
     {
         get => _gradientIndex;
