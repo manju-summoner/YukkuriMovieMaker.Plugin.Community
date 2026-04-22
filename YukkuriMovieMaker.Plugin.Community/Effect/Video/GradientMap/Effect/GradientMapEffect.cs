@@ -104,6 +104,11 @@ public sealed class GradientMapEffect : VideoEffectBase
     }
     private bool _isHorizontal = true;
 
+    public GradientMapEffect()
+    {
+        SubscribeChildUndoRedoable(CustomGradientStops);
+    }
+
     public override IEnumerable<string> CreateExoVideoFilters(
         int keyFrameIndex,
         ExoOutputDescription exoOutputDescription) => [];
