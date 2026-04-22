@@ -128,7 +128,6 @@
 <data name="BlendModeColorDesc" xml:space="preserve"><value>保留原始亮度并应用渐变色调和饱和度</value></data>
 <data name="CustomGradientName" xml:space="preserve"><value>渐变</value></data>
 <data name="CustomGradientDesc" xml:space="preserve"><value>定义内联渐变。为空时使用渐变文件。</value></data>
-<data name="DeleteStopName" xml:space="preserve"><value>删除颜色点</value></data>
 <data name="ExportAsGrdName" xml:space="preserve"><value>导出为GRD</value></data>
 <data name="ExportAsPngName" xml:space="preserve"><value>导出为PNG</value></data>
 <data name="ExportGrdFilterName" xml:space="preserve"><value>渐变文件 (*.grd)|*.grd</value></data>

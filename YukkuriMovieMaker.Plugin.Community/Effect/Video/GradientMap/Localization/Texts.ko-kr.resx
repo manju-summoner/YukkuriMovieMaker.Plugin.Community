@@ -128,7 +128,6 @@
 <data name="BlendModeColorDesc" xml:space="preserve"><value>원본 밝기를 유지하면서 그라디언트 색조와 채도를 적용합니다</value></data>
 <data name="CustomGradientName" xml:space="preserve"><value>그라디언트</value></data>
 <data name="CustomGradientDesc" xml:space="preserve"><value>그라디언트를 인라인으로 정의합니다. 비어 있으면 그라디언트 파일을 사용합니다.</value></data>
-<data name="DeleteStopName" xml:space="preserve"><value>색상 포인트 삭제</value></data>
 <data name="ExportAsGrdName" xml:space="preserve"><value>GRD로 내보내기</value></data>
 <data name="ExportAsPngName" xml:space="preserve"><value>PNG로 내보내기</value></data>
 <data name="ExportGrdFilterName" xml:space="preserve"><value>그라디언트 파일 (*.grd)|*.grd</value></data>

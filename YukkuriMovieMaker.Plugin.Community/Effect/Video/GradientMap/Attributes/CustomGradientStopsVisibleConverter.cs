@@ -4,7 +4,7 @@ using System.Windows.Data;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Attributes;
 
-internal sealed class CustomGradientJsonVisibleConverter : IValueConverter
+internal sealed class CustomGradientStopsVisibleConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {

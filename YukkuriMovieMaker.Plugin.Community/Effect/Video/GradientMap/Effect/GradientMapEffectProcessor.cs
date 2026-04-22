@@ -1,15 +1,20 @@
+using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using Vortice.Direct2D1;
+using YukkuriMovieMaker.Brush;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Models;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Services;
+using GradientStop = YukkuriMovieMaker.Brush.GradientStop;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Effect;
 
 internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
 {
+    private static readonly GradientStopComparer StopComparer = new();
+
     private readonly IGraphicsDevicesAndContext _devices;
     private readonly GradientMapEffect _item;
 
@@ -19,7 +24,7 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
 
     private string _loadedPath = string.Empty;
     private int _loadedIndex = -1;
-    private string _loadedJson = string.Empty;
+    private ImmutableList<GradientStop> _loadedStops = [];
     private bool _isFirst = true;
     private float _opacity;
     private int _blendMode;
@@ -83,34 +88,35 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
 
         var opacity = (float)(_item.Opacity.GetValue(frame, length, fps) / 100d);
         var blendMode = (int)_item.BlendMode;
-        var json = _item.CustomGradientJson ?? string.Empty;
+        var stops = _item.CustomGradientStops ?? [];
         var path = _item.GradientFilePath ?? string.Empty;
         var gradientIndex = _item.GradientIndex;
 
-        // グラデーション源が画像以外（インラインJSON / GRD / fallback）の場合は1Dテクスチャとなり、
+        // グラデーション源が画像以外（インラインStops / GRD / fallback）の場合は1Dテクスチャとなり、
         // 垂直サンプリングすると中央行ピクセルを繰り返し引くだけになるため水平サンプリングに固定する。
         var isHorizontal = (!ImageFormatParser.IsImageFile(path) || _item.IsHorizontal) ? 1 : 0;
 
-        var jsonChanged = !string.Equals(json, _loadedJson, StringComparison.Ordinal);
+        var stopsChanged = stops.Count != _loadedStops.Count || !stops.SequenceEqual(_loadedStops, StopComparer);
         var fileChanged = !string.Equals(path, _loadedPath, StringComparison.Ordinal) || gradientIndex != _loadedIndex;
+        var hasStops = stops.Count >= 2;
 
-        if (fileChanged && !jsonChanged)
+        if (fileChanged && !stopsChanged)
         {
-            RefreshGradientBitmapFromFile(path, gradientIndex, json);
+            RefreshGradientBitmapFromFile(path, gradientIndex, stops);
         }
-        else if (jsonChanged && !fileChanged)
+        else if (stopsChanged && !fileChanged)
         {
-            if (!string.IsNullOrWhiteSpace(json))
-                RefreshGradientBitmapFromJson(json, path, gradientIndex);
+            if (hasStops)
+                RefreshGradientBitmapFromStops(stops, path, gradientIndex);
             else
-                RefreshGradientBitmapFromFile(path, gradientIndex, json);
+                RefreshGradientBitmapFromFile(path, gradientIndex, stops);
         }
-        else if (jsonChanged && fileChanged)
+        else if (stopsChanged && fileChanged)
         {
-            if (!string.IsNullOrWhiteSpace(json))
-                RefreshGradientBitmapFromJson(json, path, gradientIndex);
+            if (hasStops)
+                RefreshGradientBitmapFromStops(stops, path, gradientIndex);
             else if (!string.IsNullOrWhiteSpace(path))
-                RefreshGradientBitmapFromFile(path, gradientIndex, json);
+                RefreshGradientBitmapFromFile(path, gradientIndex, stops);
         }
 
         if (_isFirst || _opacity != opacity)
@@ -130,14 +136,14 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
         return effectDescription.DrawDescription;
     }
 
-    private void RefreshGradientBitmapFromJson(string json, string path, int gradientIndex)
+    private void RefreshGradientBitmapFromStops(ImmutableList<GradientStop> stops, string path, int gradientIndex)
     {
         ReleaseBitmap();
-        _loadedJson = json;
+        _loadedStops = [.. stops.Select(x => x.Clone())];
         _loadedPath = path;
         _loadedIndex = gradientIndex;
 
-        var bitmap = GradientTextureFactory.CreateGradientBitmapFromJson(_devices.DeviceContext, json);
+        var bitmap = GradientTextureFactory.CreateGradientBitmapFromStops(_devices.DeviceContext, stops);
         if (bitmap is null)
         {
             _effect?.SetGradientInput(_fallbackBitmap);
@@ -149,12 +155,12 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
         _effect?.SetGradientInput(bitmap);
     }
 
-    private void RefreshGradientBitmapFromFile(string path, int gradientIndex, string json)
+    private void RefreshGradientBitmapFromFile(string path, int gradientIndex, ImmutableList<GradientStop> stops)
     {
         ReleaseBitmap();
         _loadedPath = path;
         _loadedIndex = gradientIndex;
-        _loadedJson = json;
+        _loadedStops = [.. stops.Select(x => x.Clone())];
 
         var bitmap = GradientTextureFactory.CreateGradientBitmap(_devices.DeviceContext, path, gradientIndex);
         if (bitmap is null)

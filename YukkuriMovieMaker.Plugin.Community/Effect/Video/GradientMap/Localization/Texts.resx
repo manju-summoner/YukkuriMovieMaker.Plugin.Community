@@ -128,7 +128,6 @@
 <data name="BlendModeColorDesc" xml:space="preserve"><value>元の輝度を維持しグラデーションの色相と彩度を適用します</value></data>
 <data name="CustomGradientName" xml:space="preserve"><value>グラデーション</value></data>
 <data name="CustomGradientDesc" xml:space="preserve"><value>グラデーションをインラインで定義します。空の場合はグラデーションファイルを使用します。</value></data>
-<data name="DeleteStopName" xml:space="preserve"><value>カラーポイントを削除</value></data>
 <data name="ExportAsGrdName" xml:space="preserve"><value>GRDとして書き出す</value></data>
 <data name="ExportAsPngName" xml:space="preserve"><value>PNGとして書き出す</value></data>
 <data name="ExportGrdFilterName" xml:space="preserve"><value>グラデーションファイル (*.grd)|*.grd</value></data>

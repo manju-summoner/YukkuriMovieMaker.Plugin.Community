@@ -68,7 +68,6 @@ BlendModeColorName,,カラー,Color,颜色,色彩,색상,Color,لون,Warna
 BlendModeColorDesc,,元の輝度を維持しグラデーションの色相と彩度を適用します,Applies gradient hue and saturation while preserving original luminance,保留原始亮度并应用渐变色调和饱和度,保留原始亮度並套用漸層色相和飽和度,원본 밝기를 유지하면서 그라디언트 색조와 채도를 적용합니다,Aplica el tono y la saturación del degradado manteniendo la luminancia original,يطبق صبغة التدرج وتشبعه مع الحفاظ على الإضاءة الأصلية,Menerapkan hue dan saturasi gradien sambil mempertahankan luminance asli
 CustomGradientName,,グラデーション,Gradient,渐变,漸層,그라디언트,Degradado,تدرج,Gradien
 CustomGradientDesc,,グラデーションをインラインで定義します。空の場合はグラデーションファイルを使用します。,Defines the gradient inline. When empty the gradient file is used.,定义内联渐变。为空时使用渐变文件。,以內嵌方式定義漸層。為空時使用漸層檔案。,그라디언트를 인라인으로 정의합니다. 비어 있으면 그라디언트 파일을 사용합니다.,Define el degradado de forma integrada. Si está vacío se usa el archivo de degradado.,يعرّف التدرج بشكل مضمّن. عند الفراغ يُستخدم ملف التدرج.,Mendefinisikan gradien secara langsung. Jika kosong file gradien digunakan.
-DeleteStopName,,カラーポイントを削除,Delete Color Stop,删除颜色点,刪除色標,색상 포인트 삭제,Eliminar punto de color,حذف نقطة اللون,Hapus Titik Warna
 ExportAsGrdName,,GRDとして書き出す,Export as GRD,导出为GRD,匯出為GRD,GRD로 내보내기,Exportar como GRD,تصدير بصيغة GRD,Ekspor sebagai GRD
 ExportAsPngName,,PNGとして書き出す,Export as PNG,导出为PNG,匯出為PNG,PNG로 내보내기,Exportar como PNG,تصدير بصيغة PNG,Ekspor sebagai PNG
 ExportGrdFilterName,,グラデーションファイル (*.grd)|*.grd,Gradient Files (*.grd)|*.grd,渐变文件 (*.grd)|*.grd,漸層檔案 (*.grd)|*.grd,그라디언트 파일 (*.grd)|*.grd,Archivos de degradado (*.grd)|*.grd,ملفات التدرج (*.grd)|*.grd,File Gradien (*.grd)|*.grd

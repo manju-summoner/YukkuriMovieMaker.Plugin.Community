@@ -1,8 +1,6 @@
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Views;
 using System.Windows;
-using System.Windows.Data;
 using YukkuriMovieMaker.Commons;
-using YukkuriMovieMaker.Views.Converters;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Views;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Attributes;
 
@@ -14,24 +12,17 @@ public sealed class GradientEditorAttribute : PropertyEditorAttribute2
         PropertyEditorSize = PropertyEditorSize.FullWidth;
     }
 
-    public override FrameworkElement Create()
-    {
-        var control = new GradientEditor();
-        control.Initialize();
-        return control;
-    }
+    public override FrameworkElement Create() => new GradientEditor();
 
     public override void SetBindings(FrameworkElement control, ItemProperty[] itemProperties)
     {
         if (control is not GradientEditor editor) return;
-        editor.SetBinding(
-            GradientEditor.GradientJsonProperty,
-            ItemPropertiesBinding.Create2(itemProperties));
+        editor.ItemProperties = itemProperties;
     }
 
     public override void ClearBindings(FrameworkElement control)
     {
         if (control is not GradientEditor editor) return;
-        BindingOperations.ClearBinding(editor, GradientEditor.GradientJsonProperty);
+        editor.ItemProperties = [];
     }
 }

@@ -128,7 +128,6 @@
 <data name="BlendModeColorDesc" xml:space="preserve"><value>يطبق صبغة التدرج وتشبعه مع الحفاظ على الإضاءة الأصلية</value></data>
 <data name="CustomGradientName" xml:space="preserve"><value>تدرج</value></data>
 <data name="CustomGradientDesc" xml:space="preserve"><value>يعرّف التدرج بشكل مضمّن. عند الفراغ يُستخدم ملف التدرج.</value></data>
-<data name="DeleteStopName" xml:space="preserve"><value>حذف نقطة اللون</value></data>
 <data name="ExportAsGrdName" xml:space="preserve"><value>تصدير بصيغة GRD</value></data>
 <data name="ExportAsPngName" xml:space="preserve"><value>تصدير بصيغة PNG</value></data>
 <data name="ExportGrdFilterName" xml:space="preserve"><value>ملفات التدرج (*.grd)|*.grd</value></data>

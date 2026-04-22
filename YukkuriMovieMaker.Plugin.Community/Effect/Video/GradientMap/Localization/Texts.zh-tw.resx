@@ -128,7 +128,6 @@
 <data name="BlendModeColorDesc" xml:space="preserve"><value>保留原始亮度並套用漸層色相和飽和度</value></data>
 <data name="CustomGradientName" xml:space="preserve"><value>漸層</value></data>
 <data name="CustomGradientDesc" xml:space="preserve"><value>以內嵌方式定義漸層。為空時使用漸層檔案。</value></data>
-<data name="DeleteStopName" xml:space="preserve"><value>刪除色標</value></data>
 <data name="ExportAsGrdName" xml:space="preserve"><value>匯出為GRD</value></data>
 <data name="ExportAsPngName" xml:space="preserve"><value>匯出為PNG</value></data>
 <data name="ExportGrdFilterName" xml:space="preserve"><value>漸層檔案 (*.grd)|*.grd</value></data>
