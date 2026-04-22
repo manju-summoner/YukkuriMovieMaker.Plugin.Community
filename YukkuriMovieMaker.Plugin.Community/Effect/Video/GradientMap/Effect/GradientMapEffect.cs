@@ -94,6 +94,7 @@ public sealed class GradientMapEffect : VideoEffectBase
         ResourceType = typeof(Texts),
         Order = 4)]
     [ToggleSlider]
+    [IsHorizontalVisible]
     public bool IsHorizontal
     {
         get => _isHorizontal;

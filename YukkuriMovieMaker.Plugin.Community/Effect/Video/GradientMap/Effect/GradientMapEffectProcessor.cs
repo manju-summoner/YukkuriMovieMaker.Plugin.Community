@@ -83,10 +83,13 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
 
         var opacity = (float)(_item.Opacity.GetValue(frame, length, fps) / 100d);
         var blendMode = (int)_item.BlendMode;
-        var isHorizontal = _item.IsHorizontal ? 1 : 0;
         var json = _item.CustomGradientJson ?? string.Empty;
         var path = _item.GradientFilePath ?? string.Empty;
         var gradientIndex = _item.GradientIndex;
+
+        // グラデーション源が画像以外（インラインJSON / GRD / fallback）の場合は1Dテクスチャとなり、
+        // 垂直サンプリングすると中央行ピクセルを繰り返し引くだけになるため水平サンプリングに固定する。
+        var isHorizontal = (!ImageFormatParser.IsImageFile(path) || _item.IsHorizontal) ? 1 : 0;
 
         var jsonChanged = !string.Equals(json, _loadedJson, StringComparison.Ordinal);
         var fileChanged = !string.Equals(path, _loadedPath, StringComparison.Ordinal) || gradientIndex != _loadedIndex;

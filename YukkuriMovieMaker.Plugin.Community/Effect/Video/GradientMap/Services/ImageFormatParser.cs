@@ -22,6 +22,10 @@ public sealed class ImageFormatParser : IGradientFormatParser
     public bool CanParse(string filePath) =>
         SupportedExtensions.Contains(Path.GetExtension(filePath));
 
+    public static bool IsImageFile(string filePath) =>
+        !string.IsNullOrEmpty(filePath) &&
+        SupportedExtensions.Contains(Path.GetExtension(filePath));
+
     public ID2D1Bitmap? CreateBitmap(
         ID2D1DeviceContext deviceContext,
         string filePath,
