@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
+<data name="EffectName" xml:space="preserve"><value>渐变映射</value></data>
+<data name="GroupName" xml:space="preserve"><value>渐变映射</value></data>
+<data name="GradientFilePathName" xml:space="preserve"><value>文件</value></data>
+<data name="GradientFilePathDesc" xml:space="preserve"><value>渐变映射图像文件路径</value></data>
+<data name="GradientIndexName" xml:space="preserve"><value>选择</value></data>
+<data name="GradientIndexDesc" xml:space="preserve"><value>从文件中的多个渐变中按索引选择</value></data>
+<data name="OpacityName" xml:space="preserve"><value>不透明度</value></data>
+<data name="OpacityDesc" xml:space="preserve"><value>渐变映射应用强度</value></data>
+<data name="BlendModeName" xml:space="preserve"><value>混合模式</value></data>
+<data name="BlendModeDesc" xml:space="preserve"><value>渐变映射混合模式</value></data>
+<data name="IsHorizontalName" xml:space="preserve"><value>水平采样</value></data>
+<data name="IsHorizontalDesc" xml:space="preserve"><value>启用时水平采样渐变图像</value></data>
+<data name="BlendModeNormalName" xml:space="preserve"><value>正常</value></data>
+<data name="BlendModeNormalDesc" xml:space="preserve"><value>直接应用渐变映射颜色</value></data>
+<data name="BlendModeLuminosityName" xml:space="preserve"><value>亮度</value></data>
+<data name="BlendModeLuminosityDesc" xml:space="preserve"><value>保留原始色调和饱和度并应用渐变亮度</value></data>
+<data name="BlendModeHueName" xml:space="preserve"><value>色调</value></data>
+<data name="BlendModeHueDesc" xml:space="preserve"><value>沿渐变色调方向应用原始亮度</value></data>
+<data name="GrdFileTooltip" xml:space="preserve"><value>Photoshop兼容文件</value></data>
+<data name="BlendModeDarkenName" xml:space="preserve"><value>变暗</value></data>
+<data name="BlendModeDarkenDesc" xml:space="preserve"><value>选取每个通道中较暗的值</value></data>
+<data name="BlendModeMultiplyName" xml:space="preserve"><value>正片叠底</value></data>
+<data name="BlendModeMultiplyDesc" xml:space="preserve"><value>将原始颜色与渐变颜色相乘</value></data>
+<data name="BlendModeColorBurnName" xml:space="preserve"><value>颜色加深</value></data>
+<data name="BlendModeColorBurnDesc" xml:space="preserve"><value>通过增加对比度使颜色变暗</value></data>
+<data name="BlendModeLinearBurnName" xml:space="preserve"><value>线性加深</value></data>
+<data name="BlendModeLinearBurnDesc" xml:space="preserve"><value>将原色与渐变色相加后减1</value></data>
+<data name="BlendModeSubtractName" xml:space="preserve"><value>减去</value></data>
+<data name="BlendModeSubtractDesc" xml:space="preserve"><value>从原始颜色中减去渐变颜色</value></data>
+<data name="BlendModeLightenName" xml:space="preserve"><value>变亮</value></data>
+<data name="BlendModeLightenDesc" xml:space="preserve"><value>选取每个通道中较亮的值</value></data>
+<data name="BlendModeScreenName" xml:space="preserve"><value>滤色</value></data>
+<data name="BlendModeScreenDesc" xml:space="preserve"><value>将两种颜色取反相乘后再取反</value></data>
+<data name="BlendModeColorDodgeName" xml:space="preserve"><value>颜色减淡</value></data>
+<data name="BlendModeColorDodgeDesc" xml:space="preserve"><value>通过降低对比度使颜色变亮</value></data>
+<data name="BlendModeLinearDodgeName" xml:space="preserve"><value>线性减淡(添加)</value></data>
+<data name="BlendModeLinearDodgeDesc" xml:space="preserve"><value>将原色与渐变色相加后限制结果</value></data>
+<data name="BlendModeAddGlowName" xml:space="preserve"><value>添加(发光)</value></data>
+<data name="BlendModeAddGlowDesc" xml:space="preserve"><value>将原色与渐变色相加并限制在1以内</value></data>
+<data name="BlendModeOverlayName" xml:space="preserve"><value>叠加</value></data>
+<data name="BlendModeOverlayDesc" xml:space="preserve"><value>对暗部使用正片叠底对亮部使用滤色</value></data>
+<data name="BlendModeSoftLightName" xml:space="preserve"><value>柔光</value></data>
+<data name="BlendModeSoftLightDesc" xml:space="preserve"><value>类似叠加但对比度更柔和</value></data>
+<data name="BlendModeHardLightName" xml:space="preserve"><value>强光</value></data>
+<data name="BlendModeHardLightDesc" xml:space="preserve"><value>以渐变值为基础应用叠加效果</value></data>
+<data name="BlendModeDifferenceName" xml:space="preserve"><value>差值</value></data>
+<data name="BlendModeDifferenceDesc" xml:space="preserve"><value>返回原色与渐变色之间的差值绝对值</value></data>
+<data name="BlendModeVividLightName" xml:space="preserve"><value>亮光</value></data>
+<data name="BlendModeVividLightDesc" xml:space="preserve"><value>根据渐变值应用颜色加深或减淡</value></data>
+<data name="BlendModeLinearLightName" xml:space="preserve"><value>线性光</value></data>
+<data name="BlendModeLinearLightDesc" xml:space="preserve"><value>根据渐变值应用线性加深或减淡</value></data>
+<data name="BlendModePinLightName" xml:space="preserve"><value>点光</value></data>
+<data name="BlendModePinLightDesc" xml:space="preserve"><value>根据渐变值替换高光或阴影</value></data>
+<data name="BlendModeHardMixName" xml:space="preserve"><value>实色混合</value></data>
+<data name="BlendModeHardMixDesc" xml:space="preserve"><value>当各通道之和大于等于1时设为白色否则设为黑色</value></data>
+<data name="BlendModeExclusionName" xml:space="preserve"><value>排除</value></data>
+<data name="BlendModeExclusionDesc" xml:space="preserve"><value>类似差值但对比度较低</value></data>
+<data name="BlendModeDarkerColorName" xml:space="preserve"><value>深色</value></data>
+<data name="BlendModeDarkerColorDesc" xml:space="preserve"><value>选择亮度较低的整体颜色</value></data>
+<data name="BlendModeLighterColorName" xml:space="preserve"><value>浅色</value></data>
+<data name="BlendModeLighterColorDesc" xml:space="preserve"><value>选择亮度较高的整体颜色</value></data>
+<data name="BlendModeDivideName" xml:space="preserve"><value>划分</value></data>
+<data name="BlendModeDivideDesc" xml:space="preserve"><value>将原始颜色除以渐变颜色</value></data>
+<data name="BlendModeSaturationName" xml:space="preserve"><value>饱和度</value></data>
+<data name="BlendModeSaturationDesc" xml:space="preserve"><value>保留原始色调和亮度并应用渐变饱和度</value></data>
+<data name="BlendModeColorName" xml:space="preserve"><value>颜色</value></data>
+<data name="BlendModeColorDesc" xml:space="preserve"><value>保留原始亮度并应用渐变色调和饱和度</value></data>
+<data name="CustomGradientName" xml:space="preserve"><value>渐变</value></data>
+<data name="CustomGradientDesc" xml:space="preserve"><value>定义内联渐变。为空时使用渐变文件。</value></data>
+<data name="DeleteStopName" xml:space="preserve"><value>删除颜色点</value></data>
+<data name="ExportAsGrdName" xml:space="preserve"><value>导出为GRD</value></data>
+<data name="ExportAsPngName" xml:space="preserve"><value>导出为PNG</value></data>
+<data name="ExportGrdFilterName" xml:space="preserve"><value>渐变文件 (*.grd)|*.grd</value></data>
+<data name="ExportPngFilterName" xml:space="preserve"><value>PNG图像 (*.png)|*.png</value></data>
+<data name="NoFileSelected" xml:space="preserve"><value>未选择</value></data>
+</root>

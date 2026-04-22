@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
+<data name="EffectName" xml:space="preserve"><value>グラデーションマップ</value></data>
+<data name="GroupName" xml:space="preserve"><value>グラデーションマップ</value></data>
+<data name="GradientFilePathName" xml:space="preserve"><value>ファイル</value></data>
+<data name="GradientFilePathDesc" xml:space="preserve"><value>グラデーションマップ画像ファイルのパス</value></data>
+<data name="GradientIndexName" xml:space="preserve"><value>選択</value></data>
+<data name="GradientIndexDesc" xml:space="preserve"><value>ファイル内の複数グラデーションからインデックスで選択します</value></data>
+<data name="OpacityName" xml:space="preserve"><value>不透明度</value></data>
+<data name="OpacityDesc" xml:space="preserve"><value>グラデーションマップの適用強度</value></data>
+<data name="BlendModeName" xml:space="preserve"><value>合成モード</value></data>
+<data name="BlendModeDesc" xml:space="preserve"><value>グラデーションマップの合成モード</value></data>
+<data name="IsHorizontalName" xml:space="preserve"><value>水平サンプリング</value></data>
+<data name="IsHorizontalDesc" xml:space="preserve"><value>オンのとき水平方向にグラデーション画像をサンプリングします</value></data>
+<data name="BlendModeNormalName" xml:space="preserve"><value>通常</value></data>
+<data name="BlendModeNormalDesc" xml:space="preserve"><value>グラデーションマップの色をそのまま適用します</value></data>
+<data name="BlendModeLuminosityName" xml:space="preserve"><value>輝度</value></data>
+<data name="BlendModeLuminosityDesc" xml:space="preserve"><value>元の色相と彩度を維持しグラデーションの輝度を適用します</value></data>
+<data name="BlendModeHueName" xml:space="preserve"><value>色相</value></data>
+<data name="BlendModeHueDesc" xml:space="preserve"><value>グラデーションの色相方向に元の輝度を適用します</value></data>
+<data name="GrdFileTooltip" xml:space="preserve"><value>Photoshop対応ファイル</value></data>
+<data name="BlendModeDarkenName" xml:space="preserve"><value>比較(暗)</value></data>
+<data name="BlendModeDarkenDesc" xml:space="preserve"><value>各チャンネルの暗い方の値を選択します</value></data>
+<data name="BlendModeMultiplyName" xml:space="preserve"><value>乗算</value></data>
+<data name="BlendModeMultiplyDesc" xml:space="preserve"><value>元の色とグラデーションの色を乗算します</value></data>
+<data name="BlendModeColorBurnName" xml:space="preserve"><value>焼き込みカラー</value></data>
+<data name="BlendModeColorBurnDesc" xml:space="preserve"><value>グラデーションの値に基づいてコントラストを上げて暗くします</value></data>
+<data name="BlendModeLinearBurnName" xml:space="preserve"><value>焼き込みカラー(リニア)</value></data>
+<data name="BlendModeLinearBurnDesc" xml:space="preserve"><value>元の色とグラデーションの色を加算し1を減算します</value></data>
+<data name="BlendModeSubtractName" xml:space="preserve"><value>減算</value></data>
+<data name="BlendModeSubtractDesc" xml:space="preserve"><value>グラデーションの色を元の色から減算します</value></data>
+<data name="BlendModeLightenName" xml:space="preserve"><value>比較(明)</value></data>
+<data name="BlendModeLightenDesc" xml:space="preserve"><value>各チャンネルの明るい方の値を選択します</value></data>
+<data name="BlendModeScreenName" xml:space="preserve"><value>スクリーン</value></data>
+<data name="BlendModeScreenDesc" xml:space="preserve"><value>元の色とグラデーションを反転して乗算し再反転します</value></data>
+<data name="BlendModeColorDodgeName" xml:space="preserve"><value>覆い焼きカラー</value></data>
+<data name="BlendModeColorDodgeDesc" xml:space="preserve"><value>グラデーションの値に基づいてコントラストを下げて明るくします</value></data>
+<data name="BlendModeLinearDodgeName" xml:space="preserve"><value>覆い焼きカラー(加算)</value></data>
+<data name="BlendModeLinearDodgeDesc" xml:space="preserve"><value>元の色とグラデーションの色を加算してクランプします</value></data>
+<data name="BlendModeAddGlowName" xml:space="preserve"><value>加算(発光)</value></data>
+<data name="BlendModeAddGlowDesc" xml:space="preserve"><value>元の色とグラデーションの色を加算し1でクランプします</value></data>
+<data name="BlendModeOverlayName" xml:space="preserve"><value>オーバーレイ</value></data>
+<data name="BlendModeOverlayDesc" xml:space="preserve"><value>暗い部分に乗算・明るい部分にスクリーンを適用します</value></data>
+<data name="BlendModeSoftLightName" xml:space="preserve"><value>ソフトライト</value></data>
+<data name="BlendModeSoftLightDesc" xml:space="preserve"><value>オーバーレイに似ていますがより柔らかいコントラストです</value></data>
+<data name="BlendModeHardLightName" xml:space="preserve"><value>ハードライト</value></data>
+<data name="BlendModeHardLightDesc" xml:space="preserve"><value>グラデーションを基準にオーバーレイを適用します</value></data>
+<data name="BlendModeDifferenceName" xml:space="preserve"><value>差の絶対値</value></data>
+<data name="BlendModeDifferenceDesc" xml:space="preserve"><value>元の色とグラデーションの差の絶対値を返します</value></data>
+<data name="BlendModeVividLightName" xml:space="preserve"><value>ビビッドライト</value></data>
+<data name="BlendModeVividLightDesc" xml:space="preserve"><value>グラデーションに応じて焼き込みまたは覆い焼きを適用します</value></data>
+<data name="BlendModeLinearLightName" xml:space="preserve"><value>リニアライト</value></data>
+<data name="BlendModeLinearLightDesc" xml:space="preserve"><value>グラデーションに応じてリニア焼き込みまたは覆い焼きを適用します</value></data>
+<data name="BlendModePinLightName" xml:space="preserve"><value>ピンライト</value></data>
+<data name="BlendModePinLightDesc" xml:space="preserve"><value>グラデーションの値に基づいて明暗を置き換えます</value></data>
+<data name="BlendModeHardMixName" xml:space="preserve"><value>ハードミックス</value></data>
+<data name="BlendModeHardMixDesc" xml:space="preserve"><value>各チャンネルの合計が1以上かどうかで白か黒にします</value></data>
+<data name="BlendModeExclusionName" xml:space="preserve"><value>除外</value></data>
+<data name="BlendModeExclusionDesc" xml:space="preserve"><value>差の絶対値に似ていますがコントラストが低くなります</value></data>
+<data name="BlendModeDarkerColorName" xml:space="preserve"><value>カラー比較(暗)</value></data>
+<data name="BlendModeDarkerColorDesc" xml:space="preserve"><value>輝度の低いほうの色全体を選択します</value></data>
+<data name="BlendModeLighterColorName" xml:space="preserve"><value>カラー比較(明)</value></data>
+<data name="BlendModeLighterColorDesc" xml:space="preserve"><value>輝度の高いほうの色全体を選択します</value></data>
+<data name="BlendModeDivideName" xml:space="preserve"><value>除算</value></data>
+<data name="BlendModeDivideDesc" xml:space="preserve"><value>元の色をグラデーションの色で除算します</value></data>
+<data name="BlendModeSaturationName" xml:space="preserve"><value>彩度</value></data>
+<data name="BlendModeSaturationDesc" xml:space="preserve"><value>元の色相と輝度を維持しグラデーションの彩度を適用します</value></data>
+<data name="BlendModeColorName" xml:space="preserve"><value>カラー</value></data>
+<data name="BlendModeColorDesc" xml:space="preserve"><value>元の輝度を維持しグラデーションの色相と彩度を適用します</value></data>
+<data name="CustomGradientName" xml:space="preserve"><value>グラデーション</value></data>
+<data name="CustomGradientDesc" xml:space="preserve"><value>グラデーションをインラインで定義します。空の場合はグラデーションファイルを使用します。</value></data>
+<data name="DeleteStopName" xml:space="preserve"><value>カラーポイントを削除</value></data>
+<data name="ExportAsGrdName" xml:space="preserve"><value>GRDとして書き出す</value></data>
+<data name="ExportAsPngName" xml:space="preserve"><value>PNGとして書き出す</value></data>
+<data name="ExportGrdFilterName" xml:space="preserve"><value>グラデーションファイル (*.grd)|*.grd</value></data>
+<data name="ExportPngFilterName" xml:space="preserve"><value>PNG イメージ (*.png)|*.png</value></data>
+<data name="NoFileSelected" xml:space="preserve"><value>未選択</value></data>
+</root>
