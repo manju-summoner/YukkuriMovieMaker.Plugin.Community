@@ -1,0 +1,76 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+EffectName,,グラデーションマップ,Gradient Map,渐变映射,漸層對應,그라디언트 맵,Mapa de degradado,خريطة التدرج,Peta Gradien
+GroupName,,グラデーションマップ,Gradient Map,渐变映射,漸層對應,그라디언트 맵,Mapa de degradado,خريطة التدرج,Peta Gradien
+GradientFilePathName,,ファイル,File,文件,檔案,파일,Archivo,ملف,File
+GradientFilePathDesc,,グラデーションマップ画像ファイルのパス,Path to the gradient map image file,渐变映射图像文件路径,漸層對應影像檔案路徑,그라디언트 맵 이미지 파일 경로,Ruta al archivo de imagen del mapa de degradado,مسار ملف صورة خريطة التدرج,Jalur file gambar peta gradien
+GradientIndexName,,選択,Selection,选择,選擇,선택,Selección,تحديد,Pilihan
+GradientIndexDesc,,ファイル内の複数グラデーションからインデックスで選択します,Select by index from multiple gradients within the file,从文件中的多个渐变中按索引选择,從檔案內多個漸層中依索引選取,파일 내 여러 그라디언트 중 인덱스로 선택합니다,Selecciona por índice entre múltiples degradados del archivo,تحديد حسب الفهرس من تدرجات متعددة داخل الملف,Pilih berdasarkan indeks dari beberapa gradien dalam file
+OpacityName,,不透明度,Opacity,不透明度,不透明度,불투명도,Opacidad,التعتيم,Opasitas
+OpacityDesc,,グラデーションマップの適用強度,Gradient map application strength,渐变映射应用强度,漸層對應套用強度,그라디언트 맵 적용 강도,Intensidad de aplicación del mapa de degradado,قوة تطبيق خريطة التدرج,Kekuatan penerapan peta gradien
+BlendModeName,,合成モード,Blend Mode,混合模式,混合模式,블렌드 모드,Modo de fusión,وضع المزج,Mode Blend
+BlendModeDesc,,グラデーションマップの合成モード,Gradient map blend mode,渐变映射混合模式,漸層對應混合模式,그라디언트 맵 블렌드 모드,Modo de fusión del mapa de degradado,وضع مزج خريطة التدرج,Mode blend peta gradien
+IsHorizontalName,,水平サンプリング,Horizontal Sampling,水平采样,水平採樣,수평 샘플링,Muestreo horizontal,أخذ العينات الأفقي,Sampling Horizontal
+IsHorizontalDesc,,オンのとき水平方向にグラデーション画像をサンプリングします,When enabled samples the gradient image horizontally,启用时水平采样渐变图像,啟用時水平採樣漸層影像,활성화 시 수평 방향으로 그라디언트 이미지를 샘플링합니다,Cuando está activado muestrea la imagen de degradado horizontalmente,عند التفعيل يأخذ عينات أفقياً من صورة التدرج,Saat diaktifkan mengambil sampel gambar gradien secara horizontal
+BlendModeNormalName,,通常,Normal,正常,正常,보통,Normal,عادي,Normal
+BlendModeNormalDesc,,グラデーションマップの色をそのまま適用します,Applies gradient map colours directly,直接应用渐变映射颜色,直接套用漸層對應顏色,그라디언트 맵 색상을 직접 적용합니다,Aplica los colores del mapa de degradado directamente,يطبق ألوان خريطة التدرج مباشرة,Menerapkan warna peta gradien secara langsung
+BlendModeLuminosityName,,輝度,Luminosity,亮度,亮度,밝기,Luminosidad,السطوع,Luminositas
+BlendModeLuminosityDesc,,元の色相と彩度を維持しグラデーションの輝度を適用します,Applies gradient luminosity while preserving original hue and saturation,保留原始色调和饱和度并应用渐变亮度,保留原始色相和飽和度並套用漸層亮度,원본 색조와 채도를 유지하면서 그라디언트 밝기를 적용합니다,Aplica la luminosidad del degradado manteniendo el tono y la saturación originales,يطبق سطوع التدرج مع الحفاظ على الصبغة والتشبع الأصليين,Menerapkan luminositas gradien sambil mempertahankan hue dan saturasi asli
+BlendModeHueName,,色相,Hue,色调,色相,색조,Tono,الصبغة,Hue
+BlendModeHueDesc,,グラデーションの色相方向に元の輝度を適用します,Applies original luminosity along the gradient hue direction,沿渐变色调方向应用原始亮度,沿漸層色相方向套用原始亮度,그라디언트 색조 방향으로 원본 밝기를 적용합니다,Aplica la luminosidad original en la dirección del tono del degradado,يطبق السطوع الأصلي في اتجاه صبغة التدرج,Menerapkan luminositas asli sepanjang arah hue gradien
+GrdFileTooltip,,Photoshop対応ファイル,Photoshop Compatible File,Photoshop兼容文件,Photoshop相容檔案,Photoshop 호환 파일,Archivo compatible con Photoshop,ملف متوافق مع Photoshop,File Kompatibel Photoshop
+BlendModeDarkenName,,比較(暗),Darken,变暗,變暗,비교(어둡게),Oscurecer,مقارنة (أغمق),Perbandingkan (Gelap)
+BlendModeDarkenDesc,,各チャンネルの暗い方の値を選択します,Selects the darker value of each channel,选取每个通道中较暗的值,取每個色版中較暗的值,각 채널에서 더 어두운 값을 선택합니다,Selecciona el valor más oscuro de cada canal,يختار القيمة الأغمق لكل قناة,Memilih nilai lebih gelap di setiap saluran
+BlendModeMultiplyName,,乗算,Multiply,正片叠底,色彩增值,곱하기,Multiplicar,الضرب,Multiply
+BlendModeMultiplyDesc,,元の色とグラデーションの色を乗算します,Multiplies source colour by gradient colour,将原始颜色与渐变颜色相乘,將原始色彩與漸層色彩相乘,원본 색상과 그라디언트 색상을 곱합니다,Multiplica el color original por el color del degradado,يضرب اللون الأصلي في لون التدرج,Mengalikan warna sumber dengan warna gradien
+BlendModeColorBurnName,,焼き込みカラー,Color Burn,颜色加深,加深颜色,번 (색상),Sobreexponer color,حرق الألوان,Bakar Warna
+BlendModeColorBurnDesc,,グラデーションの値に基づいてコントラストを上げて暗くします,Darkens by increasing contrast based on gradient value,通过增加对比度使颜色变暗,藉由增加對比來加深顏色,그라디언트 값을 기반으로 대비를 높여 어둡게 합니다,Oscurece aumentando el contraste según el valor del degradado,يزيد التباين ليجعل الصورة أكثر قتامة بناءً على قيمة التدرج,Menggelapkan dengan meningkatkan kontras berdasarkan nilai gradien
+BlendModeLinearBurnName,,焼き込みカラー(リニア),Linear Burn,线性加深,线性加深,선형 번,Sobreexponer lineal,حرق خطي,Bakar Linear
+BlendModeLinearBurnDesc,,元の色とグラデーションの色を加算し1を減算します,Adds source and gradient then subtracts 1,将原色与渐变色相加后减1,將原色與漸層色相加後減1,원본과 그라디언트를 더한 후 1을 뺍니다,Suma el color original y el degradado y resta 1,يجمع اللون الأصلي والتدرج ثم يطرح 1,Menjumlahkan sumber dan gradien lalu mengurangi 1
+BlendModeSubtractName,,減算,Subtract,减去,减去,빼기,Restar,الطرح,Subtract
+BlendModeSubtractDesc,,グラデーションの色を元の色から減算します,Subtracts gradient colour from source colour,从原始颜色中减去渐变颜色,從原始色彩中減去漸層色彩,그라디언트 색상을 원본 색상에서 뺍니다,Resta el color del degradado del color original,يطرح لون التدرج من اللون الأصلي,Mengurangi warna gradien dari warna sumber
+BlendModeLightenName,,比較(明),Lighten,变亮,變亮,비교(밝게),Aclarar,مقارنة (أفتح),Perbandingkan (Terang)
+BlendModeLightenDesc,,各チャンネルの明るい方の値を選択します,Selects the lighter value of each channel,选取每个通道中较亮的值,取每個色版中較亮的值,각 채널에서 더 밝은 값을 선택합니다,Selecciona el valor más claro de cada canal,يختار القيمة الأفتح لكل قناة,Memilih nilai lebih terang di setiap saluran
+BlendModeScreenName,,スクリーン,Screen,滤色,網屏,스크린,Trama,الشاشة,Screen
+BlendModeScreenDesc,,元の色とグラデーションを反転して乗算し再反転します,Inverts both colours multiplies then inverts the result,将两种颜色取反相乘后再取反,將兩色取反相乘後再取反,두 색상을 반전하여 곱한 후 다시 반전합니다,Invierte ambos colores los multiplica y luego invierte el resultado,يعكس كلا اللونين يضربهما ثم يعكس النتيجة,Membalik kedua warna mengalikan lalu membalik hasilnya
+BlendModeColorDodgeName,,覆い焼きカラー,Color Dodge,颜色减淡,加亮颜色,닷지 (색상),Sobreexponer color positivo,تفتيح الألوان,Dodge Warna
+BlendModeColorDodgeDesc,,グラデーションの値に基づいてコントラストを下げて明るくします,Brightens by decreasing contrast based on gradient value,通过降低对比度使颜色变亮,藉由降低對比來提亮色彩,그라디언트 값을 기반으로 대비를 낮춰 밝게 합니다,Aclara reduciendo el contraste según el valor del degradado,يقلل التباين ليجعل الصورة أكثر إضاءةً بناءً على قيمة التدرج,Mencerahkan dengan mengurangi kontras berdasarkan nilai gradien
+BlendModeLinearDodgeName,,覆い焼きカラー(加算),Linear Dodge (Add),线性减淡(添加),线性减淡(添加),선형 닷지 (추가),Sobreexponer lineal (añadir),تفتيح خطي (إضافة),Dodge Linear (Tambah)
+BlendModeLinearDodgeDesc,,元の色とグラデーションの色を加算してクランプします,Adds source and gradient colours then clamps the result,将原色与渐变色相加后限制结果,將原色與漸層色相加後限制結果,원본과 그라디언트 색상을 더한 후 클램핑합니다,Suma el color original y el degradado y limita el resultado,يجمع اللونين ثم يضبط النتيجة ضمن النطاق المسموح,Menjumlahkan warna sumber dan gradien lalu membatasi hasilnya
+BlendModeAddGlowName,,加算(発光),Add (Glow),添加(发光),添加(發光),추가 (발광),Añadir (resplandor),إضافة (توهج),Tambah (Cahaya)
+BlendModeAddGlowDesc,,元の色とグラデーションの色を加算し1でクランプします,Adds source and gradient colours clamped to 1,将原色与渐变色相加并限制在1以内,將原色與漸層色相加並限制在1以內,원본과 그라디언트 색상을 더하고 1로 클램핑합니다,Suma el color original y el degradado limitado a 1,يجمع اللونين مع تقييد النتيجة بحد أقصى 1,Menjumlahkan warna sumber dan gradien dibatasi hingga 1
+BlendModeOverlayName,,オーバーレイ,Overlay,叠加,覆蓋,오버레이,Superposición,تراكب,Overlay
+BlendModeOverlayDesc,,暗い部分に乗算・明るい部分にスクリーンを適用します,Applies multiply to darks and screen to lights,对暗部使用正片叠底对亮部使用滤色,對暗部套用乘法對亮部套用網屏,어두운 영역에 곱하기、밝은 영역에 스크린을 적용합니다,Aplica multiplicar en las sombras y trama en las luces,يطبق الضرب على الأجزاء الداكنة والشاشة على الأجزاء الفاتحة,Menerapkan multiply pada area gelap dan screen pada area terang
+BlendModeSoftLightName,,ソフトライト,Soft Light,柔光,柔光,소프트 라이트,Luz suave,ضوء ناعم,Soft Light
+BlendModeSoftLightDesc,,オーバーレイに似ていますがより柔らかいコントラストです,Similar to overlay but with softer contrast,类似叠加但对比度更柔和,類似覆蓋但對比更柔和,오버레이와 유사하지만 더 부드러운 대비입니다,Similar a superposición pero con contraste más suave,مشابه للتراكب لكن بتباين أكثر نعومة,Mirip overlay tetapi dengan kontras yang lebih lembut
+BlendModeHardLightName,,ハードライト,Hard Light,强光,實光,하드 라이트,Luz fuerte,ضوء قوي,Hard Light
+BlendModeHardLightDesc,,グラデーションを基準にオーバーレイを適用します,Applies overlay based on gradient values,以渐变值为基础应用叠加效果,以漸層值為基準套用覆蓋效果,그라디언트 값을 기준으로 오버레이를 적용합니다,Aplica superposición basándose en los valores del degradado,يطبق التراكب بناءً على قيم التدرج,Menerapkan overlay berdasarkan nilai gradien
+BlendModeDifferenceName,,差の絶対値,Difference,差值,差異,차이,Diferencia,الفرق,Difference
+BlendModeDifferenceDesc,,元の色とグラデーションの差の絶対値を返します,Returns the absolute difference between source and gradient,返回原色与渐变色之间的差值绝对值,傳回原色與漸層色之差的絕對值,원본과 그라디언트의 절대 차이를 반환합니다,Devuelve la diferencia absoluta entre el color original y el degradado,يُعيد القيمة المطلقة للفرق بين اللون الأصلي والتدرج,Mengembalikan selisih absolut antara sumber dan gradien
+BlendModeVividLightName,,ビビッドライト,Vivid Light,亮光,鮮豔光源,선명한 라이트,Luz vívida,ضوء نابض,Vivid Light
+BlendModeVividLightDesc,,グラデーションに応じて焼き込みまたは覆い焼きを適用します,Applies color burn or dodge depending on gradient value,根据渐变值应用颜色加深或减淡,根據漸層值套用加深或加亮,그라디언트 값에 따라 번 또는 닷지를 적용합니다,Aplica sobreexponer o subexponer según el valor del degradado,يطبق الحرق أو التفتيح بناءً على قيمة التدرج,Menerapkan burn atau dodge tergantung nilai gradien
+BlendModeLinearLightName,,リニアライト,Linear Light,线性光,線性光源,선형 라이트,Luz lineal,ضوء خطي,Linear Light
+BlendModeLinearLightDesc,,グラデーションに応じてリニア焼き込みまたは覆い焼きを適用します,Applies linear burn or dodge depending on gradient value,根据渐变值应用线性加深或减淡,根據漸層值套用線性加深或加亮,그라디언트 값에 따라 선형 번 또는 닷지를 적용합니다,Aplica sobreexponer o subexponer lineal según el valor del degradado,يطبق الحرق الخطي أو التفتيح الخطي بناءً على قيمة التدرج,Menerapkan linear burn atau dodge tergantung nilai gradien
+BlendModePinLightName,,ピンライト,Pin Light,点光,固定光源,핀 라이트,Luz de pin,ضوء ثابت,Pin Light
+BlendModePinLightDesc,,グラデーションの値に基づいて明暗を置き換えます,Replaces highlights or shadows based on gradient value,根据渐变值替换高光或阴影,根據漸層值替換亮部或暗部,그라디언트 값을 기반으로 밝은 부분 또는 어두운 부분을 교체합니다,Reemplaza luces o sombras según el valor del degradado,يستبدل الإضاءة أو الظلال بناءً على قيمة التدرج,Menggantikan highlight atau shadow berdasarkan nilai gradien
+BlendModeHardMixName,,ハードミックス,Hard Mix,实色混合,實色疊印,하드 믹스,Mezcla fuerte,مزج قوي,Hard Mix
+BlendModeHardMixDesc,,各チャンネルの合計が1以上かどうかで白か黒にします,Sets each channel to white or black based on whether the sum exceeds 1,当各通道之和大于等于1时设为白色否则设为黑色,各色版相加是否大於等於1以決定白或黑,각 채널의 합이 1 이상이면 흰색、아니면 검정으로 설정합니다,Establece cada canal en blanco o negro según si la suma supera 1,يضبط كل قناة على الأبيض أو الأسود بناءً على ما إذا كان المجموع يتجاوز 1,Menetapkan setiap saluran ke putih atau hitam berdasarkan apakah jumlahnya melebihi 1
+BlendModeExclusionName,,除外,Exclusion,排除,排除,제외,Exclusión,استبعاد,Exclusion
+BlendModeExclusionDesc,,差の絶対値に似ていますがコントラストが低くなります,Similar to difference but with lower contrast,类似差值但对比度较低,類似差異但對比度較低,차이와 유사하지만 대비가 낮습니다,Similar a diferencia pero con menos contraste,مشابه للفرق لكن بتباين أقل,Mirip difference tetapi dengan kontras lebih rendah
+BlendModeDarkerColorName,,カラー比較(暗),Darker Color,深色,較深色彩,더 어두운 색상,Color más oscuro,لون أغمق,Warna Lebih Gelap
+BlendModeDarkerColorDesc,,輝度の低いほうの色全体を選択します,Selects whichever full colour has the lower luminance,选择亮度较低的整体颜色,選擇亮度較低的整體色彩,전체 색상 중 밝기가 더 낮은 색상을 선택합니다,Selecciona el color completo con menor luminancia,يختار اللون الذي يملك إضاءة أقل,Memilih warna penuh yang memiliki luminance lebih rendah
+BlendModeLighterColorName,,カラー比較(明),Lighter Color,浅色,較淺色彩,더 밝은 색상,Color más claro,لون أفتح,Warna Lebih Terang
+BlendModeLighterColorDesc,,輝度の高いほうの色全体を選択します,Selects whichever full colour has the higher luminance,选择亮度较高的整体颜色,選擇亮度較高的整體色彩,전체 색상 중 밝기가 더 높은 색상을 선택합니다,Selecciona el color completo con mayor luminancia,يختار اللون الذي يملك إضاءة أعلى,Memilih warna penuh yang memiliki luminance lebih tinggi
+BlendModeDivideName,,除算,Divide,划分,劃分,나누기,Dividir,القسمة,Divide
+BlendModeDivideDesc,,元の色をグラデーションの色で除算します,Divides source colour by gradient colour,将原始颜色除以渐变颜色,將原始色彩除以漸層色彩,원본 색상을 그라디언트 색상으로 나눕니다,Divide el color original por el color del degradado,يقسم اللون الأصلي على لون التدرج,Membagi warna sumber dengan warna gradien
+BlendModeSaturationName,,彩度,Saturation,饱和度,飽和度,채도,Saturación,تشبع,Saturasi
+BlendModeSaturationDesc,,元の色相と輝度を維持しグラデーションの彩度を適用します,Applies gradient saturation while preserving original hue and luminance,保留原始色调和亮度并应用渐变饱和度,保留原始色相和亮度並套用漸層飽和度,원본 색조와 밝기를 유지하면서 그라디언트 채도를 적용합니다,Aplica la saturación del degradado manteniendo el tono y la luminancia originales,يطبق تشبع التدرج مع الحفاظ على الصبغة والإضاءة الأصليتين,Menerapkan saturasi gradien sambil mempertahankan hue dan luminance asli
+BlendModeColorName,,カラー,Color,颜色,色彩,색상,Color,لون,Warna
+BlendModeColorDesc,,元の輝度を維持しグラデーションの色相と彩度を適用します,Applies gradient hue and saturation while preserving original luminance,保留原始亮度并应用渐变色调和饱和度,保留原始亮度並套用漸層色相和飽和度,원본 밝기를 유지하면서 그라디언트 색조와 채도를 적용합니다,Aplica el tono y la saturación del degradado manteniendo la luminancia original,يطبق صبغة التدرج وتشبعه مع الحفاظ على الإضاءة الأصلية,Menerapkan hue dan saturasi gradien sambil mempertahankan luminance asli
+CustomGradientName,,グラデーション,Gradient,渐变,漸層,그라디언트,Degradado,تدرج,Gradien
+CustomGradientDesc,,グラデーションをインラインで定義します。空の場合はグラデーションファイルを使用します。,Defines the gradient inline. When empty the gradient file is used.,定义内联渐变。为空时使用渐变文件。,以內嵌方式定義漸層。為空時使用漸層檔案。,그라디언트를 인라인으로 정의합니다. 비어 있으면 그라디언트 파일을 사용합니다.,Define el degradado de forma integrada. Si está vacío se usa el archivo de degradado.,يعرّف التدرج بشكل مضمّن. عند الفراغ يُستخدم ملف التدرج.,Mendefinisikan gradien secara langsung. Jika kosong file gradien digunakan.
+DeleteStopName,,カラーポイントを削除,Delete Color Stop,删除颜色点,刪除色標,색상 포인트 삭제,Eliminar punto de color,حذف نقطة اللون,Hapus Titik Warna
+ExportAsGrdName,,GRDとして書き出す,Export as GRD,导出为GRD,匯出為GRD,GRD로 내보내기,Exportar como GRD,تصدير بصيغة GRD,Ekspor sebagai GRD
+ExportAsPngName,,PNGとして書き出す,Export as PNG,导出为PNG,匯出為PNG,PNG로 내보내기,Exportar como PNG,تصدير بصيغة PNG,Ekspor sebagai PNG
+ExportGrdFilterName,,グラデーションファイル (*.grd)|*.grd,Gradient Files (*.grd)|*.grd,渐变文件 (*.grd)|*.grd,漸層檔案 (*.grd)|*.grd,그라디언트 파일 (*.grd)|*.grd,Archivos de degradado (*.grd)|*.grd,ملفات التدرج (*.grd)|*.grd,File Gradien (*.grd)|*.grd
+ExportPngFilterName,,PNG イメージ (*.png)|*.png,PNG Image (*.png)|*.png,PNG图像 (*.png)|*.png,PNG 影像 (*.png)|*.png,PNG 이미지 (*.png)|*.png,Imagen PNG (*.png)|*.png,صورة PNG (*.png)|*.png,Gambar PNG (*.png)|*.png
+NoFileSelected,,未選択,Not Selected,未选择,未選擇,선택 안 함,No seleccionado,غير محدد,Tidak Dipilih

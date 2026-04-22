@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
+<data name="EffectName" xml:space="preserve"><value>그라디언트 맵</value></data>
+<data name="GroupName" xml:space="preserve"><value>그라디언트 맵</value></data>
+<data name="GradientFilePathName" xml:space="preserve"><value>파일</value></data>
+<data name="GradientFilePathDesc" xml:space="preserve"><value>그라디언트 맵 이미지 파일 경로</value></data>
+<data name="GradientIndexName" xml:space="preserve"><value>선택</value></data>
+<data name="GradientIndexDesc" xml:space="preserve"><value>파일 내 여러 그라디언트 중 인덱스로 선택합니다</value></data>
+<data name="OpacityName" xml:space="preserve"><value>불투명도</value></data>
+<data name="OpacityDesc" xml:space="preserve"><value>그라디언트 맵 적용 강도</value></data>
+<data name="BlendModeName" xml:space="preserve"><value>블렌드 모드</value></data>
+<data name="BlendModeDesc" xml:space="preserve"><value>그라디언트 맵 블렌드 모드</value></data>
+<data name="IsHorizontalName" xml:space="preserve"><value>수평 샘플링</value></data>
+<data name="IsHorizontalDesc" xml:space="preserve"><value>활성화 시 수평 방향으로 그라디언트 이미지를 샘플링합니다</value></data>
+<data name="BlendModeNormalName" xml:space="preserve"><value>보통</value></data>
+<data name="BlendModeNormalDesc" xml:space="preserve"><value>그라디언트 맵 색상을 직접 적용합니다</value></data>
+<data name="BlendModeLuminosityName" xml:space="preserve"><value>밝기</value></data>
+<data name="BlendModeLuminosityDesc" xml:space="preserve"><value>원본 색조와 채도를 유지하면서 그라디언트 밝기를 적용합니다</value></data>
+<data name="BlendModeHueName" xml:space="preserve"><value>색조</value></data>
+<data name="BlendModeHueDesc" xml:space="preserve"><value>그라디언트 색조 방향으로 원본 밝기를 적용합니다</value></data>
+<data name="GrdFileTooltip" xml:space="preserve"><value>Photoshop 호환 파일</value></data>
+<data name="BlendModeDarkenName" xml:space="preserve"><value>비교(어둡게)</value></data>
+<data name="BlendModeDarkenDesc" xml:space="preserve"><value>각 채널에서 더 어두운 값을 선택합니다</value></data>
+<data name="BlendModeMultiplyName" xml:space="preserve"><value>곱하기</value></data>
+<data name="BlendModeMultiplyDesc" xml:space="preserve"><value>원본 색상과 그라디언트 색상을 곱합니다</value></data>
+<data name="BlendModeColorBurnName" xml:space="preserve"><value>번 (색상)</value></data>
+<data name="BlendModeColorBurnDesc" xml:space="preserve"><value>그라디언트 값을 기반으로 대비를 높여 어둡게 합니다</value></data>
+<data name="BlendModeLinearBurnName" xml:space="preserve"><value>선형 번</value></data>
+<data name="BlendModeLinearBurnDesc" xml:space="preserve"><value>원본과 그라디언트를 더한 후 1을 뺍니다</value></data>
+<data name="BlendModeSubtractName" xml:space="preserve"><value>빼기</value></data>
+<data name="BlendModeSubtractDesc" xml:space="preserve"><value>그라디언트 색상을 원본 색상에서 뺍니다</value></data>
+<data name="BlendModeLightenName" xml:space="preserve"><value>비교(밝게)</value></data>
+<data name="BlendModeLightenDesc" xml:space="preserve"><value>각 채널에서 더 밝은 값을 선택합니다</value></data>
+<data name="BlendModeScreenName" xml:space="preserve"><value>스크린</value></data>
+<data name="BlendModeScreenDesc" xml:space="preserve"><value>두 색상을 반전하여 곱한 후 다시 반전합니다</value></data>
+<data name="BlendModeColorDodgeName" xml:space="preserve"><value>닷지 (색상)</value></data>
+<data name="BlendModeColorDodgeDesc" xml:space="preserve"><value>그라디언트 값을 기반으로 대비를 낮춰 밝게 합니다</value></data>
+<data name="BlendModeLinearDodgeName" xml:space="preserve"><value>선형 닷지 (추가)</value></data>
+<data name="BlendModeLinearDodgeDesc" xml:space="preserve"><value>원본과 그라디언트 색상을 더한 후 클램핑합니다</value></data>
+<data name="BlendModeAddGlowName" xml:space="preserve"><value>추가 (발광)</value></data>
+<data name="BlendModeAddGlowDesc" xml:space="preserve"><value>원본과 그라디언트 색상을 더하고 1로 클램핑합니다</value></data>
+<data name="BlendModeOverlayName" xml:space="preserve"><value>오버레이</value></data>
+<data name="BlendModeOverlayDesc" xml:space="preserve"><value>어두운 영역에 곱하기、밝은 영역에 스크린을 적용합니다</value></data>
+<data name="BlendModeSoftLightName" xml:space="preserve"><value>소프트 라이트</value></data>
+<data name="BlendModeSoftLightDesc" xml:space="preserve"><value>오버레이와 유사하지만 더 부드러운 대비입니다</value></data>
+<data name="BlendModeHardLightName" xml:space="preserve"><value>하드 라이트</value></data>
+<data name="BlendModeHardLightDesc" xml:space="preserve"><value>그라디언트 값을 기준으로 오버레이를 적용합니다</value></data>
+<data name="BlendModeDifferenceName" xml:space="preserve"><value>차이</value></data>
+<data name="BlendModeDifferenceDesc" xml:space="preserve"><value>원본과 그라디언트의 절대 차이를 반환합니다</value></data>
+<data name="BlendModeVividLightName" xml:space="preserve"><value>선명한 라이트</value></data>
+<data name="BlendModeVividLightDesc" xml:space="preserve"><value>그라디언트 값에 따라 번 또는 닷지를 적용합니다</value></data>
+<data name="BlendModeLinearLightName" xml:space="preserve"><value>선형 라이트</value></data>
+<data name="BlendModeLinearLightDesc" xml:space="preserve"><value>그라디언트 값에 따라 선형 번 또는 닷지를 적용합니다</value></data>
+<data name="BlendModePinLightName" xml:space="preserve"><value>핀 라이트</value></data>
+<data name="BlendModePinLightDesc" xml:space="preserve"><value>그라디언트 값을 기반으로 밝은 부분 또는 어두운 부분을 교체합니다</value></data>
+<data name="BlendModeHardMixName" xml:space="preserve"><value>하드 믹스</value></data>
+<data name="BlendModeHardMixDesc" xml:space="preserve"><value>각 채널의 합이 1 이상이면 흰색、아니면 검정으로 설정합니다</value></data>
+<data name="BlendModeExclusionName" xml:space="preserve"><value>제외</value></data>
+<data name="BlendModeExclusionDesc" xml:space="preserve"><value>차이와 유사하지만 대비가 낮습니다</value></data>
+<data name="BlendModeDarkerColorName" xml:space="preserve"><value>더 어두운 색상</value></data>
+<data name="BlendModeDarkerColorDesc" xml:space="preserve"><value>전체 색상 중 밝기가 더 낮은 색상을 선택합니다</value></data>
+<data name="BlendModeLighterColorName" xml:space="preserve"><value>더 밝은 색상</value></data>
+<data name="BlendModeLighterColorDesc" xml:space="preserve"><value>전체 색상 중 밝기가 더 높은 색상을 선택합니다</value></data>
+<data name="BlendModeDivideName" xml:space="preserve"><value>나누기</value></data>
+<data name="BlendModeDivideDesc" xml:space="preserve"><value>원본 색상을 그라디언트 색상으로 나눕니다</value></data>
+<data name="BlendModeSaturationName" xml:space="preserve"><value>채도</value></data>
+<data name="BlendModeSaturationDesc" xml:space="preserve"><value>원본 색조와 밝기를 유지하면서 그라디언트 채도를 적용합니다</value></data>
+<data name="BlendModeColorName" xml:space="preserve"><value>색상</value></data>
+<data name="BlendModeColorDesc" xml:space="preserve"><value>원본 밝기를 유지하면서 그라디언트 색조와 채도를 적용합니다</value></data>
+<data name="CustomGradientName" xml:space="preserve"><value>그라디언트</value></data>
+<data name="CustomGradientDesc" xml:space="preserve"><value>그라디언트를 인라인으로 정의합니다. 비어 있으면 그라디언트 파일을 사용합니다.</value></data>
+<data name="DeleteStopName" xml:space="preserve"><value>색상 포인트 삭제</value></data>
+<data name="ExportAsGrdName" xml:space="preserve"><value>GRD로 내보내기</value></data>
+<data name="ExportAsPngName" xml:space="preserve"><value>PNG로 내보내기</value></data>
+<data name="ExportGrdFilterName" xml:space="preserve"><value>그라디언트 파일 (*.grd)|*.grd</value></data>
+<data name="ExportPngFilterName" xml:space="preserve"><value>PNG 이미지 (*.png)|*.png</value></data>
+<data name="NoFileSelected" xml:space="preserve"><value>선택 안 함</value></data>
+</root>

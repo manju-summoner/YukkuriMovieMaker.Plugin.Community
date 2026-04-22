@@ -1,0 +1,156 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Views.CustomFileSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Views"
+             xmlns:conv="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Converters"
+             xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Localization"
+             Name="root">
+    <UserControl.Resources>
+        <conv:BoolToStarConverter x:Key="BoolToStar"/>
+        <conv:BoolToStarBrushConverter x:Key="BoolToStarBrush"/>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:NullToVisibilityConverter x:Key="NullToVis"/>
+
+        <DataTemplate x:Key="SelectedTemplate">
+            <TextBlock VerticalAlignment="Center"
+                       TextTrimming="CharacterEllipsis"
+                       Margin="2,0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="{Binding FileName}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsNone}" Value="True">
+                                <Setter Property="Text" Value="{x:Static loc:Texts.NoFileSelected}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </DataTemplate>
+
+        <DataTemplate x:Key="NoneEntryTemplate">
+            <Grid Height="52">
+                <TextBlock Text="{x:Static loc:Texts.NoFileSelected}"
+                           VerticalAlignment="Center"
+                           Margin="8,0"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DropdownTemplate">
+            <Grid Height="52">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="28"/>
+                    <ColumnDefinition Width="96"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Content="{Binding IsFavorite, Converter={StaticResource BoolToStar}}"
+                        Foreground="{Binding IsFavorite, Converter={StaticResource BoolToStarBrush}}"
+                        Command="{Binding DataContext.ToggleFavoriteCommand, ElementName=root}"
+                        CommandParameter="{Binding}"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        FontSize="18"
+                        Padding="2,0"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Cursor="Hand"
+                        Focusable="False"/>
+
+                <Border Grid.Column="1"
+                        Width="90" Height="40"
+                        Margin="2,0"
+                        BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                        BorderThickness="1"
+                        Visibility="{Binding Thumbnail, Converter={StaticResource NullToVis}}"
+                        VerticalAlignment="Center">
+                    <Image Source="{Binding Thumbnail}"
+                           Stretch="UniformToFill"
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                </Border>
+
+                <TextBlock Grid.Column="2"
+                           Text="{Binding FileName}"
+                           VerticalAlignment="Center"
+                           Margin="4,0"
+                           TextWrapping="Wrap"
+                           TextTrimming="None"/>
+
+                <Border Grid.Column="3"
+                        Visibility="{Binding IsGrd, Converter={StaticResource BoolToVis}}"
+                        Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"
+                        Padding="4,1"
+                        Margin="2,0,4,0"
+                        VerticalAlignment="Center"
+                        ToolTip="{Binding Tag, ElementName=root}">
+                    <TextBlock Text="GRD"
+                               Foreground="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"
+                               FontSize="9"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
+        </DataTemplate>
+
+        <conv:FileEntryTemplateSelector x:Key="TemplateSelector"
+                                         SelectedTemplate="{StaticResource SelectedTemplate}"
+                                         DropdownTemplate="{StaticResource DropdownTemplate}"
+                                         NoneEntryTemplate="{StaticResource NoneEntryTemplate}"/>
+    </UserControl.Resources>
+
+    <Grid Height="26">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="26"/>
+        </Grid.ColumnDefinitions>
+
+        <ComboBox Grid.Column="0"
+                  x:Name="FileComboBox"
+                  ItemsSource="{Binding Files}"
+                  SelectedItem="{Binding SelectedFile, Mode=TwoWay}"
+                  ItemTemplateSelector="{StaticResource TemplateSelector}"
+                  VerticalContentAlignment="Center"
+                  MaxDropDownHeight="320">
+            <ComboBox.Style>
+                <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+                    <Style.Triggers>
+                        <Trigger Property="IsDropDownOpen" Value="True">
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ComboBox.Style>
+            <ComboBox.ItemContainerStyle>
+                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsNone}" Value="True"/>
+                                <Condition Binding="{Binding DataContext.HasFavorites, ElementName=root}" Value="True"/>
+                            </MultiDataTrigger.Conditions>
+                            <MultiDataTrigger.Setters>
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </MultiDataTrigger.Setters>
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ComboBox.ItemContainerStyle>
+        </ComboBox>
+
+        <Button Grid.Column="1"
+                Command="{Binding BrowseCommand}"
+                Padding="4,0">
+            <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"/>
+            </Button.Style>
+            <Path Data="M6.1,10L4,18V8H21A2,2 0 0,0 19,6H12L10,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H19C19.9,20 20.7,19.4 20.9,18.5L23.2,10H6.1M19,18H6L7.6,12H20.6L19,18Z"
+                  Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                  Width="14" Height="14"
+                  Stretch="Uniform"/>
+        </Button>
+    </Grid>
+</UserControl>
