@@ -5,7 +5,7 @@ LoadingWhisperModelMessage,,Whisperモデルを読み込み中,Loading Whisper m
 ProcessingAudioMessage,0: current 1:total 2:last text,音声を解析中 {0} / {1} {2},Processing audio {0} / {1} {2},音频解析中 {0} / {1} {2},正在解析音频 {0} / {1} {2},오디오 처리 중 {0} / {1} {2},Procesando audio {0} / {1} {2},معالجة الصوت {0} / {1} {2},Memproses audio {0} / {1} {2},
 Model,,モデル,Model,模型,模型,모델,Modelo,النموذج,Model,
 Language,,言語,Language,语言,语言,언어,Idioma,اللغة,Bahasa,
-RuntimeNotInstalledTitle,,"{0} が必要です","{0} Required","需要{0}","需要 {0}","{0}가 필요합니다","Se requiere {0}","مطلوب ‎{0}‎","{0} diperlukan",
+RuntimeNotInstalledTitle,0: runtimeName,"{0} が必要です","{0} Required","需要{0}","需要 {0}","{0}가 필요합니다","Se requiere {0}","مطلوب ‎{0}‎","{0} diperlukan",
 RuntimeNotInstalledMessage,0: runtimeName,"必要なランタイムがインストールされていません。
 この機能を利用するためには「{0}」をインストールする必要があります。
 
