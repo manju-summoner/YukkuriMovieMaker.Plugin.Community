@@ -60,11 +60,11 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="XName" xml:space="preserve"><value>X</value></data>
-<data name="XDesc" xml:space="preserve"><value>Sumur Cahaya X</value></data>
+<data name="XDesc" xml:space="preserve"><value>Sumber Cahaya X</value></data>
 <data name="YName" xml:space="preserve"><value>Y</value></data>
-<data name="YDesc" xml:space="preserve"><value>Sumur Cahaya Y</value></data>
+<data name="YDesc" xml:space="preserve"><value>Sumber Cahaya Y</value></data>
 <data name="ZName" xml:space="preserve"><value>Z</value></data>
-<data name="ZDesc" xml:space="preserve"><value>Sumur Cahaya Z</value></data>
+<data name="ZDesc" xml:space="preserve"><value>Sumber Cahaya Z</value></data>
 <data name="ConstantName" xml:space="preserve"><value>Intensitas</value></data>
 <data name="ConstantDesc" xml:space="preserve"><value>Intensitas Cahaya</value></data>
 <data name="ExponentName" xml:space="preserve"><value>Reduksi</value></data>
@@ -99,6 +99,6 @@
 <data name="InvertedRoundBevel" xml:space="preserve"><value>Putaran Terbalik</value></data>
 <data name="StepBevel" xml:space="preserve"><value>Langkah</value></data>
 <data name="StringBevel" xml:space="preserve"><value>Putaran</value></data>
-<data name="HeadCollerBevel" xml:space="preserve"><value>Head Coller</value></data>
+<data name="HeadCollerBevel" xml:space="preserve"><value>Batas Bersudut</value></data>
 <data name="BevelMode" xml:space="preserve"><value>Mode Bevel</value></data>
 </root>

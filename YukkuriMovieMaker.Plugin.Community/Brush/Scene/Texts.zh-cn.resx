@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
-<data name="Scene" xml:space="preserve"><value>次合成</value></data>
+<data name="Scene" xml:space="preserve"><value>场景</value></data>
 <data name="PlaybackRate" xml:space="preserve"><value>播放速度</value></data>
 <data name="ContentOffset" xml:space="preserve"><value>播放起始位置</value></data>
 <data name="ExtendModeX" xml:space="preserve"><value>重复X</value></data>

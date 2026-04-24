@@ -60,7 +60,7 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
 <data name="LensBlur" xml:space="preserve"><value>تعتيم العدسة</value></data>
-<data name="BlurRadius" xml:space="preserve"><value>نصف قطر العدسة</value></data>
+<data name="BlurRadius" xml:space="preserve"><value>نصف قطر التمويه</value></data>
 <data name="Brightness" xml:space="preserve"><value>سطوع</value></data>
 <data name="Quality" xml:space="preserve"><value>جودة</value></data>
 <data name="QualityDesc" xml:space="preserve"><value>كلما زاد الرقم، زادت الجودة.</value></data>

@@ -62,8 +62,8 @@
 <data name="EdgeDetectionEffectName" xml:space="preserve"><value>Extracción de bordes</value></data>
 <data name="EdgeDetectionEffectStrengthName" xml:space="preserve"><value>Fuerza</value></data>
 <data name="EdgeDetectionEffectStrengthDesc" xml:space="preserve"><value>Fuerza</value></data>
-<data name="EdgeDetectionEffectBlurRadiusName" xml:space="preserve"><value>Desenfoque de radio</value></data>
-<data name="EdgeDetectionEffectBlurRadiusDesc" xml:space="preserve"><value>Desenfoque de radio</value></data>
+<data name="EdgeDetectionEffectBlurRadiusName" xml:space="preserve"><value>Radio de desenfoque</value></data>
+<data name="EdgeDetectionEffectBlurRadiusDesc" xml:space="preserve"><value>Radio de desenfoque</value></data>
 <data name="EdgeDetectionEffectModeName" xml:space="preserve"><value>Modo</value></data>
 <data name="EdgeDetectionEffectModeDesc" xml:space="preserve"><value>Modo</value></data>
 <data name="EdgeDetectionEffectIsOverlayEdgesName" xml:space="preserve"><value>Superposición de bordes</value></data>

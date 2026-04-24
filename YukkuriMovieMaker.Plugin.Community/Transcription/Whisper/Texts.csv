@@ -31,7 +31,7 @@ Para utilizar esta función debes instalar “{0}”.
 Untuk menggunakan fitur ini, Anda harus memasang {0}.
 
 Apakah Anda ingin mengunduh dan menjalankan pemasang sekarang？",
-RuntimeNotInstalledErrorMessage,0: runtimeName,"「{0}」がインストールされていません。","“{0}” is not installed.","未安装 “{0}”。","尚未安裝「{0}」。","'{0}'가 설치되어 있지 않습니다.","No está instalado “{0}”.","لم يتم تثبيت «{0}».",“”{0}” belum terpasang.”,
+RuntimeNotInstalledErrorMessage,0: runtimeName,"「{0}」がインストールされていません。","“{0}” is not installed.","未安装 “{0}”。","尚未安裝「{0}」。","'{0}'가 설치되어 있지 않습니다.","No está instalado “{0}”.","لم يتم تثبيت «{0}».","“{0}” belum terpasang.",
 InstallerNotFoundMessage,0: filePath,"インストーラーが見つかりません: {0}","Installer not found: {0}","找不到安装程序: {0}","找不到安裝程式: {0}","설치 프로그램을 찾을 수 없습니다: {0}","Instalador no encontrado: {0}","لم يتم العثور على المثبّت: {0}","Instalasi tidak ditemukan: {0}",
 InstallerStartFailedMessage,,インストーラーの起動に失敗しました。,"Failed to start the installer.","安装程序启动失败。","啟動安裝程式失敗。","설치 프로그램 실행에 실패했습니다.","No se pudo iniciar el instalador.","فشل بدء تشغيل المثبّت.","Gagal menjalankan installer.",
 InstallerExitFailureMessage,0: exitCode,"インストールに失敗しました。ExitCode = {0}","Installation failed. ExitCode = {0}","安装失败。退出代码 = {0}","安裝失敗。結束代碼 = {0}","설치에 실패했습니다. 종료 코드 = {0}","La instalación falló. ExitCode = {0}","فشلت عملية التثبيت. رمز الخروج = {0}","Instalasi gagal. ExitCode = {0}",

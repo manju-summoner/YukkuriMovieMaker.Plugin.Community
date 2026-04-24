@@ -75,7 +75,7 @@
 <data name="ExportAsIsf" xml:space="preserve"><value>Ekspor sebagai .isf</value></data>
 <data name="PenToolWindowTitle" xml:space="preserve"><value>Alat pena</value></data>
 <data name="Close" xml:space="preserve"><value>Tutup</value></data>
-<data name="Thickness" xml:space="preserve"><value>Kepekatan</value></data>
+<data name="Thickness" xml:space="preserve"><value>Ketebalan</value></data>
 <data name="Offset" xml:space="preserve"><value>Pergeseran</value></data>
 <data name="Length" xml:space="preserve"><value>Panjang</value></data>
 <data name="Pressure" xml:space="preserve"><value>Tekanan</value></data>

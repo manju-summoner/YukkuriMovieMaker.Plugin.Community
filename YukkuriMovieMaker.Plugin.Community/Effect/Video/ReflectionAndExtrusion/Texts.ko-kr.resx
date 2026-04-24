@@ -98,7 +98,7 @@
 <data name="RoundBevel" xml:space="preserve"><value>둥근</value></data>
 <data name="InvertedRoundBevel" xml:space="preserve"><value>역 둥근</value></data>
 <data name="StepBevel" xml:space="preserve"><value>단계</value></data>
-<data name="StringBevel" xml:space="preserve"><value>스트링</value></data>
-<data name="HeadCollerBevel" xml:space="preserve"><value>헤드 콜러</value></data>
+<data name="StringBevel" xml:space="preserve"><value>둥근 테두리</value></data>
+<data name="HeadCollerBevel" xml:space="preserve"><value>각진 테두리</value></data>
 <data name="BevelMode" xml:space="preserve"><value>면 모드</value></data>
 </root>

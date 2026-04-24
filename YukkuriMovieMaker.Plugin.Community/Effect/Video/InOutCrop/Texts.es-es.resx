@@ -60,7 +60,7 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
 <data name="InOutCropEffectName" xml:space="preserve"><value>Entrar y salir mientras se libera el recorte</value></data>
-<data name="InOutCropEffectGroupName" xml:space="preserve"><value>Salida de la comparecencia</value></data>
+<data name="InOutCropEffectGroupName" xml:space="preserve"><value>Aparición y salida</value></data>
 <data name="InOutCropEffectInCropDirectionName" xml:space="preserve"><value>En el momento de la aparición</value></data>
 <data name="InOutCropEffectInCropDirectionDesc" xml:space="preserve"><value>Dirección de recorte</value></data>
 <data name="InOutCropEffectOutCropDirectionName" xml:space="preserve"><value>Al salir</value></data>

@@ -60,7 +60,7 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
 <data name="LensBlur" xml:space="preserve"><value>Desenfoque de lente</value></data>
-<data name="BlurRadius" xml:space="preserve"><value>Desenfoque de radio</value></data>
+<data name="BlurRadius" xml:space="preserve"><value>Radio de desenfoque</value></data>
 <data name="Brightness" xml:space="preserve"><value>Brillo</value></data>
 <data name="Quality" xml:space="preserve"><value>Calidad</value></data>
 <data name="QualityDesc" xml:space="preserve"><value>Cuanto mayor sea el número, mayor será la calidad.</value></data>

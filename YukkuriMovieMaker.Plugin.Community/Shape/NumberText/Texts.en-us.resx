@@ -74,7 +74,7 @@
 <data name="Italic" xml:space="preserve"><value>Italic</value></data>
 <data name="BasePointRightBottom" xml:space="preserve"><value>Align right [bottom]</value></data>
 <data name="BasePointRightTop" xml:space="preserve"><value>Align right [top]</value></data>
-<data name="BasePointRightCenter" xml:space="preserve"><value>Align right [medium]</value></data>
+<data name="BasePointRightCenter" xml:space="preserve"><value>Align right [middle]</value></data>
 <data name="BasePointLeftBottom" xml:space="preserve"><value>Align left [bottom]</value></data>
 <data name="BasePointLeftTop" xml:space="preserve"><value>Align left [top]</value></data>
 <data name="BasePointLeftCenter" xml:space="preserve"><value>Align left [middle]</value></data>

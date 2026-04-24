@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
-<data name="InOutCropEffectName" xml:space="preserve"><value>釋放夾子時進入和退出</value></data>
+<data name="InOutCropEffectName" xml:space="preserve"><value>解除剪裁時進入和退出</value></data>
 <data name="InOutCropEffectGroupName" xml:space="preserve"><value>登場退場</value></data>
 <data name="InOutCropEffectInCropDirectionName" xml:space="preserve"><value>登場時</value></data>
 <data name="InOutCropEffectInCropDirectionDesc" xml:space="preserve"><value>剪裁方向</value></data>

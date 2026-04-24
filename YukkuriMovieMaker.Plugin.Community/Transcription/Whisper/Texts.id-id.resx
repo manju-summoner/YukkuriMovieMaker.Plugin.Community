@@ -70,7 +70,7 @@
 Untuk menggunakan fitur ini, Anda harus memasang {0}.
 
 Apakah Anda ingin mengunduh dan menjalankan pemasang sekarang？</value></data>
-<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>“”{0}” belum terpasang.”</value></data>
+<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>“{0}” belum terpasang.</value></data>
 <data name="InstallerNotFoundMessage" xml:space="preserve"><value>Instalasi tidak ditemukan: {0}</value></data>
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>Gagal menjalankan installer.</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>Instalasi gagal. ExitCode = {0}</value></data>

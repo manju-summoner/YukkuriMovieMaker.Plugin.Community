@@ -64,7 +64,7 @@
 <data name="ColorCorrectionEffectBrightnessDesc" xml:space="preserve"><value>밝기</value></data>
 <data name="ColorCorrectionEffectSaturationName" xml:space="preserve"><value>채도</value></data>
 <data name="ColorCorrectionEffectSaturationDesc" xml:space="preserve"><value>색의 선명도</value></data>
-<data name="ColorCorrectionEffectHueRotationName" xml:space="preserve"><value>Hue색상</value></data>
+<data name="ColorCorrectionEffectHueRotationName" xml:space="preserve"><value>색상</value></data>
 <data name="ColorCorrectionEffectHueRotationDesc" xml:space="preserve"><value>Hue 조정</value></data>
 <data name="ColorCorrectionEffectName" xml:space="preserve"><value>색조 보정</value></data>
 <data name="ColorCorrectionGroupName" xml:space="preserve"><value>색조 보정</value></data>

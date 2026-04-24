@@ -66,6 +66,6 @@
 <data name="EdgeDetectionEffectBlurRadiusDesc" xml:space="preserve"><value>Radius Buram</value></data>
 <data name="EdgeDetectionEffectModeName" xml:space="preserve"><value>Mode</value></data>
 <data name="EdgeDetectionEffectModeDesc" xml:space="preserve"><value>Mode Deteksi Tepi</value></data>
-<data name="EdgeDetectionEffectIsOverlayEdgesName" xml:space="preserve"><value>Tepi Gunakan Overlay</value></data>
+<data name="EdgeDetectionEffectIsOverlayEdgesName" xml:space="preserve"><value>Overlay Tepi</value></data>
 <data name="EdgeDetectionEffectIsOverlayEdgesDesc" xml:space="preserve"><value>Tepi Overlay</value></data>
 </root>

@@ -99,6 +99,6 @@
 <data name="InvertedRoundBevel" xml:space="preserve"><value>مستدير مقلوب</value></data>
 <data name="StepBevel" xml:space="preserve"><value>خطوة</value></data>
 <data name="StringBevel" xml:space="preserve"><value>مستدير</value></data>
-<data name="HeadCollerBevel" xml:space="preserve"><value>حافة الرأس</value></data>
+<data name="HeadCollerBevel" xml:space="preserve"><value>حافة زاوية</value></data>
 <data name="BevelMode" xml:space="preserve"><value>وضع المائل</value></data>
 </root>

@@ -98,7 +98,7 @@
 <data name="RoundBevel" xml:space="preserve"><value>Round</value></data>
 <data name="InvertedRoundBevel" xml:space="preserve"><value>Inverted Round</value></data>
 <data name="StepBevel" xml:space="preserve"><value>Step</value></data>
-<data name="StringBevel" xml:space="preserve"><value>String</value></data>
-<data name="HeadCollerBevel" xml:space="preserve"><value>Head Coller</value></data>
+<data name="StringBevel" xml:space="preserve"><value>Round Border</value></data>
+<data name="HeadCollerBevel" xml:space="preserve"><value>Angular Border</value></data>
 <data name="BevelMode" xml:space="preserve"><value>Bevel Mode</value></data>
 </root>

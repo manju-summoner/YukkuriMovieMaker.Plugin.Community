@@ -60,7 +60,7 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
 <data name="Safety" xml:space="preserve"><value>안전</value></data>
-<data name="Harassment" xml:space="preserve"><value>폭행</value></data>
+<data name="Harassment" xml:space="preserve"><value>괴롭힘</value></data>
 <data name="HateSpeech" xml:space="preserve"><value>혐오 발언</value></data>
 <data name="SexuallyExplicit" xml:space="preserve"><value>성적 표현</value></data>
 <data name="DangerousContent" xml:space="preserve"><value>위험한 콘텐츠</value></data>
