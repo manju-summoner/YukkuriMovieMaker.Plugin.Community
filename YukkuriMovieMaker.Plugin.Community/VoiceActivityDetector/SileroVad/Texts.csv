@@ -10,4 +10,4 @@ MinSilenceDurationMsDesc,,この時間以上無音が続いた場合に発話終
 SpeechPadMs,,発話区間拡張,Speech Padding,语音区间扩展,發話區間擴展,음성 구간 확장,Espaciado de habla,توسيع الكلام,Jeda Bicara,
 SpeechPadMsDesc,,この時間だけ発話区間を前後に拡張します。,Extends the speech interval back and forth by this time.,仅延长此时间段前后的语音区间。,將發言區間前後擴展此時間。,이 시간만큼 음성 구간을 앞뒤로 확장합니다.,Extiende el intervalo de habla hacia adelante y hacia atrás por este tiempo.,يمدد فترة الكلام ذهابًا وإيابًا بهذا الوقت.,Memperluas interval bicara bolak-balik selama waktu ini.,
 SecUnit,,秒,s,秒,秒,초,Seg,ثانية,Detik,
-MilliSecUnit,,㍉秒,ms,毫秒,ms,초,1 milisegundo,مللي ثانية,milidetik
+MilliSecUnit,,㍉秒,ms,毫秒,毫秒,밀리초,ms,مللي ثانية,milidetik,

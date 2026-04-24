@@ -70,5 +70,5 @@
 <data name="SpeechPadMs" xml:space="preserve"><value>Espaciado de habla</value></data>
 <data name="SpeechPadMsDesc" xml:space="preserve"><value>Extiende el intervalo de habla hacia adelante y hacia atrás por este tiempo.</value></data>
 <data name="SecUnit" xml:space="preserve"><value>Seg</value></data>
-<data name="MilliSecUnit" xml:space="preserve"><value>1 milisegundo</value></data>
+<data name="MilliSecUnit" xml:space="preserve"><value>ms</value></data>
 </root>
