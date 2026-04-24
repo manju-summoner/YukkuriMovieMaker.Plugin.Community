@@ -61,7 +61,7 @@
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="OutputCompositeEffectName" xml:space="preserve"><value>Gabungkan Output</value></data>
 <data name="OutputCompositeTargetIndexName" xml:space="preserve"><value>Indeks target</value></data>
-<data name="OutputCompositeTargetIndexDesc" xml:space="preserve"><value>Tentukan indeks output yang akan digabungkan. Jika sama dengan indeks output saat ini</value></data>
+<data name="OutputCompositeTargetIndexDesc" xml:space="preserve"><value>Tentukan indeks output yang akan digabungkan. Jika sama dengan indeks output saat ini, input saat ini diduplikasi</value></data>
 <data name="OutputCompositeBlendModeName" xml:space="preserve"><value>Mode campuran</value></data>
 <data name="OutputCompositeBlendModeDesc" xml:space="preserve"><value>Tentukan metode penggabungan</value></data>
 </root>
