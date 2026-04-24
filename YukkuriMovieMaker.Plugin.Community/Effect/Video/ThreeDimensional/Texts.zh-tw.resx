@@ -59,29 +59,29 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
-<data name="ThreeDimensionalEffectName" xml:space="preserve"><value>Three dimensional</value></data>
-<data name="ThreeDimensionalEffectXName" xml:space="preserve"><value>Vanishing x</value></data>
-<data name="ThreeDimensionalEffectXDesc" xml:space="preserve"><value>Vanishing x</value></data>
-<data name="ThreeDimensionalEffectYName" xml:space="preserve"><value>Vanishing y</value></data>
-<data name="ThreeDimensionalEffectYDesc" xml:space="preserve"><value>Vanishing y</value></data>
-<data name="ThreeDimensionalEffectLengthName" xml:space="preserve"><value>Length</value></data>
-<data name="ThreeDimensionalEffectLengthDesc" xml:space="preserve"><value>Length</value></data>
-<data name="ThreeDimensionalEffectOpacityName" xml:space="preserve"><value>Opacity</value></data>
-<data name="ThreeDimensionalEffectOpacityDesc" xml:space="preserve"><value>Opacity</value></data>
-<data name="ThreeDimensionalEffectAttenuationName" xml:space="preserve"><value>Attenuation</value></data>
-<data name="ThreeDimensionalEffectAttenuationDesc" xml:space="preserve"><value>Attenuation</value></data>
-<data name="ThreeDimensionalEffectColor1Name" xml:space="preserve"><value>Color 1</value></data>
-<data name="ThreeDimensionalEffectColor1Desc" xml:space="preserve"><value>Color 1</value></data>
-<data name="ThreeDimensionalEffectColor2Name" xml:space="preserve"><value>Color 2</value></data>
-<data name="ThreeDimensionalEffectColor2Desc" xml:space="preserve"><value>Color 2</value></data>
-<data name="ThreeDimensionalEffectShadowTypeName" xml:space="preserve"><value>Shadow type</value></data>
-<data name="ThreeDimensionalEffectShadowTypeDesc" xml:space="preserve"><value>Shadow type</value></data>
-<data name="ThreeDimensionalTypeImageName" xml:space="preserve"><value>Image</value></data>
-<data name="ThreeDimensionalTypeSolidName" xml:space="preserve"><value>Solid color</value></data>
-<data name="ThreeDimensionalTypeGradientName" xml:space="preserve"><value>Gradient color</value></data>
-<data name="ThreeDimensionalTypeImageDesc" xml:space="preserve"><value>Image</value></data>
-<data name="ThreeDimensionalTypeSolidDesc" xml:space="preserve"><value>Solid color</value></data>
-<data name="ThreeDimensionalTypeGradientDesc" xml:space="preserve"><value>Gradient color</value></data>
-<data name="ThreeDimensionalEffectIsAbsolutePointName" xml:space="preserve"><value>Absolute coordinate</value></data>
-<data name="ThreeDimensionalEffectIsAbsolutePointDesc" xml:space="preserve"><value>Absolute coordinate</value></data>
+<data name="ThreeDimensionalEffectName" xml:space="preserve"><value>立體化</value></data>
+<data name="ThreeDimensionalEffectXName" xml:space="preserve"><value>消失點X</value></data>
+<data name="ThreeDimensionalEffectXDesc" xml:space="preserve"><value>消失點X</value></data>
+<data name="ThreeDimensionalEffectYName" xml:space="preserve"><value>消失點Y</value></data>
+<data name="ThreeDimensionalEffectYDesc" xml:space="preserve"><value>消失點Y</value></data>
+<data name="ThreeDimensionalEffectLengthName" xml:space="preserve"><value>長度</value></data>
+<data name="ThreeDimensionalEffectLengthDesc" xml:space="preserve"><value>長度</value></data>
+<data name="ThreeDimensionalEffectOpacityName" xml:space="preserve"><value>不透明度</value></data>
+<data name="ThreeDimensionalEffectOpacityDesc" xml:space="preserve"><value>不透明度</value></data>
+<data name="ThreeDimensionalEffectAttenuationName" xml:space="preserve"><value>衰減</value></data>
+<data name="ThreeDimensionalEffectAttenuationDesc" xml:space="preserve"><value>衰減</value></data>
+<data name="ThreeDimensionalEffectColor1Name" xml:space="preserve"><value>顏色 1</value></data>
+<data name="ThreeDimensionalEffectColor1Desc" xml:space="preserve"><value>顏色 1</value></data>
+<data name="ThreeDimensionalEffectColor2Name" xml:space="preserve"><value>顏色 2</value></data>
+<data name="ThreeDimensionalEffectColor2Desc" xml:space="preserve"><value>顏色 2</value></data>
+<data name="ThreeDimensionalEffectShadowTypeName" xml:space="preserve"><value>陰影種類</value></data>
+<data name="ThreeDimensionalEffectShadowTypeDesc" xml:space="preserve"><value>陰影種類</value></data>
+<data name="ThreeDimensionalTypeImageName" xml:space="preserve"><value>圖片</value></data>
+<data name="ThreeDimensionalTypeSolidName" xml:space="preserve"><value>純色</value></data>
+<data name="ThreeDimensionalTypeGradientName" xml:space="preserve"><value>漸層色</value></data>
+<data name="ThreeDimensionalTypeImageDesc" xml:space="preserve"><value>圖片</value></data>
+<data name="ThreeDimensionalTypeSolidDesc" xml:space="preserve"><value>純色</value></data>
+<data name="ThreeDimensionalTypeGradientDesc" xml:space="preserve"><value>漸層色</value></data>
+<data name="ThreeDimensionalEffectIsAbsolutePointName" xml:space="preserve"><value>絕對座標</value></data>
+<data name="ThreeDimensionalEffectIsAbsolutePointDesc" xml:space="preserve"><value>絕對座標</value></data>
 </root>

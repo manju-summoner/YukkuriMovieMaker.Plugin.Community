@@ -65,5 +65,5 @@
 <data name="Vertical" xml:space="preserve"><value>عمودي</value></data>
 <data name="VerticalDesc" xml:space="preserve"><value>ترتيب العناصر عموديًا</value></data>
 <data name="EndAligned" xml:space="preserve"><value>محاذاة النهاية</value></data>
-<data name="EndAlignedDesc" xml:space="preserve"><value>Alinea los elementos al final</value></data>
+<data name="EndAlignedDesc" xml:space="preserve"><value>يوازن العناصر إلى النهاية</value></data>
 </root>

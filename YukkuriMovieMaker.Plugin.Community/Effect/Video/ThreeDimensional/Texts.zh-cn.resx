@@ -73,7 +73,7 @@
 <data name="ThreeDimensionalEffectColor1Name" xml:space="preserve"><value>颜色 1</value></data>
 <data name="ThreeDimensionalEffectColor1Desc" xml:space="preserve"><value>颜色 1</value></data>
 <data name="ThreeDimensionalEffectColor2Name" xml:space="preserve"><value>颜色 2</value></data>
-<data name="ThreeDimensionalEffectColor2Desc" xml:space="preserve"><value>颜色 1</value></data>
+<data name="ThreeDimensionalEffectColor2Desc" xml:space="preserve"><value>颜色 2</value></data>
 <data name="ThreeDimensionalEffectShadowTypeName" xml:space="preserve"><value>阴影类型</value></data>
 <data name="ThreeDimensionalEffectShadowTypeDesc" xml:space="preserve"><value>阴影类型</value></data>
 <data name="ThreeDimensionalTypeImageName" xml:space="preserve"><value>图片</value></data>

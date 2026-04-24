@@ -61,5 +61,5 @@
 <data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
 <data name="BlurMap" xml:space="preserve"><value>خريطة التمويه</value></data>
 <data name="Blur" xml:space="preserve"><value>تمويه</value></data>
-<data name="IsFixedSize" xml:space="preserve"><value>Tamaño fijo</value></data>
+<data name="IsFixedSize" xml:space="preserve"><value>حجم ثابت</value></data>
 </root>

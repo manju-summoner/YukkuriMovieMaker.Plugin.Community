@@ -3,5 +3,5 @@ RadialArrangeGroupItemsEffectName,,グループ制御中のアイテムを円周
 Radius,,半径,Radius,半径,半徑,반지름,Radián,نصف القطر,Jari-jari
 SyncAngle,,回転を同期,Sync angle,同步旋转,同步角度,동기 각도,Ángulo de sincronización,زاوية التزامن,Sudut sinkronisasi
 Arc,,円弧,Arc,圆弧,圓弧,호,Arco,قوس,Busur
-Direction,,方向,Direction,方向,方向,방향,Dirección,Dirección,Arah
-Centering,,中心寄せ,Centering,中心对齐,中心對齊,중앙 정렬,Centrado,Centrado,Pemusatan
+Direction,,方向,Direction,方向,方向,방향,Dirección,اتجاه,Arah
+Centering,,中心寄せ,Centering,中心对齐,中心對齊,중앙 정렬,Centrado,توسيط,Pemusatan

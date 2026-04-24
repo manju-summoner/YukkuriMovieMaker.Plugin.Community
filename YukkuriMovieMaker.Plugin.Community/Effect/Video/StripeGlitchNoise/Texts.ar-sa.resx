@@ -70,16 +70,16 @@
 <data name="StripeGlitchNoiseEffectRepeatName" xml:space="preserve"><value>تكرار</value></data>
 <data name="StripeGlitchNoiseEffectRepeatDesc" xml:space="preserve"><value>كرر</value></data>
 <data name="StripeGlitchNoiseEffectColorMaxShiftName" xml:space="preserve"><value>انزياح اللون</value></data>
-<data name="StripeGlitchNoiseEffectColorMaxShiftDesc" xml:space="preserve"><value>بيرلن</value></data>
-<data name="StripeGlitchNoiseEffectIsHardBorderModeName" xml:space="preserve"><value>بيرلن</value></data>
+<data name="StripeGlitchNoiseEffectColorMaxShiftDesc" xml:space="preserve"><value>انزياح اللون</value></data>
+<data name="StripeGlitchNoiseEffectIsHardBorderModeName" xml:space="preserve"><value>حجم ثابت</value></data>
 <data name="StripeGlitchNoiseEffectIsHardBorderModeDesc" xml:space="preserve"><value>حجم ثابت</value></data>
 <data name="StripeGlitchNoiseEffectStripeMaxWidthAttenuationName" xml:space="preserve"><value>توهين عرض القطاع</value></data>
 <data name="StripeGlitchNoiseEffectStripeMaxWidthAttenuationDesc" xml:space="preserve"><value>توهين العرض</value></data>
-<data name="StripeGlitchNoiseEffectStripeMaxShiftAttenuationName" xml:space="preserve"><value>خلوي</value></data>
-<data name="StripeGlitchNoiseEffectStripeMaxShiftAttenuationDesc" xml:space="preserve"><value>التوهين الأقصى لانحراف شريط تأثير الضوضاء الشريطية</value></data>
+<data name="StripeGlitchNoiseEffectStripeMaxShiftAttenuationName" xml:space="preserve"><value>توهين الانزياح</value></data>
+<data name="StripeGlitchNoiseEffectStripeMaxShiftAttenuationDesc" xml:space="preserve"><value>توهين الانزياح</value></data>
 <data name="StripeGlitchNoiseEffectComplicationGroupName" xml:space="preserve"><value>التعقيد</value></data>
-<data name="StripeGlitchNoiseEffectPlaybackRateName" xml:space="preserve"><value>معدل تشغيل الضوضاء المتموجة</value></data>
-<data name="StripeGlitchNoiseEffectPlaybackRateDesc" xml:space="preserve"><value>معدل تشغيل تأثير ضوضاء خطأ الشريط</value></data>
+<data name="StripeGlitchNoiseEffectPlaybackRateName" xml:space="preserve"><value>معدل التشغيل</value></data>
+<data name="StripeGlitchNoiseEffectPlaybackRateDesc" xml:space="preserve"><value>معدل التشغيل</value></data>
 <data name="StripeGlitchNoiseEffectProbability" xml:space="preserve"><value>معدل الحدوث</value></data>
 <data name="StripeGlitchNoiseEffectProbabilityDesc" xml:space="preserve"><value>احتمالية حدوث ضوضاء خلل</value></data>
 </root>

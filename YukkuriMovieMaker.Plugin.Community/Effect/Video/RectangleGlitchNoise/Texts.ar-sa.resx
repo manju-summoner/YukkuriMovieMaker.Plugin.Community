@@ -67,9 +67,9 @@
 <data name="RectangleMaxXShift" xml:space="preserve"><value>الانحراف الأفقي للمستطيلات</value></data>
 <data name="RectangleMaxYShift" xml:space="preserve"><value>الانحراف العمودي للمستطيلات</value></data>
 <data name="ColorMaxShift" xml:space="preserve"><value>انزياح اللون</value></data>
-<data name="PlaybackRate" xml:space="preserve"><value>معدل تشغيل الضوضاء المتموجة</value></data>
+<data name="PlaybackRate" xml:space="preserve"><value>معدل التشغيل</value></data>
 <data name="IsClipping" xml:space="preserve"><value>قص</value></data>
-<data name="IsHardBorderMode" xml:space="preserve"><value>بيرلن</value></data>
+<data name="IsHardBorderMode" xml:space="preserve"><value>حجم ثابت</value></data>
 <data name="ComplicationGroupName" xml:space="preserve"><value>التعقيد</value></data>
 <data name="Repeat" xml:space="preserve"><value>تكرار</value></data>
 <data name="RectangleMaxWidthAttenuation" xml:space="preserve"><value>تخفيف العرض</value></data>

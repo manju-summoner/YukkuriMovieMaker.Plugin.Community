@@ -75,6 +75,7 @@
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>فشل بدء تشغيل المثبّت.</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>فشلت عملية التثبيت. رمز الخروج = {0}</value></data>
 <data name="NotSupportedMessage" xml:space="preserve"><value>لا تدعم بيئتك هذه الميزة</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>جارٍ تثبيت {0}. يرجى الانتظار. لن يعمل زر الإلغاء أثناء التثبيت.</value></data>
 <data name="FileSizeLimitMessage" xml:space="preserve"><value>نظرًا لأن YMM4 موجود في مسار يحتوي على أحرف متعددة البايت، فلا يمكنه تحميل النماذج التي يتجاوز حجمها 2 جيجابايت.
 عليك إما التبديل إلى نموذج بحجم أقل من ‎2‎ جيجابايت، أو نقل YMM4 إلى مسار لا يحتوي على أحرف متعددة البايت.</value></data>
 <data name="VoiceActivityDetection" xml:space="preserve"><value>كشف نشاط الصوت</value></data>
