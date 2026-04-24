@@ -60,7 +60,7 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="Threshold" xml:space="preserve"><value>Ambang</value></data>
-<data name="ThresholdDesc" xml:space="preserve"><value>El umbral para detectar la voz. Cuanto menor sea el valor</value></data>
+<data name="ThresholdDesc" xml:space="preserve"><value>Ambang untuk mendeteksi suara. Semakin rendah nilainya, semakin mudah untuk mendeteksi, tetapi semakin banyak deteksi palsu.</value></data>
 <data name="MinSpeechDurationMs" xml:space="preserve"><value>Durasi Bicara Minimum</value></data>
 <data name="MinSpeechDurationMsDesc" xml:space="preserve"><value>Dianggap sebagai bicara jika suara berlanjut lebih dari waktu ini.</value></data>
 <data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>Durasi Bicara Maksimum</value></data>

@@ -67,7 +67,7 @@
 <data name="Search" xml:space="preserve"><value>Buscar</value></data>
 <data name="OpenNewTab" xml:space="preserve"><value>Abrir pestaña nueva</value></data>
 <data name="OpenNewTabMenuHeader" xml:space="preserve"><value>Abrir pestaña nueva(_N)</value></data>
-<data name="AddFileToTimeline" xml:space="preserve"><value>타임라인에 파일 추가</value></data>
+<data name="AddFileToTimeline" xml:space="preserve"><value>Agregar archivo a la línea de tiempo</value></data>
 <data name="CopyMenuHeader" xml:space="preserve"><value>Copiar(_C)</value></data>
 <data name="CutMenuHeader" xml:space="preserve"><value>Cortar(_T)</value></data>
 <data name="PasteMenuHeader" xml:space="preserve"><value>Pegar(_P)</value></data>

@@ -60,6 +60,6 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="UnidirectionalBlur" xml:space="preserve"><value>Buram searah</value></data>
-<data name="Angle" xml:space="preserve"><value>زاوية</value></data>
-<data name="Length" xml:space="preserve"><value>الطول</value></data>
+<data name="Angle" xml:space="preserve"><value>Sudut</value></data>
+<data name="Length" xml:space="preserve"><value>Panjang</value></data>
 </root>

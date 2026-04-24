@@ -61,6 +61,6 @@
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="APIKey" xml:space="preserve"><value>API密钥</value></data>
 <data name="Language" xml:space="preserve"><value>语言</value></data>
-<data name="LanguageDesc" xml:space="preserve"><value>pt-BR)。auto で自動判定。</value></data>
+<data name="LanguageDesc" xml:space="preserve"><value>BCP-47 语言代码（如 ja、en、pt-BR）。auto 为自动检测。</value></data>
 <data name="HowToUseGrokTTS" xml:space="preserve"><value>帮助: Grok TTS设置方法</value></data>
 </root>

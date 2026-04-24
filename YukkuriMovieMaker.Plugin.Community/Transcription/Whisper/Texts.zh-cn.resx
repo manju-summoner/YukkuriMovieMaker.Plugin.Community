@@ -74,8 +74,8 @@
 <data name="InstallerNotFoundMessage" xml:space="preserve"><value>找不到安装程序: {0}</value></data>
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>安装程序启动失败。</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>安装失败。退出代码 = {0}</value></data>
-<data name="NotSupportedMessage" xml:space="preserve"><value>Your environment does not support this feature</value></data>
-<data name="InstallingMessage" xml:space="preserve"><value>Installing {0}. Please wait. The cancel button will not work during installation.</value></data>
+<data name="NotSupportedMessage" xml:space="preserve"><value>您的操作环境不支持该功能</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>{0}安装中。请稍候。安装期间取消按钮将无法工作。</value></data>
 <data name="FileSizeLimitMessage" xml:space="preserve"><value>YMM4位于包含多字节字符的路径中，因此无法加载文件大小超过2 GB的模型。
 请切换为2 GB以下的模型，或将YMM4移动到不包含多字节字符的路径下。</value></data>
 <data name="VoiceActivityDetection" xml:space="preserve"><value>语音检测</value></data>

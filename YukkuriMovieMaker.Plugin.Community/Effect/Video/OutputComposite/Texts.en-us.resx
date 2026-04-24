@@ -61,7 +61,7 @@
 <data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
 <data name="OutputCompositeEffectName" xml:space="preserve"><value>Composite Output</value></data>
 <data name="OutputCompositeTargetIndexName" xml:space="preserve"><value>Target Index</value></data>
-<data name="OutputCompositeTargetIndexDesc" xml:space="preserve"><value>Index of the output to composite with. If equal to the current output index</value></data>
+<data name="OutputCompositeTargetIndexDesc" xml:space="preserve"><value>Index of the output to composite with. If equal to the current output index, the current input is duplicated</value></data>
 <data name="OutputCompositeBlendModeName" xml:space="preserve"><value>Blend Mode</value></data>
 <data name="OutputCompositeBlendModeDesc" xml:space="preserve"><value>Specifies the blending method</value></data>
 </root>

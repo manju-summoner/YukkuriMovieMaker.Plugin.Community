@@ -90,7 +90,7 @@ También puede reducir significativamente la velocidad de generación.</value></
 <data name="Description" xml:space="preserve"><value>Descripción</value></data>
 <data name="Add" xml:space="preserve"><value>Agregar</value></data>
 <data name="Delete" xml:space="preserve"><value>Eliminar</value></data>
-<data name="MissingUuidMessage" xml:space="preserve"><value>Por favor</value></data>
+<data name="MissingUuidMessage" xml:space="preserve"><value>Por favor, ingrese el UUID del modelo o la URL de la página del modelo de AivisHub.</value></data>
 <data name="Error" xml:space="preserve"><value>Error</value></data>
 <data name="FetchingModelInfo" xml:space="preserve"><value>Obteniendo información del modelo</value></data>
 <data name="ErrorFetchingModelInfo" xml:space="preserve"><value>Error al obtener información del modelo</value></data>

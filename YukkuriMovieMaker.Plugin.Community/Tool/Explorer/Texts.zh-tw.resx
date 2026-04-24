@@ -67,7 +67,7 @@
 <data name="Search" xml:space="preserve"><value>搜尋</value></data>
 <data name="OpenNewTab" xml:space="preserve"><value>開啟新分頁</value></data>
 <data name="OpenNewTabMenuHeader" xml:space="preserve"><value>開啟新分頁(_N)</value></data>
-<data name="AddFileToTimeline" xml:space="preserve"><value>将文件添加到时间轴</value></data>
+<data name="AddFileToTimeline" xml:space="preserve"><value>將檔案新增至時間軸</value></data>
 <data name="CopyMenuHeader" xml:space="preserve"><value>複製(_C)</value></data>
 <data name="CutMenuHeader" xml:space="preserve"><value>剪下(_T)</value></data>
 <data name="PasteMenuHeader" xml:space="preserve"><value>貼上(_P)</value></data>

@@ -60,7 +60,7 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
 <data name="Threshold" xml:space="preserve"><value>Umbral</value></data>
-<data name="ThresholdDesc" xml:space="preserve"><value>檢測聲音的閾值。值越小，檢測越容易，但誤報也會增加。</value></data>
+<data name="ThresholdDesc" xml:space="preserve"><value>El umbral para detectar la voz. Cuanto menor sea el valor, más fácil será detectar, pero habrá más falsas detecciones.</value></data>
 <data name="MinSpeechDurationMs" xml:space="preserve"><value>Duración mínima del habla</value></data>
 <data name="MinSpeechDurationMsDesc" xml:space="preserve"><value>Se considera habla si la voz continúa durante más de este tiempo.</value></data>
 <data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>Duración máxima del habla</value></data>

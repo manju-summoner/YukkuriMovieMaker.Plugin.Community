@@ -68,7 +68,7 @@
 <data name="ConstantName" xml:space="preserve"><value>قوة</value></data>
 <data name="ConstantDesc" xml:space="preserve"><value>قوة الضوء</value></data>
 <data name="ExponentName" xml:space="preserve"><value>التضاءل</value></data>
-<data name="ExponentDesc" xml:space="preserve"><value>Cuanto mayor sea el valor</value></data>
+<data name="ExponentDesc" xml:space="preserve"><value>كلما زادت القيمة ، زاد التضاءل.</value></data>
 <data name="SurfaceScale" xml:space="preserve"><value>ارتفاع</value></data>
 <data name="Color" xml:space="preserve"><value>لون</value></data>
 <data name="Light" xml:space="preserve"><value>ضوء</value></data>

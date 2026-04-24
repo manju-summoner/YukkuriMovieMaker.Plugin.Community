@@ -60,6 +60,6 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
 <data name="UnidirectionalBlur" xml:space="preserve"><value>단방향 블러</value></data>
-<data name="Angle" xml:space="preserve"><value>角度</value></data>
-<data name="Length" xml:space="preserve"><value>長度</value></data>
+<data name="Angle" xml:space="preserve"><value>각도</value></data>
+<data name="Length" xml:space="preserve"><value>길이</value></data>
 </root>

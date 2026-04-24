@@ -68,7 +68,7 @@
 <data name="ConstantName" xml:space="preserve"><value>Strength</value></data>
 <data name="ConstantDesc" xml:space="preserve"><value>Light strength</value></data>
 <data name="ExponentName" xml:space="preserve"><value>Attenuation</value></data>
-<data name="ExponentDesc" xml:space="preserve"><value>The larger the value</value></data>
+<data name="ExponentDesc" xml:space="preserve"><value>The larger the value, the more attenuation.</value></data>
 <data name="SurfaceScale" xml:space="preserve"><value>Height</value></data>
 <data name="Color" xml:space="preserve"><value>Color</value></data>
 <data name="Light" xml:space="preserve"><value>Light</value></data>

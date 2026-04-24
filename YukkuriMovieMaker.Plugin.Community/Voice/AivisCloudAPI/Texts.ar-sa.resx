@@ -90,7 +90,7 @@ También puede reducir بشكل كبير سرعة التوليد.</value></data>
 <data name="Description" xml:space="preserve"><value>وصف</value></data>
 <data name="Add" xml:space="preserve"><value>إضافة</value></data>
 <data name="Delete" xml:space="preserve"><value>حذف</value></data>
-<data name="MissingUuidMessage" xml:space="preserve"><value>ingrese el UUID del modelo o la URL de la página del modelo de AivisHub.</value></data>
+<data name="MissingUuidMessage" xml:space="preserve"><value>الرجاء إدخال UUID النموذج أو عنوان URL لصفحة نموذج AivisHub.</value></data>
 <data name="Error" xml:space="preserve"><value>خطأ</value></data>
 <data name="FetchingModelInfo" xml:space="preserve"><value>جاري الحصول على معلومات النموذج</value></data>
 <data name="ErrorFetchingModelInfo" xml:space="preserve"><value>Fallo al obtener información del modelo</value></data>

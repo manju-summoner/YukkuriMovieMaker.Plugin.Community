@@ -61,7 +61,7 @@
 <data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
 <data name="OutputCompositeEffectName" xml:space="preserve"><value>تركيب المخرج</value></data>
 <data name="OutputCompositeTargetIndexName" xml:space="preserve"><value>الفهرس المستهدف</value></data>
-<data name="OutputCompositeTargetIndexDesc" xml:space="preserve"><value>Índice de la salida con la que componer. Si es igual al índice de salida actual se duplica la entrada actual</value></data>
+<data name="OutputCompositeTargetIndexDesc" xml:space="preserve"><value>حدد فهرس المخرج المراد تركيبه. إذا كان مطابقاً للفهرس الحالي فسيتم تكرار المدخل الحالي</value></data>
 <data name="OutputCompositeBlendModeName" xml:space="preserve"><value>وضع المزج</value></data>
 <data name="OutputCompositeBlendModeDesc" xml:space="preserve"><value>حدد طريقة المزج</value></data>
 </root>

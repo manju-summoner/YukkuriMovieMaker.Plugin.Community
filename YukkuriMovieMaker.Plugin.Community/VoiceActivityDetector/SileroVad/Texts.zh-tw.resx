@@ -60,7 +60,7 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
 <data name="Threshold" xml:space="preserve"><value>閾值</value></data>
-<data name="ThresholdDesc" xml:space="preserve"><value>but the more false detections there will be.</value></data>
+<data name="ThresholdDesc" xml:space="preserve"><value>檢測聲音的閾值。值越小，檢測越容易，但誤報也會增加。</value></data>
 <data name="MinSpeechDurationMs" xml:space="preserve"><value>最短發話時間</value></data>
 <data name="MinSpeechDurationMsDesc" xml:space="preserve"><value>如果聲音持續超過此時間，則視為發言。</value></data>
 <data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>最長發話時間</value></data>

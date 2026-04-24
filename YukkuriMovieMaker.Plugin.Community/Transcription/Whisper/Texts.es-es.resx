@@ -63,7 +63,7 @@
 <data name="CreatingAudioStreamMessage" xml:space="preserve"><value>Preparando el objetivo</value></data>
 <data name="LoadingWhisperModelMessage" xml:space="preserve"><value>Cargando el modelo de susurro</value></data>
 <data name="ProcessingAudioMessage" xml:space="preserve"><value>Procesando audio {0} / {1} {2}</value></data>
-<data name="Model" xml:space="preserve"><value>النموذج</value></data>
+<data name="Model" xml:space="preserve"><value>Modelo</value></data>
 <data name="Language" xml:space="preserve"><value>Idioma</value></data>
 <data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>Se requiere {0}</value></data>
 <data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>No se ha instalado el runtime necesario.
@@ -74,8 +74,8 @@ Para utilizar esta función debes instalar “{0}”.
 <data name="InstallerNotFoundMessage" xml:space="preserve"><value>Instalador no encontrado: {0}</value></data>
 <data name="InstallerStartFailedMessage" xml:space="preserve"><value>No se pudo iniciar el instalador.</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>La instalación falló. ExitCode = {0}</value></data>
-<data name="NotSupportedMessage" xml:space="preserve"><value>이 기능은 귀하의 환경에서 지원되지 않습니다</value></data>
-<data name="InstallingMessage" xml:space="preserve"><value>설치 중입니다 {0}. 잠시만 기다려 주십시오. 설치 중에는 취소 버튼이 작동하지 않습니다.</value></data>
+<data name="NotSupportedMessage" xml:space="preserve"><value>Esta función no es compatible con su entorno</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>Instalando {0}. Por favor espera. El botón de cancelar no funcionará durante la instalación.</value></data>
 <data name="FileSizeLimitMessage" xml:space="preserve"><value>YMM4 está ubicado en una ruta que contiene caracteres multibyte, por lo que no puede cargar modelos cuyo tamaño de archivo supere los 2 GB.
 Cambia a un modelo de menos de 2 GB o mueve YMM4 a una ruta que no contenga caracteres multibyte.</value></data>
 <data name="VoiceActivityDetection" xml:space="preserve"><value>Detección de actividad de voz</value></data>

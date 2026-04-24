@@ -63,7 +63,7 @@
 <data name="CreatingAudioStreamMessage" xml:space="preserve"><value>Preparing to parse target</value></data>
 <data name="LoadingWhisperModelMessage" xml:space="preserve"><value>Loading Whisper model</value></data>
 <data name="ProcessingAudioMessage" xml:space="preserve"><value>Processing audio {0} / {1} {2}</value></data>
-<data name="Model" xml:space="preserve"><value>模型</value></data>
+<data name="Model" xml:space="preserve"><value>Model</value></data>
 <data name="Language" xml:space="preserve"><value>Language</value></data>
 <data name="RuntimeNotInstalledTitle" xml:space="preserve"><value>{0} Required</value></data>
 <data name="RuntimeNotInstalledMessage" xml:space="preserve"><value>The required runtime is not installed.

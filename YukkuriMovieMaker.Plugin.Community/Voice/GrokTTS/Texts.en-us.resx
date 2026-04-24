@@ -61,6 +61,6 @@
 <data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
 <data name="APIKey" xml:space="preserve"><value>API Key</value></data>
 <data name="Language" xml:space="preserve"><value>Language</value></data>
-<data name="LanguageDesc" xml:space="preserve"><value>en</value></data>
+<data name="LanguageDesc" xml:space="preserve"><value>BCP-47 language code (e.g., ja, en, pt-BR). Use auto to detect.</value></data>
 <data name="HowToUseGrokTTS" xml:space="preserve"><value>Help: How to set up Grok TTS</value></data>
 </root>

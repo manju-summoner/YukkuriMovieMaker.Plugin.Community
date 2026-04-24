@@ -61,6 +61,6 @@
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="APIKey" xml:space="preserve"><value>Kunci API</value></data>
 <data name="Language" xml:space="preserve"><value>Bahasa</value></data>
-<data name="LanguageDesc" xml:space="preserve"><value>Código de idioma BCP-47 (p. ej. ja</value></data>
+<data name="LanguageDesc" xml:space="preserve"><value>Kode bahasa BCP-47 (misal ja, en, pt-BR). Gunakan auto untuk deteksi otomatis.</value></data>
 <data name="HowToUseGrokTTS" xml:space="preserve"><value>Bantuan: Cara mengatur Grok TTS</value></data>
 </root>

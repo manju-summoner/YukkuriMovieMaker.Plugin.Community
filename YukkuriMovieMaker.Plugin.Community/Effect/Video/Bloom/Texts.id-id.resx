@@ -66,9 +66,9 @@
 <data name="IsColorizationEnabledDesc" xml:space="preserve"><value>Menambahkan warna pada cahaya.</value></data>
 <data name="Color" xml:space="preserve"><value>Warna</value></data>
 <data name="ColorDesc" xml:space="preserve"><value>Warna cahaya</value></data>
-<data name="Strength" xml:space="preserve"><value>قوة</value></data>
+<data name="Strength" xml:space="preserve"><value>Kekuatan</value></data>
 <data name="StrengthDesc" xml:space="preserve"><value>Kekuatan cahaya</value></data>
-<data name="Blur" xml:space="preserve"><value>تشويش</value></data>
+<data name="Blur" xml:space="preserve"><value>Keburaman</value></data>
 <data name="BlurDesc" xml:space="preserve"><value>Keburaman cahaya</value></data>
 <data name="IsFixedSizeEnabled" xml:space="preserve"><value>Ukuran tetap</value></data>
 <data name="IsFixedSizeEnabledDesc" xml:space="preserve"><value>Pertahankan ukuran gambar asli.</value></data>

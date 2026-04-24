@@ -61,6 +61,6 @@
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
 <data name="APIKey" xml:space="preserve"><value>API 키</value></data>
 <data name="Language" xml:space="preserve"><value>언어</value></data>
-<data name="LanguageDesc" xml:space="preserve"><value>BCP-47 语言代码（如 ja、en、pt-BR）。auto 为自动检测。</value></data>
+<data name="LanguageDesc" xml:space="preserve"><value>BCP-47 언어 코드 (예: ja, en, pt-BR). auto는 자동 감지.</value></data>
 <data name="HowToUseGrokTTS" xml:space="preserve"><value>도움말: Grok TTS 설정 방법</value></data>
 </root>

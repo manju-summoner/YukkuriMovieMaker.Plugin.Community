@@ -68,7 +68,7 @@
 <data name="ConstantName" xml:space="preserve"><value>Intensidad</value></data>
 <data name="ConstantDesc" xml:space="preserve"><value>Intensidad de la luz</value></data>
 <data name="ExponentName" xml:space="preserve"><value>Atenuación</value></data>
-<data name="ExponentDesc" xml:space="preserve"><value>값이 클수록 감쇠가 커집니다.</value></data>
+<data name="ExponentDesc" xml:space="preserve"><value>Cuanto mayor sea el valor, mayor será la atenuación.</value></data>
 <data name="SurfaceScale" xml:space="preserve"><value>Altura</value></data>
 <data name="Color" xml:space="preserve"><value>Color</value></data>
 <data name="Light" xml:space="preserve"><value>Luz</value></data>

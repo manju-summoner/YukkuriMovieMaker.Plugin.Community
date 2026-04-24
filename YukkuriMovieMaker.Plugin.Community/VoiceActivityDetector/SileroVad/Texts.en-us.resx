@@ -60,7 +60,7 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
 <data name="Threshold" xml:space="preserve"><value>Threshold</value></data>
-<data name="ThresholdDesc" xml:space="preserve"><value>The threshold for detecting voice. The lower the value</value></data>
+<data name="ThresholdDesc" xml:space="preserve"><value>The threshold for detecting voice. The lower the value, the easier it is to detect, but the more false detections there will be.</value></data>
 <data name="MinSpeechDurationMs" xml:space="preserve"><value>Min Speech Duration</value></data>
 <data name="MinSpeechDurationMsDesc" xml:space="preserve"><value>Considered speech if the voice continues for more than this time.</value></data>
 <data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>Max Speech Duration</value></data>

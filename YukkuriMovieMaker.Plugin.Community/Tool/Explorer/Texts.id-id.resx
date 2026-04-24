@@ -67,7 +67,7 @@
 <data name="Search" xml:space="preserve"><value>Cari</value></data>
 <data name="OpenNewTab" xml:space="preserve"><value>Buka Tab Baru</value></data>
 <data name="OpenNewTabMenuHeader" xml:space="preserve"><value>Buka Tab Baru(_N)</value></data>
-<data name="AddFileToTimeline" xml:space="preserve"><value>إضافة ملف إلى الجدول الزمني</value></data>
+<data name="AddFileToTimeline" xml:space="preserve"><value>Tambahkan File ke Garis Waktu</value></data>
 <data name="CopyMenuHeader" xml:space="preserve"><value>Salin(_C)</value></data>
 <data name="CutMenuHeader" xml:space="preserve"><value>Potong(_T)</value></data>
 <data name="PasteMenuHeader" xml:space="preserve"><value>Tempel(_P)</value></data>

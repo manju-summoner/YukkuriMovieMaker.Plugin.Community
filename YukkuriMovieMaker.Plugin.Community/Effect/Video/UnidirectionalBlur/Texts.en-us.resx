@@ -60,6 +60,6 @@
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
 <data name="UnidirectionalBlur" xml:space="preserve"><value>Unidirectional Blur</value></data>
-<data name="Angle" xml:space="preserve"><value>角度</value></data>
-<data name="Length" xml:space="preserve"><value>长度</value></data>
+<data name="Angle" xml:space="preserve"><value>Angle</value></data>
+<data name="Length" xml:space="preserve"><value>Length</value></data>
 </root>

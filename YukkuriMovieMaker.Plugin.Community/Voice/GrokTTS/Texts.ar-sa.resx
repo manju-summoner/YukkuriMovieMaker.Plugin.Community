@@ -61,6 +61,6 @@
 <data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
 <data name="APIKey" xml:space="preserve"><value>مفتاح API</value></data>
 <data name="Language" xml:space="preserve"><value>اللغة</value></data>
-<data name="LanguageDesc" xml:space="preserve"><value>BCP-47 언어 코드 (예: ja, en, pt-BR). auto는 자동 감지.</value></data>
+<data name="LanguageDesc" xml:space="preserve"><value>رمز لغة BCP-47 (مثل ja و en و pt-BR). استخدم auto للاكتشاف التلقائي.</value></data>
 <data name="HowToUseGrokTTS" xml:space="preserve"><value>المساعدة: كيفية إعداد Grok TTS</value></data>
 </root>

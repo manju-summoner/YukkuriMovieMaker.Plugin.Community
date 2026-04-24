@@ -6,9 +6,9 @@ IsColorizationEnabled,,光に着色,Colorize light,给光着色,給光著色,빛
 IsColorizationEnabledDesc,,光に色を付けます。,Adds color to the light.,为光添加颜色。,給光添加顏色。,빛에 색상을 추가합니다.,Añade color a la luz.,يضيف لونًا للضوء.,Menambahkan warna pada cahaya.
 Color,,色,Color,色彩,色彩,색상,Color,لون,Warna
 ColorDesc,,光の色,Color of light,发光颜色,光的顏色,빛의 색상,Color de luz,لون الضوء,Warna cahaya
-Strength,,強度,Strength,强度,強度,강도,Strength,Fuerza,قوة,Kekuatan
+Strength,,強度,Strength,强度,強度,강도,Fuerza,قوة,Kekuatan
 StrengthDesc,,光の強さ,Strength of light,发光强度,光的強度,빛의 강도,Intensidad de luz,شدة الضوء,Kekuatan cahaya
-Blur,,ぼかし,Blur,模糊,模糊,블러,Blur,Desenfoque,تشويش,Keburaman
+Blur,,ぼかし,Blur,模糊,模糊,블러,Desenfoque,تشويش,Keburaman
 BlurDesc,,光のぼかし,Blur of light,发光模糊,光的模糊,빛의 블러,Desenfoque de luz,تشويش الضوء,Keburaman cahaya
 IsFixedSizeEnabled,,サイズを固定,Fixed size,固定尺寸,固定大小,고정 크기,Tamaño fijo,Tamaño fijo,Ukuran tetap
 IsFixedSizeEnabledDesc,,元の画像サイズを維持します。,Maintains the original image size.,保持源图像尺寸。,保持原圖大小。,원본 이미지 크기를 유지합니다.,Mantiene el tamaño original de la imagen.,Mantiene el tamaño original de la imagen.,Pertahankan ukuran gambar asli.

@@ -61,6 +61,6 @@
 <data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
 <data name="APIKey" xml:space="preserve"><value>Clave de API</value></data>
 <data name="Language" xml:space="preserve"><value>Idioma</value></data>
-<data name="LanguageDesc" xml:space="preserve"><value>BCP-47 語言代碼（例如 ja、en、pt-BR）。auto 為自動偵測。</value></data>
+<data name="LanguageDesc" xml:space="preserve"><value>Código de idioma BCP-47 (p. ej. ja, en, pt-BR). auto para detección automática.</value></data>
 <data name="HowToUseGrokTTS" xml:space="preserve"><value>Ayuda: Cómo configurar Grok TTS</value></data>
 </root>

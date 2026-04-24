@@ -68,7 +68,7 @@
 <data name="ConstantName" xml:space="preserve"><value>강도</value></data>
 <data name="ConstantDesc" xml:space="preserve"><value>빛의 강도</value></data>
 <data name="ExponentName" xml:space="preserve"><value>감쇠</value></data>
-<data name="ExponentDesc" xml:space="preserve"><value>数値を大きくするほど減衰するようになります。</value></data>
+<data name="ExponentDesc" xml:space="preserve"><value>값이 클수록 감쇠가 커집니다.</value></data>
 <data name="SurfaceScale" xml:space="preserve"><value>높이</value></data>
 <data name="Color" xml:space="preserve"><value>색깔</value></data>
 <data name="Light" xml:space="preserve"><value>빛</value></data>

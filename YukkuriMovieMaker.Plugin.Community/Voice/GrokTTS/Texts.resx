@@ -61,6 +61,6 @@
 <data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
 <data name="APIKey" xml:space="preserve"><value>APIキー</value></data>
 <data name="Language" xml:space="preserve"><value>言語</value></data>
-<data name="LanguageDesc" xml:space="preserve"><value>BCP-47の言語コード (例: ja</value></data>
+<data name="LanguageDesc" xml:space="preserve"><value>BCP-47の言語コード (例: ja, en, pt-BR)。auto で自動判定。</value></data>
 <data name="HowToUseGrokTTS" xml:space="preserve"><value>ヘルプ: Grok TTSの設定方法</value></data>
 </root>

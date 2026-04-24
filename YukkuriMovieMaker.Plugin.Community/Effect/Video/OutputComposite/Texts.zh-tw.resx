@@ -61,7 +61,7 @@
 <data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
 <data name="OutputCompositeEffectName" xml:space="preserve"><value>合成輸出</value></data>
 <data name="OutputCompositeTargetIndexName" xml:space="preserve"><value>目標索引</value></data>
-<data name="OutputCompositeTargetIndexDesc" xml:space="preserve"><value>指定要合成的目标索引。如果与当前输出索引相同，则复制当前输入进行合成</value></data>
+<data name="OutputCompositeTargetIndexDesc" xml:space="preserve"><value>指定要合成的目標索引。如果與當前輸出索引相同，則複製當前輸入進行合成</value></data>
 <data name="OutputCompositeBlendModeName" xml:space="preserve"><value>混合模式</value></data>
 <data name="OutputCompositeBlendModeDesc" xml:space="preserve"><value>指定混合方法</value></data>
 </root>
