@@ -61,13 +61,13 @@
 <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
 <data name="Threshold" xml:space="preserve"><value>阈值</value></data>
 <data name="ThresholdDesc" xml:space="preserve"><value>检测声音的阈值。数值越小，检测越容易，但误报也会增加。</value></data>
-<data name="MinSpeechDurationMs" xml:space="preserve"><value>Minimum Speech Duration</value></data>
+<data name="MinSpeechDurationMs" xml:space="preserve"><value>最短发音时长</value></data>
 <data name="MinSpeechDurationMsDesc" xml:space="preserve"><value>如果发音时间超过该值，则视为发言。</value></data>
-<data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>Maximum Speech Duration</value></data>
+<data name="MaxSpeechDurationSeconds" xml:space="preserve"><value>最长发音时长</value></data>
 <data name="MaxSpeechDurationSecondsDesc" xml:space="preserve"><value>如果发音时间超过该值，则视为发言结束。</value></data>
-<data name="MinSilenceDurationMs" xml:space="preserve"><value>Minimum Silence Duration</value></data>
+<data name="MinSilenceDurationMs" xml:space="preserve"><value>最短静音时长</value></data>
 <data name="MinSilenceDurationMsDesc" xml:space="preserve"><value>如果静默时间超过该值，则视为发言结束。</value></data>
-<data name="SpeechPadMs" xml:space="preserve"><value>Speech Padding</value></data>
+<data name="SpeechPadMs" xml:space="preserve"><value>语音区间扩展</value></data>
 <data name="SpeechPadMsDesc" xml:space="preserve"><value>仅延长此时间段前后的语音区间。</value></data>
 <data name="SecUnit" xml:space="preserve"><value>秒</value></data>
 <data name="MilliSecUnit" xml:space="preserve"><value>毫秒</value></data>

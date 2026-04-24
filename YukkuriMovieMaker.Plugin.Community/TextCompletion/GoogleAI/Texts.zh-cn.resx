@@ -62,7 +62,7 @@
 <data name="Safety" xml:space="preserve"><value>安全</value></data>
 <data name="Harassment" xml:space="preserve"><value>骚扰</value></data>
 <data name="HateSpeech" xml:space="preserve"><value>仇恨言论</value></data>
-<data name="SexuallyExplicit" xml:space="preserve"><value>性暴力</value></data>
+<data name="SexuallyExplicit" xml:space="preserve"><value>色情内容</value></data>
 <data name="DangerousContent" xml:space="preserve"><value>危险内容</value></data>
 <data name="BlockNone" xml:space="preserve"><value>无屏蔽</value></data>
 <data name="BlockFew" xml:space="preserve"><value>少量屏蔽</value></data>

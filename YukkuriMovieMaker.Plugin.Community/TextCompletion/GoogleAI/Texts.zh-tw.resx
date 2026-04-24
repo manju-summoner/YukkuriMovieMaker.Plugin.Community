@@ -59,13 +59,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
-<data name="Safety" xml:space="preserve"><value>안전</value></data>
+<data name="Safety" xml:space="preserve"><value>安全</value></data>
 <data name="Harassment" xml:space="preserve"><value>騷擾</value></data>
-<data name="HateSpeech" xml:space="preserve"><value>혐오 발언</value></data>
-<data name="SexuallyExplicit" xml:space="preserve"><value>성적 표현</value></data>
-<data name="DangerousContent" xml:space="preserve"><value>위험한 콘텐츠</value></data>
-<data name="BlockNone" xml:space="preserve"><value>차단 없음</value></data>
-<data name="BlockFew" xml:space="preserve"><value>일부 차단</value></data>
-<data name="BlockSome" xml:space="preserve"><value>일부 차단</value></data>
-<data name="BlockMost" xml:space="preserve"><value>대부분 차단</value></data>
+<data name="HateSpeech" xml:space="preserve"><value>仇恨言論</value></data>
+<data name="SexuallyExplicit" xml:space="preserve"><value>色情內容</value></data>
+<data name="DangerousContent" xml:space="preserve"><value>危險內容</value></data>
+<data name="BlockNone" xml:space="preserve"><value>無屏蔽</value></data>
+<data name="BlockFew" xml:space="preserve"><value>少量屏蔽</value></data>
+<data name="BlockSome" xml:space="preserve"><value>部分屏蔽</value></data>
+<data name="BlockMost" xml:space="preserve"><value>大部分屏蔽</value></data>
 </root>

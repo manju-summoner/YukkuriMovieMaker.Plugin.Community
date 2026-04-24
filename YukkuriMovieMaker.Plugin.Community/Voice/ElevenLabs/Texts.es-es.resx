@@ -67,7 +67,7 @@
 <data name="SimilarityBoostDesc" xml:space="preserve"><value>Determina cuán fielmente debe seguir la IA la voz original al intentar replicarla.</value></data>
 <data name="StyleName" xml:space="preserve"><value>Estilo</value></data>
 <data name="StyleDesc" xml:space="preserve"><value>Determina el grado de exageración del estilo de la voz. Esta configuración intenta amplificar el estilo del hablante original. Consume recursos computacionales adicionales y puede aumentar la latencia si se establece un valor distinto de 0.</value></data>
-<data name="UseSpeakerBoostName" xml:space="preserve"><value>Estilo de Estilo</value></data>
+<data name="UseSpeakerBoostName" xml:space="preserve"><value>Mejora de estilo</value></data>
 <data name="UseSpeakerBoostDesc" xml:space="preserve"><value>Esta configuración aumenta la similitud con el hablante original. Usarla implica una carga computacional ligeramente mayor, lo que aumenta la latencia.</value></data>
 <data name="APIKey" xml:space="preserve"><value>Clave API</value></data>
 <data name="Speakers" xml:space="preserve"><value>Lista de hablantes</value></data>

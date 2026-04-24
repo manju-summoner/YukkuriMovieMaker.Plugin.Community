@@ -67,7 +67,7 @@
 <data name="SimilarityBoostDesc" xml:space="preserve"><value>يحدد مدى التزام الذكاء الاصطناعي بالصوت الأصلي عند محاولة تقليده.</value></data>
 <data name="StyleName" xml:space="preserve"><value>أسلوب</value></data>
 <data name="StyleDesc" xml:space="preserve"><value>يحدد مدى المبالغة في أسلوب الصوت. تحاول هذه الإعدادات تضخيم أسلوب المتحدث الأصلي. تستهلك موارد حسابية إضافية وقد تؤدي إلى زيادة في زمن الاستجابة إذا تم ضبطها على أي قيمة غير الصفر.</value></data>
-<data name="UseSpeakerBoostName" xml:space="preserve"><value>أسلوب تعزيز</value></data>
+<data name="UseSpeakerBoostName" xml:space="preserve"><value>تعزيز الأسلوب</value></data>
 <data name="UseSpeakerBoostDesc" xml:space="preserve"><value>هذا الإعداد يعزز التشابه مع المتحدث الأصلي. يؤدي استخدامه إلى زيادة طفيفة في الحمل الحاسوبي وبالتالي زيادة زمن الاستجابة.</value></data>
 <data name="APIKey" xml:space="preserve"><value>مفتاح API</value></data>
 <data name="Speakers" xml:space="preserve"><value>قائمة المتحدثين</value></data>

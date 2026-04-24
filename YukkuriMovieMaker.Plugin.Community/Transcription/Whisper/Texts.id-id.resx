@@ -70,13 +70,13 @@
 Untuk menggunakan fitur ini, Anda harus memasang {0}.
 
 Apakah Anda ingin mengunduh dan menjalankan pemasang sekarang？</value></data>
-<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>“{0}” belum terpasang。</value></data>
+<data name="RuntimeNotInstalledErrorMessage" xml:space="preserve"><value>“”{0}” belum terpasang.”</value></data>
 <data name="InstallerNotFoundMessage" xml:space="preserve"><value>Instalasi tidak ditemukan: {0}</value></data>
-<data name="InstallerStartFailedMessage" xml:space="preserve"><value>Gagal menjalankan installer。</value></data>
+<data name="InstallerStartFailedMessage" xml:space="preserve"><value>Gagal menjalankan installer.</value></data>
 <data name="InstallerExitFailureMessage" xml:space="preserve"><value>Instalasi gagal. ExitCode = {0}</value></data>
 <data name="NotSupportedMessage" xml:space="preserve"><value>Lingkungan Anda tidak mendukung fitur ini</value></data>
-<data name="InstallingMessage" xml:space="preserve"><value>Sedang menginstal {0}。Silakan tunggu。Tombol batal tidak akan berfungsi selama instalasi。</value></data>
+<data name="InstallingMessage" xml:space="preserve"><value>Sedang menginstal {0}. Silakan tunggu. Tombol batal tidak akan berfungsi selama instalasi.</value></data>
 <data name="FileSizeLimitMessage" xml:space="preserve"><value>Karena YMM4 berada di jalur yang mengandung karakter multibyte, YMM4 tidak dapat memuat model dengan ukuran file melebihi 2 GB.
-Silakan beralih ke model berukuran di bawah 2 GB atau pindahkan YMM4 ke jalur yang tidak berisi karakter multibyte。</value></data>
+Silakan beralih ke model berukuran di bawah 2 GB atau pindahkan YMM4 ke jalur yang tidak berisi karakter multibyte.</value></data>
 <data name="VoiceActivityDetection" xml:space="preserve"><value>Deteksi Aktivitas Suara</value></data>
 </root>

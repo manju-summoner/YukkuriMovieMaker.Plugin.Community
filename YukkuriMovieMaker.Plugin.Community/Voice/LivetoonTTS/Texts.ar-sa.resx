@@ -59,9 +59,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
-<data name="APIKey" xml:space="preserve"><value>Kunci API</value></data>
-<data name="Speed" xml:space="preserve"><value>Kecepatan</value></data>
-<data name="About" xml:space="preserve"><value>Tentang Livetoon TTS</value></data>
-<data name="AboutMessage" xml:space="preserve"><value>Livetoon TTS adalah layanan teks-ke-ucapan berbasis cloud yang disediakan oleh Livetoon Inc.
-Diperlukan kunci API untuk menggunakan layanan ini.</value></data>
+<data name="APIKey" xml:space="preserve"><value>مفتاح API</value></data>
+<data name="Speed" xml:space="preserve"><value>السرعة</value></data>
+<data name="About" xml:space="preserve"><value>حول Livetoon TTS</value></data>
+<data name="AboutMessage" xml:space="preserve"><value>Livetoon TTS هي خدمة تحويل النص إلى كلام قائمة على السحابة تقدمها Livetoon Inc.
+يتطلب استخدام هذه الخدمة مفتاح API.</value></data>
 </root>

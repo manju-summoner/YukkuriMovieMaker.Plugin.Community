@@ -67,7 +67,7 @@
 <data name="Description" xml:space="preserve"><value>Deskripsi</value></data>
 <data name="IsEnabled" xml:space="preserve"><value>Dihentikan</value></data>
 <data name="DownloadFromGitHub" xml:space="preserve"><value>Unduh dari GitHub</value></data>
-<data name="Search" xml:space="preserve"><value>Tutup</value></data>
+<data name="Search" xml:space="preserve"><value>Cari</value></data>
 <data name="InstallDownloaded" xml:space="preserve"><value>Pasang yang sudah Diunduh</value></data>
 <data name="InvalidGitHubURL" xml:space="preserve"><value>URL GitHub tidak valid</value></data>
 <data name="FetchingLatestRelease" xml:space="preserve"><value>Mengambil rilis terbaru...</value></data>

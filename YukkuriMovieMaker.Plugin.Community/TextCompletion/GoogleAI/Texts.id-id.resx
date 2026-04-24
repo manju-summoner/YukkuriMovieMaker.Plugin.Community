@@ -59,5 +59,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
+<data name="Safety" xml:space="preserve"><value>Keamanan</value></data>
 <data name="Harassment" xml:space="preserve"><value>Pelecehan</value></data>
+<data name="HateSpeech" xml:space="preserve"><value>Ujaran kebencian</value></data>
+<data name="SexuallyExplicit" xml:space="preserve"><value>Konten Seksual Eksplisit</value></data>
+<data name="DangerousContent" xml:space="preserve"><value>Konten berbahaya</value></data>
+<data name="BlockNone" xml:space="preserve"><value>Block Tidak Ada</value></data>
+<data name="BlockFew" xml:space="preserve"><value>Block Beberapa</value></data>
+<data name="BlockSome" xml:space="preserve"><value>Block Beberapa</value></data>
+<data name="BlockMost" xml:space="preserve"><value>Block Sebagian Besar</value></data>
 </root>

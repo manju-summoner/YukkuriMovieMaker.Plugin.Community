@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
-<data name="APIKey" xml:space="preserve"><value>API 키</value></data>
+<data name="APIKey" xml:space="preserve"><value>API金鑰</value></data>
 <data name="Model" xml:space="preserve"><value>模型</value></data>
 <data name="Prompt" xml:space="preserve"><value>提示</value></data>
 <data name="HowToUseGeminiTTS" xml:space="preserve"><value>幫助: 如何設定 Gemini TTS</value></data>

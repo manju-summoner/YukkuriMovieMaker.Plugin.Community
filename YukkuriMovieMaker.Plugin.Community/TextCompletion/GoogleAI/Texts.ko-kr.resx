@@ -59,13 +59,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
-<data name="Safety" xml:space="preserve"><value>Seguridad</value></data>
+<data name="Safety" xml:space="preserve"><value>안전</value></data>
 <data name="Harassment" xml:space="preserve"><value>폭행</value></data>
-<data name="HateSpeech" xml:space="preserve"><value>Discurso de odio</value></data>
-<data name="SexuallyExplicit" xml:space="preserve"><value>Contenido sexual</value></data>
-<data name="DangerousContent" xml:space="preserve"><value>Contenido peligroso</value></data>
-<data name="BlockNone" xml:space="preserve"><value>Bloquear Ninguno</value></data>
-<data name="BlockFew" xml:space="preserve"><value>Bloquear Algunos</value></data>
-<data name="BlockSome" xml:space="preserve"><value>Bloquear Algunos</value></data>
-<data name="BlockMost" xml:space="preserve"><value>Bloquear la mayoría</value></data>
+<data name="HateSpeech" xml:space="preserve"><value>혐오 발언</value></data>
+<data name="SexuallyExplicit" xml:space="preserve"><value>성적 표현</value></data>
+<data name="DangerousContent" xml:space="preserve"><value>위험한 콘텐츠</value></data>
+<data name="BlockNone" xml:space="preserve"><value>차단 없음</value></data>
+<data name="BlockFew" xml:space="preserve"><value>일부 차단</value></data>
+<data name="BlockSome" xml:space="preserve"><value>일부 차단</value></data>
+<data name="BlockMost" xml:space="preserve"><value>대부분 차단</value></data>
 </root>

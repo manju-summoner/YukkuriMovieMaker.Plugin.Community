@@ -94,7 +94,7 @@
 <data name="Error" xml:space="preserve"><value>錯誤</value></data>
 <data name="FetchingModelInfo" xml:space="preserve"><value>正在獲取模型資訊</value></data>
 <data name="ErrorFetchingModelInfo" xml:space="preserve"><value>獲取模型資訊失敗</value></data>
-<data name="HowToUseAivisCloudApi" xml:space="preserve"><value>如何设置AivisCloudAPI的帮助</value></data>
+<data name="HowToUseAivisCloudApi" xml:space="preserve"><value>說明：如何設定AivisCloudAPI</value></data>
 <data name="AnnielBlockedMessage" xml:space="preserve"><value>該模型不可用。
 詳情: {0}</value></data>
 <data name="SpeakerBlockedMessage" xml:space="preserve"><value>由於違反開發政策，該模型不可用。</value></data>

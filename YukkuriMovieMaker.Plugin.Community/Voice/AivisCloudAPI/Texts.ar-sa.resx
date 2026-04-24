@@ -75,7 +75,7 @@
 كلما زادت القيمة، كانت نغمة الصوت أعلى.
 
 تغيير هذه القيمة من 0.0 قد يؤدي إلى تدهور جودة الكلام المُركب.
-También puede reducir بشكل كبير سرعة التوليد.</value></data>
+كما يمكن أن يُبطئ بشكل كبير سرعة التوليد.</value></data>
 <data name="LeadingSilenceSeconds" xml:space="preserve"><value>ثواني الصمت الأولية</value></data>
 <data name="LeadingSilenceSecondsDesc" xml:space="preserve"><value>طول الصمت في بداية الكلام</value></data>
 <data name="TrailingSilenceSeconds" xml:space="preserve"><value>ثواني الصمت النهائية</value></data>
@@ -93,7 +93,7 @@ También puede reducir بشكل كبير سرعة التوليد.</value></data>
 <data name="MissingUuidMessage" xml:space="preserve"><value>الرجاء إدخال UUID النموذج أو عنوان URL لصفحة نموذج AivisHub.</value></data>
 <data name="Error" xml:space="preserve"><value>خطأ</value></data>
 <data name="FetchingModelInfo" xml:space="preserve"><value>جاري الحصول على معلومات النموذج</value></data>
-<data name="ErrorFetchingModelInfo" xml:space="preserve"><value>Fallo al obtener información del modelo</value></data>
+<data name="ErrorFetchingModelInfo" xml:space="preserve"><value>فشل في الحصول على معلومات النموذج</value></data>
 <data name="HowToUseAivisCloudApi" xml:space="preserve"><value>مساعدة: كيفية إعداد AivisCloudAPI</value></data>
 <data name="AnnielBlockedMessage" xml:space="preserve"><value>هذا النموذج غير متاح.
 التفاصيل: {0}</value></data>

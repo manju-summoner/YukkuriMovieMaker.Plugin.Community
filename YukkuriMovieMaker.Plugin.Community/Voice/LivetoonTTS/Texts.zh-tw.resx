@@ -59,9 +59,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
-<data name="APIKey" xml:space="preserve"><value>API 키</value></data>
-<data name="Speed" xml:space="preserve"><value>속도</value></data>
-<data name="About" xml:space="preserve"><value>Livetoon TTS 정보</value></data>
-<data name="AboutMessage" xml:space="preserve"><value>Livetoon TTS는 Livetoon Inc.에서 제공하는 클라우드 기반 텍스트 음성 변환 서비스입니다.
-이 서비스를 사용하려면 API 키가 필요합니다.</value></data>
+<data name="APIKey" xml:space="preserve"><value>API金鑰</value></data>
+<data name="Speed" xml:space="preserve"><value>語速</value></data>
+<data name="About" xml:space="preserve"><value>關於Livetoon TTS</value></data>
+<data name="AboutMessage" xml:space="preserve"><value>Livetoon TTS是由Livetoon公司提供的雲端語音合成服務。
+使用此服務需要另外的API金鑰。</value></data>
 </root>

@@ -70,6 +70,6 @@
 <data name="StrengthDesc" xml:space="preserve"><value>شدة الضوء</value></data>
 <data name="Blur" xml:space="preserve"><value>تشويش</value></data>
 <data name="BlurDesc" xml:space="preserve"><value>تشويش الضوء</value></data>
-<data name="IsFixedSizeEnabled" xml:space="preserve"><value>Tamaño fijo</value></data>
-<data name="IsFixedSizeEnabledDesc" xml:space="preserve"><value>Mantiene el tamaño original de la imagen.</value></data>
+<data name="IsFixedSizeEnabled" xml:space="preserve"><value>حجم ثابت</value></data>
+<data name="IsFixedSizeEnabledDesc" xml:space="preserve"><value>يحافظ على حجم الصورة الأصلية.</value></data>
 </root>

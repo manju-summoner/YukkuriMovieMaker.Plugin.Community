@@ -67,7 +67,7 @@
 <data name="Description" xml:space="preserve"><value>Descripción</value></data>
 <data name="IsEnabled" xml:space="preserve"><value>Descontinuado</value></data>
 <data name="DownloadFromGitHub" xml:space="preserve"><value>Descargar desde GitHub</value></data>
-<data name="Search" xml:space="preserve"><value>Cerrar</value></data>
+<data name="Search" xml:space="preserve"><value>Buscar</value></data>
 <data name="InstallDownloaded" xml:space="preserve"><value>Instalar descargado</value></data>
 <data name="InvalidGitHubURL" xml:space="preserve"><value>URL de GitHub no válido</value></data>
 <data name="FetchingLatestRelease" xml:space="preserve"><value>Obteniendo la última versión...</value></data>
