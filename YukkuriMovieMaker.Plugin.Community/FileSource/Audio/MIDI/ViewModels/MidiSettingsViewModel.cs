@@ -101,6 +101,13 @@ internal sealed class MidiSettingsViewModel : INotifyPropertyChanged
         InstalledSoundFonts.Clear();
         foreach (var f in SoundFontDownloadService.GetInstalledSoundFonts())
             InstalledSoundFonts.Add(Path.GetFileName(f));
+
+        var stale = SoundFont.Layers
+            .Where(l => !string.IsNullOrEmpty(l.FileName) && !InstalledSoundFonts.Contains(l.FileName, StringComparer.OrdinalIgnoreCase))
+            .ToList();
+        foreach (var layer in stale)
+            SoundFont.Layers.Remove(layer);
+
         OnPropertyChanged(nameof(HasSoundFonts));
         OnPropertyChanged(nameof(HasNoSoundFonts));
         CommandManager.InvalidateRequerySuggested();
