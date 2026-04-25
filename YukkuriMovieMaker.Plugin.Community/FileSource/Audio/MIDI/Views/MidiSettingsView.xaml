@@ -100,7 +100,7 @@
                     <StackPanel Orientation="Horizontal" Margin="0,2">
                         <Button Content="{x:Static loc:Texts.DownloadSoundFont}"
                                 Command="{Binding DownloadSoundFontCommand}"
-                                Height="26" Padding="8,0" Margin="0,0,4,0"
+                                Height="26" Padding="8,0"
                                 IsEnabled="{Binding HasNoSoundFonts}"/>
                         <Button Content="{x:Static loc:Texts.OpenSoundFontFolder}"
                                 Command="{Binding OpenSoundFontFolderCommand}"
@@ -168,10 +168,10 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,2">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0">
                         <Button Content="{x:Static loc:Texts.AddLayer}"
                                 Command="{Binding AddLayerCommand}"
-                                Height="24" Padding="8,0" Margin="0,0,4,0"/>
+                                Height="24" Padding="8,0"/>
                         <Button Content="{x:Static loc:Texts.RemoveLayer}"
                                 Command="{Binding RemoveLayerCommand}"
                                 Height="24" Padding="8,0"/>
