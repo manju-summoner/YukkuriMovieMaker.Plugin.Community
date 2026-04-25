@@ -77,4 +77,10 @@ Ejemplo: NombreCarpeta/SubcarpetaNombre</value></data>
 <data name="Done" xml:space="preserve"><value>Hecho</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>Editar favorito</value></data>
 <data name="Favorite" xml:space="preserve"><value>Favorito</value></data>
+<data name="History" xml:space="preserve"><value>Historial</value></data>
+<data name="MobileMonitor" xml:space="preserve"><value>Monitor móvil</value></data>
+<data name="ClearBrowsingData" xml:space="preserve"><value>Borrar datos de navegación</value></data>
+<data name="Download" xml:space="preserve"><value>Descargar</value></data>
+<data name="Print" xml:space="preserve"><value>Imprimir</value></data>
+<data name="Find" xml:space="preserve"><value>Buscar</value></data>
 </root>

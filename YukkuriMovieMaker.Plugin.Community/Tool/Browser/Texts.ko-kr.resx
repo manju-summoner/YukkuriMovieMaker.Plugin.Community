@@ -77,4 +77,10 @@
 <data name="Done" xml:space="preserve"><value>완료</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>즐겨찾기 편집</value></data>
 <data name="Favorite" xml:space="preserve"><value>즐겨찾기</value></data>
+<data name="History" xml:space="preserve"><value>기록</value></data>
+<data name="MobileMonitor" xml:space="preserve"><value>모바일 모니터</value></data>
+<data name="ClearBrowsingData" xml:space="preserve"><value>브라우저 데이터 지우기</value></data>
+<data name="Download" xml:space="preserve"><value>다운로드</value></data>
+<data name="Print" xml:space="preserve"><value>인쇄</value></data>
+<data name="Find" xml:space="preserve"><value>검색</value></data>
 </root>

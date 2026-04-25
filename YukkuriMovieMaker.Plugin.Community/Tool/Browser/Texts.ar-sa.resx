@@ -77,4 +77,10 @@
 <data name="Done" xml:space="preserve"><value>تم</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>تحرير المفضلة</value></data>
 <data name="Favorite" xml:space="preserve"><value>المفضلة</value></data>
+<data name="History" xml:space="preserve"><value>تاريخ</value></data>
+<data name="MobileMonitor" xml:space="preserve"><value>مراقب الجوال</value></data>
+<data name="ClearBrowsingData" xml:space="preserve"><value>مسح بيانات المتصفح</value></data>
+<data name="Download" xml:space="preserve"><value>تنزيل</value></data>
+<data name="Print" xml:space="preserve"><value>طباعة</value></data>
+<data name="Find" xml:space="preserve"><value>بحث</value></data>
 </root>

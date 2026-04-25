@@ -77,4 +77,10 @@
 <data name="Done" xml:space="preserve"><value>完成</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>編輯最愛</value></data>
 <data name="Favorite" xml:space="preserve"><value>收藏夾</value></data>
+<data name="History" xml:space="preserve"><value>歷史</value></data>
+<data name="MobileMonitor" xml:space="preserve"><value>行動裝置檢視</value></data>
+<data name="ClearBrowsingData" xml:space="preserve"><value>清除瀏覽器資料</value></data>
+<data name="Download" xml:space="preserve"><value>下載</value></data>
+<data name="Print" xml:space="preserve"><value>列印</value></data>
+<data name="Find" xml:space="preserve"><value>搜尋</value></data>
 </root>

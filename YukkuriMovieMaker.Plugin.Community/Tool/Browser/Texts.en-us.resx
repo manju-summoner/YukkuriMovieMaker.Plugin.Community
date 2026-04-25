@@ -77,4 +77,10 @@ Example: FolderName/SubfolderName</value></data>
 <data name="Done" xml:space="preserve"><value>Done</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>Edit Favorite</value></data>
 <data name="Favorite" xml:space="preserve"><value>Favorite</value></data>
+<data name="History" xml:space="preserve"><value>History</value></data>
+<data name="MobileMonitor" xml:space="preserve"><value>Mobile Monitor</value></data>
+<data name="ClearBrowsingData" xml:space="preserve"><value>Clear Browsing Data</value></data>
+<data name="Download" xml:space="preserve"><value>Download</value></data>
+<data name="Print" xml:space="preserve"><value>Print</value></data>
+<data name="Find" xml:space="preserve"><value>Search</value></data>
 </root>

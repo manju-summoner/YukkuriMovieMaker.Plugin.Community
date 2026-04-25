@@ -77,4 +77,10 @@
 <data name="Done" xml:space="preserve"><value>完成</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>编辑收藏夹</value></data>
 <data name="Favorite" xml:space="preserve"><value>收藏夹</value></data>
+<data name="History" xml:space="preserve"><value>历史</value></data>
+<data name="MobileMonitor" xml:space="preserve"><value>移动视图</value></data>
+<data name="ClearBrowsingData" xml:space="preserve"><value>清除浏览器数据</value></data>
+<data name="Download" xml:space="preserve"><value>下载</value></data>
+<data name="Print" xml:space="preserve"><value>打印</value></data>
+<data name="Find" xml:space="preserve"><value>搜索</value></data>
 </root>

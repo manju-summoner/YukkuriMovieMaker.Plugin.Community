@@ -77,4 +77,10 @@ Contoh: NamaFolder/NamaSubfolder</value></data>
 <data name="Done" xml:space="preserve"><value>Selesai</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>Sunting Favorit</value></data>
 <data name="Favorite" xml:space="preserve"><value>Favorit</value></data>
+<data name="History" xml:space="preserve"><value>Riwayat</value></data>
+<data name="MobileMonitor" xml:space="preserve"><value>Monitor Seluler</value></data>
+<data name="ClearBrowsingData" xml:space="preserve"><value>Hapus Data Penjelajahan</value></data>
+<data name="Download" xml:space="preserve"><value>Unduh</value></data>
+<data name="Print" xml:space="preserve"><value>Cetak</value></data>
+<data name="Find" xml:space="preserve"><value>Cari</value></data>
 </root>
