@@ -14,7 +14,7 @@
         <BooleanToVisibilityConverter x:Key="BoolVis"/>
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="4">
+        <StackPanel>
 
             <Border Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}"
                     BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
@@ -25,7 +25,7 @@
             </Border>
 
             <Expander Header="{x:Static loc:Texts.AudioSettings}" IsExpanded="True" Margin="0,2">
-                <StackPanel Margin="8,4">
+                <StackPanel Margin="8,4,0,4">
                     <Grid Margin="0,2">
                         <Label Content="{x:Static loc:Texts.SampleRate}" VerticalAlignment="Center"/>
                         <ComboBox Width="120" HorizontalAlignment="Right" VerticalAlignment="Center" Height="24"
@@ -52,7 +52,7 @@
             </Expander>
 
             <Expander Header="{x:Static loc:Texts.PerformanceSettings}" IsExpanded="True" Margin="0,2">
-                <StackPanel Margin="8,4">
+                <StackPanel Margin="8,4,0,4">
                     <Grid Margin="0,2">
                         <Label Content="{x:Static loc:Texts.RenderingMode}" VerticalAlignment="Center"/>
                         <ComboBox Width="200" HorizontalAlignment="Right" VerticalAlignment="Center" Height="24"
@@ -85,7 +85,7 @@
             </Expander>
 
             <Expander Header="{x:Static loc:Texts.SoundFontSettings}" IsExpanded="True" Margin="0,2">
-                <StackPanel Margin="8,4">
+                <StackPanel Margin="8,4,0,4">
                     <Grid Margin="0,2">
                         <Label Content="{x:Static loc:Texts.EnableSoundFont}" VerticalAlignment="Center"/>
                         <c:ToggleSlider Value="{Binding SoundFont.EnableSoundFont, Mode=TwoWay}"
@@ -182,7 +182,7 @@
             </Expander>
 
             <Expander Header="{x:Static loc:Texts.EffectsSettings}" IsExpanded="False" Margin="0,2">
-                <StackPanel Margin="8,4">
+                <StackPanel Margin="8,4,0,4">
                     <Grid Margin="0,2">
                         <Label Content="{x:Static loc:Texts.EnableEffects}" VerticalAlignment="Center"/>
                         <c:ToggleSlider Value="{Binding Effects.EnableEffects, Mode=TwoWay}"
