@@ -122,7 +122,8 @@
                         <Label Grid.Column="1" Content="{x:Static loc:Texts.LayerFileName}" FontWeight="SemiBold" Padding="2"/>
                         <Label Grid.Column="2" Content="{x:Static loc:Texts.LayerVolume}" FontWeight="SemiBold" Padding="2"/>
                     </Grid>
-                    <ListBox ItemsSource="{Binding SoundFont.Layers}"
+                    <ListBox x:Name="LayerListBox"
+                             ItemsSource="{Binding SoundFont.Layers}"
                              SelectedItem="{Binding SelectedLayer, Mode=TwoWay}"
                              MaxHeight="200" BorderThickness="1"
                              HorizontalContentAlignment="Stretch">
@@ -158,7 +159,8 @@
                                               VerticalAlignment="Center"
                                               Text="{Binding FileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                               ItemsSource="{Binding DataContext.InstalledSoundFonts, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                              MaxDropDownHeight="160"/>
+                                              MaxDropDownHeight="160"
+                                              DropDownOpened="LayerComboBox_DropDownOpened"/>
                                     <c:TextBoxSlider Grid.Column="2"
                                                      Value="{Binding Volume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                      Min="0" Max="2" DefaultMin="0.5" DefaultMax="1.5" Delta="0.05"
