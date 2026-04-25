@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
+<data name="PluginName" xml:space="preserve"><value>Plugin Sumber Audio MIDI</value></data>
+<data name="SettingsName" xml:space="preserve"><value>Pengaturan MIDI</value></data>
+<data name="AudioSettings" xml:space="preserve"><value>Pengaturan Audio</value></data>
+<data name="SampleRate" xml:space="preserve"><value>Laju Sampel</value></data>
+<data name="MasterVolume" xml:space="preserve"><value>Volume Utama</value></data>
+<data name="EnableNormalization" xml:space="preserve"><value>Normalisasi</value></data>
+<data name="PerformanceSettings" xml:space="preserve"><value>Pengaturan Performa</value></data>
+<data name="RenderingMode" xml:space="preserve"><value>Mode Rendering</value></data>
+<data name="BufferSize" xml:space="preserve"><value>Ukuran Buffer</value></data>
+<data name="MaxPolyphony" xml:space="preserve"><value>Polifoni Maksimal</value></data>
+<data name="EnableGpuAcceleration" xml:space="preserve"><value>Akselerasi GPU</value></data>
+<data name="SoundFontSettings" xml:space="preserve"><value>Pengaturan SoundFont</value></data>
+<data name="EnableSoundFont" xml:space="preserve"><value>Gunakan SoundFont</value></data>
+<data name="FallbackToSynthesis" xml:space="preserve"><value>Fallback ke Sintesis</value></data>
+<data name="AutoDownload" xml:space="preserve"><value>Unduh Otomatis</value></data>
+<data name="SoundFontLayers" xml:space="preserve"><value>Layer SoundFont</value></data>
+<data name="LayerFileName" xml:space="preserve"><value>Nama File</value></data>
+<data name="LayerVolume" xml:space="preserve"><value>Volume</value></data>
+<data name="LayerEnabled" xml:space="preserve"><value>Diaktifkan</value></data>
+<data name="EffectsSettings" xml:space="preserve"><value>Pengaturan Efek</value></data>
+<data name="EnableEffects" xml:space="preserve"><value>Aktifkan Efek</value></data>
+<data name="EnableReverb" xml:space="preserve"><value>Reverb</value></data>
+<data name="ReverbDecay" xml:space="preserve"><value>Peluruhan Reverb</value></data>
+<data name="EnableCompression" xml:space="preserve"><value>Kompresi</value></data>
+<data name="CompressionThreshold" xml:space="preserve"><value>Ambang Kompresi</value></data>
+<data name="CompressionRatio" xml:space="preserve"><value>Rasio Kompresi</value></data>
+<data name="EnableLimiter" xml:space="preserve"><value>Limiter</value></data>
+<data name="LimiterThreshold" xml:space="preserve"><value>Ambang Limiter</value></data>
+<data name="DownloadSoundFont" xml:space="preserve"><value>Unduh SoundFont</value></data>
+<data name="Downloading" xml:space="preserve"><value>Mengunduh...</value></data>
+<data name="DownloadComplete" xml:space="preserve"><value>Unduhan Selesai</value></data>
+<data name="DownloadFailed" xml:space="preserve"><value>Unduhan Gagal</value></data>
+<data name="AddLayer" xml:space="preserve"><value>Tambah Layer</value></data>
+<data name="RemoveLayer" xml:space="preserve"><value>Hapus Layer</value></data>
+<data name="RenderingModeSoundFont" xml:space="preserve"><value>SoundFont</value></data>
+<data name="RenderingModeSynthesis" xml:space="preserve"><value>Sintesis Gelombang</value></data>
+<data name="SoundFontDirectory" xml:space="preserve"><value>Folder SoundFont</value></data>
+<data name="OpenSoundFontFolder" xml:space="preserve"><value>Buka Folder</value></data>
+<data name="FileReadError" xml:space="preserve"><value>Gagal membaca file.</value></data>
+</root>

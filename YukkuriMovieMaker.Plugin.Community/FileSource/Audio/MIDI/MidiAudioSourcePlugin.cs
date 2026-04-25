@@ -1,0 +1,86 @@
+using System.Collections.Frozen;
+using System.IO;
+using System.Windows;
+using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Localization;
+using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Services;
+using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Views;
+using YukkuriMovieMaker.Plugin.FileSource;
+
+namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI;
+
+public sealed class MidiAudioSourcePlugin : IAudioFileSourcePlugin
+{
+    private const string DefaultSoundFontFileName = "GeneralUser-GS.sf2";
+    private static readonly Lock DownloadPromptLock = new();
+    private static readonly FrozenSet<string> SupportedExtensions =
+        new[] { ".mid", ".midi" }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+
+    public string Name => Texts.PluginName;
+
+    public MidiAudioSourcePlugin()
+    {
+        MidiPluginSettings.Default.Initialize();
+        SoundFontDownloadService.EnsureDirectory();
+    }
+
+    public IAudioFileSource? CreateAudioFileSource(string filePath, int audioTrackIndex)
+    {
+        if (!IsSupportedFile(filePath)) return null;
+        TryPromptDownloadOnFirstUse();
+        return new MidiAudioSource(filePath, MidiPluginSettings.Default);
+    }
+
+    private static void TryPromptDownloadOnFirstUse()
+    {
+        var sf = MidiPluginSettings.Default.SoundFont;
+        if (sf.HasShownDownloadPrompt) return;
+
+        lock (DownloadPromptLock)
+        {
+            if (sf.HasShownDownloadPrompt) return;
+            if (SoundFontDownloadService.GetInstalledSoundFonts().Count > 0) return;
+            if (!sf.EnableSoundFont) return;
+
+            Application.Current?.Dispatcher.Invoke(() =>
+            {
+                if (MessageBox.Show(
+                        $"{Texts.DownloadSoundFont}\n\n({DefaultSoundFontFileName})",
+                        Texts.PluginName,
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question) != MessageBoxResult.Yes ||
+                    new SoundFontDownloadDialog().ShowDialog() == true)
+                {
+                    sf.HasShownDownloadPrompt = true;
+                    MidiPluginSettings.Default.Save();
+                }
+            });
+        }
+    }
+
+    private static bool IsSupportedFile(string filePath)
+    {
+        if (!SupportedExtensions.Contains(Path.GetExtension(filePath))) return false;
+        if (!File.Exists(filePath)) return false;
+        return HasValidMidiHeader(filePath);
+    }
+
+    private static bool HasValidMidiHeader(string filePath)
+    {
+        try
+        {
+            using var stream = File.OpenRead(filePath);
+            Span<byte> header = stackalloc byte[4];
+            if (stream.Read(header) < 4) return false;
+            return header.SequenceEqual("MThd"u8);
+        }
+        catch (Exception ex)
+        {
+            Application.Current?.Dispatcher.Invoke(() => MessageBox.Show(
+                $"{Texts.FileReadError}\n\n{ex.Message}",
+                Texts.PluginName,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error));
+            return false;
+        }
+    }
+}
