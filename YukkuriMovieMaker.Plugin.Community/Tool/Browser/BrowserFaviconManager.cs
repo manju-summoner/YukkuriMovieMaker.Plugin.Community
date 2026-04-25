@@ -53,18 +53,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             if (e.OldItems != null)
             {
                 foreach (BrowserFavorite favorite in e.OldItems)
-                {
                     favorite.PropertyChanged -= OnFavoritePropertyChanged;
-                    DeleteIconFile(favorite.Url);
-                }
             }
             if (e.NewItems != null)
             {
                 foreach (BrowserFavorite favorite in e.NewItems)
                     favorite.PropertyChanged += OnFavoritePropertyChanged;
             }
-            if (e.Action == NotifyCollectionChangedAction.Reset)
-                CleanupOrphanedIcons();
+            CleanupOrphanedIcons();
         }
 
         static void OnFavoritePropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -84,14 +80,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 if (!validFileNames.Contains(Path.GetFileName(file)))
                     File.Delete(file);
             }
-        }
-
-        static void DeleteIconFile(string favoriteUrl)
-        {
-            var key = GetFavoriteKey(favoriteUrl);
-            var path = Path.Combine(CacheDirectoryPath, $"{key}.png");
-            if (File.Exists(path))
-                File.Delete(path);
         }
 
         public static bool IsFaviconMissingForMatchingFavorite(string url, IEnumerable<BrowserFavorite> favorites)
@@ -115,7 +103,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         static string GetFavoriteKey(string favoriteUrl)
         {
-            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(favoriteUrl));
+            var keySource = Uri.TryCreate(favoriteUrl, UriKind.Absolute, out var uri) && !string.IsNullOrEmpty(uri.Host)
+                ? uri.Host.ToLowerInvariant()
+                : favoriteUrl;
+            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(keySource));
             return Convert.ToHexString(bytes).ToLowerInvariant();
         }
     }
