@@ -12,7 +12,7 @@ internal sealed class SoundFontRenderer : IMidiRenderer
 {
     private readonly int _sampleRate;
     private readonly float _masterVolume;
-    private readonly List<Synthesizer> _synthesizers;
+    private readonly List<(Synthesizer Synth, float Volume)> _layers;
     private readonly List<ParsedEvent> _events;
     private long _currentMonoPosition = -1;
     private int _eventIndex;
@@ -36,11 +36,11 @@ internal sealed class SoundFontRenderer : IMidiRenderer
     private static SoundFont GetSoundFont(string path) =>
         _sfCache.GetOrAdd(path, p => new Lazy<SoundFont>(() => new SoundFont(p))).Value;
 
-    public SoundFontRenderer(string midiFilePath, IReadOnlyList<string> sf2Paths, AudioSettings audio, PerformanceSettings performance)
+    public SoundFontRenderer(string midiFilePath, IReadOnlyList<(string Path, float Volume)> layers, AudioSettings audio, PerformanceSettings performance)
     {
         _sampleRate = audio.SampleRate;
         _masterVolume = audio.MasterVolume;
-        _synthesizers = sf2Paths.Select(p => new Synthesizer(GetSoundFont(p), _sampleRate)).ToList();
+        _layers = layers.Select(l => (new Synthesizer(GetSoundFont(l.Path), _sampleRate), l.Volume)).ToList();
         _events = ParseEvents(midiFilePath);
         SeekTo(0);
     }
@@ -104,9 +104,9 @@ internal sealed class SoundFontRenderer : IMidiRenderer
 
     private void SeekTo(long targetSample)
     {
-        foreach (var synth in _synthesizers)
+        foreach (var layer in _layers)
         {
-            synth.Reset();
+            layer.Synth.Reset();
         }
 
         var activeNotes = new Dictionary<(int Channel, int Note), int>();
@@ -127,13 +127,13 @@ internal sealed class SoundFontRenderer : IMidiRenderer
             else if (evt is ParsedChannelAfterTouch cat) lastCat[cat.Channel] = cat.Pressure;
         }
 
-        foreach (var synth in _synthesizers)
+        foreach (var layer in _layers)
         {
-            foreach (var kv in lastPatch) synth.ProcessMidiMessage(kv.Key, 0xC0, kv.Value, 0);
-            foreach (var kv in lastCC) synth.ProcessMidiMessage(kv.Key.Channel, 0xB0, kv.Key.Controller, kv.Value);
-            foreach (var kv in lastPitch) synth.ProcessMidiMessage(kv.Key, 0xE0, kv.Value & 0x7F, (kv.Value >> 7) & 0x7F);
-            foreach (var kv in lastCat) synth.ProcessMidiMessage(kv.Key, 0xD0, kv.Value, 0);
-            foreach (var kv in activeNotes) synth.ProcessMidiMessage(kv.Key.Channel, 0x90, kv.Key.Note, kv.Value);
+            foreach (var kv in lastPatch) layer.Synth.ProcessMidiMessage(kv.Key, 0xC0, kv.Value, 0);
+            foreach (var kv in lastCC) layer.Synth.ProcessMidiMessage(kv.Key.Channel, 0xB0, kv.Key.Controller, kv.Value);
+            foreach (var kv in lastPitch) layer.Synth.ProcessMidiMessage(kv.Key, 0xE0, kv.Value & 0x7F, (kv.Value >> 7) & 0x7F);
+            foreach (var kv in lastCat) layer.Synth.ProcessMidiMessage(kv.Key, 0xD0, kv.Value, 0);
+            foreach (var kv in activeNotes) layer.Synth.ProcessMidiMessage(kv.Key.Channel, 0x90, kv.Key.Note, kv.Value);
         }
 
         _eventIndex = _events.FindIndex(e => e.SampleTime > targetSample);
@@ -177,16 +177,16 @@ internal sealed class SoundFontRenderer : IMidiRenderer
                     var tls = ls.Slice(0, samplesToRender);
                     var trs = rs.Slice(0, samplesToRender);
 
-                    foreach (var synth in _synthesizers)
+                    foreach (var layer in _layers)
                     {
                         tls.Clear();
                         trs.Clear();
-                        synth.Render(tls, trs);
+                        layer.Synth.Render(tls, trs);
 
                         for (int i = 0; i < samplesToRender; i++)
                         {
-                            mls[samplesRendered + i] += tls[i];
-                            mrs[samplesRendered + i] += trs[i];
+                            mls[samplesRendered + i] += tls[i] * layer.Volume;
+                            mrs[samplesRendered + i] += trs[i] * layer.Volume;
                         }
                     }
 
@@ -197,15 +197,15 @@ internal sealed class SoundFontRenderer : IMidiRenderer
                 while (_eventIndex < _events.Count && _events[_eventIndex].SampleTime <= _currentMonoPosition)
                 {
                     var evt = _events[_eventIndex];
-                    foreach (var synth in _synthesizers)
+                    foreach (var layer in _layers)
                     {
-                        if (evt is ParsedNoteOn on) synth.ProcessMidiMessage(on.Channel, 0x90, on.Note, on.Velocity);
-                        else if (evt is ParsedNoteOff off) synth.ProcessMidiMessage(off.Channel, 0x80, off.Note, 0);
-                        else if (evt is ParsedPatchChange pc) synth.ProcessMidiMessage(pc.Channel, 0xC0, pc.Patch, 0);
-                        else if (evt is ParsedControlChange cc) synth.ProcessMidiMessage(cc.Channel, 0xB0, cc.Controller, cc.Value);
-                        else if (evt is ParsedPitchBend pb) synth.ProcessMidiMessage(pb.Channel, 0xE0, pb.Value & 0x7F, (pb.Value >> 7) & 0x7F);
-                        else if (evt is ParsedChannelAfterTouch cat) synth.ProcessMidiMessage(cat.Channel, 0xD0, cat.Pressure, 0);
-                        else if (evt is ParsedKeyAfterTouch kat) synth.ProcessMidiMessage(kat.Channel, 0xA0, kat.Note, kat.Pressure);
+                        if (evt is ParsedNoteOn on) layer.Synth.ProcessMidiMessage(on.Channel, 0x90, on.Note, on.Velocity);
+                        else if (evt is ParsedNoteOff off) layer.Synth.ProcessMidiMessage(off.Channel, 0x80, off.Note, 0);
+                        else if (evt is ParsedPatchChange pc) layer.Synth.ProcessMidiMessage(pc.Channel, 0xC0, pc.Patch, 0);
+                        else if (evt is ParsedControlChange cc) layer.Synth.ProcessMidiMessage(cc.Channel, 0xB0, cc.Controller, cc.Value);
+                        else if (evt is ParsedPitchBend pb) layer.Synth.ProcessMidiMessage(pb.Channel, 0xE0, pb.Value & 0x7F, (pb.Value >> 7) & 0x7F);
+                        else if (evt is ParsedChannelAfterTouch cat) layer.Synth.ProcessMidiMessage(cat.Channel, 0xD0, cat.Pressure, 0);
+                        else if (evt is ParsedKeyAfterTouch kat) layer.Synth.ProcessMidiMessage(kat.Channel, 0xA0, kat.Note, kat.Pressure);
                     }
                     _eventIndex++;
                 }

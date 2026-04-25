@@ -15,23 +15,23 @@ internal sealed class SoundFontResolverService : ISoundFontProvider
         _soundFontDirectory = SoundFontDownloadService.SoundFontDirectory;
     }
 
-    public IReadOnlyList<string> GetActiveSoundFontPaths()
+    public IReadOnlyList<(string Path, float Volume)> GetActiveSoundFontPaths()
     {
         if (!_settings.EnableSoundFont) return [];
 
-        var result = new List<string>();
+        var result = new List<(string Path, float Volume)>();
         var installedFiles = GetInstalledFiles();
 
         foreach (var layer in _settings.Layers.Where(l => l.IsEnabled && !string.IsNullOrEmpty(l.FileName)))
         {
             var match = installedFiles.FirstOrDefault(f =>
                 Path.GetFileName(f).Equals(layer.FileName, StringComparison.OrdinalIgnoreCase));
-            if (match is not null && !result.Contains(match))
-                result.Add(match);
+            if (match is not null && !result.Any(r => r.Path == match))
+                result.Add((match, layer.Volume));
         }
 
         if (result.Count == 0 && installedFiles.Count > 0)
-            result.Add(installedFiles.OrderByDescending(f => new FileInfo(f).Length).First());
+            result.Add((installedFiles.OrderByDescending(f => new FileInfo(f).Length).First(), 1.0f));
 
         return result;
     }
