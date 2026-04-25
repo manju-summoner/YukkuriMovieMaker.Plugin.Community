@@ -2,6 +2,8 @@ using MeltySynth;
 using NAudio.Midi;
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Interfaces;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Models;
 using MidiFile = NAudio.Midi.MidiFile;
@@ -285,10 +287,47 @@ internal sealed class SoundFontRenderer : IMidiRenderer
                         trs.Clear();
                         layer.Synth.Render(tls, trs);
 
-                        for (int i = 0; i < samplesToRender; i++)
+                        unsafe
                         {
-                            mls[samplesRendered + i] += tls[i] * layer.Volume;
-                            mrs[samplesRendered + i] += trs[i] * layer.Volume;
+                            fixed (float* pDstL = mls)
+                            fixed (float* pDstR = mrs)
+                            fixed (float* pSrcL = tls)
+                            fixed (float* pSrcR = trs)
+                            {
+                                float* dL = pDstL + samplesRendered;
+                                float* dR = pDstR + samplesRendered;
+                                float* sL = pSrcL;
+                                float* sR = pSrcR;
+                                float vol = layer.Volume;
+                                int i = 0;
+
+                                if (Avx.IsSupported && samplesToRender >= 8)
+                                {
+                                    int simdLength = samplesToRender - (samplesToRender % 8);
+                                    var vVol = Vector256.Create(vol);
+                                    for (; i < simdLength; i += 8)
+                                    {
+                                        Avx.Store(dL + i, Avx.Add(Avx.LoadVector256(dL + i), Avx.Multiply(Avx.LoadVector256(sL + i), vVol)));
+                                        Avx.Store(dR + i, Avx.Add(Avx.LoadVector256(dR + i), Avx.Multiply(Avx.LoadVector256(sR + i), vVol)));
+                                    }
+                                }
+                                else if (Sse.IsSupported && samplesToRender >= 4)
+                                {
+                                    int simdLength = samplesToRender - (samplesToRender % 4);
+                                    var vVol = Vector128.Create(vol);
+                                    for (; i < simdLength; i += 4)
+                                    {
+                                        Sse.Store(dL + i, Sse.Add(Sse.LoadVector128(dL + i), Sse.Multiply(Sse.LoadVector128(sL + i), vVol)));
+                                        Sse.Store(dR + i, Sse.Add(Sse.LoadVector128(dR + i), Sse.Multiply(Sse.LoadVector128(sR + i), vVol)));
+                                    }
+                                }
+
+                                for (; i < samplesToRender; i++)
+                                {
+                                    dL[i] += sL[i] * vol;
+                                    dR[i] += sR[i] * vol;
+                                }
+                            }
                         }
                     }
 
@@ -313,10 +352,51 @@ internal sealed class SoundFontRenderer : IMidiRenderer
                 }
             }
 
-            for (int i = 0; i < numMono; i++)
+            unsafe
             {
-                buffer[i * 2] = mls[i] * _masterVolume;
-                buffer[i * 2 + 1] = mrs[i] * _masterVolume;
+                fixed (float* pDst = buffer)
+                fixed (float* pSrcL = mixLeft)
+                fixed (float* pSrcR = mixRight)
+                {
+                    float* dst = pDst;
+                    float* srcL = pSrcL;
+                    float* srcR = pSrcR;
+                    float masterVol = _masterVolume;
+                    int i = 0;
+
+                    if (Avx.IsSupported && numMono >= 8)
+                    {
+                        int simdLength = numMono - (numMono % 8);
+                        var vVol = Vector256.Create(masterVol);
+                        for (; i < simdLength; i += 8)
+                        {
+                            var vL = Avx.Multiply(Avx.LoadVector256(srcL + i), vVol);
+                            var vR = Avx.Multiply(Avx.LoadVector256(srcR + i), vVol);
+                            var low = Avx.UnpackLow(vL, vR);
+                            var high = Avx.UnpackHigh(vL, vR);
+                            Avx.Store(dst + i * 2, Avx.Permute2x128(low, high, 0x20));
+                            Avx.Store(dst + i * 2 + 8, Avx.Permute2x128(low, high, 0x31));
+                        }
+                    }
+                    else if (Sse.IsSupported && numMono >= 4)
+                    {
+                        int simdLength = numMono - (numMono % 4);
+                        var vVol = Vector128.Create(masterVol);
+                        for (; i < simdLength; i += 4)
+                        {
+                            var vL = Sse.Multiply(Sse.LoadVector128(srcL + i), vVol);
+                            var vR = Sse.Multiply(Sse.LoadVector128(srcR + i), vVol);
+                            Sse.Store(dst + i * 2, Sse.UnpackLow(vL, vR));
+                            Sse.Store(dst + i * 2 + 4, Sse.UnpackHigh(vL, vR));
+                        }
+                    }
+
+                    for (; i < numMono; i++)
+                    {
+                        dst[i * 2] = srcL[i] * masterVol;
+                        dst[i * 2 + 1] = srcR[i] * masterVol;
+                    }
+                }
             }
         }
         finally
