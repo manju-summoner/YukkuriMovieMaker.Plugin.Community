@@ -17,11 +17,11 @@ internal sealed class SoundFontRenderer : IMidiRenderer
     private readonly List<(Synthesizer Synth, float Volume)> _layers;
     private readonly List<ParsedEvent> _events;
     private readonly List<MidiStateSnapshot> _snapshots = [];
-    private readonly int[] _activeNotes = new int[2048];
-    private readonly int[] _lastPatch = new int[16];
-    private readonly int[] _lastCC = new int[2048];
-    private readonly int[] _lastPitch = new int[16];
-    private readonly int[] _lastCat = new int[16];
+    private readonly int[] _activeNotes = new int[4096];
+    private readonly int[] _lastPatch = new int[32];
+    private readonly int[] _lastCC = new int[4096];
+    private readonly int[] _lastPitch = new int[32];
+    private readonly int[] _lastCat = new int[32];
     private long _currentMonoPosition = -1;
     private int _eventIndex;
     private bool _disposed;
@@ -187,11 +187,11 @@ internal sealed class SoundFontRenderer : IMidiRenderer
         if (snapshotIndex >= 0 && _snapshots.Count > 0)
         {
             var snap = _snapshots[snapshotIndex];
-            Array.Copy(snap.ActiveNotes, _activeNotes, 2048);
-            Array.Copy(snap.LastPatch, _lastPatch, 16);
-            Array.Copy(snap.LastCC, _lastCC, 2048);
-            Array.Copy(snap.LastPitch, _lastPitch, 16);
-            Array.Copy(snap.LastCat, _lastCat, 16);
+            Array.Copy(snap.ActiveNotes, _activeNotes, 4096);
+            Array.Copy(snap.LastPatch, _lastPatch, 32);
+            Array.Copy(snap.LastCC, _lastCC, 4096);
+            Array.Copy(snap.LastPitch, _lastPitch, 32);
+            Array.Copy(snap.LastCat, _lastCat, 32);
             startIndex = snap.EventIndex;
         }
         else
@@ -218,7 +218,7 @@ internal sealed class SoundFontRenderer : IMidiRenderer
 
         foreach (var layer in _layers)
         {
-            for (int ch = 0; ch < 16; ch++)
+            for (int ch = 0; ch < 32; ch++)
             {
                 if (_lastPatch[ch] != -1) layer.Synth.ProcessMidiMessage(ch, 0xC0, _lastPatch[ch], 0);
                 for (int cc = 0; cc < 128; cc++)
