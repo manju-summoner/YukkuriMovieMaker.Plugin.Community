@@ -83,4 +83,5 @@
 <data name="Download" xml:space="preserve"><value>다운로드</value></data>
 <data name="Print" xml:space="preserve"><value>인쇄</value></data>
 <data name="Find" xml:space="preserve"><value>검색</value></data>
+<data name="ConfirmClearBrowsingDataMessage" xml:space="preserve"><value>브라우징 데이터를 지우시겠습니까?</value></data>
 </root>

@@ -83,4 +83,5 @@
 <data name="Download" xml:space="preserve"><value>ダウンロード</value></data>
 <data name="Print" xml:space="preserve"><value>印刷</value></data>
 <data name="Find" xml:space="preserve"><value>検索</value></data>
+<data name="ConfirmClearBrowsingDataMessage" xml:space="preserve"><value>ブラウザの閲覧データを消去しますか？</value></data>
 </root>

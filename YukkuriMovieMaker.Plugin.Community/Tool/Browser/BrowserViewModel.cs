@@ -149,7 +149,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private async Task ExecuteClearBrowsingDataAsync()
         {
-            if (webView2?.CoreWebView2?.Profile != null)
+            if (webView2?.CoreWebView2?.Profile == null)
+                return;
+
+            var result = System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+                System.Windows.MessageBox.Show(
+                    Texts.ConfirmClearBrowsingDataMessage,
+                    Texts.ClearBrowsingData,
+                    System.Windows.MessageBoxButton.YesNo,
+                    System.Windows.MessageBoxImage.Question));
+
+            if (result == System.Windows.MessageBoxResult.Yes)
             {
                 await webView2.CoreWebView2.Profile.ClearBrowsingDataAsync();
             }

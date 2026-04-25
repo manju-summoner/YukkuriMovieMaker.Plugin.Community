@@ -83,4 +83,5 @@
 <data name="Download" xml:space="preserve"><value>تنزيل</value></data>
 <data name="Print" xml:space="preserve"><value>طباعة</value></data>
 <data name="Find" xml:space="preserve"><value>بحث</value></data>
+<data name="ConfirmClearBrowsingDataMessage" xml:space="preserve"><value>هل أنت متأكد أنك تريد مسح بيانات التصفح؟</value></data>
 </root>

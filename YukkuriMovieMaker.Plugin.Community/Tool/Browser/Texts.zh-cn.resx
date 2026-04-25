@@ -83,4 +83,5 @@
 <data name="Download" xml:space="preserve"><value>下载</value></data>
 <data name="Print" xml:space="preserve"><value>打印</value></data>
 <data name="Find" xml:space="preserve"><value>搜索</value></data>
+<data name="ConfirmClearBrowsingDataMessage" xml:space="preserve"><value>确定要清除浏览数据吗？</value></data>
 </root>
