@@ -37,12 +37,13 @@ public sealed class MidiAudioSource : IAudioFileSource
     private static IMidiRenderer CreateRenderer(string filePath, MidiPluginSettings settings)
     {
         var sfProvider = new SoundFontResolverService(settings.SoundFont);
-        IMidiRenderer baseRenderer;
-
-        if (settings.Performance.RenderingMode == RenderingMode.SoundFont && sfProvider.HasAnySoundFont())
-            baseRenderer = new SoundFontRenderer(filePath, sfProvider.GetActiveSoundFontPaths(), settings.Audio, settings.Performance);
-        else
-            baseRenderer = new WaveformSynthesisRenderer(filePath, settings.Audio, settings.Performance);
+        IMidiRenderer baseRenderer = settings.Performance.RenderingMode switch
+        {
+            RenderingMode.SoundFont when sfProvider.HasAnySoundFont() => new SoundFontRenderer(filePath, sfProvider.GetActiveSoundFontPaths(), settings.Audio, settings.Performance),
+            RenderingMode.SoundFont when settings.SoundFont.FallbackToSynthesis => new WaveformSynthesisRenderer(filePath, settings.Audio, settings.Performance),
+            RenderingMode.SoundFont => new SilentRenderer(),
+            _ => new WaveformSynthesisRenderer(filePath, settings.Audio, settings.Performance)
+        };
 
         if (settings.Performance.EnableGpuAcceleration)
             return new GpuChunkedRenderer(baseRenderer, settings);
