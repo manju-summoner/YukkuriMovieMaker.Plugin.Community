@@ -116,7 +116,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="60"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="150"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0" Content="{x:Static loc:Texts.LayerEnabled}" FontWeight="SemiBold" Padding="2"/>
                         <Label Grid.Column="1" Content="{x:Static loc:Texts.LayerFileName}" FontWeight="SemiBold" Padding="2"/>
@@ -148,7 +148,7 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="60"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="150"/>
                                     </Grid.ColumnDefinitions>
                                     <c:ToggleSlider Grid.Column="0"
                                                     Value="{Binding IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
