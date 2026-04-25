@@ -14,6 +14,12 @@ internal sealed class SoundFontRenderer : IMidiRenderer
     private readonly float _masterVolume;
     private readonly List<(Synthesizer Synth, float Volume)> _layers;
     private readonly List<ParsedEvent> _events;
+    private readonly List<MidiStateSnapshot> _snapshots = [];
+    private readonly int[] _activeNotes = new int[2048];
+    private readonly int[] _lastPatch = new int[16];
+    private readonly int[] _lastCC = new int[2048];
+    private readonly int[] _lastPitch = new int[16];
+    private readonly int[] _lastCat = new int[16];
     private long _currentMonoPosition = -1;
     private int _eventIndex;
     private bool _disposed;
@@ -28,6 +34,16 @@ internal sealed class SoundFontRenderer : IMidiRenderer
     private record ParsedPitchBend(long SampleTime, int Channel, int Value) : ParsedEvent(SampleTime);
     private record ParsedChannelAfterTouch(long SampleTime, int Channel, int Pressure) : ParsedEvent(SampleTime);
     private record ParsedKeyAfterTouch(long SampleTime, int Channel, int Note, int Pressure) : ParsedEvent(SampleTime);
+
+    private sealed record MidiStateSnapshot(
+        long SampleTime,
+        int EventIndex,
+        int[] ActiveNotes,
+        int[] LastPatch,
+        int[] LastCC,
+        int[] LastPitch,
+        int[] LastCat
+    );
 
     private static readonly ConcurrentDictionary<string, Lazy<SoundFont>> _sfCache = new(StringComparer.OrdinalIgnoreCase);
     private static readonly Lock _cacheLock = new();
@@ -54,7 +70,48 @@ internal sealed class SoundFontRenderer : IMidiRenderer
         _masterVolume = audio.MasterVolume;
         _layers = layers.Select(l => (new Synthesizer(GetSoundFont(l.Path), _sampleRate), l.Volume)).ToList();
         _events = ParseEvents(midiFilePath);
+        BuildSnapshots();
         SeekTo(0);
+    }
+
+    private void BuildSnapshots()
+    {
+        Array.Fill(_activeNotes, 0);
+        Array.Fill(_lastPatch, -1);
+        Array.Fill(_lastCC, -1);
+        Array.Fill(_lastPitch, -1);
+        Array.Fill(_lastCat, -1);
+
+        long nextSnapshotSample = 0;
+        int eventIndex = 0;
+        long maxSample = _events.Count > 0 ? _events[^1].SampleTime : 0;
+
+        while (nextSnapshotSample <= maxSample)
+        {
+            while (eventIndex < _events.Count && _events[eventIndex].SampleTime <= nextSnapshotSample)
+            {
+                var evt = _events[eventIndex];
+                if (evt is ParsedNoteOn on) _activeNotes[on.Channel * 128 + on.Note] = on.Velocity;
+                else if (evt is ParsedNoteOff off) _activeNotes[off.Channel * 128 + off.Note] = 0;
+                else if (evt is ParsedPatchChange pc) _lastPatch[pc.Channel] = pc.Patch;
+                else if (evt is ParsedControlChange cc) _lastCC[cc.Channel * 128 + cc.Controller] = cc.Value;
+                else if (evt is ParsedPitchBend pb) _lastPitch[pb.Channel] = pb.Value;
+                else if (evt is ParsedChannelAfterTouch cat) _lastCat[cat.Channel] = cat.Pressure;
+                eventIndex++;
+            }
+
+            _snapshots.Add(new MidiStateSnapshot(
+                nextSnapshotSample,
+                eventIndex,
+                _activeNotes.ToArray(),
+                _lastPatch.ToArray(),
+                _lastCC.ToArray(),
+                _lastPitch.ToArray(),
+                _lastCat.ToArray()
+            ));
+
+            nextSnapshotSample += _sampleRate;
+        }
     }
 
     private List<ParsedEvent> ParseEvents(string path)
@@ -121,35 +178,68 @@ internal sealed class SoundFontRenderer : IMidiRenderer
             layer.Synth.Reset();
         }
 
-        var activeNotes = new Dictionary<(int Channel, int Note), int>();
-        var lastPatch = new Dictionary<int, int>();
-        var lastCC = new Dictionary<(int Channel, int Controller), int>();
-        var lastPitch = new Dictionary<int, int>();
-        var lastCat = new Dictionary<int, int>();
+        int snapshotIndex = (int)(targetSample / _sampleRate);
+        if (snapshotIndex >= _snapshots.Count) snapshotIndex = _snapshots.Count - 1;
 
-        foreach (var evt in _events)
+        int startIndex = 0;
+        if (snapshotIndex >= 0 && _snapshots.Count > 0)
         {
+            var snap = _snapshots[snapshotIndex];
+            Array.Copy(snap.ActiveNotes, _activeNotes, 2048);
+            Array.Copy(snap.LastPatch, _lastPatch, 16);
+            Array.Copy(snap.LastCC, _lastCC, 2048);
+            Array.Copy(snap.LastPitch, _lastPitch, 16);
+            Array.Copy(snap.LastCat, _lastCat, 16);
+            startIndex = snap.EventIndex;
+        }
+        else
+        {
+            Array.Fill(_activeNotes, 0);
+            Array.Fill(_lastPatch, -1);
+            Array.Fill(_lastCC, -1);
+            Array.Fill(_lastPitch, -1);
+            Array.Fill(_lastCat, -1);
+        }
+
+        for (int i = startIndex; i < _events.Count; i++)
+        {
+            var evt = _events[i];
             if (evt.SampleTime > targetSample) break;
 
-            if (evt is ParsedNoteOn on) activeNotes[(on.Channel, on.Note)] = on.Velocity;
-            else if (evt is ParsedNoteOff off) activeNotes.Remove((off.Channel, off.Note));
-            else if (evt is ParsedPatchChange pc) lastPatch[pc.Channel] = pc.Patch;
-            else if (evt is ParsedControlChange cc) lastCC[(cc.Channel, cc.Controller)] = cc.Value;
-            else if (evt is ParsedPitchBend pb) lastPitch[pb.Channel] = pb.Value;
-            else if (evt is ParsedChannelAfterTouch cat) lastCat[cat.Channel] = cat.Pressure;
+            if (evt is ParsedNoteOn on) _activeNotes[on.Channel * 128 + on.Note] = on.Velocity;
+            else if (evt is ParsedNoteOff off) _activeNotes[off.Channel * 128 + off.Note] = 0;
+            else if (evt is ParsedPatchChange pc) _lastPatch[pc.Channel] = pc.Patch;
+            else if (evt is ParsedControlChange cc) _lastCC[cc.Channel * 128 + cc.Controller] = cc.Value;
+            else if (evt is ParsedPitchBend pb) _lastPitch[pb.Channel] = pb.Value;
+            else if (evt is ParsedChannelAfterTouch cat) _lastCat[cat.Channel] = cat.Pressure;
         }
 
         foreach (var layer in _layers)
         {
-            foreach (var kv in lastPatch) layer.Synth.ProcessMidiMessage(kv.Key, 0xC0, kv.Value, 0);
-            foreach (var kv in lastCC) layer.Synth.ProcessMidiMessage(kv.Key.Channel, 0xB0, kv.Key.Controller, kv.Value);
-            foreach (var kv in lastPitch) layer.Synth.ProcessMidiMessage(kv.Key, 0xE0, kv.Value & 0x7F, (kv.Value >> 7) & 0x7F);
-            foreach (var kv in lastCat) layer.Synth.ProcessMidiMessage(kv.Key, 0xD0, kv.Value, 0);
-            foreach (var kv in activeNotes) layer.Synth.ProcessMidiMessage(kv.Key.Channel, 0x90, kv.Key.Note, kv.Value);
+            for (int ch = 0; ch < 16; ch++)
+            {
+                if (_lastPatch[ch] != -1) layer.Synth.ProcessMidiMessage(ch, 0xC0, _lastPatch[ch], 0);
+                for (int cc = 0; cc < 128; cc++)
+                {
+                    int val = _lastCC[ch * 128 + cc];
+                    if (val != -1) layer.Synth.ProcessMidiMessage(ch, 0xB0, cc, val);
+                }
+                if (_lastPitch[ch] != -1) layer.Synth.ProcessMidiMessage(ch, 0xE0, _lastPitch[ch] & 0x7F, (_lastPitch[ch] >> 7) & 0x7F);
+                if (_lastCat[ch] != -1) layer.Synth.ProcessMidiMessage(ch, 0xD0, _lastCat[ch], 0);
+
+                for (int n = 0; n < 128; n++)
+                {
+                    int vel = _activeNotes[ch * 128 + n];
+                    if (vel > 0) layer.Synth.ProcessMidiMessage(ch, 0x90, n, vel);
+                }
+            }
         }
 
-        _eventIndex = _events.FindIndex(e => e.SampleTime > targetSample);
-        if (_eventIndex == -1) _eventIndex = _events.Count;
+        _eventIndex = startIndex;
+        while (_eventIndex < _events.Count && _events[_eventIndex].SampleTime <= targetSample)
+        {
+            _eventIndex++;
+        }
         _currentMonoPosition = targetSample;
     }
 
