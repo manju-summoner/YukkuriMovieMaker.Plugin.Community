@@ -18,6 +18,7 @@ public sealed class MidiAudioSource : IAudioFileSource
     private readonly IMidiRenderer _renderer;
     private long _position;
     private bool _disposed;
+    private readonly Lock _syncRoot = new();
 
     internal MidiAudioSource(string filePath, MidiPluginSettings settings)
     {
@@ -55,17 +56,22 @@ public sealed class MidiAudioSource : IAudioFileSource
     {
         if (_disposed) return 0;
 
-        var pos = Interlocked.Read(ref _position);
-        _renderer.Read(destBuffer.AsSpan(offset, count), pos);
-        Interlocked.Add(ref _position, count);
-        return count;
+        lock (_syncRoot)
+        {
+            _renderer.Read(destBuffer.AsSpan(offset, count), _position);
+            _position += count;
+            return count;
+        }
     }
 
     public void Seek(TimeSpan time)
     {
         var newPos = (long)(time.TotalSeconds * _sampleRate) * 2;
-        Interlocked.Exchange(ref _position, newPos);
-        _renderer.Seek(newPos);
+        lock (_syncRoot)
+        {
+            _position = newPos;
+            _renderer.Seek(newPos);
+        }
     }
 
     public void Dispose()
