@@ -111,7 +111,7 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
                     {
                         _gpuProcessor.TryApplyEffects(
                             workBuffer.AsSpan(),
-                            _settings.Effects.LimiterThreshold,
+                            _settings.Effects.EnableLimiter ? _settings.Effects.LimiterThreshold : 0f,
                             _settings.Effects.EnableCompression,
                             _settings.Effects.CompressionThreshold,
                             _settings.Effects.CompressionRatio);
@@ -126,7 +126,7 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
                     {
                         _gpuProcessor.TryApplyEffects(
                             processedChunk.AsSpan(),
-                            _settings.Effects.LimiterThreshold,
+                            _settings.Effects.EnableLimiter ? _settings.Effects.LimiterThreshold : 0f,
                             _settings.Effects.EnableCompression,
                             _settings.Effects.CompressionThreshold,
                             _settings.Effects.CompressionRatio);
