@@ -43,15 +43,18 @@ public sealed class MidiAudioSourcePlugin : IAudioFileSourcePlugin
 
             Application.Current?.Dispatcher.Invoke(() =>
             {
-                if (MessageBox.Show(
-                        $"{Texts.DownloadSoundFont}\n\n({DefaultSoundFontFileName})",
-                        Texts.PluginName,
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question) != MessageBoxResult.Yes ||
-                    new SoundFontDownloadDialog().ShowDialog() == true)
+                var result = MessageBox.Show(
+                    $"{Texts.DownloadSoundFont}\n\n({DefaultSoundFontFileName})",
+                    Texts.PluginName,
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                sf.HasShownDownloadPrompt = true;
+                MidiPluginSettings.Default.Save();
+
+                if (result == MessageBoxResult.Yes)
                 {
-                    sf.HasShownDownloadPrompt = true;
-                    MidiPluginSettings.Default.Save();
+                    new SoundFontDownloadDialog().ShowDialog();
                 }
             });
         }
