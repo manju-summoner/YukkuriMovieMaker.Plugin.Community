@@ -98,4 +98,5 @@
 <data name="SoundFontDirectory" xml:space="preserve"><value>사운드폰트 폴더</value></data>
 <data name="OpenSoundFontFolder" xml:space="preserve"><value>폴더 열기</value></data>
 <data name="FileReadError" xml:space="preserve"><value>파일 읽기에 실패했습니다.</value></data>
+<data name="MidiParseError" xml:space="preserve"><value>MIDI 파일 구문 분석에 실패했습니다. 파일이 손상되었을 수 있습니다.</value></data>
 </root>

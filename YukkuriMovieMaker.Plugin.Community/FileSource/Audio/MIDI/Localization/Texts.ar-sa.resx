@@ -98,4 +98,5 @@
 <data name="SoundFontDirectory" xml:space="preserve"><value>مجلد SoundFont</value></data>
 <data name="OpenSoundFontFolder" xml:space="preserve"><value>فتح المجلد</value></data>
 <data name="FileReadError" xml:space="preserve"><value>فشل في قراءة الملف.</value></data>
+<data name="MidiParseError" xml:space="preserve"><value>فشل في تحليل ملف MIDI. قد يكون الملف تالفًا.</value></data>
 </root>

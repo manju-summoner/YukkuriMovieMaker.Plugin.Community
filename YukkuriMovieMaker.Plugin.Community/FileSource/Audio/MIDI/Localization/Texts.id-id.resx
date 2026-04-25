@@ -98,4 +98,5 @@
 <data name="SoundFontDirectory" xml:space="preserve"><value>Folder SoundFont</value></data>
 <data name="OpenSoundFontFolder" xml:space="preserve"><value>Buka Folder</value></data>
 <data name="FileReadError" xml:space="preserve"><value>Gagal membaca file.</value></data>
+<data name="MidiParseError" xml:space="preserve"><value>Gagal mengurai file MIDI. File mungkin rusak.</value></data>
 </root>

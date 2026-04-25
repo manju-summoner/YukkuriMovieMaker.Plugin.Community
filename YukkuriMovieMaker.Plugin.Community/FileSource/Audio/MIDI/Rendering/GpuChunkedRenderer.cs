@@ -63,6 +63,11 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
         return samplesRead;
     }
 
+    /// <summary>
+    /// オーバーラップ・セーブ方式による音声チャンクの取得およびレンダリングを行います。
+    /// 前後のチャンク履歴を考慮したエフェクト処理をシームレスに適用し、
+    /// 同時に再生位置から一定距離離れたチャンクを即座に破棄する戦略によりメモリ枯渇を防ぎます。
+    /// </summary>
     private float[] GetOrRenderChunk(long chunkIndex)
     {
         if (_processedChunks.TryGetValue(chunkIndex, out var cached))

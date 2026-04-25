@@ -98,4 +98,5 @@
 <data name="SoundFontDirectory" xml:space="preserve"><value>Carpeta SoundFont</value></data>
 <data name="OpenSoundFontFolder" xml:space="preserve"><value>Abrir carpeta</value></data>
 <data name="FileReadError" xml:space="preserve"><value>Error al leer el archivo.</value></data>
+<data name="MidiParseError" xml:space="preserve"><value>Error al analizar el archivo MIDI. El archivo puede estar dañado.</value></data>
 </root>

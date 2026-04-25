@@ -4,7 +4,9 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
+using System.Windows;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Interfaces;
+using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Localization;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Models;
 using MidiFile = NAudio.Midi.MidiFile;
 
@@ -76,6 +78,11 @@ internal sealed class SoundFontRenderer : IMidiRenderer
         SeekTo(0);
     }
 
+    /// <summary>
+    /// シーク時の計算量をO(N)からO(1)へ削減するための状態スナップショットを事前に構築します。
+    /// 一定間隔ごとに再生状態を記録することで、
+    /// 任意の再生位置へ瞬時に移動可能なシークパフォーマンスを実現します。
+    /// </summary>
     private void BuildSnapshots()
     {
         Array.Fill(_activeNotes, 0);
@@ -169,7 +176,14 @@ internal sealed class SoundFontRenderer : IMidiRenderer
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Application.Current?.Dispatcher.Invoke(() => MessageBox.Show(
+                $"{Texts.MidiParseError}\n\n{ex.Message}",
+                Texts.PluginName,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error));
+        }
         return result;
     }
 
@@ -245,6 +259,11 @@ internal sealed class SoundFontRenderer : IMidiRenderer
         _currentMonoPosition = targetSample;
     }
 
+    /// <summary>
+    /// 指定された位置からのオーディオレンダリングを実行します。
+    /// 配列プールを利用したゼロアロケーションアーキテクチャと、SIMD命令を用いた
+    /// 音声のベクトル化ミックス処理により、ガベージコレクションの発生を抑えつつ高いパフォーマンスを引き出します。
+    /// </summary>
     public int Read(Span<float> buffer, long stereoPosition)
     {
         long targetMono = stereoPosition / 2;
