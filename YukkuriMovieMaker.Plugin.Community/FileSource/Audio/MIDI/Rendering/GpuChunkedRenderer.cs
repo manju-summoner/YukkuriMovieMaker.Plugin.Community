@@ -139,7 +139,18 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
             }
 
             _processedChunks[chunkIndex] = processedChunk;
-            _rawChunks.TryRemove(chunkIndex - 2, out _);
+
+            foreach (var key in _processedChunks.Keys)
+            {
+                if (key < chunkIndex - 2 || key > chunkIndex + 2)
+                    _processedChunks.TryRemove(key, out _);
+            }
+
+            foreach (var key in _rawChunks.Keys)
+            {
+                if (key < chunkIndex - 2 || key > chunkIndex + 2)
+                    _rawChunks.TryRemove(key, out _);
+            }
 
             return processedChunk;
         }
