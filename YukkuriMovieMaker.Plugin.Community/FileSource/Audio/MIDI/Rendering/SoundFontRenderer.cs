@@ -30,11 +30,23 @@ internal sealed class SoundFontRenderer : IMidiRenderer
     private record ParsedKeyAfterTouch(long SampleTime, int Channel, int Note, int Pressure) : ParsedEvent(SampleTime);
 
     private static readonly ConcurrentDictionary<string, Lazy<SoundFont>> _sfCache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Lock _cacheLock = new();
 
-    public static void ClearCache() => _sfCache.Clear();
+    public static void ClearCache()
+    {
+        lock (_cacheLock)
+        {
+            _sfCache.Clear();
+        }
+    }
 
-    private static SoundFont GetSoundFont(string path) =>
-        _sfCache.GetOrAdd(path, p => new Lazy<SoundFont>(() => new SoundFont(p))).Value;
+    private static SoundFont GetSoundFont(string path)
+    {
+        lock (_cacheLock)
+        {
+            return _sfCache.GetOrAdd(path, p => new Lazy<SoundFont>(() => new SoundFont(p))).Value;
+        }
+    }
 
     public SoundFontRenderer(string midiFilePath, IReadOnlyList<(string Path, float Volume)> layers, AudioSettings audio, PerformanceSettings performance)
     {
