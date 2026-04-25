@@ -75,14 +75,16 @@ internal readonly partial struct CompressionShader : IComputeShader
 [GeneratedComputeShaderDescriptor]
 internal readonly partial struct ReverbShader : IComputeShader
 {
-    private readonly ReadWriteBuffer<float> buffer;
+    private readonly ReadOnlyBuffer<float> input;
+    private readonly ReadWriteBuffer<float> output;
     private readonly int delaySamples;
     private readonly float decay;
     private readonly int bufferLength;
 
-    public ReverbShader(ReadWriteBuffer<float> buffer, int delaySamples, float decay, int bufferLength)
+    public ReverbShader(ReadOnlyBuffer<float> input, ReadWriteBuffer<float> output, int delaySamples, float decay, int bufferLength)
     {
-        this.buffer = buffer;
+        this.input = input;
+        this.output = output;
         this.delaySamples = delaySamples;
         this.decay = decay;
         this.bufferLength = bufferLength;
@@ -93,6 +95,8 @@ internal readonly partial struct ReverbShader : IComputeShader
         int i = ThreadIds.X;
         if (i >= bufferLength) return;
         if (i >= delaySamples)
-            buffer[i] += buffer[i - delaySamples] * decay;
+            output[i] = input[i] + input[i - delaySamples] * decay;
+        else
+            output[i] = input[i];
     }
 }
