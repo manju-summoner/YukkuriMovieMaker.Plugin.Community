@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -32,6 +32,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         } = string.Empty;
         public double FontSize => Math.Max(8, SystemFonts.MessageFontSize * Zoom);
         public double Zoom { get; set => Set(ref field, Math.Max(0.25, value), nameof(Zoom), nameof(FontSize)); } = 1.0;
+        public bool WordWrap { get; set => Set(ref field, value); } = false;
 
         public OpenFileDialogViewModel OpenFileDialog { get; } = new();
         public SaveFileDialogViewModel SaveFileDialog { get; } = new();
@@ -104,11 +105,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 {
                     var notepadState = new NotepadState()
                     {
-                        Zoom = Zoom
+                        Zoom = Zoom,
+                        WordWrap = WordWrap
                     };
-                    var toolState = new ToolState() 
-                    { 
-                        SavedState = Json.Json.GetJsonText(notepadState) 
+                    var toolState = new ToolState()
+                    {
+                        SavedState = Json.Json.GetJsonText(notepadState)
                     };
                     var args = new CreateNewToolViewRequestedEventArgs(toolState);
                     CreateNewToolViewRequested?.Invoke(this, args);
@@ -118,15 +120,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         public void LoadState(ToolState stateData)
         {
-            if(stateData.SavedState is null)
+            if (stateData.SavedState is null)
                 return;
             var state = Json.Json.LoadFromText<NotepadState>(stateData.SavedState);
-            if(state is null)
+            if (state is null)
                 return;
             FilePath = state.FilePath;
             Text = state.Text;
             Zoom = state.Zoom;
             IsSaved = state.IsSaved;
+            WordWrap = state.WordWrap;
         }
 
         public ToolState SaveState()
@@ -140,6 +143,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     Text = Text,
                     Zoom = Zoom,
                     IsSaved = IsSaved,
+                    WordWrap = WordWrap,
                 }),
             };
         }

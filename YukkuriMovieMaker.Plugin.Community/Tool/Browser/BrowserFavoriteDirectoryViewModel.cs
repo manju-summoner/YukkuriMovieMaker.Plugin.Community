@@ -1,8 +1,9 @@
-﻿namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
+namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 {
     class BrowserFavoriteDirectoryViewModel : IBrowserFavoriteItemViewModel
     {
         public string Display { get; }
+        public string IconPath => string.Empty;
         public string[] Path { get; }
         public IBrowserFavoriteItemViewModel[] Items { get; }
 

@@ -1,4 +1,4 @@
-﻿namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
+namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
     internal class NotepadState
     {
@@ -6,5 +6,6 @@
         public string Text { get; set; } = string.Empty;
         public double Zoom { get; set; } = 1.0;
         public bool IsSaved { get; set; } = true;
+        public bool WordWrap { get; set; } = false;
     }
 }
