@@ -13,9 +13,11 @@ public sealed class MidiAudioSource : IAudioFileSource
 
     public TimeSpan Duration { get; }
     public int Hz => _sampleRate;
+    public bool IsReadable { get; }
+    internal Exception? LoadError { get; }
 
     private readonly int _sampleRate;
-    private readonly IMidiRenderer _renderer;
+    private readonly IMidiRenderer? _renderer;
     private long _position;
     private bool _disposed;
     private readonly Lock _syncRoot = new();
@@ -23,16 +25,30 @@ public sealed class MidiAudioSource : IAudioFileSource
     internal MidiAudioSource(string filePath, MidiPluginSettings settings)
     {
         _sampleRate = settings.Audio.SampleRate;
+
         try
         {
             var mf = new MidiFile(filePath);
             Duration = mf.Length + TimeSpan.FromSeconds(2.0);
         }
-        catch
+        catch (Exception ex)
         {
             Duration = TimeSpan.Zero;
+            LoadError = ex;
+            IsReadable = false;
+            return;
         }
-        _renderer = CreateRenderer(filePath, settings);
+
+        try
+        {
+            _renderer = CreateRenderer(filePath, settings);
+            IsReadable = true;
+        }
+        catch (Exception ex)
+        {
+            LoadError = ex;
+            IsReadable = false;
+        }
     }
 
     private static IMidiRenderer CreateRenderer(string filePath, MidiPluginSettings settings)
@@ -42,7 +58,7 @@ public sealed class MidiAudioSource : IAudioFileSource
         {
             RenderingMode.SoundFont when sfProvider.HasAnySoundFont() => new SoundFontRenderer(filePath, sfProvider.GetActiveSoundFontPaths(), settings.Audio, settings.Performance),
             RenderingMode.SoundFont when settings.SoundFont.FallbackToSynthesis => new WaveformSynthesisRenderer(filePath, settings.Audio, settings.Performance),
-            RenderingMode.SoundFont => new SilentRenderer(),
+            RenderingMode.SoundFont => throw new InvalidOperationException("No SoundFont available and fallback to synthesis is disabled."),
             _ => new WaveformSynthesisRenderer(filePath, settings.Audio, settings.Performance)
         };
 
@@ -54,7 +70,7 @@ public sealed class MidiAudioSource : IAudioFileSource
 
     public int Read(float[] destBuffer, int offset, int count)
     {
-        if (_disposed) return 0;
+        if (_disposed || _renderer is null) return 0;
 
         lock (_syncRoot)
         {
@@ -70,7 +86,7 @@ public sealed class MidiAudioSource : IAudioFileSource
         lock (_syncRoot)
         {
             _position = newPos;
-            _renderer.Seek(newPos);
+            _renderer?.Seek(newPos);
         }
     }
 
@@ -78,7 +94,7 @@ public sealed class MidiAudioSource : IAudioFileSource
     {
         if (_disposed) return;
         _disposed = true;
-        _renderer.Dispose();
+        _renderer?.Dispose();
         GC.SuppressFinalize(this);
     }
 }

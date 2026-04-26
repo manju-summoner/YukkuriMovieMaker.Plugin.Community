@@ -4,9 +4,7 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
-using System.Windows;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Interfaces;
-using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Localization;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Models;
 using MidiFile = NAudio.Midi.MidiFile;
 
@@ -126,63 +124,52 @@ internal sealed class SoundFontRenderer : IMidiRenderer
     private List<ParsedEvent> ParseEvents(string path)
     {
         var result = new List<ParsedEvent>();
-        try
+        var midiFile = new MidiFile(path, false);
+        int ticksPerQ = midiFile.DeltaTicksPerQuarterNote;
+        double secondsPerTick = 500000.0 / (ticksPerQ * 1_000_000.0);
+        var allEvents = midiFile.Events.SelectMany(t => t).OrderBy(e => e.AbsoluteTime).ToList();
+
+        long currentSample = 0;
+        long lastTick = 0;
+
+        foreach (var evt in allEvents)
         {
-            var midiFile = new MidiFile(path, false);
-            int ticksPerQ = midiFile.DeltaTicksPerQuarterNote;
-            double secondsPerTick = 500000.0 / (ticksPerQ * 1_000_000.0);
-            var allEvents = midiFile.Events.SelectMany(t => t).OrderBy(e => e.AbsoluteTime).ToList();
+            long delta = evt.AbsoluteTime - lastTick;
+            currentSample += (long)(delta * secondsPerTick * _sampleRate);
+            lastTick = evt.AbsoluteTime;
 
-            long currentSample = 0;
-            long lastTick = 0;
-
-            foreach (var evt in allEvents)
+            if (evt is TempoEvent te)
             {
-                long delta = evt.AbsoluteTime - lastTick;
-                currentSample += (long)(delta * secondsPerTick * _sampleRate);
-                lastTick = evt.AbsoluteTime;
-
-                if (evt is TempoEvent te)
-                {
-                    secondsPerTick = te.MicrosecondsPerQuarterNote / (ticksPerQ * 1_000_000.0);
-                }
-                else if (evt is NoteOnEvent on && on.Velocity > 0)
-                {
-                    result.Add(new ParsedNoteOn(currentSample, on.Channel, on.NoteNumber, on.Velocity));
-                }
-                else if (evt is NoteEvent ne && (ne.CommandCode == MidiCommandCode.NoteOff || (ne is NoteOnEvent no && no.Velocity == 0)))
-                {
-                    result.Add(new ParsedNoteOff(currentSample, ne.Channel, ne.NoteNumber));
-                }
-                else if (evt is PatchChangeEvent pc)
-                {
-                    result.Add(new ParsedPatchChange(currentSample, pc.Channel, pc.Patch));
-                }
-                else if (evt is ControlChangeEvent cc)
-                {
-                    result.Add(new ParsedControlChange(currentSample, cc.Channel, (int)cc.Controller, cc.ControllerValue));
-                }
-                else if (evt is PitchWheelChangeEvent pw)
-                {
-                    result.Add(new ParsedPitchBend(currentSample, pw.Channel, pw.Pitch));
-                }
-                else if (evt is ChannelAfterTouchEvent cat)
-                {
-                    result.Add(new ParsedChannelAfterTouch(currentSample, cat.Channel, cat.AfterTouchPressure));
-                }
-                else if (evt.CommandCode == MidiCommandCode.KeyAfterTouch && evt is NoteEvent kat)
-                {
-                    result.Add(new ParsedKeyAfterTouch(currentSample, kat.Channel, kat.NoteNumber, kat.Velocity));
-                }
+                secondsPerTick = te.MicrosecondsPerQuarterNote / (ticksPerQ * 1_000_000.0);
             }
-        }
-        catch (Exception ex)
-        {
-            Application.Current?.Dispatcher.Invoke(() => MessageBox.Show(
-                $"{Texts.MidiParseError}\n\n{ex.Message}",
-                Texts.PluginName,
-                MessageBoxButton.OK,
-                MessageBoxImage.Error));
+            else if (evt is NoteOnEvent on && on.Velocity > 0)
+            {
+                result.Add(new ParsedNoteOn(currentSample, on.Channel, on.NoteNumber, on.Velocity));
+            }
+            else if (evt is NoteEvent ne && (ne.CommandCode == MidiCommandCode.NoteOff || (ne is NoteOnEvent no && no.Velocity == 0)))
+            {
+                result.Add(new ParsedNoteOff(currentSample, ne.Channel, ne.NoteNumber));
+            }
+            else if (evt is PatchChangeEvent pc)
+            {
+                result.Add(new ParsedPatchChange(currentSample, pc.Channel, pc.Patch));
+            }
+            else if (evt is ControlChangeEvent cc)
+            {
+                result.Add(new ParsedControlChange(currentSample, cc.Channel, (int)cc.Controller, cc.ControllerValue));
+            }
+            else if (evt is PitchWheelChangeEvent pw)
+            {
+                result.Add(new ParsedPitchBend(currentSample, pw.Channel, pw.Pitch));
+            }
+            else if (evt is ChannelAfterTouchEvent cat)
+            {
+                result.Add(new ParsedChannelAfterTouch(currentSample, cat.Channel, cat.AfterTouchPressure));
+            }
+            else if (evt.CommandCode == MidiCommandCode.KeyAfterTouch && evt is NoteEvent kat)
+            {
+                result.Add(new ParsedKeyAfterTouch(currentSample, kat.Channel, kat.NoteNumber, kat.Velocity));
+            }
         }
         return result;
     }

@@ -27,52 +27,48 @@ internal sealed class WaveformSynthesisRenderer : IMidiRenderer
     private List<ParsedNote> ParseNoteEvents(string path)
     {
         var result = new List<ParsedNote>();
-        try
+        var midiFile = new MidiFile(path, false);
+        int ticksPerQ = midiFile.DeltaTicksPerQuarterNote;
+        double secondsPerTick = 500000.0 / (ticksPerQ * 1_000_000.0);
+        var openNotes = new Dictionary<(int, int), (long StartSample, float Velocity)>();
+        var allEvents = midiFile.Events.SelectMany(t => t).OrderBy(e => e.AbsoluteTime).ToList();
+        long currentSample = 0;
+        long lastTick = 0;
+
+        foreach (var evt in allEvents)
         {
-            var midiFile = new MidiFile(path, false);
-            int ticksPerQ = midiFile.DeltaTicksPerQuarterNote;
-            double secondsPerTick = 500000.0 / (ticksPerQ * 1_000_000.0);
-            var openNotes = new Dictionary<(int, int), (long StartSample, float Velocity)>();
-            var allEvents = midiFile.Events.SelectMany(t => t).OrderBy(e => e.AbsoluteTime).ToList();
-            long currentSample = 0;
-            long lastTick = 0;
+            long delta = evt.AbsoluteTime - lastTick;
+            currentSample += (long)(delta * secondsPerTick * _sampleRate);
+            lastTick = evt.AbsoluteTime;
+            if (evt is TempoEvent te)
+                secondsPerTick = te.MicrosecondsPerQuarterNote / (ticksPerQ * 1_000_000.0);
 
-            foreach (var evt in allEvents)
+            if (evt is NoteOnEvent on && on.Velocity > 0)
             {
-                long delta = evt.AbsoluteTime - lastTick;
-                currentSample += (long)(delta * secondsPerTick * _sampleRate);
-                lastTick = evt.AbsoluteTime;
-                if (evt is TempoEvent te)
-                    secondsPerTick = te.MicrosecondsPerQuarterNote / (ticksPerQ * 1_000_000.0);
-
-                if (evt is NoteOnEvent on && on.Velocity > 0)
+                var key = (on.Channel, on.NoteNumber);
+                if (openNotes.TryGetValue(key, out var oldNote))
                 {
-                    var key = (on.Channel, on.NoteNumber);
-                    if (openNotes.TryGetValue(key, out var oldNote))
-                    {
-                        result.Add(new ParsedNote(Freq(key.Item2), oldNote.StartSample, currentSample, oldNote.Velocity));
-                    }
-                    else if (openNotes.Count >= _maxPolyphony)
-                    {
-                        var oldest = openNotes.OrderBy(kv => kv.Value.StartSample).First();
-                        openNotes.Remove(oldest.Key);
-                        result.Add(new ParsedNote(Freq(oldest.Key.Item2), oldest.Value.StartSample, currentSample, oldest.Value.Velocity));
-                    }
-                    openNotes[key] = (currentSample, on.Velocity / 127f);
+                    result.Add(new ParsedNote(Freq(key.Item2), oldNote.StartSample, currentSample, oldNote.Velocity));
                 }
-                else if (evt is NoteEvent ne && (ne.CommandCode == MidiCommandCode.NoteOff || (ne is NoteOnEvent no && no.Velocity == 0)))
+                else if (openNotes.Count >= _maxPolyphony)
                 {
-                    var key = (ne.Channel, ne.NoteNumber);
-                    if (openNotes.Remove(key, out var op))
-                    {
-                        result.Add(new ParsedNote(Freq(ne.NoteNumber), op.StartSample, currentSample, op.Velocity));
-                    }
+                    var oldest = openNotes.OrderBy(kv => kv.Value.StartSample).First();
+                    openNotes.Remove(oldest.Key);
+                    result.Add(new ParsedNote(Freq(oldest.Key.Item2), oldest.Value.StartSample, currentSample, oldest.Value.Velocity));
+                }
+                openNotes[key] = (currentSample, on.Velocity / 127f);
+            }
+            else if (evt is NoteEvent ne && (ne.CommandCode == MidiCommandCode.NoteOff || (ne is NoteOnEvent no && no.Velocity == 0)))
+            {
+                var key = (ne.Channel, ne.NoteNumber);
+                if (openNotes.Remove(key, out var op))
+                {
+                    result.Add(new ParsedNote(Freq(ne.NoteNumber), op.StartSample, currentSample, op.Velocity));
                 }
             }
-            foreach (var kv in openNotes)
-                result.Add(new ParsedNote(Freq(kv.Key.Item2), kv.Value.StartSample, currentSample, kv.Value.Velocity));
         }
-        catch { }
+        foreach (var kv in openNotes)
+            result.Add(new ParsedNote(Freq(kv.Key.Item2), kv.Value.StartSample, currentSample, kv.Value.Velocity));
         return result;
     }
 

@@ -27,7 +27,17 @@ public sealed class MidiAudioSourcePlugin : IAudioFileSourcePlugin
     {
         if (!IsSupportedFile(filePath)) return null;
         TryPromptDownloadOnFirstUse();
-        return new MidiAudioSource(filePath, MidiPluginSettings.Default);
+        var source = new MidiAudioSource(filePath, MidiPluginSettings.Default);
+        if (source.IsReadable) 
+            return source;
+
+        if (source.LoadError is { } ex)
+            Log.Default.Write($"{Texts.MidiParseError} path={filePath}", ex);
+        else
+            Log.Default.Write($"{Texts.MidiParseError} path={filePath}");
+        source.Dispose();
+
+        return null;
     }
 
     private static void TryPromptDownloadOnFirstUse()
