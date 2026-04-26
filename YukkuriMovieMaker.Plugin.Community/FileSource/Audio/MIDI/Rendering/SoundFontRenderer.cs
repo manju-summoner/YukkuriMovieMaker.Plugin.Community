@@ -73,7 +73,11 @@ internal sealed class SoundFontRenderer : IMidiRenderer
     {
         _sampleRate = audio.SampleRate;
         _masterVolume = audio.MasterVolume;
-        _layers = layers.Select(l => (new Synthesizer(GetSoundFont(l.Path), _sampleRate), l.Volume)).ToList();
+        var synthSettings = new SynthesizerSettings(_sampleRate)
+        {
+            MaximumPolyphony = performance.MaxPolyphony,
+        };
+        _layers = layers.Select(l => (new Synthesizer(GetSoundFont(l.Path), synthSettings), l.Volume)).ToList();
         _events = ParseEvents(midiFilePath);
         BuildSnapshots();
         SeekTo(0);
