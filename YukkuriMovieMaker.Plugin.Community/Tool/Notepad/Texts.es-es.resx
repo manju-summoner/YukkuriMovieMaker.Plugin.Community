@@ -69,4 +69,5 @@
 <data name="Error" xml:space="preserve"><value>Error</value></data>
 <data name="Untitled" xml:space="preserve"><value>Sin título</value></data>
 <data name="OpenNewTab" xml:space="preserve"><value>Abrir pestaña nueva</value></data>
+<data name="WordWrap" xml:space="preserve"><value>Ajuste de línea</value></data>
 </root>
