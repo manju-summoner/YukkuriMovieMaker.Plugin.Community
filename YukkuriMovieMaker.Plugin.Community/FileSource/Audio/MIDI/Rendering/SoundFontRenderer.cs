@@ -17,11 +17,14 @@ internal sealed class SoundFontRenderer : IMidiRenderer
     private readonly List<(Synthesizer Synth, float Volume)> _layers;
     private readonly List<ParsedEvent> _events;
     private readonly List<MidiStateSnapshot> _snapshots = [];
-    private readonly int[] _activeNotes = new int[4096];
-    private readonly int[] _lastPatch = new int[32];
-    private readonly int[] _lastCC = new int[4096];
-    private readonly int[] _lastPitch = new int[32];
-    private readonly int[] _lastCat = new int[32];
+    private const int ChannelCount = 16;
+    private const int NotesPerChannel = 128;
+    private const int CCPerChannel = 128;
+    private readonly int[] _activeNotes = new int[ChannelCount * NotesPerChannel];
+    private readonly int[] _lastPatch = new int[ChannelCount];
+    private readonly int[] _lastCC = new int[ChannelCount * CCPerChannel];
+    private readonly int[] _lastPitch = new int[ChannelCount];
+    private readonly int[] _lastCat = new int[ChannelCount];
     private long _currentMonoPosition = -1;
     private int _eventIndex;
     private bool _disposed;
@@ -96,10 +99,10 @@ internal sealed class SoundFontRenderer : IMidiRenderer
             while (eventIndex < _events.Count && _events[eventIndex].SampleTime <= nextSnapshotSample)
             {
                 var evt = _events[eventIndex];
-                if (evt is ParsedNoteOn on) _activeNotes[on.Channel * 128 + on.Note] = on.Velocity;
-                else if (evt is ParsedNoteOff off) _activeNotes[off.Channel * 128 + off.Note] = 0;
+                if (evt is ParsedNoteOn on) _activeNotes[on.Channel * NotesPerChannel + on.Note] = on.Velocity;
+                else if (evt is ParsedNoteOff off) _activeNotes[off.Channel * NotesPerChannel + off.Note] = 0;
                 else if (evt is ParsedPatchChange pc) _lastPatch[pc.Channel] = pc.Patch;
-                else if (evt is ParsedControlChange cc) _lastCC[cc.Channel * 128 + cc.Controller] = cc.Value;
+                else if (evt is ParsedControlChange cc) _lastCC[cc.Channel * CCPerChannel + cc.Controller] = cc.Value;
                 else if (evt is ParsedPitchBend pb) _lastPitch[pb.Channel] = pb.Value;
                 else if (evt is ParsedChannelAfterTouch cat) _lastCat[cat.Channel] = cat.Pressure;
                 eventIndex++;
@@ -190,11 +193,11 @@ internal sealed class SoundFontRenderer : IMidiRenderer
         if (snapshotIndex >= 0 && _snapshots.Count > 0)
         {
             var snap = _snapshots[snapshotIndex];
-            Array.Copy(snap.ActiveNotes, _activeNotes, 4096);
-            Array.Copy(snap.LastPatch, _lastPatch, 32);
-            Array.Copy(snap.LastCC, _lastCC, 4096);
-            Array.Copy(snap.LastPitch, _lastPitch, 32);
-            Array.Copy(snap.LastCat, _lastCat, 32);
+            Array.Copy(snap.ActiveNotes, _activeNotes, _activeNotes.Length);
+            Array.Copy(snap.LastPatch, _lastPatch, _lastPatch.Length);
+            Array.Copy(snap.LastCC, _lastCC, _lastCC.Length);
+            Array.Copy(snap.LastPitch, _lastPitch, _lastPitch.Length);
+            Array.Copy(snap.LastCat, _lastCat, _lastCat.Length);
             startIndex = snap.EventIndex;
         }
         else
@@ -211,30 +214,30 @@ internal sealed class SoundFontRenderer : IMidiRenderer
             var evt = _events[i];
             if (evt.SampleTime > targetSample) break;
 
-            if (evt is ParsedNoteOn on) _activeNotes[on.Channel * 128 + on.Note] = on.Velocity;
-            else if (evt is ParsedNoteOff off) _activeNotes[off.Channel * 128 + off.Note] = 0;
+            if (evt is ParsedNoteOn on) _activeNotes[on.Channel * NotesPerChannel + on.Note] = on.Velocity;
+            else if (evt is ParsedNoteOff off) _activeNotes[off.Channel * NotesPerChannel + off.Note] = 0;
             else if (evt is ParsedPatchChange pc) _lastPatch[pc.Channel] = pc.Patch;
-            else if (evt is ParsedControlChange cc) _lastCC[cc.Channel * 128 + cc.Controller] = cc.Value;
+            else if (evt is ParsedControlChange cc) _lastCC[cc.Channel * CCPerChannel + cc.Controller] = cc.Value;
             else if (evt is ParsedPitchBend pb) _lastPitch[pb.Channel] = pb.Value;
             else if (evt is ParsedChannelAfterTouch cat) _lastCat[cat.Channel] = cat.Pressure;
         }
 
         foreach (var layer in _layers)
         {
-            for (int ch = 0; ch < 32; ch++)
+            for (int ch = 0; ch < ChannelCount; ch++)
             {
                 if (_lastPatch[ch] != -1) layer.Synth.ProcessMidiMessage(ch, 0xC0, _lastPatch[ch], 0);
-                for (int cc = 0; cc < 128; cc++)
+                for (int cc = 0; cc < CCPerChannel; cc++)
                 {
-                    int val = _lastCC[ch * 128 + cc];
+                    int val = _lastCC[ch * CCPerChannel + cc];
                     if (val != -1) layer.Synth.ProcessMidiMessage(ch, 0xB0, cc, val);
                 }
                 if (_lastPitch[ch] != -1) layer.Synth.ProcessMidiMessage(ch, 0xE0, _lastPitch[ch] & 0x7F, (_lastPitch[ch] >> 7) & 0x7F);
                 if (_lastCat[ch] != -1) layer.Synth.ProcessMidiMessage(ch, 0xD0, _lastCat[ch], 0);
 
-                for (int n = 0; n < 128; n++)
+                for (int n = 0; n < NotesPerChannel; n++)
                 {
-                    int vel = _activeNotes[ch * 128 + n];
+                    int vel = _activeNotes[ch * NotesPerChannel + n];
                     if (vel > 0) layer.Synth.ProcessMidiMessage(ch, 0x90, n, vel);
                 }
             }
