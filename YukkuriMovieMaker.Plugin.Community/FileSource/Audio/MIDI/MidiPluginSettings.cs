@@ -92,20 +92,4 @@ public class MidiPluginSettings : SettingsBase<MidiPluginSettings>
         if (e.PropertyName != nameof(SoundFontEntry.Volume))
             MidiAudioSource.ClearCache();
     }
-
-    public string GetConfigurationHash()
-    {
-        var parts = string.Concat(
-            audio.SampleRate, audio.MasterVolume,
-            performance.RenderingMode, performance.MaxPolyphony, performance.EnableGpuAcceleration,
-            soundFont.EnableSoundFont, soundFont.FallbackToSynthesis,
-            string.Join(",", soundFont.Layers.Select(l => $"{l.FileName}:{l.Volume}:{l.IsEnabled}")),
-            effects.EnableEffects, effects.EnableReverb, effects.ReverbDecay,
-            effects.EnableCompression, effects.CompressionThreshold, effects.CompressionRatio,
-            effects.EnableLimiter, effects.LimiterThreshold);
-
-        using var sha = SHA256.Create();
-        var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(parts));
-        return Convert.ToHexString(hash).ToLowerInvariant();
-    }
 }
