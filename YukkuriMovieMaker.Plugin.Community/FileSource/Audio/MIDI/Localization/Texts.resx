@@ -97,6 +97,6 @@
 <data name="RenderingModeSynthesis" xml:space="preserve"><value>波形シンセシス</value></data>
 <data name="SoundFontDirectory" xml:space="preserve"><value>サウンドフォントフォルダー</value></data>
 <data name="OpenSoundFontFolder" xml:space="preserve"><value>フォルダーを開く</value></data>
-<data name="FileReadError" xml:space="preserve"><value>ファイルの読み込みに失敗しました。</value></data>
 <data name="MidiParseError" xml:space="preserve"><value>MIDIファイルの解析に失敗しました。ファイルが破損している可能性があります。</value></data>
+<data name="MidiHeaderValidationError" xml:space="preserve"><value>MIDIヘッダの検証中に例外が発生しました。</value></data>
 </root>

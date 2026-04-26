@@ -97,6 +97,6 @@
 <data name="RenderingModeSynthesis" xml:space="preserve"><value>Waveform Synthesis</value></data>
 <data name="SoundFontDirectory" xml:space="preserve"><value>SoundFont Folder</value></data>
 <data name="OpenSoundFontFolder" xml:space="preserve"><value>Open Folder</value></data>
-<data name="FileReadError" xml:space="preserve"><value>Failed to read file.</value></data>
 <data name="MidiParseError" xml:space="preserve"><value>Failed to parse MIDI file. The file may be corrupted.</value></data>
+<data name="MidiHeaderValidationError" xml:space="preserve"><value>An exception occurred while validating the MIDI header.</value></data>
 </root>

@@ -1,6 +1,7 @@
 using System.Collections.Frozen;
 using System.IO;
 using System.Windows;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Localization;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Services;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Views;
@@ -78,11 +79,7 @@ public sealed class MidiAudioSourcePlugin : IAudioFileSourcePlugin
         }
         catch (Exception ex)
         {
-            Application.Current?.Dispatcher.Invoke(() => MessageBox.Show(
-                $"{Texts.FileReadError}\n\n{ex.Message}",
-                Texts.PluginName,
-                MessageBoxButton.OK,
-                MessageBoxImage.Error));
+            Log.Default.Write($"{Texts.MidiHeaderValidationError} path={filePath}", ex);
             return false;
         }
     }

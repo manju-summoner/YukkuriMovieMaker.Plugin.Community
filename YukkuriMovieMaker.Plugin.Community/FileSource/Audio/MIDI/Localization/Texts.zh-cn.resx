@@ -97,6 +97,6 @@
 <data name="RenderingModeSynthesis" xml:space="preserve"><value>波形合成</value></data>
 <data name="SoundFontDirectory" xml:space="preserve"><value>音色库文件夹</value></data>
 <data name="OpenSoundFontFolder" xml:space="preserve"><value>打开文件夹</value></data>
-<data name="FileReadError" xml:space="preserve"><value>读取文件失败。</value></data>
 <data name="MidiParseError" xml:space="preserve"><value>解析 MIDI 文件失败。文件可能已损坏。</value></data>
+<data name="MidiHeaderValidationError" xml:space="preserve"><value>验证 MIDI 头时发生异常。</value></data>
 </root>
