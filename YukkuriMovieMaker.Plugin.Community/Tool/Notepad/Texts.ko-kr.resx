@@ -69,4 +69,5 @@
 <data name="Error" xml:space="preserve"><value>오류</value></data>
 <data name="Untitled" xml:space="preserve"><value>제목 없음</value></data>
 <data name="OpenNewTab" xml:space="preserve"><value>새 탭 열기</value></data>
+<data name="WordWrap" xml:space="preserve"><value>자동 줄 바꿈</value></data>
 </root>

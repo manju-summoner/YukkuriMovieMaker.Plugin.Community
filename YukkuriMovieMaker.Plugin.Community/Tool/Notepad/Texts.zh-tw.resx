@@ -69,4 +69,5 @@
 <data name="Error" xml:space="preserve"><value>錯誤</value></data>
 <data name="Untitled" xml:space="preserve"><value>未命名</value></data>
 <data name="OpenNewTab" xml:space="preserve"><value>打開新分頁</value></data>
+<data name="WordWrap" xml:space="preserve"><value>自動換行</value></data>
 </root>
