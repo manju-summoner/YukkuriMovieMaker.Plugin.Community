@@ -83,5 +83,10 @@
 <data name="Download" xml:space="preserve"><value>تنزيل</value></data>
 <data name="Print" xml:space="preserve"><value>طباعة</value></data>
 <data name="Find" xml:space="preserve"><value>بحث</value></data>
-<data name="ConfirmClearBrowsingDataMessage" xml:space="preserve"><value>هل أنت متأكد أنك تريد مسح بيانات التصفح؟</value></data>
+<data name="ClearBrowserCache" xml:space="preserve"><value>ذاكرة التخزين المؤقت للمتصفح</value></data>
+<data name="ClearPluginHistory" xml:space="preserve"><value>سجل URL للمكون الإضافي</value></data>
+<data name="ClearPluginFavicon" xml:space="preserve"><value>أيقونات الموقع للمكون الإضافي</value></data>
+<data name="ClearBrowsingDataDesc" xml:space="preserve"><value>حدد البيانات التي تريد مسحها</value></data>
+<data name="Cancel" xml:space="preserve"><value>إلغاء</value></data>
+<data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>تم مسح بيانات التصفح بنجاح.</value></data>
 </root>

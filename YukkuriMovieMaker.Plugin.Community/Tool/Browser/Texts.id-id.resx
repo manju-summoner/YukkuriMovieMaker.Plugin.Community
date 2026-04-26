@@ -83,5 +83,10 @@ Contoh: NamaFolder/NamaSubfolder</value></data>
 <data name="Download" xml:space="preserve"><value>Unduh</value></data>
 <data name="Print" xml:space="preserve"><value>Cetak</value></data>
 <data name="Find" xml:space="preserve"><value>Cari</value></data>
-<data name="ConfirmClearBrowsingDataMessage" xml:space="preserve"><value>Apakah Anda yakin ingin menghapus data penelusuran?</value></data>
+<data name="ClearBrowserCache" xml:space="preserve"><value>Cache Peramban</value></data>
+<data name="ClearPluginHistory" xml:space="preserve"><value>Riwayat URL Plugin</value></data>
+<data name="ClearPluginFavicon" xml:space="preserve"><value>Ikon Situs Plugin</value></data>
+<data name="ClearBrowsingDataDesc" xml:space="preserve"><value>Pilih data yang ingin Anda hapus</value></data>
+<data name="Cancel" xml:space="preserve"><value>Batal</value></data>
+<data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>Data penjelajahan berhasil dihapus.</value></data>
 </root>

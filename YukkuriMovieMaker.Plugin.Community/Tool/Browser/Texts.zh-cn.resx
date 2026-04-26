@@ -83,5 +83,10 @@
 <data name="Download" xml:space="preserve"><value>下载</value></data>
 <data name="Print" xml:space="preserve"><value>打印</value></data>
 <data name="Find" xml:space="preserve"><value>搜索</value></data>
-<data name="ConfirmClearBrowsingDataMessage" xml:space="preserve"><value>确定要清除浏览数据吗？</value></data>
+<data name="ClearBrowserCache" xml:space="preserve"><value>浏览器缓存</value></data>
+<data name="ClearPluginHistory" xml:space="preserve"><value>插件的URL历史</value></data>
+<data name="ClearPluginFavicon" xml:space="preserve"><value>插件网站图标</value></data>
+<data name="ClearBrowsingDataDesc" xml:space="preserve"><value>选择要清除的数据</value></data>
+<data name="Cancel" xml:space="preserve"><value>取消</value></data>
+<data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>浏览数据清除成功。</value></data>
 </root>

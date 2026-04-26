@@ -83,5 +83,10 @@
 <data name="Download" xml:space="preserve"><value>다운로드</value></data>
 <data name="Print" xml:space="preserve"><value>인쇄</value></data>
 <data name="Find" xml:space="preserve"><value>검색</value></data>
-<data name="ConfirmClearBrowsingDataMessage" xml:space="preserve"><value>브라우징 데이터를 지우시겠습니까?</value></data>
+<data name="ClearBrowserCache" xml:space="preserve"><value>브라우저 캐시</value></data>
+<data name="ClearPluginHistory" xml:space="preserve"><value>플러그인의 URL 기록</value></data>
+<data name="ClearPluginFavicon" xml:space="preserve"><value>플러그인의 파비콘</value></data>
+<data name="ClearBrowsingDataDesc" xml:space="preserve"><value>지울 데이터를 선택하세요</value></data>
+<data name="Cancel" xml:space="preserve"><value>취소</value></data>
+<data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>브라우징 데이터가 성공적으로 지워졌습니다.</value></data>
 </root>

@@ -61,6 +61,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         public ActionCommand FindCommand { get; }
 
         public BrowserFavoriteEditorViewModel? FavoriteEditorViewModel { get; set=>Set(ref field, value); }
+        public ClearBrowsingDataViewModel? ClearBrowsingDataViewModel { get => field; set => Set(ref field, value); }
 
         [SuppressMessage("Performance", "CA1822:メンバーを static に設定します", Justification = "")]
         public BrowserFavoriteDirectoryViewModel FavoriteDirectoryViewModel => BrowserFavoriteDirectoryViewModel.CreateBrowserFavoriteRoot();
@@ -147,22 +148,37 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             OnPropertyChanged(nameof(FavoriteDirectoryViewModel));
         }
 
-        private async Task ExecuteClearBrowsingDataAsync()
+        private Task ExecuteClearBrowsingDataAsync()
         {
             if (webView2?.CoreWebView2?.Profile == null)
-                return;
+                return Task.CompletedTask;
 
-            var result = System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
-                System.Windows.MessageBox.Show(
-                    Texts.ConfirmClearBrowsingDataMessage,
-                    Texts.ClearBrowsingData,
-                    System.Windows.MessageBoxButton.YesNo,
-                    System.Windows.MessageBoxImage.Question));
-
-            if (result == System.Windows.MessageBoxResult.Yes)
+            ClearBrowsingDataViewModel = new ClearBrowsingDataViewModel(async vm =>
             {
-                await webView2.CoreWebView2.Profile.ClearBrowsingDataAsync();
-            }
+                if (vm.ClearBrowserCache && webView2?.CoreWebView2?.Profile != null)
+                {
+                    await webView2.CoreWebView2.Profile.ClearBrowsingDataAsync();
+                }
+                if (vm.ClearPluginHistory)
+                {
+                    BrowserHistoryManager.ClearHistory();
+                    System.Windows.Application.Current?.Dispatcher?.Invoke(() => History.Clear());
+                }
+                if (vm.ClearPluginFavicon)
+                {
+                    BrowserFaviconManager.ClearFavicons();
+                    OnPropertyChanged(nameof(FavoriteDirectoryViewModel));
+                }
+                ClearBrowsingDataViewModel = null;
+                System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+                    System.Windows.MessageBox.Show(
+                        Texts.ClearBrowsingDataCompletedMessage,
+                        Texts.ClearBrowsingData,
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Information));
+            });
+
+            return Task.CompletedTask;
         }
 
         private async Task ExecuteFindAsync()

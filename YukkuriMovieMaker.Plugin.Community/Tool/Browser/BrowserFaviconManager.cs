@@ -109,5 +109,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(keySource));
             return Convert.ToHexString(bytes).ToLowerInvariant();
         }
+
+        public static void ClearFavicons()
+        {
+            if (!Directory.Exists(CacheDirectoryPath))
+                return;
+            foreach (var file in Directory.EnumerateFiles(CacheDirectoryPath, "*.png"))
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch
+                {
+                }
+            }
+        }
     }
 }

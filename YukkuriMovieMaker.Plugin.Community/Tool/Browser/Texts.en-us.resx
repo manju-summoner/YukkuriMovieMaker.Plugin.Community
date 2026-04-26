@@ -83,5 +83,10 @@ Example: FolderName/SubfolderName</value></data>
 <data name="Download" xml:space="preserve"><value>Download</value></data>
 <data name="Print" xml:space="preserve"><value>Print</value></data>
 <data name="Find" xml:space="preserve"><value>Search</value></data>
-<data name="ConfirmClearBrowsingDataMessage" xml:space="preserve"><value>Are you sure you want to clear browsing data?</value></data>
+<data name="ClearBrowserCache" xml:space="preserve"><value>Browser Cache</value></data>
+<data name="ClearPluginHistory" xml:space="preserve"><value>Plugin URL History</value></data>
+<data name="ClearPluginFavicon" xml:space="preserve"><value>Plugin Favicons</value></data>
+<data name="ClearBrowsingDataDesc" xml:space="preserve"><value>Select the data you want to clear</value></data>
+<data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+<data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>Browsing data cleared successfully.</value></data>
 </root>

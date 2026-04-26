@@ -35,6 +35,19 @@
                 </DataTemplate>
             </pb:DialogBehavior.ContentTemplate>
         </pb:DialogBehavior>
+        <pb:DialogBehavior Content="{Binding ClearBrowsingDataViewModel}" IsModal="True">
+            <pb:DialogBehavior.Style>
+                <Style TargetType="Window">
+                    <Setter Property="Title" Value="{x:Static local:Texts.ClearBrowsingData}"/>
+                    <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+                </Style>
+            </pb:DialogBehavior.Style>
+            <pb:DialogBehavior.ContentTemplate>
+                <DataTemplate>
+                    <local:ClearBrowsingDataView/>
+                </DataTemplate>
+            </pb:DialogBehavior.ContentTemplate>
+        </pb:DialogBehavior>
     </i:Interaction.Behaviors>
     <Grid>
         <Grid.Resources>

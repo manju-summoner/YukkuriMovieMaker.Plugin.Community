@@ -83,5 +83,10 @@ Ejemplo: NombreCarpeta/SubcarpetaNombre</value></data>
 <data name="Download" xml:space="preserve"><value>Descargar</value></data>
 <data name="Print" xml:space="preserve"><value>Imprimir</value></data>
 <data name="Find" xml:space="preserve"><value>Buscar</value></data>
-<data name="ConfirmClearBrowsingDataMessage" xml:space="preserve"><value>¿Está seguro de que desea borrar los datos de navegación?</value></data>
+<data name="ClearBrowserCache" xml:space="preserve"><value>Caché del navegador</value></data>
+<data name="ClearPluginHistory" xml:space="preserve"><value>Historial de URL del complemento</value></data>
+<data name="ClearPluginFavicon" xml:space="preserve"><value>Iconos de sitios del complemento</value></data>
+<data name="ClearBrowsingDataDesc" xml:space="preserve"><value>Seleccione los datos que desea borrar</value></data>
+<data name="Cancel" xml:space="preserve"><value>Cancelar</value></data>
+<data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>Los datos de navegación se borraron correctamente.</value></data>
 </root>

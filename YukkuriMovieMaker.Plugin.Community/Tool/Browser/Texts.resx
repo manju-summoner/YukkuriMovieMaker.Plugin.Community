@@ -83,5 +83,10 @@
 <data name="Download" xml:space="preserve"><value>ダウンロード</value></data>
 <data name="Print" xml:space="preserve"><value>印刷</value></data>
 <data name="Find" xml:space="preserve"><value>検索</value></data>
-<data name="ConfirmClearBrowsingDataMessage" xml:space="preserve"><value>ブラウザの閲覧データを消去しますか？</value></data>
+<data name="ClearBrowserCache" xml:space="preserve"><value>ブラウザキャッシュ</value></data>
+<data name="ClearPluginHistory" xml:space="preserve"><value>プラグインのURL履歴</value></data>
+<data name="ClearPluginFavicon" xml:space="preserve"><value>プラグインのファビコン</value></data>
+<data name="ClearBrowsingDataDesc" xml:space="preserve"><value>消去するデータを選択してください</value></data>
+<data name="Cancel" xml:space="preserve"><value>キャンセル</value></data>
+<data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>ブラウザの閲覧データの消去が完了しました。</value></data>
 </root>

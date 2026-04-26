@@ -83,5 +83,10 @@
 <data name="Download" xml:space="preserve"><value>下載</value></data>
 <data name="Print" xml:space="preserve"><value>列印</value></data>
 <data name="Find" xml:space="preserve"><value>搜尋</value></data>
-<data name="ConfirmClearBrowsingDataMessage" xml:space="preserve"><value>確定要清除瀏覽資料嗎？</value></data>
+<data name="ClearBrowserCache" xml:space="preserve"><value>瀏覽器快取</value></data>
+<data name="ClearPluginHistory" xml:space="preserve"><value>外掛程式的URL歷史</value></data>
+<data name="ClearPluginFavicon" xml:space="preserve"><value>外掛程式網站圖示</value></data>
+<data name="ClearBrowsingDataDesc" xml:space="preserve"><value>選擇要清除的資料</value></data>
+<data name="Cancel" xml:space="preserve"><value>取消</value></data>
+<data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>瀏覽資料清除成功。</value></data>
 </root>

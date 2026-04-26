@@ -118,5 +118,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         static string GetDayFilePath(DateOnly date) =>
             Path.Combine(CacheDirectoryPath, $"{date:yyyy-MM-dd}.json");
+
+        public static void ClearHistory()
+        {
+            if (!Directory.Exists(CacheDirectoryPath))
+                return;
+            foreach (var file in Directory.EnumerateFiles(CacheDirectoryPath, "*.json"))
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch
+                {
+                }
+            }
+        }
     }
 }
