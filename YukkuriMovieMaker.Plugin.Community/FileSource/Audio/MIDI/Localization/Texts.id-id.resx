@@ -66,7 +66,6 @@
 <data name="MasterVolume" xml:space="preserve"><value>Volume Utama</value></data>
 <data name="PerformanceSettings" xml:space="preserve"><value>Pengaturan Performa</value></data>
 <data name="RenderingMode" xml:space="preserve"><value>Mode Rendering</value></data>
-<data name="BufferSize" xml:space="preserve"><value>Ukuran Buffer</value></data>
 <data name="MaxPolyphony" xml:space="preserve"><value>Polifoni Maksimal</value></data>
 <data name="EnableGpuAcceleration" xml:space="preserve"><value>Akselerasi GPU</value></data>
 <data name="SoundFontSettings" xml:space="preserve"><value>Pengaturan SoundFont</value></data>

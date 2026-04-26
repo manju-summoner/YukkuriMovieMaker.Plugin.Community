@@ -66,7 +66,6 @@
 <data name="MasterVolume" xml:space="preserve"><value>Volumen maestro</value></data>
 <data name="PerformanceSettings" xml:space="preserve"><value>Configuración de rendimiento</value></data>
 <data name="RenderingMode" xml:space="preserve"><value>Modo de renderizado</value></data>
-<data name="BufferSize" xml:space="preserve"><value>Tamaño del búfer</value></data>
 <data name="MaxPolyphony" xml:space="preserve"><value>Polifonía máxima</value></data>
 <data name="EnableGpuAcceleration" xml:space="preserve"><value>Aceleración GPU</value></data>
 <data name="SoundFontSettings" xml:space="preserve"><value>Configuración de SoundFont</value></data>

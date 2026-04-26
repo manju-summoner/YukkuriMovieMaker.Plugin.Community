@@ -47,13 +47,6 @@
                         </ComboBox>
                     </Grid>
                     <Grid Margin="0,2">
-                        <Label Content="{x:Static loc:Texts.BufferSize}" VerticalAlignment="Center"/>
-                        <c:TextBoxSlider Value="{Binding Performance.BufferSize, Mode=TwoWay}"
-                                         Min="256" Max="8192" DefaultMin="512" DefaultMax="2048" Delta="256"
-                                         StringFormat="F0" Unit="" Width="200"
-                                         HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    </Grid>
-                    <Grid Margin="0,2">
                         <Label Content="{x:Static loc:Texts.MaxPolyphony}" VerticalAlignment="Center"/>
                         <c:TextBoxSlider Value="{Binding Performance.MaxPolyphony, Mode=TwoWay}"
                                          Min="16" Max="512" DefaultMin="64" DefaultMax="256" Delta="16"

@@ -97,7 +97,7 @@ public class MidiPluginSettings : SettingsBase<MidiPluginSettings>
     {
         var parts = string.Concat(
             audio.SampleRate, audio.MasterVolume,
-            performance.RenderingMode, performance.BufferSize, performance.MaxPolyphony, performance.EnableGpuAcceleration,
+            performance.RenderingMode, performance.MaxPolyphony, performance.EnableGpuAcceleration,
             soundFont.EnableSoundFont, soundFont.FallbackToSynthesis,
             string.Join(",", soundFont.Layers.Select(l => $"{l.FileName}:{l.Volume}:{l.IsEnabled}")),
             effects.EnableEffects, effects.EnableReverb, effects.ReverbDecay,

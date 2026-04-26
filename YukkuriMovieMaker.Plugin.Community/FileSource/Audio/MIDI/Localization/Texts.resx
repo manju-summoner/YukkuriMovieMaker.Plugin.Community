@@ -66,7 +66,6 @@
 <data name="MasterVolume" xml:space="preserve"><value>マスター音量</value></data>
 <data name="PerformanceSettings" xml:space="preserve"><value>パフォーマンス設定</value></data>
 <data name="RenderingMode" xml:space="preserve"><value>レンダリングモード</value></data>
-<data name="BufferSize" xml:space="preserve"><value>バッファサイズ</value></data>
 <data name="MaxPolyphony" xml:space="preserve"><value>最大和音数</value></data>
 <data name="EnableGpuAcceleration" xml:space="preserve"><value>GPU高速化</value></data>
 <data name="SoundFontSettings" xml:space="preserve"><value>サウンドフォント設定</value></data>

@@ -8,9 +8,6 @@ public class PerformanceSettings : INotifyPropertyChanged
     private RenderingMode _renderingMode = RenderingMode.SoundFont;
     public RenderingMode RenderingMode { get => _renderingMode; set => SetField(ref _renderingMode, value); }
 
-    private int _bufferSize = 1024;
-    public int BufferSize { get => _bufferSize; set => SetField(ref _bufferSize, value); }
-
     private int _maxPolyphony = 256;
     public int MaxPolyphony { get => _maxPolyphony; set => SetField(ref _maxPolyphony, value); }
 
@@ -20,7 +17,6 @@ public class PerformanceSettings : INotifyPropertyChanged
     public void CopyFrom(PerformanceSettings source)
     {
         RenderingMode = source.RenderingMode;
-        BufferSize = source.BufferSize;
         MaxPolyphony = source.MaxPolyphony;
         EnableGpuAcceleration = source.EnableGpuAcceleration;
     }
