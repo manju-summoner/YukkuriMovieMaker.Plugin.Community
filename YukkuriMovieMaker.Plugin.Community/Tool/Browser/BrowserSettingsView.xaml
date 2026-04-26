@@ -37,7 +37,7 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="{x:Static local:Texts.TrackingPreventionLevel}" VerticalAlignment="Center"/>
-                    <ComboBox Grid.Column="1" SelectedIndex="{Binding Settings.TrackingPreventionLevel}" Width="150" VerticalAlignment="Center" Height="26">
+                    <ComboBox Grid.Column="1" SelectedIndex="{Binding Settings.TrackingPreventionLevel}" Width="150" VerticalAlignment="Center" Height="26" VerticalContentAlignment="Center">
                         <TextBlock Text="{x:Static local:Texts.TrackingPreventionBasic}"/>
                         <TextBlock Text="{x:Static local:Texts.TrackingPreventionBalanced}"/>
                         <TextBlock Text="{x:Static local:Texts.TrackingPreventionStrict}"/>
