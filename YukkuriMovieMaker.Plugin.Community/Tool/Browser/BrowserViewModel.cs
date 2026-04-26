@@ -68,8 +68,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         public BrowserViewModel()
         {
+            DateOnly? lastDate = null;
             foreach (var entry in BrowserHistoryManager.LoadHistory())
+            {
+                var localDate = DateOnly.FromDateTime(entry.Timestamp.ToLocalTime().DateTime);
+                if (lastDate != localDate)
+                {
+                    History.Add(new BrowserHistoryItemViewModel(localDate));
+                    lastDate = localDate;
+                }
                 History.Add(new BrowserHistoryItemViewModel(entry));
+            }
             CreateNewWindowCommand = new ActionCommand(
                 _ => true,
                 _ => ExecuteCreateNewWindow());
@@ -403,13 +412,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         private void AddHistory(string url, string title)
         {
             if (string.IsNullOrWhiteSpace(url) || url.StartsWith("about:", StringComparison.OrdinalIgnoreCase)) return;
-            if (History.Count > 0 && History[0].Url == url) return;
 
-            var entry = new BrowserHistoryEntry(url, title, DateTimeOffset.Now);
             BrowserHistoryManager.AddEntry(url, title);
-            History.Insert(0, new BrowserHistoryItemViewModel(entry));
-            if (History.Count > 128)
-                History.RemoveAt(History.Count - 1);
+
+            History.Clear();
+            DateOnly? lastDate = null;
+            foreach (var entry in BrowserHistoryManager.LoadHistory())
+            {
+                var localDate = DateOnly.FromDateTime(entry.Timestamp.ToLocalTime().DateTime);
+                if (lastDate != localDate)
+                {
+                    History.Add(new BrowserHistoryItemViewModel(localDate));
+                    lastDate = localDate;
+                }
+                History.Add(new BrowserHistoryItemViewModel(entry));
+            }
         }
 
         private async Task FetchAndSaveFaviconAsync(string url)

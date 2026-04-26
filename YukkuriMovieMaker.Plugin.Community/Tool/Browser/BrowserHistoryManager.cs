@@ -19,20 +19,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         public static void AddEntry(string url, string title)
         {
-            var today = DateOnly.FromDateTime(DateTime.Now);
-            var todayEntries = LoadDayEntries(today);
+            var now = DateTimeOffset.UtcNow;
+            var localDate = DateOnly.FromDateTime(now.ToLocalTime().DateTime);
+            var localDateEntries = LoadDayEntries(localDate);
 
-            if (todayEntries.Count > 0 && todayEntries[0].Url == url)
+            if (localDateEntries.Count > 0 && localDateEntries[0].Url == url)
                 return;
 
-            todayEntries.Insert(0, new BrowserHistoryEntry(url, title, DateTimeOffset.Now));
-            SaveDayEntries(today, todayEntries);
+            localDateEntries.Insert(0, new BrowserHistoryEntry(url, title, now));
+            SaveDayEntries(localDate, localDateEntries);
             TrimToMaxCount();
         }
 
         public static IReadOnlyList<BrowserHistoryEntry> LoadHistory()
         {
-            var result = new List<BrowserHistoryEntry>(MaxHistoryCount);
+            var result = new List<BrowserHistoryEntry>();
             foreach (var file in GetDayFilesDescending())
             {
                 if (result.Count >= MaxHistoryCount)
@@ -42,7 +43,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                     continue;
                 result.AddRange(LoadDayEntries(date.Value));
             }
-            return result.Count <= MaxHistoryCount ? result : result.Take(MaxHistoryCount).ToList();
+            return result.OrderByDescending(x => x.Timestamp).Take(MaxHistoryCount).ToList();
         }
 
         static void TrimToMaxCount()

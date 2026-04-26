@@ -217,10 +217,15 @@
                             <MenuItem.Resources>
                                 <Style TargetType="MenuItem">
                                     <Setter Property="Header" Value="{Binding Display}"/>
-                                    <Setter Property="Command" Value="{Binding DataContext.NavigateCommand,RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                    <Setter Property="CommandParameter" Value="{Binding Url}"/>
-                                    <Setter Property="ToolTip" Value="{Binding Url}"/>
-                                    <Setter Property="Icon" Value="{Binding IconPath, Converter={StaticResource FilePathToImageConverter}}"/>
+                                    <Setter Property="IsEnabled" Value="{Binding IsSelectable}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSelectable}" Value="True">
+                                            <Setter Property="Command" Value="{Binding DataContext.NavigateCommand,RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <Setter Property="CommandParameter" Value="{Binding Url}"/>
+                                            <Setter Property="ToolTip" Value="{Binding Url}"/>
+                                            <Setter Property="Icon" Value="{Binding IconPath, Converter={StaticResource FilePathToImageConverter}}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
                             </MenuItem.Resources>
                         </MenuItem>
