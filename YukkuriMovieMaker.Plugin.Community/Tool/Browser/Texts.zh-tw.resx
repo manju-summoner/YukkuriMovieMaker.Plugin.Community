@@ -77,4 +77,32 @@
 <data name="Done" xml:space="preserve"><value>完成</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>編輯最愛</value></data>
 <data name="Favorite" xml:space="preserve"><value>收藏夾</value></data>
+<data name="History" xml:space="preserve"><value>歷史</value></data>
+<data name="MobileMonitor" xml:space="preserve"><value>行動裝置檢視</value></data>
+<data name="ClearBrowsingData" xml:space="preserve"><value>清除瀏覽器資料</value></data>
+<data name="Download" xml:space="preserve"><value>下載</value></data>
+<data name="Print" xml:space="preserve"><value>列印</value></data>
+<data name="Find" xml:space="preserve"><value>搜尋</value></data>
+<data name="ClearBrowserCache" xml:space="preserve"><value>瀏覽器快取</value></data>
+<data name="ClearPluginHistory" xml:space="preserve"><value>外掛程式的URL歷史</value></data>
+<data name="ClearPluginFavicon" xml:space="preserve"><value>外掛程式網站圖示</value></data>
+<data name="ClearBrowsingDataDesc" xml:space="preserve"><value>選擇要清除的資料</value></data>
+<data name="Cancel" xml:space="preserve"><value>取消</value></data>
+<data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>瀏覽資料清除成功。</value></data>
+<data name="BrowserSettings" xml:space="preserve"><value>設定</value></data>
+<data name="BrowserSettingsDesc" xml:space="preserve"><value>設定詳細的瀏覽器設定。</value></data>
+<data name="SmartScreenEnabled" xml:space="preserve"><value>自動攔截惡意網站 (SmartScreen)</value></data>
+<data name="SmartScreenEnabledDesc" xml:space="preserve"><value>使用 Microsoft Defender SmartScreen 攔截惡意網站。</value></data>
+<data name="TrackingPreventionLevel" xml:space="preserve"><value>防追蹤</value></data>
+<data name="TrackingPreventionBasic" xml:space="preserve"><value>基本</value></data>
+<data name="TrackingPreventionBalanced" xml:space="preserve"><value>平衡</value></data>
+<data name="TrackingPreventionStrict" xml:space="preserve"><value>嚴格</value></data>
+<data name="PasswordAutosaveEnabled" xml:space="preserve"><value>允許儲存密碼</value></data>
+<data name="GeneralAutofillEnabled" xml:space="preserve"><value>表單自動填寫</value></data>
+<data name="ScriptEnabled" xml:space="preserve"><value>允許執行 JavaScript</value></data>
+<data name="WebStorageEnabled" xml:space="preserve"><value>允許 Cookie 和網站資料</value></data>
+<data name="MediaAutoplayEnabled" xml:space="preserve"><value>允許媒體自動播放</value></data>
+<data name="MediaAutoplayEnabledDesc" xml:space="preserve"><value>無論此設定如何，媒體在某些網站上可能仍會自動播放。</value></data>
+<data name="CustomUserAgent" xml:space="preserve"><value>自訂使用者代理</value></data>
+<data name="Close" xml:space="preserve"><value>關閉</value></data>
 </root>

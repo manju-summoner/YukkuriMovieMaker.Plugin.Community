@@ -77,4 +77,32 @@
 <data name="Done" xml:space="preserve"><value>完了</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>お気に入りの編集</value></data>
 <data name="Favorite" xml:space="preserve"><value>お気に入り</value></data>
+<data name="History" xml:space="preserve"><value>履歴</value></data>
+<data name="MobileMonitor" xml:space="preserve"><value>モバイルモニター</value></data>
+<data name="ClearBrowsingData" xml:space="preserve"><value>ブラウザデータを消去</value></data>
+<data name="Download" xml:space="preserve"><value>ダウンロード</value></data>
+<data name="Print" xml:space="preserve"><value>印刷</value></data>
+<data name="Find" xml:space="preserve"><value>検索</value></data>
+<data name="ClearBrowserCache" xml:space="preserve"><value>ブラウザキャッシュ</value></data>
+<data name="ClearPluginHistory" xml:space="preserve"><value>プラグインのURL履歴</value></data>
+<data name="ClearPluginFavicon" xml:space="preserve"><value>プラグインのファビコン</value></data>
+<data name="ClearBrowsingDataDesc" xml:space="preserve"><value>消去するデータを選択してください</value></data>
+<data name="Cancel" xml:space="preserve"><value>キャンセル</value></data>
+<data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>ブラウザの閲覧データの消去が完了しました。</value></data>
+<data name="BrowserSettings" xml:space="preserve"><value>設定</value></data>
+<data name="BrowserSettingsDesc" xml:space="preserve"><value>ブラウザに関する詳細な設定を行います。</value></data>
+<data name="SmartScreenEnabled" xml:space="preserve"><value>危険なサイトを自動ブロック (SmartScreen)</value></data>
+<data name="SmartScreenEnabledDesc" xml:space="preserve"><value>Microsoft Defender SmartScreen を使用して悪意のあるサイトをブロックします。</value></data>
+<data name="TrackingPreventionLevel" xml:space="preserve"><value>トラッキング防止機能</value></data>
+<data name="TrackingPreventionBasic" xml:space="preserve"><value>基本</value></data>
+<data name="TrackingPreventionBalanced" xml:space="preserve"><value>バランス</value></data>
+<data name="TrackingPreventionStrict" xml:space="preserve"><value>厳格</value></data>
+<data name="PasswordAutosaveEnabled" xml:space="preserve"><value>パスワードの自動保存を許可</value></data>
+<data name="GeneralAutofillEnabled" xml:space="preserve"><value>フォームの自動入力 (オートフィル)</value></data>
+<data name="ScriptEnabled" xml:space="preserve"><value>JavaScript の実行を許可</value></data>
+<data name="WebStorageEnabled" xml:space="preserve"><value>Cookie およびサイトデータを許可</value></data>
+<data name="MediaAutoplayEnabled" xml:space="preserve"><value>メディアの自動再生を許可</value></data>
+<data name="MediaAutoplayEnabledDesc" xml:space="preserve"><value>一部のサイトではこの設定に関わらず自動再生される場合があります。</value></data>
+<data name="CustomUserAgent" xml:space="preserve"><value>カスタム ユーザーエージェント</value></data>
+<data name="Close" xml:space="preserve"><value>閉じる</value></data>
 </root>

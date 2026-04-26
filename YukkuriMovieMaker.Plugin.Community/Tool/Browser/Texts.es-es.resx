@@ -77,4 +77,32 @@ Ejemplo: NombreCarpeta/SubcarpetaNombre</value></data>
 <data name="Done" xml:space="preserve"><value>Hecho</value></data>
 <data name="EditFavorite" xml:space="preserve"><value>Editar favorito</value></data>
 <data name="Favorite" xml:space="preserve"><value>Favorito</value></data>
+<data name="History" xml:space="preserve"><value>Historial</value></data>
+<data name="MobileMonitor" xml:space="preserve"><value>Monitor móvil</value></data>
+<data name="ClearBrowsingData" xml:space="preserve"><value>Borrar datos de navegación</value></data>
+<data name="Download" xml:space="preserve"><value>Descargar</value></data>
+<data name="Print" xml:space="preserve"><value>Imprimir</value></data>
+<data name="Find" xml:space="preserve"><value>Buscar</value></data>
+<data name="ClearBrowserCache" xml:space="preserve"><value>Caché del navegador</value></data>
+<data name="ClearPluginHistory" xml:space="preserve"><value>Historial de URL del complemento</value></data>
+<data name="ClearPluginFavicon" xml:space="preserve"><value>Iconos de sitios del complemento</value></data>
+<data name="ClearBrowsingDataDesc" xml:space="preserve"><value>Seleccione los datos que desea borrar</value></data>
+<data name="Cancel" xml:space="preserve"><value>Cancelar</value></data>
+<data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>Los datos de navegación se borraron correctamente.</value></data>
+<data name="BrowserSettings" xml:space="preserve"><value>Configuración</value></data>
+<data name="BrowserSettingsDesc" xml:space="preserve"><value>Configure ajustes detallados del navegador.</value></data>
+<data name="SmartScreenEnabled" xml:space="preserve"><value>Bloqueo automático de sitios maliciosos (SmartScreen)</value></data>
+<data name="SmartScreenEnabledDesc" xml:space="preserve"><value>Utiliza Microsoft Defender SmartScreen para bloquear sitios maliciosos.</value></data>
+<data name="TrackingPreventionLevel" xml:space="preserve"><value>Prevención de seguimiento</value></data>
+<data name="TrackingPreventionBasic" xml:space="preserve"><value>Básica</value></data>
+<data name="TrackingPreventionBalanced" xml:space="preserve"><value>Equilibrada</value></data>
+<data name="TrackingPreventionStrict" xml:space="preserve"><value>Estricta</value></data>
+<data name="PasswordAutosaveEnabled" xml:space="preserve"><value>Permitir guardar contraseñas</value></data>
+<data name="GeneralAutofillEnabled" xml:space="preserve"><value>Autocompletar formularios</value></data>
+<data name="ScriptEnabled" xml:space="preserve"><value>Permitir JavaScript</value></data>
+<data name="WebStorageEnabled" xml:space="preserve"><value>Permitir cookies y datos del sitio</value></data>
+<data name="MediaAutoplayEnabled" xml:space="preserve"><value>Permitir reproducción automática de medios</value></data>
+<data name="MediaAutoplayEnabledDesc" xml:space="preserve"><value>Es posible que los medios aún se reproduzcan automáticamente en algunos sitios independientemente de esta configuración.</value></data>
+<data name="CustomUserAgent" xml:space="preserve"><value>Agente de usuario personalizado</value></data>
+<data name="Close" xml:space="preserve"><value>Cerrar</value></data>
 </root>
