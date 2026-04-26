@@ -12,8 +12,6 @@ internal sealed class WaveformSynthesisRenderer : IMidiRenderer
     private readonly List<ParsedNote> _noteEvents;
     private bool _disposed;
 
-    public bool IsSeeking => false;
-
     private sealed record ParsedNote(float Frequency, long StartSample, long EndSample, float Velocity);
 
     public WaveformSynthesisRenderer(string midiFilePath, AudioSettings audio, PerformanceSettings performance)

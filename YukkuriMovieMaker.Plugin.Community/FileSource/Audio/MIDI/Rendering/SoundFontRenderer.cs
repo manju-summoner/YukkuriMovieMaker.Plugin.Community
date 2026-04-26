@@ -26,8 +26,6 @@ internal sealed class SoundFontRenderer : IMidiRenderer
     private int _eventIndex;
     private bool _disposed;
 
-    public bool IsSeeking => false;
-
     private abstract record ParsedEvent(long SampleTime);
     private record ParsedNoteOn(long SampleTime, int Channel, int Note, int Velocity) : ParsedEvent(SampleTime);
     private record ParsedNoteOff(long SampleTime, int Channel, int Note) : ParsedEvent(SampleTime);

@@ -16,8 +16,6 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
     private readonly Lock _renderLock = new();
     private bool _disposed;
 
-    public bool IsSeeking => false;
-
     public GpuChunkedRenderer(IMidiRenderer baseRenderer, MidiPluginSettings settings)
     {
         _baseRenderer = baseRenderer;
