@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>en-us</value></data>
-<data name="PluginName" xml:space="preserve"><value>MIDI Audio Source Plugin</value></data>
+<data name="PluginName" xml:space="preserve"><value>MIDI Audio Source</value></data>
 <data name="SettingsName" xml:space="preserve"><value>MIDI Settings</value></data>
 <data name="AudioSettings" xml:space="preserve"><value>Audio Settings</value></data>
 <data name="SampleRate" xml:space="preserve"><value>Sample Rate</value></data>

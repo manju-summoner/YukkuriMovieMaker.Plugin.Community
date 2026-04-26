@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
-<data name="PluginName" xml:space="preserve"><value>MIDI 오디오 소스 플러그인</value></data>
+<data name="PluginName" xml:space="preserve"><value>MIDI 오디오 소스</value></data>
 <data name="SettingsName" xml:space="preserve"><value>MIDI 설정</value></data>
 <data name="AudioSettings" xml:space="preserve"><value>오디오 설정</value></data>
 <data name="SampleRate" xml:space="preserve"><value>샘플 레이트</value></data>

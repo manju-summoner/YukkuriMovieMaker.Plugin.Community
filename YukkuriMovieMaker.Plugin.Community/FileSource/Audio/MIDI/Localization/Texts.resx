@@ -59,7 +59,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
-<data name="PluginName" xml:space="preserve"><value>MIDI 音声読み込みプラグイン</value></data>
+<data name="PluginName" xml:space="preserve"><value>MIDI 音声読み込み</value></data>
 <data name="SettingsName" xml:space="preserve"><value>MIDI 設定</value></data>
 <data name="AudioSettings" xml:space="preserve"><value>音声設定</value></data>
 <data name="SampleRate" xml:space="preserve"><value>サンプリングレート</value></data>
