@@ -30,14 +30,19 @@ internal sealed class WaveformSynthesisRenderer : IMidiRenderer
         double secondsPerTick = 500000.0 / (ticksPerQ * 1_000_000.0);
         var openNotes = new Dictionary<(int, int), (long StartSample, float Velocity)>();
         var allEvents = midiFile.Events.SelectMany(t => t).OrderBy(e => e.AbsoluteTime).ToList();
+        // 累積はdoubleで保持し、ParsedNoteへ書き出す瞬間だけlongに量子化する。
+        // tickごとに(long)キャストすると小数部が切り捨てられて誤差が累積し、
+        // 長尺・高密度MIDIでタイミングずれを引き起こすため。
+        double currentSampleAcc = 0.0;
         long currentSample = 0;
         long lastTick = 0;
 
         foreach (var evt in allEvents)
         {
             long delta = evt.AbsoluteTime - lastTick;
-            currentSample += (long)(delta * secondsPerTick * _sampleRate);
+            currentSampleAcc += delta * secondsPerTick * _sampleRate;
             lastTick = evt.AbsoluteTime;
+            currentSample = (long)currentSampleAcc;
             if (evt is TempoEvent te)
                 secondsPerTick = te.MicrosecondsPerQuarterNote / (ticksPerQ * 1_000_000.0);
 
