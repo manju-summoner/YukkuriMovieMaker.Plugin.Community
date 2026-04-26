@@ -37,7 +37,7 @@
         </pb:DialogBehavior>
         <pb:DialogBehavior Content="{Binding ClearBrowsingDataViewModel}" IsModal="True">
             <pb:DialogBehavior.Style>
-                <Style TargetType="Window">
+                <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}">
                     <Setter Property="Title" Value="{x:Static local:Texts.ClearBrowsingData}"/>
                     <Setter Property="SizeToContent" Value="WidthAndHeight"/>
                 </Style>
