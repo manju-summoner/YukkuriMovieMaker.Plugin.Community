@@ -15,6 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         TaskCompletionSource<WebView2>? webView2TCS;
         WebView2? webView2;
+        bool isDetached;
         public bool IsLoading { get => field; private set => Set(ref field, value); }
         public double LoadingProgress { get => field; private set => Set(ref field, value); }
         CancellationTokenSource? progressCts;
@@ -225,6 +226,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         public void AttachWebView2(WebView2 webView2Service)
         {
             webView2 = webView2Service;
+            isDetached = false;
+
             if (webView2.CoreWebView2 is { } core)
             {
                 core.IsMuted = false;
@@ -237,6 +240,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 core.SourceChanged += CoreWebView2_SourceChanged;
                 core.DocumentTitleChanged += CoreWebView2_DocumentTitleChanged;
                 core.FaviconChanged += CoreWebView2_FaviconChanged;
+
+                core.ScriptDialogOpening -= CoreWebView2_ScriptDialogOpening;
+                core.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
             }
 
             BrowserSettings.Default.PropertyChanged += BrowserSettings_PropertyChanged;
@@ -252,6 +258,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         public void DetachWebView2()
         {
+            isDetached = true;
+
             if (webView2?.CoreWebView2 is { } core)
             {
                 core.NewWindowRequested -= CoreWebView2_NewWindowRequested;
@@ -264,13 +272,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 core.FaviconChanged -= CoreWebView2_FaviconChanged;
 
                 core.IsMuted = true;
-                core.ExecuteScriptAsync("window.onbeforeunload = null;");
+                core.ExecuteScriptAsync("window.onbeforeunload = null; document.querySelectorAll('video, audio').forEach(x => x.pause());");
                 core.Navigate("about:blank");
             }
 
             BrowserSettings.Default.PropertyChanged -= BrowserSettings_PropertyChanged;
 
             webView2 = null;
+        }
+
+        private void CoreWebView2_ScriptDialogOpening(object? sender, CoreWebView2ScriptDialogOpeningEventArgs e)
+        {
+            if (isDetached && e.Kind == CoreWebView2ScriptDialogKind.Beforeunload)
+            {
+                e.Accept();
+            }
         }
 
         private async Task LoadExtensionsAsync()
