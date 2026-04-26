@@ -14,13 +14,6 @@ public class PerformanceSettings : INotifyPropertyChanged
     private bool _enableGpuAcceleration = true;
     public bool EnableGpuAcceleration { get => _enableGpuAcceleration; set => SetField(ref _enableGpuAcceleration, value); }
 
-    public void CopyFrom(PerformanceSettings source)
-    {
-        RenderingMode = source.RenderingMode;
-        MaxPolyphony = source.MaxPolyphony;
-        EnableGpuAcceleration = source.EnableGpuAcceleration;
-    }
-
     public event PropertyChangedEventHandler? PropertyChanged;
 
     protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
