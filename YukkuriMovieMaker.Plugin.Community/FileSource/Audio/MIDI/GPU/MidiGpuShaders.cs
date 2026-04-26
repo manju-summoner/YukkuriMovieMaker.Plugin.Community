@@ -4,26 +4,6 @@ namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.GPU;
 
 [ThreadGroupSize(DefaultThreadGroupSizes.X)]
 [GeneratedComputeShaderDescriptor]
-internal readonly partial struct NormalizeSamplesShader : IComputeShader
-{
-    private readonly ReadWriteBuffer<float> buffer;
-    private readonly float scale;
-
-    public NormalizeSamplesShader(ReadWriteBuffer<float> buffer, float scale)
-    {
-        this.buffer = buffer;
-        this.scale = scale;
-    }
-
-    public void Execute()
-    {
-        int i = ThreadIds.X;
-        buffer[i] = Hlsl.Clamp(buffer[i] * scale, -1.0f, 1.0f);
-    }
-}
-
-[ThreadGroupSize(DefaultThreadGroupSizes.X)]
-[GeneratedComputeShaderDescriptor]
 internal readonly partial struct LimiterShader : IComputeShader
 {
     private readonly ReadWriteBuffer<float> buffer;

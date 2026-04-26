@@ -64,7 +64,6 @@
 <data name="AudioSettings" xml:space="preserve"><value>إعدادات الصوت</value></data>
 <data name="SampleRate" xml:space="preserve"><value>معدل أخذ العينات</value></data>
 <data name="MasterVolume" xml:space="preserve"><value>مستوى الصوت الرئيسي</value></data>
-<data name="EnableNormalization" xml:space="preserve"><value>تطبيع الصوت</value></data>
 <data name="PerformanceSettings" xml:space="preserve"><value>إعدادات الأداء</value></data>
 <data name="RenderingMode" xml:space="preserve"><value>وضع التقديم</value></data>
 <data name="BufferSize" xml:space="preserve"><value>حجم المخزن المؤقت</value></data>

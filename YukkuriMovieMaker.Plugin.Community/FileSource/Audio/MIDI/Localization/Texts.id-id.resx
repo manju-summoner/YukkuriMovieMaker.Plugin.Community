@@ -64,7 +64,6 @@
 <data name="AudioSettings" xml:space="preserve"><value>Pengaturan Audio</value></data>
 <data name="SampleRate" xml:space="preserve"><value>Laju Sampel</value></data>
 <data name="MasterVolume" xml:space="preserve"><value>Volume Utama</value></data>
-<data name="EnableNormalization" xml:space="preserve"><value>Normalisasi</value></data>
 <data name="PerformanceSettings" xml:space="preserve"><value>Pengaturan Performa</value></data>
 <data name="RenderingMode" xml:space="preserve"><value>Mode Rendering</value></data>
 <data name="BufferSize" xml:space="preserve"><value>Ukuran Buffer</value></data>

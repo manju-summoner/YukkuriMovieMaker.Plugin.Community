@@ -71,26 +71,6 @@ internal sealed class GpuAudioProcessor : IGpuAudioProcessor
         catch { return false; }
     }
 
-    public bool TryNormalize(Span<float> buffer, float targetLevel)
-    {
-        if (_device is null || buffer.IsEmpty) return false;
-        try
-        {
-            var peak = 0f;
-            foreach (var s in buffer) peak = MathF.Max(peak, MathF.Abs(s));
-            if (peak < 1e-6f) return true;
-
-            var scale = targetLevel / peak;
-            EnsureGpuBuffers(buffer.Length);
-            var gpuBuffer = _gpuBuffer!;
-            gpuBuffer.CopyFrom(buffer);
-            _device.For(buffer.Length, new NormalizeSamplesShader(gpuBuffer, scale));
-            gpuBuffer.CopyTo(buffer);
-            return true;
-        }
-        catch { return false; }
-    }
-
     public void Dispose()
     {
         if (_disposed) return;

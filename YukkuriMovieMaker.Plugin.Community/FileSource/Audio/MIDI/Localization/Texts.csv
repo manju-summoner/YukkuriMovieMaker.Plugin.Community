@@ -4,7 +4,6 @@ SettingsName,,MIDI 設定,MIDI Settings,MIDI 设置,MIDI 設定,MIDI 설정,Conf
 AudioSettings,,音声設定,Audio Settings,音频设置,音訊設定,오디오 설정,Configuración de audio,إعدادات الصوت,Pengaturan Audio,
 SampleRate,,サンプリングレート,Sample Rate,采样率,取樣率,샘플 레이트,Frecuencia de muestreo,معدل أخذ العينات,Laju Sampel,
 MasterVolume,,マスター音量,Master Volume,主音量,主音量,마스터 볼륨,Volumen maestro,مستوى الصوت الرئيسي,Volume Utama,
-EnableNormalization,,音量正規化,Normalization,音量归一化,音量正規化,음량 정규화,Normalización,تطبيع الصوت,Normalisasi,
 PerformanceSettings,,パフォーマンス設定,Performance Settings,性能设置,效能設定,성능 설정,Configuración de rendimiento,إعدادات الأداء,Pengaturan Performa,
 RenderingMode,,レンダリングモード,Rendering Mode,渲染模式,渲染模式,렌더링 모드,Modo de renderizado,وضع التقديم,Mode Rendering,
 BufferSize,,バッファサイズ,Buffer Size,缓冲区大小,緩衝區大小,버퍼 크기,Tamaño del búfer,حجم المخزن المؤقت,Ukuran Buffer,

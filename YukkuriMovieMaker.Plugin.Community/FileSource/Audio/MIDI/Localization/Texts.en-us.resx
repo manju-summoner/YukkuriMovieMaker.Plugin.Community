@@ -64,7 +64,6 @@
 <data name="AudioSettings" xml:space="preserve"><value>Audio Settings</value></data>
 <data name="SampleRate" xml:space="preserve"><value>Sample Rate</value></data>
 <data name="MasterVolume" xml:space="preserve"><value>Master Volume</value></data>
-<data name="EnableNormalization" xml:space="preserve"><value>Normalization</value></data>
 <data name="PerformanceSettings" xml:space="preserve"><value>Performance Settings</value></data>
 <data name="RenderingMode" xml:space="preserve"><value>Rendering Mode</value></data>
 <data name="BufferSize" xml:space="preserve"><value>Buffer Size</value></data>

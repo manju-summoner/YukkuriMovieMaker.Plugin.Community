@@ -64,7 +64,6 @@
 <data name="AudioSettings" xml:space="preserve"><value>오디오 설정</value></data>
 <data name="SampleRate" xml:space="preserve"><value>샘플 레이트</value></data>
 <data name="MasterVolume" xml:space="preserve"><value>마스터 볼륨</value></data>
-<data name="EnableNormalization" xml:space="preserve"><value>음량 정규화</value></data>
 <data name="PerformanceSettings" xml:space="preserve"><value>성능 설정</value></data>
 <data name="RenderingMode" xml:space="preserve"><value>렌더링 모드</value></data>
 <data name="BufferSize" xml:space="preserve"><value>버퍼 크기</value></data>

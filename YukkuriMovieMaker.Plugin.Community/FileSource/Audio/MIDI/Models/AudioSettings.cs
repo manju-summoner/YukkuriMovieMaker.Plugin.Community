@@ -11,18 +11,10 @@ public class AudioSettings : INotifyPropertyChanged
     private float _masterVolume = 1.0f;
     public float MasterVolume { get => _masterVolume; set => SetField(ref _masterVolume, value); }
 
-    private bool _enableNormalization = false;
-    public bool EnableNormalization { get => _enableNormalization; set => SetField(ref _enableNormalization, value); }
-
-    private float _normalizationLevel = 0.95f;
-    public float NormalizationLevel { get => _normalizationLevel; set => SetField(ref _normalizationLevel, value); }
-
     public void CopyFrom(AudioSettings source)
     {
         SampleRate = source.SampleRate;
         MasterVolume = source.MasterVolume;
-        EnableNormalization = source.EnableNormalization;
-        NormalizationLevel = source.NormalizationLevel;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

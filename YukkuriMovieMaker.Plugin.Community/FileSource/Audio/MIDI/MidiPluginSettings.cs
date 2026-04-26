@@ -96,7 +96,7 @@ public class MidiPluginSettings : SettingsBase<MidiPluginSettings>
     public string GetConfigurationHash()
     {
         var parts = string.Concat(
-            audio.SampleRate, audio.MasterVolume, audio.EnableNormalization, audio.NormalizationLevel,
+            audio.SampleRate, audio.MasterVolume,
             performance.RenderingMode, performance.BufferSize, performance.MaxPolyphony, performance.EnableGpuAcceleration,
             soundFont.EnableSoundFont, soundFont.FallbackToSynthesis,
             string.Join(",", soundFont.Layers.Select(l => $"{l.FileName}:{l.Volume}:{l.IsEnabled}")),

@@ -32,11 +32,6 @@
                                          StringFormat="F2" Unit="×" Width="200"
                                          HorizontalAlignment="Right" VerticalAlignment="Center"/>
                     </Grid>
-                    <Grid Margin="0,2">
-                        <Label Content="{x:Static loc:Texts.EnableNormalization}" VerticalAlignment="Center"/>
-                        <c:ToggleSlider Value="{Binding Audio.EnableNormalization, Mode=TwoWay}"
-                                        HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    </Grid>
                 </StackPanel>
             </Expander>
 

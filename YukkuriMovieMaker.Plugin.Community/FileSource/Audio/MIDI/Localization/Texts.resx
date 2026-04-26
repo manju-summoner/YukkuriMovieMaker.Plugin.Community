@@ -64,7 +64,6 @@
 <data name="AudioSettings" xml:space="preserve"><value>音声設定</value></data>
 <data name="SampleRate" xml:space="preserve"><value>サンプリングレート</value></data>
 <data name="MasterVolume" xml:space="preserve"><value>マスター音量</value></data>
-<data name="EnableNormalization" xml:space="preserve"><value>音量正規化</value></data>
 <data name="PerformanceSettings" xml:space="preserve"><value>パフォーマンス設定</value></data>
 <data name="RenderingMode" xml:space="preserve"><value>レンダリングモード</value></data>
 <data name="BufferSize" xml:space="preserve"><value>バッファサイズ</value></data>
