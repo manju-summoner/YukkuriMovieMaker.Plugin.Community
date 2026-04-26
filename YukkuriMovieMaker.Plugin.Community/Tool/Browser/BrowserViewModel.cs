@@ -266,6 +266,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
             BrowserSettings.Default.PropertyChanged -= BrowserSettings_PropertyChanged;
 
+            //ブラウザ非表示後も表示中ページの音声が再生され続けるのを避けるため、空白ページに待避する
             webView2?.CoreWebView2.Navigate("about:blank");
 
             webView2 = null;
