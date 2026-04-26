@@ -272,6 +272,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 core.IsMuted = true;
                 core.ExecuteScriptAsync("window.onbeforeunload = null; document.querySelectorAll('video, audio').forEach(x => x.pause());");
                 core.Navigate("about:blank");
+
+                core.ScriptDialogOpening -= CoreWebView2_ScriptDialogOpening;
             }
 
             BrowserSettings.Default.PropertyChanged -= BrowserSettings_PropertyChanged;
