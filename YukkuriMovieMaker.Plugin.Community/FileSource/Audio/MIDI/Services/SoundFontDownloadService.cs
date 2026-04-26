@@ -10,8 +10,7 @@ internal sealed class SoundFontDownloadService
 {
     private const string ReleaseBaseUrl = "https://github.com/routersys/YMM4-SoundFonts/releases/latest/download/";
     private static readonly string SoundFontDir = Path.Combine(
-        Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty,
-        "user", "resources", "soundFonts");
+        AppDirectories.UserDirectory, "resources", "soundFonts");
 
     public static string SoundFontDirectory => SoundFontDir;
 
