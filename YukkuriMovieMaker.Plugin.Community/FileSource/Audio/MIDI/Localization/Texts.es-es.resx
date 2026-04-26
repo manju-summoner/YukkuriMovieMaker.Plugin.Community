@@ -92,4 +92,5 @@
 <data name="RenderingModeSynthesis" xml:space="preserve"><value>Síntesis de forma de onda</value></data>
 <data name="MidiParseError" xml:space="preserve"><value>Error al analizar el archivo MIDI. El archivo puede estar dañado.</value></data>
 <data name="MidiHeaderValidationError" xml:space="preserve"><value>Se produjo una excepción al validar el encabezado MIDI.</value></data>
+<data name="SoundFontInitFailedFallback" xml:space="preserve"><value>Falló la inicialización de SoundFont; recurriendo a síntesis de forma de onda.</value></data>
 </root>

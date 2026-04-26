@@ -92,4 +92,5 @@
 <data name="RenderingModeSynthesis" xml:space="preserve"><value>Sintesis Gelombang</value></data>
 <data name="MidiParseError" xml:space="preserve"><value>Gagal mengurai file MIDI. File mungkin rusak.</value></data>
 <data name="MidiHeaderValidationError" xml:space="preserve"><value>Terjadi pengecualian saat memvalidasi header MIDI.</value></data>
+<data name="SoundFontInitFailedFallback" xml:space="preserve"><value>Inisialisasi SoundFont gagal; fallback ke sintesis gelombang.</value></data>
 </root>

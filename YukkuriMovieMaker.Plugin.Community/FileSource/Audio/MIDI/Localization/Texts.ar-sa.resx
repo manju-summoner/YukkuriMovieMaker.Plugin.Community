@@ -92,4 +92,5 @@
 <data name="RenderingModeSynthesis" xml:space="preserve"><value>توليف الموجة</value></data>
 <data name="MidiParseError" xml:space="preserve"><value>فشل في تحليل ملف MIDI. قد يكون الملف تالفًا.</value></data>
 <data name="MidiHeaderValidationError" xml:space="preserve"><value>حدث استثناء أثناء التحقق من رأس MIDI.</value></data>
+<data name="SoundFontInitFailedFallback" xml:space="preserve"><value>فشل تهيئة SoundFont؛ الرجوع إلى توليف الموجة.</value></data>
 </root>

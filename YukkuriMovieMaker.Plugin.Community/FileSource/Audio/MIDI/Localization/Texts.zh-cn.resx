@@ -92,4 +92,5 @@
 <data name="RenderingModeSynthesis" xml:space="preserve"><value>波形合成</value></data>
 <data name="MidiParseError" xml:space="preserve"><value>解析 MIDI 文件失败。文件可能已损坏。</value></data>
 <data name="MidiHeaderValidationError" xml:space="preserve"><value>验证 MIDI 头时发生异常。</value></data>
+<data name="SoundFontInitFailedFallback" xml:space="preserve"><value>SoundFont 初始化失败，回退到波形合成。</value></data>
 </root>

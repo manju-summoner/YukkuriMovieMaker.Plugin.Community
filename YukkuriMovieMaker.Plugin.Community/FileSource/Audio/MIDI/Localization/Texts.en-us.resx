@@ -92,4 +92,5 @@
 <data name="RenderingModeSynthesis" xml:space="preserve"><value>Waveform Synthesis</value></data>
 <data name="MidiParseError" xml:space="preserve"><value>Failed to parse MIDI file. The file may be corrupted.</value></data>
 <data name="MidiHeaderValidationError" xml:space="preserve"><value>An exception occurred while validating the MIDI header.</value></data>
+<data name="SoundFontInitFailedFallback" xml:space="preserve"><value>SoundFont initialization failed; falling back to waveform synthesis.</value></data>
 </root>
