@@ -28,8 +28,7 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
         int hist = 0;
         if (settings.Effects.EnableEffects && settings.Effects.EnableReverb)
         {
-            hist = (int)(settings.Effects.ReverbDecay * settings.Audio.SampleRate);
-            if (hist % 2 != 0) hist++;
+            hist = (int)(settings.Effects.ReverbDecay * settings.Audio.SampleRate) * 2;
         }
         _historySamples = hist;
     }

@@ -59,7 +59,7 @@ internal sealed class GpuAudioProcessor : IGpuAudioProcessor
 
             if (_effects.EnableReverb)
             {
-                var delaySamples = (int)(_effects.ReverbDecay * _sampleRate);
+                var delaySamples = (int)(_effects.ReverbDecay * _sampleRate) * 2;
                 var reverbBuffer = _reverbInputBuffer!;
                 reverbBuffer.CopyFrom(gpuBuffer);
                 _device.For(buffer.Length, new ReverbShader(reverbBuffer, gpuBuffer, delaySamples, 0.4f, buffer.Length));
