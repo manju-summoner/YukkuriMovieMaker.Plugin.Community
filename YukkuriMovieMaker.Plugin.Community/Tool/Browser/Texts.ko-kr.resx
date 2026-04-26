@@ -89,4 +89,20 @@
 <data name="ClearBrowsingDataDesc" xml:space="preserve"><value>지울 데이터를 선택하세요</value></data>
 <data name="Cancel" xml:space="preserve"><value>취소</value></data>
 <data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>브라우징 데이터가 성공적으로 지워졌습니다.</value></data>
+<data name="BrowserSettings" xml:space="preserve"><value>설정</value></data>
+<data name="BrowserSettingsDesc" xml:space="preserve"><value>브라우저에 대한 자세한 설정을 구성합니다.</value></data>
+<data name="SmartScreenEnabled" xml:space="preserve"><value>악성 사이트 자동 차단 (SmartScreen)</value></data>
+<data name="SmartScreenEnabledDesc" xml:space="preserve"><value>Microsoft Defender SmartScreen을 사용하여 악성 사이트를 차단합니다.</value></data>
+<data name="TrackingPreventionLevel" xml:space="preserve"><value>추적 방지</value></data>
+<data name="TrackingPreventionBasic" xml:space="preserve"><value>기본</value></data>
+<data name="TrackingPreventionBalanced" xml:space="preserve"><value>균형</value></data>
+<data name="TrackingPreventionStrict" xml:space="preserve"><value>엄격</value></data>
+<data name="PasswordAutosaveEnabled" xml:space="preserve"><value>비밀번호 자동 저장 허용</value></data>
+<data name="GeneralAutofillEnabled" xml:space="preserve"><value>양식 자동 완성</value></data>
+<data name="ScriptEnabled" xml:space="preserve"><value>JavaScript 실행 허용</value></data>
+<data name="WebStorageEnabled" xml:space="preserve"><value>쿠키 및 사이트 데이터 허용</value></data>
+<data name="MediaAutoplayEnabled" xml:space="preserve"><value>미디어 자동 재생 허용</value></data>
+<data name="MediaAutoplayEnabledDesc" xml:space="preserve"><value>이 설정과 관계없이 일부 사이트에서는 미디어가 자동으로 재생될 수 있습니다.</value></data>
+<data name="CustomUserAgent" xml:space="preserve"><value>사용자 지정 사용자 에ージェント</value></data>
+<data name="Close" xml:space="preserve"><value>닫기</value></data>
 </root>

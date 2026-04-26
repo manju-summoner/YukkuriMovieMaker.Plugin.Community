@@ -89,4 +89,20 @@ Example: FolderName/SubfolderName</value></data>
 <data name="ClearBrowsingDataDesc" xml:space="preserve"><value>Select the data you want to clear</value></data>
 <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
 <data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>Browsing data cleared successfully.</value></data>
+<data name="BrowserSettings" xml:space="preserve"><value>Settings</value></data>
+<data name="BrowserSettingsDesc" xml:space="preserve"><value>Configure detailed browser settings.</value></data>
+<data name="SmartScreenEnabled" xml:space="preserve"><value>Auto-block malicious sites (SmartScreen)</value></data>
+<data name="SmartScreenEnabledDesc" xml:space="preserve"><value>Uses Microsoft Defender SmartScreen to block malicious sites.</value></data>
+<data name="TrackingPreventionLevel" xml:space="preserve"><value>Tracking Prevention</value></data>
+<data name="TrackingPreventionBasic" xml:space="preserve"><value>Basic</value></data>
+<data name="TrackingPreventionBalanced" xml:space="preserve"><value>Balanced</value></data>
+<data name="TrackingPreventionStrict" xml:space="preserve"><value>Strict</value></data>
+<data name="PasswordAutosaveEnabled" xml:space="preserve"><value>Allow saving passwords</value></data>
+<data name="GeneralAutofillEnabled" xml:space="preserve"><value>Form Autofill</value></data>
+<data name="ScriptEnabled" xml:space="preserve"><value>Allow JavaScript</value></data>
+<data name="WebStorageEnabled" xml:space="preserve"><value>Allow cookies and site data</value></data>
+<data name="MediaAutoplayEnabled" xml:space="preserve"><value>Allow media autoplay</value></data>
+<data name="MediaAutoplayEnabledDesc" xml:space="preserve"><value>Media may still autoplay on some sites regardless of this setting.</value></data>
+<data name="CustomUserAgent" xml:space="preserve"><value>Custom User Agent</value></data>
+<data name="Close" xml:space="preserve"><value>Close</value></data>
 </root>

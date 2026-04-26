@@ -56,12 +56,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         public ActionCommand NavigateCommand { get; }
         public ActionCommand OpenFavoriteEditorCommand { get; }
         public ActionCommand ClearBrowsingDataCommand { get; }
+        public ActionCommand OpenBrowserSettingsCommand { get; }
         public ActionCommand DownloadCommand { get; }
         public ActionCommand PrintCommand { get; }
         public ActionCommand FindCommand { get; }
 
         public BrowserFavoriteEditorViewModel? FavoriteEditorViewModel { get; set=>Set(ref field, value); }
         public ClearBrowsingDataViewModel? ClearBrowsingDataViewModel { get => field; set => Set(ref field, value); }
+        public BrowserSettingsViewModel? BrowserSettingsViewModel { get => field; set => Set(ref field, value); }
 
         [SuppressMessage("Performance", "CA1822:メンバーを static に設定します", Justification = "")]
         public BrowserFavoriteDirectoryViewModel FavoriteDirectoryViewModel => BrowserFavoriteDirectoryViewModel.CreateBrowserFavoriteRoot();
@@ -103,6 +105,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             ClearBrowsingDataCommand = new ActionCommand(
                 _ => webView2?.CoreWebView2?.Profile != null,
                 async _ => await ExecuteClearBrowsingDataAsync());
+            OpenBrowserSettingsCommand = new ActionCommand(
+                _ => true,
+                _ => ExecuteOpenBrowserSettings());
             DownloadCommand = new ActionCommand(
                 _ => webView2?.CoreWebView2 != null,
                 _ => webView2?.CoreWebView2?.OpenDefaultDownloadDialog());
@@ -155,6 +160,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             FavoriteEditorViewModel = null;
             OnPropertyChanged(nameof(IsFavorite));
             OnPropertyChanged(nameof(FavoriteDirectoryViewModel));
+        }
+
+        private void ExecuteOpenBrowserSettings()
+        {
+            BrowserSettingsViewModel = new BrowserSettingsViewModel();
+            BrowserSettingsViewModel = null;
         }
 
         private Task ExecuteClearBrowsingDataAsync()
@@ -225,8 +236,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             webView2.CoreWebView2.DocumentTitleChanged += CoreWebView2_DocumentTitleChanged;
             webView2.CoreWebView2.FaviconChanged += CoreWebView2_FaviconChanged;
 
-            webView2.CoreWebView2.Settings.UserAgent = IsMobileMode ? MobileUserAgent : defaultUserAgent;
+            BrowserSettings.Default.PropertyChanged += BrowserSettings_PropertyChanged;
 
+            ApplySettings();
             ApplyState();
 
             _ = LoadExtensionsAsync();
@@ -251,6 +263,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             {
                 webView2.CoreWebView2.FaviconChanged -= CoreWebView2_FaviconChanged;
             }
+
+            BrowserSettings.Default.PropertyChanged -= BrowserSettings_PropertyChanged;
 
             webView2?.CoreWebView2.Navigate("about:blank");
 
@@ -487,6 +501,38 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             var url = NormalizeOrCreateSearchUrl(state.Location);
             webView2?.CoreWebView2.Navigate(url);
             webView2?.ZoomFactor = state.Zoom;
+        }
+
+        private void BrowserSettings_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            ApplySettings();
+        }
+
+        private void ApplySettings()
+        {
+            if (webView2?.CoreWebView2 == null) return;
+            var settings = webView2.CoreWebView2.Settings;
+            settings.IsReputationCheckingRequired = BrowserSettings.Default.IsSmartScreenEnabled;
+            settings.IsPasswordAutosaveEnabled = BrowserSettings.Default.IsPasswordAutosaveEnabled;
+            settings.IsGeneralAutofillEnabled = BrowserSettings.Default.IsGeneralAutofillEnabled;
+            settings.IsScriptEnabled = BrowserSettings.Default.IsScriptEnabled;
+            
+            if (webView2.CoreWebView2.Profile != null)
+            {
+                webView2.CoreWebView2.Profile.PreferredTrackingPreventionLevel = (CoreWebView2TrackingPreventionLevel)(BrowserSettings.Default.TrackingPreventionLevel + 1);
+            }
+
+            string userAgent = defaultUserAgent ?? string.Empty;
+            if (IsMobileMode)
+                userAgent = MobileUserAgent;
+            else if (!string.IsNullOrEmpty(BrowserSettings.Default.CustomUserAgent))
+                userAgent = BrowserSettings.Default.CustomUserAgent;
+
+            if (settings.UserAgent != userAgent)
+            {
+                settings.UserAgent = userAgent;
+                webView2.CoreWebView2.Reload();
+            }
         }
 
         public ToolState SaveState()

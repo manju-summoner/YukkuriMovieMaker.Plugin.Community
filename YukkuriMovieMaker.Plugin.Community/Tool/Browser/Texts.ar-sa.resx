@@ -89,4 +89,20 @@
 <data name="ClearBrowsingDataDesc" xml:space="preserve"><value>حدد البيانات التي تريد مسحها</value></data>
 <data name="Cancel" xml:space="preserve"><value>إلغاء</value></data>
 <data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>تم مسح بيانات التصفح بنجاح.</value></data>
+<data name="BrowserSettings" xml:space="preserve"><value>الإعدادات</value></data>
+<data name="BrowserSettingsDesc" xml:space="preserve"><value>تكوين إعدادات المتصفح التفصيلية.</value></data>
+<data name="SmartScreenEnabled" xml:space="preserve"><value>الحظر التلقائي للمواقع الضارة (SmartScreen)</value></data>
+<data name="SmartScreenEnabledDesc" xml:space="preserve"><value>يستخدم Microsoft Defender SmartScreen لحظر المواقع الضارة.</value></data>
+<data name="TrackingPreventionLevel" xml:space="preserve"><value>منع التتبع</value></data>
+<data name="TrackingPreventionBasic" xml:space="preserve"><value>أساسي</value></data>
+<data name="TrackingPreventionBalanced" xml:space="preserve"><value>متوازن</value></data>
+<data name="TrackingPreventionStrict" xml:space="preserve"><value>صارم</value></data>
+<data name="PasswordAutosaveEnabled" xml:space="preserve"><value>السماح بحفظ كلمات المرور</value></data>
+<data name="GeneralAutofillEnabled" xml:space="preserve"><value>الملء التلقائي للنموذج</value></data>
+<data name="ScriptEnabled" xml:space="preserve"><value>السماح بـ JavaScript</value></data>
+<data name="WebStorageEnabled" xml:space="preserve"><value>السماح بملفات تعريف الارتباط وبيانات الموقع</value></data>
+<data name="MediaAutoplayEnabled" xml:space="preserve"><value>السماح بالتشغيل التلقائي للوسائط</value></data>
+<data name="MediaAutoplayEnabledDesc" xml:space="preserve"><value>قد تستمر الوسائط في التشغيل التلقائي على بعض المواقع بغض النظر عن هذا الإعداد.</value></data>
+<data name="CustomUserAgent" xml:space="preserve"><value>وكيل مستخدم مخصص</value></data>
+<data name="Close" xml:space="preserve"><value>إغلاق</value></data>
 </root>

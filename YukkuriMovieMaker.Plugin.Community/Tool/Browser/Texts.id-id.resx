@@ -89,4 +89,20 @@ Contoh: NamaFolder/NamaSubfolder</value></data>
 <data name="ClearBrowsingDataDesc" xml:space="preserve"><value>Pilih data yang ingin Anda hapus</value></data>
 <data name="Cancel" xml:space="preserve"><value>Batal</value></data>
 <data name="ClearBrowsingDataCompletedMessage" xml:space="preserve"><value>Data penjelajahan berhasil dihapus.</value></data>
+<data name="BrowserSettings" xml:space="preserve"><value>Pengaturan</value></data>
+<data name="BrowserSettingsDesc" xml:space="preserve"><value>Konfigurasikan pengaturan browser secara rinci.</value></data>
+<data name="SmartScreenEnabled" xml:space="preserve"><value>Blokir otomatis situs berbahaya (SmartScreen)</value></data>
+<data name="SmartScreenEnabledDesc" xml:space="preserve"><value>Menggunakan Microsoft Defender SmartScreen untuk memblokir situs berbahaya.</value></data>
+<data name="TrackingPreventionLevel" xml:space="preserve"><value>Pencegahan Pelacakan</value></data>
+<data name="TrackingPreventionBasic" xml:space="preserve"><value>Dasar</value></data>
+<data name="TrackingPreventionBalanced" xml:space="preserve"><value>Seimbang</value></data>
+<data name="TrackingPreventionStrict" xml:space="preserve"><value>Ketat</value></data>
+<data name="PasswordAutosaveEnabled" xml:space="preserve"><value>Izinkan menyimpan kata sandi</value></data>
+<data name="GeneralAutofillEnabled" xml:space="preserve"><value>Isi Otomatis Formulir</value></data>
+<data name="ScriptEnabled" xml:space="preserve"><value>Izinkan JavaScript</value></data>
+<data name="WebStorageEnabled" xml:space="preserve"><value>Izinkan cookie dan data situs</value></data>
+<data name="MediaAutoplayEnabled" xml:space="preserve"><value>Izinkan pemutaran otomatis media</value></data>
+<data name="MediaAutoplayEnabledDesc" xml:space="preserve"><value>Media mungkin masih diputar secara otomatis di beberapa situs terlepas dari pengaturan ini.</value></data>
+<data name="CustomUserAgent" xml:space="preserve"><value>Agen Pengguna Kustom</value></data>
+<data name="Close" xml:space="preserve"><value>Tutup</value></data>
 </root>
