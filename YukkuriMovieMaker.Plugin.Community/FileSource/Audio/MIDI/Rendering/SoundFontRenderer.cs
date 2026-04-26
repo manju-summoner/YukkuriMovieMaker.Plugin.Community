@@ -25,6 +25,7 @@ internal sealed class SoundFontRenderer : IMidiRenderer
     private readonly int[] _lastCC = new int[ChannelCount * CCPerChannel];
     private readonly int[] _lastPitch = new int[ChannelCount];
     private readonly int[] _lastCat = new int[ChannelCount];
+    private readonly int[] _keyPressure = new int[ChannelCount * NotesPerChannel];
     private long _currentMonoPosition = -1;
     private int _eventIndex;
     private bool _disposed;
@@ -45,7 +46,8 @@ internal sealed class SoundFontRenderer : IMidiRenderer
         int[] LastPatch,
         int[] LastCC,
         int[] LastPitch,
-        int[] LastCat
+        int[] LastCat,
+        int[] KeyPressure
     );
 
     private static readonly ConcurrentDictionary<string, Lazy<SoundFont>> _sfCache = new(StringComparer.OrdinalIgnoreCase);
@@ -89,6 +91,7 @@ internal sealed class SoundFontRenderer : IMidiRenderer
         Array.Fill(_lastCC, -1);
         Array.Fill(_lastPitch, -1);
         Array.Fill(_lastCat, -1);
+        Array.Fill(_keyPressure, -1);
 
         long nextSnapshotSample = 0;
         int eventIndex = 0;
@@ -100,11 +103,12 @@ internal sealed class SoundFontRenderer : IMidiRenderer
             {
                 var evt = _events[eventIndex];
                 if (evt is ParsedNoteOn on) _activeNotes[on.Channel * NotesPerChannel + on.Note] = on.Velocity;
-                else if (evt is ParsedNoteOff off) _activeNotes[off.Channel * NotesPerChannel + off.Note] = 0;
+                else if (evt is ParsedNoteOff off) { _activeNotes[off.Channel * NotesPerChannel + off.Note] = 0; _keyPressure[off.Channel * NotesPerChannel + off.Note] = -1; }
                 else if (evt is ParsedPatchChange pc) _lastPatch[pc.Channel] = pc.Patch;
                 else if (evt is ParsedControlChange cc) _lastCC[cc.Channel * CCPerChannel + cc.Controller] = cc.Value;
                 else if (evt is ParsedPitchBend pb) _lastPitch[pb.Channel] = pb.Value;
                 else if (evt is ParsedChannelAfterTouch cat) _lastCat[cat.Channel] = cat.Pressure;
+                else if (evt is ParsedKeyAfterTouch kat) _keyPressure[kat.Channel * NotesPerChannel + kat.Note] = kat.Pressure;
                 eventIndex++;
             }
 
@@ -115,7 +119,8 @@ internal sealed class SoundFontRenderer : IMidiRenderer
                 _lastPatch.ToArray(),
                 _lastCC.ToArray(),
                 _lastPitch.ToArray(),
-                _lastCat.ToArray()
+                _lastCat.ToArray(),
+                _keyPressure.ToArray()
             ));
 
             nextSnapshotSample += _sampleRate;
@@ -198,6 +203,7 @@ internal sealed class SoundFontRenderer : IMidiRenderer
             Array.Copy(snap.LastCC, _lastCC, _lastCC.Length);
             Array.Copy(snap.LastPitch, _lastPitch, _lastPitch.Length);
             Array.Copy(snap.LastCat, _lastCat, _lastCat.Length);
+            Array.Copy(snap.KeyPressure, _keyPressure, _keyPressure.Length);
             startIndex = snap.EventIndex;
         }
         else
@@ -207,6 +213,7 @@ internal sealed class SoundFontRenderer : IMidiRenderer
             Array.Fill(_lastCC, -1);
             Array.Fill(_lastPitch, -1);
             Array.Fill(_lastCat, -1);
+            Array.Fill(_keyPressure, -1);
         }
 
         for (int i = startIndex; i < _events.Count; i++)
@@ -215,11 +222,12 @@ internal sealed class SoundFontRenderer : IMidiRenderer
             if (evt.SampleTime > targetSample) break;
 
             if (evt is ParsedNoteOn on) _activeNotes[on.Channel * NotesPerChannel + on.Note] = on.Velocity;
-            else if (evt is ParsedNoteOff off) _activeNotes[off.Channel * NotesPerChannel + off.Note] = 0;
+            else if (evt is ParsedNoteOff off) { _activeNotes[off.Channel * NotesPerChannel + off.Note] = 0; _keyPressure[off.Channel * NotesPerChannel + off.Note] = -1; }
             else if (evt is ParsedPatchChange pc) _lastPatch[pc.Channel] = pc.Patch;
             else if (evt is ParsedControlChange cc) _lastCC[cc.Channel * CCPerChannel + cc.Controller] = cc.Value;
             else if (evt is ParsedPitchBend pb) _lastPitch[pb.Channel] = pb.Value;
             else if (evt is ParsedChannelAfterTouch cat) _lastCat[cat.Channel] = cat.Pressure;
+            else if (evt is ParsedKeyAfterTouch kat) _keyPressure[kat.Channel * NotesPerChannel + kat.Note] = kat.Pressure;
         }
 
         foreach (var layer in _layers)
@@ -238,7 +246,12 @@ internal sealed class SoundFontRenderer : IMidiRenderer
                 for (int n = 0; n < NotesPerChannel; n++)
                 {
                     int vel = _activeNotes[ch * NotesPerChannel + n];
-                    if (vel > 0) layer.Synth.ProcessMidiMessage(ch, 0x90, n, vel);
+                    if (vel > 0)
+                    {
+                        layer.Synth.ProcessMidiMessage(ch, 0x90, n, vel);
+                        int pressure = _keyPressure[ch * NotesPerChannel + n];
+                        if (pressure >= 0) layer.Synth.ProcessMidiMessage(ch, 0xA0, n, pressure);
+                    }
                 }
             }
         }
