@@ -187,14 +187,14 @@ internal sealed class SoundFontRenderer : IMidiRenderer
     private void SeekTo(long targetSample)
     {
         foreach (var layer in _layers)
-        {
             layer.Synth.Reset();
-        }
+
+        long snapSample = 0;
+        int snapEventIndex = 0;
 
         int snapshotIndex = (int)(targetSample / _sampleRate);
         if (snapshotIndex >= _snapshots.Count) snapshotIndex = _snapshots.Count - 1;
 
-        int startIndex = 0;
         if (snapshotIndex >= 0 && _snapshots.Count > 0)
         {
             var snap = _snapshots[snapshotIndex];
@@ -204,7 +204,8 @@ internal sealed class SoundFontRenderer : IMidiRenderer
             Array.Copy(snap.LastPitch, _lastPitch, _lastPitch.Length);
             Array.Copy(snap.LastCat, _lastCat, _lastCat.Length);
             Array.Copy(snap.KeyPressure, _keyPressure, _keyPressure.Length);
-            startIndex = snap.EventIndex;
+            snapSample = snap.SampleTime;
+            snapEventIndex = snap.EventIndex;
         }
         else
         {
@@ -216,52 +217,89 @@ internal sealed class SoundFontRenderer : IMidiRenderer
             Array.Fill(_keyPressure, -1);
         }
 
-        for (int i = startIndex; i < _events.Count; i++)
-        {
-            var evt = _events[i];
-            if (evt.SampleTime > targetSample) break;
-
-            if (evt is ParsedNoteOn on) _activeNotes[on.Channel * NotesPerChannel + on.Note] = on.Velocity;
-            else if (evt is ParsedNoteOff off) { _activeNotes[off.Channel * NotesPerChannel + off.Note] = 0; _keyPressure[off.Channel * NotesPerChannel + off.Note] = -1; }
-            else if (evt is ParsedPatchChange pc) _lastPatch[pc.Channel] = pc.Patch;
-            else if (evt is ParsedControlChange cc) _lastCC[cc.Channel * CCPerChannel + cc.Controller] = cc.Value;
-            else if (evt is ParsedPitchBend pb) _lastPitch[pb.Channel] = pb.Value;
-            else if (evt is ParsedChannelAfterTouch cat) _lastCat[cat.Channel] = cat.Pressure;
-            else if (evt is ParsedKeyAfterTouch kat) _keyPressure[kat.Channel * NotesPerChannel + kat.Note] = kat.Pressure;
-        }
-
+        // スナップショット時点の状態をsynthに流す。長期サステイン中のノートはこの時点を起点に
+        // envelope/LFOが動き始めるため、最大でスナップショット間隔(=1秒)分の位相ずれが残る。
         foreach (var layer in _layers)
-        {
-            for (int ch = 0; ch < ChannelCount; ch++)
-            {
-                if (_lastPatch[ch] != -1) layer.Synth.ProcessMidiMessage(ch, 0xC0, _lastPatch[ch], 0);
-                for (int cc = 0; cc < CCPerChannel; cc++)
-                {
-                    int val = _lastCC[ch * CCPerChannel + cc];
-                    if (val != -1) layer.Synth.ProcessMidiMessage(ch, 0xB0, cc, val);
-                }
-                if (_lastPitch[ch] != -1) layer.Synth.ProcessMidiMessage(ch, 0xE0, _lastPitch[ch] & 0x7F, (_lastPitch[ch] >> 7) & 0x7F);
-                if (_lastCat[ch] != -1) layer.Synth.ProcessMidiMessage(ch, 0xD0, _lastCat[ch], 0);
+            FlushStateToSynth(layer.Synth);
 
-                for (int n = 0; n < NotesPerChannel; n++)
+        // snapSampleからtargetSampleまで実時間でレンダリング(出力は破棄)し、
+        // 中間イベントを正しい時刻に適用することでenvelope/LFO/フィルタを正しい位相まで進める。
+        // これによりサステイン中ノートがアタックからやり直す問題が解消される。
+        _eventIndex = snapEventIndex;
+        SilentCatchUp(snapSample, targetSample);
+        _currentMonoPosition = targetSample;
+    }
+
+    private void FlushStateToSynth(Synthesizer synth)
+    {
+        for (int ch = 0; ch < ChannelCount; ch++)
+        {
+            if (_lastPatch[ch] != -1) synth.ProcessMidiMessage(ch, 0xC0, _lastPatch[ch], 0);
+            for (int cc = 0; cc < CCPerChannel; cc++)
+            {
+                int val = _lastCC[ch * CCPerChannel + cc];
+                if (val != -1) synth.ProcessMidiMessage(ch, 0xB0, cc, val);
+            }
+            if (_lastPitch[ch] != -1) synth.ProcessMidiMessage(ch, 0xE0, _lastPitch[ch] & 0x7F, (_lastPitch[ch] >> 7) & 0x7F);
+            if (_lastCat[ch] != -1) synth.ProcessMidiMessage(ch, 0xD0, _lastCat[ch], 0);
+
+            for (int n = 0; n < NotesPerChannel; n++)
+            {
+                int vel = _activeNotes[ch * NotesPerChannel + n];
+                if (vel > 0)
                 {
-                    int vel = _activeNotes[ch * NotesPerChannel + n];
-                    if (vel > 0)
-                    {
-                        layer.Synth.ProcessMidiMessage(ch, 0x90, n, vel);
-                        int pressure = _keyPressure[ch * NotesPerChannel + n];
-                        if (pressure >= 0) layer.Synth.ProcessMidiMessage(ch, 0xA0, n, pressure);
-                    }
+                    synth.ProcessMidiMessage(ch, 0x90, n, vel);
+                    int pressure = _keyPressure[ch * NotesPerChannel + n];
+                    if (pressure >= 0) synth.ProcessMidiMessage(ch, 0xA0, n, pressure);
                 }
             }
         }
+    }
 
-        _eventIndex = startIndex;
-        while (_eventIndex < _events.Count && _events[_eventIndex].SampleTime <= targetSample)
+    private void SilentCatchUp(long fromSample, long toSample)
+    {
+        if (toSample <= fromSample || _layers.Count == 0) return;
+
+        const int chunkSize = 1024;
+        var dummyL = ArrayPool<float>.Shared.Rent(chunkSize);
+        var dummyR = ArrayPool<float>.Shared.Rent(chunkSize);
+        try
         {
-            _eventIndex++;
+            long pos = fromSample;
+            while (pos < toSample)
+            {
+                long nextEventTime = _eventIndex < _events.Count ? _events[_eventIndex].SampleTime : long.MaxValue;
+                int chunk = (int)Math.Min(chunkSize, Math.Min(toSample - pos, nextEventTime - pos));
+                if (chunk > 0)
+                {
+                    var tls = dummyL.AsSpan(0, chunk);
+                    var trs = dummyR.AsSpan(0, chunk);
+                    foreach (var layer in _layers)
+                        layer.Synth.Render(tls, trs);
+                    pos += chunk;
+                }
+                while (_eventIndex < _events.Count && _events[_eventIndex].SampleTime <= pos)
+                {
+                    var evt = _events[_eventIndex];
+                    foreach (var layer in _layers)
+                    {
+                        if (evt is ParsedNoteOn on) layer.Synth.ProcessMidiMessage(on.Channel, 0x90, on.Note, on.Velocity);
+                        else if (evt is ParsedNoteOff off) layer.Synth.ProcessMidiMessage(off.Channel, 0x80, off.Note, 0);
+                        else if (evt is ParsedPatchChange pc) layer.Synth.ProcessMidiMessage(pc.Channel, 0xC0, pc.Patch, 0);
+                        else if (evt is ParsedControlChange cc) layer.Synth.ProcessMidiMessage(cc.Channel, 0xB0, cc.Controller, cc.Value);
+                        else if (evt is ParsedPitchBend pb) layer.Synth.ProcessMidiMessage(pb.Channel, 0xE0, pb.Value & 0x7F, (pb.Value >> 7) & 0x7F);
+                        else if (evt is ParsedChannelAfterTouch cat) layer.Synth.ProcessMidiMessage(cat.Channel, 0xD0, cat.Pressure, 0);
+                        else if (evt is ParsedKeyAfterTouch kat) layer.Synth.ProcessMidiMessage(kat.Channel, 0xA0, kat.Note, kat.Pressure);
+                    }
+                    _eventIndex++;
+                }
+            }
         }
-        _currentMonoPosition = targetSample;
+        finally
+        {
+            ArrayPool<float>.Shared.Return(dummyL);
+            ArrayPool<float>.Shared.Return(dummyR);
+        }
     }
 
     /// <summary>
