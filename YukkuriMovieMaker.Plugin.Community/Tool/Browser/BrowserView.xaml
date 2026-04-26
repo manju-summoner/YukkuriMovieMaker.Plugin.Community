@@ -230,6 +230,13 @@
                             <MenuItem.Resources>
                                 <Style TargetType="MenuItem">
                                     <Setter Property="Header" Value="{Binding Display}"/>
+                                    <Setter Property="HeaderTemplate">
+                                        <Setter.Value>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" MaxWidth="400"/>
+                                            </DataTemplate>
+                                        </Setter.Value>
+                                    </Setter>
                                     <Setter Property="IsEnabled" Value="{Binding IsSelectable}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsSelectable}" Value="True">
