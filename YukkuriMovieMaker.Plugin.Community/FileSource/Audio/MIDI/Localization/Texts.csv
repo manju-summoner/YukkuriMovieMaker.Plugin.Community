@@ -1,5 +1,5 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
-PluginName,,MIDI 音声読み込みプラグイン,MIDI Audio Source Plugin,MIDI 音频源插件,MIDI 音訊源插件,MIDI 오디오 소스 플러그인,Plugin de fuente de audio MIDI,مكون إضافي لمصدر صوت MIDI,Plugin Sumber Audio MIDI,
+PluginName,,MIDI 音声読み込み,MIDI Audio Source,MIDI 音频源,MIDI 音訊源,MIDI 오디오 소스,Fuente de audio MIDI,مصدر صوت MIDI,Sumber Audio MIDI,
 SettingsName,,MIDI 設定,MIDI Settings,MIDI 设置,MIDI 設定,MIDI 설정,Configuración MIDI,إعدادات MIDI,Pengaturan MIDI,
 AudioSettings,,音声設定,Audio Settings,音频设置,音訊設定,오디오 설정,Configuración de audio,إعدادات الصوت,Pengaturan Audio,
 SampleRate,,サンプリングレート,Sample Rate,采样率,取樣率,샘플 레이트,Frecuencia de muestreo,معدل أخذ العينات,Laju Sampel,
