@@ -5,13 +5,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 {
     class BrowserSettings : SettingsBase<BrowserSettings>
     {
-        public override SettingsCategory Category => SettingsCategory.None;
+        public override SettingsCategory Category => SettingsCategory.Tool;
 
-        public override string Name => throw new NotImplementedException();
+        public override string Name => Texts.Browser;
 
-        public override bool HasSettingView => false;
+        public override bool HasSettingView => true;
 
-        public override object? SettingView => throw new NotImplementedException();
+        public override object? SettingView => new BrowserSettingsView() { DataContext = new BrowserSettingsViewModel() };
 
         public ObservableCollection<BrowserFavorite> Favorites { get; } = [];
 
