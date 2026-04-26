@@ -6,6 +6,7 @@ using System.Text;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Models;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Views;
 
+
 namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI;
 
 public class MidiPluginSettings : SettingsBase<MidiPluginSettings>
@@ -66,8 +67,6 @@ public class MidiPluginSettings : SettingsBase<MidiPluginSettings>
     private void OnSoundFontChanged(object? sender, PropertyChangedEventArgs e)
     {
         Save();
-        if (e.PropertyName == nameof(SoundFontSettings.HasShownDownloadPrompt))
-            return;
         if (e.PropertyName == nameof(SoundFontSettings.Layers))
             AttachLayersHandlers(soundFont.Layers);
         MidiAudioSource.ClearCache();

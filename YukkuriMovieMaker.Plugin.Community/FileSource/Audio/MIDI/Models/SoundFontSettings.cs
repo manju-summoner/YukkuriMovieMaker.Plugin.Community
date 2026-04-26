@@ -12,9 +12,6 @@ public class SoundFontSettings : INotifyPropertyChanged
     private bool _fallbackToSynthesis = true;
     public bool FallbackToSynthesis { get => _fallbackToSynthesis; set => SetField(ref _fallbackToSynthesis, value); }
 
-    private bool _hasShownDownloadPrompt = false;
-    public bool HasShownDownloadPrompt { get => _hasShownDownloadPrompt; set => SetField(ref _hasShownDownloadPrompt, value); }
-
     private ObservableCollection<SoundFontEntry> _layers = [];
     public ObservableCollection<SoundFontEntry> Layers { get => _layers; set => SetField(ref _layers, value); }
 
@@ -22,7 +19,6 @@ public class SoundFontSettings : INotifyPropertyChanged
     {
         EnableSoundFont = source.EnableSoundFont;
         FallbackToSynthesis = source.FallbackToSynthesis;
-        HasShownDownloadPrompt = source.HasShownDownloadPrompt;
         Layers = new ObservableCollection<SoundFontEntry>(source.Layers.Select(l => (SoundFontEntry)l.Clone()));
     }
 

@@ -92,7 +92,18 @@
     <None Remove="Effect\Video\LensBlur\Texts.csv" />
     <None Remove="Effect\Video\LuminanceKey\Texts.csv" />
     <None Remove="Effect\Video\UnidirectionalBlur\Texts.csv" />
+    <None Remove="Resources\License\GeneralUserGS.txt" />
+    <None Remove="Resources\SoundFonts\GeneralUser-GS.sf2" />
     <None Remove="Shape\Pen\Texts.csv" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <Content Include="Resources\License\GeneralUserGS.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SoundFonts\GeneralUser-GS.sf2">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 	
   <ItemGroup>

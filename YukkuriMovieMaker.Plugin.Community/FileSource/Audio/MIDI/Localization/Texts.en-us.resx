@@ -73,7 +73,6 @@
 <data name="SoundFontSettings" xml:space="preserve"><value>SoundFont Settings</value></data>
 <data name="EnableSoundFont" xml:space="preserve"><value>Use SoundFont</value></data>
 <data name="FallbackToSynthesis" xml:space="preserve"><value>Fallback to Synthesis</value></data>
-<data name="AutoDownload" xml:space="preserve"><value>Auto Download</value></data>
 <data name="SoundFontLayers" xml:space="preserve"><value>SoundFont Layers</value></data>
 <data name="LayerFileName" xml:space="preserve"><value>File Name</value></data>
 <data name="LayerVolume" xml:space="preserve"><value>Volume</value></data>
@@ -87,16 +86,10 @@
 <data name="CompressionRatio" xml:space="preserve"><value>Compression Ratio</value></data>
 <data name="EnableLimiter" xml:space="preserve"><value>Limiter</value></data>
 <data name="LimiterThreshold" xml:space="preserve"><value>Limiter Threshold</value></data>
-<data name="DownloadSoundFont" xml:space="preserve"><value>Download SoundFont</value></data>
-<data name="Downloading" xml:space="preserve"><value>Downloading...</value></data>
-<data name="DownloadComplete" xml:space="preserve"><value>Download Complete</value></data>
-<data name="DownloadFailed" xml:space="preserve"><value>Download Failed</value></data>
 <data name="AddLayer" xml:space="preserve"><value>Add Layer</value></data>
 <data name="RemoveLayer" xml:space="preserve"><value>Remove Layer</value></data>
 <data name="RenderingModeSoundFont" xml:space="preserve"><value>SoundFont</value></data>
 <data name="RenderingModeSynthesis" xml:space="preserve"><value>Waveform Synthesis</value></data>
-<data name="SoundFontDirectory" xml:space="preserve"><value>SoundFont Folder</value></data>
-<data name="OpenSoundFontFolder" xml:space="preserve"><value>Open Folder</value></data>
 <data name="MidiParseError" xml:space="preserve"><value>Failed to parse MIDI file. The file may be corrupted.</value></data>
 <data name="MidiHeaderValidationError" xml:space="preserve"><value>An exception occurred while validating the MIDI header.</value></data>
 </root>

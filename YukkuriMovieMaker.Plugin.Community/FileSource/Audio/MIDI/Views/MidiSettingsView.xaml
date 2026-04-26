@@ -10,19 +10,8 @@
     <UserControl.DataContext>
         <vm:MidiSettingsViewModel/>
     </UserControl.DataContext>
-    <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolVis"/>
-    </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel>
-
-            <Border Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}"
-                    BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                    BorderThickness="1" Padding="6,4" Margin="0,0,0,4"
-                    Visibility="{Binding HasNoSoundFonts, Converter={StaticResource BoolVis}}">
-                <TextBlock Text="{x:Static loc:Texts.DownloadSoundFont}"
-                           Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}"/>
-            </Border>
 
             <Expander Header="{x:Static loc:Texts.AudioSettings}" IsExpanded="True" Margin="0,2">
                 <StackPanel Margin="8,4,0,4">
@@ -96,21 +85,6 @@
                         <c:ToggleSlider Value="{Binding SoundFont.FallbackToSynthesis, Mode=TwoWay}"
                                         HorizontalAlignment="Right" VerticalAlignment="Center"/>
                     </Grid>
-                    <Separator Margin="0,4"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                        <Button Content="{x:Static loc:Texts.DownloadSoundFont}"
-                                Command="{Binding DownloadSoundFontCommand}"
-                                Height="26" Padding="8,0"
-                                IsEnabled="{Binding HasNoSoundFonts}"/>
-                        <Button Content="{x:Static loc:Texts.OpenSoundFontFolder}"
-                                Command="{Binding OpenSoundFontFolderCommand}"
-                                Height="26" Padding="8,0"/>
-                    </StackPanel>
-                    <Grid Margin="0,2" Visibility="{Binding IsDownloading, Converter={StaticResource BoolVis}}">
-                        <ProgressBar Height="12" Value="{Binding DownloadProgress, Mode=OneWay}" Maximum="100"/>
-                    </Grid>
-                    <TextBlock Text="{Binding DownloadStatus}" Margin="0,2" FontSize="11"
-                               Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
                     <Separator Margin="0,4"/>
                     <Grid>
                         <Grid.ColumnDefinitions>

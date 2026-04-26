@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -11,8 +10,6 @@ namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.ViewModels;
 
 internal sealed class MidiSettingsViewModel : INotifyPropertyChanged
 {
-    private readonly SoundFontDownloadService _downloadService = new();
-
     public MidiPluginSettings Settings => MidiPluginSettings.Default;
     public AudioSettings Audio => Settings.Audio;
     public PerformanceSettings Performance => Settings.Performance;
@@ -22,10 +19,8 @@ internal sealed class MidiSettingsViewModel : INotifyPropertyChanged
     public ObservableCollection<string> InstalledSoundFonts { get; } = [];
     public IReadOnlyList<RenderingMode> AvailableRenderingModes { get; } = Enum.GetValues<RenderingMode>();
 
-    public ICommand DownloadSoundFontCommand { get; }
     public ICommand AddLayerCommand { get; }
     public ICommand RemoveLayerCommand { get; }
-    public ICommand OpenSoundFontFolderCommand { get; }
     public ICommand RefreshSoundFontsCommand { get; }
 
     private SoundFontEntry? _selectedLayer;
@@ -35,71 +30,25 @@ internal sealed class MidiSettingsViewModel : INotifyPropertyChanged
         set => SetField(ref _selectedLayer, value);
     }
 
-    private bool _isDownloading;
-    public bool IsDownloading { get => _isDownloading; private set => SetField(ref _isDownloading, value); }
-
-    private double _downloadProgress;
-    public double DownloadProgress { get => _downloadProgress; private set => SetField(ref _downloadProgress, value); }
-
-    private string _downloadStatus = string.Empty;
-    public string DownloadStatus { get => _downloadStatus; private set => SetField(ref _downloadStatus, value); }
-
     public bool HasSoundFonts => InstalledSoundFonts.Count > 0;
     public bool HasNoSoundFonts => !HasSoundFonts;
 
     public MidiSettingsViewModel()
     {
-        DownloadSoundFontCommand = new RelayCommand(async () => await DownloadAsync(), () => !IsDownloading && HasNoSoundFonts);
         AddLayerCommand = new RelayCommand(() => SoundFont.Layers.Add(new SoundFontEntry()));
         RemoveLayerCommand = new RelayCommand(() =>
         {
             if (SelectedLayer is not null)
                 SoundFont.Layers.Remove(SelectedLayer);
         }, () => SelectedLayer is not null);
-        OpenSoundFontFolderCommand = new RelayCommand(() =>
-        {
-            SoundFontDownloadService.EnsureDirectory();
-            Process.Start("explorer.exe", SoundFontDownloadService.SoundFontDirectory);
-        });
         RefreshSoundFontsCommand = new RelayCommand(RefreshList);
         RefreshList();
-    }
-
-    private async Task DownloadAsync()
-    {
-        IsDownloading = true;
-        DownloadStatus = Localization.Texts.Downloading;
-        DownloadProgress = 0;
-        CommandManager.InvalidateRequerySuggested();
-        try
-        {
-            var progress = new YukkuriMovieMaker.Commons.ProgressMessage();
-            progress.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(progress.Rate))
-                    DownloadProgress = progress.Rate >= 0 ? progress.Rate * 100 : 0;
-                else if (e.PropertyName == nameof(progress.Message))
-                    DownloadStatus = progress.Message;
-            };
-            await _downloadService.DownloadAsync("GeneralUser-GS.sf2.zip", progress);
-            DownloadStatus = Localization.Texts.DownloadComplete;
-            RefreshList();
-        }
-        catch
-        {
-            DownloadStatus = Localization.Texts.DownloadFailed;
-        }
-        finally
-        {
-            IsDownloading = false;
-            CommandManager.InvalidateRequerySuggested();
-        }
     }
 
     private void RefreshList()
     {
         InstalledSoundFonts.Clear();
-        foreach (var f in SoundFontDownloadService.GetInstalledSoundFonts())
+        foreach (var f in SoundFontResolverService.GetInstalledFiles())
             InstalledSoundFonts.Add(Path.GetFileName(f));
 
         var stale = SoundFont.Layers

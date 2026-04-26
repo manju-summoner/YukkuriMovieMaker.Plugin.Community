@@ -73,7 +73,6 @@
 <data name="SoundFontSettings" xml:space="preserve"><value>サウンドフォント設定</value></data>
 <data name="EnableSoundFont" xml:space="preserve"><value>サウンドフォントを使用</value></data>
 <data name="FallbackToSynthesis" xml:space="preserve"><value>シンセシスにフォールバック</value></data>
-<data name="AutoDownload" xml:space="preserve"><value>自動ダウンロード</value></data>
 <data name="SoundFontLayers" xml:space="preserve"><value>サウンドフォントレイヤー</value></data>
 <data name="LayerFileName" xml:space="preserve"><value>ファイル名</value></data>
 <data name="LayerVolume" xml:space="preserve"><value>音量</value></data>
@@ -87,16 +86,10 @@
 <data name="CompressionRatio" xml:space="preserve"><value>コンプレッション比</value></data>
 <data name="EnableLimiter" xml:space="preserve"><value>リミッター</value></data>
 <data name="LimiterThreshold" xml:space="preserve"><value>リミッターしきい値</value></data>
-<data name="DownloadSoundFont" xml:space="preserve"><value>サウンドフォントをダウンロード</value></data>
-<data name="Downloading" xml:space="preserve"><value>ダウンロード中...</value></data>
-<data name="DownloadComplete" xml:space="preserve"><value>ダウンロード完了</value></data>
-<data name="DownloadFailed" xml:space="preserve"><value>ダウンロード失敗</value></data>
 <data name="AddLayer" xml:space="preserve"><value>レイヤーを追加</value></data>
 <data name="RemoveLayer" xml:space="preserve"><value>レイヤーを削除</value></data>
 <data name="RenderingModeSoundFont" xml:space="preserve"><value>サウンドフォント</value></data>
 <data name="RenderingModeSynthesis" xml:space="preserve"><value>波形シンセシス</value></data>
-<data name="SoundFontDirectory" xml:space="preserve"><value>サウンドフォントフォルダー</value></data>
-<data name="OpenSoundFontFolder" xml:space="preserve"><value>フォルダーを開く</value></data>
 <data name="MidiParseError" xml:space="preserve"><value>MIDIファイルの解析に失敗しました。ファイルが破損している可能性があります。</value></data>
 <data name="MidiHeaderValidationError" xml:space="preserve"><value>MIDIヘッダの検証中に例外が発生しました。</value></data>
 </root>
