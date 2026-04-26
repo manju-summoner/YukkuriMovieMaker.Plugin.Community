@@ -140,33 +140,37 @@ internal sealed class SoundFontRenderer : IMidiRenderer
             {
                 secondsPerTick = te.MicrosecondsPerQuarterNote / (ticksPerQ * 1_000_000.0);
             }
+            // NAudioのMidiEvent.Channelは1-based(1..16)、MeltySynthのProcessMidiMessageは0-based(0..15、percussion=9)のため、
+            // 保存時点で-1して0-basedに正規化する。これを怠るとドラム(MIDI Ch.10)がメロディックチャンネルに流れて打楽器音色で鳴らなくなる。
+            // NAudio: https://github.com/naudio/NAudio/blob/master/NAudio.Midi/Midi/MidiEvent.cs#L202 ("The MIDI Channel Number for this event (1-16)")
+            // MeltySynth: https://github.com/sinshu/meltysynth/blob/main/MeltySynth/src/Synthesizer.cs#L18 (percussionChannel = 9), #L172 (0 <= channel && channel < channels.Length)
             else if (evt is NoteOnEvent on && on.Velocity > 0)
             {
-                result.Add(new ParsedNoteOn(currentSample, on.Channel, on.NoteNumber, on.Velocity));
+                result.Add(new ParsedNoteOn(currentSample, on.Channel - 1, on.NoteNumber, on.Velocity));
             }
             else if (evt is NoteEvent ne && (ne.CommandCode == MidiCommandCode.NoteOff || (ne is NoteOnEvent no && no.Velocity == 0)))
             {
-                result.Add(new ParsedNoteOff(currentSample, ne.Channel, ne.NoteNumber));
+                result.Add(new ParsedNoteOff(currentSample, ne.Channel - 1, ne.NoteNumber));
             }
             else if (evt is PatchChangeEvent pc)
             {
-                result.Add(new ParsedPatchChange(currentSample, pc.Channel, pc.Patch));
+                result.Add(new ParsedPatchChange(currentSample, pc.Channel - 1, pc.Patch));
             }
             else if (evt is ControlChangeEvent cc)
             {
-                result.Add(new ParsedControlChange(currentSample, cc.Channel, (int)cc.Controller, cc.ControllerValue));
+                result.Add(new ParsedControlChange(currentSample, cc.Channel - 1, (int)cc.Controller, cc.ControllerValue));
             }
             else if (evt is PitchWheelChangeEvent pw)
             {
-                result.Add(new ParsedPitchBend(currentSample, pw.Channel, pw.Pitch));
+                result.Add(new ParsedPitchBend(currentSample, pw.Channel - 1, pw.Pitch));
             }
             else if (evt is ChannelAfterTouchEvent cat)
             {
-                result.Add(new ParsedChannelAfterTouch(currentSample, cat.Channel, cat.AfterTouchPressure));
+                result.Add(new ParsedChannelAfterTouch(currentSample, cat.Channel - 1, cat.AfterTouchPressure));
             }
             else if (evt.CommandCode == MidiCommandCode.KeyAfterTouch && evt is NoteEvent kat)
             {
-                result.Add(new ParsedKeyAfterTouch(currentSample, kat.Channel, kat.NoteNumber, kat.Velocity));
+                result.Add(new ParsedKeyAfterTouch(currentSample, kat.Channel - 1, kat.NoteNumber, kat.Velocity));
             }
         }
         return result;
