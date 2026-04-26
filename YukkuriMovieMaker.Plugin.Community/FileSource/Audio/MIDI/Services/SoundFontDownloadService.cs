@@ -8,7 +8,7 @@ namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Services;
 
 internal sealed class SoundFontDownloadService
 {
-    private const string ReleaseBaseUrl = "https://github.com/routersys/YMM4-SoundFonts/releases/latest/download/";
+    private const string ReleaseBaseUrl = "https://github.com/manju-summoner/YMM4-SoundFonts/releases/latest/download/";
     private static readonly string SoundFontDir = Path.Combine(
         AppDirectories.UserDirectory, "resources", "soundFonts");
 
