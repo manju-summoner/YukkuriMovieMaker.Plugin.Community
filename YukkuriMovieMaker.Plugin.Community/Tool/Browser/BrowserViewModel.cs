@@ -35,10 +35,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             get => field;
             set
             {
-                if (Set(ref field, value) && webView2?.CoreWebView2 != null)
+                if (Set(ref field, value) && webView2?.CoreWebView2 is { } core)
                 {
-                    webView2.CoreWebView2.Settings.UserAgent = value ? MobileUserAgent : (defaultUserAgent ?? string.Empty);
-                    webView2.CoreWebView2.Reload();
+                    core.Settings.UserAgent = value ? MobileUserAgent : (defaultUserAgent ?? string.Empty);
+                    core.Reload();
                 }
             }
         }
@@ -61,7 +61,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         public ActionCommand PrintCommand { get; }
         public ActionCommand FindCommand { get; }
 
-        public BrowserFavoriteEditorViewModel? FavoriteEditorViewModel { get; set=>Set(ref field, value); }
+        public BrowserFavoriteEditorViewModel? FavoriteEditorViewModel { get; set => Set(ref field, value); }
         public ClearBrowsingDataViewModel? ClearBrowsingDataViewModel { get => field; set => Set(ref field, value); }
         public BrowserSettingsViewModel? BrowserSettingsViewModel { get => field; set => Set(ref field, value); }
 
@@ -135,7 +135,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         private void ExecuteNavigate(object? parameter)
         {
             var url = NormalizeOrCreateSearchUrl(parameter as string ?? string.Empty);
-            if (NormalizeUrl(webView2?.CoreWebView2.Source ?? string.Empty) == url)
+            if (NormalizeUrl(webView2?.CoreWebView2?.Source ?? string.Empty) == url)
                 return;
             webView2?.CoreWebView2?.Navigate(url);
         }
@@ -150,7 +150,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 favorite = new BrowserFavorite()
                 {
                     Url = location,
-                    Name = webView2?.CoreWebView2.DocumentTitle ?? location,
+                    Name = webView2?.CoreWebView2?.DocumentTitle ?? location,
                     Directory = string.Empty,
                 };
                 BrowserSettings.Default.Favorites.Add(favorite);
@@ -175,9 +175,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
             ClearBrowsingDataViewModel = new ClearBrowsingDataViewModel(async vm =>
             {
-                if (vm.ClearBrowserCache && webView2?.CoreWebView2?.Profile != null)
+                if (vm.ClearBrowserCache && webView2?.CoreWebView2?.Profile is { } profile)
                 {
-                    await webView2.CoreWebView2.Profile.ClearBrowsingDataAsync();
+                    await profile.ClearBrowsingDataAsync();
                 }
                 if (vm.ClearPluginHistory)
                 {
@@ -203,20 +203,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private async Task ExecuteFindAsync()
         {
-            var coreWebView2 = webView2?.CoreWebView2;
-            if (coreWebView2?.Find == null || coreWebView2.Environment == null)
+            if (webView2?.CoreWebView2 is not { } core || core.Environment == null)
                 return;
 
             try
             {
-                var options = coreWebView2.Environment.CreateFindOptions();
+                var options = core.Environment.CreateFindOptions();
 
-                options.FindTerm = "";
+                options.FindTerm = string.Empty;
                 options.IsCaseSensitive = false;
                 options.ShouldHighlightAllMatches = true;
                 options.SuppressDefaultFindDialog = false;
 
-                await coreWebView2.Find.StartAsync(options);
+                await core.Find.StartAsync(options);
             }
             catch
             {
@@ -226,15 +225,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         public void AttachWebView2(WebView2 webView2Service)
         {
             webView2 = webView2Service;
-            defaultUserAgent ??= webView2.CoreWebView2.Settings.UserAgent;
-            webView2.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
-            webView2.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
-            webView2.CoreWebView2.ContentLoading += CoreWebView2_ContentLoading;
-            webView2.CoreWebView2.DOMContentLoaded += CoreWebView2_DOMContentLoaded;
-            webView2.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
-            webView2.CoreWebView2.SourceChanged += CoreWebView2_SourceChanged;
-            webView2.CoreWebView2.DocumentTitleChanged += CoreWebView2_DocumentTitleChanged;
-            webView2.CoreWebView2.FaviconChanged += CoreWebView2_FaviconChanged;
+            if (webView2.CoreWebView2 is { } core)
+            {
+                core.IsMuted = false;
+                defaultUserAgent ??= core.Settings.UserAgent;
+                core.NewWindowRequested += CoreWebView2_NewWindowRequested;
+                core.NavigationStarting += CoreWebView2_NavigationStarting;
+                core.ContentLoading += CoreWebView2_ContentLoading;
+                core.DOMContentLoaded += CoreWebView2_DOMContentLoaded;
+                core.NavigationCompleted += CoreWebView2_NavigationCompleted;
+                core.SourceChanged += CoreWebView2_SourceChanged;
+                core.DocumentTitleChanged += CoreWebView2_DocumentTitleChanged;
+                core.FaviconChanged += CoreWebView2_FaviconChanged;
+            }
 
             BrowserSettings.Default.PropertyChanged += BrowserSettings_PropertyChanged;
 
@@ -249,25 +252,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         public void DetachWebView2()
         {
-            webView2?.CoreWebView2.NewWindowRequested -= CoreWebView2_NewWindowRequested;
-            webView2?.CoreWebView2.NavigationStarting -= CoreWebView2_NavigationStarting;
-            if (webView2 != null)
+            if (webView2?.CoreWebView2 is { } core)
             {
-                webView2.CoreWebView2.ContentLoading -= CoreWebView2_ContentLoading;
-                webView2.CoreWebView2.DOMContentLoaded -= CoreWebView2_DOMContentLoaded;
-            }
-            webView2?.CoreWebView2.NavigationCompleted -= CoreWebView2_NavigationCompleted;
-            webView2?.CoreWebView2.SourceChanged -= CoreWebView2_SourceChanged;
-            webView2?.CoreWebView2.DocumentTitleChanged -= CoreWebView2_DocumentTitleChanged;
-            if (webView2 != null)
-            {
-                webView2.CoreWebView2.FaviconChanged -= CoreWebView2_FaviconChanged;
+                core.NewWindowRequested -= CoreWebView2_NewWindowRequested;
+                core.NavigationStarting -= CoreWebView2_NavigationStarting;
+                core.ContentLoading -= CoreWebView2_ContentLoading;
+                core.DOMContentLoaded -= CoreWebView2_DOMContentLoaded;
+                core.NavigationCompleted -= CoreWebView2_NavigationCompleted;
+                core.SourceChanged -= CoreWebView2_SourceChanged;
+                core.DocumentTitleChanged -= CoreWebView2_DocumentTitleChanged;
+                core.FaviconChanged -= CoreWebView2_FaviconChanged;
+
+                core.IsMuted = true;
+                core.ExecuteScriptAsync("window.onbeforeunload = null;");
+                core.Navigate("about:blank");
             }
 
             BrowserSettings.Default.PropertyChanged -= BrowserSettings_PropertyChanged;
-
-            //ブラウザ非表示後も表示中ページの音声が再生され続けるのを避けるため、空白ページに待避する
-            webView2?.CoreWebView2.Navigate("about:blank");
 
             webView2 = null;
         }
@@ -302,7 +303,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             var deferral = e.GetDeferral();
             try
             {
-                var toolState = new ToolState() 
+                var toolState = new ToolState()
                 {
                     SavedState = Json.Json.GetJsonText(new WebBrowserSavedState(
                         Location: e.Uri,
@@ -313,8 +314,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 CreateNewToolViewRequested?.Invoke(this, args);
                 if (args.ResultNewToolViewModel is BrowserViewModel newBrowserVM)
                 {
-                    var webView2 = await newBrowserVM.GetWebView2Async();
-                    e.NewWindow = webView2.CoreWebView2;
+                    var webView2Instance = await newBrowserVM.GetWebView2Async();
+                    e.NewWindow = webView2Instance.CoreWebView2;
                 }
             }
             finally
@@ -374,16 +375,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             IsLoading = false;
             LoadingProgress = 0;
             UpdateCommandCanExecuteState();
-            if (webView2?.CoreWebView2 is null)
+            if (webView2?.CoreWebView2 is not { } core)
                 return;
-            AddHistory(webView2.CoreWebView2.Source, webView2.CoreWebView2.DocumentTitle);
-            var url = webView2.CoreWebView2.Source;
+            AddHistory(core.Source, core.DocumentTitle);
+            var url = core.Source;
             var favorites = BrowserSettings.Default.Favorites;
             if (!BrowserFaviconManager.IsFaviconMissingForMatchingFavorite(url, favorites))
                 return;
             try
             {
-                using var stream = await webView2.CoreWebView2.GetFaviconAsync(CoreWebView2FaviconImageFormat.Png);
+                using var stream = await core.GetFaviconAsync(CoreWebView2FaviconImageFormat.Png);
                 if (stream != null && stream.Length > 0)
                 {
                     BrowserFaviconManager.SaveIconForFavorite(url, stream, favorites);
@@ -395,26 +396,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private void CoreWebView2_SourceChanged(object? sender, CoreWebView2SourceChangedEventArgs e)
         {
-            Location = NormalizeUrl(webView2?.CoreWebView2.Source ?? string.Empty);
+            Location = NormalizeUrl(webView2?.CoreWebView2?.Source ?? string.Empty);
             OnPropertyChanged(nameof(IsFavorite));
             UpdateCommandCanExecuteState();
         }
 
         private void CoreWebView2_DocumentTitleChanged(object? sender, object e)
         {
-            Title = webView2?.CoreWebView2.DocumentTitle ?? Texts.Browser;
+            Title = webView2?.CoreWebView2?.DocumentTitle ?? Texts.Browser;
         }
 
         private async void CoreWebView2_FaviconChanged(object? sender, object e)
         {
-            if (webView2?.CoreWebView2 is null || string.IsNullOrEmpty(webView2.CoreWebView2.FaviconUri)) return;
-            var url = webView2.CoreWebView2.Source;
+            if (webView2?.CoreWebView2 is not { } core || string.IsNullOrEmpty(core.FaviconUri)) return;
+            var url = core.Source;
             var favorites = BrowserSettings.Default.Favorites;
             if (!favorites.Any(f => Uri.TryCreate(f.Url, UriKind.Absolute, out var fUri) && Uri.TryCreate(url, UriKind.Absolute, out var uUri) && string.Equals(fUri.Host, uUri.Host, StringComparison.OrdinalIgnoreCase)))
                 return;
             try
             {
-                using var stream = await webView2.CoreWebView2.GetFaviconAsync(CoreWebView2FaviconImageFormat.Png);
+                using var stream = await core.GetFaviconAsync(CoreWebView2FaviconImageFormat.Png);
                 if (stream != null)
                 {
                     BrowserFaviconManager.SaveIconForFavorite(url, stream, favorites);
@@ -446,15 +447,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private async Task FetchAndSaveFaviconAsync(string url)
         {
-            var coreWebView2 = webView2?.CoreWebView2;
-            if (coreWebView2 is null || string.IsNullOrEmpty(coreWebView2.FaviconUri))
+            if (webView2?.CoreWebView2 is not { } core || string.IsNullOrEmpty(core.FaviconUri))
                 return;
             var favorites = BrowserSettings.Default.Favorites;
             if (!BrowserFaviconManager.IsFaviconMissingForMatchingFavorite(url, favorites))
                 return;
             try
             {
-                using var stream = await coreWebView2.GetFaviconAsync(CoreWebView2FaviconImageFormat.Png);
+                using var stream = await core.GetFaviconAsync(CoreWebView2FaviconImageFormat.Png);
                 if (stream != null && stream.Length > 0)
                 {
                     BrowserFaviconManager.SaveIconForFavorite(url, stream, favorites);
@@ -500,8 +500,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         private void ApplyState()
         {
             var url = NormalizeOrCreateSearchUrl(state.Location);
-            webView2?.CoreWebView2.Navigate(url);
-            webView2?.ZoomFactor = state.Zoom;
+            webView2?.CoreWebView2?.Navigate(url);
+            if (webView2 != null)
+                webView2.ZoomFactor = state.Zoom;
         }
 
         private void BrowserSettings_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -511,16 +512,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private void ApplySettings()
         {
-            if (webView2?.CoreWebView2 == null) return;
-            var settings = webView2.CoreWebView2.Settings;
+            if (webView2?.CoreWebView2 is not { } core) return;
+            var settings = core.Settings;
             settings.IsReputationCheckingRequired = BrowserSettings.Default.IsSmartScreenEnabled;
             settings.IsPasswordAutosaveEnabled = BrowserSettings.Default.IsPasswordAutosaveEnabled;
             settings.IsGeneralAutofillEnabled = BrowserSettings.Default.IsGeneralAutofillEnabled;
             settings.IsScriptEnabled = BrowserSettings.Default.IsScriptEnabled;
-            
-            if (webView2.CoreWebView2.Profile != null)
+
+            if (core.Profile != null)
             {
-                webView2.CoreWebView2.Profile.PreferredTrackingPreventionLevel = (CoreWebView2TrackingPreventionLevel)(BrowserSettings.Default.TrackingPreventionLevel + 1);
+                core.Profile.PreferredTrackingPreventionLevel = (CoreWebView2TrackingPreventionLevel)(BrowserSettings.Default.TrackingPreventionLevel + 1);
             }
 
             string userAgent = defaultUserAgent ?? string.Empty;
@@ -532,7 +533,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             if (settings.UserAgent != userAgent)
             {
                 settings.UserAgent = userAgent;
-                webView2.CoreWebView2.Reload();
+                core.Reload();
             }
         }
 
@@ -554,14 +555,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             {
                 return uri.ToString();
             }
-            else if (MaybeUrlWithoutScheme(urlOrQuery) && Uri.TryCreate("https://" + urlOrQuery, UriKind.Absolute, out uri))
+            if (MaybeUrlWithoutScheme(urlOrQuery) && Uri.TryCreate("https://" + urlOrQuery, UriKind.Absolute, out uri))
             {
                 return uri.ToString();
             }
-            else
-            {
-                return "https://www.google.com/search?q=" + Uri.EscapeDataString(urlOrQuery);
-            }
+            return "https://www.google.com/search?q=" + Uri.EscapeDataString(urlOrQuery);
         }
         static string NormalizeUrl(string url)
         {
@@ -569,10 +567,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             {
                 return uri.ToString();
             }
-            else
-            {
-                return url;
-            }
+            return url;
         }
         static bool MaybeUrlWithoutScheme(string url)
         {
