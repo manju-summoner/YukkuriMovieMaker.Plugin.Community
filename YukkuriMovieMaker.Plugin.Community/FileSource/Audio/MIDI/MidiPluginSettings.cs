@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text;
@@ -25,6 +27,8 @@ public class MidiPluginSettings : SettingsBase<MidiPluginSettings>
     public EffectsSettings Effects { get => effects; set => Set(ref effects, value); }
     EffectsSettings effects = new();
 
+    private ObservableCollection<SoundFontEntry>? _trackedLayers;
+
     public override void Initialize()
     {
         AttachNestedHandlers();
@@ -32,16 +36,62 @@ public class MidiPluginSettings : SettingsBase<MidiPluginSettings>
 
     private void AttachNestedHandlers()
     {
-        audio.PropertyChanged += OnNestedChanged;
-        performance.PropertyChanged += OnNestedChanged;
-        soundFont.PropertyChanged += OnNestedChanged;
-        effects.PropertyChanged += OnNestedChanged;
+        audio.PropertyChanged += OnSettingChanged;
+        performance.PropertyChanged += OnSettingChanged;
+        effects.PropertyChanged += OnSettingChanged;
+        soundFont.PropertyChanged += OnSoundFontChanged;
+        AttachLayersHandlers(soundFont.Layers);
     }
 
-    private void OnNestedChanged(object? sender, PropertyChangedEventArgs e)
+    private void AttachLayersHandlers(ObservableCollection<SoundFontEntry> layers)
+    {
+        if (_trackedLayers is not null)
+        {
+            _trackedLayers.CollectionChanged -= OnLayersCollectionChanged;
+            foreach (var entry in _trackedLayers)
+                entry.PropertyChanged -= OnLayerEntryChanged;
+        }
+
+        _trackedLayers = layers;
+        layers.CollectionChanged += OnLayersCollectionChanged;
+        foreach (var entry in layers)
+            entry.PropertyChanged += OnLayerEntryChanged;
+    }
+
+    private void OnSettingChanged(object? sender, PropertyChangedEventArgs e)
     {
         Save();
+    }
+
+    private void OnSoundFontChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        Save();
+        if (e.PropertyName == nameof(SoundFontSettings.HasShownDownloadPrompt))
+            return;
+        if (e.PropertyName == nameof(SoundFontSettings.Layers))
+            AttachLayersHandlers(soundFont.Layers);
         MidiAudioSource.ClearCache();
+    }
+
+    private void OnLayersCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.OldItems is not null)
+            foreach (SoundFontEntry entry in e.OldItems)
+                entry.PropertyChanged -= OnLayerEntryChanged;
+
+        if (e.NewItems is not null)
+            foreach (SoundFontEntry entry in e.NewItems)
+                entry.PropertyChanged += OnLayerEntryChanged;
+
+        Save();
+        MidiAudioSource.ClearCache();
+    }
+
+    private void OnLayerEntryChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        Save();
+        if (e.PropertyName != nameof(SoundFontEntry.Volume))
+            MidiAudioSource.ClearCache();
     }
 
     public string GetConfigurationHash()
