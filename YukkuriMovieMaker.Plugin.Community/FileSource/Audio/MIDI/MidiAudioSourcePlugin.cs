@@ -20,7 +20,6 @@ public sealed class MidiAudioSourcePlugin : IAudioFileSourcePlugin
 
     public MidiAudioSourcePlugin()
     {
-        MidiPluginSettings.Default.Initialize();
         SoundFontDownloadService.EnsureDirectory();
     }
 
