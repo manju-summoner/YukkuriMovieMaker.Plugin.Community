@@ -109,7 +109,19 @@ internal sealed class SoundFontRenderer : IMidiRenderer
                 if (evt is ParsedNoteOn on) _activeNotes[on.Channel * NotesPerChannel + on.Note] = on.Velocity;
                 else if (evt is ParsedNoteOff off) { _activeNotes[off.Channel * NotesPerChannel + off.Note] = 0; _keyPressure[off.Channel * NotesPerChannel + off.Note] = -1; }
                 else if (evt is ParsedPatchChange pc) _lastPatch[pc.Channel] = pc.Patch;
-                else if (evt is ParsedControlChange cc) _lastCC[cc.Channel * CCPerChannel + cc.Controller] = cc.Value;
+                else if (evt is ParsedControlChange cc)
+                {
+                    _lastCC[cc.Channel * CCPerChannel + cc.Controller] = cc.Value;
+                    // CC120(All Sound Off) / CC123(All Notes Off) はチャンネルの全ノートを消音する。
+                    // これを状態配列に反映しないと、スナップショットが既に消えたはずのノートを保持し続け、
+                    // シーク後のFlushStateToSynthでそれらを再発音してしまい線形再生と音が乖離する。
+                    if (cc.Controller == 120 || cc.Controller == 123)
+                    {
+                        int baseIdx = cc.Channel * NotesPerChannel;
+                        Array.Fill(_activeNotes, 0, baseIdx, NotesPerChannel);
+                        Array.Fill(_keyPressure, -1, baseIdx, NotesPerChannel);
+                    }
+                }
                 else if (evt is ParsedPitchBend pb) _lastPitch[pb.Channel] = pb.Value;
                 else if (evt is ParsedChannelAfterTouch cat) _lastCat[cat.Channel] = cat.Pressure;
                 else if (evt is ParsedKeyAfterTouch kat) _keyPressure[kat.Channel * NotesPerChannel + kat.Note] = kat.Pressure;
