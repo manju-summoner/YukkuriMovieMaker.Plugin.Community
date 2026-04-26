@@ -105,7 +105,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 parameter => ExecuteOpenFavoriteEditor(parameter));
             ClearBrowsingDataCommand = new ActionCommand(
                 _ => webView2?.CoreWebView2?.Profile != null,
-                async _ => await ExecuteClearBrowsingDataAsync());
+                _ => ExecuteClearBrowsingData());
             OpenBrowserSettingsCommand = new ActionCommand(
                 _ => true,
                 _ => ExecuteOpenBrowserSettings());
@@ -169,10 +169,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             BrowserSettingsViewModel = null;
         }
 
-        private Task ExecuteClearBrowsingDataAsync()
+        private void ExecuteClearBrowsingData()
         {
             if (webView2?.CoreWebView2?.Profile == null)
-                return Task.CompletedTask;
+                return;
 
             ClearBrowsingDataViewModel = new ClearBrowsingDataViewModel(async vm =>
             {
@@ -198,8 +198,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                         System.Windows.MessageBoxButton.OK,
                         System.Windows.MessageBoxImage.Information));
             });
-
-            return Task.CompletedTask;
         }
 
         private async Task ExecuteFindAsync()
