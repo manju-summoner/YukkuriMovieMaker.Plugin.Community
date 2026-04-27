@@ -217,6 +217,43 @@
                                                         </Button.Template>
                                                     </Button>
                                                 </Grid>
+                                                
+                                                <!-- 途中再生ボタン -->
+                                                <Grid Width="26"
+                                                      Height="26" 
+                                                      Margin="-26,-26,0,0"
+                                                      HorizontalAlignment="Left"
+                                                      VerticalAlignment="Top">
+                                                    <Grid.Style>
+                                                        <Style TargetType="Grid">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsChainable}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsChain}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Grid.Style>
+                                                    <Button Command="{Binding PlayCommand}" CommandParameter="{Binding}" ToolTip="{x:Static vt:Texts.PlayFrom}" Background="Transparent" BorderBrush="Transparent">
+                                                        <Button.Style>
+                                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                                <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Play}}"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Status}" Value="Playing">
+                                                                        <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Stop}}"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Status}" Value="Busy">
+                                                                        <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.LoadingAnimation}}"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                </Grid>
                                                 <!-- 結合ボタン -->
                                                 <Grid Width="26" 
                                                       Height="26" 

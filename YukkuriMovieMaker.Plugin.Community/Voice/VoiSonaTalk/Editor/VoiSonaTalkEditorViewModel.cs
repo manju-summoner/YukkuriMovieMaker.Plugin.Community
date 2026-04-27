@@ -23,6 +23,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
         AudioPlayer? player;
         bool isPlaying = false;
         bool isBusy = false;
+        readonly ICommand playFromCommand;
 
         ImmutableList<VoiSonaTalkEditorAcousticPhraseViewModel> acousticPhrases = [];
         public ImmutableList<VoiSonaTalkEditorAcousticPhraseViewModel> AcousticPhrases { get => acousticPhrases; set => Set(ref acousticPhrases, value); }
@@ -39,47 +40,56 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
         {
             this.pronounce = pronounce;
             WeakEventManager<VoiSonaTalkVoicePronounce, PropertyChangedEventArgs>.AddHandler(pronounce, nameof(pronounce.PropertyChanged), Pronounce_PropertyChanged);
+            playFromCommand = new ActionCommand(
+                _ => true,
+                async arg => await PlayPauseAsync(arg as VoiSonaTalkEditorWordViewModel));
+            TogglePlayCommand = new ActionCommand(
+                _ => true,
+                async _ => await PlayPauseAsync(null));
+
             UpdateAcousticPhrases();
             UpdatePhonemes();
+        }
 
-            TogglePlayCommand = new ActionCommand(
-                _=> true,
-                async _ =>
+        async Task PlayPauseAsync(VoiSonaTalkEditorWordViewModel? startWord)
+        {
+            await playbackControlSemaphore.WaitAsync();
+            try
+            {
+                if (IsPlaying)
                 {
-                    await playbackControlSemaphore.WaitAsync();
-                    try
-                    {
-                        if (IsPlaying)
-                        {
-                            StopPlayback();
-                        }
-                        else
-                        {
-                            IsBusy = true;
-                            try
-                            {
-                                await (Info?.VoiceItemEdit?.CreateVoiceFileAsync() ?? Task.CompletedTask);
+                    StopPlayback();
+                    return;
+                }
 
-                                stream = Info?.CreateItemAudioSource(new ItemAudioSourceCreationParameter(AudioEffectSelection.None) { RangeMode = ItemAudioSourceRangeMode.FullContentRange });
-                                if (stream is null)
-                                    return;
-                                player = new AudioPlayer(stream) { Volume = YMMSettings.Default.Volume / 100d };
-                                player.StreamEnded += Player_StreamEnded;
-                                player.Play();
-                                IsPlaying = true;
-                            }
-                            finally
-                            {
-                                IsBusy = false;
-                            }
+                IsBusy = true;
+                SetWordPlaybackStatus(VoiSonaTalkEditorPlayButtonStatus.Busy);
+                try
+                {
+                    await (Info?.VoiceItemEdit?.CreateVoiceFileAsync() ?? Task.CompletedTask);
 
-                        }
-                    }
-                    finally
-                    {
-                        playbackControlSemaphore.Release();
-                    }
-                });
+                    stream = Info?.CreateItemAudioSource(new ItemAudioSourceCreationParameter(AudioEffectSelection.None) { RangeMode = ItemAudioSourceRangeMode.FullContentRange });
+                    if (stream is null)
+                        return;
+
+                    stream.Seek(GetPlaybackStartTime(startWord));
+                    player = new AudioPlayer(stream) { Volume = YMMSettings.Default.Volume / 100d };
+                    player.StreamEnded += Player_StreamEnded;
+                    player.Play();
+                    IsPlaying = true;
+                    SetWordPlaybackStatus(VoiSonaTalkEditorPlayButtonStatus.Playing);
+                }
+                finally
+                {
+                    IsBusy = false;
+                    if (!IsPlaying)
+                        SetWordPlaybackStatus(VoiSonaTalkEditorPlayButtonStatus.Idle);
+                }
+            }
+            finally
+            {
+                playbackControlSemaphore.Release();
+            }
         }
 
         private void Player_StreamEnded(object? sender, EventArgs e)
@@ -96,6 +106,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
             stream?.Dispose();
             stream = null;
             IsPlaying = false;
+            SetWordPlaybackStatus(VoiSonaTalkEditorPlayButtonStatus.Idle);
         }
 
         private void Pronounce_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -126,10 +137,60 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
 
             currentRoot = XDocument.Parse(pronounce.TSML ?? "<tsml></tsml>").Root;
             var acousticPhrases = currentRoot?.Elements("acoustic_phrase") ?? [];
-            var phrases = acousticPhrases.Select((x, i) => new VoiSonaTalkEditorAcousticPhraseViewModel(x, i is 0)).ToImmutableList();
+            var wordIndex = 0;
+            var phrases = acousticPhrases.Select((x, i) => new VoiSonaTalkEditorAcousticPhraseViewModel(x, i is 0, () => wordIndex++, playFromCommand)).ToImmutableList();
             foreach(var phrase in phrases)
                 phrase.Changed += Phrase_Changed;
             AcousticPhrases = phrases;
+        }
+
+        TimeSpan GetPlaybackStartTime(VoiSonaTalkEditorWordViewModel? startWord)
+        {
+            if (startWord is null || currentRoot is null || pronounce.Phonemes is not { } phonemes || pronounce.PhonemeDurations is not { } durations)
+                return TimeSpan.Zero;
+
+            var startIndex = GetPhonemeStartIndex(startWord.WordIndex, phonemes);
+            return TimeSpan.FromSeconds(durations.Take(startIndex).Sum());
+        }
+
+        int GetPhonemeStartIndex(int startWordIndex, string[] phonemes)
+        {
+            var cursor = 0;
+            foreach (var (word, wordIndex) in (currentRoot?.Descendants("word") ?? []).Select((word, index) => (word, index)))
+            {
+                var wordPhonemes = GetWordPhonemes(word);
+                var matchIndex = wordPhonemes.Length == 0 ? cursor : FindPhonemeSequence(phonemes, wordPhonemes, cursor);
+                if (wordIndex == startWordIndex)
+                    return Math.Clamp(matchIndex < 0 ? cursor : matchIndex, 0, phonemes.Length);
+
+                if (matchIndex >= 0)
+                    cursor = matchIndex + wordPhonemes.Length;
+                else
+                    cursor = Math.Min(cursor + wordPhonemes.Length, phonemes.Length);
+            }
+            return 0;
+        }
+
+        static string[] GetWordPhonemes(XElement word)
+        {
+            return ((string?)word.Attribute("phoneme") ?? string.Empty)
+                .Split([',', '|', ' ', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        static int FindPhonemeSequence(string[] phonemes, string[] target, int startIndex)
+        {
+            for (int i = startIndex; i <= phonemes.Length - target.Length; i++)
+            {
+                if (target.SequenceEqual(phonemes.Skip(i).Take(target.Length)))
+                    return i;
+            }
+            return -1;
+        }
+
+        void SetWordPlaybackStatus(VoiSonaTalkEditorPlayButtonStatus status)
+        {
+            foreach (var word in AcousticPhrases.SelectMany(x => x.Words))
+                word.SetStatus(status);
         }
 
         private void Phrase_Changed(object? sender, EventArgs e)

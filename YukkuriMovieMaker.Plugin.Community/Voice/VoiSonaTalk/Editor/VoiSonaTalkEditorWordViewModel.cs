@@ -5,10 +5,12 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
 {
-    internal class VoiSonaTalkEditorWordViewModel
+    internal class VoiSonaTalkEditorWordViewModel : Bindable
     {
         public event EventHandler? Changed;
         readonly XElement word;
+        VoiSonaTalkEditorPlayButtonStatus status = VoiSonaTalkEditorPlayButtonStatus.Idle;
+        internal int WordIndex { get; }
         public string Text
         {
             get => word.Value;
@@ -32,11 +34,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
 
         public ICommand JoinCommand { get; }
         public ICommand SplitCommand { get; }
+        public ICommand PlayCommand { get; }
+        public VoiSonaTalkEditorPlayButtonStatus Status { get => status; private set => Set(ref status, value); }
 
-        public VoiSonaTalkEditorWordViewModel(XElement word, bool isChainable)
+        public VoiSonaTalkEditorWordViewModel(XElement word, int wordIndex, bool isChainable, ICommand playCommand)
         {
             this.word = word;
+            WordIndex = wordIndex;
             IsChainable = isChainable && !string.IsNullOrEmpty(Pronunciation);
+            PlayCommand = playCommand;
             var moras = 
                 Enumerable.Range(0, VoiSonaTalkEditorMoraViewModel.GetMoraList(word).Length)
                 .Select(i => new VoiSonaTalkEditorMoraViewModel(word, i));
@@ -78,6 +84,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
         private void Child_Changed(object? sender, EventArgs e)
         {
             Changed?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void SetStatus(VoiSonaTalkEditorPlayButtonStatus status)
+        {
+            Status = status;
         }
     }
 }
