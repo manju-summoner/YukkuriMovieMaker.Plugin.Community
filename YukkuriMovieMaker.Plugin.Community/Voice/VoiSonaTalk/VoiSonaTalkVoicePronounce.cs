@@ -15,6 +15,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
 
         public LipSyncFrame[]? LipSyncFrames { get; set => Set(ref field, value); }
 
+        public string[]? Phonemes { get; set => Set(ref field, value); }
+
+        public double[]? PhonemeDurations { get; set => Set(ref field, value); }
+
         public void BeginEdit()
         {
 

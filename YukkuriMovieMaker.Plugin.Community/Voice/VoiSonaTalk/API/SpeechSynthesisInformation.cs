@@ -15,6 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.API
         [property: JsonProperty("global_parameters")] SpeechSynthesisGlobalParameters GlobalParameters,
         [property: JsonProperty("phonemes")] string[] Phonemes,
         [property: JsonProperty("phoneme_durations")] double[] PhonemeDurations,
+        [property: JsonProperty("requested_phoneme_durations")] double[] RequestedPhonemeDurations,
         [property: JsonProperty("voice_name")] string VoiceName,
         [property: JsonProperty("voice_version")] string VoiceVersion
         );

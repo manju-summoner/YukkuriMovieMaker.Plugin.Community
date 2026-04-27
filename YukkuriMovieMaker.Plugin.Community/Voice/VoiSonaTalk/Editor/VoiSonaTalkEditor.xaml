@@ -7,6 +7,10 @@
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
              xmlns:vt="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk"
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:pt="clr-namespace:YukkuriMovieMaker.Views.Triggers;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:pa="clr-namespace:YukkuriMovieMaker.Views.Actions;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" 
              d:DataContext="{d:DesignInstance Type={x:Type local:VoiSonaTalkEditorViewModel}}">
@@ -23,11 +27,16 @@
                     <ColumnDefinition/>
                     <ColumnDefinition Width="26"/>
                 </Grid.ColumnDefinitions>
+                <TabControl>
+                    <TabItem Header="{x:Static vt:Texts.TabAccent}">
                 <!-- 句読点毎の塊 -->
                 <ItemsControl ItemsSource="{Binding AcousticPhrases}">
                     <ItemsControl.Template>
                         <ControlTemplate>
                             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                <i:Interaction.Behaviors>
+                                    <pb:SwapScrollOrientationBehavior/>
+                                </i:Interaction.Behaviors>
                                 <ItemsPresenter/>
                             </ScrollViewer>
                         </ControlTemplate>
@@ -249,6 +258,64 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+                    </TabItem>
+                    <TabItem Header="{x:Static vt:Texts.TabPhonemeDuration}">
+                        <!-- 音素ごとの長さ編集 -->
+                        <ItemsControl ItemsSource="{Binding Phonemes}">
+                            <ItemsControl.Template>
+                                <ControlTemplate>
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                        <i:Interaction.Behaviors>
+                                            <pb:SwapScrollOrientationBehavior/>
+                                        </i:Interaction.Behaviors>
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </ControlTemplate>
+                            </ItemsControl.Template>
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:VoiSonaTalkEditorPhonemeViewModel}">
+                                    <Grid Width="32" Margin="0,4,0,4">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBox Grid.Row="0"
+                                                 Text="{Binding Duration, Mode=TwoWay, StringFormat=F2, UpdateSourceTrigger=LostFocus}"
+                                                 HorizontalContentAlignment="Center"
+                                                 BorderBrush="Transparent"
+                                                 Background="Transparent"
+                                                 Padding="0"
+                                                 Margin="0,0,0,2">
+                                            <i:Interaction.Triggers>
+                                                <pt:PreviewKeyDownTrigger Key="Enter">
+                                                    <pa:ClearFocusAction/>
+                                                </pt:PreviewKeyDownTrigger>
+                                            </i:Interaction.Triggers>
+                                        </TextBox>
+                                        <Slider Grid.Row="1"
+                                                Value="{Binding Duration, Mode=TwoWay}"
+                                                Minimum="0" Maximum="1"
+                                                SmallChange="0.01" LargeChange="0.01"
+                                                Orientation="Vertical"
+                                                HorizontalAlignment="Center"
+                                                Height="120"
+                                                ToolTip="{Binding Duration, StringFormat=F3}"/>
+                                        <TextBlock Grid.Row="2"
+                                                   Text="{Binding Phoneme}"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,2,0,0"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </TabItem>
+                </TabControl>
                 <Button Command="{Binding TogglePlayCommand}" Grid.Column="1">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">

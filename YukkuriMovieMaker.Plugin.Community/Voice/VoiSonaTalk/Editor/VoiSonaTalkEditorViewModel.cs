@@ -27,6 +27,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
         ImmutableList<VoiSonaTalkEditorAcousticPhraseViewModel> acousticPhrases = [];
         public ImmutableList<VoiSonaTalkEditorAcousticPhraseViewModel> AcousticPhrases { get => acousticPhrases; set => Set(ref acousticPhrases, value); }
 
+        ImmutableList<VoiSonaTalkEditorPhonemeViewModel> phonemes = [];
+        public ImmutableList<VoiSonaTalkEditorPhonemeViewModel> Phonemes { get => phonemes; set => Set(ref phonemes, value); }
+
         public bool IsPlaying { get => isPlaying; set => Set(ref isPlaying, value); }
         public bool IsBusy { get => isBusy; set => Set(ref isBusy, value); }
         public ICommand TogglePlayCommand { get; }
@@ -37,6 +40,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
             this.pronounce = pronounce;
             WeakEventManager<VoiSonaTalkVoicePronounce, PropertyChangedEventArgs>.AddHandler(pronounce, nameof(pronounce.PropertyChanged), Pronounce_PropertyChanged);
             UpdateAcousticPhrases();
+            UpdatePhonemes();
 
             TogglePlayCommand = new ActionCommand(
                 _=> true,
@@ -98,6 +102,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
         {
             if (e.PropertyName == nameof(pronounce.TSML))
                 UpdateAcousticPhrases();
+            if (e.PropertyName == nameof(pronounce.Phonemes) || e.PropertyName == nameof(pronounce.PhonemeDurations))
+                UpdatePhonemes();
+        }
+
+        void UpdatePhonemes()
+        {
+            var length = pronounce.Phonemes?.Length ?? 0;
+            if (Phonemes.Count == length)
+            {
+                foreach (var vm in Phonemes)
+                    vm.Refresh();
+                return;
+            }
+
+            Phonemes = [.. Enumerable.Range(0, length).Select(i => new VoiSonaTalkEditorPhonemeViewModel(pronounce, i))];
         }
 
         void UpdateAcousticPhrases()
