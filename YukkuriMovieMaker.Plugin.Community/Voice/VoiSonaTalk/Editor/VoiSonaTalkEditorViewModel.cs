@@ -60,7 +60,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
                             {
                                 await (Info?.VoiceItemEdit?.CreateVoiceFileAsync() ?? Task.CompletedTask);
 
-                                stream = Info?.CreateItemAudioSource(AudioEffectSelection.None);
+                                stream = Info?.CreateItemAudioSource(new ItemAudioSourceCreationParameter(AudioEffectSelection.None) { RangeMode = ItemAudioSourceRangeMode.FullContentRange });
                                 if (stream is null)
                                     return;
                                 player = new AudioPlayer(stream) { Volume = YMMSettings.Default.Volume / 100d };

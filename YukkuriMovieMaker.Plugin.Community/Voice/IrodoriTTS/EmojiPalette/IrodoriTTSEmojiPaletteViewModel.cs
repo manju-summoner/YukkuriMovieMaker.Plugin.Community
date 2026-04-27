@@ -104,7 +104,7 @@ internal class IrodoriTTSEmojiPaletteViewModel : Bindable
                 lastGeneratedHatsuon = currentHatsuon;
                 voiceItemEdit?.IsHatsuonChanged = false;
 
-                stream = editorInfo?.CreateItemAudioSource(AudioEffectSelection.None);
+                stream = editorInfo?.CreateItemAudioSource(new ItemAudioSourceCreationParameter(AudioEffectSelection.None) { RangeMode = ItemAudioSourceRangeMode.FullContentRange });
                 if (stream is null)
                     return;
                 player = new AudioPlayer(stream) { Volume = YMMSettings.Default.Volume / 100d };
