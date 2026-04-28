@@ -1211,8 +1211,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 var d = item.dir;
                 if (oldItemsMap.TryGetValue(d.FullName, out var oldItem) && oldItem is ExplorerDirectoryItemViewModel oldDir)
                 {
-                    newItemsList.Add(oldDir);
-                    oldItemsMap.Remove(d.FullName);
+                    if (oldDir.LastWriteTime == d.LastWriteTime)
+                    {
+                        newItemsList.Add(oldDir);
+                        oldItemsMap.Remove(d.FullName);
+                    }
+                    else
+                    {
+                        newItemsList.Add(new ExplorerDirectoryItemViewModel(d.FullName, d.LastWriteTime)
+                        {
+                            IsSelected = oldDir.IsSelected,
+                            IsRenaming = oldDir.IsRenaming,
+                            RenameText = oldDir.RenameText
+                        });
+                    }
                 }
                 else
                 {
@@ -1224,8 +1236,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             {
                 if (oldItemsMap.TryGetValue(f.FullName, out var oldItem) && oldItem is ExplorerFileItemViewModel oldFile)
                 {
-                    newItemsList.Add(oldFile);
-                    oldItemsMap.Remove(f.FullName);
+                    if (oldFile.LastWriteTime == f.LastWriteTime)
+                    {
+                        newItemsList.Add(oldFile);
+                        oldItemsMap.Remove(f.FullName);
+                    }
+                    else
+                    {
+                        newItemsList.Add(new ExplorerFileItemViewModel(f.FullName, f.LastWriteTime)
+                        {
+                            IsSelected = oldFile.IsSelected,
+                            IsRenaming = oldFile.IsRenaming,
+                            RenameText = oldFile.RenameText
+                        });
+                    }
                 }
                 else
                 {
