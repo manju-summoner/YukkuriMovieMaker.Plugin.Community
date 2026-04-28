@@ -1085,16 +1085,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         private void UpdateSelectedItems()
         {
             if (isSkipUpdateSelection) return;
+
             if (isSidebarLastActive)
             {
-                SelectedItems = [.. SidebarItems.Where(item => item.IsSelected)];
-            }
-            else
-            {
-                SelectedItems = [.. FilteredItems.Where(item => item.IsSelected)];
-            }
-            if (SelectedItems.Length == 0)
+                var sidebarSelected = SidebarItems.Where(item => item.IsSelected).ToArray();
+                if (sidebarSelected.Length > 0)
+                {
+                    SelectedItems = sidebarSelected;
+                    return;
+                }
                 isSidebarLastActive = false;
+            }
+
+            SelectedItems = [.. FilteredItems.Where(item => item.IsSelected)];
         }
 
         private IExplorerSelectableItem[] GetActiveSelectedItems(object? parameter)
