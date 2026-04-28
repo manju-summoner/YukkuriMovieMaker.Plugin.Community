@@ -109,4 +109,13 @@ Ejemplo: NombreCarpeta/SubcarpetaNombre</value></data>
 <data name="SortAscending" xml:space="preserve"><value>Ascendente</value></data>
 <data name="SortDescending" xml:space="preserve"><value>Descendente</value></data>
 <data name="SortOrder" xml:space="preserve"><value>Orden de clasificación</value></data>
+<data name="Sidebar" xml:space="preserve"><value>Barra lateral</value></data>
+<data name="NewFolderName" xml:space="preserve"><value>Nueva carpeta</value></data>
+<data name="CreateNewFolderMenuHeader" xml:space="preserve"><value>Crear nueva carpeta(_F)</value></data>
+<data name="CompressMenuHeader" xml:space="preserve"><value>Comprimir(_Z)</value></data>
+<data name="ExtractMenuHeader" xml:space="preserve"><value>Extraer(_X)</value></data>
+<data name="SevenZipCompressMenuHeader" xml:space="preserve"><value>Comprimir con 7-Zip(_7)</value></data>
+<data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>Extraer con 7-Zip(_E)</value></data>
+<data name="RenameMenuHeader" xml:space="preserve"><value>Cambiar nombre(_M)</value></data>
+<data name="Cancel" xml:space="preserve"><value>Cancelar</value></data>
 </root>

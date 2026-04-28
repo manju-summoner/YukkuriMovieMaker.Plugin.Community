@@ -109,4 +109,13 @@
 <data name="SortAscending" xml:space="preserve"><value>昇順</value></data>
 <data name="SortDescending" xml:space="preserve"><value>降順</value></data>
 <data name="SortOrder" xml:space="preserve"><value>並べ替え順</value></data>
+<data name="Sidebar" xml:space="preserve"><value>サイドバー</value></data>
+<data name="NewFolderName" xml:space="preserve"><value>新しいフォルダー</value></data>
+<data name="CreateNewFolderMenuHeader" xml:space="preserve"><value>新規フォルダの作成(_F)</value></data>
+<data name="CompressMenuHeader" xml:space="preserve"><value>圧縮(_Z)</value></data>
+<data name="ExtractMenuHeader" xml:space="preserve"><value>解凍(_X)</value></data>
+<data name="SevenZipCompressMenuHeader" xml:space="preserve"><value>7-Zip で圧縮(_7)</value></data>
+<data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>7-Zip で解凍(_E)</value></data>
+<data name="RenameMenuHeader" xml:space="preserve"><value>名前の変更(_M)</value></data>
+<data name="Cancel" xml:space="preserve"><value>キャンセル</value></data>
 </root>

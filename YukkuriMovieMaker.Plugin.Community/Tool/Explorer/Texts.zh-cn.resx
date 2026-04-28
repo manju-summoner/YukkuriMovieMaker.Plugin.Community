@@ -108,4 +108,13 @@
 <data name="SortAscending" xml:space="preserve"><value>升序</value></data>
 <data name="SortDescending" xml:space="preserve"><value>降序</value></data>
 <data name="SortOrder" xml:space="preserve"><value>排序顺序</value></data>
+<data name="Sidebar" xml:space="preserve"><value>侧边栏</value></data>
+<data name="NewFolderName" xml:space="preserve"><value>新建文件夹</value></data>
+<data name="CreateNewFolderMenuHeader" xml:space="preserve"><value>创建新文件夹(_F)</value></data>
+<data name="CompressMenuHeader" xml:space="preserve"><value>压缩(_Z)</value></data>
+<data name="ExtractMenuHeader" xml:space="preserve"><value>解压(_X)</value></data>
+<data name="SevenZipCompressMenuHeader" xml:space="preserve"><value>用 7-Zip 压缩(_7)</value></data>
+<data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>用 7-Zip 解压(_E)</value></data>
+<data name="RenameMenuHeader" xml:space="preserve"><value>重命名(_M)</value></data>
+<data name="Cancel" xml:space="preserve"><value>取消</value></data>
 </root>

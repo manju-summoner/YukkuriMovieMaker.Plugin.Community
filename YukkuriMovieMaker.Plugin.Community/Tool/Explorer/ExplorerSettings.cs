@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
@@ -15,6 +15,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         public bool IsAlwaysShowToolBar { get; set => Set(ref field, value); } = true;
 
         public bool IsAutoPlay { get; set => Set(ref field, value); } = true;
+
+        public bool IsSidebarVisible { get; set => Set(ref field, value); } = false;
 
         public ObservableCollection<ExplorerFavorite> Favorites { get; } = [];
 

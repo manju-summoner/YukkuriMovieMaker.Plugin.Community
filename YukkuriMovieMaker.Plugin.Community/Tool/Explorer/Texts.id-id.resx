@@ -108,4 +108,13 @@ Contoh: NamaFolder/NamaSubfolder</value></data>
 <data name="SortAscending" xml:space="preserve"><value>Naik</value></data>
 <data name="SortDescending" xml:space="preserve"><value>Turun</value></data>
 <data name="SortOrder" xml:space="preserve"><value>Urutan pengurutan</value></data>
+<data name="Sidebar" xml:space="preserve"><value>Bilah sisi</value></data>
+<data name="NewFolderName" xml:space="preserve"><value>Folder baru</value></data>
+<data name="CreateNewFolderMenuHeader" xml:space="preserve"><value>Buat Folder Baru(_F)</value></data>
+<data name="CompressMenuHeader" xml:space="preserve"><value>Kompres(_Z)</value></data>
+<data name="ExtractMenuHeader" xml:space="preserve"><value>Ekstrak(_X)</value></data>
+<data name="SevenZipCompressMenuHeader" xml:space="preserve"><value>Kompres dengan 7-Zip(_7)</value></data>
+<data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>Ekstrak dengan 7-Zip(_E)</value></data>
+<data name="RenameMenuHeader" xml:space="preserve"><value>Ganti Nama(_M)</value></data>
+<data name="Cancel" xml:space="preserve"><value>Batal</value></data>
 </root>

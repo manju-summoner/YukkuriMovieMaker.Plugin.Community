@@ -1,112 +1,187 @@
-﻿using System.Windows;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
-    public class ExplorerFileItemViewModel : Bindable, IExplorerItemViewModel
+    internal class ExplorerFileItemViewModel : Bindable, IExplorerItemViewModel
     {
-        static readonly SemaphoreSlim semaphore = new(1);
+        string path;
         int iconSize = 24, thumbnailSize = 300;
-        Task? loadIconTask, loadThumbnailTask;
         CancellationTokenSource? loadIconCts, loadThumbnailCts;
         ImageSource? icon, thumbnail;
-        bool isFailedToLoadThumbnail = false;
 
-        public string Path { get; }
-        public string Name => System.IO.Path.GetFileName(Path);
+        public string Path => path;
+        public string Name { get; private set; }
+        public bool IsDirectory => false;
+        public string Extension { get; private set; }
+        public DateTime LastWriteTime { get; }
+        public bool SelectsNameOnlyOnRename => true;
 
         public ImageSource? Icon
         {
             get
             {
-                if (icon is not null)
-                    return icon;
-                if (loadIconTask is not null)
-                    return icon;
-                loadIconCts = new CancellationTokenSource();
-                var token = loadIconCts.Token;
-                loadIconTask ??= Task.Run(() =>
+                if (iconSize <= 0) return null;
+                if (icon != null) return icon;
+
+                if (loadIconCts == null)
                 {
-                    try
-                    {
-                        if (token.IsCancellationRequested)
-                            return;
-                        var loadedIcon = ShellIcon.GetIcon(Path, ShellIcon.GetIconSize(iconSize), isDirectory: false);
-                        if (token.IsCancellationRequested)
-                            return;
-                        icon = loadedIcon;
-                        OnPropertyChanged(nameof(Icon));
-                    }
-                    finally
-                    {
-                        loadIconCts = null;
-                        loadIconTask = null;
-                    }
-                });
+                    var capturedPath = path;
+                    var capturedSize = iconSize;
+                    loadIconCts = new CancellationTokenSource();
+                    _ = LoadIconAsync(capturedPath, capturedSize, loadIconCts.Token);
+                }
+
                 return icon;
             }
         }
+
         public ImageSource? Thumbnail
         {
             get
             {
-                if (isFailedToLoadThumbnail)
-                    return null;
-                if (thumbnail is not null)
-                    return thumbnail;
-                if (loadThumbnailTask is not null)
-                    return thumbnail;
+                if (thumbnailSize <= 0) return null;
+                if (thumbnail != null) return thumbnail;
 
-                loadThumbnailCts = new CancellationTokenSource();
-                var token = loadThumbnailCts.Token;
-                loadThumbnailTask ??= Task.Run(async () =>
+                if (loadThumbnailCts == null)
                 {
-                    await semaphore.WaitAsync();
-                    try
-                    {
-                        if (token.IsCancellationRequested)
-                            return;
-                        var loadedThumbnail = ShellThumbnail.GetThumbnailFromFactory(Path, thumbnailSize, thumbnailSize);
-                        loadedThumbnail?.Freeze();
-                        if (loadedThumbnail is null)
-                        {
-                            isFailedToLoadThumbnail = true;
-                            return;
-                        }
+                    var capturedPath = path;
+                    var capturedIconSize = iconSize;
+                    var capturedThumbSize = thumbnailSize;
+                    loadThumbnailCts = new CancellationTokenSource();
+                    _ = LoadThumbnailAsync(capturedPath, capturedIconSize, capturedThumbSize, loadThumbnailCts.Token);
+                }
 
-                        if (token.IsCancellationRequested)
-                            return;
-
-                        thumbnail = loadedThumbnail;
-                        OnPropertyChanged(nameof(Thumbnail));
-                    }
-                    finally
-                    {
-                        loadThumbnailCts = null;
-                        loadThumbnailTask = null;
-                        semaphore.Release();
-                    }
-                });
-                return thumbnail;
+                return thumbnail ?? icon;
             }
         }
-        public bool IsSelected { get => field; set => Set(ref field, value); } = false;
 
+        public bool IsSelected { get => field; set => Set(ref field, value); } = false;
+        public bool IsRenaming { get => field; set => Set(ref field, value); } = false;
+        public string RenameText { get => field; set => Set(ref field, value); } = string.Empty;
         public ICommand ClearCacheCommand { get; }
 
-        public ExplorerFileItemViewModel(string path)
+        public ExplorerFileItemViewModel(string path, DateTime lastWriteTime)
         {
-            Path = path;
-            ClearCacheCommand = new ActionCommand(
-                _ => true,
-                _ =>
+            this.path = path;
+            Name = System.IO.Path.GetFileName(path) ?? path;
+            LastWriteTime = lastWriteTime;
+            Extension = (System.IO.Path.GetExtension(path) ?? string.Empty).TrimStart('.').ToLowerInvariant();
+            ClearCacheCommand = new ActionCommand(_ => true, _ =>
+            {
+                ClearIcon();
+                ClearThumbnail();
+            });
+        }
+
+        public void UpdatePathAndName(string newPath)
+        {
+            path = newPath;
+            Name = System.IO.Path.GetFileName(newPath) ?? newPath;
+            Extension = (System.IO.Path.GetExtension(newPath) ?? string.Empty).TrimStart('.').ToLowerInvariant();
+            CancelLoadIcon();
+            CancelLoadThumbnail();
+            icon = null;
+            thumbnail = null;
+            OnPropertyChanged(nameof(Path));
+            OnPropertyChanged(nameof(Name));
+            OnPropertyChanged(nameof(Extension));
+            OnPropertyChanged(nameof(Icon));
+            OnPropertyChanged(nameof(Thumbnail));
+        }
+
+        async Task LoadIconAsync(string capturedPath, int capturedSize, CancellationToken token)
+        {
+            var myCts = loadIconCts;
+            try
+            {
+                var loadedIcon = await ShellImageLoader.LoadAsync(
+                    () => ShellIcon.GetIcon(capturedPath, ShellIcon.GetIconSize(capturedSize), isDirectory: false), token);
+
+                if (loadedIcon != null && !token.IsCancellationRequested)
                 {
-                    ClearIcon();
-                    ClearThumbnail();
+                    icon = loadedIcon;
+                    OnPropertyChanged(nameof(Icon));
+                    OnPropertyChanged(nameof(Thumbnail));
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception e)
+            {
+                Log.Default.Write("ExplorerFileItemViewModel.Icon", e);
+            }
+            finally
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (ReferenceEquals(loadIconCts, myCts))
+                    {
+                        loadIconCts = null;
+                        myCts?.Dispose();
+                    }
                 });
+            }
+        }
+
+        async Task LoadThumbnailAsync(string capturedPath, int capturedIconSize, int capturedThumbSize, CancellationToken token)
+        {
+            var myCts = loadThumbnailCts;
+            try
+            {
+                ImageSource? result = null;
+
+                try
+                {
+                    result = await ShellImageLoader.LoadAsync(
+                        () => ShellThumbnail.GetThumbnailFromFactory(capturedPath, capturedThumbSize, capturedThumbSize), token);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    Log.Default.Write("ExplorerFileItemViewModel.Thumbnail.Factory", ex);
+                }
+
+                if (result == null)
+                {
+                    token.ThrowIfCancellationRequested();
+                    try
+                    {
+                        result = await ShellImageLoader.LoadAsync(
+                            () => ShellIcon.GetIcon(capturedPath, ShellIcon.GetIconSize(capturedThumbSize), isDirectory: false), token);
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        Log.Default.Write("ExplorerFileItemViewModel.Thumbnail.Icon", ex);
+                    }
+                }
+
+                if (result != null && !token.IsCancellationRequested)
+                {
+                    thumbnail = result;
+                    OnPropertyChanged(nameof(Thumbnail));
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception e)
+            {
+                Log.Default.Write("ExplorerFileItemViewModel.Thumbnail", e);
+            }
+            finally
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (ReferenceEquals(loadThumbnailCts, myCts))
+                    {
+                        loadThumbnailCts = null;
+                        myCts?.Dispose();
+                    }
+                });
+            }
         }
 
         public void SetImageSize(int iconSize, int thumbnailSize)
@@ -114,30 +189,55 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             if (this.iconSize != iconSize)
             {
                 this.iconSize = iconSize;
+                CancelLoadIcon();
                 icon = null;
                 OnPropertyChanged(nameof(Icon));
             }
             if (this.thumbnailSize != thumbnailSize)
             {
                 this.thumbnailSize = thumbnailSize;
+                CancelLoadThumbnail();
                 thumbnail = null;
                 OnPropertyChanged(nameof(Thumbnail));
             }
         }
 
-        private void ClearIcon()
+        void CancelLoadIcon()
         {
-            loadIconCts?.Cancel();
-            loadIconTask = null;
-            icon = null;
+            var cts = loadIconCts;
+            loadIconCts = null;
+            cts?.Cancel();
+            cts?.Dispose();
         }
 
-        private void ClearThumbnail()
+        void CancelLoadThumbnail()
         {
-            isFailedToLoadThumbnail = false;
-            loadThumbnailCts?.Cancel();
-            loadThumbnailTask = null;
-            thumbnail = null;
+            var cts = loadThumbnailCts;
+            loadThumbnailCts = null;
+            cts?.Cancel();
+            cts?.Dispose();
         }
+
+        void ClearIcon()
+        {
+            CancelLoadIcon();
+            icon = null;
+            OnPropertyChanged(nameof(Icon));
+        }
+
+        void ClearThumbnail()
+        {
+            CancelLoadThumbnail();
+            thumbnail = null;
+            OnPropertyChanged(nameof(Thumbnail));
+        }
+
+        public void CancelLoad()
+        {
+            CancelLoadIcon();
+            CancelLoadThumbnail();
+        }
+
+        public void Dispose() => CancelLoad();
     }
 }

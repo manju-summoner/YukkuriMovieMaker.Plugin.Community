@@ -34,10 +34,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             switch (key)
             {
                 case ExplorerSortKey.Extension:
-                    result = CompareExtension(x.Path, y.Path);
+                    result = CompareExtension(x, y);
                     break;
                 case ExplorerSortKey.LastWriteTime:
-                    result = CompareLastWriteTime(x.Path, y.Path);
+                    result = CompareLastWriteTime(x, y);
                     break;
                 case ExplorerSortKey.Name:
                 default:
@@ -55,52 +55,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             return NaturalComparer.Compare(a, b);
         }
 
-        static int CompareExtension(string aPath, string bPath)
+        static int CompareExtension(IExplorerItemViewModel a, IExplorerItemViewModel b)
         {
-            // Directories have no extension.
-            var aExt = GetExtensionForSort(aPath);
-            var bExt = GetExtensionForSort(bPath);
-
-            int cmp = NaturalComparer.Compare(aExt, bExt);
+            int cmp = NaturalComparer.Compare(a.Extension, b.Extension);
             if (cmp != 0) return cmp;
 
             // Tiebreaker by name natural sort
-            return CompareName(Path.GetFileName(aPath), Path.GetFileName(bPath));
+            return CompareName(a.Name, b.Name);
         }
 
-        static string GetExtensionForSort(string path)
+        static int CompareLastWriteTime(IExplorerItemViewModel a, IExplorerItemViewModel b)
         {
-            try
-            {
-                if (File.Exists(path))
-                {
-                    var ext = Path.GetExtension(path) ?? string.Empty;
-                    return ext.StartsWith(".", StringComparison.Ordinal) ? ext[1..] : ext;
-                }
-            }
-            catch { }
-            return string.Empty;
-        }
-
-        static int CompareLastWriteTime(string aPath, string bPath)
-        {
-            DateTime a = GetLastWriteTime(aPath);
-            DateTime b = GetLastWriteTime(bPath);
-            int cmp = a.CompareTo(b);
+            int cmp = a.LastWriteTime.CompareTo(b.LastWriteTime);
             if (cmp != 0) return cmp;
             // Tiebreaker by name natural sort
-            return CompareName(Path.GetFileName(aPath), Path.GetFileName(bPath));
-        }
-
-        static DateTime GetLastWriteTime(string path)
-        {
-            try
-            {
-                if (File.Exists(path)) return new FileInfo(path).LastWriteTime;
-                if (Directory.Exists(path)) return new DirectoryInfo(path).LastWriteTime;
-            }
-            catch { }
-            return DateTime.MinValue;
+            return CompareName(a.Name, b.Name);
         }
     }
 }
