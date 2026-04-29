@@ -2,6 +2,7 @@ using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
@@ -72,8 +73,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         static string BuildArchiveName(string[] sourcePaths)
         {
             if (sourcePaths.Length == 1)
-                return Path.GetFileNameWithoutExtension(sourcePaths[0].TrimEnd(Path.DirectorySeparatorChar));
+            {
+                var trimmed = sourcePaths[0].TrimEnd(Path.DirectorySeparatorChar);
+                var rawName = Path.GetFileNameWithoutExtension(trimmed);
+                return SanitizeArchiveBaseName(rawName);
+            }
             return "archive";
+        }
+
+        static string SanitizeArchiveBaseName(string candidate)
+        {
+            if (string.IsNullOrWhiteSpace(candidate))
+                return "archive";
+            var invalid = Path.GetInvalidFileNameChars();
+            var sanitized = string.Concat(candidate.Where(c => !invalid.Contains(c))).Trim();
+            return string.IsNullOrWhiteSpace(sanitized) ? "archive" : sanitized;
         }
 
         static string BuildCompressArguments(string archivePath, string[] sourcePaths)
@@ -82,7 +96,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             return $"a \"{EscapeArgument(archivePath)}\" {sources}";
         }
 
-        static string EscapeArgument(string value) => value.Replace("\"", "\\\"");
+        static string EscapeArgument(string value)
+        {
+            var sb = new System.Text.StringBuilder();
+            int backslashCount = 0;
+            foreach (char c in value)
+            {
+                if (c == '\\')
+                {
+                    backslashCount++;
+                }
+                else if (c == '"')
+                {
+                    sb.Append('\\', backslashCount * 2 + 1);
+                    sb.Append('"');
+                    backslashCount = 0;
+                }
+                else
+                {
+                    sb.Append('\\', backslashCount);
+                    sb.Append(c);
+                    backslashCount = 0;
+                }
+            }
+            sb.Append('\\', backslashCount * 2);
+            return sb.ToString();
+        }
 
         static async Task StartProcessAsync(string exe, string arguments, CancellationToken token)
         {
