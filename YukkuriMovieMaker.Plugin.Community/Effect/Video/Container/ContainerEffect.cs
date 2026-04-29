@@ -11,7 +11,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 [VideoEffect(nameof(Texts.VideoEffect_Name), [VideoEffectCategories.Decoration], [nameof(Texts.VideoEffect_Tag_Container), nameof(Texts.VideoEffect_Tag_Preset), nameof(Texts.VideoEffect_Tag_Group)], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
 public sealed class ContainerEffect : VideoEffectBase
 {
-    public string PresetName { get; set; } = string.Empty;
+    public string PresetName
+    {
+        get => _presetName;
+        set
+        {
+            if (Set(ref _presetName, value))
+                OnPropertyChanged(nameof(Label));
+        }
+    }
+    private string _presetName = string.Empty;
 
     public override string Label
     {
