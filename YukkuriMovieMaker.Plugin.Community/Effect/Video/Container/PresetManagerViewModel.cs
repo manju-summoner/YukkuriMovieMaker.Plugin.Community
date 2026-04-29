@@ -395,21 +395,29 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
         if (SelectedGroup == null) return;
 
         IEnumerable<EffectPreset> source;
+        bool shouldSortByName = false;
+
         if (SelectedGroup.IsVirtual && SelectedGroup.Name == Texts.PresetManager_GroupAll)
         {
             source = ContainerSettings.Instance.Presets;
+            shouldSortByName = true;
         }
         else if (SelectedGroup.IsVirtual && SelectedGroup.Name == Texts.PresetManager_GroupFavorites)
         {
             source = ContainerSettings.Instance.Presets.Where(p => p.IsFavorite);
+            shouldSortByName = true;
         }
         else if (SelectedGroup.IsVirtual && SelectedGroup.Name == Texts.PresetManager_GroupRecent)
         {
-            source = ContainerSettings.Instance.Presets.Where(p => ContainerSettings.Instance.RecentPresetIds.Contains(p.Id));
+            source = ContainerSettings.Instance.RecentPresetIds
+                .Select(id => ContainerSettings.Instance.Presets.FirstOrDefault(p => p.Id == id))
+                .OfType<EffectPreset>();
         }
         else
         {
-            source = ContainerSettings.Instance.Presets.Where(p => SelectedGroup.PresetIds.Contains(p.Id));
+            source = SelectedGroup.PresetIds
+                .Select(id => ContainerSettings.Instance.Presets.FirstOrDefault(p => p.Id == id))
+                .OfType<EffectPreset>();
         }
 
         if (!string.IsNullOrWhiteSpace(SearchText))
@@ -430,7 +438,9 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
             };
         }
 
-        foreach (var preset in source.OrderBy(p => p.Name))
+        var finalSource = shouldSortByName ? source.OrderBy(p => p.Name) : source;
+
+        foreach (var preset in finalSource)
         {
             DisplayedPresets.Add(new PresetItemViewModel(preset));
         }
