@@ -10,6 +10,7 @@ internal static class EffectSerializer
     private static readonly JsonSerializerSettings Settings = new()
     {
         TypeNameHandling = TypeNameHandling.Auto,
+        SerializationBinder = KnownEffectSerializationBinder.Instance,
         NullValueHandling = NullValueHandling.Ignore,
     };
 

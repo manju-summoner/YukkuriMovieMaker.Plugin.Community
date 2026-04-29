@@ -21,6 +21,12 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
     private const int WmLeftButtonDown = 0x0201;
     private const int WmLeftButtonUp = 0x0202;
 
+    private static readonly JsonSerializerSettings ExchangeSettings = new()
+    {
+        TypeNameHandling = TypeNameHandling.None,
+        NullValueHandling = NullValueHandling.Ignore,
+    };
+
     private readonly ItemProperty[] _itemProperties;
     private readonly ContainerEffect _effect;
 
@@ -727,11 +733,7 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
         try
         {
             var package = new PresetExchangePackage { Presets = presets };
-            var json = JsonConvert.SerializeObject(package, Formatting.Indented, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-            });
+            var json = JsonConvert.SerializeObject(package, Formatting.Indented, ExchangeSettings);
             using var archive = System.IO.Compression.ZipFile.Open(dialog.FileName, System.IO.Compression.ZipArchiveMode.Create);
             var entry = archive.CreateEntry("presets.json");
             using var writer = new System.IO.StreamWriter(entry.Open());
@@ -758,11 +760,7 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
             if (entry == null) throw new InvalidOperationException();
             using var reader = new System.IO.StreamReader(entry.Open());
             var json = reader.ReadToEnd();
-            var package = JsonConvert.DeserializeObject<PresetExchangePackage>(json, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-            });
+            var package = JsonConvert.DeserializeObject<PresetExchangePackage>(json, ExchangeSettings);
             if (package?.Presets == null) throw new InvalidOperationException();
 
             var targetGroup = SelectedGroup;
@@ -796,11 +794,7 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
         var presets = ResolveTargets(parameter).Select(p => p.Model).ToList();
         if (presets.Count == 0) return;
 
-        var json = JsonConvert.SerializeObject(new PresetExchangePackage { Presets = presets }, new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.Auto,
-            NullValueHandling = NullValueHandling.Ignore,
-        });
+        var json = JsonConvert.SerializeObject(new PresetExchangePackage { Presets = presets }, ExchangeSettings);
         Clipboard.SetText(json);
     }
 
@@ -812,11 +806,7 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
 
         try
         {
-            var package = JsonConvert.DeserializeObject<PresetExchangePackage>(text, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore,
-            });
+            var package = JsonConvert.DeserializeObject<PresetExchangePackage>(text, ExchangeSettings);
             if (package?.Presets == null) return;
 
             var targetGroup = SelectedGroup;
