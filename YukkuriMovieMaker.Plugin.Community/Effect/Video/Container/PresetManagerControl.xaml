@@ -12,7 +12,6 @@
              Loaded="UserControl_Loaded">
 
     <UserControl.Resources>
-        <converters:FavoriteStarBrushConverter x:Key="FavoriteStarBrushConverter"/>
 
         <Style x:Key="AnimatedTextBlockStyle" TargetType="TextBlock">
             <Setter Property="MaxWidth" Value="0"/>
@@ -546,18 +545,37 @@
                                     <Button Grid.Column="0"
                                             Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                             CommandParameter="{Binding}"
-                                            Width="24" Height="24" Padding="0" Margin="0,0,4,0"
-                                            Foreground="{Binding IsFavorite, Converter={StaticResource FavoriteStarBrushConverter}}">
-                                        <Button.Style>
-                                            <Style TargetType="Button" BasedOn="{StaticResource StarButtonStyle}">
-                                                <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.StarOutline}}"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsFavorite}" Value="True">
-                                                        <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Star}}"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
+                                            Style="{StaticResource StarButtonStyle}"
+                                            Width="24" Height="24" Padding="0" Margin="0,0,4,0">
+                                        <Grid Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.StarOutline}}"
+                                                            Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}">
+                                                <ContentControl.Style>
+                                                    <Style TargetType="ContentControl">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ContentControl.Style>
+                                            </ContentControl>
+                                            
+                                            <Path Data="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"
+                                                  Fill="#FFD700" Stretch="Uniform">
+                                                <Path.Style>
+                                                    <Style TargetType="Path">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Path.Style>
+                                            </Path>
+                                        </Grid>
                                     </Button>
 
                                     <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding Name}">
