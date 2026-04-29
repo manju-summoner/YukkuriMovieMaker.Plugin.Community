@@ -35,6 +35,8 @@ public partial class PresetManagerControl : UserControl, IPropertyEditorControl
 
     public void SetProperties(ItemProperty[] itemProperties)
     {
+        if (DataContext is IDisposable old)
+            old.Dispose();
         DataContext = new PresetManagerViewModel(itemProperties);
     }
 

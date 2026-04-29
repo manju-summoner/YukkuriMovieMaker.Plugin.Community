@@ -20,6 +20,8 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
 
     public void SetProperties(ItemProperty[] itemProperties)
     {
+        if (DataContext is IDisposable old)
+            old.Dispose();
         DataContext = new EffectTabManagerViewModel(itemProperties);
     }
 
