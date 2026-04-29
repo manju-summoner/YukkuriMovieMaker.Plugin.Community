@@ -845,6 +845,7 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
         if (srcIdx < 0 || dstIdx < 0 || srcIdx == dstIdx) return;
 
         ContainerSettings.Instance.Groups.RemoveAt(srcIdx);
+        if (srcIdx < dstIdx) dstIdx--;
         ContainerSettings.Instance.Groups.Insert(dstIdx, source);
         ContainerSettings.Instance.Save();
 
@@ -866,6 +867,7 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
         if (srcIdx < 0 || dstIdx < 0 || srcIdx == dstIdx) return;
 
         group.PresetIds.RemoveAt(srcIdx);
+        if (srcIdx < dstIdx) dstIdx--;
         group.PresetIds.Insert(dstIdx, source.Model.Id);
         ContainerSettings.Instance.Save();
 
