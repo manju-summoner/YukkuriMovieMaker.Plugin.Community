@@ -550,7 +550,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                             foreach (var path in paths)
                             {
                                 if (Directory.Exists(path))
-                                    AddDirectoryToArchive(archive, path, Path.GetFileName(path));
+                                    AddDirectoryToArchive(archive, path, SanitizeArchiveBaseName(Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar))));
                                 else if (File.Exists(path))
                                     archive.CreateEntryFromFile(path, Path.GetFileName(path));
                             }
@@ -1649,14 +1649,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
+        static string SanitizeArchiveBaseName(string candidate)
+        {
+            if (string.IsNullOrWhiteSpace(candidate))
+                return "archive";
+            var invalid = Path.GetInvalidFileNameChars();
+            var sanitized = string.Concat(candidate.Where(c => !invalid.Contains(c))).Trim();
+            return string.IsNullOrWhiteSpace(sanitized) ? "archive" : sanitized;
+        }
+
         static string BuildArchiveName(string[] paths)
         {
             if (paths.Length == 1)
             {
                 var targetPath = paths[0].TrimEnd(Path.DirectorySeparatorChar);
-                if (Directory.Exists(targetPath))
-                    return Path.GetFileName(targetPath);
-                return Path.GetFileNameWithoutExtension(targetPath);
+                var rawName = Directory.Exists(targetPath)
+                    ? Path.GetFileName(targetPath)
+                    : Path.GetFileNameWithoutExtension(targetPath);
+                return SanitizeArchiveBaseName(rawName);
             }
             return "archive";
         }
