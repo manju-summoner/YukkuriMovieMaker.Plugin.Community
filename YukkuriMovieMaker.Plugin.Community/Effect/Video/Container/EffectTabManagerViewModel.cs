@@ -22,7 +22,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             if (Set(ref _selectedTab, value))
             {
                 OnPropertyChanged(nameof(IsTabSelected));
-                if (_selectedTab != null)
+                if (_selectedTab != null && !_isSyncing)
                 {
                     ApplyTabToEffect(_selectedTab);
                 }
@@ -72,6 +72,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         _effect.PropertyChanged += OnEffectPropertyChanged;
     }
 
+    private bool _isSyncing;
+
     private void LoadTabs()
     {
         var state = EffectTabStateService.ResolveEffectState(_effect.EffectTabsJson, _effect.Effects, Texts.EffectTab_FirstName);
@@ -84,41 +86,74 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         UpdateIndices();
 
+        EffectTabItemViewModel? newSelectedTab = null;
         if (state.SelectedTabId != null)
         {
-            SelectedTab = Tabs.FirstOrDefault(t => t.Id == state.SelectedTabId.Value);
+            newSelectedTab = Tabs.FirstOrDefault(t => t.Id == state.SelectedTabId.Value);
         }
-        if (SelectedTab == null)
+        if (newSelectedTab == null)
         {
-            SelectedTab = Tabs.FirstOrDefault();
+            newSelectedTab = Tabs.FirstOrDefault();
         }
+        
+        SelectedTab = newSelectedTab;
     }
 
     private void OnEffectPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
+        if (_isSyncing) return;
+
         if (e.PropertyName == nameof(ContainerEffect.Effects) && SelectedTab != null)
         {
-            SelectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-            WriteState();
+            _isSyncing = true;
+            try
+            {
+                SelectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
+                WriteState();
+            }
+            finally
+            {
+                _isSyncing = false;
+            }
+        }
+        else if (e.PropertyName == nameof(ContainerEffect.EffectTabsJson))
+        {
+            _isSyncing = true;
+            try
+            {
+                LoadTabs();
+            }
+            finally
+            {
+                _isSyncing = false;
+            }
         }
     }
 
     private void ApplyTabToEffect(EffectTabItemViewModel tab)
     {
-        BeginEdit?.Invoke(this, EventArgs.Empty);
+        _isSyncing = true;
         try
         {
-            foreach (var prop in _itemProperties)
+            BeginEdit?.Invoke(this, EventArgs.Empty);
+            try
             {
-                var target = (ContainerEffect)prop.PropertyOwner;
-                target.Effects = EffectSerializer.Deserialize(tab.SerializedEffects);
+                foreach (var prop in _itemProperties)
+                {
+                    var target = (ContainerEffect)prop.PropertyOwner;
+                    target.Effects = EffectSerializer.Deserialize(tab.SerializedEffects);
+                }
             }
+            finally
+            {
+                EndEdit?.Invoke(this, EventArgs.Empty);
+            }
+            WriteState();
         }
         finally
         {
-            EndEdit?.Invoke(this, EventArgs.Empty);
+            _isSyncing = false;
         }
-        WriteState();
     }
 
     private void WriteState()
@@ -134,7 +169,10 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         foreach (var prop in _itemProperties)
         {
             var target = (ContainerEffect)prop.PropertyOwner;
-            target.EffectTabsJson = json;
+            if (target.EffectTabsJson != json)
+            {
+                target.EffectTabsJson = json;
+            }
         }
     }
 
