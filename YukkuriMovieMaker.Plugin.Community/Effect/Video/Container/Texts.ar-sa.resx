@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
+<data name="Container_DisplayName" xml:space="preserve"><value>حاوية</value></data>
+<data name="Container_DisplayNameWithPreset" xml:space="preserve"><value>حاوية [{0}]</value></data>
+<data name="Container_PresetGroup" xml:space="preserve"><value>إدارة الإعدادات المسبقة</value></data>
+<data name="Container_EffectGroup" xml:space="preserve"><value>التأثيرات النشطة</value></data>
+<data name="Container_ActiveEffectsCount" xml:space="preserve"><value>{0} نشط: {1}</value></data>
+<data name="Container_ActiveEffectsCountWithPreset" xml:space="preserve"><value>{0} نشط: {1} [{2}]</value></data>
+<data name="PresetManager_SearchPlaceholder" xml:space="preserve"><value>البحث في الإعدادات المسبقة...</value></data>
+<data name="PresetManager_AddGroup" xml:space="preserve"><value>إضافة مجموعة</value></data>
+<data name="PresetManager_RemoveGroup" xml:space="preserve"><value>إزالة مجموعة</value></data>
+<data name="PresetManager_AddPreset" xml:space="preserve"><value>إضافة</value></data>
+<data name="PresetManager_RemovePreset" xml:space="preserve"><value>إزالة</value></data>
+<data name="PresetManager_UpdatePreset" xml:space="preserve"><value>تحديث</value></data>
+<data name="PresetManager_ApplyPreset" xml:space="preserve"><value>تطبيق</value></data>
+<data name="PresetManager_GroupAll" xml:space="preserve"><value>الكل</value></data>
+<data name="PresetManager_GroupFavorites" xml:space="preserve"><value>المفضلة</value></data>
+<data name="PresetManager_DefaultGroup" xml:space="preserve"><value>الافتراضي</value></data>
+<data name="PresetManager_NewGroup" xml:space="preserve"><value>مجموعة جديدة</value></data>
+<data name="PresetManager_NewPreset" xml:space="preserve"><value>إعداد مسبق جديد</value></data>
+<data name="PresetManager_SaveError" xml:space="preserve"><value>فشل في حفظ الإعداد المسبق</value></data>
+<data name="PresetManager_ApplyError" xml:space="preserve"><value>فشل في تطبيق الإعداد المسبق</value></data>
+<data name="EffectTab_FirstName" xml:space="preserve"><value>جديد</value></data>
+<data name="EffectTab_NumberedName" xml:space="preserve"><value>علامة تبويب {0}</value></data>
+<data name="EffectTab_CopyName" xml:space="preserve"><value>(نسخة)</value></data>
+<data name="EffectTab_Add" xml:space="preserve"><value>إضافة علامة تبويب</value></data>
+<data name="EffectTab_Remove" xml:space="preserve"><value>إزالة علامة تبويب</value></data>
+<data name="VideoEffect_Name" xml:space="preserve"><value>حاوية</value></data>
+<data name="VideoEffect_Tag_Container" xml:space="preserve"><value>حاوية</value></data>
+<data name="VideoEffect_Tag_Preset" xml:space="preserve"><value>إعداد مسبق</value></data>
+<data name="VideoEffect_Tag_Group" xml:space="preserve"><value>مجموعة</value></data>
+<data name="PresetManager_GroupRecent" xml:space="preserve"><value>الأخيرة</value></data>
+<data name="Dialog_Cancel" xml:space="preserve"><value>إلغاء</value></data>
+<data name="PresetManager_Clear" xml:space="preserve"><value>مسح</value></data>
+<data name="PresetManager_ClearUnselected" xml:space="preserve"><value>إزالة التأثيرات غير المحددة</value></data>
+<data name="Dialog_Title" xml:space="preserve"><value>إدخال</value></data>
+<data name="Dialog_InputName" xml:space="preserve"><value>أدخل اسما</value></data>
+<data name="PresetManager_RenamePreset" xml:space="preserve"><value>إعادة تسمية</value></data>
+<data name="PresetManager_ClearPreset" xml:space="preserve"><value>إفراغ الإعداد</value></data>
+<data name="SearchMode_Tooltip" xml:space="preserve"><value>تغيير هدف البحث</value></data>
+<data name="SearchMode_Name" xml:space="preserve"><value>اسم الإعداد المسبق</value></data>
+<data name="SearchMode_EffectName" xml:space="preserve"><value>اسم التأثير</value></data>
+<data name="SearchMode_EffectCount" xml:space="preserve"><value>عدد التأثيرات</value></data>
+<data name="SearchMode_RawJson" xml:space="preserve"><value>البيانات الخام (JSON)</value></data>
+<data name="SearchMode_Any" xml:space="preserve"><value>الكل</value></data>
+<data name="PresetManager_ExchangeExport" xml:space="preserve"><value>تصدير</value></data>
+<data name="PresetManager_ExchangeImport" xml:space="preserve"><value>استيراد</value></data>
+<data name="PresetManager_ExchangeFileType" xml:space="preserve"><value>حزمة إعدادات الحاوية</value></data>
+<data name="PresetManager_AllFiles" xml:space="preserve"><value>كل الملفات</value></data>
+<data name="PresetManager_ExchangeExportError" xml:space="preserve"><value>فشل تصدير الإعدادات المسبقة</value></data>
+<data name="PresetManager_ExchangeImportError" xml:space="preserve"><value>فشل استيراد الإعدادات المسبقة</value></data>
+<data name="PresetManager_ExchangeBundleDefaultName" xml:space="preserve"><value>الحاوية_إعدادات</value></data>
+<data name="Menu_Copy" xml:space="preserve"><value>نسخ</value></data>
+<data name="Menu_Paste" xml:space="preserve"><value>لصق</value></data>
+<data name="Menu_Cut" xml:space="preserve"><value>قص</value></data>
+</root>

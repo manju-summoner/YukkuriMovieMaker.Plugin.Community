@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>zh-tw</value></data>
+<data name="Container_DisplayName" xml:space="preserve"><value>容器</value></data>
+<data name="Container_DisplayNameWithPreset" xml:space="preserve"><value>容器 [{0}]</value></data>
+<data name="Container_PresetGroup" xml:space="preserve"><value>預設管理</value></data>
+<data name="Container_EffectGroup" xml:space="preserve"><value>活動效果</value></data>
+<data name="Container_ActiveEffectsCount" xml:space="preserve"><value>{0} 套用中: {1}個</value></data>
+<data name="Container_ActiveEffectsCountWithPreset" xml:space="preserve"><value>{0} 套用中: {1}個 [{2}]</value></data>
+<data name="PresetManager_SearchPlaceholder" xml:space="preserve"><value>搜尋預設...</value></data>
+<data name="PresetManager_AddGroup" xml:space="preserve"><value>新增群組</value></data>
+<data name="PresetManager_RemoveGroup" xml:space="preserve"><value>刪除群組</value></data>
+<data name="PresetManager_AddPreset" xml:space="preserve"><value>新增</value></data>
+<data name="PresetManager_RemovePreset" xml:space="preserve"><value>刪除</value></data>
+<data name="PresetManager_UpdatePreset" xml:space="preserve"><value>更新</value></data>
+<data name="PresetManager_ApplyPreset" xml:space="preserve"><value>套用</value></data>
+<data name="PresetManager_GroupAll" xml:space="preserve"><value>全部</value></data>
+<data name="PresetManager_GroupFavorites" xml:space="preserve"><value>收藏</value></data>
+<data name="PresetManager_DefaultGroup" xml:space="preserve"><value>預設</value></data>
+<data name="PresetManager_NewGroup" xml:space="preserve"><value>新增群組</value></data>
+<data name="PresetManager_NewPreset" xml:space="preserve"><value>新增預設</value></data>
+<data name="PresetManager_SaveError" xml:space="preserve"><value>無法儲存預設</value></data>
+<data name="PresetManager_ApplyError" xml:space="preserve"><value>無法套用預設</value></data>
+<data name="EffectTab_FirstName" xml:space="preserve"><value>新增</value></data>
+<data name="EffectTab_NumberedName" xml:space="preserve"><value>分頁 {0}</value></data>
+<data name="EffectTab_CopyName" xml:space="preserve"><value>(複本)</value></data>
+<data name="EffectTab_Add" xml:space="preserve"><value>新增分頁</value></data>
+<data name="EffectTab_Remove" xml:space="preserve"><value>刪除分頁</value></data>
+<data name="VideoEffect_Name" xml:space="preserve"><value>容器</value></data>
+<data name="VideoEffect_Tag_Container" xml:space="preserve"><value>容器</value></data>
+<data name="VideoEffect_Tag_Preset" xml:space="preserve"><value>預設</value></data>
+<data name="VideoEffect_Tag_Group" xml:space="preserve"><value>群組</value></data>
+<data name="PresetManager_GroupRecent" xml:space="preserve"><value>最近使用</value></data>
+<data name="Dialog_Cancel" xml:space="preserve"><value>取消</value></data>
+<data name="PresetManager_Clear" xml:space="preserve"><value>清除</value></data>
+<data name="PresetManager_ClearUnselected" xml:space="preserve"><value>刪除未選中的效果</value></data>
+<data name="Dialog_Title" xml:space="preserve"><value>輸入</value></data>
+<data name="Dialog_InputName" xml:space="preserve"><value>請輸入名稱</value></data>
+<data name="PresetManager_RenamePreset" xml:space="preserve"><value>重新命名</value></data>
+<data name="PresetManager_ClearPreset" xml:space="preserve"><value>清空預設</value></data>
+<data name="SearchMode_Tooltip" xml:space="preserve"><value>更改搜尋目標</value></data>
+<data name="SearchMode_Name" xml:space="preserve"><value>預設名稱</value></data>
+<data name="SearchMode_EffectName" xml:space="preserve"><value>效果名稱</value></data>
+<data name="SearchMode_EffectCount" xml:space="preserve"><value>效果數量</value></data>
+<data name="SearchMode_RawJson" xml:space="preserve"><value>內部數據 (JSON)</value></data>
+<data name="SearchMode_Any" xml:space="preserve"><value>所有</value></data>
+<data name="PresetManager_ExchangeExport" xml:space="preserve"><value>匯出</value></data>
+<data name="PresetManager_ExchangeImport" xml:space="preserve"><value>匯入</value></data>
+<data name="PresetManager_ExchangeFileType" xml:space="preserve"><value>容器預設封裝</value></data>
+<data name="PresetManager_AllFiles" xml:space="preserve"><value>所有檔案</value></data>
+<data name="PresetManager_ExchangeExportError" xml:space="preserve"><value>匯出預設失敗</value></data>
+<data name="PresetManager_ExchangeImportError" xml:space="preserve"><value>匯入預設失敗</value></data>
+<data name="PresetManager_ExchangeBundleDefaultName" xml:space="preserve"><value>容器_預設</value></data>
+<data name="Menu_Copy" xml:space="preserve"><value>複製</value></data>
+<data name="Menu_Paste" xml:space="preserve"><value>貼上</value></data>
+<data name="Menu_Cut" xml:space="preserve"><value>剪下</value></data>
+</root>
