@@ -26,6 +26,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         readonly BoundedStack<string> redoHistory = new(100);
 
         bool isSidebarLastActive = false;
+        const double DefaultSidebarWidth = 150;
+        const double MinSidebarWidth = 100;
+        const double MaxSidebarWidth = 500;
 
         public event EventHandler<CreateNewToolViewRequestedEventArgs>? CreateNewToolViewRequested;
 
@@ -150,6 +153,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         public bool IsFavorite => ExplorerSettings.Default.Favorites.Any(x => x.Url == Location);
         public ExplorerFavoriteEditorViewModel? FavoriteEditorViewModel { get; set => Set(ref field, value); }
         public MessageBoxViewModel MessageBoxViewModel { get; } = new();
+        public bool IsSidebarVisible { get; set => Set(ref field, value); } = false;
+        public double SidebarWidth { get; set => Set(ref field, NormalizeSidebarWidth(value)); } = DefaultSidebarWidth;
         [SuppressMessage("Performance", "CA1822:メンバーを static に設定します", Justification = "")]
         public ExplorerFavoriteDirectoryViewModel FavoriteDirectoryViewModel => ExplorerFavoriteDirectoryViewModel.CreateExplorerFavoriteRoot();
 
@@ -226,7 +231,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     if (x is not string path || string.IsNullOrEmpty(path)) return;
                     var toolState = new ToolState()
                     {
-                        SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder })
+                        SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible })
                     };
                     CreateNewToolViewRequested?.Invoke(this, new CreateNewToolViewRequestedEventArgs(toolState));
                 });
@@ -239,7 +244,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     {
                         var toolState = new ToolState()
                         {
-                            SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder })
+                            SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible })
                         };
                         CreateNewToolViewRequested?.Invoke(this, new CreateNewToolViewRequestedEventArgs(toolState));
                     }
@@ -1610,14 +1615,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             Filter.CopyFrom(state.Filter);
             SortKey = state.SortKey;
             SortOrder = state.SortOrder;
+            SidebarWidth = state.SidebarWidth;
+            IsSidebarVisible = state.IsSidebarVisible;
             RequestRefresh();
             UpdateFilteredItems();
         }
 
         public ToolState SaveState() => new()
         {
-            SavedState = Json.Json.GetJsonText(new ExplorerState(Location, Layout.Clone(), Filter) { SortKey = SortKey, SortOrder = SortOrder })
+            SavedState = Json.Json.GetJsonText(new ExplorerState(Location, Layout.Clone(), Filter) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible })
         };
+
+        static double NormalizeSidebarWidth(double value)
+        {
+            if (double.IsNaN(value) || double.IsInfinity(value))
+                return DefaultSidebarWidth;
+
+            return Math.Clamp(value, MinSidebarWidth, MaxSidebarWidth);
+        }
 
         static string? ResolveNavigationTarget(string? raw)
         {

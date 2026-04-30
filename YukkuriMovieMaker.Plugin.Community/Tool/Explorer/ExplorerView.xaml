@@ -19,6 +19,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <local:DoubleToGridLengthConverter x:Key="DoubleToGridLengthConverter"/>
             <ItemsPanelTemplate x:Key="VirtualizedStackPanelItemsPanelTemplate">
                 <VirtualizingStackPanel IsItemsHost="True" Orientation="Vertical" Margin="3"/>
             </ItemsPanelTemplate>
@@ -640,7 +641,7 @@
                         <MenuItem Header="{x:Static local:Texts.IncreaseViewSizeMenuHeader}" Command="{Binding DataContext.IncreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyPlus}}"/>
                         <MenuItem Header="{x:Static local:Texts.DecreaseViewSizeMenuHeader}" Command="{Binding DataContext.DecreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyMinus}}"/>
                         <Separator/>
-                        <MenuItem Header="{x:Static local:Texts.Sidebar}" IsCheckable="True" IsChecked="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsSidebarVisible,Mode=TwoWay}"/>
+                        <MenuItem Header="{x:Static local:Texts.Sidebar}" IsCheckable="True" IsChecked="{Binding IsSidebarVisible,Mode=TwoWay}"/>
                         <MenuItem Header="{x:Static local:Texts.AutoPlay}" IsCheckable="True" IsChecked="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsAutoPlay,Mode=TwoWay}"/>
                     </ContextMenu>
                 </c:DropDownButton.ContextMenu>
@@ -648,13 +649,13 @@
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition MinWidth="100">
+                <ColumnDefinition Width="{Binding SidebarWidth, Converter={StaticResource DoubleToGridLengthConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     <ColumnDefinition.Style>
                         <Style TargetType="ColumnDefinition">
-                            <Setter Property="Width" Value="150"/>
+                            <Setter Property="MinWidth" Value="100"/>
                             <Setter Property="MaxWidth" Value="500"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsSidebarVisible}" Value="False">
+                                <DataTrigger Binding="{Binding IsSidebarVisible}" Value="False">
                                     <Setter Property="MaxWidth" Value="0"/>
                                     <Setter Property="MinWidth" Value="0"/>
                                 </DataTrigger>
@@ -666,7 +667,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" Visibility="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsSidebarVisible,Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Grid.Column="0" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" Visibility="{Binding IsSidebarVisible,Converter={StaticResource BooleanToVisibilityConverter}}">
                 <ListBox ItemsSource="{Binding SidebarItems}" BorderThickness="0" Background="Transparent" SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ContextMenu="{StaticResource SidebarContextMenu}">
                     <ListBox.Template>
                         <ControlTemplate TargetType="ListBox">
@@ -811,7 +812,7 @@
                 </ListBox>
             </Border>
 
-            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent" Visibility="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsSidebarVisible,Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent" Visibility="{Binding IsSidebarVisible,Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <ListBox Grid.Column="2"
                      SelectedValue="{Binding ReadOnlyLastSelectedValue, Mode=OneWayToSource}"
                      ItemsSource="{Binding FilteredItems}"
