@@ -123,7 +123,7 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
     private ImmutableList<IVideoEffect> _trackedEffects = ImmutableList<IVideoEffect>.Empty;
     private bool _disposed;
     private bool _hasPotentialUnnotifiedEffectMutation;
-    private DispatcherOperation? _pendingInputDrivenCheckOperation;
+    private DispatcherOperation? _pendingUpdateCheckOperation;
 
     public PresetManagerViewModel() : this(Array.Empty<ItemProperty>()) { }
 
@@ -156,7 +156,7 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
         ComponentDispatcher.ThreadPreprocessMessage += OnThreadPreprocessMessage;
         UpdateAppliedPresetId();
         AttachEffectHandlers(_effect.Effects);
-        TriggerUpdateCheck();
+        QueueUpdateCheck();
 
         LoadData();
     }
@@ -176,16 +176,16 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
         if (e.PropertyName == nameof(ContainerEffect.SelectedPresetJson))
         {
             UpdateAppliedPresetId();
-            TriggerUpdateCheck();
+            QueueUpdateCheck();
         }
         else if (e.PropertyName == nameof(ContainerEffect.Effects))
         {
             AttachEffectHandlers(_effect.Effects);
-            TriggerUpdateCheck();
+            QueueUpdateCheck();
         }
         else if (e.PropertyName == nameof(ContainerEffect.EffectTabsJson))
         {
-            TriggerUpdateCheck();
+            QueueUpdateCheck();
         }
     }
 
@@ -208,7 +208,7 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
 
     private void OnVideoEffectPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        TriggerUpdateCheck();
+        QueueUpdateCheck();
     }
 
     private void UpdateAppliedPresetId()
@@ -302,7 +302,8 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
         if (input is not MouseButtonEventArgs mouseButton) return;
         if (mouseButton.ChangedButton != MouseButton.Left || mouseButton.ButtonState != MouseButtonState.Released) return;
 
-        QueueInputDrivenUpdateCheck();
+        if (_hasPotentialUnnotifiedEffectMutation)
+            QueueUpdateCheck();
     }
 
     private void OnThreadPreprocessMessage(ref MSG msg, ref bool handled)
@@ -315,35 +316,28 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
                 _hasPotentialUnnotifiedEffectMutation = true;
                 break;
             case WmLeftButtonUp:
-                QueueInputDrivenUpdateCheck();
+                if (_hasPotentialUnnotifiedEffectMutation)
+                    QueueUpdateCheck();
                 break;
         }
     }
 
-    private void QueueInputDrivenUpdateCheck()
+    private void QueueUpdateCheck()
     {
-        if (!_hasPotentialUnnotifiedEffectMutation) return;
-
-        if (_pendingInputDrivenCheckOperation != null &&
-            (_pendingInputDrivenCheckOperation.Status == DispatcherOperationStatus.Pending || 
-             _pendingInputDrivenCheckOperation.Status == DispatcherOperationStatus.Executing))
+        if (_pendingUpdateCheckOperation != null &&
+            (_pendingUpdateCheckOperation.Status == DispatcherOperationStatus.Pending || 
+             _pendingUpdateCheckOperation.Status == DispatcherOperationStatus.Executing))
             return;
 
-        _pendingInputDrivenCheckOperation = Application.Current.Dispatcher.InvokeAsync(
-            ExecuteInputDrivenUpdateCheck,
+        _pendingUpdateCheckOperation = Application.Current.Dispatcher.InvokeAsync(
+            ExecuteUpdateCheck,
             DispatcherPriority.ContextIdle);
     }
 
-    private void ExecuteInputDrivenUpdateCheck()
+    private void ExecuteUpdateCheck()
     {
-        _pendingInputDrivenCheckOperation = null;
-
-        var shouldCheck = _hasPotentialUnnotifiedEffectMutation;
+        _pendingUpdateCheckOperation = null;
         _hasPotentialUnnotifiedEffectMutation = false;
-        if (!shouldCheck) return;
-
-        if (_appliedPresetId == null) return;
-
         TriggerUpdateCheck();
     }
 
