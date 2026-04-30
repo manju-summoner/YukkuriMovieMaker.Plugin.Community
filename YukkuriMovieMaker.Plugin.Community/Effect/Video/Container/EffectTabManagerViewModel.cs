@@ -158,12 +158,12 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                     var target = (ContainerEffect)prop.PropertyOwner;
                     target.Effects = EffectSerializer.Deserialize(tab.SerializedEffects);
                 }
+                WriteState();
             }
             finally
             {
                 EndEdit?.Invoke(this, EventArgs.Empty);
             }
-            WriteState();
         }
         finally
         {
