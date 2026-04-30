@@ -761,7 +761,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
             item.IsRenaming = false;
 
-            if (string.IsNullOrWhiteSpace(newName) || newName == oldName)
+            if (string.IsNullOrWhiteSpace(newName) || newName == oldName || !IsValidRenameName(newName))
                 return;
 
             var oldPath = item.Path.TrimEnd(Path.DirectorySeparatorChar);
@@ -790,6 +790,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     Log.Default.Write($"名前変更中に例外が発生しました。path={oldPath}", e);
                 }
             });
+        }
+
+        static bool IsValidRenameName(string name)
+        {
+            try
+            {
+                return !Path.IsPathRooted(name)
+                    && Path.GetFileName(name) == name
+                    && name.IndexOfAny(Path.GetInvalidFileNameChars()) < 0;
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
         }
 
         async Task AfterFolderCreatedAsync(object? p, string path)
