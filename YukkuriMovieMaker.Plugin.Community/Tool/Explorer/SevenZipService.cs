@@ -75,7 +75,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             if (sourcePaths.Length == 1)
             {
                 var trimmed = sourcePaths[0].TrimEnd(Path.DirectorySeparatorChar);
-                var rawName = Path.GetFileNameWithoutExtension(trimmed);
+                var rawName = Directory.Exists(trimmed)
+                    ? Path.GetFileName(trimmed)
+                    : Path.GetFileNameWithoutExtension(trimmed);
                 return SanitizeArchiveBaseName(rawName);
             }
             return "archive";
