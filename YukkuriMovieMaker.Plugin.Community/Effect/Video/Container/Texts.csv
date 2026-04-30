@@ -1,7 +1,7 @@
 Key,comment,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
 Container_DisplayName,Effect display name,コンテナ,Container,容器,容器,컨테이너,Contenedor,حاوية,Kontainer,
 Container_DisplayNameWithPreset,Effect name with preset,コンテナ [{0}],Container [{0}],容器 [{0}],容器 [{0}],컨테이너 [{0}],Contenedor [{0}],حاوية [{0}],Kontainer [{0}],
-Container_PresetGroup,Preset settings group,プリセット管理,Preset Management,预设管理,預設管理,프리셋 관리,Gestión de Preajustes,إدارة الإعدادات المسبقة,Manajemen Prasetel,
+Container_PresetGroup,Container settings group,コンテナ管理,Container Management,容器管理,容器管理,컨테이너 관리,Gestión de Contenedores,إدارة الحاويات,Manajemen Kontainer,
 Container_EffectGroup,Active effects group,適用中エフェクト,Active Effects,活动效果,活動效果,활성 효과,Efectos Activos,التأثيرات النشطة,Efek Aktif,
 Container_EmptyLabel,Empty label, , , , , , , , ,
 Container_ActiveEffectsCount,Active effects format,{0} 適用中: {1}個,{0} Active: {1},{0} 应用中: {1}个,{0} 套用中: {1}個,{0} 적용 중: {1}개,{0} Activo: {1},{0} نشط: {1},{0} Aktif: {1},
