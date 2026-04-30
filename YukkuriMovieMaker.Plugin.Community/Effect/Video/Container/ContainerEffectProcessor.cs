@@ -76,16 +76,39 @@ internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
     private void SynchronizeProcessors()
     {
         if (ReferenceEquals(_currentEffects, _effect.Effects)) return;
-        DisposeProcessors();
-        foreach (var effect in _effect.Effects)
-            _processors.Add(effect.CreateVideoEffect(_devices));
+
+        var newProcessors = new List<IVideoEffectProcessor>();
+        for (int i = 0; i < _effect.Effects.Count; i++)
+        {
+            var effect = _effect.Effects[i];
+            var index = _currentEffects.IndexOf(effect);
+            if (index >= 0 && index < _processors.Count && _processors[index] != null)
+            {
+                newProcessors.Add(_processors[index]);
+                _processors[index] = null!;
+            }
+            else
+            {
+                newProcessors.Add(effect.CreateVideoEffect(_devices));
+            }
+        }
+
+        foreach (var processor in _processors)
+        {
+            processor?.Dispose();
+        }
+
+        _processors.Clear();
+        _processors.AddRange(newProcessors);
         _currentEffects = _effect.Effects;
     }
 
     private void DisposeProcessors()
     {
         foreach (var processor in _processors)
-            processor.Dispose();
+        {
+            processor?.Dispose();
+        }
         _processors.Clear();
     }
 }
