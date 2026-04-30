@@ -227,13 +227,13 @@
                                                TextTrimming="CharacterEllipsis"
                                                Text="{Binding Name}"/>
                                     <TextBox x:Name="RenameTextBox"
+                                             loc:FocusExtension.IsFocused="{Binding IsEditing}"
                                              VerticalAlignment="Center"
                                              Visibility="Collapsed"
                                              Background="Transparent"
                                              BorderThickness="0"
                                              Padding="0"
                                              Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}"
-                                             IsVisibleChanged="RenameTextBox_IsVisibleChanged"
                                              LostKeyboardFocus="RenameTextBox_LostKeyboardFocus"
                                              KeyDown="RenameTextBox_KeyDown"/>
                                 </Grid>

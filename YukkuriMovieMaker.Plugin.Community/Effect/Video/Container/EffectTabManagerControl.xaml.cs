@@ -37,54 +37,17 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         {
             oldVm.BeginEdit -= OnBeginEdit;
             oldVm.EndEdit -= OnEndEdit;
-            oldVm.RenameRequested -= OnRenameRequested;
         }
 
         if (e.NewValue is EffectTabManagerViewModel newVm)
         {
             newVm.BeginEdit += OnBeginEdit;
             newVm.EndEdit += OnEndEdit;
-            newVm.RenameRequested += OnRenameRequested;
         }
     }
 
     private void OnBeginEdit(object? sender, EventArgs e) => BeginEdit?.Invoke(this, EventArgs.Empty);
     private void OnEndEdit(object? sender, EventArgs e) => EndEdit?.Invoke(this, EventArgs.Empty);
-
-    private void OnRenameRequested(Guid tabId)
-    {
-        Dispatcher.InvokeAsync(() =>
-        {
-            var vm = DataContext as EffectTabManagerViewModel;
-            if (vm is null) return;
-
-            var tab = vm.Tabs.FirstOrDefault(t => t.Id == tabId);
-            if (tab is null) return;
-
-            var container = TabListBox.ItemContainerGenerator.ContainerFromItem(tab) as ListBoxItem;
-            if (container is null) return;
-
-            var textBox = FindDescendantByName<TextBox>(container, "RenameTextBox");
-            if (textBox is null) return;
-
-            textBox.Focus();
-            textBox.SelectAll();
-        });
-    }
-
-    private static T? FindDescendantByName<T>(DependencyObject root, string name) where T : FrameworkElement
-        => WpfTreeHelper.FindDescendantByName<T>(root, name);
-
-    private void RenameTextBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-    {
-        if (sender is not TextBox textBox) return;
-        if (!textBox.IsVisible) return;
-        Dispatcher.InvokeAsync(() =>
-        {
-            textBox.Focus();
-            textBox.SelectAll();
-        });
-    }
 
     private void RenameTextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {

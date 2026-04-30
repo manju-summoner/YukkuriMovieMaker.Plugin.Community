@@ -117,8 +117,6 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
 
     public event EventHandler? BeginEdit;
     public event EventHandler? EndEdit;
-    public event Action<PresetGroup>? GroupRenameRequested;
-    public event Action<PresetItemViewModel>? PresetRenameRequested;
 
     private Guid? _appliedPresetId;
     private bool _canUpdatePresetCache;
@@ -360,7 +358,6 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
         var target = group ?? SelectedGroup;
         if (target == null || target.IsVirtual) return;
         target.BeginEdit();
-        GroupRenameRequested?.Invoke(target);
     }
 
     private void CommitRenameGroup(PresetGroup group)
@@ -656,7 +653,6 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
         var target = targets[0];
 
         target.BeginEdit();
-        PresetRenameRequested?.Invoke(target);
     }
 
     public void CommitRenamePreset(PresetItemViewModel presetVm)

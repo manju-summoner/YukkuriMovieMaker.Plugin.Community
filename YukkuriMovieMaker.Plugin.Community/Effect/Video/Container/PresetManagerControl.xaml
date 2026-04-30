@@ -212,6 +212,7 @@
                                         </TextBlock.Style>
                                     </TextBlock>
                                     <TextBox x:Name="GroupRenameTextBox"
+                                             loc:FocusExtension.IsFocused="{Binding IsEditing}"
                                              Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}"
                                              VerticalAlignment="Center"
                                              Background="Transparent" BorderThickness="1"
@@ -295,6 +296,7 @@
                                                         </TextBlock.Style>
                                                     </TextBlock>
                                                     <TextBox x:Name="GroupRenameTextBox"
+                                                             loc:FocusExtension.IsFocused="{Binding IsEditing}"
                                                              Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}"
                                                              VerticalAlignment="Center"
                                                              Background="Transparent" BorderThickness="1"
@@ -590,6 +592,7 @@
                                         </TextBlock.Style>
                                     </TextBlock>
                                     <TextBox x:Name="PresetRenameTextBox"
+                                             loc:FocusExtension.IsFocused="{Binding IsEditing}"
                                              Grid.Column="1"
                                              Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}"
                                              VerticalAlignment="Center"

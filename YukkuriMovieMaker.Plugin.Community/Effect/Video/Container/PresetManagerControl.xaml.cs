@@ -59,54 +59,16 @@ public partial class PresetManagerControl : UserControl, IPropertyEditorControl
         {
             oldVm.BeginEdit -= OnBeginEdit;
             oldVm.EndEdit -= OnEndEdit;
-            oldVm.GroupRenameRequested -= OnGroupRenameRequested;
-            oldVm.PresetRenameRequested -= OnPresetRenameRequested;
         }
         if (e.NewValue is PresetManagerViewModel newVm)
         {
             newVm.BeginEdit += OnBeginEdit;
             newVm.EndEdit += OnEndEdit;
-            newVm.GroupRenameRequested += OnGroupRenameRequested;
-            newVm.PresetRenameRequested += OnPresetRenameRequested;
         }
     }
 
     private void OnBeginEdit(object? sender, EventArgs e) => BeginEdit?.Invoke(this, EventArgs.Empty);
     private void OnEndEdit(object? sender, EventArgs e) => EndEdit?.Invoke(this, EventArgs.Empty);
-
-    private void OnGroupRenameRequested(PresetGroup group)
-    {
-        Dispatcher.InvokeAsync(() =>
-        {
-            var listBoxes = new[] { GroupListBox, MobileGroupListBox };
-            foreach (var listBox in listBoxes)
-            {
-                var container = listBox?.ItemContainerGenerator.ContainerFromItem(group) as ListBoxItem;
-                if (container is null) continue;
-                var textBox = FindDescendantByName<TextBox>(container, "GroupRenameTextBox");
-                if (textBox is null) continue;
-                textBox.Focus();
-                textBox.SelectAll();
-                return;
-            }
-        });
-    }
-
-    private void OnPresetRenameRequested(PresetItemViewModel presetVm)
-    {
-        Dispatcher.InvokeAsync(() =>
-        {
-            var container = PresetListBox.ItemContainerGenerator.ContainerFromItem(presetVm) as ListBoxItem;
-            if (container is null) return;
-            var textBox = FindDescendantByName<TextBox>(container, "PresetRenameTextBox");
-            if (textBox is null) return;
-            textBox.Focus();
-            textBox.SelectAll();
-        });
-    }
-
-    private static T? FindDescendantByName<T>(DependencyObject root, string name) where T : FrameworkElement
-        => WpfTreeHelper.FindDescendantByName<T>(root, name);
 
     private void GroupRenameTextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {

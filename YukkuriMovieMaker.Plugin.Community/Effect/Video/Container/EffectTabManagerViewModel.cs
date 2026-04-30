@@ -57,7 +57,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     public event EventHandler? BeginEdit;
     public event EventHandler? EndEdit;
-    public event Action<Guid>? RenameRequested;
 
     public EffectTabManagerViewModel() : this(Array.Empty<ItemProperty>()) { }
 
@@ -290,11 +289,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void ExecuteBeginEdit(EffectTabItemViewModel? tabVm)
     {
         var target = tabVm ?? SelectedTab;
-        if (target != null)
-        {
-            target.BeginEdit();
-            RenameRequested?.Invoke(target.Id);
-        }
+        target?.BeginEdit();
     }
 
     private void ExecuteCommitEdit(EffectTabItemViewModel? tabVm)
