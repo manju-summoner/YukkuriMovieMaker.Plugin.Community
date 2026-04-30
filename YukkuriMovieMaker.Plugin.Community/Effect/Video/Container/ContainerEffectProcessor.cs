@@ -77,15 +77,28 @@ internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
     {
         if (ReferenceEquals(_currentEffects, _effect.Effects)) return;
 
-        var newProcessors = new List<IVideoEffectProcessor>();
+        var oldProcessors = new Dictionary<IVideoEffect, Stack<IVideoEffectProcessor>>();
+        for (int i = 0; i < _currentEffects.Count; i++)
+        {
+            if (i < _processors.Count && _processors[i] != null)
+            {
+                var effect = _currentEffects[i];
+                if (!oldProcessors.TryGetValue(effect, out var stack))
+                {
+                    stack = new Stack<IVideoEffectProcessor>();
+                    oldProcessors[effect] = stack;
+                }
+                stack.Push(_processors[i]);
+            }
+        }
+
+        var newProcessors = new List<IVideoEffectProcessor>(_effect.Effects.Count);
         for (int i = 0; i < _effect.Effects.Count; i++)
         {
             var effect = _effect.Effects[i];
-            var index = _currentEffects.IndexOf(effect);
-            if (index >= 0 && index < _processors.Count && _processors[index] != null)
+            if (oldProcessors.TryGetValue(effect, out var stack) && stack.TryPop(out var processor))
             {
-                newProcessors.Add(_processors[index]);
-                _processors[index] = null!;
+                newProcessors.Add(processor);
             }
             else
             {
@@ -93,9 +106,12 @@ internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
             }
         }
 
-        foreach (var processor in _processors)
+        foreach (var stack in oldProcessors.Values)
         {
-            processor?.Dispose();
+            foreach (var processor in stack)
+            {
+                processor.Dispose();
+            }
         }
 
         _processors.Clear();
