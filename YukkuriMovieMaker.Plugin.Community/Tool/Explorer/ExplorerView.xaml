@@ -669,6 +669,9 @@
 
             <Border Grid.Column="0" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" Visibility="{Binding IsSidebarVisible,Converter={StaticResource BooleanToVisibilityConverter}}">
                 <ListBox ItemsSource="{Binding SidebarItems}" BorderThickness="0" Background="Transparent" SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ContextMenu="{StaticResource SidebarContextMenu}">
+                    <i:Interaction.Behaviors>
+                        <local:ScrollSelectedItemIntoViewBehavior/>
+                    </i:Interaction.Behaviors>
                     <ListBox.Template>
                         <ControlTemplate TargetType="ListBox">
                             <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
