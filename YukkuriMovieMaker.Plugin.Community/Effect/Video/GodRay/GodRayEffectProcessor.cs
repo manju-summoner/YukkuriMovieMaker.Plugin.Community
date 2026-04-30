@@ -1,4 +1,6 @@
+using System.Numerics;
 using Vortice.Direct2D1;
+using Vortice.Direct2D1.Effects;
 using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
@@ -8,11 +10,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
 {
     internal class GodRayEffectProcessor(IGraphicsDevicesAndContext devices, GodRayEffect item) : VideoEffectProcessorBase(devices)
     {
+        readonly IGraphicsDevicesAndContext devices = devices;
         GodRayCustomEffect? effect;
 
         bool isFirst = true;
         double lightX, lightY, intensity, decay, density, weight, samples, threshold;
         Color lightColor;
+        float inputLeft, inputTop, inputRight, inputBottom;
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
@@ -33,11 +37,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
             var threshold = item.Threshold.GetValue(frame, length, fps);
             var lightColor = item.LightColor;
 
+            var bounds = devices.DeviceContext.GetImageLocalBounds(input);
+            var inputLeft = bounds.Left;
+            var inputTop = bounds.Top;
+            var inputRight = bounds.Right;
+            var inputBottom = bounds.Bottom;
+
             if (isFirst || this.lightX != lightX || this.lightY != lightY ||
                 this.intensity != intensity || this.decay != decay ||
                 this.density != density || this.weight != weight ||
                 this.samples != samples || this.threshold != threshold ||
-                this.lightColor != lightColor)
+                this.lightColor != lightColor ||
+                this.inputLeft != inputLeft || this.inputTop != inputTop ||
+                this.inputRight != inputRight || this.inputBottom != inputBottom)
             {
                 effect.LightX = (float)lightX;
                 effect.LightY = (float)lightY;
@@ -51,6 +63,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
                 effect.ColorG = lightColor.G / 255f;
                 effect.ColorB = lightColor.B / 255f;
                 effect.ColorA = lightColor.A / 255f;
+                effect.InputLeft = inputLeft;
+                effect.InputTop = inputTop;
+                effect.InputRight = inputRight;
+                effect.InputBottom = inputBottom;
             }
 
             isFirst = false;
@@ -63,6 +79,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
             this.samples = samples;
             this.threshold = threshold;
             this.lightColor = lightColor;
+            this.inputLeft = inputLeft;
+            this.inputTop = inputTop;
+            this.inputRight = inputRight;
+            this.inputBottom = inputBottom;
 
             return effectDescription.DrawDescription;
         }

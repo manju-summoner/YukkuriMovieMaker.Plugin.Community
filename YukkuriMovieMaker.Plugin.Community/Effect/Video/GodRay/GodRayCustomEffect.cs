@@ -70,6 +70,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
             get => GetFloatValue((int)EffectImpl.Properties.ColorA);
         }
 
+        public float InputLeft
+        {
+            set => SetValue((int)EffectImpl.Properties.InputLeft, value);
+            get => GetFloatValue((int)EffectImpl.Properties.InputLeft);
+        }
+        public float InputTop
+        {
+            set => SetValue((int)EffectImpl.Properties.InputTop, value);
+            get => GetFloatValue((int)EffectImpl.Properties.InputTop);
+        }
+        public float InputRight
+        {
+            set => SetValue((int)EffectImpl.Properties.InputRight, value);
+            get => GetFloatValue((int)EffectImpl.Properties.InputRight);
+        }
+        public float InputBottom
+        {
+            set => SetValue((int)EffectImpl.Properties.InputBottom, value);
+            get => GetFloatValue((int)EffectImpl.Properties.InputBottom);
+        }
+
         [CustomEffect(1)]
         class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
@@ -148,6 +169,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
                 set { constants.ColorA = value; UpdateConstants(); }
             }
 
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.InputLeft)]
+            public float InputLeft
+            {
+                get => constants.InputLeft;
+                set { constants.InputLeft = value; UpdateConstants(); }
+            }
+
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.InputTop)]
+            public float InputTop
+            {
+                get => constants.InputTop;
+                set { constants.InputTop = value; UpdateConstants(); }
+            }
+
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.InputRight)]
+            public float InputRight
+            {
+                get => constants.InputRight;
+                set { constants.InputRight = value; UpdateConstants(); }
+            }
+
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.InputBottom)]
+            public float InputBottom
+            {
+                get => constants.InputBottom;
+                set { constants.InputBottom = value; UpdateConstants(); }
+            }
+
             public EffectImpl() : base(ShaderResourceUri.Get("GodRay"))
             {
             }
@@ -159,25 +208,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
 
             public override void MapInputRectsToOutputRect(RawRect[] inputRects, RawRect[] inputOpaqueSubRects, out RawRect outputRect, out RawRect outputOpaqueSubRect)
             {
-                inputRect = ClampInputRect(inputRects[0]);
-                var width = inputRect.Right - inputRect.Left;
-                var height = inputRect.Bottom - inputRect.Top;
+                var width = InputRight - InputLeft;
+                var height = InputBottom - InputTop;
 
                 var expandX = (int)(width * Math.Max(1f, constants.Density) * 2);
                 var expandY = (int)(height * Math.Max(1f, constants.Density) * 2);
 
                 outputRect = new RawRect(
-                    inputRect.Left - expandX,
-                    inputRect.Top - expandY,
-                    inputRect.Right + expandX,
-                    inputRect.Bottom + expandY
+                    (int)InputLeft - expandX,
+                    (int)InputTop - expandY,
+                    (int)InputRight + expandX,
+                    (int)InputBottom + expandY
                 );
                 outputOpaqueSubRect = default;
             }
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
-                inputRects[0] = inputRect;
+                inputRects[0] = new RawRect(
+                    (int)InputLeft,
+                    (int)InputTop,
+                    (int)InputRight,
+                    (int)InputBottom
+                );
             }
 
             [StructLayout(LayoutKind.Sequential)]
@@ -195,6 +248,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
                 public float ColorG;
                 public float ColorB;
                 public float ColorA;
+
+                public float InputLeft;
+                public float InputTop;
+                public float InputRight;
+                public float InputBottom;
             }
 
             public enum Properties : int
@@ -211,6 +269,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
                 ColorG = 9,
                 ColorB = 10,
                 ColorA = 11,
+                InputLeft = 12,
+                InputTop = 13,
+                InputRight = 14,
+                InputBottom = 15,
             }
         }
     }
