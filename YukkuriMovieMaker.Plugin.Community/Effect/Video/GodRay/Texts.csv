@@ -1,0 +1,20 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+GodRayEffectName,,ゴッドレイ,God Ray,丁达尔光线,丁達爾光線,갓 레이,Rayo divino,شعاع إلهي,Sinar Tuhan
+GodRayLightXName,,光源X,Light X,光源X,光源X,광원 X,Luz X,ضوء X,Cahaya X
+GodRayLightXDesc,,光源の水平位置 (0.0〜1.0),Horizontal position of the light source (0.0 to 1.0),光源的水平位置 (0.0〜1.0),光源的水平位置 (0.0〜1.0),광원의 수평 위치 (0.0〜1.0),Posición horizontal de la fuente de luz (0.0 a 1.0),موضع أفقي للمصدر الضوئي (0.0 إلى 1.0),Posisi horizontal sumber cahaya (0,0 hingga 1,0)
+GodRayLightYName,,光源Y,Light Y,光源Y,光源Y,광원 Y,Luz Y,ضوء Y,Cahaya Y
+GodRayLightYDesc,,光源の垂直位置 (0.0〜1.0),Vertical position of the light source (0.0 to 1.0),光源的垂直位置 (0.0〜1.0),光源的垂直位置 (0.0〜1.0),광원의 수직 위치 (0.0〜1.0),Posición vertical de la fuente de luz (0.0 a 1.0),موضع رأسي للمصدر الضوئي (0.0 إلى 1.0),Posisi vertikal sumber cahaya (0,0 hingga 1,0)
+GodRayIntensityName,,強度,Intensity,强度,強度,강도,Intensidad,الكثافة,Intensitas
+GodRayIntensityDesc,,光線の強度,Intensity of the light rays,光线的强度,光線的強度,광선의 강도,Intensidad de los rayos de luz,شدة أشعة الضوء,Intensitas sinar cahaya
+GodRayDecayName,,減衰,Decay,衰减,衰減,감쇠,Desvanecimiento,تلاشي,Peluruhan
+GodRayDecayDesc,,光線の距離による減衰率,Decay rate of rays over distance,光线随距离的衰减率,光線隨距離的衰減率,거리에 따른 광선 감쇠율,Tasa de atenuación de los rayos con la distancia,معدل تلاشي الأشعة بالمسافة,Tingkat peluruhan sinar terhadap jarak
+GodRayDensityName,,密度,Density,密度,密度,밀도,Densidad,الكثافة,Kerapatan
+GodRayDensityDesc,,光線のサンプリング密度,Sampling density of the light rays,光线的采样密度,光線的取樣密度,광선의 샘플링 밀도,Densidad de muestreo de los rayos de luz,كثافة أخذ عينات أشعة الضوء,Kerapatan pengambilan sampel sinar cahaya
+GodRayWeightName,,重み,Weight,权重,權重,가중치,Peso,الوزن,Bobot
+GodRayWeightDesc,,各サンプルの重み,Weight of each sample,每个样本的权重,每個樣本的權重,각 샘플의 가중치,Peso de cada muestra,وزن كل عينة,Bobot setiap sampel
+GodRaySamplesName,,サンプル数,Samples,采样数,取樣數,샘플 수,Muestras,عدد العينات,Jumlah Sampel
+GodRaySamplesDesc,,光線のサンプル数 (多いほど高品質),Number of ray samples (more = higher quality),光线采样数（越多越高质量）,光線取樣數（越多品質越高）,광선 샘플 수 (많을수록 품질 높음),Número de muestras de rayos (más = mayor calidad),عدد عينات الأشعة (أكثر = جودة أعلى),Jumlah sampel sinar (lebih banyak = kualitas lebih tinggi)
+GodRayThresholdName,,しきい値,Threshold,阈值,閾值,임계값,Umbral,العتبة,Ambang batas
+GodRayThresholdDesc,,光として認識する輝度のしきい値,Luminance threshold for ray detection,识别为光的亮度阈值,識別為光的亮度閾值,광으로 인식하는 휘도 임계값,Umbral de luminancia para la detección de rayos,عتبة اللمعان للكشف عن الأشعة,Ambang kecerahan untuk deteksi sinar
+GodRayColorName,,色,Color,颜色,顏色,색상,Color,لون,Warna
+GodRayColorDesc,,光線の色,Color of the light rays,光线的颜色,光線的顏色,광선의 색상,Color de los rayos de luz,لون أشعة الضوء,Warna sinar cahaya
