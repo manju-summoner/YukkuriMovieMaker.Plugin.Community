@@ -163,7 +163,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border x:Name="RootBorder" Margin="5,5,5,0"
+        <Border x:Name="RootBorder"
                 Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
                 BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                 BorderThickness="1">
