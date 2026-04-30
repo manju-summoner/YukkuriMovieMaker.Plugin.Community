@@ -102,8 +102,17 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         {
             newSelectedTab = Tabs.FirstOrDefault();
         }
-        
-        SelectedTab = newSelectedTab;
+
+        SelectTabWithoutApplying(newSelectedTab);
+    }
+
+    private void SelectTabWithoutApplying(EffectTabItemViewModel? tab)
+    {
+        if (_selectedTab == tab) return;
+
+        _selectedTab = tab;
+        OnPropertyChanged(nameof(SelectedTab));
+        OnPropertyChanged(nameof(IsTabSelected));
     }
 
     private void OnEffectPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
