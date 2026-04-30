@@ -62,9 +62,14 @@ internal static class EffectTabStateService
 
     public static EffectTabState ResolveEffectState(
         string? serializedTabs,
-        ImmutableList<IVideoEffect> fallbackEffects,
-        string defaultTabName) =>
-        ResolveState(serializedTabs, null, Guid.Empty, fallbackEffects, defaultTabName);
+        ImmutableList<IVideoEffect> currentEffects,
+        string defaultTabName)
+    {
+        var state = ResolveState(serializedTabs, null, Guid.Empty, currentEffects, defaultTabName);
+        var selectedTab = GetSelectedTab(state);
+        selectedTab.SerializedEffects = EffectSerializer.Serialize(currentEffects);
+        return state;
+    }
 
     public static EffectTabState ResolvePresetState(
         EffectPreset preset,

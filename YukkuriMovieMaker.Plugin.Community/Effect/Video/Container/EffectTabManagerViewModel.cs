@@ -19,6 +19,13 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         get => _selectedTab;
         set
         {
+            if (_selectedTab == value) return;
+
+            if (_selectedTab != null && !_isSyncing)
+            {
+                _selectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
+            }
+
             if (Set(ref _selectedTab, value))
             {
                 OnPropertyChanged(nameof(IsTabSelected));
