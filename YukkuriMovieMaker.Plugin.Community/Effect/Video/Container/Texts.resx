@@ -61,7 +61,7 @@
 <data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
 <data name="Container_DisplayName" xml:space="preserve"><value>コンテナ</value></data>
 <data name="Container_DisplayNameWithPreset" xml:space="preserve"><value>コンテナ [{0}]</value></data>
-<data name="Container_PresetGroup" xml:space="preserve"><value>プリセット管理</value></data>
+<data name="Container_PresetGroup" xml:space="preserve"><value>コンテナ管理</value></data>
 <data name="Container_EffectGroup" xml:space="preserve"><value>適用中エフェクト</value></data>
 <data name="Container_ActiveEffectsCount" xml:space="preserve"><value>{0} 適用中: {1}個</value></data>
 <data name="Container_ActiveEffectsCountWithPreset" xml:space="preserve"><value>{0} 適用中: {1}個 [{2}]</value></data>

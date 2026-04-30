@@ -61,7 +61,7 @@
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
 <data name="Container_DisplayName" xml:space="preserve"><value>Kontainer</value></data>
 <data name="Container_DisplayNameWithPreset" xml:space="preserve"><value>Kontainer [{0}]</value></data>
-<data name="Container_PresetGroup" xml:space="preserve"><value>Manajemen Prasetel</value></data>
+<data name="Container_PresetGroup" xml:space="preserve"><value>Manajemen Kontainer</value></data>
 <data name="Container_EffectGroup" xml:space="preserve"><value>Efek Aktif</value></data>
 <data name="Container_ActiveEffectsCount" xml:space="preserve"><value>{0} Aktif: {1}</value></data>
 <data name="Container_ActiveEffectsCountWithPreset" xml:space="preserve"><value>{0} Aktif: {1} [{2}]</value></data>

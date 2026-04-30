@@ -61,7 +61,7 @@
 <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
 <data name="Container_DisplayName" xml:space="preserve"><value>컨테이너</value></data>
 <data name="Container_DisplayNameWithPreset" xml:space="preserve"><value>컨테이너 [{0}]</value></data>
-<data name="Container_PresetGroup" xml:space="preserve"><value>프리셋 관리</value></data>
+<data name="Container_PresetGroup" xml:space="preserve"><value>컨테이너 관리</value></data>
 <data name="Container_EffectGroup" xml:space="preserve"><value>활성 효과</value></data>
 <data name="Container_ActiveEffectsCount" xml:space="preserve"><value>{0} 적용 중: {1}개</value></data>
 <data name="Container_ActiveEffectsCountWithPreset" xml:space="preserve"><value>{0} 적용 중: {1}개 [{2}]</value></data>

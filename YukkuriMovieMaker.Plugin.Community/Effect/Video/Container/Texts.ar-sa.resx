@@ -61,7 +61,7 @@
 <data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
 <data name="Container_DisplayName" xml:space="preserve"><value>حاوية</value></data>
 <data name="Container_DisplayNameWithPreset" xml:space="preserve"><value>حاوية [{0}]</value></data>
-<data name="Container_PresetGroup" xml:space="preserve"><value>إدارة الإعدادات المسبقة</value></data>
+<data name="Container_PresetGroup" xml:space="preserve"><value>إدارة الحاويات</value></data>
 <data name="Container_EffectGroup" xml:space="preserve"><value>التأثيرات النشطة</value></data>
 <data name="Container_ActiveEffectsCount" xml:space="preserve"><value>{0} نشط: {1}</value></data>
 <data name="Container_ActiveEffectsCountWithPreset" xml:space="preserve"><value>{0} نشط: {1} [{2}]</value></data>

@@ -61,7 +61,7 @@
 <data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
 <data name="Container_DisplayName" xml:space="preserve"><value>Contenedor</value></data>
 <data name="Container_DisplayNameWithPreset" xml:space="preserve"><value>Contenedor [{0}]</value></data>
-<data name="Container_PresetGroup" xml:space="preserve"><value>Gestión de Preajustes</value></data>
+<data name="Container_PresetGroup" xml:space="preserve"><value>Gestión de Contenedores</value></data>
 <data name="Container_EffectGroup" xml:space="preserve"><value>Efectos Activos</value></data>
 <data name="Container_ActiveEffectsCount" xml:space="preserve"><value>{0} Activo: {1}</value></data>
 <data name="Container_ActiveEffectsCountWithPreset" xml:space="preserve"><value>{0} Activo: {1} [{2}]</value></data>
