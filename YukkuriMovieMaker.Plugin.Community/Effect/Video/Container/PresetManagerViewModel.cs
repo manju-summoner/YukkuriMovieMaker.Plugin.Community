@@ -560,6 +560,23 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
         ContainerSettings.Instance.Save();
 
         RefreshDisplayedPresets();
+
+        BeginEdit?.Invoke(this, EventArgs.Empty);
+        try
+        {
+            foreach (var prop in _itemProperties)
+            {
+                var target = (ContainerEffect)prop.PropertyOwner;
+                target.SelectedPresetJson = JsonConvert.SerializeObject(preset);
+                target.PresetName = preset.Name;
+            }
+        }
+        finally
+        {
+            EndEdit?.Invoke(this, EventArgs.Empty);
+        }
+        UpdateAppliedPresetId();
+        TriggerUpdateCheck();
     }
 
     private void ExecuteRemovePreset(object? parameter)
@@ -647,6 +664,24 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
         presetVm.CommitEdit(Texts.PresetManager_NewPreset);
         ContainerSettings.Instance.Save();
         RefreshDisplayedPresets();
+
+        if (_appliedPresetId == presetVm.Model.Id)
+        {
+            BeginEdit?.Invoke(this, EventArgs.Empty);
+            try
+            {
+                foreach (var prop in _itemProperties)
+                {
+                    var target = (ContainerEffect)prop.PropertyOwner;
+                    target.SelectedPresetJson = JsonConvert.SerializeObject(presetVm.Model);
+                    target.PresetName = presetVm.Model.Name;
+                }
+            }
+            finally
+            {
+                EndEdit?.Invoke(this, EventArgs.Empty);
+            }
+        }
     }
 
     public void CancelRenamePreset(PresetItemViewModel presetVm)
