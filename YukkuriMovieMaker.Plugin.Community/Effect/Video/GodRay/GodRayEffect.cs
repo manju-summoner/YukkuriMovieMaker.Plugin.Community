@@ -14,12 +14,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
         public override string Label => Texts.GodRayEffectName;
 
         [Display(GroupName = nameof(Texts.GodRayEffectName), Name = nameof(Texts.GodRayLightXName), Description = nameof(Texts.GodRayLightXDesc), Order = 100, ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "%", 0d, 100d)]
-        public Animation LightX { get; } = new Animation(50, 0d, 100d);
+        [AnimationSlider("F1", "px", -500d, 500d)]
+        public Animation LightX { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.GodRayEffectName), Name = nameof(Texts.GodRayLightYName), Description = nameof(Texts.GodRayLightYDesc), Order = 101, ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "%", 0d, 100d)]
-        public Animation LightY { get; } = new Animation(20, 0d, 100d);
+        [AnimationSlider("F1", "px", -500d, 500d)]
+        public Animation LightY { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.GodRayEffectName), Name = nameof(Texts.GodRayIntensityName), Description = nameof(Texts.GodRayIntensityDesc), Order = 102, ResourceType = typeof(Texts))]
         [AnimationSlider("F2", "", 0d, 2d)]

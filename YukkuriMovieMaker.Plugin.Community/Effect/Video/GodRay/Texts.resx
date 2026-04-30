@@ -61,9 +61,9 @@
 <data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
 <data name="GodRayEffectName" xml:space="preserve"><value>ゴッドレイ</value></data>
 <data name="GodRayLightXName" xml:space="preserve"><value>光源X</value></data>
-<data name="GodRayLightXDesc" xml:space="preserve"><value>光源の水平位置 (0.0〜1.0)</value></data>
+<data name="GodRayLightXDesc" xml:space="preserve"><value>光源の水平位置 (px)</value></data>
 <data name="GodRayLightYName" xml:space="preserve"><value>光源Y</value></data>
-<data name="GodRayLightYDesc" xml:space="preserve"><value>光源の垂直位置 (0.0〜1.0)</value></data>
+<data name="GodRayLightYDesc" xml:space="preserve"><value>光源の垂直位置 (px)</value></data>
 <data name="GodRayIntensityName" xml:space="preserve"><value>強度</value></data>
 <data name="GodRayIntensityDesc" xml:space="preserve"><value>光線の強度</value></data>
 <data name="GodRayDecayName" xml:space="preserve"><value>減衰</value></data>

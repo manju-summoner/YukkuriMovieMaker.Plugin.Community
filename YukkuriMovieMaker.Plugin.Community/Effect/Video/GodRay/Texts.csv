@@ -1,9 +1,9 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
 GodRayEffectName,,ゴッドレイ,God Ray,丁达尔光线,丁達爾光線,갓 레이,Rayo divino,شعاع إلهي,Sinar Tuhan
 GodRayLightXName,,光源X,Light X,光源X,光源X,광원 X,Luz X,ضوء X,Cahaya X
-GodRayLightXDesc,,光源の水平位置 (0.0〜1.0),Horizontal position of the light source (0.0 to 1.0),光源的水平位置 (0.0〜1.0),光源的水平位置 (0.0〜1.0),광원의 수평 위치 (0.0〜1.0),Posición horizontal de la fuente de luz (0.0 a 1.0),موضع أفقي للمصدر الضوئي (0.0 إلى 1.0),Posisi horizontal sumber cahaya (0,0 hingga 1,0)
+GodRayLightXDesc,,光源の水平位置 (px),Horizontal position of the light source (px),光源的水平位置 (px),光源的水平位置 (px),광원의 수평 위치 (px),Posición horizontal de la fuente de luz (px),موضع أفقي للمصدر الضوئي (px),Posisi horizontal sumber cahaya (px)
 GodRayLightYName,,光源Y,Light Y,光源Y,光源Y,광원 Y,Luz Y,ضوء Y,Cahaya Y
-GodRayLightYDesc,,光源の垂直位置 (0.0〜1.0),Vertical position of the light source (0.0 to 1.0),光源的垂直位置 (0.0〜1.0),光源的垂直位置 (0.0〜1.0),광원의 수직 위치 (0.0〜1.0),Posición vertical de la fuente de luz (0.0 a 1.0),موضع رأسي للمصدر الضوئي (0.0 إلى 1.0),Posisi vertikal sumber cahaya (0,0 hingga 1,0)
+GodRayLightYDesc,,光源の垂直位置 (px),Vertical position of the light source (px),光源的垂直位置 (px),光源的垂直位置 (px),광원의 수직 위치 (px),Posición vertical de la fuente de luz (px),موضع رأسي للمصدر الضوئي (px),Posisi vertikal sumber cahaya (px)
 GodRayIntensityName,,強度,Intensity,强度,強度,강도,Intensidad,الكثافة,Intensitas
 GodRayIntensityDesc,,光線の強度,Intensity of the light rays,光线的强度,光線的強度,광선의 강도,Intensidad de los rayos de luz,شدة أشعة الضوء,Intensitas sinar cahaya
 GodRayDecayName,,減衰,Decay,衰减,衰減,감쇠,Desvanecimiento,تلاشي,Peluruhan

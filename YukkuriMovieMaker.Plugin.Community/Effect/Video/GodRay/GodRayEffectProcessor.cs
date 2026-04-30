@@ -23,8 +23,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
             var length = effectDescription.ItemDuration.Frame;
             var fps = effectDescription.FPS;
 
-            var lightX = item.LightX.GetValue(frame, length, fps) / 100.0;
-            var lightY = item.LightY.GetValue(frame, length, fps) / 100.0;
+            var lightX = item.LightX.GetValue(frame, length, fps);
+            var lightY = item.LightY.GetValue(frame, length, fps);
             var intensity = item.Intensity.GetValue(frame, length, fps);
             var decay = item.Decay.GetValue(frame, length, fps);
             var density = item.Density.GetValue(frame, length, fps);

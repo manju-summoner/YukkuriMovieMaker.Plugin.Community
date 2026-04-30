@@ -32,11 +32,11 @@ float4 main(
 ) : SV_Target
 {
 	float2 texCoord = uv0.xy;
-	float2 lightUV = float2(lightX, lightY);
+	float2 lightAbs = float2(lightX, lightY);
 
-	float2 dir = (texCoord - lightUV) * density;
 	int numSamples = (int)clamp(samples, 1.0f, 256.0f);
-	float2 delta = dir / (float)numSamples;
+	float2 stepPixel = (posScene.xy - lightAbs) * density / (float)numSamples;
+	float2 stepUV = stepPixel * uv0.zw;
 
 	float2 currentUV = texCoord;
 	float illuminationDecay = 1.0f;
@@ -45,7 +45,7 @@ float4 main(
 	[loop]
 	for (int i = 0; i < numSamples; i++)
 	{
-		currentUV -= delta;
+		currentUV -= stepUV;
 		float4 s = SampleInput(InputTexture, InputSampler, currentUV);
 		float lum = dot(s.rgb, float3(0.299f, 0.587f, 0.114f));
 		float mask = (lum >= threshold) ? s.a : 0.0f;

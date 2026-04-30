@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Vortice;
 using Vortice.Direct2D1;
@@ -160,24 +161,99 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
             public override void MapInputRectsToOutputRect(RawRect[] inputRects, RawRect[] inputOpaqueSubRects, out RawRect outputRect, out RawRect outputOpaqueSubRect)
             {
                 inputRect = ClampInputRect(inputRects[0]);
-                var width = inputRect.Right - inputRect.Left;
-                var height = inputRect.Bottom - inputRect.Top;
+                if (inputRect.Right <= inputRect.Left || inputRect.Bottom <= inputRect.Top)
+                {
+                    outputRect = inputRect;
+                    outputOpaqueSubRect = default;
+                    return;
+                }
 
-                var expandX = (int)(width * Math.Max(1f, constants.Density) * 2);
-                var expandY = (int)(height * Math.Max(1f, constants.Density) * 2);
+                var density = constants.Density;
+                var lightAbs = new Vector2(constants.LightX, constants.LightY);
+
+                // 出力ピクセル P が i 番目のサンプルで inputRect に到達する条件:
+                //   sampleAbs(i) = P*(1-τ) + lightAbs*τ ∈ inputRect,  τ = i*density/N ∈ (0, density]
+                // P について解くと P(τ) = lightAbs + (C - lightAbs)/(1-τ),  C ∈ inputRect。
+                // density < 1 では P は直線上を C から pMax(C) = (C - density*lightAbs)/(1-density) まで動き、
+                // 全 C・全 τ の和集合の axis-aligned bounding box は inputRect の4コーナーと
+                // pMax(コーナー) の合計8点の bounding box で厳密に決まる。
+                // density >= 1 では (C - density*lightAbs)/(1-density) が発散するため理論上無限遠まで広がる。
+                const int MaxOutputExpand = 4096;
+                float minX = inputRect.Left - MaxOutputExpand;
+                float minY = inputRect.Top - MaxOutputExpand;
+                float maxX = inputRect.Right + MaxOutputExpand;
+                float maxY = inputRect.Bottom + MaxOutputExpand;
+
+                if (density < 1f)
+                {
+                    float exactMinX = inputRect.Left;
+                    float exactMinY = inputRect.Top;
+                    float exactMaxX = inputRect.Right;
+                    float exactMaxY = inputRect.Bottom;
+                    var corners = new[]
+                    {
+                        new Vector2(inputRect.Left, inputRect.Top),
+                        new Vector2(inputRect.Right, inputRect.Top),
+                        new Vector2(inputRect.Left, inputRect.Bottom),
+                        new Vector2(inputRect.Right, inputRect.Bottom),
+                    };
+                    foreach (var c in corners)
+                    {
+                        var pMax = (c - density * lightAbs) / (1 - density);
+                        exactMinX = Math.Min(exactMinX, pMax.X);
+                        exactMinY = Math.Min(exactMinY, pMax.Y);
+                        exactMaxX = Math.Max(exactMaxX, pMax.X);
+                        exactMaxY = Math.Max(exactMaxY, pMax.Y);
+                    }
+                    // 厳密境界を採用するが、density が 1 に近い場合の暴発を避けるため絶対上限でクランプ
+                    minX = Math.Max(minX, exactMinX);
+                    minY = Math.Max(minY, exactMinY);
+                    maxX = Math.Min(maxX, exactMaxX);
+                    maxY = Math.Min(maxY, exactMaxY);
+                }
 
                 outputRect = new RawRect(
-                    inputRect.Left - expandX,
-                    inputRect.Top - expandY,
-                    inputRect.Right + expandX,
-                    inputRect.Bottom + expandY
+                    (int)Math.Floor(minX),
+                    (int)Math.Floor(minY),
+                    (int)Math.Ceiling(maxX),
+                    (int)Math.Ceiling(maxY)
                 );
                 outputOpaqueSubRect = default;
             }
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
-                inputRects[0] = inputRect;
+                var density = constants.Density;
+                var lightAbs = new Vector2(constants.LightX, constants.LightY);
+
+                var corners = new[]
+                {
+                    new Vector2(outputRect.Left, outputRect.Top),
+                    new Vector2(outputRect.Right, outputRect.Top),
+                    new Vector2(outputRect.Left, outputRect.Bottom),
+                    new Vector2(outputRect.Right, outputRect.Bottom),
+                };
+
+                float minX = outputRect.Left;
+                float minY = outputRect.Top;
+                float maxX = outputRect.Right;
+                float maxY = outputRect.Bottom;
+                foreach (var c in corners)
+                {
+                    var end = c * (1 - density) + lightAbs * density;
+                    minX = Math.Min(minX, end.X);
+                    minY = Math.Min(minY, end.Y);
+                    maxX = Math.Max(maxX, end.X);
+                    maxY = Math.Max(maxY, end.Y);
+                }
+
+                // バイリニアサンプリングによる端1pxの参照に備えて1pxマージンを追加
+                inputRects[0] = new RawRect(
+                    (int)Math.Floor(minX) - 1,
+                    (int)Math.Floor(minY) - 1,
+                    (int)Math.Ceiling(maxX) + 1,
+                    (int)Math.Ceiling(maxY) + 1
+                );
             }
 
             [StructLayout(LayoutKind.Sequential)]
