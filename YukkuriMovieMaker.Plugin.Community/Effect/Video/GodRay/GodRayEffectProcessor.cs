@@ -33,6 +33,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
             var threshold = item.Threshold.GetValue(frame, length, fps);
             var lightColor = item.LightColor;
 
+
             if (isFirst || this.lightX != lightX || this.lightY != lightY ||
                 this.intensity != intensity || this.decay != decay ||
                 this.density != density || this.weight != weight ||
