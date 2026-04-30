@@ -248,14 +248,16 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
                 return;
             }
 
-            var currentState = EffectTabStateService.ResolveEffectState(_effect.EffectTabsJson, _effect.Effects, Texts.EffectTab_FirstName);
-            var selectedTab = EffectTabStateService.GetSelectedTab(currentState);
-            selectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
+            var rawCurrentState = EffectTabStateService.ResolveEffectState(_effect.EffectTabsJson, _effect.Effects, Texts.EffectTab_FirstName);
+            var currentState = EffectTabStateService.DeepCopy(rawCurrentState);
+            var currentSelectedTab = EffectTabStateService.GetSelectedTab(currentState);
+            currentSelectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
             foreach (var tab in currentState.Tabs) tab.Id = Guid.Empty;
             currentState.SelectedTabId = Guid.Empty;
             var currentStateJson = EffectTabStateService.Serialize(currentState);
 
-            var presetState = EffectTabStateService.ResolvePresetState(preset, Texts.EffectTab_FirstName);
+            var rawPresetState = EffectTabStateService.ResolvePresetState(preset, Texts.EffectTab_FirstName);
+            var presetState = EffectTabStateService.DeepCopy(rawPresetState);
             var presetSelectedTab = EffectTabStateService.GetSelectedTab(presetState);
             var presetEffects = EffectSerializer.Deserialize(presetSelectedTab.SerializedEffects);
             presetSelectedTab.SerializedEffects = EffectSerializer.Serialize(presetEffects);

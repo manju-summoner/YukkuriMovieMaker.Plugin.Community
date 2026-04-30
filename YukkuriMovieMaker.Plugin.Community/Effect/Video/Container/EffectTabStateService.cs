@@ -131,6 +131,9 @@ internal static class EffectTabStateService
 
     public static EffectTab GetSelectedTab(EffectTabState state)
     {
+        if (state.Tabs.Count == 0)
+            throw new InvalidOperationException("Cannot get selected tab from a state with no tabs.");
+
         var selectedId = state.SelectedTabId;
         if (selectedId is not null)
         {
@@ -145,12 +148,28 @@ internal static class EffectTabStateService
     public static ImmutableList<IVideoEffect> GetSelectedEffects(EffectTabState state)
     {
         var selected = GetSelectedTab(state);
-        return EffectSerializer.Deserialize(selected.SerializedEffects) ?? ImmutableList<IVideoEffect>.Empty;
+        return EffectSerializer.Deserialize(selected.SerializedEffects);
     }
 
     public static string GetSelectedEffectsJson(EffectTabState state)
     {
         var selected = GetSelectedTab(state);
         return selected.SerializedEffects ?? string.Empty;
+    }
+
+    public static EffectTabState DeepCopy(EffectTabState source)
+    {
+        var copiedTabs = source.Tabs.Select(t => new EffectTab
+        {
+            Id = t.Id,
+            Name = t.Name,
+            SerializedEffects = t.SerializedEffects,
+        }).ToList();
+
+        return new EffectTabState
+        {
+            SelectedTabId = source.SelectedTabId,
+            Tabs = copiedTabs,
+        };
     }
 }

@@ -211,12 +211,23 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var target = tabVm ?? SelectedTab;
         if (target == null || Tabs.Count <= 1) return;
 
+        var wasSelected = SelectedTab == target;
         Tabs.Remove(target);
         UpdateIndices();
-        if (SelectedTab == target || SelectedTab == null)
-            SelectedTab = Tabs.FirstOrDefault();
+
+        if (wasSelected)
+        {
+            var next = Tabs.FirstOrDefault();
+            _isSyncing = true;
+            try { SelectedTab = next; }
+            finally { _isSyncing = false; }
+            if (next != null)
+                ApplyTabToEffect(next);
+        }
         else
+        {
             SaveState();
+        }
     }
 
     private bool CanMoveTab(EffectTabItemViewModel? tabVm, int offset)

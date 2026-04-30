@@ -1,4 +1,3 @@
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -107,21 +106,7 @@ public partial class PresetManagerControl : UserControl, IPropertyEditorControl
     }
 
     private static T? FindDescendantByName<T>(DependencyObject root, string name) where T : FrameworkElement
-    {
-        var count = VisualTreeHelper.GetChildrenCount(root);
-        for (var i = 0; i < count; i++)
-        {
-            var child = VisualTreeHelper.GetChild(root, i);
-            if (child is T element && element.Name == name)
-                return element;
-
-            var nested = FindDescendantByName<T>(child, name);
-            if (nested is not null)
-                return nested;
-        }
-
-        return null;
-    }
+        => WpfTreeHelper.FindDescendantByName<T>(root, name);
 
     private void GroupRenameTextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
@@ -231,7 +216,7 @@ public partial class PresetManagerControl : UserControl, IPropertyEditorControl
         e.Handled = true;
         var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
         {
-            RoutedEvent = UIElement.MouseWheelEvent,
+            RoutedEvent = MouseWheelEvent,
             Source = sender
         };
         (VisualTreeHelper.GetParent((DependencyObject)sender) as UIElement)?.RaiseEvent(eventArg);

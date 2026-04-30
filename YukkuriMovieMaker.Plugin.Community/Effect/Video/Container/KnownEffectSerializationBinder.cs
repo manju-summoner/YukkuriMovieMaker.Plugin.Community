@@ -19,13 +19,16 @@ internal sealed class KnownEffectSerializationBinder : ISerializationBinder
 
     public Type BindToType(string? assemblyName, string typeName)
     {
+        if (assemblyName is null)
+            throw new InvalidOperationException($"Assembly name is required to deserialize '{typeName}'.");
+
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
         var match = assemblies
-            .Where(a => assemblyName == null || a.GetName().Name == assemblyName)
+            .Where(a => a.GetName().Name == assemblyName)
             .Select(a => a.GetType(typeName))
             .FirstOrDefault(t => t != null && typeof(IVideoEffect).IsAssignableFrom(t));
 
         return match ?? throw new InvalidOperationException(
-            $"Type '{typeName}' is not a known IVideoEffect and cannot be deserialized.");
+            $"Type '{assemblyName}:{typeName}' is not a known IVideoEffect and cannot be deserialized.");
     }
 }

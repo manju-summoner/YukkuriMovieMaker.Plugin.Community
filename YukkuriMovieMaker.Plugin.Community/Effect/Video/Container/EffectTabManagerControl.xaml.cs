@@ -1,4 +1,3 @@
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -74,21 +73,7 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
     }
 
     private static T? FindDescendantByName<T>(DependencyObject root, string name) where T : FrameworkElement
-    {
-        var count = VisualTreeHelper.GetChildrenCount(root);
-        for (var i = 0; i < count; i++)
-        {
-            var child = VisualTreeHelper.GetChild(root, i);
-            if (child is T element && element.Name == name)
-                return element;
-
-            var nested = FindDescendantByName<T>(child, name);
-            if (nested is not null)
-                return nested;
-        }
-
-        return null;
-    }
+        => WpfTreeHelper.FindDescendantByName<T>(root, name);
 
     private void RenameTextBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
@@ -139,7 +124,7 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         e.Handled = true;
         var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
         {
-            RoutedEvent = UIElement.MouseWheelEvent,
+            RoutedEvent = MouseWheelEvent,
             Source = sender
         };
         (VisualTreeHelper.GetParent((DependencyObject)sender) as UIElement)?.RaiseEvent(eventArg);
