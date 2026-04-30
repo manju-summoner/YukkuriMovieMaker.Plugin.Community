@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
 	<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
@@ -137,6 +137,7 @@
 	  <Resource Include="$(ShaderDirPath)AfterImage.cso" Link="Resources\Shader\AfterImage.cso" />
 	  <Resource Include="$(ShaderDirPath)WaveClipping.cso" Link="Resources\Shader\WaveClipping.cso" />
 	  <Resource Include="$(ShaderDirPath)GradientMap.cso" Link="Resources\Shader\GradientMap.cso" />
+	  <Resource Include="$(ShaderDirPath)GodRay.cso" Link="Resources\Shader\GodRay.cso" />
   </ItemGroup>
 
 </Project>
