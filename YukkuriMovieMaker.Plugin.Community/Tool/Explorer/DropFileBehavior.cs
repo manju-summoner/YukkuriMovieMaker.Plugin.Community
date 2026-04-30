@@ -1,7 +1,11 @@
-﻿using Microsoft.Xaml.Behaviors;
+using Microsoft.Xaml.Behaviors;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using YukkuriMovieMaker.Commons;
+using System.Linq;
+using System;
+using System.Threading;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
@@ -30,6 +34,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         }
         public static readonly DependencyProperty IsDragOverHighlightingEnabledProperty =
             DependencyProperty.Register(nameof(IsDragOverHighlightingEnabled), typeof(bool), typeof(DropFileBehavior), new PropertyMetadata(true));
+
+        public System.Windows.Input.ICommand? DropCompletedCommand
+        {
+            get { return (System.Windows.Input.ICommand)GetValue(DropCompletedCommandProperty); }
+            set { SetValue(DropCompletedCommandProperty, value); }
+        }
+        public static readonly DependencyProperty DropCompletedCommandProperty =
+            DependencyProperty.Register(nameof(DropCompletedCommand), typeof(System.Windows.Input.ICommand), typeof(DropFileBehavior), new PropertyMetadata(null));
 
         AdornerLayer? layer;
         DropHighlightAdorner? adorner;
@@ -90,7 +102,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         private void AssociatedObject_Drop(object sender, DragEventArgs e)
         {
-            if(!IsEnabled)
+            if (!IsEnabled)
                 return;
             RemoveAdorner();
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -99,27 +111,46 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     return;
 
                 // 移動可能なものだけに絞る
-                paths = [..paths.Where(path => ShellFileOperation.CanMove(path, Path))];
+                paths = [.. paths.Where(path => ShellFileOperation.CanMove(path, Path))];
 
                 // PathがDependencyPropertyでUIスレッドからしか取得できないため、ローカル変数にコピーしておく
                 var path = Path;
-                var thread = new Thread(() =>
+                var effect = e.Effects;
+
+                // Shell APIはSTAコンテキストが必須なため専用スレッドで実行する
+                RunOnStaThread(() =>
                 {
                     try
                     {
-                        if (e.Effects.HasFlag(DragDropEffects.Move))
+                        if (effect.HasFlag(DragDropEffects.Move))
                             ShellFileOperation.MoveFiles(paths, path);
-                        else if (e.Effects is DragDropEffects.Copy)
+                        else if (effect is DragDropEffects.Copy)
                             ShellFileOperation.CopyFiles(paths, path);
+
+                        Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            if (DropCompletedCommand?.CanExecute(path) == true)
+                            {
+                                DropCompletedCommand.Execute(path);
+                            }
+                        });
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
-                        Log.Default.Write("ファイルのドロップ処理中に例外が発生しました。", e);
+                        Log.Default.Write("ファイルのドロップ処理中に例外が発生しました。", ex);
                     }
                 });
-                thread.SetApartmentState(ApartmentState.STA);
-                thread.Start();
             }
+        }
+
+        static void RunOnStaThread(Action action)
+        {
+            var thread = new Thread(() => action())
+            {
+                IsBackground = true,
+            };
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
         }
 
         void EnsureAdorner()
@@ -140,5 +171,4 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             adorner = null;
         }
     }
-
 }

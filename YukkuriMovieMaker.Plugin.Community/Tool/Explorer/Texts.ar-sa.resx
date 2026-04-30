@@ -109,4 +109,17 @@
 <data name="SortAscending" xml:space="preserve"><value>تصاعدي</value></data>
 <data name="SortDescending" xml:space="preserve"><value>تنازلي</value></data>
 <data name="SortOrder" xml:space="preserve"><value>ترتيب الفرز</value></data>
+<data name="Sidebar" xml:space="preserve"><value>شريط جانبي</value></data>
+<data name="NewFolderName" xml:space="preserve"><value>مجلد جديد</value></data>
+<data name="CreateNewFolderMenuHeader" xml:space="preserve"><value>إنشاء مجلد جديد(_F)</value></data>
+<data name="CompressMenuHeader" xml:space="preserve"><value>ضغط(_Z)</value></data>
+<data name="ExtractMenuHeader" xml:space="preserve"><value>استخراج(_X)</value></data>
+<data name="SevenZipCompressMenuHeader" xml:space="preserve"><value>ضغط بـ 7-Zip(_7)</value></data>
+<data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>استخراج بـ 7-Zip(_E)</value></data>
+<data name="RenameMenuHeader" xml:space="preserve"><value>إعادة تسمية(_M)</value></data>
+<data name="Cancel" xml:space="preserve"><value>إلغاء</value></data>
+<data name="RenameDialogTitle" xml:space="preserve"><value>إعادة تسمية</value></data>
+<data name="ChangeExtensionConfirmMessage" xml:space="preserve"><value>إذا قمت بتغيير امتداد الملف، فقد يصبح الملف غير قابل للاستخدام.
+
+هل تريد تغييره؟</value></data>
 </root>

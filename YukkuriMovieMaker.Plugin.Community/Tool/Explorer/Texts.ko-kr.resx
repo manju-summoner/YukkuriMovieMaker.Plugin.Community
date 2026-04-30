@@ -109,4 +109,17 @@
 <data name="SortAscending" xml:space="preserve"><value>오름차순</value></data>
 <data name="SortDescending" xml:space="preserve"><value>내림차순</value></data>
 <data name="SortOrder" xml:space="preserve"><value>정렬 순서</value></data>
+<data name="Sidebar" xml:space="preserve"><value>사이드바</value></data>
+<data name="NewFolderName" xml:space="preserve"><value>새 폴더</value></data>
+<data name="CreateNewFolderMenuHeader" xml:space="preserve"><value>새 폴더 만들기(_F)</value></data>
+<data name="CompressMenuHeader" xml:space="preserve"><value>압축(_Z)</value></data>
+<data name="ExtractMenuHeader" xml:space="preserve"><value>압축 해제(_X)</value></data>
+<data name="SevenZipCompressMenuHeader" xml:space="preserve"><value>7-Zip으로 압축(_7)</value></data>
+<data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>7-Zip으로 압축 해제(_E)</value></data>
+<data name="RenameMenuHeader" xml:space="preserve"><value>이름 바꾸기(_M)</value></data>
+<data name="Cancel" xml:space="preserve"><value>취소</value></data>
+<data name="RenameDialogTitle" xml:space="preserve"><value>이름 바꾸기</value></data>
+<data name="ChangeExtensionConfirmMessage" xml:space="preserve"><value>파일 확장자를 변경하면 파일을 사용할 수 없게 될 수 있습니다.
+
+변경하시겠습니까?</value></data>
 </root>

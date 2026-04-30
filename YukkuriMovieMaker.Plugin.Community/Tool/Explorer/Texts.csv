@@ -56,3 +56,30 @@ SortByExtension,,拡張子,Extension,扩展名,副檔名,확장자,Extensión,ا
 SortAscending,,昇順,Ascending,升序,升冪,오름차순,Ascendente,تصاعدي,Naik,
 SortDescending,,降順,Descending,降序,降冪,내림차순,Descendente,تنازلي,Turun,
 SortOrder,,並べ替え順,Sort order,排序顺序,排序順序,정렬 순서,Orden de clasificación,ترتيب الفرز,Urutan pengurutan,
+Sidebar,,サイドバー,Sidebar,侧边栏,側邊欄,사이드바,Barra lateral,شريط جانبي,Bilah sisi,
+NewFolderName,,新しいフォルダー,New folder,新建文件夹,新增資料夾,새 폴더,Nueva carpeta,مجلد جديد,Folder baru,
+CreateNewFolderMenuHeader,,新規フォルダの作成(_F),Create New Folder(_F),创建新文件夹(_F),建立新資料夾(_F),새 폴더 만들기(_F),Crear nueva carpeta(_F),إنشاء مجلد جديد(_F),Buat Folder Baru(_F),
+CompressMenuHeader,,圧縮(_Z),Compress(_Z),压缩(_Z),壓縮(_Z),압축(_Z),Comprimir(_Z),ضغط(_Z),Kompres(_Z),
+ExtractMenuHeader,,解凍(_X),Extract(_X),解压(_X),解壓縮(_X),압축 해제(_X),Extraer(_X),استخراج(_X),Ekstrak(_X),
+SevenZipCompressMenuHeader,,7-Zip で圧縮(_7),Compress with 7-Zip(_7),用 7-Zip 压缩(_7),使用 7-Zip 壓縮(_7),7-Zip으로 압축(_7),Comprimir con 7-Zip(_7),ضغط بـ 7-Zip(_7),Kompres dengan 7-Zip(_7),
+SevenZipExtractMenuHeader,,7-Zip で解凍(_E),Extract with 7-Zip(_E),用 7-Zip 解压(_E),使用 7-Zip 解壓縮(_E),7-Zip으로 압축 해제(_E),Extraer con 7-Zip(_E),استخراج بـ 7-Zip(_E),Ekstrak dengan 7-Zip(_E),
+RenameMenuHeader,,名前の変更(_M),Rename(_M),重命名(_M),重新命名(_M),이름 바꾸기(_M),Cambiar nombre(_M),إعادة تسمية(_M),Ganti Nama(_M),
+Cancel,,キャンセル,Cancel,取消,取消,취소,Cancelar,إلغاء,Batal,
+RenameDialogTitle,,名前の変更,Rename,重命名,重新命名,이름 바꾸기,Cambiar nombre,إعادة تسمية,Ganti Nama,
+ChangeExtensionConfirmMessage,,"拡張子を変更すると、ファイルが使えなくなる可能性があります。
+
+変更しますか?","If you change a file name extension, the file might become unusable.
+
+Are you sure you want to change it?","如果更改文件扩展名，文件可能会变得不可用。
+
+确定要更改吗?","如果變更副檔名，檔案可能會無法使用。
+
+確定要變更嗎?","파일 확장자를 변경하면 파일을 사용할 수 없게 될 수 있습니다.
+
+변경하시겠습니까?","Si cambia la extensión del archivo, es posible que el archivo quede inutilizable.
+
+¿Desea cambiarla?","إذا قمت بتغيير امتداد الملف، فقد يصبح الملف غير قابل للاستخدام.
+
+هل تريد تغييره؟","Jika ekstensi file diubah, file mungkin tidak dapat digunakan.
+
+Ubah ekstensi?",

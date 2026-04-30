@@ -109,4 +109,17 @@ Example: FolderName/SubfolderName</value></data>
 <data name="SortAscending" xml:space="preserve"><value>Ascending</value></data>
 <data name="SortDescending" xml:space="preserve"><value>Descending</value></data>
 <data name="SortOrder" xml:space="preserve"><value>Sort order</value></data>
+<data name="Sidebar" xml:space="preserve"><value>Sidebar</value></data>
+<data name="NewFolderName" xml:space="preserve"><value>New folder</value></data>
+<data name="CreateNewFolderMenuHeader" xml:space="preserve"><value>Create New Folder(_F)</value></data>
+<data name="CompressMenuHeader" xml:space="preserve"><value>Compress(_Z)</value></data>
+<data name="ExtractMenuHeader" xml:space="preserve"><value>Extract(_X)</value></data>
+<data name="SevenZipCompressMenuHeader" xml:space="preserve"><value>Compress with 7-Zip(_7)</value></data>
+<data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>Extract with 7-Zip(_E)</value></data>
+<data name="RenameMenuHeader" xml:space="preserve"><value>Rename(_M)</value></data>
+<data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+<data name="RenameDialogTitle" xml:space="preserve"><value>Rename</value></data>
+<data name="ChangeExtensionConfirmMessage" xml:space="preserve"><value>If you change a file name extension, the file might become unusable.
+
+Are you sure you want to change it?</value></data>
 </root>

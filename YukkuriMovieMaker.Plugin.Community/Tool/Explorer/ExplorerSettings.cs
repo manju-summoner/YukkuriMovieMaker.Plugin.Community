@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
@@ -11,8 +11,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         public override bool HasSettingView => false;
 
         public override object? SettingView => throw new NotImplementedException();
-
-        public bool IsAlwaysShowToolBar { get; set => Set(ref field, value); } = true;
 
         public bool IsAutoPlay { get; set => Set(ref field, value); } = true;
 

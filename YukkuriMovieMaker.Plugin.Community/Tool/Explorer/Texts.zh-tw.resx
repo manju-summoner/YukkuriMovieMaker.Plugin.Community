@@ -109,4 +109,17 @@
 <data name="SortAscending" xml:space="preserve"><value>升冪</value></data>
 <data name="SortDescending" xml:space="preserve"><value>降冪</value></data>
 <data name="SortOrder" xml:space="preserve"><value>排序順序</value></data>
+<data name="Sidebar" xml:space="preserve"><value>側邊欄</value></data>
+<data name="NewFolderName" xml:space="preserve"><value>新增資料夾</value></data>
+<data name="CreateNewFolderMenuHeader" xml:space="preserve"><value>建立新資料夾(_F)</value></data>
+<data name="CompressMenuHeader" xml:space="preserve"><value>壓縮(_Z)</value></data>
+<data name="ExtractMenuHeader" xml:space="preserve"><value>解壓縮(_X)</value></data>
+<data name="SevenZipCompressMenuHeader" xml:space="preserve"><value>使用 7-Zip 壓縮(_7)</value></data>
+<data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>使用 7-Zip 解壓縮(_E)</value></data>
+<data name="RenameMenuHeader" xml:space="preserve"><value>重新命名(_M)</value></data>
+<data name="Cancel" xml:space="preserve"><value>取消</value></data>
+<data name="RenameDialogTitle" xml:space="preserve"><value>重新命名</value></data>
+<data name="ChangeExtensionConfirmMessage" xml:space="preserve"><value>如果變更副檔名，檔案可能會無法使用。
+
+確定要變更嗎?</value></data>
 </root>

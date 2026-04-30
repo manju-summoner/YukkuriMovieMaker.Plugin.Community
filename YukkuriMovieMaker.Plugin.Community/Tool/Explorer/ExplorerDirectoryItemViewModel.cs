@@ -1,4 +1,7 @@
-﻿using System.IO;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -6,59 +9,108 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
-    public class ExplorerDirectoryItemViewModel : Bindable, IExplorerItemViewModel
+    internal class ExplorerDirectoryItemViewModel : Bindable, IExplorerItemViewModel
     {
-        private readonly string dir;
+        string dir;
         int iconSize = 24;
-        Task? loadIconTask;
         CancellationTokenSource? loadIconCts;
         ImageSource? icon;
 
         public string Path => dir;
-        public string Name => System.IO.Path.GetFileName(dir);
+        public string Name { get; private set; }
+        public bool IsDirectory => true;
+        public string Extension => string.Empty;
+        public DateTime LastWriteTime { get; }
+        public bool SelectsNameOnlyOnRename => false;
 
         public ImageSource? Icon
         {
             get
             {
-                if (icon is not null)
-                    return icon;
-                if (loadIconTask is not null)
-                    return icon;
-                loadIconCts = new CancellationTokenSource();
-                var token = loadIconCts.Token;
-                loadIconTask ??= Task.Run(() =>
+                if (iconSize <= 0) return null;
+                if (icon != null) return icon;
+
+                if (loadIconCts == null)
                 {
-                    try
-                    {
-                        if (token.IsCancellationRequested)
-                            return;
-                        var loadedIcon = ShellIcon.GetIcon(Path, ShellIcon.GetIconSize(iconSize), isDirectory: false);
-                        if (token.IsCancellationRequested)
-                            return;
-                        icon = loadedIcon;
-                        OnPropertyChanged(nameof(Icon));
-                    }
-                    finally
-                    {
-                        loadIconCts = null;
-                        loadIconTask = null;
-                    }
-                });
+                    var capturedPath = dir;
+                    var capturedSize = iconSize;
+                    loadIconCts = new CancellationTokenSource();
+                    _ = LoadIconAsync(capturedPath, capturedSize, loadIconCts.Token);
+                }
+
                 return icon;
             }
         }
-        public ImageSource? Thumbnail => null;
-        public bool IsSelected { get; set => Set(ref field, value); } = false;
 
+        public ImageSource? Thumbnail => null;
+        public bool IsSelected { get => field; set => Set(ref field, value); } = false;
+        public bool IsRenaming { get => field; set => Set(ref field, value); } = false;
+        public string RenameText { get => field; set => Set(ref field, value); } = string.Empty;
         public ICommand ClearCacheCommand { get; }
 
-        public ExplorerDirectoryItemViewModel(string dir)
+        public ExplorerDirectoryItemViewModel(string dir, DateTime lastWriteTime)
         {
             this.dir = dir;
-            ClearCacheCommand = new ActionCommand(
-                _=> true,
-                _=> ClearIcon());
+            LastWriteTime = lastWriteTime;
+            Name = GetDirectoryName(dir);
+            ClearCacheCommand = new ActionCommand(_ => true, _ => ClearIcon());
+        }
+
+        public void UpdatePathAndName(string newPath)
+        {
+            dir = newPath;
+            Name = GetDirectoryName(newPath);
+            CancelLoadOnly();
+            icon = null;
+            OnPropertyChanged(nameof(Path));
+            OnPropertyChanged(nameof(Name));
+            OnPropertyChanged(nameof(Icon));
+        }
+
+        static string GetDirectoryName(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return string.Empty;
+            try
+            {
+                return new DirectoryInfo(path).Name;
+            }
+            catch
+            {
+                return path;
+            }
+        }
+
+        async Task LoadIconAsync(string capturedPath, int capturedSize, CancellationToken token)
+        {
+            var myCts = loadIconCts;
+            try
+            {
+                var loadedIcon = await ShellImageLoader.LoadAsync(
+                    () => ShellIcon.GetIcon(capturedPath, ShellIcon.GetIconSize(capturedSize), isDirectory: true), token);
+
+                if (loadedIcon != null && !token.IsCancellationRequested)
+                {
+                    icon = loadedIcon;
+                    OnPropertyChanged(nameof(Icon));
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception e)
+            {
+                Log.Default.Write("ExplorerDirectoryItemViewModel.Icon", e);
+            }
+            finally
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (ReferenceEquals(loadIconCts, myCts))
+                    {
+                        loadIconCts = null;
+                        myCts?.Dispose();
+                    }
+                });
+            }
         }
 
         public void SetImageSize(int iconSize, int thumbnailSize)
@@ -66,17 +118,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             if (this.iconSize != iconSize)
             {
                 this.iconSize = iconSize;
+                CancelLoadOnly();
                 icon = null;
                 OnPropertyChanged(nameof(Icon));
             }
+        }
 
+        void CancelLoadOnly()
+        {
+            var cts = loadIconCts;
+            loadIconCts = null;
+            cts?.Cancel();
+            cts?.Dispose();
         }
 
         void ClearIcon()
         {
-            loadIconCts?.Cancel();
-            loadIconTask = null;
+            CancelLoadOnly();
             icon = null;
+            OnPropertyChanged(nameof(Icon));
         }
+
+        public void CancelLoad() => CancelLoadOnly();
+
+        public void Dispose() => CancelLoad();
     }
 }
