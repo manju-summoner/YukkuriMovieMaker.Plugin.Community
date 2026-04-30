@@ -16,6 +16,7 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Shell;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.ViewModels;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
@@ -148,6 +149,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         public bool IsFavorite => ExplorerSettings.Default.Favorites.Any(x => x.Url == Location);
         public ExplorerFavoriteEditorViewModel? FavoriteEditorViewModel { get; set => Set(ref field, value); }
+        public MessageBoxViewModel MessageBoxViewModel { get; } = new();
         [SuppressMessage("Performance", "CA1822:メンバーを static に設定します", Justification = "")]
         public ExplorerFavoriteDirectoryViewModel FavoriteDirectoryViewModel => ExplorerFavoriteDirectoryViewModel.CreateExplorerFavoriteRoot();
 
@@ -770,6 +772,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
             var newPath = Path.Combine(parent, newName);
             if (string.Equals(oldPath, newPath, StringComparison.Ordinal)) return;
+            if (IsFileExtensionChanged(item, newName)
+                && MessageBoxViewModel.Show(
+                    Texts.ChangeExtensionConfirmMessage,
+                    Texts.RenameDialogTitle,
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning,
+                    MessageBoxResult.No) is not MessageBoxResult.Yes)
+            {
+                return;
+            }
 
             _ = Task.Run(() =>
             {
@@ -804,6 +816,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             {
                 return false;
             }
+        }
+
+        static bool IsFileExtensionChanged(IExplorerSelectableItem item, string newName)
+        {
+            if (item is not ExplorerFileItemViewModel)
+                return false;
+
+            return !string.Equals(
+                Path.GetExtension(item.Name),
+                Path.GetExtension(newName),
+                StringComparison.OrdinalIgnoreCase);
         }
 
         async Task AfterFolderCreatedAsync(object? p, string path)

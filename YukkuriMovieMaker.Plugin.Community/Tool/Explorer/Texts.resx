@@ -118,4 +118,8 @@
 <data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>7-Zip で解凍(_E)</value></data>
 <data name="RenameMenuHeader" xml:space="preserve"><value>名前の変更(_M)</value></data>
 <data name="Cancel" xml:space="preserve"><value>キャンセル</value></data>
+<data name="RenameDialogTitle" xml:space="preserve"><value>名前の変更</value></data>
+<data name="ChangeExtensionConfirmMessage" xml:space="preserve"><value>拡張子を変更すると、ファイルが使えなくなる可能性があります。
+
+変更しますか?</value></data>
 </root>

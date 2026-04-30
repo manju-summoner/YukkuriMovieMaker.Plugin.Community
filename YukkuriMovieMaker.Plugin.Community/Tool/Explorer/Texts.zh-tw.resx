@@ -118,4 +118,8 @@
 <data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>使用 7-Zip 解壓縮(_E)</value></data>
 <data name="RenameMenuHeader" xml:space="preserve"><value>重新命名(_M)</value></data>
 <data name="Cancel" xml:space="preserve"><value>取消</value></data>
+<data name="RenameDialogTitle" xml:space="preserve"><value>重新命名</value></data>
+<data name="ChangeExtensionConfirmMessage" xml:space="preserve"><value>如果變更副檔名，檔案可能會無法使用。
+
+確定要變更嗎?</value></data>
 </root>

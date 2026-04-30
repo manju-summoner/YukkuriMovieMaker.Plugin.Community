@@ -118,4 +118,8 @@
 <data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>7-Zip으로 압축 해제(_E)</value></data>
 <data name="RenameMenuHeader" xml:space="preserve"><value>이름 바꾸기(_M)</value></data>
 <data name="Cancel" xml:space="preserve"><value>취소</value></data>
+<data name="RenameDialogTitle" xml:space="preserve"><value>이름 바꾸기</value></data>
+<data name="ChangeExtensionConfirmMessage" xml:space="preserve"><value>파일 확장자를 변경하면 파일을 사용할 수 없게 될 수 있습니다.
+
+변경하시겠습니까?</value></data>
 </root>

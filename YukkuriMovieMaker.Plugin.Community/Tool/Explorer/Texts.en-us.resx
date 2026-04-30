@@ -118,4 +118,8 @@ Example: FolderName/SubfolderName</value></data>
 <data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>Extract with 7-Zip(_E)</value></data>
 <data name="RenameMenuHeader" xml:space="preserve"><value>Rename(_M)</value></data>
 <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+<data name="RenameDialogTitle" xml:space="preserve"><value>Rename</value></data>
+<data name="ChangeExtensionConfirmMessage" xml:space="preserve"><value>If you change a file name extension, the file might become unusable.
+
+Are you sure you want to change it?</value></data>
 </root>

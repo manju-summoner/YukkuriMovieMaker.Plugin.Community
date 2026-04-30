@@ -407,6 +407,7 @@
     </UserControl.Resources>
     <i:Interaction.Behaviors>
         <local:NavigationInputBehavior BackCommand="{Binding BackCommand}" ForwardCommand="{Binding ForwardCommand}"/>
+        <pb:MessageBoxBehavior ViewModel="{Binding MessageBoxViewModel,Mode=OneWay}"/>
         <pb:DialogBehavior Content="{Binding FavoriteEditorViewModel}" IsModal="True">
             <pb:DialogBehavior.Style>
                 <Style TargetType="Window">

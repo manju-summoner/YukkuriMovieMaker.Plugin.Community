@@ -118,4 +118,8 @@
 <data name="SevenZipExtractMenuHeader" xml:space="preserve"><value>استخراج بـ 7-Zip(_E)</value></data>
 <data name="RenameMenuHeader" xml:space="preserve"><value>إعادة تسمية(_M)</value></data>
 <data name="Cancel" xml:space="preserve"><value>إلغاء</value></data>
+<data name="RenameDialogTitle" xml:space="preserve"><value>إعادة تسمية</value></data>
+<data name="ChangeExtensionConfirmMessage" xml:space="preserve"><value>إذا قمت بتغيير امتداد الملف، فقد يصبح الملف غير قابل للاستخدام.
+
+هل تريد تغييره؟</value></data>
 </root>
