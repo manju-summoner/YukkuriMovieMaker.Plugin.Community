@@ -363,7 +363,7 @@
                                         <Grid Width="28" Height="28" Background="Transparent">
                                             <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Tune}}"
                                                             Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"
-                                                            Width="14" Height="14"
+                                                            Width="16" Height="16"
                                                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Grid>
                                     </MenuItem.Header>
@@ -647,7 +647,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid Grid.Column="0" Width="28">
-                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                                     </Grid>
                                     <TextBlock Grid.Column="1" Text="{x:Static loc:Texts.PresetManager_AddPreset}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Style="{StaticResource AnimatedTextBlockStyle}" />
                                 </Grid>
@@ -659,7 +659,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid Grid.Column="0" Width="28">
-                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                                     </Grid>
                                     <TextBlock Grid.Column="1" Text="{x:Static loc:Texts.PresetManager_RemovePreset}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Style="{StaticResource AnimatedTextBlockStyle}" />
                                 </Grid>
@@ -671,7 +671,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid Grid.Column="0" Width="28">
-                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Update}}" Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Update}}" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                                     </Grid>
                                     <TextBlock Grid.Column="1" Text="{x:Static loc:Texts.PresetManager_UpdatePreset}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Style="{StaticResource AnimatedTextBlockStyle}" />
                                 </Grid>
@@ -683,7 +683,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid Grid.Column="0" Width="28">
-                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Check}}" Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Check}}" Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                                     </Grid>
                                     <TextBlock Grid.Column="1" Text="{x:Static loc:Texts.PresetManager_ApplyPreset}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Style="{StaticResource AnimatedTextBlockStyle}" />
                                 </Grid>
