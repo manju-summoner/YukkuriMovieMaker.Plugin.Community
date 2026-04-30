@@ -7,16 +7,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
 internal static class EffectSerializer
 {
-    private static readonly JsonSerializerSettings Settings = new()
-    {
-        TypeNameHandling = TypeNameHandling.Auto,
-        SerializationBinder = KnownEffectSerializationBinder.Instance,
-        NullValueHandling = NullValueHandling.Ignore,
-    };
-
     public static string Serialize(ImmutableList<IVideoEffect> effects)
     {
-        return JsonConvert.SerializeObject(effects, Formatting.None, Settings);
+        return Json.Json.GetJsonText(effects);
     }
 
     public static ImmutableList<IVideoEffect> Deserialize(string json)
@@ -24,7 +17,7 @@ internal static class EffectSerializer
         if (string.IsNullOrWhiteSpace(json)) return ImmutableList<IVideoEffect>.Empty;
         try
         {
-            var list = JsonConvert.DeserializeObject<List<IVideoEffect>>(json, Settings);
+            var list = Json.Json.LoadFromText<List<IVideoEffect>>(json);
             return list == null ? ImmutableList<IVideoEffect>.Empty : list.ToImmutableList();
         }
         catch
