@@ -46,14 +46,14 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         set => Set(ref _isCompactMode, value);
     }
 
-    public ICommand AddTabCommand { get; }
-    public ICommand RemoveTabCommand { get; }
-    public ICommand MoveTabLeftCommand { get; }
-    public ICommand MoveTabRightCommand { get; }
-    public ICommand DuplicateTabCommand { get; }
-    public ICommand BeginEditCommand { get; }
-    public ICommand CommitEditCommand { get; }
-    public ICommand CancelEditCommand { get; }
+    public ActionCommand AddTabCommand { get; }
+    public ActionCommand RemoveTabCommand { get; }
+    public ActionCommand MoveTabLeftCommand { get; }
+    public ActionCommand MoveTabRightCommand { get; }
+    public ActionCommand DuplicateTabCommand { get; }
+    public ActionCommand BeginEditCommand { get; }
+    public ActionCommand CommitEditCommand { get; }
+    public ActionCommand CancelEditCommand { get; }
 
     public event EventHandler? BeginEdit;
     public event EventHandler? EndEdit;
