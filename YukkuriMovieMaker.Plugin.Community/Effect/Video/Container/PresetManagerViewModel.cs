@@ -1,11 +1,8 @@
 using Newtonsoft.Json;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -325,7 +322,7 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
     private void QueueUpdateCheck()
     {
         if (_pendingUpdateCheckOperation != null &&
-            (_pendingUpdateCheckOperation.Status == DispatcherOperationStatus.Pending || 
+            (_pendingUpdateCheckOperation.Status == DispatcherOperationStatus.Pending ||
              _pendingUpdateCheckOperation.Status == DispatcherOperationStatus.Executing))
             return;
 
@@ -498,7 +495,7 @@ internal sealed class PresetManagerViewModel : Bindable, IDisposable
 
     public void UpdateActionCommands()
     {
-        ActionCommand[] commands = 
+        ActionCommand[] commands =
         {
             AddGroupCommand, RemoveGroupCommand, RenameGroupCommand,
             AddPresetCommand, RemovePresetCommand, UpdatePresetCommand,

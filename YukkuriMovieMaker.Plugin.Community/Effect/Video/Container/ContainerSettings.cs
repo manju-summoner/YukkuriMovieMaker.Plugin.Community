@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using YukkuriMovieMaker.Plugin;
-
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
 public class ContainerSettings : SettingsBase<ContainerSettings>

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;

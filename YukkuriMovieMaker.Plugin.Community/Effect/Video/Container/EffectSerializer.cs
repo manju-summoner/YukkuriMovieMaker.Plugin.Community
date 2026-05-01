@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using YukkuriMovieMaker.Plugin.Effects;
 
