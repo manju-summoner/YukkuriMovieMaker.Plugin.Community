@@ -69,11 +69,6 @@ internal static class EffectTabStateService
         return state;
     }
 
-    public static EffectTabState ResolvePresetState(
-        EffectPreset preset,
-        string defaultTabName) =>
-        ResolveState(preset.SerializedTabs, preset.SerializedEffects, preset.Id, ImmutableList<IVideoEffect>.Empty, defaultTabName);
-
     public static EffectTabState Normalize(
         EffectTabState? state,
         ImmutableList<IVideoEffect> fallbackEffects,

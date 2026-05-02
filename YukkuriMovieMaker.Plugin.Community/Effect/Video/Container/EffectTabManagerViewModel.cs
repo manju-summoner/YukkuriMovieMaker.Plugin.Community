@@ -107,6 +107,10 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         if (_selectedTab == tab) return;
 
         _selectedTab = tab;
+        foreach (var prop in _itemProperties)
+        {
+            ((ContainerEffect)prop.PropertyOwner).SelectedTabName = tab?.Name;
+        }
         OnPropertyChanged(nameof(SelectedTab));
         OnPropertyChanged(nameof(IsTabSelected));
     }
@@ -154,6 +158,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 {
                     var target = (ContainerEffect)prop.PropertyOwner;
                     target.Effects = EffectSerializer.Deserialize(tab.SerializedEffects);
+                    target.SelectedTabName = tab.Name;
                 }
                 WriteState();
             }
@@ -295,6 +300,13 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         if (target != null)
         {
             target.CommitEdit(Texts.EffectTab_FirstName);
+            if (target == SelectedTab)
+            {
+                foreach (var prop in _itemProperties)
+                {
+                    ((ContainerEffect)prop.PropertyOwner).SelectedTabName = target.Name;
+                }
+            }
             SaveState();
         }
     }

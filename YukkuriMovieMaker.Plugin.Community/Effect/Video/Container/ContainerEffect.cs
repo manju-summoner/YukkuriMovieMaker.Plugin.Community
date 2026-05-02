@@ -8,42 +8,35 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-[VideoEffect(nameof(Texts.VideoEffect_Name), [VideoEffectCategories.Decoration], [nameof(Texts.VideoEffect_Tag_Container), nameof(Texts.VideoEffect_Tag_Preset), nameof(Texts.VideoEffect_Tag_Group)], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+[VideoEffect(nameof(Texts.VideoEffect_Name), [VideoEffectCategories.Decoration], [nameof(Texts.VideoEffect_Tag_Container)], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
 public sealed class ContainerEffect : VideoEffectBase
 {
-    public string PresetName
-    {
-        get => _presetName;
-        set
-        {
-            if (Set(ref _presetName, value))
-                OnPropertyChanged(nameof(Label));
-        }
-    }
-    private string _presetName = string.Empty;
-
     public override string Label
     {
         get
         {
             var count = Effects.Count;
-            return string.IsNullOrEmpty(PresetName)
-                ? string.Format(Texts.Container_ActiveEffectsCount, Texts.Container_DisplayName, count)
-                : string.Format(Texts.Container_ActiveEffectsCountWithPreset, Texts.Container_DisplayName, count, PresetName);
+            return string.Format(Texts.Container_LabelFormat, Texts.Container_DisplayName, SelectedTabName ?? string.Empty, count);
         }
     }
 
-    [Display(GroupName = nameof(Texts.Container_PresetGroup), Name = nameof(Texts.Container_EmptyLabel), ResourceType = typeof(Texts))]
-    [PresetManagerControl]
-    [Newtonsoft.Json.JsonIgnore]
-    public bool PresetManagerVisible { get; set; } = true;
+    public string? SelectedTabName
+    {
+        get => _selectedTabName;
+        set
+        {
+            if (Set(ref _selectedTabName, value))
+                OnPropertyChanged(nameof(Label));
+        }
+    }
+    private string? _selectedTabName;
 
-    [Display(GroupName = nameof(Texts.Container_EffectGroup), Name = nameof(Texts.Container_EmptyLabel), ResourceType = typeof(Texts))]
+    [Display(GroupName = nameof(Texts.Container_ManagementGroup), Name = nameof(Texts.Container_EmptyLabel), ResourceType = typeof(Texts))]
     [EffectTabManagerControl]
     [Newtonsoft.Json.JsonIgnore]
     public bool EffectTabManagerVisible { get; set; } = true;
 
-    [Display(GroupName = nameof(Texts.Container_EffectGroup), Name = nameof(Texts.Container_EmptyLabel), ResourceType = typeof(Texts))]
+    [Display(GroupName = nameof(Texts.Container_ManagementGroup), Name = nameof(Texts.Container_EmptyLabel), ResourceType = typeof(Texts))]
     [VideoEffectSelector(PropertyEditorSize = PropertyEditorSize.FullWidth)]
     public ImmutableList<IVideoEffect> Effects
     {
@@ -57,13 +50,6 @@ public sealed class ContainerEffect : VideoEffectBase
         }
     }
     private ImmutableList<IVideoEffect> _effects = ImmutableList<IVideoEffect>.Empty;
-
-    public string? SelectedPresetJson
-    {
-        get => _selectedPresetJson;
-        set => Set(ref _selectedPresetJson, value);
-    }
-    private string? _selectedPresetJson;
 
     public string? EffectTabsJson
     {
