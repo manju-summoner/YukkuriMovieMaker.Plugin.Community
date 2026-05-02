@@ -265,12 +265,12 @@
                                 <Button x:Name="CloseButton"
                                         Grid.Column="2"
                                         Style="{StaticResource CloseIconButtonStyle}"
-                                        Width="20"
-                                        Height="20"
+                                        Width="22"
+                                        Height="22"
                                         ToolTip="{x:Static loc:Texts.EffectTab_Remove}"
                                         Command="{Binding DataContext.RemoveTabCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         CommandParameter="{Binding}">
-                                    <Viewbox Width="12" Height="12">
+                                    <Viewbox Width="18" Height="18">
                                         <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Close}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                                     </Viewbox>
                                 </Button>
@@ -356,7 +356,7 @@
                 VerticalAlignment="Bottom"
                 ToolTip="{x:Static loc:Texts.EffectTab_Add}"
                 Command="{Binding AddTabCommand}">
-            <Viewbox Width="14" Height="14">
+            <Viewbox Width="24" Height="24">
                 <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
             </Viewbox>
         </Button>
