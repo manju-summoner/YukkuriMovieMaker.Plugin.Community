@@ -43,7 +43,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     public ActionCommand BeginEditCommand { get; }
     public ActionCommand CommitEditCommand { get; }
     public ActionCommand CancelEditCommand { get; }
-    public ActionCommand TogglePinCommand { get; }
 
     public event EventHandler? BeginEdit;
     public event EventHandler? EndEdit;
@@ -56,7 +55,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         _effect = itemProperties.Length > 0 ? (ContainerEffect)itemProperties[0].PropertyOwner : new ContainerEffect();
 
         AddTabCommand = new ActionCommand(_ => true, _ => ExecuteAddTab());
-        RemoveTabCommand = new ActionCommand(p => Tabs.Count > 1 && (p as EffectTabItemViewModel ?? SelectedTab) != null && !(p as EffectTabItemViewModel ?? SelectedTab)!.IsPinned, p => ExecuteRemoveTab(p as EffectTabItemViewModel));
+        RemoveTabCommand = new ActionCommand(p => Tabs.Count > 1 && (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteRemoveTab(p as EffectTabItemViewModel));
         MoveTabLeftCommand = new ActionCommand(p => CanMoveTab(p as EffectTabItemViewModel, -1), p => ExecuteMoveTab(p as EffectTabItemViewModel, -1));
         MoveTabRightCommand = new ActionCommand(p => CanMoveTab(p as EffectTabItemViewModel, 1), p => ExecuteMoveTab(p as EffectTabItemViewModel, 1));
         DuplicateTabCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteDuplicateTab(p as EffectTabItemViewModel));
@@ -65,7 +64,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         BeginEditCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteBeginEdit(p as EffectTabItemViewModel));
         CommitEditCommand = new ActionCommand(_ => true, p => ExecuteCommitEdit(p as EffectTabItemViewModel));
         CancelEditCommand = new ActionCommand(_ => true, p => ExecuteCancelEdit(p as EffectTabItemViewModel));
-        TogglePinCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteTogglePin(p as EffectTabItemViewModel));
 
         LoadTabs();
         _effect.PropertyChanged += OnEffectPropertyChanged;
@@ -76,28 +74,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var state = EffectTabStateService.ResolveEffectState(_effect.EffectTabsJson, _effect.Effects, Texts.EffectTab_FirstName);
 
         Tabs.Clear();
-
-        var existingIds = state.Tabs.Select(t => t.Id).ToHashSet();
-        foreach (var pinnedTab in EffectTabSettings.Default.PinnedTabs.Reverse())
-        {
-            if (!existingIds.Contains(pinnedTab.Id))
-            {
-                state.Tabs.Insert(0, new EffectTab
-                {
-                    Id = pinnedTab.Id,
-                    Name = pinnedTab.Name,
-                    SerializedEffects = pinnedTab.SerializedEffects
-                });
-                existingIds.Add(pinnedTab.Id);
-            }
-            else
-            {
-                var tab = state.Tabs.First(t => t.Id == pinnedTab.Id);
-                state.Tabs.Remove(tab);
-                state.Tabs.Insert(0, tab);
-            }
-        }
-
         foreach (var tab in state.Tabs)
             Tabs.Add(new EffectTabItemViewModel(tab));
 
@@ -170,36 +146,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
-    public void MoveTab(int sourceIndex, int targetIndex)
-    {
-        if (sourceIndex == targetIndex) return;
-
-        var sourceTab = Tabs[sourceIndex];
-        Tabs.Move(sourceIndex, targetIndex);
-
-        if (sourceTab.IsPinned)
-        {
-            var pinnedTabs = Tabs.Where(t => t.IsPinned).Select(t => t.Model.Id).ToList();
-            var newOrder = new System.Collections.ObjectModel.ObservableCollection<EffectTab>();
-            foreach (var id in pinnedTabs)
-            {
-                var matching = EffectTabSettings.Default.PinnedTabs.FirstOrDefault(p => p.Id == id);
-                if (matching != null)
-                    newOrder.Add(matching);
-            }
-
-            EffectTabSettings.Default.PinnedTabs.Clear();
-            foreach (var matching in newOrder)
-            {
-                EffectTabSettings.Default.PinnedTabs.Add(matching);
-            }
-            EffectTabSettings.Default.Save();
-        }
-
-        UpdateIndices();
-        PersistState();
-    }
-
     private void UpdateIndices()
     {
         for (int i = 0; i < Tabs.Count; i++)
@@ -221,7 +167,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void ExecuteRemoveTab(EffectTabItemViewModel? tabVm)
     {
         var target = tabVm ?? SelectedTab;
-        if (target == null || Tabs.Count <= 1 || target.IsPinned) return;
+        if (target == null || Tabs.Count <= 1) return;
 
         using (BeginUndo())
         {
@@ -249,14 +195,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var idx = Tabs.IndexOf(target);
         if (idx < 0) return false;
         var newIdx = idx + offset;
-
-        if (newIdx < 0 || newIdx >= Tabs.Count) return false;
-
-        var pinnedCount = Tabs.Count(t => t.IsPinned);
-        if (target.IsPinned && newIdx >= pinnedCount) return false;
-        if (!target.IsPinned && newIdx < pinnedCount) return false;
-
-        return true;
+        return newIdx >= 0 && newIdx < Tabs.Count;
     }
 
     private void ExecuteMoveTab(EffectTabItemViewModel? tabVm, int offset)
@@ -357,32 +296,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 UpdateIndices();
                 SelectedTab = vm;
             }
-        }
-    }
-
-    private void ExecuteTogglePin(EffectTabItemViewModel? tabVm)
-    {
-        var target = tabVm ?? SelectedTab;
-        if (target == null) return;
-        using (BeginUndo())
-        {
-            var oldPinned = target.IsPinned;
-            target.IsPinned = !target.IsPinned;
-
-            if (target.IsPinned)
-            {
-                var idx = Tabs.IndexOf(target);
-                if (idx > 0)
-                {
-                    Tabs.Move(idx, 0);
-                    UpdateIndices();
-                    PersistState();
-                }
-            }
-
-            RemoveTabCommand.RaiseCanExecuteChanged();
-            MoveTabLeftCommand.RaiseCanExecuteChanged();
-            MoveTabRightCommand.RaiseCanExecuteChanged();
         }
     }
 

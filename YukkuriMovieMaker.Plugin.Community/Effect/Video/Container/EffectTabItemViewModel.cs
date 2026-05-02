@@ -22,14 +22,6 @@ public sealed class EffectTabItemViewModel : Bindable
         {
             if (Model.Name == value) return;
             Model.Name = value;
-
-            var pinned = EffectTabSettings.Default.PinnedTabs.FirstOrDefault(x => x.Id == Model.Id);
-            if (pinned != null)
-            {
-                pinned.Name = value;
-                EffectTabSettings.Default.Save();
-            }
-
             OnPropertyChanged(nameof(Name));
             OnPropertyChanged(nameof(CompactLabel));
         }
@@ -42,40 +34,7 @@ public sealed class EffectTabItemViewModel : Bindable
         {
             if (Model.SerializedEffects == value) return;
             Model.SerializedEffects = value;
-
-            var pinned = EffectTabSettings.Default.PinnedTabs.FirstOrDefault(x => x.Id == Model.Id);
-            if (pinned != null)
-            {
-                pinned.SerializedEffects = value;
-                EffectTabSettings.Default.Save();
-            }
-
             OnPropertyChanged(nameof(SerializedEffects));
-        }
-    }
-
-    public bool IsPinned
-    {
-        get => EffectTabSettings.Default.PinnedTabs.Any(x => x.Id == Model.Id);
-        set
-        {
-            if (value == IsPinned) return;
-            var alreadyPinned = EffectTabSettings.Default.PinnedTabs.FirstOrDefault(x => x.Id == Model.Id);
-            if (value && alreadyPinned == null)
-            {
-                EffectTabSettings.Default.PinnedTabs.Add(new EffectTab
-                {
-                    Id = Model.Id,
-                    Name = Model.Name,
-                    SerializedEffects = Model.SerializedEffects
-                });
-            }
-            else if (!value && alreadyPinned != null)
-            {
-                EffectTabSettings.Default.PinnedTabs.Remove(alreadyPinned);
-            }
-            EffectTabSettings.Default.Save();
-            OnPropertyChanged(nameof(IsPinned));
         }
     }
 
