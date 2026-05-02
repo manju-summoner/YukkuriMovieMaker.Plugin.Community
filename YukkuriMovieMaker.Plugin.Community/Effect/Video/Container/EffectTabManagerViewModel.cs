@@ -99,35 +99,24 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         if (e.PropertyName == nameof(ContainerEffect.Effects) && SelectedTab != null)
         {
-            _isSelfUpdating = true;
-            try
+            using (BeginSelfUpdate())
             {
                 SelectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
                 PersistState();
             }
-            finally
-            {
-                _isSelfUpdating = false;
-            }
         }
         else if (e.PropertyName == nameof(ContainerEffect.EffectTabsJson))
         {
-            _isSelfUpdating = true;
-            try
+            using (BeginSelfUpdate())
             {
                 LoadTabs();
-            }
-            finally
-            {
-                _isSelfUpdating = false;
             }
         }
     }
 
     private void ApplyStateToEffectInternal(EffectTabItemViewModel tab)
     {
-        _isSelfUpdating = true;
-        try
+        using (BeginSelfUpdate())
         {
             foreach (var prop in _itemProperties)
             {
@@ -136,10 +125,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 target.SelectedTabName = tab.Name;
             }
             PersistState();
-        }
-        finally
-        {
-            _isSelfUpdating = false;
         }
     }
 
@@ -160,7 +145,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 target.EffectTabsJson = json;
         }
     }
-
 
     private void UpdateIndices()
     {
@@ -358,19 +342,32 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
-    private IDisposable BeginUndo() => new UndoScope(this);
+    private IDisposable BeginUndo() => new StateScope(this, true);
+    private IDisposable BeginSelfUpdate() => new StateScope(this, false);
 
-    private sealed class UndoScope : IDisposable
+    private sealed class StateScope : IDisposable
     {
         private readonly EffectTabManagerViewModel _vm;
-        public UndoScope(EffectTabManagerViewModel vm)
+        private readonly bool _useUndo;
+        private readonly bool _wasSelfUpdating;
+
+        public StateScope(EffectTabManagerViewModel vm, bool useUndo)
         {
             _vm = vm;
-            _vm.BeginEdit?.Invoke(_vm, EventArgs.Empty);
+            _useUndo = useUndo;
+            _wasSelfUpdating = _vm._isSelfUpdating;
+
+            _vm._isSelfUpdating = true;
+            if (_useUndo)
+                _vm.BeginEdit?.Invoke(_vm, EventArgs.Empty);
         }
+
         public void Dispose()
         {
-            _vm.EndEdit?.Invoke(_vm, EventArgs.Empty);
+            if (_useUndo)
+                _vm.EndEdit?.Invoke(_vm, EventArgs.Empty);
+
+            _vm._isSelfUpdating = _wasSelfUpdating;
         }
     }
 
