@@ -122,7 +122,7 @@ internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
     {
         foreach (var processor in _processors)
         {
-            processor?.Dispose();
+            processor.Dispose();
         }
         _processors.Clear();
     }
