@@ -9,6 +9,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private readonly ContainerEffect _effect;
     private const string ClipboardFormat = "YukkuriMovieMaker.Plugin.Community.Effect.Video.Container.EffectTab";
 
+    private bool _isSelfUpdating;
+
     public ObservableCollection<EffectTabItemViewModel> Tabs { get; } = new();
 
     private EffectTabItemViewModel? _selectedTab;
@@ -19,30 +21,17 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         {
             if (_selectedTab == value) return;
 
-            if (_selectedTab != null && !_isSyncing)
-            {
+            if (_selectedTab != null)
                 _selectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-            }
 
-            if (Set(ref _selectedTab, value))
-            {
-                OnPropertyChanged(nameof(IsTabSelected));
-                if (_selectedTab != null && !_isSyncing)
-                {
-                    ApplyTabToEffect(_selectedTab);
-                }
-            }
+            SelectTabInternal(value);
+
+            if (_selectedTab != null)
+                ApplyTabToEffect(_selectedTab);
         }
     }
 
     public bool IsTabSelected => SelectedTab != null;
-
-    private bool _isCompactMode;
-    public bool IsCompactMode
-    {
-        get => _isCompactMode;
-        set => Set(ref _isCompactMode, value);
-    }
 
     public ActionCommand AddTabCommand { get; }
     public ActionCommand RemoveTabCommand { get; }
@@ -80,83 +69,69 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         _effect.PropertyChanged += OnEffectPropertyChanged;
     }
 
-    private bool _isSyncing;
-
     private void LoadTabs()
     {
         var state = EffectTabStateService.ResolveEffectState(_effect.EffectTabsJson, _effect.Effects, Texts.EffectTab_FirstName);
 
         Tabs.Clear();
         foreach (var tab in state.Tabs)
-        {
             Tabs.Add(new EffectTabItemViewModel(tab));
-        }
 
         UpdateIndices();
 
-        EffectTabItemViewModel? newSelectedTab = null;
-        if (state.SelectedTabId != null)
-        {
-            newSelectedTab = Tabs.FirstOrDefault(t => t.Id == state.SelectedTabId.Value);
-        }
-        if (newSelectedTab == null)
-        {
-            newSelectedTab = Tabs.FirstOrDefault();
-        }
+        var newSelected = state.SelectedTabId.HasValue
+            ? Tabs.FirstOrDefault(t => t.Id == state.SelectedTabId.Value) ?? Tabs.FirstOrDefault()
+            : Tabs.FirstOrDefault();
 
-        SelectTabWithoutApplying(newSelectedTab);
+        SelectTabInternal(newSelected);
     }
 
-    private void SelectTabWithoutApplying(EffectTabItemViewModel? tab)
+    private void SelectTabInternal(EffectTabItemViewModel? tab)
     {
-        if (_selectedTab == tab) return;
-
         _selectedTab = tab;
         foreach (var prop in _itemProperties)
-        {
             ((ContainerEffect)prop.PropertyOwner).SelectedTabName = tab?.Name;
-        }
         OnPropertyChanged(nameof(SelectedTab));
         OnPropertyChanged(nameof(IsTabSelected));
     }
 
     private void OnEffectPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (_isSyncing) return;
+        if (_isSelfUpdating) return;
 
         if (e.PropertyName == nameof(ContainerEffect.Effects) && SelectedTab != null)
         {
-            _isSyncing = true;
+            _isSelfUpdating = true;
             try
             {
                 SelectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-                WriteState();
+                PersistState();
             }
             finally
             {
-                _isSyncing = false;
+                _isSelfUpdating = false;
             }
         }
         else if (e.PropertyName == nameof(ContainerEffect.EffectTabsJson))
         {
-            _isSyncing = true;
+            _isSelfUpdating = true;
             try
             {
                 LoadTabs();
             }
             finally
             {
-                _isSyncing = false;
+                _isSelfUpdating = false;
             }
         }
     }
 
     private void ApplyTabToEffect(EffectTabItemViewModel tab)
     {
-        _isSyncing = true;
+        BeginEdit?.Invoke(this, EventArgs.Empty);
         try
         {
-            BeginEdit?.Invoke(this, EventArgs.Empty);
+            _isSelfUpdating = true;
             try
             {
                 foreach (var prop in _itemProperties)
@@ -165,26 +140,21 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                     target.Effects = EffectSerializer.Deserialize(tab.SerializedEffects);
                     target.SelectedTabName = tab.Name;
                 }
-                WriteState();
+                PersistState();
             }
             finally
             {
-                EndEdit?.Invoke(this, EventArgs.Empty);
+                _isSelfUpdating = false;
             }
         }
         finally
         {
-            _isSyncing = false;
+            EndEdit?.Invoke(this, EventArgs.Empty);
         }
     }
 
-    private void WriteState()
+    private void PersistState()
     {
-        if (SelectedTab != null && !_isSyncing)
-        {
-            SelectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-        }
-
         var state = new EffectTabState
         {
             SelectedTabId = SelectedTab?.Id,
@@ -197,18 +167,24 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         {
             var target = (ContainerEffect)prop.PropertyOwner;
             if (target.EffectTabsJson != json)
-            {
                 target.EffectTabsJson = json;
-            }
         }
     }
 
-    private void SaveState()
+    private void CommitState()
     {
         BeginEdit?.Invoke(this, EventArgs.Empty);
         try
         {
-            WriteState();
+            _isSelfUpdating = true;
+            try
+            {
+                PersistState();
+            }
+            finally
+            {
+                _isSelfUpdating = false;
+            }
         }
         finally
         {
@@ -219,9 +195,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void UpdateIndices()
     {
         for (int i = 0; i < Tabs.Count; i++)
-        {
             Tabs[i].Index = i;
-        }
     }
 
     private void ExecuteAddTab()
@@ -244,16 +218,13 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         if (wasSelected)
         {
-            var next = Tabs.FirstOrDefault();
-            _isSyncing = true;
-            try { SelectedTab = next; }
-            finally { _isSyncing = false; }
-            if (next != null)
-                ApplyTabToEffect(next);
+            var next = Tabs[0];
+            SelectTabInternal(next);
+            ApplyTabToEffect(next);
         }
         else
         {
-            SaveState();
+            CommitState();
         }
     }
 
@@ -277,27 +248,25 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         {
             Tabs.Move(idx, newIdx);
             UpdateIndices();
-            SaveState();
+            CommitState();
         }
     }
 
     private void ExecuteDuplicateTab(EffectTabItemViewModel? tabVm)
     {
-        var target = tabVm ?? SelectedTab;
-        if (target == null) return;
+        var source = tabVm ?? SelectedTab;
+        if (source == null) return;
 
-        if (target == SelectedTab && !_isSyncing)
-        {
-            target.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-        }
+        if (source == SelectedTab)
+            source.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
 
         var dup = new EffectTab
         {
-            Name = target.Name + Texts.EffectTab_CopyName,
-            SerializedEffects = target.SerializedEffects
+            Name = source.Name + Texts.EffectTab_CopyName,
+            SerializedEffects = source.SerializedEffects
         };
         var vm = new EffectTabItemViewModel(dup);
-        var idx = Tabs.IndexOf(target);
+        var idx = Tabs.IndexOf(source);
         Tabs.Insert(idx + 1, vm);
         UpdateIndices();
         SelectedTab = vm;
@@ -305,18 +274,16 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     private void ExecuteCopy(EffectTabItemViewModel? tabVm)
     {
-        var target = tabVm ?? SelectedTab;
-        if (target == null) return;
+        var source = tabVm ?? SelectedTab;
+        if (source == null) return;
 
-        if (target == SelectedTab && !_isSyncing)
-        {
-            target.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-        }
+        if (source == SelectedTab)
+            source.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
 
         var data = new EffectTab
         {
-            Name = target.Name,
-            SerializedEffects = target.SerializedEffects
+            Name = source.Name,
+            SerializedEffects = source.SerializedEffects
         };
         var json = Newtonsoft.Json.JsonConvert.SerializeObject(data);
         System.Windows.Clipboard.SetData(ClipboardFormat, json);
@@ -324,84 +291,79 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     private void ExecutePaste(EffectTabItemViewModel? targetTabVm)
     {
+        if (!System.Windows.Clipboard.ContainsData(ClipboardFormat)) return;
+
+        var raw = System.Windows.Clipboard.GetData(ClipboardFormat) as string;
+        if (string.IsNullOrWhiteSpace(raw)) return;
+
+        EffectTab? data;
         try
         {
-            if (!System.Windows.Clipboard.ContainsData(ClipboardFormat)) return;
-            var json = System.Windows.Clipboard.GetData(ClipboardFormat) as string;
-            if (string.IsNullOrWhiteSpace(json)) return;
-
-            var data = Newtonsoft.Json.JsonConvert.DeserializeObject<EffectTab>(json);
-            if (data == null) return;
-
-            if (targetTabVm != null)
-            {
-                targetTabVm.SerializedEffects = data.SerializedEffects;
-                if (targetTabVm == SelectedTab)
-                {
-                    ApplyTabToEffect(targetTabVm);
-                }
-                else
-                {
-                    SaveState();
-                }
-            }
-            else
-            {
-                var tab = new EffectTab
-                {
-                    Name = data.Name + Texts.EffectTab_CopyName,
-                    SerializedEffects = data.SerializedEffects
-                };
-                var vm = new EffectTabItemViewModel(tab);
-                Tabs.Add(vm);
-                UpdateIndices();
-                SelectedTab = vm;
-            }
+            data = Newtonsoft.Json.JsonConvert.DeserializeObject<EffectTab>(raw);
         }
-        catch
+        catch (Newtonsoft.Json.JsonException)
         {
+            return;
+        }
+
+        if (data == null) return;
+
+        if (targetTabVm != null)
+        {
+            targetTabVm.SerializedEffects = data.SerializedEffects;
+            if (targetTabVm == SelectedTab)
+                ApplyTabToEffect(targetTabVm);
+            else
+                CommitState();
+        }
+        else
+        {
+            var tab = new EffectTab
+            {
+                Name = data.Name + Texts.EffectTab_CopyName,
+                SerializedEffects = data.SerializedEffects
+            };
+            var vm = new EffectTabItemViewModel(tab);
+            Tabs.Add(vm);
+            UpdateIndices();
+            SelectedTab = vm;
         }
     }
 
     private void ExecuteBeginEdit(EffectTabItemViewModel? tabVm)
     {
-        var target = tabVm ?? SelectedTab;
-        target?.BeginEdit();
+        (tabVm ?? SelectedTab)?.BeginEdit();
     }
 
     private void ExecuteCommitEdit(EffectTabItemViewModel? tabVm)
     {
         var target = tabVm ?? SelectedTab;
-        if (target != null)
+        if (target == null) return;
+
+        target.CommitEdit(Texts.EffectTab_FirstName);
+
+        if (target == SelectedTab)
         {
-            target.CommitEdit(Texts.EffectTab_FirstName);
-            if (target == SelectedTab)
-            {
-                foreach (var prop in _itemProperties)
-                {
-                    ((ContainerEffect)prop.PropertyOwner).SelectedTabName = target.Name;
-                }
-            }
-            SaveState();
+            foreach (var prop in _itemProperties)
+                ((ContainerEffect)prop.PropertyOwner).SelectedTabName = target.Name;
         }
+
+        CommitState();
     }
 
     private void ExecuteCancelEdit(EffectTabItemViewModel? tabVm)
     {
-        var target = tabVm ?? SelectedTab;
-        target?.CancelEdit();
+        (tabVm ?? SelectedTab)?.CancelEdit();
     }
 
     public void MoveTab(EffectTabItemViewModel source, EffectTabItemViewModel target)
     {
         var srcIdx = Tabs.IndexOf(source);
         var dstIdx = Tabs.IndexOf(target);
-        if (srcIdx >= 0 && dstIdx >= 0 && srcIdx != dstIdx)
-        {
-            Tabs.Move(srcIdx, dstIdx);
-            UpdateIndices();
-            SaveState();
-        }
+        if (srcIdx < 0 || dstIdx < 0 || srcIdx == dstIdx) return;
+        Tabs.Move(srcIdx, dstIdx);
+        UpdateIndices();
+        CommitState();
     }
 
     public void Dispose()

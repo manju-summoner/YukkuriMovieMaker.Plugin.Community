@@ -63,9 +63,8 @@ internal static class EffectTabStateService
         ImmutableList<IVideoEffect> currentEffects,
         string defaultTabName)
     {
-        var state = ResolveState(serializedTabs, null, Guid.Empty, currentEffects, defaultTabName);
-        var selectedTab = GetSelectedTab(state);
-        selectedTab.SerializedEffects = EffectSerializer.Serialize(currentEffects);
+        var state = ResolveState(serializedTabs, currentEffects, defaultTabName);
+        GetSelectedTab(state).SerializedEffects = EffectSerializer.Serialize(currentEffects);
         return state;
     }
 
@@ -108,22 +107,10 @@ internal static class EffectTabStateService
 
     private static EffectTabState ResolveState(
         string? serializedTabs,
-        string? serializedEffects,
-        Guid fallbackLegacyTabId,
         ImmutableList<IVideoEffect> fallbackEffects,
         string defaultTabName)
     {
-        EffectTabState? parsed = null;
-        if (TryDeserialize(serializedTabs, out var state))
-            parsed = state;
-        else if (!string.IsNullOrWhiteSpace(serializedEffects))
-        {
-            parsed = CreateSingleTabState(serializedEffects, defaultTabName);
-            var tab = parsed.Tabs[0];
-            tab.Id = fallbackLegacyTabId == Guid.Empty ? tab.Id : fallbackLegacyTabId;
-            parsed.SelectedTabId = tab.Id;
-        }
-
+        EffectTabState? parsed = TryDeserialize(serializedTabs, out var state) ? state : null;
         return Normalize(parsed, fallbackEffects, defaultTabName);
     }
 
