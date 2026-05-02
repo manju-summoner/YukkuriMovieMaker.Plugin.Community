@@ -27,7 +27,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             SelectTabInternal(value);
 
             if (_selectedTab != null)
-                ApplyTabToEffect(_selectedTab);
+                ApplyStateToEffectInternal(_selectedTab);
         }
     }
 
@@ -79,11 +79,9 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         UpdateIndices();
 
-        var newSelected = state.SelectedTabId.HasValue
+        SelectedTab = state.SelectedTabId.HasValue
             ? Tabs.FirstOrDefault(t => t.Id == state.SelectedTabId.Value) ?? Tabs.FirstOrDefault()
             : Tabs.FirstOrDefault();
-
-        SelectTabInternal(newSelected);
     }
 
     private void SelectTabInternal(EffectTabItemViewModel? tab)
@@ -126,30 +124,22 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
-    private void ApplyTabToEffect(EffectTabItemViewModel tab)
+    private void ApplyStateToEffectInternal(EffectTabItemViewModel tab)
     {
-        BeginEdit?.Invoke(this, EventArgs.Empty);
+        _isSelfUpdating = true;
         try
         {
-            _isSelfUpdating = true;
-            try
+            foreach (var prop in _itemProperties)
             {
-                foreach (var prop in _itemProperties)
-                {
-                    var target = (ContainerEffect)prop.PropertyOwner;
-                    target.Effects = EffectSerializer.Deserialize(tab.SerializedEffects);
-                    target.SelectedTabName = tab.Name;
-                }
-                PersistState();
+                var target = (ContainerEffect)prop.PropertyOwner;
+                target.Effects = EffectSerializer.Deserialize(tab.SerializedEffects);
+                target.SelectedTabName = tab.Name;
             }
-            finally
-            {
-                _isSelfUpdating = false;
-            }
+            PersistState();
         }
         finally
         {
-            EndEdit?.Invoke(this, EventArgs.Empty);
+            _isSelfUpdating = false;
         }
     }
 
@@ -171,26 +161,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
-    private void CommitState()
-    {
-        BeginEdit?.Invoke(this, EventArgs.Empty);
-        try
-        {
-            _isSelfUpdating = true;
-            try
-            {
-                PersistState();
-            }
-            finally
-            {
-                _isSelfUpdating = false;
-            }
-        }
-        finally
-        {
-            EndEdit?.Invoke(this, EventArgs.Empty);
-        }
-    }
 
     private void UpdateIndices()
     {
@@ -200,11 +170,14 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     private void ExecuteAddTab()
     {
-        var tab = new EffectTab { Name = string.Format(Texts.EffectTab_NumberedName, Tabs.Count + 1), SerializedEffects = string.Empty };
-        var vm = new EffectTabItemViewModel(tab);
-        Tabs.Add(vm);
-        UpdateIndices();
-        SelectedTab = vm;
+        using (BeginUndo())
+        {
+            var tab = new EffectTab { Name = string.Format(Texts.EffectTab_NumberedName, Tabs.Count + 1), SerializedEffects = string.Empty };
+            var vm = new EffectTabItemViewModel(tab);
+            Tabs.Add(vm);
+            UpdateIndices();
+            SelectedTab = vm;
+        }
     }
 
     private void ExecuteRemoveTab(EffectTabItemViewModel? tabVm)
@@ -212,19 +185,22 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var target = tabVm ?? SelectedTab;
         if (target == null || Tabs.Count <= 1) return;
 
-        var wasSelected = SelectedTab == target;
-        Tabs.Remove(target);
-        UpdateIndices();
+        using (BeginUndo())
+        {
+            var wasSelected = SelectedTab == target;
+            Tabs.Remove(target);
+            UpdateIndices();
 
-        if (wasSelected)
-        {
-            var next = Tabs[0];
-            SelectTabInternal(next);
-            ApplyTabToEffect(next);
-        }
-        else
-        {
-            CommitState();
+            if (wasSelected)
+            {
+                var next = Tabs[0];
+                SelectTabInternal(next);
+                ApplyStateToEffectInternal(next);
+            }
+            else
+            {
+                PersistState();
+            }
         }
     }
 
@@ -246,9 +222,12 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var newIdx = idx + offset;
         if (newIdx >= 0 && newIdx < Tabs.Count)
         {
-            Tabs.Move(idx, newIdx);
-            UpdateIndices();
-            CommitState();
+            using (BeginUndo())
+            {
+                Tabs.Move(idx, newIdx);
+                UpdateIndices();
+                PersistState();
+            }
         }
     }
 
@@ -257,19 +236,22 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var source = tabVm ?? SelectedTab;
         if (source == null) return;
 
-        if (source == SelectedTab)
-            source.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-
-        var dup = new EffectTab
+        using (BeginUndo())
         {
-            Name = source.Name + Texts.EffectTab_CopyName,
-            SerializedEffects = source.SerializedEffects
-        };
-        var vm = new EffectTabItemViewModel(dup);
-        var idx = Tabs.IndexOf(source);
-        Tabs.Insert(idx + 1, vm);
-        UpdateIndices();
-        SelectedTab = vm;
+            if (source == SelectedTab)
+                source.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
+
+            var dup = new EffectTab
+            {
+                Name = source.Name + Texts.EffectTab_CopyName,
+                SerializedEffects = source.SerializedEffects
+            };
+            var vm = new EffectTabItemViewModel(dup);
+            var idx = Tabs.IndexOf(source);
+            Tabs.Insert(idx + 1, vm);
+            UpdateIndices();
+            SelectedTab = vm;
+        }
     }
 
     private void ExecuteCopy(EffectTabItemViewModel? tabVm)
@@ -308,25 +290,28 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         if (data == null) return;
 
-        if (targetTabVm != null)
+        using (BeginUndo())
         {
-            targetTabVm.SerializedEffects = data.SerializedEffects;
-            if (targetTabVm == SelectedTab)
-                ApplyTabToEffect(targetTabVm);
-            else
-                CommitState();
-        }
-        else
-        {
-            var tab = new EffectTab
+            if (targetTabVm != null)
             {
-                Name = data.Name + Texts.EffectTab_CopyName,
-                SerializedEffects = data.SerializedEffects
-            };
-            var vm = new EffectTabItemViewModel(tab);
-            Tabs.Add(vm);
-            UpdateIndices();
-            SelectedTab = vm;
+                targetTabVm.SerializedEffects = data.SerializedEffects;
+                if (targetTabVm == SelectedTab)
+                    ApplyStateToEffectInternal(targetTabVm);
+                else
+                    PersistState();
+            }
+            else
+            {
+                var tab = new EffectTab
+                {
+                    Name = data.Name + Texts.EffectTab_CopyName,
+                    SerializedEffects = data.SerializedEffects
+                };
+                var vm = new EffectTabItemViewModel(tab);
+                Tabs.Add(vm);
+                UpdateIndices();
+                SelectedTab = vm;
+            }
         }
     }
 
@@ -340,15 +325,18 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var target = tabVm ?? SelectedTab;
         if (target == null) return;
 
-        target.CommitEdit(Texts.EffectTab_FirstName);
-
-        if (target == SelectedTab)
+        using (BeginUndo())
         {
-            foreach (var prop in _itemProperties)
-                ((ContainerEffect)prop.PropertyOwner).SelectedTabName = target.Name;
-        }
+            target.CommitEdit(Texts.EffectTab_FirstName);
 
-        CommitState();
+            if (target == SelectedTab)
+            {
+                foreach (var prop in _itemProperties)
+                    ((ContainerEffect)prop.PropertyOwner).SelectedTabName = target.Name;
+            }
+
+            PersistState();
+        }
     }
 
     private void ExecuteCancelEdit(EffectTabItemViewModel? tabVm)
@@ -361,9 +349,29 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var srcIdx = Tabs.IndexOf(source);
         var dstIdx = Tabs.IndexOf(target);
         if (srcIdx < 0 || dstIdx < 0 || srcIdx == dstIdx) return;
-        Tabs.Move(srcIdx, dstIdx);
-        UpdateIndices();
-        CommitState();
+
+        using (BeginUndo())
+        {
+            Tabs.Move(srcIdx, dstIdx);
+            UpdateIndices();
+            PersistState();
+        }
+    }
+
+    private IDisposable BeginUndo() => new UndoScope(this);
+
+    private sealed class UndoScope : IDisposable
+    {
+        private readonly EffectTabManagerViewModel _vm;
+        public UndoScope(EffectTabManagerViewModel vm)
+        {
+            _vm = vm;
+            _vm.BeginEdit?.Invoke(_vm, EventArgs.Empty);
+        }
+        public void Dispose()
+        {
+            _vm.EndEdit?.Invoke(_vm, EventArgs.Empty);
+        }
     }
 
     public void Dispose()
