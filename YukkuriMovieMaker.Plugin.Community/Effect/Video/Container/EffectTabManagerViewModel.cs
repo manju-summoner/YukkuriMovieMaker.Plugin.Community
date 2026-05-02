@@ -40,12 +40,19 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     public ActionCommand DuplicateTabCommand { get; }
     public ActionCommand CopyCommand { get; }
     public ActionCommand PasteCommand { get; }
+    public ActionCommand StashCommand { get; }
+    public ActionCommand RestoreStashCommand { get; }
+    public ActionCommand RemoveStashCommand { get; }
     public ActionCommand BeginEditCommand { get; }
     public ActionCommand CommitEditCommand { get; }
     public ActionCommand CancelEditCommand { get; }
 
     public event EventHandler? BeginEdit;
     public event EventHandler? EndEdit;
+
+    public ObservableCollection<EffectTabStashViewModel> Stashes { get; } = new();
+
+    public bool HasStashes => Stashes.Count > 0;
 
     public EffectTabManagerViewModel() : this(Array.Empty<ItemProperty>()) { }
 
@@ -61,12 +68,37 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         DuplicateTabCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteDuplicateTab(p as EffectTabItemViewModel));
         CopyCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteCopy(p as EffectTabItemViewModel));
         PasteCommand = new ActionCommand(_ => System.Windows.Clipboard.ContainsData(ClipboardFormat), p => ExecutePaste(p as EffectTabItemViewModel));
+        StashCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteStash(p as EffectTabItemViewModel));
+        RestoreStashCommand = new ActionCommand(p => p is EffectTabStashViewModel, p => ExecuteRestoreStash(p as EffectTabStashViewModel));
+        RemoveStashCommand = new ActionCommand(p => p is EffectTabStashViewModel, p => ExecuteRemoveStash(p as EffectTabStashViewModel));
         BeginEditCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteBeginEdit(p as EffectTabItemViewModel));
         CommitEditCommand = new ActionCommand(_ => true, p => ExecuteCommitEdit(p as EffectTabItemViewModel));
         CancelEditCommand = new ActionCommand(_ => true, p => ExecuteCancelEdit(p as EffectTabItemViewModel));
 
         LoadTabs();
+        LoadStashes();
         _effect.PropertyChanged += OnEffectPropertyChanged;
+    }
+
+    private void LoadStashes()
+    {
+        Stashes.Clear();
+        foreach (var stash in EffectTabStashSettings.Default.Stashes)
+        {
+            Stashes.Add(new EffectTabStashViewModel(stash));
+        }
+        OnPropertyChanged(nameof(HasStashes));
+        EffectTabStashSettings.Default.Stashes.CollectionChanged += OnStashesChanged;
+    }
+
+    private void OnStashesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        Stashes.Clear();
+        foreach (var stash in EffectTabStashSettings.Default.Stashes)
+        {
+            Stashes.Add(new EffectTabStashViewModel(stash));
+        }
+        OnPropertyChanged(nameof(HasStashes));
     }
 
     private void LoadTabs()
@@ -299,6 +331,63 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
+    private void ExecuteStash(EffectTabItemViewModel? tabVm)
+    {
+        var target = tabVm ?? SelectedTab;
+        if (target == null) return;
+
+        if (target == SelectedTab)
+            target.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
+
+        var effects = EffectSerializer.Deserialize(target.SerializedEffects);
+        if (effects.Count == 0) return;
+
+        var firstEffectName = effects[0].Label;
+        var name = effects.Count > 1 
+            ? string.Format(Texts.Menu_StashNameFormat, target.Name, firstEffectName, effects.Count - 1)
+            : string.Format(Texts.Menu_StashNameFormatSingle, target.Name, firstEffectName);
+
+        var stash = new EffectTab
+        {
+            Id = Guid.NewGuid(),
+            Name = name,
+            SerializedEffects = target.SerializedEffects
+        };
+
+        EffectTabStashSettings.Default.Stashes.Add(stash);
+        EffectTabStashSettings.Default.Save();
+
+        ExecuteRemoveTab(target);
+    }
+
+    private void ExecuteRestoreStash(EffectTabStashViewModel? stashVm)
+    {
+        if (stashVm == null) return;
+
+        using (BeginUndo())
+        {
+            var tab = new EffectTab
+            {
+                Name = Texts.Menu_RestoreStashName,
+                SerializedEffects = stashVm.SerializedEffects
+            };
+            var vm = new EffectTabItemViewModel(tab);
+            Tabs.Add(vm);
+            UpdateIndices();
+            SelectedTab = vm;
+        }
+
+        EffectTabStashSettings.Default.Stashes.Remove(stashVm.Model);
+        EffectTabStashSettings.Default.Save();
+    }
+
+    private void ExecuteRemoveStash(EffectTabStashViewModel? stashVm)
+    {
+        if (stashVm == null) return;
+        EffectTabStashSettings.Default.Stashes.Remove(stashVm.Model);
+        EffectTabStashSettings.Default.Save();
+    }
+
     private void ExecuteBeginEdit(EffectTabItemViewModel? tabVm)
     {
         (tabVm ?? SelectedTab)?.BeginEdit();
@@ -373,6 +462,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     public void Dispose()
     {
+        EffectTabStashSettings.Default.Stashes.CollectionChanged -= OnStashesChanged;
         _effect.PropertyChanged -= OnEffectPropertyChanged;
     }
 }

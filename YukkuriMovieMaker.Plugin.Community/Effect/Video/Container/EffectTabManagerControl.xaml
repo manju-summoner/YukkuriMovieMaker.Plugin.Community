@@ -11,6 +11,7 @@
              Background="Transparent">
 
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:TabCompactModeConverter x:Key="TabCompactModeConverter"/>
 
         <Style x:Key="TabListBoxStyle" TargetType="ListBox">
@@ -190,6 +191,23 @@
                 <ListBox.ContextMenu>
                     <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
                         <MenuItem Header="{x:Static loc:Texts.Menu_Paste}" Command="{Binding PasteCommand}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>
+                        <MenuItem Header="{x:Static loc:Texts.Menu_Stashes}" Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}" ItemsSource="{Binding Stashes}" Visibility="{Binding HasStashes, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <MenuItem.ItemContainerStyle>
+                                <Style TargetType="MenuItem">
+                                    <Setter Property="Header" Value="{Binding Name}"/>
+                                    <Setter Property="ToolTip" Value="{Binding ToolTipText}" />
+                                    <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.RestoreStashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                    <Setter Property="CommandParameter" Value="{Binding}"/>
+                                    <Setter Property="Icon">
+                                        <Setter.Value>
+                                            <Button Style="{StaticResource CloseIconButtonStyle}" Command="{Binding PlacementTarget.DataContext.RemoveStashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}">
+                                                <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Close}}" Width="12" Height="12" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                            </Button>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </MenuItem.ItemContainerStyle>
+                        </MenuItem>
                     </ContextMenu>
                 </ListBox.ContextMenu>
                 <ListBox.ItemsPanel>
@@ -221,6 +239,10 @@
                                               Command="{Binding DuplicateTabCommand}" 
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
                                               Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
+                                    <MenuItem Header="{x:Static loc:Texts.Menu_Stash}" 
+                                              Command="{Binding DataContext.StashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                                              Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveArrowDownOutline}}"/>
                                 </ContextMenu>
                             </Border.ContextMenu>
                             <Grid VerticalAlignment="Center">
