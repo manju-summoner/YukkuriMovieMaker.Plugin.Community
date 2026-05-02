@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Container"
              xmlns:converters="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Container"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
              d:DesignHeight="40" d:DesignWidth="700"
              Background="Transparent">
@@ -184,7 +185,13 @@
                      ItemContainerStyle="{StaticResource TabListBoxItemStyle}"
                      ItemsSource="{Binding Tabs}"
                      PreviewMouseWheel="TabListBox_PreviewMouseWheel"
-                     SelectedItem="{Binding SelectedTab}">
+                     SelectedItem="{Binding SelectedTab}"
+                     Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}">
+                <ListBox.ContextMenu>
+                    <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                        <MenuItem Header="{x:Static loc:Texts.Menu_Paste}" Command="{Binding PasteCommand}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>
+                    </ContextMenu>
+                </ListBox.ContextMenu>
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal"/>
@@ -197,8 +204,25 @@
                                 BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                                 BorderThickness="1"
                                 MinHeight="28"
-                            Width="120"
-                                Padding="6,0,4,0">
+                                Width="120"
+                                Padding="6,0,4,0"
+                                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                            <Border.ContextMenu>
+                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                    <MenuItem Header="{x:Static loc:Texts.Menu_Copy}" 
+                                              Command="{Binding CopyCommand}" 
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                                              Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
+                                    <MenuItem Header="{x:Static loc:Texts.Menu_Paste}" 
+                                              Command="{Binding PasteCommand}" 
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                                              Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>
+                                    <MenuItem Header="{x:Static loc:Texts.Menu_Duplicate}" 
+                                              Command="{Binding DuplicateTabCommand}" 
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                                              Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
+                                </ContextMenu>
+                            </Border.ContextMenu>
                             <Grid VerticalAlignment="Center">
                                 <Grid.InputBindings>
                                     <MouseBinding Gesture="LeftDoubleClick"
@@ -240,17 +264,15 @@
 
                                 <Button x:Name="CloseButton"
                                         Grid.Column="2"
-                                    Style="{StaticResource CloseIconButtonStyle}"
+                                        Style="{StaticResource CloseIconButtonStyle}"
                                         Width="20"
                                         Height="20"
                                         ToolTip="{x:Static loc:Texts.EffectTab_Remove}"
                                         Command="{Binding DataContext.RemoveTabCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         CommandParameter="{Binding}">
-                                    <Path Data="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-                                          Stretch="Uniform"
-                                          Width="12"
-                                          Height="12"
-                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                    <Viewbox Width="12" Height="12">
+                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Close}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                    </Viewbox>
                                 </Button>
                             </Grid>
                         </Border>
@@ -329,16 +351,14 @@
         </Border>
 
         <Button Grid.Column="1"
-            Style="{StaticResource AddIconButtonStyle}"
+                Style="{StaticResource AddIconButtonStyle}"
                 Margin="6,0,0,4"
                 VerticalAlignment="Bottom"
                 ToolTip="{x:Static loc:Texts.EffectTab_Add}"
                 Command="{Binding AddTabCommand}">
-            <Path Data="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"
-                  Stretch="Uniform"
-                  Width="14"
-                  Height="14"
-                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+            <Viewbox Width="14" Height="14">
+                <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+            </Viewbox>
         </Button>
     </Grid>
 </UserControl>

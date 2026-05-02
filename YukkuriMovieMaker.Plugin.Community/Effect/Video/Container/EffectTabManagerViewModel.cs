@@ -7,6 +7,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 {
     private readonly ItemProperty[] _itemProperties;
     private readonly ContainerEffect _effect;
+    private const string ClipboardFormat = "YukkuriMovieMaker.Plugin.Community.Effect.Video.Container.EffectTab";
 
     public ObservableCollection<EffectTabItemViewModel> Tabs { get; } = new();
 
@@ -48,6 +49,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     public ActionCommand MoveTabLeftCommand { get; }
     public ActionCommand MoveTabRightCommand { get; }
     public ActionCommand DuplicateTabCommand { get; }
+    public ActionCommand CopyCommand { get; }
+    public ActionCommand PasteCommand { get; }
     public ActionCommand BeginEditCommand { get; }
     public ActionCommand CommitEditCommand { get; }
     public ActionCommand CancelEditCommand { get; }
@@ -67,6 +70,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         MoveTabLeftCommand = new ActionCommand(p => CanMoveTab(p as EffectTabItemViewModel, -1), p => ExecuteMoveTab(p as EffectTabItemViewModel, -1));
         MoveTabRightCommand = new ActionCommand(p => CanMoveTab(p as EffectTabItemViewModel, 1), p => ExecuteMoveTab(p as EffectTabItemViewModel, 1));
         DuplicateTabCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteDuplicateTab(p as EffectTabItemViewModel));
+        CopyCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteCopy(p as EffectTabItemViewModel));
+        PasteCommand = new ActionCommand(_ => System.Windows.Clipboard.ContainsData(ClipboardFormat), p => ExecutePaste(p as EffectTabItemViewModel));
         BeginEditCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteBeginEdit(p as EffectTabItemViewModel));
         CommitEditCommand = new ActionCommand(_ => true, p => ExecuteCommitEdit(p as EffectTabItemViewModel));
         CancelEditCommand = new ActionCommand(_ => true, p => ExecuteCancelEdit(p as EffectTabItemViewModel));
@@ -175,6 +180,11 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     private void WriteState()
     {
+        if (SelectedTab != null && !_isSyncing)
+        {
+            SelectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
+        }
+
         var state = new EffectTabState
         {
             SelectedTabId = SelectedTab?.Id,
@@ -276,6 +286,11 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var target = tabVm ?? SelectedTab;
         if (target == null) return;
 
+        if (target == SelectedTab && !_isSyncing)
+        {
+            target.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
+        }
+
         var dup = new EffectTab
         {
             Name = target.Name + Texts.EffectTab_CopyName,
@@ -286,6 +301,66 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         Tabs.Insert(idx + 1, vm);
         UpdateIndices();
         SelectedTab = vm;
+    }
+
+    private void ExecuteCopy(EffectTabItemViewModel? tabVm)
+    {
+        var target = tabVm ?? SelectedTab;
+        if (target == null) return;
+
+        if (target == SelectedTab && !_isSyncing)
+        {
+            target.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
+        }
+
+        var data = new EffectTab
+        {
+            Name = target.Name,
+            SerializedEffects = target.SerializedEffects
+        };
+        var json = Newtonsoft.Json.JsonConvert.SerializeObject(data);
+        System.Windows.Clipboard.SetData(ClipboardFormat, json);
+    }
+
+    private void ExecutePaste(EffectTabItemViewModel? targetTabVm)
+    {
+        try
+        {
+            if (!System.Windows.Clipboard.ContainsData(ClipboardFormat)) return;
+            var json = System.Windows.Clipboard.GetData(ClipboardFormat) as string;
+            if (string.IsNullOrWhiteSpace(json)) return;
+
+            var data = Newtonsoft.Json.JsonConvert.DeserializeObject<EffectTab>(json);
+            if (data == null) return;
+
+            if (targetTabVm != null)
+            {
+                targetTabVm.SerializedEffects = data.SerializedEffects;
+                if (targetTabVm == SelectedTab)
+                {
+                    ApplyTabToEffect(targetTabVm);
+                }
+                else
+                {
+                    SaveState();
+                }
+            }
+            else
+            {
+                var tab = new EffectTab
+                {
+                    Name = data.Name + Texts.EffectTab_CopyName,
+                    SerializedEffects = data.SerializedEffects
+                };
+                var vm = new EffectTabItemViewModel(tab);
+                Tabs.Add(vm);
+                UpdateIndices();
+                SelectedTab = vm;
+            }
+        }
+        catch
+        {
+        }
     }
 
     private void ExecuteBeginEdit(EffectTabItemViewModel? tabVm)
