@@ -54,24 +54,22 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     public bool HasStashes => Stashes.Count > 0;
 
-    public EffectTabManagerViewModel() : this(Array.Empty<ItemProperty>()) { }
-
     public EffectTabManagerViewModel(ItemProperty[] itemProperties)
     {
         _itemProperties = itemProperties;
         _effect = itemProperties.Length > 0 ? (ContainerEffect)itemProperties[0].PropertyOwner : new ContainerEffect();
 
         AddTabCommand = new ActionCommand(_ => true, _ => ExecuteAddTab());
-        RemoveTabCommand = new ActionCommand(p => Tabs.Count > 1 && (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteRemoveTab(p as EffectTabItemViewModel));
-        MoveTabLeftCommand = new ActionCommand(p => CanMoveTab(p as EffectTabItemViewModel, -1), p => ExecuteMoveTab(p as EffectTabItemViewModel, -1));
-        MoveTabRightCommand = new ActionCommand(p => CanMoveTab(p as EffectTabItemViewModel, 1), p => ExecuteMoveTab(p as EffectTabItemViewModel, 1));
-        DuplicateTabCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteDuplicateTab(p as EffectTabItemViewModel));
-        CopyCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteCopy(p as EffectTabItemViewModel));
+        RemoveTabCommand = new ActionCommand(p => Tabs.Count > 1 && ResolveTab(p) != null, p => ExecuteRemoveTab(ResolveTab(p)));
+        MoveTabLeftCommand = new ActionCommand(p => CanMoveTab(ResolveTab(p), -1), p => ExecuteMoveTab(ResolveTab(p), -1));
+        MoveTabRightCommand = new ActionCommand(p => CanMoveTab(ResolveTab(p), 1), p => ExecuteMoveTab(ResolveTab(p), 1));
+        DuplicateTabCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteDuplicateTab(ResolveTab(p)));
+        CopyCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteCopy(ResolveTab(p)));
         PasteCommand = new ActionCommand(_ => System.Windows.Clipboard.ContainsData(ClipboardFormat), p => ExecutePaste(p as EffectTabItemViewModel));
-        StashCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteStash(p as EffectTabItemViewModel));
+        StashCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteStash(ResolveTab(p)));
         RestoreStashCommand = new ActionCommand(p => p is EffectTabStashViewModel, p => ExecuteRestoreStash(p as EffectTabStashViewModel));
         RemoveStashCommand = new ActionCommand(p => p is EffectTabStashViewModel, p => ExecuteRemoveStash(p as EffectTabStashViewModel));
-        BeginEditCommand = new ActionCommand(p => (p as EffectTabItemViewModel ?? SelectedTab) != null, p => ExecuteBeginEdit(p as EffectTabItemViewModel));
+        BeginEditCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteBeginEdit(ResolveTab(p)));
         CommitEditCommand = new ActionCommand(_ => true, p => ExecuteCommitEdit(p as EffectTabItemViewModel));
         CancelEditCommand = new ActionCommand(_ => true, p => ExecuteCancelEdit(p as EffectTabItemViewModel));
 
@@ -80,26 +78,30 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         _effect.PropertyChanged += OnEffectPropertyChanged;
     }
 
+    private EffectTabItemViewModel? ResolveTab(object? param) => param as EffectTabItemViewModel ?? SelectedTab;
+
+    private void ForEachEffect(Action<ContainerEffect> action)
+    {
+        foreach (var prop in _itemProperties)
+            action((ContainerEffect)prop.PropertyOwner);
+    }
+
     private void LoadStashes()
+    {
+        EffectTabStashSettings.Default.Stashes.CollectionChanged += OnStashesChanged;
+        SyncStashes();
+    }
+
+    private void SyncStashes()
     {
         Stashes.Clear();
         foreach (var stash in EffectTabStashSettings.Default.Stashes)
-        {
             Stashes.Add(new EffectTabStashViewModel(stash));
-        }
         OnPropertyChanged(nameof(HasStashes));
-        EffectTabStashSettings.Default.Stashes.CollectionChanged += OnStashesChanged;
     }
 
     private void OnStashesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-    {
-        Stashes.Clear();
-        foreach (var stash in EffectTabStashSettings.Default.Stashes)
-        {
-            Stashes.Add(new EffectTabStashViewModel(stash));
-        }
-        OnPropertyChanged(nameof(HasStashes));
-    }
+        => SyncStashes();
 
     private void LoadTabs()
     {
@@ -119,8 +121,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void SelectTabInternal(EffectTabItemViewModel? tab)
     {
         _selectedTab = tab;
-        foreach (var prop in _itemProperties)
-            ((ContainerEffect)prop.PropertyOwner).SelectedTabName = tab?.Name;
+        ForEachEffect(e => e.SelectedTabName = tab?.Name);
         OnPropertyChanged(nameof(SelectedTab));
         OnPropertyChanged(nameof(IsTabSelected));
     }
@@ -150,12 +151,11 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         using (BeginSelfUpdate())
         {
-            foreach (var prop in _itemProperties)
+            ForEachEffect(e =>
             {
-                var target = (ContainerEffect)prop.PropertyOwner;
-                target.Effects = EffectSerializer.Deserialize(tab.SerializedEffects);
-                target.SelectedTabName = tab.Name;
-            }
+                e.Effects = EffectSerializer.Deserialize(tab.SerializedEffects);
+                e.SelectedTabName = tab.Name;
+            });
             PersistState();
         }
     }
@@ -170,12 +170,11 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         var json = EffectTabStateService.Serialize(state);
 
-        foreach (var prop in _itemProperties)
+        ForEachEffect(e =>
         {
-            var target = (ContainerEffect)prop.PropertyOwner;
-            if (target.EffectTabsJson != json)
-                target.EffectTabsJson = json;
-        }
+            if (e.EffectTabsJson != json)
+                e.EffectTabsJson = json;
+        });
     }
 
     private void UpdateIndices()
@@ -196,9 +195,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
-    private void ExecuteRemoveTab(EffectTabItemViewModel? tabVm)
+    private void ExecuteRemoveTab(EffectTabItemViewModel? target)
     {
-        var target = tabVm ?? SelectedTab;
         if (target == null || Tabs.Count <= 1) return;
 
         using (BeginUndo())
@@ -220,9 +218,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
-    private bool CanMoveTab(EffectTabItemViewModel? tabVm, int offset)
+    private bool CanMoveTab(EffectTabItemViewModel? target, int offset)
     {
-        var target = tabVm ?? SelectedTab;
         if (target == null) return false;
         var idx = Tabs.IndexOf(target);
         if (idx < 0) return false;
@@ -230,9 +227,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         return newIdx >= 0 && newIdx < Tabs.Count;
     }
 
-    private void ExecuteMoveTab(EffectTabItemViewModel? tabVm, int offset)
+    private void ExecuteMoveTab(EffectTabItemViewModel? target, int offset)
     {
-        var target = tabVm ?? SelectedTab;
         if (target == null) return;
         var idx = Tabs.IndexOf(target);
         var newIdx = idx + offset;
@@ -247,9 +243,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
-    private void ExecuteDuplicateTab(EffectTabItemViewModel? tabVm)
+    private void ExecuteDuplicateTab(EffectTabItemViewModel? source)
     {
-        var source = tabVm ?? SelectedTab;
         if (source == null) return;
 
         using (BeginUndo())
@@ -270,9 +265,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
-    private void ExecuteCopy(EffectTabItemViewModel? tabVm)
+    private void ExecuteCopy(EffectTabItemViewModel? source)
     {
-        var source = tabVm ?? SelectedTab;
         if (source == null) return;
 
         if (source == SelectedTab)
@@ -331,9 +325,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
-    private void ExecuteStash(EffectTabItemViewModel? tabVm)
+    private void ExecuteStash(EffectTabItemViewModel? target)
     {
-        var target = tabVm ?? SelectedTab;
         if (target == null) return;
 
         if (target == SelectedTab)
@@ -343,7 +336,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         if (effects.Count == 0) return;
 
         var firstEffectName = effects[0].Label;
-        var name = effects.Count > 1 
+        var name = effects.Count > 1
             ? string.Format(Texts.Menu_StashNameFormat, target.Name, firstEffectName, effects.Count - 1)
             : string.Format(Texts.Menu_StashNameFormatSingle, target.Name, firstEffectName);
 
@@ -388,14 +381,13 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         EffectTabStashSettings.Default.Save();
     }
 
-    private void ExecuteBeginEdit(EffectTabItemViewModel? tabVm)
+    private void ExecuteBeginEdit(EffectTabItemViewModel? target)
     {
-        (tabVm ?? SelectedTab)?.BeginEdit();
+        target?.BeginEdit();
     }
 
-    private void ExecuteCommitEdit(EffectTabItemViewModel? tabVm)
+    private void ExecuteCommitEdit(EffectTabItemViewModel? target)
     {
-        var target = tabVm ?? SelectedTab;
         if (target == null) return;
 
         using (BeginUndo())
@@ -403,32 +395,15 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             target.CommitEdit(Texts.EffectTab_FirstName);
 
             if (target == SelectedTab)
-            {
-                foreach (var prop in _itemProperties)
-                    ((ContainerEffect)prop.PropertyOwner).SelectedTabName = target.Name;
-            }
+                ForEachEffect(e => e.SelectedTabName = target.Name);
 
             PersistState();
         }
     }
 
-    private void ExecuteCancelEdit(EffectTabItemViewModel? tabVm)
+    private void ExecuteCancelEdit(EffectTabItemViewModel? target)
     {
-        (tabVm ?? SelectedTab)?.CancelEdit();
-    }
-
-    public void MoveTab(EffectTabItemViewModel source, EffectTabItemViewModel target)
-    {
-        var srcIdx = Tabs.IndexOf(source);
-        var dstIdx = Tabs.IndexOf(target);
-        if (srcIdx < 0 || dstIdx < 0 || srcIdx == dstIdx) return;
-
-        using (BeginUndo())
-        {
-            Tabs.Move(srcIdx, dstIdx);
-            UpdateIndices();
-            PersistState();
-        }
+        target?.CancelEdit();
     }
 
     private IDisposable BeginUndo() => new StateScope(this, true);
