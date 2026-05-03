@@ -8,7 +8,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private readonly ItemProperty[] _itemProperties;
     private readonly ContainerEffect _effect;
     private const string ClipboardFormat = "YukkuriMovieMaker.Plugin.Community.Effect.Video.Container.EffectTab";
-
     private bool _isSelfUpdating;
 
     public ObservableCollection<EffectTabItemViewModel> Tabs { get; } = new();
@@ -32,6 +31,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     }
 
     public bool IsTabSelected => SelectedTab != null;
+    public bool HasMultipleTabs => Tabs.Count > 1;
 
     public ActionCommand AddTabCommand { get; }
     public ActionCommand RemoveTabCommand { get; }
@@ -52,7 +52,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     public event EventHandler? EndEdit;
 
     public ObservableCollection<EffectTabStashViewModel> Stashes { get; } = new();
-
     public bool HasStashes => Stashes.Count > 0;
 
     public EffectTabManagerViewModel(ItemProperty[] itemProperties)
@@ -60,8 +59,10 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         _itemProperties = itemProperties;
         _effect = itemProperties.Length > 0 ? (ContainerEffect)itemProperties[0].PropertyOwner : new ContainerEffect();
 
+        Tabs.CollectionChanged += Tabs_CollectionChanged;
+
         AddTabCommand = new ActionCommand(_ => true, _ => ExecuteAddTab());
-        RemoveTabCommand = new ActionCommand(p => Tabs.Count > 1 && ResolveTab(p) != null, p => ExecuteRemoveTab(ResolveTab(p)));
+        RemoveTabCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteRemoveTab(ResolveTab(p)));
         MoveTabLeftCommand = new ActionCommand(p => CanMoveTab(ResolveTab(p), -1), p => ExecuteMoveTab(ResolveTab(p), -1));
         MoveTabRightCommand = new ActionCommand(p => CanMoveTab(ResolveTab(p), 1), p => ExecuteMoveTab(ResolveTab(p), 1));
         DuplicateTabCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteDuplicateTab(ResolveTab(p)));
@@ -79,10 +80,16 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         LoadTabs();
         LoadStashes();
+
         _effect.PropertyChanged += OnEffectPropertyChanged;
     }
 
     private EffectTabItemViewModel? ResolveTab(object? param) => param as EffectTabItemViewModel ?? SelectedTab;
+
+    private void Tabs_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(HasMultipleTabs));
+    }
 
     private void ForEachEffect(Action<ContainerEffect> action)
     {
@@ -173,7 +180,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         };
 
         var json = EffectTabStateService.Serialize(state);
-
         ForEachEffect(e =>
         {
             if (e.EffectTabsJson != json)
@@ -201,24 +207,67 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     private void ExecuteRemoveTab(EffectTabItemViewModel? target)
     {
-        if (target == null || Tabs.Count <= 1) return;
+        if (target == null || !HasMultipleTabs) return;
 
         using (BeginUndo())
         {
-            var wasSelected = SelectedTab == target;
-            Tabs.Remove(target);
-            UpdateIndices();
+            RemoveTabInternal(target);
+        }
+    }
 
-            if (wasSelected)
-            {
-                var next = Tabs[0];
-                SelectTabInternal(next);
-                ApplyStateToEffectInternal(next);
-            }
-            else
-            {
-                PersistState();
-            }
+    private void ExecuteStash(EffectTabItemViewModel? target)
+    {
+        if (target == null) return;
+
+        if (target == SelectedTab)
+            target.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
+
+        var effects = EffectSerializer.Deserialize(target.SerializedEffects);
+        if (effects.Count == 0) return;
+
+        var firstEffectName = effects[0].Label;
+        var name = effects.Count > 1
+            ? string.Format(Texts.Menu_StashNameFormat, target.Name, firstEffectName, effects.Count - 1)
+            : string.Format(Texts.Menu_StashNameFormatSingle, target.Name, firstEffectName);
+
+        var stash = new EffectTab
+        {
+            Id = Guid.NewGuid(),
+            Name = name,
+            SerializedEffects = target.SerializedEffects
+        };
+
+        EffectTabStashSettings.Default.Stashes.Add(stash);
+        EffectTabStashSettings.Default.Save();
+
+        using (BeginUndo())
+        {
+            RemoveTabInternal(target);
+        }
+    }
+
+    private void RemoveTabInternal(EffectTabItemViewModel target)
+    {
+        var wasSelected = SelectedTab == target;
+        Tabs.Remove(target);
+
+        if (Tabs.Count == 0)
+        {
+            var tab = new EffectTab { Name = Texts.EffectTab_FirstName, SerializedEffects = string.Empty };
+            Tabs.Add(new EffectTabItemViewModel(tab));
+        }
+
+        UpdateIndices();
+
+        if (wasSelected)
+        {
+            var next = Tabs.First();
+            SelectTabInternal(next);
+            ApplyStateToEffectInternal(next);
+        }
+        else
+        {
+            PersistState();
         }
     }
 
@@ -236,6 +285,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         if (target == null) return;
         var idx = Tabs.IndexOf(target);
         var newIdx = idx + offset;
+
         if (newIdx >= 0 && newIdx < Tabs.Count)
         {
             using (BeginUndo())
@@ -252,6 +302,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var sourceIndex = Tabs.IndexOf(param.Tab);
         if (sourceIndex < 0) return false;
         var target = param.TargetIndex;
+
         return target >= 0 && target <= Tabs.Count
             && target != sourceIndex
             && target != sourceIndex + 1;
@@ -260,7 +311,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void ExecuteMoveTabToIndex(MoveTabToIndexParameter? param)
     {
         if (param == null) return;
-
         var sourceIndex = Tabs.IndexOf(param.Tab);
         if (sourceIndex < 0) return;
 
@@ -294,9 +344,11 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 SerializedEffects = source.SerializedEffects
             };
             var vm = new EffectTabItemViewModel(dup);
+
             var idx = Tabs.IndexOf(source);
             Tabs.Insert(idx + 1, vm);
             UpdateIndices();
+
             SelectedTab = vm;
         }
     }
@@ -313,6 +365,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             Name = source.Name,
             SerializedEffects = source.SerializedEffects
         };
+
         var json = Newtonsoft.Json.JsonConvert.SerializeObject(data);
         System.Windows.Clipboard.SetData(ClipboardFormat, json);
     }
@@ -361,34 +414,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
-    private void ExecuteStash(EffectTabItemViewModel? target)
-    {
-        if (target == null) return;
-
-        if (target == SelectedTab)
-            target.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-
-        var effects = EffectSerializer.Deserialize(target.SerializedEffects);
-        if (effects.Count == 0) return;
-
-        var firstEffectName = effects[0].Label;
-        var name = effects.Count > 1
-            ? string.Format(Texts.Menu_StashNameFormat, target.Name, firstEffectName, effects.Count - 1)
-            : string.Format(Texts.Menu_StashNameFormatSingle, target.Name, firstEffectName);
-
-        var stash = new EffectTab
-        {
-            Id = Guid.NewGuid(),
-            Name = name,
-            SerializedEffects = target.SerializedEffects
-        };
-
-        EffectTabStashSettings.Default.Stashes.Add(stash);
-        EffectTabStashSettings.Default.Save();
-
-        ExecuteRemoveTab(target);
-    }
-
     private void ExecuteRestoreStash(EffectTabStashViewModel? stashVm)
     {
         if (stashVm == null) return;
@@ -429,7 +454,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         using (BeginUndo())
         {
             target.CommitEdit(Texts.EffectTab_FirstName);
-
             if (target == SelectedTab)
                 ForEachEffect(e => e.SelectedTabName = target.Name);
 
@@ -455,9 +479,10 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         {
             _vm = vm;
             _useUndo = useUndo;
-            _wasSelfUpdating = _vm._isSelfUpdating;
 
+            _wasSelfUpdating = _vm._isSelfUpdating;
             _vm._isSelfUpdating = true;
+
             if (_useUndo)
                 _vm.BeginEdit?.Invoke(_vm, EventArgs.Empty);
         }
@@ -473,6 +498,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     public void Dispose()
     {
+        Tabs.CollectionChanged -= Tabs_CollectionChanged;
         EffectTabStashSettings.Default.Stashes.CollectionChanged -= OnStashesChanged;
         _effect.PropertyChanged -= OnEffectPropertyChanged;
     }

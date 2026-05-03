@@ -45,13 +45,10 @@ public sealed class EffectTabItemViewModel : Bindable
         set
         {
             if (!Set(ref _index, value)) return;
-            OnPropertyChanged(nameof(IsFirstTab));
             OnPropertyChanged(nameof(IndexLabel));
             OnPropertyChanged(nameof(CompactLabel));
         }
     }
-
-    public bool IsFirstTab => Index == 0;
 
     public string IndexLabel => (Index + 1).ToString(CultureInfo.InvariantCulture);
 
@@ -62,6 +59,7 @@ public sealed class EffectTabItemViewModel : Bindable
             var trimmed = Name?.Trim();
             if (!string.IsNullOrEmpty(trimmed))
                 return StringInfo.GetNextTextElement(trimmed, 0);
+
             return IndexLabel;
         }
     }

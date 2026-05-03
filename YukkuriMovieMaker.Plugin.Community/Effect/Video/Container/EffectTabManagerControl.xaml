@@ -9,11 +9,13 @@
              mc:Ignorable="d"
              d:DesignHeight="40" d:DesignWidth="700"
              Background="Transparent">
-    
+
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:TabCompactModeConverter x:Key="TabCompactModeConverter"/>
+
         <ContentControl x:Key="StashMenuItemIcon" x:Shared="False" Content="{DynamicResource {x:Static icons:IconKeys.SubdirectoryArrowRight}}" Width="16" Height="16" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+
         <Style x:Key="TabListBoxStyle" TargetType="ListBox">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -24,7 +26,7 @@
             <Setter Property="VerticalContentAlignment" Value="Stretch"/>
             <Setter Property="Padding" Value="0"/>
         </Style>
-        
+
         <Style x:Key="TabListBoxItemStyle" TargetType="ListBoxItem">
             <Setter Property="Margin" Value="0"/>
             <Setter Property="Padding" Value="0"/>
@@ -46,7 +48,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
         <Style x:Key="ThinScrollBarLineButtonStyle" TargetType="RepeatButton">
             <Setter Property="Template">
                 <Setter.Value>
@@ -56,7 +58,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
         <Style x:Key="ThinScrollBarThumbStyle" TargetType="Thumb">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="MinHeight" Value="40"/>
@@ -72,7 +74,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
         <Style TargetType="ScrollBar">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Width" Value="6"/>
@@ -113,7 +115,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
         <Style x:Key="IconButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -132,7 +134,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
         <Style x:Key="AddIconButtonStyle" TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
             <Setter Property="Opacity" Value="0.55"/>
             <Style.Triggers>
@@ -150,7 +152,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        
+
         <Style x:Key="CloseIconButtonStyle" TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
             <Setter Property="Opacity" Value="0.45"/>
             <Style.Triggers>
@@ -166,16 +168,20 @@
                 <Trigger Property="IsPressed" Value="True">
                     <Setter Property="Opacity" Value="0.85"/>
                 </Trigger>
+                <DataTrigger Binding="{Binding DataContext.HasMultipleTabs, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False">
+                    <Setter Property="IsHitTestVisible" Value="False"/>
+                    <Setter Property="Opacity" Value="0.15"/>
+                </DataTrigger>
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    
+
     <Grid Background="Transparent" Margin="5,5,5,0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        
+
         <Border Grid.Column="0"
                 Background="Transparent"
                 BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
@@ -267,7 +273,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                
+
                                 <TextBlock x:Name="IndexText"
                                            Grid.Column="0"
                                            Grid.ColumnSpan="3"
@@ -277,7 +283,7 @@
                                            VerticalAlignment="Center"
                                            Margin="0"
                                            Visibility="Collapsed"/>
-                                
+
                                 <Grid Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock x:Name="NameText"
                                                VerticalAlignment="Center"
@@ -294,7 +300,7 @@
                                              LostKeyboardFocus="RenameTextBox_LostKeyboardFocus"
                                              KeyDown="RenameTextBox_KeyDown"/>
                                 </Grid>
-                                
+
                                 <Button x:Name="CloseButton"
                                         Grid.Column="2"
                                         Style="{StaticResource CloseIconButtonStyle}"
@@ -321,9 +327,6 @@
                                 <Setter TargetName="NameText" Property="Visibility" Value="Collapsed"/>
                                 <Setter TargetName="RenameTextBox" Property="Visibility" Value="Visible"/>
                                 <Setter TargetName="IndexText" Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsFirstTab}" Value="True">
-                                <Setter TargetName="CloseButton" Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
                             <MultiDataTrigger>
                                 <MultiDataTrigger.Conditions>
@@ -372,7 +375,6 @@
                                             </MultiBinding>
                                         </Condition.Binding>
                                     </Condition>
-                                    <Condition Binding="{Binding IsFirstTab}" Value="False"/>
                                     <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsMouseOver}" Value="True"/>
                                 </MultiDataTrigger.Conditions>
                                 <Setter TargetName="CloseButton" Property="Visibility" Value="Visible"/>
@@ -382,7 +384,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </Border>
-        
+
         <Border Grid.Column="1"
                 Background="Transparent"
                 BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
