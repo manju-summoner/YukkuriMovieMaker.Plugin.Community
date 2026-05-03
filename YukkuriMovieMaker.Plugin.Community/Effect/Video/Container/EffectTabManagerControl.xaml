@@ -202,8 +202,11 @@
                      Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}">
                 <ListBox.ContextMenu>
                     <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                        <ContextMenu.Resources>
+                            <CollectionViewSource x:Key="StashesCollection" Source="{Binding Stashes}"/>
+                        </ContextMenu.Resources>
                         <MenuItem Header="{x:Static loc:Texts.Menu_Paste}" Command="{Binding PasteCommand}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>
-                        <MenuItem Header="{x:Static loc:Texts.Menu_Stashes}" Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}" ItemsSource="{Binding Stashes}" Visibility="{Binding HasStashes, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <MenuItem Header="{x:Static loc:Texts.Menu_Stashes}" Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}" Visibility="{Binding HasStashes, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <MenuItem.ItemContainerStyle>
                                 <Style TargetType="MenuItem">
                                     <Setter Property="Header" Value="{Binding}"/>
@@ -230,6 +233,26 @@
                                     </Setter>
                                 </Style>
                             </MenuItem.ItemContainerStyle>
+                            <MenuItem.ItemsSource>
+                                <CompositeCollection>
+                                    <MenuItem Header="{x:Static loc:Texts.Menu_ClearStashes}"
+                                              Click="ClearStashesMenuItem_Click"
+                                              Foreground="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}">
+                                        <MenuItem.Style>
+                                            <Style TargetType="MenuItem">
+                                                <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
+                                            </Style>
+                                        </MenuItem.Style>
+                                        <MenuItem.HeaderTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Header, RelativeSource={RelativeSource AncestorType=MenuItem}}" TextDecorations="Underline" Cursor="Hand"/>
+                                            </DataTemplate>
+                                        </MenuItem.HeaderTemplate>
+                                    </MenuItem>
+                                    <Separator/>
+                                    <CollectionContainer Collection="{Binding Source={StaticResource StashesCollection}}"/>
+                                </CompositeCollection>
+                            </MenuItem.ItemsSource>
                         </MenuItem>
                     </ContextMenu>
                 </ListBox.ContextMenu>
@@ -268,6 +291,7 @@
                                               Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveArrowDownOutline}}"/>
                                 </ContextMenu>
                             </Border.ContextMenu>
+
                             <Grid VerticalAlignment="Center">
                                 <Grid.InputBindings>
                                     <MouseBinding Gesture="LeftDoubleClick"

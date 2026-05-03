@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Windows;
+using Newtonsoft.Json;
 using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
@@ -43,6 +45,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     public ActionCommand StashCommand { get; }
     public ActionCommand RestoreStashCommand { get; }
     public ActionCommand RemoveStashCommand { get; }
+    public ActionCommand ClearStashesCommand { get; }
     public ActionCommand BeginEditCommand { get; }
     public ActionCommand CommitEditCommand { get; }
     public ActionCommand CancelEditCommand { get; }
@@ -67,10 +70,11 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         MoveTabRightCommand = new ActionCommand(p => CanMoveTab(ResolveTab(p), 1), p => ExecuteMoveTab(ResolveTab(p), 1));
         DuplicateTabCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteDuplicateTab(ResolveTab(p)));
         CopyCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteCopy(ResolveTab(p)));
-        PasteCommand = new ActionCommand(_ => System.Windows.Clipboard.ContainsData(ClipboardFormat), p => ExecutePaste(p as EffectTabItemViewModel));
+        PasteCommand = new ActionCommand(_ => Clipboard.ContainsData(ClipboardFormat), p => ExecutePaste(p as EffectTabItemViewModel));
         StashCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteStash(ResolveTab(p)));
         RestoreStashCommand = new ActionCommand(p => p is EffectTabStashViewModel, p => ExecuteRestoreStash(p as EffectTabStashViewModel));
         RemoveStashCommand = new ActionCommand(p => p is EffectTabStashViewModel, p => ExecuteRemoveStash(p as EffectTabStashViewModel));
+        ClearStashesCommand = new ActionCommand(_ => HasStashes, _ => ExecuteClearStashes());
         BeginEditCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteBeginEdit(ResolveTab(p)));
         CommitEditCommand = new ActionCommand(_ => true, p => ExecuteCommitEdit(p as EffectTabItemViewModel));
         CancelEditCommand = new ActionCommand(_ => true, p => ExecuteCancelEdit(p as EffectTabItemViewModel));
@@ -108,6 +112,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         Stashes.Clear();
         foreach (var stash in EffectTabStashSettings.Default.Stashes)
             Stashes.Add(new EffectTabStashViewModel(stash));
+
         OnPropertyChanged(nameof(HasStashes));
     }
 
@@ -180,6 +185,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         };
 
         var json = EffectTabStateService.Serialize(state);
+
         ForEachEffect(e =>
         {
             if (e.EffectTabsJson != json)
@@ -301,8 +307,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         var sourceIndex = Tabs.IndexOf(param.Tab);
         if (sourceIndex < 0) return false;
-        var target = param.TargetIndex;
 
+        var target = param.TargetIndex;
         return target >= 0 && target <= Tabs.Count
             && target != sourceIndex
             && target != sourceIndex + 1;
@@ -311,6 +317,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void ExecuteMoveTabToIndex(MoveTabToIndexParameter? param)
     {
         if (param == null) return;
+
         var sourceIndex = Tabs.IndexOf(param.Tab);
         if (sourceIndex < 0) return;
 
@@ -365,24 +372,22 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             Name = source.Name,
             SerializedEffects = source.SerializedEffects
         };
-
-        var json = Newtonsoft.Json.JsonConvert.SerializeObject(data);
-        System.Windows.Clipboard.SetData(ClipboardFormat, json);
+        var json = JsonConvert.SerializeObject(data);
+        Clipboard.SetData(ClipboardFormat, json);
     }
 
     private void ExecutePaste(EffectTabItemViewModel? targetTabVm)
     {
-        if (!System.Windows.Clipboard.ContainsData(ClipboardFormat)) return;
-
-        var raw = System.Windows.Clipboard.GetData(ClipboardFormat) as string;
+        if (!Clipboard.ContainsData(ClipboardFormat)) return;
+        var raw = Clipboard.GetData(ClipboardFormat) as string;
         if (string.IsNullOrWhiteSpace(raw)) return;
 
         EffectTab? data;
         try
         {
-            data = Newtonsoft.Json.JsonConvert.DeserializeObject<EffectTab>(raw);
+            data = JsonConvert.DeserializeObject<EffectTab>(raw);
         }
-        catch (Newtonsoft.Json.JsonException)
+        catch (JsonException)
         {
             return;
         }
@@ -438,7 +443,14 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void ExecuteRemoveStash(EffectTabStashViewModel? stashVm)
     {
         if (stashVm == null) return;
+
         EffectTabStashSettings.Default.Stashes.Remove(stashVm.Model);
+        EffectTabStashSettings.Default.Save();
+    }
+
+    private void ExecuteClearStashes()
+    {
+        EffectTabStashSettings.Default.Stashes.Clear();
         EffectTabStashSettings.Default.Save();
     }
 

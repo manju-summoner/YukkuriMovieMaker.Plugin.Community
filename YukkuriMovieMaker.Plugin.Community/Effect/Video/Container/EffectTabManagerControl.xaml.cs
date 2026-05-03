@@ -23,6 +23,7 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
     {
         if (DataContext is IDisposable old)
             old.Dispose();
+
         DataContext = new EffectTabManagerViewModel(itemProperties);
     }
 
@@ -30,6 +31,7 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
     {
         if (DataContext is IDisposable disposable)
             disposable.Dispose();
+
         DataContext = null;
     }
 
@@ -60,6 +62,7 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         if (DataContext is not EffectTabManagerViewModel vm) return;
         if (sender is not FrameworkElement fe) return;
         if (fe.DataContext is not EffectTabItemViewModel tab) return;
+
         if (vm.CommitEditCommand.CanExecute(tab))
             vm.CommitEditCommand.Execute(tab);
     }
@@ -90,6 +93,7 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
     {
         if (Keyboard.Modifiers != ModifierKeys.None) return;
         if (e.Handled) return;
+
         e.Handled = true;
         var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
         {
@@ -97,5 +101,21 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
             Source = sender
         };
         (VisualTreeHelper.GetParent((DependencyObject)sender) as UIElement)?.RaiseEvent(eventArg);
+    }
+
+    private void ClearStashesMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not EffectTabManagerViewModel vm) return;
+
+        var result = MessageBox.Show(
+            Texts.Menu_ClearStashesConfirm,
+            Texts.Menu_ClearStashes,
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result == MessageBoxResult.Yes && vm.ClearStashesCommand.CanExecute(null))
+        {
+            vm.ClearStashesCommand.Execute(null);
+        }
     }
 }
