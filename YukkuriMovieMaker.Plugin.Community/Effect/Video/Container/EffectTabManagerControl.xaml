@@ -9,11 +9,11 @@
              mc:Ignorable="d"
              d:DesignHeight="40" d:DesignWidth="700"
              Background="Transparent">
-
+    
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:TabCompactModeConverter x:Key="TabCompactModeConverter"/>
-
+        <ContentControl x:Key="StashMenuItemIcon" x:Shared="False" Content="{DynamicResource {x:Static icons:IconKeys.SubdirectoryArrowRight}}" Width="16" Height="16" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
         <Style x:Key="TabListBoxStyle" TargetType="ListBox">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -24,7 +24,7 @@
             <Setter Property="VerticalContentAlignment" Value="Stretch"/>
             <Setter Property="Padding" Value="0"/>
         </Style>
-
+        
         <Style x:Key="TabListBoxItemStyle" TargetType="ListBoxItem">
             <Setter Property="Margin" Value="0"/>
             <Setter Property="Padding" Value="0"/>
@@ -46,7 +46,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+        
         <Style x:Key="ThinScrollBarLineButtonStyle" TargetType="RepeatButton">
             <Setter Property="Template">
                 <Setter.Value>
@@ -56,7 +56,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+        
         <Style x:Key="ThinScrollBarThumbStyle" TargetType="Thumb">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="MinHeight" Value="40"/>
@@ -72,7 +72,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+        
         <Style TargetType="ScrollBar">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Width" Value="6"/>
@@ -113,7 +113,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+        
         <Style x:Key="IconButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -132,7 +132,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+        
         <Style x:Key="AddIconButtonStyle" TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
             <Setter Property="Opacity" Value="0.55"/>
             <Style.Triggers>
@@ -150,7 +150,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
+        
         <Style x:Key="CloseIconButtonStyle" TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
             <Setter Property="Opacity" Value="0.45"/>
             <Style.Triggers>
@@ -169,13 +169,13 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-
+    
     <Grid Background="Transparent" Margin="5,5,5,0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-
+        
         <Border Grid.Column="0"
                 Background="Transparent"
                 BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
@@ -194,15 +194,26 @@
                         <MenuItem Header="{x:Static loc:Texts.Menu_Stashes}" Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}" ItemsSource="{Binding Stashes}" Visibility="{Binding HasStashes, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <MenuItem.ItemContainerStyle>
                                 <Style TargetType="MenuItem">
-                                    <Setter Property="Header" Value="{Binding Name}"/>
-                                    <Setter Property="ToolTip" Value="{Binding ToolTipText}" />
+                                    <Setter Property="Header" Value="{Binding}"/>
+                                    <Setter Property="ToolTip" Value="{Binding ToolTipText}"/>
                                     <Setter Property="Command" Value="{Binding PlacementTarget.DataContext.RestoreStashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                     <Setter Property="CommandParameter" Value="{Binding}"/>
-                                    <Setter Property="Icon">
+                                    <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
+                                    <Setter Property="Icon" Value="{StaticResource StashMenuItemIcon}"/>
+                                    <Setter Property="HeaderTemplate">
                                         <Setter.Value>
-                                            <Button Style="{StaticResource CloseIconButtonStyle}" Command="{Binding PlacementTarget.DataContext.RemoveStashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}">
-                                                <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Close}}" Width="12" Height="12" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-                                            </Button>
+                                            <DataTemplate>
+                                                <Grid Height="22">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
+                                                    <Button Style="{StaticResource CloseIconButtonStyle}" Command="{Binding PlacementTarget.DataContext.RemoveStashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" Grid.Column="1" Width="20" Height="20">
+                                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Close}}" Width="12" Height="12" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                                    </Button>
+                                                </Grid>
+                                            </DataTemplate>
                                         </Setter.Value>
                                     </Setter>
                                 </Style>
@@ -227,21 +238,21 @@
                                 Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
                             <Border.ContextMenu>
                                 <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
-                                    <MenuItem Header="{x:Static loc:Texts.Menu_Copy}" 
-                                              Command="{Binding CopyCommand}" 
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                                    <MenuItem Header="{x:Static loc:Texts.Menu_Copy}"
+                                              Command="{Binding CopyCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
-                                    <MenuItem Header="{x:Static loc:Texts.Menu_Paste}" 
-                                              Command="{Binding PasteCommand}" 
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                                    <MenuItem Header="{x:Static loc:Texts.Menu_Paste}"
+                                              Command="{Binding PasteCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>
-                                    <MenuItem Header="{x:Static loc:Texts.Menu_Duplicate}" 
-                                              Command="{Binding DuplicateTabCommand}" 
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                                    <MenuItem Header="{x:Static loc:Texts.Menu_Duplicate}"
+                                              Command="{Binding DuplicateTabCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
-                                    <MenuItem Header="{x:Static loc:Texts.Menu_Stash}" 
-                                              Command="{Binding DataContext.StashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                                    <MenuItem Header="{x:Static loc:Texts.Menu_Stash}"
+                                              Command="{Binding DataContext.StashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveArrowDownOutline}}"/>
                                 </ContextMenu>
                             </Border.ContextMenu>
@@ -256,7 +267,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-
+                                
                                 <TextBlock x:Name="IndexText"
                                            Grid.Column="0"
                                            Grid.ColumnSpan="3"
@@ -266,7 +277,7 @@
                                            VerticalAlignment="Center"
                                            Margin="0"
                                            Visibility="Collapsed"/>
-
+                                
                                 <Grid Grid.Column="1" VerticalAlignment="Center">
                                     <TextBlock x:Name="NameText"
                                                VerticalAlignment="Center"
@@ -283,7 +294,7 @@
                                              LostKeyboardFocus="RenameTextBox_LostKeyboardFocus"
                                              KeyDown="RenameTextBox_KeyDown"/>
                                 </Grid>
-
+                                
                                 <Button x:Name="CloseButton"
                                         Grid.Column="2"
                                         Style="{StaticResource CloseIconButtonStyle}"
@@ -371,7 +382,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </Border>
-
+        
         <Border Grid.Column="1"
                 Background="Transparent"
                 BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
