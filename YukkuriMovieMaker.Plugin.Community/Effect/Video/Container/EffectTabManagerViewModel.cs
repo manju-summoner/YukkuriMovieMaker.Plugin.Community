@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Windows;
 using Newtonsoft.Json;
 using YukkuriMovieMaker.Commons;
 
@@ -21,13 +20,14 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         set
         {
             if (_selectedTab == value) return;
+
             if (_selectedTab != null)
                 _selectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
 
             SelectTabInternal(value);
 
-            if (_selectedTab != null)
-                ApplyStateToEffectInternal(_selectedTab);
+            if (value != null)
+                ApplyStateToEffectInternal(value);
         }
     }
 
@@ -57,7 +57,9 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     public event EventHandler? BeginEdit;
     public event EventHandler? EndEdit;
-    public event Action<string, string>? ShowWarningMessageRequested;
+    public event EventHandler<ShowWarningEventArgs>? ShowWarningMessageRequested;
+    public event EventHandler<ConfirmationEventArgs>? ConfirmationRequested;
+    public event EventHandler<BookmarkDialogEventArgs>? BookmarkDialogRequested;
 
     public ObservableCollection<EffectTabStashViewModel> Stashes { get; } = new();
     public bool HasStashes => Stashes.Count > 0;
@@ -78,7 +80,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         MoveTabRightCommand = new ActionCommand(p => CanMoveTab(ResolveTab(p), 1), p => ExecuteMoveTab(ResolveTab(p), 1));
         DuplicateTabCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteDuplicateTab(ResolveTab(p)));
         CopyCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteCopy(ResolveTab(p)));
-        PasteCommand = new ActionCommand(_ => Clipboard.ContainsData(ClipboardFormat), p => ExecutePaste(p as EffectTabItemViewModel));
+        PasteCommand = new ActionCommand(_ => System.Windows.Clipboard.ContainsData(ClipboardFormat), p => ExecutePaste(p as EffectTabItemViewModel));
         StashCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteStash(ResolveTab(p)));
         RestoreStashCommand = new ActionCommand(p => p is EffectTabStashViewModel, p => ExecuteRestoreStash(p as EffectTabStashViewModel));
         RemoveStashCommand = new ActionCommand(p => p is EffectTabStashViewModel, p => ExecuteRemoveStash(p as EffectTabStashViewModel));
@@ -227,6 +229,13 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             Tabs[i].Index = i;
     }
 
+    private bool RequestConfirmation(string message, string title)
+    {
+        var args = new ConfirmationEventArgs(message, title);
+        ConfirmationRequested?.Invoke(this, args);
+        return args.Confirmed;
+    }
+
     private void ExecuteAddTab()
     {
         using (BeginUndo())
@@ -290,23 +299,19 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var effects = EffectSerializer.Deserialize(target.SerializedEffects);
         if (effects.Count == 0)
         {
-            ShowWarningMessageRequested?.Invoke(Texts.Message_EmptyEffectTab, Texts.Menu_Bookmark);
+            ShowWarningMessageRequested?.Invoke(this, new ShowWarningEventArgs(Texts.Message_EmptyEffectTab, Texts.Menu_Bookmark));
             return;
         }
 
-        var window = new BookmarkNameWindow(target.Name, false)
-        {
-            Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(x => x.IsActive) ?? Application.Current.MainWindow
-        };
+        var args = new BookmarkDialogEventArgs(target.Name, false);
+        BookmarkDialogRequested?.Invoke(this, args);
 
-        window.ShowDialog();
-
-        if (window.Result == BookmarkWindowResult.Create && !string.IsNullOrWhiteSpace(window.BookmarkName))
+        if (args.Result == BookmarkWindowResult.Create && !string.IsNullOrWhiteSpace(args.BookmarkName))
         {
             var bookmark = new EffectTab
             {
                 Id = Guid.NewGuid(),
-                Name = window.BookmarkName,
+                Name = args.BookmarkName,
                 SerializedEffects = target.SerializedEffects
             };
             EffectTabSettings.Default.Bookmarks.Add(bookmark);
@@ -318,19 +323,15 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         if (bookmarkVm == null) return;
 
-        var window = new BookmarkNameWindow(bookmarkVm.Name, true)
-        {
-            Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(x => x.IsActive) ?? Application.Current.MainWindow
-        };
+        var args = new BookmarkDialogEventArgs(bookmarkVm.Name, true);
+        BookmarkDialogRequested?.Invoke(this, args);
 
-        window.ShowDialog();
-
-        if (window.Result == BookmarkWindowResult.Complete && !string.IsNullOrWhiteSpace(window.BookmarkName))
+        if (args.Result == BookmarkWindowResult.Complete && !string.IsNullOrWhiteSpace(args.BookmarkName))
         {
-            bookmarkVm.Name = window.BookmarkName;
+            bookmarkVm.Name = args.BookmarkName;
             EffectTabSettings.Default.Save();
         }
-        else if (window.Result == BookmarkWindowResult.Delete)
+        else if (args.Result == BookmarkWindowResult.Delete)
         {
             EffectTabSettings.Default.Bookmarks.Remove(bookmarkVm.Model);
             EffectTabSettings.Default.Save();
@@ -473,14 +474,14 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             SerializedEffects = source.SerializedEffects
         };
         var json = JsonConvert.SerializeObject(data);
-        Clipboard.SetData(ClipboardFormat, json);
+        System.Windows.Clipboard.SetData(ClipboardFormat, json);
     }
 
     private void ExecutePaste(EffectTabItemViewModel? targetTabVm)
     {
-        if (!Clipboard.ContainsData(ClipboardFormat)) return;
+        if (!System.Windows.Clipboard.ContainsData(ClipboardFormat)) return;
 
-        var raw = Clipboard.GetData(ClipboardFormat) as string;
+        var raw = System.Windows.Clipboard.GetData(ClipboardFormat) as string;
         if (string.IsNullOrWhiteSpace(raw)) return;
 
         EffectTab? data;
@@ -551,6 +552,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     private void ExecuteClearStashes()
     {
+        if (!RequestConfirmation(Texts.Menu_ClearStashesConfirm, Texts.Menu_ClearStashes)) return;
         EffectTabSettings.Default.Stashes.Clear();
         EffectTabSettings.Default.Save();
     }
@@ -575,6 +577,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     private void ExecuteClearBookmarks()
     {
+        if (!RequestConfirmation(Texts.Menu_ClearBookmarksConfirm, Texts.Menu_ClearBookmarks)) return;
         EffectTabSettings.Default.Bookmarks.Clear();
         EffectTabSettings.Default.Save();
     }

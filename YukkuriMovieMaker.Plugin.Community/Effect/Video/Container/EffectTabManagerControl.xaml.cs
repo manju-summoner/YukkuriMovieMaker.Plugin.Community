@@ -40,6 +40,8 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
             oldVm.BeginEdit -= OnBeginEdit;
             oldVm.EndEdit -= OnEndEdit;
             oldVm.ShowWarningMessageRequested -= OnShowWarningMessageRequested;
+            oldVm.ConfirmationRequested -= OnConfirmationRequested;
+            oldVm.BookmarkDialogRequested -= OnBookmarkDialogRequested;
         }
 
         _dragDropService?.Dispose();
@@ -50,6 +52,8 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
             newVm.BeginEdit += OnBeginEdit;
             newVm.EndEdit += OnEndEdit;
             newVm.ShowWarningMessageRequested += OnShowWarningMessageRequested;
+            newVm.ConfirmationRequested += OnConfirmationRequested;
+            newVm.BookmarkDialogRequested += OnBookmarkDialogRequested;
             _dragDropService = new TabDragDropService(TabListBox, newVm);
         }
     }
@@ -58,9 +62,25 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
 
     private void OnEndEdit(object? sender, EventArgs e) => EndEdit?.Invoke(this, EventArgs.Empty);
 
-    private void OnShowWarningMessageRequested(string message, string title)
+    private void OnShowWarningMessageRequested(object? sender, ShowWarningEventArgs e)
     {
-        MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBox.Show(e.Message, e.Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+    }
+
+    private void OnConfirmationRequested(object? sender, ConfirmationEventArgs e)
+    {
+        e.Confirmed = MessageBox.Show(e.Message, e.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+    }
+
+    private void OnBookmarkDialogRequested(object? sender, BookmarkDialogEventArgs e)
+    {
+        var window = new BookmarkNameWindow(e.InitialName, e.IsEditMode)
+        {
+            Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(x => x.IsActive) ?? Application.Current.MainWindow
+        };
+        window.ShowDialog();
+        e.Result = window.Result;
+        e.BookmarkName = window.BookmarkName ?? string.Empty;
     }
 
     private void RenameTextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -112,32 +132,14 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
     private void ClearStashesMenuItem_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is not EffectTabManagerViewModel vm) return;
-
-        var result = MessageBox.Show(
-            Texts.Menu_ClearStashesConfirm,
-            Texts.Menu_ClearStashes,
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
-
-        if (result == MessageBoxResult.Yes && vm.ClearStashesCommand.CanExecute(null))
-        {
+        if (vm.ClearStashesCommand.CanExecute(null))
             vm.ClearStashesCommand.Execute(null);
-        }
     }
 
     private void ClearBookmarksMenuItem_Click(object sender, RoutedEventArgs e)
     {
         if (DataContext is not EffectTabManagerViewModel vm) return;
-
-        var result = MessageBox.Show(
-            Texts.Menu_ClearBookmarksConfirm,
-            Texts.Menu_ClearBookmarks,
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
-
-        if (result == MessageBoxResult.Yes && vm.ClearBookmarksCommand.CanExecute(null))
-        {
+        if (vm.ClearBookmarksCommand.CanExecute(null))
             vm.ClearBookmarksCommand.Execute(null);
-        }
     }
 }
