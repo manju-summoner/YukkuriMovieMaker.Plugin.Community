@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-public class EffectTabStashSettings : SettingsBase<EffectTabStashSettings>
+public class EffectTabSettings : SettingsBase<EffectTabSettings>
 {
     public override SettingsCategory Category => SettingsCategory.None;
 
@@ -13,6 +13,8 @@ public class EffectTabStashSettings : SettingsBase<EffectTabStashSettings>
     public override object? SettingView => null;
 
     public ObservableCollection<EffectTab> Stashes { get; } = [];
+
+    public ObservableCollection<EffectTab> Bookmarks { get; } = [];
 
     public override void Initialize()
     {

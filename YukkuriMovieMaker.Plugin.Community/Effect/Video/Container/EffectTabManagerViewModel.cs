@@ -21,7 +21,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         set
         {
             if (_selectedTab == value) return;
-
             if (_selectedTab != null)
                 _selectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
 
@@ -50,12 +49,21 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     public ActionCommand CommitEditCommand { get; }
     public ActionCommand CancelEditCommand { get; }
     public ActionCommand MoveTabToIndexCommand { get; }
+    public ActionCommand AddBookmarkCommand { get; }
+    public ActionCommand RestoreBookmarkCommand { get; }
+    public ActionCommand EditBookmarkCommand { get; }
+    public ActionCommand ClearBookmarksCommand { get; }
+    public ActionCommand ExtractEffectCommand { get; }
 
     public event EventHandler? BeginEdit;
     public event EventHandler? EndEdit;
+    public event Action<string, string>? ShowWarningMessageRequested;
 
     public ObservableCollection<EffectTabStashViewModel> Stashes { get; } = new();
     public bool HasStashes => Stashes.Count > 0;
+
+    public ObservableCollection<EffectTabBookmarkViewModel> Bookmarks { get; } = new();
+    public bool HasBookmarks => Bookmarks.Count > 0;
 
     public EffectTabManagerViewModel(ItemProperty[] itemProperties)
     {
@@ -81,9 +89,15 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         MoveTabToIndexCommand = new ActionCommand(
             p => p is MoveTabToIndexParameter param && CanMoveTabToIndex(param),
             p => ExecuteMoveTabToIndex(p as MoveTabToIndexParameter));
+        AddBookmarkCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteAddBookmark(ResolveTab(p)));
+        RestoreBookmarkCommand = new ActionCommand(p => p is EffectTabBookmarkViewModel, p => ExecuteRestoreBookmark(p as EffectTabBookmarkViewModel));
+        EditBookmarkCommand = new ActionCommand(p => p is EffectTabBookmarkViewModel, p => ExecuteEditBookmark(p as EffectTabBookmarkViewModel));
+        ClearBookmarksCommand = new ActionCommand(_ => HasBookmarks, _ => ExecuteClearBookmarks());
+        ExtractEffectCommand = new ActionCommand(p => p is ExtractEffectViewModel, p => ExecuteExtractEffect(p as ExtractEffectViewModel));
 
         LoadTabs();
         LoadStashes();
+        LoadBookmarks();
 
         _effect.PropertyChanged += OnEffectPropertyChanged;
     }
@@ -103,26 +117,41 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     private void LoadStashes()
     {
-        EffectTabStashSettings.Default.Stashes.CollectionChanged += OnStashesChanged;
+        EffectTabSettings.Default.Stashes.CollectionChanged += OnStashesChanged;
         SyncStashes();
     }
 
     private void SyncStashes()
     {
         Stashes.Clear();
-        foreach (var stash in EffectTabStashSettings.Default.Stashes)
+        foreach (var stash in EffectTabSettings.Default.Stashes)
             Stashes.Add(new EffectTabStashViewModel(stash));
-
         OnPropertyChanged(nameof(HasStashes));
     }
 
     private void OnStashesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         => SyncStashes();
 
+    private void LoadBookmarks()
+    {
+        EffectTabSettings.Default.Bookmarks.CollectionChanged += OnBookmarksChanged;
+        SyncBookmarks();
+    }
+
+    private void SyncBookmarks()
+    {
+        Bookmarks.Clear();
+        foreach (var bookmark in EffectTabSettings.Default.Bookmarks)
+            Bookmarks.Add(new EffectTabBookmarkViewModel(bookmark));
+        OnPropertyChanged(nameof(HasBookmarks));
+    }
+
+    private void OnBookmarksChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        => SyncBookmarks();
+
     private void LoadTabs()
     {
         var state = EffectTabStateService.ResolveEffectState(_effect.EffectTabsJson, _effect.Effects, Texts.EffectTab_FirstName);
-
         Tabs.Clear();
         foreach (var tab in state.Tabs)
             Tabs.Add(new EffectTabItemViewModel(tab));
@@ -183,7 +212,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             SelectedTabId = SelectedTab?.Id,
             Tabs = Tabs.Select(t => t.Model).ToList()
         };
-
         var json = EffectTabStateService.Serialize(state);
 
         ForEachEffect(e =>
@@ -243,12 +271,85 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             SerializedEffects = target.SerializedEffects
         };
 
-        EffectTabStashSettings.Default.Stashes.Add(stash);
-        EffectTabStashSettings.Default.Save();
+        EffectTabSettings.Default.Stashes.Add(stash);
+        EffectTabSettings.Default.Save();
 
         using (BeginUndo())
         {
             RemoveTabInternal(target);
+        }
+    }
+
+    private void ExecuteAddBookmark(EffectTabItemViewModel? target)
+    {
+        if (target == null) return;
+
+        if (target == SelectedTab)
+            target.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
+
+        var effects = EffectSerializer.Deserialize(target.SerializedEffects);
+        if (effects.Count == 0)
+        {
+            ShowWarningMessageRequested?.Invoke(Texts.Message_EmptyEffectTab, Texts.Menu_Bookmark);
+            return;
+        }
+
+        var window = new BookmarkNameWindow(target.Name, false)
+        {
+            Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(x => x.IsActive) ?? Application.Current.MainWindow
+        };
+
+        window.ShowDialog();
+
+        if (window.Result == BookmarkWindowResult.Create && !string.IsNullOrWhiteSpace(window.BookmarkName))
+        {
+            var bookmark = new EffectTab
+            {
+                Id = Guid.NewGuid(),
+                Name = window.BookmarkName,
+                SerializedEffects = target.SerializedEffects
+            };
+            EffectTabSettings.Default.Bookmarks.Add(bookmark);
+            EffectTabSettings.Default.Save();
+        }
+    }
+
+    private void ExecuteEditBookmark(EffectTabBookmarkViewModel? bookmarkVm)
+    {
+        if (bookmarkVm == null) return;
+
+        var window = new BookmarkNameWindow(bookmarkVm.Name, true)
+        {
+            Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(x => x.IsActive) ?? Application.Current.MainWindow
+        };
+
+        window.ShowDialog();
+
+        if (window.Result == BookmarkWindowResult.Complete && !string.IsNullOrWhiteSpace(window.BookmarkName))
+        {
+            bookmarkVm.Name = window.BookmarkName;
+            EffectTabSettings.Default.Save();
+        }
+        else if (window.Result == BookmarkWindowResult.Delete)
+        {
+            EffectTabSettings.Default.Bookmarks.Remove(bookmarkVm.Model);
+            EffectTabSettings.Default.Save();
+        }
+    }
+
+    private void ExecuteExtractEffect(ExtractEffectViewModel? p)
+    {
+        if (p == null || SelectedTab == null) return;
+
+        var effectToAdd = EffectSerializer.Deserialize(p.SerializedEffect).FirstOrDefault();
+        if (effectToAdd == null) return;
+
+        using (BeginUndo())
+        {
+            var currentEffects = EffectSerializer.Deserialize(SelectedTab.SerializedEffects);
+            var newEffects = currentEffects.Add(effectToAdd);
+            SelectedTab.SerializedEffects = EffectSerializer.Serialize(newEffects);
+            ApplyStateToEffectInternal(SelectedTab);
         }
     }
 
@@ -355,7 +456,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             var idx = Tabs.IndexOf(source);
             Tabs.Insert(idx + 1, vm);
             UpdateIndices();
-
             SelectedTab = vm;
         }
     }
@@ -379,6 +479,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void ExecutePaste(EffectTabItemViewModel? targetTabVm)
     {
         if (!Clipboard.ContainsData(ClipboardFormat)) return;
+
         var raw = Clipboard.GetData(ClipboardFormat) as string;
         if (string.IsNullOrWhiteSpace(raw)) return;
 
@@ -436,22 +537,46 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             SelectedTab = vm;
         }
 
-        EffectTabStashSettings.Default.Stashes.Remove(stashVm.Model);
-        EffectTabStashSettings.Default.Save();
+        EffectTabSettings.Default.Stashes.Remove(stashVm.Model);
+        EffectTabSettings.Default.Save();
     }
 
     private void ExecuteRemoveStash(EffectTabStashViewModel? stashVm)
     {
         if (stashVm == null) return;
 
-        EffectTabStashSettings.Default.Stashes.Remove(stashVm.Model);
-        EffectTabStashSettings.Default.Save();
+        EffectTabSettings.Default.Stashes.Remove(stashVm.Model);
+        EffectTabSettings.Default.Save();
     }
 
     private void ExecuteClearStashes()
     {
-        EffectTabStashSettings.Default.Stashes.Clear();
-        EffectTabStashSettings.Default.Save();
+        EffectTabSettings.Default.Stashes.Clear();
+        EffectTabSettings.Default.Save();
+    }
+
+    private void ExecuteRestoreBookmark(EffectTabBookmarkViewModel? bookmarkVm)
+    {
+        if (bookmarkVm == null) return;
+
+        using (BeginUndo())
+        {
+            var tab = new EffectTab
+            {
+                Name = bookmarkVm.Name,
+                SerializedEffects = bookmarkVm.SerializedEffects
+            };
+            var vm = new EffectTabItemViewModel(tab);
+            Tabs.Add(vm);
+            UpdateIndices();
+            SelectedTab = vm;
+        }
+    }
+
+    private void ExecuteClearBookmarks()
+    {
+        EffectTabSettings.Default.Bookmarks.Clear();
+        EffectTabSettings.Default.Save();
     }
 
     private void ExecuteBeginEdit(EffectTabItemViewModel? target)
@@ -466,6 +591,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         using (BeginUndo())
         {
             target.CommitEdit(Texts.EffectTab_FirstName);
+
             if (target == SelectedTab)
                 ForEachEffect(e => e.SelectedTabName = target.Name);
 
@@ -479,6 +605,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     }
 
     private IDisposable BeginUndo() => new StateScope(this, true);
+
     private IDisposable BeginSelfUpdate() => new StateScope(this, false);
 
     private sealed class StateScope : IDisposable
@@ -491,8 +618,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         {
             _vm = vm;
             _useUndo = useUndo;
-
             _wasSelfUpdating = _vm._isSelfUpdating;
+
             _vm._isSelfUpdating = true;
 
             if (_useUndo)
@@ -511,7 +638,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     public void Dispose()
     {
         Tabs.CollectionChanged -= Tabs_CollectionChanged;
-        EffectTabStashSettings.Default.Stashes.CollectionChanged -= OnStashesChanged;
+        EffectTabSettings.Default.Stashes.CollectionChanged -= OnStashesChanged;
+        EffectTabSettings.Default.Bookmarks.CollectionChanged -= OnBookmarksChanged;
         _effect.PropertyChanged -= OnEffectPropertyChanged;
     }
 }

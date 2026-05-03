@@ -3,17 +3,28 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-public class EffectTabStashViewModel : Bindable
+public class EffectTabBookmarkViewModel : Bindable
 {
     public EffectTab Model { get; }
 
-    public EffectTabStashViewModel(EffectTab model)
+    public EffectTabBookmarkViewModel(EffectTab model)
     {
         Model = model;
     }
 
     public Guid Id => Model.Id;
-    public string Name => Model.Name;
+
+    public string Name
+    {
+        get => Model.Name;
+        set
+        {
+            if (Model.Name == value) return;
+            Model.Name = value;
+            OnPropertyChanged(nameof(Name));
+        }
+    }
+
     public string SerializedEffects => Model.SerializedEffects;
 
     public IEnumerable<ExtractEffectViewModel> ExtractEffects

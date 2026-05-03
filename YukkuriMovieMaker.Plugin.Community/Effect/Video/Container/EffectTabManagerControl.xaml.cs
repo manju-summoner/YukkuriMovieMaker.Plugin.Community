@@ -23,7 +23,6 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
     {
         if (DataContext is IDisposable old)
             old.Dispose();
-
         DataContext = new EffectTabManagerViewModel(itemProperties);
     }
 
@@ -31,7 +30,6 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
     {
         if (DataContext is IDisposable disposable)
             disposable.Dispose();
-
         DataContext = null;
     }
 
@@ -41,6 +39,7 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         {
             oldVm.BeginEdit -= OnBeginEdit;
             oldVm.EndEdit -= OnEndEdit;
+            oldVm.ShowWarningMessageRequested -= OnShowWarningMessageRequested;
         }
 
         _dragDropService?.Dispose();
@@ -50,12 +49,19 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         {
             newVm.BeginEdit += OnBeginEdit;
             newVm.EndEdit += OnEndEdit;
+            newVm.ShowWarningMessageRequested += OnShowWarningMessageRequested;
             _dragDropService = new TabDragDropService(TabListBox, newVm);
         }
     }
 
     private void OnBeginEdit(object? sender, EventArgs e) => BeginEdit?.Invoke(this, EventArgs.Empty);
+
     private void OnEndEdit(object? sender, EventArgs e) => EndEdit?.Invoke(this, EventArgs.Empty);
+
+    private void OnShowWarningMessageRequested(string message, string title)
+    {
+        MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Warning);
+    }
 
     private void RenameTextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
@@ -116,6 +122,22 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         if (result == MessageBoxResult.Yes && vm.ClearStashesCommand.CanExecute(null))
         {
             vm.ClearStashesCommand.Execute(null);
+        }
+    }
+
+    private void ClearBookmarksMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is not EffectTabManagerViewModel vm) return;
+
+        var result = MessageBox.Show(
+            Texts.Menu_ClearBookmarksConfirm,
+            Texts.Menu_ClearBookmarks,
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result == MessageBoxResult.Yes && vm.ClearBookmarksCommand.CanExecute(null))
+        {
+            vm.ClearBookmarksCommand.Execute(null);
         }
     }
 }
