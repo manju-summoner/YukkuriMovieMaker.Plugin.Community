@@ -372,15 +372,21 @@
             </ListBox>
         </Border>
 
-        <Button Grid.Column="1"
+        <Border Grid.Column="1"
+                Background="Transparent"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                BorderThickness="0,0,0,1"
+                Padding="0,0,0,4">
+            <Button
                 Style="{StaticResource AddIconButtonStyle}"
-                Margin="6,0,0,4"
+                Margin="6,0,0,0"
                 VerticalAlignment="Bottom"
                 ToolTip="{x:Static loc:Texts.EffectTab_Add}"
                 Command="{Binding AddTabCommand}">
-            <Viewbox Width="24" Height="24">
-                <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
-            </Viewbox>
-        </Button>
+                <Viewbox Width="24" Height="24">
+                    <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                </Viewbox>
+            </Button>
+        </Border>
     </Grid>
 </UserControl>
