@@ -11,6 +11,8 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
     public event EventHandler? BeginEdit;
     public event EventHandler? EndEdit;
 
+    private TabDragDropService? _dragDropService;
+
     public EffectTabManagerControl()
     {
         InitializeComponent();
@@ -39,10 +41,14 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
             oldVm.EndEdit -= OnEndEdit;
         }
 
+        _dragDropService?.Dispose();
+        _dragDropService = null;
+
         if (e.NewValue is EffectTabManagerViewModel newVm)
         {
             newVm.BeginEdit += OnBeginEdit;
             newVm.EndEdit += OnEndEdit;
+            _dragDropService = new TabDragDropService(TabListBox, newVm);
         }
     }
 

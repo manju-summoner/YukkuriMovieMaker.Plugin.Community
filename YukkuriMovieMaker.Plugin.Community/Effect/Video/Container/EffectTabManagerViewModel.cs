@@ -46,6 +46,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     public ActionCommand BeginEditCommand { get; }
     public ActionCommand CommitEditCommand { get; }
     public ActionCommand CancelEditCommand { get; }
+    public ActionCommand MoveTabToIndexCommand { get; }
 
     public event EventHandler? BeginEdit;
     public event EventHandler? EndEdit;
@@ -72,6 +73,9 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         BeginEditCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteBeginEdit(ResolveTab(p)));
         CommitEditCommand = new ActionCommand(_ => true, p => ExecuteCommitEdit(p as EffectTabItemViewModel));
         CancelEditCommand = new ActionCommand(_ => true, p => ExecuteCancelEdit(p as EffectTabItemViewModel));
+        MoveTabToIndexCommand = new ActionCommand(
+            p => p is MoveTabToIndexParameter param && CanMoveTabToIndex(param),
+            p => ExecuteMoveTabToIndex(p as MoveTabToIndexParameter));
 
         LoadTabs();
         LoadStashes();
@@ -240,6 +244,38 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 UpdateIndices();
                 PersistState();
             }
+        }
+    }
+
+    private bool CanMoveTabToIndex(MoveTabToIndexParameter param)
+    {
+        var sourceIndex = Tabs.IndexOf(param.Tab);
+        if (sourceIndex < 0) return false;
+        var target = param.TargetIndex;
+        return target >= 0 && target <= Tabs.Count
+            && target != sourceIndex
+            && target != sourceIndex + 1;
+    }
+
+    private void ExecuteMoveTabToIndex(MoveTabToIndexParameter? param)
+    {
+        if (param == null) return;
+
+        var sourceIndex = Tabs.IndexOf(param.Tab);
+        if (sourceIndex < 0) return;
+
+        var adjustedIndex = param.TargetIndex > sourceIndex
+            ? param.TargetIndex - 1
+            : param.TargetIndex;
+
+        if (adjustedIndex == sourceIndex) return;
+        if (adjustedIndex < 0 || adjustedIndex >= Tabs.Count) return;
+
+        using (BeginUndo())
+        {
+            Tabs.Move(sourceIndex, adjustedIndex);
+            UpdateIndices();
+            PersistState();
         }
     }
 
