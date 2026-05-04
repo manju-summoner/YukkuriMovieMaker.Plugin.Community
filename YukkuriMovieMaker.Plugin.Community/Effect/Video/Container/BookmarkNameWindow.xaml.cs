@@ -29,5 +29,14 @@ public partial class BookmarkNameWindow : Window
             LeftButton.Click += (s, e) => { Result = BookmarkWindowResult.Create; DialogResult = true; Close(); };
             RightButton.Click += (s, e) => { Result = BookmarkWindowResult.Cancel; DialogResult = false; Close(); };
         }
+
+        PreviewKeyDown += (s, e) =>
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                LeftButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+                e.Handled = true;
+            }
+        };
     }
 }
