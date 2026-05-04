@@ -335,11 +335,13 @@
                                             <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                             <Setter Property="Command" Value="{Binding Tag.ExtractEffectCommand, RelativeSource={RelativeSource Self}}" />
                                             <Setter Property="CommandParameter" Value="{Binding}" />
+                                            <Setter Property="Icon" Value="{DynamicResource {x:Static icons:IconKeys.ArrowBottomRight}}" />
                                         </Style>
                                         <Style TargetType="MenuItem" x:Key="ExtractParentItemStyle">
                                             <Setter Property="Header" Value="{Binding Name}" />
                                             <Setter Property="ItemsSource" Value="{Binding ExtractEffects}" />
                                             <Setter Property="ItemContainerStyle" Value="{StaticResource ExtractEffectItemStyle}" />
+                                            <Setter Property="Icon" Value="{DynamicResource {x:Static icons:IconKeys.ChevronRight}}" />
                                         </Style>
                                     </ContextMenu.Resources>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_Copy}"
