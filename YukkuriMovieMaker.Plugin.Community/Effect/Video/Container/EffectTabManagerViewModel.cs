@@ -67,6 +67,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     public ObservableCollection<EffectTabBookmarkViewModel> Bookmarks { get; } = new();
     public bool HasBookmarks => Bookmarks.Count > 0;
 
+    public bool HasExtractEffectSources => HasStashes || HasBookmarks;
+
     public EffectTabManagerViewModel(ItemProperty[] itemProperties)
     {
         _itemProperties = itemProperties;
@@ -129,6 +131,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         foreach (var stash in EffectTabSettings.Default.Stashes)
             Stashes.Add(new EffectTabStashViewModel(stash));
         OnPropertyChanged(nameof(HasStashes));
+        OnPropertyChanged(nameof(HasExtractEffectSources));
     }
 
     private void OnStashesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -146,6 +149,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         foreach (var bookmark in EffectTabSettings.Default.Bookmarks)
             Bookmarks.Add(new EffectTabBookmarkViewModel(bookmark));
         OnPropertyChanged(nameof(HasBookmarks));
+        OnPropertyChanged(nameof(HasExtractEffectSources));
     }
 
     private void OnBookmarksChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

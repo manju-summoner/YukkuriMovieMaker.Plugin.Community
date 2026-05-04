@@ -10,6 +10,7 @@ EffectTab_Add,,タブを追加,Add Tab,添加标签,新增分頁,タブ 追加,A
 EffectTab_Remove,,タブを削除,Remove Tab,削除标签,刪除分頁,タブ 削除,Eliminar pestaña,إزالة علامة تبويب,Hapus Tab,
 VideoEffect_Name,,コンテナ,Container,容器,容器,컨테이너,Contenedor,حاوية,Kontainer,
 VideoEffect_Tag_Container,,コンテナ,Container,容器,容器,컨테이너,Contenedor,حاوية,Kontainer,
+Menu_Rename,,名前変更,Rename,重命名,重新命名,이름 변경,Renombrar,إعادة التسمية,Ganti Nama,
 Menu_Copy,,コピー,Copy,复制,複製,복사,Copiar,نسخ,Salin,
 Menu_Paste,,貼り付け,Paste,粘贴,貼上,붙여넣기,Pegar,لصق,Tempel,
 Menu_Duplicate,,複製,Duplicate,复制,複製,복제,Duplicar,تكرار,Duplikat,

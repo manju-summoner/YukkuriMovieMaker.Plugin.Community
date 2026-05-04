@@ -344,6 +344,10 @@
                                             <Setter Property="Icon" Value="{DynamicResource {x:Static icons:IconKeys.ChevronRight}}" />
                                         </Style>
                                     </ContextMenu.Resources>
+                                    <MenuItem Header="{x:Static loc:Texts.Menu_Rename}"
+                                              Command="{Binding BeginEditCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                              Icon="{DynamicResource {x:Static icons:IconKeys.Pencil}}"/>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_Copy}"
                                               Command="{Binding CopyCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
@@ -365,7 +369,8 @@
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.BookmarkOutline}}"/>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_ExtractEffect}"
-                                              Icon="{DynamicResource {x:Static icons:IconKeys.TrayArrowDown}}">
+                                              Icon="{DynamicResource {x:Static icons:IconKeys.TrayArrowDown}}"
+                                              Visibility="{Binding DataContext.HasExtractEffectSources, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <MenuItem Header="{x:Static loc:Texts.Menu_Stashes}" ItemsSource="{Binding Stashes}" ItemContainerStyle="{StaticResource ExtractParentItemStyle}" Visibility="{Binding HasStashes, Converter={StaticResource BooleanToVisibilityConverter}}" Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}"/>
                                         <MenuItem Header="{x:Static loc:Texts.Menu_Bookmarks}" ItemsSource="{Binding Bookmarks}" ItemContainerStyle="{StaticResource ExtractParentItemStyle}" Visibility="{Binding HasBookmarks, Converter={StaticResource BooleanToVisibilityConverter}}" Icon="{DynamicResource {x:Static icons:IconKeys.BookmarkMultipleOutline}}"/>
                                     </MenuItem>
