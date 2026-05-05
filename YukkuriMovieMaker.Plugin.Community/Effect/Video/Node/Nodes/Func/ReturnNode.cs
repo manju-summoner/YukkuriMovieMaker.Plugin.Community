@@ -4,6 +4,10 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 
+/// <summary>
+///     グラフの出力を受け取るノード。
+///     ノードエディタ上では出力端子として機能し、グラフの評価結果をまとめて返す。
+/// </summary>
 [Node(typeof(FunctionCategory), "戻値", "ノードのグラフの計算結果を受け取ります。")]
 public class ReturnNode : NodeLogic
 {
@@ -27,7 +31,6 @@ public class ReturnNode : NodeLogic
         {
             var port = new InputPort(this, portDef.ValueType);
             Inputs.Add(portDef.Name, port);
-
             if (portDef.DefaultValue != null) port.SetValue(portDef.DefaultValue);
         }
     }
@@ -41,18 +44,14 @@ public class ReturnNode : NodeLogic
     {
         var results = new Dictionary<string, object?>();
         foreach (var (name, port) in Inputs)
-        {
-            var value = await port.GetValue(context);
-            results[name] = value;
-        }
-
+            results[name] = await port.GetValue(context).ConfigureAwait(false);
         return results;
     }
 
     public async Task<object?> ExtractReturn(string name, EvaluationContext? context = null)
     {
-        if (Inputs.TryGetValue(name, out var port)) return await port.GetValue(context);
-
+        if (Inputs.TryGetValue(name, out var port))
+            return await port.GetValue(context).ConfigureAwait(false);
         return null;
     }
 

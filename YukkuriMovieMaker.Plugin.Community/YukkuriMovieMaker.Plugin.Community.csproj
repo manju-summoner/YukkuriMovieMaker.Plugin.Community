@@ -79,6 +79,7 @@
     </Target>
 
     <ItemGroup>
+        <Folder Include="Effect\Video\Node\Nodes\Generator\"/>
         <Folder Include="FileSource\"/>
         <Folder Include="FileWriter\"/>
         <Folder Include="Tachie\"/>

@@ -173,16 +173,15 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
             .Select(x => new
             {
                 x.Type,
-                x.Attr,
-                CtgrInst = (INodeCategory)Activator.CreateInstance(x.Attr!.CategoryType)!
+                x.Attr
             })
             .Select(x => new NodeTypeInfo
             {
                 Type = x.Type,
-                Category = x.CtgrInst.Category,
+                Category = x.Attr!.GetCategoryName(),
                 Label = x.Attr!.GetLabel(),
                 Description = x.Attr!.GetDescription(),
-                Color = x.CtgrInst.Color
+                Color = x.Attr!.GetCategoryColor()
             });
 
         foreach (var nodeInfo in nodeTypes)
@@ -197,6 +196,42 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
         }
 
         return categories;
+    }
+
+    public void AddDynamicNodeTypes(IEnumerable<Type> types)
+    {
+        foreach (var t in types)
+        {
+            NodeTypeInfo info;
+            try
+            {
+                var attr = t.GetCustomAttribute<NodeAttribute>();
+                if (attr == null) continue;
+                var ctgr = (INodeCategory)Activator.CreateInstance(attr.CategoryType)!;
+                info = new NodeTypeInfo
+                {
+                    Type = t,
+                    Category = ctgr.Category,
+                    Label = attr.GetLabel(),
+                    Description = attr.GetDescription(),
+                    Color = ctgr.Color
+                };
+            }
+            catch
+            {
+                continue;
+            }
+
+            if (!_nodeCategories.TryGetValue(info.Category, out var list))
+            {
+                list = [];
+                _nodeCategories[info.Category] = list;
+            }
+
+            // 同一型の二重登録を防ぐ
+            if (list.All(n => n.Type != info.Type))
+                list.Add(info);
+        }
     }
 
     private void CloseTab(TabViewModel tab)

@@ -1,6 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Windows.Data;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters;
 
@@ -11,9 +11,9 @@ public class EnumTypeToStringList : IValueConverter
         return value is not Type { IsEnum: true } type
             ? []
             : type.GetFields()
-                .Select(field => field.GetCustomAttributes(typeof(EnumDisplayAttribute), false))
+                .Select(field => field.GetCustomAttributes(typeof(DisplayAttribute), false))
                 .Where(attributes => attributes.Length != 0)
-                .Select(attributes => ((EnumDisplayAttribute)attributes[0]).Name)
+                .Select(attributes => ((DisplayAttribute)attributes[0]).GetName())
                 .ToList();
     }
 

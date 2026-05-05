@@ -16,3 +16,6 @@ CannotCreateEffectInstance,エフェクトインスタンス生成失敗,エフ�
 CannotCastToShaderEffect,ShaderEffect 型変換失敗,ShaderEffect にキャストできません,Cannot cast to ShaderEffect,无法转换为 ShaderEffect,無法轉換為 ShaderEffect,ShaderEffect로 캐스팅할 수 없습니다,No se puede convertir a ShaderEffect,لا يمكن التحويل إلى ShaderEffect
 IndexOutOfRange,インデックス範囲外エラー,指定されたインデックスが範囲外です,The specified index is out of range.,指定索引超出范围,指定索引超出範圍,지정된 인덱스가 범위를 벗어났습니다,El índice especificado está fuera de rango,الفهرس المحدد خارج النطاق
 CannotCreateType,型生成失敗,型を作成できません,Cannot create the type,无法创建类型,無法建立類型,타입을 생성할 수 없습니다,No se puede crear el tipo,تعذر إنشاء النوع
+
+Input,入力,入力,Input,输入,輸入,입력,Aporte,مدخل
+Output,出力,出力,Output,输出,輸出,출력,Producción,الناتج

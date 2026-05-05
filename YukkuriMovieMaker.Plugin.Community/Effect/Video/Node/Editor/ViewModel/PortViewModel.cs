@@ -39,17 +39,7 @@ public sealed class PortViewModel : INotifyPropertyChanged
         if (direction == PortDirection.Input)
         {
             var port = graph.Nodes[nodeId].Inputs[name];
-            if (!port.IsConnected)
-            {
-                try
-                {
-                    _currentValue = port.GetValue().GetAwaiter().GetResult();
-                }
-                catch (NullReferenceException)
-                {
-                    // ignore
-                }
-            }
+            _currentValue = port.LocalValue;
         }
 
         BeginEditCommand = new RelayCommand(() => _graph.BeginEdit());

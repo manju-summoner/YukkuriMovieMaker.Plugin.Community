@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
 
@@ -153,8 +154,6 @@ public partial class ColorPort
         cp._suppress = true;
         cp.SelectedColor = Color.FromArgb(cp.Alpha, cp.Red, cp.Green, cp.Blue);
         cp._suppress = false;
-
-        cp.OnPropertyChanged(nameof(SelectedColor));
     }
 
     private static void OnSelectedColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -167,10 +166,6 @@ public partial class ColorPort
         cp._suppress = true;
         cp.UpdateAllPropertiesFromColor(newColor);
         cp._suppress = false;
-
-        cp.BeginEditCommand?.Execute(null);
-        cp.OnPropertyChanged(nameof(SelectedColor));
-        cp.EndEditCommand?.Execute(null);
     }
 
     private void UpdateAllPropertiesFromColor(Color color)
@@ -220,6 +215,28 @@ public partial class ColorPort
 
     private void btnColor_Click(object sender, RoutedEventArgs e)
     {
+        if (ColorPickerHost.Content == null)
+        {
+            var picker = new ColorPicker();
+            picker.SetBinding(ColorPicker.RProperty,
+                new Binding(nameof(Red)) { Source = this, Mode = BindingMode.TwoWay });
+            picker.SetBinding(ColorPicker.GProperty,
+                new Binding(nameof(Green)) { Source = this, Mode = BindingMode.TwoWay });
+            picker.SetBinding(ColorPicker.BProperty,
+                new Binding(nameof(Blue)) { Source = this, Mode = BindingMode.TwoWay });
+            picker.SetBinding(ColorPicker.AProperty,
+                new Binding(nameof(Alpha)) { Source = this, Mode = BindingMode.TwoWay });
+            picker.SetBinding(ColorPicker.HProperty,
+                new Binding(nameof(Hue)) { Source = this, Mode = BindingMode.TwoWay });
+            picker.SetBinding(ColorPicker.SProperty,
+                new Binding(nameof(Saturation)) { Source = this, Mode = BindingMode.TwoWay });
+            picker.SetBinding(ColorPicker.VProperty,
+                new Binding(nameof(BValue)) { Source = this, Mode = BindingMode.TwoWay });
+            picker.SetBinding(ColorPicker.SelectedColorProperty,
+                new Binding(nameof(SelectedColor)) { Source = this, Mode = BindingMode.TwoWay });
+            ColorPickerHost.Content = picker;
+        }
+
         Popup.IsOpen = true;
     }
 
@@ -263,6 +280,10 @@ public partial class ColorPort
 
     private void Popup_OnClosed(object? sender, EventArgs e)
     {
+        BeginEditCommand?.Execute(null);
+        if (DataContext is PortViewModel vm)
+            vm.CurrentValue = SelectedColor;
+        EndEditCommand?.Execute(null);
         OnPropertyChanged(nameof(SelectedColor));
     }
 

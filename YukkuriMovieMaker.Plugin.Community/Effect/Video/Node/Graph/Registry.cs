@@ -17,6 +17,13 @@ public static class Registry
         }
     }
 
+    public static void RegisterType(Type type)
+    {
+        if (!typeof(NodeLogic).IsAssignableFrom(type)) return;
+        var key = type.AssemblyQualifiedName ?? type.Name;
+        Nodes.TryAdd(key, type);
+    }
+
     public static NodeLogic Create(string assemblyQualifiedName, Guid id)
     {
         var type = Nodes[assemblyQualifiedName];

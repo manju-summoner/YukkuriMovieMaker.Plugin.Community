@@ -79,7 +79,8 @@ public static class Serializer
 
         foreach (var nodeSnap in snapshot.Nodes)
         {
-            var type = Type.GetType(nodeSnap.TypeName);
+            var type = Type.GetType(nodeSnap.TypeName)
+                       ?? Registry.AllNodes.GetValueOrDefault(nodeSnap.TypeName);
             if (type == null) continue;
             var node = (NodeLogic)Activator.CreateInstance(type)!;
             node.Id = nodeSnap.Id;

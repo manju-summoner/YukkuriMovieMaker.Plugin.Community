@@ -18,13 +18,13 @@ public class OutputPort : Port
 
     public async Task<object?> GetValue()
     {
-        if (!_isCached) await Owner.EvaluateInternal();
+        if (!_isCached) await Owner.EvaluateInternal().ConfigureAwait(false);
         return _cachedValue;
     }
 
     public async Task<object?> GetValue(EvaluationContext? context)
     {
-        if (!_isCached) await Owner.EvaluateInternal(context);
+        if (!_isCached) await Owner.EvaluateInternal(context).ConfigureAwait(false);
         return _cachedValue;
     }
 
@@ -38,11 +38,14 @@ public class OutputPort : Port
         _connection.Remove(inputPort);
     }
 
+    /// <summary>
+    ///     キャッシュを無効化し、下流ノードにも無効化を伝播する。
+    ///     すでに無効化済みであれば伝播を止める。
+    /// </summary>
     internal void Invalidate()
     {
         if (!_isCached) return;
         _isCached = false;
-
         foreach (var input in _connection) input.Owner.Invalidate();
     }
 }

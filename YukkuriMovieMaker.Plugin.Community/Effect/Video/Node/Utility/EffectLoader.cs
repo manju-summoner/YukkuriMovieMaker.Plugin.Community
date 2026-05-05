@@ -55,7 +55,6 @@ public class VideoEffectsLoader : IDisposable
 
     public void Dispose()
     {
-        _processor?.Output.Dispose();
         _processor?.ClearInput();
         _processor?.Dispose();
         _processor = null;

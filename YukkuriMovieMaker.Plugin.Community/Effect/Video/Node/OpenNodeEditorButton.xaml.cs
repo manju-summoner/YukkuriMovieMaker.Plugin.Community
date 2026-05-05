@@ -9,6 +9,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
 
@@ -61,6 +62,12 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
             toolAreaViewModel?.GetType().GetProperty("ViewModel")?.GetValue(toolAreaViewModel) as NodeEditorViewModel;
 
         vm?.OpenGraph(pluginItem.InternalGraph!);
+
+        if (vm != null)
+        {
+            var dynamicTypes = EffectNodeFactory.Create();
+            vm.AddDynamicNodeTypes(dynamicTypes);
+        }
 
         if (_committedHandler != null)
             pluginItem.InternalGraph!.Committed -= _committedHandler;

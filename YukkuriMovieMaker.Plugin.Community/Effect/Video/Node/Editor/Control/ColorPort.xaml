@@ -34,7 +34,7 @@
                                 <GeometryDrawing>
                                     <GeometryDrawing.Brush>
                                         <SolidColorBrush
-                                            Color="{Binding SelectedColor, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}" />
+                                            Color="{Binding SelectedColor, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=OneWay}" />
                                     </GeometryDrawing.Brush>
                                     <GeometryDrawing.Geometry>
                                         <RectangleGeometry Rect="0,0,10,10" />
@@ -47,7 +47,7 @@
             </Button>
             <TextBox Width="75" Height="25"
                      Text="{Binding SelectedColor, RelativeSource={RelativeSource AncestorType=local:ColorPort},
-                     Converter={StaticResource ColorToHexConverter}, Mode=TwoWay, ElementName=ColorPortControl}"
+                     Converter={StaticResource ColorToHexConverter}, Mode=TwoWay}"
                      VerticalContentAlignment="Center" FontFamily="Consolas" />
         </StackPanel>
         <Popup x:Name="Popup" AllowsTransparency="True" PlacementTarget="{Binding ElementName=BtnColor}"
@@ -65,49 +65,41 @@
                     <Grid Grid.ColumnSpan="3" Background="Transparent" IsHitTestVisible="True" Focusable="True"
                           PreviewMouseDown="UIElement_OnPreviewMouseDown" />
 
-                    <local:ColorPicker Grid.Column="0"
-                                       R="{Binding Red, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}"
-                                       G="{Binding Green, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}"
-                                       B="{Binding Blue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}"
-                                       A="{Binding Alpha, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}"
-                                       H="{Binding Hue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}"
-                                       S="{Binding Saturation, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}"
-                                       V="{Binding BValue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}"
-                                       SelectedColor="{Binding SelectedColor, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}" />
+                    <ContentControl x:Name="ColorPickerHost" Grid.Column="0" />
 
                     <StackPanel Grid.Column="2" VerticalAlignment="Center">
                         <TextBlock Text="RGB" FontWeight="Bold" Margin="0,0,0,5" />
                         <StackPanel Orientation="Horizontal" Margin="0,5">
                             <TextBlock Text="R:" Width="20" VerticalAlignment="Center" />
                             <TextBox
-                                Text="{Binding Red, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}"
+                                Text="{Binding Red, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}"
                                 Width="50" VerticalContentAlignment="Center" />
                             <Slider Minimum="0" Maximum="255" Width="150" Margin="5,0,0,0"
-                                    Value="{Binding Red, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}" />
+                                    Value="{Binding Red, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
                             <TextBlock Text="G:" Width="20" VerticalAlignment="Center" />
                             <TextBox
-                                Text="{Binding Green, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}"
+                                Text="{Binding Green, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}"
                                 Width="50" VerticalContentAlignment="Center" />
                             <Slider Minimum="0" Maximum="255" Width="150" Margin="5,0,0,0"
-                                    Value="{Binding Green, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}" />
+                                    Value="{Binding Green, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
                             <TextBlock Text="B:" Width="20" VerticalAlignment="Center" />
                             <TextBox
-                                Text="{Binding Blue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}"
+                                Text="{Binding Blue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}"
                                 Width="50" VerticalContentAlignment="Center" />
                             <Slider Minimum="0" Maximum="255" Width="150" Margin="5,0,0,0"
-                                    Value="{Binding Blue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}" />
+                                    Value="{Binding Blue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
                             <TextBlock Text="A:" Width="20" VerticalAlignment="Center" />
                             <TextBox
-                                Text="{Binding Alpha, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}"
+                                Text="{Binding Alpha, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}"
                                 Width="50" VerticalContentAlignment="Center" />
                             <Slider Minimum="0" Maximum="255" Width="150" Margin="5,0,0,0"
-                                    Value="{Binding Alpha, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}" />
+                                    Value="{Binding Alpha, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
                         </StackPanel>
 
                         <Separator Margin="0,10" />
@@ -116,26 +108,26 @@
                         <StackPanel Orientation="Horizontal" Margin="0,5">
                             <TextBlock Text="H:" Width="20" VerticalAlignment="Center" />
                             <TextBox
-                                Text="{Binding Hue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl, StringFormat={}{0:F1}}"
+                                Text="{Binding Hue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, StringFormat={}{0:F1}}"
                                 Width="50" VerticalContentAlignment="Center" />
                             <Slider Minimum="0" Maximum="359" Width="150" Margin="5,0,0,0"
-                                    Value="{Binding Hue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}" />
+                                    Value="{Binding Hue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
                             <TextBlock Text="S:" Width="20" VerticalAlignment="Center" />
                             <TextBox
-                                Text="{Binding Saturation, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl, StringFormat={}{0:P0}}"
+                                Text="{Binding Saturation, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, StringFormat={}{0:P0}}"
                                 Width="50" VerticalContentAlignment="Center" />
                             <Slider Minimum="0" Maximum="1" Width="150" Margin="5,0,0,0"
-                                    Value="{Binding Saturation, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}" />
+                                    Value="{Binding Saturation, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
                             <TextBlock Text="V:" Width="20" VerticalAlignment="Center" />
                             <TextBox
-                                Text="{Binding BValue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl, StringFormat={}{0:P0}}"
+                                Text="{Binding BValue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, StringFormat={}{0:P0}}"
                                 Width="50" VerticalContentAlignment="Center" />
                             <Slider Minimum="0" Maximum="1" Width="150" Margin="5,0,0,0"
-                                    Value="{Binding BValue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, ElementName=ColorPortControl}" />
+                                    Value="{Binding BValue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
                         </StackPanel>
                     </StackPanel>
                 </Grid>

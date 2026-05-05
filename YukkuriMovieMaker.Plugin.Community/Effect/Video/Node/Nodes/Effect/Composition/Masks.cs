@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Windows.Media;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
@@ -9,13 +10,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.Comp
 
 public enum MaskMode
 {
-    [EnumDisplay("色相")] Hue,
-    [EnumDisplay("彩度")] Saturation,
-    [EnumDisplay("明度")] Value,
-    [EnumDisplay("赤")] Red,
-    [EnumDisplay("緑")] Green,
-    [EnumDisplay("青")] Blue,
-    [EnumDisplay("透明度")] Alpha
+    [Display(Name = "色相")] Hue,
+    [Display(Name = "彩度")] Saturation,
+    [Display(Name = "明度")] Value,
+    [Display(Name = "赤")] Red,
+    [Display(Name = "緑")] Green,
+    [Display(Name = "青")] Blue,
+    [Display(Name = "透明度")] Alpha
 }
 
 [Node(typeof(CompositionCategory), "マスク生成", "指定した画像の要素から画像を生成します")]

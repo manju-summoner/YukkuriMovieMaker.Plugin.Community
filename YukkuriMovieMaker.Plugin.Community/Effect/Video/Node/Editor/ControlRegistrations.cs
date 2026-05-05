@@ -177,8 +177,7 @@ public static class ControlRegistrations
             factory.SetBinding(ColorPort.SelectedColorProperty,
                 new Binding(nameof(PortViewModel.CurrentValue))
                 {
-                    Mode = BindingMode.TwoWay,
-                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    Mode = BindingMode.OneWay,
                     TargetNullValue = Colors.White,
                     FallbackValue = Colors.White
                 });

@@ -60,7 +60,7 @@ public abstract class NodeLogic
         var success = false;
         try
         {
-            await Calculate();
+            await Calculate().ConfigureAwait(false);
             success = true;
         }
         catch (NullReferenceException)
@@ -77,22 +77,19 @@ public abstract class NodeLogic
     public void Invalidate()
     {
         if (!_isEvaluated) return;
-
         _isEvaluated = false;
-
         foreach (var output in Outputs.Values) output.Invalidate();
     }
 
     protected void InvalidateForce()
     {
         _isEvaluated = false;
-
         foreach (var output in Outputs.Values) output.Invalidate();
     }
 
     protected async Task<T?> GetInputAsync<T>([CallerMemberName] string name = null!)
     {
-        var value = await Inputs[name].GetValue(EvaluationContext);
+        var value = await Inputs[name].GetValue(EvaluationContext).ConfigureAwait(false);
         if (value is null) return default;
         if (value is T typed) return typed;
         try
@@ -132,7 +129,7 @@ public abstract class NodeLogic
 
     protected async Task<T?> GetOutputAsync<T>([CallerMemberName] string name = null!)
     {
-        var value = await Outputs[name].GetValue();
+        var value = await Outputs[name].GetValue().ConfigureAwait(false);
         if (value is null) return default;
         if (value is T typed) return typed;
         try

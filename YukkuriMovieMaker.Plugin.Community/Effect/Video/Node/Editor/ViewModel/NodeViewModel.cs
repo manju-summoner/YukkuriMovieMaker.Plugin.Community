@@ -30,10 +30,9 @@ public sealed class NodeViewModel : INotifyPropertyChanged
         var nodeAttr = nodeLogic.GetType().GetCustomAttribute<NodeAttribute>();
         if (nodeAttr == null) throw new InvalidOperationException();
         DisplayName = nodeAttr.GetLabel();
-        var instance = (INodeCategory)Activator.CreateInstance(nodeAttr.CategoryType)!;
-        Category = instance.Category;
+        Category = nodeAttr.GetCategoryName();
         Description = nodeAttr.GetDescription();
-        Color = instance.Color;
+        Color = nodeAttr.GetCategoryColor();
 
         InputPorts = new ObservableCollection<PortViewModel>(
             CreateInputPorts(nodeLogic, graph)
