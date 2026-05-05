@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
+<data name="HeatHazeEffectName" xml:space="preserve"><value>熱揺らぎ</value></data>
+<data name="HeatHazeControlModeName" xml:space="preserve"><value>モード切替</value></data>
+<data name="HeatHazeControlModeDesc" xml:space="preserve"><value>操作モードを「自動」と「手動」で切り替えます。</value></data>
+<data name="HeatHazeControlModeAutomatic" xml:space="preserve"><value>自動</value></data>
+<data name="HeatHazeControlModeAutomaticDesc" xml:space="preserve"><value>温度と湿度から揺らぎを自動計算します。</value></data>
+<data name="HeatHazeControlModeManual" xml:space="preserve"><value>手動</value></data>
+<data name="HeatHazeControlModeManualDesc" xml:space="preserve"><value>各パラメータを手動で設定します。</value></data>
+<data name="HeatHazeAutoSettingsGroup" xml:space="preserve"><value>自動設定</value></data>
+<data name="HeatHazeTemperatureName" xml:space="preserve"><value>温度</value></data>
+<data name="HeatHazeTemperatureDesc" xml:space="preserve"><value>現実の温度を模倣して揺らぎの強さや速さを自動調整します（15℃以下で無効 50℃で最大）。</value></data>
+<data name="HeatHazeHumidityName" xml:space="preserve"><value>湿度</value></data>
+<data name="HeatHazeHumidityDesc" xml:space="preserve"><value>湿度が高いほど屈折指数の変動が増幅され揺らぎが強くなります。</value></data>
+<data name="HeatHazeManualSettingsGroup" xml:space="preserve"><value>手動設定</value></data>
+<data name="HeatHazeStrengthName" xml:space="preserve"><value>揺らぎの強さ</value></data>
+<data name="HeatHazeStrengthDesc" xml:space="preserve"><value>映像の歪みの大きさを調整します。</value></data>
+<data name="HeatHazeScaleName" xml:space="preserve"><value>揺らぎの細かさ</value></data>
+<data name="HeatHazeScaleDesc" xml:space="preserve"><value>ノイズパターンの大きさを調整します。値が小さいほど細かく 大きいほど粗くなります。</value></data>
+<data name="HeatHazeFlowSpeedName" xml:space="preserve"><value>流れの速さ</value></data>
+<data name="HeatHazeFlowSpeedDesc" xml:space="preserve"><value>歪みパターン全体が移動する速度を制御します。</value></data>
+<data name="HeatHazeBoilSpeedName" xml:space="preserve"><value>うねりの速さ</value></data>
+<data name="HeatHazeBoilSpeedDesc" xml:space="preserve"><value>歪みパターンがその場で変化する速度を制御します。</value></data>
+<data name="HeatHazeCommonSettingsGroup" xml:space="preserve"><value>共通設定</value></data>
+<data name="HeatHazeAngleName" xml:space="preserve"><value>揺らぎの方向</value></data>
+<data name="HeatHazeAngleDesc" xml:space="preserve"><value>熱揺らぎの流れる方向を角度で指定します（90°が上方向 現実の熱気流を模倣します）。</value></data>
+<data name="HeatHazeChromaticAberrationName" xml:space="preserve"><value>色収差</value></data>
+<data name="HeatHazeChromaticAberrationDesc" xml:space="preserve"><value>歪みに伴うRGBの色ズレの強さを調整します。</value></data>
+<data name="HeatHazeEnableBlurName" xml:space="preserve"><value>連動ブラー</value></data>
+<data name="HeatHazeEnableBlurDesc" xml:space="preserve"><value>オンにすると歪みの強さに応じて映像が僅かにぼやけます。</value></data>
+<data name="HeatHazeBlurStrengthName" xml:space="preserve"><value>ブラーの強さ</value></data>
+<data name="HeatHazeBlurStrengthDesc" xml:space="preserve"><value>歪みに連動するぼかしの強さを調整します。</value></data>
+<data name="TagHeatHaze" xml:space="preserve"><value>熱揺らぎ</value></data>
+<data name="TagDistortion" xml:space="preserve"><value>歪み</value></data>
+<data name="TagHeatShimmer" xml:space="preserve"><value>陽炎</value></data>
+</root>
