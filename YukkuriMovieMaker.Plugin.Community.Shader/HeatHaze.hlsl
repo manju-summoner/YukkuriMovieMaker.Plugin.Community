@@ -16,9 +16,11 @@ cbuffer Constants : register(b0)
 	float blurStrengthPx       : packoffset(c1.w);
 
 	float time                 : packoffset(c2.x);
-	float pad0                 : packoffset(c2.y);
-	float pad1                 : packoffset(c2.z);
-	float pad2                 : packoffset(c2.w);
+	float inputLeft            : packoffset(c2.y);
+	float inputTop             : packoffset(c2.z);
+	float inputWidth           : packoffset(c2.w);
+
+	float inputHeight          : packoffset(c3.x);
 };
 
 float4 SampleInput(float2 uv)
@@ -73,11 +75,16 @@ float4 main(
 	float sinA = sin(angle);
 	float2 dir = float2(cosA, sinA);
 
+	float2 globalUV = float2(
+		(posScene.x - inputLeft) / inputWidth,
+		(posScene.y - inputTop) / inputHeight
+	);
+
 	float2 flow = dir * (time * flowSpeed * noiseScale);
 
 	float3 noiseCoord = float3(
-		uv0.x * noiseScale + flow.x,
-		uv0.y * noiseScale + flow.y,
+		globalUV.x * noiseScale + flow.x,
+		globalUV.y * noiseScale + flow.y,
 		time * boilSpeed
 	);
 	float2 disp = Fbm(noiseCoord);
@@ -87,7 +94,8 @@ float4 main(
 		disp.x * sinA + disp.y * cosA
 	);
 
-	float2 dispUV = rotatedDisp * strength * 0.1f;
+	float2 dispPixel = rotatedDisp * strength * 0.1f * float2(inputWidth, inputHeight);
+	float2 dispUV = dispPixel * uv0.zw;
 	float2 sampleUV = uv0.xy + dispUV;
 
 	float4 result;

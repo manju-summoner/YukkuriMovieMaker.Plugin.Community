@@ -99,12 +99,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.HeatHaze
             public override void MapInputRectsToOutputRect(RawRect[] inputRects, RawRect[] inputOpaqueSubRects, out RawRect outputRect, out RawRect outputOpaqueSubRect)
             {
                 inputRect = ClampInputRect(inputRects[0]);
+                if (inputRect.Right <= inputRect.Left || inputRect.Bottom <= inputRect.Top)
+                {
+                    outputRect = inputRect;
+                    outputOpaqueSubRect = default;
+                    return;
+                }
 
-                int w = Math.Max(1, inputRect.Right - inputRect.Left);
-                int h = Math.Max(1, inputRect.Bottom - inputRect.Top);
+                int w = inputRect.Right - inputRect.Left;
+                int h = inputRect.Bottom - inputRect.Top;
+
+                _cb.InputLeft = inputRect.Left;
+                _cb.InputTop = inputRect.Top;
+                _cb.InputWidth = w;
+                _cb.InputHeight = h;
+                UpdateConstants();
 
                 float maxDispUV = _cb.Strength * 0.1f;
-                int dispPx = (int)Math.Ceiling(Math.Max(maxDispUV * w, maxDispUV * h));
+                int dispPx = (int)Math.Ceiling(Math.Max(maxDispUV * w, maxDispUV * h) * 1.5f);
                 int aberPx = (int)Math.Ceiling(_cb.ChromaticAberrationPx);
                 int blurPx = _cb.EnableBlur != 0 ? (int)Math.Ceiling(_cb.BlurStrengthPx * 2f) : 0;
 
@@ -120,7 +132,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.HeatHaze
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
-                inputRects[0] = inputRect;
+                if (inputRect.Right <= inputRect.Left || inputRect.Bottom <= inputRect.Top)
+                {
+                    inputRects[0] = inputRect;
+                    return;
+                }
+
+                int w = inputRect.Right - inputRect.Left;
+                int h = inputRect.Bottom - inputRect.Top;
+
+                float maxDispUV = _cb.Strength * 0.1f;
+                int dispPx = (int)Math.Ceiling(Math.Max(maxDispUV * w, maxDispUV * h) * 1.5f);
+                int aberPx = (int)Math.Ceiling(_cb.ChromaticAberrationPx);
+                int blurPx = _cb.EnableBlur != 0 ? (int)Math.Ceiling(_cb.BlurStrengthPx * 2f) : 0;
+
+                int padding = Math.Min(dispPx + aberPx + blurPx + 2, 4096);
+
+                inputRects[0] = new RawRect(
+                    outputRect.Left - padding,
+                    outputRect.Top - padding,
+                    outputRect.Right + padding,
+                    outputRect.Bottom + padding);
             }
 
             [StructLayout(LayoutKind.Sequential)]
@@ -135,6 +167,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.HeatHaze
                 public int EnableBlur;
                 public float BlurStrengthPx;
                 public float Time;
+                public float InputLeft;
+                public float InputTop;
+                public float InputWidth;
+                public float InputHeight;
                 public float Pad0;
                 public float Pad1;
                 public float Pad2;

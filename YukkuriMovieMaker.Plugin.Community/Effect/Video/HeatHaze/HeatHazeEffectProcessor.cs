@@ -5,20 +5,20 @@ using YukkuriMovieMaker.Player.Video.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.HeatHaze
 {
-    internal sealed class HeatHazeEffectProcessor : VideoEffectProcessorBase
+    internal sealed class HeatHazeEffectProcessor(IGraphicsDevicesAndContext devices, HeatHazeEffect item) : VideoEffectProcessorBase(devices)
     {
-        private readonly HeatHazeEffect _item;
-        private HeatHazeCustomEffect? _effect;
+        HeatHazeCustomEffect? effect;
 
-        public HeatHazeEffectProcessor(IGraphicsDevicesAndContext devices, HeatHazeEffect item)
-            : base(devices)
-        {
-            _item = item;
-        }
+        bool isFirst = true;
+        HeatHazeControlMode controlMode;
+        double temperature, humidity;
+        double strength, scale, flowSpeed, boilSpeed;
+        double angle, chromaticAberration, blurStrength;
+        bool enableBlur;
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
-            if (IsPassThroughEffect || _effect is null)
+            if (IsPassThroughEffect || effect is null)
                 return effectDescription.DrawDescription;
 
             var frame = effectDescription.ItemPosition.Frame;
@@ -27,66 +27,103 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.HeatHaze
 
             var totalSeconds = (double)frame / fps;
 
-            float finalStrength, finalScale, finalFlowSpeed, finalBoilSpeed;
+            var controlMode = item.ControlMode;
+            var temperature = item.Temperature.GetValue(frame, length, fps);
+            var humidity = item.Humidity.GetValue(frame, length, fps);
+            var strength = item.Strength.GetValue(frame, length, fps);
+            var scale = item.Scale.GetValue(frame, length, fps);
+            var flowSpeed = item.FlowSpeed.GetValue(frame, length, fps);
+            var boilSpeed = item.BoilSpeed.GetValue(frame, length, fps);
+            var angle = item.Angle.GetValue(frame, length, fps);
+            var chromaticAberration = item.ChromaticAberration.GetValue(frame, length, fps);
+            var enableBlur = item.EnableBlur;
+            var blurStrength = item.BlurStrength.GetValue(frame, length, fps);
 
-            if (_item.ControlMode == HeatHazeControlMode.Automatic)
+            if (isFirst
+                || this.controlMode != controlMode
+                || this.temperature != temperature
+                || this.humidity != humidity
+                || this.strength != strength
+                || this.scale != scale
+                || this.flowSpeed != flowSpeed
+                || this.boilSpeed != boilSpeed
+                || this.angle != angle
+                || this.chromaticAberration != chromaticAberration
+                || this.enableBlur != enableBlur
+                || this.blurStrength != blurStrength)
             {
-                var temperature = (float)_item.Temperature.GetValue(frame, length, fps);
-                var humidity = (float)_item.Humidity.GetValue(frame, length, fps) / 100f;
+                float finalStrength, finalScale, finalFlowSpeed, finalBoilSpeed;
 
-                var tempFactor = Math.Clamp((temperature - 15f) / 35f, 0f, 1.5f);
-                var humidityFactor = 1f + humidity * 0.5f;
+                if (controlMode == HeatHazeControlMode.Automatic)
+                {
+                    var tempFactor = Math.Clamp(((float)temperature - 15f) / 35f, 0f, 1.5f);
+                    var humidityFactor = 1f + (float)humidity / 100f * 0.5f;
 
-                finalStrength = tempFactor * humidityFactor * 0.5f;
-                finalScale = (1f + tempFactor) * 1.5f;
-                finalFlowSpeed = tempFactor * 0.2f;
-                finalBoilSpeed = tempFactor * 0.3f;
+                    finalStrength = tempFactor * humidityFactor * 0.5f;
+                    finalScale = (1f + tempFactor) * 1.5f;
+                    finalFlowSpeed = tempFactor * 0.2f;
+                    finalBoilSpeed = tempFactor * 0.3f;
+                }
+                else
+                {
+                    finalStrength = (float)strength / 100f;
+                    finalScale = (float)scale / 100f;
+                    finalFlowSpeed = (float)flowSpeed / 100f;
+                    finalBoilSpeed = (float)boilSpeed / 100f;
+                }
+
+                effect.Strength = finalStrength;
+                effect.NoiseScale = finalScale;
+                effect.FlowSpeed = finalFlowSpeed;
+                effect.BoilSpeed = finalBoilSpeed;
+                effect.Angle = (float)(angle * Math.PI / 180.0);
+                effect.ChromaticAberration = (float)chromaticAberration;
+                effect.EnableBlur = enableBlur ? 1 : 0;
+                effect.BlurStrength = (float)blurStrength;
             }
-            else
-            {
-                finalStrength = (float)_item.Strength.GetValue(frame, length, fps) / 100f;
-                finalScale = (float)_item.Scale.GetValue(frame, length, fps) / 100f;
-                finalFlowSpeed = (float)_item.FlowSpeed.GetValue(frame, length, fps) / 100f;
-                finalBoilSpeed = (float)_item.BoilSpeed.GetValue(frame, length, fps) / 100f;
-            }
 
-            _effect.Strength = finalStrength;
-            _effect.NoiseScale = finalScale;
-            _effect.FlowSpeed = finalFlowSpeed;
-            _effect.BoilSpeed = finalBoilSpeed;
-            _effect.Angle = (float)(_item.Angle.GetValue(frame, length, fps) * Math.PI / 180.0);
-            _effect.ChromaticAberration = (float)_item.ChromaticAberration.GetValue(frame, length, fps);
-            _effect.EnableBlur = _item.EnableBlur ? 1 : 0;
-            _effect.BlurStrength = (float)_item.BlurStrength.GetValue(frame, length, fps);
-            _effect.Time = (float)totalSeconds;
+            effect.Time = (float)totalSeconds;
+
+            isFirst = false;
+            this.controlMode = controlMode;
+            this.temperature = temperature;
+            this.humidity = humidity;
+            this.strength = strength;
+            this.scale = scale;
+            this.flowSpeed = flowSpeed;
+            this.boilSpeed = boilSpeed;
+            this.angle = angle;
+            this.chromaticAberration = chromaticAberration;
+            this.enableBlur = enableBlur;
+            this.blurStrength = blurStrength;
 
             return effectDescription.DrawDescription;
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            _effect = new HeatHazeCustomEffect(devices);
-            if (!_effect.IsEnabled)
+            effect = new HeatHazeCustomEffect(devices);
+            if (!effect.IsEnabled)
             {
-                _effect.Dispose();
-                _effect = null;
+                effect.Dispose();
+                effect = null;
                 return null;
             }
-            disposer.Collect(_effect);
+            disposer.Collect(effect);
 
-            var output = _effect.Output;
+            var output = effect.Output;
             disposer.Collect(output);
             return output;
         }
 
         protected override void setInput(ID2D1Image? input)
         {
-            _effect?.SetInput(0, input, true);
+            effect?.SetInput(0, input, true);
         }
 
         protected override void ClearEffectChain()
         {
-            _effect?.SetInput(0, null, true);
+            effect?.SetInput(0, null, true);
         }
     }
 }
