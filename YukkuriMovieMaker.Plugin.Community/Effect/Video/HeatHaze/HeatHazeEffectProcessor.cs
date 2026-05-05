@@ -67,7 +67,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.HeatHaze
                 else
                 {
                     finalStrength = (float)strength / 100f;
-                    finalScale = (float)scale / 100f;
+                    finalScale = 100f / Math.Max((float)scale, 0.001f);
                     finalFlowSpeed = (float)flowSpeed / 100f;
                     finalBoilSpeed = (float)boilSpeed / 100f;
                 }

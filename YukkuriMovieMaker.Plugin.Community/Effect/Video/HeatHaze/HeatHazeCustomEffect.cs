@@ -82,7 +82,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.HeatHaze
             public int EnableBlur { get => _cb.EnableBlur; set { _cb.EnableBlur = value; UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.BlurStrength)]
-            public float BlurStrength { get => _cb.BlurStrengthPx; set { _cb.BlurStrengthPx = Math.Max(value, 0f); UpdateConstants(); } }
+            public float BlurStrength { get => _cb.BlurStrength; set { _cb.BlurStrength = Math.Max(value, 0f); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.Time)]
             public float Time { get => _cb.Time; set { _cb.Time = value; UpdateConstants(); } }
@@ -118,7 +118,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.HeatHaze
                 float maxDispUV = _cb.Strength * 0.1f;
                 int dispPx = (int)Math.Ceiling(Math.Max(maxDispUV * w, maxDispUV * h) * 1.5f);
                 int aberPx = (int)Math.Ceiling(_cb.ChromaticAberrationPx);
-                int blurPx = _cb.EnableBlur != 0 ? (int)Math.Ceiling(_cb.BlurStrengthPx * 2f) : 0;
+                float actualBlurPx = Math.Max(maxDispUV * w, maxDispUV * h) * (_cb.BlurStrength / 100f);
+                int blurPx = _cb.EnableBlur != 0 ? (int)Math.Ceiling(actualBlurPx * 2f) : 0;
 
                 int padding = Math.Min(dispPx + aberPx + blurPx + 2, 4096);
 
@@ -144,7 +145,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.HeatHaze
                 float maxDispUV = _cb.Strength * 0.1f;
                 int dispPx = (int)Math.Ceiling(Math.Max(maxDispUV * w, maxDispUV * h) * 1.5f);
                 int aberPx = (int)Math.Ceiling(_cb.ChromaticAberrationPx);
-                int blurPx = _cb.EnableBlur != 0 ? (int)Math.Ceiling(_cb.BlurStrengthPx * 2f) : 0;
+                float actualBlurPx = Math.Max(maxDispUV * w, maxDispUV * h) * (_cb.BlurStrength / 100f);
+                int blurPx = _cb.EnableBlur != 0 ? (int)Math.Ceiling(actualBlurPx * 2f) : 0;
 
                 int padding = Math.Min(dispPx + aberPx + blurPx + 2, 4096);
 
@@ -165,7 +167,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.HeatHaze
                 public float BoilSpeed;
                 public float ChromaticAberrationPx;
                 public int EnableBlur;
-                public float BlurStrengthPx;
+                public float BlurStrength;
                 public float Time;
                 public float InputLeft;
                 public float InputTop;

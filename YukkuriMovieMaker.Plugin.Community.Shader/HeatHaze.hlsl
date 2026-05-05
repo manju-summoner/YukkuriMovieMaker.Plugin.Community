@@ -13,7 +13,7 @@ cbuffer Constants : register(b0)
 	float boilSpeed            : packoffset(c1.x);
 	float chromaticAberPx      : packoffset(c1.y);
 	int   enableBlur           : packoffset(c1.z);
-	float blurStrengthPx       : packoffset(c1.w);
+	float blurStrength         : packoffset(c1.w);
 
 	float time                 : packoffset(c2.x);
 	float inputLeft            : packoffset(c2.y);
@@ -100,9 +100,10 @@ float4 main(
 
 	float4 result;
 
-	if (enableBlur != 0 && blurStrengthPx > 0.0f)
+	if (enableBlur != 0 && blurStrength > 0.0f)
 	{
-		float2 blurStepUV = dir * float2(blurStrengthPx * uv0.z, blurStrengthPx * uv0.w);
+		float actualBlurPx = blurStrength * 0.01f * (strength * 0.1f * max(inputWidth, inputHeight));
+		float2 blurStepUV = dir * float2(actualBlurPx * uv0.z, actualBlurPx * uv0.w);
 		static const float kWeights[5] = { 0.0625f, 0.25f, 0.375f, 0.25f, 0.0625f };
 		float4 blurred = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
