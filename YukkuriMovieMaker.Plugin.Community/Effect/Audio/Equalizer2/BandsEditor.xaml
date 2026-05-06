@@ -1,0 +1,69 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Audio.Equalizer2.BandsEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Audio.Equalizer2"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             xmlns:pc="clr-namespace:YukkuriMovieMaker.Views.Converters;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance Type={x:Type local:BandsEditorViewModel}}">
+    <UserControl.Resources>
+        <local:DoubleToGridLengthConverter x:Key="DoubleToGridLengthConverter"/>
+        <local:EnumToDisplayNameConverter x:Key="EnumToDisplayNameConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{Binding EditorHeight, Source={x:Static local:BandsEditorSettings.Default}, Mode=TwoWay, Converter={StaticResource DoubleToGridLengthConverter}}" MinHeight="130"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ListBox ItemsSource="{Binding Path=Bands}" SelectedIndex="{Binding SelectedIndex,Mode=TwoWay}" Name="list"
+                     PreviewMouseWheel="ListBox_PreviewMouseWheel">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                        <Setter Property="Height" Value="26"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding FilterType, Converter={StaticResource EnumToDisplayNameConverter}}" Margin="0,0,5,0" VerticalAlignment="Center" Width="80"/>
+                            <TextBlock Text="{Binding Frequency.Values[0].Value,StringFormat={}{0:F1}Hz}" Margin="0,0,5,0" VerticalAlignment="Center" Width="60"/>
+                            <TextBlock Text="{Binding Gain.Values[0].Value,StringFormat={}{0:F1}dB}" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Button Grid.Row="0" Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Width="26" MinHeight="26" Command="{Binding AddCommand}" ToolTipService.ToolTip="{x:Static local:Texts.AddBandDesc}"/>
+                <Button Grid.Row="1" Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" Width="26" MinHeight="26" Command="{Binding RemoveCommand}" ToolTipService.ToolTip="{x:Static local:Texts.RemoveBandDesc}"/>
+                <Button Grid.Row="2" Content="{DynamicResource {x:Static icons:IconKeys.Triangle}}" Width="26" MinHeight="26" Padding="6,0" Command="{Binding MoveUpCommand}" ToolTipService.ToolTip="{x:Static local:Texts.MoveUpDesc}"/>
+                <Button Grid.Row="3" Content="{DynamicResource {x:Static icons:IconKeys.TriangleDown}}" Width="26" MinHeight="26" Padding="6,0" Command="{Binding MoveDownCommand}" ToolTipService.ToolTip="{x:Static local:Texts.MoveDownDesc}"/>
+                <Button Grid.Row="4" Content="{DynamicResource {x:Static icons:IconKeys.SortDescending}}" Width="26" MinHeight="26" Command="{Binding SortByFrequencyCommand}" ToolTipService.ToolTip="{x:Static local:Texts.SortByFrequencyDesc}"/>
+            </Grid>
+        </Grid>
+
+        <GridSplitter Grid.Row="1" Height="4" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Transparent" ResizeBehavior="PreviousAndNext"/>
+
+        <c:PropertiesEditor 
+            Grid.Row="2"
+            Target="{Binding ElementName=list,Path=SelectedValue}"
+            BeginEdit="PropertiesEditor_BeginEdit" 
+            EndEdit="PropertiesEditor_EndEdit">
+        </c:PropertiesEditor>
+    </Grid>
+</UserControl>

@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ja-jp</value></data>
+<data name="Equalizer2" xml:space="preserve"><value>パラメトリックイコライザー</value></data>
+<data name="Bands" xml:space="preserve"><value>バンド</value></data>
+<data name="Frequency" xml:space="preserve"><value>周波数</value></data>
+<data name="Gain" xml:space="preserve"><value>ゲイン</value></data>
+<data name="Q" xml:space="preserve"><value>Q</value></data>
+<data name="FilterType" xml:space="preserve"><value>フィルタ種別</value></data>
+<data name="FilterTypeDesc" xml:space="preserve"><value>各帯域のフィルタの種類を指定します。</value></data>
+<data name="LowPass" xml:space="preserve"><value>ローパス</value></data>
+<data name="HighPass" xml:space="preserve"><value>ハイパス</value></data>
+<data name="BandPass" xml:space="preserve"><value>バンドパス</value></data>
+<data name="AllPass" xml:space="preserve"><value>オールパス</value></data>
+<data name="Notch" xml:space="preserve"><value>ノッチ</value></data>
+<data name="LowShelf" xml:space="preserve"><value>ローシェルフ</value></data>
+<data name="HighShelf" xml:space="preserve"><value>ハイシェルフ</value></data>
+<data name="PeakingEQ" xml:space="preserve"><value>ピーキングEQ</value></data>
+<data name="FrequencyDesc" xml:space="preserve"><value>フィルタの基準となる周波数を指定します。</value></data>
+<data name="GainDesc" xml:space="preserve"><value>指定した周波数帯域の音量を増減させます。</value></data>
+<data name="QDesc" xml:space="preserve"><value>フィルタの影響が及ぶ帯域の広さを指定します。</value></data>
+<data name="AddBandDesc" xml:space="preserve"><value>バンドを追加</value></data>
+<data name="RemoveBandDesc" xml:space="preserve"><value>バンドを削除</value></data>
+<data name="MoveUpDesc" xml:space="preserve"><value>上に移動</value></data>
+<data name="MoveDownDesc" xml:space="preserve"><value>下に移動</value></data>
+<data name="SortByFrequencyDesc" xml:space="preserve"><value>周波数の高い順に並べ替え</value></data>
+</root>
