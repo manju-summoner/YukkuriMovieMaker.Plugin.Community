@@ -177,7 +177,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
 
             long nextPos = Position + processCount;
             long minPos = Math.Min(nextPos, Math.Min(belowBranch!.Position, aboveBranch!.Position));
-            sharedInput.Trim(minPos, nextPos, hz);
+            sharedInput.Trim(minPos, nextPos);
 
             return processCount;
         }
@@ -218,6 +218,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
 
         sealed class SharedInput(IAudioStream source)
         {
+            const int MaxRetentionSeconds = 20;
+            const int MinBufferCapacity = 4096;
+
             public int Hz => source.Hz;
             public long Duration => source.Duration;
 
@@ -256,13 +259,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
             {
                 if (buffer.Length >= cap) return;
                 int next = Math.Max(cap, buffer.Length * 2);
-                if (next < 4096) next = 4096;
+                if (next < MinBufferCapacity) next = MinBufferCapacity;
                 Array.Resize(ref buffer, next);
             }
 
-            public void Trim(long minPosition, long currentPosition, int hz)
+            public void Trim(long minPosition, long currentPosition)
             {
-                long maxLag = hz * 20L;
+                long maxLag = Hz * 2L * MaxRetentionSeconds;
                 long safeMin = Math.Max(minPosition, currentPosition - maxLag);
 
                 if (safeMin <= basePosition) return;

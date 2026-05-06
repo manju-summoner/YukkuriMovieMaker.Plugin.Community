@@ -45,12 +45,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
         public double ReleaseMs { get => releaseMs; set => Set(ref releaseMs, value); }
         double releaseMs = 100;
 
-        [Display(GroupName = nameof(Texts.BelowEffectsGroup), Name = nameof(Texts.Empty), Description = nameof(Texts.BelowEffectsDesc), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.BelowEffectsGroup), Description = nameof(Texts.BelowEffectsDesc), ResourceType = typeof(Texts))]
         [AudioEffectSelector]
         public ImmutableList<IAudioEffect> BelowEffects { get => belowEffects; set => Set(ref belowEffects, value); }
         ImmutableList<IAudioEffect> belowEffects = [];
 
-        [Display(GroupName = nameof(Texts.AboveEffectsGroup), Name = nameof(Texts.Empty), Description = nameof(Texts.AboveEffectsDesc), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.AboveEffectsGroup), Description = nameof(Texts.AboveEffectsDesc), ResourceType = typeof(Texts))]
         [AudioEffectSelector]
         public ImmutableList<IAudioEffect> AboveEffects { get => aboveEffects; set => Set(ref aboveEffects, value); }
         ImmutableList<IAudioEffect> aboveEffects = [];

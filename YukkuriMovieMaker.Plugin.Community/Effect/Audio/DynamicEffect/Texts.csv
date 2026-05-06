@@ -1,6 +1,5 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
 ConditionalDynamicsEffect,,条件分岐ダイナミクス,Conditional Dynamics,条件动态效果,條件動態效果,조건 다이나믹스,Dinámica Condicional,ديناميكيات مشروطة,Dinamika Kondisional,
-Empty,,,,,,,,,,
 DetectionGroup,,検出,Detection,检测,檢測,감지,Detección,الكشف,Deteksi,
 DetectionModeName,,検出モード,Detection Mode,检测模式,檢測模式,감지 모드,Modo de Detección,وضع الكشف,Mode Deteksi,
 DetectionModeDesc,,レベル検出の方式,Level detection method,电平检测方式,電平檢測方式,레벨 감지 방법,Método de detección de nivel,طريقة كشف المستوى,Metode deteksi level,
