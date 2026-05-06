@@ -141,8 +141,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
                 }
                 else
                 {
-                    float mono = (rawBuffer[i] + rawBuffer[i + 1]) * 0.5f;
-                    float sq = mono * mono;
+                    float sq = (rawBuffer[i] * rawBuffer[i] + rawBuffer[i + 1] * rawBuffer[i + 1]) * 0.5f;
 
                     rmsRunningSum -= rmsWindowBuffer[rmsWindowPos];
                     rmsWindowBuffer[rmsWindowPos] = sq;
@@ -214,7 +213,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
 
         static float DbToLinear(double db)
         {
-            return db <= -60.0 ? 0f : (float)Math.Pow(10.0, db / 20.0);
+            return (float)Math.Pow(10.0, db / 20.0);
         }
 
         sealed class SharedInput(IAudioStream source)
