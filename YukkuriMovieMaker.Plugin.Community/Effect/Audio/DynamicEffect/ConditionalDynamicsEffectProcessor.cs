@@ -71,18 +71,41 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
 
             int readCount = sharedInput!.Read(Position, rawBuffer, 0, count);
             readCount -= readCount % 2;
-            if (readCount <= 0) return 0;
 
-            int belowRead = belowChain is not null
-                ? belowChain.Read(belowBuffer, readCount)
-                : belowBranch!.Read(belowBuffer, 0, readCount);
+            if (readCount < count)
+                Array.Clear(rawBuffer, Math.Max(0, readCount), count - Math.Max(0, readCount));
 
-            int aboveRead = aboveChain is not null
-                ? aboveChain.Read(aboveBuffer, readCount)
-                : aboveBranch!.Read(aboveBuffer, 0, readCount);
+            int belowRead = 0;
+            if (belowChain is not null)
+            {
+                belowRead = belowChain.Read(belowBuffer, count);
+                belowRead -= belowRead % 2;
+            }
+            else if (readCount > 0)
+            {
+                Array.Copy(rawBuffer, 0, belowBuffer, 0, readCount);
+                belowRead = readCount;
+                belowBranch!.Seek(belowBranch.Position + readCount);
+            }
 
-            if (belowRead < readCount) Array.Clear(belowBuffer, belowRead, readCount - belowRead);
-            if (aboveRead < readCount) Array.Clear(aboveBuffer, aboveRead, readCount - aboveRead);
+            int aboveRead = 0;
+            if (aboveChain is not null)
+            {
+                aboveRead = aboveChain.Read(aboveBuffer, count);
+                aboveRead -= aboveRead % 2;
+            }
+            else if (readCount > 0)
+            {
+                Array.Copy(rawBuffer, 0, aboveBuffer, 0, readCount);
+                aboveRead = readCount;
+                aboveBranch!.Seek(aboveBranch.Position + readCount);
+            }
+
+            int processCount = Math.Max(readCount, Math.Max(belowRead, aboveRead));
+            if (processCount <= 0) return 0;
+
+            if (belowRead < processCount) Array.Clear(belowBuffer, belowRead, processCount - belowRead);
+            if (aboveRead < processCount) Array.Clear(aboveBuffer, aboveRead, processCount - aboveRead);
 
             int hz = Hz;
             float attackCoeff = ComputeCoeff(effect.AttackMs, hz);
@@ -91,20 +114,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
 
             long totalPairs = Duration / 2;
             long startPos = Position / 2;
-            long endPos = (Position + readCount) / 2;
+            long endPos = (Position + processCount - 1) / 2;
             
             float startDb = (float)effect.ThresholdDb.GetValue(startPos, totalPairs, hz);
             float endDb = (float)effect.ThresholdDb.GetValue(endPos, totalPairs, hz);
 
             float startLinear = DbToLinear(startDb);
             float endLinear = DbToLinear(endDb);
-            int stepCount = readCount / 2;
-            float linearStep = stepCount > 1 ? (endLinear - startLinear) / stepCount : 0f;
+            int stepCount = processCount / 2;
+            float linearStep = stepCount > 1 ? (endLinear - startLinear) / (stepCount - 1) : 0f;
             float currentThresholdLinear = startLinear;
 
             bool isPeak = effect.DetectionMode == DetectionMode.Peak;
 
-            for (int i = 0; i < readCount; i += 2)
+            for (int i = 0; i < processCount; i += 2)
             {
                 float scLevel;
                 if (isPeak)
@@ -153,11 +176,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
                 destBuffer[offset + i + 1] = belowFactor * belowBuffer[i + 1] + aboveFactor * aboveBuffer[i + 1];
             }
 
-            long nextPos = Position + readCount;
+            long nextPos = Position + processCount;
             long minPos = Math.Min(nextPos, Math.Min(belowBranch!.Position, aboveBranch!.Position));
-            sharedInput.Trim(minPos);
+            sharedInput.Trim(minPos, nextPos, hz);
 
-            return readCount;
+            return processCount;
         }
 
         protected override void seek(long position)
@@ -186,7 +209,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
 
         static float ComputeCoeff(double timeMs, int hz)
         {
-            return (float)Math.Exp(-1.0 / (timeMs * 0.001 * hz));
+            return (float)Math.Exp(-1.0 / (Math.Max(0.1, timeMs) * 0.001 * hz));
         }
 
         static float DbToLinear(double db)
@@ -238,20 +261,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
                 Array.Resize(ref buffer, next);
             }
 
-            public void Trim(long minPosition)
+            public void Trim(long minPosition, long currentPosition, int hz)
             {
-                if (minPosition <= basePosition) return;
-                long advance = minPosition - basePosition;
+                long maxLag = hz * 20L;
+                long safeMin = Math.Max(minPosition, currentPosition - maxLag);
+
+                if (safeMin <= basePosition) return;
+                long advance = safeMin - basePosition;
                 if (advance >= length)
                 {
-                    basePosition = minPosition;
+                    basePosition = safeMin;
                     length = 0;
                 }
                 else
                 {
                     int advInt = (int)advance;
                     Array.Copy(buffer, advInt, buffer, 0, length - advInt);
-                    basePosition = minPosition;
+                    basePosition = safeMin;
                     length -= advInt;
                 }
             }

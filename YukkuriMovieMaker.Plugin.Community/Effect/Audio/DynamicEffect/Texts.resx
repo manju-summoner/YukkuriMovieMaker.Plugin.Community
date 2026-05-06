@@ -74,7 +74,7 @@
 <data name="AttackMsName" xml:space="preserve"><value>アタック</value></data>
 <data name="AttackMsDesc" xml:space="preserve"><value>スレッショルド超過を検出するまでの時間（ミリ秒）</value></data>
 <data name="ReleaseMsName" xml:space="preserve"><value>リリース</value></data>
-<data name="ReleaseMsDesc" xml:space="preserve"><value>スレッショルドを下回りを検出するまでの時間（ミリ秒）</value></data>
+<data name="ReleaseMsDesc" xml:space="preserve"><value>スレッショルドを下回るのを検出するまでの時間（ミリ秒）</value></data>
 <data name="BelowEffectsGroup" xml:space="preserve"><value>条件以下</value></data>
 <data name="BelowEffectsDesc" xml:space="preserve"><value>レベルがスレッショルド以下のときに適用するエフェクト（空の場合はバイパス）</value></data>
 <data name="AboveEffectsGroup" xml:space="preserve"><value>条件以上</value></data>

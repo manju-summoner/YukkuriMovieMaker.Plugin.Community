@@ -15,7 +15,7 @@ ThresholdDbDesc,,条件判定の基準レベル（dB）,Reference level for cond
 AttackMsName,,アタック,Attack,起音,起音,어택,Ataque,هجوم,Serangan,
 AttackMsDesc,,スレッショルド超過を検出するまでの時間（ミリ秒）,Time to detect threshold crossing (ms),检测到超过阈值的时间（毫秒）,檢測到超過閾值的時間（毫秒）,스레쇼울드 초과를 감지하기까지의 시간(밀리초),Tiempo para detectar el cruce del umbral (ms),وقت الكشف عن تجاوز العتبة (مللي ثانية),Waktu deteksi pelampauan ambang batas (ms),
 ReleaseMsName,,リリース,Release,释放,釋放,릴리즈,Liberación,إطلاق,Pelepasan,
-ReleaseMsDesc,,スレッショルドを下回りを検出するまでの時間（ミリ秒）,Time to detect level falling below threshold (ms),检测到低于阈值的时间（毫秒）,檢測到低於閾值的時間（毫秒）,스레쇼울드 미만을 감지하기까지의 시간(밀리초),Tiempo para detectar nivel por debajo del umbral (ms),وقت الكشف عن مستوى أقل من العتبة (مللي ثانية),Waktu deteksi level di bawah ambang batas (ms),
+ReleaseMsDesc,,スレッショルドを下回るのを検出するまでの時間（ミリ秒）,Time to detect level falling below threshold (ms),检测到低于阈值的时间（毫秒）,檢測到低於閾值的時間（毫秒）,스레쇼울드 미만을 감지하기까지의 시간(밀리초),Tiempo para detectar nivel por debajo del umbral (ms),وقت الكشف عن مستوى أقل من العتبة (مللي ثانية),Waktu deteksi level di bawah ambang batas (ms),
 BelowEffectsGroup,,条件以下,Below Threshold,阈值以下,閾值以下,스레쇼울드 이하,Por Debajo del Umbral,ما دون العتبة,Di Bawah Ambang Batas,
 BelowEffectsDesc,,レベルがスレッショルド以下のときに適用するエフェクト（空の場合はバイパス）,Effects applied when level is below threshold (bypass if empty),电平低于阈值时应用的效果（为空则旁路）,電平低於閾值時應用的效果（為空則旁路）,레벨이 스레쇼울드 이하일 때 적용할 효과(비어 있으면 바이패스),Efectos aplicados cuando el nivel está por debajo del umbral (bypass si está vacío),التأثيرات عندما يكون المستوى أقل من العتبة (تجاوز إذا كان فارغًا),Efek ketika level di bawah ambang batas (bypass jika kosong),
 AboveEffectsGroup,,条件以上,Above Threshold,阈值以上,閾值以上,스레쇼울드 이상,Por Encima del Umbral,فوق العتبة,Di Atas Ambang Batas,
