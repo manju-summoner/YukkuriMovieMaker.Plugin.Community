@@ -89,7 +89,7 @@
 
     <Border x:Name="RootBorder"
             Background="Transparent"
-            BorderBrush="#FFB0B0B0"
+            BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
             BorderThickness="1">
         <!-- ここに ViewModel を DataContext として直接入れる -->
         <Grid x:Name="RootGrid">
