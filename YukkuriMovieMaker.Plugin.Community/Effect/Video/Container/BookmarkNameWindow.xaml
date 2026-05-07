@@ -27,7 +27,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" x:Name="LeftButton"/>
-            <Button Grid.Column="1" x:Name="RightButton" IsCancel="True"/>
+            <Button Grid.Column="1" x:Name="RightButton"/>
         </Grid>
     </Grid>
 </Window>

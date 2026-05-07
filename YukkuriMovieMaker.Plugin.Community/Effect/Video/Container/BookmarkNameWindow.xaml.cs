@@ -25,6 +25,7 @@ public partial class BookmarkNameWindow : Window
         {
             LeftButton.Content = Texts.Menu_Create;
             RightButton.Content = Texts.Menu_Cancel;
+            RightButton.IsCancel = true;
 
             LeftButton.Click += (s, e) => { Result = BookmarkWindowResult.Create; DialogResult = true; Close(); };
             RightButton.Click += (s, e) => { Result = BookmarkWindowResult.Cancel; DialogResult = false; Close(); };
@@ -35,6 +36,15 @@ public partial class BookmarkNameWindow : Window
             if (e.Key == System.Windows.Input.Key.Enter)
             {
                 LeftButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+                e.Handled = true;
+                return;
+            }
+
+            if (isEditMode && e.Key == System.Windows.Input.Key.Escape)
+            {
+                Result = BookmarkWindowResult.None;
+                DialogResult = false;
+                Close();
                 e.Handled = true;
             }
         };
