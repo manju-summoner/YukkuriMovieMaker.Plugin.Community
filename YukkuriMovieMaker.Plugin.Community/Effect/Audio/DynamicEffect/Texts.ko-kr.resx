@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
+<data name="ConditionalDynamicsEffect" xml:space="preserve"><value>조건 다이나믹스</value></data>
+<data name="DetectionGroup" xml:space="preserve"><value>감지</value></data>
+<data name="DetectionModeName" xml:space="preserve"><value>감지 모드</value></data>
+<data name="DetectionModeDesc" xml:space="preserve"><value>레벨 감지 방법</value></data>
+<data name="DetectionModeRms" xml:space="preserve"><value>RMS</value></data>
+<data name="DetectionModeRmsDesc" xml:space="preserve"><value>제곱 평균 제곱근으로 감지</value></data>
+<data name="DetectionModePeak" xml:space="preserve"><value>피크</value></data>
+<data name="DetectionModePeakDesc" xml:space="preserve"><value>피크 레벨로 감지</value></data>
+<data name="RmsWindowMsName" xml:space="preserve"><value>RMS 창</value></data>
+<data name="RmsWindowMsDesc" xml:space="preserve"><value>RMS 계산에 사용할 시간 창(밀리초)</value></data>
+<data name="ThresholdDbName" xml:space="preserve"><value>스레쇼울드</value></data>
+<data name="ThresholdDbDesc" xml:space="preserve"><value>조건 판정 기준 레벨(dB)</value></data>
+<data name="AttackMsName" xml:space="preserve"><value>어택</value></data>
+<data name="AttackMsDesc" xml:space="preserve"><value>스레쇼울드 초과를 감지하기까지의 시간(밀리초)</value></data>
+<data name="ReleaseMsName" xml:space="preserve"><value>릴리즈</value></data>
+<data name="ReleaseMsDesc" xml:space="preserve"><value>스레쇼울드 미만을 감지하기까지의 시간(밀리초)</value></data>
+<data name="BelowEffectsGroup" xml:space="preserve"><value>스레쇼울드 이하</value></data>
+<data name="BelowEffectsDesc" xml:space="preserve"><value>레벨이 스레쇼울드 이하일 때 적용할 효과(비어 있으면 바이패스)</value></data>
+<data name="AboveEffectsGroup" xml:space="preserve"><value>스레쇼울드 이상</value></data>
+<data name="AboveEffectsDesc" xml:space="preserve"><value>레벨이 스레쇼울드 이상일 때 적용할 효과(비어 있으면 바이패스)</value></data>
+</root>
