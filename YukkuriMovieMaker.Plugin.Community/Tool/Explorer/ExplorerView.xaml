@@ -815,7 +815,7 @@
                 </ListBox>
             </Border>
 
-            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Transparent" Visibility="{Binding IsSidebarVisible,Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Cursor="SizeWE" Visibility="{Binding IsSidebarVisible,Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <ListBox Grid.Column="2"
                      SelectedValue="{Binding ReadOnlyLastSelectedValue, Mode=OneWayToSource}"
                      ItemsSource="{Binding FilteredItems}"
