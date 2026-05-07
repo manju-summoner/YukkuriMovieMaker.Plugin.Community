@@ -21,13 +21,21 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         {
             if (_selectedTab == value) return;
 
-            if (_selectedTab != null)
-                _selectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
+            IDisposable? scope = _isSelfUpdating ? null : BeginUndo();
+            try
+            {
+                if (_selectedTab != null)
+                    _selectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
 
-            SelectTabInternal(value);
+                SelectTabInternal(value);
 
-            if (value != null)
-                ApplyStateToEffectInternal(value);
+                if (value != null)
+                    ApplyStateToEffectInternal(value);
+            }
+            finally
+            {
+                scope?.Dispose();
+            }
         }
     }
 
