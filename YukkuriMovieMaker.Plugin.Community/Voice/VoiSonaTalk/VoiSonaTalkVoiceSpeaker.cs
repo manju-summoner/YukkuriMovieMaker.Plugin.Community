@@ -94,11 +94,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
                         0),
                     lang,
                     filePath,
+                    pron.PhonemeDurations ?? [],
                     voiceName,
                     version);
                 var speechInfo = await VoiSonaTalkAPIHelper.SpeechSynthesisAsync(request);
                 pron.TSML = speechInfo?.AnalyzedText;
                 pron.LipSyncFrames = CreateLipSyncFrames(speechInfo);
+                pron.Phonemes = speechInfo?.Phonemes;
+                pron.PhonemeDurations = speechInfo?.PhonemeDurations;
                 if (speechInfo is null)
                     return null;
 

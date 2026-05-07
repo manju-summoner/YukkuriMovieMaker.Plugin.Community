@@ -1,42 +1,31 @@
 <UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Tool.Browser.BrowserSettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Tool.Browser"
-             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:pa="clr-namespace:YukkuriMovieMaker.Views.Actions;assembly=YukkuriMovieMaker.Plugin"
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
+             d:DesignWidth="450"
              d:DataContext="{d:DesignInstance Type={x:Type local:BrowserSettingsViewModel}}">
-    <Grid Width="450">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="10"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="15"/>
-            <RowDefinition Height="26"/>
-        </Grid.RowDefinitions>
-
-        <TextBlock Grid.Row="0" Text="{x:Static local:Texts.BrowserSettingsDesc}" TextWrapping="Wrap" Margin="6"/>
-
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" MaxHeight="450">
-            <StackPanel Margin="6,3">
-                <Grid Margin="0,3">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Expander Header="{x:Static local:Texts.Browser}" IsExpanded="True">
+            <StackPanel>
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{x:Static local:Texts.SmartScreenEnabled}" VerticalAlignment="Center" ToolTip="{x:Static local:Texts.SmartScreenEnabledDesc}"/>
+                    <Label Grid.Column="0" Content="{x:Static local:Texts.SmartScreenEnabled}" VerticalAlignment="Center" ToolTip="{x:Static local:Texts.SmartScreenEnabledDesc}"/>
                     <c:ToggleSlider Grid.Column="1" Value="{Binding Settings.IsSmartScreenEnabled}" VerticalAlignment="Center"/>
                 </Grid>
-                
-                <Grid Margin="0,3">
+
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{x:Static local:Texts.TrackingPreventionLevel}" VerticalAlignment="Center"/>
+                    <Label Grid.Column="0" Content="{x:Static local:Texts.TrackingPreventionLevel}" VerticalAlignment="Center"/>
                     <ComboBox Grid.Column="1" SelectedIndex="{Binding Settings.TrackingPreventionLevel}" Width="150" VerticalAlignment="Center" Height="26" VerticalContentAlignment="Center">
                         <TextBlock Text="{x:Static local:Texts.TrackingPreventionBasic}"/>
                         <TextBlock Text="{x:Static local:Texts.TrackingPreventionBalanced}"/>
@@ -44,65 +33,51 @@
                     </ComboBox>
                 </Grid>
 
-                <Grid Margin="0,3">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{x:Static local:Texts.PasswordAutosaveEnabled}" VerticalAlignment="Center"/>
+                    <Label Grid.Column="0" Content="{x:Static local:Texts.PasswordAutosaveEnabled}" VerticalAlignment="Center"/>
                     <c:ToggleSlider Grid.Column="1" Value="{Binding Settings.IsPasswordAutosaveEnabled}" VerticalAlignment="Center"/>
                 </Grid>
 
-                <Grid Margin="0,3">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{x:Static local:Texts.GeneralAutofillEnabled}" VerticalAlignment="Center"/>
+                    <Label Grid.Column="0" Content="{x:Static local:Texts.GeneralAutofillEnabled}" VerticalAlignment="Center"/>
                     <c:ToggleSlider Grid.Column="1" Value="{Binding Settings.IsGeneralAutofillEnabled}" VerticalAlignment="Center"/>
                 </Grid>
 
-                <Grid Margin="0,3">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{x:Static local:Texts.ScriptEnabled}" VerticalAlignment="Center"/>
+                    <Label Grid.Column="0" Content="{x:Static local:Texts.ScriptEnabled}" VerticalAlignment="Center"/>
                     <c:ToggleSlider Grid.Column="1" Value="{Binding Settings.IsScriptEnabled}" VerticalAlignment="Center"/>
                 </Grid>
 
-                <Grid Margin="0,3">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{x:Static local:Texts.MediaAutoplayEnabled}" VerticalAlignment="Center" ToolTip="{x:Static local:Texts.MediaAutoplayEnabledDesc}"/>
+                    <Label Grid.Column="0" Content="{x:Static local:Texts.MediaAutoplayEnabled}" VerticalAlignment="Center" ToolTip="{x:Static local:Texts.MediaAutoplayEnabledDesc}"/>
                     <c:ToggleSlider Grid.Column="1" Value="{Binding Settings.IsMediaAutoplayEnabled}" VerticalAlignment="Center"/>
                 </Grid>
 
-                <Grid Margin="0,3">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="150"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{x:Static local:Texts.CustomUserAgent}" VerticalAlignment="Center"/>
+                    <Label Grid.Column="0" Content="{x:Static local:Texts.CustomUserAgent}" VerticalAlignment="Center"/>
                     <TextBox Grid.Column="1" Text="{Binding Settings.CustomUserAgent, UpdateSourceTrigger=PropertyChanged, Delay=1}" VerticalAlignment="Center" Padding="3,0,0,0" Height="26" VerticalContentAlignment="Center"/>
                 </Grid>
             </StackPanel>
-        </ScrollViewer>
-
-        <Grid Grid.Row="4">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="100"/>
-            </Grid.ColumnDefinitions>
-            <Button Grid.Column="1" Content="{x:Static local:Texts.Close}">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="Click">
-                        <pa:CloseWindowAction/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </Button>
-        </Grid>
-    </Grid>
+        </Expander>
+    </ScrollViewer>
 </UserControl>

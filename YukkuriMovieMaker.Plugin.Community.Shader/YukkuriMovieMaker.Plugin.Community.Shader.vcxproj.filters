@@ -54,9 +54,6 @@
     <FxCompile Include="ColorShift.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-    <FxCompile Include="InnerOutline.hlsl">
-      <Filter>ソース ファイル</Filter>
-    </FxCompile>
     <FxCompile Include="LongShadow.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
