@@ -12,7 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
     [AudioEffect(nameof(Texts.ConditionalDynamicsEffect), [AudioEffectCategories.Effect], ["dynamics", "conditional", "gate", "ダイナミクス", "条件分岐"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     internal class ConditionalDynamicsEffect : AudioEffectBase
     {
-        public override string Label => Texts.ConditionalDynamicsEffect;
+        public override string Label => $"{Texts.ConditionalDynamicsEffect} {ThresholdDb.GetValue(0, 1, 30):0.0}dB";
 
         [Display(GroupName = nameof(Texts.DetectionGroup), Name = nameof(Texts.DetectionModeName), Description = nameof(Texts.DetectionModeDesc), ResourceType = typeof(Texts))]
         [EnumComboBox]
