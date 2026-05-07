@@ -49,6 +49,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
             belowChain = EffectChain.Build(effect.BelowEffects, belowBranch, duration);
             aboveChain = EffectChain.Build(effect.AboveEffects, aboveBranch, duration);
 
+            belowChain?.Seek(Position);
+            aboveChain?.Seek(Position);
+
             if (belowChain is not null) disposer.Collect(belowChain);
             if (aboveChain is not null) disposer.Collect(aboveChain);
 
