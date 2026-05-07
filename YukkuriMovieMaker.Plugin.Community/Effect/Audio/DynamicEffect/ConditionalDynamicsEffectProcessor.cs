@@ -508,18 +508,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
 
             public static EffectChain? Build(ImmutableList<IAudioEffect> effects, IAudioStream source, TimeSpan timeSpan)
             {
-                if (effects.IsEmpty) return null;
+                var enabledEffects = effects.Where(x => x.IsEnabled);
 
                 var all = new List<IAudioEffectProcessor>();
                 IAudioStream current = source;
 
-                foreach (var eff in effects)
+                foreach (var eff in enabledEffects)
                 {
                     var proc = eff.CreateAudioEffect(timeSpan);
                     proc.Input = current;
                     current = proc;
                     all.Add(proc);
                 }
+
+                if (all.Count == 0) return null;
 
                 return new EffectChain((IAudioEffectProcessor)current, all);
             }
