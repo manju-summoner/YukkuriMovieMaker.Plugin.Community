@@ -65,7 +65,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GodRay
             this.threshold = threshold;
             this.lightColor = lightColor;
 
-            return effectDescription.DrawDescription;
+            var controller = new VideoEffectController(
+                item,
+                [
+                    new ControllerPoint(
+                        new((float)lightX, (float)lightY, 0f),
+                        arg =>
+                        {
+                            item.LightX.AddToEachValues(arg.Delta.X);
+                            item.LightY.AddToEachValues(arg.Delta.Y);
+                        })
+                ]);
+
+            var desc = effectDescription.DrawDescription;
+            return desc with { Controllers = [..desc.Controllers, controller] };
         }
 
         protected override void ClearEffectChain()
