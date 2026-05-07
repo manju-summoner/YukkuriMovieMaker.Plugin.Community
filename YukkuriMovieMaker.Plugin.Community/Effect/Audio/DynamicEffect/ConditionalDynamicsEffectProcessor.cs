@@ -1,4 +1,6 @@
 using System.Collections.Immutable;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 using YukkuriMovieMaker.Player.Audio.Effects;
 using YukkuriMovieMaker.Plugin.Effects;
 
@@ -60,7 +62,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
             if (aboveBuffer.Length < count) aboveBuffer = new float[count];
         }
 
-        protected override int read(float[] destBuffer, int offset, int count)
+        protected override unsafe int read(float[] destBuffer, int offset, int count)
         {
             if (Input is null) return 0;
 
@@ -123,56 +125,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
             float endLinear = DbToLinear(endDb);
             int stepCount = processCount / 2;
             float linearStep = stepCount > 1 ? (endLinear - startLinear) / (stepCount - 1) : 0f;
-            float currentThresholdLinear = startLinear;
-
-            bool isPeak = effect.DetectionMode == DetectionMode.Peak;
-
-            for (int i = 0; i < processCount; i += 2)
+            fixed (float* pRaw = rawBuffer, pBelow = belowBuffer, pAbove = aboveBuffer, pDest = &destBuffer[offset])
             {
-                float scLevel;
-                if (isPeak)
+                if (effect.DetectionMode == DetectionMode.Peak)
                 {
-                    float peak = Math.Max(Math.Abs(rawBuffer[i]), Math.Abs(rawBuffer[i + 1]));
-                    if (peak > sidechainEnvelope)
-                        sidechainEnvelope = peak;
-                    else
-                        sidechainEnvelope = peakHoldReleaseCoeff * sidechainEnvelope + (1f - peakHoldReleaseCoeff) * peak;
-                    scLevel = sidechainEnvelope;
+                    ProcessPeak(pRaw, pBelow, pAbove, pDest, processCount, startLinear, linearStep, attackCoeff, releaseCoeff, peakHoldReleaseCoeff);
                 }
                 else
                 {
-                    float sq = (rawBuffer[i] * rawBuffer[i] + rawBuffer[i + 1] * rawBuffer[i + 1]) * 0.5f;
-
-                    rmsRunningSum -= rmsWindowBuffer[rmsWindowPos];
-                    rmsWindowBuffer[rmsWindowPos] = sq;
-                    rmsRunningSum += sq;
-                    
-                    rmsWindowPos++;
-                    if (rmsWindowPos >= rmsWindowBuffer.Length)
-                        rmsWindowPos = 0;
-
-                    if (rmsWindowPos == 0)
+                    fixed (float* pRmsWindow = rmsWindowBuffer)
                     {
-                        float recomputed = 0f;
-                        for (int j = 0; j < rmsWindowBuffer.Length; j++)
-                            recomputed += rmsWindowBuffer[j];
-                        rmsRunningSum = recomputed;
+                        ProcessRms(pRaw, pBelow, pAbove, pDest, pRmsWindow, processCount, startLinear, linearStep, attackCoeff, releaseCoeff);
                     }
-
-                    scLevel = (float)Math.Sqrt(Math.Max(0f, rmsRunningSum) * rmsReciprocal);
                 }
-
-                float targetGain = scLevel >= currentThresholdLinear ? 1f : 0f;
-                currentThresholdLinear += linearStep;
-
-                float coeff = targetGain > crossfadeGain ? attackCoeff : releaseCoeff;
-                crossfadeGain = coeff * crossfadeGain + (1f - coeff) * targetGain;
-
-                float aboveFactor = crossfadeGain;
-                float belowFactor = 1f - aboveFactor;
-
-                destBuffer[offset + i] = belowFactor * belowBuffer[i] + aboveFactor * aboveBuffer[i];
-                destBuffer[offset + i + 1] = belowFactor * belowBuffer[i + 1] + aboveFactor * aboveBuffer[i + 1];
             }
 
             long nextPos = Position + processCount;
@@ -180,6 +145,223 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
             sharedInput.Trim(minPos, nextPos);
 
             return processCount;
+        }
+
+        unsafe void ProcessPeak(float* pRaw, float* pBelow, float* pAbove, float* pDest, int processCount, float startLinear, float linearStep, float attackCoeff, float releaseCoeff, float peakHoldReleaseCoeff)
+        {
+            float currentThresholdLinear = startLinear;
+
+            if (Vector.IsHardwareAccelerated && processCount >= Vector<float>.Count)
+            {
+                int vectorCount = Vector<float>.Count;
+                int simdEnd = processCount - (processCount % vectorCount);
+                float* pGains = stackalloc float[vectorCount];
+
+                for (int i = 0; i < simdEnd; i += vectorCount)
+                {
+                    for (int j = 0; j < vectorCount; j += 2)
+                    {
+                        float peak = Math.Max(Math.Abs(pRaw[i + j]), Math.Abs(pRaw[i + j + 1]));
+                        if (peak > sidechainEnvelope)
+                            sidechainEnvelope = peak;
+                        else
+                            sidechainEnvelope = peakHoldReleaseCoeff * sidechainEnvelope + (1f - peakHoldReleaseCoeff) * peak;
+
+                        float targetGain = sidechainEnvelope >= currentThresholdLinear ? 1f : 0f;
+                        currentThresholdLinear += linearStep;
+
+                        float coeff = targetGain > crossfadeGain ? attackCoeff : releaseCoeff;
+                        crossfadeGain = coeff * crossfadeGain + (1f - coeff) * targetGain;
+
+                        pGains[j] = crossfadeGain;
+                        pGains[j + 1] = crossfadeGain;
+                    }
+
+                    Vector<float> vGains = Unsafe.ReadUnaligned<Vector<float>>(pGains);
+                    Vector<float> vOnes = Vector<float>.One;
+                    Vector<float> vBelowGains = vOnes - vGains;
+
+                    Vector<float> vBelow = Unsafe.ReadUnaligned<Vector<float>>(pBelow + i);
+                    Vector<float> vAbove = Unsafe.ReadUnaligned<Vector<float>>(pAbove + i);
+
+                    Vector<float> vDest = (vBelow * vBelowGains) + (vAbove * vGains);
+                    Unsafe.WriteUnaligned(pDest + i, vDest);
+                }
+
+                for (int i = simdEnd; i < processCount; i += 2)
+                {
+                    float peak = Math.Max(Math.Abs(pRaw[i]), Math.Abs(pRaw[i + 1]));
+                    if (peak > sidechainEnvelope)
+                        sidechainEnvelope = peak;
+                    else
+                        sidechainEnvelope = peakHoldReleaseCoeff * sidechainEnvelope + (1f - peakHoldReleaseCoeff) * peak;
+
+                    float targetGain = sidechainEnvelope >= currentThresholdLinear ? 1f : 0f;
+                    currentThresholdLinear += linearStep;
+
+                    float coeff = targetGain > crossfadeGain ? attackCoeff : releaseCoeff;
+                    crossfadeGain = coeff * crossfadeGain + (1f - coeff) * targetGain;
+
+                    float aboveFactor = crossfadeGain;
+                    float belowFactor = 1f - aboveFactor;
+
+                    pDest[i] = pBelow[i] * belowFactor + pAbove[i] * aboveFactor;
+                    pDest[i + 1] = pBelow[i + 1] * belowFactor + pAbove[i + 1] * aboveFactor;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < processCount; i += 2)
+                {
+                    float peak = Math.Max(Math.Abs(pRaw[i]), Math.Abs(pRaw[i + 1]));
+                    if (peak > sidechainEnvelope)
+                        sidechainEnvelope = peak;
+                    else
+                        sidechainEnvelope = peakHoldReleaseCoeff * sidechainEnvelope + (1f - peakHoldReleaseCoeff) * peak;
+
+                    float targetGain = sidechainEnvelope >= currentThresholdLinear ? 1f : 0f;
+                    currentThresholdLinear += linearStep;
+
+                    float coeff = targetGain > crossfadeGain ? attackCoeff : releaseCoeff;
+                    crossfadeGain = coeff * crossfadeGain + (1f - coeff) * targetGain;
+
+                    float aboveFactor = crossfadeGain;
+                    float belowFactor = 1f - aboveFactor;
+
+                    pDest[i] = pBelow[i] * belowFactor + pAbove[i] * aboveFactor;
+                    pDest[i + 1] = pBelow[i + 1] * belowFactor + pAbove[i + 1] * aboveFactor;
+                }
+            }
+        }
+
+        unsafe void ProcessRms(float* pRaw, float* pBelow, float* pAbove, float* pDest, float* pRmsWindow, int processCount, float startLinear, float linearStep, float attackCoeff, float releaseCoeff)
+        {
+            float currentThresholdLinear = startLinear;
+            int windowLength = rmsWindowBuffer.Length;
+
+            if (Vector.IsHardwareAccelerated && processCount >= Vector<float>.Count)
+            {
+                int vectorCount = Vector<float>.Count;
+                int simdEnd = processCount - (processCount % vectorCount);
+                float* pGains = stackalloc float[vectorCount];
+
+                for (int i = 0; i < simdEnd; i += vectorCount)
+                {
+                    for (int j = 0; j < vectorCount; j += 2)
+                    {
+                        float sq = (pRaw[i + j] * pRaw[i + j] + pRaw[i + j + 1] * pRaw[i + j + 1]) * 0.5f;
+
+                        rmsRunningSum -= pRmsWindow[rmsWindowPos];
+                        pRmsWindow[rmsWindowPos] = sq;
+                        rmsRunningSum += sq;
+
+                        rmsWindowPos++;
+                        if (rmsWindowPos >= windowLength)
+                            rmsWindowPos = 0;
+
+                        if (rmsWindowPos == 0)
+                        {
+                            float recomputed = 0f;
+                            for (int k = 0; k < windowLength; k++)
+                                recomputed += pRmsWindow[k];
+                            rmsRunningSum = recomputed;
+                        }
+
+                        float scLevel = (float)Math.Sqrt(Math.Max(0f, rmsRunningSum) * rmsReciprocal);
+
+                        float targetGain = scLevel >= currentThresholdLinear ? 1f : 0f;
+                        currentThresholdLinear += linearStep;
+
+                        float coeff = targetGain > crossfadeGain ? attackCoeff : releaseCoeff;
+                        crossfadeGain = coeff * crossfadeGain + (1f - coeff) * targetGain;
+
+                        pGains[j] = crossfadeGain;
+                        pGains[j + 1] = crossfadeGain;
+                    }
+
+                    Vector<float> vGains = Unsafe.ReadUnaligned<Vector<float>>(pGains);
+                    Vector<float> vOnes = Vector<float>.One;
+                    Vector<float> vBelowGains = vOnes - vGains;
+
+                    Vector<float> vBelow = Unsafe.ReadUnaligned<Vector<float>>(pBelow + i);
+                    Vector<float> vAbove = Unsafe.ReadUnaligned<Vector<float>>(pAbove + i);
+
+                    Vector<float> vDest = (vBelow * vBelowGains) + (vAbove * vGains);
+                    Unsafe.WriteUnaligned(pDest + i, vDest);
+                }
+
+                for (int i = simdEnd; i < processCount; i += 2)
+                {
+                    float sq = (pRaw[i] * pRaw[i] + pRaw[i + 1] * pRaw[i + 1]) * 0.5f;
+
+                    rmsRunningSum -= pRmsWindow[rmsWindowPos];
+                    pRmsWindow[rmsWindowPos] = sq;
+                    rmsRunningSum += sq;
+
+                    rmsWindowPos++;
+                    if (rmsWindowPos >= windowLength)
+                        rmsWindowPos = 0;
+
+                    if (rmsWindowPos == 0)
+                    {
+                        float recomputed = 0f;
+                        for (int k = 0; k < windowLength; k++)
+                            recomputed += pRmsWindow[k];
+                        rmsRunningSum = recomputed;
+                    }
+
+                    float scLevel = (float)Math.Sqrt(Math.Max(0f, rmsRunningSum) * rmsReciprocal);
+
+                    float targetGain = scLevel >= currentThresholdLinear ? 1f : 0f;
+                    currentThresholdLinear += linearStep;
+
+                    float coeff = targetGain > crossfadeGain ? attackCoeff : releaseCoeff;
+                    crossfadeGain = coeff * crossfadeGain + (1f - coeff) * targetGain;
+
+                    float aboveFactor = crossfadeGain;
+                    float belowFactor = 1f - aboveFactor;
+
+                    pDest[i] = pBelow[i] * belowFactor + pAbove[i] * aboveFactor;
+                    pDest[i + 1] = pBelow[i + 1] * belowFactor + pAbove[i + 1] * aboveFactor;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < processCount; i += 2)
+                {
+                    float sq = (pRaw[i] * pRaw[i] + pRaw[i + 1] * pRaw[i + 1]) * 0.5f;
+
+                    rmsRunningSum -= pRmsWindow[rmsWindowPos];
+                    pRmsWindow[rmsWindowPos] = sq;
+                    rmsRunningSum += sq;
+
+                    rmsWindowPos++;
+                    if (rmsWindowPos >= windowLength)
+                        rmsWindowPos = 0;
+
+                    if (rmsWindowPos == 0)
+                    {
+                        float recomputed = 0f;
+                        for (int k = 0; k < windowLength; k++)
+                            recomputed += pRmsWindow[k];
+                        rmsRunningSum = recomputed;
+                    }
+
+                    float scLevel = (float)Math.Sqrt(Math.Max(0f, rmsRunningSum) * rmsReciprocal);
+
+                    float targetGain = scLevel >= currentThresholdLinear ? 1f : 0f;
+                    currentThresholdLinear += linearStep;
+
+                    float coeff = targetGain > crossfadeGain ? attackCoeff : releaseCoeff;
+                    crossfadeGain = coeff * crossfadeGain + (1f - coeff) * targetGain;
+
+                    float aboveFactor = crossfadeGain;
+                    float belowFactor = 1f - aboveFactor;
+
+                    pDest[i] = pBelow[i] * belowFactor + pAbove[i] * aboveFactor;
+                    pDest[i + 1] = pBelow[i + 1] * belowFactor + pAbove[i + 1] * aboveFactor;
+                }
+            }
         }
 
         protected override void seek(long position)
