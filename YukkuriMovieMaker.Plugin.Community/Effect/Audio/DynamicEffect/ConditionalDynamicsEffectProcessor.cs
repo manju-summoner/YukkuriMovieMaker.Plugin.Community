@@ -8,6 +8,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
 {
     internal class ConditionalDynamicsEffectProcessor(ConditionalDynamicsEffect effect, TimeSpan duration) : AudioEffectProcessorBase
     {
+        const double PeakHoldReleaseMs = 10.0;
+        const double MsToSeconds = 0.001;
+        const double MinTimeMs = 0.1;
+
         public override int Hz => Input?.Hz ?? throw new InvalidOperationException();
         public override long Duration => Input?.Duration ?? throw new InvalidOperationException();
 
@@ -48,7 +52,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
             if (belowChain is not null) disposer.Collect(belowChain);
             if (aboveChain is not null) disposer.Collect(aboveChain);
 
-            int windowSamples = Math.Max(1, (int)(effect.RmsWindowMs * 0.001 * hz));
+            int windowSamples = Math.Max(1, (int)(effect.RmsWindowMs * MsToSeconds * hz));
             rmsWindowBuffer = new float[windowSamples];
             rmsReciprocal = 1f / windowSamples;
 
@@ -112,12 +116,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
             int hz = Hz;
             float attackCoeff = ComputeCoeff(effect.AttackMs, hz);
             float releaseCoeff = ComputeCoeff(effect.ReleaseMs, hz);
-            float peakHoldReleaseCoeff = ComputeCoeff(10.0, hz);
+            float peakHoldReleaseCoeff = ComputeCoeff(PeakHoldReleaseMs, hz);
 
             long totalPairs = Duration / 2;
             long startPos = Position / 2;
             long endPos = (Position + processCount - 1) / 2;
-            
+
             float startDb = (float)effect.ThresholdDb.GetValue(startPos, totalPairs, hz);
             float endDb = (float)effect.ThresholdDb.GetValue(endPos, totalPairs, hz);
 
@@ -125,6 +129,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
             float endLinear = DbToLinear(endDb);
             int stepCount = processCount / 2;
             float linearStep = stepCount > 1 ? (endLinear - startLinear) / (stepCount - 1) : 0f;
+
             fixed (float* pRaw = rawBuffer, pBelow = belowBuffer, pAbove = aboveBuffer, pDest = &destBuffer[offset])
             {
                 if (effect.DetectionMode == DetectionMode.Peak)
@@ -156,6 +161,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
                 int vectorCount = Vector<float>.Count;
                 int simdEnd = processCount - (processCount % vectorCount);
                 float* pGains = stackalloc float[vectorCount];
+                Vector<float> vOnes = Vector<float>.One;
 
                 for (int i = 0; i < simdEnd; i += vectorCount)
                 {
@@ -178,14 +184,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
                     }
 
                     Vector<float> vGains = Unsafe.ReadUnaligned<Vector<float>>(pGains);
-                    Vector<float> vOnes = Vector<float>.One;
                     Vector<float> vBelowGains = vOnes - vGains;
 
                     Vector<float> vBelow = Unsafe.ReadUnaligned<Vector<float>>(pBelow + i);
                     Vector<float> vAbove = Unsafe.ReadUnaligned<Vector<float>>(pAbove + i);
 
-                    Vector<float> vDest = (vBelow * vBelowGains) + (vAbove * vGains);
-                    Unsafe.WriteUnaligned(pDest + i, vDest);
+                    Unsafe.WriteUnaligned(pDest + i, (vBelow * vBelowGains) + (vAbove * vGains));
                 }
 
                 for (int i = simdEnd; i < processCount; i += 2)
@@ -244,6 +248,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
                 int vectorCount = Vector<float>.Count;
                 int simdEnd = processCount - (processCount % vectorCount);
                 float* pGains = stackalloc float[vectorCount];
+                Vector<float> vOnes = Vector<float>.One;
 
                 for (int i = 0; i < simdEnd; i += vectorCount)
                 {
@@ -280,14 +285,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
                     }
 
                     Vector<float> vGains = Unsafe.ReadUnaligned<Vector<float>>(pGains);
-                    Vector<float> vOnes = Vector<float>.One;
                     Vector<float> vBelowGains = vOnes - vGains;
 
                     Vector<float> vBelow = Unsafe.ReadUnaligned<Vector<float>>(pBelow + i);
                     Vector<float> vAbove = Unsafe.ReadUnaligned<Vector<float>>(pAbove + i);
 
-                    Vector<float> vDest = (vBelow * vBelowGains) + (vAbove * vGains);
-                    Unsafe.WriteUnaligned(pDest + i, vDest);
+                    Unsafe.WriteUnaligned(pDest + i, (vBelow * vBelowGains) + (vAbove * vGains));
                 }
 
                 for (int i = simdEnd; i < processCount; i += 2)
@@ -390,7 +393,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.DynamicEffect
 
         static float ComputeCoeff(double timeMs, int hz)
         {
-            return (float)Math.Exp(-1.0 / (Math.Max(0.1, timeMs) * 0.001 * hz));
+            return (float)Math.Exp(-1.0 / (Math.Max(MinTimeMs, timeMs) * MsToSeconds * hz));
         }
 
         static float DbToLinear(double db)
