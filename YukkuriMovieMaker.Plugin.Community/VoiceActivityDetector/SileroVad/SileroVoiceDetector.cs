@@ -8,7 +8,7 @@ namespace YukkuriMovieMaker.Plugin.Community.VoiceActivityDetector.SileroVad
 {
     internal class SileroVoiceDetector(float threshold, int minSpeechDurationMs, float maxSpeechDurationSeconds, int minSilenceDurationMs, int speechPadMs) : Bindable, IVoiceActivityDetector
     {
-        static readonly string modelFilePath = Path.Combine(AppDirectories.ResourceDirectory, "models", "silero", "silero_vad_v6.onnx");
+        static readonly string modelFilePath = Path.Combine(AppDirectories.UserResourceDirectory, "models", "silero", "silero_vad_v6.onnx");
         SileroVadDetector? vad;
 
         public async Task DownloadResourcesAsync(ProgressMessage progress, CancellationToken token)
