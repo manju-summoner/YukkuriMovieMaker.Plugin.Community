@@ -14,6 +14,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion;
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
 {
     using AlphaMask = Vortice.Direct2D1.Effects.AlphaMask;
+    using Blend = Vortice.Direct2D1.Effects.Blend;
 
     public class InnerOutlineEffectProcessor : VideoEffectProcessorBase
     {
@@ -36,6 +37,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
         readonly ID2D1SolidColorBrush transparentBrush;
         ID2D1CommandList? brushCommandList;
         ID2D1CommandList? expandedInputCommandList;
+        ID2D1Bitmap1? inputBitmap;
+        int inputBitmapWidth;
+        int inputBitmapHeight;
+        AffineTransform2D? inputBitmapTransform;
 
         InvertAlphaCustomEffect? invertAlphaEffect;
         ID2D1Image? invertAlphaOutput;
@@ -47,7 +52,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
         Opacity? opacityEffect;
         AlphaMask? alphaMaskEffect2;
         ID2D1Image? opacityOutput;
-        ID2D1CommandList? commandList;
+        Composite? compositeEffect;
+        Blend? blendEffect;
+        AffineTransform2D? sink;
 
         public InnerOutlineEffectProcessor(IGraphicsDevicesAndContext devices, InnerOutlineEffect item) : base(devices)
         {
@@ -70,6 +77,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
                 || opacityEffect is null
                 || alphaMaskEffect2 is null
                 || opacityOutput is null
+                || compositeEffect is null
+                || blendEffect is null
+                || sink is null
+                || inputBitmapTransform is null
                 || input is null)
                 return effectDescription.DrawDescription;
 
@@ -104,6 +115,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
                 inputBounds.Right + (float)expandPadding,
                 inputBounds.Bottom + (float)expandPadding);
 
+            //inputをBitmapに焼き直してグラフ依存を切る（Bitmapはグラフのリーフ扱いでD2Dの「CommandListの参照ルール」に影響しない）
+            var requiredBitmapWidth = System.Math.Clamp((int)System.Math.Ceiling(inputBounds.Right - inputBounds.Left), 1, dc.MaximumBitmapSize);
+            var requiredBitmapHeight = System.Math.Clamp((int)System.Math.Ceiling(inputBounds.Bottom - inputBounds.Top), 1, dc.MaximumBitmapSize);
+            if (inputBitmap is null || inputBitmapWidth != requiredBitmapWidth || inputBitmapHeight != requiredBitmapHeight)
+            {
+                if (inputBitmap is not null)
+                    disposer.RemoveAndDispose(ref inputBitmap);
+                inputBitmap = dc.CreateEmptyBitmap(requiredBitmapWidth, requiredBitmapHeight);
+                disposer.Collect(inputBitmap);
+                inputBitmapWidth = requiredBitmapWidth;
+                inputBitmapHeight = requiredBitmapHeight;
+            }
+
+            dc.Target = inputBitmap;
+            dc.BeginDraw();
+            dc.Clear(null);
+            dc.DrawImage(input, new Vector2(-inputBounds.Left, -inputBounds.Top));
+            dc.EndDraw();
+            dc.Target = null;
+
+            inputBitmapTransform.SetInput(0, inputBitmap, true);
+            inputBitmapTransform.TransformMatrix = Matrix3x2.CreateTranslation(inputBounds.Left, inputBounds.Top);
+
             if (isFirst || isInputChanged || !this.expandedInputBounds.Equals(expandedBounds) || this.expandPadding != expandPadding)
             {
                 if (expandedInputCommandList != null)
@@ -115,12 +149,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
                 dc.BeginDraw();
                 dc.Clear(null);
                 dc.DrawRectangle(expandedBounds, transparentBrush);
-                dc.DrawImage(input);
+                //inputBitmap (Bitmapリーフ) を描画。CommandListは「自身の消費グラフ内のエフェクト」を参照してはいけないが、Bitmapはエフェクトではないので違反にならない
+                dc.DrawImage(inputBitmap, new Vector2(inputBounds.Left, inputBounds.Top));
                 dc.EndDraw();
                 dc.Target = null;
                 expandedInputCommandList.Close();
 
                 invertAlphaEffect.SetInput(0, expandedInputCommandList, true);
+            }
+            else
+            {
+                //bounds変化が無くてもinputBitmapの中身は更新されているので、CommandListの参照を再バインドする必要は無い（同じCommandListが新しいBitmap内容で再評価される）
             }
 
             var bounds = dc.GetImageLocalBounds(outlineOutput);
@@ -143,24 +182,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
                 alphaMaskEffect.SetInput(0, brushCommandList, true);
             }
 
-            if (commandList != null)
-                disposer.RemoveAndDispose(ref commandList);
-            commandList = devices.DeviceContext.CreateCommandList();
-            disposer.Collect(commandList);
-
-            dc.Target = commandList;
-            dc.BeginDraw();
-            dc.Clear(null);
-            if (!isOutlineOnly)
-                dc.DrawImage(input);
-            if (blend.IsCompositionEffect())
-                dc.DrawImage(opacityOutput, compositeMode: blend.ToD2DCompositionMode());
-            else
-                dc.BlendImage(opacityOutput, blend.ToD2DBlendMode(), Vector2.Zero, null, InterpolationMode.HighQualityCubic);
-            dc.EndDraw();
-            dc.Target = null;
-            commandList.Close();
-            alphaMaskEffect2.SetInput(0, commandList, true);
+            if (isFirst || this.isOutlineOnly != isOutlineOnly || this.blend != blend)
+            {
+                if (isOutlineOnly)
+                {
+                    using var output = alphaMaskEffect2.Output;
+                    sink.SetInput(0, output, true);
+                }
+                else if (blend.IsCompositionEffect())
+                {
+                    compositeEffect.Mode = blend.ToD2DCompositionMode();
+                    using var output = compositeEffect.Output;
+                    sink.SetInput(0, output, true);
+                }
+                else
+                {
+                    blendEffect.Mode = blend.ToD2DBlendMode();
+                    using var output = blendEffect.Output;
+                    sink.SetInput(0, output, true);
+                }
+            }
 
             isFirst = false;
             isInputChanged = false;
@@ -219,6 +260,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
             alphaMaskEffect2 = new AlphaMask(devices.DeviceContext);
             disposer.Collect(alphaMaskEffect2);
 
+            compositeEffect = new Composite(devices.DeviceContext);
+            disposer.Collect(compositeEffect);
+
+            blendEffect = new Blend(devices.DeviceContext);
+            disposer.Collect(blendEffect);
+
+            sink = new AffineTransform2D(devices.DeviceContext);
+            disposer.Collect(sink);
+
+            //inputBitmapTransform: 毎フレーム焼き直すinputBitmap (Bitmap) を入力位置に平行移動するためのラッパー
+            inputBitmapTransform = new AffineTransform2D(devices.DeviceContext);
+            disposer.Collect(inputBitmapTransform);
+
             featherAlphaEffect.SetInput(0, outlineOutput, true);
             using (var output = featherAlphaEffect.Output)
                 alphaMaskEffect.SetInput(1, output, true);
@@ -230,7 +284,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
             opacityOutput = opacityEffect.Output;
             disposer.Collect(opacityOutput);
 
-            var result = alphaMaskEffect2.Output;
+            //alphaMaskEffect2: opacityOutput (色付き縁取り) を inputBitmapTransform (= input相当) のアルファでクリップ
+            alphaMaskEffect2.SetInput(0, opacityOutput, true);
+            using (var output = inputBitmapTransform.Output)
+            {
+                alphaMaskEffect2.SetInput(1, output, true);
+                //compositeEffect/blendEffect: input相当 + alphaMaskEffect2.Output で最終合成
+                compositeEffect.SetInput(0, output, true);
+                blendEffect.SetInput(0, output, true);
+            }
+
+            using (var output = alphaMaskEffect2.Output)
+            {
+                compositeEffect.SetInput(1, output, true);
+                blendEffect.SetInput(1, output, true);
+            }
+
+            var result = sink.Output;
             disposer.Collect(result);
             return result;
         }
@@ -240,7 +310,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
             isInputChanged = true;
             if (dilationEffects.Count > 0 && invertAlphaOutput is not null)
                 dilationEffects[0].SetInput(0, invertAlphaOutput, true);
-            alphaMaskEffect2?.SetInput(1, input, true);
+            //inputは毎フレームinputBitmapに焼くのでここで効果側に直接接続しない（CommandList参照ルール違反を避ける）
         }
 
         protected override void ClearEffectChain()
@@ -255,6 +325,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
             opacityEffect?.SetInput(0, null, true);
             alphaMaskEffect2?.SetInput(0, null, true);
             alphaMaskEffect2?.SetInput(1, null, true);
+            compositeEffect?.SetInput(0, null, true);
+            compositeEffect?.SetInput(1, null, true);
+            blendEffect?.SetInput(0, null, true);
+            blendEffect?.SetInput(1, null, true);
+            inputBitmapTransform?.SetInput(0, null, true);
+            sink?.SetInput(0, null, true);
         }
 
         void ApplyDilationPasses(double thickness, int samples, bool isAngular)
