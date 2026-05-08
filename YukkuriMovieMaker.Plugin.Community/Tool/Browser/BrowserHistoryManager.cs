@@ -9,7 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         const int MaxHistoryCount = 128;
 
         public static string CacheDirectoryPath { get; } =
-            Path.Combine(AppDirectories.UserDirectory, "resources", "cache", "BrowserHistory");
+            Path.Combine(AppDirectories.UserResourceDirectory, "cache", "BrowserHistory");
 
         static BrowserHistoryManager()
         {

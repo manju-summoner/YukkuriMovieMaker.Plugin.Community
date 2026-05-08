@@ -9,7 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 {
     static class BrowserFaviconManager
     {
-        public static string CacheDirectoryPath { get; } = Path.Combine(AppDirectories.UserDirectory, "resources", "cache", "BrowserFavicon");
+        public static string CacheDirectoryPath { get; } = Path.Combine(AppDirectories.UserResourceDirectory, "cache", "BrowserFavicon");
 
         static BrowserFaviconManager()
         {
