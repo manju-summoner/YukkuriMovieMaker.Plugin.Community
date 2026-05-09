@@ -1,0 +1,36 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+ChannelRouterEffectName,,チャンネルルーター,Channel Router,通道路由器,通道路由器,채널 라우터,Enrutador de canal,موجّه القناة,Perute Saluran
+TargetIndexName,,分岐インデックス,Branch Index,分支索引,分支索引,분기 인덱스,Índice de rama,فهرس الفرع,Indeks Cabang
+TargetIndexDesc,,参照する分岐出力のインデックス,Index of the branched output to reference,要参考的分支输出的索引,要參考的分支輸出的索引,참조할 분기 출력 인덱스,Índice de la salida ramificada a referenciar,فهرس الخرج المتفرع المراد الرجوع إليه,Indeks output cabang yang akan dirujuk
+OutputRName,,出力R,Output R,输出R,輸出R,출력 R,Salida R,خرج R,Keluaran R
+OutputRDesc,,出力の赤チャンネルのソースを選択します,Select the source for the output red channel,选择输出红色通道的来源,選擇輸出紅色通道的來源,출력 빨간 채널의 소스를 선택합니다,Selecciona la fuente para el canal rojo de salida,اختر مصدر قناة الأحمر في الخرج,Pilih sumber untuk saluran merah keluaran
+OutputGName,,出力G,Output G,输出G,輸出G,출력 G,Salida G,خرج G,Keluaran G
+OutputGDesc,,出力の緑チャンネルのソースを選択します,Select the source for the output green channel,选择输出绿色通道的来源,選擇輸出綠色通道的來源,출력 초록 채널의 소스를 선택합니다,Selecciona la fuente para el canal verde de salida,اختر مصدر قناة الأخضر في الخرج,Pilih sumber untuk saluran hijau keluaran
+OutputBName,,出力B,Output B,输出B,輸出B,출력 B,Salida B,خرج B,Keluaran B
+OutputBDesc,,出力の青チャンネルのソースを選択します,Select the source for the output blue channel,选择输出蓝色通道的来源,選擇輸出藍色通道的來源,출력 파란 채널의 소스를 선택합니다,Selecciona la fuente para el canal azul de salida,اختر مصدر قناة الأزرق في الخرج,Pilih sumber untuk saluran biru keluaran
+OutputAName,,出力A,Output A,输出A,輸出A,출력 A,Salida A,خرج A,Keluaran A
+OutputADesc,,出力のアルファチャンネルのソースを選択します,Select the source for the output alpha channel,选择输出透明度通道的来源,選擇輸出透明度通道的來源,출력 알파 채널의 소스를 선택합니다,Selecciona la fuente para el canal alfa de salida,اختر مصدر قناة الشفافية في الخرج,Pilih sumber untuk saluran alfa keluaran
+ChannelSourceCurrentR,,現在のR,Current R,当前R,目前R,현재 R,R actual,R الحالي,R Saat Ini
+ChannelSourceCurrentRDesc,,現在の映像の赤チャンネル,Red channel of the current image,当前图像的红色通道,目前影像的紅色通道,현재 영상의 빨간 채널,Canal rojo de la imagen actual,قناة الأحمر للصورة الحالية,Saluran merah gambar saat ini
+ChannelSourceCurrentG,,現在のG,Current G,当前G,目前G,현재 G,G actual,G الحالي,G Saat Ini
+ChannelSourceCurrentGDesc,,現在の映像の緑チャンネル,Green channel of the current image,当前图像的绿色通道,目前影像的綠色通道,현재 영상의 초록 채널,Canal verde de la imagen actual,قناة الأخضر للصورة الحالية,Saluran hijau gambar saat ini
+ChannelSourceCurrentB,,現在のB,Current B,当前B,目前B,현재 B,B actual,B الحالي,B Saat Ini
+ChannelSourceCurrentBDesc,,現在の映像の青チャンネル,Blue channel of the current image,当前图像的蓝色通道,目前影像的藍色通道,현재 영상의 파란 채널,Canal azul de la imagen actual,قناة الأزرق للصورة الحالية,Saluran biru gambar saat ini
+ChannelSourceCurrentA,,現在のA,Current A,当前A,目前A,현재 A,A actual,A الحالي,A Saat Ini
+ChannelSourceCurrentADesc,,現在の映像のアルファチャンネル,Alpha channel of the current image,当前图像的透明度通道,目前影像的透明度通道,현재 영상의 알파 채널,Canal alfa de la imagen actual,قناة الشفافية للصورة الحالية,Saluran alfa gambar saat ini
+ChannelSourceCurrentLuminance,,現在の輝度,Current Luminance,当前亮度,目前亮度,현재 휘도,Luminancia actual,اللمعان الحالي,Luminansi Saat Ini
+ChannelSourceCurrentLuminanceDesc,,現在の映像の輝度 (グレースケール値),Luminance of the current image (grayscale value),当前图像的亮度（灰度值）,目前影像的亮度（灰階值）,현재 영상의 휘도 (그레이스케일 값),Luminancia de la imagen actual (valor en escala de grises),اللمعان للصورة الحالية (قيمة تدرج الرمادي),Luminansi gambar saat ini (nilai skala abu-abu)
+ChannelSourceBranchR,,分岐のR,Branch R,分支R,分支R,분기 R,R de rama,R الفرع,R Cabang
+ChannelSourceBranchRDesc,,分岐出力の赤チャンネル,Red channel of the branched output,分支输出的红色通道,分支輸出的紅色通道,분기 출력의 빨간 채널,Canal rojo de la salida ramificada,قناة الأحمر للخرج المتفرع,Saluran merah output cabang
+ChannelSourceBranchG,,分岐のG,Branch G,分支G,分支G,분기 G,G de rama,G الفرع,G Cabang
+ChannelSourceBranchGDesc,,分岐出力の緑チャンネル,Green channel of the branched output,分支输出的绿色通道,分支輸出的綠色通道,분기 출력의 초록 채널,Canal verde de la salida ramificada,قناة الأخضر للخرج المتفرع,Saluran hijau output cabang
+ChannelSourceBranchB,,分岐のB,Branch B,分支B,分支B,분기 B,B de rama,B الفرع,B Cabang
+ChannelSourceBranchBDesc,,分岐出力の青チャンネル,Blue channel of the branched output,分支输出的蓝色通道,分支輸出的藍色通道,분기 출력의 파란 채널,Canal azul de la salida ramificada,قناة الأزرق للخرج المتفرع,Saluran biru output cabang
+ChannelSourceBranchA,,分岐のA,Branch A,分支A,分支A,분기 A,A de rama,A الفرع,A Cabang
+ChannelSourceBranchADesc,,分岐出力のアルファチャンネル,Alpha channel of the branched output,分支输出的透明度通道,分支輸出的透明度通道,분기 출력의 알파 채널,Canal alfa de la salida ramificada,قناة الشفافية للخرج المتفرع,Saluran alfa output cabang
+ChannelSourceBranchLuminance,,分岐の輝度,Branch Luminance,分支亮度,分支亮度,분기 휘도,Luminancia de rama,اللمعان للفرع,Luminansi Cabang
+ChannelSourceBranchLuminanceDesc,,分岐出力の輝度 (グレースケール値),Luminance of the branched output (grayscale value),分支输出的亮度（灰度值）,分支輸出的亮度（灰階值）,분기 출력의 휘도 (그레이스케일 값),Luminancia de la salida ramificada (valor en escala de grises),اللمعان للخرج المتفرع (قيمة تدرج الرمادي),Luminansi output cabang (nilai skala abu-abu)
+ChannelSourceOne,,1 (最大値),1 (Maximum),1（最大值）,1（最大值）,1 (최댓값),1 (Máximo),1 (الحد الأقصى),1 (Nilai Maksimum)
+ChannelSourceOneDesc,,チャンネル値を常に1.0 (最大値) に設定します,Sets the channel value to a constant 1.0 (maximum),将通道值固定为1.0（最大值）,將通道值固定為1.0（最大值）,채널 값을 항상 1.0 (최댓값) 으로 설정합니다,Establece el valor del canal en 1.0 constante (máximo),يضبط قيمة القناة على 1.0 ثابتة (الحد الأقصى),Mengatur nilai saluran ke 1,0 tetap (maksimum)
+ChannelSourceZero,,0 (最小値),0 (Zero),0（最小值）,0（最小值）,0 (최솟값),0 (Cero),0 (صفر),0 (Nol)
+ChannelSourceZeroDesc,,チャンネル値を常に0.0 (最小値) に設定します,Sets the channel value to a constant 0.0 (zero),将通道值固定为0.0（最小值）,將通道值固定為0.0（最小值）,채널 값을 항상 0.0 (최솟값) 으로 설정합니다,Establece el valor del canal en 0.0 constante (cero),يضبط قيمة القناة على 0.0 ثابتة (صفر),Mengatur nilai saluran ke 0,0 tetap (nol)
