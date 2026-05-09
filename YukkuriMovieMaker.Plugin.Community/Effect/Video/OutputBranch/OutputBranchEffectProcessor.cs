@@ -6,15 +6,10 @@ using YukkuriMovieMaker.Player.Video.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputBranch
 {
-    internal class OutputBranchEffectProcessor : VideoEffectProcessorBase
+    internal class OutputBranchEffectProcessor(IGraphicsDevicesAndContext devices) : VideoEffectProcessorBase(devices)
     {
         private AffineTransform2D? transformEffect;
         private ID2D1Image? transformOutput;
-
-        public OutputBranchEffectProcessor(IGraphicsDevicesAndContext devices) : base(devices)
-        {
-
-        }
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
