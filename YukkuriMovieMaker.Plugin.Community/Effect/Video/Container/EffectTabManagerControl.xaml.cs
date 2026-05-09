@@ -39,7 +39,6 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         {
             oldVm.BeginEdit -= OnBeginEdit;
             oldVm.EndEdit -= OnEndEdit;
-            oldVm.ShowWarningMessageRequested -= OnShowWarningMessageRequested;
             oldVm.ConfirmationRequested -= OnConfirmationRequested;
             oldVm.BookmarkDialogRequested -= OnBookmarkDialogRequested;
         }
@@ -51,7 +50,6 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         {
             newVm.BeginEdit += OnBeginEdit;
             newVm.EndEdit += OnEndEdit;
-            newVm.ShowWarningMessageRequested += OnShowWarningMessageRequested;
             newVm.ConfirmationRequested += OnConfirmationRequested;
             newVm.BookmarkDialogRequested += OnBookmarkDialogRequested;
             _dragDropService = new TabDragDropService(TabListBox, newVm);
@@ -61,11 +59,6 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
     private void OnBeginEdit(object? sender, EventArgs e) => BeginEdit?.Invoke(this, EventArgs.Empty);
 
     private void OnEndEdit(object? sender, EventArgs e) => EndEdit?.Invoke(this, EventArgs.Empty);
-
-    private void OnShowWarningMessageRequested(object? sender, ShowWarningEventArgs e)
-    {
-        MessageBox.Show(e.Message, e.Title, MessageBoxButton.OK, MessageBoxImage.Warning);
-    }
 
     private void OnConfirmationRequested(object? sender, ConfirmationEventArgs e)
     {

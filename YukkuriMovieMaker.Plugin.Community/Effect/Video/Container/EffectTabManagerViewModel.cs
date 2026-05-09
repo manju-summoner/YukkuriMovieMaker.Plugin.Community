@@ -65,7 +65,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     public event EventHandler? BeginEdit;
     public event EventHandler? EndEdit;
-    public event EventHandler<ShowWarningEventArgs>? ShowWarningMessageRequested;
     public event EventHandler<ConfirmationEventArgs>? ConfirmationRequested;
     public event EventHandler<BookmarkDialogEventArgs>? BookmarkDialogRequested;
 
@@ -91,7 +90,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         DuplicateTabCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteDuplicateTab(ResolveTab(p)));
         CopyCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteCopy(ResolveTab(p)));
         PasteCommand = new ActionCommand(_ => System.Windows.Clipboard.ContainsData(ClipboardFormat), p => ExecutePaste(p as EffectTabItemViewModel));
-        StashCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteStash(ResolveTab(p)));
+        StashCommand = new ActionCommand(p => HasEffects(ResolveTab(p)), p => ExecuteStash(ResolveTab(p)));
         RestoreStashCommand = new ActionCommand(p => p is EffectTabStashViewModel, p => ExecuteRestoreStash(p as EffectTabStashViewModel));
         RemoveStashCommand = new ActionCommand(p => p is EffectTabStashViewModel, p => ExecuteRemoveStash(p as EffectTabStashViewModel));
         ClearStashesCommand = new ActionCommand(_ => HasStashes, _ => ExecuteClearStashes());
@@ -101,7 +100,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         MoveTabToIndexCommand = new ActionCommand(
             p => p is MoveTabToIndexParameter param && CanMoveTabToIndex(param),
             p => ExecuteMoveTabToIndex(p as MoveTabToIndexParameter));
-        AddBookmarkCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteAddBookmark(ResolveTab(p)));
+        AddBookmarkCommand = new ActionCommand(p => HasEffects(ResolveTab(p)), p => ExecuteAddBookmark(ResolveTab(p)));
         RestoreBookmarkCommand = new ActionCommand(p => p is EffectTabBookmarkViewModel, p => ExecuteRestoreBookmark(p as EffectTabBookmarkViewModel));
         EditBookmarkCommand = new ActionCommand(p => p is EffectTabBookmarkViewModel, p => ExecuteEditBookmark(p as EffectTabBookmarkViewModel));
         ClearBookmarksCommand = new ActionCommand(_ => HasBookmarks, _ => ExecuteClearBookmarks());
@@ -118,6 +117,16 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     }
 
     private EffectTabItemViewModel? ResolveTab(object? param) => param as EffectTabItemViewModel ?? SelectedTab;
+
+    private bool HasEffects(EffectTabItemViewModel? target)
+    {
+        if (target == null) return false;
+
+        if (target == SelectedTab)
+            return _effect.Effects.Count > 0;
+
+        return EffectSerializer.Deserialize(target.SerializedEffects).Count > 0;
+    }
 
     private void Tabs_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
@@ -311,13 +320,9 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         if (target == SelectedTab)
             target.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-
+        
         var effects = EffectSerializer.Deserialize(target.SerializedEffects);
-        if (effects.Count == 0)
-        {
-            ShowWarningMessageRequested?.Invoke(this, new ShowWarningEventArgs(Texts.Message_EmptyEffectTab, Texts.Menu_Bookmark));
-            return;
-        }
+        if (effects.Count == 0) return;
 
         var args = new BookmarkDialogEventArgs(target.Name, false);
         BookmarkDialogRequested?.Invoke(this, args);
