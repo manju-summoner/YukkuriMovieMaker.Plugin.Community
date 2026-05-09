@@ -107,7 +107,10 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         ClearBookmarksCommand = new ActionCommand(_ => HasBookmarks, _ => ExecuteClearBookmarks());
         ExtractEffectCommand = new ActionCommand(p => p is ExtractEffectViewModel, p => ExecuteExtractEffect(p as ExtractEffectViewModel));
 
-        LoadTabs();
+        using (BeginSelfUpdate())
+        {
+            LoadTabs();
+        }
         LoadStashes();
         LoadBookmarks();
 
