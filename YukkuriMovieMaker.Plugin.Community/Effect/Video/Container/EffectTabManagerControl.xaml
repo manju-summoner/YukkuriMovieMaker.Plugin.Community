@@ -449,6 +449,7 @@
                                         </Condition.Binding>
                                     </Condition>
                                     <Condition Binding="{Binding IsEditing}" Value="False"/>
+                                    <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="False"/>
                                 </MultiDataTrigger.Conditions>
                                 <Setter TargetName="TabBorder" Property="MinWidth" Value="28"/>
                                 <Setter TargetName="TabBorder" Property="Width" Value="28"/>
