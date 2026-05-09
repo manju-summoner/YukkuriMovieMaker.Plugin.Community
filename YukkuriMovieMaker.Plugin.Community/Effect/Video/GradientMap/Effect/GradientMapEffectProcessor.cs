@@ -29,12 +29,16 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
     private ID2D1Bitmap? _fallbackBitmap;
 
     private string _loadedPath = string.Empty;
-    private int _loadedIndex = -1;
+    private int _loadedIndex;
     private ImmutableList<GradientStop> _loadedStops = [];
-    private bool _isFirst = true;
     private float _opacity;
     private Project.Blend _blendMode;
     private int _isHorizontal;
+
+    private bool _gradientDirty = true;
+    private bool _blendModeDirty = true;
+    private bool _opacityDirty = true;
+    private bool _isHorizontalDirty = true;
 
     public GradientMapEffectProcessor(
         IGraphicsDevicesAndContext devices,
@@ -128,33 +132,25 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
         // 垂直サンプリングすると中央行ピクセルを繰り返し引くだけになるため水平サンプリングに固定する。
         var isHorizontal = (!ImageFormatParser.IsImageFile(path) || _item.IsHorizontal) ? 1 : 0;
 
-        var stopsChanged = stops.Count != _loadedStops.Count || !stops.SequenceEqual(_loadedStops, StopComparer);
-        var fileChanged = !string.Equals(path, _loadedPath, StringComparison.Ordinal) || gradientIndex != _loadedIndex;
-        var hasStops = stops.Count >= 2;
+        var fileChanged = !string.Equals(path, _loadedPath, StringComparison.Ordinal)
+            || gradientIndex != _loadedIndex;
+        var stopsChanged = stops.Count != _loadedStops.Count
+            || !stops.SequenceEqual(_loadedStops, StopComparer);
 
-        if (fileChanged && !stopsChanged)
+        if (_gradientDirty || fileChanged || stopsChanged)
         {
-            RefreshGradientBitmapFromFile(path, gradientIndex, stops);
-        }
-        else if (stopsChanged && !fileChanged)
-        {
-            if (hasStops)
-                RefreshGradientBitmapFromStops(stops, path, gradientIndex);
-            else
-                RefreshGradientBitmapFromFile(path, gradientIndex, stops);
-        }
-        else if (stopsChanged && fileChanged)
-        {
-            if (hasStops)
-                RefreshGradientBitmapFromStops(stops, path, gradientIndex);
-            else if (!string.IsNullOrWhiteSpace(path))
-                RefreshGradientBitmapFromFile(path, gradientIndex, stops);
+            RefreshGradientBitmap(path, gradientIndex, stops);
+            _gradientDirty = false;
         }
 
-        if (_isFirst || _isHorizontal != isHorizontal)
+        if (_isHorizontalDirty || _isHorizontal != isHorizontal)
+        {
             _gradMapEffect.IsHorizontal = isHorizontal;
+            _isHorizontal = isHorizontal;
+            _isHorizontalDirty = false;
+        }
 
-        if (_isFirst || _blendMode != blendMode)
+        if (_blendModeDirty || _blendMode != blendMode)
         {
             if (blendMode.IsCompositionEffect())
             {
@@ -168,17 +164,28 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
                 using var blended = _blendEffect.Output;
                 _crossFadeEffect.SetInput(0, blended, true);
             }
+            _blendMode = blendMode;
+            _blendModeDirty = false;
         }
 
-        if (_isFirst || _opacity != opacity)
+        if (_opacityDirty || _opacity != opacity)
+        {
             _crossFadeEffect.Weight = opacity;
-
-        _isFirst = false;
-        _opacity = opacity;
-        _blendMode = blendMode;
-        _isHorizontal = isHorizontal;
+            _opacity = opacity;
+            _opacityDirty = false;
+        }
 
         return effectDescription.DrawDescription;
+    }
+
+    private void RefreshGradientBitmap(string path, int gradientIndex, ImmutableList<GradientStop> stops)
+    {
+        if (!string.IsNullOrWhiteSpace(path))
+            RefreshGradientBitmapFromFile(path, gradientIndex, stops);
+        else if (stops.Count >= 2)
+            RefreshGradientBitmapFromStops(stops, path, gradientIndex);
+        else
+            ApplyFallback(stops, path, gradientIndex);
     }
 
     private void RefreshGradientBitmapFromStops(ImmutableList<GradientStop> stops, string path, int gradientIndex)
@@ -217,6 +224,15 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
         _gradientBitmap = bitmap;
         disposer.Collect(_gradientBitmap);
         _gradMapEffect?.SetGradientInput(bitmap);
+    }
+
+    private void ApplyFallback(ImmutableList<GradientStop> stops, string path, int gradientIndex)
+    {
+        ReleaseBitmap();
+        _loadedStops = stops;
+        _loadedPath = path;
+        _loadedIndex = gradientIndex;
+        _gradMapEffect?.SetGradientInput(_fallbackBitmap);
     }
 
     private void ReleaseBitmap()
