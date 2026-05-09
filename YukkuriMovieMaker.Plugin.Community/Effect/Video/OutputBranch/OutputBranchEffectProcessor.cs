@@ -9,6 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputBranch
     internal class OutputBranchEffectProcessor : VideoEffectProcessorBase
     {
         private AffineTransform2D? transformEffect;
+        private ID2D1Image? transformOutput;
 
         public OutputBranchEffectProcessor(IGraphicsDevicesAndContext devices) : base(devices)
         {
@@ -18,14 +19,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputBranch
         public override DrawDescription Update(EffectDescription effectDescription)
         {
             var desc = effectDescription.DrawDescription;
-            if (input is null || transformEffect is null)
+            if (input is null || transformOutput is null)
                 return desc;
 
             var next = desc.GetCustomValue<int>("OutputBranch.NextBranchIndex");
             if (next <= 0)
                 next = 1;
 
-            desc = desc.SetCustomValue<ID2D1Image>(transformEffect.Output, $"OutputBranch.Branch{next}");
+            desc = desc.SetCustomValue<ID2D1Image>(transformOutput, $"OutputBranch.Branch{next}");
             desc = desc.SetCustomValue<int>(next + 1, "OutputBranch.NextBranchIndex");
             return desc;
         }
@@ -36,24 +37,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputBranch
             {
                 Cached = true
             };
-            return transformEffect.Output;
+            disposer.Collect(transformEffect);
+
+            transformOutput = transformEffect.Output;
+            disposer.Collect(transformOutput);
+            return transformOutput;
         }
 
         protected override void setInput(ID2D1Image? input)
         {
-            if (transformEffect != null)
-            {
-                transformEffect.SetInput(0, input, true);
-            }
+            transformEffect?.SetInput(0, input, true);
         }
 
         protected override void ClearEffectChain()
         {
-            if (transformEffect != null)
-            {
-                transformEffect.Dispose();
-                transformEffect = null;
-            }
+            transformEffect?.SetInput(0, null, true);
         }
     }
 }
