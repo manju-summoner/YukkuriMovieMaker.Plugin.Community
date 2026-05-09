@@ -180,8 +180,7 @@
         <Style x:Key="CloseIconButtonStyle" TargetType="Button" BasedOn="{StaticResource ListIconButtonStyle}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding DataContext.HasMultipleTabs, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="False">
-                    <Setter Property="IsHitTestVisible" Value="False"/>
-                    <Setter Property="Opacity" Value="0.15"/>
+                    <Setter Property="Visibility" Value="Collapsed"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
