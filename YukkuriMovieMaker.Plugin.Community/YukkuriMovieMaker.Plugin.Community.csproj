@@ -85,7 +85,7 @@
     <Resource Include="Voice\IrodoriTTS\EmojiPalette\Emoji\*.png" />
   </ItemGroup>
 	
-	<ItemGroup>
+  <ItemGroup>
     <None Remove="Brush\Rainbow\Linear\Texts.csv" />
     <None Remove="Brush\Rainbow\Radial\Texts.csv" />
     <None Remove="Effect\Audio\DecibelVolume\Texts.csv" />
