@@ -1,7 +1,9 @@
 Texture2D CurrentTexture : register(t0);
+SamplerState CurrentSampler : register(s0);
 Texture2D TargetTexture : register(t1);
+SamplerState TargetSampler : register(s1);
 Texture2D MapTexture : register(t2);
-SamplerState Sampler : register(s0);
+SamplerState MapSampler : register(s2);
 
 cbuffer constants : register(b0)
 {
@@ -44,9 +46,9 @@ float4 main(
     float4 uv2 : TEXCOORD2
 ) : SV_Target
 {
-    float4 current = SafeSample(CurrentTexture, Sampler, uv0.xy);
-    float4 target = SafeSample(TargetTexture, Sampler, uv1.xy);
-    float4 map = SafeSample(MapTexture, Sampler, uv2.xy);
+    float4 current = SafeSample(CurrentTexture, CurrentSampler, uv0.xy);
+    float4 target = SafeSample(TargetTexture, TargetSampler, uv1.xy);
+    float4 map = SafeSample(MapTexture, MapSampler, uv2.xy);
 
     float weight;
     [branch]
