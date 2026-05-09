@@ -8,9 +8,8 @@
              xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
              xmlns:ps="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
              xmlns:pt="clr-namespace:YukkuriMovieMaker.Views.Triggers;assembly=YukkuriMovieMaker.Plugin"
-             xmlns:pc="clr-namespace:YukkuriMovieMaker.Views.Converters;assembly=YukkuriMovieMaker.Plugin"
-             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type={x:Type local:NotepadViewModel}}">
@@ -23,7 +22,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <ToolBarTray Grid.Row="0" Name="ToolBar">
+        <ToolBarTray Grid.Row="0">
             <i:Interaction.Triggers>
                 <pt:PreviewMouseWheelEventTrigger ModifierKeys="Ctrl" DeltaMode="Down" Handled="True">
                     <i:InvokeCommandAction Command="{Binding Source={x:Static ps:CommandSettings.Default},Path=[SizeDownToolBar]}" PassEventArgsToCommand="True"/>
@@ -40,22 +39,26 @@
                 <Button Content="{DynamicResource {x:Static icons:IconKeys.ContentSaveEdit}}" Command="{Binding SaveCommand}" ToolTip="{x:Static local:Texts.SaveAs}"/>
                 <Separator/>
                 <ToggleButton Content="{DynamicResource {x:Static icons:IconKeys.FormatTextWrappingWrap}}" IsChecked="{Binding WordWrap}" ToolTip="{x:Static local:Texts.WordWrap}"/>
+                <ToggleButton Content="{DynamicResource {x:Static icons:IconKeys.FormatListNumbered}}" IsChecked="{Binding ShowLineNumbers}" ToolTip="{x:Static local:Texts.ShowLineNumbers}"/>
             </ToolBar>
         </ToolBarTray>
-        <TextBox Grid.Row="1"
-                 Text="{Binding Text,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}"
-                 FontSize="{Binding FontSize}"
-                 Padding="3"
-                 AcceptsReturn="True"
-                 AcceptsTab="True"
-                 TextWrapping="{Binding WordWrap, Converter={local:BoolToTextWrappingConverter}}"
-                 VerticalScrollBarVisibility="Auto"
-                 HorizontalScrollBarVisibility="Auto">
+        <avalon:TextEditor Grid.Row="1"
+                           FontSize="{Binding FontSize}"
+                           ShowLineNumbers="{Binding ShowLineNumbers}"
+                           IsReadOnly="False"
+                           VerticalScrollBarVisibility="Auto"
+                           HorizontalScrollBarVisibility="Auto">
+            <avalon:TextEditor.Options>
+                <avalon:TextEditorOptions EnableHyperlinks="False" />
+            </avalon:TextEditor.Options>
+            <i:Interaction.Behaviors>
+                <local:AvalonEditBehavior Text="{Binding Text, Mode=TwoWay}" WordWrap="{Binding WordWrap}"/>
+            </i:Interaction.Behaviors>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="PreviewMouseWheel">
                     <i:InvokeCommandAction Command="{Binding ChangeFontSizeCommand}" PassEventArgsToCommand="True"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-        </TextBox>
+        </avalon:TextEditor>
     </Grid>
 </UserControl>
