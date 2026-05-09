@@ -25,7 +25,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            sink = new D2DEffects.AffineTransform2D(devices.DeviceContext);
+            sink = new D2DEffects.AffineTransform2D(devices.DeviceContext)
+            {
+                Cached = true
+            };
             disposer.Collect(sink);
 
             compositeEffect = new D2DEffects.Composite(devices.DeviceContext) { InputCount = 2 };
