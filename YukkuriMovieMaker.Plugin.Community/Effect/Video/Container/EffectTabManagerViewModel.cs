@@ -289,6 +289,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         {
             Id = Guid.NewGuid(),
             Name = name,
+            OriginalTabName = target.Name,
             SerializedEffects = target.SerializedEffects
         };
 
@@ -539,9 +540,13 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         using (BeginUndo())
         {
+            var restoredName = string.IsNullOrWhiteSpace(stashVm.Model.OriginalTabName)
+                ? Texts.Menu_RestoreStashName
+                : stashVm.Model.OriginalTabName!;
+
             var tab = new EffectTab
             {
-                Name = Texts.Menu_RestoreStashName,
+                Name = restoredName,
                 SerializedEffects = stashVm.SerializedEffects
             };
             var vm = new EffectTabItemViewModel(tab);
