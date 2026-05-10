@@ -45,7 +45,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Kagome
             var factory = devices.D2D.Factory;
 
             var sqrt3 = MathF.Sqrt(3f);
-            var r = (float)Math.Max(1.0, newSize);
+            var r = (float)Math.Max(1.0, Math.Round(newSize));
 
             var tileW = r * 4f / sqrt3;
             var tileH = r * 2f;
