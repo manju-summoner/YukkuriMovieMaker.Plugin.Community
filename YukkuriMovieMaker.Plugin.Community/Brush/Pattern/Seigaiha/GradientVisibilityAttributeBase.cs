@@ -11,7 +11,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
         {
             return new Binding(nameof(SeigaihaBrushParameter.GradientEnabled))
             {
-                Source = propertyOwner,
+                Source = item,
                 Converter = new BoolToVisibilityConverter { Invert = Invert }
             };
         }
