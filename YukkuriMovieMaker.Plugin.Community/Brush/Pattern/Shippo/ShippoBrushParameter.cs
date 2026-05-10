@@ -8,6 +8,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Shippo
 {
     internal class ShippoBrushParameter : DrawingBrushParameterBase
     {
+        [Display(Name = nameof(Texts.PatternType), ResourceType = typeof(Texts))]
+        [EnumComboBox]
+        public ShippoPattern Pattern { get => pattern; set => Set(ref pattern, value); }
+        ShippoPattern pattern = ShippoPattern.Basic;
+
         [Display(Name = nameof(Texts.Color), ResourceType = typeof(Texts))]
         [ColorPicker]
         public Color Color { get => color; set => Set(ref color, value); }
