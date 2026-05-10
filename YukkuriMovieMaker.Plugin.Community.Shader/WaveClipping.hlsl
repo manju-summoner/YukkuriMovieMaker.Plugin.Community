@@ -16,11 +16,67 @@ cbuffer Constants : register(b0)
     int mode;
     float isInverted;
     float rotation;
+    float randomSeed;
+    float useRandom;
+    float randomSpeed;
 };
+
+static const float TWO_PI = 6.28318530718f;
+static const float HASH_FACTOR = 0.10306f;
+static const float HASH_BIAS = 33.33f;
+static const float NOISE_SEED_SCALE = 1.73205f;
+static const float NOISE_PERSISTENCE = 0.55f;
+static const float LACUNARITY = 2.137f;
+
+float Hash(float x)
+{
+    x = frac(x * HASH_FACTOR);
+    x *= x + HASH_BIAS;
+    x *= x + x;
+    return frac(x);
+}
+
+float CubicInterp(float a, float b, float t)
+{
+    float s = t * t * (3.0f - 2.0f * t);
+    return lerp(a, b, s);
+}
+
+float ValueNoise(float x)
+{
+    float i = floor(x);
+    float f = frac(x);
+    return CubicInterp(Hash(i), Hash(i + 1.0f), f);
+}
+
+float FractalNoise(float x, float seed)
+{
+    float xs = x + seed * NOISE_SEED_SCALE;
+    float v = 0.0f;
+    float amp = 0.5f;
+    float freq = 1.0f;
+    float norm = 0.0f;
+
+    [unroll]
+    for (int i = 0; i < 5; i++)
+    {
+        v += ValueNoise(xs * freq + seed * (float(i) * TWO_PI + 0.5f)) * amp;
+        norm += amp;
+        amp *= NOISE_PERSISTENCE;
+        freq *= LACUNARITY;
+    }
+
+    return (v / norm) * 2.0f - 1.0f;
+}
 
 float ComputeWave(float normalizedX)
 {
-    return sin(normalizedX * frequency * 6.28318530718f + phase) * amplitude;
+    return sin(normalizedX * frequency * TWO_PI + phase) * amplitude;
+}
+
+float ComputeRandomWave(float normalizedX)
+{
+    return FractalNoise(normalizedX * max(frequency, 0.01f) + randomSpeed, randomSeed) * amplitude;
 }
 
 float4 main(float4 pos : SV_POSITION, float4 posScene : SCENE_POSITION, float4 uv : TEXCOORD0) : SV_TARGET
@@ -43,9 +99,15 @@ float4 main(float4 pos : SV_POSITION, float4 posScene : SCENE_POSITION, float4 u
 
     float u = uPx / safeWidth + 0.5f;
     float v = vPx / edgeSpan + 0.5f;
-
     float scale = safeHeight / edgeSpan;
-    float wave = ComputeWave(u) * scale;
+
+    float wave;
+    [branch]
+    if (useRandom != 0.0f)
+        wave = ComputeRandomWave(u) * scale;
+    else
+        wave = ComputeWave(u) * scale;
+
     float halfBand = (mode == 0) ? 0.0f : bandWidth * 0.5f * scale;
     float e1 = edgePosition - halfBand + wave;
     float e2 = edgePosition + halfBand + wave;
@@ -71,7 +133,9 @@ float4 main(float4 pos : SV_POSITION, float4 posScene : SCENE_POSITION, float4 u
         mask = 1.0f - above * below;
     }
 
-    mask = lerp(mask, 1.0f - mask, isInverted);
+    [branch]
+    if (isInverted != 0.0f)
+        mask = 1.0f - mask;
 
     color.a *= mask;
     color.rgb *= mask;

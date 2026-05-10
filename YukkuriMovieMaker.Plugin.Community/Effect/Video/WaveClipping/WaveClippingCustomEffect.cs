@@ -23,6 +23,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             Mode,
             IsInverted,
             Rotation,
+            RandomSeed,
+            UseRandom,
+            RandomSpeed,
         }
 
         public float InputLeft { set => SetValue((int)PropertyIndex.InputLeft, value); }
@@ -38,6 +41,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         public int Mode { set => SetValue((int)PropertyIndex.Mode, value); }
         public float IsInverted { set => SetValue((int)PropertyIndex.IsInverted, value); }
         public float Rotation { set => SetValue((int)PropertyIndex.Rotation, value); }
+        public float RandomSeed { set => SetValue((int)PropertyIndex.RandomSeed, value); }
+        public float UseRandom { set => SetValue((int)PropertyIndex.UseRandom, value); }
+        public float RandomSpeed { set => SetValue((int)PropertyIndex.RandomSpeed, value); }
+
         internal void ClearInput() => SetInput(0, null, true);
 
         public WaveClippingCustomEffect(IGraphicsDevicesAndContext devices)
@@ -87,6 +94,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Rotation)]
             public float Rotation { get => _cb.Rotation; set { _cb.Rotation = value; UpdateConstants(); } }
 
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.RandomSeed)]
+            public float RandomSeed { get => _cb.RandomSeed; set { _cb.RandomSeed = value; UpdateConstants(); } }
+
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.UseRandom)]
+            public float UseRandom { get => _cb.UseRandom; set { _cb.UseRandom = value; UpdateConstants(); } }
+
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.RandomSpeed)]
+            public float RandomSpeed { get => _cb.RandomSpeed; set { _cb.RandomSpeed = value; UpdateConstants(); } }
+
             public EffectImpl() : base(ShaderResourceUri.Get("WaveClipping")) { }
 
             protected override void UpdateConstants()
@@ -129,9 +145,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
                 public int Mode;
                 public float IsInverted;
                 public float Rotation;
-                public float Pad0;
-                public float Pad1;
-                public float Pad2;
+                public float RandomSeed;
+                public float UseRandom;
+                public float RandomSpeed;
             }
         }
     }

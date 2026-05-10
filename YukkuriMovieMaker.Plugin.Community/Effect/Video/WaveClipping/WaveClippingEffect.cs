@@ -40,7 +40,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
 
         [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.Phase), Description = nameof(Texts.PhaseDescription), ResourceType = typeof(Texts))]
         [AnimationSlider("F3", "rad", -6.2832, 6.2832)]
+        [SineModeVisible]
         public Animation Phase { get; } = new Animation(0, -314.159, 314.159);
+
+        [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.RandomSpeed), Description = nameof(Texts.RandomSpeedDescription), ResourceType = typeof(Texts))]
+        [AnimationSlider("F2", "", -10, 10)]
+        [RandomModeVisible]
+        public Animation RandomSpeed { get; } = new Animation(0, -100, 100);
 
         [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.Rotation), Description = nameof(Texts.RotationDescription), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -180, 180)]
@@ -59,6 +65,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         }
         private bool _isInverted;
 
+        [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.UseRandom), Description = nameof(Texts.UseRandomDescription), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool UseRandom
+        {
+            get => _useRandom;
+            set => Set(ref _useRandom, value);
+        }
+        private bool _useRandom;
+
+        public float RandomSeed { get; } = (float)(new Random().NextDouble() * 1000.0);
+
         private IAnimatable[]? _animatables;
 
         public override IEnumerable<string> CreateExoVideoFilters(
@@ -69,6 +86,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             => new WaveClippingEffectProcessor(devices, this);
 
         protected override IEnumerable<IAnimatable> GetAnimatables()
-            => _animatables ??= [ClipPosition, BandWidth, Amplitude, Frequency, Phase, Rotation, Softness];
+            => _animatables ??= [ClipPosition, BandWidth, Amplitude, Frequency, Phase, RandomSpeed, Rotation, Softness];
     }
 }
