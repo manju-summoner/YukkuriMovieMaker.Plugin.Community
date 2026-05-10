@@ -1221,13 +1221,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
             };
 
-            var (dirsInfo, filesInfo) = await Task.Run(() =>
+            var result = await Task.Run(() =>
             {
                 var di = new DirectoryInfo(currentLocation);
                 var d = new List<(DirectoryInfo dir, bool hasChild)>();
                 foreach (var dir in di.EnumerateDirectories("*", options))
                 {
-                    token.ThrowIfCancellationRequested();
+                    if (token.IsCancellationRequested)
+                        return null;
                     bool hasChild = false;
                     try { hasChild = dir.EnumerateDirectories("*", options).Any(); } catch { }
                     d.Add((dir, hasChild));
@@ -1236,15 +1237,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 var f = new List<FileInfo>();
                 foreach (var file in di.EnumerateFiles("*", options))
                 {
-                    token.ThrowIfCancellationRequested();
+                    if (token.IsCancellationRequested)
+                        return null;
                     f.Add(file);
                 }
-                return (d, f);
-            }, token);
+                return ((List<(DirectoryInfo dir, bool hasChild)> dirs, List<FileInfo> files)?)(d, f);
+            });
 
-            token.ThrowIfCancellationRequested();
+            if (result is null)
+                return;
 
             if (Location != currentLocation) return;
+
+            var (dirsInfo, filesInfo) = result.Value;
 
             var oldItemsMap = Items.ToDictionary(x => x.Path, StringComparer.OrdinalIgnoreCase);
             var newItemsList = new List<IExplorerItemViewModel>(dirsInfo.Count + filesInfo.Count);
