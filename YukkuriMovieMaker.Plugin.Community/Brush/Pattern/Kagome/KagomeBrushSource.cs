@@ -220,25 +220,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Kagome
             ID2D1Factory1 factory,
             params (Vector2 From, Vector2 To)[] segments)
         {
-            var geometries = new ID2D1Geometry[segments.Length];
+            var created = new List<ID2D1Geometry>(segments.Length);
             try
             {
-                for (var i = 0; i < segments.Length; i++)
+                foreach (var (from, to) in segments)
                 {
-                    var (from, to) = segments[i];
                     var path = factory.CreatePathGeometry();
+                    created.Add(path);
                     using var sink = path.Open();
                     sink.BeginFigure(from, FigureBegin.Hollow);
                     sink.AddLine(to);
                     sink.EndFigure(FigureEnd.Open);
                     sink.Close();
-                    geometries[i] = path;
                 }
-                return factory.CreateGeometryGroup(FillMode.Winding, geometries);
+                return factory.CreateGeometryGroup(FillMode.Winding, [.. created]);
             }
             finally
             {
-                foreach (var g in geometries)
+                foreach (var g in created)
                     g.Dispose();
             }
         }
