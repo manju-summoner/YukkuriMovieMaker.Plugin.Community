@@ -62,6 +62,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
             return new SeigaihaBrushSource(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => base.GetAnimatables().Concat([Radius, LineWidth, RingCount, Zoom]);
+        protected override IEnumerable<IAnimatable> GetAnimatables()
+            => base.GetAnimatables().Concat([Radius, LineWidth, RingCount, Zoom]);
     }
 }

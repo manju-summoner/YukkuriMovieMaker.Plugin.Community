@@ -35,6 +35,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Asanoha
             return new AsanohaBrushSource(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => base.GetAnimatables().Concat([Size, LineWidth, Zoom]);
+        protected override IEnumerable<IAnimatable> GetAnimatables()
+            => base.GetAnimatables().Concat([Size, LineWidth, Zoom]);
     }
 }

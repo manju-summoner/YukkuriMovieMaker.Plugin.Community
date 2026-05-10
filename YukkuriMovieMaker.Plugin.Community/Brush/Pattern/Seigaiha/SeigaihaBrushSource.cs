@@ -10,18 +10,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
 {
     internal class SeigaihaBrushSource(IGraphicsDevicesAndContext devices, SeigaihaBrushParameter parameter) : IBrushSource
     {
-        public ID2D1Brush Brush => brush ?? throw new InvalidOperationException($"{nameof(Update)} must be called before accessing {nameof(Brush)}.");
+        public ID2D1Brush Brush => brush ?? throw new InvalidOperationException(
+            $"{nameof(Update)} must be called before accessing {nameof(Brush)}.");
 
-        bool gradientEnabled;
-        System.Windows.Media.Color color, outerColor, innerColor, backgroundColor, strokeColor;
-        double rawRadius, rawLineWidth, rawZoom, ringCount;
-        Matrix3x2 matrix;
+        readonly DisposeCollector disposer = new();
 
         ID2D1Bitmap? bitmap;
         ID2D1BitmapBrush? brush;
 
-        bool isInitialized;
-        bool disposedValue;
+        bool isFirst = true;
+        bool gradientEnabled;
+        System.Windows.Media.Color color, outerColor, innerColor, backgroundColor, strokeColor;
+        double rawRadius, rawLineWidth, rawZoom, ringCount;
+        int bitmapWidth, bitmapHeight;
+        Matrix3x2 matrix;
 
         public bool Update(TimelineItemSourceDescription desc)
         {
@@ -52,7 +54,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
             var scaledLineWidth = (float)Math.Max(0.0, lineWidth);
 
             var maximumBitmapSize = dc.MaximumBitmapSize;
-            var bitmapScale = Math.Min(1.0, (double)maximumBitmapSize / (r * 2));
+            var bitmapScale = Math.Min(1.0, (double)maximumBitmapSize / (r * 2.0));
             if (bitmapScale < 1.0)
             {
                 r = (float)Math.Round(r * bitmapScale);
@@ -60,12 +62,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
                 newMatrix *= Matrix3x2.CreateScale((float)(1.0 / bitmapScale));
             }
 
-            var bitmapWidth = Math.Max(1, (int)(r * 2));
-            var bitmapHeight = Math.Max(1, (int)r);
+            var newBitmapWidth = Math.Max(1, (int)(r * 2.0));
+            var newBitmapHeight = Math.Max(1, (int)r);
 
-            var isChanged = false;
-
-            var bitmapNeedsUpdate = !isInitialized
+            var bitmapNeedsUpdate = isFirst
                 || this.gradientEnabled != newGradientEnabled
                 || !this.color.Equals(newColor)
                 || !this.outerColor.Equals(newOuterColor)
@@ -75,16 +75,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
                 || this.rawRadius != newRawRadius
                 || this.rawLineWidth != newRawLineWidth
                 || this.rawZoom != newRawZoom
-                || this.ringCount != newRingCount;
+                || this.ringCount != newRingCount
+                || this.bitmapWidth != newBitmapWidth
+                || this.bitmapHeight != newBitmapHeight;
+
+            var isChanged = false;
 
             if (bitmapNeedsUpdate)
             {
                 var rings = (int)newRingCount;
 
-                bitmap?.Dispose();
-                bitmap = null;
+                if (bitmap != null) disposer.RemoveAndDispose(ref bitmap);
+                if (brush != null) disposer.RemoveAndDispose(ref brush);
 
-                bitmap = dc.CreateNotInitializedBitmap(bitmapWidth, bitmapHeight);
+                bitmap = dc.CreateNotInitializedBitmap(newBitmapWidth, newBitmapHeight);
                 dc.Target = bitmap;
                 try
                 {
@@ -94,7 +98,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
                     using var bgBrush = dc.CreateSolidColorBrush(ToColor4(newBackgroundColor));
                     using var strokeBrush = dc.CreateSolidColorBrush(ToColor4(newStrokeColor));
 
-                    dc.FillRectangle(new Vortice.RawRectF(0, 0, bitmapWidth, bitmapHeight), bgBrush);
+                    dc.FillRectangle(new Vortice.RawRectF(0, 0, newBitmapWidth, newBitmapHeight), bgBrush);
 
                     for (int j = -2; j <= 4; j++)
                     {
@@ -102,6 +106,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
                         bool isOdd = (j % 2 != 0);
                         int startK = isOdd ? -1 : 0;
                         int endK = isOdd ? 3 : 2;
+
                         for (int k = startK; k <= endK; k += 2)
                         {
                             float cx = k * r;
@@ -119,13 +124,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
                     dc.Target = null;
                 }
 
+                disposer.Collect(bitmap);
                 isChanged = true;
             }
 
             if (bitmapNeedsUpdate || !this.matrix.Equals(newMatrix))
             {
-                brush?.Dispose();
-                brush = null;
+                if (brush != null) disposer.RemoveAndDispose(ref brush);
 
                 brush = dc.CreateBitmapBrush(
                     bitmap,
@@ -137,10 +142,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
                     },
                     new BrushProperties(1f, newMatrix));
 
+                disposer.Collect(brush);
                 isChanged = true;
             }
 
-            isInitialized = true;
+            isFirst = false;
             this.gradientEnabled = newGradientEnabled;
             this.color = newColor;
             this.outerColor = newOuterColor;
@@ -151,6 +157,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
             this.rawLineWidth = newRawLineWidth;
             this.rawZoom = newRawZoom;
             this.ringCount = newRingCount;
+            this.bitmapWidth = newBitmapWidth;
+            this.bitmapHeight = newBitmapHeight;
             this.matrix = newMatrix;
 
             return isChanged;
@@ -159,7 +167,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
         static void DrawWaveFlat(
             ID2D1DeviceContext dc,
             ID2D1Factory1 factory,
-            float cx, float cy, float r,
+            float cx,
+            float cy,
+            float r,
             int rings,
             Color4 fillColor,
             ID2D1SolidColorBrush strokeBrush,
@@ -183,7 +193,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
         static void DrawWaveGradient(
             ID2D1DeviceContext dc,
             ID2D1Factory1 factory,
-            float cx, float cy, float r,
+            float cx,
+            float cy,
+            float r,
             int rings,
             System.Windows.Media.Color outerColor,
             System.Windows.Media.Color innerColor,
@@ -195,6 +207,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
                 var t = rings > 1 ? (float)(i - 1) / (rings - 1) : 1f;
                 var fillColor = LerpColor(innerColor, outerColor, t);
                 var ri = r * i / rings;
+
                 using var circle = factory.CreateEllipseGeometry(new Ellipse(new Vector2(cx, cy), ri, ri));
                 using var fillBrush = dc.CreateSolidColorBrush(ToColor4(fillColor));
                 dc.FillGeometry(circle, fillBrush);
@@ -223,23 +236,37 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
         static Color4 ToColor4(System.Windows.Media.Color c)
             => new(c.R / 255f, c.G / 255f, c.B / 255f, c.A / 255f);
 
+        #region IDisposable Support
+        private bool disposedValue;
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
                 if (disposing)
                 {
-                    brush?.Dispose();
-                    bitmap?.Dispose();
+                    // マネージド状態を破棄します (マネージド オブジェクト)
+                    disposer.Dispose();
                 }
+
+                // アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします
+                // 大きなフィールドを null に設定します
                 disposedValue = true;
             }
         }
 
+        // 'Dispose(bool disposing)' にアンマネージド リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします
+        // ~SeigaihaBrushSource()
+        // {
+        //     // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
+        //     Dispose(disposing: false);
+        // }
+
         void IDisposable.Dispose()
         {
+            // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+        #endregion
     }
 }
