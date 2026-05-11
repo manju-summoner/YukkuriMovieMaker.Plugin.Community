@@ -64,8 +64,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Kagome
                 newMatrix *= Matrix3x2.CreateScale((float)(1.0 / bitmapScale));
             }
 
-            var newBitmapWidth = Math.Max(1, (int)Math.Ceiling(tileW));
-            var newBitmapHeight = Math.Max(1, (int)Math.Ceiling(tileH));
+            var newBitmapWidth = Math.Min(maximumBitmapSize, Math.Max(1, (int)Math.Ceiling(tileW)));
+            var newBitmapHeight = Math.Min(maximumBitmapSize, Math.Max(1, (int)Math.Ceiling(tileH)));
 
             var bitmapNeedsUpdate = isFirst
                 || this.weaveEnabled != newWeaveEnabled
@@ -158,7 +158,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Kagome
 
         static void DrawKagomeTile(
             ID2D1DeviceContext dc,
-            ID2D1Factory1 factory,
+            ID2D1Factory factory,
             ID2D1StrokeStyle strokeStyle,
             float tileW,
             float tileH,
@@ -217,7 +217,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Kagome
         }
 
         static ID2D1GeometryGroup CreateGeometryGroup(
-            ID2D1Factory1 factory,
+            ID2D1Factory factory,
             params (Vector2 From, Vector2 To)[] segments)
         {
             var created = new List<ID2D1Geometry>(segments.Length);

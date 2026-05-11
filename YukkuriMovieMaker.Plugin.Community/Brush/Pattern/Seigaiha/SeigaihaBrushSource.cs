@@ -62,8 +62,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
                 newMatrix *= Matrix3x2.CreateScale((float)(1.0 / bitmapScale));
             }
 
-            var newBitmapWidth = Math.Max(1, (int)(r * 2.0));
-            var newBitmapHeight = Math.Max(1, (int)r);
+            var newBitmapWidth = Math.Min(maximumBitmapSize, Math.Max(1, (int)(r * 2.0)));
+            var newBitmapHeight = Math.Min(maximumBitmapSize, Math.Max(1, (int)r));
 
             var bitmapNeedsUpdate = isFirst
                 || this.gradientEnabled != newGradientEnabled
@@ -166,7 +166,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
 
         static void DrawWaveFlat(
             ID2D1DeviceContext dc,
-            ID2D1Factory1 factory,
+            ID2D1Factory factory,
             float cx,
             float cy,
             float r,
@@ -192,7 +192,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
 
         static void DrawWaveGradient(
             ID2D1DeviceContext dc,
-            ID2D1Factory1 factory,
+            ID2D1Factory factory,
             float cx,
             float cy,
             float r,
