@@ -105,6 +105,12 @@
     <Content Include="Resources\License\GeneralUserGS.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+	<Content Include="Resources\License\ComputeSharp.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\License\MeltySynth.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\SoundFonts\GeneralUser-GS.sf2">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
