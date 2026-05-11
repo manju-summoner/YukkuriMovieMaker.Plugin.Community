@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Shippo
 {
-    public enum ShippoPattern
+    internal enum ShippoPattern
     {
         [Display(Name = nameof(Texts.ShippoPattern_Basic_Name), Description = nameof(Texts.ShippoPattern_Basic_Description), ResourceType = typeof(Texts))]
         Basic,
