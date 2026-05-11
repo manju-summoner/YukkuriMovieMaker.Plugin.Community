@@ -1244,7 +1244,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 return ((List<(DirectoryInfo dir, bool hasChild)> dirs, List<FileInfo> files)?)(d, f);
             });
 
-            if (result is null)
+            if (result is null || token.IsCancellationRequested)
                 return;
 
             if (Location != currentLocation) return;
