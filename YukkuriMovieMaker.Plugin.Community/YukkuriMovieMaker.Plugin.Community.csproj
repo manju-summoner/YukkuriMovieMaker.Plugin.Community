@@ -28,11 +28,17 @@
 	  <Reference Include="SharpGen.Runtime">
 		  <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
 	  </Reference>
+	  <Reference Include="Vortice.Direct2D1">
+		  <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Vortice.Direct3D11">
+		  <HintPath>$(YMM4DirPath)Vortice.Direct3D11.dll</HintPath>
+	  </Reference>
 	  <Reference Include="Vortice.DirectX">
 		  <HintPath>$(YMM4DirPath)Vortice.DirectX.dll</HintPath>
 	  </Reference>
-	  <Reference Include="Vortice.Direct2D1">
-		  <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
+	  <Reference Include="Vortice.DXGI">
+		  <HintPath>$(YMM4DirPath)Vortice.DXGI.dll</HintPath>
 	  </Reference>
       <Reference Include="Vortice.Mathematics">
           <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
@@ -46,6 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	<PackageReference Include="LlmTornado" Version="3.8.56" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3912.50" />
