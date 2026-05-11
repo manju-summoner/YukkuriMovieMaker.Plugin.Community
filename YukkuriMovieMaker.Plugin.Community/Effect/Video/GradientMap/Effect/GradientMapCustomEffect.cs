@@ -10,18 +10,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Effect;
 public sealed class GradientMapCustomEffect(IGraphicsDevicesAndContext devices)
     : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices))
 {
-    public float Opacity
-    {
-        get => GetFloatValue((int)EffectImpl.Properties.Opacity);
-        set => SetValue((int)EffectImpl.Properties.Opacity, value);
-    }
-
-    public int BlendMode
-    {
-        get => GetIntValue((int)EffectImpl.Properties.BlendMode);
-        set => SetValue((int)EffectImpl.Properties.BlendMode, value);
-    }
-
     public int IsHorizontal
     {
         get => GetIntValue((int)EffectImpl.Properties.IsHorizontal);
@@ -35,20 +23,6 @@ public sealed class GradientMapCustomEffect(IGraphicsDevicesAndContext devices)
     private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
     {
         private ConstantBuffer _cb;
-
-        [CustomEffectProperty(PropertyType.Float, (int)Properties.Opacity)]
-        public float Opacity
-        {
-            get => _cb.Opacity;
-            set { _cb.Opacity = Math.Clamp(value, 0f, 1f); UpdateConstants(); }
-        }
-
-        [CustomEffectProperty(PropertyType.Int32, (int)Properties.BlendMode)]
-        public int BlendMode
-        {
-            get => _cb.BlendMode;
-            set { _cb.BlendMode = value; UpdateConstants(); }
-        }
 
         [CustomEffectProperty(PropertyType.Int32, (int)Properties.IsHorizontal)]
         public int IsHorizontal
@@ -85,16 +59,14 @@ public sealed class GradientMapCustomEffect(IGraphicsDevicesAndContext devices)
         [StructLayout(LayoutKind.Sequential)]
         private struct ConstantBuffer
         {
-            public float Opacity;
-            public int BlendMode;
             public int IsHorizontal;
-            public float Pad;
+            public float Pad0;
+            public float Pad1;
+            public float Pad2;
         }
 
         public enum Properties
         {
-            Opacity,
-            BlendMode,
             IsHorizontal
         }
     }

@@ -1,8 +1,10 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using Vortice.Direct2D1;
+using YukkuriMovieMaker.Brush;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Interfaces;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Models;
+using GradientStop = YukkuriMovieMaker.Brush.GradientStop;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Services;
 
@@ -57,19 +59,24 @@ public static class GradientTextureFactory
         }
     }
 
-    public static ID2D1Bitmap? CreateGradientBitmapFromJson(
+    public static ID2D1Bitmap? CreateGradientBitmapFromStops(
         ID2D1DeviceContext deviceContext,
-        string json)
+        IReadOnlyList<GradientStop> stops)
     {
-        if (string.IsNullOrWhiteSpace(json))
+        if (stops is null || stops.Count < 2)
             return null;
 
         try
         {
-            var stops = GradientStopSerializer.Deserialize(json);
-            if (stops.Length < 2) return null;
+            var colorStops = new GradientColorStop[stops.Count];
+            for (var i = 0; i < stops.Count; i++)
+            {
+                var s = stops[i];
+                colorStops[i] = new GradientColorStop((float)s.Offset, s.Color.R, s.Color.G, s.Color.B, s.Color.A);
+            }
+            Array.Sort(colorStops, (a, b) => a.Position.CompareTo(b.Position));
 
-            var pixels = GradientExportService.RasterizeGradient(stops);
+            var pixels = GradientExportService.RasterizeGradient(colorStops);
             return CreateD2DBitmap(deviceContext, pixels, GradientExportService.GradientResolution);
         }
         catch

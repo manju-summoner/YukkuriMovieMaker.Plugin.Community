@@ -1,4 +1,4 @@
-﻿namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
+namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
     internal class NotepadSettings : SettingsBase<NotepadSettings>
     {

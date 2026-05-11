@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="ソース ファイル">
@@ -54,9 +54,6 @@
     <FxCompile Include="ColorShift.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-    <FxCompile Include="InnerOutline.hlsl">
-      <Filter>ソース ファイル</Filter>
-    </FxCompile>
     <FxCompile Include="LongShadow.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
@@ -103,6 +100,12 @@
       <Filter>ソース ファイル</Filter>
     </FxCompile>
 	<FxCompile Include="GradientMap.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+	<FxCompile Include="GodRay.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+	<FxCompile Include="HeatHaze.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
   </ItemGroup>

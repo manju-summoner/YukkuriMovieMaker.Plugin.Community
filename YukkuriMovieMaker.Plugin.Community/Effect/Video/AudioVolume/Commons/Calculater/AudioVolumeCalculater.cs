@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Commons.Calculater.AudioSourceReader;
@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Commons.Ca
         AudioSourceReaderParameterBase sourceParameter = new TimelineAudioSourceReaderParameter();
 
         [Display(Name = nameof(Texts.Power), Description = nameof(Texts.Power), ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "%", 0, 200)]
+        [AnimationSlider("F1", "%", 0, 100)]
         public Animation Power { get; } = new Animation(100, 0, 99999);
 
         [Display(Name = nameof(Texts.Smooth), Description = nameof(Texts.Smooth), ResourceType = typeof(Texts))]

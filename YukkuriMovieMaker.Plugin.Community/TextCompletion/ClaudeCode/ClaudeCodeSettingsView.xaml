@@ -1,0 +1,39 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.TextCompletion.ClaudeCode.ClaudeCodeSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.TextCompletion.ClaudeCode"
+             xmlns:controls="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <StackPanel>
+        <Expander Header="{x:Static local:Texts.ClaudeCode}" IsExpanded="True">
+            <StackPanel>
+                <Grid>
+                    <Label Content="{x:Static local:Texts.ApiKey}"/>
+                    <TextBox Text="{Binding Source={x:Static local:ClaudeCodeSettings.Default},Path=ApiKey}" Width="260" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
+                    <Label Content="{x:Static local:Texts.Model}"/>
+                    <TextBox Text="{Binding Source={x:Static local:ClaudeCodeSettings.Default},Path=Model}" Width="260" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
+                    <Label Content="{x:Static local:Texts.TimeoutSeconds}"/>
+                    <TextBox Text="{Binding Source={x:Static local:ClaudeCodeSettings.Default},Path=TimeoutSeconds}" Width="260" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
+                    <Label Content="{x:Static local:Texts.Effort}"/>
+                    <controls:EnumComboBox Value="{Binding Source={x:Static local:ClaudeCodeSettings.Default},Path=Effort}" EnumType="{x:Type local:EffortLevel}" Width="200" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
+                    <Label Content="{x:Static local:Texts.SendCurrentFrame}"/>
+                    <controls:ToggleSlider Value="{Binding Source={x:Static local:ClaudeCodeSettings.Default},Path=IsSendImageEnabled}" HorizontalAlignment="Right"/>
+                </Grid>
+                <GroupBox Header="{x:Static local:Texts.Setup}" Margin="12,6,12,6" Padding="12">
+                    <TextBlock Text="{x:Static local:Texts.SetupDescription}" TextWrapping="Wrap"/>
+                </GroupBox>
+            </StackPanel>
+        </Expander>
+    </StackPanel>
+</UserControl>

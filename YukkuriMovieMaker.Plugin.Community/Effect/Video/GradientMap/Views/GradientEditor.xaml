@@ -2,66 +2,16 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Localization"
-             xmlns:ymmc="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
-             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:controls="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
              x:Name="root">
-    <UserControl.Resources>
-        <Style x:Key="GradientMarkerStyle" TargetType="Border">
-            <Setter Property="Width" Value="14"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#66AAAAAA"/>
-            <Setter Property="Cursor" Value="SizeWE"/>
-        </Style>
-    </UserControl.Resources>
-    <StackPanel>
-        <Grid Height="22">
-            <Rectangle Fill="{Binding GradientBrush}"
-                       RadiusX="0" RadiusY="0"/>
-            <Canvas x:Name="GradientCanvas"
-                    Background="Transparent"
-                    Cursor="Cross"
-                    MouseLeftButtonDown="OnCanvasMouseLeftButtonDown">
-                <Canvas.ContextMenu>
-                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext,
-                                     RelativeSource={RelativeSource Self}}">
-                        <MenuItem Header="{x:Static loc:Texts.ExportAsGrdName}"
-                                  Command="{Binding ExportAsGrdCommand}"/>
-                        <MenuItem Header="{x:Static loc:Texts.ExportAsPngName}"
-                                  Command="{Binding ExportAsPngCommand}"/>
-                    </ContextMenu>
-                </Canvas.ContextMenu>
-            </Canvas>
-        </Grid>
-
-        <ItemsControl ItemsSource="{Binding Stops}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid Height="26">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="26"/>
-                        </Grid.ColumnDefinitions>
-
-                        <ymmc:ColorPicker Grid.Column="0"
-                                          Value="{Binding Color, Mode=TwoWay}"
-                                          VerticalAlignment="Stretch"
-                                          HorizontalAlignment="Stretch"/>
-
-                        <Button Grid.Column="1"
-                                Command="{Binding DataContext.DeleteStopCommand, ElementName=root}"
-                                CommandParameter="{Binding}"
-                                ToolTip="{x:Static loc:Texts.DeleteStopName}"
-                                Padding="4">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"/>
-                            </Button.Style>
-                            <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Delete}}"
-                                            Width="15" Height="15"/>
-                        </Button>
-                    </Grid>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </StackPanel>
+    <UserControl.ContextMenu>
+        <ContextMenu DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
+            <MenuItem Header="{x:Static loc:Texts.ExportAsGrdName}"
+                      Command="{Binding ExportAsGrdCommand}"/>
+            <MenuItem Header="{x:Static loc:Texts.ExportAsPngName}"
+                      Command="{Binding ExportAsPngCommand}"/>
+        </ContextMenu>
+    </UserControl.ContextMenu>
+    <controls:GradientStopsEditor x:Name="stopsEditor"
+                                  ItemProperties="{Binding ItemProperties, ElementName=root}"/>
 </UserControl>

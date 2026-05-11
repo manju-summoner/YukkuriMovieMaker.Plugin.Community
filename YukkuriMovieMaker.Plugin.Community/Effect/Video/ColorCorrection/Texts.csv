@@ -4,7 +4,7 @@ ColorCorrectionEffectBrightnessName,,輝度,Luminance,亮度,亮度,밝기,Lumin
 ColorCorrectionEffectBrightnessDesc,,輝度,Luminance,亮度,亮度,밝기,Luminancia,سطوع,Pencahayaan
 ColorCorrectionEffectSaturationName,,彩度,Saturation,饱和度,飽和度,채도,Saturación.,التشبع,Saturasi
 ColorCorrectionEffectSaturationDesc,,色の鮮やかさ,Color Vibrancy,色彩鲜艳度,顏色鮮豔度,색의 선명도,Vibración del color,حيوية اللون,Kecerahan warna
-ColorCorrectionEffectHueRotationName,,色相,Hue,色相,色相,Hue색상,Matiz,التدرج اللوني,Rona
+ColorCorrectionEffectHueRotationName,,色相,Hue,色相,色相,색상,Matiz,التدرج اللوني,Rona
 ColorCorrectionEffectHueRotationDesc,,色相をずらす,Shift hue,色相偏移,色相偏移,Hue 조정,Desplazamiento del tono,تدوير درجة اللون,Mengubah rona warna (hue)
 ColorCorrectionEffectName,,色調補正,Color Correction,色调修正,色調補償,색조 보정,Corrección del matiz,تصحيح الألوان,Koreksi Warna
 ColorCorrectionGroupName,,色調補正,Color Correction,色调修正,色調補償,색조 보정,Corrección del matiz,تصحيح اللون,Koreksi Warna

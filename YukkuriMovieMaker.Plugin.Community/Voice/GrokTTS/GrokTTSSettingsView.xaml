@@ -1,0 +1,24 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Voice.GrokTTS.GrokTTSSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.GrokTTS"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             xmlns:s="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Expander Header="Grok TTS" IsExpanded="True">
+        <StackPanel>
+            <Grid>
+                <Label Content="{x:Static local:Texts.APIKey}"/>
+                <TextBox Text="{Binding Source={x:Static local:GrokTTSSettings.Default},Path=ApiKey,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
+            </Grid>
+            <Grid>
+                <TextBlock HorizontalAlignment="Right" Margin="6">
+                    <Hyperlink Command="{Binding Source={x:Static s:CommandSettings.Default},Path=[OpenUri]}" CommandParameter="https://manjubox.net/ymm4/faq/%E3%82%86%E3%81%A3%E3%81%8F%E3%82%8A%E3%83%9C%E3%82%A4%E3%82%B9/GrokTTS/"><Run Text="{x:Static local:Texts.HowToUseGrokTTS}"/></Hyperlink>
+                </TextBlock>
+            </Grid>
+        </StackPanel>
+    </Expander>
+</UserControl>

@@ -1,12 +1,16 @@
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Localization;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
+using System.Windows.Media;
+using YukkuriMovieMaker.Brush;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Models;
 using YukkuriMovieMaker.Plugin.Effects;
+using YukkuriMovieMaker.Project;
+using GradientStop = YukkuriMovieMaker.Brush.GradientStop;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Effect;
 
@@ -22,13 +26,16 @@ public sealed class GradientMapEffect : VideoEffectBase
         ResourceType = typeof(Texts),
         Order = -1)]
     [GradientEditor]
-    [CustomGradientJsonVisible]
-    public string CustomGradientJson
+    [CustomGradientStopsVisible]
+    public ImmutableList<GradientStop> CustomGradientStops
     {
-        get => _customGradientJson;
-        set => Set(ref _customGradientJson, value);
+        get => _customGradientStops;
+        set => Set(ref _customGradientStops, value);
     }
-    private string _customGradientJson = string.Empty;
+    private ImmutableList<GradientStop> _customGradientStops = [
+        new GradientStop(0, Colors.Black),
+        new GradientStop(1, Colors.White),
+    ];
 
     [Display(
         GroupName = nameof(Texts.GroupName),
@@ -36,12 +43,7 @@ public sealed class GradientMapEffect : VideoEffectBase
         Description = nameof(Texts.GradientFilePathDesc),
         ResourceType = typeof(Texts),
         Order = 0)]
-    [CustomFileSelector(
-        ".grd,.png,.jpg,.jpeg,.bmp,.gif,.tiff",
-        "Gradient Files (*.grd;*.png;*.jpg)|*.grd;*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tiff,All Files (*.*)|*.*",
-        SpecialExtensions = ".grd",
-        SpecialTooltipKey = nameof(Texts.GrdFileTooltip),
-        ResourceType = typeof(Texts))]
+    [GradientMapFileSelector]
     public string GradientFilePath
     {
         get => _gradientFilePath;
@@ -80,12 +82,12 @@ public sealed class GradientMapEffect : VideoEffectBase
         ResourceType = typeof(Texts),
         Order = 3)]
     [EnumComboBox]
-    public GradientBlendMode BlendMode
+    public Blend BlendMode
     {
         get => _blendMode;
         set => Set(ref _blendMode, value);
     }
-    private GradientBlendMode _blendMode = GradientBlendMode.Normal;
+    private Blend _blendMode = Blend.Normal;
 
     [Display(
         GroupName = nameof(Texts.GroupName),
@@ -101,6 +103,11 @@ public sealed class GradientMapEffect : VideoEffectBase
         set => Set(ref _isHorizontal, value);
     }
     private bool _isHorizontal = true;
+
+    public GradientMapEffect()
+    {
+        SubscribeChildUndoRedoable(CustomGradientStops);
+    }
 
     public override IEnumerable<string> CreateExoVideoFilters(
         int keyFrameIndex,
