@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;

@@ -14,7 +14,11 @@ public abstract class EffectTabBaseViewModel : Bindable
 
     public Guid Id => Model.Id;
 
-    public string SerializedEffects => Model.SerializedEffects;
+    public virtual string SerializedEffects
+    {
+        get => Model.SerializedEffects;
+        set => Model.SerializedEffects = value;
+    }
 
     public IEnumerable<ExtractEffectViewModel> ExtractEffects =>
         EffectSerializer.Deserialize(SerializedEffects)

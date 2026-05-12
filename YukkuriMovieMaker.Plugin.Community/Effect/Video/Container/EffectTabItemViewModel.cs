@@ -1,19 +1,13 @@
 using System.Globalization;
-using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-public sealed class EffectTabItemViewModel : Bindable
+public sealed class EffectTabItemViewModel : EffectTabBaseViewModel
 {
-    public EffectTab Model { get; }
-
-    public EffectTabItemViewModel(EffectTab model)
+    public EffectTabItemViewModel(EffectTab model) : base(model)
     {
-        Model = model;
         _editName = model.Name;
     }
-
-    public Guid Id => Model.Id;
 
     public string Name
     {
@@ -27,7 +21,7 @@ public sealed class EffectTabItemViewModel : Bindable
         }
     }
 
-    public string SerializedEffects
+    public override string SerializedEffects
     {
         get => Model.SerializedEffects;
         set
