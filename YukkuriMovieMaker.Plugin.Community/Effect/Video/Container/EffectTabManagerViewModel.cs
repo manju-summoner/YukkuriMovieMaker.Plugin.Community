@@ -194,7 +194,10 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         UpdateIndices();
 
-        SelectedTab = Tabs.FirstOrDefault(t => t.Id == selectedId) ?? Tabs.FirstOrDefault();
+        // SelectedTab セッターは ApplyStateToContainers() を必ず呼ぶため、初期化時に経由すると
+        // マルチセレクト中のプロパティパネル表示だけで他コンテナの Tabs/SelectedTabId が
+        // 先頭コンテナの内容で上書きされてしまう。setter を介さず内部状態のみ更新する。
+        SelectTabInternal(Tabs.FirstOrDefault(t => t.Id == selectedId) ?? Tabs.FirstOrDefault());
     }
 
     private void SelectTabInternal(EffectTabItemViewModel? tab)
