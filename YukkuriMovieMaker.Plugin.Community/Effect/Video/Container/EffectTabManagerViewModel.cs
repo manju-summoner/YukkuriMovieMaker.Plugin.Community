@@ -80,7 +80,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         Tabs.CollectionChanged += Tabs_CollectionChanged;
 
         AddTabCommand = new ActionCommand(_ => true, _ => ExecuteAddTab());
-        RemoveTabCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteRemoveTab(ResolveTab(p)));
+        RemoveTabCommand = new ActionCommand(p => ResolveTab(p) != null && HasMultipleTabs, p => ExecuteRemoveTab(ResolveTab(p)));
         MoveTabLeftCommand = new ActionCommand(p => CanMoveTab(ResolveTab(p), -1), p => ExecuteMoveTab(ResolveTab(p), -1));
         MoveTabRightCommand = new ActionCommand(p => CanMoveTab(ResolveTab(p), 1), p => ExecuteMoveTab(ResolveTab(p), 1));
         DuplicateTabCommand = new ActionCommand(p => ResolveTab(p) != null, p => ExecuteDuplicateTab(ResolveTab(p)));
@@ -119,6 +119,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void Tabs_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
         OnPropertyChanged(nameof(HasMultipleTabs));
+        RemoveTabCommand.RaiseCanExecuteChanged();
     }
 
     private void ApplyToContainers(Action<ContainerEffect> action)
