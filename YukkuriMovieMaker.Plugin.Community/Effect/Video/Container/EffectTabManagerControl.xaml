@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Container"
-             xmlns:converters="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Container"
+
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
@@ -12,7 +12,7 @@
              Background="Transparent">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-        <converters:TabCompactModeConverter x:Key="TabCompactModeConverter"/>
+        <loc:TabCompactModeConverter x:Key="TabCompactModeConverter"/>
 
         <ContentControl x:Key="StashMenuItemIcon" x:Shared="False" Content="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}" Width="16" Height="16" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
         <ContentControl x:Key="BookmarkMenuItemIcon" x:Shared="False" Content="{DynamicResource {x:Static icons:IconKeys.BookmarkOutline}}" Width="16" Height="16" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
