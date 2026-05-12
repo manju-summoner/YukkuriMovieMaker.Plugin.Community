@@ -15,7 +15,7 @@
         <loc:TabCompactModeConverter x:Key="TabCompactModeConverter"/>
 
         <ContentControl x:Key="StashMenuItemIcon" x:Shared="False" Content="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}" Width="16" Height="16" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-        <ContentControl x:Key="TemplateMenuItemIcon" x:Shared="False" Content="{DynamicResource {x:Static icons:IconKeys.BookmarkOutline}}" Width="16" Height="16" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        <ContentControl x:Key="TemplateMenuItemIcon" x:Shared="False" Content="{DynamicResource {x:Static icons:IconKeys.Book}}" Width="16" Height="16" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
 
         <Style x:Key="TabListBoxStyle" TargetType="ListBox">
             <Setter Property="Background" Value="Transparent"/>
@@ -267,7 +267,7 @@
 
         <MenuItem x:Key="TemplatesMenuItem" x:Shared="False"
                   Header="{x:Static loc:Texts.Menu_Templates}"
-                  Icon="{DynamicResource {x:Static icons:IconKeys.BookmarkMultipleOutline}}"
+                  Icon="{DynamicResource {x:Static icons:IconKeys.BookMultiple}}"
                   ItemsSource="{Binding Templates}"
                   Visibility="{Binding HasTemplates, Converter={StaticResource BooleanToVisibilityConverter}}">
             <MenuItem.ItemContainerStyle>
@@ -380,12 +380,12 @@
                                     <MenuItem Header="{x:Static loc:Texts.Menu_Template}"
                                               Command="{Binding Manager.AddTemplateCommand}"
                                               CommandParameter="{Binding}"
-                                              Icon="{DynamicResource {x:Static icons:IconKeys.BookmarkOutline}}"/>
+                                              Icon="{DynamicResource {x:Static icons:IconKeys.BookPlus}}"/>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_ExtractEffect}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.TrayArrowDown}}"
                                               Visibility="{Binding Manager.HasExtractEffectSources, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <MenuItem Header="{x:Static loc:Texts.Menu_Stashes}" ItemsSource="{Binding Manager.Stashes}" ItemContainerStyle="{StaticResource ExtractParentItemStyle}" Visibility="{Binding Manager.HasStashes, Converter={StaticResource BooleanToVisibilityConverter}}" Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}"/>
-                                        <MenuItem Header="{x:Static loc:Texts.Menu_Templates}" ItemsSource="{Binding Manager.Templates}" ItemContainerStyle="{StaticResource ExtractParentItemStyle}" Visibility="{Binding Manager.HasTemplates, Converter={StaticResource BooleanToVisibilityConverter}}" Icon="{DynamicResource {x:Static icons:IconKeys.BookmarkMultipleOutline}}"/>
+                                        <MenuItem Header="{x:Static loc:Texts.Menu_Templates}" ItemsSource="{Binding Manager.Templates}" ItemContainerStyle="{StaticResource ExtractParentItemStyle}" Visibility="{Binding Manager.HasTemplates, Converter={StaticResource BooleanToVisibilityConverter}}" Icon="{DynamicResource {x:Static icons:IconKeys.BookMultiple}}"/>
                                     </MenuItem>
                                     <Separator/>
                                     <MenuItem Header="{x:Static loc:Texts.EffectTab_Remove}"
