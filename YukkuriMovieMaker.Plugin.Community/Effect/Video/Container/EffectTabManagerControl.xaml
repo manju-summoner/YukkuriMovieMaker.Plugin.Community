@@ -202,10 +202,9 @@
                      ItemContainerStyle="{StaticResource TabListBoxItemStyle}"
                      ItemsSource="{Binding Tabs}"
                      PreviewMouseWheel="TabListBox_PreviewMouseWheel"
-                     SelectedItem="{Binding SelectedTab}"
-                     Tag="{Binding DataContext, RelativeSource={RelativeSource Self}}">
+                     SelectedItem="{Binding SelectedTab}">
                 <ListBox.ContextMenu>
-                    <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                    <ContextMenu DataContext="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget.DataContext}">
                         <ContextMenu.Resources>
                             <CollectionViewSource x:Key="StashesCollection" Source="{Binding Stashes}"/>
                             <CollectionViewSource x:Key="BookmarksCollection" Source="{Binding Bookmarks}"/>
@@ -214,10 +213,9 @@
                         <MenuItem Header="{x:Static loc:Texts.Menu_Stashes}" Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}" Visibility="{Binding HasStashes, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <MenuItem.ItemContainerStyle>
                                 <Style TargetType="MenuItem">
-                                    <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                     <Setter Property="Header" Value="{Binding}"/>
                                     <Setter Property="ToolTip" Value="{Binding ToolTipText}"/>
-                                    <Setter Property="Command" Value="{Binding Tag.RestoreStashCommand, RelativeSource={RelativeSource Self}}"/>
+                                    <Setter Property="Command" Value="{Binding DataContext.RestoreStashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                     <Setter Property="CommandParameter" Value="{Binding}"/>
                                     <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
                                     <Setter Property="Icon" Value="{StaticResource StashMenuItemIcon}"/>
@@ -230,7 +228,7 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
-                                                    <Button Style="{StaticResource ListIconButtonStyle}" Command="{Binding Tag.RemoveStashCommand, RelativeSource={RelativeSource AncestorType=MenuItem}}" CommandParameter="{Binding}" Grid.Column="1" Width="20" Height="20">
+                                                    <Button Style="{StaticResource ListIconButtonStyle}" Command="{Binding DataContext.RemoveStashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" Grid.Column="1" Width="20" Height="20">
                                                         <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Close}}" Width="12" Height="12" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
                                                     </Button>
                                                 </Grid>
@@ -263,10 +261,9 @@
                         <MenuItem Header="{x:Static loc:Texts.Menu_Bookmarks}" Icon="{DynamicResource {x:Static icons:IconKeys.BookmarkMultipleOutline}}" Visibility="{Binding HasBookmarks, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <MenuItem.ItemContainerStyle>
                                 <Style TargetType="MenuItem">
-                                    <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                     <Setter Property="Header" Value="{Binding}"/>
                                     <Setter Property="ToolTip" Value="{Binding ToolTipText}"/>
-                                    <Setter Property="Command" Value="{Binding Tag.RestoreBookmarkCommand, RelativeSource={RelativeSource Self}}"/>
+                                    <Setter Property="Command" Value="{Binding DataContext.RestoreBookmarkCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                     <Setter Property="CommandParameter" Value="{Binding}"/>
                                     <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
                                     <Setter Property="Icon" Value="{StaticResource BookmarkMenuItemIcon}"/>
@@ -279,7 +276,7 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0"/>
-                                                    <Button Style="{StaticResource ListIconButtonStyle}" Command="{Binding Tag.EditBookmarkCommand, RelativeSource={RelativeSource AncestorType=MenuItem}}" CommandParameter="{Binding}" Grid.Column="1" Width="20" Height="20">
+                                                    <Button Style="{StaticResource ListIconButtonStyle}" Command="{Binding DataContext.EditBookmarkCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" Grid.Column="1" Width="20" Height="20">
                                                         <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Pencil}}" Width="12" Height="12" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
                                                     </Button>
                                                 </Grid>
@@ -324,15 +321,13 @@
                                 BorderThickness="1"
                                 MinHeight="28"
                                 Width="120"
-                                Padding="6,0,4,0"
-                                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                Padding="6,0,4,0">
                             <Border.ContextMenu>
-                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}">
+                                <ContextMenu DataContext="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget.DataContext}">
                                     <ContextMenu.Resources>
                                         <Style TargetType="MenuItem" x:Key="ExtractEffectItemStyle">
                                             <Setter Property="Header" Value="{Binding Name}" />
-                                            <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
-                                            <Setter Property="Command" Value="{Binding Tag.ExtractEffectCommand, RelativeSource={RelativeSource Self}}" />
+                                            <Setter Property="Command" Value="{Binding DataContext.Manager.ExtractEffectCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                             <Setter Property="CommandParameter" Value="{Binding}" />
                                             <Setter Property="Icon" Value="{DynamicResource {x:Static icons:IconKeys.ArrowBottomRight}}" />
                                         </Style>
@@ -344,34 +339,34 @@
                                         </Style>
                                     </ContextMenu.Resources>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_Rename}"
-                                              Command="{Binding BeginEditCommand}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                              Command="{Binding Manager.BeginEditCommand}"
+                                              CommandParameter="{Binding}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.Pencil}}"/>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_Copy}"
-                                              Command="{Binding CopyCommand}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                              Command="{Binding Manager.CopyCommand}"
+                                              CommandParameter="{Binding}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_Paste}"
-                                              Command="{Binding PasteCommand}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                              Command="{Binding Manager.PasteCommand}"
+                                              CommandParameter="{Binding}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_Duplicate}"
-                                              Command="{Binding DuplicateTabCommand}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                              Command="{Binding Manager.DuplicateTabCommand}"
+                                              CommandParameter="{Binding}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_Stash}"
-                                              Command="{Binding DataContext.StashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                              Command="{Binding Manager.StashCommand}"
+                                              CommandParameter="{Binding}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveArrowDownOutline}}"/>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_Bookmark}"
-                                              Command="{Binding DataContext.AddBookmarkCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                              Command="{Binding Manager.AddBookmarkCommand}"
+                                              CommandParameter="{Binding}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.BookmarkOutline}}"/>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_ExtractEffect}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.TrayArrowDown}}"
-                                              Visibility="{Binding DataContext.HasExtractEffectSources, RelativeSource={RelativeSource AncestorType=ContextMenu}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <MenuItem Header="{x:Static loc:Texts.Menu_Stashes}" ItemsSource="{Binding Stashes}" ItemContainerStyle="{StaticResource ExtractParentItemStyle}" Visibility="{Binding HasStashes, Converter={StaticResource BooleanToVisibilityConverter}}" Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}"/>
-                                        <MenuItem Header="{x:Static loc:Texts.Menu_Bookmarks}" ItemsSource="{Binding Bookmarks}" ItemContainerStyle="{StaticResource ExtractParentItemStyle}" Visibility="{Binding HasBookmarks, Converter={StaticResource BooleanToVisibilityConverter}}" Icon="{DynamicResource {x:Static icons:IconKeys.BookmarkMultipleOutline}}"/>
+                                              Visibility="{Binding Manager.HasExtractEffectSources, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <MenuItem Header="{x:Static loc:Texts.Menu_Stashes}" ItemsSource="{Binding Manager.Stashes}" ItemContainerStyle="{StaticResource ExtractParentItemStyle}" Visibility="{Binding Manager.HasStashes, Converter={StaticResource BooleanToVisibilityConverter}}" Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}"/>
+                                        <MenuItem Header="{x:Static loc:Texts.Menu_Bookmarks}" ItemsSource="{Binding Manager.Bookmarks}" ItemContainerStyle="{StaticResource ExtractParentItemStyle}" Visibility="{Binding Manager.HasBookmarks, Converter={StaticResource BooleanToVisibilityConverter}}" Icon="{DynamicResource {x:Static icons:IconKeys.BookmarkMultipleOutline}}"/>
                                     </MenuItem>
                                 </ContextMenu>
                             </Border.ContextMenu>

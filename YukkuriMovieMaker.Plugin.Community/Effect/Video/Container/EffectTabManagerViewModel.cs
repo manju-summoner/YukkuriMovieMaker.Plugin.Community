@@ -180,7 +180,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var state = EffectTabStateService.ResolveEffectState(_effect.EffectTabsJson, _effect.Effects, Texts.EffectTab_FirstName);
         Tabs.Clear();
         foreach (var tab in state.Tabs)
-            Tabs.Add(new EffectTabItemViewModel(tab));
+            Tabs.Add(new EffectTabItemViewModel(tab, this));
 
         UpdateIndices();
 
@@ -265,7 +265,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         using (BeginUndo())
         {
             var tab = new EffectTab { Name = string.Format(Texts.EffectTab_NumberedName, Tabs.Count + 1), SerializedEffects = string.Empty };
-            var vm = new EffectTabItemViewModel(tab);
+            var vm = new EffectTabItemViewModel(tab, this);
             Tabs.Add(vm);
             UpdateIndices();
             SelectedTab = vm;
@@ -383,7 +383,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         if (Tabs.Count == 0)
         {
             var tab = new EffectTab { Name = Texts.EffectTab_FirstName, SerializedEffects = string.Empty };
-            Tabs.Add(new EffectTabItemViewModel(tab));
+            Tabs.Add(new EffectTabItemViewModel(tab, this));
         }
 
         UpdateIndices();
@@ -473,7 +473,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 Name = source.Name + Texts.EffectTab_CopyName,
                 SerializedEffects = source.SerializedEffects
             };
-            var vm = new EffectTabItemViewModel(dup);
+            var vm = new EffectTabItemViewModel(dup, this);
 
             var idx = Tabs.IndexOf(source);
             Tabs.Insert(idx + 1, vm);
@@ -534,7 +534,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                     Name = data.Name + Texts.EffectTab_CopyName,
                     SerializedEffects = data.SerializedEffects
                 };
-                var vm = new EffectTabItemViewModel(tab);
+                var vm = new EffectTabItemViewModel(tab, this);
                 Tabs.Add(vm);
                 UpdateIndices();
                 SelectedTab = vm;
@@ -557,7 +557,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 Name = restoredName,
                 SerializedEffects = stashVm.SerializedEffects
             };
-            var vm = new EffectTabItemViewModel(tab);
+            var vm = new EffectTabItemViewModel(tab, this);
             Tabs.Add(vm);
             UpdateIndices();
             SelectedTab = vm;
@@ -593,7 +593,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 Name = bookmarkVm.Name,
                 SerializedEffects = bookmarkVm.SerializedEffects
             };
-            var vm = new EffectTabItemViewModel(tab);
+            var vm = new EffectTabItemViewModel(tab, this);
             Tabs.Add(vm);
             UpdateIndices();
             SelectedTab = vm;

@@ -3,13 +3,15 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-public sealed class EffectTabItemViewModel : Bindable
+internal sealed class EffectTabItemViewModel : Bindable
 {
     public EffectTab Model { get; }
+    public EffectTabManagerViewModel Manager { get; }
 
-    public EffectTabItemViewModel(EffectTab model)
+    public EffectTabItemViewModel(EffectTab model, EffectTabManagerViewModel manager)
     {
         Model = model;
+        Manager = manager;
         _editName = model.Name;
     }
 
