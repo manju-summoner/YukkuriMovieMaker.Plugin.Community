@@ -285,18 +285,12 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var effects = target.Effects;
         if (effects.Count == 0) return;
 
-        var firstEffectName = effects[0].Label;
-        var name = effects.Count > 1
-            ? string.Format(Texts.Menu_StashNameFormat, target.Name, firstEffectName, effects.Count - 1)
-            : string.Format(Texts.Menu_StashNameFormatSingle, target.Name, firstEffectName);
-
         // タブから退避箱への移動。元タブはこの直後 RemoveTabInternal で消えるのでインスタンス共有でよいが、
         // 復元時に独立性が要るので Clone しておく。
         var stash = new EffectTab
         {
             Id = Guid.NewGuid(),
-            Name = name,
-            OriginalTabName = target.Name,
+            Name = target.Name,
             Effects = CloneEffects(effects),
         };
 
@@ -528,14 +522,11 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         using (BeginUndo())
         {
-            var restoredName = string.IsNullOrWhiteSpace(stashVm.Model.OriginalTabName)
-                ? Texts.Menu_RestoreStashName
-                : stashVm.Model.OriginalTabName!;
-
             // スタッシュは復元直後に Stashes から削除されるので、移管としてインスタンスをそのまま渡す。
+            // stashVm.Name は表示用に整形された文字列なので、元のタブ名は Model.Name を直接参照する。
             var tab = new EffectTab
             {
-                Name = restoredName,
+                Name = stashVm.Model.Name,
                 Effects = stashVm.Effects,
             };
             var vm = new EffectTabItemViewModel(tab, this);

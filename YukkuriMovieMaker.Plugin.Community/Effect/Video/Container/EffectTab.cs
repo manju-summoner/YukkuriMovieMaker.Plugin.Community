@@ -21,11 +21,4 @@ public sealed class EffectTab : Bindable
         set => Set(ref _effects, value);
     }
     private ImmutableList<IVideoEffect> _effects = ImmutableList<IVideoEffect>.Empty;
-
-    public string? OriginalTabName
-    {
-        get => _originalTabName;
-        set => Set(ref _originalTabName, value);
-    }
-    private string? _originalTabName;
 }

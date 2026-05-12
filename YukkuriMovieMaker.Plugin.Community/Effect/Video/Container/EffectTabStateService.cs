@@ -33,7 +33,6 @@ internal static class EffectTabStateService
                 ? (i == 0 ? defaultTabName : $"{defaultTabName} {i + 1}")
                 : tab.Name,
             Effects = tab.Effects ?? ImmutableList<IVideoEffect>.Empty,
-            OriginalTabName = tab.OriginalTabName,
         }).ToImmutableList();
 
         var resolvedSelectedId = rawSelectedTabId is { } sid && normalizedTabs.Any(t => t.Id == sid)
