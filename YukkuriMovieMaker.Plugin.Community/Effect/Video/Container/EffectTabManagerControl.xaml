@@ -359,6 +359,7 @@
                                               Command="{Binding Manager.BeginEditCommand}"
                                               CommandParameter="{Binding}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.Pencil}}"/>
+                                    <Separator/>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_Copy}"
                                               Command="{Binding Manager.CopyCommand}"
                                               CommandParameter="{Binding}"
@@ -371,6 +372,7 @@
                                               Command="{Binding Manager.DuplicateTabCommand}"
                                               CommandParameter="{Binding}"
                                               Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
+                                    <Separator/>
                                     <MenuItem Header="{x:Static loc:Texts.Menu_Stash}"
                                               Command="{Binding Manager.StashCommand}"
                                               CommandParameter="{Binding}"
@@ -385,6 +387,11 @@
                                         <MenuItem Header="{x:Static loc:Texts.Menu_Stashes}" ItemsSource="{Binding Manager.Stashes}" ItemContainerStyle="{StaticResource ExtractParentItemStyle}" Visibility="{Binding Manager.HasStashes, Converter={StaticResource BooleanToVisibilityConverter}}" Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}"/>
                                         <MenuItem Header="{x:Static loc:Texts.Menu_Templates}" ItemsSource="{Binding Manager.Templates}" ItemContainerStyle="{StaticResource ExtractParentItemStyle}" Visibility="{Binding Manager.HasTemplates, Converter={StaticResource BooleanToVisibilityConverter}}" Icon="{DynamicResource {x:Static icons:IconKeys.BookmarkMultipleOutline}}"/>
                                     </MenuItem>
+                                    <Separator/>
+                                    <MenuItem Header="{x:Static loc:Texts.EffectTab_Remove}"
+                                              Command="{Binding Manager.RemoveTabCommand}"
+                                              CommandParameter="{Binding}"
+                                              Icon="{DynamicResource {x:Static icons:IconKeys.Delete}}"/>
                                 </ContextMenu>
                             </Border.ContextMenu>
                             <Grid VerticalAlignment="Center">
