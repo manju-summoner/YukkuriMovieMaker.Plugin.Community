@@ -1,5 +1,7 @@
+using System.Collections.Immutable;
 using System.Text;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
@@ -14,19 +16,17 @@ public abstract class EffectTabBaseViewModel : Bindable
 
     public Guid Id => Model.Id;
 
-    public string SerializedEffects => Model.SerializedEffects;
+    public ImmutableList<IVideoEffect> Effects => Model.Effects;
 
     public IEnumerable<ExtractEffectViewModel> ExtractEffects =>
-        EffectSerializer.Deserialize(SerializedEffects)
-            .Select(e => new ExtractEffectViewModel(e))
-            .ToList();
+        Model.Effects.Select(e => new ExtractEffectViewModel(e)).ToList();
 
     public string ToolTipText
     {
         get
         {
             var sb = new StringBuilder();
-            foreach (var effect in EffectSerializer.Deserialize(SerializedEffects))
+            foreach (var effect in Model.Effects)
                 sb.AppendLine(effect.Label);
             return sb.ToString().TrimEnd();
         }

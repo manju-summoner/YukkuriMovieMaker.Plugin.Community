@@ -6,8 +6,9 @@
              xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Container"
              xmlns:converters="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Container"
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
-             d:DesignHeight="40" d:DesignWidth="700"
+             d:DesignHeight="320" d:DesignWidth="700"
              Background="Transparent">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -187,12 +188,18 @@
     </UserControl.Resources>
 
     <Grid Background="Transparent" Margin="5,5,5,0">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <Border Grid.Column="0"
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
                 Background="Transparent"
                 BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                 BorderThickness="0,0,0,1"
@@ -507,5 +514,8 @@
                 </Viewbox>
             </Button>
         </Border>
+        </Grid>
+
+        <c:VideoEffectSelector Grid.Row="1" x:Name="EffectSelector" Margin="0,4,0,0"/>
     </Grid>
 </UserControl>

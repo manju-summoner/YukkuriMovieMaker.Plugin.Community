@@ -10,6 +10,7 @@ internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
 {
     private readonly ContainerEffect _effect;
     private readonly IGraphicsDevicesAndContext _devices;
+    private readonly DisposeCollector _disposer = new();
     private readonly List<IVideoEffectProcessor> _processors = new();
     private ImmutableList<IVideoEffect> _currentEffects = ImmutableList<IVideoEffect>.Empty;
     private ID2D1Image? _inputImage;
@@ -69,61 +70,50 @@ internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
     {
         if (_disposed) return;
         _disposed = true;
-        DisposeProcessors();
+        _disposer.Dispose();
+        _processors.Clear();
     }
 
     private void SynchronizeProcessors()
     {
-        if (ReferenceEquals(_currentEffects, _effect.Effects)) return;
+        var nextEffects = _effect.GetSelectedTabEffects();
+        if (ReferenceEquals(_currentEffects, nextEffects)) return;
 
-        var oldProcessors = new Dictionary<IVideoEffect, Stack<IVideoEffectProcessor>>();
-        for (int i = 0; i < _currentEffects.Count; i++)
+        var oldProcessors = new Dictionary<IVideoEffect, IVideoEffectProcessor>(_currentEffects.Count);
+        for (int i = 0; i < _currentEffects.Count && i < _processors.Count; i++)
         {
-            if (i < _processors.Count && _processors[i] != null)
-            {
-                var effect = _currentEffects[i];
-                if (!oldProcessors.TryGetValue(effect, out var stack))
-                {
-                    stack = new Stack<IVideoEffectProcessor>();
-                    oldProcessors[effect] = stack;
-                }
-                stack.Push(_processors[i]);
-            }
+            if (!oldProcessors.TryAdd(_currentEffects[i], _processors[i]))
+                throw new InvalidOperationException("Same IVideoEffect instance appears multiple times in the previous effects list.");
         }
 
-        var newProcessors = new List<IVideoEffectProcessor>(_effect.Effects.Count);
-        for (int i = 0; i < _effect.Effects.Count; i++)
+        var seen = new HashSet<IVideoEffect>(nextEffects.Count);
+        var newProcessors = new List<IVideoEffectProcessor>(nextEffects.Count);
+        foreach (var effect in nextEffects)
         {
-            var effect = _effect.Effects[i];
-            if (oldProcessors.TryGetValue(effect, out var stack) && stack.TryPop(out var processor))
+            if (!seen.Add(effect))
+                throw new InvalidOperationException("Same IVideoEffect instance appears multiple times in the current effects list.");
+
+            if (oldProcessors.Remove(effect, out var processor))
             {
                 newProcessors.Add(processor);
             }
             else
             {
-                newProcessors.Add(effect.CreateVideoEffect(_devices));
+                var created = effect.CreateVideoEffect(_devices);
+                _disposer.Collect(created);
+                newProcessors.Add(created);
             }
         }
 
-        foreach (var stack in oldProcessors.Values)
+        // 再利用されなかった旧プロセッサは Disposer から外して破棄
+        foreach (var processor in oldProcessors.Values)
         {
-            foreach (var processor in stack)
-            {
-                processor.Dispose();
-            }
+            var p = processor;
+            _disposer.RemoveAndDispose(ref p);
         }
 
         _processors.Clear();
         _processors.AddRange(newProcessors);
-        _currentEffects = _effect.Effects;
-    }
-
-    private void DisposeProcessors()
-    {
-        foreach (var processor in _processors)
-        {
-            processor.Dispose();
-        }
-        _processors.Clear();
+        _currentEffects = nextEffects;
     }
 }

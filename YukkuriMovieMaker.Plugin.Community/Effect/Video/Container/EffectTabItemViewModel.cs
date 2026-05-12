@@ -1,5 +1,7 @@
+using System.Collections.Immutable;
 using System.Globalization;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
@@ -29,14 +31,14 @@ internal sealed class EffectTabItemViewModel : Bindable
         }
     }
 
-    public string SerializedEffects
+    public ImmutableList<IVideoEffect> Effects
     {
-        get => Model.SerializedEffects;
+        get => Model.Effects;
         set
         {
-            if (Model.SerializedEffects == value) return;
-            Model.SerializedEffects = value;
-            OnPropertyChanged(nameof(SerializedEffects));
+            if (ReferenceEquals(Model.Effects, value)) return;
+            Model.Effects = value;
+            OnPropertyChanged(nameof(Effects));
         }
     }
 

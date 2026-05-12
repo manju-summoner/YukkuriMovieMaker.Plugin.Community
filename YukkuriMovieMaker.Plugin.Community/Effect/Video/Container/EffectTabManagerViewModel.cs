@@ -1,6 +1,7 @@
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
-using Newtonsoft.Json;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
@@ -24,13 +25,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             IDisposable? scope = _isSelfUpdating ? null : BeginUndo();
             try
             {
-                if (_selectedTab != null)
-                    _selectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-
                 SelectTabInternal(value);
-
-                if (value != null)
-                    ApplyStateToEffectInternal(value);
+                ApplyStateToContainers();
             }
             finally
             {
@@ -119,24 +115,37 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private EffectTabItemViewModel? ResolveTab(object? param) => param as EffectTabItemViewModel ?? SelectedTab;
 
     private bool HasEffects(EffectTabItemViewModel? target)
-    {
-        if (target == null) return false;
-
-        if (target == SelectedTab)
-            return _effect.Effects.Count > 0;
-
-        return EffectSerializer.Deserialize(target.SerializedEffects).Count > 0;
-    }
+        => target is not null && target.Effects.Count > 0;
 
     private void Tabs_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
         OnPropertyChanged(nameof(HasMultipleTabs));
     }
 
-    private void ForEachEffect(Action<ContainerEffect> action)
+    private void ApplyToContainers(Action<ContainerEffect> action)
     {
         foreach (var prop in _itemProperties)
             action((ContainerEffect)prop.PropertyOwner);
+    }
+
+    /// <summary>
+    /// マルチセレクト中のすべての ContainerEffect に対して action を呼ぶ。
+    /// 先頭の Container には sharedValue をそのまま渡し、2 個目以降には毎回 deep clone を渡す。
+    /// （複数 Container に同一インスタンスを共有させるとマルチセレクト解除後の編集が
+    /// 他の Container にも波及してしまうため、独立性を保つ。）
+    /// </summary>
+    private void ApplyToContainers<T>(T sharedValue, Action<ContainerEffect, T> action)
+        where T : class
+    {
+        bool isFirst = true;
+        foreach (var prop in _itemProperties)
+        {
+            var instance = isFirst
+                ? sharedValue
+                : (YukkuriMovieMaker.Json.Json.GetClone(sharedValue) ?? sharedValue);
+            isFirst = false;
+            action((ContainerEffect)prop.PropertyOwner, instance);
+        }
     }
 
     private void LoadStashes()
@@ -177,22 +186,21 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     private void LoadTabs()
     {
-        var state = EffectTabStateService.ResolveEffectState(_effect.EffectTabsJson, _effect.Effects, Texts.EffectTab_FirstName);
+        var (normalizedTabs, selectedId) = EffectTabStateService.Normalize(
+            _effect.Tabs, _effect.SelectedTabId, ImmutableList<IVideoEffect>.Empty, Texts.EffectTab_FirstName);
+
         Tabs.Clear();
-        foreach (var tab in state.Tabs)
+        foreach (var tab in normalizedTabs)
             Tabs.Add(new EffectTabItemViewModel(tab, this));
 
         UpdateIndices();
 
-        SelectedTab = state.SelectedTabId.HasValue
-            ? Tabs.FirstOrDefault(t => t.Id == state.SelectedTabId.Value) ?? Tabs.FirstOrDefault()
-            : Tabs.FirstOrDefault();
+        SelectedTab = Tabs.FirstOrDefault(t => t.Id == selectedId) ?? Tabs.FirstOrDefault();
     }
 
     private void SelectTabInternal(EffectTabItemViewModel? tab)
     {
         _selectedTab = tab;
-        ForEachEffect(e => e.SelectedTabName = tab?.Name);
         OnPropertyChanged(nameof(SelectedTab));
         OnPropertyChanged(nameof(IsTabSelected));
     }
@@ -201,15 +209,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         if (_isSelfUpdating) return;
 
-        if (e.PropertyName == nameof(ContainerEffect.Effects) && SelectedTab != null)
-        {
-            using (BeginSelfUpdate())
-            {
-                SelectedTab.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-                PersistState();
-            }
-        }
-        else if (e.PropertyName == nameof(ContainerEffect.EffectTabsJson))
+        if (e.PropertyName == nameof(ContainerEffect.Tabs))
         {
             using (BeginSelfUpdate())
             {
@@ -218,32 +218,28 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
-    private void ApplyStateToEffectInternal(EffectTabItemViewModel tab)
+    /// <summary>
+    /// VideoEffectSelector が EffectTab.Effects を編集した直後に呼ばれる。
+    /// EffectTab 自体は INotifyPropertyChanged ではないので、ここで Tabs を新インスタンスとして
+    /// 各 ContainerEffect に再代入し、Label 更新と外部監視を発火させる。
+    /// </summary>
+    internal void NotifyEffectsEdited()
     {
         using (BeginSelfUpdate())
         {
-            ForEachEffect(e =>
-            {
-                e.Effects = EffectSerializer.Deserialize(tab.SerializedEffects);
-                e.SelectedTabName = tab.Name;
-            });
-            PersistState();
+            ApplyStateToContainers();
         }
     }
 
-    private void PersistState()
+    private void ApplyStateToContainers()
     {
-        var state = new EffectTabState
-        {
-            SelectedTabId = SelectedTab?.Id,
-            Tabs = Tabs.Select(t => t.Model).ToList()
-        };
-        var json = EffectTabStateService.Serialize(state);
+        var snapshot = Tabs.Select(t => t.Model).ToImmutableList();
+        var selectedId = SelectedTab?.Id;
 
-        ForEachEffect(e =>
+        ApplyToContainers(snapshot, (e, tabs) =>
         {
-            if (e.EffectTabsJson != json)
-                e.EffectTabsJson = json;
+            e.Tabs = tabs;
+            e.SelectedTabId = selectedId;
         });
     }
 
@@ -264,7 +260,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         using (BeginUndo())
         {
-            var tab = new EffectTab { Name = string.Format(Texts.EffectTab_NumberedName, Tabs.Count + 1), SerializedEffects = string.Empty };
+            var tab = new EffectTab { Name = string.Format(Texts.EffectTab_NumberedName, Tabs.Count + 1) };
             var vm = new EffectTabItemViewModel(tab, this);
             Tabs.Add(vm);
             UpdateIndices();
@@ -286,10 +282,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         if (target == null) return;
 
-        if (target == SelectedTab)
-            target.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-
-        var effects = EffectSerializer.Deserialize(target.SerializedEffects);
+        var effects = target.Effects;
         if (effects.Count == 0) return;
 
         var firstEffectName = effects[0].Label;
@@ -297,12 +290,14 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             ? string.Format(Texts.Menu_StashNameFormat, target.Name, firstEffectName, effects.Count - 1)
             : string.Format(Texts.Menu_StashNameFormatSingle, target.Name, firstEffectName);
 
+        // タブから退避箱への移動。元タブはこの直後 RemoveTabInternal で消えるのでインスタンス共有でよいが、
+        // 復元時に独立性が要るので Clone しておく。
         var stash = new EffectTab
         {
             Id = Guid.NewGuid(),
             Name = name,
             OriginalTabName = target.Name,
-            SerializedEffects = target.SerializedEffects
+            Effects = CloneEffects(effects),
         };
 
         EffectTabSettings.Default.Stashes.Add(stash);
@@ -318,10 +313,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         if (target == null) return;
 
-        if (target == SelectedTab)
-            target.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-        
-        var effects = EffectSerializer.Deserialize(target.SerializedEffects);
+        var effects = target.Effects;
         if (effects.Count == 0) return;
 
         var args = new BookmarkDialogEventArgs(target.Name, false);
@@ -333,7 +325,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             {
                 Id = Guid.NewGuid(),
                 Name = args.BookmarkName,
-                SerializedEffects = target.SerializedEffects
+                Effects = CloneEffects(effects),
             };
             EffectTabSettings.Default.Bookmarks.Add(bookmark);
             EffectTabSettings.Default.Save();
@@ -363,15 +355,13 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         if (p == null || SelectedTab == null) return;
 
-        var effectToAdd = EffectSerializer.Deserialize(p.SerializedEffect).FirstOrDefault();
+        var effectToAdd = YukkuriMovieMaker.Json.Json.GetClone(p.Effect);
         if (effectToAdd == null) return;
 
         using (BeginUndo())
         {
-            var currentEffects = EffectSerializer.Deserialize(SelectedTab.SerializedEffects);
-            var newEffects = currentEffects.Add(effectToAdd);
-            SelectedTab.SerializedEffects = EffectSerializer.Serialize(newEffects);
-            ApplyStateToEffectInternal(SelectedTab);
+            SelectedTab.Effects = SelectedTab.Effects.Add(effectToAdd);
+            ApplyStateToContainers();
         }
     }
 
@@ -382,7 +372,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         if (Tabs.Count == 0)
         {
-            var tab = new EffectTab { Name = Texts.EffectTab_FirstName, SerializedEffects = string.Empty };
+            var tab = new EffectTab { Name = Texts.EffectTab_FirstName };
             Tabs.Add(new EffectTabItemViewModel(tab, this));
         }
 
@@ -392,12 +382,9 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         {
             var next = Tabs.First();
             SelectTabInternal(next);
-            ApplyStateToEffectInternal(next);
         }
-        else
-        {
-            PersistState();
-        }
+
+        ApplyStateToContainers();
     }
 
     private bool CanMoveTab(EffectTabItemViewModel? target, int offset)
@@ -421,7 +408,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             {
                 Tabs.Move(idx, newIdx);
                 UpdateIndices();
-                PersistState();
+                ApplyStateToContainers();
             }
         }
     }
@@ -455,7 +442,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         {
             Tabs.Move(sourceIndex, adjustedIndex);
             UpdateIndices();
-            PersistState();
+            ApplyStateToContainers();
         }
     }
 
@@ -465,13 +452,10 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         using (BeginUndo())
         {
-            if (source == SelectedTab)
-                source.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-
             var dup = new EffectTab
             {
                 Name = source.Name + Texts.EffectTab_CopyName,
-                SerializedEffects = source.SerializedEffects
+                Effects = CloneEffects(source.Effects),
             };
             var vm = new EffectTabItemViewModel(dup, this);
 
@@ -486,15 +470,13 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         if (source == null) return;
 
-        if (source == SelectedTab)
-            source.SerializedEffects = EffectSerializer.Serialize(_effect.Effects);
-
+        // クリップボードへは JSON 化するので元インスタンスとは自動的に独立する。
         var data = new EffectTab
         {
             Name = source.Name,
-            SerializedEffects = source.SerializedEffects
+            Effects = source.Effects,
         };
-        var json = JsonConvert.SerializeObject(data);
+        var json = YukkuriMovieMaker.Json.Json.GetJsonText(data);
         System.Windows.Clipboard.SetData(ClipboardFormat, json);
     }
 
@@ -508,31 +490,29 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         EffectTab? data;
         try
         {
-            data = JsonConvert.DeserializeObject<EffectTab>(raw);
+            data = YukkuriMovieMaker.Json.Json.LoadFromText<EffectTab>(raw);
         }
-        catch (JsonException)
+        catch
         {
             return;
         }
 
         if (data == null) return;
+        var pastedEffects = data.Effects ?? ImmutableList<IVideoEffect>.Empty;
 
         using (BeginUndo())
         {
             if (targetTabVm != null)
             {
-                targetTabVm.SerializedEffects = data.SerializedEffects;
-                if (targetTabVm == SelectedTab)
-                    ApplyStateToEffectInternal(targetTabVm);
-                else
-                    PersistState();
+                targetTabVm.Effects = pastedEffects;
+                ApplyStateToContainers();
             }
             else
             {
                 var tab = new EffectTab
                 {
                     Name = data.Name + Texts.EffectTab_CopyName,
-                    SerializedEffects = data.SerializedEffects
+                    Effects = pastedEffects,
                 };
                 var vm = new EffectTabItemViewModel(tab, this);
                 Tabs.Add(vm);
@@ -552,10 +532,11 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 ? Texts.Menu_RestoreStashName
                 : stashVm.Model.OriginalTabName!;
 
+            // スタッシュは復元直後に Stashes から削除されるので、移管としてインスタンスをそのまま渡す。
             var tab = new EffectTab
             {
                 Name = restoredName,
-                SerializedEffects = stashVm.SerializedEffects
+                Effects = stashVm.Effects,
             };
             var vm = new EffectTabItemViewModel(tab, this);
             Tabs.Add(vm);
@@ -588,10 +569,11 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         using (BeginUndo())
         {
+            // ブックマークは複数回復元できるので Clone してからタブに渡す。
             var tab = new EffectTab
             {
                 Name = bookmarkVm.Name,
-                SerializedEffects = bookmarkVm.SerializedEffects
+                Effects = CloneEffects(bookmarkVm.Effects),
             };
             var vm = new EffectTabItemViewModel(tab, this);
             Tabs.Add(vm);
@@ -619,17 +601,20 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         using (BeginUndo())
         {
             target.CommitEdit(Texts.EffectTab_FirstName);
-
-            if (target == SelectedTab)
-                ForEachEffect(e => e.SelectedTabName = target.Name);
-
-            PersistState();
+            ApplyStateToContainers();
         }
     }
 
     private void ExecuteCancelEdit(EffectTabItemViewModel? target)
     {
         target?.CancelEdit();
+    }
+
+    private static ImmutableList<IVideoEffect> CloneEffects(ImmutableList<IVideoEffect> effects)
+    {
+        if (effects.IsEmpty) return ImmutableList<IVideoEffect>.Empty;
+        var cloned = YukkuriMovieMaker.Json.Json.GetClone(effects);
+        return cloned ?? ImmutableList<IVideoEffect>.Empty;
     }
 
     private IDisposable BeginUndo() => new StateScope(this, true);
