@@ -187,7 +187,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="Transparent" Margin="5,5,5,0">
+    <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -199,11 +199,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0"
-                Background="Transparent"
-                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                BorderThickness="0,0,0,1"
-                Padding="0,0,0,4">
+            <Border Grid.Column="0">
             <ListBox x:Name="TabListBox"
                      Style="{StaticResource TabListBoxStyle}"
                      ItemContainerStyle="{StaticResource TabListBoxItemStyle}"
@@ -498,11 +494,7 @@
             </ListBox>
         </Border>
 
-        <Border Grid.Column="1"
-                Background="Transparent"
-                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                BorderThickness="0,0,0,1"
-                Padding="0,0,0,4">
+        <Border Grid.Column="1">
             <Button
                 Style="{StaticResource AddIconButtonStyle}"
                 Margin="6,0,0,0"
@@ -516,6 +508,6 @@
         </Border>
         </Grid>
 
-        <c:VideoEffectSelector Grid.Row="1" x:Name="EffectSelector" Margin="0,4,0,0"/>
+        <c:VideoEffectSelector Grid.Row="1" x:Name="EffectSelector"/>
     </Grid>
 </UserControl>
