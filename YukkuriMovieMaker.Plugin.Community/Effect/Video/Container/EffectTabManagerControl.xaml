@@ -399,6 +399,9 @@
                                     <MouseBinding Gesture="LeftDoubleClick"
                                                   Command="{Binding DataContext.BeginEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                   CommandParameter="{Binding}"/>
+                                    <MouseBinding MouseAction="MiddleClick"
+                                                  Command="{Binding DataContext.RemoveTabCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                  CommandParameter="{Binding}"/>
                                 </Grid.InputBindings>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
