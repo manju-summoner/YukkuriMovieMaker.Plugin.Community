@@ -42,7 +42,7 @@ public partial class BookmarkNameWindow : Window
 
             if (isEditMode && e.Key == System.Windows.Input.Key.Escape)
             {
-                Result = BookmarkWindowResult.None;
+                Result = BookmarkWindowResult.Cancel;
                 DialogResult = false;
                 Close();
                 e.Handled = true;
