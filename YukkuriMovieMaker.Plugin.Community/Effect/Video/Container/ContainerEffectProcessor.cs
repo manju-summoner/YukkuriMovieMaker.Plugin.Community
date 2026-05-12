@@ -26,9 +26,12 @@ internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
 
     public DrawDescription Update(EffectDescription effectDescription)
     {
+        if (_inputImage is null)
+            return effectDescription.DrawDescription;
+
         if (_disposed || !_effect.IsEnabled)
         {
-            Output = _inputImage!;
+            Output = _inputImage;
             return effectDescription.DrawDescription;
         }
 
@@ -36,11 +39,11 @@ internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
 
         if (_processors.Count == 0)
         {
-            Output = _inputImage!;
+            Output = _inputImage;
             return effectDescription.DrawDescription;
         }
 
-        ID2D1Image? current = _inputImage;
+        ID2D1Image current = _inputImage;
         var description = effectDescription;
         var activeEffects = _currentEffects;
         for (int i = 0; i < _processors.Count; i++)
@@ -52,7 +55,7 @@ internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
             description = description with { DrawDescription = updated };
         }
 
-        Output = current!;
+        Output = current;
         return description.DrawDescription;
     }
 
