@@ -185,6 +185,118 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="AddIconSplitButtonStyle" TargetType="{x:Type c:SplitButton}" BasedOn="{StaticResource {x:Type c:SplitButton}}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Opacity" Value="0.55"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="1"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="Opacity" Value="1"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="Opacity" Value="1"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Opacity" Value="0.85"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 右クリックメニューと▼メニュー両方で使う共有 MenuItem。
+             ContextMenu は親が排他的なので、x:Shared="False" で各使用箇所に別インスタンスを生成させる。 -->
+        <CollectionViewSource x:Key="StashesCollection" Source="{Binding Stashes}"/>
+
+        <MenuItem x:Key="StashesMenuItem" x:Shared="False"
+                  Header="{x:Static loc:Texts.Menu_Stashes}"
+                  Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}"
+                  Visibility="{Binding HasStashes, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <MenuItem.ItemContainerStyle>
+                <Style TargetType="MenuItem">
+                    <Setter Property="Header" Value="{Binding}"/>
+                    <Setter Property="ToolTip" Value="{Binding ToolTipText}"/>
+                    <Setter Property="Command" Value="{Binding DataContext.RestoreStashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <Setter Property="CommandParameter" Value="{Binding}"/>
+                    <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
+                    <Setter Property="Icon" Value="{StaticResource StashMenuItemIcon}"/>
+                    <Setter Property="HeaderTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <Grid Height="22">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
+                                    <Button Style="{StaticResource ListIconButtonStyle}" Command="{Binding DataContext.RemoveStashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" Grid.Column="1" Width="20" Height="20">
+                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Close}}" Width="12" Height="12" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </MenuItem.ItemContainerStyle>
+            <MenuItem.ItemsSource>
+                <CompositeCollection>
+                    <MenuItem Header="{x:Static loc:Texts.Menu_ClearStashes}"
+                              Click="ClearStashesMenuItem_Click"
+                              Foreground="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}">
+                        <MenuItem.Style>
+                            <Style TargetType="MenuItem">
+                                <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
+                            </Style>
+                        </MenuItem.Style>
+                        <MenuItem.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Header, RelativeSource={RelativeSource AncestorType=MenuItem}}" TextDecorations="Underline" Cursor="Hand"/>
+                            </DataTemplate>
+                        </MenuItem.HeaderTemplate>
+                    </MenuItem>
+                    <Separator/>
+                    <CollectionContainer Collection="{Binding Source={StaticResource StashesCollection}}"/>
+                </CompositeCollection>
+            </MenuItem.ItemsSource>
+        </MenuItem>
+
+        <MenuItem x:Key="TemplatesMenuItem" x:Shared="False"
+                  Header="{x:Static loc:Texts.Menu_Templates}"
+                  Icon="{DynamicResource {x:Static icons:IconKeys.BookmarkMultipleOutline}}"
+                  ItemsSource="{Binding Templates}"
+                  Visibility="{Binding HasTemplates, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <MenuItem.ItemContainerStyle>
+                <Style TargetType="MenuItem">
+                    <Setter Property="Header" Value="{Binding}"/>
+                    <Setter Property="ToolTip" Value="{Binding ToolTipText}"/>
+                    <Setter Property="Command" Value="{Binding DataContext.RestoreTemplateCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <Setter Property="CommandParameter" Value="{Binding}"/>
+                    <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
+                    <Setter Property="Icon" Value="{StaticResource TemplateMenuItemIcon}"/>
+                    <Setter Property="HeaderTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <Grid Height="22" MinWidth="200">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0"/>
+                                    <Button Style="{StaticResource ListIconButtonStyle}" Command="{Binding DataContext.EditTemplateCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" Grid.Column="1" Width="20" Height="20">
+                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Pencil}}" Width="12" Height="12" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </MenuItem.ItemContainerStyle>
+        </MenuItem>
     </UserControl.Resources>
 
     <Grid Background="Transparent">
@@ -208,86 +320,9 @@
                      SelectedItem="{Binding SelectedTab}">
                 <ListBox.ContextMenu>
                     <ContextMenu DataContext="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget.DataContext}">
-                        <ContextMenu.Resources>
-                            <CollectionViewSource x:Key="StashesCollection" Source="{Binding Stashes}"/>
-                        </ContextMenu.Resources>
                         <MenuItem Header="{x:Static loc:Texts.Menu_Paste}" Command="{Binding PasteCommand}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>
-                        <MenuItem Header="{x:Static loc:Texts.Menu_Stashes}" Icon="{DynamicResource {x:Static icons:IconKeys.ArchiveOutline}}" Visibility="{Binding HasStashes, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <MenuItem.ItemContainerStyle>
-                                <Style TargetType="MenuItem">
-                                    <Setter Property="Header" Value="{Binding}"/>
-                                    <Setter Property="ToolTip" Value="{Binding ToolTipText}"/>
-                                    <Setter Property="Command" Value="{Binding DataContext.RestoreStashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                    <Setter Property="CommandParameter" Value="{Binding}"/>
-                                    <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
-                                    <Setter Property="Icon" Value="{StaticResource StashMenuItemIcon}"/>
-                                    <Setter Property="HeaderTemplate">
-                                        <Setter.Value>
-                                            <DataTemplate>
-                                                <Grid Height="22">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
-                                                    <Button Style="{StaticResource ListIconButtonStyle}" Command="{Binding DataContext.RemoveStashCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" Grid.Column="1" Width="20" Height="20">
-                                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Close}}" Width="12" Height="12" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-                                                    </Button>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </MenuItem.ItemContainerStyle>
-                            <MenuItem.ItemsSource>
-                                <CompositeCollection>
-                                    <MenuItem Header="{x:Static loc:Texts.Menu_ClearStashes}"
-                                              Click="ClearStashesMenuItem_Click"
-                                              Foreground="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}">
-                                        <MenuItem.Style>
-                                            <Style TargetType="MenuItem">
-                                                <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
-                                            </Style>
-                                        </MenuItem.Style>
-                                        <MenuItem.HeaderTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Header, RelativeSource={RelativeSource AncestorType=MenuItem}}" TextDecorations="Underline" Cursor="Hand"/>
-                                            </DataTemplate>
-                                        </MenuItem.HeaderTemplate>
-                                    </MenuItem>
-                                    <Separator/>
-                                    <CollectionContainer Collection="{Binding Source={StaticResource StashesCollection}}"/>
-                                </CompositeCollection>
-                            </MenuItem.ItemsSource>
-                        </MenuItem>
-                        <MenuItem Header="{x:Static loc:Texts.Menu_Templates}" Icon="{DynamicResource {x:Static icons:IconKeys.BookmarkMultipleOutline}}" ItemsSource="{Binding Templates}" Visibility="{Binding HasTemplates, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <MenuItem.ItemContainerStyle>
-                                <Style TargetType="MenuItem">
-                                    <Setter Property="Header" Value="{Binding}"/>
-                                    <Setter Property="ToolTip" Value="{Binding ToolTipText}"/>
-                                    <Setter Property="Command" Value="{Binding DataContext.RestoreTemplateCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                    <Setter Property="CommandParameter" Value="{Binding}"/>
-                                    <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
-                                    <Setter Property="Icon" Value="{StaticResource TemplateMenuItemIcon}"/>
-                                    <Setter Property="HeaderTemplate">
-                                        <Setter.Value>
-                                            <DataTemplate>
-                                                <Grid Height="22" MinWidth="200">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0"/>
-                                                    <Button Style="{StaticResource ListIconButtonStyle}" Command="{Binding DataContext.EditTemplateCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{Binding}" Grid.Column="1" Width="20" Height="20">
-                                                        <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Pencil}}" Width="12" Height="12" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
-                                                    </Button>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </MenuItem.ItemContainerStyle>
-                        </MenuItem>
+                        <StaticResource ResourceKey="StashesMenuItem"/>
+                        <StaticResource ResourceKey="TemplatesMenuItem"/>
                     </ContextMenu>
                 </ListBox.ContextMenu>
                 <ListBox.ItemsPanel>
@@ -474,16 +509,30 @@
         </Border>
 
         <Border Grid.Column="1">
-            <Button
-                Style="{StaticResource AddIconButtonStyle}"
+            <c:SplitButton
+                Style="{StaticResource AddIconSplitButtonStyle}"
                 Margin="6,0,0,0"
+                Height="26" 
+                Padding="3"
+                VerticalContentAlignment="Center"
                 VerticalAlignment="Bottom"
                 ToolTip="{x:Static loc:Texts.EffectTab_Add}"
                 Command="{Binding AddTabCommand}">
-                <Viewbox Width="24" Height="24">
-                    <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
-                </Viewbox>
-            </Button>
+                    <ContentControl Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type c:SplitButton}}}"/>
+                    <c:SplitButton.ContextMenu>
+                    <ContextMenu DataContext="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget.DataContext}">
+                        <MenuItem Header="{x:Static loc:Texts.EffectTab_Add}"
+                                  Command="{Binding AddTabCommand}"
+                                  Icon="{DynamicResource {x:Static icons:IconKeys.Plus}}"/>
+                        <MenuItem Header="{x:Static loc:Texts.Menu_Paste}"
+                                  Command="{Binding PasteCommand}"
+                                  Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>
+                        <Separator/>
+                        <StaticResource ResourceKey="StashesMenuItem"/>
+                        <StaticResource ResourceKey="TemplatesMenuItem"/>
+                    </ContextMenu>
+                </c:SplitButton.ContextMenu>
+            </c:SplitButton>
         </Border>
         </Grid>
 
