@@ -536,7 +536,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             var tab = new EffectTab
             {
                 Name = restoredName,
-                Effects = stashVm.Effects,
+                Effects = CloneEffects(stashVm.Effects),
             };
             var vm = new EffectTabItemViewModel(tab, this);
             Tabs.Add(vm);
