@@ -42,7 +42,7 @@ public partial class TemplateNameWindow : Window
 
             if (isEditMode && e.Key == System.Windows.Input.Key.Escape)
             {
-                Result = TemplateWindowResult.None;
+                Result = BookmarkWindowResult.Cancel;
                 DialogResult = false;
                 Close();
                 e.Handled = true;
