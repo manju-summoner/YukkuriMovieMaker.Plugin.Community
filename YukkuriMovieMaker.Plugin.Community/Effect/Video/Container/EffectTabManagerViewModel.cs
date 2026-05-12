@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Effects;
+using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
@@ -53,24 +54,23 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     public ActionCommand CommitEditCommand { get; }
     public ActionCommand CancelEditCommand { get; }
     public ActionCommand MoveTabToIndexCommand { get; }
-    public ActionCommand AddBookmarkCommand { get; }
-    public ActionCommand RestoreBookmarkCommand { get; }
-    public ActionCommand EditBookmarkCommand { get; }
-    public ActionCommand ClearBookmarksCommand { get; }
+    public ActionCommand AddTemplateCommand { get; }
+    public ActionCommand RestoreTemplateCommand { get; }
+    public ActionCommand EditTemplateCommand { get; }
     public ActionCommand ExtractEffectCommand { get; }
 
     public event EventHandler? BeginEdit;
     public event EventHandler? EndEdit;
     public event EventHandler<ConfirmationEventArgs>? ConfirmationRequested;
-    public event EventHandler<BookmarkDialogEventArgs>? BookmarkDialogRequested;
+    public event EventHandler<TemplateDialogEventArgs>? TemplateDialogRequested;
 
     public ObservableCollection<EffectTabStashViewModel> Stashes { get; } = new();
     public bool HasStashes => Stashes.Count > 0;
 
-    public ObservableCollection<EffectTabBookmarkViewModel> Bookmarks { get; } = new();
-    public bool HasBookmarks => Bookmarks.Count > 0;
+    public ObservableCollection<EffectTabTemplateViewModel> Templates { get; } = new();
+    public bool HasTemplates => Templates.Count > 0;
 
-    public bool HasExtractEffectSources => HasStashes || HasBookmarks;
+    public bool HasExtractEffectSources => HasStashes || HasTemplates;
 
     public EffectTabManagerViewModel(ItemProperty[] itemProperties)
     {
@@ -96,10 +96,9 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         MoveTabToIndexCommand = new ActionCommand(
             p => p is MoveTabToIndexParameter param && CanMoveTabToIndex(param),
             p => ExecuteMoveTabToIndex(p as MoveTabToIndexParameter));
-        AddBookmarkCommand = new ActionCommand(p => HasEffects(ResolveTab(p)), p => ExecuteAddBookmark(ResolveTab(p)));
-        RestoreBookmarkCommand = new ActionCommand(p => p is EffectTabBookmarkViewModel, p => ExecuteRestoreBookmark(p as EffectTabBookmarkViewModel));
-        EditBookmarkCommand = new ActionCommand(p => p is EffectTabBookmarkViewModel, p => ExecuteEditBookmark(p as EffectTabBookmarkViewModel));
-        ClearBookmarksCommand = new ActionCommand(_ => HasBookmarks, _ => ExecuteClearBookmarks());
+        AddTemplateCommand = new ActionCommand(p => HasEffects(ResolveTab(p)), p => ExecuteAddTemplate(ResolveTab(p)));
+        RestoreTemplateCommand = new ActionCommand(p => p is EffectTabTemplateViewModel, p => ExecuteRestoreTemplate(p as EffectTabTemplateViewModel));
+        EditTemplateCommand = new ActionCommand(p => p is EffectTabTemplateViewModel, p => ExecuteEditTemplate(p as EffectTabTemplateViewModel));
         ExtractEffectCommand = new ActionCommand(p => p is ExtractEffectViewModel, p => ExecuteExtractEffect(p as ExtractEffectViewModel));
 
         using (BeginSelfUpdate())
@@ -107,7 +106,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             LoadTabs();
         }
         LoadStashes();
-        LoadBookmarks();
+        LoadTemplates();
 
         _effect.PropertyChanged += OnEffectPropertyChanged;
     }
@@ -166,23 +165,23 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void OnStashesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         => SyncStashes();
 
-    private void LoadBookmarks()
+    private void LoadTemplates()
     {
-        EffectTabSettings.Default.Bookmarks.CollectionChanged += OnBookmarksChanged;
-        SyncBookmarks();
+        EffectSettings.Default.EffectTemplate.CollectionChanged += OnTemplatesChanged;
+        SyncTemplates();
     }
 
-    private void SyncBookmarks()
+    private void SyncTemplates()
     {
-        Bookmarks.Clear();
-        foreach (var bookmark in EffectTabSettings.Default.Bookmarks)
-            Bookmarks.Add(new EffectTabBookmarkViewModel(bookmark));
-        OnPropertyChanged(nameof(HasBookmarks));
+        Templates.Clear();
+        foreach (var template in EffectSettings.Default.EffectTemplate)
+            Templates.Add(new EffectTabTemplateViewModel(template));
+        OnPropertyChanged(nameof(HasTemplates));
         OnPropertyChanged(nameof(HasExtractEffectSources));
     }
 
-    private void OnBookmarksChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        => SyncBookmarks();
+    private void OnTemplatesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        => SyncTemplates();
 
     private void LoadTabs()
     {
@@ -303,45 +302,41 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
     }
 
-    private void ExecuteAddBookmark(EffectTabItemViewModel? target)
+    private void ExecuteAddTemplate(EffectTabItemViewModel? target)
     {
         if (target == null) return;
 
         var effects = target.Effects;
         if (effects.Count == 0) return;
 
-        var args = new BookmarkDialogEventArgs(target.Name, false);
-        BookmarkDialogRequested?.Invoke(this, args);
+        var args = new TemplateDialogEventArgs(target.Name, false);
+        TemplateDialogRequested?.Invoke(this, args);
 
-        if (args.Result == BookmarkWindowResult.Create && !string.IsNullOrWhiteSpace(args.BookmarkName))
+        if (args.Result == TemplateWindowResult.Create && !string.IsNullOrWhiteSpace(args.TemplateName))
         {
-            var bookmark = new EffectTab
-            {
-                Id = Guid.NewGuid(),
-                Name = args.BookmarkName,
-                Effects = CloneEffects(effects),
-            };
-            EffectTabSettings.Default.Bookmarks.Add(bookmark);
-            EffectTabSettings.Default.Save();
+            // EffectTemplate のコンストラクタが内部で Json.Json.GetClone してくれるので、ここで Clone は不要。
+            var template = new EffectTemplate<IVideoEffect>(args.TemplateName, effects);
+            EffectSettings.Default.EffectTemplate.Add(template);
+            EffectSettings.Default.Save();
         }
     }
 
-    private void ExecuteEditBookmark(EffectTabBookmarkViewModel? bookmarkVm)
+    private void ExecuteEditTemplate(EffectTabTemplateViewModel? templateVm)
     {
-        if (bookmarkVm == null) return;
+        if (templateVm == null) return;
 
-        var args = new BookmarkDialogEventArgs(bookmarkVm.Name, true);
-        BookmarkDialogRequested?.Invoke(this, args);
+        var args = new TemplateDialogEventArgs(templateVm.Name, true);
+        TemplateDialogRequested?.Invoke(this, args);
 
-        if (args.Result == BookmarkWindowResult.Complete && !string.IsNullOrWhiteSpace(args.BookmarkName))
+        if (args.Result == TemplateWindowResult.Complete && !string.IsNullOrWhiteSpace(args.TemplateName))
         {
-            bookmarkVm.Name = args.BookmarkName;
-            EffectTabSettings.Default.Save();
+            templateVm.Name = args.TemplateName;
+            EffectSettings.Default.Save();
         }
-        else if (args.Result == BookmarkWindowResult.Delete)
+        else if (args.Result == TemplateWindowResult.Delete)
         {
-            EffectTabSettings.Default.Bookmarks.Remove(bookmarkVm.Model);
-            EffectTabSettings.Default.Save();
+            EffectSettings.Default.EffectTemplate.Remove(templateVm.Model);
+            EffectSettings.Default.Save();
         }
     }
 
@@ -554,30 +549,23 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         EffectTabSettings.Default.Save();
     }
 
-    private void ExecuteRestoreBookmark(EffectTabBookmarkViewModel? bookmarkVm)
+    private void ExecuteRestoreTemplate(EffectTabTemplateViewModel? templateVm)
     {
-        if (bookmarkVm == null) return;
+        if (templateVm == null) return;
 
         using (BeginUndo())
         {
-            // ブックマークは複数回復元できるので Clone してからタブに渡す。
+            // ブックマークは複数回復元できる。EffectTemplate.CreateEffects() が deep clone を返す。
             var tab = new EffectTab
             {
-                Name = bookmarkVm.Name,
-                Effects = CloneEffects(bookmarkVm.Effects),
+                Name = templateVm.Name,
+                Effects = templateVm.Model.CreateEffects().ToImmutableList(),
             };
             var vm = new EffectTabItemViewModel(tab, this);
             Tabs.Add(vm);
             UpdateIndices();
             SelectedTab = vm;
         }
-    }
-
-    private void ExecuteClearBookmarks()
-    {
-        if (!RequestConfirmation(Texts.Menu_ClearBookmarksConfirm, Texts.Menu_ClearBookmarks)) return;
-        EffectTabSettings.Default.Bookmarks.Clear();
-        EffectTabSettings.Default.Save();
     }
 
     private void ExecuteBeginEdit(EffectTabItemViewModel? target)
@@ -643,7 +631,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         Tabs.CollectionChanged -= Tabs_CollectionChanged;
         EffectTabSettings.Default.Stashes.CollectionChanged -= OnStashesChanged;
-        EffectTabSettings.Default.Bookmarks.CollectionChanged -= OnBookmarksChanged;
+        EffectSettings.Default.EffectTemplate.CollectionChanged -= OnTemplatesChanged;
         _effect.PropertyChanged -= OnEffectPropertyChanged;
     }
 }

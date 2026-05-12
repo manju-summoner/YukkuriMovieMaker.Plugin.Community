@@ -1,6 +1,6 @@
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-public enum BookmarkWindowResult
+public enum TemplateWindowResult
 {
     None,
     Create,

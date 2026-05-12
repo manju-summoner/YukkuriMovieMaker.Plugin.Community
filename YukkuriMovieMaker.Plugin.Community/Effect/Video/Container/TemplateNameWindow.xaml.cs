@@ -2,24 +2,24 @@ using System.Windows;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-public partial class BookmarkNameWindow : Window
+public partial class TemplateNameWindow : Window
 {
-    public string BookmarkName => BookmarkNameTextBox.Text;
-    public BookmarkWindowResult Result { get; private set; } = BookmarkWindowResult.None;
+    public string TemplateName => TemplateNameTextBox.Text;
+    public TemplateWindowResult Result { get; private set; } = TemplateWindowResult.None;
 
-    public BookmarkNameWindow(string defaultName, bool isEditMode)
+    public TemplateNameWindow(string defaultName, bool isEditMode)
     {
         InitializeComponent();
-        BookmarkNameTextBox.Text = defaultName;
-        Title = Texts.Menu_Bookmark;
+        TemplateNameTextBox.Text = defaultName;
+        Title = Texts.Menu_Template;
 
         if (isEditMode)
         {
             LeftButton.Content = Texts.Menu_Complete;
             RightButton.Content = Texts.Menu_Delete;
 
-            LeftButton.Click += (s, e) => { Result = BookmarkWindowResult.Complete; DialogResult = true; Close(); };
-            RightButton.Click += (s, e) => { Result = BookmarkWindowResult.Delete; DialogResult = false; Close(); };
+            LeftButton.Click += (s, e) => { Result = TemplateWindowResult.Complete; DialogResult = true; Close(); };
+            RightButton.Click += (s, e) => { Result = TemplateWindowResult.Delete; DialogResult = false; Close(); };
         }
         else
         {
@@ -27,8 +27,8 @@ public partial class BookmarkNameWindow : Window
             RightButton.Content = Texts.Menu_Cancel;
             RightButton.IsCancel = true;
 
-            LeftButton.Click += (s, e) => { Result = BookmarkWindowResult.Create; DialogResult = true; Close(); };
-            RightButton.Click += (s, e) => { Result = BookmarkWindowResult.Cancel; DialogResult = false; Close(); };
+            LeftButton.Click += (s, e) => { Result = TemplateWindowResult.Create; DialogResult = true; Close(); };
+            RightButton.Click += (s, e) => { Result = TemplateWindowResult.Cancel; DialogResult = false; Close(); };
         }
 
         PreviewKeyDown += (s, e) =>
@@ -42,7 +42,7 @@ public partial class BookmarkNameWindow : Window
 
             if (isEditMode && e.Key == System.Windows.Input.Key.Escape)
             {
-                Result = BookmarkWindowResult.None;
+                Result = TemplateWindowResult.None;
                 DialogResult = false;
                 Close();
                 e.Handled = true;

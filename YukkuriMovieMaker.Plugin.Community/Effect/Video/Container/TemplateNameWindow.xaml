@@ -1,10 +1,10 @@
-<Window x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.Container.BookmarkNameWindow"
+<Window x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.Container.TemplateNameWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Width="200" SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize" Topmost="True" ShowInTaskbar="False"
-        FocusManager.FocusedElement="{Binding ElementName=BookmarkNameTextBox}">
+        FocusManager.FocusedElement="{Binding ElementName=TemplateNameTextBox}">
     <Window.Style>
         <Style TargetType="{x:Type Window}" BasedOn="{StaticResource {x:Type Window}}"/>
     </Window.Style>
@@ -21,7 +21,7 @@
             <RowDefinition Height="26"/>
             <RowDefinition Height="26"/>
         </Grid.RowDefinitions>
-        <TextBox Grid.Row="0" x:Name="BookmarkNameTextBox"/>
+        <TextBox Grid.Row="0" x:Name="TemplateNameTextBox"/>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>

@@ -54,7 +54,7 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
             oldVm.BeginEdit -= OnBeginEdit;
             oldVm.EndEdit -= OnEndEdit;
             oldVm.ConfirmationRequested -= OnConfirmationRequested;
-            oldVm.BookmarkDialogRequested -= OnBookmarkDialogRequested;
+            oldVm.TemplateDialogRequested -= OnTemplateDialogRequested;
         }
 
         _dragDropService?.Dispose();
@@ -66,7 +66,7 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
             newVm.BeginEdit += OnBeginEdit;
             newVm.EndEdit += OnEndEdit;
             newVm.ConfirmationRequested += OnConfirmationRequested;
-            newVm.BookmarkDialogRequested += OnBookmarkDialogRequested;
+            newVm.TemplateDialogRequested += OnTemplateDialogRequested;
             _dragDropService = new TabDragDropService(TabListBox, newVm);
 
             UpdateEffectSelectorBinding();
@@ -140,15 +140,15 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         e.Confirmed = MessageBox.Show(e.Message, e.Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
     }
 
-    private void OnBookmarkDialogRequested(object? sender, BookmarkDialogEventArgs e)
+    private void OnTemplateDialogRequested(object? sender, TemplateDialogEventArgs e)
     {
-        var window = new BookmarkNameWindow(e.InitialName, e.IsEditMode)
+        var window = new TemplateNameWindow(e.InitialName, e.IsEditMode)
         {
             Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(x => x.IsActive) ?? Application.Current.MainWindow
         };
         window.ShowDialog();
         e.Result = window.Result;
-        e.BookmarkName = window.BookmarkName ?? string.Empty;
+        e.TemplateName = window.TemplateName ?? string.Empty;
     }
 
     private void RenameTextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -204,10 +204,4 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
             vm.ClearStashesCommand.Execute(null);
     }
 
-    private void ClearBookmarksMenuItem_Click(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is not EffectTabManagerViewModel vm) return;
-        if (vm.ClearBookmarksCommand.CanExecute(null))
-            vm.ClearBookmarksCommand.Execute(null);
-    }
 }

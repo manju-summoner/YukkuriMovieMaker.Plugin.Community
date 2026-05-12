@@ -14,8 +14,6 @@ public class EffectTabSettings : SettingsBase<EffectTabSettings>
 
     public ObservableCollection<EffectTab> Stashes { get; } = [];
 
-    public ObservableCollection<EffectTab> Bookmarks { get; } = [];
-
     public override void Initialize()
     {
 
