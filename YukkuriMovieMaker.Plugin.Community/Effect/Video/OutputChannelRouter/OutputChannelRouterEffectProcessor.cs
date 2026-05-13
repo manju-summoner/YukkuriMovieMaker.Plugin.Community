@@ -82,7 +82,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputChannelRouter
             var needsBranch = NeedsBranchInput(outputR, outputG, outputB, outputA);
             if (needsBranch)
             {
-                if (desc.TryGetCustomValue<ID2D1Image>(out var branchImage, $"OutputBranch.Branch{targetIndex}"))
+                var cur = desc.GetCustomValue<int>("OutputBranch.CurrentIndex");
+                if (targetIndex == cur && input is not null)
+                    _routerEffect.SetBranchInput(input);
+                else if (desc.TryGetCustomValue<ID2D1Image>(out var branchImage, $"OutputBranch.Branch{targetIndex}"))
                     _routerEffect.SetBranchInput(branchImage);
                 else
                     _routerEffect.SetBranchInput(_transparentBitmap);
