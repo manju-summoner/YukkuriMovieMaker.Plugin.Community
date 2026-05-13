@@ -9,6 +9,7 @@
              xmlns:ps="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
              xmlns:pt="clr-namespace:YukkuriMovieMaker.Views.Triggers;assembly=YukkuriMovieMaker.Plugin"
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:controls="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
              xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
@@ -38,8 +39,24 @@
                 <Button Content="{DynamicResource {x:Static icons:IconKeys.ContentSave}}" Command="{Binding SaveCommand}" CommandParameter="{Binding FilePath}" ToolTip="{x:Static local:Texts.Save}"/>
                 <Button Content="{DynamicResource {x:Static icons:IconKeys.ContentSaveEdit}}" Command="{Binding SaveCommand}" ToolTip="{x:Static local:Texts.SaveAs}"/>
                 <Separator/>
-                <ToggleButton Content="{DynamicResource {x:Static icons:IconKeys.FormatTextWrappingWrap}}" IsChecked="{Binding WordWrap}" ToolTip="{x:Static local:Texts.WordWrap}"/>
-                <ToggleButton Content="{DynamicResource {x:Static icons:IconKeys.FormatListNumbered}}" IsChecked="{Binding ShowLineNumbers}" ToolTip="{x:Static local:Texts.ShowLineNumbers}"/>
+                <controls:DropDownButton Content="{DynamicResource {x:Static icons:IconKeys.Cog}}" ToolTip="{x:Static local:Texts.Settings}" BorderBrush="Transparent" Padding="3">
+                    <controls:DropDownButton.Style>
+                        <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                    </controls:DropDownButton.Style>
+                    <controls:DropDownButton.ContextMenu>
+                        <ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}"
+                                     d:DataContext="{d:DesignInstance Type={x:Type local:NotepadViewModel}}">
+                            <MenuItem Header="{x:Static local:Texts.WordWrap}"
+                                      IsCheckable="True"
+                                      IsChecked="{Binding WordWrap, Mode=TwoWay}"
+                                      Icon="{DynamicResource {x:Static icons:IconKeys.FormatTextWrappingWrap}}"/>
+                            <MenuItem Header="{x:Static local:Texts.ShowLineNumbers}"
+                                      IsCheckable="True"
+                                      IsChecked="{Binding ShowLineNumbers, Mode=TwoWay}"
+                                      Icon="{DynamicResource {x:Static icons:IconKeys.FormatListNumbered}}"/>
+                        </ContextMenu>
+                    </controls:DropDownButton.ContextMenu>
+                </controls:DropDownButton>
             </ToolBar>
         </ToolBarTray>
         <avalon:TextEditor Grid.Row="1"
