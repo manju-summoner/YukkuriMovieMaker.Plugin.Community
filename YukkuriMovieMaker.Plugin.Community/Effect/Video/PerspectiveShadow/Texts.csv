@@ -1,6 +1,6 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
-PerspectiveShadowEffectName,,立体投影シャドウ,Perspective Shadow,立体投影阴影,立體投影陰影,입체 투영 그림자,Sombra en perspectiva,ظل منظوري,Bayangan Perspektif
-TagPerspectiveShadow,,立体投影シャドウ,perspective shadow,立体投影阴影,立體投影陰影,입체 투영 그림자,sombra en perspectiva,ظل منظوري,bayangan perspektif
+PerspectiveShadowEffectName,,影（立体投影）,Shadow (Perspective),阴影（立体投影）,陰影（立體投影）,그림자 (입체 투영),Sombra (Perspectiva),ظل (منظوري),Bayangan (Perspektif)
+TagPerspectiveShadow,,影（立体投影）,shadow (perspective),阴影（立体投影）,陰影（立體投影）,그림자 (입체 투영),sombra (perspectiva),ظل (منظوري),bayangan (perspektif)
 TagPerspective,,透視投影,perspective,透视,透視,투시,perspectiva,منظور,perspektif
 TagShadow3D,,3D影,3d shadow,3d阴影,3D陰影,3D 그림자,sombra 3d,ظل ثلاثي الأبعاد,bayangan 3d
 TagCastShadow,,落ち影,cast shadow,投射阴影,投射陰影,투영 그림자,sombra proyectada,ظل مُسقط,bayangan jatuh
