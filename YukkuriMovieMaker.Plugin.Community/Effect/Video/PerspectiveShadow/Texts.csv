@@ -1,0 +1,29 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+PerspectiveShadowEffectName,,立体投影シャドウ,Perspective Shadow,立体投影阴影,立體投影陰影,입체 투영 그림자,Sombra en perspectiva,ظل منظوري,Bayangan Perspektif
+TagPerspectiveShadow,,立体投影シャドウ,perspective shadow,立体投影阴影,立體投影陰影,입체 투영 그림자,sombra en perspectiva,ظل منظوري,bayangan perspektif
+TagPerspective,,透視投影,perspective,透视,透視,투시,perspectiva,منظور,perspektif
+TagShadow3D,,3D影,3d shadow,3d阴影,3D陰影,3D 그림자,sombra 3d,ظل ثلاثي الأبعاد,bayangan 3d
+TagCastShadow,,落ち影,cast shadow,投射阴影,投射陰影,투영 그림자,sombra proyectada,ظل مُسقط,bayangan jatuh
+TagShadow,,影,shadow,阴影,陰影,그림자,sombra,ظل,bayangan
+PerspectiveShadowGroupLight,,光源,Light Source,光源,光源,광원,Fuente de luz,مصدر الضوء,Sumber Cahaya
+PerspectiveShadowGroupAppearance,,影の見え方,Shadow Appearance,阴影外观,陰影外觀,그림자 외관,Apariencia de sombra,مظهر الظل,Tampilan Bayangan
+PerspectiveShadowLightXName,,光源X,Light X,光源X,光源X,광원 X,Luz X,ضوء X,Cahaya X
+PerspectiveShadowLightXDesc,,光源の水平位置 (px),Horizontal position of the light source (px),光源的水平位置 (px),光源的水平位置 (px),광원의 수평 위치 (px),Posición horizontal de la fuente de luz (px),الموضع الأفقي للمصدر الضوئي (px),Posisi horizontal sumber cahaya (px)
+PerspectiveShadowLightYName,,光源Y,Light Y,光源Y,光源Y,광원 Y,Luz Y,ضوء Y,Cahaya Y
+PerspectiveShadowLightYDesc,,光源の垂直位置 (px),Vertical position of the light source (px),光源的垂直位置 (px),光源的垂直位置 (px),광원의 수직 위치 (px),Posición vertical de la fuente de luz (px),الموضع الرأسي للمصدر الضوئي (px),Posisi vertikal sumber cahaya (px)
+PerspectiveShadowLightHeightName,,光源の高さ,Light Height,光源高度,光源高度,광원 높이,Altura de luz,ارتفاع الضوء,Tinggi Cahaya
+PerspectiveShadowLightHeightDesc,,光源の仮想的な高さ。小さいほど影が長く伸びます。,Virtual height of the light. Smaller values produce longer shadows.,光源的虚拟高度。值越小阴影越长。,光源的虛擬高度。值越小陰影越長。,광원의 가상 높이. 값이 작을수록 그림자가 길어집니다.,Altura virtual de la luz. Valores menores producen sombras más largas.,الارتفاع الافتراضي للضوء. القيم الأصغر تنتج ظلالًا أطول.,Tinggi virtual cahaya. Nilai lebih kecil menghasilkan bayangan lebih panjang.
+PerspectiveShadowGroundYName,,接地線Y,Ground Y,接地线Y,接地線Y,접지선 Y,Suelo Y,خط الأرضية Y,Tanah Y
+PerspectiveShadowGroundYDesc,,影が落ちる地面のY座標 (px)。,Y-coordinate of the ground plane where the shadow is cast (px).,阴影投射的地面的Y坐标 (px)。,陰影投射的地面的Y座標 (px)。,그림자가 투사되는 지면의 Y좌표 (px).,Coordenada Y del plano del suelo donde se proyecta la sombra (px).,إحداثي Y للأرضية حيث يُسقط الظل (px).,Koordinat Y bidang tanah tempat bayangan diproyeksikan (px).
+PerspectiveShadowOpacityName,,不透明度,Opacity,不透明度,不透明度,불투명도,Opacidad,العتامة,Opasitas
+PerspectiveShadowOpacityDesc,,影全体の不透明度。,Overall opacity of the shadow.,阴影整体的不透明度。,陰影整體的不透明度。,그림자 전체의 불투명도.,Opacidad general de la sombra.,العتامة الكلية للظل.,Opasitas keseluruhan bayangan.
+PerspectiveShadowFalloffName,,距離減衰,Distance Falloff,距离衰减,距離衰減,거리 감쇠,Atenuación por distancia,تخفيف بالمسافة,Peluruhan Jarak
+PerspectiveShadowFalloffDesc,,影の先端に向かって薄くなる強さ。,How much the shadow fades toward its far end.,阴影朝向远端逐渐变淡的强度。,陰影朝向遠端逐漸變淡的強度。,그림자가 끝쪽으로 향할수록 흐려지는 강도.,Cuánto se desvanece la sombra hacia su extremo lejano.,مقدار تلاشي الظل نحو نهايته البعيدة.,Seberapa banyak bayangan memudar ke ujung jauhnya.
+PerspectiveShadowBlurName,,ぼかし半径,Blur Radius,模糊半径,模糊半徑,블러 반경,Radio de desenfoque,نصف قطر التمويه,Radius Blur
+PerspectiveShadowBlurDesc,,影のソフトエッジ半径 (px)。,Soft-edge radius of the shadow (px).,阴影柔和边缘的半径 (px)。,陰影柔和邊緣的半徑 (px)。,그림자의 부드러운 가장자리 반경 (px).,Radio del borde suave de la sombra (px).,نصف قطر الحافة الناعمة للظل (px).,Radius tepi lembut bayangan (px).
+PerspectiveShadowSpreadName,,拡散,Spread,扩散,擴散,확산,Dispersión,انتشار,Penyebaran
+PerspectiveShadowSpreadDesc,,距離が大きいほど影のエッジが拡散する強さ。,How strongly the shadow edge spreads with increasing distance.,距离越远阴影边缘扩散的强度。,距離越遠陰影邊緣擴散的強度。,거리가 멀어질수록 그림자 가장자리가 확산되는 강도.,Cuánto se dispersa el borde de la sombra a medida que aumenta la distancia.,مدى انتشار حافة الظل مع زيادة المسافة.,Seberapa kuat tepi bayangan menyebar seiring jarak.
+PerspectiveShadowAlphaThresholdName,,シルエットしきい値,Silhouette Threshold,轮廓阈值,輪廓閾值,실루엣 임계값,Umbral de silueta,عتبة الظل الخارجي,Ambang Siluet
+PerspectiveShadowAlphaThresholdDesc,,シルエットとして扱う不透明度のしきい値。,Opacity threshold used to determine the subject's silhouette.,作为轮廓处理的不透明度阈值。,作為輪廓處理的不透明度閾值。,실루엣으로 취급할 불투명도 임계값.,Umbral de opacidad para determinar la silueta del sujeto.,عتبة العتامة المستخدمة لتحديد الظل الخارجي للهدف.,Ambang opasitas untuk menentukan siluet subjek.
+PerspectiveShadowShadowColorName,,影の色,Shadow Color,阴影颜色,陰影顏色,그림자 색상,Color de sombra,لون الظل,Warna Bayangan
+PerspectiveShadowShadowColorDesc,,影の色。,Color of the shadow.,阴影的颜色。,陰影的顏色。,그림자의 색상.,Color de la sombra.,لون الظل.,Warna bayangan.
