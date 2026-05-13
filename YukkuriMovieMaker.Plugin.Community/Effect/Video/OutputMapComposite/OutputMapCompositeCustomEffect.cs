@@ -5,9 +5,9 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Community.Commons;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DynamicLerp
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputMapComposite
 {
-    internal sealed class DynamicLerpCustomEffect(IGraphicsDevicesAndContext devices)
+    internal sealed class OutputMapCompositeCustomEffect(IGraphicsDevicesAndContext devices)
         : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices))
     {
         public int MapType
@@ -32,7 +32,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DynamicLerp
                 set { _cb.MapType = value; UpdateConstants(); }
             }
 
-            public EffectImpl() : base(ShaderResourceUri.Get("DynamicLerp")) { }
+            public EffectImpl() : base(ShaderResourceUri.Get("OutputMapComposite")) { }
 
             protected override void UpdateConstants()
             {

@@ -156,7 +156,7 @@
 	  <Resource Include="$(ShaderDirPath)GradientMap.cso" Link="Resources\Shader\GradientMap.cso" />
 	  <Resource Include="$(ShaderDirPath)GodRay.cso" Link="Resources\Shader\GodRay.cso" />
 	  <Resource Include="$(ShaderDirPath)HeatHaze.cso" Link="Resources\Shader\HeatHaze.cso" />
-	  <Resource Include="$(ShaderDirPath)DynamicLerp.cso" Link="Resources\Shader\DynamicLerp.cso" />
+	  <Resource Include="$(ShaderDirPath)OutputMapComposite.cso" Link="Resources\Shader\OutputMapComposite.cso" />
   </ItemGroup>
 
 </Project>

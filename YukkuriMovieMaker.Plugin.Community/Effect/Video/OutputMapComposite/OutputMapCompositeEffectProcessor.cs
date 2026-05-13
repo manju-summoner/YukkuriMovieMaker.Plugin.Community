@@ -4,19 +4,19 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DynamicLerp
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputMapComposite
 {
-    internal sealed class DynamicLerpEffectProcessor : VideoEffectProcessorBase
+    internal sealed class OutputMapCompositeEffectProcessor : VideoEffectProcessorBase
     {
-        private readonly DynamicLerpEffect _item;
+        private readonly OutputMapCompositeEffect _item;
 
-        private DynamicLerpCustomEffect? _lerpEffect;
+        private OutputMapCompositeCustomEffect? _lerpEffect;
         private D2DEffects.AffineTransform2D? _sink;
 
         private bool _isFirst = true;
         private int _mapType;
 
-        public DynamicLerpEffectProcessor(IGraphicsDevicesAndContext devices, DynamicLerpEffect item)
+        public OutputMapCompositeEffectProcessor(IGraphicsDevicesAndContext devices, OutputMapCompositeEffect item)
             : base(devices)
         {
             _item = item;
@@ -24,7 +24,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DynamicLerp
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            var lerp = new DynamicLerpCustomEffect(devices);
+            var lerp = new OutputMapCompositeCustomEffect(devices);
             if (!lerp.IsEnabled)
             {
                 lerp.Dispose();
