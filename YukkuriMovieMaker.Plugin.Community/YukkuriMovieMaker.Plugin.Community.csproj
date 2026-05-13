@@ -63,6 +63,7 @@
 	<PackageReference Include="System.Management" Version="10.0.7" />
 	<PackageReference Include="ComputeSharp" Version="3.2.0" />
 	<PackageReference Include="MeltySynth" Version="2.4.1" />
+	<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
   </ItemGroup>
 
   <!--ビルド後、YMM4フォルダに関連ファイルをコピーする-->
