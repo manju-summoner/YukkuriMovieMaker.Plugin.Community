@@ -31,14 +31,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DynamicLerp
         }
         private int _mapIndex = 2;
 
-        [Display(GroupName = nameof(Texts.DynamicLerpEffectName), Name = nameof(Texts.WeightSourceName), Description = nameof(Texts.WeightSourceDesc), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.DynamicLerpEffectName), Name = nameof(Texts.MapTypeName), Description = nameof(Texts.MapTypeDesc), ResourceType = typeof(Texts))]
         [EnumComboBox]
-        public DynamicLerpWeightSource WeightSource
+        public DynamicLerpMapType MapType
         {
-            get => _weightSource;
-            set => Set(ref _weightSource, value);
+            get => _mapType;
+            set => Set(ref _mapType, value);
         }
-        private DynamicLerpWeightSource _weightSource = DynamicLerpWeightSource.MapLuminance;
+        private DynamicLerpMapType _mapType = DynamicLerpMapType.Luminance;
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription) => [];
 

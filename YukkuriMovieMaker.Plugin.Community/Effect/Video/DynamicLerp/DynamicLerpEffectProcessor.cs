@@ -14,9 +14,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DynamicLerp
         private D2DEffects.AffineTransform2D? _sink;
 
         private bool _isFirst = true;
-        private int _weightSource;
-        private int _targetIndex;
-        private int _mapIndex;
+        private int _mapType;
 
         public DynamicLerpEffectProcessor(IGraphicsDevicesAndContext devices, DynamicLerpEffect item)
             : base(devices)
@@ -39,6 +37,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DynamicLerp
             _sink = new D2DEffects.AffineTransform2D(devices.DeviceContext);
             disposer.Collect(_sink);
 
+            using (var lerpOutput = _lerpEffect.Output)
+                _sink.SetInput(0, lerpOutput, true);
+
             var output = _sink.Output;
             disposer.Collect(output);
             return output;
@@ -53,45 +54,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DynamicLerp
 
             var targetIndex = _item.TargetIndex;
             var mapIndex = _item.MapIndex;
-            var weightSource = _item.WeightSource;
+            var mapType = _item.MapType;
 
             if (!desc.TryGetCustomValue<ID2D1Image>(out var targetImage, $"OutputBranch.Branch{targetIndex}"))
-            {
-                _sink.SetInput(0, input, true);
-                return desc;
-            }
+                targetImage = input;
 
-            var requiresMap = RequiresMapInput(weightSource);
-            ID2D1Image? mapImage = null;
-            if (requiresMap && !desc.TryGetCustomValue<ID2D1Image>(out mapImage, $"OutputBranch.Branch{mapIndex}"))
-            {
-                _sink.SetInput(0, input, true);
-                return desc;
-            }
+            if (!desc.TryGetCustomValue<ID2D1Image>(out var mapImage, $"OutputBranch.Branch{mapIndex}"))
+                mapImage = input;
 
-            var weightSourceInt = (int)weightSource;
+            var mapTypeInt = (int)mapType;
 
-            if (_isFirst || _weightSource != weightSourceInt)
-                _lerpEffect.WeightSource = weightSourceInt;
+            if (_isFirst || _mapType != mapTypeInt)
+                _lerpEffect.MapType = mapTypeInt;
 
-            _lerpEffect.SetCurrentInput(input);
             _lerpEffect.SetTargetInput(targetImage);
-            _lerpEffect.SetMapInput(requiresMap ? mapImage : null);
-
-            using var lerpOutput = _lerpEffect.Output;
-            _sink.SetInput(0, lerpOutput, true);
+            _lerpEffect.SetMapInput(mapImage);
 
             _isFirst = false;
-            _weightSource = weightSourceInt;
-            _targetIndex = targetIndex;
-            _mapIndex = mapIndex;
+            _mapType = mapTypeInt;
 
             return desc;
         }
-
-        private static bool RequiresMapInput(DynamicLerpWeightSource weightSource) =>
-            weightSource is DynamicLerpWeightSource.MapLuminance
-                        or DynamicLerpWeightSource.MapAlpha;
 
         protected override void setInput(ID2D1Image? input)
         {

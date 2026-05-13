@@ -10,10 +10,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DynamicLerp
     internal sealed class DynamicLerpCustomEffect(IGraphicsDevicesAndContext devices)
         : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices))
     {
-        public int WeightSource
+        public int MapType
         {
-            get => GetIntValue((int)EffectImpl.Properties.WeightSource);
-            set => SetValue((int)EffectImpl.Properties.WeightSource, value);
+            get => GetIntValue((int)EffectImpl.Properties.MapType);
+            set => SetValue((int)EffectImpl.Properties.MapType, value);
         }
 
         public void SetCurrentInput(ID2D1Image? image) => SetInput(0, image, true);
@@ -25,11 +25,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DynamicLerp
         {
             private ConstantBuffer _cb;
 
-            [CustomEffectProperty(PropertyType.Int32, (int)Properties.WeightSource)]
-            public int WeightSource
+            [CustomEffectProperty(PropertyType.Int32, (int)Properties.MapType)]
+            public int MapType
             {
-                get => _cb.WeightSource;
-                set { _cb.WeightSource = value; UpdateConstants(); }
+                get => _cb.MapType;
+                set { _cb.MapType = value; UpdateConstants(); }
             }
 
             public EffectImpl() : base(ShaderResourceUri.Get("DynamicLerp")) { }
@@ -60,7 +60,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DynamicLerp
             [StructLayout(LayoutKind.Sequential)]
             private struct ConstantBuffer
             {
-                public int WeightSource;
+                public int MapType;
                 public float Pad0;
                 public float Pad1;
                 public float Pad2;
@@ -68,7 +68,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DynamicLerp
 
             public enum Properties
             {
-                WeightSource = 0,
+                MapType = 0,
             }
         }
     }
