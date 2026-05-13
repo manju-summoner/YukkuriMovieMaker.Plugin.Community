@@ -68,13 +68,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         }
         private bool _useRandom;
 
-        public float RandomSeed
-        {
-            get => _randomSeed;
-            set => Set(ref _randomSeed, value);
-        }
-        private float _randomSeed = (float)(new Random().NextDouble() * 1000.0);
-
         private IAnimatable[]? _animatables;
 
         public override IEnumerable<string> CreateExoVideoFilters(
