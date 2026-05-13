@@ -5,9 +5,9 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Community.Commons;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ChannelRouter
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputChannelRouter
 {
-    internal sealed class ChannelRouterCustomEffect(IGraphicsDevicesAndContext devices)
+    internal sealed class OutputChannelRouterCustomEffect(IGraphicsDevicesAndContext devices)
         : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices))
     {
         public int SourceR

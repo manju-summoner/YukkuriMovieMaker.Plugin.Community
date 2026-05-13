@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ChannelRouter
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputChannelRouter
 {
     public enum ChannelSource
     {

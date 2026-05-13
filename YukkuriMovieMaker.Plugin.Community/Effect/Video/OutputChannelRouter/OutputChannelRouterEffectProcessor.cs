@@ -4,22 +4,22 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ChannelRouter
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputChannelRouter
 {
-    internal sealed class ChannelRouterEffectProcessor : VideoEffectProcessorBase
+    internal sealed class OutputChannelRouterEffectProcessor : VideoEffectProcessorBase
     {
-        private readonly ChannelRouterEffect _item;
+        private readonly OutputChannelRouterEffect _item;
 
-        private ChannelRouterCustomEffect? _routerEffect;
+        private OutputChannelRouterCustomEffect? _routerEffect;
         private D2DEffects.AffineTransform2D? _sink;
         private ID2D1Bitmap? _transparentBitmap;
 
         private bool _isFirst = true;
         private ChannelSource _outputR, _outputG, _outputB, _outputA;
 
-        public ChannelRouterEffectProcessor(
+        public OutputChannelRouterEffectProcessor(
             IGraphicsDevicesAndContext devices,
-            ChannelRouterEffect item)
+            OutputChannelRouterEffect item)
             : base(devices)
         {
             _item = item;
@@ -32,7 +32,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ChannelRouter
                 return null;
             disposer.Collect(_transparentBitmap);
 
-            var router = new ChannelRouterCustomEffect(devices);
+            var router = new OutputChannelRouterCustomEffect(devices);
             if (!router.IsEnabled)
             {
                 router.Dispose();

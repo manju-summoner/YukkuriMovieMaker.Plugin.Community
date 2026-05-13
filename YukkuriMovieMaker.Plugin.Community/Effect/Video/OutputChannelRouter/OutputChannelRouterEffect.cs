@@ -6,10 +6,10 @@ using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Effects;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ChannelRouter
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputChannelRouter
 {
     [VideoEffect(nameof(Texts.ChannelRouterEffectName), [VideoEffectCategories.Filtering], ["channel router", "channel combiner", "set channel", "composite channels", "channel composite", "チャンネルルーター", "分岐とチャンネル合成", "チャンネル合成", "通道路由", "通道合成", "채널 라우터", "채널 합성", "CustomValue"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
-    public sealed class ChannelRouterEffect : VideoEffectBase
+    public sealed class OutputChannelRouterEffect : VideoEffectBase
     {
         public override string Label => $"{Texts.ChannelRouterEffectName} {TargetIndex}";
 
@@ -63,7 +63,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ChannelRouter
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription) => [];
 
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
-            => new ChannelRouterEffectProcessor(devices, this);
+            => new OutputChannelRouterEffectProcessor(devices, this);
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => [];
     }
