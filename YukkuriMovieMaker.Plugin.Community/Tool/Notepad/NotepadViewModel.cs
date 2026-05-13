@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -14,7 +12,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
     internal class NotepadViewModel : Bindable, IToolViewModel
     {
-
         public event EventHandler<CreateNewToolViewRequestedEventArgs>? CreateNewToolViewRequested;
 
         public string Title => string.IsNullOrEmpty(FileName) ? Texts.Notepad : $"{FileName}{(IsSaved ? string.Empty : "*")}";
@@ -33,6 +30,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public double FontSize => Math.Max(8, SystemFonts.MessageFontSize * Zoom);
         public double Zoom { get; set => Set(ref field, Math.Max(0.25, value), nameof(Zoom), nameof(FontSize)); } = 1.0;
         public bool WordWrap { get; set => Set(ref field, value); } = false;
+        public bool ShowLineNumbers { get; set => Set(ref field, value); } = false;
 
         public OpenFileDialogViewModel OpenFileDialog { get; } = new();
         public SaveFileDialogViewModel SaveFileDialog { get; } = new();
@@ -72,7 +70,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     {
                         var message = $"{Texts.FailedToOpenFile}\r\n{ex.Message}";
                         Log.Default.Write(message, ex);
-                        MessageBox.Show($"{Texts.FailedToOpenFile}\r\n{ex.Message}", Texts.Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(message, Texts.Error, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 });
             SaveCommand = new ActionCommand(
@@ -96,7 +94,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     {
                         var message = $"{Texts.FailedToSaveFile}\r\n{ex.Message}";
                         Log.Default.Write(message, ex);
-                        MessageBox.Show($"{Texts.FailedToSaveFile}\r\n{ex.Message}", Texts.Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(message, Texts.Error, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 });
             OpenNewTabCommand = new ActionCommand(
@@ -106,16 +104,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     var notepadState = new NotepadState()
                     {
                         Zoom = Zoom,
-                        WordWrap = WordWrap
+                        WordWrap = WordWrap,
+                        ShowLineNumbers = ShowLineNumbers
                     };
                     var toolState = new ToolState()
                     {
                         SavedState = Json.Json.GetJsonText(notepadState)
                     };
-                    var args = new CreateNewToolViewRequestedEventArgs(toolState);
-                    CreateNewToolViewRequested?.Invoke(this, args);
+                    CreateNewToolViewRequested?.Invoke(this, new CreateNewToolViewRequestedEventArgs(toolState));
                 });
-
         }
 
         public void LoadState(ToolState stateData)
@@ -130,6 +127,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             Zoom = state.Zoom;
             IsSaved = state.IsSaved;
             WordWrap = state.WordWrap;
+            ShowLineNumbers = state.ShowLineNumbers;
         }
 
         public ToolState SaveState()
@@ -144,6 +142,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     Zoom = Zoom,
                     IsSaved = IsSaved,
                     WordWrap = WordWrap,
+                    ShowLineNumbers = ShowLineNumbers
                 }),
             };
         }

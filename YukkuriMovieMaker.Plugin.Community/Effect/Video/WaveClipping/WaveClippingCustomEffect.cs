@@ -23,6 +23,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             Mode,
             IsInverted,
             Rotation,
+            RandomSeed,
+            UseRandom,
         }
 
         public float InputLeft { set => SetValue((int)PropertyIndex.InputLeft, value); }
@@ -38,6 +40,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         public int Mode { set => SetValue((int)PropertyIndex.Mode, value); }
         public float IsInverted { set => SetValue((int)PropertyIndex.IsInverted, value); }
         public float Rotation { set => SetValue((int)PropertyIndex.Rotation, value); }
+        public float RandomSeed { set => SetValue((int)PropertyIndex.RandomSeed, value); }
+        public float UseRandom { set => SetValue((int)PropertyIndex.UseRandom, value); }
+
         internal void ClearInput() => SetInput(0, null, true);
 
         public WaveClippingCustomEffect(IGraphicsDevicesAndContext devices)
@@ -87,6 +92,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Rotation)]
             public float Rotation { get => _cb.Rotation; set { _cb.Rotation = value; UpdateConstants(); } }
 
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.RandomSeed)]
+            public float RandomSeed { get => _cb.RandomSeed; set { _cb.RandomSeed = value; UpdateConstants(); } }
+
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.UseRandom)]
+            public float UseRandom { get => _cb.UseRandom; set { _cb.UseRandom = value; UpdateConstants(); } }
+
             public EffectImpl() : base(ShaderResourceUri.Get("WaveClipping")) { }
 
             protected override void UpdateConstants()
@@ -129,9 +140,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
                 public int Mode;
                 public float IsInverted;
                 public float Rotation;
+                public float RandomSeed;
+                public float UseRandom;
                 public float Pad0;
-                public float Pad1;
-                public float Pad2;
             }
         }
     }
