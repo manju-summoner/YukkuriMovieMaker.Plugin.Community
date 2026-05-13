@@ -15,8 +15,6 @@ Frequency,,周波数,Frequency,频率,頻率,주파수,Frecuencia,تردد,Freku
 FrequencyDescription,,画像幅あたりのウェーブ周期数,Number of wave cycles per image width.,图像宽度上的波周期数。,圖像寬度上的波週期數。,이미지 너비당 웨이브 주기 수.,Número de ciclos de onda por ancho de imagen.,عدد دورات الموجة لكل عرض صورة.,Jumlah siklus gelombang per lebar gambar.,
 Phase,,位相,Phase,相位,相位,위상,Fase,مرحلة,Fase,
 PhaseDescription,,ウェーブの水平位相オフセット (ラジアン),Horizontal phase offset of the wave (radians).,波的水平相位偏移（弧度）。,波的水平相位偏移（弧度）。,웨이브의 수평 위상 오프셋 (라디안).,Desplazamiento de fase horizontal de la onda (radianes).,إزاحة الطور الأفقي للموجة (بالراديان).,Offset fase horizontal gelombang (radian).,
-RandomSpeed,,ランダム速度,Random Speed,随机速度,隨機速度,랜덤 속도,Velocidad aleatoria,سرعة عشوائية,Kecepatan Acak,
-RandomSpeedDescription,,フラクタルノイズの水平オフセット。アニメーションさせることで波を流せます,Horizontal offset of the fractal noise. Animate to scroll the wave.,分形噪声的水平偏移。通过动画使波浪流动。,分形雜訊的水平偏移。通過動畫使波浪流動。,프랙탈 노이즈의 수평 오프셋. 애니메이션으로 파도를 흐르게 할 수 있습니다.,Desplazamiento horizontal del ruido fractal. Anima para hacer fluir la onda.,الإزاحة الأفقية لضوضاء كسورية. قم بتحريكها لتدفق الموجة.,Offset horizontal noise fraktal. Animasikan untuk mengalirkan gelombang.,
 Softness,,ソフトネス,Softness,柔和度,柔和度,부드러움,Suavidad,نعومة,Kelembutan,
 SoftnessDescription,,クリッピングエッジの柔らかさ。画像高さに対する割合,Softness of the clipping edge. Percentage of image height.,裁剪边缘的柔和度。占图像高度的百分比。,裁剪邊緣的柔和度。占圖像高度的百分比。,클리핑 가장자리의 부드러움. 이미지 높이에 대한 비율.,Suavidad del borde de recorte. Porcentaje de la altura de la imagen.,نعومة حافة القص. النسبة المئوية من ارتفاع الصورة.,Kelembutan tepi kliping. Persentase tinggi gambar.,
 Inverted,,反転,Inverted,反转,反轉,반전,Invertido,مقلوب,Terbalik,

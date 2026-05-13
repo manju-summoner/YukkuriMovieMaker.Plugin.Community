@@ -40,13 +40,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
 
         [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.Phase), Description = nameof(Texts.PhaseDescription), ResourceType = typeof(Texts))]
         [AnimationSlider("F3", "rad", -6.2832, 6.2832)]
-        [SineModeVisible]
         public Animation Phase { get; } = new Animation(0, -314.159, 314.159);
-
-        [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.RandomSpeed), Description = nameof(Texts.RandomSpeedDescription), ResourceType = typeof(Texts))]
-        [AnimationSlider("F2", "", -10, 10)]
-        [RandomModeVisible]
-        public Animation RandomSpeed { get; } = new Animation(0, -100, 100);
 
         [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.Rotation), Description = nameof(Texts.RotationDescription), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", -180, 180)]
@@ -91,6 +85,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             => new WaveClippingEffectProcessor(devices, this);
 
         protected override IEnumerable<IAnimatable> GetAnimatables()
-            => _animatables ??= [ClipPosition, BandWidth, Amplitude, Frequency, Phase, RandomSpeed, Rotation, Softness];
+            => _animatables ??= [ClipPosition, BandWidth, Amplitude, Frequency, Phase, Rotation, Softness];
     }
 }

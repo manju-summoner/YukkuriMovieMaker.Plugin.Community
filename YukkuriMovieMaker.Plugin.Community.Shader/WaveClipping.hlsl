@@ -18,7 +18,7 @@ cbuffer Constants : register(b0)
     float rotation;
     float randomSeed;
     float useRandom;
-    float randomSpeed;
+    float pad0;
 };
 
 static const float TWO_PI = 6.28318530718f;
@@ -76,7 +76,7 @@ float ComputeWave(float normalizedX)
 
 float ComputeRandomWave(float normalizedX)
 {
-    return FractalNoise(normalizedX * max(frequency, 0.01f) + randomSpeed, randomSeed) * amplitude;
+    return FractalNoise(normalizedX * max(frequency, 0.01f) + phase / TWO_PI, randomSeed) * amplitude;
 }
 
 float4 main(float4 pos : SV_POSITION, float4 posScene : SCENE_POSITION, float4 uv : TEXCOORD0) : SV_TARGET

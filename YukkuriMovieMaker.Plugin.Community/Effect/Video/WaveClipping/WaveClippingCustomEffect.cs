@@ -25,7 +25,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             Rotation,
             RandomSeed,
             UseRandom,
-            RandomSpeed,
         }
 
         public float InputLeft { set => SetValue((int)PropertyIndex.InputLeft, value); }
@@ -43,7 +42,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         public float Rotation { set => SetValue((int)PropertyIndex.Rotation, value); }
         public float RandomSeed { set => SetValue((int)PropertyIndex.RandomSeed, value); }
         public float UseRandom { set => SetValue((int)PropertyIndex.UseRandom, value); }
-        public float RandomSpeed { set => SetValue((int)PropertyIndex.RandomSpeed, value); }
 
         internal void ClearInput() => SetInput(0, null, true);
 
@@ -100,9 +98,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.UseRandom)]
             public float UseRandom { get => _cb.UseRandom; set { _cb.UseRandom = value; UpdateConstants(); } }
 
-            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.RandomSpeed)]
-            public float RandomSpeed { get => _cb.RandomSpeed; set { _cb.RandomSpeed = value; UpdateConstants(); } }
-
             public EffectImpl() : base(ShaderResourceUri.Get("WaveClipping")) { }
 
             protected override void UpdateConstants()
@@ -147,7 +142,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
                 public float Rotation;
                 public float RandomSeed;
                 public float UseRandom;
-                public float RandomSpeed;
+                public float Pad0;
             }
         }
     }
