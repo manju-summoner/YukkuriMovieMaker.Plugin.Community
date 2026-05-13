@@ -22,6 +22,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
         public int TargetIndex { get => targetIndex; set => Set(ref targetIndex, value, nameof(TargetIndex), nameof(Label)); }
         int targetIndex = 1;
 
+        [Display(GroupName = nameof(Texts.OutputCompositeEffectName), Name = nameof(Texts.OutputCompositeOpacityName), Description = nameof(Texts.OutputCompositeOpacityDesc), ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 0, 100)]
+        public Animation Opacity { get; } = new Animation(100, 0, 100);
+
         [Display(GroupName = nameof(Texts.OutputCompositeEffectName), Name = nameof(Texts.OutputCompositeBlendModeName), Description = nameof(Texts.OutputCompositeBlendModeDesc), ResourceType = typeof(Texts))]
         [EnumComboBox]
         public Blend BlendMode { get => blendMode; set => Set(ref blendMode, value); }
@@ -34,6 +38,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
             return new OutputCompositeEffectProcessor(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [Opacity];
     }
 }
