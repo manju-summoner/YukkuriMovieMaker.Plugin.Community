@@ -92,7 +92,7 @@
   <ItemGroup>
     <Resource Include="Voice\IrodoriTTS\EmojiPalette\Emoji\*.png" />
   </ItemGroup>
-	
+
   <ItemGroup>
     <None Remove="Brush\Rainbow\Linear\Texts.csv" />
     <None Remove="Brush\Rainbow\Radial\Texts.csv" />
@@ -158,6 +158,7 @@
 	  <Resource Include="$(ShaderDirPath)HeatHaze.cso" Link="Resources\Shader\HeatHaze.cso" />
 	  <Resource Include="$(ShaderDirPath)OutputMapComposite.cso" Link="Resources\Shader\OutputMapComposite.cso" />
 	  <Resource Include="$(ShaderDirPath)ChannelRouter.cso" Link="Resources\Shader\ChannelRouter.cso" />
+	  <Resource Include="$(ShaderDirPath)Tritone.cso" Link="Resources\Shader\Tritone.cso" />
   </ItemGroup>
 
 </Project>
