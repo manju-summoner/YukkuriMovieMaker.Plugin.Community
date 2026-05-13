@@ -28,11 +28,17 @@
 	  <Reference Include="SharpGen.Runtime">
 		  <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
 	  </Reference>
+	  <Reference Include="Vortice.Direct2D1">
+		  <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Vortice.Direct3D11">
+		  <HintPath>$(YMM4DirPath)Vortice.Direct3D11.dll</HintPath>
+	  </Reference>
 	  <Reference Include="Vortice.DirectX">
 		  <HintPath>$(YMM4DirPath)Vortice.DirectX.dll</HintPath>
 	  </Reference>
-	  <Reference Include="Vortice.Direct2D1">
-		  <HintPath>$(YMM4DirPath)Vortice.Direct2D1.dll</HintPath>
+	  <Reference Include="Vortice.DXGI">
+		  <HintPath>$(YMM4DirPath)Vortice.DXGI.dll</HintPath>
 	  </Reference>
       <Reference Include="Vortice.Mathematics">
           <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
@@ -46,6 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	<PackageReference Include="LlmTornado" Version="3.8.56" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3912.50" />
@@ -63,6 +70,7 @@
 	<PackageReference Include="System.Management" Version="10.0.7" />
 	<PackageReference Include="ComputeSharp" Version="3.2.0" />
 	<PackageReference Include="MeltySynth" Version="2.4.1" />
+	<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
   </ItemGroup>
 
   <!--ビルド後、YMM4フォルダに関連ファイルをコピーする-->
@@ -80,7 +88,7 @@
     <ProjectReference Include="$(GeneratorDirPath)YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <AdditionalFiles Include="**/*.csv" />
   </ItemGroup>
-
+	
   <ItemGroup>
     <Resource Include="Voice\IrodoriTTS\EmojiPalette\Emoji\*.png" />
   </ItemGroup>
@@ -103,6 +111,12 @@
 	
   <ItemGroup>
     <Content Include="Resources\License\GeneralUserGS.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+	<Content Include="Resources\License\ComputeSharp.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\License\MeltySynth.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SoundFonts\GeneralUser-GS.sf2">
@@ -142,6 +156,8 @@
 	  <Resource Include="$(ShaderDirPath)GradientMap.cso" Link="Resources\Shader\GradientMap.cso" />
 	  <Resource Include="$(ShaderDirPath)GodRay.cso" Link="Resources\Shader\GodRay.cso" />
 	  <Resource Include="$(ShaderDirPath)HeatHaze.cso" Link="Resources\Shader\HeatHaze.cso" />
+	  <Resource Include="$(ShaderDirPath)OutputMapComposite.cso" Link="Resources\Shader\OutputMapComposite.cso" />
+	  <Resource Include="$(ShaderDirPath)ChannelRouter.cso" Link="Resources\Shader\ChannelRouter.cso" />
 	  <Resource Include="$(ShaderDirPath)Tritone.cso" Link="Resources\Shader\Tritone.cso" />
   </ItemGroup>
 

@@ -108,6 +108,12 @@
 	<FxCompile Include="HeatHaze.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+	<FxCompile Include="OutputMapComposite.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+	<FxCompile Include="ChannelRouter.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
 	<FxCompile Include="Tritone.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>

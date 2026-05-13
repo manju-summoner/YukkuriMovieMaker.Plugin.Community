@@ -59,6 +59,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         }
         private bool _isInverted;
 
+        [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.UseRandom), Description = nameof(Texts.UseRandomDescription), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool UseRandom
+        {
+            get => _useRandom;
+            set => Set(ref _useRandom, value);
+        }
+        private bool _useRandom;
+
         private IAnimatable[]? _animatables;
 
         public override IEnumerable<string> CreateExoVideoFilters(
