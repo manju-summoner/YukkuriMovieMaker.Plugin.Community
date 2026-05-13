@@ -14,13 +14,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ChannelRouter
         public override string Label => $"{Texts.ChannelRouterEffectName} {TargetIndex}";
 
         [Display(GroupName = nameof(Texts.ChannelRouterEffectName), Name = nameof(Texts.TargetIndexName), Description = nameof(Texts.TargetIndexDesc), ResourceType = typeof(Texts))]
-        [TextBoxSlider("F0", "", 1, 16)]
-        [Range(1, 1024)]
+        [TextBoxSlider("F0", "", 0, 16)]
+        [Range(0, 1024)]
         [DefaultValue(1)]
         public int TargetIndex
         {
             get => _targetIndex;
-            set => Set(ref _targetIndex, Math.Max(1, value), nameof(TargetIndex), nameof(Label));
+            set => Set(ref _targetIndex, value, nameof(TargetIndex), nameof(Label));
         }
         private int _targetIndex = 1;
 
