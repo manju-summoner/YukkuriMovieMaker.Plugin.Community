@@ -36,6 +36,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             _effect.Mode = (int)_item.Mode;
             _effect.IsInverted = _item.IsInverted ? 1.0f : 0.0f;
             _effect.Rotation = (float)(-_item.Rotation.GetValue(frame, length, fps) * Math.PI / 180.0);
+            _effect.RandomSeed = _item.GetHashCode();
+            _effect.UseRandom = _item.UseRandom ? 1.0f : 0.0f;
 
             return effectDescription.DrawDescription;
         }

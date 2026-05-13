@@ -561,7 +561,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                                 else if (File.Exists(path))
                                     archive.CreateEntryFromFile(path, Path.GetFileName(path));
                             }
-                            
+
                             Application.Current.Dispatcher.Invoke(() => RequestRefresh());
                         }
                         catch (Exception e)
@@ -839,12 +839,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             if (p is ExplorerSidebarDirectoryViewModel sidebarVm)
             {
                 if (sidebarVm.IsExpanded)
-                {
                     CollapseSidebarItem(sidebarVm);
-                    sidebarVm.ResetExpandedState();
-                }
+
                 await ExpandSidebarItemAsync(sidebarVm);
-                sidebarVm.IsExpanded = true;
+                sidebarVm.MarkExpanded();
 
                 var newItem = SidebarItems.FirstOrDefault(x => string.Equals(x.Path, path, StringComparison.OrdinalIgnoreCase));
                 if (newItem != null)
@@ -1223,13 +1221,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
             };
 
-            var (dirsInfo, filesInfo) = await Task.Run(() =>
+            var result = await Task.Run(() =>
             {
                 var di = new DirectoryInfo(currentLocation);
                 var d = new List<(DirectoryInfo dir, bool hasChild)>();
                 foreach (var dir in di.EnumerateDirectories("*", options))
                 {
-                    token.ThrowIfCancellationRequested();
+                    if (token.IsCancellationRequested)
+                        return null;
                     bool hasChild = false;
                     try { hasChild = dir.EnumerateDirectories("*", options).Any(); } catch { }
                     d.Add((dir, hasChild));
@@ -1238,15 +1237,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 var f = new List<FileInfo>();
                 foreach (var file in di.EnumerateFiles("*", options))
                 {
-                    token.ThrowIfCancellationRequested();
+                    if (token.IsCancellationRequested)
+                        return null;
                     f.Add(file);
                 }
-                return (d, f);
-            }, token);
+                return ((List<(DirectoryInfo dir, bool hasChild)> dirs, List<FileInfo> files)?)(d, f);
+            });
 
-            token.ThrowIfCancellationRequested();
+            if (result is null || token.IsCancellationRequested)
+                return;
 
             if (Location != currentLocation) return;
+
+            var (dirsInfo, filesInfo) = result.Value;
 
             var oldItemsMap = Items.ToDictionary(x => x.Path, StringComparer.OrdinalIgnoreCase);
             var newItemsList = new List<IExplorerItemViewModel>(dirsInfo.Count + filesInfo.Count);
@@ -1478,8 +1481,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-
-
         private void Watcher_Callback(object sender, FileSystemEventArgs e)
         {
             if (e.ChangeType is WatcherChangeTypes.Deleted)
@@ -1542,7 +1543,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
             var orderedDirs = dirs.OrderBy(d => d.dir.Name).ToList();
             int insertIndex = SidebarItems.IndexOf(parent) + 1;
-            
+
             foreach (var item in orderedDirs)
             {
                 bool found = false;
@@ -1581,7 +1582,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     insertIndex++;
                 }
             }
-            
+
             parent.SetHasDummyChild(orderedDirs.Count > 0);
         }
 

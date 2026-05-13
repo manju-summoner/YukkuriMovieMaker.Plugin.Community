@@ -19,7 +19,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputSwitch
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            sink = new D2DEffects.AffineTransform2D(devices.DeviceContext);
+            sink = new D2DEffects.AffineTransform2D(devices.DeviceContext)
+            {
+                Cached = true
+            };
             disposer.Collect(sink);
 
             var output = sink.Output;

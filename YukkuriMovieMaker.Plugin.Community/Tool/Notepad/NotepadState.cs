@@ -7,5 +7,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public double Zoom { get; set; } = 1.0;
         public bool IsSaved { get; set; } = true;
         public bool WordWrap { get; set; } = false;
+        public bool ShowLineNumbers { get; set; } = false;
     }
 }
