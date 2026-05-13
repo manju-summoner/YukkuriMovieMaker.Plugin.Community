@@ -1,0 +1,36 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+ChannelRouterEffectName,,分岐とチャンネル合成,Composite Channels with Branch,与分支按通道合成,與分支按通道合成,분기와 채널 합성,Componer canales con ramificación,تركيب القنوات مع التفريع,Gabungkan Saluran dengan Cabang
+TargetIndexName,,合成相手,Target Index,目标索引,目標索引,대상 인덱스,Índice objetivo,الفهرس المستهدف,Indeks target
+TargetIndexDesc,,合成する相手のインデックスを指定します,Index of the output to composite with,指定要合成的目标的索引,指定要合成的目標的索引,합성할 대상의 인덱스를 지정합니다,Índice de la salida con la que componer,حدد فهرس المخرج المراد تركيبه,Tentukan indeks output yang akan digabungkan
+OutputRName,,出力R,Output R,输出R,輸出R,출력 R,Salida R,خرج R,Keluaran R
+OutputRDesc,,出力の赤チャンネルのソースを選択します,Select the source for the output red channel,选择输出红色通道的来源,選擇輸出紅色通道的來源,출력 빨간 채널의 소스를 선택합니다,Selecciona la fuente para el canal rojo de salida,اختر مصدر قناة الأحمر في الخرج,Pilih sumber untuk saluran merah keluaran
+OutputGName,,出力G,Output G,输出G,輸出G,출력 G,Salida G,خرج G,Keluaran G
+OutputGDesc,,出力の緑チャンネルのソースを選択します,Select the source for the output green channel,选择输出绿色通道的来源,選擇輸出綠色通道的來源,출력 초록 채널의 소스를 선택합니다,Selecciona la fuente para el canal verde de salida,اختر مصدر قناة الأخضر في الخرج,Pilih sumber untuk saluran hijau keluaran
+OutputBName,,出力B,Output B,输出B,輸出B,출력 B,Salida B,خرج B,Keluaran B
+OutputBDesc,,出力の青チャンネルのソースを選択します,Select the source for the output blue channel,选择输出蓝色通道的来源,選擇輸出藍色通道的來源,출력 파란 채널의 소스를 선택합니다,Selecciona la fuente para el canal azul de salida,اختر مصدر قناة الأزرق في الخرج,Pilih sumber untuk saluran biru keluaran
+OutputAName,,出力A,Output A,输出A,輸出A,출력 A,Salida A,خرج A,Keluaran A
+OutputADesc,,出力のアルファチャンネルのソースを選択します,Select the source for the output alpha channel,选择输出透明度通道的来源,選擇輸出透明度通道的來源,출력 알파 채널의 소스를 선택합니다,Selecciona la fuente para el canal alfa de salida,اختر مصدر قناة الشفافية في الخرج,Pilih sumber untuk saluran alfa keluaran
+ChannelSourceCurrentR,,現在のR,Current R,当前R,目前R,현재 R,R actual,R الحالي,R Saat Ini
+ChannelSourceCurrentRDesc,,現在の映像の赤チャンネル,Red channel of the current image,当前图像的红色通道,目前影像的紅色通道,현재 영상의 빨간 채널,Canal rojo de la imagen actual,قناة الأحمر للصورة الحالية,Saluran merah gambar saat ini
+ChannelSourceCurrentG,,現在のG,Current G,当前G,目前G,현재 G,G actual,G الحالي,G Saat Ini
+ChannelSourceCurrentGDesc,,現在の映像の緑チャンネル,Green channel of the current image,当前图像的绿色通道,目前影像的綠色通道,현재 영상의 초록 채널,Canal verde de la imagen actual,قناة الأخضر للصورة الحالية,Saluran hijau gambar saat ini
+ChannelSourceCurrentB,,現在のB,Current B,当前B,目前B,현재 B,B actual,B الحالي,B Saat Ini
+ChannelSourceCurrentBDesc,,現在の映像の青チャンネル,Blue channel of the current image,当前图像的蓝色通道,目前影像的藍色通道,현재 영상의 파란 채널,Canal azul de la imagen actual,قناة الأزرق للصورة الحالية,Saluran biru gambar saat ini
+ChannelSourceCurrentA,,現在のA,Current A,当前A,目前A,현재 A,A actual,A الحالي,A Saat Ini
+ChannelSourceCurrentADesc,,現在の映像のアルファチャンネル,Alpha channel of the current image,当前图像的透明度通道,目前影像的透明度通道,현재 영상의 알파 채널,Canal alfa de la imagen actual,قناة الشفافية للصورة الحالية,Saluran alfa gambar saat ini
+ChannelSourceCurrentLuminance,,現在の輝度,Current Luminance,当前亮度,目前亮度,현재 휘도,Luminancia actual,اللمعان الحالي,Luminansi Saat Ini
+ChannelSourceCurrentLuminanceDesc,,現在の映像の輝度 (グレースケール値),Luminance of the current image (grayscale value),当前图像的亮度（灰度值）,目前影像的亮度（灰階值）,현재 영상의 휘도 (그레이스케일 값),Luminancia de la imagen actual (valor en escala de grises),اللمعان للصورة الحالية (قيمة تدرج الرمادي),Luminansi gambar saat ini (nilai skala abu-abu)
+ChannelSourceBranchR,,合成相手のR,Target R,目标R,目標R,대상 R,R objetivo,R الهدف,Target R
+ChannelSourceBranchRDesc,,合成相手の赤チャンネル,Red channel of the composite target,合成目标的红色通道,合成目標的紅色通道,합성 대상의 빨간 채널,Canal rojo del objetivo de composición,قناة الأحمر لهدف التركيب,Saluran merah target gabungan
+ChannelSourceBranchG,,合成相手のG,Target G,目标G,目標G,대상 G,G objetivo,G الهدف,Target G
+ChannelSourceBranchGDesc,,合成相手の緑チャンネル,Green channel of the composite target,合成目标的绿色通道,合成目標的綠色通道,합성 대상의 초록 채널,Canal verde del objetivo de composición,قناة الأخضر لهدف التركيب,Saluran hijau target gabungan
+ChannelSourceBranchB,,合成相手のB,Target B,目标B,目標B,대상 B,B objetivo,B الهدف,Target B
+ChannelSourceBranchBDesc,,合成相手の青チャンネル,Blue channel of the composite target,合成目标的蓝色通道,合成目標的藍色通道,합성 대상의 파란 채널,Canal azul del objetivo de composición,قناة الأزرق لهدف التركيب,Saluran biru target gabungan
+ChannelSourceBranchA,,合成相手のA,Target A,目标A,目標A,대상 A,A objetivo,A الهدف,Target A
+ChannelSourceBranchADesc,,合成相手のアルファチャンネル,Alpha channel of the composite target,合成目标的透明度通道,合成目標的透明度通道,합성 대상의 알파 채널,Canal alfa del objetivo de composición,قناة الشفافية لهدف التركيب,Saluran alfa target gabungan
+ChannelSourceBranchLuminance,,合成相手の輝度,Target Luminance,目标亮度,目標亮度,대상 휘도,Luminancia objetivo,لمعان الهدف,Luminansi Target
+ChannelSourceBranchLuminanceDesc,,合成相手の輝度 (グレースケール値),Luminance of the composite target (grayscale value),合成目标的亮度（灰度值）,合成目標的亮度（灰階值）,합성 대상의 휘도 (그레이스케일 값),Luminancia del objetivo de composición (valor en escala de grises),لمعان هدف التركيب (قيمة تدرج الرمادي),Luminansi target gabungan (nilai skala abu-abu)
+ChannelSourceOne,,1 (最大値),1 (Maximum),1（最大值）,1（最大值）,1 (최댓값),1 (Máximo),1 (الحد الأقصى),1 (Nilai Maksimum)
+ChannelSourceOneDesc,,チャンネル値を常に1.0 (最大値) に設定します,Sets the channel value to a constant 1.0 (maximum),将通道值固定为1.0（最大值）,將通道值固定為1.0（最大值）,채널 값을 항상 1.0 (최댓값) 으로 설정합니다,Establece el valor del canal en 1.0 constante (máximo),يضبط قيمة القناة على 1.0 ثابتة (الحد الأقصى),Mengatur nilai saluran ke 1,0 tetap (maksimum)
+ChannelSourceZero,,0 (最小値),0 (Zero),0（最小值）,0（最小值）,0 (최솟값),0 (Cero),0 (صفر),0 (Nol)
+ChannelSourceZeroDesc,,チャンネル値を常に0.0 (最小値) に設定します,Sets the channel value to a constant 0.0 (zero),将通道值固定为0.0（最小值）,將通道值固定為0.0（最小值）,채널 값을 항상 0.0 (최솟값) 으로 설정합니다,Establece el valor del canal en 0.0 constante (cero),يضبط قيمة القناة على 0.0 ثابتة (صفر),Mengatur nilai saluran ke 0,0 tetap (nol)

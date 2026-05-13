@@ -111,6 +111,9 @@
 	<FxCompile Include="OutputMapComposite.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+	<FxCompile Include="ChannelRouter.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Hash.hlsli">
