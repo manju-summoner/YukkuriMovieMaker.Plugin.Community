@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Xml;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Lut;
