@@ -8,6 +8,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Lut;
 
 internal sealed class LookLutParser : ILutParser
 {
+    private const int MaxLutSize = 128;
+
     public bool CanParse(string filePath) =>
         string.Equals(Path.GetExtension(filePath), ".look", StringComparison.OrdinalIgnoreCase);
 
@@ -37,14 +39,15 @@ internal sealed class LookLutParser : ILutParser
             return null;
 
         var sizeText = StripQuotes(lutNode.SelectSingleNode("size")?.InnerText);
-        if (!int.TryParse(sizeText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var size) || size < 2)
+        if (!int.TryParse(sizeText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var size) || size < 2 || size > MaxLutSize)
             return null;
 
         var dataText = StripQuotes(lutNode.SelectSingleNode("data")?.InnerText);
         if (string.IsNullOrWhiteSpace(dataText))
             return null;
 
-        var data3D = DecodeHexFloats(dataText, size * size * size);
+        var count = checked(size * size * size);
+        var data3D = DecodeHexFloats(dataText, count);
         if (data3D is null)
             return null;
 
