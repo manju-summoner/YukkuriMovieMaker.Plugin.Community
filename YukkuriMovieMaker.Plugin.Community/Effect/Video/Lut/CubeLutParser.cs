@@ -134,16 +134,16 @@ internal sealed class CubeLutParser : ILutParser
         if (data3D is null || read3D != expected3D || size3D < 2)
             return null;
 
-        if (!domainSet)
-        {
-            if (inputRange3D is { } r3)
-                (domainMin, domainMax) = ((r3.Min, r3.Min, r3.Min), (r3.Max, r3.Max, r3.Max));
-            else if (inputRange1D is { } r1 && data1D is not null)
-                (domainMin, domainMax) = ((r1.Min, r1.Min, r1.Min), (r1.Max, r1.Max, r1.Max));
-        }
-
         if (data1D is not null && read1D != expected1D)
             data1D = null;
+
+        if (!domainSet)
+        {
+            if (data1D is not null && inputRange1D is { } r1)
+                (domainMin, domainMax) = ((r1.Min, r1.Min, r1.Min), (r1.Max, r1.Max, r1.Max));
+            else if (inputRange3D is { } r3)
+                (domainMin, domainMax) = ((r3.Min, r3.Min, r3.Min), (r3.Max, r3.Max, r3.Max));
+        }
 
         return new CubeLut(
             title,
