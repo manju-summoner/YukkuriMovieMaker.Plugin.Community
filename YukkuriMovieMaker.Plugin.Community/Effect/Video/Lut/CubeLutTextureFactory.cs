@@ -15,7 +15,7 @@ internal static class CubeLutTextureFactory
             var n = lut.Size3D;
             var width = n * n;
             var height = n;
-            var pixels = new byte[width * height * 4];
+            var pixels = new Half[width * height * 4];
             var data = lut.HasShaper ? ComposeWithShaper(lut) : lut.Data3D;
 
             for (var b = 0; b < n; b++)
@@ -29,14 +29,10 @@ internal static class CubeLutTextureFactory
                         var dstY = g;
                         var dstIndex = (dstY * width + dstX) * 4;
 
-                        var fr = data[srcIndex];
-                        var fg = data[srcIndex + 1];
-                        var fb = data[srcIndex + 2];
-
-                        pixels[dstIndex + 0] = ToByte(fb);
-                        pixels[dstIndex + 1] = ToByte(fg);
-                        pixels[dstIndex + 2] = ToByte(fr);
-                        pixels[dstIndex + 3] = 255;
+                        pixels[dstIndex + 0] = (Half)data[srcIndex];
+                        pixels[dstIndex + 1] = (Half)data[srcIndex + 1];
+                        pixels[dstIndex + 2] = (Half)data[srcIndex + 2];
+                        pixels[dstIndex + 3] = (Half)1f;
                     }
                 }
             }
@@ -56,7 +52,7 @@ internal static class CubeLutTextureFactory
             const int n = 2;
             const int width = n * n;
             const int height = n;
-            var pixels = new byte[width * height * 4];
+            var pixels = new Half[width * height * 4];
 
             for (var b = 0; b < n; b++)
             {
@@ -68,10 +64,10 @@ internal static class CubeLutTextureFactory
                         var dstY = g;
                         var dstIndex = (dstY * width + dstX) * 4;
 
-                        pixels[dstIndex + 0] = (byte)(b == 0 ? 0 : 255);
-                        pixels[dstIndex + 1] = (byte)(g == 0 ? 0 : 255);
-                        pixels[dstIndex + 2] = (byte)(r == 0 ? 0 : 255);
-                        pixels[dstIndex + 3] = 255;
+                        pixels[dstIndex + 0] = (Half)(r == 0 ? 0f : 1f);
+                        pixels[dstIndex + 1] = (Half)(g == 0 ? 0f : 1f);
+                        pixels[dstIndex + 2] = (Half)(b == 0 ? 0f : 1f);
+                        pixels[dstIndex + 3] = (Half)1f;
                     }
                 }
             }
@@ -108,14 +104,7 @@ internal static class CubeLutTextureFactory
         return composed;
     }
 
-    private static byte ToByte(float v)
-    {
-        if (v <= 0f) return 0;
-        if (v >= 1f) return 255;
-        return (byte)MathF.Round(v * 255f);
-    }
-
-    private static ID2D1Bitmap CreateD2DBitmap(ID2D1DeviceContext deviceContext, byte[] pixels, int width, int height)
+    private static ID2D1Bitmap CreateD2DBitmap(ID2D1DeviceContext deviceContext, Half[] pixels, int width, int height)
     {
         var handle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
         try
@@ -123,11 +112,11 @@ internal static class CubeLutTextureFactory
             var size = new Vortice.Mathematics.SizeI(width, height);
             var props = new BitmapProperties1(
                 new Vortice.DCommon.PixelFormat(
-                    Vortice.DXGI.Format.B8G8R8A8_UNorm,
+                    Vortice.DXGI.Format.R16G16B16A16_Float,
                     Vortice.DCommon.AlphaMode.Premultiplied),
                 96f, 96f, BitmapOptions.None);
             return ((ID2D1DeviceContext1)deviceContext).CreateBitmap(
-                size, handle.AddrOfPinnedObject(), width * 4, props);
+                size, handle.AddrOfPinnedObject(), width * 8, props);
         }
         finally
         {
