@@ -20,7 +20,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
 
         bool isFirst = true;
         bool gradientEnabled;
-        System.Windows.Media.Color color, outerColor, innerColor, backgroundColor, strokeColor;
+        System.Windows.Media.Color color, outerColor, innerColor, strokeColor;
         double rawRadius, rawLineWidth, rawZoom, ringCount;
         int bitmapWidth, bitmapHeight;
         Matrix3x2 matrix;
@@ -35,7 +35,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
             var newColor = parameter.Color;
             var newOuterColor = parameter.OuterColor;
             var newInnerColor = parameter.InnerColor;
-            var newBackgroundColor = parameter.BackgroundColor;
             var newStrokeColor = parameter.StrokeColor;
             var newRawZoom = parameter.Zoom.GetValue(frame, length, fps);
             var newRawRadius = parameter.Radius.GetValue(frame, length, fps);
@@ -70,7 +69,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
                 || !this.color.Equals(newColor)
                 || !this.outerColor.Equals(newOuterColor)
                 || !this.innerColor.Equals(newInnerColor)
-                || !this.backgroundColor.Equals(newBackgroundColor)
                 || !this.strokeColor.Equals(newStrokeColor)
                 || this.rawRadius != newRawRadius
                 || this.rawLineWidth != newRawLineWidth
@@ -95,10 +93,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
                     dc.BeginDraw();
                     dc.Clear(null);
 
-                    using var bgBrush = dc.CreateSolidColorBrush(ToColor4(newBackgroundColor));
                     using var strokeBrush = dc.CreateSolidColorBrush(ToColor4(newStrokeColor));
-
-                    dc.FillRectangle(new Vortice.RawRectF(0, 0, newBitmapWidth, newBitmapHeight), bgBrush);
 
                     for (int j = -2; j <= 4; j++)
                     {
@@ -151,7 +146,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
             this.color = newColor;
             this.outerColor = newOuterColor;
             this.innerColor = newInnerColor;
-            this.backgroundColor = newBackgroundColor;
             this.strokeColor = newStrokeColor;
             this.rawRadius = newRawRadius;
             this.rawLineWidth = newRawLineWidth;

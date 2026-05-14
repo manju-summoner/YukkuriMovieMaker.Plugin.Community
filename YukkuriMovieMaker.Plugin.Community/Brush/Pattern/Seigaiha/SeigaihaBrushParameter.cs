@@ -31,11 +31,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
         public Color InnerColor { get => innerColor; set => Set(ref innerColor, value); }
         Color innerColor = Colors.LightBlue;
 
-        [Display(Name = nameof(Texts.BackgroundColor), ResourceType = typeof(Texts))]
-        [ColorPicker]
-        public Color BackgroundColor { get => backgroundColor; set => Set(ref backgroundColor, value); }
-        Color backgroundColor = Colors.Black;
-
         [Display(Name = nameof(Texts.StrokeColor), ResourceType = typeof(Texts))]
         [ColorPicker]
         public Color StrokeColor { get => strokeColor; set => Set(ref strokeColor, value); }
