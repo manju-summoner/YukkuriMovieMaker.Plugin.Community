@@ -110,23 +110,23 @@ internal sealed class CubeLutParser : ILutParser
                 continue;
             }
 
-            if (!TryReadFloats(span, 3, out var rgb))
+            if (!TryReadRgb(span, out var r, out var g, out var b))
                 continue;
 
             if (data1D is not null && read1D < expected1D)
             {
                 var i = read1D * 3;
-                data1D[i] = rgb[0];
-                data1D[i + 1] = rgb[1];
-                data1D[i + 2] = rgb[2];
+                data1D[i] = r;
+                data1D[i + 1] = g;
+                data1D[i + 2] = b;
                 read1D++;
             }
             else if (data3D is not null && read3D < expected3D)
             {
                 var i = read3D * 3;
-                data3D[i] = rgb[0];
-                data3D[i + 1] = rgb[1];
-                data3D[i + 2] = rgb[2];
+                data3D[i] = r;
+                data3D[i + 1] = g;
+                data3D[i + 2] = b;
                 read3D++;
             }
         }
@@ -191,19 +191,37 @@ internal sealed class CubeLutParser : ILutParser
         return int.TryParse(token, NumberStyles.Integer, CultureInfo.InvariantCulture, out value);
     }
 
+    private static bool TryReadRgb(ReadOnlySpan<char> span, out float r, out float g, out float b)
+    {
+        if (!TryReadFloat(ref span, out r) || !TryReadFloat(ref span, out g) || !TryReadFloat(ref span, out b))
+        {
+            r = g = b = 0f;
+            return false;
+        }
+        return true;
+    }
+
+    private static bool TryReadFloat(ref ReadOnlySpan<char> span, out float value)
+    {
+        var token = NextToken(ref span);
+        if (token.IsEmpty)
+        {
+            value = 0f;
+            return false;
+        }
+        return float.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+    }
+
     private static bool TryReadFloats(ReadOnlySpan<char> span, int count, out float[] values)
     {
         var buffer = new float[count];
         for (var i = 0; i < count; i++)
         {
-            var token = NextToken(ref span);
-            if (token.IsEmpty ||
-                !float.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture, out var f))
+            if (!TryReadFloat(ref span, out buffer[i]))
             {
                 values = [];
                 return false;
             }
-            buffer[i] = f;
         }
         values = buffer;
         return true;
