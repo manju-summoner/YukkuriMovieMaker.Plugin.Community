@@ -29,7 +29,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Shippo
 
         [Display(Name = nameof(Texts.LineWidth), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0.1, 20)]
-        public Animation LineWidth { get; } = new Animation(1.5, 0.1, 50);
+        public Animation LineWidth { get; } = new Animation(1.5, 0.1, YMM4Constants.MaximumBitmapSize / 2);
 
         [Display(Name = nameof(Texts.Zoom), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 1, 200)]

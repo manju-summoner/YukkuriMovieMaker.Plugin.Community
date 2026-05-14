@@ -34,11 +34,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Kagome
 
         [Display(Name = nameof(Texts.LineWidth), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0.1, 30)]
-        public Animation LineWidth { get; } = new Animation(8, 0.1, 50);
+        public Animation LineWidth { get; } = new Animation(8, 0.1, YMM4Constants.MaximumBitmapSize / 2);
 
         [Display(Name = nameof(Texts.OutlineWidth), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0, 20)]
-        public Animation OutlineWidth { get; } = new Animation(2, 0, 30);
+        public Animation OutlineWidth { get; } = new Animation(2, 0, YMM4Constants.MaximumBitmapSize / 2);
 
         [Display(Name = nameof(Texts.Zoom), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 1, 200)]

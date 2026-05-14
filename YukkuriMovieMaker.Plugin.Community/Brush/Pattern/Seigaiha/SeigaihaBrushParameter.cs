@@ -47,7 +47,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Seigaiha
 
         [Display(Name = nameof(Texts.LineWidth), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 0, 20)]
-        public Animation LineWidth { get; } = new Animation(1.5, 0, 50);
+        public Animation LineWidth { get; } = new Animation(1.5, 0, YMM4Constants.MaximumBitmapSize / 2);
 
         [Display(Name = nameof(Texts.RingCount), ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "", 1, 10)]
