@@ -117,6 +117,9 @@
 	<FxCompile Include="Tritone.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+	<FxCompile Include="PerspectiveShadow.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
 	<FxCompile Include="Lut.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
