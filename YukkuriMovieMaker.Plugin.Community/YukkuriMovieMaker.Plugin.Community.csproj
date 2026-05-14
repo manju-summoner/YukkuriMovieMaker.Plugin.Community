@@ -46,9 +46,6 @@
 	  <Reference Include="System.Drawing.Common">
 		  <HintPath>$(YMM4DirPath)System.Drawing.Common.dll</HintPath>
 	  </Reference>
-	  <Reference Include="Vortice.Mathematics">
-		  <HintPath>$(YMM4DirPath)Vortice.Mathematics.dll</HintPath>
-	  </Reference>
 	  <Reference Include="ICSharpCode.AvalonEdit">
 		  <HintPath>$(YMM4DirPath)ICSharpCode.AvalonEdit.dll</HintPath>
 	  </Reference>
