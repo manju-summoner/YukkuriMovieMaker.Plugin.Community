@@ -168,10 +168,10 @@ internal sealed class LutEffectProcessor : VideoEffectProcessorBase
     private void RefreshLut(string path)
     {
         ReleaseLutBitmap();
+        _loadedPath = path;
 
         if (string.IsNullOrWhiteSpace(path))
         {
-            _loadedPath = path;
             ApplyIdentity();
             return;
         }
@@ -190,7 +190,6 @@ internal sealed class LutEffectProcessor : VideoEffectProcessorBase
             return;
         }
 
-        _loadedPath = path;
         _lutBitmap = bitmap;
         disposer.Collect(_lutBitmap);
 
