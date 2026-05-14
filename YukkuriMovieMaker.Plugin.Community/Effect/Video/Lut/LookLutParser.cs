@@ -30,8 +30,15 @@ internal sealed class LookLutParser : ILutParser
 
     private static CubeLut? ParseCore(Stream stream, string fallbackTitle)
     {
-        var doc = new XmlDocument();
-        doc.Load(stream);
+        var settings = new XmlReaderSettings
+        {
+            DtdProcessing = DtdProcessing.Prohibit,
+            XmlResolver = null,
+            MaxCharactersFromEntities = 0,
+        };
+        var doc = new XmlDocument { XmlResolver = null };
+        using var xmlReader = XmlReader.Create(stream, settings);
+        doc.Load(xmlReader);
 
         var lutNode = doc.SelectSingleNode("/look/LUT");
         if (lutNode is null)
