@@ -75,24 +75,17 @@ internal sealed class LookLutParser : ILutParser
         if (hex.Length != expectedBytes * 2)
             return null;
 
-        var result = new float[count * 3];
-        Span<byte> tripletBytes = stackalloc byte[12];
-
-        for (var i = 0; i < count; i++)
+        byte[] bytes;
+        try
         {
-            var hexOffset = i * 24;
-            for (var b = 0; b < 12; b++)
-            {
-                tripletBytes[b] = byte.Parse(hex.AsSpan(hexOffset + b * 2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-            }
-
-            var dataOffset = i * 3;
-            result[dataOffset + 0] = MemoryMarshal.Read<float>(tripletBytes[0..4]);
-            result[dataOffset + 1] = MemoryMarshal.Read<float>(tripletBytes[4..8]);
-            result[dataOffset + 2] = MemoryMarshal.Read<float>(tripletBytes[8..12]);
+            bytes = Convert.FromHexString(hex);
+        }
+        catch (FormatException)
+        {
+            return null;
         }
 
-        return result;
+        return MemoryMarshal.Cast<byte, float>(bytes).ToArray();
     }
 
     private static string StripWhitespace(string text)
