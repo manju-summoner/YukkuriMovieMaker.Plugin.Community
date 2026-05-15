@@ -17,6 +17,19 @@
     <i:Interaction.Behaviors>
         <pb:OpenFileDialogBehavior ViewModel="{Binding OpenFileDialog}"/>
         <pb:SaveFileDialogBehavior ViewModel="{Binding SaveFileDialog}"/>
+        <pb:DialogBehavior Content="{Binding ClearImageCacheViewModel}" IsModal="True">
+            <pb:DialogBehavior.Style>
+                <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}">
+                    <Setter Property="Title" Value="{x:Static local:Texts.ClearImageCache}"/>
+                    <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+                </Style>
+            </pb:DialogBehavior.Style>
+            <pb:DialogBehavior.ContentTemplate>
+                <DataTemplate>
+                    <local:ClearNotepadCacheView/>
+                </DataTemplate>
+            </pb:DialogBehavior.ContentTemplate>
+        </pb:DialogBehavior>
     </i:Interaction.Behaviors>
     <Grid>
         <Grid.RowDefinitions>
@@ -58,6 +71,10 @@
                                       IsCheckable="True"
                                       IsChecked="{Binding ShowLineNumbers, Mode=TwoWay}"
                                       Icon="{DynamicResource {x:Static icons:IconKeys.FormatListNumbered}}"/>
+                            <Separator/>
+                            <MenuItem Header="{x:Static local:Texts.ClearImageCache}"
+                                      Command="{Binding ClearImageCacheCommand}"
+                                      Icon="{DynamicResource {x:Static icons:IconKeys.Delete}}"/>
                         </ContextMenu>
                     </controls:DropDownButton.ContextMenu>
                 </controls:DropDownButton>

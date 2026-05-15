@@ -164,6 +164,54 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         public static string BuildPlaceholder(string id) => $"{PlaceholderPrefix}{id}{PlaceholderSuffix}";
 
+        public static long GetCacheSizeInBytes()
+        {
+            if (!Directory.Exists(CacheDirectory))
+                return 0;
+            long total = 0;
+            foreach (var file in Directory.EnumerateFiles(CacheDirectory))
+            {
+                try
+                {
+                    total += new FileInfo(file).Length;
+                }
+                catch (IOException)
+                {
+                }
+                catch (UnauthorizedAccessException)
+                {
+                }
+            }
+            return total;
+        }
+
+        public static void ClearCache()
+        {
+            lock (BitmapCacheLock)
+            {
+                BitmapCache.Clear();
+                BitmapAccessNodes.Clear();
+                BitmapAccessOrder.Clear();
+            }
+            References.Clear();
+
+            if (!Directory.Exists(CacheDirectory))
+                return;
+            foreach (var file in Directory.EnumerateFiles(CacheDirectory))
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (IOException)
+                {
+                }
+                catch (UnauthorizedAccessException)
+                {
+                }
+            }
+        }
+
         private static void WriteCacheFileAtomically(string cachePath, byte[] data)
         {
             if (File.Exists(cachePath))
