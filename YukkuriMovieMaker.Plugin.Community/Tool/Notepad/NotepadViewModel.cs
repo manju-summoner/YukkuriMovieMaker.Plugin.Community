@@ -38,8 +38,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public ICommand SaveCommand { get; }
         public ICommand OpenNewTabCommand { get; }
         public ICommand InsertImageCommand { get; }
+        public ICommand OpenSearchCommand { get; }
 
         public event EventHandler<NotepadImageInsertRequestedEventArgs>? ImageInsertRequested;
+        public event EventHandler? OpenSearchRequested;
 
         public NotepadViewModel()
         {
@@ -126,6 +128,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                         return;
                     ImageInsertRequested?.Invoke(this, new NotepadImageInsertRequestedEventArgs(filePath));
                 });
+            OpenSearchCommand = new ActionCommand(
+                _ => true,
+                _ => OpenSearchRequested?.Invoke(this, EventArgs.Empty));
         }
 
         public void LoadState(ToolState stateData)

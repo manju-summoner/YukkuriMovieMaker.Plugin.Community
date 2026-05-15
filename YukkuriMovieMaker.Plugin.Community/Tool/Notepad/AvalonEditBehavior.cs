@@ -119,10 +119,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             if (ReferenceEquals(_attachedViewModel, viewModel))
                 return;
             if (_attachedViewModel is not null)
+            {
                 _attachedViewModel.ImageInsertRequested -= OnImageInsertRequested;
+                _attachedViewModel.OpenSearchRequested -= OnOpenSearchRequested;
+            }
             _attachedViewModel = viewModel;
             if (_attachedViewModel is not null)
+            {
                 _attachedViewModel.ImageInsertRequested += OnImageInsertRequested;
+                _attachedViewModel.OpenSearchRequested += OnOpenSearchRequested;
+            }
         }
 
         private void OnImageInsertRequested(object? sender, NotepadImageInsertRequestedEventArgs e)
@@ -130,6 +136,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             if (AssociatedObject is null || AssociatedObject.IsReadOnly)
                 return;
             NotepadClipboardHandler.InsertImageFromFile(AssociatedObject.TextArea, e.FilePath);
+        }
+
+        private void OnOpenSearchRequested(object? sender, EventArgs e)
+        {
+            _searchPanel?.Open();
+            AssociatedObject?.TextArea?.Focus();
         }
 
         private void OnPastePreviewCanExecute(object sender, CanExecuteRoutedEventArgs e)
