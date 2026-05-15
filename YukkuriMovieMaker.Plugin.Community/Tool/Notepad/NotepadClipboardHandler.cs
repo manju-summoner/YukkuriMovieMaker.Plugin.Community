@@ -10,6 +10,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         private const string PngFormat = "PNG";
         private const string DibFormat = "DeviceIndependentBitmap";
 
+        private const int BI_RGB = 0;
+        private const int BI_BITFIELDS = 3;
+        private const int BI_ALPHABITFIELDS = 6;
+
         public static bool TryHandleClipboard(TextArea textArea)
         {
             try
@@ -209,6 +213,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 return null;
 
             int bitCount = headerSize >= 16 ? BitConverter.ToInt16(dib, 14) : 0;
+            int compression = headerSize >= 20 ? BitConverter.ToInt32(dib, 16) : BI_RGB;
             int colorsUsed = headerSize >= 36 ? BitConverter.ToInt32(dib, 32) : 0;
             int paletteEntries = bitCount switch
             {
@@ -217,8 +222,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             };
             int paletteSize = paletteEntries * 4;
 
-            bool hasBitfields = bitCount is 16 or 32;
-            int bitfieldsSize = hasBitfields && headerSize == 40 ? 12 : 0;
+            int bitfieldsSize = headerSize == 40 ? compression switch
+            {
+                BI_BITFIELDS => 12,
+                BI_ALPHABITFIELDS => 16,
+                _ => 0,
+            } : 0;
 
             int pixelOffset = FileHeaderSize + headerSize + paletteSize + bitfieldsSize;
             int totalSize = FileHeaderSize + dib.Length;
