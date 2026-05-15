@@ -126,7 +126,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     var filePath = OpenFileDialog.Show($"{Texts.ImageFile}|{NotepadImageCache.GetSupportedImageFileFilter()}");
                     if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
                         return;
-                    ImageInsertRequested?.Invoke(this, new NotepadImageInsertRequestedEventArgs(filePath));
+                    try
+                    {
+                        ImageInsertRequested?.Invoke(this, new NotepadImageInsertRequestedEventArgs(filePath));
+                    }
+                    catch (Exception ex)
+                    {
+                        var message = $"{Texts.FailedToOpenFile}\r\n{ex.Message}";
+                        Log.Default.Write(message, ex);
+                        MessageBox.Show(message, Texts.Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 });
             OpenSearchCommand = new ActionCommand(
                 _ => true,
