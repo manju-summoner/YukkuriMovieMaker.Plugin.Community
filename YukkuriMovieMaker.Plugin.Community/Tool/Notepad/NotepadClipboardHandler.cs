@@ -148,8 +148,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             if (dataObject.GetDataPresent(format) &&
                 dataObject.GetData(format) is Stream stream)
             {
-                bytes = ReadStreamToEnd(stream);
-                return bytes.Length > 0;
+                using (stream)
+                {
+                    bytes = ReadStreamToEnd(stream);
+                    return bytes.Length > 0;
+                }
             }
             bytes = [];
             return false;
