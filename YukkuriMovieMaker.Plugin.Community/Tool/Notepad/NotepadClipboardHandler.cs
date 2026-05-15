@@ -7,7 +7,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
     internal static class NotepadClipboardHandler
     {
-        private static readonly string[] SupportedImageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tiff", ".tif"];
         private const string PngFormat = "PNG";
         private const string DibFormat = "DeviceIndependentBitmap";
 
@@ -97,7 +96,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         public static bool IsSupportedImagePath(string path) =>
             !string.IsNullOrEmpty(path) &&
-            SupportedImageExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
+            NotepadImageCache.TryNormalizeExtension(Path.GetExtension(path), out _);
 
         private static bool TryRegisterFromImageFiles(IDataObject dataObject, out IReadOnlyList<NotepadImageReference> references)
         {

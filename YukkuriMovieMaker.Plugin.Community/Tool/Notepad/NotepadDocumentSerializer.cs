@@ -98,10 +98,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     continue;
                 if (string.IsNullOrEmpty(entry.Name))
                     continue;
+                if (!IsDirectImageEntry(entry.FullName))
+                    continue;
 
                 var id = Path.GetFileNameWithoutExtension(entry.Name).ToLowerInvariant();
-                var extension = Path.GetExtension(entry.Name);
+                if (!NotepadImageCache.IsValidImageId(id))
+                    continue;
+                if (!NotepadImageCache.TryNormalizeExtension(Path.GetExtension(entry.Name), out var extension))
+                    continue;
+
                 var destination = Path.Combine(NotepadImageCache.CacheDirectory, $"{id}{extension}");
+                if (!IsWithinCacheDirectory(destination))
+                    continue;
+
                 if (!File.Exists(destination))
                 {
                     using var entryStream = entry.Open();
@@ -112,6 +121,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             }
 
             return text ?? string.Empty;
+        }
+
+        private static bool IsDirectImageEntry(string fullName)
+        {
+            var remainder = fullName[ImagesDirectoryName.Length..];
+            return !remainder.Contains('/') && !remainder.Contains('\\');
+        }
+
+        private static bool IsWithinCacheDirectory(string destination)
+        {
+            var cacheDirectory = Path.GetFullPath(NotepadImageCache.CacheDirectory);
+            var fullDestination = Path.GetFullPath(destination);
+            var separator = Path.DirectorySeparatorChar;
+            var prefix = cacheDirectory.EndsWith(separator) ? cacheDirectory : cacheDirectory + separator;
+            return fullDestination.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

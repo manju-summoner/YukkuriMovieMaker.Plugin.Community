@@ -121,7 +121,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 _ => true,
                 _ =>
                 {
-                    var filePath = OpenFileDialog.Show($"{Texts.ImageFile}|*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.webp;*.tiff;*.tif");
+                    var filePath = OpenFileDialog.Show($"{Texts.ImageFile}|{NotepadImageCache.GetSupportedImageFileFilter()}");
                     if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
                         return;
                     ImageInsertRequested?.Invoke(this, new NotepadImageInsertRequestedEventArgs(filePath));

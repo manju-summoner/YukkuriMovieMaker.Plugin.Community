@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Windows.Media.Imaging;
@@ -11,8 +12,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public const string PlaceholderPrefix = "\ufffc[image:";
         public const string PlaceholderSuffix = "]";
 
+        private const int MaxBitmapCacheEntries = 256;
+        private static readonly string[] AllowedExtensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tiff", ".tif"];
+
         private static readonly ConcurrentDictionary<string, NotepadImageReference> References = new();
-        private static readonly ConcurrentDictionary<string, BitmapSource> BitmapCache = new();
+        private static readonly LinkedList<string> BitmapAccessOrder = new();
+        private static readonly Dictionary<string, LinkedListNode<string>> BitmapAccessNodes = new();
+        private static readonly Dictionary<string, BitmapSource> BitmapCache = new();
+        private static readonly object BitmapCacheLock = new();
         private static readonly object InitLock = new();
         private static string? cacheDirectory;
 
@@ -34,9 +41,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             }
         }
 
+        public static bool IsValidImageId(string id) =>
+            !string.IsNullOrEmpty(id) &&
+            id.Length <= 128 &&
+            id.All(static c => (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'));
+
+        public static string GetSupportedImageFileFilter() =>
+            string.Join(';', AllowedExtensions.Select(static ext => $"*{ext}"));
+
+        public static bool TryNormalizeExtension(string extension, out string normalized)
+        {
+            normalized = string.Empty;
+            if (string.IsNullOrWhiteSpace(extension))
+                return false;
+            var ext = extension.ToLowerInvariant();
+            if (!ext.StartsWith('.'))
+                ext = "." + ext;
+            if (!AllowedExtensions.Contains(ext))
+                return false;
+            normalized = ext;
+            return true;
+        }
+
         public static NotepadImageReference RegisterFromBytes(byte[] data, string extension)
         {
-            var normalizedExt = NormalizeExtension(extension);
+            var normalizedExt = TryNormalizeExtension(extension, out var ext) ? ext : ".png";
             var id = ComputeHash(data);
             if (References.TryGetValue(id, out var existing))
                 return existing;
@@ -86,8 +115,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         public static BitmapSource? GetBitmap(string id)
         {
-            if (BitmapCache.TryGetValue(id, out var cached))
-                return cached;
+            lock (BitmapCacheLock)
+            {
+                if (BitmapCache.TryGetValue(id, out var cached))
+                {
+                    TouchBitmapAccessOrder(id);
+                    return cached;
+                }
+            }
             if (!TryGet(id, out var reference))
                 return null;
             try
@@ -103,7 +138,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     bitmap.EndInit();
                 }
                 bitmap.Freeze();
-                BitmapCache[id] = bitmap;
+                StoreBitmap(id, bitmap);
                 return bitmap;
             }
             catch
@@ -112,10 +147,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             }
         }
 
-        public static NotepadImageReference RegisterExistingCacheFile(string cachePath)
+        public static NotepadImageReference? RegisterExistingCacheFile(string cachePath)
         {
-            var id = Path.GetFileNameWithoutExtension(cachePath).ToLowerInvariant();
-            var extension = NormalizeExtension(Path.GetExtension(cachePath));
+            var fileName = Path.GetFileNameWithoutExtension(cachePath);
+            var id = fileName.ToLowerInvariant();
+            if (!IsValidImageId(id))
+                return null;
+            if (!TryNormalizeExtension(Path.GetExtension(cachePath), out var extension))
+                return null;
             if (References.TryGetValue(id, out var existing))
                 return existing;
             var (w, h) = ReadDimensions(cachePath);
@@ -126,8 +165,39 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         public static string BuildPlaceholder(string id) => $"{PlaceholderPrefix}{id}{PlaceholderSuffix}";
 
+        private static void StoreBitmap(string id, BitmapSource bitmap)
+        {
+            lock (BitmapCacheLock)
+            {
+                if (BitmapCache.ContainsKey(id))
+                {
+                    BitmapCache[id] = bitmap;
+                    TouchBitmapAccessOrder(id);
+                    return;
+                }
+                while (BitmapCache.Count >= MaxBitmapCacheEntries && BitmapAccessOrder.First is { } oldest)
+                {
+                    BitmapAccessOrder.RemoveFirst();
+                    BitmapAccessNodes.Remove(oldest.Value);
+                    BitmapCache.Remove(oldest.Value);
+                }
+                BitmapCache[id] = bitmap;
+                BitmapAccessNodes[id] = BitmapAccessOrder.AddLast(id);
+            }
+        }
+
+        private static void TouchBitmapAccessOrder(string id)
+        {
+            if (!BitmapAccessNodes.TryGetValue(id, out var node))
+                return;
+            BitmapAccessOrder.Remove(node);
+            BitmapAccessOrder.AddLast(node);
+        }
+
         private static NotepadImageReference? TryRehydrateFromDisk(string id)
         {
+            if (!IsValidImageId(id))
+                return null;
             try
             {
                 var dir = new DirectoryInfo(CacheDirectory);
@@ -135,8 +205,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     return null;
                 foreach (var file in dir.EnumerateFiles($"{id}.*"))
                 {
+                    if (!TryNormalizeExtension(file.Extension, out var extension))
+                        continue;
                     var (w, h) = ReadDimensions(file.FullName);
-                    var reference = new NotepadImageReference(id, file.FullName, w, h, file.Extension);
+                    var reference = new NotepadImageReference(id, file.FullName, w, h, extension);
                     References[id] = reference;
                     return reference;
                 }
@@ -166,20 +238,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             {
                 return (0, 0);
             }
-        }
-
-        private static string NormalizeExtension(string extension)
-        {
-            if (string.IsNullOrWhiteSpace(extension))
-                return ".png";
-            var ext = extension.ToLowerInvariant();
-            if (!ext.StartsWith('.'))
-                ext = "." + ext;
-            return ext switch
-            {
-                ".jpg" or ".jpeg" or ".png" or ".gif" or ".bmp" or ".webp" or ".tiff" or ".tif" => ext,
-                _ => ".png"
-            };
         }
     }
 }
