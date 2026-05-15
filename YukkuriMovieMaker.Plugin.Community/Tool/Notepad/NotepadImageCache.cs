@@ -71,8 +71,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 return existing;
 
             var cachePath = Path.Combine(CacheDirectory, $"{id}{normalizedExt}");
-            if (!File.Exists(cachePath))
-                File.WriteAllBytes(cachePath, data);
+            WriteCacheFileAtomically(cachePath, data);
 
             var (w, h) = ReadDimensions(cachePath);
             var reference = new NotepadImageReference(id, cachePath, w, h, normalizedExt);
@@ -164,6 +163,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         }
 
         public static string BuildPlaceholder(string id) => $"{PlaceholderPrefix}{id}{PlaceholderSuffix}";
+
+        private static void WriteCacheFileAtomically(string cachePath, byte[] data)
+        {
+            if (File.Exists(cachePath))
+                return;
+            var tempPath = Path.Combine(CacheDirectory, $"{Path.GetFileName(cachePath)}.{Guid.NewGuid():N}.tmp");
+            try
+            {
+                File.WriteAllBytes(tempPath, data);
+                File.Move(tempPath, cachePath, overwrite: true);
+            }
+            catch (IOException) when (File.Exists(cachePath))
+            {
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    try { File.Delete(tempPath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            }
+        }
 
         private static void StoreBitmap(string id, BitmapSource bitmap)
         {
