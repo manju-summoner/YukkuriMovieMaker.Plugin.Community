@@ -59,12 +59,7 @@ internal sealed class LutEffectProcessor : VideoEffectProcessorBase
         disposer.Collect(_lutEffect);
         disposer.Collect(_identityBitmap);
 
-        _lutEffect.LutSize = 2f;
-        _lutEffect.AtlasWidth = 4f;
-        _lutEffect.AtlasHeight = 2f;
-        _lutEffect.InterpolationMode = (int)LutInterpolationMode.Tetrahedral;
-        _lutEffect.SetDomain(0f, 0f, 0f, 1f, 1f, 1f);
-        _lutEffect.SetLutInput(_identityBitmap);
+        ApplyIdentity();
 
         _compositeEffect = new D2DEffects.Composite(devices.DeviceContext) { InputCount = 2 };
         disposer.Collect(_compositeEffect);
