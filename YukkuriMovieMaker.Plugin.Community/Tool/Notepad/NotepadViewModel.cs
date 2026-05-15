@@ -161,7 +161,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                         MessageBoxButton.OK,
                         MessageBoxImage.Information));
             });
-            ClearImageCacheViewModel = null;
         }
 
         public void LoadState(ToolState stateData)
