@@ -160,6 +160,7 @@
 	  <Resource Include="$(ShaderDirPath)OutputMapComposite.cso" Link="Resources\Shader\OutputMapComposite.cso" />
 	  <Resource Include="$(ShaderDirPath)ChannelRouter.cso" Link="Resources\Shader\ChannelRouter.cso" />
 	  <Resource Include="$(ShaderDirPath)Tritone.cso" Link="Resources\Shader\Tritone.cso" />
+	  <Resource Include="$(ShaderDirPath)Lut.cso" Link="Resources\Shader\Lut.cso" />
   </ItemGroup>
 
 </Project>
