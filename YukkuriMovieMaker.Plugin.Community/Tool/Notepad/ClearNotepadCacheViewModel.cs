@@ -3,9 +3,6 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
-    /// <summary>
-    /// ClearNotepadCacheView.xaml の相互作用ロジック
-    /// </summary>
     internal class ClearNotepadCacheViewModel : Bindable
     {
         public long CacheSizeInBytes { get; }
