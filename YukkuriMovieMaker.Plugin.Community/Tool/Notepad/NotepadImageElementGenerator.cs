@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using ICSharpCode.AvalonEdit.Rendering;
+using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
@@ -94,8 +95,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 {
                     Process.Start(new ProcessStartInfo(cachePath) { UseShellExecute = true });
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Log.Default.Write($"{Texts.FailedToOpenFile}: {cachePath}", ex);
                 }
             };
             border.MouseLeave += (_, _) => armed = false;
