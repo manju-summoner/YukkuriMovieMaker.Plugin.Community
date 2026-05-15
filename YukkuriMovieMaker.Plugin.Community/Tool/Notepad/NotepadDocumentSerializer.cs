@@ -11,6 +11,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public const string PlainTextExtension = ".txt";
         private const string ContentEntryName = "content.txt";
         private const string ImagesDirectoryName = "images/";
+        private const long MaxImageEntryBytes = 256L * 1024 * 1024;
 
         public static bool ContainsImages(string text) =>
             NotepadImagePlaceholder.Pattern.IsMatch(text ?? string.Empty);
@@ -110,17 +111,37 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 var destination = Path.Combine(NotepadImageCache.CacheDirectory, $"{id}{extension}");
                 if (!IsWithinCacheDirectory(destination))
                     continue;
+                if (entry.Length > MaxImageEntryBytes)
+                    continue;
 
                 if (!File.Exists(destination))
-                {
-                    using var entryStream = entry.Open();
-                    using var fileStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None);
-                    entryStream.CopyTo(fileStream);
-                }
+                    ExtractEntryAtomically(entry, destination);
                 NotepadImageCache.RegisterExistingCacheFile(destination);
             }
 
             return text ?? string.Empty;
+        }
+
+        private static void ExtractEntryAtomically(ZipArchiveEntry entry, string destination)
+        {
+            var tempPath = Path.Combine(NotepadImageCache.CacheDirectory, $"{Path.GetFileName(destination)}.{Guid.NewGuid():N}.tmp");
+            try
+            {
+                using (var entryStream = entry.Open())
+                using (var fileStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    entryStream.CopyTo(fileStream);
+                File.Move(tempPath, destination, overwrite: true);
+            }
+            catch (IOException) when (File.Exists(destination))
+            {
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    try { File.Delete(tempPath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                }
+            }
         }
 
         private static bool IsDirectImageEntry(string fullName)
