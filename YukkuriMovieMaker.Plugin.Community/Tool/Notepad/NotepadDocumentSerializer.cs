@@ -114,8 +114,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 if (entry.Length > MaxImageEntryBytes)
                     continue;
 
-                if (!File.Exists(destination))
-                    ExtractEntryAtomically(entry, destination);
+                ExtractEntryAtomically(entry, destination);
                 NotepadImageCache.RegisterExistingCacheFile(destination);
             }
 
