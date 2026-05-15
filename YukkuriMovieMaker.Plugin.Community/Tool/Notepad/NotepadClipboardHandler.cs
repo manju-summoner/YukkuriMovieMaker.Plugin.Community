@@ -142,13 +142,37 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         private static bool TryReadStream(IDataObject dataObject, string format, out byte[] bytes)
         {
             if (dataObject.GetDataPresent(format) &&
-                dataObject.GetData(format) is MemoryStream stream)
+                dataObject.GetData(format) is Stream stream)
             {
-                bytes = stream.ToArray();
+                bytes = ReadStreamToEnd(stream);
                 return bytes.Length > 0;
             }
             bytes = [];
             return false;
+        }
+
+        private static byte[] ReadStreamToEnd(Stream stream)
+        {
+            if (stream is MemoryStream memoryStream)
+                return memoryStream.ToArray();
+
+            long? originalPosition = null;
+            if (stream.CanSeek)
+            {
+                originalPosition = stream.Position;
+                stream.Position = 0;
+            }
+            try
+            {
+                using var buffer = new MemoryStream();
+                stream.CopyTo(buffer);
+                return buffer.ToArray();
+            }
+            finally
+            {
+                if (originalPosition.HasValue)
+                    stream.Position = originalPosition.Value;
+            }
         }
 
         private static byte[]? ConvertDibToPng(byte[] dibBytes)
