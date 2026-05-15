@@ -1,0 +1,117 @@
+using System.IO;
+using System.IO.Compression;
+using System.Text;
+using YukkuriMovieMaker.Commons;
+
+namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
+{
+    internal static class NotepadDocumentSerializer
+    {
+        public const string PackageExtension = ".ymmnote";
+        public const string PlainTextExtension = ".txt";
+        private const string ContentEntryName = "content.txt";
+        private const string ImagesDirectoryName = "images/";
+
+        public static bool ContainsImages(string text) =>
+            NotepadImagePlaceholder.Pattern.IsMatch(text ?? string.Empty);
+
+        public static string DetermineSaveExtension(string text) =>
+            ContainsImages(text) ? PackageExtension : PlainTextExtension;
+
+        public static void Save(string filePath, string text)
+        {
+            var extension = Path.GetExtension(filePath);
+            if (string.Equals(extension, PackageExtension, StringComparison.OrdinalIgnoreCase))
+                SavePackage(filePath, text);
+            else
+                File.WriteAllText(filePath, text, new UTF8Encoding(false));
+        }
+
+        public static (string Text, string ResolvedExtension) Load(string filePath)
+        {
+            var extension = Path.GetExtension(filePath);
+            if (string.Equals(extension, PackageExtension, StringComparison.OrdinalIgnoreCase))
+                return (LoadPackage(filePath), PackageExtension);
+
+            var bytes = File.ReadAllBytes(filePath);
+            var encoding = EncodingChecker.GetAvailableEncodings(bytes).FirstOrDefault() ?? Encoding.UTF8;
+            return (encoding.GetString(bytes), PlainTextExtension);
+        }
+
+        private static void SavePackage(string filePath, string text)
+        {
+            var tempPath = filePath + ".tmp";
+            try
+            {
+                using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (var archive = new ZipArchive(fs, ZipArchiveMode.Create, leaveOpen: false, Encoding.UTF8))
+                {
+                    var contentEntry = archive.CreateEntry(ContentEntryName, CompressionLevel.Optimal);
+                    using (var writer = new StreamWriter(contentEntry.Open(), new UTF8Encoding(false)))
+                        writer.Write(text);
+
+                    var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var id in NotepadImagePlaceholder.CollectImageIds(text))
+                    {
+                        if (!seen.Add(id))
+                            continue;
+                        if (!NotepadImageCache.TryGet(id, out var reference))
+                            continue;
+                        if (!File.Exists(reference.CachePath))
+                            continue;
+
+                        var entryName = $"{ImagesDirectoryName}{id}{reference.Extension}";
+                        var imageEntry = archive.CreateEntry(entryName, CompressionLevel.NoCompression);
+                        using var entryStream = imageEntry.Open();
+                        using var source = File.OpenRead(reference.CachePath);
+                        source.CopyTo(entryStream);
+                    }
+                }
+
+                File.Move(tempPath, filePath, overwrite: true);
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    try { File.Delete(tempPath); } catch { }
+                }
+            }
+        }
+
+        private static string LoadPackage(string filePath)
+        {
+            using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var archive = new ZipArchive(fs, ZipArchiveMode.Read, leaveOpen: false, Encoding.UTF8);
+
+            string? text = null;
+            foreach (var entry in archive.Entries)
+            {
+                if (string.Equals(entry.FullName, ContentEntryName, StringComparison.OrdinalIgnoreCase))
+                {
+                    using var reader = new StreamReader(entry.Open(), Encoding.UTF8);
+                    text = reader.ReadToEnd();
+                    continue;
+                }
+
+                if (!entry.FullName.StartsWith(ImagesDirectoryName, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                if (string.IsNullOrEmpty(entry.Name))
+                    continue;
+
+                var id = Path.GetFileNameWithoutExtension(entry.Name).ToLowerInvariant();
+                var extension = Path.GetExtension(entry.Name);
+                var destination = Path.Combine(NotepadImageCache.CacheDirectory, $"{id}{extension}");
+                if (!File.Exists(destination))
+                {
+                    using var entryStream = entry.Open();
+                    using var fileStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None);
+                    entryStream.CopyTo(fileStream);
+                }
+                NotepadImageCache.RegisterExistingCacheFile(destination);
+            }
+
+            return text ?? string.Empty;
+        }
+    }
+}

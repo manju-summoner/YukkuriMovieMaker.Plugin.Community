@@ -39,6 +39,8 @@
                 <Button Content="{DynamicResource {x:Static icons:IconKeys.ContentSave}}" Command="{Binding SaveCommand}" CommandParameter="{Binding FilePath}" ToolTip="{x:Static local:Texts.Save}"/>
                 <Button Content="{DynamicResource {x:Static icons:IconKeys.ContentSaveEdit}}" Command="{Binding SaveCommand}" ToolTip="{x:Static local:Texts.SaveAs}"/>
                 <Separator/>
+                <Button Content="{DynamicResource {x:Static icons:IconKeys.Image}}" Command="{Binding InsertImageCommand}" ToolTip="{x:Static local:Texts.InsertImage}"/>
+                <Separator/>
                 <controls:DropDownButton Content="{DynamicResource {x:Static icons:IconKeys.Cog}}" ToolTip="{x:Static local:Texts.Settings}" BorderBrush="Transparent" Padding="3">
                     <controls:DropDownButton.Style>
                         <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
@@ -64,12 +66,15 @@
                            ShowLineNumbers="{Binding ShowLineNumbers}"
                            IsReadOnly="False"
                            VerticalScrollBarVisibility="Auto"
-                           HorizontalScrollBarVisibility="Auto">
+                           HorizontalScrollBarVisibility="Auto"
+                           AllowDrop="True">
             <avalon:TextEditor.Options>
                 <avalon:TextEditorOptions EnableHyperlinks="False" />
             </avalon:TextEditor.Options>
             <i:Interaction.Behaviors>
-                <local:AvalonEditBehavior Text="{Binding Text, Mode=TwoWay}" WordWrap="{Binding WordWrap}"/>
+                <local:AvalonEditBehavior Text="{Binding Text, Mode=TwoWay}"
+                                          WordWrap="{Binding WordWrap}"
+                                          ImageScale="{Binding Zoom}"/>
             </i:Interaction.Behaviors>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="PreviewMouseWheel">
