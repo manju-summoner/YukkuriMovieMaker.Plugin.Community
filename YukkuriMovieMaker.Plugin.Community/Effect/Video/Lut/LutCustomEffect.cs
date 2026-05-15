@@ -139,14 +139,19 @@ public sealed class LutCustomEffect(IGraphicsDevicesAndContext devices)
 
         public EffectImpl() : base(ShaderResourceUri.Get("Lut")) { }
 
-        protected override void UpdateConstants()
+        public override void SetDrawInfo(ID2D1DrawInfo drawInfo)
         {
-            drawInformation?.SetPixelShaderConstantBuffer(_cb);
-            drawInformation?.SetInputDescription(1, new InputDescription
+            base.SetDrawInfo(drawInfo);
+            drawInfo?.SetInputDescription(1, new InputDescription
             {
                 Filter = Filter.MinMagMipPoint,
                 LevelOfDetailCount = 0,
             });
+        }
+
+        protected override void UpdateConstants()
+        {
+            drawInformation?.SetPixelShaderConstantBuffer(_cb);
         }
 
         public override void MapInputRectsToOutputRect(
