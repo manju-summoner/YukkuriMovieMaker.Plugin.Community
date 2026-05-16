@@ -10,13 +10,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         public ICommand ClearCommand { get; }
 
-        public ClearNotepadCacheViewModel(Action<ClearNotepadCacheViewModel> onClear)
+        public ClearNotepadCacheViewModel(Func<ClearNotepadCacheViewModel, Task> onClearAsync)
         {
             CacheSizeInBytes = NotepadImageCache.GetCacheSizeInBytes();
             CacheSizeDisplay = FormatSize(CacheSizeInBytes);
             ClearCommand = new ActionCommand(
                 _ => CacheSizeInBytes > 0,
-                _ => onClear(this));
+                async _ => await onClearAsync(this));
         }
 
         private static string FormatSize(long bytes)

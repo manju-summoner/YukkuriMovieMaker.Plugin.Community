@@ -150,9 +150,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         private void ExecuteClearImageCache()
         {
-            ClearImageCacheViewModel = new ClearNotepadCacheViewModel(_ =>
+            ClearImageCacheViewModel = new ClearNotepadCacheViewModel(async _ =>
             {
-                NotepadImageCache.ClearCache();
+                await NotepadImageCache.ClearCacheAsync();
                 ClearImageCacheViewModel = null;
                 Application.Current?.Dispatcher?.Invoke(() =>
                     MessageBox.Show(
