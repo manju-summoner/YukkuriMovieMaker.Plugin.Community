@@ -1,0 +1,170 @@
+using System;
+using System.Numerics;
+using Vortice.Direct2D1;
+using Vortice.Direct2D1.Effects;
+using Vortice.DCommon;
+using Vortice.Mathematics;
+using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Player.Video.Effects;
+
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
+{
+    internal sealed class TrimMarginEffectProcessor : VideoEffectProcessorBase
+    {
+        readonly TrimMarginEffect item;
+        readonly ID2D1DeviceContext isolatedContext;
+
+        Crop? cropEffect;
+        AffineTransform2D? translateEffect;
+        ID2D1Image? currentInput;
+
+        public TrimMarginEffectProcessor(IGraphicsDevicesAndContext devices, TrimMarginEffect item) : base(devices)
+        {
+            this.item = item;
+            isolatedContext = devices.DeviceContext.Device.CreateDeviceContext(DeviceContextOptions.None);
+            disposer.Collect(isolatedContext);
+        }
+
+        public override DrawDescription Update(EffectDescription effectDescription)
+        {
+            if (IsPassThroughEffect || cropEffect is null || translateEffect is null || currentInput is null)
+                return effectDescription.DrawDescription;
+
+            var trimRect = ComputeTrimRect(isolatedContext, currentInput);
+            if (!trimRect.HasValue)
+                return effectDescription.DrawDescription;
+
+            var (left, top, right, bottom) = trimRect.Value;
+
+            cropEffect.Rectangle = new Vector4(left, top, right, bottom);
+
+            float offsetX, offsetY;
+            if (item.Center)
+            {
+                offsetX = -(left + right) * 0.5f;
+                offsetY = -(top + bottom) * 0.5f;
+            }
+            else
+            {
+                offsetX = -left;
+                offsetY = -top;
+            }
+
+            translateEffect.TransformMatrix = new Matrix3x2(1f, 0f, 0f, 1f, offsetX, offsetY);
+
+            return effectDescription.DrawDescription;
+        }
+
+        private static (float Left, float Top, float Right, float Bottom)? ComputeTrimRect(
+            ID2D1DeviceContext context, ID2D1Image image)
+        {
+            var bounds = context.GetImageLocalBounds(image);
+            int width = (int)MathF.Ceiling(bounds.Right - bounds.Left);
+            int height = (int)MathF.Ceiling(bounds.Bottom - bounds.Top);
+
+            if (width <= 0 || height <= 0)
+                return null;
+
+            var gpuProps = new BitmapProperties1(
+                new PixelFormat(Vortice.DXGI.Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
+                context.Dpi.Width,
+                context.Dpi.Height,
+                BitmapOptions.Target);
+
+            var cpuProps = new BitmapProperties1(
+                new PixelFormat(Vortice.DXGI.Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
+                context.Dpi.Width,
+                context.Dpi.Height,
+                BitmapOptions.CpuRead | BitmapOptions.CannotDraw);
+
+            using var gpuBitmap = context.CreateBitmap(new SizeI(width, height), gpuProps);
+            using var cpuBitmap = context.CreateBitmap(new SizeI(width, height), cpuProps);
+
+            context.Target = gpuBitmap;
+            context.BeginDraw();
+            context.Clear(new Color4(0f, 0f, 0f, 0f));
+            context.DrawImage(
+                image,
+                new Vector2(-bounds.Left, -bounds.Top),
+                null,
+                InterpolationMode.NearestNeighbor,
+                CompositeMode.SourceCopy);
+            context.EndDraw();
+            context.Target = null;
+
+            cpuBitmap.CopyFromBitmap(gpuBitmap);
+
+            var map = cpuBitmap.Map(MapOptions.Read);
+            try
+            {
+                return FindOpaqueBounds(map, width, height, bounds.Left, bounds.Top);
+            }
+            finally
+            {
+                cpuBitmap.Unmap();
+            }
+        }
+
+        private static unsafe (float Left, float Top, float Right, float Bottom)? FindOpaqueBounds(
+            MappedRectangle map, int width, int height, float originX, float originY)
+        {
+            int minX = width, minY = height, maxX = -1, maxY = -1;
+            var ptr = (byte*)map.Bits;
+
+            for (int y = 0; y < height; y++)
+            {
+                var row = ptr + (long)y * map.Pitch;
+                for (int x = 0; x < width; x++)
+                {
+                    if (row[x * 4 + 3] == 0)
+                        continue;
+
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+
+            if (maxX < 0)
+                return null;
+
+            return (
+                originX + minX,
+                originY + minY,
+                originX + maxX + 1f,
+                originY + maxY + 1f);
+        }
+
+        protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
+        {
+            cropEffect = new Crop(devices.DeviceContext);
+            disposer.Collect(cropEffect);
+
+            var cropOutput = cropEffect.Output;
+            disposer.Collect(cropOutput);
+
+            translateEffect = new AffineTransform2D(devices.DeviceContext);
+            disposer.Collect(translateEffect);
+
+            translateEffect.SetInput(0, cropOutput, true);
+
+            var output = translateEffect.Output;
+            disposer.Collect(output);
+            return output;
+        }
+
+        protected override void setInput(ID2D1Image? input)
+        {
+            currentInput = input;
+            cropEffect?.SetInput(0, input, true);
+        }
+
+        protected override void ClearEffectChain()
+        {
+            currentInput = null;
+            cropEffect?.SetInput(0, null, true);
+        }
+    }
+}
