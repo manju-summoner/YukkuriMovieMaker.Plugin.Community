@@ -5,7 +5,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
     internal static partial class NotepadImagePlaceholder
     {
-        [GeneratedRegex(@"\ufffc\[image:([0-9a-fA-F]+)\]")]
+        [GeneratedRegex(@"\ufffc\[image:([0-9a-fA-F]{1,128})\]")]
         private static partial Regex PlaceholderRegex();
 
         public static Regex Pattern => PlaceholderRegex();
