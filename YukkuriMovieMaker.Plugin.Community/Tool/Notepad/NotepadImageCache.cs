@@ -66,6 +66,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public static NotepadImageReference RegisterFromBytes(byte[] data, string extension)
         {
             var normalizedExt = TryNormalizeExtension(extension, out var ext) ? ext : ".png";
+            var (width, height) = DecodeAndValidate(data);
             var id = ComputeHash(data);
             if (References.TryGetValue(id, out var existing))
                 return existing;
@@ -73,8 +74,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             var cachePath = Path.Combine(CacheDirectory, $"{id}{normalizedExt}");
             WriteCacheFileAtomically(cachePath, data);
 
-            var (w, h) = ReadDimensions(cachePath);
-            var reference = new NotepadImageReference(id, cachePath, w, h, normalizedExt);
+            var reference = new NotepadImageReference(id, cachePath, width, height, normalizedExt);
             References[id] = reference;
             return reference;
         }
@@ -209,6 +209,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 catch (UnauthorizedAccessException)
                 {
                 }
+            }
+        }
+
+        private static (int Width, int Height) DecodeAndValidate(byte[] data)
+        {
+            try
+            {
+                using var stream = new MemoryStream(data, writable: false);
+                var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.IgnoreColorProfile, BitmapCacheOption.OnLoad);
+                if (decoder.Frames.Count == 0)
+                    throw new NotSupportedException(Texts.UnsupportedImageFormat);
+                var frame = decoder.Frames[0];
+                if (frame.PixelWidth <= 0 || frame.PixelHeight <= 0)
+                    throw new NotSupportedException(Texts.UnsupportedImageFormat);
+                return (frame.PixelWidth, frame.PixelHeight);
+            }
+            catch (NotSupportedException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new NotSupportedException(Texts.UnsupportedImageFormat, ex);
             }
         }
 
