@@ -65,16 +65,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         public static NotepadImageReference RegisterFromBytes(byte[] data, string extension)
         {
-            var normalizedExt = TryNormalizeExtension(extension, out var ext) ? ext : ".png";
-            var (width, height) = DecodeAndValidate(data);
             var id = ComputeHash(data);
             if (References.TryGetValue(id, out var existing))
                 return existing;
 
-            var cachePath = Path.Combine(CacheDirectory, $"{id}{normalizedExt}");
+            var (width, height, codecExtension) = DecodeAndValidate(data);
+            var fallbackExt = TryNormalizeExtension(extension, out var normalized) ? normalized : ".png";
+            var finalExt = codecExtension ?? fallbackExt;
+
+            var cachePath = Path.Combine(CacheDirectory, $"{id}{finalExt}");
             WriteCacheFileAtomically(cachePath, data);
 
-            var reference = new NotepadImageReference(id, cachePath, width, height, normalizedExt);
+            var reference = new NotepadImageReference(id, cachePath, width, height, finalExt);
             References[id] = reference;
             return reference;
         }
@@ -185,7 +187,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             return total;
         }
 
-        public static void ClearCache()
+        public static Task ClearCacheAsync()
         {
             lock (BitmapCacheLock)
             {
@@ -195,24 +197,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             }
             References.Clear();
 
-            if (!Directory.Exists(CacheDirectory))
-                return;
-            foreach (var file in Directory.EnumerateFiles(CacheDirectory))
+            return Task.Run(() =>
             {
-                try
+                if (!Directory.Exists(CacheDirectory))
+                    return;
+                foreach (var file in Directory.EnumerateFiles(CacheDirectory))
                 {
-                    File.Delete(file);
+                    try
+                    {
+                        File.Delete(file);
+                    }
+                    catch (IOException)
+                    {
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                    }
                 }
-                catch (IOException)
-                {
-                }
-                catch (UnauthorizedAccessException)
-                {
-                }
-            }
+            });
         }
 
-        private static (int Width, int Height) DecodeAndValidate(byte[] data)
+        private static (int Width, int Height, string? Extension) DecodeAndValidate(byte[] data)
         {
             try
             {
@@ -223,7 +228,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 var frame = decoder.Frames[0];
                 if (frame.PixelWidth <= 0 || frame.PixelHeight <= 0)
                     throw new NotSupportedException(Texts.UnsupportedImageFormat);
-                return (frame.PixelWidth, frame.PixelHeight);
+                var extension = DeriveExtensionFromCodec(decoder.CodecInfo);
+                return (frame.PixelWidth, frame.PixelHeight, extension);
             }
             catch (NotSupportedException)
             {
@@ -233,6 +239,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             {
                 throw new NotSupportedException(Texts.UnsupportedImageFormat, ex);
             }
+        }
+
+        private static string? DeriveExtensionFromCodec(BitmapCodecInfo? codecInfo)
+        {
+            if (codecInfo is null)
+                return null;
+            var extensions = codecInfo.FileExtensions;
+            if (string.IsNullOrEmpty(extensions))
+                return null;
+            foreach (var candidate in extensions.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                if (TryNormalizeExtension(candidate, out var normalized))
+                    return normalized;
+            }
+            return null;
         }
 
         private static void WriteCacheFileAtomically(string cachePath, byte[] data)
