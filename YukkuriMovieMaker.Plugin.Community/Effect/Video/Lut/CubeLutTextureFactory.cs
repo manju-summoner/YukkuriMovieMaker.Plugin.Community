@@ -15,7 +15,7 @@ internal static class CubeLutTextureFactory
             var n = lut.Size3D;
             var width = n * n;
             var height = n;
-            var pixels = new byte[width * height * 4];
+            var pixels = new ushort[width * height * 4];
             var data = lut.HasShaper ? ComposeWithShaper(lut) : lut.Data3D;
 
             for (var b = 0; b < n; b++)
@@ -29,10 +29,10 @@ internal static class CubeLutTextureFactory
                         var dstY = g;
                         var dstIndex = (dstY * width + dstX) * 4;
 
-                        pixels[dstIndex + 0] = ToByte(data[srcIndex + 2]); // B
-                        pixels[dstIndex + 1] = ToByte(data[srcIndex + 1]); // G
-                        pixels[dstIndex + 2] = ToByte(data[srcIndex + 0]); // R
-                        pixels[dstIndex + 3] = 255;
+                        pixels[dstIndex + 0] = ToHalf(data[srcIndex + 0]);
+                        pixels[dstIndex + 1] = ToHalf(data[srcIndex + 1]);
+                        pixels[dstIndex + 2] = ToHalf(data[srcIndex + 2]);
+                        pixels[dstIndex + 3] = OneHalf;
                     }
                 }
             }
@@ -52,7 +52,7 @@ internal static class CubeLutTextureFactory
             const int n = 2;
             const int width = n * n;
             const int height = n;
-            var pixels = new byte[width * height * 4];
+            var pixels = new ushort[width * height * 4];
 
             for (var b = 0; b < n; b++)
             {
@@ -64,11 +64,10 @@ internal static class CubeLutTextureFactory
                         var dstY = g;
                         var dstIndex = (dstY * width + dstX) * 4;
 
-                        // B8G8R8A8_UNorm: memory order B, G, R, A
-                        pixels[dstIndex + 0] = (byte)(b == 0 ? 0 : 255); // B
-                        pixels[dstIndex + 1] = (byte)(g == 0 ? 0 : 255); // G
-                        pixels[dstIndex + 2] = (byte)(r == 0 ? 0 : 255); // R
-                        pixels[dstIndex + 3] = 255;
+                        pixels[dstIndex + 0] = r == 0 ? ZeroHalf : OneHalf;
+                        pixels[dstIndex + 1] = g == 0 ? ZeroHalf : OneHalf;
+                        pixels[dstIndex + 2] = b == 0 ? ZeroHalf : OneHalf;
+                        pixels[dstIndex + 3] = OneHalf;
                     }
                 }
             }
@@ -105,14 +104,12 @@ internal static class CubeLutTextureFactory
         return composed;
     }
 
-    private static byte ToByte(float v)
-    {
-        if (v <= 0f) return 0;
-        if (v >= 1f) return 255;
-        return (byte)MathF.Round(v * 255f);
-    }
+    private const ushort ZeroHalf = 0x0000;
+    private const ushort OneHalf = 0x3C00;
 
-    private static ID2D1Bitmap CreateD2DBitmap(ID2D1DeviceContext deviceContext, byte[] pixels, int width, int height)
+    private static ushort ToHalf(float value) => BitConverter.HalfToUInt16Bits((Half)value);
+
+    private static ID2D1Bitmap CreateD2DBitmap(ID2D1DeviceContext deviceContext, ushort[] pixels, int width, int height)
     {
         var handle = GCHandle.Alloc(pixels, GCHandleType.Pinned);
         try
@@ -120,11 +117,11 @@ internal static class CubeLutTextureFactory
             var size = new Vortice.Mathematics.SizeI(width, height);
             var props = new BitmapProperties1(
                 new Vortice.DCommon.PixelFormat(
-                    Vortice.DXGI.Format.B8G8R8A8_UNorm,
+                    Vortice.DXGI.Format.R16G16B16A16_Float,
                     Vortice.DCommon.AlphaMode.Premultiplied),
                 96f, 96f, BitmapOptions.None);
             return ((ID2D1DeviceContext1)deviceContext).CreateBitmap(
-                size, handle.AddrOfPinnedObject(), width * 4, props);
+                size, handle.AddrOfPinnedObject(), width * 8, props);
         }
         finally
         {

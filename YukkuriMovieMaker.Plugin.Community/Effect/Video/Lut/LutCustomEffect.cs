@@ -168,8 +168,14 @@ public sealed class LutCustomEffect(IGraphicsDevicesAndContext devices)
             RawRect outputRect,
             RawRect[] inputRects)
         {
-            if (inputRects.Length > 0) inputRects[0] = outputRect;
-            if (inputRects.Length > 1) inputRects[1] = new RawRect(-65536, -65536, 65536, 65536);
+            if (inputRects.Length > 0)
+                inputRects[0] = outputRect;
+            if (inputRects.Length > 1)
+            {
+                var width = (int)MathF.Max(1f, _cb.AtlasWidth);
+                var height = (int)MathF.Max(1f, _cb.AtlasHeight);
+                inputRects[1] = new RawRect(0, 0, width, height);
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
