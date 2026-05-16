@@ -41,10 +41,9 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </Button>
-            <Button Grid.Column="2" Content="{x:Static local:Texts.ClearImageCache}">
+            <Button Grid.Column="2" Content="{x:Static local:Texts.ClearImageCache}" Command="{Binding ClearCommand}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
-                        <i:InvokeCommandAction Command="{Binding ClearCommand}"/>
                         <pa:CloseWindowAction/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
