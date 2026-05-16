@@ -166,12 +166,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShapePaste
 
         static double ComputePerspectiveScale(float z)
         {
-            if (Math.Abs(z) < PerspectiveDistance)
-                return Math.Max(PerspectiveDistance / (PerspectiveDistance - z), MinimumScale);
+            if (z >= PerspectiveDistance)
+                return MinimumScale;
 
-            return Math.Sign(PerspectiveDistance - z) >= 0
-                ? double.MaxValue
-                : MinimumScale;
+            return Math.Max(PerspectiveDistance / (PerspectiveDistance - z), MinimumScale);
         }
 
         void UpdateShapeTransform(int frame, int length, int fps, float offsetX, float offsetY, float scaleX, float scaleY)
