@@ -12,6 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         private const string ContentEntryName = "content.txt";
         private const string ImagesDirectoryName = "images/";
         private const long MaxImageEntryBytes = 256L * 1024 * 1024;
+        private const long MaxContentEntryBytes = 256L * 1024 * 1024;
 
         public static bool ContainsImages(string text) =>
             NotepadImagePlaceholder.Pattern.IsMatch(text ?? string.Empty);
@@ -77,12 +78,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         private static IReadOnlyList<(string Id, NotepadImageReference Reference)> ResolveImageReferences(string text)
         {
             var resolved = new List<(string, NotepadImageReference)>();
-            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var missing = new List<string>();
             foreach (var id in NotepadImagePlaceholder.CollectImageIds(text))
             {
-                if (!seen.Add(id))
-                    continue;
                 if (!NotepadImageCache.TryGet(id, out var reference) || !File.Exists(reference.CachePath))
                 {
                     missing.Add(id);
@@ -105,6 +103,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             {
                 if (string.Equals(entry.FullName, ContentEntryName, StringComparison.OrdinalIgnoreCase))
                 {
+                    if (entry.Length > MaxContentEntryBytes)
+                        throw new InvalidOperationException(Texts.ContentEntryTooLarge);
                     using var reader = new StreamReader(entry.Open(), Encoding.UTF8);
                     text = reader.ReadToEnd();
                     continue;
