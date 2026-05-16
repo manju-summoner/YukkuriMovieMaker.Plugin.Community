@@ -41,6 +41,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         private static void SavePackage(string filePath, string text)
         {
+            var resolvedImages = ResolveImageReferences(text);
+
             var tempPath = filePath + ".tmp";
             try
             {
@@ -51,16 +53,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     using (var writer = new StreamWriter(contentEntry.Open(), new UTF8Encoding(false)))
                         writer.Write(text);
 
-                    var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    foreach (var id in NotepadImagePlaceholder.CollectImageIds(text))
+                    foreach (var (id, reference) in resolvedImages)
                     {
-                        if (!seen.Add(id))
-                            continue;
-                        if (!NotepadImageCache.TryGet(id, out var reference))
-                            continue;
-                        if (!File.Exists(reference.CachePath))
-                            continue;
-
                         var entryName = $"{ImagesDirectoryName}{id}{reference.Extension}";
                         var imageEntry = archive.CreateEntry(entryName, CompressionLevel.NoCompression);
                         using var entryStream = imageEntry.Open();
@@ -78,6 +72,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     try { File.Delete(tempPath); } catch { }
                 }
             }
+        }
+
+        private static IReadOnlyList<(string Id, NotepadImageReference Reference)> ResolveImageReferences(string text)
+        {
+            var resolved = new List<(string, NotepadImageReference)>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var missing = new List<string>();
+            foreach (var id in NotepadImagePlaceholder.CollectImageIds(text))
+            {
+                if (!seen.Add(id))
+                    continue;
+                if (!NotepadImageCache.TryGet(id, out var reference) || !File.Exists(reference.CachePath))
+                {
+                    missing.Add(id);
+                    continue;
+                }
+                resolved.Add((id, reference));
+            }
+            if (missing.Count > 0)
+                throw new InvalidOperationException($"{Texts.MissingImageData} ({string.Join(", ", missing)})");
+            return resolved;
         }
 
         private static string LoadPackage(string filePath)
