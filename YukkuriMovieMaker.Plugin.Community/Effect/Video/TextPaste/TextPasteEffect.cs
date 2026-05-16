@@ -11,7 +11,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TextPaste
 {
-    [VideoEffect(nameof(Texts.TextPasteEffectDefaultName), [VideoEffectCategories.Animation], ["Paste Text", "テキスト貼り付け", "シャッフル"], isAviUtlSupported: false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.TextPasteEffectDefaultName), [VideoEffectCategories.Decoration], ["Paste Text", "テキスト貼り付け", "シャッフル"], isAviUtlSupported: false, ResourceType = typeof(Texts))]
     internal class TextPasteEffect : VideoEffectBase
     {
         public override string Label => Texts.TextPasteEffectDefaultName;
