@@ -39,19 +39,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
 
             cropEffect.Rectangle = new Vector4(left, top, right, bottom);
 
-            float offsetX, offsetY;
-            if (item.Center)
-            {
-                offsetX = -(left + right) * 0.5f;
-                offsetY = -(top + bottom) * 0.5f;
-            }
-            else
-            {
-                offsetX = -left;
-                offsetY = -top;
-            }
-
-            translateEffect.TransformMatrix = new Matrix3x2(1f, 0f, 0f, 1f, offsetX, offsetY);
+            translateEffect.TransformMatrix = item.Center
+                ? new Matrix3x2(1f, 0f, 0f, 1f, -(left + right) * 0.5f, -(top + bottom) * 0.5f)
+                : Matrix3x2.Identity;
 
             return effectDescription.DrawDescription;
         }
