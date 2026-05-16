@@ -117,9 +117,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TextPaste
             var zoom = (float)(item.Zoom.GetValue(frame, length, fps) / 100.0);
             var rotationRad = (float)(item.Rotation.GetValue(frame, length, fps) * Math.PI / 180.0);
 
-            var perspectiveScale = MathF.Abs(z) < PerspectiveDistance
-                ? PerspectiveDistance / (PerspectiveDistance - z)
-                : MathF.Sign(PerspectiveDistance - z) * float.MaxValue;
+            var denominator = PerspectiveDistance - z;
+            var perspectiveScale = MathF.Abs(denominator) > MinimumScale
+                ? PerspectiveDistance / denominator
+                : MathF.Sign(denominator) * float.MaxValue;
 
             var finalZoom = MathF.Max(zoom * perspectiveScale, MinimumScale);
 
