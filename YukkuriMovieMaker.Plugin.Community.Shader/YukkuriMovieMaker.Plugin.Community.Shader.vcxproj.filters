@@ -120,6 +120,9 @@
 	<FxCompile Include="PerspectiveShadow.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+	<FxCompile Include="Lut.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Hash.hlsli">
