@@ -13,7 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
         const int HalfSize = FrameSize / 2;
         const int CepstralLifterCutoff = 30;
         const float MinLogMagnitude = 1e-10f;
-        const float OlaNormalization = 2f / 3f;
+        const float SynthesisScale = 2f;
         const float TwoPi = (float)(Math.PI * 2.0);
         const float ShelfFrequency = 4500f;
         const float ShelfSlope = 0.9f;
@@ -189,7 +189,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
                 {
                     int dstIndex = startIndex + k;
                     if (dstIndex >= FrameSize) dstIndex -= FrameSize;
-                    pOut[dstIndex] += pSpectrum[k].X * pWindow[k] * OlaNormalization;
+                    pOut[dstIndex] += pSpectrum[k].X * pWindow[k] * SynthesisScale;
                 }
             }
         }
