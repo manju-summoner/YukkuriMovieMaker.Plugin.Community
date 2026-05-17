@@ -12,8 +12,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
 {
     internal sealed class TrimMarginEffectProcessor : VideoEffectProcessorBase
     {
+        readonly IGraphicsDevicesAndContext devices;
         readonly TrimMarginEffect item;
-        readonly ID2D1DeviceContext isolatedContext;
 
         Crop? cropEffect;
         AffineTransform2D? translateEffect;
@@ -26,9 +26,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
 
         public TrimMarginEffectProcessor(IGraphicsDevicesAndContext devices, TrimMarginEffect item) : base(devices)
         {
+            this.devices = devices;
             this.item = item;
-            isolatedContext = devices.DeviceContext.Device.CreateDeviceContext(DeviceContextOptions.None);
-            disposer.Collect(isolatedContext);
         }
 
         public override DrawDescription Update(EffectDescription effectDescription)
@@ -36,7 +35,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
             if (IsPassThroughEffect || cropEffect is null || translateEffect is null || currentInput is null)
                 return effectDescription.DrawDescription;
 
-            var bounds = isolatedContext.GetImageLocalBounds(currentInput);
+            var dc = devices.DeviceContext;
+            var bounds = dc.GetImageLocalBounds(currentInput);
 
             (float Left, float Top, float Right, float Bottom)? trimRect;
             if (hasCache && ReferenceEquals(cachedInput, currentInput) && cachedBounds.Equals(bounds))
@@ -45,7 +45,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
             }
             else
             {
-                trimRect = ComputeTrimRect(isolatedContext, currentInput, bounds);
+                trimRect = ComputeTrimRect(dc, currentInput, bounds);
                 cachedInput = currentInput;
                 cachedBounds = bounds;
                 cachedTrimRect = trimRect;
