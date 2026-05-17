@@ -1,6 +1,5 @@
 using System.IO;
 using Windows.Media.SpeechSynthesis;
-using Windows.Storage.Streams;
 using YukkuriMovieMaker.Plugin.Voice;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.WinRTTTS
@@ -47,7 +46,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.WinRTTTS
                 synthesizer.Voice = voiceInfo;
                 synthesizer.Options.SpeakingRate = param.SpeakingRate;
                 synthesizer.Options.AudioVolume = param.Volume;
-                synthesizer.Options.AudioPitch = param.Pitch;
+
+                if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 16299))
+                {
+                    synthesizer.Options.AudioPitch = param.Pitch;
+                }
+
+                if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17134))
+                {
+                    synthesizer.Options.AppendedSilence = param.AppendedSilence;
+                    synthesizer.Options.PunctuationSilence = param.PunctuationSilence;
+                }
 
                 using var stream = await synthesizer.SynthesizeTextToStreamAsync(text);
                 using var fileStream = File.Create(filePath);
