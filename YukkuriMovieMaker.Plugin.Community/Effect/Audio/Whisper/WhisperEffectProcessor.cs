@@ -12,6 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
         const int FftOrder = 10;
         const int HalfSize = FrameSize / 2;
         const int CepstralLifterCutoff = 30;
+        const int MaxTailSamples = FrameSize - HopSize;
         const float MinLogMagnitude = 1e-10f;
         const float SynthesisScale = 2f;
         const float TwoPi = (float)(Math.PI * 2.0);
@@ -36,6 +37,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
         float lastHighPassHz = -1f;
         float lastBrightnessDb = float.NaN;
         float[] dryBuffer = [];
+        int tailRemaining;
 
         public WhisperEffectProcessor(WhisperEffect effect)
         {
@@ -64,13 +66,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
             count -= count % 2;
             if (dryBuffer.Length < count) dryBuffer = new float[count];
 
-            int read = Input.Read(dryBuffer, 0, count);
-            read -= read % 2;
-            if (read <= 0) return 0;
+            int inputRead = Input.Read(dryBuffer, 0, count);
+            inputRead -= inputRead % 2;
+
+            int pairs;
+            bool isTail;
+
+            if (inputRead > 0)
+            {
+                pairs = inputRead / 2;
+                isTail = false;
+            }
+            else if (tailRemaining > 0)
+            {
+                int tailPairs = Math.Min(tailRemaining, count / 2);
+                Array.Clear(dryBuffer, 0, tailPairs * 2);
+                pairs = tailPairs;
+                isTail = true;
+            }
+            else
+            {
+                return 0;
+            }
 
             int hz = Hz;
             long totalPairs = Duration / 2;
-            int pairs = read / 2;
             long startPair = currentPosition / 2;
             long endPair = startPair + Math.Max(0, pairs - 1);
 
@@ -109,8 +129,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
                 }
             }
 
-            currentPosition += read;
-            return read;
+            int written = pairs * 2;
+            currentPosition += written;
+            if (isTail) tailRemaining -= pairs;
+            else tailRemaining = MaxTailSamples;
+            return written;
         }
 
         float ProcessChannelSample(ChannelState ch, float sample)
@@ -237,6 +260,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
             brightnessFilter.Reset();
             lastHighPassHz = -1f;
             lastBrightnessDb = float.NaN;
+            tailRemaining = 0;
         }
     }
 }
