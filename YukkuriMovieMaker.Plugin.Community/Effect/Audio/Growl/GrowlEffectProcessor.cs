@@ -12,10 +12,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Growl
         const double DcBlockerCutoffHz = 20.0;
         const double ZcLowpassCutoffHz = 500.0;
         const double ZcLowpassQ = 0.7071067811865476;
-        const double ShimmerCutoffHz = 5.0;
         const float ShimmerDepthScale = 0.3f;
         const float AsymmetryBias = 0.6f;
         const float ToneUpdateThreshold = 0.05f;
+        const float RoughnessFreqUpdateThreshold = 0.5f;
         const float SubharmonicMix = 0.5f;
         const double MinFundamentalHz = 60.0;
         const double MaxFundamentalHz = 800.0;
@@ -42,6 +42,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Growl
         readonly ChannelState rightChannel = new() { RngState = 0x6C62272Eu };
         readonly StereoBiQuadFilter toneFilter = new();
         float lastToneDb = float.NaN;
+        float lastRoughnessFreq = float.NaN;
         bool filtersInitialized;
         float dcBlockerCoef;
         float dcInLeft, dcOutLeft, dcInRight, dcOutRight;
@@ -78,7 +79,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Growl
             float mixEnd = (float)(effect.Mix.GetValue(endPair, totalPairs, hz) * 0.01);
 
             float averageToneDb = (toneDbStart + toneDbEnd) * 0.5f;
-            EnsureFilters(hz, averageToneDb);
+            float roughnessFreqStart = (float)effect.RoughnessFreq.GetValue(startPair, totalPairs, hz);
+            float roughnessFreqEnd = (float)effect.RoughnessFreq.GetValue(endPair, totalPairs, hz);
+            float averageRoughnessFreq = (roughnessFreqStart + roughnessFreqEnd) * 0.5f;
+
+            EnsureFilters(hz);
+            UpdateShimmerCoefs(hz, averageRoughnessFreq);
+            UpdateToneFilter(hz, averageToneDb);
 
             float invDenominator = pairs > 1 ? 1f / (pairs - 1) : 0f;
             float coef = dcBlockerCoef;
@@ -181,41 +188,47 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Growl
             return sample + modulatedSub * roughness * SubharmonicMix * ch.Envelope;
         }
 
-        void EnsureFilters(int hz, float toneDb)
+        void EnsureFilters(int hz)
         {
-            if (!filtersInitialized)
-            {
-                filtersInitialized = true;
+            if (filtersInitialized) return;
+            filtersInitialized = true;
 
-                dcBlockerCoef = (float)Math.Exp(-TwoPi * DcBlockerCutoffHz / hz);
+            dcBlockerCoef = (float)Math.Exp(-TwoPi * DcBlockerCutoffHz / hz);
 
-                double w0 = TwoPi * ZcLowpassCutoffHz / hz;
-                double cosw0 = Math.Cos(w0);
-                double sinw0 = Math.Sin(w0);
-                double alpha = sinw0 / (2.0 * ZcLowpassQ);
-                double inv_a0 = 1.0 / (1.0 + alpha);
-                zcB0 = (1.0 - cosw0) * 0.5 * inv_a0;
-                zcB1 = (1.0 - cosw0) * inv_a0;
-                zcB2 = zcB0;
-                zcA1 = -2.0 * cosw0 * inv_a0;
-                zcA2 = (1.0 - alpha) * inv_a0;
+            double w0 = TwoPi * ZcLowpassCutoffHz / hz;
+            double cosw0 = Math.Cos(w0);
+            double sinw0 = Math.Sin(w0);
+            double alpha = sinw0 / (2.0 * ZcLowpassQ);
+            double inv_a0 = 1.0 / (1.0 + alpha);
+            zcB0 = (1.0 - cosw0) * 0.5 * inv_a0;
+            zcB1 = (1.0 - cosw0) * inv_a0;
+            zcB2 = zcB0;
+            zcA1 = -2.0 * cosw0 * inv_a0;
+            zcA2 = (1.0 - alpha) * inv_a0;
 
-                double sAlpha = Math.Exp(-TwoPi * ShimmerCutoffHz / hz);
-                shimmerAlpha = (float)sAlpha;
-                shimmerNorm = (float)Math.Sqrt(3.0 * (1.0 + sAlpha) / (1.0 - sAlpha));
+            envAttackCoef = (float)Math.Exp(-1.0 / (EnvelopeAttackMs * hz / 1000.0));
+            envReleaseCoef = (float)Math.Exp(-1.0 / (EnvelopeReleaseMs * hz / 1000.0));
 
-                envAttackCoef = (float)Math.Exp(-1.0 / (EnvelopeAttackMs * hz / 1000.0));
-                envReleaseCoef = (float)Math.Exp(-1.0 / (EnvelopeReleaseMs * hz / 1000.0));
+            zcMinPeriod = (int)(hz / MaxFundamentalHz);
+            zcMaxPeriod = (int)(hz / MinFundamentalHz);
+        }
 
-                zcMinPeriod = (int)(hz / MaxFundamentalHz);
-                zcMaxPeriod = (int)(hz / MinFundamentalHz);
-            }
+        void UpdateShimmerCoefs(int hz, float roughnessFreq)
+        {
+            if (!float.IsNaN(lastRoughnessFreq) && MathF.Abs(roughnessFreq - lastRoughnessFreq) <= RoughnessFreqUpdateThreshold) return;
 
-            if (float.IsNaN(lastToneDb) || MathF.Abs(toneDb - lastToneDb) > ToneUpdateThreshold)
-            {
-                toneFilter.SetHighShelf(hz, ToneShelfFrequency, ToneShelfSlope, toneDb);
-                lastToneDb = toneDb;
-            }
+            double sAlpha = Math.Exp(-TwoPi * roughnessFreq / hz);
+            shimmerAlpha = (float)sAlpha;
+            shimmerNorm = (float)Math.Sqrt(3.0 * (1.0 + sAlpha) / (1.0 - sAlpha));
+            lastRoughnessFreq = roughnessFreq;
+        }
+
+        void UpdateToneFilter(int hz, float toneDb)
+        {
+            if (!float.IsNaN(lastToneDb) && MathF.Abs(toneDb - lastToneDb) <= ToneUpdateThreshold) return;
+
+            toneFilter.SetHighShelf(hz, ToneShelfFrequency, ToneShelfSlope, toneDb);
+            lastToneDb = toneDb;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -239,6 +252,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Growl
             zcMaxPeriod = 0;
             toneFilter.Reset();
             lastToneDb = float.NaN;
+            lastRoughnessFreq = float.NaN;
         }
 
         static void ResetChannel(ChannelState ch, uint rngState)
