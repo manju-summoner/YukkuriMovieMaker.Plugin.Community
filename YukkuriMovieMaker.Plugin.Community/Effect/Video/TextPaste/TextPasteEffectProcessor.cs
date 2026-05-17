@@ -22,8 +22,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TextPaste
         readonly ColorMatrix textOpacity;
         readonly ID2D1Image textTransformOutput;
         readonly Composite composite;
-        readonly TextItem dummyTextItem;
-        readonly ISource textSource;
+        readonly TextItem renderingTextItem;
+        readonly ISource renderingTextSource;
         readonly ID2D1Image emptyImage;
 
         ID2D1CommandList? textCommandList;
@@ -51,9 +51,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TextPaste
             Output = composite.Output;
             disposer.Collect(Output);
 
-            dummyTextItem = new TextItem();
-            textSource = dummyTextItem.CreateVideoSource(this.devices, null!);
-            disposer.Collect(textSource);
+            renderingTextItem = new TextItem();
+            renderingTextSource = renderingTextItem.CreateVideoSource(this.devices, null!);
+            disposer.Collect(renderingTextSource);
 
             var emptyFlood = new Flood(devices.DeviceContext);
             emptyFlood.Color = new Vortice.Mathematics.Color4(0f, 0f, 0f, 0f);
@@ -162,20 +162,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TextPaste
 
         void BuildTextCommandList(EffectDescription effectDescription, int frame, int length, int fps)
         {
-            dummyTextItem.Text = item.Text;
-            dummyTextItem.Decorations = item.Decorations;
-            dummyTextItem.Font = item.Font;
-            dummyTextItem.FontColor = item.Color;
-            dummyTextItem.BasePoint = item.BasePoint;
+            renderingTextItem.Text = item.Text;
+            renderingTextItem.Decorations = item.Decorations;
+            renderingTextItem.Font = item.Font;
+            renderingTextItem.FontColor = item.Color;
+            renderingTextItem.BasePoint = item.BasePoint;
 
-            if (dummyTextItem.FontSize.Values.Count > 0)
-                dummyTextItem.FontSize.Values[0].Value = item.FontSize.GetValue(frame, length, fps);
+            if (renderingTextItem.FontSize.Values.Count > 0)
+                renderingTextItem.FontSize.Values[0].Value = item.FontSize.GetValue(frame, length, fps);
 
-            if (dummyTextItem.LetterSpacing2.Values.Count > 0)
-                dummyTextItem.LetterSpacing2.Values[0].Value = item.CharSpacing.GetValue(frame, length, fps);
+            if (renderingTextItem.LetterSpacing2.Values.Count > 0)
+                renderingTextItem.LetterSpacing2.Values[0].Value = item.CharSpacing.GetValue(frame, length, fps);
 
-            if (dummyTextItem.LineHeight2.Values.Count > 0)
-                dummyTextItem.LineHeight2.Values[0].Value = item.LineHeight.GetValue(frame, length, fps);
+            if (renderingTextItem.LineHeight2.Values.Count > 0)
+                renderingTextItem.LineHeight2.Values[0].Value = item.LineHeight.GetValue(frame, length, fps);
 
             var timelineDesc = new TimelineItemSourceDescription(
                 new TimelineSourceDescription(
@@ -190,7 +190,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TextPaste
                 length,
                 0);
 
-            textSource.Update(timelineDesc);
+            renderingTextSource.Update(timelineDesc);
 
             var dc = devices.DeviceContext;
 
@@ -208,7 +208,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TextPaste
             dc.BeginDraw();
             dc.Clear(null);
 
-            foreach (var output in textSource.Outputs)
+            foreach (var output in renderingTextSource.Outputs)
             {
                 dc.Transform = Matrix3x2.CreateTranslation(output.DrawingOffset.X, output.DrawingOffset.Y);
                 if (output.DrawingEffect is not null)
