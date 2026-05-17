@@ -14,7 +14,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Growl
 
         [Display(GroupName = nameof(Texts.GrowlEffect), Name = nameof(Texts.DriveDbName), Description = nameof(Texts.DriveDbDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "dB", 0, 36)]
-        public Animation DriveDb { get; } = new Animation(18, 0, 60);
+        public Animation DriveDb { get; } = new Animation(10, 0, 60);
 
         [Display(GroupName = nameof(Texts.GrowlEffect), Name = nameof(Texts.AsymmetryName), Description = nameof(Texts.AsymmetryDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F2", "", -1, 1)]
