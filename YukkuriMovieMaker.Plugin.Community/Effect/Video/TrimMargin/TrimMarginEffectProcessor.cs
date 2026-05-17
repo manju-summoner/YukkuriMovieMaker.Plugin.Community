@@ -16,7 +16,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
         readonly TrimMarginEffect item;
 
         Crop? cropEffect;
-        AffineTransform2D? translateEffect;
+        AffineTransform2D? transformEffect;
         ID2D1Image? currentInput;
 
         bool hasCache;
@@ -32,7 +32,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
-            if (IsPassThroughEffect || cropEffect is null || translateEffect is null || currentInput is null)
+            if (IsPassThroughEffect || cropEffect is null || transformEffect is null || currentInput is null)
                 return effectDescription.DrawDescription;
 
             var dc = devices.DeviceContext;
@@ -59,7 +59,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
 
             cropEffect.Rectangle = new Vector4(left, top, right, bottom);
 
-            translateEffect.TransformMatrix = item.Center
+            transformEffect.TransformMatrix = item.Center
                 ? new Matrix3x2(1f, 0f, 0f, 1f, -(left + right) * 0.5f, -(top + bottom) * 0.5f)
                 : Matrix3x2.Identity;
 
@@ -151,13 +151,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
             cropEffect = new Crop(devices.DeviceContext);
             disposer.Collect(cropEffect);
 
-            translateEffect = new AffineTransform2D(devices.DeviceContext);
-            disposer.Collect(translateEffect);
+            transformEffect = new AffineTransform2D(devices.DeviceContext);
+            disposer.Collect(transformEffect);
 
             using(var cropOutput = cropEffect.Output)
-                translateEffect.SetInput(0, cropOutput, true);
+                transformEffect.SetInput(0, cropOutput, true);
 
-            var output = translateEffect.Output;
+            var output = transformEffect.Output;
             disposer.Collect(output);
             return output;
         }
@@ -172,7 +172,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
         {
             currentInput = null;
             cropEffect?.SetInput(0, null, true);
-            translateEffect?.SetInput(0, null, true);
+            transformEffect?.SetInput(0, null, true);
             hasCache = false;
             cachedInput = null;
             cachedTrimRect = null;
