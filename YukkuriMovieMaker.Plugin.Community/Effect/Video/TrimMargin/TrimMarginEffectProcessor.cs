@@ -151,12 +151,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
             cropEffect = new Crop(devices.DeviceContext);
             disposer.Collect(cropEffect);
 
-            var cropOutput = cropEffect.Output;
-            disposer.Collect(cropOutput);
-
             translateEffect = new AffineTransform2D(devices.DeviceContext);
             disposer.Collect(translateEffect);
 
+            using(var cropOutput = cropEffect.Output)
             translateEffect.SetInput(0, cropOutput, true);
 
             var output = translateEffect.Output;
