@@ -17,7 +17,8 @@
     <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Commons\YukkuriMovieMaker.Plugin.csproj" />
     <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Controls\YukkuriMovieMaker.Controls.csproj" />
   </ItemGroup>
-	  
+
+  <!-- YMM4のdllや、カスタムdllを参照。サードパーティー開発者向け。-->
   <ItemGroup Condition="'$(YMM4Proj)' == ''">
 	  <Reference Include="YukkuriMovieMaker.Controls">
 		  <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Controls.dll</HintPath>
@@ -46,11 +47,9 @@
 	  <Reference Include="System.Drawing.Common">
 		  <HintPath>$(YMM4DirPath)System.Drawing.Common.dll</HintPath>
 	  </Reference>
-	  <Reference Include="ICSharpCode.AvalonEdit">
-		  <HintPath>$(YMM4DirPath)ICSharpCode.AvalonEdit.dll</HintPath>
-	  </Reference>
   </ItemGroup>
 
+  <!-- nugetパッケージで公開されているライブラリはPackageReferenceで参照する。-->
   <ItemGroup>
 	<PackageReference Include="LlmTornado" Version="3.8.56" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
@@ -70,6 +69,7 @@
 	<PackageReference Include="System.Management" Version="10.0.7" />
 	<PackageReference Include="ComputeSharp" Version="3.2.0" />
 	<PackageReference Include="MeltySynth" Version="2.4.1" />
+	<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
   </ItemGroup>
 
   <!--ビルド後、YMM4フォルダに関連ファイルをコピーする-->
