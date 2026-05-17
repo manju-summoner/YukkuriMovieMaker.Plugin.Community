@@ -155,7 +155,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
             disposer.Collect(translateEffect);
 
             using(var cropOutput = cropEffect.Output)
-            translateEffect.SetInput(0, cropOutput, true);
+                translateEffect.SetInput(0, cropOutput, true);
 
             var output = translateEffect.Output;
             disposer.Collect(output);
@@ -172,6 +172,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
         {
             currentInput = null;
             cropEffect?.SetInput(0, null, true);
+            translateEffect?.SetInput(0, null, true);
             hasCache = false;
             cachedInput = null;
             cachedTrimRect = null;
