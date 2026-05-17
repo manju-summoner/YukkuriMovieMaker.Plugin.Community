@@ -19,6 +19,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
         AffineTransform2D? translateEffect;
         ID2D1Image? currentInput;
 
+        bool hasCache;
+        ID2D1Image? cachedInput;
+        Rect cachedBounds;
+        (float Left, float Top, float Right, float Bottom)? cachedTrimRect;
+
         public TrimMarginEffectProcessor(IGraphicsDevicesAndContext devices, TrimMarginEffect item) : base(devices)
         {
             this.item = item;
@@ -31,7 +36,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
             if (IsPassThroughEffect || cropEffect is null || translateEffect is null || currentInput is null)
                 return effectDescription.DrawDescription;
 
-            var trimRect = ComputeTrimRect(isolatedContext, currentInput);
+            var bounds = isolatedContext.GetImageLocalBounds(currentInput);
+
+            (float Left, float Top, float Right, float Bottom)? trimRect;
+            if (hasCache && ReferenceEquals(cachedInput, currentInput) && cachedBounds.Equals(bounds))
+            {
+                trimRect = cachedTrimRect;
+            }
+            else
+            {
+                trimRect = ComputeTrimRect(isolatedContext, currentInput, bounds);
+                cachedInput = currentInput;
+                cachedBounds = bounds;
+                cachedTrimRect = trimRect;
+                hasCache = true;
+            }
+
             if (!trimRect.HasValue)
                 return effectDescription.DrawDescription;
 
@@ -47,9 +67,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
         }
 
         private static (float Left, float Top, float Right, float Bottom)? ComputeTrimRect(
-            ID2D1DeviceContext context, ID2D1Image image)
+            ID2D1DeviceContext context, ID2D1Image image, Rect bounds)
         {
-            var bounds = context.GetImageLocalBounds(image);
             int width = (int)MathF.Ceiling(bounds.Right - bounds.Left);
             int height = (int)MathF.Ceiling(bounds.Bottom - bounds.Top);
 
@@ -155,6 +174,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
         {
             currentInput = null;
             cropEffect?.SetInput(0, null, true);
+            hasCache = false;
+            cachedInput = null;
+            cachedTrimRect = null;
         }
     }
 }
