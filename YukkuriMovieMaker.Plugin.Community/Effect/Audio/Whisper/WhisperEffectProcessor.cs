@@ -12,7 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
         const int FftOrder = 10;
         const int HalfSize = FrameSize / 2;
         const int CepstralLifterCutoff = 30;
-        const int MaxTailSamples = FrameSize - HopSize;
+        const int TailFlushSamples = FrameSize - HopSize;
         const float MinLogMagnitude = 1e-10f;
         const float SynthesisScale = 2f;
         const float TwoPi = (float)(Math.PI * 2.0);
@@ -64,33 +64,41 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
             if (Input is null) return 0;
 
             count -= count % 2;
+            if (count <= 0) return 0;
             if (dryBuffer.Length < count) dryBuffer = new float[count];
 
             int inputRead = Input.Read(dryBuffer, 0, count);
             inputRead -= inputRead % 2;
+            if (inputRead < 0) inputRead = 0;
 
-            int pairs;
-            bool isTail;
-
-            if (inputRead > 0)
+            int producedSamples;
+            if (inputRead >= count)
             {
-                pairs = inputRead / 2;
-                isTail = false;
-            }
-            else if (tailRemaining > 0)
-            {
-                int tailPairs = Math.Min(tailRemaining, count / 2);
-                Array.Clear(dryBuffer, 0, tailPairs * 2);
-                pairs = tailPairs;
-                isTail = true;
+                producedSamples = count;
+                tailRemaining = TailFlushSamples;
             }
             else
             {
-                return 0;
+                int remainingPairs = tailRemaining;
+                if (remainingPairs <= 0)
+                {
+                    if (inputRead <= 0) return 0;
+                    producedSamples = inputRead;
+                }
+                else
+                {
+                    int availableTailSamples = remainingPairs * 2;
+                    int padSamples = count - inputRead;
+                    if (padSamples > availableTailSamples) padSamples = availableTailSamples;
+                    Array.Clear(dryBuffer, inputRead, padSamples);
+                    producedSamples = inputRead + padSamples;
+                    tailRemaining = remainingPairs - padSamples / 2;
+                }
             }
 
             int hz = Hz;
             long totalPairs = Duration / 2;
+            int pairs = producedSamples / 2;
             long startPair = currentPosition / 2;
             long endPair = startPair + Math.Max(0, pairs - 1);
 
@@ -129,35 +137,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
                 }
             }
 
-            int written = pairs * 2;
-            currentPosition += written;
-            if (isTail) tailRemaining -= pairs;
-            else tailRemaining = MaxTailSamples;
-            return written;
+            currentPosition += producedSamples;
+            return producedSamples;
         }
 
         float ProcessChannelSample(ChannelState ch, float sample)
         {
             ch.InRing[ch.Pos] = sample;
-            float output = ch.OutRing[ch.Pos];
-            ch.OutRing[ch.Pos] = 0f;
-
             ch.HopCounter++;
             if (ch.HopCounter >= HopSize)
             {
                 ch.HopCounter = 0;
                 ProcessFrame(ch);
             }
-
-            ch.Pos++;
-            if (ch.Pos >= FrameSize) ch.Pos = 0;
+            int nextPos = ch.Pos + 1;
+            if (nextPos >= FrameSize) nextPos = 0;
+            float output = ch.OutRing[nextPos];
+            ch.OutRing[nextPos] = 0f;
+            ch.Pos = nextPos;
             return output;
         }
 
         unsafe void ProcessFrame(ChannelState ch)
         {
-            int startIndex = ch.Pos - FrameSize + 1;
-            if (startIndex < 0) startIndex += FrameSize;
+            int startIndex = ch.Pos + 1;
+            if (startIndex >= FrameSize) startIndex = 0;
 
             fixed (float* pIn = ch.InRing, pOut = ch.OutRing, pWindow = window)
             fixed (Complex* pSpectrum = ch.Spectrum, pCepstrum = ch.Cepstrum)

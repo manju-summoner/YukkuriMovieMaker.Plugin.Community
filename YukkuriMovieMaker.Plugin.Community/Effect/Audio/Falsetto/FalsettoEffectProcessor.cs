@@ -40,7 +40,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Falsetto
         float[] dryBuffer = [];
         int cachedLifterCount = -1;
         int cachedSampleRate;
-        int tailRemaining = TailFlushSamples;
+        int tailRemaining;
         readonly float[] lifterWindow = new float[HalfSize + 1];
 
         public FalsettoEffectProcessor(FalsettoEffect effect)
@@ -607,7 +607,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Falsetto
             breathHpPrevInputLeft = 0f;
             breathHpPrevInputRight = 0f;
             rngState = RngInitialState;
-            tailRemaining = TailFlushSamples;
+            tailRemaining = 0;
         }
     }
 }
