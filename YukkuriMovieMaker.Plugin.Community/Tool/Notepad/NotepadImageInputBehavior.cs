@@ -18,6 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
             CommandManager.AddPreviewCanExecuteHandler(AssociatedObject.TextArea, OnPastePreviewCanExecute);
             CommandManager.AddPreviewExecutedHandler(AssociatedObject.TextArea, OnPastePreviewExecuted);
+            DataObject.AddCopyingHandler(AssociatedObject, OnDataObjectCopying);
 
             AttachViewModel(AssociatedObject.DataContext as NotepadViewModel);
         }
@@ -30,9 +31,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
             CommandManager.RemovePreviewCanExecuteHandler(AssociatedObject.TextArea, OnPastePreviewCanExecute);
             CommandManager.RemovePreviewExecutedHandler(AssociatedObject.TextArea, OnPastePreviewExecuted);
+            DataObject.RemoveCopyingHandler(AssociatedObject, OnDataObjectCopying);
 
             AttachViewModel(null);
             base.OnDetaching();
+        }
+
+        private void OnDataObjectCopying(object sender, DataObjectCopyingEventArgs e)
+        {
+            if (_attachedViewModel is null)
+                return;
+            if (e.DataObject.GetData(DataFormats.UnicodeText) is not string text)
+                return;
+            NotepadClipboardHandler.AttachImageEnvelope(e.DataObject, text, _attachedViewModel.ImageStore);
         }
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)

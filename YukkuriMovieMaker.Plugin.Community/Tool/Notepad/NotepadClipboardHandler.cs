@@ -72,6 +72,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         {
             try
             {
+                // envelopeで画像をImageStoreへ登録。
+                // 成功した場合はfalseを返し、AvalonEdit側の貼り付け処理でプレースホルダー文字列を含む本文テキストを扱う。
+                if (TryImportEnvelope(dataObject, store))
+                    return false;
+
                 if (TryRegisterFromImageFiles(dataObject, store, out var references))
                 {
                     foreach (var reference in references)
@@ -90,6 +95,54 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             {
             }
             return false;
+        }
+
+        public static void AttachImageEnvelope(IDataObject dataObject, string copiedText, NotepadImageStore store)
+        {
+            if (string.IsNullOrEmpty(copiedText))
+                return;
+            var seen = new HashSet<string>();
+            var references = new List<NotepadImageReference>();
+            foreach (var id in NotepadImagePlaceholder.CollectImageIds(copiedText))
+            {
+                if (!seen.Add(id))
+                    continue;
+                if (store.TryGet(id, out var reference))
+                    references.Add(reference);
+            }
+            if (references.Count == 0)
+                return;
+            try
+            {
+                var payload = NotepadClipboardEnvelope.Serialize(references);
+                dataObject.SetData(NotepadClipboardEnvelope.DataFormat, payload);
+            }
+            catch
+            {
+            }
+        }
+
+        private static bool TryImportEnvelope(IDataObject dataObject, NotepadImageStore store)
+        {
+            if (!dataObject.GetDataPresent(NotepadClipboardEnvelope.DataFormat))
+                return false;
+            byte[]? bytes = dataObject.GetData(NotepadClipboardEnvelope.DataFormat) switch
+            {
+                byte[] b => b,
+                MemoryStream ms => ms.ToArray(),
+                _ => null,
+            };
+            if (bytes is null)
+                return false;
+            if (!NotepadClipboardEnvelope.TryDeserialize(bytes, out var images))
+                return false;
+            foreach (var (id, data, extension) in images)
+            {
+                try { store.RegisterWithId(id, data, extension); }
+                catch (ArgumentException) { }
+                catch (NotSupportedException) { }
+            }
+            return true;
         }
 
         public static void InsertImageFromFile(TextArea textArea, string filePath, NotepadImageStore store)
