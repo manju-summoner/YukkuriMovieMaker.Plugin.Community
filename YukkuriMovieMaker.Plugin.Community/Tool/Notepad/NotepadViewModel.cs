@@ -1,6 +1,4 @@
-using System;
 using System.IO;
-using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
@@ -17,7 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public string Title => string.IsNullOrEmpty(FileName) ? Texts.Notepad : $"{FileName}{(IsSaved ? string.Empty : "*")}";
         public string FileName => string.IsNullOrEmpty(FilePath) ? string.Empty : Path.GetFileNameWithoutExtension(FilePath);
         public string FilePath { get; set => Set(ref field, value, nameof(FilePath), nameof(FileName), nameof(Title)); } = string.Empty;
-        public bool IsSaved { get; set => Set(ref field, value); } = true;
+        public bool IsSaved { get; set => Set(ref field, value, nameof(IsSaved), nameof(Title)); } = true;
         public string Text
         {
             get;
@@ -34,11 +32,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         public OpenFileDialogViewModel OpenFileDialog { get; } = new();
         public SaveFileDialogViewModel SaveFileDialog { get; } = new();
+        public NotepadImageStore ImageStore { get; } = new();
 
         public ICommand ChangeFontSizeCommand { get; }
         public ICommand OpenCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand OpenNewTabCommand { get; }
+        public ICommand InsertImageCommand { get; }
+        public ICommand ToggleSearchCommand { get; }
+
+        public event EventHandler<NotepadImageInsertRequestedEventArgs>? ImageInsertRequested;
+        public event EventHandler? ToggleSearchRequested;
 
         public NotepadViewModel()
         {
@@ -55,16 +59,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 _ => true,
                 _ =>
                 {
-                    var filePath = OpenFileDialog.Show($"{Texts.TextFile}|*.txt;");
+                    var filePath = OpenFileDialog.Show(BuildOpenFilter());
                     if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
                         return;
                     try
                     {
-                        var bytes = File.ReadAllBytes(filePath);
-                        var encoding = EncodingChecker.GetAvailableEncodings(bytes).FirstOrDefault() ?? Encoding.UTF8;
-                        Text = encoding.GetString(bytes);
+                        var (text, failedImageIds) = NotepadDocumentSerializer.Load(filePath, ImageStore);
+                        Text = text;
                         FilePath = filePath;
                         IsSaved = true;
+                        if (failedImageIds.Count > 0)
+                        {
+                            MessageBox.Show(
+                                $"{Texts.MissingImageData}\r\n{string.Join(", ", failedImageIds)}",
+                                Texts.Notepad,
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -78,16 +89,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 x =>
                 {
                     var filePath = x as string;
-                    if (string.IsNullOrEmpty(filePath))
+                    var preferredExt = NotepadDocumentSerializer.DetermineSaveExtension(Text);
+
+                    if (string.IsNullOrEmpty(filePath) || !MatchesPreferredExtension(filePath, preferredExt))
                     {
-                        filePath = SaveFileDialog.Show($"{Texts.TextFile}|*.txt;", Texts.Untitled);
+                        filePath = SaveFileDialog.Show(BuildSaveFilter(preferredExt), BuildDefaultFileName(preferredExt));
                         if (string.IsNullOrEmpty(filePath))
                             return;
+                        filePath = EnsureExtension(filePath, preferredExt);
                         FilePath = filePath;
                     }
+
                     try
                     {
-                        File.WriteAllText(filePath, Text, Encoding.UTF8);
+                        NotepadDocumentSerializer.Save(filePath, Text, ImageStore);
                         IsSaved = true;
                     }
                     catch (Exception ex)
@@ -113,6 +128,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     };
                     CreateNewToolViewRequested?.Invoke(this, new CreateNewToolViewRequestedEventArgs(toolState));
                 });
+            InsertImageCommand = new ActionCommand(
+                _ => true,
+                _ =>
+                {
+                    var filePath = OpenFileDialog.Show($"{Texts.ImageFile}|{NotepadImageFormat.GetSupportedImageFileFilter()}");
+                    if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+                        return;
+                    try
+                    {
+                        ImageInsertRequested?.Invoke(this, new NotepadImageInsertRequestedEventArgs(filePath));
+                    }
+                    catch (Exception ex)
+                    {
+                        var message = $"{Texts.FailedToOpenFile}\r\n{ex.Message}";
+                        Log.Default.Write(message, ex);
+                        MessageBox.Show(message, Texts.Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                });
+            ToggleSearchCommand = new ActionCommand(
+                _ => true,
+                _ => ToggleSearchRequested?.Invoke(this, EventArgs.Empty));
         }
 
         public void LoadState(ToolState stateData)
@@ -122,6 +158,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             var state = Json.Json.LoadFromText<NotepadState>(stateData.SavedState);
             if (state is null)
                 return;
+            RestoreEmbeddedImages(state.Images);
             FilePath = state.FilePath;
             Text = state.Text;
             Zoom = state.Zoom;
@@ -142,9 +179,65 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     Zoom = Zoom,
                     IsSaved = IsSaved,
                     WordWrap = WordWrap,
-                    ShowLineNumbers = ShowLineNumbers
+                    ShowLineNumbers = ShowLineNumbers,
+                    Images = CollectEmbeddedImages(Text)
                 }),
             };
         }
+
+        private Dictionary<string, NotepadEmbeddedImage> CollectEmbeddedImages(string text)
+        {
+            var images = new Dictionary<string, NotepadEmbeddedImage>();
+            foreach (var id in NotepadImagePlaceholder.CollectImageIds(text))
+            {
+                if (!ImageStore.TryGet(id, out var reference))
+                    continue;
+                images[id] = new NotepadEmbeddedImage
+                {
+                    Data = reference.Data,
+                    Extension = reference.Extension,
+                };
+            }
+            return images;
+        }
+
+        private void RestoreEmbeddedImages(Dictionary<string, NotepadEmbeddedImage>? images)
+        {
+            if (images is null)
+                return;
+            foreach (var (_, embedded) in images)
+            {
+                if (embedded.Data.Length == 0)
+                    continue;
+                try
+                {
+                    ImageStore.RegisterFromBytes(embedded.Data, embedded.Extension);
+                }
+                catch (NotSupportedException)
+                {
+                }
+            }
+        }
+
+        private static string BuildOpenFilter() =>
+            $"{Texts.NotepadDocument}|*.txt;*{NotepadDocumentSerializer.PackageExtension}|" +
+            $"{Texts.TextFile}|*.txt|" +
+            $"{Texts.RichNotepadFile}|*{NotepadDocumentSerializer.PackageExtension}";
+
+        private static string BuildSaveFilter(string preferredExtension) =>
+            string.Equals(preferredExtension, NotepadDocumentSerializer.PackageExtension, StringComparison.OrdinalIgnoreCase)
+                ? $"{Texts.RichNotepadFile}|*{NotepadDocumentSerializer.PackageExtension}"
+                : $"{Texts.TextFile}|*.txt";
+
+        private static string BuildDefaultFileName(string preferredExtension) =>
+            $"{Texts.Untitled}{preferredExtension}";
+
+        private static bool MatchesPreferredExtension(string filePath, string preferredExtension) =>
+            string.Equals(Path.GetExtension(filePath), preferredExtension, StringComparison.OrdinalIgnoreCase);
+
+        private static string EnsureExtension(string filePath, string preferredExtension) =>
+            MatchesPreferredExtension(filePath, preferredExtension)
+                ? filePath
+                : Path.ChangeExtension(filePath, preferredExtension);
     }
 }

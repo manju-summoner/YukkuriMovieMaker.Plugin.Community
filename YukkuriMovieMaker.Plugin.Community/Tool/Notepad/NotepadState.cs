@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
     internal class NotepadState
@@ -8,5 +10,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public bool IsSaved { get; set; } = true;
         public bool WordWrap { get; set; } = false;
         public bool ShowLineNumbers { get; set; } = false;
+        public Dictionary<string, NotepadEmbeddedImage> Images { get; set; } = [];
     }
 }

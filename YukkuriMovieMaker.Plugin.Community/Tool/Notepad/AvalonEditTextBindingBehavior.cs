@@ -4,7 +4,7 @@ using Microsoft.Xaml.Behaviors;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
-    internal class AvalonEditBehavior : Behavior<TextEditor>
+    internal class AvalonEditTextBindingBehavior : Behavior<TextEditor>
     {
         public string Text
         {
@@ -15,7 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             DependencyProperty.Register(
                 nameof(Text),
                 typeof(string),
-                typeof(AvalonEditBehavior),
+                typeof(AvalonEditTextBindingBehavior),
                 new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnTextChanged));
 
         public bool WordWrap
@@ -27,7 +27,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             DependencyProperty.Register(
                 nameof(WordWrap),
                 typeof(bool),
-                typeof(AvalonEditBehavior),
+                typeof(AvalonEditTextBindingBehavior),
                 new PropertyMetadata(false, OnWordWrapChanged));
 
         private bool _isSyncing;
@@ -36,7 +36,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         {
             base.OnAttached();
             AssociatedObject.TextChanged += OnEditorTextChanged;
-
             SyncTextToEditor(Text);
             AssociatedObject.WordWrap = WordWrap;
         }
@@ -46,10 +45,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             AssociatedObject.TextChanged -= OnEditorTextChanged;
             base.OnDetaching();
         }
-        
+
         private static void OnWordWrapChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is AvalonEditBehavior behavior && behavior.AssociatedObject is not null)
+            if (d is AvalonEditTextBindingBehavior behavior && behavior.AssociatedObject is not null)
                 behavior.AssociatedObject.WordWrap = (bool)e.NewValue;
         }
 
@@ -60,7 +59,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         private static void OnTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is not AvalonEditBehavior behavior || behavior._isSyncing)
+            if (d is not AvalonEditTextBindingBehavior behavior || behavior._isSyncing)
                 return;
             behavior.SyncTextToEditor(e.NewValue as string ?? string.Empty);
         }
