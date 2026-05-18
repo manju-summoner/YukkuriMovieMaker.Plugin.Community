@@ -5,7 +5,7 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Community.Commons;
 
-namespace YMM4SamplePlugin.Transition.Pixelize
+namespace YukkuriMovieMaker.Plugin.Community.Transition.Pixelize
 {
     internal sealed class PixelizeCustomEffect(IGraphicsDevicesAndContext devices) : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices))
     {

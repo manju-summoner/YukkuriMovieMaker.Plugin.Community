@@ -1,6 +1,6 @@
 using YukkuriMovieMaker.Generator;
 
-namespace YMM4SamplePlugin.Transition.Pixelize
+namespace YukkuriMovieMaker.Plugin.Community.Transition.Pixelize
 {
     [AutoGenLocalizer]
     partial class Texts

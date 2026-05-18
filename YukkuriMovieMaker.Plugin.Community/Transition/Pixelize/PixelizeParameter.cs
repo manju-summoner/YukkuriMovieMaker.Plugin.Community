@@ -5,7 +5,7 @@ using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Transition;
 
-namespace YMM4SamplePlugin.Transition.Pixelize
+namespace YukkuriMovieMaker.Plugin.Community.Transition.Pixelize
 {
     internal sealed class PixelizeParameter : TransitionParameterBase
     {
