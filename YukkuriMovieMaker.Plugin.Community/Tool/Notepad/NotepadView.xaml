@@ -22,6 +22,7 @@
                 <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}">
                     <Setter Property="Title" Value="{x:Static local:Texts.ClearImageCache}"/>
                     <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+                    <Setter Property="ResizeMode" Value="NoResize"/>
                 </Style>
             </pb:DialogBehavior.Style>
             <pb:DialogBehavior.ContentTemplate>
