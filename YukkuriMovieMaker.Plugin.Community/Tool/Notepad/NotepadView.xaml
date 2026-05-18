@@ -91,9 +91,11 @@
                 <avalon:TextEditorOptions EnableHyperlinks="False" />
             </avalon:TextEditor.Options>
             <i:Interaction.Behaviors>
-                <local:AvalonEditBehavior Text="{Binding Text, Mode=TwoWay}"
-                                          WordWrap="{Binding WordWrap}"
-                                          ImageScale="{Binding Zoom}"/>
+                <local:AvalonEditTextBindingBehavior Text="{Binding Text, Mode=TwoWay}"
+                                                     WordWrap="{Binding WordWrap}"/>
+                <local:NotepadImageDisplayBehavior ImageScale="{Binding Zoom}"/>
+                <local:NotepadImageInputBehavior/>
+                <local:NotepadSearchBehavior/>
             </i:Interaction.Behaviors>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="PreviewMouseWheel">

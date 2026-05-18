@@ -1,0 +1,115 @@
+using System.Windows;
+using System.Windows.Input;
+using ICSharpCode.AvalonEdit;
+using Microsoft.Xaml.Behaviors;
+
+namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
+{
+    internal class NotepadImageInputBehavior : Behavior<TextEditor>
+    {
+        private NotepadViewModel? _attachedViewModel;
+
+        protected override void OnAttached()
+        {
+            base.OnAttached();
+            AssociatedObject.PreviewDragOver += OnPreviewDragOver;
+            AssociatedObject.PreviewDrop += OnPreviewDrop;
+            AssociatedObject.DataContextChanged += OnDataContextChanged;
+            AssociatedObject.TextArea.PreviewKeyDown += OnTextAreaPreviewKeyDown;
+
+            CommandManager.AddPreviewCanExecuteHandler(AssociatedObject.TextArea, OnPastePreviewCanExecute);
+            CommandManager.AddPreviewExecutedHandler(AssociatedObject.TextArea, OnPastePreviewExecuted);
+
+            AttachViewModel(AssociatedObject.DataContext as NotepadViewModel);
+        }
+
+        protected override void OnDetaching()
+        {
+            AssociatedObject.PreviewDragOver -= OnPreviewDragOver;
+            AssociatedObject.PreviewDrop -= OnPreviewDrop;
+            AssociatedObject.DataContextChanged -= OnDataContextChanged;
+            AssociatedObject.TextArea.PreviewKeyDown -= OnTextAreaPreviewKeyDown;
+
+            CommandManager.RemovePreviewCanExecuteHandler(AssociatedObject.TextArea, OnPastePreviewCanExecute);
+            CommandManager.RemovePreviewExecutedHandler(AssociatedObject.TextArea, OnPastePreviewExecuted);
+
+            AttachViewModel(null);
+            base.OnDetaching();
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            AttachViewModel(e.NewValue as NotepadViewModel);
+        }
+
+        private void AttachViewModel(NotepadViewModel? viewModel)
+        {
+            if (ReferenceEquals(_attachedViewModel, viewModel))
+                return;
+            if (_attachedViewModel is not null)
+                _attachedViewModel.ImageInsertRequested -= OnImageInsertRequested;
+            _attachedViewModel = viewModel;
+            if (_attachedViewModel is not null)
+                _attachedViewModel.ImageInsertRequested += OnImageInsertRequested;
+        }
+
+        private void OnImageInsertRequested(object? sender, NotepadImageInsertRequestedEventArgs e)
+        {
+            if (AssociatedObject is null || AssociatedObject.IsReadOnly)
+                return;
+            NotepadClipboardHandler.InsertImageFromFile(AssociatedObject.TextArea, e.FilePath);
+        }
+
+        private void OnTextAreaPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (AssociatedObject is null || AssociatedObject.IsReadOnly)
+                return;
+            if (e.Key != Key.V || (Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
+                return;
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                return;
+            if (NotepadClipboardHandler.TryHandleClipboard(AssociatedObject.TextArea))
+                e.Handled = true;
+        }
+
+        private void OnPastePreviewCanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            if (e.Command != ApplicationCommands.Paste)
+                return;
+            if (AssociatedObject is null || AssociatedObject.IsReadOnly)
+                return;
+            if (NotepadClipboardHandler.ClipboardContainsHandleableImage())
+            {
+                e.CanExecute = true;
+                e.Handled = true;
+            }
+        }
+
+        private void OnPastePreviewExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (e.Command != ApplicationCommands.Paste)
+                return;
+            if (AssociatedObject is null || AssociatedObject.IsReadOnly)
+                return;
+            if (NotepadClipboardHandler.TryHandleClipboard(AssociatedObject.TextArea))
+                e.Handled = true;
+        }
+
+        private void OnPreviewDragOver(object sender, DragEventArgs e)
+        {
+            if (NotepadClipboardHandler.CanHandleDataObject(e.Data))
+            {
+                e.Effects = DragDropEffects.Copy;
+                e.Handled = true;
+            }
+        }
+
+        private void OnPreviewDrop(object sender, DragEventArgs e)
+        {
+            if (AssociatedObject.IsReadOnly)
+                return;
+            if (NotepadClipboardHandler.TryHandleDataObject(AssociatedObject.TextArea, e.Data))
+                e.Handled = true;
+        }
+    }
+}
