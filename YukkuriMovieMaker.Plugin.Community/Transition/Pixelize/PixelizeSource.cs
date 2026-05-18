@@ -5,11 +5,11 @@ using YukkuriMovieMaker.Plugin.Transition;
 
 namespace YMM4SamplePlugin.Transition.Pixelize
 {
-    internal sealed class PixelizeTransitionSource : ITransitionSource
+    internal sealed class PixelizeSource : ITransitionSource
     {
         readonly ID2D1Image before;
         readonly ID2D1Image after;
-        readonly PixelizeTransitionParameter parameter;
+        readonly PixelizeParameter parameter;
 
         readonly PixelizeCustomEffect? effect;
         readonly ID2D1Image? effectOutput;
@@ -20,7 +20,7 @@ namespace YMM4SamplePlugin.Transition.Pixelize
 
         public ID2D1Image Output => effectOutput ?? before;
 
-        public PixelizeTransitionSource(IGraphicsDevicesAndContext devices, ID2D1Image before, ID2D1Image after, PixelizeTransitionParameter parameter)
+        public PixelizeSource(IGraphicsDevicesAndContext devices, ID2D1Image before, ID2D1Image after, PixelizeParameter parameter)
         {
             this.before = before;
             this.after = after;

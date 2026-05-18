@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Plugin.Transition;
 
 namespace YMM4SamplePlugin.Transition.Pixelize
 {
-    internal sealed class PixelizeTransitionParameter : TransitionParameterBase
+    internal sealed class PixelizeParameter : TransitionParameterBase
     {
         [Display(Name = nameof(Texts.EasingTypeName), Description = nameof(Texts.EasingTypeDesc), ResourceType = typeof(Texts))]
         [EnumComboBox]
@@ -24,7 +24,7 @@ namespace YMM4SamplePlugin.Transition.Pixelize
         public Animation MaxBlockSize { get; } = new Animation(64, 1, 512);
 
         public override ITransitionSource CreateTransition(IGraphicsDevicesAndContext devices, ID2D1Image before, ID2D1Image after)
-            => new PixelizeTransitionSource(devices, before, after, this);
+            => new PixelizeSource(devices, before, after, this);
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => [MaxBlockSize];
     }
