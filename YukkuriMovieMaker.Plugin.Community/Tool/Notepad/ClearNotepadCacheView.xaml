@@ -34,14 +34,14 @@
                 <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="1" Content="{x:Static local:Texts.Cancel}">
+            <Button Grid.Column="1" Content="{x:Static local:Texts.ClearImageCache}" Command="{Binding ClearCommand}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
                         <pa:CloseWindowAction/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </Button>
-            <Button Grid.Column="2" Content="{x:Static local:Texts.ClearImageCache}" Command="{Binding ClearCommand}">
+            <Button Grid.Column="2" Content="{x:Static local:Texts.Cancel}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
                         <pa:CloseWindowAction/>
