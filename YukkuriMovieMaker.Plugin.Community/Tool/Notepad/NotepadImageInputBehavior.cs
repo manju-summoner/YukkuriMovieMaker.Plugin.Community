@@ -15,7 +15,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             AssociatedObject.PreviewDragOver += OnPreviewDragOver;
             AssociatedObject.PreviewDrop += OnPreviewDrop;
             AssociatedObject.DataContextChanged += OnDataContextChanged;
-            AssociatedObject.TextArea.PreviewKeyDown += OnTextAreaPreviewKeyDown;
 
             CommandManager.AddPreviewCanExecuteHandler(AssociatedObject.TextArea, OnPastePreviewCanExecute);
             CommandManager.AddPreviewExecutedHandler(AssociatedObject.TextArea, OnPastePreviewExecuted);
@@ -28,7 +27,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             AssociatedObject.PreviewDragOver -= OnPreviewDragOver;
             AssociatedObject.PreviewDrop -= OnPreviewDrop;
             AssociatedObject.DataContextChanged -= OnDataContextChanged;
-            AssociatedObject.TextArea.PreviewKeyDown -= OnTextAreaPreviewKeyDown;
 
             CommandManager.RemovePreviewCanExecuteHandler(AssociatedObject.TextArea, OnPastePreviewCanExecute);
             CommandManager.RemovePreviewExecutedHandler(AssociatedObject.TextArea, OnPastePreviewExecuted);
@@ -60,25 +58,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             NotepadClipboardHandler.InsertImageFromFile(AssociatedObject.TextArea, e.FilePath);
         }
 
-        private void OnTextAreaPreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (AssociatedObject is null || AssociatedObject.IsReadOnly)
-                return;
-            if (e.Key != Key.V || (Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
-                return;
-            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
-                return;
-            if (NotepadClipboardHandler.TryHandleClipboard(AssociatedObject.TextArea))
-                e.Handled = true;
-        }
-
         private void OnPastePreviewCanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (e.Command != ApplicationCommands.Paste)
-                return;
             if (AssociatedObject is null || AssociatedObject.IsReadOnly)
                 return;
-            if (NotepadClipboardHandler.ClipboardContainsHandleableImage())
+            if (e.Command == ApplicationCommands.Paste && NotepadClipboardHandler.ClipboardContainsHandleableImage())
             {
                 e.CanExecute = true;
                 e.Handled = true;
@@ -87,11 +71,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         private void OnPastePreviewExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            if (e.Command != ApplicationCommands.Paste)
-                return;
             if (AssociatedObject is null || AssociatedObject.IsReadOnly)
                 return;
-            if (NotepadClipboardHandler.TryHandleClipboard(AssociatedObject.TextArea))
+            if (e.Command == ApplicationCommands.Paste && NotepadClipboardHandler.TryHandleClipboard(AssociatedObject.TextArea))
                 e.Handled = true;
         }
 
