@@ -15,6 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             base.OnAttached();
             AssociatedObject.DataContextChanged += OnDataContextChanged;
             _searchPanel = SearchPanel.Install(AssociatedObject);
+            _searchPanel.Localization = new NotepadSearchLocalization();
             AttachViewModel(AssociatedObject.DataContext as NotepadViewModel);
         }
 
