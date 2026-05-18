@@ -487,7 +487,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Falsetto
                     float rotated = WrapPhase(ch.AnalysisPhase[k] + phaseRotation);
                     ch.OutMagnitude[newK] = newMag;
                     ch.OutPhase[newK] = rotated;
-                    ch.SynthesisPhase[newK] = rotated;
                 }
             }
         }
@@ -506,6 +505,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Falsetto
                 float newTrueBin = trueBin * pitchRatio;
                 float synthPhaseIncrement = twoPiHopOverN * newTrueBin;
                 float instPhase = WrapPhase(ch.SynthesisPhase[k] + synthPhaseIncrement);
+                ch.SynthesisPhase[k] = instPhase;
 
                 float newKf = k * pitchRatio;
                 if (newKf < 0f || newKf > HalfSize) continue;
@@ -525,13 +525,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Falsetto
                 {
                     ch.OutMagnitude[newK0] = mag0;
                     ch.OutPhase[newK0] = instPhase;
-                    ch.SynthesisPhase[newK0] = instPhase;
                 }
                 if (newK1 != newK0 && mag1 > ch.OutMagnitude[newK1])
                 {
                     ch.OutMagnitude[newK1] = mag1;
                     ch.OutPhase[newK1] = instPhase;
-                    ch.SynthesisPhase[newK1] = instPhase;
                 }
             }
         }
