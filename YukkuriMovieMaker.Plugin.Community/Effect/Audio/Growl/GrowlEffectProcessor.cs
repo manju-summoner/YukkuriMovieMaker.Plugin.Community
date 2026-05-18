@@ -21,6 +21,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Growl
         const double MaxFundamentalHz = 800.0;
         const double EnvelopeAttackMs = 5.0;
         const double EnvelopeReleaseMs = 50.0;
+        const uint RngInitialStateLeft = 0x9E3779B1u;
+        const uint RngInitialStateRight = 0x6C62272Eu;
 
         public override int Hz => Input?.Hz ?? throw new InvalidOperationException();
         public override long Duration => Input?.Duration ?? throw new InvalidOperationException();
@@ -38,12 +40,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Growl
         }
 
         long currentPosition;
-        readonly ChannelState leftChannel = new() { RngState = 0x9E3779B1u };
-        readonly ChannelState rightChannel = new() { RngState = 0x6C62272Eu };
+        readonly ChannelState leftChannel = new() { RngState = RngInitialStateLeft };
+        readonly ChannelState rightChannel = new() { RngState = RngInitialStateRight };
         readonly StereoBiQuadFilter toneFilter = new();
         float lastToneDb = float.NaN;
         float lastRoughnessFreq = float.NaN;
-        bool filtersInitialized;
+        int lastSampleRate;
         float dcBlockerCoef;
         float dcInLeft, dcOutLeft, dcInRight, dcOutRight;
         double zcB0, zcB1, zcB2, zcA1, zcA2;
@@ -190,8 +192,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Growl
 
         void EnsureFilters(int hz)
         {
-            if (filtersInitialized) return;
-            filtersInitialized = true;
+            if (hz == lastSampleRate) return;
+            lastSampleRate = hz;
 
             dcBlockerCoef = (float)Math.Exp(-TwoPi * DcBlockerCutoffHz / hz);
 
@@ -239,23 +241,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Growl
             currentPosition = position;
             Input?.Seek(position);
 
-            ResetChannel(leftChannel, 0x9E3779B1u);
-            ResetChannel(rightChannel, 0x6C62272Eu);
+            ResetChannel(leftChannel);
+            ResetChannel(rightChannel);
+            leftChannel.RngState = RngInitialStateLeft;
+            rightChannel.RngState = RngInitialStateRight;
 
             dcInLeft = dcOutLeft = dcInRight = dcOutRight = 0f;
-            filtersInitialized = false;
-            dcBlockerCoef = 0f;
-            zcB0 = zcB1 = zcB2 = zcA1 = zcA2 = 0.0;
-            shimmerAlpha = shimmerNorm = 0f;
-            envAttackCoef = envReleaseCoef = 0f;
-            zcMinPeriod = 0;
-            zcMaxPeriod = 0;
             toneFilter.Reset();
             lastToneDb = float.NaN;
             lastRoughnessFreq = float.NaN;
+            lastSampleRate = 0;
         }
 
-        static void ResetChannel(ChannelState ch, uint rngState)
+        static void ResetChannel(ChannelState ch)
         {
             ch.ZcZ1 = ch.ZcZ2 = 0.0;
             ch.LastFiltered = 0.0;
@@ -264,7 +262,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Growl
             ch.ZcCounter = 0;
             ch.ShimmerValue = 0f;
             ch.Envelope = 0f;
-            ch.RngState = rngState;
         }
     }
 }
