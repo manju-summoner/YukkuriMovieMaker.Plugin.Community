@@ -38,13 +38,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public ICommand SaveCommand { get; }
         public ICommand OpenNewTabCommand { get; }
         public ICommand InsertImageCommand { get; }
-        public ICommand OpenSearchCommand { get; }
+        public ICommand ToggleSearchCommand { get; }
         public ICommand ClearImageCacheCommand { get; }
 
         public ClearNotepadCacheViewModel? ClearImageCacheViewModel { get; set => Set(ref field, value); }
 
         public event EventHandler<NotepadImageInsertRequestedEventArgs>? ImageInsertRequested;
-        public event EventHandler? OpenSearchRequested;
+        public event EventHandler? ToggleSearchRequested;
 
         public NotepadViewModel()
         {
@@ -140,9 +140,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                         MessageBox.Show(message, Texts.Error, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 });
-            OpenSearchCommand = new ActionCommand(
+            ToggleSearchCommand = new ActionCommand(
                 _ => true,
-                _ => OpenSearchRequested?.Invoke(this, EventArgs.Empty));
+                _ => ToggleSearchRequested?.Invoke(this, EventArgs.Empty));
             ClearImageCacheCommand = new ActionCommand(
                 _ => true,
                 _ => ExecuteClearImageCache());

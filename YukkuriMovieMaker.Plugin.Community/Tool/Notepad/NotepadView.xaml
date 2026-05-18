@@ -120,7 +120,7 @@
                 <Separator/>
                 <Button Content="{DynamicResource {x:Static icons:IconKeys.Image}}" Command="{Binding InsertImageCommand}" ToolTip="{x:Static local:Texts.InsertImage}"/>
                 <Separator/>
-                <Button Content="{DynamicResource {x:Static icons:IconKeys.Magnify}}" Command="{Binding OpenSearchCommand}" ToolTip="{x:Static local:Texts.Search}"/>
+                <Button Content="{DynamicResource {x:Static icons:IconKeys.Magnify}}" Command="{Binding ToggleSearchCommand}" ToolTip="{x:Static local:Texts.Search}"/>
                 <Separator/>
                 <controls:DropDownButton Content="{DynamicResource {x:Static icons:IconKeys.Cog}}" ToolTip="{x:Static local:Texts.Settings}" BorderBrush="Transparent" Padding="3">
                     <controls:DropDownButton.Style>

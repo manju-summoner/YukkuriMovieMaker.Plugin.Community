@@ -38,16 +38,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             if (ReferenceEquals(_attachedViewModel, viewModel))
                 return;
             if (_attachedViewModel is not null)
-                _attachedViewModel.OpenSearchRequested -= OnOpenSearchRequested;
+                _attachedViewModel.ToggleSearchRequested -= OnToggleSearchRequested;
             _attachedViewModel = viewModel;
             if (_attachedViewModel is not null)
-                _attachedViewModel.OpenSearchRequested += OnOpenSearchRequested;
+                _attachedViewModel.ToggleSearchRequested += OnToggleSearchRequested;
         }
 
-        private void OnOpenSearchRequested(object? sender, EventArgs e)
+        private void OnToggleSearchRequested(object? sender, EventArgs e)
         {
-            _searchPanel?.Open();
-            AssociatedObject?.TextArea?.Focus();
+            if (_searchPanel is null)
+                return;
+            if (_searchPanel.IsClosed)
+            {
+                _searchPanel.Open();
+                AssociatedObject?.TextArea?.Focus();
+            }
+            else
+            {
+                _searchPanel.Close();
+            }
         }
     }
 }
