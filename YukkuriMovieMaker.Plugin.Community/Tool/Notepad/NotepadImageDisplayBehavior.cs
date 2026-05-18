@@ -19,22 +19,49 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 new PropertyMetadata(1.0, OnImageScaleChanged));
 
         private NotepadImageElementGenerator? _imageGenerator;
+        private NotepadViewModel? _attachedViewModel;
 
         protected override void OnAttached()
         {
             base.OnAttached();
-            _imageGenerator = new NotepadImageElementGenerator { Scale = ImageScale };
-            AssociatedObject.TextArea.TextView.ElementGenerators.Add(_imageGenerator);
+            AssociatedObject.DataContextChanged += OnDataContextChanged;
+            AttachViewModel(AssociatedObject.DataContext as NotepadViewModel);
         }
 
         protected override void OnDetaching()
         {
-            if (_imageGenerator is not null)
-            {
-                AssociatedObject.TextArea.TextView.ElementGenerators.Remove(_imageGenerator);
-                _imageGenerator = null;
-            }
+            AssociatedObject.DataContextChanged -= OnDataContextChanged;
+            AttachViewModel(null);
             base.OnDetaching();
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            AttachViewModel(e.NewValue as NotepadViewModel);
+        }
+
+        private void AttachViewModel(NotepadViewModel? viewModel)
+        {
+            if (ReferenceEquals(_attachedViewModel, viewModel))
+                return;
+            DetachGenerator();
+            _attachedViewModel = viewModel;
+            if (_attachedViewModel is null || AssociatedObject is null)
+                return;
+            _imageGenerator = new NotepadImageElementGenerator(_attachedViewModel.ImageStore) { Scale = ImageScale };
+            AssociatedObject.TextArea.TextView.ElementGenerators.Add(_imageGenerator);
+            AssociatedObject.TextArea.TextView.Redraw();
+        }
+
+        private void DetachGenerator()
+        {
+            if (_imageGenerator is null || AssociatedObject is null)
+            {
+                _imageGenerator = null;
+                return;
+            }
+            AssociatedObject.TextArea.TextView.ElementGenerators.Remove(_imageGenerator);
+            _imageGenerator = null;
         }
 
         private static void OnImageScaleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

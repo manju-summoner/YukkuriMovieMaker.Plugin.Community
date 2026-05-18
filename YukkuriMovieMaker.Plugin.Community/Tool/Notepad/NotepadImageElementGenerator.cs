@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,13 +13,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
     internal sealed class NotepadImageElementGenerator : VisualLineElementGenerator
     {
+        private readonly NotepadImageStore store;
         private readonly double baseMaxWidth;
         private readonly double baseMaxHeight;
 
         public double Scale { get; set; } = 1.0;
 
-        public NotepadImageElementGenerator(double baseMaxWidth = 480, double baseMaxHeight = 360)
+        public NotepadImageElementGenerator(NotepadImageStore store, double baseMaxWidth = 480, double baseMaxHeight = 360)
         {
+            this.store = store;
             this.baseMaxWidth = baseMaxWidth;
             this.baseMaxHeight = baseMaxHeight;
         }
@@ -50,18 +53,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
             var match = result.Value.Match;
             var id = match.Groups[1].Value.ToLowerInvariant();
-            if (!NotepadImageCache.TryGet(id, out var reference))
+            if (!store.TryGet(id, out var reference))
                 return null;
-            var bitmap = NotepadImageCache.GetBitmap(id);
+            var bitmap = store.GetBitmap(id);
             if (bitmap is null)
                 return null;
 
             var (width, height) = ComputeFitSize(bitmap.PixelWidth, bitmap.PixelHeight);
-            var container = BuildVisual(bitmap, reference.CachePath, width, height);
+            var container = BuildVisual(bitmap, reference, width, height);
             return new InlineObjectElement(match.Length, container);
         }
 
-        private static FrameworkElement BuildVisual(BitmapSource bitmap, string cachePath, double width, double height)
+        private static FrameworkElement BuildVisual(BitmapSource bitmap, NotepadImageReference reference, double width, double height)
         {
             var image = new Image
             {
@@ -101,15 +104,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 e.Handled = true;
                 try
                 {
-                    Process.Start(new ProcessStartInfo(cachePath) { UseShellExecute = true });
+                    var tempPath = WriteToTempFile(reference);
+                    Process.Start(new ProcessStartInfo(tempPath) { UseShellExecute = true });
                 }
                 catch (Exception ex)
                 {
-                    Log.Default.Write($"{Texts.FailedToOpenFile}: {cachePath}", ex);
+                    Log.Default.Write($"{Texts.FailedToOpenFile}: {reference.Id}", ex);
                 }
             };
             border.MouseLeave += (_, _) => armed = false;
             return border;
+        }
+
+        private static string WriteToTempFile(NotepadImageReference reference)
+        {
+            var dir = AppDirectories.TemporaryDirectory;
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+            var tempPath = Path.Combine(dir, $"ymm_notepad_{reference.Id}{reference.Extension}");
+            if (!File.Exists(tempPath))
+                File.WriteAllBytes(tempPath, reference.Data);
+            return tempPath;
         }
 
         private (double Width, double Height) ComputeFitSize(int pixelWidth, int pixelHeight)

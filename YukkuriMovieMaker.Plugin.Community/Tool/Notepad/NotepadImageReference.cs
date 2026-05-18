@@ -1,4 +1,4 @@
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
-    internal sealed record NotepadImageReference(string Id, string CachePath, int PixelWidth, int PixelHeight, string Extension);
+    internal sealed record NotepadImageReference(string Id, byte[] Data, string Extension);
 }

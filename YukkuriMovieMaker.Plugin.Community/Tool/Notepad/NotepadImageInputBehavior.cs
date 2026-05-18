@@ -53,9 +53,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         private void OnImageInsertRequested(object? sender, NotepadImageInsertRequestedEventArgs e)
         {
-            if (AssociatedObject is null || AssociatedObject.IsReadOnly)
+            if (AssociatedObject is null || AssociatedObject.IsReadOnly || _attachedViewModel is null)
                 return;
-            NotepadClipboardHandler.InsertImageFromFile(AssociatedObject.TextArea, e.FilePath);
+            NotepadClipboardHandler.InsertImageFromFile(AssociatedObject.TextArea, e.FilePath, _attachedViewModel.ImageStore);
         }
 
         private void OnPastePreviewCanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -71,9 +71,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         private void OnPastePreviewExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            if (AssociatedObject is null || AssociatedObject.IsReadOnly)
+            if (AssociatedObject is null || AssociatedObject.IsReadOnly || _attachedViewModel is null)
                 return;
-            if (e.Command == ApplicationCommands.Paste && NotepadClipboardHandler.TryHandleClipboard(AssociatedObject.TextArea))
+            if (e.Command == ApplicationCommands.Paste && NotepadClipboardHandler.TryHandleClipboard(AssociatedObject.TextArea, _attachedViewModel.ImageStore))
                 e.Handled = true;
         }
 
@@ -88,9 +88,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         private void OnPreviewDrop(object sender, DragEventArgs e)
         {
-            if (AssociatedObject.IsReadOnly)
+            if (AssociatedObject.IsReadOnly || _attachedViewModel is null)
                 return;
-            if (NotepadClipboardHandler.TryHandleDataObject(AssociatedObject.TextArea, e.Data))
+            if (NotepadClipboardHandler.TryHandleDataObject(AssociatedObject.TextArea, e.Data, _attachedViewModel.ImageStore))
                 e.Handled = true;
         }
     }

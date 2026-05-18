@@ -20,29 +20,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public static string DetermineSaveExtension(string text) =>
             ContainsImages(text) ? PackageExtension : PlainTextExtension;
 
-        public static void Save(string filePath, string text)
+        public static void Save(string filePath, string text, NotepadImageStore store)
         {
-            var extension = Path.GetExtension(filePath);
+                var extension = Path.GetExtension(filePath);
             if (string.Equals(extension, PackageExtension, StringComparison.OrdinalIgnoreCase))
-                SavePackage(filePath, text);
+                SavePackage(filePath, text, store);
             else
                 File.WriteAllText(filePath, text, new UTF8Encoding(false));
         }
 
-        public static (string Text, string ResolvedExtension) Load(string filePath)
+        public static (string Text, IReadOnlyList<string> FailedImageIds) Load(string filePath, NotepadImageStore store)
         {
             var extension = Path.GetExtension(filePath);
             if (string.Equals(extension, PackageExtension, StringComparison.OrdinalIgnoreCase))
-                return (LoadPackage(filePath), PackageExtension);
+                return LoadPackage(filePath, store);
 
             var bytes = File.ReadAllBytes(filePath);
             var encoding = EncodingChecker.GetAvailableEncodings(bytes).FirstOrDefault() ?? Encoding.UTF8;
-            return (encoding.GetString(bytes), PlainTextExtension);
+            return (encoding.GetString(bytes), []);
         }
 
-        private static void SavePackage(string filePath, string text)
+        private static void SavePackage(string filePath, string text, NotepadImageStore store)
         {
-            var resolvedImages = ResolveImageReferences(text);
+            var resolvedImages = ResolveImageReferences(text, store);
 
             var tempPath = filePath + ".tmp";
             try
@@ -59,8 +59,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                         var entryName = $"{ImagesDirectoryName}{id}{reference.Extension}";
                         var imageEntry = archive.CreateEntry(entryName, CompressionLevel.NoCompression);
                         using var entryStream = imageEntry.Open();
-                        using var source = File.OpenRead(reference.CachePath);
-                        source.CopyTo(entryStream);
+                        entryStream.Write(reference.Data);
                     }
                 }
 
@@ -75,13 +74,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             }
         }
 
-        private static IReadOnlyList<(string Id, NotepadImageReference Reference)> ResolveImageReferences(string text)
+        private static IReadOnlyList<(string Id, NotepadImageReference Reference)> ResolveImageReferences(string text, NotepadImageStore store)
         {
             var resolved = new List<(string, NotepadImageReference)>();
             var missing = new List<string>();
             foreach (var id in NotepadImagePlaceholder.CollectImageIds(text))
             {
-                if (!NotepadImageCache.TryGet(id, out var reference) || !File.Exists(reference.CachePath))
+                if (!store.TryGet(id, out var reference))
                 {
                     missing.Add(id);
                     continue;
@@ -93,12 +92,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             return resolved;
         }
 
-        private static string LoadPackage(string filePath)
+        private static (string Text, IReadOnlyList<string> FailedImageIds) LoadPackage(string filePath, NotepadImageStore store)
         {
             using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var archive = new ZipArchive(fs, ZipArchiveMode.Read, leaveOpen: false, Encoding.UTF8);
 
             string? text = null;
+            var failedIds = new List<string>();
             foreach (var entry in archive.Entries)
             {
                 if (string.Equals(entry.FullName, ContentEntryName, StringComparison.OrdinalIgnoreCase))
@@ -118,59 +118,55 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     continue;
 
                 var id = Path.GetFileNameWithoutExtension(entry.Name).ToLowerInvariant();
-                if (!NotepadImageCache.IsValidImageId(id))
+                if (!NotepadImageFormat.IsValidImageId(id))
                     continue;
-                if (!NotepadImageCache.TryNormalizeExtension(Path.GetExtension(entry.Name), out var extension))
-                    continue;
-
-                var destination = Path.Combine(NotepadImageCache.CacheDirectory, $"{id}{extension}");
-                if (!IsWithinCacheDirectory(destination))
+                if (!NotepadImageFormat.TryNormalizeExtension(Path.GetExtension(entry.Name), out var extension))
                     continue;
                 if (entry.Length > MaxImageEntryBytes)
-                    continue;
-
-                ExtractEntryAtomically(entry, destination);
-                NotepadImageCache.RegisterExistingCacheFile(destination);
-            }
-
-            return text ?? string.Empty;
-        }
-
-        private static void ExtractEntryAtomically(ZipArchiveEntry entry, string destination)
-        {
-            var tempPath = Path.Combine(NotepadImageCache.CacheDirectory, $"{Path.GetFileName(destination)}.{Guid.NewGuid():N}.tmp");
-            try
-            {
-                using (var entryStream = entry.Open())
-                using (var fileStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    entryStream.CopyTo(fileStream);
-                File.Move(tempPath, destination, overwrite: true);
-            }
-            catch (IOException) when (File.Exists(destination))
-            {
-            }
-            finally
-            {
-                if (File.Exists(tempPath))
                 {
-                    try { File.Delete(tempPath); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+                    Log.Default.Write($"Notepad image entry exceeds the maximum allowed size: {entry.FullName}");
+                    failedIds.Add(id);
+                    continue;
+                }
+
+                var bytes = ReadEntryBytes(entry);
+                try
+                {
+                    store.RegisterWithId(id, bytes, extension);
+                }
+                catch (NotSupportedException ex)
+                {
+                    Log.Default.Write($"Failed to load notepad image entry: {entry.FullName}", ex);
+                    failedIds.Add(id);
                 }
             }
+
+            var resultText = RemoveFailedPlaceholders(text ?? string.Empty, failedIds);
+            return (resultText, failedIds);
+        }
+
+        private static string RemoveFailedPlaceholders(string text, IReadOnlyList<string> failedIds)
+        {
+            if (failedIds.Count == 0 || text.Length == 0)
+                return text;
+            var result = text;
+            foreach (var id in failedIds)
+                result = result.Replace(NotepadImageFormat.BuildPlaceholder(id), string.Empty);
+            return result;
+        }
+
+        private static byte[] ReadEntryBytes(ZipArchiveEntry entry)
+        {
+            using var entryStream = entry.Open();
+            using var ms = new MemoryStream();
+            entryStream.CopyTo(ms);
+            return ms.ToArray();
         }
 
         private static bool IsDirectImageEntry(string fullName)
         {
             var remainder = fullName[ImagesDirectoryName.Length..];
             return !remainder.Contains('/') && !remainder.Contains('\\');
-        }
-
-        private static bool IsWithinCacheDirectory(string destination)
-        {
-            var cacheDirectory = Path.GetFullPath(NotepadImageCache.CacheDirectory);
-            var fullDestination = Path.GetFullPath(destination);
-            var separator = Path.DirectorySeparatorChar;
-            var prefix = cacheDirectory.EndsWith(separator) ? cacheDirectory : cacheDirectory + separator;
-            return fullDestination.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

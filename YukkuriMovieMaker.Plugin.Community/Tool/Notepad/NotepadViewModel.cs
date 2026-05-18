@@ -32,6 +32,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         public OpenFileDialogViewModel OpenFileDialog { get; } = new();
         public SaveFileDialogViewModel SaveFileDialog { get; } = new();
+        public NotepadImageStore ImageStore { get; } = new();
 
         public ICommand ChangeFontSizeCommand { get; }
         public ICommand OpenCommand { get; }
@@ -39,9 +40,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public ICommand OpenNewTabCommand { get; }
         public ICommand InsertImageCommand { get; }
         public ICommand ToggleSearchCommand { get; }
-        public ICommand ClearImageCacheCommand { get; }
-
-        public ClearNotepadCacheViewModel? ClearImageCacheViewModel { get; set => Set(ref field, value); }
 
         public event EventHandler<NotepadImageInsertRequestedEventArgs>? ImageInsertRequested;
         public event EventHandler? ToggleSearchRequested;
@@ -66,10 +64,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                         return;
                     try
                     {
-                        var (text, _) = NotepadDocumentSerializer.Load(filePath);
+                        var (text, failedImageIds) = NotepadDocumentSerializer.Load(filePath, ImageStore);
                         Text = text;
                         FilePath = filePath;
                         IsSaved = true;
+                        if (failedImageIds.Count > 0)
+                        {
+                            MessageBox.Show(
+                                $"{Texts.MissingImageData}\r\n{string.Join(", ", failedImageIds)}",
+                                Texts.Notepad,
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -96,7 +102,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
                     try
                     {
-                        NotepadDocumentSerializer.Save(filePath, Text);
+                        NotepadDocumentSerializer.Save(filePath, Text, ImageStore);
                         IsSaved = true;
                     }
                     catch (Exception ex)
@@ -126,7 +132,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 _ => true,
                 _ =>
                 {
-                    var filePath = OpenFileDialog.Show($"{Texts.ImageFile}|{NotepadImageCache.GetSupportedImageFileFilter()}");
+                    var filePath = OpenFileDialog.Show($"{Texts.ImageFile}|{NotepadImageFormat.GetSupportedImageFileFilter()}");
                     if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
                         return;
                     try
@@ -143,24 +149,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             ToggleSearchCommand = new ActionCommand(
                 _ => true,
                 _ => ToggleSearchRequested?.Invoke(this, EventArgs.Empty));
-            ClearImageCacheCommand = new ActionCommand(
-                _ => true,
-                _ => ExecuteClearImageCache());
-        }
-
-        private void ExecuteClearImageCache()
-        {
-            ClearImageCacheViewModel = new ClearNotepadCacheViewModel(async _ =>
-            {
-                await NotepadImageCache.ClearCacheAsync();
-                ClearImageCacheViewModel = null;
-                Application.Current?.Dispatcher?.Invoke(() =>
-                    MessageBox.Show(
-                        Texts.ClearImageCacheCompletedMessage,
-                        Texts.ClearImageCache,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information));
-            });
         }
 
         public void LoadState(ToolState stateData)
@@ -170,6 +158,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             var state = Json.Json.LoadFromText<NotepadState>(stateData.SavedState);
             if (state is null)
                 return;
+            RestoreEmbeddedImages(state.Images);
             FilePath = state.FilePath;
             Text = state.Text;
             Zoom = state.Zoom;
@@ -190,9 +179,44 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     Zoom = Zoom,
                     IsSaved = IsSaved,
                     WordWrap = WordWrap,
-                    ShowLineNumbers = ShowLineNumbers
+                    ShowLineNumbers = ShowLineNumbers,
+                    Images = CollectEmbeddedImages(Text)
                 }),
             };
+        }
+
+        private Dictionary<string, NotepadEmbeddedImage> CollectEmbeddedImages(string text)
+        {
+            var images = new Dictionary<string, NotepadEmbeddedImage>();
+            foreach (var id in NotepadImagePlaceholder.CollectImageIds(text))
+            {
+                if (!ImageStore.TryGet(id, out var reference))
+                    continue;
+                images[id] = new NotepadEmbeddedImage
+                {
+                    Data = reference.Data,
+                    Extension = reference.Extension,
+                };
+            }
+            return images;
+        }
+
+        private void RestoreEmbeddedImages(Dictionary<string, NotepadEmbeddedImage>? images)
+        {
+            if (images is null)
+                return;
+            foreach (var (_, embedded) in images)
+            {
+                if (embedded.Data.Length == 0)
+                    continue;
+                try
+                {
+                    ImageStore.RegisterFromBytes(embedded.Data, embedded.Extension);
+                }
+                catch (NotSupportedException)
+                {
+                }
+            }
         }
 
         private static string BuildOpenFilter() =>

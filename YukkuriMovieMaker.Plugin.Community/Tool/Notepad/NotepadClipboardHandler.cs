@@ -14,14 +14,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         private const int BI_BITFIELDS = 3;
         private const int BI_ALPHABITFIELDS = 6;
 
-        public static bool TryHandleClipboard(TextArea textArea)
+        public static bool TryHandleClipboard(TextArea textArea, NotepadImageStore store)
         {
             try
             {
                 var dataObject = Clipboard.GetDataObject();
                 if (dataObject is null)
                     return false;
-                return TryHandleDataObject(textArea, dataObject);
+                return TryHandleDataObject(textArea, dataObject, store);
             }
             catch
             {
@@ -68,18 +68,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             return false;
         }
 
-        public static bool TryHandleDataObject(TextArea textArea, IDataObject dataObject)
+        public static bool TryHandleDataObject(TextArea textArea, IDataObject dataObject, NotepadImageStore store)
         {
             try
             {
-                if (TryRegisterFromImageFiles(dataObject, out var references))
+                if (TryRegisterFromImageFiles(dataObject, store, out var references))
                 {
                     foreach (var reference in references)
                         InsertPlaceholder(textArea, reference.Id);
                     return true;
                 }
 
-                var bitmapReference = TryRegisterFromBitmapFormats(dataObject);
+                var bitmapReference = TryRegisterFromBitmapFormats(dataObject, store);
                 if (bitmapReference is not null)
                 {
                     InsertPlaceholder(textArea, bitmapReference.Id);
@@ -92,17 +92,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             return false;
         }
 
-        public static void InsertImageFromFile(TextArea textArea, string filePath)
+        public static void InsertImageFromFile(TextArea textArea, string filePath, NotepadImageStore store)
         {
-            var reference = NotepadImageCache.RegisterFromFile(filePath);
+            var reference = store.RegisterFromFile(filePath);
             InsertPlaceholder(textArea, reference.Id);
         }
 
         public static bool IsSupportedImagePath(string path) =>
             !string.IsNullOrEmpty(path) &&
-            NotepadImageCache.TryNormalizeExtension(Path.GetExtension(path), out _);
+            NotepadImageFormat.TryNormalizeExtension(Path.GetExtension(path), out _);
 
-        private static bool TryRegisterFromImageFiles(IDataObject dataObject, out IReadOnlyList<NotepadImageReference> references)
+        private static bool TryRegisterFromImageFiles(IDataObject dataObject, NotepadImageStore store, out IReadOnlyList<NotepadImageReference> references)
         {
             if (dataObject.GetDataPresent(DataFormats.FileDrop) &&
                 dataObject.GetData(DataFormats.FileDrop) is string[] paths)
@@ -112,7 +112,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 {
                     if (!IsSupportedImagePath(path) || !File.Exists(path))
                         continue;
-                    registered.Add(NotepadImageCache.RegisterFromFile(path));
+                    registered.Add(store.RegisterFromFile(path));
                 }
                 if (registered.Count > 0)
                 {
@@ -124,20 +124,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             return false;
         }
 
-        private static NotepadImageReference? TryRegisterFromBitmapFormats(IDataObject dataObject)
+        private static NotepadImageReference? TryRegisterFromBitmapFormats(IDataObject dataObject, NotepadImageStore store)
         {
             if (TryReadStream(dataObject, PngFormat, out var pngBytes))
-                return NotepadImageCache.RegisterFromBytes(pngBytes, ".png");
+                return store.RegisterFromBytes(pngBytes, ".png");
 
             if (dataObject.GetDataPresent(DataFormats.Bitmap) &&
                 dataObject.GetData(DataFormats.Bitmap) is BitmapSource bitmap)
-                return NotepadImageCache.RegisterFromBitmap(bitmap);
+                return store.RegisterFromBitmap(bitmap);
 
             if (TryReadStream(dataObject, DibFormat, out var dibBytes))
             {
                 var pngFromDib = ConvertDibToPng(dibBytes);
                 if (pngFromDib is not null)
-                    return NotepadImageCache.RegisterFromBytes(pngFromDib, ".png");
+                    return store.RegisterFromBytes(pngFromDib, ".png");
             }
 
             return null;
@@ -246,7 +246,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         private static void InsertPlaceholder(TextArea textArea, string id)
         {
-            var placeholder = NotepadImageCache.BuildPlaceholder(id);
+            var placeholder = NotepadImageFormat.BuildPlaceholder(id);
             var document = textArea.Document;
             if (document is null)
                 return;
