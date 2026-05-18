@@ -68,6 +68,7 @@
                                         Content="{DynamicResource {x:Static icons:IconKeys.ChevronDown}}"
                                         Width="24" Height="24" Padding="3"/>
                                 <Button Command="search:SearchCommands.CloseSearchPanel"
+                                        ToolTip="{x:Static local:Texts.SearchClose}"
                                         Content="{DynamicResource {x:Static icons:IconKeys.Close}}"
                                         Width="24" Height="24" Margin="3,0,0,0" Padding="3"
                                         Focusable="False"/>
