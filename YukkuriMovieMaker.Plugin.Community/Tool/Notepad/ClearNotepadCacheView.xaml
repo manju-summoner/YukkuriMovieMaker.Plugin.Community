@@ -34,7 +34,7 @@
                 <ColumnDefinition Width="100"/>
                 <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="1" Content="{x:Static local:Texts.ClearImageCache}" Command="{Binding ClearCommand}">
+            <Button Grid.Column="1" Content="{x:Static local:Texts.Delete}" Command="{Binding ClearCommand}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Click">
                         <pa:CloseWindowAction/>
