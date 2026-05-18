@@ -75,13 +75,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             {
                 Child = image,
                 Background = Brushes.Transparent,
-                Cursor = Cursors.Hand,
-                ToolTip = $"{bitmap.PixelWidth} x {bitmap.PixelHeight}",
+                ToolTip = $"{bitmap.PixelWidth} x {bitmap.PixelHeight}\r\n{Texts.OpenWithCtrlClick}",
                 Focusable = false,
+            };
+            border.QueryCursor += (_, e) =>
+            {
+                if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
+                    return;
+                e.Cursor = Cursors.Hand;
+                e.Handled = true;
             };
             var armed = false;
             border.PreviewMouseLeftButtonDown += (_, e) =>
             {
+                if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
+                    return;
                 armed = true;
                 e.Handled = true;
             };
