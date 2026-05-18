@@ -8,7 +8,7 @@ using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Shape.PdfPage;
 
-internal sealed class PdfPageParameter(SharedDataStore? sharedData) : ShapeParameterBase(sharedData)
+internal sealed class PdfPageParameter(SharedDataStore? sharedData) : ShapeParameterBase(sharedData), IFileItem, IResourceItem
 {
     private string _file = string.Empty;
 
@@ -67,6 +67,24 @@ internal sealed class PdfPageParameter(SharedDataStore? sharedData) : ShapeParam
     protected override IEnumerable<IAnimatable> GetAnimatables()
         => [PageNumber, Scale, RenderDpi];
 
+    public IEnumerable<string> GetFiles()
+    {
+        if (!string.IsNullOrEmpty(File))
+            yield return File;
+    }
+
+    public void ReplaceFile(string from, string to)
+    {
+        if (File == from)
+            File = to;
+    }
+
+    public IEnumerable<TimelineResource> GetResources()
+    {
+        if (TimelineResource.TryParseFromPath(File, TimelineResourceType.Image, out var resource))
+            yield return resource;
+    }
+
     protected override void LoadSharedData(SharedDataStore store)
     {
         var sharedData = store.Load<SharedData>();
@@ -78,25 +96,27 @@ internal sealed class PdfPageParameter(SharedDataStore? sharedData) : ShapeParam
 
     private sealed class SharedData
     {
-        private string File { get; }
-        private readonly Animation _pageNumber = new(1, 1, YMM4Constants.VeryLargeValue);
-        private readonly Animation _scale = new(100, 1, YMM4Constants.VeryLargeValue);
-        private readonly Animation _renderDpi = new(150, 72, 600);
+        public string File { get; set; } = string.Empty;
+        public Animation PageNumber { get; } = new(1, 1, YMM4Constants.VeryLargeValue);
+        public Animation Scale { get; } = new(100, 1, YMM4Constants.VeryLargeValue);
+        public Animation RenderDpi { get; } = new(150, 72, 600);
+
+        public SharedData() { }
 
         public SharedData(PdfPageParameter param)
         {
             File = param.File;
-            _pageNumber.CopyFrom(param.PageNumber);
-            _scale.CopyFrom(param.Scale);
-            _renderDpi.CopyFrom(param.RenderDpi);
+            PageNumber.CopyFrom(param.PageNumber);
+            Scale.CopyFrom(param.Scale);
+            RenderDpi.CopyFrom(param.RenderDpi);
         }
 
         public void CopyTo(PdfPageParameter param)
         {
             param.File = File;
-            param.PageNumber.CopyFrom(_pageNumber);
-            param.Scale.CopyFrom(_scale);
-            param.RenderDpi.CopyFrom(_renderDpi);
+            param.PageNumber.CopyFrom(PageNumber);
+            param.Scale.CopyFrom(Scale);
+            param.RenderDpi.CopyFrom(RenderDpi);
         }
     }
 }

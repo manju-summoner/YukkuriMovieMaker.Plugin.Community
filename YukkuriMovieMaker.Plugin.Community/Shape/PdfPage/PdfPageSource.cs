@@ -2,6 +2,7 @@ using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices.WindowsRuntime;
 using WinRtPdf = Windows.Data.Pdf;
+using WinRtBuffer = Windows.Storage.Streams.Buffer;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Vortice.Direct2D1;
@@ -36,7 +37,7 @@ internal sealed class PdfPageSource(IGraphicsDevicesAndContext devices, PdfPageP
         var length = desc.ItemDuration.Frame;
 
         var file = parameter.File;
-        var pageIndex = Math.Max(0, (int)parameter.PageNumber.GetValue(frame, length, fps) - 1);
+        var pageIndex = (int)parameter.PageNumber.GetValue(frame, length, fps) - 1;
         var scale = parameter.Scale.GetValue(frame, length, fps);
         var renderDpi = parameter.RenderDpi.GetValue(frame, length, fps);
 
@@ -82,9 +83,14 @@ internal sealed class PdfPageSource(IGraphicsDevicesAndContext devices, PdfPageP
             return;
         }
 
-        var safePageIndex = Math.Clamp(pageIndex, 0, (int)_pdfDocument.PageCount - 1);
+        var pageCount = (int)_pdfDocument.PageCount;
+        if (pageCount <= 0 || pageIndex < 0 || pageIndex >= pageCount)
+        {
+            DisposeCachedBitmap();
+            return;
+        }
 
-        using var page = _pdfDocument.GetPage((uint)safePageIndex);
+        using var page = _pdfDocument.GetPage((uint)pageIndex);
         var dpiScale = (float)(renderDpi / 96.0);
         var (renderWidth, renderHeight) = ComputeRenderSize(page.Size.Width, page.Size.Height, dpiScale);
 
@@ -185,9 +191,10 @@ internal sealed class PdfPageSource(IGraphicsDevicesAndContext devices, PdfPageP
         page.RenderToStreamAsync(stream, options).AsTask().GetAwaiter().GetResult();
 
         stream.Seek(0);
-        var bytes = new byte[stream.Size];
-        stream.ReadAsync(bytes.AsBuffer(), (uint)bytes.Length, InputStreamOptions.None)
+        var buffer = new WinRtBuffer((uint)stream.Size);
+        var readBuffer = stream.ReadAsync(buffer, (uint)stream.Size, InputStreamOptions.None)
             .AsTask().GetAwaiter().GetResult();
+        var bytes = readBuffer.ToArray(0, (int)readBuffer.Length);
 
         using var memStream = new MemoryStream(bytes);
         using var wicFactory = new Vortice.WIC.IWICImagingFactory();
