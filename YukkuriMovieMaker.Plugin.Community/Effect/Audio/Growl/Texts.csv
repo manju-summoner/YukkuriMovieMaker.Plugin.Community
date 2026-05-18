@@ -1,5 +1,5 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
-GrowlEffect,,がなり,Growl,嘶吼,嘶吼,그르렁,Gruñido,خشونة الصوت,Geraman,
+GrowlEffect,,グロウル,Growl,嘶吼,嘶吼,그르렁,Gruñido,خشونة الصوت,Geraman,
 DriveDbName,,ドライブ,Drive,驱动,驅動,드라이브,Saturación,تشبع,Penggerak,
 DriveDbDesc,,入力信号に与える歪み量（dB）。値が大きいほど倍音が豊かになります。,Distortion amount applied to the input signal (dB). Higher values produce richer harmonics.,输入信号的失真量（dB）。值越大谐波越丰富。,輸入信號的失真量（dB）。值越大諧波越豐富。,입력 신호에 적용되는 왜곡량（dB）。값이 클수록 배음이 풍부해집니다.,Cantidad de distorsión aplicada a la señal de entrada (dB). Valores más altos producen armónicos más ricos.,مقدار التشويه المطبق على إشارة الإدخال (ديسيبل). القيم الأعلى تنتج توافقيات أغنى.,Jumlah distorsi yang diterapkan pada sinyal masukan (dB). Nilai yang lebih tinggi menghasilkan harmonik yang lebih kaya.,
 AsymmetryName,,非対称性,Asymmetry,非对称性,非對稱性,비대칭성,Asimetría,عدم تناظر,Asimetri,

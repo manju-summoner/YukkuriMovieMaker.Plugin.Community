@@ -1,5 +1,5 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
-FalsettoEffect,,裏声化,Falsetto,假声化,假聲化,가성화,Falsete,صوت الرأس,Falseto,
+FalsettoEffect,,ファルセット,Falsetto,假声化,假聲化,가성화,Falsete,صوت الرأس,Falseto,
 PitchName,,ピッチ,Pitch,音高,音高,피치,Tono,طبقة الصوت,Nada,
 PitchDesc,,ピッチシフト量（半音）。フェーズボコーダー方式により高品質に音高を変換します。,Pitch shift amount (semitones). High-quality pitch transposition via the phase vocoder method.,音高变换量（半音）。通过相位声码器方式实现高品质音高变换。,音高變換量（半音）。透過相位聲碼器方式實現高品質音高變換。,피치 시프트량（반음）。페이즈 보코더 방식으로 고품질로 음높이를 변환합니다.,Cantidad de cambio de tono (semitonos). Transposición de tono de alta calidad mediante el método de vocoder de fase.,مقدار تغيير الطبقة (نصف نغمة). نقل الطبقة عالي الجودة عبر طريقة مرمز الطور.,Jumlah pergeseran nada (semiton). Transposisi nada berkualitas tinggi melalui metode phase vocoder.,
 FormantName,,フォルマント,Formant,共振峰,共振峰,포먼트,Formante,صيغة,Forman,
