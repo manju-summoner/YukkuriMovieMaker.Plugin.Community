@@ -11,9 +11,73 @@
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              xmlns:controls="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
              xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
-             mc:Ignorable="d" 
+             xmlns:search="clr-namespace:ICSharpCode.AvalonEdit.Search;assembly=ICSharpCode.AvalonEdit"
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type={x:Type local:NotepadViewModel}}">
+    <UserControl.Resources>
+        <Style TargetType="{x:Type search:SearchPanel}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type search:SearchPanel}">
+                        <Border Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+                                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                HorizontalAlignment="Right" VerticalAlignment="Top"
+                                Margin="0,4,18,0" Padding="4"
+                                Cursor="Arrow">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox Name="PART_searchTextBox"
+                                         Width="200" MinHeight="24"
+                                         VerticalContentAlignment="Center"
+                                         Margin="0,0,4,0">
+                                    <TextBox.Text>
+                                        <Binding Path="SearchPattern"
+                                                 RelativeSource="{RelativeSource TemplatedParent}"
+                                                 UpdateSourceTrigger="PropertyChanged">
+                                            <Binding.ValidationRules>
+                                                <ExceptionValidationRule/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+
+                                <ToggleButton IsChecked="{Binding MatchCase, RelativeSource={RelativeSource TemplatedParent}}"
+                                              ToolTip="{Binding Localization.MatchCaseText, RelativeSource={RelativeSource TemplatedParent}}"
+                                              Content="{DynamicResource {x:Static icons:IconKeys.FormatLetterCase}}"
+                                              Width="24" Height="24"
+                                              Padding="3"/>
+                                <ToggleButton IsChecked="{Binding WholeWords, RelativeSource={RelativeSource TemplatedParent}}"
+                                              ToolTip="{Binding Localization.MatchWholeWordsText, RelativeSource={RelativeSource TemplatedParent}}"
+                                              Content="{DynamicResource {x:Static icons:IconKeys.FormatLetterMatches}}"
+                                              Width="24" Height="24"
+                                              Padding="3"/>
+                                <ToggleButton IsChecked="{Binding UseRegex, RelativeSource={RelativeSource TemplatedParent}}"
+                                              ToolTip="{Binding Localization.UseRegexText, RelativeSource={RelativeSource TemplatedParent}}"
+                                              Content="{DynamicResource {x:Static icons:IconKeys.Regex}}"
+                                              Width="24" Height="24"
+                                              Padding="3"/>
+
+                                <Button Command="search:SearchCommands.FindPrevious"
+                                        ToolTip="{Binding Localization.FindPreviousText, RelativeSource={RelativeSource TemplatedParent}}"
+                                        Content="{DynamicResource {x:Static icons:IconKeys.ChevronUp}}"
+                                        Width="24" Height="24" Margin="3,0,0,0" Padding="3"/>
+                                <Button Command="search:SearchCommands.FindNext"
+                                        ToolTip="{Binding Localization.FindNextText, RelativeSource={RelativeSource TemplatedParent}}"
+                                        Content="{DynamicResource {x:Static icons:IconKeys.ChevronDown}}"
+                                        Width="24" Height="24" Padding="3"/>
+                                <Button Command="search:SearchCommands.CloseSearchPanel"
+                                        Content="{DynamicResource {x:Static icons:IconKeys.Close}}"
+                                        Width="24" Height="24" Margin="3,0,0,0" Padding="3"
+                                        Focusable="False"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
     <i:Interaction.Behaviors>
         <pb:OpenFileDialogBehavior ViewModel="{Binding OpenFileDialog}"/>
         <pb:SaveFileDialogBehavior ViewModel="{Binding SaveFileDialog}"/>
