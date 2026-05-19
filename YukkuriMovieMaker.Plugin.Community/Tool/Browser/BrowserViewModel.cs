@@ -96,7 +96,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 _ => !isBrowserCrashed && webView2 != null && !IsLoading,
                 _ => webView2?.CoreWebView2?.Reload());
             StopCommand = new ActionCommand(
-                _ => webView2 != null && IsLoading,
+                _ => !isBrowserCrashed && webView2 != null && IsLoading,
                 _ => webView2?.CoreWebView2?.Stop());
             NavigateCommand = new ActionCommand(
                 _ => !isBrowserCrashed && webView2 != null,
