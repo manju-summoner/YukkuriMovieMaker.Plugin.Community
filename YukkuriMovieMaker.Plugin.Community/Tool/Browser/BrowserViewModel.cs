@@ -16,6 +16,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         TaskCompletionSource<WebView2>? webView2TCS;
         WebView2? webView2;
         bool isDetached;
+        bool isBrowserCrashed;
         public bool IsLoading { get => field; private set => Set(ref field, value); }
         public double LoadingProgress { get => field; private set => Set(ref field, value); }
         CancellationTokenSource? progressCts;
@@ -36,7 +37,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             get => field;
             set
             {
-                if (Set(ref field, value) && webView2?.CoreWebView2 is { } core)
+                if (Set(ref field, value) && !isBrowserCrashed && webView2?.CoreWebView2 is { } core)
                 {
                     core.Settings.UserAgent = value ? MobileUserAgent : (defaultUserAgent ?? string.Empty);
                     core.Reload();
@@ -86,37 +87,37 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 _ => true,
                 _ => ExecuteCreateNewWindow());
             GoBackCommand = new ActionCommand(
-                _ => webView2?.CoreWebView2?.CanGoBack ?? false,
+                _ => !isBrowserCrashed && (webView2?.CoreWebView2?.CanGoBack ?? false),
                 _ => webView2?.CoreWebView2?.GoBack());
             GoForwardCommand = new ActionCommand(
-                _ => webView2?.CoreWebView2?.CanGoForward ?? false,
+                _ => !isBrowserCrashed && (webView2?.CoreWebView2?.CanGoForward ?? false),
                 _ => webView2?.CoreWebView2?.GoForward());
             RefreshCommand = new ActionCommand(
-                _ => webView2 != null && !IsLoading,
+                _ => !isBrowserCrashed && webView2 != null && !IsLoading,
                 _ => webView2?.CoreWebView2?.Reload());
             StopCommand = new ActionCommand(
-                _ => webView2 != null && IsLoading,
+                _ => !isBrowserCrashed && webView2 != null && IsLoading,
                 _ => webView2?.CoreWebView2?.Stop());
             NavigateCommand = new ActionCommand(
-                _ => webView2 != null,
+                _ => !isBrowserCrashed && webView2 != null,
                 parameter => ExecuteNavigate(parameter));
             OpenFavoriteEditorCommand = new ActionCommand(
                 _ => true,
                 parameter => ExecuteOpenFavoriteEditor(parameter));
             ClearBrowsingDataCommand = new ActionCommand(
-                _ => webView2?.CoreWebView2?.Profile != null,
+                _ => !isBrowserCrashed && webView2?.CoreWebView2?.Profile != null,
                 _ => ExecuteClearBrowsingData());
             OpenBrowserSettingsCommand = new ActionCommand(
                 _ => true,
                 _ => ExecuteOpenBrowserSettings());
             DownloadCommand = new ActionCommand(
-                _ => webView2?.CoreWebView2 != null,
+                _ => !isBrowserCrashed && webView2?.CoreWebView2 != null,
                 _ => webView2?.CoreWebView2?.OpenDefaultDownloadDialog());
             PrintCommand = new ActionCommand(
-                _ => webView2?.CoreWebView2 != null,
+                _ => !isBrowserCrashed && webView2?.CoreWebView2 != null,
                 _ => webView2?.CoreWebView2?.ShowPrintUI());
             FindCommand = new ActionCommand(
-                _ => webView2?.CoreWebView2 != null,
+                _ => !isBrowserCrashed && webView2?.CoreWebView2 != null,
                 async _ => await ExecuteFindAsync());
         }
 
@@ -135,6 +136,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private void ExecuteNavigate(object? parameter)
         {
+            if (isBrowserCrashed)
+                return;
             var url = NormalizeOrCreateSearchUrl(parameter as string ?? string.Empty);
             if (NormalizeUrl(webView2?.CoreWebView2?.Source ?? string.Empty) == url)
                 return;
@@ -171,12 +174,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private void ExecuteClearBrowsingData()
         {
-            if (webView2?.CoreWebView2?.Profile == null)
+            if (isBrowserCrashed || webView2?.CoreWebView2?.Profile == null)
                 return;
 
             ClearBrowsingDataViewModel = new ClearBrowsingDataViewModel(async vm =>
             {
-                if (vm.ClearBrowserCache && webView2?.CoreWebView2?.Profile is { } profile)
+                if (vm.ClearBrowserCache && !isBrowserCrashed && webView2?.CoreWebView2?.Profile is { } profile)
                 {
                     await profile.ClearBrowsingDataAsync();
                 }
@@ -202,7 +205,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private async Task ExecuteFindAsync()
         {
-            if (webView2?.CoreWebView2 is not { } core || core.Environment == null)
+            if (isBrowserCrashed || webView2?.CoreWebView2 is not { } core || core.Environment == null)
                 return;
 
             try
@@ -221,24 +224,43 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             }
         }
 
+        void SubscribeCoreWebView2Events(CoreWebView2 core)
+        {
+            core.NewWindowRequested += CoreWebView2_NewWindowRequested;
+            core.NavigationStarting += CoreWebView2_NavigationStarting;
+            core.ContentLoading += CoreWebView2_ContentLoading;
+            core.DOMContentLoaded += CoreWebView2_DOMContentLoaded;
+            core.NavigationCompleted += CoreWebView2_NavigationCompleted;
+            core.SourceChanged += CoreWebView2_SourceChanged;
+            core.DocumentTitleChanged += CoreWebView2_DocumentTitleChanged;
+            core.FaviconChanged += CoreWebView2_FaviconChanged;
+            core.ProcessFailed += CoreWebView2_ProcessFailed;
+        }
+
+        void UnsubscribeCoreWebView2Events(CoreWebView2 core)
+        {
+            core.NewWindowRequested -= CoreWebView2_NewWindowRequested;
+            core.NavigationStarting -= CoreWebView2_NavigationStarting;
+            core.ContentLoading -= CoreWebView2_ContentLoading;
+            core.DOMContentLoaded -= CoreWebView2_DOMContentLoaded;
+            core.NavigationCompleted -= CoreWebView2_NavigationCompleted;
+            core.SourceChanged -= CoreWebView2_SourceChanged;
+            core.DocumentTitleChanged -= CoreWebView2_DocumentTitleChanged;
+            core.FaviconChanged -= CoreWebView2_FaviconChanged;
+            core.ProcessFailed -= CoreWebView2_ProcessFailed;
+        }
+
         public void AttachWebView2(WebView2 webView2Service)
         {
             webView2 = webView2Service;
             isDetached = false;
+            isBrowserCrashed = false;
 
             if (webView2.CoreWebView2 is { } core)
             {
                 core.IsMuted = false;
                 defaultUserAgent ??= core.Settings.UserAgent;
-                core.NewWindowRequested += CoreWebView2_NewWindowRequested;
-                core.NavigationStarting += CoreWebView2_NavigationStarting;
-                core.ContentLoading += CoreWebView2_ContentLoading;
-                core.DOMContentLoaded += CoreWebView2_DOMContentLoaded;
-                core.NavigationCompleted += CoreWebView2_NavigationCompleted;
-                core.SourceChanged += CoreWebView2_SourceChanged;
-                core.DocumentTitleChanged += CoreWebView2_DocumentTitleChanged;
-                core.FaviconChanged += CoreWebView2_FaviconChanged;
-
+                SubscribeCoreWebView2Events(core);
                 core.ScriptDialogOpening -= CoreWebView2_ScriptDialogOpening;
                 core.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
             }
@@ -258,22 +280,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         {
             isDetached = true;
 
-            if (webView2?.CoreWebView2 is { } core)
+            if (webView2 is { } wv2 && !isBrowserCrashed)
             {
-                core.NewWindowRequested -= CoreWebView2_NewWindowRequested;
-                core.NavigationStarting -= CoreWebView2_NavigationStarting;
-                core.ContentLoading -= CoreWebView2_ContentLoading;
-                core.DOMContentLoaded -= CoreWebView2_DOMContentLoaded;
-                core.NavigationCompleted -= CoreWebView2_NavigationCompleted;
-                core.SourceChanged -= CoreWebView2_SourceChanged;
-                core.DocumentTitleChanged -= CoreWebView2_DocumentTitleChanged;
-                core.FaviconChanged -= CoreWebView2_FaviconChanged;
+                CoreWebView2? core = null;
+                try { core = wv2.CoreWebView2; }
+                catch (InvalidOperationException) { }
 
-                core.IsMuted = true;
-                core.ExecuteScriptAsync("window.onbeforeunload = null; document.querySelectorAll('video, audio').forEach(x => x.pause());");
-                core.Navigate("about:blank");
-
-                core.ScriptDialogOpening -= CoreWebView2_ScriptDialogOpening;
+                if (core is not null)
+                {
+                    UnsubscribeCoreWebView2Events(core);
+                    core.IsMuted = true;
+                    core.ExecuteScriptAsync("window.onbeforeunload = null; document.querySelectorAll('video, audio').forEach(x => x.pause());");
+                    core.Navigate("about:blank");
+                    core.ScriptDialogOpening -= CoreWebView2_ScriptDialogOpening;
+                }
             }
 
             BrowserSettings.Default.PropertyChanged -= BrowserSettings_PropertyChanged;
@@ -391,7 +411,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             IsLoading = false;
             LoadingProgress = 0;
             UpdateCommandCanExecuteState();
-            if (webView2?.CoreWebView2 is not { } core)
+            if (isBrowserCrashed || webView2?.CoreWebView2 is not { } core)
                 return;
             AddHistory(core.Source, core.DocumentTitle);
             var url = core.Source;
@@ -412,6 +432,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private void CoreWebView2_SourceChanged(object? sender, CoreWebView2SourceChangedEventArgs e)
         {
+            if (isBrowserCrashed)
+                return;
             Location = NormalizeUrl(webView2?.CoreWebView2?.Source ?? string.Empty);
             OnPropertyChanged(nameof(IsFavorite));
             UpdateCommandCanExecuteState();
@@ -424,7 +446,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private async void CoreWebView2_FaviconChanged(object? sender, object e)
         {
-            if (webView2?.CoreWebView2 is not { } core || string.IsNullOrEmpty(core.FaviconUri)) return;
+            if (isBrowserCrashed || webView2?.CoreWebView2 is not { } core || string.IsNullOrEmpty(core.FaviconUri)) return;
             var url = core.Source;
             var favorites = BrowserSettings.Default.Favorites;
             if (!favorites.Any(f => Uri.TryCreate(f.Url, UriKind.Absolute, out var fUri) && Uri.TryCreate(url, UriKind.Absolute, out var uUri) && string.Equals(fUri.Host, uUri.Host, StringComparison.OrdinalIgnoreCase)))
@@ -439,6 +461,55 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 }
             }
             catch { }
+        }
+
+        private async void CoreWebView2_ProcessFailed(object? sender, CoreWebView2ProcessFailedEventArgs e)
+        {
+            if (e.ProcessFailedKind != CoreWebView2ProcessFailedKind.BrowserProcessExited)
+                return;
+
+            isBrowserCrashed = true;
+            IsLoading = false;
+            progressCts?.Cancel();
+            UpdateCommandCanExecuteState();
+
+            if (isDetached || webView2 is not { } wv2)
+                return;
+
+            if (sender is CoreWebView2 crashedCore)
+                UnsubscribeCoreWebView2Events(crashedCore);
+
+            try
+            {
+                await wv2.EnsureCoreWebView2Async();
+            }
+            catch
+            {
+                return;
+            }
+
+            if (isDetached || !ReferenceEquals(webView2, wv2))
+                return;
+
+            CoreWebView2? newCore;
+            try
+            {
+                newCore = wv2.CoreWebView2;
+            }
+            catch
+            {
+                return;
+            }
+
+            isBrowserCrashed = false;
+            newCore.IsMuted = false;
+            defaultUserAgent ??= newCore.Settings.UserAgent;
+            SubscribeCoreWebView2Events(newCore);
+            newCore.ScriptDialogOpening -= CoreWebView2_ScriptDialogOpening;
+            newCore.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
+            ApplySettings();
+            ApplyState();
+            UpdateCommandCanExecuteState();
         }
 
         private void AddHistory(string url, string title)
@@ -463,7 +534,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private async Task FetchAndSaveFaviconAsync(string url)
         {
-            if (webView2?.CoreWebView2 is not { } core || string.IsNullOrEmpty(core.FaviconUri))
+            if (isBrowserCrashed || webView2?.CoreWebView2 is not { } core || string.IsNullOrEmpty(core.FaviconUri))
                 return;
             var favorites = BrowserSettings.Default.Favorites;
             if (!BrowserFaviconManager.IsFaviconMissingForMatchingFavorite(url, favorites))
@@ -515,10 +586,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private void ApplyState()
         {
+            if (isBrowserCrashed || webView2 == null)
+                return;
             var url = NormalizeOrCreateSearchUrl(state.Location);
-            webView2?.CoreWebView2?.Navigate(url);
-            if (webView2 != null)
-                webView2.ZoomFactor = state.Zoom;
+            webView2.CoreWebView2?.Navigate(url);
+            webView2.ZoomFactor = state.Zoom;
         }
 
         private void BrowserSettings_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -528,7 +600,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         private void ApplySettings()
         {
-            if (webView2?.CoreWebView2 is not { } core) return;
+            if (isBrowserCrashed || webView2?.CoreWebView2 is not { } core) return;
             var settings = core.Settings;
             settings.IsReputationCheckingRequired = BrowserSettings.Default.IsSmartScreenEnabled;
             settings.IsPasswordAutosaveEnabled = BrowserSettings.Default.IsPasswordAutosaveEnabled;
