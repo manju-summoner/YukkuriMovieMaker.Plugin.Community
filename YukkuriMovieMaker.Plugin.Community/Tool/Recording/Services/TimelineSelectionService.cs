@@ -134,14 +134,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 {
                     selectionMoved = TrySetSelection(next);
                 }
-                catch (Exception ex)
+                catch
                 {
                 }
 
                 var frameMoved = TryMoveCurrentFrame(next);
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
@@ -187,7 +187,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
             }
             return result;
@@ -206,7 +206,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     .ThenBy(i => GetIntMember(i, "Layer"))
                     .ToList();
             }
-            catch (Exception ex)
+            catch
             {
                 return Array.Empty<object>();
             }
@@ -706,6 +706,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         }
     }
 }
+
 
 
 

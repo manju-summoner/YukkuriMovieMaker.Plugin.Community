@@ -174,7 +174,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch
             {
             }
 
@@ -275,7 +275,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                         return true;
                 }
             }
-            catch (Exception ex)
+            catch
             {
             }
 
@@ -332,7 +332,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
             }
 
@@ -395,7 +395,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 TryRequestVoiceGeneration(selected);
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
@@ -443,7 +443,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 var updatedContentLength = SetMemberWithBackingField(selected, "ContentLength", contentDuration);
                 var updatedOriginalContentLength = SetMemberWithBackingField(selected, "OriginalContentLength", contentDuration);
             }
-            catch (Exception ex)
+            catch
             {
             }
         }
@@ -747,7 +747,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 if (TryExecuteVoiceGenerationCommand(selected))
                     return;
             }
-            catch (Exception ex)
+            catch
             {
             }
         }
@@ -1128,6 +1128,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         }
     }
 }
+
 
 
 
