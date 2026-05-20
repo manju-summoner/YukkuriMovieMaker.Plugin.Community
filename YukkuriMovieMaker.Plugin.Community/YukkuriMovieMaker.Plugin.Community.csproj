@@ -84,7 +84,6 @@
     <Folder Include="FileWriter\" />
     <Folder Include="Tachie\" />
     <Folder Include="Transition\" />
-    <Folder Include="Voice\Recording\" />
   </ItemGroup>
 	
   <ItemGroup>
