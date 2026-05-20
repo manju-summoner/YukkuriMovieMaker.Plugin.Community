@@ -33,6 +33,9 @@
         <TextBlock Grid.Row="1"
                    Text="{Binding DisplayText}"
                    Margin="0,6,0,0"
+                   FontSize="22"
+                   FontWeight="SemiBold"
+                   LineHeight="34"
                    TextWrapping="Wrap"/>
 
         <Separator Grid.Row="2" Margin="0,8,0,6"/>
