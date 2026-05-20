@@ -25,6 +25,9 @@
 	  <Reference Include="YukkuriMovieMaker.Plugin">
 		  <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
 	  </Reference>
+	  <Reference Include="YukkuriMovieMaker">
+		  <HintPath>$(YMM4DirPath)YukkuriMovieMaker.dll</HintPath>
+	  </Reference>
 	  <Reference Include="SharpGen.Runtime">
 		  <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
 	  </Reference>
@@ -81,6 +84,7 @@
     <Folder Include="FileWriter\" />
     <Folder Include="Tachie\" />
     <Folder Include="Transition\" />
+    <Folder Include="Voice\Recording\" />
   </ItemGroup>
 	
   <ItemGroup>

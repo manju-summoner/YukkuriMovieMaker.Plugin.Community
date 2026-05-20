@@ -1,0 +1,250 @@
+﻿using NAudio.Wave;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
+
+namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
+{
+    public class RecordingService
+    {
+        private const int SampleRate = 48000;
+        private const int BitDepth = 16;
+        private const int Channels = 1;
+
+        private readonly object syncRoot = new();
+        private readonly RecordPathService recordPathService;
+
+        private WaveInEvent? waveIn;
+        private WaveFileWriter? writer;
+        private string? currentFilePath;
+        private DateTime recordingStartedAt;
+        private long recordedBytes;
+        private Exception? recordingStopException;
+        private readonly ManualResetEventSlim recordingStoppedEvent = new(false);
+
+        public RecordingService(RecordPathService recordPathService)
+        {
+            this.recordPathService = recordPathService;
+        }
+
+        public bool IsRecording { get; private set; }
+
+        public event EventHandler<RecordingDataEventArgs>? DataAvailable;
+        public event EventHandler? RecordingStateChanged;
+
+        public IReadOnlyList<string> GetAvailableDeviceNames()
+        {
+            var devices = new List<string>();
+            for (var index = 0; index < WaveInEvent.DeviceCount; index++)
+            {
+                devices.Add(WaveInEvent.GetCapabilities(index).ProductName);
+            }
+            return devices;
+        }
+
+        public void StartRecording(string deviceName)
+        {
+            lock (syncRoot)
+            {
+                if (IsRecording)
+                    return;
+
+                var deviceIndex = FindDeviceIndex(deviceName);
+                if (deviceIndex < 0)
+                {
+                    throw new InvalidOperationException($"録音デバイスを取得できません: {deviceName}");
+                }
+
+                var filePath = recordPathService.CreateRecordFilePath();
+
+                try
+                {
+                    var input = new WaveInEvent
+                    {
+                        DeviceNumber = deviceIndex,
+                        WaveFormat = new WaveFormat(SampleRate, BitDepth, Channels),
+                        BufferMilliseconds = 100
+                    };
+                    var output = new WaveFileWriter(filePath, input.WaveFormat);
+
+                    input.DataAvailable += OnDataAvailable;
+                    input.RecordingStopped += OnRecordingStopped;
+
+                    waveIn = input;
+                    writer = output;
+                    currentFilePath = filePath;
+                    recordingStartedAt = DateTime.Now;
+                    recordedBytes = 0;
+                    recordingStopException = null;
+                    recordingStoppedEvent.Reset();
+                    IsRecording = true;
+                    OnRecordingStateChanged();
+
+                    input.StartRecording();
+                }
+                catch
+                {
+                    CleanupRecordingResources(deleteFile: true);
+                    throw;
+                }
+            }
+        }
+
+        public RecordedFileInfo? StopRecording()
+        {
+            string? filePath;
+            DateTime startedAt;
+            long dataLength;
+
+            lock (syncRoot)
+            {
+                if (!IsRecording)
+                    return null;
+
+                try
+                {
+                    filePath = currentFilePath;
+                    startedAt = recordingStartedAt;
+                    dataLength = recordedBytes;
+
+                    recordingStoppedEvent.Reset();
+                    waveIn?.StopRecording();
+                }
+                catch
+                {
+                    CleanupRecordingResources(deleteFile: false);
+                    throw;
+                }
+            }
+
+            if (!recordingStoppedEvent.Wait(TimeSpan.FromSeconds(3)))
+                throw new TimeoutException("録音停止の完了待機がタイムアウトしました。");
+
+            lock (syncRoot)
+            {
+                if (recordingStopException is not null)
+                    throw new InvalidOperationException("録音停止に失敗しました。", recordingStopException);
+            }
+
+            var info = CreateRecordedFileInfo(filePath, startedAt, dataLength);
+            return info;
+        }
+
+        private int FindDeviceIndex(string deviceName)
+        {
+            for (var index = 0; index < WaveInEvent.DeviceCount; index++)
+            {
+                if (string.Equals(WaveInEvent.GetCapabilities(index).ProductName, deviceName, StringComparison.Ordinal))
+                    return index;
+            }
+
+            return -1;
+        }
+
+        private void OnDataAvailable(object? sender, WaveInEventArgs e)
+        {
+            lock (syncRoot)
+            {
+                if (writer is null)
+                    return;
+
+                writer.Write(e.Buffer, 0, e.BytesRecorded);
+                writer.Flush();
+                recordedBytes += e.BytesRecorded;
+
+                var volume = CalculateVolume(e.Buffer, e.BytesRecorded);
+                DataAvailable?.Invoke(this, new RecordingDataEventArgs(volume));
+            }
+        }
+
+        private void OnRecordingStopped(object? sender, StoppedEventArgs e)
+        {
+            try
+            {
+                lock (syncRoot)
+                {
+                    recordingStopException = e.Exception;
+                    CleanupRecordingResources(deleteFile: false);
+                }
+            }
+            finally
+            {
+                recordingStoppedEvent.Set();
+            }
+        }
+
+        private static double CalculateVolume(byte[] buffer, int bytesRecorded)
+        {
+            if (bytesRecorded <= 0)
+                return 0;
+
+            double sum = 0;
+            var sampleCount = bytesRecorded / 2;
+
+            for (var index = 0; index + 1 < bytesRecorded; index += 2)
+            {
+                var sample = BitConverter.ToInt16(buffer, index);
+                var normalized = sample / 32768.0;
+                sum += normalized * normalized;
+            }
+
+            return sampleCount == 0 ? 0 : Math.Sqrt(sum / sampleCount);
+        }
+
+        private static RecordedFileInfo? CreateRecordedFileInfo(string? filePath, DateTime startedAt, long dataLength)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+                return null;
+
+            if (!File.Exists(filePath))
+                return null;
+
+            return new RecordedFileInfo
+            {
+                FilePath = filePath,
+                Duration = DateTime.Now - startedAt,
+                SampleRate = SampleRate,
+                Channels = Channels,
+                CreatedAt = DateTime.Now,
+                DataLength = dataLength
+            };
+        }
+
+        private void CleanupRecordingResources(bool deleteFile)
+        {
+            if (waveIn is not null)
+            {
+                waveIn.DataAvailable -= OnDataAvailable;
+                waveIn.RecordingStopped -= OnRecordingStopped;
+                waveIn.Dispose();
+                waveIn = null;
+            }
+
+            if (writer is not null)
+            {
+                writer.Dispose();
+                writer = null;
+            }
+
+            var filePath = currentFilePath;
+            currentFilePath = null;
+            IsRecording = false;
+            OnRecordingStateChanged();
+
+            if (deleteFile && !string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+        }
+
+        private void OnRecordingStateChanged()
+        {
+            RecordingStateChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+}
+
+
+

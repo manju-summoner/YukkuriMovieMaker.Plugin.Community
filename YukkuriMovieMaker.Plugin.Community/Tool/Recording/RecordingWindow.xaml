@@ -1,0 +1,81 @@
+﻿<Window x:Class="YukkuriMovieMaker.Plugin.Community.Tool.Recording.RecordingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="セリフ録音"
+        Width="760"
+        Height="520"
+        MinWidth="680"
+        MinHeight="460"
+        xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+        >
+    <Window.Resources>
+        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="セリフ録音"
+                   FontWeight="Bold"
+                   Margin="0,2,0,0"/>
+
+        <TextBlock Grid.Row="1"
+                   Text="{Binding DisplayText}"
+                   Margin="0,6,0,0"
+                   TextWrapping="Wrap"/>
+
+        <Separator Grid.Row="2" Margin="0,8,0,6"/>
+
+        <Grid Grid.Row="3" Margin="0,0,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="保存先" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <TextBox Grid.Column="1" Text="{Binding OutputDirectory, UpdateSourceTrigger=PropertyChanged}" MinWidth="260" VerticalAlignment="Center"/>
+            <Button Grid.Column="2" Content="参照..." Command="{Binding BrowseOutputDirectoryCommand}" Margin="8,0,0,0" MinWidth="78"/>
+            <Button Grid.Column="3" Content="既定値" Command="{Binding ResetOutputDirectoryCommand}" Margin="8,0,0,0" MinWidth="72"/>
+        </Grid>
+
+        <TextBlock Grid.Row="4"
+                   Text="操作: 録音開始 → 録音停止（自動反映）→ 次のセリフ"
+                   Margin="0,6,0,0"
+                   FontSize="12"
+                   TextWrapping="Wrap"/>
+
+        <ScrollViewer Grid.Row="5" Margin="0,10,0,0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <WrapPanel Margin="0,0,0,8" ItemHeight="32">
+                    <Button Content="録音開始" Command="{Binding StartRecordingCommand}" MinWidth="110" Margin="0,0,8,8"/>
+                    <Button Content="録音停止" Command="{Binding StopRecordingCommand}" MinWidth="110" Margin="0,0,8,8"/>
+                    <Button Content="タイムラインへ追加" Command="{Binding AddToTimelineCommand}" MinWidth="130" Margin="0,0,8,8"/>
+                    <Button Content="再録音" Command="{Binding RegenerateCommand}" MinWidth="90" Margin="0,0,8,8"/>
+                    <Button Content="再生" Command="{Binding PlayCommand}" MinWidth="70" Margin="0,0,8,8"/>
+                </WrapPanel>
+
+                <TextBlock Text="入力レベル"/>
+                <ProgressBar Minimum="0" Maximum="1" Value="{Binding CurrentVolume}" Height="16" Margin="0,4,0,0"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <TextBlock Grid.Row="6"
+                   Text="{Binding Status}"
+                   Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                   FontWeight="Bold"
+                   Margin="0,10,0,0"
+                   TextWrapping="Wrap"/>
+    </Grid>
+</Window>
