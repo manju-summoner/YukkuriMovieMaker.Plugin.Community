@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
+using System.Threading.Tasks;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         private DateTime recordingStartedAt;
         private long recordedBytes;
         private Exception? recordingStopException;
-        private readonly ManualResetEventSlim recordingStoppedEvent = new(false);
+        private TaskCompletionSource<bool>? recordingStoppedTcs;
 
         public RecordingService(RecordPathService recordPathService)
         {
@@ -74,7 +74,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     recordingStartedAt = DateTime.Now;
                     recordedBytes = 0;
                     recordingStopException = null;
-                    recordingStoppedEvent.Reset();
+                    recordingStoppedTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
                     IsRecording = true;
                     OnRecordingStateChanged();
 
@@ -88,11 +88,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             }
         }
 
-        public RecordedFileInfo? StopRecording()
+        public async Task<RecordedFileInfo?> StopRecordingAsync()
         {
             string? filePath;
             DateTime startedAt;
-            long dataLength;
+            TaskCompletionSource<bool>? stopCompletion;
 
             lock (syncRoot)
             {
@@ -103,9 +103,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 {
                     filePath = currentFilePath;
                     startedAt = recordingStartedAt;
-                    dataLength = recordedBytes;
-
-                    recordingStoppedEvent.Reset();
+                    stopCompletion = recordingStoppedTcs ?? new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                    recordingStoppedTcs = stopCompletion;
                     waveIn?.StopRecording();
                 }
                 catch
@@ -115,17 +114,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 }
             }
 
-            if (!recordingStoppedEvent.Wait(TimeSpan.FromSeconds(3)))
+            if (stopCompletion is null)
+                throw new InvalidOperationException("録音停止の完了待機オブジェクトを取得できませんでした。");
+
+            if (!await WaitForStopAsync(stopCompletion.Task, TimeSpan.FromSeconds(3)).ConfigureAwait(false))
                 throw new TimeoutException("録音停止の完了待機がタイムアウトしました。");
 
+            long dataLength;
             lock (syncRoot)
             {
                 if (recordingStopException is not null)
                     throw new InvalidOperationException("録音停止に失敗しました。", recordingStopException);
+                dataLength = recordedBytes;
             }
 
             var info = CreateRecordedFileInfo(filePath, startedAt, dataLength);
             return info;
+        }
+
+        public RecordedFileInfo? StopRecording()
+        {
+            return StopRecordingAsync().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         private int FindDeviceIndex(string deviceName)
@@ -157,18 +166,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
         private void OnRecordingStopped(object? sender, StoppedEventArgs e)
         {
+            TaskCompletionSource<bool>? stopCompletion = null;
             try
             {
                 lock (syncRoot)
                 {
                     recordingStopException = e.Exception;
+                    stopCompletion = recordingStoppedTcs;
+                    recordingStoppedTcs = null;
                     CleanupRecordingResources(deleteFile: false);
                 }
             }
             finally
             {
-                recordingStoppedEvent.Set();
+                stopCompletion?.TrySetResult(true);
             }
+        }
+
+        private static async Task<bool> WaitForStopAsync(Task stopTask, TimeSpan timeout)
+        {
+            var completed = await Task.WhenAny(stopTask, Task.Delay(timeout)).ConfigureAwait(false);
+            if (completed != stopTask)
+                return false;
+
+            await stopTask.ConfigureAwait(false);
+            return true;
         }
 
         private static double CalculateVolume(byte[] buffer, int bytesRecorded)

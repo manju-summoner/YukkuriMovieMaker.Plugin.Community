@@ -212,7 +212,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
             try
             {
-                var recordedFile = recordingService.StopRecording();
+                var recordedFile = await recordingService.StopRecordingAsync();
                 CurrentVolume = 0;
 
                 if (recordedFile is null || recordedFile.DataLength <= 0)
