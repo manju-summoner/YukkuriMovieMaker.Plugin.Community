@@ -54,8 +54,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             var items = GetSelectedItemsSnapshot();
             foreach (var item in items)
             {
-                var serif = GetStringProperty(item, "Serif")
-                            ?? GetStringProperty(item, "Text");
+                var serif = TimelineMemberReader.GetStringProperty(item, "Serif")
+                            ?? TimelineMemberReader.GetStringProperty(item, "Text");
                 if (!string.IsNullOrWhiteSpace(serif))
                 {
                     return serif;
@@ -72,10 +72,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             var items = GetSelectedItemsSnapshot();
             foreach (var item in items)
             {
-                if (TryGetIntProperty(item, "Frame", out var foundFrame))
+                if (TimelineMemberReader.TryGetIntProperty(item, "Frame", out var foundFrame))
                 {
                     frame = foundFrame;
-                    if (!TryGetIntProperty(item, "Layer", out layer))
+                    if (!TimelineMemberReader.TryGetIntProperty(item, "Layer", out layer))
                         layer = 0;
                     return true;
                 }
@@ -104,8 +104,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 }
 
                 var voiceItems = CollectVoiceItems(timeline)
-                    .OrderBy(i => GetIntMember(i, "Frame"))
-                    .ThenBy(i => GetIntMember(i, "Layer"))
+                    .OrderBy(i => TimelineMemberReader.GetIntMember(i, "Frame"))
+                    .ThenBy(i => TimelineMemberReader.GetIntMember(i, "Layer"))
                     .ToList();
                 if (voiceItems.Count == 0)
                 {
@@ -121,7 +121,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 }
 
                 var next = voiceItems[currentIndex + 1];
-                var serif = GetStringProperty(next, "Serif") ?? GetStringProperty(next, "Text");
+                var serif = TimelineMemberReader.GetStringProperty(next, "Serif") ?? TimelineMemberReader.GetStringProperty(next, "Text");
                 if (string.IsNullOrWhiteSpace(serif))
                 {
                     return false;
@@ -149,8 +149,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
         private static void SetPreferredVoiceTarget(object item, string serif)
         {
-            var frame = GetIntMember(item, "Frame");
-            var layer = GetIntMember(item, "Layer");
+            var frame = TimelineMemberReader.GetIntMember(item, "Frame");
+            var layer = TimelineMemberReader.GetIntMember(item, "Layer");
             if (frame < 0 || layer < 0)
                 return;
 
@@ -202,8 +202,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     return Array.Empty<object>();
 
                 return CollectVoiceItems(timeline)
-                    .OrderBy(i => GetIntMember(i, "Frame"))
-                    .ThenBy(i => GetIntMember(i, "Layer"))
+                    .OrderBy(i => TimelineMemberReader.GetIntMember(i, "Frame"))
+                    .ThenBy(i => TimelineMemberReader.GetIntMember(i, "Layer"))
                     .ToList();
             }
             catch
@@ -268,7 +268,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         {
             try
             {
-                if (!TryGetIntProperty(item, "Frame", out var frame))
+                if (!TimelineMemberReader.TryGetIntProperty(item, "Frame", out var frame))
                     return false;
 
                 var timeline = ToolViewModel.TimelineInstance;
@@ -433,9 +433,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             if (type.Name.Contains("Voice", StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            var serif = GetStringProperty(item, "Serif");
-            var frame = GetIntMember(item, "Frame");
-            var layer = GetIntMember(item, "Layer");
+            var serif = TimelineMemberReader.GetStringProperty(item, "Serif");
+            var frame = TimelineMemberReader.GetIntMember(item, "Frame");
+            var layer = TimelineMemberReader.GetIntMember(item, "Layer");
             return serif is not null && (frame != int.MinValue || layer != int.MinValue);
         }
 
@@ -447,14 +447,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     return i;
             }
 
-            var selectedFrame = GetIntMember(selected, "Frame");
-            var selectedLayer = GetIntMember(selected, "Layer");
-            var selectedSerif = GetStringProperty(selected, "Serif");
+            var selectedFrame = TimelineMemberReader.GetIntMember(selected, "Frame");
+            var selectedLayer = TimelineMemberReader.GetIntMember(selected, "Layer");
+            var selectedSerif = TimelineMemberReader.GetStringProperty(selected, "Serif");
             for (var i = 0; i < items.Count; i++)
             {
-                if (GetIntMember(items[i], "Frame") == selectedFrame
-                    && GetIntMember(items[i], "Layer") == selectedLayer
-                    && string.Equals(GetStringProperty(items[i], "Serif"), selectedSerif, StringComparison.Ordinal))
+                if (TimelineMemberReader.GetIntMember(items[i], "Frame") == selectedFrame
+                    && TimelineMemberReader.GetIntMember(items[i], "Layer") == selectedLayer
+                    && string.Equals(TimelineMemberReader.GetStringProperty(items[i], "Serif"), selectedSerif, StringComparison.Ordinal))
                 {
                     return i;
                 }
@@ -469,7 +469,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             var bySelected = FindCurrentIndex(items, selected);
             if (bySelected >= 0)
             {
-                var selectedSerif = GetStringProperty(items[bySelected], "Serif");
+                var selectedSerif = TimelineMemberReader.GetStringProperty(items[bySelected], "Serif");
                 if (string.IsNullOrWhiteSpace(currentSerif) || string.Equals(selectedSerif, currentSerif, StringComparison.Ordinal))
                     return bySelected;
             }
@@ -479,8 +479,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             {
                 for (var i = 0; i < items.Count; i++)
                 {
-                    if (GetIntMember(items[i], "Frame") == currentFrame
-                        && string.Equals(GetStringProperty(items[i], "Serif"), currentSerif, StringComparison.Ordinal))
+                    if (TimelineMemberReader.GetIntMember(items[i], "Frame") == currentFrame
+                        && string.Equals(TimelineMemberReader.GetStringProperty(items[i], "Serif"), currentSerif, StringComparison.Ordinal))
                     {
                         return i;
                     }
@@ -494,10 +494,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 var bestFrame = int.MinValue;
                 for (var i = 0; i < items.Count; i++)
                 {
-                    if (!string.Equals(GetStringProperty(items[i], "Serif"), currentSerif, StringComparison.Ordinal))
+                    if (!string.Equals(TimelineMemberReader.GetStringProperty(items[i], "Serif"), currentSerif, StringComparison.Ordinal))
                         continue;
 
-                    var frame = GetIntMember(items[i], "Frame");
+                    var frame = TimelineMemberReader.GetIntMember(items[i], "Frame");
                     if (frame <= currentFrame && frame >= bestFrame)
                     {
                         bestFrame = frame;
@@ -513,13 +513,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             return FindCurrentIndex(items, selected);
         }
 
-        private static int GetIntMember(object instance, string name)
-        {
-            if (TryGetIntProperty(instance, name, out var value))
-                return value;
-            return int.MinValue;
-        }
-
         private static int GetCurrentFrame(object timeline)
         {
             try
@@ -528,7 +521,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 if (prop is not null && prop.GetIndexParameters().Length == 0)
                 {
                     var value = prop.GetValue(timeline);
-                    if (TryConvertToInt(value, out var frame))
+                    if (TimelineMemberReader.TryConvertToInt(value, out var frame))
                         return frame;
                 }
             }
@@ -570,69 +563,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             return item;
         }
 
-        private static string? GetStringProperty(object instance, string propertyName)
-        {
-            var property = instance.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (property is not null && property.GetIndexParameters().Length > 0)
-                return null;
-            if (property?.GetValue(instance) is string value)
-                return value;
-
-            return null;
-        }
-
-        private static bool TryGetIntProperty(object instance, string propertyName, out int value)
-        {
-            value = 0;
-            var property = instance.GetType().GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (property is not null)
-            {
-                if (property.GetIndexParameters().Length > 0)
-                    return false;
-                var raw = property.GetValue(instance);
-                if (TryConvertToInt(raw, out value))
-                    return true;
-            }
-
-            var field = instance.GetType().GetField(propertyName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (field is not null)
-            {
-                var raw = field.GetValue(instance);
-                if (TryConvertToInt(raw, out value))
-                    return true;
-            }
-
-            return false;
-        }
-
-        private static bool TryConvertToInt(object? raw, out int value)
-        {
-            value = 0;
-            if (raw is null)
-                return false;
-
-            switch (raw)
-            {
-                case int i:
-                    value = i;
-                    return true;
-                case long l:
-                    value = (int)l;
-                    return true;
-                case short s:
-                    value = s;
-                    return true;
-                case byte b:
-                    value = b;
-                    return true;
-                case string str when int.TryParse(str, out var parsed):
-                    value = parsed;
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
         private sealed class PreferredVoiceTarget
         {
             public PreferredVoiceTarget(int frame, int layer, string? serif)
@@ -648,6 +578,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         }
     }
 }
+
 
 
 

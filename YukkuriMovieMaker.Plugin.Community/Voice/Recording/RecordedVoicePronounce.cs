@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.ItemEditor;
 using YukkuriMovieMaker.Plugin.Voice;
@@ -7,14 +6,8 @@ using YukkuriMovieMaker.UndoRedo;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 {
-    public class RecordedVoicePronounce : IVoicePronounce, IEditable, INotifyPropertyChanged, IUndoRedoable
+    public class RecordedVoicePronounce : Bindable, IVoicePronounce, IEditable, IUndoRedoable
     {
-        public event PropertyChangedEventHandler? PropertyChanged
-        {
-            add { }
-            remove { }
-        }
-
         public event EventHandler<UndoRedoEventArgs>? UndoRedoCommandCreated
         {
             add { }
@@ -36,5 +29,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         }
     }
 }
+
 
 

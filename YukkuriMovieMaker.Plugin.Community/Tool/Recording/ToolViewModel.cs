@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
@@ -10,10 +9,12 @@ using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 {
-    public class ToolViewModel : INotifyPropertyChanged, ITimelineToolViewModel
+    public class ToolViewModel : Bindable, ITimelineToolViewModel
     {
         private readonly RecordingService recordingService;
-        private readonly TimelineInsertService timelineInsertService;
+        private readonly ToolRecordingStartWorkflowService recordingStartWorkflowService;
+        private readonly ToolRecordingStopWorkflowService recordingStopWorkflowService;
+        private readonly TimelineSelectionService timelineSelectionService;
         private RecordingWindow? recordingWindow;
 
         public ObservableCollection<string> AvailableDevices { get; } = new();
@@ -29,9 +30,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             get => selectedDevice;
             set
             {
-                selectedDevice = value;
-                OnPropertyChanged(nameof(SelectedDevice));
-                RaiseCommandStates();
+                if (Set(ref selectedDevice, value))
+                    RaiseCommandStates();
             }
         }
 
@@ -39,33 +39,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         public string RecordingStatus
         {
             get => recordingStatus;
-            set
-            {
-                recordingStatus = value;
-                OnPropertyChanged(nameof(RecordingStatus));
-            }
+            set => Set(ref recordingStatus, value);
         }
 
         private double currentVolume;
         public double CurrentVolume
         {
             get => currentVolume;
-            set
-            {
-                currentVolume = value;
-                OnPropertyChanged(nameof(CurrentVolume));
-            }
+            set => Set(ref currentVolume, value);
         }
 
         private string recordsDirectory = string.Empty;
         public string RecordsDirectory
         {
             get => recordsDirectory;
-            set
-            {
-                recordsDirectory = value;
-                OnPropertyChanged(nameof(RecordsDirectory));
-            }
+            set => Set(ref recordsDirectory, value);
         }
 
         public bool IsRecording => recordingService.IsRecording;
@@ -74,10 +62,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         public Timeline Timeline { get; set; } = null!;
 
         public ToolViewModel()
+            : this(CreateDefaultArguments())
         {
-            var recordPathService = new RecordPathService(RecordingSettings.Default.OutputDirectory);
-            recordingService = new RecordingService(recordPathService);
-            timelineInsertService = new TimelineInsertService();
+        }
+
+        private ToolViewModel(DefaultArguments arguments)
+            : this(
+                arguments.RecordingService,
+                arguments.StartWorkflowService,
+                arguments.StopWorkflowService,
+                arguments.RecordPathService,
+                arguments.TimelineSelectionService)
+        {
+        }
+
+        internal ToolViewModel(
+            RecordingService recordingService,
+            ToolRecordingStartWorkflowService recordingStartWorkflowService,
+            ToolRecordingStopWorkflowService recordingStopWorkflowService,
+            RecordPathService recordPathService,
+            TimelineSelectionService timelineSelectionService)
+        {
+            this.recordingService = recordingService;
+            this.recordingStartWorkflowService = recordingStartWorkflowService;
+            this.recordingStopWorkflowService = recordingStopWorkflowService;
+            this.timelineSelectionService = timelineSelectionService;
 
             recordingService.DataAvailable += OnRecordingDataAvailable;
             recordingService.RecordingStateChanged += OnRecordingStateChanged;
@@ -91,7 +100,48 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             RefreshMicrophones();
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        private static RecordingService CreateDefaultRecordingService(out RecordPathService recordPathService)
+        {
+            recordPathService = new RecordPathService(RecordingSettings.Default.OutputDirectory);
+            return new RecordingService(recordPathService);
+        }
+
+        private static DefaultArguments CreateDefaultArguments()
+        {
+            var recordingService = CreateDefaultRecordingService(out var recordPathService);
+            return new DefaultArguments
+            {
+                RecordingService = recordingService,
+                StartWorkflowService = CreateDefaultStartWorkflowService(recordingService),
+                StopWorkflowService = CreateDefaultStopWorkflowService(recordingService),
+                RecordPathService = recordPathService,
+                TimelineSelectionService = CreateDefaultTimelineSelectionService()
+            };
+        }
+
+        private static ToolRecordingStartWorkflowService CreateDefaultStartWorkflowService(RecordingService recordingService)
+        {
+            return new ToolRecordingStartWorkflowService(recordingService);
+        }
+
+        private static ToolRecordingStopWorkflowService CreateDefaultStopWorkflowService(RecordingService recordingService)
+        {
+            return new ToolRecordingStopWorkflowService(recordingService, new TimelineInsertService());
+        }
+
+        private static TimelineSelectionService CreateDefaultTimelineSelectionService()
+        {
+            return new TimelineSelectionService();
+        }
+
+        private sealed class DefaultArguments
+        {
+            public required RecordingService RecordingService { get; init; }
+            public required ToolRecordingStartWorkflowService StartWorkflowService { get; init; }
+            public required ToolRecordingStopWorkflowService StopWorkflowService { get; init; }
+            public required RecordPathService RecordPathService { get; init; }
+            public required TimelineSelectionService TimelineSelectionService { get; init; }
+        }
 
         public void RefreshMicrophones()
         {
@@ -124,15 +174,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         private void StartRecording()
         {
-            if (SelectedDevice is null)
-            {
-                RecordingStatus = "録音デバイスを再選択してください。";
-                return;
-            }
-
             try
             {
-                recordingService.StartRecording(SelectedDevice);
+                var startResult = recordingStartWorkflowService.Execute(SelectedDevice);
+                if (!startResult.IsSuccess)
+                {
+                    RecordingStatus = startResult.ErrorMessage ?? "録音デバイスを再選択してください。";
+                    return;
+                }
+
                 RecordingStatus = $"録音中... 保存先: {RecordsDirectory}";
             }
             catch (Exception ex)
@@ -146,27 +196,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
             try
             {
-                var recordedFile = await recordingService.StopRecordingAsync();
+                var stopResult = await recordingStopWorkflowService.ExecuteAsync();
 
                 CurrentVolume = 0;
                 RaiseCommandStates();
 
-                if (recordedFile is null)
+                if (!stopResult.HasData)
                 {
                     RecordingStatus = "録音データがありません。再録音してください。";
                     return;
                 }
 
-                if (recordedFile.DataLength <= 0)
+                if (stopResult.HasZeroLengthData)
                 {
-                    RecordingStatus = $"録音データ長が 0 のため追加しませんでした: {recordedFile.FilePath}";
+                    RecordingStatus = $"録音データ長が 0 のため追加しませんでした: {stopResult.FilePath ?? string.Empty}";
                     return;
                 }
 
-                RecordingStatus = $"録音停止。タイムラインへ追加中... {recordedFile.FilePath}";
-
-                await timelineInsertService.InsertAsync(recordedFile);
-                RecordingStatus = $"録音停止。タイムラインへ追加しました: {recordedFile.FilePath}";
+                RecordingStatus = $"録音停止。タイムラインへ追加しました: {stopResult.FilePath ?? string.Empty}";
             }
             catch (Exception ex)
             {
@@ -184,8 +231,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 return;
             }
 
-            var selectionService = new TimelineSelectionService();
-            var serif = selectionService.TryGetSelectedSerif();
+            var serif = timelineSelectionService.TryGetSelectedSerif();
 
             recordingWindow = new RecordingWindow(serif)
             {
@@ -204,13 +250,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         private void OnRecordingDataAvailable(object? sender, Models.RecordingDataEventArgs e)
         {
-            CurrentVolume = e.Volume;
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                CurrentVolume = e.Volume;
+                return;
+            }
+
+            _ = dispatcher.BeginInvoke((Action)(() => CurrentVolume = e.Volume));
         }
 
         private void OnRecordingStateChanged(object? sender, EventArgs e)
         {
-            OnPropertyChanged(nameof(IsRecording));
-            RaiseCommandStates();
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                OnPropertyChanged(nameof(IsRecording));
+                RaiseCommandStates();
+                return;
+            }
+
+            _ = dispatcher.BeginInvoke((Action)(() =>
+            {
+                OnPropertyChanged(nameof(IsRecording));
+                RaiseCommandStates();
+            }));
         }
 
         public void SetTimelineToolInfo(TimelineToolInfo info)
@@ -230,10 +294,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 open.RaiseCanExecuteChanged();
         }
 
-        private void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }
 

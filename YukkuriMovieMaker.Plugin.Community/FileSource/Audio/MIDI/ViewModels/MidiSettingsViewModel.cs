@@ -1,14 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
+using System.Linq;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Models;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Services;
 
 namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.ViewModels;
 
-internal sealed class MidiSettingsViewModel : INotifyPropertyChanged
+internal sealed class MidiSettingsViewModel : Bindable
 {
     public MidiPluginSettings Settings => MidiPluginSettings.Default;
     public AudioSettings Audio => Settings.Audio;
@@ -19,15 +20,20 @@ internal sealed class MidiSettingsViewModel : INotifyPropertyChanged
     public ObservableCollection<string> InstalledSoundFonts { get; } = [];
     public IReadOnlyList<RenderingMode> AvailableRenderingModes { get; } = Enum.GetValues<RenderingMode>();
 
-    public ICommand AddLayerCommand { get; }
-    public ICommand RemoveLayerCommand { get; }
-    public ICommand RefreshSoundFontsCommand { get; }
+    public ActionCommand AddLayerCommand { get; }
+    public ActionCommand RemoveLayerCommand { get; }
+    public ActionCommand RefreshSoundFontsCommand { get; }
 
-    private SoundFontEntry? _selectedLayer;
+    private SoundFontEntry? selectedLayer;
     public SoundFontEntry? SelectedLayer
     {
-        get => _selectedLayer;
-        set => SetField(ref _selectedLayer, value);
+        get => selectedLayer;
+        set
+        {
+            if (!Set(ref selectedLayer, value))
+                return;
+            RemoveLayerCommand.RaiseCanExecuteChanged();
+        }
     }
 
     public bool HasSoundFonts => InstalledSoundFonts.Count > 0;
@@ -35,13 +41,13 @@ internal sealed class MidiSettingsViewModel : INotifyPropertyChanged
 
     public MidiSettingsViewModel()
     {
-        AddLayerCommand = new RelayCommand(() => SoundFont.Layers.Add(new SoundFontEntry()));
-        RemoveLayerCommand = new RelayCommand(() =>
+        AddLayerCommand = new ActionCommand(_ => true, _ => SoundFont.Layers.Add(new SoundFontEntry()));
+        RemoveLayerCommand = new ActionCommand(_ => SelectedLayer is not null, _ =>
         {
             if (SelectedLayer is not null)
                 SoundFont.Layers.Remove(SelectedLayer);
-        }, () => SelectedLayer is not null);
-        RefreshSoundFontsCommand = new RelayCommand(RefreshList);
+        });
+        RefreshSoundFontsCommand = new ActionCommand(_ => true, _ => RefreshList());
         RefreshList();
     }
 
@@ -59,30 +65,6 @@ internal sealed class MidiSettingsViewModel : INotifyPropertyChanged
 
         OnPropertyChanged(nameof(HasSoundFonts));
         OnPropertyChanged(nameof(HasNoSoundFonts));
-        CommandManager.InvalidateRequerySuggested();
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private void OnPropertyChanged(string name) =>
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        return true;
-    }
-}
-
-file sealed class RelayCommand(Action execute, Func<bool>? canExecute = null) : ICommand
-{
-    public bool CanExecute(object? _) => canExecute?.Invoke() ?? true;
-    public void Execute(object? _) => execute();
-    public event EventHandler? CanExecuteChanged
-    {
-        add => CommandManager.RequerySuggested += value;
-        remove => CommandManager.RequerySuggested -= value;
+        RemoveLayerCommand.RaiseCanExecuteChanged();
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using Forms = System.Windows.Forms;
@@ -19,9 +17,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         Recorded
     }
 
-    public class RecordingWindowViewModel : INotifyPropertyChanged, IDisposable
+    public class RecordingWindowViewModel : Bindable, IDisposable
     {
-        public RecordingWindowViewModel() : this(null)
+        public RecordingWindowViewModel() : this(null, CreateDefaultArguments())
         {
         }
 
@@ -29,66 +27,101 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         private RecordingService recordingService;
         private readonly VoiceTimelineInsertService voiceTimelineInsertService;
         private readonly TimelineSelectionService timelineSelectionService;
+        private readonly RecordingScriptItemService recordingScriptItemService;
         private readonly RecordingScriptItem scriptItem;
+        private readonly AudioPlaybackService audioPlaybackService;
+        private RecordingStartWorkflowService recordingStartWorkflowService;
+        private RecordingStopWorkflowService recordingStopWorkflowService;
 
         private string scriptText = string.Empty;
         private string status = "待機中";
         private double currentVolume;
         private RecordingDialogState state = RecordingDialogState.Idle;
         private bool commandsReady;
-        private WaveOutEvent? playbackOutput;
-        private AudioFileReader? playbackReader;
-        private bool isPlaying;
         private string outputDirectory = string.Empty;
         private bool disposed;
 
-        public RecordingWindowViewModel(string? initialText)
+        public RecordingWindowViewModel(string? initialText) : this(initialText, CreateDefaultArguments())
+        {
+        }
+
+        private RecordingWindowViewModel(string? initialText, DefaultArguments arguments)
+            : this(
+                initialText,
+                arguments.RecordPathService,
+                arguments.RecordingService,
+                arguments.VoiceTimelineInsertService,
+                arguments.TimelineSelectionService,
+                arguments.RecordingScriptItemService,
+                arguments.ScriptItem,
+                arguments.AudioPlaybackService,
+                arguments.StartWorkflowService,
+                arguments.StopWorkflowService)
+        {
+        }
+
+        internal RecordingWindowViewModel(
+            string? initialText,
+            RecordPathService recordPathService,
+            RecordingService recordingService,
+            VoiceTimelineInsertService voiceTimelineInsertService,
+            TimelineSelectionService timelineSelectionService,
+            RecordingScriptItemService recordingScriptItemService,
+            RecordingScriptItem scriptItem,
+            AudioPlaybackService audioPlaybackService,
+            RecordingStartWorkflowService recordingStartWorkflowService,
+            RecordingStopWorkflowService recordingStopWorkflowService)
         {
             outputDirectory = RecordingSettings.Default.OutputDirectory;
-            recordPathService = new RecordPathService(outputDirectory);
-            recordingService = new RecordingService(recordPathService);
-            voiceTimelineInsertService = new VoiceTimelineInsertService();
-            timelineSelectionService = new TimelineSelectionService();
-            scriptItem = new RecordingScriptItem();
+            this.recordPathService = recordPathService;
+            this.recordingService = recordingService;
+            this.voiceTimelineInsertService = voiceTimelineInsertService;
+            this.timelineSelectionService = timelineSelectionService;
+            this.recordingScriptItemService = recordingScriptItemService;
+            this.scriptItem = scriptItem;
+            this.audioPlaybackService = audioPlaybackService;
+            this.recordingStartWorkflowService = recordingStartWorkflowService;
+            this.recordingStopWorkflowService = recordingStopWorkflowService;
+            this.audioPlaybackService.PlaybackStopped += OnPlaybackStopped;
 
-            StartRecordingCommand = new ActionCommand(_ => CanStartRecording(), _ => StartRecording());
-            StopRecordingCommand = new ActionCommand(_ => CanStopRecording(), _ => StopRecording());
-            AddToTimelineCommand = new ActionCommand(_ => CanAddToTimeline(), _ => AddToTimeline());
-            RegenerateCommand = new ActionCommand(_ => CanRegenerate(), _ => Regenerate());
-            PlayCommand = new ActionCommand(_ => CanPlay(), _ => Play());
-            BrowseOutputDirectoryCommand = new ActionCommand(_ => State != RecordingDialogState.Recording, _ => BrowseOutputDirectory());
-            ResetOutputDirectoryCommand = new ActionCommand(_ => State != RecordingDialogState.Recording, _ => ResetOutputDirectory());
+            StartRecordingCommand = CreateStartRecordingCommand();
+            StopRecordingCommand = CreateStopRecordingCommand();
+            AddToTimelineCommand = CreateAddToTimelineCommand();
+            RegenerateCommand = CreateRegenerateCommand();
+            PlayCommand = CreatePlayCommand();
+            BrowseOutputDirectoryCommand = CreateBrowseOutputDirectoryCommand();
+            ResetOutputDirectoryCommand = CreateResetOutputDirectoryCommand();
+            ScriptText = ResolveInitialScriptText(initialText);
 
-            if (!string.IsNullOrWhiteSpace(initialText))
-            {
-                scriptText = initialText;
-            }
-            else
-            {
-                scriptText = timelineSelectionService.TryGetSelectedSerif() ?? string.Empty;
-            }
-            OnPropertyChanged(nameof(ScriptText));
-            OnPropertyChanged(nameof(DisplayText));
-
-            recordingService.DataAvailable += OnRecordingDataAvailable;
-            recordingService.RecordingStateChanged += OnRecordingStateChanged;
-
+            RecordingLifecycleService.AttachRecordingEvents(this.recordingService, OnRecordingDataAvailable, OnRecordingStateChanged);
             EnsureSilentPlaceholderInCurrentDirectory();
-
             commandsReady = true;
             RaiseCommandStates();
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        private ActionCommand CreateStartRecordingCommand() => new(_ => CanStartRecording(), _ => StartRecording());
+        private ActionCommand CreateStopRecordingCommand() => new(_ => CanStopRecording(), _ => StopRecording());
+        private ActionCommand CreateAddToTimelineCommand() => new(_ => CanAddToTimeline(), _ => AddToTimeline());
+        private ActionCommand CreateRegenerateCommand() => new(_ => CanRegenerate(), _ => Regenerate());
+        private ActionCommand CreatePlayCommand() => new(_ => CanPlay(), _ => Play());
+        private ActionCommand CreateBrowseOutputDirectoryCommand() => new(_ => RecordingDialogStateService.CanChangeOutputDirectory(State), _ => BrowseOutputDirectory());
+        private ActionCommand CreateResetOutputDirectoryCommand() => new(_ => RecordingDialogStateService.CanChangeOutputDirectory(State), _ => ResetOutputDirectory());
+
+        private string ResolveInitialScriptText(string? initialText)
+        {
+            if (!string.IsNullOrWhiteSpace(initialText))
+                return initialText;
+
+            return timelineSelectionService.TryGetSelectedSerif() ?? string.Empty;
+        }
 
         public string ScriptText
         {
             get => scriptText;
             set
             {
-                scriptText = value;
-                OnPropertyChanged(nameof(ScriptText));
-                OnPropertyChanged(nameof(DisplayText));
+                if (!Set(ref scriptText, value, nameof(ScriptText), nameof(DisplayText)))
+                    return;
                 if (commandsReady)
                     RaiseCommandStates();
             }
@@ -101,41 +134,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             get => outputDirectory;
             set
             {
-                if (State == RecordingDialogState.Recording)
+                if (!RecordingDialogStateService.CanChangeOutputDirectory(State))
                 {
                     Status = "録音中は保存先を変更できません。";
                     return;
                 }
 
                 var normalized = string.IsNullOrWhiteSpace(value) ? GetDefaultOutputDirectory() : value.Trim();
-                if (outputDirectory == normalized)
+                if (!Set(ref outputDirectory, normalized))
                     return;
-                outputDirectory = normalized;
                 RecordingSettings.Default.OutputDirectory = outputDirectory;
                 ReplaceRecordingService(outputDirectory);
                 EnsureSilentPlaceholderInCurrentDirectory();
-                OnPropertyChanged(nameof(OutputDirectory));
             }
         }
 
         public string Status
         {
             get => status;
-            set
-            {
-                status = value;
-                OnPropertyChanged(nameof(Status));
-            }
+            set => Set(ref status, value);
         }
 
         public double CurrentVolume
         {
             get => currentVolume;
-            set
-            {
-                currentVolume = value;
-                OnPropertyChanged(nameof(CurrentVolume));
-            }
+            set => Set(ref currentVolume, value);
         }
 
         public RecordingDialogState State
@@ -143,8 +166,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             get => state;
             private set
             {
-                state = value;
-                OnPropertyChanged(nameof(State));
+                if (!Set(ref state, value))
+                    return;
                 RaiseCommandStates();
             }
         }
@@ -157,20 +180,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         public ActionCommand BrowseOutputDirectoryCommand { get; }
         public ActionCommand ResetOutputDirectoryCommand { get; }
 
-        private bool CanStartRecording() => State != RecordingDialogState.Recording && !string.IsNullOrWhiteSpace(ScriptText);
+        private bool CanStartRecording() => RecordingDialogStateService.CanStartRecording(State, ScriptText);
 
-        private bool CanStopRecording() => State == RecordingDialogState.Recording;
+        private bool CanStopRecording() => RecordingDialogStateService.CanStopRecording(State);
 
-        private bool CanAddToTimeline() => State == RecordingDialogState.Recorded;
+        private bool CanAddToTimeline() => RecordingDialogStateService.CanAddToTimeline(State);
 
-        private bool CanRegenerate() => State != RecordingDialogState.Recording && !string.IsNullOrWhiteSpace(ScriptText);
+        private bool CanRegenerate() => RecordingDialogStateService.CanRegenerate(State, ScriptText);
 
         private bool CanPlay()
         {
-            if (State == RecordingDialogState.Recording || isPlaying)
-                return false;
-
-            return !string.IsNullOrWhiteSpace(scriptItem.AudioFilePath) && File.Exists(scriptItem.AudioFilePath);
+            var hasAudioFile = !string.IsNullOrWhiteSpace(scriptItem.AudioFilePath) && File.Exists(scriptItem.AudioFilePath);
+            return RecordingDialogStateService.CanPlay(State, audioPlaybackService.IsPlaying, hasAudioFile);
         }
 
         private void StartRecording()
@@ -182,29 +203,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 ScriptText = timelineSelectionService.TryGetSelectedSerif() ?? string.Empty;
             }
 
-            var deviceName = recordingService.GetAvailableDeviceNames().FirstOrDefault();
-            if (string.IsNullOrWhiteSpace(deviceName))
-            {
-                Status = "録音デバイスが見つかりません。";
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(ScriptText))
-            {
-                Status = "セリフが選択されていません。タイムラインのセリフを選択してください。";
-                return;
-            }
-
             try
             {
-                recordingService.StartRecording(deviceName);
-                State = RecordingDialogState.Recording;
+                var startResult = recordingStartWorkflowService.Execute(ScriptText);
+                if (!startResult.IsSuccess)
+                {
+                    Status = startResult.ErrorMessage ?? "セリフが選択されていません。タイムラインのセリフを選択してください。";
+                    return;
+                }
+
+                State = RecordingDialogStateService.ToRecording();
                 Status = "録音中...";
             }
             catch (Exception ex)
             {
                 Status = $"録音開始に失敗しました: {ex.Message}";
-                State = RecordingDialogState.Idle;
+                State = RecordingDialogStateService.ToIdle();
             }
         }
 
@@ -212,41 +226,42 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
             try
             {
-                var recordedFile = await recordingService.StopRecordingAsync();
+                var result = await recordingStopWorkflowService.ExecuteAsync(scriptItem, ScriptText);
                 CurrentVolume = 0;
 
-                if (recordedFile is null || recordedFile.DataLength <= 0)
+                if (!result.HasData)
                 {
-                    Status = "録音データがありません。再度録音してください。";
-                    State = RecordingDialogState.Idle;
+                    TransitionToIdleWithStatus("録音データがありません。再度録音してください。");
                     return;
                 }
 
-                scriptItem.AudioFilePath = recordedFile.FilePath;
-                scriptItem.Text = ScriptText;
-                scriptItem.Duration = GetAudioDuration(recordedFile.FilePath);
-                scriptItem.CreatedAt = DateTime.Now;
-                scriptItem.IsRecorded = true;
-
-                State = RecordingDialogState.Recorded;
-                Status = $"録音完了: {recordedFile.FilePath}";
-                await voiceTimelineInsertService.InsertAsync(scriptItem);
-                State = RecordingDialogState.Idle;
-                if (timelineSelectionService.TryMoveToNextSerif(scriptItem.Text, out var nextSerif) && !string.IsNullOrWhiteSpace(nextSerif))
-                {
-                    ScriptText = nextSerif;
-                    Status = "次のセリフを準備しました。録音開始できます。";
-                }
-                else
-                {
-                    Status = "タイムラインへ追加しました。続けて録音できます。";
-                }
+                ApplyStopRecordingResult(result);
             }
             catch (Exception ex)
             {
-                Status = $"録音停止に失敗しました: {ex.Message}";
-                State = RecordingDialogState.Idle;
+                TransitionToIdleWithStatus($"録音停止に失敗しました: {ex.Message}");
             }
+        }
+
+        private void ApplyStopRecordingResult(Services.RecordingStopResult result)
+        {
+            State = RecordingDialogStateService.ToRecorded();
+            var filePath = result.FilePath ?? string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(result.NextSerif))
+            {
+                ScriptText = result.NextSerif;
+                TransitionToIdleWithStatus($"録音完了: {filePath} / 次のセリフを準備しました。");
+                return;
+            }
+
+            Status = $"録音完了してタイムラインへ追加しました: {filePath}";
+        }
+
+        private void TransitionToIdleWithStatus(string message)
+        {
+            State = RecordingDialogStateService.ToIdle();
+            Status = message;
         }
 
         private void Regenerate()
@@ -288,20 +303,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
             try
             {
-                StopPlayback();
-                playbackReader = new AudioFileReader(scriptItem.AudioFilePath);
-                playbackOutput = new WaveOutEvent();
-                playbackOutput.PlaybackStopped += OnPlaybackStopped;
-                playbackOutput.Init(playbackReader);
-                playbackOutput.Play();
-                isPlaying = true;
+                audioPlaybackService.Play(scriptItem.AudioFilePath);
                 Status = "再生中...";
                 RaiseCommandStates();
             }
             catch (Exception ex)
             {
                 Status = $"再生に失敗: {ex.Message}";
-                StopPlayback();
+                audioPlaybackService.Stop();
+                RaiseCommandStates();
             }
         }
 
@@ -309,15 +319,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
             void HandlePlaybackStopped()
             {
-                StopPlayback(skipStopCall: true);
-
                 if (e.Exception is not null)
                 {
                     Status = $"再生エラー: {e.Exception.Message}";
+                    RaiseCommandStates();
                     return;
                 }
 
                 Status = "再生完了";
+                RaiseCommandStates();
             }
 
             var dispatcher = Application.Current?.Dispatcher;
@@ -333,31 +343,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         private void StopPlayback(bool skipStopCall = false)
         {
-            try
-            {
-                if (playbackOutput is not null)
-                {
-                    playbackOutput.PlaybackStopped -= OnPlaybackStopped;
-                    if (!skipStopCall && playbackOutput.PlaybackState == PlaybackState.Playing)
-                        playbackOutput.Stop();
-                    playbackOutput.Dispose();
-                    playbackOutput = null;
-                }
-
-                if (playbackReader is not null)
-                {
-                    playbackReader.Dispose();
-                    playbackReader = null;
-                }
-            }
-            finally
-            {
-                if (isPlaying)
-                {
-                    isPlaying = false;
-                    RaiseCommandStates();
-                }
-            }
+            audioPlaybackService.Stop(skipStopCall);
+            RaiseCommandStates();
         }
 
         private async void AddToTimeline()
@@ -382,12 +369,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         private void OnRecordingDataAvailable(object? sender, Models.RecordingDataEventArgs e)
         {
-            CurrentVolume = e.Volume;
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                CurrentVolume = e.Volume;
+                return;
+            }
+
+            _ = dispatcher.BeginInvoke((Action)(() => CurrentVolume = e.Volume));
         }
 
         private void OnRecordingStateChanged(object? sender, EventArgs e)
         {
-            RaiseCommandStates();
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                RaiseCommandStates();
+                return;
+            }
+
+            _ = dispatcher.BeginInvoke((Action)RaiseCommandStates);
         }
 
         private void RaiseCommandStates()
@@ -413,23 +414,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         private void ReplaceRecordingService(string directory)
         {
-            recordingService.DataAvailable -= OnRecordingDataAvailable;
-            recordingService.RecordingStateChanged -= OnRecordingStateChanged;
-
-            try
-            {
-                if (recordingService.IsRecording)
-                    recordingService.StopRecording();
-            }
-            catch
-            {
-            }
+            RecordingLifecycleService.DetachRecordingEvents(recordingService, OnRecordingDataAvailable, OnRecordingStateChanged);
+            audioPlaybackService.PlaybackStopped -= OnPlaybackStopped;
+            RecordingLifecycleService.TryStopRecording(recordingService);
 
             recordPathService = new RecordPathService(directory);
             recordingService = new RecordingService(recordPathService);
-            recordingService.DataAvailable += OnRecordingDataAvailable;
-            recordingService.RecordingStateChanged += OnRecordingStateChanged;
+            recordingStartWorkflowService = CreateRecordingStartWorkflowService(recordingService);
+            recordingStopWorkflowService = CreateRecordingStopWorkflowService(recordingService);
+            RecordingLifecycleService.AttachRecordingEvents(recordingService, OnRecordingDataAvailable, OnRecordingStateChanged);
             RaiseCommandStates();
+        }
+
+        private static RecordingStartWorkflowService CreateRecordingStartWorkflowService(RecordingService service)
+        {
+            return new RecordingStartWorkflowService(service);
+        }
+
+        private RecordingStopWorkflowService CreateRecordingStopWorkflowService(RecordingService service)
+        {
+            return new RecordingStopWorkflowService(
+                service,
+                recordingScriptItemService,
+                voiceTimelineInsertService,
+                timelineSelectionService,
+                GetAudioDuration);
         }
 
         private void EnsureSilentPlaceholderInCurrentDirectory()
@@ -441,15 +450,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             if (string.IsNullOrWhiteSpace(silentPath))
                 return;
 
-            scriptItem.AudioFilePath = silentPath;
-            scriptItem.Duration = TimeSpan.FromSeconds(5);
-            scriptItem.CreatedAt = DateTime.Now;
-            scriptItem.IsRecorded = false;
-        }
-
-        private void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            recordingScriptItemService.ApplySilentPlaceholder(
+                scriptItem,
+                silentPath,
+                TimeSpan.FromSeconds(5),
+                DateTime.Now);
         }
 
         public void Dispose()
@@ -459,22 +464,56 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
             disposed = true;
 
-            recordingService.DataAvailable -= OnRecordingDataAvailable;
-            recordingService.RecordingStateChanged -= OnRecordingStateChanged;
-
-            try
-            {
-                if (recordingService.IsRecording)
-                    recordingService.StopRecording();
-            }
-            catch
-            {
-            }
+            RecordingLifecycleService.DetachRecordingEvents(recordingService, OnRecordingDataAvailable, OnRecordingStateChanged);
+            RecordingLifecycleService.TryStopRecording(recordingService);
 
             StopPlayback();
+            audioPlaybackService.Dispose();
+        }
+
+        private static DefaultArguments CreateDefaultArguments()
+        {
+            var outputDirectory = RecordingSettings.Default.OutputDirectory;
+            var recordPathService = new RecordPathService(outputDirectory);
+            var recordingService = new RecordingService(recordPathService);
+            var voiceTimelineInsertService = new VoiceTimelineInsertService();
+            var timelineSelectionService = new TimelineSelectionService();
+            var recordingScriptItemService = new RecordingScriptItemService();
+
+            return new DefaultArguments
+            {
+                RecordPathService = recordPathService,
+                RecordingService = recordingService,
+                VoiceTimelineInsertService = voiceTimelineInsertService,
+                TimelineSelectionService = timelineSelectionService,
+                RecordingScriptItemService = recordingScriptItemService,
+                ScriptItem = new RecordingScriptItem(),
+                AudioPlaybackService = new AudioPlaybackService(),
+                StartWorkflowService = new RecordingStartWorkflowService(recordingService),
+                StopWorkflowService = new RecordingStopWorkflowService(
+                    recordingService,
+                    recordingScriptItemService,
+                    voiceTimelineInsertService,
+                    timelineSelectionService,
+                    GetAudioDuration)
+            };
+        }
+
+        private sealed class DefaultArguments
+        {
+            public required RecordPathService RecordPathService { get; init; }
+            public required RecordingService RecordingService { get; init; }
+            public required VoiceTimelineInsertService VoiceTimelineInsertService { get; init; }
+            public required TimelineSelectionService TimelineSelectionService { get; init; }
+            public required RecordingScriptItemService RecordingScriptItemService { get; init; }
+            public required RecordingScriptItem ScriptItem { get; init; }
+            public required AudioPlaybackService AudioPlaybackService { get; init; }
+            public required RecordingStartWorkflowService StartWorkflowService { get; init; }
+            public required RecordingStopWorkflowService StopWorkflowService { get; init; }
         }
     }
 }
+
 
 
 
