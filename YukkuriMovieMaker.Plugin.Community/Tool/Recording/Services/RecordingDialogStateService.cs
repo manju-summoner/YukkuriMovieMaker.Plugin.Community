@@ -3,7 +3,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
     internal static class RecordingDialogStateService
     {
         public static bool CanStartRecording(RecordingDialogState state, string scriptText)
-            => state != RecordingDialogState.Recording && !string.IsNullOrWhiteSpace(scriptText);
+            => state != RecordingDialogState.Recording;
 
         public static bool CanStopRecording(RecordingDialogState state)
             => state == RecordingDialogState.Recording;
@@ -12,10 +12,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             => state == RecordingDialogState.Recorded;
 
         public static bool CanRegenerate(RecordingDialogState state, string scriptText)
-            => state != RecordingDialogState.Recording && !string.IsNullOrWhiteSpace(scriptText);
+            => state != RecordingDialogState.Recording;
 
         public static bool CanPlay(RecordingDialogState state, bool isPlaying, bool hasAudioFile)
-            => state != RecordingDialogState.Recording && !isPlaying && hasAudioFile;
+            => state != RecordingDialogState.Recording && !isPlaying;
 
         public static bool CanChangeOutputDirectory(RecordingDialogState state)
             => state != RecordingDialogState.Recording;
