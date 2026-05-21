@@ -9,7 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             => state == RecordingDialogState.Recording;
 
         public static bool CanAddToTimeline(RecordingDialogState state)
-            => state == RecordingDialogState.Recorded;
+            => state != RecordingDialogState.Recording;
 
         public static bool CanRegenerate(RecordingDialogState state, string scriptText)
             => state != RecordingDialogState.Recording;

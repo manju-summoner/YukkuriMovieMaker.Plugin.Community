@@ -207,6 +207,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
             StopPlayback();
 
+            if (!EnsureOutputDirectory())
+                return;
+
             if (string.IsNullOrWhiteSpace(ScriptText))
             {
                 ScriptText = timelineSelectionService.TryGetSelectedSerif() ?? string.Empty;
@@ -216,7 +219,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 var targetDevice = deviceName ?? recordingService.GetAvailableDeviceNames().FirstOrDefault();
                 
-                // 先にStateをRecordingに変更することで、コマンドバインディングの同期ズレを防ぐ
                 State = RecordingDialogStateService.ToRecording();
                 Status = Texts.RecordingNow;
 
@@ -232,6 +234,41 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 Status = string.Format(Texts.RecordingStartFailed, ex.Message);
                 State = RecordingDialogStateService.ToIdle();
+            }
+        }
+
+        private bool EnsureOutputDirectory()
+        {
+            try
+            {
+                Directory.CreateDirectory(OutputDirectory);
+                return true;
+            }
+            catch (Exception)
+            {
+                var fallback = RecordingSettings.GetDefaultOutputDirectory();
+                if (string.Equals(OutputDirectory, fallback, StringComparison.OrdinalIgnoreCase))
+                {
+                    Status = Texts.OutputFolderUnavailable;
+                    return false;
+                }
+
+                try
+                {
+                    Directory.CreateDirectory(fallback);
+                    OutputDirectory = fallback;
+                    MessageBox.Show(
+                        string.Format(Texts.OutputDirectoryFallback, fallback),
+                        Texts.RecordingWindowTitle,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return true;
+                }
+                catch (Exception)
+                {
+                    Status = Texts.OutputFolderUnavailable;
+                    return false;
+                }
             }
         }
 
@@ -265,7 +302,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         private void ApplyStopRecordingResult(Services.RecordingStopResult result)
         {
-            State = RecordingDialogStateService.ToRecorded();
+            State = RecordingDialogStateService.ToIdle();
             var filePath = result.FilePath ?? string.Empty;
             Status = string.Format(Texts.RecordingCompletedAdded, filePath);
         }

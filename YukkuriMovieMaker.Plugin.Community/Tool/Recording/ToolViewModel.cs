@@ -11,8 +11,9 @@ using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 {
-    public class ToolViewModel : Bindable, ITimelineToolViewModel
+    public class ToolViewModel : Bindable, ITimelineToolViewModel, IDisposable
     {
+        public bool CanSuspend => !IsRecording && !audioPlaybackService.IsPlaying && recordingWindow == null;
         private readonly RecordingService recordingService;
         private readonly ToolRecordingStartWorkflowService recordingStartWorkflowService;
         private readonly ToolRecordingStopWorkflowService recordingStopWorkflowService;
@@ -22,6 +23,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         private RecordingWindow? recordingWindow;
         private string? latestRecordedFilePath;
         private string? lastTimelineAddedFilePath;
+        private bool disposed;
 
         public ObservableCollection<string> AvailableDevices { get; } = new();
 
@@ -227,6 +229,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
             try
             {
+                if (!EnsureOutputDirectory())
+                    return;
+
                 if (audioPlaybackService.IsPlaying)
                     audioPlaybackService.Stop();
 
@@ -246,6 +251,43 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 RecordingStatus = string.Format(Texts.RecordingStartFailed, ex.Message);
                 RaiseCommandStates();
+            }
+        }
+
+        private bool EnsureOutputDirectory()
+        {
+            try
+            {
+                Directory.CreateDirectory(OutputDirectory);
+                return true;
+            }
+            catch (Exception)
+            {
+                var fallback = RecordingSettings.GetDefaultOutputDirectory();
+                if (string.Equals(OutputDirectory, fallback, StringComparison.OrdinalIgnoreCase))
+                {
+                    RecordingStatus = Texts.OutputFolderUnavailable;
+                    RaiseCommandStates();
+                    return false;
+                }
+
+                try
+                {
+                    Directory.CreateDirectory(fallback);
+                    OutputDirectory = fallback;
+                    MessageBox.Show(
+                        string.Format(Texts.OutputDirectoryFallback, fallback),
+                        Texts.RecordingUiTitle,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return true;
+                }
+                catch (Exception)
+                {
+                    RecordingStatus = Texts.OutputFolderUnavailable;
+                    RaiseCommandStates();
+                    return false;
+                }
             }
         }
 
@@ -294,6 +336,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 audioPlaybackService.Play(latestRecordedFilePath!);
                 RecordingStatus = Texts.Playing;
+                OnPropertyChanged(nameof(CanSuspend));
             }
             catch (Exception ex)
             {
@@ -355,12 +398,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
                 Topmost = true
             };
-            recordingWindow.Closed += (_, _) =>
-            {
-                recordingWindow = null;
-            };
+            recordingWindow.Closed += RecordingWindow_Closed;
             recordingWindow.Show();
             recordingWindow.Activate();
+            OnPropertyChanged(nameof(CanSuspend));
+        }
+
+        private void RecordingWindow_Closed(object? sender, EventArgs e)
+        {
+            if (recordingWindow != null)
+            {
+                recordingWindow.Closed -= RecordingWindow_Closed;
+                recordingWindow = null;
+            }
+
+            if (!disposed)
+                OnPropertyChanged(nameof(CanSuspend));
         }
 
         private void BrowseOutputDirectory()
@@ -402,14 +455,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             var dispatcher = Application.Current?.Dispatcher;
             if (dispatcher is null || dispatcher.CheckAccess())
             {
-                OnPropertyChanged(nameof(IsRecording));
-                RaiseCommandStates();
+                if (!disposed)
+                {
+                    OnPropertyChanged(nameof(IsRecording));
+                    OnPropertyChanged(nameof(CanSuspend));
+                    RaiseCommandStates();
+                }
                 return;
             }
 
             _ = dispatcher.BeginInvoke((Action)(() =>
             {
+                if (disposed) return;
                 OnPropertyChanged(nameof(IsRecording));
+                OnPropertyChanged(nameof(CanSuspend));
                 RaiseCommandStates();
             }));
         }
@@ -427,6 +486,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                     RecordingStatus = Texts.PlaybackCompleted;
                 }
 
+                OnPropertyChanged(nameof(CanSuspend));
                 RaiseCommandStates();
             }
 
@@ -474,6 +534,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             return !string.IsNullOrWhiteSpace(latestRecordedFilePath) && File.Exists(latestRecordedFilePath);
         }
 
+        public void Dispose()
+        {
+            if (disposed) return;
+            disposed = true;
+
+            recordingService.DataAvailable -= OnRecordingDataAvailable;
+            recordingService.RecordingStateChanged -= OnRecordingStateChanged;
+            audioPlaybackService.PlaybackStopped -= OnPlaybackStopped;
+            RecordingLifecycleService.TryStopRecording(recordingService);
+            audioPlaybackService.Dispose();
+
+            var window = recordingWindow;
+            if (window != null)
+            {
+                recordingWindow = null;
+                window.Closed -= RecordingWindow_Closed;
+                
+                var dispatcher = Application.Current?.Dispatcher;
+                if (dispatcher != null && !dispatcher.CheckAccess())
+                {
+                    dispatcher.Invoke(window.Close);
+                }
+                else
+                {
+                    window.Close();
+                }
+            }
+        }
     }
 }
 
