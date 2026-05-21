@@ -95,9 +95,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
             if (_isFirst || _glowRadius != glowRadius)
             {
                 var radius = (float)Math.Max(glowRadius, 0d);
-                var clampedRadius = Math.Min(radius, MaxGaussianBlurStandardDeviation / WideRadiusMultiplier);
-                _coreBlur.StandardDeviation = clampedRadius;
-                _wideBlur.StandardDeviation = clampedRadius * WideRadiusMultiplier;
+                _coreBlur.StandardDeviation = Math.Min(radius, MaxGaussianBlurStandardDeviation);
+                _wideBlur.StandardDeviation = Math.Min(radius * WideRadiusMultiplier, MaxGaussianBlurStandardDeviation);
             }
 
             if (_isFirst || _enableGlowSpread != enableGlowSpread)
