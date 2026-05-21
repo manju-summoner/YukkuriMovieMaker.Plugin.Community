@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
@@ -9,10 +9,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
         }
 
-        public RecordingWindow(string? initialText = null)
+        public RecordingWindow(string? initialText = null, string? deviceName = null)
         {
             InitializeComponent();
-            DataContext = new RecordingWindowViewModel(initialText);
+            DataContext = new RecordingWindowViewModel(initialText, deviceName);
             Closed += OnClosed;
         }
 

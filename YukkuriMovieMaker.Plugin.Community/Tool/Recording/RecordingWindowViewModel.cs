@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
     public class RecordingWindowViewModel : Bindable, IDisposable
     {
-        public RecordingWindowViewModel() : this(null, CreateDefaultArguments())
+        public RecordingWindowViewModel() : this(null, null, CreateDefaultArguments())
         {
         }
 
@@ -40,14 +40,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         private bool commandsReady;
         private string outputDirectory = string.Empty;
         private bool disposed;
+        private readonly string? deviceName;
 
-        public RecordingWindowViewModel(string? initialText) : this(initialText, CreateDefaultArguments())
+        public RecordingWindowViewModel(string? initialText, string? deviceName = null) : this(initialText, deviceName, CreateDefaultArguments())
         {
         }
 
-        private RecordingWindowViewModel(string? initialText, DefaultArguments arguments)
+        private RecordingWindowViewModel(string? initialText, string? deviceName, DefaultArguments arguments)
             : this(
                 initialText,
+                deviceName,
                 arguments.RecordPathService,
                 arguments.RecordingService,
                 arguments.VoiceTimelineInsertService,
@@ -62,6 +64,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         internal RecordingWindowViewModel(
             string? initialText,
+            string? deviceName,
             RecordPathService recordPathService,
             RecordingService recordingService,
             VoiceTimelineInsertService voiceTimelineInsertService,
@@ -72,6 +75,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             RecordingStartWorkflowService recordingStartWorkflowService,
             RecordingStopWorkflowService recordingStopWorkflowService)
         {
+            this.deviceName = deviceName;
             outputDirectory = RecordingSettings.Default.OutputDirectory;
             this.recordPathService = recordPathService;
             this.recordingService = recordingService;
@@ -210,15 +214,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
             try
             {
-                var startResult = recordingStartWorkflowService.Execute(ScriptText);
+                var targetDevice = deviceName ?? recordingService.GetAvailableDeviceNames().FirstOrDefault();
+                
+                // 先にStateをRecordingに変更することで、コマンドバインディングの同期ズレを防ぐ
+                State = RecordingDialogStateService.ToRecording();
+                Status = Texts.RecordingNow;
+
+                var startResult = recordingStartWorkflowService.Execute(ScriptText, targetDevice);
                 if (!startResult.IsSuccess)
                 {
+                    State = RecordingDialogStateService.ToIdle();
                     Status = startResult.ErrorMessage ?? Texts.SelectSerifInTimeline;
                     return;
                 }
-
-                State = RecordingDialogStateService.ToRecording();
-                Status = Texts.RecordingNow;
             }
             catch (Exception ex)
             {

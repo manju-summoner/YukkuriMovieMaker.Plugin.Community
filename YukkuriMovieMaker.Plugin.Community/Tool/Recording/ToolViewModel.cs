@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -350,7 +350,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
             var serif = timelineSelectionService.TryGetSelectedSerif();
 
-            recordingWindow = new RecordingWindow(serif)
+            recordingWindow = new RecordingWindow(serif, SelectedDevice)
             {
                 Owner = null,
                 ShowInTaskbar = true,
