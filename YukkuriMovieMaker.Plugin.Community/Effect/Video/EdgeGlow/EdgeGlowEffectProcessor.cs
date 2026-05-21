@@ -169,14 +169,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
 
             _coreBlur = new D2DEffects.GaussianBlur(devices.DeviceContext)
             {
-                BorderMode = BorderMode.Hard,
+                BorderMode = BorderMode.Soft,
                 Optimization = GaussianBlurOptimization.Quality,
             };
             disposer.Collect(_coreBlur);
 
             _wideBlur = new D2DEffects.GaussianBlur(devices.DeviceContext)
             {
-                BorderMode = BorderMode.Hard,
+                BorderMode = BorderMode.Soft,
                 Optimization = GaussianBlurOptimization.Quality,
             };
             disposer.Collect(_wideBlur);
