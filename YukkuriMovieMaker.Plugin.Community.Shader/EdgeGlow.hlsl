@@ -13,7 +13,14 @@ cbuffer Constants : register(b0)
     float colorB : packoffset(c1.z);
     float colorA : packoffset(c1.w);
 
-    int2 flags : packoffset(c2.x);
+    int useSourceColor : packoffset(c2.x);
+    int includeAlpha : packoffset(c2.y);
+    int ignoreImageBorder : packoffset(c2.z);
+    float inputLeft : packoffset(c2.w);
+
+    float inputTop : packoffset(c3.x);
+    float inputWidth : packoffset(c3.y);
+    float inputHeight : packoffset(c3.z);
 };
 
 float3 SrgbToLinear(float3 c)
@@ -39,21 +46,22 @@ float3 LinearToOklab(float3 rgb)
 		0.0259040371f * l_ + 0.7827717662f * m_ - 0.8086757660f * s_);
 }
 
-float4 SampleInput(float2 uv)
+float4 SampleInput(float2 uv, float2 globalUV, out float inside)
 {
-    if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f)
+    inside = (globalUV.x >= 0.0f && globalUV.x <= 1.0f && globalUV.y >= 0.0f && globalUV.y <= 1.0f) ? 1.0f : 0.0f;
+    if (inside == 0.0f)
         return float4(0.0f, 0.0f, 0.0f, 0.0f);
     return InputTexture.SampleLevel(InputSampler, uv, 0);
 }
 
-float4 SampleFeature(float2 uv, int includeAlpha)
+float4 SampleFeature(float2 uv, float2 globalUV, int alphaFlag, out float inside)
 {
-    float4 raw = SampleInput(uv);
+    float4 raw = SampleInput(uv, globalUV, inside);
     float a = saturate(raw.a);
     float3 straight = a > 1e-5f ? raw.rgb / a : float3(0.0f, 0.0f, 0.0f);
     float3 linearRgb = SrgbToLinear(saturate(straight));
     float3 lab = LinearToOklab(linearRgb);
-    return float4(lab, includeAlpha != 0 ? a : 0.0f);
+    return float4(lab, alphaFlag != 0 ? a : 0.0f);
 }
 
 float4 main(
@@ -62,19 +70,23 @@ float4 main(
 	float4 uv0 : TEXCOORD0
 ) : SV_TARGET
 {
-    int useSourceColor = flags.x;
-    int includeAlpha = flags.y;
+    float2 centerGlobalUV = float2(
+        (posScene.x - inputLeft) / inputWidth,
+        (posScene.y - inputTop) / inputHeight);
 
-    float2 step = thickness * uv0.zw;
+    float2 globalUVStep = float2(thickness / inputWidth, thickness / inputHeight);
+    float2 uvStep = thickness * uv0.zw;
 
-    float4 f00 = SampleFeature(uv0.xy + float2(-step.x, -step.y), includeAlpha);
-    float4 f10 = SampleFeature(uv0.xy + float2(0.0f, -step.y), includeAlpha);
-    float4 f20 = SampleFeature(uv0.xy + float2(step.x, -step.y), includeAlpha);
-    float4 f01 = SampleFeature(uv0.xy + float2(-step.x, 0.0f), includeAlpha);
-    float4 f21 = SampleFeature(uv0.xy + float2(step.x, 0.0f), includeAlpha);
-    float4 f02 = SampleFeature(uv0.xy + float2(-step.x, step.y), includeAlpha);
-    float4 f12 = SampleFeature(uv0.xy + float2(0.0f, step.y), includeAlpha);
-    float4 f22 = SampleFeature(uv0.xy + float2(step.x, step.y), includeAlpha);
+    float in00, in10, in20, in01, in21, in02, in12, in22;
+
+    float4 f00 = SampleFeature(uv0.xy + float2(-uvStep.x, -uvStep.y), centerGlobalUV + float2(-globalUVStep.x, -globalUVStep.y), includeAlpha, in00);
+    float4 f10 = SampleFeature(uv0.xy + float2(0.0f, -uvStep.y), centerGlobalUV + float2(0.0f, -globalUVStep.y), includeAlpha, in10);
+    float4 f20 = SampleFeature(uv0.xy + float2(uvStep.x, -uvStep.y), centerGlobalUV + float2(globalUVStep.x, -globalUVStep.y), includeAlpha, in20);
+    float4 f01 = SampleFeature(uv0.xy + float2(-uvStep.x, 0.0f), centerGlobalUV + float2(-globalUVStep.x, 0.0f), includeAlpha, in01);
+    float4 f21 = SampleFeature(uv0.xy + float2(uvStep.x, 0.0f), centerGlobalUV + float2(globalUVStep.x, 0.0f), includeAlpha, in21);
+    float4 f02 = SampleFeature(uv0.xy + float2(-uvStep.x, uvStep.y), centerGlobalUV + float2(-globalUVStep.x, globalUVStep.y), includeAlpha, in02);
+    float4 f12 = SampleFeature(uv0.xy + float2(0.0f, uvStep.y), centerGlobalUV + float2(0.0f, globalUVStep.y), includeAlpha, in12);
+    float4 f22 = SampleFeature(uv0.xy + float2(uvStep.x, uvStep.y), centerGlobalUV + float2(globalUVStep.x, globalUVStep.y), includeAlpha, in22);
 
     const float kA = 3.0f / 16.0f;
     const float kB = 10.0f / 16.0f;
@@ -104,7 +116,13 @@ float4 main(
     float upper = min(threshold + max(softness, 1e-5f), 1.0f);
     float mask = smoothstep(lower, upper, edge);
 
-    float4 center = SampleInput(uv0.xy);
+    float centerInside;
+    float4 center = SampleInput(uv0.xy, centerGlobalUV, centerInside);
+
+    float kernelInside = in00 * in10 * in20 * in01 * centerInside * in21 * in02 * in12 * in22;
+    float borderGate = ignoreImageBorder != 0 ? kernelInside : 1.0f;
+    mask *= borderGate;
+
     float centerAlpha = saturate(center.a);
     float3 centerStraight = centerAlpha > 1e-5f ? center.rgb / centerAlpha : float3(0.0f, 0.0f, 0.0f);
 

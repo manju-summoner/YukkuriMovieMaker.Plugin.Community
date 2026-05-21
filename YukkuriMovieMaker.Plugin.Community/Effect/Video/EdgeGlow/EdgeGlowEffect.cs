@@ -35,6 +35,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
         }
         private bool _includeAlpha = true;
 
+        [Display(GroupName = nameof(Texts.EdgeGlowGroupDetection), Name = nameof(Texts.EdgeGlowIgnoreImageBorderName), Description = nameof(Texts.EdgeGlowIgnoreImageBorderDesc), Order = 104, ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool IgnoreImageBorder
+        {
+            get => _ignoreImageBorder;
+            set => Set(ref _ignoreImageBorder, value);
+        }
+        private bool _ignoreImageBorder = true;
+
         [Display(GroupName = nameof(Texts.EdgeGlowGroupAppearance), Name = nameof(Texts.EdgeGlowIntensityName), Description = nameof(Texts.EdgeGlowIntensityDesc), Order = 200, ResourceType = typeof(Texts))]
         [AnimationSlider("F2", "", 0d, 5d)]
         public Animation Intensity { get; } = new Animation(1.50, 0, 20);

@@ -29,7 +29,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
 
         private bool _isFirst = true;
         private double _threshold, _softness, _thickness, _intensity, _glowRadius, _opacity;
-        private bool _includeAlpha, _enableGlowSpread;
+        private bool _includeAlpha, _enableGlowSpread, _ignoreImageBorder;
         private EdgeGlowColorSource _colorSource;
         private Color _glowColor;
         private Blend _blendMode;
@@ -63,6 +63,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
             var glowRadius = _item.GlowRadius.GetValue(frame, length, fps);
             var opacity = _item.Opacity.GetValue(frame, length, fps) / 100d;
             var includeAlpha = _item.IncludeAlpha;
+            var ignoreImageBorder = _item.IgnoreImageBorder;
             var enableGlowSpread = _item.EnableGlowSpread;
             var colorSource = _item.ColorSource;
             var glowColor = _item.GlowColor;
@@ -78,6 +79,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
                 _glowEffect.Intensity = (float)intensity;
             if (_isFirst || _includeAlpha != includeAlpha)
                 _glowEffect.IncludeAlpha = includeAlpha ? 1 : 0;
+            if (_isFirst || _ignoreImageBorder != ignoreImageBorder)
+                _glowEffect.IgnoreImageBorder = ignoreImageBorder ? 1 : 0;
             if (_isFirst || _colorSource != colorSource)
                 _glowEffect.UseSourceColor = colorSource == EdgeGlowColorSource.Source ? 1 : 0;
             if (_isFirst || _glowColor != glowColor)
@@ -142,6 +145,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
             _glowRadius = glowRadius;
             _opacity = opacity;
             _includeAlpha = includeAlpha;
+            _ignoreImageBorder = ignoreImageBorder;
             _enableGlowSpread = enableGlowSpread;
             _colorSource = colorSource;
             _glowColor = glowColor;

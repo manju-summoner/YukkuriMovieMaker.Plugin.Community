@@ -59,6 +59,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
             set => SetValue((int)EffectImpl.Properties.IncludeAlpha, value);
             get => GetIntValue((int)EffectImpl.Properties.IncludeAlpha);
         }
+        public int IgnoreImageBorder
+        {
+            set => SetValue((int)EffectImpl.Properties.IgnoreImageBorder, value);
+            get => GetIntValue((int)EffectImpl.Properties.IgnoreImageBorder);
+        }
 
         [CustomEffect(1)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
@@ -95,6 +100,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
             [CustomEffectProperty(PropertyType.Int32, (int)Properties.IncludeAlpha)]
             public int IncludeAlpha { get => _cb.IncludeAlpha; set { _cb.IncludeAlpha = value; UpdateConstants(); } }
 
+            [CustomEffectProperty(PropertyType.Int32, (int)Properties.IgnoreImageBorder)]
+            public int IgnoreImageBorder { get => _cb.IgnoreImageBorder; set { _cb.IgnoreImageBorder = value; UpdateConstants(); } }
+
             public EffectImpl() : base(ShaderResourceUri.Get("EdgeGlow"))
             {
             }
@@ -114,7 +122,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
                     return;
                 }
 
-                int padding = ComputePadding();
+                int w = inputRect.Right - inputRect.Left;
+                int h = inputRect.Bottom - inputRect.Top;
+
+                _cb.InputLeft = inputRect.Left;
+                _cb.InputTop = inputRect.Top;
+                _cb.InputWidth = w;
+                _cb.InputHeight = h;
+                UpdateConstants();
+
+                int padding = Math.Min((int)Math.Ceiling(_cb.Thickness) + 1, 4096);
+
                 outputRect = new RawRect(
                     inputRect.Left - padding,
                     inputRect.Top - padding,
@@ -125,18 +143,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
-                int padding = ComputePadding();
+                int padding = Math.Min((int)Math.Ceiling(_cb.Thickness) + 1, 4096);
                 inputRects[0] = new RawRect(
                     outputRect.Left - padding,
                     outputRect.Top - padding,
                     outputRect.Right + padding,
                     outputRect.Bottom + padding);
-            }
-
-            private int ComputePadding()
-            {
-                int raw = (int)Math.Ceiling(_cb.Thickness) + 1;
-                return Math.Min(raw, 4096);
             }
 
             [StructLayout(LayoutKind.Sequential)]
@@ -152,8 +164,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
                 public float ColorA;
                 public int UseSourceColor;
                 public int IncludeAlpha;
-                public int Pad0;
-                public int Pad1;
+                public int IgnoreImageBorder;
+                public float InputLeft;
+                public float InputTop;
+                public float InputWidth;
+                public float InputHeight;
+                public float Pad0;
             }
 
             public enum Properties : int
@@ -168,6 +184,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
                 ColorA = 7,
                 UseSourceColor = 8,
                 IncludeAlpha = 9,
+                IgnoreImageBorder = 10,
             }
         }
     }
