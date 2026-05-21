@@ -415,6 +415,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             recordingStartWorkflowService = CreateRecordingStartWorkflowService(recordingService);
             recordingStopWorkflowService = CreateRecordingStopWorkflowService(recordingService);
             RecordingLifecycleService.AttachRecordingEvents(recordingService, OnRecordingDataAvailable, OnRecordingStateChanged);
+            audioPlaybackService.PlaybackStopped += OnPlaybackStopped;
             RaiseCommandStates();
         }
 
