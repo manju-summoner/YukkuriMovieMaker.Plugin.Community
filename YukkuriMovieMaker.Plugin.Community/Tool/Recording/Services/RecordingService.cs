@@ -121,7 +121,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 throw new InvalidOperationException(Texts.StopWaitObjectUnavailable);
 
             if (!await WaitForStopAsync(stopCompletion.Task, TimeSpan.FromSeconds(3)).ConfigureAwait(false))
+            {
+                lock (syncRoot)
+                {
+                    // Ensure recording state is always recoverable even when RecordingStopped is delayed/missing.
+                    recordingStoppedTcs = null;
+                    CleanupRecordingResources(deleteFile: false);
+                }
                 throw new TimeoutException(Texts.StopWaitTimeout);
+            }
 
             long dataLength;
             lock (syncRoot)

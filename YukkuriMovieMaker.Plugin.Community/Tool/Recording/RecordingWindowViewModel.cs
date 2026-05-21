@@ -250,7 +250,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         private void ApplyStopRecordingResult(Services.RecordingStopResult result)
         {
-            State = RecordingDialogStateService.ToRecorded();
+            // RecordingStopWorkflowService already inserts into timeline.
+            // Keep state idle to prevent duplicate manual insertion.
+            State = RecordingDialogStateService.ToIdle();
             var filePath = result.FilePath ?? string.Empty;
             Status = string.Format(Texts.RecordingCompletedAdded, filePath);
         }
