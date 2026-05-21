@@ -163,20 +163,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
                 glow.Dispose();
                 return null;
             }
+            glow.Cached = true;
             _glowEffect = glow;
             disposer.Collect(_glowEffect);
 
             _coreBlur = new D2DEffects.GaussianBlur(devices.DeviceContext)
             {
                 BorderMode = BorderMode.Soft,
-                Optimization = GaussianBlurOptimization.Quality,
+                Optimization = GaussianBlurOptimization.Speed,
             };
             disposer.Collect(_coreBlur);
 
             _wideBlur = new D2DEffects.GaussianBlur(devices.DeviceContext)
             {
                 BorderMode = BorderMode.Soft,
-                Optimization = GaussianBlurOptimization.Quality,
+                Optimization = GaussianBlurOptimization.Speed,
             };
             disposer.Collect(_wideBlur);
 
