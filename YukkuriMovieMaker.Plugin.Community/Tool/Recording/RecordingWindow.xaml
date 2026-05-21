@@ -10,6 +10,9 @@
         xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
         xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
         >
+    <Window.Style>
+        <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}"/>
+    </Window.Style>
     <Window.Resources>
         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Height" Value="26"/>
@@ -37,8 +40,6 @@
                    FontWeight="SemiBold"
                    LineHeight="34"
                    TextWrapping="Wrap"/>
-
-        <Separator Grid.Row="2" />
 
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
