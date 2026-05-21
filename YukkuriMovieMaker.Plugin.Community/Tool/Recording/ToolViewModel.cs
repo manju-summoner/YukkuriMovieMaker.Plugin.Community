@@ -23,6 +23,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         private RecordingWindow? recordingWindow;
         private string? latestRecordedFilePath;
         private string? lastTimelineAddedFilePath;
+        private bool disposed;
 
         public ObservableCollection<string> AvailableDevices { get; } = new();
 
@@ -397,14 +398,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
                 Topmost = true
             };
-            recordingWindow.Closed += (_, _) =>
-            {
-                recordingWindow = null;
-                OnPropertyChanged(nameof(CanSuspend));
-            };
+            recordingWindow.Closed += RecordingWindow_Closed;
             recordingWindow.Show();
             recordingWindow.Activate();
             OnPropertyChanged(nameof(CanSuspend));
+        }
+
+        private void RecordingWindow_Closed(object? sender, EventArgs e)
+        {
+            if (recordingWindow != null)
+            {
+                recordingWindow.Closed -= RecordingWindow_Closed;
+                recordingWindow = null;
+            }
+
+            if (!disposed)
+                OnPropertyChanged(nameof(CanSuspend));
         }
 
         private void BrowseOutputDirectory()
@@ -446,14 +455,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             var dispatcher = Application.Current?.Dispatcher;
             if (dispatcher is null || dispatcher.CheckAccess())
             {
-                OnPropertyChanged(nameof(IsRecording));
-                OnPropertyChanged(nameof(CanSuspend));
-                RaiseCommandStates();
+                if (!disposed)
+                {
+                    OnPropertyChanged(nameof(IsRecording));
+                    OnPropertyChanged(nameof(CanSuspend));
+                    RaiseCommandStates();
+                }
                 return;
             }
 
             _ = dispatcher.BeginInvoke((Action)(() =>
             {
+                if (disposed) return;
                 OnPropertyChanged(nameof(IsRecording));
                 OnPropertyChanged(nameof(CanSuspend));
                 RaiseCommandStates();
@@ -523,12 +536,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         public void Dispose()
         {
+            if (disposed) return;
+            disposed = true;
+
             recordingService.DataAvailable -= OnRecordingDataAvailable;
             recordingService.RecordingStateChanged -= OnRecordingStateChanged;
             audioPlaybackService.PlaybackStopped -= OnPlaybackStopped;
             RecordingLifecycleService.TryStopRecording(recordingService);
             audioPlaybackService.Dispose();
-            recordingWindow?.Close();
+
+            var window = recordingWindow;
+            if (window != null)
+            {
+                recordingWindow = null;
+                window.Closed -= RecordingWindow_Closed;
+                
+                var dispatcher = Application.Current?.Dispatcher;
+                if (dispatcher != null && !dispatcher.CheckAccess())
+                {
+                    dispatcher.Invoke(window.Close);
+                }
+                else
+                {
+                    window.Close();
+                }
+            }
         }
     }
 }
