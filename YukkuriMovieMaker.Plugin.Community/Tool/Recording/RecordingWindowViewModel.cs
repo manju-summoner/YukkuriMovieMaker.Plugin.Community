@@ -252,15 +252,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
             catch (Exception ex)
             {
+                if (HasRecordedAudio())
+                {
+                    State = RecordingDialogStateService.ToRecorded();
+                    Status = string.Format(Texts.TimelineAddFailed, ex.Message);
+                    return;
+                }
+
                 TransitionToIdleWithStatus(string.Format(Texts.RecordingStopFailed, ex.Message));
             }
         }
 
         private void ApplyStopRecordingResult(Services.RecordingStopResult result)
         {
-            // RecordingStopWorkflowService already inserts into timeline.
-            // Keep state idle to prevent duplicate manual insertion.
-            State = RecordingDialogStateService.ToIdle();
+            State = RecordingDialogStateService.ToRecorded();
             var filePath = result.FilePath ?? string.Empty;
             Status = string.Format(Texts.RecordingCompletedAdded, filePath);
         }
@@ -269,6 +274,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
             State = RecordingDialogStateService.ToIdle();
             Status = message;
+        }
+
+        private bool HasRecordedAudio()
+        {
+            return scriptItem.IsRecorded
+                && !string.IsNullOrWhiteSpace(scriptItem.AudioFilePath)
+                && File.Exists(scriptItem.AudioFilePath);
         }
 
         private void Regenerate()
