@@ -9,10 +9,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
     public class RecordingService
     {
-        private const int SampleRate = 48000;
-        private const int BitDepth = 16;
-        private const int Channels = 1;
-
         private readonly object syncRoot = new();
         private readonly RecordPathService recordPathService;
 
@@ -64,7 +60,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     var input = new WaveInEvent
                     {
                         DeviceNumber = deviceIndex,
-                        WaveFormat = new WaveFormat(SampleRate, BitDepth, Channels),
+                        WaveFormat = new WaveFormat(RecordingAudioFormat.SampleRate, RecordingAudioFormat.BitDepth, RecordingAudioFormat.Channels),
                         BufferMilliseconds = 100
                     };
                     var output = new WaveFileWriter(filePath, input.WaveFormat);
@@ -183,7 +179,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             double sum = 0;
             var sampleCount = bytesRecorded / 2;
 
-            for (var index = 0; index + 1 < bytesRecorded; index += 2)
+            for (var index = 0; index + 2 <= bytesRecorded; index += 2)
             {
                 var sample = BitConverter.ToInt16(buffer, index);
                 var normalized = sample / 32768.0;
@@ -205,8 +201,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             {
                 FilePath = filePath,
                 Duration = DateTime.Now - startedAt,
-                SampleRate = SampleRate,
-                Channels = Channels,
+                SampleRate = RecordingAudioFormat.SampleRate,
+                Channels = RecordingAudioFormat.Channels,
                 CreatedAt = DateTime.Now,
                 DataLength = dataLength
             };

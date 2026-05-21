@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services;
 using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Project;
@@ -81,10 +82,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             recordingService.DataAvailable += OnRecordingDataAvailable;
             recordingService.RecordingStateChanged += OnRecordingStateChanged;
 
-            StartRecordingCommand = new RelayCommand(StartRecording, CanStartRecording);
-            StopRecordingCommand = new RelayCommand(StopRecording, CanStopRecording);
-            RefreshDevicesCommand = new RelayCommand(RefreshMicrophones);
-            OpenRecordingWindowCommand = new RelayCommand(OpenRecordingWindow, CanOpenRecordingWindow);
+            StartRecordingCommand = new ActionCommand(_ => CanStartRecording(), _ => StartRecording());
+            StopRecordingCommand = new ActionCommand(_ => CanStopRecording(), _ => StopRecording());
+            RefreshDevicesCommand = new ActionCommand(_ => true, _ => RefreshMicrophones());
+            OpenRecordingWindowCommand = new ActionCommand(_ => CanOpenRecordingWindow(), _ => OpenRecordingWindow());
 
             RecordsDirectory = recordPathService.GetRecordsDirectory();
             RefreshMicrophones();
@@ -219,13 +220,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         private void RaiseCommandStates()
         {
-            if (StartRecordingCommand is RelayCommand start)
+            if (StartRecordingCommand is ActionCommand start)
                 start.RaiseCanExecuteChanged();
 
-            if (StopRecordingCommand is RelayCommand stop)
+            if (StopRecordingCommand is ActionCommand stop)
                 stop.RaiseCanExecuteChanged();
 
-            if (OpenRecordingWindowCommand is RelayCommand open)
+            if (OpenRecordingWindowCommand is ActionCommand open)
                 open.RaiseCanExecuteChanged();
         }
 

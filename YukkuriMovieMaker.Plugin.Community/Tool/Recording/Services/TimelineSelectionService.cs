@@ -633,64 +633,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             }
         }
 
-        private static void DumpObjectShape(string prefix, object instance)
-        {
-            var type = instance.GetType();
-
-            foreach (var prop in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-            {
-                if (prop.GetIndexParameters().Length > 0)
-                    continue;
-
-                var valueSummary = TryFormatValue(prop, instance);
-            }
-
-            foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-            {
-                var valueSummary = TryFormatValue(field, instance);
-            }
-        }
-
-        private static string TryFormatValue(PropertyInfo prop, object instance)
-        {
-            try
-            {
-                var value = prop.GetValue(instance);
-                return SummarizeValue(value);
-            }
-            catch (Exception ex)
-            {
-                return $"<error {ex.GetType().Name}: {ex.Message}>";
-            }
-        }
-
-        private static string TryFormatValue(FieldInfo field, object instance)
-        {
-            try
-            {
-                var value = field.GetValue(instance);
-                return SummarizeValue(value);
-            }
-            catch (Exception ex)
-            {
-                return $"<error {ex.GetType().Name}: {ex.Message}>";
-            }
-        }
-
-        private static string SummarizeValue(object? value)
-        {
-            if (value is null)
-                return "null";
-
-            if (value is string s)
-                return $"\"{s}\" (len={s.Length})";
-
-            if (value is System.Collections.IEnumerable && value is not string)
-                return $"[{value.GetType().FullName}]";
-
-            return value.ToString() ?? value.GetType().FullName ?? "<unknown>";
-        }
-
         private sealed class PreferredVoiceTarget
         {
             public PreferredVoiceTarget(int frame, int layer, string? serif)

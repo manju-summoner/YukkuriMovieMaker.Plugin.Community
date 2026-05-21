@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Forms = System.Windows.Forms;
 using NAudio.Wave;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services;
 
@@ -50,13 +51,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             timelineSelectionService = new TimelineSelectionService();
             scriptItem = new RecordingScriptItem();
 
-            StartRecordingCommand = new RelayCommand(StartRecording, CanStartRecording);
-            StopRecordingCommand = new RelayCommand(StopRecording, CanStopRecording);
-            AddToTimelineCommand = new RelayCommand(AddToTimeline, CanAddToTimeline);
-            RegenerateCommand = new RelayCommand(Regenerate, CanRegenerate);
-            PlayCommand = new RelayCommand(Play, CanPlay);
-            BrowseOutputDirectoryCommand = new RelayCommand(BrowseOutputDirectory, () => State != RecordingDialogState.Recording);
-            ResetOutputDirectoryCommand = new RelayCommand(ResetOutputDirectory, () => State != RecordingDialogState.Recording);
+            StartRecordingCommand = new ActionCommand(_ => CanStartRecording(), _ => StartRecording());
+            StopRecordingCommand = new ActionCommand(_ => CanStopRecording(), _ => StopRecording());
+            AddToTimelineCommand = new ActionCommand(_ => CanAddToTimeline(), _ => AddToTimeline());
+            RegenerateCommand = new ActionCommand(_ => CanRegenerate(), _ => Regenerate());
+            PlayCommand = new ActionCommand(_ => CanPlay(), _ => Play());
+            BrowseOutputDirectoryCommand = new ActionCommand(_ => State != RecordingDialogState.Recording, _ => BrowseOutputDirectory());
+            ResetOutputDirectoryCommand = new ActionCommand(_ => State != RecordingDialogState.Recording, _ => ResetOutputDirectory());
 
             if (!string.IsNullOrWhiteSpace(initialText))
             {
@@ -72,14 +73,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             recordingService.DataAvailable += OnRecordingDataAvailable;
             recordingService.RecordingStateChanged += OnRecordingStateChanged;
 
-            var silentPath = recordPathService.GetOrCreateSilentWavPath(TimeSpan.FromSeconds(5));
-            if (!string.IsNullOrWhiteSpace(silentPath))
-            {
-                scriptItem.AudioFilePath = silentPath;
-                scriptItem.Duration = TimeSpan.FromSeconds(5);
-                scriptItem.CreatedAt = DateTime.Now;
-                scriptItem.IsRecorded = false;
-            }
+            EnsureSilentPlaceholderInCurrentDirectory();
 
             commandsReady = true;
             RaiseCommandStates();
@@ -119,6 +113,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 outputDirectory = normalized;
                 RecordingSettings.Default.OutputDirectory = outputDirectory;
                 ReplaceRecordingService(outputDirectory);
+                EnsureSilentPlaceholderInCurrentDirectory();
                 OnPropertyChanged(nameof(OutputDirectory));
             }
         }
@@ -154,13 +149,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
         }
 
-        public RelayCommand StartRecordingCommand { get; }
-        public RelayCommand StopRecordingCommand { get; }
-        public RelayCommand AddToTimelineCommand { get; }
-        public RelayCommand RegenerateCommand { get; }
-        public RelayCommand PlayCommand { get; }
-        public RelayCommand BrowseOutputDirectoryCommand { get; }
-        public RelayCommand ResetOutputDirectoryCommand { get; }
+        public ActionCommand StartRecordingCommand { get; }
+        public ActionCommand StopRecordingCommand { get; }
+        public ActionCommand AddToTimelineCommand { get; }
+        public ActionCommand RegenerateCommand { get; }
+        public ActionCommand PlayCommand { get; }
+        public ActionCommand BrowseOutputDirectoryCommand { get; }
+        public ActionCommand ResetOutputDirectoryCommand { get; }
 
         private bool CanStartRecording() => State != RecordingDialogState.Recording && !string.IsNullOrWhiteSpace(ScriptText);
 
@@ -257,14 +252,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         private void Regenerate()
         {
             StopPlayback();
-            var silentPath = recordPathService.GetOrCreateSilentWavPath(TimeSpan.FromSeconds(5));
-            if (!string.IsNullOrWhiteSpace(silentPath))
-            {
-                scriptItem.AudioFilePath = silentPath;
-                scriptItem.Duration = TimeSpan.FromSeconds(5);
-                scriptItem.CreatedAt = DateTime.Now;
-                scriptItem.IsRecorded = false;
-            }
+            EnsureSilentPlaceholderInCurrentDirectory();
             StartRecording();
         }
 
@@ -442,6 +430,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             recordingService.DataAvailable += OnRecordingDataAvailable;
             recordingService.RecordingStateChanged += OnRecordingStateChanged;
             RaiseCommandStates();
+        }
+
+        private void EnsureSilentPlaceholderInCurrentDirectory()
+        {
+            if (scriptItem.IsRecorded)
+                return;
+
+            var silentPath = recordPathService.GetOrCreateSilentWavPath(TimeSpan.FromSeconds(5));
+            if (string.IsNullOrWhiteSpace(silentPath))
+                return;
+
+            scriptItem.AudioFilePath = silentPath;
+            scriptItem.Duration = TimeSpan.FromSeconds(5);
+            scriptItem.CreatedAt = DateTime.Now;
+            scriptItem.IsRecorded = false;
         }
 
         private void OnPropertyChanged(string propertyName)

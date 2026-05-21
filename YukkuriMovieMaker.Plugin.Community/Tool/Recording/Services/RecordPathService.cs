@@ -7,10 +7,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
     public class RecordPathService
     {
-        private const int SampleRate = 48000;
-        private const int BitDepth = 16;
-        private const int Channels = 1;
-
         private readonly string? customBaseDirectory;
 
         public RecordPathService(string? customBaseDirectory = null)
@@ -50,25 +46,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             var recordsDirectory = GetRecordsDirectory();
             var seconds = Math.Max(1, (int)Math.Round(duration.TotalSeconds, MidpointRounding.AwayFromZero));
             var filePath = Path.Combine(recordsDirectory, $"Silent_{seconds}s.wav");
-            if (File.Exists(filePath))
-                return filePath;
 
             try
             {
-                var format = new WaveFormat(SampleRate, BitDepth, Channels);
+                var format = new WaveFormat(RecordingAudioFormat.SampleRate, RecordingAudioFormat.BitDepth, RecordingAudioFormat.Channels);
                 var bytesPerSecond = format.AverageBytesPerSecond;
                 var totalBytes = (long)seconds * bytesPerSecond;
                 var buffer = new byte[bytesPerSecond];
 
-                using var writer = new WaveFileWriter(filePath, format);
-                var remaining = totalBytes;
-                while (remaining > 0)
+                // Avoid TOCTOU race by opening with CreateNew and falling back to existing file when already created.
+                using (var stream = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.Read))
                 {
-                    var toWrite = (int)Math.Min(buffer.Length, remaining);
-                    writer.Write(buffer, 0, toWrite);
-                    remaining -= toWrite;
+                    using var writer = new WaveFileWriter(stream, format);
+                    var remaining = totalBytes;
+                    while (remaining > 0)
+                    {
+                        var toWrite = (int)Math.Min(buffer.Length, remaining);
+                        writer.Write(buffer, 0, toWrite);
+                        remaining -= toWrite;
+                    }
+                    writer.Flush();
                 }
-                writer.Flush();
+            }
+            catch (IOException) when (File.Exists(filePath))
+            {
+                return filePath;
             }
             catch (Exception ex)
             {

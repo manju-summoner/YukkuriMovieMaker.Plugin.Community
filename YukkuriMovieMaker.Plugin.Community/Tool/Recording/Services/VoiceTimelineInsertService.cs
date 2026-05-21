@@ -181,15 +181,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             return false;
         }
 
-        private static string Summarize(object? value)
-        {
-            if (value is null)
-                return "null";
-            if (value is string s)
-                return $"\"{s}\" (len={s.Length})";
-            return value.ToString() ?? value.GetType().FullName ?? "<unknown>";
-        }
-
         private static void SetBoolMember(object target, string name, bool value)
         {
             if (SetMemberWithBackingField(target, name, value))
