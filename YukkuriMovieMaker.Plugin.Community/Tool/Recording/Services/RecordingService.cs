@@ -18,6 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         private WaveFileWriter? writer;
         private string? currentFilePath;
         private WaveFormat? currentWaveFormat;
+        private MMDevice? currentDevice;
         private DateTime recordingStartedAt;
         private long recordedBytes;
         private Exception? recordingStopException;
@@ -39,7 +40,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             using var enumerator = new MMDeviceEnumerator();
             foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active))
             {
-                devices.Add(device.FriendlyName);
+                using (device)
+                {
+                    devices.Add(device.FriendlyName);
+                }
             }
             return devices;
         }
@@ -56,10 +60,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 {
                     foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active))
                     {
-                        if (string.Equals(device.FriendlyName, deviceName, StringComparison.Ordinal))
+                        if (targetDevice is null && string.Equals(device.FriendlyName, deviceName, StringComparison.Ordinal))
                         {
                             targetDevice = device;
-                            break;
+                        }
+                        else
+                        {
+                            device.Dispose();
                         }
                     }
                 }
@@ -86,6 +93,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     writer = output;
                     currentFilePath = filePath;
                     currentWaveFormat = input.WaveFormat;
+                    currentDevice = targetDevice;
                     recordingStartedAt = DateTime.Now;
                     recordedBytes = 0;
                     recordingStopException = null;
@@ -216,9 +224,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             if (bytesRecorded <= 0)
                 return 0;
 
+            bool isFloat = format.Encoding == WaveFormatEncoding.IeeeFloat;
+            if (format.Encoding == WaveFormatEncoding.Extensible && format is WaveFormatExtensible ext)
+            {
+                isFloat = ext.SubFormat == new Guid("00000003-0000-0010-8000-00aa00389b71");
+            }
+
             double sum = 0;
 
-            if (format.Encoding == WaveFormatEncoding.IeeeFloat)
+            if (isFloat)
             {
                 var sampleCount = bytesRecorded / 4;
                 for (var index = 0; index + 4 <= bytesRecorded; index += 4)
@@ -229,13 +243,37 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 return sampleCount == 0 ? 0 : Math.Sqrt(sum / sampleCount);
             }
 
-            if (format.Encoding == WaveFormatEncoding.Pcm && format.BitsPerSample == 16)
+            if (format.BitsPerSample == 16)
             {
                 var sampleCount = bytesRecorded / 2;
                 for (var index = 0; index + 2 <= bytesRecorded; index += 2)
                 {
                     var sample = BitConverter.ToInt16(buffer, index);
                     var normalized = sample / 32768.0;
+                    sum += normalized * normalized;
+                }
+                return sampleCount == 0 ? 0 : Math.Sqrt(sum / sampleCount);
+            }
+
+            if (format.BitsPerSample == 24)
+            {
+                var sampleCount = bytesRecorded / 3;
+                for (var index = 0; index + 3 <= bytesRecorded; index += 3)
+                {
+                    var sample = buffer[index] | (buffer[index + 1] << 8) | ((sbyte)buffer[index + 2] << 16);
+                    var normalized = sample / 8388608.0;
+                    sum += normalized * normalized;
+                }
+                return sampleCount == 0 ? 0 : Math.Sqrt(sum / sampleCount);
+            }
+
+            if (format.BitsPerSample == 32)
+            {
+                var sampleCount = bytesRecorded / 4;
+                for (var index = 0; index + 4 <= bytesRecorded; index += 4)
+                {
+                    var sample = BitConverter.ToInt32(buffer, index);
+                    var normalized = sample / 2147483648.0;
                     sum += normalized * normalized;
                 }
                 return sampleCount == 0 ? 0 : Math.Sqrt(sum / sampleCount);
@@ -283,6 +321,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             currentFilePath = null;
             currentWaveFormat = null;
             IsRecording = false;
+
+            if (currentDevice is not null)
+            {
+                currentDevice.Dispose();
+                currentDevice = null;
+            }
+
             OnRecordingStateChanged();
 
             if (deleteFile && !string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
