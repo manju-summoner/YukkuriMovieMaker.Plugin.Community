@@ -39,7 +39,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
                 var result = method.Invoke(target, args);
                 if (result is Task task)
-                    _ = task.ContinueWith(_ => { }, TaskScheduler.Default);
+                {
+                    _ = task.ContinueWith(
+                        t =>
+                        {
+                            // Observe faulted task exceptions to avoid UnobservedTaskException.
+                            _ = t.Exception;
+                        },
+                        CancellationToken.None,
+                        TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                        TaskScheduler.Default);
+                }
 
                 return true;
             }

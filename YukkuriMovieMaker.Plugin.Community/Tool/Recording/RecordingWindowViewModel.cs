@@ -89,6 +89,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             AddToTimelineCommand = CreateAddToTimelineCommand();
             RegenerateCommand = CreateRegenerateCommand();
             PlayCommand = CreatePlayCommand();
+            NextSerifCommand = CreateNextSerifCommand();
             BrowseOutputDirectoryCommand = CreateBrowseOutputDirectoryCommand();
             ResetOutputDirectoryCommand = CreateResetOutputDirectoryCommand();
             ScriptText = ResolveInitialScriptText(initialText);
@@ -104,6 +105,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         private ActionCommand CreateAddToTimelineCommand() => new(_ => CanAddToTimeline(), _ => AddToTimeline());
         private ActionCommand CreateRegenerateCommand() => new(_ => CanRegenerate(), _ => Regenerate());
         private ActionCommand CreatePlayCommand() => new(_ => CanPlay(), _ => Play());
+        private ActionCommand CreateNextSerifCommand() => new(_ => CanMoveToNextSerif(), _ => MoveToNextSerif());
         private ActionCommand CreateBrowseOutputDirectoryCommand() => new(_ => RecordingDialogStateService.CanChangeOutputDirectory(State), _ => BrowseOutputDirectory());
         private ActionCommand CreateResetOutputDirectoryCommand() => new(_ => RecordingDialogStateService.CanChangeOutputDirectory(State), _ => ResetOutputDirectory());
 
@@ -177,6 +179,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         public ActionCommand AddToTimelineCommand { get; }
         public ActionCommand RegenerateCommand { get; }
         public ActionCommand PlayCommand { get; }
+        public ActionCommand NextSerifCommand { get; }
         public ActionCommand BrowseOutputDirectoryCommand { get; }
         public ActionCommand ResetOutputDirectoryCommand { get; }
 
@@ -193,6 +196,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             var hasAudioFile = !string.IsNullOrWhiteSpace(scriptItem.AudioFilePath) && File.Exists(scriptItem.AudioFilePath);
             return RecordingDialogStateService.CanPlay(State, audioPlaybackService.IsPlaying, hasAudioFile);
         }
+
+        private bool CanMoveToNextSerif() => State != RecordingDialogState.Recording;
 
         private void StartRecording()
         {
@@ -247,14 +252,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
             State = RecordingDialogStateService.ToRecorded();
             var filePath = result.FilePath ?? string.Empty;
-
-            if (!string.IsNullOrWhiteSpace(result.NextSerif))
-            {
-                ScriptText = result.NextSerif;
-                TransitionToIdleWithStatus(string.Format(Texts.RecordingCompletedNextPrepared, filePath));
-                return;
-            }
-
             Status = string.Format(Texts.RecordingCompletedAdded, filePath);
         }
 
@@ -269,6 +266,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             StopPlayback();
             EnsureSilentPlaceholderInCurrentDirectory();
             StartRecording();
+        }
+
+        private void MoveToNextSerif()
+        {
+            if (timelineSelectionService.TryMoveToNextSerif(ScriptText, out var nextSerif) && !string.IsNullOrWhiteSpace(nextSerif))
+            {
+                ScriptText = nextSerif;
+                Status = Texts.MovedToNextSerif;
+                return;
+            }
+
+            Status = Texts.NoNextSerif;
         }
 
         private void BrowseOutputDirectory()
@@ -400,6 +409,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             AddToTimelineCommand?.RaiseCanExecuteChanged();
             RegenerateCommand?.RaiseCanExecuteChanged();
             PlayCommand?.RaiseCanExecuteChanged();
+            NextSerifCommand?.RaiseCanExecuteChanged();
             BrowseOutputDirectoryCommand?.RaiseCanExecuteChanged();
             ResetOutputDirectoryCommand?.RaiseCanExecuteChanged();
         }
@@ -430,7 +440,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 service,
                 recordingScriptItemService,
                 voiceTimelineInsertService,
-                timelineSelectionService,
                 GetAudioDuration);
         }
 
@@ -487,7 +496,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                     recordingService,
                     recordingScriptItemService,
                     voiceTimelineInsertService,
-                    timelineSelectionService,
                     GetAudioDuration)
             };
         }

@@ -66,7 +66,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
         public bool IsMatch(string api, string id)
         {
-            return string.Equals(api, API, StringComparison.Ordinal) && string.Equals(id, ID, StringComparison.Ordinal);
+            if (!string.Equals(api, API, StringComparison.Ordinal))
+                return false;
+
+            return string.Equals(id, RecordingPluginIds.SpeakerId, StringComparison.Ordinal)
+                || string.Equals(id, RecordingPluginIds.LegacySpeakerId, StringComparison.Ordinal)
+                || string.Equals(id, RecordingPluginIds.LegacySpeakerIdTypo, StringComparison.Ordinal);
         }
 
         public IVoiceParameter MigrateParameter(IVoiceParameter parameter)

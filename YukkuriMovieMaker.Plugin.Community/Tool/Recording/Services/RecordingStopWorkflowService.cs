@@ -9,20 +9,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         private readonly RecordingService recordingService;
         private readonly RecordingScriptItemService recordingScriptItemService;
         private readonly VoiceTimelineInsertService voiceTimelineInsertService;
-        private readonly TimelineSelectionService timelineSelectionService;
         private readonly Func<string, TimeSpan> audioDurationResolver;
 
         public RecordingStopWorkflowService(
             RecordingService recordingService,
             RecordingScriptItemService recordingScriptItemService,
             VoiceTimelineInsertService voiceTimelineInsertService,
-            TimelineSelectionService timelineSelectionService,
             Func<string, TimeSpan> audioDurationResolver)
         {
             this.recordingService = recordingService;
             this.recordingScriptItemService = recordingScriptItemService;
             this.voiceTimelineInsertService = voiceTimelineInsertService;
-            this.timelineSelectionService = timelineSelectionService;
             this.audioDurationResolver = audioDurationResolver;
         }
 
@@ -41,9 +38,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
             await voiceTimelineInsertService.InsertAsync(scriptItem);
 
-            if (timelineSelectionService.TryMoveToNextSerif(scriptItem.Text, out var nextSerif) && !string.IsNullOrWhiteSpace(nextSerif))
-                return RecordingStopResult.NextSerifPrepared(nextSerif, recordedFile.FilePath);
-
             return RecordingStopResult.Inserted(recordedFile.FilePath);
         }
     }
@@ -52,7 +46,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
     {
         public bool HasData { get; private set; }
         public string? FilePath { get; private set; }
-        public string? NextSerif { get; private set; }
 
         private RecordingStopResult()
         {
@@ -64,13 +57,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         {
             HasData = true,
             FilePath = filePath
-        };
-
-        public static RecordingStopResult NextSerifPrepared(string nextSerif, string filePath) => new()
-        {
-            HasData = true,
-            FilePath = filePath,
-            NextSerif = nextSerif
         };
     }
 }

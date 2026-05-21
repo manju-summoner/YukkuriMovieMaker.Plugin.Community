@@ -68,6 +68,7 @@
                     <Button Content="{x:Static local:Texts.AddToTimeline}" Command="{Binding AddToTimelineCommand}" MinWidth="130" Margin="0,0,8,8"/>
                     <Button Content="{x:Static local:Texts.ReRecord}" Command="{Binding RegenerateCommand}" MinWidth="90" Margin="0,0,8,8"/>
                     <Button Content="{x:Static local:Texts.Play}" Command="{Binding PlayCommand}" MinWidth="70" Margin="0,0,8,8"/>
+                    <Button Content="{x:Static local:Texts.NextSerifButton}" Command="{Binding NextSerifCommand}" MinWidth="100" Margin="0,0,8,8"/>
                 </WrapPanel>
 
                 <TextBlock Text="{x:Static local:Texts.InputLevel}"/>
