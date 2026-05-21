@@ -123,6 +123,9 @@
 	<FxCompile Include="Lut.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+	<FxCompile Include="EdgeGlow.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Hash.hlsli">
