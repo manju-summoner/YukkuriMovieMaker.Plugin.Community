@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -95,7 +96,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 }
 
                 var selected = GetSelectedItemsSnapshot()
-                    .Where(IsVoiceLikeItem)
+                    .Where(VoiceTimelineNavigator.IsVoiceLikeItem)
                     .Distinct()
                     .FirstOrDefault();
                 if (selected is null)
@@ -103,17 +104,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     return false;
                 }
 
-                var voiceItems = CollectVoiceItems(timeline)
-                    .OrderBy(i => TimelineMemberReader.GetIntMember(i, "Frame"))
-                    .ThenBy(i => TimelineMemberReader.GetIntMember(i, "Layer"))
-                    .ToList();
+                var voiceItems = VoiceTimelineNavigator.GetSortedVoiceItems(timeline);
                 if (voiceItems.Count == 0)
                 {
                     return false;
                 }
 
                 var currentFrame = GetCurrentFrame(timeline);
-                var currentIndex = FindCurrentIndex(voiceItems, selected, currentSerif, currentFrame);
+                var currentIndex = VoiceTimelineNavigator.FindCurrentIndex(voiceItems, selected, currentSerif, currentFrame);
                 if (currentIndex < 0 || currentIndex >= voiceItems.Count - 1)
                 {
                     ClearPreferredVoiceTarget();
@@ -132,17 +130,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 var selectionMoved = false;
                 try
                 {
-                    selectionMoved = TrySetSelection(next);
+                    selectionMoved = TimelineSelectionApplier.TrySetSelection(next, SelectionPropertyNames);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Debug.WriteLine($"[TimelineSelectionService] TryMoveToNextSerif selection apply failed: {ex}");
                 }
 
-                var frameMoved = TryMoveCurrentFrame(next);
+                var frameMoved = TimelineSelectionApplier.TryMoveCurrentFrame(next);
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[TimelineSelectionService] TryMoveToNextSerif failed: {ex}");
                 return false;
             }
         }
@@ -187,8 +187,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[TimelineSelectionService] GetSelectedItemsSnapshot failed: {ex}");
             }
             return result;
         }
@@ -201,13 +202,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 if (timeline is null)
                     return Array.Empty<object>();
 
-                return CollectVoiceItems(timeline)
-                    .OrderBy(i => TimelineMemberReader.GetIntMember(i, "Frame"))
-                    .ThenBy(i => TimelineMemberReader.GetIntMember(i, "Layer"))
-                    .ToList();
+                return VoiceTimelineNavigator.GetSortedVoiceItems(timeline);
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[TimelineSelectionService] GetVoiceItemsSnapshot failed: {ex}");
                 return Array.Empty<object>();
             }
         }
@@ -243,293 +242,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             }
         }
 
-        private static bool TrySetSelection(object item)
-        {
-            var timeline = ToolViewModel.TimelineInstance;
-            if (timeline is not null && TrySetSelectionOnObject(timeline, item))
-                return true;
-
-            var mainViewModel = Application.Current?.MainWindow?.DataContext;
-            if (mainViewModel is not null)
-            {
-                if (TrySetSelectionOnObject(mainViewModel, item))
-                    return true;
-
-                var activeTimelineViewModel = mainViewModel.GetType()
-                    .GetProperty("ActiveTimelineViewModel", BindingFlags.Instance | BindingFlags.Public)
-                    ?.GetValue(mainViewModel);
-                if (activeTimelineViewModel is not null && TrySetSelectionOnObject(activeTimelineViewModel, item))
-                    return true;
-            }
-            return false;
-        }
-
-        private static bool TryMoveCurrentFrame(object item)
-        {
-            try
-            {
-                if (!TimelineMemberReader.TryGetIntProperty(item, "Frame", out var frame))
-                    return false;
-
-                var timeline = ToolViewModel.TimelineInstance;
-                if (timeline is null)
-                    return false;
-
-                var frameProp = timeline.GetType().GetProperty("CurrentFrame", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (frameProp?.CanWrite != true)
-                    return false;
-
-                frameProp.SetValue(timeline, frame);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private static bool TrySetSelectionOnObject(object source, object item)
-        {
-            foreach (var name in SelectionPropertyNames)
-            {
-                var property = source.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (property is null)
-                    continue;
-                if (property.GetIndexParameters().Length > 0)
-                    continue;
-
-                try
-                {
-                    if (name == "SelectedItem" && property.CanWrite)
-                    {
-                        if (property.PropertyType.IsInstanceOfType(item) || property.PropertyType == typeof(object))
-                        {
-                            property.SetValue(source, item);
-                            return true;
-                        }
-                    }
-
-                    var current = property.GetValue(source);
-                    if (current is null)
-                        continue;
-
-                    if (TryReplaceInCollection(current, item))
-                    {
-                        return true;
-                    }
-                }
-                catch
-                {
-                }
-            }
-
-            return false;
-        }
-
-        private static bool TryReplaceInCollection(object collection, object item)
-        {
-            if (collection is IList list)
-            {
-                list.Clear();
-                list.Add(item);
-                return true;
-            }
-
-            var clear = collection.GetType().GetMethod("Clear", BindingFlags.Instance | BindingFlags.Public);
-            var add = collection.GetType().GetMethod("Add", BindingFlags.Instance | BindingFlags.Public);
-            if (clear is null || add is null)
-                return false;
-
-            var parameters = add.GetParameters();
-            if (parameters.Length != 1 || !parameters[0].ParameterType.IsInstanceOfType(item))
-                return false;
-
-            clear.Invoke(collection, null);
-            add.Invoke(collection, new[] { item });
-            return true;
-        }
-
-        private static IEnumerable<object> CollectVoiceItems(object root)
-        {
-            var result = new List<object>();
-            var queue = new Queue<(object obj, int depth)>();
-            queue.Enqueue((root, 0));
-
-            while (queue.Count > 0)
-            {
-                var (current, depth) = queue.Dequeue();
-                if (depth > 3)
-                    continue;
-
-                foreach (var child in GetChildObjects(current))
-                {
-                    if (child is null)
-                        continue;
-
-                    var unwrapped = UnwrapItem(child);
-                    if (IsVoiceLikeItem(unwrapped))
-                    {
-                        if (!result.Contains(unwrapped))
-                            result.Add(unwrapped);
-                        continue;
-                    }
-
-                    if (depth < 3 && ShouldTraverse(unwrapped))
-                        queue.Enqueue((unwrapped, depth + 1));
-                }
-            }
-
-            return result;
-        }
-
-        private static IEnumerable<object?> GetChildObjects(object source)
-        {
-            foreach (var prop in source.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-            {
-                if (prop.GetIndexParameters().Length > 0)
-                    continue;
-
-                object? value;
-                try
-                {
-                    value = prop.GetValue(source);
-                }
-                catch
-                {
-                    continue;
-                }
-
-                if (value is null || value is string)
-                    continue;
-
-                if (value is IEnumerable enumerable)
-                {
-                    foreach (var item in enumerable)
-                        yield return item;
-                }
-                else
-                {
-                    yield return value;
-                }
-            }
-        }
-
-        private static bool ShouldTraverse(object obj)
-        {
-            var t = obj.GetType();
-            if (t.IsPrimitive || t.IsEnum)
-                return false;
-            if (obj is string)
-                return false;
-            var ns = t.Namespace ?? string.Empty;
-            if (ns.StartsWith("System", StringComparison.Ordinal))
-                return false;
-            return true;
-        }
-
-        private static bool IsVoiceLikeItem(object item)
-        {
-            var type = item.GetType();
-            if (type.Name.Contains("Voice", StringComparison.OrdinalIgnoreCase))
-                return true;
-
-            var serif = TimelineMemberReader.GetStringProperty(item, "Serif");
-            var frame = TimelineMemberReader.GetIntMember(item, "Frame");
-            var layer = TimelineMemberReader.GetIntMember(item, "Layer");
-            return serif is not null && (frame != int.MinValue || layer != int.MinValue);
-        }
-
-        private static int FindCurrentIndex(IReadOnlyList<object> items, object selected)
-        {
-            for (var i = 0; i < items.Count; i++)
-            {
-                if (ReferenceEquals(items[i], selected))
-                    return i;
-            }
-
-            var selectedFrame = TimelineMemberReader.GetIntMember(selected, "Frame");
-            var selectedLayer = TimelineMemberReader.GetIntMember(selected, "Layer");
-            var selectedSerif = TimelineMemberReader.GetStringProperty(selected, "Serif");
-            for (var i = 0; i < items.Count; i++)
-            {
-                if (TimelineMemberReader.GetIntMember(items[i], "Frame") == selectedFrame
-                    && TimelineMemberReader.GetIntMember(items[i], "Layer") == selectedLayer
-                    && string.Equals(TimelineMemberReader.GetStringProperty(items[i], "Serif"), selectedSerif, StringComparison.Ordinal))
-                {
-                    return i;
-                }
-            }
-
-            return -1;
-        }
-
-        private static int FindCurrentIndex(IReadOnlyList<object> items, object selected, string? currentSerif, int currentFrame)
-        {
-            // 1) Prefer currently selected item if it matches.
-            var bySelected = FindCurrentIndex(items, selected);
-            if (bySelected >= 0)
-            {
-                var selectedSerif = TimelineMemberReader.GetStringProperty(items[bySelected], "Serif");
-                if (string.IsNullOrWhiteSpace(currentSerif) || string.Equals(selectedSerif, currentSerif, StringComparison.Ordinal))
-                    return bySelected;
-            }
-
-            // 2) Prefer item at current frame + same serif (frame cursor survives when selection move fails).
-            if (!string.IsNullOrWhiteSpace(currentSerif))
-            {
-                for (var i = 0; i < items.Count; i++)
-                {
-                    if (TimelineMemberReader.GetIntMember(items[i], "Frame") == currentFrame
-                        && string.Equals(TimelineMemberReader.GetStringProperty(items[i], "Serif"), currentSerif, StringComparison.Ordinal))
-                    {
-                        return i;
-                    }
-                }
-            }
-
-            // 3) Fallback to same serif with nearest frame <= current frame.
-            if (!string.IsNullOrWhiteSpace(currentSerif))
-            {
-                var candidate = -1;
-                var bestFrame = int.MinValue;
-                for (var i = 0; i < items.Count; i++)
-                {
-                    if (!string.Equals(TimelineMemberReader.GetStringProperty(items[i], "Serif"), currentSerif, StringComparison.Ordinal))
-                        continue;
-
-                    var frame = TimelineMemberReader.GetIntMember(items[i], "Frame");
-                    if (frame <= currentFrame && frame >= bestFrame)
-                    {
-                        bestFrame = frame;
-                        candidate = i;
-                    }
-                }
-
-                if (candidate >= 0)
-                    return candidate;
-            }
-
-            // 4) Last resort: original selected-based logic.
-            return FindCurrentIndex(items, selected);
-        }
-
         private static int GetCurrentFrame(object timeline)
         {
-            try
-            {
-                var prop = timeline.GetType().GetProperty("CurrentFrame", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (prop is not null && prop.GetIndexParameters().Length == 0)
-                {
-                    var value = prop.GetValue(timeline);
-                    if (TimelineMemberReader.TryConvertToInt(value, out var frame))
-                        return frame;
-                }
-            }
-            catch
-            {
-            }
-
-            return 0;
+            var frame = TimelineMemberReader.GetCurrentFrame(timeline);
+            return frame == int.MinValue ? 0 : frame;
         }
 
         private static object UnwrapItem(object item)
@@ -543,8 +259,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                         return inner;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[TimelineSelectionService] UnwrapItem by Item failed: {ex}");
             }
 
             try
@@ -556,8 +273,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                         return model;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[TimelineSelectionService] UnwrapItem by Model failed: {ex}");
             }
 
             return item;

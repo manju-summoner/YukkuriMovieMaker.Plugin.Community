@@ -1,7 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Reflection;
-using NAudio.Wave;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
 using YukkuriMovieMaker.Plugin.Community.Voice.Recording;
 
@@ -9,6 +7,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
     internal class VoiceTimelineReflectionService
     {
+        private readonly TimelineAudioMetricsService timelineAudioMetricsService = new();
+
         public object? GetActiveTimeline(object mainViewModel)
         {
             var mainViewModelType = mainViewModel.GetType();
@@ -35,18 +35,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
         public int GetCurrentFrame(object timeline)
         {
-            return (int)(timeline.GetType()
-                .GetProperty("CurrentFrame", BindingFlags.Instance | BindingFlags.Public)
-                ?.GetValue(timeline)
-                ?? throw new InvalidOperationException("現在フレームを取得できません。"));
+            var frame = TimelineMemberReader.GetCurrentFrame(timeline);
+            if (frame == int.MinValue)
+                throw new InvalidOperationException("現在フレームを取得できません。");
+            return frame;
         }
 
         public int GetLengthFrames(object timeline, string filePath)
         {
-            var fps = GetTimelineFps(timeline, fallbackFps: 60.0);
-            var durationSeconds = GetAudioDuration(filePath).TotalSeconds;
-            var frames = (int)Math.Round(durationSeconds * fps, MidpointRounding.AwayFromZero);
-            return Math.Max(1, frames);
+            return timelineAudioMetricsService.GetLengthFrames(timeline, filePath);
         }
 
         public object CreateVoiceItemViaReflection(RecordingScriptItem item, int frame, int length, int layer)
@@ -92,7 +89,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             voiceItemType.GetProperty("Length")?.SetValue(voiceItem, length);
             var voiceLengthProp = voiceItemType.GetProperty("VoiceLength");
             if (voiceLengthProp?.CanWrite == true)
-                voiceLengthProp.SetValue(voiceItem, item.Duration ?? GetAudioDuration(item.AudioFilePath));
+                voiceLengthProp.SetValue(voiceItem, item.Duration ?? timelineAudioMetricsService.GetAudioDuration(item.AudioFilePath));
 
             return voiceItem;
         }
@@ -126,60 +123,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 throw new InvalidOperationException("タイムライン追加メソッドを取得できません。");
 
             addItems.Invoke(timeline, new object[] { itemArray });
-        }
-
-        private static TimeSpan GetAudioDuration(string filePath)
-        {
-            using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            using var reader = new WaveFileReader(stream);
-            return reader.TotalTime;
-        }
-
-        private static double GetTimelineFps(object timeline, double fallbackFps)
-        {
-            try
-            {
-                var videoInfoProperty = timeline.GetType().GetProperty("VideoInfo", BindingFlags.Public | BindingFlags.Instance);
-                var videoInfo = videoInfoProperty?.GetValue(timeline);
-                if (videoInfo is not null)
-                {
-                    var fpsFromVideoInfo = GetPropertyDouble(videoInfo, "FPS");
-                    if (fpsFromVideoInfo > 0)
-                        return fpsFromVideoInfo;
-                }
-
-                var fps = GetPropertyDouble(timeline, "FPS");
-                if (fps > 0)
-                    return fps;
-
-                fps = GetPropertyDouble(timeline, "FrameRate");
-                if (fps > 0)
-                    return fps;
-            }
-            catch
-            {
-            }
-
-            return fallbackFps;
-        }
-
-        private static double GetPropertyDouble(object instance, string propertyName)
-        {
-            var property = instance.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-            if (property is null)
-                return 0;
-
-            var value = property.GetValue(instance);
-            return value switch
-            {
-                double d => d,
-                float f => f,
-                decimal m => (double)m,
-                int i => i,
-                long l => l,
-                string s when double.TryParse(s, out var parsed) => parsed,
-                _ => 0
-            };
         }
     }
 }

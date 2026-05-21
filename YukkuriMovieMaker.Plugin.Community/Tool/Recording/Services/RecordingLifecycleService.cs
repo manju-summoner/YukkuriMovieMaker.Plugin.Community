@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
@@ -29,8 +30,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 if (recordingService.IsRecording)
                     recordingService.StopRecording();
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[RecordingLifecycleService] TryStopRecording failed: {ex}");
             }
         }
     }

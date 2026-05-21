@@ -3,7 +3,6 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
-using NAudio.Wave;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
 using YukkuriMovieMaker.Project;
 using YukkuriMovieMaker.Project.Items;
@@ -12,6 +11,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
     public class TimelineInsertService
     {
+        private readonly TimelineAudioMetricsService timelineAudioMetricsService = new();
+
         public Task InsertAsync(RecordedFileInfo recordedFile)
         {
             if (recordedFile is null)
@@ -38,17 +39,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 var fallbackTimeline = GetActiveTimeline(mainViewModel)
                     ?? throw new InvalidOperationException("タイムラインを取得できません。");
 
-                var currentFrame = GetCurrentFrame(fallbackTimeline);
-                var length = GetLengthFrames(fallbackTimeline, recordedFile.FilePath);
+                var currentFrame = TimelineMemberReader.GetCurrentFrame(fallbackTimeline);
+                if (currentFrame == int.MinValue)
+                    throw new InvalidOperationException("現在フレームを取得できません。");
+                var length = timelineAudioMetricsService.GetLengthFrames(fallbackTimeline, recordedFile.FilePath);
                 var audioItem = CreateAudioItem(recordedFile.FilePath, currentFrame, length);
                 TryAddItem(fallbackTimeline, audioItem, currentFrame, length);
             }).Task;
         }
 
-        private static void InsertWithTimeline(Timeline timeline, string filePath)
+        private void InsertWithTimeline(Timeline timeline, string filePath)
         {
             var frame = timeline.CurrentFrame;
-            var length = GetLengthFrames(timeline, filePath);
+            var length = timelineAudioMetricsService.GetLengthFrames(timeline, filePath);
             var audioItem = new AudioItem(filePath)
             {
                 Frame = frame,
@@ -59,67 +62,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             var added = timeline.TryAddItems(new IItem[] { audioItem }, audioItem.Frame, audioItem.Layer);
             if (!added)
                 throw new InvalidOperationException("タイムラインへの追加に失敗しました。");
-        }
-
-        private static int GetLengthFrames(object timeline, string filePath)
-        {
-            var fps = GetTimelineFps(timeline, fallbackFps: 60.0);
-            var durationSeconds = GetAudioDurationSeconds(filePath);
-            var frames = (int)Math.Round(durationSeconds * fps, MidpointRounding.AwayFromZero);
-            return Math.Max(1, frames);
-        }
-
-        private static double GetAudioDurationSeconds(string filePath)
-        {
-            using var reader = new WaveFileReader(filePath);
-            return reader.TotalTime.TotalSeconds;
-        }
-
-        private static double GetTimelineFps(object timeline, double fallbackFps)
-        {
-            try
-            {
-                var videoInfoProperty = timeline.GetType().GetProperty("VideoInfo", BindingFlags.Public | BindingFlags.Instance);
-                var videoInfo = videoInfoProperty?.GetValue(timeline);
-                if (videoInfo is not null)
-                {
-                    var fpsFromVideoInfo = GetPropertyDouble(videoInfo, "FPS");
-                    if (fpsFromVideoInfo > 0)
-                        return fpsFromVideoInfo;
-                }
-
-                var fps = GetPropertyDouble(timeline, "FPS");
-                if (fps > 0)
-                    return fps;
-
-                fps = GetPropertyDouble(timeline, "FrameRate");
-                if (fps > 0)
-                    return fps;
-            }
-            catch
-            {
-            }
-
-            return fallbackFps;
-        }
-
-        private static double GetPropertyDouble(object instance, string propertyName)
-        {
-            var property = instance.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-            if (property is null)
-                return 0;
-
-            var value = property.GetValue(instance);
-            return value switch
-            {
-                double d => d,
-                float f => f,
-                decimal m => (double)m,
-                int i => i,
-                long l => l,
-                string s when double.TryParse(s, out var parsed) => parsed,
-                _ => 0
-            };
         }
 
         private static object? GetActiveTimeline(object mainViewModel)
@@ -144,14 +86,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             return model?.GetType()
                 .GetProperty("Timeline", BindingFlags.Instance | BindingFlags.Public)
                 ?.GetValue(model);
-        }
-
-        private static int GetCurrentFrame(object timeline)
-        {
-            return (int)(timeline.GetType()
-                .GetProperty("CurrentFrame", BindingFlags.Instance | BindingFlags.Public)
-                ?.GetValue(timeline)
-                ?? throw new InvalidOperationException("現在フレームを取得できません。"));
         }
 
         private static object CreateAudioItem(string filePath, int frame, int length)
@@ -211,6 +145,3 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         }
     }
 }
-
-
-

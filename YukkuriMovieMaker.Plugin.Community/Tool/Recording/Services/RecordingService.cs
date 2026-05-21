@@ -1,6 +1,7 @@
 ﻿using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
@@ -80,8 +81,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
                     input.StartRecording();
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Debug.WriteLine($"[RecordingService] StartRecording failed: {ex}");
                     CleanupRecordingResources(deleteFile: true);
                     throw;
                 }
@@ -107,8 +109,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     recordingStoppedTcs = stopCompletion;
                     waveIn?.StopRecording();
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Debug.WriteLine($"[RecordingService] StopRecordingAsync failed before waiting stop event: {ex}");
                     CleanupRecordingResources(deleteFile: false);
                     throw;
                 }

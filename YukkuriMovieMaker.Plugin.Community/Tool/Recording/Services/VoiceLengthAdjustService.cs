@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
 
@@ -6,13 +7,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
     internal static class VoiceLengthAdjustService
     {
+        private static readonly TimelineAudioMetricsService timelineAudioMetricsService = new();
+
         public static void UpdateSelectedVoiceItemLength(object selected, RecordingScriptItem item)
         {
             try
             {
                 var duration = item.Duration.HasValue && item.Duration.Value > TimeSpan.Zero
                     ? item.Duration.Value
-                    : GetAudioDuration(item.AudioFilePath);
+                    : timelineAudioMetricsService.GetAudioDuration(item.AudioFilePath);
                 item.Duration = duration;
 
                 var fps = ResolveFpsForSelectedItem(selected);
@@ -25,16 +28,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 _ = SetMemberWithBackingField(selected, "ContentLength", contentDuration);
                 _ = SetMemberWithBackingField(selected, "OriginalContentLength", contentDuration);
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[VoiceLengthAdjustService] UpdateSelectedVoiceItemLength failed: {ex}");
             }
-        }
-
-        private static TimeSpan GetAudioDuration(string filePath)
-        {
-            using var stream = new System.IO.FileStream(filePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
-            using var reader = new NAudio.Wave.WaveFileReader(stream);
-            return reader.TotalTime;
         }
 
         private static TimeSpan ResolveTailPadding(object selected, double fps)
@@ -69,8 +66,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 if (existingPadding > TimeSpan.Zero && existingPadding <= TimeSpan.FromSeconds(2))
                     return existingPadding;
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[VoiceLengthAdjustService] ResolveTailPadding fallback to default: {ex}");
             }
 
             return defaultPadding;
@@ -184,12 +182,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             {
                 if (ToolViewModel.TimelineInstance is { } timeline)
                 {
-                    var fpsFromTimeline = GetTimelineFps(timeline, 0);
+                    var fpsFromTimeline = timelineAudioMetricsService.GetTimelineFps(timeline, 0);
                     if (fpsFromTimeline > 0)
                         return fpsFromTimeline;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[VoiceLengthAdjustService] ResolveFpsForSelectedItem failed to read timeline fps: {ex}");
+            }
 
             var fps = GetMemberDouble(selected, "videoFPS");
             if (fps > 0) return fps;
@@ -198,38 +199,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             fps = GetMemberDouble(selected, "FrameRate");
             if (fps > 0) return fps;
             return 60.0;
-        }
-
-        private static double GetTimelineFps(object timeline, double fallbackFps)
-        {
-            try
-            {
-                var videoInfoProperty = timeline.GetType().GetProperty("VideoInfo", BindingFlags.Public | BindingFlags.Instance);
-                var videoInfo = videoInfoProperty?.GetValue(timeline);
-                if (videoInfo is not null)
-                {
-                    var fpsFromVideoInfo = GetPropertyDouble(videoInfo, "FPS");
-                    if (fpsFromVideoInfo > 0)
-                        return fpsFromVideoInfo;
-                }
-
-                var fps = GetPropertyDouble(timeline, "FPS");
-                if (fps > 0)
-                    return fps;
-
-                fps = GetPropertyDouble(timeline, "FrameRate");
-                if (fps > 0)
-                    return fps;
-            }
-            catch { }
-            return fallbackFps;
-        }
-
-        private static double GetPropertyDouble(object instance, string propertyName)
-        {
-            var property = instance.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-            if (property is null) return 0;
-            return ToDouble(property.GetValue(instance));
         }
 
         private static double GetMemberDouble(object target, string name)

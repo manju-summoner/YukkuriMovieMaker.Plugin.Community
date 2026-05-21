@@ -8,9 +8,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
     public class VoiceTimelineInsertService
     {
-        private readonly VoiceTimelineReflectionService reflectionService = new();
         private readonly VoiceItemAttachmentService voiceItemAttachmentService = new();
         private readonly VoiceTimelineDirectInsertService directInsertService = new();
+        private readonly VoiceTimelineFallbackInsertService fallbackInsertService = new();
         private readonly TimelineSelectionService selectionService;
         private readonly VoiceTargetResolverService targetResolver;
 
@@ -59,14 +59,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 var mainViewModel = Application.Current?.MainWindow?.DataContext
                     ?? throw new InvalidOperationException("MainViewModel を取得できません。");
 
-                var fallbackTimeline = reflectionService.GetActiveTimeline(mainViewModel)
-                    ?? throw new InvalidOperationException("タイムラインを取得できません。");
-
-                var currentFrame = selectedFrame ?? reflectionService.GetCurrentFrame(fallbackTimeline);
-                var length = reflectionService.GetLengthFrames(fallbackTimeline, item.AudioFilePath);
-                var targetLayer = selectedLayer ?? 0;
-                var voiceItem = reflectionService.CreateVoiceItemViaReflection(item, currentFrame, length, targetLayer);
-                reflectionService.TryAddItem(fallbackTimeline, voiceItem, currentFrame, targetLayer);
+                fallbackInsertService.Insert(mainViewModel, item, selectedFrame, selectedLayer);
             }).Task;
         }
     }

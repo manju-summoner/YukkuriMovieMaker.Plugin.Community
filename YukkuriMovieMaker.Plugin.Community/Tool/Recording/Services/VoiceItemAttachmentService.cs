@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
 
@@ -39,8 +40,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     return true;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[VoiceItemAttachmentService] TryAttachToSelectedVoiceItem failed: {ex}");
             }
 
             return false;
@@ -56,8 +58,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                         return true;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[VoiceItemAttachmentService] TryAttachToMatchingVoiceItem failed: {ex}");
             }
 
             return false;
@@ -72,8 +75,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
                 return TryAttachToVoiceItemCore(item, candidate);
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[VoiceItemAttachmentService] TryAttachToPreferredVoiceItem failed: {ex}");
             }
 
             return false;
@@ -98,8 +102,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 VoiceLengthAdjustService.UpdateSelectedVoiceItemLength(selected, item);
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"[VoiceItemAttachmentService] TryAttachToVoiceItemCore failed: {ex}");
                 return false;
             }
         }

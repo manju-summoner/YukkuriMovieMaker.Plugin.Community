@@ -5,6 +5,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
     internal static class TimelineMemberReader
     {
+        public static int GetCurrentFrame(object timeline)
+        {
+            return GetIntMember(timeline, "CurrentFrame");
+        }
+
         public static int GetIntMember(object instance, string name)
         {
             if (TryGetIntProperty(instance, name, out var value))
