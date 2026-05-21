@@ -216,7 +216,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 var targetDevice = deviceName ?? recordingService.GetAvailableDeviceNames().FirstOrDefault();
                 
-                // 先にStateをRecordingに変更することで、コマンドバインディングの同期ズレを防ぐ
                 State = RecordingDialogStateService.ToRecording();
                 Status = Texts.RecordingNow;
 
@@ -265,7 +264,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         private void ApplyStopRecordingResult(Services.RecordingStopResult result)
         {
-            State = RecordingDialogStateService.ToRecorded();
+            State = RecordingDialogStateService.ToIdle();
             var filePath = result.FilePath ?? string.Empty;
             Status = string.Format(Texts.RecordingCompletedAdded, filePath);
         }

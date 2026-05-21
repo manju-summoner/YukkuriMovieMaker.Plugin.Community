@@ -11,8 +11,9 @@ using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 {
-    public class ToolViewModel : Bindable, ITimelineToolViewModel
+    public class ToolViewModel : Bindable, ITimelineToolViewModel, IDisposable
     {
+        public bool CanSuspend => !IsRecording && !audioPlaybackService.IsPlaying && recordingWindow == null;
         private readonly RecordingService recordingService;
         private readonly ToolRecordingStartWorkflowService recordingStartWorkflowService;
         private readonly ToolRecordingStopWorkflowService recordingStopWorkflowService;
@@ -294,6 +295,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 audioPlaybackService.Play(latestRecordedFilePath!);
                 RecordingStatus = Texts.Playing;
+                OnPropertyChanged(nameof(CanSuspend));
             }
             catch (Exception ex)
             {
@@ -358,9 +360,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             recordingWindow.Closed += (_, _) =>
             {
                 recordingWindow = null;
+                OnPropertyChanged(nameof(CanSuspend));
             };
             recordingWindow.Show();
             recordingWindow.Activate();
+            OnPropertyChanged(nameof(CanSuspend));
         }
 
         private void BrowseOutputDirectory()
@@ -403,6 +407,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             if (dispatcher is null || dispatcher.CheckAccess())
             {
                 OnPropertyChanged(nameof(IsRecording));
+                OnPropertyChanged(nameof(CanSuspend));
                 RaiseCommandStates();
                 return;
             }
@@ -410,6 +415,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             _ = dispatcher.BeginInvoke((Action)(() =>
             {
                 OnPropertyChanged(nameof(IsRecording));
+                OnPropertyChanged(nameof(CanSuspend));
                 RaiseCommandStates();
             }));
         }
@@ -427,6 +433,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                     RecordingStatus = Texts.PlaybackCompleted;
                 }
 
+                OnPropertyChanged(nameof(CanSuspend));
                 RaiseCommandStates();
             }
 
@@ -474,6 +481,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             return !string.IsNullOrWhiteSpace(latestRecordedFilePath) && File.Exists(latestRecordedFilePath);
         }
 
+        public void Dispose()
+        {
+            recordingService.DataAvailable -= OnRecordingDataAvailable;
+            recordingService.RecordingStateChanged -= OnRecordingStateChanged;
+            audioPlaybackService.PlaybackStopped -= OnPlaybackStopped;
+            RecordingLifecycleService.TryStopRecording(recordingService);
+            audioPlaybackService.Dispose();
+            recordingWindow?.Close();
+        }
     }
 }
 
