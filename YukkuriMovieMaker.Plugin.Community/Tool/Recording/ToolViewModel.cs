@@ -228,6 +228,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
             try
             {
+                if (!EnsureOutputDirectory())
+                    return;
+
                 if (audioPlaybackService.IsPlaying)
                     audioPlaybackService.Stop();
 
@@ -247,6 +250,43 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 RecordingStatus = string.Format(Texts.RecordingStartFailed, ex.Message);
                 RaiseCommandStates();
+            }
+        }
+
+        private bool EnsureOutputDirectory()
+        {
+            try
+            {
+                Directory.CreateDirectory(OutputDirectory);
+                return true;
+            }
+            catch (Exception)
+            {
+                var fallback = RecordingSettings.GetDefaultOutputDirectory();
+                if (string.Equals(OutputDirectory, fallback, StringComparison.OrdinalIgnoreCase))
+                {
+                    RecordingStatus = Texts.OutputFolderUnavailable;
+                    RaiseCommandStates();
+                    return false;
+                }
+
+                try
+                {
+                    Directory.CreateDirectory(fallback);
+                    OutputDirectory = fallback;
+                    MessageBox.Show(
+                        string.Format(Texts.OutputDirectoryFallback, fallback),
+                        Texts.RecordingUiTitle,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return true;
+                }
+                catch (Exception)
+                {
+                    RecordingStatus = Texts.OutputFolderUnavailable;
+                    RaiseCommandStates();
+                    return false;
+                }
             }
         }
 

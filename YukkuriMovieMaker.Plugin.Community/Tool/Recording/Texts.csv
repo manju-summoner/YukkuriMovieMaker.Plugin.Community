@@ -1,4 +1,4 @@
-﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
 ToolName,,録音ツール,Recording Tool,录音工具,錄音工具,녹음 도구,Herramienta de grabación,أداة التسجيل,Alat Perekaman
 RecordingUiTitle,,収録UI,Recording UI,录制界面,錄製介面,녹음 UI,Interfaz de grabación,واجهة التسجيل,UI Perekaman
 OpenSerifRecording,,セリフ録音を開く,Open Serif Recording,打开台词录音,開啟台詞錄音,대사 녹음 열기,Abrir grabación de diálogo,فتح تسجيل النص,Buka Rekaman Dialog
@@ -68,3 +68,4 @@ CharacterUnavailable,,Character を取得できません。,Character is unavail
 CharacterCreateFailed,,Character を作成できません。,Failed to create Character.,创建 Character 失败。,建立 Character 失敗。,Character 생성 실패.,No se pudo crear Character.,فشل إنشاء Character.,Gagal membuat Character.
 VoiceDescriptionUnavailable,,VoiceDescription を取得できません。,VoiceDescription is unavailable.,无法获取 VoiceDescription。,無法取得 VoiceDescription。,VoiceDescription을 사용할 수 없습니다.,VoiceDescription no disponible.,VoiceDescription غير متاح.,VoiceDescription tidak tersedia.
 VoiceDescriptionCreateFailed,,VoiceDescription を作成できません。,Failed to create VoiceDescription.,创建 VoiceDescription 失败。,建立 VoiceDescription 失敗。,VoiceDescription 생성 실패.,No se pudo crear VoiceDescription.,فشل إنشاء VoiceDescription.,Gagal membuat VoiceDescription.
+OutputDirectoryFallback,0:path,保存先が存在しないため、既定値へ変更しました: {0},Invalid output folder. Reset to default: {0},保存位置无效，已恢复默认值: {0},儲存位置無效，已恢復預設值: {0},저장 위치가 잘못되어 기본값으로 재설정했습니다: {0},Carpeta de salida no válida. Restablecido al predeterminado: {0},مجلد الحفظ غير صالح. تم الرجوع إلى الافتراضي: {0},Folder output tidak valid. Kembali ke default: {0}
