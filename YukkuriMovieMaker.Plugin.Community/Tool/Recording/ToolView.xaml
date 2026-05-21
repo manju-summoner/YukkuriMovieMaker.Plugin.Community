@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Tool.Recording.ToolView"
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Tool.Recording.ToolView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -15,7 +15,7 @@
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
     </UserControl.Resources>
-    <Grid Margin="6">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -26,58 +26,49 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="{x:Static local:Texts.RecordingUiTitle}" FontWeight="Bold" Margin="0,2,0,0" />
+        <TextBlock Grid.Row="0" Text="{x:Static local:Texts.RecordingUiTitle}" FontWeight="Bold" />
         <Button Grid.Row="1"
                 Content="{x:Static local:Texts.OpenSerifRecording}"
                 Command="{Binding OpenRecordingWindowCommand}"
-                MinWidth="170"
-                HorizontalAlignment="Left"
-                Margin="0,6,0,10" />
+                HorizontalAlignment="Left" />
 
-        <Separator Grid.Row="2" Margin="0,0,0,8" />
+        <Separator Grid.Row="2" />
 
-        <TextBlock Grid.Row="3" Text="{x:Static local:Texts.RecordingDevice}" Margin="0,0,0,2" />
-        <DockPanel Grid.Row="4" Margin="0,0,0,0">
+        <TextBlock Grid.Row="3" Text="{x:Static local:Texts.RecordingDevice}" />
+        <DockPanel Grid.Row="4">
             <Button Content="{x:Static local:Texts.Refresh}"
                     Command="{Binding RefreshDevicesCommand}"
-                    MinWidth="70"
-                    Margin="8,0,0,0"
                     DockPanel.Dock="Right" />
             <ComboBox ItemsSource="{Binding AvailableDevices}"
                       SelectedItem="{Binding SelectedDevice}"
-                      MinWidth="280" />
+                      VerticalContentAlignment="Center"
+                      Height="26" />
         </DockPanel>
 
-        <TextBlock Grid.Row="5" TextWrapping="Wrap" Margin="0,10,0,0">
+        <TextBlock Grid.Row="5" TextWrapping="Wrap">
             <Run Text="{x:Static local:Texts.SaveDestination}"/>
             <Run Text=": "/>
             <Run Text="{Binding RecordsDirectory}"/>
         </TextBlock>
 
-        <StackPanel Grid.Row="6" Margin="0,10,0,0">
+        <StackPanel Grid.Row="6">
             <WrapPanel>
                 <Button Content="{x:Static local:Texts.StartRecording}"
-                        Command="{Binding StartRecordingCommand}"
-                        MinWidth="120"
-                        Margin="0,0,8,8" />
+                        Command="{Binding StartRecordingCommand}" />
                 <Button Content="{x:Static local:Texts.StopRecording}"
-                        Command="{Binding StopRecordingCommand}"
-                        MinWidth="120"
-                        Margin="0,0,8,8" />
+                        Command="{Binding StopRecordingCommand}" />
             </WrapPanel>
 
             <TextBlock Text="{Binding RecordingStatus}"
                        Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
                        FontWeight="Bold"
-                       TextWrapping="Wrap"
-                       Margin="0,2,0,0" />
+                       TextWrapping="Wrap" />
 
-            <TextBlock Text="{x:Static local:Texts.InputLevel}" Margin="0,10,0,0" />
+            <TextBlock Text="{x:Static local:Texts.InputLevel}" />
             <ProgressBar Minimum="0"
                          Maximum="1"
                          Value="{Binding CurrentVolume}"
-                         Height="16"
-                         Margin="0,4,0,0" />
+                         Height="26" />
         </StackPanel>
     </Grid>
 </UserControl>
