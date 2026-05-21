@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,7 +10,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
     {
         private readonly VoiceItemAttachmentService voiceItemAttachmentService = new();
         private readonly VoiceTimelineDirectInsertService directInsertService = new();
-        private readonly VoiceTimelineFallbackInsertService fallbackInsertService = new();
         private readonly TimelineSelectionService selectionService;
         private readonly VoiceTargetResolverService targetResolver;
 
@@ -56,10 +55,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     return;
                 }
 
-                var mainViewModel = Application.Current?.MainWindow?.DataContext
-                    ?? throw new InvalidOperationException(Texts.MainViewModelUnavailable);
-
-                fallbackInsertService.Insert(mainViewModel, item, selectedFrame, selectedLayer);
+                throw new InvalidOperationException(Texts.TimelineUnavailable);
             }).Task;
         }
     }

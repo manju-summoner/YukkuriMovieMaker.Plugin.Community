@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -33,18 +33,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     return;
                 }
 
-                var mainViewModel = Application.Current?.MainWindow?.DataContext
-                    ?? throw new InvalidOperationException(Texts.MainViewModelUnavailable);
-
-                var fallbackTimeline = GetActiveTimeline(mainViewModel)
-                    ?? throw new InvalidOperationException(Texts.TimelineUnavailable);
-
-                var currentFrame = TimelineMemberReader.GetCurrentFrame(fallbackTimeline);
-                if (currentFrame == int.MinValue)
-                    throw new InvalidOperationException(Texts.CurrentFrameUnavailable);
-                var length = timelineAudioMetricsService.GetLengthFrames(fallbackTimeline, recordedFile.FilePath);
-                var audioItem = CreateAudioItem(recordedFile.FilePath, currentFrame, length);
-                TryAddItem(fallbackTimeline, audioItem, currentFrame, length);
+                throw new InvalidOperationException(Texts.TimelineUnavailable);
             }).Task;
         }
 
@@ -62,86 +51,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             var added = timeline.TryAddItems(new IItem[] { audioItem }, audioItem.Frame, audioItem.Layer);
             if (!added)
                 throw new InvalidOperationException(Texts.TimelineAddFailedMessage);
-        }
-
-        private static object? GetActiveTimeline(object mainViewModel)
-        {
-            var mainViewModelType = mainViewModel.GetType();
-
-            var activeTimelineViewModel = mainViewModelType
-                .GetProperty("ActiveTimelineViewModel", BindingFlags.Instance | BindingFlags.Public)
-                ?.GetValue(mainViewModel);
-
-            if (activeTimelineViewModel is not null)
-            {
-                var timelineField = activeTimelineViewModel.GetType()
-                    .GetField("timeline", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                if (timelineField?.GetValue(activeTimelineViewModel) is { } timeline)
-                    return timeline;
-            }
-
-            var modelField = mainViewModelType.GetField("model", BindingFlags.Instance | BindingFlags.NonPublic);
-            var model = modelField?.GetValue(mainViewModel);
-            return model?.GetType()
-                .GetProperty("Timeline", BindingFlags.Instance | BindingFlags.Public)
-                ?.GetValue(model);
-        }
-
-        private static object CreateAudioItem(string filePath, int frame, int length)
-        {
-            var audioItemType = Type.GetType("YukkuriMovieMaker.Project.Items.AudioItem, YukkuriMovieMaker")
-                ?? throw new InvalidOperationException(Texts.AudioItemUnavailable);
-
-            object audioItem;
-
-            var stringCtor = audioItemType.GetConstructor(new[] { typeof(string) });
-            if (stringCtor is not null)
-            {
-                audioItem = stringCtor.Invoke(new object[] { filePath });
-            }
-            else
-            {
-                audioItem = Activator.CreateInstance(audioItemType)
-                    ?? throw new InvalidOperationException(Texts.AudioItemCannotSetup);
-                audioItemType.GetProperty("FilePath")?.SetValue(audioItem, filePath);
-            }
-
-            audioItemType.GetProperty("Frame")?.SetValue(audioItem, frame);
-            audioItemType.GetProperty("Layer")?.SetValue(audioItem, 0);
-            audioItemType.GetProperty("Length")?.SetValue(audioItem, length);
-            return audioItem;
-        }
-
-        private static void TryAddItem(object timeline, object audioItem, int frame, int length)
-        {
-            var timelineType = timeline.GetType();
-            var itemInterfaceType = timelineType.Assembly.GetType("YukkuriMovieMaker.Project.Items.IItem")
-                ?? throw new InvalidOperationException(Texts.IItemUnavailable);
-
-            var itemArray = Array.CreateInstance(itemInterfaceType, 1);
-            itemArray.SetValue(audioItem, 0);
-
-            var tryAddItems = timelineType.GetMethod(
-                "TryAddItems",
-                BindingFlags.Instance | BindingFlags.Public,
-                binder: null,
-                types: new[] { itemArray.GetType(), typeof(int), typeof(int) },
-                modifiers: null);
-
-            if (tryAddItems is not null)
-            {
-                var added = (bool)tryAddItems.Invoke(timeline, new object[] { itemArray, frame, 0 })!;
-                if (!added)
-                    throw new InvalidOperationException(Texts.TimelineAddFailedMessage);
-                return;
-            }
-
-            var addItems = timelineType.GetMethod("AddItems", BindingFlags.Instance | BindingFlags.Public);
-            if (addItems is null)
-                throw new InvalidOperationException(Texts.TimelineAddMethodUnavailable);
-
-            addItems.Invoke(timeline, new object[] { itemArray });
         }
     }
 }
