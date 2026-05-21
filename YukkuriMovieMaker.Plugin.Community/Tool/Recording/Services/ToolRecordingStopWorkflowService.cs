@@ -5,12 +5,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
     internal class ToolRecordingStopWorkflowService
     {
         private readonly RecordingService recordingService;
-        private readonly TimelineInsertService timelineInsertService;
 
-        public ToolRecordingStopWorkflowService(RecordingService recordingService, TimelineInsertService timelineInsertService)
+        public ToolRecordingStopWorkflowService(RecordingService recordingService)
         {
             this.recordingService = recordingService;
-            this.timelineInsertService = timelineInsertService;
         }
 
         public async Task<ToolRecordingStopResult> ExecuteAsync()
@@ -22,8 +20,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             if (recordedFile.DataLength <= 0)
                 return ToolRecordingStopResult.ZeroData(recordedFile.FilePath);
 
-            await timelineInsertService.InsertAsync(recordedFile);
-            return ToolRecordingStopResult.Inserted(recordedFile.FilePath);
+            return ToolRecordingStopResult.Recorded(recordedFile.FilePath);
         }
     }
 
@@ -46,7 +43,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             FilePath = filePath
         };
 
-        public static ToolRecordingStopResult Inserted(string filePath) => new()
+        public static ToolRecordingStopResult Recorded(string filePath) => new()
         {
             HasData = true,
             FilePath = filePath

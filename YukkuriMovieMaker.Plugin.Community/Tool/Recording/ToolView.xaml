@@ -7,6 +7,7 @@
              mc:Ignorable="d"
              d:DesignHeight="360"
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              d:DesignWidth="520">
     <UserControl.Resources>
         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
@@ -15,7 +16,7 @@
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
     </UserControl.Resources>
-    <Grid>
+    <Grid Margin="4">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -23,10 +24,14 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="{x:Static local:Texts.RecordingUiTitle}" FontWeight="Bold" />
+        <TextBlock Grid.Row="0"
+                   Text="{x:Static local:Texts.RecordingUiTitle}"
+                   FontWeight="Bold" />
         <Button Grid.Row="1"
                 Content="{x:Static local:Texts.OpenSerifRecording}"
                 Command="{Binding OpenRecordingWindowCommand}"
@@ -34,7 +39,8 @@
 
         <Separator Grid.Row="2" />
 
-        <TextBlock Grid.Row="3" Text="{x:Static local:Texts.RecordingDevice}" />
+        <TextBlock Grid.Row="3"
+                   Text="{x:Static local:Texts.RecordingDevice}" />
         <DockPanel Grid.Row="4">
             <Button Content="{x:Static local:Texts.Refresh}"
                     Command="{Binding RefreshDevicesCommand}"
@@ -45,30 +51,41 @@
                       Height="26" />
         </DockPanel>
 
-        <TextBlock Grid.Row="5" TextWrapping="Wrap">
-            <Run Text="{x:Static local:Texts.SaveDestination}"/>
-            <Run Text=": "/>
-            <Run Text="{Binding RecordsDirectory}"/>
-        </TextBlock>
+        <Grid Grid.Row="5" Margin="0,4,0,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.SaveDestination}" VerticalAlignment="Center"/>
+            <TextBox Grid.Column="1" Text="{Binding OutputDirectory, UpdateSourceTrigger=LostFocus}" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="26"/>
+            <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.FolderOpen}}" ToolTip="{x:Static local:Texts.Browse}" Command="{Binding BrowseOutputDirectoryCommand}"/>
+            <Button Grid.Column="3" Content="{DynamicResource {x:Static icons:IconKeys.Refresh}}" ToolTip="{x:Static local:Texts.ResetToDefault}" Command="{Binding ResetOutputDirectoryCommand}"/>
+        </Grid>
+        <StackPanel Grid.Row="7">
+                <WrapPanel>
+                    <Button Content="{x:Static local:Texts.StartRecording}"
+                            Command="{Binding StartRecordingCommand}" />
+                    <Button Content="{x:Static local:Texts.StopRecording}"
+                            Command="{Binding StopRecordingCommand}" />
+                    <Button Content="{x:Static local:Texts.AddToTimeline}"
+                            Command="{Binding AddToTimelineCommand}" />
+                    <Button Content="{x:Static local:Texts.Play}"
+                            Command="{Binding PlayCommand}" />
+                </WrapPanel>
 
-        <StackPanel Grid.Row="6">
-            <WrapPanel>
-                <Button Content="{x:Static local:Texts.StartRecording}"
-                        Command="{Binding StartRecordingCommand}" />
-                <Button Content="{x:Static local:Texts.StopRecording}"
-                        Command="{Binding StopRecordingCommand}" />
-            </WrapPanel>
-
-            <TextBlock Text="{Binding RecordingStatus}"
-                       Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
-                       FontWeight="Bold"
-                       TextWrapping="Wrap" />
-
-            <TextBlock Text="{x:Static local:Texts.InputLevel}" />
-            <ProgressBar Minimum="0"
-                         Maximum="1"
-                         Value="{Binding CurrentVolume}"
-                         Height="26" />
+                <TextBlock Text="{x:Static local:Texts.InputLevel}" />
+                <ProgressBar Minimum="0"
+                             Maximum="1"
+                             Value="{Binding CurrentVolume}"
+                             Height="26" />
         </StackPanel>
+
+        <TextBlock Grid.Row="8"
+                   Text="{Binding RecordingStatus}"
+                   Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                   FontWeight="Bold"
+                   TextWrapping="Wrap" />
     </Grid>
 </UserControl>
