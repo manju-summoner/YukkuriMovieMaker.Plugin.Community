@@ -78,13 +78,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
                 var filePath = recordPathService.CreateRecordFilePath();
 
+                IWaveIn? input = null;
+                WaveFileWriter? output = null;
+                var transferred = false;
+
                 try
                 {
-                    var input = new WasapiCapture(targetDevice)
+                    input = new WasapiCapture(targetDevice)
                     {
                         ShareMode = AudioClientShareMode.Shared
                     };
-                    var output = new WaveFileWriter(filePath, input.WaveFormat);
+                    output = new WaveFileWriter(filePath, input.WaveFormat);
 
                     input.DataAvailable += OnDataAvailable;
                     input.RecordingStopped += OnRecordingStopped;
@@ -99,6 +103,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     recordingStopException = null;
                     recordingStoppedTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
                     IsRecording = true;
+                    transferred = true;
                     OnRecordingStateChanged();
 
                     input.StartRecording();
@@ -108,6 +113,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     Debug.WriteLine($"[RecordingService] StartRecording failed: {ex}");
                     CleanupRecordingResources(deleteFile: true);
                     throw;
+                }
+                finally
+                {
+                    if (!transferred && input is not null)
+                    {
+                        input.DataAvailable -= OnDataAvailable;
+                        input.RecordingStopped -= OnRecordingStopped;
+                        input.Dispose();
+                    }
+
+                    if (!transferred)
+                    {
+                        output?.Dispose();
+                        targetDevice.Dispose();
+                    }
                 }
             }
         }
