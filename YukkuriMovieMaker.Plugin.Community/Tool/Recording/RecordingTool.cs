@@ -2,7 +2,7 @@
 {
     internal class RecordingTool : IToolPlugin
     {
-        public string Name => "録音ツール";
+        public string Name => Texts.ToolName;
 
         public Type ViewModelType => typeof(ToolViewModel);
         public Type ViewType => typeof(ToolView);

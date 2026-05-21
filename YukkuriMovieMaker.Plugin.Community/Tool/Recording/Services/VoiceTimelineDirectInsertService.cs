@@ -19,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
             var added = timeline.TryAddItems(new IItem[] { voiceItem }, voiceItem.Frame, voiceItem.Layer);
             if (!added)
-                throw new InvalidOperationException("タイムラインへの追加に失敗しました。");
+                throw new InvalidOperationException(Texts.TimelineAddFailedMessage);
         }
 
         private static VoiceItem CreateVoiceItem(RecordingScriptItem item, int frame, int length, int layer)

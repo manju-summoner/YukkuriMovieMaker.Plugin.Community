@@ -15,10 +15,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         {
             var deviceName = recordingService.GetAvailableDeviceNames().FirstOrDefault();
             if (string.IsNullOrWhiteSpace(deviceName))
-                return RecordingStartResult.Failed("録音デバイスが見つかりません。");
+                return RecordingStartResult.Failed(Texts.NoRecordingDeviceFound);
 
             if (string.IsNullOrWhiteSpace(scriptText))
-                return RecordingStartResult.Failed("セリフが選択されていません。タイムラインのセリフを選択してください。");
+                return RecordingStartResult.Failed(Texts.SelectSerifInTimeline);
 
             recordingService.StartRecording(deviceName);
             return RecordingStartResult.Succeeded();

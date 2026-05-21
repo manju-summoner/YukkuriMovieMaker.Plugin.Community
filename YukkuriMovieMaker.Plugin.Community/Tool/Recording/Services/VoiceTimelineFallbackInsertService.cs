@@ -10,7 +10,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         public void Insert(object mainViewModel, RecordingScriptItem item, int? selectedFrame, int? selectedLayer)
         {
             var timeline = reflectionService.GetActiveTimeline(mainViewModel)
-                ?? throw new InvalidOperationException("タイムラインを取得できません。");
+                ?? throw new InvalidOperationException(Texts.TimelineUnavailable);
 
             var currentFrame = selectedFrame ?? reflectionService.GetCurrentFrame(timeline);
             var length = reflectionService.GetLengthFrames(timeline, item.AudioFilePath);

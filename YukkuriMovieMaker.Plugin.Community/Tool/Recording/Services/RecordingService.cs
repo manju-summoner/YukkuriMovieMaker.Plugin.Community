@@ -51,7 +51,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 var deviceIndex = FindDeviceIndex(deviceName);
                 if (deviceIndex < 0)
                 {
-                    throw new InvalidOperationException($"録音デバイスを取得できません: {deviceName}");
+                    throw new InvalidOperationException(string.Format(Texts.InvalidRecordingDevice, deviceName));
                 }
 
                 var filePath = recordPathService.CreateRecordFilePath();
@@ -118,16 +118,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             }
 
             if (stopCompletion is null)
-                throw new InvalidOperationException("録音停止の完了待機オブジェクトを取得できませんでした。");
+                throw new InvalidOperationException(Texts.StopWaitObjectUnavailable);
 
             if (!await WaitForStopAsync(stopCompletion.Task, TimeSpan.FromSeconds(3)).ConfigureAwait(false))
-                throw new TimeoutException("録音停止の完了待機がタイムアウトしました。");
+                throw new TimeoutException(Texts.StopWaitTimeout);
 
             long dataLength;
             lock (syncRoot)
             {
                 if (recordingStopException is not null)
-                    throw new InvalidOperationException("録音停止に失敗しました。", recordingStopException);
+                    throw new InvalidOperationException(Texts.RecordingStopFailedMessage, recordingStopException);
                 dataLength = recordedBytes;
             }
 

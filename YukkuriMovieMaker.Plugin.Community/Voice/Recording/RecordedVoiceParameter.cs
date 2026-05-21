@@ -12,14 +12,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         private TimeSpan? duration;
         private DateTime? createdAt;
 
-        [Display(Name = "セリフ", Description = "読み上げテキスト")]
+        [Display(Name = nameof(Texts.ParameterTextName), Description = nameof(Texts.ParameterTextDescription), ResourceType = typeof(Texts))]
         public string Text
         {
             get => text;
             set => Set(ref text, value ?? string.Empty);
         }
 
-        [Display(Name = "録音ファイル", Description = "録音済み wav ファイルのパス")]
+        [Display(Name = nameof(Texts.ParameterAudioFileName), Description = nameof(Texts.ParameterAudioFileDescription), ResourceType = typeof(Texts))]
         [ReadOnly(true)]
         public string AudioFilePath
         {

@@ -14,7 +14,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             remove { }
         }
 
-        public string Name => "録音ツール";
+        public string Name => Texts.ToolName;
         public string Terms => string.Empty;
         public bool IsDownloaded => true;
         public string FileSize => string.Empty;

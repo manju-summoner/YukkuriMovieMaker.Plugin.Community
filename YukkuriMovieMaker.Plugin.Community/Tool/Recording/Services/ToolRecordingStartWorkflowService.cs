@@ -14,7 +14,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         public ToolRecordingStartResult Execute(string? selectedDevice)
         {
             if (string.IsNullOrWhiteSpace(selectedDevice))
-                return ToolRecordingStartResult.Failed("録音デバイスを再選択してください。");
+                return ToolRecordingStartResult.Failed(Texts.ReselectRecordingDevice);
 
             recordingService.StartRecording(selectedDevice);
             return ToolRecordingStartResult.Succeeded();

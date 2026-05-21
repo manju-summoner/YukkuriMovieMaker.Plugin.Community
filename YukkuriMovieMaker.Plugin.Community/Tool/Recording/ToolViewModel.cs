@@ -35,7 +35,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
         }
 
-        private string recordingStatus = "待機中";
+        private string recordingStatus = Texts.Idle;
         public string RecordingStatus
         {
             get => recordingStatus;
@@ -160,7 +160,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             else
             {
                 SelectedDevice = null;
-                RecordingStatus = "録音デバイスが見つかりません。";
+                RecordingStatus = Texts.NoRecordingDeviceFound;
             }
 
             RaiseCommandStates();
@@ -179,15 +179,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 var startResult = recordingStartWorkflowService.Execute(SelectedDevice);
                 if (!startResult.IsSuccess)
                 {
-                    RecordingStatus = startResult.ErrorMessage ?? "録音デバイスを再選択してください。";
+                    RecordingStatus = startResult.ErrorMessage ?? Texts.ReselectRecordingDevice;
                     return;
                 }
 
-                RecordingStatus = $"録音中... 保存先: {RecordsDirectory}";
+                RecordingStatus = string.Format(Texts.RecordingNowWithPath, RecordsDirectory);
             }
             catch (Exception ex)
             {
-                RecordingStatus = $"録音開始に失敗しました: {ex.Message}";
+                RecordingStatus = string.Format(Texts.RecordingStartFailed, ex.Message);
                 RaiseCommandStates();
             }
         }
@@ -203,21 +203,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
                 if (!stopResult.HasData)
                 {
-                    RecordingStatus = "録音データがありません。再録音してください。";
+                    RecordingStatus = Texts.NoRecordingDataRetry;
                     return;
                 }
 
                 if (stopResult.HasZeroLengthData)
                 {
-                    RecordingStatus = $"録音データ長が 0 のため追加しませんでした: {stopResult.FilePath ?? string.Empty}";
+                    RecordingStatus = string.Format(Texts.RecordingDataLengthZero, stopResult.FilePath ?? string.Empty);
                     return;
                 }
 
-                RecordingStatus = $"録音停止。タイムラインへ追加しました: {stopResult.FilePath ?? string.Empty}";
+                RecordingStatus = string.Format(Texts.StoppedAndAddedToTimeline, stopResult.FilePath ?? string.Empty);
             }
             catch (Exception ex)
             {
-                RecordingStatus = $"録音停止に失敗しました: {ex.Message}";
+                RecordingStatus = string.Format(Texts.RecordingStopFailed, ex.Message);
             }
         }
 

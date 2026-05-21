@@ -31,10 +31,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 throw new ArgumentNullException(nameof(item));
 
             if (string.IsNullOrWhiteSpace(item.AudioFilePath) || !File.Exists(item.AudioFilePath))
-                throw new FileNotFoundException("録音済み wav が見つかりません。", item.AudioFilePath);
+                throw new FileNotFoundException(Texts.RecordedWavNotFoundShort, item.AudioFilePath);
 
             var dispatcher = Application.Current?.Dispatcher
-                ?? throw new InvalidOperationException("UI Dispatcher を取得できません。");
+                ?? throw new InvalidOperationException(Texts.UiDispatcherUnavailable);
 
             return dispatcher.InvokeAsync(() =>
             {
@@ -57,7 +57,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 }
 
                 var mainViewModel = Application.Current?.MainWindow?.DataContext
-                    ?? throw new InvalidOperationException("MainViewModel を取得できません。");
+                    ?? throw new InvalidOperationException(Texts.MainViewModelUnavailable);
 
                 fallbackInsertService.Insert(mainViewModel, item, selectedFrame, selectedLayer);
             }).Task;

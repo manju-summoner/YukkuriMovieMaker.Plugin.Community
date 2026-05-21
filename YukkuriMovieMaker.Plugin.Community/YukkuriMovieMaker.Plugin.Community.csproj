@@ -109,6 +109,9 @@
     <None Remove="Resources\License\GeneralUserGS.txt" />
     <None Remove="Resources\SoundFonts\GeneralUser-GS.sf2" />
     <None Remove="Shape\Pen\Texts.csv" />
+	<None Remove="Voice\Recording\Texts.csv.csv" />
+	<None Remove="Tool\Recording\Texts.csv" />
+	  
   </ItemGroup>
 	
   <ItemGroup>

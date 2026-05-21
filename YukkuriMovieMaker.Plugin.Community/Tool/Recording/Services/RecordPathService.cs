@@ -20,7 +20,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             if (string.IsNullOrWhiteSpace(selectedBaseDirectory))
                 selectedBaseDirectory = RecordingSettings.Default.OutputDirectory;
             if (string.IsNullOrWhiteSpace(selectedBaseDirectory))
-                throw new InvalidOperationException("保存先フォルダーを取得できません。");
+                throw new InvalidOperationException(Texts.OutputFolderUnavailable);
 
             Directory.CreateDirectory(selectedBaseDirectory);
             return selectedBaseDirectory;
@@ -74,7 +74,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("無音 wav の作成に失敗しました。保存先フォルダー設定を確認してください。", ex);
+                throw new InvalidOperationException(Texts.SilentWavCreateFailed, ex);
             }
 
             return filePath;

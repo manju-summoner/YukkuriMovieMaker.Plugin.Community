@@ -34,7 +34,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         private RecordingStopWorkflowService recordingStopWorkflowService;
 
         private string scriptText = string.Empty;
-        private string status = "待機中";
+        private string status = Texts.Idle;
         private double currentVolume;
         private RecordingDialogState state = RecordingDialogState.Idle;
         private bool commandsReady;
@@ -127,7 +127,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
         }
 
-        public string DisplayText => string.IsNullOrWhiteSpace(ScriptText) ? "セリフが選択されていません。" : ScriptText;
+        public string DisplayText => string.IsNullOrWhiteSpace(ScriptText) ? Texts.NoSerifSelected : ScriptText;
 
         public string OutputDirectory
         {
@@ -136,7 +136,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 if (!RecordingDialogStateService.CanChangeOutputDirectory(State))
                 {
-                    Status = "録音中は保存先を変更できません。";
+                    Status = Texts.CannotChangeOutputWhileRecording;
                     return;
                 }
 
@@ -208,16 +208,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 var startResult = recordingStartWorkflowService.Execute(ScriptText);
                 if (!startResult.IsSuccess)
                 {
-                    Status = startResult.ErrorMessage ?? "セリフが選択されていません。タイムラインのセリフを選択してください。";
+                    Status = startResult.ErrorMessage ?? Texts.SelectSerifInTimeline;
                     return;
                 }
 
                 State = RecordingDialogStateService.ToRecording();
-                Status = "録音中...";
+                Status = Texts.RecordingNow;
             }
             catch (Exception ex)
             {
-                Status = $"録音開始に失敗しました: {ex.Message}";
+                Status = string.Format(Texts.RecordingStartFailed, ex.Message);
                 State = RecordingDialogStateService.ToIdle();
             }
         }
@@ -231,7 +231,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
                 if (!result.HasData)
                 {
-                    TransitionToIdleWithStatus("録音データがありません。再度録音してください。");
+                    TransitionToIdleWithStatus(Texts.NoRecordingDataPleaseRetry);
                     return;
                 }
 
@@ -239,7 +239,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
             catch (Exception ex)
             {
-                TransitionToIdleWithStatus($"録音停止に失敗しました: {ex.Message}");
+                TransitionToIdleWithStatus(string.Format(Texts.RecordingStopFailed, ex.Message));
             }
         }
 
@@ -251,11 +251,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             if (!string.IsNullOrWhiteSpace(result.NextSerif))
             {
                 ScriptText = result.NextSerif;
-                TransitionToIdleWithStatus($"録音完了: {filePath} / 次のセリフを準備しました。");
+                TransitionToIdleWithStatus(string.Format(Texts.RecordingCompletedNextPrepared, filePath));
                 return;
             }
 
-            Status = $"録音完了してタイムラインへ追加しました: {filePath}";
+            Status = string.Format(Texts.RecordingCompletedAdded, filePath);
         }
 
         private void TransitionToIdleWithStatus(string message)
@@ -275,7 +275,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
             using var dialog = new Forms.FolderBrowserDialog
             {
-                Description = "録音ファイルの保存先を選択してください。",
+                Description = Texts.SelectOutputDirectory,
                 UseDescriptionForTitle = true,
                 SelectedPath = OutputDirectory
             };
@@ -283,33 +283,33 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             if (dialog.ShowDialog() == Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
             {
                 OutputDirectory = dialog.SelectedPath;
-                Status = $"保存先を変更しました: {OutputDirectory}";
+                Status = string.Format(Texts.OutputDirectoryChanged, OutputDirectory);
             }
         }
 
         private void ResetOutputDirectory()
         {
             OutputDirectory = GetDefaultOutputDirectory();
-            Status = $"保存先を既定値に戻しました: {OutputDirectory}";
+            Status = string.Format(Texts.OutputDirectoryReset, OutputDirectory);
         }
 
         private void Play()
         {
             if (string.IsNullOrWhiteSpace(scriptItem.AudioFilePath) || !File.Exists(scriptItem.AudioFilePath))
             {
-                Status = "再生できる音声がありません";
+                Status = Texts.NoPlayableAudio;
                 return;
             }
 
             try
             {
                 audioPlaybackService.Play(scriptItem.AudioFilePath);
-                Status = "再生中...";
+                Status = Texts.Playing;
                 RaiseCommandStates();
             }
             catch (Exception ex)
             {
-                Status = $"再生に失敗: {ex.Message}";
+                Status = string.Format(Texts.PlaybackFailed, ex.Message);
                 audioPlaybackService.Stop();
                 RaiseCommandStates();
             }
@@ -321,12 +321,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 if (e.Exception is not null)
                 {
-                    Status = $"再生エラー: {e.Exception.Message}";
+                    Status = string.Format(Texts.PlaybackError, e.Exception.Message);
                     RaiseCommandStates();
                     return;
                 }
 
-                Status = "再生完了";
+                Status = Texts.PlaybackCompleted;
                 RaiseCommandStates();
             }
 
@@ -352,11 +352,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             try
             {
                 await voiceTimelineInsertService.InsertAsync(scriptItem);
-                Status = "タイムラインへ追加しました。";
+                Status = Texts.TimelineAdded;
             }
             catch (Exception ex)
             {
-                Status = $"タイムライン追加に失敗しました: {ex.Message}";
+                Status = string.Format(Texts.TimelineAddFailed, ex.Message);
             }
         }
 

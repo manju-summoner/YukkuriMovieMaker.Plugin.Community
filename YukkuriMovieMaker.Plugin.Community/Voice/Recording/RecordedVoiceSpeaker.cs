@@ -18,8 +18,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         {
         }
 
-        public string EngineName => "録音ツール";
-        public string SpeakerName => "録音";
+        public string EngineName => Texts.EngineName;
+        public string SpeakerName => Texts.SpeakerName;
         public string API => ApiName;
         public string ID => SpeakerId;
         public bool IsVoiceDataCachingRequired => false;
@@ -39,13 +39,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         public Task<IVoicePronounce?> CreateVoiceAsync(string text, IVoicePronounce? pronounce, IVoiceParameter? parameter, string outputFilePath)
         {
             if (parameter is not RecordedVoiceParameter recorded)
-                throw new InvalidOperationException("録音パラメータが不正です。");
+                throw new InvalidOperationException(Texts.InvalidParameter);
 
             if (string.IsNullOrWhiteSpace(recorded.AudioFilePath))
-                throw new InvalidOperationException("録音済み wav のパスが空です。");
+                throw new InvalidOperationException(Texts.AudioFilePathEmpty);
 
             if (!File.Exists(recorded.AudioFilePath))
-                throw new FileNotFoundException("録音済み wav が見つかりません。", recorded.AudioFilePath);
+                throw new FileNotFoundException(Texts.RecordedWavNotFound, recorded.AudioFilePath);
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath) ?? ".");
             File.Copy(recorded.AudioFilePath, outputFilePath, overwrite: true);

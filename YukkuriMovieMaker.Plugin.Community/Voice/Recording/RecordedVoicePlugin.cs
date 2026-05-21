@@ -12,7 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         {
         }
 
-        public string Name => "録音ツール";
+        public string Name => Texts.ToolName;
         public PluginDetailsAttribute Details => new PluginDetailsAttribute
         {
             AuthorName = "CommunityRecording",

@@ -37,7 +37,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         {
             var frame = TimelineMemberReader.GetCurrentFrame(timeline);
             if (frame == int.MinValue)
-                throw new InvalidOperationException("現在フレームを取得できません。");
+                throw new InvalidOperationException(Texts.CurrentFrameUnavailable);
             return frame;
         }
 
@@ -49,7 +49,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         public object CreateVoiceItemViaReflection(RecordingScriptItem item, int frame, int length, int layer)
         {
             var voiceItemType = Type.GetType("YukkuriMovieMaker.Project.Items.VoiceItem, YukkuriMovieMaker")
-                ?? throw new InvalidOperationException("VoiceItem を取得できません。");
+                ?? throw new InvalidOperationException(Texts.VoiceItemUnavailable);
 
             var parameter = new RecordedVoiceParameter
             {
@@ -60,15 +60,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             };
 
             var characterType = Type.GetType("YukkuriMovieMaker.Project.Character, YukkuriMovieMaker")
-                ?? throw new InvalidOperationException("Character を取得できません。");
+                ?? throw new InvalidOperationException(Texts.CharacterUnavailable);
             var character = Activator.CreateInstance(characterType)
-                ?? throw new InvalidOperationException("Character を作成できません。");
+                ?? throw new InvalidOperationException(Texts.CharacterCreateFailed);
 
             var voiceDescriptionType = Type.GetType("YukkuriMovieMaker.Plugin.Voice.VoiceDescription, YukkuriMovieMaker.Plugin")
-                ?? throw new InvalidOperationException("VoiceDescription を取得できません。");
+                ?? throw new InvalidOperationException(Texts.VoiceDescriptionUnavailable);
             var speaker = RecordedVoiceSpeaker.Instance;
             var voiceDescription = Activator.CreateInstance(voiceDescriptionType, speaker)
-                ?? throw new InvalidOperationException("VoiceDescription を作成できません。");
+                ?? throw new InvalidOperationException(Texts.VoiceDescriptionCreateFailed);
             var apiProp = voiceDescriptionType.GetProperty("API");
             if (apiProp?.CanWrite == true)
                 apiProp.SetValue(voiceDescription, RecordedVoiceSpeaker.ApiName);
@@ -80,7 +80,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             characterType.GetProperty("VoiceParameter")?.SetValue(character, parameter.Clone());
 
             var voiceItem = Activator.CreateInstance(voiceItemType, character)
-                ?? throw new InvalidOperationException("VoiceItem を作成できません。");
+                ?? throw new InvalidOperationException(Texts.VoiceItemUnavailable);
 
             voiceItemType.GetProperty("Serif")?.SetValue(voiceItem, item.Text);
             voiceItemType.GetProperty("VoiceParameter")?.SetValue(voiceItem, parameter);
@@ -98,7 +98,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         {
             var timelineType = timeline.GetType();
             var itemInterfaceType = timelineType.Assembly.GetType("YukkuriMovieMaker.Project.Items.IItem")
-                ?? throw new InvalidOperationException("IItem を取得できません。");
+                ?? throw new InvalidOperationException(Texts.IItemUnavailable);
 
             var itemArray = Array.CreateInstance(itemInterfaceType, 1);
             itemArray.SetValue(voiceItem, 0);
@@ -114,13 +114,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             {
                 var added = (bool)tryAddItems.Invoke(timeline, new object[] { itemArray, frame, layer })!;
                 if (!added)
-                    throw new InvalidOperationException("タイムラインへの追加に失敗しました。");
+                    throw new InvalidOperationException(Texts.TimelineAddFailedMessage);
                 return;
             }
 
             var addItems = timelineType.GetMethod("AddItems", BindingFlags.Instance | BindingFlags.Public);
             if (addItems is null)
-                throw new InvalidOperationException("タイムライン追加メソッドを取得できません。");
+                throw new InvalidOperationException(Texts.TimelineAddMethodUnavailable);
 
             addItems.Invoke(timeline, new object[] { itemArray });
         }
