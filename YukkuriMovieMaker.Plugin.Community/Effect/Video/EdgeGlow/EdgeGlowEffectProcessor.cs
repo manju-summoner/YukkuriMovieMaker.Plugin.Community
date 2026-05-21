@@ -15,6 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
     {
         private const float WideRadiusMultiplier = 4.0f;
         private const float WideLayerOpacity = 0.5f;
+        private const float MaxGaussianBlurStandardDeviation = 250.0f;
 
         private readonly EdgeGlowEffect _item;
 
@@ -94,8 +95,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
             if (_isFirst || _glowRadius != glowRadius)
             {
                 var radius = (float)Math.Max(glowRadius, 0d);
-                _coreBlur.StandardDeviation = radius;
-                _wideBlur.StandardDeviation = radius * WideRadiusMultiplier;
+                var clampedRadius = Math.Min(radius, MaxGaussianBlurStandardDeviation / WideRadiusMultiplier);
+                _coreBlur.StandardDeviation = clampedRadius;
+                _wideBlur.StandardDeviation = clampedRadius * WideRadiusMultiplier;
             }
 
             if (_isFirst || _enableGlowSpread != enableGlowSpread)
@@ -183,11 +185,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
             {
                 Matrix = new Matrix5x4()
                 {
-                    M11 = WideLayerOpacity, M12 = 0, M13 = 0, M14 = 0,
-                    M21 = 0, M22 = WideLayerOpacity, M23 = 0, M24 = 0,
-                    M31 = 0, M32 = 0, M33 = WideLayerOpacity, M34 = 0,
-                    M41 = 0, M42 = 0, M43 = 0, M44 = WideLayerOpacity,
-                    M51 = 0, M52 = 0, M53 = 0, M54 = 0,
+                    M11 = WideLayerOpacity,
+                    M12 = 0,
+                    M13 = 0,
+                    M14 = 0,
+                    M21 = 0,
+                    M22 = WideLayerOpacity,
+                    M23 = 0,
+                    M24 = 0,
+                    M31 = 0,
+                    M32 = 0,
+                    M33 = WideLayerOpacity,
+                    M34 = 0,
+                    M41 = 0,
+                    M42 = 0,
+                    M43 = 0,
+                    M44 = WideLayerOpacity,
+                    M51 = 0,
+                    M52 = 0,
+                    M53 = 0,
+                    M54 = 0,
                 },
             };
             disposer.Collect(_wideAttenuator);
