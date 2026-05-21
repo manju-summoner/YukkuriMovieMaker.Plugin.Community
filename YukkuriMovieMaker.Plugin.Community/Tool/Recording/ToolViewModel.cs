@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -213,17 +213,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             RaiseCommandStates();
         }
 
-        private bool CanStartRecording() => !IsRecording && !string.IsNullOrWhiteSpace(SelectedDevice);
+        private bool CanStartRecording() => !IsRecording;
 
         private bool CanStopRecording() => IsRecording;
 
         private bool CanOpenRecordingWindow() => !IsRecording;
-        private bool CanPlay() => !IsRecording && !audioPlaybackService.IsPlaying && HasPlayableAudioFile();
-        private bool CanAddToTimeline()
-            => !IsRecording
-                && !audioPlaybackService.IsPlaying
-                && HasPlayableAudioFile()
-                && !string.Equals(latestRecordedFilePath, lastTimelineAddedFilePath, StringComparison.OrdinalIgnoreCase);
+        
+        private bool CanPlay() => !IsRecording && !audioPlaybackService.IsPlaying;
+        
+        private bool CanAddToTimeline() => !IsRecording && !audioPlaybackService.IsPlaying;
 
         private void StartRecording()
         {
@@ -350,7 +348,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
             var serif = timelineSelectionService.TryGetSelectedSerif();
 
-            recordingWindow = new RecordingWindow(serif)
+            recordingWindow = new RecordingWindow(serif, SelectedDevice)
             {
                 Owner = null,
                 ShowInTaskbar = true,

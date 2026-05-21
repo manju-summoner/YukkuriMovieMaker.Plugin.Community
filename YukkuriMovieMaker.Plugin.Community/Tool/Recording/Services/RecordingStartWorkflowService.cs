@@ -11,9 +11,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             this.recordingService = recordingService;
         }
 
-        public RecordingStartResult Execute(string scriptText)
+        public RecordingStartResult Execute(string scriptText, string? deviceName)
         {
-            var deviceName = recordingService.GetAvailableDeviceNames().FirstOrDefault();
             if (string.IsNullOrWhiteSpace(deviceName))
                 return RecordingStartResult.Failed(Texts.NoRecordingDeviceFound);
 

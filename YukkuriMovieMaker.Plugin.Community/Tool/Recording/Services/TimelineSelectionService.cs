@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Windows;
+using YukkuriMovieMaker.Project.Items;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
@@ -12,16 +10,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
     {
         private static readonly object preferredVoiceTargetLock = new();
         private static PreferredVoiceTarget? preferredVoiceTarget;
-
-        private static readonly string[] SelectionPropertyNames =
-        {
-            "SelectedItems",
-            "SelectedItem",
-            "SelectedTimelineItems",
-            "SelectedItemViewModels",
-            "SelectedElements",
-            "SelectedClips"
-        };
 
         public static bool TryGetPreferredVoiceTarget(out int frame, out int layer, out string? serif)
         {
@@ -55,11 +43,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             var items = GetSelectedItemsSnapshot();
             foreach (var item in items)
             {
-                var serif = TimelineMemberReader.GetStringProperty(item, "Serif")
-                            ?? TimelineMemberReader.GetStringProperty(item, "Text");
-                if (!string.IsNullOrWhiteSpace(serif))
+                if (item is VoiceItem voiceItem && !string.IsNullOrWhiteSpace(voiceItem.Serif))
                 {
-                    return serif;
+                    return voiceItem.Serif;
+                }
+                if (item is TextItem textItem && !string.IsNullOrWhiteSpace(textItem.Text))
+                {
+                    return textItem.Text;
                 }
             }
             return null;
@@ -71,15 +61,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             layer = 0;
 
             var items = GetSelectedItemsSnapshot();
-            foreach (var item in items)
+            foreach (var item in items.OfType<IItem>())
             {
-                if (TimelineMemberReader.TryGetIntProperty(item, "Frame", out var foundFrame))
-                {
-                    frame = foundFrame;
-                    if (!TimelineMemberReader.TryGetIntProperty(item, "Layer", out layer))
-                        layer = 0;
-                    return true;
-                }
+                frame = item.Frame;
+                layer = item.Layer;
+                return true;
             }
             return false;
         }
@@ -95,23 +81,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     return false;
                 }
 
-                var selected = GetSelectedItemsSnapshot()
-                    .Where(VoiceTimelineNavigator.IsVoiceLikeItem)
-                    .Distinct()
-                    .FirstOrDefault();
+                var selected = GetSelectedItemsSnapshot().OfType<VoiceItem>().FirstOrDefault();
                 if (selected is null)
                 {
                     return false;
                 }
 
-                var voiceItems = VoiceTimelineNavigator.GetSortedVoiceItems(timeline);
+                var voiceItems = timeline.Items.OfType<VoiceItem>().OrderBy(x => x.Frame).ToList();
                 if (voiceItems.Count == 0)
                 {
                     return false;
                 }
 
-                var currentFrame = GetCurrentFrame(timeline);
-                var currentIndex = VoiceTimelineNavigator.FindCurrentIndex(voiceItems, selected, currentSerif, currentFrame);
+                var currentIndex = voiceItems.IndexOf(selected);
                 if (currentIndex < 0 || currentIndex >= voiceItems.Count - 1)
                 {
                     ClearPreferredVoiceTarget();
@@ -119,7 +101,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 }
 
                 var next = voiceItems[currentIndex + 1];
-                var serif = TimelineMemberReader.GetStringProperty(next, "Serif") ?? TimelineMemberReader.GetStringProperty(next, "Text");
+                var serif = next.Serif;
                 if (string.IsNullOrWhiteSpace(serif))
                 {
                     return false;
@@ -127,17 +109,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
                 SetPreferredVoiceTarget(next, serif);
                 nextSerif = serif;
-                var selectionMoved = false;
-                try
-                {
-                    selectionMoved = TimelineSelectionApplier.TrySetSelection(next, SelectionPropertyNames);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"[TimelineSelectionService] TryMoveToNextSerif selection apply failed: {ex}");
-                }
 
-                var frameMoved = TimelineSelectionApplier.TryMoveCurrentFrame(next);
+                timeline.SelectedItems = System.Collections.Immutable.ImmutableList.Create<IItem>(next);
+                timeline.CurrentFrame = next.Frame;
                 return true;
             }
             catch (Exception ex)
@@ -147,51 +121,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             }
         }
 
-        private static void SetPreferredVoiceTarget(object item, string serif)
+        private static void SetPreferredVoiceTarget(IItem item, string serif)
         {
-            var frame = TimelineMemberReader.GetIntMember(item, "Frame");
-            var layer = TimelineMemberReader.GetIntMember(item, "Layer");
-            if (frame < 0 || layer < 0)
+            if (item.Frame < 0 || item.Layer < 0)
                 return;
 
             lock (preferredVoiceTargetLock)
             {
-                preferredVoiceTarget = new PreferredVoiceTarget(frame, layer, serif);
+                preferredVoiceTarget = new PreferredVoiceTarget(item.Frame, item.Layer, serif);
             }
         }
 
         public IReadOnlyList<object> GetSelectedItemsSnapshot()
         {
-            var result = new List<object>();
-
             try
             {
                 var timeline = ToolViewModel.TimelineInstance;
                 if (timeline is not null)
                 {
-                    CollectFromObject(timeline, result);
-                }
-                else
-                {
-                    var mainViewModel = Application.Current?.MainWindow?.DataContext;
-                    if (mainViewModel is not null)
-                    {
-                        CollectFromObject(mainViewModel, result);
-                        var activeTimelineViewModel = mainViewModel.GetType()
-                            .GetProperty("ActiveTimelineViewModel", BindingFlags.Instance | BindingFlags.Public)
-                            ?.GetValue(mainViewModel);
-                        if (activeTimelineViewModel is not null)
-                        {
-                            CollectFromObject(activeTimelineViewModel, result);
-                        }
-                    }
+                    return timeline.SelectedItems.Cast<object>().ToList();
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[TimelineSelectionService] GetSelectedItemsSnapshot failed: {ex}");
             }
-            return result;
+            return Array.Empty<object>();
         }
 
         public IReadOnlyList<object> GetVoiceItemsSnapshot()
@@ -202,83 +157,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 if (timeline is null)
                     return Array.Empty<object>();
 
-                return VoiceTimelineNavigator.GetSortedVoiceItems(timeline);
+                return timeline.Items.OfType<VoiceItem>().OrderBy(x => x.Frame).Cast<object>().ToList();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[TimelineSelectionService] GetVoiceItemsSnapshot failed: {ex}");
                 return Array.Empty<object>();
             }
-        }
-
-        private static void CollectFromObject(object source, List<object> result)
-        {
-            foreach (var name in SelectionPropertyNames)
-            {
-                var property = source.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (property is null)
-                    continue;
-                if (property.GetIndexParameters().Length > 0)
-                    continue;
-
-                var value = property.GetValue(source);
-                if (value is null)
-                    continue;
-
-                if (value is IEnumerable enumerable && value is not string)
-                {
-                    foreach (var item in enumerable)
-                    {
-                        if (item is null)
-                            continue;
-
-                        result.Add(UnwrapItem(item));
-                    }
-                }
-                else
-                {
-                    result.Add(UnwrapItem(value));
-                }
-            }
-        }
-
-        private static int GetCurrentFrame(object timeline)
-        {
-            var frame = TimelineMemberReader.GetCurrentFrame(timeline);
-            return frame == int.MinValue ? 0 : frame;
-        }
-
-        private static object UnwrapItem(object item)
-        {
-            try
-            {
-                var itemProperty = item.GetType().GetProperty("Item", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (itemProperty is not null && itemProperty.GetIndexParameters().Length == 0)
-                {
-                    if (itemProperty.GetValue(item) is object inner)
-                        return inner;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[TimelineSelectionService] UnwrapItem by Item failed: {ex}");
-            }
-
-            try
-            {
-                var modelProperty = item.GetType().GetProperty("Model", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (modelProperty is not null && modelProperty.GetIndexParameters().Length == 0)
-                {
-                    if (modelProperty.GetValue(item) is object model)
-                        return model;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[TimelineSelectionService] UnwrapItem by Model failed: {ex}");
-            }
-
-            return item;
         }
 
         private sealed class PreferredVoiceTarget
@@ -296,8 +181,3 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         }
     }
 }
-
-
-
-
-
