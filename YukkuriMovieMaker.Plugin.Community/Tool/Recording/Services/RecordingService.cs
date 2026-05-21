@@ -118,27 +118,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             DateTime startedAt;
             TaskCompletionSource<bool>? stopCompletion;
             WaveFormat? format;
+            IWaveIn? captureInstance;
 
             lock (syncRoot)
             {
                 if (!IsRecording)
                     return null;
 
-                try
+                filePath = currentFilePath;
+                startedAt = recordingStartedAt;
+                format = currentWaveFormat;
+                stopCompletion = recordingStoppedTcs ?? new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                recordingStoppedTcs = stopCompletion;
+                captureInstance = waveIn;
+            }
+
+            try
+            {
+                captureInstance?.StopRecording();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[RecordingService] StopRecordingAsync failed before waiting stop event: {ex}");
+                lock (syncRoot)
                 {
-                    filePath = currentFilePath;
-                    startedAt = recordingStartedAt;
-                    format = currentWaveFormat;
-                    stopCompletion = recordingStoppedTcs ?? new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-                    recordingStoppedTcs = stopCompletion;
-                    waveIn?.StopRecording();
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"[RecordingService] StopRecordingAsync failed before waiting stop event: {ex}");
+                    recordingStoppedTcs = null;
                     CleanupRecordingResources(deleteFile: false);
-                    throw;
                 }
+                throw;
             }
 
             if (stopCompletion is null)
