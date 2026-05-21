@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+using NAudio.CoreAudioApi;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,9 +14,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         private readonly object syncRoot = new();
         private readonly RecordPathService recordPathService;
 
-        private WaveInEvent? waveIn;
+        private IWaveIn? waveIn;
         private WaveFileWriter? writer;
         private string? currentFilePath;
+        private WaveFormat? currentWaveFormat;
+        private MMDevice? currentDevice;
         private DateTime recordingStartedAt;
         private long recordedBytes;
         private Exception? recordingStopException;
@@ -34,9 +37,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         public IReadOnlyList<string> GetAvailableDeviceNames()
         {
             var devices = new List<string>();
-            for (var index = 0; index < WaveInEvent.DeviceCount; index++)
+            using var enumerator = new MMDeviceEnumerator();
+            foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active))
             {
-                devices.Add(WaveInEvent.GetCapabilities(index).ProductName);
+                using (device)
+                {
+                    devices.Add(device.FriendlyName);
+                }
             }
             return devices;
         }
@@ -48,8 +55,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 if (IsRecording)
                     return;
 
-                var deviceIndex = FindDeviceIndex(deviceName);
-                if (deviceIndex < 0)
+                MMDevice? targetDevice = null;
+                using (var enumerator = new MMDeviceEnumerator())
+                {
+                    foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active))
+                    {
+                        if (targetDevice is null && string.Equals(device.FriendlyName, deviceName, StringComparison.Ordinal))
+                        {
+                            targetDevice = device;
+                        }
+                        else
+                        {
+                            device.Dispose();
+                        }
+                    }
+                }
+
+                if (targetDevice is null)
                 {
                     throw new InvalidOperationException(string.Format(Texts.InvalidRecordingDevice, deviceName));
                 }
@@ -58,11 +80,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
                 try
                 {
-                    var input = new WaveInEvent
+                    var input = new WasapiCapture(targetDevice)
                     {
-                        DeviceNumber = deviceIndex,
-                        WaveFormat = new WaveFormat(RecordingAudioFormat.SampleRate, RecordingAudioFormat.BitDepth, RecordingAudioFormat.Channels),
-                        BufferMilliseconds = 100
+                        ShareMode = AudioClientShareMode.Shared
                     };
                     var output = new WaveFileWriter(filePath, input.WaveFormat);
 
@@ -72,6 +92,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     waveIn = input;
                     writer = output;
                     currentFilePath = filePath;
+                    currentWaveFormat = input.WaveFormat;
+                    currentDevice = targetDevice;
                     recordingStartedAt = DateTime.Now;
                     recordedBytes = 0;
                     recordingStopException = null;
@@ -95,26 +117,35 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             string? filePath;
             DateTime startedAt;
             TaskCompletionSource<bool>? stopCompletion;
+            WaveFormat? format;
+            IWaveIn? captureInstance;
 
             lock (syncRoot)
             {
                 if (!IsRecording)
                     return null;
 
-                try
+                filePath = currentFilePath;
+                startedAt = recordingStartedAt;
+                format = currentWaveFormat;
+                stopCompletion = recordingStoppedTcs ?? new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                recordingStoppedTcs = stopCompletion;
+                captureInstance = waveIn;
+            }
+
+            try
+            {
+                captureInstance?.StopRecording();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[RecordingService] StopRecordingAsync failed before waiting stop event: {ex}");
+                lock (syncRoot)
                 {
-                    filePath = currentFilePath;
-                    startedAt = recordingStartedAt;
-                    stopCompletion = recordingStoppedTcs ?? new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-                    recordingStoppedTcs = stopCompletion;
-                    waveIn?.StopRecording();
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"[RecordingService] StopRecordingAsync failed before waiting stop event: {ex}");
+                    recordingStoppedTcs = null;
                     CleanupRecordingResources(deleteFile: false);
-                    throw;
                 }
+                throw;
             }
 
             if (stopCompletion is null)
@@ -124,7 +155,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             {
                 lock (syncRoot)
                 {
-                    // Ensure recording state is always recoverable even when RecordingStopped is delayed/missing.
                     recordingStoppedTcs = null;
                     CleanupRecordingResources(deleteFile: false);
                 }
@@ -139,7 +169,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 dataLength = recordedBytes;
             }
 
-            var info = CreateRecordedFileInfo(filePath, startedAt, dataLength);
+            if (format is null)
+                return null;
+
+            var info = CreateRecordedFileInfo(filePath, startedAt, dataLength, format);
             return info;
         }
 
@@ -148,29 +181,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             return StopRecordingAsync().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        private int FindDeviceIndex(string deviceName)
-        {
-            for (var index = 0; index < WaveInEvent.DeviceCount; index++)
-            {
-                if (string.Equals(WaveInEvent.GetCapabilities(index).ProductName, deviceName, StringComparison.Ordinal))
-                    return index;
-            }
-
-            return -1;
-        }
-
         private void OnDataAvailable(object? sender, WaveInEventArgs e)
         {
             lock (syncRoot)
             {
-                if (writer is null)
+                if (writer is null || currentWaveFormat is null)
                     return;
 
                 writer.Write(e.Buffer, 0, e.BytesRecorded);
                 writer.Flush();
                 recordedBytes += e.BytesRecorded;
 
-                var volume = CalculateVolume(e.Buffer, e.BytesRecorded);
+                var volume = CalculateVolume(e.Buffer, e.BytesRecorded, currentWaveFormat);
                 DataAvailable?.Invoke(this, new RecordingDataEventArgs(volume));
             }
         }
@@ -204,25 +226,70 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             return true;
         }
 
-        private static double CalculateVolume(byte[] buffer, int bytesRecorded)
+        private static double CalculateVolume(byte[] buffer, int bytesRecorded, WaveFormat format)
         {
             if (bytesRecorded <= 0)
                 return 0;
 
-            double sum = 0;
-            var sampleCount = bytesRecorded / 2;
-
-            for (var index = 0; index + 2 <= bytesRecorded; index += 2)
+            bool isFloat = format.Encoding == WaveFormatEncoding.IeeeFloat;
+            if (format.Encoding == WaveFormatEncoding.Extensible && format is WaveFormatExtensible ext)
             {
-                var sample = BitConverter.ToInt16(buffer, index);
-                var normalized = sample / 32768.0;
-                sum += normalized * normalized;
+                isFloat = ext.SubFormat == new Guid("00000003-0000-0010-8000-00aa00389b71");
             }
 
-            return sampleCount == 0 ? 0 : Math.Sqrt(sum / sampleCount);
+            double sum = 0;
+
+            if (isFloat)
+            {
+                var sampleCount = bytesRecorded / 4;
+                for (var index = 0; index + 4 <= bytesRecorded; index += 4)
+                {
+                    var sample = BitConverter.ToSingle(buffer, index);
+                    sum += sample * sample;
+                }
+                return sampleCount == 0 ? 0 : Math.Sqrt(sum / sampleCount);
+            }
+
+            if (format.BitsPerSample == 16)
+            {
+                var sampleCount = bytesRecorded / 2;
+                for (var index = 0; index + 2 <= bytesRecorded; index += 2)
+                {
+                    var sample = BitConverter.ToInt16(buffer, index);
+                    var normalized = sample / 32768.0;
+                    sum += normalized * normalized;
+                }
+                return sampleCount == 0 ? 0 : Math.Sqrt(sum / sampleCount);
+            }
+
+            if (format.BitsPerSample == 24)
+            {
+                var sampleCount = bytesRecorded / 3;
+                for (var index = 0; index + 3 <= bytesRecorded; index += 3)
+                {
+                    var sample = buffer[index] | (buffer[index + 1] << 8) | ((sbyte)buffer[index + 2] << 16);
+                    var normalized = sample / 8388608.0;
+                    sum += normalized * normalized;
+                }
+                return sampleCount == 0 ? 0 : Math.Sqrt(sum / sampleCount);
+            }
+
+            if (format.BitsPerSample == 32)
+            {
+                var sampleCount = bytesRecorded / 4;
+                for (var index = 0; index + 4 <= bytesRecorded; index += 4)
+                {
+                    var sample = BitConverter.ToInt32(buffer, index);
+                    var normalized = sample / 2147483648.0;
+                    sum += normalized * normalized;
+                }
+                return sampleCount == 0 ? 0 : Math.Sqrt(sum / sampleCount);
+            }
+
+            return 0;
         }
 
-        private static RecordedFileInfo? CreateRecordedFileInfo(string? filePath, DateTime startedAt, long dataLength)
+        private static RecordedFileInfo? CreateRecordedFileInfo(string? filePath, DateTime startedAt, long dataLength, WaveFormat format)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 return null;
@@ -234,8 +301,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             {
                 FilePath = filePath,
                 Duration = DateTime.Now - startedAt,
-                SampleRate = RecordingAudioFormat.SampleRate,
-                Channels = RecordingAudioFormat.Channels,
+                SampleRate = format.SampleRate,
+                Channels = format.Channels,
                 CreatedAt = DateTime.Now,
                 DataLength = dataLength
             };
@@ -259,7 +326,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
             var filePath = currentFilePath;
             currentFilePath = null;
+            currentWaveFormat = null;
             IsRecording = false;
+
+            if (currentDevice is not null)
+            {
+                currentDevice.Dispose();
+                currentDevice = null;
+            }
+
             OnRecordingStateChanged();
 
             if (deleteFile && !string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
