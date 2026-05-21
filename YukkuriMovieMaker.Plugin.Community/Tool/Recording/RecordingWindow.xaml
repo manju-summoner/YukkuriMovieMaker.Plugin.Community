@@ -48,7 +48,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="{x:Static local:Texts.SaveDestination}" VerticalAlignment="Center"/>
-            <TextBox Grid.Column="1" Text="{Binding OutputDirectory, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="26"/>
+            <TextBox Grid.Column="1" Text="{Binding OutputDirectory, UpdateSourceTrigger=LostFocus}" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="26"/>
             <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.FolderOpen}}" ToolTip="{x:Static local:Texts.Browse}" Command="{Binding BrowseOutputDirectoryCommand}"/>
             <Button Grid.Column="3" Content="{DynamicResource {x:Static icons:IconKeys.Refresh}}" ToolTip="{x:Static local:Texts.ResetToDefault}" Command="{Binding ResetOutputDirectoryCommand}"/>
         </Grid>
