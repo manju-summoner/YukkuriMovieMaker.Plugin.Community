@@ -15,8 +15,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         public string Name => Texts.ToolName;
         public PluginDetailsAttribute Details => new PluginDetailsAttribute
         {
-            AuthorName = "CommunityRecording",
-            ContentId = "CommunityRecording"
+            AuthorName = RecordingPluginIds.AuthorName,
+            ContentId = RecordingPluginIds.ContentId
         };
         public IPluginUpdater? Updater => null;
 

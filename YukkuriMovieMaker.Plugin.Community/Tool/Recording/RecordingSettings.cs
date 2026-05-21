@@ -10,20 +10,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         public override bool HasSettingView => false;
         public override object? SettingView => null;
 
+        public static string GetDefaultOutputDirectory()
+        {
+            return Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "YMM4",
+                "Recording");
+        }
+
         public string OutputDirectory
         {
             get => outputDirectory;
             set => Set(ref outputDirectory, value);
         }
 
-        private string outputDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            "YMM4",
-            "Recording");
+        private string outputDirectory = GetDefaultOutputDirectory();
 
         public override void Initialize()
         {
         }
     }
 }
-

@@ -8,9 +8,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 {
     public class RecordedVoiceSpeaker : IVoiceSpeaker
     {
-        public const string ApiName = "CommunityRecording";
-        public const string SpeakerId = "CommunitMicRecording";
-
         public static RecordedVoiceSpeaker Instance { get; } = new RecordedVoiceSpeaker();
         public static VoiceDescription Description { get; } = new VoiceDescription(Instance);
 
@@ -20,8 +17,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
         public string EngineName => Texts.EngineName;
         public string SpeakerName => Texts.SpeakerName;
-        public string API => ApiName;
-        public string ID => SpeakerId;
+        public string API => RecordingPluginIds.ApiName;
+        public string ID => RecordingPluginIds.SpeakerId;
         public bool IsVoiceDataCachingRequired => false;
         public SupportedTextFormat Format => SupportedTextFormat.Text;
         public IVoiceLicense License => new NoVoiceLicense();

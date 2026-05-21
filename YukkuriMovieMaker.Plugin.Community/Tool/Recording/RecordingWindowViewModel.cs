@@ -140,7 +140,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                     return;
                 }
 
-                var normalized = string.IsNullOrWhiteSpace(value) ? GetDefaultOutputDirectory() : value.Trim();
+                var normalized = string.IsNullOrWhiteSpace(value) ? RecordingSettings.GetDefaultOutputDirectory() : value.Trim();
                 if (!Set(ref outputDirectory, normalized))
                     return;
                 RecordingSettings.Default.OutputDirectory = outputDirectory;
@@ -289,7 +289,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         private void ResetOutputDirectory()
         {
-            OutputDirectory = GetDefaultOutputDirectory();
+            OutputDirectory = RecordingSettings.GetDefaultOutputDirectory();
             Status = string.Format(Texts.OutputDirectoryReset, OutputDirectory);
         }
 
@@ -402,14 +402,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             PlayCommand?.RaiseCanExecuteChanged();
             BrowseOutputDirectoryCommand?.RaiseCanExecuteChanged();
             ResetOutputDirectoryCommand?.RaiseCanExecuteChanged();
-        }
-
-        private static string GetDefaultOutputDirectory()
-        {
-            return Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                "YMM4",
-                "Recording");
         }
 
         private void ReplaceRecordingService(string directory)

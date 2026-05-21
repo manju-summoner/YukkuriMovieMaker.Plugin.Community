@@ -71,10 +71,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 ?? throw new InvalidOperationException(Texts.VoiceDescriptionCreateFailed);
             var apiProp = voiceDescriptionType.GetProperty("API");
             if (apiProp?.CanWrite == true)
-                apiProp.SetValue(voiceDescription, RecordedVoiceSpeaker.ApiName);
+                apiProp.SetValue(voiceDescription, RecordingPluginIds.ApiName);
             var argProp = voiceDescriptionType.GetProperty("Arg");
             if (argProp?.CanWrite == true)
-                argProp.SetValue(voiceDescription, RecordedVoiceSpeaker.SpeakerId);
+                argProp.SetValue(voiceDescription, RecordingPluginIds.SpeakerId);
 
             characterType.GetProperty("Voice")?.SetValue(character, voiceDescription);
             characterType.GetProperty("VoiceParameter")?.SetValue(character, parameter.Clone());
