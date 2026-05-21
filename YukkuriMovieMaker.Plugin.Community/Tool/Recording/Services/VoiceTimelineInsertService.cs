@@ -165,12 +165,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     }
 
                     // Force YMM to rebuild voice even when text has not changed.
-                    ForceRefreshForVoice(selected, item.Text);
+                    VoiceRegenerationService.RefreshAndRequest(selected, item.Text);
                     if (!ReferenceEquals(targetForParameter, selected) && targetForParameter is not null)
-                        ForceRefreshForVoice(targetForParameter, item.Text);
+                        VoiceRegenerationService.RefreshAndRequest(targetForParameter, item.Text);
 
                     UpdateSelectedVoiceItemLength(selected, item);
-                    TryRequestVoiceGeneration(selected);
                     return true;
                 }
             }
@@ -378,12 +377,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 if (serifProp is not null && serifProp.CanWrite && !string.IsNullOrWhiteSpace(item.Text))
                     serifProp.SetValue(selected, item.Text);
 
-                ForceRefreshForVoice(selected, item.Text);
+                VoiceRegenerationService.RefreshAndRequest(selected, item.Text);
                 if (!ReferenceEquals(targetForParameter, selected) && targetForParameter is not null)
-                    ForceRefreshForVoice(targetForParameter, item.Text);
+                    VoiceRegenerationService.RefreshAndRequest(targetForParameter, item.Text);
 
                 UpdateSelectedVoiceItemLength(selected, item);
-                TryRequestVoiceGeneration(selected);
                 return true;
             }
             catch
@@ -1119,6 +1117,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         }
     }
 }
+
 
 
 
