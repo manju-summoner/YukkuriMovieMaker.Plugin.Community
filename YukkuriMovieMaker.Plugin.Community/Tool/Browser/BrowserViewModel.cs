@@ -27,6 +27,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         static string? defaultUserAgent;
 
         public event EventHandler<CreateNewToolViewRequestedEventArgs>? CreateNewToolViewRequested;
+        public event EventHandler? RecreateWebViewRequested;
 
         public bool IsFailedToInitializeWebView2 { get; private set; }
         public string FailedToInitializeWebView2Message { get; private set; } = string.Empty;
@@ -265,6 +266,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 core.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
             }
 
+            BrowserSettings.Default.PropertyChanged -= BrowserSettings_PropertyChanged;
             BrowserSettings.Default.PropertyChanged += BrowserSettings_PropertyChanged;
 
             ApplySettings();
@@ -463,7 +465,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             catch { }
         }
 
-        private async void CoreWebView2_ProcessFailed(object? sender, CoreWebView2ProcessFailedEventArgs e)
+        private void CoreWebView2_ProcessFailed(object? sender, CoreWebView2ProcessFailedEventArgs e)
         {
             if (e.ProcessFailedKind != CoreWebView2ProcessFailedKind.BrowserProcessExited)
                 return;
@@ -473,43 +475,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             progressCts?.Cancel();
             UpdateCommandCanExecuteState();
 
-            if (isDetached || webView2 is not { } wv2)
-                return;
-
             if (sender is CoreWebView2 crashedCore)
                 UnsubscribeCoreWebView2Events(crashedCore);
 
-            try
-            {
-                await wv2.EnsureCoreWebView2Async();
-            }
-            catch
-            {
-                return;
-            }
-
-            if (isDetached || !ReferenceEquals(webView2, wv2))
+            if (isDetached)
                 return;
 
-            CoreWebView2? newCore;
-            try
-            {
-                newCore = wv2.CoreWebView2;
-            }
-            catch
-            {
-                return;
-            }
-
-            isBrowserCrashed = false;
-            newCore.IsMuted = false;
-            defaultUserAgent ??= newCore.Settings.UserAgent;
-            SubscribeCoreWebView2Events(newCore);
-            newCore.ScriptDialogOpening -= CoreWebView2_ScriptDialogOpening;
-            newCore.ScriptDialogOpening += CoreWebView2_ScriptDialogOpening;
-            ApplySettings();
-            ApplyState();
-            UpdateCommandCanExecuteState();
+            // BrowserProcessExited 後は同一コントロールを再初期化しても新しいブラウザプロセスは作られないため、View にコントロールごとの再生成を要求する
+            RecreateWebViewRequested?.Invoke(this, EventArgs.Empty);
         }
 
         private void AddHistory(string url, string title)

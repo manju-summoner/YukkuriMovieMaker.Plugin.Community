@@ -20,6 +20,13 @@
         <webview2:CoreWebView2CreationProperties x:Key="DummyWebViewCreationProperties" BrowserExecutableFolder="C:\dummy"/>
         <webview2:CoreWebView2CreationProperties x:Key="WebViewCreationProperties" UserDataFolder="{x:Static local:BrowserViewModel.UserDataFolderPath}" AreBrowserExtensionsEnabled="True" AdditionalBrowserArguments="{Binding Path=AdditionalBrowserArguments, Source={x:Static local:BrowserSettings.Default}}"/>
         <local:FilePathToImageConverter x:Key="FilePathToImageConverter"/>
+        <Style x:Key="WebViewStyle" TargetType="webview2:WebView2">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsFailedToInitializeWebView2}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <i:Interaction.Behaviors>
         <pb:DialogBehavior Content="{Binding FavoriteEditorViewModel}" IsModal="True">
@@ -286,17 +293,7 @@
             </c:DropDownButton>
         </Grid>
 
-        <webview2:WebView2 Grid.Row="1" x:Name="webView" CreationProperties="{StaticResource WebViewCreationProperties}">
-            <webview2:WebView2.Style>
-                <Style TargetType="webview2:WebView2">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsFailedToInitializeWebView2}" Value="True">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </webview2:WebView2.Style>
-        </webview2:WebView2>
+        <Grid Grid.Row="1" x:Name="webViewHost"/>
 
         <ProgressBar Grid.Row="0" Height="2" VerticalAlignment="Bottom" Value="{Binding LoadingProgress, Mode=OneWay}" Maximum="100">
             <ProgressBar.Style>
