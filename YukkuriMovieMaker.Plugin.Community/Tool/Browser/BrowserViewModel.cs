@@ -102,7 +102,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 _ => !isBrowserCrashed && webView2 != null,
                 parameter => ExecuteNavigate(parameter));
             OpenFavoriteEditorCommand = new ActionCommand(
-                _ => true,
+                _ => !isBrowserCrashed && webView2 != null,
                 parameter => ExecuteOpenFavoriteEditor(parameter));
             ClearBrowsingDataCommand = new ActionCommand(
                 _ => !isBrowserCrashed && webView2?.CoreWebView2?.Profile != null,
