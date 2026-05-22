@@ -411,9 +411,10 @@
         <pb:MessageBoxBehavior ViewModel="{Binding MessageBoxViewModel,Mode=OneWay}"/>
         <pb:DialogBehavior Content="{Binding FavoriteEditorViewModel}" IsModal="True">
             <pb:DialogBehavior.Style>
-                <Style TargetType="Window">
+                <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}">
                     <Setter Property="Title" Value="{x:Static local:Texts.EditFavorite}"/>
                     <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+                    <Setter Property="ResizeMode" Value="NoResize"/>
                 </Style>
             </pb:DialogBehavior.Style>
             <pb:DialogBehavior.ContentTemplate>
