@@ -115,6 +115,12 @@ internal sealed class PdfPageSource(IGraphicsDevicesAndContext devices, PdfPageP
         dc.Target = commandList;
         dc.BeginDraw();
         dc.Clear(null);
+
+        //1pxの透明を描画する
+        //これがないと描画内容が空の場合にcommandListの画面サイズが定まらず、エラーになる
+        using (var transparent = dc.CreateSolidColorBrush(new Vortice.Mathematics.Color4(0, 0, 0, 0)))
+            dc.DrawRectangle(new Vortice.RawRectF(0, 0, 1, 1), transparent);
+
         dc.EndDraw();
         dc.Target = null;
         commandList.Close();
