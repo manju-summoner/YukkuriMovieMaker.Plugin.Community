@@ -83,22 +83,34 @@ internal sealed class PdfPageSource(IGraphicsDevicesAndContext devices, PdfPageP
             return;
         }
 
-        var pageCount = (int)_pdfDocument.PageCount;
-        if (pageCount <= 0 || pageIndex < 0 || pageIndex >= pageCount)
+        try
         {
+            var pageCount = (int)_pdfDocument.PageCount;
+            if (pageCount <= 0 || pageIndex < 0 || pageIndex >= pageCount)
+            {
+                DisposeCachedBitmap();
+                return;
+            }
+
+            using var page = _pdfDocument.GetPage((uint)pageIndex);
+            var pageWidth = page.Size.Width;
+            var pageHeight = page.Size.Height;
+            var dpiScale = (float)(renderDpi / 96.0);
+            var maxBitmapSize = devices.DeviceContext.MaximumBitmapSize;
+            var (renderWidth, renderHeight) = ComputeRenderSize(pageWidth, pageHeight, dpiScale, maxBitmapSize);
+
+            var bitmap = RasterizePage(page, renderWidth, renderHeight);
+
             DisposeCachedBitmap();
-            return;
+            _cachedBitmap = bitmap;
+            //レンダサイズがD2Dビットマップの上限でクランプされた場合に備え、実際の解像度を逆算する
+            _cachedBitmapDpi = renderWidth / Math.Max(1.0, pageWidth) * 96.0;
         }
-
-        using var page = _pdfDocument.GetPage((uint)pageIndex);
-        var dpiScale = (float)(renderDpi / 96.0);
-        var (renderWidth, renderHeight) = ComputeRenderSize(page.Size.Width, page.Size.Height, dpiScale);
-
-        var bitmap = RasterizePage(page, renderWidth, renderHeight);
-
-        DisposeCachedBitmap();
-        _cachedBitmap = bitmap;
-        _cachedBitmapDpi = renderDpi;
+        catch
+        {
+            //破損PDF・レンダリング失敗・サイズ超過などはキャッシュ無し（空表示）にフォールバックする
+            DisposeCachedBitmap();
+        }
     }
 
     private ID2D1CommandList BuildCommandList(ID2D1Bitmap? bitmap, double scale)
@@ -178,10 +190,22 @@ internal sealed class PdfPageSource(IGraphicsDevicesAndContext devices, PdfPageP
     private static (int width, int height) ComputeRenderSize(
         double pageWidth,
         double pageHeight,
-        float dpiScale)
+        float dpiScale,
+        int maxBitmapSize)
     {
-        return (Math.Max(1, (int)Math.Round(pageWidth * dpiScale)),
-                Math.Max(1, (int)Math.Round(pageHeight * dpiScale)));
+        var width = Math.Max(1, (int)Math.Round(pageWidth * dpiScale));
+        var height = Math.Max(1, (int)Math.Round(pageHeight * dpiScale));
+
+        //D2Dビットマップの最大寸法を超えるとCreateBitmapFromWicBitmapが失敗するため、
+        //アスペクト比を保ったまま上限内に収める
+        if (maxBitmapSize > 0 && (width > maxBitmapSize || height > maxBitmapSize))
+        {
+            var ratio = Math.Min((double)maxBitmapSize / width, (double)maxBitmapSize / height);
+            width = Math.Max(1, (int)(width * ratio));
+            height = Math.Max(1, (int)(height * ratio));
+        }
+
+        return (width, height);
     }
 
     private ID2D1Bitmap? RasterizePage(WinRtPdf.PdfPage page, int renderWidth, int renderHeight)
