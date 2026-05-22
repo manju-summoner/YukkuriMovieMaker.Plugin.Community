@@ -42,6 +42,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         public RecordedVoiceAudioSelectorEditor()
         {
             InitializeComponent();
+            Unloaded += OnUnloaded;
         }
 
         public void SetEditorInfo(IEditorInfo info)
@@ -99,6 +100,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             var path = Parameter?.AudioFilePath ?? string.Empty;
             SelectedFilePath = path;
             SelectedFileLabel = string.IsNullOrWhiteSpace(path) ? Texts.Unselected : Path.GetFileName(path);
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            if (Parameter is INotifyPropertyChanged notify)
+                notify.PropertyChanged -= OnParameterPropertyChanged;
         }
     }
 }
