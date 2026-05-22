@@ -162,6 +162,7 @@
 	  <Resource Include="$(ShaderDirPath)ChannelRouter.cso" Link="Resources\Shader\ChannelRouter.cso" />
 	  <Resource Include="$(ShaderDirPath)Tritone.cso" Link="Resources\Shader\Tritone.cso" />
 	  <Resource Include="$(ShaderDirPath)Lut.cso" Link="Resources\Shader\Lut.cso" />
+	  <Resource Include="$(ShaderDirPath)EdgeGlow.cso" Link="Resources\Shader\EdgeGlow.cso" />
 	  <Resource Include="$(ShaderDirPath)PixelizeTransition.cso" Link="Resources\Shader\PixelizeTransition.cso" />
   </ItemGroup>
 
