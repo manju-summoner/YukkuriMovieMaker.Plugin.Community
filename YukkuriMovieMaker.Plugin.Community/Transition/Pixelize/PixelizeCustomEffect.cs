@@ -79,8 +79,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.Pixelize
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
+                int expansion = (int)Math.Ceiling(_cb.MaxBlockPx * 0.5f) + 1;
+                var requiredRect = new RawRect(
+                    outputRect.Left - expansion,
+                    outputRect.Top - expansion,
+                    outputRect.Right + expansion,
+                    outputRect.Bottom + expansion);
+
                 for (int i = 0; i < inputRects.Length; i++)
-                    inputRects[i] = inputRect;
+                    inputRects[i] = requiredRect;
             }
 
             [StructLayout(LayoutKind.Sequential)]
