@@ -12,15 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.PdfPage;
 [AttributeUsage(AttributeTargets.Property)]
 internal sealed class PdfFileSelectorAttribute : PropertyEditorAttribute2
 {
-    private static string FilterName
-    {
-        get
-        {
-            var raw = Texts.FileFilter;
-            var sep = raw.IndexOf('|');
-            return sep >= 0 ? raw[..sep] : raw;
-        }
-    }
+    const string FilterPattern = "*.pdf";
 
     public PdfFileSelectorAttribute()
     {
@@ -34,8 +26,8 @@ internal sealed class PdfFileSelectorAttribute : PropertyEditorAttribute2
         var editor = (FileSelector)control;
         editor.FileType = FileType.None;
         editor.ShowThumbnail = true;
-        editor.Filter = "*.pdf";
-        editor.FilterName = FilterName;
+        editor.Filter = FilterPattern;
+        editor.FilterName = Texts.FilterName;
 
         var currentItemProperty = itemProperties[0];
         var file = (string?)currentItemProperty.PropertyInfo.GetValue(currentItemProperty.PropertyOwner);
