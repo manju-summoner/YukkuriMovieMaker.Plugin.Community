@@ -188,9 +188,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
                 if (!string.IsNullOrWhiteSpace(recordsDirectory))
                 {
-                    var directoryFullPath = Path.GetFullPath(recordsDirectory).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                    var directoryFullPath = Path.GetFullPath(recordsDirectory);
                     var fileFullPath = Path.GetFullPath(path);
-                    if (!fileFullPath.StartsWith(directoryFullPath, StringComparison.OrdinalIgnoreCase))
+                    var relativePath = Path.GetRelativePath(directoryFullPath, fileFullPath);
+
+                    if (Path.IsPathRooted(relativePath) || relativePath.StartsWith("..", StringComparison.Ordinal))
                         return string.Empty;
                 }
 
