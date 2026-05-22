@@ -20,13 +20,21 @@
         <webview2:CoreWebView2CreationProperties x:Key="DummyWebViewCreationProperties" BrowserExecutableFolder="C:\dummy"/>
         <webview2:CoreWebView2CreationProperties x:Key="WebViewCreationProperties" UserDataFolder="{x:Static local:BrowserViewModel.UserDataFolderPath}" AreBrowserExtensionsEnabled="True" AdditionalBrowserArguments="{Binding Path=AdditionalBrowserArguments, Source={x:Static local:BrowserSettings.Default}}"/>
         <local:FilePathToImageConverter x:Key="FilePathToImageConverter"/>
+        <Style x:Key="WebViewStyle" TargetType="webview2:WebView2">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsFailedToInitializeWebView2}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <i:Interaction.Behaviors>
         <pb:DialogBehavior Content="{Binding FavoriteEditorViewModel}" IsModal="True">
             <pb:DialogBehavior.Style>
-                <Style TargetType="Window">
+                <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}">
                     <Setter Property="Title" Value="{x:Static local:Texts.EditFavorite}"/>
                     <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+                    <Setter Property="ResizeMode" Value="NoResize"/>
                 </Style>
             </pb:DialogBehavior.Style>
             <pb:DialogBehavior.ContentTemplate>
@@ -40,6 +48,7 @@
                 <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}">
                     <Setter Property="Title" Value="{x:Static local:Texts.ClearBrowsingData}"/>
                     <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+                    <Setter Property="ResizeMode" Value="NoResize"/>
                 </Style>
             </pb:DialogBehavior.Style>
             <pb:DialogBehavior.ContentTemplate>
@@ -54,6 +63,7 @@
                     <Setter Property="Title" Value="{x:Static local:Texts.BrowserSettings}"/>
                     <Setter Property="Width" Value="500"/>
                     <Setter Property="Height" Value="300"/>
+                    <Setter Property="ResizeMode" Value="NoResize"/>
                 </Style>
             </pb:DialogBehavior.Style>
             <pb:DialogBehavior.ContentTemplate>
@@ -101,7 +111,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
+
         <Grid Grid.Row="0" Name="toolBar" Height="26">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -283,17 +293,7 @@
             </c:DropDownButton>
         </Grid>
 
-        <webview2:WebView2 Grid.Row="1" x:Name="webView" CreationProperties="{StaticResource WebViewCreationProperties}">
-            <webview2:WebView2.Style>
-                <Style TargetType="webview2:WebView2">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsFailedToInitializeWebView2}" Value="True">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </webview2:WebView2.Style>
-        </webview2:WebView2>
+        <Grid Grid.Row="1" x:Name="webViewHost"/>
 
         <ProgressBar Grid.Row="0" Height="2" VerticalAlignment="Bottom" Value="{Binding LoadingProgress, Mode=OneWay}" Maximum="100">
             <ProgressBar.Style>
