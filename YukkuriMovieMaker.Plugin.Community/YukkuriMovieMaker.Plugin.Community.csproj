@@ -47,6 +47,9 @@
 	  <Reference Include="System.Drawing.Common">
 		  <HintPath>$(YMM4DirPath)System.Drawing.Common.dll</HintPath>
 	  </Reference>
+	  <Reference Include="SharpGen.Runtime.COM">
+		  <HintPath>$(YMM4DirPath)SharpGen.Runtime.COM.dll</HintPath>
+	  </Reference>
   </ItemGroup>
 
   <!-- nugetパッケージで公開されているライブラリはPackageReferenceで参照する。-->
