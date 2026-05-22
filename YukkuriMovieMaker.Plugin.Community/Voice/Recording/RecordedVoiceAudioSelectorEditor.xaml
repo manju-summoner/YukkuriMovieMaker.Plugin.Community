@@ -1,0 +1,25 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Voice.Recording.RecordedVoiceAudioSelectorEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.Recording"
+             MinHeight="26">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Column="0"
+                   VerticalAlignment="Center"
+                   TextTrimming="CharacterEllipsis"
+                   ToolTip="{Binding SelectedFilePath, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Text="{Binding SelectedFileLabel, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+
+        <Button Grid.Column="1"
+                Margin="6,0,0,0"
+                MinWidth="120"
+                Height="24"
+                Content="{x:Static local:Texts.SelectRecordedAudioButton}"
+                Click="OnSelectClicked"/>
+    </Grid>
+</UserControl>

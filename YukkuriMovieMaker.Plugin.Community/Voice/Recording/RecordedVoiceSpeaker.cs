@@ -11,9 +11,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 {
     public class RecordedVoiceSpeaker : IVoiceSpeaker
     {
-        private const string InitialUnselectedFileName = "Unselected.wav";
-        private const string LegacyJapaneseUnselectedFileName = "未選択.wav";
-        private const string LegacySilentFileName = "Silent_5s.wav";
+        private const string InitialSilentFileName = "Silent_5s.wav";
 
         public static RecordedVoiceSpeaker Instance { get; } = new RecordedVoiceSpeaker();
         public static VoiceDescription Description { get; } = new VoiceDescription(Instance);
@@ -120,27 +118,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                     return defaultPath;
 
                 Directory.CreateDirectory(recordsDirectory);
-                var path = Path.Combine(recordsDirectory, InitialUnselectedFileName);
-                var legacyJapanesePath = Path.Combine(recordsDirectory, LegacyJapaneseUnselectedFileName);
-                var legacyPath = Path.Combine(recordsDirectory, LegacySilentFileName);
-
-                if (!File.Exists(path) && File.Exists(legacyJapanesePath))
-                {
-                    File.Move(legacyJapanesePath, path);
-                    return path;
-                }
-
-                if (!File.Exists(path) && File.Exists(legacyPath))
-                {
-                    File.Move(legacyPath, path);
-                    return path;
-                }
-
-                if (File.Exists(path) && File.Exists(legacyJapanesePath))
-                    File.Delete(legacyJapanesePath);
-
-                if (File.Exists(path) && File.Exists(legacyPath))
-                    File.Delete(legacyPath);
+                var path = Path.Combine(recordsDirectory, InitialSilentFileName);
 
                 if (File.Exists(path))
                     return path;
