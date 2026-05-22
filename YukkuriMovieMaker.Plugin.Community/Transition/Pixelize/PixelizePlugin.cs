@@ -1,4 +1,3 @@
-using YMM4SamplePlugin.Transition.Pixelize;
 using YukkuriMovieMaker.Plugin.Transition;
 
 namespace YukkuriMovieMaker.Plugin.Community.Transition.Pixelize
