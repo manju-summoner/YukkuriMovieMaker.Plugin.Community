@@ -208,7 +208,7 @@ internal sealed class PdfPageSource(IGraphicsDevicesAndContext devices, PdfPageP
         return (width, height);
     }
 
-    private ID2D1Bitmap? RasterizePage(WinRtPdf.PdfPage page, int renderWidth, int renderHeight)
+    private ID2D1Bitmap RasterizePage(WinRtPdf.PdfPage page, int renderWidth, int renderHeight)
     {
         using var stream = new InMemoryRandomAccessStream();
 
