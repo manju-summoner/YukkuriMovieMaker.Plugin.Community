@@ -481,6 +481,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             if (isDetached)
                 return;
 
+            // 復旧後の AttachWebView2 → ApplyState でクラッシュ直前のページ・ズームへ戻れるよう state を更新する
+            if (!string.IsNullOrEmpty(Location))
+                state = new WebBrowserSavedState(Location, webView2?.ZoomFactor ?? state.Zoom);
+
             // BrowserProcessExited 後は同一コントロールを再初期化しても新しいブラウザプロセスは作られないため、View にコントロールごとの再生成を要求する
             RecreateWebViewRequested?.Invoke(this, EventArgs.Empty);
         }
