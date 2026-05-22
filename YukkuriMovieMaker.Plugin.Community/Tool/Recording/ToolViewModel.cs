@@ -61,6 +61,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 if (Set(ref selectedRecord, value))
                 {
                     RenameText = selectedRecord?.FileNameWithoutExtension ?? string.Empty;
+                    RecordingSettings.Default.DefaultVoiceAudioFilePath = selectedRecord?.Path ?? string.Empty;
                     RaiseCommandStates();
                 }
             }
@@ -343,6 +344,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 RecordingStatus = string.Format(Texts.RecordDeleted, target.FileName);
                 if (string.Equals(latestRecordedFilePath, target.Path, StringComparison.OrdinalIgnoreCase))
                     latestRecordedFilePath = null;
+                if (string.Equals(RecordingSettings.Default.DefaultVoiceAudioFilePath, target.Path, StringComparison.OrdinalIgnoreCase))
+                    RecordingSettings.Default.DefaultVoiceAudioFilePath = string.Empty;
                 RefreshRecords();
             }
             catch (Exception ex)
@@ -373,6 +376,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 File.Move(sourcePath, destinationPath, overwrite: false);
                 if (string.Equals(latestRecordedFilePath, sourcePath, StringComparison.OrdinalIgnoreCase))
                     latestRecordedFilePath = destinationPath;
+                if (string.Equals(RecordingSettings.Default.DefaultVoiceAudioFilePath, sourcePath, StringComparison.OrdinalIgnoreCase))
+                    RecordingSettings.Default.DefaultVoiceAudioFilePath = destinationPath;
 
                 RecordingStatus = string.Format(Texts.RecordRenamed, Path.GetFileName(destinationPath));
                 RefreshRecords();

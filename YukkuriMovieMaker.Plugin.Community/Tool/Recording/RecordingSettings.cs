@@ -26,6 +26,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         private string outputDirectory = GetDefaultOutputDirectory();
 
+        public string DefaultVoiceAudioFilePath
+        {
+            get => defaultVoiceAudioFilePath;
+            set => Set(ref defaultVoiceAudioFilePath, value ?? string.Empty);
+        }
+
+        private string defaultVoiceAudioFilePath = string.Empty;
+
         public override void Initialize()
         {
         }
