@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.Pixelize
         float lastProgress;
         float lastMaxBlockPx;
 
-        public ID2D1Image Output => effectOutput ?? before;
+        public ID2D1Image Output => effectOutput ?? after;
 
         public PixelizeSource(IGraphicsDevicesAndContext devices, ID2D1Image before, ID2D1Image after, PixelizeParameter parameter)
         {
