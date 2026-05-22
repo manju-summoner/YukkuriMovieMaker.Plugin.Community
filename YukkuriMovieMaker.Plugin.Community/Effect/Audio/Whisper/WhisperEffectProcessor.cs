@@ -12,7 +12,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
         const int FftOrder = 10;
         const int HalfSize = FrameSize / 2;
         const int CepstralLifterCutoff = 30;
-        const int TailFlushSamples = FrameSize - HopSize;
         const float MinLogMagnitude = 1e-10f;
         const float SynthesisScale = 2f;
         const float TwoPi = (float)(Math.PI * 2.0);
@@ -37,7 +36,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
         float lastHighPassHz = -1f;
         float lastBrightnessDb = float.NaN;
         float[] dryBuffer = [];
-        int tailRemaining;
+        float[] primeBuffer = [];
+        bool primed;
 
         public WhisperEffectProcessor(WhisperEffect effect)
         {
@@ -65,40 +65,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
 
             count -= count % 2;
             if (count <= 0) return 0;
-            if (dryBuffer.Length < count) dryBuffer = new float[count];
 
-            int inputRead = Input.Read(dryBuffer, 0, count);
-            inputRead -= inputRead % 2;
-            if (inputRead < 0) inputRead = 0;
-
-            int producedSamples;
-            if (inputRead >= count)
-            {
-                producedSamples = count;
-                tailRemaining = TailFlushSamples;
-            }
-            else
-            {
-                int remainingPairs = tailRemaining;
-                if (remainingPairs <= 0)
-                {
-                    if (inputRead <= 0) return 0;
-                    producedSamples = inputRead;
-                }
-                else
-                {
-                    int availableTailSamples = remainingPairs * 2;
-                    int padSamples = count - inputRead;
-                    if (padSamples > availableTailSamples) padSamples = availableTailSamples;
-                    Array.Clear(dryBuffer, inputRead, padSamples);
-                    producedSamples = inputRead + padSamples;
-                    tailRemaining = remainingPairs - padSamples / 2;
-                }
-            }
+            long totalSamples = Duration;
+            if (currentPosition >= totalSamples) return 0;
 
             int hz = Hz;
-            long totalPairs = Duration / 2;
-            int pairs = producedSamples / 2;
+
+            if (!primed)
+            {
+                PrimeLatency();
+                primed = true;
+            }
+
+            int pairs = (int)Math.Min(count / 2L, (totalSamples - currentPosition) / 2L);
+            int producedSamples = pairs * 2;
+
+            if (dryBuffer.Length < producedSamples) dryBuffer = new float[producedSamples];
+            int inputRead = FillFromInput(dryBuffer, producedSamples);
+            if (inputRead < producedSamples)
+                Array.Clear(dryBuffer, inputRead, producedSamples - inputRead);
+
+            long totalPairs = totalSamples / 2;
             long startPair = currentPosition / 2;
             long endPair = startPair + Math.Max(0, pairs - 1);
 
@@ -139,6 +126,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
 
             currentPosition += producedSamples;
             return producedSamples;
+        }
+
+        int FillFromInput(float[] buffer, int count)
+        {
+            int total = 0;
+            while (total < count)
+            {
+                int n = Input!.Read(buffer, total, count - total);
+                if (n <= 0) break;
+                total += n;
+            }
+            return total - total % 2;
+        }
+
+        // FFT/OLAのアルゴリズム遅延（FrameSizeサンプル）を吸収するため、
+        // 先頭でFrameSize分の入力を処理系に通して読み捨て、出力を入力に揃える。
+        void PrimeLatency()
+        {
+            int primeSamples = FrameSize * 2;
+            if (primeBuffer.Length < primeSamples) primeBuffer = new float[primeSamples];
+            int filled = FillFromInput(primeBuffer, primeSamples);
+            if (filled < primeSamples)
+                Array.Clear(primeBuffer, filled, primeSamples - filled);
+            for (int i = 0; i < FrameSize; i++)
+            {
+                ProcessChannelSample(leftChannel, primeBuffer[i * 2]);
+                ProcessChannelSample(rightChannel, primeBuffer[i * 2 + 1]);
+            }
         }
 
         float ProcessChannelSample(ChannelState ch, float sample)
@@ -264,7 +279,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Whisper
             brightnessFilter.Reset();
             lastHighPassHz = -1f;
             lastBrightnessDb = float.NaN;
-            tailRemaining = 0;
+            primed = false;
         }
     }
 }

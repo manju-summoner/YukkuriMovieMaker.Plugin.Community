@@ -24,8 +24,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Falsetto
         const float BreathHighpassCutoffHz = 200f;
         const uint RngInitialState = 0xC2B2AE3Du;
 
-        const int TailFlushSamples = FrameSize - HopSize;
-
         public override int Hz => Input?.Hz ?? throw new InvalidOperationException();
         public override long Duration => Input?.Duration ?? throw new InvalidOperationException();
 
@@ -38,9 +36,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Falsetto
         float breathHpStateLeft, breathHpStateRight;
         float breathHpPrevInputLeft, breathHpPrevInputRight;
         float[] dryBuffer = [];
+        float[] primeBuffer = [];
+        bool primed;
         int cachedLifterCount = -1;
         int cachedSampleRate;
-        int tailRemaining;
         readonly float[] lifterWindow = new float[HalfSize + 1];
 
         public FalsettoEffectProcessor(FalsettoEffect effect)
@@ -86,44 +85,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Falsetto
 
             count -= count % 2;
             if (count <= 0) return 0;
-            if (dryBuffer.Length < count) dryBuffer = new float[count];
 
-            int read = Input.Read(dryBuffer, 0, count);
-            read -= read % 2;
-            if (read < 0) read = 0;
-
-            int producedSamples;
-            if (read >= count)
-            {
-                producedSamples = count;
-                tailRemaining = TailFlushSamples;
-            }
-            else
-            {
-                int remainingPairs = tailRemaining;
-                if (remainingPairs <= 0)
-                {
-                    if (read <= 0) return 0;
-                    producedSamples = read;
-                }
-                else
-                {
-                    int availableTailSamples = remainingPairs * 2;
-                    int padSamples = count - read;
-                    if (padSamples > availableTailSamples) padSamples = availableTailSamples;
-                    Array.Clear(dryBuffer, read, padSamples);
-                    producedSamples = read + padSamples;
-                    tailRemaining = remainingPairs - padSamples / 2;
-                }
-            }
+            long totalSamples = Duration;
+            if (currentPosition >= totalSamples) return 0;
 
             int hz = Hz;
-            long totalPairs = Duration / 2;
-            int pairs = producedSamples / 2;
+            EnsureLifterWindow(hz);
+
+            if (!primed)
+            {
+                PrimeLatency(hz);
+                primed = true;
+            }
+
+            int pairs = (int)Math.Min(count / 2L, (totalSamples - currentPosition) / 2L);
+            int producedSamples = pairs * 2;
+
+            if (dryBuffer.Length < producedSamples) dryBuffer = new float[producedSamples];
+            int inputRead = FillFromInput(dryBuffer, producedSamples);
+            if (inputRead < producedSamples)
+                Array.Clear(dryBuffer, inputRead, producedSamples - inputRead);
+
+            long totalPairs = totalSamples / 2;
             long startPair = currentPosition / 2;
             long endPair = startPair + Math.Max(0, pairs - 1);
-
-            EnsureLifterWindow(hz);
 
             float pitchStart = (float)effect.PitchSemitones.GetValue(startPair, totalPairs, hz);
             float pitchEnd = (float)effect.PitchSemitones.GetValue(endPair, totalPairs, hz);
@@ -183,6 +168,41 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Falsetto
 
             currentPosition += producedSamples;
             return producedSamples;
+        }
+
+        int FillFromInput(float[] buffer, int count)
+        {
+            int total = 0;
+            while (total < count)
+            {
+                int n = Input!.Read(buffer, total, count - total);
+                if (n <= 0) break;
+                total += n;
+            }
+            return total - total % 2;
+        }
+
+        // フェーズボコーダのアルゴリズム遅延（FrameSizeサンプル）を吸収するため、
+        // 先頭でFrameSize分の入力を処理系に通して読み捨て、出力を入力に揃える。
+        void PrimeLatency(int hz)
+        {
+            long totalPairs = Duration / 2;
+            long startPair = currentPosition / 2;
+            float pitchSemitones = (float)effect.PitchSemitones.GetValue(startPair, totalPairs, hz);
+            float formantSemitones = (float)effect.FormantSemitones.GetValue(startPair, totalPairs, hz);
+            float pitchRatio = MathF.Pow(2f, pitchSemitones / 12f);
+            float formantRatio = MathF.Pow(2f, formantSemitones / 12f);
+
+            int primeSamples = FrameSize * 2;
+            if (primeBuffer.Length < primeSamples) primeBuffer = new float[primeSamples];
+            int filled = FillFromInput(primeBuffer, primeSamples);
+            if (filled < primeSamples)
+                Array.Clear(primeBuffer, filled, primeSamples - filled);
+            for (int i = 0; i < FrameSize; i++)
+            {
+                ProcessChannelSample(channels[0], primeBuffer[i * 2], pitchRatio, formantRatio);
+                ProcessChannelSample(channels[1], primeBuffer[i * 2 + 1], pitchRatio, formantRatio);
+            }
         }
 
         void EnsureLifterWindow(int hz)
@@ -605,7 +625,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Falsetto
             breathHpPrevInputLeft = 0f;
             breathHpPrevInputRight = 0f;
             rngState = RngInitialState;
-            tailRemaining = 0;
+            primed = false;
         }
     }
 }
