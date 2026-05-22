@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services;
 using YukkuriMovieMaker.Plugin.Voice;
@@ -10,10 +11,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
     {
         public static RecordedVoiceSpeaker Instance { get; } = new RecordedVoiceSpeaker();
         public static VoiceDescription Description { get; } = new VoiceDescription(Instance);
-
-        static RecordedVoiceSpeaker()
-        {
-        }
 
         public string EngineName => Texts.EngineName;
         public string SpeakerName => Texts.SpeakerName;
@@ -53,15 +50,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
         public IVoiceParameter CreateVoiceParameter()
         {
-            var parameter = new RecordedVoiceParameter();
-            var silentPath = new RecordPathService().GetOrCreateSilentWavPath(TimeSpan.FromSeconds(5));
-            if (!string.IsNullOrWhiteSpace(silentPath))
+            return new RecordedVoiceParameter
             {
-                parameter.AudioFilePath = silentPath;
-                parameter.Duration = TimeSpan.FromSeconds(5);
-                parameter.CreatedAt = DateTime.Now;
-            }
-            return parameter;
+                AudioFilePath = ResolveInitialAudioFilePath()
+            };
         }
 
         public bool IsMatch(string api, string id)
@@ -78,22 +70,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         {
             if (parameter is RecordedVoiceParameter recorded)
             {
-                if (string.IsNullOrWhiteSpace(recorded.AudioFilePath) || !File.Exists(recorded.AudioFilePath))
-                {
-                    var silentPath = new RecordPathService().GetOrCreateSilentWavPath(TimeSpan.FromSeconds(5));
-                    if (!string.IsNullOrWhiteSpace(silentPath))
-                    {
-                        recorded.AudioFilePath = silentPath;
-                        recorded.Duration ??= TimeSpan.FromSeconds(5);
-                        recorded.CreatedAt ??= DateTime.Now;
-                    }
-                }
+                if (string.IsNullOrWhiteSpace(recorded.AudioFilePath))
+                    recorded.AudioFilePath = ResolveInitialAudioFilePath();
                 return recorded;
             }
 
             return CreateVoiceParameter();
         }
+
+        private static string ResolveInitialAudioFilePath()
+        {
+            try
+            {
+                var directory = new RecordPathService().GetRecordsDirectory();
+                return Directory.EnumerateFiles(directory, "*.wav", SearchOption.TopDirectoryOnly)
+                    .OrderByDescending(File.GetLastWriteTimeUtc)
+                    .FirstOrDefault() ?? string.Empty;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
     }
 }
-
-

@@ -23,7 +23,7 @@ RecordingNowWithPath,0:path,録音中... 保存先: {0},Recording... Destination
 RecordingStartFailed,0:error,録音開始に失敗しました: {0},Failed to start recording: {0},开始录音失败: {0},開始錄音失敗: {0},녹음 시작 실패: {0},No se pudo iniciar la grabación: {0},فشل بدء التسجيل: {0},Gagal memulai rekaman: {0}
 NoRecordingDataRetry,,録音データがありません。再録音してください。,No recording data. Please record again.,没有录音数据。请重新录音。,沒有錄音資料。請重新錄音。,녹음 데이터가 없습니다. 다시 녹음해 주세요.,No hay datos de grabación. Vuelva a grabar.,لا توجد بيانات تسجيل. يرجى التسجيل مرة أخرى.,Tidak ada data rekaman. Silakan rekam ulang.
 RecordingDataLengthZero,0:path,録音データ長が 0 のため追加しませんでした: {0},Skipped because recorded data length is 0: {0},录音数据长度为 0，未添加: {0},錄音資料長度為 0，因此未加入: {0},녹음 데이터 길이가 0이어서 추가하지 않았습니다: {0},Omitido porque la longitud de los datos grabados es 0: {0},تم التخطي لأن طول بيانات التسجيل يساوي 0: {0},Dilewati karena panjang data rekaman adalah 0: {0}
-StoppedAndAddedToTimeline,0:path,録音停止。タイムラインへ追加しました: {0},Recording stopped and added to timeline: {0},录音已停止并添加到时间轴: {0},錄音已停止並加入時間軸: {0},녹음이 중지되고 타임라인에 추가되었습니다: {0},Grabación detenida y agregada a la línea de tiempo: {0},تم إيقاف التسجيل وإضافته إلى الخط الزمني: {0},Rekaman dihentikan dan ditambahkan ke timeline: {0}
+StoppedAndAddedToTimeline,0:path,録音停止。タイムラインへ追加しました: {0},Recording stopped and added to timeline: {0},录音已停止并添加到时间轴: {0},錄音已停止並加入時間軸: {0},녹음이 중지되고 타임라인に追加されました: {0},Grabación detenida y agregada a la línea de tiempo: {0},تم إيقاف التسجيل وإضافته إلى الخط الزمني: {0},Rekaman dihentikan dan ditambahkan ke timeline: {0}
 RecordingStoppedAndSaved,0:path,録音停止。保存しました: {0},Recording stopped and saved: {0},录音已停止并保存: {0},錄音已停止並儲存: {0},녹음이 중지되고 저장되었습니다: {0},Grabación detenida y guardada: {0},تم إيقاف التسجيل والحفظ: {0},Rekaman dihentikan dan disimpan: {0}
 RecordingStopFailed,0:error,録音停止に失敗しました: {0},Failed to stop recording: {0},停止录音失败: {0},停止錄音失敗: {0},녹음 중지 실패: {0},No se pudo detener la grabación: {0},فشل إيقاف التسجيل: {0},Gagal menghentikan rekaman: {0}
 NoSerifSelected,,セリフが選択されていません。,No serif selected.,未选择台词。,未選擇台詞。,선택된 대사가 없습니다.,No se seleccionó diálogo.,لم يتم تحديد نص.,Tidak ada dialog yang dipilih.
@@ -38,25 +38,25 @@ NoNextSerif,,次のセリフが見つかりません。,No next serif found.,未
 SelectOutputDirectory,,録音ファイルの保存先を選択してください。,Select output folder for recording files.,请选择录音文件保存文件夹。,請選擇錄音檔案儲存資料夾。,녹음 파일 저장 폴더를 선택해 주세요.,Seleccione la carpeta de salida para los archivos grabados.,حدد مجلد حفظ ملفات التسجيل.,Pilih folder output untuk file rekaman.
 OutputDirectoryChanged,0:path,保存先を変更しました: {0},Output directory changed: {0},保存位置已更改: {0},儲存位置已變更: {0},저장 위치가 변경되었습니다: {0},Directorio de salida cambiado: {0},تم تغيير مجلد الحفظ: {0},Direktori output diubah: {0}
 OutputDirectoryReset,0:path,保存先を既定値に戻しました: {0},Output directory reset to default: {0},保存位置已恢复默认值: {0},儲存位置已重設為預設值: {0},저장 위치가 기본값으로 재설정되었습니다: {0},Directorio restablecido al predeterminado: {0},تمت إعادة مجلد الحفظ إلى الافتراضي: {0},Direktori output dikembalikan ke default: {0}
-NoPlayableAudio,,再生できる音声がありません,No audio available to play.,没有可播放的音频。,沒有可播放の音訊。,재생 가능한 오디오가 없습니다.,No hay audio disponible para reproducir.,لا يوجد صوت قابل للتشغيل.,Tidak ada audio yang dapat diputar.
+NoPlayableAudio,,再生できる音声がありません,No audio available to play.,没有可播放的音频。,沒有可播放の音訊。,재생 가능한 오디오가 없습니다.,No hay audio disponible para reproducir.,لا يوجد صوت قابل للتشغيل.,Tidak ada audio yang dapat putar.
 Playing,,再生中...,Playing...,播放中...,播放中...,재생 중...,Reproduciendo...,جارٍ التشغيل...,Sedang memutar...
 PlaybackFailed,0:error,再生に失敗: {0},Playback failed: {0},播放失败: {0},播放失敗: {0},재생 실패: {0},Error de reproducción: {0},فشل التشغيل: {0},Pemutaran gagal: {0}
 PlaybackError,0:error,再生エラー: {0},Playback error: {0},播放错误: {0},播放錯誤: {0},재생 오류: {0},Error de reproducción: {0},خطأ في التشغيل: {0},Kesalahan pemutaran: {0}
 PlaybackCompleted,,再生完了,Playback completed.,播放完成,播放完成,재생 완료,Reproducción finalizada.,اكتمل التشغيل.,Pemutaran selesai.
 TimelineAdded,,タイムラインへ追加しました。,Added to timeline.,已添加到时间轴。,已加入時間軸。,타임라인에 추가되었습니다.,Agregado a la línea de tiempo.,تمت الإضافة إلى الخط الزمني.,Ditambahkan ke timeline.
-TimelineAddFailed,0:error,タイムライン追加に失敗しました: {0},Failed to add to timeline: {0},添加到时间轴失败: {0},加入時間軸失敗: {0},타임ライン 추가 실패: {0},No se pudo agregar a la línea de tiempo: {0},فشل الإضافة إلى الخط الزمني: {0},Gagal menambahkan ke timeline: {0}
+TimelineAddFailed,0:error,タイムライン追加に失敗しました: {0},Failed to add to timeline: {0},添加到时间轴失败: {0},加入時間軸失敗: {0},타임라인 추가 실패: {0},No se pudo agregar a la línea de tiempo: {0},فشل الإضافة إلى الخط الزمني: {0},Gagal menambahkan ke timeline: {0}
 SaveDestinationWithPath,0:path,保存先: {0},Destination: {0},保存位置: {0},儲存位置: {0},저장 위치: {0},Destino: {0},الوجهة: {0},Tujuan: {0}
 InvalidRecordingDevice,0:device,録音デバイスを取得できません: {0},Could not resolve recording device: {0},无法获取录音设备: {0},無法取得錄音裝置: {0},녹음 장치를 가져올 수 없습니다: {0},No se pudo obtener el dispositivo de grabación: {0},تعذر الحصول على جهاز التسجيل: {0},Tidak dapat memperoleh perangkat perekaman: {0}
 StopWaitObjectUnavailable,,録音停止の完了待機オブジェクトを取得できませんでした。,Could not obtain stop-wait object.,无法获取录音停止等待对象。,無法取得錄音停止等待物件。,녹음 중지 대기 객체를 가져올 수 없습니다.,No se pudo obtener el objeto de espera de detención.,تعذر الحصول على كائن انتظار الإيقاف.,Tidak dapat memperoleh objek tunggu penghentian.
 StopWaitTimeout,,録音停止の完了待機がタイムアウトしました。,Timed out while waiting for recording stop.,等待录音停止超时。,等待錄音停止逾時。,녹음 중지 대기 시간이 초과되었습니다.,Tiempo de espera agotado al detener la grabación.,انتهت مهلة انتظار إيقاف التسجيل.,Waktu tunggu penghentian rekaman habis.
 RecordingStopFailedMessage,,録音停止に失敗しました。,Failed to stop recording.,停止录音失败。,停止錄音失敗。,녹음 중지 실패.,No se pudo detener la grabación.,فشل إيقاف التسجيل.,Gagal menghentikan rekaman.
-RecordedWavNotFound,,録音済み wav ファイルが見つかりません。,Recorded wav file not found.,未找到已录制的 wav 文件。,找不到已錄製の wav 檔案。,녹음된 wav 파일을 찾을 수 없습니다.,No se encontró el archivo wav grabado.,لم يتم العثور على ملف wav المسجل.,File wav rekaman tidak ditemukan.
-RecordedWavNotFoundShort,,録音済み wav が見つかりません。,Recorded wav not found.,未找到录制的 wav。,找不到錄製の wav。,녹음된 wav를 찾을 수 없습니다.,No se encontró wav grabado.,لم يتم العثور على wav المسجل.,Wav rekaman tidak ditemukan.
+RecordedWavNotFound,,録音済み wav ファイルが見つかりません。,Recorded wav file not found.,未找到已录制的 wav 文件。,找不到已錄製的 wav 檔案。,녹음된 wav 파일을 찾을 수 없습니다.,No se encontró el archivo wav grabado.,لم يتم العثور على ملف wav المسجل.,File wav rekaman tidak ditemukan.
+RecordedWavNotFoundShort,,録音済み wav が見つかりません。,Recorded wav not found.,未找到录制的 wav。,找不到錄製的 wav。,녹음된 wav를 찾을 수 없습니다.,No se encontró wav grabado.,لم يتم العثور على wav المسجل.,Wav rekaman tidak ditemukan.
 UiDispatcherUnavailable,,UI Dispatcher を取得できません。,UI dispatcher is unavailable.,无法获取 UI Dispatcher。,無法取得 UI Dispatcher。,UI Dispatcher를 사용할 수 없습니다.,UI Dispatcher no disponible.,موزع واجهة المستخدم غير متاح.,UI Dispatcher tidak tersedia.
 MainViewModelUnavailable,,MainViewModel を取得できません。,MainViewModel is unavailable.,无法获取 MainViewModel。,無法取得 MainViewModel。,MainViewModel을 사용할 수 없습니다.,MainViewModel no disponible.,MainViewModel غير متاح.,MainViewModel tidak tersedia.
 TimelineUnavailable,,タイムラインを取得できません。,Timeline is unavailable.,无法获取时间轴。,無法取得時間軸。,타임라인을 사용할 수 없습니다.,La línea de tiempo no está disponible.,الخط الزمني غير متاح.,Timeline tidak tersedia.
 CurrentFrameUnavailable,,現在フレームを取得できません。,Could not get current frame.,无法获取当前帧。,無法取得目前影格。,현재 프레임을 가져올 수 없습니다.,No se pudo obtener el fotograma actual.,تعذر الحصول على الإطار الحالي.,Tidak dapat memperoleh frame saat ini.
-TimelineAddFailedMessage,,タイムラインへの追加に失敗しました。,Failed to add item to timeline.,添加到时间轴失败。,加入時間軸失敗。,타임ライン에 항목 추가 실패.,No se pudo agregar el elemento a la línea de tiempo.,فشل إضافة العنصر إلى الخط الزمني.,Gagal menambahkan item ke timeline.
+TimelineAddFailedMessage,,タイムラインへの追加に失敗しました。,Failed to add item to timeline.,添加到时间轴失败。,加入時間軸失敗。,타임라인에 항목 추가 실패.,No se pudo agregar el elemento a la línea de tiempo.,فشل إضافة العنصر إلى الخط الزمني.,Gagal menambahkan item ke timeline.
 AudioItemUnavailable,,AudioItem を取得できません。,AudioItem is unavailable.,无法获取 AudioItem。,無法取得 AudioItem。,AudioItem을 사용할 수 없습니다.,AudioItem no disponible.,AudioItem غير متاح.,AudioItem tidak tersedia.
 AudioItemCannotSetup,,AudioItem を設定できません。,Failed to setup AudioItem.,无法设置 AudioItem。,無法設定 AudioItem。,AudioItem 설정 실패.,No se pudo configurar AudioItem.,فشل إعداد AudioItem.,Gagal mengatur AudioItem.
 IItemUnavailable,,IItem を取得できません。,IItem is unavailable.,无法获取 IItem。,無法取得 IItem。,IItem을 사용할 수 없습니다.,IItem no disponible.,IItem غير متاح.,IItem tidak tersedia.
@@ -69,3 +69,23 @@ CharacterCreateFailed,,Character を作成できません。,Failed to create Ch
 VoiceDescriptionUnavailable,,VoiceDescription を取得できません。,VoiceDescription is unavailable.,无法获取 VoiceDescription。,無法取得 VoiceDescription。,VoiceDescription을 사용할 수 없습니다.,VoiceDescription no disponible.,VoiceDescription غير متاح.,VoiceDescription tidak tersedia.
 VoiceDescriptionCreateFailed,,VoiceDescription を作成できません。,Failed to create VoiceDescription.,创建 VoiceDescription 失败。,建立 VoiceDescription 失敗。,VoiceDescription 생성 실패.,No se pudo crear VoiceDescription.,فشل إنشاء VoiceDescription.,Gagal membuat VoiceDescription.
 OutputDirectoryFallback,0:path,保存先が存在しないため、既定値へ変更しました: {0},Invalid output folder. Reset to default: {0},保存位置无效，已恢复默认值: {0},儲存位置無效，已恢復預設值: {0},저장 위치가 잘못되어 기본값으로 재설정했습니다: {0},Carpeta de salida no válida. Restablecido al predeterminado: {0},مجلد الحفظ غير صالح. تم الرجوع إلى الافتراضي: {0},Folder output tidak valid. Kembali ke default: {0}
+RefreshRecords,,一覧更新,Refresh List,刷新列表,重新整理清單,목록 새로고침,Actualizar lista,تحديث القائمة,Segarkan Daftar
+OpenFolder,,フォルダを開く,Open Folder,打开文件夹,開啟資料夾,폴더 열기,Abrir carpeta,فتح المجلد,Buka Folder
+RecordFileName,,ファイル名,File Name,文件名,檔名,파일명,Nombre de archivo,اسم الملف,Nama File
+RecordUpdatedAt,,更新日時,Updated At,更新时间,更新時間,수정 시각,Fecha de actualización,وقت التحديث,Waktu Diperbarui
+RecordFileSize,,サイズ,Size,大小,大小,크기,Tamaño,الحجم,Ukuran
+RecordFilePath,,ファイルパス,File Path,文件路径,檔案路徑,파일 경로,Ruta de archivo,مسار الملف,Jalur File
+PlaySelected,,選択を試聴,Preview Selected,试听所选,試聽所選,선택 항목 재생,Reproducir selección,تشغيل المحدد,Putar Terpilih
+DeleteSelected,,選択を削除,Delete Selected,删除所选,刪除所選,선택 항목 삭제,Eliminar selección,حذف المحدد,Hapus Terpilih
+RenameSelected,,選択をリネーム,Rename Selected,重命名所选,重新命名所選,선택 항목 이름 변경,Renombrar selección,إعادة تسمية المحدد,Ubah Nama Terpilih
+CopyPath,,パスをコピー,Copy Path,复制路径,複製路徑,경로 복사,Copiar ruta,نسخ المسار,Salin Jalur
+RecordDeleted,0:file,削除しました: {0},Deleted: {0},已删除: {0},已刪除: {0},삭제됨: {0},Eliminado: {0},تم الحذف: {0},Dihapus: {0}
+RecordDeleteFailed,0:error,削除に失敗しました: {0},Failed to delete: {0},删除失败: {0},刪除失敗: {0},삭제 실패: {0},Error al eliminar: {0},فشل الحذف: {0},Gagal menghapus: {0}
+InvalidFileName,,ファイル名が無効です。,Invalid file name.,文件名无效。,檔名無效。,잘못된 파일명입니다.,Nombre de archivo no válido.,اسم الملف غير صالح.,Nama file tidak valid.
+RecordRenamed,0:file,リネームしました: {0},Renamed: {0},已重命名: {0},已重新命名: {0},이름 변경됨: {0},Renombrado: {0},تمت إعادة التسمية: {0},Diubah nama: {0}
+RecordRenameFailed,0:error,リネームに失敗しました: {0},Failed to rename: {0},重命名失败: {0},重新命名失敗: {0},이름 변경 실패: {0},Error al renombrar: {0},فشلت إعادة التسمية: {0},Gagal mengubah nama: {0}
+RecordPathCopied,,パスをコピーしました。,Path copied.,路径已复制。,路徑已複製。,경로를 복사했습니다.,Ruta copiada.,تم نسخ المسار.,Jalur disalin.
+CopyPathFailed,0:error,パスコピーに失敗しました: {0},Failed to copy path: {0},复制路径失败: {0},複製路徑失敗: {0},경로 복사 실패: {0},Error al copiar ruta: {0},فشل نسخ المسار: {0},Gagal menyalin jalur: {0}
+OpenFolderFailed,0:error,フォルダを開けませんでした: {0},Failed to open folder: {0},无法打开文件夹: {0},無法開啟資料夾: {0},폴더 열기 실패: {0},No se pudo abrir la carpeta: {0},فشل فتح المجلد: {0},Gagal membuka folder: {0}
+RecordListRefreshFailed,0:error,一覧更新に失敗しました: {0},Failed to refresh list: {0},刷新列表失败: {0},重新整理清單失敗: {0},목록 새로고침 실패: {0},Error al actualizar la lista: {0},فشل تحديث القائمة: {0},Gagal menyegarkan daftar: {0}
+RecordingToolMemo,,メモ: 一覧のwavはドラッグ＆ドロップでタイムラインへ追加できます。ファイル名を変更すると参照リンクが切れる可能性があります。,Memo: You can drag and drop listed wav files to the timeline. Renaming files may break existing links.,备注：可将列表中的 wav 拖放到时间轴。重命名文件可能导致现有链接失效。,備註：可將清單中的 wav 拖放到時間軸。重新命名檔案可能導致既有連結失效。,메모: 목록의 wav를 드래그 앤 드ロップ으로 타임라인에 추가할 수 있습니다. 파일명을 변경하면 기존 링크가 끊길 수 있습니다.,Nota: Puedes arrastrar y soltar los wav de la lista a la línea de tiempo. Cambiar el nombre puede romper vínculos existentes.,ملاحظة: يمكنك سحب وإفلات ملفات wav المدرجة إلى المخطط الزمني. تغيير اسم الملف قد يقطع الروابط الحالية.,Catatan: File wav pada daftar dapat ditambahkan ke timeline dengan drag & drop. Mengubah nama file dapat memutus tautan yang sudah ada.

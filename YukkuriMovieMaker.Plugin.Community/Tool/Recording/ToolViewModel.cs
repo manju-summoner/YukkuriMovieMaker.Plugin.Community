@@ -1,42 +1,47 @@
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using Forms = System.Windows.Forms;
 using YukkuriMovieMaker.Commons;
-using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services;
 using YukkuriMovieMaker.Plugin;
-using YukkuriMovieMaker.Project;
+using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
+using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 {
-    public class ToolViewModel : Bindable, ITimelineToolViewModel, IDisposable
+    public class ToolViewModel : Bindable, IDisposable
     {
-        public bool CanSuspend => !IsRecording && !audioPlaybackService.IsPlaying && recordingWindow == null;
-        private readonly RecordingService recordingService;
-        private readonly ToolRecordingStartWorkflowService recordingStartWorkflowService;
-        private readonly ToolRecordingStopWorkflowService recordingStopWorkflowService;
-        private readonly TimelineInsertService timelineInsertService;
-        private readonly AudioPlaybackService audioPlaybackService;
-        private readonly TimelineSelectionService timelineSelectionService;
-        private RecordingWindow? recordingWindow;
-        private string? latestRecordedFilePath;
-        private string? lastTimelineAddedFilePath;
-        private bool disposed;
+        public bool CanSuspend => !IsRecording && !audioPlaybackService.IsPlaying;
 
-        public ObservableCollection<string> AvailableDevices { get; } = new();
+        readonly RecordingService recordingService;
+        readonly ToolRecordingStartWorkflowService recordingStartWorkflowService;
+        readonly ToolRecordingStopWorkflowService recordingStopWorkflowService;
+        readonly AudioPlaybackService audioPlaybackService;
+        readonly RecordPathService recordPathService;
+        bool disposed;
+        string? latestRecordedFilePath;
+
+        public ObservableCollection<string> AvailableDevices { get; } = [];
+        public ObservableCollection<RecordedFileListItem> Records { get; } = [];
 
         public ICommand StartRecordingCommand { get; }
         public ICommand StopRecordingCommand { get; }
         public ICommand RefreshDevicesCommand { get; }
-        public ICommand OpenRecordingWindowCommand { get; }
         public ICommand BrowseOutputDirectoryCommand { get; }
         public ICommand ResetOutputDirectoryCommand { get; }
+        public ICommand RefreshRecordsCommand { get; }
         public ICommand PlayCommand { get; }
-        public ICommand AddToTimelineCommand { get; }
+        public ICommand PlaySelectedCommand { get; }
+        public ICommand DeleteSelectedCommand { get; }
+        public ICommand RenameSelectedCommand { get; }
+        public ICommand OpenFolderCommand { get; }
+        public ICommand CopyPathCommand { get; }
 
-        private string? selectedDevice;
+        string? selectedDevice;
         public string? SelectedDevice
         {
             get => selectedDevice;
@@ -47,21 +52,46 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
         }
 
-        private string recordingStatus = Texts.Idle;
+        RecordedFileListItem? selectedRecord;
+        public RecordedFileListItem? SelectedRecord
+        {
+            get => selectedRecord;
+            set
+            {
+                if (Set(ref selectedRecord, value))
+                {
+                    RenameText = selectedRecord?.FileNameWithoutExtension ?? string.Empty;
+                    RaiseCommandStates();
+                }
+            }
+        }
+
+        string renameText = string.Empty;
+        public string RenameText
+        {
+            get => renameText;
+            set
+            {
+                if (Set(ref renameText, value))
+                    RaiseCommandStates();
+            }
+        }
+
+        string recordingStatus = Texts.Idle;
         public string RecordingStatus
         {
             get => recordingStatus;
             set => Set(ref recordingStatus, value);
         }
 
-        private double currentVolume;
+        double currentVolume;
         public double CurrentVolume
         {
             get => currentVolume;
             set => Set(ref currentVolume, value);
         }
 
-        private string recordsDirectory = string.Empty;
+        string recordsDirectory = string.Empty;
         public string RecordsDirectory
         {
             get => recordsDirectory;
@@ -87,119 +117,48 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                     return;
 
                 RecordingSettings.Default.OutputDirectory = normalized;
+                RefreshRecords();
             }
         }
 
         public bool IsRecording => recordingService.IsRecording;
 
-        public static Timeline? TimelineInstance { get; private set; }
-        public Timeline Timeline { get; set; } = null!;
-
         public ToolViewModel()
-            : this(CreateDefaultArguments())
         {
-        }
-
-        private ToolViewModel(DefaultArguments arguments)
-            : this(
-                arguments.RecordingService,
-                arguments.StartWorkflowService,
-                arguments.StopWorkflowService,
-                arguments.TimelineInsertService,
-                arguments.AudioPlaybackService,
-                arguments.RecordPathService,
-                arguments.TimelineSelectionService)
-        {
-        }
-
-        internal ToolViewModel(
-            RecordingService recordingService,
-            ToolRecordingStartWorkflowService recordingStartWorkflowService,
-            ToolRecordingStopWorkflowService recordingStopWorkflowService,
-            TimelineInsertService timelineInsertService,
-            AudioPlaybackService audioPlaybackService,
-            RecordPathService recordPathService,
-            TimelineSelectionService timelineSelectionService)
-        {
-            this.recordingService = recordingService;
-            this.recordingStartWorkflowService = recordingStartWorkflowService;
-            this.recordingStopWorkflowService = recordingStopWorkflowService;
-            this.timelineInsertService = timelineInsertService;
-            this.audioPlaybackService = audioPlaybackService;
-            this.timelineSelectionService = timelineSelectionService;
+            recordPathService = new RecordPathService();
+            recordingService = new RecordingService(recordPathService);
+            recordingStartWorkflowService = new ToolRecordingStartWorkflowService(recordingService);
+            recordingStopWorkflowService = new ToolRecordingStopWorkflowService(recordingService);
+            audioPlaybackService = new AudioPlaybackService();
 
             recordingService.DataAvailable += OnRecordingDataAvailable;
             recordingService.RecordingStateChanged += OnRecordingStateChanged;
-            this.audioPlaybackService.PlaybackStopped += OnPlaybackStopped;
+            audioPlaybackService.PlaybackStopped += OnPlaybackStopped;
 
-            StartRecordingCommand = new ActionCommand(_ => CanStartRecording(), _ => StartRecording());
-            StopRecordingCommand = new ActionCommand(_ => CanStopRecording(), _ => StopRecording());
+            StartRecordingCommand = new ActionCommand(_ => !IsRecording, _ => StartRecording());
+            StopRecordingCommand = new ActionCommand(_ => IsRecording, _ => StopRecording());
             RefreshDevicesCommand = new ActionCommand(_ => true, _ => RefreshMicrophones());
-            OpenRecordingWindowCommand = new ActionCommand(_ => CanOpenRecordingWindow(), _ => OpenRecordingWindow());
             BrowseOutputDirectoryCommand = new ActionCommand(_ => !IsRecording, _ => BrowseOutputDirectory());
             ResetOutputDirectoryCommand = new ActionCommand(_ => !IsRecording, _ => ResetOutputDirectory());
-            PlayCommand = new ActionCommand(_ => CanPlay(), _ => Play());
-            AddToTimelineCommand = new ActionCommand(_ => CanAddToTimeline(), _ => AddToTimeline());
+            RefreshRecordsCommand = new ActionCommand(_ => true, _ => RefreshRecords());
+            PlayCommand = new ActionCommand(_ => CanPlayLatest(), _ => PlayLatest());
+            PlaySelectedCommand = new ActionCommand(_ => CanPlaySelected(), _ => PlaySelected());
+            DeleteSelectedCommand = new ActionCommand(_ => CanDeleteSelected(), _ => DeleteSelected());
+            RenameSelectedCommand = new ActionCommand(_ => CanRenameSelected(), _ => RenameSelected());
+            OpenFolderCommand = new ActionCommand(_ => Directory.Exists(OutputDirectory), _ => OpenFolder());
+            CopyPathCommand = new ActionCommand(_ => SelectedRecord is not null, _ => CopyPath());
 
             RecordsDirectory = recordPathService.GetRecordsDirectory();
             RefreshMicrophones();
+            RefreshRecords();
         }
 
-        private static RecordingService CreateDefaultRecordingService(out RecordPathService recordPathService)
-        {
-            recordPathService = new RecordPathService();
-            return new RecordingService(recordPathService);
-        }
-
-        private static DefaultArguments CreateDefaultArguments()
-        {
-            var recordingService = CreateDefaultRecordingService(out var recordPathService);
-            return new DefaultArguments
-            {
-                RecordingService = recordingService,
-                StartWorkflowService = CreateDefaultStartWorkflowService(recordingService),
-                StopWorkflowService = CreateDefaultStopWorkflowService(recordingService),
-                TimelineInsertService = new TimelineInsertService(),
-                AudioPlaybackService = new AudioPlaybackService(),
-                RecordPathService = recordPathService,
-                TimelineSelectionService = CreateDefaultTimelineSelectionService()
-            };
-        }
-
-        private static ToolRecordingStartWorkflowService CreateDefaultStartWorkflowService(RecordingService recordingService)
-        {
-            return new ToolRecordingStartWorkflowService(recordingService);
-        }
-
-        private static ToolRecordingStopWorkflowService CreateDefaultStopWorkflowService(RecordingService recordingService)
-        {
-            return new ToolRecordingStopWorkflowService(recordingService);
-        }
-
-        private static TimelineSelectionService CreateDefaultTimelineSelectionService()
-        {
-            return new TimelineSelectionService();
-        }
-
-        private sealed class DefaultArguments
-        {
-            public required RecordingService RecordingService { get; init; }
-            public required ToolRecordingStartWorkflowService StartWorkflowService { get; init; }
-            public required ToolRecordingStopWorkflowService StopWorkflowService { get; init; }
-            public required TimelineInsertService TimelineInsertService { get; init; }
-            public required AudioPlaybackService AudioPlaybackService { get; init; }
-            public required RecordPathService RecordPathService { get; init; }
-            public required TimelineSelectionService TimelineSelectionService { get; init; }
-        }
-
-        public void RefreshMicrophones()
+        void RefreshMicrophones()
         {
             AvailableDevices.Clear();
 
             foreach (var deviceName in recordingService.GetAvailableDeviceNames())
-            {
                 AvailableDevices.Add(deviceName);
-            }
 
             if (AvailableDevices.Count > 0)
             {
@@ -215,17 +174,35 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             RaiseCommandStates();
         }
 
-        private bool CanStartRecording() => !IsRecording;
+        void RefreshRecords()
+        {
+            try
+            {
+                var directory = recordPathService.GetRecordsDirectory();
+                RecordsDirectory = directory;
 
-        private bool CanStopRecording() => IsRecording;
+                var items = Directory.EnumerateFiles(directory, "*.wav", SearchOption.TopDirectoryOnly)
+                    .Select(path => new FileInfo(path))
+                    .OrderByDescending(x => x.LastWriteTimeUtc)
+                    .Select(x => new RecordedFileListItem(x.FullName, x.Name, x.LastWriteTime, x.Length))
+                    .ToList();
 
-        private bool CanOpenRecordingWindow() => !IsRecording;
-        
-        private bool CanPlay() => !IsRecording && !audioPlaybackService.IsPlaying;
-        
-        private bool CanAddToTimeline() => !IsRecording && !audioPlaybackService.IsPlaying;
+                Records.Clear();
+                foreach (var item in items)
+                    Records.Add(item);
 
-        private void StartRecording()
+                SelectedRecord = Records.FirstOrDefault(x => string.Equals(x.Path, latestRecordedFilePath, StringComparison.OrdinalIgnoreCase))
+                    ?? Records.FirstOrDefault();
+
+                RaiseCommandStates();
+            }
+            catch (Exception ex)
+            {
+                RecordingStatus = string.Format(Texts.RecordListRefreshFailed, ex.Message);
+            }
+        }
+
+        void StartRecording()
         {
             try
             {
@@ -243,7 +220,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 }
 
                 latestRecordedFilePath = null;
-                lastTimelineAddedFilePath = null;
                 RecordingStatus = string.Format(Texts.RecordingNowWithPath, RecordsDirectory);
                 RaiseCommandStates();
             }
@@ -254,7 +230,40 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
         }
 
-        private bool EnsureOutputDirectory()
+        async void StopRecording()
+        {
+            try
+            {
+                var stopResult = await recordingStopWorkflowService.ExecuteAsync();
+
+                CurrentVolume = 0;
+
+                if (!stopResult.HasData)
+                {
+                    RecordingStatus = Texts.NoRecordingDataRetry;
+                    RaiseCommandStates();
+                    return;
+                }
+
+                if (stopResult.HasZeroLengthData)
+                {
+                    RecordingStatus = string.Format(Texts.RecordingDataLengthZero, stopResult.FilePath ?? string.Empty);
+                    RaiseCommandStates();
+                    return;
+                }
+
+                latestRecordedFilePath = stopResult.FilePath;
+                RecordingStatus = string.Format(Texts.RecordingStoppedAndSaved, stopResult.FilePath ?? string.Empty);
+                RefreshRecords();
+            }
+            catch (Exception ex)
+            {
+                RecordingStatus = string.Format(Texts.RecordingStopFailed, ex.Message);
+                RaiseCommandStates();
+            }
+        }
+
+        bool EnsureOutputDirectory()
         {
             try
             {
@@ -267,7 +276,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 if (string.Equals(OutputDirectory, fallback, StringComparison.OrdinalIgnoreCase))
                 {
                     RecordingStatus = Texts.OutputFolderUnavailable;
-                    RaiseCommandStates();
                     return false;
                 }
 
@@ -285,58 +293,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 catch (Exception)
                 {
                     RecordingStatus = Texts.OutputFolderUnavailable;
-                    RaiseCommandStates();
                     return false;
                 }
             }
         }
 
-        private async void StopRecording()
+        bool CanPlayLatest() => !IsRecording && !audioPlaybackService.IsPlaying && !string.IsNullOrWhiteSpace(latestRecordedFilePath) && File.Exists(latestRecordedFilePath);
+        bool CanPlaySelected() => !IsRecording && !audioPlaybackService.IsPlaying && SelectedRecord is not null && File.Exists(SelectedRecord.Path);
+        bool CanDeleteSelected() => !IsRecording && !audioPlaybackService.IsPlaying && SelectedRecord is not null;
+        bool CanRenameSelected() => !IsRecording && SelectedRecord is not null && !string.IsNullOrWhiteSpace(RenameText);
+
+        void PlayLatest() => PlayFile(latestRecordedFilePath!);
+        void PlaySelected()
         {
-            try
-            {
-                var stopResult = await recordingStopWorkflowService.ExecuteAsync();
-
-                CurrentVolume = 0;
-                RaiseCommandStates();
-
-                if (!stopResult.HasData)
-                {
-                    RecordingStatus = Texts.NoRecordingDataRetry;
-                    return;
-                }
-
-                if (stopResult.HasZeroLengthData)
-                {
-                    RecordingStatus = string.Format(Texts.RecordingDataLengthZero, stopResult.FilePath ?? string.Empty);
-                    return;
-                }
-
-                latestRecordedFilePath = stopResult.FilePath;
-                lastTimelineAddedFilePath = null;
-                RecordingStatus = string.Format(Texts.RecordingStoppedAndSaved, stopResult.FilePath ?? string.Empty);
-                RaiseCommandStates();
-            }
-            catch (Exception ex)
-            {
-                RecordingStatus = string.Format(Texts.RecordingStopFailed, ex.Message);
-            }
+            if (SelectedRecord is null)
+                return;
+            PlayFile(SelectedRecord.Path);
         }
 
-        private void Play()
+        void PlayFile(string path)
         {
-            if (!HasPlayableAudioFile())
-            {
-                RecordingStatus = Texts.NoPlayableAudio;
-                RaiseCommandStates();
-                return;
-            }
-
             try
             {
-                audioPlaybackService.Play(latestRecordedFilePath!);
+                audioPlaybackService.Play(path);
                 RecordingStatus = Texts.Playing;
-                OnPropertyChanged(nameof(CanSuspend));
             }
             catch (Exception ex)
             {
@@ -349,74 +329,101 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
         }
 
-        private async void AddToTimeline()
+        void DeleteSelected()
         {
-            if (!HasPlayableAudioFile())
-            {
-                RecordingStatus = Texts.NoRecordingDataRetry;
-                RaiseCommandStates();
+            if (SelectedRecord is null)
                 return;
-            }
 
+            var target = SelectedRecord;
             try
             {
-                var filePath = latestRecordedFilePath!;
-                await timelineInsertService.InsertAsync(new Models.RecordedFileInfo
-                {
-                    FilePath = filePath
-                });
+                if (File.Exists(target.Path))
+                    File.Delete(target.Path);
 
-                lastTimelineAddedFilePath = filePath;
-                RecordingStatus = Texts.TimelineAdded;
+                RecordingStatus = string.Format(Texts.RecordDeleted, target.FileName);
+                if (string.Equals(latestRecordedFilePath, target.Path, StringComparison.OrdinalIgnoreCase))
+                    latestRecordedFilePath = null;
+                RefreshRecords();
             }
             catch (Exception ex)
             {
-                RecordingStatus = string.Format(Texts.TimelineAddFailed, ex.Message);
-            }
-            finally
-            {
-                RaiseCommandStates();
+                RecordingStatus = string.Format(Texts.RecordDeleteFailed, ex.Message);
             }
         }
 
-        private void OpenRecordingWindow()
+        void RenameSelected()
         {
-            if (recordingWindow is not null)
+            if (SelectedRecord is null)
+                return;
+
+            var safeName = string.Join("_", RenameText.Trim().Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+            if (string.IsNullOrWhiteSpace(safeName))
             {
-                if (recordingWindow.WindowState == WindowState.Minimized)
-                    recordingWindow.WindowState = WindowState.Normal;
-                recordingWindow.Activate();
+                RecordingStatus = Texts.InvalidFileName;
                 return;
             }
 
-            var serif = timelineSelectionService.TryGetSelectedSerif();
+            var sourcePath = SelectedRecord.Path;
+            var destinationPath = Path.Combine(Path.GetDirectoryName(sourcePath) ?? string.Empty, safeName + ".wav");
+            if (string.Equals(sourcePath, destinationPath, StringComparison.OrdinalIgnoreCase))
+                return;
 
-            recordingWindow = new RecordingWindow(serif, SelectedDevice)
+            try
             {
-                Owner = null,
-                ShowInTaskbar = true,
-                WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                Topmost = true
-            };
-            recordingWindow.Closed += RecordingWindow_Closed;
-            recordingWindow.Show();
-            recordingWindow.Activate();
-            OnPropertyChanged(nameof(CanSuspend));
-        }
+                File.Move(sourcePath, destinationPath, overwrite: false);
+                if (string.Equals(latestRecordedFilePath, sourcePath, StringComparison.OrdinalIgnoreCase))
+                    latestRecordedFilePath = destinationPath;
 
-        private void RecordingWindow_Closed(object? sender, EventArgs e)
-        {
-            if (recordingWindow != null)
-            {
-                recordingWindow.Closed -= RecordingWindow_Closed;
-                recordingWindow = null;
+                RecordingStatus = string.Format(Texts.RecordRenamed, Path.GetFileName(destinationPath));
+                RefreshRecords();
             }
-
-            if (!disposed)
-                OnPropertyChanged(nameof(CanSuspend));
+            catch (Exception ex)
+            {
+                RecordingStatus = string.Format(Texts.RecordRenameFailed, ex.Message);
+            }
         }
 
-        private void BrowseOutputDirectory()
+        void OpenFolder()
+        {
+            try
+            {
+                Directory.CreateDirectory(OutputDirectory);
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = OutputDirectory,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                RecordingStatus = string.Format(Texts.OpenFolderFailed, ex.Message);
+            }
+        }
+
+        void CopyPath()
+        {
+            if (SelectedRecord is null)
+                return;
+
+            try
+            {
+                Clipboard.SetText(SelectedRecord.Path);
+                RecordingStatus = Texts.RecordPathCopied;
+            }
+            catch (Exception ex)
+            {
+                RecordingStatus = string.Format(Texts.CopyPathFailed, ex.Message);
+            }
+        }
+
+        public string[] GetSelectedRecordPathsForDragDrop()
+        {
+            if (SelectedRecord is null || !File.Exists(SelectedRecord.Path))
+                return [];
+            return [SelectedRecord.Path];
+        }
+
+        void BrowseOutputDirectory()
         {
             using var dialog = new Forms.FolderBrowserDialog
             {
@@ -432,13 +439,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
         }
 
-        private void ResetOutputDirectory()
+        void ResetOutputDirectory()
         {
             OutputDirectory = RecordingSettings.GetDefaultOutputDirectory();
             RecordingStatus = string.Format(Texts.OutputDirectoryReset, OutputDirectory);
         }
 
-        private void OnRecordingDataAvailable(object? sender, Models.RecordingDataEventArgs e)
+        void OnRecordingDataAvailable(object? sender, Models.RecordingDataEventArgs e)
         {
             var dispatcher = Application.Current?.Dispatcher;
             if (dispatcher is null || dispatcher.CheckAccess())
@@ -450,7 +457,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             _ = dispatcher.BeginInvoke((Action)(() => CurrentVolume = e.Volume));
         }
 
-        private void OnRecordingStateChanged(object? sender, EventArgs e)
+        void OnRecordingStateChanged(object? sender, EventArgs e)
         {
             var dispatcher = Application.Current?.Dispatcher;
             if (dispatcher is null || dispatcher.CheckAccess())
@@ -473,19 +480,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }));
         }
 
-        private void OnPlaybackStopped(object? sender, NAudio.Wave.StoppedEventArgs e)
+        void OnPlaybackStopped(object? sender, NAudio.Wave.StoppedEventArgs e)
         {
             void HandlePlaybackStopped()
             {
-                if (e.Exception is not null)
-                {
-                    RecordingStatus = string.Format(Texts.PlaybackError, e.Exception.Message);
-                }
-                else
-                {
-                    RecordingStatus = Texts.PlaybackCompleted;
-                }
-
+                RecordingStatus = e.Exception is null
+                    ? Texts.PlaybackCompleted
+                    : string.Format(Texts.PlaybackError, e.Exception.Message);
                 OnPropertyChanged(nameof(CanSuspend));
                 RaiseCommandStates();
             }
@@ -500,38 +501,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             _ = dispatcher.BeginInvoke((Action)HandlePlaybackStopped);
         }
 
-        public void SetTimelineToolInfo(TimelineToolInfo info)
+        void RaiseCommandStates()
         {
-            TimelineInstance = info.Timeline;
-        }
-
-        private void RaiseCommandStates()
-        {
-            if (StartRecordingCommand is ActionCommand start)
-                start.RaiseCanExecuteChanged();
-
-            if (StopRecordingCommand is ActionCommand stop)
-                stop.RaiseCanExecuteChanged();
-
-            if (OpenRecordingWindowCommand is ActionCommand open)
-                open.RaiseCanExecuteChanged();
-
-            if (BrowseOutputDirectoryCommand is ActionCommand browse)
-                browse.RaiseCanExecuteChanged();
-
-            if (ResetOutputDirectoryCommand is ActionCommand reset)
-                reset.RaiseCanExecuteChanged();
-
-            if (PlayCommand is ActionCommand play)
-                play.RaiseCanExecuteChanged();
-
-            if (AddToTimelineCommand is ActionCommand addToTimeline)
-                addToTimeline.RaiseCanExecuteChanged();
-        }
-
-        private bool HasPlayableAudioFile()
-        {
-            return !string.IsNullOrWhiteSpace(latestRecordedFilePath) && File.Exists(latestRecordedFilePath);
+            (StartRecordingCommand as ActionCommand)?.RaiseCanExecuteChanged();
+            (StopRecordingCommand as ActionCommand)?.RaiseCanExecuteChanged();
+            (BrowseOutputDirectoryCommand as ActionCommand)?.RaiseCanExecuteChanged();
+            (ResetOutputDirectoryCommand as ActionCommand)?.RaiseCanExecuteChanged();
+            (RefreshRecordsCommand as ActionCommand)?.RaiseCanExecuteChanged();
+            (PlayCommand as ActionCommand)?.RaiseCanExecuteChanged();
+            (PlaySelectedCommand as ActionCommand)?.RaiseCanExecuteChanged();
+            (DeleteSelectedCommand as ActionCommand)?.RaiseCanExecuteChanged();
+            (RenameSelectedCommand as ActionCommand)?.RaiseCanExecuteChanged();
+            (OpenFolderCommand as ActionCommand)?.RaiseCanExecuteChanged();
+            (CopyPathCommand as ActionCommand)?.RaiseCanExecuteChanged();
         }
 
         public void Dispose()
@@ -544,26 +526,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             audioPlaybackService.PlaybackStopped -= OnPlaybackStopped;
             RecordingLifecycleService.TryStopRecording(recordingService);
             audioPlaybackService.Dispose();
-
-            var window = recordingWindow;
-            if (window != null)
-            {
-                recordingWindow = null;
-                window.Closed -= RecordingWindow_Closed;
-                
-                var dispatcher = Application.Current?.Dispatcher;
-                if (dispatcher != null && !dispatcher.CheckAccess())
-                {
-                    dispatcher.Invoke(window.Close);
-                }
-                else
-                {
-                    window.Close();
-                }
-            }
         }
     }
+
+    public class RecordedFileListItem
+    {
+        public RecordedFileListItem(string path, string fileName, DateTime updatedAt, long fileSize)
+        {
+            Path = path;
+            FileName = fileName;
+            UpdatedAt = updatedAt;
+            FileSize = fileSize;
+        }
+
+        public string Path { get; }
+        public string FileName { get; }
+        public string FileNameWithoutExtension => System.IO.Path.GetFileNameWithoutExtension(FileName);
+        public DateTime UpdatedAt { get; }
+        public long FileSize { get; }
+        public string UpdatedAtText => UpdatedAt.ToString("yyyy/MM/dd HH:mm:ss");
+        public string FileSizeText => $"{FileSize / 1024d:F1} KB";
+    }
 }
-
-
-

@@ -25,9 +25,6 @@
 	  <Reference Include="YukkuriMovieMaker.Plugin">
 		  <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Plugin.dll</HintPath>
 	  </Reference>
-	  <Reference Include="YukkuriMovieMaker">
-		  <HintPath>$(YMM4DirPath)YukkuriMovieMaker.dll</HintPath>
-	  </Reference>
 	  <Reference Include="SharpGen.Runtime">
 		  <HintPath>$(YMM4DirPath)SharpGen.Runtime.dll</HintPath>
 	  </Reference>
@@ -108,10 +105,7 @@
     <None Remove="Effect\Video\UnidirectionalBlur\Texts.csv" />
     <None Remove="Resources\License\GeneralUserGS.txt" />
     <None Remove="Resources\SoundFonts\GeneralUser-GS.sf2" />
-    <None Remove="Shape\Pen\Texts.csv" />
-	<None Remove="Voice\Recording\Texts.csv.csv" />
-	<None Remove="Tool\Recording\Texts.csv" />
-	  
+    <None Remove="Shape\Pen\Texts.csv" />  
   </ItemGroup>
 	
   <ItemGroup>

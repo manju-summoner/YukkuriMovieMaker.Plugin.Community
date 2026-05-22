@@ -1,7 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Plugin.Voice;
+using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 {
@@ -20,7 +22,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         }
 
         [Display(Name = nameof(Texts.ParameterAudioFileName), Description = nameof(Texts.ParameterAudioFileDescription), ResourceType = typeof(Texts))]
-        [ReadOnly(true)]
+        [FileSelector(FileGroupType.None)]
         public string AudioFilePath
         {
             get => audioFilePath;
