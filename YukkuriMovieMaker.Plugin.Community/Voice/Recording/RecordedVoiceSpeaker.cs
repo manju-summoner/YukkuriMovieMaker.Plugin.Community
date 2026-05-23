@@ -161,6 +161,33 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                 if (string.IsNullOrWhiteSpace(recordsDirectory))
                     return string.Empty;
 
+                var defaultPath = ResolveDefaultVoiceAudioFilePath(recordsDirectory);
+                if (!string.IsNullOrWhiteSpace(defaultPath))
+                    return defaultPath;
+
+                return GetOrCreateSilentWavInDirectory(recordsDirectory);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        internal static string GetOrCreateSilentFilePath(string? recordsDirectory)
+        {
+            var directory = string.IsNullOrWhiteSpace(recordsDirectory)
+                ? ResolveRecordsDirectory()
+                : recordsDirectory;
+            return GetOrCreateSilentWavInDirectory(directory);
+        }
+
+        private static string GetOrCreateSilentWavInDirectory(string? recordsDirectory)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(recordsDirectory))
+                    return string.Empty;
+
                 Directory.CreateDirectory(recordsDirectory);
                 var path = Path.Combine(recordsDirectory, InitialSilentFileName);
 
@@ -186,14 +213,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             {
                 return string.Empty;
             }
-        }
-
-        internal static string GetOrCreateSilentFilePath(string? recordsDirectory)
-        {
-            var directory = string.IsNullOrWhiteSpace(recordsDirectory)
-                ? ResolveRecordsDirectory()
-                : recordsDirectory;
-            return ResolveInitialAudioFilePath(directory);
         }
 
         private static string ResolveRecordsDirectory()

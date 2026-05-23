@@ -83,7 +83,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
         private void OnUnselectClicked(object sender, RoutedEventArgs e)
         {
-            SelectedPath = RecordedVoiceSpeaker.GetOrCreateSilentFilePath(RecordsDirectory);
+            var silentPath = RecordedVoiceSpeaker.GetOrCreateSilentFilePath(RecordsDirectory);
+            if (string.IsNullOrWhiteSpace(silentPath) || !File.Exists(silentPath))
+            {
+                MessageBox.Show(
+                    Texts.RecordedWavNotFound,
+                    Texts.RecordedAudioSelectorTitle,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            SelectedPath = silentPath;
             DialogResult = true;
         }
 
