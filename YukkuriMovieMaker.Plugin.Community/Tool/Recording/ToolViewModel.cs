@@ -171,7 +171,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             SetDefaultVoiceAudioCommand = new ActionCommand(_ => CanSetDefaultVoiceAudio(), _ => SetDefaultVoiceAudio());
             ClearDefaultVoiceAudioCommand = new ActionCommand(_ => CanClearDefaultVoiceAudio(), _ => ClearDefaultVoiceAudio());
 
-            RecordsDirectory = recordPathService.GetRecordsDirectory();
+            InitializeRecordsDirectory();
             SelectedDeviceId = string.IsNullOrWhiteSpace(RecordingSettings.Default.SelectedRecordingDeviceId)
                 ? RecordingService.DefaultRecordingDeviceId
                 : RecordingSettings.Default.SelectedRecordingDeviceId;
@@ -349,6 +349,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 {
                     RecordingStatus = Texts.OutputFolderUnavailable;
                     return false;
+                }
+            }
+        }
+
+        void InitializeRecordsDirectory()
+        {
+            try
+            {
+                RecordsDirectory = recordPathService.GetRecordsDirectory();
+            }
+            catch (Exception)
+            {
+                var fallback = RecordingSettings.GetDefaultOutputDirectory();
+                try
+                {
+                    Directory.CreateDirectory(fallback);
+                    OutputDirectory = fallback;
+                    RecordingStatus = string.Format(Texts.OutputDirectoryFallback, fallback);
+                }
+                catch (Exception)
+                {
+                    RecordsDirectory = fallback;
+                    RecordingStatus = Texts.OutputFolderUnavailable;
                 }
             }
         }
