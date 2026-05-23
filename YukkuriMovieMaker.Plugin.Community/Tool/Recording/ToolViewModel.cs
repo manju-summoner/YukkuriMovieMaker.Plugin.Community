@@ -40,8 +40,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         public ICommand RenameSelectedCommand { get; }
         public ICommand OpenFolderCommand { get; }
         public ICommand CopyPathCommand { get; }
-        public ICommand SetDefaultVoiceAudioCommand { get; }
-        public ICommand ClearDefaultVoiceAudioCommand { get; }
 
         string? selectedDeviceId;
         public string? SelectedDeviceId
@@ -129,17 +127,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         public bool IsRecording => recordingService.IsRecording;
 
-        public string DefaultVoiceAudioFilePath
-        {
-            get => RecordingSettings.Default.DefaultVoiceAudioFilePath;
-            set => RecordingSettings.Default.DefaultVoiceAudioFilePath = value ?? string.Empty;
-        }
-
-        public string DefaultVoiceAudioFileName
-            => string.IsNullOrWhiteSpace(DefaultVoiceAudioFilePath)
-                ? Texts.Unselected
-                : Path.GetFileName(DefaultVoiceAudioFilePath);
-
         public string SelectedDeviceDisplayName
             => AvailableDevices.FirstOrDefault(x => string.Equals(x.Id, SelectedDeviceId, StringComparison.Ordinal))?.FriendlyName
                 ?? Texts.Unselected;
@@ -168,8 +155,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             RenameSelectedCommand = new ActionCommand(_ => CanRenameSelected(), _ => RenameSelected());
             OpenFolderCommand = new ActionCommand(_ => Directory.Exists(OutputDirectory), _ => OpenFolder());
             CopyPathCommand = new ActionCommand(_ => SelectedRecord is not null, _ => CopyPath());
-            SetDefaultVoiceAudioCommand = new ActionCommand(_ => CanSetDefaultVoiceAudio(), _ => SetDefaultVoiceAudio());
-            ClearDefaultVoiceAudioCommand = new ActionCommand(_ => CanClearDefaultVoiceAudio(), _ => ClearDefaultVoiceAudio());
 
             InitializeRecordsDirectory();
             SelectedDeviceId = string.IsNullOrWhiteSpace(RecordingSettings.Default.SelectedRecordingDeviceId)
@@ -423,12 +408,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 RecordingStatus = string.Format(Texts.RecordDeleted, target.FileName);
                 if (string.Equals(latestRecordedFilePath, target.Path, StringComparison.OrdinalIgnoreCase))
                     latestRecordedFilePath = null;
-                if (string.Equals(RecordingSettings.Default.DefaultVoiceAudioFilePath, target.Path, StringComparison.OrdinalIgnoreCase))
-                {
-                    RecordingSettings.Default.DefaultVoiceAudioFilePath = string.Empty;
-                    OnPropertyChanged(nameof(DefaultVoiceAudioFilePath));
-                    OnPropertyChanged(nameof(DefaultVoiceAudioFileName));
-                }
                 RefreshRecords();
             }
             catch (Exception ex)
@@ -459,12 +438,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 File.Move(sourcePath, destinationPath, overwrite: false);
                 if (string.Equals(latestRecordedFilePath, sourcePath, StringComparison.OrdinalIgnoreCase))
                     latestRecordedFilePath = destinationPath;
-                if (string.Equals(RecordingSettings.Default.DefaultVoiceAudioFilePath, sourcePath, StringComparison.OrdinalIgnoreCase))
-                {
-                    RecordingSettings.Default.DefaultVoiceAudioFilePath = destinationPath;
-                    OnPropertyChanged(nameof(DefaultVoiceAudioFilePath));
-                    OnPropertyChanged(nameof(DefaultVoiceAudioFileName));
-                }
 
                 RecordingStatus = string.Format(Texts.RecordRenamed, Path.GetFileName(destinationPath));
                 RefreshRecords();
@@ -537,30 +510,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             RecordingStatus = string.Format(Texts.OutputDirectoryReset, OutputDirectory);
         }
 
-        bool CanSetDefaultVoiceAudio() => !IsRecording && SelectedRecord is not null && File.Exists(SelectedRecord.Path);
-        bool CanClearDefaultVoiceAudio() => !IsRecording && !string.IsNullOrWhiteSpace(DefaultVoiceAudioFilePath);
-
-        void SetDefaultVoiceAudio()
-        {
-            if (SelectedRecord is null)
-                return;
-
-            DefaultVoiceAudioFilePath = SelectedRecord.Path;
-            RecordingStatus = string.Format(Texts.DefaultVoiceAudioSet, SelectedRecord.FileName);
-            OnPropertyChanged(nameof(DefaultVoiceAudioFilePath));
-            OnPropertyChanged(nameof(DefaultVoiceAudioFileName));
-            RaiseCommandStates();
-        }
-
-        void ClearDefaultVoiceAudio()
-        {
-            DefaultVoiceAudioFilePath = string.Empty;
-            RecordingStatus = Texts.DefaultVoiceAudioCleared;
-            OnPropertyChanged(nameof(DefaultVoiceAudioFilePath));
-            OnPropertyChanged(nameof(DefaultVoiceAudioFileName));
-            RaiseCommandStates();
-        }
-
         void OnRecordingDataAvailable(object? sender, Models.RecordingDataEventArgs e)
         {
             var dispatcher = Application.Current?.Dispatcher;
@@ -630,8 +579,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             (RenameSelectedCommand as ActionCommand)?.RaiseCanExecuteChanged();
             (OpenFolderCommand as ActionCommand)?.RaiseCanExecuteChanged();
             (CopyPathCommand as ActionCommand)?.RaiseCanExecuteChanged();
-            (SetDefaultVoiceAudioCommand as ActionCommand)?.RaiseCanExecuteChanged();
-            (ClearDefaultVoiceAudioCommand as ActionCommand)?.RaiseCanExecuteChanged();
         }
 
         public void Dispose()

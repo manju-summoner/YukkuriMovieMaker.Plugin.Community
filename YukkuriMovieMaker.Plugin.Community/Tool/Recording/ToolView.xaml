@@ -107,27 +107,11 @@
                 <Button Content="{x:Static local:Texts.PlaySelected}" Command="{Binding PlaySelectedCommand}" />
                 <Button Content="{x:Static local:Texts.DeleteSelected}" Command="{Binding DeleteSelectedCommand}" />
                 <Button Content="{x:Static local:Texts.CopyPath}" Command="{Binding CopyPathCommand}" />
-                <Button Content="{x:Static local:Texts.SetAsDefaultVoiceAudio}" Command="{Binding SetDefaultVoiceAudioCommand}" />
-                <Button Content="{x:Static local:Texts.ClearDefaultVoiceAudio}" Command="{Binding ClearDefaultVoiceAudioCommand}" />
                 <TextBox Width="220" Height="26" VerticalContentAlignment="Center" Text="{Binding RenameText, UpdateSourceTrigger=PropertyChanged}" />
                 <Button Content="{x:Static local:Texts.RenameSelected}" Command="{Binding RenameSelectedCommand}" />
             </WrapPanel>
         </Grid>
 
-        <TextBlock Grid.Row="7" TextWrapping="Wrap">
-            <TextBlock.Style>
-                <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                    <Setter Property="Text">
-                        <Setter.Value>
-                            <MultiBinding StringFormat="{}{0}: {1}">
-                                <Binding Source="{x:Static local:Texts.DefaultVoiceAudioCurrent}"/>
-                                <Binding Path="DefaultVoiceAudioFileName"/>
-                            </MultiBinding>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </TextBlock.Style>
-        </TextBlock>
         <TextBlock Grid.Row="8" Text="{x:Static local:Texts.RecordingToolMemo}" TextWrapping="Wrap"/>
         <TextBlock Grid.Row="9" Text="{Binding RecordingStatus}" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" FontWeight="Bold" TextWrapping="Wrap"/>
     </Grid>
