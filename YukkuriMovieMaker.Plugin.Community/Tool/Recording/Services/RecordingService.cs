@@ -34,21 +34,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         public event EventHandler<RecordingDataEventArgs>? DataAvailable;
         public event EventHandler? RecordingStateChanged;
 
-        public IReadOnlyList<string> GetAvailableDeviceNames()
+        public IReadOnlyList<RecordingDeviceInfo> GetAvailableDevices()
         {
-            var devices = new List<string>();
+            var devices = new List<RecordingDeviceInfo>();
             using var enumerator = new MMDeviceEnumerator();
             foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active))
             {
                 using (device)
                 {
-                    devices.Add(device.FriendlyName);
+                    devices.Add(new RecordingDeviceInfo
+                    {
+                        Id = device.ID,
+                        FriendlyName = device.FriendlyName,
+                    });
                 }
             }
             return devices;
         }
 
-        public void StartRecording(string deviceName)
+        public void StartRecording(string deviceId)
         {
             lock (syncRoot)
             {
@@ -60,7 +64,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 {
                     foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active))
                     {
-                        if (targetDevice is null && string.Equals(device.FriendlyName, deviceName, StringComparison.Ordinal))
+                        if (targetDevice is null && string.Equals(device.ID, deviceId, StringComparison.Ordinal))
                         {
                             targetDevice = device;
                         }
@@ -73,7 +77,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
                 if (targetDevice is null)
                 {
-                    throw new InvalidOperationException(string.Format(Texts.InvalidRecordingDevice, deviceName));
+                    throw new InvalidOperationException(string.Format(Texts.InvalidRecordingDevice, deviceId));
                 }
 
                 var filePath = recordPathService.CreateRecordFilePath();

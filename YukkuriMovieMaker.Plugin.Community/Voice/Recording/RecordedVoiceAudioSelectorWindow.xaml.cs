@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -7,21 +8,32 @@ using NAudio.Wave;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 {
-    public partial class RecordedVoiceAudioSelectorWindow : Window
+    public partial class RecordedVoiceAudioSelectorWindow : Window, INotifyPropertyChanged
     {
         private WaveOutEvent? player;
         private AudioFileReader? reader;
 
         public ObservableCollection<RecordedAudioListItem> Items { get; } = [];
-        public RecordedAudioListItem? SelectedItem { get; set; }
+        private RecordedAudioListItem? selectedItem;
+        public RecordedAudioListItem? SelectedItem
+        {
+            get => selectedItem;
+            set
+            {
+                if (ReferenceEquals(selectedItem, value))
+                    return;
+                selectedItem = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedItem)));
+            }
+        }
         public string SelectedPath { get; private set; } = string.Empty;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public RecordedVoiceAudioSelectorWindow(string? recordsDirectory, string? currentPath)
         {
             InitializeComponent();
-            DataContext = this;
-
             LoadItems(recordsDirectory, currentPath);
+            DataContext = this;
         }
 
         private void LoadItems(string? recordsDirectory, string? currentPath)
@@ -63,6 +75,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             {
                 reader = new AudioFileReader(SelectedItem.Path);
                 player = new WaveOutEvent();
+                player.PlaybackStopped += OnPlaybackStopped;
                 player.Init(reader);
                 player.Play();
             }
@@ -81,9 +94,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
         private void StopPlayback()
         {
-            player?.Stop();
-            player?.Dispose();
+            var currentPlayer = player;
+            var currentReader = reader;
             player = null;
+            reader = null;
+
+            if (currentPlayer is not null)
+            {
+                currentPlayer.PlaybackStopped -= OnPlaybackStopped;
+                currentPlayer.Stop();
+                currentPlayer.Dispose();
+            }
+
+            currentReader?.Dispose();
+        }
+
+        private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
+        {
+            if (player is not null)
+            {
+                player.PlaybackStopped -= OnPlaybackStopped;
+                player.Dispose();
+                player = null;
+            }
 
             reader?.Dispose();
             reader = null;

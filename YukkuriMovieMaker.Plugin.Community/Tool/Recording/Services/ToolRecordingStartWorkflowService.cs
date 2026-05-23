@@ -11,12 +11,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             this.recordingService = recordingService;
         }
 
-        public ToolRecordingStartResult Execute(string? selectedDevice)
+        public ToolRecordingStartResult Execute(string? selectedDeviceId)
         {
-            if (string.IsNullOrWhiteSpace(selectedDevice))
+            if (string.IsNullOrWhiteSpace(selectedDeviceId))
                 return ToolRecordingStartResult.Failed(Texts.ReselectRecordingDevice);
 
-            recordingService.StartRecording(selectedDevice);
+            recordingService.StartRecording(selectedDeviceId);
             return ToolRecordingStartResult.Succeeded();
         }
     }

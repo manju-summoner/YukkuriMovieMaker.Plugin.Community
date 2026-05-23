@@ -91,8 +91,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
         private static string ResolveRecordedWavPath(RecordedVoiceParameter recorded)
         {
-            if (!string.IsNullOrWhiteSpace(recorded.AudioFilePath) && File.Exists(recorded.AudioFilePath))
-                return recorded.AudioFilePath;
+            if (!string.IsNullOrWhiteSpace(recorded.AudioFilePath))
+            {
+                if (File.Exists(recorded.AudioFilePath))
+                    return recorded.AudioFilePath;
+                return string.Empty;
+            }
 
             var defaultPath = ResolveDefaultVoiceAudioFilePath(recorded.RecordsDirectory);
             if (!string.IsNullOrWhiteSpace(defaultPath))
@@ -170,7 +174,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                     var fileFullPath = Path.GetFullPath(path);
                     var relativePath = Path.GetRelativePath(directoryFullPath, fileFullPath);
 
-                    if (Path.IsPathRooted(relativePath) || relativePath.StartsWith("..", StringComparison.Ordinal))
+                    if (Path.IsPathRooted(relativePath)
+                        || string.Equals(relativePath, "..", StringComparison.Ordinal)
+                        || relativePath.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                        || relativePath.StartsWith($"..{Path.AltDirectorySeparatorChar}", StringComparison.Ordinal))
                         return string.Empty;
                 }
 

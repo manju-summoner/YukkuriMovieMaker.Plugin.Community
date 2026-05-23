@@ -34,7 +34,12 @@
         <TextBlock Grid.Row="1" Text="{x:Static local:Texts.RecordingDevice}" />
         <DockPanel Grid.Row="2">
             <Button Content="{x:Static local:Texts.Refresh}" Command="{Binding RefreshDevicesCommand}" DockPanel.Dock="Right" />
-            <ComboBox ItemsSource="{Binding AvailableDevices}" SelectedItem="{Binding SelectedDevice}" VerticalContentAlignment="Center" Height="26" />
+            <ComboBox ItemsSource="{Binding AvailableDevices}"
+                      DisplayMemberPath="FriendlyName"
+                      SelectedValuePath="Id"
+                      SelectedValue="{Binding SelectedDeviceId}"
+                      VerticalContentAlignment="Center"
+                      Height="26" />
         </DockPanel>
 
         <Grid Grid.Row="3" Margin="0,4,0,4">

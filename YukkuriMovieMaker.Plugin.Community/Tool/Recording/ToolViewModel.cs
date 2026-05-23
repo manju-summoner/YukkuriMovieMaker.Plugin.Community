@@ -25,7 +25,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         bool disposed;
         string? latestRecordedFilePath;
 
-        public ObservableCollection<string> AvailableDevices { get; } = [];
+        public ObservableCollection<RecordingDeviceInfo> AvailableDevices { get; } = [];
         public ObservableCollection<RecordedFileListItem> Records { get; } = [];
 
         public ICommand StartRecordingCommand { get; }
@@ -43,13 +43,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         public ICommand SetDefaultVoiceAudioCommand { get; }
         public ICommand ClearDefaultVoiceAudioCommand { get; }
 
-        string? selectedDevice;
-        public string? SelectedDevice
+        string? selectedDeviceId;
+        public string? SelectedDeviceId
         {
-            get => selectedDevice;
+            get => selectedDeviceId;
             set
             {
-                if (Set(ref selectedDevice, value))
+                if (Set(ref selectedDeviceId, value))
                     RaiseCommandStates();
             }
         }
@@ -172,17 +172,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
             AvailableDevices.Clear();
 
-            foreach (var deviceName in recordingService.GetAvailableDeviceNames())
-                AvailableDevices.Add(deviceName);
+            foreach (var device in recordingService.GetAvailableDevices())
+                AvailableDevices.Add(device);
 
             if (AvailableDevices.Count > 0)
             {
-                if (SelectedDevice is null || !AvailableDevices.Contains(SelectedDevice))
-                    SelectedDevice = AvailableDevices[0];
+                if (string.IsNullOrWhiteSpace(SelectedDeviceId) || AvailableDevices.All(x => !string.Equals(x.Id, SelectedDeviceId, StringComparison.Ordinal)))
+                    SelectedDeviceId = AvailableDevices[0].Id;
             }
             else
             {
-                SelectedDevice = null;
+                SelectedDeviceId = null;
                 RecordingStatus = Texts.NoRecordingDeviceFound;
             }
 
@@ -227,7 +227,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 if (audioPlaybackService.IsPlaying)
                     audioPlaybackService.Stop();
 
-                var startResult = recordingStartWorkflowService.Execute(SelectedDevice);
+                var startResult = recordingStartWorkflowService.Execute(SelectedDeviceId);
                 if (!startResult.IsSuccess)
                 {
                     RecordingStatus = startResult.ErrorMessage ?? Texts.ReselectRecordingDevice;
@@ -332,6 +332,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 audioPlaybackService.Play(path);
                 RecordingStatus = Texts.Playing;
+                OnPropertyChanged(nameof(CanSuspend));
             }
             catch (Exception ex)
             {
