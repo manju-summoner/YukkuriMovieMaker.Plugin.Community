@@ -91,23 +91,64 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
         private static string ResolveRecordedWavPath(RecordedVoiceParameter recorded)
         {
+            var recordsDirectory = !string.IsNullOrWhiteSpace(recorded.RecordsDirectory)
+                ? recorded.RecordsDirectory
+                : ResolveRecordsDirectory();
+
+            if (string.Equals(recorded.AudioFilePath, RecordedVoiceParameter.ExplicitUnselectedToken, StringComparison.Ordinal))
+                return GetOrCreateSilentFilePath(recordsDirectory);
+
             if (!string.IsNullOrWhiteSpace(recorded.AudioFilePath))
             {
-                if (File.Exists(recorded.AudioFilePath))
-                    return recorded.AudioFilePath;
+                var resolvedPath = ResolveExistingPath(recorded.AudioFilePath, recordsDirectory);
+                if (!string.IsNullOrWhiteSpace(resolvedPath))
+                    return resolvedPath;
                 return string.Empty;
             }
 
-            var defaultPath = ResolveDefaultVoiceAudioFilePath(recorded.RecordsDirectory);
+            var defaultPath = ResolveDefaultVoiceAudioFilePath(recordsDirectory);
             if (!string.IsNullOrWhiteSpace(defaultPath))
                 return defaultPath;
 
-            if (string.IsNullOrWhiteSpace(recorded.RecordsDirectory) || !Directory.Exists(recorded.RecordsDirectory))
+            if (string.IsNullOrWhiteSpace(recordsDirectory) || !Directory.Exists(recordsDirectory))
                 return string.Empty;
 
-            return Directory.EnumerateFiles(recorded.RecordsDirectory, "*.wav", SearchOption.TopDirectoryOnly)
+            return Directory.EnumerateFiles(recordsDirectory, "*.wav", SearchOption.TopDirectoryOnly)
                 .OrderByDescending(File.GetLastWriteTimeUtc)
                 .FirstOrDefault() ?? string.Empty;
+        }
+
+        private static string ResolveExistingPath(string path, string recordsDirectory)
+        {
+            try
+            {
+                if (File.Exists(path))
+                    return path;
+
+                if (!string.IsNullOrWhiteSpace(recordsDirectory) && Directory.Exists(recordsDirectory))
+                {
+                    // Support legacy/serialized relative file names and moved folders.
+                    var fileName = Path.GetFileName(path);
+                    if (!string.IsNullOrWhiteSpace(fileName))
+                    {
+                        var combined = Path.Combine(recordsDirectory, fileName);
+                        if (File.Exists(combined))
+                            return combined;
+                    }
+
+                    if (!Path.IsPathRooted(path))
+                    {
+                        var full = Path.GetFullPath(Path.Combine(recordsDirectory, path));
+                        if (File.Exists(full))
+                            return full;
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return string.Empty;
         }
 
         private static string ResolveInitialAudioFilePath(string recordsDirectory)
@@ -115,11 +156,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             try
             {
                 if (string.IsNullOrWhiteSpace(recordsDirectory))
-                    return string.Empty;
+                    recordsDirectory = ResolveRecordsDirectory();
 
-                var defaultPath = ResolveDefaultVoiceAudioFilePath(recordsDirectory);
-                if (!string.IsNullOrWhiteSpace(defaultPath))
-                    return defaultPath;
+                if (string.IsNullOrWhiteSpace(recordsDirectory))
+                    return string.Empty;
 
                 Directory.CreateDirectory(recordsDirectory);
                 var path = Path.Combine(recordsDirectory, InitialSilentFileName);
@@ -148,6 +188,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             }
         }
 
+        internal static string GetOrCreateSilentFilePath(string? recordsDirectory)
+        {
+            var directory = string.IsNullOrWhiteSpace(recordsDirectory)
+                ? ResolveRecordsDirectory()
+                : recordsDirectory;
+            return ResolveInitialAudioFilePath(directory);
+        }
+
         private static string ResolveRecordsDirectory()
         {
             try
@@ -165,10 +213,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             try
             {
                 var path = RecordingSettings.Default.DefaultVoiceAudioFilePath;
-                if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+                if (string.IsNullOrWhiteSpace(path))
                     return string.Empty;
 
-                return path;
+                return ResolveExistingPath(path, recordsDirectory);
             }
             catch
             {

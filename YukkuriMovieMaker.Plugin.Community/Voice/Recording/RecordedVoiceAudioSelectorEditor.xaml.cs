@@ -60,13 +60,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             if (e.NewValue is INotifyPropertyChanged newNotify)
                 newNotify.PropertyChanged += editor.OnParameterPropertyChanged;
 
+            editor.EnsureSilentAudioAssigned();
             editor.RefreshSelectedFileLabel();
         }
 
         private void OnParameterPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (string.Equals(e.PropertyName, nameof(RecordedVoiceParameter.AudioFilePath), StringComparison.Ordinal))
+            {
+                EnsureSilentAudioAssigned();
                 RefreshSelectedFileLabel();
+            }
+        }
+
+        private void EnsureSilentAudioAssigned()
+        {
+            if (Parameter is null)
+                return;
+
+            if (!string.IsNullOrWhiteSpace(Parameter.AudioFilePath)
+                && !string.Equals(Parameter.AudioFilePath, RecordedVoiceParameter.ExplicitUnselectedToken, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            Parameter.AudioFilePath = RecordedVoiceSpeaker.GetOrCreateSilentFilePath(Parameter.RecordsDirectory);
         }
 
         private void OnSelectClicked(object sender, RoutedEventArgs e)
@@ -83,8 +101,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
             try
             {
-                if (window.ShowDialog() == true && !string.IsNullOrWhiteSpace(window.SelectedPath))
+                if (window.ShowDialog() == true)
                 {
+                    Parameter.RecordsDirectory = window.RecordsDirectory;
                     Parameter.AudioFilePath = window.SelectedPath;
                     RefreshSelectedFileLabel();
                 }
@@ -98,6 +117,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         private void RefreshSelectedFileLabel()
         {
             var path = Parameter?.AudioFilePath ?? string.Empty;
+
             SelectedFilePath = path;
             SelectedFileLabel = string.IsNullOrWhiteSpace(path) ? Texts.Unselected : Path.GetFileName(path);
         }

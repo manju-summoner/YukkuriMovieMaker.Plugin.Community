@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
+using Forms = System.Windows.Forms;
 using NAudio.Wave;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
@@ -24,15 +26,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                     return;
                 selectedItem = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedItem)));
+                UpdatePreviewForSelectionChange();
             }
         }
         public string SelectedPath { get; private set; } = string.Empty;
+        public string RecordsDirectory
+        {
+            get => recordsDirectory;
+            private set
+            {
+                if (string.Equals(recordsDirectory, value, StringComparison.Ordinal))
+                    return;
+                recordsDirectory = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RecordsDirectory)));
+            }
+        }
+
+        private string recordsDirectory = string.Empty;
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public RecordedVoiceAudioSelectorWindow(string? recordsDirectory, string? currentPath)
         {
             InitializeComponent();
-            LoadItems(recordsDirectory, currentPath);
+            RecordsDirectory = recordsDirectory ?? string.Empty;
+            LoadItems(RecordsDirectory, currentPath);
             DataContext = this;
         }
 
@@ -64,26 +81,40 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             DialogResult = true;
         }
 
-        private void OnPreviewClicked(object sender, RoutedEventArgs e)
+        private void OnUnselectClicked(object sender, RoutedEventArgs e)
         {
-            if (SelectedItem is null || !File.Exists(SelectedItem.Path))
+            SelectedPath = RecordedVoiceSpeaker.GetOrCreateSilentFilePath(RecordsDirectory);
+            DialogResult = true;
+        }
+
+        private void OnChangeFolderClicked(object sender, RoutedEventArgs e)
+        {
+            using var dialog = new Forms.FolderBrowserDialog
+            {
+                Description = Texts.SelectRecordedAudioFolder,
+                UseDescriptionForTitle = true,
+                SelectedPath = string.IsNullOrWhiteSpace(RecordsDirectory) ? string.Empty : RecordsDirectory
+            };
+
+            if (dialog.ShowDialog() != Forms.DialogResult.OK || string.IsNullOrWhiteSpace(dialog.SelectedPath))
                 return;
 
-            StopPlayback();
+            RecordsDirectory = dialog.SelectedPath;
+            LoadItems(RecordsDirectory, SelectedPath);
+        }
 
-            try
-            {
-                reader = new AudioFileReader(SelectedItem.Path);
-                player = new WaveOutEvent();
-                player.PlaybackStopped += OnPlaybackStopped;
-                player.Init(reader);
-                player.Play();
-            }
-            catch
-            {
-                // Keep the selector usable even if the file is temporarily locked or invalid.
-                StopPlayback();
-            }
+        private void OnPreviewClicked(object sender, RoutedEventArgs e)
+        {
+            PlaySelected();
+        }
+
+        private void OnListViewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (SelectedItem is null)
+                return;
+
+            SelectedPath = SelectedItem.Path;
+            DialogResult = true;
         }
 
         protected override void OnClosed(EventArgs e)
@@ -120,6 +151,42 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
             reader?.Dispose();
             reader = null;
+        }
+
+        private void UpdatePreviewForSelectionChange()
+        {
+            if (player is null)
+                return;
+
+            if (SelectedItem is null || !File.Exists(SelectedItem.Path))
+            {
+                StopPlayback();
+                return;
+            }
+
+            PlaySelected();
+        }
+
+        private void PlaySelected()
+        {
+            if (SelectedItem is null || !File.Exists(SelectedItem.Path))
+                return;
+
+            StopPlayback();
+
+            try
+            {
+                reader = new AudioFileReader(SelectedItem.Path);
+                player = new WaveOutEvent();
+                player.PlaybackStopped += OnPlaybackStopped;
+                player.Init(reader);
+                player.Play();
+            }
+            catch
+            {
+                // Keep the selector usable even if the file is temporarily locked or invalid.
+                StopPlayback();
+            }
         }
     }
 

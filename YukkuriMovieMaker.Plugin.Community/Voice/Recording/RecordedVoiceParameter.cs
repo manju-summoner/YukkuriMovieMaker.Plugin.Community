@@ -7,6 +7,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 {
     public class RecordedVoiceParameter : VoiceParameterBase, IVoiceParameter
     {
+        public const string ExplicitUnselectedToken = "__UNSELECTED__";
+
         private string text = string.Empty;
         private string recordsDirectory = string.Empty;
         private string audioFilePath = string.Empty;
