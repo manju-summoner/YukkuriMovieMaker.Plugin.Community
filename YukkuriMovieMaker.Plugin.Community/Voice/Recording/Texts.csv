@@ -1,20 +1,20 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
-ToolName,,録音ツール,Recording Tool,录音工具,錄音工具,녹음 도구,Herramienta de grabación,أداة التسجيل,Alat Perekaman
-EngineName,,録音ツール,Recording Tool,录音工具,錄音工具,녹음 도구,Herramienta de grabación,أداة التسجيل,Alat Perekaman
+ToolName,,録音,Recording,录音,錄音,녹음,Grabación,التسجيل,Perekaman
+EngineName,,録音,Recording,录音,錄音,녹음,Grabación,التسجيل,Perekaman
 SpeakerName,,録音,Recording,录音,錄音,녹음,Grabación,التسجيل,Perekaman
-ParameterTextName,,セリフ,Dialogue,台词,台詞,대사,Diálogo,النص,Dialog
-ParameterTextDescription,,読み上げテキスト,Speech text,朗读文本,朗讀文字,읽기 텍스트,Texto de voz,نص القراءة,Teks ucapan
+ParameterTextName,,セリフ,Dialogue,台词,台詞,대사,Diálogo,الحوار,Dialog
+ParameterTextDescription,,読み上げ用テキスト,Speech text,朗读文本,朗讀文本,읽기용 텍스트,Texto de voz,نص القراءة,Teks ucapan
 ParameterAudioFileName,,録音ファイル,Recording File,录音文件,錄音檔案,녹음 파일,Archivo de grabación,ملف التسجيل,File Rekaman
-ParameterAudioFileDescription,,録音済み wav ファイルのパス,Path to recorded WAV file,已录制 wav 文件路径,已錄製 wav 檔案路徑,녹음된 wav 파일 경로,Ruta del archivo wav grabado,مسار ملف wav المسجل,Jalur file wav rekaman
-InvalidParameter,,録音パラメータが不正です。,Recording parameter is invalid.,录音参数无效。,錄音參數無效。,녹음 매개변수가 잘못되었습니다.,El parámetro de grabación no es válido.,معلمة التسجيل غير صالحة.,Parameter perekaman tidak valid.
-AudioFilePathEmpty,,録音済み wav のパスが空です。,Recorded WAV path is empty.,录制 wav 路径为空。,錄製 wav 路徑為空。,녹음된 wav 경로가 비어 있습니다.,La ruta del wav grabado está vacía.,مسار wav المسجل فارغ.,Jalur wav rekaman kosong.
-RecordedWavNotFound,,録音済み wav が見つかりません。,Recorded WAV not found.,未找到已录制的 wav。,找不到已錄製的 wav。,녹음된 wav를 찾을 수 없습니다.,No se encontró el wav grabado.,لم يتم العثور على wav المسجل.,Wav rekaman tidak ditemukan.
+ParameterAudioFileDescription,,録音済みWAVファイルのパス,Path to recorded WAV file,已录制WAV文件路径,已錄製WAV檔案路徑,녹음된 WAV 파일 경로,Ruta del archivo WAV grabado,مسار ملف WAV المسجل,Jalur file WAV rekaman
+InvalidParameter,,録音パラメータが不正です。,Recording parameter is invalid.,录音参数无效。,錄音參數無效。,녹음 매개변수가 올바르지 않습니다.,El parámetro de grabación no es válido.,معلمة التسجيل غير صالحة.,Parameter perekaman tidak valid.
+AudioFilePathEmpty,,録音ファイルのパスが空です。,Recorded WAV path is empty.,录音文件路径为空。,錄音檔案路徑為空。,녹음 파일 경로가 비어 있습니다.,La ruta del archivo grabado está vacía.,مسار ملف التسجيل فارغ.,Jalur file rekaman kosong.
+RecordedWavNotFound,,録音ファイルが見つかりません。,Recorded WAV not found.,未找到录音文件。,找不到錄音檔案。,녹음 파일을 찾을 수 없습니다.,No se encontró el archivo grabado.,لم يتم العثور على ملف التسجيل.,File rekaman tidak ditemukan.
 Unselected,,未選択,Unselected,未选择,未選擇,선택 안 함,Sin seleccionar,غير محدد,Belum dipilih
-SelectRecordedAudioButton,,録音素材を選択,Select Recording,选择录音素材,選擇錄音素材,녹음 소스 선택,Seleccionar grabación,اختيار مادة التسجيل,Pilih rekaman
-RecordedAudioSelectorTitle,,録音素材を選択,Select Recording,选择录音素材,選擇錄音素材,녹음 소스 선택,Seleccionar grabación,اختيار مادة التسجيل,Pilih rekaman
-RecordedAudioSelectorHint,,最新の録音が上に表示されます。,Latest recordings are shown first.,最新录音显示在最上方。,最新錄音顯示在最上方。,최신 녹음이 위에 표시됩니다.,Las grabaciones más recientes se muestran primero.,تظهر أحدث التسجيلات أولاً.,Rekaman terbaru ditampilkan di atas.
+SelectRecordedAudioButton,,録音を選択,Select Recording,选择录音,選擇錄音,녹음 선택,Seleccionar grabación,اختيار التسجيل,Pilih rekaman
+RecordedAudioSelectorTitle,,録音の選択,Select Recording,选择录音,選擇錄音,녹음 선택,Seleccionar grabación,اختيار التسجيل,Pilih rekaman
+RecordedAudioSelectorHint,,最新の録音データが上に表示されます。,Latest recordings are shown at the top.,最新录音显示在最上方。,最新錄音顯示在最上方。,최신 녹음 데이터가 위에 표시됩니다.,Las grabaciones más recientes se muestran arriba.,تظهر أحدث التسجيلات في الأعلى.,Rekaman terbaru ditampilkan di atas.
 RecordedAudioFileNameHeader,,ファイル名,File Name,文件名,檔案名稱,파일 이름,Nombre de archivo,اسم الملف,Nama File
-RecordedAudioCreatedAtHeader,,作成日時,Created At,创建时间,建立時間,생성 시각,Fecha de creación,وقت الإنشاء,Waktu Dibuat
+RecordedAudioCreatedAtHeader,,作成日時,Created At,创建时间,建立時間,생성 일시,Fecha de creación,تاريخ الإنشاء,Waktu Dibuat
 RecordedAudioDurationHeader,,長さ,Duration,时长,長度,길이,Duración,المدة,Durasi
 Select,,選択,Select,选择,選擇,선택,Seleccionar,تحديد,Pilih
 Cancel,,キャンセル,Cancel,取消,取消,취소,Cancelar,إلغاء,Batal
