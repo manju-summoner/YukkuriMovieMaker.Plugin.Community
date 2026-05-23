@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         void RecordList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            isDragStarted = true;
+            isDragStarted = FindListViewItem(e.OriginalSource as DependencyObject) is not null;
         }
 
         void RecordList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -50,6 +50,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             var moveBytes = BitConverter.GetBytes((int)DragDropEffects.Move);
             dataObject.SetData(PreferredDropEffectFormat, new MemoryStream(moveBytes));
             DragDrop.DoDragDrop(this, dataObject, DragDropEffects.Copy | DragDropEffects.Move);
+        }
+
+        static ListViewItem? FindListViewItem(DependencyObject? current)
+        {
+            while (current is not null)
+            {
+                if (current is ListViewItem item)
+                    return item;
+                current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+            }
+            return null;
         }
     }
 }

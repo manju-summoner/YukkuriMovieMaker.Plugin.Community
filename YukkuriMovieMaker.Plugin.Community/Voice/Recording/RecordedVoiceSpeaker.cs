@@ -168,19 +168,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                 if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
                     return string.Empty;
 
-                if (!string.IsNullOrWhiteSpace(recordsDirectory))
-                {
-                    var directoryFullPath = Path.GetFullPath(recordsDirectory);
-                    var fileFullPath = Path.GetFullPath(path);
-                    var relativePath = Path.GetRelativePath(directoryFullPath, fileFullPath);
-
-                    if (Path.IsPathRooted(relativePath)
-                        || string.Equals(relativePath, "..", StringComparison.Ordinal)
-                        || relativePath.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
-                        || relativePath.StartsWith($"..{Path.AltDirectorySeparatorChar}", StringComparison.Ordinal))
-                        return string.Empty;
-                }
-
                 return path;
             }
             catch
