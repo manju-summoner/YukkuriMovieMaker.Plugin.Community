@@ -1,4 +1,4 @@
-using NAudio.CoreAudioApi;
+﻿using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -11,6 +11,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
     public class RecordingService
     {
+        public const string DefaultRecordingDeviceId = "default";
+
         private readonly object syncRoot = new();
         private readonly RecordPathService recordPathService;
 
@@ -52,33 +54,64 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             return devices;
         }
 
-        public void StartRecording(string deviceId)
+        public string? GetDefaultRecordingDeviceFriendlyName()
+        {
+            using var enumerator = new MMDeviceEnumerator();
+            try
+            {
+                using var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Multimedia);
+                return device.FriendlyName;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public RecordingStartDeviceSelection StartRecording(string? deviceId)
         {
             lock (syncRoot)
             {
                 if (IsRecording)
-                    return;
+                    return RecordingStartDeviceSelection.Empty;
 
                 MMDevice? targetDevice = null;
+                var fallbackToDefault = false;
+                var requestDefault = string.IsNullOrWhiteSpace(deviceId) || string.Equals(deviceId, DefaultRecordingDeviceId, StringComparison.Ordinal);
+
                 using (var enumerator = new MMDeviceEnumerator())
                 {
-                    foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active))
+                    if (!requestDefault)
                     {
-                        if (targetDevice is null && string.Equals(device.ID, deviceId, StringComparison.Ordinal))
+                        foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active))
                         {
-                            targetDevice = device;
+                            if (targetDevice is null && string.Equals(device.ID, deviceId, StringComparison.Ordinal))
+                            {
+                                targetDevice = device;
+                            }
+                            else
+                            {
+                                device.Dispose();
+                            }
                         }
-                        else
+                    }
+
+                    if (targetDevice is null)
+                    {
+                        fallbackToDefault = true;
+                        try
                         {
-                            device.Dispose();
+                            targetDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Multimedia);
+                        }
+                        catch
+                        {
+                            targetDevice = null;
                         }
                     }
                 }
 
                 if (targetDevice is null)
-                {
-                    throw new InvalidOperationException(string.Format(Texts.InvalidRecordingDevice, deviceId));
-                }
+                    throw new InvalidOperationException(Texts.NoRecordingDeviceFoundDetailed);
 
                 var filePath = recordPathService.CreateRecordFilePath();
 
@@ -111,6 +144,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     OnRecordingStateChanged();
 
                     input.StartRecording();
+                    return new RecordingStartDeviceSelection(
+                        targetDevice.ID,
+                        targetDevice.FriendlyName,
+                        fallbackToDefault);
                 }
                 catch (Exception ex)
                 {
@@ -371,6 +408,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         {
             RecordingStateChanged?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    public readonly record struct RecordingStartDeviceSelection(
+        string DeviceId,
+        string FriendlyName,
+        bool FellBackToDefault)
+    {
+        public static RecordingStartDeviceSelection Empty { get; } = new(string.Empty, string.Empty, false);
     }
 }
 

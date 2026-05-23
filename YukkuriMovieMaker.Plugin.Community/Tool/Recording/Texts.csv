@@ -1,4 +1,4 @@
-Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
 ToolName,,録音ツール,Recording Tool,录音工具,錄音工具,녹음 도구,Herramienta de grabación,أداة التسجيل,Alat Perekaman
 RecordingUiTitle,,収録UI,Recording UI,录音界面,錄音介面,녹음 UI,Interfaz de grabación,واجهة التسجيل,UI Perekaman
 OpenSerifRecording,,セリフ録音を開く,Open Dialogue Recording,打开台词录音,開啟台詞錄音,대사 녹음 열기,Abrir grabación de diálogo,فتح تسجيل الحوار,Buka Rekaman Dialog
@@ -95,3 +95,11 @@ ClearDefaultVoiceAudio,,既定解除,Clear default,取消默认,解除預設,기
 DefaultVoiceAudioSet,0:file,既定音声を設定しました: {0},Default voice set: {0},已设置默认语音: {0},已設定預設語音: {0},기본 음성을 설정했습니다: {0},Voz predeterminada establecida: {0},تم تعيين الصوت الافتراضي: {0},Suara default ditetapkan: {0}
 DefaultVoiceAudioCleared,,既定音声を解除しました。,Default voice cleared.,已取消默认语音。,已解除預設語音。,기본 음성을 해제했습니다.,Se quitó la voz predeterminada.,تم إلغاء الصوت الافتراضي.,Suara default dihapus.
 Unselected,,未選択,Unselected,未选择,未選擇,선택 안 함,Sin seleccionar,غير محدد,Belum dipilih
+
+SelectedRecordingDevice,,選択中の録音デバイス,Selected recording device,当前选择的录音设备,目前選取的錄音裝置,선택된 녹음 장치,Dispositivo de grabación seleccionado,جهاز التسجيل المحدد,Perangkat perekaman yang dipilih
+DefaultRecordingDevice,,既定の録音デバイス,Default recording device,默认录音设备,預設錄音裝置,기본 녹음 장치,Dispositivo de grabación predeterminado,جهاز التسجيل الافتراضي,Perangkat perekaman default
+DefaultRecordingDeviceWithName,0:name,既定の録音デバイス（{0}）,Default recording device ({0}),默认录音设备（{0}）,預設錄音裝置（{0}）,기본 녹음 장치({0}),Dispositivo de grabación predeterminado ({0}),جهاز التسجيل الافتراضي ({0}),Perangkat perekaman default ({0})
+SavedRecordingDeviceNotFoundFallback,,保存されていた録音デバイスが見つからないため、既定の録音デバイスを使用します,"Saved recording device was not found, so the default recording device will be used",找不到已保存的录音设备，因此将使用默认录音设备,找不到已儲存的錄音裝置，將改用預設錄音裝置,저장된 녹음 장치를 찾을 수 없어 기본 녹음 장치를 사용합니다,No se encontró el dispositivo de grabación guardado; se usará el predeterminado,لم يتم العثور على جهاز التسجيل المحفوظ، سيتم استخدام الجهاز الافتراضي,"Perangkat perekaman tersimpan tidak ditemukan, perangkat default akan digunakan"
+SavedRecordingDeviceNotFoundFallbackWithName,0:name,保存されていた録音デバイスが見つからないため、既定の録音デバイスを使用します（{0}）,"Saved recording device was not found, so default recording device will be used ({0})",找不到已保存的录音设备，因此将使用默认录音设备（{0}）,找不到已儲存的錄音裝置，將改用預設錄音裝置（{0}）,저장된 녹음 장치를 찾을 수 없어 기본 녹음 장치를 사용합니다({0}),No se encontró el dispositivo guardado; se usará el predeterminado ({0}),لم يتم العثور على الجهاز المحفوظ، سيتم استخدام الافتراضي ({0}),"Perangkat tersimpan tidak ditemukan, gunakan default ({0})"
+NoRecordingDeviceFoundDetailed,,録音デバイスが見つかりません。Windows の録音デバイス設定を確認してください,Recording device not found. Check Windows recording device settings,未找到录音设备。请检查 Windows 录音设备设置,找不到錄音裝置。請檢查 Windows 錄音裝置設定,녹음 장치를 찾을 수 없습니다. Windows 녹음 장치 설정을 확인해 주세요,No se encontró ningún dispositivo de grabación. Revise la configuración de Windows,لم يتم العثور على جهاز تسجيل. تحقق من إعدادات أجهزة التسجيل في Windows,Perangkat perekaman tidak ditemukan. Periksa pengaturan perangkat rekaman Windows
+RecordingNowWithPathAndDevice,0:path 1:device,録音中... 保存先: {0} / デバイス: {1},Recording... Save destination: {0} / Device: {1},录音中... 保存位置: {0} / 设备: {1},錄音中... 儲存位置: {0} / 裝置: {1},녹음 중... 저장 위치: {0} / 장치: {1},Grabando... Destino: {0} / Dispositivo: {1},جارٍ التسجيل... الوجهة: {0} / الجهاز: {1},Merekam... Tujuan: {0} / Perangkat: {1}

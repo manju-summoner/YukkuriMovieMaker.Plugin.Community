@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.IO;
+using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 {
@@ -33,6 +34,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         }
 
         private string defaultVoiceAudioFilePath = string.Empty;
+
+        public string SelectedRecordingDeviceId
+        {
+            get => selectedRecordingDeviceId;
+            set => Set(ref selectedRecordingDeviceId, value ?? RecordingService.DefaultRecordingDeviceId);
+        }
+
+        private string selectedRecordingDeviceId = RecordingService.DefaultRecordingDeviceId;
 
         public override void Initialize()
         {

@@ -32,15 +32,31 @@
         <TextBlock Grid.Row="0" Text="{x:Static local:Texts.RecordingUiTitle}" FontWeight="Bold" />
 
         <TextBlock Grid.Row="1" Text="{x:Static local:Texts.RecordingDevice}" />
-        <DockPanel Grid.Row="2">
-            <Button Content="{x:Static local:Texts.Refresh}" Command="{Binding RefreshDevicesCommand}" DockPanel.Dock="Right" />
-            <ComboBox ItemsSource="{Binding AvailableDevices}"
-                      DisplayMemberPath="FriendlyName"
-                      SelectedValuePath="Id"
-                      SelectedValue="{Binding SelectedDeviceId}"
-                      VerticalContentAlignment="Center"
-                      Height="26" />
-        </DockPanel>
+        <StackPanel Grid.Row="2">
+            <DockPanel>
+                <Button Content="{x:Static local:Texts.Refresh}" Command="{Binding RefreshDevicesCommand}" DockPanel.Dock="Right" />
+                <ComboBox ItemsSource="{Binding AvailableDevices}"
+                          DisplayMemberPath="FriendlyName"
+                          SelectedValuePath="Id"
+                          SelectedValue="{Binding SelectedDeviceId}"
+                          VerticalContentAlignment="Center"
+                          Height="26" />
+            </DockPanel>
+            <TextBlock Margin="0,4,0,0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                        <Setter Property="Text">
+                            <Setter.Value>
+                                <MultiBinding StringFormat="{}{0}: {1}">
+                                    <Binding Source="{x:Static local:Texts.SelectedRecordingDevice}"/>
+                                    <Binding Path="SelectedDeviceDisplayName"/>
+                                </MultiBinding>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </StackPanel>
 
         <Grid Grid.Row="3" Margin="0,4,0,4">
             <Grid.ColumnDefinitions>
