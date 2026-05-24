@@ -535,6 +535,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         void ResetOutputDirectory()
         {
+            var confirm = MessageBoxViewModel.Show(
+                Texts.ConfirmResetOutputDirectory,
+                Texts.ToolName,
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question,
+                MessageBoxResult.No);
+            if (confirm != MessageBoxResult.Yes)
+                return;
+
             OutputDirectory = RecordingSettings.GetDefaultOutputDirectory();
             RecordingStatus = string.Format(Texts.OutputDirectoryReset, OutputDirectory);
         }
