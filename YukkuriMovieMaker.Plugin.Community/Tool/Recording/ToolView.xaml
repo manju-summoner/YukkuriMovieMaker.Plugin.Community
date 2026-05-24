@@ -9,11 +9,12 @@
              d:DesignHeight="560"
              d:DesignWidth="760">
     <UserControl.Resources>
-        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Style x:Key="ToolButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Height" Value="26"/>
             <Setter Property="Padding" Value="10,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource ToolButtonStyle}"/>
     </UserControl.Resources>
     <Grid Grid.IsSharedSizeScope="True">
         <Grid.RowDefinitions>
@@ -58,8 +59,20 @@
         </Grid>
 
         <WrapPanel Grid.Row="2">
-            <Button Content="{x:Static local:Texts.StartRecording}" Command="{Binding StartRecordingCommand}" />
-            <Button Content="{x:Static local:Texts.StopRecording}" Command="{Binding StopRecordingCommand}" />
+            <Button>
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource ToolButtonStyle}">
+                        <Setter Property="Content" Value="{x:Static local:Texts.StartRecording}"/>
+                        <Setter Property="Command" Value="{Binding StartRecordingCommand}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsRecording}" Value="True">
+                                <Setter Property="Content" Value="{x:Static local:Texts.StopRecording}"/>
+                                <Setter Property="Command" Value="{Binding StopRecordingCommand}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
             <Button Content="{x:Static local:Texts.Play}" Command="{Binding PlayCommand}" />
             <Button Content="{x:Static local:Texts.RefreshRecords}" Command="{Binding RefreshRecordsCommand}" />
             <Button Content="{x:Static local:Texts.OpenFolder}" Command="{Binding OpenFolderCommand}" />
