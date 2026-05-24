@@ -8,7 +8,7 @@ using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Lut;
 
-[VideoEffect(nameof(Texts.EffectName), [VideoEffectCategories.Filtering], ["lut", "cube", "LUT適用", "色查找表", "色彩查找表", "룩업 테이블"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+[VideoEffect(nameof(Texts.EffectName), [VideoEffectCategories.Filtering], ["lut", "cube", "LUT適用", "look up table", "ルックアップテーブル", "色查找表", "色彩查找表", "룩업 테이블"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
 public sealed class LutEffect : VideoEffectBase
 {
     public override string Label => Texts.EffectName;
