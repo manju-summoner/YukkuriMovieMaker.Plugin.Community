@@ -107,7 +107,7 @@
     <None Remove="Effect\Video\UnidirectionalBlur\Texts.csv" />
     <None Remove="Resources\License\GeneralUserGS.txt" />
     <None Remove="Resources\SoundFonts\GeneralUser-GS.sf2" />
-    <None Remove="Shape\Pen\Texts.csv" />
+    <None Remove="Shape\Pen\Texts.csv" />  
   </ItemGroup>
 	
   <ItemGroup>
