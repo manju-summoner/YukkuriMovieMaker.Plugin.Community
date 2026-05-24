@@ -66,8 +66,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                     });
                     const style = el.getAttribute('style') || '';
                     if (style) extractCssUrls(style);
-                    const computed = window.getComputedStyle(el);
-                    extractCssUrls(computed.backgroundImage);
                 };
 
                 const extractCssUrls = (cssText) => {
