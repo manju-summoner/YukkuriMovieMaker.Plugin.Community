@@ -1,5 +1,6 @@
 ﻿using System;
 using NAudio.Wave;
+using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
@@ -18,10 +19,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
             playbackReader = new AudioFileReader(filePath);
             playbackOutput = new WaveOutEvent();
+            playbackOutput.Volume = GetYmmVolume();
             playbackOutput.PlaybackStopped += OnPlaybackStopped;
             playbackOutput.Init(playbackReader);
             playbackOutput.Play();
             IsPlaying = true;
+        }
+
+        static float GetYmmVolume()
+        {
+            var settings = YMMSettings.Default;
+            if (settings.IsMuted)
+                return 0f;
+            return (float)Math.Clamp(settings.Volume / 100.0, 0.0, 1.0);
         }
 
         public void Stop(bool skipStopCall = false)

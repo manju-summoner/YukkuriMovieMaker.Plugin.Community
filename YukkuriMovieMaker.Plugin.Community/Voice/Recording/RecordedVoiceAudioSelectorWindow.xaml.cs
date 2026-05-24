@@ -10,6 +10,7 @@ using NAudio.Wave;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services;
+using YukkuriMovieMaker.Settings;
 using ToolTexts = YukkuriMovieMaker.Plugin.Community.Tool.Recording.Texts;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
@@ -377,6 +378,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             {
                 reader = new AudioFileReader(SelectedItem.Path);
                 player = new WaveOutEvent();
+                player.Volume = GetYmmVolume();
                 player.PlaybackStopped += OnPlaybackStopped;
                 player.Init(reader);
                 player.Play();
@@ -387,6 +389,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                 // Keep the selector usable even if the file is temporarily locked or invalid.
                 StopPlayback();
             }
+        }
+
+        static float GetYmmVolume()
+        {
+            var settings = YMMSettings.Default;
+            if (settings.IsMuted)
+                return 0f;
+            return (float)Math.Clamp(settings.Volume / 100.0, 0.0, 1.0);
         }
     }
 
