@@ -7,15 +7,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
     public class RecordPathService
     {
         private readonly string? customBaseDirectory;
+        private readonly Func<string?>? customBaseDirectoryProvider;
 
         public RecordPathService(string? customBaseDirectory = null)
         {
             this.customBaseDirectory = customBaseDirectory;
         }
 
+        public RecordPathService(Func<string?> customBaseDirectoryProvider)
+        {
+            this.customBaseDirectoryProvider = customBaseDirectoryProvider;
+        }
+
         public string GetRecordsDirectory()
         {
-            var selectedBaseDirectory = customBaseDirectory;
+            var selectedBaseDirectory = customBaseDirectoryProvider?.Invoke() ?? customBaseDirectory;
             if (string.IsNullOrWhiteSpace(selectedBaseDirectory))
                 selectedBaseDirectory = RecordingSettings.Default.OutputDirectory;
             if (string.IsNullOrWhiteSpace(selectedBaseDirectory))

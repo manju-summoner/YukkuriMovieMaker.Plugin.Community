@@ -61,7 +61,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                     return;
 
                 recordsDirectory = normalized;
-                RecordingSettings.Default.OutputDirectory = normalized;
                 Raise(nameof(OutputDirectory));
                 Raise(nameof(RecordsDirectory));
                 LoadItems(recordsDirectory, SelectedPath);
@@ -109,7 +108,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                 ? RecordingSettings.Default.OutputDirectory
                 : recordsDirectory;
 
-            recordPathService = new RecordPathService();
+            recordPathService = new RecordPathService(() => this.recordsDirectory);
             recordingService = new RecordingService(recordPathService);
             recordingService.DataAvailable += OnRecordingDataAvailable;
             recordingService.RecordingStateChanged += OnRecordingStateChanged;
