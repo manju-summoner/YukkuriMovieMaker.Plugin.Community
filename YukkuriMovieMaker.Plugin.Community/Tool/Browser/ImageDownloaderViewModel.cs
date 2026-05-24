@@ -142,12 +142,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         public ActionCommand RefreshCommand { get; }
         public ActionCommand SelectSaveFolderCommand { get; }
         public ActionCommand DownloadSelectedCommand { get; }
+        public ActionCommand CloseCommand { get; }
 
         public ImageDownloaderViewModel(CoreWebView2 core, Action onClose)
         {
             this.core = core;
             this.onClose = onClose;
 
+            CloseCommand = new ActionCommand(
+                _ => true,
+                _ => onClose());
             SelectAllCommand = new ActionCommand(
                 _ => Items.Count > 0,
                 _ => SetAllSelected(true));

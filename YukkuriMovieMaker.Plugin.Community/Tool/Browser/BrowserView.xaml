@@ -95,8 +95,11 @@
             <pb:DialogBehavior.Style>
                 <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}">
                     <Setter Property="Title" Value="{x:Static local:Texts.ImageDownloader}"/>
-                    <Setter Property="SizeToContent" Value="WidthAndHeight"/>
-                    <Setter Property="ResizeMode" Value="NoResize"/>
+                    <Setter Property="Width" Value="700"/>
+                    <Setter Property="Height" Value="600"/>
+                    <Setter Property="MinWidth" Value="500"/>
+                    <Setter Property="MinHeight" Value="400"/>
+                    <Setter Property="ResizeMode" Value="CanResize"/>
                 </Style>
             </pb:DialogBehavior.Style>
             <pb:DialogBehavior.ContentTemplate>
