@@ -51,7 +51,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             var destPath = GetUniqueFilePath(folder, fileName);
             try
             {
-                await source.SaveToFileAsync(destPath, cancellationToken);
+                var bytes = source.GetCachedBytes();
+                if (bytes is not null)
+                {
+                    await File.WriteAllBytesAsync(destPath, bytes, cancellationToken);
+                }
+                else
+                {
+                    await source.SaveToFileAsync(destPath, cancellationToken);
+                }
                 return true;
             }
             catch
@@ -89,6 +97,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         abstract class ImageSource
         {
             public abstract string FileName { get; }
+            public abstract byte[]? GetCachedBytes();
             public abstract Task<byte[]> GetBytesAsync(CancellationToken cancellationToken);
             public abstract Task SaveToFileAsync(string path, CancellationToken cancellationToken);
 
@@ -100,16 +109,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         sealed class HttpImageSource(string url) : ImageSource
         {
+            byte[]? cachedBytes;
+
             public override string FileName =>
                 Path.GetFileName(new Uri(url).AbsolutePath) is { Length: > 0 } name ? name : "image";
 
+            public override byte[]? GetCachedBytes() => cachedBytes;
+
             public override async Task<byte[]> GetBytesAsync(CancellationToken cancellationToken)
             {
+                if (cachedBytes is not null)
+                    return cachedBytes;
+
                 using var request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.Add("User-Agent", $"YukkuriMovieMaker v{AppVersion.Current}");
                 using var response = await HttpClientFactory.Client.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
                 response.EnsureSuccessStatusCode();
-                return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+                cachedBytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+                return cachedBytes;
             }
 
             public override async Task SaveToFileAsync(string path, CancellationToken cancellationToken)
@@ -140,6 +157,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 ["image/x-icon"] = ".ico",
             };
 
+            byte[]? cachedBytes;
+
             public override string FileName
             {
                 get
@@ -150,20 +169,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 }
             }
 
+            public override byte[]? GetCachedBytes() => cachedBytes;
+
             public override Task<byte[]> GetBytesAsync(CancellationToken cancellationToken)
             {
+                if (cachedBytes is not null)
+                    return Task.FromResult(cachedBytes);
+
                 var commaIndex = dataUri.IndexOf(',');
                 if (commaIndex < 0)
-                    return Task.FromResult(Array.Empty<byte>());
+                {
+                    cachedBytes = [];
+                    return Task.FromResult(cachedBytes);
+                }
 
                 var header = dataUri[..commaIndex];
                 var data = dataUri[(commaIndex + 1)..];
 
-                var bytes = header.Contains(";base64", StringComparison.OrdinalIgnoreCase)
+                cachedBytes = header.Contains(";base64", StringComparison.OrdinalIgnoreCase)
                     ? Convert.FromBase64String(data)
                     : System.Text.Encoding.UTF8.GetBytes(Uri.UnescapeDataString(data));
 
-                return Task.FromResult(bytes);
+                return Task.FromResult(cachedBytes);
             }
 
             public override async Task SaveToFileAsync(string path, CancellationToken cancellationToken)
