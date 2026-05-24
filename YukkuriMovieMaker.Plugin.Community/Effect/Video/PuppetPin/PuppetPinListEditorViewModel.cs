@@ -130,9 +130,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
                 if (Keyboard.Modifiers == ModifierKeys.Control)
                 {
                     if (isOffset)
-                        vm.IsOffsetSelected = !vm.IsOffsetSelected;
+                    {
+                        var next = !vm.IsOffsetSelected;
+                        vm.IsOffsetSelected = next;
+                        if (next) vm.IsRestSelected = false;
+                    }
                     else
-                        vm.IsRestSelected = !vm.IsRestSelected;
+                    {
+                        var next = !vm.IsRestSelected;
+                        vm.IsRestSelected = next;
+                        if (next) vm.IsOffsetSelected = false;
+                    }
                 }
                 else if (Keyboard.Modifiers == ModifierKeys.Shift)
                 {
