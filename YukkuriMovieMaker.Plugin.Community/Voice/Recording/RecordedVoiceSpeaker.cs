@@ -22,12 +22,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         public string ID => RecordingPluginIds.SpeakerId;
         public bool IsVoiceDataCachingRequired => false;
         public SupportedTextFormat Format => SupportedTextFormat.Text;
-        public IVoiceLicense License => new NoVoiceLicense();
-        public IVoiceResource Resource => new NoVoiceResource();
-        public string SpeakerAuthor => string.Empty;
-        public string SpeakerContentId => string.Empty;
-        public string EngineAuthor => string.Empty;
-        public string EngineContentId => string.Empty;
+        public IVoiceLicense? License => null;
+        public IVoiceResource? Resource => null;
+        public string? SpeakerAuthor => null;
+        public string? SpeakerContentId => null;
+        public string? EngineAuthor => null;
+        public string? EngineContentId => null;
 
         public Task<string> ConvertKanjiToYomiAsync(string text, IVoiceParameter parameter)
         {
