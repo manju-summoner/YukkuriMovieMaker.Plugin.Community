@@ -18,13 +18,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
 
         PuppetPinCustomEffect? effect;
         ID2D1DeviceContext? deviceContext;
-
         PinGpuCache? gpuCache;
 
-        int lastPinCount = -1;
-        float lastStiffness = float.NaN;
-        float lastImageWidth = float.NaN;
-        float lastImageHeight = float.NaN;
+        bool isFirst = true;
+        int pinCount;
+        float stiffness;
+        float imageWidth;
+        float imageHeight;
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
@@ -49,33 +49,40 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
                 samples.Add(new PinSample(i, new Vector2(rx, ry), new Vector2(rx + ox, ry + oy), pin.IsEnabled));
             }
 
-            var gpuPinCount = Math.Min(samples.Count, PuppetPinCustomEffect.MaxPins);
+            var pinCount = Math.Min(samples.Count, PuppetPinCustomEffect.MaxPins);
 
             var inputBounds = deviceContext is not null && input is not null
                 ? deviceContext.GetImageLocalBounds(input)
                 : default;
-            float imageWidth = inputBounds.Right - inputBounds.Left;
-            float imageHeight = inputBounds.Bottom - inputBounds.Top;
+            var imageWidth = inputBounds.Right - inputBounds.Left;
+            var imageHeight = inputBounds.Bottom - inputBounds.Top;
 
-            if (!IsCacheValid(samples, gpuPinCount, stiffness, imageWidth, imageHeight))
+            if (isFirst
+                || this.pinCount != pinCount
+                || this.stiffness != stiffness
+                || this.imageWidth != imageWidth
+                || this.imageHeight != imageHeight
+                || !PinSamplesMatchBuffer(samples, pinCount))
             {
                 gpuCache?.Dispose();
-                gpuCache = BuildGpuCache(gpuPinCount, stiffness, imageWidth, imageHeight, samples);
-                lastPinCount = gpuPinCount;
-                lastStiffness = stiffness;
-                lastImageWidth = imageWidth;
-                lastImageHeight = imageHeight;
+                gpuCache = BuildGpuCache(pinCount, stiffness, imageWidth, imageHeight, samples);
+
+                effect.SetInput(1, gpuCache.DataBitmap, true);
+                effect.PinCount = pinCount;
+                effect.Stiffness = stiffness;
+
+                var (tl, tt, tr, tb) = gpuCache.TightBounds;
+                effect.TightLocalLeft = tl;
+                effect.TightLocalTop = tt;
+                effect.TightLocalRight = tr;
+                effect.TightLocalBottom = tb;
             }
 
-            effect.SetInput(1, gpuCache!.DataBitmap, true);
-            effect.PinCount = gpuPinCount;
-            effect.Stiffness = stiffness;
-
-            var (tl, tt, tr, tb) = gpuCache.TightBounds;
-            effect.TightLocalLeft = tl;
-            effect.TightLocalTop = tt;
-            effect.TightLocalRight = tr;
-            effect.TightLocalBottom = tb;
+            isFirst = false;
+            this.pinCount = pinCount;
+            this.stiffness = stiffness;
+            this.imageWidth = imageWidth;
+            this.imageHeight = imageHeight;
 
             return effectDescription.DrawDescription with
             {
@@ -83,20 +90,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             };
         }
 
-        bool IsCacheValid(
-            List<PinSample> samples,
-            int gpuPinCount,
-            float stiffness,
-            float imageWidth,
-            float imageHeight)
+        bool PinSamplesMatchBuffer(List<PinSample> samples, int pinCount)
         {
-            if (gpuCache is null) return false;
-            if (gpuPinCount != lastPinCount) return false;
-            if (stiffness != lastStiffness) return false;
-            if (imageWidth != lastImageWidth) return false;
-            if (imageHeight != lastImageHeight) return false;
-
-            for (var i = 0; i < gpuPinCount; i++)
+            for (var i = 0; i < pinCount; i++)
             {
                 var s = samples[i];
                 if (pinDataBuffer[i * 4 + 0] != s.Rest.X) return false;
@@ -104,12 +100,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
                 if (pinDataBuffer[i * 4 + 2] != s.Current.X) return false;
                 if (pinDataBuffer[i * 4 + 3] != s.Current.Y) return false;
             }
-
             return true;
         }
 
         PinGpuCache BuildGpuCache(
-            int gpuPinCount,
+            int pinCount,
             float stiffness,
             float imageWidth,
             float imageHeight,
@@ -117,7 +112,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
         {
             var maxPins = PuppetPinCustomEffect.MaxPins;
 
-            for (var i = 0; i < gpuPinCount; i++)
+            for (var i = 0; i < pinCount; i++)
             {
                 var s = samples[i];
                 pinDataBuffer[i * 4 + 0] = s.Rest.X;
@@ -125,7 +120,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
                 pinDataBuffer[i * 4 + 2] = s.Current.X;
                 pinDataBuffer[i * 4 + 3] = s.Current.Y;
             }
-            Array.Clear(pinDataBuffer, gpuPinCount * 4, (maxPins - gpuPinCount) * 4);
+            Array.Clear(pinDataBuffer, pinCount * 4, (maxPins - pinCount) * 4);
 
             ID2D1Bitmap dataBitmap;
             unsafe
@@ -144,10 +139,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             }
 
             (float left, float top, float right, float bottom) tightBounds;
-            if (gpuPinCount > 0 && imageWidth > 0 && imageHeight > 0)
+            if (pinCount > 0 && imageWidth > 0 && imageHeight > 0)
             {
-                var restList = new SampleProjection(samples, gpuPinCount, static s => s.Rest);
-                var currentList = new SampleProjection(samples, gpuPinCount, static s => s.Current);
+                var restList = new SampleProjection(samples, pinCount, static s => s.Rest);
+                var currentList = new SampleProjection(samples, pinCount, static s => s.Current);
                 tightBounds = MlsDeformBounds.Compute(imageWidth, imageHeight, restList, currentList, stiffness);
             }
             else
@@ -269,10 +264,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             effect?.SetInput(1, null, true);
             gpuCache?.Dispose();
             gpuCache = null;
-            lastPinCount = -1;
-            lastStiffness = float.NaN;
-            lastImageWidth = float.NaN;
-            lastImageHeight = float.NaN;
+            isFirst = true;
         }
 
         protected override void Dispose(bool disposing)
