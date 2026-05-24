@@ -14,12 +14,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
     internal sealed class PuppetPinEffectProcessor(IGraphicsDevicesAndContext devices, PuppetPinEffect item) : VideoEffectProcessorBase(devices)
     {
         readonly PuppetPinEffect item = item;
+        readonly float[] pinDataBuffer = new float[PuppetPinCustomEffect.MaxPins * 4];
 
         PuppetPinCustomEffect? effect;
         ID2D1DeviceContext? deviceContext;
 
-        PinCacheKey? lastCacheKey;
         PinGpuCache? gpuCache;
+
+        int lastPinCount = -1;
+        float lastStiffness = float.NaN;
+        float lastImageWidth = float.NaN;
+        float lastImageHeight = float.NaN;
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
@@ -52,13 +57,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             float imageWidth = inputBounds.Right - inputBounds.Left;
             float imageHeight = inputBounds.Bottom - inputBounds.Top;
 
-            var key = PinCacheKey.Build(samples, gpuPinCount, stiffness, imageWidth, imageHeight);
-
-            if (lastCacheKey is null || !lastCacheKey.Value.Equals(key))
+            if (!IsCacheValid(samples, gpuPinCount, stiffness, imageWidth, imageHeight))
             {
                 gpuCache?.Dispose();
-                gpuCache = BuildGpuCache(samples, gpuPinCount, stiffness, imageWidth, imageHeight);
-                lastCacheKey = key;
+                gpuCache = BuildGpuCache(gpuPinCount, stiffness, imageWidth, imageHeight, samples);
+                lastPinCount = gpuPinCount;
+                lastStiffness = stiffness;
+                lastImageWidth = imageWidth;
+                lastImageHeight = imageHeight;
             }
 
             effect.SetInput(1, gpuCache!.DataBitmap, true);
@@ -77,29 +83,54 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             };
         }
 
-        PinGpuCache BuildGpuCache(
+        bool IsCacheValid(
             List<PinSample> samples,
             int gpuPinCount,
             float stiffness,
             float imageWidth,
             float imageHeight)
         {
-            var maxPins = PuppetPinCustomEffect.MaxPins;
-            var data = new float[maxPins * 4];
+            if (gpuCache is null) return false;
+            if (gpuPinCount != lastPinCount) return false;
+            if (stiffness != lastStiffness) return false;
+            if (imageWidth != lastImageWidth) return false;
+            if (imageHeight != lastImageHeight) return false;
 
             for (var i = 0; i < gpuPinCount; i++)
             {
                 var s = samples[i];
-                data[i * 4 + 0] = s.Rest.X;
-                data[i * 4 + 1] = s.Rest.Y;
-                data[i * 4 + 2] = s.Current.X;
-                data[i * 4 + 3] = s.Current.Y;
+                if (pinDataBuffer[i * 4 + 0] != s.Rest.X) return false;
+                if (pinDataBuffer[i * 4 + 1] != s.Rest.Y) return false;
+                if (pinDataBuffer[i * 4 + 2] != s.Current.X) return false;
+                if (pinDataBuffer[i * 4 + 3] != s.Current.Y) return false;
             }
+
+            return true;
+        }
+
+        PinGpuCache BuildGpuCache(
+            int gpuPinCount,
+            float stiffness,
+            float imageWidth,
+            float imageHeight,
+            List<PinSample> samples)
+        {
+            var maxPins = PuppetPinCustomEffect.MaxPins;
+
+            for (var i = 0; i < gpuPinCount; i++)
+            {
+                var s = samples[i];
+                pinDataBuffer[i * 4 + 0] = s.Rest.X;
+                pinDataBuffer[i * 4 + 1] = s.Rest.Y;
+                pinDataBuffer[i * 4 + 2] = s.Current.X;
+                pinDataBuffer[i * 4 + 3] = s.Current.Y;
+            }
+            Array.Clear(pinDataBuffer, gpuPinCount * 4, (maxPins - gpuPinCount) * 4);
 
             ID2D1Bitmap dataBitmap;
             unsafe
             {
-                fixed (float* pData = data)
+                fixed (float* pData = pinDataBuffer)
                 {
                     var props = new BitmapProperties1(
                         new Vortice.DCommon.PixelFormat(Format.R32G32B32A32_Float, Vortice.DCommon.AlphaMode.Premultiplied),
@@ -238,7 +269,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             effect?.SetInput(1, null, true);
             gpuCache?.Dispose();
             gpuCache = null;
-            lastCacheKey = null;
+            lastPinCount = -1;
+            lastStiffness = float.NaN;
+            lastImageWidth = float.NaN;
+            lastImageHeight = float.NaN;
         }
 
         protected override void Dispose(bool disposing)
@@ -259,66 +293,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             public Vector2 Rest { get; } = rest;
             public Vector2 Current { get; } = current;
             public bool IsEnabled { get; } = isEnabled;
-        }
-
-        readonly struct PinCacheKey : IEquatable<PinCacheKey>
-        {
-            private readonly int pinCount;
-            private readonly float stiffness;
-            private readonly float imageWidth;
-            private readonly float imageHeight;
-            private readonly float[] pinData;
-
-            private PinCacheKey(int pinCount, float stiffness, float imageWidth, float imageHeight, float[] pinData)
-            {
-                this.pinCount = pinCount;
-                this.stiffness = stiffness;
-                this.imageWidth = imageWidth;
-                this.imageHeight = imageHeight;
-                this.pinData = pinData;
-            }
-
-            public static PinCacheKey Build(
-                List<PinSample> activeSamples,
-                int gpuPinCount,
-                float stiffness,
-                float imageWidth,
-                float imageHeight)
-            {
-                var data = new float[gpuPinCount * 4];
-                for (var i = 0; i < gpuPinCount; i++)
-                {
-                    var s = activeSamples[i];
-                    data[i * 4 + 0] = s.Rest.X;
-                    data[i * 4 + 1] = s.Rest.Y;
-                    data[i * 4 + 2] = s.Current.X;
-                    data[i * 4 + 3] = s.Current.Y;
-                }
-                return new PinCacheKey(gpuPinCount, stiffness, imageWidth, imageHeight, data);
-            }
-
-            public bool Equals(PinCacheKey other)
-            {
-                if (pinCount != other.pinCount) return false;
-                if (stiffness != other.stiffness) return false;
-                if (imageWidth != other.imageWidth) return false;
-                if (imageHeight != other.imageHeight) return false;
-                return pinData.AsSpan().SequenceEqual(other.pinData.AsSpan());
-            }
-
-            public override bool Equals(object? obj) => obj is PinCacheKey other && Equals(other);
-
-            public override int GetHashCode()
-            {
-                var hash = new HashCode();
-                hash.Add(pinCount);
-                hash.Add(stiffness);
-                hash.Add(imageWidth);
-                hash.Add(imageHeight);
-                foreach (var v in pinData)
-                    hash.Add(v);
-                return hash.ToHashCode();
-            }
         }
 
         sealed class PinGpuCache(
