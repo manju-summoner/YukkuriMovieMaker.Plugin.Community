@@ -12,6 +12,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputSwitch
 
         D2DEffects.AffineTransform2D? sink;
 
+        bool isFirst = true;
+        ID2D1Image? lastSinkInput;
+
         public OutputSwitchEffectProcessor(IGraphicsDevicesAndContext devices, OutputSwitchEffect item) : base(devices)
         {
             this.item = item;
@@ -39,21 +42,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputSwitch
             var cur = desc.GetCustomValue<int>("OutputBranch.CurrentIndex");
             var target = item.TargetIndex;
 
+            ID2D1Image? sinkInput;
             if (target == cur)
             {
-                sink.SetInput(0, input, true);
-                return desc;
+                sinkInput = input;
             }
-
-            if (!desc.TryGetCustomValue<ID2D1Image>(out var targetImage, $"OutputBranch.Branch{target}"))
+            else if (!desc.TryGetCustomValue<ID2D1Image>(out var targetImage, $"OutputBranch.Branch{target}"))
             {
-                sink.SetInput(0, input, true);
-                return desc;
+                sinkInput = input;
+            }
+            else
+            {
+                desc = desc.SetCustomValue<ID2D1Image>(input, $"OutputBranch.Branch{cur}");
+                desc = desc.SetCustomValue<int>(target, "OutputBranch.CurrentIndex");
+                sinkInput = targetImage;
             }
 
-            desc = desc.SetCustomValue<ID2D1Image>(input, $"OutputBranch.Branch{cur}");
-            desc = desc.SetCustomValue<int>(target, "OutputBranch.CurrentIndex");
-            sink.SetInput(0, targetImage, true);
+            if (isFirst || !ReferenceEquals(lastSinkInput, sinkInput))
+                sink.SetInput(0, sinkInput, true);
+
+            isFirst = false;
+            lastSinkInput = sinkInput;
+
             return desc;
         }
 
@@ -65,6 +75,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputSwitch
         protected override void ClearEffectChain()
         {
             sink?.SetInput(0, null, true);
+            lastSinkInput = null;
         }
     }
 }

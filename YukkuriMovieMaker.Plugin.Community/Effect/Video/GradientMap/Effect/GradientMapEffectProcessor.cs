@@ -35,10 +35,7 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
     private Project.Blend _blendMode;
     private int _isHorizontal;
 
-    private bool _gradientDirty = true;
-    private bool _blendModeDirty = true;
-    private bool _opacityDirty = true;
-    private bool _isHorizontalDirty = true;
+    private bool _isFirst = true;
 
     public GradientMapEffectProcessor(
         IGraphicsDevicesAndContext devices,
@@ -137,20 +134,13 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
         var stopsChanged = stops.Count != _loadedStops.Count
             || !stops.SequenceEqual(_loadedStops, StopComparer);
 
-        if (_gradientDirty || fileChanged || stopsChanged)
-        {
+        if (_isFirst || fileChanged || stopsChanged)
             RefreshGradientBitmap(path, gradientIndex, stops);
-            _gradientDirty = false;
-        }
 
-        if (_isHorizontalDirty || _isHorizontal != isHorizontal)
-        {
+        if (_isFirst || _isHorizontal != isHorizontal)
             _gradMapEffect.IsHorizontal = isHorizontal;
-            _isHorizontal = isHorizontal;
-            _isHorizontalDirty = false;
-        }
 
-        if (_blendModeDirty || _blendMode != blendMode)
+        if (_isFirst || _blendMode != blendMode)
         {
             if (blendMode.IsCompositionEffect())
             {
@@ -164,16 +154,15 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
                 using var blended = _blendEffect.Output;
                 _crossFadeEffect.SetInput(0, blended, true);
             }
-            _blendMode = blendMode;
-            _blendModeDirty = false;
         }
 
-        if (_opacityDirty || _opacity != opacity)
-        {
+        if (_isFirst || _opacity != opacity)
             _crossFadeEffect.Weight = opacity;
-            _opacity = opacity;
-            _opacityDirty = false;
-        }
+
+        _isFirst = false;
+        _isHorizontal = isHorizontal;
+        _blendMode = blendMode;
+        _opacity = opacity;
 
         return effectDescription.DrawDescription;
     }
