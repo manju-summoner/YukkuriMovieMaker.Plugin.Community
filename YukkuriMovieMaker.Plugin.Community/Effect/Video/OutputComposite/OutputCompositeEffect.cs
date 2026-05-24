@@ -10,7 +10,7 @@ using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
 {
-    [VideoEffect(nameof(Texts.OutputCompositeEffectName), [VideoEffectCategories.Composition], ["合成", "composite", "blend", "output", "出力", "CustomValue"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.OutputCompositeEffectName), [VideoEffectCategories.Composition], ["分岐", "branch", "合成", "composite", "blend"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public class OutputCompositeEffect : VideoEffectBase
     {
         public override string Label => $"{Texts.OutputCompositeEffectName} {TargetIndex}";

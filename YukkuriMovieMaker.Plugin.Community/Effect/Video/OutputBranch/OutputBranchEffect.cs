@@ -6,7 +6,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputBranch
 {
-    [VideoEffect(nameof(Texts.OutputBranchEffectName), [VideoEffectCategories.Composition], ["分岐", "branch", "output", "出力", "CustomValue"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.OutputBranchEffectName), [VideoEffectCategories.Composition], ["分岐", "branch", "出力", "output" ], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public class OutputBranchEffect : VideoEffectBase
     {
         public override string Label => Texts.OutputBranchEffectName;
