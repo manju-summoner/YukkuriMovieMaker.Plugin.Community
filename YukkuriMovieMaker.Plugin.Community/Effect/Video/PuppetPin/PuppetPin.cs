@@ -25,12 +25,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
         [Display(GroupName = nameof(Texts.PuppetPinEffectName), Name = nameof(Texts.PuppetPinRestXName), Description = nameof(Texts.PuppetPinRestXDesc), Order = 1, ResourceType = typeof(Texts))]
         [PuppetPinRestVisible]
         [AnimationSlider("F1", "px", -500.0, 500.0)]
-        public Animation RestX { get; } = new Animation(0, -10000.0, 10000.0);
+        public Animation RestX { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.PuppetPinEffectName), Name = nameof(Texts.PuppetPinRestYName), Description = nameof(Texts.PuppetPinRestYDesc), Order = 2, ResourceType = typeof(Texts))]
         [PuppetPinRestVisible]
         [AnimationSlider("F1", "px", -500.0, 500.0)]
-        public Animation RestY { get; } = new Animation(0, -10000.0, 10000.0);
+        public Animation RestY { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.PuppetPinEffectName), Name = nameof(Texts.PuppetPinOffsetXName), Description = nameof(Texts.PuppetPinOffsetXDesc), Order = 3, ResourceType = typeof(Texts))]
         [PuppetPinOffsetVisible]
