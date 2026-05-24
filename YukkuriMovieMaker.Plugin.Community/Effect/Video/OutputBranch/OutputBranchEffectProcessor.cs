@@ -6,7 +6,7 @@ using YukkuriMovieMaker.Player.Video.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputBranch
 {
-    internal class OutputBranchEffectProcessor(IGraphicsDevicesAndContext devices) : VideoEffectProcessorBase(devices)
+    internal class OutputBranchEffectProcessor(IGraphicsDevicesAndContext devices, OutputBranchEffect item) : VideoEffectProcessorBase(devices)
     {
         private AffineTransform2D? transformEffect;
         private ID2D1Image? transformOutput;
@@ -21,8 +21,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputBranch
             if (next <= 0)
                 next = 1;
 
-            desc = desc.SetCustomValue<ID2D1Image>(transformOutput, $"OutputBranch.Branch{next}");
-            desc = desc.SetCustomValue<int>(next + 1, "OutputBranch.NextBranchIndex");
+            var count = item.BranchCount;
+            if (count < 1)
+                count = 1;
+
+            for (var i = 0; i < count; i++)
+                desc = desc.SetCustomValue<ID2D1Image>(transformOutput, $"OutputBranch.Branch{next + i}");
+            desc = desc.SetCustomValue<int>(next + count, "OutputBranch.NextBranchIndex");
             return desc;
         }
 
