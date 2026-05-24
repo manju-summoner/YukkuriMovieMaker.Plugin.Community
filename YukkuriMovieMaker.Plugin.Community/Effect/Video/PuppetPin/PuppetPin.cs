@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 
@@ -7,9 +8,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
 {
     public class PuppetPin : Animatable
     {
+        [JsonIgnore]
         public bool IsRestSelected { get => isRestSelected; set => Set(ref isRestSelected, value); }
         bool isRestSelected = false;
 
+        [JsonIgnore]
         public bool IsOffsetSelected { get => isOffsetSelected; set => Set(ref isOffsetSelected, value); }
         bool isOffsetSelected = false;
 
