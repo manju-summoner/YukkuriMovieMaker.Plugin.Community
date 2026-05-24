@@ -61,19 +61,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
                 lastCacheKey = key;
             }
 
-            var maxDisplacement = 0f;
-            foreach (var s in samples.FindAll(s => s.IsEnabled))
-            {
-                var dx = Math.Abs(s.Current.X - s.Rest.X);
-                var dy = Math.Abs(s.Current.Y - s.Rest.Y);
-                if (dx > maxDisplacement) maxDisplacement = dx;
-                if (dy > maxDisplacement) maxDisplacement = dy;
-            }
-
             effect.SetInput(1, gpuCache!.DataBitmap, true);
             effect.PinCount = gpuPinCount;
             effect.Stiffness = stiffness;
-            effect.MaxDisplacement = maxDisplacement;
 
             var (tl, tt, tr, tb) = gpuCache.TightBounds;
             effect.TightLocalLeft = tl;

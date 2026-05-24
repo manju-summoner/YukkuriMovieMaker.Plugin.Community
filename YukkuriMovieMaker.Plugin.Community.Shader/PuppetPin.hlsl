@@ -11,8 +11,6 @@ cbuffer constants : register(b0)
     float InputTop : packoffset(c0.w);
     float InputWidth : packoffset(c1.x);
     float InputHeight : packoffset(c1.y);
-    float MaxDisplacement : packoffset(c1.z);
-    float Pad0 : packoffset(c1.w);
 };
 
 static const int MaxPins = 256;

@@ -23,12 +23,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             get => GetFloatValue((int)EffectImpl.Properties.Stiffness);
         }
 
-        public float MaxDisplacement
-        {
-            set => SetValue((int)EffectImpl.Properties.MaxDisplacement, value);
-            get => GetFloatValue((int)EffectImpl.Properties.MaxDisplacement);
-        }
-
         public float TightLocalLeft
         {
             set => SetValue((int)EffectImpl.Properties.TightLocalLeft, value);
@@ -67,13 +61,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             {
                 get => _cb.Stiffness;
                 set { _cb.Stiffness = System.Math.Clamp(value, 0.1f, 8f); UpdateConstants(); }
-            }
-
-            [CustomEffectProperty(PropertyType.Float, (int)Properties.MaxDisplacement)]
-            public float MaxDisplacement
-            {
-                get => _cb.MaxDisplacement;
-                set { _cb.MaxDisplacement = System.Math.Max(value, 0f); UpdateConstants(); }
             }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.TightLocalLeft)]
@@ -155,19 +142,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
                 public float InputTop;
                 public float InputWidth;
                 public float InputHeight;
-                public float MaxDisplacement;
-                public float Pad0;
             }
 
             public enum Properties : int
             {
                 PinCount = 0,
                 Stiffness = 1,
-                MaxDisplacement = 2,
-                TightLocalLeft = 3,
-                TightLocalTop = 4,
-                TightLocalRight = 5,
-                TightLocalBottom = 6,
+                TightLocalLeft = 2,
+                TightLocalTop = 3,
+                TightLocalRight = 4,
+                TightLocalBottom = 5,
             }
         }
     }
