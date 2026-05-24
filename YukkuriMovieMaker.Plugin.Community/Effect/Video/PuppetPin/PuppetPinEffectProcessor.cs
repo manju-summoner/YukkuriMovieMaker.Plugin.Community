@@ -146,8 +146,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             (float left, float top, float right, float bottom) tightBounds;
             if (gpuPinCount > 0 && imageWidth > 0 && imageHeight > 0)
             {
-                var restList = samples.ConvertAll(s => s.Rest);
-                var currentList = samples.ConvertAll(s => s.Current);
+                var restList = new SampleProjection(samples, gpuPinCount, static s => s.Rest);
+                var currentList = new SampleProjection(samples, gpuPinCount, static s => s.Current);
                 tightBounds = MlsDeformBounds.Compute(imageWidth, imageHeight, restList, currentList, stiffness);
             }
             else
@@ -293,6 +293,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             public Vector2 Rest { get; } = rest;
             public Vector2 Current { get; } = current;
             public bool IsEnabled { get; } = isEnabled;
+        }
+
+        readonly struct SampleProjection(List<PinSample> samples, int count, Func<PinSample, Vector2> selector)
+            : IReadOnlyList<Vector2>
+        {
+            public Vector2 this[int index] => selector(samples[index]);
+            public int Count => count;
+            public IEnumerator<Vector2> GetEnumerator()
+            {
+                for (var i = 0; i < count; i++)
+                    yield return selector(samples[i]);
+            }
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
         }
 
         sealed class PinGpuCache(
