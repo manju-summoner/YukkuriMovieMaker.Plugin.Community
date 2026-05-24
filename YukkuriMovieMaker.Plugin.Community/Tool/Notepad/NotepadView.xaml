@@ -108,7 +108,7 @@
                 <Separator/>
                 <Button Content="{DynamicResource {x:Static icons:IconKeys.Magnify}}" Command="{Binding ToggleSearchCommand}" ToolTip="{x:Static local:Texts.Search}"/>
                 <Separator/>
-                <controls:DropDownButton Content="{DynamicResource {x:Static icons:IconKeys.Cog}}" ToolTip="{x:Static local:Texts.Settings}" BorderBrush="Transparent" Padding="3">
+                <controls:DropDownButton Content="{DynamicResource {x:Static icons:IconKeys.Cog}}" ToolTip="{x:Static local:Texts.Settings}" Background="Transparent" BorderBrush="Transparent" Padding="3">
                     <controls:DropDownButton.Style>
                         <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
                     </controls:DropDownButton.Style>
@@ -138,6 +138,26 @@
             <avalon:TextEditor.Options>
                 <avalon:TextEditorOptions EnableHyperlinks="False" />
             </avalon:TextEditor.Options>
+            <avalon:TextEditor.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="ApplicationCommands.Undo"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Command="ApplicationCommands.Redo"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <Separator/>
+                    <MenuItem Command="ApplicationCommands.Cut"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Command="ApplicationCommands.Copy"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Command="ApplicationCommands.Paste"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Command="ApplicationCommands.Delete"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <Separator/>
+                    <MenuItem Command="ApplicationCommands.SelectAll"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                </ContextMenu>
+            </avalon:TextEditor.ContextMenu>
             <i:Interaction.Behaviors>
                 <local:AvalonEditTextBindingBehavior Text="{Binding Text, Mode=TwoWay}"
                                                      WordWrap="{Binding WordWrap}"/>

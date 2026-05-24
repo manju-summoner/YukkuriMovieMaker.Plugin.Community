@@ -123,6 +123,12 @@
 	<FxCompile Include="Lut.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+	<FxCompile Include="PixelizeTransition.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+	<FxCompile Include="EdgeGlow.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
 	<FxCompile Include="PuppetPin.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>

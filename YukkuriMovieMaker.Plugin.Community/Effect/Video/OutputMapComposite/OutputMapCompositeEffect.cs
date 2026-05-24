@@ -8,7 +8,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputMapComposite
 {
-    [VideoEffect(nameof(Texts.OutputMapCompositeEffectName), [VideoEffectCategories.Composition], ["合成", "composite", "blend", "map", "マップ", "lerp", "output", "出力", "CustomValue"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.OutputMapCompositeEffectName), [VideoEffectCategories.Composition], ["分岐", "branch", "合成", "composite", "blend", "map", "マップ", "lerp"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public sealed class OutputMapCompositeEffect : VideoEffectBase
     {
         public override string Label => $"{Texts.OutputMapCompositeEffectName} T:{TargetIndex} M:{MapIndex}";

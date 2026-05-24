@@ -10,6 +10,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         private readonly WaveClippingEffect _item;
         private WaveClippingCustomEffect? _effect;
 
+        private bool _isFirst = true;
+        private double _amplitude;
+        private double _frequency;
+        private double _phase;
+        private double _clipPosition;
+        private double _bandWidth;
+        private double _softness;
+        private WaveClippingMode _mode;
+        private bool _isInverted;
+        private double _rotation;
+        private int _randomSeed;
+        private bool _useRandom;
+
         public WaveClippingEffectProcessor(
             IGraphicsDevicesAndContext devices,
             WaveClippingEffect item)
@@ -27,17 +40,53 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             var length = effectDescription.ItemDuration.Frame;
             var fps = effectDescription.FPS;
 
-            _effect.Amplitude = (float)(_item.Amplitude.GetValue(frame, length, fps) / 100.0);
-            _effect.Frequency = (float)_item.Frequency.GetValue(frame, length, fps);
-            _effect.Phase = (float)_item.Phase.GetValue(frame, length, fps);
-            _effect.EdgePosition = (float)(_item.ClipPosition.GetValue(frame, length, fps) / 100.0);
-            _effect.BandWidth = (float)(_item.BandWidth.GetValue(frame, length, fps) / 100.0);
-            _effect.Softness = (float)_item.Softness.GetValue(frame, length, fps);
-            _effect.Mode = (int)_item.Mode;
-            _effect.IsInverted = _item.IsInverted ? 1.0f : 0.0f;
-            _effect.Rotation = (float)(-_item.Rotation.GetValue(frame, length, fps) * Math.PI / 180.0);
-            _effect.RandomSeed = _item.GetHashCode();
-            _effect.UseRandom = _item.UseRandom ? 1.0f : 0.0f;
+            var amplitude = _item.Amplitude.GetValue(frame, length, fps) / 100.0;
+            var frequency = _item.Frequency.GetValue(frame, length, fps);
+            var phase = _item.Phase.GetValue(frame, length, fps);
+            var clipPosition = _item.ClipPosition.GetValue(frame, length, fps) / 100.0;
+            var bandWidth = _item.BandWidth.GetValue(frame, length, fps) / 100.0;
+            var softness = _item.Softness.GetValue(frame, length, fps);
+            var mode = _item.Mode;
+            var isInverted = _item.IsInverted;
+            var rotation = -_item.Rotation.GetValue(frame, length, fps) * Math.PI / 180.0;
+            var randomSeed = _item.GetHashCode();
+            var useRandom = _item.UseRandom;
+
+            if (_isFirst || _amplitude != amplitude)
+                _effect.Amplitude = (float)amplitude;
+            if (_isFirst || _frequency != frequency)
+                _effect.Frequency = (float)frequency;
+            if (_isFirst || _phase != phase)
+                _effect.Phase = (float)phase;
+            if (_isFirst || _clipPosition != clipPosition)
+                _effect.EdgePosition = (float)clipPosition;
+            if (_isFirst || _bandWidth != bandWidth)
+                _effect.BandWidth = (float)bandWidth;
+            if (_isFirst || _softness != softness)
+                _effect.Softness = (float)softness;
+            if (_isFirst || _mode != mode)
+                _effect.Mode = (int)mode;
+            if (_isFirst || _isInverted != isInverted)
+                _effect.IsInverted = isInverted ? 1.0f : 0.0f;
+            if (_isFirst || _rotation != rotation)
+                _effect.Rotation = (float)rotation;
+            if (_isFirst || _randomSeed != randomSeed)
+                _effect.RandomSeed = randomSeed;
+            if (_isFirst || _useRandom != useRandom)
+                _effect.UseRandom = useRandom ? 1.0f : 0.0f;
+
+            _isFirst = false;
+            _amplitude = amplitude;
+            _frequency = frequency;
+            _phase = phase;
+            _clipPosition = clipPosition;
+            _bandWidth = bandWidth;
+            _softness = softness;
+            _mode = mode;
+            _isInverted = isInverted;
+            _rotation = rotation;
+            _randomSeed = randomSeed;
+            _useRandom = useRandom;
 
             return effectDescription.DrawDescription;
         }

@@ -47,6 +47,9 @@
 	  <Reference Include="System.Drawing.Common">
 		  <HintPath>$(YMM4DirPath)System.Drawing.Common.dll</HintPath>
 	  </Reference>
+	  <Reference Include="SharpGen.Runtime.COM">
+		  <HintPath>$(YMM4DirPath)SharpGen.Runtime.COM.dll</HintPath>
+	  </Reference>
   </ItemGroup>
 
   <!-- nugetパッケージで公開されているライブラリはPackageReferenceで参照する。-->
@@ -80,7 +83,6 @@
   <ItemGroup>
     <Folder Include="FileWriter\" />
     <Folder Include="Tachie\" />
-    <Folder Include="Transition\" />
   </ItemGroup>
 	
   <ItemGroup>
@@ -160,7 +162,9 @@
 	  <Resource Include="$(ShaderDirPath)ChannelRouter.cso" Link="Resources\Shader\ChannelRouter.cso" />
 	  <Resource Include="$(ShaderDirPath)Tritone.cso" Link="Resources\Shader\Tritone.cso" />
 	  <Resource Include="$(ShaderDirPath)Lut.cso" Link="Resources\Shader\Lut.cso" />
-	  <Resource Include="$(ShaderDirPath)PuppetPin.cso" Link="Resources\Shader\PuppetPin.cso" />
+	  <Resource Include="$(ShaderDirPath)EdgeGlow.cso" Link="Resources\Shader\EdgeGlow.cso" />
+	  <Resource Include="$(ShaderDirPath)PixelizeTransition.cso" Link="Resources\Shader\PixelizeTransition.cso" />
+    <Resource Include="$(ShaderDirPath)PuppetPin.cso" Link="Resources\Shader\PuppetPin.cso" />
   </ItemGroup>
 
 </Project>

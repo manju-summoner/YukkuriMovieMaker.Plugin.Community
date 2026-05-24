@@ -24,6 +24,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
         Rect cachedBounds;
         (float Left, float Top, float Right, float Bottom)? cachedTrimRect;
 
+        bool isFirst = true;
+        float left, top, right, bottom;
+        bool center;
+
         public TrimMarginEffectProcessor(IGraphicsDevicesAndContext devices, TrimMarginEffect item) : base(devices)
         {
             this.devices = devices;
@@ -56,12 +60,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
                 return effectDescription.DrawDescription;
 
             var (left, top, right, bottom) = trimRect.Value;
+            var center = item.Center;
 
-            cropEffect.Rectangle = new Vector4(left, top, right, bottom);
+            if (isFirst || this.left != left || this.top != top || this.right != right || this.bottom != bottom)
+                cropEffect.Rectangle = new Vector4(left, top, right, bottom);
 
-            transformEffect.TransformMatrix = item.Center
-                ? new Matrix3x2(1f, 0f, 0f, 1f, -(left + right) * 0.5f, -(top + bottom) * 0.5f)
-                : Matrix3x2.Identity;
+            if (isFirst || this.center != center || this.left != left || this.top != top || this.right != right || this.bottom != bottom)
+            {
+                transformEffect.TransformMatrix = center
+                    ? new Matrix3x2(1f, 0f, 0f, 1f, -(left + right) * 0.5f, -(top + bottom) * 0.5f)
+                    : Matrix3x2.Identity;
+            }
+
+            isFirst = false;
+            this.left = left;
+            this.top = top;
+            this.right = right;
+            this.bottom = bottom;
+            this.center = center;
 
             return effectDescription.DrawDescription;
         }
