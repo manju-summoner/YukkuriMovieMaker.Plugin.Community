@@ -63,8 +63,8 @@ float4 main(
     float scaleInvSq = 1.0f / (scale * scale);
 
     float totalW = 0.0f;
-    float2 rStar = float2(0.0f, 0.0f);
-    float2 cStar = float2(0.0f, 0.0f);
+    float2 pStar = float2(0.0f, 0.0f);
+    float2 qStar = float2(0.0f, 0.0f);
 
     float minDistSq = 1e30f;
     int nearestIndex = 0;
@@ -72,8 +72,8 @@ float4 main(
     [loop]
     for (int i = 0; i < n; i++)
     {
-        float2 ri = GetRestScene(i);
-        float2 d = ri - v;
+        float2 ci = GetCurrentScene(i);
+        float2 d = ci - v;
         float distSq = dot(d, d) * scaleInvSq + Epsilon;
         if (distSq < minDistSq)
         {
@@ -82,8 +82,8 @@ float4 main(
         }
         float w = pow(distSq, -alpha);
         totalW += w;
-        rStar += w * ri;
-        cStar += w * GetCurrentScene(i);
+        pStar += w * ci;
+        qStar += w * GetRestScene(i);
     }
 
     if (minDistSq < Epsilon * 4.0f)
@@ -96,10 +96,10 @@ float4 main(
     }
 
     float invTotalW = 1.0f / totalW;
-    rStar *= invTotalW;
-    cStar *= invTotalW;
+    pStar *= invTotalW;
+    qStar *= invTotalW;
 
-    float2 vHat = v - rStar;
+    float2 vHat = v - pStar;
     float vHatLen = length(vHat);
 
     float frX = 0.0f;
@@ -108,19 +108,19 @@ float4 main(
     [loop]
     for (int j = 0; j < n; j++)
     {
-        float2 ri = GetRestScene(j);
         float2 ci = GetCurrentScene(j);
-        float2 d = ri - v;
+        float2 ri = GetRestScene(j);
+        float2 d = ci - v;
         float distSq = dot(d, d) * scaleInvSq + Epsilon;
         float w = pow(distSq, -alpha);
 
-        float2 rHat = ri - rStar;
-        float2 cHat = ci - cStar;
+        float2 pHat = ci - pStar;
+        float2 qHat = ri - qStar;
 
-        float2 rHatPerp = float2(-rHat.y, rHat.x);
+        float2 pHatPerp = float2(-pHat.y, pHat.x);
 
-        frX += w * (dot(rHat, vHat) * cHat.x - dot(rHatPerp, vHat) * cHat.y);
-        frY += w * (dot(rHat, vHat) * cHat.y + dot(rHatPerp, vHat) * cHat.x);
+        frX += w * (dot(pHat, vHat) * qHat.x - dot(pHatPerp, vHat) * qHat.y);
+        frY += w * (dot(pHat, vHat) * qHat.y + dot(pHatPerp, vHat) * qHat.x);
     }
 
     float frLen = length(float2(frX, frY));
@@ -128,11 +128,11 @@ float4 main(
     float2 source;
     if (frLen < Epsilon)
     {
-        source = v - rStar + cStar;
+        source = v - pStar + qStar;
     }
     else
     {
-        source = (vHatLen / frLen) * float2(frX, frY) + cStar;
+        source = (vHatLen / frLen) * float2(frX, frY) + qStar;
     }
 
     float2 sampleUV = uv0.xy + (source - v) * uv0.zw;
