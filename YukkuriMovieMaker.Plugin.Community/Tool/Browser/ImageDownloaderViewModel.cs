@@ -201,6 +201,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         async void LoadImagesAsync()
         {
             loadCts?.Cancel();
+            loadCts?.Dispose();
             loadCts = new CancellationTokenSource();
             var token = loadCts.Token;
 
@@ -257,6 +258,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 return;
 
             downloadCts?.Cancel();
+            downloadCts?.Dispose();
             downloadCts = new CancellationTokenSource();
             var token = downloadCts.Token;
 
