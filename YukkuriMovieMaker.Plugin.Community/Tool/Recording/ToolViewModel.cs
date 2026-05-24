@@ -76,13 +76,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
         }
 
-        string recordingStatus = Texts.Idle;
-        public string RecordingStatus
-        {
-            get => recordingStatus;
-            set => Set(ref recordingStatus, value);
-        }
-
         double currentVolume;
         public double CurrentVolume
         {
@@ -104,7 +97,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 if (IsRecording)
                 {
-                    RecordingStatus = Texts.CannotChangeOutputWhileRecording;
+                    ShowError(Texts.CannotChangeOutputWhileRecording);
                     return;
                 }
 
@@ -184,7 +177,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                     else if (AvailableDevices.All(x => !string.Equals(x.Id, SelectedDeviceId, StringComparison.Ordinal)))
                     {
                         if (!string.Equals(SelectedDeviceId, RecordingService.DefaultRecordingDeviceId, StringComparison.Ordinal))
-                            RecordingStatus = Texts.SavedRecordingDeviceNotFoundFallback;
+                            ShowError(Texts.SavedRecordingDeviceNotFoundFallback);
 
                         SelectedDeviceId = RecordingService.DefaultRecordingDeviceId;
                     }
@@ -192,14 +185,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 else
                 {
                     SelectedDeviceId = null;
-                    RecordingStatus = Texts.NoRecordingDeviceFoundDetailed;
+                    ShowError(Texts.NoRecordingDeviceFoundDetailed);
                 }
             }
             catch (Exception ex)
             {
                 AvailableDevices.Clear();
                 SelectedDeviceId = null;
-                RecordingStatus = string.Format(Texts.RecordingStartFailed, ex.Message);
+                ShowError(string.Format(Texts.RecordingStartFailed, ex.Message));
             }
 
             RaiseCommandStates();
@@ -229,7 +222,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
             catch (Exception ex)
             {
-                RecordingStatus = string.Format(Texts.RecordListRefreshFailed, ex.Message);
+                ShowError(string.Format(Texts.RecordListRefreshFailed, ex.Message));
             }
         }
 
@@ -246,29 +239,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 var startResult = recordingStartWorkflowService.Execute(SelectedDeviceId);
                 if (!startResult.IsSuccess)
                 {
-                    RecordingStatus = startResult.ErrorMessage ?? Texts.ReselectRecordingDevice;
+                    ShowError(startResult.ErrorMessage ?? Texts.ReselectRecordingDevice);
                     return;
                 }
 
                 latestRecordedFilePath = null;
-                var recordingStatusMessage = string.Format(Texts.RecordingNowWithPathAndDevice, RecordsDirectory, startResult.Selection.FriendlyName);
                 if (startResult.Selection.FellBackToDefault)
-                {
-                    var fallbackMessage = string.Format(Texts.SavedRecordingDeviceNotFoundFallbackWithName, startResult.Selection.FriendlyName);
-                    recordingStatusMessage = $"{fallbackMessage}{Environment.NewLine}{recordingStatusMessage}";
-                }
+                    ShowError(string.Format(Texts.SavedRecordingDeviceNotFoundFallbackWithName, startResult.Selection.FriendlyName));
 
-                RecordingStatus = recordingStatusMessage;
                 RaiseCommandStates();
             }
             catch (InvalidOperationException ex)
             {
-                RecordingStatus = ex.Message;
+                ShowError(ex.Message);
                 RaiseCommandStates();
             }
             catch (Exception ex)
             {
-                RecordingStatus = string.Format(Texts.RecordingStartFailed, ex.Message);
+                ShowError(string.Format(Texts.RecordingStartFailed, ex.Message));
                 RaiseCommandStates();
             }
         }
@@ -283,25 +271,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
                 if (!stopResult.HasData)
                 {
-                    RecordingStatus = Texts.NoRecordingDataRetry;
+                    ShowError(Texts.NoRecordingDataRetry);
                     RaiseCommandStates();
                     return;
                 }
 
                 if (stopResult.HasZeroLengthData)
                 {
-                    RecordingStatus = string.Format(Texts.RecordingDataLengthZero, stopResult.FilePath ?? string.Empty);
+                    ShowError(string.Format(Texts.RecordingDataLengthZero, stopResult.FilePath ?? string.Empty));
                     RaiseCommandStates();
                     return;
                 }
 
                 latestRecordedFilePath = stopResult.FilePath;
-                RecordingStatus = string.Format(Texts.RecordingStoppedAndSaved, stopResult.FilePath ?? string.Empty);
                 RefreshRecords();
             }
             catch (Exception ex)
             {
-                RecordingStatus = string.Format(Texts.RecordingStopFailed, ex.Message);
+                ShowError(string.Format(Texts.RecordingStopFailed, ex.Message));
                 RaiseCommandStates();
             }
         }
@@ -318,7 +305,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 var fallback = RecordingSettings.GetDefaultOutputDirectory();
                 if (string.Equals(OutputDirectory, fallback, StringComparison.OrdinalIgnoreCase))
                 {
-                    RecordingStatus = Texts.OutputFolderUnavailable;
+                    ShowError(Texts.OutputFolderUnavailable);
                     return false;
                 }
 
@@ -326,17 +313,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 {
                     Directory.CreateDirectory(fallback);
                     OutputDirectory = fallback;
-                    MessageBoxViewModel.Show(
-                        string.Format(Texts.OutputDirectoryFallback, fallback),
-                        Texts.ToolName,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning,
-                        MessageBoxResult.OK);
+                    ShowError(string.Format(Texts.OutputDirectoryFallback, fallback));
                     return true;
                 }
                 catch (Exception)
                 {
-                    RecordingStatus = Texts.OutputFolderUnavailable;
+                    ShowError(Texts.OutputFolderUnavailable);
                     return false;
                 }
             }
@@ -355,12 +337,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 {
                     Directory.CreateDirectory(fallback);
                     OutputDirectory = fallback;
-                    RecordingStatus = string.Format(Texts.OutputDirectoryFallback, fallback);
+                    ShowError(string.Format(Texts.OutputDirectoryFallback, fallback));
                 }
                 catch (Exception)
                 {
                     RecordsDirectory = fallback;
-                    RecordingStatus = Texts.OutputFolderUnavailable;
+                    ShowError(Texts.OutputFolderUnavailable);
                 }
             }
         }
@@ -397,15 +379,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             try
             {
                 audioPlaybackService.Play(path);
-                RecordingStatus = Texts.Playing;
                 OnPropertyChanged(nameof(IsPlaying));
                 OnPropertyChanged(nameof(CanSuspend));
             }
             catch (Exception ex)
             {
-                RecordingStatus = string.Format(Texts.PlaybackFailed, ex.Message);
                 audioPlaybackService.Stop();
                 OnPropertyChanged(nameof(IsPlaying));
+                ShowError(string.Format(Texts.PlaybackFailed, ex.Message));
             }
             finally
             {
@@ -433,14 +414,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 if (File.Exists(target.Path))
                     File.Delete(target.Path);
 
-                RecordingStatus = string.Format(Texts.RecordDeleted, target.FileName);
                 if (string.Equals(latestRecordedFilePath, target.Path, StringComparison.OrdinalIgnoreCase))
                     latestRecordedFilePath = null;
                 RefreshRecords();
             }
             catch (Exception ex)
             {
-                RecordingStatus = string.Format(Texts.RecordDeleteFailed, ex.Message);
+                ShowError(string.Format(Texts.RecordDeleteFailed, ex.Message));
             }
         }
 
@@ -466,7 +446,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             var safeName = string.Join("_", newName.Trim().Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
             if (string.IsNullOrWhiteSpace(safeName))
             {
-                RecordingStatus = Texts.InvalidFileName;
+                ShowError(Texts.InvalidFileName);
                 return;
             }
 
@@ -481,12 +461,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 if (string.Equals(latestRecordedFilePath, sourcePath, StringComparison.OrdinalIgnoreCase))
                     latestRecordedFilePath = destinationPath;
 
-                RecordingStatus = string.Format(Texts.RecordRenamed, Path.GetFileName(destinationPath));
                 RefreshRecords();
             }
             catch (Exception ex)
             {
-                RecordingStatus = string.Format(Texts.RecordRenameFailed, ex.Message);
+                ShowError(string.Format(Texts.RecordRenameFailed, ex.Message));
             }
         }
 
@@ -503,7 +482,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
             catch (Exception ex)
             {
-                RecordingStatus = string.Format(Texts.OpenFolderFailed, ex.Message);
+                ShowError(string.Format(Texts.OpenFolderFailed, ex.Message));
             }
         }
 
@@ -515,12 +494,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             try
             {
                 Clipboard.SetText(SelectedRecord.Path);
-                RecordingStatus = Texts.RecordPathCopied;
             }
             catch (Exception ex)
             {
-                RecordingStatus = string.Format(Texts.CopyPathFailed, ex.Message);
+                ShowError(string.Format(Texts.CopyPathFailed, ex.Message));
             }
+        }
+
+        void ShowError(string message)
+        {
+            MessageBoxViewModel.Show(
+                message,
+                Texts.ToolName,
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning,
+                MessageBoxResult.OK);
         }
 
         public string[] GetSelectedRecordPathsForDragDrop()
@@ -542,7 +530,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             if (dialog.ShowDialog() == Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
             {
                 OutputDirectory = dialog.SelectedPath;
-                RecordingStatus = string.Format(Texts.OutputDirectoryChanged, OutputDirectory);
             }
         }
 
@@ -558,7 +545,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 return;
 
             OutputDirectory = RecordingSettings.GetDefaultOutputDirectory();
-            RecordingStatus = string.Format(Texts.OutputDirectoryReset, OutputDirectory);
         }
 
         void OnRecordingDataAvailable(object? sender, Models.RecordingDataEventArgs e)
@@ -600,12 +586,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         {
             void HandlePlaybackStopped()
             {
-                RecordingStatus = e.Exception is null
-                    ? Texts.PlaybackCompleted
-                    : string.Format(Texts.PlaybackError, e.Exception.Message);
                 OnPropertyChanged(nameof(IsPlaying));
                 OnPropertyChanged(nameof(CanSuspend));
                 RaiseCommandStates();
+                if (e.Exception is not null)
+                    ShowError(string.Format(Texts.PlaybackError, e.Exception.Message));
             }
 
             var dispatcher = Application.Current?.Dispatcher;

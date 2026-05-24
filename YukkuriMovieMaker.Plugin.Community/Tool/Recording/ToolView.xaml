@@ -44,7 +44,6 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
@@ -156,6 +155,5 @@
         </Grid>
 
         <TextBlock Grid.Row="5" Text="{x:Static local:Texts.RecordingToolMemo}" TextWrapping="Wrap"/>
-        <TextBlock Grid.Row="6" Text="{Binding RecordingStatus}" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" FontWeight="Bold" TextWrapping="Wrap"/>
     </Grid>
 </UserControl>
