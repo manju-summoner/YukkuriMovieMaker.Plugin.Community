@@ -81,7 +81,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             if (!string.IsNullOrWhiteSpace(Parameter.AudioFilePath))
                 return;
 
-            Parameter.AudioFilePath = RecordedVoiceSpeaker.GetOrCreateSilentFilePath(Parameter.RecordsDirectory);
+            Parameter.AudioFilePath = RecordedVoiceParameter.ExplicitUnselectedToken;
         }
 
         private void OnSelectClicked(object sender, RoutedEventArgs e)

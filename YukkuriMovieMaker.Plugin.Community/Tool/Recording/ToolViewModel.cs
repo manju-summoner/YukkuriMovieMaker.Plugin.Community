@@ -166,40 +166,49 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         void RefreshMicrophones()
         {
-            AvailableDevices.Clear();
-
-            var defaultDeviceName = recordingService.GetDefaultRecordingDeviceFriendlyName();
-            AvailableDevices.Add(new RecordingDeviceInfo
+            try
             {
-                Id = RecordingService.DefaultRecordingDeviceId,
-                IsDefault = true,
-                FriendlyName = string.IsNullOrWhiteSpace(defaultDeviceName)
-                    ? Texts.DefaultRecordingDevice
-                    : string.Format(Texts.DefaultRecordingDeviceWithName, defaultDeviceName),
-                ResolvedDeviceName = defaultDeviceName,
-            });
+                AvailableDevices.Clear();
 
-            foreach (var device in recordingService.GetAvailableDevices())
-                AvailableDevices.Add(device);
-
-            if (AvailableDevices.Count > 1 || !string.IsNullOrWhiteSpace(defaultDeviceName))
-            {
-                if (string.IsNullOrWhiteSpace(SelectedDeviceId))
+                var defaultDeviceName = recordingService.GetDefaultRecordingDeviceFriendlyName();
+                AvailableDevices.Add(new RecordingDeviceInfo
                 {
-                    SelectedDeviceId = AvailableDevices[0].Id;
+                    Id = RecordingService.DefaultRecordingDeviceId,
+                    IsDefault = true,
+                    FriendlyName = string.IsNullOrWhiteSpace(defaultDeviceName)
+                        ? Texts.DefaultRecordingDevice
+                        : string.Format(Texts.DefaultRecordingDeviceWithName, defaultDeviceName),
+                    ResolvedDeviceName = defaultDeviceName,
+                });
+
+                foreach (var device in recordingService.GetAvailableDevices())
+                    AvailableDevices.Add(device);
+
+                if (AvailableDevices.Count > 1 || !string.IsNullOrWhiteSpace(defaultDeviceName))
+                {
+                    if (string.IsNullOrWhiteSpace(SelectedDeviceId))
+                    {
+                        SelectedDeviceId = AvailableDevices[0].Id;
+                    }
+                    else if (AvailableDevices.All(x => !string.Equals(x.Id, SelectedDeviceId, StringComparison.Ordinal)))
+                    {
+                        if (!string.Equals(SelectedDeviceId, RecordingService.DefaultRecordingDeviceId, StringComparison.Ordinal))
+                            RecordingStatus = Texts.SavedRecordingDeviceNotFoundFallback;
+
+                        SelectedDeviceId = RecordingService.DefaultRecordingDeviceId;
+                    }
                 }
-                else if (AvailableDevices.All(x => !string.Equals(x.Id, SelectedDeviceId, StringComparison.Ordinal)))
+                else
                 {
-                    if (!string.Equals(SelectedDeviceId, RecordingService.DefaultRecordingDeviceId, StringComparison.Ordinal))
-                        RecordingStatus = Texts.SavedRecordingDeviceNotFoundFallback;
-
-                    SelectedDeviceId = RecordingService.DefaultRecordingDeviceId;
+                    SelectedDeviceId = null;
+                    RecordingStatus = Texts.NoRecordingDeviceFoundDetailed;
                 }
             }
-            else
+            catch (Exception ex)
             {
+                AvailableDevices.Clear();
                 SelectedDeviceId = null;
-                RecordingStatus = Texts.NoRecordingDeviceFoundDetailed;
+                RecordingStatus = string.Format(Texts.RecordingStartFailed, ex.Message);
             }
 
             RaiseCommandStates();

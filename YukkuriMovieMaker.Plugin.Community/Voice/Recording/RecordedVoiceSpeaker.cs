@@ -165,7 +165,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                 if (!string.IsNullOrWhiteSpace(defaultPath))
                     return defaultPath;
 
-                return GetOrCreateSilentWavInDirectory(recordsDirectory);
+                return RecordedVoiceParameter.ExplicitUnselectedToken;
             }
             catch
             {
