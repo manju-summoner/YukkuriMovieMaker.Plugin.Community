@@ -73,7 +73,6 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <Button Content="{x:Static local:Texts.Play}" Command="{Binding PlayCommand}" />
             <Button Content="{x:Static local:Texts.RefreshRecords}" Command="{Binding RefreshRecordsCommand}" />
             <Button Content="{x:Static local:Texts.OpenFolder}" Command="{Binding OpenFolderCommand}" />
         </WrapPanel>

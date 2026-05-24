@@ -34,7 +34,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         public ICommand BrowseOutputDirectoryCommand { get; }
         public ICommand ResetOutputDirectoryCommand { get; }
         public ICommand RefreshRecordsCommand { get; }
-        public ICommand PlayCommand { get; }
         public ICommand PlaySelectedCommand { get; }
         public ICommand DeleteSelectedCommand { get; }
         public ICommand RenameSelectedCommand { get; }
@@ -144,7 +143,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             BrowseOutputDirectoryCommand = new ActionCommand(_ => !IsRecording, _ => BrowseOutputDirectory());
             ResetOutputDirectoryCommand = new ActionCommand(_ => !IsRecording, _ => ResetOutputDirectory());
             RefreshRecordsCommand = new ActionCommand(_ => true, _ => RefreshRecords());
-            PlayCommand = new ActionCommand(_ => CanPlayLatest(), _ => PlayLatest());
             PlaySelectedCommand = new ActionCommand(_ => CanPlaySelected(), _ => PlaySelected());
             DeleteSelectedCommand = new ActionCommand(_ => CanDeleteSelected(), _ => DeleteSelected());
             RenameSelectedCommand = new ActionCommand(_ => CanRenameSelected(), _ => RenameSelected());
@@ -369,12 +367,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         }
 
         bool CanStartRecording() => !IsRecording && !string.IsNullOrWhiteSpace(SelectedDeviceId);
-        bool CanPlayLatest() => !IsRecording && !audioPlaybackService.IsPlaying && !string.IsNullOrWhiteSpace(latestRecordedFilePath) && File.Exists(latestRecordedFilePath);
         bool CanPlaySelected() => !IsRecording && !audioPlaybackService.IsPlaying && SelectedRecord is not null && File.Exists(SelectedRecord.Path);
         bool CanDeleteSelected() => !IsRecording && !audioPlaybackService.IsPlaying && SelectedRecord is not null;
         bool CanRenameSelected() => !IsRecording && SelectedRecord is not null && !string.IsNullOrWhiteSpace(RenameText);
 
-        void PlayLatest() => PlayFile(latestRecordedFilePath!);
         void PlaySelected()
         {
             if (SelectedRecord is null)
@@ -580,7 +576,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             (BrowseOutputDirectoryCommand as ActionCommand)?.RaiseCanExecuteChanged();
             (ResetOutputDirectoryCommand as ActionCommand)?.RaiseCanExecuteChanged();
             (RefreshRecordsCommand as ActionCommand)?.RaiseCanExecuteChanged();
-            (PlayCommand as ActionCommand)?.RaiseCanExecuteChanged();
             (PlaySelectedCommand as ActionCommand)?.RaiseCanExecuteChanged();
             (DeleteSelectedCommand as ActionCommand)?.RaiseCanExecuteChanged();
             (RenameSelectedCommand as ActionCommand)?.RaiseCanExecuteChanged();
