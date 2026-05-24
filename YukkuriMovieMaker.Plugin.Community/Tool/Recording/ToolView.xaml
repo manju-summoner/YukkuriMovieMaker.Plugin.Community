@@ -15,9 +15,8 @@
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
     </UserControl.Resources>
-    <Grid Margin="4">
+    <Grid Grid.IsSharedSizeScope="True">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -28,47 +27,37 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="{x:Static local:Texts.RecordingDevice}" />
-        <StackPanel Grid.Row="1">
-            <DockPanel>
-                <Button Content="{x:Static local:Texts.Refresh}" Command="{Binding RefreshDevicesCommand}" DockPanel.Dock="Right" />
-                <ComboBox ItemsSource="{Binding AvailableDevices}"
-                          DisplayMemberPath="FriendlyName"
-                          SelectedValuePath="Id"
-                          SelectedValue="{Binding SelectedDeviceId}"
-                          VerticalContentAlignment="Center"
-                          Height="26" />
-            </DockPanel>
-            <TextBlock Margin="0,4,0,0">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
-                        <Setter Property="Text">
-                            <Setter.Value>
-                                <MultiBinding StringFormat="{}{0}: {1}">
-                                    <Binding Source="{x:Static local:Texts.SelectedRecordingDevice}"/>
-                                    <Binding Path="SelectedDeviceDisplayName"/>
-                                </MultiBinding>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-        </StackPanel>
-
-        <Grid Grid.Row="2" Margin="0,4,0,4">
+        <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.RecordingDevice}" VerticalAlignment="Center" Margin="6,0"/>
+            <ComboBox Grid.Column="1"
+                      ItemsSource="{Binding AvailableDevices}"
+                      DisplayMemberPath="FriendlyName"
+                      SelectedValuePath="Id"
+                      SelectedValue="{Binding SelectedDeviceId}"
+                      VerticalContentAlignment="Center"
+                      Height="26" />
+            <Button Grid.Column="2" Width="26" Padding="2" Content="{DynamicResource {x:Static icons:IconKeys.Refresh}}" ToolTip="{x:Static local:Texts.Refresh}" Command="{Binding RefreshDevicesCommand}"/>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.SaveDestination}" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.SaveDestination}" VerticalAlignment="Center" Margin="6,0"/>
             <TextBox Grid.Column="1" Text="{Binding OutputDirectory, UpdateSourceTrigger=LostFocus}" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="26"/>
-            <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.FolderOpen}}" ToolTip="{x:Static local:Texts.Browse}" Command="{Binding BrowseOutputDirectoryCommand}"/>
-            <Button Grid.Column="3" Content="{DynamicResource {x:Static icons:IconKeys.Refresh}}" ToolTip="{x:Static local:Texts.ResetToDefault}" Command="{Binding ResetOutputDirectoryCommand}"/>
+            <Button Grid.Column="2" Width="26" Padding="2" Content="{DynamicResource {x:Static icons:IconKeys.FolderOpen}}" ToolTip="{x:Static local:Texts.Browse}" Command="{Binding BrowseOutputDirectoryCommand}"/>
+            <Button Grid.Column="3" Width="26" Padding="4" Content="{DynamicResource {x:Static icons:IconKeys.Backspace}}" ToolTip="{x:Static local:Texts.ResetToDefault}" Command="{Binding ResetOutputDirectoryCommand}"/>
         </Grid>
 
-        <WrapPanel Grid.Row="3" Margin="0,0,0,6">
+        <WrapPanel Grid.Row="2">
             <Button Content="{x:Static local:Texts.StartRecording}" Command="{Binding StartRecordingCommand}" />
             <Button Content="{x:Static local:Texts.StopRecording}" Command="{Binding StopRecordingCommand}" />
             <Button Content="{x:Static local:Texts.Play}" Command="{Binding PlayCommand}" />
@@ -76,12 +65,12 @@
             <Button Content="{x:Static local:Texts.OpenFolder}" Command="{Binding OpenFolderCommand}" />
         </WrapPanel>
 
-        <StackPanel Grid.Row="4">
+        <StackPanel Grid.Row="3">
             <TextBlock Text="{x:Static local:Texts.InputLevel}" />
             <ProgressBar Minimum="0" Maximum="1" Value="{Binding CurrentVolume}" Height="22" />
         </StackPanel>
 
-        <Grid Grid.Row="5" Margin="0,6,0,0">
+        <Grid Grid.Row="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
@@ -100,7 +89,7 @@
                 </ListView.View>
             </ListView>
 
-            <WrapPanel Grid.Row="1" Margin="0,6,0,0">
+            <WrapPanel Grid.Row="1">
                 <Button Content="{x:Static local:Texts.PlaySelected}" Command="{Binding PlaySelectedCommand}" />
                 <Button Content="{x:Static local:Texts.DeleteSelected}" Command="{Binding DeleteSelectedCommand}" />
                 <Button Content="{x:Static local:Texts.CopyPath}" Command="{Binding CopyPathCommand}" />
@@ -109,7 +98,7 @@
             </WrapPanel>
         </Grid>
 
-        <TextBlock Grid.Row="7" Text="{x:Static local:Texts.RecordingToolMemo}" TextWrapping="Wrap"/>
-        <TextBlock Grid.Row="8" Text="{Binding RecordingStatus}" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" FontWeight="Bold" TextWrapping="Wrap"/>
+        <TextBlock Grid.Row="6" Text="{x:Static local:Texts.RecordingToolMemo}" TextWrapping="Wrap"/>
+        <TextBlock Grid.Row="7" Text="{Binding RecordingStatus}" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" FontWeight="Bold" TextWrapping="Wrap"/>
     </Grid>
 </UserControl>

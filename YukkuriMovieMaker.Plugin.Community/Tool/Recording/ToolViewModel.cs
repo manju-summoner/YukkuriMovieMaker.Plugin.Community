@@ -50,7 +50,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 if (Set(ref selectedDeviceId, value))
                 {
                     RecordingSettings.Default.SelectedRecordingDeviceId = value ?? RecordingService.DefaultRecordingDeviceId;
-                    OnPropertyChanged(nameof(SelectedDeviceDisplayName));
                     RaiseCommandStates();
                 }
             }
@@ -126,10 +125,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         }
 
         public bool IsRecording => recordingService.IsRecording;
-
-        public string SelectedDeviceDisplayName
-            => AvailableDevices.FirstOrDefault(x => string.Equals(x.Id, SelectedDeviceId, StringComparison.Ordinal))?.FriendlyName
-                ?? Texts.Unselected;
 
         public ToolViewModel()
         {
@@ -212,7 +207,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }
 
             RaiseCommandStates();
-            OnPropertyChanged(nameof(SelectedDeviceDisplayName));
         }
 
         void RefreshRecords()
