@@ -158,17 +158,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 _ => SetAllSelected(false));
             RefreshCommand = new ActionCommand(
                 _ => !IsLoading,
-                _ => LoadImagesAsync());
+                _ => _ = LoadImagesAsync());
             SelectSaveFolderCommand = new ActionCommand(
                 _ => true,
                 _ => SelectSaveFolder());
             DownloadSelectedCommand = new ActionCommand(
                 _ => !IsDownloading && !string.IsNullOrWhiteSpace(SaveFolder) && Items.Any(x => x.IsSelected),
-                _ => DownloadSelectedAsync());
+                _ => _ = DownloadSelectedAsync());
 
             Items.CollectionChanged += OnItemsCollectionChanged;
 
-            LoadImagesAsync();
+            _ = LoadImagesAsync();
         }
 
         void OnItemsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -230,7 +230,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             return $"{uri.GetLeftPart(UriPartial.Authority)}{uri.AbsolutePath}{uri.Query}";
         }
 
-        async void LoadImagesAsync()
+        async Task LoadImagesAsync()
         {
             loadCts?.Cancel();
             loadCts?.Dispose();
@@ -277,7 +277,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 }));
             }
             catch (OperationCanceledException) { }
-            catch { }
             finally
             {
                 if (!token.IsCancellationRequested)
@@ -288,7 +287,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             }
         }
 
-        async void DownloadSelectedAsync()
+        async Task DownloadSelectedAsync()
         {
             var targets = Items.Where(x => x.IsSelected).ToList();
             if (targets.Count == 0 || string.IsNullOrWhiteSpace(SaveFolder))
@@ -322,11 +321,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                     try
                     {
                         await item.SaveToAsync(SaveFolder, token);
+                        await Application.Current?.Dispatcher?.InvokeAsync(() => DownloadProgress++);
                     }
                     finally
                     {
                         semaphore.Release();
-                        await Application.Current?.Dispatcher?.InvokeAsync(() => DownloadProgress++);
                     }
                 });
                 await Task.WhenAll(tasks);
