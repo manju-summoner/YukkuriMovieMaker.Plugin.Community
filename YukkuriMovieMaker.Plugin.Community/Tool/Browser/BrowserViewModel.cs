@@ -63,10 +63,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         public ActionCommand DownloadCommand { get; }
         public ActionCommand PrintCommand { get; }
         public ActionCommand FindCommand { get; }
+        public ActionCommand OpenImageDownloaderCommand { get; }
 
         public BrowserFavoriteEditorViewModel? FavoriteEditorViewModel { get; set => Set(ref field, value); }
         public ClearBrowsingDataViewModel? ClearBrowsingDataViewModel { get => field; set => Set(ref field, value); }
         public BrowserSettingsViewModel? BrowserSettingsViewModel { get => field; set => Set(ref field, value); }
+        public ImageDownloaderViewModel? ImageDownloaderViewModel { get => field; set => Set(ref field, value); }
 
         [SuppressMessage("Performance", "CA1822:メンバーを static に設定します", Justification = "")]
         public BrowserFavoriteDirectoryViewModel FavoriteDirectoryViewModel => BrowserFavoriteDirectoryViewModel.CreateBrowserFavoriteRoot();
@@ -120,6 +122,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             FindCommand = new ActionCommand(
                 _ => !isBrowserCrashed && webView2?.CoreWebView2 != null,
                 async _ => await ExecuteFindAsync());
+            OpenImageDownloaderCommand = new ActionCommand(
+                _ => !isBrowserCrashed && webView2?.CoreWebView2 != null,
+                _ => ExecuteOpenImageDownloader());
         }
 
         private void ExecuteCreateNewWindow()
@@ -171,6 +176,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         {
             BrowserSettingsViewModel = new BrowserSettingsViewModel();
             BrowserSettingsViewModel = null;
+        }
+
+        private void ExecuteOpenImageDownloader()
+        {
+            if (isBrowserCrashed || webView2?.CoreWebView2 is not { } core)
+                return;
+            ImageDownloaderViewModel = new ImageDownloaderViewModel(core, () => ImageDownloaderViewModel = null);
         }
 
         private void ExecuteClearBrowsingData()
@@ -677,6 +689,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 GoForwardCommand,
                 RefreshCommand,
                 StopCommand,
+                OpenImageDownloaderCommand,
             };
             foreach (var cmd in commands)
                 cmd.RaiseCanExecuteChanged();

@@ -91,6 +91,26 @@
                 </DataTemplate>
             </pb:DialogBehavior.ContentTemplate>
         </pb:DialogBehavior>
+        <pb:DialogBehavior Content="{Binding ImageDownloaderViewModel}" IsModal="False">
+            <pb:DialogBehavior.Style>
+                <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}">
+                    <Setter Property="Title" Value="{x:Static local:Texts.ImageDownloader}"/>
+                    <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+                    <Setter Property="ResizeMode" Value="NoResize"/>
+                </Style>
+            </pb:DialogBehavior.Style>
+            <pb:DialogBehavior.ContentTemplate>
+                <DataTemplate>
+                    <local:ImageDownloaderView>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Unloaded">
+                                <i:InvokeCommandAction Command="{Binding CloseCommand}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </local:ImageDownloaderView>
+                </DataTemplate>
+            </pb:DialogBehavior.ContentTemplate>
+        </pb:DialogBehavior>
     </i:Interaction.Behaviors>
     <Grid>
         <Grid.Resources>
@@ -286,6 +306,8 @@
                         <Separator/>
                         <MenuItem Header="{x:Static local:Texts.MobileMonitor}" IsCheckable="True" IsChecked="{Binding IsMobileMode}" Icon="{DynamicResource {x:Static icons:IconKeys.Cellphone}}"/>
                         <MenuItem Header="{x:Static local:Texts.ClearBrowsingData}" Command="{Binding ClearBrowsingDataCommand}" Icon="{DynamicResource {x:Static icons:IconKeys.Delete}}"/>
+                        <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.ImageDownloader}" Command="{Binding OpenImageDownloaderCommand}" Icon="{DynamicResource {x:Static icons:IconKeys.ImageMultiple}}"/>
                         <Separator/>
                         <MenuItem Header="{x:Static local:Texts.BrowserSettings}" Command="{Binding OpenBrowserSettingsCommand}" Icon="{DynamicResource {x:Static icons:IconKeys.Cog}}"/>
                     </ContextMenu>

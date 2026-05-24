@@ -1,0 +1,142 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Tool.Browser.ImageDownloaderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Tool.Browser"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="700"
+             d:DataContext="{d:DesignInstance Type=local:ImageDownloaderViewModel}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Resources>
+    <Grid Width="700" Height="600">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="26"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="{x:Static local:Texts.SelectAll}" Command="{Binding SelectAllCommand}"/>
+            <Button Grid.Column="1" Content="{x:Static local:Texts.DeselectAll}" Command="{Binding DeselectAllCommand}"/>
+            <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="6,0">
+                <Run Text="{Binding Items.Count, Mode=OneWay}"/>
+                <Run Text="{x:Static local:Texts.ImagesFound}"/>
+            </TextBlock>
+            <Button Grid.Column="3" Content="{DynamicResource {x:Static icons:IconKeys.Refresh}}" Command="{Binding RefreshCommand}" Width="26" Padding="3" ToolTip="{x:Static local:Texts.Refresh}"/>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.SaveFolder}" VerticalAlignment="Center" Margin="6,0"/>
+            <TextBox Grid.Column="1" Text="{Binding SaveFolder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="3,0,0,0" Height="26" IsReadOnly="True"/>
+            <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.FolderOpen}}" Command="{Binding SelectSaveFolderCommand}" Width="26" Padding="3" ToolTip="{x:Static local:Texts.SelectSaveFolder}"/>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <ListBox ItemsSource="{Binding Items}" SelectionMode="Extended"
+                     VirtualizingPanel.IsVirtualizing="True"
+                     VirtualizingPanel.VirtualizationMode="Recycling"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.Style>
+                    <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}"/>
+                </ListBox.Style>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:ImageDownloaderItemViewModel}">
+                        <Grid Height="80">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="26"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <Border Grid.Column="1" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+                                <Image Source="{Binding Thumbnail}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            </Border>
+                            <Grid Grid.Column="2" Margin="6,0,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="{Binding FileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="1" Text="{Binding Url}" TextTrimming="CharacterEllipsis" VerticalAlignment="Top" TextWrapping="NoWrap" Opacity="0.6" FontSize="10" Margin="0,2,0,0"/>
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <Grid Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+                        <Setter Property="Opacity" Value="0.8"/>
+                    </Style>
+                </Grid.Style>
+                <TextBlock Text="{x:Static local:Texts.LoadingImages}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </Grid>
+
+        <ProgressBar Grid.Row="3" Value="{Binding DownloadProgress, Mode=OneWay}" Maximum="{Binding DownloadTotal, Mode=OneWay}">
+            <ProgressBar.Style>
+                <Style TargetType="ProgressBar" BasedOn="{StaticResource {x:Type ProgressBar}}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsDownloading}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ProgressBar.Style>
+        </ProgressBar>
+
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="6,0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDownloading}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+                <Run Text="{Binding DownloadProgress, Mode=OneWay}"/>
+                <Run Text="/"/>
+                <Run Text="{Binding DownloadTotal, Mode=OneWay}"/>
+            </TextBlock>
+            <Button Grid.Column="2" Content="{x:Static local:Texts.DownloadSelected}" Command="{Binding DownloadSelectedCommand}"/>
+        </Grid>
+    </Grid>
+</UserControl>

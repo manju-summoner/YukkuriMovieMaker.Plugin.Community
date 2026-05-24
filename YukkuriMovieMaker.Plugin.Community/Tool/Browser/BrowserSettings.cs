@@ -37,6 +37,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         public string CustomUserAgent { get => field; set => Set(ref field, value); } = string.Empty;
 
+        public string ImageDownloadFolder { get => field; set => Set(ref field, value); } = string.Empty;
+
         [JsonIgnore]
         public string AdditionalBrowserArguments => IsMediaAutoplayEnabled ? string.Empty : "--autoplay-policy=document-user-activation-required";
 
