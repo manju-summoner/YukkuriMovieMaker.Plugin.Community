@@ -11,7 +11,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 {
     public class RecordedVoiceSpeaker : IVoiceSpeaker
     {
-        private const string InitialSilentFileName = "Silent_5s.wav";
+        private const int SilentDurationSeconds = 5;
+        private const int SilentSampleRate = 44100;
+        private const int SilentBitsPerSample = 16;
+        private const int SilentChannels = 1;
 
         public static RecordedVoiceSpeaker Instance { get; } = new RecordedVoiceSpeaker();
         public static VoiceDescription Description { get; } = new VoiceDescription(Instance);
@@ -39,6 +42,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             if (parameter is not RecordedVoiceParameter recorded)
                 throw new InvalidOperationException(Texts.InvalidParameter);
 
+            Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath) ?? ".");
+
+            if (string.Equals(recorded.AudioFilePath, RecordedVoiceParameter.ExplicitUnselectedToken, StringComparison.Ordinal))
+            {
+                WriteSilentWav(outputFilePath);
+                return Task.FromResult<IVoicePronounce?>(null);
+            }
+
             var sourceWavPath = ResolveRecordedWavPath(recorded);
             if (string.IsNullOrWhiteSpace(sourceWavPath))
                 throw new InvalidOperationException(Texts.RecordedWavNotFound);
@@ -46,10 +57,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             if (!File.Exists(sourceWavPath))
                 throw new FileNotFoundException(Texts.RecordedWavNotFound, sourceWavPath);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath) ?? ".");
             File.Copy(sourceWavPath, outputFilePath, overwrite: true);
 
             return Task.FromResult<IVoicePronounce?>(null);
+        }
+
+        private static void WriteSilentWav(string outputFilePath)
+        {
+            var format = new WaveFormat(SilentSampleRate, SilentBitsPerSample, SilentChannels);
+            var totalBytes = format.AverageBytesPerSecond * SilentDurationSeconds;
+            var buffer = new byte[4096];
+
+            using var writer = new WaveFileWriter(outputFilePath, format);
+            var remaining = totalBytes;
+            while (remaining > 0)
+            {
+                var writeBytes = Math.Min(buffer.Length, remaining);
+                writer.Write(buffer, 0, writeBytes);
+                remaining -= writeBytes;
+            }
         }
 
         public IVoiceParameter CreateVoiceParameter()
@@ -93,9 +119,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             var recordsDirectory = !string.IsNullOrWhiteSpace(recorded.RecordsDirectory)
                 ? recorded.RecordsDirectory
                 : ResolveRecordsDirectory();
-
-            if (string.Equals(recorded.AudioFilePath, RecordedVoiceParameter.ExplicitUnselectedToken, StringComparison.Ordinal))
-                return GetOrCreateSilentFilePath(recordsDirectory);
 
             if (!string.IsNullOrWhiteSpace(recorded.AudioFilePath))
             {
@@ -166,48 +189,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                     return defaultPath;
 
                 return RecordedVoiceParameter.ExplicitUnselectedToken;
-            }
-            catch
-            {
-                return string.Empty;
-            }
-        }
-
-        internal static string GetOrCreateSilentFilePath(string? recordsDirectory)
-        {
-            var directory = string.IsNullOrWhiteSpace(recordsDirectory)
-                ? ResolveRecordsDirectory()
-                : recordsDirectory;
-            return GetOrCreateSilentWavInDirectory(directory);
-        }
-
-        private static string GetOrCreateSilentWavInDirectory(string? recordsDirectory)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(recordsDirectory))
-                    return string.Empty;
-
-                Directory.CreateDirectory(recordsDirectory);
-                var path = Path.Combine(recordsDirectory, InitialSilentFileName);
-
-                if (File.Exists(path))
-                    return path;
-
-                var format = new WaveFormat(44100, 16, 1);
-                var totalBytes = format.AverageBytesPerSecond * 5;
-                var buffer = new byte[4096];
-
-                using var writer = new WaveFileWriter(path, format);
-                var remaining = totalBytes;
-                while (remaining > 0)
-                {
-                    var writeBytes = Math.Min(buffer.Length, remaining);
-                    writer.Write(buffer, 0, writeBytes);
-                    remaining -= writeBytes;
-                }
-
-                return path;
             }
             catch
             {
