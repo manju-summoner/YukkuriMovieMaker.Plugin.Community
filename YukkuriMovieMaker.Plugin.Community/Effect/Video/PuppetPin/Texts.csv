@@ -1,0 +1,31 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+PuppetPinEffectName,,パペットピン,Puppet Pin,木偶图钉,木偶圖釘,퍼펫 핀,Alfiler Marioneta,دبوس الدمية,Pin Boneka
+PuppetPinStiffnessName,,剛性,Stiffness,刚性,剛性,강성,Rigidez,الصلابة,Kekakuan
+PuppetPinStiffnessDesc,,ピン周囲の変形の硬さを調整します。値が大きいほど近傍ピンの影響が強くなり 小さいほどなだらかに広がります。,Adjusts how rigidly the area around a pin holds its shape. Higher values concentrate the effect near each pin; lower values spread it smoothly.,调整图钉周围变形的硬度。值越大附近图钉的影响越强 越小变形越平滑。,調整圖釘周圍變形的硬度。值越大附近圖釘的影響越強 越小變形越平滑。,핀 주변 변형의 강도를 조정합니다. 값이 클수록 근처 핀의 영향이 강해지고 작을수록 부드럽게 퍼집니다.,Ajusta la rigidez del área alrededor del alfiler. Valores altos concentran el efecto cerca del alfiler; valores bajos lo difunden.,يضبط مدى صلابة المنطقة حول الدبوس. القيم الأعلى تركّز التأثير قرب الدبوس والأقل توزّعه بسلاسة.,Menyesuaikan kekakuan area di sekitar pin. Nilai lebih besar memusatkan efek di sekitar pin; lebih kecil menyebarkannya dengan halus.
+PuppetPinEnabledName,,有効,Enable,启用,啟用,사용,Activar,تفعيل,Aktif
+PuppetPinEnabledDesc,,このピンの移動を有効にします。無効の場合 ピンは固定アンカーとして変形を抑制します。,Enables movement for this pin. When disabled the pin acts as a fixed anchor that resists deformation.,启用此图钉的移动。禁用时图钉作为固定锚点抑制变形。,啟用此圖釘的移動。停用時圖釘作為固定錨點抑制變形。,이 핀의 이동을 활성화합니다. 비활성화 시 핀은 고정 앵커로 변형을 억제합니다.,Activa el movimiento de este alfiler. Desactivado actúa como ancla fija que resiste la deformación.,تفعيل تحريك هذا الدبوس. عند التعطيل يعمل الدبوس كمرساة ثابتة تقاوم التشويه.,Mengaktifkan pergerakan pin ini. Jika dinonaktifkan pin bertindak sebagai jangkar tetap yang menahan deformasi.
+PuppetPinRestXName,,基準X,Anchor X,基准X,基準X,기준 X,Ancla X,المرجع X,Jangkar X
+PuppetPinRestXDesc,,ピンを打つ元の位置 (X座標)。画像上でピンが固定される基準点です。,The original X position where the pin is placed. This is the anchor that the image follows.,图钉的原始X位置。这是图像跟随的锚点。,圖釘的原始X位置。這是圖像跟隨的錨點。,핀의 원래 X 위치. 이미지가 따라가는 기준점입니다.,Posición X original donde se coloca el alfiler. Es el ancla que sigue la imagen.,موضع X الأصلي للدبوس. هو المرجع الذي تتبعه الصورة.,Posisi X asli tempat pin diletakkan. Ini adalah jangkar yang diikuti gambar.
+PuppetPinRestYName,,基準Y,Anchor Y,基准Y,基準Y,기준 Y,Ancla Y,المرجع Y,Jangkar Y
+PuppetPinRestYDesc,,ピンを打つ元の位置 (Y座標)。画像上でピンが固定される基準点です。,The original Y position where the pin is placed. This is the anchor that the image follows.,图钉的原始Y位置。这是图像跟随的锚点。,圖釘的原始Y位置。這是圖像跟隨的錨點。,핀의 원래 Y 위치. 이미지가 따라가는 기준점입니다.,Posición Y original donde se coloca el alfiler. Es el ancla que sigue la imagen.,موضع Y الأصلي للدبوس. هو المرجع الذي تتبعه الصورة.,Posisi Y asli tempat pin diletakkan. Ini adalah jangkar yang diikuti gambar.
+PuppetPinOffsetXName,,移動X,Move X,移动X,移動X,이동 X,Mover X,تحريك X,Pindah X
+PuppetPinOffsetXDesc,,基準位置からの移動量 (X)。プレビュー上のドラッグで変化します。,Movement from the anchor (X). Updated by dragging the pin in the preview.,从基准位置的移动量 (X)。通过在预览中拖动图钉来更新。,從基準位置的移動量 (X)。透過在預覽中拖曳圖釘來更新。,기준 위치로부터의 이동량 (X). 미리보기에서 드래그로 변경됩니다.,Desplazamiento desde el ancla (X). Cambia al arrastrar en la vista previa.,مقدار التحرك من المرجع (X). يتغير بسحب الدبوس في المعاينة.,Pergeseran dari jangkar (X). Berubah dengan menyeret pin di pratinjau.
+PuppetPinOffsetYName,,移動Y,Move Y,移动Y,移動Y,이동 Y,Mover Y,تحريك Y,Pindah Y
+PuppetPinOffsetYDesc,,基準位置からの移動量 (Y)。プレビュー上のドラッグで変化します。,Movement from the anchor (Y). Updated by dragging the pin in the preview.,从基准位置的移动量 (Y)。通过在预览中拖动图钉来更新。,從基準位置的移動量 (Y)。透過在預覽中拖曳圖釘來更新。,기준 위치로부터의 이동량 (Y). 미리보기에서 드래그로 변경됩니다.,Desplazamiento desde el ancla (Y). Cambia al arrastrar en la vista previa.,مقدار التحرك من المرجع (Y). يتغير بسحب الدبوس في المعاينة.,Pergeseran dari jangkar (Y). Berubah dengan menyeret pin di pratinjau.
+TagPuppet,,パペット,puppet,木偶,木偶,퍼펫,marioneta,دمية,boneka
+TagPin,,ピン,pin,图钉,圖釘,핀,alfiler,دبوس,pin
+TagWarp,,ワープ,warp,变形,變形,워프,deformar,تشويه,warp
+TagDeform,,変形,deform,变形,變形,변형,deformación,تشويه,deformasi
+PuppetPinListPinsDesc,,パペットピンを追加・削除します。,Add or remove puppet pins.,添加或删除木偶图钉。,新增或刪除木偶圖釘。,퍼펫 핀을 추가/삭제합니다.,Agrega o elimina alfileres marioneta.,إضافة أو إزالة دبابيس الدمية.,Tambah atau hapus pin boneka.
+PuppetPinListAddPin,,ピンを追加,Add Pin,添加图钉,新增圖釘,핀 추가,Agregar alfiler,إضافة دبوس,Tambah Pin
+PuppetPinListRemovePin,,選択中のピンを削除,Remove Selected Pin,删除选中的图钉,刪除選中的圖釘,선택된 핀 삭제,Eliminar alfiler seleccionado,إزالة الدبوس المحدد,Hapus Pin Terpilih
+PuppetPinListResetTitle,,確認,Confirm,确认,確認,확인,Confirmar,تأكيد,Konfirmasi
+PuppetPinListResetMessage,,すべてのピンの移動量をリセットします。よろしいですか?,Reset the movement of all pins. Continue?,将所有图钉的移动量重置。是否继续?,將所有圖釘的移動量重置。是否繼續?,모든 핀의 이동량을 초기화합니다. 계속하시겠습니까?,Restablecer el movimiento de todos los alfileres. ¿Continuar?,إعادة تعيين تحريك جميع الدبابيس. هل تريد المتابعة؟,Atur ulang pergeseran semua pin. Lanjutkan?
+PuppetPinEditorSyncModeName,,同期モード,Sync Mode,同步模式,同步模式,동기화 모드,Modo de sincronización,وضع المزامنة,Mode Sinkronisasi
+PuppetPinEditorSyncModeDesc,,複数選択中のピンを同期して動かす方法を選択します。,Selects how multiple selected pins move together.,选择多个选中的图钉如何同步移动。,選擇多個選中的圖釘如何同步移動。,여러 선택된 핀의 동기 이동 방식을 선택합니다.,Selecciona cómo se mueven juntos varios alfileres seleccionados.,يحدد كيفية تحرك الدبابيس المحددة المتعددة معًا.,Memilih cara beberapa pin terpilih bergerak bersama.
+PuppetPinEditorSyncModeNoneName,,なし,None,无,無,없음,Ninguno,لا شيء,Tidak Ada
+PuppetPinEditorSyncModeNoneDesc,,選択したピンのみ移動します。,Move only selected pins.,仅移动选中的图钉。,僅移動選中的圖釘。,선택한 핀만 이동합니다.,Mueve solo los alfileres seleccionados.,تحريك الدبابيس المحددة فقط.,Hanya pindahkan pin terpilih.
+PuppetPinEditorSyncModeDistanceName,,距離減衰,Distance Decay,距离衰减,距離衰減,거리 감쇠,Decaimiento por distancia,اضمحلال المسافة,Peluruhan Jarak
+PuppetPinEditorSyncModeDistanceDesc,,選択したピンの移動量に合わせて、他の選択ピンも距離に応じて減衰しながら移動します。,Move other selected pins based on distance from the moved pin.,根据与移动图钉的距离，相应衰减移动其他选中的图钉。,根據與移動圖釘的距離，相應衰減移動其他選中的圖釘。,이동한 핀과의 거리에 따라 다른 선택된 핀도 감쇠하며 이동합니다.,Mueve otros alfileres seleccionados basándose en la distancia.,تحريك الدبابيس المحددة الأخرى بناءً على المسافة من الدبوس المحرك.,Pindahkan pin terpilih lainnya berdasarkan jarak.
+PuppetPinEditorSyncModeParallelName,,平行移動,Parallel,平行移动,平行移動,평행 이동,Paralelo,موازي,Sejajar
+PuppetPinEditorSyncModeParallelDesc,,選択したすべてのピンが同じ量だけ平行に移動します。,Move all selected pins equally in parallel.,将所有选中的图钉同等平行移动。,將所有選中的圖釘同等平行移動。,모든 선택된 핀을 평행하게 같은 양만큼 이동합니다.,Mueve todos los alfileres seleccionados igualmente en paralelo.,تحريك جميع الدبابيس المحددة بشكل متساوٍ ومتوازي.,Pindahkan semua pin terpilih secara paralel.
