@@ -1,0 +1,57 @@
+using System.IO;
+using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.API;
+
+namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
+
+internal static class PiperModelScanner
+{
+    static readonly EnumerationOptions EnumerationOptions = new()
+    {
+        RecurseSubdirectories = true,
+        IgnoreInaccessible = true,
+        MatchType = MatchType.Simple,
+        AttributesToSkip = FileAttributes.System | FileAttributes.ReparsePoint,
+    };
+
+    public static IReadOnlyList<PiperModelInfo> Scan(string directory)
+    {
+        if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+            return [];
+
+        var results = new List<PiperModelInfo>();
+
+        foreach (var onnxPath in Directory.EnumerateFiles(directory, "*.onnx", EnumerationOptions))
+        {
+            var jsonPath = onnxPath + ".json";
+            if (!File.Exists(jsonPath))
+                continue;
+
+            var info = TryLoad(onnxPath, jsonPath);
+            if (info is not null)
+                results.Add(info);
+        }
+
+        return results;
+    }
+
+    static PiperModelInfo? TryLoad(string onnxPath, string jsonPath)
+    {
+        try
+        {
+            var json = File.ReadAllText(jsonPath);
+            var config = Json.Json.LoadFromText<PiperModelConfig>(json);
+            if (config is null)
+                return null;
+
+            var modelName = Path.GetFileNameWithoutExtension(onnxPath);
+            var speakerIdMap = config.SpeakerIdMap ?? new Dictionary<string, int>();
+            var numSpeakers = config.NumSpeakers > 0 ? config.NumSpeakers : 1;
+
+            return new PiperModelInfo(onnxPath, jsonPath, modelName, numSpeakers, speakerIdMap);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+}
