@@ -98,7 +98,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
                     if (targetDevice is null)
                     {
-                        fallbackToDefault = true;
+                        fallbackToDefault = !requestDefault;
                         try
                         {
                             targetDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Multimedia);

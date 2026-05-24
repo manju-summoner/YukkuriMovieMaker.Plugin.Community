@@ -251,11 +251,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                     return;
                 }
 
-                if (startResult.Selection.FellBackToDefault)
-                    RecordingStatus = string.Format(Texts.SavedRecordingDeviceNotFoundFallbackWithName, startResult.Selection.FriendlyName);
-
                 latestRecordedFilePath = null;
-                RecordingStatus = string.Format(Texts.RecordingNowWithPathAndDevice, RecordsDirectory, startResult.Selection.FriendlyName);
+                var recordingStatusMessage = string.Format(Texts.RecordingNowWithPathAndDevice, RecordsDirectory, startResult.Selection.FriendlyName);
+                if (startResult.Selection.FellBackToDefault)
+                {
+                    var fallbackMessage = string.Format(Texts.SavedRecordingDeviceNotFoundFallbackWithName, startResult.Selection.FriendlyName);
+                    recordingStatusMessage = $"{fallbackMessage}{Environment.NewLine}{recordingStatusMessage}";
+                }
+
+                RecordingStatus = recordingStatusMessage;
                 RaiseCommandStates();
             }
             catch (InvalidOperationException ex)
