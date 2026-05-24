@@ -47,19 +47,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         public async Task<bool> SaveToAsync(string folder, CancellationToken cancellationToken)
         {
+            var fileName = SanitizeFileName(FileName);
+            var destPath = GetUniqueFilePath(folder, fileName);
             try
             {
-                var bytes = await source.GetBytesAsync(cancellationToken);
-                if (bytes.Length == 0)
-                    return false;
-
-                var fileName = SanitizeFileName(FileName);
-                var destPath = GetUniqueFilePath(folder, fileName);
-                await File.WriteAllBytesAsync(destPath, bytes, cancellationToken);
+                await source.SaveToFileAsync(destPath, cancellationToken);
                 return true;
             }
             catch
             {
+                if (File.Exists(destPath))
+                    File.Delete(destPath);
                 return false;
             }
         }
@@ -91,6 +89,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         {
             public abstract string FileName { get; }
             public abstract Task<byte[]> GetBytesAsync(CancellationToken cancellationToken);
+            public abstract Task SaveToFileAsync(string path, CancellationToken cancellationToken);
 
             public static ImageSource From(string url) =>
                 url.StartsWith("data:", StringComparison.OrdinalIgnoreCase)
@@ -110,6 +109,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 using var response = await HttpClientFactory.Client.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+            }
+
+            public override async Task SaveToFileAsync(string path, CancellationToken cancellationToken)
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Add("User-Agent", $"YukkuriMovieMaker v{AppVersion.Current}");
+                using var response = await HttpClientFactory.Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                await using var src = await response.Content.ReadAsStreamAsync(cancellationToken);
+                await using var dest = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 1024 * 256, FileOptions.Asynchronous | FileOptions.SequentialScan);
+                await src.CopyToAsync(dest, cancellationToken);
             }
         }
 
@@ -153,6 +163,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                     : System.Text.Encoding.UTF8.GetBytes(Uri.UnescapeDataString(data));
 
                 return Task.FromResult(bytes);
+            }
+
+            public override async Task SaveToFileAsync(string path, CancellationToken cancellationToken)
+            {
+                var bytes = await GetBytesAsync(cancellationToken);
+                await File.WriteAllBytesAsync(path, bytes, cancellationToken);
             }
 
             static string ParseMimeType(string dataUri)
