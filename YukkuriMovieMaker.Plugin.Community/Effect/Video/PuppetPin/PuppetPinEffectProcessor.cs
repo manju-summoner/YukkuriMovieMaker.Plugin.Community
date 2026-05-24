@@ -44,8 +44,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
                 samples.Add(new PinSample(i, new Vector2(rx, ry), new Vector2(rx + ox, ry + oy), pin.IsEnabled));
             }
 
-            var activeSamples = samples.FindAll(s => s.IsEnabled);
-            var gpuPinCount = Math.Min(activeSamples.Count, PuppetPinCustomEffect.MaxPins);
+            var gpuPinCount = Math.Min(samples.Count, PuppetPinCustomEffect.MaxPins);
 
             var inputBounds = deviceContext is not null && input is not null
                 ? deviceContext.GetImageLocalBounds(input)
@@ -53,17 +52,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             float imageWidth = inputBounds.Right - inputBounds.Left;
             float imageHeight = inputBounds.Bottom - inputBounds.Top;
 
-            var key = PinCacheKey.Build(activeSamples, gpuPinCount, stiffness, imageWidth, imageHeight);
+            var key = PinCacheKey.Build(samples, gpuPinCount, stiffness, imageWidth, imageHeight);
 
             if (lastCacheKey is null || !lastCacheKey.Value.Equals(key))
             {
                 gpuCache?.Dispose();
-                gpuCache = BuildGpuCache(activeSamples, gpuPinCount, stiffness, imageWidth, imageHeight);
+                gpuCache = BuildGpuCache(samples, gpuPinCount, stiffness, imageWidth, imageHeight);
                 lastCacheKey = key;
             }
 
             var maxDisplacement = 0f;
-            foreach (var s in activeSamples)
+            foreach (var s in samples.FindAll(s => s.IsEnabled))
             {
                 var dx = Math.Abs(s.Current.X - s.Rest.X);
                 var dy = Math.Abs(s.Current.Y - s.Rest.Y);
@@ -84,12 +83,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
 
             return effectDescription.DrawDescription with
             {
-                Controllers = ImmutableList.CreateRange(BuildControllers(samples, activeSamples))
+                Controllers = ImmutableList.CreateRange(BuildControllers(samples))
             };
         }
 
         PinGpuCache BuildGpuCache(
-            List<PinSample> activeSamples,
+            List<PinSample> samples,
             int gpuPinCount,
             float stiffness,
             float imageWidth,
@@ -100,7 +99,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
 
             for (var i = 0; i < gpuPinCount; i++)
             {
-                var s = activeSamples[i];
+                var s = samples[i];
                 data[i * 4 + 0] = s.Rest.X;
                 data[i * 4 + 1] = s.Rest.Y;
                 data[i * 4 + 2] = s.Current.X;
@@ -126,8 +125,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             (float left, float top, float right, float bottom) tightBounds;
             if (gpuPinCount > 0 && imageWidth > 0 && imageHeight > 0)
             {
-                var restList = activeSamples.ConvertAll(s => s.Rest);
-                var currentList = activeSamples.ConvertAll(s => s.Current);
+                var restList = samples.ConvertAll(s => s.Rest);
+                var currentList = samples.ConvertAll(s => s.Current);
                 tightBounds = MlsDeformBounds.Compute(imageWidth, imageHeight, restList, currentList, stiffness);
             }
             else
@@ -140,15 +139,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             return new PinGpuCache(dataBitmap, tightBounds);
         }
 
-        List<VideoEffectController> BuildControllers(List<PinSample> samples, List<PinSample> activeSamples)
+        List<VideoEffectController> BuildControllers(List<PinSample> samples)
         {
             var controllers = new List<VideoEffectController>(samples.Count * 3);
 
-            var (_, meshEdges) = DelaunayTriangulation.Compute(activeSamples.ConvertAll(s => s.Current));
+            var (_, meshEdges) = DelaunayTriangulation.Compute(samples.ConvertAll(s => s.Current));
             foreach (var edge in meshEdges)
             {
-                var pA = activeSamples[edge.A].Current;
-                var pB = activeSamples[edge.B].Current;
+                var pA = samples[edge.A].Current;
+                var pB = samples[edge.B].Current;
                 controllers.Add(new VideoEffectController(item, new[]
                 {
                     new ControllerPoint(new Vector3(pA.X, pA.Y, 0f)),
