@@ -268,7 +268,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                     {
                         var valid = await item.TryLoadThumbnailAsync(token);
                         if (!valid && !token.IsCancellationRequested)
-                            Application.Current?.Dispatcher?.Invoke(() => Items.Remove(item));
+                            await Application.Current?.Dispatcher?.InvokeAsync(() => Items.Remove(item));
                     }
                     finally
                     {
@@ -326,7 +326,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                     finally
                     {
                         semaphore.Release();
-                        Application.Current?.Dispatcher?.Invoke(() => DownloadProgress++);
+                        await Application.Current?.Dispatcher?.InvokeAsync(() => DownloadProgress++);
                     }
                 });
                 await Task.WhenAll(tasks);
