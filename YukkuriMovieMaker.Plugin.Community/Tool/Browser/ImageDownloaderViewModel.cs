@@ -264,11 +264,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 foreach (var item in items)
                     Items.Add(item);
 
+                var semaphore = new SemaphoreSlim(4, 4);
                 await Task.WhenAll(items.Select(async item =>
                 {
-                    var valid = await item.TryLoadThumbnailAsync(token);
-                    if (!valid && !token.IsCancellationRequested)
-                        Application.Current?.Dispatcher?.Invoke(() => Items.Remove(item));
+                    await semaphore.WaitAsync(token);
+                    try
+                    {
+                        var valid = await item.TryLoadThumbnailAsync(token);
+                        if (!valid && !token.IsCancellationRequested)
+                            Application.Current?.Dispatcher?.Invoke(() => Items.Remove(item));
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
                 }));
             }
             catch (OperationCanceledException) { }
