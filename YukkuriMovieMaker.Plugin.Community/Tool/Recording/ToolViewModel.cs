@@ -603,6 +603,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             recordingService.RecordingStateChanged -= OnRecordingStateChanged;
             audioPlaybackService.PlaybackStopped -= OnPlaybackStopped;
             RecordingLifecycleService.TryStopRecording(recordingService);
+            recordingService.Dispose();
             audioPlaybackService.Dispose();
         }
     }

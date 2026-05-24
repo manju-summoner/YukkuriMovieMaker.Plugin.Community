@@ -9,7 +9,7 @@ using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
-    public class RecordingService
+    public class RecordingService : IDisposable
     {
         public const string DefaultRecordingDeviceId = "default";
 
@@ -25,6 +25,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         private long recordedBytes;
         private Exception? recordingStopException;
         private TaskCompletionSource<bool>? recordingStoppedTcs;
+        private bool disposed;
 
         public RecordingService(RecordPathService recordPathService)
         {
@@ -407,6 +408,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         private void OnRecordingStateChanged()
         {
             RecordingStateChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void Dispose()
+        {
+            TaskCompletionSource<bool>? pendingStop;
+            lock (syncRoot)
+            {
+                if (disposed)
+                    return;
+                disposed = true;
+
+                pendingStop = recordingStoppedTcs;
+                recordingStoppedTcs = null;
+
+                CleanupRecordingResources(deleteFile: false);
+            }
+
+            // StopRecordingAsync を待っている呼び出し元があれば抜けさせる。
+            pendingStop?.TrySetResult(false);
         }
     }
 
