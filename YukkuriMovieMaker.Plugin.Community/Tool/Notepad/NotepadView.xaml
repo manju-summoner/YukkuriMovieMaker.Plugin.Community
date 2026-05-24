@@ -108,7 +108,7 @@
                 <Separator/>
                 <Button Content="{DynamicResource {x:Static icons:IconKeys.Magnify}}" Command="{Binding ToggleSearchCommand}" ToolTip="{x:Static local:Texts.Search}"/>
                 <Separator/>
-                <controls:DropDownButton Content="{DynamicResource {x:Static icons:IconKeys.Cog}}" ToolTip="{x:Static local:Texts.Settings}" BorderBrush="Transparent" Padding="3">
+                <controls:DropDownButton Content="{DynamicResource {x:Static icons:IconKeys.Cog}}" ToolTip="{x:Static local:Texts.Settings}" Background="Transparent" BorderBrush="Transparent" Padding="3">
                     <controls:DropDownButton.Style>
                         <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
                     </controls:DropDownButton.Style>
