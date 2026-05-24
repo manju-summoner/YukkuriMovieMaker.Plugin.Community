@@ -338,7 +338,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                     OutputDirectory = fallback;
                     MessageBox.Show(
                         string.Format(Texts.OutputDirectoryFallback, fallback),
-                        Texts.RecordingUiTitle,
+                        Texts.ToolName,
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                     return true;

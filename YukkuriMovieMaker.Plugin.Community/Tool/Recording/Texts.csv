@@ -1,6 +1,5 @@
 ﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
 ToolName,,録音,Recording,录音,錄音,녹음,Grabación,التسجيل,Perekaman
-RecordingUiTitle,,収録UI,Recording UI,录音界面,錄音介面,녹음 UI,Interfaz de grabación,واجهة التسجيل,UI Perekaman
 RecordingDevice,,録音デバイス,Recording Device,录音设备,錄音裝置,녹음 장치,Dispositivo de grabación,جهاز التسجيل,Perangkat Perekaman
 Refresh,,更新,Refresh,刷新,重新整理,새로 고침,Actualizar,تحديث,Segarkan
 SaveDestination,,保存先,Save Destination,保存位置,儲存位置,저장 위치,Destino de guardado,وجهة الحفظ,Tujuan Penyimpanan
