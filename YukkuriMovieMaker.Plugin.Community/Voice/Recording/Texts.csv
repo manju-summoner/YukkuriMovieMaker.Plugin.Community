@@ -17,7 +17,8 @@ RecordedAudioCreatedAtHeader,,作成日時,Created At,创建时间,建立時間,
 RecordedAudioDurationHeader,,長さ,Duration,时长,長度,길이,Duración,المدة,Durasi
 Select,,選択,Select,选择,選擇,선택,Seleccionar,تحديد,Pilih
 Cancel,,キャンセル,Cancel,取消,取消,취소,Cancelar,إلغاء,Batal
-PlaySelected,,試聴,Preview,试听,試聽,미리듣기,Escuchar,معاينة,Dengarkan
+PlaySelected,,再生,Play,播放,播放,재생,Reproducir,تشغيل,Putar
+Stop,,停止,Stop,停止,停止,중지,Detener,إيقاف,Hentikan
 ChangeFolder,,フォルダー変更,Change Folder,更改文件夹,變更資料夾,폴더 변경,Cambiar carpeta,تغيير المجلد,Ubah folder
 SelectRecordedAudioFolder,,録音フォルダーを選択してください,Please select a recording folder,请选择录音文件夹,請選擇錄音資料夾,녹음 폴더를 선택해 주세요,Seleccione una carpeta de grabaciones,يرجى تحديد مجلد التسجيل,Pilih folder rekaman
 Unselect,,未選択にする,Unselect,设为未选择,設為未選擇,선택 해제,Deseleccionar,إلغاء التحديد,Batalkan pilihan

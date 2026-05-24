@@ -42,8 +42,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             }
         }
 
+        public bool IsPlaying => player is not null;
+
         private string recordsDirectory = string.Empty;
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        private void RaiseIsPlayingChanged()
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPlaying)));
 
         public RecordedVoiceAudioSelectorWindow(string? recordsDirectory, string? currentPath)
         {
@@ -118,7 +123,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
         private void OnPreviewClicked(object sender, RoutedEventArgs e)
         {
-            PlaySelected();
+            if (IsPlaying)
+                StopPlayback();
+            else
+                PlaySelected();
         }
 
         private void OnListViewMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -151,6 +159,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             }
 
             currentReader?.Dispose();
+            RaiseIsPlayingChanged();
         }
 
         private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
@@ -164,6 +173,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
             reader?.Dispose();
             reader = null;
+            RaiseIsPlayingChanged();
         }
 
         private void UpdatePreviewForSelectionChange()
@@ -194,6 +204,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                 player.PlaybackStopped += OnPlaybackStopped;
                 player.Init(reader);
                 player.Play();
+                RaiseIsPlayingChanged();
             }
             catch
             {

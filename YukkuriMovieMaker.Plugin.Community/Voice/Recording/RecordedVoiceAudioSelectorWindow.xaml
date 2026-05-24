@@ -55,7 +55,18 @@
         </ListView>
 
         <DockPanel Grid.Row="3" >
-            <Button DockPanel.Dock="Left" MinWidth="84" Height="26" Content="{x:Static local:Texts.PlaySelected}" Click="OnPreviewClicked"/>
+            <Button DockPanel.Dock="Left" MinWidth="84" Height="26" Click="OnPreviewClicked">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Content" Value="{x:Static local:Texts.PlaySelected}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                <Setter Property="Content" Value="{x:Static local:Texts.Stop}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
             <Button DockPanel.Dock="Left" MinWidth="84" Height="26" Content="{x:Static local:Texts.Unselect}" Click="OnUnselectClicked"/>
             <Button DockPanel.Dock="Right" MinWidth="84" Height="26" Content="{x:Static local:Texts.Cancel}" IsCancel="True"/>
             <Button DockPanel.Dock="Right" MinWidth="84" Height="26" Content="{x:Static local:Texts.Select}" IsDefault="True" Click="OnSelectClicked"/>
