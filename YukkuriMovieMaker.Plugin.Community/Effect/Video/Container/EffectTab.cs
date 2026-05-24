@@ -4,7 +4,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-public sealed class EffectTab : Bindable
+public sealed class EffectTab : Animatable
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 
@@ -21,4 +21,6 @@ public sealed class EffectTab : Bindable
         set => Set(ref _effects, value);
     }
     private ImmutableList<IVideoEffect> _effects = ImmutableList<IVideoEffect>.Empty;
+
+    protected override IEnumerable<IAnimatable> GetAnimatables() => Effects;
 }

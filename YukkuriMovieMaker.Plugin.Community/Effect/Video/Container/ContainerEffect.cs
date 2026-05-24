@@ -54,7 +54,7 @@ public sealed class ContainerEffect : VideoEffectBase
     public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription) =>
         [];
 
-    protected override IEnumerable<IAnimatable> GetAnimatables() => Tabs.SelectMany(t => t.Effects);
+    protected override IEnumerable<IAnimatable> GetAnimatables() => Tabs;
 
     /// <summary>
     /// 現在選択中のタブの Effects を返す。レンダリングパイプラインや UI バインディング元として使用。
