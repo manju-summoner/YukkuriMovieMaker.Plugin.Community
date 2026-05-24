@@ -563,7 +563,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             lastPinXValues.Clear();
             lastPinYValues.Clear();
 
-            ItemProperties[0].SetValue(ImmutableList.CreateRange(pins.Select(p => YukkuriMovieMaker.Json.Json.GetClone(p)!)));
+            pins = ImmutableList.CreateRange(pins.Select(p => Json.Json.GetClone(p)!));
+            ItemProperties[0].SetValue(pins);
 
             EndEdit?.Invoke(this, EventArgs.Empty);
         }
