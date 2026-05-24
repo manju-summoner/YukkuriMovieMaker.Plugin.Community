@@ -195,7 +195,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
                 return url;
             var path = uri.AbsolutePath.TrimEnd('/');
-            return $"{uri.Scheme}://{uri.Host}{(uri.IsDefaultPort ? "" : $":{uri.Port}")}{path}";
+            return $"{uri.Scheme}://{uri.Host}{(uri.IsDefaultPort ? "" : $":{uri.Port}")}{path}{uri.Query}";
         }
 
         async void LoadImagesAsync()
