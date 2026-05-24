@@ -168,7 +168,43 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 _ => !IsDownloading && !string.IsNullOrWhiteSpace(SaveFolder) && Items.Any(x => x.IsSelected),
                 _ => DownloadSelectedAsync());
 
+            Items.CollectionChanged += OnItemsCollectionChanged;
+
             LoadImagesAsync();
+        }
+
+        void OnItemsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
+            {
+                foreach (var item in Items)
+                    item.PropertyChanged -= OnItemPropertyChanged;
+            }
+            else
+            {
+                if (e.NewItems is not null)
+                    foreach (ImageDownloaderItemViewModel item in e.NewItems)
+                        item.PropertyChanged += OnItemPropertyChanged;
+
+                if (e.OldItems is not null)
+                    foreach (ImageDownloaderItemViewModel item in e.OldItems)
+                        item.PropertyChanged -= OnItemPropertyChanged;
+            }
+
+            RaiseSelectionCommandsCanExecuteChanged();
+        }
+
+        void OnItemPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ImageDownloaderItemViewModel.IsSelected))
+                DownloadSelectedCommand.RaiseCanExecuteChanged();
+        }
+
+        void RaiseSelectionCommandsCanExecuteChanged()
+        {
+            SelectAllCommand.RaiseCanExecuteChanged();
+            DeselectAllCommand.RaiseCanExecuteChanged();
+            DownloadSelectedCommand.RaiseCanExecuteChanged();
         }
 
         void SetAllSelected(bool selected)
@@ -227,10 +263,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
                 foreach (var item in items)
                     Items.Add(item);
-
-                SelectAllCommand.RaiseCanExecuteChanged();
-                DeselectAllCommand.RaiseCanExecuteChanged();
-                DownloadSelectedCommand.RaiseCanExecuteChanged();
 
                 await Task.WhenAll(items.Select(async item =>
                 {
@@ -304,6 +336,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         public void Dispose()
         {
+            Items.CollectionChanged -= OnItemsCollectionChanged;
+            foreach (var item in Items)
+                item.PropertyChanged -= OnItemPropertyChanged;
+
             loadCts?.Cancel();
             loadCts?.Dispose();
             loadCts = null;
