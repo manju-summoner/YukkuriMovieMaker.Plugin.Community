@@ -78,11 +78,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             if (Parameter is null)
                 return;
 
-            if (!string.IsNullOrWhiteSpace(Parameter.AudioFilePath)
-                && !string.Equals(Parameter.AudioFilePath, RecordedVoiceParameter.ExplicitUnselectedToken, StringComparison.Ordinal))
-            {
+            if (!string.IsNullOrWhiteSpace(Parameter.AudioFilePath))
                 return;
-            }
 
             Parameter.AudioFilePath = RecordedVoiceSpeaker.GetOrCreateSilentFilePath(Parameter.RecordsDirectory);
         }
@@ -117,6 +114,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         private void RefreshSelectedFileLabel()
         {
             var path = Parameter?.AudioFilePath ?? string.Empty;
+
+            if (string.Equals(path, RecordedVoiceParameter.ExplicitUnselectedToken, StringComparison.Ordinal))
+            {
+                SelectedFilePath = string.Empty;
+                SelectedFileLabel = Texts.Unselected;
+                return;
+            }
 
             SelectedFilePath = path;
             SelectedFileLabel = string.IsNullOrWhiteSpace(path) ? Texts.Unselected : Path.GetFileName(path);

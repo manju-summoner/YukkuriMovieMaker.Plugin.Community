@@ -94,7 +94,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                 return;
             }
 
-            SelectedPath = silentPath;
+            // Persist as explicit unselected token so silent-path self-healing works
+            // even if Silent_5s.wav is moved/deleted later.
+            SelectedPath = RecordedVoiceParameter.ExplicitUnselectedToken;
             DialogResult = true;
         }
 
