@@ -4,6 +4,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Tool.Recording"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
              d:DesignHeight="560"
@@ -16,6 +18,9 @@
         </Style>
         <Style TargetType="Button" BasedOn="{StaticResource ToolButtonStyle}"/>
     </UserControl.Resources>
+    <i:Interaction.Behaviors>
+        <pb:MessageBoxBehavior ViewModel="{Binding MessageBoxViewModel, Mode=OneWay}"/>
+    </i:Interaction.Behaviors>
     <Grid Grid.IsSharedSizeScope="True">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

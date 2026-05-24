@@ -10,6 +10,7 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services;
+using YukkuriMovieMaker.ViewModels;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 {
@@ -27,6 +28,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         public ObservableCollection<RecordingDeviceInfo> AvailableDevices { get; } = [];
         public ObservableCollection<RecordedFileListItem> Records { get; } = [];
+        public MessageBoxViewModel MessageBoxViewModel { get; } = new();
 
         public ICommand StartRecordingCommand { get; }
         public ICommand StopRecordingCommand { get; }
@@ -329,11 +331,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 {
                     Directory.CreateDirectory(fallback);
                     OutputDirectory = fallback;
-                    MessageBox.Show(
+                    MessageBoxViewModel.Show(
                         string.Format(Texts.OutputDirectoryFallback, fallback),
                         Texts.ToolName,
                         MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
+                        MessageBoxImage.Warning,
+                        MessageBoxResult.OK);
                     return true;
                 }
                 catch (Exception)
@@ -417,6 +420,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 return;
 
             var target = SelectedRecord;
+            var confirm = MessageBoxViewModel.Show(
+                string.Format(Texts.ConfirmDeleteRecord, target.FileName),
+                Texts.ToolName,
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question,
+                MessageBoxResult.No);
+            if (confirm != MessageBoxResult.Yes)
+                return;
+
             try
             {
                 if (File.Exists(target.Path))
