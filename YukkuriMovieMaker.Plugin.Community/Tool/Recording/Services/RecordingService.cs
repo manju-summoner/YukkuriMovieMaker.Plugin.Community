@@ -13,7 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
     {
         public const string DefaultRecordingDeviceId = "default";
 
-        private readonly object syncRoot = new();
+        private readonly Lock syncRoot = new();
         private readonly RecordPathService recordPathService;
 
         private IWaveIn? waveIn;
