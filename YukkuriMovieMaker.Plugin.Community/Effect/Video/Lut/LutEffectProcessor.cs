@@ -26,10 +26,7 @@ internal sealed class LutEffectProcessor : VideoEffectProcessorBase
     private ProjectBlend _blendMode;
     private LutInterpolationMode _interpolation;
 
-    private bool _lutDirty = true;
-    private bool _blendModeDirty = true;
-    private bool _opacityDirty = true;
-    private bool _interpolationDirty = true;
+    private bool _isFirst = true;
 
     public LutEffectProcessor(IGraphicsDevicesAndContext devices, LutEffect item)
         : base(devices)
@@ -119,20 +116,13 @@ internal sealed class LutEffectProcessor : VideoEffectProcessorBase
 
         var fileChanged = !string.Equals(path, _loadedPath, StringComparison.Ordinal);
 
-        if (_lutDirty || fileChanged)
-        {
+        if (_isFirst || fileChanged)
             RefreshLut(path);
-            _lutDirty = false;
-        }
 
-        if (_interpolationDirty || _interpolation != interpolation)
-        {
+        if (_isFirst || _interpolation != interpolation)
             _lutEffect.InterpolationMode = (int)interpolation;
-            _interpolation = interpolation;
-            _interpolationDirty = false;
-        }
 
-        if (_blendModeDirty || _blendMode != blendMode)
+        if (_isFirst || _blendMode != blendMode)
         {
             if (blendMode.IsCompositionEffect())
             {
@@ -146,16 +136,15 @@ internal sealed class LutEffectProcessor : VideoEffectProcessorBase
                 using var blended = _blendEffect.Output;
                 _crossFadeEffect.SetInput(0, blended, true);
             }
-            _blendMode = blendMode;
-            _blendModeDirty = false;
         }
 
-        if (_opacityDirty || _opacity != opacity)
-        {
+        if (_isFirst || _opacity != opacity)
             _crossFadeEffect.Weight = opacity;
-            _opacity = opacity;
-            _opacityDirty = false;
-        }
+
+        _isFirst = false;
+        _interpolation = interpolation;
+        _blendMode = blendMode;
+        _opacity = opacity;
 
         return effectDescription.DrawDescription;
     }

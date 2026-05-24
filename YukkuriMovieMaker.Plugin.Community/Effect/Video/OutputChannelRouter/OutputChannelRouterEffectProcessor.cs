@@ -16,6 +16,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputChannelRouter
 
         private bool _isFirst = true;
         private ChannelSource _outputR, _outputG, _outputB, _outputA;
+        private ID2D1Image? _lastBranchInput;
 
         public OutputChannelRouterEffectProcessor(
             IGraphicsDevicesAndContext devices,
@@ -64,6 +65,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputChannelRouter
             _routerEffect?.SetCurrentInput(null);
             _routerEffect?.SetBranchInput(null);
             _sink?.SetInput(0, null, true);
+            _lastBranchInput = null;
         }
 
         public override DrawDescription Update(EffectDescription effectDescription)
@@ -79,21 +81,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputChannelRouter
             var outputB = _item.OutputB;
             var outputA = _item.OutputA;
 
+            ID2D1Image? branchInput;
             var needsBranch = NeedsBranchInput(outputR, outputG, outputB, outputA);
             if (needsBranch)
             {
                 var cur = desc.GetCustomValue<int>("OutputBranch.CurrentIndex");
                 if (targetIndex == cur && input is not null)
-                    _routerEffect.SetBranchInput(input);
+                    branchInput = input;
                 else if (desc.TryGetCustomValue<ID2D1Image>(out var branchImage, $"OutputBranch.Branch{targetIndex}"))
-                    _routerEffect.SetBranchInput(branchImage);
+                    branchInput = branchImage;
                 else
-                    _routerEffect.SetBranchInput(_transparentBitmap);
+                    branchInput = _transparentBitmap;
             }
             else
             {
-                _routerEffect.SetBranchInput(_transparentBitmap);
+                branchInput = _transparentBitmap;
             }
+
+            if (_isFirst || !ReferenceEquals(_lastBranchInput, branchInput))
+                _routerEffect.SetBranchInput(branchInput);
 
             if (_isFirst || _outputR != outputR)
                 _routerEffect.SourceR = (int)outputR;
@@ -109,6 +115,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputChannelRouter
             _outputG = outputG;
             _outputB = outputB;
             _outputA = outputA;
+            _lastBranchInput = branchInput;
 
             return desc;
         }

@@ -15,6 +15,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputMapComposite
 
         private bool _isFirst = true;
         private int _mapType;
+        private ID2D1Image? _lastTargetImage;
+        private ID2D1Image? _lastMapImage;
 
         public OutputMapCompositeEffectProcessor(IGraphicsDevicesAndContext devices, OutputMapCompositeEffect item)
             : base(devices)
@@ -67,11 +69,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputMapComposite
             if (_isFirst || _mapType != mapTypeInt)
                 _lerpEffect.MapType = mapTypeInt;
 
-            _lerpEffect.SetTargetInput(targetImage);
-            _lerpEffect.SetMapInput(mapImage);
+            if (_isFirst || !ReferenceEquals(_lastTargetImage, targetImage))
+                _lerpEffect.SetTargetInput(targetImage);
+            if (_isFirst || !ReferenceEquals(_lastMapImage, mapImage))
+                _lerpEffect.SetMapInput(mapImage);
 
             _isFirst = false;
             _mapType = mapTypeInt;
+            _lastTargetImage = targetImage;
+            _lastMapImage = mapImage;
 
             return desc;
         }
@@ -87,6 +93,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputMapComposite
             _lerpEffect?.SetTargetInput(null);
             _lerpEffect?.SetMapInput(null);
             _sink?.SetInput(0, null, true);
+            _lastTargetImage = null;
+            _lastMapImage = null;
         }
     }
 }
