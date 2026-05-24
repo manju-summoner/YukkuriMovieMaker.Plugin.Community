@@ -68,7 +68,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         public BrowserFavoriteEditorViewModel? FavoriteEditorViewModel { get; set => Set(ref field, value); }
         public ClearBrowsingDataViewModel? ClearBrowsingDataViewModel { get => field; set => Set(ref field, value); }
         public BrowserSettingsViewModel? BrowserSettingsViewModel { get => field; set => Set(ref field, value); }
-        public ImageDownloaderViewModel? ImageDownloaderViewModel { get => field; set => Set(ref field, value); }
+        public ImageDownloaderViewModel? ImageDownloaderViewModel
+        {
+            get => field;
+            set
+            {
+                var old = field;
+                if (Set(ref field, value))
+                    old?.Dispose();
+            }
+        }
 
         [SuppressMessage("Performance", "CA1822:メンバーを static に設定します", Justification = "")]
         public BrowserFavoriteDirectoryViewModel FavoriteDirectoryViewModel => BrowserFavoriteDirectoryViewModel.CreateBrowserFavoriteRoot();
@@ -700,6 +709,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         public void Dispose()
         {
+            ImageDownloaderViewModel = null;
             DetachWebView2();
         }
     }

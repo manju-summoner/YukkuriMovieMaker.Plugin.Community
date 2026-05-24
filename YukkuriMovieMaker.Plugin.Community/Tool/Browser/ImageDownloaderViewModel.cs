@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 {
-    internal class ImageDownloaderViewModel : Bindable
+    internal class ImageDownloaderViewModel : Bindable, IDisposable
     {
         const string CollectImagesScript = """
             (function() {
@@ -298,6 +298,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
                 IsDownloading = false;
                 DownloadSelectedCommand.RaiseCanExecuteChanged();
             }
+        }
+
+        public void Dispose()
+        {
+            loadCts?.Cancel();
+            loadCts?.Dispose();
+            loadCts = null;
+
+            downloadCts?.Cancel();
+            downloadCts?.Dispose();
+            downloadCts = null;
         }
     }
 }
