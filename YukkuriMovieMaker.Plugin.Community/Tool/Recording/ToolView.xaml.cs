@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
 
         void RecordList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            isDragStarted = FindListViewItem(e.OriginalSource as DependencyObject) is not null;
+            isDragStarted = FindDataGridRow(e.OriginalSource as DependencyObject) is not null;
         }
 
         void RecordList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -52,12 +52,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             DragDrop.DoDragDrop(this, dataObject, DragDropEffects.Copy | DragDropEffects.Move);
         }
 
-        static ListViewItem? FindListViewItem(DependencyObject? current)
+        static DataGridRow? FindDataGridRow(DependencyObject? current)
         {
             while (current is not null)
             {
-                if (current is ListViewItem item)
-                    return item;
+                if (current is DataGridRow row)
+                    return row;
                 current = System.Windows.Media.VisualTreeHelper.GetParent(current);
             }
             return null;

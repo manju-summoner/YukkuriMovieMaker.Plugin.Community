@@ -106,19 +106,25 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <ListView Grid.Row="0"
+            <DataGrid Grid.Row="0"
                       ItemsSource="{Binding Records}"
                       SelectedItem="{Binding SelectedRecord}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="None"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      CanUserResizeRows="False"
+                      SelectionMode="Single"
                       PreviewMouseLeftButtonDown="RecordList_PreviewMouseLeftButtonDown"
                       PreviewMouseLeftButtonUp="RecordList_PreviewMouseLeftButtonUp"
                       PreviewMouseMove="RecordList_PreviewMouseMove">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Header="{x:Static local:Texts.RecordFileName}" DisplayMemberBinding="{Binding FileName}"/>
-                        <GridViewColumn Header="{x:Static local:Texts.RecordUpdatedAt}" DisplayMemberBinding="{Binding UpdatedAtText}"/>
-                    </GridView>
-                </ListView.View>
-            </ListView>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{x:Static local:Texts.RecordFileName}" Binding="{Binding FileName}" Width="*"/>
+                    <DataGridTextColumn Header="{x:Static local:Texts.RecordUpdatedAt}" Binding="{Binding UpdatedAtText}" Width="Auto"/>
+                </DataGrid.Columns>
+            </DataGrid>
 
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
