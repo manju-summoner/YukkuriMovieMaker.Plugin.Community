@@ -11,7 +11,6 @@ RecordedWavNotFound,,録音ファイルが見つかりません。,Recorded WAV 
 Unselected,,未選択,Unselected,未选择,未選擇,선택 안 함,Sin seleccionar,غير محدد,Belum dipilih
 SelectRecordedAudioButton,,録音を選択,Select Recording,选择录音,選擇錄音,녹음 선택,Seleccionar grabación,اختيار التسجيل,Pilih rekaman
 RecordedAudioSelectorTitle,,録音の選択,Select Recording,选择录音,選擇錄音,녹음 선택,Seleccionar grabación,اختيار التسجيل,Pilih rekaman
-RecordedAudioSelectorHint,,最新の録音データが上に表示されます。,Latest recordings are shown at the top.,最新录音显示在最上方。,最新錄音顯示在最上方。,최신 녹음 데이터가 위에 표시됩니다.,Las grabaciones más recentes se muestran arriba.,تظهر أحدث التسجيلات في الأعلى.,Rekaman terbaru ditampilkan di atas.
 RecordedAudioFileNameHeader,,ファイル名,File Name,文件名,檔案名稱,파일 이름,Nombre de archivo,اسم الملف,Nama File
 RecordedAudioCreatedAtHeader,,作成日時,Created At,创建时间,建立時間,생성 일시,Fecha de creación,تاريخ الإنشاء,Waktu Dibuat
 RecordedAudioDurationHeader,,長さ,Duration,时长,長度,길이,Duración,المدة,Durasi
@@ -19,6 +18,7 @@ Select,,選択,Select,选择,選擇,선택,Seleccionar,تحديد,Pilih
 Cancel,,キャンセル,Cancel,取消,取消,취소,Cancelar,إلغاء,Batal
 PlaySelected,,再生,Play,播放,播放,재생,Reproducir,تشغيل,Putar
 Stop,,停止,Stop,停止,停止,중지,Detener,إيقاف,Hentikan
-ChangeFolder,,フォルダー変更,Change Folder,更改文件夹,變更資料夾,폴더 변경,Cambiar carpeta,تغيير المجلد,Ubah folder
-SelectRecordedAudioFolder,,録音フォルダーを選択してください,Please select a recording folder,请选择录音文件夹,請選擇錄音資料夾,녹음 폴더를 선택해 주세요,Seleccione una carpeta de grabaciones,يرجى تحديد مجلد التسجيل,Pilih folder rekaman
+StartRecording,,録音開始,Start Recording,开始录音,開始錄音,녹음 시작,Iniciar grabación,بدء التسجيل,Mulai Perekaman
+StopRecording,,録音停止,Stop Recording,停止录音,停止錄音,녹음 중지,Detener grabación,إيقاف التسجيل,Hentikan Perekaman
+RecordingFailed,0:error,録音に失敗しました: {0},Recording failed: {0},录音失败: {0},錄音失敗: {0},녹음에 실패했습니다: {0},Error de grabación: {0},فشل التسجيل: {0},Gagal merekam: {0}
 Unselect,,未選択にする,Unselect,设为未选择,設為未選擇,선택 해제,Deseleccionar,إلغاء التحديد,Batalkan pilihan

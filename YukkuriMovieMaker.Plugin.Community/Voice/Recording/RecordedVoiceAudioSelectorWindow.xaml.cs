@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -7,6 +7,10 @@ using System.Windows;
 using System.Windows.Input;
 using Forms = System.Windows.Forms;
 using NAudio.Wave;
+using YukkuriMovieMaker.Plugin.Community.Tool.Recording;
+using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
+using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services;
+using ToolTexts = YukkuriMovieMaker.Plugin.Community.Tool.Recording.Texts;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 {
@@ -15,7 +19,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         private WaveOutEvent? player;
         private AudioFileReader? reader;
 
+        private readonly RecordPathService recordPathService;
+        private readonly RecordingService recordingService;
+
         public ObservableCollection<RecordedAudioListItem> Items { get; } = [];
+        public ObservableCollection<RecordingDeviceInfo> AvailableDevices { get; } = [];
+
         private RecordedAudioListItem? selectedItem;
         public RecordedAudioListItem? SelectedItem
         {
@@ -25,37 +34,153 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                 if (ReferenceEquals(selectedItem, value))
                     return;
                 selectedItem = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedItem)));
+                Raise(nameof(SelectedItem));
                 UpdatePreviewForSelectionChange();
             }
         }
+
         public string SelectedPath { get; private set; } = string.Empty;
-        public string RecordsDirectory
+
+        private string recordsDirectory = string.Empty;
+        public string RecordsDirectory => recordsDirectory;
+
+        public string OutputDirectory
         {
             get => recordsDirectory;
-            private set
+            set
             {
-                if (string.Equals(recordsDirectory, value, StringComparison.Ordinal))
+                if (IsRecording)
                     return;
-                recordsDirectory = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RecordsDirectory)));
+
+                var normalized = string.IsNullOrWhiteSpace(value)
+                    ? RecordingSettings.GetDefaultOutputDirectory()
+                    : value.Trim();
+
+                if (string.Equals(recordsDirectory, normalized, StringComparison.Ordinal))
+                    return;
+
+                recordsDirectory = normalized;
+                RecordingSettings.Default.OutputDirectory = normalized;
+                Raise(nameof(OutputDirectory));
+                Raise(nameof(RecordsDirectory));
+                LoadItems(recordsDirectory, SelectedPath);
+            }
+        }
+
+        private string? selectedDeviceId;
+        public string? SelectedDeviceId
+        {
+            get => selectedDeviceId;
+            set
+            {
+                if (string.Equals(selectedDeviceId, value, StringComparison.Ordinal))
+                    return;
+                selectedDeviceId = value;
+                RecordingSettings.Default.SelectedRecordingDeviceId = value ?? RecordingService.DefaultRecordingDeviceId;
+                Raise(nameof(SelectedDeviceId));
+            }
+        }
+
+        private double currentVolume;
+        public double CurrentVolume
+        {
+            get => currentVolume;
+            set
+            {
+                if (currentVolume == value)
+                    return;
+                currentVolume = value;
+                Raise(nameof(CurrentVolume));
             }
         }
 
         public bool IsPlaying => player is not null;
+        public bool IsRecording => recordingService.IsRecording;
 
-        private string recordsDirectory = string.Empty;
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private void RaiseIsPlayingChanged()
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPlaying)));
+        private void Raise(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         public RecordedVoiceAudioSelectorWindow(string? recordsDirectory, string? currentPath)
         {
             InitializeComponent();
-            RecordsDirectory = recordsDirectory ?? string.Empty;
-            LoadItems(RecordsDirectory, currentPath);
+            this.recordsDirectory = string.IsNullOrWhiteSpace(recordsDirectory)
+                ? RecordingSettings.Default.OutputDirectory
+                : recordsDirectory;
+
+            recordPathService = new RecordPathService();
+            recordingService = new RecordingService(recordPathService);
+            recordingService.DataAvailable += OnRecordingDataAvailable;
+            recordingService.RecordingStateChanged += OnRecordingStateChanged;
+
+            selectedDeviceId = string.IsNullOrWhiteSpace(RecordingSettings.Default.SelectedRecordingDeviceId)
+                ? RecordingService.DefaultRecordingDeviceId
+                : RecordingSettings.Default.SelectedRecordingDeviceId;
+
+            RefreshMicrophones();
+            LoadItems(this.recordsDirectory, currentPath);
             DataContext = this;
+        }
+
+        private void RefreshMicrophones()
+        {
+            try
+            {
+                AvailableDevices.Clear();
+                var defaultDeviceName = recordingService.GetDefaultRecordingDeviceFriendlyName();
+                AvailableDevices.Add(new RecordingDeviceInfo
+                {
+                    Id = RecordingService.DefaultRecordingDeviceId,
+                    IsDefault = true,
+                    FriendlyName = string.IsNullOrWhiteSpace(defaultDeviceName)
+                        ? ToolTexts.DefaultRecordingDevice
+                        : string.Format(ToolTexts.DefaultRecordingDeviceWithName, defaultDeviceName),
+                    ResolvedDeviceName = defaultDeviceName,
+                });
+                foreach (var device in recordingService.GetAvailableDevices())
+                    AvailableDevices.Add(device);
+
+                if (AvailableDevices.All(x => !string.Equals(x.Id, SelectedDeviceId, StringComparison.Ordinal)))
+                    SelectedDeviceId = RecordingService.DefaultRecordingDeviceId;
+            }
+            catch
+            {
+                AvailableDevices.Clear();
+            }
+        }
+
+        private void OnRefreshDevicesClicked(object sender, RoutedEventArgs e) => RefreshMicrophones();
+
+        private void OnBrowseOutputClicked(object sender, RoutedEventArgs e)
+        {
+            using var dialog = new Forms.FolderBrowserDialog
+            {
+                Description = ToolTexts.SelectOutputDirectory,
+                UseDescriptionForTitle = true,
+                SelectedPath = OutputDirectory,
+            };
+            if (dialog.ShowDialog() == Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
+                OutputDirectory = dialog.SelectedPath;
+        }
+
+        private void OnResetOutputClicked(object sender, RoutedEventArgs e)
+        {
+            OutputDirectory = RecordingSettings.GetDefaultOutputDirectory();
+        }
+
+        private void OnRecordingDataAvailable(object? sender, RecordingDataEventArgs e)
+        {
+            Dispatcher.BeginInvoke(() => CurrentVolume = e.Volume);
+        }
+
+        private void OnRecordingStateChanged(object? sender, EventArgs e)
+        {
+            Dispatcher.BeginInvoke(() =>
+            {
+                Raise(nameof(IsRecording));
+                if (!IsRecording)
+                    CurrentVolume = 0;
+            });
         }
 
         private void LoadItems(string? recordsDirectory, string? currentPath)
@@ -92,6 +217,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             if (string.IsNullOrWhiteSpace(silentPath) || !File.Exists(silentPath))
             {
                 MessageBox.Show(
+                    this,
                     Texts.RecordedWavNotFound,
                     Texts.RecordedAudioSelectorTitle,
                     MessageBoxButton.OK,
@@ -105,28 +231,69 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             DialogResult = true;
         }
 
-        private void OnChangeFolderClicked(object sender, RoutedEventArgs e)
-        {
-            using var dialog = new Forms.FolderBrowserDialog
-            {
-                Description = Texts.SelectRecordedAudioFolder,
-                UseDescriptionForTitle = true,
-                SelectedPath = string.IsNullOrWhiteSpace(RecordsDirectory) ? string.Empty : RecordsDirectory
-            };
-
-            if (dialog.ShowDialog() != Forms.DialogResult.OK || string.IsNullOrWhiteSpace(dialog.SelectedPath))
-                return;
-
-            RecordsDirectory = dialog.SelectedPath;
-            LoadItems(RecordsDirectory, SelectedPath);
-        }
-
         private void OnPreviewClicked(object sender, RoutedEventArgs e)
         {
             if (IsPlaying)
                 StopPlayback();
             else
                 PlaySelected();
+        }
+
+        private void OnDeleteClicked(object sender, RoutedEventArgs e)
+        {
+            if (SelectedItem is null)
+                return;
+
+            var target = SelectedItem;
+            var result = MessageBox.Show(
+                this,
+                string.Format(ToolTexts.ConfirmDeleteRecord, target.FileName),
+                Texts.RecordedAudioSelectorTitle,
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            StopPlayback();
+
+            try
+            {
+                if (File.Exists(target.Path))
+                    File.Delete(target.Path);
+                LoadItems(OutputDirectory, null);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, string.Format(ToolTexts.RecordDeleteFailed, ex.Message), Texts.RecordedAudioSelectorTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private async void OnRecordClicked(object sender, RoutedEventArgs e)
+        {
+            if (IsRecording)
+            {
+                try
+                {
+                    var info = await recordingService.StopRecordingAsync();
+                    if (info is not null && info.DataLength > 0)
+                        LoadItems(OutputDirectory, info.FilePath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, string.Format(Texts.RecordingFailed, ex.Message), Texts.RecordedAudioSelectorTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                return;
+            }
+
+            StopPlayback();
+            try
+            {
+                recordingService.StartRecording(SelectedDeviceId);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, string.Format(Texts.RecordingFailed, ex.Message), Texts.RecordedAudioSelectorTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void OnListViewMouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -141,6 +308,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         protected override void OnClosed(EventArgs e)
         {
             StopPlayback();
+            recordingService.DataAvailable -= OnRecordingDataAvailable;
+            recordingService.RecordingStateChanged -= OnRecordingStateChanged;
+            try
+            {
+                if (recordingService.IsRecording)
+                    recordingService.StopRecording();
+            }
+            catch { /* shutting down */ }
+            recordingService.Dispose();
             base.OnClosed(e);
         }
 
@@ -159,7 +335,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             }
 
             currentReader?.Dispose();
-            RaiseIsPlayingChanged();
+            Raise(nameof(IsPlaying));
         }
 
         private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
@@ -173,7 +349,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
             reader?.Dispose();
             reader = null;
-            RaiseIsPlayingChanged();
+            Raise(nameof(IsPlaying));
         }
 
         private void UpdatePreviewForSelectionChange()
@@ -204,7 +380,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                 player.PlaybackStopped += OnPlaybackStopped;
                 player.Init(reader);
                 player.Play();
-                RaiseIsPlayingChanged();
+                Raise(nameof(IsPlaying));
             }
             catch
             {

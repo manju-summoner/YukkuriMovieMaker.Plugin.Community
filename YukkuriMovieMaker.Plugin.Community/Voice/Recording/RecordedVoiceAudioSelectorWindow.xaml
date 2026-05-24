@@ -1,47 +1,84 @@
-<Window x:Class="YukkuriMovieMaker.Plugin.Community.Voice.Recording.RecordedVoiceAudioSelectorWindow"
+﻿<Window x:Class="YukkuriMovieMaker.Plugin.Community.Voice.Recording.RecordedVoiceAudioSelectorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.Recording"
+        xmlns:tool="clr-namespace:YukkuriMovieMaker.Plugin.Community.Tool.Recording"
         xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
         Title="{x:Static local:Texts.RecordedAudioSelectorTitle}"
         Width="560"
-        Height="420"
+        Height="480"
         WindowStartupLocation="CenterOwner"
         Style="{StaticResource {x:Type Window}}">
     <Window.Resources>
-        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Style x:Key="ToolButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Height" Value="26"/>
             <Setter Property="Padding" Value="10,0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource ToolButtonStyle}"/>
     </Window.Resources>
-    <Grid>
+    <Grid Grid.IsSharedSizeScope="True">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Margin="3" Text="{x:Static local:Texts.RecordedAudioSelectorHint}"/>
-
-        <Grid Grid.Row="1" Margin="3,0,0,0" Height="26">
+        <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="26"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock VerticalAlignment="Center"
-                       TextTrimming="CharacterEllipsis"
-                       ToolTip="{Binding RecordsDirectory}"
-                       Text="{Binding RecordsDirectory}"/>
-            <Button Grid.Column="1"
-                    Padding="3"
-                    Content="{DynamicResource {x:Static icons:IconKeys.FolderOpen}}"
-                    ToolTip="{x:Static local:Texts.ChangeFolder}"
-                    Click="OnChangeFolderClicked"/>
+            <TextBlock Grid.Column="0" Text="{x:Static tool:Texts.RecordingDevice}" VerticalAlignment="Center" Margin="6,0"/>
+            <ComboBox Grid.Column="1"
+                      ItemsSource="{Binding AvailableDevices}"
+                      DisplayMemberPath="FriendlyName"
+                      SelectedValuePath="Id"
+                      SelectedValue="{Binding SelectedDeviceId}"
+                      VerticalContentAlignment="Center"
+                      Height="26" />
+            <Button Grid.Column="2" Width="26" Padding="2" Content="{DynamicResource {x:Static icons:IconKeys.Refresh}}" ToolTip="{x:Static tool:Texts.Refresh}" Click="OnRefreshDevicesClicked"/>
         </Grid>
 
-        <ListView Grid.Row="2"
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{x:Static tool:Texts.SaveDestination}" VerticalAlignment="Center" Margin="6,0"/>
+            <TextBox Grid.Column="1" Text="{Binding OutputDirectory, UpdateSourceTrigger=LostFocus}" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="26"/>
+            <Button Grid.Column="2" Width="26" Padding="2" Content="{DynamicResource {x:Static icons:IconKeys.FolderOpen}}" ToolTip="{x:Static tool:Texts.Browse}" Click="OnBrowseOutputClicked"/>
+            <Button Grid.Column="3" Width="26" Padding="4" Content="{DynamicResource {x:Static icons:IconKeys.Backspace}}" ToolTip="{x:Static tool:Texts.ResetToDefault}" Click="OnResetOutputClicked"/>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" MinWidth="100"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.ToolName}" VerticalAlignment="Center" Margin="6,0"/>
+            <ProgressBar Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding CurrentVolume}"/>
+            <Button Grid.Column="2" Click="OnRecordClicked">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource ToolButtonStyle}">
+                        <Setter Property="Content" Value="{x:Static local:Texts.StartRecording}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsRecording}" Value="True">
+                                <Setter Property="Content" Value="{x:Static local:Texts.StopRecording}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
+
+        <ListView Grid.Row="3"
                   ItemsSource="{Binding Items}"
                   SelectedItem="{Binding SelectedItem}"
                   MouseDoubleClick="OnListViewMouseDoubleClick">
@@ -54,10 +91,10 @@
             </ListView.View>
         </ListView>
 
-        <DockPanel Grid.Row="3" >
+        <DockPanel Grid.Row="4">
             <Button DockPanel.Dock="Left" MinWidth="84" Height="26" Click="OnPreviewClicked">
                 <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                    <Style TargetType="Button" BasedOn="{StaticResource ToolButtonStyle}">
                         <Setter Property="Content" Value="{x:Static local:Texts.PlaySelected}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsPlaying}" Value="True">
@@ -67,6 +104,7 @@
                     </Style>
                 </Button.Style>
             </Button>
+            <Button DockPanel.Dock="Left" MinWidth="84" Height="26" Content="{x:Static tool:Texts.DeleteSelected}" Click="OnDeleteClicked"/>
             <Button DockPanel.Dock="Left" MinWidth="84" Height="26" Content="{x:Static local:Texts.Unselect}" Click="OnUnselectClicked"/>
             <Button DockPanel.Dock="Right" MinWidth="84" Height="26" Content="{x:Static local:Texts.Cancel}" IsCancel="True"/>
             <Button DockPanel.Dock="Right" MinWidth="84" Height="26" Content="{x:Static local:Texts.Select}" IsDefault="True" Click="OnSelectClicked"/>
