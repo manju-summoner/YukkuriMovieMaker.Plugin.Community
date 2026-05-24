@@ -7,8 +7,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 {
     internal class ImageDownloaderItemViewModel : Bindable
     {
-        static readonly HttpClient httpClient = new();
-
         readonly ImageSource source;
 
         public string Url { get; }
@@ -105,8 +103,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             public override string FileName =>
                 Path.GetFileName(new Uri(url).AbsolutePath) is { Length: > 0 } name ? name : "image";
 
-            public override Task<byte[]> GetBytesAsync(CancellationToken cancellationToken) =>
-                httpClient.GetByteArrayAsync(url, cancellationToken);
+            public override async Task<byte[]> GetBytesAsync(CancellationToken cancellationToken)
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Add("User-Agent", $"YukkuriMovieMaker v{AppVersion.Current}");
+                using var response = await HttpClientFactory.Client.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+            }
         }
 
         sealed class DataUriImageSource(string dataUri) : ImageSource
