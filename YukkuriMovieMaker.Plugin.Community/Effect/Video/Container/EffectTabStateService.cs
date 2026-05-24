@@ -26,17 +26,13 @@ internal static class EffectTabStateService
                 }
             ];
 
-        var normalizedTabs = source.Select((tab, i) =>
+        var normalizedTabs = source.Select((tab, i) => new EffectTab
         {
-            if (tab.Id == Guid.Empty)
-                tab.Id = Guid.NewGuid();
-
-            if (string.IsNullOrWhiteSpace(tab.Name))
-                tab.Name = i == 0 ? defaultTabName : $"{defaultTabName} {i + 1}";
-
-            tab.Effects ??= ImmutableList<IVideoEffect>.Empty;
-
-            return tab;
+            Id = tab.Id == Guid.Empty ? Guid.NewGuid() : tab.Id,
+            Name = string.IsNullOrWhiteSpace(tab.Name)
+                ? (i == 0 ? defaultTabName : $"{defaultTabName} {i + 1}")
+                : tab.Name,
+            Effects = tab.Effects ?? ImmutableList<IVideoEffect>.Empty,
         }).ToImmutableList();
 
         var resolvedSelectedId = rawSelectedTabId is { } sid && normalizedTabs.Any(t => t.Id == sid)

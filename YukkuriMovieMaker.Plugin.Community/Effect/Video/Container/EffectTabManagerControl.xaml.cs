@@ -17,6 +17,7 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
 
     private TabDragDropService? _dragDropService;
     private ItemProperty[] _containerItemProperties = [];
+    private ContainerEffect? _boundContainerEffect;
     private static readonly PropertyInfo ContainerEffectEffectsProperty =
         typeof(ContainerEffect).GetProperty(nameof(ContainerEffect.Effects))
             ?? throw new InvalidOperationException("ContainerEffect.Effects not found");
@@ -50,7 +51,6 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
     {
         if (e.OldValue is EffectTabManagerViewModel oldVm)
         {
-            oldVm.PropertyChanged -= OnViewModelPropertyChanged;
             oldVm.BeginEdit -= OnBeginEdit;
             oldVm.EndEdit -= OnEndEdit;
             oldVm.ConfirmationRequested -= OnConfirmationRequested;
@@ -62,7 +62,6 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
 
         if (e.NewValue is EffectTabManagerViewModel newVm)
         {
-            newVm.PropertyChanged += OnViewModelPropertyChanged;
             newVm.BeginEdit += OnBeginEdit;
             newVm.EndEdit += OnEndEdit;
             newVm.ConfirmationRequested += OnConfirmationRequested;
@@ -75,12 +74,6 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         {
             ClearEffectSelectorBinding();
         }
-    }
-
-    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(EffectTabManagerViewModel.SelectedTab))
-            EffectSelector.SelectFirstItem();
     }
 
     private void SetEffectSelectorBinding()
@@ -96,6 +89,13 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         // 経由で PersistState がまとめて行う（ApplyToAllSelectedContainers が deep clone も担当する）。
         var item = _containerItemProperties[0].Item;
         var containerEffect = (ContainerEffect)_containerItemProperties[0].PropertyOwner;
+
+        if (_boundContainerEffect is not null)
+            _boundContainerEffect.PropertyChanged -= OnContainerEffectPropertyChanged;
+
+        _boundContainerEffect = containerEffect;
+        _boundContainerEffect.PropertyChanged += OnContainerEffectPropertyChanged;
+
         var itemProp = new ItemProperty(item, containerEffect, ContainerEffectEffectsProperty, null);
 
         EffectSelector.SetBinding(
@@ -107,8 +107,20 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
 
     private void ClearEffectSelectorBinding()
     {
+        if (_boundContainerEffect is not null)
+        {
+            _boundContainerEffect.PropertyChanged -= OnContainerEffectPropertyChanged;
+            _boundContainerEffect = null;
+        }
+
         EffectSelector.ItemProperties = null;
         BindingOperations.ClearBinding(EffectSelector, VideoEffectSelector.EffectsProperty);
+    }
+
+    private void OnContainerEffectPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ContainerEffect.Effects))
+            EffectSelector.SelectFirstItem();
     }
 
     private void OnEffectSelectorBeginEdit(object? sender, EventArgs e)
