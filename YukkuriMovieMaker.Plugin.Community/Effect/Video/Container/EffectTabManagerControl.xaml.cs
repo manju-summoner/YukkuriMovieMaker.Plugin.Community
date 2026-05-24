@@ -69,7 +69,7 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
             newVm.TemplateDialogRequested += OnTemplateDialogRequested;
             _dragDropService = new TabDragDropService(TabListBox, newVm);
 
-            UpdateEffectSelectorBinding();
+            SetEffectSelectorBinding();
         }
         else
         {
@@ -80,18 +80,12 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(EffectTabManagerViewModel.SelectedTab))
-            UpdateEffectSelectorBinding();
+            EffectSelector.SelectFirstItem();
     }
 
-    private void UpdateEffectSelectorBinding()
+    private void SetEffectSelectorBinding()
     {
-        if (DataContext is not EffectTabManagerViewModel vm)
-        {
-            ClearEffectSelectorBinding();
-            return;
-        }
-
-        if (vm.SelectedTab is null || _containerItemProperties.Length == 0)
+        if (_containerItemProperties.Length == 0)
         {
             ClearEffectSelectorBinding();
             return;
@@ -203,5 +197,4 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         if (vm.ClearStashesCommand.CanExecute(null))
             vm.ClearStashesCommand.Execute(null);
     }
-
 }
