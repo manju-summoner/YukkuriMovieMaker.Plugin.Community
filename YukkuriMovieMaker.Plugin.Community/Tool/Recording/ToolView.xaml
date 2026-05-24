@@ -20,6 +20,21 @@
     </UserControl.Resources>
     <i:Interaction.Behaviors>
         <pb:MessageBoxBehavior ViewModel="{Binding MessageBoxViewModel, Mode=OneWay}"/>
+        <pb:DialogBehavior Content="{Binding RenameRecord}" IsModal="True">
+            <pb:DialogBehavior.Style>
+                <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}">
+                    <Setter Property="Title" Value="{x:Static local:Texts.RenameRecordDialogTitle}"/>
+                    <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+                    <Setter Property="ResizeMode" Value="NoResize"/>
+                    <Setter Property="ShowInTaskbar" Value="False"/>
+                </Style>
+            </pb:DialogBehavior.Style>
+            <pb:DialogBehavior.ContentTemplate>
+                <DataTemplate>
+                    <local:RenameRecordView/>
+                </DataTemplate>
+            </pb:DialogBehavior.ContentTemplate>
+        </pb:DialogBehavior>
     </i:Interaction.Behaviors>
     <Grid Grid.IsSharedSizeScope="True">
         <Grid.RowDefinitions>
@@ -126,7 +141,6 @@
                 </Button>
                 <Button Content="{x:Static local:Texts.DeleteSelected}" Command="{Binding DeleteSelectedCommand}" />
                 <Button Content="{x:Static local:Texts.CopyPath}" Command="{Binding CopyPathCommand}" />
-                <TextBox Width="220" Height="26" VerticalContentAlignment="Center" Text="{Binding RenameText, UpdateSourceTrigger=PropertyChanged}" />
                 <Button Content="{x:Static local:Texts.RenameSelected}" Command="{Binding RenameSelectedCommand}" />
             </WrapPanel>
         </Grid>

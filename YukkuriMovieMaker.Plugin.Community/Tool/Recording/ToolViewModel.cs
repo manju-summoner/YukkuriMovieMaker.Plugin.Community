@@ -30,6 +30,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         public ObservableCollection<RecordedFileListItem> Records { get; } = [];
         public MessageBoxViewModel MessageBoxViewModel { get; } = new();
 
+        RenameRecordViewModel? renameRecord;
+        public RenameRecordViewModel? RenameRecord
+        {
+            get => renameRecord;
+            set => Set(ref renameRecord, value);
+        }
+
         public ICommand StartRecordingCommand { get; }
         public ICommand StopRecordingCommand { get; }
         public ICommand RefreshDevicesCommand { get; }
@@ -64,20 +71,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 if (Set(ref selectedRecord, value))
                 {
-                    RenameText = selectedRecord?.FileNameWithoutExtension ?? string.Empty;
                     RaiseCommandStates();
                 }
-            }
-        }
-
-        string renameText = string.Empty;
-        public string RenameText
-        {
-            get => renameText;
-            set
-            {
-                if (Set(ref renameText, value))
-                    RaiseCommandStates();
             }
         }
 
@@ -379,7 +374,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             && (audioPlaybackService.IsPlaying
                 || (SelectedRecord is not null && File.Exists(SelectedRecord.Path)));
         bool CanDeleteSelected() => !IsRecording && !audioPlaybackService.IsPlaying && SelectedRecord is not null;
-        bool CanRenameSelected() => !IsRecording && SelectedRecord is not null && !string.IsNullOrWhiteSpace(RenameText);
+        bool CanRenameSelected() => !IsRecording && SelectedRecord is not null;
 
         void PlaySelected()
         {
@@ -454,7 +449,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             if (SelectedRecord is null)
                 return;
 
-            var safeName = string.Join("_", RenameText.Trim().Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+            // DialogBehavior は IsModal=True のとき Content の setter で同期的に ShowDialog を呼ぶ。
+            var dialogVm = new RenameRecordViewModel(SelectedRecord.FileNameWithoutExtension);
+            RenameRecord = dialogVm;
+            RenameRecord = null;
+
+            if (dialogVm.Confirmed)
+                Rename(dialogVm.NewName);
+        }
+
+        void Rename(string newName)
+        {
+            if (SelectedRecord is null)
+                return;
+
+            var safeName = string.Join("_", newName.Trim().Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
             if (string.IsNullOrWhiteSpace(safeName))
             {
                 RecordingStatus = Texts.InvalidFileName;

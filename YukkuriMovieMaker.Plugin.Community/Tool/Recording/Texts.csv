@@ -36,7 +36,11 @@ RecordUpdatedAt,,更新日時,Date Updated,更新时间,更新時間,수정일,F
 PlaySelected,,再生,Play,播放,播放,재생,Reproducir,تشغيل,Putar
 DeleteSelected,,削除,Delete,删除,刪除,삭제,Eliminar,حذف,Hapus
 ConfirmDeleteRecord,0:file,{0} を削除しますか？,Delete {0}?,是否删除 {0}？,是否刪除 {0}？,{0}을(를) 삭제하시겠습니까?,¿Eliminar {0}?,حذف {0}؟,Hapus {0}?
-RenameSelected,,選択をリネーム,Rename Selected,重命名选中项,重新命名選取項目,선택 항목 이름 바꾸기,Cambiar nombre al seleccionado,إعادة تسمية المحدد,Ganti Nama yang Dipilih
+RenameSelected,,名前を変更,Rename,重命名,重新命名,이름 바꾸기,Cambiar nombre,إعادة تسمية,Ganti nama
+RenameRecordDialogTitle,,名前を変更,Rename,重命名,重新命名,이름 바꾸기,Cambiar nombre,إعادة تسمية,Ganti nama
+RenameRecordDialogPrompt,,新しい名前を入力してください。,Please enter a new name.,请输入新名称。,請輸入新名稱。,새 이름을 입력해 주세요.,Introduzca un nombre nuevo.,يرجى إدخال اسم جديد.,Silakan masukkan nama baru.
+OK,,OK,OK,确定,確定,확인,Aceptar,موافق,OK
+Cancel,,キャンセル,Cancel,取消,取消,취소,Cancelar,إلغاء,Batal
 CopyPath,,パスをコピー,Copy Path,复制路径,複製路徑,경로 복사,Copiar ruta,نسخ المسار,Salin Jalur
 RecordDeleted,0:file,削除しました: {0},Deleted: {0},已删除: {0},已刪除: {0},삭제했습니다: {0},Eliminado: {0},تم الحذف: {0},Dihapus: {0}
 RecordDeleteFailed,0:error,削除に失敗しました: {0},Failed to delete: {0},删除失败: {0},刪除失敗: {0},삭제에 실패했습니다: {0},Error al eliminar: {0},فشل الحذف: {0},Gagal menghapus: {0}
