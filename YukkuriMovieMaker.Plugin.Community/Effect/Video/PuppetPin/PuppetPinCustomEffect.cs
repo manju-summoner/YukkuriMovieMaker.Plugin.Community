@@ -16,31 +16,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             set => SetValue((int)EffectImpl.Properties.PinCount, value);
             get => GetFloatValue((int)EffectImpl.Properties.PinCount);
         }
-
         public float Stiffness
         {
             set => SetValue((int)EffectImpl.Properties.Stiffness, value);
             get => GetFloatValue((int)EffectImpl.Properties.Stiffness);
         }
-
         public float TightLocalLeft
         {
             set => SetValue((int)EffectImpl.Properties.TightLocalLeft, value);
+            get => GetFloatValue((int)EffectImpl.Properties.TightLocalLeft);
         }
-
         public float TightLocalTop
         {
             set => SetValue((int)EffectImpl.Properties.TightLocalTop, value);
+            get => GetFloatValue((int)EffectImpl.Properties.TightLocalTop);
         }
-
         public float TightLocalRight
         {
             set => SetValue((int)EffectImpl.Properties.TightLocalRight, value);
+            get => GetFloatValue((int)EffectImpl.Properties.TightLocalRight);
         }
-
         public float TightLocalBottom
         {
             set => SetValue((int)EffectImpl.Properties.TightLocalBottom, value);
+            get => GetFloatValue((int)EffectImpl.Properties.TightLocalBottom);
         }
 
         [CustomEffect(2)]
@@ -50,18 +49,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             float _tightLocalLeft, _tightLocalTop, _tightLocalRight, _tightLocalBottom;
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.PinCount)]
-            public float PinCount
-            {
-                get => _cb.PinCount;
-                set { _cb.PinCount = System.Math.Clamp(value, 0f, MaxPins); UpdateConstants(); }
-            }
+            public float PinCount { get => _cb.PinCount; set { _cb.PinCount = Math.Clamp(value, 0f, MaxPins); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.Stiffness)]
-            public float Stiffness
-            {
-                get => _cb.Stiffness;
-                set { _cb.Stiffness = System.Math.Clamp(value, 0.1f, 8f); UpdateConstants(); }
-            }
+            public float Stiffness { get => _cb.Stiffness; set { _cb.Stiffness = Math.Clamp(value, 0.1f, 8f); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.TightLocalLeft)]
             public float TightLocalLeft { get => _tightLocalLeft; set => _tightLocalLeft = value; }
@@ -75,7 +66,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             [CustomEffectProperty(PropertyType.Float, (int)Properties.TightLocalBottom)]
             public float TightLocalBottom { get => _tightLocalBottom; set => _tightLocalBottom = value; }
 
-            public EffectImpl() : base(ShaderResourceUri.Get("PuppetPin")) { }
+            public EffectImpl() : base(ShaderResourceUri.Get("PuppetPin"))
+            {
+            }
 
             protected override void UpdateConstants()
             {
@@ -98,8 +91,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
                 _cb.InputHeight = inputRect.Bottom - inputRect.Top;
                 UpdateConstants();
 
-                bool hasTight = _tightLocalRight > _tightLocalLeft && _tightLocalBottom > _tightLocalTop;
-                if (hasTight)
+                if (_tightLocalRight > _tightLocalLeft && _tightLocalBottom > _tightLocalTop)
                 {
                     float cx = inputRect.Left + _cb.InputWidth * 0.5f;
                     float cy = inputRect.Top + _cb.InputHeight * 0.5f;
@@ -108,14 +100,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
                     int tr = (int)Math.Ceiling(cx + _tightLocalRight);
                     int tb = (int)Math.Ceiling(cy + _tightLocalBottom);
 
-                    if (tr > tl && tb > tt)
-                    {
-                        outputRect = new RawRect(tl, tt, tr, tb);
-                    }
-                    else
-                    {
-                        outputRect = inputRect;
-                    }
+                    outputRect = tr > tl && tb > tt
+                        ? new RawRect(tl, tt, tr, tb)
+                        : inputRect;
                 }
                 else
                 {
