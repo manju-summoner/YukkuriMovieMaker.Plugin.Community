@@ -175,23 +175,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         void OnItemsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset)
-            {
-                foreach (var item in Items)
-                    item.PropertyChanged -= OnItemPropertyChanged;
-            }
-            else
-            {
-                if (e.NewItems is not null)
-                    foreach (ImageDownloaderItemViewModel item in e.NewItems)
-                        item.PropertyChanged += OnItemPropertyChanged;
+            if (e.NewItems is not null)
+                foreach (ImageDownloaderItemViewModel item in e.NewItems)
+                    item.PropertyChanged += OnItemPropertyChanged;
 
-                if (e.OldItems is not null)
-                    foreach (ImageDownloaderItemViewModel item in e.OldItems)
-                        item.PropertyChanged -= OnItemPropertyChanged;
-            }
+            if (e.OldItems is not null)
+                foreach (ImageDownloaderItemViewModel item in e.OldItems)
+                    item.PropertyChanged -= OnItemPropertyChanged;
 
             RaiseSelectionCommandsCanExecuteChanged();
+        }
+
+        void ClearItems()
+        {
+            foreach (var item in Items)
+                item.PropertyChanged -= OnItemPropertyChanged;
+            Items.Clear();
         }
 
         void OnItemPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -242,7 +241,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             var token = loadCts.Token;
 
             IsLoading = true;
-            Items.Clear();
+            ClearItems();
             RefreshCommand.RaiseCanExecuteChanged();
 
             try
@@ -346,8 +345,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         public void Dispose()
         {
             Items.CollectionChanged -= OnItemsCollectionChanged;
-            foreach (var item in Items)
-                item.PropertyChanged -= OnItemPropertyChanged;
+            ClearItems();
 
             loadCts?.Cancel();
             loadCts?.Dispose();
