@@ -9,7 +9,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputSwitch
 {
-    [VideoEffect(nameof(Texts.OutputSwitchEffectName), [VideoEffectCategories.Composition], ["分岐", "branch", "切替", "switch"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.OutputSwitchEffectName), [VideoEffectCategories.Branch], ["分岐", "branch", "切替", "switch"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public class OutputSwitchEffect : VideoEffectBase
     {
         public override string Label => $"{Texts.OutputSwitchEffectName} {TargetIndex}";
