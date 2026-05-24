@@ -48,7 +48,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="{x:Static local:Texts.SaveFolder}" VerticalAlignment="Center" Margin="6,0"/>
-            <TextBox Grid.Column="1" Text="{Binding SaveFolder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="3,0,0,0" Height="26" IsReadOnly="True"/>
+            <TextBox Grid.Column="1" Text="{Binding SaveFolder, Mode=OneWay}" VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="3,0,0,0" Height="26" IsReadOnly="True"/>
             <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.FolderOpen}}" Command="{Binding SelectSaveFolderCommand}" Width="26" Padding="3" ToolTip="{x:Static local:Texts.SelectSaveFolder}"/>
         </Grid>
 
