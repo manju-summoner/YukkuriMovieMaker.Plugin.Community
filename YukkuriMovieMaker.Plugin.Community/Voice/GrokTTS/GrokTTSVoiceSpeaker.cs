@@ -12,17 +12,19 @@ using YukkuriMovieMaker.Plugin.Voice;
 namespace YukkuriMovieMaker.Plugin.Community.Voice.GrokTTS
 {
     //https://docs.x.ai/developers/model-capabilities/audio/text-to-speech
-    internal class GrokTTSVoiceSpeaker(string voice) : IVoiceSpeaker
+    internal class GrokTTSVoiceSpeaker(GrokTTSVoice voice) : IVoiceSpeaker
     {
         static readonly SemaphoreSlim semaphore = new(1);
 
+        readonly GrokTTSVoice voice = voice;
+
         public string EngineName => API;
 
-        public string SpeakerName => voice;
+        public string SpeakerName => voice.Name ?? string.Empty;
 
         public string API => "GrokTTS";
 
-        public string ID => voice;
+        public string ID => voice.Id ?? string.Empty;
 
         public bool IsVoiceDataCachingRequired => true;
 
@@ -46,6 +48,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GrokTTS
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new InvalidOperationException("Grok TTS APIキーが設定されていません。");
 
+            if (string.IsNullOrWhiteSpace(voice.Id))
+                throw new InvalidOperationException("Grok TTS 話者IDが設定されていません。");
+
             await semaphore.WaitAsync();
             try
             {
@@ -54,7 +59,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GrokTTS
                 var requestJson = new JObject
                 {
                     ["text"] = text,
-                    ["voice_id"] = voice,
+                    ["voice_id"] = voice.Id,
                     ["language"] = string.IsNullOrWhiteSpace(grokParameter.Language) ? "auto" : grokParameter.Language,
                     ["output_format"] = new JObject
                     {

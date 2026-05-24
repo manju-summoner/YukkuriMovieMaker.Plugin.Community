@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 namespace YukkuriMovieMaker.Plugin.Community.Voice.GrokTTS
 {
     internal class GrokTTSSettings : SettingsBase<GrokTTSSettings>
@@ -13,6 +15,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GrokTTS
         string apiKey = string.Empty;
 
         public string ApiKey { get => apiKey; set => Set(ref apiKey, value); }
+
+        public ObservableCollection<GrokTTSVoice> Voices { get; } = [];
 
         public override void Initialize()
         {
