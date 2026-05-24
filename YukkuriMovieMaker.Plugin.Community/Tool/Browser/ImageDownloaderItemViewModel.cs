@@ -65,7 +65,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         static string SanitizeFileName(string name)
         {
             var invalid = Path.GetInvalidFileNameChars();
-            return string.Concat(name.Select(c => invalid.Contains(c) ? '_' : c));
+            var sanitized = string.Concat(name.Select(c => invalid.Contains(c) ? '_' : c));
+            return string.IsNullOrWhiteSpace(sanitized) ? "image" : sanitized;
         }
 
         static string GetUniqueFilePath(string folder, string fileName)
