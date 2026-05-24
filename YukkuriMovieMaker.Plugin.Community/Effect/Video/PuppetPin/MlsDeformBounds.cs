@@ -6,8 +6,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
 {
     internal static class MlsDeformBounds
     {
-        private const float Epsilon = 1e-6f;
-        private const int GridResolution = 48;
+        const float Epsilon = 1e-6f;
+        const int GridResolution = 48;
 
         public static (float left, float top, float right, float bottom) Compute(
             float imageWidth,
@@ -69,7 +69,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             return (minX - margin, minY - margin, maxX + margin, maxY + margin);
         }
 
-        private static Vector2 MapPointForward(
+        static Vector2 MapPointForward(
             Vector2 p,
             IReadOnlyList<Vector2> restLocal,
             IReadOnlyList<Vector2> currentLocal,

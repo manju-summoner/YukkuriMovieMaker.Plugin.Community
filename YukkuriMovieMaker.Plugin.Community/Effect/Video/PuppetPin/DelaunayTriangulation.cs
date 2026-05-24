@@ -71,8 +71,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             pts.Add(new Vector2(midx + 20 * deltaMax, midy - deltaMax));
 
             int n = pts.Count;
-            var triangles = new List<TriangleData>();
-            triangles.Add(new TriangleData(n - 3, n - 2, n - 1, pts));
+            var triangles = new List<TriangleData>
+            {
+                new(n - 3, n - 2, n - 1, pts)
+            };
 
             var edgeSeen = new HashSet<Edge>();
             var uniqueEdges = new List<Edge>();
