@@ -49,8 +49,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath) ?? ".");
             File.Copy(sourceWavPath, outputFilePath, overwrite: true);
 
-            var result = pronounce ?? new RecordedVoicePronounce();
-            return Task.FromResult<IVoicePronounce?>(result);
+            return Task.FromResult<IVoicePronounce?>(null);
         }
 
         public IVoiceParameter CreateVoiceParameter()
