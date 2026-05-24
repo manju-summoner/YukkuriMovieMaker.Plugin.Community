@@ -122,7 +122,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
         {
             try
             {
-                if (File.Exists(path))
+                // 相対パスは CWD 上の同名ファイルを誤って拾わないよう、必ず recordsDirectory 基準で解決する。
+                if (Path.IsPathRooted(path) && File.Exists(path))
                     return path;
 
                 if (!string.IsNullOrWhiteSpace(recordsDirectory) && Directory.Exists(recordsDirectory))
