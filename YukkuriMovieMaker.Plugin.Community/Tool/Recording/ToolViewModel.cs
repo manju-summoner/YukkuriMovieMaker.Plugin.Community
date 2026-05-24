@@ -124,6 +124,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         }
 
         public bool IsRecording => recordingService.IsRecording;
+        public bool IsPlaying => audioPlaybackService.IsPlaying;
 
         public ToolViewModel()
         {
@@ -367,12 +368,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         }
 
         bool CanStartRecording() => !IsRecording && !string.IsNullOrWhiteSpace(SelectedDeviceId);
-        bool CanPlaySelected() => !IsRecording && !audioPlaybackService.IsPlaying && SelectedRecord is not null && File.Exists(SelectedRecord.Path);
+        bool CanPlaySelected() => !IsRecording
+            && (audioPlaybackService.IsPlaying
+                || (SelectedRecord is not null && File.Exists(SelectedRecord.Path)));
         bool CanDeleteSelected() => !IsRecording && !audioPlaybackService.IsPlaying && SelectedRecord is not null;
         bool CanRenameSelected() => !IsRecording && SelectedRecord is not null && !string.IsNullOrWhiteSpace(RenameText);
 
         void PlaySelected()
         {
+            if (audioPlaybackService.IsPlaying)
+            {
+                audioPlaybackService.Stop();
+                OnPropertyChanged(nameof(IsPlaying));
+                OnPropertyChanged(nameof(CanSuspend));
+                RaiseCommandStates();
+                return;
+            }
+
             if (SelectedRecord is null)
                 return;
             PlayFile(SelectedRecord.Path);
@@ -384,12 +396,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             {
                 audioPlaybackService.Play(path);
                 RecordingStatus = Texts.Playing;
+                OnPropertyChanged(nameof(IsPlaying));
                 OnPropertyChanged(nameof(CanSuspend));
             }
             catch (Exception ex)
             {
                 RecordingStatus = string.Format(Texts.PlaybackFailed, ex.Message);
                 audioPlaybackService.Stop();
+                OnPropertyChanged(nameof(IsPlaying));
             }
             finally
             {
@@ -555,6 +569,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 RecordingStatus = e.Exception is null
                     ? Texts.PlaybackCompleted
                     : string.Format(Texts.PlaybackError, e.Exception.Message);
+                OnPropertyChanged(nameof(IsPlaying));
                 OnPropertyChanged(nameof(CanSuspend));
                 RaiseCommandStates();
             }

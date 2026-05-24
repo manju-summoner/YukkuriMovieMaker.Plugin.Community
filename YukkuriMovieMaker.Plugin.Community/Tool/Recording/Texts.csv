@@ -7,6 +7,7 @@ Browse,,参照...,Browse...,浏览...,瀏覽...,찾아보기...,Examinar...,اس
 ResetToDefault,,既定値,Default,默认值,預設值,기본값,Predeterminado,الافتراضي,Default
 StartRecording,,録音開始,Start Recording,开始录音,開始錄音,녹음 시작,Iniciar grabación,بدء التسجيل,Mulai Perekaman
 StopRecording,,録音停止,Stop Recording,停止录音,停止錄音,녹음 중지,Detener grabación,إيقاف التسجيل,Hentikan Perekaman
+Stop,,停止,Stop,停止,停止,중지,Detener,إيقاف,Hentikan
 InputLevel,,入力レベル,Input Level,输入电平,輸入音量,입력 레벨,Nivel de entrada,مستوى الإدخال,Tingkat Input
 Idle,,待機中,Standby,待机中,待機中,대기 중,En espera,قيد الانتظار,Siaga
 ReselectRecordingDevice,,録音デバイスを再選択してください。,Please reselect the recording device.,请重新选择录音设备。,請重新選擇錄音裝置。,녹음 장치를 다시 선택해 주세요.,Vuelva a seleccionar el dispositivo de grabación.,يرجى إعادة تحديد جهاز التسجيل.,Silakan pilih kembali perangkat perekaman.

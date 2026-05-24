@@ -102,7 +102,18 @@
             </ListView>
 
             <WrapPanel Grid.Row="1">
-                <Button Content="{x:Static local:Texts.PlaySelected}" Command="{Binding PlaySelectedCommand}" />
+                <Button Command="{Binding PlaySelectedCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource ToolButtonStyle}">
+                            <Setter Property="Content" Value="{x:Static local:Texts.PlaySelected}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                    <Setter Property="Content" Value="{x:Static local:Texts.Stop}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
                 <Button Content="{x:Static local:Texts.DeleteSelected}" Command="{Binding DeleteSelectedCommand}" />
                 <Button Content="{x:Static local:Texts.CopyPath}" Command="{Binding CopyPathCommand}" />
                 <TextBox Width="220" Height="26" VerticalContentAlignment="Center" Text="{Binding RenameText, UpdateSourceTrigger=PropertyChanged}" />
