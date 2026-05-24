@@ -64,7 +64,19 @@
         </Grid>
 
         <WrapPanel Grid.Row="2">
-            <Button>
+            <Button Content="{x:Static local:Texts.RefreshRecords}" Command="{Binding RefreshRecordsCommand}" />
+            <Button Content="{x:Static local:Texts.OpenFolder}" Command="{Binding OpenFolderCommand}" />
+        </WrapPanel>
+
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" MinWidth="100"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.ToolName}" VerticalAlignment="Center" Margin="6,0"/>
+            <ProgressBar Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding CurrentVolume}"/>
+            <Button Grid.Column="2">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource ToolButtonStyle}">
                         <Setter Property="Content" Value="{x:Static local:Texts.StartRecording}"/>
@@ -78,14 +90,7 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <Button Content="{x:Static local:Texts.RefreshRecords}" Command="{Binding RefreshRecordsCommand}" />
-            <Button Content="{x:Static local:Texts.OpenFolder}" Command="{Binding OpenFolderCommand}" />
-        </WrapPanel>
-
-        <StackPanel Grid.Row="3">
-            <TextBlock Text="{x:Static local:Texts.InputLevel}" />
-            <ProgressBar Minimum="0" Maximum="1" Value="{Binding CurrentVolume}" Height="22" />
-        </StackPanel>
+        </Grid>
 
         <Grid Grid.Row="4">
             <Grid.RowDefinitions>

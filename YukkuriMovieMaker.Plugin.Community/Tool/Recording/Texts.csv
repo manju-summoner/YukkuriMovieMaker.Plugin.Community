@@ -8,7 +8,6 @@ ResetToDefault,,保存先を既定値に戻す,Reset save destination to default
 StartRecording,,録音開始,Start Recording,开始录音,開始錄音,녹음 시작,Iniciar grabación,بدء التسجيل,Mulai Perekaman
 StopRecording,,録音停止,Stop Recording,停止录音,停止錄音,녹음 중지,Detener grabación,إيقاف التسجيل,Hentikan Perekaman
 Stop,,停止,Stop,停止,停止,중지,Detener,إيقاف,Hentikan
-InputLevel,,入力レベル,Input Level,输入电平,輸入音量,입력 레벨,Nivel de entrada,مستوى الإدخال,Tingkat Input
 Idle,,待機中,Standby,待机中,待機中,대기 중,En espera,قيد الانتظار,Siaga
 ReselectRecordingDevice,,録音デバイスを再選択してください。,Please reselect the recording device.,请重新选择录音设备。,請重新選擇錄音裝置。,녹음 장치를 다시 선택해 주세요.,Vuelva a seleccionar el dispositivo de grabación.,يرجى إعادة تحديد جهاز التسجيل.,Silakan pilih kembali perangkat perekaman.
 RecordingStartFailed,0:error,録音開始に失敗しました: {0},Failed to start recording: {0},开始录音失败: {0},開始錄音失敗: {0},녹음 시작에 실패했습니다: {0},Error al iniciar la grabación: {0},فشل بدء التسجيل: {0},Gagal memulai perekaman: {0}

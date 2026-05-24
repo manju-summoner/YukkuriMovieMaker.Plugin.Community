@@ -144,7 +144,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             StopRecordingCommand = new ActionCommand(_ => IsRecording, _ => StopRecording());
             RefreshDevicesCommand = new ActionCommand(_ => true, _ => RefreshMicrophones());
             BrowseOutputDirectoryCommand = new ActionCommand(_ => !IsRecording, _ => BrowseOutputDirectory());
-            ResetOutputDirectoryCommand = new ActionCommand(_ => !IsRecording, _ => ResetOutputDirectory());
+            ResetOutputDirectoryCommand = new ActionCommand(_ => CanResetOutputDirectory(), _ => ResetOutputDirectory());
             RefreshRecordsCommand = new ActionCommand(_ => true, _ => RefreshRecords());
             PlaySelectedCommand = new ActionCommand(_ => CanPlaySelected(), _ => PlaySelected());
             DeleteSelectedCommand = new ActionCommand(_ => CanDeleteSelected(), _ => DeleteSelected());
@@ -371,6 +371,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         }
 
         bool CanStartRecording() => !IsRecording && !string.IsNullOrWhiteSpace(SelectedDeviceId);
+        bool CanResetOutputDirectory() => !IsRecording && !string.Equals(
+            OutputDirectory,
+            RecordingSettings.GetDefaultOutputDirectory(),
+            StringComparison.OrdinalIgnoreCase);
         bool CanPlaySelected() => !IsRecording
             && (audioPlaybackService.IsPlaying
                 || (SelectedRecord is not null && File.Exists(SelectedRecord.Path)));
