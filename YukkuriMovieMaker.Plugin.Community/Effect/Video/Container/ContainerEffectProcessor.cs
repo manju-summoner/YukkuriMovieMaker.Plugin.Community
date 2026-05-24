@@ -79,7 +79,7 @@ internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
 
     private void SynchronizeProcessors()
     {
-        var nextEffects = _effect.GetSelectedTabEffects();
+        var nextEffects = _effect.Effects;
         if (ReferenceEquals(_currentEffects, nextEffects)) return;
 
         var oldProcessors = new Dictionary<IVideoEffect, IVideoEffectProcessor>(_currentEffects.Count);

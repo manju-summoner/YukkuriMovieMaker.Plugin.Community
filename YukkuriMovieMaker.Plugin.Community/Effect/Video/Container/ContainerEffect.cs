@@ -16,7 +16,7 @@ public sealed class ContainerEffect : VideoEffectBase
         {
             var selectedTab = Tabs.FirstOrDefault(t => t.Id == SelectedTabId);
             var selectedName = selectedTab?.Name ?? string.Empty;
-            var count = selectedTab?.Effects.Count ?? 0;
+            var count = Effects.Count;
             return string.Format(Texts.Container_LabelFormat, Texts.Container_DisplayName, selectedName, count);
         }
     }
@@ -25,6 +25,18 @@ public sealed class ContainerEffect : VideoEffectBase
     [EffectTabManagerControl]
     [Newtonsoft.Json.JsonIgnore]
     public bool EffectTabManagerVisible { get; set; } = true;
+
+    [Newtonsoft.Json.JsonIgnore]
+    public ImmutableList<IVideoEffect> Effects
+    {
+        get => _effects;
+        set
+        {
+            if (Set(ref _effects, value))
+                OnPropertyChanged(nameof(Label));
+        }
+    }
+    private ImmutableList<IVideoEffect> _effects = ImmutableList<IVideoEffect>.Empty;
 
     public ImmutableList<EffectTab> Tabs
     {
@@ -54,15 +66,5 @@ public sealed class ContainerEffect : VideoEffectBase
     public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription) =>
         [];
 
-    protected override IEnumerable<IAnimatable> GetAnimatables() => Tabs.SelectMany(t => t.Effects);
-
-    /// <summary>
-    /// 現在選択中のタブの Effects を返す。レンダリングパイプラインや UI バインディング元として使用。
-    /// 該当タブが無いときは空リストを返す。
-    /// </summary>
-    internal ImmutableList<IVideoEffect> GetSelectedTabEffects()
-    {
-        var selectedTab = Tabs.FirstOrDefault(t => t.Id == SelectedTabId);
-        return selectedTab?.Effects ?? ImmutableList<IVideoEffect>.Empty;
-    }
+    protected override IEnumerable<IAnimatable> GetAnimatables() => Effects;
 }

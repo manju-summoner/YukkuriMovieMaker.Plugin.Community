@@ -17,9 +17,9 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
 
     private TabDragDropService? _dragDropService;
     private ItemProperty[] _containerItemProperties = [];
-    private static readonly PropertyInfo EffectTabEffectsProperty =
-        typeof(EffectTab).GetProperty(nameof(EffectTab.Effects))
-            ?? throw new InvalidOperationException("EffectTab.Effects not found");
+    private static readonly PropertyInfo ContainerEffectEffectsProperty =
+        typeof(ContainerEffect).GetProperty(nameof(ContainerEffect.Effects))
+            ?? throw new InvalidOperationException("ContainerEffect.Effects not found");
 
     public EffectTabManagerControl()
     {
@@ -91,8 +91,7 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
             return;
         }
 
-        var tab = vm.SelectedTab?.Model;
-        if (tab is null || _containerItemProperties.Length == 0)
+        if (vm.SelectedTab is null || _containerItemProperties.Length == 0)
         {
             ClearEffectSelectorBinding();
             return;
@@ -102,11 +101,12 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         // マルチセレクト中の他 Container への分配は EffectTabManagerViewModel.NotifyEffectsEdited
         // 経由で PersistState がまとめて行う（ApplyToAllSelectedContainers が deep clone も担当する）。
         var item = _containerItemProperties[0].Item;
-        var itemProp = new ItemProperty(item, tab, EffectTabEffectsProperty, null);
+        var containerEffect = (ContainerEffect)_containerItemProperties[0].PropertyOwner;
+        var itemProp = new ItemProperty(item, containerEffect, ContainerEffectEffectsProperty, null);
 
         EffectSelector.SetBinding(
             VideoEffectSelector.EffectsProperty,
-            new Binding(nameof(EffectTab.Effects)) { Source = tab, Mode = BindingMode.TwoWay });
+            new Binding(nameof(ContainerEffect.Effects)) { Source = containerEffect, Mode = BindingMode.TwoWay });
         EffectSelector.ItemProperties = [itemProp];
         EffectSelector.SelectFirstItem();
     }

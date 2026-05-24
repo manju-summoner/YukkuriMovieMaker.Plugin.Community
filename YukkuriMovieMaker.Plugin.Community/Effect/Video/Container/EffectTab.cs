@@ -6,7 +6,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
 public sealed class EffectTab : Bindable
 {
-    public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public string Name
     {

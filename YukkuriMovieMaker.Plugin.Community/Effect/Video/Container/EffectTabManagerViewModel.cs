@@ -195,10 +195,9 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         UpdateIndices();
 
-        // SelectedTab セッターは ApplyStateToContainers() を必ず呼ぶため、初期化時に経由すると
-        // マルチセレクト中のプロパティパネル表示だけで他コンテナの Tabs/SelectedTabId が
-        // 先頭コンテナの内容で上書きされてしまう。setter を介さず内部状態のみ更新する。
-        SelectTabInternal(Tabs.FirstOrDefault(t => t.Id == selectedId) ?? Tabs.FirstOrDefault());
+        var selected = Tabs.FirstOrDefault(t => t.Id == selectedId) ?? Tabs.FirstOrDefault();
+        SelectTabInternal(selected);
+        _effect.Effects = selected?.Effects ?? ImmutableList<IVideoEffect>.Empty;
     }
 
     private void SelectTabInternal(EffectTabItemViewModel? tab)
@@ -219,6 +218,14 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 LoadTabs();
             }
         }
+        else if (e.PropertyName == nameof(ContainerEffect.Effects) && SelectedTab != null)
+        {
+            using (BeginSelfUpdate())
+            {
+                SelectedTab.Effects = _effect.Effects;
+                ApplyStateToContainers();
+            }
+        }
     }
 
     /// <summary>
@@ -230,6 +237,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         using (BeginSelfUpdate())
         {
+            if (SelectedTab != null)
+                SelectedTab.Effects = _effect.Effects;
             ApplyStateToContainers();
         }
     }
@@ -238,11 +247,13 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         var snapshot = Tabs.Select(t => t.Model).ToImmutableList();
         var selectedId = SelectedTab?.Id;
+        var effects = SelectedTab?.Effects ?? ImmutableList<IVideoEffect>.Empty;
 
         ApplyToContainers(snapshot, (e, tabs) =>
         {
             e.Tabs = tabs;
             e.SelectedTabId = selectedId;
+            e.Effects = effects;
         });
     }
 
