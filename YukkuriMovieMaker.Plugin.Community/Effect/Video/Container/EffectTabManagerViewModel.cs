@@ -218,14 +218,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 LoadTabs();
             }
         }
-        else if (e.PropertyName == nameof(ContainerEffect.Effects) && SelectedTab != null)
-        {
-            using (BeginSelfUpdate())
-            {
-                SelectedTab.Effects = _effect.Effects;
-                ApplyStateToContainers();
-            }
-        }
     }
 
     /// <summary>
@@ -247,13 +239,13 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         var snapshot = Tabs.Select(t => t.Model).ToImmutableList();
         var selectedId = SelectedTab?.Id;
-        var effects = SelectedTab?.Effects ?? ImmutableList<IVideoEffect>.Empty;
 
         ApplyToContainers(snapshot, (e, tabs) =>
         {
             e.Tabs = tabs;
             e.SelectedTabId = selectedId;
-            e.Effects = effects;
+            var selectedTab = tabs.FirstOrDefault(t => t.Id == selectedId);
+            e.Effects = selectedTab?.Effects ?? ImmutableList<IVideoEffect>.Empty;
         });
     }
 
