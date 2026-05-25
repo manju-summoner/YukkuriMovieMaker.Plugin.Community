@@ -81,7 +81,8 @@ internal static class PiperBinaryResource
 
         var targetDir = InstallDirectory(version);
         var tempDir = targetDir + ".tmp";
-        var backupDir = currentVersion is not null ? InstallDirectory(currentVersion) + ".bak" : null;
+        var currentDir = currentVersion is not null ? InstallDirectory(currentVersion) : null;
+        var backupDir = currentDir is not null ? currentDir + ".bak" : null;
 
         if (Directory.Exists(tempDir))
             Directory.Delete(tempDir, recursive: true);
@@ -120,12 +121,15 @@ internal static class PiperBinaryResource
 
         try { File.Delete(zipPath); } catch { }
 
-        if (backupDir is not null && Directory.Exists(targetDir))
+        if (currentDir is not null && backupDir is not null && Directory.Exists(currentDir))
         {
             if (Directory.Exists(backupDir))
                 Directory.Delete(backupDir, recursive: true);
-            Directory.Move(targetDir, backupDir);
+            Directory.Move(currentDir, backupDir);
         }
+
+        if (Directory.Exists(targetDir))
+            Directory.Delete(targetDir, recursive: true);
 
         Directory.Move(tempDir, targetDir);
 
@@ -137,12 +141,10 @@ internal static class PiperBinaryResource
 
         if (newExecutable is null)
         {
+            if (Directory.Exists(targetDir))
+                Directory.Delete(targetDir, recursive: true);
             if (backupDir is not null && Directory.Exists(backupDir))
-            {
-                if (Directory.Exists(targetDir))
-                    Directory.Delete(targetDir, recursive: true);
-                Directory.Move(backupDir, targetDir);
-            }
+                Directory.Move(backupDir, currentDir!);
             throw new FileNotFoundException(
                 $"Piper Plus CLI executable not found after extraction in '{targetDir}'.");
         }
