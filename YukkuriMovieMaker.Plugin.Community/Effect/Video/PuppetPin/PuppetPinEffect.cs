@@ -36,7 +36,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             get => pins;
             set
             {
-                if (Set(ref pins, value))
+                if (Set(ref pins, value ?? ImmutableList<PuppetPin>.Empty))
                     OnPropertyChanged(nameof(Label));
             }
         }
