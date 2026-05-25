@@ -136,8 +136,7 @@ internal class IrodoriTTSVoiceDesignDialogViewModel : Bindable
 
     void StopPlayback()
     {
-        if (audioPlayer != null)
-            audioPlayer.StreamEnded -= Player_StreamEnded;
+        audioPlayer?.StreamEnded -= Player_StreamEnded;
         audioPlayer?.Dispose();
         audioPlayer = null;
         audioFileReader?.Dispose();

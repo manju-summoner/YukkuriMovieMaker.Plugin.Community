@@ -705,7 +705,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
                 {
                     var container = (ContainerEffect)prop.PropertyOwner;
                     var tab = container.Tabs.FirstOrDefault(t => t.Id == targetId);
-                    if (tab != null) tab.Name = newName;
+                    tab?.Name = newName;
                 }
             }
         }

@@ -118,9 +118,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             get;
             private set
             {
-                if (field != null) field.PropertyChanged -= Layout_PropertyChanged;
+                field?.PropertyChanged -= Layout_PropertyChanged;
                 Set(ref field!, value);
-                if (field != null) field.PropertyChanged += Layout_PropertyChanged;
+                field?.PropertyChanged += Layout_PropertyChanged;
                 NotifyLayoutModeProperties();
             }
         } = new ExplorerLayout();
@@ -1792,7 +1792,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     foreach (var favorite in ExplorerSettings.Default.Favorites)
                         PropertyChangedEventManager.RemoveHandler(favorite, Favorite_PropertyChanged, string.Empty);
 
-                    if (Layout != null) Layout.PropertyChanged -= Layout_PropertyChanged;
+                    Layout?.PropertyChanged -= Layout_PropertyChanged;
 
                     foreach (var item in Items)
                     {

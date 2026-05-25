@@ -375,22 +375,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 waveIn = null;
             }
 
-            if (writer is not null)
-            {
-                writer.Dispose();
-                writer = null;
-            }
+            writer?.Dispose();
+            writer = null;
 
             var filePath = currentFilePath;
             currentFilePath = null;
             currentWaveFormat = null;
             IsRecording = false;
-
-            if (currentDevice is not null)
-            {
-                currentDevice.Dispose();
-                currentDevice = null;
-            }
+            currentDevice?.Dispose();
+            currentDevice = null;
 
             OnRecordingStateChanged();
 

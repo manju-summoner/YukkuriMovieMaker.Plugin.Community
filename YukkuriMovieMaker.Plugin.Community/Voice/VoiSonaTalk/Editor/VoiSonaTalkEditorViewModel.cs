@@ -99,8 +99,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
 
         public void StopPlayback()
         {
-            if(player != null)
-                player.StreamEnded -= Player_StreamEnded;
+            player?.StreamEnded -= Player_StreamEnded;
             player?.Dispose();
             player = null;
             stream?.Dispose();

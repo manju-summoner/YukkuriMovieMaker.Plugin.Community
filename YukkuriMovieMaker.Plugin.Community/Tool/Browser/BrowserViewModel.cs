@@ -584,10 +584,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             settings.IsGeneralAutofillEnabled = BrowserSettings.Default.IsGeneralAutofillEnabled;
             settings.IsScriptEnabled = BrowserSettings.Default.IsScriptEnabled;
 
-            if (core.Profile != null)
-            {
-                core.Profile.PreferredTrackingPreventionLevel = (CoreWebView2TrackingPreventionLevel)(BrowserSettings.Default.TrackingPreventionLevel + 1);
-            }
+            core.Profile?.PreferredTrackingPreventionLevel = (CoreWebView2TrackingPreventionLevel)(BrowserSettings.Default.TrackingPreventionLevel + 1);
 
             string userAgent = defaultUserAgent ?? string.Empty;
             if (IsMobileMode)

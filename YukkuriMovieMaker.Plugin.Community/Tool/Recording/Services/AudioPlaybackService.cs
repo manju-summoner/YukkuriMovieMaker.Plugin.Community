@@ -47,11 +47,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     playbackOutput = null;
                 }
 
-                if (playbackReader is not null)
-                {
-                    playbackReader.Dispose();
-                    playbackReader = null;
-                }
+                playbackReader?.Dispose();
+                playbackReader = null;
             }
             finally
             {

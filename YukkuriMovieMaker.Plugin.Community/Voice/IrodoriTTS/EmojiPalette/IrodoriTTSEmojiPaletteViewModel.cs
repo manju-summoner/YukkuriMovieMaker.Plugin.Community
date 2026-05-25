@@ -27,8 +27,7 @@ internal class IrodoriTTSEmojiPaletteViewModel : Bindable
         get => voiceItemEdit?.Hatsuon ?? string.Empty;
         set
         {
-            if (voiceItemEdit != null)
-                voiceItemEdit.Hatsuon = value;
+            voiceItemEdit?.Hatsuon = value;
             OnPropertyChanged();
         }
     }

@@ -37,11 +37,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         {
             if (ReferenceEquals(_attachedViewModel, viewModel))
                 return;
-            if (_attachedViewModel is not null)
-                _attachedViewModel.ToggleSearchRequested -= OnToggleSearchRequested;
+            _attachedViewModel?.ToggleSearchRequested -= OnToggleSearchRequested;
             _attachedViewModel = viewModel;
-            if (_attachedViewModel is not null)
-                _attachedViewModel.ToggleSearchRequested += OnToggleSearchRequested;
+            _attachedViewModel?.ToggleSearchRequested += OnToggleSearchRequested;
         }
 
         private void OnToggleSearchRequested(object? sender, EventArgs e)
