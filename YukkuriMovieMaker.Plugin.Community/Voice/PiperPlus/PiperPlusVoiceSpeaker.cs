@@ -9,6 +9,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
 
 internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpeaker
 {
+    const int ProcessTimeoutMs = 120_000;
+
     static readonly SemaphoreSlim Semaphore = new(1, 1);
 
     public string EngineName => "Piper Plus";
@@ -119,7 +121,13 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpe
 
         process.Start();
         process.BeginErrorReadLine();
-        process.WaitForExit();
+
+        if (!process.WaitForExit(ProcessTimeoutMs))
+        {
+            try { process.Kill(entireProcessTree: true); } catch { }
+            throw new TimeoutException(
+                $"Piper Plus process did not complete within {ProcessTimeoutMs / 1000} seconds.");
+        }
 
         if (process.ExitCode != 0)
         {
