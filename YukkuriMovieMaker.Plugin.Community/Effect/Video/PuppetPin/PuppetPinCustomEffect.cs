@@ -45,6 +45,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
         [CustomEffect(2)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
+            const float MaxLocalExtent = 4096f;
+
             ConstantBuffer _cb;
             float _tightLocalLeft, _tightLocalTop, _tightLocalRight, _tightLocalBottom;
 
@@ -55,16 +57,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             public float Stiffness { get => _cb.Stiffness; set { _cb.Stiffness = Math.Clamp(value, 0.1f, 8f); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.TightLocalLeft)]
-            public float TightLocalLeft { get => _tightLocalLeft; set => _tightLocalLeft = value; }
+            public float TightLocalLeft { get => _tightLocalLeft; set => _tightLocalLeft = Math.Clamp(value, -MaxLocalExtent, MaxLocalExtent); }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.TightLocalTop)]
-            public float TightLocalTop { get => _tightLocalTop; set => _tightLocalTop = value; }
+            public float TightLocalTop { get => _tightLocalTop; set => _tightLocalTop = Math.Clamp(value, -MaxLocalExtent, MaxLocalExtent); }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.TightLocalRight)]
-            public float TightLocalRight { get => _tightLocalRight; set => _tightLocalRight = value; }
+            public float TightLocalRight { get => _tightLocalRight; set => _tightLocalRight = Math.Clamp(value, -MaxLocalExtent, MaxLocalExtent); }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.TightLocalBottom)]
-            public float TightLocalBottom { get => _tightLocalBottom; set => _tightLocalBottom = value; }
+            public float TightLocalBottom { get => _tightLocalBottom; set => _tightLocalBottom = Math.Clamp(value, -MaxLocalExtent, MaxLocalExtent); }
 
             public EffectImpl() : base(ShaderResourceUri.Get("PuppetPin"))
             {
