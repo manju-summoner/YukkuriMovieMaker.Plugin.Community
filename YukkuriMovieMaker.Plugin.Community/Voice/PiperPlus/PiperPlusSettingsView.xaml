@@ -178,7 +178,11 @@
 
                 <GroupBox Header="{x:Static local:Texts.AboutPiperPlus}" Margin="6" Padding="12,6,12,6">
                     <TextBlock Margin="6" TextWrapping="Wrap">
-                        <Run Text="{x:Static local:Texts.AboutPiperPlusMessage}"/>
+                        <Run Text="{x:Static local:Texts.AboutPiperPlusDescription}"/>
+                        <LineBreak/>
+                        <Run Text="{x:Static local:Texts.AboutPiperPlusHowTo}"/>
+                        <LineBreak/>
+                        <Run Text="{x:Static local:Texts.AboutPiperPlusBinaryNote}"/>
                         <LineBreak/>
                         <LineBreak/>
                         <Hyperlink Command="{Binding Source={x:Static ps:CommandSettings.Default}, Path=[OpenUri]}" CommandParameter="https://github.com/ayutaz/piper-plus">
