@@ -73,7 +73,7 @@ public sealed class ContainerEffect : VideoEffectBase
     internal ImmutableList<IVideoEffect> GetSelectedTabEffects()
     {
         var selectedTab = Tabs.FirstOrDefault(t => t.Id == SelectedTabId);
-        return selectedTab?.Effects ?? ImmutableList<IVideoEffect>.Empty;
+        return selectedTab?.Effects ?? [];
     }
 
     private void ReplaceTabsSubscription(ImmutableList<EffectTab> oldTabs, ImmutableList<EffectTab> newTabs)

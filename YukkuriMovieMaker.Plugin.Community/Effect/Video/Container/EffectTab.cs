@@ -18,7 +18,7 @@ public sealed class EffectTab : Animatable
     {
         get;
         set => Set(ref field, value, nameof(Effects));
-    } = ImmutableList<IVideoEffect>.Empty;
+    } = [];
 
     protected override IEnumerable<IAnimatable> GetAnimatables() => Effects;
 }

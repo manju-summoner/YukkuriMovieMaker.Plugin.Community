@@ -243,7 +243,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             var matching = container.Tabs.FirstOrDefault(t => t.Id == sourceTab.Id);
             if (matching != null)
             {
-                var cloned = YukkuriMovieMaker.Json.Json.GetClone(sourceEffects) ?? ImmutableList<IVideoEffect>.Empty;
+                var cloned = YukkuriMovieMaker.Json.Json.GetClone(sourceEffects) ?? [];
                 matching.Effects = cloned;
             }
         }
@@ -566,7 +566,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         }
 
         if (data == null) return;
-        var pastedEffects = data.Effects ?? ImmutableList<IVideoEffect>.Empty;
+        var pastedEffects = data.Effects ?? [];
 
         using (BeginUndo())
         {
@@ -583,7 +583,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
                     var effects = isFirst
                         ? pastedEffects
-                        : (YukkuriMovieMaker.Json.Json.GetClone(pastedEffects) ?? ImmutableList<IVideoEffect>.Empty);
+                        : (YukkuriMovieMaker.Json.Json.GetClone(pastedEffects) ?? []);
                     isFirst = false;
                     tab.Effects = effects;
                 }
@@ -720,9 +720,9 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
     private static ImmutableList<IVideoEffect> CloneEffects(ImmutableList<IVideoEffect> effects)
     {
-        if (effects.IsEmpty) return ImmutableList<IVideoEffect>.Empty;
+        if (effects.IsEmpty) return [];
         var cloned = YukkuriMovieMaker.Json.Json.GetClone(effects);
-        return cloned ?? ImmutableList<IVideoEffect>.Empty;
+        return cloned ?? [];
     }
 
     private IDisposable BeginUndo() => new UndoScope(this);

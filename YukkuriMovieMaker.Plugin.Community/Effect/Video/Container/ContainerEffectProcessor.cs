@@ -12,7 +12,7 @@ internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
     private readonly IGraphicsDevicesAndContext _devices;
     private readonly DisposeCollector _disposer = new();
     private readonly List<IVideoEffectProcessor> _processors = new();
-    private ImmutableList<IVideoEffect> _currentEffects = ImmutableList<IVideoEffect>.Empty;
+    private ImmutableList<IVideoEffect> _currentEffects = [];
     private ID2D1Image? _inputImage;
     private bool _disposed;
 
