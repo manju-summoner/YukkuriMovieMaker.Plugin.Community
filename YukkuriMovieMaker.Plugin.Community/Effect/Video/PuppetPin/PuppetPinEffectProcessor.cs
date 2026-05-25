@@ -19,6 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
         PuppetPinCustomEffect? effect;
         ID2D1DeviceContext? deviceContext;
         PinGpuCache? gpuCache;
+        ImmutableList<VideoEffectController> cachedControllers = ImmutableList<VideoEffectController>.Empty;
 
         bool isFirst = true;
         int pinCount;
@@ -75,6 +76,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
                 effect.TightLocalTop = tt;
                 effect.TightLocalRight = tr;
                 effect.TightLocalBottom = tb;
+
+                cachedControllers = ImmutableList.CreateRange(BuildControllers(samples));
             }
 
             isFirst = false;
@@ -85,7 +88,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
 
             return effectDescription.DrawDescription with
             {
-                Controllers = ImmutableList.CreateRange(BuildControllers(samples))
+                Controllers = cachedControllers
             };
         }
 
@@ -263,6 +266,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             effect?.SetInput(1, null, true);
             gpuCache?.Dispose();
             gpuCache = null;
+            cachedControllers = ImmutableList<VideoEffectController>.Empty;
             isFirst = true;
         }
 
