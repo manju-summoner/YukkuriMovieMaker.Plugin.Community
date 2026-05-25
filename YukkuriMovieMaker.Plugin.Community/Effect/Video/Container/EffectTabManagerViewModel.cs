@@ -6,39 +6,41 @@ using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
+/// <summary>
+/// EffectTabManagerControl の ViewModel。
+///
+/// 設計方針：
+/// - <see cref="ContainerEffect"/>（モデル）が単一の真実の出所。VM はモデルからの一方向で構築される。
+/// - VM プロパティの setter ではモデルを直接書き換えない。書き換えはすべて Command 経由で行い、
+///   Command 側で <see cref="BeginUndo"/> スコープを張ってモデルを更新する。
+/// - モデルの PropertyChanged を購読し、変更を検知したら <see cref="SyncFromModel"/> で VM を再構築する。
+/// - Undo/Redo の実行はモデル側プロパティが直接書き換わる経路（UndoRedoPropertyChangedCommand）で行われるため、
+///   VM 側に副作用ループは発生しない。
+/// </summary>
 internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 {
     private readonly ItemProperty[] _itemProperties;
     private readonly ContainerEffect _effect;
     private const string ClipboardFormat = "YukkuriMovieMaker.Plugin.Community.Effect.Video.Container.EffectTab";
-    private bool _isSelfUpdating;
+
+    /// <summary>
+    /// true の間は <see cref="OnEffectPropertyChanged"/> での再同期をスキップする。
+    /// Command の Undo スコープでモデルを複数回触る間、毎回 VM を作り直すのを防ぐためのガード。
+    /// </summary>
+    private bool _isSyncingFromModel;
 
     public ObservableCollection<EffectTabItemViewModel> Tabs { get; } = new();
 
-    private EffectTabItemViewModel? _selectedTab;
-    public EffectTabItemViewModel? SelectedTab
-    {
-        get => _selectedTab;
-        set
-        {
-            if (_selectedTab == value) return;
-
-            IDisposable? scope = _isSelfUpdating ? null : BeginUndo();
-            try
-            {
-                SelectTabInternal(value);
-                ApplyStateToContainers();
-            }
-            finally
-            {
-                scope?.Dispose();
-            }
-        }
-    }
+    /// <summary>
+    /// 選択中タブ。VM 内部および <see cref="SyncFromModel"/> 以外からは setter を呼ばない。
+    /// ユーザー操作からの変更は <see cref="SelectTabCommand"/> 経由で行う。
+    /// </summary>
+    public EffectTabItemViewModel? SelectedTab { get; private set; }
 
     public bool IsTabSelected => SelectedTab != null;
     public bool HasMultipleTabs => Tabs.Count > 1;
 
+    public ActionCommand SelectTabCommand { get; }
     public ActionCommand AddTabCommand { get; }
     public ActionCommand RemoveTabCommand { get; }
     public ActionCommand MoveTabLeftCommand { get; }
@@ -79,6 +81,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         Tabs.CollectionChanged += Tabs_CollectionChanged;
 
+        SelectTabCommand = new ActionCommand(p => p is EffectTabItemViewModel, p => ExecuteSelectTab(p as EffectTabItemViewModel));
         AddTabCommand = new ActionCommand(_ => true, _ => ExecuteAddTab());
         RemoveTabCommand = new ActionCommand(p => ResolveTab(p) != null && HasMultipleTabs, p => ExecuteRemoveTab(ResolveTab(p)));
         MoveTabLeftCommand = new ActionCommand(p => CanMoveTab(ResolveTab(p), -1), p => ExecuteMoveTab(ResolveTab(p), -1));
@@ -101,10 +104,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         EditTemplateCommand = new ActionCommand(p => p is EffectTabTemplateViewModel, p => ExecuteEditTemplate(p as EffectTabTemplateViewModel));
         ExtractEffectCommand = new ActionCommand(p => p is ExtractEffectViewModel, p => ExecuteExtractEffect(p as ExtractEffectViewModel));
 
-        using (BeginSelfUpdate())
-        {
-            LoadTabs();
-        }
+        SyncFromModel();
         LoadStashes();
         LoadTemplates();
 
@@ -129,13 +129,10 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     }
 
     /// <summary>
-    /// マルチセレクト中のすべての ContainerEffect に対して action を呼ぶ。
-    /// 先頭の Container には sharedValue をそのまま渡し、2 個目以降には毎回 deep clone を渡す。
-    /// （複数 Container に同一インスタンスを共有させるとマルチセレクト解除後の編集が
-    /// 他の Container にも波及してしまうため、独立性を保つ。）
+    /// マルチセレクト中の全 <see cref="ContainerEffect"/> に対して action を呼ぶ。
+    /// 先頭の Container には <paramref name="sharedValue"/> をそのまま渡し、2 個目以降には毎回 deep clone を渡す。
     /// </summary>
-    private void ApplyToContainers<T>(T sharedValue, Action<ContainerEffect, T> action)
-        where T : class
+    private void ApplyToContainers<T>(T sharedValue, Action<ContainerEffect, T> action) where T : class
     {
         bool isFirst = true;
         foreach (var prop in _itemProperties)
@@ -184,66 +181,72 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void OnTemplatesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         => SyncTemplates();
 
-    private void LoadTabs()
+    /// <summary>
+    /// モデル（<see cref="ContainerEffect.Tabs"/> / <see cref="ContainerEffect.SelectedTabId"/>）の
+    /// 現在状態から VM の Tabs と SelectedTab を再構築する。OneWay の伝播のみで、モデルは書き換えない。
+    /// </summary>
+    private void SyncFromModel()
     {
-        var (normalizedTabs, selectedId) = EffectTabStateService.Normalize(
-            _effect.Tabs, _effect.SelectedTabId, ImmutableList<IVideoEffect>.Empty, Texts.EffectTab_FirstName);
-
+        foreach (var t in Tabs)
+            t.Dispose();
         Tabs.Clear();
-        foreach (var tab in normalizedTabs)
+
+        foreach (var tab in _effect.Tabs)
             Tabs.Add(new EffectTabItemViewModel(tab, this));
 
         UpdateIndices();
 
-        // SelectedTab セッターは ApplyStateToContainers() を必ず呼ぶため、初期化時に経由すると
-        // マルチセレクト中のプロパティパネル表示だけで他コンテナの Tabs/SelectedTabId が
-        // 先頭コンテナの内容で上書きされてしまう。setter を介さず内部状態のみ更新する。
-        SelectTabInternal(Tabs.FirstOrDefault(t => t.Id == selectedId) ?? Tabs.FirstOrDefault());
-    }
+        var newSelected = (_effect.SelectedTabId is { } sid ? Tabs.FirstOrDefault(t => t.Id == sid) : null)
+            ?? Tabs.FirstOrDefault();
 
-    private void SelectTabInternal(EffectTabItemViewModel? tab)
-    {
-        _selectedTab = tab;
-        OnPropertyChanged(nameof(SelectedTab));
-        OnPropertyChanged(nameof(IsTabSelected));
+        if (!ReferenceEquals(SelectedTab, newSelected))
+        {
+            SelectedTab = newSelected;
+            OnPropertyChanged(nameof(SelectedTab));
+            OnPropertyChanged(nameof(IsTabSelected));
+        }
     }
 
     private void OnEffectPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (_isSelfUpdating) return;
+        if (_isSyncingFromModel) return;
 
-        if (e.PropertyName == nameof(ContainerEffect.Tabs))
-        {
-            using (BeginSelfUpdate())
-            {
-                LoadTabs();
-            }
-        }
+        // Undo/Redo の実行や、コマンド外でのモデル変更（プロジェクトロード等）に追従して VM を再構築する。
+        if (e.PropertyName is nameof(ContainerEffect.Tabs) or nameof(ContainerEffect.SelectedTabId))
+            SyncFromModel();
     }
 
     /// <summary>
-    /// VideoEffectSelector が EffectTab.Effects を編集した直後に呼ばれる。
-    /// EffectTab 自体は INotifyPropertyChanged ではないので、ここで Tabs を新インスタンスとして
-    /// 各 ContainerEffect に再代入し、Label 更新と外部監視を発火させる。
+    /// <see cref="YukkuriMovieMaker.Controls.VideoEffectSelector"/> が
+    /// <see cref="EffectTab.Effects"/> を直接編集した直後に呼ばれる。
+    /// マルチセレクト時、先頭以外の <see cref="ContainerEffect"/> の対応タブに deep clone を分配する。
+    /// VideoEffectSelector 側で BeginEdit/EndEdit が中継されるので、本メソッド内で BeginUndo は張らない。
+    /// Label の再評価は ContainerEffect 側の EffectTab.PropertyChanged 監視で自動的に行われる。
     /// </summary>
     internal void NotifyEffectsEdited()
     {
-        using (BeginSelfUpdate())
+        if (SelectedTab == null) return;
+        if (_itemProperties.Length <= 1) return;
+
+        var sourceTab = SelectedTab.Model;
+        var sourceEffects = sourceTab.Effects;
+
+        bool isFirst = true;
+        foreach (var prop in _itemProperties)
         {
-            ApplyStateToContainers();
+            if (isFirst)
+            {
+                isFirst = false;
+                continue;
+            }
+            var container = (ContainerEffect)prop.PropertyOwner;
+            var matching = container.Tabs.FirstOrDefault(t => t.Id == sourceTab.Id);
+            if (matching != null)
+            {
+                var cloned = YukkuriMovieMaker.Json.Json.GetClone(sourceEffects) ?? ImmutableList<IVideoEffect>.Empty;
+                matching.Effects = cloned;
+            }
         }
-    }
-
-    private void ApplyStateToContainers()
-    {
-        var snapshot = Tabs.Select(t => t.Model).ToImmutableList();
-        var selectedId = SelectedTab?.Id;
-
-        ApplyToContainers(snapshot, (e, tabs) =>
-        {
-            e.Tabs = tabs;
-            e.SelectedTabId = selectedId;
-        });
     }
 
     private void UpdateIndices()
@@ -259,15 +262,53 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         return args.Confirmed;
     }
 
-    private void ExecuteAddTab()
+    private void ExecuteSelectTab(EffectTabItemViewModel? target)
     {
+        if (target == null) return;
+        if (ReferenceEquals(SelectedTab, target)) return;
+
+        var newId = target.Id;
         using (BeginUndo())
         {
-            var tab = new EffectTab { Name = string.Format(Texts.EffectTab_NumberedName, Tabs.Count + 1) };
-            var vm = new EffectTabItemViewModel(tab, this);
-            Tabs.Add(vm);
-            UpdateIndices();
-            SelectedTab = vm;
+            ApplyToContainers(c => c.SelectedTabId = newId);
+        }
+    }
+
+    private void ExecuteAddTab()
+    {
+        var newTab = new EffectTab { Name = GenerateNextTabName() };
+        var newTabs = _effect.Tabs.Add(newTab);
+        var newSelectedId = newTab.Id;
+
+        using (BeginUndo())
+        {
+            ApplyToContainers(newTabs, (c, t) =>
+            {
+                c.Tabs = t;
+                c.SelectedTabId = newSelectedId;
+            });
+        }
+    }
+
+    /// <summary>
+    /// 既存タブの表示名と被らない「タブ N」形式の名前を生成する。
+    /// 比較時、Model.Name が null/empty のタブは「タブ 1」相当として扱う（表示フォールバックと一致させるため）。
+    /// <paramref name="excludeTabId"/> を渡すと、その ID のタブは比較対象から除外する（リネーム時の自分自身を外すため）。
+    /// </summary>
+    private string GenerateNextTabName(Guid? excludeTabId = null)
+    {
+        var existingNames = new HashSet<string>(
+            _effect.Tabs
+                .Where(t => excludeTabId is null || t.Id != excludeTabId)
+                .Select(t => string.IsNullOrEmpty(t.Name)
+                    ? string.Format(Texts.EffectTab_NumberedName, 1)
+                    : t.Name));
+
+        for (int n = 1; ; n++)
+        {
+            var candidate = string.Format(Texts.EffectTab_NumberedName, n);
+            if (!existingNames.Contains(candidate))
+                return candidate;
         }
     }
 
@@ -277,8 +318,45 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         using (BeginUndo())
         {
-            RemoveTabInternal(target);
+            RemoveTabFromContainers(target.Id);
         }
+    }
+
+    /// <summary>
+    /// 先頭 Container を基準に Tabs から指定 ID を除き、全 Container に分配する。
+    /// 1 個も残らなくなる場合は新規空タブを 1 個入れた状態にする。
+    /// </summary>
+    private void RemoveTabFromContainers(Guid tabId)
+    {
+        var current = _effect.Tabs;
+        var idx = current.FindIndex(t => t.Id == tabId);
+        if (idx < 0) return;
+
+        var newTabs = current.RemoveAt(idx);
+
+        Guid? newSelectedId;
+        if (newTabs.Count == 0)
+        {
+            // Name は空。VM/Label 側で「タブ 1」フォールバック表示する。
+            var newTab = new EffectTab();
+            newTabs = newTabs.Add(newTab);
+            newSelectedId = newTab.Id;
+        }
+        else if (_effect.SelectedTabId == tabId)
+        {
+            var nextIdx = idx < newTabs.Count ? idx : newTabs.Count - 1;
+            newSelectedId = newTabs[nextIdx].Id;
+        }
+        else
+        {
+            newSelectedId = _effect.SelectedTabId;
+        }
+
+        ApplyToContainers(newTabs, (c, t) =>
+        {
+            c.Tabs = t;
+            c.SelectedTabId = newSelectedId;
+        });
     }
 
     private void ExecuteStash(EffectTabItemViewModel? target)
@@ -288,8 +366,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var effects = target.Effects;
         if (effects.Count == 0) return;
 
-        // タブから退避箱への移動。元タブはこの直後 RemoveTabInternal で消えるのでインスタンス共有でよいが、
-        // 復元時に独立性が要るので Clone しておく。
+        // Stash 自体は EffectTabSettings.Default 側に保存し、Undo の対象外。
+        // 続けてタブを削除する操作だけが Undo スタックに積まれる（現状仕様の維持）。
         var stash = new EffectTab
         {
             Id = Guid.NewGuid(),
@@ -302,7 +380,7 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         using (BeginUndo())
         {
-            RemoveTabInternal(target);
+            RemoveTabFromContainers(target.Id);
         }
     }
 
@@ -318,7 +396,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
 
         if (args.Result == TemplateWindowResult.Create && !string.IsNullOrWhiteSpace(args.TemplateName))
         {
-            // EffectTemplate のコンストラクタが内部で Json.Json.GetClone してくれるので、ここで Clone は不要。
             var template = new EffectTemplate<IVideoEffect>(args.TemplateName, effects);
             EffectSettings.Default.EffectTemplate.Add(template);
             EffectSettings.Default.Save();
@@ -351,33 +428,24 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         var effectToAdd = YukkuriMovieMaker.Json.Json.GetClone(p.Effect);
         if (effectToAdd == null) return;
 
+        var targetTabId = SelectedTab.Id;
         using (BeginUndo())
         {
-            SelectedTab.Effects = SelectedTab.Effects.Add(effectToAdd);
-            ApplyStateToContainers();
+            // 各 Container の対応タブに deep clone した Effect を追加。
+            bool isFirst = true;
+            foreach (var prop in _itemProperties)
+            {
+                var container = (ContainerEffect)prop.PropertyOwner;
+                var tab = container.Tabs.FirstOrDefault(t => t.Id == targetTabId);
+                if (tab == null) continue;
+
+                var add = isFirst
+                    ? effectToAdd
+                    : (YukkuriMovieMaker.Json.Json.GetClone(effectToAdd) ?? effectToAdd);
+                isFirst = false;
+                tab.Effects = tab.Effects.Add(add);
+            }
         }
-    }
-
-    private void RemoveTabInternal(EffectTabItemViewModel target)
-    {
-        var wasSelected = SelectedTab == target;
-        Tabs.Remove(target);
-
-        if (Tabs.Count == 0)
-        {
-            var tab = new EffectTab { Name = Texts.EffectTab_FirstName };
-            Tabs.Add(new EffectTabItemViewModel(tab, this));
-        }
-
-        UpdateIndices();
-
-        if (wasSelected)
-        {
-            var next = Tabs.First();
-            SelectTabInternal(next);
-        }
-
-        ApplyStateToContainers();
     }
 
     private bool CanMoveTab(EffectTabItemViewModel? target, int offset)
@@ -392,17 +460,17 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void ExecuteMoveTab(EffectTabItemViewModel? target, int offset)
     {
         if (target == null) return;
-        var idx = Tabs.IndexOf(target);
+        var current = _effect.Tabs;
+        var idx = current.FindIndex(t => t.Id == target.Id);
+        if (idx < 0) return;
         var newIdx = idx + offset;
+        if (newIdx < 0 || newIdx >= current.Count) return;
 
-        if (newIdx >= 0 && newIdx < Tabs.Count)
+        var moved = current.RemoveAt(idx).Insert(newIdx, current[idx]);
+
+        using (BeginUndo())
         {
-            using (BeginUndo())
-            {
-                Tabs.Move(idx, newIdx);
-                UpdateIndices();
-                ApplyStateToContainers();
-            }
+            ApplyToContainers(moved, (c, t) => c.Tabs = t);
         }
     }
 
@@ -420,8 +488,8 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void ExecuteMoveTabToIndex(MoveTabToIndexParameter? param)
     {
         if (param == null) return;
-
-        var sourceIndex = Tabs.IndexOf(param.Tab);
+        var current = _effect.Tabs;
+        var sourceIndex = current.FindIndex(t => t.Id == param.Tab.Id);
         if (sourceIndex < 0) return;
 
         var adjustedIndex = param.TargetIndex > sourceIndex
@@ -429,13 +497,13 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
             : param.TargetIndex;
 
         if (adjustedIndex == sourceIndex) return;
-        if (adjustedIndex < 0 || adjustedIndex >= Tabs.Count) return;
+        if (adjustedIndex < 0 || adjustedIndex >= current.Count) return;
+
+        var moved = current.RemoveAt(sourceIndex).Insert(adjustedIndex, current[sourceIndex]);
 
         using (BeginUndo())
         {
-            Tabs.Move(sourceIndex, adjustedIndex);
-            UpdateIndices();
-            ApplyStateToContainers();
+            ApplyToContainers(moved, (c, t) => c.Tabs = t);
         }
     }
 
@@ -443,19 +511,27 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         if (source == null) return;
 
+        var srcId = source.Id;
+        var current = _effect.Tabs;
+        var srcIdx = current.FindIndex(t => t.Id == srcId);
+        if (srcIdx < 0) return;
+
+        var srcTab = current[srcIdx];
+        var dup = new EffectTab
+        {
+            Name = srcTab.Name + Texts.EffectTab_CopyName,
+            Effects = CloneEffects(srcTab.Effects),
+        };
+        var newTabs = current.Insert(srcIdx + 1, dup);
+        var newSelectedId = dup.Id;
+
         using (BeginUndo())
         {
-            var dup = new EffectTab
+            ApplyToContainers(newTabs, (c, t) =>
             {
-                Name = source.Name + Texts.EffectTab_CopyName,
-                Effects = CloneEffects(source.Effects),
-            };
-            var vm = new EffectTabItemViewModel(dup, this);
-
-            var idx = Tabs.IndexOf(source);
-            Tabs.Insert(idx + 1, vm);
-            UpdateIndices();
-            SelectedTab = vm;
+                c.Tabs = t;
+                c.SelectedTabId = newSelectedId;
+            });
         }
     }
 
@@ -463,7 +539,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         if (source == null) return;
 
-        // クリップボードへは JSON 化するので元インスタンスとは自動的に独立する。
         var data = new EffectTab
         {
             Name = source.Name,
@@ -497,20 +572,38 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         {
             if (targetTabVm != null)
             {
-                targetTabVm.Effects = pastedEffects;
-                ApplyStateToContainers();
+                // 指定タブの Effects を貼り付け内容で置き換える。
+                var targetId = targetTabVm.Id;
+                bool isFirst = true;
+                foreach (var prop in _itemProperties)
+                {
+                    var container = (ContainerEffect)prop.PropertyOwner;
+                    var tab = container.Tabs.FirstOrDefault(t => t.Id == targetId);
+                    if (tab == null) continue;
+
+                    var effects = isFirst
+                        ? pastedEffects
+                        : (YukkuriMovieMaker.Json.Json.GetClone(pastedEffects) ?? ImmutableList<IVideoEffect>.Empty);
+                    isFirst = false;
+                    tab.Effects = effects;
+                }
             }
             else
             {
-                var tab = new EffectTab
+                // 新規タブとして追加。
+                var newTab = new EffectTab
                 {
                     Name = data.Name + Texts.EffectTab_CopyName,
                     Effects = pastedEffects,
                 };
-                var vm = new EffectTabItemViewModel(tab, this);
-                Tabs.Add(vm);
-                UpdateIndices();
-                SelectedTab = vm;
+                var newTabs = _effect.Tabs.Add(newTab);
+                var newSelectedId = newTab.Id;
+
+                ApplyToContainers(newTabs, (c, t) =>
+                {
+                    c.Tabs = t;
+                    c.SelectedTabId = newSelectedId;
+                });
             }
         }
     }
@@ -519,19 +612,21 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         if (stashVm == null) return;
 
+        var newTab = new EffectTab
+        {
+            Name = stashVm.Model.Name,
+            Effects = CloneEffects(stashVm.Effects),
+        };
+        var newTabs = _effect.Tabs.Add(newTab);
+        var newSelectedId = newTab.Id;
+
         using (BeginUndo())
         {
-            // スタッシュは復元直後に Stashes から削除されるので、移管としてインスタンスをそのまま渡す。
-            // stashVm.Name は表示用に整形された文字列なので、元のタブ名は Model.Name を直接参照する。
-            var tab = new EffectTab
+            ApplyToContainers(newTabs, (c, t) =>
             {
-                Name = stashVm.Model.Name,
-                Effects = CloneEffects(stashVm.Effects),
-            };
-            var vm = new EffectTabItemViewModel(tab, this);
-            Tabs.Add(vm);
-            UpdateIndices();
-            SelectedTab = vm;
+                c.Tabs = t;
+                c.SelectedTabId = newSelectedId;
+            });
         }
 
         EffectTabSettings.Default.Stashes.Remove(stashVm.Model);
@@ -541,7 +636,6 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     private void ExecuteRemoveStash(EffectTabStashViewModel? stashVm)
     {
         if (stashVm == null) return;
-
         EffectTabSettings.Default.Stashes.Remove(stashVm.Model);
         EffectTabSettings.Default.Save();
     }
@@ -557,40 +651,71 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
     {
         if (templateVm == null) return;
 
+        var newTab = new EffectTab
+        {
+            Name = templateVm.Name,
+            Effects = templateVm.Model.CreateEffects().ToImmutableList(),
+        };
+        var newTabs = _effect.Tabs.Add(newTab);
+        var newSelectedId = newTab.Id;
+
         using (BeginUndo())
         {
-            // ブックマークは複数回復元できる。EffectTemplate.CreateEffects() が deep clone を返す。
-            var tab = new EffectTab
+            ApplyToContainers(newTabs, (c, t) =>
             {
-                Name = templateVm.Name,
-                Effects = templateVm.Model.CreateEffects().ToImmutableList(),
-            };
-            var vm = new EffectTabItemViewModel(tab, this);
-            Tabs.Add(vm);
-            UpdateIndices();
-            SelectedTab = vm;
+                c.Tabs = t;
+                c.SelectedTabId = newSelectedId;
+            });
         }
     }
 
     private void ExecuteBeginEdit(EffectTabItemViewModel? target)
     {
-        target?.BeginEdit();
+        target?.BeginEditing();
     }
 
     private void ExecuteCommitEdit(EffectTabItemViewModel? target)
     {
-        if (target == null) return;
+        if (target == null || !target.IsEditing) return;
 
-        using (BeginUndo())
+        // 空入力時：他のタブと表示が被るかチェックする。
+        // 「タブ 1」が空くなら Model.Name は空のまま（表示フォールバックで「タブ 1」になる）、
+        // すでに他に「タブ 1」相当があるなら被らない最小番号を Model.Name に焼く。
+        var trimmed = target.EditName?.Trim() ?? string.Empty;
+        var targetId = target.Id;
+        string newName;
+        if (string.IsNullOrEmpty(trimmed))
         {
-            target.CommitEdit(Texts.EffectTab_FirstName);
-            ApplyStateToContainers();
+            var firstFallback = string.Format(Texts.EffectTab_NumberedName, 1);
+            var generated = GenerateNextTabName(targetId);
+            newName = generated == firstFallback ? string.Empty : generated;
         }
+        else
+        {
+            newName = trimmed;
+        }
+        var oldName = target.Model.Name;
+
+        if (newName != oldName)
+        {
+            using (BeginUndo())
+            {
+                // 各 Container の対応タブの Name を更新。Name は値型相当なので deep clone 不要。
+                foreach (var prop in _itemProperties)
+                {
+                    var container = (ContainerEffect)prop.PropertyOwner;
+                    var tab = container.Tabs.FirstOrDefault(t => t.Id == targetId);
+                    if (tab != null) tab.Name = newName;
+                }
+            }
+        }
+
+        target.EndEditing();
     }
 
     private void ExecuteCancelEdit(EffectTabItemViewModel? target)
     {
-        target?.CancelEdit();
+        target?.EndEditing();
     }
 
     private static ImmutableList<IVideoEffect> CloneEffects(ImmutableList<IVideoEffect> effects)
@@ -600,39 +725,40 @@ internal sealed class EffectTabManagerViewModel : Bindable, IDisposable
         return cloned ?? ImmutableList<IVideoEffect>.Empty;
     }
 
-    private IDisposable BeginUndo() => new StateScope(this, true);
+    private IDisposable BeginUndo() => new UndoScope(this);
 
-    private IDisposable BeginSelfUpdate() => new StateScope(this, false);
-
-    private sealed class StateScope : IDisposable
+    /// <summary>
+    /// Command がモデルを更新するためのスコープ。
+    /// - BeginEdit/EndEdit イベントを発火し、Recorder に Undo の塊として記録させる。
+    /// - スコープ内では <see cref="OnEffectPropertyChanged"/> の再同期をガードして、
+    ///   モデル更新を複数回したときに毎回 VM を作り直すのを防ぐ。
+    /// - スコープを抜けたところで一度だけ <see cref="SyncFromModel"/> を呼ぶ。
+    /// </summary>
+    private sealed class UndoScope : IDisposable
     {
         private readonly EffectTabManagerViewModel _vm;
-        private readonly bool _useUndo;
-        private readonly bool _wasSelfUpdating;
+        private readonly bool _prevSyncing;
 
-        public StateScope(EffectTabManagerViewModel vm, bool useUndo)
+        public UndoScope(EffectTabManagerViewModel vm)
         {
             _vm = vm;
-            _useUndo = useUndo;
-            _wasSelfUpdating = _vm._isSelfUpdating;
-
-            _vm._isSelfUpdating = true;
-
-            if (_useUndo)
-                _vm.BeginEdit?.Invoke(_vm, EventArgs.Empty);
+            _prevSyncing = _vm._isSyncingFromModel;
+            _vm._isSyncingFromModel = true;
+            _vm.BeginEdit?.Invoke(_vm, EventArgs.Empty);
         }
 
         public void Dispose()
         {
-            if (_useUndo)
-                _vm.EndEdit?.Invoke(_vm, EventArgs.Empty);
-
-            _vm._isSelfUpdating = _wasSelfUpdating;
+            _vm._isSyncingFromModel = _prevSyncing;
+            _vm.SyncFromModel();
+            _vm.EndEdit?.Invoke(_vm, EventArgs.Empty);
         }
     }
 
     public void Dispose()
     {
+        foreach (var t in Tabs)
+            t.Dispose();
         Tabs.CollectionChanged -= Tabs_CollectionChanged;
         EffectTabSettings.Default.Stashes.CollectionChanged -= OnStashesChanged;
         EffectSettings.Default.EffectTemplate.CollectionChanged -= OnTemplatesChanged;

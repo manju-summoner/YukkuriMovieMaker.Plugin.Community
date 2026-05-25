@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Exo;
@@ -11,12 +12,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 public sealed class ContainerEffect : VideoEffectBase
 {
     static readonly Guid _initialGuid = Guid.NewGuid();
+
     public override string Label
     {
         get
         {
             var selectedTab = Tabs.FirstOrDefault(t => t.Id == SelectedTabId);
-            var selectedName = selectedTab?.Name ?? string.Empty;
+            // タブ名が null/empty の場合は「タブ 1」表記にフォールバックする。
+            var rawName = selectedTab?.Name;
+            var selectedName = string.IsNullOrEmpty(rawName)
+                ? string.Format(Texts.EffectTab_NumberedName, 1)
+                : rawName;
             var count = selectedTab?.Effects.Count ?? 0;
             return string.Format(Texts.Container_LabelFormat, Texts.Container_DisplayName, selectedName, count);
         }
@@ -29,25 +35,28 @@ public sealed class ContainerEffect : VideoEffectBase
 
     public ImmutableList<EffectTab> Tabs
     {
-        get => _tabs;
+        get => field;
         set
         {
-            if (Set(ref _tabs, value))
-                OnPropertyChanged(nameof(Label));
+            var oldTabs = field;
+            if (Set(ref field, value, nameof(Tabs), nameof(Label)))
+                ReplaceTabsSubscription(oldTabs, value);
         }
-    }
-    private ImmutableList<EffectTab> _tabs = [new EffectTab() { Id = _initialGuid }];
+    } = [new EffectTab() { Id = _initialGuid }];
 
     public Guid? SelectedTabId
     {
-        get => _selectedTabId;
-        set
-        {
-            if (Set(ref _selectedTabId, value))
-                OnPropertyChanged(nameof(Label));
-        }
+        get => field;
+        set => Set(ref field, value, nameof(SelectedTabId), nameof(Label));
+    } = _initialGuid;
+
+    public ContainerEffect()
+    {
+        // プロパティ初期化子で構築済みのデフォルトタブの PropertyChanged を購読する。
+        // 以降は Tabs setter で購読を付け替える。
+        foreach (var tab in Tabs)
+            SubscribeTab(tab);
     }
-    private Guid? _selectedTabId = _initialGuid;
 
     public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices) =>
         new ContainerEffectProcessor(this, devices);
@@ -65,5 +74,27 @@ public sealed class ContainerEffect : VideoEffectBase
     {
         var selectedTab = Tabs.FirstOrDefault(t => t.Id == SelectedTabId);
         return selectedTab?.Effects ?? ImmutableList<IVideoEffect>.Empty;
+    }
+
+    private void ReplaceTabsSubscription(ImmutableList<EffectTab> oldTabs, ImmutableList<EffectTab> newTabs)
+    {
+        foreach (var tab in oldTabs)
+            UnsubscribeTab(tab);
+        foreach (var tab in newTabs)
+            SubscribeTab(tab);
+    }
+
+    private void SubscribeTab(EffectTab tab) => tab.PropertyChanged += OnTabPropertyChanged;
+
+    private void UnsubscribeTab(EffectTab tab) => tab.PropertyChanged -= OnTabPropertyChanged;
+
+    /// <summary>
+    /// 配下の EffectTab の Name / Effects が変わったら Label を再評価する。
+    /// Tabs リスト自体は変わらないので setter 経由の Label 通知は出ない。ここで補完する。
+    /// </summary>
+    private void OnTabPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(EffectTab.Name) or nameof(EffectTab.Effects))
+            OnPropertyChanged(nameof(Label));
     }
 }

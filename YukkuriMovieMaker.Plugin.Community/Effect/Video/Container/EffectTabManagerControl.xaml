@@ -317,7 +317,8 @@
                      ItemContainerStyle="{StaticResource TabListBoxItemStyle}"
                      ItemsSource="{Binding Tabs}"
                      PreviewMouseWheel="TabListBox_PreviewMouseWheel"
-                     SelectedItem="{Binding SelectedTab}">
+                     SelectedItem="{Binding SelectedTab, Mode=OneWay}"
+                     SelectionChanged="TabListBox_SelectionChanged">
                 <ListBox.ContextMenu>
                     <ContextMenu DataContext="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget.DataContext}">
                         <MenuItem Header="{x:Static loc:Texts.Menu_Paste}" Command="{Binding PasteCommand}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>

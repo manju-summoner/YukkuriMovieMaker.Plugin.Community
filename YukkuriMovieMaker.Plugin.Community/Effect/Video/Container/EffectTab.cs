@@ -10,17 +10,15 @@ public sealed class EffectTab : Animatable
 
     public string Name
     {
-        get => _name;
-        set => Set(ref _name, value);
-    }
-    private string _name = string.Empty;
+        get => field;
+        set => Set(ref field, value, nameof(Name));
+    } = string.Empty;
 
     public ImmutableList<IVideoEffect> Effects
     {
-        get => _effects;
-        set => Set(ref _effects, value);
-    }
-    private ImmutableList<IVideoEffect> _effects = ImmutableList<IVideoEffect>.Empty;
+        get => field;
+        set => Set(ref field, value, nameof(Effects));
+    } = ImmutableList<IVideoEffect>.Empty;
 
     protected override IEnumerable<IAnimatable> GetAnimatables() => Effects;
 }

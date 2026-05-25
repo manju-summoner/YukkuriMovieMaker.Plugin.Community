@@ -1,57 +1,29 @@
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Globalization;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-internal sealed class EffectTabItemViewModel : Bindable
+internal sealed class EffectTabItemViewModel : Bindable, IDisposable
 {
     public EffectTab Model { get; }
     public EffectTabManagerViewModel Manager { get; }
 
-    public EffectTabItemViewModel(EffectTab model, EffectTabManagerViewModel manager)
-    {
-        Model = model;
-        Manager = manager;
-        _editName = model.Name;
-    }
-
     public Guid Id => Model.Id;
 
-    public string Name
-    {
-        get => Model.Name;
-        set
-        {
-            if (Model.Name == value) return;
-            Model.Name = value;
-            OnPropertyChanged(nameof(Name));
-            OnPropertyChanged(nameof(CompactLabel));
-        }
-    }
+    /// <summary>
+    /// 表示用のタブ名。Model.Name が null/empty の場合は「タブ 1」表記にフォールバックする。
+    /// </summary>
+    public string Name => string.IsNullOrEmpty(Model.Name) ? string.Format(Texts.EffectTab_NumberedName, 1) : Model.Name;
 
-    public ImmutableList<IVideoEffect> Effects
-    {
-        get => Model.Effects;
-        set
-        {
-            if (ReferenceEquals(Model.Effects, value)) return;
-            Model.Effects = value;
-            OnPropertyChanged(nameof(Effects));
-        }
-    }
+    public ImmutableList<IVideoEffect> Effects => Model.Effects;
 
-    private int _index;
     public int Index
     {
-        get => _index;
-        set
-        {
-            if (!Set(ref _index, value)) return;
-            OnPropertyChanged(nameof(IndexLabel));
-            OnPropertyChanged(nameof(CompactLabel));
-        }
+        get => field;
+        set => Set(ref field, value, nameof(Index), nameof(IndexLabel), nameof(CompactLabel));
     }
 
     public string IndexLabel => (Index + 1).ToString(CultureInfo.InvariantCulture);
@@ -68,37 +40,58 @@ internal sealed class EffectTabItemViewModel : Bindable
         }
     }
 
-    private bool _isEditing;
     public bool IsEditing
     {
-        get => _isEditing;
-        set => Set(ref _isEditing, value);
+        get => field;
+        set => Set(ref field, value, nameof(IsEditing));
     }
 
-    private string _editName;
     public string EditName
     {
-        get => _editName;
-        set => Set(ref _editName, value);
+        get => field;
+        set => Set(ref field, value, nameof(EditName));
+    } = string.Empty;
+
+
+    public EffectTabItemViewModel(EffectTab model, EffectTabManagerViewModel manager)
+    {
+        Model = model;
+        Manager = manager;
+        EditName = model.Name;
+        Model.PropertyChanged += OnModelPropertyChanged;
     }
 
-    public void BeginEdit()
+    /// <summary>
+    /// Model 側プロパティの変更を VM へ OneWay で伝播する。
+    /// VM は Model を直接書き換えない（Command 経由でのみ更新される）。
+    /// </summary>
+    private void OnModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(EffectTab.Name):
+                OnPropertyChanged(nameof(Name));
+                OnPropertyChanged(nameof(CompactLabel));
+                break;
+            case nameof(EffectTab.Effects):
+                OnPropertyChanged(nameof(Effects));
+                break;
+        }
+    }
+    internal void BeginEditing()
     {
         EditName = Name;
         IsEditing = true;
     }
 
-    public void CommitEdit(string fallbackName)
-    {
-        var next = string.IsNullOrWhiteSpace(EditName) ? fallbackName : EditName.Trim();
-        Name = next;
-        EditName = next;
-        IsEditing = false;
-    }
-
-    public void CancelEdit()
+    internal void EndEditing()
     {
         EditName = Name;
         IsEditing = false;
+    }
+
+    public void Dispose()
+    {
+        Model.PropertyChanged -= OnModelPropertyChanged;
     }
 }

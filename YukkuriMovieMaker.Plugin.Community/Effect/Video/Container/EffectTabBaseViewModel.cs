@@ -5,14 +5,9 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-public abstract class EffectTabBaseViewModel : Bindable
+public abstract class EffectTabBaseViewModel(EffectTab model) : Bindable
 {
-    public EffectTab Model { get; }
-
-    protected EffectTabBaseViewModel(EffectTab model)
-    {
-        Model = model;
-    }
+    public EffectTab Model { get; } = model;
 
     public Guid Id => Model.Id;
 
