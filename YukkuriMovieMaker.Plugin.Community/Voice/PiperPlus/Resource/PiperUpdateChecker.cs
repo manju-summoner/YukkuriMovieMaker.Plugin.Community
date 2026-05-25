@@ -23,8 +23,13 @@ internal static class PiperUpdateChecker
                 return cachedRelease;
 
             var result = await FetchLatestAsync(cancellationToken);
-            cachedRelease = result;
-            isCached = true;
+
+            if (result is not null)
+            {
+                cachedRelease = result;
+                isCached = true;
+            }
+
             return result;
         }
         finally
