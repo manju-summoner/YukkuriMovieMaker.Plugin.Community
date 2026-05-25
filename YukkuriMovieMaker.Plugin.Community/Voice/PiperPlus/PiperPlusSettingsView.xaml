@@ -8,51 +8,123 @@
              xmlns:s="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Expander Header="Piper Plus" IsExpanded="True">
-        <StackPanel>
-            <Grid>
-                <Label Content="{x:Static local:Texts.ModelDirectory}"/>
-                <c:DirectorySelector
-                    Value="{Binding Source={x:Static local:PiperPlusSettings.Default}, Path=ModelDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Width="300"
-                    HorizontalAlignment="Right"/>
-            </Grid>
-            <Grid>
-                <Label Content="{x:Static local:Texts.BinaryDirectory}"/>
-                <c:DirectorySelector
-                    Value="{Binding Source={x:Static local:PiperPlusSettings.Default}, Path=BinaryDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Width="300"
-                    HorizontalAlignment="Right"/>
-            </Grid>
-            <Grid>
-                <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                <Button HorizontalAlignment="Right"
-                        Width="26"
-                        Command="{Binding RefreshCommand}">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                            <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Refresh}}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsLoading}" Value="True">
-                                    <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.LoadingAnimation}}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </Grid>
-            <GroupBox Header="{x:Static local:Texts.AboutPiperPlus}" Margin="6">
-                <TextBlock Margin="6" TextWrapping="Wrap">
-                    <Run Text="{x:Static local:Texts.AboutPiperPlusMessage}"/>
-                    <LineBreak/>
-                    <LineBreak/>
-                    <Hyperlink Command="{Binding Source={x:Static s:CommandSettings.Default}, Path=[OpenUri]}"
-                               CommandParameter="https://manjubox.net/ymm4/faq/%E3%82%86%E3%81%A3%E3%81%8F%E3%82%8A%E3%83%9C%E3%82%A4%E3%82%B9/PiperPlus/">
-                        <Run Text="{x:Static local:Texts.HelpLink}"/>
-                    </Hyperlink>
-                </TextBlock>
-            </GroupBox>
-        </StackPanel>
-    </Expander>
+             d:DesignHeight="600" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Expander Grid.Row="0" Header="Piper Plus" IsExpanded="True">
+            <StackPanel>
+                <Grid>
+                    <Label Content="{x:Static local:Texts.ModelDirectory}"/>
+                    <c:DirectorySelector
+                        Value="{Binding Source={x:Static local:PiperPlusSettings.Default}, Path=ModelDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Width="300"
+                        HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
+                    <Label Content="{x:Static local:Texts.BinaryDirectory}"/>
+                    <c:DirectorySelector
+                        Value="{Binding Source={x:Static local:PiperPlusSettings.Default}, Path=BinaryDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Width="300"
+                        HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
+                    <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button MinWidth="60" Height="26" Padding="6,0" Margin="0,0,2,0"
+                                Content="{Binding UpdateDescription}"
+                                Command="{Binding UpdateCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasUpdate}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Width="26" Command="{Binding RefreshCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                    <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Refresh}}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                            <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.LoadingAnimation}}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <Expander Header="{x:Static local:Texts.ModelList}" IsExpanded="True">
+                    <DataGrid ItemsSource="{Binding Models}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserReorderColumns="False"
+                              IsReadOnly="False"
+                              SelectionMode="Single"
+                              HeadersVisibility="Column"
+                              MinHeight="60"
+                              MaxHeight="200">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="{x:Static local:Texts.ModelDisplayName}"
+                                                Binding="{Binding DisplayName, UpdateSourceTrigger=LostFocus}"
+                                                Width="*"/>
+                            <DataGridTextColumn Header="{x:Static local:Texts.ModelInternalName}"
+                                                Binding="{Binding ModelName, Mode=OneWay}"
+                                                Width="*"
+                                                IsReadOnly="True"/>
+                            <DataGridTextColumn Header="{x:Static local:Texts.ModelSpeakerCount}"
+                                                Binding="{Binding NumSpeakers, Mode=OneWay}"
+                                                Width="80"
+                                                IsReadOnly="True"/>
+                            <DataGridTextColumn Header="{x:Static local:Texts.ModelLanguage}"
+                                                Binding="{Binding LanguageCodes, Mode=OneWay}"
+                                                Width="120"
+                                                IsReadOnly="True"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Expander>
+
+                <GroupBox Header="{x:Static local:Texts.AboutPiperPlus}" Margin="6">
+                    <TextBlock Margin="6" TextWrapping="Wrap">
+                        <Run Text="{x:Static local:Texts.AboutPiperPlusMessage}"/>
+                        <LineBreak/>
+                        <LineBreak/>
+                        <Hyperlink Command="{Binding Source={x:Static s:CommandSettings.Default}, Path=[OpenUri]}"
+                                   CommandParameter="https://manjubox.net/ymm4/faq/%E3%82%86%E3%81%A3%E3%81%8F%E3%82%8A%E3%83%9C%E3%82%A4%E3%82%B9/PiperPlus/">
+                            <Run Text="{x:Static local:Texts.HelpLink}"/>
+                        </Hyperlink>
+                    </TextBlock>
+                </GroupBox>
+            </StackPanel>
+        </Expander>
+
+        <Grid Grid.Row="1" Height="26">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsProgressVisible}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <ProgressBar Value="{Binding ProgressValue, Mode=OneWay}"
+                         Minimum="0" Maximum="1"/>
+            <TextBlock Text="{Binding ProgressMessage}"
+                       VerticalAlignment="Center"
+                       Margin="6,0,0,0"
+                       Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+        </Grid>
+    </Grid>
 </UserControl>

@@ -31,7 +31,12 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpe
     {
         var param = parameter as PiperPlusVoiceParameter ?? new PiperPlusVoiceParameter();
 
-        await PiperBinaryResource.EnsureAsync();
+        var installed = PiperBinaryResource.InstalledVersion;
+        var release = await PiperUpdateChecker.GetLatestReleaseAsync();
+        var version = installed ?? release?.TagName
+            ?? throw new InvalidOperationException(Texts.BinaryNotFound);
+
+        await PiperBinaryResource.EnsureAsync(version);
 
         var executablePath = PiperBinaryResource.ExecutablePath
             ?? throw new FileNotFoundException(Texts.BinaryNotFound);
@@ -105,7 +110,6 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpe
         var stderrBuilder = new StringBuilder();
 
         using var process = new Process { StartInfo = startInfo };
-
         process.ErrorDataReceived += (_, e) =>
         {
             if (e.Data is not null)
