@@ -20,10 +20,11 @@ internal static class PiperBinaryResource
         MatchType = MatchType.Simple,
     };
 
+    static readonly object CacheLock = new();
+    static string? resolvedExecutablePath;
+
     static string InstalledVersionFilePath =>
         Path.Combine(PiperPlusSettings.Default.BinaryDirectory, "installed_version.txt");
-
-    static string? resolvedExecutablePath;
 
     public static string? InstalledVersion
     {
@@ -41,28 +42,37 @@ internal static class PiperBinaryResource
     {
         get
         {
-            if (resolvedExecutablePath is not null && File.Exists(resolvedExecutablePath))
-                return resolvedExecutablePath;
-
-            var version = InstalledVersion;
-            if (version is null)
+            lock (CacheLock)
             {
-                resolvedExecutablePath = null;
-                return null;
+                if (resolvedExecutablePath is not null && File.Exists(resolvedExecutablePath))
+                    return resolvedExecutablePath;
+
+                var version = InstalledVersion;
+                if (version is null)
+                {
+                    resolvedExecutablePath = null;
+                    return null;
+                }
+
+                var dir = InstallDirectory(version);
+                resolvedExecutablePath = Directory.Exists(dir)
+                    ? Directory.EnumerateFiles(dir, ExecutableName, SearchOptions).FirstOrDefault()
+                    : null;
+
+                return resolvedExecutablePath;
             }
-
-            var dir = InstallDirectory(version);
-            resolvedExecutablePath = Directory.Exists(dir)
-                ? Directory.EnumerateFiles(dir, ExecutableName, SearchOptions).FirstOrDefault()
-                : null;
-
-            return resolvedExecutablePath;
         }
     }
 
     public static bool IsReady => ExecutablePath is not null;
 
-    public static void InvalidateCache() => resolvedExecutablePath = null;
+    public static void InvalidateCache()
+    {
+        lock (CacheLock)
+        {
+            resolvedExecutablePath = null;
+        }
+    }
 
     public static async Task EnsureAsync(
         string version,
@@ -133,7 +143,7 @@ internal static class PiperBinaryResource
 
         Directory.Move(tempDir, targetDir);
 
-        resolvedExecutablePath = null;
+        InvalidateCache();
 
         var newExecutable = Directory.Exists(targetDir)
             ? Directory.EnumerateFiles(targetDir, ExecutableName, SearchOptions).FirstOrDefault()
@@ -156,7 +166,11 @@ internal static class PiperBinaryResource
             try { Directory.Delete(backupDir, recursive: true); } catch { }
         }
 
-        resolvedExecutablePath = newExecutable;
+        lock (CacheLock)
+        {
+            resolvedExecutablePath = newExecutable;
+        }
+
         progress?.Report((1.0, Texts.BinaryReady));
     }
 }
