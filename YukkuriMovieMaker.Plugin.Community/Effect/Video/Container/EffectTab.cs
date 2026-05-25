@@ -10,13 +10,13 @@ public sealed class EffectTab : Animatable
 
     public string Name
     {
-        get => field;
+        get;
         set => Set(ref field, value, nameof(Name));
     } = string.Empty;
 
     public ImmutableList<IVideoEffect> Effects
     {
-        get => field;
+        get;
         set => Set(ref field, value, nameof(Effects));
     } = ImmutableList<IVideoEffect>.Empty;
 

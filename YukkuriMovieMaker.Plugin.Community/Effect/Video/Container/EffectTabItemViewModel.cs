@@ -22,7 +22,7 @@ internal sealed class EffectTabItemViewModel : Bindable, IDisposable
 
     public int Index
     {
-        get => field;
+        get;
         set => Set(ref field, value, nameof(Index), nameof(IndexLabel), nameof(CompactLabel));
     }
 
@@ -42,13 +42,13 @@ internal sealed class EffectTabItemViewModel : Bindable, IDisposable
 
     public bool IsEditing
     {
-        get => field;
+        get;
         set => Set(ref field, value, nameof(IsEditing));
     }
 
     public string EditName
     {
-        get => field;
+        get;
         set => Set(ref field, value, nameof(EditName));
     } = string.Empty;
 

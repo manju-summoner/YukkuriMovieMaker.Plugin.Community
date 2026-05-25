@@ -13,20 +13,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.IrodoriTTS;
 internal class IrodoriTTSVoiceDesignDialogViewModel : Bindable
 {
     // 入力
-    public string SpeakerName { get => field; set { if (Set(ref field, value)) UpdateCommands(); } } = string.Empty;
-    public string Caption { get => field; set { if (Set(ref field, value)) UpdateCommands(); } } = string.Empty;
-    public string SpeechText { get => field; set { if (Set(ref field, value)) UpdateCommands(); } } = string.Empty;
-    public string Seed { get => field; set => Set(ref field, value); } = string.Empty;
-    public double NumSteps { get => field; set => Set(ref field, value); } = 40;
-    public string Checkpoint { get => field; set => Set(ref field, value); } = string.Empty;
+    public string SpeakerName { get; set { if (Set(ref field, value)) UpdateCommands(); } } = string.Empty;
+    public string Caption { get; set { if (Set(ref field, value)) UpdateCommands(); } } = string.Empty;
+    public string SpeechText { get; set { if (Set(ref field, value)) UpdateCommands(); } } = string.Empty;
+    public string Seed { get; set => Set(ref field, value); } = string.Empty;
+    public double NumSteps { get; set => Set(ref field, value); } = 40;
+    public string Checkpoint { get; set => Set(ref field, value); } = string.Empty;
 
     // 状態
-    public string ErrorText { get => field; set => Set(ref field, value); } = string.Empty;
-    public bool IsGenerating { get => field; set { if (Set(ref field, value)) UpdateCommands(); } }
-    public bool HasGeneratedAudio { get => field; set { if (Set(ref field, value)) UpdateCommands(); } }
-    public bool IsPlaying { get => field; set => Set(ref field, value); }
-    public bool IsSaving { get => field; set { if (Set(ref field, value)) UpdateCommands(); } }
-    public bool IsSaved { get => field; private set => Set(ref field, value); }
+    public string ErrorText { get; set => Set(ref field, value); } = string.Empty;
+    public bool IsGenerating { get; set { if (Set(ref field, value)) UpdateCommands(); } }
+    public bool HasGeneratedAudio { get; set { if (Set(ref field, value)) UpdateCommands(); } }
+    public bool IsPlaying { get; set => Set(ref field, value); }
+    public bool IsSaving { get; set { if (Set(ref field, value)) UpdateCommands(); } }
+    public bool IsSaved { get; private set => Set(ref field, value); }
 
     // コマンド
     public ICommand GenerateCommand { get; }

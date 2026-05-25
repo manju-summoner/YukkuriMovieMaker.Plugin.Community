@@ -26,13 +26,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         public bool IsExpanding
         {
-            get => field;
+            get;
             set => Set(ref field, value);
         }
 
         public bool IsSelected { get => isSelected; set => Set(ref isSelected, value); }
-        public bool IsRenaming { get => field; set => Set(ref field, value); } = false;
-        public string RenameText { get => field; set => Set(ref field, value); } = string.Empty;
+        public bool IsRenaming { get; set => Set(ref field, value); } = false;
+        public string RenameText { get; set => Set(ref field, value); } = string.Empty;
         public System.Windows.Input.ICommand ClearCacheCommand { get; } = new ActionCommand(_ => true, _ => { });
 
         public event EventHandler? ExpandRequested;

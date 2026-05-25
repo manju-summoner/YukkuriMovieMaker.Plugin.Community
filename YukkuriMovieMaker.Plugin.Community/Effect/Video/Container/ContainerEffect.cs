@@ -35,7 +35,7 @@ public sealed class ContainerEffect : VideoEffectBase
 
     public ImmutableList<EffectTab> Tabs
     {
-        get => field;
+        get;
         set
         {
             var oldTabs = field;
@@ -46,7 +46,7 @@ public sealed class ContainerEffect : VideoEffectBase
 
     public Guid? SelectedTabId
     {
-        get => field;
+        get;
         set => Set(ref field, value, nameof(SelectedTabId), nameof(Label));
     } = _initialGuid;
 

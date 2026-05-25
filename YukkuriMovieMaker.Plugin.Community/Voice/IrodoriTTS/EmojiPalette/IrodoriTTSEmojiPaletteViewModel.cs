@@ -33,8 +33,8 @@ internal class IrodoriTTSEmojiPaletteViewModel : Bindable
         }
     }
 
-    public bool IsBusy { get => field; set { if (Set(ref field, value)) UpdateCommands(); } }
-    public bool IsPlaying { get => field; set => Set(ref field, value); }
+    public bool IsBusy { get; set { if (Set(ref field, value)) UpdateCommands(); } }
+    public bool IsPlaying { get; set => Set(ref field, value); }
 
     // View からキャレット位置を受け取るための Func
     public Func<int>? GetCaretIndex { get; set; }

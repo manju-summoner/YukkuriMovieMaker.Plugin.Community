@@ -8,6 +8,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Kotodama
     {
         [Display(Name = nameof(Texts.Decoration), ResourceType = typeof(Texts))]
         [KotodamaDecorationIdComboBox]
-        public string? DecorationId { get => field; set => Set(ref field, value); }
+        public string? DecorationId { get; set => Set(ref field, value); }
     }
 }

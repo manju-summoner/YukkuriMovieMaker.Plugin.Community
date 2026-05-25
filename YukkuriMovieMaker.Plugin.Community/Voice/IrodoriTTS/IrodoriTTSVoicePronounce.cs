@@ -15,7 +15,7 @@ public class IrodoriTTSVoicePronounce : UndoRedoable, IVoicePronounce
     public object EditorDummy { get; } = new();
 
     [JsonIgnore]
-    public object Dummy { get => field; set => Set(ref field, value); } = new();
+    public object Dummy { get; set => Set(ref field, value); } = new();
 
     public void RaiseChanged() => Dummy = new object();
 

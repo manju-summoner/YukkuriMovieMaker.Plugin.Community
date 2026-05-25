@@ -17,8 +17,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         WebView2? webView2;
         bool isDetached;
         bool isBrowserCrashed;
-        public bool IsLoading { get => field; private set => Set(ref field, value); }
-        public double LoadingProgress { get => field; private set => Set(ref field, value); }
+        public bool IsLoading { get; private set => Set(ref field, value); }
+        public double LoadingProgress { get; private set => Set(ref field, value); }
         CancellationTokenSource? progressCts;
         WebBrowserSavedState state = new("google.com", 1d);
         static bool isExtensionsLoaded;
@@ -35,7 +35,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         public ObservableCollection<BrowserHistoryItemViewModel> History { get; } = [];
         public bool IsMobileMode
         {
-            get => field;
+            get;
             set
             {
                 if (Set(ref field, value) && !isBrowserCrashed && webView2?.CoreWebView2 is { } core)
@@ -65,8 +65,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
         public ActionCommand FindCommand { get; }
 
         public BrowserFavoriteEditorViewModel? FavoriteEditorViewModel { get; set => Set(ref field, value); }
-        public ClearBrowsingDataViewModel? ClearBrowsingDataViewModel { get => field; set => Set(ref field, value); }
-        public BrowserSettingsViewModel? BrowserSettingsViewModel { get => field; set => Set(ref field, value); }
+        public ClearBrowsingDataViewModel? ClearBrowsingDataViewModel { get; set => Set(ref field, value); }
+        public BrowserSettingsViewModel? BrowserSettingsViewModel { get; set => Set(ref field, value); }
 
         [SuppressMessage("Performance", "CA1822:メンバーを static に設定します", Justification = "")]
         public BrowserFavoriteDirectoryViewModel FavoriteDirectoryViewModel => BrowserFavoriteDirectoryViewModel.CreateBrowserFavoriteRoot();

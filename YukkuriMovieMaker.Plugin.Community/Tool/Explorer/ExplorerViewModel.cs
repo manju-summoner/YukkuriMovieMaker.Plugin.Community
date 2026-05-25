@@ -115,7 +115,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         public ExplorerLayout Layout
         {
-            get => field;
+            get;
             private set
             {
                 if (field != null) field.PropertyChanged -= Layout_PropertyChanged;
@@ -125,8 +125,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         } = new ExplorerLayout();
 
-        public ExplorerSortKey SortKey { get => field; set => Set(ref field, value, nameof(SortKey), nameof(IsSortByName), nameof(IsSortByLastWriteTime), nameof(IsSortByExtension)); } = ExplorerSortKey.Name;
-        public ExplorerSortOrder SortOrder { get => field; set => Set(ref field, value, nameof(SortOrder), nameof(IsSortAscending), nameof(IsSortDescending)); } = ExplorerSortOrder.Ascending;
+        public ExplorerSortKey SortKey { get; set => Set(ref field, value, nameof(SortKey), nameof(IsSortByName), nameof(IsSortByLastWriteTime), nameof(IsSortByExtension)); } = ExplorerSortKey.Name;
+        public ExplorerSortOrder SortOrder { get; set => Set(ref field, value, nameof(SortOrder), nameof(IsSortAscending), nameof(IsSortDescending)); } = ExplorerSortOrder.Ascending;
 
         public bool IsSortByName => SortKey == ExplorerSortKey.Name;
         public bool IsSortByLastWriteTime => SortKey == ExplorerSortKey.LastWriteTime;
