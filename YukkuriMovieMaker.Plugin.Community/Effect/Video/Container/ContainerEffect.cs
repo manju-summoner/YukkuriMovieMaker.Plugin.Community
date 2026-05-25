@@ -10,6 +10,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 [VideoEffect(nameof(Texts.VideoEffect_Name), [VideoEffectCategories.Decoration], [nameof(Texts.VideoEffect_Tag_Container)], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
 public sealed class ContainerEffect : VideoEffectBase
 {
+    static readonly Guid _initialGuid = Guid.NewGuid();
     public override string Label
     {
         get
@@ -35,7 +36,7 @@ public sealed class ContainerEffect : VideoEffectBase
                 OnPropertyChanged(nameof(Label));
         }
     }
-    private ImmutableList<EffectTab> _tabs = ImmutableList<EffectTab>.Empty;
+    private ImmutableList<EffectTab> _tabs = [new EffectTab() { Id = _initialGuid }];
 
     public Guid? SelectedTabId
     {
@@ -46,7 +47,7 @@ public sealed class ContainerEffect : VideoEffectBase
                 OnPropertyChanged(nameof(Label));
         }
     }
-    private Guid? _selectedTabId;
+    private Guid? _selectedTabId = _initialGuid;
 
     public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices) =>
         new ContainerEffectProcessor(this, devices);
