@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Pretrained;
 using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Resource;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
@@ -64,6 +65,9 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         get => models;
         private set => Set(ref models, value);
     }
+
+    public IReadOnlyList<PretrainedModelEntry> PretrainedModels { get; } =
+        PretrainedModelCatalog.All.Select(d => new PretrainedModelEntry(d)).ToList();
 
     public ICommand RefreshCommand { get; }
     public ICommand UpdateCommand { get; }
@@ -149,6 +153,8 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         IsProgressVisible = true;
         await Task.Run(PiperSpeakerLoader.Reload);
         BuildModelsFromSettings();
+        foreach (var entry in PretrainedModels)
+            entry.RefreshDownloadedState();
         UpdateStatusText();
     }
 
