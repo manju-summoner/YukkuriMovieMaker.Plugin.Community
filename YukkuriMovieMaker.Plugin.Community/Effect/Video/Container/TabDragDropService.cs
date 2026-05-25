@@ -143,8 +143,7 @@ internal sealed class TabDragDropService : IDisposable
         HideDropIndicator();
 
         if (!IsOurDragFormat(e)) return;
-        var draggedItem = e.Data.GetData(DragFormat) as EffectTabItemViewModel;
-        if (draggedItem == null) return;
+        if (e.Data.GetData(DragFormat) is not EffectTabItemViewModel draggedItem) return;
 
         var dropIndex = CalculateDropIndex(e.GetPosition(_listBox));
         if (dropIndex < 0) return;
@@ -202,8 +201,7 @@ internal sealed class TabDragDropService : IDisposable
 
         for (int i = 0; i < items.Count; i++)
         {
-            var container = _listBox.ItemContainerGenerator.ContainerFromIndex(i) as FrameworkElement;
-            if (container == null) continue;
+            if (_listBox.ItemContainerGenerator.ContainerFromIndex(i) is not FrameworkElement container) continue;
 
             var bounds = GetBoundsRelativeToListBox(container);
             var midX = bounds.Left + bounds.Width / 2.0;
@@ -221,15 +219,13 @@ internal sealed class TabDragDropService : IDisposable
 
         if (insertIndex < items.Count)
         {
-            var container = _listBox.ItemContainerGenerator.ContainerFromIndex(insertIndex) as FrameworkElement;
-            if (container == null) return -1;
+            if (_listBox.ItemContainerGenerator.ContainerFromIndex(insertIndex) is not FrameworkElement container) return -1;
             var bounds = GetBoundsRelativeToListBox(container);
             return bounds.Left;
         }
         else
         {
-            var container = _listBox.ItemContainerGenerator.ContainerFromIndex(items.Count - 1) as FrameworkElement;
-            if (container == null) return -1;
+            if (_listBox.ItemContainerGenerator.ContainerFromIndex(items.Count - 1) is not FrameworkElement container) return -1;
             var bounds = GetBoundsRelativeToListBox(container);
             return bounds.Right;
         }
