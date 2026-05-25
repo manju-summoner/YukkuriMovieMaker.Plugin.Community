@@ -46,8 +46,9 @@ internal static class PiperModelScanner
             var modelName = Path.GetFileNameWithoutExtension(onnxPath);
             var speakerIdMap = config.SpeakerIdMap ?? new Dictionary<string, int>();
             var numSpeakers = config.NumSpeakers > 0 ? config.NumSpeakers : 1;
+            var languageIdMap = config.LanguageIdMap ?? new Dictionary<string, int>();
 
-            return new PiperModelInfo(onnxPath, jsonPath, modelName, numSpeakers, speakerIdMap);
+            return new PiperModelInfo(onnxPath, jsonPath, modelName, numSpeakers, speakerIdMap, languageIdMap);
         }
         catch
         {

@@ -91,6 +91,12 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpe
             startInfo.ArgumentList.Add(entry.SpeakerId.ToString(CultureInfo.InvariantCulture));
         }
 
+        if (!string.IsNullOrEmpty(entry.LanguageArgument))
+        {
+            startInfo.ArgumentList.Add("--language");
+            startInfo.ArgumentList.Add(entry.LanguageArgument);
+        }
+
         startInfo.Environment["APPDATA"] = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         startInfo.Environment["USERPROFILE"] = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         startInfo.Environment["TEMP"] = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);
