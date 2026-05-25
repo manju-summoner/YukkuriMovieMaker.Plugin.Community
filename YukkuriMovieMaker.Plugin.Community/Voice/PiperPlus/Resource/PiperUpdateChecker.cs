@@ -33,10 +33,18 @@ internal static class PiperUpdateChecker
         }
     }
 
-    public static void InvalidateCache()
+    public static async Task InvalidateCacheAsync()
     {
-        cachedRelease = null;
-        isCached = false;
+        await Gate.WaitAsync();
+        try
+        {
+            cachedRelease = null;
+            isCached = false;
+        }
+        finally
+        {
+            Gate.Release();
+        }
     }
 
     static async Task<GitHubReleaseInfo?> FetchLatestAsync(CancellationToken cancellationToken)
