@@ -11,7 +11,7 @@ internal sealed class PiperSpeakerEntry
     public bool IsMultiSpeaker { get; init; }
     public string LanguageArgument { get; init; } = string.Empty;
 
-    public string UniqueId => $"{ModelPath}::{SpeakerId}";
+    public string UniqueId => $"{Uri.EscapeDataString(ModelPath)}::{SpeakerId}";
 
     public string DisplayName => IsMultiSpeaker
         ? $"{ModelDisplayName} / {SpeakerName}"
