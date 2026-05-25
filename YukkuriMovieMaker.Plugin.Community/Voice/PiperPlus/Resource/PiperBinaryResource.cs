@@ -8,7 +8,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Resource;
 
 internal static class PiperBinaryResource
 {
-    const string WindowsX64Asset = "piper-plus-cli-win-x64.zip";
     const string ExecutableName = "PiperPlus.Cli.exe";
     const string RepoOwner = "ayutaz";
     const string RepoName = "piper-plus";
@@ -93,11 +92,12 @@ internal static class PiperBinaryResource
         IProgress<(double Progress, string Message)>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
-            RuntimeInformation.OSArchitecture != Architecture.X64 ||
-            RuntimeInformation.ProcessArchitecture != Architecture.X64)
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            throw new PlatformNotSupportedException("Piper Plus requires Windows.");
+
+        if (!TryResolveAssetName(out var assetName))
             throw new PlatformNotSupportedException(
-                $"Piper Plus requires Windows x64. Detected OS architecture: {RuntimeInformation.OSArchitecture}, process architecture: {RuntimeInformation.ProcessArchitecture}.");
+                $"Piper Plus does not support this architecture. Process: {RuntimeInformation.ProcessArchitecture}, OS: {RuntimeInformation.OSArchitecture}.");
 
         await InstallGate.WaitAsync(cancellationToken);
         try
@@ -106,7 +106,7 @@ internal static class PiperBinaryResource
             if (currentVersion == version && IsReady)
                 return;
 
-            await InstallCoreAsync(version, currentVersion, progress, cancellationToken);
+            await InstallCoreAsync(version, assetName, currentVersion, progress, cancellationToken);
         }
         finally
         {
@@ -114,8 +114,20 @@ internal static class PiperBinaryResource
         }
     }
 
+    static bool TryResolveAssetName(out string assetName)
+    {
+        assetName = RuntimeInformation.ProcessArchitecture switch
+        {
+            Architecture.X64 => "piper-plus-cli-win-x64.zip",
+            Architecture.Arm64 => "piper-plus-cli-win-arm64.zip",
+            _ => string.Empty,
+        };
+        return assetName.Length > 0;
+    }
+
     static async Task InstallCoreAsync(
         string version,
+        string assetName,
         string? currentVersion,
         IProgress<(double Progress, string Message)>? progress,
         CancellationToken cancellationToken)
@@ -130,7 +142,7 @@ internal static class PiperBinaryResource
 
         Directory.CreateDirectory(tempDir);
 
-        await DownloadAndExtractAsync(version, tempDir, progress, cancellationToken);
+        await DownloadAndExtractAsync(version, assetName, tempDir, progress, cancellationToken);
 
         CommitInstall(version, currentDir, backupDir, targetDir, tempDir);
 
@@ -139,12 +151,13 @@ internal static class PiperBinaryResource
 
     static async Task DownloadAndExtractAsync(
         string version,
+        string assetName,
         string tempDir,
         IProgress<(double Progress, string Message)>? progress,
         CancellationToken cancellationToken)
     {
-        var zipPath = Path.Combine(tempDir, WindowsX64Asset);
-        var downloadUrl = $"https://github.com/{RepoOwner}/{RepoName}/releases/download/{version}/{WindowsX64Asset}";
+        var zipPath = Path.Combine(tempDir, assetName);
+        var downloadUrl = $"https://github.com/{RepoOwner}/{RepoName}/releases/download/{version}/{assetName}";
 
         var client = HttpClientFactory.Client;
         using var response = await client.GetAsync(
@@ -229,7 +242,7 @@ internal static class PiperBinaryResource
 
             try
             {
-                if (tempDir is not null && Directory.Exists(tempDir))
+                if (Directory.Exists(tempDir))
                     Directory.Delete(tempDir, recursive: true);
             }
             catch { }
