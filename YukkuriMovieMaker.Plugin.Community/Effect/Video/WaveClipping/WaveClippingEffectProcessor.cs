@@ -5,9 +5,11 @@ using YukkuriMovieMaker.Player.Video.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
 {
-    internal sealed class WaveClippingEffectProcessor : VideoEffectProcessorBase
+    internal sealed class WaveClippingEffectProcessor(
+        IGraphicsDevicesAndContext devices,
+        WaveClippingEffect item) : VideoEffectProcessorBase(devices)
     {
-        private readonly WaveClippingEffect _item;
+        private readonly WaveClippingEffect _item = item;
         private WaveClippingCustomEffect? _effect;
 
         private bool _isFirst = true;
@@ -22,14 +24,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         private double _rotation;
         private int _randomSeed;
         private bool _useRandom;
-
-        public WaveClippingEffectProcessor(
-            IGraphicsDevicesAndContext devices,
-            WaveClippingEffect item)
-            : base(devices)
-        {
-            _item = item;
-        }
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {

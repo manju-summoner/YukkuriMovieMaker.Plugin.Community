@@ -19,14 +19,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             !IsOtherVisible ||
             !IsDirectoryVisible;
 
-        public bool IsVideoVisible { get => field; set => Set(ref field, value); } = true;
-        public bool IsAudioVisible { get => field; set => Set(ref field, value); } = true;
-        public bool IsImageVisible { get => field; set => Set(ref field, value); } = true;
-        public bool IsTextVisible { get => field; set => Set(ref field, value); } = true;
-        public bool IsOtherVisible { get => field; set => Set(ref field, value); } = true;
-        public bool IsDirectoryVisible { get => field; set => Set(ref field, value); } = true;
+        public bool IsVideoVisible { get; set => Set(ref field, value); } = true;
+        public bool IsAudioVisible { get; set => Set(ref field, value); } = true;
+        public bool IsImageVisible { get; set => Set(ref field, value); } = true;
+        public bool IsTextVisible { get; set => Set(ref field, value); } = true;
+        public bool IsOtherVisible { get; set => Set(ref field, value); } = true;
+        public bool IsDirectoryVisible { get; set => Set(ref field, value); } = true;
 
-        public string SearchText { get => field; set => Set(ref field, value); } = string.Empty;
+        public string SearchText { get; set => Set(ref field, value); } = string.Empty;
 
         static readonly IReadOnlyList<(Predicate<FileType> TypeMatch, Predicate<string> ExtensionMatch, Func<ExplorerFilter, bool> IsVisible)> fileTypeRules =
         [

@@ -15,19 +15,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         public ObservableCollection<BrowserFavorite> Favorites { get; } = [];
 
-        public bool IsSmartScreenEnabled { get => field; set => Set(ref field, value); } = true;
+        public bool IsSmartScreenEnabled { get; set => Set(ref field, value); } = true;
         
-        public int TrackingPreventionLevel { get => field; set => Set(ref field, value); } = 1;
+        public int TrackingPreventionLevel { get; set => Set(ref field, value); } = 1;
 
-        public bool IsPasswordAutosaveEnabled { get => field; set => Set(ref field, value); } = false;
+        public bool IsPasswordAutosaveEnabled { get; set => Set(ref field, value); } = false;
 
-        public bool IsGeneralAutofillEnabled { get => field; set => Set(ref field, value); } = true;
+        public bool IsGeneralAutofillEnabled { get; set => Set(ref field, value); } = true;
 
-        public bool IsScriptEnabled { get => field; set => Set(ref field, value); } = true;
+        public bool IsScriptEnabled { get; set => Set(ref field, value); } = true;
 
         public bool IsMediaAutoplayEnabled 
-        { 
-            get => field; 
+        {
+            get;
             set 
             {
                 if (Set(ref field, value))
@@ -35,7 +35,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
             } 
         } = true;
 
-        public string CustomUserAgent { get => field; set => Set(ref field, value); } = string.Empty;
+        public string CustomUserAgent { get; set => Set(ref field, value); } = string.Empty;
 
         public string ImageDownloadFolder { get => field; set => Set(ref field, value); } = string.Empty;
 

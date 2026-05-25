@@ -150,11 +150,8 @@ internal static class IrodoriTTSGradioServer
             managedProcess = null;
         }
 
-        if (jobObject != null)
-        {
-            jobObject.Dispose();
-            jobObject = null;
-        }
+        jobObject?.Dispose();
+        jobObject = null;
 
         currentApp = null;
     }

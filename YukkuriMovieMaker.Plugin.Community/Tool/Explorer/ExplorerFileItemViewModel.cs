@@ -62,9 +62,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-        public bool IsSelected { get => field; set => Set(ref field, value); } = false;
-        public bool IsRenaming { get => field; set => Set(ref field, value); } = false;
-        public string RenameText { get => field; set => Set(ref field, value); } = string.Empty;
+        public bool IsSelected { get; set => Set(ref field, value); } = false;
+        public bool IsRenaming { get; set => Set(ref field, value); } = false;
+        public string RenameText { get; set => Set(ref field, value); } = string.Empty;
         public ICommand ClearCacheCommand { get; }
 
         public ExplorerFileItemViewModel(string path, DateTime lastWriteTime)

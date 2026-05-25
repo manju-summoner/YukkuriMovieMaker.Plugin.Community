@@ -52,7 +52,7 @@ public sealed class GrdIndexSelectorViewModel : INotifyPropertyChanged
 
     public string FilePath
     {
-        get => field;
+        get;
         set
         {
             if (string.Equals(field, value, StringComparison.OrdinalIgnoreCase)) return;

@@ -1,0 +1,51 @@
+﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+ToolName,,録音,Recording,录音,錄音,녹음,Grabación,التسجيل,Perekaman
+RecordingDevice,,録音デバイス,Recording Device,录音设备,錄音裝置,녹음 장치,Dispositivo de grabación,جهاز التسجيل,Perangkat Perekaman
+Refresh,,更新,Refresh,刷新,重新整理,새로 고침,Actualizar,تحديث,Segarkan
+SaveDestination,,保存先,Save Destination,保存位置,儲存位置,저장 위치,Destino de guardado,وجهة الحفظ,Tujuan Penyimpanan
+Browse,,参照...,Browse...,浏览...,瀏覽...,찾아보기...,Examinar...,استعراض...,Telusuri...
+ResetToDefault,,保存先を既定値に戻す,Reset save destination to default,将保存位置重置为默认值,將儲存位置重設為預設值,저장 위치를 기본값으로 되돌리기,Restablecer destino al predeterminado,إعادة تعيين الوجهة إلى الافتراضي,Kembalikan tujuan ke default
+StartRecording,,録音開始,Start Recording,开始录音,開始錄音,녹음 시작,Iniciar grabación,بدء التسجيل,Mulai Perekaman
+StopRecording,,録音停止,Stop Recording,停止录音,停止錄音,녹음 중지,Detener grabación,إيقاف التسجيل,Hentikan Perekaman
+Stop,,停止,Stop,停止,停止,중지,Detener,إيقاف,Hentikan
+ReselectRecordingDevice,,録音デバイスを再選択してください。,Please reselect the recording device.,请重新选择录音设备。,請重新選擇錄音裝置。,녹음 장치를 다시 선택해 주세요.,Vuelva a seleccionar el dispositivo de grabación.,يرجى إعادة تحديد جهاز التسجيل.,Silakan pilih kembali perangkat perekaman.
+RecordingStartFailed,0:error,録音開始に失敗しました: {0},Failed to start recording: {0},开始录音失败: {0},開始錄音失敗: {0},녹음 시작에 실패했습니다: {0},Error al iniciar la grabación: {0},فشل بدء التسجيل: {0},Gagal memulai perekaman: {0}
+NoRecordingDataRetry,,録音データがありません。再録音してください。,No recording data. Please re-record.,没有录音数据。请重新录音。,沒有錄音資料。請重新錄音。,녹음 데이터가 없습니다. 다시 녹음해 주세요.,No hay datos de grabación. Vuelva a grabar.,لا توجد بيانات تسجيل. يرجى إعادة التسجيل.,Tidak ada data rekaman. Silakan rekam ulang.
+RecordingDataLengthZero,0:path,録音データ長が 0 のため追加しませんでした: {0},Not added because recording data length is 0: {0},因录音数据长度为 0，未添加: {0},因錄音資料長度為 0，未加入: {0},녹음 데이터 길이가 0이라 추가하지 않았습니다: {0},No se agregó porque la longitud de los datos de grabación es 0: {0},لم تتم الإضافة لأن طول بيانات التسجيل 0: {0},Tidak ditambahkan karena panjang data rekaman 0: {0}
+RecordingStopFailed,0:error,録音停止に失敗しました: {0},Failed to stop recording: {0},停止录音失败: {0},停止錄音失敗: {0},녹음 중지에 실패했습니다: {0},Error al detener la grabación: {0},فشل إيقاف التسجيل: {0},Gagal menghentikan perekaman: {0}
+CannotChangeOutputWhileRecording,,録音中は保存先を変更できません。,Cannot change the save destination while recording.,录音期间无法更改保存位置。,錄音期間無法變更儲存位置。,녹음 중에는 저장 위치를 변경할 수 없습니다.,No se puede cambiar el destino de guardado mientras se graba.,لا يمكن تغيير وجهة الحفظ أثناء التسجيل.,Tidak dapat mengubah tujuan penyimpanan saat merekam.
+SelectOutputDirectory,,録音ファイルの保存先を選択してください。,Please select a save destination for the recorded files.,请选择录音文件的保存位置。,請選擇錄音檔案的儲存位置。,녹음 파일의 저장 위치를 선택해 주세요.,Seleccione un destino de guardado para los archivos de grabación.,يرجى تحديد وجهة حفظ لملفات التسجيل.,Silakan pilih tujuan penyimpanan untuk file rekaman.
+ConfirmResetOutputDirectory,,保存先を既定値に戻しますか？,Reset save destination to default?,是否将保存位置重置为默认值？,是否將儲存位置重設為預設值？,저장 위치를 기본값으로 되돌리시겠습니까?,¿Restablecer el destino de guardado al predeterminado?,إعادة تعيين وجهة الحفظ إلى الافتراضي؟,Kembalikan tujuan penyimpanan ke default?
+PlaybackFailed,0:error,再生に失敗: {0},Playback failed: {0},播放失败: {0},播放失敗: {0},재생 실패: {0},Error de reproducción: {0},فشل التشغيل: {0},Pemutaran gagal: {0}
+PlaybackError,0:error,再生エラー: {0},Playback error: {0},播放错误: {0},播放錯誤: {0},재생 오류: {0},Error de reproducción: {0},خطأ في التشغيل: {0},Kesalahan pemutaran: {0}
+StopWaitObjectUnavailable,,録音停止の完了待機オブジェクトを取得できませんでした。,Could not get the object waiting for recording to stop.,无法获取等待录音停止的对象。,無法取得等待錄音停止的物件。,녹음 중지 완료 대기 객체를 가져올 수 없습니다.,No se pudo obtener el objeto de espera de finalización de grabación.,لم يتمكن من الحصول على كائن انتظار اكتمال إيقاف التسجيل.,Tidak bisa mendapatkan objek tunggu untuk menghentikan rekaman.
+StopWaitTimeout,,録音停止の完了待機がタイムアウトしました。,Waiting for recording to stop timed out.,等待录音停止超时。,等待錄音停止逾時。,녹음 중지 완료 대기가 시간 초과되었습니다.,Se agotó el tiempo de espera para que se detuviera la grabación.,انتهت مهلة انتظار اكتمال إيقاف التسجيل.,Waktu tunggu penghentian perekaman habis.
+RecordingStopFailedMessage,,録音停止に失敗しました。,Failed to stop recording.,停止录音失败。,停止錄音失敗。,녹음 중지에 실패했습니다.,Error al detener la grabación.,فشل إيقاف التسجيل.,Gagal menghentikan perekaman.
+OutputFolderUnavailable,,保存先フォルダーを取得できません。,Cannot get save destination folder.,无法获取保存位置文件夹。,無法取得儲存位置資料夾。,저장 위치 폴더를 가져올 수 없습니다.,No se puede obtener la carpeta de destino de guardado.,لا يمكن الحصول على مجلد وجهة الحفظ.,Tidak dapat mengambil folder tujuan penyimpanan.
+OutputDirectoryFallback,0:path,保存先が存在しないため、既定値へ変更しました: {0},"Save destination does not exist, changed to default: {0}","保存位置不存在，已更改为默认值: {0}","儲存位置不存在，已變更為預設值: {0}",저장 위치가 존재하지 않아 기본값으로 변경했습니다: {0},"El destino de guardado no existe, cambiado al predeterminado: {0}","وجهة الحفظ غير موجودة، تم التغيير إلى الافتراضي: {0}","Tujuan penyimpanan tidak ada, diubah ke default: {0}"
+RefreshRecords,,一覧更新,Refresh List,更新列表,更新清單,목록 새로고침,Actualizar lista,تحديث القائمة,Segarkan Daftar
+OpenFolder,,フォルダを開く,Open Folder,打开文件夹,開啟資料夾,폴더 열기,Abrir carpeta,فتح المجلد,Buka Folder
+RecordFileName,,ファイル名,File Name,文件名,檔案名稱,파일 이름,Nombre de archivo,اسم الملف,Nama File
+RecordUpdatedAt,,更新日時,Date Updated,更新时间,更新時間,수정일,Fecha de actualización,تاريخ التحديث,Tanggal Diperbarui
+PlaySelected,,再生,Play,播放,播放,재생,Reproducir,تشغيل,Putar
+DeleteSelected,,削除,Delete,删除,刪除,삭제,Eliminar,حذف,Hapus
+ConfirmDeleteRecord,0:file,{0} を削除しますか？,Delete {0}?,是否删除 {0}？,是否刪除 {0}？,{0}을(를) 삭제하시겠습니까?,¿Eliminar {0}?,حذف {0}؟,Hapus {0}?
+RenameSelected,,名前を変更,Rename,重命名,重新命名,이름 바꾸기,Cambiar nombre,إعادة تسمية,Ganti nama
+RenameRecordDialogTitle,,名前を変更,Rename,重命名,重新命名,이름 바꾸기,Cambiar nombre,إعادة تسمية,Ganti nama
+RenameRecordDialogPrompt,,新しい名前を入力してください。,Please enter a new name.,请输入新名称。,請輸入新名稱。,새 이름을 입력해 주세요.,Introduzca un nombre nuevo.,يرجى إدخال اسم جديد.,Silakan masukkan nama baru.
+OK,,OK,OK,确定,確定,확인,Aceptar,موافق,OK
+Cancel,,キャンセル,Cancel,取消,取消,취소,Cancelar,إلغاء,Batal
+CopyPath,,パスをコピー,Copy Path,复制路径,複製路徑,경로 복사,Copiar ruta,نسخ المسار,Salin Jalur
+RecordDeleteFailed,0:error,削除に失敗しました: {0},Failed to delete: {0},删除失败: {0},刪除失敗: {0},삭제에 실패했습니다: {0},Error al eliminar: {0},فشل الحذف: {0},Gagal menghapus: {0}
+InvalidFileName,,ファイル名が無効です。,Invalid file name.,文件名无效。,檔案名稱無效。,파일 이름이 올바르지 않습니다.,Nombre de archivo no válido.,اسم الملف غير صالح.,Nama file tidak valid.
+RecordRenameFailed,0:error,リネームに失敗しました: {0},Failed to rename: {0},重命名失败: {0},重新命名失敗: {0},이름 바꾸기에 실패했습니다: {0},Error al cambiar el nombre: {0},فشلت إعادة التسمية: {0},Gagal mengganti nama: {0}
+CopyPathFailed,0:error,パスコピーに失敗しました: {0},Failed to copy path: {0},复制路径失败: {0},複製路徑失敗: {0},경로 복사에 실패했습니다: {0},Error al copiar la ruta: {0},فشل نسخ المسار: {0},Gagal menyalin jalur: {0}
+OpenFolderFailed,0:error,フォルダを開けませんでした: {0},Failed to open folder: {0},无法打开文件夹: {0},無法開啟資料夾: {0},폴더를 열 수 없습니다: {0},Error al abrir la carpeta: {0},فشل فتح المجلد: {0},Gagal membuka folder: {0}
+RecordListRefreshFailed,0:error,一覧更新に失敗しました: {0},Failed to refresh list: {0},更新列表失败: {0},更新清單失敗: {0},목록 새로고침에 실패했습니다: {0},Error al actualizar la lista: {0},فشل تحديث القائمة: {0},Gagal menyegarkan daftar: {0}
+RecordingToolMemo,,ファイルを削除したり名前を変更すると、タイムライン上の音声が再生されなくなります。,Deleting or renaming files will prevent audio on the timeline from being played back.,如果删除文件或更改文件名，时间轴上的音频将无法播放。,如果刪除檔案或變更檔案名稱，時間軸上的音訊將無法播放。,파일을 삭제하거나 이름을 변경하면 타임라인의 오디오가 재생되지 않게 됩니다.,Eliminar o renombrar archivos hará que el audio en la línea de tiempo no se pueda reproducir.,حذف الملفات أو إعادة تسميتها سيمنع تشغيل الصوت على الخط الزمني.,Menghapus atau mengganti nama file akan menyebabkan audio pada linimasa tidak dapat diputar.
+Unselected,,未選択,Unselected,未选择,未選擇,선택 안 함,Sin seleccionar,غير محدد,Belum dipilih
+DefaultRecordingDevice,,既定の録音デバイス,Default recording device,默认录音设备,預設録音裝置,기본 녹음 장치,Dispositivo de grabación predeterminado,جهاز التسجيل الافتراضي,Perangkat perekaman default
+DefaultRecordingDeviceWithName,0:name,既定の録音デバイス（{0}）,Default recording device ({0}),默认录音设备（{0}）,預設錄音裝置（{0}）,기본 녹음 장치({0}),Dispositivo de grabación predeterminado ({0}),جهاز التسجيل الافتراضي ({0}),Perangkat perekaman default ({0})
+SavedRecordingDeviceNotFoundFallback,,保存されていた録音デバイスが見つからないため、既定の録音デバイスを使用します,"Saved recording device was not found, so the default recording device will be used",找不到已保存的录音设备，因此将使用默认录音设备,找不到已儲存的錄音裝置，將改用預設錄音裝置,저장된 녹음 장치를 찾을 수 없어 기본 녹음 장치를 사용합니다,No se encontró el dispositivo de grabación guardado; se usará el predeterminado,لم يتم العثور على جهاز التسجيل المحفوظ، سيتم استخدام الجهاز الافتراضي,"Perangkat perekaman tersimpan tidak ditemukan, perangkat default akan digunakan"
+SavedRecordingDeviceNotFoundFallbackWithName,0:name,保存されていた録音デバイスが見つからないため、既定の録音デバイスを使用します（{0}）,"Saved recording device was not found, so default recording device will be used ({0})",找不到已保存的录音设备，因此将使用默认录音设备（{0}）,找不到已儲存的錄音裝置，將改用預設錄音裝置（{0}）,저장된 녹음 장치를 찾을 수 없어 기본 녹음 장치를 사용합니다({0}),No se encontró el dispositivo guardado; se usará el predeterminado ({0}),لم يتم العثور على الجهاز المحفوظ، سيتم استخدام الافتراضي ({0}),"Perangkat tersimpan tidak ditemukan, gunakan default ({0})"
+NoRecordingDeviceFoundDetailed,,録音デバイスが見つかりません。Windows の録音デバイス設定を確認してください,Recording device not found. Check Windows recording device settings,未找到录音设备。请检查 Windows 录音设备设置,找不到錄音裝置。請檢查 Windows 錄音裝置設定,녹음 장치를 찾을 수 없습니다. Windows 녹음 장치 설정을 확인해 주세요,No se encontró ningún dispositivo de grabación. Revise la configuración de Windows,لم يتم العثور على جهاز تسجيل. تحقق من إعدادات أجهزة التسجيل في Windows,Perangkat perekaman tidak ditemukan. Periksa pengaturan perangkat rekaman Windows
