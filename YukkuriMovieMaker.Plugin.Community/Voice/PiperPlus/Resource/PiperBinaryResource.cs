@@ -32,7 +32,20 @@ internal static class PiperBinaryResource
         get
         {
             var path = InstalledVersionFilePath;
-            return File.Exists(path) ? File.ReadAllText(path).Trim() : null;
+            if (!File.Exists(path))
+                return null;
+            try
+            {
+                return File.ReadAllText(path).Trim();
+            }
+            catch (IOException)
+            {
+                return null;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return null;
+            }
         }
     }
 
