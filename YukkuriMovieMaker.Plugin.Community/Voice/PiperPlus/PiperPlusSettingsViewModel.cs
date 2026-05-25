@@ -91,21 +91,23 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         IsLoading = true;
         try
         {
+            PiperUpdateChecker.InvalidateCache();
+
+            var release = await PiperUpdateChecker.GetLatestReleaseAsync();
+
             if (!PiperBinaryResource.IsReady)
             {
-                var release = await PiperUpdateChecker.GetLatestReleaseAsync();
-                var version = release?.TagName ?? string.Empty;
+                var version = release?.TagName;
                 if (string.IsNullOrEmpty(version))
                 {
                     StatusText = Texts.BinaryNotFound;
                     return;
                 }
-                pendingVersion = version;
                 await InstallVersionAsync(version);
             }
 
             await ReloadModelsAsync();
-            ApplyUpdateState();
+            ApplyUpdateState(release);
         }
         catch (Exception ex)
         {
@@ -169,9 +171,8 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         await PiperBinaryResource.EnsureAsync(version, progress);
     }
 
-    void ApplyUpdateState()
+    void ApplyUpdateState(GitHubReleaseInfo? release)
     {
-        var release = PiperUpdateChecker.CachedRelease;
         if (release is null)
             return;
 
