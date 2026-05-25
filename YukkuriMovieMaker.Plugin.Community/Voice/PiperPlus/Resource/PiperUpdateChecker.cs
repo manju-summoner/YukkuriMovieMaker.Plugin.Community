@@ -9,31 +9,34 @@ internal static class PiperUpdateChecker
     const string ReleasesApiUrl = "https://api.github.com/repos/ayutaz/piper-plus/releases/latest";
 
     static readonly SemaphoreSlim Gate = new(1, 1);
-    static GitHubReleaseInfo? cachedResult;
-    static bool checked_;
+    static GitHubReleaseInfo? cachedRelease;
+    static bool isCached;
 
-    public static GitHubReleaseInfo? CachedRelease => cachedResult;
+    public static GitHubReleaseInfo? CachedRelease => cachedRelease;
 
     public static async Task<GitHubReleaseInfo?> GetLatestReleaseAsync(CancellationToken cancellationToken = default)
     {
         await Gate.WaitAsync(cancellationToken);
         try
         {
-            if (checked_)
-                return cachedResult;
+            if (isCached)
+                return cachedRelease;
 
             var result = await FetchLatestAsync(cancellationToken);
-            if (result is not null)
-            {
-                cachedResult = result;
-                checked_ = true;
-            }
+            cachedRelease = result;
+            isCached = true;
             return result;
         }
         finally
         {
             Gate.Release();
         }
+    }
+
+    public static void InvalidateCache()
+    {
+        cachedRelease = null;
+        isCached = false;
     }
 
     static async Task<GitHubReleaseInfo?> FetchLatestAsync(CancellationToken cancellationToken)
