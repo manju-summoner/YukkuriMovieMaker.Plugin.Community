@@ -9,7 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
 
 internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpeaker
 {
-    static readonly SemaphoreSlim Semaphore = new(1);
+    static readonly SemaphoreSlim Semaphore = new(1, 1);
 
     public string EngineName => "Piper Plus";
     public string SpeakerName => entry.DisplayName;
