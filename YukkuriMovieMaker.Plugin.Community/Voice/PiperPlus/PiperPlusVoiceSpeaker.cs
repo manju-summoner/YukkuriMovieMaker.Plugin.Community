@@ -82,7 +82,7 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpe
         startInfo.ArgumentList.Add("--output-file");
         startInfo.ArgumentList.Add(filePath);
         startInfo.ArgumentList.Add("--text");
-        startInfo.ArgumentList.Add(text);
+        startInfo.ArgumentList.Add(PhonemeNotationConverter.Convert(text));
         startInfo.ArgumentList.Add("--length-scale");
         startInfo.ArgumentList.Add(param.LengthScale.ToString("F3", CultureInfo.InvariantCulture));
         startInfo.ArgumentList.Add("--noise-scale");
