@@ -97,30 +97,14 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         if (IsLoading)
             return;
 
-        IsLoading = true;
-        try
-        {
-            await ReloadModelsAsync();
-        }
-        catch (Exception ex)
-        {
-            StatusText = ex.Message;
-        }
-        finally
-        {
-            IsLoading = false;
-            IsProgressVisible = false;
-            ProgressValue = 0;
-            ProgressMessage = string.Empty;
-        }
+        await ExecuteLoadingOperationAsync(ReloadModelsAsync);
     }
 
     async Task RefreshAsync()
     {
-        IsLoading = true;
-        try
+        await ExecuteLoadingOperationAsync(async () =>
         {
-            PiperUpdateChecker.InvalidateCache();
+            await PiperUpdateChecker.InvalidateCacheAsync();
 
             var release = await PiperUpdateChecker.GetLatestReleaseAsync();
 
@@ -137,18 +121,7 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
 
             await ReloadModelsAsync();
             ApplyUpdateState(release);
-        }
-        catch (Exception ex)
-        {
-            StatusText = ex.Message;
-        }
-        finally
-        {
-            IsLoading = false;
-            IsProgressVisible = false;
-            ProgressValue = 0;
-            ProgressMessage = string.Empty;
-        }
+        });
     }
 
     async Task UpdateBinaryAsync()
@@ -156,13 +129,21 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         if (string.IsNullOrEmpty(pendingVersion))
             return;
 
-        IsLoading = true;
-        try
+        await ExecuteLoadingOperationAsync(async () =>
         {
             await InstallVersionAsync(pendingVersion);
             HasUpdate = false;
             UpdateDescription = string.Empty;
             await ReloadModelsAsync();
+        });
+    }
+
+    async Task ExecuteLoadingOperationAsync(Func<Task> operation)
+    {
+        IsLoading = true;
+        try
+        {
+            await operation();
         }
         catch (Exception ex)
         {
