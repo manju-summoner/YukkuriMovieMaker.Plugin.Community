@@ -184,7 +184,12 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     void ApplyUpdateState(GitHubReleaseInfo? release)
     {
         if (release is null)
+        {
+            pendingVersion = string.Empty;
+            UpdateDescription = string.Empty;
+            HasUpdate = false;
             return;
+        }
 
         pendingVersion = release.TagName;
         var installed = PiperBinaryResource.InstalledVersion;
