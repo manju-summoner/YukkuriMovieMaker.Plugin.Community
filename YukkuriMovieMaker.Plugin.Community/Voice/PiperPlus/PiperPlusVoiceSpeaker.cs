@@ -129,6 +129,8 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpe
                 $"Piper Plus process did not complete within {ProcessTimeoutMs / 1000} seconds.");
         }
 
+        process.WaitForExit();
+
         if (process.ExitCode != 0)
         {
             var stderr = stderrBuilder.ToString().Trim();
