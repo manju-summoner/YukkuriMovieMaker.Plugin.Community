@@ -8,12 +8,13 @@ internal static class PiperSpeakerLoader
     public static void Reload()
     {
         var models = PiperModelScanner.Scan(PiperPlusSettings.Default.ModelDirectory);
-        var entries = models.SelectMany(PiperSpeakerEntryBuilder.Build).ToList();
         var activePaths = models.Select(m => m.ModelPath).ToList();
 
         Application.Current.Dispatcher.Invoke(() =>
         {
             SyncSavedModels(models);
+
+            var entries = models.SelectMany(PiperSpeakerEntryBuilder.Build).ToList();
 
             PiperPlusSettings.Default.Speakers.Clear();
             foreach (var entry in entries)
