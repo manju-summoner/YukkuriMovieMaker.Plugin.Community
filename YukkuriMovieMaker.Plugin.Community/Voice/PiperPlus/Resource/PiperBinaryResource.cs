@@ -69,8 +69,11 @@ internal static class PiperBinaryResource
         IProgress<(double Progress, string Message)>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            throw new PlatformNotSupportedException("Piper Plus is only supported on Windows x64.");
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
+            RuntimeInformation.OSArchitecture != Architecture.X64 ||
+            RuntimeInformation.ProcessArchitecture != Architecture.X64)
+            throw new PlatformNotSupportedException(
+                $"Piper Plus requires Windows x64. Detected OS architecture: {RuntimeInformation.OSArchitecture}, process architecture: {RuntimeInformation.ProcessArchitecture}.");
 
         var currentVersion = InstalledVersion;
         if (currentVersion == version && IsReady)
