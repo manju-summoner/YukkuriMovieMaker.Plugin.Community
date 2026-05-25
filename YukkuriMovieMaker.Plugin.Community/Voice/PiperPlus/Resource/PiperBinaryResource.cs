@@ -20,6 +20,7 @@ internal static class PiperBinaryResource
         MatchType = MatchType.Simple,
     };
 
+    static readonly SemaphoreSlim InstallGate = new(1, 1);
     static readonly object CacheLock = new();
     static string? resolvedExecutablePath;
 
@@ -85,10 +86,27 @@ internal static class PiperBinaryResource
             throw new PlatformNotSupportedException(
                 $"Piper Plus requires Windows x64. Detected OS architecture: {RuntimeInformation.OSArchitecture}, process architecture: {RuntimeInformation.ProcessArchitecture}.");
 
-        var currentVersion = InstalledVersion;
-        if (currentVersion == version && IsReady)
-            return;
+        await InstallGate.WaitAsync(cancellationToken);
+        try
+        {
+            var currentVersion = InstalledVersion;
+            if (currentVersion == version && IsReady)
+                return;
 
+            await InstallCoreAsync(version, currentVersion, progress, cancellationToken);
+        }
+        finally
+        {
+            InstallGate.Release();
+        }
+    }
+
+    static async Task InstallCoreAsync(
+        string version,
+        string? currentVersion,
+        IProgress<(double Progress, string Message)>? progress,
+        CancellationToken cancellationToken)
+    {
         var targetDir = InstallDirectory(version);
         var tempDir = targetDir + ".tmp";
         var currentDir = currentVersion is not null ? InstallDirectory(currentVersion) : null;
@@ -142,8 +160,6 @@ internal static class PiperBinaryResource
             Directory.Delete(targetDir, recursive: true);
 
         Directory.Move(tempDir, targetDir);
-
-        InvalidateCache();
 
         var newExecutable = Directory.Exists(targetDir)
             ? Directory.EnumerateFiles(targetDir, ExecutableName, SearchOptions).FirstOrDefault()
