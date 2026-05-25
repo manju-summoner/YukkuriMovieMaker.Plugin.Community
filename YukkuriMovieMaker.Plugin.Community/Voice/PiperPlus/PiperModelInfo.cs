@@ -11,8 +11,6 @@ internal record PiperModelInfo(
 {
     public bool IsMultiSpeaker => NumSpeakers > 1;
 
-    public bool IsMultilingual => LanguageCodes.Count > 1;
-
     public string LanguageArgument =>
         LanguageCodes.Count > 0
             ? string.Join("-", LanguageCodes)
