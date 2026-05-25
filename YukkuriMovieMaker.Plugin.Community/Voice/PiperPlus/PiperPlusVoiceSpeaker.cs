@@ -74,15 +74,15 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpe
         startInfo.ArgumentList.Add(entry.ModelPath);
         startInfo.ArgumentList.Add("--config");
         startInfo.ArgumentList.Add(entry.ConfigPath);
-        startInfo.ArgumentList.Add("--output_file");
+        startInfo.ArgumentList.Add("--output-file");
         startInfo.ArgumentList.Add(filePath);
         startInfo.ArgumentList.Add("--text");
         startInfo.ArgumentList.Add(text);
-        startInfo.ArgumentList.Add("--length_scale");
+        startInfo.ArgumentList.Add("--length-scale");
         startInfo.ArgumentList.Add(param.LengthScale.ToString("F3", CultureInfo.InvariantCulture));
-        startInfo.ArgumentList.Add("--noise_scale");
+        startInfo.ArgumentList.Add("--noise-scale");
         startInfo.ArgumentList.Add(param.NoiseScale.ToString("F3", CultureInfo.InvariantCulture));
-        startInfo.ArgumentList.Add("--noise_w");
+        startInfo.ArgumentList.Add("--noise-w");
         startInfo.ArgumentList.Add(param.NoiseScaleW.ToString("F3", CultureInfo.InvariantCulture));
 
         if (entry.IsMultiSpeaker)

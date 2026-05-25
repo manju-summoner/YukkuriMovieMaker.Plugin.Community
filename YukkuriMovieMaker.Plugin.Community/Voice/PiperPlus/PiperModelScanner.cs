@@ -46,13 +46,27 @@ internal static class PiperModelScanner
             var modelName = Path.GetFileNameWithoutExtension(onnxPath);
             var speakerIdMap = config.SpeakerIdMap ?? new Dictionary<string, int>();
             var numSpeakers = config.NumSpeakers > 0 ? config.NumSpeakers : 1;
-            var languageIdMap = config.LanguageIdMap ?? new Dictionary<string, int>();
+            var languageCodes = ResolveLanguageCodes(config);
 
-            return new PiperModelInfo(onnxPath, jsonPath, modelName, numSpeakers, speakerIdMap, languageIdMap);
+            return new PiperModelInfo(onnxPath, jsonPath, modelName, numSpeakers, speakerIdMap, languageCodes);
         }
         catch
         {
             return null;
         }
+    }
+
+    static IReadOnlyList<string> ResolveLanguageCodes(PiperModelConfig config)
+    {
+        if (config.LanguageIdMap is { Count: > 0 })
+            return config.LanguageIdMap
+                .OrderBy(kv => kv.Value)
+                .Select(kv => kv.Key)
+                .ToList();
+
+        if (config.Language?.Code is { } code && !string.IsNullOrEmpty(code))
+            return [code];
+
+        return [];
     }
 }

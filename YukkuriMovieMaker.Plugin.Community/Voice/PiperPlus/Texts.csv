@@ -1,7 +1,7 @@
-Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
+﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
 LengthScale,,話速,Speed,速度,速度,속도,Velocidad,سرعة,Kecepatan,
 LengthScaleDesc,,値が大きいほど遅くなります (1.0 が標準)。,Larger values produce slower speech (1.0 is normal).,值越大语速越慢（1.0 为标准）。,值越大語速越慢（1.0 為標準）。,값이 클수록 느려집니다 (1.0이 표준).,Valores más altos producen habla más lenta (1.0 es normal).,القيمة الأكبر تعني حديثاً أبطأ (1.0 هو المعيار).,Nilai lebih besar menghasilkan bicara lebih lambat (1.0 adalah normal).,
-NoiseScale,,ノイズスケール,Noise Scale,噪声强度,噪聲強度,노이즈 스케일,Escala de ruido,مقياس الضوضاء,Skala Kebisingan,
+NoiseScale,,ノイズスケール,Noise Scale,噪声強度,噪聲強度,노이즈 스케일,Escala de ruido,مقياس الضوضاء,Skala Kebisingan,
 NoiseScaleDesc,,音声のバリエーションを制御します (デフォルト: 0.667)。,Controls audio variation (default: 0.667).,控制音频变化幅度（默认：0.667）。,控制音訊變化幅度（預設：0.667）。,음성 변화를 제어합니다 (기본값: 0.667).,Controla la variación de audio (predeterminado: 0.667).,يتحكم في تباين الصوت (الافتراضي: 0.667).,Mengontrol variasi audio (default: 0.667).,
 NoiseScaleW,,音素長ノイズ,Phoneme Length Noise,音素长度噪声,音素長度噪聲,음소 길이 노이즈,Ruido de longitud de fonema,ضوضاء طول الصوت,Kebisingan Panjang Fonem,
 NoiseScaleWDesc,,音素長のバリエーションを制御します (デフォルト: 0.8)。,Controls phoneme length variation (default: 0.8).,控制音素长度变化（默认：0.8）。,控制音素長度變化（預設：0.8）。,음소 길이 변화를 제어합니다 (기본값: 0.8).,Controla la variación de longitud de fonema (predeterminado: 0.8).,يتحكم في تباين طول الصوت (الافتراضي: 0.8).,Mengontrol variasi panjang fonem (default: 0.8).,
@@ -9,25 +9,27 @@ Speaker,,話者,Speaker,说话者,說話者,화자,Hablante,المتحدث,Pembi
 SpeakerDesc,,マルチスピーカーモデルの話者ID。シングルスピーカーモデルでは無効です。,Speaker ID for multi-speaker models. Ignored for single-speaker models.,多说话者模型的话者ID。单说话者模型无效。,多說話者模型的說話者ID。單說話者模型無效。,다중 화자 모델의 화자 ID. 단일 화자 모델에서는 무시됩니다.,ID de hablante para modelos multi-hablante. Ignorado en modelos de un solo hablante.,معرف المتحدث لنماذج متعددة المتحدثين. يُتجاهل في النماذج أحادية المتحدث.,ID pembicara untuk model multi-pembicara. Diabaikan untuk model satu pembicara.,
 ModelDirectory,,モデルディレクトリ,Model Directory,模型目录,模型目錄,모델 디렉토리,Directorio de modelos,مجلد النموذج,Direktori Model,
 ModelDirectoryDesc,,ONNXモデルファイル (.onnx, .onnx.json) が格納されているディレクトリ。,Directory containing ONNX model files (.onnx and .onnx.json).,存储ONNX模型文件（.onnx、.onnx.json）的目录。,存儲ONNX模型文件（.onnx、.onnx.json）的目錄。,ONNX 모델 파일 (.onnx, .onnx.json)이 저장된 디렉토리.,Directorio que contiene archivos del modelo ONNX (.onnx y .onnx.json).,المجلد الذي يحتوي على ملفات نموذج ONNX (.onnx و .onnx.json).,Direktori yang berisi file model ONNX (.onnx dan .onnx.json).,
+BinaryDirectory,,バイナリディレクトリ,Binary Directory,二进制目录,二進位目錄,바이너리 디렉토리,Directorio de binarios,مجلد الثنائي,Direktori Biner,
+BinaryDirectoryDesc,,Piper Plusの実行ファイルを格納するディレクトリ。モデルディレクトリと同じ場所を推奨します。,Directory to store the Piper Plus executable. Recommended to use the same location as the model directory.,存储Piper Plus可执行文件的目录。推荐与模型目录相同。,存儲Piper Plus執行檔的目錄。建議與模型目錄相同。,Piper Plus 실행 파일을 저장할 디렉토리. 모델 디렉토리와 동일한 위치를 권장합니다.,Directorio para almacenar el ejecutable de Piper Plus. Se recomienda el mismo lugar que el directorio de modelos.,مجلد لتخزين ملف تنفيذ Piper Plus. يُوصى باستخدام نفس موقع مجلد النموذج.,Direktori untuk menyimpan file eksekusi Piper Plus. Disarankan menggunakan lokasi yang sama dengan direktori model.,
 Refresh,,更新,Refresh,刷新,重新整理,새로 고침,Actualizar,تحديث,Muat Ulang,
 AboutPiperPlus,,Piper Plusについて,About Piper Plus,关于 Piper Plus,關於 Piper Plus,Piper Plus 정보,Acerca de Piper Plus,حول Piper Plus,Tentang Piper Plus,
 AboutPiperPlusMessage,,"Piper Plus は高品質なオフラインニューラル音声合成エンジンです。
 モデルファイル (.onnx / .onnx.json) をモデルディレクトリに配置し、更新ボタンを押すと話者一覧が表示されます。
-バイナリは初回起動時に自動でダウンロード・展開されます。","Piper Plus is a high-quality offline neural TTS engine.
+バイナリは初回起動時にバイナリディレクトリへ自動でダウンロード・展開されます。","Piper Plus is a high-quality offline neural TTS engine.
 Place model files (.onnx / .onnx.json) in the model directory and press Refresh to list speakers.
-The binary is automatically downloaded and extracted on first launch.","Piper Plus 是高质量的离线神经网络语音合成引擎。
+The binary is automatically downloaded and extracted to the binary directory on first launch.","Piper Plus 是高质量的离线神经网络语音合成引擎。
 将模型文件（.onnx / .onnx.json）放入模型目录，点击刷新即可显示说话者列表。
-首次启动时将自动下载并解压二进制文件。","Piper Plus 是高品質的離線神經網路語音合成引擎。
+首次启动时将自动下载并解压二进制文件到二进制目录。","Piper Plus 是高品質的離線神經網路語音合成引擎。
 將模型文件（.onnx / .onnx.json）放入模型目錄，點擊重新整理即可顯示說話者清單。
-首次啟動時將自動下載並解壓縮二進位文件。","Piper Plus는 고품질 오프라인 신경망 TTS 엔진입니다.
+首次啟動時將自動下載並解壓縮二進位文件到二進位目錄。","Piper Plus는 고품질 오프라인 신경망 TTS 엔진입니다.
 모델 파일 (.onnx / .onnx.json)을 모델 디렉토리에 배치하고 새로 고침을 누르면 화자 목록이 표시됩니다.
-바이너리는 첫 실행 시 자동으로 다운로드 및 압축 해제됩니다.","Piper Plus es un motor de síntesis de voz neuronal sin conexión de alta calidad.
+바이너리는 첫 실행 시 바이너리 디렉토리에 자동으로 다운로드 및 압축 해제됩니다.","Piper Plus es un motor de síntesis de voz neuronal sin conexión de alta calidad.
 Coloque los archivos del modelo (.onnx / .onnx.json) en el directorio de modelos y presione Actualizar para listar los hablantes.
-El binario se descarga y extrae automáticamente en el primer inicio.","Piper Plus هو محرك تحويل نص إلى كلام عصبي عالي الجودة يعمل دون اتصال.
+El binario se descarga y extrae automáticamente en el directorio de binarios en el primer inicio.","Piper Plus هو محرك تحويل نص إلى كلام عصبي عالي الجودة يعمل دون اتصال.
 ضع ملفات النموذج (.onnx / .onnx.json) في مجلد النموذج واضغط على تحديث لعرض قائمة المتحدثين.
-يتم تنزيل الثنائي وفك ضغطه تلقائياً عند التشغيل الأول.","Piper Plus adalah mesin TTS neural offline berkualitas tinggi.
+يتم تنزيل الثنائي وفك ضغطه تلقائياً في مجلد الثنائي عند التشغيل الأول.","Piper Plus adalah mesin TTS neural offline berkualitas tinggi.
 Tempatkan file model (.onnx / .onnx.json) di direktori model dan tekan Muat Ulang untuk menampilkan daftar pembicara.
-Biner diunduh dan diekstrak secara otomatis saat pertama kali dijalankan.",
+Biner diunduh dan diekstrak secara otomatis ke direktori biner saat pertama kali dijalankan.",
 HelpLink,,ヘルプ: Piper Plusの設定方法,Help: How to set up Piper Plus,帮助：Piper Plus设置方法,說明：如何設定 Piper Plus,도움말: Piper Plus 설정 방법,Ayuda: Cómo configurar Piper Plus,مساعدة: كيفية إعداد Piper Plus,Bantuan: Cara mengatur Piper Plus,
 DownloadingBinary,,バイナリをダウンロード中,Downloading binary,正在下载二进制文件,正在下載二進位文件,바이너리 다운로드 중,Descargando binario,جارٍ تنزيل الثنائي,Mengunduh biner,
 ExtractingBinary,,バイナリを展開中,Extracting binary,正在解压二进制文件,正在解壓縮二進位文件,바이너리 압축 해제 중,Extrayendo binario,جارٍ فك ضغط الثنائي,Mengekstrak biner,

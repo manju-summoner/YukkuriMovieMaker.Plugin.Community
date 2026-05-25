@@ -6,14 +6,15 @@ internal record PiperModelInfo(
     string ModelName,
     int NumSpeakers,
     IReadOnlyDictionary<string, int> SpeakerIdMap,
-    IReadOnlyDictionary<string, int> LanguageIdMap
+    IReadOnlyList<string> LanguageCodes
 )
 {
     public bool IsMultiSpeaker => NumSpeakers > 1;
-    public bool IsMultilingual => LanguageIdMap.Count > 1;
+
+    public bool IsMultilingual => LanguageCodes.Count > 1;
 
     public string LanguageArgument =>
-        IsMultilingual
-            ? string.Join("-", LanguageIdMap.OrderBy(kv => kv.Value).Select(kv => kv.Key))
+        LanguageCodes.Count > 0
+            ? string.Join("-", LanguageCodes)
             : string.Empty;
 }

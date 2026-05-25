@@ -19,6 +19,13 @@
                     HorizontalAlignment="Right"/>
             </Grid>
             <Grid>
+                <Label Content="{x:Static local:Texts.BinaryDirectory}"/>
+                <c:DirectorySelector
+                    Value="{Binding Source={x:Static local:PiperPlusSettings.Default}, Path=BinaryDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Width="300"
+                    HorizontalAlignment="Right"/>
+            </Grid>
+            <Grid>
                 <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" Margin="6,0,0,0"/>
                 <Button HorizontalAlignment="Right"
                         Width="26"

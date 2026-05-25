@@ -15,15 +15,15 @@ internal static class PiperBinaryResource
     static readonly string DownloadUrl =
         $"https://github.com/ayutaz/piper-plus/releases/download/{Version}/{WindowsX64Asset}";
 
-    static readonly string InstallDirectory = Path.Combine(
-        AppDirectories.UserResourceDirectory, "piper", Version);
-
     static readonly EnumerationOptions SearchOptions = new()
     {
         RecurseSubdirectories = true,
         IgnoreInaccessible = true,
         MatchType = MatchType.Simple,
     };
+
+    static string InstallDirectory =>
+        Path.Combine(PiperPlusSettings.Default.BinaryDirectory, Version);
 
     static string? resolvedExecutablePath;
 
@@ -34,9 +34,10 @@ internal static class PiperBinaryResource
             if (resolvedExecutablePath is not null && File.Exists(resolvedExecutablePath))
                 return resolvedExecutablePath;
 
-            resolvedExecutablePath = Directory.Exists(InstallDirectory)
+            var dir = InstallDirectory;
+            resolvedExecutablePath = Directory.Exists(dir)
                 ? Directory
-                    .EnumerateFiles(InstallDirectory, ExecutableName, SearchOptions)
+                    .EnumerateFiles(dir, ExecutableName, SearchOptions)
                     .FirstOrDefault()
                 : null;
 
@@ -45,6 +46,8 @@ internal static class PiperBinaryResource
     }
 
     public static bool IsReady => ExecutablePath is not null;
+
+    public static void InvalidateCache() => resolvedExecutablePath = null;
 
     public static async Task EnsureAsync(
         IProgress<double>? progress = null,
@@ -56,9 +59,10 @@ internal static class PiperBinaryResource
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             throw new PlatformNotSupportedException("Piper Plus is only supported on Windows x64.");
 
-        Directory.CreateDirectory(InstallDirectory);
+        var dir = InstallDirectory;
+        Directory.CreateDirectory(dir);
 
-        var zipPath = Path.Combine(InstallDirectory, WindowsX64Asset);
+        var zipPath = Path.Combine(dir, WindowsX64Asset);
 
         var client = HttpClientFactory.Client;
         using var response = await client.GetAsync(
@@ -84,7 +88,7 @@ internal static class PiperBinaryResource
         }
 
         await Task.Run(
-            () => ZipFile.ExtractToDirectory(zipPath, InstallDirectory, overwriteFiles: true),
+            () => ZipFile.ExtractToDirectory(zipPath, dir, overwriteFiles: true),
             cancellationToken);
 
         try { File.Delete(zipPath); } catch { }
@@ -93,7 +97,7 @@ internal static class PiperBinaryResource
 
         if (!IsReady)
             throw new FileNotFoundException(
-                $"Piper Plus CLI executable not found after extraction in '{InstallDirectory}'.");
+                $"Piper Plus CLI executable not found after extraction in '{dir}'.");
 
         progress?.Report(1.0);
     }
