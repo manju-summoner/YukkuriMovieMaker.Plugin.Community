@@ -38,6 +38,7 @@ LoadingModels,,モデルを読み込み中,Loading models,正在加载模型,正
 ModelCount,0: count,{0} モデル,{0} model(s),{0} 个模型,{0} 個模型,{0}개 모델,{0} modelo(s),{0} نموذج,{0} model,
 SpeakerCount,0: count,{0} 話者,{0} speaker(s),{0} 个说话者,{0} 個說話者,{0}명 화자,{0} hablante(s),{0} متحدث,{0} pembicara,
 NoModelsFound,,モデルが見つかりません。モデルディレクトリにONNXファイルを配置してください。,No models found. Place ONNX files in the model directory.,未找到模型。请将ONNX文件放入模型目录。,找不到模型。請將ONNX文件放入模型目錄。,모델을 찾을 수 없습니다. 모델 디렉토리에 ONNX 파일을 배치하세요.,No se encontraron modelos. Coloque archivos ONNX en el directorio de modelos.,لم يتم العثور على نماذج. ضع ملفات ONNX في مجلد النماذج.,Tidak ada model yang ditemukan. Tempatkan file ONNX di direktori model.,
+AboutPiperPlusLink,,GitHubリポジトリ,GitHub Repository,GitHub 仓库,GitHub 存儲庫,GitHub 저장소,Repositorio de GitHub,مستودع GitHub,Repositori GitHub,
 UpdateAvailable,,アップデートがあります: ,Update available: ,有新版本: ,有新版本: ,업데이트가 있습니다: ,Actualización disponible: ,يتوفر تحديث: ,Pembaruan tersedia: ,
 UpdateNow,,今すぐ更新,Update Now,立即更新,立即更新,지금 업데이트,Actualizar ahora,تحديث الآن,Perbarui Sekarang,
 ModelList,,モデル一覧,Model List,模型列表,模型清單,모델 목록,Lista de modelos,قائمة النماذج,Daftar Model,

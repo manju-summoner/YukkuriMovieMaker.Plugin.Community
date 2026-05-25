@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus"
+             xmlns:ps="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
@@ -175,9 +176,19 @@
                     </Grid>
                 </Expander>
 
-                <GroupBox Header="{x:Static local:Texts.AboutPiperPlus}" Margin="6">
+                <GroupBox Header="{x:Static local:Texts.AboutPiperPlus}" Margin="6" Padding="12,6,12,6">
                     <TextBlock Margin="6" TextWrapping="Wrap">
                         <Run Text="{x:Static local:Texts.AboutPiperPlusMessage}"/>
+                        <LineBreak/>
+                        <LineBreak/>
+                        <Hyperlink Command="{Binding Source={x:Static ps:CommandSettings.Default}, Path=[OpenUri]}" CommandParameter="https://github.com/ayutaz/piper-plus">
+                            <Run Text="{x:Static local:Texts.AboutPiperPlusLink}"/>
+                        </Hyperlink>
+                        <LineBreak/>
+                        <LineBreak/>
+                        <Run Text="Copyright (c) 2022 Michael Hansen"/>
+                        <LineBreak/>
+                        <Run Text="Copyright (c) 2025 ayutaz"/>
                     </TextBlock>
                 </GroupBox>
             </StackPanel>
