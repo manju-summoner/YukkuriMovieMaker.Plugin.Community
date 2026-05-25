@@ -30,7 +30,6 @@ El binario se descarga y extrae automáticamente en el directorio de binarios en
 يتم تنزيل الثنائي وفك ضغطه تلقائياً في مجلد الثنائي عند التشغيل الأول.","Piper Plus adalah mesin TTS neural offline berkualitas tinggi.
 Tempatkan file model (.onnx / .onnx.json) di direktori model dan tekan Muat Ulang untuk menampilkan daftar pembicara.
 Biner diunduh dan diekstrak secara otomatis ke direktori biner saat pertama kali dijalankan.",
-HelpLink,,ヘルプ: Piper Plusの設定方法,Help: How to set up Piper Plus,帮助：Piper Plus设置方法,說明：如何設定 Piper Plus,도움말: Piper Plus 설정 방법,Ayuda: Cómo configurar Piper Plus,مساعدة: كيفية إعداد Piper Plus,Bantuan: Cara mengatur Piper Plus,
 DownloadingBinary,,バイナリをダウンロード中,Downloading binary,正在下载二进制文件,正在下載二進位文件,바이너리 다운로드 중,Descargando binario,جارٍ تنزيل الثنائي,Mengunduh biner,
 ExtractingBinary,,バイナリを展開中,Extracting binary,正在解压二进制文件,正在解壓縮二進位文件,바이너리 압축 해제 중,Extrayendo binario,جارٍ فك ضغط الثنائي,Mengekstrak biner,
 BinaryReady,,バイナリの準備完了,Binary is ready,二进制文件已准备就绪,二進位文件已準備就緒,바이너리 준비 완료,Binario listo,الثنائي جاهز,Biner siap,
