@@ -29,6 +29,7 @@ internal static class PiperModelScanner
                 var resolved = TryAutoRenameJson(onnxPath);
                 if (resolved is null)
                     continue;
+                canonicalJsonPath = resolved;
             }
 
             var info = TryLoad(onnxPath, canonicalJsonPath);
