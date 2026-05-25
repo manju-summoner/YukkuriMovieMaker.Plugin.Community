@@ -74,7 +74,15 @@ internal static class PiperUpdateChecker
 
             return new GitHubReleaseInfo(tag, url);
         }
-        catch
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (HttpRequestException)
+        {
+            return null;
+        }
+        catch (Newtonsoft.Json.JsonException)
         {
             return null;
         }
