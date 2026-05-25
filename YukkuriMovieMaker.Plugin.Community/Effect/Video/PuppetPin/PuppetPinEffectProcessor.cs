@@ -38,8 +38,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             var pins = item.Pins;
             var stiffness = (float)item.Stiffness.GetValue(frame, length, fps);
 
-            var samples = new List<PinSample>(pins.Count);
-            for (var i = 0; i < pins.Count; i++)
+            var pinCount = Math.Min(pins.Count, PuppetPinCustomEffect.MaxPins);
+            var samples = new List<PinSample>(pinCount);
+            for (var i = 0; i < pinCount; i++)
             {
                 var pin = pins[i];
                 var rx = (float)pin.RestX.GetValue(frame, length, fps);
@@ -48,8 +49,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
                 var oy = pin.IsEnabled ? (float)pin.OffsetY.GetValue(frame, length, fps) : 0f;
                 samples.Add(new PinSample(i, new Vector2(rx, ry), new Vector2(rx + ox, ry + oy), pin.IsEnabled));
             }
-
-            var pinCount = Math.Min(samples.Count, PuppetPinCustomEffect.MaxPins);
 
             var inputBounds = deviceContext is not null && input is not null
                 ? deviceContext.GetImageLocalBounds(input)
