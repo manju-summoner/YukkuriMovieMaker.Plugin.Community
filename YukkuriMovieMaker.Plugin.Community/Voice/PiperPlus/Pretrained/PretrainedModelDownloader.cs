@@ -26,7 +26,7 @@ internal static class PretrainedModelDownloader
         await DownloadFileAsync(client, definition.ConfigUrl, jsonPath,
             startFraction: 0.9, endFraction: 1.0, progress, cancellationToken);
 
-        progress?.Report((1.0, Texts.BinaryReady));
+        progress?.Report((1.0, Texts.LoadingModels));
     }
 
     static async Task DownloadFileAsync(
@@ -39,27 +39,38 @@ internal static class PretrainedModelDownloader
         CancellationToken cancellationToken)
     {
         var fileName = Path.GetFileName(destinationPath);
-        using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-
-        await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        await using var fileStream = File.Create(destinationPath);
-
-        var buffer = new byte[81920];
-        long downloaded = 0;
-        int read;
-        while ((read = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
+        var tempPath = destinationPath + ".tmp";
+        try
         {
-            await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
-            downloaded += read;
-            if (totalBytes > 0)
+            using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+
+            await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            await using var fileStream = File.Create(tempPath);
+
+            var buffer = new byte[81920];
+            long downloaded = 0;
+            int read;
+            while ((read = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
             {
-                var fileFraction = (double)downloaded / totalBytes;
-                var overall = startFraction + fileFraction * (endFraction - startFraction);
-                progress?.Report((overall, string.Format(Texts.DownloadingPretrainedModel, fileName)));
+                await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+                downloaded += read;
+                if (totalBytes > 0)
+                {
+                    var fileFraction = (double)downloaded / totalBytes;
+                    var overall = startFraction + fileFraction * (endFraction - startFraction);
+                    progress?.Report((overall, string.Format(Texts.DownloadingPretrainedModel, fileName)));
+                }
             }
         }
+        catch
+        {
+            try { File.Delete(tempPath); } catch { }
+            throw;
+        }
+
+        File.Move(tempPath, destinationPath, overwrite: true);
     }
 }
