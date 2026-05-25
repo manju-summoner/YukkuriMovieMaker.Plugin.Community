@@ -563,7 +563,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             lastPinXValues.Clear();
             lastPinYValues.Clear();
 
-            pins = ImmutableList.CreateRange(pins.Select(p => Json.Json.GetClone(p)!));
+            var selectionStates = pins.Select(p => (p.IsRestSelected, p.IsOffsetSelected)).ToArray();
+            var clonedPins = ImmutableList.CreateRange(pins.Select(p => Json.Json.GetClone(p)!));
+            for (var i = 0; i < clonedPins.Count && i < selectionStates.Length; i++)
+            {
+                clonedPins[i].IsRestSelected = selectionStates[i].IsRestSelected;
+                clonedPins[i].IsOffsetSelected = selectionStates[i].IsOffsetSelected;
+            }
+            pins = clonedPins;
             ItemProperties[0].SetValue(pins);
 
             EndEdit?.Invoke(this, EventArgs.Empty);
