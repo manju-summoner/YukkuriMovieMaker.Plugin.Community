@@ -1,14 +1,8 @@
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-public sealed class ConfirmationEventArgs : EventArgs
+public sealed class ConfirmationEventArgs(string message, string title) : EventArgs
 {
-    public string Message { get; }
-    public string Title { get; }
+    public string Message { get; } = message;
+    public string Title { get; } = title;
     public bool Confirmed { get; set; }
-
-    public ConfirmationEventArgs(string message, string title)
-    {
-        Message = message;
-        Title = title;
-    }
 }

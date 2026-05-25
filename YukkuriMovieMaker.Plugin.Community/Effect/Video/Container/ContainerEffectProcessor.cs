@@ -6,10 +6,10 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
+internal sealed class ContainerEffectProcessor(ContainerEffect effect, IGraphicsDevicesAndContext devices) : IVideoEffectProcessor
 {
-    private readonly ContainerEffect _effect;
-    private readonly IGraphicsDevicesAndContext _devices;
+    private readonly ContainerEffect _effect = effect;
+    private readonly IGraphicsDevicesAndContext _devices = devices;
     private readonly DisposeCollector _disposer = new();
     private readonly List<IVideoEffectProcessor> _processors = new();
     private ImmutableList<IVideoEffect> _currentEffects = [];
@@ -17,12 +17,6 @@ internal sealed class ContainerEffectProcessor : IVideoEffectProcessor
     private bool _disposed;
 
     public ID2D1Image Output { get; private set; } = null!;
-
-    public ContainerEffectProcessor(ContainerEffect effect, IGraphicsDevicesAndContext devices)
-    {
-        _effect = effect;
-        _devices = devices;
-    }
 
     public DrawDescription Update(EffectDescription effectDescription)
     {

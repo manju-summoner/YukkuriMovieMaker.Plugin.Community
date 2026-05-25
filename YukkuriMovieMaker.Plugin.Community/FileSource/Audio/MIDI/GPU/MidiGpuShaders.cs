@@ -4,16 +4,10 @@ namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.GPU;
 
 [ThreadGroupSize(DefaultThreadGroupSizes.X)]
 [GeneratedComputeShaderDescriptor]
-internal readonly partial struct LimiterShader : IComputeShader
+internal readonly partial struct LimiterShader(ReadWriteBuffer<float> buffer, float threshold) : IComputeShader
 {
-    private readonly ReadWriteBuffer<float> buffer;
-    private readonly float threshold;
-
-    public LimiterShader(ReadWriteBuffer<float> buffer, float threshold)
-    {
-        this.buffer = buffer;
-        this.threshold = threshold;
-    }
+    private readonly ReadWriteBuffer<float> buffer = buffer;
+    private readonly float threshold = threshold;
 
     public void Execute()
     {
@@ -24,18 +18,11 @@ internal readonly partial struct LimiterShader : IComputeShader
 
 [ThreadGroupSize(DefaultThreadGroupSizes.X)]
 [GeneratedComputeShaderDescriptor]
-internal readonly partial struct CompressionShader : IComputeShader
+internal readonly partial struct CompressionShader(ReadWriteBuffer<float> buffer, float threshold, float ratio) : IComputeShader
 {
-    private readonly ReadWriteBuffer<float> buffer;
-    private readonly float threshold;
-    private readonly float ratio;
-
-    public CompressionShader(ReadWriteBuffer<float> buffer, float threshold, float ratio)
-    {
-        this.buffer = buffer;
-        this.threshold = threshold;
-        this.ratio = ratio;
-    }
+    private readonly ReadWriteBuffer<float> buffer = buffer;
+    private readonly float threshold = threshold;
+    private readonly float ratio = ratio;
 
     public void Execute()
     {
@@ -53,22 +40,13 @@ internal readonly partial struct CompressionShader : IComputeShader
 
 [ThreadGroupSize(DefaultThreadGroupSizes.X)]
 [GeneratedComputeShaderDescriptor]
-internal readonly partial struct ReverbShader : IComputeShader
+internal readonly partial struct ReverbShader(ReadOnlyBuffer<float> input, ReadWriteBuffer<float> output, int delaySamples, float decay, int bufferLength) : IComputeShader
 {
-    private readonly ReadOnlyBuffer<float> input;
-    private readonly ReadWriteBuffer<float> output;
-    private readonly int delaySamples;
-    private readonly float decay;
-    private readonly int bufferLength;
-
-    public ReverbShader(ReadOnlyBuffer<float> input, ReadWriteBuffer<float> output, int delaySamples, float decay, int bufferLength)
-    {
-        this.input = input;
-        this.output = output;
-        this.delaySamples = delaySamples;
-        this.decay = decay;
-        this.bufferLength = bufferLength;
-    }
+    private readonly ReadOnlyBuffer<float> input = input;
+    private readonly ReadWriteBuffer<float> output = output;
+    private readonly int delaySamples = delaySamples;
+    private readonly float decay = decay;
+    private readonly int bufferLength = bufferLength;
 
     public void Execute()
     {

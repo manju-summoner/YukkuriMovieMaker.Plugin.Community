@@ -6,9 +6,9 @@ using YukkuriMovieMaker.Player.Video.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputMapComposite
 {
-    internal sealed class OutputMapCompositeEffectProcessor : VideoEffectProcessorBase
+    internal sealed class OutputMapCompositeEffectProcessor(IGraphicsDevicesAndContext devices, OutputMapCompositeEffect item) : VideoEffectProcessorBase(devices)
     {
-        private readonly OutputMapCompositeEffect _item;
+        private readonly OutputMapCompositeEffect _item = item;
 
         private OutputMapCompositeCustomEffect? _lerpEffect;
         private D2DEffects.AffineTransform2D? _sink;
@@ -17,12 +17,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputMapComposite
         private int _mapType;
         private ID2D1Image? _lastTargetImage;
         private ID2D1Image? _lastMapImage;
-
-        public OutputMapCompositeEffectProcessor(IGraphicsDevicesAndContext devices, OutputMapCompositeEffect item)
-            : base(devices)
-        {
-            _item = item;
-        }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {

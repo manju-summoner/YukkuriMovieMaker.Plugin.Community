@@ -10,10 +10,10 @@ using YukkuriMovieMaker.Player.Video.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
 {
-    internal sealed class TrimMarginEffectProcessor : VideoEffectProcessorBase
+    internal sealed class TrimMarginEffectProcessor(IGraphicsDevicesAndContext devices, TrimMarginEffect item) : VideoEffectProcessorBase(devices)
     {
-        readonly IGraphicsDevicesAndContext devices;
-        readonly TrimMarginEffect item;
+        readonly IGraphicsDevicesAndContext devices = devices;
+        readonly TrimMarginEffect item = item;
 
         Crop? cropEffect;
         AffineTransform2D? transformEffect;
@@ -27,12 +27,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.TrimMargin
         bool isFirst = true;
         float left, top, right, bottom;
         bool center;
-
-        public TrimMarginEffectProcessor(IGraphicsDevicesAndContext devices, TrimMarginEffect item) : base(devices)
-        {
-            this.devices = devices;
-            this.item = item;
-        }
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {

@@ -2,14 +2,9 @@
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
-    internal class ToolRecordingStartWorkflowService
+    internal class ToolRecordingStartWorkflowService(RecordingService recordingService)
     {
-        private readonly RecordingService recordingService;
-
-        public ToolRecordingStartWorkflowService(RecordingService recordingService)
-        {
-            this.recordingService = recordingService;
-        }
+        private readonly RecordingService recordingService = recordingService;
 
         public ToolRecordingStartResult Execute(string? selectedDeviceId)
         {

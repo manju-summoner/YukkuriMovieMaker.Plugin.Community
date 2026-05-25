@@ -2,14 +2,9 @@ using System.Threading.Tasks;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
-    internal class ToolRecordingStopWorkflowService
+    internal class ToolRecordingStopWorkflowService(RecordingService recordingService)
     {
-        private readonly RecordingService recordingService;
-
-        public ToolRecordingStopWorkflowService(RecordingService recordingService)
-        {
-            this.recordingService = recordingService;
-        }
+        private readonly RecordingService recordingService = recordingService;
 
         public async Task<ToolRecordingStopResult> ExecuteAsync()
         {

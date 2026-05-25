@@ -1,10 +1,7 @@
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-public sealed class EffectTabStashViewModel : EffectTabBaseViewModel
+public sealed class EffectTabStashViewModel(EffectTab model) : EffectTabBaseViewModel(model)
 {
-    public EffectTabStashViewModel(EffectTab model) : base(model)
-    {
-    }
 
     /// <summary>
     /// メニュー表示用の文字列。「タブ名: 先頭エフェクト名 (+他N件)」形式。

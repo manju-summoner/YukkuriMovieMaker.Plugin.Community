@@ -6,14 +6,9 @@ using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Container;
 
-public sealed class EffectTabTemplateViewModel : Bindable
+public sealed class EffectTabTemplateViewModel(EffectTemplate<IVideoEffect> model) : Bindable
 {
-    public EffectTemplate<IVideoEffect> Model { get; }
-
-    public EffectTabTemplateViewModel(EffectTemplate<IVideoEffect> model)
-    {
-        Model = model;
-    }
+    public EffectTemplate<IVideoEffect> Model { get; } = model;
 
     public string Name
     {

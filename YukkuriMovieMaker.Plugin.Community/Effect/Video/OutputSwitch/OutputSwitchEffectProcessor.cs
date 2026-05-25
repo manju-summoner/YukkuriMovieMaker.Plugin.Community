@@ -6,19 +6,14 @@ using YukkuriMovieMaker.Player.Video.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputSwitch
 {
-    internal class OutputSwitchEffectProcessor : VideoEffectProcessorBase
+    internal class OutputSwitchEffectProcessor(IGraphicsDevicesAndContext devices, OutputSwitchEffect item) : VideoEffectProcessorBase(devices)
     {
-        readonly OutputSwitchEffect item;
+        readonly OutputSwitchEffect item = item;
 
         D2DEffects.AffineTransform2D? sink;
 
         bool isFirst = true;
         ID2D1Image? lastSinkInput;
-
-        public OutputSwitchEffectProcessor(IGraphicsDevicesAndContext devices, OutputSwitchEffect item) : base(devices)
-        {
-            this.item = item;
-        }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {

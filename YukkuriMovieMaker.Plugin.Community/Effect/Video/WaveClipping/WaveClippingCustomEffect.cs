@@ -6,7 +6,7 @@ using YukkuriMovieMaker.Plugin.Community.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
 {
-    public sealed class WaveClippingCustomEffect : D2D1CustomShaderEffectBase
+    public sealed class WaveClippingCustomEffect(IGraphicsDevicesAndContext devices) : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices))
     {
         private enum PropertyIndex
         {
@@ -44,9 +44,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         public float UseRandom { set => SetValue((int)PropertyIndex.UseRandom, value); }
 
         internal void ClearInput() => SetInput(0, null, true);
-
-        public WaveClippingCustomEffect(IGraphicsDevicesAndContext devices)
-            : base(Create<EffectImpl>(devices)) { }
 
         [CustomEffect(1)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>

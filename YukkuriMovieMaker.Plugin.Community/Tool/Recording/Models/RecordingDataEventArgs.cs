@@ -2,14 +2,9 @@
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models
 {
-    public class RecordingDataEventArgs : EventArgs
+    public class RecordingDataEventArgs(double volume) : EventArgs
     {
-        public RecordingDataEventArgs(double volume)
-        {
-            Volume = volume;
-        }
-
-        public double Volume { get; }
+        public double Volume { get; } = volume;
     }
 }
 

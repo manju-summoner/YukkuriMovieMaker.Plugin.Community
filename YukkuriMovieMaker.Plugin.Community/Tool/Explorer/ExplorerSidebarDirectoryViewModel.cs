@@ -8,13 +8,13 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
-    internal class ExplorerSidebarDirectoryViewModel : Bindable, IExplorerSelectableItem
+    internal class ExplorerSidebarDirectoryViewModel(string path, string name, int level, bool hasChild) : Bindable, IExplorerSelectableItem
     {
-        string path;
-        string name;
-        readonly int level;
+        string path = path;
+        string name = name;
+        readonly int level = level;
         bool isExpanded;
-        bool hasDummyChild;
+        bool hasDummyChild = hasChild;
         bool isSelected;
         CancellationTokenSource? loadIconCts;
         ImageSource? icon;
@@ -88,14 +88,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             if (isExpanded) return;
             isExpanded = true;
             OnPropertyChanged(nameof(IsExpanded));
-        }
-
-        public ExplorerSidebarDirectoryViewModel(string path, string name, int level, bool hasChild)
-        {
-            this.path = path;
-            this.name = name;
-            this.level = level;
-            this.hasDummyChild = hasChild;
         }
 
         public void UpdatePathAndName(string newPath)

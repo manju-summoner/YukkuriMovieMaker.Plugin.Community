@@ -5,23 +5,16 @@ using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Models;
 
 namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Rendering;
 
-internal sealed class GpuAudioProcessor : IGpuAudioProcessor
+internal sealed class GpuAudioProcessor(EffectsSettings effects, int sampleRate) : IGpuAudioProcessor
 {
-    private readonly EffectsSettings _effects;
-    private readonly int _sampleRate;
-    private GraphicsDevice? _device;
+    private readonly EffectsSettings _effects = effects;
+    private readonly int _sampleRate = sampleRate;
+    private GraphicsDevice? _device = TryGetDevice();
     private ReadWriteBuffer<float>? _gpuBuffer;
     private ReadOnlyBuffer<float>? _reverbInputBuffer;
     private bool _disposed;
 
     public bool IsAvailable => _device is not null;
-
-    public GpuAudioProcessor(EffectsSettings effects, int sampleRate)
-    {
-        _effects = effects;
-        _sampleRate = sampleRate;
-        _device = TryGetDevice();
-    }
 
     private static GraphicsDevice? TryGetDevice()
     {

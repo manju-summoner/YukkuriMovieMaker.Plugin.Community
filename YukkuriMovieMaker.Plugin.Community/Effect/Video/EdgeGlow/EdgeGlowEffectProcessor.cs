@@ -11,13 +11,13 @@ using YukkuriMovieMaker.Player;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
 {
-    internal sealed class EdgeGlowEffectProcessor : VideoEffectProcessorBase
+    internal sealed class EdgeGlowEffectProcessor(IGraphicsDevicesAndContext devices, EdgeGlowEffect item) : VideoEffectProcessorBase(devices)
     {
         private const float WideRadiusMultiplier = 4.0f;
         private const float WideLayerOpacity = 0.5f;
         private const float MaxGaussianBlurStandardDeviation = 250.0f;
 
-        private readonly EdgeGlowEffect _item;
+        private readonly EdgeGlowEffect _item = item;
 
         private EdgeGlowCustomEffect? _glowEffect;
         private D2DEffects.GaussianBlur? _coreBlur;
@@ -34,11 +34,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeGlow
         private EdgeGlowColorSource _colorSource;
         private Color _glowColor;
         private Blend _blendMode;
-
-        public EdgeGlowEffectProcessor(IGraphicsDevicesAndContext devices, EdgeGlowEffect item) : base(devices)
-        {
-            _item = item;
-        }
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
