@@ -22,9 +22,13 @@ internal static class PiperUpdateChecker
             if (checked_)
                 return cachedResult;
 
-            checked_ = true;
-            cachedResult = await FetchLatestAsync(cancellationToken);
-            return cachedResult;
+            var result = await FetchLatestAsync(cancellationToken);
+            if (result is not null)
+            {
+                cachedResult = result;
+                checked_ = true;
+            }
+            return result;
         }
         finally
         {
