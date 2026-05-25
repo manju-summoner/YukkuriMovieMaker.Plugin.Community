@@ -66,14 +66,20 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         private set => Set(ref models, value);
     }
 
-    public IReadOnlyList<PretrainedModelEntry> PretrainedModels { get; } =
-        PretrainedModelCatalog.All.Select(d => new PretrainedModelEntry(d)).ToList();
+    public IReadOnlyList<PretrainedModelEntry> PretrainedModels { get; }
 
     public ICommand RefreshCommand { get; }
     public ICommand UpdateCommand { get; }
 
     public PiperPlusSettingsViewModel()
     {
+        PretrainedModels = PretrainedModelCatalog.All
+            .Select(d => new PretrainedModelEntry(d))
+            .ToList();
+
+        foreach (var entry in PretrainedModels)
+            entry.DownloadCompleted += OnPretrainedDownloadCompleted;
+
         RefreshCommand = new ActionCommand(_ => !IsLoading, async _ => await RefreshAsync());
         UpdateCommand = new ActionCommand(_ => !IsLoading && HasUpdate, async _ => await UpdateBinaryAsync());
         BuildModelsFromSettings();
@@ -84,6 +90,29 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     {
         Models = new ObservableCollection<PiperModelViewModel>(
             PiperPlusSettings.Default.SavedModels.Select(s => new PiperModelViewModel(s)));
+    }
+
+    async void OnPretrainedDownloadCompleted(object? sender, EventArgs e)
+    {
+        if (IsLoading)
+            return;
+
+        IsLoading = true;
+        try
+        {
+            await ReloadModelsAsync();
+        }
+        catch (Exception ex)
+        {
+            StatusText = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+            IsProgressVisible = false;
+            ProgressValue = 0;
+            ProgressMessage = string.Empty;
+        }
     }
 
     async Task RefreshAsync()

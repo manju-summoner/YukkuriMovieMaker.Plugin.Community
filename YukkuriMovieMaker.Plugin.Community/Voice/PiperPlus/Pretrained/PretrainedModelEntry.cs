@@ -43,6 +43,8 @@ internal sealed class PretrainedModelEntry : Bindable
 
     public ICommand DownloadCommand { get; }
 
+    public event EventHandler? DownloadCompleted;
+
     public PretrainedModelEntry(PretrainedModelDefinition definition)
     {
         this.definition = definition;
@@ -74,6 +76,7 @@ internal sealed class PretrainedModelEntry : Bindable
 
             await PretrainedModelDownloader.DownloadAsync(definition, progress);
             RefreshDownloadedState();
+            DownloadCompleted?.Invoke(this, EventArgs.Empty);
         }
         catch (Exception ex)
         {
