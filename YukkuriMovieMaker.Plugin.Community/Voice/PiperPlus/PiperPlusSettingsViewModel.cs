@@ -12,7 +12,8 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     double progressValue;
     string progressMessage = string.Empty;
     bool isProgressVisible;
-    string statusText = string.Empty;
+    string versionText = string.Empty;
+    string speakerCountText = string.Empty;
     bool hasUpdate;
     string updateDescription = string.Empty;
     string pendingVersion = string.Empty;
@@ -42,10 +43,16 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         private set => Set(ref isProgressVisible, value);
     }
 
-    public string StatusText
+    public string VersionText
     {
-        get => statusText;
-        private set => Set(ref statusText, value);
+        get => versionText;
+        private set => Set(ref versionText, value);
+    }
+
+    public string SpeakerCountText
+    {
+        get => speakerCountText;
+        private set => Set(ref speakerCountText, value);
     }
 
     public bool HasUpdate
@@ -83,7 +90,7 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         RefreshCommand = new ActionCommand(_ => !IsLoading, async _ => await RefreshAsync());
         UpdateCommand = new ActionCommand(_ => !IsLoading && HasUpdate, async _ => await UpdateBinaryAsync());
         BuildModelsFromSettings();
-        UpdateStatusText();
+        UpdateVersionAndSpeakerText();
     }
 
     void BuildModelsFromSettings()
@@ -113,7 +120,8 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
                 var version = release?.TagName;
                 if (string.IsNullOrEmpty(version))
                 {
-                    StatusText = Texts.BinaryNotFound;
+                    VersionText = Texts.BinaryNotFound;
+                    SpeakerCountText = string.Empty;
                     return;
                 }
                 await InstallVersionAsync(version);
@@ -147,7 +155,8 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         }
         catch (Exception ex)
         {
-            StatusText = ex.Message;
+            VersionText = ex.Message;
+            SpeakerCountText = string.Empty;
         }
         finally
         {
@@ -167,7 +176,7 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         BuildModelsFromSettings();
         foreach (var entry in PretrainedModels)
             entry.RefreshDownloadedState();
-        UpdateStatusText();
+        UpdateVersionAndSpeakerText();
     }
 
     async Task InstallVersionAsync(string version)
@@ -208,18 +217,18 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         }
     }
 
-    void UpdateStatusText()
+    void UpdateVersionAndSpeakerText()
     {
         var installed = PiperBinaryResource.InstalledVersion;
         if (!PiperBinaryResource.IsReady)
         {
-            StatusText = Texts.BinaryNotFound;
+            VersionText = Texts.BinaryNotFound;
+            SpeakerCountText = string.Empty;
             return;
         }
 
+        VersionText = installed ?? string.Empty;
         var speakerCount = PiperPlusSettings.Default.Speakers.Count;
-        StatusText = installed is not null
-            ? $"{installed}  |  {string.Format(Texts.SpeakerCount, speakerCount)}"
-            : string.Format(Texts.SpeakerCount, speakerCount);
+        SpeakerCountText = string.Format(Texts.SpeakerCount, speakerCount);
     }
 }
