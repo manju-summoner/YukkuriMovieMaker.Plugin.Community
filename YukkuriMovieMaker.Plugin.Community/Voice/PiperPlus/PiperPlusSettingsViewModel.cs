@@ -91,6 +91,15 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         UpdateCommand = new ActionCommand(_ => !IsLoading && HasUpdate, async _ => await UpdateBinaryAsync());
         BuildModelsFromSettings();
         UpdateVersionAndSpeakerText();
+        ApplyUpdateState(PiperUpdateChecker.CachedRelease);
+
+        _ = InitializeUpdateStateAsync();
+    }
+
+    async Task InitializeUpdateStateAsync()
+    {
+        var release = await PiperUpdateChecker.GetLatestReleaseAsync();
+        ApplyUpdateState(release);
     }
 
     void BuildModelsFromSettings()
@@ -207,7 +216,7 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
 
         if (needsUpdate)
         {
-            UpdateDescription = $"{Texts.UpdateAvailable}{release.TagName}";
+            UpdateDescription = $"{Texts.UpdateAvailable} {release.TagName}";
             HasUpdate = true;
         }
         else
