@@ -4,11 +4,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     public enum PuppetDeformationEditorPointsSync
     {
-        [Display(Name = nameof(Texts.PuppetPinEditorSyncModeNoneName), Description = nameof(Texts.PuppetPinEditorSyncModeNoneDesc), ResourceType = typeof(Texts))]
+        [Display(Name = nameof(Texts.PuppetDeformationEditorSyncModeNoneName), Description = nameof(Texts.PuppetDeformationEditorSyncModeNoneDesc), ResourceType = typeof(Texts))]
         None,
-        [Display(Name = nameof(Texts.PuppetPinEditorSyncModeDistanceName), Description = nameof(Texts.PuppetPinEditorSyncModeDistanceDesc), ResourceType = typeof(Texts))]
+        [Display(Name = nameof(Texts.PuppetDeformationEditorSyncModeDistanceName), Description = nameof(Texts.PuppetDeformationEditorSyncModeDistanceDesc), ResourceType = typeof(Texts))]
         Distance,
-        [Display(Name = nameof(Texts.PuppetPinEditorSyncModeParallelName), Description = nameof(Texts.PuppetPinEditorSyncModeParallelDesc), ResourceType = typeof(Texts))]
+        [Display(Name = nameof(Texts.PuppetDeformationEditorSyncModeParallelName), Description = nameof(Texts.PuppetDeformationEditorSyncModeParallelDesc), ResourceType = typeof(Texts))]
         Parallel
     }
 }

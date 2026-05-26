@@ -122,9 +122,9 @@
                 <ColumnDefinition Width="26"/>
                 <ColumnDefinition Width="26"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Content="{x:Static local:Texts.PuppetPinListAddPin}" Command="{Binding AddPinCommand}"/>
-            <Button Grid.Column="1" Padding="6" Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" ToolTip="{x:Static local:Texts.PuppetPinListRemovePin}" Command="{Binding RemovePinCommand}"/>
-            <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.Autorenew}}" ToolTip="{x:Static local:Texts.PuppetPinListResetMessage}" Command="{Binding ResetCommand}"/>
+            <Button Grid.Column="0" Content="{x:Static local:Texts.PuppetDeformationListAddPin}" Command="{Binding AddPinCommand}"/>
+            <Button Grid.Column="1" Padding="6" Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" ToolTip="{x:Static local:Texts.PuppetDeformationListRemovePin}" Command="{Binding RemovePinCommand}"/>
+            <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.Autorenew}}" ToolTip="{x:Static local:Texts.PuppetDeformationListResetMessage}" Command="{Binding ResetCommand}"/>
         </Grid>
         <Grid Grid.Row="2" ClipToBounds="True">
             <c:PropertiesEditor x:Name="propertiesEditor" Margin="0,-22,0,0" Target="{Binding SelectedTarget}">

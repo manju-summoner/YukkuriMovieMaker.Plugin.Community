@@ -100,7 +100,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
             ResetCommand = new ActionCommand(_ => pins.Count > 0, _ =>
             {
-                if (MessageBox.Show(Texts.PuppetPinListResetMessage, Texts.PuppetPinListResetTitle, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
+                if (MessageBox.Show(Texts.PuppetDeformationListResetMessage, Texts.PuppetDeformationListResetTitle, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
                     return;
                 InvokeBeginEdit();
                 foreach (var pin in pins)
