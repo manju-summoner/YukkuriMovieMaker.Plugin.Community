@@ -7,12 +7,9 @@ using System.Numerics;
 using System.Windows;
 using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
-using YukkuriMovieMaker.Controls;
-using YukkuriMovieMaker.ItemEditor;
-using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.ViewModels;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     internal sealed class PuppetPinListEditorViewModel : Bindable, IDisposable, IPropertyEditorControl2, IPropertyEditorControl, INotifyPropertyChanged
     {

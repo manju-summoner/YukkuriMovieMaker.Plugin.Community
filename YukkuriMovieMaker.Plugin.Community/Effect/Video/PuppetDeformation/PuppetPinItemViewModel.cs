@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     internal sealed class PuppetPinItemViewModel : Bindable, IDisposable
     {

@@ -3,7 +3,7 @@ using System.Windows.Data;
 using System.Windows.Controls;
 using YukkuriMovieMaker.ItemEditor;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     [AttributeUsage(AttributeTargets.Property)]
     internal sealed class PuppetPinRestVisibleAttribute : Attribute, ICustomVisibilityAttribute2

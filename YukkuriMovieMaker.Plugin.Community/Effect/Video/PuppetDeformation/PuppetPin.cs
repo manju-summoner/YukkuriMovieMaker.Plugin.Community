@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     public class PuppetPin : Animatable
     {

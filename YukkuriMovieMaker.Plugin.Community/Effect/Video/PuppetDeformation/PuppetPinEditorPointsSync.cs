@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     public enum PuppetPinEditorPointsSync
     {

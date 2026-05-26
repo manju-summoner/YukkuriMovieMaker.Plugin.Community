@@ -5,7 +5,7 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Community.Commons;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     internal sealed class PuppetPinCustomEffect(IGraphicsDevicesAndContext devices) : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices))
     {
@@ -68,7 +68,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
             [CustomEffectProperty(PropertyType.Float, (int)Properties.TightLocalBottom)]
             public float TightLocalBottom { get => _tightLocalBottom; set => _tightLocalBottom = Math.Clamp(value, -MaxLocalExtent, MaxLocalExtent); }
 
-            public EffectImpl() : base(ShaderResourceUri.Get("PuppetPin"))
+            public EffectImpl() : base(ShaderResourceUri.Get("PuppetDeformation"))
             {
             }
 

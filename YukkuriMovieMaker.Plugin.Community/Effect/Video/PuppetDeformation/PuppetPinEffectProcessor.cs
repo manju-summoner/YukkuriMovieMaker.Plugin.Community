@@ -9,7 +9,7 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     internal sealed class PuppetPinEffectProcessor(IGraphicsDevicesAndContext devices, PuppetPinEffect item) : VideoEffectProcessorBase(devices)
     {

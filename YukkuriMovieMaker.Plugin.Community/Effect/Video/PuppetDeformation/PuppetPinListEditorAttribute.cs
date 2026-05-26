@@ -1,7 +1,7 @@
 using System.Windows;
 using YukkuriMovieMaker.Commons;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     internal class PuppetPinListEditorAttribute : PropertyEditorAttribute2
     {

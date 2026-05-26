@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Effects;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     [VideoEffect(nameof(Texts.PuppetPinEffectName), [VideoEffectCategories.Filtering], [nameof(Texts.TagPuppet), nameof(Texts.TagPin), nameof(Texts.TagWarp), nameof(Texts.TagDeform)], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public sealed class PuppetPinEffect : VideoEffectBase

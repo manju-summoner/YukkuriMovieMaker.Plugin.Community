@@ -2,9 +2,8 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using YukkuriMovieMaker.Commons;
-using YukkuriMovieMaker.ItemEditor;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetPin
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     public partial class PuppetPinListEditor : UserControl, IPropertyEditorControl2, IPropertyEditorControl
     {
