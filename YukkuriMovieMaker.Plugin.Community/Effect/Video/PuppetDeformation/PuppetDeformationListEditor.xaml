@@ -59,7 +59,7 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.Resources>
-                    <DataTemplate DataType="{x:Type local:PuppetPinItemViewModel}">
+                    <DataTemplate DataType="{x:Type local:PuppetDeformationItemViewModel}">
                         <Viewbox StretchDirection="DownOnly">
                             <Grid Width="48" Height="48">
                                 <Grid RenderTransformOrigin="0.5,0.5">

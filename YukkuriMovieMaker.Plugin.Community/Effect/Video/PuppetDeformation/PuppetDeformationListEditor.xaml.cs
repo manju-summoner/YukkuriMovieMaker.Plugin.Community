@@ -20,13 +20,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void PuppetPinListEditor_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (e.OldValue is PuppetPinListEditorViewModel oldVm)
+            if (e.OldValue is PuppetDeformationListEditorViewModel oldVm)
             {
                 oldVm.BeginEdit -= OnBeginEdit;
                 oldVm.EndEdit -= OnEndEdit;
                 oldVm.Dispose();
             }
-            if (e.NewValue is PuppetPinListEditorViewModel newVm)
+            if (e.NewValue is PuppetDeformationListEditorViewModel newVm)
             {
                 newVm.BeginEdit += OnBeginEdit;
                 newVm.EndEdit += OnEndEdit;
@@ -39,7 +39,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         public void SetEditorInfo(IEditorInfo frame)
         {
-            if (DataContext is PuppetPinListEditorViewModel vm)
+            if (DataContext is PuppetDeformationListEditorViewModel vm)
             {
                 vm.SetEditorInfo(frame);
             }

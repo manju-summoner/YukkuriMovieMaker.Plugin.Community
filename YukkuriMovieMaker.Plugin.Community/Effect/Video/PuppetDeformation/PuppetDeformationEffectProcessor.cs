@@ -11,12 +11,12 @@ using YukkuriMovieMaker.Player.Video.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
-    internal sealed class PuppetPinEffectProcessor(IGraphicsDevicesAndContext devices, PuppetPinEffect item) : VideoEffectProcessorBase(devices)
+    internal sealed class PuppetDeformationEffectProcessor(IGraphicsDevicesAndContext devices, PuppetDeformationEffect item) : VideoEffectProcessorBase(devices)
     {
-        readonly PuppetPinEffect item = item;
-        readonly float[] pinDataBuffer = new float[PuppetPinCustomEffect.MaxPins * 4];
+        readonly PuppetDeformationEffect item = item;
+        readonly float[] pinDataBuffer = new float[PuppetDeformationCustomEffect.MaxPins * 4];
 
-        PuppetPinCustomEffect? effect;
+        PuppetDeformationCustomEffect? effect;
         ID2D1DeviceContext? deviceContext;
         PinGpuCache? gpuCache;
         ImmutableList<VideoEffectController> cachedControllers = ImmutableList<VideoEffectController>.Empty;
@@ -39,7 +39,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var pins = item.Pins;
             var stiffness = (float)item.Stiffness.GetValue(frame, length, fps);
 
-            var pinCount = Math.Min(pins.Count, PuppetPinCustomEffect.MaxPins);
+            var pinCount = Math.Min(pins.Count, PuppetDeformationCustomEffect.MaxPins);
             var samples = new List<PinSample>(pinCount);
             for (var i = 0; i < pinCount; i++)
             {
@@ -112,7 +112,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             float imageHeight,
             List<PinSample> samples)
         {
-            var maxPins = PuppetPinCustomEffect.MaxPins;
+            var maxPins = PuppetDeformationCustomEffect.MaxPins;
 
             for (var i = 0; i < pinCount; i++)
             {
@@ -220,7 +220,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             return controllers;
         }
 
-        void SelectRestExclusively(PuppetPin target)
+        void SelectRestExclusively(PuppetDeformation target)
         {
             foreach (var p in item.Pins)
             {
@@ -229,7 +229,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
         }
 
-        void SelectOffsetExclusively(PuppetPin target)
+        void SelectOffsetExclusively(PuppetDeformation target)
         {
             foreach (var p in item.Pins)
             {
@@ -241,7 +241,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
             deviceContext = devices.DeviceContext;
-            effect = new PuppetPinCustomEffect(devices);
+            effect = new PuppetDeformationCustomEffect(devices);
             if (!effect.IsEnabled)
             {
                 effect.Dispose();

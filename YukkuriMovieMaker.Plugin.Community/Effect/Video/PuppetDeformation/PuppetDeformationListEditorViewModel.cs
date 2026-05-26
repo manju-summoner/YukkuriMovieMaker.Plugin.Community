@@ -11,17 +11,17 @@ using YukkuriMovieMaker.ViewModels;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
-    internal sealed class PuppetPinListEditorViewModel : Bindable, IDisposable, IPropertyEditorControl2, IPropertyEditorControl, INotifyPropertyChanged
+    internal sealed class PuppetDeformationListEditorViewModel : Bindable, IDisposable, IPropertyEditorControl2, IPropertyEditorControl, INotifyPropertyChanged
     {
         readonly ICommand selectRestCommand;
         readonly ICommand selectOffsetCommand;
 
-        ImmutableList<PuppetPin> pins;
-        ImmutableList<PuppetPinItemViewModel?> items = ImmutableList<PuppetPinItemViewModel?>.Empty;
-        ImmutableList<PuppetPinItemViewModel> allViewModels = ImmutableList<PuppetPinItemViewModel>.Empty;
+        ImmutableList<PuppetDeformation> pins;
+        ImmutableList<PuppetDeformationItemViewModel?> items = ImmutableList<PuppetDeformationItemViewModel?>.Empty;
+        ImmutableList<PuppetDeformationItemViewModel> allViewModels = ImmutableList<PuppetDeformationItemViewModel>.Empty;
 
         object? selectedTarget;
-        PuppetPinItemViewModel? selectedItem;
+        PuppetDeformationItemViewModel? selectedItem;
         IEditorInfo? editorInfo;
         int columns = 1;
         int rows = 1;
@@ -37,8 +37,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         double oldXSpan;
         double oldYSpan;
 
-        readonly Dictionary<PuppetPin, double[]> lastPinXValues = new();
-        readonly Dictionary<PuppetPin, double[]> lastPinYValues = new();
+        readonly Dictionary<PuppetDeformation, double[]> lastPinXValues = new();
+        readonly Dictionary<PuppetDeformation, double[]> lastPinYValues = new();
 
         public IEditorInfo? EditorInfo
         {
@@ -53,7 +53,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         public object[] VerticalLines { get => verticalLines; private set => Set(ref verticalLines, value); }
         public object[] HorizontalLines { get => horizontalLines; private set => Set(ref horizontalLines, value); }
 
-        public ImmutableList<PuppetPinItemViewModel?> Items { get => items; private set => Set(ref items, value); }
+        public ImmutableList<PuppetDeformationItemViewModel?> Items { get => items; private set => Set(ref items, value); }
         public object? SelectedTarget { get => selectedTarget; set => Set(ref selectedTarget, value); }
 
         public ICommand AddPinCommand { get; }
@@ -64,18 +64,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         public MessageBoxViewModel MessageBox { get; } = new MessageBoxViewModel();
 
-        public bool CanAddPin => pins.Count < PuppetPinCustomEffect.MaxPins;
+        public bool CanAddPin => pins.Count < PuppetDeformationCustomEffect.MaxPins;
 
         public event EventHandler? BeginEdit;
         public event EventHandler? EndEdit;
 
         public ItemProperty[] ItemProperties { get; internal set; }
 
-        public PuppetPinListEditorViewModel(ItemProperty[] itemProperties)
+        public PuppetDeformationListEditorViewModel(ItemProperty[] itemProperties)
         {
             ItemProperties = itemProperties;
 
-            var effect = (PuppetPinEffect)itemProperties[0].PropertyOwner;
+            var effect = (PuppetDeformationEffect)itemProperties[0].PropertyOwner;
             pins = effect.Pins;
             effect.PropertyChanged += Effect_PropertyChanged;
 
@@ -85,7 +85,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             AddPinCommand = new ActionCommand(_ => CanAddPin, _ =>
             {
                 InvokeBeginEdit();
-                pins = pins.Add(PuppetPin.Create(0, 0));
+                pins = pins.Add(PuppetDeformation.Create(0, 0));
                 InvokeEndEdit();
             });
 
@@ -119,7 +119,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void HandleSelect(object? arg, bool isOffset)
         {
-            if (arg is not PuppetPinItemViewModel vm) return;
+            if (arg is not PuppetDeformationItemViewModel vm) return;
 
             isMutatingSelection = true;
             try
@@ -155,7 +155,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
         }
 
-        void SelectExclusively(PuppetPinItemViewModel target, bool isOffset)
+        void SelectExclusively(PuppetDeformationItemViewModel target, bool isOffset)
         {
             foreach (var item in allViewModels)
             {
@@ -175,7 +175,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
         }
 
-        void ExtendRangeSelection(PuppetPinItemViewModel target, bool isOffset)
+        void ExtendRangeSelection(PuppetDeformationItemViewModel target, bool isOffset)
         {
             var selectedIndices = allViewModels
                 .Select((x, i) => (x, i))
@@ -215,23 +215,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void Effect_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(PuppetPinEffect.Pins)) return;
+            if (e.PropertyName != nameof(PuppetDeformationEffect.Pins)) return;
 
-            var effect = (PuppetPinEffect)ItemProperties[0].PropertyOwner;
+            var effect = (PuppetDeformationEffect)ItemProperties[0].PropertyOwner;
             if (pins == effect.Pins) return;
 
-            pins = effect.Pins ?? ImmutableList<PuppetPin>.Empty;
+            pins = effect.Pins ?? ImmutableList<PuppetDeformation>.Empty;
             RebuildItems();
             OnPropertyChanged(nameof(CanAddPin));
         }
 
         void RebuildItems()
         {
-            var newAllViewModels = new List<PuppetPinItemViewModel>(pins.Count);
+            var newAllViewModels = new List<PuppetDeformationItemViewModel>(pins.Count);
             foreach (var pin in pins)
             {
                 var vm = allViewModels.FirstOrDefault(x => x.Model == pin)
-                         ?? new PuppetPinItemViewModel(pin, selectRestCommand, selectOffsetCommand);
+                         ?? new PuppetDeformationItemViewModel(pin, selectRestCommand, selectOffsetCommand);
                 newAllViewModels.Add(vm);
             }
 
@@ -265,17 +265,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             UpdateSelection();
         }
 
-        readonly struct GridLayout(int columns, int rows, PuppetPinItemViewModel?[] cells)
+        readonly struct GridLayout(int columns, int rows, PuppetDeformationItemViewModel?[] cells)
         {
             public int Columns { get; } = columns;
             public int Rows { get; } = rows;
-            public PuppetPinItemViewModel?[] Cells { get; } = cells;
+            public PuppetDeformationItemViewModel?[] Cells { get; } = cells;
         }
 
-        static GridLayout ComputeGridLayout(List<PuppetPinItemViewModel> viewModels)
+        static GridLayout ComputeGridLayout(List<PuppetDeformationItemViewModel> viewModels)
         {
             if (viewModels.Count == 0)
-                return new GridLayout(1, 1, new PuppetPinItemViewModel?[1]);
+                return new GridLayout(1, 1, new PuppetDeformationItemViewModel?[1]);
 
             var xs = viewModels.Select(v => v.Model.RestX.Values.FirstOrDefault()?.Value ?? 0.0).ToArray();
             var ys = viewModels.Select(v => v.Model.RestY.Values.FirstOrDefault()?.Value ?? 0.0).ToArray();
@@ -287,7 +287,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var colsAssign = ClusterCoordinates(xs, tolerance, out var colCount);
             var rowsAssign = ClusterCoordinates(ys, tolerance, out var rowCount);
 
-            var cells = new PuppetPinItemViewModel?[rowCount * colCount];
+            var cells = new PuppetDeformationItemViewModel?[rowCount * colCount];
             var pending = new List<(int Index, int Row, int Col)>();
 
             for (var i = 0; i < viewModels.Count; i++)
@@ -310,7 +310,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     continue;
                 }
 
-                var expanded = new PuppetPinItemViewModel?[(rowCount + 1) * colCount];
+                var expanded = new PuppetDeformationItemViewModel?[(rowCount + 1) * colCount];
                 Array.Copy(cells, expanded, cells.Length);
                 cells = expanded;
                 rowCount++;
@@ -320,7 +320,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             return new GridLayout(colCount, rowCount, cells);
         }
 
-        static int FindNearestEmptyCell(PuppetPinItemViewModel?[] cells, int row, int col, int rowCount, int colCount)
+        static int FindNearestEmptyCell(PuppetDeformationItemViewModel?[] cells, int row, int col, int rowCount, int colCount)
         {
             for (var radius = 1; radius <= rowCount + colCount; radius++)
             {
@@ -394,8 +394,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void Item_PropertyChanged(object? sender, PropertyChangedEventArgs args)
         {
-            if (args.PropertyName == nameof(PuppetPinItemViewModel.IsRestSelected)
-                || args.PropertyName == nameof(PuppetPinItemViewModel.IsOffsetSelected))
+            if (args.PropertyName == nameof(PuppetDeformationItemViewModel.IsRestSelected)
+                || args.PropertyName == nameof(PuppetDeformationItemViewModel.IsOffsetSelected))
             {
                 UpdateSelection();
             }
@@ -428,16 +428,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var selectedPins = pins.Where(x => x.IsOffsetSelected).ToList();
             if (selectedPins.Count <= 1) return;
 
-            var targetEffect = ItemProperties[0].PropertyOwner as PuppetPinEffect;
-            var syncMode = targetEffect?.SyncMode ?? PuppetPinEditorPointsSync.Distance;
-            if (syncMode == PuppetPinEditorPointsSync.None) return;
+            var targetEffect = ItemProperties[0].PropertyOwner as PuppetDeformationEffect;
+            var syncMode = targetEffect?.SyncMode ?? PuppetDeformationEditorPointsSync.Distance;
+            if (syncMode == PuppetDeformationEditorPointsSync.None) return;
 
             var currentVector = new Vector2(
                 (float)(selectedItem.Model.RestX.Values.FirstOrDefault()?.Value ?? 0),
                 (float)(selectedItem.Model.RestY.Values.FirstOrDefault()?.Value ?? 0));
 
             var maxDistance = 1f;
-            if (syncMode == PuppetPinEditorPointsSync.Distance)
+            if (syncMode == PuppetDeformationEditorPointsSync.Distance)
             {
                 var minX = selectedPins.Min(x => (float)(x.RestX.Values.FirstOrDefault()?.Value ?? 0));
                 var maxX = selectedPins.Max(x => (float)(x.RestX.Values.FirstOrDefault()?.Value ?? 0));
@@ -454,7 +454,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             ApplySync(selectedPins, syncMode, currentVector, maxDistance, lastPinYValues, p => p.OffsetY);
         }
 
-        void EnsureLastValues(Dictionary<PuppetPin, double[]> cache, Func<PuppetPin, Animation> animSelector)
+        void EnsureLastValues(Dictionary<PuppetDeformation, double[]> cache, Func<PuppetDeformation, Animation> animSelector)
         {
             foreach (var pin in pins)
             {
@@ -464,12 +464,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         }
 
         void ApplySync(
-            List<PuppetPin> selectedPins,
-            PuppetPinEditorPointsSync syncMode,
+            List<PuppetDeformation> selectedPins,
+            PuppetDeformationEditorPointsSync syncMode,
             Vector2 currentVector,
             float maxDistance,
-            Dictionary<PuppetPin, double[]> cache,
-            Func<PuppetPin, Animation> offsetSelector)
+            Dictionary<PuppetDeformation, double[]> cache,
+            Func<PuppetDeformation, Animation> offsetSelector)
         {
             if (selectedItem == null) return;
             var sourceAnim = offsetSelector(selectedItem.Model);
@@ -493,7 +493,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     if (i >= pointLast.Length) continue;
 
                     var ratio = 1f;
-                    if (syncMode == PuppetPinEditorPointsSync.Distance)
+                    if (syncMode == PuppetDeformationEditorPointsSync.Distance)
                     {
                         var px = (float)(point.RestX.Values.FirstOrDefault()?.Value ?? 0);
                         var py = (float)(point.RestY.Values.FirstOrDefault()?.Value ?? 0);
@@ -578,7 +578,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (disposedValue) return;
             if (disposing)
             {
-                var effect = (PuppetPinEffect)ItemProperties[0].PropertyOwner;
+                var effect = (PuppetDeformationEffect)ItemProperties[0].PropertyOwner;
                 effect.PropertyChanged -= Effect_PropertyChanged;
                 foreach (var item in allViewModels)
                 {

@@ -3,9 +3,9 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
-    internal class PuppetPinListEditorAttribute : PropertyEditorAttribute2
+    internal class PuppetDeformationListEditorAttribute : PropertyEditorAttribute2
     {
-        public PuppetPinListEditorAttribute()
+        public PuppetDeformationListEditorAttribute()
         {
             PropertyEditorSize = PropertyEditorSize.FullWidth;
         }
@@ -20,7 +20,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (control is PuppetPinListEditor editor)
             {
                 editor.ItemProperties = itemProperties;
-                editor.DataContext = new PuppetPinListEditorViewModel(itemProperties);
+                editor.DataContext = new PuppetDeformationListEditorViewModel(itemProperties);
             }
         }
 

@@ -6,11 +6,11 @@ using YukkuriMovieMaker.ItemEditor;
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     [AttributeUsage(AttributeTargets.Property)]
-    internal sealed class PuppetPinRestVisibleAttribute : Attribute, ICustomVisibilityAttribute2
+    internal sealed class PuppetDeformationOffsetVisibleAttribute : Attribute, ICustomVisibilityAttribute2
     {
         public Binding GetBinding(object item, object propertyOwner)
         {
-            return new Binding(nameof(PuppetPin.IsRestSelected))
+            return new Binding(nameof(PuppetDeformation.IsOffsetSelected))
             {
                 Source = propertyOwner,
                 Converter = new BooleanToVisibilityConverter(),

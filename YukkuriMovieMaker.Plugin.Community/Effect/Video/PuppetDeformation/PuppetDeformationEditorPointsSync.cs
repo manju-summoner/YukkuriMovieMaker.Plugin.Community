@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
-    public enum PuppetPinEditorPointsSync
+    public enum PuppetDeformationEditorPointsSync
     {
         [Display(Name = nameof(Texts.PuppetPinEditorSyncModeNoneName), Description = nameof(Texts.PuppetPinEditorSyncModeNoneDesc), ResourceType = typeof(Texts))]
         None,

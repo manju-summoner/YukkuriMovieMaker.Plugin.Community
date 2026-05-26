@@ -6,11 +6,11 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
-    internal sealed class PuppetPinItemViewModel : Bindable, IDisposable
+    internal sealed class PuppetDeformationItemViewModel : Bindable, IDisposable
     {
         bool disposedValue;
 
-        public PuppetPin Model { get; }
+        public PuppetDeformation Model { get; }
 
         public string Position => $"{(Model.RestX.Values.FirstOrDefault()?.Value ?? 0):F0}px, {(Model.RestY.Values.FirstOrDefault()?.Value ?? 0):F0}px";
 
@@ -59,7 +59,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         public event EventHandler? OffsetChanged;
         public event EventHandler? RestChanged;
 
-        public PuppetPinItemViewModel(PuppetPin model, ICommand selectRestCommand, ICommand selectOffsetCommand)
+        public PuppetDeformationItemViewModel(PuppetDeformation model, ICommand selectRestCommand, ICommand selectOffsetCommand)
         {
             Model = model;
             SelectRestCommand = selectRestCommand;
@@ -104,13 +104,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             switch (e.PropertyName)
             {
-                case nameof(PuppetPin.IsRestSelected):
+                case nameof(PuppetDeformation.IsRestSelected):
                     OnPropertyChanged(nameof(IsRestSelected));
                     break;
-                case nameof(PuppetPin.IsOffsetSelected):
+                case nameof(PuppetDeformation.IsOffsetSelected):
                     OnPropertyChanged(nameof(IsOffsetSelected));
                     break;
-                case nameof(PuppetPin.IsEnabled):
+                case nameof(PuppetDeformation.IsEnabled):
                     OnPropertyChanged(nameof(IsEnabled));
                     break;
             }
