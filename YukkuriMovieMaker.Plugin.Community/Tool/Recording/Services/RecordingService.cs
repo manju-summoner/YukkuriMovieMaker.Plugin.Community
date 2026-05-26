@@ -9,12 +9,12 @@ using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
-    public class RecordingService : IDisposable
+    public class RecordingService(RecordPathService recordPathService) : IDisposable
     {
         public const string DefaultRecordingDeviceId = "default";
 
         private readonly Lock syncRoot = new();
-        private readonly RecordPathService recordPathService;
+        private readonly RecordPathService recordPathService = recordPathService;
 
         private IWaveIn? waveIn;
         private WaveFileWriter? writer;
@@ -26,11 +26,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         private Exception? recordingStopException;
         private TaskCompletionSource<bool>? recordingStoppedTcs;
         private bool disposed;
-
-        public RecordingService(RecordPathService recordPathService)
-        {
-            this.recordPathService = recordPathService;
-        }
 
         public bool IsRecording { get; private set; }
 
@@ -380,22 +375,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 waveIn = null;
             }
 
-            if (writer is not null)
-            {
-                writer.Dispose();
-                writer = null;
-            }
+            writer?.Dispose();
+            writer = null;
 
             var filePath = currentFilePath;
             currentFilePath = null;
             currentWaveFormat = null;
             IsRecording = false;
-
-            if (currentDevice is not null)
-            {
-                currentDevice.Dispose();
-                currentDevice = null;
-            }
+            currentDevice?.Dispose();
+            currentDevice = null;
 
             OnRecordingStateChanged();
 

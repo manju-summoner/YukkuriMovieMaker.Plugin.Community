@@ -169,8 +169,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
                 foreach(var cpsw in cp.StyleWeights)
                 {
                     var sw = styleWeights.FirstOrDefault(s => s.Name == cpsw.Name);
-                    if (sw != null)
-                        sw.Weight = cpsw.Weight;
+                    sw?.Weight = cpsw.Weight;
                 }
                 cp.StyleWeights = [..styleWeights];
             }

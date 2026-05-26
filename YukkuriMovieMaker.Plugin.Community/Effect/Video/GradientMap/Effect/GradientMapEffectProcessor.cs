@@ -14,12 +14,14 @@ using GradientStop = YukkuriMovieMaker.Brush.GradientStop;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Effect;
 
-internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
+internal sealed class GradientMapEffectProcessor(
+    IGraphicsDevicesAndContext devices,
+    GradientMapEffect item) : VideoEffectProcessorBase(devices)
 {
     private static readonly GradientStopComparer StopComparer = new();
 
-    private readonly IGraphicsDevicesAndContext _devices;
-    private readonly GradientMapEffect _item;
+    private readonly IGraphicsDevicesAndContext _devices = devices;
+    private readonly GradientMapEffect _item = item;
 
     private GradientMapCustomEffect? _gradMapEffect;
     private D2DEffects.Composite? _compositeEffect;
@@ -36,15 +38,6 @@ internal sealed class GradientMapEffectProcessor : VideoEffectProcessorBase
     private int _isHorizontal;
 
     private bool _isFirst = true;
-
-    public GradientMapEffectProcessor(
-        IGraphicsDevicesAndContext devices,
-        GradientMapEffect item)
-        : base(devices)
-    {
-        _devices = devices;
-        _item = item;
-    }
 
     protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
     {

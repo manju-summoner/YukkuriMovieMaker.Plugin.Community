@@ -9,9 +9,9 @@ using YukkuriMovieMaker.Player;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Tritone;
 
-internal sealed class TritoneEffectProcessor : VideoEffectProcessorBase
+internal sealed class TritoneEffectProcessor(IGraphicsDevicesAndContext devices, TritoneEffect item) : VideoEffectProcessorBase(devices)
 {
-    private readonly TritoneEffect _item;
+    private readonly TritoneEffect _item = item;
 
     private TritoneCustomEffect? _tritoneEffect;
     private D2DEffects.Composite? _compositeEffect;
@@ -25,12 +25,6 @@ internal sealed class TritoneEffectProcessor : VideoEffectProcessorBase
     private double _midPosition;
     private float _opacity;
     private Project.Blend _blendMode;
-
-    public TritoneEffectProcessor(IGraphicsDevicesAndContext devices, TritoneEffect item)
-        : base(devices)
-    {
-        _item = item;
-    }
 
     protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
     {

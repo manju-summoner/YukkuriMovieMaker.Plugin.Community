@@ -6,9 +6,11 @@ using YukkuriMovieMaker.Player.Video.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputChannelRouter
 {
-    internal sealed class OutputChannelRouterEffectProcessor : VideoEffectProcessorBase
+    internal sealed class OutputChannelRouterEffectProcessor(
+        IGraphicsDevicesAndContext devices,
+        OutputChannelRouterEffect item) : VideoEffectProcessorBase(devices)
     {
-        private readonly OutputChannelRouterEffect _item;
+        private readonly OutputChannelRouterEffect _item = item;
 
         private OutputChannelRouterCustomEffect? _routerEffect;
         private D2DEffects.AffineTransform2D? _sink;
@@ -17,14 +19,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputChannelRouter
         private bool _isFirst = true;
         private ChannelSource _outputR, _outputG, _outputB, _outputA;
         private ID2D1Image? _lastBranchInput;
-
-        public OutputChannelRouterEffectProcessor(
-            IGraphicsDevicesAndContext devices,
-            OutputChannelRouterEffect item)
-            : base(devices)
-        {
-            _item = item;
-        }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {

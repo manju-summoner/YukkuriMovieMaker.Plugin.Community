@@ -55,11 +55,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         {
             if (ReferenceEquals(_attachedViewModel, viewModel))
                 return;
-            if (_attachedViewModel is not null)
-                _attachedViewModel.ImageInsertRequested -= OnImageInsertRequested;
+            _attachedViewModel?.ImageInsertRequested -= OnImageInsertRequested;
             _attachedViewModel = viewModel;
-            if (_attachedViewModel is not null)
-                _attachedViewModel.ImageInsertRequested += OnImageInsertRequested;
+            _attachedViewModel?.ImageInsertRequested += OnImageInsertRequested;
         }
 
         private void OnImageInsertRequested(object? sender, NotepadImageInsertRequestedEventArgs e)

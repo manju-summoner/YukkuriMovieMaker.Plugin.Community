@@ -631,21 +631,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
         }
     }
 
-    public class RecordedFileListItem
+    public class RecordedFileListItem(string path, string fileName, DateTime updatedAt, long fileSize)
     {
-        public RecordedFileListItem(string path, string fileName, DateTime updatedAt, long fileSize)
-        {
-            Path = path;
-            FileName = fileName;
-            UpdatedAt = updatedAt;
-            FileSize = fileSize;
-        }
-
-        public string Path { get; }
-        public string FileName { get; }
+        public string Path { get; } = path;
+        public string FileName { get; } = fileName;
         public string FileNameWithoutExtension => System.IO.Path.GetFileNameWithoutExtension(FileName);
-        public DateTime UpdatedAt { get; }
-        public long FileSize { get; }
+        public DateTime UpdatedAt { get; } = updatedAt;
+        public long FileSize { get; } = fileSize;
         public string UpdatedAtText => UpdatedAt.ToString("yyyy/MM/dd HH:mm:ss");
         public string FileSizeText => $"{FileSize / 1024d:F1} KB";
     }

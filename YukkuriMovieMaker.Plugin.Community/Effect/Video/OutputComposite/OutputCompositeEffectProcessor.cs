@@ -8,21 +8,15 @@ using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
 {
-    internal class OutputCompositeEffectProcessor : VideoEffectProcessorBase
+    internal class OutputCompositeEffectProcessor(IGraphicsDevicesAndContext devices, OutputCompositeEffect item) : VideoEffectProcessorBase(devices)
     {
-        readonly OutputCompositeEffect item;
-        readonly IGraphicsDevicesAndContext devices;
+        readonly OutputCompositeEffect item = item;
+        readonly IGraphicsDevicesAndContext devices = devices;
 
         D2DEffects.Composite? compositeEffect;
         D2DEffects.Blend? blendEffect;
         D2DEffects.Opacity? opacityEffect;
         D2DEffects.AffineTransform2D? sink;
-
-        public OutputCompositeEffectProcessor(IGraphicsDevicesAndContext devices, OutputCompositeEffect item) : base(devices)
-        {
-            this.item = item;
-            this.devices = devices;
-        }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {

@@ -70,7 +70,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         public bool IsSuggestionsOpen
         {
-            get => field;
+            get;
             private set
             {
                 if (field == value) return;

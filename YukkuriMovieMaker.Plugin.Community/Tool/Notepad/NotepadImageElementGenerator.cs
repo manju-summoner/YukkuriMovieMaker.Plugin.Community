@@ -11,20 +11,13 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
-    internal sealed class NotepadImageElementGenerator : VisualLineElementGenerator
+    internal sealed class NotepadImageElementGenerator(NotepadImageStore store, double baseMaxWidth = 480, double baseMaxHeight = 360) : VisualLineElementGenerator
     {
-        private readonly NotepadImageStore store;
-        private readonly double baseMaxWidth;
-        private readonly double baseMaxHeight;
+        private readonly NotepadImageStore store = store;
+        private readonly double baseMaxWidth = baseMaxWidth;
+        private readonly double baseMaxHeight = baseMaxHeight;
 
         public double Scale { get; set; } = 1.0;
-
-        public NotepadImageElementGenerator(NotepadImageStore store, double baseMaxWidth = 480, double baseMaxHeight = 360)
-        {
-            this.store = store;
-            this.baseMaxWidth = baseMaxWidth;
-            this.baseMaxHeight = baseMaxHeight;
-        }
 
         private (Match Match, int DocumentIndex)? FindMatch(int startOffset)
         {

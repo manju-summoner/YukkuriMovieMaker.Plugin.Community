@@ -8,13 +8,13 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
-    internal class ExplorerSidebarDirectoryViewModel : Bindable, IExplorerSelectableItem
+    internal class ExplorerSidebarDirectoryViewModel(string path, string name, int level, bool hasChild) : Bindable, IExplorerSelectableItem
     {
-        string path;
-        string name;
-        readonly int level;
+        string path = path;
+        string name = name;
+        readonly int level = level;
         bool isExpanded;
-        bool hasDummyChild;
+        bool hasDummyChild = hasChild;
         bool isSelected;
         CancellationTokenSource? loadIconCts;
         ImageSource? icon;
@@ -26,13 +26,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         public bool IsExpanding
         {
-            get => field;
+            get;
             set => Set(ref field, value);
         }
 
         public bool IsSelected { get => isSelected; set => Set(ref isSelected, value); }
-        public bool IsRenaming { get => field; set => Set(ref field, value); } = false;
-        public string RenameText { get => field; set => Set(ref field, value); } = string.Empty;
+        public bool IsRenaming { get; set => Set(ref field, value); } = false;
+        public string RenameText { get; set => Set(ref field, value); } = string.Empty;
         public System.Windows.Input.ICommand ClearCacheCommand { get; } = new ActionCommand(_ => true, _ => { });
 
         public event EventHandler? ExpandRequested;
@@ -88,14 +88,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             if (isExpanded) return;
             isExpanded = true;
             OnPropertyChanged(nameof(IsExpanded));
-        }
-
-        public ExplorerSidebarDirectoryViewModel(string path, string name, int level, bool hasChild)
-        {
-            this.path = path;
-            this.name = name;
-            this.level = level;
-            this.hasDummyChild = hasChild;
         }
 
         public void UpdatePathAndName(string newPath)

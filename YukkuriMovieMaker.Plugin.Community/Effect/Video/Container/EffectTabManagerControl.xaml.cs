@@ -183,6 +183,18 @@ public partial class EffectTabManagerControl : UserControl, IPropertyEditorContr
         }
     }
 
+    private void TabListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        // ListBox を OneWay バインドにしているため、ユーザー操作による選択変更は SelectionChanged を介して
+        // SelectTabCommand に変換する。VM 側からの SelectedTab 変更（SyncFromModel 経由）でも本イベントは飛ぶが、
+        // その場合は VM.SelectedTab と一致するので Command を発火させない。
+        if (DataContext is not EffectTabManagerViewModel vm) return;
+        if (TabListBox.SelectedItem is not EffectTabItemViewModel tab) return;
+        if (ReferenceEquals(tab, vm.SelectedTab)) return;
+        if (vm.SelectTabCommand.CanExecute(tab))
+            vm.SelectTabCommand.Execute(tab);
+    }
+
     private void TabListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
     {
         if (Keyboard.Modifiers != ModifierKeys.None) return;

@@ -12,22 +12,22 @@ internal class IrodoriTTSVoiceParameter : VoiceParameterBase
     [TextBoxSlider("F0", "", 1, 120)]
     [Range(1, 120)]
     [DefaultValue(40)]
-    public int NumSteps { get => field; set => Set(ref field, value); } = 40;
+    public int NumSteps { get; set => Set(ref field, value); } = 40;
 
     [Display(Name = nameof(Texts.CfgScaleTextName), Description = nameof(Texts.CfgScaleTextDesc), ResourceType = typeof(Texts))]
     [TextBoxSlider("F1", "", 0, 10)]
     [Range(0d, 10d)]
     [DefaultValue(3d)]
-    public double CfgScaleText { get => field; set => Set(ref field, value); } = 3d;
+    public double CfgScaleText { get; set => Set(ref field, value); } = 3d;
 
     [Display(Name = nameof(Texts.CfgScaleSpeakerName), Description = nameof(Texts.CfgScaleSpeakerDesc), ResourceType = typeof(Texts))]
     [TextBoxSlider("F1", "", 0, 10)]
     [Range(0d, 10d)]
     [DefaultValue(5d)]
-    public double CfgScaleSpeaker { get => field; set => Set(ref field, value); } = 5d;
+    public double CfgScaleSpeaker { get; set => Set(ref field, value); } = 5d;
 
     [Display(Name = nameof(Texts.Checkpoint), Description = nameof(Texts.CheckpointDesc), ResourceType = typeof(Texts))]
     [FileSelector(FileGroupType.None)]
     [DefaultValue("")]
-    public string Checkpoint { get => field; set => Set(ref field, value); } = string.Empty;
+    public string Checkpoint { get; set => Set(ref field, value); } = string.Empty;
 }

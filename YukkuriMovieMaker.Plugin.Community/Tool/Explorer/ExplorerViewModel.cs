@@ -115,18 +115,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         public ExplorerLayout Layout
         {
-            get => field;
+            get;
             private set
             {
-                if (field != null) field.PropertyChanged -= Layout_PropertyChanged;
+                field?.PropertyChanged -= Layout_PropertyChanged;
                 Set(ref field!, value);
-                if (field != null) field.PropertyChanged += Layout_PropertyChanged;
+                field?.PropertyChanged += Layout_PropertyChanged;
                 NotifyLayoutModeProperties();
             }
         } = new ExplorerLayout();
 
-        public ExplorerSortKey SortKey { get => field; set => Set(ref field, value, nameof(SortKey), nameof(IsSortByName), nameof(IsSortByLastWriteTime), nameof(IsSortByExtension)); } = ExplorerSortKey.Name;
-        public ExplorerSortOrder SortOrder { get => field; set => Set(ref field, value, nameof(SortOrder), nameof(IsSortAscending), nameof(IsSortDescending)); } = ExplorerSortOrder.Ascending;
+        public ExplorerSortKey SortKey { get; set => Set(ref field, value, nameof(SortKey), nameof(IsSortByName), nameof(IsSortByLastWriteTime), nameof(IsSortByExtension)); } = ExplorerSortKey.Name;
+        public ExplorerSortOrder SortOrder { get; set => Set(ref field, value, nameof(SortOrder), nameof(IsSortAscending), nameof(IsSortDescending)); } = ExplorerSortOrder.Ascending;
 
         public bool IsSortByName => SortKey == ExplorerSortKey.Name;
         public bool IsSortByLastWriteTime => SortKey == ExplorerSortKey.LastWriteTime;
@@ -1792,7 +1792,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     foreach (var favorite in ExplorerSettings.Default.Favorites)
                         PropertyChangedEventManager.RemoveHandler(favorite, Favorite_PropertyChanged, string.Empty);
 
-                    if (Layout != null) Layout.PropertyChanged -= Layout_PropertyChanged;
+                    Layout?.PropertyChanged -= Layout_PropertyChanged;
 
                     foreach (var item in Items)
                     {

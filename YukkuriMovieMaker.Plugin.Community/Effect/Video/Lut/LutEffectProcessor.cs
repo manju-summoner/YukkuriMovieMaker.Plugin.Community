@@ -9,10 +9,10 @@ using YukkuriMovieMaker.Player;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Lut;
 
-internal sealed class LutEffectProcessor : VideoEffectProcessorBase
+internal sealed class LutEffectProcessor(IGraphicsDevicesAndContext devices, LutEffect item) : VideoEffectProcessorBase(devices)
 {
-    private readonly IGraphicsDevicesAndContext _devices;
-    private readonly LutEffect _item;
+    private readonly IGraphicsDevicesAndContext _devices = devices;
+    private readonly LutEffect _item = item;
 
     private LutCustomEffect? _lutEffect;
     private D2DEffects.Composite? _compositeEffect;
@@ -27,13 +27,6 @@ internal sealed class LutEffectProcessor : VideoEffectProcessorBase
     private LutInterpolationMode _interpolation;
 
     private bool _isFirst = true;
-
-    public LutEffectProcessor(IGraphicsDevicesAndContext devices, LutEffect item)
-        : base(devices)
-    {
-        _devices = devices;
-        _item = item;
-    }
 
     protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
     {
