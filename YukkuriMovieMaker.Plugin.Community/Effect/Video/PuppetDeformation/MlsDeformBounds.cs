@@ -117,6 +117,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             float alpha,
             float scaleInvSq)
         {
+            Span<float> weights = stackalloc float[n];
             float totalW = 0f;
             float pStarX = 0f, pStarY = 0f;
             float qStarX = 0f, qStarY = 0f;
@@ -130,6 +131,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 float distSq = (dx * dx + dy * dy) * scaleInvSq + Epsilon;
                 if (distSq < minDistSq) { minDistSq = distSq; nearest = i; }
                 float wi = MathF.Pow(distSq, -alpha);
+                weights[i] = wi;
                 totalW += wi;
                 pStarX += wi * currentLocal[i].X;
                 pStarY += wi * currentLocal[i].Y;
@@ -153,11 +155,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
             for (int i = 0; i < n; i++)
             {
-                float dx = currentLocal[i].X - v.X;
-                float dy = currentLocal[i].Y - v.Y;
-                float distSq = (dx * dx + dy * dy) * scaleInvSq + Epsilon;
-                float wi = MathF.Pow(distSq, -alpha);
-
                 float pHatX = currentLocal[i].X - pStarX;
                 float pHatY = currentLocal[i].Y - pStarY;
                 float qHatX = restLocal[i].X - qStarX;
@@ -169,6 +166,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 float dotPV = pHatX * vHatX + pHatY * vHatY;
                 float dotPperpV = pHatPerpX * vHatX + pHatPerpY * vHatY;
 
+                float wi = weights[i];
                 frX += wi * (dotPV * qHatX - dotPperpV * qHatY);
                 frY += wi * (dotPV * qHatY + dotPperpV * qHatX);
             }
