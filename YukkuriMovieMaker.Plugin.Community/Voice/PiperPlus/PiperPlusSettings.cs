@@ -43,8 +43,8 @@ internal sealed class PiperPlusSettings : SettingsBase<PiperPlusSettings>
     public string ResolveDisplayName(string modelPath, string fallback)
     {
         var alias = ModelAliases.FirstOrDefault(a => a.ModelPath == modelPath);
-        return alias is not null && !string.IsNullOrWhiteSpace(alias.DisplayName)
-            ? alias.DisplayName
+        return alias is { DisplayName: { Length: > 0 } name }
+            ? name
             : fallback;
     }
 

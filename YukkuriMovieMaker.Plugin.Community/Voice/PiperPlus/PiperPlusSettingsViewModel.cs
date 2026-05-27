@@ -126,8 +126,7 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
 
             if (!PiperBinaryResource.IsReady)
             {
-                var version = release?.TagName;
-                if (string.IsNullOrEmpty(version))
+                if (release is not { TagName: { Length: > 0 } version })
                 {
                     VersionText = Texts.BinaryNotFound;
                     SpeakerCountText = string.Empty;

@@ -131,21 +131,19 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpe
 
         process.WaitForExit();
 
-        if (process.ExitCode != 0)
+        string StderrDetail()
         {
-            var stderr = stderrBuilder.ToString().Trim();
-            var detail = string.IsNullOrEmpty(stderr) ? string.Empty : $"\n{stderr}";
-            throw new InvalidOperationException(
-                $"Piper Plus exited with code {process.ExitCode}.{detail}");
+            var s = stderrBuilder.ToString().Trim();
+            return s.Length > 0 ? $"\n{s}" : string.Empty;
         }
 
-        if (!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
-        {
-            var stderr = stderrBuilder.ToString().Trim();
-            var detail = string.IsNullOrEmpty(stderr) ? string.Empty : $"\n{stderr}";
+        if (process.ExitCode != 0)
             throw new InvalidOperationException(
-                $"Piper Plus produced no output at: {filePath}{detail}");
-        }
+                $"Piper Plus exited with code {process.ExitCode}.{StderrDetail()}");
+
+        if (!File.Exists(filePath) || new FileInfo(filePath).Length == 0)
+            throw new InvalidOperationException(
+                $"Piper Plus produced no output at: {filePath}{StderrDetail()}");
     }
 
     public IVoiceParameter CreateVoiceParameter() => new PiperPlusVoiceParameter();
