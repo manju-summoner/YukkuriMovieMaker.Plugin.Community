@@ -138,11 +138,23 @@ internal static class PiperBinaryResource
 
         Directory.CreateDirectory(tempDir);
 
-        await DownloadAndExtractAsync(version, assetName, tempDir, progress, cancellationToken);
+        try
+        {
+            await DownloadAndExtractAsync(version, assetName, tempDir, progress, cancellationToken);
+            CommitInstall(version, currentDir, backupDir, targetDir, tempDir);
+            progress?.Report((1.0, Texts.BinaryReady));
+        }
+        catch
+        {
+            try
+            {
+                if (Directory.Exists(tempDir))
+                    Directory.Delete(tempDir, recursive: true);
+            }
+            catch { }
 
-        CommitInstall(version, currentDir, backupDir, targetDir, tempDir);
-
-        progress?.Report((1.0, Texts.BinaryReady));
+            throw;
+        }
     }
 
     static async Task DownloadAndExtractAsync(
@@ -162,18 +174,19 @@ internal static class PiperBinaryResource
 
         var totalBytes = response.Content.Headers.ContentLength ?? -1L;
 
-        await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        await using var fileStream = File.Create(zipPath);
-
-        var buffer = new byte[81920];
-        long downloaded = 0;
-        int read;
-        while ((read = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
+        await using (var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken))
+        await using (var fileStream = File.Create(zipPath))
         {
-            await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
-            downloaded += read;
-            if (totalBytes > 0)
-                progress?.Report(((double)downloaded / totalBytes * 0.9, Texts.DownloadingBinary));
+            var buffer = new byte[81920];
+            long downloaded = 0;
+            int read;
+            while ((read = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
+            {
+                await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+                downloaded += read;
+                if (totalBytes > 0)
+                    progress?.Report(((double)downloaded / totalBytes * 0.9, Texts.DownloadingBinary));
+            }
         }
 
         progress?.Report((0.9, Texts.ExtractingBinary));
@@ -181,7 +194,7 @@ internal static class PiperBinaryResource
             () => ZipFile.ExtractToDirectory(zipPath, tempDir, overwriteFiles: true),
             cancellationToken);
 
-        try { File.Delete(zipPath); } catch { }
+        File.Delete(zipPath);
     }
 
     static void CommitInstall(
@@ -232,13 +245,6 @@ internal static class PiperBinaryResource
             {
                 if (Directory.Exists(targetDir))
                     Directory.Delete(targetDir, recursive: true);
-            }
-            catch { }
-
-            try
-            {
-                if (Directory.Exists(tempDir))
-                    Directory.Delete(tempDir, recursive: true);
             }
             catch { }
 

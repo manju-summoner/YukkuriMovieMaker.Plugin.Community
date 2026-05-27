@@ -209,6 +209,14 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         }
 
         pendingVersion = tag;
+
+        if (!PiperBinaryResource.IsReady)
+        {
+            UpdateDescription = string.Empty;
+            HasUpdate = false;
+            return;
+        }
+
         var installed = PiperBinaryResource.InstalledVersion;
         var needsUpdate = installed is null ||
             !string.Equals(installed, tag, StringComparison.OrdinalIgnoreCase);
