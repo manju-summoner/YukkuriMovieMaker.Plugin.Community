@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Media;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
@@ -49,6 +50,46 @@ public sealed class NodeViewModel : INotifyPropertyChanged
         var visualState = graph.GetVisualState(Id);
         _x = visualState?.X ?? 0;
         _y = visualState?.Y ?? 0;
+
+        nodeLogic.NeedToReinitializeInputPorts += (sender, @event) =>
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(() => nodeLogic.InvokeNeedToReinitializeInputPorts(sender, @event));
+                return;
+            }
+
+            var logic = (NodeLogic)sender!;
+
+            var oldPortsAndConnections = InputPorts.Select(portVm => new
+            {
+                portVm.Name,
+                ControlAttributeType = portVm.ControlAttribute?.ControlType,
+                Connections = graph.Connections
+                    .Where(c => c.ToId == Id && c.ToPort == portVm.Name)
+                    .Select(c => new { c.FromId, c.FromPort })
+                    .ToList()
+            }).ToList();
+
+            foreach (var oldPort in oldPortsAndConnections)
+            foreach (var conn in oldPort.Connections)
+                graph.Disconnect(conn.FromId, conn.FromPort, Id, oldPort.Name);
+
+            InputPorts.Clear();
+            foreach (var portVm in CreateInputPorts(logic, graph))
+                InputPorts.Add(portVm);
+
+            var newPortsByName = InputPorts.ToDictionary(p => p.Name);
+            foreach (var oldPort in oldPortsAndConnections)
+            {
+                if (!newPortsByName.TryGetValue(oldPort.Name, out var newPortVm)) continue;
+                if (newPortVm.ControlAttribute?.ControlType != oldPort.ControlAttributeType) continue;
+
+                foreach (var conn in oldPort.Connections)
+                    graph.Connect(conn.FromId, conn.FromPort, Id, oldPort.Name);
+            }
+        };
     }
 
     public NodeEditorViewModel ParentEditor { get; }
@@ -121,7 +162,18 @@ public sealed class NodeViewModel : INotifyPropertyChanged
     {
         foreach (var (name, port) in node.Inputs)
         {
-            var prop = node.GetType().GetProperty(name);
+            PropertyInfo? prop;
+            if (name.Contains('.'))
+            {
+                var parts = name.Split('.', 2);
+                var containerProp = node.GetType().GetProperty(parts[0]);
+                prop = containerProp?.PropertyType.GetProperty(parts[1]);
+            }
+            else
+            {
+                prop = node.GetType().GetProperty(name);
+            }
+
             var portAttr = prop?.GetCustomAttribute<InputPortAttribute>();
             var portColorAttr = prop?.GetCustomAttribute<PortColorSettingAttribute>();
             var controlAttr = prop?.GetCustomAttribute<PropertyControlBaseAttribute>();

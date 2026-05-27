@@ -685,7 +685,8 @@ public sealed class EffectNodeCategory : INodeCategory
 internal static class Attr
 {
     private static readonly ConstructorInfo InputPortCtor =
-        typeof(InputPortAttribute).GetConstructor([typeof(string), typeof(string), typeof(Type)])!;
+        typeof(InputPortAttribute).GetConstructor(
+            [typeof(string), typeof(string), typeof(Type), typeof(bool)])!;
 
     private static readonly ConstructorInfo OutputPortCtor =
         typeof(OutputPortAttribute).GetConstructor([typeof(string), typeof(string), typeof(Type)])!;
@@ -707,7 +708,7 @@ internal static class Attr
 
     public static void InputPort(PropertyBuilder pb, string label, string desc, Type? resourceType)
     {
-        pb.SetCustomAttribute(new CustomAttributeBuilder(InputPortCtor, [label, desc, resourceType!]));
+        pb.SetCustomAttribute(new CustomAttributeBuilder(InputPortCtor, [label, desc, resourceType!, false]));
     }
 
     public static void OutputPort(PropertyBuilder pb, string label, string desc, Type? resourceType)

@@ -197,6 +197,7 @@ public sealed class Processor : IVideoEffectProcessor
             _blankBitmap?.Dispose();
             _blankBitmap = null;
 
+            _outputImage?.Dispose();
             _outputImage = null;
         }
     }

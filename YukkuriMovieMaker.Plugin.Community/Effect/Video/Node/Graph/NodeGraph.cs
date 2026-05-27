@@ -114,6 +114,7 @@ public sealed class NodeGraph
     {
         var input = _nodes[nodeId].Inputs[inputName];
         input.SetValue(value);
+        _nodes[nodeId].OnInputValueChanged(inputName, value);
 
         OnGraphChanged(new ValueChangedEventArgs(nodeId, inputName, value));
     }
