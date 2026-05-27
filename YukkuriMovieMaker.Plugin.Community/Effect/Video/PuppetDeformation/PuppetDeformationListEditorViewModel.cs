@@ -322,9 +322,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
                 var expanded = new PuppetDeformationItemViewModel?[(rowCount + 1) * colCount];
                 Array.Copy(cells, expanded, cells.Length);
-                cells = expanded;
                 rowCount++;
-                expanded[rowCount * colCount - colCount + p.Col] = viewModels[p.Index];
+                cells = expanded;
+                var newSlot = FindNearestEmptyCell(cells, p.Row, p.Col, rowCount, colCount);
+                if (newSlot >= 0)
+                    cells[newSlot] = viewModels[p.Index];
             }
 
             return new GridLayout(colCount, rowCount, cells);
@@ -467,10 +469,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         void EnsureLastValues(Dictionary<PuppetDeformation, double[]> cache, ImmutableList<PuppetDeformation> pins, Func<PuppetDeformation, Animation> animSelector)
         {
             foreach (var pin in pins)
-            {
-                if (!cache.ContainsKey(pin))
-                    cache[pin] = animSelector(pin).Values.Select(x => x.Value).ToArray();
-            }
+                cache.TryAdd(pin, animSelector(pin).Values.Select(x => x.Value).ToArray());
         }
 
         void ApplySync(
