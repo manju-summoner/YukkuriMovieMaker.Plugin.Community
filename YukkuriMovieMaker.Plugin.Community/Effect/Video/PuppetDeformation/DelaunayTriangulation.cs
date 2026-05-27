@@ -7,7 +7,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     internal static class DelaunayTriangulation
     {
-        public struct Edge : IEquatable<Edge>
+        internal struct Edge : IEquatable<Edge>
         {
             public int A, B;
             public Edge(int a, int b) { A = Math.Min(a, b); B = Math.Max(a, b); }
@@ -16,7 +16,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             public override int GetHashCode() => HashCode.Combine(A, B);
         }
 
-        public struct TriangleData
+        internal struct TriangleData
         {
             public int A, B, C;
             public Vector2 CircumCenter;
@@ -117,7 +117,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             return (resultTriangles, resultEdges.ToList());
         }
 
-        private static void TryAddUniqueEdge(Edge edge, HashSet<Edge> seen, List<Edge> unique)
+        static void TryAddUniqueEdge(Edge edge, HashSet<Edge> seen, List<Edge> unique)
         {
             if (!seen.Add(edge))
                 unique.RemoveAll(e => e.Equals(edge));
