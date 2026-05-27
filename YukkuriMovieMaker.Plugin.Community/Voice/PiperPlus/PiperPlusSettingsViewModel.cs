@@ -201,7 +201,7 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
 
     void ApplyUpdateState(GitHubReleaseInfo? release)
     {
-        if (release is null)
+        if (release is not { TagName: var tag })
         {
             pendingVersion = string.Empty;
             UpdateDescription = string.Empty;
@@ -209,26 +209,18 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
             return;
         }
 
-        pendingVersion = release.TagName;
+        pendingVersion = tag;
         var installed = PiperBinaryResource.InstalledVersion;
         var needsUpdate = installed is null ||
-            !string.Equals(installed, release.TagName, StringComparison.OrdinalIgnoreCase);
+            !string.Equals(installed, tag, StringComparison.OrdinalIgnoreCase);
 
-        if (needsUpdate)
-        {
-            UpdateDescription = $"{Texts.UpdateAvailable} {release.TagName}";
-            HasUpdate = true;
-        }
-        else
-        {
-            UpdateDescription = string.Empty;
-            HasUpdate = false;
-        }
+        (UpdateDescription, HasUpdate) = needsUpdate
+            ? ($"{Texts.UpdateAvailable} {tag}", true)
+            : (string.Empty, false);
     }
 
     void UpdateVersionAndSpeakerText()
     {
-        var installed = PiperBinaryResource.InstalledVersion;
         if (!PiperBinaryResource.IsReady)
         {
             VersionText = Texts.BinaryNotFound;
@@ -236,8 +228,7 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
             return;
         }
 
-        VersionText = installed ?? string.Empty;
-        var speakerCount = PiperPlusSettings.Default.Speakers.Count;
-        SpeakerCountText = string.Format(Texts.SpeakerCount, speakerCount);
+        VersionText = PiperBinaryResource.InstalledVersion ?? string.Empty;
+        SpeakerCountText = string.Format(Texts.SpeakerCount, PiperPlusSettings.Default.Speakers.Count);
     }
 }

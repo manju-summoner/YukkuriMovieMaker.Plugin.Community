@@ -2,10 +2,9 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
 
-internal sealed class PiperModelViewModel : Bindable
+internal sealed class PiperModelViewModel(PiperSavedModel saved) : Bindable
 {
-    readonly PiperSavedModel saved;
-    string displayName;
+    string displayName = PiperPlusSettings.Default.ResolveDisplayName(saved.ModelPath, saved.ModelName);
 
     public string ModelName => saved.ModelName;
     public string ModelPath => saved.ModelPath;
@@ -20,11 +19,5 @@ internal sealed class PiperModelViewModel : Bindable
             if (Set(ref displayName, value))
                 PiperPlusSettings.Default.SetDisplayName(saved.ModelPath, value);
         }
-    }
-
-    public PiperModelViewModel(PiperSavedModel saved)
-    {
-        this.saved = saved;
-        displayName = PiperPlusSettings.Default.ResolveDisplayName(saved.ModelPath, saved.ModelName);
     }
 }

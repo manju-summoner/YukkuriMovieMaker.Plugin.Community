@@ -115,8 +115,8 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpe
         using var process = new Process { StartInfo = startInfo };
         process.ErrorDataReceived += (_, e) =>
         {
-            if (e.Data is not null)
-                stderrBuilder.AppendLine(e.Data);
+            if (e.Data is { } data)
+                stderrBuilder.AppendLine(data);
         };
 
         process.Start();
@@ -153,9 +153,5 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpe
     public bool IsMatch(string api, string id) => api == API && id == ID;
 
     public IVoiceParameter MigrateParameter(IVoiceParameter currentParameter)
-    {
-        if (currentParameter is not PiperPlusVoiceParameter)
-            return CreateVoiceParameter();
-        return currentParameter;
-    }
+        => currentParameter is PiperPlusVoiceParameter ? currentParameter : CreateVoiceParameter();
 }

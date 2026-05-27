@@ -24,9 +24,9 @@ internal static class PiperUpdateChecker
 
             var result = await FetchLatestAsync(cancellationToken);
 
-            if (result is not null)
+            if (result is { } release)
             {
-                cachedRelease = result;
+                cachedRelease = release;
                 isCached = true;
             }
 
@@ -78,11 +78,7 @@ internal static class PiperUpdateChecker
         {
             throw;
         }
-        catch (HttpRequestException)
-        {
-            return null;
-        }
-        catch (Newtonsoft.Json.JsonException)
+        catch (Exception e) when (e is HttpRequestException or Newtonsoft.Json.JsonException)
         {
             return null;
         }
