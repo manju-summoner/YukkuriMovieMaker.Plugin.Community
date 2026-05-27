@@ -494,9 +494,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 foreach (var point in selectedPins)
                 {
                     if (point == selectedItem.Model) continue;
+                    var pointAnim = offsetSelector(point);
                     if (!cache.TryGetValue(point, out var pointLast))
                     {
-                        pointLast = offsetSelector(point).Values.Select(x => x.Value).ToArray();
+                        pointLast = pointAnim.Values.Select(x => x.Value).ToArray();
                         cache[point] = pointLast;
                     }
                     if (i >= pointLast.Length) continue;
@@ -510,8 +511,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                         ratio = Math.Max(0f, 1f - distance / maxDistance);
                     }
 
-                    offsetSelector(point).Values[i].Value += delta * ratio;
-                    pointLast[i] = offsetSelector(point).Values[i].Value;
+                    pointAnim.Values[i].Value += delta * ratio;
+                    pointLast[i] = pointAnim.Values[i].Value;
                 }
 
                 sourceLast[i] = targetValue;
