@@ -21,10 +21,14 @@ internal static class PretrainedModelDownloader
         var client = HttpClientFactory.Client;
 
         await DownloadFileAsync(client, definition.OnnxUrl, onnxPath,
-            startFraction: 0.0, endFraction: 0.9, progress, cancellationToken);
+            startFraction: 0.0, endFraction: 0.9,
+            string.Format(Texts.DownloadingPretrainedModel, definition.OnnxFileName),
+            progress, cancellationToken);
 
         await DownloadFileAsync(client, definition.ConfigUrl, jsonPath,
-            startFraction: 0.9, endFraction: 1.0, progress, cancellationToken);
+            startFraction: 0.9, endFraction: 1.0,
+            string.Format(Texts.DownloadingPretrainedModel, Path.GetFileName(jsonPath)),
+            progress, cancellationToken);
 
         progress?.Report((1.0, Texts.LoadingModels));
     }
@@ -35,10 +39,10 @@ internal static class PretrainedModelDownloader
         string destinationPath,
         double startFraction,
         double endFraction,
+        string message,
         IProgress<(double Progress, string Message)>? progress,
         CancellationToken cancellationToken)
     {
-        var fileName = Path.GetFileName(destinationPath);
         var tempPath = destinationPath + ".tmp";
         try
         {
@@ -61,7 +65,7 @@ internal static class PretrainedModelDownloader
                 {
                     var fileFraction = (double)downloaded / totalBytes;
                     var overall = startFraction + fileFraction * (endFraction - startFraction);
-                    progress?.Report((overall, string.Format(Texts.DownloadingPretrainedModel, fileName)));
+                    progress?.Report((overall, message));
                 }
             }
         }

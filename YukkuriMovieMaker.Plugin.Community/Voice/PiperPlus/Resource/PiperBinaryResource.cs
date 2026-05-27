@@ -167,15 +167,13 @@ internal static class PiperBinaryResource
         var zipPath = Path.Combine(tempDir, assetName);
         var downloadUrl = $"https://github.com/{RepoOwner}/{RepoName}/releases/download/{version}/{assetName}";
 
-        var downloadProgress = progress is null ? null : new Progress<double>(
-            fraction => progress.Report((fraction * 0.9, Texts.DownloadingBinary)));
+        await DownloadFileAsync(downloadUrl, zipPath,
+            startFraction: 0.0, endFraction: 0.9,
+            Texts.DownloadingBinary, progress, cancellationToken);
 
-        await DownloadFileAsync(downloadUrl, zipPath, downloadProgress, cancellationToken);
-
-        progress?.Report((0.9, Texts.ExtractingBinary));
-        await Task.Run(
-            () => ZipFile.ExtractToDirectory(zipPath, tempDir, overwriteFiles: true),
-            cancellationToken);
+        await ExtractZipAsync(zipPath, tempDir,
+            startFraction: 0.9, endFraction: 1.0,
+            Texts.ExtractingBinary, progress, cancellationToken);
 
         File.Delete(zipPath);
     }
@@ -183,7 +181,10 @@ internal static class PiperBinaryResource
     static async Task DownloadFileAsync(
         string url,
         string destinationPath,
-        IProgress<double>? progress,
+        double startFraction,
+        double endFraction,
+        string message,
+        IProgress<(double Progress, string Message)>? progress,
         CancellationToken cancellationToken)
     {
         var client = HttpClientFactory.Client;
@@ -203,8 +204,54 @@ internal static class PiperBinaryResource
             await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
             downloaded += read;
             if (totalBytes > 0)
-                progress?.Report((double)downloaded / totalBytes);
+            {
+                var fileFraction = (double)downloaded / totalBytes;
+                var overall = startFraction + fileFraction * (endFraction - startFraction);
+                progress?.Report((overall, message));
+            }
         }
+    }
+
+    static async Task ExtractZipAsync(
+        string zipPath,
+        string destinationDir,
+        double startFraction,
+        double endFraction,
+        string message,
+        IProgress<(double Progress, string Message)>? progress,
+        CancellationToken cancellationToken)
+    {
+        await Task.Run(() =>
+        {
+            using var archive = ZipFile.OpenRead(zipPath);
+            var entries = archive.Entries;
+            var total = entries.Count;
+
+            for (var i = 0; i < total; i++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var entry = entries[i];
+                var destPath = Path.GetFullPath(Path.Combine(destinationDir, entry.FullName));
+
+                if (!destPath.StartsWith(Path.GetFullPath(destinationDir) + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+                    throw new InvalidOperationException($"Entry '{entry.FullName}' would extract outside destination directory.");
+
+                if (entry.FullName.EndsWith('/') || entry.FullName.EndsWith('\\'))
+                {
+                    Directory.CreateDirectory(destPath);
+                }
+                else
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
+                    entry.ExtractToFile(destPath, overwrite: true);
+                }
+
+                var fraction = (double)(i + 1) / total;
+                var overall = startFraction + fraction * (endFraction - startFraction);
+                progress?.Report((overall, message));
+            }
+        }, cancellationToken);
     }
 
     static void CommitInstall(
