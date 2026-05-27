@@ -12,8 +12,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         public PuppetDeformation Model { get; }
 
-        public string Position => $"{(Model.RestX.Values.FirstOrDefault()?.Value ?? 0):F0}px, {(Model.RestY.Values.FirstOrDefault()?.Value ?? 0):F0}px";
-
         public bool IsRestSelected
         {
             get => Model.IsRestSelected;
@@ -125,7 +123,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void Rest_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            OnPropertyChanged(nameof(Position));
             RestChanged?.Invoke(this, EventArgs.Empty);
         }
 
