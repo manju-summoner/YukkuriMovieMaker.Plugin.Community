@@ -20,7 +20,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         object? selectedTarget;
         PuppetDeformationItemViewModel? selectedItem;
-        IEditorInfo? editorInfo;
         int columns = 1;
         int rows = 1;
         object[] verticalLines = Array.Empty<object>();
@@ -38,13 +37,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         readonly Dictionary<PuppetDeformation, double[]> lastPinXValues = new();
         readonly Dictionary<PuppetDeformation, double[]> lastPinYValues = new();
 
-        public IEditorInfo? EditorInfo
-        {
-            get => editorInfo;
-            private set => Set(ref editorInfo, value);
-        }
-
-        public void SetEditorInfo(IEditorInfo info) => EditorInfo = info;
+        public void SetEditorInfo(IEditorInfo info) { }
 
         public int Columns { get => columns; private set => Set(ref columns, value); }
         public int Rows { get => rows; private set => Set(ref rows, value); }
