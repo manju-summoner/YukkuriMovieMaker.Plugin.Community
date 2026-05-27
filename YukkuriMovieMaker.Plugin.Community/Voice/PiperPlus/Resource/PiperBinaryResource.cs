@@ -167,27 +167,10 @@ internal static class PiperBinaryResource
         var zipPath = Path.Combine(tempDir, assetName);
         var downloadUrl = $"https://github.com/{RepoOwner}/{RepoName}/releases/download/{version}/{assetName}";
 
-        var client = HttpClientFactory.Client;
-        using var response = await client.GetAsync(
-            downloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        var downloadProgress = progress is null ? null : new Progress<double>(
+            fraction => progress.Report((fraction * 0.9, Texts.DownloadingBinary)));
 
-        var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-
-        await using (var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken))
-        await using (var fileStream = File.Create(zipPath))
-        {
-            var buffer = new byte[81920];
-            long downloaded = 0;
-            int read;
-            while ((read = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
-            {
-                await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
-                downloaded += read;
-                if (totalBytes > 0)
-                    progress?.Report(((double)downloaded / totalBytes * 0.9, Texts.DownloadingBinary));
-            }
-        }
+        await DownloadFileAsync(downloadUrl, zipPath, downloadProgress, cancellationToken);
 
         progress?.Report((0.9, Texts.ExtractingBinary));
         await Task.Run(
@@ -195,6 +178,33 @@ internal static class PiperBinaryResource
             cancellationToken);
 
         File.Delete(zipPath);
+    }
+
+    static async Task DownloadFileAsync(
+        string url,
+        string destinationPath,
+        IProgress<double>? progress,
+        CancellationToken cancellationToken)
+    {
+        var client = HttpClientFactory.Client;
+        using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+
+        await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        await using var fileStream = File.Create(destinationPath);
+
+        var buffer = new byte[81920];
+        long downloaded = 0;
+        int read;
+        while ((read = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
+        {
+            await fileStream.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+            downloaded += read;
+            if (totalBytes > 0)
+                progress?.Report((double)downloaded / totalBytes);
+        }
     }
 
     static void CommitInstall(
