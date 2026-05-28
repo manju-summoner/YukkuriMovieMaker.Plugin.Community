@@ -11,20 +11,20 @@ using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
 {
-    [VideoEffect("同色塗りつぶし", ["装飾"], ["fill"], IsAviUtlSupported = false)]
+    [VideoEffect(nameof(Texts.FillSamegroundEffectName), [VideoEffectCategories.Decoration], ["fill", "同色", "塗りつぶし"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public class FillSamegroundEffect : VideoEffectBase
     {
-        public override string Label => "同色塗りつぶし";
+        public override string Label => Texts.FillSamegroundEffectName;
 
-        [Display(GroupName = "同色塗りつぶし", Name = "不透明度", Order = 0)]
+        [Display(GroupName = nameof(Texts.FillSamegroundEffectName), Name = nameof(Texts.FillSamegroundOpacityName), ResourceType = typeof(Texts), Order = 0)]
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation Opacity { get; } = new Animation(100, 0, 100);
 
-        [Display(GroupName = "同色塗りつぶし", Name = "境界ぼかし", Order = 10)]
+        [Display(GroupName = nameof(Texts.FillSamegroundEffectName), Name = nameof(Texts.FillSamegroundBlurName), ResourceType = typeof(Texts), Order = 10)]
         [AnimationSlider("F1", "px", 0, 10)]
         public Animation Blur { get; } = new Animation(0, 0, 100000);
 
-        [Display(GroupName = "同色塗りつぶし", Name = "合成モード", Order = 20)]
+        [Display(GroupName = nameof(Texts.FillSamegroundEffectName), Name = nameof(Texts.FillSamegroundBlendModeName), ResourceType = typeof(Texts), Order = 20)]
         [EnumComboBox]
         public Blend BlendMode
         {
@@ -33,7 +33,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
         }
         Blend blendMode = Blend.Normal;
 
-        [Display(GroupName = "同色塗りつぶし", Name = "領域反転", Order = 30)]
+        [Display(GroupName = nameof(Texts.FillSamegroundEffectName), Name = nameof(Texts.FillSamegroundIsInvertedName), ResourceType = typeof(Texts), Order = 30)]
         [ToggleSlider]
         public bool IsInverted
         {
@@ -42,7 +42,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
         }
         bool isInverted;
 
-        [Display(GroupName = "同色塗りつぶし", Name = "模様のみ", Order = 40)]
+        [Display(GroupName = nameof(Texts.FillSamegroundEffectName), Name = nameof(Texts.FillSamegroundIsBrushOnlyName), ResourceType = typeof(Texts), Order = 40)]
         [ToggleSlider]
         public bool IsBrushOnly
         {
@@ -51,7 +51,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
         }
         bool isBrushOnly;
 
-        [Display(GroupName = "同色塗りつぶし", Name = "輝度保持", Order = 45)]
+        [Display(GroupName = nameof(Texts.FillSamegroundEffectName), Name = nameof(Texts.FillSamegroundPreserveLuminanceName), ResourceType = typeof(Texts), Order = 45)]
         [ToggleSlider]
         public bool PreserveLuminance
         {
@@ -60,7 +60,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
         }
         bool preserveLuminance;
 
-        [Display(GroupName = "対象", Name = "モード", Order = 100)]
+        [Display(GroupName = nameof(Texts.FillSamegroundTargetGroupName), Name = nameof(Texts.FillSamegroundModeName), ResourceType = typeof(Texts), Order = 100)]
         [EnumComboBox]
         public FillSamegroundMode Mode
         {
@@ -69,17 +69,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
         }
         FillSamegroundMode mode = FillSamegroundMode.Position;
 
-        [Display(GroupName = "対象", Name = "X", Order = 110)]
+        [Display(GroupName = nameof(Texts.FillSamegroundTargetGroupName), Name = nameof(Texts.FillSamegroundXName), ResourceType = typeof(Texts), Order = 110)]
         [AnimationSlider("F1", "px", -2000, 2000)]
         [ShowPropertyEditorWhen(nameof(Mode), FillSamegroundMode.Position | FillSamegroundMode.PositionColor)]
         public Animation X { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
-        [Display(GroupName = "対象", Name = "Y", Order = 111)]
+        [Display(GroupName = nameof(Texts.FillSamegroundTargetGroupName), Name = nameof(Texts.FillSamegroundYName), ResourceType = typeof(Texts), Order = 111)]
         [AnimationSlider("F1", "px", -2000, 2000)]
         [ShowPropertyEditorWhen(nameof(Mode), FillSamegroundMode.Position | FillSamegroundMode.PositionColor)]
         public Animation Y { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
-        [Display(GroupName = "対象", Name = "対象色", Order = 120)]
+        [Display(GroupName = nameof(Texts.FillSamegroundTargetGroupName), Name = nameof(Texts.FillSamegroundTargetColorName), ResourceType = typeof(Texts), Order = 120)]
         [ColorPicker]
         [ShowPropertyEditorWhen(nameof(Mode), FillSamegroundMode.Color)]
         public Color TargetColor
@@ -89,11 +89,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
         }
         Color targetColor = Color.FromRgb(255, 0, 0);
 
-        [Display(GroupName = "対象", Name = "許容範囲", Order = 130)]
+        [Display(GroupName = nameof(Texts.FillSamegroundTargetGroupName), Name = nameof(Texts.FillSamegroundToleranceName), ResourceType = typeof(Texts), Order = 130)]
         [AnimationSlider("F0", "", 0, 128)]
         public Animation Tolerance { get; } = new Animation(15, 0, 255);
 
-        [Display(GroupName = "模様", Order = 200, AutoGenerateField = true)]
+        [Display(GroupName = nameof(Texts.FillSamegroundBrushGroupName), Order = 200, AutoGenerateField = true)]
         public YukkuriMovieMaker.Plugin.Brush.Brush Brush { get; } = new YukkuriMovieMaker.Plugin.Brush.Brush();
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
