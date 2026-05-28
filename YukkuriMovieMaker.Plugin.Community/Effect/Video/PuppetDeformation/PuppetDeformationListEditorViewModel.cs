@@ -76,7 +76,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 EndEdit?.Invoke(this, EventArgs.Empty);
             });
 
-            RemovePinCommand = new ActionCommand(_ => selectedItem != null && Effect.Pins.Count > 0, _ =>
+            RemovePinCommand = new ActionCommand(_ => selectedItem != null, _ =>
             {
                 if (selectedItem == null) return;
                 var target = selectedItem.Model;
@@ -199,10 +199,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var start = Math.Min(min, targetIndex);
             var end = Math.Max(max, targetIndex);
 
-            for (var i = 0; i < allViewModels.Count; i++)
+            for (var i = start; i <= end; i++)
             {
-                var inRange = (start <= i && i <= end);
-                if (!inRange) continue;
                 var item = allViewModels[i];
                 if (isOffset)
                 {
@@ -227,11 +225,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         void RebuildViewModels()
         {
             var pins = Effect.Pins;
+            var existingByModel = allViewModels.ToDictionary(x => x.Model);
             var newAllViewModels = new List<PuppetDeformationItemViewModel>(pins.Count);
             foreach (var pin in pins)
             {
-                var vm = allViewModels.FirstOrDefault(x => x.Model == pin)
-                         ?? new PuppetDeformationItemViewModel(pin, selectRestCommand, selectOffsetCommand);
+                var vm = existingByModel.TryGetValue(pin, out var existing)
+                         ? existing
+                         : new PuppetDeformationItemViewModel(pin, selectRestCommand, selectOffsetCommand);
                 newAllViewModels.Add(vm);
             }
 
