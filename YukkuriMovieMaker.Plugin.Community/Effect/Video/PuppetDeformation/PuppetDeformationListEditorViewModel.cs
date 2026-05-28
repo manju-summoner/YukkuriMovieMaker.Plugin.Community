@@ -12,7 +12,7 @@ using YukkuriMovieMaker.ViewModels;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
-    internal sealed class PuppetDeformationListEditorViewModel : Bindable, IDisposable, IPropertyEditorControl2, IPropertyEditorControl
+    internal sealed class PuppetDeformationListEditorViewModel : Bindable, IDisposable
     {
         readonly ICommand selectRestCommand;
         readonly ICommand selectOffsetCommand;
@@ -29,19 +29,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         bool isMutatingSelection;
         bool disposedValue;
 
-        AnimationType oldRestXAnimationType;
-        AnimationType oldRestYAnimationType;
-        double oldRestXSpan;
-        double oldRestYSpan;
-        double[]? oldRestXValues;
-        double[]? oldRestYValues;
-
-        AnimationType oldOffsetXAnimationType;
-        AnimationType oldOffsetYAnimationType;
-        double oldOffsetXSpan;
-        double oldOffsetYSpan;
-        double[]? oldOffsetXValues;
-        double[]? oldOffsetYValues;
+        EditSnapshot? activeSnapshot;
 
         public void SetEditorInfo(IEditorInfo info) { }
 
@@ -415,14 +403,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void SyncRestValues()
         {
-            if (selectedItem == null || oldRestXValues == null || oldRestYValues == null) return;
+            if (selectedItem == null || activeSnapshot == null) return;
 
             var m = selectedItem.Model;
             var selectedPins = Effect.Pins.Where(x => x.IsRestSelected).ToList();
             if (selectedPins.Count <= 1) return;
 
-            var changedAnimType = oldRestXAnimationType != m.RestX.AnimationType || oldRestYAnimationType != m.RestY.AnimationType;
-            var changedSpan = oldRestXSpan != m.RestX.Span || oldRestYSpan != m.RestY.Span;
+            var changedAnimType = activeSnapshot.RestXAnimationType != m.RestX.AnimationType || activeSnapshot.RestYAnimationType != m.RestY.AnimationType;
+            var changedSpan = activeSnapshot.RestXSpan != m.RestX.Span || activeSnapshot.RestYSpan != m.RestY.Span;
 
             if (changedAnimType)
             {
@@ -443,27 +431,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 return;
             }
 
-            var changedXIndex = FindChangedValueIndex(oldRestXValues, m.RestX);
-            var changedYIndex = FindChangedValueIndex(oldRestYValues, m.RestY);
+            var changedXIndex = FindChangedValueIndex(activeSnapshot.RestXValues, m.RestX);
+            var changedYIndex = FindChangedValueIndex(activeSnapshot.RestYValues, m.RestY);
             if (changedXIndex < 0 && changedYIndex < 0) return;
 
             foreach (var point in selectedPins.Where(p => p != m))
             {
-                ApplyValueDelta(changedXIndex, m.RestX, point.RestX, oldRestXValues, 1f);
-                ApplyValueDelta(changedYIndex, m.RestY, point.RestY, oldRestYValues, 1f);
+                ApplyValueDelta(changedXIndex, m.RestX, point.RestX, activeSnapshot.RestXValues, 1f);
+                ApplyValueDelta(changedYIndex, m.RestY, point.RestY, activeSnapshot.RestYValues, 1f);
             }
         }
 
         void SyncOffsetValues()
         {
-            if (selectedItem == null || oldOffsetXValues == null || oldOffsetYValues == null) return;
+            if (selectedItem == null || activeSnapshot == null) return;
 
             var m = selectedItem.Model;
             var selectedPins = Effect.Pins.Where(x => x.IsOffsetSelected).ToList();
             if (selectedPins.Count <= 1) return;
 
-            var changedAnimType = oldOffsetXAnimationType != m.OffsetX.AnimationType || oldOffsetYAnimationType != m.OffsetY.AnimationType;
-            var changedSpan = oldOffsetXSpan != m.OffsetX.Span || oldOffsetYSpan != m.OffsetY.Span;
+            var changedAnimType = activeSnapshot.OffsetXAnimationType != m.OffsetX.AnimationType || activeSnapshot.OffsetYAnimationType != m.OffsetY.AnimationType;
+            var changedSpan = activeSnapshot.OffsetXSpan != m.OffsetX.Span || activeSnapshot.OffsetYSpan != m.OffsetY.Span;
 
             if (changedAnimType)
             {
@@ -487,8 +475,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var syncMode = Effect.SyncMode;
             if (syncMode == PuppetDeformationEditorPointsSync.None) return;
 
-            var changedXIndex = FindChangedValueIndex(oldOffsetXValues, m.OffsetX);
-            var changedYIndex = FindChangedValueIndex(oldOffsetYValues, m.OffsetY);
+            var changedXIndex = FindChangedValueIndex(activeSnapshot.OffsetXValues, m.OffsetX);
+            var changedYIndex = FindChangedValueIndex(activeSnapshot.OffsetYValues, m.OffsetY);
             if (changedXIndex < 0 && changedYIndex < 0) return;
 
             var sourceVector = new Vector2(
@@ -509,8 +497,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             foreach (var point in selectedPins.Where(p => p != m))
             {
                 var ratio = ComputeDistanceRatio(syncMode, point, sourceVector, maxDistance);
-                ApplyValueDelta(changedXIndex, m.OffsetX, point.OffsetX, oldOffsetXValues, ratio);
-                ApplyValueDelta(changedYIndex, m.OffsetY, point.OffsetY, oldOffsetYValues, ratio);
+                ApplyValueDelta(changedXIndex, m.OffsetX, point.OffsetX, activeSnapshot.OffsetXValues, ratio);
+                ApplyValueDelta(changedYIndex, m.OffsetY, point.OffsetY, activeSnapshot.OffsetYValues, ratio);
             }
         }
 
@@ -545,19 +533,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (selectedItem != null)
             {
                 var m = selectedItem.Model;
-                oldRestXAnimationType = m.RestX.AnimationType;
-                oldRestYAnimationType = m.RestY.AnimationType;
-                oldRestXSpan = m.RestX.Span;
-                oldRestYSpan = m.RestY.Span;
-                oldRestXValues = m.RestX.Values.Select(x => x.Value).ToArray();
-                oldRestYValues = m.RestY.Values.Select(x => x.Value).ToArray();
-
-                oldOffsetXAnimationType = m.OffsetX.AnimationType;
-                oldOffsetYAnimationType = m.OffsetY.AnimationType;
-                oldOffsetXSpan = m.OffsetX.Span;
-                oldOffsetYSpan = m.OffsetY.Span;
-                oldOffsetXValues = m.OffsetX.Values.Select(x => x.Value).ToArray();
-                oldOffsetYValues = m.OffsetY.Values.Select(x => x.Value).ToArray();
+                activeSnapshot = new EditSnapshot(m);
             }
 
             BeginEdit?.Invoke(this, EventArgs.Empty);
@@ -571,10 +547,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 SyncOffsetValues();
             }
 
-            oldRestXValues = null;
-            oldRestYValues = null;
-            oldOffsetXValues = null;
-            oldOffsetYValues = null;
+            activeSnapshot = null;
 
             EndEdit?.Invoke(this, EventArgs.Empty);
         }
@@ -599,6 +572,40 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        sealed class EditSnapshot
+        {
+            public AnimationType RestXAnimationType { get; }
+            public AnimationType RestYAnimationType { get; }
+            public double RestXSpan { get; }
+            public double RestYSpan { get; }
+            public double[] RestXValues { get; }
+            public double[] RestYValues { get; }
+
+            public AnimationType OffsetXAnimationType { get; }
+            public AnimationType OffsetYAnimationType { get; }
+            public double OffsetXSpan { get; }
+            public double OffsetYSpan { get; }
+            public double[] OffsetXValues { get; }
+            public double[] OffsetYValues { get; }
+
+            public EditSnapshot(PuppetDeformation model)
+            {
+                RestXAnimationType = model.RestX.AnimationType;
+                RestYAnimationType = model.RestY.AnimationType;
+                RestXSpan = model.RestX.Span;
+                RestYSpan = model.RestY.Span;
+                RestXValues = model.RestX.Values.Select(x => x.Value).ToArray();
+                RestYValues = model.RestY.Values.Select(x => x.Value).ToArray();
+
+                OffsetXAnimationType = model.OffsetX.AnimationType;
+                OffsetYAnimationType = model.OffsetY.AnimationType;
+                OffsetXSpan = model.OffsetX.Span;
+                OffsetYSpan = model.OffsetY.Span;
+                OffsetXValues = model.OffsetX.Values.Select(x => x.Value).ToArray();
+                OffsetYValues = model.OffsetY.Values.Select(x => x.Value).ToArray();
+            }
         }
     }
 }
