@@ -63,10 +63,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 || this.stiffness != stiffness
                 || this.imageWidth != imageWidth
                 || this.imageHeight != imageHeight
-                || !PinSamplesMatchBuffer(samples, pinCount))
+                || !PinSamplesMatchBuffer(samples))
             {
                 gpuCache?.Dispose();
-                gpuCache = BuildGpuCache(pinCount, stiffness, imageWidth, imageHeight, samples);
+                gpuCache = BuildGpuCache(stiffness, imageWidth, imageHeight, samples);
 
                 effect.SetInput(1, gpuCache.DataBitmap, true);
                 effect.PinCount = pinCount;
@@ -93,9 +93,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             };
         }
 
-        bool PinSamplesMatchBuffer(List<PinSample> samples, int pinCount)
+        bool PinSamplesMatchBuffer(List<PinSample> samples)
         {
-            for (var i = 0; i < pinCount; i++)
+            for (var i = 0; i < samples.Count; i++)
             {
                 var s = samples[i];
                 if (pinDataBuffer[i * 4 + 0] != s.Rest.X) return false;
@@ -107,15 +107,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         }
 
         PinGpuCache BuildGpuCache(
-            int pinCount,
             float stiffness,
             float imageWidth,
             float imageHeight,
             List<PinSample> samples)
         {
             var maxPins = PuppetDeformationCustomEffect.MaxPins;
+            var count = samples.Count;
 
-            for (var i = 0; i < pinCount; i++)
+            for (var i = 0; i < count; i++)
             {
                 var s = samples[i];
                 pinDataBuffer[i * 4 + 0] = s.Rest.X;
@@ -123,7 +123,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 pinDataBuffer[i * 4 + 2] = s.Current.X;
                 pinDataBuffer[i * 4 + 3] = s.Current.Y;
             }
-            Array.Clear(pinDataBuffer, pinCount * 4, (maxPins - pinCount) * 4);
+            Array.Clear(pinDataBuffer, count * 4, (maxPins - count) * 4);
 
             ID2D1Bitmap dataBitmap;
             unsafe
@@ -142,10 +142,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
 
             (float left, float top, float right, float bottom) tightBounds;
-            if (pinCount > 0 && imageWidth > 0 && imageHeight > 0)
+            if (count > 0 && imageWidth > 0 && imageHeight > 0)
             {
-                var restList = new SampleProjection(samples, pinCount, static s => s.Rest);
-                var currentList = new SampleProjection(samples, pinCount, static s => s.Current);
+                var restList = new SampleProjection(samples, count, static s => s.Rest);
+                var currentList = new SampleProjection(samples, count, static s => s.Current);
                 tightBounds = MlsDeformBounds.Compute(imageWidth, imageHeight, restList, currentList, stiffness);
             }
             else
@@ -167,11 +167,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 var pA = samples[edge.A].Current;
                 var pB = samples[edge.B].Current;
-                controllers.Add(new VideoEffectController(item, new[]
-                {
+                controllers.Add(new VideoEffectController(item, [
                     new ControllerPoint(new Vector3(pA.X, pA.Y, 0f)),
                     new ControllerPoint(new Vector3(pB.X, pB.Y, 0f)),
-                })
+                ])
                 { Connection = VideoControllerPointConnection.Line });
             }
 
@@ -197,16 +196,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     IsSelected = pin.IsRestSelected,
                     Shape = VideoControllerPointShape.Circle
                 };
-                controllers.Add(new VideoEffectController(item, new[] { restPoint }));
+                controllers.Add(new VideoEffectController(item, [restPoint]));
 
                 if (!s.IsEnabled)
                     continue;
 
-                controllers.Add(new VideoEffectController(item, new[]
-                {
+                controllers.Add(new VideoEffectController(item, [
                     new ControllerPoint(new Vector3(s.Rest.X, s.Rest.Y, 0f)),
                     new ControllerPoint(new Vector3(s.Current.X, s.Current.Y, 0f)),
-                })
+                ])
                 { Connection = VideoControllerPointConnection.Line });
 
                 var offsetPoint = new ControllerPoint(
@@ -227,7 +225,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     IsSelected = pin.IsOffsetSelected,
                     Shape = VideoControllerPointShape.Point
                 };
-                controllers.Add(new VideoEffectController(item, new[] { offsetPoint }));
+                controllers.Add(new VideoEffectController(item, [offsetPoint]));
             }
 
             return controllers;
@@ -235,9 +233,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void ApplyRestDelta(double deltaX, double deltaY)
         {
-            var selectedPins = item.Pins.Where(p => p.IsRestSelected).ToList();
-            foreach (var p in selectedPins)
+            foreach (var p in item.Pins)
             {
+                if (!p.IsRestSelected) continue;
                 p.RestX.AddToEachValues(deltaX);
                 p.RestY.AddToEachValues(deltaY);
             }
@@ -281,7 +279,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 var maxX = selectedPins.Max(p => (float)(p.RestX.Values.FirstOrDefault()?.Value ?? 0));
                 var minY = selectedPins.Min(p => (float)(p.RestY.Values.FirstOrDefault()?.Value ?? 0));
                 var maxY = selectedPins.Max(p => (float)(p.RestY.Values.FirstOrDefault()?.Value ?? 0));
-                Vector2[] corners = { new(minX, minY), new(maxX, minY), new(minX, maxY), new(maxX, maxY) };
+                Vector2[] corners = [new(minX, minY), new(maxX, minY), new(minX, maxY), new(maxX, maxY)];
                 maxDistance = corners.Max(c => Vector2.Distance(c, sourceRest)) + 1f;
             }
 
