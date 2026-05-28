@@ -72,7 +72,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
             }
 
             public EffectImpl() : base(
-                new Uri("pack://application:,,,/YukkuriMovieMaker.Plugin.Community;component/Resources/Shader/FillSamegroundShader.cso")
+                new Uri("pack://application:,,,/YukkuriMovieMaker.Plugin.Community;component/Resources/Shader/FillSamegroundShader.cso"))
             {
             }
 
