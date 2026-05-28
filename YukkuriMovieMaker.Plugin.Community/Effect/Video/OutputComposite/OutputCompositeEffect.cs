@@ -10,7 +10,7 @@ using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
 {
-    [VideoEffect(nameof(Texts.OutputCompositeEffectName), [VideoEffectCategories.Composition], ["合成", "composite", "blend", "output", "出力", "CustomValue"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.OutputCompositeEffectName), [VideoEffectCategories.Composition], ["分岐", "branch", "合成", "composite", "blend"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public class OutputCompositeEffect : VideoEffectBase
     {
         public override string Label => $"{Texts.OutputCompositeEffectName} {TargetIndex}";
@@ -21,6 +21,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
         [DefaultValue(1)]
         public int TargetIndex { get => targetIndex; set => Set(ref targetIndex, value, nameof(TargetIndex), nameof(Label)); }
         int targetIndex = 1;
+
+        [Display(GroupName = nameof(Texts.OutputCompositeEffectName), Name = nameof(Texts.OutputCompositeOpacityName), Description = nameof(Texts.OutputCompositeOpacityDesc), ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 0, 100)]
+        public Animation Opacity { get; } = new Animation(100, 0, 100);
 
         [Display(GroupName = nameof(Texts.OutputCompositeEffectName), Name = nameof(Texts.OutputCompositeBlendModeName), Description = nameof(Texts.OutputCompositeBlendModeDesc), ResourceType = typeof(Texts))]
         [EnumComboBox]
@@ -34,6 +38,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
             return new OutputCompositeEffectProcessor(devices, this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [Opacity];
     }
 }

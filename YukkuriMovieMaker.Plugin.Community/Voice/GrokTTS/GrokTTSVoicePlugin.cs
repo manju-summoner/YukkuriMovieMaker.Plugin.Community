@@ -7,10 +7,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GrokTTS
 {
     internal class GrokTTSVoicePlugin : IVoicePlugin
     {
-        public IEnumerable<IVoiceSpeaker> Voices =>
-            !string.IsNullOrWhiteSpace(GrokTTSSettings.Default.ApiKey)
-                ? GrokTTSVoices.Voices.Select(v => new GrokTTSVoiceSpeaker(v))
-                : [];
+        public IEnumerable<IVoiceSpeaker> Voices
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(GrokTTSSettings.Default.ApiKey))
+                    return [];
+
+                var seen = new HashSet<string>();
+                var result = new List<IVoiceSpeaker>();
+
+                foreach (var v in GrokTTSVoices.Defaults)
+                {
+                    if (string.IsNullOrWhiteSpace(v.Id) || !seen.Add(v.Id))
+                        continue;
+                    result.Add(new GrokTTSVoiceSpeaker(v));
+                }
+                foreach (var v in GrokTTSSettings.Default.Voices)
+                {
+                    if (string.IsNullOrWhiteSpace(v.Id) || !seen.Add(v.Id))
+                        continue;
+                    result.Add(new GrokTTSVoiceSpeaker(v));
+                }
+                return result;
+            }
+        }
 
         public bool CanUpdateVoices => false;
 

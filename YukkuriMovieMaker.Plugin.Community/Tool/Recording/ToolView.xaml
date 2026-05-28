@@ -1,0 +1,159 @@
+﻿<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Tool.Recording.ToolView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Tool.Recording"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             mc:Ignorable="d"
+             d:DesignHeight="560"
+             d:DesignWidth="760">
+    <UserControl.Resources>
+        <Style x:Key="ToolButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource ToolButtonStyle}"/>
+    </UserControl.Resources>
+    <i:Interaction.Behaviors>
+        <pb:MessageBoxBehavior ViewModel="{Binding MessageBoxViewModel, Mode=OneWay}"/>
+        <pb:DialogBehavior Content="{Binding RenameRecord}" IsModal="True">
+            <pb:DialogBehavior.Style>
+                <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}">
+                    <Setter Property="Title" Value="{x:Static local:Texts.RenameRecordDialogTitle}"/>
+                    <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+                    <Setter Property="ResizeMode" Value="NoResize"/>
+                    <Setter Property="ShowInTaskbar" Value="False"/>
+                </Style>
+            </pb:DialogBehavior.Style>
+            <pb:DialogBehavior.ContentTemplate>
+                <DataTemplate>
+                    <local:RenameRecordView/>
+                </DataTemplate>
+            </pb:DialogBehavior.ContentTemplate>
+        </pb:DialogBehavior>
+    </i:Interaction.Behaviors>
+    <Grid Grid.IsSharedSizeScope="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.RecordingDevice}" VerticalAlignment="Center" Margin="6,0"/>
+            <ComboBox Grid.Column="1"
+                      ItemsSource="{Binding AvailableDevices}"
+                      DisplayMemberPath="FriendlyName"
+                      SelectedValuePath="Id"
+                      SelectedValue="{Binding SelectedDeviceId}"
+                      VerticalContentAlignment="Center"
+                      Height="26" />
+            <Button Grid.Column="2" Width="26" Padding="2" Content="{DynamicResource {x:Static icons:IconKeys.Refresh}}" ToolTip="{x:Static local:Texts.Refresh}" Command="{Binding RefreshDevicesCommand}"/>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.SaveDestination}" VerticalAlignment="Center" Margin="6,0"/>
+            <TextBox Grid.Column="1" Text="{Binding OutputDirectory, UpdateSourceTrigger=LostFocus}" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="26"/>
+            <Button Grid.Column="2" Width="26" Padding="2" Content="{DynamicResource {x:Static icons:IconKeys.FolderOpen}}" ToolTip="{x:Static local:Texts.Browse}" Command="{Binding BrowseOutputDirectoryCommand}"/>
+            <Button Grid.Column="3" Width="26" Padding="4" Content="{DynamicResource {x:Static icons:IconKeys.Backspace}}" ToolTip="{x:Static local:Texts.ResetToDefault}" Command="{Binding ResetOutputDirectoryCommand}"/>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="LabelColumn"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" MinWidth="100"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.ToolName}" VerticalAlignment="Center" Margin="6,0"/>
+            <ProgressBar Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding CurrentVolume}"/>
+            <Button Grid.Column="2">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource ToolButtonStyle}">
+                        <Setter Property="Content" Value="{x:Static local:Texts.StartRecording}"/>
+                        <Setter Property="Command" Value="{Binding StartRecordingCommand}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsRecording}" Value="True">
+                                <Setter Property="Content" Value="{x:Static local:Texts.StopRecording}"/>
+                                <Setter Property="Command" Value="{Binding StopRecordingCommand}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
+
+        <Grid Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <DataGrid Grid.Row="0"
+                      ItemsSource="{Binding Records}"
+                      SelectedItem="{Binding SelectedRecord}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="None"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      CanUserResizeRows="False"
+                      SelectionMode="Single"
+                      PreviewMouseLeftButtonDown="RecordList_PreviewMouseLeftButtonDown"
+                      PreviewMouseLeftButtonUp="RecordList_PreviewMouseLeftButtonUp"
+                      PreviewMouseMove="RecordList_PreviewMouseMove">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{x:Static local:Texts.RecordFileName}" Binding="{Binding FileName}" Width="*"/>
+                    <DataGridTextColumn Header="{x:Static local:Texts.RecordUpdatedAt}" Binding="{Binding UpdatedAtText}" Width="Auto"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <WrapPanel Grid.Column="0">
+                    <Button MinWidth="84" Command="{Binding PlaySelectedCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource ToolButtonStyle}">
+                                <Setter Property="Content" Value="{x:Static local:Texts.PlaySelected}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                        <Setter Property="Content" Value="{x:Static local:Texts.Stop}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button MinWidth="84" Content="{x:Static local:Texts.DeleteSelected}" Command="{Binding DeleteSelectedCommand}" />
+                    <Button MinWidth="84" Content="{x:Static local:Texts.CopyPath}" Command="{Binding CopyPathCommand}" />
+                    <Button MinWidth="84" Content="{x:Static local:Texts.RenameSelected}" Command="{Binding RenameSelectedCommand}" />
+                </WrapPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                    <Button MinWidth="84" Content="{x:Static local:Texts.RefreshRecords}" Command="{Binding RefreshRecordsCommand}" />
+                    <Button MinWidth="84" Content="{x:Static local:Texts.OpenFolder}" Command="{Binding OpenFolderCommand}" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <TextBlock Grid.Row="5" Text="{x:Static local:Texts.RecordingToolMemo}" TextWrapping="Wrap"/>
+    </Grid>
+</UserControl>

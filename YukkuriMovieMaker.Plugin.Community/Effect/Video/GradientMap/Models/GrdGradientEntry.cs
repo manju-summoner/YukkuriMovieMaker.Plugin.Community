@@ -6,21 +6,14 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Services;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Models;
 
-public sealed class GrdGradientEntry : INotifyPropertyChanged
+public sealed class GrdGradientEntry(int index, string name, string filePath) : INotifyPropertyChanged
 {
     private bool _thumbnailLoaded;
     private bool _thumbnailLoading;
 
-    public GrdGradientEntry(int index, string name, string filePath)
-    {
-        Index = index;
-        Name = name;
-        FilePath = filePath;
-    }
-
-    public int Index { get; }
-    public string Name { get; }
-    public string FilePath { get; }
+    public int Index { get; } = index;
+    public string Name { get; } = name;
+    public string FilePath { get; } = filePath;
 
     public BitmapSource? Thumbnail
     {

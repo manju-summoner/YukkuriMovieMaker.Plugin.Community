@@ -9,18 +9,18 @@ internal class IrodoriTTSSettings : SettingsBase<IrodoriTTSSettings>
     public override bool HasSettingView => true;
     public override object? SettingView => new IrodoriTTSSettingsView();
 
-    public string TTSUrl { get => field; set => Set(ref field, value); } = string.Empty;
-    public string VoiceDesignUrl { get => field; set => Set(ref field, value); } = string.Empty;
-    public string GradioAppPath { get => field; set => Set(ref field, value); } = string.Empty;
-    public int ServerPort { get => field; set => Set(ref field, value); } = 7860;
-    public bool ShowConsoleWindow { get => field; set => Set(ref field, value); } = true;
+    public string TTSUrl { get; set => Set(ref field, value); } = string.Empty;
+    public string VoiceDesignUrl { get; set => Set(ref field, value); } = string.Empty;
+    public string GradioAppPath { get; set => Set(ref field, value); } = string.Empty;
+    public int ServerPort { get; set => Set(ref field, value); } = 7860;
+    public bool ShowConsoleWindow { get; set => Set(ref field, value); } = true;
 
     // VoiceDesign の前回設定（話者名以外）
-    public string LastCaption { get => field; set => Set(ref field, value); } = string.Empty;
-    public string LastSpeechText { get => field; set => Set(ref field, value); } = string.Empty;
-    public string LastSeed { get => field; set => Set(ref field, value); } = string.Empty;
-    public double LastNumSteps { get => field; set => Set(ref field, value); } = 40;
-    public string LastVoiceDesignCheckpoint { get => field; set => Set(ref field, value); } = string.Empty;
+    public string LastCaption { get; set => Set(ref field, value); } = string.Empty;
+    public string LastSpeechText { get; set => Set(ref field, value); } = string.Empty;
+    public string LastSeed { get; set => Set(ref field, value); } = string.Empty;
+    public double LastNumSteps { get; set => Set(ref field, value); } = 40;
+    public string LastVoiceDesignCheckpoint { get; set => Set(ref field, value); } = string.Empty;
 
     public override void Initialize() { }
 }

@@ -8,7 +8,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
     {
         public bool ClearBrowserCache
         {
-            get => field;
+            get;
             set
             {
                 if (Set(ref field, value))
@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         public bool ClearPluginHistory
         {
-            get => field;
+            get;
             set
             {
                 if (Set(ref field, value))
@@ -28,7 +28,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Browser
 
         public bool ClearPluginFavicon
         {
-            get => field;
+            get;
             set
             {
                 if (Set(ref field, value))

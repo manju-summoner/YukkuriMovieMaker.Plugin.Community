@@ -5,18 +5,12 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
-    internal class ExplorerItemComparer : IComparer<IExplorerItemViewModel>
+    internal class ExplorerItemComparer(ExplorerSortKey key, ExplorerSortOrder order) : IComparer<IExplorerItemViewModel>
     {
         static readonly NaturalComparer NaturalComparer = new();
 
-        readonly ExplorerSortKey key;
-        readonly ExplorerSortOrder order;
-
-        public ExplorerItemComparer(ExplorerSortKey key, ExplorerSortOrder order)
-        {
-            this.key = key;
-            this.order = order;
-        }
+        readonly ExplorerSortKey key = key;
+        readonly ExplorerSortOrder order = order;
 
         public int Compare(IExplorerItemViewModel? x, IExplorerItemViewModel? y)
         {

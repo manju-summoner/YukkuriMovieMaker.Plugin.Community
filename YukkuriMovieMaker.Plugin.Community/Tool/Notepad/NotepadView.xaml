@@ -8,12 +8,77 @@
              xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
              xmlns:ps="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
              xmlns:pt="clr-namespace:YukkuriMovieMaker.Views.Triggers;assembly=YukkuriMovieMaker.Plugin"
-             xmlns:pc="clr-namespace:YukkuriMovieMaker.Views.Converters;assembly=YukkuriMovieMaker.Plugin"
-             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
-             mc:Ignorable="d" 
+             xmlns:controls="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
+             xmlns:search="clr-namespace:ICSharpCode.AvalonEdit.Search;assembly=ICSharpCode.AvalonEdit"
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type={x:Type local:NotepadViewModel}}">
+    <UserControl.Resources>
+        <Style TargetType="{x:Type search:SearchPanel}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type search:SearchPanel}">
+                        <Border Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+                                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                                BorderThickness="1"
+                                CornerRadius="3"
+                                HorizontalAlignment="Right" VerticalAlignment="Top"
+                                Margin="0,4,18,0" Padding="4"
+                                Cursor="Arrow">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox Name="PART_searchTextBox"
+                                         Width="200" MinHeight="24"
+                                         VerticalContentAlignment="Center"
+                                         Margin="0,0,4,0">
+                                    <TextBox.Text>
+                                        <Binding Path="SearchPattern"
+                                                 RelativeSource="{RelativeSource TemplatedParent}"
+                                                 UpdateSourceTrigger="PropertyChanged">
+                                            <Binding.ValidationRules>
+                                                <ExceptionValidationRule/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+
+                                <ToggleButton IsChecked="{Binding MatchCase, RelativeSource={RelativeSource TemplatedParent}}"
+                                              ToolTip="{Binding Localization.MatchCaseText, RelativeSource={RelativeSource TemplatedParent}}"
+                                              Content="{DynamicResource {x:Static icons:IconKeys.FormatLetterCase}}"
+                                              Width="24" Height="24"
+                                              Padding="3"/>
+                                <ToggleButton IsChecked="{Binding WholeWords, RelativeSource={RelativeSource TemplatedParent}}"
+                                              ToolTip="{Binding Localization.MatchWholeWordsText, RelativeSource={RelativeSource TemplatedParent}}"
+                                              Content="{DynamicResource {x:Static icons:IconKeys.FormatLetterMatches}}"
+                                              Width="24" Height="24"
+                                              Padding="3"/>
+                                <ToggleButton IsChecked="{Binding UseRegex, RelativeSource={RelativeSource TemplatedParent}}"
+                                              ToolTip="{Binding Localization.UseRegexText, RelativeSource={RelativeSource TemplatedParent}}"
+                                              Content="{DynamicResource {x:Static icons:IconKeys.Regex}}"
+                                              Width="24" Height="24"
+                                              Padding="3"/>
+
+                                <Button Command="search:SearchCommands.FindPrevious"
+                                        ToolTip="{Binding Localization.FindPreviousText, RelativeSource={RelativeSource TemplatedParent}}"
+                                        Content="{DynamicResource {x:Static icons:IconKeys.ChevronUp}}"
+                                        Width="24" Height="24" Margin="3,0,0,0" Padding="3"/>
+                                <Button Command="search:SearchCommands.FindNext"
+                                        ToolTip="{Binding Localization.FindNextText, RelativeSource={RelativeSource TemplatedParent}}"
+                                        Content="{DynamicResource {x:Static icons:IconKeys.ChevronDown}}"
+                                        Width="24" Height="24" Padding="3"/>
+                                <Button Command="search:SearchCommands.CloseSearchPanel"
+                                        ToolTip="{x:Static local:Texts.SearchClose}"
+                                        Content="{DynamicResource {x:Static icons:IconKeys.Close}}"
+                                        Width="24" Height="24" Margin="3,0,0,0" Padding="3"
+                                        Focusable="False"/>
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
     <i:Interaction.Behaviors>
         <pb:OpenFileDialogBehavior ViewModel="{Binding OpenFileDialog}"/>
         <pb:SaveFileDialogBehavior ViewModel="{Binding SaveFileDialog}"/>
@@ -23,7 +88,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <ToolBarTray Grid.Row="0" Name="ToolBar">
+        <ToolBarTray Grid.Row="0">
             <i:Interaction.Triggers>
                 <pt:PreviewMouseWheelEventTrigger ModifierKeys="Ctrl" DeltaMode="Down" Handled="True">
                     <i:InvokeCommandAction Command="{Binding Source={x:Static ps:CommandSettings.Default},Path=[SizeDownToolBar]}" PassEventArgsToCommand="True"/>
@@ -39,23 +104,72 @@
                 <Button Content="{DynamicResource {x:Static icons:IconKeys.ContentSave}}" Command="{Binding SaveCommand}" CommandParameter="{Binding FilePath}" ToolTip="{x:Static local:Texts.Save}"/>
                 <Button Content="{DynamicResource {x:Static icons:IconKeys.ContentSaveEdit}}" Command="{Binding SaveCommand}" ToolTip="{x:Static local:Texts.SaveAs}"/>
                 <Separator/>
-                <ToggleButton Content="{DynamicResource {x:Static icons:IconKeys.FormatTextWrappingWrap}}" IsChecked="{Binding WordWrap}" ToolTip="{x:Static local:Texts.WordWrap}"/>
+                <Button Content="{DynamicResource {x:Static icons:IconKeys.Image}}" Command="{Binding InsertImageCommand}" ToolTip="{x:Static local:Texts.InsertImage}"/>
+                <Separator/>
+                <Button Content="{DynamicResource {x:Static icons:IconKeys.Magnify}}" Command="{Binding ToggleSearchCommand}" ToolTip="{x:Static local:Texts.Search}"/>
+                <Separator/>
+                <controls:DropDownButton Content="{DynamicResource {x:Static icons:IconKeys.Cog}}" ToolTip="{x:Static local:Texts.Settings}" Background="Transparent" BorderBrush="Transparent" Padding="3">
+                    <controls:DropDownButton.Style>
+                        <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                    </controls:DropDownButton.Style>
+                    <controls:DropDownButton.ContextMenu>
+                        <ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}"
+                                     d:DataContext="{d:DesignInstance Type={x:Type local:NotepadViewModel}}">
+                            <MenuItem Header="{x:Static local:Texts.WordWrap}"
+                                      IsCheckable="True"
+                                      IsChecked="{Binding WordWrap, Mode=TwoWay}"
+                                      Icon="{DynamicResource {x:Static icons:IconKeys.FormatTextWrappingWrap}}"/>
+                            <MenuItem Header="{x:Static local:Texts.ShowLineNumbers}"
+                                      IsCheckable="True"
+                                      IsChecked="{Binding ShowLineNumbers, Mode=TwoWay}"
+                                      Icon="{DynamicResource {x:Static icons:IconKeys.FormatListNumbered}}"/>
+                        </ContextMenu>
+                    </controls:DropDownButton.ContextMenu>
+                </controls:DropDownButton>
             </ToolBar>
         </ToolBarTray>
-        <TextBox Grid.Row="1"
-                 Text="{Binding Text,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}"
-                 FontSize="{Binding FontSize}"
-                 Padding="3"
-                 AcceptsReturn="True"
-                 AcceptsTab="True"
-                 TextWrapping="{Binding WordWrap, Converter={local:BoolToTextWrappingConverter}}"
-                 VerticalScrollBarVisibility="Auto"
-                 HorizontalScrollBarVisibility="Auto">
+        <avalon:TextEditor Grid.Row="1"
+                           FontSize="{Binding FontSize}"
+                           ShowLineNumbers="{Binding ShowLineNumbers}"
+                           IsReadOnly="False"
+                           VerticalScrollBarVisibility="Auto"
+                           HorizontalScrollBarVisibility="Auto"
+                           AllowDrop="True">
+            <avalon:TextEditor.Options>
+                <avalon:TextEditorOptions EnableHyperlinks="False" />
+            </avalon:TextEditor.Options>
+            <avalon:TextEditor.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="ApplicationCommands.Undo"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Command="ApplicationCommands.Redo"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <Separator/>
+                    <MenuItem Command="ApplicationCommands.Cut"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Command="ApplicationCommands.Copy"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Command="ApplicationCommands.Paste"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Command="ApplicationCommands.Delete"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <Separator/>
+                    <MenuItem Command="ApplicationCommands.SelectAll"
+                              CommandTarget="{Binding PlacementTarget.TextArea, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                </ContextMenu>
+            </avalon:TextEditor.ContextMenu>
+            <i:Interaction.Behaviors>
+                <local:AvalonEditTextBindingBehavior Text="{Binding Text, Mode=TwoWay}"
+                                                     WordWrap="{Binding WordWrap}"/>
+                <local:NotepadImageDisplayBehavior ImageScale="{Binding Zoom}"/>
+                <local:NotepadImageInputBehavior/>
+                <local:NotepadSearchBehavior/>
+            </i:Interaction.Behaviors>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="PreviewMouseWheel">
                     <i:InvokeCommandAction Command="{Binding ChangeFontSizeCommand}" PassEventArgsToCommand="True"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-        </TextBox>
+        </avalon:TextEditor>
     </Grid>
 </UserControl>

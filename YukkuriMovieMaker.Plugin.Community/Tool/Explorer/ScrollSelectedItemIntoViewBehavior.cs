@@ -49,8 +49,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         private void SubscribeItemsSource()
         {
             itemsSourceCollection = AssociatedObject.ItemsSource as INotifyCollectionChanged;
-            if (itemsSourceCollection is not null)
-                itemsSourceCollection.CollectionChanged += ItemsSourceCollection_CollectionChanged;
+            itemsSourceCollection?.CollectionChanged += ItemsSourceCollection_CollectionChanged;
 
             foreach (var item in GetItems())
                 SubscribeItem(item);
@@ -58,11 +57,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         private void UnsubscribeItemsSource()
         {
-            if (itemsSourceCollection is not null)
-            {
-                itemsSourceCollection.CollectionChanged -= ItemsSourceCollection_CollectionChanged;
-                itemsSourceCollection = null;
-            }
+            itemsSourceCollection?.CollectionChanged -= ItemsSourceCollection_CollectionChanged;
+            itemsSourceCollection = null;
 
             UnsubscribeItems();
         }

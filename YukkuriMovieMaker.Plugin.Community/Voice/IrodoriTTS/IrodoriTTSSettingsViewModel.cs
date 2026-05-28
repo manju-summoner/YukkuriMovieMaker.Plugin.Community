@@ -17,17 +17,17 @@ internal class IrodoriTTSSettingsViewModel : Bindable
     public ObservableCollection<IrodoriTTSRefVoiceItem> RefVoiceItems { get; } = [];
     public IrodoriTTSRefVoiceItem? SelectedRefVoice
     {
-        get => field;
+        get;
         set
         {
             if (Set(ref field, value))
                 UpdateRefVoiceCommands();
         }
     }
-    public bool IsPlaying { get => field; set => Set(ref field, value); }
+    public bool IsPlaying { get; set => Set(ref field, value); }
 
     // サーバーステータス
-    public string ServerStatusText { get => field; set => Set(ref field, value); } = Texts.ServerStatusUnknown;
+    public string ServerStatusText { get; set => Set(ref field, value); } = Texts.ServerStatusUnknown;
 
     // コマンド
     public ICommand CreateNewCommand { get; }

@@ -5,7 +5,7 @@ using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Models;
 
 namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Services;
 
-internal sealed class SoundFontResolverService : ISoundFontProvider
+internal sealed class SoundFontResolverService(SoundFontSettings settings) : ISoundFontProvider
 {
     // 同名ファイルがあればユーザーフォルダ側を優先する（バンドル版を上書き可能にするため、ユーザーディレクトリを先に並べる）
     public static IReadOnlyList<string> SoundFontDirectories { get; } =
@@ -30,12 +30,7 @@ internal sealed class SoundFontResolverService : ISoundFontProvider
         return result;
     }
 
-    private readonly SoundFontSettings _settings;
-
-    public SoundFontResolverService(SoundFontSettings settings)
-    {
-        _settings = settings;
-    }
+    private readonly SoundFontSettings _settings = settings;
 
     public IReadOnlyList<(string Path, float Volume)> GetActiveSoundFontPaths()
     {
