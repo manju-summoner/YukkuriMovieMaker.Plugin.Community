@@ -115,6 +115,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var maxPins = PuppetDeformationCustomEffect.MaxPins;
             var count = samples.Count;
 
+            var restPositions = new Vector2[count];
+            var currentPositions = new Vector2[count];
+
             for (var i = 0; i < count; i++)
             {
                 var s = samples[i];
@@ -122,6 +125,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 pinDataBuffer[i * 4 + 1] = s.Rest.Y;
                 pinDataBuffer[i * 4 + 2] = s.Current.X;
                 pinDataBuffer[i * 4 + 3] = s.Current.Y;
+                restPositions[i] = s.Rest;
+                currentPositions[i] = s.Current;
             }
             Array.Clear(pinDataBuffer, count * 4, (maxPins - count) * 4);
 
@@ -144,9 +149,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             (float left, float top, float right, float bottom) tightBounds;
             if (count > 0 && imageWidth > 0 && imageHeight > 0)
             {
-                var restList = new SampleProjection(samples, count, static s => s.Rest);
-                var currentList = new SampleProjection(samples, count, static s => s.Current);
-                tightBounds = MlsDeformBounds.Compute(imageWidth, imageHeight, restList, currentList, stiffness);
+                tightBounds = MlsDeformBounds.Compute(imageWidth, imageHeight, restPositions, currentPositions, stiffness);
             }
             else
             {
@@ -160,7 +163,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         List<VideoEffectController> BuildControllers(List<PinSample> samples)
         {
-            var controllers = new List<VideoEffectController>(samples.Count * 3);
+            var controllers = new List<VideoEffectController>(samples.Count * 5);
 
             var (_, meshEdges) = DelaunayTriangulation.Compute(samples.ConvertAll(s => s.Current));
             foreach (var edge in meshEdges)
@@ -243,8 +246,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void SelectRestToggle(PuppetDeformation pin)
         {
-            if (!pin.IsRestSelected || item.Pins.Where(p => p.IsRestSelected).Skip(1).Any())
-                pin.IsRestSelected = !pin.IsRestSelected;
+            if (!pin.IsRestSelected)
+                pin.IsRestSelected = true;
+            else if (item.Pins.Any(p => p != pin && p.IsRestSelected))
+                pin.IsRestSelected = false;
         }
 
         void SelectRestExclusively(PuppetDeformation target)
@@ -299,8 +304,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void SelectOffsetToggle(PuppetDeformation pin)
         {
-            if (!pin.IsOffsetSelected || item.Pins.Where(p => p.IsOffsetSelected).Skip(1).Any())
-                pin.IsOffsetSelected = !pin.IsOffsetSelected;
+            if (!pin.IsOffsetSelected)
+                pin.IsOffsetSelected = true;
+            else if (item.Pins.Any(p => p != pin && p.IsOffsetSelected))
+                pin.IsOffsetSelected = false;
         }
 
         void SelectOffsetExclusively(PuppetDeformation target)
@@ -362,19 +369,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             public Vector2 Rest { get; } = rest;
             public Vector2 Current { get; } = current;
             public bool IsEnabled { get; } = isEnabled;
-        }
-
-        readonly struct SampleProjection(List<PinSample> samples, int count, Func<PinSample, Vector2> selector)
-            : IReadOnlyList<Vector2>
-        {
-            public Vector2 this[int index] => selector(samples[index]);
-            public int Count => count;
-            public IEnumerator<Vector2> GetEnumerator()
-            {
-                for (var i = 0; i < count; i++)
-                    yield return selector(samples[i]);
-            }
-            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
         }
 
         sealed class PinGpuCache(
