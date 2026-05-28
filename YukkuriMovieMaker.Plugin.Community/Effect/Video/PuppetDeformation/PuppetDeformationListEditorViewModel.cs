@@ -84,7 +84,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             AddPinCommand = new ActionCommand(_ => CanAddPin, _ =>
             {
                 BeginEdit?.Invoke(this, EventArgs.Empty);
-                CommitPins(Effect.Pins.Add(PuppetDeformation.Create(0, 0)));
+                CommitStructuralChange(Effect.Pins.Add(PuppetDeformation.Create(0, 0)));
                 EndEdit?.Invoke(this, EventArgs.Empty);
             });
 
@@ -93,7 +93,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 if (selectedItem == null) return;
                 var target = selectedItem.Model;
                 BeginEdit?.Invoke(this, EventArgs.Empty);
-                CommitPins(Effect.Pins.Remove(target));
+                CommitStructuralChange(Effect.Pins.Remove(target));
                 EndEdit?.Invoke(this, EventArgs.Empty);
             });
 
@@ -107,7 +107,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     foreach (var v in pin.OffsetX.Values) v.Value = 0;
                     foreach (var v in pin.OffsetY.Values) v.Value = 0;
                 }
-                CommitPins(Effect.Pins);
                 EndEdit?.Invoke(this, EventArgs.Empty);
             });
 
@@ -117,7 +116,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             RebuildViewModels();
         }
 
-        void CommitPins(ImmutableList<PuppetDeformation> newPins)
+        void CommitStructuralChange(ImmutableList<PuppetDeformation> newPins)
         {
             var cloned = newPins.Select(p =>
             {
@@ -376,21 +375,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             return result;
         }
 
-        bool isUpdateScheduled;
-
         void UpdateSelection()
         {
             if (isMutatingSelection) return;
-            if (isUpdateScheduled) return;
-
-            isUpdateScheduled = true;
-            Application.Current?.Dispatcher.BeginInvoke(() =>
-            {
-                isUpdateScheduled = false;
-                if (disposedValue) return;
-                selectedItem = allViewModels.FirstOrDefault(x => x.IsRestSelected || x.IsOffsetSelected);
-                SelectedTarget = selectedItem?.Model;
-            }, System.Windows.Threading.DispatcherPriority.Background);
+            if (disposedValue) return;
+            selectedItem = allViewModels.FirstOrDefault(x => x.IsRestSelected || x.IsOffsetSelected);
+            SelectedTarget = selectedItem?.Model;
         }
 
         void EnsureSelectionAfterRebuild()
@@ -586,7 +576,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             oldOffsetXValues = null;
             oldOffsetYValues = null;
 
-            CommitPins(Effect.Pins);
             EndEdit?.Invoke(this, EventArgs.Empty);
         }
 
