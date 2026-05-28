@@ -66,7 +66,7 @@
                                     <Grid.RenderTransform>
                                         <RotateTransform Angle="{Binding OffsetAngle}"/>
                                     </Grid.RenderTransform>
-                                    <c:ReadOnlyToggleButton Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0" IsChecked="{Binding IsOffsetSelected, Mode=OneWay}" Command="{Binding SelectOffsetCommand}" CommandParameter="{Binding}" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">
+                                    <c:ReadOnlyToggleButton Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0" IsChecked="{Binding IsOffsetSelected, Mode=OneWay}" Command="{Binding SelectOffsetCommand}" CommandParameter="{Binding}" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" ToolTip="{x:Static local:Texts.PuppetDeformationOffsetButtonTooltip}">
                                         <FrameworkElement.Resources>
                                             <ResourceDictionary>
                                                 <Style x:Key="{x:Type Border}" TargetType="{x:Type Border}">
@@ -92,7 +92,7 @@
                                         </FrameworkElement.Style>
                                     </c:ReadOnlyToggleButton>
                                 </Grid>
-                                <c:ReadOnlyToggleButton Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding IsRestSelected, Mode=OneWay}" Command="{Binding SelectRestCommand}" CommandParameter="{Binding}">
+                                <c:ReadOnlyToggleButton Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding IsRestSelected, Mode=OneWay}" Command="{Binding SelectRestCommand}" CommandParameter="{Binding}" ToolTip="{x:Static local:Texts.PuppetDeformationRestButtonTooltip}">
                                     <FrameworkElement.Resources>
                                         <ResourceDictionary>
                                             <Style x:Key="{x:Type Border}" TargetType="{x:Type Border}">
