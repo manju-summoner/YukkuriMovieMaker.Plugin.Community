@@ -33,9 +33,9 @@ float2 GetCurrentScene(int index)
 }
 
 float4 main(
-	float4 pos : SV_POSITION,
+    float4 pos : SV_POSITION,
     float4 posScene : SCENE_POSITION,
-	float4 uv0 : TEXCOORD0
+    float4 uv0 : TEXCOORD0
 ) : SV_TARGET
 {
     int n = (int) clamp(pinCount, 0.0f, (float) MaxPins);
@@ -59,11 +59,11 @@ float4 main(
         float scaleInvSq = 1.0f / (scale * scale);
 
         float totalW = 0.0f;
-        float2 pStar = float2(0.0f, 0.0f);
-        float2 qStar = float2(0.0f, 0.0f);
+        float2 pStar = (float2)0;
+        float2 qStar = (float2)0;
 
         float minDistSq = 1e30f;
-        float2 nearestRest = float2(0.0f, 0.0f);
+        float2 nearestRest = (float2)0;
 
         [loop]
         for (int i = 0; i < n; i++)
@@ -83,7 +83,7 @@ float4 main(
             qStar += w * ri;
         }
 
-        if (minDistSq < Epsilon * 4.0f)
+        if (minDistSq < Epsilon * 4.0f || isinf(totalW))
         {
             source = nearestRest;
         }
@@ -133,7 +133,7 @@ float4 main(
 
     if (source.x < inputLeft || source.x >= srcRight ||
         source.y < inputTop || source.y >= srcBottom)
-        return float4(0.0f, 0.0f, 0.0f, 0.0f);
+        return (float4)0;
 
     float2 uv = uv0.xy + (source - v) * uv0.zw;
 
