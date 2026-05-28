@@ -59,10 +59,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 if (c.X > regionMaxX) regionMaxX = c.X;
                 if (c.Y > regionMaxY) regionMaxY = c.Y;
 
-                float dx = MathF.Abs(c.X - r.X);
-                float dy = MathF.Abs(c.Y - r.Y);
-                if (dx > maxDisplacement) maxDisplacement = dx;
-                if (dy > maxDisplacement) maxDisplacement = dy;
+                float ddx = MathF.Abs(c.X - r.X);
+                float ddy = MathF.Abs(c.Y - r.Y);
+                if (ddx > maxDisplacement) maxDisplacement = ddx;
+                if (ddy > maxDisplacement) maxDisplacement = ddy;
             }
 
             float expansion = maxDisplacement * SearchExpansionFactor + scale;
@@ -139,7 +139,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 qStarY += wi * restLocal[i].Y;
             }
 
-            if (minDistSq < Epsilon * 4f)
+            if (minDistSq < Epsilon * 4f || float.IsInfinity(totalW))
                 return restLocal[nearest];
 
             float invW = 1f / totalW;
