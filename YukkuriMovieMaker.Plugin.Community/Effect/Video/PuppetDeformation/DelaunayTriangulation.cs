@@ -26,8 +26,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 A = a; B = b; C = c;
                 Vector2 p1 = pts[a], p2 = pts[b], p3 = pts[c];
-                float d = 2 * (p1.X * (p2.Y - p3.Y) + p2.X * (p3.Y - p1.Y) + p3.X * (p1.Y - p2.Y));
-                if (Math.Abs(d) < 1e-6f)
+                float d = 2f * (p1.X * (p2.Y - p3.Y) + p2.X * (p3.Y - p1.Y) + p3.X * (p1.Y - p2.Y));
+                if (MathF.Abs(d) < 1e-6f)
                 {
                     CircumCenter = p1;
                     CircumRadiusSq = float.MaxValue;
@@ -62,13 +62,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
             float dx = maxX - minX;
             float dy = maxY - minY;
-            float deltaMax = Math.Max(dx, dy);
-            float midx = (minX + maxX) / 2f;
-            float midy = (minY + maxY) / 2f;
+            float deltaMax = MathF.Max(MathF.Max(dx, dy), 1f);
+            float midx = (minX + maxX) * 0.5f;
+            float midy = (minY + maxY) * 0.5f;
 
-            pts.Add(new Vector2(midx - 20 * deltaMax, midy - deltaMax));
-            pts.Add(new Vector2(midx, midy + 20 * deltaMax));
-            pts.Add(new Vector2(midx + 20 * deltaMax, midy - deltaMax));
+            pts.Add(new Vector2(midx - 20f * deltaMax, midy - deltaMax));
+            pts.Add(new Vector2(midx, midy + 20f * deltaMax));
+            pts.Add(new Vector2(midx + 20f * deltaMax, midy - deltaMax));
 
             int n = pts.Count;
             var triangles = new List<TriangleData>
@@ -120,7 +120,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         static void TryAddUniqueEdge(Edge edge, HashSet<Edge> seen, List<Edge> unique)
         {
             if (!seen.Add(edge))
-                unique.RemoveAll(e => e.Equals(edge));
+                unique.Remove(edge);
             else
                 unique.Add(edge);
         }
