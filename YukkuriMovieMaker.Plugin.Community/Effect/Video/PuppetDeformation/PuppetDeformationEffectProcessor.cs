@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Numerics;
+using System.Windows.Input;
 using Vortice.Direct2D1;
 using Vortice.DXGI;
 using Vortice.Mathematics;
@@ -182,12 +183,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     new Vector3(s.Rest.X, s.Rest.Y, 0f),
                     arg =>
                     {
-                        if (!pin.IsRestSelected)
-                            SelectRestExclusively(pin);
-                        pin.RestX.AddToEachValues(arg.Delta.X);
-                        pin.RestY.AddToEachValues(arg.Delta.Y);
+                        if (!pin.IsRestSelected) return;
+                        ApplyRestDelta(arg.Delta.X, arg.Delta.Y);
                     })
                 {
+                    OnDragStart = arg =>
+                    {
+                        if (arg.ModifierKeys.HasFlag(ModifierKeys.Control))
+                            SelectRestToggle(pin);
+                        else if (!pin.IsRestSelected)
+                            SelectRestExclusively(pin);
+                    },
+                    IsSelected = pin.IsRestSelected,
                     Shape = VideoControllerPointShape.Circle
                 };
                 controllers.Add(new VideoEffectController(item, new[] { restPoint }));
@@ -206,18 +213,40 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     new Vector3(s.Current.X, s.Current.Y, 0f),
                     arg =>
                     {
-                        if (!pin.IsOffsetSelected)
-                            SelectOffsetExclusively(pin);
-                        pin.OffsetX.AddToEachValues(arg.Delta.X);
-                        pin.OffsetY.AddToEachValues(arg.Delta.Y);
+                        if (!pin.IsOffsetSelected) return;
+                        ApplyOffsetDelta(pin, arg.Delta.X, arg.Delta.Y);
                     })
                 {
+                    OnDragStart = arg =>
+                    {
+                        if (arg.ModifierKeys.HasFlag(ModifierKeys.Control))
+                            SelectOffsetToggle(pin);
+                        else if (!pin.IsOffsetSelected)
+                            SelectOffsetExclusively(pin);
+                    },
+                    IsSelected = pin.IsOffsetSelected,
                     Shape = VideoControllerPointShape.Point
                 };
                 controllers.Add(new VideoEffectController(item, new[] { offsetPoint }));
             }
 
             return controllers;
+        }
+
+        void ApplyRestDelta(double deltaX, double deltaY)
+        {
+            var selectedPins = item.Pins.Where(p => p.IsRestSelected).ToList();
+            foreach (var p in selectedPins)
+            {
+                p.RestX.AddToEachValues(deltaX);
+                p.RestY.AddToEachValues(deltaY);
+            }
+        }
+
+        void SelectRestToggle(PuppetDeformation pin)
+        {
+            if (!pin.IsRestSelected || item.Pins.Where(p => p.IsRestSelected).Skip(1).Any())
+                pin.IsRestSelected = !pin.IsRestSelected;
         }
 
         void SelectRestExclusively(PuppetDeformation target)
@@ -227,6 +256,53 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 p.IsOffsetSelected = false;
                 p.IsRestSelected = (p == target);
             }
+        }
+
+        void ApplyOffsetDelta(PuppetDeformation source, double deltaX, double deltaY)
+        {
+            var syncMode = item.SyncMode;
+            var selectedPins = item.Pins.Where(p => p.IsOffsetSelected).ToList();
+
+            if (syncMode == PuppetDeformationEditorPointsSync.None || selectedPins.Count <= 1)
+            {
+                source.OffsetX.AddToEachValues(deltaX);
+                source.OffsetY.AddToEachValues(deltaY);
+                return;
+            }
+
+            var sourceRest = new Vector2(
+                (float)(source.RestX.Values.FirstOrDefault()?.Value ?? 0),
+                (float)(source.RestY.Values.FirstOrDefault()?.Value ?? 0));
+
+            var maxDistance = 1f;
+            if (syncMode == PuppetDeformationEditorPointsSync.Distance)
+            {
+                var minX = selectedPins.Min(p => (float)(p.RestX.Values.FirstOrDefault()?.Value ?? 0));
+                var maxX = selectedPins.Max(p => (float)(p.RestX.Values.FirstOrDefault()?.Value ?? 0));
+                var minY = selectedPins.Min(p => (float)(p.RestY.Values.FirstOrDefault()?.Value ?? 0));
+                var maxY = selectedPins.Max(p => (float)(p.RestY.Values.FirstOrDefault()?.Value ?? 0));
+                Vector2[] corners = { new(minX, minY), new(maxX, minY), new(minX, maxY), new(maxX, maxY) };
+                maxDistance = corners.Max(c => Vector2.Distance(c, sourceRest)) + 1f;
+            }
+
+            foreach (var p in selectedPins)
+            {
+                var ratio = 1f;
+                if (syncMode == PuppetDeformationEditorPointsSync.Distance)
+                {
+                    var px = (float)(p.RestX.Values.FirstOrDefault()?.Value ?? 0);
+                    var py = (float)(p.RestY.Values.FirstOrDefault()?.Value ?? 0);
+                    ratio = Math.Max(0f, 1f - Vector2.Distance(new Vector2(px, py), sourceRest) / maxDistance);
+                }
+                p.OffsetX.AddToEachValues(deltaX * ratio);
+                p.OffsetY.AddToEachValues(deltaY * ratio);
+            }
+        }
+
+        void SelectOffsetToggle(PuppetDeformation pin)
+        {
+            if (!pin.IsOffsetSelected || item.Pins.Where(p => p.IsOffsetSelected).Skip(1).Any())
+                pin.IsOffsetSelected = !pin.IsOffsetSelected;
         }
 
         void SelectOffsetExclusively(PuppetDeformation target)

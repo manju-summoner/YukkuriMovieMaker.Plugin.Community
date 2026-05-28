@@ -6,6 +6,7 @@ using System.Linq;
 using System.Numerics;
 using System.Windows;
 using System.Windows.Input;
+using Newtonsoft.Json;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.ViewModels;
 
@@ -26,16 +27,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         object[] horizontalLines = Array.Empty<object>();
 
         bool isMutatingSelection;
-        bool isSyncing;
         bool disposedValue;
 
-        AnimationType oldXAnimationType;
-        AnimationType oldYAnimationType;
-        double oldXSpan;
-        double oldYSpan;
+        AnimationType oldRestXAnimationType;
+        AnimationType oldRestYAnimationType;
+        double oldRestXSpan;
+        double oldRestYSpan;
+        double[]? oldRestXValues;
+        double[]? oldRestYValues;
 
-        readonly Dictionary<PuppetDeformation, double[]> lastPinXValues = new();
-        readonly Dictionary<PuppetDeformation, double[]> lastPinYValues = new();
+        AnimationType oldOffsetXAnimationType;
+        AnimationType oldOffsetYAnimationType;
+        double oldOffsetXSpan;
+        double oldOffsetYSpan;
+        double[]? oldOffsetXValues;
+        double[]? oldOffsetYValues;
 
         public void SetEditorInfo(IEditorInfo info) { }
 
@@ -113,7 +119,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void CommitPins(ImmutableList<PuppetDeformation> newPins)
         {
-            ItemProperties[0].SetValue(newPins);
+            var cloned = newPins.Select(p =>
+            {
+                var clone = JsonConvert.DeserializeObject<PuppetDeformation>(JsonConvert.SerializeObject(p)) 
+                            ?? PuppetDeformation.Create(0, 0);
+                clone.IsRestSelected = p.IsRestSelected;
+                clone.IsOffsetSelected = p.IsOffsetSelected;
+                return clone;
+            }).ToImmutableList();
+            ItemProperties[0].SetValue(cloned);
         }
 
         void HandleSelect(object? arg, bool isOffset)
@@ -237,7 +251,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             foreach (var oldVm in allViewModels.Except(newAllViewModels))
             {
                 oldVm.PropertyChanged -= Item_PropertyChanged;
-                oldVm.OffsetChanged -= Item_OffsetChanged;
                 oldVm.RestChanged -= Item_RestChanged;
                 oldVm.Dispose();
             }
@@ -245,7 +258,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             foreach (var newVm in newAllViewModels.Except(allViewModels))
             {
                 newVm.PropertyChanged += Item_PropertyChanged;
-                newVm.OffsetChanged += Item_OffsetChanged;
                 newVm.RestChanged += Item_RestChanged;
             }
 
@@ -411,35 +423,87 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             RefreshGridLayout();
         }
 
-        void Item_OffsetChanged(object? sender, EventArgs e)
+        void SyncRestValues()
         {
-            if (isSyncing || selectedItem == null || sender != selectedItem) return;
+            if (selectedItem == null || oldRestXValues == null || oldRestYValues == null) return;
 
-            isSyncing = true;
-            try
+            var m = selectedItem.Model;
+            var selectedPins = Effect.Pins.Where(x => x.IsRestSelected).ToList();
+            if (selectedPins.Count <= 1) return;
+
+            var changedAnimType = oldRestXAnimationType != m.RestX.AnimationType || oldRestYAnimationType != m.RestY.AnimationType;
+            var changedSpan = oldRestXSpan != m.RestX.Span || oldRestYSpan != m.RestY.Span;
+
+            if (changedAnimType)
             {
-                SyncPointsRealTime();
+                foreach (var p in selectedPins)
+                {
+                    p.RestX.AnimationType = m.RestX.AnimationType;
+                    p.RestY.AnimationType = m.RestY.AnimationType;
+                }
+                return;
             }
-            finally
+            if (changedSpan)
             {
-                isSyncing = false;
+                foreach (var p in selectedPins)
+                {
+                    p.RestX.Span = m.RestX.Span;
+                    p.RestY.Span = m.RestY.Span;
+                }
+                return;
+            }
+
+            var changedXIndex = FindChangedValueIndex(oldRestXValues, m.RestX);
+            var changedYIndex = FindChangedValueIndex(oldRestYValues, m.RestY);
+            if (changedXIndex < 0 && changedYIndex < 0) return;
+
+            foreach (var point in selectedPins.Where(p => p != m))
+            {
+                ApplyValueDelta(changedXIndex, m.RestX, point.RestX, oldRestXValues, 1f);
+                ApplyValueDelta(changedYIndex, m.RestY, point.RestY, oldRestYValues, 1f);
             }
         }
 
-        void SyncPointsRealTime()
+        void SyncOffsetValues()
         {
-            if (selectedItem == null) return;
+            if (selectedItem == null || oldOffsetXValues == null || oldOffsetYValues == null) return;
 
-            var pins = Effect.Pins;
-            var selectedPins = pins.Where(x => x.IsOffsetSelected).ToList();
+            var m = selectedItem.Model;
+            var selectedPins = Effect.Pins.Where(x => x.IsOffsetSelected).ToList();
             if (selectedPins.Count <= 1) return;
+
+            var changedAnimType = oldOffsetXAnimationType != m.OffsetX.AnimationType || oldOffsetYAnimationType != m.OffsetY.AnimationType;
+            var changedSpan = oldOffsetXSpan != m.OffsetX.Span || oldOffsetYSpan != m.OffsetY.Span;
+
+            if (changedAnimType)
+            {
+                foreach (var p in selectedPins)
+                {
+                    p.OffsetX.AnimationType = m.OffsetX.AnimationType;
+                    p.OffsetY.AnimationType = m.OffsetY.AnimationType;
+                }
+                return;
+            }
+            if (changedSpan)
+            {
+                foreach (var p in selectedPins)
+                {
+                    p.OffsetX.Span = m.OffsetX.Span;
+                    p.OffsetY.Span = m.OffsetY.Span;
+                }
+                return;
+            }
 
             var syncMode = Effect.SyncMode;
             if (syncMode == PuppetDeformationEditorPointsSync.None) return;
 
-            var currentVector = new Vector2(
-                (float)(selectedItem.Model.RestX.Values.FirstOrDefault()?.Value ?? 0),
-                (float)(selectedItem.Model.RestY.Values.FirstOrDefault()?.Value ?? 0));
+            var changedXIndex = FindChangedValueIndex(oldOffsetXValues, m.OffsetX);
+            var changedYIndex = FindChangedValueIndex(oldOffsetYValues, m.OffsetY);
+            if (changedXIndex < 0 && changedYIndex < 0) return;
+
+            var sourceVector = new Vector2(
+                (float)(m.RestX.Values.FirstOrDefault()?.Value ?? 0),
+                (float)(m.RestY.Values.FirstOrDefault()?.Value ?? 0));
 
             var maxDistance = 1f;
             if (syncMode == PuppetDeformationEditorPointsSync.Distance)
@@ -449,87 +513,61 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 var minY = selectedPins.Min(x => (float)(x.RestY.Values.FirstOrDefault()?.Value ?? 0));
                 var maxY = selectedPins.Max(x => (float)(x.RestY.Values.FirstOrDefault()?.Value ?? 0));
                 Vector2[] corners = { new(minX, minY), new(maxX, minY), new(minX, maxY), new(maxX, maxY) };
-                maxDistance = corners.Max(x => Vector2.Distance(x, currentVector)) + 1f;
+                maxDistance = corners.Max(x => Vector2.Distance(x, sourceVector)) + 1f;
             }
 
-            EnsureLastValues(lastPinXValues, pins, p => p.OffsetX);
-            EnsureLastValues(lastPinYValues, pins, p => p.OffsetY);
-
-            ApplySync(selectedPins, syncMode, currentVector, maxDistance, lastPinXValues, p => p.OffsetX);
-            ApplySync(selectedPins, syncMode, currentVector, maxDistance, lastPinYValues, p => p.OffsetY);
-        }
-
-        void EnsureLastValues(Dictionary<PuppetDeformation, double[]> cache, ImmutableList<PuppetDeformation> pins, Func<PuppetDeformation, Animation> animSelector)
-        {
-            foreach (var pin in pins)
-                cache.TryAdd(pin, animSelector(pin).Values.Select(x => x.Value).ToArray());
-        }
-
-        void ApplySync(
-            List<PuppetDeformation> selectedPins,
-            PuppetDeformationEditorPointsSync syncMode,
-            Vector2 currentVector,
-            float maxDistance,
-            Dictionary<PuppetDeformation, double[]> cache,
-            Func<PuppetDeformation, Animation> offsetSelector)
-        {
-            if (selectedItem == null) return;
-            var sourceAnim = offsetSelector(selectedItem.Model);
-            if (!cache.TryGetValue(selectedItem.Model, out var sourceLast)) return;
-
-            for (var i = 0; i < sourceAnim.Values.Count; i++)
+            foreach (var point in selectedPins.Where(p => p != m))
             {
-                if (i >= sourceLast.Length) continue;
-                var targetValue = sourceAnim.Values[i].Value;
-                var delta = targetValue - sourceLast[i];
-                if (delta == 0) continue;
-
-                foreach (var point in selectedPins)
-                {
-                    if (point == selectedItem.Model) continue;
-                    var pointAnim = offsetSelector(point);
-                    if (!cache.TryGetValue(point, out var pointLast))
-                    {
-                        pointLast = pointAnim.Values.Select(x => x.Value).ToArray();
-                        cache[point] = pointLast;
-                    }
-                    if (i >= pointLast.Length) continue;
-
-                    var ratio = 1f;
-                    if (syncMode == PuppetDeformationEditorPointsSync.Distance)
-                    {
-                        var px = (float)(point.RestX.Values.FirstOrDefault()?.Value ?? 0);
-                        var py = (float)(point.RestY.Values.FirstOrDefault()?.Value ?? 0);
-                        var distance = Vector2.Distance(new Vector2(px, py), currentVector);
-                        ratio = Math.Max(0f, 1f - distance / maxDistance);
-                    }
-
-                    pointAnim.Values[i].Value += delta * ratio;
-                    pointLast[i] = pointAnim.Values[i].Value;
-                }
-
-                sourceLast[i] = targetValue;
+                var ratio = ComputeDistanceRatio(syncMode, point, sourceVector, maxDistance);
+                ApplyValueDelta(changedXIndex, m.OffsetX, point.OffsetX, oldOffsetXValues, ratio);
+                ApplyValueDelta(changedYIndex, m.OffsetY, point.OffsetY, oldOffsetYValues, ratio);
             }
+        }
+
+        static int FindChangedValueIndex(double[] oldValues, Animation animation)
+        {
+            for (var i = 0; i < Math.Min(oldValues.Length, animation.Values.Count); i++)
+            {
+                if (oldValues[i] != animation.Values[i].Value) return i;
+            }
+            return -1;
+        }
+
+        static float ComputeDistanceRatio(PuppetDeformationEditorPointsSync syncMode, PuppetDeformation point, Vector2 sourceVector, float maxDistance)
+        {
+            if (syncMode != PuppetDeformationEditorPointsSync.Distance) return 1f;
+            var px = (float)(point.RestX.Values.FirstOrDefault()?.Value ?? 0);
+            var py = (float)(point.RestY.Values.FirstOrDefault()?.Value ?? 0);
+            var distance = Vector2.Distance(new Vector2(px, py), sourceVector);
+            return Math.Max(0f, 1f - distance / maxDistance);
+        }
+
+        static void ApplyValueDelta(int changedIndex, Animation source, Animation target, double[] oldValues, float ratio)
+        {
+            if (changedIndex < 0) return;
+            if (changedIndex >= source.Values.Count || changedIndex >= target.Values.Count || changedIndex >= oldValues.Length) return;
+            var delta = source.Values[changedIndex].Value - oldValues[changedIndex];
+            target.Values[changedIndex].Value += delta * ratio;
         }
 
         void OnBeginEditPoint()
         {
-            lastPinXValues.Clear();
-            lastPinYValues.Clear();
-
-            var pins = Effect.Pins;
-            foreach (var pin in pins)
-            {
-                lastPinXValues[pin] = pin.OffsetX.Values.Select(x => x.Value).ToArray();
-                lastPinYValues[pin] = pin.OffsetY.Values.Select(x => x.Value).ToArray();
-            }
-
             if (selectedItem != null)
             {
-                oldXAnimationType = selectedItem.Model.OffsetX.AnimationType;
-                oldYAnimationType = selectedItem.Model.OffsetY.AnimationType;
-                oldXSpan = selectedItem.Model.OffsetX.Span;
-                oldYSpan = selectedItem.Model.OffsetY.Span;
+                var m = selectedItem.Model;
+                oldRestXAnimationType = m.RestX.AnimationType;
+                oldRestYAnimationType = m.RestY.AnimationType;
+                oldRestXSpan = m.RestX.Span;
+                oldRestYSpan = m.RestY.Span;
+                oldRestXValues = m.RestX.Values.Select(x => x.Value).ToArray();
+                oldRestYValues = m.RestY.Values.Select(x => x.Value).ToArray();
+
+                oldOffsetXAnimationType = m.OffsetX.AnimationType;
+                oldOffsetYAnimationType = m.OffsetY.AnimationType;
+                oldOffsetXSpan = m.OffsetX.Span;
+                oldOffsetYSpan = m.OffsetY.Span;
+                oldOffsetXValues = m.OffsetX.Values.Select(x => x.Value).ToArray();
+                oldOffsetYValues = m.OffsetY.Values.Select(x => x.Value).ToArray();
             }
 
             BeginEdit?.Invoke(this, EventArgs.Empty);
@@ -539,31 +577,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             if (selectedItem != null)
             {
-                var changedAnimType = oldXAnimationType != selectedItem.Model.OffsetX.AnimationType
-                                      || oldYAnimationType != selectedItem.Model.OffsetY.AnimationType;
-                var changedSpan = oldXSpan != selectedItem.Model.OffsetX.Span
-                                  || oldYSpan != selectedItem.Model.OffsetY.Span;
-
-                if (changedAnimType)
-                {
-                    foreach (var item in Effect.Pins.Where(x => x.IsOffsetSelected))
-                    {
-                        item.OffsetX.AnimationType = selectedItem.Model.OffsetX.AnimationType;
-                        item.OffsetY.AnimationType = selectedItem.Model.OffsetY.AnimationType;
-                    }
-                }
-                else if (changedSpan)
-                {
-                    foreach (var item in Effect.Pins.Where(x => x.IsOffsetSelected))
-                    {
-                        item.OffsetX.Span = selectedItem.Model.OffsetX.Span;
-                        item.OffsetY.Span = selectedItem.Model.OffsetY.Span;
-                    }
-                }
+                SyncRestValues();
+                SyncOffsetValues();
             }
 
-            lastPinXValues.Clear();
-            lastPinYValues.Clear();
+            oldRestXValues = null;
+            oldRestYValues = null;
+            oldOffsetXValues = null;
+            oldOffsetYValues = null;
 
             CommitPins(Effect.Pins);
             EndEdit?.Invoke(this, EventArgs.Empty);
@@ -579,7 +600,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 {
                     item.PropertyChanged -= Item_PropertyChanged;
                     item.RestChanged -= Item_RestChanged;
-                    item.OffsetChanged -= Item_OffsetChanged;
                     item.Dispose();
                 }
             }

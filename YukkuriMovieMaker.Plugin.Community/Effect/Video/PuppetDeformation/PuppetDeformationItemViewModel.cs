@@ -54,7 +54,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         public ICommand SelectRestCommand { get; }
         public ICommand SelectOffsetCommand { get; }
 
-        public event EventHandler? OffsetChanged;
         public event EventHandler? RestChanged;
 
         public PuppetDeformationItemViewModel(PuppetDeformation model, ICommand selectRestCommand, ICommand selectOffsetCommand)
@@ -118,7 +117,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             OnPropertyChanged(nameof(OffsetAngle));
             OnPropertyChanged(nameof(IsOffsetZero));
-            OffsetChanged?.Invoke(this, EventArgs.Empty);
         }
 
         void Rest_PropertyChanged(object? sender, PropertyChangedEventArgs e)
