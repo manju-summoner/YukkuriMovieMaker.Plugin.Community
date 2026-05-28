@@ -12,7 +12,7 @@ using YukkuriMovieMaker.ViewModels;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
-    internal sealed class PuppetDeformationListEditorViewModel : Bindable, IDisposable, IPropertyEditorControl2, IPropertyEditorControl, INotifyPropertyChanged
+    internal sealed class PuppetDeformationListEditorViewModel : Bindable, IDisposable, IPropertyEditorControl2, IPropertyEditorControl
     {
         readonly ICommand selectRestCommand;
         readonly ICommand selectOffsetCommand;
@@ -23,8 +23,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         PuppetDeformationItemViewModel? selectedItem;
         int columns = 1;
         int rows = 1;
-        object[] verticalLines = Array.Empty<object>();
-        object[] horizontalLines = Array.Empty<object>();
+        object[] verticalLines = [];
+        object[] horizontalLines = [];
 
         bool isMutatingSelection;
         bool disposedValue;
@@ -121,7 +121,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             var cloned = newPins.Select(p =>
             {
-                var clone = JsonConvert.DeserializeObject<PuppetDeformation>(JsonConvert.SerializeObject(p)) 
+                var clone = JsonConvert.DeserializeObject<PuppetDeformation>(JsonConvert.SerializeObject(p))
                             ?? PuppetDeformation.Create(0, 0);
                 clone.IsRestSelected = p.IsRestSelected;
                 clone.IsOffsetSelected = p.IsOffsetSelected;
@@ -384,13 +384,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (isUpdateScheduled) return;
 
             isUpdateScheduled = true;
-            Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+            Application.Current?.Dispatcher.BeginInvoke(() =>
             {
                 isUpdateScheduled = false;
                 if (disposedValue) return;
                 selectedItem = allViewModels.FirstOrDefault(x => x.IsRestSelected || x.IsOffsetSelected);
                 SelectedTarget = selectedItem?.Model;
-            }), System.Windows.Threading.DispatcherPriority.Background);
+            }, System.Windows.Threading.DispatcherPriority.Background);
         }
 
         void EnsureSelectionAfterRebuild()
@@ -512,7 +512,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 var maxX = selectedPins.Max(x => (float)(x.RestX.Values.FirstOrDefault()?.Value ?? 0));
                 var minY = selectedPins.Min(x => (float)(x.RestY.Values.FirstOrDefault()?.Value ?? 0));
                 var maxY = selectedPins.Max(x => (float)(x.RestY.Values.FirstOrDefault()?.Value ?? 0));
-                Vector2[] corners = { new(minX, minY), new(maxX, minY), new(minX, maxY), new(maxX, maxY) };
+                Vector2[] corners = [new(minX, minY), new(maxX, minY), new(minX, maxY), new(maxX, maxY)];
                 maxDistance = corners.Max(x => Vector2.Distance(x, sourceVector)) + 1f;
             }
 
