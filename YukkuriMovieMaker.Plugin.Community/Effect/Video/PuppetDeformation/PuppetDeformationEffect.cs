@@ -14,7 +14,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
     {
         public const int PinCapacity = PuppetDeformationCustomEffect.MaxPins;
 
-        public override string Label => $"{Texts.PuppetDeformationEffectName} ({Pins.Count})";
+        public override string Label
+        {
+            get
+            {
+                var active = Pins.Count(p => p.IsEnabled);
+                return $"{Texts.PuppetDeformationEffectName} - {Texts.PuppetDeformationLabelMove}: {active} {Texts.PuppetDeformationLabelAnchor}: {Pins.Count}";
+            }
+        }
 
         [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationStiffnessName), Description = nameof(Texts.PuppetDeformationStiffnessDesc), Order = 0, ResourceType = typeof(Texts))]
         [AnimationSlider("F2", "", 0.5d, 4d)]
