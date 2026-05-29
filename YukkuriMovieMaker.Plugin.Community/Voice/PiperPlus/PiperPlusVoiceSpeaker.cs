@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.API;
 using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Resource;
 using YukkuriMovieMaker.Plugin.Voice;
 
@@ -12,6 +13,19 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry, IVoiceResou
     const int ProcessTimeoutMs = 120_000;
 
     static readonly SemaphoreSlim Semaphore = new(1, 1);
+
+    /// <summary>
+    /// 合成時に必要な <see cref="PiperModelInfo"/> を遅延ロードしてキャッシュする。
+    /// </summary>
+    PiperModelInfo? ModelInfo
+    {
+        get
+        {
+            if (field is null)
+                PiperModelInfo.TryLoad(entry.ModelPath, entry.ConfigPath, out field);
+            return field;
+        }
+    }
 
     public string EngineName => "Piper Plus";
     public string SpeakerName => entry.DisplayName;
@@ -36,15 +50,13 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry, IVoiceResou
         if (!PiperBinaryResource.IsReady)
             throw new InvalidOperationException(Texts.BinaryNotInstalled);
 
-        var executablePath = PiperBinaryResource.ExecutablePath;
-
         if (!File.Exists(entry.ModelPath))
             throw new FileNotFoundException($"Model not found: {entry.ModelPath}");
 
         await Semaphore.WaitAsync();
         try
         {
-            await Task.Run(() => RunPiper(executablePath, text, param, filePath));
+            await Task.Run(() => RunPiper(text, param, filePath));
         }
         finally
         {
@@ -55,11 +67,11 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry, IVoiceResou
     }
 
     void RunPiper(
-        string executablePath,
         string text,
         PiperPlusVoiceParameter param,
         string filePath)
     {
+        var executablePath = PiperBinaryResource.ExecutablePath;
         var workingDirectory = Path.GetDirectoryName(executablePath)
             ?? throw new DirectoryNotFoundException($"Cannot resolve directory of: {executablePath}");
 
@@ -93,10 +105,11 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry, IVoiceResou
             startInfo.ArgumentList.Add(entry.SpeakerId.ToString(CultureInfo.InvariantCulture));
         }
 
-        if (!string.IsNullOrEmpty(entry.LanguageArgument))
+        var languageArgument = ModelInfo?.LanguageArgument ?? string.Empty;
+        if (!string.IsNullOrEmpty(languageArgument))
         {
             startInfo.ArgumentList.Add("--language");
-            startInfo.ArgumentList.Add(entry.LanguageArgument);
+            startInfo.ArgumentList.Add(languageArgument);
         }
 
         startInfo.Environment["APPDATA"] = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);

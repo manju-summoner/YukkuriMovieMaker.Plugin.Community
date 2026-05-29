@@ -9,7 +9,6 @@ internal sealed class PiperSpeakerEntry
     public int SpeakerId { get; init; }
     public string SpeakerName { get; init; } = string.Empty;
     public bool IsMultiSpeaker { get; init; }
-    public string LanguageArgument { get; init; } = string.Empty;
 
     public string UniqueId =>
         $"{Uri.EscapeDataString(Path.GetRelativePath(PiperPlusPaths.ModelDirectory, ModelPath))}::{SpeakerId}";

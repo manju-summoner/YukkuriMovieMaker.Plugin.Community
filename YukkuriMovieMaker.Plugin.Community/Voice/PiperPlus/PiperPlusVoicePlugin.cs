@@ -42,7 +42,6 @@ internal sealed class PiperPlusVoicePlugin : IVoicePlugin
                     SpeakerId = 0,
                     SpeakerName = definition.ModelName,
                     IsMultiSpeaker = false,
-                    LanguageArgument = string.Empty,
                 },
                 new PretrainedModelResource(definition));
         }

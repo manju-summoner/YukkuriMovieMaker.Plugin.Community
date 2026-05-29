@@ -15,7 +15,6 @@ internal static class PiperSpeakerEntryBuilder
                 SpeakerId = speakerId,
                 SpeakerName = speakerName,
                 IsMultiSpeaker = model.IsMultiSpeaker,
-                LanguageArgument = model.LanguageArgument,
             };
         }
     }

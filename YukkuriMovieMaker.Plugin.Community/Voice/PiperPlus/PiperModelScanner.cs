@@ -26,8 +26,7 @@ internal static class PiperModelScanner
             if (jsonPath is null)
                 continue;
 
-            var info = TryLoad(onnxPath, jsonPath);
-            if (info is not null)
+            if (PiperModelInfo.TryLoad(onnxPath, jsonPath, out var info))
                 results.Add(info);
         }
 
@@ -56,40 +55,5 @@ internal static class PiperModelScanner
             return configJsonPath;
 
         return null;
-    }
-
-    static PiperModelInfo? TryLoad(string onnxPath, string jsonPath)
-    {
-        try
-        {
-            var json = File.ReadAllText(jsonPath);
-            var config = Json.Json.LoadFromText<PiperModelConfig>(json);
-            if (config is null)
-                return null;
-
-            var speakerIdMap = config.SpeakerIdMap ?? new Dictionary<string, int>();
-            var numSpeakers = config.NumSpeakers > 0 ? config.NumSpeakers : 1;
-            var languageCodes = ResolveLanguageCodes(config);
-
-            return new PiperModelInfo(onnxPath, jsonPath, numSpeakers, speakerIdMap, languageCodes);
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    static IReadOnlyList<string> ResolveLanguageCodes(PiperModelConfig config)
-    {
-        if (config.LanguageIdMap is { Count: > 0 })
-            return config.LanguageIdMap
-                .OrderBy(kv => kv.Value)
-                .Select(kv => kv.Key)
-                .ToList();
-
-        if (config.Language?.Code is { } code && !string.IsNullOrEmpty(code))
-            return [code];
-
-        return [];
     }
 }
