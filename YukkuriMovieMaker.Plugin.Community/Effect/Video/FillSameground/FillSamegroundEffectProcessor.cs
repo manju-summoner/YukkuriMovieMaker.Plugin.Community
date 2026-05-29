@@ -130,6 +130,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
 
         protected override void ClearEffectChain()
         {
+            colorMatchEffect?.SetInput(0, null, true);
             outputEffect?.SetInput(0, null, true);
             alphaMaskEffect?.SetInput(0, null, true);
             alphaMaskEffect?.SetInput(1, null, true);
