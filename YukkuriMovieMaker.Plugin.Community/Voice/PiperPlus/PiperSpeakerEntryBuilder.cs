@@ -12,8 +12,6 @@ internal static class PiperSpeakerEntryBuilder
             {
                 ModelPath = model.ModelPath,
                 ConfigPath = model.ConfigPath,
-                ModelName = model.ModelName,
-                ModelDisplayName = model.ModelName,
                 SpeakerId = speakerId,
                 SpeakerName = speakerName,
                 IsMultiSpeaker = model.IsMultiSpeaker,

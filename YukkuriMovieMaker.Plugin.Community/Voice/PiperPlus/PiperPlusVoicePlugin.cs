@@ -39,8 +39,6 @@ internal sealed class PiperPlusVoicePlugin : IVoicePlugin
                 {
                     ModelPath = definition.ModelPath,
                     ConfigPath = definition.ConfigPath,
-                    ModelName = definition.ModelName,
-                    ModelDisplayName = definition.ModelName,
                     SpeakerId = 0,
                     SpeakerName = definition.ModelName,
                     IsMultiSpeaker = false,

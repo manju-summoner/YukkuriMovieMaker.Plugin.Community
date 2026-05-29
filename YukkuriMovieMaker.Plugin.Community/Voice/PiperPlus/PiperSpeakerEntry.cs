@@ -1,11 +1,11 @@
+using System.IO;
+
 namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
 
 internal sealed class PiperSpeakerEntry
 {
     public string ModelPath { get; init; } = string.Empty;
     public string ConfigPath { get; init; } = string.Empty;
-    public string ModelName { get; init; } = string.Empty;
-    public string ModelDisplayName { get; init; } = string.Empty;
     public int SpeakerId { get; init; }
     public string SpeakerName { get; init; } = string.Empty;
     public bool IsMultiSpeaker { get; init; }
@@ -13,7 +13,12 @@ internal sealed class PiperSpeakerEntry
 
     public string UniqueId => $"{Uri.EscapeDataString(ModelPath)}::{SpeakerId}";
 
-    public string DisplayName => IsMultiSpeaker
-        ? $"{ModelDisplayName} / {SpeakerName}"
-        : ModelDisplayName;
+    public string DisplayName
+    {
+        get
+        {
+            var modelName = Path.GetFileNameWithoutExtension(ModelPath);
+            return IsMultiSpeaker ? $"{modelName} / {SpeakerName}" : modelName;
+        }
+    }
 }
