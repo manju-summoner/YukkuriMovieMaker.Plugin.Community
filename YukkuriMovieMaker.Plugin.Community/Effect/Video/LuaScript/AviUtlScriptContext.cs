@@ -39,6 +39,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
         public bool IsPixelsDirty => _isPixelsDirty;
 
+        internal int TotalChannels => ImageWidth * ImageHeight * 4;
+
         internal void SetPixelLoader(Func<byte[]> loader)
         {
             _pixelLoader = loader;
@@ -57,39 +59,45 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
         internal void MarkPixelsDirty() => _isPixelsDirty = true;
 
-        public (double r, double g, double b, double a) GetPixel(int x, int y)
+        public unsafe (double r, double g, double b, double a) GetPixel(int x, int y)
         {
             EnsurePixelBuffer();
             if (_pixelBuffer is null || (uint)x >= (uint)ImageWidth || (uint)y >= (uint)ImageHeight)
                 return (0d, 0d, 0d, 0d);
 
-            int idx = (y * ImageWidth + x) * 4;
-            double a = _pixelBuffer[idx + 3];
-            if (a <= 0d) return (0d, 0d, 0d, 0d);
+            fixed (byte* buf = _pixelBuffer)
+            {
+                byte* p = buf + (y * ImageWidth + x) * 4;
+                double a = p[3];
+                if (a <= 0d) return (0d, 0d, 0d, 0d);
 
-            double scale = 255d / a;
-            return (
-                Math.Clamp(_pixelBuffer[idx + 2] * scale, 0d, 255d),
-                Math.Clamp(_pixelBuffer[idx + 1] * scale, 0d, 255d),
-                Math.Clamp(_pixelBuffer[idx + 0] * scale, 0d, 255d),
-                a
-            );
+                double scale = 255d / a;
+                return (
+                    Math.Clamp(p[2] * scale, 0d, 255d),
+                    Math.Clamp(p[1] * scale, 0d, 255d),
+                    Math.Clamp(p[0] * scale, 0d, 255d),
+                    a
+                );
+            }
         }
 
-        public void SetPixel(int x, int y, double r, double g, double b, double a = 255d)
+        public unsafe void SetPixel(int x, int y, double r, double g, double b, double a = 255d)
         {
             EnsurePixelBuffer();
             if (_pixelBuffer is null || (uint)x >= (uint)ImageWidth || (uint)y >= (uint)ImageHeight)
                 return;
 
             _isPixelsDirty = true;
-            int idx = (y * ImageWidth + x) * 4;
             double aK = Math.Clamp(a, 0d, 255d) / 255d;
 
-            _pixelBuffer[idx + 0] = (byte)Math.Clamp(b * aK, 0d, 255d);
-            _pixelBuffer[idx + 1] = (byte)Math.Clamp(g * aK, 0d, 255d);
-            _pixelBuffer[idx + 2] = (byte)Math.Clamp(r * aK, 0d, 255d);
-            _pixelBuffer[idx + 3] = (byte)Math.Clamp(a, 0d, 255d);
+            fixed (byte* buf = _pixelBuffer)
+            {
+                byte* p = buf + (y * ImageWidth + x) * 4;
+                p[0] = (byte)Math.Clamp(b * aK, 0d, 255d);
+                p[1] = (byte)Math.Clamp(g * aK, 0d, 255d);
+                p[2] = (byte)Math.Clamp(r * aK, 0d, 255d);
+                p[3] = (byte)Math.Clamp(a, 0d, 255d);
+            }
         }
     }
 }
