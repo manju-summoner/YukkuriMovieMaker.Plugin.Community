@@ -34,9 +34,7 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry, IVoiceResou
         var param = parameter as PiperPlusVoiceParameter ?? new PiperPlusVoiceParameter();
 
         if (!PiperBinaryResource.IsReady)
-        {
-            await PiperBinaryResource.EnsureAsync(PiperBinaryResource.Version);
-        }
+            throw new InvalidOperationException(Texts.BinaryNotInstalled);
 
         var executablePath = PiperBinaryResource.ExecutablePath;
 

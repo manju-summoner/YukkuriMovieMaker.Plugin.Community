@@ -1,5 +1,6 @@
 using YukkuriMovieMaker.Plugin.Voice;
 using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Pretrained;
+using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Resource;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
 
@@ -22,7 +23,7 @@ internal sealed class PiperPlusVoicePlugin : IVoicePlugin
 
         var speakers = PiperSpeakerLoader.Speakers.ToList();
         foreach (var entry in speakers)
-            yield return new PiperPlusVoiceSpeaker(entry);
+            yield return new PiperPlusVoiceSpeaker(entry, new PiperBinaryVoiceResource());
 
         var downloadedModelPaths = speakers
             .Select(s => s.ModelPath)

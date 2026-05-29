@@ -8,8 +8,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
 internal sealed class PiperPlusSettingsViewModel : Bindable
 {
     bool isLoading;
-    ProgressMessage progress = new();
-    bool isProgressVisible;
     string versionText = string.Empty;
     string speakerCountText = string.Empty;
     ObservableCollection<PiperModelViewModel> models = [];
@@ -18,18 +16,6 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     {
         get => isLoading;
         private set => Set(ref isLoading, value);
-    }
-
-    public ProgressMessage Progress
-    {
-        get => progress;
-        private set => Set(ref progress, value);
-    }
-
-    public bool IsProgressVisible
-    {
-        get => isProgressVisible;
-        private set => Set(ref isProgressVisible, value);
     }
 
     public string VersionText
@@ -67,13 +53,7 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
 
     async Task RefreshAsync()
     {
-        await ExecuteLoadingOperationAsync(async () =>
-        {
-            if (!PiperBinaryResource.IsReady)
-                await InstallVersionAsync(PiperBinaryResource.Version);
-
-            await ReloadModelsAsync();
-        });
+        await ExecuteLoadingOperationAsync(ReloadModelsAsync);
     }
 
     async Task ExecuteLoadingOperationAsync(Func<Task> operation)
@@ -91,24 +71,14 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         finally
         {
             IsLoading = false;
-            IsProgressVisible = false;
-            Progress = new ProgressMessage();
         }
     }
 
     async Task ReloadModelsAsync()
     {
-        Progress.Report(0, Texts.LoadingModels);
-        IsProgressVisible = true;
         await Task.Run(PiperSpeakerLoader.Reload);
         BuildModelsFromSettings();
         UpdateVersionAndSpeakerText();
-    }
-
-    async Task InstallVersionAsync(string version)
-    {
-        IsProgressVisible = true;
-        await PiperBinaryResource.EnsureAsync(version, Progress);
     }
 
     void UpdateVersionAndSpeakerText()
@@ -120,7 +90,7 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
             return;
         }
 
-        VersionText = PiperBinaryResource.InstalledVersion ?? string.Empty;
+        VersionText = PiperBinaryResource.Version;
         SpeakerCountText = string.Format(Texts.SpeakerCount, PiperSpeakerLoader.Speakers.Count);
     }
 }

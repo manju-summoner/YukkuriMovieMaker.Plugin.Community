@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.IO;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Resource;
 using YukkuriMovieMaker.Plugin.Voice;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Pretrained;
@@ -12,7 +13,8 @@ internal sealed class PretrainedModelResource(PretrainedModelDefinition definiti
 
     public string Name => definition.ModelName;
     public string Terms => Texts.ResourceTerms;
-    public bool IsDownloaded => File.Exists(definition.ModelPath) && File.Exists(definition.ConfigPath);
+    public bool IsDownloaded =>
+        PiperBinaryResource.IsReady && File.Exists(definition.ModelPath) && File.Exists(definition.ConfigPath);
     public string? FileSize => null;
 
     public Task<bool> HasUpdateAsync() => Task.FromResult(!IsDownloaded);
@@ -20,6 +22,9 @@ internal sealed class PretrainedModelResource(PretrainedModelDefinition definiti
     public async Task DownloadAsync(ProgressMessage progress)
     {
         DownloadStarted?.Invoke(this, EventArgs.Empty);
+
+        if (!PiperBinaryResource.IsReady)
+            await PiperBinaryResource.EnsureAsync(PiperBinaryResource.Version, progress);
 
         await PretrainedModelDownloader.DownloadAsync(definition, progress);
         await Task.Run(PiperSpeakerLoader.Reload);
