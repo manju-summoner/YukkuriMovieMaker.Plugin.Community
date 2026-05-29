@@ -41,11 +41,11 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     public PiperPlusSettingsViewModel()
     {
         RefreshCommand = new ActionCommand(_ => !IsLoading, async _ => await RefreshAsync());
-        BuildModelsFromSettings();
+        UpdateModelViewModels();
         UpdateVersionAndSpeakerText();
     }
 
-    void BuildModelsFromSettings()
+    void UpdateModelViewModels()
     {
         Models = new ObservableCollection<PiperModelViewModel>(
             PiperSpeakerLoader.Models.Select(m => new PiperModelViewModel(m)));
@@ -77,7 +77,7 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     async Task ReloadModelsAsync()
     {
         await Task.Run(PiperSpeakerLoader.Reload);
-        BuildModelsFromSettings();
+        UpdateModelViewModels();
         UpdateVersionAndSpeakerText();
     }
 
