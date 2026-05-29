@@ -68,6 +68,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             ]),
         ];
 
+        private static readonly string[] s_staticCandidates =
+            s_keywords
+            .Concat(s_globals)
+            .Concat(s_namespaces.SelectMany(n => n.Members))
+            .Distinct()
+            .OrderBy(x => x.Length)
+            .ToArray();
+
         private static readonly Regex s_identifierPattern = new(
             @"[a-zA-Z_][a-zA-Z_0-9]*$",
             RegexOptions.Compiled);
@@ -107,9 +115,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             if (input[0] is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z') or '_')
             {
                 var userFunctions = GetUserDefinedFunctions(sourceCode);
-                return s_keywords
-                    .Concat(s_globals)
-                    .Concat(s_namespaces.SelectMany(n => n.Members))
+                return s_staticCandidates
                     .Concat(userFunctions)
                     .Where(x => x.StartsWith(input, System.StringComparison.OrdinalIgnoreCase))
                     .Distinct()
