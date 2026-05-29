@@ -5,6 +5,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 {
     internal sealed class LuaScriptEngine : IDisposable
     {
+        private const int ExecutionTimeoutMilliseconds = 5000;
+
         static LuaScriptEngine()
         {
             UserData.RegisterType<PixelDataProxy>();
@@ -171,17 +173,41 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
             SetupGlobals(ctx);
 
-            try
+            var scriptToCall = _script!;
+            var chunkToCall = _compiledChunk!;
+
+            var task = Task.Run(() =>
             {
-                _script!.Call(_compiledChunk!);
+                try
+                {
+                    scriptToCall.Call(chunkToCall);
+                }
+                catch (ScriptRuntimeException ex)
+                {
+                    throw new LuaScriptRuntimeException(ex.DecoratedMessage ?? ex.Message, ex);
+                }
+            });
+
+            bool completed = task.Wait(ExecutionTimeoutMilliseconds);
+
+            _currentContext = null;
+
+            if (!completed)
+            {
+                _script = null;
+                _compiledChunk = null;
+                _lastCompiledCode = string.Empty;
+                _objTable = null;
+                _sceneTable = null;
+                throw new LuaScriptRuntimeException($"Script execution timed out after {ExecutionTimeoutMilliseconds} ms.");
             }
-            catch (ScriptRuntimeException ex)
+
+            if (task.IsFaulted)
             {
-                throw new LuaScriptRuntimeException(ex.DecoratedMessage ?? ex.Message, ex);
-            }
-            finally
-            {
-                _currentContext = null;
+                var inner = task.Exception!.InnerException;
+                if (inner is LuaScriptRuntimeException rte)
+                    throw rte;
+                throw new LuaScriptRuntimeException(inner?.Message ?? task.Exception.Message, inner ?? task.Exception);
             }
 
             ReadBackGlobals(ctx);
