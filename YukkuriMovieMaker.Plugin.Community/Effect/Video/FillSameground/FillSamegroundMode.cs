@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
 {
-    [Flags]
     public enum FillSamegroundMode
     {
         [Display(Name = nameof(Texts.FillSamegroundModePositionName), ResourceType = typeof(Texts))]
