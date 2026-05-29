@@ -8,7 +8,7 @@
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
-    <Grid>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Expander Header="Piper Plus" IsExpanded="True">
             <StackPanel>
                 <Grid>
@@ -81,5 +81,5 @@
                 </GroupBox>
             </StackPanel>
         </Expander>
-    </Grid>
+    </ScrollViewer>
 </UserControl>
