@@ -1,5 +1,4 @@
 using YukkuriMovieMaker.Plugin.Voice;
-using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Pretrained;
 using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Resource;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
@@ -29,21 +28,21 @@ internal sealed class PiperPlusVoicePlugin : IVoicePlugin
             .Select(s => s.ModelPath)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var definition in PretrainedModelCatalog.All)
+        foreach (var item in PretrainedModelCatalog.All)
         {
-            if (downloadedModelPaths.Contains(definition.ModelPath))
+            if (downloadedModelPaths.Contains(item.ModelPath))
                 continue;
 
             yield return new PiperPlusVoiceSpeaker(
                 new PiperSpeakerEntry
                 {
-                    ModelPath = definition.ModelPath,
-                    ConfigPath = definition.ConfigPath,
+                    ModelPath = item.ModelPath,
+                    ConfigPath = item.ConfigPath,
                     SpeakerId = 0,
-                    SpeakerName = definition.ModelName,
+                    SpeakerName = item.ModelName,
                     IsMultiSpeaker = false,
                 },
-                new PretrainedModelResource(definition));
+                new PretrainedModelResource(item));
         }
     }
 }
