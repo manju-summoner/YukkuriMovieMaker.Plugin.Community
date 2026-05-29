@@ -113,7 +113,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
                 outDesc = BuildOutputDesc(inDesc, ctx);
             }
-            catch (Exception ex) when (ex is LuaScriptCompilationException or LuaScriptRuntimeException)
+            catch (LuaScriptException ex)
             {
                 effectOutput = null;
                 outDesc = inDesc;
