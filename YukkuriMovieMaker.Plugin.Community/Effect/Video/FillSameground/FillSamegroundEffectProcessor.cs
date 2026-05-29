@@ -187,6 +187,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
                 || mode != currentMode
                 || tolerance != currentTolerance
                 || isInverted != currentIsInverted
+                || currentMode == FillSamegroundMode.Position
+                || currentMode == FillSamegroundMode.PositionColor
                 || (UsesPosition(currentMode) && (posX != currentX || posY != currentY))
                 || (currentMode == FillSamegroundMode.Color && targetColor != currentTargetColor);
             
