@@ -72,9 +72,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
             transparentBrush = devices.DeviceContext.CreateSolidColorBrush(new Color4(0f, 0f, 0f, 0f));
             disposer.Collect(transparentBrush);
 
-            brushSource = item.Brush.CreateBrush(devices);
-            disposer.Collect(brushSource);
-
             colorMatchEffect = new FillSamegroundCustomEffect(devices);
             if (!colorMatchEffect.IsEnabled)
             {
