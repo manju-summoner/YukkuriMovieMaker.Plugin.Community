@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Loaders;
 
@@ -12,17 +13,121 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             UserData.RegisterType<PixelDataProxy>();
         }
 
+        private LuaExecutionThread _executionThread = new();
+
+        public void Execute(string code, AviUtlScriptContext ctx)
+        {
+            bool completed = _executionThread.TryExecute(code, ctx, ExecutionTimeoutMilliseconds, out var exception);
+
+            if (!completed)
+            {
+                _executionThread.Dispose();
+                _executionThread = new LuaExecutionThread();
+                throw new LuaScriptRuntimeException($"Script execution timed out after {ExecutionTimeoutMilliseconds} ms.");
+            }
+
+            if (exception is not null)
+                throw exception;
+        }
+
+        public void Dispose() => _executionThread.Dispose();
+    }
+
+    internal sealed class LuaExecutionThread : IDisposable
+    {
+        private sealed record ExecutionJob(
+            string Code,
+            AviUtlScriptContext Context,
+            TaskCompletionSource<LuaScriptRuntimeException?> Result);
+
+        private readonly BlockingCollection<ExecutionJob> _queue = new(boundedCapacity: 1);
+        private readonly Thread _thread;
+
         private Script? _script;
         private DynValue? _compiledChunk;
         private string _lastCompiledCode = string.Empty;
-
         private Table? _objTable;
         private Table? _sceneTable;
+        private AviUtlScriptContext? _activeContext;
 
-        private AviUtlScriptContext? _currentContext;
-        private PixelDataProxy? _pixelProxy;
+        internal LuaExecutionThread()
+        {
+            _thread = new Thread(WorkerLoop)
+            {
+                IsBackground = true,
+                Name = "LuaScriptWorker"
+            };
+            _thread.Start();
+        }
 
-        private Script CreateScript()
+        internal bool TryExecute(string code, AviUtlScriptContext ctx, int timeoutMs, out LuaScriptRuntimeException? exception)
+        {
+            var tcs = new TaskCompletionSource<LuaScriptRuntimeException?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _queue.Add(new ExecutionJob(code, ctx, tcs));
+
+            if (!tcs.Task.Wait(timeoutMs))
+            {
+                exception = null;
+                return false;
+            }
+
+            exception = tcs.Task.Result;
+            return true;
+        }
+
+        private void WorkerLoop()
+        {
+            try
+            {
+                foreach (var job in _queue.GetConsumingEnumerable())
+                    ProcessJob(job);
+            }
+            catch (ThreadInterruptedException) { }
+            catch (OperationCanceledException) { }
+            catch (InvalidOperationException) { }
+        }
+
+        private void ProcessJob(ExecutionJob job)
+        {
+            try
+            {
+                _activeContext = job.Context;
+                EnsureScript();
+                EnsureCompiled(job.Code);
+                SetupGlobals(job.Context);
+                _script!.Call(_compiledChunk!);
+                ReadBackGlobals(job.Context);
+                job.Result.TrySetResult(null);
+            }
+            catch (LuaScriptCompilationException ex)
+            {
+                job.Result.TrySetException(ex);
+            }
+            catch (ScriptRuntimeException ex)
+            {
+                job.Result.TrySetResult(new LuaScriptRuntimeException(ex.DecoratedMessage ?? ex.Message, ex));
+            }
+            catch (Exception ex)
+            {
+                job.Result.TrySetResult(new LuaScriptRuntimeException(ex.Message, ex));
+            }
+            finally
+            {
+                _activeContext = null;
+            }
+        }
+
+        private void EnsureScript()
+        {
+            if (_script is not null) return;
+            _script = CreateScript();
+            _compiledChunk = null;
+            _lastCompiledCode = string.Empty;
+            _objTable = null;
+            _sceneTable = null;
+        }
+
+        private static Script CreateScript()
         {
             var s = new Script(
                 CoreModules.Basic |
@@ -34,16 +139,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
             s.Options.ScriptLoader = new DisabledFileScriptLoader();
             return s;
-        }
-
-        private void EnsureScript()
-        {
-            if (_script is not null) return;
-            _script = CreateScript();
-            _compiledChunk = null;
-            _lastCompiledCode = string.Empty;
-            _objTable = null;
-            _sceneTable = null;
         }
 
         private void EnsureCompiled(string code)
@@ -111,10 +206,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         {
             obj["getpixel"] = DynValue.NewCallback((_, args) =>
             {
-                if (_currentContext is null) return DynValue.Nil;
+                if (_activeContext is null) return DynValue.Nil;
                 int x = (int)(args[0].CastToNumber() ?? 0d);
                 int y = (int)(args[1].CastToNumber() ?? 0d);
-                var (r, g, b, a) = _currentContext.GetPixel(x, y);
+                var (r, g, b, a) = _activeContext.GetPixel(x, y);
                 return DynValue.NewTuple(
                     DynValue.NewNumber(r),
                     DynValue.NewNumber(g),
@@ -124,23 +219,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
             obj["setpixel"] = DynValue.NewCallback((_, args) =>
             {
-                if (_currentContext is null) return DynValue.Void;
+                if (_activeContext is null) return DynValue.Void;
                 int x = (int)(args[0].CastToNumber() ?? 0d);
                 int y = (int)(args[1].CastToNumber() ?? 0d);
                 double r = args[2].CastToNumber() ?? 0d;
                 double g = args[3].CastToNumber() ?? 0d;
                 double b = args[4].CastToNumber() ?? 0d;
                 double a = args.Count > 5 ? args[5].CastToNumber() ?? 255d : 255d;
-                _currentContext.SetPixel(x, y, r, g, b, a);
+                _activeContext.SetPixel(x, y, r, g, b, a);
                 return DynValue.Void;
             });
 
             obj["getpixeldata"] = DynValue.NewCallback((_, _) =>
             {
-                if (_currentContext is null) return DynValue.Nil;
-                _currentContext.EnsurePixelBuffer();
-                _pixelProxy ??= new PixelDataProxy(_currentContext);
-                return UserData.Create(_pixelProxy);
+                if (_activeContext is null) return DynValue.Nil;
+                _activeContext.EnsurePixelBuffer();
+                return UserData.Create(new PixelDataProxy(_activeContext));
             });
 
             obj["putpixeldata"] = DynValue.NewCallback((_, _) => DynValue.Void);
@@ -163,64 +257,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             ctx.Rz = _objTable.Get("rz").CastToNumber() ?? ctx.Rz;
         }
 
-        public void Execute(string code, AviUtlScriptContext ctx)
-        {
-            EnsureScript();
-            EnsureCompiled(code);
-
-            _currentContext = ctx;
-            _pixelProxy = null;
-
-            SetupGlobals(ctx);
-
-            var scriptToCall = _script!;
-            var chunkToCall = _compiledChunk!;
-
-            var task = Task.Run(() =>
-            {
-                try
-                {
-                    scriptToCall.Call(chunkToCall);
-                }
-                catch (ScriptRuntimeException ex)
-                {
-                    throw new LuaScriptRuntimeException(ex.DecoratedMessage ?? ex.Message, ex);
-                }
-            });
-
-            bool completed = task.Wait(ExecutionTimeoutMilliseconds);
-
-            _currentContext = null;
-
-            if (!completed)
-            {
-                _script = null;
-                _compiledChunk = null;
-                _lastCompiledCode = string.Empty;
-                _objTable = null;
-                _sceneTable = null;
-                throw new LuaScriptRuntimeException($"Script execution timed out after {ExecutionTimeoutMilliseconds} ms.");
-            }
-
-            if (task.IsFaulted)
-            {
-                var inner = task.Exception!.InnerException;
-                if (inner is LuaScriptRuntimeException rte)
-                    throw rte;
-                throw new LuaScriptRuntimeException(inner?.Message ?? task.Exception.Message, inner ?? task.Exception);
-            }
-
-            ReadBackGlobals(ctx);
-        }
-
         public void Dispose()
         {
-            _script = null;
-            _compiledChunk = null;
-            _objTable = null;
-            _sceneTable = null;
-            _currentContext = null;
-            _pixelProxy = null;
+            _queue.CompleteAdding();
+            _thread.Interrupt();
+            _thread.Join(millisecondsTimeout: 100);
+            _queue.Dispose();
         }
 
         private sealed class DisabledFileScriptLoader : ScriptLoaderBase
