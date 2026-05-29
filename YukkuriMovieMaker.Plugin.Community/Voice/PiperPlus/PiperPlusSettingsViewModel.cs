@@ -12,9 +12,6 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     bool isProgressVisible;
     string versionText = string.Empty;
     string speakerCountText = string.Empty;
-    bool hasUpdate;
-    string updateDescription = string.Empty;
-    string pendingVersion = string.Empty;
     ObservableCollection<PiperModelViewModel> models = [];
 
     public bool IsLoading
@@ -47,18 +44,6 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         private set => Set(ref speakerCountText, value);
     }
 
-    public bool HasUpdate
-    {
-        get => hasUpdate;
-        private set => Set(ref hasUpdate, value);
-    }
-
-    public string UpdateDescription
-    {
-        get => updateDescription;
-        private set => Set(ref updateDescription, value);
-    }
-
     public ObservableCollection<PiperModelViewModel> Models
     {
         get => models;
@@ -66,23 +51,12 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     }
 
     public ICommand RefreshCommand { get; }
-    public ICommand UpdateCommand { get; }
 
     public PiperPlusSettingsViewModel()
     {
         RefreshCommand = new ActionCommand(_ => !IsLoading, async _ => await RefreshAsync());
-        UpdateCommand = new ActionCommand(_ => !IsLoading && HasUpdate, async _ => await UpdateBinaryAsync());
         BuildModelsFromSettings();
         UpdateVersionAndSpeakerText();
-        ApplyUpdateState(PiperUpdateChecker.CachedRelease);
-
-        _ = InitializeUpdateStateAsync();
-    }
-
-    async Task InitializeUpdateStateAsync()
-    {
-        var release = await PiperUpdateChecker.GetLatestReleaseAsync();
-        ApplyUpdateState(release);
     }
 
     void BuildModelsFromSettings()
@@ -95,36 +69,9 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     {
         await ExecuteLoadingOperationAsync(async () =>
         {
-            await PiperUpdateChecker.InvalidateCacheAsync();
-
-            var release = await PiperUpdateChecker.GetLatestReleaseAsync();
-
             if (!PiperBinaryResource.IsReady)
-            {
-                if (release is not { TagName: { Length: > 0 } version })
-                {
-                    VersionText = Texts.BinaryNotFound;
-                    SpeakerCountText = string.Empty;
-                    return;
-                }
-                await InstallVersionAsync(version);
-            }
+                await InstallVersionAsync(PiperBinaryResource.Version);
 
-            await ReloadModelsAsync();
-            ApplyUpdateState(release);
-        });
-    }
-
-    async Task UpdateBinaryAsync()
-    {
-        if (string.IsNullOrEmpty(pendingVersion))
-            return;
-
-        await ExecuteLoadingOperationAsync(async () =>
-        {
-            await InstallVersionAsync(pendingVersion);
-            HasUpdate = false;
-            UpdateDescription = string.Empty;
             await ReloadModelsAsync();
         });
     }
@@ -162,34 +109,6 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     {
         IsProgressVisible = true;
         await PiperBinaryResource.EnsureAsync(version, Progress);
-    }
-
-    void ApplyUpdateState(GitHubReleaseInfo? release)
-    {
-        if (release is not { TagName: var tag })
-        {
-            pendingVersion = string.Empty;
-            UpdateDescription = string.Empty;
-            HasUpdate = false;
-            return;
-        }
-
-        pendingVersion = tag;
-
-        if (!PiperBinaryResource.IsReady)
-        {
-            UpdateDescription = string.Empty;
-            HasUpdate = false;
-            return;
-        }
-
-        var installed = PiperBinaryResource.InstalledVersion;
-        var needsUpdate = installed is null ||
-            !string.Equals(installed, tag, StringComparison.OrdinalIgnoreCase);
-
-        (UpdateDescription, HasUpdate) = needsUpdate
-            ? ($"{Texts.UpdateAvailable} {tag}", true)
-            : (string.Empty, false);
     }
 
     void UpdateVersionAndSpeakerText()

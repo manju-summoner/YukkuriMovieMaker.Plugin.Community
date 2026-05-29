@@ -6,6 +6,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Resource;
 
 internal static class PiperBinaryResource
 {
+    public const string Version = "v1.12.0";
+
     const string ExecutableName = "PiperPlus.Cli.exe";
     const string RepoOwner = "ayutaz";
     const string RepoName = "piper-plus";
@@ -36,7 +38,7 @@ internal static class PiperBinaryResource
 
     public static string ExecutablePath => Path.Combine(PiperPlusPaths.BinaryDirectory, ExecutableName);
 
-    public static bool IsReady => InstalledVersion is not null && File.Exists(ExecutablePath);
+    public static bool IsReady => InstalledVersion == Version && File.Exists(ExecutablePath);
 
     public static async Task EnsureAsync(
         string version,

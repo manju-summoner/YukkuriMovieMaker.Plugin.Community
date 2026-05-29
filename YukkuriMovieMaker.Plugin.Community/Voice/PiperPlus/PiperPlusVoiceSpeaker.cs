@@ -35,10 +35,7 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry, IVoiceResou
 
         if (!PiperBinaryResource.IsReady)
         {
-            var release = await PiperUpdateChecker.GetLatestReleaseAsync();
-            var version = release?.TagName
-                ?? throw new InvalidOperationException(Texts.BinaryNotFound);
-            await PiperBinaryResource.EnsureAsync(version);
+            await PiperBinaryResource.EnsureAsync(PiperBinaryResource.Version);
         }
 
         var executablePath = PiperBinaryResource.ExecutablePath;
