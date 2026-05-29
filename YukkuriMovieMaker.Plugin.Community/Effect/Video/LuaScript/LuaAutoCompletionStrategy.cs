@@ -35,7 +35,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 "obj.rx", "obj.ry", "obj.rz",
                 "obj.track0", "obj.track1", "obj.track2", "obj.track3",
                 "obj.getpixel", "obj.setpixel",
-                "obj.getpixeldata", "obj.putpixeldata"
+                "obj.getpixeldata"
             ]),
             ("math", [
                 "math.abs", "math.ceil", "math.cos", "math.exp", "math.floor",
@@ -68,6 +68,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             ]),
         ];
 
+        private static readonly Regex s_identifierPattern = new(
+            @"[a-zA-Z_][a-zA-Z_0-9]*$",
+            RegexOptions.Compiled);
+
         private static readonly Regex s_functionPattern = new(
             @"(?<!local\s)\bfunction\s+([a-zA-Z_][a-zA-Z_0-9]*(?:\.[a-zA-Z_][a-zA-Z_0-9]*)*)\s*\(",
             RegexOptions.Compiled);
@@ -84,13 +88,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             var lastDot = line.LastIndexOf('.');
             if (lastDot >= 0)
             {
-                var prefix = line[..lastDot].TrimStart();
+                var beforeDot = line[..lastDot];
+                var nsMatch = s_identifierPattern.Match(beforeDot);
+                if (!nsMatch.Success)
+                    return [];
+
+                var ns = nsMatch.Value;
                 var afterDot = input == "." ? "" : line[(lastDot + 1)..];
 
-                foreach (var (ns, members) in s_namespaces)
+                foreach (var (namespaceName, members) in s_namespaces)
                 {
-                    if (prefix.EndsWith(ns, System.StringComparison.Ordinal))
-                        return FilterPrefix(members, ns + "." + afterDot);
+                    if (ns == namespaceName)
+                        return FilterPrefix(members, namespaceName + "." + afterDot);
                 }
                 return [];
             }

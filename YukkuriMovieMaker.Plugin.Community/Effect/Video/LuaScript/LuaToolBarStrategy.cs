@@ -27,7 +27,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                                 DefaultExt = ".lua"
                             };
                             if (dlg.ShowDialog() != true) return;
-                            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                             param.Text = File.ReadAllText(dlg.FileName, Encoding.UTF8);
                         })),
 
