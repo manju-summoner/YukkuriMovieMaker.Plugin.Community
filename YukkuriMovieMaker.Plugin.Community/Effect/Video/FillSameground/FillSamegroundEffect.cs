@@ -90,10 +90,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
         Color targetColor = Color.FromRgb(255, 0, 0);
 
         [Display(GroupName = nameof(Texts.FillSamegroundTargetGroupName), Name = nameof(Texts.FillSamegroundToleranceName), ResourceType = typeof(Texts), Order = 130)]
-        [AnimationSlider("F0", "", 0, 128)]
+        [AnimationSlider("F0", "", 0, 255)]
         public Animation Tolerance { get; } = new Animation(15, 0, 255);
 
-        [Display(GroupName = nameof(Texts.FillSamegroundBrushGroupName), Order = 200, AutoGenerateField = true)]
+        [Display(GroupName = nameof(Texts.FillSamegroundBrushGroupName), Order = 200, AutoGenerateField = true, ResourceType = typeof(Texts))]
         public YukkuriMovieMaker.Plugin.Brush.Brush Brush { get; } = new YukkuriMovieMaker.Plugin.Brush.Brush();
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
