@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MoonSharp.Interpreter;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
@@ -18,23 +19,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             var buf = _ctx.GetPixelBuffer();
             if (buf is null) return 0d;
 
-            int i = index - 1;
-            int totalCh = _ctx.ImageWidth * _ctx.ImageHeight * 4;
-            if ((uint)i >= (uint)totalCh) return 0d;
+            int zeroBasedIndex = index - 1;
+            int totalChannels = _ctx.ImageWidth * _ctx.ImageHeight * 4;
+            if ((uint)zeroBasedIndex >= (uint)totalChannels) return 0d;
 
-            int pixelIdx = i / 4;
-            int channel = i % 4;
-            int bufIdx = pixelIdx * 4;
-
-            double a = buf[bufIdx + 3];
+            int pixelIndex = zeroBasedIndex / 4;
+            int channel = zeroBasedIndex % 4;
+            int bufIndex = pixelIndex * 4;
+            double a = buf[bufIndex + 3];
 
             return channel switch
             {
-                0 => a > 0d ? Math.Clamp(buf[bufIdx + 2] * 255d / a, 0d, 255d) : 0d,
-                1 => a > 0d ? Math.Clamp(buf[bufIdx + 1] * 255d / a, 0d, 255d) : 0d,
-                2 => a > 0d ? Math.Clamp(buf[bufIdx + 0] * 255d / a, 0d, 255d) : 0d,
+                0 => a > 0d ? Math.Clamp(buf[bufIndex + 2] * 255d / a, 0d, 255d) : 0d,
+                1 => a > 0d ? Math.Clamp(buf[bufIndex + 1] * 255d / a, 0d, 255d) : 0d,
+                2 => a > 0d ? Math.Clamp(buf[bufIndex + 0] * 255d / a, 0d, 255d) : 0d,
                 3 => a,
-                _ => 0d
+                _ => throw new UnreachableException()
             };
         }
 
@@ -44,40 +44,40 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             var buf = _ctx.GetPixelBuffer();
             if (buf is null) return;
 
-            int i = index - 1;
-            int totalCh = _ctx.ImageWidth * _ctx.ImageHeight * 4;
-            if ((uint)i >= (uint)totalCh) return;
+            int zeroBasedIndex = index - 1;
+            int totalChannels = _ctx.ImageWidth * _ctx.ImageHeight * 4;
+            if ((uint)zeroBasedIndex >= (uint)totalChannels) return;
 
             _ctx.MarkPixelsDirty();
 
-            int pixelIdx = i / 4;
-            int channel = i % 4;
-            int bufIdx = pixelIdx * 4;
-            double v = Math.Clamp(value, 0d, 255d);
+            int pixelIndex = zeroBasedIndex / 4;
+            int channel = zeroBasedIndex % 4;
+            int bufIndex = pixelIndex * 4;
+            double clamped = Math.Clamp(value, 0d, 255d);
 
             if (channel == 3)
             {
-                double oldA = buf[bufIdx + 3];
-                double newA = v;
+                double oldA = buf[bufIndex + 3];
+                double newA = clamped;
                 if (oldA > 0d && newA > 0d)
                 {
                     double factor = newA / oldA;
-                    buf[bufIdx + 0] = (byte)Math.Clamp(buf[bufIdx + 0] * factor, 0d, 255d);
-                    buf[bufIdx + 1] = (byte)Math.Clamp(buf[bufIdx + 1] * factor, 0d, 255d);
-                    buf[bufIdx + 2] = (byte)Math.Clamp(buf[bufIdx + 2] * factor, 0d, 255d);
+                    buf[bufIndex + 0] = (byte)Math.Clamp(buf[bufIndex + 0] * factor, 0d, 255d);
+                    buf[bufIndex + 1] = (byte)Math.Clamp(buf[bufIndex + 1] * factor, 0d, 255d);
+                    buf[bufIndex + 2] = (byte)Math.Clamp(buf[bufIndex + 2] * factor, 0d, 255d);
                 }
                 else if (newA <= 0d)
                 {
-                    buf[bufIdx + 0] = buf[bufIdx + 1] = buf[bufIdx + 2] = 0;
+                    buf[bufIndex + 0] = buf[bufIndex + 1] = buf[bufIndex + 2] = 0;
                 }
-                buf[bufIdx + 3] = (byte)newA;
+                buf[bufIndex + 3] = (byte)newA;
             }
             else
             {
-                double a = buf[bufIdx + 3];
-                double pv = v * (a / 255d);
-                int bi = channel switch { 0 => bufIdx + 2, 1 => bufIdx + 1, 2 => bufIdx + 0, _ => bufIdx + 0 };
-                buf[bi] = (byte)Math.Clamp(pv, 0d, 255d);
+                double a = buf[bufIndex + 3];
+                double premultiplied = clamped * (a / 255d);
+                int byteIndex = channel switch { 0 => bufIndex + 2, 1 => bufIndex + 1, 2 => bufIndex + 0, _ => throw new UnreachableException() };
+                buf[byteIndex] = (byte)Math.Clamp(premultiplied, 0d, 255d);
             }
         }
     }
