@@ -1,0 +1,35 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
+LengthScale,,話速,Speed,速度,速度,속도,Velocidad,سرعة,Kecepatan,
+LengthScaleDesc,,値が大きいほど遅くなります (1.0 が標準)。,Larger values produce slower speech (1.0 is normal).,值越大语速越慢（1.0 为标准）。,值越大語速越慢（1.0 為標準）。,값이 클수록 느려집니다 (1.0이 표준).,Valores más altos producen habla más lenta (1.0 es normal).,القيمة الأكبر تعني حديثاً أبطأ (1.0 هو المعيار).,Nilai lebih besar menghasilkan bicara lebih lambat (1.0 adalah normal).,
+NoiseScale,,ノイズスケール,Noise Scale,噪声強度,噪聲強度,노이즈 스케일,Escala de ruido,مقياس الضوضاء,Skala Kebisingan,
+NoiseScaleDesc,,音声のバリエーションを制御します (デフォルト: 0.667)。,Controls audio variation (default: 0.667).,控制音频变化幅度（默认：0.667）。,控制音訊變化幅度（預設：0.667）。,음성 변화를 제어합니다 (기본값: 0.667).,Controla la variación de audio (predeterminado: 0.667).,يتحكم في تباين الصوت (الافتراضي: 0.667).,Mengontrol variasi audio (default: 0.667).,
+NoiseScaleW,,音素長ノイズ,Phoneme Length Noise,音素长度噪声,音素長度噪聲,음소 길이 노이즈,Ruido de longitud de fonema,ضوضاء طول الصوت,Kebisingan Panjang Fonem,
+NoiseScaleWDesc,,音素長のバリエーションを制御します (デフォルト: 0.8)。,Controls phoneme length variation (default: 0.8).,控制音素长度变化（默认：0.8）。,控制音素長度變化（預設：0.8）。,음소 길이 변화를 제어합니다 (기본값: 0.8).,Controla la variación de longitud de fonema (predeterminado: 0.8).,يتحكم في تباين طول الصوت (الافتراضي: 0.8).,Mengontrol variasi panjang fonem (default: 0.8).,
+AboutPiperPlus,,Piper Plusについて,About Piper Plus,关于 Piper Plus,關於 Piper Plus,Piper Plus 정보,Acerca de Piper Plus,حول Piper Plus,Tentang Piper Plus,
+AboutPiperPlusDescription,,Piper Plus は高品質なオフラインニューラル音声合成エンジンです。,Piper Plus is a high-quality offline neural TTS engine.,Piper Plus 是高质量的离线神经网络语音合成引擎。,Piper Plus 是高品質的離線神經網路語音合成引擎。,Piper Plus는 고품질 오프라인 신경망 TTS 엔진입니다.,Piper Plus es un motor de síntesis de voz neuronal sin conexión de alta calidad.,Piper Plus هو محرك تحويل نص إلى كلام عصبي عالي الجودة يعمل دون اتصال.,Piper Plus adalah mesin TTS neural offline berkualitas tinggi.,
+AboutPiperPlusHowTo,,モデルファイル (.onnx / .onnx.json) は user/resources/piper/models に保存されます。更新ボタンを押すと話者一覧が表示されます。,Model files (.onnx / .onnx.json) are stored in user/resources/piper/models. Press Refresh to list speakers.,模型文件（.onnx / .onnx.json）会保存到 user/resources/piper/models。点击刷新即可显示说话者列表。,模型檔案（.onnx / .onnx.json）會儲存在 user/resources/piper/models。點擊重新整理即可顯示說話者清單。,모델 파일 (.onnx / .onnx.json)은 user/resources/piper/models에 저장됩니다. 새로 고침을 누르면 화자 목록이 표시됩니다.,Los archivos del modelo (.onnx / .onnx.json) se guardan en user/resources/piper/models. Presione Actualizar para listar los hablantes.,يتم حفظ ملفات النموذج (.onnx / .onnx.json) في user/resources/piper/models. اضغط على تحديث لعرض قائمة المتحدثين.,File model (.onnx / .onnx.json) disimpan di user/resources/piper/models. Tekan Muat Ulang untuk menampilkan daftar pembicara.,
+AboutPiperPlusBinaryNote,,バイナリは話者を初めて使用する際に user/resources/piper へダウンロードされます。,The binary is downloaded to user/resources/piper the first time you use a speaker.,首次使用说话者时，二进制文件会下载到 user/resources/piper。,首次使用說話者時，二進位檔案會下載到 user/resources/piper。,화자를 처음 사용할 때 바이너리가 user/resources/piper에 다운로드됩니다.,El binario se descarga en user/resources/piper la primera vez que usa un hablante.,يتم تنزيل الملف الثنائي إلى user/resources/piper عند استخدام متحدث لأول مرة.,Biner diunduh ke user/resources/piper saat pertama kali Anda menggunakan pembicara.,
+ResourceTerms,,"Piper Plus の音声モデルをダウンロードします。
+各音声モデルのライセンスを確認してから利用してください。","This downloads the Piper Plus voice model.
+Please review each voice model license before use.","将下载 Piper Plus 语音模型。
+使用前请确认各语音模型许可证。","將下載 Piper Plus 語音模型。
+使用前請確認各語音模型授權。","Piper Plus 음성 모델을 다운로드합니다.
+사용 전에 각 음성 모델 라이선스를 확인하세요.","Se descargará el modelo de voz de Piper Plus.
+Revise la licencia de cada modelo de voz antes de usarlo.","سيتم تنزيل نموذج صوت Piper Plus.
+يرجى مراجعة ترخيص كل نموذج صوت قبل الاستخدام.","Ini akan mengunduh model suara Piper Plus.
+Harap periksa lisensi tiap model suara sebelum digunakan.",
+DownloadingBinary,,バイナリをダウンロード中,Downloading binary,正在下载二进制文件,正在下載二進位文件,바이너리 다운로드 중,Descargando binario,جارٍ تنزيل الثنائي,Mengunduh biner,
+ExtractingBinary,,バイナリを展開中,Extracting binary,正在解压二进制文件,正在解壓縮二進位文件,바이너리 압축 해제 중,Extrayendo binario,جارٍ فك ضغط الثنائي,Mengekstrak biner,
+BinaryReady,,バイナリの準備完了,Binary is ready,二进制文件已准备就绪,二進位文件已準備就緒,바이너리 준비 완료,Binario listo,الثنائي جاهز,Biner siap,
+BinaryNotFound,,バイナリが見つかりません,Binary not found,找不到二进制文件,找不到二進位文件,바이너리를 찾을 수 없음,Binario no encontrado,لم يتم العثور على الثنائي,Biner tidak ditemukan,
+LoadingModels,,モデルを読み込み中,Loading models,正在加载模型,正在載入模型,모델 로드 중,Cargando modelos,جارٍ تحميل النماذج,Memuat model,
+SpeakerCount,0: count,{0} 話者,{0} speaker(s),{0} 个说话者,{0} 個說話者,{0}명 화자,{0} hablante(s),{0} متحدث,{0} pembicara,
+AboutPiperPlusLink,,GitHubリポジトリ,GitHub Repository,GitHub 仓库,GitHub 存儲庫,GitHub 저장소,Repositorio de GitHub,مستودع GitHub,Repositori GitHub,
+ModelList,,モデル一覧,Model List,模型列表,模型清單,모델 목록,Lista de modelos,قائمة النماذج,Daftar Model,
+ModelInternalName,,モデル名,Model Name,模型名,模型名,모델 이름,Nombre del modelo,اسم النموذج,Nama Model,
+ModelSpeakerCount,,話者数,Speakers,说话者数,說話者數,화자 수,Hablantes,عدد المتحدثين,Jumlah Pembicara,
+ModelLanguage,,言語,Language,语言,語言,언어,Idioma,اللغة,Bahasa,
+DownloadingPretrainedModel,0: filename,{0} をダウンロード中,Downloading {0},正在下载 {0},正在下載 {0},{0} 다운로드 중,Descargando {0},جارٍ تنزيل {0},Mengunduh {0},
+BinaryNotInstalled,,Piper Plus のバイナリがダウンロードされていません。話者のダウンロードを実行してください。,The Piper Plus binary is not downloaded. Please download the speaker first.,尚未下载 Piper Plus 二进制文件。请先下载该说话者。,尚未下載 Piper Plus 二進位文件。請先下載該說話者。,Piper Plus 바이너리가 다운로드되지 않았습니다. 먼저 화자를 다운로드하세요.,El binario de Piper Plus no está descargado. Descargue primero el hablante.,لم يتم تنزيل ثنائي Piper Plus. يرجى تنزيل المتحدث أولاً.,Biner Piper Plus belum diunduh. Silakan unduh pembicara terlebih dahulu.,
+BinaryResourceName,,Piper Plus バイナリ,Piper Plus binary,Piper Plus 二进制文件,Piper Plus 二進位文件,Piper Plus 바이너리,Binario de Piper Plus,ثنائي Piper Plus,Biner Piper Plus,
+BinaryResourceTerms,,Piper Plus の音声合成エンジン (PiperPlus.Cli.exe) をダウンロードします。,This downloads the Piper Plus speech synthesis engine (PiperPlus.Cli.exe).,将下载 Piper Plus 语音合成引擎 (PiperPlus.Cli.exe)。,將下載 Piper Plus 語音合成引擎 (PiperPlus.Cli.exe)。,Piper Plus 음성 합성 엔진 (PiperPlus.Cli.exe)을 다운로드합니다.,Se descargará el motor de síntesis de voz de Piper Plus (PiperPlus.Cli.exe).,سيتم تنزيل محرك تحويل النص إلى كلام Piper Plus (PiperPlus.Cli.exe).,Ini akan mengunduh mesin sintesis suara Piper Plus (PiperPlus.Cli.exe).,
