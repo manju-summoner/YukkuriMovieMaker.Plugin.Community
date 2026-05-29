@@ -31,7 +31,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
         FillSamegroundCustomEffect? colorMatchEffect;
         ID2D1Image? colorMatchOutput;
         GaussianBlur? blurEffect;
-        AlphaMask? alphaMaskEffect;
+        Vortice.Direct2D1.Effects.AlphaMask? alphaMaskEffect;
         Opacity? opacityEffect;
         AffineTransform2D? finalMaskTransform;
         ID2D1Image? finalMaskTransformOutput;
@@ -95,7 +95,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
             };
             disposer.Collect(blurEffect);
 
-            alphaMaskEffect = new AlphaMask(devices.DeviceContext);
+            alphaMaskEffect = new Vortice.Direct2D1.Effects.AlphaMask(devices.DeviceContext);
             disposer.Collect(alphaMaskEffect);
 
             opacityEffect = new Opacity(devices.DeviceContext);
