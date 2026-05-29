@@ -25,6 +25,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         private int _bitmapHeight;
 
         private bool _isFirst = true;
+        private ID2D1Image? _cachedInput;
         private int _cachedFrame;
         private double _cachedTime;
         private double _cachedTrack0, _cachedTrack1, _cachedTrack2, _cachedTrack3;
@@ -40,7 +41,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             return null;
         }
 
-        protected override void setInput(ID2D1Image? input) { }
+        protected override void setInput(ID2D1Image? input)
+        {
+            if (!ReferenceEquals(_cachedInput, input))
+                _isFirst = true;
+            _cachedInput = input;
+        }
 
         protected override void ClearEffectChain()
         {
