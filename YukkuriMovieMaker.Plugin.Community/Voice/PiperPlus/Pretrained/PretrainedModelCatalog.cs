@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Pretrained;
 
 internal sealed record PretrainedModelDefinition(
@@ -9,7 +11,11 @@ internal sealed record PretrainedModelDefinition(
     string OnnxFileName,
     string OnnxUrl,
     string ConfigUrl
-);
+)
+{
+    public string ModelPath => Path.Combine(PiperPlusSettings.Default.ModelDirectory, SubDirectory, OnnxFileName);
+    public string ConfigPath => ModelPath + ".json";
+}
 
 internal static class PretrainedModelCatalog
 {

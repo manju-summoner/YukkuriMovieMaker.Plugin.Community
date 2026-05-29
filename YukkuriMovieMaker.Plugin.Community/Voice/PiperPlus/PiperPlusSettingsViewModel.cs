@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
-using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Pretrained;
 using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Resource;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
@@ -73,20 +72,11 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         private set => Set(ref models, value);
     }
 
-    public IReadOnlyList<PretrainedModelEntry> PretrainedModels { get; }
-
     public ICommand RefreshCommand { get; }
     public ICommand UpdateCommand { get; }
 
     public PiperPlusSettingsViewModel()
     {
-        PretrainedModels = PretrainedModelCatalog.All
-            .Select(d => new PretrainedModelEntry(d))
-            .ToList();
-
-        foreach (var entry in PretrainedModels)
-            entry.DownloadCompleted += OnPretrainedDownloadCompleted;
-
         RefreshCommand = new ActionCommand(_ => !IsLoading, async _ => await RefreshAsync());
         UpdateCommand = new ActionCommand(_ => !IsLoading && HasUpdate, async _ => await UpdateBinaryAsync());
         BuildModelsFromSettings();
@@ -106,14 +96,6 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     {
         Models = new ObservableCollection<PiperModelViewModel>(
             PiperPlusSettings.Default.SavedModels.Select(s => new PiperModelViewModel(s)));
-    }
-
-    async void OnPretrainedDownloadCompleted(object? sender, EventArgs e)
-    {
-        if (IsLoading)
-            return;
-
-        await ExecuteLoadingOperationAsync(ReloadModelsAsync);
     }
 
     async Task RefreshAsync()
@@ -182,8 +164,6 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         IsProgressVisible = true;
         await Task.Run(PiperSpeakerLoader.Reload);
         BuildModelsFromSettings();
-        foreach (var entry in PretrainedModels)
-            entry.RefreshDownloadedState();
         UpdateVersionAndSpeakerText();
     }
 

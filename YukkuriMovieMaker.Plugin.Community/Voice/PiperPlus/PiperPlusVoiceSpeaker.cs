@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Plugin.Voice;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
 
-internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpeaker
+internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry, IVoiceResource? resource = null) : IVoiceSpeaker
 {
     const int ProcessTimeoutMs = 120_000;
 
@@ -20,7 +20,7 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry) : IVoiceSpe
     public bool IsVoiceDataCachingRequired => true;
     public SupportedTextFormat Format => SupportedTextFormat.Text;
     public IVoiceLicense? License => null;
-    public IVoiceResource? Resource => null;
+    public IVoiceResource? Resource => resource;
 
     public Task<string> ConvertKanjiToYomiAsync(string text, IVoiceParameter voiceParameter)
         => throw new NotImplementedException();
