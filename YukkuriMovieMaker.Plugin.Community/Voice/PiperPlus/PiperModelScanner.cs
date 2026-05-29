@@ -22,17 +22,11 @@ internal static class PiperModelScanner
 
         foreach (var onnxPath in Directory.EnumerateFiles(directory, "*.onnx", EnumerationOptions))
         {
-            var canonicalJsonPath = onnxPath + ".json";
+            var jsonPath = ResolveJsonPath(onnxPath);
+            if (jsonPath is null)
+                continue;
 
-            if (!File.Exists(canonicalJsonPath))
-            {
-                var resolved = TryAutoRenameJson(onnxPath);
-                if (resolved is null)
-                    continue;
-                canonicalJsonPath = resolved;
-            }
-
-            var info = TryLoad(onnxPath, canonicalJsonPath);
+            var info = TryLoad(onnxPath, jsonPath);
             if (info is not null)
                 results.Add(info);
         }
@@ -40,39 +34,28 @@ internal static class PiperModelScanner
         return results;
     }
 
-    static string? TryAutoRenameJson(string onnxPath)
+    static string? ResolveJsonPath(string onnxPath)
     {
+        // 1. model.onnx.json
+        var canonicalJsonPath = onnxPath + ".json";
+        if (File.Exists(canonicalJsonPath))
+            return canonicalJsonPath;
+
+        // 2. model.json
+        var modelJsonPath = Path.ChangeExtension(onnxPath, ".json");
+        if (File.Exists(modelJsonPath))
+            return modelJsonPath;
+
+        // 3. config.json
         var folder = Path.GetDirectoryName(onnxPath);
         if (folder is null)
             return null;
 
-        var folderOnnxFiles = Directory
-            .GetFiles(folder, "*.onnx", SearchOption.TopDirectoryOnly);
-        var folderJsonFiles = Directory
-            .GetFiles(folder, "*.json", SearchOption.TopDirectoryOnly)
-            .Where(j => !j.EndsWith(".onnx.json", StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        var configJsonPath = Path.Combine(folder, "config.json");
+        if (File.Exists(configJsonPath))
+            return configJsonPath;
 
-        if (folderOnnxFiles.Length != 1 || folderJsonFiles.Count != 1)
-            return null;
-
-        var singleOnnx = folderOnnxFiles[0];
-        var singleJson = folderJsonFiles[0];
-
-        if (!string.Equals(singleOnnx, onnxPath, StringComparison.OrdinalIgnoreCase))
-            return null;
-
-        var targetJsonPath = singleOnnx + ".json";
-
-        try
-        {
-            File.Move(singleJson, targetJsonPath);
-            return targetJsonPath;
-        }
-        catch
-        {
-            return null;
-        }
+        return null;
     }
 
     static PiperModelInfo? TryLoad(string onnxPath, string jsonPath)
