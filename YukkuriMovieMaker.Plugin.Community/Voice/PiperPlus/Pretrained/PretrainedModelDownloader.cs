@@ -12,7 +12,7 @@ internal static class PretrainedModelDownloader
         IProgress<(double Progress, string Message)>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        var modelRoot = PiperPlusSettings.Default.ModelDirectory;
+        var modelRoot = PiperPlusPaths.ModelDirectory;
         var targetDir = Path.Combine(modelRoot, definition.SubDirectory);
         Directory.CreateDirectory(targetDir);
 

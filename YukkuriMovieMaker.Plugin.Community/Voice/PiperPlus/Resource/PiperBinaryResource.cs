@@ -22,7 +22,7 @@ internal static class PiperBinaryResource
     static string? resolvedExecutablePath;
 
     static string InstalledVersionFilePath =>
-        Path.Combine(PiperPlusSettings.Default.BinaryDirectory, "installed_version.txt");
+        Path.Combine(PiperPlusPaths.BinaryDirectory, "installed_version.txt");
 
     public static string? InstalledVersion
     {
@@ -43,7 +43,7 @@ internal static class PiperBinaryResource
     }
 
     static string InstallDirectory(string version) =>
-        Path.Combine(PiperPlusSettings.Default.BinaryDirectory, version);
+        Path.Combine(PiperPlusPaths.BinaryDirectory, version);
 
     public static string? ExecutablePath
     {

@@ -7,7 +7,7 @@ internal static class PiperSpeakerLoader
 {
     public static void Reload()
     {
-        var models = PiperModelScanner.Scan(PiperPlusSettings.Default.ModelDirectory);
+        var models = PiperModelScanner.Scan(PiperPlusPaths.ModelDirectory);
         var activePaths = models.Select(m => m.ModelPath).ToList();
 
         Application.Current.Dispatcher.Invoke(() =>

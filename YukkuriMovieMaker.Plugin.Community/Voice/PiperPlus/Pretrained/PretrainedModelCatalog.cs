@@ -13,7 +13,7 @@ internal sealed record PretrainedModelDefinition(
     string ConfigUrl
 )
 {
-    public string ModelPath => Path.Combine(PiperPlusSettings.Default.ModelDirectory, SubDirectory, OnnxFileName);
+    public string ModelPath => Path.Combine(PiperPlusPaths.ModelDirectory, SubDirectory, OnnxFileName);
     public string ConfigPath => ModelPath + ".json";
 }
 

@@ -5,7 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus"
              xmlns:ps="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
-             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
@@ -17,20 +16,6 @@
 
         <Expander Grid.Row="0" Header="Piper Plus" IsExpanded="True">
             <StackPanel>
-                <Grid>
-                    <Label Content="{x:Static local:Texts.ModelDirectory}"/>
-                    <c:DirectorySelector
-                        Value="{Binding Source={x:Static local:PiperPlusSettings.Default}, Path=ModelDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="300"
-                        HorizontalAlignment="Right"/>
-                </Grid>
-                <Grid>
-                    <Label Content="{x:Static local:Texts.BinaryDirectory}"/>
-                    <c:DirectorySelector
-                        Value="{Binding Source={x:Static local:PiperPlusSettings.Default}, Path=BinaryDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="300"
-                        HorizontalAlignment="Right"/>
-                </Grid>
                 <Grid>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
                         <TextBlock Text="{Binding VersionText}" VerticalAlignment="Center">
