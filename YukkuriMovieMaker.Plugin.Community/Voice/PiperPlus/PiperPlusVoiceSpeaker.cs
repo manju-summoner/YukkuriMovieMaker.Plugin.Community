@@ -33,16 +33,15 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry, IVoiceResou
     {
         var param = parameter as PiperPlusVoiceParameter ?? new PiperPlusVoiceParameter();
 
-        var executablePath = PiperBinaryResource.ExecutablePath;
-        if (executablePath is null)
+        if (!PiperBinaryResource.IsReady)
         {
             var release = await PiperUpdateChecker.GetLatestReleaseAsync();
             var version = release?.TagName
                 ?? throw new InvalidOperationException(Texts.BinaryNotFound);
             await PiperBinaryResource.EnsureAsync(version);
-            executablePath = PiperBinaryResource.ExecutablePath
-                ?? throw new FileNotFoundException(Texts.BinaryNotFound);
         }
+
+        var executablePath = PiperBinaryResource.ExecutablePath;
 
         if (!File.Exists(entry.ModelPath))
             throw new FileNotFoundException($"Model not found: {entry.ModelPath}");

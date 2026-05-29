@@ -9,20 +9,12 @@ internal static class PiperBinaryResource
     const string ExecutableName = "PiperPlus.Cli.exe";
     const string RepoOwner = "ayutaz";
     const string RepoName = "piper-plus";
-
-    static readonly EnumerationOptions SearchOptions = new()
-    {
-        RecurseSubdirectories = true,
-        IgnoreInaccessible = true,
-        MatchType = MatchType.Simple,
-    };
+    const string InstalledVersionFileName = "installed_version.txt";
 
     static readonly SemaphoreSlim InstallGate = new(1, 1);
-    static readonly object CacheLock = new();
-    static string? resolvedExecutablePath;
 
     static string InstalledVersionFilePath =>
-        Path.Combine(PiperPlusPaths.BinaryDirectory, "installed_version.txt");
+        Path.Combine(PiperPlusPaths.BinaryDirectory, InstalledVersionFileName);
 
     public static string? InstalledVersion
     {
@@ -42,44 +34,9 @@ internal static class PiperBinaryResource
         }
     }
 
-    static string InstallDirectory(string version) =>
-        Path.Combine(PiperPlusPaths.BinaryDirectory, version);
+    public static string ExecutablePath => Path.Combine(PiperPlusPaths.BinaryDirectory, ExecutableName);
 
-    public static string? ExecutablePath
-    {
-        get
-        {
-            lock (CacheLock)
-            {
-                if (resolvedExecutablePath is not null && File.Exists(resolvedExecutablePath))
-                    return resolvedExecutablePath;
-
-                var version = InstalledVersion;
-                if (version is null)
-                {
-                    resolvedExecutablePath = null;
-                    return null;
-                }
-
-                var dir = InstallDirectory(version);
-                resolvedExecutablePath = Directory.Exists(dir)
-                    ? Directory.EnumerateFiles(dir, ExecutableName, SearchOptions).FirstOrDefault()
-                    : null;
-
-                return resolvedExecutablePath;
-            }
-        }
-    }
-
-    public static bool IsReady => ExecutablePath is not null;
-
-    public static void InvalidateCache()
-    {
-        lock (CacheLock)
-        {
-            resolvedExecutablePath = null;
-        }
-    }
+    public static bool IsReady => InstalledVersion is not null && File.Exists(ExecutablePath);
 
     public static async Task EnsureAsync(
         string version,
@@ -96,11 +53,10 @@ internal static class PiperBinaryResource
         await InstallGate.WaitAsync(cancellationToken);
         try
         {
-            var currentVersion = InstalledVersion;
-            if (currentVersion == version && IsReady)
+            if (InstalledVersion == version && IsReady)
                 return;
 
-            await InstallCoreAsync(version, assetName, currentVersion, progress, cancellationToken);
+            await InstallCoreAsync(version, assetName, progress, cancellationToken);
         }
         finally
         {
@@ -122,14 +78,11 @@ internal static class PiperBinaryResource
     static async Task InstallCoreAsync(
         string version,
         string assetName,
-        string? currentVersion,
         IProgress<(double Progress, string Message)>? progress,
         CancellationToken cancellationToken)
     {
-        var targetDir = InstallDirectory(version);
+        var targetDir = PiperPlusPaths.BinaryDirectory;
         var tempDir = targetDir + ".tmp";
-        var currentDir = currentVersion is not null ? InstallDirectory(currentVersion) : null;
-        var backupDir = currentDir is not null ? currentDir + ".bak" : null;
 
         if (Directory.Exists(tempDir))
             Directory.Delete(tempDir, recursive: true);
@@ -139,7 +92,7 @@ internal static class PiperBinaryResource
         try
         {
             await DownloadAndExtractAsync(version, assetName, tempDir, progress, cancellationToken);
-            CommitInstall(version, currentDir, backupDir, targetDir, tempDir);
+            CommitInstall(version, targetDir, tempDir);
             progress?.Report((1.0, Texts.BinaryReady));
         }
         catch
@@ -179,59 +132,50 @@ internal static class PiperBinaryResource
 
     static void CommitInstall(
         string version,
-        string? currentDir,
-        string? backupDir,
         string targetDir,
         string tempDir)
     {
-        var backedUp = false;
-
-        if (currentDir is not null && backupDir is not null && Directory.Exists(currentDir))
-        {
-            if (Directory.Exists(backupDir))
-                Directory.Delete(backupDir, recursive: true);
-            Directory.Move(currentDir, backupDir);
-            backedUp = true;
-        }
+        var extractedRoot = Directory.EnumerateFiles(tempDir, ExecutableName, SearchOption.AllDirectories)
+            .Select(Path.GetDirectoryName)
+            .FirstOrDefault()
+            ?? throw new FileNotFoundException(
+                $"Piper Plus CLI executable not found after extraction in '{tempDir}'.");
 
         try
         {
-            if (Directory.Exists(targetDir))
-                Directory.Delete(targetDir, recursive: true);
+            Directory.CreateDirectory(targetDir);
 
-            Directory.Move(tempDir, targetDir);
+            CopyDirectory(extractedRoot, targetDir);
 
-            var newExecutable = Directory.Exists(targetDir)
-                ? Directory.EnumerateFiles(targetDir, ExecutableName, SearchOptions).FirstOrDefault()
-                : null;
-
-            if (newExecutable is null)
+            var newExecutable = Path.Combine(targetDir, ExecutableName);
+            if (!File.Exists(newExecutable))
                 throw new FileNotFoundException(
-                    $"Piper Plus CLI executable not found after extraction in '{targetDir}'.");
+                    $"Piper Plus CLI executable not found after install in '{targetDir}'.");
 
             File.WriteAllText(InstalledVersionFilePath, version);
+            try { Directory.Delete(tempDir, recursive: true); } catch { }
 
-            if (backedUp && backupDir is not null && Directory.Exists(backupDir))
-                try { Directory.Delete(backupDir, recursive: true); } catch { }
-
-            lock (CacheLock)
-            {
-                resolvedExecutablePath = newExecutable;
-            }
         }
         catch
         {
-            try
-            {
-                if (Directory.Exists(targetDir))
-                    Directory.Delete(targetDir, recursive: true);
-            }
-            catch { }
-
-            if (backedUp && backupDir is not null && currentDir is not null && Directory.Exists(backupDir))
-                try { Directory.Move(backupDir, currentDir); } catch { }
-
             throw;
+        }
+    }
+
+    static void CopyDirectory(string sourceDir, string destinationDir)
+    {
+        foreach (var dir in Directory.EnumerateDirectories(sourceDir, "*", SearchOption.AllDirectories))
+        {
+            var relativePath = Path.GetRelativePath(sourceDir, dir);
+            Directory.CreateDirectory(Path.Combine(destinationDir, relativePath));
+        }
+
+        foreach (var file in Directory.EnumerateFiles(sourceDir, "*", SearchOption.AllDirectories))
+        {
+            var relativePath = Path.GetRelativePath(sourceDir, file);
+            var destinationPath = Path.Combine(destinationDir, relativePath);
+            Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
+            File.Copy(file, destinationPath, overwrite: true);
         }
     }
 }
