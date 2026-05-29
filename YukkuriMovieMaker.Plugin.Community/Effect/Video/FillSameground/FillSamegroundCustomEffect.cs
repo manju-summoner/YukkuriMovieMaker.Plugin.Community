@@ -1,13 +1,16 @@
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Plugin.Community.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
 {
-    internal class FillSamegroundCustomEffect : D2D1CustomShaderEffectBase
+    internal sealed class FillSamegroundCustomEffect(IGraphicsDevicesAndContext devices)
+        : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices))
     {
-        public System.Numerics.Vector4 TargetColor
+        public Vector4 TargetColor
         {
             set => SetValue((int)EffectImpl.Properties.TargetColor, value);
             get => GetVector4Value((int)EffectImpl.Properties.TargetColor);
@@ -25,54 +28,33 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
             get => GetFloatValue((int)EffectImpl.Properties.Invert);
         }
 
-        public FillSamegroundCustomEffect(IGraphicsDevicesAndContext devices)
-            : base(Create<EffectImpl>(devices))
-        {
-        }
-
         [CustomEffect(1)]
         class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
             ConstantBuffer constants;
 
             [CustomEffectProperty(PropertyType.Vector4, (int)Properties.TargetColor)]
-            public System.Numerics.Vector4 TargetColor
+            public Vector4 TargetColor
             {
-                get => new(constants.R, constants.G, constants.B, constants.A);
-                set
-                {
-                    constants.R = value.X;
-                    constants.G = value.Y;
-                    constants.B = value.Z;
-                    constants.A = value.W;
-                    UpdateConstants();
-                }
+                get => constants.TargetColor;
+                set { constants.TargetColor = value; UpdateConstants(); }
             }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.Tolerance)]
             public float Tolerance
             {
                 get => constants.Tolerance;
-                set
-                {
-                    constants.Tolerance = value;
-                    UpdateConstants();
-                }
+                set { constants.Tolerance = value; UpdateConstants(); }
             }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.Invert)]
             public float Invert
             {
                 get => constants.Invert;
-                set
-                {
-                    constants.Invert = value;
-                    UpdateConstants();
-                }
+                set { constants.Invert = value; UpdateConstants(); }
             }
 
-            public EffectImpl() : base(
-                new Uri("pack://application:,,,/YukkuriMovieMaker.Plugin.Community;component/Resources/Shader/FillSamegroundShader.cso"))
+            public EffectImpl() : base(ShaderResourceUri.Get("FillSamegroundShader"))
             {
             }
 
@@ -84,10 +66,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
             [StructLayout(LayoutKind.Sequential)]
             struct ConstantBuffer
             {
-                public float R;
-                public float G;
-                public float B;
-                public float A;
+                public Vector4 TargetColor;
                 public float Tolerance;
                 public float Invert;
                 float _pad1;
