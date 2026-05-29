@@ -187,16 +187,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
                 || mode != currentMode
                 || tolerance != currentTolerance
                 || isInverted != currentIsInverted
-                || currentMode == FillSamegroundMode.Position
                 || (UsesPosition(currentMode) && (posX != currentX || posY != currentY))
                 || (currentMode == FillSamegroundMode.Color && targetColor != currentTargetColor);
-
-            ID2D1Image? maskSource = currentMode switch
+            
+            ID2D1Image? maskSource;
+            if (needsMaskUpdate)
             {
-                FillSamegroundMode.Color => PrepareColorMask(currentTargetColor, currentTolerance, currentIsInverted),
-                FillSamegroundMode.PositionColor => PreparePositionColorMask(dc, bounds, width, height, currentX, currentY, currentTolerance, currentIsInverted),
-                _ => PrepareConnectedPositionMask(dc, bounds, width, height, currentX, currentY, currentTolerance, currentIsInverted),
-            };
+                maskSource = currentMode switch
+                {
+                    FillSamegroundMode.Color => PrepareColorMask(currentTargetColor, currentTolerance, currentIsInverted),
+                    FillSamegroundMode.PositionColor => PreparePositionColorMask(dc, bounds, width, height, currentX, currentY, currentTolerance, currentIsInverted),
+                    _ => PrepareConnectedPositionMask(dc, bounds, width, height, currentX, currentY, currentTolerance, currentIsInverted),
+                };
+            }
+            else
+            {
+                maskSource = currentMode switch
+                {
+                    FillSamegroundMode.Color or FillSamegroundMode.PositionColor => colorMatchOutput,
+                    _ => finalMaskTransformOutput,
+                };
+            }
 
             if (maskSource is null)
             {
@@ -304,8 +315,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
                 };
             }
 
-            _ = brushUpdated;
-            _ = needsMaskUpdate;
             _ = opacity;
             _ = blur;
             _ = blendMode;
