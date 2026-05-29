@@ -25,7 +25,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             "assert", "print", "next", "load", "require"
         ];
 
-        private static readonly (string ns, string[] members)[] s_namespaces =
+        private static readonly (string Prefix, string[] Members)[] s_namespaces =
         [
             ("obj", [
                 "obj.w", "obj.h", "obj.cx", "obj.cy",
@@ -96,10 +96,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 var ns = nsMatch.Value;
                 var afterDot = input == "." ? "" : line[(lastDot + 1)..];
 
-                foreach (var (namespaceName, members) in s_namespaces)
+                foreach (var (prefix, members) in s_namespaces)
                 {
-                    if (ns == namespaceName)
-                        return FilterPrefix(members, namespaceName + "." + afterDot);
+                    if (ns == prefix)
+                        return FilterPrefix(members, prefix + "." + afterDot);
                 }
                 return [];
             }
@@ -109,7 +109,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 var userFunctions = GetUserDefinedFunctions(sourceCode);
                 return s_keywords
                     .Concat(s_globals)
-                    .Concat(s_namespaces.SelectMany(n => n.members))
+                    .Concat(s_namespaces.SelectMany(n => n.Members))
                     .Concat(userFunctions)
                     .Where(x => x.StartsWith(input, System.StringComparison.OrdinalIgnoreCase))
                     .Distinct()
