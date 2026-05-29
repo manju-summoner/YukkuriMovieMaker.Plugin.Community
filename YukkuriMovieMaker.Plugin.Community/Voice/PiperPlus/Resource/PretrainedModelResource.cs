@@ -11,7 +11,7 @@ internal sealed class PretrainedModelResource(PretrainedModelCatalogItem item) :
     public event EventHandler? DownloadStarted;
 
     public string Name => item.ModelName;
-    public string Terms => Texts.ResourceTerms;
+    public string Terms => $"{Texts.ResourceTerms}\n\n{item.TermsUrl}";
     public bool IsDownloaded =>
         PiperBinaryResource.IsReady && File.Exists(item.ModelPath) && File.Exists(item.ConfigPath);
     public string? FileSize => null;

@@ -6,7 +6,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Resource;
 internal sealed record PretrainedModelCatalogItem(
     string OnnxFileName,
     string OnnxUrl,
-    string ConfigUrl
+    string ConfigUrl,
+    string TermsUrl
 )
 {
     public string ModelName => Path.GetFileNameWithoutExtension(OnnxFileName);

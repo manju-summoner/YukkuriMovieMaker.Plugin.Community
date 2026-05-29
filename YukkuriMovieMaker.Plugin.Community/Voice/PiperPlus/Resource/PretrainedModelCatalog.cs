@@ -10,12 +10,14 @@ internal static class PretrainedModelCatalog
         new(
             OnnxFileName: "tsukuyomi-chan-6lang-fp16.onnx",
             OnnxUrl: $"{TsukuyomiBase}/tsukuyomi-chan-6lang-fp16.onnx",
-            ConfigUrl: $"{TsukuyomiBase}/config.json"
+            ConfigUrl: $"{TsukuyomiBase}/config.json",
+            TermsUrl: "https://huggingface.co/ayousanz/piper-plus-tsukuyomi-chan"
         ),
         new(
             OnnxFileName: "css10-ja-6lang-fp16.onnx",
             OnnxUrl: $"{Css10Base}/css10-ja-6lang-fp16.onnx",
-            ConfigUrl: $"{Css10Base}/config.json"
+            ConfigUrl: $"{Css10Base}/config.json",
+            TermsUrl: "https://huggingface.co/ayousanz/piper-plus-css10-ja-6lang"
         ),
     ];
 }
