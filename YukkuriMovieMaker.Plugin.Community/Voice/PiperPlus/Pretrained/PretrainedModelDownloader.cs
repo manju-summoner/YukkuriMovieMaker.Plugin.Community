@@ -12,11 +12,9 @@ internal static class PretrainedModelDownloader
         IProgress<(double Progress, string Message)>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        var modelRoot = PiperPlusPaths.ModelDirectory;
-        var targetDir = Path.Combine(modelRoot, definition.SubDirectory);
-        Directory.CreateDirectory(targetDir);
+        Directory.CreateDirectory(PiperPlusPaths.ModelDirectory);
 
-        var onnxPath = Path.Combine(targetDir, definition.OnnxFileName);
+        var onnxPath = definition.ModelPath;
         var jsonPath = onnxPath + ".json";
 
         var client = HttpClientFactory.Client;

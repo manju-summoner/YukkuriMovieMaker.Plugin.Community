@@ -10,7 +10,7 @@ internal sealed class PretrainedModelResource(PretrainedModelDefinition definiti
     public event PropertyChangedEventHandler? PropertyChanged;
     public event EventHandler? DownloadStarted;
 
-    public string Name => definition.DisplayName;
+    public string Name => definition.ModelName;
     public string Terms => Texts.ResourceTerms;
     public bool IsDownloaded => File.Exists(definition.ModelPath) && File.Exists(definition.ConfigPath);
     public string? FileSize => null;

@@ -1,4 +1,3 @@
-using System.IO;
 using YukkuriMovieMaker.Plugin.Voice;
 using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Pretrained;
 
@@ -39,10 +38,10 @@ internal sealed class PiperPlusVoicePlugin : IVoicePlugin
                 {
                     ModelPath = definition.ModelPath,
                     ConfigPath = definition.ConfigPath,
-                    ModelName = Path.GetFileNameWithoutExtension(definition.OnnxFileName),
-                    ModelDisplayName = definition.DisplayName,
+                    ModelName = definition.ModelName,
+                    ModelDisplayName = definition.ModelName,
                     SpeakerId = 0,
-                    SpeakerName = definition.DisplayName,
+                    SpeakerName = definition.ModelName,
                     IsMultiSpeaker = false,
                     LanguageArgument = string.Empty,
                 },
