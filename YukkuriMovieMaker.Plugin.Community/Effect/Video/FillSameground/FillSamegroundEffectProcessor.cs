@@ -576,7 +576,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
                 return;
 
             disposer.RemoveAndDispose(ref finalMaskBitmap);
-            var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied);
+            var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied);
             finalMaskBitmap = dc.CreateBitmap(
                 new SizeI(width, height),
                 new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.None));
@@ -596,7 +596,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
             disposer.RemoveAndDispose(ref candidateBitmap);
             disposer.RemoveAndDispose(ref candidateStagingBitmap);
 
-            var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied);
+            var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied);
             var size = new SizeI(width, height);
 
             candidateBitmap = dc.CreateBitmap(
@@ -618,7 +618,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
             if (seedBitmap is not null && seedStagingBitmap is not null)
                 return;
 
-            var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied);
+            var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied);
             var size = new SizeI(1, 1);
 
             seedBitmap = dc.CreateBitmap(
