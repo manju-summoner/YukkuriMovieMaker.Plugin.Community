@@ -158,6 +158,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             private void SetupGlobals(AviUtlScriptContext ctx)
             {
                 var script = _script!;
+                bool firstSetup = _objTable is null;
+
+                if (firstSetup)
+                {
+                    _sceneTable = new Table(script);
+                    script.Globals["scene"] = _sceneTable;
+
+                    _objTable = new Table(script);
+                    RegisterPixelCallbacks(_objTable);
+                    script.Globals["obj"] = _objTable;
+                }
 
                 script.Globals["time"] = ctx.Time;
                 script.Globals["frame"] = ctx.Frame;
@@ -167,38 +178,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 script.Globals["timelinetime"] = ctx.TimelineTime;
                 script.Globals["layer"] = ctx.Layer;
 
-                _sceneTable ??= new Table(script);
-                _sceneTable["width"] = ctx.SceneWidth;
-                _sceneTable["height"] = ctx.SceneHeight;
-                script.Globals["scene"] = _sceneTable;
+                _sceneTable!["width"] = ctx.SceneWidth;
+                _sceneTable!["height"] = ctx.SceneHeight;
 
-                bool firstSetup = _objTable is null;
-                _objTable ??= new Table(script);
-
-                _objTable["w"] = ctx.ImageWidth;
-                _objTable["h"] = ctx.ImageHeight;
-                _objTable["cx"] = ctx.ImageWidth / 2d;
-                _objTable["cy"] = ctx.ImageHeight / 2d;
-                _objTable["x"] = ctx.X;
-                _objTable["y"] = ctx.Y;
-                _objTable["z"] = ctx.Z;
-                _objTable["ox"] = ctx.Ox;
-                _objTable["oy"] = ctx.Oy;
-                _objTable["zoom"] = ctx.Zoom;
-                _objTable["aspect"] = ctx.Aspect;
-                _objTable["alpha"] = ctx.Alpha;
-                _objTable["rx"] = ctx.Rx;
-                _objTable["ry"] = ctx.Ry;
-                _objTable["rz"] = ctx.Rz;
-                _objTable["track0"] = ctx.Track0;
-                _objTable["track1"] = ctx.Track1;
-                _objTable["track2"] = ctx.Track2;
-                _objTable["track3"] = ctx.Track3;
-
-                if (firstSetup)
-                    RegisterPixelCallbacks(_objTable);
-
-                script.Globals["obj"] = _objTable;
+                _objTable!["w"] = ctx.ImageWidth;
+                _objTable!["h"] = ctx.ImageHeight;
+                _objTable!["cx"] = ctx.ImageWidth / 2d;
+                _objTable!["cy"] = ctx.ImageHeight / 2d;
+                _objTable!["x"] = ctx.X;
+                _objTable!["y"] = ctx.Y;
+                _objTable!["z"] = ctx.Z;
+                _objTable!["ox"] = ctx.Ox;
+                _objTable!["oy"] = ctx.Oy;
+                _objTable!["zoom"] = ctx.Zoom;
+                _objTable!["aspect"] = ctx.Aspect;
+                _objTable!["alpha"] = ctx.Alpha;
+                _objTable!["rx"] = ctx.Rx;
+                _objTable!["ry"] = ctx.Ry;
+                _objTable!["rz"] = ctx.Rz;
+                _objTable!["track0"] = ctx.Track0;
+                _objTable!["track1"] = ctx.Track1;
+                _objTable!["track2"] = ctx.Track2;
+                _objTable!["track3"] = ctx.Track3;
             }
 
             private void RegisterPixelCallbacks(Table obj)
