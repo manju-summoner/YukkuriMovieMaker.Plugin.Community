@@ -6,8 +6,6 @@ internal static class PiperSpeakerEntryBuilder
 {
     public static IEnumerable<PiperSpeakerEntry> Build(PiperModelInfo model)
     {
-        var modelDisplayName = PiperPlusSettings.Default.ResolveDisplayName(model.ModelPath, model.ModelName);
-
         foreach (var (speakerId, speakerName) in EnumerateSpeakers(model))
         {
             yield return new PiperSpeakerEntry
@@ -15,7 +13,7 @@ internal static class PiperSpeakerEntryBuilder
                 ModelPath = model.ModelPath,
                 ConfigPath = model.ConfigPath,
                 ModelName = model.ModelName,
-                ModelDisplayName = modelDisplayName,
+                ModelDisplayName = model.ModelName,
                 SpeakerId = speakerId,
                 SpeakerName = speakerName,
                 IsMultiSpeaker = model.IsMultiSpeaker,

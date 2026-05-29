@@ -74,9 +74,6 @@
                               MinHeight="60"
                               MaxHeight="200">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="{x:Static local:Texts.ModelDisplayName}"
-                                                Binding="{Binding DisplayName, UpdateSourceTrigger=LostFocus}"
-                                                Width="*"/>
                             <DataGridTextColumn Header="{x:Static local:Texts.ModelInternalName}"
                                                 Binding="{Binding ModelName, Mode=OneWay}"
                                                 Width="*"

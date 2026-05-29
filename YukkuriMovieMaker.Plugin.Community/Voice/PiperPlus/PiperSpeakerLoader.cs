@@ -8,7 +8,6 @@ internal static class PiperSpeakerLoader
     public static void Reload()
     {
         var models = PiperModelScanner.Scan(PiperPlusPaths.ModelDirectory);
-        var activePaths = models.Select(m => m.ModelPath).ToList();
 
         Application.Current.Dispatcher.Invoke(() =>
         {
@@ -19,8 +18,6 @@ internal static class PiperSpeakerLoader
             PiperPlusSettings.Default.Speakers.Clear();
             foreach (var entry in entries)
                 PiperPlusSettings.Default.Speakers.Add(entry);
-
-            PiperPlusSettings.Default.PruneAliases(activePaths);
         });
     }
 
