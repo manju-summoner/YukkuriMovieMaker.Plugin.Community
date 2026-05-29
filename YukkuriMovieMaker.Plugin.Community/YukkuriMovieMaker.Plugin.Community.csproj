@@ -58,6 +58,7 @@
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3912.50" />
+    <PackageReference Include="MoonSharp" Version="2.0.0" GeneratePathProperty="true" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NAudio" Version="2.3.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
@@ -92,6 +93,8 @@
 	
   <ItemGroup>
     <Resource Include="Voice\IrodoriTTS\EmojiPalette\Emoji\*.png" />
+    <Resource Include="Resources\SyntaxDefinitions\Lua-Dark.xshd" />
+    <Resource Include="Resources\SyntaxDefinitions\Lua-Light.xshd" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,17 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+LuaScript,,Luaスクリプト,Lua Script,Lua脚本,Lua腳本,Lua 스크립트,Script Lua,نص Lua,Skrip Lua
+ScriptGroup,,スクリプト,Script,脚本,腳本,스크립트,Script,نص,Skrip
+ScriptCode,,スクリプトコード,Script Code,脚本代码,腳本代碼,스크립트 코드,Código de script,كود النص,Kode skrip
+ScriptCodeDesc,,Luaスクリプトを記述します。obj.x/y/zoom/alpha等でエフェクトを制御できます。,Write a Lua script. Control effects with obj.x/y/zoom/alpha etc.,编写Lua脚本，使用obj.x/y/zoom/alpha等控制效果。,編寫Lua腳本，使用obj.x/y/zoom/alpha等控制效果。,Lua 스크립트를 작성합니다. obj.x/y/zoom/alpha 등으로 효과를 제어할 수 있습니다.,Escriba un script Lua. Controle efectos con obj.x/y/zoom/alpha etc.,اكتب نص Lua. تحكم في التأثيرات باستخدام obj.x/y/zoom/alpha وما إلى ذلك.,Tulis skrip Lua. Kendalikan efek dengan obj.x/y/zoom/alpha dll.
+ParametersGroup,,パラメータ,Parameters,参数,參數,파라미터,Parámetros,المعاملات,Parameter
+Track0,,トラック0,Track 0,轨道0,軌道0,트랙0,Pista 0,مسار 0,Jalur 0
+Track1,,トラック1,Track 1,轨道1,軌道1,트랙1,Pista 1,مسار 1,Jalur 1
+Track2,,トラック2,Track 2,轨道2,軌道2,트랙2,Pista 2,مسار 2,Jalur 2
+Track3,,トラック3,Track 3,轨道3,軌道3,트랙3,Pista 3,مسار 3,Jalur 3
+TrackDesc,,スライダー値 (AviUtl準拠 track0〜3 に対応),Slider value (AviUtl compatible: track0–3),滑块值(AviUtl兼容: track0~3),滑塊值(AviUtl兼容: track0~3),슬라이더 값 (AviUtl 호환: track0~3),Valor del deslizador (compatible AviUtl: track0-3),قيمة المنزلق (متوافق مع AviUtl: track0-3),Nilai slider (kompatibel AviUtl: track0-3)
+ToolBarImport,,インポート,Import,导入,導入,가져오기,Importar,استيراد,Impor
+ToolBarExport,,エクスポート,Export,导出,導出,내보내기,Exportar,تصدير,Ekspor
+ToolBarClear,,クリア,Clear,清除,清除,지우기,Limpiar,مسح,Hapus
+ToolBarClearConfirm,,スクリプトをデフォルトに戻しますか？,Reset script to default?,将脚本重置为默认值？,將腳本重置為預設值？,스크립트를 기본값으로 초기화하겠습니까？,¿Restablecer el script a los valores predeterminados?,هل تريد إعادة تعيين النص إلى الإعداد الافتراضي؟,Atur ulang skrip ke default?
+ToolBarClearTitle,,確認,Confirm,确认,確認,확인,Confirmar,تأكيد,Konfirmasi
+LuaFileFilter,,Luaスクリプト (*.lua)|*.lua|すべてのファイル (*.*)|*.*,Lua Script (*.lua)|*.lua|All Files (*.*)|*.*,Lua脚本 (*.lua)|*.lua|所有文件 (*.*)|*.*,Lua腳本 (*.lua)|*.lua|所有檔案 (*.*)|*.*,Lua 스크립트 (*.lua)|*.lua|모든 파일 (*.*)|*.*,Script Lua (*.lua)|*.lua|Todos los archivos (*.*)|*.*,نص Lua (*.lua)|*.lua|جميع الملفات (*.*)|*.*,Skrip Lua (*.lua)|*.lua|Semua File (*.*)|*.*

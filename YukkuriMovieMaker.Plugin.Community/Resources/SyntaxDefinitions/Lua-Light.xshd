@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="Lua" extensions=".lua" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Comment"       foreground="#FF008000" />
+    <Color name="String"        foreground="#FFA31515" />
+    <Color name="NumberLiteral" foreground="#FF000000"/>
+    <Color name="NilKeyword"    foreground="#FF0000FF"/>
+    <Color name="Keywords"      foreground="#FF0000FF" />
+    <Color name="TrueFalse"     foreground="#FF0000FF" />
+
+    <RuleSet>
+        <Span color="Comment">
+            <Begin>--</Begin>
+        </Span>
+        <Span color="Comment" multiline="true">
+            <Begin>--\[\[</Begin>
+            <End>\]\]</End>
+        </Span>
+        <Span color="String">
+            <Begin>"</Begin>
+            <End>"</End>
+            <RuleSet>
+                <Span begin="\\" end="." />
+            </RuleSet>
+        </Span>
+        <Span color="String">
+            <Begin>'</Begin>
+            <End>'</End>
+            <RuleSet>
+                <Span begin="\\" end="." />
+            </RuleSet>
+        </Span>
+        <Keywords color="TrueFalse">
+            <Word>true</Word>
+            <Word>false</Word>
+        </Keywords>
+        <Keywords color="Keywords">
+            <Word>and</Word>
+            <Word>break</Word>
+            <Word>do</Word>
+            <Word>else</Word>
+            <Word>elseif</Word>
+            <Word>end</Word>
+            <Word>for</Word>
+            <Word>function</Word>
+            <Word>goto</Word>
+            <Word>if</Word>
+            <Word>in</Word>
+            <Word>local</Word>
+            <Word>not</Word>
+            <Word>or</Word>
+            <Word>repeat</Word>
+            <Word>return</Word>
+            <Word>then</Word>
+            <Word>until</Word>
+            <Word>while</Word>
+        </Keywords>
+        <Keywords color="NilKeyword">
+            <Word>nil</Word>
+        </Keywords>
+        <Rule color="NumberLiteral">
+            \b0[xX][0-9a-fA-F]+
+        |    \b
+            (    \d+(\.[0-9]+)?
+            |    \.[0-9]+
+            )
+            ([eE][+-]?[0-9]+)?
+        </Rule>
+    </RuleSet>
+</SyntaxDefinition>
