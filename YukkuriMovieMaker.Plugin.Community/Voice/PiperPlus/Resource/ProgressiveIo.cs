@@ -1,6 +1,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
+using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Resource;
 
@@ -13,7 +14,7 @@ internal static class ProgressiveIo
         double startFraction,
         double endFraction,
         string message,
-        IProgress<(double Progress, string Message)>? progress,
+        ProgressMessage? progress,
         CancellationToken cancellationToken)
     {
         var tempPath = destinationPath + ".tmp";
@@ -24,7 +25,7 @@ internal static class ProgressiveIo
 
             var totalBytes = response.Content.Headers.ContentLength ?? -1L;
 
-            progress?.Report((startFraction, message));
+            progress?.Report(startFraction, message);
 
             await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
             await using var fileStream = File.Create(tempPath);
@@ -40,7 +41,7 @@ internal static class ProgressiveIo
                 {
                     var fileFraction = (double)downloaded / totalBytes;
                     var overall = startFraction + fileFraction * (endFraction - startFraction);
-                    progress?.Report((overall, message));
+                    progress?.Report(overall, message);
                 }
             }
         }
@@ -59,10 +60,10 @@ internal static class ProgressiveIo
         double startFraction,
         double endFraction,
         string message,
-        IProgress<(double Progress, string Message)>? progress,
+        ProgressMessage? progress,
         CancellationToken cancellationToken)
     {
-        progress?.Report((startFraction, message));
+        progress?.Report(startFraction, message);
 
         await Task.Run(() =>
         {
@@ -93,7 +94,7 @@ internal static class ProgressiveIo
 
                 var fraction = (double)(i + 1) / total;
                 var overall = startFraction + fraction * (endFraction - startFraction);
-                progress?.Report((overall, message));
+                progress?.Report(overall, message);
             }
         }, cancellationToken);
     }

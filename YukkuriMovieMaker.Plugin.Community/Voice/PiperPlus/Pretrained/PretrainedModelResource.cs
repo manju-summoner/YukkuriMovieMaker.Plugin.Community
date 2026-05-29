@@ -21,10 +21,7 @@ internal sealed class PretrainedModelResource(PretrainedModelDefinition definiti
     {
         DownloadStarted?.Invoke(this, EventArgs.Empty);
 
-        var downloadProgress = new Progress<(double Progress, string Message)>(report =>
-            progress.Report(report.Progress, report.Message));
-
-        await PretrainedModelDownloader.DownloadAsync(definition, downloadProgress);
+        await PretrainedModelDownloader.DownloadAsync(definition, progress);
         await Task.Run(PiperSpeakerLoader.Reload);
 
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDownloaded)));

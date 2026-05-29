@@ -8,8 +8,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
 internal sealed class PiperPlusSettingsViewModel : Bindable
 {
     bool isLoading;
-    double progressValue;
-    string progressMessage = string.Empty;
+    ProgressMessage progress = new();
     bool isProgressVisible;
     string versionText = string.Empty;
     string speakerCountText = string.Empty;
@@ -24,16 +23,10 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         private set => Set(ref isLoading, value);
     }
 
-    public double ProgressValue
+    public ProgressMessage Progress
     {
-        get => progressValue;
-        private set => Set(ref progressValue, value);
-    }
-
-    public string ProgressMessage
-    {
-        get => progressMessage;
-        private set => Set(ref progressMessage, value);
+        get => progress;
+        private set => Set(ref progress, value);
     }
 
     public bool IsProgressVisible
@@ -152,15 +145,13 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         {
             IsLoading = false;
             IsProgressVisible = false;
-            ProgressValue = 0;
-            ProgressMessage = string.Empty;
+            Progress = new ProgressMessage();
         }
     }
 
     async Task ReloadModelsAsync()
     {
-        ProgressValue = 0;
-        ProgressMessage = Texts.LoadingModels;
+        Progress.Report(0, Texts.LoadingModels);
         IsProgressVisible = true;
         await Task.Run(PiperSpeakerLoader.Reload);
         BuildModelsFromSettings();
@@ -170,12 +161,7 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     async Task InstallVersionAsync(string version)
     {
         IsProgressVisible = true;
-        var progress = new Progress<(double Progress, string Message)>(report =>
-        {
-            ProgressValue = report.Progress;
-            ProgressMessage = report.Message;
-        });
-        await PiperBinaryResource.EnsureAsync(version, progress);
+        await PiperBinaryResource.EnsureAsync(version, Progress);
     }
 
     void ApplyUpdateState(GitHubReleaseInfo? release)

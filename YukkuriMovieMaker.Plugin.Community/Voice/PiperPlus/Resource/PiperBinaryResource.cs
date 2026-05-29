@@ -40,7 +40,7 @@ internal static class PiperBinaryResource
 
     public static async Task EnsureAsync(
         string version,
-        IProgress<(double Progress, string Message)>? progress = null,
+        ProgressMessage? progress = null,
         CancellationToken cancellationToken = default)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -78,7 +78,7 @@ internal static class PiperBinaryResource
     static async Task InstallCoreAsync(
         string version,
         string assetName,
-        IProgress<(double Progress, string Message)>? progress,
+        ProgressMessage? progress,
         CancellationToken cancellationToken)
     {
         var targetDir = PiperPlusPaths.BinaryDirectory;
@@ -93,7 +93,7 @@ internal static class PiperBinaryResource
         {
             await DownloadAndExtractAsync(version, assetName, tempDir, progress, cancellationToken);
             CommitInstall(version, targetDir, tempDir);
-            progress?.Report((1.0, Texts.BinaryReady));
+            progress?.Report(1.0, Texts.BinaryReady);
         }
         catch
         {
@@ -112,7 +112,7 @@ internal static class PiperBinaryResource
         string version,
         string assetName,
         string tempDir,
-        IProgress<(double Progress, string Message)>? progress,
+        ProgressMessage? progress,
         CancellationToken cancellationToken)
     {
         var zipPath = Path.Combine(tempDir, assetName);

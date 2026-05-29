@@ -9,7 +9,7 @@ internal static class PretrainedModelDownloader
 {
     public static async Task DownloadAsync(
         PretrainedModelDefinition definition,
-        IProgress<(double Progress, string Message)>? progress = null,
+        ProgressMessage? progress = null,
         CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(PiperPlusPaths.ModelDirectory);
@@ -29,6 +29,6 @@ internal static class PretrainedModelDownloader
             string.Format(Texts.DownloadingPretrainedModel, Path.GetFileName(jsonPath)),
             progress, cancellationToken);
 
-        progress?.Report((1.0, Texts.LoadingModels));
+        progress?.Report(1.0, Texts.LoadingModels);
     }
 }
