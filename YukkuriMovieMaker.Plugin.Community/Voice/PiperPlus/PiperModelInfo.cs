@@ -1,14 +1,17 @@
+using System.IO;
+
 namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.API;
 
 internal record PiperModelInfo(
     string ModelPath,
     string ConfigPath,
-    string ModelName,
     int NumSpeakers,
     IReadOnlyDictionary<string, int> SpeakerIdMap,
     IReadOnlyList<string> LanguageCodes
 )
 {
+    public string ModelName => Path.GetFileNameWithoutExtension(ModelPath);
+
     public bool IsMultiSpeaker => NumSpeakers > 1;
 
     public string LanguageArgument =>
