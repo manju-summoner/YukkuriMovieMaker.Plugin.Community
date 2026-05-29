@@ -9,7 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
         internal PixelDataProxy(AviUtlScriptContext ctx) => _ctx = ctx;
 
-        public int width  => _ctx.ImageWidth;
+        public int width => _ctx.ImageWidth;
         public int height => _ctx.ImageHeight;
 
         public double get(int index)
@@ -18,13 +18,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             var buf = _ctx.GetPixelBuffer();
             if (buf is null) return 0d;
 
-            int i        = index - 1;
-            int totalCh  = _ctx.ImageWidth * _ctx.ImageHeight * 4;
+            int i = index - 1;
+            int totalCh = _ctx.ImageWidth * _ctx.ImageHeight * 4;
             if ((uint)i >= (uint)totalCh) return 0d;
 
             int pixelIdx = i / 4;
-            int channel  = i % 4;
-            int bufIdx   = pixelIdx * 4;
+            int channel = i % 4;
+            int bufIdx = pixelIdx * 4;
 
             double a = buf[bufIdx + 3];
 
@@ -44,16 +44,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             var buf = _ctx.GetPixelBuffer();
             if (buf is null) return;
 
-            int i       = index - 1;
+            int i = index - 1;
             int totalCh = _ctx.ImageWidth * _ctx.ImageHeight * 4;
             if ((uint)i >= (uint)totalCh) return;
 
             _ctx.MarkPixelsDirty();
 
             int pixelIdx = i / 4;
-            int channel  = i % 4;
-            int bufIdx   = pixelIdx * 4;
-            double v     = Math.Clamp(value, 0d, 255d);
+            int channel = i % 4;
+            int bufIdx = pixelIdx * 4;
+            double v = Math.Clamp(value, 0d, 255d);
 
             if (channel == 3)
             {
@@ -74,9 +74,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             }
             else
             {
-                double a  = buf[bufIdx + 3];
+                double a = buf[bufIdx + 3];
                 double pv = v * (a / 255d);
-                int    bi = channel switch { 0 => bufIdx + 2, 1 => bufIdx + 1, _ => bufIdx + 0 };
+                int bi = channel switch { 0 => bufIdx + 2, 1 => bufIdx + 1, 2 => bufIdx + 0, _ => bufIdx + 0 };
                 buf[bi] = (byte)Math.Clamp(pv, 0d, 255d);
             }
         }
