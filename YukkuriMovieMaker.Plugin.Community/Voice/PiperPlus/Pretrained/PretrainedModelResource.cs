@@ -23,10 +23,16 @@ internal sealed class PretrainedModelResource(PretrainedModelDefinition definiti
     {
         DownloadStarted?.Invoke(this, EventArgs.Empty);
 
+        var modelRateFrom = 0.0;
         if (!PiperBinaryResource.IsReady)
-            await PiperBinaryResource.EnsureAsync(PiperBinaryResource.Version, progress);
+        {
+            await PiperBinaryResource.EnsureAsync(
+                PiperBinaryResource.Version, progress.GetChildProgress(0.0, 0.5));
+            modelRateFrom = 0.5;
+        }
 
-        await PretrainedModelDownloader.DownloadAsync(definition, progress);
+        await PretrainedModelDownloader.DownloadAsync(
+            definition, progress.GetChildProgress(modelRateFrom, 1.0));
         await Task.Run(PiperSpeakerLoader.Reload);
 
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDownloaded)));
