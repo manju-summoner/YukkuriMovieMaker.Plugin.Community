@@ -9,8 +9,7 @@ internal static class PretrainedModelDownloader
 {
     public static async Task DownloadAsync(
         PretrainedModelDefinition definition,
-        ProgressMessage? progress = null,
-        CancellationToken cancellationToken = default)
+        ProgressMessage progress)
     {
         Directory.CreateDirectory(PiperPlusPaths.ModelDirectory);
 
@@ -22,13 +21,13 @@ internal static class PretrainedModelDownloader
         await ProgressiveIo.DownloadFileAsync(client, definition.OnnxUrl, onnxPath,
             startFraction: 0.0, endFraction: 0.9,
             string.Format(Texts.DownloadingPretrainedModel, definition.OnnxFileName),
-            progress, cancellationToken);
+            progress, default);
 
         await ProgressiveIo.DownloadFileAsync(client, definition.ConfigUrl, jsonPath,
             startFraction: 0.9, endFraction: 1.0,
             string.Format(Texts.DownloadingPretrainedModel, Path.GetFileName(jsonPath)),
-            progress, cancellationToken);
+            progress, default);
 
-        progress?.Report(1.0, Texts.LoadingModels);
+        progress.Report(1.0, Texts.LoadingModels);
     }
 }
