@@ -12,13 +12,16 @@ internal sealed class PiperPlusVoicePlugin : IVoicePlugin
 
     public bool CanUpdateVoices => true;
 
-    public bool IsVoicesCached => PiperPlusSettings.Default.Speakers.Count > 0;
+    public bool IsVoicesCached => PiperSpeakerLoader.IsLoaded;
 
     public Task UpdateVoicesAsync() => Task.Run(PiperSpeakerLoader.Reload);
 
     static IEnumerable<IVoiceSpeaker> GetVoices()
     {
-        var speakers = PiperPlusSettings.Default.Speakers.ToList();
+        if (!PiperSpeakerLoader.IsLoaded)
+            PiperSpeakerLoader.Reload();
+
+        var speakers = PiperSpeakerLoader.Speakers.ToList();
         foreach (var entry in speakers)
             yield return new PiperPlusVoiceSpeaker(entry);
 

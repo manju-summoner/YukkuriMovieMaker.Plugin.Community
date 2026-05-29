@@ -95,7 +95,7 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
     void BuildModelsFromSettings()
     {
         Models = new ObservableCollection<PiperModelViewModel>(
-            PiperPlusSettings.Default.SavedModels.Select(s => new PiperModelViewModel(s)));
+            PiperSpeakerLoader.Models.Select(m => new PiperModelViewModel(m)));
     }
 
     async Task RefreshAsync()
@@ -216,6 +216,6 @@ internal sealed class PiperPlusSettingsViewModel : Bindable
         }
 
         VersionText = PiperBinaryResource.InstalledVersion ?? string.Empty;
-        SpeakerCountText = string.Format(Texts.SpeakerCount, PiperPlusSettings.Default.Speakers.Count);
+        SpeakerCountText = string.Format(Texts.SpeakerCount, PiperSpeakerLoader.Speakers.Count);
     }
 }

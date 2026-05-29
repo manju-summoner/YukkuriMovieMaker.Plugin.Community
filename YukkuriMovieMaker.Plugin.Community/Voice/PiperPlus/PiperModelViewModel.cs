@@ -1,9 +1,11 @@
+using YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.API;
+
 namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus;
 
-internal sealed class PiperModelViewModel(PiperSavedModel saved)
+internal sealed class PiperModelViewModel(PiperModelInfo model)
 {
-    public string ModelName => saved.ModelName;
-    public string ModelPath => saved.ModelPath;
-    public int NumSpeakers => saved.NumSpeakers;
-    public string LanguageCodes => string.Join(", ", saved.LanguageCodes);
+    public string ModelName => model.ModelName;
+    public string ModelPath => model.ModelPath;
+    public int NumSpeakers => model.NumSpeakers;
+    public string LanguageCodes => string.Join(", ", model.LanguageCodes);
 }
