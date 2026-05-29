@@ -125,7 +125,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
             private static Script CreateScript()
             {
-                var s = new Script(
+                var script = new Script(
                     CoreModules.Basic |
                     CoreModules.Math |
                     CoreModules.String |
@@ -133,8 +133,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                     CoreModules.Bit32 |
                     CoreModules.TableIterators);
 
-                s.Options.ScriptLoader = new DisabledFileScriptLoader();
-                return s;
+                script.Options.ScriptLoader = new DisabledFileScriptLoader();
+                return script;
             }
 
             private void EnsureCompiled(string code)
@@ -157,23 +157,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
             private void SetupGlobals(AviUtlScriptContext ctx)
             {
-                var s = _script!;
+                var script = _script!;
 
-                s.Globals["time"] = ctx.Time;
-                s.Globals["frame"] = ctx.Frame;
-                s.Globals["totalframe"] = ctx.TotalFrame;
-                s.Globals["framerate"] = ctx.Framerate;
-                s.Globals["timelineframe"] = ctx.TimelineFrame;
-                s.Globals["timelinetime"] = ctx.TimelineTime;
-                s.Globals["layer"] = ctx.Layer;
+                script.Globals["time"] = ctx.Time;
+                script.Globals["frame"] = ctx.Frame;
+                script.Globals["totalframe"] = ctx.TotalFrame;
+                script.Globals["framerate"] = ctx.Framerate;
+                script.Globals["timelineframe"] = ctx.TimelineFrame;
+                script.Globals["timelinetime"] = ctx.TimelineTime;
+                script.Globals["layer"] = ctx.Layer;
 
-                _sceneTable ??= new Table(s);
+                _sceneTable ??= new Table(script);
                 _sceneTable["width"] = ctx.SceneWidth;
                 _sceneTable["height"] = ctx.SceneHeight;
-                s.Globals["scene"] = _sceneTable;
+                script.Globals["scene"] = _sceneTable;
 
                 bool firstSetup = _objTable is null;
-                _objTable ??= new Table(s);
+                _objTable ??= new Table(script);
 
                 _objTable["w"] = ctx.ImageWidth;
                 _objTable["h"] = ctx.ImageHeight;
@@ -198,7 +198,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 if (firstSetup)
                     RegisterPixelCallbacks(_objTable);
 
-                s.Globals["obj"] = _objTable;
+                script.Globals["obj"] = _objTable;
             }
 
             private void RegisterPixelCallbacks(Table obj)
