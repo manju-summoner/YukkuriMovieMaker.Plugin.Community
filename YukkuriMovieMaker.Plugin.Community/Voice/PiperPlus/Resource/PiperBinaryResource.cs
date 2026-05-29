@@ -40,7 +40,7 @@ internal static class PiperBinaryResource
 
     public static bool IsReady => InstalledVersion == Version && File.Exists(ExecutablePath);
 
-    public static async Task EnsureAsync(
+    public static async Task InstallAsync(
         string version,
         ProgressMessage? progress = null,
         CancellationToken cancellationToken = default)

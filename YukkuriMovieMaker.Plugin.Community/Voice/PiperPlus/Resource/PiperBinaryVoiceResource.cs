@@ -20,7 +20,7 @@ internal sealed class PiperBinaryVoiceResource : IVoiceResource
     {
         DownloadStarted?.Invoke(this, EventArgs.Empty);
 
-        await PiperBinaryResource.EnsureAsync(PiperBinaryResource.Version, progress);
+        await PiperBinaryResource.InstallAsync(PiperBinaryResource.Version, progress);
         await Task.Run(PiperSpeakerLoader.Reload);
 
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDownloaded)));

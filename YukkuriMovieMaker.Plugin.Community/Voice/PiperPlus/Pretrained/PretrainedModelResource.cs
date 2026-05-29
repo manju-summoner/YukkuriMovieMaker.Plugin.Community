@@ -26,7 +26,7 @@ internal sealed class PretrainedModelResource(PretrainedModelDefinition definiti
         var modelRateFrom = 0.0;
         if (!PiperBinaryResource.IsReady)
         {
-            await PiperBinaryResource.EnsureAsync(
+            await PiperBinaryResource.InstallAsync(
                 PiperBinaryResource.Version, progress.GetChildProgress(0.0, 0.5));
             modelRateFrom = 0.5;
         }
