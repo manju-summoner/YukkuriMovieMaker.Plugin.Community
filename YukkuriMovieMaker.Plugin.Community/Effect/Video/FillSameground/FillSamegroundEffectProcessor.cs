@@ -412,8 +412,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
             out int seedX,
             out int seedY)
         {
-            seedX = Math.Clamp((int)Math.Round(x - bounds.Left), 0, width - 1);
-            seedY = Math.Clamp((int)Math.Round(y - bounds.Top), 0, height - 1);
+            seedX = (int)Math.Round(x - bounds.Left);
+            seedY = (int)Math.Round(y - bounds.Top);
+            if ((uint)seedX >= (uint)width || (uint)seedY >= (uint)height) { seedX = seedY = 0; return default; }
             float sourceX = bounds.Left + seedX;
             float sourceY = bounds.Top + seedY;
 
