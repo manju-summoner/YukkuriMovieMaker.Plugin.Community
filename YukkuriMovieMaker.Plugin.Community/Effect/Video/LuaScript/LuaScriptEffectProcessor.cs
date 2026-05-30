@@ -21,7 +21,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         private ID2D1Bitmap1? _renderTarget;
         private ID2D1Bitmap1? _stagingBitmap;
         private ID2D1Bitmap1? _outputBitmap;
-        private AffineTransform2D? _translateEffect;
+        private AffineTransform2D? _transformEffect;
         private byte[]? _pixelBuffer;
         private int _bitmapWidth;
         private int _bitmapHeight;
@@ -84,7 +84,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 script == _cachedScript &&
                 inDesc == _cachedInputDesc)
             {
-                effectOutput = _cachedPixelsModified ? _translateEffect?.Output : null;
+                effectOutput = _cachedPixelsModified ? _transformEffect?.Output : null;
                 return _cachedOutputDesc ?? inDesc;
             }
 
@@ -106,8 +106,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 {
                     EnsureBitmaps(imgW, imgH);
                     WritePixelsToOutput(ctx.GetPixelBuffer()!, imgW);
-                    UpdateTranslateEffect(bounds);
-                    effectOutput = _translateEffect!.Output;
+                    UpdateTransformEffect(bounds);
+                    effectOutput = _transformEffect!.Output;
                     pixelsModified = true;
                 }
                 else
@@ -243,18 +243,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 _outputBitmap!.CopyFromMemory(new nint(ptr), width * 4);
         }
 
-        private void UpdateTranslateEffect(RawRectF bounds)
+        private void UpdateTransformEffect(RawRectF bounds)
         {
-            if (_translateEffect is null)
+            if (_transformEffect is null)
             {
-                _translateEffect = new AffineTransform2D(_ownCtx!.DeviceContext);
-                _translateEffect.SetInput(0, _outputBitmap, true);
+                _transformEffect = new AffineTransform2D(_ownCtx!.DeviceContext);
+                _transformEffect.SetInput(0, _outputBitmap, true);
                 _cachedBounds = default;
             }
 
             if (_cachedBounds.Left != bounds.Left || _cachedBounds.Top != bounds.Top)
             {
-                _translateEffect.TransformMatrix = Matrix3x2.CreateTranslation(bounds.Left, bounds.Top);
+                _transformEffect.TransformMatrix = Matrix3x2.CreateTranslation(bounds.Left, bounds.Top);
                 _cachedBounds = bounds;
             }
         }
@@ -266,11 +266,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             _renderTarget?.Dispose();
             _stagingBitmap?.Dispose();
             _outputBitmap?.Dispose();
-            _translateEffect?.Dispose();
+            _transformEffect?.Dispose();
             _renderTarget = null;
             _stagingBitmap = null;
             _outputBitmap = null;
-            _translateEffect = null;
+            _transformEffect = null;
             _bitmapWidth = 0;
             _bitmapHeight = 0;
 
@@ -303,11 +303,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 _renderTarget?.Dispose();
                 _stagingBitmap?.Dispose();
                 _outputBitmap?.Dispose();
-                _translateEffect?.Dispose();
+                _transformEffect?.Dispose();
                 _renderTarget = null;
                 _stagingBitmap = null;
                 _outputBitmap = null;
-                _translateEffect = null;
+                _transformEffect = null;
             }
             base.Dispose(disposing);
         }
