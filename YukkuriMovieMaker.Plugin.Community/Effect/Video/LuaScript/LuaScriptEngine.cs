@@ -17,33 +17,38 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             CancellationToken Cancellation,
             TaskCompletionSource<ExecutionResult> Completion);
 
-        private sealed class CancellationDebugger(Func<CancellationToken> tokenProvider) : IDebugger
-        {
-            private static readonly DebuggerAction s_runAction = new() { Action = DebuggerAction.ActionType.Run };
-
-            public DebuggerCaps GetDebuggerCaps() => 0;
-            public void SetDebugService(DebugService debugService) { }
-            public void SetSourceCode(SourceCode sourceCode) { }
-            public void SetByteCode(string[] byteCode) { }
-            public bool SignalRuntimeException(ScriptRuntimeException ex) => false;
-            public void SignalExecutionEnded() { }
-            public void Update(WatchType watchType, IEnumerable<WatchItem> items) { }
-            public List<DynamicExpression> GetWatchItems() => [];
-            public void RefreshBreakpoints(IEnumerable<SourceRef> refs) { }
-
-            public bool IsPauseRequested() => tokenProvider().IsCancellationRequested;
-
-            public DebuggerAction GetAction(int ip, SourceRef sourceref)
-            {
-                tokenProvider().ThrowIfCancellationRequested();
-                return s_runAction;
-            }
-        }
-
         private sealed class ExecutionThread : IDisposable
         {
+            private sealed class CancellationDebugger : IDebugger
+            {
+                private static readonly DebuggerAction s_runAction = new() { Action = DebuggerAction.ActionType.Run };
+
+                private CancellationToken _token;
+
+                internal void UpdateToken(CancellationToken token) => _token = token;
+
+                public DebuggerCaps GetDebuggerCaps() => 0;
+                public void SetDebugService(DebugService debugService) { }
+                public void SetSourceCode(SourceCode sourceCode) { }
+                public void SetByteCode(string[] byteCode) { }
+                public bool SignalRuntimeException(ScriptRuntimeException ex) => false;
+                public void SignalExecutionEnded() { }
+                public void Update(WatchType watchType, IEnumerable<WatchItem> items) { }
+                public List<DynamicExpression> GetWatchItems() => [];
+                public void RefreshBreakpoints(IEnumerable<SourceRef> refs) { }
+
+                public bool IsPauseRequested() => _token.IsCancellationRequested;
+
+                public DebuggerAction GetAction(int ip, SourceRef sourceref)
+                {
+                    _token.ThrowIfCancellationRequested();
+                    return s_runAction;
+                }
+            }
+
             private readonly BlockingCollection<ExecutionJob> _queue = new(boundedCapacity: 1);
             private readonly Thread _thread;
+            private readonly CancellationDebugger _debugger = new();
 
             private Script? _script;
             private DynValue? _compiledChunk;
@@ -101,6 +106,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
                 _activeCancellation = job.Cancellation;
                 _activeContext = job.Context;
+                _debugger.UpdateToken(job.Cancellation);
 
                 try
                 {
@@ -131,6 +137,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 }
                 finally
                 {
+                    _debugger.UpdateToken(default);
                     _activeContext = null;
                     _activeCancellation = default;
                 }
@@ -139,15 +146,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             private void EnsureScript()
             {
                 if (_script is not null) return;
-                _script = CreateScript();
-                _compiledChunk = null;
-                _lastCompiledCode = string.Empty;
-                _objTable = null;
-                _sceneTable = null;
-            }
-
-            private Script CreateScript()
-            {
                 var script = new Script(
                     CoreModules.Basic |
                     CoreModules.Math |
@@ -155,10 +153,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                     CoreModules.Table |
                     CoreModules.Bit32 |
                     CoreModules.TableIterators);
-
                 script.Options.ScriptLoader = new DisabledFileScriptLoader();
-                script.AttachDebugger(new CancellationDebugger(() => _activeCancellation));
-                return script;
+                script.AttachDebugger(_debugger);
+                _script = script;
             }
 
             private void EnsureCompiled(string code)
@@ -182,9 +179,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             private void SetupGlobals(AviUtlScriptContext ctx)
             {
                 var script = _script!;
-                bool firstSetup = _objTable is null;
 
-                if (firstSetup)
+                if (_objTable is null)
                 {
                     _sceneTable = new Table(script);
                     script.Globals["scene"] = _sceneTable;
