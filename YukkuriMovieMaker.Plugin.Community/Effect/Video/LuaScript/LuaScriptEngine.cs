@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using MoonSharp.Interpreter;
+using MoonSharp.Interpreter.Debugging;
 using MoonSharp.Interpreter.Loaders;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
@@ -15,6 +16,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             AviUtlScriptContext Context,
             CancellationToken Cancellation,
             TaskCompletionSource<ExecutionResult> Completion);
+
+        private sealed class CancellationDebugger(Func<CancellationToken> tokenProvider) : IDebugger
+        {
+            private static readonly DebuggerAction s_runAction = new() { Action = DebuggerAction.ActionType.Run };
+
+            public DebuggerCaps GetDebuggerCaps() => 0;
+            public void SetDebugService(DebugService debugService) { }
+            public void SetSourceCode(SourceCode sourceCode) { }
+            public void SetByteCode(string[] byteCode) { }
+            public bool SignalRuntimeException(ScriptRuntimeException ex) => false;
+            public void SignalExecutionEnded() { }
+            public void Update(WatchType watchType, IEnumerable<WatchItem> items) { }
+            public List<DynamicExpression> GetWatchItems() => [];
+            public void RefreshBreakpoints(IEnumerable<SourceRef> refs) { }
+
+            public bool IsPauseRequested() => tokenProvider().IsCancellationRequested;
+
+            public DebuggerAction GetAction(int ip, SourceRef sourceref)
+            {
+                tokenProvider().ThrowIfCancellationRequested();
+                return s_runAction;
+            }
+        }
 
         private sealed class ExecutionThread : IDisposable
         {
@@ -63,7 +87,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                     foreach (var job in _queue.GetConsumingEnumerable())
                         ProcessJob(job);
                 }
-                catch (ThreadInterruptedException) { }
                 catch (OperationCanceledException) { }
                 catch (InvalidOperationException) { }
             }
@@ -123,7 +146,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 _sceneTable = null;
             }
 
-            private static Script CreateScript()
+            private Script CreateScript()
             {
                 var script = new Script(
                     CoreModules.Basic |
@@ -134,6 +157,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                     CoreModules.TableIterators);
 
                 script.Options.ScriptLoader = new DisabledFileScriptLoader();
+                script.AttachDebugger(new CancellationDebugger(() => _activeCancellation));
                 return script;
             }
 
@@ -263,15 +287,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             public void Dispose()
             {
                 _queue.CompleteAdding();
-                _thread.Interrupt();
-                _thread.Join(millisecondsTimeout: 500);
+                _thread.Join();
                 _queue.Dispose();
             }
 
             internal void AbandonAsync()
             {
                 _queue.CompleteAdding();
-                _thread.Interrupt();
                 ThreadPool.QueueUserWorkItem(_ =>
                 {
                     _thread.Join();
