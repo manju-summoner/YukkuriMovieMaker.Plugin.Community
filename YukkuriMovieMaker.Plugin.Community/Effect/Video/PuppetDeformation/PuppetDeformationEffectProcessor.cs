@@ -136,7 +136,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 fixed (float* pData = pinDataBuffer)
                 {
                     var props = new BitmapProperties1(
-                        new Vortice.DCommon.PixelFormat(Format.R32G32B32A32_Float, Vortice.DCommon.AlphaMode.Premultiplied),
+                        new Vortice.DCommon.PixelFormat(Format.R32G32B32A32_Float, Vortice.DCommon.AlphaMode.Ignore),
                         96f, 96f, BitmapOptions.None);
                     dataBitmap = deviceContext!.CreateBitmap(
                         new SizeI(maxPins, 1),
