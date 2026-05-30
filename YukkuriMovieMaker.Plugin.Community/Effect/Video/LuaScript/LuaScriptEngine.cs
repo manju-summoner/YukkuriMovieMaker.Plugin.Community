@@ -152,7 +152,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                     CoreModules.String |
                     CoreModules.Table |
                     CoreModules.Bit32 |
-                    CoreModules.TableIterators);
+                    CoreModules.TableIterators |
+                    CoreModules.Metatables |
+                    CoreModules.ErrorHandling);
                 script.Options.ScriptLoader = new DisabledFileScriptLoader();
                 script.AttachDebugger(_debugger);
                 _script = script;

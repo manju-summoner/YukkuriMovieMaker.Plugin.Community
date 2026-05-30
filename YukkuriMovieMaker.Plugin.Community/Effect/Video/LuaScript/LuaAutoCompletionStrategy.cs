@@ -18,11 +18,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         [
             "time", "frame", "totalframe", "framerate",
             "timelineframe", "timelinetime", "layer",
-            "obj", "scene", "math", "string", "table", "bit32",
-            "type", "tostring", "tonumber", "ipairs", "pairs",
-            "select", "unpack", "rawget", "rawset", "rawequal", "rawlen",
-            "setmetatable", "getmetatable", "pcall", "xpcall", "error",
-            "assert", "print", "next", "load", "require"
+            "obj", "scene",
+            "math", "string", "table", "bit32",
+            "type", "tostring", "tonumber", "select", "error", "assert", "print",
+            "ipairs", "pairs", "next",
+            "unpack",
+            "setmetatable", "getmetatable", "rawget", "rawset", "rawequal", "rawlen",
+            "pcall", "xpcall",
         ];
 
         private static readonly (string Prefix, string[] Members)[] s_namespaces =
