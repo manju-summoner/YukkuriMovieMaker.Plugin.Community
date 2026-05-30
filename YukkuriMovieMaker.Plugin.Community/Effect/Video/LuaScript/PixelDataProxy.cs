@@ -4,23 +4,19 @@ using MoonSharp.Interpreter;
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 {
     [MoonSharpUserData]
-    internal sealed class PixelDataProxy
+    internal sealed class PixelDataProxy(AviUtlScriptContext ctx)
     {
-        private readonly AviUtlScriptContext _ctx;
-
-        internal PixelDataProxy(AviUtlScriptContext ctx) => _ctx = ctx;
-
-        public int width => _ctx.ImageWidth;
-        public int height => _ctx.ImageHeight;
+        public int width => ctx.ImageWidth;
+        public int height => ctx.ImageHeight;
 
         public unsafe double get(int index)
         {
-            _ctx.EnsurePixelBuffer();
-            var buf = _ctx.GetPixelBuffer();
+            ctx.EnsurePixelBuffer();
+            var buf = ctx.GetPixelBuffer();
             if (buf is null) return 0d;
 
             int zeroBasedIndex = index - 1;
-            if ((uint)zeroBasedIndex >= (uint)_ctx.TotalChannels) return 0d;
+            if ((uint)zeroBasedIndex >= (uint)ctx.TotalChannels) return 0d;
 
             int pixelIndex = Math.DivRem(zeroBasedIndex, 4, out int channel);
 
@@ -42,14 +38,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
         public unsafe void set(int index, double value)
         {
-            _ctx.EnsurePixelBuffer();
-            var buf = _ctx.GetPixelBuffer();
+            ctx.EnsurePixelBuffer();
+            var buf = ctx.GetPixelBuffer();
             if (buf is null) return;
 
             int zeroBasedIndex = index - 1;
-            if ((uint)zeroBasedIndex >= (uint)_ctx.TotalChannels) return;
+            if ((uint)zeroBasedIndex >= (uint)ctx.TotalChannels) return;
 
-            _ctx.MarkPixelsDirty();
+            ctx.MarkPixelsDirty();
 
             int pixelIndex = Math.DivRem(zeroBasedIndex, 4, out int channel);
             double clamped = Math.Clamp(value, 0d, 255d);
