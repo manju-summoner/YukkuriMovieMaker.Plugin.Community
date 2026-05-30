@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Vortice;
 using Vortice.DCommon;
 using Vortice.Direct2D1;
+using Vortice.Direct2D1.Effects;
 using Vortice.DXGI;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
@@ -20,9 +21,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         private ID2D1Bitmap1? _renderTarget;
         private ID2D1Bitmap1? _stagingBitmap;
         private ID2D1Bitmap1? _outputBitmap;
+        private AffineTransform2D? _translateEffect;
         private byte[]? _pixelBuffer;
         private int _bitmapWidth;
         private int _bitmapHeight;
+        private RawRectF _cachedBounds;
 
         private bool _isFirst = true;
         private ID2D1Image? _cachedInput;
@@ -81,7 +84,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 script == _cachedScript &&
                 inDesc == _cachedInputDesc)
             {
-                effectOutput = _cachedPixelsModified ? _outputBitmap : null;
+                effectOutput = _cachedPixelsModified ? _translateEffect?.Output : null;
                 return _cachedOutputDesc ?? inDesc;
             }
 
@@ -103,7 +106,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 {
                     EnsureBitmaps(imgW, imgH);
                     WritePixelsToOutput(ctx.GetPixelBuffer()!, imgW);
-                    effectOutput = _outputBitmap;
+                    UpdateTranslateEffect(bounds);
+                    effectOutput = _translateEffect!.Output;
                     pixelsModified = true;
                 }
                 else
@@ -239,6 +243,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 _outputBitmap!.CopyFromMemory(new nint(ptr), width * 4);
         }
 
+        private void UpdateTranslateEffect(RawRectF bounds)
+        {
+            if (_translateEffect is null)
+            {
+                _translateEffect = new AffineTransform2D(_ownCtx!.DeviceContext);
+                _translateEffect.SetInput(0, _outputBitmap, true);
+                _cachedBounds = default;
+            }
+
+            if (_cachedBounds.Left != bounds.Left || _cachedBounds.Top != bounds.Top)
+            {
+                _translateEffect.TransformMatrix = Matrix3x2.CreateTranslation(bounds.Left, bounds.Top);
+                _cachedBounds = bounds;
+            }
+        }
+
         private void EnsureBitmaps(int width, int height)
         {
             if (_bitmapWidth == width && _bitmapHeight == height) return;
@@ -246,9 +266,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             _renderTarget?.Dispose();
             _stagingBitmap?.Dispose();
             _outputBitmap?.Dispose();
+            _translateEffect?.Dispose();
             _renderTarget = null;
             _stagingBitmap = null;
             _outputBitmap = null;
+            _translateEffect = null;
             _bitmapWidth = 0;
             _bitmapHeight = 0;
 
@@ -281,9 +303,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 _renderTarget?.Dispose();
                 _stagingBitmap?.Dispose();
                 _outputBitmap?.Dispose();
+                _translateEffect?.Dispose();
                 _renderTarget = null;
                 _stagingBitmap = null;
                 _outputBitmap = null;
+                _translateEffect = null;
             }
             base.Dispose(disposing);
         }
