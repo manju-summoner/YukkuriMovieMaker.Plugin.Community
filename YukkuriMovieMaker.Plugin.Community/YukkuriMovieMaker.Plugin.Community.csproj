@@ -126,6 +126,9 @@
     <Content Include="Resources\SoundFonts\GeneralUser-GS.sf2">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+	<Content Include="Resources\LuaScript\LuaScript.txt">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
   </ItemGroup>
 	
   <ItemGroup>
