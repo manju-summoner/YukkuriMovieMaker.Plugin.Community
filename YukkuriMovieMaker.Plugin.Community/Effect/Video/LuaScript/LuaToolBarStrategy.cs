@@ -45,9 +45,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                                 FileName = "script.lua"
                             };
                             if (dlg.ShowDialog() != true) return;
-                            using var stream = new FileStream(dlg.FileName, FileMode.Create, FileAccess.Write);
-                            using var writer = new StreamWriter(stream, Encoding.UTF8);
-                            writer.Write((string?)param.Text);
+                            File.WriteAllText(dlg.FileName, (string?)param.Text ?? string.Empty, new UTF8Encoding(false));
                         })),
 
                 new ToolBarItem(
