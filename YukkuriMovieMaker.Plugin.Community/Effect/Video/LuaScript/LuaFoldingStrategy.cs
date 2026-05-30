@@ -14,7 +14,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             @"|""(?:[^""\\]|\\.)*""|'(?:[^'\\]|\\.)*'" +
             @"|(?<repeat>\brepeat\b)" +
             @"|(?<until>\buntil\b)" +
-            @"|(?<open>\b(?:function|do|if|while|for)\b)" +
+            @"|(?<open>\b(?:function|do|if)\b)" +
             @"|(?<close>\bend\b)",
             RegexOptions.Compiled | RegexOptions.Singleline);
 
