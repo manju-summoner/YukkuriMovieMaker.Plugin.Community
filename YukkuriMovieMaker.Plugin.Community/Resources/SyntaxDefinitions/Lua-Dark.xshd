@@ -8,12 +8,12 @@
     <Color name="TrueFalse"     foreground="#FF569CD6" />
 
     <RuleSet>
-        <Span color="Comment">
-            <Begin>--</Begin>
-        </Span>
         <Span color="Comment" multiline="true">
             <Begin>--\[\[</Begin>
             <End>\]\]</End>
+        </Span>
+        <Span color="Comment">
+            <Begin>--</Begin>
         </Span>
         <Span color="String">
             <Begin>"</Begin>
