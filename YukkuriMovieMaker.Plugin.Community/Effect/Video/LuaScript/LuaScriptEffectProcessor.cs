@@ -14,6 +14,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 {
     internal sealed class LuaScriptEffectProcessor(IGraphicsDevicesAndContext devices, LuaScriptEffect item) : VideoEffectProcessorBase(devices)
     {
+        private readonly record struct RenderKey(
+            int Frame,
+            double Time,
+            int Length,
+            int Fps,
+            double Track0,
+            double Track1,
+            double Track2,
+            double Track3,
+            string Script,
+            TimelineSourceUsage Usage,
+            Guid SceneId,
+            int TimelineFrame,
+            double TimelineTime,
+            int SceneWidth,
+            int SceneHeight,
+            int Layer,
+            int InputIndex,
+            int InputCount,
+            int GroupIndex,
+            int GroupCount,
+            int TimelineTotalFrame,
+            double TimelineTotalTime,
+            DrawDescription InputDesc
+        );
+
         private readonly LuaScriptEngine _engine = new();
 
         private GraphicsDevicesAndContext? _ownCtx;
@@ -29,15 +55,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
         private bool _isFirst = true;
         private ID2D1Image? _cachedInput;
-        private int _cachedFrame;
-        private double _cachedTime;
-        private double _cachedTrack0, _cachedTrack1, _cachedTrack2, _cachedTrack3;
-        private string _cachedScript = string.Empty;
-        private DrawDescription? _cachedInputDesc;
+        private RenderKey _cachedKey;
         private DrawDescription? _cachedOutputDesc;
         private bool _cachedPixelsModified;
-        private Guid _cachedSceneId;
-        private string _cachedSceneIdString = string.Empty;
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
@@ -76,15 +96,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
             var inDesc = desc.DrawDescription;
 
-            if (!_isFirst &&
-                frame == _cachedFrame &&
-                time == _cachedTime &&
-                t0 == _cachedTrack0 &&
-                t1 == _cachedTrack1 &&
-                t2 == _cachedTrack2 &&
-                t3 == _cachedTrack3 &&
-                script == _cachedScript &&
-                inDesc == _cachedInputDesc)
+            var key = new RenderKey(
+                frame, time, length, fps,
+                t0, t1, t2, t3,
+                script, desc.Usage, desc.SceneId,
+                desc.TimelinePosition.Frame,
+                desc.TimelinePosition.Time.TotalSeconds,
+                desc.ScreenSize.Width, desc.ScreenSize.Height,
+                desc.Layer, desc.InputIndex, desc.InputCount,
+                desc.GroupIndex, desc.GroupCount,
+                desc.TimelineDuration.Frame,
+                desc.TimelineDuration.Time.TotalSeconds,
+                inDesc);
+
+            if (!_isFirst && key == _cachedKey)
             {
                 effectOutput = _cachedPixelsModified ? _transformEffect?.Output : null;
                 return _cachedOutputDesc ?? inDesc;
@@ -94,13 +119,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             int imgW = Math.Max(1, (int)Math.Ceiling(bounds.Right - bounds.Left));
             int imgH = Math.Max(1, (int)Math.Ceiling(bounds.Bottom - bounds.Top));
 
-            if (_cachedSceneId != desc.SceneId)
-            {
-                _cachedSceneId = desc.SceneId;
-                _cachedSceneIdString = desc.SceneId.ToString();
-            }
-
-            var ctx = BuildContext(desc, inDesc, imgW, imgH, t0, t1, t2, t3, time, frame, length, fps, _cachedSceneIdString);
+            var ctx = BuildContext(in key, imgW, imgH);
             ctx.SetPixelLoader(() => LoadInputPixels(bounds, imgW, imgH));
 
             DrawDescription outDesc;
@@ -133,74 +152,64 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             }
 
             _isFirst = false;
-            _cachedFrame = frame;
-            _cachedTime = time;
-            _cachedTrack0 = t0;
-            _cachedTrack1 = t1;
-            _cachedTrack2 = t2;
-            _cachedTrack3 = t3;
-            _cachedScript = script;
-            _cachedInputDesc = inDesc;
+            _cachedKey = key;
             _cachedOutputDesc = outDesc;
             _cachedPixelsModified = pixelsModified;
 
             return outDesc;
         }
 
-        private static AviUtlScriptContext BuildContext(
-            EffectDescription desc, DrawDescription inDesc,
-            int imgW, int imgH,
-            double t0, double t1, double t2, double t3,
-            double time, int frame, int length, int fps, string sceneIdString)
+        private static AviUtlScriptContext BuildContext(in RenderKey key, int imgW, int imgH)
         {
-            double zoomAvg = (inDesc.Zoom.X + inDesc.Zoom.Y) / 2d;
+            var zoom = key.InputDesc.Zoom;
+            double zoomAvg = (zoom.X + zoom.Y) / 2d;
             double aspect = zoomAvg > 0d
-                ? (inDesc.Zoom.X - inDesc.Zoom.Y) / (inDesc.Zoom.X + inDesc.Zoom.Y)
+                ? (zoom.X - zoom.Y) / (zoom.X + zoom.Y)
                 : 0d;
 
             return new AviUtlScriptContext
             {
                 ImageWidth = imgW,
                 ImageHeight = imgH,
-                X = inDesc.Draw.X,
-                Y = inDesc.Draw.Y,
-                Z = inDesc.Draw.Z,
-                Ox = inDesc.CenterPoint.X,
-                Oy = inDesc.CenterPoint.Y,
+                X = key.InputDesc.Draw.X,
+                Y = key.InputDesc.Draw.Y,
+                Z = key.InputDesc.Draw.Z,
+                Ox = key.InputDesc.CenterPoint.X,
+                Oy = key.InputDesc.CenterPoint.Y,
                 Oz = 0d,
-                Sx = inDesc.Zoom.X,
-                Sy = inDesc.Zoom.Y,
+                Sx = zoom.X,
+                Sy = zoom.Y,
                 Zoom = zoomAvg,
                 Aspect = aspect,
-                Alpha = inDesc.Opacity * 255d,
-                Rx = inDesc.Rotation.X,
-                Ry = inDesc.Rotation.Y,
-                Rz = inDesc.Rotation.Z,
-                Track0 = t0,
-                Track1 = t1,
-                Track2 = t2,
-                Track3 = t3,
-                Time = time,
-                Frame = frame,
-                TotalFrame = length,
-                TotalTime = fps > 0 ? length / (double)fps : 0d,
-                Framerate = fps,
-                TimelineFrame = desc.TimelinePosition.Frame,
-                TimelineTime = desc.TimelinePosition.Time.TotalSeconds,
-                SceneWidth = desc.ScreenSize.Width,
-                SceneHeight = desc.ScreenSize.Height,
-                Layer = desc.Layer,
-                Index = desc.InputIndex,
-                Num = desc.InputCount,
-                GroupIndex = desc.GroupIndex,
-                GroupCount = desc.GroupCount,
-                TimelineTotalFrame = desc.TimelineDuration.Frame,
-                TimelineTotalTime = desc.TimelineDuration.Time.TotalSeconds,
-                IsSaving = desc.Usage == TimelineSourceUsage.Exporting,
-                IsPlaying = desc.Usage == TimelineSourceUsage.Playing,
-                IsPaused = desc.Usage == TimelineSourceUsage.Paused,
-                SceneId = sceneIdString,
-                TimeRatio = length > 0 ? frame / (double)length : 0d,
+                Alpha = key.InputDesc.Opacity * 255d,
+                Rx = key.InputDesc.Rotation.X,
+                Ry = key.InputDesc.Rotation.Y,
+                Rz = key.InputDesc.Rotation.Z,
+                Track0 = key.Track0,
+                Track1 = key.Track1,
+                Track2 = key.Track2,
+                Track3 = key.Track3,
+                Time = key.Time,
+                Frame = key.Frame,
+                TotalFrame = key.Length,
+                TotalTime = key.Fps > 0 ? key.Length / (double)key.Fps : 0d,
+                Framerate = key.Fps,
+                TimelineFrame = key.TimelineFrame,
+                TimelineTime = key.TimelineTime,
+                SceneWidth = key.SceneWidth,
+                SceneHeight = key.SceneHeight,
+                Layer = key.Layer,
+                Index = key.InputIndex,
+                Num = key.InputCount,
+                GroupIndex = key.GroupIndex,
+                GroupCount = key.GroupCount,
+                TimelineTotalFrame = key.TimelineTotalFrame,
+                TimelineTotalTime = key.TimelineTotalTime,
+                IsSaving = key.Usage == TimelineSourceUsage.Exporting,
+                IsPlaying = key.Usage == TimelineSourceUsage.Playing,
+                IsPaused = key.Usage == TimelineSourceUsage.Paused,
+                SceneId = key.SceneId.ToString(),
+                TimeRatio = key.Length > 0 ? key.Frame / (double)key.Length : 0d,
             };
         }
 
