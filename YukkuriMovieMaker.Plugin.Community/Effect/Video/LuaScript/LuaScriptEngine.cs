@@ -55,6 +55,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             private string _lastCompiledCode = string.Empty;
             private Table? _objTable;
             private Table? _sceneTable;
+            private Table? _animTable;
             private Table? _ymm4Table;
             private CancellationToken _activeCancellation;
             private AviUtlScriptContext? _activeContext;
@@ -192,8 +193,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                     RegisterPixelCallbacks(_objTable);
                     script.Globals["obj"] = _objTable;
 
+                    _animTable = new Table(script);
+                    AnimTableRegistrar.RegisterFunctions(_animTable);
+                    script.Globals["anim"] = _animTable;
+
                     _ymm4Table = new Table(script);
-                    Ymm4TableRegistrar.RegisterFunctions(_ymm4Table);
                     script.Globals["ymm4"] = _ymm4Table;
                 }
 
@@ -207,11 +211,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
                 _sceneTable!["width"] = ctx.SceneWidth;
                 _sceneTable!["height"] = ctx.SceneHeight;
+                _sceneTable!["cx"] = ctx.SceneWidth / 2d;
+                _sceneTable!["cy"] = ctx.SceneHeight / 2d;
 
                 Ymm4TableRegistrar.UpdateVariables(_ymm4Table!, ctx);
 
                 _objTable!["w"] = ctx.ImageWidth;
                 _objTable!["h"] = ctx.ImageHeight;
+                _objTable!["hw"] = ctx.ImageWidth / 2d;
+                _objTable!["hh"] = ctx.ImageHeight / 2d;
                 _objTable!["cx"] = ctx.ImageWidth / 2d;
                 _objTable!["cy"] = ctx.ImageHeight / 2d;
                 _objTable!["cz"] = 0d;

@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         [
             "time", "frame", "totalframe", "framerate",
             "timelineframe", "timelinetime", "layer",
-            "obj", "scene", "ymm4",
+            "obj", "scene", "anim", "ymm4",
             "math", "string", "table", "bit32",
             "type", "tostring", "tonumber", "select", "error", "assert", "print",
             "ipairs", "pairs", "next",
@@ -30,7 +30,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         private static readonly (string Prefix, string[] Members)[] s_namespaces =
         [
             ("obj", [
-                "obj.w", "obj.h", "obj.cx", "obj.cy", "obj.cz",
+                "obj.w", "obj.h", "obj.hw", "obj.hh",
+                "obj.cx", "obj.cy", "obj.cz",
                 "obj.x", "obj.y", "obj.z",
                 "obj.ox", "obj.oy", "obj.oz",
                 "obj.sx", "obj.sy", "obj.sz",
@@ -70,14 +71,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 "bit32.btest", "bit32.countlz", "bit32.countrz"
             ]),
             ("scene", [
-                "scene.width", "scene.height"
+                "scene.width", "scene.height", "scene.cx", "scene.cy"
+            ]),
+            ("anim", [
+                "anim.tau",
+                "anim.lerp", "anim.smoothstep", "anim.clamp",
+                "anim.map", "anim.pingpong",
+                "anim.sign", "anim.oscillate",
+                "anim.ease_in", "anim.ease_out",
+                "anim.step", "anim.fract", "anim.bounce"
             ]),
             ("ymm4", [
-                "ymm4.group_index", "ymm4.group_count",
+                "ymm4.group_index", "ymm4.group_count", "ymm4.group_ratio",
                 "ymm4.timeline_totalframe", "ymm4.timeline_totaltime",
-                "ymm4.is_saving", "ymm4.time_ratio",
-                "ymm4.lerp", "ymm4.smoothstep", "ymm4.clamp",
-                "ymm4.map", "ymm4.pingpong"
+                "ymm4.is_saving", "ymm4.time_ratio"
             ]),
         ];
 
