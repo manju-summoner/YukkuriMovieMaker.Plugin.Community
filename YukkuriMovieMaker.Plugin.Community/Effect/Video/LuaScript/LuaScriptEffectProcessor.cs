@@ -41,6 +41,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         );
 
         private readonly LuaScriptEngine _engine = new();
+        private readonly SemaphoreSlim _pixelLoaderSemaphore = new(1, 1);
 
         private GraphicsDevicesAndContext? _ownCtx;
 
@@ -122,7 +123,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             var ctx = BuildContext(in key, imgW, imgH);
             ctx.SetPixelLoader(() => LoadInputPixels(bounds, imgW, imgH));
 
-            DrawDescription outDesc;
+            DrawDescription outDesc = inDesc;
             bool pixelsModified = false;
 
             try
@@ -149,6 +150,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 effectOutput = null;
                 outDesc = inDesc;
                 Log.Default.Write(ex.Message, ex);
+            }
+            finally
+            {
+                _pixelLoaderSemaphore.Wait();
+                _pixelLoaderSemaphore.Release();
             }
 
             _isFirst = false;
@@ -227,43 +233,51 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
         private byte[] LoadInputPixels(RawRectF bounds, int width, int height)
         {
-            EnsureBitmaps(width, height);
-
-            var dc = _ownCtx!.DeviceContext;
-            var savedTarget = dc.Target;
-
-            dc.Target = _renderTarget;
-            dc.BeginDraw();
-            dc.Clear(null);
-            dc.DrawImage(input!, new Vector2(-bounds.Left, -bounds.Top));
-            dc.EndDraw();
-            dc.Target = savedTarget;
-
-            _stagingBitmap!.CopyFromBitmap(_renderTarget!);
-
-            var mapped = _stagingBitmap.Map(MapOptions.Read);
+            _pixelLoaderSemaphore.Wait();
             try
             {
-                if (mapped.Pitch == width * 4)
+                EnsureBitmaps(width, height);
+
+                var dc = _ownCtx!.DeviceContext;
+                var savedTarget = dc.Target;
+
+                dc.Target = _renderTarget;
+                dc.BeginDraw();
+                dc.Clear(null);
+                dc.DrawImage(input!, new Vector2(-bounds.Left, -bounds.Top));
+                dc.EndDraw();
+                dc.Target = savedTarget;
+
+                _stagingBitmap!.CopyFromBitmap(_renderTarget!);
+
+                var mapped = _stagingBitmap.Map(MapOptions.Read);
+                try
                 {
-                    Marshal.Copy(mapped.Bits, _pixelBuffer!, 0, width * height * 4);
+                    if (mapped.Pitch == width * 4)
+                    {
+                        Marshal.Copy(mapped.Bits, _pixelBuffer!, 0, width * height * 4);
+                    }
+                    else
+                    {
+                        for (int row = 0; row < height; row++)
+                            Marshal.Copy(
+                                mapped.Bits + mapped.Pitch * row,
+                                _pixelBuffer!,
+                                row * width * 4,
+                                width * 4);
+                    }
                 }
-                else
+                finally
                 {
-                    for (int row = 0; row < height; row++)
-                        Marshal.Copy(
-                            mapped.Bits + mapped.Pitch * row,
-                            _pixelBuffer!,
-                            row * width * 4,
-                            width * 4);
+                    _stagingBitmap.Unmap();
                 }
+
+                return _pixelBuffer!;
             }
             finally
             {
-                _stagingBitmap.Unmap();
+                _pixelLoaderSemaphore.Release();
             }
-
-            return _pixelBuffer!;
         }
 
         private unsafe void WritePixelsToOutput(byte[] pixels, int width)
@@ -329,6 +343,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             if (disposing)
             {
                 _engine.Dispose();
+                _pixelLoaderSemaphore.Dispose();
                 _renderTarget?.Dispose();
                 _stagingBitmap?.Dispose();
                 _outputBitmap?.Dispose();
