@@ -30,12 +30,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         private static readonly (string Prefix, string[] Members)[] s_namespaces =
         [
             ("obj", [
-                "obj.w", "obj.h", "obj.cx", "obj.cy",
+                "obj.w", "obj.h", "obj.cx", "obj.cy", "obj.cz",
                 "obj.x", "obj.y", "obj.z",
-                "obj.ox", "obj.oy",
+                "obj.ox", "obj.oy", "obj.oz",
+                "obj.sx", "obj.sy", "obj.sz",
                 "obj.zoom", "obj.alpha", "obj.aspect",
                 "obj.rx", "obj.ry", "obj.rz",
                 "obj.track0", "obj.track1", "obj.track2", "obj.track3",
+                "obj.time", "obj.totaltime", "obj.frame", "obj.totalframe",
+                "obj.framerate", "obj.layer", "obj.index", "obj.num",
                 "obj.getpixel", "obj.setpixel",
                 "obj.getpixeldata"
             ]),

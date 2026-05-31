@@ -207,11 +207,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 _objTable!["h"] = ctx.ImageHeight;
                 _objTable!["cx"] = ctx.ImageWidth / 2d;
                 _objTable!["cy"] = ctx.ImageHeight / 2d;
+                _objTable!["cz"] = 0d;
                 _objTable!["x"] = ctx.X;
                 _objTable!["y"] = ctx.Y;
                 _objTable!["z"] = ctx.Z;
                 _objTable!["ox"] = ctx.Ox;
                 _objTable!["oy"] = ctx.Oy;
+                _objTable!["oz"] = ctx.Oz;
+                _objTable!["sx"] = ctx.Sx;
+                _objTable!["sy"] = ctx.Sy;
+                _objTable!["sz"] = 1d;
                 _objTable!["zoom"] = ctx.Zoom;
                 _objTable!["aspect"] = ctx.Aspect;
                 _objTable!["alpha"] = ctx.Alpha;
@@ -222,6 +227,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 _objTable!["track1"] = ctx.Track1;
                 _objTable!["track2"] = ctx.Track2;
                 _objTable!["track3"] = ctx.Track3;
+                _objTable!["time"] = ctx.Time;
+                _objTable!["frame"] = ctx.Frame;
+                _objTable!["totalframe"] = ctx.TotalFrame;
+                _objTable!["totaltime"] = ctx.TotalTime;
+                _objTable!["framerate"] = ctx.Framerate;
+                _objTable!["layer"] = ctx.Layer;
+                _objTable!["index"] = ctx.Index;
+                _objTable!["num"] = ctx.Num;
             }
 
             private void RegisterPixelCallbacks(Table obj)
@@ -274,6 +287,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 ctx.Z = _objTable.Get("z").CastToNumber() ?? ctx.Z;
                 ctx.Ox = _objTable.Get("ox").CastToNumber() ?? ctx.Ox;
                 ctx.Oy = _objTable.Get("oy").CastToNumber() ?? ctx.Oy;
+                ctx.Oz = _objTable.Get("oz").CastToNumber() ?? ctx.Oz;
+                ctx.Sx = _objTable.Get("sx").CastToNumber() ?? ctx.Sx;
+                ctx.Sy = _objTable.Get("sy").CastToNumber() ?? ctx.Sy;
                 ctx.Zoom = _objTable.Get("zoom").CastToNumber() ?? ctx.Zoom;
                 ctx.Aspect = _objTable.Get("aspect").CastToNumber() ?? ctx.Aspect;
                 ctx.Alpha = _objTable.Get("alpha").CastToNumber() ?? ctx.Alpha;

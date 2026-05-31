@@ -159,6 +159,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 Z = inDesc.Draw.Z,
                 Ox = inDesc.CenterPoint.X,
                 Oy = inDesc.CenterPoint.Y,
+                Oz = 0d,
+                Sx = inDesc.Zoom.X,
+                Sy = inDesc.Zoom.Y,
                 Zoom = zoomAvg,
                 Aspect = aspect,
                 Alpha = inDesc.Opacity * 255d,
@@ -172,25 +175,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 Time = time,
                 Frame = frame,
                 TotalFrame = length,
+                TotalTime = fps > 0 ? length / (double)fps : 0d,
                 Framerate = fps,
                 TimelineFrame = desc.TimelinePosition.Frame,
                 TimelineTime = desc.TimelinePosition.Time.TotalSeconds,
                 SceneWidth = desc.ScreenSize.Width,
                 SceneHeight = desc.ScreenSize.Height,
                 Layer = desc.Layer,
+                Index = desc.InputIndex,
+                Num = desc.InputCount,
             };
         }
 
         private static DrawDescription BuildOutputDesc(DrawDescription inDesc, AviUtlScriptContext ctx)
         {
-            float zoomX = (float)(ctx.Zoom * (1d + ctx.Aspect));
-            float zoomY = (float)(ctx.Zoom * (1d - ctx.Aspect));
-
             return inDesc with
             {
                 Draw = new Vector3((float)ctx.X, (float)ctx.Y, (float)ctx.Z),
                 CenterPoint = new Vector2((float)ctx.Ox, (float)ctx.Oy),
-                Zoom = new Vector2(zoomX, zoomY),
+                Zoom = new Vector2((float)ctx.Sx, (float)ctx.Sy),
                 Opacity = Math.Clamp(ctx.Alpha / 255d, 0d, 1d),
                 Rotation = new Vector3((float)ctx.Rx, (float)ctx.Ry, (float)ctx.Rz),
             };

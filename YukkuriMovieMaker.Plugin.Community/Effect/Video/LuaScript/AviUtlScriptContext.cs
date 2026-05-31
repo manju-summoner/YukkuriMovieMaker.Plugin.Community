@@ -10,6 +10,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         public double Z { get; set; }
         public double Ox { get; set; }
         public double Oy { get; set; }
+        public double Oz { get; set; }
+        public double Sx { get; set; }
+        public double Sy { get; set; }
         public double Zoom { get; set; }
         public double Aspect { get; set; }
         public double Alpha { get; set; }
@@ -25,12 +28,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         public double Time { get; init; }
         public int Frame { get; init; }
         public int TotalFrame { get; init; }
+        public double TotalTime { get; init; }
         public int Framerate { get; init; }
         public int TimelineFrame { get; init; }
         public double TimelineTime { get; init; }
         public int SceneWidth { get; init; }
         public int SceneHeight { get; init; }
         public int Layer { get; init; }
+        public int Index { get; init; }
+        public int Num { get; init; }
 
         private Func<byte[]>? _pixelLoader;
         private byte[]? _pixelBuffer;
