@@ -269,6 +269,9 @@
         ymm4.timeline_totaltime : Total time in seconds for the entire timeline
         ymm4.time_ratio         : Current playback position ratio (0.0 ~ 1.0)
         ymm4.is_saving          : Whether video is currently being exported (true only during export)
+        ymm4.is_playing         : Whether the timeline is currently playing (true only during playback)
+        ymm4.is_paused          : Whether the timeline is currently paused (true only when paused)
+        ymm4.scene_id           : Unique ID (Guid string) of the current scene
 
 
 - anim Table -
@@ -298,6 +301,11 @@
         anim.bounce(t)          : Bouncing ease effect
         anim.hsv_to_rgb(h, s, v): Converts HSV (Hue 0~360, Saturation 0~1, Value 0~1) to RGB (0~255)
         anim.rgb_to_hsv(r, g, b): Converts RGB (0~255) to HSV
+        anim.noise(x, y, z)     : 1D to 3D continuous smooth noise (-1.0 ~ 1.0)
+        anim.rand(min, max, s)  : Stable random value based on seed `s`
+        anim.polar(r, a)        : Converts polar coordinates (radius, angle) to (x, y) tuple
+        anim.rotate(x, y, a)    : Rotates 2D point (x, y) by angle `a` (degrees) returning (x, y) tuple
+        anim.bezier(t, p0, p1, p2, p3): Evaluates cubic bezier curve at `t` (0.0~1.0)
 
 
 - المكتبات القياسية المتاحة -

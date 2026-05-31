@@ -269,6 +269,9 @@
         ymm4.timeline_totaltime : 整个时间轴的总时间(秒)
         ymm4.time_ratio         : 当前播放位置的比例 (0.0 ～ 1.0)
         ymm4.is_saving          : 视频是否正在导出中 (仅在导出时为true)
+        ymm4.is_playing         : 是否正在播放中 (仅在播放时为true)
+        ymm4.is_paused          : 是否处于暂停中 (仅在暂停时为true)
+        ymm4.scene_id           : 当前场景的唯一识别字符串 (Guid)
 
 
 - anim 表 -
@@ -298,6 +301,11 @@
         anim.bounce(t)          : 弹跳缓动
         anim.hsv_to_rgb(h, s, v): 将HSV (色相0～360, 饱和度0～1, 明度0～1) 转为 RGB
         anim.rgb_to_hsv(r, g, b): 将RGB (0～255) 转为 HSV
+        anim.noise(x, y, z)     : 1维～3维的平滑噪声 (-1.0～1.0)
+        anim.rand(min, max, s)  : 基于种子 s 的稳定随机数
+        anim.polar(r, a)        : 通过半径 r 和角度 a(度) 获取 (x, y) 坐标的元组
+        anim.rotate(x, y, a)    : 获取将坐标 (x, y) 旋转 a(度) 后的坐标元组
+        anim.bezier(t, p0, p1, p2, p3): 计算 t(0.0～1.0) 时的三次贝塞尔曲线值
 
 
 - 可用标准库 -

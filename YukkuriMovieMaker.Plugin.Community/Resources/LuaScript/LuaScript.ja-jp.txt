@@ -271,6 +271,9 @@
         ymm4.timeline_totaltime : タイムライン全体の総時間(秒)
         ymm4.time_ratio         : 現在の再生位置の割合 (0.0 ～ 1.0)
         ymm4.is_saving          : 動画出力中であるかどうか (出力中のみ true)
+        ymm4.is_playing         : 再生中であるかどうか (再生中のみ true)
+        ymm4.is_paused          : 一時停止中であるかどうか (一時停止中のみ true)
+        ymm4.scene_id           : 現在のシーンを一意に識別する文字列 (Guid)
 
 
 - anim テーブル -
@@ -300,6 +303,11 @@
         anim.bounce(t)          : バウンドするようなイージング
         anim.hsv_to_rgb(h, s, v): HSV (色相0～360, 彩度0～1, 明度0～1) を RGB に変換
         anim.rgb_to_hsv(r, g, b): RGB (0～255) を HSV に変換
+        anim.noise(x, y, z)     : 1次元～3次元の滑らかなパーリン/バリューノイズ (-1.0～1.0)
+        anim.rand(min, max, s)  : シード値 s に基づく安定した乱数を生成
+        anim.polar(r, a)        : 半径 r, 角度 a(度) から (x, y) の移動量(Tuple)を取得
+        anim.rotate(x, y, a)    : 座標 (x, y) を a(度) 回転させた座標(Tuple)を取得
+        anim.bezier(t, p0, p1, p2, p3): t (0.0～1.0) における3次ベジェ曲線の値を計算
 
 
 - 利用可能な標準ライブラリ -

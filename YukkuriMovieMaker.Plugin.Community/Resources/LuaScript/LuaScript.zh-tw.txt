@@ -269,6 +269,9 @@
         ymm4.timeline_totaltime : 整個時間軸的總時間(秒)
         ymm4.time_ratio         : 當前播放位置的比例 (0.0 ～ 1.0)
         ymm4.is_saving          : 影片是否正在輸出中 (僅在輸出時為true)
+        ymm4.is_playing         : 是否正在播放中 (僅在播放時為true)
+        ymm4.is_paused          : 是否處於暫停中 (僅在暫停時為true)
+        ymm4.scene_id           : 當前場景的唯一識別字串 (Guid)
 
 
 - anim 表 -
@@ -298,6 +301,11 @@
         anim.bounce(t)          : 彈跳緩動
         anim.hsv_to_rgb(h, s, v): 將HSV (色相0～360, 飽和度0～1, 明度0～1) 轉為 RGB
         anim.rgb_to_hsv(r, g, b): 將RGB (0～255) 轉為 HSV
+        anim.noise(x, y, z)     : 1維～3維的平滑雜訊 (-1.0～1.0)
+        anim.rand(min, max, s)  : 基於種子 s 的穩定亂數
+        anim.polar(r, a)        : 透過半徑 r 和角度 a(度) 獲取 (x, y) 座標的元組
+        anim.rotate(x, y, a)    : 獲取將座標 (x, y) 旋轉 a(度) 後的座標元組
+        anim.bezier(t, p0, p1, p2, p3): 計算 t(0.0～1.0) 時的三次貝茲曲線值
 
 
 - 可用標準函式庫 -

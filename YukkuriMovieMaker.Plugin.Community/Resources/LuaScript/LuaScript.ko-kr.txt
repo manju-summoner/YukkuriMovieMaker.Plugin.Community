@@ -269,6 +269,9 @@
         ymm4.timeline_totaltime : 타임라인 전체의 총 시간(초)
         ymm4.time_ratio         : 현재 재생 위치 비율 (0.0 ~ 1.0)
         ymm4.is_saving          : 동영상 출력 중인지 여부 (출력 중에만 true)
+        ymm4.is_playing         : 재생 중인지 여부 (재생 중에만 true)
+        ymm4.is_paused          : 일시 정지 중인지 여부 (일시 정지 중에만 true)
+        ymm4.scene_id           : 현재 씬을 고유하게 식별하는 문자열 (Guid)
 
 
 - anim 테이블 -
@@ -298,6 +301,11 @@
         anim.bounce(t)          : 바운스 이징
         anim.hsv_to_rgb(h, s, v): HSV (색상 0~360, 채도 0~1, 명도 0~1)를 RGB로 변환
         anim.rgb_to_hsv(r, g, b): RGB (0~255)를 HSV로 변환
+        anim.noise(x, y, z)     : 1차원~3차원의 부드러운 노이즈 (-1.0 ~ 1.0)
+        anim.rand(min, max, s)  : 시드값 s에 기반한 안정적인 난수 생성
+        anim.polar(r, a)        : 반지름 r, 각도 a(도)에서 (x, y) 이동량(Tuple)을 가져옴
+        anim.rotate(x, y, a)    : 좌표 (x, y)를 a(도)만큼 회전시킨 좌표(Tuple)를 가져옴
+        anim.bezier(t, p0, p1, p2, p3): t(0.0~1.0)에서의 3차 베지어 곡선 값을 계산
 
 
 - 사용 가능한 표준 라이브러리 -
