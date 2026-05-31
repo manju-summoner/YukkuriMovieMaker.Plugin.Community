@@ -61,6 +61,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         internal void SetPixelLoader(Func<byte[]> loader)
         {
             _pixelLoader = loader;
+            _pixelBuffer = null;
             _pixelBufferLoaded = false;
             _isPixelsDirty = false;
         }
