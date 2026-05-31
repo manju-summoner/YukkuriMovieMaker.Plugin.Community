@@ -34,7 +34,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 "obj.cx", "obj.cy", "obj.cz",
                 "obj.x", "obj.y", "obj.z",
                 "obj.ox", "obj.oy", "obj.oz",
-                "obj.sx", "obj.sy", "obj.sz",
+                "obj.sx", "obj.sy",
                 "obj.zoom", "obj.alpha", "obj.aspect",
                 "obj.rx", "obj.ry", "obj.rz",
                 "obj.rxr", "obj.ryr", "obj.rzr",
