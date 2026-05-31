@@ -30,7 +30,9 @@ float4 main(
 
 	float dist = abs(proj - bandCenter);
 	float edgeWidth = softness * halfBandWidth;
-	float mask = 1.0f - smoothstep(halfBandWidth - edgeWidth, halfBandWidth + edgeWidth, dist);
+	float edge0 = halfBandWidth - edgeWidth;
+	float edge1 = halfBandWidth + edgeWidth;
+	float mask = (edge1 > edge0) ? (1.0f - smoothstep(edge0, edge1, dist)) : step(dist, halfBandWidth);
 
 	return color * mask;
 }

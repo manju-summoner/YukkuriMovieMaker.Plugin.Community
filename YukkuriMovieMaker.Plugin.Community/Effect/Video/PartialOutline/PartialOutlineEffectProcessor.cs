@@ -222,6 +222,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PartialOutline
 
             EnsureDilationCapacity(devices, 1);
 
+            if (dilationEffects.Count == 0)
+                return null;
+
             outerRingComposite = new Composite(devices.DeviceContext);
             outerRingComposite.Mode = CompositeMode.SourceOut;
             disposer.Collect(outerRingComposite);
