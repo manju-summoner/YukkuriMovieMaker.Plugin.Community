@@ -135,7 +135,7 @@
 	<FxCompile Include="PuppetDeformation.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-  <FxCompile Include="PartialOutline.hlsl">
+	<FxCompile Include="PartialOutline.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
   </ItemGroup>
