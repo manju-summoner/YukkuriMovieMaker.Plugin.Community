@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         [
             "time", "frame", "totalframe", "framerate",
             "timelineframe", "timelinetime", "layer",
-            "obj", "scene",
+            "obj", "scene", "ymm4",
             "math", "string", "table", "bit32",
             "type", "tostring", "tonumber", "select", "error", "assert", "print",
             "ipairs", "pairs", "next",
@@ -36,6 +36,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 "obj.sx", "obj.sy", "obj.sz",
                 "obj.zoom", "obj.alpha", "obj.aspect",
                 "obj.rx", "obj.ry", "obj.rz",
+                "obj.rxr", "obj.ryr", "obj.rzr",
                 "obj.track0", "obj.track1", "obj.track2", "obj.track3",
                 "obj.time", "obj.totaltime", "obj.frame", "obj.totalframe",
                 "obj.framerate", "obj.layer", "obj.index", "obj.num",
@@ -70,6 +71,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             ]),
             ("scene", [
                 "scene.width", "scene.height"
+            ]),
+            ("ymm4", [
+                "ymm4.group_index", "ymm4.group_count",
+                "ymm4.timeline_totalframe", "ymm4.timeline_totaltime",
+                "ymm4.is_saving", "ymm4.time_ratio",
+                "ymm4.lerp", "ymm4.smoothstep", "ymm4.clamp",
+                "ymm4.map", "ymm4.pingpong"
             ]),
         ];
 

@@ -55,6 +55,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             private string _lastCompiledCode = string.Empty;
             private Table? _objTable;
             private Table? _sceneTable;
+            private Table? _ymm4Table;
             private CancellationToken _activeCancellation;
             private AviUtlScriptContext? _activeContext;
 
@@ -190,6 +191,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                     _objTable = new Table(script);
                     RegisterPixelCallbacks(_objTable);
                     script.Globals["obj"] = _objTable;
+
+                    _ymm4Table = new Table(script);
+                    Ymm4TableRegistrar.RegisterFunctions(_ymm4Table);
+                    script.Globals["ymm4"] = _ymm4Table;
                 }
 
                 script.Globals["time"] = ctx.Time;
@@ -202,6 +207,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
                 _sceneTable!["width"] = ctx.SceneWidth;
                 _sceneTable!["height"] = ctx.SceneHeight;
+
+                Ymm4TableRegistrar.UpdateVariables(_ymm4Table!, ctx);
 
                 _objTable!["w"] = ctx.ImageWidth;
                 _objTable!["h"] = ctx.ImageHeight;
@@ -223,6 +230,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 _objTable!["rx"] = ctx.Rx;
                 _objTable!["ry"] = ctx.Ry;
                 _objTable!["rz"] = ctx.Rz;
+                _objTable!["rxr"] = ctx.RxRad;
+                _objTable!["ryr"] = ctx.RyRad;
+                _objTable!["rzr"] = ctx.RzRad;
                 _objTable!["track0"] = ctx.Track0;
                 _objTable!["track1"] = ctx.Track1;
                 _objTable!["track2"] = ctx.Track2;
@@ -293,9 +303,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 ctx.Zoom = _objTable.Get("zoom").CastToNumber() ?? ctx.Zoom;
                 ctx.Aspect = _objTable.Get("aspect").CastToNumber() ?? ctx.Aspect;
                 ctx.Alpha = _objTable.Get("alpha").CastToNumber() ?? ctx.Alpha;
-                ctx.Rx = _objTable.Get("rx").CastToNumber() ?? ctx.Rx;
-                ctx.Ry = _objTable.Get("ry").CastToNumber() ?? ctx.Ry;
-                ctx.Rz = _objTable.Get("rz").CastToNumber() ?? ctx.Rz;
+
+                double rxrNew = _objTable.Get("rxr").CastToNumber() ?? ctx.RxRad;
+                ctx.Rx = Math.Abs(rxrNew - ctx.RxRad) > 1e-10
+                    ? rxrNew * (180d / Math.PI)
+                    : _objTable.Get("rx").CastToNumber() ?? ctx.Rx;
+
+                double ryrNew = _objTable.Get("ryr").CastToNumber() ?? ctx.RyRad;
+                ctx.Ry = Math.Abs(ryrNew - ctx.RyRad) > 1e-10
+                    ? ryrNew * (180d / Math.PI)
+                    : _objTable.Get("ry").CastToNumber() ?? ctx.Ry;
+
+                double rzrNew = _objTable.Get("rzr").CastToNumber() ?? ctx.RzRad;
+                ctx.Rz = Math.Abs(rzrNew - ctx.RzRad) > 1e-10
+                    ? rzrNew * (180d / Math.PI)
+                    : _objTable.Get("rz").CastToNumber() ?? ctx.Rz;
             }
 
             public void Dispose()

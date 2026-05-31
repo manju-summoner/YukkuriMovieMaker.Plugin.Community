@@ -168,6 +168,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 Rx = inDesc.Rotation.X,
                 Ry = inDesc.Rotation.Y,
                 Rz = inDesc.Rotation.Z,
+                RxRad = inDesc.Rotation.X * Math.PI / 180d,
+                RyRad = inDesc.Rotation.Y * Math.PI / 180d,
+                RzRad = inDesc.Rotation.Z * Math.PI / 180d,
                 Track0 = t0,
                 Track1 = t1,
                 Track2 = t2,
@@ -184,6 +187,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 Layer = desc.Layer,
                 Index = desc.InputIndex,
                 Num = desc.InputCount,
+                GroupIndex = desc.GroupIndex,
+                GroupCount = desc.GroupCount,
+                TimelineTotalFrame = desc.TimelineDuration.Frame,
+                TimelineTotalTime = desc.TimelineDuration.Time.TotalSeconds,
+                IsSaving = desc.Usage == TimelineSourceUsage.Exporting,
+                TimeRatio = length > 0 ? frame / (double)length : 0d,
             };
         }
 

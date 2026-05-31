@@ -38,6 +38,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         public int Index { get; init; }
         public int Num { get; init; }
 
+        public double RxRad { get; init; }
+        public double RyRad { get; init; }
+        public double RzRad { get; init; }
+
+        public int GroupIndex { get; init; }
+        public int GroupCount { get; init; }
+        public int TimelineTotalFrame { get; init; }
+        public double TimelineTotalTime { get; init; }
+        public bool IsSaving { get; init; }
+        public double TimeRatio { get; init; }
+
         private Func<byte[]>? _pixelLoader;
         private byte[]? _pixelBuffer;
         private bool _pixelBufferLoaded;
