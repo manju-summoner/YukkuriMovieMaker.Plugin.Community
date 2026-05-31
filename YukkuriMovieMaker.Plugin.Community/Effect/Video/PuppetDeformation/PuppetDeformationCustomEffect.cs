@@ -149,7 +149,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
                 if (inputRects.Length > 0)
-                    inputRects[0] = inputRect;
+                    inputRects[0] = new RawRect(inputRect.Left-2, inputRect.Top-2, inputRect.Right+2, inputRect.Bottom+2);
             }
 
             [StructLayout(LayoutKind.Sequential)]
