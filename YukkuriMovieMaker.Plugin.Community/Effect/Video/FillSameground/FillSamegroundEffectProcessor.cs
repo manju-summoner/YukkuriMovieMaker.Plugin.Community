@@ -60,8 +60,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
         FillSamegroundMode mode;
         double opacity, blur, tolerance, posX, posY;
         System.Windows.Media.Color targetColor;
-        YukkuriMovieMaker.Project.Blend blendMode;
-        bool isInverted, isBrushOnly, preserveLuminance;
+        bool isInverted;
 
         public FillSamegroundProcessor(IGraphicsDevicesAndContext devices, FillSamegroundEffect item)
             : base(devices)
@@ -218,9 +217,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
             }
 
             if(isFirst || currentBlur != blur)
-            UpdateAlphaMask(maskSource, currentBlur);
+                UpdateAlphaMask(maskSource, currentBlur);
             if(isFirst || currentOpacity != opacity)
-            opacityEffect.Value = (float)(Math.Clamp(currentOpacity, 0, 100) / 100.0);
+                opacityEffect.Value = (float)(Math.Clamp(currentOpacity, 0, 100) / 100.0);
 
             disposer.RemoveAndDispose(ref brushCommandList);
             brushCommandList = dc.CreateCommandList();
@@ -285,10 +284,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
             mode = currentMode;
             opacity = currentOpacity;
             blur = currentBlur;
-            blendMode = currentBlendMode;
             isInverted = currentIsInverted;
-            isBrushOnly = currentIsBrushOnly;
-            preserveLuminance = currentPreserveLuminance;
             tolerance = currentTolerance;
             targetColor = currentTargetColor;
             posX = currentX;
