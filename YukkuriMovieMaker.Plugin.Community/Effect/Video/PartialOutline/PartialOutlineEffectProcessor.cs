@@ -33,7 +33,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PartialOutline
         RawRectF expandedInputBounds;
         RawRectF originalInputBounds;
 
-        readonly IBrushSource brushSource;
+        IBrushSource? brushSource;
+        object? brushType;
         ID2D1CommandList? brushCommandList;
 
         Flood? floodEffect;
@@ -58,13 +59,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PartialOutline
         {
             this.devices = devices;
             this.item = item;
+            brushType = item.Brush.Type;
             brushSource = item.Brush.CreateBrush(devices);
-            disposer.Collect(brushSource);
+            if (brushSource != null)
+                disposer.Collect(brushSource);
         }
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
             if (IsPassThroughEffect
+                || brushSource is null
                 || featherAlphaEffect is null
                 || partialMaskEffect is null
                 || alphaMaskEffect is null
@@ -142,7 +146,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PartialOutline
             }
 
             var currentOutlineBounds = dc.GetImageLocalBounds(outerRingOutput);
-            var isBrushChanged = brushSource.Update(effectDescription);
+            var newBrushType = item.Brush.Type;
+            if (!Equals(this.brushType, newBrushType))
+            {
+                disposer.RemoveAndDispose(ref brushSource);
+                brushSource = item.Brush.CreateBrush(devices);
+                if (brushSource != null)
+                    disposer.Collect(brushSource);
+                else
+                    return effectDescription.DrawDescription;
+            }
+            var isBrushChanged = brushSource.Update(effectDescription) || !Equals(this.brushType, newBrushType);
             if (isFirst || isBrushChanged || !this.outlineBounds.Equals(currentOutlineBounds))
             {
                 if (brushCommandList != null)
@@ -194,6 +208,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PartialOutline
             this.blend = blend;
             this.isOutlineOnly = isOutlineOnly;
             this.isAngular = isAngular;
+            this.brushType = newBrushType;
             this.outlineBounds = currentOutlineBounds;
             this.expandedInputBounds = expandedBounds;
             this.originalInputBounds = inputBounds;
