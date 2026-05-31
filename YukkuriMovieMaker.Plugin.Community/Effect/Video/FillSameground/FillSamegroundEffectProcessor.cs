@@ -317,11 +317,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
                 };
             }
 
-            _ = opacity;
-            _ = blur;
-            _ = blendMode;
-            _ = isBrushOnly;
-            _ = preserveLuminance;
             return effectDescription.DrawDescription;
         }
 
