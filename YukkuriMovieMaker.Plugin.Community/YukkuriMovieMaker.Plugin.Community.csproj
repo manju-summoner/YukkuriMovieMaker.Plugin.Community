@@ -157,13 +157,14 @@
 	  <Resource Include="$(ShaderDirPath)GradientMap.cso" Link="Resources\Shader\GradientMap.cso" />
 	  <Resource Include="$(ShaderDirPath)GodRay.cso" Link="Resources\Shader\GodRay.cso" />
 	  <Resource Include="$(ShaderDirPath)HeatHaze.cso" Link="Resources\Shader\HeatHaze.cso" />
-	  <Resource Include="$(ShaderDirPath)PerspectiveShadow.cso" Link="Resources\Shader\PerspectiveShadow.cso" />
+<Resource Include="$(ShaderDirPath)PerspectiveShadow.cso" Link="Resources\Shader\PerspectiveShadow.cso" />
 	  <Resource Include="$(ShaderDirPath)OutputMapComposite.cso" Link="Resources\Shader\OutputMapComposite.cso" />
 	  <Resource Include="$(ShaderDirPath)ChannelRouter.cso" Link="Resources\Shader\ChannelRouter.cso" />
 	  <Resource Include="$(ShaderDirPath)Tritone.cso" Link="Resources\Shader\Tritone.cso" />
 	  <Resource Include="$(ShaderDirPath)Lut.cso" Link="Resources\Shader\Lut.cso" />
 	  <Resource Include="$(ShaderDirPath)EdgeGlow.cso" Link="Resources\Shader\EdgeGlow.cso" />
 	  <Resource Include="$(ShaderDirPath)PixelizeTransition.cso" Link="Resources\Shader\PixelizeTransition.cso" />
+	  <Resource Include="$(ShaderDirPath)FillSamegroundShader.cso" Link="Resources\Shader\FillSamegroundShader.cso" />
 	  <Resource Include="$(ShaderDirPath)PuppetDeformation.cso" Link="Resources\Shader\PuppetDeformation.cso" />
   </ItemGroup>
 
