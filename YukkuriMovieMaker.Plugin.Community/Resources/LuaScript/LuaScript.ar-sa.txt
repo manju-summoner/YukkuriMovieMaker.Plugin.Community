@@ -98,6 +98,12 @@
         obj.aspect    : نسبة العرض إلى الارتفاع (قابل للتعديل)، النطاق: -1.0 ~ 1.0
                         * القيم الموجبة تقلّص في اتجاه X؛ القيم السالبة في اتجاه Y.
                         * يُحسب داخلياً كـ (ZoomX - ZoomY) / (ZoomX + ZoomY).
+        obj.sx        : Scale factor in X direction (writable) 1.0 = 100%
+                        * Precise independent scale control specific to YMM4.
+                        * Takes precedence over zoom/aspect modifications.
+        obj.sy        : Scale factor in Y direction (writable) 1.0 = 100%
+                        * Precise independent scale control specific to YMM4.
+                        * Takes precedence over zoom/aspect modifications.
         obj.alpha     : العتامة (قابل للتعديل)، النطاق: 0.0 ~ 255.0
                         * يستخدم AviUtl2 النطاق 0.0~1.0، لكن هذا المكوِّن يستخدم 0.0~255.0.
                         * يُعيَّن داخلياً من DrawDescription.Opacity * 255.

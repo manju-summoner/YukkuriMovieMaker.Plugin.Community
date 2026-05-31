@@ -100,6 +100,12 @@
         obj.aspect    : Aspect ratio (writable), Range: -1.0 ~ 1.0
                         * Positive values shrink in X direction; negative values shrink in Y direction.
                         * Internally calculated as (ZoomX - ZoomY) / (ZoomX + ZoomY).
+        obj.sx        : Scale factor in X direction (writable) 1.0 = 100%
+                        * Precise independent scale control specific to YMM4.
+                        * Takes precedence over zoom/aspect modifications.
+        obj.sy        : Scale factor in Y direction (writable) 1.0 = 100%
+                        * Precise independent scale control specific to YMM4.
+                        * Takes precedence over zoom/aspect modifications.
         obj.alpha     : Opacity (writable), Range: 0.0 ~ 255.0
                         * AviUtl2 uses 0.0~1.0, but this plugin uses 0.0~255.0.
                         * Internally set from DrawDescription.Opacity * 255.

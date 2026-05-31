@@ -98,6 +98,12 @@
         obj.aspect    : 長寬比（可修改），範圍：-1.0 ～ 1.0
                         * 正值在 X 方向縮小，負值在 Y 方向縮小。
                         * 內部由 (ZoomX - ZoomY) / (ZoomX + ZoomY) 計算得出。
+        obj.sx        : X方向縮放率 (可修改) 1.0為100%
+                        ※ YMM4專有的精確獨立縮放控制。
+                        ※ 優先於 zoom/aspect 的修改生效。
+        obj.sy        : Y方向縮放率 (可修改) 1.0為100%
+                        ※ YMM4專有的精確獨立縮放控制。
+                        ※ 優先於 zoom/aspect 的修改生效。
         obj.alpha     : 不透明度（可修改），範圍：0.0 ～ 255.0
                         * AviUtl2 為 0.0～1.0，本外掛為 0.0～255.0。
                         * 內部由 DrawDescription.Opacity * 255 設定。

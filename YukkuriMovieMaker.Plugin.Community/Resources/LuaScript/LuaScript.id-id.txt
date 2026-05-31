@@ -98,6 +98,12 @@
         obj.aspect    : Rasio aspek (dapat dimodifikasi), Rentang: -1.0 ~ 1.0
                         * Nilai positif mengecilkan arah X; nilai negatif mengecilkan arah Y.
                         * Dihitung secara internal sebagai (ZoomX - ZoomY) / (ZoomX + ZoomY).
+        obj.sx        : Scale factor in X direction (writable) 1.0 = 100%
+                        * Precise independent scale control specific to YMM4.
+                        * Takes precedence over zoom/aspect modifications.
+        obj.sy        : Scale factor in Y direction (writable) 1.0 = 100%
+                        * Precise independent scale control specific to YMM4.
+                        * Takes precedence over zoom/aspect modifications.
         obj.alpha     : Opasitas (dapat dimodifikasi), Rentang: 0.0 ~ 255.0
                         * AviUtl2 menggunakan 0.0~1.0, tetapi plugin ini menggunakan 0.0~255.0.
                         * Ditetapkan secara internal dari DrawDescription.Opacity * 255.
