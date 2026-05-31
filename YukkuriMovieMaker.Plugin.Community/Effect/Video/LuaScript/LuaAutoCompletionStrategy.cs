@@ -76,10 +76,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             ("anim", [
                 "anim.tau",
                 "anim.lerp", "anim.smoothstep", "anim.clamp",
-                "anim.map", "anim.pingpong",
-                "anim.sign", "anim.oscillate",
-                "anim.ease_in", "anim.ease_out",
-                "anim.step", "anim.fract", "anim.bounce"
+                "anim.map", "anim.norm", "anim.wrap", "anim.pingpong",
+                "anim.sign", "anim.oscillate", "anim.triangle", "anim.square",
+                "anim.duration", "anim.delay",
+                "anim.ease_in", "anim.ease_out", "anim.elastic", "anim.back",
+                "anim.step", "anim.fract", "anim.bounce",
+                "anim.hsv_to_rgb", "anim.rgb_to_hsv"
             ]),
             ("ymm4", [
                 "ymm4.group_index", "ymm4.group_count", "ymm4.group_ratio",

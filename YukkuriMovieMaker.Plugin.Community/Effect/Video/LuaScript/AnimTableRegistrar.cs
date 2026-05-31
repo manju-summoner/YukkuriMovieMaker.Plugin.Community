@@ -48,6 +48,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 return DynValue.NewNumber(a2 + (b2 - a2) * (v - a1) / range);
             });
 
+            anim["norm"] = DynValue.NewCallback((_, args) =>
+            {
+                double v = args[0].CastToNumber() ?? 0d;
+                double lo = args[1].CastToNumber() ?? 0d;
+                double hi = args[2].CastToNumber() ?? 1d;
+                double span = hi - lo;
+                if (span == 0d) return DynValue.NewNumber(0d);
+                return DynValue.NewNumber((v - lo) / span);
+            });
+
+            anim["wrap"] = DynValue.NewCallback((_, args) =>
+            {
+                double v = args[0].CastToNumber() ?? 0d;
+                double lo = args[1].CastToNumber() ?? 0d;
+                double hi = args[2].CastToNumber() ?? 1d;
+                double range = hi - lo;
+                if (range <= 0d) return DynValue.NewNumber(lo);
+                double result = (v - lo) % range;
+                if (result < 0d) result += range;
+                return DynValue.NewNumber(lo + result);
+            });
+
             anim["pingpong"] = DynValue.NewCallback((_, args) =>
             {
                 double t = args[0].CastToNumber() ?? 0d;
@@ -74,6 +96,39 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 return DynValue.NewNumber(lo + (hi - lo) * wave);
             });
 
+            anim["triangle"] = DynValue.NewCallback((_, args) =>
+            {
+                double t = args[0].CastToNumber() ?? 0d;
+                double freq = args[1].CastToNumber() ?? 1d;
+                double f = t * freq;
+                f -= Math.Floor(f);
+                return DynValue.NewNumber(1d - 2d * Math.Abs(f - 0.5d));
+            });
+
+            anim["square"] = DynValue.NewCallback((_, args) =>
+            {
+                double t = args[0].CastToNumber() ?? 0d;
+                double freq = args[1].CastToNumber() ?? 1d;
+                double f = t * freq;
+                f -= Math.Floor(f);
+                return DynValue.NewNumber(f >= 0.5d ? 1d : 0d);
+            });
+
+            anim["duration"] = DynValue.NewCallback((_, args) =>
+            {
+                double t = args[0].CastToNumber() ?? 0d;
+                double dur = args[1].CastToNumber() ?? 1d;
+                if (dur <= 0d) return DynValue.NewNumber(1d);
+                return DynValue.NewNumber(Math.Clamp(t / dur, 0d, 1d));
+            });
+
+            anim["delay"] = DynValue.NewCallback((_, args) =>
+            {
+                double t = args[0].CastToNumber() ?? 0d;
+                double d = args[1].CastToNumber() ?? 0d;
+                return DynValue.NewNumber(Math.Max(0d, t - d));
+            });
+
             anim["ease_in"] = DynValue.NewCallback((_, args) =>
             {
                 double t = args[0].CastToNumber() ?? 0d;
@@ -85,6 +140,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 double t = args[0].CastToNumber() ?? 0d;
                 double inv = 1d - t;
                 return DynValue.NewNumber(1d - inv * inv);
+            });
+
+            anim["elastic"] = DynValue.NewCallback((_, args) =>
+            {
+                double t = Math.Clamp(args[0].CastToNumber() ?? 0d, 0d, 1d);
+                if (t == 0d) return DynValue.NewNumber(0d);
+                if (t == 1d) return DynValue.NewNumber(1d);
+                return DynValue.NewNumber(Math.Pow(2d, -10d * t) * Math.Sin((t * 10d - 0.75d) * (s_tau / 3d)) + 1d);
+            });
+
+            anim["back"] = DynValue.NewCallback((_, args) =>
+            {
+                const double c1 = 1.70158d;
+                const double c3 = c1 + 1d;
+                double t = args[0].CastToNumber() ?? 0d;
+                double inv = t - 1d;
+                return DynValue.NewNumber(1d + c3 * inv * inv * inv + c1 * inv * inv);
             });
 
             anim["step"] = DynValue.NewCallback((_, args) =>
@@ -119,6 +191,51 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 }
                 t -= 2.625d / d1;
                 return DynValue.NewNumber(n1 * t * t + 0.984375d);
+            });
+
+            anim["hsv_to_rgb"] = DynValue.NewCallback((_, args) =>
+            {
+                double h = args[0].CastToNumber() ?? 0d;
+                double s = args[1].CastToNumber() ?? 0d;
+                double v = args[2].CastToNumber() ?? 0d;
+                double c = v * s;
+                double x = c * (1d - Math.Abs((h / 60d) % 2d - 1d));
+                double m = v - c;
+                int sector = ((int)Math.Floor(h / 60d) % 6 + 6) % 6;
+                (double r, double g, double b) = sector switch
+                {
+                    0 => (c, x, 0d),
+                    1 => (x, c, 0d),
+                    2 => (0d, c, x),
+                    3 => (0d, x, c),
+                    4 => (x, 0d, c),
+                    _ => (c, 0d, x),
+                };
+                return DynValue.NewTuple(
+                    DynValue.NewNumber((r + m) * 255d),
+                    DynValue.NewNumber((g + m) * 255d),
+                    DynValue.NewNumber((b + m) * 255d));
+            });
+
+            anim["rgb_to_hsv"] = DynValue.NewCallback((_, args) =>
+            {
+                double r = (args[0].CastToNumber() ?? 0d) / 255d;
+                double g = (args[1].CastToNumber() ?? 0d) / 255d;
+                double b = (args[2].CastToNumber() ?? 0d) / 255d;
+                double max = Math.Max(r, Math.Max(g, b));
+                double min = Math.Min(r, Math.Min(g, b));
+                double delta = max - min;
+                double h = 0d;
+                if (delta > 0d)
+                {
+                    if (max == r) h = 60d * ((((g - b) / delta) % 6d + 6d) % 6d);
+                    else if (max == g) h = 60d * ((b - r) / delta + 2d);
+                    else h = 60d * ((r - g) / delta + 4d);
+                }
+                return DynValue.NewTuple(
+                    DynValue.NewNumber(h),
+                    DynValue.NewNumber(max > 0d ? delta / max : 0d),
+                    DynValue.NewNumber(max));
             });
         }
     }
