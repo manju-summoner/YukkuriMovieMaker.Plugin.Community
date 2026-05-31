@@ -1,7 +1,8 @@
 Texture2D InputTexture : register(t0);
 SamplerState InputSampler : register(s0);
 
-Texture2D<float4> PinTexture : register(t1);
+static const int MaxPins = 256;
+static const float Epsilon = 1e-6f;
 
 cbuffer Constants : register(b0)
 {
@@ -12,10 +13,10 @@ cbuffer Constants : register(b0)
 
     float inputWidth : packoffset(c1.x);
     float inputHeight : packoffset(c1.y);
-};
 
-static const int MaxPins = 256;
-static const float Epsilon = 1e-6f;
+    //各ピン: xy = rest(ローカル座標), zw = current(ローカル座標)
+    float4 pins[MaxPins] : packoffset(c2);
+};
 
 float2 LocalToScene(float2 local)
 {
@@ -24,12 +25,12 @@ float2 LocalToScene(float2 local)
 
 float2 GetRestScene(int index)
 {
-    return LocalToScene(PinTexture.Load(int3(index, 0, 0)).xy);
+    return LocalToScene(pins[index].xy);
 }
 
 float2 GetCurrentScene(int index)
 {
-    return LocalToScene(PinTexture.Load(int3(index, 0, 0)).zw);
+    return LocalToScene(pins[index].zw);
 }
 
 float4 main(

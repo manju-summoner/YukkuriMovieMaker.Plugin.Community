@@ -42,12 +42,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             get => GetFloatValue((int)EffectImpl.Properties.TightLocalBottom);
         }
 
-        [CustomEffect(2)]
+        public byte[] PinData
+        {
+            set => SetValue((int)EffectImpl.Properties.PinData, value);
+        }
+
+        [CustomEffect(1)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
             const float MaxLocalExtent = 4096f;
+            const int HeaderByteSize = 32;
+            const int ConstantBufferByteSize = HeaderByteSize + MaxPins * 16;
 
             ConstantBuffer _cb;
+            readonly byte[] _pinData = new byte[MaxPins * 16];
             float _tightLocalLeft, _tightLocalTop, _tightLocalRight, _tightLocalBottom;
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.PinCount)]
@@ -68,13 +76,37 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             [CustomEffectProperty(PropertyType.Float, (int)Properties.TightLocalBottom)]
             public float TightLocalBottom { get => _tightLocalBottom; set => _tightLocalBottom = Math.Clamp(value, -MaxLocalExtent, MaxLocalExtent); }
 
+            [CustomEffectProperty(PropertyType.Blob, (int)Properties.PinData)]
+            public byte[] PinData
+            {
+                get => _pinData;
+                set
+                {
+                    if (value is null)
+                        return;
+                    var length = Math.Min(value.Length, _pinData.Length);
+                    Array.Copy(value, _pinData, length);
+                    UpdateConstants();
+                }
+            }
+
             public EffectImpl() : base(ShaderResourceUri.Get("PuppetDeformation"))
             {
             }
 
             protected override void UpdateConstants()
             {
-                drawInformation?.SetPixelShaderConstantBuffer(_cb);
+                if (drawInformation is null)
+                    return;
+
+                //ヘッダ(_cb 32byte) + ピンデータ(_pinData) を結合して定数バッファとして渡す。
+                //ピンデータを入力テクスチャ(float32)ではなく定数バッファで渡すことで、
+                //Direct2Dの中間テクスチャ精度がfloat32に昇格するのを防ぎ、
+                //タイル分割境界のアーティファクトを回避する。
+                Span<byte> buffer = stackalloc byte[ConstantBufferByteSize];
+                MemoryMarshal.Write(buffer, in _cb);
+                _pinData.CopyTo(buffer[HeaderByteSize..]);
+                drawInformation.SetPixelShaderConstantBuffer(buffer);
             }
 
             public override void MapInputRectsToOutputRect(RawRect[] inputRects, RawRect[] inputOpaqueSubRects, out RawRect outputRect, out RawRect outputOpaqueSubRect)
@@ -118,8 +150,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 if (inputRects.Length > 0)
                     inputRects[0] = inputRect;
-                if (inputRects.Length > 1)
-                    inputRects[1] = new RawRect(0, 0, MaxPins, 1);
             }
 
             [StructLayout(LayoutKind.Sequential)]
@@ -131,6 +161,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 public float InputTop;
                 public float InputWidth;
                 public float InputHeight;
+                public float Pad0;
+                public float Pad1;
             }
 
             public enum Properties : int
@@ -141,6 +173,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 TightLocalTop = 3,
                 TightLocalRight = 4,
                 TightLocalBottom = 5,
+                PinData = 6,
             }
         }
     }

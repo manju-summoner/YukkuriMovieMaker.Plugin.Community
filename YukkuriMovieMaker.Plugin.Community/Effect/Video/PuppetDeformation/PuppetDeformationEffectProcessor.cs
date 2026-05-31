@@ -65,10 +65,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 || this.imageHeight != imageHeight
                 || !PinSamplesMatchBuffer(samples))
             {
-                gpuCache?.Dispose();
                 gpuCache = BuildGpuCache(stiffness, imageWidth, imageHeight, samples);
 
-                effect.SetInput(1, gpuCache.DataBitmap, true);
+                effect.PinData = gpuCache.PinData;
                 effect.PinCount = pinCount;
                 effect.Stiffness = stiffness;
 
@@ -130,21 +129,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
             Array.Clear(pinDataBuffer, count * 4, (maxPins - count) * 4);
 
-            ID2D1Bitmap dataBitmap;
-            unsafe
-            {
-                fixed (float* pData = pinDataBuffer)
-                {
-                    var props = new BitmapProperties1(
-                        new Vortice.DCommon.PixelFormat(Format.R32G32B32A32_Float, Vortice.DCommon.AlphaMode.Ignore),
-                        96f, 96f, BitmapOptions.None);
-                    dataBitmap = deviceContext!.CreateBitmap(
-                        new SizeI(maxPins, 1),
-                        (nint)pData,
-                        maxPins * 16,
-                        props);
-                }
-            }
+            var pinData = new byte[maxPins * 16];
+            Buffer.BlockCopy(pinDataBuffer, 0, pinData, 0, pinData.Length);
 
             (float left, float top, float right, float bottom) tightBounds;
             if (count > 0 && imageWidth > 0 && imageHeight > 0)
@@ -158,7 +144,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 tightBounds = (-halfW, -halfH, halfW, halfH);
             }
 
-            return new PinGpuCache(dataBitmap, tightBounds);
+            return new PinGpuCache(pinData, tightBounds);
         }
 
         List<VideoEffectController> BuildControllers(List<PinSample> samples)
@@ -344,8 +330,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         protected override void ClearEffectChain()
         {
             effect?.SetInput(0, null, true);
-            effect?.SetInput(1, null, true);
-            gpuCache?.Dispose();
             gpuCache = null;
             cachedControllers = ImmutableList<VideoEffectController>.Empty;
             isFirst = true;
@@ -355,7 +339,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             if (disposing)
             {
-                gpuCache?.Dispose();
                 gpuCache = null;
                 deviceContext = null;
                 effect = null;
@@ -372,13 +355,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         }
 
         sealed class PinGpuCache(
-            ID2D1Bitmap dataBitmap,
-            (float Left, float Top, float Right, float Bottom) tightBounds) : IDisposable
+            byte[] pinData,
+            (float Left, float Top, float Right, float Bottom) tightBounds)
         {
-            public ID2D1Bitmap DataBitmap { get; } = dataBitmap;
+            public byte[] PinData { get; } = pinData;
             public (float Left, float Top, float Right, float Bottom) TightBounds { get; } = tightBounds;
-
-            public void Dispose() => DataBitmap.Dispose();
         }
     }
 }
