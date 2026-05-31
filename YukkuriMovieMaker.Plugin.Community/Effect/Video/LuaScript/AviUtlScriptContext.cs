@@ -38,9 +38,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         public int Index { get; init; }
         public int Num { get; init; }
 
-        public double RxRad { get; init; }
-        public double RyRad { get; init; }
-        public double RzRad { get; init; }
+        public double RxRad => Rx * Math.PI / 180d;
+        public double RyRad => Ry * Math.PI / 180d;
+        public double RzRad => Rz * Math.PI / 180d;
 
         public int GroupIndex { get; init; }
         public int GroupCount { get; init; }
