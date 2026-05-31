@@ -1,0 +1,142 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.PuppetPinListEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:converter="clr-namespace:YukkuriMovieMaker.Views.Converters;assembly=YukkuriMovieMaker.Plugin"
+             mc:Ignorable="d"
+             d:DesignHeight="400" d:DesignWidth="300">
+    <i:Interaction.Behaviors>
+        <pb:MessageBoxBehavior ViewModel="{Binding MessageBox}"/>
+    </i:Interaction.Behaviors>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Margin="0,0,0,4">
+            <Grid.Effect>
+                <DropShadowEffect Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" Opacity="1" BlurRadius="1" ShadowDepth="0" Direction="0"/>
+            </Grid.Effect>
+            <ItemsControl ItemsSource="{Binding VerticalLines}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="{Binding Columns}" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Width="1" ClipToBounds="True">
+                            <Rectangle StrokeThickness="1" Width="2" Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" Margin="0,16,0,0" StrokeDashArray="4,4"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ItemsControl ItemsSource="{Binding HorizontalLines}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="1" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Height="1" ClipToBounds="True">
+                            <Rectangle StrokeThickness="1" Height="2" Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" Margin="16,0,0,0" StrokeDashArray="4,4"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="{Binding Columns}" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.Resources>
+                    <DataTemplate DataType="{x:Type local:PuppetDeformationItemViewModel}">
+                        <Viewbox StretchDirection="DownOnly">
+                            <Grid Width="48" Height="48">
+                                <Grid RenderTransformOrigin="0.5,0.5">
+                                    <Grid.RenderTransform>
+                                        <RotateTransform Angle="{Binding OffsetAngle}"/>
+                                    </Grid.RenderTransform>
+                                    <c:ReadOnlyToggleButton Width="16" Height="16" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,0" IsChecked="{Binding IsOffsetSelected, Mode=OneWay}" Command="{Binding SelectOffsetCommand}" CommandParameter="{Binding}" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" ToolTip="{x:Static local:Texts.PuppetDeformationOffsetButtonTooltip}">
+                                        <FrameworkElement.Resources>
+                                            <ResourceDictionary>
+                                                <Style x:Key="{x:Type Border}" TargetType="{x:Type Border}">
+                                                    <Setter Property="CornerRadius" Value="{Binding ActualWidth, RelativeSource={RelativeSource Self}}"/>
+                                                </Style>
+                                            </ResourceDictionary>
+                                        </FrameworkElement.Resources>
+                                        <FrameworkElement.Style>
+                                            <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type c:ReadOnlyToggleButton}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsOffsetZero}" Value="True">
+                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                                                        <Setter Property="Opacity" Value="0.3"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsOffsetSelected}" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </FrameworkElement.Style>
+                                    </c:ReadOnlyToggleButton>
+                                </Grid>
+                                <c:ReadOnlyToggleButton Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding IsRestSelected, Mode=OneWay}" Command="{Binding SelectRestCommand}" CommandParameter="{Binding}" ToolTip="{x:Static local:Texts.PuppetDeformationRestButtonTooltip}">
+                                    <FrameworkElement.Resources>
+                                        <ResourceDictionary>
+                                            <Style x:Key="{x:Type Border}" TargetType="{x:Type Border}">
+                                                <Setter Property="CornerRadius" Value="{Binding ActualWidth, RelativeSource={RelativeSource Self}}"/>
+                                            </Style>
+                                        </ResourceDictionary>
+                                    </FrameworkElement.Resources>
+                                    <FrameworkElement.Style>
+                                        <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type c:ReadOnlyToggleButton}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRestSelected}" Value="True">
+                                                    <Setter Property="BorderThickness" Value="2" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </FrameworkElement.Style>
+                                </c:ReadOnlyToggleButton>
+                            </Grid>
+                        </Viewbox>
+                    </DataTemplate>
+                </ItemsControl.Resources>
+            </ItemsControl>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="26"/>
+                <ColumnDefinition Width="26"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="{x:Static local:Texts.PuppetDeformationListAddPin}" Command="{Binding AddPinCommand}"/>
+            <Button Grid.Column="1" Padding="6" Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" ToolTip="{x:Static local:Texts.PuppetDeformationListRemovePin}" Command="{Binding RemovePinCommand}"/>
+            <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.Autorenew}}" ToolTip="{x:Static local:Texts.PuppetDeformationListResetMessage}" Command="{Binding ResetCommand}"/>
+        </Grid>
+        <Grid Grid.Row="2" ClipToBounds="True">
+            <c:PropertiesEditor x:Name="propertiesEditor" Margin="0,-22,0,0" Target="{Binding SelectedTarget}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="BeginEdit">
+                        <i:InvokeCommandAction Command="{Binding OnBeginEditPointCommand}"/>
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="EndEdit">
+                        <i:InvokeCommandAction Command="{Binding OnEndEditPointCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </c:PropertiesEditor>
+        </Grid>
+    </Grid>
+</UserControl>
