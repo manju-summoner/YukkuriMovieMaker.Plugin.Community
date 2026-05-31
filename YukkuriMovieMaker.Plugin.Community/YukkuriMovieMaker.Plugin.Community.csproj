@@ -164,6 +164,7 @@
 	  <Resource Include="$(ShaderDirPath)Lut.cso" Link="Resources\Shader\Lut.cso" />
 	  <Resource Include="$(ShaderDirPath)EdgeGlow.cso" Link="Resources\Shader\EdgeGlow.cso" />
 	  <Resource Include="$(ShaderDirPath)PixelizeTransition.cso" Link="Resources\Shader\PixelizeTransition.cso" />
+	  <Resource Include="$(ShaderDirPath)PartialOutline.cso" Link="Resources\Shader\PartialOutline.cso" />
   </ItemGroup>
 
 </Project>
