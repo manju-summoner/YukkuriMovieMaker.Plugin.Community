@@ -135,7 +135,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PartialOutline
 
                 partialMaskEffect.Angle = angleRad;
                 partialMaskEffect.BandCenter = (float)(position / 100.0) * halfExtent;
-                partialMaskEffect.HalfBandWidth = (float)(width / 100.0) * halfExtent;
+                partialMaskEffect.HalfBandWidth = (float)(width / 200.0) * halfExtent;
                 partialMaskEffect.Softness = (float)(softness / 100.0);
                 partialMaskEffect.CenterX = inputBounds.Left + halfW;
                 partialMaskEffect.CenterY = inputBounds.Top + halfH;

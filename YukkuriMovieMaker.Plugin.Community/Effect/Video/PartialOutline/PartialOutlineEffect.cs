@@ -48,7 +48,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PartialOutline
 
         [Display(GroupName = nameof(Texts.PartialOutlinePartialGroupName), Name = nameof(Texts.PartialOutlineWidthName), Description = nameof(Texts.PartialOutlineWidthDesc), Order = 12, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0d, 100d)]
-        public Animation Width { get; } = new Animation(50, 0, 200);
+        public Animation Width { get; } = new Animation(100, 0, 200);
 
         [Display(GroupName = nameof(Texts.PartialOutlinePartialGroupName), Name = nameof(Texts.PartialOutlineSoftnessName), Description = nameof(Texts.PartialOutlineSoftnessDesc), Order = 13, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0d, 100d)]
