@@ -57,6 +57,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             private Table? _sceneTable;
             private Table? _animTable;
             private Table? _ymm4Table;
+            private HashSet<string>? _builtinGlobalSnapshot;
             private CancellationToken _activeCancellation;
             private AviUtlScriptContext? _activeContext;
 
@@ -183,8 +184,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             private void SetupGlobals(AviUtlScriptContext ctx)
             {
                 var script = _script!;
+                bool isFirstSetup = _objTable is null;
 
-                if (_objTable is null)
+                if (isFirstSetup)
                 {
                     var sceneTable = new Table(script);
                     script.Globals["scene"] = sceneTable;
@@ -204,6 +206,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                     _animTable = animTable;
                     _ymm4Table = ymm4Table;
                     _objTable = objTable;
+                }
+                else
+                {
+                    ResetUserGlobals(script);
                 }
 
                 script.Globals["time"] = ctx.Time;
@@ -258,6 +264,41 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 _objTable!["layer"] = ctx.Layer;
                 _objTable!["index"] = ctx.Index;
                 _objTable!["num"] = ctx.Num;
+
+                if (isFirstSetup)
+                {
+                    _builtinGlobalSnapshot = CaptureGlobalKeys(script);
+                }
+
+                script.Call(
+                    script.Globals.Get("math").Table.Get("randomseed"),
+                    DynValue.NewNumber(ctx.Frame));
+            }
+
+            private static HashSet<string> CaptureGlobalKeys(Script script)
+            {
+                var keys = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var key in script.Globals.Keys)
+                {
+                    if (key.Type == DataType.String)
+                        keys.Add(key.String);
+                }
+                return keys;
+            }
+
+            private void ResetUserGlobals(Script script)
+            {
+                var keysToRemove = new List<string>();
+                foreach (var key in script.Globals.Keys)
+                {
+                    if (key.Type == DataType.String &&
+                        !_builtinGlobalSnapshot!.Contains(key.String))
+                    {
+                        keysToRemove.Add(key.String);
+                    }
+                }
+                foreach (var key in keysToRemove)
+                    script.Globals[key] = DynValue.Nil;
             }
 
             private void RegisterPixelCallbacks(Table obj)
