@@ -96,6 +96,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             .Concat(s_namespaces.SelectMany(n => n.Members))
             .Distinct()
             .OrderBy(x => x.Length)
+            .ThenBy(x => x, StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
         private static readonly Regex s_identifierPattern = new(
@@ -141,7 +142,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                     .Concat(userFunctions)
                     .Where(x => x.StartsWith(input, System.StringComparison.OrdinalIgnoreCase))
                     .Distinct()
-                    .OrderBy(x => x.Length);
+                    .OrderBy(x => x.Length)
+                    .ThenBy(x => x, StringComparer.OrdinalIgnoreCase);
             }
 
             return [];
