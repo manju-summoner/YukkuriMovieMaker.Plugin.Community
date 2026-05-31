@@ -23,7 +23,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
         }
 
-        [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationStiffnessName), Description = nameof(Texts.PuppetDeformationStiffnessDesc), Order = 0, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationApplyName), Description = nameof(Texts.PuppetDeformationApplyDesc), Order = 0, ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool ApplyDeformation { get => applyDeformation; set => Set(ref applyDeformation, value); }
+        bool applyDeformation = true;
+
+        [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationStiffnessName), Description = nameof(Texts.PuppetDeformationStiffnessDesc), Order = 1, ResourceType = typeof(Texts))]
         [AnimationSlider("F2", "", 0.5d, 4d)]
         public Animation Stiffness { get; } = new Animation(2.0, 0.1, 8.0);
 

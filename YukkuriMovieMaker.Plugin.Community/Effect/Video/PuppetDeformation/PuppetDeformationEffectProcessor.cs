@@ -23,6 +23,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         ImmutableList<VideoEffectController> cachedControllers = ImmutableList<VideoEffectController>.Empty;
 
         bool isFirst = true;
+        bool apply = true;
         int pinCount;
         float stiffness;
         float imageWidth;
@@ -39,6 +40,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
             var pins = item.Pins;
             var stiffness = (float)item.Stiffness.GetValue(frame, length, fps);
+            var apply = item.ApplyDeformation;
 
             var pinCount = Math.Min(pins.Count, PuppetDeformationCustomEffect.MaxPins);
             var samples = new List<PinSample>(pinCount);
@@ -63,19 +65,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 || this.stiffness != stiffness
                 || this.imageWidth != imageWidth
                 || this.imageHeight != imageHeight
+                || this.apply != apply
                 || !PinSamplesMatchBuffer(samples))
             {
                 gpuCache = BuildGpuCache(stiffness, imageWidth, imageHeight, samples);
 
                 effect.PinData = gpuCache.PinData;
-                effect.PinCount = pinCount;
+                //変形オフ時はPinCount=0を送り、シェーダー側で変形せず入力をそのまま出力する。
+                effect.PinCount = apply ? pinCount : 0;
                 effect.Stiffness = stiffness;
 
-                var (tl, tt, tr, tb) = gpuCache.TightBounds;
-                effect.TightLocalLeft = tl;
-                effect.TightLocalTop = tt;
-                effect.TightLocalRight = tr;
-                effect.TightLocalBottom = tb;
+                if (apply)
+                {
+                    var (tl, tt, tr, tb) = gpuCache.TightBounds;
+                    effect.TightLocalLeft = tl;
+                    effect.TightLocalTop = tt;
+                    effect.TightLocalRight = tr;
+                    effect.TightLocalBottom = tb;
+                }
+                else
+                {
+                    //変形しないので出力範囲は拡張しない(入力範囲のまま)。
+                    effect.TightLocalLeft = 0;
+                    effect.TightLocalTop = 0;
+                    effect.TightLocalRight = 0;
+                    effect.TightLocalBottom = 0;
+                }
 
                 cachedControllers = [.. BuildControllers(samples)];
             }
@@ -85,6 +100,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             this.stiffness = stiffness;
             this.imageWidth = imageWidth;
             this.imageHeight = imageHeight;
+            this.apply = apply;
 
             return effectDescription.DrawDescription with
             {
