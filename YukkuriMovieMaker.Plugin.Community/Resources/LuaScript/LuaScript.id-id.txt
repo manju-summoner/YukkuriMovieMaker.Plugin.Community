@@ -1,0 +1,336 @@
+- Tentang Efek Script Lua -
+
+        Efek video "Script Lua" di YukkuriMovieMaker4 menggunakan
+        bahasa Lua untuk penulisan skrip.
+        Mesin skrip yang digunakan adalah MoonSharp (kompatibel dengan Lua 5.2).
+
+        * Efek ini adalah implementasi mandiri dan berbeda dari spesifikasi skrip AviUtl2.
+        * Memiliki spesifikasi yang berbeda dari file skrip AviUtl2 (*.anm2, dll.).
+        * Karena IsAviUtlSupported = false, output EXO untuk AviUtl tidak didukung.
+
+
+- Catatan -
+
+        o Mesin eksekusi skrip adalah MoonSharp (kompatibel dengan Lua 5.2).
+        o Pustaka standar yang tersedia terbatas pada berikut ini:
+            table, string, math, bit32
+            * io, os, debug, ffi, require, dll. tidak tersedia.
+        o Batas waktu skrip adalah 5000ms (5 detik).
+            Saat habis waktu, eksekusi dihentikan paksa dan diperlakukan sebagai kesalahan.
+        o Skrip tidak dapat mengakses sistem file (termasuk require).
+        o Pemanggilan skrip eksternal dari dalam skrip tidak didukung.
+        o Operasi piksel (getpixel/setpixel/getpixeldata) mengakses gambar masukan aktual,
+            sehingga transfer data GPU→CPU hanya terjadi pada akses pertama.
+            Menghilangkan panggilan ini saat tidak diperlukan akan mempercepat pemrosesan.
+
+
+- Parameter -
+
+        Panel efek memiliki 4 trackbar berikut (mendukung animasi).
+        Setiap nilai dapat direferensikan dalam skrip sebagai obj.track0 ~ obj.track3.
+
+        Track0 : Parameter 0 (Default: 0, Rentang: Minimum ~ Maksimum)
+        Track1 : Parameter 1 (Default: 0, Rentang: Minimum ~ Maksimum)
+        Track2 : Parameter 2 (Default: 0, Rentang: Minimum ~ Maksimum)
+        Track3 : Parameter 3 (Default: 0, Rentang: Minimum ~ Maksimum)
+
+        * Setiap trackbar mendukung slider animasi (dengan interpolasi).
+        * File .lua dapat diimpor/diekspor dari toolbar editor skrip.
+
+
+- Variabel Global -
+
+        Variabel-variabel berikut dapat direferensikan langsung dalam lingkup global skrip.
+
+        time          : Waktu saat ini dalam detik relatif terhadap objek [Hanya Baca]
+                        * Nilai yang sama dengan obj.time.
+        frame         : Nomor frame saat ini relatif terhadap objek [Hanya Baca]
+                        * Nilai yang sama dengan obj.frame.
+        totalframe    : Total jumlah frame objek [Hanya Baca]
+                        * Nilai yang sama dengan obj.totalframe.
+        framerate     : Kecepatan frame (fps) [Hanya Baca]
+                        * Nilai yang sama dengan obj.framerate.
+        timelineframe : Nomor frame saat ini relatif terhadap seluruh timeline [Hanya Baca]
+                        * obj.frame adalah frame relatif dari awal objek,
+                          sedangkan ini adalah frame absolut dari awal timeline.
+        timelinetime  : Waktu saat ini dalam detik relatif terhadap seluruh timeline [Hanya Baca]
+        layer         : Nomor layer tempat objek ditempatkan [Hanya Baca]
+                        * Nilai yang sama dengan obj.layer.
+        obj           : Tabel informasi objek (lihat «Tabel obj» di bawah)
+        scene         : Tabel informasi adegan (lihat «Tabel scene» di bawah)
+
+
+- Tabel scene -
+
+        scene.width   : Resolusi horizontal (piksel) adegan (proyek) [Hanya Baca]
+        scene.height  : Resolusi vertikal (piksel) adegan (proyek) [Hanya Baca]
+
+
+- Tabel obj - Variabel -
+
+        Variabel-variabel berikut menyimpan informasi render objek saat ini.
+        * Variabel yang tidak ditandai Hanya Baca dapat dimodifikasi dalam skrip, dan perubahannya akan tercermin dalam render.
+
+        o Koordinat / Offset
+        obj.x         : Koordinat referensi tampilan X [Hanya Baca]
+                        * Setara dengan «Koordinat Referensi Tampilan X» dalam spesifikasi AviUtl2.
+                        * Perubahan yang dilakukan di dalam skrip tidak dibaca kembali dan tidak berpengaruh.
+                        * Ditetapkan secara internal dari DrawDescription.Draw.X;
+                          perubahan berlaku setelah skrip dijalankan.
+        obj.y         : Koordinat referensi tampilan Y [setara Hanya Baca]
+                        * Ditetapkan secara internal dari DrawDescription.Draw.Y.
+        obj.z         : Koordinat referensi tampilan Z [setara Hanya Baca]
+                        * Ditetapkan secara internal dari DrawDescription.Draw.Z.
+        obj.ox        : Offset pusat X (dapat dimodifikasi)
+                        * Ditetapkan secara internal dari DrawDescription.CenterPoint.X (inDesc).
+                        * Setara dengan «Koordinat X relatif dari referensi (obj.ox)» di AviUtl2,
+                          tetapi dalam plugin ini diperlakukan sebagai CenterPoint (offset titik pusat).
+        obj.oy        : Offset pusat Y (dapat dimodifikasi)
+                        * Ditetapkan secara internal dari DrawDescription.CenterPoint.Y (inDesc).
+
+        o Skala / Transformasi
+        obj.zoom      : Faktor skala (dapat dimodifikasi)
+                        * 1.0 adalah skala normal (bukan 0.0), kompatibel dengan AviUtl2.
+                        * Dihitung secara internal sebagai rata-rata ZoomX dan ZoomY (zoomAvg).
+                        * Saat output, diperluas ke zoom X/Y individual sebagai obj.zoom * (1 ± obj.aspect).
+        obj.aspect    : Rasio aspek (dapat dimodifikasi), Rentang: -1.0 ~ 1.0
+                        * Nilai positif mengecilkan arah X; nilai negatif mengecilkan arah Y.
+                        * Dihitung secara internal sebagai (ZoomX - ZoomY) / (ZoomX + ZoomY).
+        obj.alpha     : Opasitas (dapat dimodifikasi), Rentang: 0.0 ~ 255.0
+                        * AviUtl2 menggunakan 0.0~1.0, tetapi plugin ini menggunakan 0.0~255.0.
+                        * Ditetapkan secara internal dari DrawDescription.Opacity * 255.
+                        * Dibagi 255 dan dinormalisasi ke 0.0~1.0 pada output (dengan Clamp).
+                        * Skrip default menetapkan obj.alpha = math.min(time * 255, 255),
+                          memberikan implementasi fade-in default.
+
+        o Rotasi
+        obj.rx        : Sudut rotasi sumbu X (dapat dimodifikasi), Satuan: derajat (°), 360.0 = satu putaran penuh
+                        * Ditetapkan secara internal dari DrawDescription.Rotation.X.
+        obj.ry        : Sudut rotasi sumbu Y (dapat dimodifikasi), Satuan: derajat (°), 360.0 = satu putaran penuh
+                        * Ditetapkan secara internal dari DrawDescription.Rotation.Y.
+        obj.rz        : Sudut rotasi sumbu Z (dapat dimodifikasi), Satuan: derajat (°), 360.0 = satu putaran penuh
+                        * Ditetapkan secara internal dari DrawDescription.Rotation.Z.
+
+        o Ukuran Gambar
+        obj.w         : Lebar gambar masukan dalam piksel [Hanya Baca]
+                        * Secara internal adalah bilangan bulat yang diturunkan dari D2D GetImageLocalBounds.
+        obj.h         : Tinggi gambar masukan dalam piksel [Hanya Baca]
+                        * Secara internal adalah bilangan bulat yang diturunkan dari D2D GetImageLocalBounds.
+        obj.cx        : Koordinat X pusat gambar (= obj.w / 2) [Hanya Baca]
+                        * Koordinat pusat referensi untuk operasi piksel.
+        obj.cy        : Koordinat Y pusat gambar (= obj.h / 2) [Hanya Baca]
+
+        o Waktu / Frame
+        obj.time      : Waktu saat ini dalam detik relatif terhadap objek [Hanya Baca]
+                        * Nilai yang sama dengan variabel global time.
+                        * Ditetapkan secara internal dari EffectDescription.ItemPosition.Time.TotalSeconds.
+        obj.frame     : Nomor frame saat ini relatif terhadap objek [Hanya Baca]
+                        * Nilai yang sama dengan variabel global frame.
+                        * Ditetapkan secara internal dari EffectDescription.ItemPosition.Frame.
+        obj.totalframe: Total jumlah frame objek [Hanya Baca]
+                        * Nilai yang sama dengan variabel global totalframe.
+                        * Ditetapkan secara internal dari EffectDescription.ItemDuration.Frame.
+        obj.framerate : Kecepatan frame (fps) [Hanya Baca]
+                        * Nilai yang sama dengan variabel global framerate.
+                        * Ditetapkan secara internal dari EffectDescription.FPS.
+
+        o Trackbar
+        obj.track0    : Nilai saat ini Track0 di panel efek [Hanya Baca]
+                        * Nilai setelah interpolasi animasi.
+        obj.track1    : Nilai saat ini Track1 di panel efek [Hanya Baca]
+        obj.track2    : Nilai saat ini Track2 di panel efek [Hanya Baca]
+        obj.track3    : Nilai saat ini Track3 di panel efek [Hanya Baca]
+
+        o Layer
+        obj.layer     : Nomor layer tempat objek ditempatkan [Hanya Baca]
+                        * Nilai yang sama dengan variabel global layer.
+                        * Ditetapkan secara internal dari EffectDescription.Layer.
+
+
+- Tabel obj - Perubahan Variabel dan Pencerminan ke Render -
+
+        Setelah eksekusi skrip, hanya variabel-variabel berikut yang dibaca kembali ke informasi render (diterapkan).
+
+        Variabel yang diterapkan:
+            obj.x, obj.y, obj.z
+            obj.ox, obj.oy
+            obj.zoom, obj.aspect
+            obj.alpha
+            obj.rx, obj.ry, obj.rz
+
+        * obj.w, obj.h, obj.cx, obj.cy, obj.frame, obj.time,
+          obj.totalframe, obj.framerate, obj.track0 ~ obj.track3,
+          obj.layer adalah Hanya Baca dan perubahannya tidak akan tercermin dalam render.
+
+        Rumus nilai output:
+            ZoomX = obj.zoom * (1.0 + obj.aspect)
+            ZoomY = obj.zoom * (1.0 - obj.aspect)
+            Opacity = Clamp(obj.alpha / 255.0, 0.0, 1.0)
+            Draw = (obj.x, obj.y, obj.z)
+            CenterPoint = (obj.ox, obj.oy)
+            Rotation = (obj.rx, obj.ry, obj.rz)
+
+
+- Tabel obj - Fungsi -
+
+        o obj.getpixel(x, y)
+                Mengambil informasi piksel pada koordinat yang ditentukan.
+                * Transfer data gambar GPU→CPU terjadi pada panggilan pertama (dengan overhead pemrosesan).
+                * Koordinat piksel menggunakan sudut kiri atas gambar sebagai (0, 0), dengan kanan dan bawah sebagai positif.
+                * Nilai yang dikembalikan adalah ekuivalen alpha langsung yang dikonversi dari alpha premultiplied.
+                x       : Koordinat X (0 ~ obj.w - 1)
+                y       : Koordinat Y (0 ~ obj.h - 1)
+                Mengembalikan : 4 nilai r, g, b, a (nilai kembalian jamak)
+                          r = Komponen merah (0.0 ~ 255.0)
+                          g = Komponen hijau (0.0 ~ 255.0)
+                          b = Komponen biru (0.0 ~ 255.0)
+                          a = Nilai alpha (0.0 ~ 255.0)
+                          * Mengembalikan (0, 0, 0, 0) untuk koordinat di luar rentang.
+                Contoh: r, g, b, a = obj.getpixel(10, 20)
+
+        o obj.setpixel(x, y, r, g, b [, a])
+                Menimpa informasi piksel pada koordinat yang ditentukan.
+                * Data piksel secara otomatis ditandai sebagai «dimodifikasi» saat dipanggil,
+                  dan gambar yang dimodifikasi dikeluarkan setelah skrip berakhir.
+                * Disimpan secara internal dalam format alpha premultiplied (BGRA).
+                  Konversi premultiplied dilakukan saat setpixel.
+                x       : Koordinat X (0 ~ obj.w - 1)
+                y       : Koordinat Y (0 ~ obj.h - 1)
+                r       : Komponen merah (0.0 ~ 255.0)
+                g       : Komponen hijau (0.0 ~ 255.0)
+                b       : Komponen biru (0.0 ~ 255.0)
+                a       : Nilai alpha (default: 255.0)
+                Contoh: obj.setpixel(10, 20, 255, 0, 0, 128)
+
+        o obj.getpixeldata()
+                Mengembalikan objek proxy untuk akses massal ke semua data piksel.
+                * Manipulasi piksel lebih cepat dibandingkan getpixel/setpixel.
+                * Transfer data gambar GPU→CPU terjadi pada panggilan pertama (dengan overhead pemrosesan).
+                Mengembalikan : Objek PixelDataProxy
+                          .width  : Lebar gambar dalam piksel (= obj.w)
+                          .height : Tinggi gambar dalam piksel (= obj.h)
+                          :get(index)        : Mendapatkan nilai saluran berdasarkan indeks
+                          :set(index, value) : Menetapkan nilai saluran berdasarkan indeks
+
+                Spesifikasi indeks:
+                    Indeks dimulai dari 1 (mengikuti konvensi Lua).
+                    Urutan saluran adalah R, G, B, A berulang.
+                    Indeks saluran R untuk pixel(x, y) =
+                        (y * obj.w + x) * 4 + 1
+                    Indeks saluran G untuk pixel(x, y) =
+                        (y * obj.w + x) * 4 + 2
+                    Indeks saluran B untuk pixel(x, y) =
+                        (y * obj.w + x) * 4 + 3
+                    Indeks saluran A untuk pixel(x, y) =
+                        (y * obj.w + x) * 4 + 4
+
+                    * Memodifikasi alpha (saluran 4) juga akan mengkonversi RGB secara proporsional.
+                    * Memodifikasi saluran RGB akan menerapkan konversi premultiplied.
+                    * Nilai yang diambil adalah ekuivalen alpha langsung, sama seperti get(index).
+
+                Contoh:
+                    local pd = obj.getpixeldata()
+                    local idx = (10 * obj.w + 20) * 4 + 1  -- Saluran R dari (x=20, y=10)
+                    local r = pd:get(idx)
+                    pd:set(idx, 128)
+
+        o obj.putpixeldata()
+                Fungsi kosong (no-op) yang didefinisikan untuk kompatibilitas.
+                * Dalam skrip AviUtl, getpixeldata/putpixeldata digunakan bersama,
+                  tetapi dalam plugin ini perubahan melalui setpixel/set diterapkan secara otomatis,
+                  sehingga tidak perlu memanggil fungsi ini.
+
+
+- Pustaka Standar yang Tersedia -
+
+        Pustaka math:
+            math.abs, math.ceil, math.cos, math.exp, math.floor,
+            math.fmod, math.huge, math.log, math.max, math.min,
+            math.modf, math.pi, math.random, math.randomseed,
+            math.sin, math.sqrt, math.tan, math.atan, math.atan2,
+            math.deg, math.rad, math.ldexp, math.frexp,
+            math.sinh, math.cosh, math.tanh, math.type,
+            math.tointeger, math.maxinteger, math.mininteger
+
+        Pustaka string:
+            string.format, string.len, string.sub, string.upper,
+            string.lower, string.rep, string.reverse, string.find,
+            string.match, string.gmatch, string.gsub, string.byte,
+            string.char, string.dump, string.pack, string.unpack,
+            string.packsize
+
+        Pustaka table:
+            table.insert, table.remove, table.sort,
+            table.concat, table.unpack, table.move
+
+        Pustaka bit32:
+            bit32.band, bit32.bor, bit32.bxor, bit32.bnot,
+            bit32.lshift, bit32.rshift, bit32.arshift,
+            bit32.extract, bit32.replace,
+            bit32.btest, bit32.countlz, bit32.countrz
+
+        Fungsi dasar:
+            type, tostring, tonumber, select, error, assert, print,
+            ipairs, pairs, next, unpack,
+            setmetatable, getmetatable, rawget, rawset, rawequal, rawlen,
+            pcall, xpcall
+
+
+- Contoh Skrip -
+
+        o Fade in (skrip default)
+                obj.alpha = math.min(time * 255, 255)
+
+        o Fade out
+                obj.alpha = math.max((obj.totalframe - obj.frame) / obj.framerate * 255, 0)
+
+        o Mengontrol opasitas dengan Track0
+                obj.alpha = obj.track0
+
+        o Rotasi seiring waktu
+                obj.rz = time * 90  -- 90 derajat per detik
+
+        o Membalik komponen merah piksel
+                for y = 0, obj.h - 1 do
+                    for x = 0, obj.w - 1 do
+                        local r, g, b, a = obj.getpixel(x, y)
+                        obj.setpixel(x, y, 255 - r, g, b, a)
+                    end
+                end
+
+        o Konversi skala abu-abu menggunakan getpixeldata (cepat)
+                local pd = obj.getpixeldata()
+                local w = pd.width
+                local h = pd.height
+                for y = 0, h - 1 do
+                    for x = 0, w - 1 do
+                        local base = (y * w + x) * 4
+                        local r = pd:get(base + 1)
+                        local g = pd:get(base + 2)
+                        local b = pd:get(base + 3)
+                        local a = pd:get(base + 4)
+                        local gray = r * 0.299 + g * 0.587 + b * 0.114
+                        pd:set(base + 1, gray)
+                        pd:set(base + 2, gray)
+                        pd:set(base + 3, gray)
+                    end
+                end
+
+        o Mengontrol zoom dengan Track0 (1.0 = skala normal)
+                obj.zoom = obj.zoom * (1 + obj.track0 / 100)
+
+
+- Fitur yang Tidak Didukung / Batasan -
+
+        x obj.effect(), obj.draw(), obj.drawpoly(), obj.load(), dll. dari AviUtl2 tidak didukung.
+        x obj.rand(), obj.rand1(), obj.setfont(), obj.mes(), dll. dari AviUtl2 tidak didukung.
+        x obj.setoption(), obj.getoption(), obj.getvalue(), obj.setanchor(), dll. dari AviUtl2 tidak didukung.
+        x Fungsi seperti scene.set() dan scene.get() dalam tabel scene AviUtl2 tidak didukung.
+          (Hanya scene.width dan scene.height yang dapat dibaca)
+        x Akses file (require, dofile, io, dll.) tidak didukung.
+        x Memodifikasi obj.z tercermin dalam render (termasuk dalam ReadBack),
+          tetapi dukungan render 3D terbatas.
+        x Jika batas waktu skrip (5 detik) terlampaui, eksekusi dihentikan paksa.
+          Perhatian harus diberikan dalam implementasi untuk mencegah loop tak terbatas.
+        x Direktif header AviUtl2 seperti --track@ dan --check@ tidak didukung.
+          Hanya Track0 ~ Track3 yang dapat digunakan sebagai parameter.

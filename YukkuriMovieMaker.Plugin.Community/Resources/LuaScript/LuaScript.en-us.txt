@@ -1,0 +1,336 @@
+- About the Lua Script Effect -
+
+        The "Lua Script" video effect in YukkuriMovieMaker4 uses
+        the Lua language for scripting.
+        The scripting engine is MoonSharp (Lua 5.2 compatible).
+
+        * This effect is a custom implementation and differs from the AviUtl2 script specification.
+        * This is a separate specification from AviUtl2 script files (*.anm2, etc.).
+        * Since IsAviUtlSupported = false, EXO output for AviUtl is not supported.
+
+
+- Notes -
+
+        o The script execution engine is MoonSharp (Lua 5.2 compatible).
+        o Available standard libraries are limited to the following:
+            table, string, math, bit32
+            * io, os, debug, ffi, require, etc. are not available.
+        o Script timeout is 5000ms (5 seconds).
+            On timeout, execution is forcibly terminated and treated as an error.
+        o Scripts cannot access the file system (including require).
+        o Calling external scripts from within a script is not supported.
+        o Pixel operations (getpixel/setpixel/getpixeldata) access the actual input image,
+            so a GPU->CPU data transfer occurs only on the first access.
+            Omitting these calls when unnecessary will speed up processing.
+
+
+- Parameters -
+
+        The effect panel has 4 trackbars (animation-enabled) as follows.
+        Each value can be referenced in the script as obj.track0 through obj.track3.
+
+        Track0 : Parameter 0 (Default: 0, Range: Min ~ Max)
+        Track1 : Parameter 1 (Default: 0, Range: Min ~ Max)
+        Track2 : Parameter 2 (Default: 0, Range: Min ~ Max)
+        Track3 : Parameter 3 (Default: 0, Range: Min ~ Max)
+
+        * Each trackbar supports animation sliders (with interpolation).
+        * .lua files can be imported/exported from the script editor toolbar.
+
+
+- Global Variables -
+
+        The following variables can be referenced directly in the global scope of the script.
+
+        time          : Current time in seconds relative to the object [ReadOnly]
+                        * Same value as obj.time.
+        frame         : Current frame number relative to the object [ReadOnly]
+                        * Same value as obj.frame.
+        totalframe    : Total number of frames in the object [ReadOnly]
+                        * Same value as obj.totalframe.
+        framerate     : Frame rate (fps) [ReadOnly]
+                        * Same value as obj.framerate.
+        timelineframe : Current frame number relative to the entire timeline [ReadOnly]
+                        * obj.frame is a relative frame from the start of the object,
+                          while this is the absolute frame from the start of the timeline.
+        timelinetime  : Current time in seconds relative to the entire timeline [ReadOnly]
+        layer         : Layer number where the object is placed [ReadOnly]
+                        * Same value as obj.layer.
+        obj           : Object information table (see "obj Table" below)
+        scene         : Scene information table (see "scene Table" below)
+
+
+- scene Table -
+
+        scene.width   : Horizontal resolution (pixels) of the scene (project) [ReadOnly]
+        scene.height  : Vertical resolution (pixels) of the scene (project) [ReadOnly]
+
+
+- obj Table - Variables -
+
+        The following variables hold the current rendering information of the object.
+        * Variables not marked ReadOnly can be modified in the script, and the changes will be reflected in rendering.
+
+        o Position / Offset
+        obj.x         : Display reference coordinate X [ReadOnly]
+                        * Corresponds to "Display Reference X" in AviUtl2 specification.
+                        * Changes made inside the script are not read back and have no effect.
+                        * Internally set from DrawDescription.Draw.X;
+                          changes take effect after the script runs.
+        obj.y         : Display reference coordinate Y [ReadOnly equivalent]
+                        * Internally set from DrawDescription.Draw.Y.
+        obj.z         : Display reference coordinate Z [ReadOnly equivalent]
+                        * Internally set from DrawDescription.Draw.Z.
+        obj.ox        : Center offset X (writable)
+                        * Internally set from DrawDescription.CenterPoint.X (inDesc).
+                        * Corresponds to "Relative X from reference coordinate (obj.ox)" in AviUtl2,
+                          but in this plugin it is treated as CenterPoint (center point offset).
+        obj.oy        : Center offset Y (writable)
+                        * Internally set from DrawDescription.CenterPoint.Y (inDesc).
+
+        o Scale / Transform
+        obj.zoom      : Scale factor (writable)
+                        * 1.0 is 100% scale (not 0.0), compatible with AviUtl2.
+                        * Internally calculated as the average of ZoomX and ZoomY (zoomAvg).
+                        * On output, expanded to individual X/Y zoom as obj.zoom * (1 ± obj.aspect).
+        obj.aspect    : Aspect ratio (writable), Range: -1.0 ~ 1.0
+                        * Positive values shrink in X direction; negative values shrink in Y direction.
+                        * Internally calculated as (ZoomX - ZoomY) / (ZoomX + ZoomY).
+        obj.alpha     : Opacity (writable), Range: 0.0 ~ 255.0
+                        * AviUtl2 uses 0.0~1.0, but this plugin uses 0.0~255.0.
+                        * Internally set from DrawDescription.Opacity * 255.
+                        * Divided by 255 and normalized to 0.0~1.0 on output (with Clamp).
+                        * The default script sets obj.alpha = math.min(time * 255, 255),
+                          providing a default fade-in implementation.
+
+        o Rotation
+        obj.rx        : Rotation angle around X axis (writable), Unit: degrees (°), 360.0 = one full rotation
+                        * Internally set from DrawDescription.Rotation.X.
+        obj.ry        : Rotation angle around Y axis (writable), Unit: degrees (°), 360.0 = one full rotation
+                        * Internally set from DrawDescription.Rotation.Y.
+        obj.rz        : Rotation angle around Z axis (writable), Unit: degrees (°), 360.0 = one full rotation
+                        * Internally set from DrawDescription.Rotation.Z.
+
+        o Image Size
+        obj.w         : Width of the input image in pixels [ReadOnly]
+                        * Internally an integer derived from D2D GetImageLocalBounds.
+        obj.h         : Height of the input image in pixels [ReadOnly]
+                        * Internally an integer derived from D2D GetImageLocalBounds.
+        obj.cx        : Center X coordinate of the image (= obj.w / 2) [ReadOnly]
+                        * Reference center coordinate for pixel operations.
+        obj.cy        : Center Y coordinate of the image (= obj.h / 2) [ReadOnly]
+
+        o Time / Frame
+        obj.time      : Current time in seconds relative to the object [ReadOnly]
+                        * Same value as global variable time.
+                        * Internally set from EffectDescription.ItemPosition.Time.TotalSeconds.
+        obj.frame     : Current frame number relative to the object [ReadOnly]
+                        * Same value as global variable frame.
+                        * Internally set from EffectDescription.ItemPosition.Frame.
+        obj.totalframe: Total number of frames in the object [ReadOnly]
+                        * Same value as global variable totalframe.
+                        * Internally set from EffectDescription.ItemDuration.Frame.
+        obj.framerate : Frame rate (fps) [ReadOnly]
+                        * Same value as global variable framerate.
+                        * Internally set from EffectDescription.FPS.
+
+        o Trackbars
+        obj.track0    : Current value of Track0 in the effect panel [ReadOnly]
+                        * Value after animation interpolation.
+        obj.track1    : Current value of Track1 in the effect panel [ReadOnly]
+        obj.track2    : Current value of Track2 in the effect panel [ReadOnly]
+        obj.track3    : Current value of Track3 in the effect panel [ReadOnly]
+
+        o Layer
+        obj.layer     : Layer number where the object is placed [ReadOnly]
+                        * Same value as global variable layer.
+                        * Internally set from EffectDescription.Layer.
+
+
+- obj Table - Variable Changes and Rendering Reflection -
+
+        After script execution, only the following variables are read back into rendering (applied).
+
+        Applied variables:
+            obj.x, obj.y, obj.z
+            obj.ox, obj.oy
+            obj.zoom, obj.aspect
+            obj.alpha
+            obj.rx, obj.ry, obj.rz
+
+        * obj.w, obj.h, obj.cx, obj.cy, obj.frame, obj.time,
+          obj.totalframe, obj.framerate, obj.track0 ~ obj.track3,
+          obj.layer are ReadOnly and changes will not be reflected in rendering.
+
+        Output value formulas:
+            ZoomX = obj.zoom * (1.0 + obj.aspect)
+            ZoomY = obj.zoom * (1.0 - obj.aspect)
+            Opacity = Clamp(obj.alpha / 255.0, 0.0, 1.0)
+            Draw = (obj.x, obj.y, obj.z)
+            CenterPoint = (obj.ox, obj.oy)
+            Rotation = (obj.rx, obj.ry, obj.rz)
+
+
+- obj Table - Functions -
+
+        o obj.getpixel(x, y)
+                Retrieves pixel information at the specified coordinates.
+                * A GPU->CPU image data transfer occurs on the first call (involves processing overhead).
+                * Pixel coordinates use the top-left of the image as (0, 0), with right and down as positive.
+                * The returned values are straight alpha equivalents converted from premultiplied alpha.
+                x       : X coordinate (0 ~ obj.w - 1)
+                y       : Y coordinate (0 ~ obj.h - 1)
+                Returns : 4 values r, g, b, a (multiple return values)
+                          r = Red component (0.0 ~ 255.0)
+                          g = Green component (0.0 ~ 255.0)
+                          b = Blue component (0.0 ~ 255.0)
+                          a = Alpha value (0.0 ~ 255.0)
+                          * Returns (0, 0, 0, 0) for out-of-range coordinates.
+                Example: r, g, b, a = obj.getpixel(10, 20)
+
+        o obj.setpixel(x, y, r, g, b [, a])
+                Overwrites pixel information at the specified coordinates.
+                * The pixel data is automatically marked as "modified" on call,
+                  and the modified image is output after the script ends.
+                * Stored internally in premultiplied alpha format (BGRA).
+                  A premultiplied conversion is performed on setpixel.
+                x       : X coordinate (0 ~ obj.w - 1)
+                y       : Y coordinate (0 ~ obj.h - 1)
+                r       : Red component (0.0 ~ 255.0)
+                g       : Green component (0.0 ~ 255.0)
+                b       : Blue component (0.0 ~ 255.0)
+                a       : Alpha value (default: 255.0)
+                Example: obj.setpixel(10, 20, 255, 0, 0, 128)
+
+        o obj.getpixeldata()
+                Returns a proxy object for bulk access to all pixel data.
+                * Faster pixel manipulation compared to getpixel/setpixel.
+                * A GPU->CPU image data transfer occurs on the first call (involves processing overhead).
+                Returns : PixelDataProxy object
+                          .width  : Width of the image in pixels (= obj.w)
+                          .height : Height of the image in pixels (= obj.h)
+                          :get(index)        : Get channel value by index
+                          :set(index, value) : Set channel value by index
+
+                Index specification:
+                    Indices are 1-based (following Lua convention).
+                    Channel order is R, G, B, A repeating.
+                    R channel index for pixel(x, y) =
+                        (y * obj.w + x) * 4 + 1
+                    G channel index for pixel(x, y) =
+                        (y * obj.w + x) * 4 + 2
+                    B channel index for pixel(x, y) =
+                        (y * obj.w + x) * 4 + 3
+                    A channel index for pixel(x, y) =
+                        (y * obj.w + x) * 4 + 4
+
+                    * Modifying the alpha (channel 4) will also proportionally convert RGB.
+                    * Modifying RGB channels will apply a premultiplied conversion.
+                    * Retrieved values are straight alpha equivalents, same as get(index).
+
+                Example:
+                    local pd = obj.getpixeldata()
+                    local idx = (10 * obj.w + 20) * 4 + 1  -- R channel of (x=20, y=10)
+                    local r = pd:get(idx)
+                    pd:set(idx, 128)
+
+        o obj.putpixeldata()
+                An empty (no-op) function defined for compatibility.
+                * In AviUtl scripts, getpixeldata/putpixeldata are used together,
+                  but in this plugin changes via setpixel/set are automatically applied,
+                  so calling this function is unnecessary.
+
+
+- Available Standard Libraries -
+
+        math library:
+            math.abs, math.ceil, math.cos, math.exp, math.floor,
+            math.fmod, math.huge, math.log, math.max, math.min,
+            math.modf, math.pi, math.random, math.randomseed,
+            math.sin, math.sqrt, math.tan, math.atan, math.atan2,
+            math.deg, math.rad, math.ldexp, math.frexp,
+            math.sinh, math.cosh, math.tanh, math.type,
+            math.tointeger, math.maxinteger, math.mininteger
+
+        string library:
+            string.format, string.len, string.sub, string.upper,
+            string.lower, string.rep, string.reverse, string.find,
+            string.match, string.gmatch, string.gsub, string.byte,
+            string.char, string.dump, string.pack, string.unpack,
+            string.packsize
+
+        table library:
+            table.insert, table.remove, table.sort,
+            table.concat, table.unpack, table.move
+
+        bit32 library:
+            bit32.band, bit32.bor, bit32.bxor, bit32.bnot,
+            bit32.lshift, bit32.rshift, bit32.arshift,
+            bit32.extract, bit32.replace,
+            bit32.btest, bit32.countlz, bit32.countrz
+
+        Basic functions:
+            type, tostring, tonumber, select, error, assert, print,
+            ipairs, pairs, next, unpack,
+            setmetatable, getmetatable, rawget, rawset, rawequal, rawlen,
+            pcall, xpcall
+
+
+- Script Examples -
+
+        o Fade in (default script)
+                obj.alpha = math.min(time * 255, 255)
+
+        o Fade out
+                obj.alpha = math.max((obj.totalframe - obj.frame) / obj.framerate * 255, 0)
+
+        o Control opacity with Track0
+                obj.alpha = obj.track0
+
+        o Rotate over time
+                obj.rz = time * 90  -- 90 degrees per second
+
+        o Invert the red component of pixels
+                for y = 0, obj.h - 1 do
+                    for x = 0, obj.w - 1 do
+                        local r, g, b, a = obj.getpixel(x, y)
+                        obj.setpixel(x, y, 255 - r, g, b, a)
+                    end
+                end
+
+        o Grayscale conversion using getpixeldata (fast)
+                local pd = obj.getpixeldata()
+                local w = pd.width
+                local h = pd.height
+                for y = 0, h - 1 do
+                    for x = 0, w - 1 do
+                        local base = (y * w + x) * 4
+                        local r = pd:get(base + 1)
+                        local g = pd:get(base + 2)
+                        local b = pd:get(base + 3)
+                        local a = pd:get(base + 4)
+                        local gray = r * 0.299 + g * 0.587 + b * 0.114
+                        pd:set(base + 1, gray)
+                        pd:set(base + 2, gray)
+                        pd:set(base + 3, gray)
+                    end
+                end
+
+        o Control zoom with Track0 (1.0 = 100% scale)
+                obj.zoom = obj.zoom * (1 + obj.track0 / 100)
+
+
+- Unsupported Features / Limitations -
+
+        x obj.effect(), obj.draw(), obj.drawpoly(), obj.load(), etc. from AviUtl2 are not supported.
+        x obj.rand(), obj.rand1(), obj.setfont(), obj.mes(), etc. from AviUtl2 are not supported.
+        x obj.setoption(), obj.getoption(), obj.getvalue(), obj.setanchor(), etc. from AviUtl2 are not supported.
+        x Functions such as scene.set() and scene.get() in the AviUtl2 scene table are not supported.
+          (Only scene.width and scene.height can be read)
+        x File access (require, dofile, io, etc.) is not supported.
+        x Modifying obj.z is reflected in rendering (included in ReadBack),
+          but 3D rendering support is limited.
+        x If the script timeout (5 seconds) is exceeded, execution is forcibly terminated.
+          Care must be taken in implementation to prevent infinite loops.
+        x AviUtl2 header directives such as --track@ and --check@ are not supported.
+          Only Track0 ~ Track3 can be used as parameters.

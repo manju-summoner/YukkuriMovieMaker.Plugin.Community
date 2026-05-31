@@ -1,0 +1,336 @@
+- 關於 Lua 腳本特效 -
+
+        YukkuriMovieMaker4 的「Lua 腳本」視訊特效使用
+        Lua 語言編寫腳本。
+        腳本引擎採用 MoonSharp（相容 Lua 5.2）。
+
+        * 本特效為獨立實作，與 AviUtl2 的腳本規範不同。
+        * 與 AviUtl2 的腳本檔案（*.anm2 等）為不同規範。
+        * 由於 IsAviUtlSupported = false，不支援面向 AviUtl 的 EXO 輸出。
+
+
+- 注意事項 -
+
+        ○ 腳本執行引擎為 MoonSharp（相容 Lua 5.2）。
+        ○ 可用的標準函式庫僅限以下內容：
+            table, string, math, bit32
+            * io、os、debug、ffi、require 等不可使用。
+        ○ 腳本逾時時間為 5000ms（5 秒）。
+            逾時時，執行將被強制終止並視為錯誤。
+        ○ 腳本無法存取檔案系統（包括 require）。
+        ○ 不支援從腳本內部呼叫外部腳本。
+        ○ 像素操作（getpixel/setpixel/getpixeldata）會存取實際輸入影像，
+            因此僅在首次存取時發生 GPU→CPU 的資料傳輸。
+            不需要時省略呼叫可加快處理速度。
+
+
+- 參數 -
+
+        特效面板包含以下 4 個軌道條（支援動畫）。
+        各值在腳本中可透過 obj.track0 ～ obj.track3 參照。
+
+        Track0：參數 0（預設值：0，範圍：最小值 ～ 最大值）
+        Track1：參數 1（預設值：0，範圍：最小值 ～ 最大值）
+        Track2：參數 2（預設值：0，範圍：最小值 ～ 最大值）
+        Track3：參數 3（預設值：0，範圍：最小值 ～ 最大值）
+
+        * 每個軌道條均支援動畫滑桿（含插值）。
+        * 可透過腳本編輯器工具列匯入/匯出 .lua 檔案。
+
+
+- 全域變數 -
+
+        以下變數可在腳本的全域範圍內直接參照。
+
+        time          : 相對於物件的當前時間（秒）[唯讀]
+                        * 與 obj.time 的值相同。
+        frame         : 相對於物件的當前影格編號 [唯讀]
+                        * 與 obj.frame 的值相同。
+        totalframe    : 物件的總影格數 [唯讀]
+                        * 與 obj.totalframe 的值相同。
+        framerate     : 影格率（fps）[唯讀]
+                        * 與 obj.framerate 的值相同。
+        timelineframe : 相對於整個時間軸的當前影格編號 [唯讀]
+                        * obj.frame 是從物件起點的相對影格，
+                          而此值是從時間軸起點的絕對影格。
+        timelinetime  : 相對於整個時間軸的當前時間（秒）[唯讀]
+        layer         : 物件所在的圖層編號 [唯讀]
+                        * 與 obj.layer 的值相同。
+        obj           : 物件資訊表（參見下文「obj 表」）
+        scene         : 場景資訊表（參見下文「scene 表」）
+
+
+- scene 表 -
+
+        scene.width   : 場景（專案）的水平解析度（像素）[唯讀]
+        scene.height  : 場景（專案）的垂直解析度（像素）[唯讀]
+
+
+- obj 表 - 變數 -
+
+        以下變數保存物件當前的繪製資訊。
+        * 未標注「唯讀」的變數可在腳本中修改，修改後的值將反映至繪製中。
+
+        ○ 座標·偏移
+        obj.x         : 顯示基準座標 X [唯讀]
+                        * 對應 AviUtl2 規範的「顯示基準座標 X」。
+                        * 在腳本內修改無效，不會被回讀。
+                        * 內部由 DrawDescription.Draw.X 設定，
+                          腳本執行後更改內容才會生效。
+        obj.y         : 顯示基準座標 Y [相當於唯讀]
+                        * 內部由 DrawDescription.Draw.Y 設定。
+        obj.z         : 顯示基準座標 Z [相當於唯讀]
+                        * 內部由 DrawDescription.Draw.Z 設定。
+        obj.ox        : 中心偏移 X（可修改）
+                        * 內部由 DrawDescription.CenterPoint.X (inDesc) 設定。
+                        * 對應 AviUtl2 規範的「從基準座標的相對座標 X (obj.ox)」，
+                          但在本外掛中作為 CenterPoint（中心點偏移）處理。
+        obj.oy        : 中心偏移 Y（可修改）
+                        * 內部由 DrawDescription.CenterPoint.Y (inDesc) 設定。
+
+        ○ 縮放·變形
+        obj.zoom      : 縮放比例（可修改）
+                        * 等倍為 1.0 而非 0.0（相容 AviUtl2）。
+                        * 內部由 ZoomX 與 ZoomY 的平均值（zoomAvg）計算得出。
+                        * 輸出時以 obj.zoom * (1 ± obj.aspect) 展開為 X/Y 各自的 Zoom。
+        obj.aspect    : 長寬比（可修改），範圍：-1.0 ～ 1.0
+                        * 正值在 X 方向縮小，負值在 Y 方向縮小。
+                        * 內部由 (ZoomX - ZoomY) / (ZoomX + ZoomY) 計算得出。
+        obj.alpha     : 不透明度（可修改），範圍：0.0 ～ 255.0
+                        * AviUtl2 為 0.0～1.0，本外掛為 0.0～255.0。
+                        * 內部由 DrawDescription.Opacity * 255 設定。
+                        * 輸出時除以 255 並正規化為 0.0～1.0（含 Clamp）。
+                        * 預設腳本設定了 obj.alpha = math.min(time * 255, 255)，
+                          作為淡入的預設實作。
+
+        ○ 旋轉
+        obj.rx        : X 軸旋轉角度（可修改），單位：度（°），360.0 為一圈
+                        * 內部由 DrawDescription.Rotation.X 設定。
+        obj.ry        : Y 軸旋轉角度（可修改），單位：度（°），360.0 為一圈
+                        * 內部由 DrawDescription.Rotation.Y 設定。
+        obj.rz        : Z 軸旋轉角度（可修改），單位：度（°），360.0 為一圈
+                        * 內部由 DrawDescription.Rotation.Z 設定。
+
+        ○ 影像尺寸
+        obj.w         : 輸入影像的水平像素數 [唯讀]
+                        * 內部為從 D2D 的 GetImageLocalBounds 計算得出的整數值。
+        obj.h         : 輸入影像的垂直像素數 [唯讀]
+                        * 內部為從 D2D 的 GetImageLocalBounds 計算得出的整數值。
+        obj.cx        : 影像中心 X 座標（= obj.w / 2）[唯讀]
+                        * 像素操作中中心座標的參考值。
+        obj.cy        : 影像中心 Y 座標（= obj.h / 2）[唯讀]
+
+        ○ 時間·影格
+        obj.time      : 相對於物件的當前時間（秒）[唯讀]
+                        * 與全域變數 time 的值相同。
+                        * 內部由 EffectDescription.ItemPosition.Time.TotalSeconds 設定。
+        obj.frame     : 相對於物件的當前影格編號 [唯讀]
+                        * 與全域變數 frame 的值相同。
+                        * 內部由 EffectDescription.ItemPosition.Frame 設定。
+        obj.totalframe: 物件的總影格數 [唯讀]
+                        * 與全域變數 totalframe 的值相同。
+                        * 內部由 EffectDescription.ItemDuration.Frame 設定。
+        obj.framerate : 影格率（fps）[唯讀]
+                        * 與全域變數 framerate 的值相同。
+                        * 內部由 EffectDescription.FPS 設定。
+
+        ○ 軌道條
+        obj.track0    : 特效面板 Track0 的當前值 [唯讀]
+                        * 動畫插值後的值。
+        obj.track1    : 特效面板 Track1 的當前值 [唯讀]
+        obj.track2    : 特效面板 Track2 的當前值 [唯讀]
+        obj.track3    : 特效面板 Track3 的當前值 [唯讀]
+
+        ○ 圖層
+        obj.layer     : 物件所在的圖層編號 [唯讀]
+                        * 與全域變數 layer 的值相同。
+                        * 內部由 EffectDescription.Layer 設定。
+
+
+- obj 表 - 變數修改與繪製反映 -
+
+        腳本執行後，僅以下變數會被回讀至繪製資訊中（生效）。
+
+        生效的變數：
+            obj.x, obj.y, obj.z
+            obj.ox, obj.oy
+            obj.zoom, obj.aspect
+            obj.alpha
+            obj.rx, obj.ry, obj.rz
+
+        * obj.w、obj.h、obj.cx、obj.cy、obj.frame、obj.time、
+          obj.totalframe、obj.framerate、obj.track0 ～ obj.track3、
+          obj.layer 為唯讀，修改後不會反映至繪製中。
+
+        輸出值計算公式：
+            ZoomX = obj.zoom * (1.0 + obj.aspect)
+            ZoomY = obj.zoom * (1.0 - obj.aspect)
+            Opacity = Clamp(obj.alpha / 255.0, 0.0, 1.0)
+            Draw = (obj.x, obj.y, obj.z)
+            CenterPoint = (obj.ox, obj.oy)
+            Rotation = (obj.rx, obj.ry, obj.rz)
+
+
+- obj 表 - 函式 -
+
+        ○ obj.getpixel(x, y)
+                取得指定座標的像素資訊。
+                * 首次呼叫時發生 GPU→CPU 的影像資料傳輸（存在處理負擔）。
+                * 像素座標以影像左上角為 (0, 0)，向右和向下為正方向。
+                * 傳回值為將預乘 Alpha 逆轉換後的直通 Alpha 等效值。
+                x      ：X 座標（0 ～ obj.w - 1）
+                y      ：Y 座標（0 ～ obj.h - 1）
+                傳回值 ：r, g, b, a 共 4 個值（多值傳回）
+                          r = 紅色分量（0.0 ～ 255.0）
+                          g = 綠色分量（0.0 ～ 255.0）
+                          b = 藍色分量（0.0 ～ 255.0）
+                          a = Alpha 值（0.0 ～ 255.0）
+                          * 超出範圍的座標傳回 (0, 0, 0, 0)。
+                範例：r, g, b, a = obj.getpixel(10, 20)
+
+        ○ obj.setpixel(x, y, r, g, b [, a])
+                覆寫指定座標的像素資訊。
+                * 呼叫時像素資料自動標記為「已修改」，
+                  腳本結束後輸出修改後的影像。
+                * 內部以預乘 Alpha 格式（BGRA）保存，
+                  setpixel 時進行預乘轉換。
+                x      ：X 座標（0 ～ obj.w - 1）
+                y      ：Y 座標（0 ～ obj.h - 1）
+                r      ：紅色分量（0.0 ～ 255.0）
+                g      ：綠色分量（0.0 ～ 255.0）
+                b      ：藍色分量（0.0 ～ 255.0）
+                a      ：Alpha 值（省略時為 255.0）
+                範例：obj.setpixel(10, 20, 255, 0, 0, 128)
+
+        ○ obj.getpixeldata()
+                傳回用於批次存取所有像素資料的代理物件。
+                * 與 getpixel/setpixel 相比，像素操作速度更快。
+                * 首次呼叫時發生 GPU→CPU 的影像資料傳輸（存在處理負擔）。
+                傳回值 ：PixelDataProxy 物件
+                          .width  ：影像水平像素數（= obj.w）
+                          .height ：影像垂直像素數（= obj.h）
+                          :get(index)        ：透過索引取得通道值
+                          :set(index, value) ：透過索引設定通道值
+
+                索引規則：
+                    索引從 1 開始（遵循 Lua 慣例）。
+                    通道順序為 R、G、B、A 循環。
+                    pixel(x, y) 的 R 通道索引 =
+                        (y * obj.w + x) * 4 + 1
+                    pixel(x, y) 的 G 通道索引 =
+                        (y * obj.w + x) * 4 + 2
+                    pixel(x, y) 的 B 通道索引 =
+                        (y * obj.w + x) * 4 + 3
+                    pixel(x, y) 的 A 通道索引 =
+                        (y * obj.w + x) * 4 + 4
+
+                    * 修改 Alpha（通道 4）時，RGB 也會按比例轉換。
+                    * 修改 RGB 通道時，會進行預乘轉換。
+                    * 取得值與 get(index) 相同，為直通 Alpha 等效值。
+
+                範例：
+                    local pd = obj.getpixeldata()
+                    local idx = (10 * obj.w + 20) * 4 + 1  -- (x=20, y=10) 的 R 通道
+                    local r = pd:get(idx)
+                    pd:set(idx, 128)
+
+        ○ obj.putpixeldata()
+                為相容性而定義的空實作函式（no-op）。
+                * AviUtl 腳本中 getpixeldata/putpixeldata 組合使用，
+                  但本外掛中 setpixel/set 的修改會自動反映，
+                  因此無需呼叫此函式。
+
+
+- 可用標準函式庫 -
+
+        math 函式庫：
+            math.abs, math.ceil, math.cos, math.exp, math.floor,
+            math.fmod, math.huge, math.log, math.max, math.min,
+            math.modf, math.pi, math.random, math.randomseed,
+            math.sin, math.sqrt, math.tan, math.atan, math.atan2,
+            math.deg, math.rad, math.ldexp, math.frexp,
+            math.sinh, math.cosh, math.tanh, math.type,
+            math.tointeger, math.maxinteger, math.mininteger
+
+        string 函式庫：
+            string.format, string.len, string.sub, string.upper,
+            string.lower, string.rep, string.reverse, string.find,
+            string.match, string.gmatch, string.gsub, string.byte,
+            string.char, string.dump, string.pack, string.unpack,
+            string.packsize
+
+        table 函式庫：
+            table.insert, table.remove, table.sort,
+            table.concat, table.unpack, table.move
+
+        bit32 函式庫：
+            bit32.band, bit32.bor, bit32.bxor, bit32.bnot,
+            bit32.lshift, bit32.rshift, bit32.arshift,
+            bit32.extract, bit32.replace,
+            bit32.btest, bit32.countlz, bit32.countrz
+
+        基本函式：
+            type, tostring, tonumber, select, error, assert, print,
+            ipairs, pairs, next, unpack,
+            setmetatable, getmetatable, rawget, rawset, rawequal, rawlen,
+            pcall, xpcall
+
+
+- 腳本範例 -
+
+        ○ 淡入（預設腳本）
+                obj.alpha = math.min(time * 255, 255)
+
+        ○ 淡出
+                obj.alpha = math.max((obj.totalframe - obj.frame) / obj.framerate * 255, 0)
+
+        ○ 用 Track0 控制不透明度
+                obj.alpha = obj.track0
+
+        ○ 隨時間旋轉
+                obj.rz = time * 90  -- 每秒旋轉 90 度
+
+        ○ 反轉像素紅色分量
+                for y = 0, obj.h - 1 do
+                    for x = 0, obj.w - 1 do
+                        local r, g, b, a = obj.getpixel(x, y)
+                        obj.setpixel(x, y, 255 - r, g, b, a)
+                    end
+                end
+
+        ○ 使用 getpixeldata 進行灰階轉換（高速）
+                local pd = obj.getpixeldata()
+                local w = pd.width
+                local h = pd.height
+                for y = 0, h - 1 do
+                    for x = 0, w - 1 do
+                        local base = (y * w + x) * 4
+                        local r = pd:get(base + 1)
+                        local g = pd:get(base + 2)
+                        local b = pd:get(base + 3)
+                        local a = pd:get(base + 4)
+                        local gray = r * 0.299 + g * 0.587 + b * 0.114
+                        pd:set(base + 1, gray)
+                        pd:set(base + 2, gray)
+                        pd:set(base + 3, gray)
+                    end
+                end
+
+        ○ 用 Track0 控制縮放（1.0 = 等倍）
+                obj.zoom = obj.zoom * (1 + obj.track0 / 100)
+
+
+- 不支援項目·限制事項 -
+
+        × 不支援 AviUtl2 的 obj.effect()、obj.draw()、obj.drawpoly()、obj.load() 等。
+        × 不支援 AviUtl2 的 obj.rand()、obj.rand1()、obj.setfont()、obj.mes() 等。
+        × 不支援 AviUtl2 的 obj.setoption()、obj.getoption()、obj.getvalue()、obj.setanchor() 等。
+        × 不支援 AviUtl2 scene 表中的 scene.set()、scene.get() 等函式。
+          （僅支援讀取 scene.width 和 scene.height）
+        × 不支援檔案存取（require、dofile、io 等）。
+        × 修改 obj.z 會反映至繪製中（包含在 ReadBack 中），
+          但 3D 繪製支援有限。
+        × 超過腳本逾時時間（5 秒）時，執行將被強制終止。
+          實作時需注意避免出現無限迴圈。
+        × 不支援 AviUtl2 的 --track@、--check@ 等標頭指令。
+          參數僅可使用 Track0 ～ Track3。
