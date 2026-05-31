@@ -77,7 +77,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 effect.TightLocalRight = tr;
                 effect.TightLocalBottom = tb;
 
-                cachedControllers = ImmutableList.CreateRange(BuildControllers(samples));
+                cachedControllers = [.. BuildControllers(samples)];
             }
 
             isFirst = false;
