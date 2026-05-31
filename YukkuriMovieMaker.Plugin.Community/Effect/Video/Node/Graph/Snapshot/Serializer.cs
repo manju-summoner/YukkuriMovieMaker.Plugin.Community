@@ -123,6 +123,8 @@ public static class Serializer
 
                 AutoBindSubGraphNodes(node, subGraphKvp.Key, subGraph);
             }
+
+            node.SyncDynamicInputs();
         }
 
         foreach (var conn in snapshot.Connections)

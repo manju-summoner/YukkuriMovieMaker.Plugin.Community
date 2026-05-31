@@ -63,7 +63,7 @@ public abstract class NodeLogic
             _dynamicHandlers.Remove(propName);
         }
 
-        foreach (var subProp in containerType.GetProperties())
+        foreach (var subProp in containerType.GetProperties().OrderBy(p => p.MetadataToken))
         {
             if (!Attribute.IsDefined(subProp, typeof(InputPortAttribute))) continue;
             var key = $"{propName}.{subProp.Name}";
@@ -98,6 +98,21 @@ public abstract class NodeLogic
                 else
                     SubGraphs.Remove(prop.Name);
             }
+    }
+
+    /// <summary>
+    ///     復元後など、VMなしで動的ポートの Inputs を現在のコンテナ状態に同期する。
+    /// </summary>
+    internal void SyncDynamicInputs()
+    {
+        foreach (var prop in GetType().GetProperties())
+        {
+            if (!Attribute.IsDefined(prop, typeof(InputPortAttribute))) continue;
+            var attr = (InputPortAttribute)prop.GetCustomAttributes(typeof(InputPortAttribute), true).First();
+            if (!attr.IsDynamic || !typeof(InputsContainer).IsAssignableFrom(prop.PropertyType)) continue;
+            if (prop.GetValue(this) is not InputsContainer container) continue;
+            SwapDynamicContainer(prop.Name, container);
+        }
     }
 
     public async Task EvaluateInternal(EvaluationContext? context = null)
@@ -171,13 +186,15 @@ public abstract class NodeLogic
 
     protected void SetDynamicContainer(InputsContainer newContainer, [CallerMemberName] string name = null!)
     {
+        NeedToReinitializeInputPorts?.Invoke(this, new NeedToReinitializeInputPortsEvent(name, newContainer));
+    }
+
+    internal void SwapDynamicContainer(string name, InputsContainer newContainer)
+    {
         var prefix = name + ".";
         foreach (var key in Inputs.Keys.Where(k => k.StartsWith(prefix)).ToList())
             Inputs.Remove(key);
-
         SubscribeDynamicContainer(name, newContainer, newContainer.GetType());
-
-        NeedToReinitializeInputPorts?.Invoke(this, new NeedToReinitializeInputPortsEvent());
     }
 
     public event EventHandler<NeedToReinitializeInputPortsEvent>? NeedToReinitializeInputPorts;

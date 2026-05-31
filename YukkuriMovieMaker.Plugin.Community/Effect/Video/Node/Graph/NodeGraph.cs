@@ -197,6 +197,20 @@ public sealed class NodeGraph
         OnGraphChanged(new ConnectionChangedEventArgs(null, null, to, inputName));
     }
 
+    internal void DisconnectSilently(
+        Guid from, string outputName,
+        Guid to, string inputName)
+    {
+        var output = _nodes[from].Outputs[outputName];
+        var input = _nodes[to].Inputs[inputName];
+        input.DisConnect(output);
+        Connections.RemoveAll(c =>
+            c.FromId == from &&
+            c.FromPort == outputName &&
+            c.ToId == to &&
+            c.ToPort == inputName);
+    }
+
     /// <summary>
     ///     このグラフが変更され、ノードの入出力の値が更新された可能性があることを通知します
     /// </summary>
