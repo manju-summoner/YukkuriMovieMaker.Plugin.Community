@@ -186,19 +186,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
                 if (_objTable is null)
                 {
-                    _sceneTable = new Table(script);
-                    script.Globals["scene"] = _sceneTable;
+                    var sceneTable = new Table(script);
+                    script.Globals["scene"] = sceneTable;
 
-                    _objTable = new Table(script);
-                    RegisterPixelCallbacks(_objTable);
-                    script.Globals["obj"] = _objTable;
+                    var objTable = new Table(script);
+                    RegisterPixelCallbacks(objTable);
+                    script.Globals["obj"] = objTable;
 
-                    _animTable = new Table(script);
-                    AnimTableRegistrar.RegisterFunctions(_animTable);
-                    script.Globals["anim"] = _animTable;
+                    var animTable = new Table(script);
+                    AnimTableRegistrar.RegisterFunctions(animTable);
+                    script.Globals["anim"] = animTable;
 
-                    _ymm4Table = new Table(script);
-                    script.Globals["ymm4"] = _ymm4Table;
+                    var ymm4Table = new Table(script);
+                    script.Globals["ymm4"] = ymm4Table;
+
+                    _sceneTable = sceneTable;
+                    _animTable = animTable;
+                    _ymm4Table = ymm4Table;
+                    _objTable = objTable;
                 }
 
                 script.Globals["time"] = ctx.Time;
