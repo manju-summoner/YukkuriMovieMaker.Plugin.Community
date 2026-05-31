@@ -58,6 +58,8 @@
                         * 與 obj.layer 的值相同。
         obj           : 物件資訊表（參見下文「obj 表」）
         scene         : 場景資訊表（參見下文「scene 表」）
+        ymm4          : YMM4專有的元數據表 (參見下文「ymm4 表」)
+        anim          : 動畫專用工具表 (參見下文「anim 表」)
 
 
 - scene 表 -
@@ -110,12 +112,20 @@
                         * 內部由 DrawDescription.Rotation.Y 設定。
         obj.rz        : Z 軸旋轉角度（可修改），單位：度（°），360.0 為一圈
                         * 內部由 DrawDescription.Rotation.Z 設定。
+        obj.rxr       : X軸旋轉角度(弧度) (可修改)
+                        ※ 若與rx同時修改，將優先反映此值。
+        obj.ryr       : Y軸旋轉角度(弧度) (可修改)
+                        ※ 若與ry同時修改，將優先反映此值。
+        obj.rzr       : Z軸旋轉角度(弧度) (可修改)
+                        ※ 若與rz同時修改，將優先反映此值。
 
         ○ 影像尺寸
         obj.w         : 輸入影像的水平像素數 [唯讀]
                         * 內部為從 D2D 的 GetImageLocalBounds 計算得出的整數值。
         obj.h         : 輸入影像的垂直像素數 [唯讀]
                         * 內部為從 D2D 的 GetImageLocalBounds 計算得出的整數值。
+        obj.hw        : 輸入圖像水平像素數的一半 (= obj.w / 2) [ReadOnly]
+        obj.hh        : 輸入圖像垂直像素數的一半 (= obj.h / 2) [ReadOnly]
         obj.cx        : 影像中心 X 座標（= obj.w / 2）[唯讀]
                         * 像素操作中中心座標的參考值。
         obj.cy        : 影像中心 Y 座標（= obj.h / 2）[唯讀]
@@ -239,6 +249,49 @@
                 * AviUtl 腳本中 getpixeldata/putpixeldata 組合使用，
                   但本外掛中 setpixel/set 的修改會自動反映，
                   因此無需呼叫此函式。
+
+
+
+- ymm4 表 -
+
+        保存YMM4專有元數據的表。全部為 ReadOnly。
+
+        ymm4.group_index        : 群組控制中的當前索引 (從0開始)
+        ymm4.group_count        : 群組控制中的總項目數
+        ymm4.group_ratio        : 群組內進度比例 (group_index / group_count)
+        ymm4.timeline_totalframe: 整個時間軸的總幀數
+        ymm4.timeline_totaltime : 整個時間軸的總時間(秒)
+        ymm4.time_ratio         : 當前播放位置的比例 (0.0 ～ 1.0)
+        ymm4.is_saving          : 影片是否正在輸出中 (僅在輸出時為true)
+
+
+- anim 表 -
+
+        便於動畫計算的純工具函數及常數表。
+
+        anim.tau                : 圓周率的兩倍 (math.pi * 2)
+        anim.lerp(a, b, t)      : 將a與b按t(0.0～1.0)進行線性插值
+        anim.smoothstep(e0, e1, x): 在e0和e1之間進行平滑過渡插值
+        anim.clamp(v, lo, hi)   : 將值v限制在lo～hi範圍內
+        anim.map(v, a1, b1, a2, b2): 將範圍a1～b1內的值v映射至a2～b2範圍
+        anim.norm(v, lo, hi)    : 獲取值v在lo～hi範圍內的比例(0.0～1.0)
+        anim.wrap(v, lo, hi)    : 使值v在lo～hi範圍內循環
+        anim.pingpong(t, len)   : 在0～len之間往復變化的值
+        anim.sign(v)            : 獲取值v的符號 (正=1, 負=-1, 零=0)
+        anim.oscillate(t, lo, hi, freq): 以freq頻率在lo與hi之間平滑往復(正弦波)
+        anim.triangle(t, freq)  : 以freq頻率在0.0～1.0之間往復的三角波
+        anim.square(t, freq)    : 以freq頻率在1.0與0.0之間切換的方波
+        anim.duration(t, dur)   : 針對持續時間dur的當前比例(0.0～1.0, 含clamp)
+        anim.delay(t, d)        : 經過時間d後開始計時的值 (小於0則為0)
+        anim.ease_in(t)         : 二次加速緩動
+        anim.ease_out(t)        : 二次減速緩動
+        anim.elastic(t)         : 彈性彈簧緩動
+        anim.back(t)            : 略微越界後返回的緩動
+        anim.step(edge, x)      : 若x大於等於edge則返回1.0，否則返回0.0
+        anim.fract(v)           : 僅獲取值v的小數部分
+        anim.bounce(t)          : 彈跳緩動
+        anim.hsv_to_rgb(h, s, v): 將HSV (色相0～360, 飽和度0～1, 明度0～1) 轉為 RGB
+        anim.rgb_to_hsv(r, g, b): 將RGB (0～255) 轉為 HSV
 
 
 - 可用標準函式庫 -

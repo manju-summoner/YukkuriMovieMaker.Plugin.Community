@@ -58,6 +58,8 @@
                         ※ obj.layer와 동일한 값입니다.
         obj           : 오브젝트 정보 테이블 (아래「obj 테이블」참조)
         scene         : 씬 정보 테이블 (아래「scene 테이블」참조)
+        ymm4          : YMM4 고유 메타 정보 테이블 (아래 'ymm4 테이블' 참조)
+        anim          : 애니메이션용 유틸리티 테이블 (아래 'anim 테이블' 참조)
 
 
 - scene 테이블 -
@@ -110,12 +112,20 @@
                         ※ 구현 상 DrawDescription.Rotation.Y에서 설정됩니다.
         obj.rz        : Z 축 회전 각도(변경 가능) 단위: 도(°), 360.0에서 한 바퀴
                         ※ 구현 상 DrawDescription.Rotation.Z에서 설정됩니다.
+        obj.rxr       : X축 회전 각도(라디안) (변경 가능)
+                        ※ rx와 동시에 변경된 경우 이것이 우선 반영됩니다.
+        obj.ryr       : Y축 회전 각도(라디안) (변경 가능)
+                        ※ ry와 동시에 변경된 경우 이것이 우선 반영됩니다.
+        obj.rzr       : Z축 회전 각도(라디안) (변경 가능)
+                        ※ rz와 동시에 변경된 경우 이것이 우선 반영됩니다.
 
         ○ 이미지 크기
         obj.w         : 입력 이미지의 가로 픽셀 수 [읽기 전용]
                         ※ 구현 상 D2D의 GetImageLocalBounds에서 산출된 정수값입니다.
         obj.h         : 입력 이미지의 세로 픽셀 수 [읽기 전용]
                         ※ 구현 상 D2D의 GetImageLocalBounds에서 산출된 정수값입니다.
+        obj.hw        : 입력 이미지 가로 픽셀 수의 절반 (= obj.w / 2) [ReadOnly]
+        obj.hh        : 입력 이미지 세로 픽셀 수의 절반 (= obj.h / 2) [ReadOnly]
         obj.cx        : 이미지의 중심 X 좌표 (= obj.w / 2) [읽기 전용]
                         ※ 픽셀 조작에서 중심 좌표의 참조값입니다.
         obj.cy        : 이미지의 중심 Y 좌표 (= obj.h / 2) [읽기 전용]
@@ -239,6 +249,49 @@
                 ※ AviUtl 스크립트에서는 getpixeldata/putpixeldata 조합으로 사용하지만,
                   이 플러그인에서는 setpixel/set에 의한 변경이 자동으로 반영되므로,
                   이 함수를 호출할 필요가 없습니다.
+
+
+
+- ymm4 테이블 -
+
+        YMM4 고유의 메타 정보를 유지하는 테이블입니다. 모두 ReadOnly입니다.
+
+        ymm4.group_index        : 그룹 제어 내 현재 인덱스 (0부터 시작)
+        ymm4.group_count        : 그룹 제어 내 총 아이템 수
+        ymm4.group_ratio        : 그룹 내 진행 비율 (group_index / group_count)
+        ymm4.timeline_totalframe: 타임라인 전체의 총 프레임 수
+        ymm4.timeline_totaltime : 타임라인 전체의 총 시간(초)
+        ymm4.time_ratio         : 현재 재생 위치 비율 (0.0 ~ 1.0)
+        ymm4.is_saving          : 동영상 출력 중인지 여부 (출력 중에만 true)
+
+
+- anim 테이블 -
+
+        애니메이션 계산에 편리한 순수 유틸리티 함수/상수 그룹입니다.
+
+        anim.tau                : 원주율의 2배 (math.pi * 2)
+        anim.lerp(a, b, t)      : a와 b를 t(0.0~1.0)로 선형 보간
+        anim.smoothstep(e0, e1, x): e0과 e1 사이를 매끄럽게 보간
+        anim.clamp(v, lo, hi)   : 값 v를 lo~hi 범위로 제한
+        anim.map(v, a1, b1, a2, b2): a1~b1 범위의 값 v를 a2~b2 범위로 매핑
+        anim.norm(v, lo, hi)    : 값 v가 lo~hi 범위에서 차지하는 비율(0.0~1.0) 반환
+        anim.wrap(v, lo, hi)    : 값 v를 lo~hi 범위 내에서 루프시킴
+        anim.pingpong(t, len)   : 0~len 범위를 왕복하는 값
+        anim.sign(v)            : 값 v의 부호 반환 (양수=1, 음수=-1, 0=0)
+        anim.oscillate(t, lo, hi, freq): freq 주파수로 lo~hi를 매끄럽게 왕복(사인파)
+        anim.triangle(t, freq)  : freq 주파수로 0.0~1.0을 왕복하는 삼각파
+        anim.square(t, freq)    : freq 주파수로 1.0과 0.0을 전환하는 구형파
+        anim.duration(t, dur)   : 시간 dur에 대한 현재 비율(0.0~1.0, clamp 적용)
+        anim.delay(t, d)        : 시간 d 경과 후 시작되는 시간 (0 이하는 0)
+        anim.ease_in(t)         : 2차 이즈 인(가속)
+        anim.ease_out(t)        : 2차 이즈 아웃(감속)
+        anim.elastic(t)         : 튕기는 듯한 스프링 이징
+        anim.back(t)            : 범위를 살짝 넘었다가 돌아오는 이징
+        anim.step(edge, x)      : x가 edge 이상이면 1.0, 미만이면 0.0 반환
+        anim.fract(v)           : 값 v의 소수 부분만 반환
+        anim.bounce(t)          : 바운스 이징
+        anim.hsv_to_rgb(h, s, v): HSV (색상 0~360, 채도 0~1, 명도 0~1)를 RGB로 변환
+        anim.rgb_to_hsv(r, g, b): RGB (0~255)를 HSV로 변환
 
 
 - 사용 가능한 표준 라이브러리 -

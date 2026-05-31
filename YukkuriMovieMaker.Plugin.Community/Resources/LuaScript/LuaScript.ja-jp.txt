@@ -58,12 +58,16 @@
                         ※ obj.layer と同じ値です。
         obj           : オブジェクト情報テーブル (下記「obj テーブル」を参照)
         scene         : シーン情報テーブル (下記「scene テーブル」を参照)
+        ymm4          : YMM4固有のメタ情報テーブル (下記「ymm4 テーブル」を参照)
+        anim          : アニメーション用ユーティリティテーブル (下記「anim テーブル」を参照)
 
 
 - scene テーブル -
 
         scene.width   : シーン(プロジェクト)の横解像度(ピクセル) [ReadOnly]
         scene.height  : シーン(プロジェクト)の縦解像度(ピクセル) [ReadOnly]
+        scene.cx      : シーンの横解像度の半分 (= scene.width / 2) [ReadOnly]
+        scene.cy      : シーンの縦解像度の半分 (= scene.height / 2) [ReadOnly]
 
 
 - obj テーブル - 変数 -
@@ -110,12 +114,20 @@
                         ※ 実装上は DrawDescription.Rotation.Y から設定されます。
         obj.rz        : Z 軸回転角度(変更可) 単位: 度(°), 360.0 で一回転
                         ※ 実装上は DrawDescription.Rotation.Z から設定されます。
+        obj.rxr       : X 軸回転角度(ラジアン) (変更可) 単位: ラジアン(rad)
+                        ※ rx と同時に変更された場合はこちらが優先して反映されます。
+        obj.ryr       : Y 軸回転角度(ラジアン) (変更可) 単位: ラジアン(rad)
+                        ※ ry と同時に変更された場合はこちらが優先して反映されます。
+        obj.rzr       : Z 軸回転角度(ラジアン) (変更可) 単位: ラジアン(rad)
+                        ※ rz と同時に変更された場合はこちらが優先して反映されます。
 
         ○画像サイズ
         obj.w         : 入力画像の横ピクセル数 [ReadOnly]
                         ※ 実装上は D2D の GetImageLocalBounds から算出した整数値です。
         obj.h         : 入力画像の縦ピクセル数 [ReadOnly]
                         ※ 実装上は D2D の GetImageLocalBounds から算出した整数値です。
+        obj.hw        : 入力画像の横ピクセル数の半分 (= obj.w / 2) [ReadOnly]
+        obj.hh        : 入力画像の縦ピクセル数の半分 (= obj.h / 2) [ReadOnly]
         obj.cx        : 画像の中心 X 座標 (= obj.w / 2) [ReadOnly]
                         ※ ピクセル操作における中心座標の参照値です。
         obj.cy        : 画像の中心 Y 座標 (= obj.h / 2) [ReadOnly]
@@ -239,6 +251,49 @@
                 ※ AviUtl のスクリプトでは getpixeldata/putpixeldata の組み合わせで使用しますが、
                   このプラグインでは setpixel/set による変更が自動的に反映されるため、
                   本関数を呼び出す必要はありません。
+
+
+
+- ymm4 テーブル -
+
+        YMM4固有のメタ情報を保持するテーブルです。全て ReadOnly です。
+
+        ymm4.group_index        : グループ制御内の現在のインデックス (0始まり)
+        ymm4.group_count        : グループ制御内の総アイテム数
+        ymm4.group_ratio        : グループ内の進行割合 (group_index / group_count)
+        ymm4.timeline_totalframe: タイムライン全体の総フレーム数
+        ymm4.timeline_totaltime : タイムライン全体の総時間(秒)
+        ymm4.time_ratio         : 現在の再生位置の割合 (0.0 ～ 1.0)
+        ymm4.is_saving          : 動画出力中であるかどうか (出力中のみ true)
+
+
+- anim テーブル -
+
+        アニメーション計算に便利な純粋ユーティリティ関数・定数群です。
+
+        anim.tau                : 円周率の2倍 (math.pi * 2)
+        anim.lerp(a, b, t)      : a と b を t (0.0～1.0) で線形補間
+        anim.smoothstep(e0, e1, x): e0 と e1 の間をエルミート補間でスムーズに遷移
+        anim.clamp(v, lo, hi)   : 値 v を lo ～ hi の範囲に収める
+        anim.map(v, a1, b1, a2, b2): a1～b1 の範囲の値 v を a2～b2 の範囲にマッピング
+        anim.norm(v, lo, hi)    : 値 v が lo ～ hi の範囲でどの割合(0.0～1.0)かを取得
+        anim.wrap(v, lo, hi)    : 値 v を lo ～ hi の範囲でループさせる
+        anim.pingpong(t, len)   : 0 ～ len の範囲を往復する値
+        anim.sign(v)            : 値 v の符号を取得 (正=1, 負=-1, ゼロ=0)
+        anim.oscillate(t, lo, hi, freq): freq の周波数で lo ～ hi を滑らかに往復(正弦波)
+        anim.triangle(t, freq)  : freq の周波数で 0.0 ～ 1.0 を往復する三角波
+        anim.square(t, freq)    : freq の周波数で 1.0 と 0.0 を切り替える矩形波
+        anim.duration(t, dur)   : 時間 dur に対する現在の割合(0.0～1.0, clampあり)
+        anim.delay(t, d)        : 時間 d 経過後から開始する時間 (0以下は0)
+        anim.ease_in(t)         : 2次イーズイン(加速)
+        anim.ease_out(t)        : 2次イーズアウト(減速)
+        anim.elastic(t)         : 弾むようなスプリングイージング
+        anim.back(t)            : 勢い余って行き過ぎてから戻るイージング
+        anim.step(edge, x)      : x が edge 以上なら 1.0、未満なら 0.0 を返す
+        anim.fract(v)           : 値 v の小数部分のみを取得
+        anim.bounce(t)          : バウンドするようなイージング
+        anim.hsv_to_rgb(h, s, v): HSV (色相0～360, 彩度0～1, 明度0～1) を RGB に変換
+        anim.rgb_to_hsv(r, g, b): RGB (0～255) を HSV に変換
 
 
 - 利用可能な標準ライブラリ -
