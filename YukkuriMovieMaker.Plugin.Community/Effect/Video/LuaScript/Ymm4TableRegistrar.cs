@@ -13,6 +13,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             ymm4["timeline_totaltime"] = ctx.TimelineTotalTime;
             ymm4["is_saving"] = ctx.IsSaving;
             ymm4["time_ratio"] = ctx.TimeRatio;
+            ymm4["is_playing"] = ctx.IsPlaying;
+            ymm4["is_paused"] = ctx.IsPaused;
+            ymm4["scene_id"] = ctx.SceneId;
         }
     }
 }

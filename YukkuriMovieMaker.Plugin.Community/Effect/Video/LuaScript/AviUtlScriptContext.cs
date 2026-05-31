@@ -2,6 +2,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 {
     internal sealed class AviUtlScriptContext
     {
+        public bool IsPlaying { get; init; }
+        public bool IsPaused { get; init; }
+        public string SceneId { get; init; } = string.Empty;
+
         public int ImageWidth { get; init; }
         public int ImageHeight { get; init; }
 

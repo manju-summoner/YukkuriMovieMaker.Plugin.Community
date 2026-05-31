@@ -36,6 +36,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         private DrawDescription? _cachedInputDesc;
         private DrawDescription? _cachedOutputDesc;
         private bool _cachedPixelsModified;
+        private Guid _cachedSceneId;
+        private string _cachedSceneIdString = string.Empty;
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
@@ -92,7 +94,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             int imgW = Math.Max(1, (int)Math.Ceiling(bounds.Right - bounds.Left));
             int imgH = Math.Max(1, (int)Math.Ceiling(bounds.Bottom - bounds.Top));
 
-            var ctx = BuildContext(desc, inDesc, imgW, imgH, t0, t1, t2, t3, time, frame, length, fps);
+            if (_cachedSceneId != desc.SceneId)
+            {
+                _cachedSceneId = desc.SceneId;
+                _cachedSceneIdString = desc.SceneId.ToString();
+            }
+
+            var ctx = BuildContext(desc, inDesc, imgW, imgH, t0, t1, t2, t3, time, frame, length, fps, _cachedSceneIdString);
             ctx.SetPixelLoader(() => LoadInputPixels(bounds, imgW, imgH));
 
             DrawDescription outDesc;
@@ -143,7 +151,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             EffectDescription desc, DrawDescription inDesc,
             int imgW, int imgH,
             double t0, double t1, double t2, double t3,
-            double time, int frame, int length, int fps)
+            double time, int frame, int length, int fps, string sceneIdString)
         {
             double zoomAvg = (inDesc.Zoom.X + inDesc.Zoom.Y) / 2d;
             double aspect = zoomAvg > 0d
@@ -189,6 +197,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 TimelineTotalFrame = desc.TimelineDuration.Frame,
                 TimelineTotalTime = desc.TimelineDuration.Time.TotalSeconds,
                 IsSaving = desc.Usage == TimelineSourceUsage.Exporting,
+                IsPlaying = desc.Usage == TimelineSourceUsage.Playing,
+                IsPaused = desc.Usage == TimelineSourceUsage.Paused,
+                SceneId = sceneIdString,
                 TimeRatio = length > 0 ? frame / (double)length : 0d,
             };
         }
