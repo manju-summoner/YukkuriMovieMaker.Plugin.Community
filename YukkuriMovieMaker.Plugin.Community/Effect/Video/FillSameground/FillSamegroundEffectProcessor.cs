@@ -32,6 +32,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
         ID2D1Image? colorMatchOutput;
         GaussianBlur? blurEffect;
         Vortice.Direct2D1.Effects.AlphaMask? alphaMaskEffect;
+        Vortice.Direct2D1.Effects.AlphaMask? luminanceMaskEffect;
         Opacity? opacityEffect;
         AffineTransform2D? finalMaskTransform;
         ID2D1Image? finalMaskTransformOutput;
@@ -94,6 +95,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
             alphaMaskEffect = new Vortice.Direct2D1.Effects.AlphaMask(devices.DeviceContext);
             disposer.Collect(alphaMaskEffect);
 
+            luminanceMaskEffect = new Vortice.Direct2D1.Effects.AlphaMask(devices.DeviceContext);
+            disposer.Collect(luminanceMaskEffect);
+
             opacityEffect = new Opacity(devices.DeviceContext);
             disposer.Collect(opacityEffect);
 
@@ -130,6 +134,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
             outputEffect?.SetInput(0, null, true);
             alphaMaskEffect?.SetInput(0, null, true);
             alphaMaskEffect?.SetInput(1, null, true);
+            luminanceMaskEffect?.SetInput(0, null, true);
+            luminanceMaskEffect?.SetInput(1, null, true);
             blurEffect?.SetInput(0, null, true);
             finalMaskTransform?.SetInput(0, null, true);
         }
@@ -266,7 +272,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
                 dc.Clear(null);
                 dc.DrawImage(blendedCommandList, InterpolationMode.MultiSampleLinear, CompositeMode.SourceOver);
 
-                dc.BlendImage(input, Vortice.Direct2D1.BlendMode.Luminosity, null, null, effectDescription.DrawDescription.ZoomInterpolationMode);
+                if (currentIsBrushOnly && luminanceMaskEffect is not null)
+                {
+                    luminanceMaskEffect.SetInput(0, input, true);
+                    luminanceMaskEffect.SetInput(1, blendedCommandList, true);
+                    using var luminanceSource = luminanceMaskEffect.Output;
+                    dc.BlendImage(luminanceSource, Vortice.Direct2D1.BlendMode.Luminosity, null, null, effectDescription.DrawDescription.ZoomInterpolationMode);
+                }
+                else
+                {
+                    dc.BlendImage(input, Vortice.Direct2D1.BlendMode.Luminosity, null, null, effectDescription.DrawDescription.ZoomInterpolationMode);
+                }
                 dc.EndDraw();
                 dc.Target = null;
                 luminanceCommandList.Close();
