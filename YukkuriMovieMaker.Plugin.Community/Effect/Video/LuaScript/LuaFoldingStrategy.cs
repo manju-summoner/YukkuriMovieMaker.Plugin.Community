@@ -9,7 +9,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
     internal sealed class LuaFoldingStrategy : IFoldingStrategy
     {
         private static readonly Regex s_tokenPattern = new(
-            @"--\[(=*)\[.*?\]\1\]" +
+            @"--\[(?<lc>=*)\[.*?\]\k<lc>\]" +
+            @"|\[(?<ls>=*)\[.*?\]\k<ls>\]" +
             @"|--[^\r\n]*" +
             @"|""(?:[^""\\]|\\.)*""|'(?:[^'\\]|\\.)*'" +
             @"|(?<repeat>\brepeat\b)" +
