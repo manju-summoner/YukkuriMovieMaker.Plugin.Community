@@ -237,6 +237,114 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                     DynValue.NewNumber(max > 0d ? delta / max : 0d),
                     DynValue.NewNumber(max));
             });
+
+            anim["polar"] = DynValue.NewCallback((_, args) =>
+            {
+                double r = args[0].CastToNumber() ?? 0d;
+                double a = args[1].CastToNumber() ?? 0d;
+                double rad = a * Math.PI / 180d;
+                return DynValue.NewTuple(
+                    DynValue.NewNumber(r * Math.Cos(rad)),
+                    DynValue.NewNumber(r * Math.Sin(rad))
+                );
+            });
+
+            anim["rotate"] = DynValue.NewCallback((_, args) =>
+            {
+                double x = args[0].CastToNumber() ?? 0d;
+                double y = args[1].CastToNumber() ?? 0d;
+                double a = args[2].CastToNumber() ?? 0d;
+                double rad = a * Math.PI / 180d;
+                double c = Math.Cos(rad);
+                double s = Math.Sin(rad);
+                return DynValue.NewTuple(
+                    DynValue.NewNumber(x * c - y * s),
+                    DynValue.NewNumber(x * s + y * c)
+                );
+            });
+
+            anim["bezier"] = DynValue.NewCallback((_, args) =>
+            {
+                double t = Math.Clamp(args[0].CastToNumber() ?? 0d, 0d, 1d);
+                double p0 = args[1].CastToNumber() ?? 0d;
+                double p1 = args[2].CastToNumber() ?? 0d;
+                double p2 = args[3].CastToNumber() ?? 1d;
+                double p3 = args[4].CastToNumber() ?? 1d;
+
+                double inv = 1d - t;
+                double b0 = inv * inv * inv;
+                double b1 = 3d * inv * inv * t;
+                double b2 = 3d * inv * t * t;
+                double b3 = t * t * t;
+
+                return DynValue.NewNumber(b0 * p0 + b1 * p1 + b2 * p2 + b3 * p3);
+            });
+
+            anim["rand"] = DynValue.NewCallback((_, args) =>
+            {
+                if (args.Count == 0) return DynValue.NewNumber(0d);
+                double seed, min = 0d, max = 1d;
+                if (args.Count == 1) {
+                    seed = args[0].CastToNumber() ?? 0d;
+                } else if (args.Count == 2) {
+                    max = args[0].CastToNumber() ?? 1d;
+                    seed = args[1].CastToNumber() ?? 0d;
+                } else {
+                    min = args[0].CastToNumber() ?? 0d;
+                    max = args[1].CastToNumber() ?? 1d;
+                    seed = args[2].CastToNumber() ?? 0d;
+                }
+                long bits = BitConverter.DoubleToInt64Bits(seed);
+                uint h = (uint)((bits ^ (bits >> 32)) * 374761393);
+                h = (h ^ (h >> 13)) * 1274126177;
+                double r = (double)(h ^ (h >> 16)) / 4294967295.0;
+                return DynValue.NewNumber(min + r * (max - min));
+            });
+
+            anim["noise"] = DynValue.NewCallback((_, args) =>
+            {
+                double x = args[0].CastToNumber() ?? 0d;
+                double y = args.Count > 1 ? args[1].CastToNumber() ?? 0d : 0d;
+                double z = args.Count > 2 ? args[2].CastToNumber() ?? 0d : 0d;
+                
+                int xi = (int)Math.Floor(x);
+                int yi = (int)Math.Floor(y);
+                int zi = (int)Math.Floor(z);
+
+                double xf = x - xi;
+                double yf = y - yi;
+                double zf = z - zi;
+
+                double u = xf * xf * (3d - 2d * xf);
+                double v = yf * yf * (3d - 2d * yf);
+                double w = zf * zf * (3d - 2d * zf);
+
+                double c000 = GetNoiseHash(xi, yi, zi);
+                double c100 = GetNoiseHash(xi + 1, yi, zi);
+                double c010 = GetNoiseHash(xi, yi + 1, zi);
+                double c110 = GetNoiseHash(xi + 1, yi + 1, zi);
+                double c001 = GetNoiseHash(xi, yi, zi + 1);
+                double c101 = GetNoiseHash(xi + 1, yi, zi + 1);
+                double c011 = GetNoiseHash(xi, yi + 1, zi + 1);
+                double c111 = GetNoiseHash(xi + 1, yi + 1, zi + 1);
+
+                double x00 = c000 + u * (c100 - c000);
+                double x10 = c010 + u * (c110 - c010);
+                double x01 = c001 + u * (c101 - c001);
+                double x11 = c011 + u * (c111 - c011);
+
+                double y0 = x00 + v * (x10 - x00);
+                double y1 = x01 + v * (x11 - x01);
+
+                return DynValue.NewNumber(y0 + w * (y1 - y0));
+            });
+        }
+
+        private static double GetNoiseHash(int x, int y, int z)
+        {
+            uint n = (uint)(x * 374761393 + y * 668265263 + z * 1013904223);
+            n = (n ^ (n >> 13)) * 1274126177;
+            return (double)(n ^ (n >> 16)) / 4294967295.0;
         }
     }
 }

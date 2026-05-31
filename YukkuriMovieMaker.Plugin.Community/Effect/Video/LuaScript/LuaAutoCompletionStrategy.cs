@@ -81,12 +81,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 "anim.duration", "anim.delay",
                 "anim.ease_in", "anim.ease_out", "anim.elastic", "anim.back",
                 "anim.step", "anim.fract", "anim.bounce",
-                "anim.hsv_to_rgb", "anim.rgb_to_hsv"
+                "anim.hsv_to_rgb", "anim.rgb_to_hsv",
+                "anim.noise", "anim.rand", "anim.polar", "anim.rotate", "anim.bezier"
             ]),
             ("ymm4", [
                 "ymm4.group_index", "ymm4.group_count", "ymm4.group_ratio",
                 "ymm4.timeline_totalframe", "ymm4.timeline_totaltime",
-                "ymm4.is_saving", "ymm4.time_ratio"
+                "ymm4.is_saving", "ymm4.time_ratio",
+                "ymm4.is_playing", "ymm4.is_paused", "ymm4.scene_id"
             ]),
         ];
 
