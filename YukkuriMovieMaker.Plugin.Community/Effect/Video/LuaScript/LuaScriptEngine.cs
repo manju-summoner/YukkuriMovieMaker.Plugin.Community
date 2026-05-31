@@ -311,11 +311,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 ctx.Ox = _objTable.Get("ox").CastToNumber() ?? ctx.Ox;
                 ctx.Oy = _objTable.Get("oy").CastToNumber() ?? ctx.Oy;
                 ctx.Oz = _objTable.Get("oz").CastToNumber() ?? ctx.Oz;
+                ctx.Alpha = _objTable.Get("alpha").CastToNumber() ?? ctx.Alpha;
+
+                double initialSx = ctx.Sx;
+                double initialSy = ctx.Sy;
+                double initialZoom = ctx.Zoom;
+                double initialAspect = ctx.Aspect;
+
                 ctx.Sx = _objTable.Get("sx").CastToNumber() ?? ctx.Sx;
                 ctx.Sy = _objTable.Get("sy").CastToNumber() ?? ctx.Sy;
                 ctx.Zoom = _objTable.Get("zoom").CastToNumber() ?? ctx.Zoom;
                 ctx.Aspect = _objTable.Get("aspect").CastToNumber() ?? ctx.Aspect;
-                ctx.Alpha = _objTable.Get("alpha").CastToNumber() ?? ctx.Alpha;
+
+                bool sxsyChanged = Math.Abs(ctx.Sx - initialSx) > 1e-10 || Math.Abs(ctx.Sy - initialSy) > 1e-10;
+                bool zoomAspectChanged = Math.Abs(ctx.Zoom - initialZoom) > 1e-10 || Math.Abs(ctx.Aspect - initialAspect) > 1e-10;
+
+                if (zoomAspectChanged && !sxsyChanged)
+                {
+                    ctx.Sx = ctx.Zoom * (1.0 + ctx.Aspect);
+                    ctx.Sy = ctx.Zoom * (1.0 - ctx.Aspect);
+                }
 
                 double rxrNew = _objTable.Get("rxr").CastToNumber() ?? ctx.RxRad;
                 ctx.Rx = Math.Abs(rxrNew - ctx.RxRad) > 1e-10
