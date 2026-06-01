@@ -30,7 +30,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         private static readonly (string Prefix, string[] Members)[] s_namespaces =
         [
             ("obj", [
-                "obj.w", "obj.h", "obj.hw", "obj.hh",
+                "obj.w", "obj.h", "obj.hw", "obj.hh", "obj.diagonal",
                 "obj.cx", "obj.cy", "obj.cz",
                 "obj.x", "obj.y", "obj.z",
                 "obj.ox", "obj.oy", "obj.oz",
@@ -39,7 +39,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 "obj.rx", "obj.ry", "obj.rz",
                 "obj.rxr", "obj.ryr", "obj.rzr",
                 "obj.track0", "obj.track1", "obj.track2", "obj.track3",
-                "obj.time", "obj.totaltime", "obj.frame", "obj.totalframe",
+                "obj.time", "obj.totaltime", "obj.t", "obj.frame", "obj.totalframe",
                 "obj.framerate", "obj.layer", "obj.index", "obj.num",
                 "obj.getpixel", "obj.setpixel",
                 "obj.getpixeldata"
@@ -74,14 +74,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 "scene.width", "scene.height", "scene.cx", "scene.cy"
             ]),
             ("anim", [
-                "anim.tau",
-                "anim.lerp", "anim.smoothstep", "anim.clamp",
+                "anim.tau", "anim.e", "anim.phi", "anim.sqrt2",
+                "anim.lerp", "anim.smoothstep", "anim.smootherstep", "anim.clamp",
                 "anim.map", "anim.norm", "anim.wrap", "anim.pingpong",
                 "anim.sign", "anim.oscillate", "anim.triangle", "anim.square",
                 "anim.duration", "anim.delay",
-                "anim.ease_in", "anim.ease_out", "anim.elastic", "anim.back",
+                "anim.ease_in", "anim.ease_out", "anim.ease_in_out", "anim.elastic", "anim.back",
                 "anim.step", "anim.fract", "anim.bounce",
                 "anim.hsv_to_rgb", "anim.rgb_to_hsv",
+                "anim.len", "anim.dist", "anim.dot", "anim.normalize",
                 "anim.noise", "anim.rand", "anim.polar", "anim.rotate", "anim.bezier"
             ]),
             ("ymm4", [

@@ -234,6 +234,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 _objTable!["cx"] = ctx.ImageWidth / 2d;
                 _objTable!["cy"] = ctx.ImageHeight / 2d;
                 _objTable!["cz"] = 0d;
+                _objTable!["diagonal"] = Math.Sqrt((double)ctx.ImageWidth * ctx.ImageWidth + (double)ctx.ImageHeight * ctx.ImageHeight);
                 _objTable!["x"] = ctx.X;
                 _objTable!["y"] = ctx.Y;
                 _objTable!["z"] = ctx.Z;
@@ -260,6 +261,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 _objTable!["frame"] = ctx.Frame;
                 _objTable!["totalframe"] = ctx.TotalFrame;
                 _objTable!["totaltime"] = ctx.TotalTime;
+                _objTable!["t"] = ctx.TotalFrame > 0 ? ctx.Frame / (double)ctx.TotalFrame : 0d;
                 _objTable!["framerate"] = ctx.Framerate;
                 _objTable!["layer"] = ctx.Layer;
                 _objTable!["index"] = ctx.Index;

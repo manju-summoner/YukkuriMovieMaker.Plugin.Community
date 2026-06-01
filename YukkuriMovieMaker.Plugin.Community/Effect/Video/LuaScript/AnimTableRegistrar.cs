@@ -5,10 +5,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
     internal static class AnimTableRegistrar
     {
         private static readonly double s_tau = Math.PI * 2d;
+        private static readonly double s_e = Math.E;
+        private static readonly double s_phi = (1d + Math.Sqrt(5d)) / 2d;
+        private static readonly double s_sqrt2 = Math.Sqrt(2d);
 
         internal static void RegisterFunctions(Table anim)
         {
             anim["tau"] = s_tau;
+            anim["e"] = s_e;
+            anim["phi"] = s_phi;
+            anim["sqrt2"] = s_sqrt2;
 
             anim["lerp"] = DynValue.NewCallback((_, args) =>
             {
@@ -26,6 +32,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 double span = edge1 - edge0;
                 double t = span == 0d ? 0d : Math.Clamp((x - edge0) / span, 0d, 1d);
                 return DynValue.NewNumber(t * t * (3d - 2d * t));
+            });
+
+            anim["smootherstep"] = DynValue.NewCallback((_, args) =>
+            {
+                double edge0 = args[0].CastToNumber() ?? 0d;
+                double edge1 = args[1].CastToNumber() ?? 1d;
+                double x = args[2].CastToNumber() ?? 0d;
+                double span = edge1 - edge0;
+                double t = span == 0d ? 0d : Math.Clamp((x - edge0) / span, 0d, 1d);
+                return DynValue.NewNumber(t * t * t * (t * (6d * t - 15d) + 10d));
             });
 
             anim["clamp"] = DynValue.NewCallback((_, args) =>
@@ -142,6 +158,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 return DynValue.NewNumber(1d - inv * inv);
             });
 
+            anim["ease_in_out"] = DynValue.NewCallback((_, args) =>
+            {
+                double t = args[0].CastToNumber() ?? 0d;
+                if (t < 0.5d)
+                    return DynValue.NewNumber(2d * t * t);
+                double inv = -2d * t + 2d;
+                return DynValue.NewNumber(1d - inv * inv / 2d);
+            });
+
             anim["elastic"] = DynValue.NewCallback((_, args) =>
             {
                 double t = Math.Clamp(args[0].CastToNumber() ?? 0d, 0d, 1d);
@@ -238,6 +263,45 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                     DynValue.NewNumber(max));
             });
 
+            anim["len"] = DynValue.NewCallback((_, args) =>
+            {
+                double x = args[0].CastToNumber() ?? 0d;
+                double y = args[1].CastToNumber() ?? 0d;
+                return DynValue.NewNumber(Math.Sqrt(x * x + y * y));
+            });
+
+            anim["dist"] = DynValue.NewCallback((_, args) =>
+            {
+                double x1 = args[0].CastToNumber() ?? 0d;
+                double y1 = args[1].CastToNumber() ?? 0d;
+                double x2 = args[2].CastToNumber() ?? 0d;
+                double y2 = args[3].CastToNumber() ?? 0d;
+                double dx = x2 - x1;
+                double dy = y2 - y1;
+                return DynValue.NewNumber(Math.Sqrt(dx * dx + dy * dy));
+            });
+
+            anim["dot"] = DynValue.NewCallback((_, args) =>
+            {
+                double x1 = args[0].CastToNumber() ?? 0d;
+                double y1 = args[1].CastToNumber() ?? 0d;
+                double x2 = args[2].CastToNumber() ?? 0d;
+                double y2 = args[3].CastToNumber() ?? 0d;
+                return DynValue.NewNumber(x1 * x2 + y1 * y2);
+            });
+
+            anim["normalize"] = DynValue.NewCallback((_, args) =>
+            {
+                double x = args[0].CastToNumber() ?? 0d;
+                double y = args[1].CastToNumber() ?? 0d;
+                double magnitude = Math.Sqrt(x * x + y * y);
+                if (magnitude == 0d)
+                    return DynValue.NewTuple(DynValue.NewNumber(0d), DynValue.NewNumber(0d));
+                return DynValue.NewTuple(
+                    DynValue.NewNumber(x / magnitude),
+                    DynValue.NewNumber(y / magnitude));
+            });
+
             anim["polar"] = DynValue.NewCallback((_, args) =>
             {
                 double r = args[0].CastToNumber() ?? 0d;
@@ -284,12 +348,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             {
                 if (args.Count == 0) return DynValue.NewNumber(0d);
                 double seed, min = 0d, max = 1d;
-                if (args.Count == 1) {
+                if (args.Count == 1)
+                {
                     seed = args[0].CastToNumber() ?? 0d;
-                } else if (args.Count == 2) {
+                }
+                else if (args.Count == 2)
+                {
                     max = args[0].CastToNumber() ?? 1d;
                     seed = args[1].CastToNumber() ?? 0d;
-                } else {
+                }
+                else
+                {
                     min = args[0].CastToNumber() ?? 0d;
                     max = args[1].CastToNumber() ?? 1d;
                     seed = args[2].CastToNumber() ?? 0d;
@@ -306,7 +375,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 double x = args[0].CastToNumber() ?? 0d;
                 double y = args.Count > 1 ? args[1].CastToNumber() ?? 0d : 0d;
                 double z = args.Count > 2 ? args[2].CastToNumber() ?? 0d : 0d;
-                
+
                 int xi = (int)Math.Floor(x);
                 int yi = (int)Math.Floor(y);
                 int zi = (int)Math.Floor(z);
