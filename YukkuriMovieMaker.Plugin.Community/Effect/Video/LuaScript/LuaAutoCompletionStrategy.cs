@@ -127,12 +127,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                     return [];
 
                 var ns = nsMatch.Value;
-                var afterDot = input == "." ? "" : line[(lastDot + 1)..];
-
                 foreach (var (prefix, members) in s_namespaces)
                 {
                     if (ns == prefix)
-                        return FilterPrefix(members, prefix + "." + afterDot);
+                        return members;
                 }
                 return [];
             }
@@ -142,7 +140,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 var userFunctions = GetUserDefinedFunctions(sourceCode);
                 return s_staticCandidates
                     .Concat(userFunctions)
-                    .Where(x => x.StartsWith(input, System.StringComparison.OrdinalIgnoreCase))
                     .Distinct()
                     .OrderBy(x => x.Length)
                     .ThenBy(x => x, StringComparer.OrdinalIgnoreCase);
@@ -159,8 +156,5 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             foreach (Match m in s_localFunctionPattern.Matches(sourceCode))
                 yield return m.Groups[1].Value;
         }
-
-        private static IEnumerable<string> FilterPrefix(IEnumerable<string> items, string prefix) =>
-            items.Where(x => x.StartsWith(prefix, System.StringComparison.OrdinalIgnoreCase));
     }
 }
