@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI"
              xmlns:s="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
-             mc:Ignorable="d" 
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -16,7 +17,7 @@
             <StackPanel>
                 <Grid>
                     <Label Content="{x:Static local:Texts.ApiKey}"/>
-                    <TextBox Text="{Binding Source={x:Static local:AivisCloudAPISettings.Default},Path=ApiKey,UpdateSourceTrigger=PropertyChanged}" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
+                    <c:PasswordEditor Password="{Binding Source={x:Static local:AivisCloudAPISettings.Default},Path=ApiKey,UpdateSourceTrigger=PropertyChanged}" Width="200" HorizontalAlignment="Right"/>
                 </Grid>
                 <Grid>
                     <TextBlock HorizontalAlignment="Right" Margin="6">

@@ -36,7 +36,7 @@
             </Grid>
             <Grid>
                 <Label Content="{x:Static local:Texts.Password}"/>
-                <TextBox Text="{Binding Source={x:Static local:VoiSonaTalkSettings.Default}, Path=Password, Mode=TwoWay, Delay=1, UpdateSourceTrigger=PropertyChanged}"/>
+                <c:PasswordEditor Password="{Binding Source={x:Static local:VoiSonaTalkSettings.Default}, Path=Password, Mode=TwoWay, Delay=1, UpdateSourceTrigger=PropertyChanged}" Width="200" HorizontalAlignment="Right"/>
             </Grid>
             <Grid>
                 <Label Content="{x:Static local:Texts.Port}"/>

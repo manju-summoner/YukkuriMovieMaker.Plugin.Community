@@ -12,7 +12,7 @@
             <StackPanel>
                 <Grid>
                     <Label Content="{x:Static local:Texts.ApiKey}"/>
-                    <TextBox Text="{Binding Source={x:Static local:CodexCLISettings.Default},Path=ApiKey}" Width="260" VerticalContentAlignment="Center" HorizontalAlignment="Right"/>
+                    <controls:PasswordEditor Password="{Binding Source={x:Static local:CodexCLISettings.Default},Path=ApiKey}" Width="260" HorizontalAlignment="Right"/>
                 </Grid>
                 <Grid>
                     <Label Content="{x:Static local:Texts.Model}"/>
