@@ -9,7 +9,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 {
     [VideoEffect(nameof(Texts.LuaScript), [VideoEffectCategories.Filtering], ["lua", "script", "スクリプト", "lua script", "アニメーション効果", "animation"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
-    internal class LuaScriptEffect : VideoEffectBase
+    internal class LuaScriptEffect : VideoEffectBase, IScriptProvider
     {
         internal const string DefaultScript =
             """
@@ -19,9 +19,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
         public override string Label => Texts.LuaScript;
 
         [Display(GroupName = nameof(Texts.ScriptGroup), Name = nameof(Texts.ScriptCode), Description = nameof(Texts.ScriptCodeDesc), ResourceType = typeof(Texts))]
-        [CodeEditor(Language = "pack://application:,,,/YukkuriMovieMaker.Plugin.Community;component/Resources/SyntaxDefinitions/Lua-{theme}.xshd", FoldingStrategyType = typeof(LuaFoldingStrategy), AutoCompletionStrategyType = typeof(LuaAutoCompletionStrategy), ToolBarStrategyType = typeof(LuaToolBarStrategy), PropertyEditorSize = PropertyEditorSize.FullWidth)]
+        [LuaScriptToolBar]
+        public object? ToolBar => null;
+
+        [Display(GroupName = nameof(Texts.ScriptGroup), ResourceType = typeof(Texts))]
+        [CodeEditor(Language = "pack://application:,,,/YukkuriMovieMaker.Plugin.Community;component/Resources/SyntaxDefinitions/Lua-{theme}.xshd", FoldingStrategyType = typeof(LuaFoldingStrategy), AutoCompletionStrategyType = typeof(LuaAutoCompletionStrategy), ToolBarStrategyType = typeof(EmptyToolBarStrategy), PropertyEditorSize = PropertyEditorSize.FullWidth)]
         public string Script { get => _script; set => Set(ref _script, value); }
         string _script = DefaultScript;
+
+        string IScriptProvider.DefaultScript => DefaultScript;
 
         [Display(GroupName = nameof(Texts.ParametersGroup), Name = nameof(Texts.Track0), Description = nameof(Texts.TrackDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F2", "", -100, 100)]

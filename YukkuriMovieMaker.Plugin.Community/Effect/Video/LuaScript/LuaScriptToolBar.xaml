@@ -1,0 +1,16 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript.LuaScriptToolBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript"
+             mc:Ignorable="d"
+             d:DesignHeight="28" d:DesignWidth="800">
+    <ToolBarTray IsLocked="True" HorizontalAlignment="Stretch">
+        <ToolBar Height="28" HorizontalAlignment="Stretch">
+            <Button ToolTip="{x:Static local:Texts.ToolBarImport}" Content="{DynamicResource MDI_Import}" Click="Import_Click" />
+            <Button ToolTip="{x:Static local:Texts.ToolBarExport}" Content="{DynamicResource MDI_Export}" Click="Export_Click" />
+            <Button ToolTip="{x:Static local:Texts.ToolBarClear}" Content="{DynamicResource MDI_Delete}" Click="Clear_Click" />
+        </ToolBar>
+    </ToolBarTray>
+</UserControl>
