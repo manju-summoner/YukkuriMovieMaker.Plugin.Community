@@ -6,9 +6,9 @@ using YukkuriMovieMaker.Controls.AvalonEdit.FoldingStrategy;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 {
-    internal sealed class LuaFoldingStrategy : IFoldingStrategy
+    internal sealed partial class LuaFoldingStrategy : IFoldingStrategy
     {
-        private static readonly Regex s_tokenPattern = new(
+        [GeneratedRegex(
             @"--\[(?<lc>=*)\[.*?\]\k<lc>\]" +
             @"|\[(?<ls>=*)\[.*?\]\k<ls>\]" +
             @"|--[^\r\n]*" +
@@ -17,7 +17,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             @"|(?<until>\buntil\b)" +
             @"|(?<open>\b(?:function|do|if)\b)" +
             @"|(?<close>\bend\b)",
-            RegexOptions.Compiled | RegexOptions.Singleline);
+            RegexOptions.Singleline)]
+        private static partial Regex TokenPattern();
 
         private readonly record struct Frame(int Offset, bool IsRepeat);
 
@@ -33,7 +34,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             var newFoldings = new List<NewFolding>();
             var openStack = new Stack<Frame>();
 
-            foreach (Match m in s_tokenPattern.Matches(text))
+            foreach (Match m in TokenPattern().Matches(text))
             {
                 if (m.Groups["repeat"].Success)
                 {

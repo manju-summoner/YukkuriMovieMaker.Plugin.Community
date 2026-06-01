@@ -5,7 +5,7 @@ using YukkuriMovieMaker.Controls.AvalonEdit.AutoCompletionStrategy;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 {
-    internal sealed class LuaAutoCompletionStrategy : IAutoCompletionStrategy
+    internal sealed partial class LuaAutoCompletionStrategy : IAutoCompletionStrategy
     {
         private static readonly string[] s_keywords =
         [
@@ -102,17 +102,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             .ThenBy(x => x, StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
-        private static readonly Regex s_identifierPattern = new(
-            @"[a-zA-Z_][a-zA-Z_0-9]*$",
-            RegexOptions.Compiled);
+        [GeneratedRegex(@"[a-zA-Z_][a-zA-Z_0-9]*$", RegexOptions.None)]
+        private static partial Regex IdentifierPattern();
 
-        private static readonly Regex s_functionPattern = new(
-            @"(?<!local\s)\bfunction\s+([a-zA-Z_][a-zA-Z_0-9]*(?:\.[a-zA-Z_][a-zA-Z_0-9]*)*)\s*\(",
-            RegexOptions.Compiled);
+        [GeneratedRegex(@"(?<!local\s)\bfunction\s+([a-zA-Z_][a-zA-Z_0-9]*(?:\.[a-zA-Z_][a-zA-Z_0-9]*)*)\s*\(", RegexOptions.None)]
+        private static partial Regex FunctionPattern();
 
-        private static readonly Regex s_localFunctionPattern = new(
-            @"\blocal\s+function\s+([a-zA-Z_][a-zA-Z_0-9]*)\s*\(",
-            RegexOptions.Compiled);
+        [GeneratedRegex(@"\blocal\s+function\s+([a-zA-Z_][a-zA-Z_0-9]*)\s*\(", RegexOptions.None)]
+        private static partial Regex LocalFunctionPattern();
 
         public IEnumerable<string> GetCompletionItems(string input, string line, string sourceCode)
         {
@@ -123,7 +120,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             if (lastDot >= 0)
             {
                 var beforeDot = line[..lastDot];
-                var nsMatch = s_identifierPattern.Match(beforeDot);
+                var nsMatch = IdentifierPattern().Match(beforeDot);
                 if (!nsMatch.Success)
                     return [];
 
@@ -151,10 +148,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
 
         private static IEnumerable<string> GetUserDefinedFunctions(string sourceCode)
         {
-            foreach (Match m in s_functionPattern.Matches(sourceCode))
+            foreach (Match m in FunctionPattern().Matches(sourceCode))
                 yield return m.Groups[1].Value;
 
-            foreach (Match m in s_localFunctionPattern.Matches(sourceCode))
+            foreach (Match m in LocalFunctionPattern().Matches(sourceCode))
                 yield return m.Groups[1].Value;
         }
     }
