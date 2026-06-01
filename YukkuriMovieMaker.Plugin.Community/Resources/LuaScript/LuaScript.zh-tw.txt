@@ -1,4 +1,4 @@
-- 關於 Lua 腳本特效 -
+﻿- 關於 Lua 腳本特效 -
 
         YukkuriMovieMaker4 的「Lua 腳本」視訊特效使用
         Lua 語言編寫腳本。
@@ -132,6 +132,7 @@
                         * 內部為從 D2D 的 GetImageLocalBounds 計算得出的整數值。
         obj.hw        : 輸入圖像水平像素數的一半 (= obj.w / 2) [ReadOnly]
         obj.hh        : 輸入圖像垂直像素數的一半 (= obj.h / 2) [ReadOnly]
+        obj.diagonal  : 輸入影像的對角線長度 (= math.sqrt(w*w + h*h)) [ReadOnly]
         obj.cx        : 影像中心 X 座標（= obj.w / 2）[唯讀]
                         * 像素操作中中心座標的參考值。
         obj.cy        : 影像中心 Y 座標（= obj.h / 2）[唯讀]
@@ -279,8 +280,12 @@
         便於動畫計算的純工具函數及常數表。
 
         anim.tau                : 圓周率的兩倍 (math.pi * 2)
+        anim.e                  : 歐拉數 (math.exp(1))
+        anim.phi                : 黃金比例 ((1 + math.sqrt(5)) / 2)
+        anim.sqrt2              : 2的平方根 (math.sqrt(2))
         anim.lerp(a, b, t)      : 將a與b按t(0.0～1.0)進行線性插值
         anim.smoothstep(e0, e1, x): 在e0和e1之間進行平滑過渡插值
+        anim.smootherstep(e0, e1, x): e0 和 e1 之間更平滑的埃爾米特插值 (二階導數連續)
         anim.clamp(v, lo, hi)   : 將值v限制在lo～hi範圍內
         anim.map(v, a1, b1, a2, b2): 將範圍a1～b1內的值v映射至a2～b2範圍
         anim.norm(v, lo, hi)    : 獲取值v在lo～hi範圍內的比例(0.0～1.0)
@@ -294,6 +299,7 @@
         anim.delay(t, d)        : 經過時間d後開始計時的值 (小於0則為0)
         anim.ease_in(t)         : 二次加速緩動
         anim.ease_out(t)        : 二次減速緩動
+        anim.ease_in_out(t)     : 二次緩入緩出 (先加速後減速)
         anim.elastic(t)         : 彈性彈簧緩動
         anim.back(t)            : 略微越界後返回的緩動
         anim.step(edge, x)      : 若x大於等於edge則返回1.0，否則返回0.0
@@ -303,6 +309,10 @@
         anim.rgb_to_hsv(r, g, b): 將RGB (0～255) 轉為 HSV
         anim.noise(x, y, z)     : 1維～3維的平滑雜訊 (-1.0～1.0)
         anim.rand(min, max, s)  : 基於種子 s 的穩定亂數
+        anim.len(x, y)          : 獲取向量 (x, y) 的長度 (範數)
+        anim.dist(x1, y1, x2, y2): 獲取兩點 (x1, y1) 和 (x2, y2) 之間的距離
+        anim.dot(x1, y1, x2, y2): 獲取兩個向量 (x1, y1) 和 (x2, y2) 的內積
+        anim.normalize(x, y)    : 正規化向量 (x, y) 返回方向向量 (Tuple)
         anim.polar(r, a)        : 透過半徑 r 和角度 a(度) 獲取 (x, y) 座標的元組
         anim.rotate(x, y, a)    : 獲取將座標 (x, y) 旋轉 a(度) 後的座標元組
         anim.bezier(t, p0, p1, p2, p3): 計算 t(0.0～1.0) 時的三次貝茲曲線值

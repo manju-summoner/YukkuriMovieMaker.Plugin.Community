@@ -1,4 +1,4 @@
-- Acerca del efecto de script Lua -
+﻿- Acerca del efecto de script Lua -
 
         El efecto de video «Script Lua» de YukkuriMovieMaker4 utiliza
         el lenguaje Lua para los scripts.
@@ -132,6 +132,7 @@
                         * Internamente es un entero derivado de D2D GetImageLocalBounds.
         obj.hw        : Half of the input image width (= obj.w / 2) [ReadOnly]
         obj.hh        : Half of the input image height (= obj.h / 2) [ReadOnly]
+        obj.diagonal  : Longitud diagonal de la imagen de entrada (= math.sqrt(w*w + h*h)) [ReadOnly]
         obj.cx        : Coordenada X central de la imagen (= obj.w / 2) [Solo lectura]
                         * Coordenada central de referencia para operaciones de píxeles.
         obj.cy        : Coordenada Y central de la imagen (= obj.h / 2) [Solo lectura]
@@ -279,8 +280,12 @@
         Pure utility functions and constants useful for animation calculations.
 
         anim.tau                : 2 * Pi (math.pi * 2)
+        anim.e                  : Número de Euler (math.exp(1))
+        anim.phi                : Proporción áurea ((1 + math.sqrt(5)) / 2)
+        anim.sqrt2              : Raíz cuadrada de 2 (math.sqrt(2))
         anim.lerp(a, b, t)      : Linear interpolation between a and b by t (0.0 ~ 1.0)
         anim.smoothstep(e0, e1, x): Smooth Hermite interpolation between e0 and e1
+        anim.smootherstep(e0, e1, x): Interpolación de Hermite más suave entre e0 y e1 (segunda derivada continua)
         anim.clamp(v, lo, hi)   : Clamps value v between lo and hi
         anim.map(v, a1, b1, a2, b2): Maps value v from range a1~b1 to range a2~b2
         anim.norm(v, lo, hi)    : Gets the normalized ratio (0.0 ~ 1.0) of v within lo~hi
@@ -294,6 +299,7 @@
         anim.delay(t, d)        : Time starting after delay d (0 if negative)
         anim.ease_in(t)         : Quadratic ease-in (acceleration)
         anim.ease_out(t)        : Quadratic ease-out (deceleration)
+        anim.ease_in_out(t)     : Aceleración y desaceleración cuadrática (entrada y salida suaves)
         anim.elastic(t)         : Bouncy spring easing
         anim.back(t)            : Easing that slightly overshoots before returning
         anim.step(edge, x)      : Returns 1.0 if x >= edge, otherwise 0.0
@@ -303,6 +309,10 @@
         anim.rgb_to_hsv(r, g, b): Converts RGB (0~255) to HSV
         anim.noise(x, y, z)     : 1D to 3D continuous smooth noise (-1.0 ~ 1.0)
         anim.rand(min, max, s)  : Stable random value based on seed `s`
+        anim.len(x, y)          : Obtiene la longitud (norma) del vector (x, y)
+        anim.dist(x1, y1, x2, y2): Obtiene la distancia entre dos puntos (x1, y1) y (x2, y2)
+        anim.dot(x1, y1, x2, y2): Obtiene el producto escalar de dos vectores (x1, y1) y (x2, y2)
+        anim.normalize(x, y)    : Normaliza el vector (x, y) devolviendo un vector de dirección (Tuple)
         anim.polar(r, a)        : Converts polar coordinates (radius, angle) to (x, y) tuple
         anim.rotate(x, y, a)    : Rotates 2D point (x, y) by angle `a` (degrees) returning (x, y) tuple
         anim.bezier(t, p0, p1, p2, p3): Evaluates cubic bezier curve at `t` (0.0~1.0)

@@ -1,4 +1,4 @@
-- Luaスクリプトエフェクトについて -
+﻿- Luaスクリプトエフェクトについて -
 
         YukkuriMovieMaker4 の「Luaスクリプト」映像エフェクトで
         利用可能なスクリプトには Lua 言語を使用します。
@@ -134,6 +134,7 @@
                         ※ 実装上は D2D の GetImageLocalBounds から算出した整数値です。
         obj.hw        : 入力画像の横ピクセル数の半分 (= obj.w / 2) [ReadOnly]
         obj.hh        : 入力画像の縦ピクセル数の半分 (= obj.h / 2) [ReadOnly]
+        obj.diagonal  : 画像の対角線の長さ (= math.sqrt(w*w + h*h)) [ReadOnly]
         obj.cx        : 画像の中心 X 座標 (= obj.w / 2) [ReadOnly]
                         ※ ピクセル操作における中心座標の参照値です。
         obj.cy        : 画像の中心 Y 座標 (= obj.h / 2) [ReadOnly]
@@ -148,6 +149,7 @@
         obj.totalframe: オブジェクトの総フレーム数 [ReadOnly]
                         ※ グローバル変数 totalframe と同じ値です。
                         ※ 実装上は EffectDescription.ItemDuration.Frame から設定されます。
+        obj.t         : オブジェクト内の現在時間の進行割合 (0.0 ～ 1.0) [ReadOnly]
         obj.framerate : フレームレート(fps) [ReadOnly]
                         ※ グローバル変数 framerate と同じ値です。
                         ※ 実装上は EffectDescription.FPS から設定されます。
@@ -281,8 +283,12 @@
         アニメーション計算に便利な純粋ユーティリティ関数・定数群です。
 
         anim.tau                : 円周率の2倍 (math.pi * 2)
+        anim.e                  : ネイピア数 (math.exp(1))
+        anim.phi                : 黄金比 ((1 + math.sqrt(5)) / 2)
+        anim.sqrt2              : 2の平方根 (math.sqrt(2))
         anim.lerp(a, b, t)      : a と b を t (0.0～1.0) で線形補間
         anim.smoothstep(e0, e1, x): e0 と e1 の間をエルミート補間でスムーズに遷移
+        anim.smootherstep(e0, e1, x): e0 と e1 の間をより滑らかに(2次導関数まで連続)補間
         anim.clamp(v, lo, hi)   : 値 v を lo ～ hi の範囲に収める
         anim.map(v, a1, b1, a2, b2): a1～b1 の範囲の値 v を a2～b2 の範囲にマッピング
         anim.norm(v, lo, hi)    : 値 v が lo ～ hi の範囲でどの割合(0.0～1.0)かを取得
@@ -296,6 +302,7 @@
         anim.delay(t, d)        : 時間 d 経過後から開始する時間 (0以下は0)
         anim.ease_in(t)         : 2次イーズイン(加速)
         anim.ease_out(t)        : 2次イーズアウト(減速)
+        anim.ease_in_out(t)     : 2次イーズイン・アウト(加速後減速)
         anim.elastic(t)         : 弾むようなスプリングイージング
         anim.back(t)            : 勢い余って行き過ぎてから戻るイージング
         anim.step(edge, x)      : x が edge 以上なら 1.0、未満なら 0.0 を返す
@@ -305,6 +312,10 @@
         anim.rgb_to_hsv(r, g, b): RGB (0～255) を HSV に変換
         anim.noise(x, y, z)     : 1次元～3次元の滑らかなパーリン/バリューノイズ (-1.0～1.0)
         anim.rand(min, max, s)  : シード値 s に基づく安定した乱数を生成
+        anim.len(x, y)          : ベクトル (x, y) の長さ(ノルム)を取得
+        anim.dist(x1, y1, x2, y2): 2点 (x1, y1) と (x2, y2) の距離を取得
+        anim.dot(x1, y1, x2, y2): 2つのベクトル (x1, y1) と (x2, y2) の内積を取得
+        anim.normalize(x, y)    : ベクトル (x, y) を正規化して方向ベクトル(Tuple)を取得
         anim.polar(r, a)        : 半径 r, 角度 a(度) から (x, y) の移動量(Tuple)を取得
         anim.rotate(x, y, a)    : 座標 (x, y) を a(度) 回転させた座標(Tuple)を取得
         anim.bezier(t, p0, p1, p2, p3): t (0.0～1.0) における3次ベジェ曲線の値を計算

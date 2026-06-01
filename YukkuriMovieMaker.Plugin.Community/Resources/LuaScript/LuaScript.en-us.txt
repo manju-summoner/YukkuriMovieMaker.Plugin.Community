@@ -1,4 +1,4 @@
-- About the Lua Script Effect -
+﻿- About the Lua Script Effect -
 
         The "Lua Script" video effect in YukkuriMovieMaker4 uses
         the Lua language for scripting.
@@ -134,6 +134,7 @@
                         * Internally an integer derived from D2D GetImageLocalBounds.
         obj.hw        : Half of the input image width (= obj.w / 2) [ReadOnly]
         obj.hh        : Half of the input image height (= obj.h / 2) [ReadOnly]
+        obj.diagonal  : Diagonal length of the input image (= math.sqrt(w*w + h*h)) [ReadOnly]
         obj.cx        : Center X coordinate of the image (= obj.w / 2) [ReadOnly]
                         * Reference center coordinate for pixel operations.
         obj.cy        : Center Y coordinate of the image (= obj.h / 2) [ReadOnly]
@@ -148,6 +149,7 @@
         obj.totalframe: Total number of frames in the object [ReadOnly]
                         * Same value as global variable totalframe.
                         * Internally set from EffectDescription.ItemDuration.Frame.
+        obj.t         : Current time progress ratio within the object (0.0 ~ 1.0) [ReadOnly]
         obj.framerate : Frame rate (fps) [ReadOnly]
                         * Same value as global variable framerate.
                         * Internally set from EffectDescription.FPS.
@@ -281,8 +283,12 @@
         Pure utility functions and constants useful for animation calculations.
 
         anim.tau                : 2 * Pi (math.pi * 2)
+        anim.e                  : Euler's number (math.exp(1))
+        anim.phi                : Golden ratio ((1 + math.sqrt(5)) / 2)
+        anim.sqrt2              : Square root of 2 (math.sqrt(2))
         anim.lerp(a, b, t)      : Linear interpolation between a and b by t (0.0 ~ 1.0)
         anim.smoothstep(e0, e1, x): Smooth Hermite interpolation between e0 and e1
+        anim.smootherstep(e0, e1, x): Smoother Hermite interpolation between e0 and e1 (continuous 2nd derivative)
         anim.clamp(v, lo, hi)   : Clamps value v between lo and hi
         anim.map(v, a1, b1, a2, b2): Maps value v from range a1~b1 to range a2~b2
         anim.norm(v, lo, hi)    : Gets the normalized ratio (0.0 ~ 1.0) of v within lo~hi
@@ -296,6 +302,7 @@
         anim.delay(t, d)        : Time starting after delay d (0 if negative)
         anim.ease_in(t)         : Quadratic ease-in (acceleration)
         anim.ease_out(t)        : Quadratic ease-out (deceleration)
+        anim.ease_in_out(t)     : Quadratic ease-in-out (acceleration then deceleration)
         anim.elastic(t)         : Bouncy spring easing
         anim.back(t)            : Easing that slightly overshoots before returning
         anim.step(edge, x)      : Returns 1.0 if x >= edge, otherwise 0.0
@@ -305,6 +312,10 @@
         anim.rgb_to_hsv(r, g, b): Converts RGB (0~255) to HSV
         anim.noise(x, y, z)     : 1D to 3D continuous smooth noise (-1.0 ~ 1.0)
         anim.rand(min, max, s)  : Stable random value based on seed `s`
+        anim.len(x, y)          : Gets the length (norm) of the vector (x, y)
+        anim.dist(x1, y1, x2, y2): Gets the distance between two points (x1, y1) and (x2, y2)
+        anim.dot(x1, y1, x2, y2): Gets the dot product of two vectors (x1, y1) and (x2, y2)
+        anim.normalize(x, y)    : Normalizes the vector (x, y) returning a direction vector tuple
         anim.polar(r, a)        : Converts polar coordinates (radius, angle) to (x, y) tuple
         anim.rotate(x, y, a)    : Rotates 2D point (x, y) by angle `a` (degrees) returning (x, y) tuple
         anim.bezier(t, p0, p1, p2, p3): Evaluates cubic bezier curve at `t` (0.0~1.0)

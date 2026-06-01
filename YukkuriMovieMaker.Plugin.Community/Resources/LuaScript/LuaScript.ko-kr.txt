@@ -1,4 +1,4 @@
-- Lua 스크립트 이펙트에 대하여 -
+﻿- Lua 스크립트 이펙트에 대하여 -
 
         YukkuriMovieMaker4의 「Lua 스크립트」 영상 이펙트에서
         사용 가능한 스크립트에는 Lua 언어를 사용합니다.
@@ -132,6 +132,7 @@
                         ※ 구현 상 D2D의 GetImageLocalBounds에서 산출된 정수값입니다.
         obj.hw        : 입력 이미지 가로 픽셀 수의 절반 (= obj.w / 2) [ReadOnly]
         obj.hh        : 입력 이미지 세로 픽셀 수의 절반 (= obj.h / 2) [ReadOnly]
+        obj.diagonal  : 입력 이미지의 대각선 길이 (= math.sqrt(w*w + h*h)) [ReadOnly]
         obj.cx        : 이미지의 중심 X 좌표 (= obj.w / 2) [읽기 전용]
                         ※ 픽셀 조작에서 중심 좌표의 참조값입니다.
         obj.cy        : 이미지의 중심 Y 좌표 (= obj.h / 2) [읽기 전용]
@@ -279,8 +280,12 @@
         애니메이션 계산에 편리한 순수 유틸리티 함수/상수 그룹입니다.
 
         anim.tau                : 원주율의 2배 (math.pi * 2)
+        anim.e                  : 오일러 수 (math.exp(1))
+        anim.phi                : 황금비 ((1 + math.sqrt(5)) / 2)
+        anim.sqrt2              : 2의 제곱근 (math.sqrt(2))
         anim.lerp(a, b, t)      : a와 b를 t(0.0~1.0)로 선형 보간
         anim.smoothstep(e0, e1, x): e0과 e1 사이를 매끄럽게 보간
+        anim.smootherstep(e0, e1, x): e0과 e1 사이의 더 부드러운 에르미트 보간 (2차 도함수까지 연속)
         anim.clamp(v, lo, hi)   : 값 v를 lo~hi 범위로 제한
         anim.map(v, a1, b1, a2, b2): a1~b1 범위의 값 v를 a2~b2 범위로 매핑
         anim.norm(v, lo, hi)    : 값 v가 lo~hi 범위에서 차지하는 비율(0.0~1.0) 반환
@@ -294,6 +299,7 @@
         anim.delay(t, d)        : 시간 d 경과 후 시작되는 시간 (0 이하는 0)
         anim.ease_in(t)         : 2차 이즈 인(가속)
         anim.ease_out(t)        : 2차 이즈 아웃(감속)
+        anim.ease_in_out(t)     : 2차 이즈 인/아웃 (가속 후 감속)
         anim.elastic(t)         : 튕기는 듯한 스프링 이징
         anim.back(t)            : 범위를 살짝 넘었다가 돌아오는 이징
         anim.step(edge, x)      : x가 edge 이상이면 1.0, 미만이면 0.0 반환
@@ -303,6 +309,10 @@
         anim.rgb_to_hsv(r, g, b): RGB (0~255)를 HSV로 변환
         anim.noise(x, y, z)     : 1차원~3차원의 부드러운 노이즈 (-1.0 ~ 1.0)
         anim.rand(min, max, s)  : 시드값 s에 기반한 안정적인 난수 생성
+        anim.len(x, y)          : 벡터 (x, y)의 길이(노름)를 가져옵니다
+        anim.dist(x1, y1, x2, y2): 두 점 (x1, y1)과 (x2, y2) 사이의 거리를 가져옵니다
+        anim.dot(x1, y1, x2, y2): 두 벡터 (x1, y1)과 (x2, y2)의 내적을 가져옵니다
+        anim.normalize(x, y)    : 벡터 (x, y)를 정규화하여 방향 벡터(Tuple)를 반환합니다
         anim.polar(r, a)        : 반지름 r, 각도 a(도)에서 (x, y) 이동량(Tuple)을 가져옴
         anim.rotate(x, y, a)    : 좌표 (x, y)를 a(도)만큼 회전시킨 좌표(Tuple)를 가져옴
         anim.bezier(t, p0, p1, p2, p3): t(0.0~1.0)에서의 3차 베지어 곡선 값을 계산

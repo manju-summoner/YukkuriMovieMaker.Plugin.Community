@@ -1,4 +1,4 @@
-- Tentang Efek Script Lua -
+﻿- Tentang Efek Script Lua -
 
         Efek video "Script Lua" di YukkuriMovieMaker4 menggunakan
         bahasa Lua untuk penulisan skrip.
@@ -132,6 +132,7 @@
                         * Secara internal adalah bilangan bulat yang diturunkan dari D2D GetImageLocalBounds.
         obj.hw        : Half of the input image width (= obj.w / 2) [ReadOnly]
         obj.hh        : Half of the input image height (= obj.h / 2) [ReadOnly]
+        obj.diagonal  : Panjang diagonal dari gambar input (= math.sqrt(w*w + h*h)) [ReadOnly]
         obj.cx        : Koordinat X pusat gambar (= obj.w / 2) [Hanya Baca]
                         * Koordinat pusat referensi untuk operasi piksel.
         obj.cy        : Koordinat Y pusat gambar (= obj.h / 2) [Hanya Baca]
@@ -279,8 +280,12 @@
         Pure utility functions and constants useful for animation calculations.
 
         anim.tau                : 2 * Pi (math.pi * 2)
+        anim.e                  : Bilangan Euler (math.exp(1))
+        anim.phi                : Rasio emas ((1 + math.sqrt(5)) / 2)
+        anim.sqrt2              : Akar kuadrat dari 2 (math.sqrt(2))
         anim.lerp(a, b, t)      : Linear interpolation between a and b by t (0.0 ~ 1.0)
         anim.smoothstep(e0, e1, x): Smooth Hermite interpolation between e0 and e1
+        anim.smootherstep(e0, e1, x): Interpolasi Hermite yang lebih halus antara e0 dan e1 (turunan kedua kontinu)
         anim.clamp(v, lo, hi)   : Clamps value v between lo and hi
         anim.map(v, a1, b1, a2, b2): Maps value v from range a1~b1 to range a2~b2
         anim.norm(v, lo, hi)    : Gets the normalized ratio (0.0 ~ 1.0) of v within lo~hi
@@ -294,6 +299,7 @@
         anim.delay(t, d)        : Time starting after delay d (0 if negative)
         anim.ease_in(t)         : Quadratic ease-in (acceleration)
         anim.ease_out(t)        : Quadratic ease-out (deceleration)
+        anim.ease_in_out(t)     : Ease-in-out kuadratik (akselerasi kemudian deselerasi)
         anim.elastic(t)         : Bouncy spring easing
         anim.back(t)            : Easing that slightly overshoots before returning
         anim.step(edge, x)      : Returns 1.0 if x >= edge, otherwise 0.0
@@ -303,6 +309,10 @@
         anim.rgb_to_hsv(r, g, b): Converts RGB (0~255) to HSV
         anim.noise(x, y, z)     : 1D to 3D continuous smooth noise (-1.0 ~ 1.0)
         anim.rand(min, max, s)  : Stable random value based on seed `s`
+        anim.len(x, y)          : Mendapatkan panjang (norma) dari vektor (x, y)
+        anim.dist(x1, y1, x2, y2): Mendapatkan jarak antara dua titik (x1, y1) dan (x2, y2)
+        anim.dot(x1, y1, x2, y2): Mendapatkan hasil kali titik (dot product) dari dua vektor (x1, y1) dan (x2, y2)
+        anim.normalize(x, y)    : Menormalisasi vektor (x, y) mengembalikan vektor arah (Tuple)
         anim.polar(r, a)        : Converts polar coordinates (radius, angle) to (x, y) tuple
         anim.rotate(x, y, a)    : Rotates 2D point (x, y) by angle `a` (degrees) returning (x, y) tuple
         anim.bezier(t, p0, p1, p2, p3): Evaluates cubic bezier curve at `t` (0.0~1.0)
