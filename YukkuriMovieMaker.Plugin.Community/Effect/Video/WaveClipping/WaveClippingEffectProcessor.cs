@@ -22,7 +22,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         private WaveClippingMode _mode;
         private bool _isInverted;
         private double _rotation;
-        private int _randomSeed;
         private bool _useRandom;
 
         private static float NormalizeInt32ToUnitFloat(int value)
@@ -46,7 +45,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             var mode = _item.Mode;
             var isInverted = _item.IsInverted;
             var rotation = -_item.Rotation.GetValue(frame, length, fps) * Math.PI / 180.0;
-            var randomSeed = _item.GetHashCode();
             var useRandom = _item.UseRandom;
 
             if (_isFirst || _amplitude != amplitude)
@@ -67,8 +65,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
                 _effect.IsInverted = isInverted ? 1.0f : 0.0f;
             if (_isFirst || _rotation != rotation)
                 _effect.Rotation = (float)rotation;
-            if (_isFirst || _randomSeed != randomSeed)
-                _effect.RandomSeed = NormalizeInt32ToUnitFloat(randomSeed);
             if (_isFirst || _useRandom != useRandom)
                 _effect.UseRandom = useRandom ? 1.0f : 0.0f;
 
@@ -82,7 +78,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             _mode = mode;
             _isInverted = isInverted;
             _rotation = rotation;
-            _randomSeed = randomSeed;
             _useRandom = useRandom;
 
             return effectDescription.DrawDescription;
@@ -97,6 +92,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
                 _effect = null;
                 return null;
             }
+            _effect.RandomSeed = NormalizeInt32ToUnitFloat(_item.RandomSeed);
             disposer.Collect(_effect);
 
             var output = _effect.Output;
