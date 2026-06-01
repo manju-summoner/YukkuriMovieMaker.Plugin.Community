@@ -25,8 +25,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
         private int _randomSeed;
         private bool _useRandom;
 
-        private static float NormalizeHashCode(int hashCode)
-            => (uint)hashCode / (float)uint.MaxValue;
+        private static float NormalizeInt32ToUnitFloat(int value)
+            => (uint)value / (float)(uint.MaxValue + 1UL);
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
@@ -68,7 +68,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
             if (_isFirst || _rotation != rotation)
                 _effect.Rotation = (float)rotation;
             if (_isFirst || _randomSeed != randomSeed)
-                _effect.RandomSeed = NormalizeHashCode(randomSeed);
+                _effect.RandomSeed = NormalizeInt32ToUnitFloat(randomSeed);
             if (_isFirst || _useRandom != useRandom)
                 _effect.UseRandom = useRandom ? 1.0f : 0.0f;
 
