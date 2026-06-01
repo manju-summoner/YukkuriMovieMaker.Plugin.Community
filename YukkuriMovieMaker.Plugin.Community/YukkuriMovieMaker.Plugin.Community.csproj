@@ -54,10 +54,10 @@
 
   <!-- nugetパッケージで公開されているライブラリはPackageReferenceで参照する。-->
   <ItemGroup>
-	<PackageReference Include="LlmTornado" Version="3.8.56" />
+	<PackageReference Include="LlmTornado" Version="3.8.57" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3912.50" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NAudio" Version="2.3.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
@@ -68,8 +68,8 @@
     <PackageReference Include="Whisper.net.Runtime.NoAvx" Version="1.9.0" />
     <PackageReference Include="Whisper.net.Runtime.OpenVino" Version="1.9.0" />
     <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.0" />
-    <PackageReference Include="YamlDotNet" Version="17.1.0" />
-	<PackageReference Include="System.Management" Version="10.0.7" />
+    <PackageReference Include="YamlDotNet" Version="18.0.0" />
+	<PackageReference Include="System.Management" Version="10.0.8" />
 	<PackageReference Include="ComputeSharp" Version="3.2.0" />
 	<PackageReference Include="MeltySynth" Version="2.4.1" />
 	<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
