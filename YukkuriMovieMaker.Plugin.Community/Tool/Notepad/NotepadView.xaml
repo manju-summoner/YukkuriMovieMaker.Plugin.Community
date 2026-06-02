@@ -108,6 +108,11 @@
                 <Separator/>
                 <Button Content="{DynamicResource {x:Static icons:IconKeys.Magnify}}" Command="{Binding ToggleSearchCommand}" ToolTip="{x:Static local:Texts.Search}"/>
                 <Separator/>
+                <ToggleButton Content="{DynamicResource {x:Static icons:IconKeys.LanguageMarkdown}}"
+                              IsChecked="{Binding IsMarkdownEnabled, Mode=TwoWay}"
+                              ToolTip="{x:Static local:Texts.MarkdownMode}"
+                              Width="24" Height="24" Padding="3"/>
+                <Separator/>
                 <controls:DropDownButton Content="{DynamicResource {x:Static icons:IconKeys.Cog}}" ToolTip="{x:Static local:Texts.Settings}" Background="Transparent" BorderBrush="Transparent" Padding="3">
                     <controls:DropDownButton.Style>
                         <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
@@ -164,6 +169,7 @@
                 <local:NotepadImageDisplayBehavior ImageScale="{Binding Zoom}"/>
                 <local:NotepadImageInputBehavior/>
                 <local:NotepadSearchBehavior/>
+                <local:NotepadMarkdownBehavior IsMarkdown="{Binding IsMarkdownEnabled}"/>
             </i:Interaction.Behaviors>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="PreviewMouseWheel">
