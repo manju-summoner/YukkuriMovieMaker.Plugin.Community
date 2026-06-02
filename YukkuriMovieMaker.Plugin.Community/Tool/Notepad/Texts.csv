@@ -32,3 +32,4 @@ SearchError,,エラー: ,Error: ,错误: ,錯誤: ,오류: ,Error: ,خطأ: ,Gal
 SearchNoMatchesFound,,一致する項目が見つかりませんでした,No matches found!,未找到匹配项,找不到符合的項目,일치하는 항목을 찾을 수 없습니다,No se encontraron coincidencias,لم يتم العثور على تطابقات,Tidak ada hasil yang cocok,
 SearchClose,,閉じる (Esc),Close (Esc),关闭 (Esc),關閉 (Esc),닫기 (Esc),Cerrar (Esc),إغلاق (Esc),Tutup (Esc),
 MarkdownMode,,マークダウン,Markdown,Markdown,Markdown,마크다운,Markdown,Markdown,Markdown,
+MarkdownFile,,マークダウンファイル,Markdown File,Markdown文件,Markdown檔,마크다운 파일,Archivo Markdown,ملف Markdown,Berkas Markdown,
