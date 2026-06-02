@@ -108,8 +108,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             {
                 int lineNumber = visualLine.FirstDocumentLine.LineNumber;
                 var info = _state.DocumentMap.GetLineInfo(lineNumber);
-                bool isCodeLine = info.BlockType is NotepadMarkdownBlockType.FencedCodeFence
-                    or NotepadMarkdownBlockType.FencedCodeContent;
+                bool isCodeLine = info.BlockType is NotepadMarkdownBlockType.FencedCodeContent;
 
                 double lineTop = visualLine.VisualTop - textView.ScrollOffset.Y;
                 double lineBottom = lineTop + visualLine.Height;
@@ -151,6 +150,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     case NotepadMarkdownBlockType.ThematicBreak:
                         DrawHorizontalRule(drawingContext, top, height, width);
                         break;
+                    case NotepadMarkdownBlockType.TableSeparator:
+                        var sepTable = _state.DocumentMap.GetTableForLine(lineNumber);
+                        if (sepTable != null)
+                        {
+                            double tableWidth = Math.Min(width, CalculateTableWidth(sepTable));
+                            DrawTableHeaderSeparator(drawingContext, top, height, tableWidth);
+                        }
+                        break;
                     case NotepadMarkdownBlockType.TaskListItem:
                         DrawCheckbox(drawingContext, top, height, info.TaskChecked);
                         break;
@@ -183,10 +190,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         private void DrawTableGrid(TextView textView, DrawingContext drawingContext, NotepadMarkdownTableInfo table)
         {
-            double tableTop = double.MaxValue;
-            double tableBottom = double.MinValue;
-            double separatorBottom = double.MinValue;
-
             var rowTops = new Dictionary<int, double>();
             var rowBottoms = new Dictionary<int, double>();
 
@@ -194,17 +197,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             {
                 if (!TryGetVisualLine(textView, ln, out var vl)) continue;
                 double top = vl.VisualTop - textView.ScrollOffset.Y;
-                double bottom = top + vl.Height;
-
                 rowTops[ln] = top;
-                rowBottoms[ln] = bottom;
-
-                if (top < tableTop) tableTop = top;
-                if (bottom > tableBottom) tableBottom = bottom;
-                if (ln == table.SeparatorLine) separatorBottom = bottom;
+                rowBottoms[ln] = top + vl.Height;
             }
 
-            if (tableTop == double.MaxValue) return;
+            if (rowTops.Count == 0) return;
+
+            double tableTop = double.MaxValue;
+            double tableBottom = double.MinValue;
+            foreach (var (ln, top) in rowTops)
+            {
+                if (top < tableTop) tableTop = top;
+                if (rowBottoms[ln] > tableBottom) tableBottom = rowBottoms[ln];
+            }
 
             double tableWidth = Math.Min(textView.ActualWidth, CalculateTableWidth(table));
             double[] columnWidths = CalculateColumnWidths(table, tableWidth);
@@ -246,18 +251,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 drawingContext.DrawLine(_tableBorderPen, new Point(x, tableTop), new Point(x, tableBottom));
             }
 
-            for (int ln = table.FirstLine; ln <= table.LastLine; ln++)
+            for (int ln = table.FirstLine + 1; ln <= table.LastLine; ln++)
             {
-                if (ln == table.FirstLine || ln == table.SeparatorLine) continue;
+                if (ln == table.SeparatorLine) continue;
                 if (!rowTops.TryGetValue(ln, out double rTop)) continue;
                 double y = Math.Round(rTop) + 0.5;
                 drawingContext.DrawLine(_tableBorderPen, new Point(0, y), new Point(tableWidth, y));
-            }
-
-            if (separatorBottom != double.MinValue)
-            {
-                double y = Math.Round(separatorBottom) - 0.5;
-                drawingContext.DrawLine(_tableHeaderSeparatorPen, new Point(0, y), new Point(tableWidth, y));
             }
         }
 
@@ -391,6 +390,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         {
             double y = Math.Round(top + height / 2.0) + 0.5;
             dc.DrawLine(_horizontalRulePen, new Point(0, y), new Point(width, y));
+        }
+
+        private void DrawTableHeaderSeparator(DrawingContext dc, double top, double height, double tableWidth)
+        {
+            double y = Math.Round(top + height / 2.0) + 0.5;
+            dc.DrawLine(_tableHeaderSeparatorPen, new Point(0, y), new Point(tableWidth, y));
         }
 
         private void DrawCheckbox(DrawingContext dc, double top, double height, bool isChecked)
