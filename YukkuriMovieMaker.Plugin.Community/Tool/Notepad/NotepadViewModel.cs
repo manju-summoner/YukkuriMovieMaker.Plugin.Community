@@ -29,6 +29,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public double Zoom { get; set => Set(ref field, Math.Max(0.25, value), nameof(Zoom), nameof(FontSize)); } = 1.0;
         public bool WordWrap { get; set => Set(ref field, value); } = false;
         public bool ShowLineNumbers { get; set => Set(ref field, value); } = false;
+        public bool IsMarkdownEnabled { get; set => Set(ref field, value); } = false;
 
         public OpenFileDialogViewModel OpenFileDialog { get; } = new();
         public SaveFileDialogViewModel SaveFileDialog { get; } = new();
@@ -120,7 +121,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     {
                         Zoom = Zoom,
                         WordWrap = WordWrap,
-                        ShowLineNumbers = ShowLineNumbers
+                        ShowLineNumbers = ShowLineNumbers,
+                        IsMarkdownEnabled = IsMarkdownEnabled,
                     };
                     var toolState = new ToolState()
                     {
@@ -165,6 +167,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             IsSaved = state.IsSaved;
             WordWrap = state.WordWrap;
             ShowLineNumbers = state.ShowLineNumbers;
+            IsMarkdownEnabled = state.IsMarkdownEnabled;
         }
 
         public ToolState SaveState()
@@ -180,6 +183,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     IsSaved = IsSaved,
                     WordWrap = WordWrap,
                     ShowLineNumbers = ShowLineNumbers,
+                    IsMarkdownEnabled = IsMarkdownEnabled,
                     Images = CollectEmbeddedImages(Text)
                 }),
             };
