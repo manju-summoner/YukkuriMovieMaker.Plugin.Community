@@ -164,7 +164,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 && _state.ActiveLineNumber <= table.LastLine;
 
             if (!activeLineInTable)
-                HideMarkerRange(line.Offset, line.Length);
+                ColorizeFull(line);
         }
 
         private void ColorizeTableLine(DocumentLine line, int lineNumber)
