@@ -90,7 +90,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 x =>
                 {
                     var filePath = x as string;
-                    var preferredExt = NotepadDocumentSerializer.DetermineSaveExtension(Text);
+                    var preferredExt = DeterminePreferredSaveExtension(FilePath, Text);
 
                     if (string.IsNullOrEmpty(filePath) || !MatchesPreferredExtension(filePath, preferredExt))
                     {
@@ -223,15 +223,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             }
         }
 
+        private static string DeterminePreferredSaveExtension(string currentFilePath, string text)
+        {
+            if (NotepadDocumentSerializer.ContainsImages(text))
+                return NotepadDocumentSerializer.PackageExtension;
+            var currentExt = Path.GetExtension(currentFilePath);
+            if (string.Equals(currentExt, NotepadDocumentSerializer.MarkdownExtension, StringComparison.OrdinalIgnoreCase))
+                return NotepadDocumentSerializer.MarkdownExtension;
+            return NotepadDocumentSerializer.PlainTextExtension;
+        }
+
         private static string BuildOpenFilter() =>
-            $"{Texts.NotepadDocument}|*.txt;*{NotepadDocumentSerializer.PackageExtension}|" +
-            $"{Texts.TextFile}|*.txt|" +
+            $"{Texts.NotepadDocument}|*.txt;*.md;*{NotepadDocumentSerializer.PackageExtension}|" +
+            $"{Texts.TextFile}|*.txt;*.md|" +
+            $"{Texts.MarkdownFile}|*.md|" +
             $"{Texts.RichNotepadFile}|*{NotepadDocumentSerializer.PackageExtension}";
 
         private static string BuildSaveFilter(string preferredExtension) =>
-            string.Equals(preferredExtension, NotepadDocumentSerializer.PackageExtension, StringComparison.OrdinalIgnoreCase)
-                ? $"{Texts.RichNotepadFile}|*{NotepadDocumentSerializer.PackageExtension}"
-                : $"{Texts.TextFile}|*.txt";
+            preferredExtension switch
+            {
+                NotepadDocumentSerializer.PackageExtension =>
+                    $"{Texts.RichNotepadFile}|*{NotepadDocumentSerializer.PackageExtension}",
+                NotepadDocumentSerializer.MarkdownExtension =>
+                    $"{Texts.MarkdownFile}|*{NotepadDocumentSerializer.MarkdownExtension}",
+                _ =>
+                    $"{Texts.TextFile}|*.txt",
+            };
 
         private static string BuildDefaultFileName(string preferredExtension) =>
             $"{Texts.Untitled}{preferredExtension}";

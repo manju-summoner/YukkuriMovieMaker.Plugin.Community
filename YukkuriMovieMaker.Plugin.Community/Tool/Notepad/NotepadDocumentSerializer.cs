@@ -9,6 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
     {
         public const string PackageExtension = ".ymmnote";
         public const string PlainTextExtension = ".txt";
+        public const string MarkdownExtension = ".md";
         private const string ContentEntryName = "content.txt";
         private const string ImagesDirectoryName = "images/";
         private const long MaxImageEntryBytes = 256L * 1024 * 1024;
@@ -22,7 +23,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         public static void Save(string filePath, string text, NotepadImageStore store)
         {
-                var extension = Path.GetExtension(filePath);
+            var extension = Path.GetExtension(filePath);
             if (string.Equals(extension, PackageExtension, StringComparison.OrdinalIgnoreCase))
                 SavePackage(filePath, text, store);
             else
