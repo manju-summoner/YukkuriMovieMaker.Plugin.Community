@@ -8,7 +8,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputChannelRouter
 {
-    [VideoEffect(nameof(Texts.ChannelRouterEffectName), [VideoEffectCategories.Composition], ["分岐", "branch", "合成", "composite", "channel router", "channel combiner", "set channel", "composite channels", "channel composite", "チャンネルルーター", "分岐とチャンネル合成", "チャンネル合成", "通道路由", "通道合成", "채널 라우터", "채널 합성"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.ChannelRouterEffectName), [VideoEffectCategories.Branch], ["分岐", "branch", "合成", "composite", "channel router", "channel combiner", "set channel", "composite channels", "channel composite", "チャンネルルーター", "分岐とチャンネル合成", "チャンネル合成", "通道路由", "通道合成", "채널 라우터", "채널 합성"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public sealed class OutputChannelRouterEffect : VideoEffectBase
     {
         public override string Label => $"{Texts.ChannelRouterEffectName} {TargetIndex}";

@@ -129,6 +129,15 @@
 	<FxCompile Include="EdgeGlow.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+	<FxCompile Include="FillSamegroundShader.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+	<FxCompile Include="PuppetDeformation.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+	<FxCompile Include="PartialOutline.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Hash.hlsli">

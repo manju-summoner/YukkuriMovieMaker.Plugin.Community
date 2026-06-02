@@ -95,9 +95,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
                 var audioBytes = Convert.FromBase64String(audioBase64);
                 var supportedAudioFileMimeTypes = new[] { "audio/wav", "audio/ogg", "audio/mpeg" };
 
-                if (mimeType.StartsWith("audio/L16"))
+                if (mimeType.StartsWith("audio/L16", StringComparison.OrdinalIgnoreCase))
                     SavePCMData(filePath, mimeType, audioBytes);
-                else if (supportedAudioFileMimeTypes.Any(mimeType.StartsWith))
+                else if (supportedAudioFileMimeTypes.Any(t => mimeType.StartsWith(t, StringComparison.OrdinalIgnoreCase)))
                     File.WriteAllBytes(filePath, audioBytes);
                 else
                     throw new NotSupportedException($"Unsupported audio format: {mimeType}");

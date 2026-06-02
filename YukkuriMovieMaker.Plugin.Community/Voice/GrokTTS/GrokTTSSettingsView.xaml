@@ -18,7 +18,7 @@
             <StackPanel>
                 <Grid>
                     <Label Content="{x:Static local:Texts.APIKey}"/>
-                    <TextBox Text="{Binding Source={x:Static local:GrokTTSSettings.Default},Path=ApiKey,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}" Width="200" HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
+                    <c:PasswordEditor Password="{Binding Source={x:Static local:GrokTTSSettings.Default},Path=ApiKey,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Delay=1}" Width="200" HorizontalAlignment="Right"/>
                 </Grid>
                 <Grid>
                     <TextBlock HorizontalAlignment="Right" Margin="6">

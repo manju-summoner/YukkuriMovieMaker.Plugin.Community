@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs"
              xmlns:s="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
              xmlns:commons="clr-namespace:YukkuriMovieMaker.Commons;assembly=YukkuriMovieMaker.Plugin"
-             mc:Ignorable="d" 
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -17,7 +18,7 @@
             <StackPanel>
                 <Grid>
                     <Label Content="{x:Static local:Texts.APIKey}"/>
-                    <TextBox Width="200" HorizontalAlignment="Right" Height="26" Text="{Binding Source={x:Static local:ElevenLabsSettings.Default},Path=APIKey,Delay=1,UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"/>
+                    <c:PasswordEditor Width="200" HorizontalAlignment="Right" Password="{Binding Source={x:Static local:ElevenLabsSettings.Default},Path=APIKey,Delay=1,UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
                 <Grid>
                     <Label Content="{x:Static local:Texts.TTSModel}"/>
