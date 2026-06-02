@@ -196,7 +196,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
                 || currentMode == FillSamegroundMode.PositionColor
                 || (UsesPosition(currentMode) && (posX != currentX || posY != currentY))
                 || (currentMode == FillSamegroundMode.Color && targetColor != currentTargetColor);
-            
+
             ID2D1Image? maskSource;
             if (needsMaskUpdate)
             {
@@ -222,7 +222,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
                 return effectDescription.DrawDescription;
             }
 
-            if(isFirst || currentBlur != blur)
+            if(needsMaskUpdate || currentBlur != blur)
                 UpdateAlphaMask(maskSource, currentBlur);
             if(isFirst || currentOpacity != opacity)
                 opacityEffect.Value = (float)(Math.Clamp(currentOpacity, 0, 100) / 100.0);
