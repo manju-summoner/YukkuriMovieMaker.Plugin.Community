@@ -13,9 +13,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         private static readonly SolidColorBrush CodeBlockBackground;
         private static readonly SolidColorBrush TableHeaderBackground;
         private static readonly SolidColorBrush TableRowEvenBackground;
-        private static readonly Pen CheckmarkPen;
         private static readonly SolidColorBrush CheckboxCheckedFill;
-        private static readonly SolidColorBrush CheckboxUncheckedFill;
+        private static readonly Typeface CheckboxTypeface;
 
         static NotepadMarkdownBackgroundRenderer()
         {
@@ -28,20 +27,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             TableRowEvenBackground = new SolidColorBrush(Color.FromArgb(8, 128, 128, 128));
             TableRowEvenBackground.Freeze();
 
-            var checkmarkBrush = new SolidColorBrush(Colors.White);
-            checkmarkBrush.Freeze();
-            CheckmarkPen = new Pen(checkmarkBrush, 1.5)
-            {
-                StartLineCap = PenLineCap.Round,
-                EndLineCap = PenLineCap.Round,
-            };
-            CheckmarkPen.Freeze();
-
             CheckboxCheckedFill = new SolidColorBrush(Color.FromArgb(220, 60, 160, 80));
             CheckboxCheckedFill.Freeze();
 
-            CheckboxUncheckedFill = new SolidColorBrush(Colors.Transparent);
-            CheckboxUncheckedFill.Freeze();
+            CheckboxTypeface = new Typeface(
+                new FontFamily("Segoe UI Symbol"),
+                FontStyles.Normal,
+                FontWeights.Normal,
+                FontStretches.Normal);
         }
 
         private readonly NotepadMarkdownRenderState _state;
@@ -51,6 +44,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         private Pen _tableHeaderSeparatorPen = null!;
         private SolidColorBrush _tableCellForeground = null!;
         private Pen _checkboxStrokePen = null!;
+        private double _pixelsPerDip = 1.0;
 
         public NotepadMarkdownBackgroundRenderer(NotepadMarkdownRenderState state)
         {
@@ -65,6 +59,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             textView.EnsureVisualLines();
             if (!textView.VisualLinesValid || textView.VisualLines.Count == 0) return;
 
+            _pixelsPerDip = VisualTreeHelper.GetDpi(textView).PixelsPerDip;
             UpdateThemeColors(textView);
 
             DrawCodeBlockBackgrounds(textView, drawingContext);
@@ -215,7 +210,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             double[] columnWidths = CalculateColumnWidths(table, tableWidth);
             double[] columnX = BuildColumnXPositions(columnWidths);
             double emSize = textView.DefaultLineHeight * 0.72;
-            double pixelsPerDip = VisualTreeHelper.GetDpi(textView).PixelsPerDip;
             const double paddingH = 6.0;
 
             int dataRowIndex = 0;
@@ -235,7 +229,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 if (rowDataIndex < table.Rows.Count)
                 {
                     DrawTableRowText(drawingContext, table.Rows[rowDataIndex], table.Alignments,
-                        columnX, columnWidths, rTop, rHeight, paddingH, isHeader, emSize, pixelsPerDip);
+                        columnX, columnWidths, rTop, rHeight, paddingH, isHeader, emSize);
                 }
 
                 if (!isHeader) dataRowIndex++;
@@ -277,8 +271,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             double rowHeight,
             double paddingH,
             bool isBold,
-            double emSize,
-            double pixelsPerDip)
+            double emSize)
         {
             var typeface = new Typeface(
                 new FontFamily("Segoe UI"),
@@ -303,7 +296,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     typeface,
                     emSize,
                     _tableCellForeground,
-                    pixelsPerDip)
+                    _pixelsPerDip)
                 {
                     MaxTextWidth = cellWidth,
                     MaxLineCount = 1,
@@ -402,28 +395,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         private void DrawCheckbox(DrawingContext dc, double top, double height, bool isChecked)
         {
-            const double size = 12.0;
-            const double margin = 4.0;
+            string glyph = isChecked ? "\u2611" : "\u2610";
+            var brush = isChecked ? CheckboxCheckedFill : _tableCellForeground;
+            double emSize = height * 0.72;
+
+            var ft = new FormattedText(
+                glyph,
+                CultureInfo.CurrentUICulture,
+                FlowDirection.LeftToRight,
+                CheckboxTypeface,
+                emSize,
+                brush,
+                _pixelsPerDip);
+
+            const double margin = 2.0;
             double cx = margin;
-            double cy = top + (height - size) / 2.0;
-            var rect = new Rect(cx, cy, size, size);
-
-            dc.DrawRoundedRectangle(
-                isChecked ? CheckboxCheckedFill : CheckboxUncheckedFill,
-                _checkboxStrokePen,
-                rect, 2, 2);
-
-            if (isChecked)
-            {
-                double x0 = cx + size * 0.20;
-                double y0 = cy + size * 0.50;
-                double x1 = cx + size * 0.42;
-                double y1 = cy + size * 0.75;
-                double x2 = cx + size * 0.80;
-                double y2 = cy + size * 0.25;
-                dc.DrawLine(CheckmarkPen, new Point(x0, y0), new Point(x1, y1));
-                dc.DrawLine(CheckmarkPen, new Point(x1, y1), new Point(x2, y2));
-            }
+            double cy = top + (height - ft.Height) / 2.0;
+            dc.DrawText(ft, new Point(cx, cy));
         }
     }
 }
