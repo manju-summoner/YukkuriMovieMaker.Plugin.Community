@@ -159,9 +159,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var centerY = translateY + imgH * scale / 2.0;
 
             var snap = PuppetDeformationFrameService.Snapshot;
-            var frame = snap?.Frame ?? 0;
+            var frame = snap?.ItemFrame ?? 0;
+            var length = snap?.ItemLength ?? 1;
             var fps = snap?.FPS ?? 0;
-            var length = 1;
             var safeFps = fps > 0 ? fps : 1;
 
             var vms = pinViewModels;
