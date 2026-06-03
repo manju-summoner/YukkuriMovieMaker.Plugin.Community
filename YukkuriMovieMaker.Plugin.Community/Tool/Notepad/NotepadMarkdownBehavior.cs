@@ -171,13 +171,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             int charOffset = Math.Clamp(pos.Value.Column - 1, 0, Math.Max(0, lineText.Length - 1));
 
             if (!NotepadMarkdownParser.TryFindLinkAtOffset(lineText, charOffset, out var url)) return;
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return;
+            if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeMailto) return;
 
             e.Handled = true;
             try
             {
-                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                Process.Start(new ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true });
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
         }
 
         private void AttachMarkdown()
