@@ -31,6 +31,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
+            if (!PuppetDeformationFrameService.IsInternalRendering)
+            {
+                var scene = effectDescription.Scenes.FirstOrDefault(x => x.ID == effectDescription.SceneId);
+                if (scene != null)
+                {
+                    PuppetDeformationFrameService.CurrentScene = scene;
+                    PuppetDeformationFrameService.CurrentFrame = effectDescription.TimelinePosition.Frame;
+                    PuppetDeformationFrameService.CurrentFPS = effectDescription.FPS;
+                    PuppetDeformationFrameService.NotifyFrameUpdated();
+                }
+            }
+
             if (IsPassThroughEffect || effect is null)
                 return effectDescription.DrawDescription;
 
@@ -71,7 +83,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 gpuCache = BuildGpuCache(stiffness, imageWidth, imageHeight, samples);
 
                 effect.PinData = gpuCache.PinData;
-                //変形オフ時はPinCount=0を送り、シェーダー側で変形せず入力をそのまま出力する。
                 effect.PinCount = apply ? pinCount : 0;
                 effect.Stiffness = stiffness;
 
@@ -85,7 +96,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 }
                 else
                 {
-                    //変形しないので出力範囲は拡張しない(入力範囲のまま)。
                     effect.TightLocalLeft = 0;
                     effect.TightLocalTop = 0;
                     effect.TightLocalRight = 0;

@@ -31,7 +31,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         EditSnapshot? activeSnapshot;
 
-        public void SetEditorInfo(IEditorInfo info) { }
+        PuppetDeformationMapWindow? mapWindow;
 
         public int Columns { get => columns; private set => Set(ref columns, value); }
         public int Rows { get => rows; private set => Set(ref rows, value); }
@@ -48,6 +48,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         public ICommand ResetCommand { get; }
         public ICommand OnBeginEditPointCommand { get; }
         public ICommand OnEndEditPointCommand { get; }
+        public ICommand OpenMapCommand { get; }
 
         public MessageBoxViewModel MessageBox { get; } = new MessageBoxViewModel();
 
@@ -101,7 +102,33 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             OnBeginEditPointCommand = new ActionCommand(_ => true, _ => OnBeginEditPoint());
             OnEndEditPointCommand = new ActionCommand(_ => true, _ => OnEndEditPoint());
 
+            OpenMapCommand = new ActionCommand(_ => true, _ => OpenMap());
+
             RebuildViewModels();
+        }
+
+        void OpenMap()
+        {
+            if (mapWindow is not null)
+            {
+                if (mapWindow.IsVisible)
+                {
+                    mapWindow.Activate();
+                    return;
+                }
+                mapWindow.Close();
+                mapWindow = null;
+            }
+
+            var vm = new PuppetDeformationMapViewModel(Effect);
+            var window = new PuppetDeformationMapWindow
+            {
+                DataContext = vm,
+                Owner = Application.Current?.MainWindow,
+            };
+            window.Closed += (_, _) => mapWindow = null;
+            mapWindow = window;
+            window.Show();
         }
 
         void CommitStructuralChange(ImmutableList<PuppetDeformation> newPins)
@@ -557,6 +584,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (disposedValue) return;
             if (disposing)
             {
+                mapWindow?.Close();
+                mapWindow = null;
                 Effect.PropertyChanged -= Effect_PropertyChanged;
                 foreach (var item in allViewModels)
                 {
