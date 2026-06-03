@@ -347,7 +347,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 totalRawWidth += widths[c];
             }
 
-            if (totalRawWidth > 0)
+            if (totalRawWidth > 0 && tableWidth > TableBorderOffset)
             {
                 double scale = (tableWidth - TableBorderOffset) / totalRawWidth;
                 for (int c = 0; c < widths.Length; c++)
