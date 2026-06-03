@@ -6,6 +6,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
     {
         private readonly Dictionary<int, NotepadMarkdownBlockInfo> _lineInfos = new();
         private readonly List<NotepadMarkdownTableInfo> _tables = new();
+        private readonly Dictionary<int, NotepadMarkdownTableInfo> _tableByLine = new();
 
         internal void SetLineInfo(int lineNumber, NotepadMarkdownBlockInfo info)
             => _lineInfos[lineNumber] = info;
@@ -14,14 +15,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             => _lineInfos.TryGetValue(lineNumber, out var info) ? info : NotepadMarkdownBlockInfo.Normal;
 
         internal void AddTable(NotepadMarkdownTableInfo table)
-            => _tables.Add(table);
+        {
+            _tables.Add(table);
+            for (int ln = table.FirstLine; ln <= table.LastLine; ln++)
+                _tableByLine[ln] = table;
+        }
 
         internal NotepadMarkdownTableInfo? GetTableForLine(int lineNumber)
-        {
-            foreach (var table in _tables)
-                if (table.ContainsLine(lineNumber)) return table;
-            return null;
-        }
+            => _tableByLine.TryGetValue(lineNumber, out var table) ? table : null;
 
         internal IReadOnlyList<NotepadMarkdownTableInfo> Tables => _tables;
         internal IReadOnlyDictionary<int, NotepadMarkdownBlockInfo> Lines => _lineInfos;
