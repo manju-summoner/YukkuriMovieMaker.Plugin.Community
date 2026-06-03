@@ -149,7 +149,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         {
             if (AssociatedObject is null) return;
             if (AssociatedObject.TextArea.Cursor == Cursors.Hand)
+            {
                 AssociatedObject.TextArea.Cursor = _savedCursor;
+                _savedCursor = null;
+            }
         }
 
         private void OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
