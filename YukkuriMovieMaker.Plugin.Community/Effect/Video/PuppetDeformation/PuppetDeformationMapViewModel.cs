@@ -97,15 +97,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 if (disposed || PuppetDeformationFrameService.IsInternalRendering) return;
 
-                var scene = PuppetDeformationFrameService.CurrentScene;
-                if (scene is null) return;
+                var snapshot = PuppetDeformationFrameService.Snapshot;
+                if (snapshot is null) return;
 
-                if (currentSceneId != scene.ID || source is null)
+                if (currentSceneId != snapshot.Scene.ID || source is null)
                 {
                     source?.Dispose();
                     source = null;
-                    currentSceneId = scene.ID;
-                    if (scene.TryCreateVideoSource(out var newSource))
+                    currentSceneId = snapshot.Scene.ID;
+                    if (snapshot.Scene.TryCreateVideoSource(out var newSource))
                         source = newSource;
                 }
 
@@ -114,8 +114,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 PuppetDeformationFrameService.IsInternalRendering = true;
                 try
                 {
-                    int frame = PuppetDeformationFrameService.CurrentFrame;
-                    int fps = PuppetDeformationFrameService.CurrentFPS;
+                    int frame = snapshot.Frame;
+                    int fps = snapshot.FPS;
                     if (fps > 0)
                     {
                         var time = TimeSpan.FromTicks((long)frame * 10000000 / fps);
@@ -158,8 +158,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var centerX = translateX + imgW * scale / 2.0;
             var centerY = translateY + imgH * scale / 2.0;
 
-            var frame = PuppetDeformationFrameService.CurrentFrame;
-            var fps = PuppetDeformationFrameService.CurrentFPS;
+            var snap = PuppetDeformationFrameService.Snapshot;
+            var frame = snap?.Frame ?? 0;
+            var fps = snap?.FPS ?? 0;
             var length = 1;
             var safeFps = fps > 0 ? fps : 1;
 

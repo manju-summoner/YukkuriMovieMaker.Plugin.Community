@@ -36,10 +36,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 var scene = effectDescription.Scenes.FirstOrDefault(x => x.ID == effectDescription.SceneId);
                 if (scene != null)
                 {
-                    PuppetDeformationFrameService.CurrentScene = scene;
-                    PuppetDeformationFrameService.CurrentFrame = effectDescription.TimelinePosition.Frame;
-                    PuppetDeformationFrameService.CurrentFPS = effectDescription.FPS;
-                    PuppetDeformationFrameService.NotifyFrameUpdated();
+                    PuppetDeformationFrameService.Publish(scene, effectDescription.TimelinePosition.Frame, effectDescription.FPS);
                 }
             }
 
