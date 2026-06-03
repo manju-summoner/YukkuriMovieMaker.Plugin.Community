@@ -90,7 +90,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 x =>
                 {
                     var filePath = x as string;
-                    var preferredExt = DeterminePreferredSaveExtension(FilePath, Text);
+                    var preferredExt = DeterminePreferredSaveExtension(FilePath, Text, IsMarkdownEnabled);
 
                     if (string.IsNullOrEmpty(filePath) || !MatchesPreferredExtension(filePath, preferredExt))
                     {
@@ -223,12 +223,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             }
         }
 
-        private static string DeterminePreferredSaveExtension(string currentFilePath, string text)
+        private static string DeterminePreferredSaveExtension(string currentFilePath, string text, bool isMarkdownEnabled)
         {
             if (NotepadDocumentSerializer.ContainsImages(text))
                 return NotepadDocumentSerializer.PackageExtension;
             var currentExt = Path.GetExtension(currentFilePath);
             if (string.Equals(currentExt, NotepadDocumentSerializer.MarkdownExtension, StringComparison.OrdinalIgnoreCase))
+                return NotepadDocumentSerializer.MarkdownExtension;
+            if (isMarkdownEnabled)
                 return NotepadDocumentSerializer.MarkdownExtension;
             return NotepadDocumentSerializer.PlainTextExtension;
         }
