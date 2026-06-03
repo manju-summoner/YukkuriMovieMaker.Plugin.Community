@@ -161,8 +161,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
             if (isValidTable)
             {
-                var alignments = ParseAlignments(accumulator[separatorIndex].text);
-                int columnCount = Math.Max(alignments.Count, 1);
+                var separatorAlignments = ParseAlignments(accumulator[separatorIndex].text);
+
+                int columnCount = separatorAlignments.Count;
+                foreach (var (_, text, isSep) in accumulator)
+                {
+                    if (isSep) continue;
+                    columnCount = Math.Max(columnCount, SplitTableCells(text).Count);
+                }
+                columnCount = Math.Max(columnCount, 1);
+
+                var alignments = new List<NotepadMarkdownTableAlignment>(columnCount);
+                alignments.AddRange(separatorAlignments);
+                while (alignments.Count < columnCount)
+                    alignments.Add(NotepadMarkdownTableAlignment.Left);
 
                 var rows = new List<IReadOnlyList<string>>();
                 int separatorLineNum = accumulator[separatorIndex].lineNum;
