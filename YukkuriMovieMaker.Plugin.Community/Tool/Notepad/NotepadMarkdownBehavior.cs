@@ -126,8 +126,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 {
                     var docLine = AssociatedObject.Document.GetLineByNumber(lineNumber);
                     var lineText = AssociatedObject.Document.GetText(docLine.Offset, docLine.Length);
-                    int charOffset = Math.Clamp(pos.Value.Column - 1, 0, Math.Max(0, lineText.Length - 1));
-                    overLink = NotepadMarkdownParser.TryFindLinkAtOffset(lineText, charOffset, out _);
+                    int charOffset = pos.Value.Column - 1;
+                    if (charOffset >= 0 && charOffset < lineText.Length)
+                        overLink = NotepadMarkdownParser.TryFindLinkAtOffset(lineText, charOffset, out _);
                 }
             }
 
@@ -171,7 +172,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
             var docLine = AssociatedObject.Document.GetLineByNumber(lineNumber);
             var lineText = AssociatedObject.Document.GetText(docLine.Offset, docLine.Length);
-            int charOffset = Math.Clamp(pos.Value.Column - 1, 0, Math.Max(0, lineText.Length - 1));
+            int charOffset = pos.Value.Column - 1;
+            if (charOffset < 0 || charOffset >= lineText.Length) return;
 
             if (!NotepadMarkdownParser.TryFindLinkAtOffset(lineText, charOffset, out var url)) return;
             if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return;
