@@ -228,13 +228,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             double emSize = textView.DefaultLineHeight * TextEmScaleFactor;
             const double paddingH = 6.0;
 
-            int dataRowIndex = 0;
+            int separatorOffset = table.SeparatorLine > table.FirstLine ? 1 : 0;
             for (int ln = table.FirstLine; ln <= table.LastLine; ln++)
             {
                 if (ln == table.SeparatorLine) continue;
+                bool isHeader = table.IsHeaderLine(ln);
+                int dataRowIndex = isHeader ? 0 : ln - table.FirstLine - separatorOffset - 1;
+
                 if (!rowTops.TryGetValue(ln, out double rTop)) continue;
                 double rHeight = rowBottoms[ln] - rTop;
-                bool isHeader = table.IsHeaderLine(ln);
 
                 if (isHeader)
                     drawingContext.DrawRectangle(TableHeaderBackground, null, new Rect(0, rTop, tableWidth, rHeight));
@@ -247,8 +249,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     DrawTableRowText(drawingContext, table.Rows[rowDataIndex], table.Alignments,
                         columnX, columnWidths, rTop, rHeight, paddingH, isHeader, emSize);
                 }
-
-                if (!isHeader) dataRowIndex++;
             }
 
             drawingContext.DrawLine(_tableBorderPen, new Point(0, tableTop + 0.5), new Point(tableWidth, tableTop + 0.5));
