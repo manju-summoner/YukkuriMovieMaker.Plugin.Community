@@ -10,6 +10,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 {
     internal sealed class NotepadMarkdownBackgroundRenderer : IBackgroundRenderer
     {
+        private const double TableBorderOffset = 2.0;
+        private const double TableMinColumnWidth = 60.0;
+        private const double TableCharWidthEstimate = 7.5;
+        private const double TableColumnPadding = 12.0;
+        private const double TableMinContentChars = 4.0;
+        private const double TextEmScaleFactor = 0.72;
+
         private static readonly SolidColorBrush CodeBlockBackground;
         private static readonly SolidColorBrush TableHeaderBackground;
         private static readonly SolidColorBrush TableRowEvenBackground;
@@ -218,7 +225,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             double tableWidth = Math.Min(textView.ActualWidth, CalculateTableWidth(table));
             double[] columnWidths = CalculateColumnWidths(table, tableWidth);
             double[] columnX = BuildColumnXPositions(columnWidths);
-            double emSize = textView.DefaultLineHeight * 0.72;
+            double emSize = textView.DefaultLineHeight * TextEmScaleFactor;
             const double paddingH = 6.0;
 
             int dataRowIndex = 0;
@@ -325,16 +332,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         {
             double total = 0;
             for (int c = 0; c < table.ColumnCount; c++)
-            {
-                double maxLen = 4;
-                foreach (var row in table.Rows)
-                {
-                    if (c < row.Count)
-                        maxLen = Math.Max(maxLen, row[c].Length);
-                }
-                total += Math.Max(60, maxLen * 7.5 + 12);
-            }
-            return total + 2;
+                total += EstimateColumnWidth(table, c);
+            return total + TableBorderOffset;
         }
 
         private static double[] CalculateColumnWidths(NotepadMarkdownTableInfo table, double tableWidth)
@@ -344,24 +343,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
             for (int c = 0; c < table.ColumnCount; c++)
             {
-                double maxLen = 4;
-                foreach (var row in table.Rows)
-                {
-                    if (c < row.Count)
-                        maxLen = Math.Max(maxLen, row[c].Length);
-                }
-                widths[c] = Math.Max(60, maxLen * 7.5 + 12);
+                widths[c] = EstimateColumnWidth(table, c);
                 totalRawWidth += widths[c];
             }
 
             if (totalRawWidth > 0)
             {
-                double scale = (tableWidth - 2) / totalRawWidth;
+                double scale = (tableWidth - TableBorderOffset) / totalRawWidth;
                 for (int c = 0; c < widths.Length; c++)
                     widths[c] *= scale;
             }
 
             return widths;
+        }
+
+        private static double EstimateColumnWidth(NotepadMarkdownTableInfo table, int columnIndex)
+        {
+            double maxLen = TableMinContentChars;
+            foreach (var row in table.Rows)
+            {
+                if (columnIndex < row.Count)
+                    maxLen = Math.Max(maxLen, row[columnIndex].Length);
+            }
+            return Math.Max(TableMinColumnWidth, maxLen * TableCharWidthEstimate + TableColumnPadding);
         }
 
         private static double[] BuildColumnXPositions(double[] columnWidths)
@@ -392,7 +396,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         {
             string glyph = isChecked ? "\u2611" : "\u2610";
             var brush = isChecked ? CheckboxCheckedFill : _tableCellForeground;
-            double emSize = height * 0.72;
+            double emSize = height * TextEmScaleFactor;
 
             var ft = new FormattedText(
                 glyph,
