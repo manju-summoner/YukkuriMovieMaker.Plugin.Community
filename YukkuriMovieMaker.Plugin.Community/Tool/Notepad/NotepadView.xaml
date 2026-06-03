@@ -108,8 +108,6 @@
                 <Separator/>
                 <Button Content="{DynamicResource {x:Static icons:IconKeys.Magnify}}" Command="{Binding ToggleSearchCommand}" ToolTip="{x:Static local:Texts.Search}"/>
                 <Separator/>
-                <Button Content="{DynamicResource {x:Static icons:IconKeys.LanguageMarkdown}}" Command="{Binding ToggleMarkdownCommand}" ToolTip="{x:Static local:Texts.MarkdownMode}"/>
-                <Separator/>
                 <controls:DropDownButton Content="{DynamicResource {x:Static icons:IconKeys.Cog}}" ToolTip="{x:Static local:Texts.Settings}" Background="Transparent" BorderBrush="Transparent" Padding="3">
                     <controls:DropDownButton.Style>
                         <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
@@ -125,6 +123,10 @@
                                       IsCheckable="True"
                                       IsChecked="{Binding ShowLineNumbers, Mode=TwoWay}"
                                       Icon="{DynamicResource {x:Static icons:IconKeys.FormatListNumbered}}"/>
+                            <MenuItem Header="{x:Static local:Texts.MarkdownMode}"
+                                      IsCheckable="True"
+                                      IsChecked="{Binding IsMarkdownEnabled, Mode=TwoWay}"
+                                      Icon="{DynamicResource {x:Static icons:IconKeys.LanguageMarkdown}}"/>
                         </ContextMenu>
                     </controls:DropDownButton.ContextMenu>
                 </controls:DropDownButton>

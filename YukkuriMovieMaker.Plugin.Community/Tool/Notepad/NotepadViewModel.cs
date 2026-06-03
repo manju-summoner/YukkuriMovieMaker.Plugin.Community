@@ -41,7 +41,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public ICommand OpenNewTabCommand { get; }
         public ICommand InsertImageCommand { get; }
         public ICommand ToggleSearchCommand { get; }
-        public ICommand ToggleMarkdownCommand { get; }
 
         public event EventHandler<NotepadImageInsertRequestedEventArgs>? ImageInsertRequested;
         public event EventHandler? ToggleSearchRequested;
@@ -152,9 +151,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             ToggleSearchCommand = new ActionCommand(
                 _ => true,
                 _ => ToggleSearchRequested?.Invoke(this, EventArgs.Empty));
-            ToggleMarkdownCommand = new ActionCommand(
-                _ => true,
-                _ => IsMarkdownEnabled = !IsMarkdownEnabled);
         }
 
         public void LoadState(ToolState stateData)
