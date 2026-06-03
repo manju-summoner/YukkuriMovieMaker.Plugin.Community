@@ -62,9 +62,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             _pixelsPerDip = VisualTreeHelper.GetDpi(textView).PixelsPerDip;
             UpdateThemeColors(textView);
 
+            var visualLineMap = new Dictionary<int, VisualLine>(textView.VisualLines.Count);
+            foreach (var vl in textView.VisualLines)
+                visualLineMap[vl.FirstDocumentLine.LineNumber] = vl;
+
             DrawCodeBlockBackgrounds(textView, drawingContext);
             DrawPerLineDecorations(textView, drawingContext);
-            DrawTables(textView, drawingContext);
+            DrawTables(textView, drawingContext, visualLineMap);
         }
 
         private void UpdateThemeColors(TextView textView)
@@ -165,14 +169,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             }
         }
 
-        private void DrawTables(TextView textView, DrawingContext drawingContext)
+        private void DrawTables(TextView textView, DrawingContext drawingContext, Dictionary<int, VisualLine> visualLineMap)
         {
             foreach (var table in _state.DocumentMap.Tables)
             {
                 bool anyVisible = false;
                 for (int ln = table.FirstLine; ln <= table.LastLine; ln++)
                 {
-                    if (TryGetVisualLine(textView, ln, out _))
+                    if (visualLineMap.ContainsKey(ln))
                     {
                         anyVisible = true;
                         break;
@@ -184,18 +188,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     && _state.ActiveLineNumber <= table.LastLine;
                 if (activeLineInTable) continue;
 
-                DrawTableGrid(textView, drawingContext, table);
+                DrawTableGrid(textView, drawingContext, table, visualLineMap);
             }
         }
 
-        private void DrawTableGrid(TextView textView, DrawingContext drawingContext, NotepadMarkdownTableInfo table)
+        private void DrawTableGrid(TextView textView, DrawingContext drawingContext, NotepadMarkdownTableInfo table, Dictionary<int, VisualLine> visualLineMap)
         {
             var rowTops = new Dictionary<int, double>();
             var rowBottoms = new Dictionary<int, double>();
 
             for (int ln = table.FirstLine; ln <= table.LastLine; ln++)
             {
-                if (!TryGetVisualLine(textView, ln, out var vl)) continue;
+                if (!visualLineMap.TryGetValue(ln, out var vl)) continue;
                 double top = vl.VisualTop - textView.ScrollOffset.Y;
                 rowTops[ln] = top;
                 rowBottoms[ln] = top + vl.Height;
@@ -370,20 +374,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 current += columnWidths[c];
             }
             return x;
-        }
-
-        private static bool TryGetVisualLine(TextView textView, int lineNumber, out VisualLine visualLine)
-        {
-            foreach (var vl in textView.VisualLines)
-            {
-                if (vl.FirstDocumentLine.LineNumber == lineNumber)
-                {
-                    visualLine = vl;
-                    return true;
-                }
-            }
-            visualLine = null!;
-            return false;
         }
 
         private void DrawHorizontalRule(DrawingContext dc, double top, double height, double width)
