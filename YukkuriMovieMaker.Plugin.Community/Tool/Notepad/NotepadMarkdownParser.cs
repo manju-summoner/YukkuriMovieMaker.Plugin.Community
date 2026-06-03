@@ -200,6 +200,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 };
                 map.AddTable(tableInfo);
             }
+            else
+            {
+                foreach (var (lineNum, _, _) in accumulator)
+                    map.SetLineInfo(lineNum, NotepadMarkdownBlockInfo.Normal);
+            }
 
             accumulator.Clear();
         }
