@@ -12,8 +12,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.WaveClipping
     {
         public override string Label => Texts.WaveClipping;
 
-        internal int RandomSeed { get; } = Random.Shared.Next();
-
         [Display(GroupName = nameof(Texts.WaveClipping), Name = nameof(Texts.Mode), Description = nameof(Texts.ModeDescription), ResourceType = typeof(Texts))]
         [EnumComboBox]
         public WaveClippingMode Mode
