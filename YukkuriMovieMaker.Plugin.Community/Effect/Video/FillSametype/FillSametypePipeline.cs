@@ -32,6 +32,7 @@ internal sealed class FillSametypePipeline : IDisposable
 
     int[] labels = [];
     int[] parent = [];
+    int[] rank = [];
     int[] remap = [];
     double[] moments = [];
     float[] centroids = [];
@@ -133,7 +134,10 @@ internal sealed class FillSametypePipeline : IDisposable
         Array.Fill(remap, -1, 0, pixelCount);
 
         for (int i = 0; i < pixelCount; i++)
+        {
             parent[i] = i;
+            rank[i] = 0;
+        }
 
         for (int y = 0; y < height; y++)
         {
@@ -186,10 +190,15 @@ internal sealed class FillSametypePipeline : IDisposable
         int rb = Find(b);
         if (ra == rb)
             return;
-        if (ra < rb)
+        if (rank[ra] < rank[rb])
+            parent[ra] = rb;
+        else if (rank[ra] > rank[rb])
             parent[rb] = ra;
         else
-            parent[ra] = rb;
+        {
+            parent[rb] = ra;
+            rank[ra]++;
+        }
     }
 
     int Find(int x)
@@ -255,6 +264,7 @@ internal sealed class FillSametypePipeline : IDisposable
 
         labels = new int[pixelCount];
         parent = new int[pixelCount];
+        rank = new int[pixelCount];
         remap = new int[pixelCount];
     }
 
