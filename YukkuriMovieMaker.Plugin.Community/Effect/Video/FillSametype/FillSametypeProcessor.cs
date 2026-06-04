@@ -31,6 +31,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         ID2D1Image? colorMatchOutput;
         GaussianBlur? blurEffect;
         Vortice.Direct2D1.Effects.AlphaMask? alphaMaskEffect;
+        ID2D1Image? alphaMaskOutput;
         Vortice.Direct2D1.Effects.AlphaMask? luminanceMaskEffect;
         Opacity? opacityEffect;
         AffineTransform2D? finalMaskTransform;
@@ -53,7 +54,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         int bufferPixelCount;
 
         bool isFirst = true;
-        ID2D1Image? currentInput;
         Type? brushType;
         RawRectF lastBounds;
         double opacity, blur, tolerance, shapeThreshold, posX, posY;
@@ -61,6 +61,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         Vector4 lastMatchColor;
         double lastForegroundTolerance;
         int lastComponentCount;
+        int lastAnalyzedFrame = -1;
 
         public FillSametypeProcessor(IGraphicsDevicesAndContext devices, FillSametypeEffect item)
             : base(devices)
@@ -95,6 +96,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             alphaMaskEffect = new Vortice.Direct2D1.Effects.AlphaMask(devices.DeviceContext);
             disposer.Collect(alphaMaskEffect);
 
+            alphaMaskOutput = alphaMaskEffect.Output;
+            disposer.Collect(alphaMaskOutput);
+
             luminanceMaskEffect = new Vortice.Direct2D1.Effects.AlphaMask(devices.DeviceContext);
             disposer.Collect(luminanceMaskEffect);
 
@@ -110,7 +114,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             finalMaskTransformOutput = finalMaskTransform.Output;
             disposer.Collect(finalMaskTransformOutput);
 
-            using var alphaMaskOutput = alphaMaskEffect.Output;
             opacityEffect.SetInput(0, alphaMaskOutput, true);
         }
 
@@ -134,7 +137,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             outputEffect?.SetInput(0, null, true);
             alphaMaskEffect?.SetInput(0, null, true);
             alphaMaskEffect?.SetInput(1, null, true);
-            opacityEffect?.SetInput(0, null, true);
             luminanceMaskEffect?.SetInput(0, null, true);
             luminanceMaskEffect?.SetInput(1, null, true);
             blurEffect?.SetInput(0, null, true);
@@ -184,18 +186,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             brushSource?.Update(effectDescription);
 
             bool needsMaskUpdate = isFirst
-                || currentInput != input
                 || !lastBounds.Equals(bounds)
                 || tolerance != currentTolerance
                 || shapeThreshold != currentShapeThreshold
                 || isInverted != currentIsInverted
                 || posX != currentX
-                || posY != currentY;
+                || posY != currentY
+                || frame != lastAnalyzedFrame;
 
             ID2D1Image? maskSource;
             if (needsMaskUpdate)
             {
-                maskSource = PrepareSametypeMask(dc, bounds, width, height, currentX, currentY, currentTolerance, currentShapeThreshold, currentIsInverted);
+                maskSource = PrepareSametypeMask(dc, bounds, width, height, currentX, currentY, currentTolerance, currentShapeThreshold, currentIsInverted, frame);
             }
             else
             {
@@ -282,7 +284,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             }
 
             isFirst = false;
-            currentInput = input;
             lastBounds = bounds;
             opacity = currentOpacity;
             blur = currentBlur;
@@ -324,7 +325,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             double y,
             double toleranceRaw,
             double shapeThresholdRaw,
-            bool invert)
+            bool invert,
+            int frame)
         {
             int pixelCount = width * height;
             var mask = EnsureBuffers(pixelCount).Mask;
@@ -332,10 +334,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             Vector4 matchColor = ReadSeedColor(dc, bounds, width, height, x, y, out int seedX, out int seedY);
 
             bool foregroundChanged = isFirst
+                || frame != lastAnalyzedFrame
                 || toleranceRaw != lastForegroundTolerance
                 || !ColorWithinTolerance(matchColor, lastMatchColor, toleranceRaw)
-                || !lastBounds.Equals(bounds)
-                || currentInput != input;
+                || !lastBounds.Equals(bounds);
 
             int components;
             if (foregroundChanged)
@@ -346,6 +348,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
                 lastMatchColor = matchColor;
                 lastForegroundTolerance = toleranceRaw;
                 lastComponentCount = components;
+                lastAnalyzedFrame = frame;
             }
             else
             {
