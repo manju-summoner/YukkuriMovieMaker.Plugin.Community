@@ -582,7 +582,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
                 bufferPixelCount = pixelCount;
             }
 
-            return (foregroundBuffer!, maskBuffer!);
+            return (foregroundBuffer ?? (foregroundBuffer = new int[pixelCount]),
+                    maskBuffer ?? (maskBuffer = new int[pixelCount]));
         }
     }
 }
