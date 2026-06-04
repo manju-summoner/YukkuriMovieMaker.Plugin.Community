@@ -106,20 +106,25 @@ internal sealed class FillSametypePipeline : IDisposable
 
         float similarityThreshold = 1f - Math.Clamp(threshold / 100f, 0f, 1f);
 
-        bool matchChanged = seedComponent != lastSeedComponent
+        bool correlationChanged = seedComponent != lastSeedComponent
             || similarityThreshold != lastSimilarityThreshold
-            || analysisGeneration != lastMatchGeneration
-            || invert != lastInvert;
+            || analysisGeneration != lastMatchGeneration;
 
-        if (!matchChanged)
+        bool maskChanged = correlationChanged || invert != lastInvert;
+
+        if (!maskChanged)
             return false;
 
-        device.For(componentCount, new CorrelationMatchShader(
-            featureBuffer, matchFlagBuffer, seedComponent, AngleBins, RadialBins, similarityThreshold, componentCount));
+        if (correlationChanged)
+        {
+            device.For(componentCount, new CorrelationMatchShader(
+                featureBuffer, matchFlagBuffer, seedComponent, AngleBins, RadialBins, similarityThreshold, componentCount));
 
-        lastSeedComponent = seedComponent;
-        lastSimilarityThreshold = similarityThreshold;
-        lastMatchGeneration = analysisGeneration;
+            lastSeedComponent = seedComponent;
+            lastSimilarityThreshold = similarityThreshold;
+            lastMatchGeneration = analysisGeneration;
+        }
+
         lastInvert = invert;
 
         device.For(width, height, new MaskShader(
