@@ -331,8 +331,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             Vector4 matchColor = ReadSeedColor(dc, bounds, width, height, x, y, out int seedX, out int seedY);
 
             bool foregroundChanged = isFirst
-                || !ColorWithinTolerance(matchColor, lastMatchColor, toleranceRaw)
                 || toleranceRaw != lastForegroundTolerance
+                || !ColorWithinTolerance(matchColor, lastMatchColor, toleranceRaw)
                 || !lastBounds.Equals(bounds)
                 || currentInput != input;
 
