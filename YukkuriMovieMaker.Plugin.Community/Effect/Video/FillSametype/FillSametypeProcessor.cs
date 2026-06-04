@@ -134,6 +134,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             outputEffect?.SetInput(0, null, true);
             alphaMaskEffect?.SetInput(0, null, true);
             alphaMaskEffect?.SetInput(1, null, true);
+            opacityEffect?.SetInput(0, null, true);
             luminanceMaskEffect?.SetInput(0, null, true);
             luminanceMaskEffect?.SetInput(1, null, true);
             blurEffect?.SetInput(0, null, true);
