@@ -174,15 +174,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             var currentY = item.Y.GetValue(frame, length, fps);
             var currentBrushType = item.Brush.Type;
 
-            bool brushUpdated = false;
             if (isFirst || brushType != currentBrushType)
             {
                 disposer.RemoveAndDispose(ref brushSource);
                 brushSource = item.Brush.CreateBrush(devices);
                 disposer.Collect(brushSource);
-                brushUpdated = true;
             }
-            brushUpdated |= brushSource?.Update(effectDescription) ?? false;
+            brushSource?.Update(effectDescription);
 
             bool needsMaskUpdate = isFirst
                 || currentInput != input
@@ -574,14 +572,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
 
         (int[] Foreground, int[] Mask) EnsureBuffers(int pixelCount)
         {
-            if (bufferPixelCount < pixelCount || foregroundBuffer is null || maskBuffer is null)
+            if (bufferPixelCount < pixelCount)
             {
                 foregroundBuffer = new int[pixelCount];
                 maskBuffer = new int[pixelCount];
                 bufferPixelCount = pixelCount;
             }
 
-            return (foregroundBuffer, maskBuffer);
+            return (foregroundBuffer!, maskBuffer!);
         }
     }
 }
