@@ -276,6 +276,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             }
             else
             {
+                disposer.RemoveAndDispose(ref luminanceCommandList);
                 outputEffect.SetInput(0, blendedCommandList, true);
             }
 
