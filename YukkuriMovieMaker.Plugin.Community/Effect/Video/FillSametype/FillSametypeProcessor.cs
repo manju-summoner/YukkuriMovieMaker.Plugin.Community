@@ -209,7 +209,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
                 return effectDescription.DrawDescription;
             }
 
-            if (isFirst || currentBlur != blur)
+            if (isFirst || needsMaskUpdate || currentBlur != blur)
                 UpdateAlphaMask(maskSource, currentBlur);
             if (isFirst || currentOpacity != opacity)
                 opacityEffect.Value = (float)(Math.Clamp(currentOpacity, 0, 100) / 100.0);
