@@ -35,6 +35,7 @@ internal sealed class FillSametypePipeline : IDisposable
     int[] remap = [];
     double[] moments = [];
     float[] centroids = [];
+    int momentCapacity;
 
     public FillSametypePipeline()
     {
@@ -54,6 +55,7 @@ internal sealed class FillSametypePipeline : IDisposable
         if (componentCount == 0)
             return 0;
 
+        EnsureMomentCapacity(componentCount);
         ComputeCentroids(width, height, componentCount);
 
         var labelGpu = EnsureLabelBuffer(pixelCount);
@@ -232,6 +234,16 @@ internal sealed class FillSametypePipeline : IDisposable
         }
     }
 
+    void EnsureMomentCapacity(int count)
+    {
+        if (momentCapacity >= count)
+            return;
+
+        moments = new double[count * MomentStride];
+        centroids = new float[count * 2];
+        momentCapacity = count;
+    }
+
     void EnsureCapacity(int width, int height)
     {
         if (this.width == width && this.height == height && labels.Length >= width * height)
@@ -244,8 +256,6 @@ internal sealed class FillSametypePipeline : IDisposable
         labels = new int[pixelCount];
         parent = new int[pixelCount];
         remap = new int[pixelCount];
-        moments = new double[MaximumComponents * MomentStride];
-        centroids = new float[MaximumComponents * 2];
     }
 
     ReadOnlyBuffer<int> EnsureLabelBuffer(int count)
