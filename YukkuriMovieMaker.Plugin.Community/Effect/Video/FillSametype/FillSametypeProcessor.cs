@@ -437,7 +437,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         {
             seedX = (int)Math.Round(x - bounds.Left);
             seedY = (int)Math.Round(y - bounds.Top);
-            if ((uint)seedX >= (uint)width || (uint)seedY >= (uint)height) { seedX = seedY = 0; return default; }
+            if ((uint)seedX >= (uint)width || (uint)seedY >= (uint)height)
+                return default;
             float sourceX = bounds.Left + seedX;
             float sourceY = bounds.Top + seedY;
 
