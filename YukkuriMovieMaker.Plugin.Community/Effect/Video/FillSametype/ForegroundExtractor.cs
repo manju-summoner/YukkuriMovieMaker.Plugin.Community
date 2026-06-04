@@ -10,17 +10,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         {
             fixed (int* destination = foreground)
             {
-                for (int y = 0; y < height; y++)
+                if (Avx2.IsSupported)
                 {
-                    byte* row = source + (nint)y * pitch;
-                    int* dst = destination + (nint)y * width;
-
-                    if (Avx2.IsSupported)
-                        ExtractRowAvx2(row, width, dst);
-                    else if (Sse2.IsSupported)
-                        ExtractRowSse2(row, width, dst);
-                    else
-                        ExtractRowScalar(row, width, dst, 0);
+                    for (int y = 0; y < height; y++)
+                        ExtractRowAvx2(source + (nint)y * pitch, width, destination + (nint)y * width);
+                }
+                else if (Sse2.IsSupported)
+                {
+                    for (int y = 0; y < height; y++)
+                        ExtractRowSse2(source + (nint)y * pitch, width, destination + (nint)y * width);
+                }
+                else
+                {
+                    for (int y = 0; y < height; y++)
+                        ExtractRowScalar(source + (nint)y * pitch, width, destination + (nint)y * width, 0);
                 }
             }
         }
