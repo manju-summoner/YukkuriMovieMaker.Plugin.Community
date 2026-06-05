@@ -163,7 +163,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                         break;
                     case NotepadMarkdownBlockType.TableSeparator:
                         var sepTable = _state.DocumentMap.GetTableForLine(lineNumber);
-                        if (sepTable != null)
+                        if (sepTable != null && !sepTable.ContainsLine(_state.ActiveLineNumber))
                         {
                             double tableWidth = Math.Min(width, CalculateTableWidth(sepTable));
                             DrawTableHeaderSeparator(drawingContext, top, height, tableWidth);
