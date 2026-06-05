@@ -1,0 +1,351 @@
+using ComputeSharp;
+
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey;
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct DisplacementFieldShader(
+    ReadOnlyBuffer<int> bgra,
+    ReadWriteBuffer<float> colorLab,
+    ReadWriteBuffer<float> directions,
+    float backgroundL,
+    float backgroundA,
+    float backgroundB,
+    float noiseThreshold,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadOnlyBuffer<int> bgra = bgra;
+    private readonly ReadWriteBuffer<float> colorLab = colorLab;
+    private readonly ReadWriteBuffer<float> directions = directions;
+    private readonly float backgroundL = backgroundL;
+    private readonly float backgroundA = backgroundA;
+    private readonly float backgroundB = backgroundB;
+    private readonly float noiseThreshold = noiseThreshold;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int index = y * width + x;
+        int triple = index * 3;
+
+        int packed = bgra[index];
+        int a = (packed >> 24) & 0xFF;
+
+        if (a == 0)
+        {
+            colorLab[triple + 0] = 0f;
+            colorLab[triple + 1] = 0f;
+            colorLab[triple + 2] = 0f;
+            directions[triple + 0] = 0f;
+            directions[triple + 1] = 0f;
+            directions[triple + 2] = 0f;
+            return;
+        }
+
+        float invA = 1f / a;
+        float bSrgb = Hlsl.Saturate(((packed >> 0) & 0xFF) * invA);
+        float gSrgb = Hlsl.Saturate(((packed >> 8) & 0xFF) * invA);
+        float rSrgb = Hlsl.Saturate(((packed >> 16) & 0xFF) * invA);
+
+        float lr = rSrgb <= 0.04045f ? rSrgb / 12.92f : Hlsl.Pow((rSrgb + 0.055f) / 1.055f, 2.4f);
+        float lg = gSrgb <= 0.04045f ? gSrgb / 12.92f : Hlsl.Pow((gSrgb + 0.055f) / 1.055f, 2.4f);
+        float lb = bSrgb <= 0.04045f ? bSrgb / 12.92f : Hlsl.Pow((bSrgb + 0.055f) / 1.055f, 2.4f);
+
+        float l = 0.4122214708f * lr + 0.5363325363f * lg + 0.0514459929f * lb;
+        float m = 0.2119034982f * lr + 0.6806995451f * lg + 0.1073969566f * lb;
+        float s = 0.0883024619f * lr + 0.2817188376f * lg + 0.6299787005f * lb;
+
+        float l_ = Hlsl.Pow(Hlsl.Abs(l), 1f / 3f) * Hlsl.Sign(l);
+        float m_ = Hlsl.Pow(Hlsl.Abs(m), 1f / 3f) * Hlsl.Sign(m);
+        float s_ = Hlsl.Pow(Hlsl.Abs(s), 1f / 3f) * Hlsl.Sign(s);
+
+        float labL = 0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_;
+        float labA = 1.9779984951f * l_ - 2.4285922050f * m_ + 0.4505937099f * s_;
+        float labB = 0.0259040371f * l_ + 0.7827717662f * m_ - 0.8086757660f * s_;
+
+        colorLab[triple + 0] = labL;
+        colorLab[triple + 1] = labA;
+        colorLab[triple + 2] = labB;
+
+        float dl = labL - backgroundL;
+        float da = labA - backgroundA;
+        float db = labB - backgroundB;
+
+        float len = Hlsl.Sqrt(dl * dl + da * da + db * db);
+
+        if (len < noiseThreshold)
+        {
+            directions[triple + 0] = 0f;
+            directions[triple + 1] = 0f;
+            directions[triple + 2] = 0f;
+            return;
+        }
+
+        float inv = 1f / len;
+        directions[triple + 0] = dl * inv;
+        directions[triple + 1] = da * inv;
+        directions[triple + 2] = db * inv;
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct DirectionSmoothShader(
+    ReadWriteBuffer<float> sourceDirections,
+    ReadWriteBuffer<float> colorLab,
+    ReadWriteBuffer<float> targetDirections,
+    float sigmaColorSq,
+    int radius,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadWriteBuffer<float> sourceDirections = sourceDirections;
+    private readonly ReadWriteBuffer<float> colorLab = colorLab;
+    private readonly ReadWriteBuffer<float> targetDirections = targetDirections;
+    private readonly float sigmaColorSq = sigmaColorSq;
+    private readonly int radius = radius;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int index = y * width + x;
+        int triple = index * 3;
+
+        float nl = sourceDirections[triple + 0];
+        float na = sourceDirections[triple + 1];
+        float nb = sourceDirections[triple + 2];
+
+        if (nl * nl + na * na + nb * nb < 0.25f)
+        {
+            targetDirections[triple + 0] = 0f;
+            targetDirections[triple + 1] = 0f;
+            targetDirections[triple + 2] = 0f;
+            return;
+        }
+
+        float cl = colorLab[triple + 0];
+        float ca = colorLab[triple + 1];
+        float cb = colorLab[triple + 2];
+
+        float sumL = 0f;
+        float sumA = 0f;
+        float sumB = 0f;
+        float sumW = 0f;
+
+        float twoSigmaSpaceSq = 2f * radius * radius;
+
+        for (int dy = -radius; dy <= radius; dy++)
+        {
+            int sy = y + dy;
+            if (sy < 0 || sy >= height)
+                continue;
+
+            for (int dx = -radius; dx <= radius; dx++)
+            {
+                int sx = x + dx;
+                if (sx < 0 || sx >= width)
+                    continue;
+
+                int sIndex = sy * width + sx;
+                int sTriple = sIndex * 3;
+
+                float ml = sourceDirections[sTriple + 0];
+                float ma = sourceDirections[sTriple + 1];
+                float mb = sourceDirections[sTriple + 2];
+
+                if (ml * ml + ma * ma + mb * mb < 0.25f)
+                    continue;
+
+                float wSpace = Hlsl.Exp(-(dx * dx + dy * dy) / Hlsl.Max(twoSigmaSpaceSq, 1e-6f));
+
+                float dcl = cl - colorLab[sTriple + 0];
+                float dca = ca - colorLab[sTriple + 1];
+                float dcb = cb - colorLab[sTriple + 2];
+                float colorDistSq = dcl * dcl + dca * dca + dcb * dcb;
+                float wColor = Hlsl.Exp(-colorDistSq / Hlsl.Max(sigmaColorSq, 1e-6f));
+
+                float dot = nl * ml + na * ma + nb * mb;
+                float wDir = Hlsl.Max(0f, dot);
+
+                float w = wSpace * wColor * wDir;
+
+                sumL += ml * w;
+                sumA += ma * w;
+                sumB += mb * w;
+                sumW += w;
+            }
+        }
+
+        if (sumW > 1e-6f)
+        {
+            float avgL = sumL / sumW;
+            float avgA = sumA / sumW;
+            float avgB = sumB / sumW;
+            float norm = Hlsl.Sqrt(avgL * avgL + avgA * avgA + avgB * avgB);
+            if (norm > 1e-6f)
+            {
+                float inv = 1f / norm;
+                targetDirections[triple + 0] = avgL * inv;
+                targetDirections[triple + 1] = avgA * inv;
+                targetDirections[triple + 2] = avgB * inv;
+                return;
+            }
+        }
+
+        targetDirections[triple + 0] = nl;
+        targetDirections[triple + 1] = na;
+        targetDirections[triple + 2] = nb;
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct ClusterAssignAccumulateShader(
+    ReadWriteBuffer<float> directions,
+    ReadOnlyBuffer<float> centers,
+    ReadWriteBuffer<int> sums,
+    ReadWriteBuffer<int> counts,
+    int clusterCount,
+    float fixedPointScale,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadWriteBuffer<float> directions = directions;
+    private readonly ReadOnlyBuffer<float> centers = centers;
+    private readonly ReadWriteBuffer<int> sums = sums;
+    private readonly ReadWriteBuffer<int> counts = counts;
+    private readonly int clusterCount = clusterCount;
+    private readonly float fixedPointScale = fixedPointScale;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int index = y * width + x;
+        int triple = index * 3;
+
+        float nl = directions[triple + 0];
+        float na = directions[triple + 1];
+        float nb = directions[triple + 2];
+
+        if (nl * nl + na * na + nb * nb < 0.25f)
+            return;
+
+        int best = 0;
+        float bestDot = -2f;
+
+        for (int c = 0; c < clusterCount; c++)
+        {
+            int cBase = c * 3;
+            float dot = nl * centers[cBase + 0] + na * centers[cBase + 1] + nb * centers[cBase + 2];
+            if (dot > bestDot)
+            {
+                bestDot = dot;
+                best = c;
+            }
+        }
+
+        int sumBase = best * 3;
+        Hlsl.InterlockedAdd(ref sums[sumBase + 0], (int)Hlsl.Round(nl * fixedPointScale));
+        Hlsl.InterlockedAdd(ref sums[sumBase + 1], (int)Hlsl.Round(na * fixedPointScale));
+        Hlsl.InterlockedAdd(ref sums[sumBase + 2], (int)Hlsl.Round(nb * fixedPointScale));
+        Hlsl.InterlockedAdd(ref counts[best], 1);
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct ProjectionHistogramShader(
+    ReadWriteBuffer<float> colorLab,
+    ReadWriteBuffer<float> directions,
+    ReadOnlyBuffer<float> centers,
+    ReadWriteBuffer<int> histogram,
+    float backgroundL,
+    float backgroundA,
+    float backgroundB,
+    int clusterCount,
+    int binsPerCluster,
+    float projectionScale,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadWriteBuffer<float> colorLab = colorLab;
+    private readonly ReadWriteBuffer<float> directions = directions;
+    private readonly ReadOnlyBuffer<float> centers = centers;
+    private readonly ReadWriteBuffer<int> histogram = histogram;
+    private readonly float backgroundL = backgroundL;
+    private readonly float backgroundA = backgroundA;
+    private readonly float backgroundB = backgroundB;
+    private readonly int clusterCount = clusterCount;
+    private readonly int binsPerCluster = binsPerCluster;
+    private readonly float projectionScale = projectionScale;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int index = y * width + x;
+        int triple = index * 3;
+
+        float nl = directions[triple + 0];
+        float na = directions[triple + 1];
+        float nb = directions[triple + 2];
+
+        if (nl * nl + na * na + nb * nb < 0.25f)
+            return;
+
+        int best = 0;
+        float bestDot = -2f;
+
+        for (int c = 0; c < clusterCount; c++)
+        {
+            int cBase = c * 3;
+            float dot = nl * centers[cBase + 0] + na * centers[cBase + 1] + nb * centers[cBase + 2];
+            if (dot > bestDot)
+            {
+                bestDot = dot;
+                best = c;
+            }
+        }
+
+        int cBase2 = best * 3;
+        float dl = colorLab[triple + 0] - backgroundL;
+        float da = colorLab[triple + 1] - backgroundA;
+        float db = colorLab[triple + 2] - backgroundB;
+
+        float proj = dl * centers[cBase2 + 0] + da * centers[cBase2 + 1] + db * centers[cBase2 + 2];
+        if (proj <= 0f)
+            return;
+
+        int bin = (int)(proj * projectionScale);
+        if (bin >= binsPerCluster)
+            bin = binsPerCluster - 1;
+        if (bin < 0)
+            bin = 0;
+
+        Hlsl.InterlockedAdd(ref histogram[best * binsPerCluster + bin], 1);
+    }
+}
