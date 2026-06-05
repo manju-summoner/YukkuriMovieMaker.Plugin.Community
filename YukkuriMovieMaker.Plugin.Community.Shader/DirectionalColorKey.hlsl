@@ -35,9 +35,9 @@ float3 LinearToOklab(float3 c)
     float m = 0.2119034982f * c.r + 0.6806995451f * c.g + 0.1073969566f * c.b;
     float s = 0.0883024619f * c.r + 0.2817188376f * c.g + 0.6299787005f * c.b;
 
-    float l_ = sign(l) * pow(abs(l), 1.0f / 3.0f);
-    float m_ = sign(m) * pow(abs(m), 1.0f / 3.0f);
-    float s_ = sign(s) * pow(abs(s), 1.0f / 3.0f);
+    float l_ = pow(l, 1.0f / 3.0f);
+    float m_ = pow(m, 1.0f / 3.0f);
+    float s_ = pow(s, 1.0f / 3.0f);
 
     return float3(
         0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_,
