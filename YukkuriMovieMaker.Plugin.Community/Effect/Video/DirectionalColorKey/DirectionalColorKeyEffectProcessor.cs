@@ -30,8 +30,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private int bufferPixelCount;
 
         private bool isFirst = true;
+        private bool hasAnalysisCache;
+        private ID2D1Image? cachedInput;
         private RawRectF lastBounds;
-        private int lastAnalyzedFrame = -1;
         private Color backgroundColor;
         private Color foregroundColor;
         private DirectionalColorKeyScaleMode scaleMode;
@@ -76,6 +77,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         protected override void ClearEffectChain()
         {
             effect?.SetInput(0, null, true);
+            hasAnalysisCache = false;
+            cachedInput = null;
         }
 
         public override DrawDescription Update(EffectDescription effectDescription)
@@ -110,7 +113,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             var backgroundChromaDir = ComputeChromaDirection(backgroundLab);
 
             bool analysisDirty = isFirst
-                || frame != lastAnalyzedFrame
+                || !hasAnalysisCache
+                || !ReferenceEquals(cachedInput, input)
                 || !lastBounds.Equals(bounds)
                 || backgroundColor != currentBackground
                 || foregroundColor != currentForeground
@@ -142,7 +146,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
                 ApplyClusters(backgroundLab);
 
-                lastAnalyzedFrame = frame;
+                cachedInput = input;
+                hasAnalysisCache = true;
             }
 
             if (isFirst || backgroundColor != currentBackground)
