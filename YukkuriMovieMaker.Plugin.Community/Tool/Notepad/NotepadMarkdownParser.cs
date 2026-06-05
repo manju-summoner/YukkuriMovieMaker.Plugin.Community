@@ -164,10 +164,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 var separatorAlignments = ParseAlignments(accumulator[separatorIndex].text);
 
                 int columnCount = separatorAlignments.Count;
-                foreach (var (_, text, isSep) in accumulator)
+                for (int idx = 0; idx < accumulator.Count; idx++)
                 {
-                    if (isSep) continue;
-                    columnCount = Math.Max(columnCount, SplitTableCells(text).Count);
+                    if (idx == separatorIndex) continue;
+                    columnCount = Math.Max(columnCount, SplitTableCells(accumulator[idx].text).Count);
                 }
                 columnCount = Math.Max(columnCount, 1);
 
@@ -183,10 +183,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
                 map.SetLineInfo(firstLineNum, new NotepadMarkdownBlockInfo(NotepadMarkdownBlockType.TableHeader, 0, 0, false));
 
-                foreach (var (lineNum, text, isSep) in accumulator)
+                for (int idx = 0; idx < accumulator.Count; idx++)
                 {
-                    if (isSep) continue;
+                    if (idx == separatorIndex) continue;
+                    var (lineNum, text, _) = accumulator[idx];
                     rows.Add(ParseTableCells(text, columnCount));
+
+                    if (idx != 0)
+                        map.SetLineInfo(lineNum, new NotepadMarkdownBlockInfo(NotepadMarkdownBlockType.TableRow, 0, 0, false));
                 }
 
                 var tableInfo = new NotepadMarkdownTableInfo
