@@ -229,13 +229,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                     byte* basePtr = (byte*)mapped.Bits;
                     fixed (int* dest = buffer)
                     {
-                        for (int row = 0; row < height; row++)
+                        int rowStride = width * sizeof(int);
+                        if (mapped.Pitch == rowStride)
                         {
-                            Buffer.MemoryCopy(
-                                basePtr + (nint)row * mapped.Pitch,
-                                dest + (nint)row * width,
-                                (long)width * 4,
-                                (long)width * 4);
+                            Buffer.MemoryCopy(basePtr, dest, (long)rowStride * height, (long)rowStride * height);
+                        }
+                        else
+                        {
+                            for (int row = 0; row < height; row++)
+                            {
+                                Buffer.MemoryCopy(
+                                    basePtr + (nint)row * mapped.Pitch,
+                                    dest + (nint)row * width,
+                                    rowStride,
+                                    rowStride);
+                            }
                         }
                     }
                 }
