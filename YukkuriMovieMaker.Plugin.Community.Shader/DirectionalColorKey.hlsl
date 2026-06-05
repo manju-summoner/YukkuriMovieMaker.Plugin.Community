@@ -81,10 +81,13 @@ float4 main(
 
     float3 d = colorLab - backgroundLab;
     float dLen = length(d);
+    float halfThreshold = noiseThreshold * 0.5f;
 
     [branch]
-    if (dLen < noiseThreshold)
+    if (dLen < halfThreshold)
         return float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+    float noiseConfidence = smoothstep(halfThreshold, noiseThreshold, dLen);
 
     int bestCluster = 0;
     float bestProj = -1e9f;
@@ -127,12 +130,12 @@ float4 main(
     [branch]
     if (outputForeground < 0.5f)
     {
-        float maskAlpha = alpha * src.a;
+        float maskAlpha = alpha * noiseConfidence * src.a;
         return float4(maskAlpha, maskAlpha, maskAlpha, maskAlpha);
     }
 
     float3 foregroundLinear = max(OklabToLinear(foregroundLab), 0.0f);
     float3 foregroundSrgb = saturate(LinearToSrgb(foregroundLinear));
-    float outAlpha = alpha * src.a;
+    float outAlpha = alpha * noiseConfidence * src.a;
     return float4(foregroundSrgb * outAlpha, outAlpha);
 }
