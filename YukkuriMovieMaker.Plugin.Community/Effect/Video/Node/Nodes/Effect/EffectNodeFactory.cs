@@ -7,6 +7,7 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Plugin.Brush;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
@@ -111,6 +112,9 @@ public sealed class PortDefinition
     /// <summary>[Display].ResourceType の値。null の場合は LabelKey をリテラルとして使う。</summary>
     public Type? ResourceType { get; init; }
 
+    // 共通
+    public object? DefaultValue { get; init; }
+
     // Float / Animation 型プロパティ用
     public float Min { get; init; } = float.NaN;
     public float Max { get; init; } = float.NaN;
@@ -119,9 +123,6 @@ public sealed class PortDefinition
 
     // Enum 型プロパティ用
     public Type? EnumType { get; init; }
-
-    // Color 型プロパティ用
-    public Color DefaultColor { get; init; } = Colors.White;
 }
 
 public enum PortType
@@ -163,7 +164,8 @@ public static class EffectPortCollector
             var displayAttr = prop.GetCustomAttribute<DisplayAttribute>();
             if (displayAttr != null)
             {
-                var def = TryMakePortDefinition(prop, displayAttr);
+                var propInstance = prop.GetValue(obj);
+                var def = TryMakePortDefinition(prop, displayAttr, propInstance);
                 if (def != null)
                 {
                     result.Add(def);
@@ -210,7 +212,7 @@ public static class EffectPortCollector
         }
     }
 
-    private static PortDefinition? TryMakePortDefinition(PropertyInfo prop, DisplayAttribute display)
+    private static PortDefinition? TryMakePortDefinition(PropertyInfo prop, DisplayAttribute display, object? inst)
     {
         var labelKey = display.Name ?? prop.Name;
         var descKey = display.Description ?? "";
@@ -219,6 +221,7 @@ public static class EffectPortCollector
         if (prop.PropertyType == typeof(Animation))
         {
             var slider = prop.GetCustomAttribute<AnimationSliderAttribute>();
+            var defaultValue = (inst as Animation)?.DefaultValue;
             return new PortDefinition
             {
                 PropName = prop.Name,
@@ -226,6 +229,7 @@ public static class EffectPortCollector
                 LabelKey = labelKey,
                 DescKey = descKey,
                 ResourceType = resourceType,
+                DefaultValue = defaultValue,
                 Min = slider != null ? (float)slider.DefaultMin : float.NaN,
                 Max = slider != null ? (float)slider.DefaultMax : float.NaN,
                 Digits = slider?.StringFormat != null ? ParseDigits(slider.StringFormat) : 2,
@@ -241,6 +245,7 @@ public static class EffectPortCollector
                 LabelKey = labelKey,
                 DescKey = descKey,
                 ResourceType = resourceType,
+                DefaultValue = inst,
                 EnumType = prop.PropertyType
             };
 
@@ -251,7 +256,8 @@ public static class EffectPortCollector
                 PortType = PortType.Bool,
                 LabelKey = labelKey,
                 DescKey = descKey,
-                ResourceType = resourceType
+                ResourceType = resourceType,
+                DefaultValue = inst
             };
 
         if (prop.PropertyType == typeof(float) || prop.PropertyType == typeof(double) ||
@@ -262,7 +268,8 @@ public static class EffectPortCollector
                 PortType = PortType.Float,
                 LabelKey = labelKey,
                 DescKey = descKey,
-                ResourceType = resourceType
+                ResourceType = resourceType,
+                DefaultValue = inst
             };
 
         if (prop.PropertyType == typeof(Color))
@@ -273,7 +280,7 @@ public static class EffectPortCollector
                 LabelKey = labelKey,
                 DescKey = descKey,
                 ResourceType = resourceType,
-                DefaultColor = Colors.White
+                DefaultValue = Colors.White
             };
 
         return null;
@@ -381,18 +388,21 @@ public static class EffectNodeTypeBuilder
         switch (def.PortType)
         {
             case PortType.Float:
-                Attr.NumberControl(pb, def.Min, def.Max, def.Digits, def.Unit);
+                Attr.NumberControl(pb, def.Min, def.Max, def.Digits, def.Unit,
+                    def.DefaultValue is null
+                        ? 0f
+                        : Convert.ToSingle(def.DefaultValue));
                 Attr.PortColor(pb, nameof(Colors.DarkOrange));
                 break;
             case PortType.Enum:
-                Attr.EnumControl(pb, def.EnumType!);
+                Attr.EnumControl(pb, def.EnumType!, Convert.ToInt32((Enum?)def.DefaultValue));
                 Attr.PortColor(pb, nameof(Colors.DarkOrange));
                 break;
             case PortType.Bool:
-                Attr.BoolControl(pb);
+                Attr.BoolControl(pb, (bool)(def.DefaultValue ?? false));
                 break;
             case PortType.Color:
-                Attr.ColorControl(pb);
+                Attr.ColorControl(pb, (Color)(def.DefaultValue ?? Colors.White));
                 Attr.PortColor(pb, nameof(Colors.MediumPurple));
                 break;
             case PortType.Brush:
@@ -721,31 +731,38 @@ internal static class Attr
         pb.SetCustomAttribute(new CustomAttributeBuilder(PortColorCtor, [colorName]));
     }
 
-    public static void NumberControl(PropertyBuilder pb, float min, float max, int digits, string unit)
+    public static void NumberControl(PropertyBuilder pb, float min, float max, int digits, string unit,
+        float defaultValue)
     {
         var minP = typeof(NumberPortControlAttribute).GetProperty(nameof(NumberPortControlAttribute.Min))!;
         var maxP = typeof(NumberPortControlAttribute).GetProperty(nameof(NumberPortControlAttribute.Max))!;
         var digP = typeof(NumberPortControlAttribute).GetProperty(nameof(NumberPortControlAttribute.Digits))!;
         var unitP = typeof(NumberPortControlAttribute).GetProperty(nameof(NumberPortControlAttribute.Unit))!;
-        pb.SetCustomAttribute(new CustomAttributeBuilder(NumberCtor, [], [minP, maxP, digP, unitP],
-            [min, max, digits, unit]));
+        var defaultP = typeof(NumberPortControlAttribute).GetProperty(nameof(NumberPortControlAttribute.Default))!;
+        pb.SetCustomAttribute(new CustomAttributeBuilder(NumberCtor, [], [minP, maxP, digP, unitP, defaultP],
+            [min, max, digits, unit, defaultValue]));
     }
 
-    public static void EnumControl(PropertyBuilder pb, Type enumType)
+    public static void EnumControl(PropertyBuilder pb, Type enumType, int defaultValue)
     {
         var itemsP = typeof(EnumPortControlAttribute).GetProperty(nameof(EnumPortControlAttribute.Items))!;
         var editP = typeof(EnumPortControlAttribute).GetProperty(nameof(EnumPortControlAttribute.IsEditable))!;
         var defP = typeof(EnumPortControlAttribute).GetProperty(nameof(EnumPortControlAttribute.Default))!;
-        pb.SetCustomAttribute(new CustomAttributeBuilder(EnumCtor, [], [itemsP, editP, defP], [enumType, false, 0]));
+        pb.SetCustomAttribute(new CustomAttributeBuilder(EnumCtor, [], [itemsP, editP, defP],
+            [enumType, false, defaultValue]));
     }
 
-    public static void BoolControl(PropertyBuilder pb)
+    public static void BoolControl(PropertyBuilder pb, bool defaultValue)
     {
-        pb.SetCustomAttribute(new CustomAttributeBuilder(BoolCtor, []));
+        var defP = typeof(BoolPortControlAttribute).GetProperty(nameof(BoolPortControlAttribute.Default))!;
+        pb.SetCustomAttribute(new CustomAttributeBuilder(BoolCtor, [], [defP],
+            [defaultValue]));
     }
 
-    public static void ColorControl(PropertyBuilder pb)
+    public static void ColorControl(PropertyBuilder pb, Color defaultValue)
     {
-        pb.SetCustomAttribute(new CustomAttributeBuilder(ColorCtor, []));
+        var defP = typeof(ColorPortControlAttribute).GetProperty(nameof(ColorPortControlAttribute.DefaultColor))!;
+        pb.SetCustomAttribute(new CustomAttributeBuilder(ColorCtor, [], [defP],
+            [ColorStringConverter.ToString(defaultValue)]));
     }
 }

@@ -40,7 +40,11 @@ public partial class BoolPort
     public bool Default
     {
         get => (bool)GetValue(DefaultProperty);
-        init => SetValue(DefaultProperty, value);
+        init
+        {
+            SetValue(DefaultProperty, value);
+            SetValue(ValueProperty, value);
+        }
     }
 
     public System.Windows.Media.Brush Brush

@@ -118,6 +118,7 @@ public static class ControlRegistrations
 
             factory.SetValue(EnumPort.ItemsProperty, enumAttr.Items);
             factory.SetValue(EnumPort.IsEditableProperty, enumAttr.IsEditable);
+            factory.SetValue(EnumPort.DefaultProperty, enumAttr.Default);
 
             factory.SetBinding(EnumPort.ValueProperty,
                 new Binding(nameof(PortViewModel.CurrentValue))
@@ -146,6 +147,7 @@ public static class ControlRegistrations
             var factory = new FrameworkElementFactory(typeof(FilePathPort));
 
             factory.SetValue(FilePathPort.AllowExtensionProperty, fileAttr.AllowExtension);
+            factory.SetValue(FilePathPort.DefaultProperty, fileAttr.Default);
 
             factory.SetBinding(FilePathPort.ValueProperty,
                 new Binding(nameof(PortViewModel.CurrentValue))
@@ -172,7 +174,7 @@ public static class ControlRegistrations
             var template = new DataTemplate();
             var factory = new FrameworkElementFactory(typeof(ColorPort));
 
-            factory.SetValue(ColorPort.DefaultColorProperty, colorAttr.DefaultColor);
+            factory.SetValue(ColorPort.DefaultColorProperty, ColorStringConverter.ToColor(colorAttr.DefaultColor));
 
             factory.SetBinding(ColorPort.SelectedColorProperty,
                 new Binding(nameof(PortViewModel.CurrentValue))

@@ -8,4 +8,9 @@ public class FilePathPortControlAttribute : PropertyControlBaseAttribute
 
     public List<(string Name, string[] Ext)> AllowExtension { get; set; } = new();
     public string Default { get; set; } = "";
+
+    public override object GetDefaultValue()
+    {
+        return Default;
+    }
 }

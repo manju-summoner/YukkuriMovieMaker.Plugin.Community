@@ -25,6 +25,13 @@ public partial class FilePathPort
             typeof(FilePathPort),
             new PropertyMetadata(new List<(string, string[])>()));
 
+    public static readonly DependencyProperty DefaultProperty =
+        DependencyProperty.Register(
+            nameof(Default),
+            typeof(string),
+            typeof(FilePathPort),
+            new PropertyMetadata(""));
+
     public FilePathPort()
     {
         InitializeComponent();
@@ -37,6 +44,16 @@ public partial class FilePathPort
     {
         get => (string)GetValue(ValueProperty);
         set => SetValue(ValueProperty, value);
+    }
+
+    public string Default
+    {
+        get => (string)GetValue(DefaultProperty);
+        init
+        {
+            SetValue(DefaultProperty, value);
+            SetValue(ValueProperty, value);
+        }
     }
 
     public List<(string Name, string[] Ext)> AllowExtension

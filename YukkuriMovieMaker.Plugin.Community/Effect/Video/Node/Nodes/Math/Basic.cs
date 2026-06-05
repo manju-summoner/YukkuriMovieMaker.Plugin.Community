@@ -90,7 +90,7 @@ public class MultiplyNode : NodeLogic
     }
 
     [InputPort("右項", "Right operand")]
-    [NumberPortControl(Min = -40000, Max = 40000)]
+    [NumberPortControl(Min = -40000, Max = 40000, Default = 1f)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Right
     {
@@ -126,7 +126,7 @@ public class DivideNode : NodeLogic
     }
 
     [InputPort("右項", "Right operand")]
-    [NumberPortControl(Min = -40000, Max = 40000)]
+    [NumberPortControl(Min = -40000, Max = 40000, Default = 1f)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Right
     {

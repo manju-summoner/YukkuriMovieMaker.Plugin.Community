@@ -79,7 +79,11 @@ public partial class ColorPort
     public Color DefaultColor
     {
         get => (Color)GetValue(DefaultColorProperty);
-        init => SetValue(DefaultColorProperty, value);
+        init
+        {
+            SetValue(DefaultColorProperty, value);
+            SetValue(SelectedColorProperty, value);
+        }
     }
 
     public byte Red

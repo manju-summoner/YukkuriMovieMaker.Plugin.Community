@@ -10,4 +10,9 @@ public class TextPortControlAttribute : PropertyControlBaseAttribute
     ///     デフォルト値
     /// </summary>
     public string Default { get; set; } = "";
+
+    public override object GetDefaultValue()
+    {
+        return Default;
+    }
 }

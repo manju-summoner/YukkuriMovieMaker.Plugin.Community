@@ -30,7 +30,11 @@ public partial class TextPort
     public string Default
     {
         get => (string)GetValue(DefaultProperty);
-        init => SetValue(DefaultProperty, value);
+        init
+        {
+            SetValue(DefaultProperty, value);
+            SetValue(ValueProperty, value);
+        }
     }
 
     public string Value

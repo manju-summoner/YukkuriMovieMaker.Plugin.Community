@@ -16,6 +16,13 @@ public partial class EnumPort
                 FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                 OnValueChanged));
 
+    public static readonly DependencyProperty DefaultProperty =
+        DependencyProperty.Register(
+            nameof(Default),
+            typeof(int),
+            typeof(EnumPort),
+            new PropertyMetadata(0));
+
     public static readonly DependencyProperty ItemsProperty =
         DependencyProperty.Register(
             nameof(Items),
@@ -40,6 +47,16 @@ public partial class EnumPort
     {
         get => (int)GetValue(ValueProperty);
         set => SetValue(ValueProperty, value);
+    }
+
+    public int Default
+    {
+        get => (int)GetValue(DefaultProperty);
+        init
+        {
+            SetValue(DefaultProperty, value);
+            SetValue(ValueProperty, value);
+        }
     }
 
     public Type Items

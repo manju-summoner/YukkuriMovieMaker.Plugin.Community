@@ -40,6 +40,12 @@ public sealed class PortViewModel : INotifyPropertyChanged
         {
             var port = graph.Nodes[nodeId].Inputs[name];
             _currentValue = port.LocalValue;
+
+            if (_currentValue == null && controlAttribute != null)
+            {
+                _currentValue = controlAttribute.GetDefaultValue();
+                graph.SetInputValue(nodeId, name, _currentValue);
+            }
         }
 
         BeginEditCommand = new RelayCommand(() => _graph.BeginEdit());

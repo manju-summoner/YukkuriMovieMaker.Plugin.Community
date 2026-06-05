@@ -119,7 +119,11 @@ public sealed partial class NumberPort
     public float Default
     {
         get => (float)GetValue(DefaultProperty);
-        init => SetValue(DefaultProperty, value);
+        init
+        {
+            SetValue(DefaultProperty, value);
+            SetValue(ValueProperty, value);
+        }
     }
 
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

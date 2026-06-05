@@ -90,7 +90,7 @@
                                         ContentTemplateSelector="{StaticResource PortControlTemplateSelector}"
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Center"
-                                        Margin="8,0,0,0">
+                                        Margin="8,0,12,0">
                             <ContentControl.Style>
                                 <Style TargetType="ContentControl">
                                     <Style.Triggers>
