@@ -62,9 +62,9 @@ internal readonly partial struct DisplacementFieldShader(
         float m = 0.2119034982f * lr + 0.6806995451f * lg + 0.1073969566f * lb;
         float s = 0.0883024619f * lr + 0.2817188376f * lg + 0.6299787005f * lb;
 
-        float l_ = Hlsl.Pow(Hlsl.Abs(l), 1f / 3f) * Hlsl.Sign(l);
-        float m_ = Hlsl.Pow(Hlsl.Abs(m), 1f / 3f) * Hlsl.Sign(m);
-        float s_ = Hlsl.Pow(Hlsl.Abs(s), 1f / 3f) * Hlsl.Sign(s);
+        float l_ = Hlsl.Pow(l, 1f / 3f);
+        float m_ = Hlsl.Pow(m, 1f / 3f);
+        float s_ = Hlsl.Pow(s, 1f / 3f);
 
         float labL = 0.2104542553f * l_ + 0.7936177850f * m_ - 0.0040720468f * s_;
         float labA = 1.9779984951f * l_ - 2.4285922050f * m_ + 0.4505937099f * s_;
