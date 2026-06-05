@@ -227,9 +227,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         {
             if (NotepadDocumentSerializer.ContainsImages(text))
                 return NotepadDocumentSerializer.PackageExtension;
+
+            // 既存ファイルを編集中なら、その拡張子を維持する（Markdown表示トグルで保存先を変えない）
             var currentExt = Path.GetExtension(currentFilePath);
             if (string.Equals(currentExt, NotepadDocumentSerializer.MarkdownExtension, StringComparison.OrdinalIgnoreCase))
                 return NotepadDocumentSerializer.MarkdownExtension;
+            if (string.Equals(currentExt, NotepadDocumentSerializer.PlainTextExtension, StringComparison.OrdinalIgnoreCase))
+                return NotepadDocumentSerializer.PlainTextExtension;
+
+            // 新規作成時のみ、Markdownモードに応じて既定拡張子を決める
             if (isMarkdownEnabled)
                 return NotepadDocumentSerializer.MarkdownExtension;
             return NotepadDocumentSerializer.PlainTextExtension;
@@ -247,7 +253,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 NotepadDocumentSerializer.PackageExtension =>
                     $"{Texts.RichNotepadFile}|*{NotepadDocumentSerializer.PackageExtension}",
                 NotepadDocumentSerializer.MarkdownExtension =>
-                    $"{Texts.MarkdownFile}|*{NotepadDocumentSerializer.MarkdownExtension}",
+                    $"{Texts.MarkdownFile}|*{NotepadDocumentSerializer.MarkdownExtension}|{Texts.TextFile}|*.txt",
                 _ =>
                     $"{Texts.TextFile}|*.txt",
             };
@@ -259,8 +265,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             string.Equals(Path.GetExtension(filePath), preferredExtension, StringComparison.OrdinalIgnoreCase);
 
         private static string EnsureExtension(string filePath, string preferredExtension) =>
-            MatchesPreferredExtension(filePath, preferredExtension)
+            IsSupportedSaveExtension(Path.GetExtension(filePath))
                 ? filePath
                 : Path.ChangeExtension(filePath, preferredExtension);
+
+        private static bool IsSupportedSaveExtension(string extension) =>
+            string.Equals(extension, NotepadDocumentSerializer.PlainTextExtension, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(extension, NotepadDocumentSerializer.MarkdownExtension, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(extension, NotepadDocumentSerializer.PackageExtension, StringComparison.OrdinalIgnoreCase);
     }
 }
