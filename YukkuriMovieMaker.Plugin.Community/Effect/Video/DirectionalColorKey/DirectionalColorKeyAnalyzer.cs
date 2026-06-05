@@ -27,18 +27,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private const int ProjectionBins = 256;
         private const float FixedPointScale = 64f;
         private const float ProjectionHistogramRange = 1.0f;
+        private const float LambdaSmoothingAlpha = 0.25f;
 
         private readonly float[] centers = new float[MaxClusters * 3];
         private readonly int[] sums = new int[MaxClusters * 3];
         private readonly int[] counts = new int[MaxClusters];
         private readonly int[] histogram = new int[MaxClusters * ProjectionBins];
         private readonly float[] lambdas = new float[MaxClusters];
+        private readonly float[] prevLambdas = new float[MaxClusters];
         private readonly int[] zeroSums = new int[MaxClusters * 3];
         private readonly int[] zeroCounts = new int[MaxClusters];
         private readonly int[] zeroHistogram = new int[MaxClusters * ProjectionBins];
 
         private int clusterCount = 1;
         private bool hasWarmStart;
+        private bool hasLambdaWarmStart;
 
         public DirectionalColorKeyAnalyzer()
         {
@@ -120,6 +123,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             ComputeLambdas(colorLabGpu, smoothedDirections, backgroundLab, scaleMode, opaquePercentile, foregroundLambda, physicalLambda);
 
+            if (hasLambdaWarmStart)
+            {
+                for (int c = 0; c < clusterCount; c++)
+                    lambdas[c] = prevLambdas[c] + (lambdas[c] - prevLambdas[c]) * LambdaSmoothingAlpha;
+            }
+            Array.Copy(lambdas, prevLambdas, clusterCount);
+            hasLambdaWarmStart = true;
+
             hasWarmStart = true;
         }
 
@@ -130,6 +141,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             if (!hasWarmStart || clusterCount != targetClusters)
             {
                 clusterCount = targetClusters;
+                hasLambdaWarmStart = false;
                 SetCenter(0, primary);
 
                 for (int c = 1; c < clusterCount; c++)
