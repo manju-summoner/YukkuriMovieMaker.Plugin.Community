@@ -129,6 +129,8 @@ public sealed class GraphViewModel : INotifyPropertyChanged
             {
                 var vm = new NodeViewModel(added.Node, _graph, ParentEditor);
                 Nodes.Add(vm);
+                foreach (var port in vm.InputPorts)
+                    port.ApplyDefaultToGraph();
                 break;
             }
 

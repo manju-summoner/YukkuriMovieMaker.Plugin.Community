@@ -280,7 +280,7 @@ public static class EffectPortCollector
                 LabelKey = labelKey,
                 DescKey = descKey,
                 ResourceType = resourceType,
-                DefaultValue = Colors.White
+                DefaultValue = inst is Color c ? c : Colors.White
             };
 
         return null;

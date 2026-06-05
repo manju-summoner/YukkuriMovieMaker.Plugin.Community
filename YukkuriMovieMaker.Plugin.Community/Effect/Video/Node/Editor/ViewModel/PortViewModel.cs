@@ -42,10 +42,7 @@ public sealed class PortViewModel : INotifyPropertyChanged
             _currentValue = port.LocalValue;
 
             if (_currentValue == null && controlAttribute != null)
-            {
                 _currentValue = controlAttribute.GetDefaultValue();
-                graph.SetInputValue(nodeId, name, _currentValue);
-            }
         }
 
         BeginEditCommand = new RelayCommand(() => _graph.BeginEdit());
@@ -104,6 +101,17 @@ public sealed class PortViewModel : INotifyPropertyChanged
             _currentValue = value;
             OnPropertyChanged(nameof(CurrentValue));
         }
+    }
+
+    internal void ApplyDefaultToGraph()
+    {
+        if (Direction != PortDirection.Input) return;
+        var port = _graph.Nodes[NodeId].Inputs[Name];
+        if (port.LocalValue != null) return;
+        if (ControlAttribute == null) return;
+        var defaultValue = ControlAttribute.GetDefaultValue();
+        if (defaultValue == null) return;
+        _graph.SetInputValue(NodeId, Name, defaultValue);
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

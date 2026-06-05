@@ -181,7 +181,8 @@ public static class ControlRegistrations
                 {
                     Mode = BindingMode.OneWay,
                     TargetNullValue = Colors.White,
-                    FallbackValue = Colors.White
+                    FallbackValue = Colors.White,
+                    Converter = new ObjectToColorConverter()
                 });
             factory.SetBinding(
                 PortControlBase.BeginEditCommandProperty,
