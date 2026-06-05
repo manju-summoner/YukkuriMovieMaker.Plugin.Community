@@ -14,6 +14,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 {
     internal sealed class DirectionalColorKeyEffectProcessor : VideoEffectProcessorBase
     {
+        private static readonly Vector3 WhiteLab = new(1f, 0f, 0f);
+
         private readonly IGraphicsDevicesAndContext devices;
         private readonly DirectionalColorKeyEffect item;
         private readonly DirectionalColorKeyAnalyzer analyzer = new();
@@ -144,9 +146,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             }
 
             if (isFirst || backgroundColor != currentBackground)
+            {
                 effect.BackgroundLab = backgroundLab;
-            if (isFirst || backgroundColor != currentBackground)
                 effect.BackgroundChromaDir = backgroundChromaDir;
+            }
             if (isFirst || noiseThreshold != currentNoiseThreshold)
                 effect.NoiseThreshold = (float)currentNoiseThreshold;
             if (isFirst || edgeSoftness != currentEdgeSoftness)
@@ -292,16 +295,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
         private static Vector3 ComputeWhiteDirection(Vector3 backgroundLab)
         {
-            var whiteLab = ToOklab(ToLinear(Color.FromRgb(255, 255, 255)));
-            var direction = whiteLab - backgroundLab;
+            var direction = WhiteLab - backgroundLab;
             float length = direction.Length();
-            return length > 1e-6f ? direction / length : new Vector3(1f, 0f, 0f);
+            return length > 1e-6f ? direction / length : WhiteLab;
         }
 
         private static Vector3 ComputeChromaDirection(Vector3 backgroundLab)
         {
-            float chromaLength = MathF.Sqrt(backgroundLab.Y * backgroundLab.Y + backgroundLab.Z * backgroundLab.Z);
-            if (chromaLength <= 1e-6f)
+            float chromaLenSq = backgroundLab.Y * backgroundLab.Y + backgroundLab.Z * backgroundLab.Z;
+            if (chromaLenSq <= 1e-12f)
                 return new Vector3(0f, 0f, 0f);
             return new Vector3(0f, backgroundLab.Y, backgroundLab.Z);
         }
