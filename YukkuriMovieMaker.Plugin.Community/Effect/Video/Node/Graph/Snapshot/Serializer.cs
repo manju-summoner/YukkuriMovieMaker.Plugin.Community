@@ -1,7 +1,8 @@
 using System.Reflection;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
+using PortDefinition = YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port.PortDefinition;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
 
@@ -56,6 +57,14 @@ public static class Serializer
                 ToPort = c.ToPort
             }));
 
+        foreach (var nodeSnap in snapshot.Nodes)
+        {
+            var typeName = nodeSnap.TypeName;
+            var effectName = EffectNodeFactory.GetEffectName(typeName);
+            if (effectName != null)
+                snapshot.EffectTypeNames[typeName] = effectName;
+        }
+
         return snapshot;
 
         void SerializePortDefinitions(NodeSnapshot snap, PortDefinition[] portDefs)
@@ -76,6 +85,13 @@ public static class Serializer
     {
         var graph = new NodeGraph();
         var nodeMap = new Dictionary<Guid, NodeLogic>();
+
+        foreach (var (typeName, effectName) in snapshot.EffectTypeNames)
+        {
+            var nodeType = EffectNodeFactory.GetOrCreate(effectName);
+            if (nodeType != null)
+                Registry.RegisterType(nodeType);
+        }
 
         foreach (var nodeSnap in snapshot.Nodes)
         {

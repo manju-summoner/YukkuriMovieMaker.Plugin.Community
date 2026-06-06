@@ -14,7 +14,6 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 using YukkuriMovieMaker.Plugin.Effects;
-using YukkuriMovieMaker.Resources.Localization;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect;
 
@@ -83,10 +82,38 @@ public static class EffectNodeFactory
         var veAttr = effectType.GetCustomAttribute<VideoEffectAttribute>();
         var categoryKey = veAttr?.Categories.FirstOrDefault() ?? "Effect";
         var labelKey = veAttr?.Name ?? effectType.Name;
+        var resourceType = veAttr?.ResourceType;
 
-        var generated = EffectNodeTypeBuilder.Build(ModBuilder, effectType.Name, categoryKey, labelKey, portDefs);
+        var generated =
+            EffectNodeTypeBuilder.Build(ModBuilder, effectType.Name, categoryKey, labelKey, resourceType, portDefs);
         TypeCache[effectType.Name] = generated;
         return generated;
+    }
+
+    internal static string? GetEffectName(string assemblyQualifiedName)
+    {
+        foreach (var (effectName, type) in TypeCache)
+            if ((type.AssemblyQualifiedName ?? type.Name) == assemblyQualifiedName)
+                return effectName;
+        return null;
+    }
+
+    internal static Type? GetOrCreate(string effectName)
+    {
+        if (TypeCache.TryGetValue(effectName, out var cached))
+            return cached;
+
+        var effectType = PluginLoader.VideoEffects.FirstOrDefault(t => t.Name == effectName);
+        if (effectType == null) return null;
+
+        try
+        {
+            return GetOrCreate(effectType);
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
 
@@ -324,6 +351,7 @@ public static class EffectNodeTypeBuilder
         string effectName,
         string categoryKey,
         string labelKey,
+        Type? resourceType,
         List<PortDefinition> portDefs)
     {
         var typeName = $"DynamicEffectNode_{effectName}";
@@ -333,8 +361,14 @@ public static class EffectNodeTypeBuilder
             typeof(NodeLogic));
 
         tb.SetCustomAttribute(new CustomAttributeBuilder(
-            typeof(NodeAttribute).GetConstructors()[0],
-            [typeof(EffectNodeCategory), labelKey, labelKey, typeof(Texts)]));
+            typeof(NodeAttribute).GetConstructors()[1],
+            [
+                "NodeEffectKey_EffectCategoryName/NodeEffectKey_VideoEffectCategoryName" +
+                (string.IsNullOrEmpty(categoryKey) ? "" : "/" + categoryKey),
+                labelKey,
+                labelKey,
+                resourceType
+            ]));
 
         var loaderField = tb.DefineField("_videoEffect", typeof(VideoEffectsLoader), FieldAttributes.Private);
 
@@ -681,12 +715,6 @@ public static class EffectNodeCalculator
             _ => raw
         };
     }
-}
-
-public sealed class EffectNodeCategory : INodeCategory
-{
-    public string Category => "Effect/VideoEffect";
-    public string Color => nameof(Colors.SteelBlue);
 }
 
 /// <summary>

@@ -5,6 +5,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Math;
 
 public sealed class MathBasicCategory : INodeCategory
 {
-    public string Category => "Math/Basic";
+    public string Category => "NodeEffectKey_MathCategoryName/NodeEffectKey_BasicCategoryName";
     public string Color => nameof(Colors.DarkOrange);
 }

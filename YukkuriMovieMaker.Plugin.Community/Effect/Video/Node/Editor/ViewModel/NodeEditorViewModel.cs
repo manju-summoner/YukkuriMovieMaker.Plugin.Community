@@ -207,14 +207,13 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
             {
                 var attr = t.GetCustomAttribute<NodeAttribute>();
                 if (attr == null) continue;
-                var ctgr = (INodeCategory)Activator.CreateInstance(attr.CategoryType)!;
                 info = new NodeTypeInfo
                 {
                     Type = t,
-                    Category = ctgr.Category,
+                    Category = attr.GetCategoryName(),
                     Label = attr.GetLabel(),
                     Description = attr.GetDescription(),
-                    Color = ctgr.Color
+                    Color = attr.GetCategoryColor()
                 };
             }
             catch
