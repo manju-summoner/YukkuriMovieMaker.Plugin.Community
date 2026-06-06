@@ -361,6 +361,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
                 Array.Clear(mask, 0, pixelCount);
                 EnsureFinalMaskBitmap(dc, width, height);
                 finalMaskBitmap!.CopyFromMemory<int>(mask, width * 4);
+                pipeline.InvalidateMatchCache();
                 return TransformFinalMask(bounds);
             }
 

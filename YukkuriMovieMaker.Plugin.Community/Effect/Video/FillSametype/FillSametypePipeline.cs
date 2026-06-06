@@ -48,6 +48,14 @@ internal sealed class FillSametypePipeline : IDisposable
         return (uint)index < (uint)pixelCount && labels[index] >= 0;
     }
 
+    public void InvalidateMatchCache()
+    {
+        lastSeedComponent = -1;
+        lastSimilarityThreshold = float.NaN;
+        lastMatchGeneration = -1;
+        lastInvert = false;
+    }
+
     public int Analyze(ReadOnlySpan<int> foreground, int width, int height)
     {
         EnsureCapacity(width, height);
