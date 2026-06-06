@@ -4,17 +4,15 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using YukkuriMovieMaker.Commons;
-using YukkuriMovieMaker.Player.Video;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     public sealed class PuppetDeformationMapViewModel : Bindable, IDisposable
     {
         bool disposed;
-        ITimelineSourceAndDevices? source;
-        Guid currentSceneId;
-        int isUpdating;
 
         ImageSource? currentImage;
         ImmutableList<PuppetDeformationMapPinViewModel> pinViewModels = ImmutableList<PuppetDeformationMapPinViewModel>.Empty;
@@ -25,6 +23,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         bool transformReady;
 
         readonly PuppetDeformationEffect effect;
+        readonly IEditorInfo editorInfo;
+        readonly Dispatcher dispatcher;
 
         public ImageSource? CurrentImage
         {
@@ -52,19 +52,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         public event EventHandler? RenderSizeChanged;
 
-        public PuppetDeformationMapViewModel(PuppetDeformationEffect effect)
+        public PuppetDeformationMapViewModel(PuppetDeformationEffect effect, IEditorInfo editorInfo)
         {
             this.effect = effect;
+            this.editorInfo = editorInfo;
+            this.dispatcher = Dispatcher.CurrentDispatcher;
             RebuildPinViewModels();
             effect.PropertyChanged += Effect_PropertyChanged;
-            PuppetDeformationFrameService.FrameUpdated += FrameService_FrameUpdated;
-            ScheduleUpdateFrame();
+            effect.FrameCaptured += Effect_FrameCaptured;
+            effect.RequestCapture();
         }
 
         void Effect_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(PuppetDeformationEffect.Pins))
-                Application.Current?.Dispatcher.InvokeAsync(RebuildPinViewModels);
+                dispatcher.InvokeAsync(RebuildPinViewModels);
+            effect.RequestCapture();
         }
 
         void RebuildPinViewModels()
@@ -80,64 +83,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             UpdatePinPositions();
         }
 
-        void FrameService_FrameUpdated(object? sender, EventArgs e)
+        void Effect_FrameCaptured(object? sender, FrameCapturedEventArgs e)
         {
-            ScheduleUpdateFrame();
-        }
+            var pixels = e.Pixels;
+            var width = e.Width;
+            var height = e.Height;
 
-        void ScheduleUpdateFrame()
-        {
-            if (Interlocked.CompareExchange(ref isUpdating, 1, 0) == 0)
-                Application.Current?.Dispatcher.InvokeAsync(UpdateFrame);
-        }
+            effect.RequestCapture();
 
-        void UpdateFrame()
-        {
-            try
+            dispatcher.InvokeAsync(() =>
             {
-                if (disposed || PuppetDeformationFrameService.IsInternalRendering) return;
-
-                var snapshot = PuppetDeformationFrameService.Snapshot;
-                if (snapshot is null) return;
-
-                if (currentSceneId != snapshot.Scene.ID || source is null)
-                {
-                    source?.Dispose();
-                    source = null;
-                    currentSceneId = snapshot.Scene.ID;
-                    if (snapshot.Scene.TryCreateVideoSource(out var newSource))
-                        source = newSource;
-                }
-
-                if (source is null) return;
-
-                PuppetDeformationFrameService.IsInternalRendering = true;
-                try
-                {
-                    int frame = snapshot.Frame;
-                    int fps = snapshot.FPS;
-                    if (fps > 0)
-                    {
-                        var time = TimeSpan.FromTicks((long)frame * 10000000 / fps);
-                        source.Update(time, TimelineSourceUsage.Paused);
-                        var bmp = source.RenderBitmapSource();
-                        bmp.Freeze();
-                        CurrentImage = bmp;
-                        UpdatePinPositions();
-                    }
-                }
-                finally
-                {
-                    PuppetDeformationFrameService.IsInternalRendering = false;
-                }
-            }
-            catch
-            {
-            }
-            finally
-            {
-                Interlocked.Exchange(ref isUpdating, 0);
-            }
+                if (disposed) return;
+                var wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
+                wb.WritePixels(new Int32Rect(0, 0, width, height), pixels, width * 4, 0);
+                wb.Freeze();
+                CurrentImage = wb;
+                UpdatePinPositions();
+            });
         }
 
         public void UpdateTransform(double tx, double ty, double sc)
@@ -158,10 +120,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var centerX = translateX + imgW * scale / 2.0;
             var centerY = translateY + imgH * scale / 2.0;
 
-            var snap = PuppetDeformationFrameService.Snapshot;
-            var frame = snap?.ItemFrame ?? 0;
-            var length = snap?.ItemLength ?? 1;
-            var fps = snap?.FPS ?? 0;
+            var itemFrame = editorInfo.ItemPosition.Frame;
+            var itemLength = editorInfo.ItemDuration.Frame;
+            var fps = editorInfo.VideoInfo.FPS;
             var safeFps = fps > 0 ? fps : 1;
 
             var vms = pinViewModels;
@@ -171,8 +132,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 var restVm = vms[i];
                 var pin = restVm.Model;
 
-                var rx = pin.RestX.GetValue(frame, length, safeFps);
-                var ry = pin.RestY.GetValue(frame, length, safeFps);
+                var rx = pin.RestX.GetValue(itemFrame, itemLength, safeFps);
+                var ry = pin.RestY.GetValue(itemFrame, itemLength, safeFps);
 
                 restVm.CanvasX = centerX + rx * scale;
                 restVm.CanvasY = centerY + ry * scale;
@@ -183,8 +144,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 if (i < vms.Count)
                 {
                     var offsetVm = vms[i];
-                    var ox = pin.OffsetX.GetValue(frame, length, safeFps);
-                    var oy = pin.OffsetY.GetValue(frame, length, safeFps);
+                    var ox = pin.OffsetX.GetValue(itemFrame, itemLength, safeFps);
+                    var oy = pin.OffsetY.GetValue(itemFrame, itemLength, safeFps);
 
                     offsetVm.CanvasX = centerX + (rx + ox) * scale;
                     offsetVm.CanvasY = centerY + (ry + oy) * scale;
@@ -226,10 +187,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             if (disposed) return;
             disposed = true;
-            PuppetDeformationFrameService.FrameUpdated -= FrameService_FrameUpdated;
+            effect.FrameCaptured -= Effect_FrameCaptured;
             effect.PropertyChanged -= Effect_PropertyChanged;
-            source?.Dispose();
-            source = null;
         }
     }
 }

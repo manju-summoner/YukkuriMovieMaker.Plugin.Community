@@ -29,6 +29,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         bool isMutatingSelection;
         bool disposedValue;
 
+        IEditorInfo? editorInfo;
         EditSnapshot? activeSnapshot;
 
         PuppetDeformationMapWindow? mapWindow;
@@ -107,8 +108,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             RebuildViewModels();
         }
 
+        public void SetEditorInfo(IEditorInfo info) => editorInfo = info;
+
         void OpenMap()
         {
+            if (editorInfo is null) return;
+
             if (mapWindow is not null)
             {
                 if (mapWindow.IsVisible)
@@ -120,7 +125,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 mapWindow = null;
             }
 
-            var vm = new PuppetDeformationMapViewModel(Effect);
+            var vm = new PuppetDeformationMapViewModel(Effect, editorInfo);
             var window = new PuppetDeformationMapWindow
             {
                 DataContext = vm,

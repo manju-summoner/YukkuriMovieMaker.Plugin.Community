@@ -9,6 +9,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
     {
         public ItemProperty[]? ItemProperties { get; internal set; }
 
+        IEditorInfo? editorInfo;
+
         public event EventHandler? BeginEdit;
         public event EventHandler? EndEdit;
 
@@ -30,6 +32,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 newVm.BeginEdit += OnBeginEdit;
                 newVm.EndEdit += OnEndEdit;
+                if (editorInfo is not null)
+                    newVm.SetEditorInfo(editorInfo);
             }
         }
 
@@ -37,6 +41,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void OnEndEdit(object? sender, EventArgs e) => EndEdit?.Invoke(this, EventArgs.Empty);
 
-        public void SetEditorInfo(IEditorInfo frame) { }
+        public void SetEditorInfo(IEditorInfo frame)
+        {
+            editorInfo = frame;
+            if (DataContext is PuppetDeformationListEditorViewModel vm)
+                vm.SetEditorInfo(frame);
+        }
     }
 }

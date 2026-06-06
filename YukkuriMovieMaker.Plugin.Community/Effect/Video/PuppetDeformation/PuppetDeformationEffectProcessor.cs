@@ -31,17 +31,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
-            if (!PuppetDeformationFrameService.IsInternalRendering)
-            {
-                var scene = effectDescription.Scenes.FirstOrDefault(x => x.ID == effectDescription.SceneId);
-                if (scene != null)
-                {
-                    PuppetDeformationFrameService.Publish(scene, effectDescription.TimelinePosition.Frame, effectDescription.FPS, effectDescription.ItemPosition.Frame, effectDescription.ItemDuration.Frame);
-                }
-            }
-
             if (IsPassThroughEffect || effect is null)
+            {
+                if (item.TakeCapturePending() && deviceContext is not null && input is not null)
+                    TryCaptureInput(input);
                 return effectDescription.DrawDescription;
+            }
 
             var frame = effectDescription.ItemPosition.Frame;
             var length = effectDescription.ItemDuration.Frame;
@@ -80,7 +75,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 gpuCache = BuildGpuCache(stiffness, imageWidth, imageHeight, samples);
 
                 effect.PinData = gpuCache.PinData;
-                //変形オフ時はPinCount=0を送り、シェーダー側で変形せず入力をそのまま出力する。
                 effect.PinCount = apply ? pinCount : 0;
                 effect.Stiffness = stiffness;
 
@@ -94,7 +88,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 }
                 else
                 {
-                    //変形しないので出力範囲は拡張しない(入力範囲のまま)。
                     effect.TightLocalLeft = 0;
                     effect.TightLocalTop = 0;
                     effect.TightLocalRight = 0;
@@ -111,10 +104,56 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             this.imageHeight = imageHeight;
             this.apply = apply;
 
+            if (item.TakeCapturePending() && deviceContext is not null && input is not null)
+                TryCaptureInput(input);
+
             return effectDescription.DrawDescription with
             {
                 Controllers = cachedControllers
             };
+        }
+
+        void TryCaptureInput(ID2D1Image image)
+        {
+            if (deviceContext is null) return;
+
+            var bounds = deviceContext.GetImageLocalBounds(image);
+            var width = (int)Math.Ceiling(bounds.Right - bounds.Left);
+            var height = (int)Math.Ceiling(bounds.Bottom - bounds.Top);
+            if (width <= 0 || height <= 0) return;
+
+            var renderTarget = deviceContext.CreateNotInitializedBitmap(
+                width,
+                height,
+                BitmapOptions.Target,
+                Format.B8G8R8A8_UNorm);
+
+            var staging = deviceContext.CreateNotInitializedBitmap(
+                width,
+                height,
+                (BitmapOptions)6,
+                Format.B8G8R8A8_UNorm);
+
+            using (renderTarget)
+            using (staging)
+            {
+                var previousTarget = deviceContext.Target;
+                var previousTransform = deviceContext.Transform;
+
+                deviceContext.Target = renderTarget;
+                deviceContext.Transform = System.Numerics.Matrix3x2.CreateTranslation(-bounds.Left, -bounds.Top);
+                deviceContext.BeginDraw();
+                deviceContext.Clear(null);
+                deviceContext.DrawImage(image);
+                deviceContext.EndDraw();
+                deviceContext.Transform = previousTransform;
+                deviceContext.Target = previousTarget;
+
+                staging.CopyFromBitmap(renderTarget);
+
+                var pixels = ID2D1Bitmap1Ex.ToBytes(staging);
+                item.NotifyFrameCaptured(pixels, width, height);
+            }
         }
 
         bool PinSamplesMatchBuffer(List<PinSample> samples)

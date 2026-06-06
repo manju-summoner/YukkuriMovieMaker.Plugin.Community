@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
+using System.Threading;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
@@ -64,6 +65,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             );
         }
 
+        int captureRequested;
+
+        public event EventHandler<FrameCapturedEventArgs>? FrameCaptured;
+
+        public void RequestCapture() => Interlocked.Exchange(ref captureRequested, 1);
+
+        internal bool TakeCapturePending() => Interlocked.Exchange(ref captureRequested, 0) == 1;
+
+        internal void NotifyFrameCaptured(byte[] pixels, int width, int height)
+            => FrameCaptured?.Invoke(this, new FrameCapturedEventArgs(pixels, width, height));
+
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription) => [];
 
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
@@ -80,5 +92,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 yield return pin.OffsetY;
             }
         }
+    }
+
+    public sealed class FrameCapturedEventArgs(byte[] pixels, int width, int height) : EventArgs
+    {
+        public byte[] Pixels { get; } = pixels;
+        public int Width { get; } = width;
+        public int Height { get; } = height;
     }
 }
