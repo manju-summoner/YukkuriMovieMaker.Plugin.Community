@@ -213,6 +213,316 @@ internal readonly partial struct DirectionSmoothShader(
 
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
+internal readonly partial struct ChangeSeedShader(
+    ReadOnlyBuffer<int> bgra,
+    ReadWriteBuffer<int> previousBgra,
+    ReadWriteBuffer<int> seedMask,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadOnlyBuffer<int> bgra = bgra;
+    private readonly ReadWriteBuffer<int> previousBgra = previousBgra;
+    private readonly ReadWriteBuffer<int> seedMask = seedMask;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int index = y * width + x;
+        seedMask[index] = bgra[index] != previousBgra[index] ? 1 : 0;
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct DilateHorizontalShader(
+    ReadWriteBuffer<int> source,
+    ReadWriteBuffer<int> target,
+    int reach,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadWriteBuffer<int> source = source;
+    private readonly ReadWriteBuffer<int> target = target;
+    private readonly int reach = reach;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int row = y * width;
+        int value = 0;
+        for (int dx = -reach; dx <= reach; dx++)
+        {
+            int sx = x + dx;
+            if (sx < 0 || sx >= width)
+                continue;
+            if (source[row + sx] != 0)
+                value = 1;
+        }
+        target[row + x] = value;
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct DilateVerticalShader(
+    ReadWriteBuffer<int> source,
+    ReadWriteBuffer<int> target,
+    int reach,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadWriteBuffer<int> source = source;
+    private readonly ReadWriteBuffer<int> target = target;
+    private readonly int reach = reach;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int value = 0;
+        for (int dy = -reach; dy <= reach; dy++)
+        {
+            int sy = y + dy;
+            if (sy < 0 || sy >= height)
+                continue;
+            if (source[sy * width + x] != 0)
+                value = 1;
+        }
+        target[y * width + x] = value;
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct RegionDirectionSmoothShader(
+    ReadWriteBuffer<float> sourceDirections,
+    ReadWriteBuffer<float> colorLab,
+    ReadWriteBuffer<float> targetDirections,
+    ReadWriteBuffer<int> computeMask,
+    float sigmaColorSq,
+    int radius,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadWriteBuffer<float> sourceDirections = sourceDirections;
+    private readonly ReadWriteBuffer<float> colorLab = colorLab;
+    private readonly ReadWriteBuffer<float> targetDirections = targetDirections;
+    private readonly ReadWriteBuffer<int> computeMask = computeMask;
+    private readonly float sigmaColorSq = sigmaColorSq;
+    private readonly int radius = radius;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int index = y * width + x;
+        int triple = index * 3;
+
+        if (computeMask[index] == 0)
+        {
+            targetDirections[triple + 0] = sourceDirections[triple + 0];
+            targetDirections[triple + 1] = sourceDirections[triple + 1];
+            targetDirections[triple + 2] = sourceDirections[triple + 2];
+            return;
+        }
+
+        float nl = sourceDirections[triple + 0];
+        float na = sourceDirections[triple + 1];
+        float nb = sourceDirections[triple + 2];
+
+        if (nl * nl + na * na + nb * nb < 0.25f)
+        {
+            targetDirections[triple + 0] = 0f;
+            targetDirections[triple + 1] = 0f;
+            targetDirections[triple + 2] = 0f;
+            return;
+        }
+
+        float cl = colorLab[triple + 0];
+        float ca = colorLab[triple + 1];
+        float cb = colorLab[triple + 2];
+
+        float sumL = 0f;
+        float sumA = 0f;
+        float sumB = 0f;
+        float sumW = 0f;
+
+        float twoSigmaSpaceSq = 2f * radius * radius;
+
+        for (int dy = -radius; dy <= radius; dy++)
+        {
+            int sy = y + dy;
+            if (sy < 0 || sy >= height)
+                continue;
+
+            for (int dx = -radius; dx <= radius; dx++)
+            {
+                int sx = x + dx;
+                if (sx < 0 || sx >= width)
+                    continue;
+
+                int sIndex = sy * width + sx;
+                int sTriple = sIndex * 3;
+
+                float ml = sourceDirections[sTriple + 0];
+                float ma = sourceDirections[sTriple + 1];
+                float mb = sourceDirections[sTriple + 2];
+
+                if (ml * ml + ma * ma + mb * mb < 0.25f)
+                    continue;
+
+                float wSpace = Hlsl.Exp(-(dx * dx + dy * dy) / Hlsl.Max(twoSigmaSpaceSq, 1e-6f));
+
+                float dcl = cl - colorLab[sTriple + 0];
+                float dca = ca - colorLab[sTriple + 1];
+                float dcb = cb - colorLab[sTriple + 2];
+                float colorDistSq = dcl * dcl + dca * dca + dcb * dcb;
+                float wColor = Hlsl.Exp(-colorDistSq / Hlsl.Max(sigmaColorSq, 1e-6f));
+
+                float dot = nl * ml + na * ma + nb * mb;
+                float wDir = Hlsl.Max(0f, dot);
+
+                float w = wSpace * wColor * wDir;
+
+                sumL += ml * w;
+                sumA += ma * w;
+                sumB += mb * w;
+                sumW += w;
+            }
+        }
+
+        if (sumW > 1e-6f)
+        {
+            float avgL = sumL / sumW;
+            float avgA = sumA / sumW;
+            float avgB = sumB / sumW;
+            float norm = Hlsl.Sqrt(avgL * avgL + avgA * avgA + avgB * avgB);
+            if (norm > 1e-6f)
+            {
+                float inv = 1f / norm;
+                targetDirections[triple + 0] = avgL * inv;
+                targetDirections[triple + 1] = avgA * inv;
+                targetDirections[triple + 2] = avgB * inv;
+                return;
+            }
+        }
+
+        targetDirections[triple + 0] = nl;
+        targetDirections[triple + 1] = na;
+        targetDirections[triple + 2] = nb;
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct AdoptRegionShader(
+    ReadWriteBuffer<float> computedDirections,
+    ReadWriteBuffer<float> previousDirections,
+    ReadWriteBuffer<int> adoptMask,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadWriteBuffer<float> computedDirections = computedDirections;
+    private readonly ReadWriteBuffer<float> previousDirections = previousDirections;
+    private readonly ReadWriteBuffer<int> adoptMask = adoptMask;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int index = y * width + x;
+        int triple = index * 3;
+
+        if (adoptMask[index] != 0)
+            return;
+
+        computedDirections[triple + 0] = previousDirections[triple + 0];
+        computedDirections[triple + 1] = previousDirections[triple + 1];
+        computedDirections[triple + 2] = previousDirections[triple + 2];
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct CopyDirectionsShader(
+    ReadWriteBuffer<float> source,
+    ReadWriteBuffer<float> target,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadWriteBuffer<float> source = source;
+    private readonly ReadWriteBuffer<float> target = target;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int triple = (y * width + x) * 3;
+        target[triple + 0] = source[triple + 0];
+        target[triple + 1] = source[triple + 1];
+        target[triple + 2] = source[triple + 2];
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct MaskCountShader(
+    ReadWriteBuffer<int> mask,
+    ReadWriteBuffer<int> count,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadWriteBuffer<int> mask = mask;
+    private readonly ReadWriteBuffer<int> count = count;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        if (mask[y * width + x] != 0)
+            Hlsl.InterlockedAdd(ref count[0], 1);
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
 internal readonly partial struct ClusterAssignAccumulateShader(
     ReadWriteBuffer<float> directions,
     ReadOnlyBuffer<float> centers,
