@@ -9,7 +9,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
 

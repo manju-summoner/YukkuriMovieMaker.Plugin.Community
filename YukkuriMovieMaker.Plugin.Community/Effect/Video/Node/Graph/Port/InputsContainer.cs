@@ -7,7 +7,7 @@ public abstract class InputsContainer
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected void Set<T>(ref T field, T value, [CallerMemberName] string name = null!)
+    protected internal void Set<T>(ref T field, T value, [CallerMemberName] string name = null!)
     {
         field = value;
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

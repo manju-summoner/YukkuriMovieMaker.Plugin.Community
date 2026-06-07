@@ -5,17 +5,17 @@ using System.Reflection.Emit;
 using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
-using YukkuriMovieMaker.Plugin.Brush;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 using YukkuriMovieMaker.Plugin.Effects;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect;
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
 
 public static class EffectNodeFactory
 {
@@ -25,6 +25,11 @@ public static class EffectNodeFactory
         AssemblyBuilder.DefineDynamicAssembly(
             new AssemblyName("DynamicEffectNodes"),
             AssemblyBuilderAccess.Run);
+
+    /*private static readonly PersistedAssemblyBuilder AsmBuilder =
+        new(
+            new AssemblyName("DynamicEffectNodes"),
+            typeof(object).Assembly);*/
 
     private static readonly ModuleBuilder ModBuilder =
         AsmBuilder.DefineDynamicModule("MainModule");
@@ -52,6 +57,7 @@ public static class EffectNodeFactory
         Console.WriteLine(
             $@"[EffectNodeFactory] Generated {result.Count} / {PluginLoader.VideoEffects.Count()} effects.");
 #endif
+        /*AsmBuilder.Save("DynamicEffectNodes.dll");*/
         return result.ToArray();
     }
 
@@ -71,12 +77,16 @@ public static class EffectNodeFactory
         var effectInstance = Activator.CreateInstance(effectType) as IVideoEffect
                              ?? throw new InvalidOperationException($"Cannot instantiate {effectType.Name}");
 
-        var portDefs = EffectPortCollector.Collect(effectInstance);
+        var (staticPortDefs, dynamicParams) = EffectPortCollector.Collect(effectInstance);
 
 #if DEBUG
-        Console.WriteLine($@"[EffectNodeFactory]   {effectType.Name}: {portDefs.Count} port(s) collected");
-        foreach (var d in portDefs)
+        Console.WriteLine(
+            $@"[EffectNodeFactory]   {effectType.Name}: {staticPortDefs.Count + dynamicParams.Count} port(s) collected (including {dynamicParams.Count} dynamics)");
+        foreach (var d in staticPortDefs)
             Console.WriteLine($@"[EffectNodeFactory]     {d.PortType,-6} {d.PropName} (label={d.LabelKey})");
+        foreach (var d in dynamicParams)
+            Console.WriteLine(
+                $@"[EffectNodeFactory]     {d.Item1.PortType,-6} {d.Item1.PropName} (Dynamic, label={d.Item1.LabelKey})");
 #endif
 
         var veAttr = effectType.GetCustomAttribute<VideoEffectAttribute>();
@@ -85,7 +95,8 @@ public static class EffectNodeFactory
         var resourceType = veAttr?.ResourceType;
 
         var generated =
-            EffectNodeTypeBuilder.Build(ModBuilder, effectType.Name, categoryKey, labelKey, resourceType, portDefs);
+            EffectNodeTypeBuilder.Build(ModBuilder, effectType.Name, categoryKey, labelKey, resourceType,
+                staticPortDefs, dynamicParams);
         TypeCache[effectType.Name] = generated;
         return generated;
     }
@@ -158,26 +169,24 @@ public enum PortType
     Enum,
     Bool,
     Color,
-    Brush
+    Brush,
+    Unknown
 }
 
 public static class EffectPortCollector
 {
-    public static List<PortDefinition> Collect(object root)
+    public static (List<PortDefinition>, List<(PortDefinition, PropertyInfo, object)>) Collect(object root)
     {
-        var result = new List<PortDefinition>();
-        CollectRecursive(root, result);
-        return result;
+        List<PortDefinition> staticResult = [];
+        List<(PortDefinition, PropertyInfo, object)> dynamicResult = [];
+        CollectRecursive(root, staticResult, dynamicResult);
+        return (staticResult, dynamicResult);
     }
 
-    private static bool IsUnsupportedSubObject(Type t)
-    {
-        if (typeof(IBrushPlugin).IsAssignableFrom(t)) return true;
-        if (t.FullName?.StartsWith("YukkuriMovieMaker.Brush.Brush") == true) return true;
-        return false;
-    }
-
-    private static void CollectRecursive(object obj, List<PortDefinition> result,
+    private static void CollectRecursive(
+        object obj,
+        List<PortDefinition> staticResult,
+        List<(PortDefinition, PropertyInfo, object)> dynamicResult,
         HashSet<object>? visited = null)
     {
         visited ??= new HashSet<object>(ReferenceEqualityComparer.Instance);
@@ -189,57 +198,24 @@ public static class EffectPortCollector
             if (prop.GetCustomAttribute<ObsoleteAttribute>() != null) continue;
 
             var displayAttr = prop.GetCustomAttribute<DisplayAttribute>();
-            if (displayAttr != null)
+            if (displayAttr == null) continue;
+
+            var propInstance = prop.GetValue(obj);
+
+            var def = TryMakePortDefinition(prop, displayAttr, propInstance);
+
+            if (propInstance is not null && propInstance.GetType().GetProperties()
+                    .Any(info => info.GetCustomAttribute<DisplayAttribute>() != null))
             {
-                var propInstance = prop.GetValue(obj);
-                var def = TryMakePortDefinition(prop, displayAttr, propInstance);
-                if (def != null)
-                {
-                    result.Add(def);
-                    continue;
-                }
-
-                if (!prop.CanRead) continue;
-                if (!prop.PropertyType.IsClass || prop.PropertyType == typeof(string)) continue;
-                if (IsUnsupportedSubObject(prop.PropertyType)) continue;
-
-                object? subDisplay;
-                try
-                {
-                    subDisplay = prop.GetValue(obj);
-                }
-                catch
-                {
-                    continue;
-                }
-
-                if (subDisplay == null) continue;
-
-                CollectRecursive(subDisplay, result, visited);
+                dynamicResult.Add((def, prop, propInstance));
                 continue;
             }
 
-            if (!prop.CanRead) continue;
-            if (!prop.PropertyType.IsClass || prop.PropertyType == typeof(string)) continue;
-            if (IsUnsupportedSubObject(prop.PropertyType)) continue;
-
-            object? sub;
-            try
-            {
-                sub = prop.GetValue(obj);
-            }
-            catch
-            {
-                continue;
-            }
-
-            if (sub == null) continue;
-
-            CollectRecursive(sub, result, visited);
+            staticResult.Add(def);
         }
     }
 
-    private static PortDefinition? TryMakePortDefinition(PropertyInfo prop, DisplayAttribute display, object? inst)
+    private static PortDefinition TryMakePortDefinition(PropertyInfo prop, DisplayAttribute display, object? inst)
     {
         var labelKey = display.Name ?? prop.Name;
         var descKey = display.Description ?? "";
@@ -310,7 +286,26 @@ public static class EffectPortCollector
                 DefaultValue = inst is Color c ? c : Colors.White
             };
 
-        return null;
+        if (prop.PropertyType == typeof(Plugin.Brush.Brush))
+            return new PortDefinition
+            {
+                PropName = prop.Name,
+                PortType = PortType.Brush,
+                LabelKey = labelKey,
+                DescKey = descKey,
+                ResourceType = resourceType,
+                DefaultValue = null
+            };
+
+        return new PortDefinition
+        {
+            PropName = prop.Name,
+            PortType = PortType.Unknown,
+            LabelKey = labelKey,
+            DescKey = descKey,
+            ResourceType = resourceType,
+            DefaultValue = null
+        };
     }
 
     private static int ParseDigits(string format)
@@ -352,7 +347,8 @@ public static class EffectNodeTypeBuilder
         string categoryKey,
         string labelKey,
         Type? resourceType,
-        List<PortDefinition> portDefs)
+        List<PortDefinition> staticPortDefs,
+        List<(PortDefinition, PropertyInfo, object)> dynamicPropertyDefs)
     {
         var typeName = $"DynamicEffectNode_{effectName}";
         var tb = mod.DefineType(
@@ -372,12 +368,14 @@ public static class EffectNodeTypeBuilder
 
         var loaderField = tb.DefineField("_videoEffect", typeof(VideoEffectsLoader), FieldAttributes.Private);
 
-        EffectNodeCalculator.RegisterPortDefs(effectName, portDefs.ToArray());
+        EffectNodeCalculator.RegisterPortDefs(effectName, staticPortDefs.ToArray());
 
         var effectNameField = tb.DefineField("_effectNameCache", typeof(string),
             FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
         var portDefsField = tb.DefineField("_portDefs", typeof(PortDefinition[]),
             FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
+        var containerBackFields = dynamicPropertyDefs.Select(props =>
+            tb.DefineField($"_{props.Item2.Name}", typeof(InputsContainer), FieldAttributes.Private)).ToList();
 
         var cctor = tb.DefineTypeInitializer();
         var cil = cctor.GetILGenerator();
@@ -386,13 +384,46 @@ public static class EffectNodeTypeBuilder
         cil.Emit(OpCodes.Ldstr, effectName);
         cil.Emit(OpCodes.Call, typeof(EffectNodeCalculator).GetMethod(nameof(EffectNodeCalculator.GetPortDefs))!);
         cil.Emit(OpCodes.Stsfld, portDefsField);
+
         cil.Emit(OpCodes.Ret);
 
         EmitImageInputPort(tb);
-        foreach (var def in portDefs) EmitParameterPort(tb, def);
+        foreach (var def in staticPortDefs) EmitParameterPort(tb, def);
+        for (var index = 0; index < dynamicPropertyDefs.Count; index++)
+        {
+            var props = dynamicPropertyDefs[index];
+            EmitContainerPort(tb, props, containerBackFields[index]);
+        }
+
         EmitImageOutputPort(tb);
-        EmitConstructor(tb);
         EmitCalculate(tb, loaderField, effectNameField, portDefsField);
+
+        var baseCtor = typeof(NodeLogic).GetConstructor(
+            BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null)!;
+
+        var ctor = tb.DefineConstructor(
+            MethodAttributes.Public | MethodAttributes.HideBySig |
+            MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
+            CallingConventions.Standard, Type.EmptyTypes);
+        var il = ctor.GetILGenerator();
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Call, baseCtor);
+
+        for (var i = 0; i < dynamicPropertyDefs.Count; i++)
+        {
+            var def = dynamicPropertyDefs[i];
+            var field = containerBackFields[i];
+            var containerType = ContainerFactory.CreateOrGenerate(def.Item3, mod);
+            var containerCtor = containerType?.GetConstructor(Type.EmptyTypes);
+            if (containerCtor == null)
+                throw new InvalidOperationException($"No parameterless ctor: {containerType}");
+
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Newobj, containerCtor);
+            il.Emit(OpCodes.Stfld, field);
+        }
+
+        il.Emit(OpCodes.Ret);
 
         return tb.CreateType()
                ?? throw new InvalidOperationException($"Failed to create type for {effectName}");
@@ -445,6 +476,13 @@ public static class EffectNodeTypeBuilder
         }
     }
 
+    private static void EmitContainerPort(TypeBuilder tb, (PortDefinition port, PropertyInfo prop, object _) info,
+        FieldInfo field)
+    {
+        var pb = EmitContainerProperty(tb, info.prop.Name, field);
+        Attr.InputPort(pb, info.port.LabelKey, info.port.DescKey, info.port.ResourceType, true);
+    }
+
     private static void EmitImageOutputPort(TypeBuilder tb)
     {
         var pb = EmitOutputProperty(tb, "Output", typeof(ImageWrapper));
@@ -486,6 +524,38 @@ public static class EffectNodeTypeBuilder
         return pb;
     }
 
+    private static PropertyBuilder EmitContainerProperty(TypeBuilder tb, string name, FieldInfo field)
+    {
+        var setMethod = typeof(NodeLogic)
+            .GetMethod(nameof(NodeLogic.SetDynamicContainer), BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+        var getter = tb.DefineMethod($"get_{name}",
+            MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+            typeof(InputsContainer), Type.EmptyTypes);
+        var gil = getter.GetILGenerator();
+        gil.Emit(OpCodes.Ldarg_0);
+        gil.Emit(OpCodes.Ldfld, field);
+        gil.Emit(OpCodes.Ret);
+
+        var setter = tb.DefineMethod($"set_{name}",
+            MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+            null, [typeof(InputsContainer)]);
+        var sil = setter.GetILGenerator();
+        sil.Emit(OpCodes.Ldarg_0);
+        sil.Emit(OpCodes.Ldarg_1);
+        sil.Emit(OpCodes.Ldstr, name);
+        sil.Emit(OpCodes.Call, setMethod);
+        sil.Emit(OpCodes.Ldarg_0);
+        sil.Emit(OpCodes.Ldarg_1);
+        sil.Emit(OpCodes.Stfld, field);
+        sil.Emit(OpCodes.Ret);
+
+        var pb = tb.DefineProperty(name, PropertyAttributes.None, typeof(InputsContainer), null);
+        pb.SetGetMethod(getter);
+        pb.SetSetMethod(setter);
+        return pb;
+    }
+
     private static PropertyBuilder EmitOutputProperty(TypeBuilder tb, string name, Type t)
     {
         var getMethod = typeof(NodeLogic)
@@ -518,21 +588,6 @@ public static class EffectNodeTypeBuilder
         pb.SetGetMethod(getter);
         pb.SetSetMethod(setter);
         return pb;
-    }
-
-    private static void EmitConstructor(TypeBuilder tb)
-    {
-        var baseCtor = typeof(NodeLogic).GetConstructor(
-            BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null)!;
-
-        var ctor = tb.DefineConstructor(
-            MethodAttributes.Public | MethodAttributes.HideBySig |
-            MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
-            CallingConventions.Standard, Type.EmptyTypes);
-        var il = ctor.GetILGenerator();
-        il.Emit(OpCodes.Ldarg_0);
-        il.Emit(OpCodes.Call, baseCtor);
-        il.Emit(OpCodes.Ret);
     }
 
     private static void EmitCalculate(
@@ -744,9 +799,10 @@ internal static class Attr
     private static readonly ConstructorInfo ColorCtor =
         typeof(ColorPortControlAttribute).GetConstructor(Type.EmptyTypes)!;
 
-    public static void InputPort(PropertyBuilder pb, string label, string desc, Type? resourceType)
+    public static void InputPort(PropertyBuilder pb, string label, string desc, Type? resourceType,
+        bool isDynamic = false)
     {
-        pb.SetCustomAttribute(new CustomAttributeBuilder(InputPortCtor, [label, desc, resourceType!, false]));
+        pb.SetCustomAttribute(new CustomAttributeBuilder(InputPortCtor, [label, desc, resourceType!, isDynamic]));
     }
 
     public static void OutputPort(PropertyBuilder pb, string label, string desc, Type? resourceType)

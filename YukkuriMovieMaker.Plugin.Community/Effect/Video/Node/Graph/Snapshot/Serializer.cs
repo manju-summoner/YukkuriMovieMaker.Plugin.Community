@@ -1,6 +1,6 @@
 using System.Reflection;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 using PortDefinition = YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port.PortDefinition;
 

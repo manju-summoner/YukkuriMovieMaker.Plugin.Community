@@ -184,7 +184,7 @@ public abstract class NodeLogic
         Inputs[name].SetValue(value);
     }
 
-    protected void SetDynamicContainer(InputsContainer newContainer, [CallerMemberName] string name = null!)
+    protected internal void SetDynamicContainer(InputsContainer newContainer, [CallerMemberName] string name = null!)
     {
         NeedToReinitializeInputPorts?.Invoke(this, new NeedToReinitializeInputPortsEvent(name, newContainer));
     }
