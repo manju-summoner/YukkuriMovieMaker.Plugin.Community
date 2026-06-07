@@ -210,8 +210,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             device.For(width, height, new DilateHorizontalShader(seedScratch, dilateScratch, AdoptReach, width, height));
             device.For(width, height, new DilateVerticalShader(dilateScratch, adoptMask, AdoptReach, width, height));
 
-            device.For(width, height, new DilateHorizontalShader(seedScratch, dilateScratch, AdoptReach + GuardReach, width, height));
-            device.For(width, height, new DilateVerticalShader(dilateScratch, computeMask, AdoptReach + GuardReach, width, height));
+            device.For(width, height, new DilateHorizontalShader(adoptMask, dilateScratch, GuardReach, width, height));
+            device.For(width, height, new DilateVerticalShader(dilateScratch, computeMask, GuardReach, width, height));
 
             var smoothSource = rawDirections;
             var smoothTarget = scratchDirections;
