@@ -34,6 +34,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private const float FixedPointScale = 64f;
         private const float ProjectionHistogramRange = 1.0f;
         private const float LambdaSmoothingAlpha = 0.25f;
+        private const float ConvergenceDot = 0.999995f;
         private const int AdoptReach = SmoothRadius * SmoothIterations;
         private const int GuardReach = SmoothRadius * SmoothIterations;
         private const float IncrementalChangeCeiling = 0.25f;
@@ -241,20 +242,36 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 SetCenter(0, primary);
 
                 for (int c = 1; c < clusterCount; c++)
+                    SetCenter(c, PerturbedCenter(c, primary));
+
+                return;
+            }
+
+            for (int c = 1; c < clusterCount; c++)
+            {
+                var current = GetCenter(c);
+                for (int other = 0; other < c; other++)
                 {
-                    float angle = MathF.PI * c / clusterCount;
-                    var perturbed = Normalize(new Vector3(
-                        primary.X,
-                        primary.Y * MathF.Cos(angle) - primary.Z * MathF.Sin(angle),
-                        primary.Y * MathF.Sin(angle) + primary.Z * MathF.Cos(angle)), primary);
-                    SetCenter(c, perturbed);
+                    if (Vector3.Dot(current, GetCenter(other)) > ConvergenceDot)
+                    {
+                        SetCenter(c, PerturbedCenter(c, primary));
+                        break;
+                    }
                 }
             }
         }
 
+        private Vector3 PerturbedCenter(int cluster, Vector3 primary)
+        {
+            float angle = MathF.PI * cluster / clusterCount;
+            return Normalize(new Vector3(
+                primary.X,
+                primary.Y * MathF.Cos(angle) - primary.Z * MathF.Sin(angle),
+                primary.Y * MathF.Sin(angle) + primary.Z * MathF.Cos(angle)), primary);
+        }
+
         private bool UpdateCenters(Vector3 whiteDirection)
         {
-            const float convergenceDot = 0.999995f;
             bool converged = true;
             Vector3 fallback = Normalize(whiteDirection, new Vector3(1f, 0f, 0f));
 
@@ -276,7 +293,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 var updated = Normalize(accumulated, previous);
                 SetCenter(c, updated);
 
-                if (Vector3.Dot(updated, previous) < convergenceDot)
+                if (Vector3.Dot(updated, previous) < ConvergenceDot)
                     converged = false;
             }
 
