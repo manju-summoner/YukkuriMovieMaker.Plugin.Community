@@ -2,6 +2,15 @@ using ComputeSharp;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey;
 
+internal static class DirectionSmoothConstants
+{
+    // DefaultThreadGroupSizes.XY が (8, 8, 1) に解決されることに対応する固定値。
+    public const int GroupSize = 8;
+    public const int Radius = 4;
+    public const int TileSize = GroupSize + Radius * 2;
+    public const int TileCount = TileSize * TileSize;
+}
+
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
 internal readonly partial struct DisplacementFieldShader(
@@ -102,7 +111,6 @@ internal readonly partial struct DirectionSmoothShader(
     ReadWriteBuffer<float> colorLab,
     ReadWriteBuffer<float> targetDirections,
     float sigmaColorSq,
-    int radius,
     int width,
     int height) : IComputeShader
 {
@@ -110,23 +118,64 @@ internal readonly partial struct DirectionSmoothShader(
     private readonly ReadWriteBuffer<float> colorLab = colorLab;
     private readonly ReadWriteBuffer<float> targetDirections = targetDirections;
     private readonly float sigmaColorSq = sigmaColorSq;
-    private readonly int radius = radius;
     private readonly int width = width;
     private readonly int height = height;
+
+    [GroupShared(DirectionSmoothConstants.TileCount * 3)]
+    private static readonly float[] directionTile = null!;
+    [GroupShared(DirectionSmoothConstants.TileCount * 3)]
+    private static readonly float[] colorTile = null!;
 
     public void Execute()
     {
         int x = ThreadIds.X;
         int y = ThreadIds.Y;
+
+        int originX = x - GroupIds.X - DirectionSmoothConstants.Radius;
+        int originY = y - GroupIds.Y - DirectionSmoothConstants.Radius;
+
+        for (int slot = GroupIds.Index; slot < DirectionSmoothConstants.TileCount; slot += GroupSize.Count)
+        {
+            int localY = slot / DirectionSmoothConstants.TileSize;
+            int localX = slot - localY * DirectionSmoothConstants.TileSize;
+            int sampleX = originX + localX;
+            int sampleY = originY + localY;
+            int tileTriple = slot * 3;
+
+            if (sampleX < 0 || sampleX >= width || sampleY < 0 || sampleY >= height)
+            {
+                directionTile[tileTriple + 0] = 0f;
+                directionTile[tileTriple + 1] = 0f;
+                directionTile[tileTriple + 2] = 0f;
+                colorTile[tileTriple + 0] = 0f;
+                colorTile[tileTriple + 1] = 0f;
+                colorTile[tileTriple + 2] = 0f;
+                continue;
+            }
+
+            int sampleTriple = (sampleY * width + sampleX) * 3;
+            directionTile[tileTriple + 0] = sourceDirections[sampleTriple + 0];
+            directionTile[tileTriple + 1] = sourceDirections[sampleTriple + 1];
+            directionTile[tileTriple + 2] = sourceDirections[sampleTriple + 2];
+            colorTile[tileTriple + 0] = colorLab[sampleTriple + 0];
+            colorTile[tileTriple + 1] = colorLab[sampleTriple + 1];
+            colorTile[tileTriple + 2] = colorLab[sampleTriple + 2];
+        }
+
+        Hlsl.GroupMemoryBarrierWithGroupSync();
+
         if (x >= width || y >= height)
             return;
 
-        int index = y * width + x;
-        int triple = index * 3;
+        int centerLocalX = GroupIds.X + DirectionSmoothConstants.Radius;
+        int centerLocalY = GroupIds.Y + DirectionSmoothConstants.Radius;
+        int centerTile = (centerLocalY * DirectionSmoothConstants.TileSize + centerLocalX) * 3;
 
-        float nl = sourceDirections[triple + 0];
-        float na = sourceDirections[triple + 1];
-        float nb = sourceDirections[triple + 2];
+        int triple = (y * width + x) * 3;
+
+        float nl = directionTile[centerTile + 0];
+        float na = directionTile[centerTile + 1];
+        float nb = directionTile[centerTile + 2];
 
         if (nl * nl + na * na + nb * nb < 0.25f)
         {
@@ -136,44 +185,43 @@ internal readonly partial struct DirectionSmoothShader(
             return;
         }
 
-        float cl = colorLab[triple + 0];
-        float ca = colorLab[triple + 1];
-        float cb = colorLab[triple + 2];
+        float cl = colorTile[centerTile + 0];
+        float ca = colorTile[centerTile + 1];
+        float cb = colorTile[centerTile + 2];
 
         float sumL = 0f;
         float sumA = 0f;
         float sumB = 0f;
         float sumW = 0f;
 
-        float twoSigmaSpaceSq = 2f * radius * radius;
+        float twoSigmaSpaceSq = 2f * DirectionSmoothConstants.Radius * DirectionSmoothConstants.Radius;
 
-        for (int dy = -radius; dy <= radius; dy++)
+        for (int dy = -DirectionSmoothConstants.Radius; dy <= DirectionSmoothConstants.Radius; dy++)
         {
             int sy = y + dy;
             if (sy < 0 || sy >= height)
                 continue;
 
-            for (int dx = -radius; dx <= radius; dx++)
+            for (int dx = -DirectionSmoothConstants.Radius; dx <= DirectionSmoothConstants.Radius; dx++)
             {
                 int sx = x + dx;
                 if (sx < 0 || sx >= width)
                     continue;
 
-                int sIndex = sy * width + sx;
-                int sTriple = sIndex * 3;
+                int sTile = ((centerLocalY + dy) * DirectionSmoothConstants.TileSize + (centerLocalX + dx)) * 3;
 
-                float ml = sourceDirections[sTriple + 0];
-                float ma = sourceDirections[sTriple + 1];
-                float mb = sourceDirections[sTriple + 2];
+                float ml = directionTile[sTile + 0];
+                float ma = directionTile[sTile + 1];
+                float mb = directionTile[sTile + 2];
 
                 if (ml * ml + ma * ma + mb * mb < 0.25f)
                     continue;
 
                 float wSpace = Hlsl.Exp(-(dx * dx + dy * dy) / Hlsl.Max(twoSigmaSpaceSq, 1e-6f));
 
-                float dcl = cl - colorLab[sTriple + 0];
-                float dca = ca - colorLab[sTriple + 1];
-                float dcb = cb - colorLab[sTriple + 2];
+                float dcl = cl - colorTile[sTile + 0];
+                float dca = ca - colorTile[sTile + 1];
+                float dcb = cb - colorTile[sTile + 2];
                 float colorDistSq = dcl * dcl + dca * dca + dcb * dcb;
                 float wColor = Hlsl.Exp(-colorDistSq / Hlsl.Max(sigmaColorSq, 1e-6f));
 
@@ -317,7 +365,6 @@ internal readonly partial struct RegionDirectionSmoothShader(
     ReadWriteBuffer<float> targetDirections,
     ReadWriteBuffer<int> computeMask,
     float sigmaColorSq,
-    int radius,
     int width,
     int height) : IComputeShader
 {
@@ -326,31 +373,73 @@ internal readonly partial struct RegionDirectionSmoothShader(
     private readonly ReadWriteBuffer<float> targetDirections = targetDirections;
     private readonly ReadWriteBuffer<int> computeMask = computeMask;
     private readonly float sigmaColorSq = sigmaColorSq;
-    private readonly int radius = radius;
     private readonly int width = width;
     private readonly int height = height;
+
+    [GroupShared(DirectionSmoothConstants.TileCount * 3)]
+    private static readonly float[] directionTile = null!;
+    [GroupShared(DirectionSmoothConstants.TileCount * 3)]
+    private static readonly float[] colorTile = null!;
 
     public void Execute()
     {
         int x = ThreadIds.X;
         int y = ThreadIds.Y;
+
+        int originX = x - GroupIds.X - DirectionSmoothConstants.Radius;
+        int originY = y - GroupIds.Y - DirectionSmoothConstants.Radius;
+
+        for (int slot = GroupIds.Index; slot < DirectionSmoothConstants.TileCount; slot += GroupSize.Count)
+        {
+            int localY = slot / DirectionSmoothConstants.TileSize;
+            int localX = slot - localY * DirectionSmoothConstants.TileSize;
+            int sampleX = originX + localX;
+            int sampleY = originY + localY;
+            int tileTriple = slot * 3;
+
+            if (sampleX < 0 || sampleX >= width || sampleY < 0 || sampleY >= height)
+            {
+                directionTile[tileTriple + 0] = 0f;
+                directionTile[tileTriple + 1] = 0f;
+                directionTile[tileTriple + 2] = 0f;
+                colorTile[tileTriple + 0] = 0f;
+                colorTile[tileTriple + 1] = 0f;
+                colorTile[tileTriple + 2] = 0f;
+                continue;
+            }
+
+            int sampleTriple = (sampleY * width + sampleX) * 3;
+            directionTile[tileTriple + 0] = sourceDirections[sampleTriple + 0];
+            directionTile[tileTriple + 1] = sourceDirections[sampleTriple + 1];
+            directionTile[tileTriple + 2] = sourceDirections[sampleTriple + 2];
+            colorTile[tileTriple + 0] = colorLab[sampleTriple + 0];
+            colorTile[tileTriple + 1] = colorLab[sampleTriple + 1];
+            colorTile[tileTriple + 2] = colorLab[sampleTriple + 2];
+        }
+
+        Hlsl.GroupMemoryBarrierWithGroupSync();
+
         if (x >= width || y >= height)
             return;
 
         int index = y * width + x;
         int triple = index * 3;
 
+        int centerLocalX = GroupIds.X + DirectionSmoothConstants.Radius;
+        int centerLocalY = GroupIds.Y + DirectionSmoothConstants.Radius;
+        int centerTile = (centerLocalY * DirectionSmoothConstants.TileSize + centerLocalX) * 3;
+
         if (computeMask[index] == 0)
         {
-            targetDirections[triple + 0] = sourceDirections[triple + 0];
-            targetDirections[triple + 1] = sourceDirections[triple + 1];
-            targetDirections[triple + 2] = sourceDirections[triple + 2];
+            targetDirections[triple + 0] = directionTile[centerTile + 0];
+            targetDirections[triple + 1] = directionTile[centerTile + 1];
+            targetDirections[triple + 2] = directionTile[centerTile + 2];
             return;
         }
 
-        float nl = sourceDirections[triple + 0];
-        float na = sourceDirections[triple + 1];
-        float nb = sourceDirections[triple + 2];
+        float nl = directionTile[centerTile + 0];
+        float na = directionTile[centerTile + 1];
+        float nb = directionTile[centerTile + 2];
 
         if (nl * nl + na * na + nb * nb < 0.25f)
         {
@@ -360,44 +449,43 @@ internal readonly partial struct RegionDirectionSmoothShader(
             return;
         }
 
-        float cl = colorLab[triple + 0];
-        float ca = colorLab[triple + 1];
-        float cb = colorLab[triple + 2];
+        float cl = colorTile[centerTile + 0];
+        float ca = colorTile[centerTile + 1];
+        float cb = colorTile[centerTile + 2];
 
         float sumL = 0f;
         float sumA = 0f;
         float sumB = 0f;
         float sumW = 0f;
 
-        float twoSigmaSpaceSq = 2f * radius * radius;
+        float twoSigmaSpaceSq = 2f * DirectionSmoothConstants.Radius * DirectionSmoothConstants.Radius;
 
-        for (int dy = -radius; dy <= radius; dy++)
+        for (int dy = -DirectionSmoothConstants.Radius; dy <= DirectionSmoothConstants.Radius; dy++)
         {
             int sy = y + dy;
             if (sy < 0 || sy >= height)
                 continue;
 
-            for (int dx = -radius; dx <= radius; dx++)
+            for (int dx = -DirectionSmoothConstants.Radius; dx <= DirectionSmoothConstants.Radius; dx++)
             {
                 int sx = x + dx;
                 if (sx < 0 || sx >= width)
                     continue;
 
-                int sIndex = sy * width + sx;
-                int sTriple = sIndex * 3;
+                int sTile = ((centerLocalY + dy) * DirectionSmoothConstants.TileSize + (centerLocalX + dx)) * 3;
 
-                float ml = sourceDirections[sTriple + 0];
-                float ma = sourceDirections[sTriple + 1];
-                float mb = sourceDirections[sTriple + 2];
+                float ml = directionTile[sTile + 0];
+                float ma = directionTile[sTile + 1];
+                float mb = directionTile[sTile + 2];
 
                 if (ml * ml + ma * ma + mb * mb < 0.25f)
                     continue;
 
                 float wSpace = Hlsl.Exp(-(dx * dx + dy * dy) / Hlsl.Max(twoSigmaSpaceSq, 1e-6f));
 
-                float dcl = cl - colorLab[sTriple + 0];
-                float dca = ca - colorLab[sTriple + 1];
-                float dcb = cb - colorLab[sTriple + 2];
+                float dcl = cl - colorTile[sTile + 0];
+                float dca = ca - colorTile[sTile + 1];
+                float dcb = cb - colorTile[sTile + 2];
                 float colorDistSq = dcl * dcl + dca * dca + dcb * dcb;
                 float wColor = Hlsl.Exp(-colorDistSq / Hlsl.Max(sigmaColorSq, 1e-6f));
 
