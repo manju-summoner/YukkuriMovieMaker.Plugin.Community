@@ -9,6 +9,8 @@ internal static class DirectionSmoothConstants
     public const int Radius = 4;
     public const int TileSize = GroupSize + Radius * 2;
     public const int TileCount = TileSize * TileSize;
+    public const int SpaceTableStride = Radius * 2 + 1;
+    public const int SpaceTableCount = SpaceTableStride * SpaceTableStride;
 }
 
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
@@ -125,11 +127,24 @@ internal readonly partial struct DirectionSmoothShader(
     private static readonly float[] directionTile = null!;
     [GroupShared(DirectionSmoothConstants.TileCount * 3)]
     private static readonly float[] colorTile = null!;
+    [GroupShared(DirectionSmoothConstants.SpaceTableCount)]
+    private static readonly float[] spaceTable = null!;
 
     public void Execute()
     {
         int x = ThreadIds.X;
         int y = ThreadIds.Y;
+
+        float twoSigmaSpaceSq = 2f * DirectionSmoothConstants.Radius * DirectionSmoothConstants.Radius;
+
+        for (int slot = GroupIds.Index; slot < DirectionSmoothConstants.SpaceTableCount; slot += GroupSize.Count)
+        {
+            int ty = slot / DirectionSmoothConstants.SpaceTableStride;
+            int tx = slot - ty * DirectionSmoothConstants.SpaceTableStride;
+            int offX = tx - DirectionSmoothConstants.Radius;
+            int offY = ty - DirectionSmoothConstants.Radius;
+            spaceTable[slot] = Hlsl.Exp(-(offX * offX + offY * offY) / Hlsl.Max(twoSigmaSpaceSq, 1e-6f));
+        }
 
         int originX = x - GroupIds.X - DirectionSmoothConstants.Radius;
         int originY = y - GroupIds.Y - DirectionSmoothConstants.Radius;
@@ -194,8 +209,6 @@ internal readonly partial struct DirectionSmoothShader(
         float sumB = 0f;
         float sumW = 0f;
 
-        float twoSigmaSpaceSq = 2f * DirectionSmoothConstants.Radius * DirectionSmoothConstants.Radius;
-
         for (int dy = -DirectionSmoothConstants.Radius; dy <= DirectionSmoothConstants.Radius; dy++)
         {
             int sy = y + dy;
@@ -217,7 +230,7 @@ internal readonly partial struct DirectionSmoothShader(
                 if (ml * ml + ma * ma + mb * mb < 0.25f)
                     continue;
 
-                float wSpace = Hlsl.Exp(-(dx * dx + dy * dy) / Hlsl.Max(twoSigmaSpaceSq, 1e-6f));
+                float wSpace = spaceTable[(dy + DirectionSmoothConstants.Radius) * DirectionSmoothConstants.SpaceTableStride + (dx + DirectionSmoothConstants.Radius)];
 
                 float dcl = cl - colorTile[sTile + 0];
                 float dca = ca - colorTile[sTile + 1];
@@ -380,11 +393,24 @@ internal readonly partial struct RegionDirectionSmoothShader(
     private static readonly float[] directionTile = null!;
     [GroupShared(DirectionSmoothConstants.TileCount * 3)]
     private static readonly float[] colorTile = null!;
+    [GroupShared(DirectionSmoothConstants.SpaceTableCount)]
+    private static readonly float[] spaceTable = null!;
 
     public void Execute()
     {
         int x = ThreadIds.X;
         int y = ThreadIds.Y;
+
+        float twoSigmaSpaceSq = 2f * DirectionSmoothConstants.Radius * DirectionSmoothConstants.Radius;
+
+        for (int slot = GroupIds.Index; slot < DirectionSmoothConstants.SpaceTableCount; slot += GroupSize.Count)
+        {
+            int ty = slot / DirectionSmoothConstants.SpaceTableStride;
+            int tx = slot - ty * DirectionSmoothConstants.SpaceTableStride;
+            int offX = tx - DirectionSmoothConstants.Radius;
+            int offY = ty - DirectionSmoothConstants.Radius;
+            spaceTable[slot] = Hlsl.Exp(-(offX * offX + offY * offY) / Hlsl.Max(twoSigmaSpaceSq, 1e-6f));
+        }
 
         int originX = x - GroupIds.X - DirectionSmoothConstants.Radius;
         int originY = y - GroupIds.Y - DirectionSmoothConstants.Radius;
@@ -458,8 +484,6 @@ internal readonly partial struct RegionDirectionSmoothShader(
         float sumB = 0f;
         float sumW = 0f;
 
-        float twoSigmaSpaceSq = 2f * DirectionSmoothConstants.Radius * DirectionSmoothConstants.Radius;
-
         for (int dy = -DirectionSmoothConstants.Radius; dy <= DirectionSmoothConstants.Radius; dy++)
         {
             int sy = y + dy;
@@ -481,7 +505,7 @@ internal readonly partial struct RegionDirectionSmoothShader(
                 if (ml * ml + ma * ma + mb * mb < 0.25f)
                     continue;
 
-                float wSpace = Hlsl.Exp(-(dx * dx + dy * dy) / Hlsl.Max(twoSigmaSpaceSq, 1e-6f));
+                float wSpace = spaceTable[(dy + DirectionSmoothConstants.Radius) * DirectionSmoothConstants.SpaceTableStride + (dx + DirectionSmoothConstants.Radius)];
 
                 float dcl = cl - colorTile[sTile + 0];
                 float dca = ca - colorTile[sTile + 1];
