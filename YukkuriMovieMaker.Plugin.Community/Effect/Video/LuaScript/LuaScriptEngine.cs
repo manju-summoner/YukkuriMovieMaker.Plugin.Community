@@ -58,6 +58,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
             private Table? _animTable;
             private Table? _ymm4Table;
             private HashSet<string>? _builtinGlobalSnapshot;
+            private HashSet<string>? _objTableSnapshot;
+            private HashSet<string>? _sceneTableSnapshot;
+            private HashSet<string>? _animTableSnapshot;
+            private HashSet<string>? _ymm4TableSnapshot;
             private CancellationToken _activeCancellation;
             private AviUtlScriptContext? _activeContext;
 
@@ -114,6 +118,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 try
                 {
                     EnsureScript();
+                    EnsureScriptIntegrity();
                     EnsureCompiled(job.Code);
                     SetupGlobals(job.Context);
                     _script!.Call(_compiledChunk!);
@@ -163,6 +168,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 _script = script;
             }
 
+            private void EnsureScriptIntegrity()
+            {
+                if (_script is null) return;
+                if (_script.Globals.Get("math").Type == DataType.Table) return;
+                _script = null;
+                _compiledChunk = null;
+                _lastCompiledCode = string.Empty;
+                _objTable = null;
+                _sceneTable = null;
+                _animTable = null;
+                _ymm4Table = null;
+                _builtinGlobalSnapshot = null;
+                _objTableSnapshot = null;
+                _sceneTableSnapshot = null;
+                _animTableSnapshot = null;
+                _ymm4TableSnapshot = null;
+                EnsureScript();
+            }
+
             private void EnsureCompiled(string code)
             {
                 if (_compiledChunk is not null && code == _lastCompiledCode) return;
@@ -210,6 +234,45 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 else
                 {
                     ResetUserGlobals(script);
+
+                    if (!ReferenceEquals(script.Globals.Get("scene").Table, _sceneTable))
+                    {
+                        var sceneTable = new Table(script);
+                        script.Globals["scene"] = sceneTable;
+                        _sceneTable = sceneTable;
+                        _sceneTableSnapshot = null;
+                    }
+
+                    if (!ReferenceEquals(script.Globals.Get("obj").Table, _objTable))
+                    {
+                        var objTable = new Table(script);
+                        RegisterPixelCallbacks(objTable);
+                        script.Globals["obj"] = objTable;
+                        _objTable = objTable;
+                        _objTableSnapshot = null;
+                    }
+
+                    if (!ReferenceEquals(script.Globals.Get("anim").Table, _animTable))
+                    {
+                        var animTable = new Table(script);
+                        AnimTableRegistrar.RegisterFunctions(animTable);
+                        script.Globals["anim"] = animTable;
+                        _animTable = animTable;
+                        _animTableSnapshot = null;
+                    }
+
+                    if (!ReferenceEquals(script.Globals.Get("ymm4").Table, _ymm4Table))
+                    {
+                        var ymm4Table = new Table(script);
+                        script.Globals["ymm4"] = ymm4Table;
+                        _ymm4Table = ymm4Table;
+                        _ymm4TableSnapshot = null;
+                    }
+
+                    ResetUserTableKeys(_objTable!, ref _objTableSnapshot);
+                    ResetUserTableKeys(_sceneTable!, ref _sceneTableSnapshot);
+                    ResetUserTableKeys(_animTable!, ref _animTableSnapshot);
+                    ResetUserTableKeys(_ymm4Table!, ref _ymm4TableSnapshot);
                 }
 
                 script.Globals["time"] = ctx.Time;
@@ -270,6 +333,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                 if (isFirstSetup)
                 {
                     _builtinGlobalSnapshot = CaptureGlobalKeys(script);
+                    _objTableSnapshot = CaptureTableKeys(_objTable!);
+                    _sceneTableSnapshot = CaptureTableKeys(_sceneTable!);
+                    _animTableSnapshot = CaptureTableKeys(_animTable!);
+                    _ymm4TableSnapshot = CaptureTableKeys(_ymm4Table!);
                 }
 
                 script.Call(
@@ -286,6 +353,33 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
                         keys.Add(key.String);
                 }
                 return keys;
+            }
+
+            private static HashSet<string> CaptureTableKeys(Table table)
+            {
+                var keys = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var key in table.Keys)
+                {
+                    if (key.Type == DataType.String)
+                        keys.Add(key.String);
+                }
+                return keys;
+            }
+
+            private static void ResetUserTableKeys(Table table, ref HashSet<string>? snapshot)
+            {
+                if (snapshot is null) return;
+                var keysToRemove = new List<string>();
+                foreach (var key in table.Keys)
+                {
+                    if (key.Type == DataType.String &&
+                        !snapshot.Contains(key.String))
+                    {
+                        keysToRemove.Add(key.String);
+                    }
+                }
+                foreach (var key in keysToRemove)
+                    table[key] = DynValue.Nil;
             }
 
             private void ResetUserGlobals(Script script)
