@@ -116,6 +116,13 @@ float4 main(
     if (alpha <= 0.0f)
         return float4(0.0f, 0.0f, 0.0f, 0.0f);
 
+    [branch]
+    if (outputForeground < 0.5f)
+    {
+        float maskAlpha = alpha * noiseConfidence * src.a;
+        return float4(maskAlpha, maskAlpha, maskAlpha, maskAlpha);
+    }
+
     float3 foregroundLab = (colorLab - (1.0f - alpha) * backgroundLab) / max(alpha, 1e-3f);
 
     [branch]
@@ -125,13 +132,6 @@ float4 main(
         float spill = dot(foregroundLab.yz, chromaDir) - despillBias;
         spill = max(0.0f, spill) * spillStrength;
         foregroundLab.yz -= chromaDir * spill;
-    }
-
-    [branch]
-    if (outputForeground < 0.5f)
-    {
-        float maskAlpha = alpha * noiseConfidence * src.a;
-        return float4(maskAlpha, maskAlpha, maskAlpha, maskAlpha);
     }
 
     float3 foregroundLinear = max(OklabToLinear(foregroundLab), 0.0f);
