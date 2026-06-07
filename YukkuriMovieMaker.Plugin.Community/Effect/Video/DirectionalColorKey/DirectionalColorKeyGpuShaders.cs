@@ -330,7 +330,10 @@ internal readonly partial struct DilateHorizontalShader(
             if (sx < 0 || sx >= width)
                 continue;
             if (source[row + sx] != 0)
+            {
                 value = 1;
+                break;
+            }
         }
         target[row + x] = value;
     }
@@ -365,7 +368,10 @@ internal readonly partial struct DilateVerticalShader(
             if (sy < 0 || sy >= height)
                 continue;
             if (source[sy * width + x] != 0)
+            {
                 value = 1;
+                break;
+            }
         }
         target[y * width + x] = value;
     }
