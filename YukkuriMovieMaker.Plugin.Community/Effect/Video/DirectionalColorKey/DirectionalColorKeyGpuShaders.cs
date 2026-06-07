@@ -13,6 +13,13 @@ internal static class DirectionSmoothConstants
     public const int SpaceTableCount = SpaceTableStride * SpaceTableStride;
 }
 
+internal static class DirectionFieldConstants
+{
+    // 方向ベクトルは長さ0の無効方向か長さ1の単位方向のいずれかを取る。
+    // 長さの2乗がこの閾値未満なら無効方向とみなす。0と1の中間に置く。
+    public const float ValidLengthSquaredThreshold = 0.25f;
+}
+
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
 internal readonly partial struct DisplacementFieldShader(
@@ -192,7 +199,7 @@ internal readonly partial struct DirectionSmoothShader(
         float na = directionTile[centerTile + 1];
         float nb = directionTile[centerTile + 2];
 
-        if (nl * nl + na * na + nb * nb < 0.25f)
+        if (nl * nl + na * na + nb * nb < DirectionFieldConstants.ValidLengthSquaredThreshold)
         {
             targetDirections[triple + 0] = 0f;
             targetDirections[triple + 1] = 0f;
@@ -227,7 +234,7 @@ internal readonly partial struct DirectionSmoothShader(
                 float ma = directionTile[sTile + 1];
                 float mb = directionTile[sTile + 2];
 
-                if (ml * ml + ma * ma + mb * mb < 0.25f)
+                if (ml * ml + ma * ma + mb * mb < DirectionFieldConstants.ValidLengthSquaredThreshold)
                     continue;
 
                 float dot = nl * ml + na * ma + nb * mb;
@@ -474,7 +481,7 @@ internal readonly partial struct RegionDirectionSmoothShader(
         float na = directionTile[centerTile + 1];
         float nb = directionTile[centerTile + 2];
 
-        if (nl * nl + na * na + nb * nb < 0.25f)
+        if (nl * nl + na * na + nb * nb < DirectionFieldConstants.ValidLengthSquaredThreshold)
         {
             targetDirections[triple + 0] = 0f;
             targetDirections[triple + 1] = 0f;
@@ -509,7 +516,7 @@ internal readonly partial struct RegionDirectionSmoothShader(
                 float ma = directionTile[sTile + 1];
                 float mb = directionTile[sTile + 2];
 
-                if (ml * ml + ma * ma + mb * mb < 0.25f)
+                if (ml * ml + ma * ma + mb * mb < DirectionFieldConstants.ValidLengthSquaredThreshold)
                     continue;
 
                 float dot = nl * ml + na * ma + nb * mb;
@@ -687,7 +694,7 @@ internal readonly partial struct ClusterAssignAccumulateShader(
         float na = directions[triple + 1];
         float nb = directions[triple + 2];
 
-        if (nl * nl + na * na + nb * nb < 0.25f)
+        if (nl * nl + na * na + nb * nb < DirectionFieldConstants.ValidLengthSquaredThreshold)
             return;
 
         int best = 0;
@@ -755,7 +762,7 @@ internal readonly partial struct ProjectionHistogramShader(
         float na = directions[triple + 1];
         float nb = directions[triple + 2];
 
-        if (nl * nl + na * na + nb * nb < 0.25f)
+        if (nl * nl + na * na + nb * nb < DirectionFieldConstants.ValidLengthSquaredThreshold)
             return;
 
         int best = 0;
