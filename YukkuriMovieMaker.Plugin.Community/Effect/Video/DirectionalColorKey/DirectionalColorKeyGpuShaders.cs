@@ -597,15 +597,28 @@ internal readonly partial struct MaskCountShader(
     private readonly int width = width;
     private readonly int height = height;
 
+    [GroupShared(DirectionSmoothConstants.GroupSize * DirectionSmoothConstants.GroupSize)]
+    private static readonly int[] partialCounts = null!;
+
     public void Execute()
     {
         int x = ThreadIds.X;
         int y = ThreadIds.Y;
-        if (x >= width || y >= height)
+
+        int local = GroupIds.Index;
+        partialCounts[local] = (x < width && y < height && mask[y * width + x] != 0) ? 1 : 0;
+
+        Hlsl.GroupMemoryBarrierWithGroupSync();
+
+        if (local != 0)
             return;
 
-        if (mask[y * width + x] != 0)
-            Hlsl.InterlockedAdd(ref count[0], 1);
+        int total = 0;
+        for (int i = 0; i < GroupSize.Count; i++)
+            total += partialCounts[i];
+
+        if (total != 0)
+            Hlsl.InterlockedAdd(ref count[0], total);
     }
 }
 
