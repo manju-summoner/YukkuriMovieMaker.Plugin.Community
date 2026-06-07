@@ -230,6 +230,10 @@ internal readonly partial struct DirectionSmoothShader(
                 if (ml * ml + ma * ma + mb * mb < 0.25f)
                     continue;
 
+                float dot = nl * ml + na * ma + nb * mb;
+                if (dot <= 0f)
+                    continue;
+
                 float wSpace = spaceTable[(dy + DirectionSmoothConstants.Radius) * DirectionSmoothConstants.SpaceTableStride + (dx + DirectionSmoothConstants.Radius)];
 
                 float dcl = cl - colorTile[sTile + 0];
@@ -238,10 +242,7 @@ internal readonly partial struct DirectionSmoothShader(
                 float colorDistSq = dcl * dcl + dca * dca + dcb * dcb;
                 float wColor = Hlsl.Exp(-colorDistSq / Hlsl.Max(sigmaColorSq, 1e-6f));
 
-                float dot = nl * ml + na * ma + nb * mb;
-                float wDir = Hlsl.Max(0f, dot);
-
-                float w = wSpace * wColor * wDir;
+                float w = wSpace * wColor * dot;
 
                 sumL += ml * w;
                 sumA += ma * w;
@@ -505,6 +506,10 @@ internal readonly partial struct RegionDirectionSmoothShader(
                 if (ml * ml + ma * ma + mb * mb < 0.25f)
                     continue;
 
+                float dot = nl * ml + na * ma + nb * mb;
+                if (dot <= 0f)
+                    continue;
+
                 float wSpace = spaceTable[(dy + DirectionSmoothConstants.Radius) * DirectionSmoothConstants.SpaceTableStride + (dx + DirectionSmoothConstants.Radius)];
 
                 float dcl = cl - colorTile[sTile + 0];
@@ -513,10 +518,7 @@ internal readonly partial struct RegionDirectionSmoothShader(
                 float colorDistSq = dcl * dcl + dca * dca + dcb * dcb;
                 float wColor = Hlsl.Exp(-colorDistSq / Hlsl.Max(sigmaColorSq, 1e-6f));
 
-                float dot = nl * ml + na * ma + nb * mb;
-                float wDir = Hlsl.Max(0f, dot);
-
-                float w = wSpace * wColor * wDir;
+                float w = wSpace * wColor * dot;
 
                 sumL += ml * w;
                 sumA += ma * w;
