@@ -27,7 +27,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private int pixelCount;
 
         private const int MaxClusters = 4;
-        private const int SmoothRadius = 4;
+        private const int SmoothRadius = DirectionSmoothConstants.Radius;
         private const int SmoothIterations = 5;
         private const int LloydIterations = 12;
         private const int ProjectionBins = 256;
@@ -126,7 +126,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 for (int iteration = 0; iteration < SmoothIterations; iteration++)
                 {
                     device.For(width, height, new DirectionSmoothShader(
-                        smoothSource, colorLabGpu, smoothTarget, sigmaColorSq, SmoothRadius, width, height));
+                        smoothSource, colorLabGpu, smoothTarget, sigmaColorSq, width, height));
                     (smoothSource, smoothTarget) = (smoothTarget, smoothSource);
                 }
 
@@ -220,7 +220,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             for (int iteration = 0; iteration < SmoothIterations; iteration++)
             {
                 device.For(width, height, new RegionDirectionSmoothShader(
-                    smoothSource, colorLabGpu, smoothTarget, computeMask, sigmaColorSq, SmoothRadius, width, height));
+                    smoothSource, colorLabGpu, smoothTarget, computeMask, sigmaColorSq, width, height));
                 (smoothSource, smoothTarget) = (smoothTarget, smoothSource);
             }
 
