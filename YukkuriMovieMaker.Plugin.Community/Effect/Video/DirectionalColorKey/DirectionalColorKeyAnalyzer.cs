@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private ReadWriteBuffer<int>? adoptMaskBuffer;
         private ReadWriteBuffer<int>? computeMaskBuffer;
         private ReadOnlyBuffer<float>? centerBuffer;
-        private ReadWriteBuffer<int>? sumBuffer;
+        private ReadWriteBuffer<int>? accumBuffer;
         private ReadWriteBuffer<int>? countBuffer;
         private ReadWriteBuffer<int>? histogramBuffer;
 
@@ -40,12 +40,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private const float IncrementalChangeCeiling = 0.25f;
 
         private readonly float[] centers = new float[MaxClusters * 3];
-        private readonly int[] sums = new int[MaxClusters * 3];
+        private readonly int[] accumulators = new int[MaxClusters * 3 + MaxClusters];
         private readonly int[] counts = new int[MaxClusters];
         private readonly int[] histogram = new int[MaxClusters * ProjectionBins];
         private readonly float[] lambdas = new float[MaxClusters];
         private readonly float[] prevLambdas = new float[MaxClusters];
-        private readonly int[] zeroSums = new int[MaxClusters * 3];
+        private readonly int[] zeroAccumulators = new int[MaxClusters * 3 + MaxClusters];
         private readonly int[] zeroCounts = new int[MaxClusters];
         private readonly int[] zeroHistogram = new int[MaxClusters * ProjectionBins];
 
@@ -146,20 +146,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             InitializeCenters(targetClusters, whiteDirection);
 
             var centerGpu = EnsureCenterBuffer();
-            var sumGpu = EnsureSumBuffer();
-            var countGpu = EnsureCountBuffer();
+            var accumGpu = EnsureAccumBuffer();
+
+            int accumLength = clusterCount * 3 + clusterCount;
 
             for (int iteration = 0; iteration < LloydIterations; iteration++)
             {
                 centerGpu.CopyFrom(centers.AsSpan(0, clusterCount * 3));
-                sumGpu.CopyFrom(zeroSums.AsSpan(0, clusterCount * 3));
-                countGpu.CopyFrom(zeroCounts.AsSpan(0, clusterCount));
+                accumGpu.CopyFrom(zeroAccumulators.AsSpan(0, accumLength));
 
                 device.For(width, height, new ClusterAssignAccumulateShader(
-                    smoothedDirections, centerGpu, sumGpu, countGpu, clusterCount, FixedPointScale, width, height));
+                    smoothedDirections, centerGpu, accumGpu, clusterCount, FixedPointScale, width, height));
 
-                sumGpu.CopyTo(sums.AsSpan(0, clusterCount * 3));
-                countGpu.CopyTo(counts.AsSpan(0, clusterCount));
+                accumGpu.CopyTo(accumulators.AsSpan(0, accumLength));
 
                 bool converged = UpdateCenters(whiteDirection);
                 if (converged)
@@ -274,10 +273,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         {
             bool converged = true;
             Vector3 fallback = Normalize(whiteDirection, new Vector3(1f, 0f, 0f));
+            int countBase = clusterCount * 3;
 
             for (int c = 0; c < clusterCount; c++)
             {
-                if (counts[c] == 0)
+                if (accumulators[countBase + c] == 0)
                 {
                     SetCenter(c, fallback);
                     converged = false;
@@ -285,9 +285,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 }
 
                 var accumulated = new Vector3(
-                    sums[c * 3 + 0] / FixedPointScale,
-                    sums[c * 3 + 1] / FixedPointScale,
-                    sums[c * 3 + 2] / FixedPointScale);
+                    accumulators[c * 3 + 0] / FixedPointScale,
+                    accumulators[c * 3 + 1] / FixedPointScale,
+                    accumulators[c * 3 + 2] / FixedPointScale);
 
                 var previous = GetCenter(c);
                 var updated = Normalize(accumulated, previous);
@@ -503,10 +503,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             return centerBuffer;
         }
 
-        private ReadWriteBuffer<int> EnsureSumBuffer()
+        private ReadWriteBuffer<int> EnsureAccumBuffer()
         {
-            sumBuffer ??= device.AllocateReadWriteBuffer<int>(MaxClusters * 3);
-            return sumBuffer;
+            accumBuffer ??= device.AllocateReadWriteBuffer<int>(MaxClusters * 3 + MaxClusters);
+            return accumBuffer;
         }
 
         private ReadWriteBuffer<int> EnsureCountBuffer()
@@ -549,11 +549,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         {
             DisposeFrameBuffers();
             centerBuffer?.Dispose();
-            sumBuffer?.Dispose();
+            accumBuffer?.Dispose();
             countBuffer?.Dispose();
             histogramBuffer?.Dispose();
             centerBuffer = null;
-            sumBuffer = null;
+            accumBuffer = null;
             countBuffer = null;
             histogramBuffer = null;
         }

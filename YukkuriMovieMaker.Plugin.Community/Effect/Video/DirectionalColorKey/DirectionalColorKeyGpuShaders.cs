@@ -627,8 +627,7 @@ internal readonly partial struct MaskCountShader(
 internal readonly partial struct ClusterAssignAccumulateShader(
     ReadWriteBuffer<float> directions,
     ReadOnlyBuffer<float> centers,
-    ReadWriteBuffer<int> sums,
-    ReadWriteBuffer<int> counts,
+    ReadWriteBuffer<int> accumulators,
     int clusterCount,
     float fixedPointScale,
     int width,
@@ -636,8 +635,7 @@ internal readonly partial struct ClusterAssignAccumulateShader(
 {
     private readonly ReadWriteBuffer<float> directions = directions;
     private readonly ReadOnlyBuffer<float> centers = centers;
-    private readonly ReadWriteBuffer<int> sums = sums;
-    private readonly ReadWriteBuffer<int> counts = counts;
+    private readonly ReadWriteBuffer<int> accumulators = accumulators;
     private readonly int clusterCount = clusterCount;
     private readonly float fixedPointScale = fixedPointScale;
     private readonly int width = width;
@@ -675,10 +673,10 @@ internal readonly partial struct ClusterAssignAccumulateShader(
         }
 
         int sumBase = best * 3;
-        Hlsl.InterlockedAdd(ref sums[sumBase + 0], (int)Hlsl.Round(nl * fixedPointScale));
-        Hlsl.InterlockedAdd(ref sums[sumBase + 1], (int)Hlsl.Round(na * fixedPointScale));
-        Hlsl.InterlockedAdd(ref sums[sumBase + 2], (int)Hlsl.Round(nb * fixedPointScale));
-        Hlsl.InterlockedAdd(ref counts[best], 1);
+        Hlsl.InterlockedAdd(ref accumulators[sumBase + 0], (int)Hlsl.Round(nl * fixedPointScale));
+        Hlsl.InterlockedAdd(ref accumulators[sumBase + 1], (int)Hlsl.Round(na * fixedPointScale));
+        Hlsl.InterlockedAdd(ref accumulators[sumBase + 2], (int)Hlsl.Round(nb * fixedPointScale));
+        Hlsl.InterlockedAdd(ref accumulators[clusterCount * 3 + best], 1);
     }
 }
 
