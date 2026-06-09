@@ -4,6 +4,7 @@ using System.Reflection.Emit;
 using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 
@@ -13,13 +14,36 @@ public class ContainerFactory
 {
     private static readonly Dictionary<string, Type> TypeCache = new();
 
+    // ModuleBuilder を内部保持して、EffectNodeCalculator から ModuleBuilder なしで呼べるようにする
+    private static ModuleBuilder? _moduleBuilder;
+
+    /// <summary>
+    ///     EffectNodeTypeBuilder.Build から呼ばれ、ModuleBuilder を登録する。
+    /// </summary>
+    public static void SetModuleBuilder(ModuleBuilder mod)
+    {
+        _moduleBuilder = mod;
+    }
+
+    /// <summary>
+    ///     ModuleBuilder なしで呼べるオーバーロード。SetModuleBuilder が先に呼ばれている必要がある。
+    /// </summary>
+    public static Type? CreateOrGenerate(object effectPropertyInst)
+    {
+        if (_moduleBuilder == null)
+            throw new InvalidOperationException("ModuleBuilder が未設定。SetModuleBuilder を先に呼ぶこと。");
+        return CreateOrGenerate(effectPropertyInst, _moduleBuilder);
+    }
+
     public static Type? CreateOrGenerate(object effectPropertyInst, ModuleBuilder mod)
     {
+        // ModuleBuilder を記録しておく（RefreshDynamicContainer から呼ばれる際に使う）
+        _moduleBuilder ??= mod;
+
         var type = effectPropertyInst.GetType();
         var name = type.FullName ?? type.Name;
         if (TypeCache.TryGetValue(name, out var cached))
             return cached;
-
 
         var properties = new List<PropertyInfo>();
         foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
@@ -191,7 +215,13 @@ public class ContainerFactory
 
         var type = tb.CreateType()
                    ?? throw new InvalidOperationException();
-
+#if DEBUG
+        foreach (var p in type.GetProperties())
+        {
+            var hasAttr = Attribute.IsDefined(p, typeof(InputPortAttribute));
+            Console.WriteLine($@"[ContainerFactory] {type.Name}.{p.Name} HasInputPort={hasAttr}");
+        }
+#endif
         TypeCache[name] = type;
 
         return type;

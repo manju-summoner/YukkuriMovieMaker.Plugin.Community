@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
@@ -186,7 +187,11 @@ public abstract class NodeLogic
 
     protected internal void SetDynamicContainer(InputsContainer newContainer, [CallerMemberName] string name = null!)
     {
-        NeedToReinitializeInputPorts?.Invoke(this, new NeedToReinitializeInputPortsEvent(name, newContainer));
+        if (Application.Current.Dispatcher.CheckAccess())
+            NeedToReinitializeInputPorts?.Invoke(this, new NeedToReinitializeInputPortsEvent(name, newContainer));
+        else
+            Application.Current.Dispatcher.BeginInvoke(() =>
+                NeedToReinitializeInputPorts?.Invoke(this, new NeedToReinitializeInputPortsEvent(name, newContainer)));
     }
 
     internal void SwapDynamicContainer(string name, InputsContainer newContainer)

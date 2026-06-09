@@ -109,6 +109,8 @@ public class VideoEffectsLoader : IDisposable
                 break;
             case EffectType.VideoEffect when _videoEffect != null:
             {
+                _videoEffect.BeginEdit();
+
                 // Recursively search for properties with DisplayAttribute within the _videoEffect hierarchy,
                 // and match the property name (identifier) with the argument propertyName
                 var result = FindPropertyByDisplay(_videoEffect, propertyName);
@@ -156,7 +158,7 @@ public class VideoEffectsLoader : IDisposable
                     propInfo.SetValue(targetObject, value);
                 }
 
-                if (_videoEffect is IEditable editable) await editable.EndEditAsync();
+                await _videoEffect.EndEditAsync();
             }
                 break;
             case EffectType.BrushEffect when _brushParameter != null:

@@ -86,7 +86,7 @@ public static class Serializer
         var graph = new NodeGraph();
         var nodeMap = new Dictionary<Guid, NodeLogic>();
 
-        foreach (var (typeName, effectName) in snapshot.EffectTypeNames)
+        foreach (var (_, effectName) in snapshot.EffectTypeNames)
         {
             var nodeType = EffectNodeFactory.GetOrCreate(effectName);
             if (nodeType != null)
@@ -130,6 +130,10 @@ public static class Serializer
         {
             if (!nodeMap.TryGetValue(nodeSnap.Id, out var node)) continue;
 
+            // SyncDynamicInputs を先に呼ぶことで Dynamic ポートのサブポートを Inputs に登録する。
+            // SetInputValue より前に呼ばないと "PropName.SubPropName" キーが存在せず KeyNotFoundException になる。
+            node.SyncDynamicInputs();
+
             foreach (var input in nodeSnap.InputsValues)
                 graph.SetInputValue(node.Id, input.Key, input.Value);
             foreach (var subGraphKvp in nodeSnap.SubGraphs)
@@ -139,8 +143,6 @@ public static class Serializer
 
                 AutoBindSubGraphNodes(node, subGraphKvp.Key, subGraph);
             }
-
-            node.SyncDynamicInputs();
         }
 
         foreach (var conn in snapshot.Connections)

@@ -26,13 +26,16 @@ public static class EffectNodeFactory
             new AssemblyName("DynamicEffectNodes"),
             AssemblyBuilderAccess.Run);
 
-    /*private static readonly PersistedAssemblyBuilder AsmBuilder =
-        new(
-            new AssemblyName("DynamicEffectNodes"),
-            typeof(object).Assembly);*/
-
     private static readonly ModuleBuilder ModBuilder =
         AsmBuilder.DefineDynamicModule("MainModule");
+
+    private static readonly PersistedAssemblyBuilder DynamicAsmBuilder =
+        new(
+            new AssemblyName("DynamicEffectNodes"),
+            typeof(object).Assembly);
+
+    private static readonly ModuleBuilder DynamicModBuilder =
+        DynamicAsmBuilder.DefineDynamicModule("MainModule");
 
     public static Type[] Create()
     {
@@ -57,7 +60,7 @@ public static class EffectNodeFactory
         Console.WriteLine(
             $@"[EffectNodeFactory] Generated {result.Count} / {PluginLoader.VideoEffects.Count()} effects.");
 #endif
-        /*AsmBuilder.Save("DynamicEffectNodes.dll");*/
+        DynamicAsmBuilder.Save("DynamicEffectNodes.dll");
         return result.ToArray();
     }
 
@@ -97,6 +100,8 @@ public static class EffectNodeFactory
         var generated =
             EffectNodeTypeBuilder.Build(ModBuilder, effectType.Name, categoryKey, labelKey, resourceType,
                 staticPortDefs, dynamicParams);
+        EffectNodeTypeBuilder.Build(DynamicModBuilder, effectType.Name, categoryKey, labelKey, resourceType,
+            staticPortDefs, dynamicParams);
         TypeCache[effectType.Name] = generated;
         return generated;
     }
@@ -317,28 +322,6 @@ public static class EffectPortCollector
     }
 }
 
-/// <summary>
-///     System.Reflection.Emit を使って NodeLogic サブクラスを動的生成する。
-///     <code>
-///     [Node(...)]
-///     public class DynamicEffectNode_{effectName} : NodeLogic
-///     {
-///         private VideoEffectsLoader? _videoEffect;
-///         private static readonly string _effectNameCache;
-///         private static readonly PortDefinition[] _portDefs;
-/// 
-///         static DynamicEffectNode_xxx() { /* _effectNameCache / _portDefs を初期化 */ }
-///         public DynamicEffectNode_xxx() : base() { }
-/// 
-///         [InputPort][PortColor] public ImageWrapper? InputImage { get/set }
-///         [InputPort][NumberPortControl/EnumPortControl/...] public T PropName { get/set }
-///         [OutputPort][PortColor] public ImageWrapper? Output { get/set }
-/// 
-///         protected override Task Calculate()
-///             => EffectNodeCalculator.Calculate(this, _effectNameCache, _portDefs, ref _videoEffect);
-///     }
-///   </code>
-/// </summary>
 public static class EffectNodeTypeBuilder
 {
     public static Type Build(
@@ -368,7 +351,9 @@ public static class EffectNodeTypeBuilder
 
         var loaderField = tb.DefineField("_videoEffect", typeof(VideoEffectsLoader), FieldAttributes.Private);
 
-        EffectNodeCalculator.RegisterPortDefs(effectName, staticPortDefs.ToArray());
+        EffectNodeCalculator.RegisterPortDefs(effectName, staticPortDefs.ToArray(),
+            dynamicPropertyDefs.Select(d => d.Item2.Name).ToArray(),
+            dynamicPropertyDefs.Select(d => $"_cachedSubType_{d.Item2.Name}").ToArray());
 
         var effectNameField = tb.DefineField("_effectNameCache", typeof(string),
             FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
@@ -398,6 +383,9 @@ public static class EffectNodeTypeBuilder
         EmitImageOutputPort(tb);
         EmitCalculate(tb, loaderField, effectNameField, portDefsField);
 
+        if (dynamicPropertyDefs.Count > 0)
+            EmitOnInputValueChanged(tb, loaderField, effectNameField, dynamicPropertyDefs, containerBackFields);
+
         var baseCtor = typeof(NodeLogic).GetConstructor(
             BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null)!;
 
@@ -406,8 +394,6 @@ public static class EffectNodeTypeBuilder
             MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
             CallingConventions.Standard, Type.EmptyTypes);
         var il = ctor.GetILGenerator();
-        il.Emit(OpCodes.Ldarg_0);
-        il.Emit(OpCodes.Call, baseCtor);
 
         for (var i = 0; i < dynamicPropertyDefs.Count; i++)
         {
@@ -423,6 +409,8 @@ public static class EffectNodeTypeBuilder
             il.Emit(OpCodes.Stfld, field);
         }
 
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Call, baseCtor);
         il.Emit(OpCodes.Ret);
 
         return tb.CreateType()
@@ -490,6 +478,70 @@ public static class EffectNodeTypeBuilder
         Attr.PortColor(pb, nameof(Colors.CornflowerBlue));
     }
 
+    /// <summary>
+    ///     OnInputValueChanged override を Emit する。
+    ///     _videoEffect が非 null の場合、Task.Run で Effect への書き込みと Dynamic コンテナ差し替えを行う。
+    /// </summary>
+    private static void EmitOnInputValueChanged(
+        TypeBuilder tb,
+        FieldBuilder loaderField,
+        FieldBuilder effectNameField,
+        List<(PortDefinition, PropertyInfo, object)> dynamicPropertyDefs,
+        List<FieldBuilder> containerBackFields)
+    {
+        var refreshMethod = typeof(EffectNodeCalculator)
+            .GetMethod(nameof(EffectNodeCalculator.RefreshDynamicContainer),
+                BindingFlags.Public | BindingFlags.Static)!;
+        var loadEffectSyncMethod = typeof(VideoEffectsLoader)
+            .GetMethod(nameof(VideoEffectsLoader.LoadEffectSync),
+                BindingFlags.Public | BindingFlags.Static,
+                null, [typeof(string)], null)!;
+
+        var m = tb.DefineMethod("OnInputValueChanged",
+            MethodAttributes.Family | MethodAttributes.Virtual | MethodAttributes.HideBySig |
+            MethodAttributes.FamORAssem,
+            typeof(void), [typeof(string), typeof(object)]);
+
+        var il = m.GetILGenerator();
+
+        // if (_videoEffect == null) _videoEffect = VideoEffectsLoader.LoadEffectSync(_effectNameCache);
+        var notNullLabel = il.DefineLabel();
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldfld, loaderField);
+        il.Emit(OpCodes.Brtrue_S, notNullLabel);
+        // _videoEffect = VideoEffectsLoader.LoadEffectSync(_effectNameCache);
+        // Stfld は (obj, value) をスタックから消費するため Ldarg_0 を先に積む
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldsfld, effectNameField);
+        il.Emit(OpCodes.Call, loadEffectSyncMethod);
+        il.Emit(OpCodes.Stfld, loaderField);
+        il.MarkLabel(notNullLabel);
+
+        // foreach dynamic prop:
+        // EffectNodeCalculator.RefreshDynamicContainer(
+        //     this, _videoEffect, portName, value, "PropName", "_PropName");
+        for (var i = 0; i < dynamicPropertyDefs.Count; i++)
+        {
+            var def = dynamicPropertyDefs[i];
+            var containerFieldName = containerBackFields[i].Name;
+
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldfld, loaderField);
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Ldarg_2);
+            il.Emit(OpCodes.Ldstr, def.Item2.Name);
+            il.Emit(OpCodes.Ldstr, containerFieldName);
+            il.Emit(OpCodes.Call, refreshMethod);
+        }
+
+        il.Emit(OpCodes.Ret);
+
+        tb.DefineMethodOverride(m,
+            typeof(NodeLogic).GetMethod("OnInputValueChanged",
+                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)!);
+    }
+
     private static PropertyBuilder EmitInputProperty(TypeBuilder tb, string name, Type t)
     {
         var getMethod = typeof(NodeLogic)
@@ -527,7 +579,8 @@ public static class EffectNodeTypeBuilder
     private static PropertyBuilder EmitContainerProperty(TypeBuilder tb, string name, FieldInfo field)
     {
         var setMethod = typeof(NodeLogic)
-            .GetMethod(nameof(NodeLogic.SetDynamicContainer), BindingFlags.NonPublic | BindingFlags.Instance)!;
+            .GetMethod(nameof(NodeLogic.SetDynamicContainer),
+                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)!;
 
         var getter = tb.DefineMethod($"get_{name}",
             MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
@@ -624,14 +677,75 @@ public static class EffectNodeCalculator
 {
     private static readonly Dictionary<string, PortDefinition[]> PortDefsRegistry = new();
 
-    public static void RegisterPortDefs(string effectName, PortDefinition[] defs)
+    private static readonly Dictionary<string, string[]> DynamicPropNamesRegistry = new();
+
+    // effectName -> propName -> (cachedSubTypeFieldName, containerFieldName)
+    private static readonly Dictionary<string, Dictionary<string, (string subTypeField, string containerField)>>
+        DynamicFieldNamesRegistry = new();
+
+    public static void RegisterPortDefs(
+        string effectName,
+        PortDefinition[] defs,
+        string[] dynamicPropNames,
+        string[] cachedSubTypeFieldNames)
     {
         PortDefsRegistry[effectName] = defs;
+        DynamicPropNamesRegistry[effectName] = dynamicPropNames;
+        var fieldMap = new Dictionary<string, (string, string)>();
+        for (var i = 0; i < dynamicPropNames.Length; i++)
+            fieldMap[dynamicPropNames[i]] = (cachedSubTypeFieldNames[i], $"_{dynamicPropNames[i]}");
+        DynamicFieldNamesRegistry[effectName] = fieldMap;
     }
 
     public static PortDefinition[] GetPortDefs(string effectName)
     {
         return PortDefsRegistry.TryGetValue(effectName, out var d) ? d : [];
+    }
+
+    /// <summary>
+    ///     OnInputValueChanged から各 Dynamic プロパティごとに呼ばれる。
+    ///     Task.Run 内で BeginEdit → 値書き込み → EndEditAsync を実行し、
+    ///     Effect 側の型切り替えが完了した後にコンテナを差し替える。
+    ///     戻り値なし（fire-and-forget）。
+    /// </summary>
+    public static void RefreshDynamicContainer(
+        NodeLogic self,
+        VideoEffectsLoader loader,
+        string changedPortName,
+        object? changedValue,
+        string dynamicPropName,
+        string containerFieldName)
+    {
+        // 値を先にキャプチャしておく（Task.Run に渡すため）
+        var nodeType = self.GetType();
+        var containerFieldInfo = nodeType.GetField(containerFieldName,
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        if (containerFieldInfo == null) return;
+
+        _ = Task.Run(async () =>
+        {
+            // VideoEffectsLoader.SetValue は BeginEdit → 値書き込み → EndEditAsync を内部で行う。
+            // これにより Effect 側の EndEditAsync 内での型切り替えが発生する。
+            await loader.SetValue(changedPortName, changedValue).ConfigureAwait(false);
+
+            // 型切り替え後にサブオブジェクト型を確認する
+            var subObject = GetEffectSubObject(loader, dynamicPropName);
+            if (subObject == null) return;
+
+            var currentType = subObject.GetType();
+            var containerType = ContainerFactory.CreateOrGenerate(subObject);
+            if (containerType == null) return;
+            if (currentType == containerType) return;
+
+            // 型が変わった: 新しいコンテナを生成してプロパティ setter 経由でセットする
+            var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
+            if (newContainer == null) return;
+
+            containerFieldInfo.SetValue(self, newContainer);
+
+            // SetDynamicContainer を発火させて VM に通知する
+            self.SetDynamicContainer(newContainer, dynamicPropName);
+        });
     }
 
     public static Task Calculate(
@@ -654,13 +768,14 @@ public static class EffectNodeCalculator
         loaderRef ??= VideoEffectsLoader.LoadEffectSync(effectName);
 
         var loader = loaderRef;
+        var dynamicPropNames = DynamicPropNamesRegistry.TryGetValue(effectName, out var names) ? names : [];
         return Task.Run(async () =>
         {
             var prev = SynchronizationContext.Current;
             SynchronizationContext.SetSynchronizationContext(null);
             try
             {
-                await CalculateAsync(self, portDefs, loader, ctx, inputImage).ConfigureAwait(false);
+                await CalculateAsync(self, portDefs, dynamicPropNames, loader, ctx, inputImage).ConfigureAwait(false);
             }
             finally
             {
@@ -672,16 +787,66 @@ public static class EffectNodeCalculator
     private static Task CalculateAsync(
         NodeLogic self,
         PortDefinition[] portDefs,
+        string[] dynamicPropNames,
         VideoEffectsLoader loader,
         EvaluationContext ctx,
         ImageWrapper inputImage)
     {
         try
         {
+            // 静的ポートを Effect に書き込む
             foreach (var def in portDefs)
             {
                 var value = GetPortValue(self, def);
                 SetPropertyDirect(loader, def.PropName, value);
+            }
+
+            // Dynamic ポートのサブポートを Effect のサブオブジェクトに書き込む
+            // キー形式: "PropName.SubPropName"
+            foreach (var propName in dynamicPropNames)
+            {
+                var subObject = GetEffectSubObject(loader, propName);
+                if (subObject == null) continue;
+
+                var prefix = propName + ".";
+
+                // Effect のサブオブジェクトが持つ [Display] プロパティ名の集合を取得する
+                var effectSubPropNames = subObject.GetType()
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.GetCustomAttribute<DisplayAttribute>() != null)
+                    .Select(p => prefix + p.Name)
+                    .ToHashSet();
+
+                // Inputs に登録済みのサブポートキーの集合を取得する
+                var registeredKeys = self.Inputs.Keys
+                    .Where(k => k.StartsWith(prefix))
+                    .ToHashSet();
+
+                // 不一致の場合: コンテナ型が切り替わっているが Inputs がまだ古い状態。
+                // プロパティ setter 経由で SetDynamicContainer を発火させて Inputs を同期する。
+                if (!effectSubPropNames.SetEquals(registeredKeys))
+                {
+                    var containerType = ContainerFactory.CreateOrGenerate(subObject);
+                    if (containerType != null)
+                    {
+                        var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
+                        if (newContainer != null)
+                            // プロパティ setter 経由で SetDynamicContainer を発火させる
+                            self.GetType().GetProperty(propName)?.SetValue(self, newContainer);
+                    }
+                }
+
+                foreach (var kv in self.Inputs)
+                {
+                    if (!kv.Key.StartsWith(prefix)) continue;
+                    var subPropName = kv.Key.Substring(prefix.Length);
+                    var subProp = subObject.GetType().GetProperty(subPropName,
+                        BindingFlags.Public | BindingFlags.Instance);
+                    if (subProp == null) continue;
+
+                    var raw = kv.Value.GetValue(null).GetAwaiter().GetResult();
+                    SetSubPropertyDirect(subObject, subProp, raw);
+                }
             }
 
             if (loader.Update(out var output, ctx, inputImage.Image))
@@ -691,6 +856,48 @@ public static class EffectNodeCalculator
         catch (Exception exception)
         {
             return Task.FromException(exception);
+        }
+    }
+
+    private static void SetSubPropertyDirect(object target, PropertyInfo propInfo, object? value)
+    {
+        if (propInfo.PropertyType == typeof(Animation))
+        {
+            if (propInfo.GetValue(target) is not Animation anim) return;
+            var valuesProp = typeof(Animation).GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
+            var values = valuesProp?.GetValue(anim) as ImmutableList<AnimationValue>;
+            if (values == null) return;
+            var doubleVal = Convert.ToDouble(value ?? 0);
+            var newValues = values.Count > 0
+                ? values.SetItem(0, new AnimationValue(doubleVal))
+                : values.Add(new AnimationValue(doubleVal));
+            valuesProp!.SetValue(anim, newValues);
+        }
+        else
+        {
+            if (!propInfo.CanWrite) return;
+            propInfo.SetValue(target, value);
+        }
+    }
+
+    private static object? GetEffectSubObject(VideoEffectsLoader loader, string propName)
+    {
+        var effectField = typeof(VideoEffectsLoader)
+            .GetField("_videoEffect", BindingFlags.NonPublic | BindingFlags.Instance);
+        var effectInstance = effectField?.GetValue(loader);
+        if (effectInstance == null) return null;
+
+        var result = FindPropertyByDisplay(effectInstance, propName);
+        if (result == null) return null;
+
+        var (target, propInfo) = result.Value;
+        try
+        {
+            return propInfo.GetValue(target);
+        }
+        catch
+        {
+            return null;
         }
     }
 
