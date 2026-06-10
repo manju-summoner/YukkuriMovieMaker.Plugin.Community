@@ -139,6 +139,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
 
         private static async Task CheckRuntime(YukkuriMovieMaker.Commons.ProgressMessage progress, CancellationToken token)
         {
+            //whisperのネイティブdllはCPU/CUDA/Vulkanのいずれのランタイムでもmsvcp140.dll等に動的リンクしているため、
+            //GPUランタイムの有無に関わらずVC++ランタイムのインストールを常に確認する
+            if (!VisualCppRuntime.IsSupported())
+                throw new NotSupportedException(Texts.NotSupportedMessage);
+
+            if (!VisualCppRuntime.IsInstalled())
+            {
+                var res = MessageBox.Show(string.Format(Texts.RuntimeNotInstalledMessage, $"Microsoft Visual C++ 2015–2022 Redistributable ({RuntimeInformation.ProcessArchitecture})"), Texts.RuntimeNotInstalledTitle, MessageBoxButton.YesNoCancel);
+                if (res is MessageBoxResult.Cancel)
+                    throw new OperationCanceledException();
+                if (res is MessageBoxResult.Yes)
+                {
+                    await new VisualCppRuntime().InstallAsync(progress, token);
+                }
+            }
+
             var isCudaRuntimeInstalled = CUDAToolkit.IsInstalled();
             var isVulkanRuntimeInstalled = VulkanRuntime.IsInstalled();
             if (isCudaRuntimeInstalled || isVulkanRuntimeInstalled)
@@ -165,20 +181,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
                 {
                     await new VulkanRuntime().InstallAsync(progress, token);
                     return;
-                }
-            }
-
-            if (!VisualCppRuntime.IsSupported())
-                throw new NotSupportedException(Texts.NotSupportedMessage);
-
-            if (!VisualCppRuntime.IsInstalled())
-            {
-                var res = MessageBox.Show(string.Format(Texts.RuntimeNotInstalledMessage, $"Microsoft Visual C++ 2015–2022 Redistributable ({RuntimeInformation.ProcessArchitecture})"), Texts.RuntimeNotInstalledTitle, MessageBoxButton.YesNoCancel);
-                if (res is MessageBoxResult.Cancel)
-                    throw new OperationCanceledException();
-                if (res is MessageBoxResult.Yes)
-                {
-                    await new VisualCppRuntime().InstallAsync(progress, token);
                 }
             }
         }
