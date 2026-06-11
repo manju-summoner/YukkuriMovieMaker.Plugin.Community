@@ -2,9 +2,11 @@ using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Windows;
 using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
+using YukkuriMovieMaker.ItemEditor;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
@@ -29,14 +31,6 @@ public static class EffectNodeFactory
     private static readonly ModuleBuilder ModBuilder =
         AsmBuilder.DefineDynamicModule("MainModule");
 
-    private static readonly PersistedAssemblyBuilder DynamicAsmBuilder =
-        new(
-            new AssemblyName("DynamicEffectNodes"),
-            typeof(object).Assembly);
-
-    private static readonly ModuleBuilder DynamicModBuilder =
-        DynamicAsmBuilder.DefineDynamicModule("MainModule");
-
     public static Type[] Create()
     {
         var result = new List<Type>();
@@ -60,7 +54,6 @@ public static class EffectNodeFactory
         Console.WriteLine(
             $@"[EffectNodeFactory] Generated {result.Count} / {PluginLoader.VideoEffects.Count()} effects.");
 #endif
-        DynamicAsmBuilder.Save("DynamicEffectNodes.dll");
         return result.ToArray();
     }
 
@@ -100,8 +93,6 @@ public static class EffectNodeFactory
         var generated =
             EffectNodeTypeBuilder.Build(ModBuilder, effectType.Name, categoryKey, labelKey, resourceType,
                 staticPortDefs, dynamicParams);
-        EffectNodeTypeBuilder.Build(DynamicModBuilder, effectType.Name, categoryKey, labelKey, resourceType,
-            staticPortDefs, dynamicParams);
         TypeCache[effectType.Name] = generated;
         return generated;
     }
@@ -133,38 +124,18 @@ public static class EffectNodeFactory
     }
 }
 
-/// <summary>
-///     IVideoEffect のプロパティを1つのノード InputPort として表現するためのデータクラス。
-///     EffectPortCollector が収集し、EffectNodeTypeBuilder と EffectNodeCalculator が参照する。
-/// </summary>
 public sealed class PortDefinition
 {
-    /// <summary>
-    ///     IVideoEffect 側の C# プロパティ名。
-    /// </summary>
     public required string PropName { get; init; }
-
     public required PortType PortType { get; init; }
-
-    /// <summary>[Display].Name の値（YMM4 リソースキーまたはリテラル文字列）。</summary>
     public required string LabelKey { get; init; }
-
-    /// <summary>[Display].Description の値。</summary>
     public required string DescKey { get; init; }
-
-    /// <summary>[Display].ResourceType の値。null の場合は LabelKey をリテラルとして使う。</summary>
     public Type? ResourceType { get; init; }
-
-    // 共通
     public object? DefaultValue { get; init; }
-
-    // Float / Animation 型プロパティ用
     public float Min { get; init; } = float.NaN;
     public float Max { get; init; } = float.NaN;
     public int Digits { get; init; } = 2;
     public string Unit { get; init; } = "";
-
-    // Enum 型プロパティ用
     public Type? EnumType { get; init; }
 }
 
@@ -206,7 +177,6 @@ public static class EffectPortCollector
             if (displayAttr == null) continue;
 
             var propInstance = prop.GetValue(obj);
-
             var def = TryMakePortDefinition(prop, displayAttr, propInstance);
 
             if (propInstance is not null && propInstance.GetType().GetProperties()
@@ -232,11 +202,8 @@ public static class EffectPortCollector
             var defaultValue = (inst as Animation)?.DefaultValue;
             return new PortDefinition
             {
-                PropName = prop.Name,
-                PortType = PortType.Float,
-                LabelKey = labelKey,
-                DescKey = descKey,
-                ResourceType = resourceType,
+                PropName = prop.Name, PortType = PortType.Float,
+                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
                 DefaultValue = defaultValue,
                 Min = slider != null ? (float)slider.DefaultMin : float.NaN,
                 Max = slider != null ? (float)slider.DefaultMax : float.NaN,
@@ -248,23 +215,16 @@ public static class EffectPortCollector
         if (prop.PropertyType.IsEnum)
             return new PortDefinition
             {
-                PropName = prop.Name,
-                PortType = PortType.Enum,
-                LabelKey = labelKey,
-                DescKey = descKey,
-                ResourceType = resourceType,
-                DefaultValue = inst,
-                EnumType = prop.PropertyType
+                PropName = prop.Name, PortType = PortType.Enum,
+                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
+                DefaultValue = inst, EnumType = prop.PropertyType
             };
 
         if (prop.PropertyType == typeof(bool))
             return new PortDefinition
             {
-                PropName = prop.Name,
-                PortType = PortType.Bool,
-                LabelKey = labelKey,
-                DescKey = descKey,
-                ResourceType = resourceType,
+                PropName = prop.Name, PortType = PortType.Bool,
+                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
                 DefaultValue = inst
             };
 
@@ -272,43 +232,31 @@ public static class EffectPortCollector
             prop.PropertyType == typeof(int))
             return new PortDefinition
             {
-                PropName = prop.Name,
-                PortType = PortType.Float,
-                LabelKey = labelKey,
-                DescKey = descKey,
-                ResourceType = resourceType,
+                PropName = prop.Name, PortType = PortType.Float,
+                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
                 DefaultValue = inst
             };
 
         if (prop.PropertyType == typeof(Color))
             return new PortDefinition
             {
-                PropName = prop.Name,
-                PortType = PortType.Color,
-                LabelKey = labelKey,
-                DescKey = descKey,
-                ResourceType = resourceType,
+                PropName = prop.Name, PortType = PortType.Color,
+                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
                 DefaultValue = inst is Color c ? c : Colors.White
             };
 
         if (prop.PropertyType == typeof(Plugin.Brush.Brush))
             return new PortDefinition
             {
-                PropName = prop.Name,
-                PortType = PortType.Brush,
-                LabelKey = labelKey,
-                DescKey = descKey,
-                ResourceType = resourceType,
+                PropName = prop.Name, PortType = PortType.Brush,
+                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
                 DefaultValue = null
             };
 
         return new PortDefinition
         {
-            PropName = prop.Name,
-            PortType = PortType.Unknown,
-            LabelKey = labelKey,
-            DescKey = descKey,
-            ResourceType = resourceType,
+            PropName = prop.Name, PortType = PortType.Unknown,
+            LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
             DefaultValue = null
         };
     }
@@ -344,16 +292,13 @@ public static class EffectNodeTypeBuilder
             [
                 "NodeEffectKey_EffectCategoryName/NodeEffectKey_VideoEffectCategoryName" +
                 (string.IsNullOrEmpty(categoryKey) ? "" : "/" + categoryKey),
-                labelKey,
-                labelKey,
-                resourceType
+                labelKey, labelKey, resourceType
             ]));
 
         var loaderField = tb.DefineField("_videoEffect", typeof(VideoEffectsLoader), FieldAttributes.Private);
 
         EffectNodeCalculator.RegisterPortDefs(effectName, staticPortDefs.ToArray(),
-            dynamicPropertyDefs.Select(d => d.Item2.Name).ToArray(),
-            dynamicPropertyDefs.Select(d => $"_cachedSubType_{d.Item2.Name}").ToArray());
+            dynamicPropertyDefs.Select(d => d.Item2.Name).ToArray());
 
         var effectNameField = tb.DefineField("_effectNameCache", typeof(string),
             FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
@@ -369,16 +314,12 @@ public static class EffectNodeTypeBuilder
         cil.Emit(OpCodes.Ldstr, effectName);
         cil.Emit(OpCodes.Call, typeof(EffectNodeCalculator).GetMethod(nameof(EffectNodeCalculator.GetPortDefs))!);
         cil.Emit(OpCodes.Stsfld, portDefsField);
-
         cil.Emit(OpCodes.Ret);
 
         EmitImageInputPort(tb);
         foreach (var def in staticPortDefs) EmitParameterPort(tb, def);
         for (var index = 0; index < dynamicPropertyDefs.Count; index++)
-        {
-            var props = dynamicPropertyDefs[index];
-            EmitContainerPort(tb, props, containerBackFields[index]);
-        }
+            EmitContainerPort(tb, dynamicPropertyDefs[index], containerBackFields[index]);
 
         EmitImageOutputPort(tb);
         EmitCalculate(tb, loaderField, effectNameField, portDefsField);
@@ -442,9 +383,7 @@ public static class EffectNodeTypeBuilder
         {
             case PortType.Float:
                 Attr.NumberControl(pb, def.Min, def.Max, def.Digits, def.Unit,
-                    def.DefaultValue is null
-                        ? 0f
-                        : Convert.ToSingle(def.DefaultValue));
+                    def.DefaultValue is null ? 0f : Convert.ToSingle(def.DefaultValue));
                 Attr.PortColor(pb, nameof(Colors.DarkOrange));
                 break;
             case PortType.Enum:
@@ -480,7 +419,8 @@ public static class EffectNodeTypeBuilder
 
     /// <summary>
     ///     OnInputValueChanged override を Emit する。
-    ///     _videoEffect が非 null の場合、Task.Run で Effect への書き込みと Dynamic コンテナ差し替えを行う。
+    ///     _videoEffect が null の場合は LoadEffectSync で初期化する。
+    ///     各 Dynamic プロパティについて RefreshDynamicContainer を呼ぶ。
     /// </summary>
     private static void EmitOnInputValueChanged(
         TypeBuilder tb,
@@ -509,15 +449,12 @@ public static class EffectNodeTypeBuilder
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Ldfld, loaderField);
         il.Emit(OpCodes.Brtrue_S, notNullLabel);
-        // _videoEffect = VideoEffectsLoader.LoadEffectSync(_effectNameCache);
-        // Stfld は (obj, value) をスタックから消費するため Ldarg_0 を先に積む
-        il.Emit(OpCodes.Ldarg_0);
-        il.Emit(OpCodes.Ldsfld, effectNameField);
-        il.Emit(OpCodes.Call, loadEffectSyncMethod);
+        il.Emit(OpCodes.Ldarg_0); // obj for Stfld
+        il.Emit(OpCodes.Ldsfld, effectNameField); // string
+        il.Emit(OpCodes.Call, loadEffectSyncMethod); // VideoEffectsLoader
         il.Emit(OpCodes.Stfld, loaderField);
         il.MarkLabel(notNullLabel);
 
-        // foreach dynamic prop:
         // EffectNodeCalculator.RefreshDynamicContainer(
         //     this, _videoEffect, portName, value, "PropName", "_PropName");
         for (var i = 0; i < dynamicPropertyDefs.Count; i++)
@@ -670,31 +607,18 @@ public static class EffectNodeTypeBuilder
     }
 }
 
-/// <summary>
-///     動的生成した NodeLogic サブクラスの Calculate() から呼ばれる静的ヘルパー。
-/// </summary>
 public static class EffectNodeCalculator
 {
     private static readonly Dictionary<string, PortDefinition[]> PortDefsRegistry = new();
-
     private static readonly Dictionary<string, string[]> DynamicPropNamesRegistry = new();
-
-    // effectName -> propName -> (cachedSubTypeFieldName, containerFieldName)
-    private static readonly Dictionary<string, Dictionary<string, (string subTypeField, string containerField)>>
-        DynamicFieldNamesRegistry = new();
 
     public static void RegisterPortDefs(
         string effectName,
         PortDefinition[] defs,
-        string[] dynamicPropNames,
-        string[] cachedSubTypeFieldNames)
+        string[] dynamicPropNames)
     {
         PortDefsRegistry[effectName] = defs;
         DynamicPropNamesRegistry[effectName] = dynamicPropNames;
-        var fieldMap = new Dictionary<string, (string, string)>();
-        for (var i = 0; i < dynamicPropNames.Length; i++)
-            fieldMap[dynamicPropNames[i]] = (cachedSubTypeFieldNames[i], $"_{dynamicPropNames[i]}");
-        DynamicFieldNamesRegistry[effectName] = fieldMap;
     }
 
     public static PortDefinition[] GetPortDefs(string effectName)
@@ -704,10 +628,37 @@ public static class EffectNodeCalculator
 
     /// <summary>
     ///     OnInputValueChanged から各 Dynamic プロパティごとに呼ばれる。
-    ///     Task.Run 内で BeginEdit → 値書き込み → EndEditAsync を実行し、
-    ///     Effect 側の型切り替えが完了した後にコンテナを差し替える。
-    ///     戻り値なし（fire-and-forget）。
+    ///     Task.Run 内で loader.SetValue を実行し Effect 側の型切り替えを発生させた後、
+    ///     コンテナ型が変わっていれば新しいコンテナを生成し dispatcher.BeginInvoke で UI スレッドに通知する。
     /// </summary>
+    /// <summary>
+    ///     BeginEdit → SetPropertyDirect → EndEditAsync の順で Effect に値を適用する。
+    ///     VideoEffectsLoader.SetValue は循環参照ガードなしの FindPropertyByDisplay を持つため使用しない。
+    /// </summary>
+    private static Task ApplyPropertyWithEditAsync(VideoEffectsLoader loader, string propName, object? value)
+    {
+        try
+        {
+            var effectField = typeof(VideoEffectsLoader)
+                .GetField("_videoEffect", BindingFlags.NonPublic | BindingFlags.Instance);
+            var effectInstance = effectField?.GetValue(loader) as IEditable;
+            if (effectInstance == null) return Task.CompletedTask;
+
+            lock (loader)
+            {
+                effectInstance.BeginEdit();
+                SetPropertyDirect(loader, propName, value);
+                effectInstance.EndEditAsync().GetAwaiter().GetResult();
+            }
+
+            return Task.CompletedTask;
+        }
+        catch (Exception exception)
+        {
+            return Task.FromException(exception);
+        }
+    }
+
     public static void RefreshDynamicContainer(
         NodeLogic self,
         VideoEffectsLoader loader,
@@ -716,35 +667,39 @@ public static class EffectNodeCalculator
         string dynamicPropName,
         string containerFieldName)
     {
-        // 値を先にキャプチャしておく（Task.Run に渡すため）
-        var nodeType = self.GetType();
-        var containerFieldInfo = nodeType.GetField(containerFieldName,
+        var containerFieldInfo = self.GetType().GetField(containerFieldName,
             BindingFlags.NonPublic | BindingFlags.Instance);
         if (containerFieldInfo == null) return;
 
         _ = Task.Run(async () =>
         {
-            // VideoEffectsLoader.SetValue は BeginEdit → 値書き込み → EndEditAsync を内部で行う。
-            // これにより Effect 側の EndEditAsync 内での型切り替えが発生する。
-            await loader.SetValue(changedPortName, changedValue).ConfigureAwait(false);
+            await ApplyPropertyWithEditAsync(loader, changedPortName, changedValue).ConfigureAwait(false);
 
-            // 型切り替え後にサブオブジェクト型を確認する
             var subObject = GetEffectSubObject(loader, dynamicPropName);
             if (subObject == null) return;
 
-            var currentType = subObject.GetType();
             var containerType = ContainerFactory.CreateOrGenerate(subObject);
             if (containerType == null) return;
-            if (currentType == containerType) return;
 
-            // 型が変わった: 新しいコンテナを生成してプロパティ setter 経由でセットする
+            var currentContainer = (InputsContainer?)containerFieldInfo.GetValue(self);
+            var expectedName = $"DynamicContainer_{subObject.GetType().FullName ?? subObject.GetType().Name}";
+            if (currentContainer?.GetType().FullName == expectedName) return;
+
             var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
             if (newContainer == null) return;
 
             containerFieldInfo.SetValue(self, newContainer);
 
-            // SetDynamicContainer を発火させて VM に通知する
-            self.SetDynamicContainer(newContainer, dynamicPropName);
+            // **
+            // NOTE
+            // **
+            //
+            // NeedToReinitializeInputPorts の発火は UI スレッドから行う。
+            // Task.Run スレッドから dispatcher.Invoke（ブロッキング）を呼ぶと
+            // NodeViewModel ハンドラ内の処理でフリーズするため BeginInvoke を使う。
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher == null) return;
+            _ = dispatcher.BeginInvoke(() => self.SetDynamicContainer(newContainer, dynamicPropName));
         });
     }
 
@@ -775,7 +730,8 @@ public static class EffectNodeCalculator
             SynchronizationContext.SetSynchronizationContext(null);
             try
             {
-                await CalculateAsync(self, portDefs, dynamicPropNames, loader, ctx, inputImage).ConfigureAwait(false);
+                await CalculateAsync(self, portDefs, dynamicPropNames, loader, ctx, inputImage)
+                    .ConfigureAwait(false);
             }
             finally
             {
@@ -794,15 +750,15 @@ public static class EffectNodeCalculator
     {
         try
         {
-            // 静的ポートを Effect に書き込む
-            foreach (var def in portDefs)
+            lock (loader)
             {
-                var value = GetPortValue(self, def);
-                SetPropertyDirect(loader, def.PropName, value);
+                foreach (var def in portDefs)
+                {
+                    var value = GetPortValue(self, def);
+                    SetPropertyDirect(loader, def.PropName, value);
+                }
             }
 
-            // Dynamic ポートのサブポートを Effect のサブオブジェクトに書き込む
-            // キー形式: "PropName.SubPropName"
             foreach (var propName in dynamicPropNames)
             {
                 var subObject = GetEffectSubObject(loader, propName);
@@ -810,20 +766,16 @@ public static class EffectNodeCalculator
 
                 var prefix = propName + ".";
 
-                // Effect のサブオブジェクトが持つ [Display] プロパティ名の集合を取得する
                 var effectSubPropNames = subObject.GetType()
                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p => p.GetCustomAttribute<DisplayAttribute>() != null)
                     .Select(p => prefix + p.Name)
                     .ToHashSet();
 
-                // Inputs に登録済みのサブポートキーの集合を取得する
                 var registeredKeys = self.Inputs.Keys
                     .Where(k => k.StartsWith(prefix))
                     .ToHashSet();
 
-                // 不一致の場合: コンテナ型が切り替わっているが Inputs がまだ古い状態。
-                // プロパティ setter 経由で SetDynamicContainer を発火させて Inputs を同期する。
                 if (!effectSubPropNames.SetEquals(registeredKeys))
                 {
                     var containerType = ContainerFactory.CreateOrGenerate(subObject);
@@ -831,21 +783,25 @@ public static class EffectNodeCalculator
                     {
                         var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
                         if (newContainer != null)
-                            // プロパティ setter 経由で SetDynamicContainer を発火させる
-                            self.GetType().GetProperty(propName)?.SetValue(self, newContainer);
+                            typeof(NodeLogic)
+                                .GetMethod("SwapDynamicContainer",
+                                    BindingFlags.NonPublic | BindingFlags.Instance)
+                                ?.Invoke(self, [propName, newContainer]);
                     }
                 }
 
-                foreach (var kv in self.Inputs)
+                lock (loader)
                 {
-                    if (!kv.Key.StartsWith(prefix)) continue;
-                    var subPropName = kv.Key.Substring(prefix.Length);
-                    var subProp = subObject.GetType().GetProperty(subPropName,
-                        BindingFlags.Public | BindingFlags.Instance);
-                    if (subProp == null) continue;
-
-                    var raw = kv.Value.GetValue(null).GetAwaiter().GetResult();
-                    SetSubPropertyDirect(subObject, subProp, raw);
+                    foreach (var kv in self.Inputs)
+                    {
+                        if (!kv.Key.StartsWith(prefix)) continue;
+                        var subPropName = kv.Key.Substring(prefix.Length);
+                        var subProp = subObject.GetType().GetProperty(subPropName,
+                            BindingFlags.Public | BindingFlags.Instance);
+                        if (subProp == null) continue;
+                        var raw = kv.Value.GetValue(null).GetAwaiter().GetResult();
+                        SetSubPropertyDirect(subObject, subProp, raw);
+                    }
                 }
             }
 
@@ -916,8 +872,7 @@ public static class EffectNodeCalculator
         if (propInfo.PropertyType == typeof(Animation))
         {
             if (propInfo.GetValue(target) is not Animation anim) return;
-            var valuesProp = typeof(Animation).GetProperty("Values",
-                BindingFlags.Public | BindingFlags.Instance);
+            var valuesProp = typeof(Animation).GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
             var values = valuesProp?.GetValue(anim) as ImmutableList<AnimationValue>;
             if (values == null) return;
             var doubleVal = Convert.ToDouble(value ?? 0);
@@ -933,9 +888,12 @@ public static class EffectNodeCalculator
         }
     }
 
-    private static (object target, PropertyInfo property)? FindPropertyByDisplay(object? obj, string name)
+    private static (object target, PropertyInfo property)? FindPropertyByDisplay(object? obj, string name,
+        HashSet<object>? visited = null)
     {
         if (obj == null) return null;
+        visited ??= new HashSet<object>(ReferenceEqualityComparer.Instance);
+        if (!visited.Add(obj)) return null;
         foreach (var prop in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
             if (prop.GetIndexParameters().Length > 0) continue;
@@ -953,7 +911,7 @@ public static class EffectNodeCalculator
             }
 
             if (sub == null) continue;
-            var result = FindPropertyByDisplay(sub, name);
+            var result = FindPropertyByDisplay(sub, name, visited);
             if (result != null) return result;
         }
 
@@ -963,9 +921,7 @@ public static class EffectNodeCalculator
     private static object? GetPortValue(NodeLogic self, PortDefinition def)
     {
         if (!self.Inputs.TryGetValue(def.PropName, out var port)) return null;
-
         var raw = port.GetValue(null).GetAwaiter().GetResult();
-
         return def.PortType switch
         {
             PortType.Enum when def.EnumType != null =>
@@ -979,9 +935,6 @@ public static class EffectNodeCalculator
     }
 }
 
-/// <summary>
-///     Emit でプロパティに属性を付与するための静的ヘルパー。
-/// </summary>
 internal static class Attr
 {
     private static readonly ConstructorInfo InputPortCtor =
@@ -1046,8 +999,7 @@ internal static class Attr
     public static void BoolControl(PropertyBuilder pb, bool defaultValue)
     {
         var defP = typeof(BoolPortControlAttribute).GetProperty(nameof(BoolPortControlAttribute.Default))!;
-        pb.SetCustomAttribute(new CustomAttributeBuilder(BoolCtor, [], [defP],
-            [defaultValue]));
+        pb.SetCustomAttribute(new CustomAttributeBuilder(BoolCtor, [], [defP], [defaultValue]));
     }
 
     public static void ColorControl(PropertyBuilder pb, Color defaultValue)
