@@ -57,6 +57,7 @@
 	<PackageReference Include="LlmTornado" Version="3.8.57" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" />
+    <PackageReference Include="MoonSharp" Version="2.0.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NAudio" Version="2.3.0" />
@@ -92,6 +93,8 @@
 	
   <ItemGroup>
     <Resource Include="Voice\IrodoriTTS\EmojiPalette\Emoji\*.png" />
+	<Resource Include="Resources\SyntaxDefinitions\Lua-Dark.xshd" />
+	<Resource Include="Resources\SyntaxDefinitions\Lua-Light.xshd" />
   </ItemGroup>
 
   <ItemGroup>
@@ -123,6 +126,9 @@
     <Content Include="Resources\SoundFonts\GeneralUser-GS.sf2">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+	<Content Include="Resources\LuaScript\LuaScript.*.txt">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
   </ItemGroup>
 	
   <ItemGroup>

@@ -1,0 +1,413 @@
+﻿- 关于 Lua 脚本特效 -
+
+        YukkuriMovieMaker4 的"Lua 脚本"视频特效使用
+        Lua 语言编写脚本。
+        脚本引擎采用 MoonSharp（兼容 Lua 5.2）。
+
+        * 本特效为独立实现，与 AviUtl2 的脚本规范不同。
+        * 与 AviUtl2 的脚本文件（*.anm2 等）为不同规范。
+        * 由于 IsAviUtlSupported = false，不支持面向 AviUtl 的 EXO 输出。
+
+
+- 注意事项 -
+
+        ○ 脚本执行引擎为 MoonSharp（兼容 Lua 5.2）。
+        ○ 可用的标准库仅限以下内容：
+            table, string, math, bit32
+            * io、os、debug、ffi、require 等不可使用。
+        ○ 脚本超时时间为 5000ms（5 秒）。
+            超时时，执行将被强制终止并视为错误。
+        ○ 脚本无法访问文件系统（包括 require）。
+        ○ 不支持从脚本内部调用外部脚本。
+        ○ 像素操作（getpixel/setpixel/getpixeldata）会访问实际输入图像，
+            因此仅在首次访问时发生 GPU→CPU 的数据传输。
+            不需要时省略调用可加快处理速度。
+
+
+- 参数 -
+
+        特效面板包含以下 4 个轨道条（支持动画）。
+        各值在脚本中可通过 obj.track0 ～ obj.track3 引用。
+
+        Track0：参数 0（默认值：0，范围：最小值 ～ 最大值）
+        Track1：参数 1（默认值：0，范围：最小值 ～ 最大值）
+        Track2：参数 2（默认值：0，范围：最小值 ～ 最大值）
+        Track3：参数 3（默认值：0，范围：最小值 ～ 最大值）
+
+        * 每个轨道条均支持动画滑块（含插值）。
+        * 可通过脚本编辑器工具栏导入/导出 .lua 文件。
+
+
+- 全局变量 -
+
+        以下变量可在脚本的全局作用域中直接引用。
+
+        time          : 相对于对象的当前时间（秒）[只读]
+                        * 与 obj.time 的值相同。
+        frame         : 相对于对象的当前帧编号 [只读]
+                        * 与 obj.frame 的值相同。
+        totalframe    : 对象的总帧数 [只读]
+                        * 与 obj.totalframe 的值相同。
+        framerate     : 帧率（fps）[只读]
+                        * 与 obj.framerate 的值相同。
+        timelineframe : 相对于整个时间轴的当前帧编号 [只读]
+                        * obj.frame 是从对象起点的相对帧，
+                          而此值是从时间轴起点的绝对帧。
+        timelinetime  : 相对于整个时间轴的当前时间（秒）[只读]
+        layer         : 对象所在的图层编号 [只读]
+                        * 与 obj.layer 的值相同。
+        obj           : 对象信息表（参见下文"obj 表"）
+        scene         : 场景信息表（参见下文"scene 表"）
+        ymm4          : YMM4专有的元数据表 (参见下文“ymm4 表”)
+        anim          : 动画专用工具表 (参见下文“anim 表”)
+
+
+- scene 表 -
+
+        scene.width   : 场景（项目）的水平分辨率（像素）[只读]
+        scene.height  : 场景（项目）的垂直分辨率（像素）[只读]
+
+
+- obj 表 - 变量 -
+
+        以下变量保存对象当前的绘制信息。
+        * 未标注"只读"的变量可在脚本中修改，修改后的值将反映到绘制中。
+
+        ○ 坐标·偏移
+        obj.x         : 显示基准坐标 X [只读]
+                        * 对应 AviUtl2 规范的"显示基准坐标 X"。
+                        * 在脚本内修改无效，不会被回读。
+                        * 内部由 DrawDescription.Draw.X 设置，
+                          脚本执行后更改内容才会生效。
+        obj.y         : 显示基准坐标 Y [相当于只读]
+                        * 内部由 DrawDescription.Draw.Y 设置。
+        obj.z         : 显示基准坐标 Z [相当于只读]
+                        * 内部由 DrawDescription.Draw.Z 设置。
+        obj.ox        : 中心偏移 X（可修改）
+                        * 内部由 DrawDescription.CenterPoint.X (inDesc) 设置。
+                        * 对应 AviUtl2 规范的"从基准坐标的相对坐标 X (obj.ox)"，
+                          但在本插件中作为 CenterPoint（中心点偏移）处理。
+        obj.oy        : 中心偏移 Y（可修改）
+                        * 内部由 DrawDescription.CenterPoint.Y (inDesc) 设置。
+
+        ○ 缩放·变形
+        obj.zoom      : 缩放比例（可修改）
+                        * 等倍为 1.0 而非 0.0（兼容 AviUtl2）。
+                        * 内部由 ZoomX 与 ZoomY 的平均值（zoomAvg）计算得出。
+                        * 输出时以 obj.zoom * (1 ± obj.aspect) 展开为 X/Y 各自的 Zoom。
+        obj.aspect    : 宽高比（可修改），范围：-1.0 ～ 1.0
+                        * 正值在 X 方向缩小，负值在 Y 方向缩小。
+                        * 内部由 (ZoomX - ZoomY) / (ZoomX + ZoomY) 计算得出。
+        obj.sx        : X方向缩放率 (可修改) 1.0为100%
+                        ※ YMM4专有的精确独立缩放控制。
+                        ※ 优先于 zoom/aspect 的修改生效。
+        obj.sy        : Y方向缩放率 (可修改) 1.0为100%
+                        ※ YMM4专有的精确独立缩放控制。
+                        ※ 优先于 zoom/aspect 的修改生效。
+        obj.alpha     : 不透明度（可修改），范围：0.0 ～ 255.0
+                        * AviUtl2 为 0.0～1.0，本插件为 0.0～255.0。
+                        * 内部由 DrawDescription.Opacity * 255 设置。
+                        * 输出时除以 255 并归一化为 0.0～1.0（含 Clamp）。
+                        * 默认脚本设置了 obj.alpha = math.min(time * 255, 255)，
+                          作为淡入的默认实现。
+
+        ○ 旋转
+        obj.rx        : X 轴旋转角度（可修改），单位：度（°），360.0 为一圈
+                        * 内部由 DrawDescription.Rotation.X 设置。
+        obj.ry        : Y 轴旋转角度（可修改），单位：度（°），360.0 为一圈
+                        * 内部由 DrawDescription.Rotation.Y 设置。
+        obj.rz        : Z 轴旋转角度（可修改），单位：度（°），360.0 为一圈
+                        * 内部由 DrawDescription.Rotation.Z 设置。
+        obj.rxr       : X轴旋转角度(弧度) (可修改)
+                        ※ 若与rx同时修改，将优先反映此值。
+        obj.ryr       : Y轴旋转角度(弧度) (可修改)
+                        ※ 若与ry同时修改，将优先反映此值。
+        obj.rzr       : Z轴旋转角度(弧度) (可修改)
+                        ※ 若与rz同时修改，将优先反映此值。
+
+        ○ 图像尺寸
+        obj.w         : 输入图像的水平像素数 [只读]
+                        * 内部为从 D2D 的 GetImageLocalBounds 计算得出的整数值。
+        obj.h         : 输入图像的垂直像素数 [只读]
+                        * 内部为从 D2D 的 GetImageLocalBounds 计算得出的整数值。
+        obj.hw        : 输入图像水平像素数的一半 (= obj.w / 2) [ReadOnly]
+        obj.hh        : 输入图像垂直像素数的一半 (= obj.h / 2) [ReadOnly]
+        obj.diagonal  : 输入图像的对角线长度 (= math.sqrt(w*w + h*h)) [ReadOnly]
+        obj.cx        : 图像中心 X 坐标（= obj.w / 2）[只读]
+                        * 像素操作中中心坐标的参考值。
+        obj.cy        : 图像中心 Y 坐标（= obj.h / 2）[只读]
+
+        ○ 时间·帧
+        obj.time      : 相对于对象的当前时间（秒）[只读]
+                        * 与全局变量 time 的值相同。
+                        * 内部由 EffectDescription.ItemPosition.Time.TotalSeconds 设置。
+        obj.frame     : 相对于对象的当前帧编号 [只读]
+                        * 与全局变量 frame 的值相同。
+                        * 内部由 EffectDescription.ItemPosition.Frame 设置。
+        obj.totalframe: 对象的总帧数 [只读]
+                        * 与全局变量 totalframe 的值相同。
+                        * 内部由 EffectDescription.ItemDuration.Frame 设置。
+        obj.framerate : 帧率（fps）[只读]
+                        * 与全局变量 framerate 的值相同。
+                        * 内部由 EffectDescription.FPS 设置。
+
+        ○ 轨道条
+        obj.track0    : 特效面板 Track0 的当前值 [只读]
+                        * 动画插值后的值。
+        obj.track1    : 特效面板 Track1 的当前值 [只读]
+        obj.track2    : 特效面板 Track2 的当前值 [只读]
+        obj.track3    : 特效面板 Track3 的当前值 [只读]
+
+        ○ 图层
+        obj.layer     : 对象所在的图层编号 [只读]
+                        * 与全局变量 layer 的值相同。
+                        * 内部由 EffectDescription.Layer 设置。
+
+
+- obj 表 - 变量修改与绘制反映 -
+
+        脚本执行后，仅以下变量会被回读到绘制信息中（生效）。
+
+        生效的变量：
+            obj.x, obj.y, obj.z
+            obj.ox, obj.oy
+            obj.zoom, obj.aspect
+            obj.alpha
+            obj.rx, obj.ry, obj.rz
+
+        * obj.w、obj.h、obj.cx、obj.cy、obj.frame、obj.time、
+          obj.totalframe、obj.framerate、obj.track0 ～ obj.track3、
+          obj.layer 为只读，修改后不会反映到绘制中。
+
+        输出值计算公式：
+            ZoomX = obj.zoom * (1.0 + obj.aspect)
+            ZoomY = obj.zoom * (1.0 - obj.aspect)
+            Opacity = Clamp(obj.alpha / 255.0, 0.0, 1.0)
+            Draw = (obj.x, obj.y, obj.z)
+            CenterPoint = (obj.ox, obj.oy)
+            Rotation = (obj.rx, obj.ry, obj.rz)
+
+
+- obj 表 - 函数 -
+
+        ○ obj.getpixel(x, y)
+                获取指定坐标的像素信息。
+                * 首次调用时发生 GPU→CPU 的图像数据传输（存在处理开销）。
+                * 像素坐标以图像左上角为 (0, 0)，向右和向下为正方向。
+                * 返回值为将预乘 Alpha 逆转换后的直通 Alpha 等效值。
+                x      ：X 坐标（0 ～ obj.w - 1）
+                y      ：Y 坐标（0 ～ obj.h - 1）
+                返回值 ：r, g, b, a 共 4 个值（多值返回）
+                          r = 红色分量（0.0 ～ 255.0）
+                          g = 绿色分量（0.0 ～ 255.0）
+                          b = 蓝色分量（0.0 ～ 255.0）
+                          a = Alpha 值（0.0 ～ 255.0）
+                          * 超出范围的坐标返回 (0, 0, 0, 0)。
+                示例：r, g, b, a = obj.getpixel(10, 20)
+
+        ○ obj.setpixel(x, y, r, g, b [, a])
+                覆写指定坐标的像素信息。
+                * 调用时像素数据自动标记为"已修改"，
+                  脚本结束后输出修改后的图像。
+                * 内部以预乘 Alpha 格式（BGRA）保存，
+                  setpixel 时进行预乘转换。
+                x      ：X 坐标（0 ～ obj.w - 1）
+                y      ：Y 坐标（0 ～ obj.h - 1）
+                r      ：红色分量（0.0 ～ 255.0）
+                g      ：绿色分量（0.0 ～ 255.0）
+                b      ：蓝色分量（0.0 ～ 255.0）
+                a      ：Alpha 值（省略时为 255.0）
+                示例：obj.setpixel(10, 20, 255, 0, 0, 128)
+
+        ○ obj.getpixeldata()
+                返回用于批量访问所有像素数据的代理对象。
+                * 与 getpixel/setpixel 相比，像素操作速度更快。
+                * 首次调用时发生 GPU→CPU 的图像数据传输（存在处理开销）。
+                返回值 ：PixelDataProxy 对象
+                          .width  ：图像水平像素数（= obj.w）
+                          .height ：图像垂直像素数（= obj.h）
+                          :get(index)        ：通过索引获取通道值
+                          :set(index, value) ：通过索引设置通道值
+
+                索引规则：
+                    索引从 1 开始（遵循 Lua 惯例）。
+                    通道顺序为 R、G、B、A 循环。
+                    pixel(x, y) 的 R 通道索引 =
+                        (y * obj.w + x) * 4 + 1
+                    pixel(x, y) 的 G 通道索引 =
+                        (y * obj.w + x) * 4 + 2
+                    pixel(x, y) 的 B 通道索引 =
+                        (y * obj.w + x) * 4 + 3
+                    pixel(x, y) 的 A 通道索引 =
+                        (y * obj.w + x) * 4 + 4
+
+                    * 修改 Alpha（通道 4）时，RGB 也会按比例转换。
+                    * 修改 RGB 通道时，会进行预乘转换。
+                    * 获取值与 get(index) 相同，为直通 Alpha 等效值。
+
+                示例：
+                    local pd = obj.getpixeldata()
+                    local idx = (10 * obj.w + 20) * 4 + 1  -- (x=20, y=10) 的 R 通道
+                    local r = pd:get(idx)
+                    pd:set(idx, 128)
+
+        ○ obj.putpixeldata()
+                为兼容性而定义的空实现函数（no-op）。
+                * AviUtl 脚本中 getpixeldata/putpixeldata 组合使用，
+                  但本插件中 setpixel/set 的修改会自动反映，
+                  因此无需调用此函数。
+
+
+
+- ymm4 表 -
+
+        保存YMM4专有元数据的表。全部为 ReadOnly。
+
+        ymm4.group_index        : 组控制中的当前索引 (从0开始)
+        ymm4.group_count        : 组控制中的总项目数
+        ymm4.group_ratio        : 组内进度比例 (group_index / group_count)
+        ymm4.timeline_totalframe: 整个时间轴的总帧数
+        ymm4.timeline_totaltime : 整个时间轴的总时间(秒)
+        ymm4.time_ratio         : 当前播放位置的比例 (0.0 ～ 1.0)
+        ymm4.is_saving          : 视频是否正在导出中 (仅在导出时为true)
+        ymm4.is_playing         : 是否正在播放中 (仅在播放时为true)
+        ymm4.is_paused          : 是否处于暂停中 (仅在暂停时为true)
+        ymm4.scene_id           : 当前场景的唯一识别字符串 (Guid)
+
+
+- anim 表 -
+
+        便于动画计算的纯工具函数及常量表。
+
+        anim.tau                : 圆周率的两倍 (math.pi * 2)
+        anim.e                  : 欧拉数 (math.exp(1))
+        anim.phi                : 黄金分割率 ((1 + math.sqrt(5)) / 2)
+        anim.sqrt2              : 2的平方根 (math.sqrt(2))
+        anim.lerp(a, b, t)      : 将a与b按t(0.0～1.0)进行线性插值
+        anim.smoothstep(e0, e1, x): 在e0和e1之间进行平滑过渡插值
+        anim.smootherstep(e0, e1, x): e0 和 e1 之间更平滑的埃尔米特插值 (二阶导数连续)
+        anim.clamp(v, lo, hi)   : 将值v限制在lo～hi范围内
+        anim.map(v, a1, b1, a2, b2): 将范围a1～b1内的值v映射至a2～b2范围
+        anim.norm(v, lo, hi)    : 获取值v在lo～hi范围内的比例(0.0～1.0)
+        anim.wrap(v, lo, hi)    : 使值v在lo～hi范围内循环
+        anim.pingpong(t, len)   : 在0～len之间往复变化的值
+        anim.sign(v)            : 获取值v的符号 (正=1, 负=-1, 零=0)
+        anim.oscillate(t, lo, hi, freq): 以freq频率在lo与hi之间平滑往复(正弦波)
+        anim.triangle(t, freq)  : 以freq频率在0.0～1.0之间往复的三角波
+        anim.square(t, freq)    : 以freq频率在1.0与0.0之间切换的方波
+        anim.duration(t, dur)   : 针对持续时间dur的当前比例(0.0～1.0, 含clamp)
+        anim.delay(t, d)        : 经过时间d后开始计时的值 (小于0则为0)
+        anim.ease_in(t)         : 二次加速缓动
+        anim.ease_out(t)        : 二次减速缓动
+        anim.ease_in_out(t)     : 二次缓入缓出 (先加速后减速)
+        anim.elastic(t)         : 弹性弹簧缓动
+        anim.back(t)            : 略微越界后返回的缓动
+        anim.step(edge, x)      : 若x大于等于edge则返回1.0，否则返回0.0
+        anim.fract(v)           : 仅获取值v的小数部分
+        anim.bounce(t)          : 弹跳缓动
+        anim.hsv_to_rgb(h, s, v): 将HSV (色相0～360, 饱和度0～1, 明度0～1) 转为 RGB
+        anim.rgb_to_hsv(r, g, b): 将RGB (0～255) 转为 HSV
+        anim.noise(x, y, z)     : 1维～3维的平滑噪声 (-1.0～1.0)
+        anim.rand(min, max, s)  : 基于种子 s 的稳定随机数
+        anim.len(x, y)          : 获取向量 (x, y) 的长度 (范数)
+        anim.dist(x1, y1, x2, y2): 获取两点 (x1, y1) 和 (x2, y2) 之间的距离
+        anim.dot(x1, y1, x2, y2): 获取两个向量 (x1, y1) 和 (x2, y2) 的点积
+        anim.normalize(x, y)    : 归一化向量 (x, y) 返回方向向量 (Tuple)
+        anim.polar(r, a)        : 通过半径 r 和角度 a(度) 获取 (x, y) 坐标的元组
+        anim.rotate(x, y, a)    : 获取将坐标 (x, y) 旋转 a(度) 后的坐标元组
+        anim.bezier(t, p0, p1, p2, p3): 计算 t(0.0～1.0) 时的三次贝塞尔曲线值
+
+
+- 可用标准库 -
+
+        math 库：
+            math.abs, math.ceil, math.cos, math.exp, math.floor,
+            math.fmod, math.huge, math.log, math.max, math.min,
+            math.modf, math.pi, math.random, math.randomseed,
+            math.sin, math.sqrt, math.tan, math.atan, math.atan2,
+            math.deg, math.rad, math.ldexp, math.frexp,
+            math.sinh, math.cosh, math.tanh, math.type,
+            math.tointeger, math.maxinteger, math.mininteger
+
+        string 库：
+            string.format, string.len, string.sub, string.upper,
+            string.lower, string.rep, string.reverse, string.find,
+            string.match, string.gmatch, string.gsub, string.byte,
+            string.char, string.dump, string.pack, string.unpack,
+            string.packsize
+
+        table 库：
+            table.insert, table.remove, table.sort,
+            table.concat, table.unpack, table.move
+
+        bit32 库：
+            bit32.band, bit32.bor, bit32.bxor, bit32.bnot,
+            bit32.lshift, bit32.rshift, bit32.arshift,
+            bit32.extract, bit32.replace,
+            bit32.btest, bit32.countlz, bit32.countrz
+
+        基本函数：
+            type, tostring, tonumber, select, error, assert, print,
+            ipairs, pairs, next, unpack,
+            setmetatable, getmetatable, rawget, rawset, rawequal, rawlen,
+            pcall, xpcall
+
+
+- 脚本示例 -
+
+        ○ 淡入（默认脚本）
+                obj.alpha = math.min(time * 255, 255)
+
+        ○ 淡出
+                obj.alpha = math.max((obj.totalframe - obj.frame) / obj.framerate * 255, 0)
+
+        ○ 用 Track0 控制不透明度
+                obj.alpha = obj.track0
+
+        ○ 随时间旋转
+                obj.rz = time * 90  -- 每秒旋转 90 度
+
+        ○ 反转像素红色分量
+                for y = 0, obj.h - 1 do
+                    for x = 0, obj.w - 1 do
+                        local r, g, b, a = obj.getpixel(x, y)
+                        obj.setpixel(x, y, 255 - r, g, b, a)
+                    end
+                end
+
+        ○ 使用 getpixeldata 进行灰度转换（高速）
+                local pd = obj.getpixeldata()
+                local w = pd.width
+                local h = pd.height
+                for y = 0, h - 1 do
+                    for x = 0, w - 1 do
+                        local base = (y * w + x) * 4
+                        local r = pd:get(base + 1)
+                        local g = pd:get(base + 2)
+                        local b = pd:get(base + 3)
+                        local a = pd:get(base + 4)
+                        local gray = r * 0.299 + g * 0.587 + b * 0.114
+                        pd:set(base + 1, gray)
+                        pd:set(base + 2, gray)
+                        pd:set(base + 3, gray)
+                    end
+                end
+
+        ○ 用 Track0 控制缩放（1.0 = 等倍）
+                obj.zoom = obj.zoom * (1 + obj.track0 / 100)
+
+
+- 不支持项目·限制事项 -
+
+        × 不支持 AviUtl2 的 obj.effect()、obj.draw()、obj.drawpoly()、obj.load() 等。
+        × 不支持 AviUtl2 的 obj.rand()、obj.rand1()、obj.setfont()、obj.mes() 等。
+        × 不支持 AviUtl2 的 obj.setoption()、obj.getoption()、obj.getvalue()、obj.setanchor() 等。
+        × 不支持 AviUtl2 scene 表中的 scene.set()、scene.get() 等函数。
+          （仅支持读取 scene.width 和 scene.height）
+        × 不支持文件访问（require、dofile、io 等）。
+        × 修改 obj.z 会反映到绘制中（包含在 ReadBack 中），
+          但 3D 绘制支持有限。
+        × 超过脚本超时时间（5 秒）时，执行将被强制终止。
+          实现时需注意避免出现无限循环。
+        × 不支持 AviUtl2 的 --track@、--check@ 等头部指令。
+          参数仅可使用 Track0 ～ Track3。

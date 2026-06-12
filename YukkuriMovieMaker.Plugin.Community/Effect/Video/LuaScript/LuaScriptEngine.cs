@@ -1,0 +1,551 @@
+using System.Collections.Concurrent;
+using MoonSharp.Interpreter;
+using MoonSharp.Interpreter.Debugging;
+using MoonSharp.Interpreter.Loaders;
+
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LuaScript
+{
+    internal sealed class LuaScriptEngine : IDisposable
+    {
+        private readonly record struct ExecutionResult(
+            LuaScriptException? Exception,
+            bool TimedOut);
+
+        private sealed record ExecutionJob(
+            string Code,
+            AviUtlScriptContext Context,
+            CancellationToken Cancellation,
+            TaskCompletionSource<ExecutionResult> Completion);
+
+        private sealed class ExecutionThread : IDisposable
+        {
+            private sealed class CancellationDebugger : IDebugger
+            {
+                private static readonly DebuggerAction s_runAction = new() { Action = DebuggerAction.ActionType.Run };
+
+                private CancellationToken _token;
+
+                internal void UpdateToken(CancellationToken token) => _token = token;
+
+                public DebuggerCaps GetDebuggerCaps() => 0;
+                public void SetDebugService(DebugService debugService) { }
+                public void SetSourceCode(SourceCode sourceCode) { }
+                public void SetByteCode(string[] byteCode) { }
+                public bool SignalRuntimeException(ScriptRuntimeException ex) => false;
+                public void SignalExecutionEnded() { }
+                public void Update(WatchType watchType, IEnumerable<WatchItem> items) { }
+                public List<DynamicExpression> GetWatchItems() => [];
+                public void RefreshBreakpoints(IEnumerable<SourceRef> refs) { }
+
+                public bool IsPauseRequested() => _token.IsCancellationRequested;
+
+                public DebuggerAction GetAction(int ip, SourceRef sourceref)
+                {
+                    _token.ThrowIfCancellationRequested();
+                    return s_runAction;
+                }
+            }
+
+            private readonly BlockingCollection<ExecutionJob> _queue = new(boundedCapacity: 1);
+            private readonly Thread _thread;
+            private readonly CancellationDebugger _debugger = new();
+
+            private Script? _script;
+            private DynValue? _compiledChunk;
+            private string _lastCompiledCode = string.Empty;
+            private Table? _objTable;
+            private Table? _sceneTable;
+            private Table? _animTable;
+            private Table? _ymm4Table;
+            private HashSet<string>? _builtinGlobalSnapshot;
+            private HashSet<string>? _objTableSnapshot;
+            private HashSet<string>? _sceneTableSnapshot;
+            private HashSet<string>? _animTableSnapshot;
+            private HashSet<string>? _ymm4TableSnapshot;
+            private CancellationToken _activeCancellation;
+            private AviUtlScriptContext? _activeContext;
+
+            internal ExecutionThread()
+            {
+                _thread = new Thread(WorkerLoop)
+                {
+                    IsBackground = true,
+                    Name = "LuaScriptWorker"
+                };
+                _thread.Start();
+            }
+
+            internal ExecutionResult TryExecute(string code, AviUtlScriptContext ctx, int timeoutMs)
+            {
+                using var cts = new CancellationTokenSource();
+                var tcs = new TaskCompletionSource<ExecutionResult>(
+                    TaskCreationOptions.RunContinuationsAsynchronously);
+
+                if (!_queue.TryAdd(new ExecutionJob(code, ctx, cts.Token, tcs)))
+                    return new ExecutionResult(
+                        new LuaScriptRuntimeException("Script execution queue is full."), false);
+
+                if (tcs.Task.Wait(timeoutMs))
+                    return tcs.Task.Result;
+
+                cts.Cancel();
+                return new ExecutionResult(null, TimedOut: true);
+            }
+
+            private void WorkerLoop()
+            {
+                try
+                {
+                    foreach (var job in _queue.GetConsumingEnumerable())
+                        ProcessJob(job);
+                }
+                catch (OperationCanceledException) { }
+                catch (InvalidOperationException) { }
+            }
+
+            private void ProcessJob(ExecutionJob job)
+            {
+                if (job.Cancellation.IsCancellationRequested)
+                {
+                    job.Completion.TrySetResult(new ExecutionResult(null, TimedOut: true));
+                    return;
+                }
+
+                _activeCancellation = job.Cancellation;
+                _activeContext = job.Context;
+                _debugger.UpdateToken(job.Cancellation);
+
+                try
+                {
+                    EnsureScript();
+                    EnsureScriptIntegrity();
+                    EnsureCompiled(job.Code);
+                    SetupGlobals(job.Context);
+                    _script!.Call(_compiledChunk!);
+                    ReadBackGlobals(job.Context);
+                    job.Completion.TrySetResult(new ExecutionResult(null, false));
+                }
+                catch (OperationCanceledException) when (job.Cancellation.IsCancellationRequested)
+                {
+                    job.Completion.TrySetResult(new ExecutionResult(null, TimedOut: true));
+                }
+                catch (LuaScriptException ex)
+                {
+                    job.Completion.TrySetResult(new ExecutionResult(ex, false));
+                }
+                catch (ScriptRuntimeException ex)
+                {
+                    job.Completion.TrySetResult(new ExecutionResult(
+                        new LuaScriptRuntimeException(ex.DecoratedMessage ?? ex.Message, ex), false));
+                }
+                catch (Exception ex)
+                {
+                    job.Completion.TrySetResult(new ExecutionResult(
+                        new LuaScriptRuntimeException(ex.Message, ex), false));
+                }
+                finally
+                {
+                    _debugger.UpdateToken(default);
+                    _activeContext = null;
+                    _activeCancellation = default;
+                }
+            }
+
+            private void EnsureScript()
+            {
+                if (_script is not null) return;
+                var script = new Script(
+                    CoreModules.Basic |
+                    CoreModules.Math |
+                    CoreModules.String |
+                    CoreModules.Table |
+                    CoreModules.Bit32 |
+                    CoreModules.TableIterators |
+                    CoreModules.Metatables |
+                    CoreModules.ErrorHandling);
+                script.Options.ScriptLoader = new DisabledFileScriptLoader();
+                script.AttachDebugger(_debugger);
+                _script = script;
+            }
+
+            private void EnsureScriptIntegrity()
+            {
+                if (_script is null) return;
+                if (_script.Globals.Get("math").Type == DataType.Table) return;
+                _script = null;
+                _compiledChunk = null;
+                _lastCompiledCode = string.Empty;
+                _objTable = null;
+                _sceneTable = null;
+                _animTable = null;
+                _ymm4Table = null;
+                _builtinGlobalSnapshot = null;
+                _objTableSnapshot = null;
+                _sceneTableSnapshot = null;
+                _animTableSnapshot = null;
+                _ymm4TableSnapshot = null;
+                EnsureScript();
+            }
+
+            private void EnsureCompiled(string code)
+            {
+                if (_compiledChunk is not null && code == _lastCompiledCode) return;
+
+                DynValue chunk;
+                try
+                {
+                    chunk = _script!.LoadString(code, null, "LuaScript");
+                }
+                catch (SyntaxErrorException ex)
+                {
+                    throw new LuaScriptCompilationException(ex.DecoratedMessage ?? ex.Message, ex);
+                }
+
+                _compiledChunk = chunk;
+                _lastCompiledCode = code;
+            }
+
+            private void SetupGlobals(AviUtlScriptContext ctx)
+            {
+                var script = _script!;
+                bool isFirstSetup = _objTable is null;
+
+                if (isFirstSetup)
+                {
+                    var sceneTable = new Table(script);
+                    script.Globals["scene"] = sceneTable;
+
+                    var objTable = new Table(script);
+                    RegisterPixelCallbacks(objTable);
+                    script.Globals["obj"] = objTable;
+
+                    var animTable = new Table(script);
+                    AnimTableRegistrar.RegisterFunctions(animTable);
+                    script.Globals["anim"] = animTable;
+
+                    var ymm4Table = new Table(script);
+                    script.Globals["ymm4"] = ymm4Table;
+
+                    _sceneTable = sceneTable;
+                    _animTable = animTable;
+                    _ymm4Table = ymm4Table;
+                    _objTable = objTable;
+                }
+                else
+                {
+                    ResetUserGlobals(script);
+
+                    if (!ReferenceEquals(script.Globals.Get("scene").Table, _sceneTable))
+                    {
+                        var sceneTable = new Table(script);
+                        script.Globals["scene"] = sceneTable;
+                        _sceneTable = sceneTable;
+                        _sceneTableSnapshot = null;
+                    }
+
+                    if (!ReferenceEquals(script.Globals.Get("obj").Table, _objTable))
+                    {
+                        var objTable = new Table(script);
+                        RegisterPixelCallbacks(objTable);
+                        script.Globals["obj"] = objTable;
+                        _objTable = objTable;
+                        _objTableSnapshot = null;
+                    }
+
+                    if (!ReferenceEquals(script.Globals.Get("anim").Table, _animTable))
+                    {
+                        var animTable = new Table(script);
+                        AnimTableRegistrar.RegisterFunctions(animTable);
+                        script.Globals["anim"] = animTable;
+                        _animTable = animTable;
+                        _animTableSnapshot = null;
+                    }
+
+                    if (!ReferenceEquals(script.Globals.Get("ymm4").Table, _ymm4Table))
+                    {
+                        var ymm4Table = new Table(script);
+                        script.Globals["ymm4"] = ymm4Table;
+                        _ymm4Table = ymm4Table;
+                        _ymm4TableSnapshot = null;
+                    }
+
+                    ResetUserTableKeys(_objTable!, ref _objTableSnapshot);
+                    ResetUserTableKeys(_sceneTable!, ref _sceneTableSnapshot);
+                    ResetUserTableKeys(_animTable!, ref _animTableSnapshot);
+                    ResetUserTableKeys(_ymm4Table!, ref _ymm4TableSnapshot);
+                }
+
+                script.Globals["time"] = ctx.Time;
+                script.Globals["frame"] = ctx.Frame;
+                script.Globals["totalframe"] = ctx.TotalFrame;
+                script.Globals["framerate"] = ctx.Framerate;
+                script.Globals["timelineframe"] = ctx.TimelineFrame;
+                script.Globals["timelinetime"] = ctx.TimelineTime;
+                script.Globals["layer"] = ctx.Layer;
+
+                _sceneTable!["width"] = ctx.SceneWidth;
+                _sceneTable!["height"] = ctx.SceneHeight;
+                _sceneTable!["cx"] = ctx.SceneWidth / 2d;
+                _sceneTable!["cy"] = ctx.SceneHeight / 2d;
+
+                Ymm4TableRegistrar.UpdateVariables(_ymm4Table!, ctx);
+
+                _objTable!["w"] = ctx.ImageWidth;
+                _objTable!["h"] = ctx.ImageHeight;
+                _objTable!["hw"] = ctx.ImageWidth / 2d;
+                _objTable!["hh"] = ctx.ImageHeight / 2d;
+                _objTable!["cx"] = ctx.ImageWidth / 2d;
+                _objTable!["cy"] = ctx.ImageHeight / 2d;
+                _objTable!["cz"] = 0d;
+                _objTable!["diagonal"] = Math.Sqrt((double)ctx.ImageWidth * ctx.ImageWidth + (double)ctx.ImageHeight * ctx.ImageHeight);
+                _objTable!["x"] = ctx.X;
+                _objTable!["y"] = ctx.Y;
+                _objTable!["z"] = ctx.Z;
+                _objTable!["ox"] = ctx.Ox;
+                _objTable!["oy"] = ctx.Oy;
+                _objTable!["oz"] = ctx.Oz;
+                _objTable!["sx"] = ctx.Sx;
+                _objTable!["sy"] = ctx.Sy;
+                _objTable!["sz"] = 1d;
+                _objTable!["zoom"] = ctx.Zoom;
+                _objTable!["aspect"] = ctx.Aspect;
+                _objTable!["alpha"] = ctx.Alpha;
+                _objTable!["rx"] = ctx.Rx;
+                _objTable!["ry"] = ctx.Ry;
+                _objTable!["rz"] = ctx.Rz;
+                _objTable!["rxr"] = ctx.RxRad;
+                _objTable!["ryr"] = ctx.RyRad;
+                _objTable!["rzr"] = ctx.RzRad;
+                _objTable!["track0"] = ctx.Track0;
+                _objTable!["track1"] = ctx.Track1;
+                _objTable!["track2"] = ctx.Track2;
+                _objTable!["track3"] = ctx.Track3;
+                _objTable!["time"] = ctx.Time;
+                _objTable!["frame"] = ctx.Frame;
+                _objTable!["totalframe"] = ctx.TotalFrame;
+                _objTable!["totaltime"] = ctx.TotalTime;
+                _objTable!["t"] = ctx.TotalFrame > 0 ? ctx.Frame / (double)ctx.TotalFrame : 0d;
+                _objTable!["framerate"] = ctx.Framerate;
+                _objTable!["layer"] = ctx.Layer;
+                _objTable!["index"] = ctx.Index;
+                _objTable!["num"] = ctx.Num;
+
+                if (isFirstSetup)
+                {
+                    _builtinGlobalSnapshot = CaptureGlobalKeys(script);
+                    _objTableSnapshot = CaptureTableKeys(_objTable!);
+                    _sceneTableSnapshot = CaptureTableKeys(_sceneTable!);
+                    _animTableSnapshot = CaptureTableKeys(_animTable!);
+                    _ymm4TableSnapshot = CaptureTableKeys(_ymm4Table!);
+                }
+
+                script.Call(
+                    script.Globals.Get("math").Table.Get("randomseed"),
+                    DynValue.NewNumber(ctx.Frame));
+            }
+
+            private static HashSet<string> CaptureGlobalKeys(Script script)
+            {
+                var keys = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var key in script.Globals.Keys)
+                {
+                    if (key.Type == DataType.String)
+                        keys.Add(key.String);
+                }
+                return keys;
+            }
+
+            private static HashSet<string> CaptureTableKeys(Table table)
+            {
+                var keys = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var key in table.Keys)
+                {
+                    if (key.Type == DataType.String)
+                        keys.Add(key.String);
+                }
+                return keys;
+            }
+
+            private static void ResetUserTableKeys(Table table, ref HashSet<string>? snapshot)
+            {
+                if (snapshot is null) return;
+                var keysToRemove = new List<string>();
+                foreach (var key in table.Keys)
+                {
+                    if (key.Type == DataType.String &&
+                        !snapshot.Contains(key.String))
+                    {
+                        keysToRemove.Add(key.String);
+                    }
+                }
+                foreach (var key in keysToRemove)
+                    table[key] = DynValue.Nil;
+            }
+
+            private void ResetUserGlobals(Script script)
+            {
+                var keysToRemove = new List<string>();
+                foreach (var key in script.Globals.Keys)
+                {
+                    if (key.Type == DataType.String &&
+                        !_builtinGlobalSnapshot!.Contains(key.String))
+                    {
+                        keysToRemove.Add(key.String);
+                    }
+                }
+                foreach (var key in keysToRemove)
+                    script.Globals[key] = DynValue.Nil;
+            }
+
+            private void RegisterPixelCallbacks(Table obj)
+            {
+                obj["getpixel"] = DynValue.NewCallback((_, args) =>
+                {
+                    _activeCancellation.ThrowIfCancellationRequested();
+                    if (_activeContext is null) return DynValue.Nil;
+                    int x = (int)(args[0].CastToNumber() ?? 0d);
+                    int y = (int)(args[1].CastToNumber() ?? 0d);
+                    var (r, g, b, a) = _activeContext.GetPixel(x, y);
+                    return DynValue.NewTuple(
+                        DynValue.NewNumber(r),
+                        DynValue.NewNumber(g),
+                        DynValue.NewNumber(b),
+                        DynValue.NewNumber(a));
+                });
+
+                obj["setpixel"] = DynValue.NewCallback((_, args) =>
+                {
+                    _activeCancellation.ThrowIfCancellationRequested();
+                    if (_activeContext is null) return DynValue.Void;
+                    int x = (int)(args[0].CastToNumber() ?? 0d);
+                    int y = (int)(args[1].CastToNumber() ?? 0d);
+                    double r = args[2].CastToNumber() ?? 0d;
+                    double g = args[3].CastToNumber() ?? 0d;
+                    double b = args[4].CastToNumber() ?? 0d;
+                    double a = args.Count > 5 ? args[5].CastToNumber() ?? 255d : 255d;
+                    _activeContext.SetPixel(x, y, r, g, b, a);
+                    return DynValue.Void;
+                });
+
+                obj["getpixeldata"] = DynValue.NewCallback((_, _) =>
+                {
+                    _activeCancellation.ThrowIfCancellationRequested();
+                    if (_activeContext is null) return DynValue.Nil;
+                    _activeContext.EnsurePixelBuffer();
+                    return UserData.Create(new PixelDataProxy(_activeContext));
+                });
+
+                obj["putpixeldata"] = DynValue.NewCallback((_, _) => DynValue.Void);
+            }
+
+            private void ReadBackGlobals(AviUtlScriptContext ctx)
+            {
+                if (_objTable is null) return;
+
+                ctx.X = _objTable.Get("x").CastToNumber() ?? ctx.X;
+                ctx.Y = _objTable.Get("y").CastToNumber() ?? ctx.Y;
+                ctx.Z = _objTable.Get("z").CastToNumber() ?? ctx.Z;
+                ctx.Ox = _objTable.Get("ox").CastToNumber() ?? ctx.Ox;
+                ctx.Oy = _objTable.Get("oy").CastToNumber() ?? ctx.Oy;
+                ctx.Oz = _objTable.Get("oz").CastToNumber() ?? ctx.Oz;
+                ctx.Alpha = _objTable.Get("alpha").CastToNumber() ?? ctx.Alpha;
+
+                double initialSx = ctx.Sx;
+                double initialSy = ctx.Sy;
+                double initialZoom = ctx.Zoom;
+                double initialAspect = ctx.Aspect;
+
+                ctx.Sx = _objTable.Get("sx").CastToNumber() ?? ctx.Sx;
+                ctx.Sy = _objTable.Get("sy").CastToNumber() ?? ctx.Sy;
+                ctx.Zoom = _objTable.Get("zoom").CastToNumber() ?? ctx.Zoom;
+                ctx.Aspect = _objTable.Get("aspect").CastToNumber() ?? ctx.Aspect;
+
+                bool sxsyChanged = Math.Abs(ctx.Sx - initialSx) > 1e-10 || Math.Abs(ctx.Sy - initialSy) > 1e-10;
+                bool zoomAspectChanged = Math.Abs(ctx.Zoom - initialZoom) > 1e-10 || Math.Abs(ctx.Aspect - initialAspect) > 1e-10;
+
+                if (zoomAspectChanged && !sxsyChanged)
+                {
+                    ctx.Sx = ctx.Zoom * (1.0 + ctx.Aspect);
+                    ctx.Sy = ctx.Zoom * (1.0 - ctx.Aspect);
+                }
+
+                double rxrNew = _objTable.Get("rxr").CastToNumber() ?? ctx.RxRad;
+                ctx.Rx = Math.Abs(rxrNew - ctx.RxRad) > 1e-10
+                    ? rxrNew * (180d / Math.PI)
+                    : _objTable.Get("rx").CastToNumber() ?? ctx.Rx;
+
+                double ryrNew = _objTable.Get("ryr").CastToNumber() ?? ctx.RyRad;
+                ctx.Ry = Math.Abs(ryrNew - ctx.RyRad) > 1e-10
+                    ? ryrNew * (180d / Math.PI)
+                    : _objTable.Get("ry").CastToNumber() ?? ctx.Ry;
+
+                double rzrNew = _objTable.Get("rzr").CastToNumber() ?? ctx.RzRad;
+                ctx.Rz = Math.Abs(rzrNew - ctx.RzRad) > 1e-10
+                    ? rzrNew * (180d / Math.PI)
+                    : _objTable.Get("rz").CastToNumber() ?? ctx.Rz;
+            }
+
+            public void Dispose()
+            {
+                _queue.CompleteAdding();
+                _thread.Join();
+                _queue.Dispose();
+            }
+
+            internal void AbandonAsync()
+            {
+                _queue.CompleteAdding();
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    _thread.Join();
+                    _queue.Dispose();
+                });
+            }
+
+            private sealed class DisabledFileScriptLoader : ScriptLoaderBase
+            {
+                public override object LoadFile(string file, Table globalContext)
+                    => throw new NotSupportedException(
+                        "File access is not allowed in Lua script effects.");
+
+                public override bool ScriptFileExists(string name) => false;
+            }
+        }
+
+        private const int ExecutionTimeoutMilliseconds = 5000;
+
+        static LuaScriptEngine()
+        {
+            UserData.RegisterType<PixelDataProxy>();
+        }
+
+        private ExecutionThread _executionThread = new();
+        private bool _disposed;
+
+        public void Execute(string code, AviUtlScriptContext ctx)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
+            var result = _executionThread.TryExecute(code, ctx, ExecutionTimeoutMilliseconds);
+
+            if (result.TimedOut)
+            {
+                var stale = _executionThread;
+                _executionThread = new ExecutionThread();
+                stale.AbandonAsync();
+                throw new LuaScriptRuntimeException(
+                    $"Script execution timed out after {ExecutionTimeoutMilliseconds} ms.");
+            }
+
+            if (result.Exception is not null)
+                throw result.Exception;
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            _executionThread.Dispose();
+        }
+    }
+}

@@ -1,0 +1,413 @@
+﻿- Acerca del efecto de script Lua -
+
+        El efecto de video «Script Lua» de YukkuriMovieMaker4 utiliza
+        el lenguaje Lua para los scripts.
+        El motor de scripts empleado es MoonSharp (compatible con Lua 5.2).
+
+        * Este efecto es una implementación propia y difiere de la especificación de scripts de AviUtl2.
+        * Tiene una especificación distinta a los archivos de script de AviUtl2 (*.anm2, etc.).
+        * Dado que IsAviUtlSupported = false, no se admite la salida EXO para AviUtl.
+
+
+- Notas -
+
+        o El motor de ejecución de scripts es MoonSharp (compatible con Lua 5.2).
+        o Las bibliotecas estándar disponibles se limitan a las siguientes:
+            table, string, math, bit32
+            * io, os, debug, ffi, require, etc. no están disponibles.
+        o El tiempo de espera del script es de 5000 ms (5 segundos).
+            Al agotarse el tiempo, la ejecución se termina forzosamente y se trata como error.
+        o Los scripts no pueden acceder al sistema de archivos (incluido require).
+        o No se admite la llamada a scripts externos desde dentro de un script.
+        o Las operaciones de píxeles (getpixel/setpixel/getpixeldata) acceden a la imagen de
+            entrada real, por lo que la transferencia de datos GPU→CPU solo ocurre en el
+            primer acceso. Omitir estas llamadas cuando no sean necesarias acelera el procesamiento.
+
+
+- Parámetros -
+
+        El panel de efectos tiene los siguientes 4 controles deslizantes (con soporte de animación).
+        Cada valor puede referenciarse en el script como obj.track0 ~ obj.track3.
+
+        Track0 : Parámetro 0 (Predeterminado: 0, Rango: Mínimo ~ Máximo)
+        Track1 : Parámetro 1 (Predeterminado: 0, Rango: Mínimo ~ Máximo)
+        Track2 : Parámetro 2 (Predeterminado: 0, Rango: Mínimo ~ Máximo)
+        Track3 : Parámetro 3 (Predeterminado: 0, Rango: Mínimo ~ Máximo)
+
+        * Cada control deslizante es compatible con los deslizadores de animación (con interpolación).
+        * Los archivos .lua pueden importarse/exportarse desde la barra de herramientas del editor de scripts.
+
+
+- Variables globales -
+
+        Las siguientes variables pueden referenciarse directamente en el ámbito global del script.
+
+        time          : Tiempo actual en segundos relativo al objeto [Solo lectura]
+                        * Mismo valor que obj.time.
+        frame         : Número de fotograma actual relativo al objeto [Solo lectura]
+                        * Mismo valor que obj.frame.
+        totalframe    : Número total de fotogramas del objeto [Solo lectura]
+                        * Mismo valor que obj.totalframe.
+        framerate     : Velocidad de fotogramas (fps) [Solo lectura]
+                        * Mismo valor que obj.framerate.
+        timelineframe : Número de fotograma actual relativo a toda la línea de tiempo [Solo lectura]
+                        * obj.frame es un fotograma relativo desde el inicio del objeto,
+                          mientras que este es el fotograma absoluto desde el inicio de la línea de tiempo.
+        timelinetime  : Tiempo actual en segundos relativo a toda la línea de tiempo [Solo lectura]
+        layer         : Número de capa donde se encuentra el objeto [Solo lectura]
+                        * Mismo valor que obj.layer.
+        obj           : Tabla de información del objeto (ver «Tabla obj» a continuación)
+        scene         : Tabla de información de la escena (ver «Tabla scene» a continuación)
+        ymm4          : YMM4 specific meta-information table (see "ymm4 Table" below)
+        anim          : Animation utility table (see "anim Table" below)
+
+
+- Tabla scene -
+
+        scene.width   : Resolución horizontal (píxeles) de la escena (proyecto) [Solo lectura]
+        scene.height  : Resolución vertical (píxeles) de la escena (proyecto) [Solo lectura]
+
+
+- Tabla obj - Variables -
+
+        Las siguientes variables contienen la información de renderizado actual del objeto.
+        * Las variables no marcadas como Solo lectura pueden modificarse en el script y los cambios se reflejan en el renderizado.
+
+        o Coordenadas / Desplazamiento
+        obj.x         : Coordenada X de referencia de visualización [Solo lectura]
+                        * Equivale a «Coordenada X de referencia de visualización» en la especificación de AviUtl2.
+                        * Los cambios realizados dentro del script no se leen de vuelta y no tienen efecto.
+                        * Internamente se establece desde DrawDescription.Draw.X;
+                          los cambios surten efecto después de ejecutar el script.
+        obj.y         : Coordenada Y de referencia de visualización [equivalente a Solo lectura]
+                        * Internamente se establece desde DrawDescription.Draw.Y.
+        obj.z         : Coordenada Z de referencia de visualización [equivalente a Solo lectura]
+                        * Internamente se establece desde DrawDescription.Draw.Z.
+        obj.ox        : Desplazamiento de centro X (modificable)
+                        * Internamente se establece desde DrawDescription.CenterPoint.X (inDesc).
+                        * Equivale a «Coordenada X relativa desde la referencia (obj.ox)» en AviUtl2,
+                          pero en este plugin se trata como CenterPoint (desplazamiento del punto central).
+        obj.oy        : Desplazamiento de centro Y (modificable)
+                        * Internamente se establece desde DrawDescription.CenterPoint.Y (inDesc).
+
+        o Escala / Transformación
+        obj.zoom      : Factor de escala (modificable)
+                        * 1.0 es la escala normal (no 0.0), compatible con AviUtl2.
+                        * Internamente se calcula como el promedio de ZoomX y ZoomY (zoomAvg).
+                        * En la salida, se expande al zoom individual de X/Y como obj.zoom * (1 ± obj.aspect).
+        obj.aspect    : Relación de aspecto (modificable), Rango: -1.0 ~ 1.0
+                        * Los valores positivos reducen en la dirección X; los negativos en la dirección Y.
+                        * Internamente se calcula como (ZoomX - ZoomY) / (ZoomX + ZoomY).
+        obj.sx        : Scale factor in X direction (writable) 1.0 = 100%
+                        * Precise independent scale control specific to YMM4.
+                        * Takes precedence over zoom/aspect modifications.
+        obj.sy        : Scale factor in Y direction (writable) 1.0 = 100%
+                        * Precise independent scale control specific to YMM4.
+                        * Takes precedence over zoom/aspect modifications.
+        obj.alpha     : Opacidad (modificable), Rango: 0.0 ~ 255.0
+                        * AviUtl2 usa 0.0~1.0, pero este plugin usa 0.0~255.0.
+                        * Internamente se establece desde DrawDescription.Opacity * 255.
+                        * Se divide por 255 y se normaliza a 0.0~1.0 en la salida (con Clamp).
+                        * El script predeterminado establece obj.alpha = math.min(time * 255, 255),
+                          proporcionando una implementación de fundido de entrada predeterminada.
+
+        o Rotación
+        obj.rx        : Ángulo de rotación alrededor del eje X (modificable), Unidad: grados (°), 360.0 = una vuelta completa
+                        * Internamente se establece desde DrawDescription.Rotation.X.
+        obj.ry        : Ángulo de rotación alrededor del eje Y (modificable), Unidad: grados (°), 360.0 = una vuelta completa
+                        * Internamente se establece desde DrawDescription.Rotation.Y.
+        obj.rz        : Ángulo de rotación alrededor del eje Z (modificable), Unidad: grados (°), 360.0 = una vuelta completa
+                        * Internamente se establece desde DrawDescription.Rotation.Z.
+        obj.rxr       : Rotation angle around X axis in radians (writable)
+                        * Takes precedence if rx is also modified simultaneously.
+        obj.ryr       : Rotation angle around Y axis in radians (writable)
+                        * Takes precedence if ry is also modified simultaneously.
+        obj.rzr       : Rotation angle around Z axis in radians (writable)
+                        * Takes precedence if rz is also modified simultaneously.
+
+        o Tamaño de imagen
+        obj.w         : Ancho de la imagen de entrada en píxeles [Solo lectura]
+                        * Internamente es un entero derivado de D2D GetImageLocalBounds.
+        obj.h         : Alto de la imagen de entrada en píxeles [Solo lectura]
+                        * Internamente es un entero derivado de D2D GetImageLocalBounds.
+        obj.hw        : Half of the input image width (= obj.w / 2) [ReadOnly]
+        obj.hh        : Half of the input image height (= obj.h / 2) [ReadOnly]
+        obj.diagonal  : Longitud diagonal de la imagen de entrada (= math.sqrt(w*w + h*h)) [ReadOnly]
+        obj.cx        : Coordenada X central de la imagen (= obj.w / 2) [Solo lectura]
+                        * Coordenada central de referencia para operaciones de píxeles.
+        obj.cy        : Coordenada Y central de la imagen (= obj.h / 2) [Solo lectura]
+
+        o Tiempo / Fotograma
+        obj.time      : Tiempo actual en segundos relativo al objeto [Solo lectura]
+                        * Mismo valor que la variable global time.
+                        * Internamente se establece desde EffectDescription.ItemPosition.Time.TotalSeconds.
+        obj.frame     : Número de fotograma actual relativo al objeto [Solo lectura]
+                        * Mismo valor que la variable global frame.
+                        * Internamente se establece desde EffectDescription.ItemPosition.Frame.
+        obj.totalframe: Número total de fotogramas del objeto [Solo lectura]
+                        * Mismo valor que la variable global totalframe.
+                        * Internamente se establece desde EffectDescription.ItemDuration.Frame.
+        obj.framerate : Velocidad de fotogramas (fps) [Solo lectura]
+                        * Mismo valor que la variable global framerate.
+                        * Internamente se establece desde EffectDescription.FPS.
+
+        o Controles deslizantes
+        obj.track0    : Valor actual de Track0 en el panel de efectos [Solo lectura]
+                        * Valor tras la interpolación de animación.
+        obj.track1    : Valor actual de Track1 en el panel de efectos [Solo lectura]
+        obj.track2    : Valor actual de Track2 en el panel de efectos [Solo lectura]
+        obj.track3    : Valor actual de Track3 en el panel de efectos [Solo lectura]
+
+        o Capa
+        obj.layer     : Número de capa donde se encuentra el objeto [Solo lectura]
+                        * Mismo valor que la variable global layer.
+                        * Internamente se establece desde EffectDescription.Layer.
+
+
+- Tabla obj - Cambios de variables y reflejo en el renderizado -
+
+        Tras la ejecución del script, solo las siguientes variables se leen de vuelta al renderizado (se aplican).
+
+        Variables aplicadas:
+            obj.x, obj.y, obj.z
+            obj.ox, obj.oy
+            obj.zoom, obj.aspect
+            obj.alpha
+            obj.rx, obj.ry, obj.rz
+
+        * obj.w, obj.h, obj.cx, obj.cy, obj.frame, obj.time,
+          obj.totalframe, obj.framerate, obj.track0 ~ obj.track3,
+          obj.layer son Solo lectura y los cambios no se reflejan en el renderizado.
+
+        Fórmulas de valores de salida:
+            ZoomX = obj.zoom * (1.0 + obj.aspect)
+            ZoomY = obj.zoom * (1.0 - obj.aspect)
+            Opacity = Clamp(obj.alpha / 255.0, 0.0, 1.0)
+            Draw = (obj.x, obj.y, obj.z)
+            CenterPoint = (obj.ox, obj.oy)
+            Rotation = (obj.rx, obj.ry, obj.rz)
+
+
+- Tabla obj - Funciones -
+
+        o obj.getpixel(x, y)
+                Obtiene información del píxel en las coordenadas especificadas.
+                * Se produce una transferencia de datos de imagen GPU→CPU en la primera llamada (con sobrecarga de procesamiento).
+                * Las coordenadas de píxel usan la esquina superior izquierda de la imagen como (0, 0), con derecha y abajo como positivos.
+                * Los valores devueltos son equivalentes al alfa directo convertido desde el alfa premultiplicado.
+                x       : Coordenada X (0 ~ obj.w - 1)
+                y       : Coordenada Y (0 ~ obj.h - 1)
+                Devuelve: 4 valores r, g, b, a (valores de retorno múltiple)
+                          r = Componente rojo (0.0 ~ 255.0)
+                          g = Componente verde (0.0 ~ 255.0)
+                          b = Componente azul (0.0 ~ 255.0)
+                          a = Valor alfa (0.0 ~ 255.0)
+                          * Devuelve (0, 0, 0, 0) para coordenadas fuera de rango.
+                Ejemplo: r, g, b, a = obj.getpixel(10, 20)
+
+        o obj.setpixel(x, y, r, g, b [, a])
+                Sobrescribe la información del píxel en las coordenadas especificadas.
+                * Los datos de píxel se marcan automáticamente como «modificados» al llamar,
+                  y la imagen modificada se emite después de que el script termina.
+                * Se almacena internamente en formato alfa premultiplicado (BGRA).
+                  Se realiza una conversión premultiplicada en setpixel.
+                x       : Coordenada X (0 ~ obj.w - 1)
+                y       : Coordenada Y (0 ~ obj.h - 1)
+                r       : Componente rojo (0.0 ~ 255.0)
+                g       : Componente verde (0.0 ~ 255.0)
+                b       : Componente azul (0.0 ~ 255.0)
+                a       : Valor alfa (predeterminado: 255.0)
+                Ejemplo: obj.setpixel(10, 20, 255, 0, 0, 128)
+
+        o obj.getpixeldata()
+                Devuelve un objeto proxy para acceso masivo a todos los datos de píxeles.
+                * Manipulación de píxeles más rápida en comparación con getpixel/setpixel.
+                * Se produce una transferencia de datos de imagen GPU→CPU en la primera llamada (con sobrecarga de procesamiento).
+                Devuelve: Objeto PixelDataProxy
+                          .width  : Ancho de la imagen en píxeles (= obj.w)
+                          .height : Alto de la imagen en píxeles (= obj.h)
+                          :get(index)        : Obtiene el valor del canal por índice
+                          :set(index, value) : Establece el valor del canal por índice
+
+                Especificación de índice:
+                    Los índices empiezan en 1 (siguiendo la convención de Lua).
+                    El orden de canales es R, G, B, A repetido.
+                    Índice del canal R para pixel(x, y) =
+                        (y * obj.w + x) * 4 + 1
+                    Índice del canal G para pixel(x, y) =
+                        (y * obj.w + x) * 4 + 2
+                    Índice del canal B para pixel(x, y) =
+                        (y * obj.w + x) * 4 + 3
+                    Índice del canal A para pixel(x, y) =
+                        (y * obj.w + x) * 4 + 4
+
+                    * Modificar el alfa (canal 4) también convertirá RGB proporcionalmente.
+                    * Modificar los canales RGB aplicará una conversión premultiplicada.
+                    * Los valores obtenidos son equivalentes al alfa directo, igual que get(index).
+
+                Ejemplo:
+                    local pd = obj.getpixeldata()
+                    local idx = (10 * obj.w + 20) * 4 + 1  -- Canal R de (x=20, y=10)
+                    local r = pd:get(idx)
+                    pd:set(idx, 128)
+
+        o obj.putpixeldata()
+                Una función vacía (sin operación) definida por compatibilidad.
+                * En los scripts de AviUtl se usan getpixeldata/putpixeldata juntos,
+                  pero en este plugin los cambios mediante setpixel/set se aplican automáticamente,
+                  por lo que no es necesario llamar a esta función.
+
+
+
+- ymm4 Table -
+
+        Table holding YMM4-specific meta-information. All values are ReadOnly.
+
+        ymm4.group_index        : Current item index within a group control (0-based)
+        ymm4.group_count        : Total number of items within a group control
+        ymm4.group_ratio        : Progress ratio within the group (group_index / group_count)
+        ymm4.timeline_totalframe: Total number of frames for the entire timeline
+        ymm4.timeline_totaltime : Total time in seconds for the entire timeline
+        ymm4.time_ratio         : Current playback position ratio (0.0 ~ 1.0)
+        ymm4.is_saving          : Whether video is currently being exported (true only during export)
+        ymm4.is_playing         : Whether the timeline is currently playing (true only during playback)
+        ymm4.is_paused          : Whether the timeline is currently paused (true only when paused)
+        ymm4.scene_id           : Unique ID (Guid string) of the current scene
+
+
+- anim Table -
+
+        Pure utility functions and constants useful for animation calculations.
+
+        anim.tau                : 2 * Pi (math.pi * 2)
+        anim.e                  : Número de Euler (math.exp(1))
+        anim.phi                : Proporción áurea ((1 + math.sqrt(5)) / 2)
+        anim.sqrt2              : Raíz cuadrada de 2 (math.sqrt(2))
+        anim.lerp(a, b, t)      : Linear interpolation between a and b by t (0.0 ~ 1.0)
+        anim.smoothstep(e0, e1, x): Smooth Hermite interpolation between e0 and e1
+        anim.smootherstep(e0, e1, x): Interpolación de Hermite más suave entre e0 y e1 (segunda derivada continua)
+        anim.clamp(v, lo, hi)   : Clamps value v between lo and hi
+        anim.map(v, a1, b1, a2, b2): Maps value v from range a1~b1 to range a2~b2
+        anim.norm(v, lo, hi)    : Gets the normalized ratio (0.0 ~ 1.0) of v within lo~hi
+        anim.wrap(v, lo, hi)    : Wraps value v to loop within the range lo~hi
+        anim.pingpong(t, len)   : Value that bounces back and forth between 0 and len
+        anim.sign(v)            : Gets the sign of v (1 for positive, -1 for negative, 0 for zero)
+        anim.oscillate(t, lo, hi, freq): Smoothly oscillates between lo and hi at the given freq (sine wave)
+        anim.triangle(t, freq)  : Triangle wave oscillating between 0.0 and 1.0 at the given freq
+        anim.square(t, freq)    : Square wave switching between 1.0 and 0.0 at the given freq
+        anim.duration(t, dur)   : Current ratio over duration dur (0.0 ~ 1.0, clamped)
+        anim.delay(t, d)        : Time starting after delay d (0 if negative)
+        anim.ease_in(t)         : Quadratic ease-in (acceleration)
+        anim.ease_out(t)        : Quadratic ease-out (deceleration)
+        anim.ease_in_out(t)     : Aceleración y desaceleración cuadrática (entrada y salida suaves)
+        anim.elastic(t)         : Bouncy spring easing
+        anim.back(t)            : Easing that slightly overshoots before returning
+        anim.step(edge, x)      : Returns 1.0 if x >= edge, otherwise 0.0
+        anim.fract(v)           : Gets only the fractional part of v
+        anim.bounce(t)          : Bouncing ease effect
+        anim.hsv_to_rgb(h, s, v): Converts HSV (Hue 0~360, Saturation 0~1, Value 0~1) to RGB (0~255)
+        anim.rgb_to_hsv(r, g, b): Converts RGB (0~255) to HSV
+        anim.noise(x, y, z)     : 1D to 3D continuous smooth noise (-1.0 ~ 1.0)
+        anim.rand(min, max, s)  : Stable random value based on seed `s`
+        anim.len(x, y)          : Obtiene la longitud (norma) del vector (x, y)
+        anim.dist(x1, y1, x2, y2): Obtiene la distancia entre dos puntos (x1, y1) y (x2, y2)
+        anim.dot(x1, y1, x2, y2): Obtiene el producto escalar de dos vectores (x1, y1) y (x2, y2)
+        anim.normalize(x, y)    : Normaliza el vector (x, y) devolviendo un vector de dirección (Tuple)
+        anim.polar(r, a)        : Converts polar coordinates (radius, angle) to (x, y) tuple
+        anim.rotate(x, y, a)    : Rotates 2D point (x, y) by angle `a` (degrees) returning (x, y) tuple
+        anim.bezier(t, p0, p1, p2, p3): Evaluates cubic bezier curve at `t` (0.0~1.0)
+
+
+- Bibliotecas estándar disponibles -
+
+        Biblioteca math:
+            math.abs, math.ceil, math.cos, math.exp, math.floor,
+            math.fmod, math.huge, math.log, math.max, math.min,
+            math.modf, math.pi, math.random, math.randomseed,
+            math.sin, math.sqrt, math.tan, math.atan, math.atan2,
+            math.deg, math.rad, math.ldexp, math.frexp,
+            math.sinh, math.cosh, math.tanh, math.type,
+            math.tointeger, math.maxinteger, math.mininteger
+
+        Biblioteca string:
+            string.format, string.len, string.sub, string.upper,
+            string.lower, string.rep, string.reverse, string.find,
+            string.match, string.gmatch, string.gsub, string.byte,
+            string.char, string.dump, string.pack, string.unpack,
+            string.packsize
+
+        Biblioteca table:
+            table.insert, table.remove, table.sort,
+            table.concat, table.unpack, table.move
+
+        Biblioteca bit32:
+            bit32.band, bit32.bor, bit32.bxor, bit32.bnot,
+            bit32.lshift, bit32.rshift, bit32.arshift,
+            bit32.extract, bit32.replace,
+            bit32.btest, bit32.countlz, bit32.countrz
+
+        Funciones básicas:
+            type, tostring, tonumber, select, error, assert, print,
+            ipairs, pairs, next, unpack,
+            setmetatable, getmetatable, rawget, rawset, rawequal, rawlen,
+            pcall, xpcall
+
+
+- Ejemplos de script -
+
+        o Fundido de entrada (script predeterminado)
+                obj.alpha = math.min(time * 255, 255)
+
+        o Fundido de salida
+                obj.alpha = math.max((obj.totalframe - obj.frame) / obj.framerate * 255, 0)
+
+        o Controlar la opacidad con Track0
+                obj.alpha = obj.track0
+
+        o Rotar con el tiempo
+                obj.rz = time * 90  -- 90 grados por segundo
+
+        o Invertir el componente rojo de los píxeles
+                for y = 0, obj.h - 1 do
+                    for x = 0, obj.w - 1 do
+                        local r, g, b, a = obj.getpixel(x, y)
+                        obj.setpixel(x, y, 255 - r, g, b, a)
+                    end
+                end
+
+        o Conversión a escala de grises usando getpixeldata (rápido)
+                local pd = obj.getpixeldata()
+                local w = pd.width
+                local h = pd.height
+                for y = 0, h - 1 do
+                    for x = 0, w - 1 do
+                        local base = (y * w + x) * 4
+                        local r = pd:get(base + 1)
+                        local g = pd:get(base + 2)
+                        local b = pd:get(base + 3)
+                        local a = pd:get(base + 4)
+                        local gray = r * 0.299 + g * 0.587 + b * 0.114
+                        pd:set(base + 1, gray)
+                        pd:set(base + 2, gray)
+                        pd:set(base + 3, gray)
+                    end
+                end
+
+        o Controlar el zoom con Track0 (1.0 = escala normal)
+                obj.zoom = obj.zoom * (1 + obj.track0 / 100)
+
+
+- Funciones no admitidas / Limitaciones -
+
+        x obj.effect(), obj.draw(), obj.drawpoly(), obj.load(), etc. de AviUtl2 no son compatibles.
+        x obj.rand(), obj.rand1(), obj.setfont(), obj.mes(), etc. de AviUtl2 no son compatibles.
+        x obj.setoption(), obj.getoption(), obj.getvalue(), obj.setanchor(), etc. de AviUtl2 no son compatibles.
+        x Las funciones como scene.set() y scene.get() de la tabla scene de AviUtl2 no son compatibles.
+          (Solo se pueden leer scene.width y scene.height)
+        x El acceso a archivos (require, dofile, io, etc.) no es compatible.
+        x Modificar obj.z se refleja en el renderizado (incluido en ReadBack),
+          pero el soporte de renderizado 3D es limitado.
+        x Si se supera el tiempo de espera del script (5 segundos), la ejecución se termina forzosamente.
+          Se debe tener cuidado en la implementación para evitar bucles infinitos.
+        x Las directivas de encabezado de AviUtl2 como --track@ y --check@ no son compatibles.
+          Solo Track0 ~ Track3 pueden usarse como parámetros.

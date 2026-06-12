@@ -1,0 +1,416 @@
+﻿- Luaスクリプトエフェクトについて -
+
+        YukkuriMovieMaker4 の「Luaスクリプト」映像エフェクトで
+        利用可能なスクリプトには Lua 言語を使用します。
+        スクリプトエンジンには MoonSharp (Lua 5.2 互換) が採用されています。
+
+        ※このエフェクトは AviUtl2 のスクリプト仕様とは異なる独自実装です。
+        ※AviUtl2 のスクリプトファイル(*.anm2 等)とは別仕様です。
+        ※IsAviUtlSupported = false のため、AviUtl 向けの EXO 出力には対応しません。
+
+
+- 注意点 -
+
+        ○スクリプトの実行エンジンは MoonSharp (Lua 5.2 互換) です。
+        ○利用可能な標準ライブラリは以下に限定されます。
+            table, string, math, bit32
+            ※io, os, debug, ffi, require 等は使用できません。
+        ○スクリプトのタイムアウトは 5000ms (5秒) です。
+            タイムアウト時は実行が強制終了され、エラーとして扱われます。
+        ○スクリプトからファイルへのアクセスはできません (require を含む)。
+        ○スクリプト内からの外部スクリプト呼び出しには対応していません。
+        ○ピクセル操作(getpixel/setpixel/getpixeldata)は実際の入力画像に
+            アクセスするため、初回アクセス時にのみ GPU→CPU へのデータ転送が
+            発生します。不要な場合は呼び出しを省略することで処理を高速化できます。
+
+
+- パラメータ -
+
+        エフェクトパネルには以下の 4 つのトラックバー(アニメーション対応)があります。
+        各値はスクリプト内で obj.track0 ～ obj.track3 として参照できます。
+
+        Track0 : パラメータ0 (デフォルト: 0, 範囲: 最小値 ～ 最大値)
+        Track1 : パラメータ1 (デフォルト: 0, 範囲: 最小値 ～ 最大値)
+        Track2 : パラメータ2 (デフォルト: 0, 範囲: 最小値 ～ 最大値)
+        Track3 : パラメータ3 (デフォルト: 0, 範囲: 最小値 ～ 最大値)
+
+        ※各トラックバーはアニメーションスライダーに対応しています(補間あり)。
+        ※スクリプトエディタのツールバーから .lua ファイルのインポート/エクスポートが可能です。
+
+
+- グローバル変数 -
+
+        以下の変数はスクリプトのグローバルスコープで直接参照できます。
+
+        time          : オブジェクト基準の現在時間(秒) [ReadOnly]
+                        ※ obj.time と同じ値です。
+        frame         : オブジェクト基準の現在フレーム番号 [ReadOnly]
+                        ※ obj.frame と同じ値です。
+        totalframe    : オブジェクトの総フレーム数 [ReadOnly]
+                        ※ obj.totalframe と同じ値です。
+        framerate     : フレームレート(fps) [ReadOnly]
+                        ※ obj.framerate と同じ値です。
+        timelineframe : タイムライン全体基準の現在フレーム番号 [ReadOnly]
+                        ※ obj.frame はオブジェクト先頭からの相対フレームですが、
+                          こちらはタイムライン先頭からの絶対フレームです。
+        timelinetime  : タイムライン全体基準の現在時間(秒) [ReadOnly]
+        layer         : オブジェクトが配置されているレイヤー番号 [ReadOnly]
+                        ※ obj.layer と同じ値です。
+        obj           : オブジェクト情報テーブル (下記「obj テーブル」を参照)
+        scene         : シーン情報テーブル (下記「scene テーブル」を参照)
+        ymm4          : YMM4固有のメタ情報テーブル (下記「ymm4 テーブル」を参照)
+        anim          : アニメーション用ユーティリティテーブル (下記「anim テーブル」を参照)
+
+
+- scene テーブル -
+
+        scene.width   : シーン(プロジェクト)の横解像度(ピクセル) [ReadOnly]
+        scene.height  : シーン(プロジェクト)の縦解像度(ピクセル) [ReadOnly]
+        scene.cx      : シーンの横解像度の半分 (= scene.width / 2) [ReadOnly]
+        scene.cy      : シーンの縦解像度の半分 (= scene.height / 2) [ReadOnly]
+
+
+- obj テーブル - 変数 -
+
+        以下の変数はオブジェクトの現在の描画情報を保持します。
+        ※ ReadOnly と記載のないものはスクリプト内で変更可能であり、変更した値が描画に反映されます。
+
+        ○座標・オフセット
+        obj.x         : 表示基準座標 X [ReadOnly]
+                        ※ AviUtl2 仕様の「表示基準座標X」に相当します。
+                        ※ スクリプト内で変更しても読み戻しが行われないため無効です。
+                        ※ 実装上は DrawDescription.Draw.X から設定され、
+                          スクリプト後に変更内容が反映されます。
+        obj.y         : 表示基準座標 Y [ReadOnly相当]
+                        ※ 実装上は DrawDescription.Draw.Y から設定されます。
+        obj.z         : 表示基準座標 Z [ReadOnly相当]
+                        ※ 実装上は DrawDescription.Draw.Z から設定されます。
+        obj.ox        : 中心オフセット X (変更可)
+                        ※ 実装上は DrawDescription.CenterPoint.X (inDesc) から設定されます。
+                        ※ AviUtl2 仕様の「基準座標からの相対座標X(obj.ox)」に相当しますが、
+                          このプラグインでは CenterPoint(中心点のオフセット)として扱われます。
+        obj.oy        : 中心オフセット Y (変更可)
+                        ※ 実装上は DrawDescription.CenterPoint.Y (inDesc) から設定されます。
+
+        ○拡大率・変形
+        obj.zoom      : 拡大率(変更可)
+                        ※ 0.0 が等倍相当ではなく、1.0 が等倍です(AviUtl2 互換)。
+                        ※ 実装上は ZoomX と ZoomY の平均値 (zoomAvg) として算出されます。
+                        ※ 出力時は obj.zoom * (1 ± obj.aspect) で X/Y 個別の Zoom に展開されます。
+        obj.aspect    : アスペクト比(変更可) 範囲: -1.0 ～ 1.0
+                        ※ 正の値で X 方向に縮小、負の値で Y 方向に縮小。
+                        ※ 実装上は (ZoomX - ZoomY) / (ZoomX + ZoomY) として算出されます。
+        obj.sx        : X 方向の拡大率 (変更可) 1.0 で等倍
+                        ※ YMM4独自の精密な独立スケール制御です。
+                        ※ zoom/aspect の変更よりも優先して反映されます。
+        obj.sy        : Y 方向の拡大率 (変更可) 1.0 で等倍
+                        ※ YMM4独自の精密な独立スケール制御です。
+                        ※ zoom/aspect の変更よりも優先して反映されます。
+        obj.alpha     : 不透明度(変更可) 範囲: 0.0 ～ 255.0
+                        ※ AviUtl2 では 0.0～1.0 ですが、このプラグインでは 0.0～255.0 です。
+                        ※ 実装上は DrawDescription.Opacity * 255 から設定されます。
+                        ※ 出力時に 255 で除算し、0.0～1.0 に正規化されます(Clamp あり)。
+                        ※ デフォルトスクリプトでは obj.alpha = math.min(time * 255, 255) が
+                          設定されており、フェードインのデフォルト実装となっています。
+
+        ○回転
+        obj.rx        : X 軸回転角度(変更可) 単位: 度(°), 360.0 で一回転
+                        ※ 実装上は DrawDescription.Rotation.X から設定されます。
+        obj.ry        : Y 軸回転角度(変更可) 単位: 度(°), 360.0 で一回転
+                        ※ 実装上は DrawDescription.Rotation.Y から設定されます。
+        obj.rz        : Z 軸回転角度(変更可) 単位: 度(°), 360.0 で一回転
+                        ※ 実装上は DrawDescription.Rotation.Z から設定されます。
+        obj.rxr       : X 軸回転角度(ラジアン) (変更可) 単位: ラジアン(rad)
+                        ※ rx と同時に変更された場合はこちらが優先して反映されます。
+        obj.ryr       : Y 軸回転角度(ラジアン) (変更可) 単位: ラジアン(rad)
+                        ※ ry と同時に変更された場合はこちらが優先して反映されます。
+        obj.rzr       : Z 軸回転角度(ラジアン) (変更可) 単位: ラジアン(rad)
+                        ※ rz と同時に変更された場合はこちらが優先して反映されます。
+
+        ○画像サイズ
+        obj.w         : 入力画像の横ピクセル数 [ReadOnly]
+                        ※ 実装上は D2D の GetImageLocalBounds から算出した整数値です。
+        obj.h         : 入力画像の縦ピクセル数 [ReadOnly]
+                        ※ 実装上は D2D の GetImageLocalBounds から算出した整数値です。
+        obj.hw        : 入力画像の横ピクセル数の半分 (= obj.w / 2) [ReadOnly]
+        obj.hh        : 入力画像の縦ピクセル数の半分 (= obj.h / 2) [ReadOnly]
+        obj.diagonal  : 画像の対角線の長さ (= math.sqrt(w*w + h*h)) [ReadOnly]
+        obj.cx        : 画像の中心 X 座標 (= obj.w / 2) [ReadOnly]
+                        ※ ピクセル操作における中心座標の参照値です。
+        obj.cy        : 画像の中心 Y 座標 (= obj.h / 2) [ReadOnly]
+
+        ○時間・フレーム
+        obj.time      : オブジェクト基準の現在時間(秒) [ReadOnly]
+                        ※ グローバル変数 time と同じ値です。
+                        ※ 実装上は EffectDescription.ItemPosition.Time.TotalSeconds から設定されます。
+        obj.frame     : オブジェクト基準の現在フレーム番号 [ReadOnly]
+                        ※ グローバル変数 frame と同じ値です。
+                        ※ 実装上は EffectDescription.ItemPosition.Frame から設定されます。
+        obj.totalframe: オブジェクトの総フレーム数 [ReadOnly]
+                        ※ グローバル変数 totalframe と同じ値です。
+                        ※ 実装上は EffectDescription.ItemDuration.Frame から設定されます。
+        obj.t         : オブジェクト内の現在時間の進行割合 (0.0 ～ 1.0) [ReadOnly]
+        obj.framerate : フレームレート(fps) [ReadOnly]
+                        ※ グローバル変数 framerate と同じ値です。
+                        ※ 実装上は EffectDescription.FPS から設定されます。
+
+        ○トラックバー
+        obj.track0    : エフェクトパネルの Track0 の現在値 [ReadOnly]
+                        ※ アニメーション補間後の値です。
+        obj.track1    : エフェクトパネルの Track1 の現在値 [ReadOnly]
+        obj.track2    : エフェクトパネルの Track2 の現在値 [ReadOnly]
+        obj.track3    : エフェクトパネルの Track3 の現在値 [ReadOnly]
+
+        ○レイヤー
+        obj.layer     : オブジェクトが配置されているレイヤー番号 [ReadOnly]
+                        ※ グローバル変数 layer と同じ値です。
+                        ※ 実装上は EffectDescription.Layer から設定されます。
+
+
+- obj テーブル - 変数の変更と描画への反映 -
+
+        スクリプト実行後、以下の変数のみが描画情報に読み戻されます(反映されます)。
+
+        反映される変数:
+            obj.x, obj.y, obj.z
+            obj.ox, obj.oy
+            obj.zoom, obj.aspect
+            obj.alpha
+            obj.rx, obj.ry, obj.rz
+
+        ※ obj.w, obj.h, obj.cx, obj.cy, obj.frame, obj.time,
+           obj.totalframe, obj.framerate, obj.track0 ～ obj.track3,
+           obj.layer は ReadOnly であり、変更しても描画には反映されません。
+
+        出力値の算出式:
+            ZoomX = obj.zoom * (1.0 + obj.aspect)
+            ZoomY = obj.zoom * (1.0 - obj.aspect)
+            Opacity = Clamp(obj.alpha / 255.0, 0.0, 1.0)
+            Draw = (obj.x, obj.y, obj.z)
+            CenterPoint = (obj.ox, obj.oy)
+            Rotation = (obj.rx, obj.ry, obj.rz)
+
+
+- obj テーブル - 関数 -
+
+        ○obj.getpixel(x, y)
+                指定座標のピクセル情報を取得します。
+                ※ 初回呼び出し時に GPU→CPU への画像データ転送が発生します(処理負荷を伴います)。
+                ※ ピクセル座標は画像の左上を (0, 0) とし、右・下方向が正です。
+                ※ 取得値はプリマルチプライドアルファを逆変換したストレートアルファ相当の値です。
+                x       : X 座標 (0 ～ obj.w - 1)
+                y       : Y 座標 (0 ～ obj.h - 1)
+                戻り値  : r, g, b, a の 4 値(多値返却)
+                          r = 赤成分 (0.0 ～ 255.0)
+                          g = 緑成分 (0.0 ～ 255.0)
+                          b = 青成分 (0.0 ～ 255.0)
+                          a = アルファ値 (0.0 ～ 255.0)
+                          ※ 範囲外の座標を指定した場合は (0, 0, 0, 0) を返します。
+                例：r, g, b, a = obj.getpixel(10, 20)
+
+        ○obj.setpixel(x, y, r, g, b [, a])
+                指定座標のピクセル情報を書き換えます。
+                ※ 呼び出し時に自動的にピクセルデータが「変更済み」としてマークされ、
+                  スクリプト終了後に変更後の画像が出力されます。
+                ※ 内部ではプリマルチプライドアルファ形式(BGRA)で保持されます。
+                   setpixel 時に premultiplied 変換が行われます。
+                x       : X 座標 (0 ～ obj.w - 1)
+                y       : Y 座標 (0 ～ obj.h - 1)
+                r       : 赤成分 (0.0 ～ 255.0)
+                g       : 緑成分 (0.0 ～ 255.0)
+                b       : 青成分 (0.0 ～ 255.0)
+                a       : アルファ値 (省略時は 255.0)
+                例：obj.setpixel(10, 20, 255, 0, 0, 128)
+
+        ○obj.getpixeldata()
+                全ピクセルデータに一括アクセスするためのプロキシオブジェクトを返します。
+                ※ getpixel/setpixel と比較して高速にピクセルを操作できます。
+                ※ 初回呼び出し時に GPU→CPU への画像データ転送が発生します(処理負荷を伴います)。
+                戻り値  : PixelDataProxy オブジェクト
+                          .width  : 画像の横ピクセル数 (= obj.w)
+                          .height : 画像の縦ピクセル数 (= obj.h)
+                          :get(index)  : インデックス指定でチャンネル値を取得
+                          :set(index, value) : インデックス指定でチャンネル値を設定
+
+                インデックスの仕様:
+                    インデックスは 1 始まりです(Lua の慣習に準拠)。
+                    チャンネルの順序は R, G, B, A の繰り返しです。
+                    pixel(x, y) の R チャンネルのインデックス =
+                        (y * obj.w + x) * 4 + 1
+                    pixel(x, y) の G チャンネルのインデックス =
+                        (y * obj.w + x) * 4 + 2
+                    pixel(x, y) の B チャンネルのインデックス =
+                        (y * obj.w + x) * 4 + 3
+                    pixel(x, y) の A チャンネルのインデックス =
+                        (y * obj.w + x) * 4 + 4
+
+                    ※ アルファ(チャンネル4)を変更した場合は RGB も比率変換されます。
+                    ※ RGB チャンネルを変更した場合は premultiplied 変換が行われます。
+                    ※ 取得値は get(index) 同様ストレートアルファ相当です。
+
+                例：
+                    local pd = obj.getpixeldata()
+                    local idx = (10 * obj.w + 20) * 4 + 1  -- (x=20, y=10) の R チャンネル
+                    local r = pd:get(idx)
+                    pd:set(idx, 128)
+
+        ○obj.putpixeldata()
+                互換性のために定義された空実装関数です(no-op)。
+                ※ AviUtl のスクリプトでは getpixeldata/putpixeldata の組み合わせで使用しますが、
+                  このプラグインでは setpixel/set による変更が自動的に反映されるため、
+                  本関数を呼び出す必要はありません。
+
+
+
+- ymm4 テーブル -
+
+        YMM4固有のメタ情報を保持するテーブルです。全て ReadOnly です。
+
+        ymm4.group_index        : グループ制御内の現在のインデックス (0始まり)
+        ymm4.group_count        : グループ制御内の総アイテム数
+        ymm4.group_ratio        : グループ内の進行割合 (group_index / group_count)
+        ymm4.timeline_totalframe: タイムライン全体の総フレーム数
+        ymm4.timeline_totaltime : タイムライン全体の総時間(秒)
+        ymm4.time_ratio         : 現在の再生位置の割合 (0.0 ～ 1.0)
+        ymm4.is_saving          : 動画出力中であるかどうか (出力中のみ true)
+        ymm4.is_playing         : 再生中であるかどうか (再生中のみ true)
+        ymm4.is_paused          : 一時停止中であるかどうか (一時停止中のみ true)
+        ymm4.scene_id           : 現在のシーンを一意に識別する文字列 (Guid)
+
+
+- anim テーブル -
+
+        アニメーション計算に便利な純粋ユーティリティ関数・定数群です。
+
+        anim.tau                : 円周率の2倍 (math.pi * 2)
+        anim.e                  : ネイピア数 (math.exp(1))
+        anim.phi                : 黄金比 ((1 + math.sqrt(5)) / 2)
+        anim.sqrt2              : 2の平方根 (math.sqrt(2))
+        anim.lerp(a, b, t)      : a と b を t (0.0～1.0) で線形補間
+        anim.smoothstep(e0, e1, x): e0 と e1 の間をエルミート補間でスムーズに遷移
+        anim.smootherstep(e0, e1, x): e0 と e1 の間をより滑らかに(2次導関数まで連続)補間
+        anim.clamp(v, lo, hi)   : 値 v を lo ～ hi の範囲に収める
+        anim.map(v, a1, b1, a2, b2): a1～b1 の範囲の値 v を a2～b2 の範囲にマッピング
+        anim.norm(v, lo, hi)    : 値 v が lo ～ hi の範囲でどの割合(0.0～1.0)かを取得
+        anim.wrap(v, lo, hi)    : 値 v を lo ～ hi の範囲でループさせる
+        anim.pingpong(t, len)   : 0 ～ len の範囲を往復する値
+        anim.sign(v)            : 値 v の符号を取得 (正=1, 負=-1, ゼロ=0)
+        anim.oscillate(t, lo, hi, freq): freq の周波数で lo ～ hi を滑らかに往復(正弦波)
+        anim.triangle(t, freq)  : freq の周波数で 0.0 ～ 1.0 を往復する三角波
+        anim.square(t, freq)    : freq の周波数で 1.0 と 0.0 を切り替える矩形波
+        anim.duration(t, dur)   : 時間 dur に対する現在の割合(0.0～1.0, clampあり)
+        anim.delay(t, d)        : 時間 d 経過後から開始する時間 (0以下は0)
+        anim.ease_in(t)         : 2次イーズイン(加速)
+        anim.ease_out(t)        : 2次イーズアウト(減速)
+        anim.ease_in_out(t)     : 2次イーズイン・アウト(加速後減速)
+        anim.elastic(t)         : 弾むようなスプリングイージング
+        anim.back(t)            : 勢い余って行き過ぎてから戻るイージング
+        anim.step(edge, x)      : x が edge 以上なら 1.0、未満なら 0.0 を返す
+        anim.fract(v)           : 値 v の小数部分のみを取得
+        anim.bounce(t)          : バウンドするようなイージング
+        anim.hsv_to_rgb(h, s, v): HSV (色相0～360, 彩度0～1, 明度0～1) を RGB に変換
+        anim.rgb_to_hsv(r, g, b): RGB (0～255) を HSV に変換
+        anim.noise(x, y, z)     : 1次元～3次元の滑らかなパーリン/バリューノイズ (-1.0～1.0)
+        anim.rand(min, max, s)  : シード値 s に基づく安定した乱数を生成
+        anim.len(x, y)          : ベクトル (x, y) の長さ(ノルム)を取得
+        anim.dist(x1, y1, x2, y2): 2点 (x1, y1) と (x2, y2) の距離を取得
+        anim.dot(x1, y1, x2, y2): 2つのベクトル (x1, y1) と (x2, y2) の内積を取得
+        anim.normalize(x, y)    : ベクトル (x, y) を正規化して方向ベクトル(Tuple)を取得
+        anim.polar(r, a)        : 半径 r, 角度 a(度) から (x, y) の移動量(Tuple)を取得
+        anim.rotate(x, y, a)    : 座標 (x, y) を a(度) 回転させた座標(Tuple)を取得
+        anim.bezier(t, p0, p1, p2, p3): t (0.0～1.0) における3次ベジェ曲線の値を計算
+
+
+- 利用可能な標準ライブラリ -
+
+        math ライブラリ:
+            math.abs, math.ceil, math.cos, math.exp, math.floor,
+            math.fmod, math.huge, math.log, math.max, math.min,
+            math.modf, math.pi, math.random, math.randomseed,
+            math.sin, math.sqrt, math.tan, math.atan, math.atan2,
+            math.deg, math.rad, math.ldexp, math.frexp,
+            math.sinh, math.cosh, math.tanh, math.type,
+            math.tointeger, math.maxinteger, math.mininteger
+
+        string ライブラリ:
+            string.format, string.len, string.sub, string.upper,
+            string.lower, string.rep, string.reverse, string.find,
+            string.match, string.gmatch, string.gsub, string.byte,
+            string.char, string.dump, string.pack, string.unpack,
+            string.packsize
+
+        table ライブラリ:
+            table.insert, table.remove, table.sort,
+            table.concat, table.unpack, table.move
+
+        bit32 ライブラリ:
+            bit32.band, bit32.bor, bit32.bxor, bit32.bnot,
+            bit32.lshift, bit32.rshift, bit32.arshift,
+            bit32.extract, bit32.replace,
+            bit32.btest, bit32.countlz, bit32.countrz
+
+        基本関数:
+            type, tostring, tonumber, select, error, assert, print,
+            ipairs, pairs, next, unpack,
+            setmetatable, getmetatable, rawget, rawset, rawequal, rawlen,
+            pcall, xpcall
+
+
+- スクリプト例 -
+
+        ○フェードイン(デフォルトスクリプト)
+                obj.alpha = math.min(time * 255, 255)
+
+        ○フェードアウト
+                obj.alpha = math.max((obj.totalframe - obj.frame) / obj.framerate * 255, 0)
+
+        ○Track0 で透明度を制御
+                obj.alpha = obj.track0
+
+        ○時間に応じて回転
+                obj.rz = time * 90  -- 1秒で90度回転
+
+        ○ピクセルの赤成分を反転する
+                for y = 0, obj.h - 1 do
+                    for x = 0, obj.w - 1 do
+                        local r, g, b, a = obj.getpixel(x, y)
+                        obj.setpixel(x, y, 255 - r, g, b, a)
+                    end
+                end
+
+        ○getpixeldata を使ったグレースケール変換(高速)
+                local pd = obj.getpixeldata()
+                local w = pd.width
+                local h = pd.height
+                for y = 0, h - 1 do
+                    for x = 0, w - 1 do
+                        local base = (y * w + x) * 4
+                        local r = pd:get(base + 1)
+                        local g = pd:get(base + 2)
+                        local b = pd:get(base + 3)
+                        local a = pd:get(base + 4)
+                        local gray = r * 0.299 + g * 0.587 + b * 0.114
+                        pd:set(base + 1, gray)
+                        pd:set(base + 2, gray)
+                        pd:set(base + 3, gray)
+                    end
+                end
+
+        ○Track0 でズームを制御 (1.0 = 等倍)
+                obj.zoom = obj.zoom * (1 + obj.track0 / 100)
+
+
+- 非対応・制限事項 -
+
+        ×AviUtl2 の obj.effect(), obj.draw(), obj.drawpoly(), obj.load() 等には対応していません。
+        ×AviUtl2 の obj.rand(), obj.rand1(), obj.setfont(), obj.mes() 等には対応していません。
+        ×AviUtl2 の obj.setoption(), obj.getoption(), obj.getvalue(), obj.setanchor() 等には対応していません。
+        ×AviUtl2 の scene テーブルの scene.set(), scene.get() 等の関数には対応していません。
+          (scene.width と scene.height の読み取りのみ対応)
+        ×ファイルアクセス(require, dofile, io 等)には対応していません。
+        ×obj.z を変更した場合、描画には反映されます(ReadBack に含まれる)が、
+          3D 描画のサポートは限定的です。
+        ×スクリプトのタイムアウト(5秒)を超えた場合、実行は強制終了されます。
+          無限ループが発生しないよう実装上の注意が必要です。
+        ×AviUtl2 の --track@, --check@ 等のヘッダーディレクティブには対応していません。
+          パラメータは Track0 ～ Track3 のみ使用できます。

@@ -1,0 +1,413 @@
+﻿- حول تأثير نصوص Lua -
+
+        يستخدم تأثير الفيديو "نص Lua" في YukkuriMovieMaker4
+        لغة Lua لكتابة النصوص البرمجية.
+        يعتمد محرك النصوص على MoonSharp (متوافق مع Lua 5.2).
+
+        * هذا التأثير تطبيق مستقل ويختلف عن مواصفات نصوص AviUtl2.
+        * يختلف في مواصفاته عن ملفات نصوص AviUtl2 (*.anm2 وما شابه).
+        * نظراً لأن IsAviUtlSupported = false، لا يُدعم إخراج EXO لبرنامج AviUtl.
+
+
+- ملاحظات -
+
+        ○ محرك تنفيذ النصوص هو MoonSharp (متوافق مع Lua 5.2).
+        ○ المكتبات القياسية المتاحة محدودة بما يلي:
+            table, string, math, bit32
+            * io, os, debug, ffi, require وغيرها غير متاحة.
+        ○ مهلة النص البرمجي هي 5000 مللي ثانية (5 ثوانٍ).
+            عند انتهاء المهلة، يُنهى التنفيذ قسراً ويُعامل كخطأ.
+        ○ لا يمكن للنصوص الوصول إلى نظام الملفات (بما في ذلك require).
+        ○ استدعاء النصوص الخارجية من داخل النص البرمجي غير مدعوم.
+        ○ عمليات البكسل (getpixel/setpixel/getpixeldata) تصل إلى الصورة المدخلة الفعلية،
+            لذا تحدث نقل البيانات من GPU إلى CPU عند الوصول الأول فقط.
+            حذف هذه الاستدعاءات عند عدم الحاجة يسرّع المعالجة.
+
+
+- المعاملات -
+
+        يحتوي لوح التأثيرات على 4 أشرطة تتبع (تدعم الرسوم المتحركة) على النحو التالي.
+        يمكن الرجوع إلى كل قيمة في النص البرمجي عبر obj.track0 إلى obj.track3.
+
+        Track0 : المعامل 0 (الافتراضي: 0، النطاق: الحد الأدنى ~ الحد الأقصى)
+        Track1 : المعامل 1 (الافتراضي: 0، النطاق: الحد الأدنى ~ الحد الأقصى)
+        Track2 : المعامل 2 (الافتراضي: 0، النطاق: الحد الأدنى ~ الحد الأقصى)
+        Track3 : المعامل 3 (الافتراضي: 0، النطاق: الحد الأدنى ~ الحد الأقصى)
+
+        * كل شريط تتبع يدعم شرائح الرسوم المتحركة (مع الاستيفاء).
+        * يمكن استيراد/تصدير ملفات .lua من شريط أدوات محرر النصوص.
+
+
+- المتغيرات العامة -
+
+        يمكن الرجوع إلى المتغيرات التالية مباشرةً في النطاق العام للنص البرمجي.
+
+        time          : الوقت الحالي بالثواني نسبةً إلى الكائن [للقراءة فقط]
+                        * نفس قيمة obj.time.
+        frame         : رقم الإطار الحالي نسبةً إلى الكائن [للقراءة فقط]
+                        * نفس قيمة obj.frame.
+        totalframe    : إجمالي عدد إطارات الكائن [للقراءة فقط]
+                        * نفس قيمة obj.totalframe.
+        framerate     : معدل الإطارات (إطار/ثانية) [للقراءة فقط]
+                        * نفس قيمة obj.framerate.
+        timelineframe : رقم الإطار الحالي نسبةً إلى الجدول الزمني بأكمله [للقراءة فقط]
+                        * obj.frame هو إطار نسبي من بداية الكائن،
+                          بينما هذا إطار مطلق من بداية الجدول الزمني.
+        timelinetime  : الوقت الحالي بالثواني نسبةً إلى الجدول الزمني بأكمله [للقراءة فقط]
+        layer         : رقم الطبقة التي يوجد فيها الكائن [للقراءة فقط]
+                        * نفس قيمة obj.layer.
+        obj           : جدول معلومات الكائن (راجع «جدول obj» أدناه)
+        scene         : جدول معلومات المشهد (راجع «جدول scene» أدناه)
+        ymm4          : YMM4 specific meta-information table (see "ymm4 Table" below)
+        anim          : Animation utility table (see "anim Table" below)
+
+
+- جدول scene -
+
+        scene.width   : الدقة الأفقية (بكسل) للمشهد (المشروع) [للقراءة فقط]
+        scene.height  : الدقة الرأسية (بكسل) للمشهد (المشروع) [للقراءة فقط]
+
+
+- جدول obj - المتغيرات -
+
+        تحتفظ المتغيرات التالية بمعلومات الرسم الحالية للكائن.
+        * المتغيرات غير المحددة بـ «للقراءة فقط» يمكن تعديلها في النص البرمجي، وتنعكس القيم المعدّلة في الرسم.
+
+        ○ الإحداثيات والإزاحة
+        obj.x         : إحداثي X المرجعي للعرض [للقراءة فقط]
+                        * يعادل «إحداثي X المرجعي للعرض» في مواصفات AviUtl2.
+                        * التعديلات داخل النص البرمجي لا تُقرأ مجدداً وليس لها تأثير.
+                        * يُعيَّن داخلياً من DrawDescription.Draw.X؛
+                          تسري التغييرات بعد تنفيذ النص البرمجي.
+        obj.y         : إحداثي Y المرجعي للعرض [ما يعادل للقراءة فقط]
+                        * يُعيَّن داخلياً من DrawDescription.Draw.Y.
+        obj.z         : إحداثي Z المرجعي للعرض [ما يعادل للقراءة فقط]
+                        * يُعيَّن داخلياً من DrawDescription.Draw.Z.
+        obj.ox        : إزاحة المركز X (قابل للتعديل)
+                        * يُعيَّن داخلياً من DrawDescription.CenterPoint.X (inDesc).
+                        * يعادل «الإحداثي X النسبي من المرجع (obj.ox)» في AviUtl2،
+                          لكنه يُعامَل في هذا المكوِّن الإضافي كـ CenterPoint (إزاحة نقطة المركز).
+        obj.oy        : إزاحة المركز Y (قابل للتعديل)
+                        * يُعيَّن داخلياً من DrawDescription.CenterPoint.Y (inDesc).
+
+        ○ التكبير والتحويل
+        obj.zoom      : عامل التكبير (قابل للتعديل)
+                        * 1.0 هو المقياس الطبيعي (وليس 0.0)، متوافق مع AviUtl2.
+                        * يُحسب داخلياً كمتوسط ZoomX و ZoomY (zoomAvg).
+                        * في المخرجات يُوسَّع إلى تكبير X/Y الفردي كـ obj.zoom * (1 ± obj.aspect).
+        obj.aspect    : نسبة العرض إلى الارتفاع (قابل للتعديل)، النطاق: -1.0 ~ 1.0
+                        * القيم الموجبة تقلّص في اتجاه X؛ القيم السالبة في اتجاه Y.
+                        * يُحسب داخلياً كـ (ZoomX - ZoomY) / (ZoomX + ZoomY).
+        obj.sx        : Scale factor in X direction (writable) 1.0 = 100%
+                        * Precise independent scale control specific to YMM4.
+                        * Takes precedence over zoom/aspect modifications.
+        obj.sy        : Scale factor in Y direction (writable) 1.0 = 100%
+                        * Precise independent scale control specific to YMM4.
+                        * Takes precedence over zoom/aspect modifications.
+        obj.alpha     : العتامة (قابل للتعديل)، النطاق: 0.0 ~ 255.0
+                        * يستخدم AviUtl2 النطاق 0.0~1.0، لكن هذا المكوِّن يستخدم 0.0~255.0.
+                        * يُعيَّن داخلياً من DrawDescription.Opacity * 255.
+                        * يُقسم على 255 ويُعيَّد تطبيعه إلى 0.0~1.0 في المخرجات (مع Clamp).
+                        * النص البرمجي الافتراضي يضبط obj.alpha = math.min(time * 255, 255)،
+                          مما يوفر تطبيقاً افتراضياً للتلاشي التدريجي (fade-in).
+
+        ○ الدوران
+        obj.rx        : زاوية الدوران حول محور X (قابل للتعديل)، الوحدة: درجة (°)، 360.0 = دورة كاملة
+                        * يُعيَّن داخلياً من DrawDescription.Rotation.X.
+        obj.ry        : زاوية الدوران حول محور Y (قابل للتعديل)، الوحدة: درجة (°)، 360.0 = دورة كاملة
+                        * يُعيَّن داخلياً من DrawDescription.Rotation.Y.
+        obj.rz        : زاوية الدوران حول محور Z (قابل للتعديل)، الوحدة: درجة (°)، 360.0 = دورة كاملة
+                        * يُعيَّن داخلياً من DrawDescription.Rotation.Z.
+        obj.rxr       : Rotation angle around X axis in radians (writable)
+                        * Takes precedence if rx is also modified simultaneously.
+        obj.ryr       : Rotation angle around Y axis in radians (writable)
+                        * Takes precedence if ry is also modified simultaneously.
+        obj.rzr       : Rotation angle around Z axis in radians (writable)
+                        * Takes precedence if rz is also modified simultaneously.
+
+        ○ حجم الصورة
+        obj.w         : عرض الصورة المدخلة بالبكسل [للقراءة فقط]
+                        * داخلياً عدد صحيح مشتق من D2D GetImageLocalBounds.
+        obj.h         : ارتفاع الصورة المدخلة بالبكسل [للقراءة فقط]
+                        * داخلياً عدد صحيح مشتق من D2D GetImageLocalBounds.
+        obj.hw        : Half of the input image width (= obj.w / 2) [ReadOnly]
+        obj.hh        : Half of the input image height (= obj.h / 2) [ReadOnly]
+        obj.diagonal  : طول القطر للصورة المدخلة (= math.sqrt(w*w + h*h)) [ReadOnly]
+        obj.cx        : إحداثي X لمركز الصورة (= obj.w / 2) [للقراءة فقط]
+                        * إحداثي المركز المرجعي لعمليات البكسل.
+        obj.cy        : إحداثي Y لمركز الصورة (= obj.h / 2) [للقراءة فقط]
+
+        ○ الوقت والإطار
+        obj.time      : الوقت الحالي بالثواني نسبةً إلى الكائن [للقراءة فقط]
+                        * نفس قيمة المتغير العام time.
+                        * يُعيَّن داخلياً من EffectDescription.ItemPosition.Time.TotalSeconds.
+        obj.frame     : رقم الإطار الحالي نسبةً إلى الكائن [للقراءة فقط]
+                        * نفس قيمة المتغير العام frame.
+                        * يُعيَّن داخلياً من EffectDescription.ItemPosition.Frame.
+        obj.totalframe: إجمالي عدد إطارات الكائن [للقراءة فقط]
+                        * نفس قيمة المتغير العام totalframe.
+                        * يُعيَّن داخلياً من EffectDescription.ItemDuration.Frame.
+        obj.framerate : معدل الإطارات (إطار/ثانية) [للقراءة فقط]
+                        * نفس قيمة المتغير العام framerate.
+                        * يُعيَّن داخلياً من EffectDescription.FPS.
+
+        ○ أشرطة التتبع
+        obj.track0    : القيمة الحالية لـ Track0 في لوح التأثيرات [للقراءة فقط]
+                        * القيمة بعد استيفاء الرسوم المتحركة.
+        obj.track1    : القيمة الحالية لـ Track1 في لوح التأثيرات [للقراءة فقط]
+        obj.track2    : القيمة الحالية لـ Track2 في لوح التأثيرات [للقراءة فقط]
+        obj.track3    : القيمة الحالية لـ Track3 في لوح التأثيرات [للقراءة فقط]
+
+        ○ الطبقة
+        obj.layer     : رقم الطبقة التي يوجد فيها الكائن [للقراءة فقط]
+                        * نفس قيمة المتغير العام layer.
+                        * يُعيَّن داخلياً من EffectDescription.Layer.
+
+
+- جدول obj - تعديل المتغيرات وانعكاسها في الرسم -
+
+        بعد تنفيذ النص البرمجي، تُقرأ المتغيرات التالية فقط مجدداً في معلومات الرسم (تُطبَّق).
+
+        المتغيرات المُطبَّقة:
+            obj.x, obj.y, obj.z
+            obj.ox, obj.oy
+            obj.zoom, obj.aspect
+            obj.alpha
+            obj.rx, obj.ry, obj.rz
+
+        * obj.w, obj.h, obj.cx, obj.cy, obj.frame, obj.time,
+          obj.totalframe, obj.framerate, obj.track0 ~ obj.track3,
+          obj.layer للقراءة فقط ولن تنعكس التغييرات في الرسم.
+
+        صيغ حساب قيم المخرجات:
+            ZoomX = obj.zoom * (1.0 + obj.aspect)
+            ZoomY = obj.zoom * (1.0 - obj.aspect)
+            Opacity = Clamp(obj.alpha / 255.0, 0.0, 1.0)
+            Draw = (obj.x, obj.y, obj.z)
+            CenterPoint = (obj.ox, obj.oy)
+            Rotation = (obj.rx, obj.ry, obj.rz)
+
+
+- جدول obj - الدوال -
+
+        ○ obj.getpixel(x, y)
+                يسترد معلومات البكسل عند الإحداثيات المحددة.
+                * تحدث نقل بيانات الصورة من GPU إلى CPU عند الاستدعاء الأول (مع عبء معالجة).
+                * تستخدم إحداثيات البكسل الزاوية العلوية اليسرى للصورة كـ (0, 0)، مع اليمين والأسفل كقيم موجبة.
+                * القيم المُعادة هي معادلات ألفا مباشر محوَّلة من ألفا مُضاعف مسبقاً.
+                x      : إحداثي X (0 ~ obj.w - 1)
+                y      : إحداثي Y (0 ~ obj.h - 1)
+                يُعيد : 4 قيم r, g, b, a (إعادة متعددة القيم)
+                          r = مكوِّن الأحمر (0.0 ~ 255.0)
+                          g = مكوِّن الأخضر (0.0 ~ 255.0)
+                          b = مكوِّن الأزرق (0.0 ~ 255.0)
+                          a = قيمة ألفا (0.0 ~ 255.0)
+                          * يُعيد (0, 0, 0, 0) للإحداثيات خارج النطاق.
+                مثال: r, g, b, a = obj.getpixel(10, 20)
+
+        ○ obj.setpixel(x, y, r, g, b [, a])
+                يكتب فوق معلومات البكسل عند الإحداثيات المحددة.
+                * تُحدَّد بيانات البكسل تلقائياً كـ «معدَّلة» عند الاستدعاء،
+                  وتُخرج الصورة المعدَّلة بعد انتهاء النص البرمجي.
+                * يُخزَّن داخلياً بتنسيق ألفا مُضاعف مسبقاً (BGRA).
+                  يُجرى تحويل premultiplied عند setpixel.
+                x      : إحداثي X (0 ~ obj.w - 1)
+                y      : إحداثي Y (0 ~ obj.h - 1)
+                r      : مكوِّن الأحمر (0.0 ~ 255.0)
+                g      : مكوِّن الأخضر (0.0 ~ 255.0)
+                b      : مكوِّن الأزرق (0.0 ~ 255.0)
+                a      : قيمة ألفا (الافتراضي: 255.0)
+                مثال: obj.setpixel(10, 20, 255, 0, 0, 128)
+
+        ○ obj.getpixeldata()
+                يُعيد كائن وكيل للوصول المجمَّع إلى جميع بيانات البكسل.
+                * معالجة أسرع للبكسل مقارنةً بـ getpixel/setpixel.
+                * تحدث نقل بيانات الصورة من GPU إلى CPU عند الاستدعاء الأول (مع عبء معالجة).
+                يُعيد : كائن PixelDataProxy
+                          .width  : عرض الصورة بالبكسل (= obj.w)
+                          .height : ارتفاع الصورة بالبكسل (= obj.h)
+                          :get(index)        : الحصول على قيمة القناة بالفهرس
+                          :set(index, value) : تعيين قيمة القناة بالفهرس
+
+                مواصفات الفهرس:
+                    الفهارس تبدأ من 1 (اتباعاً لتقليد Lua).
+                    ترتيب القنوات هو R, G, B, A متكرراً.
+                    فهرس قناة R للبكسل pixel(x, y) =
+                        (y * obj.w + x) * 4 + 1
+                    فهرس قناة G للبكسل pixel(x, y) =
+                        (y * obj.w + x) * 4 + 2
+                    فهرس قناة B للبكسل pixel(x, y) =
+                        (y * obj.w + x) * 4 + 3
+                    فهرس قناة A للبكسل pixel(x, y) =
+                        (y * obj.w + x) * 4 + 4
+
+                    * تعديل ألفا (القناة 4) سيُحوِّل RGB أيضاً بالتناسب.
+                    * تعديل قنوات RGB سيُطبِّق تحويل premultiplied.
+                    * القيم المُسترجَعة هي معادلات ألفا مباشر، مثل get(index).
+
+                مثال:
+                    local pd = obj.getpixeldata()
+                    local idx = (10 * obj.w + 20) * 4 + 1  -- قناة R لـ (x=20, y=10)
+                    local r = pd:get(idx)
+                    pd:set(idx, 128)
+
+        ○ obj.putpixeldata()
+                دالة فارغة (بلا عملية) مُعرَّفة للتوافق.
+                * تُستخدم getpixeldata/putpixeldata معاً في نصوص AviUtl،
+                  لكن في هذا المكوِّن الإضافي تنعكس التغييرات عبر setpixel/set تلقائياً،
+                  لذا لا داعي لاستدعاء هذه الدالة.
+
+
+
+- ymm4 Table -
+
+        Table holding YMM4-specific meta-information. All values are ReadOnly.
+
+        ymm4.group_index        : Current item index within a group control (0-based)
+        ymm4.group_count        : Total number of items within a group control
+        ymm4.group_ratio        : Progress ratio within the group (group_index / group_count)
+        ymm4.timeline_totalframe: Total number of frames for the entire timeline
+        ymm4.timeline_totaltime : Total time in seconds for the entire timeline
+        ymm4.time_ratio         : Current playback position ratio (0.0 ~ 1.0)
+        ymm4.is_saving          : Whether video is currently being exported (true only during export)
+        ymm4.is_playing         : Whether the timeline is currently playing (true only during playback)
+        ymm4.is_paused          : Whether the timeline is currently paused (true only when paused)
+        ymm4.scene_id           : Unique ID (Guid string) of the current scene
+
+
+- anim Table -
+
+        Pure utility functions and constants useful for animation calculations.
+
+        anim.tau                : 2 * Pi (math.pi * 2)
+        anim.e                  : العدد النيبيري (math.exp(1))
+        anim.phi                : النسبة الذهبية ((1 + math.sqrt(5)) / 2)
+        anim.sqrt2              : الجذر التربيعي لـ 2 (math.sqrt(2))
+        anim.lerp(a, b, t)      : Linear interpolation between a and b by t (0.0 ~ 1.0)
+        anim.smoothstep(e0, e1, x): Smooth Hermite interpolation between e0 and e1
+        anim.smootherstep(e0, e1, x): استيفاء هيرميت أكثر سلاسة بين e0 و e1 (مستمر حتى المشتقة الثانية)
+        anim.clamp(v, lo, hi)   : Clamps value v between lo and hi
+        anim.map(v, a1, b1, a2, b2): Maps value v from range a1~b1 to range a2~b2
+        anim.norm(v, lo, hi)    : Gets the normalized ratio (0.0 ~ 1.0) of v within lo~hi
+        anim.wrap(v, lo, hi)    : Wraps value v to loop within the range lo~hi
+        anim.pingpong(t, len)   : Value that bounces back and forth between 0 and len
+        anim.sign(v)            : Gets the sign of v (1 for positive, -1 for negative, 0 for zero)
+        anim.oscillate(t, lo, hi, freq): Smoothly oscillates between lo and hi at the given freq (sine wave)
+        anim.triangle(t, freq)  : Triangle wave oscillating between 0.0 and 1.0 at the given freq
+        anim.square(t, freq)    : Square wave switching between 1.0 and 0.0 at the given freq
+        anim.duration(t, dur)   : Current ratio over duration dur (0.0 ~ 1.0, clamped)
+        anim.delay(t, d)        : Time starting after delay d (0 if negative)
+        anim.ease_in(t)         : Quadratic ease-in (acceleration)
+        anim.ease_out(t)        : Quadratic ease-out (deceleration)
+        anim.ease_in_out(t)     : تخفيف الدخول والخروج التربيعي (تسارع ثم تباطؤ)
+        anim.elastic(t)         : Bouncy spring easing
+        anim.back(t)            : Easing that slightly overshoots before returning
+        anim.step(edge, x)      : Returns 1.0 if x >= edge, otherwise 0.0
+        anim.fract(v)           : Gets only the fractional part of v
+        anim.bounce(t)          : Bouncing ease effect
+        anim.hsv_to_rgb(h, s, v): Converts HSV (Hue 0~360, Saturation 0~1, Value 0~1) to RGB (0~255)
+        anim.rgb_to_hsv(r, g, b): Converts RGB (0~255) to HSV
+        anim.noise(x, y, z)     : 1D to 3D continuous smooth noise (-1.0 ~ 1.0)
+        anim.rand(min, max, s)  : Stable random value based on seed `s`
+        anim.len(x, y)          : الحصول على طول (معيار) المتجه (x, y)
+        anim.dist(x1, y1, x2, y2): الحصول على المسافة بين نقطتين (x1, y1) و (x2, y2)
+        anim.dot(x1, y1, x2, y2): الحصول على حاصل الضرب النقطي لمتجهين (x1, y1) و (x2, y2)
+        anim.normalize(x, y)    : تطبيع المتجه (x, y) وإرجاع متجه الاتجاه (Tuple)
+        anim.polar(r, a)        : Converts polar coordinates (radius, angle) to (x, y) tuple
+        anim.rotate(x, y, a)    : Rotates 2D point (x, y) by angle `a` (degrees) returning (x, y) tuple
+        anim.bezier(t, p0, p1, p2, p3): Evaluates cubic bezier curve at `t` (0.0~1.0)
+
+
+- المكتبات القياسية المتاحة -
+
+        مكتبة math:
+            math.abs, math.ceil, math.cos, math.exp, math.floor,
+            math.fmod, math.huge, math.log, math.max, math.min,
+            math.modf, math.pi, math.random, math.randomseed,
+            math.sin, math.sqrt, math.tan, math.atan, math.atan2,
+            math.deg, math.rad, math.ldexp, math.frexp,
+            math.sinh, math.cosh, math.tanh, math.type,
+            math.tointeger, math.maxinteger, math.mininteger
+
+        مكتبة string:
+            string.format, string.len, string.sub, string.upper,
+            string.lower, string.rep, string.reverse, string.find,
+            string.match, string.gmatch, string.gsub, string.byte,
+            string.char, string.dump, string.pack, string.unpack,
+            string.packsize
+
+        مكتبة table:
+            table.insert, table.remove, table.sort,
+            table.concat, table.unpack, table.move
+
+        مكتبة bit32:
+            bit32.band, bit32.bor, bit32.bxor, bit32.bnot,
+            bit32.lshift, bit32.rshift, bit32.arshift,
+            bit32.extract, bit32.replace,
+            bit32.btest, bit32.countlz, bit32.countrz
+
+        الدوال الأساسية:
+            type, tostring, tonumber, select, error, assert, print,
+            ipairs, pairs, next, unpack,
+            setmetatable, getmetatable, rawget, rawset, rawequal, rawlen,
+            pcall, xpcall
+
+
+- أمثلة على النصوص البرمجية -
+
+        ○ تلاشٍ تدريجي للظهور - fade-in (النص الافتراضي)
+                obj.alpha = math.min(time * 255, 255)
+
+        ○ تلاشٍ تدريجي للاختفاء - fade-out
+                obj.alpha = math.max((obj.totalframe - obj.frame) / obj.framerate * 255, 0)
+
+        ○ التحكم في العتامة بـ Track0
+                obj.alpha = obj.track0
+
+        ○ الدوران مع مرور الوقت
+                obj.rz = time * 90  -- 90 درجة في الثانية
+
+        ○ عكس المكوِّن الأحمر للبكسلات
+                for y = 0, obj.h - 1 do
+                    for x = 0, obj.w - 1 do
+                        local r, g, b, a = obj.getpixel(x, y)
+                        obj.setpixel(x, y, 255 - r, g, b, a)
+                    end
+                end
+
+        ○ تحويل إلى تدرج الرمادي باستخدام getpixeldata (سريع)
+                local pd = obj.getpixeldata()
+                local w = pd.width
+                local h = pd.height
+                for y = 0, h - 1 do
+                    for x = 0, w - 1 do
+                        local base = (y * w + x) * 4
+                        local r = pd:get(base + 1)
+                        local g = pd:get(base + 2)
+                        local b = pd:get(base + 3)
+                        local a = pd:get(base + 4)
+                        local gray = r * 0.299 + g * 0.587 + b * 0.114
+                        pd:set(base + 1, gray)
+                        pd:set(base + 2, gray)
+                        pd:set(base + 3, gray)
+                    end
+                end
+
+        ○ التحكم في التكبير بـ Track0 (1.0 = المقياس الطبيعي)
+                obj.zoom = obj.zoom * (1 + obj.track0 / 100)
+
+
+- الميزات غير المدعومة / القيود -
+
+        × obj.effect()، obj.draw()، obj.drawpoly()، obj.load() وما شابه من AviUtl2 غير مدعومة.
+        × obj.rand()، obj.rand1()، obj.setfont()، obj.mes() وما شابه من AviUtl2 غير مدعومة.
+        × obj.setoption()، obj.getoption()، obj.getvalue()، obj.setanchor() وما شابه من AviUtl2 غير مدعومة.
+        × الدوال مثل scene.set() و scene.get() في جدول scene الخاص بـ AviUtl2 غير مدعومة.
+          (يمكن قراءة scene.width و scene.height فقط)
+        × الوصول إلى الملفات (require, dofile, io وما شابه) غير مدعوم.
+        × تعديل obj.z ينعكس في الرسم (مضمَّن في ReadBack)،
+          لكن دعم الرسم ثلاثي الأبعاد محدود.
+        × إذا تجاوز النص البرمجي مهلة الانتهاء (5 ثوانٍ)، يُنهى التنفيذ قسراً.
+          يجب الانتباه في التطبيق لتجنب الحلقات اللانهائية.
+        × توجيهات الترويسة من AviUtl2 مثل --track@ و --check@ غير مدعومة.
+          يمكن استخدام Track0 ~ Track3 فقط كمعاملات.

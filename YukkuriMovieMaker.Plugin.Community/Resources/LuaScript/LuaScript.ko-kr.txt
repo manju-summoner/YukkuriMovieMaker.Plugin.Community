@@ -1,0 +1,413 @@
+﻿- Lua 스크립트 이펙트에 대하여 -
+
+        YukkuriMovieMaker4의 「Lua 스크립트」 영상 이펙트에서
+        사용 가능한 스크립트에는 Lua 언어를 사용합니다.
+        스크립트 엔진으로는 MoonSharp (Lua 5.2 호환)이 채용되어 있습니다.
+
+        ※ 이 이펙트는 AviUtl2의 스크립트 사양과는 다른 독자적인 구현입니다.
+        ※ AviUtl2의 스크립트 파일(*.anm2 등)과는 별도의 사양입니다.
+        ※ IsAviUtlSupported = false이므로 AviUtl용 EXO 출력은 지원하지 않습니다.
+
+
+- 주의 사항 -
+
+        ○ 스크립트 실행 엔진은 MoonSharp (Lua 5.2 호환)입니다.
+        ○ 사용 가능한 표준 라이브러리는 다음으로 제한됩니다.
+            table, string, math, bit32
+            ※ io, os, debug, ffi, require 등은 사용할 수 없습니다.
+        ○ 스크립트 타임아웃은 5000ms (5초)입니다.
+            타임아웃 시 실행이 강제 종료되며 오류로 처리됩니다.
+        ○ 스크립트에서 파일 시스템에 접근할 수 없습니다 (require 포함).
+        ○ 스크립트 내부에서 외부 스크립트를 호출하는 것은 지원하지 않습니다.
+        ○ 픽셀 조작(getpixel/setpixel/getpixeldata)은 실제 입력 이미지에
+            접근하므로 최초 접근 시에만 GPU→CPU로의 데이터 전송이
+            발생합니다. 필요 없는 경우 호출을 생략하면 처리를 빠르게 할 수 있습니다.
+
+
+- 파라미터 -
+
+        이펙트 패널에는 다음 4개의 트랙바(애니메이션 지원)가 있습니다.
+        각 값은 스크립트 내에서 obj.track0 ～ obj.track3으로 참조할 수 있습니다.
+
+        Track0 : 파라미터 0 (기본값: 0, 범위: 최솟값 ～ 최댓값)
+        Track1 : 파라미터 1 (기본값: 0, 범위: 최솟값 ～ 최댓값)
+        Track2 : 파라미터 2 (기본값: 0, 범위: 최솟값 ～ 최댓값)
+        Track3 : 파라미터 3 (기본값: 0, 범위: 최솟값 ～ 최댓값)
+
+        ※ 각 트랙바는 애니메이션 슬라이더를 지원합니다(보간 있음).
+        ※ 스크립트 편집기의 툴바에서 .lua 파일을 가져오기/내보내기할 수 있습니다.
+
+
+- 전역 변수 -
+
+        다음 변수는 스크립트의 전역 범위에서 직접 참조할 수 있습니다.
+
+        time          : 오브젝트 기준 현재 시간(초) [읽기 전용]
+                        ※ obj.time과 동일한 값입니다.
+        frame         : 오브젝트 기준 현재 프레임 번호 [읽기 전용]
+                        ※ obj.frame과 동일한 값입니다.
+        totalframe    : 오브젝트의 총 프레임 수 [읽기 전용]
+                        ※ obj.totalframe과 동일한 값입니다.
+        framerate     : 프레임 레이트(fps) [읽기 전용]
+                        ※ obj.framerate와 동일한 값입니다.
+        timelineframe : 타임라인 전체 기준 현재 프레임 번호 [읽기 전용]
+                        ※ obj.frame은 오브젝트 시작 지점으로부터의 상대 프레임이지만,
+                          이 값은 타임라인 시작 지점으로부터의 절대 프레임입니다.
+        timelinetime  : 타임라인 전체 기준 현재 시간(초) [읽기 전용]
+        layer         : 오브젝트가 배치된 레이어 번호 [읽기 전용]
+                        ※ obj.layer와 동일한 값입니다.
+        obj           : 오브젝트 정보 테이블 (아래「obj 테이블」참조)
+        scene         : 씬 정보 테이블 (아래「scene 테이블」참조)
+        ymm4          : YMM4 고유 메타 정보 테이블 (아래 'ymm4 테이블' 참조)
+        anim          : 애니메이션용 유틸리티 테이블 (아래 'anim 테이블' 참조)
+
+
+- scene 테이블 -
+
+        scene.width   : 씬(프로젝트)의 가로 해상도(픽셀) [읽기 전용]
+        scene.height  : 씬(프로젝트)의 세로 해상도(픽셀) [읽기 전용]
+
+
+- obj 테이블 - 변수 -
+
+        다음 변수는 오브젝트의 현재 렌더링 정보를 보유합니다.
+        ※ 읽기 전용으로 표시되지 않은 것은 스크립트 내에서 변경 가능하며, 변경된 값이 렌더링에 반영됩니다.
+
+        ○ 좌표·오프셋
+        obj.x         : 표시 기준 좌표 X [읽기 전용]
+                        ※ AviUtl2 사양의「표시 기준 좌표 X」에 해당합니다.
+                        ※ 스크립트 내에서 변경해도 읽기 복원이 이루어지지 않아 무효입니다.
+                        ※ 구현 상 DrawDescription.Draw.X에서 설정되며,
+                          스크립트 실행 후 변경 내용이 반영됩니다.
+        obj.y         : 표시 기준 좌표 Y [읽기 전용 상당]
+                        ※ 구현 상 DrawDescription.Draw.Y에서 설정됩니다.
+        obj.z         : 표시 기준 좌표 Z [읽기 전용 상당]
+                        ※ 구현 상 DrawDescription.Draw.Z에서 설정됩니다.
+        obj.ox        : 중심 오프셋 X (변경 가능)
+                        ※ 구현 상 DrawDescription.CenterPoint.X (inDesc)에서 설정됩니다.
+                        ※ AviUtl2 사양의「기준 좌표로부터의 상대 좌표 X(obj.ox)」에 해당하지만,
+                          이 플러그인에서는 CenterPoint(중심점 오프셋)로 처리됩니다.
+        obj.oy        : 중심 오프셋 Y (변경 가능)
+                        ※ 구현 상 DrawDescription.CenterPoint.Y (inDesc)에서 설정됩니다.
+
+        ○ 확대율·변형
+        obj.zoom      : 확대율(변경 가능)
+                        ※ 0.0이 등배가 아니라 1.0이 등배입니다(AviUtl2 호환).
+                        ※ 구현 상 ZoomX와 ZoomY의 평균값(zoomAvg)으로 산출됩니다.
+                        ※ 출력 시 obj.zoom * (1 ± obj.aspect)로 X/Y 각각의 Zoom으로 전개됩니다.
+        obj.aspect    : 종횡비(변경 가능) 범위: -1.0 ～ 1.0
+                        ※ 양수 값은 X 방향으로 축소, 음수 값은 Y 방향으로 축소.
+                        ※ 구현 상 (ZoomX - ZoomY) / (ZoomX + ZoomY)로 산출됩니다.
+        obj.sx        : X 방향 확대율 (변경 가능) 1.0이 100%
+                        ※ YMM4 고유의 정밀한 독립 스케일 제어입니다.
+                        ※ zoom/aspect 변경보다 우선하여 반영됩니다.
+        obj.sy        : Y 방향 확대율 (변경 가능) 1.0이 100%
+                        ※ YMM4 고유의 정밀한 독립 스케일 제어입니다.
+                        ※ zoom/aspect 변경보다 우선하여 반영됩니다.
+        obj.alpha     : 불투명도(변경 가능) 범위: 0.0 ～ 255.0
+                        ※ AviUtl2에서는 0.0～1.0이지만, 이 플러그인에서는 0.0～255.0입니다.
+                        ※ 구현 상 DrawDescription.Opacity * 255에서 설정됩니다.
+                        ※ 출력 시 255로 나누어 0.0～1.0으로 정규화됩니다(Clamp 있음).
+                        ※ 기본 스크립트에서는 obj.alpha = math.min(time * 255, 255)가
+                          설정되어 있으며, 페이드인의 기본 구현으로 되어 있습니다.
+
+        ○ 회전
+        obj.rx        : X 축 회전 각도(변경 가능) 단위: 도(°), 360.0에서 한 바퀴
+                        ※ 구현 상 DrawDescription.Rotation.X에서 설정됩니다.
+        obj.ry        : Y 축 회전 각도(변경 가능) 단위: 도(°), 360.0에서 한 바퀴
+                        ※ 구현 상 DrawDescription.Rotation.Y에서 설정됩니다.
+        obj.rz        : Z 축 회전 각도(변경 가능) 단위: 도(°), 360.0에서 한 바퀴
+                        ※ 구현 상 DrawDescription.Rotation.Z에서 설정됩니다.
+        obj.rxr       : X축 회전 각도(라디안) (변경 가능)
+                        ※ rx와 동시에 변경된 경우 이것이 우선 반영됩니다.
+        obj.ryr       : Y축 회전 각도(라디안) (변경 가능)
+                        ※ ry와 동시에 변경된 경우 이것이 우선 반영됩니다.
+        obj.rzr       : Z축 회전 각도(라디안) (변경 가능)
+                        ※ rz와 동시에 변경된 경우 이것이 우선 반영됩니다.
+
+        ○ 이미지 크기
+        obj.w         : 입력 이미지의 가로 픽셀 수 [읽기 전용]
+                        ※ 구현 상 D2D의 GetImageLocalBounds에서 산출된 정수값입니다.
+        obj.h         : 입력 이미지의 세로 픽셀 수 [읽기 전용]
+                        ※ 구현 상 D2D의 GetImageLocalBounds에서 산출된 정수값입니다.
+        obj.hw        : 입력 이미지 가로 픽셀 수의 절반 (= obj.w / 2) [ReadOnly]
+        obj.hh        : 입력 이미지 세로 픽셀 수의 절반 (= obj.h / 2) [ReadOnly]
+        obj.diagonal  : 입력 이미지의 대각선 길이 (= math.sqrt(w*w + h*h)) [ReadOnly]
+        obj.cx        : 이미지의 중심 X 좌표 (= obj.w / 2) [읽기 전용]
+                        ※ 픽셀 조작에서 중심 좌표의 참조값입니다.
+        obj.cy        : 이미지의 중심 Y 좌표 (= obj.h / 2) [읽기 전용]
+
+        ○ 시간·프레임
+        obj.time      : 오브젝트 기준 현재 시간(초) [읽기 전용]
+                        ※ 전역 변수 time과 동일한 값입니다.
+                        ※ 구현 상 EffectDescription.ItemPosition.Time.TotalSeconds에서 설정됩니다.
+        obj.frame     : 오브젝트 기준 현재 프레임 번호 [읽기 전용]
+                        ※ 전역 변수 frame과 동일한 값입니다.
+                        ※ 구현 상 EffectDescription.ItemPosition.Frame에서 설정됩니다.
+        obj.totalframe: 오브젝트의 총 프레임 수 [읽기 전용]
+                        ※ 전역 변수 totalframe과 동일한 값입니다.
+                        ※ 구현 상 EffectDescription.ItemDuration.Frame에서 설정됩니다.
+        obj.framerate : 프레임 레이트(fps) [읽기 전용]
+                        ※ 전역 변수 framerate와 동일한 값입니다.
+                        ※ 구현 상 EffectDescription.FPS에서 설정됩니다.
+
+        ○ 트랙바
+        obj.track0    : 이펙트 패널의 Track0 현재값 [읽기 전용]
+                        ※ 애니메이션 보간 후의 값입니다.
+        obj.track1    : 이펙트 패널의 Track1 현재값 [읽기 전용]
+        obj.track2    : 이펙트 패널의 Track2 현재값 [읽기 전용]
+        obj.track3    : 이펙트 패널의 Track3 현재값 [읽기 전용]
+
+        ○ 레이어
+        obj.layer     : 오브젝트가 배치된 레이어 번호 [읽기 전용]
+                        ※ 전역 변수 layer와 동일한 값입니다.
+                        ※ 구현 상 EffectDescription.Layer에서 설정됩니다.
+
+
+- obj 테이블 - 변수의 변경과 렌더링 반영 -
+
+        스크립트 실행 후, 다음 변수만이 렌더링 정보로 읽기 복원됩니다(반영됩니다).
+
+        반영되는 변수:
+            obj.x, obj.y, obj.z
+            obj.ox, obj.oy
+            obj.zoom, obj.aspect
+            obj.alpha
+            obj.rx, obj.ry, obj.rz
+
+        ※ obj.w, obj.h, obj.cx, obj.cy, obj.frame, obj.time,
+           obj.totalframe, obj.framerate, obj.track0 ～ obj.track3,
+           obj.layer는 읽기 전용이며, 변경해도 렌더링에 반영되지 않습니다.
+
+        출력값 산출 공식:
+            ZoomX = obj.zoom * (1.0 + obj.aspect)
+            ZoomY = obj.zoom * (1.0 - obj.aspect)
+            Opacity = Clamp(obj.alpha / 255.0, 0.0, 1.0)
+            Draw = (obj.x, obj.y, obj.z)
+            CenterPoint = (obj.ox, obj.oy)
+            Rotation = (obj.rx, obj.ry, obj.rz)
+
+
+- obj 테이블 - 함수 -
+
+        ○ obj.getpixel(x, y)
+                지정 좌표의 픽셀 정보를 취득합니다.
+                ※ 최초 호출 시 GPU→CPU로의 이미지 데이터 전송이 발생합니다(처리 부하 수반).
+                ※ 픽셀 좌표는 이미지의 좌상단을 (0, 0)으로 하며, 오른쪽·아래 방향이 양수입니다.
+                ※ 취득값은 프리멀티플라이드 알파를 역변환한 스트레이트 알파 상당의 값입니다.
+                x       : X 좌표 (0 ～ obj.w - 1)
+                y       : Y 좌표 (0 ～ obj.h - 1)
+                반환값  : r, g, b, a의 4개 값(다중 반환)
+                          r = 빨간색 성분 (0.0 ～ 255.0)
+                          g = 초록색 성분 (0.0 ～ 255.0)
+                          b = 파란색 성분 (0.0 ～ 255.0)
+                          a = 알파값 (0.0 ～ 255.0)
+                          ※ 범위 밖의 좌표를 지정하면 (0, 0, 0, 0)을 반환합니다.
+                예: r, g, b, a = obj.getpixel(10, 20)
+
+        ○ obj.setpixel(x, y, r, g, b [, a])
+                지정 좌표의 픽셀 정보를 덮어씁니다.
+                ※ 호출 시 자동으로 픽셀 데이터가「변경됨」으로 표시되며,
+                  스크립트 종료 후 변경된 이미지가 출력됩니다.
+                ※ 내부에서는 프리멀티플라이드 알파 형식(BGRA)으로 보유합니다.
+                   setpixel 시에 premultiplied 변환이 이루어집니다.
+                x       : X 좌표 (0 ～ obj.w - 1)
+                y       : Y 좌표 (0 ～ obj.h - 1)
+                r       : 빨간색 성분 (0.0 ～ 255.0)
+                g       : 초록색 성분 (0.0 ～ 255.0)
+                b       : 파란색 성분 (0.0 ～ 255.0)
+                a       : 알파값 (생략 시 255.0)
+                예: obj.setpixel(10, 20, 255, 0, 0, 128)
+
+        ○ obj.getpixeldata()
+                전체 픽셀 데이터에 일괄 접근하기 위한 프록시 오브젝트를 반환합니다.
+                ※ getpixel/setpixel에 비해 빠르게 픽셀을 조작할 수 있습니다.
+                ※ 최초 호출 시 GPU→CPU로의 이미지 데이터 전송이 발생합니다(처리 부하 수반).
+                반환값  : PixelDataProxy 오브젝트
+                          .width  : 이미지의 가로 픽셀 수 (= obj.w)
+                          .height : 이미지의 세로 픽셀 수 (= obj.h)
+                          :get(index)        : 인덱스 지정으로 채널값 취득
+                          :set(index, value) : 인덱스 지정으로 채널값 설정
+
+                인덱스 사양:
+                    인덱스는 1부터 시작합니다(Lua 관례에 따름).
+                    채널 순서는 R, G, B, A의 반복입니다.
+                    pixel(x, y)의 R 채널 인덱스 =
+                        (y * obj.w + x) * 4 + 1
+                    pixel(x, y)의 G 채널 인덱스 =
+                        (y * obj.w + x) * 4 + 2
+                    pixel(x, y)의 B 채널 인덱스 =
+                        (y * obj.w + x) * 4 + 3
+                    pixel(x, y)의 A 채널 인덱스 =
+                        (y * obj.w + x) * 4 + 4
+
+                    ※ 알파(채널 4)를 변경하면 RGB도 비율 변환됩니다.
+                    ※ RGB 채널을 변경하면 premultiplied 변환이 이루어집니다.
+                    ※ 취득값은 get(index)와 마찬가지로 스트레이트 알파 상당입니다.
+
+                예:
+                    local pd = obj.getpixeldata()
+                    local idx = (10 * obj.w + 20) * 4 + 1  -- (x=20, y=10)의 R 채널
+                    local r = pd:get(idx)
+                    pd:set(idx, 128)
+
+        ○ obj.putpixeldata()
+                호환성을 위해 정의된 빈 구현 함수입니다(no-op).
+                ※ AviUtl 스크립트에서는 getpixeldata/putpixeldata 조합으로 사용하지만,
+                  이 플러그인에서는 setpixel/set에 의한 변경이 자동으로 반영되므로,
+                  이 함수를 호출할 필요가 없습니다.
+
+
+
+- ymm4 테이블 -
+
+        YMM4 고유의 메타 정보를 유지하는 테이블입니다. 모두 ReadOnly입니다.
+
+        ymm4.group_index        : 그룹 제어 내 현재 인덱스 (0부터 시작)
+        ymm4.group_count        : 그룹 제어 내 총 아이템 수
+        ymm4.group_ratio        : 그룹 내 진행 비율 (group_index / group_count)
+        ymm4.timeline_totalframe: 타임라인 전체의 총 프레임 수
+        ymm4.timeline_totaltime : 타임라인 전체의 총 시간(초)
+        ymm4.time_ratio         : 현재 재생 위치 비율 (0.0 ~ 1.0)
+        ymm4.is_saving          : 동영상 출력 중인지 여부 (출력 중에만 true)
+        ymm4.is_playing         : 재생 중인지 여부 (재생 중에만 true)
+        ymm4.is_paused          : 일시 정지 중인지 여부 (일시 정지 중에만 true)
+        ymm4.scene_id           : 현재 씬을 고유하게 식별하는 문자열 (Guid)
+
+
+- anim 테이블 -
+
+        애니메이션 계산에 편리한 순수 유틸리티 함수/상수 그룹입니다.
+
+        anim.tau                : 원주율의 2배 (math.pi * 2)
+        anim.e                  : 오일러 수 (math.exp(1))
+        anim.phi                : 황금비 ((1 + math.sqrt(5)) / 2)
+        anim.sqrt2              : 2의 제곱근 (math.sqrt(2))
+        anim.lerp(a, b, t)      : a와 b를 t(0.0~1.0)로 선형 보간
+        anim.smoothstep(e0, e1, x): e0과 e1 사이를 매끄럽게 보간
+        anim.smootherstep(e0, e1, x): e0과 e1 사이의 더 부드러운 에르미트 보간 (2차 도함수까지 연속)
+        anim.clamp(v, lo, hi)   : 값 v를 lo~hi 범위로 제한
+        anim.map(v, a1, b1, a2, b2): a1~b1 범위의 값 v를 a2~b2 범위로 매핑
+        anim.norm(v, lo, hi)    : 값 v가 lo~hi 범위에서 차지하는 비율(0.0~1.0) 반환
+        anim.wrap(v, lo, hi)    : 값 v를 lo~hi 범위 내에서 루프시킴
+        anim.pingpong(t, len)   : 0~len 범위를 왕복하는 값
+        anim.sign(v)            : 값 v의 부호 반환 (양수=1, 음수=-1, 0=0)
+        anim.oscillate(t, lo, hi, freq): freq 주파수로 lo~hi를 매끄럽게 왕복(사인파)
+        anim.triangle(t, freq)  : freq 주파수로 0.0~1.0을 왕복하는 삼각파
+        anim.square(t, freq)    : freq 주파수로 1.0과 0.0을 전환하는 구형파
+        anim.duration(t, dur)   : 시간 dur에 대한 현재 비율(0.0~1.0, clamp 적용)
+        anim.delay(t, d)        : 시간 d 경과 후 시작되는 시간 (0 이하는 0)
+        anim.ease_in(t)         : 2차 이즈 인(가속)
+        anim.ease_out(t)        : 2차 이즈 아웃(감속)
+        anim.ease_in_out(t)     : 2차 이즈 인/아웃 (가속 후 감속)
+        anim.elastic(t)         : 튕기는 듯한 스프링 이징
+        anim.back(t)            : 범위를 살짝 넘었다가 돌아오는 이징
+        anim.step(edge, x)      : x가 edge 이상이면 1.0, 미만이면 0.0 반환
+        anim.fract(v)           : 값 v의 소수 부분만 반환
+        anim.bounce(t)          : 바운스 이징
+        anim.hsv_to_rgb(h, s, v): HSV (색상 0~360, 채도 0~1, 명도 0~1)를 RGB로 변환
+        anim.rgb_to_hsv(r, g, b): RGB (0~255)를 HSV로 변환
+        anim.noise(x, y, z)     : 1차원~3차원의 부드러운 노이즈 (-1.0 ~ 1.0)
+        anim.rand(min, max, s)  : 시드값 s에 기반한 안정적인 난수 생성
+        anim.len(x, y)          : 벡터 (x, y)의 길이(노름)를 가져옵니다
+        anim.dist(x1, y1, x2, y2): 두 점 (x1, y1)과 (x2, y2) 사이의 거리를 가져옵니다
+        anim.dot(x1, y1, x2, y2): 두 벡터 (x1, y1)과 (x2, y2)의 내적을 가져옵니다
+        anim.normalize(x, y)    : 벡터 (x, y)를 정규화하여 방향 벡터(Tuple)를 반환합니다
+        anim.polar(r, a)        : 반지름 r, 각도 a(도)에서 (x, y) 이동량(Tuple)을 가져옴
+        anim.rotate(x, y, a)    : 좌표 (x, y)를 a(도)만큼 회전시킨 좌표(Tuple)를 가져옴
+        anim.bezier(t, p0, p1, p2, p3): t(0.0~1.0)에서의 3차 베지어 곡선 값을 계산
+
+
+- 사용 가능한 표준 라이브러리 -
+
+        math 라이브러리:
+            math.abs, math.ceil, math.cos, math.exp, math.floor,
+            math.fmod, math.huge, math.log, math.max, math.min,
+            math.modf, math.pi, math.random, math.randomseed,
+            math.sin, math.sqrt, math.tan, math.atan, math.atan2,
+            math.deg, math.rad, math.ldexp, math.frexp,
+            math.sinh, math.cosh, math.tanh, math.type,
+            math.tointeger, math.maxinteger, math.mininteger
+
+        string 라이브러리:
+            string.format, string.len, string.sub, string.upper,
+            string.lower, string.rep, string.reverse, string.find,
+            string.match, string.gmatch, string.gsub, string.byte,
+            string.char, string.dump, string.pack, string.unpack,
+            string.packsize
+
+        table 라이브러리:
+            table.insert, table.remove, table.sort,
+            table.concat, table.unpack, table.move
+
+        bit32 라이브러리:
+            bit32.band, bit32.bor, bit32.bxor, bit32.bnot,
+            bit32.lshift, bit32.rshift, bit32.arshift,
+            bit32.extract, bit32.replace,
+            bit32.btest, bit32.countlz, bit32.countrz
+
+        기본 함수:
+            type, tostring, tonumber, select, error, assert, print,
+            ipairs, pairs, next, unpack,
+            setmetatable, getmetatable, rawget, rawset, rawequal, rawlen,
+            pcall, xpcall
+
+
+- 스크립트 예 -
+
+        ○ 페이드인(기본 스크립트)
+                obj.alpha = math.min(time * 255, 255)
+
+        ○ 페이드아웃
+                obj.alpha = math.max((obj.totalframe - obj.frame) / obj.framerate * 255, 0)
+
+        ○ Track0으로 투명도 제어
+                obj.alpha = obj.track0
+
+        ○ 시간에 따라 회전
+                obj.rz = time * 90  -- 1초에 90도 회전
+
+        ○ 픽셀의 빨간색 성분을 반전하기
+                for y = 0, obj.h - 1 do
+                    for x = 0, obj.w - 1 do
+                        local r, g, b, a = obj.getpixel(x, y)
+                        obj.setpixel(x, y, 255 - r, g, b, a)
+                    end
+                end
+
+        ○ getpixeldata를 사용한 그레이스케일 변환(고속)
+                local pd = obj.getpixeldata()
+                local w = pd.width
+                local h = pd.height
+                for y = 0, h - 1 do
+                    for x = 0, w - 1 do
+                        local base = (y * w + x) * 4
+                        local r = pd:get(base + 1)
+                        local g = pd:get(base + 2)
+                        local b = pd:get(base + 3)
+                        local a = pd:get(base + 4)
+                        local gray = r * 0.299 + g * 0.587 + b * 0.114
+                        pd:set(base + 1, gray)
+                        pd:set(base + 2, gray)
+                        pd:set(base + 3, gray)
+                    end
+                end
+
+        ○ Track0으로 줌 제어 (1.0 = 등배)
+                obj.zoom = obj.zoom * (1 + obj.track0 / 100)
+
+
+- 미지원·제한 사항 -
+
+        × AviUtl2의 obj.effect(), obj.draw(), obj.drawpoly(), obj.load() 등은 지원하지 않습니다.
+        × AviUtl2의 obj.rand(), obj.rand1(), obj.setfont(), obj.mes() 등은 지원하지 않습니다.
+        × AviUtl2의 obj.setoption(), obj.getoption(), obj.getvalue(), obj.setanchor() 등은 지원하지 않습니다.
+        × AviUtl2의 scene 테이블의 scene.set(), scene.get() 등의 함수는 지원하지 않습니다.
+          (scene.width와 scene.height의 읽기만 지원)
+        × 파일 접근(require, dofile, io 등)은 지원하지 않습니다.
+        × obj.z를 변경하면 렌더링에 반영되지만(ReadBack에 포함),
+          3D 렌더링 지원은 제한적입니다.
+        × 스크립트 타임아웃(5초)을 초과하면 실행이 강제 종료됩니다.
+          무한 루프가 발생하지 않도록 구현 시 주의가 필요합니다.
+        × AviUtl2의 --track@, --check@ 등의 헤더 디렉티브는 지원하지 않습니다.
+          파라미터는 Track0 ～ Track3만 사용할 수 있습니다.
