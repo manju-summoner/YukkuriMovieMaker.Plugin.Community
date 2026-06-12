@@ -426,6 +426,7 @@ internal static unsafe class D3D11Unsafe
     private const int SlotUnmap = 15;
     private const int SlotGetImmediateContext = 40;
     private const int SlotCopyResource = 47;
+    private const int SlotFlush = 111;
 
     [StructLayout(LayoutKind.Sequential)]
     public struct Texture2DDesc
@@ -492,12 +493,25 @@ internal static unsafe class D3D11Unsafe
         public uint DepthPitch;
     }
 
-    public static MappedSubresource Map(nint context, nint resource)
+    public static bool TryMapNoWait(nint context, nint resource, out MappedSubresource mapped)
     {
-        MappedSubresource mapped = default;
-        int hr = ((delegate* unmanaged[Stdcall]<nint, nint, uint, uint, uint, MappedSubresource*, int>)Slot(context, SlotMap))(context, resource, 0, 1, 0, &mapped);
+        const uint D3D11_MAP_FLAG_DO_NOT_WAIT = 0x100000;
+        const int DXGI_ERROR_WAS_STILL_DRAWING = unchecked((int)0x887A000A);
+        MappedSubresource local = default;
+        int hr = ((delegate* unmanaged[Stdcall]<nint, nint, uint, uint, uint, MappedSubresource*, int>)Slot(context, SlotMap))(context, resource, 0, 1, D3D11_MAP_FLAG_DO_NOT_WAIT, &local);
+        if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
+        {
+            mapped = default;
+            return false;
+        }
         Marshal.ThrowExceptionForHR(hr);
-        return mapped;
+        mapped = local;
+        return true;
+    }
+
+    public static void Flush(nint context)
+    {
+        ((delegate* unmanaged[Stdcall]<nint, void>)Slot(context, SlotFlush))(context);
     }
 
     public static void Unmap(nint context, nint resource)

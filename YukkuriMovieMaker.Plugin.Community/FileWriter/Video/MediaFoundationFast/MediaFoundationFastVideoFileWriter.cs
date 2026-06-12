@@ -47,6 +47,8 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
     private bool _gpuModeDecided;
     private bool _gpuMode;
     private bool _readbackMode;
+    private nint _cachedBitmapPointer;
+    private nint _cachedSourceTexture;
     private nint _gpuDevice;
     private nint _gpuContext;
     private readonly int _texturePoolSize;
@@ -206,6 +208,25 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
         }
     }
 
+    private nint ResolveSourceTexture(ID2D1Bitmap1 frame)
+    {
+        nint bitmapPointer = frame.NativePointer;
+        if (bitmapPointer == _cachedBitmapPointer && _cachedSourceTexture != 0)
+            return _cachedSourceTexture;
+
+        if (_cachedSourceTexture != 0)
+        {
+            Marshal.Release(_cachedSourceTexture);
+            _cachedSourceTexture = 0;
+            _cachedBitmapPointer = 0;
+        }
+        using var dxgiSurface = frame.Surface;
+        nint surface = dxgiSurface.NativePointer;
+        _cachedSourceTexture = D3D11Unsafe.QueryInterface(surface, MediaFoundationGuids.IID_ID3D11Texture2D);
+        _cachedBitmapPointer = bitmapPointer;
+        return _cachedSourceTexture;
+    }
+
     private void WriteVideoReadback(ID2D1Bitmap1 frame)
     {
         _writerReady.Task.GetAwaiter().GetResult();
@@ -230,16 +251,11 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
             ThrowIfFailed();
         }
 
-        nint surface = 0;
-        nint sourceTexture = 0;
         nint staging = 0;
         bool handedOff = false;
         try
         {
-            using var dxgiSurface = frame.Surface;
-            surface = dxgiSurface.NativePointer;
-            Marshal.AddRef(surface);
-            sourceTexture = D3D11Unsafe.QueryInterface(surface, MediaFoundationGuids.IID_ID3D11Texture2D);
+            nint sourceTexture = ResolveSourceTexture(frame);
 
             if (!_textureDescReady)
             {
@@ -259,6 +275,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
                 staging = D3D11Unsafe.CreateTexture2D(_gpuDevice, _textureDesc);
 
             D3D11Unsafe.CopyResource(_gpuContext, staging, sourceTexture);
+            D3D11Unsafe.Flush(_gpuContext);
 
             long time = VideoFrameToTime(index);
             Enqueue(new RawTexture(sequence, staging, time, VideoFrameToTime(index + 1) - time));
@@ -271,8 +288,6 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
                 if (staging != 0) _freeTextures.Add(staging);
                 _textureSlots.Release();
             }
-            if (sourceTexture != 0) Marshal.Release(sourceTexture);
-            if (surface != 0) Marshal.Release(surface);
         }
     }
 
@@ -358,8 +373,6 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
             {
                 _textureSlots.Release();
             }
-            if (sourceTexture != 0) Marshal.Release(sourceTexture);
-            if (surface != 0) Marshal.Release(surface);
         }
     }
 
@@ -598,6 +611,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
             }
             while (_freeTextures.TryTake(out var pooled))
                 Marshal.Release(pooled);
+            if (_cachedSourceTexture != 0) { Marshal.Release(_cachedSourceTexture); _cachedSourceTexture = 0; }
             if (_gpuContext != 0) { Marshal.Release(_gpuContext); _gpuContext = 0; }
             if (_gpuDevice != 0) { Marshal.Release(_gpuDevice); _gpuDevice = 0; }
             hardwareContext?.Dispose();
@@ -670,7 +684,16 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
     {
         IMFSample? sample = null;
         IMFMediaBuffer? buffer = null;
-        var mapped = D3D11Unsafe.Map(_gpuContext, item.Texture);
+        D3D11Unsafe.MappedSubresource mapped;
+        int spins = 0;
+        while (!D3D11Unsafe.TryMapNoWait(_gpuContext, item.Texture, out mapped))
+        {
+            ThrowIfFailed();
+            if (++spins < 20)
+                Thread.Yield();
+            else
+                Thread.Sleep(1);
+        }
         try
         {
             int width = _settings.Width;
