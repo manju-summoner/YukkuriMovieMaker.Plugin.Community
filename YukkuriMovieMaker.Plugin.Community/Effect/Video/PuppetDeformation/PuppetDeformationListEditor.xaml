@@ -8,7 +8,6 @@
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
-             xmlns:converter="clr-namespace:YukkuriMovieMaker.Views.Converters;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="300">
     <i:Interaction.Behaviors>
@@ -121,10 +120,12 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="26"/>
                 <ColumnDefinition Width="26"/>
+                <ColumnDefinition Width="26"/>
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" Content="{x:Static local:Texts.PuppetDeformationListAddPin}" Command="{Binding AddPinCommand}"/>
             <Button Grid.Column="1" Padding="6" Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" ToolTip="{x:Static local:Texts.PuppetDeformationListRemovePin}" Command="{Binding RemovePinCommand}"/>
             <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.Autorenew}}" ToolTip="{x:Static local:Texts.PuppetDeformationListResetMessage}" Command="{Binding ResetCommand}"/>
+            <Button Grid.Column="3" Content="{DynamicResource {x:Static icons:IconKeys.Magnify}}" ToolTip="{x:Static local:Texts.PuppetDeformationMapWindowTitle}" Command="{Binding OpenMapCommand}"/>
         </Grid>
         <Grid Grid.Row="2" ClipToBounds="True">
             <c:PropertiesEditor x:Name="propertiesEditor" Margin="0,-22,0,0" Target="{Binding SelectedTarget}">

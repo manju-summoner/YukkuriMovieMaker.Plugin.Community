@@ -1,0 +1,120 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.PuppetDeformationMapView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation"
+             xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+             mc:Ignorable="d po"
+             d:DesignHeight="450" d:DesignWidth="450"
+             ClipToBounds="True"
+             Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+             MouseWheel="UserControl_MouseWheel"
+             MouseLeftButtonDown="UserControl_MouseLeftButtonDown"
+             MouseLeftButtonUp="UserControl_MouseLeftButtonUp"
+             MouseMove="UserControl_MouseMove"
+             MouseLeave="UserControl_MouseLeave"
+             d:DataContext="{d:DesignInstance Type={x:Type local:PuppetDeformationMapViewModel}}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <DropShadowEffect x:Key="PinShadowEffect"
+                          po:Freeze="True"
+                          Color="Black"
+                          ShadowDepth="0"
+                          BlurRadius="3"
+                          Opacity="0.45"
+                          RenderingBias="Performance"/>
+    </UserControl.Resources>
+    <Grid>
+        <Canvas x:Name="RootCanvas" ClipToBounds="True">
+            <Image x:Name="PreviewImage"
+                   Source="{Binding CurrentImage}"
+                   RenderTransformOrigin="0,0">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="ImageScale" ScaleX="1" ScaleY="1"/>
+                        <TranslateTransform x:Name="ImageTranslate" X="0" Y="0"/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+            </Image>
+            <ItemsControl x:Name="PinCanvas"
+                          ItemsSource="{Binding PinViewModels}"
+                          IsHitTestVisible="True"
+                          Visibility="{Binding IsTransformReady, Converter={StaticResource BoolToVis}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="Canvas.Left" Value="{Binding CanvasX}"/>
+                        <Setter Property="Canvas.Top" Value="{Binding CanvasY}"/>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:PuppetDeformationMapPinViewModel}">
+                        <Grid Width="24" Height="24" Margin="-12,-12,0,0"
+                              Cursor="Hand"
+                              MouseLeftButtonDown="Pin_MouseLeftButtonDown">
+                            <Grid.Style>
+                                <Style TargetType="Grid">
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsOffset}" Value="True"/>
+                                                <Condition Binding="{Binding IsEnabled}" Value="False"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+
+                            <Ellipse Width="18" Height="18"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
+                                     Fill="Transparent"
+                                     StrokeThickness="1.5"
+                                     StrokeDashArray="3,2"
+                                     Effect="{StaticResource PinShadowEffect}">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Setter Property="Stroke" Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Stroke" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+
+                            <Ellipse Width="7" Height="7"
+                                     HorizontalAlignment="Center"
+                                     VerticalAlignment="Center">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Fill" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"/>
+                                        <Setter Property="Stroke" Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}"/>
+                                        <Setter Property="StrokeThickness" Value="1"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsOffset}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Fill" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                                <Setter Property="Stroke" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Canvas>
+    </Grid>
+</UserControl>
