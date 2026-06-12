@@ -81,7 +81,6 @@
   </Target>
 
   <ItemGroup>
-    <Folder Include="FileWriter\" />
     <Folder Include="Tachie\" />
   </ItemGroup>
 	
