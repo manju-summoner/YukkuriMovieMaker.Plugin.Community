@@ -18,6 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
         readonly AffineTransform2D wrap;
         readonly private IGraphicsDevicesAndContext devices;
         readonly ShuffleTextEffect item;
+        bool disposed;
 
         public ID2D1Image Output { get; }
 
@@ -116,6 +117,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ShuffleText
 
         public void Dispose()
         {
+            // Dispose が二重に呼ばれると、初回で disposer により wrap が解放され
+            // NativePointer が無効になった状態で SetInput を呼び、ゼロ番地参照→NRE で落ちる。
+            // 多重 Dispose に備えてガードする。
+            if (disposed)
+                return;
+            disposed = true;
             wrap?.SetInput(0, null, true);
             disposer.Dispose();
         }

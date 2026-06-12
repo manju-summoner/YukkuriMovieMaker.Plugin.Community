@@ -169,4 +169,11 @@
     <Resource Include="$(ShaderDirPath)PartialOutline.cso" Link="Resources\Shader\PartialOutline.cso" />
   </ItemGroup>
 
+  <!-- internalsを参照するテスト（EdgeDetectionZeroStrengthOverlayTest等）はDEBUG限定のため、Releaseビルドには付与しない -->
+  <ItemGroup Condition="'$(Configuration)'=='Debug' or '$(Configuration)'=='DebugLite'">
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>YukkuriMovieMaker.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>
