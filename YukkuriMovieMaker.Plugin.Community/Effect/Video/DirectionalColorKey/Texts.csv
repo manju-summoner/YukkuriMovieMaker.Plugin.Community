@@ -1,0 +1,31 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+DirectionalColorKeyEffectName,,方向色分離キー,Directional Color Key,方向色分离键控,方向色分離鍵控,방향 색 분리 키,Clave de color direccional,مفتاح اللون الاتجاهي,Kunci Warna Terarah
+DirectionalColorKeyGroupName,,方向色分離キー,Directional Color Key,方向色分离键控,方向色分離鍵控,방향 색 분리 키,Clave de color direccional,مفتاح اللون الاتجاهي,Kunci Warna Terarah
+DirectionalColorKeyBackgroundColorName,,背景色,Background Color,背景色,背景色,배경색,Color de fondo,لون الخلفية,Warna Latar
+DirectionalColorKeyBackgroundColorDesc,,除去する背景色,Background color to remove,要移除的背景色,要移除的背景色,제거할 배경색,Color de fondo a eliminar,لون الخلفية المراد إزالته,Warna latar yang dihapus
+DirectionalColorKeyClusterCountName,,前景層数,Foreground Layers,前景层数,前景層數,전경 레이어 수,Capas de primer plano,عدد طبقات المقدمة,Jumlah Lapisan Depan
+DirectionalColorKeyClusterCountDesc,,方向クラスタリングで分離する前景層の最大数,Maximum foreground layers separated by direction clustering,方向聚类分离的前景层最大数,方向聚類分離的前景層最大數,방향 클러스터링으로 분리할 전경 레이어 최대 수,Número máximo de capas separadas por agrupamiento direccional,أقصى عدد لطبقات المقدمة المفصولة بالتجميع الاتجاهي,Jumlah maksimum lapisan depan dari klastering arah
+DirectionalColorKeyScaleModeName,,スケール決定,Scale Mode,缩放方式,縮放方式,스케일 결정,Modo de escala,وضع المقياس,Mode Skala
+DirectionalColorKeyScaleModeDesc,,アルファのスケール決定戦略,Strategy to determine alpha scale,确定 alpha 缩放的策略,確定 alpha 縮放的策略,알파 스케일 결정 전략,Estrategia para determinar la escala alfa,استراتيجية تحديد مقياس ألفا,Strategi penentuan skala alfa
+DirectionalColorKeyScaleModePhysicalName,,物理境界,Physical Bound,物理边界,物理邊界,물리 경계,Límite físico,الحد الفيزيائي,Batas Fisik
+DirectionalColorKeyScaleModePhysicalDesc,,色域境界からスケール下限を計算,Compute scale from gamut boundary,从色域边界计算缩放,從色域邊界計算縮放,색역 경계에서 스케일 계산,Calcular escala desde el límite de gama,حساب المقياس من حدود التدرج,Hitung skala dari batas gamut
+DirectionalColorKeyScaleModeOpaqueName,,不透明基準,Opaque Reference,不透明参考,不透明參考,불투명 기준,Referencia opaca,مرجع معتم,Referensi Buram
+DirectionalColorKeyScaleModeOpaqueDesc,,射影分布のパーセンタイルからスケールを決定,Determine scale from projection percentile,从投影分布的百分位确定缩放,從投影分布的百分位確定縮放,투영 분포의 백분위에서 스케일 결정,Determinar escala desde el percentil de proyección,تحديد المقياس من النسبة المئوية للإسقاط,Tentukan skala dari persentil proyeksi
+DirectionalColorKeyScaleModeForegroundName,,前景色指定,Foreground Hint,指定前景色,指定前景色,전경색 지정,Color de primer plano,تلميح المقدمة,Petunjuk Latar Depan
+DirectionalColorKeyScaleModeForegroundDesc,,前景色を指定して厳密にスケールを決定,Specify foreground color for exact scale,指定前景色以精确确定缩放,指定前景色以精確確定縮放,전경색을 지정해 정확히 결정,Especificar color de primer plano para escala exacta,تحديد لون المقدمة لمقياس دقيق,Tentukan warna latar depan untuk skala tepat
+DirectionalColorKeyForegroundColorName,,前景色,Foreground Color,前景色,前景色,전경색,Color de primer plano,لون المقدمة,Warna Latar Depan
+DirectionalColorKeyForegroundColorDesc,,不透明部分の前景色ヒント,Foreground color hint for opaque areas,不透明区域的前景色提示,不透明區域的前景色提示,불투명 영역의 전경색 힌트,Sugerencia de color para áreas opacas,تلميح لون المقدمة للمناطق المعتمة,Petunjuk warna untuk area buram
+DirectionalColorKeyOpaquePercentileName,,不透明基準値,Opaque %ile,不透明百分位,不透明百分位,불투명 백분위,% opaco,% معتم,Persentil Buram
+DirectionalColorKeyOpaquePercentileDesc,,不透明とみなす射影値の累積百分位,Cumulative percentile of projection treated as opaque,视为不透明的投影累积百分位,視為不透明的投影累積百分位,불투명으로 간주할 투영의 누적 백분위,Percentil acumulado de proyección considerado opaco,النسبة المئوية التراكمية للإسقاط المعتبر معتمًا,Persentil kumulatif proyeksi dianggap buram
+DirectionalColorKeyNoiseThresholdName,,ノイズ閾値,Noise Threshold,噪声阈值,噪聲閾值,노이즈 임계값,Umbral de ruido,عتبة الضوضاء,Ambang Noise
+DirectionalColorKeyNoiseThresholdDesc,,背景とみなす変位の大きさ,Displacement magnitude treated as background,视为背景的位移大小,視為背景的位移大小,배경으로 간주할 변위 크기,Magnitud de desplazamiento tratada como fondo,مقدار الإزاحة المعتبر خلفية,Besaran perpindahan dianggap latar
+DirectionalColorKeySigmaColorName,,色シグマ,Color Sigma,颜色西格玛,顏色西格瑪,색 시그마,Sigma de color,سيجما اللون,Sigma Warna
+DirectionalColorKeySigmaColorDesc,,方向場平滑化の色類似度の幅,Color similarity width for direction smoothing,方向场平滑的颜色相似度宽度,方向場平滑的顏色相似度寬度,방향장 평활화의 색 유사도 폭,Ancho de similitud de color para el suavizado de dirección,عرض تشابه اللون لتنعيم الاتجاه,Lebar kemiripan warna untuk penghalusan arah
+DirectionalColorKeyEdgeSoftnessName,,エッジ柔らかさ,Edge Softness,边缘柔和度,邊緣柔和度,경계 부드러움,Suavidad de borde,نعومة الحافة,Kelembutan Tepi
+DirectionalColorKeyEdgeSoftnessDesc,,低アルファ側の足切り量,Lower-alpha cutoff amount,低 alpha 侧的截断量,低 alpha 側的截斷量,낮은 알파 측 컷오프 양,Cantidad de corte de alfa baja,مقدار قطع ألفا المنخفضة,Jumlah pemotongan alfa rendah
+DirectionalColorKeySpillStrengthName,,スピル除去,Spill Removal,溢色去除,溢色去除,스필 제거,Eliminación de derrame,إزالة التسرب,Penghapusan Spill
+DirectionalColorKeySpillStrengthDesc,,前景色への背景色被りの抑制量,Suppression of background tint on foreground,抑制前景上的背景色偏,抑制前景上的背景色偏,전경에 번진 배경색 억제량,Supresión del tinte de fondo en el primer plano,قمع صبغة الخلفية على المقدمة,Penekanan rona latar pada depan
+DirectionalColorKeyDespillBiasName,,スピル許容,Despill Bias,溢色容差,溢色容差,스필 허용,Sesgo de derrame,انحياز إزالة التسرب,Bias Despill
+DirectionalColorKeyDespillBiasDesc,,スピル除去を開始する彩度の下限,Chroma offset before despill begins,溢色去除开始的色度下限,溢色去除開始的色度下限,스필 제거 시작 채도 하한,Umbral de croma antes de despill,إزاحة اللون قبل بدء إزالة التسرب,Ambang kroma sebelum despill
+DirectionalColorKeyOutputForegroundName,,前景出力,Output Foreground,输出前景,輸出前景,전경 출력,Salida de primer plano,إخراج المقدمة,Keluarkan Latar Depan
+DirectionalColorKeyOutputForegroundDesc,,オフでマスクを確認できます,Turn off to inspect the mask,关闭以查看遮罩,關閉以查看遮罩,끄면 마스크를 확인할 수 있습니다,Desactivar para inspeccionar la máscara,أوقفه لفحص القناع,Matikan untuk memeriksa topeng
