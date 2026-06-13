@@ -11,6 +11,7 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.FileWriter.MediaFoundationFast.Interop;
 using YukkuriMovieMaker.Plugin.Community.FileWriter.MediaFoundationFast.Localization;
 using YukkuriMovieMaker.Plugin.FileWriter;
+using YukkuriMovieMaker.Project;
 using H264Level = YukkuriMovieMaker.Plugin.Community.FileWriter.MediaFoundationFast.Models.H264Level;
 using H264Profile = YukkuriMovieMaker.Plugin.Community.FileWriter.MediaFoundationFast.Models.H264Profile;
 using VideoBitRateControlMode = YukkuriMovieMaker.Plugin.Community.FileWriter.MediaFoundationFast.Models.VideoBitRateControlMode;
@@ -29,6 +30,10 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
     private static readonly PendingSample SkippedSample = new(StreamKind.Audio, null!);
 
     private readonly MediaFoundationFastWriterSettings _settings;
+    private readonly int _width;
+    private readonly int _height;
+    private readonly int _fps;
+    private readonly int _hz;
     private readonly Channel<RawItem> _rawChannel;
     private readonly ConcurrentDictionary<long, PendingSample> _completed = new();
     private readonly ConcurrentQueue<PendingSample> _emitQueue = new();
@@ -62,12 +67,16 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
 
     public VideoFileWriterSupportedStreams SupportedStreams => VideoFileWriterSupportedStreams.Audio | VideoFileWriterSupportedStreams.Video;
 
-    public MediaFoundationFastVideoFileWriter(string path, MediaFoundationFastWriterSettings settings)
+    public MediaFoundationFastVideoFileWriter(string path, VideoInfo videoInfo, MediaFoundationFastWriterSettings settings)
     {
         _settings = settings;
-        _useNv12 = settings.Width % 2 == 0 && settings.Height % 2 == 0;
+        _width = videoInfo.Width;
+        _height = videoInfo.Height;
+        _fps = videoInfo.FPS;
+        _hz = videoInfo.Hz;
+        _useNv12 = _width % 2 == 0 && _height % 2 == 0;
 
-        long frameBytes = Math.Max((long)settings.Width * settings.Height * 4, 1);
+        long frameBytes = Math.Max((long)_width * _height * 4, 1);
         _texturePoolSize = (int)Math.Clamp(268_435_456 / frameBytes, 8, 32);
         int capacity = (int)Math.Clamp(536_870_912 / frameBytes, 4, 32);
         _textureSlots = new SemaphoreSlim(_texturePoolSize, _texturePoolSize);
@@ -185,7 +194,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
             texture = D3D11Unsafe.QueryInterface(surface, MediaFoundationGuids.IID_ID3D11Texture2D);
             _gpuDevice = D3D11Unsafe.GetDevice(texture);
             _gpuContext = D3D11Unsafe.GetImmediateContext(_gpuDevice);
-            if (D3D11Unsafe.SupportsVideo(_gpuDevice))
+            if (_settings.IsHardwareAcceleration && D3D11Unsafe.SupportsVideo(_gpuDevice))
             {
                 _gpuMode = true;
                 _deviceDecision.TrySetResult(_gpuDevice);
@@ -344,7 +353,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
                 nint sampleTexture = texture;
                 texture = 0;
                 buffer = MediaFoundationApi.CreateDxgiSurfaceBuffer(sampleTexture);
-                buffer.SetCurrentLength((uint)(_settings.Width * _settings.Height * 4));
+                buffer.SetCurrentLength((uint)(_width * _height * 4));
                 sample.AddBuffer(buffer);
                 long time = VideoFrameToTime(index);
                 sample.SetSampleTime(time);
@@ -465,7 +474,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
                 if (externalDevice != 0)
                 {
                     hardwareContext = MediaFoundationApi.CreateHardwareDeviceContextFromDevice(externalDevice);
-                    (writer, _videoIndex, _audioIndex) = CreateWriter(path, _settings, hardwareContext, useNv12: false, disableThrottling: true);
+                    (writer, _videoIndex, _audioIndex) = CreateWriter(path, _width, _height, _fps, _hz, _settings, hardwareContext, useNv12: false, disableThrottling: true);
                 }
                 else
                 {
@@ -473,14 +482,14 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
                     {
                         if (_settings.IsHardwareAcceleration)
                             hardwareContext = MediaFoundationApi.CreateHardwareDeviceContext();
-                        (writer, _videoIndex, _audioIndex) = CreateWriter(path, _settings, hardwareContext, _useNv12, disableThrottling: true);
+                        (writer, _videoIndex, _audioIndex) = CreateWriter(path, _width, _height, _fps, _hz, _settings, hardwareContext, _useNv12, disableThrottling: true);
                     }
                     catch (Exception ex) when (hardwareContext is not null)
                     {
                         Log.Default.Write(Texts.HardwareFallback, ex);
                         hardwareContext.Dispose();
                         hardwareContext = null;
-                        (writer, _videoIndex, _audioIndex) = CreateWriter(path, _settings, null, _useNv12, disableThrottling: true);
+                        (writer, _videoIndex, _audioIndex) = CreateWriter(path, _width, _height, _fps, _hz, _settings, null, _useNv12, disableThrottling: true);
                     }
                 }
                 _writerReady.TrySetResult();
@@ -693,8 +702,8 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
         }
         try
         {
-            int width = _settings.Width;
-            int height = _settings.Height;
+            int width = _width;
+            int height = _height;
             int outputLength = _useNv12 ? width * height * 3 / 2 : width * height * 4;
             sample = MediaFoundationApi.CreateSample();
             buffer = MediaFoundationApi.CreateMemoryBuffer((uint)outputLength);
@@ -747,7 +756,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
         try
         {
             bool nv12Video = item is RawVideo && _useNv12 && !_gpuMode;
-            int outputLength = nv12Video ? _settings.Width * _settings.Height * 3 / 2 : item.Length;
+            int outputLength = nv12Video ? _width * _height * 3 / 2 : item.Length;
             sample = MediaFoundationApi.CreateSample();
             buffer = MediaFoundationApi.CreateMemoryBuffer((uint)outputLength);
             buffer.Lock(out var ptr, out _, out _);
@@ -755,7 +764,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
             {
                 if (nv12Video)
                 {
-                    ConvertBgraToNv12(item.Buffer, ptr, _settings.Width, _settings.Height);
+                    ConvertBgraToNv12(item.Buffer, ptr, _width, _height);
                 }
                 else
                 {
@@ -786,16 +795,18 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
         }
     }
 
-    private static (IMFSinkWriter Writer, uint VideoIndex, uint AudioIndex) CreateWriter(string path, MediaFoundationFastWriterSettings settings, HardwareDeviceContext? hardwareContext, bool useNv12, bool disableThrottling)
+    private static (IMFSinkWriter Writer, uint VideoIndex, uint AudioIndex) CreateWriter(string path, int width, int height, int fps, int hz, MediaFoundationFastWriterSettings settings, HardwareDeviceContext? hardwareContext, bool useNv12, bool disableThrottling)
     {
         IMFAttributes? attributes = null;
+        IMFAttributes? encodingParameters = null;
         IMFSinkWriter? writer = null;
         try
         {
-            attributes = CreateSinkWriterAttributes(settings, hardwareContext, disableThrottling);
+            attributes = CreateSinkWriterAttributes(hardwareContext, disableThrottling);
+            encodingParameters = CreateEncodingParameters(width, height, fps, settings);
             writer = MediaFoundationApi.CreateSinkWriterFromURL(path, attributes);
-            uint videoIndex = CreateVideoStream(settings, writer, useNv12);
-            uint audioIndex = CreateAudioStream(settings, writer);
+            uint videoIndex = CreateVideoStream(width, height, fps, settings, writer, useNv12, encodingParameters);
+            uint audioIndex = CreateAudioStream(hz, settings, writer);
             writer.BeginWriting();
             return (writer, videoIndex, audioIndex);
         }
@@ -806,34 +817,16 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
         }
         finally
         {
+            MediaFoundationApi.Release(encodingParameters);
             MediaFoundationApi.Release(attributes);
         }
     }
 
-    private static IMFAttributes CreateSinkWriterAttributes(MediaFoundationFastWriterSettings settings, HardwareDeviceContext? hardwareContext, bool disableThrottling)
+    private static IMFAttributes CreateSinkWriterAttributes(HardwareDeviceContext? hardwareContext, bool disableThrottling)
     {
-        var attributes = MediaFoundationApi.CreateAttributes(16);
+        var attributes = MediaFoundationApi.CreateAttributes(4);
         try
         {
-            attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncCommonRateControlMode, (uint)settings.VideoBitRateControlMode);
-            switch (settings.VideoBitRateControlMode)
-            {
-                case VideoBitRateControlMode.CBR:
-                case VideoBitRateControlMode.UnconstrainedVBR:
-                    attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncCommonMeanBitRate, (uint)(Math.Min(ResolveBitRateKbps(settings), 2097151) * 1024));
-                    break;
-                case VideoBitRateControlMode.Quality:
-                    attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncCommonQuality, (uint)Math.Clamp(settings.VideoQuality, 1, 100));
-                    break;
-                default:
-                    throw new NotSupportedException();
-            }
-            attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncCommonQualityVsSpeed, (uint)Math.Clamp(100 - settings.EncodeSpeed, 0, 100));
-            attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncNumWorkerThreads, (uint)(settings.NumberOfThreads <= 0 ? Environment.ProcessorCount : settings.NumberOfThreads));
-            if (settings.GOPSize > 0)
-                attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncMPVGOPSize, (uint)settings.GOPSize);
-            attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncMPVDefaultBPictureCount, (uint)(settings.H264Profile == H264Profile.Baseline ? 0 : Math.Max(settings.BFrameCount, 0)));
-            attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncH264CABACEnable, settings.H264Profile == H264Profile.Baseline ? 0u : 1u);
             if (hardwareContext is not null)
             {
                 attributes.SetUnknown(MediaFoundationGuids.MF_SINK_WRITER_D3D_MANAGER, hardwareContext.Manager);
@@ -850,14 +843,47 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
         }
     }
 
-    private static int ResolveBitRateKbps(MediaFoundationFastWriterSettings settings)
+    private static IMFAttributes CreateEncodingParameters(int width, int height, int fps, MediaFoundationFastWriterSettings settings)
+    {
+        var attributes = MediaFoundationApi.CreateAttributes(8);
+        try
+        {
+            attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncCommonRateControlMode, (uint)settings.VideoBitRateControlMode);
+            switch (settings.VideoBitRateControlMode)
+            {
+                case VideoBitRateControlMode.CBR:
+                case VideoBitRateControlMode.UnconstrainedVBR:
+                    attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncCommonMeanBitRate, (uint)(Math.Min(ResolveBitRateKbps(width, height, fps, settings), 2097151) * 1024));
+                    break;
+                case VideoBitRateControlMode.Quality:
+                    attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncCommonQuality, (uint)Math.Clamp(settings.VideoQuality, 1, 100));
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+            attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncCommonQualityVsSpeed, (uint)Math.Clamp(100 - settings.EncodeSpeed, 0, 100));
+            attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncNumWorkerThreads, (uint)(settings.NumberOfThreads <= 0 ? Environment.ProcessorCount : settings.NumberOfThreads));
+            if (settings.GOPSize > 0)
+                attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncMPVGOPSize, (uint)settings.GOPSize);
+            attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncMPVDefaultBPictureCount, (uint)(settings.H264Profile == H264Profile.Baseline ? 0 : Math.Max(settings.BFrameCount, 0)));
+            attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncH264CABACEnable, settings.H264Profile == H264Profile.Baseline ? 0u : 1u);
+            return attributes;
+        }
+        catch
+        {
+            MediaFoundationApi.Release(attributes);
+            throw;
+        }
+    }
+
+    private static int ResolveBitRateKbps(int width, int height, int fps, MediaFoundationFastWriterSettings settings)
     {
         if (settings.VideoBitRate > 0) return settings.VideoBitRate;
-        long auto = (long)settings.Width * settings.Height * settings.FPS / 10000;
+        long auto = (long)width * height * fps / 10000;
         return (int)Math.Clamp(auto, 1000, 200000);
     }
 
-    private static uint CreateVideoStream(MediaFoundationFastWriterSettings settings, IMFSinkWriter writer, bool useNv12)
+    private static uint CreateVideoStream(int width, int height, int fps, MediaFoundationFastWriterSettings settings, IMFSinkWriter writer, bool useNv12, IMFAttributes encodingParameters)
     {
         uint index;
         var outputType = MediaFoundationApi.CreateMediaType();
@@ -869,8 +895,8 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
             if (settings.H264Level != H264Level.Auto)
                 outputType.SetUINT32(MediaFoundationGuids.MF_MT_MPEG2_LEVEL, (uint)settings.H264Level);
             outputType.SetUINT32(MediaFoundationGuids.MF_MT_INTERLACE_MODE, 2);
-            outputType.SetUINT64(MediaFoundationGuids.MF_MT_FRAME_SIZE, ((ulong)(uint)settings.Width << 32) | (uint)settings.Height);
-            outputType.SetUINT64(MediaFoundationGuids.MF_MT_FRAME_RATE, ((ulong)(uint)settings.FPS << 32) | 1);
+            outputType.SetUINT64(MediaFoundationGuids.MF_MT_FRAME_SIZE, ((ulong)(uint)width << 32) | (uint)height);
+            outputType.SetUINT64(MediaFoundationGuids.MF_MT_FRAME_RATE, ((ulong)(uint)fps << 32) | 1);
             outputType.SetUINT64(MediaFoundationGuids.MF_MT_PIXEL_ASPECT_RATIO, 4294967297UL);
             outputType.SetUINT32(MediaFoundationGuids.MF_MT_VIDEO_PRIMARIES, 2);
             outputType.SetUINT32(MediaFoundationGuids.MF_MT_TRANSFER_FUNCTION, 5);
@@ -888,14 +914,14 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
         {
             inputType.SetGUID(MediaFoundationGuids.MF_MT_MAJOR_TYPE, MediaFoundationGuids.MFMediaType_Video);
             inputType.SetUINT32(MediaFoundationGuids.MF_MT_INTERLACE_MODE, 2);
-            inputType.SetUINT64(MediaFoundationGuids.MF_MT_FRAME_SIZE, ((ulong)(uint)settings.Width << 32) | (uint)settings.Height);
-            inputType.SetUINT64(MediaFoundationGuids.MF_MT_FRAME_RATE, ((ulong)(uint)settings.FPS << 32) | 1);
+            inputType.SetUINT64(MediaFoundationGuids.MF_MT_FRAME_SIZE, ((ulong)(uint)width << 32) | (uint)height);
+            inputType.SetUINT64(MediaFoundationGuids.MF_MT_FRAME_RATE, ((ulong)(uint)fps << 32) | 1);
             inputType.SetUINT64(MediaFoundationGuids.MF_MT_PIXEL_ASPECT_RATIO, 4294967297UL);
             inputType.SetUINT32(MediaFoundationGuids.MF_MT_VIDEO_PRIMARIES, 2);
             if (useNv12)
             {
                 inputType.SetGUID(MediaFoundationGuids.MF_MT_SUBTYPE, MediaFoundationGuids.MFVideoFormat_NV12);
-                inputType.SetUINT32(MediaFoundationGuids.MF_MT_DEFAULT_STRIDE, (uint)settings.Width);
+                inputType.SetUINT32(MediaFoundationGuids.MF_MT_DEFAULT_STRIDE, (uint)width);
                 inputType.SetUINT32(MediaFoundationGuids.MF_MT_TRANSFER_FUNCTION, 5);
                 inputType.SetUINT32(MediaFoundationGuids.MF_MT_VIDEO_NOMINAL_RANGE, 2);
                 inputType.SetUINT32(MediaFoundationGuids.MF_MT_YUV_MATRIX, 1);
@@ -903,11 +929,11 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
             else
             {
                 inputType.SetGUID(MediaFoundationGuids.MF_MT_SUBTYPE, MediaFoundationGuids.MFVideoFormat_RGB32);
-                inputType.SetUINT32(MediaFoundationGuids.MF_MT_DEFAULT_STRIDE, (uint)(settings.Width * 4));
+                inputType.SetUINT32(MediaFoundationGuids.MF_MT_DEFAULT_STRIDE, (uint)(width * 4));
                 inputType.SetUINT32(MediaFoundationGuids.MF_MT_TRANSFER_FUNCTION, 8);
                 inputType.SetUINT32(MediaFoundationGuids.MF_MT_VIDEO_NOMINAL_RANGE, 1);
             }
-            writer.SetInputMediaType(index, inputType, null);
+            writer.SetInputMediaType(index, inputType, encodingParameters);
         }
         finally
         {
@@ -916,7 +942,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
         return index;
     }
 
-    private static uint CreateAudioStream(MediaFoundationFastWriterSettings settings, IMFSinkWriter writer)
+    private static uint CreateAudioStream(int hz, MediaFoundationFastWriterSettings settings, IMFSinkWriter writer)
     {
         uint audioBytesPerSecond = (uint)settings.AudioBitRate switch
         {
@@ -932,7 +958,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
             outputType.SetGUID(MediaFoundationGuids.MF_MT_MAJOR_TYPE, MediaFoundationGuids.MFMediaType_Audio);
             outputType.SetGUID(MediaFoundationGuids.MF_MT_SUBTYPE, MediaFoundationGuids.MFAudioFormat_AAC);
             outputType.SetUINT32(MediaFoundationGuids.MF_MT_AUDIO_BITS_PER_SAMPLE, 16);
-            outputType.SetUINT32(MediaFoundationGuids.MF_MT_AUDIO_SAMPLES_PER_SECOND, (uint)settings.Hz);
+            outputType.SetUINT32(MediaFoundationGuids.MF_MT_AUDIO_SAMPLES_PER_SECOND, (uint)hz);
             outputType.SetUINT32(MediaFoundationGuids.MF_MT_AUDIO_NUM_CHANNELS, 2);
             outputType.SetUINT32(MediaFoundationGuids.MF_MT_AUDIO_AVG_BYTES_PER_SECOND, audioBytesPerSecond);
             outputType.SetUINT32(MediaFoundationGuids.MF_MT_AAC_AUDIO_PROFILE_LEVEL_INDICATION, (uint)settings.AACProfile);
@@ -948,7 +974,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
         {
             inputType.SetGUID(MediaFoundationGuids.MF_MT_MAJOR_TYPE, MediaFoundationGuids.MFMediaType_Audio);
             inputType.SetGUID(MediaFoundationGuids.MF_MT_SUBTYPE, MediaFoundationGuids.MFAudioFormat_PCM);
-            inputType.SetUINT32(MediaFoundationGuids.MF_MT_AUDIO_SAMPLES_PER_SECOND, (uint)settings.Hz);
+            inputType.SetUINT32(MediaFoundationGuids.MF_MT_AUDIO_SAMPLES_PER_SECOND, (uint)hz);
             inputType.SetUINT32(MediaFoundationGuids.MF_MT_AUDIO_BITS_PER_SAMPLE, 16);
             inputType.SetUINT32(MediaFoundationGuids.MF_MT_AUDIO_NUM_CHANNELS, 2);
             writer.SetInputMediaType(index, inputType, null);
@@ -1098,9 +1124,9 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
             dst[i] = (short)Math.Clamp(src[i] * 32767f, -32767f, 32767f);
     }
 
-    private long VideoFrameToTime(long frameIndex) => 10_000_000L * frameIndex / _settings.FPS;
+    private long VideoFrameToTime(long frameIndex) => 10_000_000L * frameIndex / _fps;
 
-    private long AudioPositionToTime(long samplePosition) => samplePosition / 2 * 10_000_000L / _settings.Hz;
+    private long AudioPositionToTime(long samplePosition) => samplePosition / 2 * 10_000_000L / _hz;
 
     private long NextSequence() => Interlocked.Increment(ref _sequence) - 1;
 
