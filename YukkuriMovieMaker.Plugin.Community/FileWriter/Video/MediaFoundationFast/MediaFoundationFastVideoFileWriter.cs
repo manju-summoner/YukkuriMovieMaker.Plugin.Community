@@ -56,6 +56,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
     private nint _cachedSourceTexture;
     private nint _gpuDevice;
     private nint _gpuContext;
+    private nint _deferredContext;
     private readonly int _texturePoolSize;
     private readonly ConcurrentBag<nint> _freeTextures = new();
     private readonly SemaphoreSlim _textureSlots;
@@ -194,20 +195,13 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
             texture = D3D11Unsafe.QueryInterface(surface, MediaFoundationGuids.IID_ID3D11Texture2D);
             _gpuDevice = D3D11Unsafe.GetDevice(texture);
             _gpuContext = D3D11Unsafe.GetImmediateContext(_gpuDevice);
-            if (_settings.IsHardwareAcceleration && D3D11Unsafe.SupportsVideo(_gpuDevice))
-            {
-                _gpuMode = true;
-                _deviceDecision.TrySetResult(_gpuDevice);
-            }
-            else
-            {
-                _readbackMode = true;
-                _deviceDecision.TrySetResult(0);
-            }
+            _deferredContext = D3D11Unsafe.CreateDeferredContext(_gpuDevice);
+            _readbackMode = true;
+            _deviceDecision.TrySetResult(0);
         }
         catch
         {
-            _gpuMode = false;
+            if (_deferredContext != 0) { Marshal.Release(_deferredContext); _deferredContext = 0; }
             _deviceDecision.TrySetResult(0);
         }
         finally
@@ -283,7 +277,16 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
             if (!_freeTextures.TryTake(out staging))
                 staging = D3D11Unsafe.CreateTexture2D(_gpuDevice, _textureDesc);
 
-            D3D11Unsafe.CopyResource(_gpuContext, staging, sourceTexture);
+            D3D11Unsafe.CopyResource(_deferredContext, staging, sourceTexture);
+            nint commandList = D3D11Unsafe.FinishCommandList(_deferredContext);
+            try
+            {
+                D3D11Unsafe.ExecuteCommandList(_gpuContext, commandList);
+            }
+            finally
+            {
+                Marshal.Release(commandList);
+            }
             D3D11Unsafe.Flush(_gpuContext);
 
             long time = VideoFrameToTime(index);
@@ -336,7 +339,16 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
             if (!_freeTextures.TryTake(out texture))
                 texture = D3D11Unsafe.CreateTexture2D(_gpuDevice, _textureDesc);
 
-            D3D11Unsafe.CopyResource(_gpuContext, texture, sourceTexture);
+            D3D11Unsafe.CopyResource(_deferredContext, texture, sourceTexture);
+            nint commandList = D3D11Unsafe.FinishCommandList(_deferredContext);
+            try
+            {
+                D3D11Unsafe.ExecuteCommandList(_gpuContext, commandList);
+            }
+            finally
+            {
+                Marshal.Release(commandList);
+            }
 
             IMFSample? sample = null;
             IMFMediaBuffer? buffer = null;
@@ -618,6 +630,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
             while (_freeTextures.TryTake(out var pooled))
                 Marshal.Release(pooled);
             if (_cachedSourceTexture != 0) { Marshal.Release(_cachedSourceTexture); _cachedSourceTexture = 0; }
+            if (_deferredContext != 0) { Marshal.Release(_deferredContext); _deferredContext = 0; }
             if (_gpuContext != 0) { Marshal.Release(_gpuContext); _gpuContext = 0; }
             if (_gpuDevice != 0) { Marshal.Release(_gpuDevice); _gpuDevice = 0; }
             hardwareContext?.Dispose();
