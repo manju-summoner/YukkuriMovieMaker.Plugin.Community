@@ -424,12 +424,9 @@ internal static unsafe class D3D11Unsafe
     private const int SlotGetDescTexture2D = 10;
     private const int SlotMap = 14;
     private const int SlotUnmap = 15;
-    private const int SlotCreateDeferredContext = 27;
     private const int SlotGetImmediateContext = 40;
     private const int SlotCopyResource = 47;
-    private const int SlotExecuteCommandList = 58;
     private const int SlotFlush = 111;
-    private const int SlotFinishCommandList = 114;
 
     [StructLayout(LayoutKind.Sequential)]
     public struct Texture2DDesc
@@ -463,28 +460,6 @@ internal static unsafe class D3D11Unsafe
         ((delegate* unmanaged[Stdcall]<nint, nint*, void>)Slot(device, SlotGetImmediateContext))(device, &context);
         if (context == 0) throw new InvalidOperationException("ID3D11Device.GetImmediateContext failed.");
         return context;
-    }
-
-    public static nint CreateDeferredContext(nint device)
-    {
-        nint context = 0;
-        int hr = ((delegate* unmanaged[Stdcall]<nint, uint, nint*, int>)Slot(device, SlotCreateDeferredContext))(device, 0, &context);
-        Marshal.ThrowExceptionForHR(hr);
-        if (context == 0) throw new InvalidOperationException("ID3D11Device.CreateDeferredContext failed.");
-        return context;
-    }
-
-    public static nint FinishCommandList(nint deferredContext)
-    {
-        nint commandList = 0;
-        int hr = ((delegate* unmanaged[Stdcall]<nint, int, nint*, int>)Slot(deferredContext, SlotFinishCommandList))(deferredContext, 0, &commandList);
-        Marshal.ThrowExceptionForHR(hr);
-        return commandList;
-    }
-
-    public static void ExecuteCommandList(nint immediateContext, nint commandList)
-    {
-        ((delegate* unmanaged[Stdcall]<nint, nint, int, void>)Slot(immediateContext, SlotExecuteCommandList))(immediateContext, commandList, 0);
     }
 
     public static Texture2DDesc GetTextureDesc(nint texture)
