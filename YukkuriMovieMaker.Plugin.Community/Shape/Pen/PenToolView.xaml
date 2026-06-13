@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Shape.Pen"
         xmlns:controls="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
         mc:Ignorable="d"
         Title="{x:Static local:Texts.PenToolWindowTitle}" Height="450" Width="800"
         d:DataContext="{d:DesignInstance Type={x:Type local:PenToolViewModel}}">
@@ -73,27 +74,27 @@
                 <ColumnDefinition Width="26"/>
                 <ColumnDefinition Width="26"/>
             </Grid.ColumnDefinitions>
-            <Button Content="{DynamicResource pen}" ToolTip="{x:Static local:Texts.BallPen}" Grid.Column="0" Command="{Binding SelectPenCommand}" ContextMenu="{StaticResource PenContextMenu}"/>
+            <Button Content="{DynamicResource {x:Static icons:IconKeys.Pen}}" ToolTip="{x:Static local:Texts.BallPen}" Grid.Column="0" Command="{Binding SelectPenCommand}" ContextMenu="{StaticResource PenContextMenu}"/>
             <controls:DropDownButton Content="▼" Grid.Column="1" Padding="0" FontSize="5" ContextMenu="{StaticResource PenContextMenu}">
                 <controls:DropDownButton.Style>
                     <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
                 </controls:DropDownButton.Style>
             </controls:DropDownButton>
-            <Button Content="{DynamicResource marker}" ToolTip="{x:Static local:Texts.Highlighter}" Grid.Column="2" Command="{Binding SelectHighlighterCommand}" ContextMenu="{StaticResource HighlighterContextMenu}"/>
+            <Button Content="{DynamicResource {x:Static icons:IconKeys.Marker}}" ToolTip="{x:Static local:Texts.Highlighter}" Grid.Column="2" Command="{Binding SelectHighlighterCommand}" ContextMenu="{StaticResource HighlighterContextMenu}"/>
             <controls:DropDownButton Content="▼" Grid.Column="3" Padding="0" FontSize="5" ContextMenu="{StaticResource HighlighterContextMenu}">
                 <controls:DropDownButton.Style>
                     <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
                 </controls:DropDownButton.Style>
             </controls:DropDownButton>
-            <Button Content="{DynamicResource eraser}" ToolTip="{x:Static local:Texts.Eraser}" Grid.Column="4" Command="{Binding SelectEraserCommand}" ContextMenu="{StaticResource EraserContextMenu}"/>
+            <Button Content="{DynamicResource {x:Static icons:IconKeys.Eraser}}" ToolTip="{x:Static local:Texts.Eraser}" Grid.Column="4" Command="{Binding SelectEraserCommand}" ContextMenu="{StaticResource EraserContextMenu}"/>
             <controls:DropDownButton Content="▼" Grid.Column="5" Padding="0" FontSize="5" ContextMenu="{StaticResource EraserContextMenu}">
                 <controls:DropDownButton.Style>
                     <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
                 </controls:DropDownButton.Style>
             </controls:DropDownButton>
-            <Button Content="{DynamicResource lasso}" ToolTip="{x:Static local:Texts.Select}" Grid.Column="6" Command="{Binding EnableSelectionMode}"/>
-            <RepeatButton Content="{DynamicResource Undo}" ToolTip="{x:Static local:Texts.Undo}" Grid.Column="7" Command="{Binding UndoCommand}"/>
-            <RepeatButton Content="{DynamicResource Redo}" ToolTip="{x:Static local:Texts.Redo}" Grid.Column="8" Command="{Binding RedoCommand}"/>
+            <Button Content="{DynamicResource {x:Static icons:IconKeys.Lasso}}" ToolTip="{x:Static local:Texts.Select}" Grid.Column="6" Command="{Binding EnableSelectionMode}"/>
+            <RepeatButton Content="{DynamicResource {x:Static icons:IconKeys.Undo}}" ToolTip="{x:Static local:Texts.Undo}" Grid.Column="7" Command="{Binding UndoCommand}"/>
+            <RepeatButton Content="{DynamicResource {x:Static icons:IconKeys.Redo}}" ToolTip="{x:Static local:Texts.Redo}" Grid.Column="8" Command="{Binding RedoCommand}"/>
             <controls:ColorPicker Grid.Column="9" Value="{Binding StrokeColor,Mode=TwoWay}">
                 <controls:ColorPicker.Style>
                     <Style TargetType="controls:ColorPicker" BasedOn="{StaticResource {x:Type controls:ColorPicker}}">
@@ -109,8 +110,8 @@
                 </controls:ColorPicker.Style>
             </controls:ColorPicker>
             <controls:TextBoxSlider Grid.Column="10" Value="{Binding StrokeThickness, Mode=TwoWay}" Min="0.1" Max="1024" DefaultMin="0.1" DefaultMax="10"/>
-            <Button Content="{DynamicResource import}" ToolTip="{x:Static local:Texts.Import}" Command="{Binding ImportIsfCommand}" Grid.Column="11"/>
-            <controls:DropDownButton Content="{DynamicResource export}" ToolTip="{x:Static local:Texts.Export}" Grid.Column="12" Padding="4">
+            <Button Content="{DynamicResource {x:Static icons:IconKeys.Import}}" ToolTip="{x:Static local:Texts.Import}" Command="{Binding ImportIsfCommand}" Grid.Column="11"/>
+            <controls:DropDownButton Content="{DynamicResource {x:Static icons:IconKeys.Export}}" ToolTip="{x:Static local:Texts.Export}" Grid.Column="12" Padding="4">
                 <controls:DropDownButton.Style>
                     <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
                 </controls:DropDownButton.Style>

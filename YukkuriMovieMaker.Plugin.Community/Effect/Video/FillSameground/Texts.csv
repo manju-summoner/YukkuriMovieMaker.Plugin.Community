@@ -1,0 +1,18 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+FillSamegroundEffectName,,同色塗りつぶし,Fill Same Color,填充相同颜色,填充相同顏色,같은 색 채우기,Relleno de mismo color,تعبئة نفس اللون,Isi Warna Sama
+FillSamegroundTargetGroupName,,対象,Target,目标,目標,대상,Objetivo,الهدف,Target
+FillSamegroundBrushGroupName,,模様,Pattern,图案,圖案,패턴,Patrón,نمط,Pola
+FillSamegroundOpacityName,,不透明度,Opacity,不透明度,不透明度,불투명도,Opacidad,التعتيم,Opacity
+FillSamegroundBlurName,,境界ぼかし,Edge Blur,边缘模糊,邊緣模糊,경계 블러,Desenfoque de borde,ضبابية الحافة,Blur Tepi
+FillSamegroundBlendModeName,,合成モード,Blend Mode,混合模式,混合模式,혼합 모드,Modo de fusión,وضع المزج,Mode Blend
+FillSamegroundIsInvertedName,,領域反転,Invert Region,反转区域,反轉區域,영역 반전,Invertir región,عكس المنطقة,Balik Wilayah
+FillSamegroundIsBrushOnlyName,,模様のみ,Pattern Only,仅图案,僅圖案,패턴만,Solo patrón,النمط فقط,Pola Saja
+FillSamegroundPreserveLuminanceName,,輝度保持,Preserve Luminance,保持亮度,保持亮度,휘도 유지,Preservar luminancia,الحفاظ على اللمعان,Pertahankan Kecerahan
+FillSamegroundModeName,,モード,Mode,模式,模式,모드,Modo,الوضع,Mode
+FillSamegroundXName,,X,X,X,X,X,X,X,X
+FillSamegroundYName,,Y,Y,Y,Y,Y,Y,Y,Y
+FillSamegroundTargetColorName,,対象色,Target Color,目标颜色,目標顏色,대상 색상,Color objetivo,اللون المستهدف,Warna Target
+FillSamegroundToleranceName,,許容範囲,Tolerance,容差,容差,허용 범위,Tolerancia,التسامح,Toleransi
+FillSamegroundModePositionName,,位置指定,Position,指定位置,指定位置,위치 지정,Posición,تحديد الموضع,Posisi
+FillSamegroundModeColorName,,色指定,Color,指定颜色,指定顏色,색상 지정,Color,تحديد اللون,Warna
+FillSamegroundModePositionColorName,,指定した位置の色指定,Color at Position,指定位置的颜色,指定位置的顏色,지정한 위치의 색상,Color en posición,لون الموضع المحدد,Warna di Posisi

@@ -1,0 +1,75 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Tool.Browser.ClearBrowsingDataView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Tool.Browser"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:pa="clr-namespace:YukkuriMovieMaker.Views.Actions;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type={x:Type local:ClearBrowsingDataViewModel}}">
+    <Grid Width="350">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="26"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{x:Static local:Texts.ClearBrowsingDataDesc}" TextWrapping="Wrap" Margin="6"/>
+
+        <Grid Grid.Row="2" Margin="6,3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.ClearBrowserCache}" VerticalAlignment="Center"/>
+            <c:ToggleSlider Grid.Column="1" Value="{Binding ClearBrowserCache}" VerticalAlignment="Center"/>
+        </Grid>
+
+        <Grid Grid.Row="3" Margin="6,3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.ClearPluginHistory}" VerticalAlignment="Center"/>
+            <c:ToggleSlider Grid.Column="1" Value="{Binding ClearPluginHistory}" VerticalAlignment="Center"/>
+        </Grid>
+
+        <Grid Grid.Row="4" Margin="6,3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{x:Static local:Texts.ClearPluginFavicon}" VerticalAlignment="Center"/>
+            <c:ToggleSlider Grid.Column="1" Value="{Binding ClearPluginFavicon}" VerticalAlignment="Center"/>
+        </Grid>
+
+        <Grid Grid.Row="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="1" Content="{x:Static local:Texts.Cancel}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <pa:CloseWindowAction/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+            <Button Grid.Column="2" Content="{x:Static local:Texts.ClearBrowsingData}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Click">
+                        <i:InvokeCommandAction Command="{Binding ClearCommand}"/>
+                        <pa:CloseWindowAction/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
+        </Grid>
+    </Grid>
+</UserControl>

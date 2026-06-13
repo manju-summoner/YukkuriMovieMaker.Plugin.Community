@@ -1,0 +1,85 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
+Explorer,,エクスプローラー,Explorer,资源管理器,檔案總管,탐색기,Explorador,المستكشف,Penjelajah,
+Back,,戻る,Back,返回,返回,뒤로,Regresar,رجوع,Kembali,
+Forward,,進む,Forward,前进,前進,앞으로,Adelante,تقدم,Maju,
+Refresh,,更新,Refresh,刷新,刷新,새로 고침,Actualizar,تحديث,Muat ulang,
+MoveToParentDirectory,,親ディレクトリへ移動,Move to parent directory,移动到上级目录,移動到上層目錄,상위 디렉터리로 이동,Ir al directorio padre,الانتقال إلى الدليل الرئيسي,Pindah ke direktori induk,
+Search,,検索,Search,搜索,搜尋,검색,Buscar,بحث,Cari,
+OpenNewTab,,新しいタブを開く,Open New Tab,打开新标签页,開啟新分頁,새 탭 열기,Abrir pestaña nueva,فتح علامة تبويب جديدة,Buka Tab Baru,
+OpenNewTabMenuHeader,,新しいタブを開く(_N),Open New Tab(_N),打开新标签页(_N),開啟新分頁(_N),새 탭 열기(_N),Abrir pestaña nueva(_N),فتح علامة تبويب جديدة(_N),Buka Tab Baru(_N),
+AddFileToTimeline,,ファイルをタイムラインに追加,Add File to Timeline,将文件添加到时间轴,將檔案新增至時間軸,타임라인에 파일 추가,Agregar archivo a la línea de tiempo,إضافة ملف إلى الجدول الزمني,Tambahkan File ke Garis Waktu,
+CopyMenuHeader,,コピー(_C),Copy(_C),复制(_C),複製(_C),복사(_C),Copiar(_C),نسخ(_C),Salin(_C),
+CutMenuHeader,,切り取り(_T),Cut(_T),剪切(_T),剪下(_T),잘라내기(_T),Cortar(_T),قص(_T),Potong(_T),
+PasteMenuHeader,,貼り付け(_P),Paste(_P),粘贴(_P),貼上(_P),붙여넣기(_P),Pegar(_P),لصق(_P),Tempel(_P),
+DeleteMenuHeader,,削除(_D),Delete(_D),删除(_D),刪除(_D),삭제(_D),Eliminar(_D),حذف(_D),Hapus(_D),
+OpenInNewTabMenuHeader,,新しいタブで開く(_N),Open in New Tab(_N),在新标签页中打开(_N),在新分頁中開啟(_N),새 탭에서 열기(_N),Abrir en pestaña nueva(_N),فتح في علامة تبويب جديدة(_N),Buka di Tab Baru(_N),
+OpenInWindowsExplorerMenuHeader,,Windows エクスプローラーで開く(_W),Open in Windows Explorer(_W),在Windows资源管理器中打开(_W),在Windows檔案總管中開啟(_W),Windows 탐색기에서 열기(_W),Abrir en el Explorador de Windows(_W),فتح في مستكشف Windows(_W),Buka di Penjelajah Windows(_W),
+OpenWithDefaultAppMenuHeader,,既定のアプリで開く(_O),Open with Default App(_O),使用默认应用打开(_O),使用預設應用程式開啟(_O),기본 앱으로 열기(_O),Abrir con la aplicación predeterminada(_O),الفتح بالتطبيق الافتراضي(_O),Buka dengan Aplikasi Default(_O),
+PropertiesMenuHeader,,プロパティ(_R),Properties(_R),属性(_R),內容(_R),속성(_R),Propiedades(_R),الخصائص(_R),Properti(_R),
+SelectAllMenuHeader,,すべて選択(_A),Select All(_A),全选(_A),全選取(_A),모두 선택(_A),Seleccionar todo(_A),تحديد الكل(_A),Pilih Semua(_A),
+AddFavorite,,お気に入りに追加,Add Favorite,添加收藏夹,加入最愛,즐겨찾기 추가,Agregar a favoritos,إضافة إلى المفضلة,Tambah Favorit,
+EditFavorite,,お気に入りの編集,Edit Favorite,编辑收藏夹,編輯最愛,즐겨찾기 편집,Editar favorito,تحرير المفضلة,Sunting Favorit,
+Favorite,,お気に入り,Favorite,收藏夹,收藏夾,즐겨찾기,Favorito,المفضلة,Favorit,
+NameLabel,,名前,Name,名称,名稱,이름,Nombre,اسم,Nama,
+Directory,,ディレクトリ,Directory,目录,目錄,디렉터리,Directorio,دليل,Direktori,
+DirectoryDesc,,"「/」で区切るとサブフォルダを作成できます。
+例: フォルダ名/サブフォルダ名","You can create subfolders by separating them with “/”.
+Example: FolderName/SubfolderName","您可以通过“/”分隔来创建子文件夹。
+例如：文件夹名/子文件夹名","您可以透過“/”分隔來建立子資料夾。
+例如：資料夾名/子資料夾名","“/”로 구분하여 하위 폴더를 만들 수 있습니다.
+예: 폴더명/하위폴더명","Puede crear subcarpetas separándolas con “/”.
+Ejemplo: NombreCarpeta/SubcarpetaNombre","يمكنك إنشاء مجلدات فرعية بفصلها بـ “/”.
+مثال: اسمالمجلد/اسمالمجلدالفرعي","Anda dapat membuat subfolder dengan memisahkannya dengan “/”.
+Contoh: NamaFolder/NamaSubfolder",
+Delete,,削除,Delete,删除,刪除,삭제,Eliminar,حذف,Hapus,
+Done,,完了,Done,完成,完成,완료,Hecho,تم,Selesai,
+Video,,動画,Video,视频,影片,비디오,Video,فيديو,Video,
+Audio,,音声,Audio,音频,音訊,오디오,Audio,صوت,Audio,
+Image,,画像,Image,图像,圖像,이미지,Imagen,صورة,Gambar,
+Text,,テキスト,Text,文本,文字,텍스트,Texto,نص,Teks,
+Folder,,フォルダ,Folder,文件夹,資料夾,폴더,Carpeta,مجلد,Folder,
+Other,,その他,Other,其他,其他,기타,Otro,آخر,Lainnya,
+Filter,,フィルター,Filter,筛选器,篩選器,필터,Filtro,مرشح,Filter,
+SwitchViewMenuHeader,,ビューの切り替え (_V),Switch View (_V),切换视图 (_V),切換檢視 (_V),뷰 전환 (_V),Cambiar vista (_V),تبديل العرض (_V),Beralih Tampilan (_V),
+ListView,,リスト,List View,列表视图,列表檢視,목록 보기,Vista de lista,عرض القائمة,Tampilan Daftar,
+WrapListView,,一覧,Wrap List View,换行列表视图,換行列表檢視,목록 보기(줄 바꿈),Vista de lista con ajuste de línea,عرض القائمة مع التفاف,Tampilan Daftar Pembungkus,
+ThumbnailView,,サムネイル,Thumbnail View,缩略图视图,縮圖檢視,썸네일 뷰,Vista de miniaturas,عرض الصور المصغرة,Tampilan Thumbnail,
+IncreaseViewSizeMenuHeader,,ビューを拡大,Increase View Size,放大视图,放大檢視,뷰 크기 확대,Aumentar tamaño de vista,تكبير العرض,Perbesar Ukuran Tampilan,
+DecreaseViewSizeMenuHeader,,ビューを縮小,Decrease View Size,缩小视图,縮小檢視,뷰 크기 축소,Disminuir tamaño de vista,تصغير العرض,Perkecil Ukuran Tampilan,
+AutoPlay,,自動再生,Auto Play,自动播放,自動播放,자동 재생,Reproducción automática,التشغيل التلقائي,Putar Otomatis,
+OmittedFolders,,省略されたフォルダ,Omitted Folders,省略的文件夹,省略的資料夾,생략된 폴더,Carpetas omitidas,المجلدات المحذوفة,Folder yang Dihilangkan,
+DriveList,,ドライブ一覧,Drive List,驱动器列表,磁碟機清單,드라이브 목록,Lista de unidades,قائمة محركات الأقراص,Daftar Drive,
+Sort,,並べ替え,Sort,排序,排序,정렬,Ordenar,ترتيب,Urutkan,
+SortByName,,名前,Name,名称,名稱,이름,Nombre,اسم,Nama,
+SortByLastWriteTime,,更新日時,Last write time,修改时间,修改時間,수정한 날짜,Fecha de modificación,وقت آخر تعديل,Waktu diubah,
+SortByExtension,,拡張子,Extension,扩展名,副檔名,확장자,Extensión,امتداد,Ekstensi,
+SortAscending,,昇順,Ascending,升序,升冪,오름차순,Ascendente,تصاعدي,Naik,
+SortDescending,,降順,Descending,降序,降冪,내림차순,Descendente,تنازلي,Turun,
+SortOrder,,並べ替え順,Sort order,排序顺序,排序順序,정렬 순서,Orden de clasificación,ترتيب الفرز,Urutan pengurutan,
+Sidebar,,サイドバー,Sidebar,侧边栏,側邊欄,사이드바,Barra lateral,شريط جانبي,Bilah sisi,
+NewFolderName,,新しいフォルダー,New folder,新建文件夹,新增資料夾,새 폴더,Nueva carpeta,مجلد جديد,Folder baru,
+CreateNewFolderMenuHeader,,新規フォルダの作成(_F),Create New Folder(_F),创建新文件夹(_F),建立新資料夾(_F),새 폴더 만들기(_F),Crear nueva carpeta(_F),إنشاء مجلد جديد(_F),Buat Folder Baru(_F),
+CompressMenuHeader,,圧縮(_Z),Compress(_Z),压缩(_Z),壓縮(_Z),압축(_Z),Comprimir(_Z),ضغط(_Z),Kompres(_Z),
+ExtractMenuHeader,,解凍(_X),Extract(_X),解压(_X),解壓縮(_X),압축 해제(_X),Extraer(_X),استخراج(_X),Ekstrak(_X),
+SevenZipCompressMenuHeader,,7-Zip で圧縮(_7),Compress with 7-Zip(_7),用 7-Zip 压缩(_7),使用 7-Zip 壓縮(_7),7-Zip으로 압축(_7),Comprimir con 7-Zip(_7),ضغط بـ 7-Zip(_7),Kompres dengan 7-Zip(_7),
+SevenZipExtractMenuHeader,,7-Zip で解凍(_E),Extract with 7-Zip(_E),用 7-Zip 解压(_E),使用 7-Zip 解壓縮(_E),7-Zip으로 압축 해제(_E),Extraer con 7-Zip(_E),استخراج بـ 7-Zip(_E),Ekstrak dengan 7-Zip(_E),
+RenameMenuHeader,,名前の変更(_M),Rename(_M),重命名(_M),重新命名(_M),이름 바꾸기(_M),Cambiar nombre(_M),إعادة تسمية(_M),Ganti Nama(_M),
+Cancel,,キャンセル,Cancel,取消,取消,취소,Cancelar,إلغاء,Batal,
+RenameDialogTitle,,名前の変更,Rename,重命名,重新命名,이름 바꾸기,Cambiar nombre,إعادة تسمية,Ganti Nama,
+ChangeExtensionConfirmMessage,,"拡張子を変更すると、ファイルが使えなくなる可能性があります。
+
+変更しますか?","If you change a file name extension, the file might become unusable.
+
+Are you sure you want to change it?","如果更改文件扩展名，文件可能会变得不可用。
+
+确定要更改吗?","如果變更副檔名，檔案可能會無法使用。
+
+確定要變更嗎?","파일 확장자를 변경하면 파일을 사용할 수 없게 될 수 있습니다.
+
+변경하시겠습니까?","Si cambia la extensión del archivo, es posible que el archivo quede inutilizable.
+
+¿Desea cambiarla?","إذا قمت بتغيير امتداد الملف، فقد يصبح الملف غير قابل للاستخدام.
+
+هل تريد تغييره؟","Jika ekstensi file diubah, file mungkin tidak dapat digunakan.
+
+Ubah ekstensi?",

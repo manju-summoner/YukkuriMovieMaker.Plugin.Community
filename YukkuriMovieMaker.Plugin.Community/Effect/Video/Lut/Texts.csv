@@ -1,0 +1,16 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+EffectName,,LUT適用,Apply LUT,应用LUT,套用LUT,LUT 적용,Aplicar LUT,تطبيق LUT,Terapkan LUT
+GroupName,,LUT適用,Apply LUT,应用LUT,套用LUT,LUT 적용,Aplicar LUT,تطبيق LUT,Terapkan LUT
+FilePathName,,ファイル,File,文件,檔案,파일,Archivo,ملف,File
+FilePathDesc,,適用するLUTファイル (.cube / .look),LUT file to apply (.cube / .look),要应用的LUT文件 (.cube / .look),要套用的LUT檔案 (.cube / .look),적용할 LUT 파일 (.cube / .look),Archivo LUT a aplicar (.cube / .look),ملف LUT المراد تطبيقه (.cube / .look),File LUT yang akan diterapkan (.cube / .look)
+FilterName,,LUTファイル (*.cube;*.look),LUT Files (*.cube;*.look),LUT文件 (*.cube;*.look),LUT檔案 (*.cube;*.look),LUT 파일 (*.cube;*.look),Archivos LUT (*.cube;*.look),ملفات LUT (*.cube;*.look),File LUT (*.cube;*.look)
+OpacityName,,不透明度,Opacity,不透明度,不透明度,불투명도,Opacidad,التعتيم,Opasitas
+OpacityDesc,,LUTの適用強度,LUT application strength,LUT应用强度,LUT套用強度,LUT 적용 강도,Intensidad de aplicación del LUT,قوة تطبيق LUT,Kekuatan penerapan LUT
+BlendModeName,,合成モード,Blend Mode,混合模式,混合模式,블렌드 모드,Modo de fusión,وضع المزج,Mode Blend
+BlendModeDesc,,LUT適用結果の合成モード,Blend mode of the LUT result,LUT结果的混合模式,LUT結果的混合模式,LUT 결과의 블렌드 모드,Modo de fusión del resultado LUT,وضع مزج نتيجة LUT,Mode blend hasil LUT
+InterpolationName,,補間方式,Interpolation,插値方式,內插方式,보간 방식,Interpolación,طريقة الاستيفاء,Interpolasi
+InterpolationDesc,,LUTのサンプリング補間方式,Sampling interpolation method for the LUT,LUT采样插值方式,LUT 採樣內插方式,LUT 샘플링 보간 방식,Método de interpolación al muestrear el LUT,طريقة استيفاء أخذ العينات من LUT,Metode interpolasi sampling LUT
+InterpolationTetra,,四面体,Tetrahedral,四面体,四面體,사면체,Tetraédrica,رباعي الأسطح,Tetrahedral
+InterpolationTetraDesc,,色の連続性に優れた業界標準の補間,Industry standard with superior color continuity,色彩连续性优异的业界标准插值,色彩連續性優異的業界標準內插,색의 연속성이 뛰어난 업계 표준 보간,Estándar de la industria con superior continuidad de color,معيار صناعي بتدرج لوني أفضل,Standar industri dengan kontinuitas warna unggul
+InterpolationTrilinear,,三線形,Trilinear,三线性,三線性,삼선형,Trilineal,ثلاثي الخطية,Trilinear
+InterpolationTrilinearDesc,,軸に沿った滑らかな8点補間,Smooth 8-point interpolation along axes,沿轴的平滑8点插值,沿軸的平滑8點內插,축을 따른 매끄러운 8점 보간,Interpolación suave de 8 puntos a lo largo de los ejes,استيفاء سلس بـ 8 نقاط على المحاور,Interpolasi 8-titik halus sepanjang sumbu

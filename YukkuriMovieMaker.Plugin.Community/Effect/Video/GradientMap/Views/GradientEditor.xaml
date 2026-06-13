@@ -1,0 +1,17 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Views.GradientEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.GradientMap.Localization"
+             xmlns:controls="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
+             x:Name="root">
+    <UserControl.ContextMenu>
+        <ContextMenu DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
+            <MenuItem Header="{x:Static loc:Texts.ExportAsGrdName}"
+                      Command="{Binding ExportAsGrdCommand}"/>
+            <MenuItem Header="{x:Static loc:Texts.ExportAsPngName}"
+                      Command="{Binding ExportAsPngCommand}"/>
+        </ContextMenu>
+    </UserControl.ContextMenu>
+    <controls:GradientStopsEditor x:Name="stopsEditor"
+                                  ItemProperties="{Binding ItemProperties, ElementName=root}"/>
+</UserControl>

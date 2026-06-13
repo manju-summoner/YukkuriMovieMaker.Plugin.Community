@@ -364,3 +364,7 @@ FodyWeavers.xsd
 
 # YMM4のパスの指定用
 Directory.Build.props
+
+# Auto-generated localization resx (generated from Texts.csv by source generator)
+Texts.*.resx
+Texts.resx

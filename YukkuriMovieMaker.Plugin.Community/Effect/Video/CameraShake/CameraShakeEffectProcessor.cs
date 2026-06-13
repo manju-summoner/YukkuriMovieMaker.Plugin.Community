@@ -36,7 +36,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CameraShake
 
         private double GetCenteringRandomValue(double span, int frame, int fps, int parameterID)
         {
-            double random = span != 0.0 ? Animation.GetRandomMoveRate(item, parameterID, frame, fps, span) : new MersenneTwister(this.GetHashCode() / (parameterID + 1) + frame).NextDouble();
+            double random = span != 0.0 ? Animation.GetRandomMoveRate(item, parameterID, frame, fps, span) : new MersenneTwister(item.GetHashCode() / (parameterID + 1) + frame).NextDouble();
             return random - 0.5;
         }
 

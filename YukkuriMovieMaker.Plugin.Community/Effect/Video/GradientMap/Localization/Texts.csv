@@ -1,0 +1,21 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+EffectName,,グラデーションマップ,Gradient Map,渐变映射,漸層對應,그라디언트 맵,Mapa de degradado,خريطة التدرج,Peta Gradien
+GroupName,,グラデーションマップ,Gradient Map,渐变映射,漸層對應,그라디언트 맵,Mapa de degradado,خريطة التدرج,Peta Gradien
+GradientFilePathName,,ファイル,File,文件,檔案,파일,Archivo,ملف,File
+GradientFilePathDesc,,グラデーションマップ画像ファイルのパス,Path to the gradient map image file,渐变映射图像文件路径,漸層對應影像檔案路徑,그라디언트 맵 이미지 파일 경로,Ruta al archivo de imagen del mapa de degradado,مسار ملف صورة خريطة التدرج,Jalur file gambar peta gradien
+GradientIndexName,,選択,Selection,选择,選擇,선택,Selección,تحديد,Pilihan
+GradientIndexDesc,,ファイル内の複数グラデーションからインデックスで選択します,Select by index from multiple gradients within the file,从文件中的多个渐变中按索引选择,從檔案內多個漸層中依索引選取,파일 내 여러 그라디언트 중 인덱스로 선택합니다,Selecciona por índice entre múltiples degradados del archivo,تحديد حسب الفهرس من تدرجات متعددة داخل الملف,Pilih berdasarkan indeks dari beberapa gradien dalam file
+OpacityName,,不透明度,Opacity,不透明度,不透明度,불투명도,Opacidad,التعتيم,Opasitas
+OpacityDesc,,グラデーションマップの適用強度,Gradient map application strength,渐变映射应用强度,漸層對應套用強度,그라디언트 맵 적용 강도,Intensidad de aplicación del mapa de degradado,قوة تطبيق خريطة التدرج,Kekuatan penerapan peta gradien
+BlendModeName,,合成モード,Blend Mode,混合模式,混合模式,블렌드 모드,Modo de fusión,وضع المزج,Mode Blend
+BlendModeDesc,,グラデーションマップの合成モード,Gradient map blend mode,渐变映射混合模式,漸層對應混合模式,그라디언트 맵 블렌드 모드,Modo de fusión del mapa de degradado,وضع مزج خريطة التدرج,Mode blend peta gradien
+IsHorizontalName,,水平サンプリング,Horizontal Sampling,水平采样,水平採樣,수평 샘플링,Muestreo horizontal,أخذ العينات الأفقي,Sampling Horizontal
+IsHorizontalDesc,,オンのとき水平方向にグラデーション画像をサンプリングします,When enabled samples the gradient image horizontally,启用时水平采样渐变图像,啟用時水平採樣漸層影像,활성화 시 수평 방향으로 그라디언트 이미지를 샘플링합니다,Cuando está activado muestrea la imagen de degradado horizontalmente,عند التفعيل يأخذ عينات أفقياً من صورة التدرج,Saat diaktifkan mengambil sampel gambar gradien secara horizontal
+GrdFileTooltip,,Photoshop対応ファイル,Photoshop Compatible File,Photoshop兼容文件,Photoshop相容檔案,Photoshop 호환 파일,Archivo compatible con Photoshop,ملف متوافق مع Photoshop,File Kompatibel Photoshop
+CustomGradientName,,グラデーション,Gradient,渐变,漸層,그라디언트,Degradado,تدرج,Gradien
+CustomGradientDesc,,グラデーションをインラインで定義します。空の場合はグラデーションファイルを使用します。,Defines the gradient inline. When empty the gradient file is used.,定义内联渐变。为空时使用渐变文件。,以內嵌方式定義漸層。為空時使用漸層檔案。,그라디언트를 인라인으로 정의합니다. 비어 있으면 그라디언트 파일을 사용합니다.,Define el degradado de forma integrada. Si está vacío se usa el archivo de degradado.,يعرّف التدرج بشكل مضمّن. عند الفراغ يُستخدم ملف التدرج.,Mendefinisikan gradien secara langsung. Jika kosong file gradien digunakan.
+ExportAsGrdName,,GRDとして書き出す,Export as GRD,导出为GRD,匯出為GRD,GRD로 내보내기,Exportar como GRD,تصدير بصيغة GRD,Ekspor sebagai GRD
+ExportAsPngName,,PNGとして書き出す,Export as PNG,导出为PNG,匯出為PNG,PNG로 내보내기,Exportar como PNG,تصدير بصيغة PNG,Ekspor sebagai PNG
+ExportGrdFilterName,,グラデーションファイル (*.grd)|*.grd,Gradient Files (*.grd)|*.grd,渐变文件 (*.grd)|*.grd,漸層檔案 (*.grd)|*.grd,그라디언트 파일 (*.grd)|*.grd,Archivos de degradado (*.grd)|*.grd,ملفات التدرج (*.grd)|*.grd,File Gradien (*.grd)|*.grd
+ExportPngFilterName,,PNG イメージ (*.png)|*.png,PNG Image (*.png)|*.png,PNG图像 (*.png)|*.png,PNG 影像 (*.png)|*.png,PNG 이미지 (*.png)|*.png,Imagen PNG (*.png)|*.png,صورة PNG (*.png)|*.png,Gambar PNG (*.png)|*.png
+NoFileSelected,,未選択,Not Selected,未选择,未選擇,선택 안 함,No seleccionado,غير محدد,Tidak Dipilih

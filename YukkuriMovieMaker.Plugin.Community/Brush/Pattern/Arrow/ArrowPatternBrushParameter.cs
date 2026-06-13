@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
@@ -35,7 +35,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow
         public Animation Point { get; } = new Animation(50, 0, YMM4Constants.VeryLargeValue);
 
         [Display(Name = nameof(Texts.Zoom), ResourceType = typeof(Texts), Order = 250)]
-        [AnimationSlider("F1", "%", 0, 400)]
+        [AnimationSlider("F1", "%", 0, 100)]
         public Animation Zoom { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
         public override IBrushSource CreateBrush(IGraphicsDevicesAndContext devices)

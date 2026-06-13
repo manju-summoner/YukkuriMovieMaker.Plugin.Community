@@ -1,0 +1,15 @@
+using System.Collections.Generic;
+
+namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
+{
+    internal class NotepadState
+    {
+        public string FilePath { get; set; } = string.Empty;
+        public string Text { get; set; } = string.Empty;
+        public double Zoom { get; set; } = 1.0;
+        public bool IsSaved { get; set; } = true;
+        public bool WordWrap { get; set; } = false;
+        public bool ShowLineNumbers { get; set; } = false;
+        public Dictionary<string, NotepadEmbeddedImage> Images { get; set; } = [];
+    }
+}

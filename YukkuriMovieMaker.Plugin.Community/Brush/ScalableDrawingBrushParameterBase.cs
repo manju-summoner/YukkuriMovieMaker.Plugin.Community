@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Player.Video;
@@ -12,7 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush
     internal abstract class ScalableDrawingBrushParameterBase : DrawingBrushParameterBase
     {
         [Display(Name = nameof(Texts.BrushParameterZoom), Description = nameof(Texts.BrushParameterZoom), Order = 250, ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "%", 0, 400)]
+        [AnimationSlider("F1", "%", 0, 100)]
         public Animation Zoom { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
         public override Matrix3x2 CreateBrushMatrix(TimelineItemSourceDescription desc)

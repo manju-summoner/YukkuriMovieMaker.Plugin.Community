@@ -1,0 +1,14 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+TritoneEffectName,,トライトーン,Tritone,三色调,三色調,트라이톤,Tritono,ثلاثي اللون,Tritone
+ShadowColorName,,シャドウ,Shadow,阴影,陰影,섀도우,Sombras,الظلال,Bayangan
+ShadowColorDesc,,暗部に割り当てる色,Color assigned to the shadows,分配给暗部的颜色,分配給暗部的顏色,어두운 영역에 할당되는 색상,Color asignado a las sombras,اللون المخصص للظلال,Warna yang diberikan pada bayangan
+MidtoneColorName,,ミッドトーン,Midtone,中间调,中間調,미드톤,Tonos medios,الدرجات المتوسطة,Mid-tone
+MidtoneColorDesc,,中間調に割り当てる色,Color assigned to the midtones,分配给中间调的颜色,分配給中間調的顏色,중간 영역에 할당되는 색상,Color asignado a los tonos medios,اللون المخصص للدرجات المتوسطة,Warna yang diberikan pada mid-tone
+HighlightColorName,,ハイライト,Highlight,高光,高光,하이라이트,Iluminaciones,الإضاءات,Sorotan
+HighlightColorDesc,,明部に割り当てる色,Color assigned to the highlights,分配给亮部的颜色,分配給亮部的顏色,밝은 영역에 할당되는 색상,Color asignado a las iluminaciones,اللون المخصص للإضاءات,Warna yang diberikan pada sorotan
+MidPositionName,,中間調位置,Midtone Position,中间调位置,中間調位置,미드톤 위치,Posición del tono medio,موضع الدرجة المتوسطة,Posisi Mid-tone
+MidPositionDesc,,シャドウとハイライトを分ける中間調の輝度位置,Luminance position of the midtone separating shadows and highlights,分隔阴影与高光的中间调亮度位置,分隔陰影與高光的中間調亮度位置,섀도우와 하이라이트를 나누는 미드톤의 휘도 위치,Posición de luminancia del tono medio que separa sombras e iluminaciones,موضع اللمعان للدرجة المتوسطة الفاصلة بين الظلال والإضاءات,Posisi kecerahan mid-tone yang memisahkan bayangan dan sorotan
+OpacityName,,不透明度,Opacity,不透明度,不透明度,불투명도,Opacidad,التعتيم,Opasitas
+OpacityDesc,,トライトーンの適用強度,Tritone application strength,三色调应用强度,三色調套用強度,트라이톤 적용 강도,Intensidad de aplicación del tritono,قوة تطبيق ثلاثي اللون,Kekuatan penerapan tritone
+BlendModeName,,合成モード,Blend Mode,混合模式,混合模式,블렌드 모드,Modo de fusión,وضع المزج,Mode Blend
+BlendModeDesc,,トライトーンの合成モード,Tritone blend mode,三色调混合模式,三色調混合模式,트라이톤 블렌드 모드,Modo de fusión del tritono,وضع مزج ثلاثي اللون,Mode blend tritone

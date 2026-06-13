@@ -1,0 +1,7 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+RatioCrop,,クリッピング（比率）,Clipping (Ratio),裁剪（比例）,裁剪（比例）,클리핑 (비율),Recorte (proporción),نسبة الاقتطاع,Klipping (rasio)
+Top,,上,Top,上,上,위쪽,Arriba,أعلى,Atas
+Bottom,,下,Bottom,下,下,아래,Abajo,الأسفل,Bawah
+Left,,左,Left,左,左,왼쪽,Izquierda,يسار,Kiri
+Right,,右,Right,右,右,오른쪽,Derecha,اليمين,Kanan
+IsCentering,,中央寄せ,Centered,居中,置中對齊,중앙 정렬,Centrado,مُتمركز,Tengah

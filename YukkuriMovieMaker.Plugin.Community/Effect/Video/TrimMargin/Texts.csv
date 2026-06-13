@@ -1,0 +1,7 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+TrimMarginEffectName,,余白除去,Trim Margin,裁剪空白,裁剪空白,여백 제거,Recortar Margen,إزالة الهامش,Pangkas Margin
+TrimMarginCenterName,,中央寄せ,Center,居中,居中,가운데 정렬,Centrar,توسيط,Pusatkan
+TrimMarginCenterDesc,,余白を除去した後に映像を中央に配置します。,Centers the image after trimming the transparent margin.,裁剪透明边距后将图像居中。,裁剪透明邊距後將圖像居中。,투명 여백 제거 후 이미지를 가운데에 배치합니다.,Centra la imagen tras recortar el margen transparente.,يُرتّب الصورة في المنتصف بعد قصّ الهامش الشفاف.,Menempatkan gambar di tengah setelah memangkas margin transparan.
+TagTrimMargin,,余白除去,trim margin,裁剪空白,裁剪空白,여백 제거,recortar margen,إزالة الهامش,pangkas margin
+TagCrop,,クロップ,crop,裁剪,裁剪,크롭,recorte,قص,pangkas
+TagTransparent,,透明,transparent,透明,透明,투명,transparente,شفاف,transparan

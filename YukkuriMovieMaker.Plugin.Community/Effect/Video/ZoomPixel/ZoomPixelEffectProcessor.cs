@@ -4,19 +4,13 @@ using YukkuriMovieMaker.Player.Video;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ZoomPixel
 {
-    internal class ZoomPixelEffectProcessor : IVideoEffectProcessor
+    internal class ZoomPixelEffectProcessor(IGraphicsDevicesAndContext devices, ZoomPixelEffect item) : IVideoEffectProcessor
     {
-        readonly IGraphicsDevicesAndContext devices;
-        readonly ZoomPixelEffect item;
+        readonly IGraphicsDevicesAndContext devices = devices;
+        readonly ZoomPixelEffect item = item;
         ID2D1Image? input;
 
         public ID2D1Image Output => input ?? throw new NullReferenceException(nameof(input) + "is null");
-
-        public ZoomPixelEffectProcessor(IGraphicsDevicesAndContext devices, ZoomPixelEffect item)
-        {
-            this.devices = devices;
-            this.item = item;
-        }
 
         public DrawDescription Update(EffectDescription effectDescription)
         {

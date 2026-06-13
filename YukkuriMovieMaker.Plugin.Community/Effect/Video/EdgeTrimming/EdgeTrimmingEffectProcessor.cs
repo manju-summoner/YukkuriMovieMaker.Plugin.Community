@@ -5,18 +5,13 @@ using YukkuriMovieMaker.Player.Video.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeTrimming
 {
-    internal class EdgeTrimmingEffectProcessor : VideoEffectProcessorBase
+    internal class EdgeTrimmingEffectProcessor(IGraphicsDevicesAndContext devices, EdgeTrimmingEffect item) : VideoEffectProcessorBase(devices)
     {
-        readonly EdgeTrimmingEffect item;
+        readonly EdgeTrimmingEffect item = item;
         EdgeTrimmingCustomEffect? effect;
 
         bool isFirst = true;
         double thickness;
-
-        public EdgeTrimmingEffectProcessor(IGraphicsDevicesAndContext devices, EdgeTrimmingEffect item) : base(devices)
-        {
-            this.item = item;
-        }
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {

@@ -10,7 +10,7 @@ Yaw,,水平回転,Horizontal Rotation,水平旋转,水平旋轉,수평 회전,Ro
 YawDesc,,カメラの水平回転,Camera Horizontal Rotation,相机水平旋转,相機水平旋轉,카메라 수평 회전,Rotación horizontal de la cámara,الدوران الأفقي للكاميرا,Rotasi Horizontal Kamera
 Pitch,,垂直回転,Vertical Rotation,垂直旋转,垂直旋轉,수직 회전,Rotación vertical,دوران عمودي,Rotasi Vertikal
 PitchDesc,,カメラの垂直回転,Camera Vertical Rotation,摄像机垂直旋转,相機垂直旋轉,카메라 수직 회전,Rotación vertical de la cámara,الدوران العمودي للكاميرا,Rotasi Vertikal Kamera
-Roll,,傾き,Tilt,倾斜,傾斜,기울기,Inclinación,ميل,Tilt
-RollDesc,,カメラの傾き,Camera Tilt,摄像机倾斜,相機傾斜,카메라 기울기,Inclinación de la cámara,ميل الكاميرا,Tilt Kamera
+Roll,,傾き,Tilt,倾斜,傾斜,기울기,Inclinación,ميل,Kemiringan
+RollDesc,,カメラの傾き,Camera Tilt,摄像机倾斜,相機傾斜,카메라 기울기,Inclinación de la cámara,ميل الكاميرا,Kemiringan Kamera
 Span,,間隔,Interval,间隔,間隔,간격,Intervalo,فاصل,Jarak
 SecUnit,,秒,Second,秒,秒,초,Segundo,ثانية,Detik

@@ -1,0 +1,841 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Tool.Explorer.ExplorerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Tool.Explorer"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:pt="clr-namespace:YukkuriMovieMaker.Views.Triggers;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:pa="clr-namespace:YukkuriMovieMaker.Views.Actions;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:pb="clr-namespace:YukkuriMovieMaker.Views.Behaviors;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:pap="clr-namespace:YukkuriMovieMaker.Views.AttachedProperties;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:pc="clr-namespace:YukkuriMovieMaker.Views.Converters;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:ps="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance Type={x:Type local:ExplorerViewModel}}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <local:DoubleToGridLengthConverter x:Key="DoubleToGridLengthConverter"/>
+            <ItemsPanelTemplate x:Key="VirtualizedStackPanelItemsPanelTemplate">
+                <VirtualizingStackPanel IsItemsHost="True" Orientation="Vertical" Margin="3"/>
+            </ItemsPanelTemplate>
+            <ItemsPanelTemplate x:Key="VirtualizedWrapPanelItemsPanelTemplate">
+                <c:VirtualizingWrapPanel ItemWidth="{Binding Layout.ItemWidth}" ItemHeight="{Binding Layout.ItemHeight}" CacheRows="2" Margin="3"/>
+            </ItemsPanelTemplate>
+
+            <DataTemplate x:Key="ToolTipTemplate">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Control>
+                        <Control.Style>
+                            <Style TargetType="Control">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsAutoPlay}" Value="True">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <MediaElement Grid.Row="0" MaxWidth="300" MaxHeight="300" Volume="{Binding Source={x:Static ps:YMMSettings.Default},Path=Volume,Converter={pc:PercentToScaleConverter}}">
+                                                        <MediaElement.Triggers>
+                                                            <EventTrigger RoutedEvent="Loaded">
+                                                                <EventTrigger.Actions>
+                                                                    <BeginStoryboard>
+                                                                        <Storyboard>
+                                                                            <MediaTimeline Source="{Binding Path}" RepeatBehavior="Forever"/>
+                                                                        </Storyboard>
+                                                                    </BeginStoryboard>
+                                                                </EventTrigger.Actions>
+                                                            </EventTrigger>
+                                                        </MediaElement.Triggers>
+                                                    </MediaElement>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsAutoPlay}" Value="False">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <Image Grid.Row="0" Source="{Binding Thumbnail}" MaxWidth="300" MaxHeight="300"/>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Control.Style>
+                    </Control>
+                    <TextBlock Grid.Row="1" Text="{Binding Path}" TextWrapping="Wrap" MaxWidth="300"/>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate x:Key="ListViewItemTemplate">
+                <Grid Background="Transparent" ToolTipService.Placement="Right">
+                    <Grid.ToolTip>
+                        <ToolTip ContentTemplate="{StaticResource ToolTipTemplate}" Content="{Binding}"/>
+                    </Grid.ToolTip>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Image Grid.Column="0" 
+                           Source="{Binding Icon}"
+                           Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.Layout.IconSize, FallbackValue=16}" 
+                           Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.Layout.IconSize, FallbackValue=16}" 
+                           Margin="0,0,4,0"
+                           Stretch="Uniform"/>
+                    <Grid Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBox Text="{Binding RenameText, UpdateSourceTrigger=PropertyChanged}" 
+                                 Padding="0" Margin="-4,-2,-4,-2" HorizontalAlignment="Stretch" VerticalContentAlignment="Center">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                            <i:Interaction.Behaviors>
+                                <local:RenameTextBoxBehavior CommitRenameCommand="{Binding DataContext.CommitRenameCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
+                            </i:Interaction.Behaviors>
+                        </TextBox>
+                    </Grid>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate x:Key="WrapListViewItemTemplate">
+                <Grid Background="Transparent" ToolTipService.Placement="Right">
+                    <Grid.ToolTip>
+                        <ToolTip ContentTemplate="{StaticResource ToolTipTemplate}" Content="{Binding}"/>
+                    </Grid.ToolTip>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Image Grid.Column="0" 
+                           Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.Layout.IconSize, FallbackValue=16}" 
+                           Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.Layout.IconSize, FallbackValue=16}" 
+                           Margin="0,0,4,0"
+                           Stretch="Uniform">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Source" Value="{Binding Thumbnail}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Thumbnail}" Value="{x:Null}">
+                                        <Setter Property="Source" Value="{Binding Icon}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <Grid Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBox Text="{Binding RenameText, UpdateSourceTrigger=PropertyChanged}" 
+                                 Padding="0" Margin="-4,-2,-4,-2" HorizontalAlignment="Stretch" VerticalContentAlignment="Center">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                            <i:Interaction.Behaviors>
+                                <local:RenameTextBoxBehavior CommitRenameCommand="{Binding DataContext.CommitRenameCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
+                            </i:Interaction.Behaviors>
+                        </TextBox>
+                    </Grid>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate x:Key="IconsViewItemTemplate">
+                <Grid Background="Transparent" 
+                      ToolTipService.Placement="Right">
+                    <Grid.ToolTip>
+                        <ToolTip ContentTemplate="{StaticResource ToolTipTemplate}" Content="{Binding}"/>
+                    </Grid.ToolTip>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.Layout.IconSize, FallbackValue=16}"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Image Grid.Row="0" Stretch="Uniform">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Source" Value="{Binding Thumbnail}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Thumbnail}" Value="{x:Null}">
+                                        <Setter Property="Source" Value="{Binding Icon}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <Grid Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="2,0">
+                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBox Text="{Binding RenameText, UpdateSourceTrigger=PropertyChanged}" 
+                                 Padding="0" Margin="-4,-2,-4,-2" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" TextWrapping="Wrap">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                            <i:Interaction.Behaviors>
+                                <local:RenameTextBoxBehavior CommitRenameCommand="{Binding DataContext.CommitRenameCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
+                            </i:Interaction.Behaviors>
+                        </TextBox>
+                    </Grid>
+                </Grid>
+            </DataTemplate>
+
+            <ContextMenu x:Key="FolderItemContextMenu" d:DataContext="{d:DesignInstance Type={x:Type local:ExplorerDirectoryItemViewModel}}">
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CreateNewViewCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.OpenInNewTabMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Plus}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.OpenInWindowsExplorerCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.OpenInWindowsExplorerMenuHeader}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CutCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.CutMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentCut}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CopyCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.CopyMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.RenameCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.RenameMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Pencil}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.DeleteCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.DeleteMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Delete}}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CompressCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.CompressMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ZipBox}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.SevenZipCompressCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.SevenZipCompressMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ZipBox}}" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.IsSevenZipAvailable, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.OpenPropertiesCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.PropertiesMenuHeader}"/>
+            </ContextMenu>
+            <ContextMenu x:Key="FileItemContextMenu" d:DataContext="{d:DesignInstance Type={x:Type local:ExplorerFileItemViewModel}}">
+                <MenuItem Command="{Binding Source={x:Static ps:CommandSettings.Default},Path=[AddFileItem]}" Header="{x:Static local:Texts.AddFileToTimeline}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox},Path=DataContext.SelectedPaths}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.OpenWithDefaultAppCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.OpenWithDefaultAppMenuHeader}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CutCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.CutMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentCut}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CopyCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.CopyMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.RenameCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.RenameMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Pencil}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.DeleteCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.DeleteMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Delete}}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CompressCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.CompressMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ZipBox}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.ExtractCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.ExtractMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ZipBoxOutline}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.SevenZipCompressCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.SevenZipCompressMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ZipBox}}" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.IsSevenZipAvailable, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.SevenZipExtractCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.SevenZipExtractMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ZipBoxOutline}}" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.IsSevenZipAvailable, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.OpenPropertiesCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.PropertiesMenuHeader}"/>
+            </ContextMenu>
+            <ContextMenu x:Key="SidebarFolderItemContextMenu" d:DataContext="{d:DesignInstance Type={x:Type local:ExplorerSidebarDirectoryViewModel}}">
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.OpenInWindowsExplorerCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.OpenInWindowsExplorerMenuHeader}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CutCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.CutMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentCut}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CopyCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.CopyMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.RenameCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.RenameMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Pencil}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.DeleteCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.DeleteMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Delete}}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.CompressCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.CompressMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ZipBox}}"/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.SevenZipCompressCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.SevenZipCompressMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ZipBox}}" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.IsSevenZipAvailable, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Separator/>
+                <MenuItem Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.OpenPropertiesCommand}" CommandParameter="{Binding}" Header="{x:Static local:Texts.PropertiesMenuHeader}"/>
+            </ContextMenu>
+            <ContextMenu x:Key="SidebarContextMenu" d:DataContext="{d:DesignInstance Type={x:Type local:ExplorerViewModel}}">
+                <MenuItem Command="{Binding CreateNewFolderCommand}" Header="{x:Static local:Texts.CreateNewFolderMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.FolderPlus}}"/>
+            </ContextMenu>
+            <ContextMenu x:Key="FileListBoxContextMenu" d:DataContext="{d:DesignInstance Type={x:Type local:ExplorerViewModel}}">
+                <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Plus}}"/>
+                <MenuItem Command="{Binding OpenCurrentLocationInWindowsExplorerCommand}" Header="{x:Static local:Texts.OpenInWindowsExplorerMenuHeader}"/>
+                <Separator/>
+                <MenuItem Header="{x:Static local:Texts.Refresh}" Icon="{DynamicResource {x:Static icons:IconKeys.Refresh}}" Command="{Binding RefreshCommand}"/>
+                <Separator/>
+                <MenuItem Command="{Binding CreateNewFolderCommand}" Header="{x:Static local:Texts.CreateNewFolderMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.FolderPlus}}"/>
+                <Separator/>
+                <MenuItem Header="{x:Static local:Texts.Sort}" Icon="{DynamicResource {x:Static icons:IconKeys.Sort}}">
+                    <MenuItem Header="{x:Static local:Texts.SortByName}" IsCheckable="True" IsChecked="{Binding IsSortByName, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Name"/>
+                    <MenuItem Header="{x:Static local:Texts.SortByLastWriteTime}" IsCheckable="True" IsChecked="{Binding IsSortByLastWriteTime, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="LastWriteTime"/>
+                    <MenuItem Header="{x:Static local:Texts.SortByExtension}" IsCheckable="True" IsChecked="{Binding IsSortByExtension, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Extension"/>
+                    <Separator/>
+                    <MenuItem Header="{x:Static local:Texts.SortAscending}" IsCheckable="True" IsChecked="{Binding IsSortAscending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Ascending" Icon="{DynamicResource {x:Static icons:IconKeys.SortAscending}}"/>
+                    <MenuItem Header="{x:Static local:Texts.SortDescending}" IsCheckable="True" IsChecked="{Binding IsSortDescending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Descending" Icon="{DynamicResource {x:Static icons:IconKeys.SortDescending}}"/>
+                </MenuItem>
+                <MenuItem Header="{x:Static local:Texts.SwitchViewMenuHeader}">
+                    <MenuItem Header="{x:Static local:Texts.ListView}" IsCheckable="True" IsChecked="{Binding IsViewList, Mode=OneWay}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.List}"/>
+                    <MenuItem Header="{x:Static local:Texts.WrapListView}" IsCheckable="True" IsChecked="{Binding IsViewWrapList, Mode=OneWay}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.WrapList}"/>
+                    <MenuItem Header="{x:Static local:Texts.ThumbnailView}" IsCheckable="True" IsChecked="{Binding IsViewTiles, Mode=OneWay}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.Tiles}"/>
+                </MenuItem>
+                <MenuItem Header="{x:Static local:Texts.IncreaseViewSizeMenuHeader}" Command="{Binding DataContext.IncreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyPlus}}"/>
+                <MenuItem Header="{x:Static local:Texts.DecreaseViewSizeMenuHeader}" Command="{Binding DataContext.DecreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyMinus}}"/>
+                <Separator/>
+                <MenuItem Command="{Binding PasteCommand}" Header="{x:Static local:Texts.PasteMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>
+                <Separator/>
+                <MenuItem Command="{Binding SelectAllCommand}" Header="{x:Static local:Texts.SelectAllMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.SelectAll}}"/>
+            </ContextMenu>
+
+            <Style x:Key="FileListBoxStyle" TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Layout.Mode}" Value="List">
+                        <Setter Property="ItemsPanel" Value="{StaticResource VirtualizedStackPanelItemsPanelTemplate}"/>
+                        <Setter Property="ItemTemplate" Value="{StaticResource ListViewItemTemplate}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Layout.Mode}" Value="WrapList">
+                        <Setter Property="ItemsPanel" Value="{StaticResource VirtualizedWrapPanelItemsPanelTemplate}"/>
+                        <Setter Property="ItemTemplate" Value="{StaticResource WrapListViewItemTemplate}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Layout.Mode}" Value="Tiles">
+                        <Setter Property="ItemsPanel" Value="{StaticResource VirtualizedWrapPanelItemsPanelTemplate}"/>
+                        <Setter Property="ItemTemplate" Value="{StaticResource IconsViewItemTemplate}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="pb:StyleBehaviorCollection.StyleBehaviors">
+                    <Setter.Value>
+                        <pb:StyleBehaviorCollection>
+                            <local:DropFileBehavior Path="{Binding Location}" IsDragOverHighlightingEnabled="False" DropCompletedCommand="{Binding DropCompletedCommand}"/>
+                        </pb:StyleBehaviorCollection>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="pt:StyleTriggerCollection.StyleTriggers">
+                    <Setter.Value>
+                        <pt:StyleTriggerCollection>
+                            <pt:DpiChangedTrigger>
+                                <i:InvokeCommandAction Command="{Binding DpiChangedCommand}" EventArgsParameterPath="NewDpi"/>
+                            </pt:DpiChangedTrigger>
+                            <i:EventTrigger EventName="MouseDown">
+                                <i:InvokeCommandAction Command="{Binding UnselectAllCommand}"/>
+                            </i:EventTrigger>
+                        </pt:StyleTriggerCollection>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="ContextMenu" Value="{StaticResource FileListBoxContextMenu}"/>
+            </Style>
+            <Style x:Key="FileListBoxItemStyle" TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Margin" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="VerticalContentAlignment" Value="Top"/>
+                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                <Setter Property="pb:StyleBehaviorCollection.StyleBehaviors">
+                    <Setter.Value>
+                        <pb:StyleBehaviorCollection>
+                            <local:DragFileBehavior Paths="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=ListBox}, Path=DataContext.SelectedPaths}"/>
+                            <local:DropFileBehavior Path="{Binding Path}" IsEnabled="{Binding Converter={pc:TypeEqualsConverter},ConverterParameter={x:Type local:ExplorerDirectoryItemViewModel}}" DropCompletedCommand="{Binding DataContext.DropCompletedCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
+                            <local:RightClickSelectionBehavior/>
+                        </pb:StyleBehaviorCollection>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Converter={pc:TypeEqualsConverter}, ConverterParameter={x:Type local:ExplorerFileItemViewModel}}" Value="True">
+                        <Setter Property="ContextMenu" Value="{StaticResource FileItemContextMenu}"/>
+                        <Setter Property="pt:StyleTriggerCollection.StyleTriggers">
+                            <Setter.Value>
+                                <pt:StyleTriggerCollection>
+                                    <i:EventTrigger EventName="Unloaded">
+                                        <i:InvokeCommandAction Command="{Binding ClearCacheCommand}"/>
+                                    </i:EventTrigger>
+                                    <pt:DoubleClickTrigger>
+                                        <pt:DoubleClickTrigger.Actions>
+                                            <i:InvokeCommandAction Command="{Binding DataContext.OpenFileItemCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" CommandParameter="{Binding Path}"/>
+                                        </pt:DoubleClickTrigger.Actions>
+                                    </pt:DoubleClickTrigger>
+                                </pt:StyleTriggerCollection>
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Converter={pc:TypeEqualsConverter}, ConverterParameter={x:Type local:ExplorerDirectoryItemViewModel}}" Value="True">
+                        <Setter Property="ContextMenu" Value="{StaticResource FolderItemContextMenu}"/>
+                        <Setter Property="pt:StyleTriggerCollection.StyleTriggers">
+                            <Setter.Value>
+                                <pt:StyleTriggerCollection>
+                                    <i:EventTrigger EventName="Unloaded">
+                                        <i:InvokeCommandAction Command="{Binding ClearCacheCommand}"/>
+                                    </i:EventTrigger>
+                                    <pt:DoubleClickTrigger>
+                                        <pt:DoubleClickTrigger.Actions>
+                                            <i:InvokeCommandAction Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" CommandParameter="{Binding Path}"/>
+                                        </pt:DoubleClickTrigger.Actions>
+                                    </pt:DoubleClickTrigger>
+                                    <pt:PreviewMiddleButtonDownTrigger>
+                                        <i:InvokeCommandAction Command="{Binding DataContext.CreateNewViewFromPathCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox}}" CommandParameter="{Binding Path}"/>
+                                    </pt:PreviewMiddleButtonDownTrigger>
+                                </pt:StyleTriggerCollection>
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <i:Interaction.Behaviors>
+        <local:NavigationInputBehavior BackCommand="{Binding BackCommand}" ForwardCommand="{Binding ForwardCommand}"/>
+        <pb:MessageBoxBehavior ViewModel="{Binding MessageBoxViewModel,Mode=OneWay}"/>
+        <pb:DialogBehavior Content="{Binding FavoriteEditorViewModel}" IsModal="True">
+            <pb:DialogBehavior.Style>
+                <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}">
+                    <Setter Property="Title" Value="{x:Static local:Texts.EditFavorite}"/>
+                    <Setter Property="SizeToContent" Value="WidthAndHeight"/>
+                    <Setter Property="ResizeMode" Value="NoResize"/>
+                </Style>
+            </pb:DialogBehavior.Style>
+            <pb:DialogBehavior.ContentTemplate>
+                <DataTemplate>
+                    <local:ExplorerFavoriteEditorView/>
+                </DataTemplate>
+            </pb:DialogBehavior.ContentTemplate>
+        </pb:DialogBehavior>
+    </i:Interaction.Behaviors>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.Resources>
+                <Style x:Key="ToolBarButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                    <Setter Property="Padding" Value="3"/>
+                    <Setter Property="Width" Value="26"/>
+                </Style>
+            </Grid.Resources>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition MaxWidth="125"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="{DynamicResource {x:Static icons:IconKeys.ArrowLeft}}" Command="{Binding BackCommand}" ToolTip="{x:Static local:Texts.Back}" Style="{StaticResource ToolBarButtonStyle}"/>
+            <Button Grid.Column="1" Content="{DynamicResource {x:Static icons:IconKeys.ArrowRight}}" Command="{Binding ForwardCommand}" ToolTip="{x:Static local:Texts.Forward}" Style="{StaticResource ToolBarButtonStyle}"/>
+            <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.ArrowUp}}" Command="{Binding MoveToParentDirectoryCommand}" ToolTip="{x:Static local:Texts.MoveToParentDirectory}" Style="{StaticResource ToolBarButtonStyle}"/>
+
+            <local:ExplorerAddressBar Grid.Column="4" Value="{Binding Location,Mode=OneWay}" ExternalSuggestions="{Binding FavoriteUrls}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Navigated">
+                        <i:InvokeCommandAction Command="{Binding NavigateCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=local:ExplorerAddressBar},Path=Value}"/>
+                        <pa:ClearFocusAction/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </local:ExplorerAddressBar>
+            <c:SplitButton Grid.Column="5" Command="{Binding OpenFavoriteEditorCommand}" CommandParameter="{Binding Location}" Padding="4" Height="26">
+                <c:SplitButton.Style>
+                    <Style TargetType="c:SplitButton" BasedOn="{StaticResource {x:Type c:SplitButton}}">
+                        <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.StarOutline}}"/>
+                        <Setter Property="ToolTip" Value="{x:Static local:Texts.AddFavorite}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Star}}"/>
+                                <Setter Property="ToolTip" Value="{x:Static local:Texts.EditFavorite}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding  FavoriteDirectoryViewModel.Items.Count}" Value="0">
+                                <Setter Property="IsDropDownButtonVisible" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </c:SplitButton.Style>
+                <c:SplitButton.ContextMenu>
+                    <ContextMenu ItemsSource="{Binding FavoriteDirectoryViewModel.Items}">
+                        <ContextMenu.Resources>
+                            <Style TargetType="MenuItem">
+                                <Setter Property="Header" Value="{Binding Display}"/>
+                                <Setter Property="ItemsSource" Value="{Binding Items,FallbackValue={x:Null}}"/>
+                                <Style.Triggers>
+                                    <Trigger Property="HasItems" Value="False">
+                                        <Setter Property="Header" Value="{Binding}"/>
+                                        <Setter Property="Command" Value="{Binding DataContext.NavigateCommand,RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                        <Setter Property="CommandParameter" Value="{Binding Url}"/>
+                                        <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
+                                        <Setter Property="HeaderTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <Grid Height="22">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding Display}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
+                                                        <Button Content="{DynamicResource {x:Static icons:IconKeys.Pencil}}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="ToolTip" Value="{Binding Url}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContextMenu.Resources>
+                    </ContextMenu>
+                </c:SplitButton.ContextMenu>
+            </c:SplitButton>
+            <Button Grid.Column="6" Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.OpenNewTabMenuHeader}" Style="{StaticResource ToolBarButtonStyle}"/>
+
+            <c:PopupButton Grid.Column="8" PopupWidth="300" PopupHeight="100" ResizeMode="None" Padding="3" Height="26" ToolTip="{x:Static local:Texts.Filter}">
+                <c:PopupButton.Style>
+                    <Style TargetType="{x:Type c:PopupButton}">
+                        <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.FilterOff}}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Filter.IsFilteredByExtension}" Value="True">
+                                <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Filter}}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </c:PopupButton.Style>
+                <c:PopupButton.PopupContent>
+                    <Grid>
+                        <Grid.Resources>
+                            <ResourceDictionary>
+                                <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                                    <Setter Property="Height" Value="26"/>
+                                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                    <Setter Property="Margin" Value="6,0"/>
+                                </Style>
+                            </ResourceDictionary>
+                        </Grid.Resources>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <CheckBox Grid.Row="0" Grid.Column="0" Content="{x:Static local:Texts.Video}" IsChecked="{Binding Filter.IsVideoVisible,Mode=TwoWay}"/>
+                        <CheckBox Grid.Row="1" Grid.Column="0" Content="{x:Static local:Texts.Audio}" IsChecked="{Binding Filter.IsAudioVisible,Mode=TwoWay}"/>
+                        <CheckBox Grid.Row="2" Grid.Column="0" Content="{x:Static local:Texts.Image}" IsChecked="{Binding Filter.IsImageVisible,Mode=TwoWay}"/>
+                        <CheckBox Grid.Row="0" Grid.Column="1" Content="{x:Static local:Texts.Text}" IsChecked="{Binding Filter.IsTextVisible,Mode=TwoWay}"/>
+                        <CheckBox Grid.Row="1" Grid.Column="1" Content="{x:Static local:Texts.Folder}" IsChecked="{Binding Filter.IsDirectoryVisible,Mode=TwoWay}"/>
+                        <CheckBox Grid.Row="2" Grid.Column="1" Content="{x:Static local:Texts.Other}" IsChecked="{Binding Filter.IsOtherVisible,Mode=TwoWay}"/>
+                    </Grid>
+                </c:PopupButton.PopupContent>
+            </c:PopupButton>
+            <TextBox x:Name="searchTextBox" Grid.Column="9" Padding="3,0,3,0" VerticalContentAlignment="Center"
+                     Text="{Binding Filter.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=100}" />
+            <TextBlock Grid.Column="9" Text="{x:Static local:Texts.Search}" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" VerticalAlignment="Center" Margin="6,0,3,0" IsHitTestVisible="False">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Text, ElementName=searchTextBox}" Value="">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Text, ElementName=searchTextBox}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <c:DropDownButton Grid.Column="10" Content="{DynamicResource {x:Static icons:IconKeys.Menu}}">
+                <c:DropDownButton.Style>
+                    <Style TargetType="{x:Type c:DropDownButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                        <Setter Property="Padding" Value="3"/>
+                        <Setter Property="Width" Value="26"/>
+                    </Style>
+                </c:DropDownButton.Style>
+                <c:DropDownButton.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" Header="{x:Static local:Texts.OpenNewTabMenuHeader}" Icon="{DynamicResource {x:Static icons:IconKeys.Plus}}"/>
+                        <MenuItem Command="{Binding OpenCurrentLocationInWindowsExplorerCommand}" Header="{x:Static local:Texts.OpenInWindowsExplorerMenuHeader}"/>
+                        <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.Refresh}" Icon="{DynamicResource {x:Static icons:IconKeys.Refresh}}" Command="{Binding RefreshCommand}"/>
+                        <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.Favorite}" ItemsSource="{Binding FavoriteDirectoryViewModel.Items}" Icon="{DynamicResource {x:Static icons:IconKeys.Star}}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Style.Triggers>
+                                        <Trigger Property="HasItems" Value="False">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                            <MenuItem.Resources>
+                                <Style TargetType="MenuItem">
+                                    <Setter Property="Header" Value="{Binding Display}"/>
+                                    <Setter Property="ItemsSource" Value="{Binding Items,FallbackValue={x:Null}}"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="HasItems" Value="False">
+                                            <Setter Property="Header" Value="{Binding}"/>
+                                            <Setter Property="Command" Value="{Binding DataContext.NavigateCommand,RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <Setter Property="CommandParameter" Value="{Binding Url}"/>
+                                            <Setter Property="Template" Value="{DynamicResource StretchMenuItemTemplate}"/>
+                                            <Setter Property="HeaderTemplate">
+                                                <Setter.Value>
+                                                    <DataTemplate>
+                                                        <Grid Height="22">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock Text="{Binding Display}" VerticalAlignment="Center" Grid.Column="0" Margin="4,0,12,0" MinWidth="50"/>
+                                                            <Button Content="{DynamicResource {x:Static icons:IconKeys.Pencil}}" Grid.Column="1" Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.OpenFavoriteEditorCommand}" CommandParameter="{Binding Url}" BorderBrush="Transparent" ToolTip="{x:Static local:Texts.EditFavorite}" Margin="1" Width="20" Height="20"/>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="ToolTip" Value="{Binding Url}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Resources>
+                        </MenuItem>
+                        <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.Sort}" Icon="{DynamicResource {x:Static icons:IconKeys.Sort}}">
+                            <MenuItem Header="{x:Static local:Texts.SortByName}" IsCheckable="True" IsChecked="{Binding IsSortByName, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Name"/>
+                            <MenuItem Header="{x:Static local:Texts.SortByLastWriteTime}" IsCheckable="True" IsChecked="{Binding IsSortByLastWriteTime, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="LastWriteTime"/>
+                            <MenuItem Header="{x:Static local:Texts.SortByExtension}" IsCheckable="True" IsChecked="{Binding IsSortByExtension, Mode=OneWay}" Command="{Binding SwitchSortKeyCommand}" CommandParameter="Extension"/>
+                            <Separator/>
+                            <MenuItem Header="{x:Static local:Texts.SortAscending}" IsCheckable="True" IsChecked="{Binding IsSortAscending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Ascending" Icon="{DynamicResource {x:Static icons:IconKeys.SortAscending}}"/>
+                            <MenuItem Header="{x:Static local:Texts.SortDescending}" IsCheckable="True" IsChecked="{Binding IsSortDescending, Mode=OneWay}" Command="{Binding SwitchSortOrderCommand}" CommandParameter="Descending" Icon="{DynamicResource {x:Static icons:IconKeys.SortDescending}}"/>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.SwitchViewMenuHeader}">
+                            <MenuItem Header="{x:Static local:Texts.ListView}" IsCheckable="True" IsChecked="{Binding IsViewList, Mode=OneWay}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.List}"/>
+                            <MenuItem Header="{x:Static local:Texts.WrapListView}" IsCheckable="True" IsChecked="{Binding IsViewWrapList, Mode=OneWay}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.WrapList}"/>
+                            <MenuItem Header="{x:Static local:Texts.ThumbnailView}" IsCheckable="True" IsChecked="{Binding IsViewTiles, Mode=OneWay}" Command="{Binding DataContext.SwitchViewCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" CommandParameter="{x:Static local:ExplorerViewMode.Tiles}"/>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.IncreaseViewSizeMenuHeader}" Command="{Binding DataContext.IncreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyPlus}}"/>
+                        <MenuItem Header="{x:Static local:Texts.DecreaseViewSizeMenuHeader}" Command="{Binding DataContext.DecreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyMinus}}"/>
+                        <Separator/>
+                        <MenuItem Header="{x:Static local:Texts.Sidebar}" IsCheckable="True" IsChecked="{Binding IsSidebarVisible,Mode=TwoWay}"/>
+                        <MenuItem Header="{x:Static local:Texts.AutoPlay}" IsCheckable="True" IsChecked="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsAutoPlay,Mode=TwoWay}"/>
+                    </ContextMenu>
+                </c:DropDownButton.ContextMenu>
+            </c:DropDownButton>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding SidebarWidth, Converter={StaticResource DoubleToGridLengthConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <ColumnDefinition.Style>
+                        <Style TargetType="ColumnDefinition">
+                            <Setter Property="MinWidth" Value="100"/>
+                            <Setter Property="MaxWidth" Value="500"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSidebarVisible}" Value="False">
+                                    <Setter Property="MaxWidth" Value="0"/>
+                                    <Setter Property="MinWidth" Value="0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ColumnDefinition.Style>
+                </ColumnDefinition>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" Visibility="{Binding IsSidebarVisible,Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ListBox ItemsSource="{Binding SidebarItems}" BorderThickness="0" Background="Transparent" SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ContextMenu="{StaticResource SidebarContextMenu}">
+                    <i:Interaction.Behaviors>
+                        <local:ScrollSelectedItemIntoViewBehavior/>
+                    </i:Interaction.Behaviors>
+                    <ListBox.Template>
+                        <ControlTemplate TargetType="ListBox">
+                            <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                                <ScrollViewer Focusable="false" Padding="{TemplateBinding Padding}" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                    <ScrollViewer.Template>
+                                        <ControlTemplate TargetType="ScrollViewer">
+                                            <Grid Background="{TemplateBinding Background}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ScrollContentPresenter x:Name="PART_ScrollContentPresenter" CanContentScroll="{TemplateBinding CanContentScroll}" Content="{TemplateBinding Content}" Grid.Column="0"/>
+                                                <ScrollBar x:Name="PART_VerticalScrollBar" Grid.Column="1" Maximum="{TemplateBinding ScrollableHeight}" Minimum="0" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}" Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" ViewportSize="{TemplateBinding ViewportHeight}" Width="6" HorizontalAlignment="Right">
+                                                    <ScrollBar.Template>
+                                                        <ControlTemplate TargetType="ScrollBar">
+                                                            <Grid Background="Transparent">
+                                                                <Track x:Name="PART_Track" IsDirectionReversed="true">
+                                                                    <Track.Thumb>
+                                                                        <Thumb>
+                                                                            <Thumb.Template>
+                                                                                <ControlTemplate TargetType="Thumb">
+                                                                                    <Border Background="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" CornerRadius="0" Width="4" HorizontalAlignment="Right"/>
+                                                                                </ControlTemplate>
+                                                                            </Thumb.Template>
+                                                                        </Thumb>
+                                                                    </Track.Thumb>
+                                                                </Track>
+                                                            </Grid>
+                                                        </ControlTemplate>
+                                                    </ScrollBar.Template>
+                                                </ScrollBar>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </ScrollViewer.Template>
+                                    <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                </ScrollViewer>
+                            </Border>
+                        </ControlTemplate>
+                    </ListBox.Template>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                            <Setter Property="Padding" Value="4"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+                            <Setter Property="ContextMenu" Value="{StaticResource SidebarFolderItemContextMenu}"/>
+                            <Setter Property="pb:StyleBehaviorCollection.StyleBehaviors">
+                                <Setter.Value>
+                                    <pb:StyleBehaviorCollection>
+                                        <local:DropFileBehavior Path="{Binding Path}" DropCompletedCommand="{Binding DataContext.DropCompletedCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
+                                        <local:RightClickSelectionBehavior/>
+                                    </pb:StyleBehaviorCollection>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="pt:StyleTriggerCollection.StyleTriggers">
+                                <Setter.Value>
+                                    <pt:StyleTriggerCollection>
+                                        <i:EventTrigger EventName="MouseDoubleClick">
+                                            <i:InvokeCommandAction Command="{Binding DataContext.NavigateCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding Path}"/>
+                                        </i:EventTrigger>
+                                    </pt:StyleTriggerCollection>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="{Binding Margin}" Background="Transparent">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ToggleButton Grid.Column="0" Width="16" Height="16" Margin="0,0,4,0" IsChecked="{Binding IsExpanded, Mode=TwoWay}">
+                                    <ToggleButton.Style>
+                                        <Style TargetType="ToggleButton">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasDummyChild}" Value="False">
+                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ToggleButton.Style>
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Grid Background="Transparent">
+                                                <ContentControl x:Name="Icon" Content="{DynamicResource {x:Static icons:IconKeys.ChevronRight}}" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" Width="12" Height="12"/>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter TargetName="Icon" Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.ChevronDown}}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+
+                                <Grid Grid.Column="1" VerticalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,6,0" Stretch="Uniform"/>
+                                    <Grid Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                                                            <Setter Property="Visibility" Value="Hidden"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBox Text="{Binding RenameText, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Padding="0" Margin="-4,-2,-4,-2" HorizontalAlignment="Stretch" VerticalContentAlignment="Center">
+                                            <TextBox.Style>
+                                                <Style TargetType="TextBox">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBox.Style>
+                                            <i:Interaction.Behaviors>
+                                                <local:RenameTextBoxBehavior CommitRenameCommand="{Binding DataContext.CommitRenameCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"/>
+                                            </i:Interaction.Behaviors>
+                                        </TextBox>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Cursor="SizeWE" Visibility="{Binding IsSidebarVisible,Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <ListBox Grid.Column="2"
+                     SelectedValue="{Binding ReadOnlyLastSelectedValue, Mode=OneWayToSource}"
+                     ItemsSource="{Binding FilteredItems}"
+                     VirtualizingPanel.IsVirtualizing="True" 
+                     VirtualizingPanel.ScrollUnit="Pixel"
+                     VirtualizingPanel.CacheLength="5"
+                     ScrollViewer.CanContentScroll="True"
+                     Style="{StaticResource FileListBoxStyle}"
+                     ItemContainerStyle="{StaticResource FileListBoxItemStyle}"
+                     SelectionMode="Extended">
+                <i:Interaction.Triggers>
+                    <pt:PreviewMouseWheelEventTrigger DeltaMode="Up" ModifierKeys="Ctrl" Handled="True">
+                        <i:InvokeCommandAction Command="{Binding IncreaseLayoutSizeCommand}"/>
+                    </pt:PreviewMouseWheelEventTrigger>
+                    <pt:PreviewMouseWheelEventTrigger DeltaMode="Down" ModifierKeys="Ctrl" Handled="True">
+                        <i:InvokeCommandAction Command="{Binding DecreaseLayoutSizeCommand}"/>
+                    </pt:PreviewMouseWheelEventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
+        </Grid>
+    </Grid>
+</UserControl>

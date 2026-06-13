@@ -6,10 +6,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Kotodama
 {
     class KotodamaSpeakerSettings : Bindable
     {
-        public string? Name { get => field; set => Set(ref field, value); }
-        public string? SpeakerId { get => field; set => Set(ref field, value); }
-        public ImmutableList<KotodamaDecorationSettings> Decorations { get => field; set => Set(ref field, value); } = [];
-        public string? ContentRestrictions { get => field; set => Set(ref field, value); }
+        public string? Name { get; set => Set(ref field, value); }
+        public string? SpeakerId { get; set => Set(ref field, value); }
+        public ImmutableList<KotodamaDecorationSettings> Decorations { get; set => Set(ref field, value); } = [];
+        public string? ContentRestrictions { get; set => Set(ref field, value); }
         public KotodamaSpeakerSettings()
         {
         }

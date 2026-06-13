@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Windows.Input;
 using System.Xml.Linq;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
@@ -12,7 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
         public ImmutableList<VoiSonaTalkEditorWordViewModel> Words { get; }
         public ImmutableList<VoiSonaTalkEditorAccentSliderViewModel> AccentSliders { get; }
 
-        public VoiSonaTalkEditorAcousticPhraseViewModel(XElement acousticPhrase, bool isFirst)
+        public VoiSonaTalkEditorAcousticPhraseViewModel(XElement acousticPhrase, bool isFirst, Func<int> nextWordIndex, ICommand playCommand)
         {
             this.acousticPhrase = acousticPhrase;
             IsFirst = isFirst;
@@ -20,7 +21,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
             var words = 
                 acousticPhrase
                 .Elements("word")
-                .Select((x, i) => new VoiSonaTalkEditorWordViewModel(x, i > 0));
+                .Select((x, i) => new VoiSonaTalkEditorWordViewModel(x, nextWordIndex(), i > 0, playCommand));
             Words = [.. words];
             foreach (var word in Words)
                 word.Changed += Child_Changed;

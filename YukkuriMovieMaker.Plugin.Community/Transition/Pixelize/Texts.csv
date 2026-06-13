@@ -1,0 +1,8 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+PixelizeTransitionName,,ピクセル化,Pixelize,像素化,像素化,픽셀화,Pixelar,بكسلة,Pikselasi
+EasingTypeName,,緩急,Easing Type,缓动类型,緩動類型,이징 유형,Tipo de suavizado,نوع التخفيف,Jenis Easing
+EasingTypeDesc,,アニメーションの緩急の種類を選択します。,Selects the easing curve type for the animation.,选择动画缓动曲线的类型。,選擇動畫緩動曲線的類型。,애니메이션 이징 곡선 유형을 선택합니다.,Selecciona el tipo de curva de suavizado para la animación.,يحدد نوع منحنى التخفيف للحركة.,Memilih jenis kurva easing untuk animasi.
+EasingModeName,,加減速,Easing Mode,加减速模式,加減速模式,이징 모드,Modo de suavizado,وضع التخفيف,Mode Easing
+EasingModeDesc,,アニメーションの加減速の方向を選択します。,Selects the acceleration direction of the easing.,选择缓动的加减速方向。,選擇緩動的加減速方向。,이징의 가속·감속 방향을 선택합니다.,Selecciona la dirección de aceleración del suavizado.,يحدد اتجاه التسارع للتخفيف.,Memilih arah akselerasi easing.
+MaxBlockSizeName,,最大ブロックサイズ,Max Block Size,最大块大小,最大區塊大小,최대 블록 크기,Tamaño máx. de bloque,أقصى حجم للكتلة,Ukuran Blok Maks
+MaxBlockSizeDesc,,ピクセル化のピーク時に使用するブロックの大きさです（px）。値が大きいほど粗くなります。,The block size at peak pixelation (px). Larger values produce coarser pixels.,像素化峰值时使用的块大小（px）。值越大像素越粗糙。,像素化峰值時使用的區塊大小（px）。值越大像素越粗糙。,픽셀화 절정 시 사용할 블록 크기입니다（px）。값이 클수록 더 거칠어집니다.,El tamaño de bloque en el pico de pixelación (px). Valores más grandes producen píxeles más gruesos.,حجم الكتلة عند ذروة التبكيل (بكسل). القيم الأكبر تنتج بكسلات أخشن.,Ukuran blok saat puncak pikselasi (px). Nilai lebih besar menghasilkan piksel lebih kasar.
