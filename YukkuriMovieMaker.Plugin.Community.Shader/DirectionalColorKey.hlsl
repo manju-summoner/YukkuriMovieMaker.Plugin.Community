@@ -85,9 +85,12 @@ float4 main(
     if (src.a <= 0.0f)
         return src;
 
-    float3 straightSrgb = saturate(src.rgb / src.a);
-    float3 colorLinear = SrgbToLinear(straightSrgb);
+    float3 colorSrgb = saturate(src.rgb / src.a);
+    float3 colorLinear = SrgbToLinear(colorSrgb);
     float3 colorLab = LinearToOklab(colorLinear);
+
+    float3 backgroundLinear = OklabToLinear(backgroundLab);
+    float3 backgroundSrgb = saturate(LinearToSrgb(backgroundLinear));
 
     float3 d = colorLab - backgroundLab;
     float dLen = length(d);
@@ -100,7 +103,7 @@ float4 main(
     float noiseConfidence = smoothstep(halfThreshold, noiseThreshold, dLen);
 
     float alpha = 0.0f;
-    float3 foregroundLab = colorLab;
+    float3 foregroundSrgb = colorSrgb;
     bool resolved = false;
 
     float4 foregroundSample = ForegroundTexture.Sample(InputSampler, uv1.xy);
@@ -108,16 +111,15 @@ float4 main(
     [branch]
     if (foregroundSample.a > 0.5f)
     {
-        float3 foregroundLinear = SrgbToLinear(saturate(foregroundSample.rgb));
-        float3 backgroundLinear = OklabToLinear(backgroundLab);
-        float3 fb = foregroundLinear - backgroundLinear;
+        float3 seedSrgb = saturate(foregroundSample.rgb);
+        float3 fb = seedSrgb - backgroundSrgb;
         float denom = dot(fb, fb);
 
         [branch]
         if (denom > 1e-6f)
         {
-            alpha = saturate(dot(colorLinear - backgroundLinear, fb) / denom);
-            foregroundLab = LinearToOklab(max(foregroundLinear, 1e-6f));
+            alpha = saturate(dot(colorSrgb - backgroundSrgb, fb) / denom);
+            foregroundSrgb = seedSrgb;
             resolved = true;
         }
     }
@@ -161,7 +163,7 @@ float4 main(
             }
         }
 
-        foregroundLab = (colorLab - (1.0f - alpha) * backgroundLab) / max(alpha, 1e-3f);
+        foregroundSrgb = saturate((colorSrgb - (1.0f - alpha) * backgroundSrgb) / max(alpha, 1e-3f));
     }
 
     alpha = saturate((alpha - edgeSoftness) / max(1.0f - edgeSoftness, 1e-5f));
@@ -180,24 +182,14 @@ float4 main(
     [branch]
     if (spillStrength > 0.0f && length(backgroundChromaDir.yz) > 1e-5f)
     {
+        float3 foregroundLab = LinearToOklab(SrgbToLinear(foregroundSrgb));
         float2 chromaDir = normalize(backgroundChromaDir.yz);
         float spill = dot(foregroundLab.yz, chromaDir) - despillBias;
         spill = max(0.0f, spill) * spillStrength;
         foregroundLab.yz -= chromaDir * spill;
+        foregroundSrgb = saturate(LinearToSrgb(max(OklabToLinear(foregroundLab), 0.0f)));
     }
 
-    [branch]
-    if (length(backgroundChromaDir.yz) > 1e-5f)
-    {
-        float2 chromaAxis = normalize(backgroundChromaDir.yz);
-        float observedComponent = dot(colorLab.yz, chromaAxis);
-        float foregroundComponent = dot(foregroundLab.yz, chromaAxis);
-        float clampedComponent = clamp(foregroundComponent, min(0.0f, observedComponent), max(0.0f, observedComponent));
-        foregroundLab.yz += (clampedComponent - foregroundComponent) * chromaAxis;
-    }
-
-    float3 outputLinear = max(OklabToLinear(foregroundLab), 0.0f);
-    float3 outputSrgb = saturate(LinearToSrgb(outputLinear));
     float outAlpha = alpha * noiseConfidence * src.a;
-    return float4(outputSrgb * outAlpha, outAlpha);
+    return float4(foregroundSrgb * outAlpha, outAlpha);
 }
