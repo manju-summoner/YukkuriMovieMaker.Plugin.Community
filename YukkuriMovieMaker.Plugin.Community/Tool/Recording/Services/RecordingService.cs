@@ -117,10 +117,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
                 try
                 {
-                    input = new WasapiCapture(targetDevice)
+                    try
                     {
-                        ShareMode = AudioClientShareMode.Shared
-                    };
+                        input = new WasapiCapture(targetDevice)
+                        {
+                            ShareMode = AudioClientShareMode.Shared
+                        };
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        throw new MicrophoneAccessDeniedException(ex);
+                    }
+
                     output = new WaveFileWriter(filePath, input.WaveFormat);
 
                     input.DataAvailable += OnDataAvailable;
@@ -144,6 +152,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                         targetDevice.ID,
                         targetDevice.FriendlyName,
                         fallbackToDefault);
+                }
+                catch (MicrophoneAccessDeniedException)
+                {
+                    CleanupRecordingResources(deleteFile: true);
+                    throw;
                 }
                 catch (Exception ex)
                 {
@@ -422,8 +435,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         private static bool IsMicrophoneAccessDenied(Exception ex)
         {
             const int E_ACCESSDENIED = unchecked((int)0x80070005);
-            return ex is UnauthorizedAccessException
-                || (ex is System.Runtime.InteropServices.COMException com && com.HResult == E_ACCESSDENIED);
+            return ex is System.Runtime.InteropServices.COMException com && com.HResult == E_ACCESSDENIED;
         }
     }
 
