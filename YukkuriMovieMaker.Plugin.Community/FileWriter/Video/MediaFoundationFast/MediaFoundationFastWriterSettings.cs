@@ -5,7 +5,7 @@ namespace YukkuriMovieMaker.Plugin.Community.FileWriter.MediaFoundationFast;
 
 public class MediaFoundationFastWriterSettings : SettingsBase<MediaFoundationFastWriterSettings>
 {
-    public override SettingsCategory Category => SettingsCategory.None;
+    public override SettingsCategory Category => SettingsCategory.VideoFileWriter;
     public override string Name => Texts.PluginName;
     public override bool HasSettingView => false;
     public override object? SettingView => null;
