@@ -46,21 +46,6 @@ public class MediaFoundationFastWriterSettings : SettingsBase<MediaFoundationFas
     public AACProfile AACProfile { get => aacProfile; set => Set(ref aacProfile, value); }
     AACProfile aacProfile = AACProfile.AACL2;
 
-    public int Width { get => width; set => Set(ref width, value); }
-    int width;
-
-    public int Height { get => height; set => Set(ref height, value); }
-    int height;
-
-    public int FPS { get => fps; set => Set(ref fps, value); }
-    int fps;
-
-    public int Hz { get => hz; set => Set(ref hz, value); }
-    int hz;
-
-    public int Length { get => length; set => Set(ref length, value); }
-    int length;
-
     public override void Initialize()
     {
     }
