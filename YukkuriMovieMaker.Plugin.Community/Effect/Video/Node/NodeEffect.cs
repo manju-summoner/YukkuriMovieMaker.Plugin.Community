@@ -19,6 +19,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 using YukkuriMovieMaker.Plugin.Effects;
+using AlphaMode = Vortice.DCommon.AlphaMode;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
 
