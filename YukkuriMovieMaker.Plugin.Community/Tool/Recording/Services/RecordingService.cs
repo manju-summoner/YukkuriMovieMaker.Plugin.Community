@@ -147,7 +147,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     transferred = true;
                     OnRecordingStateChanged();
 
-                    input.StartRecording();
+                    try
+                    {
+                        input.StartRecording();
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        throw new MicrophoneAccessDeniedException(ex);
+                    }
+
                     return new RecordingStartDeviceSelection(
                         targetDevice.ID,
                         targetDevice.FriendlyName,
