@@ -16,24 +16,13 @@ public sealed class MediaFoundationFastVideoFileWriterPlugin : IVideoFileWriterP
 
     public IVideoFileWriter CreateVideoFileWriter(string path, VideoInfo videoInfo)
     {
-        var settings = MediaFoundationFastWriterSettings.Default;
-        settings.Width = videoInfo.Width;
-        settings.Height = videoInfo.Height;
-        settings.FPS = videoInfo.FPS;
-        settings.Hz = videoInfo.Hz;
-        return new MediaFoundationFastVideoFileWriter(path, settings);
+        return new MediaFoundationFastVideoFileWriter(path, videoInfo, MediaFoundationFastWriterSettings.Default);
     }
 
     public string GetFileExtention() => ".mp4";
 
     public UIElement GetVideoConfigView(string projectName, VideoInfo videoInfo, int length)
     {
-        var settings = MediaFoundationFastWriterSettings.Default;
-        settings.Width = videoInfo.Width;
-        settings.Height = videoInfo.Height;
-        settings.FPS = videoInfo.FPS;
-        settings.Hz = videoInfo.Hz;
-        settings.Length = length;
         return new MediaFoundationFastConfigView
         {
             DataContext = new MediaFoundationFastConfigViewModel(),
