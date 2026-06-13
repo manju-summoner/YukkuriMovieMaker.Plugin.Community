@@ -26,7 +26,7 @@
                     <RowDefinition Height="26"/>
                 </Grid.RowDefinitions>
 
-                <Label Grid.Row="0" Grid.Column="0" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.BitRateControlMode}"/>
+                <Label Grid.Row="0" Grid.Column="0" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.BitRateControlMode}" ToolTip="{x:Static loc:Texts.VideoBitRate}"/>
                 <e:EnumComboBox Grid.Row="0" Grid.Column="1" Height="26" EnumType="{x:Type m:VideoBitRateControlMode}"
                                 Value="{Binding Settings.VideoBitRateControlMode, Mode=TwoWay}"/>
 
@@ -41,18 +41,14 @@
                             </Style.Triggers>
                         </Style>
                     </Grid.Style>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Label Grid.Column="0" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.VideoBitRate}" ToolTip="{x:Static loc:Texts.VideoBitRateAutoNote}"/>
-                    <c:TextBoxSlider Grid.Column="1" Height="26" Value="{Binding Settings.VideoBitRate, Mode=TwoWay}"
-                                     Min="0" Max="200000" DefaultMin="0" DefaultMax="50000" Delta="500"
-                                     StringFormat="F0" Unit="kbps"/>
+                    <TextBox Height="26" VerticalContentAlignment="Center" Text="{Binding Settings.VideoBitRate, Mode=TwoWay}" ToolTip="{x:Static loc:Texts.VideoBitRateAutoNote}"/>
+                    <TextBlock Text="kbps" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,0"/>
                 </Grid>
-                <Grid Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2">
-                    <Grid.Style>
-                        <Style TargetType="{x:Type Grid}">
+                <c:TextBoxSlider Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Height="26" Value="{Binding Settings.VideoQuality, Mode=TwoWay}"
+                                 Min="1" Max="100" DefaultMin="1" DefaultMax="100" Delta="1"
+                                 StringFormat="F0" Unit="" ToolTip="{x:Static loc:Texts.VideoQuality}">
+                    <c:TextBoxSlider.Style>
+                        <Style TargetType="{x:Type c:TextBoxSlider}">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Settings.VideoBitRateControlMode}" Value="Quality">
@@ -60,16 +56,8 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </Grid.Style>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Label Grid.Column="0" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.VideoQuality}"/>
-                    <c:TextBoxSlider Grid.Column="1" Height="26" Value="{Binding Settings.VideoQuality, Mode=TwoWay}"
-                                     Min="1" Max="100" DefaultMin="1" DefaultMax="100" Delta="1"
-                                     StringFormat="F0" Unit=""/>
-                </Grid>
+                    </c:TextBoxSlider.Style>
+                </c:TextBoxSlider>
 
                 <Label Grid.Row="1" Grid.Column="0" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.EncodeSpeed}" ToolTip="{x:Static loc:Texts.EncodeSpeedNote}"/>
                 <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Height="26" Value="{Binding Settings.EncodeSpeed, Mode=TwoWay}"
