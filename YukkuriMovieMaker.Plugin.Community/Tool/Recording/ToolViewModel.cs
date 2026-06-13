@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -205,11 +205,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 var directory = recordPathService.GetRecordsDirectory();
                 RecordsDirectory = directory;
 
-                var items = Directory.EnumerateFiles(directory, "*.wav", SearchOption.TopDirectoryOnly)
-                    .Select(path => new FileInfo(path))
-                    .OrderByDescending(x => x.LastWriteTimeUtc)
-                    .Select(x => new RecordedFileListItem(x.FullName, x.Name, x.LastWriteTime, x.Length))
-                    .ToList();
+                var items = Directory.Exists(directory)
+                    ? Directory.EnumerateFiles(directory, "*.wav", SearchOption.TopDirectoryOnly)
+                        .Select(path => new FileInfo(path))
+                        .OrderByDescending(x => x.LastWriteTimeUtc)
+                        .Select(x => new RecordedFileListItem(x.FullName, x.Name, x.LastWriteTime, x.Length))
+                        .ToList()
+                    : [];
 
                 Records.Clear();
                 foreach (var item in items)
@@ -247,6 +249,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 if (startResult.Selection.FellBackToDefault)
                     ShowError(string.Format(Texts.SavedRecordingDeviceNotFoundFallbackWithName, startResult.Selection.FriendlyName));
 
+                RaiseCommandStates();
+            }
+            catch (MicrophoneAccessDeniedException)
+            {
+                var result = MessageBoxViewModel.Show(
+                    Texts.MicrophoneAccessDenied,
+                    Texts.ToolName,
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning,
+                    MessageBoxResult.No);
+                if (result == MessageBoxResult.Yes)
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "ms-settings:privacy-microphone",
+                        UseShellExecute = true
+                    });
+                }
                 RaiseCommandStates();
             }
             catch (InvalidOperationException ex)
@@ -333,17 +353,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             catch (Exception)
             {
                 var fallback = RecordingSettings.GetDefaultOutputDirectory();
-                try
-                {
-                    Directory.CreateDirectory(fallback);
-                    OutputDirectory = fallback;
-                    ShowError(string.Format(Texts.OutputDirectoryFallback, fallback));
-                }
-                catch (Exception)
-                {
-                    RecordsDirectory = fallback;
-                    ShowError(Texts.OutputFolderUnavailable);
-                }
+                OutputDirectory = fallback;
+                ShowError(string.Format(Texts.OutputDirectoryFallback, fallback));
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using NAudio.CoreAudioApi;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -117,10 +117,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 
                 try
                 {
-                    input = new WasapiCapture(targetDevice)
+                    try
                     {
-                        ShareMode = AudioClientShareMode.Shared
-                    };
+                        input = new WasapiCapture(targetDevice)
+                        {
+                            ShareMode = AudioClientShareMode.Shared
+                        };
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        throw new MicrophoneAccessDeniedException(ex);
+                    }
+
                     output = new WaveFileWriter(filePath, input.WaveFormat);
 
                     input.DataAvailable += OnDataAvailable;
@@ -139,16 +147,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                     transferred = true;
                     OnRecordingStateChanged();
 
-                    input.StartRecording();
+                    try
+                    {
+                        input.StartRecording();
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        throw new MicrophoneAccessDeniedException(ex);
+                    }
+
                     return new RecordingStartDeviceSelection(
                         targetDevice.ID,
                         targetDevice.FriendlyName,
                         fallbackToDefault);
                 }
+                catch (MicrophoneAccessDeniedException)
+                {
+                    CleanupRecordingResources(deleteFile: true);
+                    throw;
+                }
                 catch (Exception ex)
                 {
                     Debug.WriteLine($"[RecordingService] StartRecording failed: {ex}");
                     CleanupRecordingResources(deleteFile: true);
+                    if (IsMicrophoneAccessDenied(ex))
+                        throw new MicrophoneAccessDeniedException(ex);
                     throw;
                 }
                 finally
@@ -416,6 +439,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             // StopRecordingAsync を待っている呼び出し元があれば抜けさせる。
             pendingStop?.TrySetResult(false);
         }
+
+        private static bool IsMicrophoneAccessDenied(Exception ex)
+        {
+            const int E_ACCESSDENIED = unchecked((int)0x80070005);
+            return ex is System.Runtime.InteropServices.COMException com && com.HResult == E_ACCESSDENIED;
+        }
     }
 
     public readonly record struct RecordingStartDeviceSelection(
@@ -424,6 +453,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
         bool FellBackToDefault)
     {
         public static RecordingStartDeviceSelection Empty { get; } = new(string.Empty, string.Empty, false);
+    }
+
+    public class MicrophoneAccessDeniedException(Exception inner)
+        : Exception(inner.Message, inner)
+    {
     }
 }
 
