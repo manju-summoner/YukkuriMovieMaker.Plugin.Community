@@ -1,0 +1,114 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.FileWriter.MediaFoundationFast.Views.MediaFoundationFastConfigView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.FileWriter.MediaFoundationFast.Localization"
+             xmlns:m="clr-namespace:YukkuriMovieMaker.Plugin.Community.FileWriter.MediaFoundationFast.Models"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             xmlns:e="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
+             mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="500">
+    <StackPanel>
+
+        <Expander Header="{x:Static loc:Texts.VideoSettings}" IsExpanded="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="26"/>
+                    <RowDefinition Height="26"/>
+                    <RowDefinition Height="26"/>
+                    <RowDefinition Height="26"/>
+                    <RowDefinition Height="26"/>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.BitRateControlMode}" ToolTip="{x:Static loc:Texts.VideoBitRate}"/>
+                <e:EnumComboBox Grid.Row="0" Grid.Column="1" Height="26" EnumType="{x:Type m:VideoBitRateControlMode}"
+                                Value="{Binding Settings.VideoBitRateControlMode, Mode=TwoWay}"/>
+
+                <Grid Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2">
+                    <Grid.Style>
+                        <Style TargetType="{x:Type Grid}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Settings.VideoBitRateControlMode}" Value="Quality">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <TextBox Height="26" VerticalContentAlignment="Center" Text="{Binding Settings.VideoBitRate, Mode=TwoWay}" ToolTip="{x:Static loc:Texts.VideoBitRateAutoNote}"/>
+                    <TextBlock Text="kbps" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,0"/>
+                </Grid>
+                <c:TextBoxSlider Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Height="26" Value="{Binding Settings.VideoQuality, Mode=TwoWay}"
+                                 Min="1" Max="100" DefaultMin="1" DefaultMax="100" Delta="1"
+                                 StringFormat="F0" Unit="" ToolTip="{x:Static loc:Texts.VideoQuality}">
+                    <c:TextBoxSlider.Style>
+                        <Style TargetType="{x:Type c:TextBoxSlider}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Settings.VideoBitRateControlMode}" Value="Quality">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </c:TextBoxSlider.Style>
+                </c:TextBoxSlider>
+
+                <Label Grid.Row="1" Grid.Column="0" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.EncodeSpeed}" ToolTip="{x:Static loc:Texts.EncodeSpeedNote}"/>
+                <c:TextBoxSlider Grid.Row="1" Grid.Column="1" Height="26" Value="{Binding Settings.EncodeSpeed, Mode=TwoWay}"
+                                 Min="0" Max="100" DefaultMin="0" DefaultMax="100" Delta="1"
+                                 StringFormat="F0" Unit=""/>
+                <Label Grid.Row="1" Grid.Column="2" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.NumberOfThreads}" ToolTip="{x:Static loc:Texts.ThreadsAutoNote}"/>
+                <c:TextBoxSlider Grid.Row="1" Grid.Column="3" Height="26" Value="{Binding Settings.NumberOfThreads, Mode=TwoWay}"
+                                 Min="0" Max="64" DefaultMin="0" DefaultMax="32" Delta="1"
+                                 StringFormat="F0" Unit=""/>
+
+                <Label Grid.Row="2" Grid.Column="0" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.GOPSize}" ToolTip="{x:Static loc:Texts.GOPSizeAutoNote}"/>
+                <c:TextBoxSlider Grid.Row="2" Grid.Column="1" Height="26" Value="{Binding Settings.GOPSize, Mode=TwoWay}"
+                                 Min="0" Max="600" DefaultMin="0" DefaultMax="300" Delta="1"
+                                 StringFormat="F0" Unit=""/>
+                <Label Grid.Row="2" Grid.Column="2" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.BFrameCount}"/>
+                <c:TextBoxSlider Grid.Row="2" Grid.Column="3" Height="26" Value="{Binding Settings.BFrameCount, Mode=TwoWay}"
+                                 Min="0" Max="16" DefaultMin="0" DefaultMax="4" Delta="1"
+                                 StringFormat="F0" Unit=""/>
+
+                <Label Grid.Row="3" Grid.Column="0" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.H264Profile}"/>
+                <e:EnumComboBox Grid.Row="3" Grid.Column="1" Height="26" EnumType="{x:Type m:H264Profile}"
+                                Value="{Binding Settings.H264Profile, Mode=TwoWay}"/>
+                <Label Grid.Row="3" Grid.Column="2" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.H264Level}" ToolTip="{x:Static loc:Texts.H264LevelAutoNote}"/>
+                <e:EnumComboBox Grid.Row="3" Grid.Column="3" Height="26" EnumType="{x:Type m:H264Level}"
+                                Value="{Binding Settings.H264Level, Mode=TwoWay}"/>
+
+                <Label Grid.Row="4" Grid.Column="0" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.HardwareAcceleration}" ToolTip="{x:Static loc:Texts.HardwareAccelerationNote}"/>
+                <c:ToggleSlider Grid.Row="4" Grid.Column="1" Height="26" Value="{Binding Settings.IsHardwareAcceleration, Mode=TwoWay}" HorizontalAlignment="Left"/>
+            </Grid>
+        </Expander>
+
+        <Expander Header="{x:Static loc:Texts.AudioSettings}" IsExpanded="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="26"/>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.AudioBitRate}"/>
+                <e:EnumComboBox Grid.Row="0" Grid.Column="1" Height="26" EnumType="{x:Type m:AudioBitRate}"
+                                Value="{Binding Settings.AudioBitRate, Mode=TwoWay}"/>
+                <Label Grid.Row="0" Grid.Column="2" Padding="4,0" VerticalContentAlignment="Center" Content="{x:Static loc:Texts.AACProfile}"/>
+                <e:EnumComboBox Grid.Row="0" Grid.Column="3" Height="26" EnumType="{x:Type m:AACProfile}"
+                                Value="{Binding Settings.AACProfile, Mode=TwoWay}"/>
+            </Grid>
+        </Expander>
+
+    </StackPanel>
+</UserControl>
