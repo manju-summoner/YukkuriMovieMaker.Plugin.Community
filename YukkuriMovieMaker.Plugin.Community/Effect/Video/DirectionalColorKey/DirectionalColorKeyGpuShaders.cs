@@ -797,3 +797,188 @@ internal readonly partial struct ProjectionHistogramShader(
         Hlsl.InterlockedAdd(ref histogram[best * binsPerCluster + bin], 1);
     }
 }
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct ForegroundSeedShader(
+    ReadOnlyBuffer<int> bgra,
+    ReadWriteBuffer<float> colorLab,
+    ReadWriteBuffer<int> foreground,
+    ReadWriteBuffer<int> valid,
+    float backgroundL,
+    float backgroundA,
+    float backgroundB,
+    float referencePerp,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadOnlyBuffer<int> bgra = bgra;
+    private readonly ReadWriteBuffer<float> colorLab = colorLab;
+    private readonly ReadWriteBuffer<int> foreground = foreground;
+    private readonly ReadWriteBuffer<int> valid = valid;
+    private readonly float backgroundL = backgroundL;
+    private readonly float backgroundA = backgroundA;
+    private readonly float backgroundB = backgroundB;
+    private readonly float referencePerp = referencePerp;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int index = y * width + x;
+        int triple = index * 3;
+
+        int packed = bgra[index];
+        int a = (packed >> 24) & 0xFF;
+
+        if (a == 0)
+        {
+            foreground[index] = 0;
+            valid[index] = 0;
+            return;
+        }
+
+        float bgLenSq = backgroundL * backgroundL + backgroundA * backgroundA + backgroundB * backgroundB;
+
+        if (bgLenSq <= 1e-8f || referencePerp <= 1e-5f)
+        {
+            foreground[index] = 0;
+            valid[index] = 0;
+            return;
+        }
+
+        float labL = colorLab[triple + 0];
+        float labA = colorLab[triple + 1];
+        float labB = colorLab[triple + 2];
+
+        float along = (labL * backgroundL + labA * backgroundA + labB * backgroundB) / bgLenSq;
+        float pl = labL - along * backgroundL;
+        float pa = labA - along * backgroundA;
+        float pb = labB - along * backgroundB;
+        float perp = Hlsl.Sqrt(pl * pl + pa * pa + pb * pb);
+
+        if (perp < referencePerp)
+        {
+            foreground[index] = 0;
+            valid[index] = 0;
+            return;
+        }
+
+        float invA = 1f / a;
+        float bSrgb = Hlsl.Saturate(((packed >> 0) & 0xFF) * invA);
+        float gSrgb = Hlsl.Saturate(((packed >> 8) & 0xFF) * invA);
+        float rSrgb = Hlsl.Saturate(((packed >> 16) & 0xFF) * invA);
+
+        int rByte = (int)(rSrgb * 255f + 0.5f);
+        int gByte = (int)(gSrgb * 255f + 0.5f);
+        int bByte = (int)(bSrgb * 255f + 0.5f);
+
+        foreground[index] = (0xFF << 24) | (rByte << 16) | (gByte << 8) | bByte;
+        valid[index] = 1;
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct ForegroundPropagateShader(
+    ReadWriteBuffer<int> sourceForeground,
+    ReadWriteBuffer<int> sourceValid,
+    ReadWriteBuffer<float> colorLab,
+    ReadWriteBuffer<int> targetForeground,
+    ReadWriteBuffer<int> targetValid,
+    int reach,
+    float sigmaColorSq,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadWriteBuffer<int> sourceForeground = sourceForeground;
+    private readonly ReadWriteBuffer<int> sourceValid = sourceValid;
+    private readonly ReadWriteBuffer<float> colorLab = colorLab;
+    private readonly ReadWriteBuffer<int> targetForeground = targetForeground;
+    private readonly ReadWriteBuffer<int> targetValid = targetValid;
+    private readonly int reach = reach;
+    private readonly float sigmaColorSq = sigmaColorSq;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int index = y * width + x;
+        int triple = index * 3;
+
+        if (sourceValid[index] != 0)
+        {
+            targetForeground[index] = sourceForeground[index];
+            targetValid[index] = 1;
+            return;
+        }
+
+        float cl = colorLab[triple + 0];
+        float ca = colorLab[triple + 1];
+        float cb = colorLab[triple + 2];
+
+        float sumR = 0f;
+        float sumG = 0f;
+        float sumB = 0f;
+        float sumW = 0f;
+
+        float twoReachSq = 2f * reach * reach;
+
+        for (int dy = -reach; dy <= reach; dy++)
+        {
+            int sy = y + dy;
+            if (sy < 0 || sy >= height)
+                continue;
+
+            for (int dx = -reach; dx <= reach; dx++)
+            {
+                int sx = x + dx;
+                if (sx < 0 || sx >= width)
+                    continue;
+
+                int sIndex = sy * width + sx;
+                if (sourceValid[sIndex] == 0)
+                    continue;
+
+                int sTriple = sIndex * 3;
+                float dcl = cl - colorLab[sTriple + 0];
+                float dca = ca - colorLab[sTriple + 1];
+                float dcb = cb - colorLab[sTriple + 2];
+                float colorDistSq = dcl * dcl + dca * dca + dcb * dcb;
+
+                float wSpace = Hlsl.Exp(-(dx * dx + dy * dy) / Hlsl.Max(twoReachSq, 1e-6f));
+                float wColor = Hlsl.Exp(-colorDistSq / Hlsl.Max(sigmaColorSq, 1e-6f));
+                float w = wSpace * wColor;
+
+                int f = sourceForeground[sIndex];
+                sumR += ((f >> 16) & 0xFF) * w;
+                sumG += ((f >> 8) & 0xFF) * w;
+                sumB += ((f >> 0) & 0xFF) * w;
+                sumW += w;
+            }
+        }
+
+        if (sumW > 1e-6f)
+        {
+            int rByte = (int)(sumR / sumW + 0.5f);
+            int gByte = (int)(sumG / sumW + 0.5f);
+            int bByte = (int)(sumB / sumW + 0.5f);
+            targetForeground[index] = (0xFF << 24) | (rByte << 16) | (gByte << 8) | bByte;
+            targetValid[index] = 1;
+            return;
+        }
+
+        targetForeground[index] = 0;
+        targetValid[index] = 0;
+    }
+}

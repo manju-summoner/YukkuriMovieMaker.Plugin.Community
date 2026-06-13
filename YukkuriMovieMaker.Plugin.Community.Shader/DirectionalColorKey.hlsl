@@ -1,4 +1,5 @@
 Texture2D InputTexture : register(t0);
+Texture2D ForegroundTexture : register(t1);
 SamplerState InputSampler : register(s0);
 
 cbuffer constants : register(b0)
@@ -63,10 +64,19 @@ float3 OklabToLinear(float3 lab)
     );
 }
 
+float PerpendicularDistance(float3 colorLab, float3 bgLab, float bgLenSq)
+{
+    float3 dvec = colorLab - bgLab;
+    float along = dot(dvec, bgLab) / bgLenSq;
+    float3 dPerp = dvec - along * bgLab;
+    return length(dPerp);
+}
+
 float4 main(
     float4 pos : SV_POSITION,
     float4 posScene : SCENE_POSITION,
-    float4 uv0 : TEXCOORD0
+    float4 uv0 : TEXCOORD0,
+    float4 uv1 : TEXCOORD1
 ) : SV_Target
 {
     float4 src = InputTexture.Sample(InputSampler, uv0.xy);
@@ -89,27 +99,71 @@ float4 main(
 
     float noiseConfidence = smoothstep(halfThreshold, noiseThreshold, dLen);
 
-    int bestCluster = 0;
-    float bestProj = -1e9f;
+    float alpha = 0.0f;
+    float3 foregroundLab = colorLab;
+    bool resolved = false;
 
-    [loop]
-    for (int c = 0; c < clusterCount; c++)
+    float4 foregroundSample = ForegroundTexture.Sample(InputSampler, uv1.xy);
+
+    [branch]
+    if (foregroundSample.a > 0.5f)
     {
-        float proj = dot(d, clusters[c].xyz);
-        if (proj > bestProj)
+        float3 foregroundLinear = SrgbToLinear(saturate(foregroundSample.rgb));
+        float3 backgroundLinear = OklabToLinear(backgroundLab);
+        float3 fb = foregroundLinear - backgroundLinear;
+        float denom = dot(fb, fb);
+
+        [branch]
+        if (denom > 1e-6f)
         {
-            bestProj = proj;
-            bestCluster = c;
+            alpha = saturate(dot(colorLinear - backgroundLinear, fb) / denom);
+            foregroundLab = LinearToOklab(max(foregroundLinear, 1e-6f));
+            resolved = true;
         }
     }
 
     [branch]
-    if (bestProj <= 0.0f)
-        return float4(0.0f, 0.0f, 0.0f, 0.0f);
+    if (!resolved)
+    {
+        int bestCluster = 0;
+        float bestProj = -1e9f;
 
-    float lambda = max(clusters[bestCluster].w, 1e-5f);
+        [loop]
+        for (int c = 0; c < clusterCount; c++)
+        {
+            float proj = dot(d, clusters[c].xyz);
+            if (proj > bestProj)
+            {
+                bestProj = proj;
+                bestCluster = c;
+            }
+        }
 
-    float alpha = saturate(bestProj / lambda);
+        [branch]
+        if (bestProj <= 0.0f)
+            return float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+        float lambda = max(clusters[bestCluster].w, 1e-5f);
+        alpha = saturate(bestProj / lambda);
+
+        float bgLenSq = dot(backgroundLab, backgroundLab);
+
+        [branch]
+        if (bgLenSq > 1e-8f)
+        {
+            float referencePerp = PerpendicularDistance(float3(1.0f, 0.0f, 0.0f), backgroundLab, bgLenSq);
+
+            [branch]
+            if (referencePerp > 1e-5f)
+            {
+                float pixelPerp = PerpendicularDistance(colorLab, backgroundLab, bgLenSq);
+                alpha = max(alpha, saturate(pixelPerp / referencePerp));
+            }
+        }
+
+        foregroundLab = (colorLab - (1.0f - alpha) * backgroundLab) / max(alpha, 1e-3f);
+    }
+
     alpha = saturate((alpha - edgeSoftness) / max(1.0f - edgeSoftness, 1e-5f));
 
     [branch]
@@ -123,8 +177,6 @@ float4 main(
         return float4(maskAlpha, maskAlpha, maskAlpha, maskAlpha);
     }
 
-    float3 foregroundLab = (colorLab - (1.0f - alpha) * backgroundLab) / max(alpha, 1e-3f);
-
     [branch]
     if (spillStrength > 0.0f && length(backgroundChromaDir.yz) > 1e-5f)
     {
@@ -134,8 +186,18 @@ float4 main(
         foregroundLab.yz -= chromaDir * spill;
     }
 
-    float3 foregroundLinear = max(OklabToLinear(foregroundLab), 0.0f);
-    float3 foregroundSrgb = saturate(LinearToSrgb(foregroundLinear));
+    [branch]
+    if (length(backgroundChromaDir.yz) > 1e-5f)
+    {
+        float2 chromaAxis = normalize(backgroundChromaDir.yz);
+        float observedComponent = dot(colorLab.yz, chromaAxis);
+        float foregroundComponent = dot(foregroundLab.yz, chromaAxis);
+        float clampedComponent = clamp(foregroundComponent, min(0.0f, observedComponent), max(0.0f, observedComponent));
+        foregroundLab.yz += (clampedComponent - foregroundComponent) * chromaAxis;
+    }
+
+    float3 outputLinear = max(OklabToLinear(foregroundLab), 0.0f);
+    float3 outputSrgb = saturate(LinearToSrgb(outputLinear));
     float outAlpha = alpha * noiseConfidence * src.a;
-    return float4(foregroundSrgb * outAlpha, outAlpha);
+    return float4(outputSrgb * outAlpha, outAlpha);
 }
