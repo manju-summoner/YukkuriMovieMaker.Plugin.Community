@@ -201,6 +201,11 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
             }
             else
             {
+                if (Marshal.GetObjectForIUnknown(_gpuContext) is ID3D10Multithread multithread)
+                {
+                    multithread.SetMultithreadProtected(1);
+                    MediaFoundationApi.Release(multithread);
+                }
                 _readbackMode = true;
                 _deviceDecision.TrySetResult(0);
             }
@@ -484,10 +489,10 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
                             hardwareContext = MediaFoundationApi.CreateHardwareDeviceContext();
                         (writer, _videoIndex, _audioIndex) = CreateWriter(path, _width, _height, _fps, _hz, _settings, hardwareContext, _useNv12, disableThrottling: true);
                     }
-                    catch (Exception ex) when (hardwareContext is not null)
+                    catch (Exception ex) when (_settings.IsHardwareAcceleration)
                     {
                         Log.Default.Write(Texts.HardwareFallback, ex);
-                        hardwareContext.Dispose();
+                        hardwareContext?.Dispose();
                         hardwareContext = null;
                         (writer, _videoIndex, _audioIndex) = CreateWriter(path, _width, _height, _fps, _hz, _settings, null, _useNv12, disableThrottling: true);
                     }
@@ -500,18 +505,28 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
                 _writerReady.TrySetException(ex);
                 _rawChannel.Writer.TryComplete();
                 while (_rawChannel.Reader.TryRead(out var remaining))
-                    ArrayPool<byte>.Shared.Return(remaining.Buffer);
+                {
+                    if (remaining is RawTexture handed)
+                    {
+                        _freeTextures.Add(handed.Texture);
+                        _textureSlots.Release();
+                    }
+                    else if (remaining.Buffer.Length > 0)
+                    {
+                        ArrayPool<byte>.Shared.Return(remaining.Buffer);
+                    }
+                }
                 return;
             }
 
+            int workerCount = (_gpuMode || _readbackMode) ? 1 : Math.Clamp(Environment.ProcessorCount / 4, 1, 4);
+            var workers = new Task[workerCount];
+            for (int i = 0; i < workerCount; i++)
+                workers[i] = Task.Run(ConvertWorkerAsync);
+            var allWorkers = Task.WhenAll(workers);
+
             try
             {
-                int workerCount = (_gpuMode || _readbackMode) ? 1 : Math.Clamp(Environment.ProcessorCount / 4, 1, 4);
-                var workers = new Task[workerCount];
-                for (int i = 0; i < workerCount; i++)
-                    workers[i] = Task.Run(ConvertWorkerAsync);
-                var allWorkers = Task.WhenAll(workers);
-
                 if (_gpuMode)
                 {
                     long idleMilliseconds = 0;
@@ -595,7 +610,24 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
                 _failure ??= ExceptionDispatchInfo.Capture(ex);
                 _rawChannel.Writer.TryComplete();
                 while (_rawChannel.Reader.TryRead(out var remaining))
-                    ArrayPool<byte>.Shared.Return(remaining.Buffer);
+                {
+                    if (remaining is RawTexture handed)
+                    {
+                        _freeTextures.Add(handed.Texture);
+                        _textureSlots.Release();
+                    }
+                    else if (remaining.Buffer.Length > 0)
+                    {
+                        ArrayPool<byte>.Shared.Return(remaining.Buffer);
+                    }
+                }
+                try
+                {
+                    allWorkers.GetAwaiter().GetResult();
+                }
+                catch
+                {
+                }
                 foreach (var key in _completed.Keys)
                 {
                     if (_completed.TryRemove(key, out var pending) && !ReferenceEquals(pending, SkippedSample))
@@ -862,7 +894,7 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
                     throw new NotSupportedException();
             }
             attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncCommonQualityVsSpeed, (uint)Math.Clamp(100 - settings.EncodeSpeed, 0, 100));
-            attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncNumWorkerThreads, (uint)(settings.NumberOfThreads <= 0 ? Environment.ProcessorCount : settings.NumberOfThreads));
+            attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncNumWorkerThreads, (uint)Math.Clamp(settings.NumberOfThreads, 0, 16));
             if (settings.GOPSize > 0)
                 attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncMPVGOPSize, (uint)settings.GOPSize);
             attributes.SetUINT32(MediaFoundationGuids.CODECAPI_AVEncMPVDefaultBPictureCount, (uint)(settings.H264Profile == H264Profile.Baseline ? 0 : Math.Max(settings.BFrameCount, 0)));
@@ -1150,6 +1182,9 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
         _pipelineThread.Join();
 
         if (_failure is { } failure)
+        {
             Log.Default.Write(Texts.WriteFailed, failure.SourceException);
+            failure.Throw();
+        }
     }
 }
