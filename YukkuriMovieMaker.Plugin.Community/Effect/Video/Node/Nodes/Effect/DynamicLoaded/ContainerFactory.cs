@@ -6,6 +6,7 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
@@ -141,12 +142,12 @@ public class ContainerFactory
                 DefaultValue = inst is Color c ? c : Colors.White
             };
 
-        if (prop.PropertyType == typeof(BrushWrapper))
+        if (prop.PropertyType == typeof(Plugin.Brush.Brush))
             return new PortDefinition
             {
                 PropName = prop.Name,
                 PortType = PortType.Brush,
-                LabelKey = labelKey,
+                LabelKey = display.Name ?? TextNode.BrushName ?? prop.Name,
                 DescKey = descKey,
                 ResourceType = resourceType,
                 DefaultValue = null

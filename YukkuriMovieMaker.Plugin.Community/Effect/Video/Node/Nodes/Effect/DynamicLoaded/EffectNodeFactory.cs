@@ -179,7 +179,9 @@ public static class EffectPortCollector
             var propInstance = prop.GetValue(obj);
             var def = TryMakePortDefinition(prop, displayAttr, propInstance);
 
-            if (propInstance is not null && propInstance.GetType().GetProperties()
+            if (propInstance is not null
+                && prop.PropertyType != typeof(Plugin.Brush.Brush)
+                && propInstance.GetType().GetProperties()
                     .Any(info => info.GetCustomAttribute<DisplayAttribute>() != null))
             {
                 dynamicResult.Add((def, prop, propInstance));
@@ -249,7 +251,8 @@ public static class EffectPortCollector
             return new PortDefinition
             {
                 PropName = prop.Name, PortType = PortType.Brush,
-                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
+                LabelKey = display.Name ?? TextNode.BrushName ?? prop.Name, DescKey = descKey,
+                ResourceType = resourceType,
                 DefaultValue = null
             };
 

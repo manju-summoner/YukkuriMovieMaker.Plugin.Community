@@ -67,4 +67,5 @@
 <data name="BrushCategoryName" xml:space="preserve"><value>ブラシ</value></data>
 <data name="FunctionsCategoryName" xml:space="preserve"><value>関数</value></data>
 <data name="VideoEffectCategoryName" xml:space="preserve"><value>映像エフェクト</value></data>
+  <data name="BrushName" xml:space="preserve"><value>ブラシ</value></data>
 </root>
