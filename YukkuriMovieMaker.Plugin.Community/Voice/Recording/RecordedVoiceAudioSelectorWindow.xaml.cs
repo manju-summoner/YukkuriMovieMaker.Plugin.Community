@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -275,6 +275,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             try
             {
                 recordingService.StartRecording(SelectedDeviceId);
+            }
+            catch (MicrophoneAccessDeniedException)
+            {
+                var result = MessageBox.Show(
+                    this,
+                    ToolTexts.MicrophoneAccessDenied,
+                    Texts.RecordedAudioSelectorTitle,
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+                if (result == MessageBoxResult.Yes)
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "ms-settings:privacy-microphone",
+                        UseShellExecute = true
+                    });
+                }
             }
             catch (Exception ex)
             {
