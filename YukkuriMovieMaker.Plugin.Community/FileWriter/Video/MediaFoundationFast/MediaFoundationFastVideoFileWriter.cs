@@ -17,7 +17,7 @@ using VideoBitRateControlMode = YukkuriMovieMaker.Plugin.Community.FileWriter.Me
 
 namespace YukkuriMovieMaker.Plugin.Community.FileWriter.MediaFoundationFast;
 
-internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IVideoFileWriter
+internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2
 {
     private enum StreamKind { Video, Audio }
     private abstract record RawItem(long Sequence, byte[] Buffer, int Length, long Time, long Duration);
