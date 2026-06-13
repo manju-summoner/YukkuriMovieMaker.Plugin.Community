@@ -68,10 +68,10 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
         _useNv12 = settings.Width % 2 == 0 && settings.Height % 2 == 0;
 
         long frameBytes = Math.Max((long)settings.Width * settings.Height * 4, 1);
-        int capacity = (int)Math.Clamp(536_870_912 / frameBytes, 4, 32);
         _texturePoolSize = (int)Math.Clamp(268_435_456 / frameBytes, 8, 32);
+        int capacity = (int)Math.Clamp(536_870_912 / frameBytes, 4, 32);
         _textureSlots = new SemaphoreSlim(_texturePoolSize, _texturePoolSize);
-        _recycler = new TextureRecycler(this);
+        _recycler = new TextureRecycler();
         _rawChannel = Channel.CreateBounded<RawItem>(new BoundedChannelOptions(capacity)
         {
             SingleReader = false,
@@ -304,16 +304,11 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
             ThrowIfFailed();
         }
 
-        nint surface = 0;
-        nint sourceTexture = 0;
         nint texture = 0;
         bool slotConsumed = false;
         try
         {
-            using var dxgiSurface = frame.Surface;
-            surface = dxgiSurface.NativePointer;
-            Marshal.AddRef(surface);
-            sourceTexture = D3D11Unsafe.QueryInterface(surface, MediaFoundationGuids.IID_ID3D11Texture2D);
+            nint sourceTexture = ResolveSourceTexture(frame);
 
             if (!_textureDescReady)
             {
@@ -339,7 +334,12 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
             try
             {
                 sample = MediaFoundationApi.CreateTrackedSample();
-                ((IMFTrackedSample)sample).SetAllocator(_recycler, new TextureToken(texture));
+                nint capturedTexture = texture;
+                ((IMFTrackedSample)sample).SetAllocator(_recycler, new RecycleToken(() =>
+                {
+                    _freeTextures.Add(capturedTexture);
+                    _textureSlots.Release();
+                }));
                 slotConsumed = true;
                 nint sampleTexture = texture;
                 texture = 0;
@@ -377,13 +377,13 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
     }
 
     [ComVisible(true)]
-    private sealed class TextureToken(nint texture)
+    private sealed class RecycleToken(Action onReleased)
     {
-        public nint Texture { get; } = texture;
+        public Action OnReleased { get; } = onReleased;
     }
 
     [ComVisible(true)]
-    private sealed class TextureRecycler(MediaFoundationFastVideoFileWriter owner) : IMFAsyncCallback
+    private sealed class TextureRecycler : IMFAsyncCallback
     {
         public int GetParameters(out uint pdwFlags, out uint pdwQueue)
         {
@@ -397,11 +397,8 @@ internal sealed class MediaFoundationFastVideoFileWriter : IVideoFileWriter2, IV
             try
             {
                 pAsyncResult.GetState(out var state);
-                if (state is TextureToken token)
-                {
-                    owner._freeTextures.Add(token.Texture);
-                    owner._textureSlots.Release();
-                }
+                if (state is RecycleToken token)
+                    token.OnReleased();
             }
             catch
             {
