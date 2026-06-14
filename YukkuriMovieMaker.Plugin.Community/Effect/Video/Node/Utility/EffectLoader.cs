@@ -11,7 +11,6 @@ using Vortice;
 using Vortice.Direct2D1;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
-using YukkuriMovieMaker.ItemEditor;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Brush;
 using YukkuriMovieMaker.Plugin.Community.Commons;
@@ -26,6 +25,7 @@ public class VideoEffectsLoader : IDisposable
 {
     private static readonly ConcurrentDictionary<string, byte[]> ShaderDictionaries = [];
     private readonly IBrushParameter? _brushParameter;
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
     private readonly ShaderEffect? _shaderEffect;
     private readonly EffectType _type;
     private readonly IVideoEffect? _videoEffect;
@@ -98,128 +98,155 @@ public class VideoEffectsLoader : IDisposable
 
     public async Task<VideoEffectsLoader> SetValue(string propertyName, object? value)
     {
-        switch (_type)
+        await _semaphore.WaitAsync().ConfigureAwait(false);
+        try
         {
-            case EffectType.ShaderEffect when _shaderEffect != null:
-                lock (_shaderEffect)
-                {
-                    _shaderEffect.SetValueByName(propertyName, value);
-                }
-
-                break;
-            case EffectType.VideoEffect when _videoEffect != null:
+#if DEBUG
+            Console.WriteLine(
+                $@"SetValue ENTER {propertyName} Thread={Environment.CurrentManagedThreadId}");
+#endif
+            switch (_type)
             {
-                _videoEffect.BeginEdit();
+                case EffectType.ShaderEffect when _shaderEffect != null:
+                    lock (_shaderEffect)
+                    {
+                        _shaderEffect.SetValueByName(propertyName, value);
+                    }
 
-                // Recursively search for properties with DisplayAttribute within the _videoEffect hierarchy,
-                // and match the property name (identifier) with the argument propertyName
-                var result = FindPropertyByDisplay(_videoEffect, propertyName);
-                if (result == null)
-                    throw new ArgumentException(string.Format(TextUi.PropertyNotFound, propertyName),
-                        nameof(propertyName));
-
-                var (targetObject, propInfo) = result.Value;
-
-                // If the property type is Animation, update the Values property of the Animation object directly
-                if (propInfo.PropertyType == typeof(Animation))
+                    break;
+                case EffectType.VideoEffect when _videoEffect != null:
                 {
-                    // Retrieve the Animation object. If it does not exist, create a new one
-                    if (propInfo.GetValue(targetObject) is not Animation animObj)
+#if DEBUG
+                    Console.WriteLine(
+                        $@"BeginEdit {propertyName}");
+#endif
+                    _videoEffect.BeginEdit();
+
+                    // Recursively search for properties with DisplayAttribute within the _videoEffect hierarchy,
+                    // and match the property name (identifier) with the argument propertyName
+                    var result = FindPropertyByDisplay(_videoEffect, propertyName);
+                    if (result == null)
+                        throw new ArgumentException(string.Format(TextUi.PropertyNotFound, propertyName),
+                            nameof(propertyName));
+
+                    var (targetObject, propInfo) = result.Value;
+
+                    // If the property type is Animation, update the Values property of the Animation object directly
+                    if (propInfo.PropertyType == typeof(Animation))
+                    {
+                        // Retrieve the Animation object. If it does not exist, create a new one
+                        if (propInfo.GetValue(targetObject) is not Animation animObj)
+                        {
+                            if (!propInfo.CanWrite)
+                                throw new InvalidOperationException(
+                                    string.Format(TextUi.PropertyReadOnly, propertyName));
+                            animObj = Activator.CreateInstance<Animation>()
+                                      ?? throw new InvalidOperationException(
+                                          TextUi.UnableCreateAnimationInstance);
+                            // Set the Animation object to the target property only if it did not exist
+                            propInfo.SetValue(targetObject, animObj);
+                        }
+
+                        // Retrieve the Values property of the Animation object
+                        var valuesProp = animObj.GetType()
+                            .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
+                        if (valuesProp == null || !valuesProp.CanRead || !valuesProp.CanWrite)
+                            throw new InvalidOperationException(
+                                TextUi.AnimationValuesPropertyError);
+
+                        // Create a new AnimationValue and add it to the existing list
+                        var newList =
+                            ImmutableList<AnimationValue>.Empty.Add(new AnimationValue(Convert.ToDouble(value ?? 0)));
+                        // Update the Values property of the Animation object directly
+                        animObj.BeginEdit();
+                        valuesProp.SetValue(animObj, newList);
+                        await animObj.EndEditAsync();
+                    }
+                    else
                     {
                         if (!propInfo.CanWrite)
                             throw new InvalidOperationException(string.Format(TextUi.PropertyReadOnly, propertyName));
-                        animObj = Activator.CreateInstance<Animation>()
-                                  ?? throw new InvalidOperationException(
-                                      TextUi.UnableCreateAnimationInstance);
-                        // Set the Animation object to the target property only if it did not exist
-                        propInfo.SetValue(targetObject, animObj);
+                        // For non-Animation types, set the value to the property as usual
+                        propInfo.SetValue(targetObject, value);
                     }
 
-                    // Retrieve the Values property of the Animation object
-                    var valuesProp = animObj.GetType()
-                        .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
-                    if (valuesProp == null || !valuesProp.CanRead || !valuesProp.CanWrite)
-                        throw new InvalidOperationException(
-                            TextUi.AnimationValuesPropertyError);
-
-                    // Create a new AnimationValue and add it to the existing list
-                    var newList =
-                        ImmutableList<AnimationValue>.Empty.Add(new AnimationValue(Convert.ToDouble(value ?? 0)));
-                    // Update the Values property of the Animation object directly
-                    animObj.BeginEdit();
-                    valuesProp.SetValue(animObj, newList);
-                    await animObj.EndEditAsync();
+                    await _videoEffect.EndEditAsync();
                 }
-                else
+                    break;
+                case EffectType.BrushEffect when _brushParameter != null:
                 {
-                    if (!propInfo.CanWrite)
-                        throw new InvalidOperationException(string.Format(TextUi.PropertyReadOnly, propertyName));
-                    // For non-Animation types, set the value to the property as usual
-                    propInfo.SetValue(targetObject, value);
-                }
+                    _brushParameter.BeginEdit();
+                    // Recursively search for properties with DisplayAttribute within the _brushParameter hierarchy,
+                    // and match the property name (identifier) with the argument propertyName
+                    var result = FindPropertyByDisplay(_brushParameter, propertyName);
+                    if (result == null)
+                        throw new ArgumentException(string.Format(TextUi.PropertyNotFound, propertyName),
+                            nameof(propertyName));
 
-                await _videoEffect.EndEditAsync();
-            }
-                break;
-            case EffectType.BrushEffect when _brushParameter != null:
-            {
-                // Recursively search for properties with DisplayAttribute within the _brushParameter hierarchy,
-                // and match the property name (identifier) with the argument propertyName
-                var result = FindPropertyByDisplay(_brushParameter, propertyName);
-                if (result == null)
-                    throw new ArgumentException(string.Format(TextUi.PropertyNotFound, propertyName),
-                        nameof(propertyName));
+                    var (targetObject, propInfo) = result.Value;
 
-                var (targetObject, propInfo) = result.Value;
+                    // If the property type is Animation, update the Values property of the Animation object directly
+                    if (propInfo.PropertyType == typeof(Animation))
+                    {
+                        // Retrieve the Animation object. If it does not exist, create a new one
+                        if (propInfo.GetValue(targetObject) is not Animation animObj)
+                        {
+                            if (!propInfo.CanWrite)
+                                throw new InvalidOperationException(
+                                    string.Format(TextUi.PropertyReadOnly, propertyName));
+                            animObj = Activator.CreateInstance<Animation>()
+                                      ?? throw new InvalidOperationException(
+                                          TextUi.UnableCreateAnimationInstance);
+                            // Set the Animation object to the target property only if it did not exist
+                            propInfo.SetValue(targetObject, animObj);
+                        }
 
-                // If the property type is Animation, update the Values property of the Animation object directly
-                if (propInfo.PropertyType == typeof(Animation))
-                {
-                    // Retrieve the Animation object. If it does not exist, create a new one
-                    if (propInfo.GetValue(targetObject) is not Animation animObj)
+                        // Retrieve the Values property of the Animation object
+                        var valuesProp = animObj.GetType()
+                            .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
+                        if (valuesProp == null || !valuesProp.CanRead || !valuesProp.CanWrite)
+                            throw new InvalidOperationException(
+                                TextUi.AnimationValuesPropertyError);
+
+                        // Create a new AnimationValue and add it to the existing list
+                        var newList =
+                            ImmutableList<AnimationValue>.Empty.Add(new AnimationValue(Convert.ToDouble(value ?? 0)));
+                        // Update the Values property of the Animation object directly
+                        animObj.BeginEdit();
+                        valuesProp.SetValue(animObj, newList);
+                        await animObj.EndEditAsync();
+                    }
+                    else
                     {
                         if (!propInfo.CanWrite)
                             throw new InvalidOperationException(string.Format(TextUi.PropertyReadOnly, propertyName));
-                        animObj = Activator.CreateInstance<Animation>()
-                                  ?? throw new InvalidOperationException(
-                                      TextUi.UnableCreateAnimationInstance);
-                        // Set the Animation object to the target property only if it did not exist
-                        propInfo.SetValue(targetObject, animObj);
+                        // For non-Animation types, set the value to the property as usual
+                        propInfo.SetValue(targetObject, value);
                     }
 
-                    // Retrieve the Values property of the Animation object
-                    var valuesProp = animObj.GetType()
-                        .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
-                    if (valuesProp == null || !valuesProp.CanRead || !valuesProp.CanWrite)
-                        throw new InvalidOperationException(
-                            TextUi.AnimationValuesPropertyError);
-
-                    // Create a new AnimationValue and add it to the existing list
-                    var newList =
-                        ImmutableList<AnimationValue>.Empty.Add(new AnimationValue(Convert.ToDouble(value ?? 0)));
-                    // Update the Values property of the Animation object directly
-                    animObj.BeginEdit();
-                    valuesProp.SetValue(animObj, newList);
-                    await animObj.EndEditAsync();
+                    await _brushParameter.EndEditAsync();
                 }
-                else
-                {
-                    if (!propInfo.CanWrite)
-                        throw new InvalidOperationException(string.Format(TextUi.PropertyReadOnly, propertyName));
-                    // For non-Animation types, set the value to the property as usual
-                    propInfo.SetValue(targetObject, value);
-                }
-
-                if (_brushParameter is IEditable editable) await editable.EndEditAsync();
+                    break;
             }
-                break;
         }
-
+        finally
+        {
+            _semaphore.Release();
+        }
+#if DEBUG
+        Console.WriteLine(
+            $@"SetValue EXIT {propertyName} Thread={Environment.CurrentManagedThreadId}");
+#endif
         return this;
 
-        (object target, PropertyInfo property)? FindPropertyByDisplay(object? obj, string name)
+        (object target, PropertyInfo property)? FindPropertyByDisplay(object? obj, string name,
+            HashSet<object>? visited = null)
         {
             if (obj == null) return null;
+
+            visited ??= new HashSet<object>(ReferenceEqualityComparer.Instance);
+
+            if (!visited.Add(obj)) return null;
 
             // Traverse the properties directly under obj
             foreach (var prop in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
@@ -233,8 +260,11 @@ public class VideoEffectsLoader : IDisposable
                 if (displayAttr != null && prop.Name == name) return (obj, prop);
 
                 // Recursively search (excluding string type)
-                if (prop is not { CanRead: true, PropertyType.IsClass: true } ||
-                    prop.PropertyType == typeof(string)) continue;
+                var dotIndex = name.IndexOf('.');
+                if (dotIndex <= 0) continue;
+                var parentName = name[..dotIndex];
+
+                if (prop.Name != parentName) continue;
                 object? subObj;
                 try
                 {
@@ -247,9 +277,11 @@ public class VideoEffectsLoader : IDisposable
                 }
 
                 if (subObj == null) continue;
-                var result = FindPropertyByDisplay(subObj, name);
-                if (result != null)
-                    return result;
+
+                return FindPropertyByDisplay(
+                    subObj,
+                    name[(dotIndex + 1)..],
+                    visited);
             }
 
             return null;

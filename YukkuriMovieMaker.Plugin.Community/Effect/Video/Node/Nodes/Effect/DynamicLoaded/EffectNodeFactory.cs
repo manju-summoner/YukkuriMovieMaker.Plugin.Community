@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
-using YukkuriMovieMaker.ItemEditor;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
@@ -180,7 +179,7 @@ public static class EffectPortCollector
             var def = TryMakePortDefinition(prop, displayAttr, propInstance);
 
             if (propInstance is not null
-                && prop.PropertyType != typeof(Plugin.Brush.Brush)
+                && prop.PropertyType != typeof(BrushWrapper)
                 && propInstance.GetType().GetProperties()
                     .Any(info => info.GetCustomAttribute<DisplayAttribute>() != null))
             {
@@ -194,7 +193,7 @@ public static class EffectPortCollector
 
     private static PortDefinition TryMakePortDefinition(PropertyInfo prop, DisplayAttribute display, object? inst)
     {
-        var labelKey = display.Name ?? prop.Name;
+        var labelKey = display.Name ?? display.GroupName ?? prop.Name;
         var descKey = display.Description ?? "";
         var resourceType = display.ResourceType;
 
@@ -247,7 +246,7 @@ public static class EffectPortCollector
                 DefaultValue = inst is Color c ? c : Colors.White
             };
 
-        if (prop.PropertyType == typeof(Plugin.Brush.Brush))
+        if (prop.PropertyType == typeof(BrushWrapper))
             return new PortDefinition
             {
                 PropName = prop.Name, PortType = PortType.Brush,
@@ -629,39 +628,6 @@ public static class EffectNodeCalculator
         return PortDefsRegistry.TryGetValue(effectName, out var d) ? d : [];
     }
 
-    /// <summary>
-    ///     OnInputValueChanged から各 Dynamic プロパティごとに呼ばれる。
-    ///     Task.Run 内で loader.SetValue を実行し Effect 側の型切り替えを発生させた後、
-    ///     コンテナ型が変わっていれば新しいコンテナを生成し dispatcher.BeginInvoke で UI スレッドに通知する。
-    /// </summary>
-    /// <summary>
-    ///     BeginEdit → SetPropertyDirect → EndEditAsync の順で Effect に値を適用する。
-    ///     VideoEffectsLoader.SetValue は循環参照ガードなしの FindPropertyByDisplay を持つため使用しない。
-    /// </summary>
-    private static Task ApplyPropertyWithEditAsync(VideoEffectsLoader loader, string propName, object? value)
-    {
-        try
-        {
-            var effectField = typeof(VideoEffectsLoader)
-                .GetField("_videoEffect", BindingFlags.NonPublic | BindingFlags.Instance);
-            var effectInstance = effectField?.GetValue(loader) as IEditable;
-            if (effectInstance == null) return Task.CompletedTask;
-
-            lock (loader)
-            {
-                effectInstance.BeginEdit();
-                SetPropertyDirect(loader, propName, value);
-                effectInstance.EndEditAsync().GetAwaiter().GetResult();
-            }
-
-            return Task.CompletedTask;
-        }
-        catch (Exception exception)
-        {
-            return Task.FromException(exception);
-        }
-    }
-
     public static void RefreshDynamicContainer(
         NodeLogic self,
         VideoEffectsLoader loader,
@@ -676,7 +642,8 @@ public static class EffectNodeCalculator
 
         _ = Task.Run(async () =>
         {
-            await ApplyPropertyWithEditAsync(loader, changedPortName, changedValue).ConfigureAwait(false);
+            await loader.SetValue(changedPortName, changedValue)
+                .ConfigureAwait(false);
 
             var subObject = GetEffectSubObject(loader, dynamicPropName);
             if (subObject == null) return;
@@ -758,7 +725,9 @@ public static class EffectNodeCalculator
                 foreach (var def in portDefs)
                 {
                     var value = GetPortValue(self, def);
-                    SetPropertyDirect(loader, def.PropName, value);
+                    loader.SetValue(def.PropName, value)
+                        .GetAwaiter()
+                        .GetResult();
                 }
             }
 
@@ -860,37 +829,6 @@ public static class EffectNodeCalculator
         }
     }
 
-    private static void SetPropertyDirect(VideoEffectsLoader loader, string propName, object? value)
-    {
-        var effectField = typeof(VideoEffectsLoader)
-            .GetField("_videoEffect", BindingFlags.NonPublic | BindingFlags.Instance);
-        var effectInstance = effectField?.GetValue(loader);
-        if (effectInstance == null) return;
-
-        var result = FindPropertyByDisplay(effectInstance, propName);
-        if (result == null) return;
-
-        var (target, propInfo) = result.Value;
-
-        if (propInfo.PropertyType == typeof(Animation))
-        {
-            if (propInfo.GetValue(target) is not Animation anim) return;
-            var valuesProp = typeof(Animation).GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
-            var values = valuesProp?.GetValue(anim) as ImmutableList<AnimationValue>;
-            if (values == null) return;
-            var doubleVal = Convert.ToDouble(value ?? 0);
-            var newValues = values.Count > 0
-                ? values.SetItem(0, new AnimationValue(doubleVal))
-                : values.Add(new AnimationValue(doubleVal));
-            valuesProp!.SetValue(anim, newValues);
-        }
-        else
-        {
-            if (!propInfo.CanWrite) return;
-            propInfo.SetValue(target, value);
-        }
-    }
-
     private static (object target, PropertyInfo property)? FindPropertyByDisplay(object? obj, string name,
         HashSet<object>? visited = null)
     {
@@ -933,8 +871,18 @@ public static class EffectNodeCalculator
                 raw is float f ? f : raw != null ? Convert.ToSingle(raw) : (object)0f,
             PortType.Color =>
                 raw ?? Colors.White,
+            PortType.Brush =>
+                ConvertBrush(raw),
             _ => raw
         };
+    }
+
+    private static Plugin.Brush.Brush? ConvertBrush(object? raw)
+    {
+        if (raw is not BrushWrapper wrapper)
+            return null;
+
+        return wrapper.Brush == null ? null : NodeBrushFactory.Create(wrapper);
     }
 }
 

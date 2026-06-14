@@ -142,7 +142,7 @@ public class ContainerFactory
                 DefaultValue = inst is Color c ? c : Colors.White
             };
 
-        if (prop.PropertyType == typeof(Plugin.Brush.Brush))
+        if (prop.PropertyType == typeof(BrushWrapper))
             return new PortDefinition
             {
                 PropName = prop.Name,
