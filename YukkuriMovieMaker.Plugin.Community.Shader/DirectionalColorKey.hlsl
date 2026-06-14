@@ -110,9 +110,16 @@ float4 main(
         [branch]
         if (denom > 1e-6f)
         {
-            alpha = saturate(dot(colorSrgb - backgroundSrgb, fb) / denom);
-            foregroundSrgb = seedSrgb;
-            resolved = true;
+            float seedAlpha = saturate(dot(colorSrgb - backgroundSrgb, fb) / denom);
+            float3 residual = (colorSrgb - backgroundSrgb) - seedAlpha * fb;
+
+            [branch]
+            if (dot(residual, residual) <= 0.0625f * denom)
+            {
+                alpha = seedAlpha;
+                foregroundSrgb = seedSrgb;
+                resolved = true;
+            }
         }
     }
 
@@ -140,6 +147,7 @@ float4 main(
         float lambda = max(clusters[bestCluster].w, 1e-5f);
         alpha = saturate(bestProj / lambda);
 
+        float unmixAlpha = alpha;
         float3 luminance = float3(0.299f, 0.587f, 0.114f);
         float3 backgroundChroma = backgroundSrgb - dot(backgroundSrgb, luminance);
         float backgroundChromaLenSq = dot(backgroundChroma, backgroundChroma);
@@ -149,10 +157,10 @@ float4 main(
         {
             float3 colorChroma = colorSrgb - dot(colorSrgb, luminance);
             float backgroundPresence = saturate(dot(colorChroma, backgroundChroma) / backgroundChromaLenSq);
-            alpha = max(alpha, 1.0f - backgroundPresence);
+            unmixAlpha = max(alpha, 1.0f - backgroundPresence);
         }
 
-        foregroundSrgb = saturate((colorSrgb - (1.0f - alpha) * backgroundSrgb) / max(alpha, 1e-3f));
+        foregroundSrgb = saturate((colorSrgb - (1.0f - unmixAlpha) * backgroundSrgb) / max(unmixAlpha, 1e-3f));
     }
 
     alpha = saturate((alpha - edgeSoftness) / max(1.0f - edgeSoftness, 1e-5f));
