@@ -64,14 +64,6 @@ float3 OklabToLinear(float3 lab)
     );
 }
 
-float PerpendicularDistance(float3 colorLab, float3 bgLab, float bgLenSq)
-{
-    float3 dvec = colorLab - bgLab;
-    float along = dot(dvec, bgLab) / bgLenSq;
-    float3 dPerp = dvec - along * bgLab;
-    return length(dPerp);
-}
-
 float4 main(
     float4 pos : SV_POSITION,
     float4 posScene : SCENE_POSITION,
@@ -148,19 +140,16 @@ float4 main(
         float lambda = max(clusters[bestCluster].w, 1e-5f);
         alpha = saturate(bestProj / lambda);
 
-        float bgLenSq = dot(backgroundLab, backgroundLab);
+        float3 luminance = float3(0.299f, 0.587f, 0.114f);
+        float3 backgroundChroma = backgroundSrgb - dot(backgroundSrgb, luminance);
+        float backgroundChromaLenSq = dot(backgroundChroma, backgroundChroma);
 
         [branch]
-        if (bgLenSq > 1e-8f)
+        if (backgroundChromaLenSq > 1e-8f)
         {
-            float referencePerp = PerpendicularDistance(float3(1.0f, 0.0f, 0.0f), backgroundLab, bgLenSq);
-
-            [branch]
-            if (referencePerp > 1e-5f)
-            {
-                float pixelPerp = PerpendicularDistance(colorLab, backgroundLab, bgLenSq);
-                alpha = max(alpha, saturate(pixelPerp / referencePerp));
-            }
+            float3 colorChroma = colorSrgb - dot(colorSrgb, luminance);
+            float backgroundPresence = saturate(dot(colorChroma, backgroundChroma) / backgroundChromaLenSq);
+            alpha = max(alpha, 1.0f - backgroundPresence);
         }
 
         foregroundSrgb = saturate((colorSrgb - (1.0f - alpha) * backgroundSrgb) / max(alpha, 1e-3f));
