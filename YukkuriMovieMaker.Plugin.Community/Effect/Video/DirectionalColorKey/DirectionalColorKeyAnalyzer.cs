@@ -25,6 +25,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private ReadWriteBuffer<int>? foregroundBufferB;
         private ReadWriteBuffer<int>? validBufferA;
         private ReadWriteBuffer<int>? validBufferB;
+        private ReadWriteBuffer<int>? seedMaskBuffer;
         private int[]? foregroundReadback;
 
         private int width;
@@ -45,6 +46,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private const float IncrementalChangeCeiling = 0.25f;
         private const int PropagateReach = 4;
         private const int PropagateIterations = 8;
+        private const float LineSigmaSquared = 0.1225f;
 
         private readonly float[] centers = new float[MaxClusters * 3];
         private readonly int[] accumulators = new int[MaxClusters * 3 + MaxClusters];
@@ -185,7 +187,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             hasWarmStart = true;
         }
 
-        public ReadOnlySpan<int> BuildForegroundField(int width, int height, Vector3 backgroundLab, float sigmaColorSq)
+        public ReadOnlySpan<int> BuildForegroundField(int width, int height, Vector3 backgroundLab, Vector3 backgroundSrgb)
         {
             EnsureCapacity(width, height);
 
@@ -201,18 +203,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             var validSource = EnsureValidBufferA();
             var foregroundTarget = EnsureForegroundBufferB();
             var validTarget = EnsureValidBufferB();
+            var seedMaskGpu = EnsureSeedMaskBuffer();
 
             device.For(width, height, new ForegroundSeedShader(
-                bgraGpu, colorLabGpu, foregroundSource, validSource,
+                bgraGpu, colorLabGpu, foregroundSource, validSource, seedMaskGpu,
                 backgroundLab.X, backgroundLab.Y, backgroundLab.Z,
                 referencePerp, width, height));
 
             for (int iteration = 0; iteration < PropagateIterations; iteration++)
             {
                 device.For(width, height, new ForegroundPropagateShader(
-                    foregroundSource, validSource, colorLabGpu,
+                    foregroundSource, validSource, seedMaskGpu, bgraGpu,
                     foregroundTarget, validTarget,
-                    PropagateReach, sigmaColorSq, width, height));
+                    backgroundSrgb.X, backgroundSrgb.Y, backgroundSrgb.Z,
+                    PropagateReach, LineSigmaSquared, width, height));
 
                 (foregroundSource, foregroundTarget) = (foregroundTarget, foregroundSource);
                 (validSource, validTarget) = (validTarget, validSource);
@@ -618,6 +622,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             return validBufferB;
         }
 
+        private ReadWriteBuffer<int> EnsureSeedMaskBuffer()
+        {
+            if (seedMaskBuffer is null || seedMaskBuffer.Length < pixelCount)
+            {
+                seedMaskBuffer?.Dispose();
+                seedMaskBuffer = device.AllocateReadWriteBuffer<int>(pixelCount);
+            }
+            return seedMaskBuffer;
+        }
+
         private void DisposeFrameBuffers()
         {
             bgraBuffer?.Dispose();
@@ -634,6 +648,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             foregroundBufferB?.Dispose();
             validBufferA?.Dispose();
             validBufferB?.Dispose();
+            seedMaskBuffer?.Dispose();
             bgraBuffer = null;
             previousBgraBuffer = null;
             colorLabBuffer = null;
@@ -648,6 +663,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             foregroundBufferB = null;
             validBufferA = null;
             validBufferB = null;
+            seedMaskBuffer = null;
         }
 
         public void Dispose()

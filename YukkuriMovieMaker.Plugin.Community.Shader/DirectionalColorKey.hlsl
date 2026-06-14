@@ -111,7 +111,7 @@ float4 main(
     [branch]
     if (foregroundSample.a > 0.5f)
     {
-        float3 seedSrgb = saturate(foregroundSample.rgb);
+        float3 seedSrgb = saturate(foregroundSample.rgb / max(foregroundSample.a, 1e-3f));
         float3 fb = seedSrgb - backgroundSrgb;
         float denom = dot(fb, fb);
 

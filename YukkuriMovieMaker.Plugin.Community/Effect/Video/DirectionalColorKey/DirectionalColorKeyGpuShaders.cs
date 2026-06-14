@@ -805,6 +805,7 @@ internal readonly partial struct ForegroundSeedShader(
     ReadWriteBuffer<float> colorLab,
     ReadWriteBuffer<int> foreground,
     ReadWriteBuffer<int> valid,
+    ReadWriteBuffer<int> seedMask,
     float backgroundL,
     float backgroundA,
     float backgroundB,
@@ -816,6 +817,7 @@ internal readonly partial struct ForegroundSeedShader(
     private readonly ReadWriteBuffer<float> colorLab = colorLab;
     private readonly ReadWriteBuffer<int> foreground = foreground;
     private readonly ReadWriteBuffer<int> valid = valid;
+    private readonly ReadWriteBuffer<int> seedMask = seedMask;
     private readonly float backgroundL = backgroundL;
     private readonly float backgroundA = backgroundA;
     private readonly float backgroundB = backgroundB;
@@ -840,6 +842,7 @@ internal readonly partial struct ForegroundSeedShader(
         {
             foreground[index] = 0;
             valid[index] = 0;
+            seedMask[index] = 0;
             return;
         }
 
@@ -849,6 +852,7 @@ internal readonly partial struct ForegroundSeedShader(
         {
             foreground[index] = 0;
             valid[index] = 0;
+            seedMask[index] = 0;
             return;
         }
 
@@ -866,6 +870,7 @@ internal readonly partial struct ForegroundSeedShader(
         {
             foreground[index] = 0;
             valid[index] = 0;
+            seedMask[index] = 0;
             return;
         }
 
@@ -880,6 +885,7 @@ internal readonly partial struct ForegroundSeedShader(
 
         foreground[index] = (0xFF << 24) | (rByte << 16) | (gByte << 8) | bByte;
         valid[index] = 1;
+        seedMask[index] = 1;
     }
 }
 
@@ -888,21 +894,29 @@ internal readonly partial struct ForegroundSeedShader(
 internal readonly partial struct ForegroundPropagateShader(
     ReadWriteBuffer<int> sourceForeground,
     ReadWriteBuffer<int> sourceValid,
-    ReadWriteBuffer<float> colorLab,
+    ReadWriteBuffer<int> seedMask,
+    ReadOnlyBuffer<int> bgra,
     ReadWriteBuffer<int> targetForeground,
     ReadWriteBuffer<int> targetValid,
+    float backgroundR,
+    float backgroundG,
+    float backgroundB,
     int reach,
-    float sigmaColorSq,
+    float sigmaLineSq,
     int width,
     int height) : IComputeShader
 {
     private readonly ReadWriteBuffer<int> sourceForeground = sourceForeground;
     private readonly ReadWriteBuffer<int> sourceValid = sourceValid;
-    private readonly ReadWriteBuffer<float> colorLab = colorLab;
+    private readonly ReadWriteBuffer<int> seedMask = seedMask;
+    private readonly ReadOnlyBuffer<int> bgra = bgra;
     private readonly ReadWriteBuffer<int> targetForeground = targetForeground;
     private readonly ReadWriteBuffer<int> targetValid = targetValid;
+    private readonly float backgroundR = backgroundR;
+    private readonly float backgroundG = backgroundG;
+    private readonly float backgroundB = backgroundB;
     private readonly int reach = reach;
-    private readonly float sigmaColorSq = sigmaColorSq;
+    private readonly float sigmaLineSq = sigmaLineSq;
     private readonly int width = width;
     private readonly int height = height;
 
@@ -914,18 +928,32 @@ internal readonly partial struct ForegroundPropagateShader(
             return;
 
         int index = y * width + x;
-        int triple = index * 3;
 
-        if (sourceValid[index] != 0)
+        if (seedMask[index] != 0)
         {
             targetForeground[index] = sourceForeground[index];
             targetValid[index] = 1;
             return;
         }
 
-        float cl = colorLab[triple + 0];
-        float ca = colorLab[triple + 1];
-        float cb = colorLab[triple + 2];
+        int packed = bgra[index];
+        int a = (packed >> 24) & 0xFF;
+
+        if (a == 0)
+        {
+            targetForeground[index] = 0;
+            targetValid[index] = 0;
+            return;
+        }
+
+        float invA = 1f / a;
+        float observedR = Hlsl.Saturate(((packed >> 16) & 0xFF) * invA);
+        float observedG = Hlsl.Saturate(((packed >> 8) & 0xFF) * invA);
+        float observedB = Hlsl.Saturate(((packed >> 0) & 0xFF) * invA);
+
+        float obr = observedR - backgroundR;
+        float obg = observedG - backgroundG;
+        float obb = observedB - backgroundB;
 
         float sumR = 0f;
         float sumG = 0f;
@@ -950,17 +978,25 @@ internal readonly partial struct ForegroundPropagateShader(
                 if (sourceValid[sIndex] == 0)
                     continue;
 
-                int sTriple = sIndex * 3;
-                float dcl = cl - colorLab[sTriple + 0];
-                float dca = ca - colorLab[sTriple + 1];
-                float dcb = cb - colorLab[sTriple + 2];
-                float colorDistSq = dcl * dcl + dca * dca + dcb * dcb;
+                int f = sourceForeground[sIndex];
+                float fr = ((f >> 16) & 0xFF) * (1f / 255f);
+                float fg = ((f >> 8) & 0xFF) * (1f / 255f);
+                float fb = ((f >> 0) & 0xFF) * (1f / 255f);
+
+                float dr = fr - backgroundR;
+                float dg = fg - backgroundG;
+                float db = fb - backgroundB;
+                float dlen2 = dr * dr + dg * dg + db * db;
+                float t = (dlen2 > 1e-8f) ? (obr * dr + obg * dg + obb * db) / dlen2 : 0f;
+                float pr = obr - t * dr;
+                float pg = obg - t * dg;
+                float pb = obb - t * db;
+                float distSq = pr * pr + pg * pg + pb * pb;
 
                 float wSpace = Hlsl.Exp(-(dx * dx + dy * dy) / Hlsl.Max(twoReachSq, 1e-6f));
-                float wColor = Hlsl.Exp(-colorDistSq / Hlsl.Max(sigmaColorSq, 1e-6f));
-                float w = wSpace * wColor;
+                float wLine = Hlsl.Exp(-distSq / Hlsl.Max(sigmaLineSq, 1e-6f));
+                float w = wSpace * wLine;
 
-                int f = sourceForeground[sIndex];
                 sumR += ((f >> 16) & 0xFF) * w;
                 sumG += ((f >> 8) & 0xFF) * w;
                 sumB += ((f >> 0) & 0xFF) * w;

@@ -147,8 +147,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
                 ApplyClusters(backgroundLab);
 
-                float sigma = (float)Math.Max(currentSigmaColor, 1e-3);
-                var foregroundField = analyzer.BuildForegroundField(width, height, backgroundLab, 2f * sigma * sigma);
+                var backgroundSrgb = new Vector3(currentBackground.R / 255f, currentBackground.G / 255f, currentBackground.B / 255f);
+                var foregroundField = analyzer.BuildForegroundField(width, height, backgroundLab, backgroundSrgb);
                 UploadForegroundField(dc, foregroundField, width, height);
                 effect.SetInput(1, foregroundBitmap, true);
 
