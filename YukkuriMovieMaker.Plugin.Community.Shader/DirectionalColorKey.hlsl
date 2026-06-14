@@ -144,8 +144,16 @@ float4 main(
         if (bestProj <= 0.0f)
             return float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-        float lambda = max(clusters[bestCluster].w, 1e-5f);
-        alpha = saturate(bestProj / lambda);
+        float3 referenceLab = backgroundLab + clusters[bestCluster].xyz * clusters[bestCluster].w;
+        float3 referenceSrgb = saturate(LinearToSrgb(max(OklabToLinear(referenceLab), 0.0f)));
+        float3 referenceDelta = referenceSrgb - backgroundSrgb;
+        float referenceDenom = dot(referenceDelta, referenceDelta);
+
+        [branch]
+        if (referenceDenom > 1e-6f)
+            alpha = saturate(dot(colorSrgb - backgroundSrgb, referenceDelta) / referenceDenom);
+        else
+            alpha = saturate(bestProj / max(clusters[bestCluster].w, 1e-5f));
 
         float unmixAlpha = alpha;
         float3 luminance = float3(0.299f, 0.587f, 0.114f);
