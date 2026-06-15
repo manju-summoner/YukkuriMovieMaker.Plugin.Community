@@ -72,7 +72,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             set => SetValue((int)EffectImpl.Properties.ClusterCount, value);
         }
 
-        [CustomEffect(2)]
+        [CustomEffect(1)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
             private ConstantBuffer _cb;
@@ -126,8 +126,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
-                for (int i = 0; i < inputRects.Length; i++)
-                    inputRects[i] = outputRect;
+                if (inputRects.Length > 0)
+                    inputRects[0] = outputRect;
             }
 
             [StructLayout(LayoutKind.Sequential)]

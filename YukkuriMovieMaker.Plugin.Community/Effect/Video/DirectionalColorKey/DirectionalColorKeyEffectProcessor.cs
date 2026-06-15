@@ -24,7 +24,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
         private ID2D1Bitmap1? sourceBitmap;
         private ID2D1Bitmap1? sourceStagingBitmap;
-        private ID2D1Bitmap1? foregroundBitmap;
         private int sourceWidth, sourceHeight;
 
         private int[]? sourceBuffer;
@@ -78,7 +77,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         protected override void ClearEffectChain()
         {
             effect?.SetInput(0, null, true);
-            effect?.SetInput(1, null, true);
             hasAnalysisCache = false;
         }
 
@@ -146,11 +144,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                     (keyDirection, floorValue) => ComputePhysicalLambda(backgroundLab, keyDirection, floorValue));
 
                 ApplyClusters(backgroundLab);
-
-                var backgroundSrgb = new Vector3(currentBackground.R / 255f, currentBackground.G / 255f, currentBackground.B / 255f);
-                var foregroundField = analyzer.BuildForegroundField(width, height, backgroundLab, backgroundSrgb);
-                UploadForegroundField(dc, foregroundField, width, height);
-                effect.SetInput(1, foregroundBitmap, true);
 
                 hasAnalysisCache = true;
             }
@@ -271,14 +264,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         {
             if (sourceBitmap is not null
                 && sourceStagingBitmap is not null
-                && foregroundBitmap is not null
                 && sourceWidth == width
                 && sourceHeight == height)
                 return;
 
             disposer.RemoveAndDispose(ref sourceBitmap);
             disposer.RemoveAndDispose(ref sourceStagingBitmap);
-            disposer.RemoveAndDispose(ref foregroundBitmap);
 
             var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied);
             var size = new SizeI(width, height);
@@ -293,26 +284,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.CpuRead | BitmapOptions.CannotDraw));
             disposer.Collect(sourceStagingBitmap);
 
-            foregroundBitmap = dc.CreateBitmap(
-                size,
-                new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.None));
-            disposer.Collect(foregroundBitmap);
-
             sourceWidth = width;
             sourceHeight = height;
-        }
-
-        private void UploadForegroundField(ID2D1DeviceContext dc, ReadOnlySpan<int> field, int width, int height)
-        {
-            EnsureSourceBitmaps(dc, width, height);
-
-            unsafe
-            {
-                fixed (int* source = field)
-                {
-                    foregroundBitmap!.CopyFromMemory((nint)source, width * sizeof(int));
-                }
-            }
         }
 
         private int[] EnsureBuffer(int pixelCount)

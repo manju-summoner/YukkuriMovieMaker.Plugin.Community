@@ -1,5 +1,4 @@
 Texture2D InputTexture : register(t0);
-Texture2D ForegroundTexture : register(t1);
 SamplerState InputSampler : register(s0);
 
 cbuffer constants : register(b0)
@@ -67,8 +66,7 @@ float3 OklabToLinear(float3 lab)
 float4 main(
     float4 pos : SV_POSITION,
     float4 posScene : SCENE_POSITION,
-    float4 uv0 : TEXCOORD0,
-    float4 uv1 : TEXCOORD1
+    float4 uv0 : TEXCOORD0
 ) : SV_Target
 {
     float4 src = InputTexture.Sample(InputSampler, uv0.xy);
@@ -77,12 +75,9 @@ float4 main(
     if (src.a <= 0.0f)
         return src;
 
-    float3 colorSrgb = saturate(src.rgb / src.a);
-    float3 colorLinear = SrgbToLinear(colorSrgb);
+    float3 straightSrgb = saturate(src.rgb / src.a);
+    float3 colorLinear = SrgbToLinear(straightSrgb);
     float3 colorLab = LinearToOklab(colorLinear);
-
-    float3 backgroundLinear = OklabToLinear(backgroundLab);
-    float3 backgroundSrgb = saturate(LinearToSrgb(backgroundLinear));
 
     float3 d = colorLab - backgroundLab;
     float dLen = length(d);
@@ -94,75 +89,27 @@ float4 main(
 
     float noiseConfidence = smoothstep(halfThreshold, noiseThreshold, dLen);
 
-    float alpha = 0.0f;
-    float3 foregroundSrgb = colorSrgb;
-    bool resolved = false;
+    int bestCluster = 0;
+    float bestProj = -1e9f;
 
-    float4 foregroundSample = ForegroundTexture.Sample(InputSampler, uv1.xy);
-
-    [branch]
-    if (foregroundSample.a > 0.5f)
+    [loop]
+    for (int c = 0; c < clusterCount; c++)
     {
-        float3 seedSrgb = saturate(foregroundSample.rgb / max(foregroundSample.a, 1e-3f));
-        float3 fb = seedSrgb - backgroundSrgb;
-        float denom = dot(fb, fb);
-
-        [branch]
-        if (denom > 1e-6f)
+        float proj = dot(d, clusters[c].xyz);
+        if (proj > bestProj)
         {
-            float seedAlpha = saturate(dot(colorSrgb - backgroundSrgb, fb) / denom);
-            float3 residual = (colorSrgb - backgroundSrgb) - seedAlpha * fb;
-
-            [branch]
-            if (dot(residual, residual) <= 0.0625f * denom)
-            {
-                alpha = seedAlpha;
-                foregroundSrgb = seedSrgb;
-                resolved = true;
-            }
+            bestProj = proj;
+            bestCluster = c;
         }
     }
 
     [branch]
-    if (!resolved)
-    {
-        int bestCluster = 0;
-        float bestProj = -1e9f;
+    if (bestProj <= 0.0f)
+        return float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-        [loop]
-        for (int c = 0; c < clusterCount; c++)
-        {
-            float proj = dot(d, clusters[c].xyz);
-            if (proj > bestProj)
-            {
-                bestProj = proj;
-                bestCluster = c;
-            }
-        }
+    float lambda = max(clusters[bestCluster].w, 1e-5f);
 
-        [branch]
-        if (bestProj <= 0.0f)
-            return float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-        float lambda = max(clusters[bestCluster].w, 1e-5f);
-        alpha = saturate(bestProj / lambda);
-
-        float unmixAlpha = alpha;
-        float3 luminance = float3(0.299f, 0.587f, 0.114f);
-        float3 backgroundChroma = backgroundSrgb - dot(backgroundSrgb, luminance);
-        float backgroundChromaLenSq = dot(backgroundChroma, backgroundChroma);
-
-        [branch]
-        if (backgroundChromaLenSq > 1e-8f)
-        {
-            float3 colorChroma = colorSrgb - dot(colorSrgb, luminance);
-            float backgroundPresence = saturate(dot(colorChroma, backgroundChroma) / backgroundChromaLenSq);
-            unmixAlpha = max(alpha, 1.0f - backgroundPresence);
-        }
-
-        foregroundSrgb = saturate((colorSrgb - (1.0f - unmixAlpha) * backgroundSrgb) / max(unmixAlpha, 1e-3f));
-    }
-
+    float alpha = saturate(bestProj / lambda);
     alpha = saturate((alpha - edgeSoftness) / max(1.0f - edgeSoftness, 1e-5f));
 
     [branch]
@@ -176,17 +123,19 @@ float4 main(
         return float4(maskAlpha, maskAlpha, maskAlpha, maskAlpha);
     }
 
+    float3 foregroundLab = (colorLab - (1.0f - alpha) * backgroundLab) / max(alpha, 1e-3f);
+
     [branch]
     if (spillStrength > 0.0f && length(backgroundChromaDir.yz) > 1e-5f)
     {
-        float3 foregroundLab = LinearToOklab(SrgbToLinear(foregroundSrgb));
         float2 chromaDir = normalize(backgroundChromaDir.yz);
         float spill = dot(foregroundLab.yz, chromaDir) - despillBias;
         spill = max(0.0f, spill) * spillStrength;
         foregroundLab.yz -= chromaDir * spill;
-        foregroundSrgb = saturate(LinearToSrgb(max(OklabToLinear(foregroundLab), 0.0f)));
     }
 
+    float3 foregroundLinear = max(OklabToLinear(foregroundLab), 0.0f);
+    float3 foregroundSrgb = saturate(LinearToSrgb(foregroundLinear));
     float outAlpha = alpha * noiseConfidence * src.a;
     return float4(foregroundSrgb * outAlpha, outAlpha);
 }
