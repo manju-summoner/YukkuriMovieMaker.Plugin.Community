@@ -123,19 +123,54 @@ float4 main(
         return float4(maskAlpha, maskAlpha, maskAlpha, maskAlpha);
     }
 
-    float3 foregroundLab = (colorLab - (1.0f - alpha) * backgroundLab) / max(alpha, 1e-3f);
+    float3 luminance = float3(0.299f, 0.587f, 0.114f);
+    float3 backgroundSrgb = saturate(LinearToSrgb(max(OklabToLinear(backgroundLab), 0.0f)));
+
+    float chromaAlpha = alpha;
+    float3 backgroundChroma = backgroundSrgb - dot(backgroundSrgb, luminance);
+    float backgroundChromaLenSq = dot(backgroundChroma, backgroundChroma);
+
+    [branch]
+    if (backgroundChromaLenSq > 1e-8f)
+    {
+        float3 colorChroma = straightSrgb - dot(straightSrgb, luminance);
+        chromaAlpha = saturate(1.0f - dot(colorChroma, backgroundChroma) / backgroundChromaLenSq);
+    }
+
+    float3 referenceLab = backgroundLab + clusters[bestCluster].xyz * lambda;
+    float3 referenceSrgb = saturate(LinearToSrgb(max(OklabToLinear(referenceLab), 0.0f)));
+    float referenceChroma = max(max(referenceSrgb.r, referenceSrgb.g), referenceSrgb.b)
+                          - min(min(referenceSrgb.r, referenceSrgb.g), referenceSrgb.b);
+
+    float3 referenceDelta = referenceSrgb - backgroundSrgb;
+    float referenceLenSq = dot(referenceDelta, referenceDelta);
+    float lineResidual = 0.0f;
+
+    [branch]
+    if (referenceLenSq > 1e-6f)
+    {
+        float t = saturate(dot(straightSrgb - backgroundSrgb, referenceDelta) / referenceLenSq);
+        float3 projection = backgroundSrgb + t * referenceDelta;
+        lineResidual = length(straightSrgb - projection) / sqrt(referenceLenSq);
+    }
+
+    float neutralWeight = 1.0f - smoothstep(0.10f, 0.30f, referenceChroma);
+    float overlapWeight = smoothstep(0.06f, 0.20f, lineResidual);
+    float unmixAlpha = lerp(lerp(alpha, chromaAlpha, overlapWeight), chromaAlpha, neutralWeight);
+
+    float3 foregroundSrgb = saturate((straightSrgb - (1.0f - unmixAlpha) * backgroundSrgb) / max(unmixAlpha, 1e-3f));
 
     [branch]
     if (spillStrength > 0.0f && length(backgroundChromaDir.yz) > 1e-5f)
     {
+        float3 foregroundLab = LinearToOklab(SrgbToLinear(foregroundSrgb));
         float2 chromaDir = normalize(backgroundChromaDir.yz);
         float spill = dot(foregroundLab.yz, chromaDir) - despillBias;
         spill = max(0.0f, spill) * spillStrength;
         foregroundLab.yz -= chromaDir * spill;
+        foregroundSrgb = saturate(LinearToSrgb(max(OklabToLinear(foregroundLab), 0.0f)));
     }
 
-    float3 foregroundLinear = max(OklabToLinear(foregroundLab), 0.0f);
-    float3 foregroundSrgb = saturate(LinearToSrgb(foregroundLinear));
     float outAlpha = alpha * noiseConfidence * src.a;
     return float4(foregroundSrgb * outAlpha, outAlpha);
 }
