@@ -117,7 +117,7 @@ float4 main(
             if (dot(residual, residual) <= 0.0625f * denom)
             {
                 alpha = seedAlpha;
-                foregroundLinear = saturate((colorLinear - (1.0f - seedAlpha) * backgroundLinear) / max(seedAlpha, 1e-3f));
+                foregroundLinear = seedLinear;
                 resolved = true;
             }
         }
