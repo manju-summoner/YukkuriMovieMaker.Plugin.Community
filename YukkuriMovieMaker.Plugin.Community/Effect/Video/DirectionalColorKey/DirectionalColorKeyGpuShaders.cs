@@ -946,14 +946,22 @@ internal readonly partial struct ForegroundPropagateShader(
             return;
         }
 
-        float invA = 1f / a;
-        float observedR = Hlsl.Saturate(((packed >> 16) & 0xFF) * invA);
-        float observedG = Hlsl.Saturate(((packed >> 8) & 0xFF) * invA);
-        float observedB = Hlsl.Saturate(((packed >> 0) & 0xFF) * invA);
+        float bgRl = backgroundR <= 0.04045f ? backgroundR / 12.92f : Hlsl.Pow((backgroundR + 0.055f) / 1.055f, 2.4f);
+        float bgGl = backgroundG <= 0.04045f ? backgroundG / 12.92f : Hlsl.Pow((backgroundG + 0.055f) / 1.055f, 2.4f);
+        float bgBl = backgroundB <= 0.04045f ? backgroundB / 12.92f : Hlsl.Pow((backgroundB + 0.055f) / 1.055f, 2.4f);
 
-        float obr = observedR - backgroundR;
-        float obg = observedG - backgroundG;
-        float obb = observedB - backgroundB;
+        float invA = 1f / a;
+        float observedRs = Hlsl.Saturate(((packed >> 16) & 0xFF) * invA);
+        float observedGs = Hlsl.Saturate(((packed >> 8) & 0xFF) * invA);
+        float observedBs = Hlsl.Saturate(((packed >> 0) & 0xFF) * invA);
+
+        float observedR = observedRs <= 0.04045f ? observedRs / 12.92f : Hlsl.Pow((observedRs + 0.055f) / 1.055f, 2.4f);
+        float observedG = observedGs <= 0.04045f ? observedGs / 12.92f : Hlsl.Pow((observedGs + 0.055f) / 1.055f, 2.4f);
+        float observedB = observedBs <= 0.04045f ? observedBs / 12.92f : Hlsl.Pow((observedBs + 0.055f) / 1.055f, 2.4f);
+
+        float obr = observedR - bgRl;
+        float obg = observedG - bgGl;
+        float obb = observedB - bgBl;
 
         float sumR = 0f;
         float sumG = 0f;
@@ -979,13 +987,17 @@ internal readonly partial struct ForegroundPropagateShader(
                     continue;
 
                 int f = sourceForeground[sIndex];
-                float fr = ((f >> 16) & 0xFF) * (1f / 255f);
-                float fg = ((f >> 8) & 0xFF) * (1f / 255f);
-                float fb = ((f >> 0) & 0xFF) * (1f / 255f);
+                float frs = ((f >> 16) & 0xFF) * (1f / 255f);
+                float fgs = ((f >> 8) & 0xFF) * (1f / 255f);
+                float fbs = ((f >> 0) & 0xFF) * (1f / 255f);
 
-                float dr = fr - backgroundR;
-                float dg = fg - backgroundG;
-                float db = fb - backgroundB;
+                float fr = frs <= 0.04045f ? frs / 12.92f : Hlsl.Pow((frs + 0.055f) / 1.055f, 2.4f);
+                float fg = fgs <= 0.04045f ? fgs / 12.92f : Hlsl.Pow((fgs + 0.055f) / 1.055f, 2.4f);
+                float fb = fbs <= 0.04045f ? fbs / 12.92f : Hlsl.Pow((fbs + 0.055f) / 1.055f, 2.4f);
+
+                float dr = fr - bgRl;
+                float dg = fg - bgGl;
+                float db = fb - bgBl;
                 float dlen2 = dr * dr + dg * dg + db * db;
                 float t = (dlen2 > 1e-8f) ? (obr * dr + obg * dg + obb * db) / dlen2 : 0f;
                 float pr = obr - t * dr;
@@ -997,18 +1009,26 @@ internal readonly partial struct ForegroundPropagateShader(
                 float wLine = Hlsl.Exp(-distSq / Hlsl.Max(sigmaLineSq, 1e-6f));
                 float w = wSpace * wLine;
 
-                sumR += ((f >> 16) & 0xFF) * w;
-                sumG += ((f >> 8) & 0xFF) * w;
-                sumB += ((f >> 0) & 0xFF) * w;
+                sumR += fr * w;
+                sumG += fg * w;
+                sumB += fb * w;
                 sumW += w;
             }
         }
 
         if (sumW > 1e-6f)
         {
-            int rByte = (int)(sumR / sumW + 0.5f);
-            int gByte = (int)(sumG / sumW + 0.5f);
-            int bByte = (int)(sumB / sumW + 0.5f);
+            float avgR = sumR / sumW;
+            float avgG = sumG / sumW;
+            float avgB = sumB / sumW;
+
+            float outRs = avgR <= 0.0031308f ? avgR * 12.92f : 1.055f * Hlsl.Pow(avgR, 1f / 2.4f) - 0.055f;
+            float outGs = avgG <= 0.0031308f ? avgG * 12.92f : 1.055f * Hlsl.Pow(avgG, 1f / 2.4f) - 0.055f;
+            float outBs = avgB <= 0.0031308f ? avgB * 12.92f : 1.055f * Hlsl.Pow(avgB, 1f / 2.4f) - 0.055f;
+
+            int rByte = (int)(Hlsl.Saturate(outRs) * 255f + 0.5f);
+            int gByte = (int)(Hlsl.Saturate(outGs) * 255f + 0.5f);
+            int bByte = (int)(Hlsl.Saturate(outBs) * 255f + 0.5f);
             targetForeground[index] = (0xFF << 24) | (rByte << 16) | (gByte << 8) | bByte;
             targetValid[index] = 1;
             return;
