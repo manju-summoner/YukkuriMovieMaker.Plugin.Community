@@ -21,6 +21,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private ReadWriteBuffer<int>? accumBuffer;
         private ReadWriteBuffer<int>? countBuffer;
         private ReadWriteBuffer<int>? histogramBuffer;
+        private ReadWriteBuffer<int>? foregroundBufferA;
+        private ReadWriteBuffer<int>? foregroundBufferB;
+        private ReadWriteBuffer<int>? validBufferA;
+        private ReadWriteBuffer<int>? validBufferB;
+        private ReadWriteBuffer<int>? seedMaskBuffer;
+        private int[]? foregroundReadback;
 
         private int width;
         private int height;
@@ -38,6 +44,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private const int AdoptReach = SmoothRadius * SmoothIterations;
         private const int GuardReach = SmoothRadius * SmoothIterations;
         private const float IncrementalChangeCeiling = 0.25f;
+        private const int PropagateReach = 4;
+        private const int PropagateIterations = 8;
+        private const float LineSigmaSquared = 0.1225f;
 
         private readonly float[] centers = new float[MaxClusters * 3];
         private readonly int[] accumulators = new int[MaxClusters * 3 + MaxClusters];
@@ -176,6 +185,108 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             hasLambdaWarmStart = true;
 
             hasWarmStart = true;
+        }
+
+        public ReadOnlySpan<int> BuildForegroundField(int width, int height, Vector3 backgroundLab, Vector3 backgroundSrgb)
+        {
+            EnsureCapacity(width, height);
+
+            foregroundReadback ??= new int[pixelCount];
+            if (foregroundReadback.Length < pixelCount)
+                foregroundReadback = new int[pixelCount];
+
+            float referencePerp = ComputeReferencePerp(backgroundLab);
+
+            var bgraGpu = EnsureBgraBuffer();
+            var colorLabGpu = EnsureColorLabBuffer();
+            var foregroundSource = EnsureForegroundBufferA();
+            var validSource = EnsureValidBufferA();
+            var foregroundTarget = EnsureForegroundBufferB();
+            var validTarget = EnsureValidBufferB();
+            var seedMaskGpu = EnsureSeedMaskBuffer();
+
+            device.For(width, height, new ForegroundSeedShader(
+                bgraGpu, colorLabGpu, foregroundSource, validSource, seedMaskGpu,
+                backgroundLab.X, backgroundLab.Y, backgroundLab.Z,
+                referencePerp, width, height));
+
+            for (int iteration = 0; iteration < PropagateIterations; iteration++)
+            {
+                device.For(width, height, new ForegroundPropagateShader(
+                    foregroundSource, validSource, seedMaskGpu, bgraGpu,
+                    foregroundTarget, validTarget,
+                    backgroundSrgb.X, backgroundSrgb.Y, backgroundSrgb.Z,
+                    PropagateReach, LineSigmaSquared, width, height));
+
+                (foregroundSource, foregroundTarget) = (foregroundTarget, foregroundSource);
+                (validSource, validTarget) = (validTarget, validSource);
+            }
+
+            foregroundSource.CopyTo(foregroundReadback.AsSpan(0, pixelCount));
+            return foregroundReadback.AsSpan(0, pixelCount);
+        }
+
+        private static float ComputeReferencePerp(Vector3 backgroundLab)
+        {
+            float bgLenSq = Vector3.Dot(backgroundLab, backgroundLab);
+            if (bgLenSq <= 1e-8f)
+                return 0f;
+
+            var white = new Vector3(1f, 0f, 0f);
+            var dvec = white - backgroundLab;
+            float along = Vector3.Dot(dvec, backgroundLab) / bgLenSq;
+            var perp = dvec - along * backgroundLab;
+            return perp.Length();
+        }
+
+        private ReadWriteBuffer<int> EnsureForegroundBufferA()
+        {
+            if (foregroundBufferA is null || foregroundBufferA.Length < pixelCount)
+            {
+                foregroundBufferA?.Dispose();
+                foregroundBufferA = device.AllocateReadWriteBuffer<int>(pixelCount);
+            }
+            return foregroundBufferA;
+        }
+
+        private ReadWriteBuffer<int> EnsureForegroundBufferB()
+        {
+            if (foregroundBufferB is null || foregroundBufferB.Length < pixelCount)
+            {
+                foregroundBufferB?.Dispose();
+                foregroundBufferB = device.AllocateReadWriteBuffer<int>(pixelCount);
+            }
+            return foregroundBufferB;
+        }
+
+        private ReadWriteBuffer<int> EnsureValidBufferA()
+        {
+            if (validBufferA is null || validBufferA.Length < pixelCount)
+            {
+                validBufferA?.Dispose();
+                validBufferA = device.AllocateReadWriteBuffer<int>(pixelCount);
+            }
+            return validBufferA;
+        }
+
+        private ReadWriteBuffer<int> EnsureValidBufferB()
+        {
+            if (validBufferB is null || validBufferB.Length < pixelCount)
+            {
+                validBufferB?.Dispose();
+                validBufferB = device.AllocateReadWriteBuffer<int>(pixelCount);
+            }
+            return validBufferB;
+        }
+
+        private ReadWriteBuffer<int> EnsureSeedMaskBuffer()
+        {
+            if (seedMaskBuffer is null || seedMaskBuffer.Length < pixelCount)
+            {
+                seedMaskBuffer?.Dispose();
+                seedMaskBuffer = device.AllocateReadWriteBuffer<int>(pixelCount);
+            }
+            return seedMaskBuffer;
         }
 
         private bool TryRunIncrementalSmooth(
@@ -533,6 +644,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             maskBufferB?.Dispose();
             adoptMaskBuffer?.Dispose();
             computeMaskBuffer?.Dispose();
+            foregroundBufferA?.Dispose();
+            foregroundBufferB?.Dispose();
+            validBufferA?.Dispose();
+            validBufferB?.Dispose();
+            seedMaskBuffer?.Dispose();
             bgraBuffer = null;
             previousBgraBuffer = null;
             colorLabBuffer = null;
@@ -543,6 +659,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             maskBufferB = null;
             adoptMaskBuffer = null;
             computeMaskBuffer = null;
+            foregroundBufferA = null;
+            foregroundBufferB = null;
+            validBufferA = null;
+            validBufferB = null;
+            seedMaskBuffer = null;
         }
 
         public void Dispose()

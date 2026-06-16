@@ -24,7 +24,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
         private ID2D1Bitmap1? sourceBitmap;
         private ID2D1Bitmap1? sourceStagingBitmap;
+        private ID2D1Bitmap1? foregroundBitmap;
         private int sourceWidth, sourceHeight;
+        private int foregroundWidth, foregroundHeight;
 
         private int[]? sourceBuffer;
         private int bufferPixelCount;
@@ -77,6 +79,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         protected override void ClearEffectChain()
         {
             effect?.SetInput(0, null, true);
+            effect?.SetInput(1, null, true);
             hasAnalysisCache = false;
         }
 
@@ -144,6 +147,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                     (keyDirection, floorValue) => ComputePhysicalLambda(backgroundLab, keyDirection, floorValue));
 
                 ApplyClusters(backgroundLab);
+
+                var backgroundSrgb = new Vector3(
+                    currentBackground.R / 255f,
+                    currentBackground.G / 255f,
+                    currentBackground.B / 255f);
+                var foregroundField = analyzer.BuildForegroundField(width, height, backgroundLab, backgroundSrgb);
+                UploadForegroundField(dc, foregroundField, width, height);
+                effect.SetInput(1, foregroundBitmap, true);
 
                 hasAnalysisCache = true;
             }
@@ -258,6 +269,37 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             }
 
             return buffer;
+        }
+
+        private unsafe void UploadForegroundField(ID2D1DeviceContext dc, ReadOnlySpan<int> field, int width, int height)
+        {
+            EnsureForegroundBitmap(dc, width, height);
+
+            fixed (int* src = field)
+            {
+                foregroundBitmap!.CopyFromMemory((nint)src, width * sizeof(int));
+            }
+        }
+
+        private void EnsureForegroundBitmap(ID2D1DeviceContext dc, int width, int height)
+        {
+            if (foregroundBitmap is not null
+                && foregroundWidth == width
+                && foregroundHeight == height)
+                return;
+
+            disposer.RemoveAndDispose(ref foregroundBitmap);
+
+            var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied);
+            var size = new SizeI(width, height);
+
+            foregroundBitmap = dc.CreateBitmap(
+                size,
+                new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.None));
+            disposer.Collect(foregroundBitmap);
+
+            foregroundWidth = width;
+            foregroundHeight = height;
         }
 
         private void EnsureSourceBitmaps(ID2D1DeviceContext dc, int width, int height)

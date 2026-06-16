@@ -1,4 +1,5 @@
 Texture2D InputTexture : register(t0);
+Texture2D ForegroundTexture : register(t1);
 SamplerState InputSampler : register(s0);
 
 cbuffer constants : register(b0)
@@ -66,7 +67,8 @@ float3 OklabToLinear(float3 lab)
 float4 main(
     float4 pos : SV_POSITION,
     float4 posScene : SCENE_POSITION,
-    float4 uv0 : TEXCOORD0
+    float4 uv0 : TEXCOORD0,
+    float4 uv1 : TEXCOORD1
 ) : SV_Target
 {
     float4 src = InputTexture.Sample(InputSampler, uv0.xy);
@@ -89,27 +91,97 @@ float4 main(
 
     float noiseConfidence = smoothstep(halfThreshold, noiseThreshold, dLen);
 
-    int bestCluster = 0;
-    float bestProj = -1e9f;
+    float3 luminance = float3(0.299f, 0.587f, 0.114f);
+    float3 backgroundSrgb = saturate(LinearToSrgb(max(OklabToLinear(backgroundLab), 0.0f)));
 
-    [loop]
-    for (int c = 0; c < clusterCount; c++)
+    float alpha = 0.0f;
+    float3 foregroundSrgb = straightSrgb;
+    bool resolved = false;
+
+    float4 foregroundSample = ForegroundTexture.Sample(InputSampler, uv1.xy);
+
+    [branch]
+    if (foregroundSample.a > 0.5f)
     {
-        float proj = dot(d, clusters[c].xyz);
-        if (proj > bestProj)
+        float3 seedSrgb = saturate(foregroundSample.rgb / max(foregroundSample.a, 1e-3f));
+        float3 fb = seedSrgb - backgroundSrgb;
+        float denom = dot(fb, fb);
+
+        [branch]
+        if (denom > 1e-6f)
         {
-            bestProj = proj;
-            bestCluster = c;
+            float seedAlpha = saturate(dot(straightSrgb - backgroundSrgb, fb) / denom);
+            float3 residual = (straightSrgb - backgroundSrgb) - seedAlpha * fb;
+
+            [branch]
+            if (dot(residual, residual) <= 0.0625f * denom)
+            {
+                alpha = seedAlpha;
+                foregroundSrgb = seedSrgb;
+                resolved = true;
+            }
         }
     }
 
     [branch]
-    if (bestProj <= 0.0f)
-        return float4(0.0f, 0.0f, 0.0f, 0.0f);
+    if (!resolved)
+    {
+        int bestCluster = 0;
+        float bestProj = -1e9f;
 
-    float lambda = max(clusters[bestCluster].w, 1e-5f);
+        [loop]
+        for (int c = 0; c < clusterCount; c++)
+        {
+            float proj = dot(d, clusters[c].xyz);
+            if (proj > bestProj)
+            {
+                bestProj = proj;
+                bestCluster = c;
+            }
+        }
 
-    float alpha = saturate(bestProj / lambda);
+        [branch]
+        if (bestProj <= 0.0f)
+            return float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+        float lambda = max(clusters[bestCluster].w, 1e-5f);
+        alpha = saturate(bestProj / lambda);
+
+        float chromaAlpha = alpha;
+        float3 backgroundChroma = backgroundSrgb - dot(backgroundSrgb, luminance);
+        float backgroundChromaLenSq = dot(backgroundChroma, backgroundChroma);
+
+        [branch]
+        if (backgroundChromaLenSq > 1e-8f)
+        {
+            float3 colorChroma = straightSrgb - dot(straightSrgb, luminance);
+            chromaAlpha = saturate(1.0f - dot(colorChroma, backgroundChroma) / backgroundChromaLenSq);
+        }
+
+        float3 referenceLab = backgroundLab + clusters[bestCluster].xyz * lambda;
+        float3 referenceSrgb = saturate(LinearToSrgb(max(OklabToLinear(referenceLab), 0.0f)));
+        float referenceChroma = max(max(referenceSrgb.r, referenceSrgb.g), referenceSrgb.b)
+                              - min(min(referenceSrgb.r, referenceSrgb.g), referenceSrgb.b);
+
+        float3 referenceDelta = referenceSrgb - backgroundSrgb;
+        float referenceLenSq = dot(referenceDelta, referenceDelta);
+        float lineResidual = 0.0f;
+
+        [branch]
+        if (referenceLenSq > 1e-6f)
+        {
+            float t = saturate(dot(straightSrgb - backgroundSrgb, referenceDelta) / referenceLenSq);
+            float3 projection = backgroundSrgb + t * referenceDelta;
+            lineResidual = length(straightSrgb - projection) / sqrt(referenceLenSq);
+        }
+
+        float neutralWeight = 1.0f - smoothstep(0.10f, 0.30f, referenceChroma);
+        float overlapWeight = smoothstep(0.06f, 0.20f, lineResidual);
+        float unmixAlpha = lerp(lerp(alpha, chromaAlpha, overlapWeight), chromaAlpha, neutralWeight);
+
+        foregroundSrgb = saturate((straightSrgb - (1.0f - unmixAlpha) * backgroundSrgb) / max(unmixAlpha, 1e-3f));
+    }
+
     alpha = saturate((alpha - edgeSoftness) / max(1.0f - edgeSoftness, 1e-5f));
 
     [branch]
@@ -122,43 +194,6 @@ float4 main(
         float maskAlpha = alpha * noiseConfidence * src.a;
         return float4(maskAlpha, maskAlpha, maskAlpha, maskAlpha);
     }
-
-    float3 luminance = float3(0.299f, 0.587f, 0.114f);
-    float3 backgroundSrgb = saturate(LinearToSrgb(max(OklabToLinear(backgroundLab), 0.0f)));
-
-    float chromaAlpha = alpha;
-    float3 backgroundChroma = backgroundSrgb - dot(backgroundSrgb, luminance);
-    float backgroundChromaLenSq = dot(backgroundChroma, backgroundChroma);
-
-    [branch]
-    if (backgroundChromaLenSq > 1e-8f)
-    {
-        float3 colorChroma = straightSrgb - dot(straightSrgb, luminance);
-        chromaAlpha = saturate(1.0f - dot(colorChroma, backgroundChroma) / backgroundChromaLenSq);
-    }
-
-    float3 referenceLab = backgroundLab + clusters[bestCluster].xyz * lambda;
-    float3 referenceSrgb = saturate(LinearToSrgb(max(OklabToLinear(referenceLab), 0.0f)));
-    float referenceChroma = max(max(referenceSrgb.r, referenceSrgb.g), referenceSrgb.b)
-                          - min(min(referenceSrgb.r, referenceSrgb.g), referenceSrgb.b);
-
-    float3 referenceDelta = referenceSrgb - backgroundSrgb;
-    float referenceLenSq = dot(referenceDelta, referenceDelta);
-    float lineResidual = 0.0f;
-
-    [branch]
-    if (referenceLenSq > 1e-6f)
-    {
-        float t = saturate(dot(straightSrgb - backgroundSrgb, referenceDelta) / referenceLenSq);
-        float3 projection = backgroundSrgb + t * referenceDelta;
-        lineResidual = length(straightSrgb - projection) / sqrt(referenceLenSq);
-    }
-
-    float neutralWeight = 1.0f - smoothstep(0.10f, 0.30f, referenceChroma);
-    float overlapWeight = smoothstep(0.06f, 0.20f, lineResidual);
-    float unmixAlpha = lerp(lerp(alpha, chromaAlpha, overlapWeight), chromaAlpha, neutralWeight);
-
-    float3 foregroundSrgb = saturate((straightSrgb - (1.0f - unmixAlpha) * backgroundSrgb) / max(unmixAlpha, 1e-3f));
 
     [branch]
     if (spillStrength > 0.0f && length(backgroundChromaDir.yz) > 1e-5f)
