@@ -21,8 +21,6 @@ DirectionalColorKeyNoiseThresholdName,,ノイズ閾値,Noise Threshold,噪声阈
 DirectionalColorKeyNoiseThresholdDesc,,背景とみなす変位の大きさ,Displacement magnitude treated as background,视为背景的位移大小,視為背景的位移大小,배경으로 간주할 변위 크기,Magnitud de desplazamiento tratada como fondo,مقدار الإزاحة المعتبر خلفية,Besaran perpindahan dianggap latar
 DirectionalColorKeySigmaColorName,,色シグマ,Color Sigma,颜色西格玛,顏色西格瑪,색 시그마,Sigma de color,سيجما اللون,Sigma Warna
 DirectionalColorKeySigmaColorDesc,,方向場平滑化の色類似度の幅,Color similarity width for direction smoothing,方向场平滑的颜色相似度宽度,方向場平滑的顏色相似度寬度,방향장 평활화의 색 유사도 폭,Ancho de similitud de color para el suavizado de dirección,عرض تشابه اللون لتنعيم الاتجاه,Lebar kemiripan warna untuk penghalusan arah
-DirectionalColorKeySeedThresholdName,,シード厳格度,Seed Strictness,种子严格度,種子嚴格度,시드 엄격도,Rigor de semilla,صرامة البذرة,Ketegasan Seed
-DirectionalColorKeySeedThresholdDesc,,高いほど前景シードを厳しく絞りぼかし境界の背景残りを抑える,Higher values restrict foreground seeds and suppress background residue at blurred edges,值越高前景种子越严格，抑制模糊边缘的背景残留,值越高前景種子越嚴格，抑制模糊邊緣的背景殘留,높을수록 전경 시드를 엄격히 제한해 흐림 경계의 배경 잔여를 억제,Valores altos restringen las semillas de primer plano y suprimen el residuo de fondo en bordes difuminados,القيم الأعلى تقيّد بذور المقدمة وتقلل بقايا الخلفية عند الحواف الضبابية,Nilai lebih tinggi memperketat seed depan dan menekan sisa latar pada tepi buram
 DirectionalColorKeyEdgeSoftnessName,,エッジ柔らかさ,Edge Softness,边缘柔和度,邊緣柔和度,경계 부드러움,Suavidad de borde,نعومة الحافة,Kelembutan Tepi
 DirectionalColorKeyEdgeSoftnessDesc,,低アルファ側の足切り量,Lower-alpha cutoff amount,低 alpha 侧的截断量,低 alpha 側的截斷量,낮은 알파 측 컷오프 양,Cantidad de corte de alfa baja,مقدار قطع ألفا المنخفضة,Jumlah pemotongan alfa rendah
 DirectionalColorKeySpillStrengthName,,スピル除去,Spill Removal,溢色去除,溢色去除,스필 제거,Eliminación de derrame,إزالة التسرب,Penghapusan Spill

@@ -41,7 +41,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private int clusterCount;
         private double noiseThreshold;
         private double sigmaColor;
-        private double seedThreshold;
         private double edgeSoftness;
         private double spillStrength;
         private double despillBias;
@@ -106,7 +105,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             var currentClusterCount = (int)Math.Round(Math.Clamp(item.ClusterCount.GetValue(frame, length, fps), 1, 4));
             var currentNoiseThreshold = item.NoiseThreshold.GetValue(frame, length, fps);
             var currentSigmaColor = item.SigmaColor.GetValue(frame, length, fps);
-            var currentSeedThreshold = item.SeedThreshold.GetValue(frame, length, fps);
             var currentEdgeSoftness = item.EdgeSoftness.GetValue(frame, length, fps) / 100.0;
             var currentSpillStrength = item.SpillStrength.GetValue(frame, length, fps) / 100.0;
             var currentDespillBias = item.DespillBias.GetValue(frame, length, fps);
@@ -126,7 +124,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 || clusterCount != currentClusterCount
                 || noiseThreshold != currentNoiseThreshold
                 || sigmaColor != currentSigmaColor
-                || seedThreshold != currentSeedThreshold
                 || opaquePercentile != currentOpaquePercentile;
 
             if (analysisDirty)
@@ -155,7 +152,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                     currentBackground.R / 255f,
                     currentBackground.G / 255f,
                     currentBackground.B / 255f);
-                var foregroundField = analyzer.BuildForegroundField(width, height, backgroundLab, backgroundSrgb, (float)currentSeedThreshold);
+                var foregroundField = analyzer.BuildForegroundField(width, height, backgroundLab, backgroundSrgb);
                 UploadForegroundField(dc, foregroundField, width, height);
                 effect.SetInput(1, foregroundBitmap, true);
 
@@ -187,7 +184,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             clusterCount = currentClusterCount;
             noiseThreshold = currentNoiseThreshold;
             sigmaColor = currentSigmaColor;
-            seedThreshold = currentSeedThreshold;
             edgeSoftness = currentEdgeSoftness;
             spillStrength = currentSpillStrength;
             despillBias = currentDespillBias;

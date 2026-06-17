@@ -805,7 +805,6 @@ internal readonly partial struct ForegroundSeedShader(
     ReadWriteBuffer<float> colorLab,
     ReadWriteBuffer<int> foreground,
     ReadWriteBuffer<int> valid,
-    ReadWriteBuffer<int> seedMask,
     float backgroundL,
     float backgroundA,
     float backgroundB,
@@ -817,7 +816,6 @@ internal readonly partial struct ForegroundSeedShader(
     private readonly ReadWriteBuffer<float> colorLab = colorLab;
     private readonly ReadWriteBuffer<int> foreground = foreground;
     private readonly ReadWriteBuffer<int> valid = valid;
-    private readonly ReadWriteBuffer<int> seedMask = seedMask;
     private readonly float backgroundL = backgroundL;
     private readonly float backgroundA = backgroundA;
     private readonly float backgroundB = backgroundB;
@@ -842,7 +840,6 @@ internal readonly partial struct ForegroundSeedShader(
         {
             foreground[index] = 0;
             valid[index] = 0;
-            seedMask[index] = 0;
             return;
         }
 
@@ -852,7 +849,6 @@ internal readonly partial struct ForegroundSeedShader(
         {
             foreground[index] = 0;
             valid[index] = 0;
-            seedMask[index] = 0;
             return;
         }
 
@@ -870,7 +866,6 @@ internal readonly partial struct ForegroundSeedShader(
         {
             foreground[index] = 0;
             valid[index] = 0;
-            seedMask[index] = 0;
             return;
         }
 
@@ -885,7 +880,6 @@ internal readonly partial struct ForegroundSeedShader(
 
         foreground[index] = (0xFF << 24) | (rByte << 16) | (gByte << 8) | bByte;
         valid[index] = 1;
-        seedMask[index] = 1;
     }
 }
 
