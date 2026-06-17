@@ -213,7 +213,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             for (int iteration = 0; iteration < PropagateIterations; iteration++)
             {
                 device.For(width, height, new ForegroundPropagateShader(
-                    foregroundSource, validSource, seedMaskGpu, bgraGpu,
+                    foregroundSource, validSource, bgraGpu,
                     foregroundTarget, validTarget,
                     backgroundSrgb.X, backgroundSrgb.Y, backgroundSrgb.Z,
                     PropagateReach, LineSigmaSquared, width, height));

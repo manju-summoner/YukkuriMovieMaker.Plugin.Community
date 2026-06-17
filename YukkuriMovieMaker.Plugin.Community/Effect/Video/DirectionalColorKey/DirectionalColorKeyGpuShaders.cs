@@ -894,7 +894,6 @@ internal readonly partial struct ForegroundSeedShader(
 internal readonly partial struct ForegroundPropagateShader(
     ReadWriteBuffer<int> sourceForeground,
     ReadWriteBuffer<int> sourceValid,
-    ReadWriteBuffer<int> seedMask,
     ReadOnlyBuffer<int> bgra,
     ReadWriteBuffer<int> targetForeground,
     ReadWriteBuffer<int> targetValid,
@@ -908,7 +907,6 @@ internal readonly partial struct ForegroundPropagateShader(
 {
     private readonly ReadWriteBuffer<int> sourceForeground = sourceForeground;
     private readonly ReadWriteBuffer<int> sourceValid = sourceValid;
-    private readonly ReadWriteBuffer<int> seedMask = seedMask;
     private readonly ReadOnlyBuffer<int> bgra = bgra;
     private readonly ReadWriteBuffer<int> targetForeground = targetForeground;
     private readonly ReadWriteBuffer<int> targetValid = targetValid;
@@ -929,13 +927,6 @@ internal readonly partial struct ForegroundPropagateShader(
 
         int index = y * width + x;
 
-        if (seedMask[index] != 0)
-        {
-            targetForeground[index] = sourceForeground[index];
-            targetValid[index] = 1;
-            return;
-        }
-
         int packed = bgra[index];
         int a = (packed >> 24) & 0xFF;
 
@@ -949,6 +940,7 @@ internal readonly partial struct ForegroundPropagateShader(
         float bgRl = backgroundR <= 0.04045f ? backgroundR / 12.92f : Hlsl.Pow((backgroundR + 0.055f) / 1.055f, 2.4f);
         float bgGl = backgroundG <= 0.04045f ? backgroundG / 12.92f : Hlsl.Pow((backgroundG + 0.055f) / 1.055f, 2.4f);
         float bgBl = backgroundB <= 0.04045f ? backgroundB / 12.92f : Hlsl.Pow((backgroundB + 0.055f) / 1.055f, 2.4f);
+        float bgLenSq = bgRl * bgRl + bgGl * bgGl + bgBl * bgBl;
 
         float invA = 1f / a;
         float observedRs = Hlsl.Saturate(((packed >> 16) & 0xFF) * invA);
@@ -963,12 +955,8 @@ internal readonly partial struct ForegroundPropagateShader(
         float obg = observedG - bgGl;
         float obb = observedB - bgBl;
 
-        float sumR = 0f;
-        float sumG = 0f;
-        float sumB = 0f;
-        float sumW = 0f;
-
-        float twoReachSq = 2f * reach * reach;
+        int bestForeground = 0;
+        float bestPurity = -1f;
 
         for (int dy = -reach; dy <= reach; dy++)
         {
@@ -999,37 +987,30 @@ internal readonly partial struct ForegroundPropagateShader(
                 float dg = fg - bgGl;
                 float db = fb - bgBl;
                 float dlen2 = dr * dr + dg * dg + db * db;
-                float t = (dlen2 > 1e-8f) ? (obr * dr + obg * dg + obb * db) / dlen2 : 0f;
+                if (dlen2 < 1e-8f)
+                    continue;
+
+                float t = (obr * dr + obg * dg + obb * db) / dlen2;
                 float pr = obr - t * dr;
                 float pg = obg - t * dg;
                 float pb = obb - t * db;
                 float distSq = pr * pr + pg * pg + pb * pb;
+                if (distSq > sigmaLineSq * dlen2)
+                    continue;
 
-                float wSpace = Hlsl.Exp(-(dx * dx + dy * dy) / Hlsl.Max(twoReachSq, 1e-6f));
-                float wLine = Hlsl.Exp(-distSq / Hlsl.Max(sigmaLineSq, 1e-6f));
-                float w = wSpace * wLine;
-
-                sumR += fr * w;
-                sumG += fg * w;
-                sumB += fb * w;
-                sumW += w;
+                float dotFB = fr * bgRl + fg * bgGl + fb * bgBl;
+                float purity = fr * fr + fg * fg + fb * fb - (bgLenSq > 1e-8f ? dotFB * dotFB / bgLenSq : 0f);
+                if (purity > bestPurity)
+                {
+                    bestPurity = purity;
+                    bestForeground = f;
+                }
             }
         }
 
-        if (sumW > 1e-6f)
+        if (bestPurity >= 0f)
         {
-            float avgR = sumR / sumW;
-            float avgG = sumG / sumW;
-            float avgB = sumB / sumW;
-
-            float outRs = avgR <= 0.0031308f ? avgR * 12.92f : 1.055f * Hlsl.Pow(avgR, 1f / 2.4f) - 0.055f;
-            float outGs = avgG <= 0.0031308f ? avgG * 12.92f : 1.055f * Hlsl.Pow(avgG, 1f / 2.4f) - 0.055f;
-            float outBs = avgB <= 0.0031308f ? avgB * 12.92f : 1.055f * Hlsl.Pow(avgB, 1f / 2.4f) - 0.055f;
-
-            int rByte = (int)(Hlsl.Saturate(outRs) * 255f + 0.5f);
-            int gByte = (int)(Hlsl.Saturate(outGs) * 255f + 0.5f);
-            int bByte = (int)(Hlsl.Saturate(outBs) * 255f + 0.5f);
-            targetForeground[index] = (0xFF << 24) | (rByte << 16) | (gByte << 8) | bByte;
+            targetForeground[index] = bestForeground;
             targetValid[index] = 1;
             return;
         }
