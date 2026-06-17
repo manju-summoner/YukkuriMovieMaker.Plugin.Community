@@ -47,6 +47,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         [AnimationSlider("F3", "", 0.001d, 0.5d)]
         public Animation SigmaColor { get; } = new Animation(0.1, 0.001, 1);
 
+        [Display(GroupName = nameof(Texts.DirectionalColorKeyGroupName), Name = nameof(Texts.DirectionalColorKeySeedThresholdName), Description = nameof(Texts.DirectionalColorKeySeedThresholdDesc), Order = 165, ResourceType = typeof(Texts))]
+        [AnimationSlider("F2", "", 1d, 4d)]
+        public Animation SeedThreshold { get; } = new Animation(1, 1, 4);
+
         [Display(GroupName = nameof(Texts.DirectionalColorKeyGroupName), Name = nameof(Texts.DirectionalColorKeyEdgeSoftnessName), Description = nameof(Texts.DirectionalColorKeyEdgeSoftnessDesc), Order = 170, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0d, 100d)]
         public Animation EdgeSoftness { get; } = new Animation(0, 0, 100);
@@ -69,6 +73,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
             => new DirectionalColorKeyEffectProcessor(devices, this);
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [ClusterCount, OpaquePercentile, NoiseThreshold, SigmaColor, EdgeSoftness, SpillStrength, DespillBias];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [ClusterCount, OpaquePercentile, NoiseThreshold, SigmaColor, SeedThreshold, EdgeSoftness, SpillStrength, DespillBias];
     }
 }

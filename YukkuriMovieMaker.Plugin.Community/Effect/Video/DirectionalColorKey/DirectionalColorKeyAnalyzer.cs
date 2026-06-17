@@ -187,7 +187,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             hasWarmStart = true;
         }
 
-        public ReadOnlySpan<int> BuildForegroundField(int width, int height, Vector3 backgroundLab, Vector3 backgroundSrgb)
+        public ReadOnlySpan<int> BuildForegroundField(int width, int height, Vector3 backgroundLab, Vector3 backgroundSrgb, float seedThreshold)
         {
             EnsureCapacity(width, height);
 
@@ -195,7 +195,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             if (foregroundReadback.Length < pixelCount)
                 foregroundReadback = new int[pixelCount];
 
-            float referencePerp = ComputeReferencePerp(backgroundLab);
+            float referencePerp = ComputeReferencePerp(backgroundLab) * seedThreshold;
 
             var bgraGpu = EnsureBgraBuffer();
             var colorLabGpu = EnsureColorLabBuffer();
