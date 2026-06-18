@@ -162,24 +162,7 @@ float4 main(
         }
 
         alpha = max(directionalAlpha, neutralAlpha);
-
-        float3 lowBound = (backgroundLinear > 1e-5f) ? (1.0f - colorLinear / max(backgroundLinear, 1e-5f)) : float3(0.0f, 0.0f, 0.0f);
-        float3 highBound = (backgroundLinear < 1.0f - 1e-5f) ? ((colorLinear - backgroundLinear) / max(1.0f - backgroundLinear, 1e-5f)) : float3(0.0f, 0.0f, 0.0f);
-        float gamutAlpha = saturate(max(max(lowBound.x, max(lowBound.y, lowBound.z)), max(highBound.x, max(highBound.y, highBound.z))));
-
-        float orthoWeight = 0.0f;
-
-        [branch]
-        if (backgroundChromaLenSq > 1e-8f)
-        {
-            float3 backgroundChromaDirL = backgroundChroma * rsqrt(backgroundChromaLenSq);
-            float3 foregroundChroma = colorLinear - dot(colorLinear, luma);
-            float3 orthogonalChroma = foregroundChroma - dot(foregroundChroma, backgroundChromaDirL) * backgroundChromaDirL;
-            orthoWeight = saturate(length(orthogonalChroma) / 0.15f);
-        }
-
-        float recoveryAlpha = lerp(alpha, gamutAlpha, orthoWeight);
-        foregroundLinear = saturate((colorLinear - (1.0f - recoveryAlpha) * backgroundLinear) / max(recoveryAlpha, 1e-3f));
+        foregroundLinear = saturate((colorLinear - (1.0f - alpha) * backgroundLinear) / max(alpha, 1e-3f));
     }
 
     alpha = saturate((alpha - edgeSoftness) / max(1.0f - edgeSoftness, 1e-5f));
