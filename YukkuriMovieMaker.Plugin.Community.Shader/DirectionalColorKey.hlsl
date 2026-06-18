@@ -91,7 +91,6 @@ float4 main(
     if (dLen < halfThreshold)
         return float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-    float noiseConfidence = smoothstep(halfThreshold, noiseThreshold, dLen);
 
     float alpha = 0.0f;
     float3 foregroundLinear = colorLinear;
@@ -174,7 +173,7 @@ float4 main(
     [branch]
     if (outputForeground < 0.5f)
     {
-        float maskAlpha = alpha * noiseConfidence * src.a;
+        float maskAlpha = alpha * src.a;
         return float4(maskAlpha, maskAlpha, maskAlpha, maskAlpha);
     }
 
@@ -190,6 +189,6 @@ float4 main(
     }
 
     float3 foregroundSrgb = saturate(LinearToSrgb(foregroundLinear));
-    float outAlpha = alpha * noiseConfidence * src.a;
+    float outAlpha = alpha * src.a;
     return float4(foregroundSrgb * outAlpha, outAlpha);
 }
