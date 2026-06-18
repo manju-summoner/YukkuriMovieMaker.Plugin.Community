@@ -93,6 +93,7 @@ float4 main(
 
     float noiseConfidence = smoothstep(halfThreshold, noiseThreshold, dLen);
 
+
     float alpha = 0.0f;
     float3 foregroundLinear = colorLinear;
     bool resolved = false;
@@ -145,24 +146,17 @@ float4 main(
             return float4(0.0f, 0.0f, 0.0f, 0.0f);
 
         float lambda = max(clusters[bestCluster].w, 1e-5f);
-        float directionalAlpha = saturate(bestProj / lambda);
-
-        float3 luma = float3(0.2126f, 0.7152f, 0.0722f);
-        float3 backgroundChroma = backgroundLinear - dot(backgroundLinear, luma);
-        float backgroundChromaLenSq = dot(backgroundChroma, backgroundChroma);
-
-        float neutralAlpha = directionalAlpha;
+        float3 referenceLab = backgroundLab + clusters[bestCluster].xyz * lambda;
+        float3 referenceLinear = max(OklabToLinear(referenceLab), 0.0f);
+        float3 fb = referenceLinear - backgroundLinear;
+        float denom = dot(fb, fb);
 
         [branch]
-        if (backgroundChromaLenSq > 1e-8f)
+        if (denom > 1e-6f)
         {
-            float3 colorChroma = colorLinear - dot(colorLinear, luma);
-            float t = dot(colorChroma, backgroundChroma) / backgroundChromaLenSq;
-            neutralAlpha = saturate(1.0f - t);
+            alpha = saturate(dot(colorLinear - backgroundLinear, fb) / denom);
+            foregroundLinear = referenceLinear;
         }
-
-        alpha = max(directionalAlpha, neutralAlpha);
-        foregroundLinear = saturate((colorLinear - (1.0f - alpha) * backgroundLinear) / max(alpha, 1e-3f));
     }
 
     alpha = saturate((alpha - edgeSoftness) / max(1.0f - edgeSoftness, 1e-5f));
