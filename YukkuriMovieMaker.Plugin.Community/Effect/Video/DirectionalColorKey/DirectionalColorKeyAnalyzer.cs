@@ -43,7 +43,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private const int AdoptReach = SmoothRadius * SmoothIterations;
         private const int GuardReach = SmoothRadius * SmoothIterations;
         private const float IncrementalChangeCeiling = 0.25f;
-        private const int PropagateRefinePasses = 2;
+        private const int PropagateReach = 4;
+        private const int PropagateIterations = 16;
         private const float LineSigmaSquared = 0.1225f;
 
         private readonly float[] centers = new float[MaxClusters * 3];
@@ -207,31 +208,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 backgroundLab.X, backgroundLab.Y, backgroundLab.Z,
                 referencePerp, width, height));
 
-            int maxDim = Math.Max(width, height);
-            int step = 1;
-            while (step < maxDim)
-                step <<= 1;
-            step >>= 1;
-
-            for (; step >= 1; step >>= 1)
+            for (int iteration = 0; iteration < PropagateIterations; iteration++)
             {
                 device.For(width, height, new ForegroundPropagateShader(
                     foregroundSource, validSource, bgraGpu,
                     foregroundTarget, validTarget,
                     backgroundSrgb.X, backgroundSrgb.Y, backgroundSrgb.Z,
-                    step, LineSigmaSquared, width, height));
-
-                (foregroundSource, foregroundTarget) = (foregroundTarget, foregroundSource);
-                (validSource, validTarget) = (validTarget, validSource);
-            }
-
-            for (int refine = 0; refine < PropagateRefinePasses; refine++)
-            {
-                device.For(width, height, new ForegroundPropagateShader(
-                    foregroundSource, validSource, bgraGpu,
-                    foregroundTarget, validTarget,
-                    backgroundSrgb.X, backgroundSrgb.Y, backgroundSrgb.Z,
-                    1, LineSigmaSquared, width, height));
+                    PropagateReach, LineSigmaSquared, width, height));
 
                 (foregroundSource, foregroundTarget) = (foregroundTarget, foregroundSource);
                 (validSource, validTarget) = (validTarget, validSource);

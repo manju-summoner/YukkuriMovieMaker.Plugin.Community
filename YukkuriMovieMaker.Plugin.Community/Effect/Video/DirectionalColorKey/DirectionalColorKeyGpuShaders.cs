@@ -952,13 +952,13 @@ internal readonly partial struct ForegroundPropagateShader(
         int bestForeground = 0;
         float bestPurity = -1f;
 
-        for (int dy = -reach; dy <= reach; dy += reach)
+        for (int dy = -reach; dy <= reach; dy++)
         {
             int sy = y + dy;
             if (sy < 0 || sy >= height)
                 continue;
 
-            for (int dx = -reach; dx <= reach; dx += reach)
+            for (int dx = -reach; dx <= reach; dx++)
             {
                 int sx = x + dx;
                 if (sx < 0 || sx >= width)
