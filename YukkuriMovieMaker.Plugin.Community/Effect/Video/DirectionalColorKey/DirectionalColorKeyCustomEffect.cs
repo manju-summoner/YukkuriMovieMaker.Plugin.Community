@@ -71,6 +71,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             get => GetIntValue((int)EffectImpl.Properties.ClusterCount);
             set => SetValue((int)EffectImpl.Properties.ClusterCount, value);
         }
+        public Vector3 BackgroundSrgb
+        {
+            get => GetVector3Value((int)EffectImpl.Properties.BackgroundSrgb);
+            set => SetValue((int)EffectImpl.Properties.BackgroundSrgb, value);
+        }
 
         [CustomEffect(2)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
@@ -106,6 +111,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             [CustomEffectProperty(PropertyType.Int32, (int)Properties.ClusterCount)]
             public int ClusterCount { get => _cb.ClusterCount; set { _cb.ClusterCount = value; UpdateConstants(); } }
+
+            [CustomEffectProperty(PropertyType.Vector3, (int)Properties.BackgroundSrgb)]
+            public Vector3 BackgroundSrgb { get => _cb.BackgroundSrgb; set { _cb.BackgroundSrgb = value; UpdateConstants(); } }
 
             public EffectImpl() : base(ShaderResourceUri.Get("DirectionalColorKey")) { }
 
@@ -145,6 +153,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 public float OutputForeground;
                 public Vector3 BackgroundChromaDir;
                 public int ClusterCount;
+                public Vector3 BackgroundSrgb;
             }
 
             public enum Properties : int
@@ -161,6 +170,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 OutputForeground = 9,
                 BackgroundChromaDir = 10,
                 ClusterCount = 11,
+                BackgroundSrgb = 12,
             }
         }
     }

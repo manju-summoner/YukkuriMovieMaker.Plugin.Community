@@ -13,6 +13,7 @@ cbuffer constants : register(b0)
     float outputForeground : packoffset(c5.w);
     float3 backgroundChromaDir : packoffset(c6.x);
     int clusterCount : packoffset(c6.w);
+    float3 backgroundSrgb : packoffset(c7.x);
 };
 
 float3 SrgbToLinear(float3 c)
@@ -99,7 +100,6 @@ float4 main(
     float chromaConfidence = smoothstep(halfThreshold, noiseThreshold, length(foregroundResidual) / max(length(colorLinear), 1e-5f));
 
     float alpha = 0.0f;
-    float3 foregroundLinear = colorLinear;
     bool resolved = false;
 
     float4 foregroundSample = ForegroundTexture.Sample(InputSampler, uv1.xy);
@@ -122,7 +122,6 @@ float4 main(
             if (dot(residual, residual) <= 0.0625f * denom)
             {
                 alpha = seedAlpha;
-                foregroundLinear = seedLinear;
                 resolved = true;
             }
         }
@@ -167,7 +166,6 @@ float4 main(
         }
 
         alpha = max(directionalAlpha, neutralAlpha);
-        foregroundLinear = saturate((colorLinear - (1.0f - alpha) * backgroundLinear) / max(alpha, 1e-3f));
     }
 
     alpha = saturate((alpha - edgeSoftness) / max(1.0f - edgeSoftness, 1e-5f));
@@ -176,25 +174,26 @@ float4 main(
     if (alpha <= 0.0f)
         return float4(0.0f, 0.0f, 0.0f, 0.0f);
 
+    float outAlpha = alpha * noiseConfidence * chromaConfidence * src.a;
+
     [branch]
     if (outputForeground < 0.5f)
-    {
-        float maskAlpha = alpha * noiseConfidence * chromaConfidence * src.a;
-        return float4(maskAlpha, maskAlpha, maskAlpha, maskAlpha);
-    }
+        return float4(outAlpha, outAlpha, outAlpha, outAlpha);
+
+    float3 foregroundSrgb = (straightSrgb - (1.0f - alpha) * backgroundSrgb) / max(alpha, 1e-3f);
 
     [branch]
     if (spillStrength > 0.0f && length(backgroundChromaDir.yz) > 1e-5f)
     {
-        float3 foregroundLab = LinearToOklab(foregroundLinear);
+        float3 clampedSrgb = saturate(foregroundSrgb);
+        float3 foregroundLab = LinearToOklab(SrgbToLinear(clampedSrgb));
         float2 chromaDir = normalize(backgroundChromaDir.yz);
         float spill = dot(foregroundLab.yz, chromaDir) - despillBias;
         spill = max(0.0f, spill) * spillStrength;
         foregroundLab.yz -= chromaDir * spill;
-        foregroundLinear = max(OklabToLinear(foregroundLab), 0.0f);
+        float3 despilledSrgb = LinearToSrgb(max(OklabToLinear(foregroundLab), 0.0f));
+        foregroundSrgb += despilledSrgb - clampedSrgb;
     }
 
-    float3 foregroundSrgb = saturate(LinearToSrgb(foregroundLinear));
-    float outAlpha = alpha * noiseConfidence * chromaConfidence * src.a;
-    return float4(foregroundSrgb * outAlpha, outAlpha);
+    return float4(saturate(foregroundSrgb * outAlpha), outAlpha);
 }

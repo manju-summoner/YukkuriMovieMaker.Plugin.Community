@@ -163,6 +163,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             {
                 effect.BackgroundLab = backgroundLab;
                 effect.BackgroundChromaDir = backgroundChromaDir;
+                effect.BackgroundSrgb = new Vector3(
+                    currentBackground.R / 255f,
+                    currentBackground.G / 255f,
+                    currentBackground.B / 255f);
             }
             if (isFirst || noiseThreshold != currentNoiseThreshold)
                 effect.NoiseThreshold = (float)currentNoiseThreshold;
