@@ -162,10 +162,7 @@ float4 main(
         }
 
         alpha = max(directionalAlpha, neutralAlpha);
-        float3 backgroundContribution = (1.0f - alpha) * backgroundLinear;
-        float3 subtractionLimit = colorLinear / max(backgroundContribution, 1e-5f);
-        float subtractionScale = saturate(min(subtractionLimit.x, min(subtractionLimit.y, subtractionLimit.z)));
-        foregroundLinear = saturate((colorLinear - subtractionScale * backgroundContribution) / max(alpha, 1e-3f));
+        foregroundLinear = saturate((colorLinear - (1.0f - alpha) * backgroundLinear) / max(alpha, 1e-3f));
     }
 
     alpha = saturate((alpha - edgeSoftness) / max(1.0f - edgeSoftness, 1e-5f));
