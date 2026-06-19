@@ -153,20 +153,17 @@ float4 main(
         float directionalAlpha = saturate(bestProj / lambda);
 
         float3 luma = float3(0.2126f, 0.7152f, 0.0722f);
-        float backgroundLuma = dot(backgroundLinear, luma);
-        float3 backgroundChroma = backgroundLinear - backgroundLuma;
+        float3 backgroundChroma = backgroundLinear - dot(backgroundLinear, luma);
         float backgroundChromaLenSq = dot(backgroundChroma, backgroundChroma);
 
         float neutralAlpha = directionalAlpha;
 
         [branch]
-        if (backgroundChromaLenSq > 1e-8f && backgroundLuma > 1e-5f)
+        if (backgroundChromaLenSq > 1e-8f)
         {
-            float colorLuma = dot(colorLinear, luma);
-            float3 colorChroma = colorLinear - colorLuma;
+            float3 colorChroma = colorLinear - dot(colorLinear, luma);
             float t = dot(colorChroma, backgroundChroma) / backgroundChromaLenSq;
-            float lumaRatio = colorLuma / backgroundLuma;
-            neutralAlpha = saturate(1.0f - t / max(lumaRatio, 1e-5f));
+            neutralAlpha = saturate(1.0f - t);
         }
 
         alpha = max(directionalAlpha, neutralAlpha);
