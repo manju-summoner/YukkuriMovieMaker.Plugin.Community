@@ -108,15 +108,14 @@ float4 main(
     if (foregroundSample.a > 0.5f)
     {
         float3 seedSrgb = saturate(foregroundSample.rgb / max(foregroundSample.a, 1e-3f));
-        float3 seedLinear = SrgbToLinear(seedSrgb);
-        float3 fb = seedLinear - backgroundLinear;
+        float3 fb = seedSrgb - backgroundSrgb;
         float denom = dot(fb, fb);
 
         [branch]
         if (denom > 1e-6f)
         {
-            float seedAlpha = saturate(dot(colorLinear - backgroundLinear, fb) / denom);
-            float3 residual = (colorLinear - backgroundLinear) - seedAlpha * fb;
+            float seedAlpha = saturate(dot(straightSrgb - backgroundSrgb, fb) / denom);
+            float3 residual = (straightSrgb - backgroundSrgb) - seedAlpha * fb;
 
             [branch]
             if (dot(residual, residual) <= 0.0625f * denom)
