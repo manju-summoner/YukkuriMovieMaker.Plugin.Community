@@ -93,6 +93,11 @@ float4 main(
 
     float noiseConfidence = smoothstep(halfThreshold, noiseThreshold, dLen);
 
+    float3 backgroundShareRatio = (backgroundLinear > 1e-4f) ? (colorLinear / max(backgroundLinear, 1e-5f)) : 1e9f;
+    float backgroundShare = saturate(min(backgroundShareRatio.x, min(backgroundShareRatio.y, backgroundShareRatio.z)));
+    float3 foregroundResidual = colorLinear - backgroundShare * backgroundLinear;
+    float chromaConfidence = smoothstep(halfThreshold, noiseThreshold, length(foregroundResidual) / max(length(colorLinear), 1e-5f));
+
     float alpha = 0.0f;
     float3 foregroundLinear = colorLinear;
     bool resolved = false;
@@ -174,7 +179,7 @@ float4 main(
     [branch]
     if (outputForeground < 0.5f)
     {
-        float maskAlpha = alpha * noiseConfidence * src.a;
+        float maskAlpha = alpha * noiseConfidence * chromaConfidence * src.a;
         return float4(maskAlpha, maskAlpha, maskAlpha, maskAlpha);
     }
 
@@ -190,6 +195,6 @@ float4 main(
     }
 
     float3 foregroundSrgb = saturate(LinearToSrgb(foregroundLinear));
-    float outAlpha = alpha * noiseConfidence * src.a;
+    float outAlpha = alpha * noiseConfidence * chromaConfidence * src.a;
     return float4(foregroundSrgb * outAlpha, outAlpha);
 }
