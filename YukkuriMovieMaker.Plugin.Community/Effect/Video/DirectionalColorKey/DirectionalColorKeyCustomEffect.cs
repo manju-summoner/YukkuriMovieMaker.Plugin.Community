@@ -76,6 +76,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             get => GetVector3Value((int)EffectImpl.Properties.BackgroundSrgb);
             set => SetValue((int)EffectImpl.Properties.BackgroundSrgb, value);
         }
+        public int DeviceInputWidth => GetIntValue((int)EffectImpl.Properties.DeviceInputWidth);
+        public int DeviceInputHeight => GetIntValue((int)EffectImpl.Properties.DeviceInputHeight);
 
         [CustomEffect(2)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
@@ -115,6 +117,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             [CustomEffectProperty(PropertyType.Vector3, (int)Properties.BackgroundSrgb)]
             public Vector3 BackgroundSrgb { get => _cb.BackgroundSrgb; set { _cb.BackgroundSrgb = value; UpdateConstants(); } }
 
+            private int _deviceInputWidth;
+            private int _deviceInputHeight;
+
+            [CustomEffectProperty(PropertyType.Int32, (int)Properties.DeviceInputWidth)]
+            public int DeviceInputWidth { get => _deviceInputWidth; set => _deviceInputWidth = value; }
+            [CustomEffectProperty(PropertyType.Int32, (int)Properties.DeviceInputHeight)]
+            public int DeviceInputHeight { get => _deviceInputHeight; set => _deviceInputHeight = value; }
+
             public EffectImpl() : base(ShaderResourceUri.Get("DirectionalColorKey")) { }
 
             protected override void UpdateConstants()
@@ -130,6 +140,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             {
                 outputRect = inputRects.Length > 0 ? inputRects[0] : default;
                 outputOpaqueSubRect = default;
+                if (inputRects.Length > 0)
+                {
+                    _deviceInputWidth = inputRects[0].Right - inputRects[0].Left;
+                    _deviceInputHeight = inputRects[0].Bottom - inputRects[0].Top;
+                }
             }
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
@@ -171,6 +186,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 BackgroundChromaDir = 10,
                 ClusterCount = 11,
                 BackgroundSrgb = 12,
+                DeviceInputWidth = 13,
+                DeviceInputHeight = 14,
             }
         }
     }

@@ -27,6 +27,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private ID2D1Bitmap1? foregroundBitmap;
         private int sourceWidth, sourceHeight;
         private int foregroundWidth, foregroundHeight;
+        private int lastRenderWidth, lastRenderHeight;
 
         private int[]? sourceBuffer;
         private int bufferPixelCount;
@@ -99,6 +100,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             if (width <= 0 || height <= 0)
                 return effectDescription.DrawDescription;
 
+            int deviceWidth = effect.DeviceInputWidth;
+            int deviceHeight = effect.DeviceInputHeight;
+            int renderWidth = deviceWidth > 0 ? deviceWidth : width;
+            int renderHeight = deviceHeight > 0 ? deviceHeight : height;
+            float renderDpiX = (bounds.Right - bounds.Left) > 0f ? 96f * renderWidth / (bounds.Right - bounds.Left) : 96f;
+            float renderDpiY = (bounds.Bottom - bounds.Top) > 0f ? 96f * renderHeight / (bounds.Bottom - bounds.Top) : 96f;
+
             var currentBackground = item.BackgroundColor;
             var currentForeground = item.ForegroundColor;
             var currentScaleMode = item.ScaleMode;
@@ -118,6 +126,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 || !hasAnalysisCache
                 || lastFrame != frame
                 || !lastBounds.Equals(bounds)
+                || lastRenderWidth != renderWidth
+                || lastRenderHeight != renderHeight
                 || backgroundColor != currentBackground
                 || foregroundColor != currentForeground
                 || scaleMode != currentScaleMode
@@ -128,14 +138,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             if (analysisDirty)
             {
-                var source = RenderSourceToBuffer(dc, bounds, width, height);
+                var source = RenderSourceToBuffer(dc, bounds, renderWidth, renderHeight, renderDpiX, renderDpiY);
                 var whiteDirection = ComputeWhiteDirection(backgroundLab);
                 float foregroundLambda = ComputeForegroundLambda(backgroundLab, currentForeground);
 
                 analyzer.Analyze(
-                    source.AsSpan(0, width * height),
-                    width,
-                    height,
+                    source.AsSpan(0, renderWidth * renderHeight),
+                    renderWidth,
+                    renderHeight,
                     backgroundLab,
                     whiteDirection,
                     currentClusterCount,
@@ -152,8 +162,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                     currentBackground.R / 255f,
                     currentBackground.G / 255f,
                     currentBackground.B / 255f);
-                var foregroundField = analyzer.BuildForegroundField(width, height, backgroundLab, backgroundSrgb);
-                UploadForegroundField(dc, foregroundField, width, height);
+                var foregroundField = analyzer.BuildForegroundField(renderWidth, renderHeight, backgroundLab, backgroundSrgb);
+                UploadForegroundField(dc, foregroundField, renderWidth, renderHeight, renderDpiX, renderDpiY);
                 effect.SetInput(1, foregroundBitmap, true);
 
                 hasAnalysisCache = true;
@@ -182,6 +192,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             isFirst = false;
             lastFrame = frame;
             lastBounds = bounds;
+            lastRenderWidth = renderWidth;
+            lastRenderHeight = renderHeight;
             backgroundColor = currentBackground;
             foregroundColor = currentForeground;
             scaleMode = currentScaleMode;
@@ -221,9 +233,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             return new Vector4(center.X, center.Y, center.Z, lambda);
         }
 
-        private int[] RenderSourceToBuffer(ID2D1DeviceContext dc, RawRectF bounds, int width, int height)
+        private int[] RenderSourceToBuffer(ID2D1DeviceContext dc, RawRectF bounds, int width, int height, float dpiX, float dpiY)
         {
-            EnsureSourceBitmaps(dc, width, height);
+            EnsureSourceBitmaps(dc, width, height, dpiX, dpiY);
             var buffer = EnsureBuffer(width * height);
 
             var previousTarget = dc.Target;
@@ -275,9 +287,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             return buffer;
         }
 
-        private unsafe void UploadForegroundField(ID2D1DeviceContext dc, ReadOnlySpan<int> field, int width, int height)
+        private unsafe void UploadForegroundField(ID2D1DeviceContext dc, ReadOnlySpan<int> field, int width, int height, float dpiX, float dpiY)
         {
-            EnsureForegroundBitmap(dc, width, height);
+            EnsureForegroundBitmap(dc, width, height, dpiX, dpiY);
 
             fixed (int* src = field)
             {
@@ -285,7 +297,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             }
         }
 
-        private void EnsureForegroundBitmap(ID2D1DeviceContext dc, int width, int height)
+        private void EnsureForegroundBitmap(ID2D1DeviceContext dc, int width, int height, float dpiX, float dpiY)
         {
             if (foregroundBitmap is not null
                 && foregroundWidth == width
@@ -299,14 +311,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             foregroundBitmap = dc.CreateBitmap(
                 size,
-                new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.None));
+                new BitmapProperties1(pixelFormat, dpiX, dpiY, BitmapOptions.None));
             disposer.Collect(foregroundBitmap);
 
             foregroundWidth = width;
             foregroundHeight = height;
         }
 
-        private void EnsureSourceBitmaps(ID2D1DeviceContext dc, int width, int height)
+        private void EnsureSourceBitmaps(ID2D1DeviceContext dc, int width, int height, float dpiX, float dpiY)
         {
             if (sourceBitmap is not null
                 && sourceStagingBitmap is not null
@@ -322,12 +334,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             sourceBitmap = dc.CreateBitmap(
                 size,
-                new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.Target));
+                new BitmapProperties1(pixelFormat, dpiX, dpiY, BitmapOptions.Target));
             disposer.Collect(sourceBitmap);
 
             sourceStagingBitmap = dc.CreateBitmap(
                 size,
-                new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.CpuRead | BitmapOptions.CannotDraw));
+                new BitmapProperties1(pixelFormat, dpiX, dpiY, BitmapOptions.CpuRead | BitmapOptions.CannotDraw));
             disposer.Collect(sourceStagingBitmap);
 
             sourceWidth = width;
