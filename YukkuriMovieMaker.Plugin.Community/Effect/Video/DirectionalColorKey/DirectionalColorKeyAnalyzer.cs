@@ -46,6 +46,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private const int PropagateReach = 4;
         private const int PropagateIterations = 16;
         private const float LineSigmaSquared = 0.1225f;
+        private const float SeedPerpTolerance = 0.99f;
 
         private readonly float[] centers = new float[MaxClusters * 3];
         private readonly int[] accumulators = new int[MaxClusters * 3 + MaxClusters];
@@ -234,7 +235,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             var dvec = white - backgroundLab;
             float along = Vector3.Dot(dvec, backgroundLab) / bgLenSq;
             var perp = dvec - along * backgroundLab;
-            return perp.Length();
+            return perp.Length() * SeedPerpTolerance;
         }
 
         private ReadWriteBuffer<int> EnsureForegroundBufferA()
