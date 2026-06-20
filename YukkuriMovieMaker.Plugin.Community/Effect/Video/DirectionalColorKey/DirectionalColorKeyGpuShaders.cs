@@ -98,7 +98,7 @@ internal readonly partial struct DisplacementFieldShader(
 
         float len = Hlsl.Sqrt(dl * dl + da * da + db * db);
 
-        if (len < noiseThreshold)
+        if (len < noiseThreshold || len <= 1e-6f)
         {
             directions[triple + 0] = 0f;
             directions[triple + 1] = 0f;
