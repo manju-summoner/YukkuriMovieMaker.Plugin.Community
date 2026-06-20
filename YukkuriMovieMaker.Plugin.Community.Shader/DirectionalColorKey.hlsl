@@ -91,13 +91,6 @@ float4 main(
     if (dLen < halfThreshold)
         return float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-    float noiseConfidence = smoothstep(halfThreshold, noiseThreshold, dLen);
-
-    float3 backgroundShareRatio = (backgroundLinear > 1e-4f) ? (colorLinear / max(backgroundLinear, 1e-5f)) : 1e9f;
-    float backgroundShare = saturate(min(backgroundShareRatio.x, min(backgroundShareRatio.y, backgroundShareRatio.z)));
-    float3 foregroundResidual = colorLinear - backgroundShare * backgroundLinear;
-    float chromaConfidence = smoothstep(halfThreshold, noiseThreshold, length(foregroundResidual) / max(length(colorLinear), 1e-5f));
-
     float alpha = 0.0f;
     float3 foregroundLinear = colorLinear;
     bool resolved = false;
@@ -179,22 +172,22 @@ float4 main(
     [branch]
     if (outputForeground < 0.5f)
     {
-        float maskAlpha = alpha * noiseConfidence * chromaConfidence * src.a;
+        float maskAlpha = alpha * src.a;
         return float4(maskAlpha, maskAlpha, maskAlpha, maskAlpha);
     }
 
     [branch]
-    if (spillStrength > 0.0f && length(backgroundChromaDir.yz) > 1e-5f)
+    if (length(backgroundChromaDir.yz) > 1e-5f)
     {
         float3 foregroundLab = LinearToOklab(foregroundLinear);
         float2 chromaDir = normalize(backgroundChromaDir.yz);
         float spill = dot(foregroundLab.yz, chromaDir) - despillBias;
-        spill = max(0.0f, spill) * spillStrength;
+        spill = max(0.0f, spill);
         foregroundLab.yz -= chromaDir * spill;
         foregroundLinear = max(OklabToLinear(foregroundLab), 0.0f);
     }
 
     float3 foregroundSrgb = saturate(LinearToSrgb(foregroundLinear));
-    float outAlpha = alpha * noiseConfidence * chromaConfidence * src.a;
+    float outAlpha = alpha * src.a;
     return float4(foregroundSrgb * outAlpha, outAlpha);
 }
