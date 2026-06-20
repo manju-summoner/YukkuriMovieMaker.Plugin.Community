@@ -13,6 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.Dyna
 
 public class ContainerFactory
 {
+    private static readonly Lock Lock = new();
     private static readonly Dictionary<string, Type> TypeCache = new();
 
     // ModuleBuilder を内部保持して、EffectNodeCalculator から ModuleBuilder なしで呼べるようにする
@@ -43,8 +44,12 @@ public class ContainerFactory
 
         var type = effectPropertyInst.GetType();
         var name = type.FullName ?? type.Name;
-        if (TypeCache.TryGetValue(name, out var cached))
-            return cached;
+
+        lock (Lock)
+        {
+            if (TypeCache.TryGetValue(name, out var cached))
+                return cached;
+        }
 
         var properties = new List<PropertyInfo>();
         foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
@@ -68,7 +73,10 @@ public class ContainerFactory
             .Cast<PortDefinition>()
             .ToList();
 
-        return CreateOrGenerate(name, ports, mod);
+        lock (Lock)
+        {
+            return TypeCache.TryGetValue(name, out var cached) ? cached : CreateOrGenerate(name, ports, mod);
+        }
     }
 
     private static PortDefinition? TryMakePortDefinition(PropertyInfo prop, DisplayAttribute display, object? inst)
@@ -166,8 +174,9 @@ public class ContainerFactory
 
     private static Type CreateOrGenerate(string name, List<PortDefinition> ports, ModuleBuilder mod)
     {
+        var flatName = name.Replace('.', '_');
         var tb = mod.DefineType(
-            $"DynamicContainer_{name}",
+            $"DynamicContainer_{flatName}",
             TypeAttributes.Public,
             typeof(InputsContainer));
 

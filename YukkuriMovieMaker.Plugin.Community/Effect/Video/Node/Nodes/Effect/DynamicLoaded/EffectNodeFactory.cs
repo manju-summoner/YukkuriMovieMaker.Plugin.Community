@@ -20,6 +20,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.Dyna
 
 public static class EffectNodeFactory
 {
+    private static readonly Lock Lock = new();
     private static readonly Dictionary<string, Type> TypeCache = new();
 
     private static readonly AssemblyBuilder AsmBuilder =
@@ -61,53 +62,62 @@ public static class EffectNodeFactory
         if (effectType.GetCustomAttribute<ObsoleteAttribute>() != null)
             throw new InvalidOperationException($"{effectType.Name} is obsolete");
 
-        if (TypeCache.TryGetValue(effectType.Name, out var cached))
+        lock (Lock)
         {
+            if (TypeCache.TryGetValue(effectType.Name, out var cached))
+            {
 #if DEBUG
-            Console.WriteLine($@"[EffectNodeFactory]   cache hit: {effectType.Name}");
+                Console.WriteLine($@"[EffectNodeFactory]   cache hit: {effectType.Name}");
 #endif
-            return cached;
-        }
+                return cached;
+            }
 
-        var effectInstance = Activator.CreateInstance(effectType) as IVideoEffect
-                             ?? throw new InvalidOperationException($"Cannot instantiate {effectType.Name}");
+            var effectInstance = Activator.CreateInstance(effectType) as IVideoEffect
+                                 ?? throw new InvalidOperationException($"Cannot instantiate {effectType.Name}");
 
-        var (staticPortDefs, dynamicParams) = EffectPortCollector.Collect(effectInstance);
+            var (staticPortDefs, dynamicParams) = EffectPortCollector.Collect(effectInstance);
 
 #if DEBUG
-        Console.WriteLine(
-            $@"[EffectNodeFactory]   {effectType.Name}: {staticPortDefs.Count + dynamicParams.Count} port(s) collected (including {dynamicParams.Count} dynamics)");
-        foreach (var d in staticPortDefs)
-            Console.WriteLine($@"[EffectNodeFactory]     {d.PortType,-6} {d.PropName} (label={d.LabelKey})");
-        foreach (var d in dynamicParams)
             Console.WriteLine(
-                $@"[EffectNodeFactory]     {d.Item1.PortType,-6} {d.Item1.PropName} (Dynamic, label={d.Item1.LabelKey})");
+                $@"[EffectNodeFactory]   {effectType.Name}: {staticPortDefs.Count + dynamicParams.Count} port(s) collected (including {dynamicParams.Count} dynamics)");
+            foreach (var d in staticPortDefs)
+                Console.WriteLine($@"[EffectNodeFactory]     {d.PortType,-6} {d.PropName} (label={d.LabelKey})");
+            foreach (var d in dynamicParams)
+                Console.WriteLine(
+                    $@"[EffectNodeFactory]     {d.Item1.PortType,-6} {d.Item1.PropName} (Dynamic, label={d.Item1.LabelKey})");
 #endif
 
-        var veAttr = effectType.GetCustomAttribute<VideoEffectAttribute>();
-        var categoryKey = veAttr?.Categories.FirstOrDefault() ?? "Effect";
-        var labelKey = veAttr?.Name ?? effectType.Name;
-        var resourceType = veAttr?.ResourceType;
+            var veAttr = effectType.GetCustomAttribute<VideoEffectAttribute>();
+            var categoryKey = veAttr?.Categories.FirstOrDefault() ?? "Effect";
+            var labelKey = veAttr?.Name ?? effectType.Name;
+            var resourceType = veAttr?.ResourceType;
 
-        var generated =
-            EffectNodeTypeBuilder.Build(ModBuilder, effectType.Name, categoryKey, labelKey, resourceType,
-                staticPortDefs, dynamicParams);
-        TypeCache[effectType.Name] = generated;
-        return generated;
+            var generated =
+                EffectNodeTypeBuilder.Build(ModBuilder, effectType.Name, categoryKey, labelKey, resourceType,
+                    staticPortDefs, dynamicParams);
+            TypeCache[effectType.Name] = generated;
+            return generated;
+        }
     }
 
     internal static string? GetEffectName(string assemblyQualifiedName)
     {
-        foreach (var (effectName, type) in TypeCache)
-            if ((type.AssemblyQualifiedName ?? type.Name) == assemblyQualifiedName)
-                return effectName;
-        return null;
+        lock (Lock)
+        {
+            foreach (var (effectName, type) in TypeCache)
+                if ((type.AssemblyQualifiedName ?? type.Name) == assemblyQualifiedName)
+                    return effectName;
+            return null;
+        }
     }
 
     internal static Type? GetOrCreate(string effectName)
     {
-        if (TypeCache.TryGetValue(effectName, out var cached))
-            return cached;
+        lock (Lock)
+        {
+            if (TypeCache.TryGetValue(effectName, out var cached))
+                return cached;
+        }
 
         var effectType = PluginLoader.VideoEffects.FirstOrDefault(t => t.Name == effectName);
         if (effectType == null) return null;
@@ -179,7 +189,7 @@ public static class EffectPortCollector
             var def = TryMakePortDefinition(prop, displayAttr, propInstance);
 
             if (propInstance is not null
-                && prop.PropertyType != typeof(BrushWrapper)
+                && prop.PropertyType != typeof(Plugin.Brush.Brush)
                 && propInstance.GetType().GetProperties()
                     .Any(info => info.GetCustomAttribute<DisplayAttribute>() != null))
             {
@@ -246,7 +256,7 @@ public static class EffectPortCollector
                 DefaultValue = inst is Color c ? c : Colors.White
             };
 
-        if (prop.PropertyType == typeof(BrushWrapper))
+        if (prop.PropertyType == typeof(Plugin.Brush.Brush))
             return new PortDefinition
             {
                 PropName = prop.Name, PortType = PortType.Brush,
@@ -636,6 +646,8 @@ public static class EffectNodeCalculator
         string dynamicPropName,
         string containerFieldName)
     {
+        if (changedPortName == "InputImage") return;
+
         var containerFieldInfo = self.GetType().GetField(containerFieldName,
             BindingFlags.NonPublic | BindingFlags.Instance);
         if (containerFieldInfo == null) return;
@@ -652,8 +664,9 @@ public static class EffectNodeCalculator
             if (containerType == null) return;
 
             var currentContainer = (InputsContainer?)containerFieldInfo.GetValue(self);
-            var expectedName = $"DynamicContainer_{subObject.GetType().FullName ?? subObject.GetType().Name}";
-            if (currentContainer?.GetType().FullName == expectedName) return;
+            var rawName = subObject.GetType().FullName ?? subObject.GetType().Name;
+            var expectedName = $"DynamicContainer_{rawName.Replace('.', '_')}";
+            if (currentContainer?.GetType().Name == expectedName) return;
 
             var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
             if (newContainer == null) return;

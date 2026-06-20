@@ -95,8 +95,8 @@ public static class Serializer
 
         foreach (var nodeSnap in snapshot.Nodes)
         {
-            var type = Type.GetType(nodeSnap.TypeName)
-                       ?? Registry.AllNodes.GetValueOrDefault(nodeSnap.TypeName);
+            var type = Registry.AllNodes.GetValueOrDefault(nodeSnap.TypeName)
+                       ?? Type.GetType(nodeSnap.TypeName);
             if (type == null) continue;
             var node = (NodeLogic)Activator.CreateInstance(type)!;
             node.Id = nodeSnap.Id;
@@ -130,12 +130,14 @@ public static class Serializer
         {
             if (!nodeMap.TryGetValue(nodeSnap.Id, out var node)) continue;
 
-            // SyncDynamicInputs を先に呼ぶことで Dynamic ポートのサブポートを Inputs に登録する。
-            // SetInputValue より前に呼ばないと "PropName.SubPropName" キーが存在せず KeyNotFoundException になる。
             node.SyncDynamicInputs();
 
             foreach (var input in nodeSnap.InputsValues)
+            {
+                if (!node.Inputs.ContainsKey(input.Key)) continue;
                 graph.SetInputValue(node.Id, input.Key, input.Value);
+            }
+
             foreach (var subGraphKvp in nodeSnap.SubGraphs)
             {
                 var subGraph = Restore(subGraphKvp.Value);
