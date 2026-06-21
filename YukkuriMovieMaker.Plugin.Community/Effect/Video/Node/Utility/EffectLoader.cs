@@ -162,6 +162,41 @@ public class VideoEffectsLoader : IDisposable
                         valuesProp.SetValue(animObj, newList);
                         await animObj.EndEditAsync();
                     }
+                    else if (propInfo.PropertyType == typeof(Plugin.Brush.Brush))
+                    {
+                        // Brush の Brush プロパティは getter のみで、オブジェクト全体の差し替えはできない。
+                        // 既存の Brush インスタンスを取得し、その Parameter プロパティのみを直接更新する。
+                        // Type は変更しない（変更すると EndEditAsync が Parameter を上書きしてしまうため）。
+                        if (propInfo.GetValue(targetObject) is not Plugin.Brush.Brush brushObj)
+                            throw new InvalidOperationException(
+                                string.Format(TextUi.PropertyReadOnly, propertyName));
+
+#if DEBUG
+                        Console.WriteLine(
+                            $@"  Brush.SetValue: incoming={value?.GetType().Name ?? "null"}, " +
+                            $@"currentParameter={brushObj.Parameter.GetType().Name}, " +
+                            $@"Type={brushObj.Type.Name}");
+#endif
+
+                        if (value is IBrushParameter brushParameter)
+                        {
+                            brushObj.BeginEdit();
+                            brushObj.Parameter = brushParameter;
+                            await brushObj.EndEditAsync();
+#if DEBUG
+                            Console.WriteLine(
+                                $@"  Brush.SetValue: after assign, Parameter={brushObj.Parameter.GetType().Name}, " +
+                                $@"sameRef={ReferenceEquals(brushObj.Parameter, brushParameter)}");
+#endif
+                        }
+#if DEBUG
+                        else
+                        {
+                            Console.WriteLine(
+                                $@"  Brush.SetValue: value is NOT IBrushParameter (actual={value?.GetType().FullName ?? "null"})");
+                        }
+#endif
+                    }
                     else
                     {
                         if (!propInfo.CanWrite)
@@ -180,8 +215,19 @@ public class VideoEffectsLoader : IDisposable
                     // and match the property name (identifier) with the argument propertyName
                     var result = FindPropertyByDisplay(_brushParameter, propertyName);
                     if (result == null)
+                    {
+#if DEBUG
+                        Console.WriteLine(
+                            $@"  BrushEffect SetValue FAILED for '{propertyName}'. " +
+                            $@"_brushParameter type={_brushParameter.GetType().Name}, direct properties: " +
+                            string.Join(", ", _brushParameter.GetType()
+                                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                .Select(p =>
+                                    $"{p.Name}({(p.GetCustomAttribute<DisplayAttribute>() != null ? "Display" : "no-Display")})")));
+#endif
                         throw new ArgumentException(string.Format(TextUi.PropertyNotFound, propertyName),
                             nameof(propertyName));
+                    }
 
                     var (targetObject, propInfo) = result.Value;
 

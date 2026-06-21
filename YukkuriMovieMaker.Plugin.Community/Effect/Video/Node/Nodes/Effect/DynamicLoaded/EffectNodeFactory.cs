@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
+using YukkuriMovieMaker.Plugin.Brush;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
@@ -654,8 +655,15 @@ public static class EffectNodeCalculator
 
         _ = Task.Run(async () =>
         {
-            await loader.SetValue(changedPortName, changedValue)
-                .ConfigureAwait(false);
+            try
+            {
+                await loader.SetValue(changedPortName, changedValue)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                // ignore
+            }
 
             var subObject = GetEffectSubObject(loader, dynamicPropName);
             if (subObject == null) return;
@@ -737,7 +745,12 @@ public static class EffectNodeCalculator
             {
                 foreach (var def in portDefs)
                 {
-                    var value = GetPortValue(self, def);
+                    var value = GetPortValue(self, def, ctx);
+#if DEBUG
+                    if (def.PortType == PortType.Brush)
+                        Console.WriteLine(
+                            $@"  CalculateAsync Brush port '{def.PropName}': value={value?.GetType().Name ?? "null"}");
+#endif
                     loader.SetValue(def.PropName, value)
                         .GetAwaiter()
                         .GetResult();
@@ -784,7 +797,7 @@ public static class EffectNodeCalculator
                         var subProp = subObject.GetType().GetProperty(subPropName,
                             BindingFlags.Public | BindingFlags.Instance);
                         if (subProp == null) continue;
-                        var raw = kv.Value.GetValue(null).GetAwaiter().GetResult();
+                        var raw = kv.Value.GetValue(ctx).GetAwaiter().GetResult();
                         SetSubPropertyDirect(subObject, subProp, raw);
                     }
                 }
@@ -796,6 +809,13 @@ public static class EffectNodeCalculator
         }
         catch (Exception exception)
         {
+#if DEBUG
+            Console.WriteLine(
+                $@"  CalculateAsync EXCEPTION: {exception.GetType().Name}: {exception.Message}" +
+                (exception.InnerException != null
+                    ? $@" --> Inner: {exception.InnerException.GetType().Name}: {exception.InnerException.Message}"
+                    : ""));
+#endif
             return Task.FromException(exception);
         }
     }
@@ -872,10 +892,10 @@ public static class EffectNodeCalculator
         return null;
     }
 
-    private static object? GetPortValue(NodeLogic self, PortDefinition def)
+    private static object? GetPortValue(NodeLogic self, PortDefinition def, EvaluationContext? ctx)
     {
         if (!self.Inputs.TryGetValue(def.PropName, out var port)) return null;
-        var raw = port.GetValue(null).GetAwaiter().GetResult();
+        var raw = port.GetValue(ctx).GetAwaiter().GetResult();
         return def.PortType switch
         {
             PortType.Enum when def.EnumType != null =>
@@ -890,8 +910,14 @@ public static class EffectNodeCalculator
         };
     }
 
-    private static Plugin.Brush.Brush? ConvertBrush(object? raw)
+    private static IBrushParameter? ConvertBrush(object? raw)
     {
+#if DEBUG
+        Console.WriteLine(
+            $@"  ConvertBrush: raw={raw?.GetType().Name ?? "null"}, " +
+            $@"isBrushWrapper={raw is BrushWrapper}, " +
+            $@"innerBrushIsNull={(raw as BrushWrapper)?.Brush == null}");
+#endif
         if (raw is not BrushWrapper wrapper)
             return null;
 

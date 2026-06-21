@@ -39,6 +39,10 @@ internal sealed class NodeBrushParameter : IBrushParameter
     public IBrushSource CreateBrush(
         IGraphicsDevicesAndContext devices)
     {
+#if DEBUG
+        Console.WriteLine(
+            $@"  NodeBrushParameter.CreateBrush called, _brush={_brush.NativePointer:x8}");
+#endif
         return new NodeBrushSource(_brush);
     }
 
@@ -66,13 +70,8 @@ internal sealed class NodeBrushParameter : IBrushParameter
 
 internal static class NodeBrushFactory
 {
-    public static Plugin.Brush.Brush Create(BrushWrapper wrapper)
+    public static IBrushParameter Create(BrushWrapper wrapper)
     {
-        var brush = new Plugin.Brush.Brush
-        {
-            Parameter = new NodeBrushParameter(wrapper.Brush!)
-        };
-
-        return brush;
+        return new NodeBrushParameter(wrapper.Brush!);
     }
 }
