@@ -114,10 +114,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             var backgroundLab = ToOklab(ToLinear(currentBackground));
             var backgroundChromaDir = ComputeChromaDirection(backgroundLab);
 
-            bool analysisDirty = isFirst
+            int pixelCount = width * height;
+
+            bool sourcePossiblyChanged = isFirst
                 || !hasAnalysisCache
                 || lastFrame != frame
+                || !lastBounds.Equals(bounds);
+
+            bool contentChanged = sourcePossiblyChanged && RenderSourceToBuffer(dc, bounds, width, height);
+
+            bool analysisDirty = isFirst
+                || !hasAnalysisCache
                 || !lastBounds.Equals(bounds)
+                || contentChanged
                 || backgroundColor != currentBackground
                 || foregroundColor != currentForeground
                 || scaleMode != currentScaleMode
@@ -128,12 +137,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             if (analysisDirty)
             {
-                var source = RenderSourceToBuffer(dc, bounds, width, height);
                 var whiteDirection = ComputeWhiteDirection(backgroundLab);
                 float foregroundLambda = ComputeForegroundLambda(backgroundLab, currentForeground);
 
                 analyzer.Analyze(
-                    source.AsSpan(0, width * height),
+                    sourceBuffer!.AsSpan(0, pixelCount),
                     width,
                     height,
                     backgroundLab,
@@ -217,10 +225,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             return new Vector4(center.X, center.Y, center.Z, lambda);
         }
 
-        private int[] RenderSourceToBuffer(ID2D1DeviceContext dc, RawRectF bounds, int width, int height)
+        private bool RenderSourceToBuffer(ID2D1DeviceContext dc, RawRectF bounds, int width, int height)
         {
             EnsureSourceBitmaps(dc, width, height);
-            var buffer = EnsureBuffer(width * height);
+            int pixelCount = width * height;
+            bool reused = sourceBuffer is not null && bufferPixelCount >= pixelCount;
+            var buffer = EnsureBuffer(pixelCount);
 
             var previousTarget = dc.Target;
             dc.Target = sourceBitmap;
@@ -237,28 +247,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             sourceStagingBitmap!.CopyFromBitmap(sourceBitmap!);
             var mapped = sourceStagingBitmap.Map(MapOptions.Read);
+            bool changed = !reused;
             try
             {
                 unsafe
                 {
                     byte* basePtr = (byte*)mapped.Bits;
-                    fixed (int* dest = buffer)
+                    for (int row = 0; row < height; row++)
                     {
-                        int rowStride = width * sizeof(int);
-                        if (mapped.Pitch == rowStride)
+                        var sourceRow = new ReadOnlySpan<int>(basePtr + (nint)row * mapped.Pitch, width);
+                        var destRow = buffer.AsSpan(row * width, width);
+
+                        if (changed)
                         {
-                            Buffer.MemoryCopy(basePtr, dest, (long)rowStride * height, (long)rowStride * height);
+                            sourceRow.CopyTo(destRow);
                         }
-                        else
+                        else if (!sourceRow.SequenceEqual(destRow))
                         {
-                            for (int row = 0; row < height; row++)
-                            {
-                                Buffer.MemoryCopy(
-                                    basePtr + (nint)row * mapped.Pitch,
-                                    dest + (nint)row * width,
-                                    rowStride,
-                                    rowStride);
-                            }
+                            changed = true;
+                            sourceRow.CopyTo(destRow);
                         }
                     }
                 }
@@ -268,7 +275,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 sourceStagingBitmap.Unmap();
             }
 
-            return buffer;
+            return changed;
         }
 
         private unsafe void UploadForegroundField(ID2D1DeviceContext dc, ReadOnlySpan<int> field, int width, int height)
