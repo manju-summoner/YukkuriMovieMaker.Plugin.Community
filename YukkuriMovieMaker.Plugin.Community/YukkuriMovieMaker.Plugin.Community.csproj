@@ -95,6 +95,8 @@
     <Resource Include="Voice\IrodoriTTS\EmojiPalette\Emoji\*.png" />
 	<Resource Include="Resources\SyntaxDefinitions\Lua-Dark.xshd" />
 	<Resource Include="Resources\SyntaxDefinitions\Lua-Light.xshd" />
+  	<Resource Include="Resources\SyntaxDefinitions\Lua-Windows.xshd" />
+	<Resource Include="Resources\SyntaxDefinitions\Lua-Black.xshd" />
   </ItemGroup>
 
   <ItemGroup>
