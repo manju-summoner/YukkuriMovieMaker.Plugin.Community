@@ -135,6 +135,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 || sigmaColor != currentSigmaColor
                 || opaquePercentile != currentOpaquePercentile;
 
+            // コンテンツ変化（再生）以外の理由で解析が走るとき＝スケール決定に関わる
+            // 設定が変わったときは、lambda の時間方向ブレンドをリセットして即座に反映する。
+            bool lambdaInputsChanged = isFirst
+                || !hasAnalysisCache
+                || !lastBounds.Equals(bounds)
+                || backgroundColor != currentBackground
+                || foregroundColor != currentForeground
+                || scaleMode != currentScaleMode
+                || clusterCount != currentClusterCount
+                || noiseThreshold != currentNoiseThreshold
+                || sigmaColor != currentSigmaColor
+                || opaquePercentile != currentOpaquePercentile;
+
             if (analysisDirty)
             {
                 var whiteDirection = ComputeWhiteDirection(backgroundLab);
@@ -152,7 +165,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                     currentScaleMode,
                     (float)currentOpaquePercentile,
                     foregroundLambda,
-                    (keyDirection, floorValue) => ComputePhysicalLambda(backgroundLab, keyDirection, floorValue));
+                    (keyDirection, floorValue) => ComputePhysicalLambda(backgroundLab, keyDirection, floorValue),
+                    lambdaInputsChanged);
 
                 ApplyClusters(backgroundLab);
 

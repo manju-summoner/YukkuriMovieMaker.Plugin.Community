@@ -91,9 +91,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             DirectionalColorKeyScaleMode scaleMode,
             float opaquePercentile,
             float foregroundLambda,
-            Func<Vector3, float, float> physicalLambda)
+            Func<Vector3, float, float> physicalLambda,
+            bool resetLambdaSmoothing)
         {
             EnsureCapacity(width, height);
+
+            // スケール決定に関わる設定が変わったときは、前回値との時間方向ブレンドを
+            // 効かせると新しい設定値へ到達しないため warm-start を破棄する。
+            // 再生によるコンテンツ変化のみのときは warm-start を維持してちらつきを抑える。
+            if (resetLambdaSmoothing)
+                hasLambdaWarmStart = false;
 
             int targetClusters = Math.Clamp(requestedClusters, 1, MaxClusters);
             int noiseThresholdBits = BitConverter.SingleToInt32Bits(noiseThreshold);
