@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 using Whisper.net;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Transcription.Whisper.Installers;
 using YukkuriMovieMaker.Plugin.Transcription;
 
@@ -73,25 +74,35 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
                 List<SegmentData> segments = [];
                 await foreach (var r in vad.ProcessAsync(blockBuffer.AsMemory()[0..readCount], token))
                 {
-                    await foreach (var segment in whisper.ProcessAsync(blockBuffer[r.Start..r.End], token))
+                    //ネイティブの推論失敗（"Failed to encode/decode audio features." 等）は環境依存・断続的に発生する。
+                    //1区間の失敗でジョブ全体を中断させず、その区間だけスキップして処理を継続する。
+                    try
                     {
-                        if (ngWords.Contains(segment.Text))
-                            continue;
-                        var segment2 = new SegmentData(
-                            segment.Text,
-                            segment.Start + TimeSpan.FromSeconds((double)r.Start / sampleRate),
-                            segment.End + TimeSpan.FromSeconds((double)r.Start / sampleRate),
-                            segment.MinProbability,
-                            segment.MaxProbability,
-                            segment.Probability,
-                            segment.NoSpeechProbability,
-                            segment.Language,
-                            segment.Tokens);
-                        segments.Add(segment2);
+                        await foreach (var segment in whisper.ProcessAsync(blockBuffer[r.Start..r.End], token))
+                        {
+                            if (ngWords.Contains(segment.Text))
+                                continue;
+                            var segment2 = new SegmentData(
+                                segment.Text,
+                                segment.Start + TimeSpan.FromSeconds((double)r.Start / sampleRate),
+                                segment.End + TimeSpan.FromSeconds((double)r.Start / sampleRate),
+                                segment.MinProbability,
+                                segment.MaxProbability,
+                                segment.Probability,
+                                segment.NoSpeechProbability,
+                                segment.Language,
+                                segment.Tokens);
+                            segments.Add(segment2);
 
-                        lastText = segment.Text;
-                        message = CreateProgressMessage(lastText, sourceDuration, blockTime);
-                        progress.Report((double)blockPosition / totalSamples, message);
+                            lastText = segment.Text;
+                            message = CreateProgressMessage(lastText, sourceDuration, blockTime);
+                            progress.Report((double)blockPosition / totalSamples, message);
+                        }
+                    }
+                    catch (WhisperProcessingException ex)
+                    {
+                        var skippedTime = blockTime + TimeSpan.FromSeconds((double)r.Start / sampleRate);
+                        Log.Default.Write($"Whisperによる音声区間の処理に失敗したためスキップしました。 time={skippedTime}", ex);
                     }
                 }
 
@@ -139,6 +150,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
 
         private static async Task CheckRuntime(YukkuriMovieMaker.Commons.ProgressMessage progress, CancellationToken token)
         {
+            //whisperのネイティブdllはCPU/CUDA/Vulkanのいずれのランタイムでもmsvcp140.dll等に動的リンクしているため、
+            //GPUランタイムの有無に関わらずVC++ランタイムのインストールを常に確認する
+            if (!VisualCppRuntime.IsSupported())
+                throw new NotSupportedException(Texts.NotSupportedMessage);
+
+            if (!VisualCppRuntime.IsInstalled())
+            {
+                var res = MessageBox.Show(string.Format(Texts.RuntimeNotInstalledMessage, $"Microsoft Visual C++ 2015–2022 Redistributable ({RuntimeInformation.ProcessArchitecture})"), Texts.RuntimeNotInstalledTitle, MessageBoxButton.YesNoCancel);
+                if (res is MessageBoxResult.Cancel)
+                    throw new OperationCanceledException();
+                if (res is MessageBoxResult.Yes)
+                {
+                    await new VisualCppRuntime().InstallAsync(progress, token);
+                }
+            }
+
             var isCudaRuntimeInstalled = CUDAToolkit.IsInstalled();
             var isVulkanRuntimeInstalled = VulkanRuntime.IsInstalled();
             if (isCudaRuntimeInstalled || isVulkanRuntimeInstalled)
@@ -165,20 +192,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
                 {
                     await new VulkanRuntime().InstallAsync(progress, token);
                     return;
-                }
-            }
-
-            if (!VisualCppRuntime.IsSupported())
-                throw new NotSupportedException(Texts.NotSupportedMessage);
-
-            if (!VisualCppRuntime.IsInstalled())
-            {
-                var res = MessageBox.Show(string.Format(Texts.RuntimeNotInstalledMessage, $"Microsoft Visual C++ 2015–2022 Redistributable ({RuntimeInformation.ProcessArchitecture})"), Texts.RuntimeNotInstalledTitle, MessageBoxButton.YesNoCancel);
-                if (res is MessageBoxResult.Cancel)
-                    throw new OperationCanceledException();
-                if (res is MessageBoxResult.Yes)
-                {
-                    await new VisualCppRuntime().InstallAsync(progress, token);
                 }
             }
         }

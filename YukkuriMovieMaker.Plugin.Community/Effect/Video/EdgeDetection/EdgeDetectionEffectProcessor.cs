@@ -24,7 +24,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.EdgeDetection
             var frame = effectDescription.ItemPosition.Frame;
             var length = effectDescription.ItemDuration.Frame;
 
-            var strength = item.Strength.GetValue(frame, length, fps) / 100;
+            //D2D組み込みのEdgeDetectionエフェクトは、STRENGTH=0.0かつOVERLAY_EDGES=trueの組み合わせで
+            //EndDraw時にアクセス違反でクラッシュする(D2D側の不具合。入力フォーマットを問わず再現)。
+            //僅かに正の値へクランプして回避する。
+            var strength = Math.Max(item.Strength.GetValue(frame, length, fps) / 100, 0.001);
             var blurRadius = item.BlurRadius.GetValue(frame, length, fps);
             var mode = item.Mode;
             var isOverlayEdges = item.IsOverlayEdges;

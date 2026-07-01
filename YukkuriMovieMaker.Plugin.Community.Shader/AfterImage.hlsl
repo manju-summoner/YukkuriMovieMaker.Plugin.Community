@@ -16,8 +16,11 @@ static float GetLuma(float3 rgb)
 
 static float4 Blend(float4 src, float4 dst)
 {
-    float outA = src.a + dst.a * (1 - src.a);
-    float3 outRGB = src.rgb + dst.rgb * (1 - src.a);
+    //src.a may exceed 1 (e.g. Plus-composited effects output premultiplied alpha > 1).
+    //Without saturate, (1 - src.a) becomes negative and the feedback loop diverges.
+    float srcA = saturate(src.a);
+    float outA = src.a + dst.a * (1 - srcA);
+    float3 outRGB = src.rgb + dst.rgb * (1 - srcA);
     return float4(outRGB, outA);
 }
 

@@ -205,6 +205,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
                 var directory = recordPathService.GetRecordsDirectory();
                 RecordsDirectory = directory;
 
+                if (!Directory.Exists(directory))
+                {
+                    Records.Clear();
+                    SelectedRecord = null;
+                    RaiseCommandStates();
+                    return;
+                }
+
                 var items = Directory.EnumerateFiles(directory, "*.wav", SearchOption.TopDirectoryOnly)
                     .Select(path => new FileInfo(path))
                     .OrderByDescending(x => x.LastWriteTimeUtc)

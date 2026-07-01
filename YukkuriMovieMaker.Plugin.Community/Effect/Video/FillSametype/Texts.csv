@@ -1,0 +1,14 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+FillSametypeEffectName,,同型塗りつぶし,Fill Same Shape,填充相同形状,填充相同形狀,같은 모양 채우기,Relleno de misma forma,تعبئة نفس الشكل,Isi Bentuk Sama
+FillSametypeTargetGroupName,,対象,Target,目标,目標,대상,Objetivo,الهدف,Target
+FillSametypeBrushGroupName,,模様,Pattern,图案,圖案,패턴,Patrón,نمط,Pola
+FillSametypeOpacityName,,不透明度,Opacity,不透明度,不透明度,불투명도,Opacidad,التعتيم,Opacity
+FillSametypeBlurName,,境界ぼかし,Edge Blur,边缘模糊,邊緣模糊,경계 블러,Desenfoque de borde,ضبابية الحافة,Blur Tepi
+FillSametypeBlendModeName,,合成モード,Blend Mode,混合模式,混合模式,혼합 모드,Modo de fusión,وضع المزج,Mode Blend
+FillSametypeIsInvertedName,,領域反転,Invert Region,反转区域,反轉區域,영역 반전,Invertir región,عكس المنطقة,Balik Wilayah
+FillSametypeIsBrushOnlyName,,模様のみ,Pattern Only,仅图案,僅圖案,패턴만,Solo patrón,النمط فقط,Pola Saja
+FillSametypePreserveLuminanceName,,輝度保持,Preserve Luminance,保持亮度,保持亮度,휘도 유지,Preservar luminancia,الحفاظ على اللمعان,Pertahankan Kecerahan
+FillSametypeXName,,X,X,X,X,X,X,X,X
+FillSametypeYName,,Y,Y,Y,Y,Y,Y,Y,Y
+FillSametypeToleranceName,,色許容範囲,Color Tolerance,颜色容差,顏色容差,색 허용 범위,Tolerancia de color,تسامح اللون,Toleransi Warna
+FillSametypeShapeThresholdName,,同型許容範囲,Shape Tolerance,形状容差,形狀容差,모양 허용 범위,Tolerancia de forma,تسامح الشكل,Toleransi Bentuk
