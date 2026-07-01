@@ -182,7 +182,7 @@ float4 main(
         float3 foregroundLab = LinearToOklab(foregroundLinear);
         float2 chromaDir = normalize(backgroundChromaDir.yz);
         float spill = dot(foregroundLab.yz, chromaDir) - despillBias;
-        spill = max(0.0f, spill);
+        spill = max(0.0f, spill) * spillStrength;
         foregroundLab.yz -= chromaDir * spill;
         foregroundLinear = max(OklabToLinear(foregroundLab), 0.0f);
     }
