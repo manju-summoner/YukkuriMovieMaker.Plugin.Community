@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
         private readonly IGraphicsDevicesAndContext devices;
         private readonly DirectionalColorKeyEffect item;
-        private readonly DirectionalColorKeyAnalyzer analyzer = new();
+        private readonly DirectionalColorKeyAnalyzer? analyzer = DirectionalColorKeyAnalyzer.TryCreate();
 
         private DirectionalColorKeyCustomEffect? effect;
 
@@ -52,11 +52,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         {
             this.devices = devices;
             this.item = item;
-            disposer.Collect(analyzer);
+            if (analyzer is not null)
+                disposer.Collect(analyzer);
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
+            // GPU（ComputeSharp）が利用できず解析器を生成できなかった場合はパススルーする。
+            if (analyzer is null)
+                return null;
+
             effect = new DirectionalColorKeyCustomEffect(devices);
             if (!effect.IsEnabled)
             {
@@ -85,7 +90,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
-            if (IsPassThroughEffect || effect is null || input is null)
+            if (IsPassThroughEffect || effect is null || analyzer is null || input is null)
                 return effectDescription.DrawDescription;
 
             var frame = effectDescription.ItemPosition.Frame;
@@ -168,7 +173,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                     (keyDirection, floorValue) => ComputePhysicalLambda(backgroundLab, keyDirection, floorValue),
                     lambdaInputsChanged);
 
-                ApplyClusters(backgroundLab);
+                ApplyClusters(analyzer, backgroundLab);
 
                 var backgroundSrgb = new Vector3(
                     currentBackground.R / 255f,
@@ -215,7 +220,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             return effectDescription.DrawDescription;
         }
 
-        private void ApplyClusters(Vector3 backgroundLab)
+        private void ApplyClusters(DirectionalColorKeyAnalyzer analyzer, Vector3 backgroundLab)
         {
             if (effect is null)
                 return;
@@ -223,13 +228,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             int count = analyzer.ClusterCount;
             effect.ClusterCount = count;
 
-            effect.Cluster0 = PackCluster(0, count);
-            effect.Cluster1 = PackCluster(1, count);
-            effect.Cluster2 = PackCluster(2, count);
-            effect.Cluster3 = PackCluster(3, count);
+            effect.Cluster0 = PackCluster(analyzer, 0, count);
+            effect.Cluster1 = PackCluster(analyzer, 1, count);
+            effect.Cluster2 = PackCluster(analyzer, 2, count);
+            effect.Cluster3 = PackCluster(analyzer, 3, count);
         }
 
-        private Vector4 PackCluster(int index, int count)
+        private static Vector4 PackCluster(DirectionalColorKeyAnalyzer analyzer, int index, int count)
         {
             if (index >= count)
                 return new Vector4(0f, 0f, 0f, 1f);

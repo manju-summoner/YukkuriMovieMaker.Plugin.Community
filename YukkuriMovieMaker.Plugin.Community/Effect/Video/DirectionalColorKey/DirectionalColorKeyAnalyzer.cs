@@ -67,9 +67,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private int lastBackgroundLabYBits;
         private int lastBackgroundLabZBits;
 
-        public DirectionalColorKeyAnalyzer()
+        private DirectionalColorKeyAnalyzer(GraphicsDevice device)
         {
-            device = GraphicsDevice.GetDefault();
+            this.device = device;
+        }
+
+        // ComputeSharp の既定デバイスを取得できない環境（GPU 非対応など）では例外になるため、
+        // 生成に失敗したときは null を返し、呼び出し側でエフェクトをパススルーさせる。
+        public static DirectionalColorKeyAnalyzer? TryCreate()
+        {
+            try
+            {
+                return new DirectionalColorKeyAnalyzer(GraphicsDevice.GetDefault());
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public int ClusterCount => clusterCount;
