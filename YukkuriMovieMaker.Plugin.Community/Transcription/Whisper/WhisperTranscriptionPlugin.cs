@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 using Whisper.net;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Transcription.Whisper.Installers;
 using YukkuriMovieMaker.Plugin.Transcription;
 
@@ -73,25 +74,35 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
                 List<SegmentData> segments = [];
                 await foreach (var r in vad.ProcessAsync(blockBuffer.AsMemory()[0..readCount], token))
                 {
-                    await foreach (var segment in whisper.ProcessAsync(blockBuffer[r.Start..r.End], token))
+                    //ネイティブの推論失敗（"Failed to encode/decode audio features." 等）は環境依存・断続的に発生する。
+                    //1区間の失敗でジョブ全体を中断させず、その区間だけスキップして処理を継続する。
+                    try
                     {
-                        if (ngWords.Contains(segment.Text))
-                            continue;
-                        var segment2 = new SegmentData(
-                            segment.Text,
-                            segment.Start + TimeSpan.FromSeconds((double)r.Start / sampleRate),
-                            segment.End + TimeSpan.FromSeconds((double)r.Start / sampleRate),
-                            segment.MinProbability,
-                            segment.MaxProbability,
-                            segment.Probability,
-                            segment.NoSpeechProbability,
-                            segment.Language,
-                            segment.Tokens);
-                        segments.Add(segment2);
+                        await foreach (var segment in whisper.ProcessAsync(blockBuffer[r.Start..r.End], token))
+                        {
+                            if (ngWords.Contains(segment.Text))
+                                continue;
+                            var segment2 = new SegmentData(
+                                segment.Text,
+                                segment.Start + TimeSpan.FromSeconds((double)r.Start / sampleRate),
+                                segment.End + TimeSpan.FromSeconds((double)r.Start / sampleRate),
+                                segment.MinProbability,
+                                segment.MaxProbability,
+                                segment.Probability,
+                                segment.NoSpeechProbability,
+                                segment.Language,
+                                segment.Tokens);
+                            segments.Add(segment2);
 
-                        lastText = segment.Text;
-                        message = CreateProgressMessage(lastText, sourceDuration, blockTime);
-                        progress.Report((double)blockPosition / totalSamples, message);
+                            lastText = segment.Text;
+                            message = CreateProgressMessage(lastText, sourceDuration, blockTime);
+                            progress.Report((double)blockPosition / totalSamples, message);
+                        }
+                    }
+                    catch (WhisperProcessingException ex)
+                    {
+                        var skippedTime = blockTime + TimeSpan.FromSeconds((double)r.Start / sampleRate);
+                        Log.Default.Write($"Whisperによる音声区間の処理に失敗したためスキップしました。 time={skippedTime}", ex);
                     }
                 }
 
