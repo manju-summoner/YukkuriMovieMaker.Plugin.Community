@@ -1,0 +1,36 @@
+<Window x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.PuppetDeformationMapWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation"
+        mc:Ignorable="d"
+        Title="{x:Static local:Texts.PuppetDeformationMapWindowTitle}"
+        Width="500" Height="500"
+        MinWidth="300" MinHeight="300"
+        Style="{DynamicResource {x:Type Window}}"
+        d:DataContext="{d:DesignInstance Type={x:Type local:PuppetDeformationMapViewModel}}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="26"/>
+        </Grid.RowDefinitions>
+        <local:PuppetDeformationMapView Grid.Row="0" x:Name="MapView" DataContext="{Binding}"/>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="80"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       Text="{x:Static local:Texts.PuppetDeformationMapWindowHint}"
+                       VerticalAlignment="Center"
+                       Margin="6,0"
+                       Opacity="0.6"
+                       FontSize="11"/>
+            <Button Grid.Column="1"
+                    Content="{x:Static local:Texts.PuppetDeformationMapFitButton}"
+                    Click="FitButton_Click"
+                    Margin="2"/>
+        </Grid>
+    </Grid>
+</Window>
