@@ -10,6 +10,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.Brush;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
 
@@ -67,6 +68,8 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         {
             var dynamicTypes = EffectNodeFactory.Create();
             vm.AddDynamicNodeTypes(dynamicTypes);
+            var dynamicBrushTypes = DynamicBrushNodeFactory.Create();
+            vm.AddDynamicNodeTypes(dynamicBrushTypes);
         }
 
         if (_committedHandler != null)
