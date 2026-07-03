@@ -7,9 +7,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AnisotropicKuwahara
 {
-    // 検索用キーワードは多言語対応していない(ResourceTypeで解決されず生の文字列がそのまま使われる)ため、
-    // nameof(Texts.~)ではなく各言語のリテラルを直接列挙する。
-    [VideoEffect(nameof(Texts.AnisotropicKuwaharaEffectName), [VideoEffectCategories.Filtering], ["絵画調", "油絵", "水彩", "クワハラ", "painterly", "oil painting", "watercolor", "kuwahara"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.AnisotropicKuwaharaEffectName), [VideoEffectCategories.Filtering], [nameof(Texts.TagPainterly), nameof(Texts.TagKuwahara), nameof(Texts.TagOilPainting), nameof(Texts.TagWatercolor)], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public sealed class AnisotropicKuwaharaEffect : VideoEffectBase
     {
         public override string Label => Texts.AnisotropicKuwaharaEffectName;

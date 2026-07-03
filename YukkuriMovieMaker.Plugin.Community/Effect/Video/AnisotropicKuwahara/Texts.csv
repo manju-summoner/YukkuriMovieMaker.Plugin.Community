@@ -16,3 +16,7 @@ AnisotropicKuwaharaQualityHigh,,高,High,高,高,높음,Alto,عالٍ,Tinggi
 AnisotropicKuwaharaQualityHighDesc,,既定です。滑らかで綺麗な仕上がりです。,Default. Produces a smooth and clean result.,默认。呈现平滑干净的效果。,預設。呈現平滑乾淨的效果。,기본값입니다. 매끄럽고 깨끗한 결과가 됩니다.,Predeterminado. Produce un resultado suave y limpio.,الافتراضي. ينتج نتيجة ناعمة ونظيفة.,Bawaan. Menghasilkan hasil yang halus dan bersih.
 AnisotropicKuwaharaQualityUltra,,最高,Ultra,最高,最高,최고,Máxima,فائقة,Ultra
 AnisotropicKuwaharaQualityUltraDesc,,最も高品質ですが最も重い設定です。静止画や大きな半径向けです。,Highest quality but the heaviest. Best for stills or large radius.,最高质量但最重。适合静止画面或大半径。,最高品質但最重。適合靜止畫面或大半徑。,최고 품질이지만 가장 무겁습니다. 정지 화면이나 큰 반경에 적합합니다.,Máxima calidad pero la más pesada. Ideal para imágenes fijas o radios grandes.,أعلى جودة لكنها الأثقل. مناسبة للصور الثابتة أو نصف القطر الكبير.,Kualitas tertinggi tetapi paling berat. Cocok untuk gambar diam atau radius besar.
+TagPainterly,,絵画調,painterly,绘画风,繪畫風,회화풍,pictórico,طابع تصويري,gaya lukisan
+TagKuwahara,,クワハラ,kuwahara,桑原,桑原,구와하라,kuwahara,كواهارا,kuwahara
+TagOilPainting,,油絵,oil painting,油画,油畫,유화,pintura al óleo,رسم زيتي,lukisan cat minyak
+TagWatercolor,,水彩,watercolor,水彩,水彩,수채화,acuarela,ألوان مائية,cat air
