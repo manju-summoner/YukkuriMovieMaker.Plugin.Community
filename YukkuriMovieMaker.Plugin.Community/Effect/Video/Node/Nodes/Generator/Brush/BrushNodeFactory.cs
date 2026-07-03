@@ -103,9 +103,9 @@ public static class BrushNodeTypeBuilder
             typeof(NodeLogic));
 
         tb.SetCustomAttribute(new CustomAttributeBuilder(
-            typeof(NodeAttribute).GetConstructors()[1],
+            typeof(NodeAttribute).GetConstructors()[0],
             [
-                "NodeEffectKey_EffectCategoryName/NodeEffectKey_GeneratorCategoryName/NodeEffectKey_BrushCategoryName",
+                typeof(BrushCategory),
                 labelKey, labelKey, null
             ]));
 

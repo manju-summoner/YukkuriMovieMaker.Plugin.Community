@@ -6,7 +6,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.B
 public sealed class BrushCategory : INodeCategory
 {
     public string Category =>
-        "NodeEffectKey_EffectCategoryName/NodeEffectKey_GeneratorCategoryName/NodeEffectKey_BrushCategoryName";
+        "NodeEffectKey_GeneratorCategoryName/NodeEffectKey_BrushCategoryName";
 
     public string Color => nameof(Colors.LawnGreen);
 }
