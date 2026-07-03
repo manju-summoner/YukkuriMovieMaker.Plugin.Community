@@ -2,13 +2,14 @@ using Vortice.Mathematics;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Math;
 
-[Node(typeof(MathBasicCategory), "加算", "Add two numbers")]
+[Node(typeof(MathBasicCategory), nameof(TextNode.AddNode), nameof(TextNode.AddNodeDescription), typeof(TextNode))]
 public class AddNode : NodeLogic
 {
-    [InputPort("左項", "Left operand")]
+    [InputPort(nameof(TextNode.LeftOperand), nameof(TextNode.LeftOperandDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Left
@@ -17,7 +18,7 @@ public class AddNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("右項", "Right operand")]
+    [InputPort(nameof(TextNode.RightOperand), nameof(TextNode.RightOperandDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Right
@@ -26,7 +27,7 @@ public class AddNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("結果", "Sum")]
+    [OutputPort(nameof(TextNode.Result), nameof(TextNode.AddResultDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Result
     {
@@ -41,10 +42,11 @@ public class AddNode : NodeLogic
     }
 }
 
-[Node(typeof(MathBasicCategory), "減算", "Subtract B from A")]
+[Node(typeof(MathBasicCategory), nameof(TextNode.SubtractNode), nameof(TextNode.SubtractNodeDescription),
+    typeof(TextNode))]
 public class SubtractNode : NodeLogic
 {
-    [InputPort("左項", "Left operand")]
+    [InputPort(nameof(TextNode.LeftOperand), nameof(TextNode.LeftOperandDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Left
@@ -53,7 +55,7 @@ public class SubtractNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("右項", "Right operand")]
+    [InputPort(nameof(TextNode.RightOperand), nameof(TextNode.RightOperandDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Right
@@ -62,7 +64,7 @@ public class SubtractNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("結果", "A minus B")]
+    [OutputPort(nameof(TextNode.Result), nameof(TextNode.SubtractResultDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Result
     {
@@ -77,10 +79,11 @@ public class SubtractNode : NodeLogic
     }
 }
 
-[Node(typeof(MathBasicCategory), "乗算", "Multiply two numbers")]
+[Node(typeof(MathBasicCategory), nameof(TextNode.MultiplyNode), nameof(TextNode.MultiplyNodeDescription),
+    typeof(TextNode))]
 public class MultiplyNode : NodeLogic
 {
-    [InputPort("左項", "Left operand")]
+    [InputPort(nameof(TextNode.LeftOperand), nameof(TextNode.LeftOperandDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Left
@@ -89,7 +92,7 @@ public class MultiplyNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("右項", "Right operand")]
+    [InputPort(nameof(TextNode.RightOperand), nameof(TextNode.RightOperandDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000, Default = 1f)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Right
@@ -98,7 +101,7 @@ public class MultiplyNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("結果", "Product")]
+    [OutputPort(nameof(TextNode.Result), nameof(TextNode.MultiplyResultDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Result
     {
@@ -113,10 +116,10 @@ public class MultiplyNode : NodeLogic
     }
 }
 
-[Node(typeof(MathBasicCategory), "除算", "Divide A by B")]
+[Node(typeof(MathBasicCategory), nameof(TextNode.DivideNode), nameof(TextNode.DivideNodeDescription), typeof(TextNode))]
 public class DivideNode : NodeLogic
 {
-    [InputPort("左項", "Left operand")]
+    [InputPort(nameof(TextNode.LeftOperand), nameof(TextNode.LeftOperandDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Left
@@ -125,7 +128,7 @@ public class DivideNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("右項", "Right operand")]
+    [InputPort(nameof(TextNode.RightOperand), nameof(TextNode.RightOperandDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000, Default = 1f)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Right
@@ -134,7 +137,7 @@ public class DivideNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("結果", "Quotient of A divided by B")]
+    [OutputPort(nameof(TextNode.Result), nameof(TextNode.DivideResultDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Result
     {

@@ -7,5 +7,268 @@ GeneratorCategoryName,生成カテゴリ名,生成,Generator,生成,生成,생�
 BrushCategoryName,ブラシカテゴリ名,ブラシ,Brush,画笔,筆刷,브러시,Pincel,فرشاة
 FunctionsCategoryName,関数カテゴリ名,関数,Functions,函数,函數,함수,Funciones,الدوال
 VideoEffectCategoryName,映像エフェクトカテゴリ名,映像エフェクト,Video Effects,视频效果,視訊效果,비디오 효과,Efectos de vídeo,تأثيرات الفيديو
+FunctionsCategoryName,関数カテゴリ名,関数,Functions,函数,函數,함수,Funciones,الدوال
+AdvancedCategoryName,高度カテゴリ名,高度,Advanced,高级,進階,고급,Advanced,متقدم
 
 BrushName,ブラシ名,ブラシ,Brush,画笔,筆刷,브러시,Pincel,فرشاة
+
+AddNode,加算ノード名,加算,Add
+AddNodeDescription,加算ノード説明,2つの数を加算します。,Add two numbers.
+SubtractNode,減算ノード名,減算,Subtract
+SubtractNodeDescription,減算ノード説明,左項から右項を減算します。,Subtract B from A.
+MultiplyNode,乗算ノード名,乗算,Multiply
+MultiplyNodeDescription,乗算ノード説明,2つの数を乗算します。,Multiply two numbers.
+DivideNode,除算ノード名,除算,Divide
+DivideNodeDescription,除算ノード説明,左項を右項で除算します。,Divide A by B.
+
+Value,値入力,値,Value,值,值,값,Value,القيمة
+ValueDescription,値入力説明,入力値です。,Input value.,输入值。,輸入值。,입력값입니다.,Input value.,قيمة الإدخال
+
+LeftOperand,左項,左項,Left operand
+LeftOperandDescription,左項説明,演算の左側の値です。,Left operand
+
+RightOperand,右項,右項,Right operand
+RightOperandDescription,右項説明,演算の右側の値です。,Right operand
+
+Result,結果,結果,Result
+ResultDescription,結果出力説明,演算結果です。,Calculation result.,运算结果。,運算結果。,연산 결과입니다.,Calculation result.,نتيجة العملية
+
+AddResultDescription,加算結果説明,加算結果です。,Sum
+SubtractResultDescription,減算結果説明,減算結果です。,A minus B
+MultiplyResultDescription,乗算結果説明,乗算結果です。,Product
+DivideResultDescription,除算結果説明,除算結果です。,Quotient of A divided by B
+
+AbsNode,絶対値ノード名,絶対値,Absolute Value,绝对值,絕對值,절댓값,Valor absoluto,القيمة المطلقة
+AbsNodeDescription,絶対値ノード説明,絶対値を求めます。,Calculate absolute value.,计算绝对值。,計算絕對值。,절댓값을 계산합니다.,Calculate absolute value.,احسب القيمة المطلقة.
+
+SignNode,符号ノード名,符号,Sign,符号,符號,부호,Signo,الإشارة
+SignNodeDescription,符号ノード説明,値の符号を返します。,Return sign of value.,返回数值符号。,回傳數值符號。,부호를 반환합니다.,Return sign.,إرجاع الإشارة.
+
+MinNode,最小値ノード名,最小値,Minimum,最小值,最小值,최솟값,Mínimo,القيمة الصغرى
+MinNodeDescription,最小値ノード説明,2つの値の小さい方を返します。,Return smaller value.,返回较小值。,回傳較小值。,작은 값을 반환합니다.,Return minimum.,إرجاع الأصغر.
+
+MaxNode,最大値ノード名,最大値,Maximum,最大值,最大值,최댓값,Máximo,القيمة الكبرى
+MaxNodeDescription,最大値ノード説明,2つの値の大きい方を返します。,Return larger value.,返回较大值。,回傳較大值。,큰 값을 반환합니다.,Return maximum.,إرجاع الأكبر.
+
+ClampNode,クランプノード名,クランプ,Clamp,限制,限制,클램프,Clamp,تقييد
+ClampNodeDescription,クランプノード説明,指定範囲に制限します。,Clamp to range.,限制到指定范围。,限制到指定範圍。,범위로 제한합니다.,Clamp to range.,تقييد ضمن المجال.
+
+LerpNode,線形補間ノード名,線形補間,Lerp,线性插值,線性插值,선형 보간,Interpolación lineal,استيفاء خطي
+LerpNodeDescription,線形補間ノード説明,2つの値を線形補間します。,Linear interpolation.,线性插值。,線性插值。,선형 보간합니다.,Linear interpolation.,استيفاء خطي.
+
+SqrtNode,平方根ノード名,平方根,Square Root,平方根,平方根,제곱근,Raíz cuadrada,الجذر التربيعي
+SqrtNodeDescription,平方根ノード説明,平方根を求めます。,Calculate square root.,计算平方根。,計算平方根。,제곱근을 계산합니다.,Square root.,احسب الجذر التربيعي.
+
+PowerNode,累乗ノード名,累乗,Power,幂,冪次,거듭제곱,Potencia,الأس
+PowerNodeDescription,累乗ノード説明,累乗を求めます。,Raise to power.,计算幂。,計算冪次。,거듭제곱을 계산합니다.,Power.,احسب الأس.
+
+FloorNode,切り捨てノード名,切り捨て,Floor,向下取整,無條件捨去,버림,Floor,التقريب للأسفل
+FloorNodeDescription,切り捨てノード説明,切り捨てます。,Round down.,向下取整。,無條件捨去。,버림합니다.,Floor.,تقريب للأسفل.
+
+CeilingNode,切り上げノード名,切り上げ,Ceiling,向上取整,無條件進位,올림,Ceiling,التقريب للأعلى
+CeilingNodeDescription,切り上げノード説明,切り上げます。,Round up.,向上取整。,無條件進位。,올림합니다.,Ceiling.,تقريب للأعلى.
+
+RoundNode,四捨五入ノード名,四捨五入,Round,四舍五入,四捨五入,반올림,Round,التقريب
+RoundNodeDescription,四捨五入ノード説明,四捨五入します。,Round value.,四舍五入。,四捨五入。,반올림합니다.,Round.,تقريب.
+
+FractionNode,小数部ノード名,小数部,Fraction,小数部分,小數部分,소수 부분,Fraction,الجزء الكسري
+FractionNodeDescription,小数部ノード説明,小数部を返します。,Return fractional part.,返回小数部分。,回傳小數部分。,소수 부분을 반환합니다.,Fractional part.,إرجاع الجزء الكسري.
+
+SinNode,サインノード名,サイン,Sin,正弦,正弦,사인,Sin,جيب
+SinNodeDescription,サインノード説明,サインを求めます。,Calculate sine.,计算正弦。,計算正弦。,사인을 계산합니다.,Calculate sine.,احسب الجيب.
+
+CosNode,コサインノード名,コサイン,Cos,余弦,餘弦,코사인,Cos,جيب التمام
+CosNodeDescription,コサインノード説明,コサインを求めます。,Calculate cosine.,计算余弦。,計算餘弦。,코사인을 계산합니다.,Calculate cosine.,احسب جيب التمام.
+
+TanNode,タンジェントノード名,タンジェント,Tan,正切,正切,탄젠트,Tan,الظل
+TanNodeDescription,タンジェントノード説明,タンジェントを求めます。,Calculate tangent.,计算正切。,計算正切。,탄젠트를 계산합니다.,Calculate tangent.,احسب الظل.
+
+Atan2Node,逆正接2ノード名,Atan2,Atan2,Atan2,Atan2,Atan2,Atan2,Atan2
+Atan2NodeDescription,逆正接2ノード説明,2変数逆正接を求めます。,Calculate atan2.,计算 atan2。,計算 atan2。,atan2를 계산합니다.,Calculate atan2.,احسب atan2.
+
+DegreesToRadiansNode,度ラジアン変換ノード名,度→ラジアン,Degrees to Radians,角度转弧度,角度轉弧度,도→라디안,Degrees to Radians,درجات إلى راديان
+DegreesToRadiansNodeDescription,度ラジアン変換説明,度をラジアンへ変換します。,Convert degrees to radians.,角度转弧度。,角度轉弧度。,도를 라디안으로 변환합니다.,Convert degrees to radians.,تحويل الدرجات إلى راديان.
+
+RadiansToDegreesNode,ラジアン度変換ノード名,ラジアン→度,Radians to Degrees,弧度转角度,弧度轉角度,라디안→도,Radians to Degrees,راديان إلى درجات
+RadiansToDegreesNodeDescription,ラジアン度変換説明,ラジアンを度へ変換します。,Convert radians to degrees.,弧度转角度。,弧度轉角度。,라디안을 도로 변환합니다.,Convert radians to degrees.,تحويل الراديان إلى درجات.
+
+Minimum,最小値入力,最小値,Minimum,最小值,最小值,최솟값,Minimum,الحد الأدنى
+MinimumDescription,最小値入力説明,下限値です。,Minimum value.,最小值。,最小值。,최솟값입니다.,Minimum value.,الحد الأدنى.
+
+Maximum,最大値入力,最大値,Maximum,最大值,最大值,최댓값,Maximum,الحد الأقصى
+MaximumDescription,最大値入力説明,上限値です。,Maximum value.,最大值。,最大值。,최댓값입니다.,Maximum value.,الحد الأقصى.
+
+StartValue,開始値入力,開始値,Start Value,起始值,起始值,시작값,Start Value,قيمة البداية
+StartValueDescription,開始値説明,補間開始値です。,Interpolation start value.,插值起始值。,插值起始值。,보간 시작값입니다.,Interpolation start value.,قيمة بداية الاستيفاء.
+
+EndValue,終了値入力,終了値,End Value,结束值,結束值,끝값,End Value,قيمة النهاية
+EndValueDescription,終了値説明,補間終了値です。,Interpolation end value.,插值结束值。,插值結束值。,보간 끝값입니다.,Interpolation end value.,قيمة نهاية الاستيفاء.
+
+InterpolationFactor,補間係数入力,補間係数,Interpolation Factor,插值系数,插值係數,보간 계수,Interpolation Factor,معامل الاستيفاء
+InterpolationFactorDescription,補間係数説明,補間係数です。,Interpolation factor.,插值系数。,插值係數。,보간 계수입니다.,Interpolation factor.,معامل الاستيفاء.
+
+Base,底入力,底,Base,底数,底數,밑,Base,الأساس
+BaseDescription,底説明,底です。,Base value.,底数。,底數。,밑입니다.,Base value.,الأساس.
+
+Exponent,指数入力,指数,Exponent,指数,指數,지수,Exponent,الأس
+ExponentDescription,指数説明,指数です。,Exponent value.,指数。,指數。,지수입니다.,Exponent value.,الأس.
+
+YValue,Y入力,Y,Y,Y,Y,Y,Y,Y
+YValueDescription,Y入力説明,Y座標です。,Y value.,Y值。,Y值。,Y값입니다.,Y value.,قيمة Y.
+
+XValue,X入力,X,X,X,X,X,X,X
+XValueDescription,X入力説明,X座標です。,X value.,X值。,X值。,X값입니다.,X value.,قيمة X.
+
+AbsResultDescription,絶対値結果説明,絶対値です。,Absolute value.
+SignResultDescription,符号結果説明,符号です。,Sign.
+MinResultDescription,最小値結果説明,最小値です。,Minimum value.
+MaxResultDescription,最大値結果説明,最大値です。,Maximum value.
+ClampResultDescription,クランプ結果説明,クランプ後の値です。,Clamped value.
+LerpResultDescription,線形補間結果説明,補間結果です。,Interpolated value.
+SqrtResultDescription,平方根結果説明,平方根です。,Square root.
+PowerResultDescription,累乗結果説明,累乗結果です。,Power result.
+FloorResultDescription,切り捨て結果説明,切り捨て結果です。,Floor result.
+CeilingResultDescription,切り上げ結果説明,切り上げ結果です。,Ceiling result.
+RoundResultDescription,四捨五入結果説明,四捨五入結果です。,Rounded value.
+FractionResultDescription,小数部結果説明,小数部です。,Fractional part.
+SinResultDescription,サイン結果説明,サイン値です。,Sine value.
+CosResultDescription,コサイン結果説明,コサイン値です。,Cosine value.
+TanResultDescription,タンジェント結果説明,タンジェント値です。,Tangent value.
+Atan2ResultDescription,Atan2結果説明,Atan2の結果です。,Atan2 result.
+DegreesToRadiansResultDescription,度ラジアン変換結果説明,ラジアン値です。,Radians.
+RadiansToDegreesResultDescription,ラジアン度変換結果説明,度数値です。,Degrees.
+
+Length,長さ入力,長さ,Length,长度,長度,길이,Length,الطول
+LengthDescription,長さ入力説明,周期の長さです。,Period length.,周期长度。,週期長度。,주기 길이입니다.,Period length.,طول الدورة
+
+Edge,しきい値入力,しきい値,Edge,阈值,臨界值,임계값,Edge,العتبة
+EdgeDescription,しきい値入力説明,しきい値です。,Threshold value.,阈值。,臨界值。,임계값입니다.,Threshold value.,قيمة العتبة
+
+Tolerance,許容誤差入力,許容誤差,Tolerance,容差,容許誤差,허용 오차,Tolerance,التفاوت
+ToleranceDescription,許容誤差入力説明,比較時の許容誤差です。,Tolerance for comparison.,比较时允许误差。,比較時容許誤差。,비교 허용 오차입니다.,Tolerance for comparison.,هامش المقارنة
+
+Condition,条件入力,条件,Condition,条件,條件,조건,Condition,الشرط
+ConditionDescription,条件入力説明,判定条件です。,Condition.,判定条件。,判定條件。,조건입니다.,Condition.,الشرط
+
+TrueValue,真の場合,真の場合,True Value,真值,真值,참일 때,True Value,عند الصحة
+TrueValueDescription,真入力説明,条件が真のときの値です。,Value when true.,条件为真时的值。,條件為真時的值。,참일 때의 값입니다.,Value when true.,القيمة عند تحقق الشرط
+
+FalseValue,偽の場合,偽の場合,False Value,假值,假值,거짓일 때,False Value,عند الخطأ
+FalseValueDescription,偽入力説明,条件が偽のときの値です。,Value when false.,条件为假时的值。,條件為假時的值。,거짓일 때의 값입니다.,Value when false.,القيمة عند عدم تحقق الشرط
+
+ComparisonResultDescription,比較結果説明,比較結果です。,Comparison result.
+
+ModuloNode,剰余ノード名,剰余,Modulo,取余,取餘,나머지,Modulo,باقي القسمة
+ModuloNodeDescription,剰余ノード説明,剰余を求めます。,Calculate remainder.
+ModuloResultDescription,剰余結果説明,剰余です。,Remainder.
+
+ReciprocalNode,逆数ノード名,逆数,Reciprocal,倒数,倒數,역수,Reciprocal,المقلوب
+ReciprocalNodeDescription,逆数ノード説明,逆数を求めます。,Calculate reciprocal.
+ReciprocalResultDescription,逆数結果説明,逆数です。,Reciprocal.
+
+OneMinusNode,1減算ノード名,1から減算,One Minus,一减去,一減去,1에서 빼기,One Minus,واحد ناقص
+OneMinusNodeDescription,1減算ノード説明,1から入力値を引きます。,Subtract value from one.
+OneMinusResultDescription,1減算結果説明,計算結果です。,Calculation result.
+
+SaturateNode,Saturateノード名,Saturate,Saturate,饱和,飽和,포화,Saturate,تشبيع
+SaturateNodeDescription,Saturateノード説明,0～1の範囲へ制限します。,Clamp to 0-1.
+SaturateResultDescription,Saturate結果説明,制限後の値です。,Clamped value.
+
+InverseLerpNode,逆補間ノード名,逆補間,Inverse Lerp,逆线性插值,逆線性插值,역보간,Inverse Lerp,استيفاء عكسي
+InverseLerpNodeDescription,逆補間ノード説明,補間係数を求めます。,Calculate interpolation factor.
+InverseLerpResultDescription,逆補間結果説明,補間係数です。,Interpolation factor.
+
+SmoothStepNode,SmoothStepノード名,SmoothStep,SmoothStep,SmoothStep,SmoothStep,SmoothStep,SmoothStep,SmoothStep
+SmoothStepNodeDescription,SmoothStepノード説明,滑らかに補間します。,Smooth interpolation.
+SmoothStepResultDescription,SmoothStep結果説明,補間結果です。,Interpolated value.
+
+StepNode,ステップノード名,ステップ,Step,阶跃,階躍,스텝,Step,خطوة
+StepNodeDescription,ステップノード説明,しきい値で0または1を返します。,Return 0 or 1 by threshold.
+StepResultDescription,ステップ結果説明,ステップ結果です。,Step result.
+
+RepeatNode,繰り返しノード名,繰り返し,Repeat,重复,重複,반복,Repeat,تكرار
+RepeatNodeDescription,繰り返しノード説明,一定周期で繰り返します。,Repeat periodically.
+RepeatResultDescription,繰り返し結果説明,繰り返し結果です。,Repeated value.
+
+PingPongNode,PingPongノード名,PingPong,PingPong,PingPong,PingPong,PingPong,PingPong,PingPong
+PingPongNodeDescription,PingPongノード説明,往復運動を生成します。,Generate ping-pong motion.
+PingPongResultDescription,PingPong結果説明,往復値です。,Ping-pong value.
+
+WrapNode,折り返しノード名,折り返し,Wrap,循环,循環,랩,Wrap,التفاف
+WrapNodeDescription,折り返しノード説明,範囲内へ折り返します。,Wrap into range.
+WrapResultDescription,折り返し結果説明,折り返し後の値です。,Wrapped value.
+
+ExpNode,指数ノード名,指数関数,Exponential,指数,指數,지수,Exponential,الدالة الأسية
+ExpNodeDescription,指数ノード説明,eの累乗を求めます。,Calculate exponential.
+ExpResultDescription,指数結果説明,指数計算結果です。,Exponential result.
+
+Exp2Node,2指数ノード名,2の累乗,Power of Two,2次幂,2次冪,2의 거듭제곱,Power of Two,قوة العدد 2
+Exp2NodeDescription,2指数ノード説明,2の累乗を求めます。,Calculate power of two.
+Exp2ResultDescription,2指数結果説明,計算結果です。,Calculation result.
+
+LogNode,自然対数ノード名,自然対数,Natural Logarithm,自然对数,自然對數,자연로그,Natural Logarithm,اللوغاريتم الطبيعي
+LogNodeDescription,自然対数ノード説明,自然対数を求めます。,Calculate natural logarithm.
+LogResultDescription,自然対数結果説明,自然対数です。,Natural logarithm.
+
+Log2Node,2進対数ノード名,2進対数,Log Base 2,以2为底对数,以2為底對數,밑이 2인 로그,Log Base 2,لوغاريتم للأساس 2
+Log2NodeDescription,2進対数ノード説明,2進対数を求めます。,Calculate base-2 logarithm.
+Log2ResultDescription,2進対数結果説明,2進対数です。,Base-2 logarithm.
+
+Log10Node,常用対数ノード名,常用対数,Log Base 10,常用对数,常用對數,상용로그,Log Base 10,لوغاريتم للأساس 10
+Log10NodeDescription,常用対数ノード説明,常用対数を求めます。,Calculate base-10 logarithm.
+Log10ResultDescription,常用対数結果説明,常用対数です。,Base-10 logarithm.
+
+AsinNode,逆正弦ノード名,逆正弦,Arc Sine,反正弦,反正弦,아크사인,Arc Sine,جيب عكسي
+AsinNodeDescription,逆正弦ノード説明,逆正弦を求めます。,Calculate arc sine.
+AsinResultDescription,逆正弦結果説明,逆正弦です。,Arc sine.
+
+AcosNode,逆余弦ノード名,逆余弦,Arc Cosine,反余弦,反餘弦,아크코사인,Arc Cosine,جيب تمام عكسي
+AcosNodeDescription,逆余弦ノード説明,逆余弦を求めます。,Calculate arc cosine.
+AcosResultDescription,逆余弦結果説明,逆余弦です。,Arc cosine.
+
+AtanNode,逆正接ノード名,逆正接,Arc Tangent,反正切,反正切,아크탄젠트,Arc Tangent,ظل عكسي
+AtanNodeDescription,逆正接ノード説明,逆正接を求めます。,Calculate arc tangent.
+AtanResultDescription,逆正接結果説明,逆正接です。,Arc tangent.
+
+EqualNode,等しいノード名,等しい,Equal,相等,相等,같음,Equal,يساوي
+EqualNodeDescription,等しいノード説明,2つの値が等しいか判定します。,Compare equality.
+EqualResultDescription,等しい結果説明,比較結果です。,Comparison result.
+
+NotEqualNode,等しくないノード名,等しくない,Not Equal,不相等,不相等,같지 않음,Not Equal,لا يساوي
+NotEqualNodeDescription,等しくないノード説明,2つの値が等しくないか判定します。,Compare inequality.
+NotEqualResultDescription,等しくない結果説明,比較結果です。,Comparison result.
+
+GreaterNode,より大きいノード名,より大きい,Greater,大于,大於,큼,Greater,أكبر من
+GreaterNodeDescription,より大きいノード説明,左辺が右辺より大きいか判定します。,Compare greater than.
+GreaterResultDescription,より大きい結果説明,比較結果です。,Comparison result.
+
+GreaterEqualNode,以上ノード名,以上,Greater or Equal,大于等于,大於等於,크거나 같음,Greater or Equal,أكبر من أو يساوي
+GreaterEqualNodeDescription,以上ノード説明,左辺が右辺以上か判定します。,Compare greater or equal.
+GreaterEqualResultDescription,以上結果説明,比較結果です。,Comparison result.
+
+LessNode,より小さいノード名,より小さい,Less,小于,小於,작음,Less,أقل من
+LessNodeDescription,より小さいノード説明,左辺が右辺より小さいか判定します。,Compare less than.
+LessResultDescription,より小さい結果説明,比較結果です。,Comparison result.
+
+LessEqualNode,以下ノード名,以下,Less or Equal,小于等于,小於等於,작거나 같음,Less or Equal,أقل من أو يساوي
+LessEqualNodeDescription,以下ノード説明,左辺が右辺以下か判定します。,Compare less or equal.
+LessEqualResultDescription,以下結果説明,比較結果です。,Comparison result.
+
+SelectNode,選択ノード名,選択,Select,选择,選擇,선택,Select,اختيار
+SelectNodeDescription,選択ノード説明,条件に応じて値を選択します。,Select value by condition.
+SelectResultDescription,選択結果説明,選択された値です。,Selected value.
+
+Seed,シード入力,シード,Seed,种子,種子,시드,Seed,البذرة
+SeedDescription,シード入力説明,乱数生成のシード値です。,Seed value for random generation.,随机数种子。,亂數種子。,난수 생성 시드입니다.,Seed value for random generation.,قيمة البذرة لتوليد الأعداد العشوائية
+
+Index,インデックス入力,インデックス,Index,索引,索引,인덱스,Index,الفهرس
+IndexDescription,インデックス入力説明,乱数を取得するインデックスです。,Random index.,随机数索引。,亂數索引。,난수 인덱스입니다.,Random index.,فهرس العدد العشوائي
+
+Parameter,パラメーター入力,パラメーター,Parameter,参数,參數,매개변수,Parameter,المعامل
+ParameterDescription,パラメーター入力説明,連続ノイズを評価する位置です。,Position for evaluating continuous noise.,连续噪声的位置。,連續雜訊的位置。,연속 노이즈를 평가할 위치입니다.,Position for evaluating continuous noise.,موضع تقييم الضوضاء المستمرة
+
+RandomNode,乱数ノード名,乱数,Random,随机数,亂數,난수,Random,عشوائي
+RandomNodeDescription,乱数ノード説明,決定論的な乱数を生成します。,Generate deterministic random value.,生成确定性随机数。,產生決定性的亂數。,결정론적 난수를 생성합니다.,Generate deterministic random value.,توليد قيمة عشوائية حتمية
+
+NoiseNode,ノイズノード名,ノイズ,Noise,噪声,雜訊,노이즈,Noise,ضوضاء
+NoiseNodeDescription,ノイズノード説明,連続的に変化するノイズを生成します。,Generate continuous noise.,生成连续噪声。,產生連續雜訊。,연속적으로 변화하는 노이즈를 생성합니다.,Generate continuous noise.,توليد ضوضاء مستمرة
