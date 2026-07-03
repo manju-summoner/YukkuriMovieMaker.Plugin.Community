@@ -141,6 +141,15 @@
 	<FxCompile Include="DirectionalColorKey.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+	<FxCompile Include="AnisotropicKuwaharaTensor.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+	<FxCompile Include="AnisotropicKuwaharaTensorBlur.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+	<FxCompile Include="AnisotropicKuwahara.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Hash.hlsli">
