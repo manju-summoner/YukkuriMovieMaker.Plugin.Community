@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Windows.Input;
 using Vortice.Direct2D1;
 using Vortice.DXGI;
@@ -9,21 +10,35 @@ using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     internal sealed class PuppetDeformationEffectProcessor(IGraphicsDevicesAndContext devices, PuppetDeformationEffect item) : VideoEffectProcessorBase(devices)
     {
+        const int ArapIterations = 6;
+        const float ArapMinSpacing = 8f;
+
         readonly PuppetDeformationEffect item = item;
         readonly float[] pinDataBuffer = new float[PuppetDeformationCustomEffect.MaxPins * 4];
 
         PuppetDeformationCustomEffect? effect;
+        PuppetDeformationArapCustomEffect? arapEffect;
         ID2D1DeviceContext? deviceContext;
         PinGpuCache? gpuCache;
         ImmutableList<VideoEffectController> cachedControllers = ImmutableList<VideoEffectController>.Empty;
 
+        //ARAP用キャッシュ
+        ArapGridMesh? arapMesh;
+        ArapDeformer? arapDeformer;
+        Vector2[]? arapRests;
+        Vector2[]? deformedPositions;
+        byte[]? arapVertexData;
+        bool useArapWiring;
+
         bool isFirst = true;
         bool apply = true;
+        PuppetDeformationAlgorithm algorithm = PuppetDeformationAlgorithm.Mls;
         int pinCount;
         float stiffness;
         float imageWidth;
@@ -41,6 +56,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var pins = item.Pins;
             var stiffness = (float)item.Stiffness.GetValue(frame, length, fps);
             var apply = item.ApplyDeformation;
+            var algorithm = item.Algorithm;
 
             var pinCount = Math.Min(pins.Count, PuppetDeformationCustomEffect.MaxPins);
             var samples = new List<PinSample>(pinCount);
@@ -60,7 +76,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var imageWidth = inputBounds.Right - inputBounds.Left;
             var imageHeight = inputBounds.Bottom - inputBounds.Top;
 
+            var useArap = algorithm == PuppetDeformationAlgorithm.Arap
+                && arapEffect is not null
+                && pinCount > 0
+                && imageWidth > 0
+                && imageHeight > 0;
+
             if (isFirst
+                || this.algorithm != algorithm
                 || this.pinCount != pinCount
                 || this.stiffness != stiffness
                 || this.imageWidth != imageWidth
@@ -68,34 +91,52 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 || this.apply != apply
                 || !PinSamplesMatchBuffer(samples))
             {
-                gpuCache = BuildGpuCache(stiffness, imageWidth, imageHeight, samples);
-
-                effect.PinData = gpuCache.PinData;
-                //変形オフ時はPinCount=0を送り、シェーダー側で変形せず入力をそのまま出力する。
-                effect.PinCount = apply ? pinCount : 0;
-                effect.Stiffness = stiffness;
-
-                if (apply)
+                if (useArap)
                 {
-                    var (tl, tt, tr, tb) = gpuCache.TightBounds;
-                    effect.TightLocalLeft = tl;
-                    effect.TightLocalTop = tt;
-                    effect.TightLocalRight = tr;
-                    effect.TightLocalBottom = tb;
-                }
-                else
-                {
-                    //変形しないので出力範囲は拡張しない(入力範囲のまま)。
+                    FillPinDataBuffer(samples);
+                    UpdateArapEffect(samples, apply, imageWidth, imageHeight);
+
+                    //終端のMLSエフェクトはパススルー(PinCount=0)として使う
+                    effect.PinCount = 0;
                     effect.TightLocalLeft = 0;
                     effect.TightLocalTop = 0;
                     effect.TightLocalRight = 0;
                     effect.TightLocalBottom = 0;
                 }
+                else
+                {
+                    gpuCache = BuildGpuCache(stiffness, imageWidth, imageHeight, samples);
+
+                    effect.PinData = gpuCache.PinData;
+                    //変形オフ時はPinCount=0を送り、シェーダー側で変形せず入力をそのまま出力する。
+                    effect.PinCount = apply ? pinCount : 0;
+                    effect.Stiffness = stiffness;
+
+                    if (apply)
+                    {
+                        var (tl, tt, tr, tb) = gpuCache.TightBounds;
+                        effect.TightLocalLeft = tl;
+                        effect.TightLocalTop = tt;
+                        effect.TightLocalRight = tr;
+                        effect.TightLocalBottom = tb;
+                    }
+                    else
+                    {
+                        //変形しないので出力範囲は拡張しない(入力範囲のまま)。
+                        effect.TightLocalLeft = 0;
+                        effect.TightLocalTop = 0;
+                        effect.TightLocalRight = 0;
+                        effect.TightLocalBottom = 0;
+                    }
+                }
 
                 cachedControllers = [.. BuildControllers(samples)];
             }
 
+            SetWiring(useArap);
+
             isFirst = false;
+            this.algorithm = algorithm;
             this.pinCount = pinCount;
             this.stiffness = stiffness;
             this.imageWidth = imageWidth;
@@ -119,6 +160,127 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 if (pinDataBuffer[i * 4 + 3] != s.Current.Y) return false;
             }
             return true;
+        }
+
+        void FillPinDataBuffer(List<PinSample> samples)
+        {
+            var maxPins = PuppetDeformationCustomEffect.MaxPins;
+            for (var i = 0; i < samples.Count; i++)
+            {
+                var s = samples[i];
+                pinDataBuffer[i * 4 + 0] = s.Rest.X;
+                pinDataBuffer[i * 4 + 1] = s.Rest.Y;
+                pinDataBuffer[i * 4 + 2] = s.Current.X;
+                pinDataBuffer[i * 4 + 3] = s.Current.Y;
+            }
+            Array.Clear(pinDataBuffer, samples.Count * 4, (maxPins - samples.Count) * 4);
+        }
+
+        void UpdateArapEffect(List<PinSample> samples, bool apply, float width, float height)
+        {
+            if (arapEffect is null)
+                return;
+
+            //メッシュは画像サイズにのみ依存する
+            if (arapMesh is null || arapMesh.Width != width || arapMesh.Height != height)
+            {
+                arapMesh = ArapGridMesh.Create(width, height, PuppetDeformationArapCustomEffect.MaxTriangles, ArapMinSpacing);
+                arapDeformer = null;
+                deformedPositions = new Vector2[arapMesh.VertexCount];
+            }
+            arapVertexData ??= new byte[PuppetDeformationArapCustomEffect.MaxVertices * PuppetDeformationArapCustomEffect.VertexStride];
+
+            //ピンのレスト位置が変わったら行列分解を作り直す
+            var restsChanged = arapRests is null || arapRests.Length != samples.Count;
+            if (!restsChanged)
+            {
+                for (var i = 0; i < samples.Count; i++)
+                {
+                    if (arapRests![i] != samples[i].Rest)
+                    {
+                        restsChanged = true;
+                        break;
+                    }
+                }
+            }
+            if (arapDeformer is null || restsChanged)
+            {
+                arapRests = new Vector2[samples.Count];
+                for (var i = 0; i < samples.Count; i++)
+                    arapRests[i] = samples[i].Rest;
+                arapDeformer = ArapDeformer.TryCreate(arapMesh, arapRests);
+            }
+
+            var rests = arapMesh.RestPositions;
+            if (arapDeformer is null)
+            {
+                Array.Copy(rests, deformedPositions!, rests.Length);
+            }
+            else
+            {
+                var targets = new Vector2[samples.Count];
+                for (var i = 0; i < samples.Count; i++)
+                    targets[i] = apply ? samples[i].Current : samples[i].Rest;
+                arapDeformer.Solve(targets, ArapIterations, deformedPositions!);
+            }
+
+            //三角形リストへ展開して頂点データを書き込み、変形後のAABBを求める
+            var deformed = deformedPositions!;
+            var triangleIndices = arapMesh.TriangleIndices;
+            var vertexFloats = MemoryMarshal.Cast<byte, float>(arapVertexData.AsSpan());
+            var o = 0;
+            foreach (var v in triangleIndices)
+            {
+                vertexFloats[o++] = deformed[v].X;
+                vertexFloats[o++] = deformed[v].Y;
+                vertexFloats[o++] = rests[v].X;
+                vertexFloats[o++] = rests[v].Y;
+            }
+
+            float minX = float.MaxValue, minY = float.MaxValue, maxX = float.MinValue, maxY = float.MinValue;
+            for (var i = 0; i < arapMesh.VertexCount; i++)
+            {
+                var p = deformed[i];
+                if (p.X < minX) minX = p.X;
+                if (p.Y < minY) minY = p.Y;
+                if (p.X > maxX) maxX = p.X;
+                if (p.Y > maxY) maxY = p.Y;
+            }
+
+            //ラスタライズの丸め対策に1pxの余白を持たせる
+            const float margin = 1f;
+            arapEffect.VertexCount = triangleIndices.Length;
+            arapEffect.VertexData = arapVertexData;
+            arapEffect.TightLocalLeft = minX - margin;
+            arapEffect.TightLocalTop = minY - margin;
+            arapEffect.TightLocalRight = maxX + margin;
+            arapEffect.TightLocalBottom = maxY + margin;
+        }
+
+        void SetWiring(bool useArap)
+        {
+            if (useArapWiring == useArap)
+                return;
+            useArapWiring = useArap;
+            ApplyWiring();
+        }
+
+        void ApplyWiring()
+        {
+            if (effect is null)
+                return;
+
+            if (useArapWiring && arapEffect is not null)
+            {
+                arapEffect.SetInput(0, input, true);
+                using var arapOutput = arapEffect.Output;
+                effect.SetInput(0, arapOutput, true);
+            }
+            else
+            {
+                arapEffect?.SetInput(0, null, true);
+                effect.SetInput(0, input, true);
+            }
         }
 
         PinGpuCache BuildGpuCache(
@@ -333,6 +495,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
             disposer.Collect(effect);
 
+            //ARAP用エフェクト。非対応環境(頂点シェーダーを読み込めない等)ではMLSにフォールバックする
+            arapEffect = new PuppetDeformationArapCustomEffect(devices);
+            if (!arapEffect.IsEnabled)
+            {
+                arapEffect.Dispose();
+                arapEffect = null;
+            }
+            else
+            {
+                disposer.Collect(arapEffect);
+            }
+
             var output = effect.Output;
             disposer.Collect(output);
             return output;
@@ -340,15 +514,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         protected override void setInput(ID2D1Image? input)
         {
-            effect?.SetInput(0, input, true);
+            ApplyWiring();
         }
 
         protected override void ClearEffectChain()
         {
             effect?.SetInput(0, null, true);
+            arapEffect?.SetInput(0, null, true);
             gpuCache = null;
             cachedControllers = ImmutableList<VideoEffectController>.Empty;
             isFirst = true;
+            useArapWiring = false;
         }
 
         protected override void Dispose(bool disposing)
@@ -358,6 +534,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 gpuCache = null;
                 deviceContext = null;
                 effect = null;
+                arapEffect = null;
+                arapMesh = null;
+                arapDeformer = null;
+                arapRests = null;
+                deformedPositions = null;
+                arapVertexData = null;
             }
             base.Dispose(disposing);
         }
