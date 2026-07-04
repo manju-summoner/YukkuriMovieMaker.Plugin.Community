@@ -409,52 +409,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         List<VideoEffectController> BuildControllers(List<PinSample> samples)
         {
-            var controllers = new List<VideoEffectController>(samples.Count * 5);
-
-            var (_, meshEdges) = DelaunayTriangulation.Compute(samples.ConvertAll(s => s.Current));
-            foreach (var edge in meshEdges)
-            {
-                var pA = samples[edge.A].Current;
-                var pB = samples[edge.B].Current;
-                controllers.Add(new VideoEffectController(item, [
-                    new ControllerPoint(new Vector3(pA.X, pA.Y, 0f)),
-                    new ControllerPoint(new Vector3(pB.X, pB.Y, 0f)),
-                ])
-                { Connection = VideoControllerPointConnection.Line });
-            }
+            //基準ピンの編集はアイテム編集UIのピン配置キャンバスで行うため、
+            //プレビュー上は移動ピンの操作に絞って表示を簡素化する
+            var controllers = new List<VideoEffectController>(samples.Count * 2);
 
             foreach (var s in samples)
             {
                 var pin = item.Pins[s.PinIndex];
 
-                var restPoint = new ControllerPoint(
-                    new Vector3(s.Rest.X, s.Rest.Y, 0f),
-                    arg =>
-                    {
-                        if (!pin.IsRestSelected) return;
-                        ApplyRestDelta(arg.Delta.X, arg.Delta.Y);
-                    })
-                {
-                    OnDragStart = arg =>
-                    {
-                        if (arg.ModifierKeys.HasFlag(ModifierKeys.Control))
-                            SelectRestToggle(pin);
-                        else if (!pin.IsRestSelected)
-                            SelectRestExclusively(pin);
-                    },
-                    IsSelected = pin.IsRestSelected,
-                    Shape = VideoControllerPointShape.Circle
-                };
-                controllers.Add(new VideoEffectController(item, [restPoint]));
-
                 if (!s.IsEnabled)
+                {
+                    //無効ピン(アンカー)は操作できないマーカーのみ表示する
+                    controllers.Add(new VideoEffectController(item, [
+                        new ControllerPoint(new Vector3(s.Rest.X, s.Rest.Y, 0f)) { Shape = VideoControllerPointShape.SmallCircle }
+                    ]));
                     continue;
+                }
 
-                controllers.Add(new VideoEffectController(item, [
-                    new ControllerPoint(new Vector3(s.Rest.X, s.Rest.Y, 0f)),
-                    new ControllerPoint(new Vector3(s.Current.X, s.Current.Y, 0f)),
-                ])
-                { Connection = VideoControllerPointConnection.Line });
+                //選択中のピンのみ基準位置との接続線を表示する
+                if (pin.IsOffsetSelected)
+                {
+                    controllers.Add(new VideoEffectController(item, [
+                        new ControllerPoint(new Vector3(s.Rest.X, s.Rest.Y, 0f)),
+                        new ControllerPoint(new Vector3(s.Current.X, s.Current.Y, 0f)),
+                    ])
+                    { Connection = VideoControllerPointConnection.Line });
+                }
 
                 var offsetPoint = new ControllerPoint(
                     new Vector3(s.Current.X, s.Current.Y, 0f),
@@ -472,39 +452,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                             SelectOffsetExclusively(pin);
                     },
                     IsSelected = pin.IsOffsetSelected,
-                    Shape = VideoControllerPointShape.Point
+                    Shape = VideoControllerPointShape.Circle
                 };
                 controllers.Add(new VideoEffectController(item, [offsetPoint]));
             }
 
             return controllers;
-        }
-
-        void ApplyRestDelta(double deltaX, double deltaY)
-        {
-            foreach (var p in item.Pins)
-            {
-                if (!p.IsRestSelected) continue;
-                p.RestX.AddToEachValues(deltaX);
-                p.RestY.AddToEachValues(deltaY);
-            }
-        }
-
-        void SelectRestToggle(PuppetDeformation pin)
-        {
-            if (!pin.IsRestSelected)
-                pin.IsRestSelected = true;
-            else if (item.Pins.Any(p => p != pin && p.IsRestSelected))
-                pin.IsRestSelected = false;
-        }
-
-        void SelectRestExclusively(PuppetDeformation target)
-        {
-            foreach (var p in item.Pins)
-            {
-                p.IsOffsetSelected = false;
-                p.IsRestSelected = (p == target);
-            }
         }
 
         void ApplyOffsetDelta(PuppetDeformation source, double deltaX, double deltaY)

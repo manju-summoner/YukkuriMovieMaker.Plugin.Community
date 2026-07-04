@@ -21,31 +21,35 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         object? selectedTarget;
         PuppetDeformationItemViewModel? selectedItem;
-        int columns = 1;
-        int rows = 1;
-        object[] verticalLines = [];
-        object[] horizontalLines = [];
 
         bool isMutatingSelection;
         bool disposedValue;
 
         EditSnapshot? activeSnapshot;
 
-        public void SetEditorInfo(IEditorInfo info) { }
+        IEditorInfo? editorInfo;
+        ITimelineSourceAndDevices? itemVideoSource;
 
-        public int Columns { get => columns; private set => Set(ref columns, value); }
-        public int Rows { get => rows; private set => Set(ref rows, value); }
-        public object[] VerticalLines { get => verticalLines; private set => Set(ref verticalLines, value); }
-        public object[] HorizontalLines { get => horizontalLines; private set => Set(ref horizontalLines, value); }
+        public void SetEditorInfo(IEditorInfo info)
+        {
+            editorInfo = info;
+            RefreshCanvasImage();
+        }
 
-        public ImmutableList<PuppetDeformationItemViewModel?> Items { get => items; private set => Set(ref items, value); }
-        ImmutableList<PuppetDeformationItemViewModel?> items = ImmutableList<PuppetDeformationItemViewModel?>.Empty;
+        /// <summary>ピン配置キャンバスに表示する画像（パペット変形の直前までのエフェクト適用済み）</summary>
+        public System.Windows.Media.Imaging.BitmapSource? CanvasImage { get => canvasImage; private set => Set(ref canvasImage, value); }
+        System.Windows.Media.Imaging.BitmapSource? canvasImage;
+
+        /// <summary>ピン配置キャンバスに表示するピン一覧</summary>
+        public ImmutableList<PuppetDeformationItemViewModel> CanvasPins { get => canvasPins; private set => Set(ref canvasPins, value); }
+        ImmutableList<PuppetDeformationItemViewModel> canvasPins = ImmutableList<PuppetDeformationItemViewModel>.Empty;
 
         public object? SelectedTarget { get => selectedTarget; set => Set(ref selectedTarget, value); }
 
         public ICommand AddPinCommand { get; }
         public ICommand RemovePinCommand { get; }
         public ICommand ResetCommand { get; }
+        public ICommand RefreshImageCommand { get; }
         public ICommand OnBeginEditPointCommand { get; }
         public ICommand OnEndEditPointCommand { get; }
 
@@ -98,11 +102,101 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 EndEdit?.Invoke(this, EventArgs.Empty);
             });
 
+            RefreshImageCommand = new ActionCommand(_ => true, _ => RefreshCanvasImage());
+
             OnBeginEditPointCommand = new ActionCommand(_ => true, _ => OnBeginEditPoint());
             OnEndEditPointCommand = new ActionCommand(_ => true, _ => OnEndEditPoint());
 
             RebuildViewModels();
         }
+
+        void RefreshCanvasImage()
+        {
+            if (editorInfo is null)
+                return;
+            try
+            {
+                //エフェクト構成の変更を反映できるよう、更新のたびにソースを作り直す
+                itemVideoSource?.Dispose();
+                itemVideoSource = null;
+                itemVideoSource = editorInfo.CreateItemVideoSource(
+                    new ItemVideoSourceCreationParameter(VideoEffectSelection.UpTo(Effect)));
+                if (itemVideoSource is null)
+                {
+                    CanvasImage = null;
+                    return;
+                }
+
+                var time = editorInfo.ItemPosition.Time;
+                if (time < TimeSpan.Zero)
+                    time = TimeSpan.Zero;
+                else if (editorInfo.ItemDuration.Time <= time && editorInfo.ItemDuration.Frame > 0)
+                    time = editorInfo.VideoInfo.GetTimeFrom(editorInfo.ItemDuration.Frame - 1);
+
+                itemVideoSource.Update(time, Player.Video.TimelineSourceUsage.Paused);
+                CanvasImage = itemVideoSource.RenderBitmapSource();
+            }
+            catch
+            {
+                CanvasImage = null;
+            }
+        }
+
+        #region ピン配置キャンバス操作
+
+        public void SelectRestFromCanvas(PuppetDeformationItemViewModel vm) => HandleSelect(vm, isOffset: false);
+
+        public void AddPinFromCanvas(double restX, double restY)
+        {
+            if (!CanAddPin)
+                return;
+            BeginEdit?.Invoke(this, EventArgs.Empty);
+            foreach (var pin in Effect.Pins)
+            {
+                pin.IsRestSelected = false;
+                pin.IsOffsetSelected = false;
+            }
+            var newPin = PuppetDeformation.Create(restX, restY);
+            newPin.IsRestSelected = true;
+            CommitStructuralChange(Effect.Pins.Add(newPin));
+            EndEdit?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void RemovePinFromCanvas(PuppetDeformationItemViewModel vm)
+        {
+            if (!Effect.Pins.Contains(vm.Model))
+                return;
+            BeginEdit?.Invoke(this, EventArgs.Empty);
+            CommitStructuralChange(Effect.Pins.Remove(vm.Model));
+            EndEdit?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void RemoveSelectedRestPinsFromCanvas()
+        {
+            var targets = Effect.Pins.Where(p => p.IsRestSelected).ToList();
+            if (targets.Count == 0)
+                return;
+            BeginEdit?.Invoke(this, EventArgs.Empty);
+            CommitStructuralChange(Effect.Pins.RemoveRange(targets));
+            EndEdit?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void BeginRestDragFromCanvas() => BeginEdit?.Invoke(this, EventArgs.Empty);
+
+        public void MoveSelectedRestsFromCanvas(double deltaX, double deltaY)
+        {
+            foreach (var pin in Effect.Pins)
+            {
+                if (!pin.IsRestSelected)
+                    continue;
+                pin.RestX.AddToEachValues(deltaX);
+                pin.RestY.AddToEachValues(deltaY);
+            }
+        }
+
+        public void EndRestDragFromCanvas() => EndEdit?.Invoke(this, EventArgs.Empty);
+
+        #endregion
 
         void CommitStructuralChange(ImmutableList<PuppetDeformation> newPins)
         {
@@ -238,129 +332,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             foreach (var oldVm in allViewModels.Except(newAllViewModels))
             {
                 oldVm.PropertyChanged -= Item_PropertyChanged;
-                oldVm.RestChanged -= Item_RestChanged;
                 oldVm.Dispose();
             }
 
             foreach (var newVm in newAllViewModels.Except(allViewModels))
             {
                 newVm.PropertyChanged += Item_PropertyChanged;
-                newVm.RestChanged += Item_RestChanged;
             }
 
             allViewModels = ImmutableList.CreateRange(newAllViewModels);
+            CanvasPins = allViewModels;
 
-            RefreshGridLayout();
             EnsureSelectionAfterRebuild();
             UpdateSelection();
-        }
-
-        void RefreshGridLayout()
-        {
-            var layout = ComputeGridLayout(allViewModels);
-            Columns = layout.Columns;
-            Rows = layout.Rows;
-
-            if (VerticalLines.Length != Columns) VerticalLines = new object[Columns];
-            if (HorizontalLines.Length != Rows) HorizontalLines = new object[Rows];
-
-            Items = ImmutableList.CreateRange(layout.Cells);
-        }
-
-        readonly struct GridLayout(int columns, int rows, PuppetDeformationItemViewModel?[] cells)
-        {
-            public int Columns { get; } = columns;
-            public int Rows { get; } = rows;
-            public PuppetDeformationItemViewModel?[] Cells { get; } = cells;
-        }
-
-        static GridLayout ComputeGridLayout(ImmutableList<PuppetDeformationItemViewModel> viewModels)
-        {
-            if (viewModels.Count == 0)
-                return new GridLayout(1, 1, new PuppetDeformationItemViewModel?[1]);
-
-            var xs = viewModels.Select(v => v.Model.RestX.Values.FirstOrDefault()?.Value ?? 0.0).ToArray();
-            var ys = viewModels.Select(v => v.Model.RestY.Values.FirstOrDefault()?.Value ?? 0.0).ToArray();
-
-            var bboxW = xs.Max() - xs.Min();
-            var bboxH = ys.Max() - ys.Min();
-            var tolerance = Math.Max(Math.Max(bboxW, bboxH) * 0.1, 1e-3);
-
-            var colsAssign = ClusterCoordinates(xs, tolerance, out var colCount);
-            var rowsAssign = ClusterCoordinates(ys, tolerance, out var rowCount);
-
-            var cells = new PuppetDeformationItemViewModel?[rowCount * colCount];
-            var pending = new List<(int Index, int Row, int Col)>();
-
-            for (var i = 0; i < viewModels.Count; i++)
-            {
-                var r = rowsAssign[i];
-                var c = colsAssign[i];
-                var slot = r * colCount + c;
-                if (cells[slot] == null)
-                    cells[slot] = viewModels[i];
-                else
-                    pending.Add((i, r, c));
-            }
-
-            foreach (var p in pending)
-            {
-                var slot = FindNearestEmptyCell(cells, p.Row, p.Col, rowCount, colCount);
-                if (slot >= 0)
-                {
-                    cells[slot] = viewModels[p.Index];
-                    continue;
-                }
-
-                var expanded = new PuppetDeformationItemViewModel?[(rowCount + 1) * colCount];
-                Array.Copy(cells, expanded, cells.Length);
-                rowCount++;
-                cells = expanded;
-                var newSlot = FindNearestEmptyCell(cells, p.Row, p.Col, rowCount, colCount);
-                if (newSlot >= 0)
-                    cells[newSlot] = viewModels[p.Index];
-            }
-
-            return new GridLayout(colCount, rowCount, cells);
-        }
-
-        static int FindNearestEmptyCell(PuppetDeformationItemViewModel?[] cells, int row, int col, int rowCount, int colCount)
-        {
-            for (var radius = 1; radius <= rowCount + colCount; radius++)
-            {
-                for (var dr = -radius; dr <= radius; dr++)
-                {
-                    for (var dc = -radius; dc <= radius; dc++)
-                    {
-                        if (Math.Abs(dr) != radius && Math.Abs(dc) != radius) continue;
-                        var r = row + dr;
-                        var c = col + dc;
-                        if (r < 0 || r >= rowCount || c < 0 || c >= colCount) continue;
-                        var slot = r * colCount + c;
-                        if (cells[slot] == null) return slot;
-                    }
-                }
-            }
-            return -1;
-        }
-
-        static int[] ClusterCoordinates(double[] values, double tolerance, out int clusterCount)
-        {
-            var n = values.Length;
-            var result = new int[n];
-            if (n == 0) { clusterCount = 0; return result; }
-
-            var indexed = values.Select((v, i) => (Value: v, Index: i)).OrderBy(p => p.Value).ToArray();
-            var cluster = 0;
-            result[indexed[0].Index] = 0;
-            for (var i = 1; i < n; i++)
-            {
-                if (indexed[i].Value - indexed[i - 1].Value > tolerance)
-                    cluster++;
-                result[indexed[i].Index] = cluster;
-            }
-            clusterCount = cluster + 1;
-            return result;
         }
 
         void UpdateSelection()
@@ -394,11 +378,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 UpdateSelection();
             }
-        }
-
-        void Item_RestChanged(object? sender, EventArgs e)
-        {
-            RefreshGridLayout();
         }
 
         void SyncRestValues()
@@ -561,9 +540,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 foreach (var item in allViewModels)
                 {
                     item.PropertyChanged -= Item_PropertyChanged;
-                    item.RestChanged -= Item_RestChanged;
                     item.Dispose();
                 }
+                itemVideoSource?.Dispose();
+                itemVideoSource = null;
             }
             disposedValue = true;
         }

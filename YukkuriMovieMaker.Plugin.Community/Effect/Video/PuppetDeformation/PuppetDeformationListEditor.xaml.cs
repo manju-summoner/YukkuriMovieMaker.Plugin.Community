@@ -44,5 +44,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 vm.SetEditorInfo(frame);
             }
         }
+
+        void CanvasResizeThumb_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+        {
+            PuppetDeformationEditorSettings.Default.CanvasHeight += e.VerticalChange;
+        }
     }
 }
