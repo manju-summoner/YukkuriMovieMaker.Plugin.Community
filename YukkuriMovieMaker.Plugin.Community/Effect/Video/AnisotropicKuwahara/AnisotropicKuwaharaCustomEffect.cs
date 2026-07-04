@@ -36,6 +36,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AnisotropicKuwahara
         {
             const int Sectors = 8;
             const int MaxNLimit = 24;
+            // サンプルは半径 n(≤MaxNLimit) の円内格子点。バッファ上限はその最大 N(MaxNLimit)。
+            //   N(r) = Σ_{i=-r..r} ( 2*floor(sqrt(r*r - i*i)) + 1 )   … i²+j²≤r² の格子点数(ガウスの円問題)
+            // 閉じた式が無く floor/sqrt を含むため const 式にできず直値。N(24)=1793。
+            // MaxNLimit を変える場合は上式で N(MaxNLimit) を再計算して更新し、シェーダー側 MAX_SAMPLES とも一致させること。
+            // 万一の不整合に備え、書き込みループは count < MaxSampleCount で保護している。
             const int MaxSampleCount = 1793;
 
             private ConstantBuffer _cb;
@@ -73,9 +78,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AnisotropicKuwahara
                 {
                     fixed (float* samples = _cb.Samples)
                     {
-                        for (var j = -n; j <= n; j++)
+                        for (var j = -n; j <= n && count < MaxSampleCount; j++)
                         {
-                            for (var i = -n; i <= n; i++)
+                            for (var i = -n; i <= n && count < MaxSampleCount; i++)
                             {
                                 if (i * i + j * j > n * n)
                                     continue;

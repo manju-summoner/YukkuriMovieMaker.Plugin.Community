@@ -16,6 +16,7 @@ Texture2D TensorTexture : register(t1);
 SamplerState TensorSampler : register(s1);
 
 static const int SECTORS = 8;
+// 半径24の円内格子点数 N(24)=1793。C#側 MaxSampleCount と一致させること(導出はそちらのコメント参照)
 static const int MAX_SAMPLES = 1793;
 
 cbuffer Constants : register(b0)
