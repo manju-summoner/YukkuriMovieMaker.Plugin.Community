@@ -9,7 +9,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AnisotropicKuwahara
     {
         // パス1: 構造テンソル -> パス2: 平滑化 -> パス3: 本体(入力0=元画像, 入力1=平滑テンソル)
         AnisotropicKuwaharaTensorCustomEffect? tensorEffect;
-        AnisotropicKuwaharaTensorBlurCustomEffect? tensorBlurEffect;
+        AnisotropicKuwaharaTensorBlurCustomEffect? tensorBlurXEffect;
+        AnisotropicKuwaharaTensorBlurCustomEffect? tensorBlurYEffect;
         AnisotropicKuwaharaCustomEffect? kuwaharaEffect;
 
         bool isFirst = true;
@@ -63,29 +64,38 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AnisotropicKuwahara
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
             tensorEffect = new AnisotropicKuwaharaTensorCustomEffect(devices);
-            tensorBlurEffect = new AnisotropicKuwaharaTensorBlurCustomEffect(devices);
+            tensorBlurXEffect = new AnisotropicKuwaharaTensorBlurCustomEffect(devices);
+            tensorBlurYEffect = new AnisotropicKuwaharaTensorBlurCustomEffect(devices);
             kuwaharaEffect = new AnisotropicKuwaharaCustomEffect(devices);
 
-            if (!tensorEffect.IsEnabled || !tensorBlurEffect.IsEnabled || !kuwaharaEffect.IsEnabled)
+            if (!tensorEffect.IsEnabled || !tensorBlurXEffect.IsEnabled || !tensorBlurYEffect.IsEnabled || !kuwaharaEffect.IsEnabled)
             {
                 tensorEffect.Dispose();
-                tensorBlurEffect.Dispose();
+                tensorBlurXEffect.Dispose();
+                tensorBlurYEffect.Dispose();
                 kuwaharaEffect.Dispose();
                 tensorEffect = null;
-                tensorBlurEffect = null;
+                tensorBlurXEffect = null;
+                tensorBlurYEffect = null;
                 kuwaharaEffect = null;
                 return null;
             }
 
             disposer.Collect(tensorEffect);
-            disposer.Collect(tensorBlurEffect);
+            disposer.Collect(tensorBlurXEffect);
+            disposer.Collect(tensorBlurYEffect);
             disposer.Collect(kuwaharaEffect);
+
+            tensorBlurXEffect.IsVertical = false;
+            tensorBlurYEffect.IsVertical = true;
 
             // テンソル -> 平滑化 -> 本体の入力1
             using (var tensorOutput = tensorEffect.Output)
-                tensorBlurEffect.SetInput(0, tensorOutput, true);
-            using (var blurOutput = tensorBlurEffect.Output)
-                kuwaharaEffect.SetInput(1, blurOutput, true);
+                tensorBlurXEffect.SetInput(0, tensorOutput, true);
+            using (var blurXOutput = tensorBlurXEffect.Output)
+                tensorBlurYEffect.SetInput(0, blurXOutput, true);
+            using (var blurYOutput = tensorBlurYEffect.Output)
+                kuwaharaEffect.SetInput(1, blurYOutput, true);
 
             var output = kuwaharaEffect.Output;
             disposer.Collect(output);
@@ -102,7 +112,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AnisotropicKuwahara
         protected override void ClearEffectChain()
         {
             tensorEffect?.SetInput(0, null, true);
-            tensorBlurEffect?.SetInput(0, null, true);
+            tensorBlurXEffect?.SetInput(0, null, true);
+            tensorBlurYEffect?.SetInput(0, null, true);
             kuwaharaEffect?.SetInput(0, null, true);
             kuwaharaEffect?.SetInput(1, null, true);
         }
