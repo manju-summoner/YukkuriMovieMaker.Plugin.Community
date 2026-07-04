@@ -11,6 +11,11 @@
 Texture2D InputTexture : register(t0);
 SamplerState InputSampler : register(s0);
 
+cbuffer Constants : register(b0)
+{
+	float2 dir : packoffset(c0);
+};
+
 static const int   BLUR_RADIUS = 5;
 static const float BLUR_SIGMA  = 2.6f;
 
@@ -35,17 +40,13 @@ float4 main(
 	float4 sum = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float wsum = 0.0f;
 
-	[loop]
-	for (int j = -BLUR_RADIUS; j <= BLUR_RADIUS; j++)
+	[unroll]
+	for (int i = -BLUR_RADIUS; i <= BLUR_RADIUS; i++)
 	{
-		[loop]
-		for (int i = -BLUR_RADIUS; i <= BLUR_RADIUS; i++)
-		{
-			float2 o = float2((float)i, (float)j);
-			float w = exp(-dot(o, o) * inv2s2);
-			sum += w * SampleTensor(c + o * t);
-			wsum += w;
-		}
+		float2 o = dir * (float)i;
+		float w = exp(-dot(o, o) * inv2s2);
+		sum += w * SampleTensor(c + o * t);
+		wsum += w;
 	}
 
 	return sum / max(wsum, 1e-6f);

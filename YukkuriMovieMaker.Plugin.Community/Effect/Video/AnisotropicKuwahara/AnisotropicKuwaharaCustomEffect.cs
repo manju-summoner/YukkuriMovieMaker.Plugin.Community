@@ -34,10 +34,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AnisotropicKuwahara
         [CustomEffect(2)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
+            const int Sectors = 8;
+            const int MaxNLimit = 24;
+            const int MaxSampleCount = 1793;
+
             private ConstantBuffer _cb;
+            private float _radius;
+            private int _maxN = MaxNLimit;
+            private int _tableN;
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.Radius)]
-            public float Radius { get => _cb.RadiusPx; set { _cb.RadiusPx = Math.Max(value, 0f); UpdateConstants(); } }
+            public float Radius { get => _radius; set { _radius = Math.Max(value, 0f); _cb.RadiusPx = _radius; UpdateSampleTable(); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.Sharpness)]
             public float Sharpness { get => _cb.Sharpness; set { _cb.Sharpness = Math.Max(value, 0f); UpdateConstants(); } }
@@ -46,10 +53,52 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AnisotropicKuwahara
             public float Anisotropy { get => _cb.Anisotropy; set { _cb.Anisotropy = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Int32, (int)Properties.MaxN)]
-            public int MaxN { get => _cb.MaxN; set { _cb.MaxN = Math.Clamp(value, 1, 24); UpdateConstants(); } }
+            public int MaxN { get => _maxN; set { _maxN = Math.Clamp(value, 1, MaxNLimit); UpdateSampleTable(); UpdateConstants(); } }
 
             public EffectImpl() : base(ShaderResourceUri.Get("AnisotropicKuwahara"))
             {
+                UpdateSampleTable();
+            }
+
+            private void UpdateSampleTable()
+            {
+                var n = Math.Clamp((int)Math.Round(_radius), 1, _maxN);
+                if (n == _tableN)
+                    return;
+                _tableN = n;
+
+                var count = 0;
+                var sectorScale = Sectors / (2.0 * Math.PI);
+                unsafe
+                {
+                    fixed (float* samples = _cb.Samples)
+                    {
+                        for (var j = -n; j <= n; j++)
+                        {
+                            for (var i = -n; i <= n; i++)
+                            {
+                                if (i * i + j * j > n * n)
+                                    continue;
+
+                                var ux = (double)i / n;
+                                var uy = (double)j / n;
+                                var r2 = ux * ux + uy * uy;
+                                var wr = Math.Exp(-2.0 * r2);
+                                var sf = (Math.Atan2(uy, ux) + Math.PI) * sectorScale;
+                                if (sf >= Sectors)
+                                    sf -= Sectors;
+
+                                var p = samples + count * 4;
+                                p[0] = (float)ux;
+                                p[1] = (float)uy;
+                                p[2] = (float)wr;
+                                p[3] = (float)sf;
+                                count++;
+                            }
+                        }
+                    }
+                }
+                _cb.SampleCount = count;
             }
 
             protected override void UpdateConstants()
@@ -74,12 +123,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AnisotropicKuwahara
             }
 
             [StructLayout(LayoutKind.Sequential)]
-            private struct ConstantBuffer
+            private unsafe struct ConstantBuffer
             {
                 public float RadiusPx;
                 public float Sharpness;
                 public float Anisotropy;
-                public int MaxN;
+                public int SampleCount;
+                public fixed float Samples[MaxSampleCount * 4];
             }
 
             public enum Properties : int
