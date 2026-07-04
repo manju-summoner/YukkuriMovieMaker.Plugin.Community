@@ -277,17 +277,33 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseRightButtonDown(e);
-            if (viewModel is null)
+            if (TryRemovePinAt(e.GetPosition(this)))
+                e.Handled = true;
+        }
+
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            base.OnMouseDown(e);
+            //中クリックでも削除できるようにする（左右ボタンは専用ハンドラ側で処理する）
+            if (e.ChangedButton != MouseButton.Middle)
                 return;
+            if (TryRemovePinAt(e.GetPosition(this)))
+                e.Handled = true;
+        }
+
+        bool TryRemovePinAt(Point display)
+        {
+            if (viewModel is null)
+                return false;
             var layout = GetLayout();
             if (layout is null)
-                return;
+                return false;
 
-            var hit = HitTestPin(e.GetPosition(this), layout.Value);
+            var hit = HitTestPin(display, layout.Value);
             if (hit is null)
-                return;
+                return false;
             viewModel.RemovePinFromCanvas(hit);
-            e.Handled = true;
+            return true;
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
