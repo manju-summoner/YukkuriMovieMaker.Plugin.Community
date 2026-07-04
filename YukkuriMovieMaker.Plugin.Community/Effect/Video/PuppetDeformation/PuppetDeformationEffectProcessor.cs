@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
+using Vortice.DCommon;
 using Vortice.Direct2D1;
 using Vortice.DXGI;
 using Vortice.Mathematics;
@@ -18,6 +19,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
     {
         const int ArapIterations = 6;
         const float ArapMinSpacing = 8f;
+        //アルファ読み戻しを行う入力サイズの上限（これを超える場合は切り離しをスキップ）
+        const int ArapAlphaReadbackMaxSize = 4096;
 
         readonly PuppetDeformationEffect item = item;
         readonly float[] pinDataBuffer = new float[PuppetDeformationCustomEffect.MaxPins * 4];
@@ -181,10 +184,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (arapEffect is null)
                 return;
 
-            //メッシュは画像サイズにのみ依存する
+            //メッシュは画像サイズに依存する。透明領域で隔てられた部位を独立して変形できるよう、
+            //完全透明な三角形は常にメッシュから除去する。
+            //アルファは再構築時点の入力から取得する（動画では以後のアルファ変化に追従しない）
             if (arapMesh is null || arapMesh.Width != width || arapMesh.Height != height)
             {
-                arapMesh = ArapGridMesh.Create(width, height, PuppetDeformationArapCustomEffect.MaxTriangles, ArapMinSpacing);
+                var mesh = ArapGridMesh.Create(width, height, PuppetDeformationArapCustomEffect.MaxTriangles, ArapMinSpacing);
+                var keep = BuildAlphaTriangleMask(mesh, width, height);
+                if (keep is not null)
+                    mesh = mesh.WithTriangleMask(keep);
+                arapMesh = mesh;
                 arapDeformer = null;
                 deformedPositions = new Vector2[arapMesh.VertexCount];
             }
@@ -237,10 +246,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 vertexFloats[o++] = rests[v].Y;
             }
 
+            //AABBは描画に使う頂点（残存三角形の頂点）のみから求める
             float minX = float.MaxValue, minY = float.MaxValue, maxX = float.MinValue, maxY = float.MinValue;
-            for (var i = 0; i < arapMesh.VertexCount; i++)
+            foreach (var v in triangleIndices)
             {
-                var p = deformed[i];
+                var p = deformed[v];
                 if (p.X < minX) minX = p.X;
                 if (p.Y < minY) minY = p.Y;
                 if (p.X > maxX) maxX = p.X;
@@ -255,6 +265,78 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             arapEffect.TightLocalTop = minY - margin;
             arapEffect.TightLocalRight = maxX + margin;
             arapEffect.TightLocalBottom = maxY + margin;
+        }
+
+        /// <summary>
+        /// 入力画像のアルファをCPUに読み戻し、不透明ピクセルを含む三角形の残存フラグを作る。
+        /// 透明領域で隔てられた部位（腕・脚など）のメッシュ接続を切るために使う。
+        /// 読み戻せない場合（入力なし・サイズ超過など）はnullを返し、呼び出し側はマスクなしで続行する。
+        /// </summary>
+        unsafe bool[]? BuildAlphaTriangleMask(ArapGridMesh mesh, float width, float height)
+        {
+            if (deviceContext is null || input is null)
+                return null;
+
+            var w = (int)MathF.Ceiling(width);
+            var h = (int)MathF.Ceiling(height);
+            if (w <= 0 || h <= 0 || w > ArapAlphaReadbackMaxSize || h > ArapAlphaReadbackMaxSize)
+                return null;
+
+            var bounds = deviceContext.GetImageLocalBounds(input);
+
+            var gpuProps = new BitmapProperties1(
+                new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied),
+                deviceContext.Dpi.Width,
+                deviceContext.Dpi.Height,
+                BitmapOptions.Target);
+            var cpuProps = new BitmapProperties1(
+                new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied),
+                deviceContext.Dpi.Width,
+                deviceContext.Dpi.Height,
+                BitmapOptions.CpuRead | BitmapOptions.CannotDraw);
+
+            using var gpuBitmap = deviceContext.CreateBitmap(new SizeI(w, h), gpuProps);
+            using var cpuBitmap = deviceContext.CreateBitmap(new SizeI(w, h), cpuProps);
+
+            deviceContext.Target = gpuBitmap;
+            deviceContext.BeginDraw();
+            deviceContext.Clear(new Color4(0f, 0f, 0f, 0f));
+            deviceContext.DrawImage(
+                input,
+                new Vector2(-bounds.Left, -bounds.Top),
+                null,
+                InterpolationMode.NearestNeighbor,
+                CompositeMode.SourceCopy);
+            deviceContext.EndDraw();
+            deviceContext.Target = null;
+
+            cpuBitmap.CopyFromBitmap(gpuBitmap);
+
+            var keep = new bool[mesh.FullTriangleCount];
+            var map = cpuBitmap.Map(MapOptions.Read);
+            try
+            {
+                var ptr = (byte*)map.Bits;
+                var halfW = width * 0.5f;
+                var halfH = height * 0.5f;
+                for (var y = 0; y < h; y++)
+                {
+                    var row = ptr + (long)y * map.Pitch;
+                    var ly = y + 0.5f - halfH;
+                    for (var x = 0; x < w; x++)
+                    {
+                        //B8G8R8A8のアルファは4バイト目。少しでも不透明ならその三角形を残す
+                        if (row[x * 4 + 3] == 0)
+                            continue;
+                        keep[mesh.GetFullTriangleIndexAt(new Vector2(x + 0.5f - halfW, ly))] = true;
+                    }
+                }
+            }
+            finally
+            {
+                cpuBitmap.Unmap();
+            }
+            return keep;
         }
 
         void SetWiring(bool useArap)

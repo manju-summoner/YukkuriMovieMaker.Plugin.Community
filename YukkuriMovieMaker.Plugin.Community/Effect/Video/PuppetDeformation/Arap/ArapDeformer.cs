@@ -26,7 +26,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
 
         //ピン拘束: 所属三角形の3頂点と重心座標
         readonly (int V0, int V1, int V2, double B0, double B1, double B2)[] pinAttachments;
+        //各ピンのアタッチ点のレスト位置。画像外や除去済み三角形上のピンはレスト位置と一致しないため、
+        //拘束目標は「アタッチ点レスト + ピンの移動量」として相対的に適用する
+        readonly Vector2[] pinAttachRests;
         readonly double pinWeight;
+
+        //エッジを持たない頂点（マスクで除去された領域）。対角1の恒等行としてレスト位置に固定する
+        readonly bool[] isIsolated;
+        //ピンの無い連結成分の頂点。動かしようがないためレスト位置にアンカーする
+        readonly bool[] isAnchored;
 
         //作業バッファ（Solve間で再利用）
         readonly double[] qx, qy, bx, by, rotCos, rotSin;
@@ -41,7 +49,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             int[] neighborIndex,
             double[] neighborWeight,
             (int, int, int, double, double, double)[] pinAttachments,
-            double pinWeight)
+            Vector2[] pinAttachRests,
+            double pinWeight,
+            bool[] isIsolated,
+            bool[] isAnchored)
         {
             this.mesh = mesh;
             this.pinRests = pinRests;
@@ -50,7 +61,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             this.neighborIndex = neighborIndex;
             this.neighborWeight = neighborWeight;
             this.pinAttachments = pinAttachments;
+            this.pinAttachRests = pinAttachRests;
             this.pinWeight = pinWeight;
+            this.isIsolated = isIsolated;
+            this.isAnchored = isAnchored;
 
             var n = mesh.VertexCount;
             qx = new double[n];
@@ -99,10 +113,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             var bandwidth = mesh.CellsX + 2;
             var cholesky = new BandCholesky(n, bandwidth);
 
-            //ラプラシアン部分: L_ii = Σw, L_ij = -w
+            //ラプラシアン部分: L_ii = Σw, L_ij = -w。
+            //マスクでエッジを失った孤立頂点は対角1の恒等行にして帯構造と正定値性を保つ
+            var isIsolated = new bool[n];
             var diagSum = 0.0;
+            var connectedCount = 0;
             for (var i = 0; i < n; i++)
             {
+                if (neighborStart[i] == neighborStart[i + 1])
+                {
+                    isIsolated[i] = true;
+                    cholesky.Add(i, i, 1.0);
+                    continue;
+                }
                 var sum = 0.0;
                 for (var k = neighborStart[i]; k < neighborStart[i + 1]; k++)
                 {
@@ -112,15 +135,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 }
                 cholesky.Add(i, i, sum);
                 diagSum += sum;
+                connectedCount++;
             }
+            if (connectedCount == 0)
+                return null;
 
             //ピン拘束: λ |B q - t|^2 → 行列に λ b_k b_l を加算
-            var pinWeight = PinWeightScale * Math.Max(1.0, diagSum / n);
+            var pinWeight = PinWeightScale * Math.Max(1.0, diagSum / connectedCount);
             var attachments = new (int, int, int, double, double, double)[pinRestPositions.Count];
+            var attachRests = new Vector2[pinRestPositions.Count];
             for (var p = 0; p < pinRestPositions.Count; p++)
             {
                 var (v0, v1, v2, b0, b1, b2) = mesh.FindContainingTriangle(pinRestPositions[p]);
                 attachments[p] = (v0, v1, v2, b0, b1, b2);
+                attachRests[p] =
+                    mesh.RestPositions[v0] * (float)b0 +
+                    mesh.RestPositions[v1] * (float)b1 +
+                    mesh.RestPositions[v2] * (float)b2;
 
                 Span<int> verts = [v0, v1, v2];
                 Span<double> bary = [b0, b1, b2];
@@ -133,6 +164,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     }
             }
 
+            //ピンが1つも乗っていない連結成分は並進の自由度が残り特異になるため、レスト位置にアンカーする
+            var isAnchored = FindPinlessComponentVertices(n, neighborStart, neighborIndex, attachments, isIsolated);
+            for (var i = 0; i < n; i++)
+            {
+                if (isAnchored[i])
+                    cholesky.Add(i, i, pinWeight);
+            }
+
             if (!cholesky.Factorize())
                 return null;
 
@@ -140,7 +179,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             for (var i = 0; i < rests.Length; i++)
                 rests[i] = pinRestPositions[i];
 
-            return new ArapDeformer(mesh, rests, cholesky, neighborStart, neighborIndex, neighborWeight, attachments, pinWeight);
+            return new ArapDeformer(mesh, rests, cholesky, neighborStart, neighborIndex, neighborWeight, attachments, attachRests, pinWeight, isIsolated, isAnchored);
         }
 
         /// <summary>
@@ -245,11 +284,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 for (var p = 0; p < pinAttachments.Length; p++)
                 {
                     var (v0, v1, v2, b0, b1, b2) = pinAttachments[p];
-                    var tx = (double)pinTargets[p].X;
-                    var ty = (double)pinTargets[p].Y;
+                    //アタッチ点をピンの移動量だけ動かす（画像外ピンのクランプ位置へのテレポートを防ぐ）
+                    var tx = pinAttachRests[p].X + (double)(pinTargets[p].X - pinRests[p].X);
+                    var ty = pinAttachRests[p].Y + (double)(pinTargets[p].Y - pinRests[p].Y);
                     bx[v0] += pinWeight * b0 * tx; by[v0] += pinWeight * b0 * ty;
                     bx[v1] += pinWeight * b1 * tx; by[v1] += pinWeight * b1 * ty;
                     bx[v2] += pinWeight * b2 * tx; by[v2] += pinWeight * b2 * ty;
+                }
+                for (var i = 0; i < n; i++)
+                {
+                    if (isIsolated[i])
+                    {
+                        //恒等行(対角1)なのでレスト位置をそのまま与える
+                        bx[i] = rests[i].X;
+                        by[i] = rests[i].Y;
+                    }
+                    else if (isAnchored[i])
+                    {
+                        bx[i] += pinWeight * rests[i].X;
+                        by[i] += pinWeight * rests[i].Y;
+                    }
                 }
 
                 cholesky.Solve(bx);
@@ -260,6 +314,56 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
 
             for (var i = 0; i < n; i++)
                 result[i] = new Vector2((float)qx[i], (float)qy[i]);
+        }
+
+        /// <summary>
+        /// エッジグラフの連結成分を求め、ピン拘束が1つも掛かっていない成分の頂点を返す。
+        /// </summary>
+        static bool[] FindPinlessComponentVertices(
+            int n,
+            int[] neighborStart,
+            int[] neighborIndex,
+            (int V0, int V1, int V2, double B0, double B1, double B2)[] pinAttachments,
+            bool[] isIsolated)
+        {
+            var component = new int[n];
+            Array.Fill(component, -1);
+            var componentCount = 0;
+            var queue = new Queue<int>();
+            for (var i = 0; i < n; i++)
+            {
+                if (isIsolated[i] || component[i] >= 0)
+                    continue;
+                component[i] = componentCount;
+                queue.Enqueue(i);
+                while (queue.Count > 0)
+                {
+                    var v = queue.Dequeue();
+                    for (var k = neighborStart[v]; k < neighborStart[v + 1]; k++)
+                    {
+                        var w = neighborIndex[k];
+                        if (component[w] < 0)
+                        {
+                            component[w] = componentCount;
+                            queue.Enqueue(w);
+                        }
+                    }
+                }
+                componentCount++;
+            }
+
+            var hasPin = new bool[componentCount];
+            foreach (var (v0, v1, v2, _, _, _) in pinAttachments)
+            {
+                if (component[v0] >= 0) hasPin[component[v0]] = true;
+                if (component[v1] >= 0) hasPin[component[v1]] = true;
+                if (component[v2] >= 0) hasPin[component[v2]] = true;
+            }
+
+            var isAnchored = new bool[n];
+            for (var i = 0; i < n; i++)
+                isAnchored[i] = component[i] >= 0 && !hasPin[component[i]];
+            return isAnchored;
         }
 
         /// <summary>
