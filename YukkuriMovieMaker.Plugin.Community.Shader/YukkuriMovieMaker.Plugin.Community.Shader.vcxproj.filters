@@ -99,55 +99,61 @@
     <FxCompile Include="WaveClipping.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="GradientMap.hlsl">
+    <FxCompile Include="GradientMap.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="GodRay.hlsl">
+    <FxCompile Include="GodRay.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="HeatHaze.hlsl">
+    <FxCompile Include="HeatHaze.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="OutputMapComposite.hlsl">
+    <FxCompile Include="OutputMapComposite.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="ChannelRouter.hlsl">
+    <FxCompile Include="ChannelRouter.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="Tritone.hlsl">
+    <FxCompile Include="Tritone.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="PerspectiveShadow.hlsl">
+    <FxCompile Include="PerspectiveShadow.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="Lut.hlsl">
+    <FxCompile Include="Lut.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="PixelizeTransition.hlsl">
+    <FxCompile Include="PixelizeTransition.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="EdgeGlow.hlsl">
+    <FxCompile Include="EdgeGlow.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="FillSamegroundShader.hlsl">
+    <FxCompile Include="FillSamegroundShader.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="PuppetDeformation.hlsl">
+    <FxCompile Include="PuppetDeformation.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="PartialOutline.hlsl">
+    <FxCompile Include="PartialOutline.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="DirectionalColorKey.hlsl">
+    <FxCompile Include="DirectionalColorKey.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="AnisotropicKuwaharaTensor.hlsl">
+    <FxCompile Include="AnisotropicKuwaharaTensor.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="AnisotropicKuwaharaTensorBlur.hlsl">
+    <FxCompile Include="AnisotropicKuwaharaTensorBlur.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-	<FxCompile Include="AnisotropicKuwahara.hlsl">
+    <FxCompile Include="AnisotropicKuwahara.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="PuppetDeformationArapVertex.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="PuppetDeformationArap.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
   </ItemGroup>
