@@ -35,7 +35,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             get => algorithm;
             set => Set(ref algorithm, value);
         }
-        PuppetDeformationAlgorithm algorithm = PuppetDeformationAlgorithm.Mls;
+        PuppetDeformationAlgorithm algorithm = PuppetDeformationAlgorithm.Arap;
 
         [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationStiffnessName), Description = nameof(Texts.PuppetDeformationStiffnessDesc), Order = 2, ResourceType = typeof(Texts))]
         [PuppetDeformationMlsOnlyVisible]
