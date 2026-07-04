@@ -24,6 +24,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         readonly PuppetDeformationEffect item = item;
         readonly float[] pinDataBuffer = new float[PuppetDeformationCustomEffect.MaxPins * 4];
+        readonly bool[] offsetSelectionCache = new bool[PuppetDeformationCustomEffect.MaxPins];
 
         PuppetDeformationCustomEffect? effect;
         PuppetDeformationArapCustomEffect? arapEffect;
@@ -85,6 +86,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 && imageWidth > 0
                 && imageHeight > 0;
 
+            //選択状態の変化はコントローラー表示にのみ影響するため、GPU側の更新とは別に検知する
+            var selectionChanged = UpdateOffsetSelectionCache(pins, pinCount);
+
             if (isFirst
                 || this.algorithm != algorithm
                 || this.pinCount != pinCount
@@ -135,6 +139,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
                 cachedControllers = [.. BuildControllers(samples)];
             }
+            else if (selectionChanged)
+            {
+                cachedControllers = [.. BuildControllers(samples)];
+            }
 
             SetWiring(useArap);
 
@@ -150,6 +158,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 Controllers = cachedControllers
             };
+        }
+
+        bool UpdateOffsetSelectionCache(ImmutableList<PuppetDeformation> pins, int pinCount)
+        {
+            var changed = false;
+            for (var i = 0; i < pinCount; i++)
+            {
+                var selected = pins[i].IsOffsetSelected;
+                if (offsetSelectionCache[i] != selected)
+                {
+                    offsetSelectionCache[i] = selected;
+                    changed = true;
+                }
+            }
+            return changed;
         }
 
         bool PinSamplesMatchBuffer(List<PinSample> samples)
@@ -413,6 +436,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             //プレビュー上は移動ピンの操作に絞って表示を簡素化する
             var controllers = new List<VideoEffectController>(samples.Count * 2);
 
+            //選択ハイライトは複数選択の把握が目的のため、1本だけの選択では表示しない
+            var selectedOffsetCount = item.Pins.Count(p => p.IsOffsetSelected);
+            var showSelectionHighlight = selectedOffsetCount > 1;
+
             foreach (var s in samples)
             {
                 var pin = item.Pins[s.PinIndex];
@@ -451,7 +478,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                         else if (!pin.IsOffsetSelected)
                             SelectOffsetExclusively(pin);
                     },
-                    IsSelected = pin.IsOffsetSelected,
+                    IsSelected = pin.IsOffsetSelected && showSelectionHighlight,
                     Shape = VideoControllerPointShape.Circle
                 };
                 controllers.Add(new VideoEffectController(item, [offsetPoint]));
