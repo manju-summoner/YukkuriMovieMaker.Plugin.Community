@@ -50,7 +50,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Stretch
             this.stretchLength = stretchLength;
             this.range = range;
 
-            return effectDescription.DrawDescription;
+            var controller =
+                new VideoEffectController(
+                    item,
+                    [
+                        new ControllerPoint(
+                            new(x, y, 0f),
+                            arg =>
+                            {
+                                item.X.AddToEachValues(arg.Delta.X);
+                                item.Y.AddToEachValues(arg.Delta.Y);
+                            })
+                    ]);
+
+            return effectDescription.DrawDescription with
+            {
+                Controllers = [.. effectDescription.DrawDescription.Controllers, controller],
+            };
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
