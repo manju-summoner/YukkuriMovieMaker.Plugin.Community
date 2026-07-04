@@ -28,11 +28,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         EditSnapshot? activeSnapshot;
 
         IEditorInfo? editorInfo;
-        ITimelineSourceAndDevices? itemVideoSource;
+        bool isCanvasImageInitialized;
 
         public void SetEditorInfo(IEditorInfo info)
         {
             editorInfo = info;
+
+            //SetEditorInfoはUndo履歴の更新などで編集操作のたびに呼ばれる。
+            //毎回レンダリングするとデバイス生成が頻発するため、初回のみ取得し以降は更新ボタンに任せる
+            if (isCanvasImageInitialized)
+                return;
+            isCanvasImageInitialized = true;
             RefreshCanvasImage();
         }
 
@@ -116,10 +122,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 return;
             try
             {
-                //エフェクト構成の変更を反映できるよう、更新のたびにソースを作り直す
-                itemVideoSource?.Dispose();
-                itemVideoSource = null;
-                itemVideoSource = editorInfo.CreateItemVideoSource(
+                //生成されるBitmapSourceはCPU側の完全なコピー(frozen BitmapImage)のため、
+                //デバイス一式を含むソースはレンダリング後すぐ破棄する。
+                //保持するとエディタを開いたままアプリを終了した際に未解放オブジェクトとして残る
+                using var itemVideoSource = editorInfo.CreateItemVideoSource(
                     new ItemVideoSourceCreationParameter(VideoEffectSelection.UpTo(Effect)));
                 if (itemVideoSource is null)
                 {
@@ -542,8 +548,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     item.PropertyChanged -= Item_PropertyChanged;
                     item.Dispose();
                 }
-                itemVideoSource?.Dispose();
-                itemVideoSource = null;
             }
             disposedValue = true;
         }
