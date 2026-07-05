@@ -36,3 +36,5 @@ InOutPageTurnEffectEasingTypeName,,種類,Type,类型,種類,종류,Tipo,نوع,
 InOutPageTurnEffectEasingTypeDesc,,アニメーションの種類,Animation type,动画类型,動畫的種類,애니메이션의 종류,Tipo de animación,نوع الحركة,Jenis animasi
 InOutPageTurnEffectEasingModeName,,加減速,Easing,缓动,加減速,가감속,aceleración/deceleración,تيسير,Easing
 InOutPageTurnEffectEasingModeDesc,,アニメーションの加減速,Animation acceleration/deceleration,动画缓动,動畫的加減速,애니메이션 가속 / 감속,Aceleración/desaceleración de la animación,حركة تسارع / تباطؤ,Animasi akselerasi/deselerasi
+InPageTurnEffectLabel,,ページを戻しながら,while turning the page back,翻回页面时,在翻回頁面時,페이지를 되돌리면서,Al devolver la página,أثناء إعادة الصفحة,saat mengembalikan halaman
+OutPageTurnEffectLabel,,ページをめくりながら,while turning the page,翻页时,在翻頁時,페이지를 넘기면서,Al pasar la página,أثناء تقليب الصفحة,saat membalik halaman

@@ -3,11 +3,12 @@ using Vortice;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Plugin.Community.Transition.PageTurn;
 using D2D = Vortice.Direct2D1;
 
-namespace YukkuriMovieMaker.Plugin.Community.Transition.PageTurn
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PageTurn
 {
-    internal class InOutPageTurnEffectProcessor(IGraphicsDevicesAndContext devices, InOutPageTurnEffect item) : VideoEffectProcessorBase(devices)
+    internal class PageTurnEffectProcessor(IGraphicsDevicesAndContext devices, PageTurnEffect item) : VideoEffectProcessorBase(devices)
     {
         readonly IGraphicsDevicesAndContext devices = devices;
 
@@ -64,29 +65,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.PageTurn
             crop?.SetInput(0, null, true);
         }
 
-        //アイテムの端で1(完全にめくれて非表示)、中間で0(元の表示)。
-        //登場・退場のうち近い方の進行度を採用する（本体InOutEffectBaseのGetEasingValue相当）。
-        double GetProgress(EffectDescription effectDescription)
-        {
-            var totalSec = effectDescription.ItemDuration.Time.TotalSeconds;
-            var sec = effectDescription.ItemPosition.Time.TotalSeconds;
-
-            var inRate = item.IsInEffect && item.EffectTimeSeconds > 0 ? Math.Clamp(sec / item.EffectTimeSeconds, 0, 1) : 1d;
-            var outRate = item.IsOutEffect && item.EffectTimeSeconds > 0 ? Math.Clamp((totalSec - sec) / item.EffectTimeSeconds, 0, 1) : 1d;
-            var rate = Math.Min(inRate, outRate);
-            return 1d - Easing.GetValue(item.EasingType, item.EasingMode, rate);
-        }
-
         public override DrawDescription Update(EffectDescription effectDescription)
         {
             var desc = effectDescription.DrawDescription;
             //ShaderModel5.0非対応環境用
             if (IsPassThroughEffect) return desc;
 
-            var progress = (float)GetProgress(effectDescription);
-            var radius = (float)item.Radius;
-            var shadow = (float)item.Shadow / 100f;
-            var backLightness = (float)item.BackLightness / 100f;
+            var frame = effectDescription.ItemPosition.Frame;
+            var length = effectDescription.ItemDuration.Frame;
+            var fps = effectDescription.FPS;
+
+            var progress = (float)item.Progress.GetValue(frame, length, fps) / 100f;
+            var radius = (float)item.Radius.GetValue(frame, length, fps);
+            var shadow = (float)item.Shadow.GetValue(frame, length, fps) / 100f;
+            var backLightness = (float)item.BackLightness.GetValue(frame, length, fps) / 100f;
             var origin = item.Origin;
 
             //after(透明)の矩形を入力画像の矩形に合わせる

@@ -4,14 +4,15 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Plugin.Community.Transition.PageTurn;
 using YukkuriMovieMaker.Plugin.Effects;
 
-namespace YukkuriMovieMaker.Plugin.Community.Transition.PageTurn
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PageTurn
 {
     [VideoEffect(nameof(Texts.InOutPageTurnEffectName), [VideoEffectCategories.Transition], ["ページめくり", "page", "turn", "curl"], ResourceType = typeof(Texts))]
     internal class InOutPageTurnEffect : VideoEffectBase
     {
-        public override string Label => Texts.InOutPageTurnEffectName;
+        public override string Label => IsInEffect ? Texts.InPageTurnEffectLabel : Texts.OutPageTurnEffectLabel;
 
         [Display(GroupName = nameof(Texts.InOutGroupName), Name = nameof(Texts.PageTurnTransitionParameterOriginName), Description = nameof(Texts.PageTurnTransitionParameterOriginDesc), Order = 0, ResourceType = typeof(Texts))]
         [EnumComboBox]
