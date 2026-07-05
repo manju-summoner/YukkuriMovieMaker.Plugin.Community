@@ -147,6 +147,9 @@
     <FxCompile Include="PixelSortCS.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="LensFlare.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="EdgeGlow.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
