@@ -1,0 +1,38 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+PageTurnTransitionPluginName,,ページめくり,Page turn,翻页,翻頁,페이지 넘기기,Pasar página,تقليب الصفحة,Balik halaman
+PageTurnTransitionParameterOriginName,,めくり始めの位置,Turn start position,翻页起始位置,翻頁起始位置,넘기기 시작 위치,Posición de inicio,موضع البداية,Posisi awal
+PageTurnTransitionParameterOriginDesc,,ページをめくり始める位置です。,Position where the page starts to turn.,开始翻页的位置。,開始翻頁的位置。,페이지를 넘기기 시작하는 위치입니다.,Posición desde la que empieza a pasar la página.,الموضع الذي يبدأ منه تقليب الصفحة.,Posisi awal halaman mulai dibalik.
+PageTurnTransitionParameterRadiusName,,丸みの半径,Curl radius,卷曲半径,捲曲半徑,말림 반지름,Radio de curvatura,نصف قطر الالتفاف,Radius gulungan
+PageTurnTransitionParameterRadiusDesc,,めくれたページの丸みの半径です（px）。,Radius of the page curl (px).,翻起页面的卷曲半径（px）。,翻起頁面的捲曲半徑（px）。,넘겨지는 페이지의 말림 반지름입니다(px).,Radio de la curvatura de la página (px).,نصف قطر التفاف الصفحة (px).,Radius lengkungan halaman (px).
+PageTurnTransitionParameterShadowName,,影の濃さ,Shadow opacity,阴影浓度,陰影濃度,그림자 진하기,Opacidad de la sombra,كثافة الظل,Kepekatan bayangan
+PageTurnTransitionParameterShadowDesc,,ページが落とす影の濃さです。,Opacity of the shadow cast by the page.,页面投下的阴影浓度。,頁面投下的陰影濃度。,페이지가 드리우는 그림자의 진하기입니다.,Opacidad de la sombra proyectada por la página.,كثافة الظل الذي تلقيه الصفحة.,Kepekatan bayangan yang dijatuhkan halaman.
+PageTurnTransitionParameterBackLightnessName,,裏面の明るさ,Back side brightness,背面亮度,背面亮度,뒷면 밝기,Brillo del reverso,سطوع الوجه الخلفي,Kecerahan sisi belakang
+PageTurnTransitionParameterBackLightnessDesc,,めくれたページの裏面を白に近づける度合いです。,How much the back side of the page is whitened.,翻起页面背面接近白色的程度。,翻起頁面背面接近白色的程度。,넘겨진 페이지 뒷면을 흰색에 가깝게 하는 정도입니다.,Grado en que el reverso de la página se acerca al blanco.,درجة تفتيح الوجه الخلفي للصفحة نحو الأبيض.,Seberapa putih sisi belakang halaman.
+PageTurnOriginBottomRightName,,右下,Bottom right,右下,右下,오른쪽 아래,Inferior derecha,أسفل اليمين,Kanan bawah
+PageTurnOriginBottomLeftName,,左下,Bottom left,左下,左下,왼쪽 아래,Inferior izquierda,أسفل اليسار,Kiri bawah
+PageTurnOriginTopLeftName,,左上,Top left,左上,左上,왼쪽 위,Superior izquierda,أعلى اليسار,Kiri atas
+PageTurnOriginTopRightName,,右上,Top right,右上,右上,오른쪽 위,Superior derecha,أعلى اليمين,Kanan atas
+PageTurnOriginRightName,,右,Right,右,右,오른쪽,Derecha,اليمين,Kanan
+PageTurnOriginLeftName,,左,Left,左,左,왼쪽,Izquierda,اليسار,Kiri
+PageTurnOriginTopName,,上,Top,上,上,위,Superior,الأعلى,Atas
+PageTurnOriginBottomName,,下,Bottom,下,下,아래,Inferior,الأسفل,Bawah
+EasingTypeName,,緩急,Easing Type,缓动类型,緩動類型,이징 유형,Tipo de suavizado,نوع التخفيف,Jenis Easing
+EasingTypeDesc,,アニメーションの緩急の種類を選択します。,Selects the easing curve type for the animation.,选择动画缓动曲线的类型。,選擇動畫緩動曲線的類型。,애니메이션 이징 곡선 유형을 선택합니다.,Selecciona el tipo de curva de suavizado para la animación.,يحدد نوع منحنى التخفيف للحركة.,Memilih jenis kurva easing untuk animasi.
+EasingModeName,,加減速,Easing Mode,加减速模式,加減速模式,이징 모드,Modo de suavizado,وضع التخفيف,Mode Easing
+EasingModeDesc,,アニメーションの加減速の方向を選択します。,Selects the acceleration direction of the easing.,选择缓动的加减速方向。,選擇緩動的加減速方向。,이징의 가속·감속 방향을 선택합니다.,Selecciona la dirección de aceleración del suavizado.,يحدد اتجاه التسارع للتخفيف.,Memilih arah akselerasi easing.
+PageTurnEffectName,,ページめくり,Page turn,翻页,翻頁,페이지 넘기기,Pasar página,تقليب الصفحة,Balik halaman
+PageTurnEffectProgressName,,めくり度合い,Turn amount,翻页程度,翻頁程度,넘김 정도,Grado de paso,مقدار التقليب,Tingkat balik
+PageTurnEffectProgressDesc,,ページをめくる度合いです。100%で完全にめくれた状態になります。,How far the page is turned. At 100% the page is fully turned.,翻页的程度。100%时完全翻过。,翻頁的程度。100%時完全翻過。,페이지를 넘기는 정도입니다. 100%에서 완전히 넘겨집니다.,Grado en que se pasa la página. Al 100% la página está completamente pasada.,مقدار تقليب الصفحة. عند 100% تكون الصفحة مقلوبة بالكامل.,Seberapa jauh halaman dibalik. Pada 100% halaman terbalik sepenuhnya.
+InOutPageTurnEffectName,,ページをめくりながら登場退場,Appearing and exiting while turning the page,翻页时入/出场,在翻頁時登場退場,페이지를 넘기면서 등장 퇴장,Apareciendo y saliendo al pasar la página,الظهور والخروج أثناء تقليب الصفحة,Masuk dan keluar sambil membalik halaman
+InOutGroupName,,登場退場,Appearance and exit,入/出场,登場退場,등장 퇴장,Aparición y salida,ظهور ومغادرة,Masuk dan keluar
+InOutPageTurnEffectIsInEffectName,,登場時,Appearing,入场时,登場時,등장 시,En el momento de la aparición,أثناء الظهور,Masuk
+InOutPageTurnEffectIsInEffectDesc,,アイテムが登場する際にエフェクトを適用する,Apply effects when items appear,在物件出场时应用效果,在物件登場時應用特效,아이템이 등장할 때 이펙트 적용하기,Aplicar efecto cuando aparece un elemento,تطبيق التأثيرات عند ظهور العناصر,Terapkan efek saat item muncul
+InOutPageTurnEffectIsOutEffectName,,退場時,Exit,出场时,退場時,퇴장 시,Al salir,عند الخروج,Keluar
+InOutPageTurnEffectIsOutEffectDesc,,アイテムが退場する際にエフェクトを適用する,Apply effect when the item exits,在物件出场时应用效果,在物件退場時應用特效,아이템이 퇴장할 때 이펙트 적용하기,Aplicar efectos al salir de un elemento,تطبيق التأثير عند خروج العنصر,Terapkan efek saat item keluar
+InOutPageTurnEffectEffectTimeSecondsName,,効果時間,Duration,效果时间,效果時間,효과 시간,Duración del efecto,مدة التأثير,Durasi
+InOutPageTurnEffectEffectTimeSecondsDesc,,エフェクトが再生される秒数,Number of seconds the effect plays,效果播放的秒数,效果持續秒數,효과가 재생되는 시간(초),Número de segundos que dura un efecto,عدد الثواني التي يستمر فيها التأثير,Jumlah detik efek diputar
+InOutPageTurnEffectSecUnit,,秒,sec,秒,秒,초,Segundos,ثانية,dtk
+InOutPageTurnEffectEasingTypeName,,種類,Type,类型,種類,종류,Tipo,نوع,Tipe
+InOutPageTurnEffectEasingTypeDesc,,アニメーションの種類,Animation type,动画类型,動畫的種類,애니메이션의 종류,Tipo de animación,نوع الحركة,Jenis animasi
+InOutPageTurnEffectEasingModeName,,加減速,Easing,缓动,加減速,가감속,aceleración/deceleración,تيسير,Easing
+InOutPageTurnEffectEasingModeDesc,,アニメーションの加減速,Animation acceleration/deceleration,动画缓动,動畫的加減速,애니메이션 가속 / 감속,Aceleración/desaceleración de la animación,حركة تسارع / تباطؤ,Animasi akselerasi/deselerasi
