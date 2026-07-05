@@ -129,6 +129,9 @@
     <FxCompile Include="PageTurnTransition.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="MotionBlur.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="EdgeGlow.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
