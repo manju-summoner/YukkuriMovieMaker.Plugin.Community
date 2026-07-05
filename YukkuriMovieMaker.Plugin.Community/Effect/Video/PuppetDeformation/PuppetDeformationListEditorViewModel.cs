@@ -21,6 +21,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         object? selectedTarget;
         PuppetDeformationItemViewModel? selectedItem;
+        PuppetDeformationEditMode editMode = PuppetDeformationEditMode.Pin;
 
         bool isMutatingSelection;
         bool disposedValue;
@@ -50,11 +51,39 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         public ImmutableList<PuppetDeformationItemViewModel> CanvasPins { get => canvasPins; private set => Set(ref canvasPins, value); }
         ImmutableList<PuppetDeformationItemViewModel> canvasPins = ImmutableList<PuppetDeformationItemViewModel>.Empty;
 
+        /// <summary>ピン配置キャンバスに表示するボーン一覧</summary>
+        public ImmutableList<PuppetBoneViewModel> CanvasBones { get => canvasBones; private set => Set(ref canvasBones, value); }
+        ImmutableList<PuppetBoneViewModel> canvasBones = ImmutableList<PuppetBoneViewModel>.Empty;
+
         public object? SelectedTarget { get => selectedTarget; set => Set(ref selectedTarget, value); }
+
+        public PuppetDeformationEditMode EditMode
+        {
+            get => editMode;
+            set
+            {
+                if (Set(ref editMode, value, nameof(EditMode), nameof(IsPinMode), nameof(IsBoneMode)))
+                    UpdateSelection();
+            }
+        }
+
+        public bool IsPinMode
+        {
+            get => EditMode == PuppetDeformationEditMode.Pin;
+            set { if (value) EditMode = PuppetDeformationEditMode.Pin; }
+        }
+
+        public bool IsBoneMode
+        {
+            get => EditMode == PuppetDeformationEditMode.Bone;
+            set { if (value) EditMode = PuppetDeformationEditMode.Bone; }
+        }
 
         public ICommand AddPinCommand { get; }
         public ICommand RemovePinCommand { get; }
         public ICommand ResetCommand { get; }
+        public ICommand AddBoneCommand { get; }
+        public ICommand RemoveBoneCommand { get; }
         public ICommand RefreshImageCommand { get; }
         public ICommand OnBeginEditPointCommand { get; }
         public ICommand OnEndEditPointCommand { get; }
@@ -62,6 +91,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         public MessageBoxViewModel MessageBox { get; } = new MessageBoxViewModel();
 
         public bool CanAddPin => Effect.Pins.Count < PuppetDeformationCustomEffect.MaxPins;
+        //ジョイントはピンと同じ拘束点枠(MaxPins)を消費するため、合計でも上限を超えないようにする
+        public bool CanAddBone => Effect.Bones.Count < PuppetDeformationEffect.BoneCapacity
+            && Effect.Pins.Count + Effect.Bones.Count < PuppetDeformationCustomEffect.MaxPins;
 
         public event EventHandler? BeginEdit;
         public event EventHandler? EndEdit;
@@ -108,12 +140,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 EndEdit?.Invoke(this, EventArgs.Empty);
             });
 
+            AddBoneCommand = new ActionCommand(_ => CanAddBone, _ => AddBoneFromCanvas(0, 0));
+
+            RemoveBoneCommand = new ActionCommand(
+                _ => canvasBones.Any(b => b.IsSelected),
+                _ => RemoveSelectedBoneFromCanvas());
+
             RefreshImageCommand = new ActionCommand(_ => true, _ => RefreshCanvasImage());
 
             OnBeginEditPointCommand = new ActionCommand(_ => true, _ => OnBeginEditPoint());
             OnEndEditPointCommand = new ActionCommand(_ => true, _ => OnEndEditPoint());
 
             RebuildViewModels();
+            RebuildBoneViewModels();
         }
 
         void RefreshCanvasImage()
@@ -201,6 +240,122 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         }
 
         public void EndRestDragFromCanvas() => EndEdit?.Invoke(this, EventArgs.Empty);
+
+        #endregion
+
+        #region ボーン編集キャンバス操作
+
+        public void SelectBoneFromCanvas(PuppetBoneViewModel vm)
+        {
+            isMutatingSelection = true;
+            try
+            {
+                foreach (var b in canvasBones)
+                    b.IsSelected = b == vm;
+            }
+            finally
+            {
+                isMutatingSelection = false;
+                UpdateSelection();
+            }
+        }
+
+        public void ClearBoneSelectionFromCanvas()
+        {
+            isMutatingSelection = true;
+            try
+            {
+                foreach (var b in canvasBones)
+                    b.IsSelected = false;
+            }
+            finally
+            {
+                isMutatingSelection = false;
+                UpdateSelection();
+            }
+        }
+
+        public void AddBoneFromCanvas(double jointX, double jointY)
+        {
+            if (!CanAddBone)
+                return;
+            BeginEdit?.Invoke(this, EventArgs.Empty);
+            //選択中のボーンを親にしてチェーンを作れるようにする
+            var parent = Effect.Bones.FirstOrDefault(b => b.IsSelected);
+            foreach (var b in Effect.Bones)
+                b.IsSelected = false;
+            var bone = PuppetBone.Create(jointX, jointY, parent?.Id ?? Guid.Empty);
+            bone.IsSelected = true;
+            CommitBonesChange(Effect.Bones.Add(bone));
+            EndEdit?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void RemoveBoneFromCanvas(PuppetBoneViewModel vm) => RemoveBoneCore(vm.Model);
+
+        public void RemoveSelectedBoneFromCanvas()
+        {
+            var target = Effect.Bones.FirstOrDefault(b => b.IsSelected);
+            if (target is not null)
+                RemoveBoneCore(target);
+        }
+
+        void RemoveBoneCore(PuppetBone target)
+        {
+            if (!Effect.Bones.Contains(target))
+                return;
+            BeginEdit?.Invoke(this, EventArgs.Empty);
+            //子ボーンは削除ボーンの親へ付け替え、割当ピンは解除する
+            foreach (var b in Effect.Bones)
+            {
+                if (b != target && b.ParentId == target.Id)
+                    b.ParentId = target.ParentId;
+            }
+            foreach (var p in Effect.Pins)
+            {
+                if (p.BoneId == target.Id)
+                    p.BoneId = Guid.Empty;
+            }
+            CommitBonesChange(Effect.Bones.Remove(target));
+            EndEdit?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void BeginBoneDragFromCanvas() => BeginEdit?.Invoke(this, EventArgs.Empty);
+
+        public void MoveSelectedBonesFromCanvas(double deltaX, double deltaY)
+        {
+            foreach (var bone in Effect.Bones)
+            {
+                if (!bone.IsSelected)
+                    continue;
+                bone.JointX.AddToEachValues(deltaX);
+                bone.JointY.AddToEachValues(deltaY);
+            }
+        }
+
+        public void EndBoneDragFromCanvas() => EndEdit?.Invoke(this, EventArgs.Empty);
+
+        /// <summary>選択中のボーンに対するピンの割り当てを切り替える</summary>
+        public void TogglePinBoneAssignFromCanvas(PuppetDeformationItemViewModel pinVm)
+        {
+            var bone = Effect.Bones.FirstOrDefault(b => b.IsSelected);
+            if (bone is null)
+                return;
+            BeginEdit?.Invoke(this, EventArgs.Empty);
+            var pin = pinVm.Model;
+            pin.BoneId = pin.BoneId == bone.Id ? Guid.Empty : bone.Id;
+            EndEdit?.Invoke(this, EventArgs.Empty);
+        }
+
+        void CommitBonesChange(ImmutableList<PuppetBone> newBones)
+        {
+            var cloned = newBones.Select(b =>
+            {
+                var clone = JsonConvert.DeserializeObject<PuppetBone>(JsonConvert.SerializeObject(b)) ?? new PuppetBone();
+                clone.IsSelected = b.IsSelected;
+                return clone;
+            }).ToImmutableList();
+            Effect.Bones = cloned;
+        }
 
         #endregion
 
@@ -317,9 +472,51 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void Effect_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(PuppetDeformationEffect.Pins)) return;
-            RebuildViewModels();
-            OnPropertyChanged(nameof(CanAddPin));
+            if (e.PropertyName == nameof(PuppetDeformationEffect.Pins))
+            {
+                RebuildViewModels();
+                OnPropertyChanged(nameof(CanAddPin));
+                OnPropertyChanged(nameof(CanAddBone));
+            }
+            else if (e.PropertyName == nameof(PuppetDeformationEffect.Bones))
+            {
+                RebuildBoneViewModels();
+                OnPropertyChanged(nameof(CanAddBone));
+            }
+        }
+
+        void RebuildBoneViewModels()
+        {
+            var bones = Effect.Bones;
+            var existingByModel = canvasBones.ToDictionary(x => x.Model);
+            var newViewModels = new List<PuppetBoneViewModel>(bones.Count);
+            foreach (var bone in bones)
+            {
+                var vm = existingByModel.TryGetValue(bone, out var existing)
+                         ? existing
+                         : new PuppetBoneViewModel(bone);
+                newViewModels.Add(vm);
+            }
+
+            foreach (var oldVm in canvasBones.Except(newViewModels))
+            {
+                oldVm.PropertyChanged -= Bone_PropertyChanged;
+                oldVm.Dispose();
+            }
+
+            foreach (var newVm in newViewModels.Except(canvasBones))
+            {
+                newVm.PropertyChanged += Bone_PropertyChanged;
+            }
+
+            CanvasBones = ImmutableList.CreateRange(newViewModels);
+            UpdateSelection();
+        }
+
+        void Bone_PropertyChanged(object? sender, PropertyChangedEventArgs args)
+        {
+            if (args.PropertyName == nameof(PuppetBoneViewModel.IsSelected))
+                UpdateSelection();
         }
 
         void RebuildViewModels()
@@ -358,7 +555,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (isMutatingSelection) return;
             if (disposedValue) return;
             selectedItem = allViewModels.FirstOrDefault(x => x.IsRestSelected || x.IsOffsetSelected);
-            SelectedTarget = selectedItem?.Model;
+            var selectedBone = canvasBones.FirstOrDefault(x => x.IsSelected);
+            SelectedTarget = EditMode == PuppetDeformationEditMode.Bone
+                ? selectedBone?.Model
+                : selectedItem?.Model;
         }
 
         void EnsureSelectionAfterRebuild()
@@ -515,7 +715,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void OnBeginEditPoint()
         {
-            if (selectedItem != null)
+            //ピンの複数選択同期はピン編集時のみ必要。ボーン編集時はスナップショットを取らない
+            if (EditMode == PuppetDeformationEditMode.Pin && selectedItem != null)
             {
                 var m = selectedItem.Model;
                 activeSnapshot = new EditSnapshot(m);
@@ -526,7 +727,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void OnEndEditPoint()
         {
-            if (selectedItem != null)
+            if (EditMode == PuppetDeformationEditMode.Pin && selectedItem != null)
             {
                 SyncRestValues();
                 SyncOffsetValues();
@@ -547,6 +748,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 {
                     item.PropertyChanged -= Item_PropertyChanged;
                     item.Dispose();
+                }
+                foreach (var bone in canvasBones)
+                {
+                    bone.PropertyChanged -= Bone_PropertyChanged;
+                    bone.Dispose();
                 }
             }
             disposedValue = true;

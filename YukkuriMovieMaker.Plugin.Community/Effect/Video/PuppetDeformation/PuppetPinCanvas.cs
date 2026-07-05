@@ -11,33 +11,57 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     /// <summary>
     /// アイテムの画像を表示し、基準ピンの追加・移動・削除を行うキャンバス。
-    /// クリックでピン追加、ドラッグで基準位置の移動、右クリックまたはDeleteキーで削除。
-    /// 移動ピン（オフセット）の編集はメインプレビュー側で行う。
+    /// ピンモード: クリックでピン追加、ドラッグで基準位置の移動、右クリックまたはDeleteキーで削除。
+    /// ボーンモード: クリックでボーン追加（選択中ボーンの子）、ピンをクリックで割当切替、ドラッグでジョイント移動。
+    /// 移動ピン（オフセット）とボーンの回転はメインプレビュー側で行う。
     /// </summary>
     internal sealed class PuppetPinCanvas : FrameworkElement
     {
         const double PinRadius = 5.0;
         const double PinHitRadius = 9.0;
+        const double BoneRadius = 6.5;
+        const double BoneHitRadius = 10.0;
 
         static readonly System.Windows.Media.Brush CheckerBrush = CreateCheckerBrush();
         static readonly System.Windows.Media.Brush PinFillBrush = CreateFrozenBrush(Color.FromRgb(0x2E, 0x86, 0xFF));
         static readonly System.Windows.Media.Brush DisabledPinFillBrush = CreateFrozenBrush(Color.FromArgb(0xA0, 0x80, 0x80, 0x80));
         static readonly Pen PinStrokePen = CreateFrozenPen(Colors.White, 1.5);
         static readonly Pen PinHaloPen = CreateFrozenPen(Color.FromArgb(0x80, 0x00, 0x00, 0x00), 3.5);
-        static readonly Pen SelectionPen = CreateFrozenPen(Color.FromRgb(0xFF, 0xC8, 0x00), 2.0);
         static readonly System.Windows.Media.Brush LabelBrush = CreateFrozenBrush(Colors.White);
+        static readonly System.Windows.Media.Brush BoneFillBrush = CreateFrozenBrush(Color.FromRgb(0xFF, 0x95, 0x00));
+        static readonly System.Windows.Media.Brush DisabledBoneFillBrush = CreateFrozenBrush(Color.FromArgb(0xA0, 0x80, 0x80, 0x80));
+        static readonly Pen BoneLinkPen = CreateFrozenPen(Color.FromArgb(0xC0, 0xFF, 0x95, 0x00), 2.0);
+        static readonly Pen AssignedPinPen = CreateFrozenPen(Color.FromRgb(0xFF, 0x95, 0x00), 2.0);
+        //ボーンと割当ピンをつなぐ点線
+        static readonly Pen BonePinLinkPen = CreateFrozenDashedPen(Color.FromArgb(0xB0, 0xFF, 0x95, 0x00), 1.5);
+        //ピン編集モード時のボーンの表示透明度
+        const double InactiveBoneOpacity = 0.4;
+        //選択リングは各マーカーの塗りつぶしと同じ色にする
+        static readonly Pen PinSelectionPen = CreateFrozenPen(Color.FromRgb(0x2E, 0x86, 0xFF), 2.0);
+        static readonly Pen BoneSelectionPen = CreateFrozenPen(Color.FromRgb(0xFF, 0x95, 0x00), 2.0);
+        //マウスオーバー時のマーカー拡大量(px)
+        const double HoverRadiusBonus = 2.0;
 
         PuppetDeformationListEditorViewModel? viewModel;
         ImmutableList<PuppetDeformationItemViewModel> pins = [];
+        ImmutableList<PuppetBoneViewModel> bones = [];
 
         bool isDragging;
+        bool isBoneDragging;
         bool dragMoved;
+        //選択済みジョイントをクリック（ドラッグなし）したときだけ選択解除するためのフラグ
+        bool pressedOnSelectedBone;
         Point lastDragPosition;
+
+        PuppetDeformationItemViewModel? hoveredPin;
+        PuppetBoneViewModel? hoveredBone;
 
         public PuppetPinCanvas()
         {
             Focusable = true;
             ClipToBounds = true;
+            //マーカー操作の邪魔にならないよう、ツールチップはパネルの下側に出す
+            System.Windows.Controls.ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Bottom);
             DataContextChanged += OnDataContextChanged;
         }
 
@@ -47,13 +71,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 viewModel.PropertyChanged -= ViewModel_PropertyChanged;
                 DetachPins();
+                DetachBones();
             }
             viewModel = e.NewValue as PuppetDeformationListEditorViewModel;
             if (viewModel is not null)
             {
                 viewModel.PropertyChanged += ViewModel_PropertyChanged;
                 AttachPins();
+                AttachBones();
             }
+            UpdateToolTip();
             InvalidateVisual();
         }
 
@@ -67,9 +94,60 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 DetachPins();
                 AttachPins();
+                ClearHover();
+                InvalidateVisual();
+            }
+            else if (e.PropertyName == nameof(PuppetDeformationListEditorViewModel.CanvasBones))
+            {
+                DetachBones();
+                AttachBones();
+                ClearHover();
+                InvalidateVisual();
+            }
+            else if (e.PropertyName == nameof(PuppetDeformationListEditorViewModel.EditMode))
+            {
+                UpdateToolTip();
+                ClearHover();
                 InvalidateVisual();
             }
         }
+
+        bool IsBoneMode => viewModel?.EditMode == PuppetDeformationEditMode.Bone;
+
+        void UpdateToolTip()
+        {
+            ToolTip = IsBoneMode
+                ? Texts.PuppetDeformationCanvasBoneTooltip
+                : Texts.PuppetDeformationCanvasTooltip;
+        }
+
+        void AttachBones()
+        {
+            bones = viewModel?.CanvasBones ?? [];
+            foreach (var bone in bones)
+            {
+                bone.PropertyChanged += Bone_PropertyChanged;
+                bone.VisualChanged += Bone_VisualChanged;
+            }
+        }
+
+        void DetachBones()
+        {
+            foreach (var bone in bones)
+            {
+                bone.PropertyChanged -= Bone_PropertyChanged;
+                bone.VisualChanged -= Bone_VisualChanged;
+            }
+            bones = [];
+        }
+
+        void Bone_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName is nameof(PuppetBoneViewModel.IsSelected) or nameof(PuppetBoneViewModel.IsEnabled))
+                InvalidateVisual();
+        }
+
+        void Bone_VisualChanged(object? sender, EventArgs e) => InvalidateVisual();
 
         void AttachPins()
         {
@@ -95,7 +173,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             if (e.PropertyName is nameof(PuppetDeformationItemViewModel.IsRestSelected)
                 or nameof(PuppetDeformationItemViewModel.IsOffsetSelected)
-                or nameof(PuppetDeformationItemViewModel.IsEnabled))
+                or nameof(PuppetDeformationItemViewModel.IsEnabled)
+                or nameof(PuppetDeformationItemViewModel.BoneId))
             {
                 InvalidateVisual();
             }
@@ -136,6 +215,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 pin.Model.RestX.Values.FirstOrDefault()?.Value ?? 0,
                 pin.Model.RestY.Values.FirstOrDefault()?.Value ?? 0);
 
+        static Point GetJointPoint(PuppetBoneViewModel bone)
+            => new(
+                bone.Model.JointX.Values.FirstOrDefault()?.Value ?? 0,
+                bone.Model.JointY.Values.FirstOrDefault()?.Value ?? 0);
+
         #endregion
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -154,16 +238,103 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var image = viewModel!.CanvasImage!;
             drawingContext.DrawImage(image, new Rect(l.Origin, new Size(l.ImageWidth * l.Scale, l.ImageHeight * l.Scale)));
 
+            //編集中の対象を手前に描画する。ピン編集モード時はボーンを半透明にして脇役に回す
+            if (IsBoneMode)
+            {
+                DrawPins(drawingContext, l);
+                DrawBones(drawingContext, l);
+            }
+            else
+            {
+                drawingContext.PushOpacity(InactiveBoneOpacity);
+                DrawBones(drawingContext, l);
+                drawingContext.Pop();
+                DrawPins(drawingContext, l);
+            }
+        }
+
+        void DrawPins(DrawingContext drawingContext, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        {
+            //ボーンモード時、選択中ボーンに割り当てられたピンをリングで示す
+            var selectedBone = IsBoneMode ? bones.FirstOrDefault(b => b.IsSelected) : null;
+
             foreach (var pin in pins)
             {
-                var p = LocalToDisplay(GetRestPoint(pin), l);
+                var p = LocalToDisplay(GetRestPoint(pin), layout);
+                //マウスオーバー中は少し大きく描いてカーソルが当たっていることを示す
+                var radius = pin == hoveredPin ? PinRadius + HoverRadiusBonus : PinRadius;
 
-                if (pin.IsRestSelected)
-                    drawingContext.DrawEllipse(null, SelectionPen, p, PinRadius + 3.5, PinRadius + 3.5);
+                //ピンの選択リングはピン編集モードでのみ表示する
+                if (!IsBoneMode && pin.IsRestSelected)
+                    drawingContext.DrawEllipse(null, PinSelectionPen, p, radius + 3.5, radius + 3.5);
+                if (selectedBone is not null && pin.BoneId == selectedBone.Model.Id)
+                    drawingContext.DrawEllipse(null, AssignedPinPen, p, radius + 3.5, radius + 3.5);
 
-                drawingContext.DrawEllipse(null, PinHaloPen, p, PinRadius, PinRadius);
-                drawingContext.DrawEllipse(pin.IsEnabled ? PinFillBrush : DisabledPinFillBrush, PinStrokePen, p, PinRadius, PinRadius);
+                drawingContext.DrawEllipse(null, PinHaloPen, p, radius, radius);
+                drawingContext.DrawEllipse(pin.IsEnabled ? PinFillBrush : DisabledPinFillBrush, PinStrokePen, p, radius, radius);
             }
+        }
+
+        void DrawBones(DrawingContext drawingContext, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        {
+            if (bones.Count == 0)
+                return;
+
+            //割当ピンとの接続点線（一番下に描く）
+            foreach (var pin in pins)
+            {
+                if (pin.BoneId == Guid.Empty)
+                    continue;
+                var bone = bones.FirstOrDefault(b => b.Model.Id == pin.BoneId);
+                if (bone is null)
+                    continue;
+                var from = LocalToDisplay(GetJointPoint(bone), layout);
+                var to = LocalToDisplay(GetRestPoint(pin), layout);
+                drawingContext.DrawLine(BonePinLinkPen, from, to);
+            }
+
+            //親子の接続線（ジョイントの下に描く）
+            foreach (var bone in bones)
+            {
+                if (bone.Model.ParentId == Guid.Empty)
+                    continue;
+                var parent = bones.FirstOrDefault(b => b.Model.Id == bone.Model.ParentId && b != bone);
+                if (parent is null)
+                    continue;
+                var from = LocalToDisplay(GetJointPoint(parent), layout);
+                var to = LocalToDisplay(GetJointPoint(bone), layout);
+                drawingContext.DrawLine(BoneLinkPen, from, to);
+            }
+
+            //ジョイント（ひし形）
+            foreach (var bone in bones)
+            {
+                var p = LocalToDisplay(GetJointPoint(bone), layout);
+                //マウスオーバー中は少し大きく描いてカーソルが当たっていることを示す
+                var radius = bone == hoveredBone ? BoneRadius + HoverRadiusBonus : BoneRadius;
+
+                //ジョイントの選択リングはボーン編集モードでのみ表示する
+                if (IsBoneMode && bone.IsSelected)
+                    drawingContext.DrawEllipse(null, BoneSelectionPen, p, radius + 3.5, radius + 3.5);
+
+                var diamond = CreateDiamondGeometry(p, radius);
+                drawingContext.DrawGeometry(null, PinHaloPen, diamond);
+                drawingContext.DrawGeometry(bone.IsEnabled ? BoneFillBrush : DisabledBoneFillBrush, PinStrokePen, diamond);
+            }
+        }
+
+        static StreamGeometry CreateDiamondGeometry(Point center, double radius)
+        {
+            var geometry = new StreamGeometry();
+            using (var ctx = geometry.Open())
+            {
+                ctx.BeginFigure(new Point(center.X, center.Y - radius), true, true);
+                ctx.LineTo(new Point(center.X + radius, center.Y), true, false);
+                ctx.LineTo(new Point(center.X, center.Y + radius), true, false);
+                ctx.LineTo(new Point(center.X - radius, center.Y), true, false);
+            }
+            geometry.Freeze();
+            return geometry;
         }
 
         void DrawCenteredText(DrawingContext drawingContext, string text, Rect bounds)
@@ -201,6 +372,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 return;
 
             var pos = e.GetPosition(this);
+            pressedOnSelectedBone = false;
+
+            if (IsBoneMode)
+            {
+                OnBoneModeLeftButtonDown(pos, layout.Value, e);
+                return;
+            }
+
             var hit = HitTestPin(pos, layout.Value);
             if (hit is not null)
             {
@@ -220,6 +399,49 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
 
             isDragging = true;
+            isBoneDragging = false;
+            dragMoved = false;
+            lastDragPosition = pos;
+            CaptureMouse();
+            e.Handled = true;
+        }
+
+        void OnBoneModeLeftButtonDown(Point pos, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout, MouseButtonEventArgs e)
+        {
+            if (viewModel is null)
+                return;
+
+            var hitBone = HitTestBone(pos, layout);
+            if (hitBone is not null)
+            {
+                //選択済みジョイントをドラッグせずクリックした場合、マウスアップ時に選択解除する
+                pressedOnSelectedBone = hitBone.IsSelected;
+                viewModel.SelectBoneFromCanvas(hitBone);
+            }
+            else
+            {
+                //ピンをクリックしたら選択中ボーンへの割り当てを切り替える
+                var hitPin = HitTestPin(pos, layout);
+                if (hitPin is not null)
+                {
+                    viewModel.TogglePinBoneAssignFromCanvas(hitPin);
+                    e.Handled = true;
+                    return;
+                }
+
+                if (!viewModel.CanAddBone)
+                    return;
+                var local = DisplayToLocal(pos, layout);
+                viewModel.AddBoneFromCanvas(local.X, local.Y);
+
+                //追加でボーン一覧が再構築されるため、追加されたボーンを取り直してそのままドラッグできるようにする
+                hitBone = HitTestBone(pos, layout);
+                if (hitBone is null)
+                    return;
+            }
+
+            isDragging = true;
+            isBoneDragging = true;
             dragMoved = false;
             lastDragPosition = pos;
             CaptureMouse();
@@ -229,13 +451,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            if (!isDragging || viewModel is null)
+            if (viewModel is null)
                 return;
             var layout = GetLayout();
             if (layout is null || layout.Value.Scale <= 0)
                 return;
 
             var pos = e.GetPosition(this);
+
+            if (!isDragging)
+            {
+                UpdateHover(pos, layout.Value);
+                return;
+            }
             var dx = (pos.X - lastDragPosition.X) / layout.Value.Scale;
             var dy = (pos.Y - lastDragPosition.Y) / layout.Value.Scale;
             if (dx == 0 && dy == 0)
@@ -243,10 +471,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
             if (!dragMoved)
             {
-                viewModel.BeginRestDragFromCanvas();
+                if (isBoneDragging)
+                    viewModel.BeginBoneDragFromCanvas();
+                else
+                    viewModel.BeginRestDragFromCanvas();
                 dragMoved = true;
             }
-            viewModel.MoveSelectedRestsFromCanvas(dx, dy);
+            if (isBoneDragging)
+                viewModel.MoveSelectedBonesFromCanvas(dx, dy);
+            else
+                viewModel.MoveSelectedRestsFromCanvas(dx, dy);
             lastDragPosition = pos;
         }
 
@@ -257,9 +491,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 return;
             isDragging = false;
             ReleaseMouseCapture();
-            if (dragMoved)
-                viewModel?.EndRestDragFromCanvas();
-            dragMoved = false;
+            //選択済みジョイントをドラッグせずクリックした場合は選択解除する
+            if (isBoneDragging && pressedOnSelectedBone && !dragMoved)
+                viewModel?.ClearBoneSelectionFromCanvas();
+            pressedOnSelectedBone = false;
+            EndActiveDrag();
             e.Handled = true;
         }
 
@@ -269,16 +505,72 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (!isDragging)
                 return;
             isDragging = false;
+            pressedOnSelectedBone = false;
+            EndActiveDrag();
+        }
+
+        protected override void OnMouseLeave(MouseEventArgs e)
+        {
+            base.OnMouseLeave(e);
+            ClearHover();
+        }
+
+        void UpdateHover(Point pos, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        {
+            PuppetBoneViewModel? bone = null;
+            PuppetDeformationItemViewModel? pin = null;
+            if (IsBoneMode)
+            {
+                //ボーンモードではピンも割当切替のクリック対象なので、両方ホバー表示する
+                bone = HitTestBone(pos, layout);
+                if (bone is null)
+                    pin = HitTestPin(pos, layout);
+            }
+            else
+            {
+                pin = HitTestPin(pos, layout);
+            }
+
+            if (bone == hoveredBone && pin == hoveredPin)
+                return;
+            hoveredBone = bone;
+            hoveredPin = pin;
+            InvalidateVisual();
+        }
+
+        void ClearHover()
+        {
+            if (hoveredBone is null && hoveredPin is null)
+                return;
+            hoveredBone = null;
+            hoveredPin = null;
+            InvalidateVisual();
+        }
+
+        void EndActiveDrag()
+        {
             if (dragMoved)
-                viewModel?.EndRestDragFromCanvas();
+            {
+                if (isBoneDragging)
+                    viewModel?.EndBoneDragFromCanvas();
+                else
+                    viewModel?.EndRestDragFromCanvas();
+            }
             dragMoved = false;
+            isBoneDragging = false;
         }
 
         protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseRightButtonDown(e);
-            if (TryRemovePinAt(e.GetPosition(this)))
+            if (TryRemoveTargetAt(e.GetPosition(this)))
+            {
                 e.Handled = true;
+                return;
+            }
+            //背景の右クリックはジョイントの選択解除
+            viewModel?.ClearBoneSelectionFromCanvas();
+            e.Handled = true;
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -287,17 +579,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             //中クリックでも削除できるようにする（左右ボタンは専用ハンドラ側で処理する）
             if (e.ChangedButton != MouseButton.Middle)
                 return;
-            if (TryRemovePinAt(e.GetPosition(this)))
+            if (TryRemoveTargetAt(e.GetPosition(this)))
+            {
                 e.Handled = true;
+                return;
+            }
+            //背景の中クリックはジョイントの選択解除
+            viewModel?.ClearBoneSelectionFromCanvas();
+            e.Handled = true;
         }
 
-        bool TryRemovePinAt(Point display)
+        bool TryRemoveTargetAt(Point display)
         {
             if (viewModel is null)
                 return false;
             var layout = GetLayout();
             if (layout is null)
                 return false;
+
+            if (IsBoneMode)
+            {
+                var hitBone = HitTestBone(display, layout.Value);
+                if (hitBone is null)
+                    return false;
+                viewModel.RemoveBoneFromCanvas(hitBone);
+                return true;
+            }
 
             var hit = HitTestPin(display, layout.Value);
             if (hit is null)
@@ -309,10 +616,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
-            if (e.Key != Key.Delete || viewModel is null)
+            if (viewModel is null)
                 return;
-            viewModel.RemoveSelectedRestPinsFromCanvas();
-            e.Handled = true;
+            if (e.Key == Key.Delete)
+            {
+                if (IsBoneMode)
+                    viewModel.RemoveSelectedBoneFromCanvas();
+                else
+                    viewModel.RemoveSelectedRestPinsFromCanvas();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Escape && IsBoneMode)
+            {
+                //選択解除するとルートボーンを追加できる
+                viewModel.ClearBoneSelectionFromCanvas();
+                e.Handled = true;
+            }
         }
 
         PuppetDeformationItemViewModel? HitTestPin(Point display, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
@@ -335,6 +654,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             return nearest;
         }
 
+        PuppetBoneViewModel? HitTestBone(Point display, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        {
+            PuppetBoneViewModel? nearest = null;
+            var nearestDistSq = BoneHitRadius * BoneHitRadius;
+            //後に描画される（手前の）ボーンを優先する
+            for (var i = bones.Count - 1; i >= 0; i--)
+            {
+                var p = LocalToDisplay(GetJointPoint(bones[i]), layout);
+                var dx = p.X - display.X;
+                var dy = p.Y - display.Y;
+                var distSq = dx * dx + dy * dy;
+                if (distSq <= nearestDistSq)
+                {
+                    nearestDistSq = distSq;
+                    nearest = bones[i];
+                }
+            }
+            return nearest;
+        }
+
         #endregion
 
         static System.Windows.Media.Brush CreateFrozenBrush(Color color)
@@ -347,6 +686,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         static Pen CreateFrozenPen(Color color, double thickness)
         {
             var pen = new Pen(CreateFrozenBrush(color), thickness);
+            pen.Freeze();
+            return pen;
+        }
+
+        static Pen CreateFrozenDashedPen(Color color, double thickness)
+        {
+            var pen = new Pen(CreateFrozenBrush(color), thickness) { DashStyle = DashStyles.Dash };
             pen.Freeze();
             return pen;
         }

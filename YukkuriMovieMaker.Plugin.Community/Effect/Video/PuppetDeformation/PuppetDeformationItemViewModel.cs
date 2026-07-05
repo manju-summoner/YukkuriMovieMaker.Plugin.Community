@@ -30,6 +30,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             set => Model.IsEnabled = value;
         }
 
+        public Guid BoneId => Model.BoneId;
+
         public double OffsetAngle
         {
             get
@@ -109,6 +111,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     break;
                 case nameof(PuppetDeformation.IsEnabled):
                     OnPropertyChanged(nameof(IsEnabled));
+                    break;
+                case nameof(PuppetDeformation.BoneId):
+                    OnPropertyChanged(nameof(BoneId));
                     break;
             }
         }

@@ -15,15 +15,25 @@
         <pb:MessageBoxBehavior ViewModel="{Binding MessageBox}"/>
     </i:Interaction.Behaviors>
     <Grid>
+        <Grid.Resources>
+            <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        </Grid.Resources>
         <Grid.RowDefinitions>
+            <RowDefinition Height="26"/>
             <RowDefinition Height="{Binding Source={x:Static local:PuppetDeformationEditorSettings.Default}, Path=CanvasHeight, Mode=OneWay}"/>
             <RowDefinition Height="8"/>
             <RowDefinition Height="26"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!--編集モード切替-->
+        <UniformGrid Grid.Row="0" Rows="1" Columns="2" Margin="0,0,0,2">
+            <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Content="{x:Static local:Texts.PuppetDeformationModePin}" IsChecked="{Binding IsPinMode}"/>
+            <RadioButton Style="{StaticResource {x:Type ToggleButton}}" Content="{x:Static local:Texts.PuppetDeformationModeBone}" IsChecked="{Binding IsBoneMode}"/>
+        </UniformGrid>
+
         <!--ピン配置キャンバス-->
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="1">
             <local:PuppetPinCanvas x:Name="pinCanvas" ToolTip="{x:Static local:Texts.PuppetDeformationCanvasTooltip}"/>
             <Button Width="22" Height="22" Margin="2"
                     HorizontalAlignment="Right" VerticalAlignment="Top"
@@ -34,7 +44,7 @@
         </Grid>
 
         <!--キャンバスの高さ変更つまみ-->
-        <Thumb Grid.Row="1" Cursor="SizeNS" Margin="0,1" DragDelta="CanvasResizeThumb_DragDelta">
+        <Thumb Grid.Row="2" Cursor="SizeNS" Margin="0,1" DragDelta="CanvasResizeThumb_DragDelta">
             <Thumb.Template>
                 <ControlTemplate TargetType="{x:Type Thumb}">
                     <Border Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
@@ -42,17 +52,27 @@
             </Thumb.Template>
         </Thumb>
 
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="26"/>
-                <ColumnDefinition Width="26"/>
-            </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Content="{x:Static local:Texts.PuppetDeformationListAddPin}" Command="{Binding AddPinCommand}"/>
-            <Button Grid.Column="1" Padding="6" Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" ToolTip="{x:Static local:Texts.PuppetDeformationListRemovePin}" Command="{Binding RemovePinCommand}"/>
-            <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.Autorenew}}" ToolTip="{x:Static local:Texts.PuppetDeformationListResetMessage}" Command="{Binding ResetCommand}"/>
+        <Grid Grid.Row="3">
+            <Grid Visibility="{Binding IsPinMode, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="26"/>
+                    <ColumnDefinition Width="26"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="{x:Static local:Texts.PuppetDeformationListAddPin}" Command="{Binding AddPinCommand}"/>
+                <Button Grid.Column="1" Padding="6" Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" ToolTip="{x:Static local:Texts.PuppetDeformationListRemovePin}" Command="{Binding RemovePinCommand}"/>
+                <Button Grid.Column="2" Content="{DynamicResource {x:Static icons:IconKeys.Autorenew}}" ToolTip="{x:Static local:Texts.PuppetDeformationListResetMessage}" Command="{Binding ResetCommand}"/>
+            </Grid>
+            <Grid Visibility="{Binding IsBoneMode, Converter={StaticResource BoolToVisibility}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="26"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="{x:Static local:Texts.PuppetDeformationListAddBone}" Command="{Binding AddBoneCommand}"/>
+                <Button Grid.Column="1" Padding="6" Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" ToolTip="{x:Static local:Texts.PuppetDeformationListRemoveBone}" Command="{Binding RemoveBoneCommand}"/>
+            </Grid>
         </Grid>
-        <Grid Grid.Row="3" ClipToBounds="True">
+        <Grid Grid.Row="4" ClipToBounds="True">
             <c:PropertiesEditor x:Name="propertiesEditor" Margin="0,-22,0,0" Target="{Binding SelectedTarget}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="BeginEdit">

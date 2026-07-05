@@ -1,20 +1,28 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
+using YukkuriMovieMaker.UndoRedo;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     public class PuppetDeformation : Animatable
     {
         [JsonIgnore]
+        [IgnoreUndoRedo]
         public bool IsRestSelected { get => isRestSelected; set => Set(ref isRestSelected, value); }
         bool isRestSelected = false;
 
         [JsonIgnore]
+        [IgnoreUndoRedo]
         public bool IsOffsetSelected { get => isOffsetSelected; set => Set(ref isOffsetSelected, value); }
         bool isOffsetSelected = false;
+
+        /// <summary>このピンを駆動するボーンのId。Guid.Emptyで割り当てなし</summary>
+        public Guid BoneId { get => boneId; set => Set(ref boneId, value); }
+        Guid boneId = Guid.Empty;
 
         [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationEnabledName), Description = nameof(Texts.PuppetDeformationEnabledDesc), Order = 0, ResourceType = typeof(Texts))]
         [ToggleSlider(PropertyEditorSize = PropertyEditorSize.FullWidth)]

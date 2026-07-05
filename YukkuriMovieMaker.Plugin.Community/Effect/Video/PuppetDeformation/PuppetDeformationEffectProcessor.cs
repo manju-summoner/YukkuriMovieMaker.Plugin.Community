@@ -19,12 +19,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
     {
         const int ArapIterations = 6;
         const float ArapMinSpacing = 8f;
+        //ボーンジョイント由来の拘束点を示すPinSample.PinIndex（item.Pinsに対応しない）
+        const int JointPinIndex = -1;
         //アルファ読み戻しを行う入力サイズの上限（これを超える場合は切り離しをスキップ）
         const int ArapAlphaReadbackMaxSize = 4096;
 
         readonly PuppetDeformationEffect item = item;
         readonly float[] pinDataBuffer = new float[PuppetDeformationCustomEffect.MaxPins * 4];
         readonly bool[] offsetSelectionCache = new bool[PuppetDeformationCustomEffect.MaxPins];
+        readonly float[] boneDataBuffer = new float[PuppetDeformationEffect.BoneCapacity * 4];
+        //ピンのボーン割当（ボーンindex、未割当は-1）。ハンドル表示の切替検知に使う
+        readonly int[] pinBoneIndexCache = new int[PuppetDeformationCustomEffect.MaxPins];
 
         PuppetDeformationCustomEffect? effect;
         PuppetDeformationArapCustomEffect? arapEffect;
@@ -43,10 +48,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         bool isFirst = true;
         bool apply = true;
         PuppetDeformationAlgorithm algorithm = PuppetDeformationAlgorithm.Mls;
-        int pinCount;
+        int constraintCount;
         float stiffness;
         float imageWidth;
         float imageHeight;
+        int boneCount;
+        bool showBones;
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
@@ -61,9 +68,44 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var stiffness = (float)item.Stiffness.GetValue(frame, length, fps);
             var apply = item.ApplyDeformation;
             var algorithm = item.Algorithm;
+            var showBones = item.ShowBones;
+
+            //ボーンを評価する。回転(角度+揺れ)を親から子へ合成したワールド変換を作り、割当ピンの移動先計算に使う
+            var bones = item.Bones;
+            var boneCount = Math.Min(bones.Count, PuppetDeformationEffect.BoneCapacity);
+            var timeSec = fps > 0 ? (double)frame / fps : 0.0;
+            //1パス目: 揺れの発生源を集め、伝播込みの揺れ角度を求める（無効ボーンは揺れを発生させない）
+            var swaySamples = new List<PuppetBoneEvaluator.SwaySample>(boneCount);
+            for (var i = 0; i < boneCount; i++)
+            {
+                var bone = bones[i];
+                var swayAmp = bone.IsEnabled ? bone.SwayAngle.GetValue(frame, length, fps) : 0.0;
+                swaySamples.Add(new PuppetBoneEvaluator.SwaySample(bone.Id, bone.ParentId, swayAmp, bone.SwayPeriod, bone.SwayPhase, bone.SwayFlexibility, bone.SwayPropagation));
+            }
+            var swayAngles = PuppetBoneEvaluator.ComputeSwayAngles(swaySamples, timeSec);
+
+            //2パス目: 角度+揺れからFK用のサンプルを作る
+            var boneSamples = new List<PuppetBoneEvaluator.BoneSample>(boneCount);
+            var boneIndexById = new Dictionary<Guid, int>(boneCount);
+            for (var i = 0; i < boneCount; i++)
+            {
+                var bone = bones[i];
+                var jx = (float)bone.JointX.GetValue(frame, length, fps);
+                var jy = (float)bone.JointY.GetValue(frame, length, fps);
+                var angleRad = 0f;
+                if (bone.IsEnabled)
+                {
+                    var angleDeg = bone.Angle.GetValue(frame, length, fps);
+                    angleRad = (float)(angleDeg * Math.PI / 180) + swayAngles[i];
+                }
+                boneSamples.Add(new PuppetBoneEvaluator.BoneSample(bone.Id, bone.ParentId, new Vector2(jx, jy), angleRad));
+                boneIndexById.TryAdd(bone.Id, i);
+            }
+            var boneWorlds = PuppetBoneEvaluator.ComputeWorldTransforms(boneSamples);
 
             var pinCount = Math.Min(pins.Count, PuppetDeformationCustomEffect.MaxPins);
             var samples = new List<PinSample>(pinCount);
+            var assignmentChanged = false;
             for (var i = 0; i < pinCount; i++)
             {
                 var pin = pins[i];
@@ -71,8 +113,37 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 var ry = (float)pin.RestY.GetValue(frame, length, fps);
                 var ox = pin.IsEnabled ? (float)pin.OffsetX.GetValue(frame, length, fps) : 0f;
                 var oy = pin.IsEnabled ? (float)pin.OffsetY.GetValue(frame, length, fps) : 0f;
-                samples.Add(new PinSample(i, new Vector2(rx, ry), new Vector2(rx + ox, ry + oy), pin.IsEnabled));
+                var rest = new Vector2(rx, ry);
+                var current = new Vector2(rx + ox, ry + oy);
+                //ボーン割当ピンはレスト位置をボーンのワールド変換で回し、その上に手動オフセットを乗せる。
+                //レスト位置自体は動かさない（ARAPの行列分解キャッシュを保つため）
+                var assignedBoneIndex = -1;
+                if (pin.IsEnabled && pin.BoneId != Guid.Empty && boneIndexById.TryGetValue(pin.BoneId, out var boneIndex))
+                {
+                    assignedBoneIndex = boneIndex;
+                    current = Vector2.Transform(rest, boneWorlds[boneIndex]) + new Vector2(ox, oy);
+                }
+                //割当の変化はボーンが無回転だとピン位置に現れないため、ハンドル表示の更新用に別途検知する
+                if (pinBoneIndexCache[i] != assignedBoneIndex)
+                {
+                    pinBoneIndexCache[i] = assignedBoneIndex;
+                    assignmentChanged = true;
+                }
+                samples.Add(new PinSample(i, rest, current, pin.IsEnabled));
             }
+
+            //ボーンのジョイントを拘束点として追加する。
+            //回転していないジョイントはアンカーとして働き、回転はFKで子孫ジョイントを動かして画像を引っ張る。
+            //自身の回転はジョイント自体を動かさないため、currentには親チェーンの変換だけが乗る
+            for (var i = 0; i < boneCount; i++)
+            {
+                if (samples.Count >= PuppetDeformationCustomEffect.MaxPins)
+                    break;
+                var s = boneSamples[i];
+                var current = Vector2.Transform(s.Joint, boneWorlds[i]);
+                samples.Add(new PinSample(JointPinIndex, s.Joint, current, true));
+            }
+            var constraintCount = samples.Count;
 
             var inputBounds = deviceContext is not null && input is not null
                 ? deviceContext.GetImageLocalBounds(input)
@@ -82,21 +153,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
             var useArap = algorithm == PuppetDeformationAlgorithm.Arap
                 && arapEffect is not null
-                && pinCount > 0
+                && constraintCount > 0
                 && imageWidth > 0
                 && imageHeight > 0;
 
             //選択状態の変化はコントローラー表示にのみ影響するため、GPU側の更新とは別に検知する
             var selectionChanged = UpdateOffsetSelectionCache(pins, pinCount);
 
-            if (isFirst
+            var gpuDirty = isFirst
                 || this.algorithm != algorithm
-                || this.pinCount != pinCount
+                || this.constraintCount != constraintCount
                 || this.stiffness != stiffness
                 || this.imageWidth != imageWidth
                 || this.imageHeight != imageHeight
                 || this.apply != apply
-                || !PinSamplesMatchBuffer(samples))
+                || !PinSamplesMatchBuffer(samples);
+            //ピンが割り当てられていないボーンの変化はGPU側に影響しないため、コントローラー再構築のみ行う
+            var bonesDirty = isFirst
+                || this.showBones != showBones
+                || this.boneCount != boneCount
+                || !BoneSamplesMatchBuffer(boneSamples, boneIndexById);
+
+            if (gpuDirty)
             {
                 if (useArap)
                 {
@@ -116,7 +194,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
                     effect.PinData = gpuCache.PinData;
                     //変形オフ時はPinCount=0を送り、シェーダー側で変形せず入力をそのまま出力する。
-                    effect.PinCount = apply ? pinCount : 0;
+                    effect.PinCount = apply ? constraintCount : 0;
                     effect.Stiffness = stiffness;
 
                     if (apply)
@@ -136,23 +214,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                         effect.TightLocalBottom = 0;
                     }
                 }
-
-                cachedControllers = [.. BuildControllers(samples)];
             }
-            else if (selectionChanged)
+
+            if (gpuDirty || bonesDirty || selectionChanged || assignmentChanged)
             {
-                cachedControllers = [.. BuildControllers(samples)];
+                FillBoneDataBuffer(boneSamples, boneIndexById);
+                cachedControllers = [.. BuildControllers(pins, samples, bones, boneSamples, boneWorlds, showBones)];
             }
 
             SetWiring(useArap);
 
             isFirst = false;
             this.algorithm = algorithm;
-            this.pinCount = pinCount;
+            this.constraintCount = constraintCount;
             this.stiffness = stiffness;
             this.imageWidth = imageWidth;
             this.imageHeight = imageHeight;
             this.apply = apply;
+            this.boneCount = boneCount;
+            this.showBones = showBones;
 
             return effectDescription.DrawDescription with
             {
@@ -186,6 +266,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 if (pinDataBuffer[i * 4 + 3] != s.Current.Y) return false;
             }
             return true;
+        }
+
+        bool BoneSamplesMatchBuffer(List<PuppetBoneEvaluator.BoneSample> samples, Dictionary<Guid, int> indexById)
+        {
+            for (var i = 0; i < samples.Count; i++)
+            {
+                var s = samples[i];
+                var parentIndex = indexById.TryGetValue(s.ParentId, out var pi) ? pi : -1;
+                if (boneDataBuffer[i * 4 + 0] != s.Joint.X) return false;
+                if (boneDataBuffer[i * 4 + 1] != s.Joint.Y) return false;
+                if (boneDataBuffer[i * 4 + 2] != s.AngleRadians) return false;
+                if (boneDataBuffer[i * 4 + 3] != parentIndex) return false;
+            }
+            return true;
+        }
+
+        void FillBoneDataBuffer(List<PuppetBoneEvaluator.BoneSample> samples, Dictionary<Guid, int> indexById)
+        {
+            for (var i = 0; i < samples.Count; i++)
+            {
+                var s = samples[i];
+                var parentIndex = indexById.TryGetValue(s.ParentId, out var pi) ? pi : -1;
+                boneDataBuffer[i * 4 + 0] = s.Joint.X;
+                boneDataBuffer[i * 4 + 1] = s.Joint.Y;
+                boneDataBuffer[i * 4 + 2] = s.AngleRadians;
+                boneDataBuffer[i * 4 + 3] = parentIndex;
+            }
+            Array.Clear(boneDataBuffer, samples.Count * 4, (PuppetDeformationEffect.BoneCapacity - samples.Count) * 4);
         }
 
         void FillPinDataBuffer(List<PinSample> samples)
@@ -430,19 +538,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             return new PinGpuCache(pinData, tightBounds);
         }
 
-        List<VideoEffectController> BuildControllers(List<PinSample> samples)
+        //ピン・ボーンのリストは編集操作で別スレッドから差し替わる可能性があるため、
+        //Update冒頭で取得したスナップショットを受け取り、item.Pins/item.Bonesを再取得しない
+        List<VideoEffectController> BuildControllers(
+            ImmutableList<PuppetDeformation> pins,
+            List<PinSample> samples,
+            ImmutableList<PuppetBone> bones,
+            List<PuppetBoneEvaluator.BoneSample> boneSamples,
+            Matrix3x2[] boneWorlds,
+            bool showBones)
         {
             //基準ピンの編集はアイテム編集UIのピン配置キャンバスで行うため、
             //プレビュー上は移動ピンの操作に絞って表示を簡素化する
-            var controllers = new List<VideoEffectController>(samples.Count * 2);
+            var controllers = new List<VideoEffectController>(samples.Count * 2 + boneSamples.Count * 2);
+
+            if (showBones)
+                AddBoneControllers(controllers, pins, bones, boneSamples, boneWorlds);
 
             //選択ハイライトは複数選択の把握が目的のため、1本だけの選択では表示しない
-            var selectedOffsetCount = item.Pins.Count(p => p.IsOffsetSelected);
+            var selectedOffsetCount = pins.Count(p => p.IsOffsetSelected);
             var showSelectionHighlight = selectedOffsetCount > 1;
 
             foreach (var s in samples)
             {
-                var pin = item.Pins[s.PinIndex];
+                //ジョイント由来の拘束点はボーン側のコントローラーで操作するため、ピン用の表示は出さない
+                if (s.PinIndex == JointPinIndex)
+                    continue;
+
+                var pin = pins[s.PinIndex];
 
                 if (!s.IsEnabled)
                 {
@@ -485,6 +608,80 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
 
             return controllers;
+        }
+
+        /// <summary>
+        /// ボーンの回転ハンドルをプレビューに追加する。
+        /// ジョイントから伸びるレバーの先端をドラッグすると角度が変わる。
+        /// </summary>
+        void AddBoneControllers(
+            List<VideoEffectController> controllers,
+            ImmutableList<PuppetDeformation> pins,
+            ImmutableList<PuppetBone> bones,
+            List<PuppetBoneEvaluator.BoneSample> boneSamples,
+            Matrix3x2[] boneWorlds)
+        {
+            //子ボーンを持たないボーンのレバー長(px)
+            const float LeverLength = 80f;
+
+            for (var i = 0; i < boneSamples.Count; i++)
+            {
+                var bone = bones[i];
+                var s = boneSamples[i];
+                var world = boneWorlds[i];
+                var jointWorld = Vector2.Transform(s.Joint, world);
+
+                //レバー先端は子ボーンのジョイント。子がいない(またはジョイントが重なる)場合は+X方向の固定長レバー
+                var tipRest = s.Joint + new Vector2(LeverLength, 0f);
+                var hasChild = false;
+                for (var c = 0; c < boneSamples.Count; c++)
+                {
+                    if (c == i || boneSamples[c].ParentId != s.Id)
+                        continue;
+                    hasChild = true;
+                    if (Vector2.DistanceSquared(boneSamples[c].Joint, s.Joint) > 1f)
+                    {
+                        tipRest = boneSamples[c].Joint;
+                        break;
+                    }
+                }
+
+                //回しても何も動かないボーン（無効、または子ボーンも割当ピンもない末端）はハンドルを出さずマーカーのみ表示する
+                var canRotate = bone.IsEnabled
+                    && (hasChild || pins.Any(p => p.IsEnabled && p.BoneId == s.Id));
+                if (!canRotate)
+                {
+                    controllers.Add(new VideoEffectController(item, [
+                        new ControllerPoint(new Vector3(jointWorld.X, jointWorld.Y, 0f)) { Shape = VideoControllerPointShape.SmallCircle }
+                    ]));
+                    continue;
+                }
+
+                var tipWorld = Vector2.Transform(tipRest, world);
+
+                controllers.Add(new VideoEffectController(item, [
+                    new ControllerPoint(new Vector3(jointWorld.X, jointWorld.Y, 0f)) { Shape = VideoControllerPointShape.SmallCircle },
+                    new ControllerPoint(new Vector3(tipWorld.X, tipWorld.Y, 0f)),
+                ])
+                { Connection = VideoControllerPointConnection.Line });
+
+                var handlePoint = new ControllerPoint(
+                    new Vector3(tipWorld.X, tipWorld.Y, 0f),
+                    arg =>
+                    {
+                        //先端の移動をジョイント周りの回転角に変換する。
+                        //角度変更→次フレームでコントローラーが再構築されるため、各イベントの差分だけ加算すればよい
+                        var baseAngle = Math.Atan2(tipWorld.Y - jointWorld.Y, tipWorld.X - jointWorld.X);
+                        var movedAngle = Math.Atan2(tipWorld.Y + arg.Delta.Y - jointWorld.Y, tipWorld.X + arg.Delta.X - jointWorld.X);
+                        var deltaDeg = (movedAngle - baseAngle) * 180.0 / Math.PI;
+                        deltaDeg = ((deltaDeg + 540.0) % 360.0) - 180.0;
+                        bone.Angle.AddToEachValues(deltaDeg);
+                    })
+                {
+                    Shape = VideoControllerPointShape.Circle
+                };
+                controllers.Add(new VideoEffectController(item, [handlePoint]));
+            }
         }
 
         void ApplyOffsetDelta(PuppetDeformation source, double deltaX, double deltaY)

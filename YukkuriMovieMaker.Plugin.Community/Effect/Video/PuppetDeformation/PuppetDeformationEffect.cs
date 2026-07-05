@@ -13,13 +13,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
     public sealed class PuppetDeformationEffect : VideoEffectBase
     {
         public const int PinCapacity = PuppetDeformationCustomEffect.MaxPins;
+        public const int BoneCapacity = 64;
 
         public override string Label
         {
             get
             {
                 var active = Pins.Count(p => p.IsEnabled);
-                return $"{Texts.PuppetDeformationEffectName} - {Texts.PuppetDeformationLabelMove}: {active} {Texts.PuppetDeformationLabelAnchor}: {Pins.Count}";
+                var label = $"{Texts.PuppetDeformationEffectName} - {Texts.PuppetDeformationLabelMove}: {active} {Texts.PuppetDeformationLabelAnchor}: {Pins.Count}";
+                if (Bones.Count > 0)
+                    label += $" {Texts.PuppetDeformationLabelBone}: {Bones.Count}";
+                return label;
             }
         }
 
@@ -51,6 +55,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         }
         PuppetDeformationEditorPointsSync syncMode = PuppetDeformationEditorPointsSync.Distance;
 
+        [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationShowBonesName), Description = nameof(Texts.PuppetDeformationShowBonesDesc), Order = 6, ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool ShowBones { get => showBones; set => Set(ref showBones, value); }
+        bool showBones = true;
+
         [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Description = nameof(Texts.PuppetDeformationListPinsDesc), Order = 10, ResourceType = typeof(Texts))]
         [PuppetDeformationListEditor]
         public ImmutableList<PuppetDeformation> Pins
@@ -63,6 +72,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
         }
         ImmutableList<PuppetDeformation> pins = ImmutableList<PuppetDeformation>.Empty;
+
+        /// <summary>ボーン一覧。編集UIはピン一覧と同じPuppetDeformationListEditorが担当する</summary>
+        public ImmutableList<PuppetBone> Bones
+        {
+            get => bones;
+            set
+            {
+                if (Set(ref bones, value ?? ImmutableList<PuppetBone>.Empty))
+                    OnPropertyChanged(nameof(Label));
+            }
+        }
+        ImmutableList<PuppetBone> bones = ImmutableList<PuppetBone>.Empty;
 
         public PuppetDeformationEffect()
         {
@@ -83,12 +104,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             yield return Stiffness;
             foreach (var pin in Pins)
-            {
-                yield return pin.RestX;
-                yield return pin.RestY;
-                yield return pin.OffsetX;
-                yield return pin.OffsetY;
-            }
+                yield return pin;
+            foreach (var bone in Bones)
+                yield return bone;
         }
     }
 }
