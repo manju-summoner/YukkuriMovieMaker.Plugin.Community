@@ -132,6 +132,18 @@
     <FxCompile Include="MotionBlur.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="NtscRasterize.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="NtscEncode.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="NtscDecode.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="NtscRestore.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="EdgeGlow.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>

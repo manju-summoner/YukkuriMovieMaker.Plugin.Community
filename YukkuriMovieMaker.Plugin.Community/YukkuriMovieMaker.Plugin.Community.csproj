@@ -166,6 +166,10 @@
 	  <Resource Include="$(ShaderDirPath)PixelizeTransition.cso" Link="Resources\Shader\PixelizeTransition.cso" />
 	  <Resource Include="$(ShaderDirPath)PageTurnTransition.cso" Link="Resources\Shader\PageTurnTransition.cso" />
 	  <Resource Include="$(ShaderDirPath)MotionBlur.cso" Link="Resources\Shader\MotionBlur.cso" />
+	  <Resource Include="$(ShaderDirPath)NtscRasterize.cso" Link="Resources\Shader\NtscRasterize.cso" />
+	  <Resource Include="$(ShaderDirPath)NtscEncode.cso" Link="Resources\Shader\NtscEncode.cso" />
+	  <Resource Include="$(ShaderDirPath)NtscDecode.cso" Link="Resources\Shader\NtscDecode.cso" />
+	  <Resource Include="$(ShaderDirPath)NtscRestore.cso" Link="Resources\Shader\NtscRestore.cso" />
 	  <Resource Include="$(ShaderDirPath)FillSamegroundShader.cso" Link="Resources\Shader\FillSamegroundShader.cso" />
 	  <Resource Include="$(ShaderDirPath)PuppetDeformation.cso" Link="Resources\Shader\PuppetDeformation.cso" />
 	  <Resource Include="$(ShaderDirPath)PuppetDeformationArap.cso" Link="Resources\Shader\PuppetDeformationArap.cso" />
