@@ -469,6 +469,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     viewModel.AddBoneFromCanvas(local.X, local.Y);
                 }
 
+                //ボーン一覧の再構築でホバー対象のViewModelは破棄されるため、参照が残らないようクリアする
+                ClearHover();
+
                 //追加でボーン一覧が再構築されるため、追加されたボーンを取り直してそのままドラッグできるようにする
                 hitBone = HitTestBone(pos, layout);
                 if (hitBone is null)
