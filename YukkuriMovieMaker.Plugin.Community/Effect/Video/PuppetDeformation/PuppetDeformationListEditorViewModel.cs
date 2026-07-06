@@ -172,8 +172,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 //生成されるBitmapSourceはCPU側の完全なコピー(frozen BitmapImage)のため、
                 //デバイス一式を含むソースはレンダリング後すぐ破棄する。
                 //保持するとエディタを開いたままアプリを終了した際に未解放オブジェクトとして残る
+                //ジョイント/ピン座標はエフェクト入力のローカル空間(等倍・無回転)のため、
+                //アイテムの描画変換(拡大率・回転)を適用しない画像を取得して座標系を一致させる
                 using var itemVideoSource = editorInfo.CreateItemVideoSource(
-                    new ItemVideoSourceCreationParameter(VideoEffectSelection.UpTo(Effect)));
+                    new ItemVideoSourceCreationParameter(VideoEffectSelection.UpTo(Effect)) { ApplyItemTransform = false });
                 if (itemVideoSource is null)
                 {
                     CanvasImage = null;
