@@ -7,6 +7,7 @@ using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Shape;
+using YukkuriMovieMaker.Project;
 
 namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
 {

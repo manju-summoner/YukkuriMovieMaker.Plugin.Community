@@ -3,6 +3,7 @@ using Vortice;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Player.Video.Effects;
 using YukkuriMovieMaker.Plugin.Community.Transition.PageTurn;
 using D2D = Vortice.Direct2D1;
 
