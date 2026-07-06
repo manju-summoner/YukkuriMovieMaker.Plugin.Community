@@ -9,8 +9,9 @@ using D2D = Vortice.Direct2D1;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PageTurn
 {
-    internal class InOutPageTurnEffectProcessor(IGraphicsDevicesAndContext devices, InOutPageTurnEffect item) : InOutEffectBase<InOutPageTurnEffect>(devices, item)
+    internal class InOutPageTurnEffectProcessor(IGraphicsDevicesAndContext devices, InOutPageTurnEffect pageTurnItem) : InOutEffectBase<InOutPageTurnEffect>(devices, pageTurnItem)
     {
+        //本体のitem参照は基底InOutEffectBase<T>のprotectedフィールドに解決される（primary ctorパラメータで二重に保持しない）
         readonly IGraphicsDevicesAndContext devices = devices;
 
         PageTurnCustomEffect effect = null!;
