@@ -81,6 +81,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         const double ZoomStep = 1.2;
         //中ドラッグでパンと判定するまでの移動しきい値（px）。これ未満なら中クリック=削除として扱う
         const double PanThreshold = 3.0;
+        //オーバーレイ表示するスクロールバーの太さ（px）。XAMLのScrollBarのWidth/Heightと一致させること
+        const double ScrollBarThickness = 17.0;
+        //バーが出ている辺で確保する掴みしろ（px）。端のピンをバーより内側へ完全に出してクリック/ドラッグできるようにする
+        const double ScrollClearMargin = PinHitRadius + 4;
         //表示の拡大率（フィット表示=1.0）。スクロール位置はScrollOffsetX/Yで持つ
         double zoom = 1.0;
         //画像サイズが変わったとき（別画像に差し替え時）に全体表示へ戻すための記録
@@ -354,9 +358,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         #region 座標変換
 
         //レイアウト計算の中間結果。フィット×ズームの実スケールと、スクロール範囲の元になるコンテンツ矩形を持つ。
+        //ViewportW/Hはオーバーレイのスクロールバーぶんだけキャンバスサイズから狭めた「有効ビューポート」。
+        //NeedH/NeedVはそれぞれ横/縦スクロールバーの要否。
         readonly record struct ViewMetrics(
             double Scale, Rect ContentLocal, double ImageWidth, double ImageHeight,
-            double ViewportW, double ViewportH, double ExtentW, double ExtentH);
+            double ViewportW, double ViewportH, double ExtentW, double ExtentH, bool NeedH, bool NeedV);
 
         ViewMetrics? GetMetrics()
         {
@@ -369,16 +375,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (iw <= 0 || ih <= 0)
                 return null;
 
-            double vpW = RenderSize.Width, vpH = RenderSize.Height;
+            //オーバーレイのスクロールバーはレイアウト領域を専有しないため、キャンバス全体がビューポート。
+            //フィット倍率もこの一定サイズを基準にするので、バー要否でextentが変わらず点滅しない。
+            double fullW = RenderSize.Width, fullH = RenderSize.Height;
             //ズーム1.0＝画像全体がちょうど収まるフィット表示
-            var fitScale = Math.Min(vpW / iw, vpH / ih);
+            var fitScale = Math.Min(fullW / iw, fullH / ih);
             var scale = fitScale * zoom;
 
             //画像とすべてのピン/ジョイントを含む範囲。画面外のピンもスクロールで辿れるようにする。
             //余白は付けない（フィット表示かつ画面外ピンが無ければスクロールの余地=0となり、バーを出さない）。
             var content = GetContentLocalBounds(iw, ih);
+            double extentW = content.Width * scale;
+            double extentH = content.Height * scale;
 
-            return new ViewMetrics(scale, content, iw, ih, vpW, vpH, content.Width * scale, content.Height * scale);
+            //スクロールバーは内容の一部を覆うため、バーが出る辺は「太さ＋掴みしろ」ぶん有効ビューポートを狭める。
+            //これにより覆われた位置のピンも、最大スクロールでバーより内側へ完全に出せる（端のピンが半分潜らない）。
+            //要否は一定のextentに対して2パスで解くので、片方のバー出現がもう片方を誘発しても収束し点滅しない。
+            const double reserve = ScrollBarThickness + ScrollClearMargin;
+            bool needV = extentH > fullH + 0.5;
+            bool needH = extentW > fullW + 0.5;
+            if (needV && !needH) needH = extentW > fullW - reserve + 0.5;
+            if (needH && !needV) needV = extentH > fullH - reserve + 0.5;
+            double effW = fullW - (needV ? reserve : 0);
+            double effH = fullH - (needH ? reserve : 0);
+
+            return new ViewMetrics(scale, content, iw, ih, effW, effH, extentW, extentH, needH, needV);
         }
 
         //画像矩形とすべてのピン/ジョイントを内包するローカル座標の範囲（画像中心を原点とする座標系）
@@ -446,8 +467,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             ScrollMaxY = maxY;
             ScrollViewportW = m.ViewportW;
             ScrollViewportH = m.ViewportH;
-            HScrollVisibility = maxX > 0.5 ? Visibility.Visible : Visibility.Collapsed;
-            VScrollVisibility = maxY > 0.5 ? Visibility.Visible : Visibility.Collapsed;
+            //可視性は要否フラグを正とする（有効ビューポートと整合し、maxの丸め誤差に左右されない）
+            HScrollVisibility = m.NeedH ? Visibility.Visible : Visibility.Collapsed;
+            VScrollVisibility = m.NeedV ? Visibility.Visible : Visibility.Collapsed;
 
             if (pendingResetView)
             {
