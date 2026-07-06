@@ -290,6 +290,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             EndEdit?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// 既存の親子リンク（線分）上に新しいジョイントを挿入してボーンを分割する。
+        /// 新ジョイントは分割対象の子の親を引き継ぎ、子は新ジョイントに付け替える。
+        /// </summary>
+        public void InsertBoneOnSegmentFromCanvas(PuppetBoneViewModel childVm, double jointX, double jointY)
+        {
+            if (!CanAddBone)
+                return;
+            var child = childVm.Model;
+            if (!Effect.Bones.Contains(child))
+                return;
+            BeginEdit?.Invoke(this, EventArgs.Empty);
+            foreach (var b in Effect.Bones)
+                b.IsSelected = false;
+            //新ジョイントは元の親の子として挿入し、既存の子をその下へ付け替える
+            var inserted = PuppetBone.Create(jointX, jointY, child.ParentId);
+            inserted.IsSelected = true;
+            child.ParentId = inserted.Id;
+            CommitBonesChange(Effect.Bones.Add(inserted));
+            EndEdit?.Invoke(this, EventArgs.Empty);
+        }
+
         public void RemoveBoneFromCanvas(PuppetBoneViewModel vm) => RemoveBoneCore(vm.Model);
 
         public void RemoveSelectedBoneFromCanvas()

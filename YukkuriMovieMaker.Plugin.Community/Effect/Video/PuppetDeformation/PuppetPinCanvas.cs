@@ -12,7 +12,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
     /// <summary>
     /// アイテムの画像を表示し、基準ピンの追加・移動・削除を行うキャンバス。
     /// ピンモード: クリックでピン追加、ドラッグで基準位置の移動、右クリックまたはDeleteキーで削除。
-    /// ボーンモード: クリックでボーン追加（選択中ボーンの子）、ピンをクリックで割当切替、ドラッグでジョイント移動。
+    /// ボーンモード: クリックでボーン追加（選択中ボーンの子）、ボーン（親子リンクの線）をクリックでジョイント挿入（分割）、
+    /// ピンをクリックで割当切替、ドラッグでジョイント移動。
     /// 移動ピン（オフセット）とボーンの回転はメインプレビュー側で行う。
     /// </summary>
     internal sealed class PuppetPinCanvas : FrameworkElement
@@ -21,6 +22,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         const double PinHitRadius = 9.0;
         const double BoneRadius = 6.5;
         const double BoneHitRadius = 10.0;
+        //親子リンク（線分）へのクリック判定距離。ジョイント判定を優先するためやや小さめにする
+        const double BoneSegmentHitRadius = 6.0;
 
         static readonly System.Windows.Media.Brush CheckerBrush = CreateCheckerBrush();
         static readonly System.Windows.Media.Brush PinFillBrush = CreateFrozenBrush(Color.FromRgb(0x2E, 0x86, 0xFF));
@@ -31,6 +34,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         static readonly System.Windows.Media.Brush BoneFillBrush = CreateFrozenBrush(Color.FromRgb(0xFF, 0x95, 0x00));
         static readonly System.Windows.Media.Brush DisabledBoneFillBrush = CreateFrozenBrush(Color.FromArgb(0xA0, 0x80, 0x80, 0x80));
         static readonly Pen BoneLinkPen = CreateFrozenPen(Color.FromArgb(0xC0, 0xFF, 0x95, 0x00), 2.0);
+        //ジョイント挿入のためにホバー中の親子リンクを強調する線と、挿入位置に出す半透明のプレビュー
+        static readonly Pen BoneSegmentHighlightPen = CreateFrozenPen(Color.FromRgb(0xFF, 0xC1, 0x66), 3.0);
+        static readonly System.Windows.Media.Brush BoneInsertGhostBrush = CreateFrozenBrush(Color.FromArgb(0xB0, 0xFF, 0xC1, 0x66));
         static readonly Pen AssignedPinPen = CreateFrozenPen(Color.FromRgb(0xFF, 0x95, 0x00), 2.0);
         //ボーンと割当ピンをつなぐ点線
         static readonly Pen BonePinLinkPen = CreateFrozenDashedPen(Color.FromArgb(0xB0, 0xFF, 0x95, 0x00), 1.5);
@@ -55,6 +61,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         PuppetDeformationItemViewModel? hoveredPin;
         PuppetBoneViewModel? hoveredBone;
+        //ジョイント挿入プレビュー：ホバー中の親子リンクの子ボーンと、線上に投影した挿入位置（表示座標）
+        PuppetBoneViewModel? hoveredSegmentBone;
+        Point hoveredSegmentPoint;
 
         public PuppetPinCanvas()
         {
@@ -306,6 +315,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 drawingContext.DrawLine(BoneLinkPen, from, to);
             }
 
+            //ジョイント挿入のプレビュー：ホバー中の親子リンクを強調し、挿入位置に半透明のジョイントを描く
+            if (IsBoneMode && hoveredSegmentBone is not null)
+            {
+                var child = hoveredSegmentBone;
+                var parent = bones.FirstOrDefault(b => b.Model.Id == child.Model.ParentId && b != child);
+                if (parent is not null)
+                {
+                    var from = LocalToDisplay(GetJointPoint(parent), layout);
+                    var to = LocalToDisplay(GetJointPoint(child), layout);
+                    drawingContext.DrawLine(BoneSegmentHighlightPen, from, to);
+                    var ghost = CreateDiamondGeometry(hoveredSegmentPoint, BoneRadius);
+                    drawingContext.DrawGeometry(BoneInsertGhostBrush, PinStrokePen, ghost);
+                }
+            }
+
             //ジョイント（ひし形）
             foreach (var bone in bones)
             {
@@ -431,8 +455,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
                 if (!viewModel.CanAddBone)
                     return;
-                var local = DisplayToLocal(pos, layout);
-                viewModel.AddBoneFromCanvas(local.X, local.Y);
+
+                //親子リンク（線分）の上ならジョイントを挿入して分割、そうでなければ新規ボーンを追加する
+                var segment = HitTestBoneSegment(pos, layout);
+                if (segment is not null)
+                {
+                    var insertLocal = DisplayToLocal(segment.Value.Display, layout);
+                    viewModel.InsertBoneOnSegmentFromCanvas(segment.Value.Bone, insertLocal.X, insertLocal.Y);
+                }
+                else
+                {
+                    var local = DisplayToLocal(pos, layout);
+                    viewModel.AddBoneFromCanvas(local.X, local.Y);
+                }
 
                 //追加でボーン一覧が再構築されるため、追加されたボーンを取り直してそのままドラッグできるようにする
                 hitBone = HitTestBone(pos, layout);
@@ -519,31 +554,47 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             PuppetBoneViewModel? bone = null;
             PuppetDeformationItemViewModel? pin = null;
+            PuppetBoneViewModel? segmentBone = null;
+            var segmentPoint = default(Point);
             if (IsBoneMode)
             {
-                //ボーンモードではピンも割当切替のクリック対象なので、両方ホバー表示する
+                //ボーンモードではジョイント→ピン→親子リンクの順でホバー対象を判定する
                 bone = HitTestBone(pos, layout);
                 if (bone is null)
+                {
                     pin = HitTestPin(pos, layout);
+                    if (pin is null)
+                    {
+                        var segment = HitTestBoneSegment(pos, layout);
+                        if (segment is not null)
+                        {
+                            segmentBone = segment.Value.Bone;
+                            segmentPoint = segment.Value.Display;
+                        }
+                    }
+                }
             }
             else
             {
                 pin = HitTestPin(pos, layout);
             }
 
-            if (bone == hoveredBone && pin == hoveredPin)
+            if (bone == hoveredBone && pin == hoveredPin && segmentBone == hoveredSegmentBone && segmentPoint == hoveredSegmentPoint)
                 return;
             hoveredBone = bone;
             hoveredPin = pin;
+            hoveredSegmentBone = segmentBone;
+            hoveredSegmentPoint = segmentPoint;
             InvalidateVisual();
         }
 
         void ClearHover()
         {
-            if (hoveredBone is null && hoveredPin is null)
+            if (hoveredBone is null && hoveredPin is null && hoveredSegmentBone is null)
                 return;
             hoveredBone = null;
             hoveredPin = null;
+            hoveredSegmentBone = null;
             InvalidateVisual();
         }
 
@@ -672,6 +723,51 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 }
             }
             return nearest;
+        }
+
+        /// <summary>
+        /// 親子リンク（線分）へのヒットテスト。ヒットした場合は分割対象の子ボーンと、
+        /// 線分上に投影した挿入位置（表示座標）を返す。ジョイント自体はここでは対象にしない。
+        /// </summary>
+        (PuppetBoneViewModel Bone, Point Display)? HitTestBoneSegment(Point display, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        {
+            PuppetBoneViewModel? nearest = null;
+            var nearestProjection = default(Point);
+            var nearestDistSq = BoneSegmentHitRadius * BoneSegmentHitRadius;
+            //後に描画される（手前の）ボーンのリンクを優先する
+            for (var i = bones.Count - 1; i >= 0; i--)
+            {
+                var bone = bones[i];
+                if (bone.Model.ParentId == Guid.Empty)
+                    continue;
+                var parent = bones.FirstOrDefault(b => b.Model.Id == bone.Model.ParentId && b != bone);
+                if (parent is null)
+                    continue;
+                var a = LocalToDisplay(GetJointPoint(parent), layout);
+                var b2 = LocalToDisplay(GetJointPoint(bone), layout);
+                var projection = ClosestPointOnSegment(display, a, b2);
+                var dx = projection.X - display.X;
+                var dy = projection.Y - display.Y;
+                var distSq = dx * dx + dy * dy;
+                if (distSq <= nearestDistSq)
+                {
+                    nearestDistSq = distSq;
+                    nearest = bone;
+                    nearestProjection = projection;
+                }
+            }
+            return nearest is null ? null : (nearest, nearestProjection);
+        }
+
+        static Point ClosestPointOnSegment(Point p, Point a, Point b)
+        {
+            var abx = b.X - a.X;
+            var aby = b.Y - a.Y;
+            var lengthSq = abx * abx + aby * aby;
+            if (lengthSq <= 1e-9)
+                return a;
+            var t = Math.Clamp(((p.X - a.X) * abx + (p.Y - a.Y) * aby) / lengthSq, 0.0, 1.0);
+            return new Point(a.X + abx * t, a.Y + aby * t);
         }
 
         #endregion
