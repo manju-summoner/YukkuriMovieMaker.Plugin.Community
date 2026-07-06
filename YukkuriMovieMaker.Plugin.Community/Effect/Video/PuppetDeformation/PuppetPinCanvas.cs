@@ -73,6 +73,126 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         PuppetBoneViewModel? hoveredSegmentBone;
         Point hoveredSegmentPoint;
 
+        //ズーム・パン（表示の拡大率と表示位置）。全体フィット表示を1.0とする拡大率と、
+        //スクロール位置（コンテンツ左上からの表示px。ScrollOffsetX/Yと連動）で表示範囲を決める。
+        const double MinZoom = 0.25;
+        const double MaxZoom = 16.0;
+        //ホイール1ノッチあたりの拡大率の倍率
+        const double ZoomStep = 1.2;
+        //中ドラッグでパンと判定するまでの移動しきい値（px）。これ未満なら中クリック=削除として扱う
+        const double PanThreshold = 3.0;
+        //表示の拡大率（フィット表示=1.0）。スクロール位置はScrollOffsetX/Yで持つ
+        double zoom = 1.0;
+        //画像サイズが変わったとき（別画像に差し替え時）に全体表示へ戻すための記録
+        Size lastImageSize = Size.Empty;
+        //レイアウト確定前にResetViewが呼ばれた場合、サイズ確定時に中央寄せを適用するための予約
+        bool pendingResetView = true;
+
+        bool isPanning;
+        bool panMoved;
+        Point lastPanPosition;
+
+        /// <summary>横スクロールバーの現在位置（コンテンツ左端からの表示px）。ScrollBar.ValueとTwoWayで連動する。</summary>
+        public double ScrollOffsetX
+        {
+            get => (double)GetValue(ScrollOffsetXProperty);
+            set => SetValue(ScrollOffsetXProperty, value);
+        }
+        public static readonly DependencyProperty ScrollOffsetXProperty =
+            DependencyProperty.Register(nameof(ScrollOffsetX), typeof(double), typeof(PuppetPinCanvas),
+                new FrameworkPropertyMetadata(0.0, OnScrollOffsetChanged, CoerceScrollOffsetX));
+
+        /// <summary>縦スクロールバーの現在位置（コンテンツ上端からの表示px）。ScrollBar.ValueとTwoWayで連動する。</summary>
+        public double ScrollOffsetY
+        {
+            get => (double)GetValue(ScrollOffsetYProperty);
+            set => SetValue(ScrollOffsetYProperty, value);
+        }
+        public static readonly DependencyProperty ScrollOffsetYProperty =
+            DependencyProperty.Register(nameof(ScrollOffsetY), typeof(double), typeof(PuppetPinCanvas),
+                new FrameworkPropertyMetadata(0.0, OnScrollOffsetChanged, CoerceScrollOffsetY));
+
+        /// <summary>横スクロールの最大値（ScrollBar.Maximum）。</summary>
+        public double ScrollMaxX
+        {
+            get => (double)GetValue(ScrollMaxXProperty);
+            private set => SetValue(ScrollMaxXPropertyKey, value);
+        }
+        static readonly DependencyPropertyKey ScrollMaxXPropertyKey =
+            DependencyProperty.RegisterReadOnly(nameof(ScrollMaxX), typeof(double), typeof(PuppetPinCanvas),
+                new FrameworkPropertyMetadata(0.0, OnScrollMaxXChanged));
+        public static readonly DependencyProperty ScrollMaxXProperty = ScrollMaxXPropertyKey.DependencyProperty;
+
+        /// <summary>縦スクロールの最大値（ScrollBar.Maximum）。</summary>
+        public double ScrollMaxY
+        {
+            get => (double)GetValue(ScrollMaxYProperty);
+            private set => SetValue(ScrollMaxYPropertyKey, value);
+        }
+        static readonly DependencyPropertyKey ScrollMaxYPropertyKey =
+            DependencyProperty.RegisterReadOnly(nameof(ScrollMaxY), typeof(double), typeof(PuppetPinCanvas),
+                new FrameworkPropertyMetadata(0.0, OnScrollMaxYChanged));
+        public static readonly DependencyProperty ScrollMaxYProperty = ScrollMaxYPropertyKey.DependencyProperty;
+
+        /// <summary>横スクロールバーのつまみ比率に使うビューポート幅（ScrollBar.ViewportSize）。</summary>
+        public double ScrollViewportW
+        {
+            get => (double)GetValue(ScrollViewportWProperty);
+            private set => SetValue(ScrollViewportWPropertyKey, value);
+        }
+        static readonly DependencyPropertyKey ScrollViewportWPropertyKey =
+            DependencyProperty.RegisterReadOnly(nameof(ScrollViewportW), typeof(double), typeof(PuppetPinCanvas),
+                new FrameworkPropertyMetadata(0.0));
+        public static readonly DependencyProperty ScrollViewportWProperty = ScrollViewportWPropertyKey.DependencyProperty;
+
+        /// <summary>縦スクロールバーのつまみ比率に使うビューポート高さ（ScrollBar.ViewportSize）。</summary>
+        public double ScrollViewportH
+        {
+            get => (double)GetValue(ScrollViewportHProperty);
+            private set => SetValue(ScrollViewportHPropertyKey, value);
+        }
+        static readonly DependencyPropertyKey ScrollViewportHPropertyKey =
+            DependencyProperty.RegisterReadOnly(nameof(ScrollViewportH), typeof(double), typeof(PuppetPinCanvas),
+                new FrameworkPropertyMetadata(0.0));
+        public static readonly DependencyProperty ScrollViewportHProperty = ScrollViewportHPropertyKey.DependencyProperty;
+
+        /// <summary>横スクロールバーの表示/非表示（スクロールの余地があるときだけ表示）。</summary>
+        public Visibility HScrollVisibility
+        {
+            get => (Visibility)GetValue(HScrollVisibilityProperty);
+            private set => SetValue(HScrollVisibilityPropertyKey, value);
+        }
+        static readonly DependencyPropertyKey HScrollVisibilityPropertyKey =
+            DependencyProperty.RegisterReadOnly(nameof(HScrollVisibility), typeof(Visibility), typeof(PuppetPinCanvas),
+                new FrameworkPropertyMetadata(Visibility.Collapsed));
+        public static readonly DependencyProperty HScrollVisibilityProperty = HScrollVisibilityPropertyKey.DependencyProperty;
+
+        /// <summary>縦スクロールバーの表示/非表示（スクロールの余地があるときだけ表示）。</summary>
+        public Visibility VScrollVisibility
+        {
+            get => (Visibility)GetValue(VScrollVisibilityProperty);
+            private set => SetValue(VScrollVisibilityPropertyKey, value);
+        }
+        static readonly DependencyPropertyKey VScrollVisibilityPropertyKey =
+            DependencyProperty.RegisterReadOnly(nameof(VScrollVisibility), typeof(Visibility), typeof(PuppetPinCanvas),
+                new FrameworkPropertyMetadata(Visibility.Collapsed));
+        public static readonly DependencyProperty VScrollVisibilityProperty = VScrollVisibilityPropertyKey.DependencyProperty;
+
+        static void OnScrollOffsetChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+            => ((PuppetPinCanvas)d).InvalidateVisual();
+
+        static object CoerceScrollOffsetX(DependencyObject d, object baseValue)
+            => Math.Clamp((double)baseValue, 0, ((PuppetPinCanvas)d).ScrollMaxX);
+
+        static object CoerceScrollOffsetY(DependencyObject d, object baseValue)
+            => Math.Clamp((double)baseValue, 0, ((PuppetPinCanvas)d).ScrollMaxY);
+
+        static void OnScrollMaxXChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+            => d.CoerceValue(ScrollOffsetXProperty);
+
+        static void OnScrollMaxYChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+            => d.CoerceValue(ScrollOffsetYProperty);
+
         public PuppetPinCanvas()
         {
             Focusable = true;
@@ -105,13 +225,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             if (e.PropertyName == nameof(PuppetDeformationListEditorViewModel.CanvasImage))
             {
-                InvalidateVisual();
+                //別サイズの画像に差し替わったときだけ全体表示へ戻す（同サイズの再取得ではズーム/パンを保つ）
+                var image = viewModel?.CanvasImage;
+                var size = image is null ? Size.Empty : new Size(image.PixelWidth, image.PixelHeight);
+                if (size != lastImageSize)
+                {
+                    lastImageSize = size;
+                    ResetView();
+                }
+                else
+                {
+                    UpdateScrollInfo();
+                    InvalidateVisual();
+                }
             }
             else if (e.PropertyName == nameof(PuppetDeformationListEditorViewModel.CanvasPins))
             {
                 DetachPins();
                 AttachPins();
                 ClearHover();
+                UpdateScrollInfo();
                 InvalidateVisual();
             }
             else if (e.PropertyName == nameof(PuppetDeformationListEditorViewModel.CanvasBones))
@@ -119,6 +252,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 DetachBones();
                 AttachBones();
                 ClearHover();
+                UpdateScrollInfo();
                 InvalidateVisual();
             }
             else if (e.PropertyName == nameof(PuppetDeformationListEditorViewModel.EditMode))
@@ -164,7 +298,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 InvalidateVisual();
         }
 
-        void Bone_VisualChanged(object? sender, EventArgs e) => InvalidateVisual();
+        void Bone_VisualChanged(object? sender, EventArgs e)
+        {
+            //ジョイントが動くとコンテンツ範囲が変わるためスクロール量も更新する
+            UpdateScrollInfo();
+            InvalidateVisual();
+        }
 
         void AttachPins()
         {
@@ -197,11 +336,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
         }
 
-        void Pin_RestChanged(object? sender, EventArgs e) => InvalidateVisual();
+        void Pin_RestChanged(object? sender, EventArgs e)
+        {
+            //ピンが動くとコンテンツ範囲が変わるためスクロール量も更新する
+            UpdateScrollInfo();
+            InvalidateVisual();
+        }
 
         #region 座標変換
 
-        (double Scale, Point Origin, double ImageWidth, double ImageHeight)? GetLayout()
+        //レイアウト計算の中間結果。フィット×ズームの実スケールと、スクロール範囲の元になるコンテンツ矩形を持つ。
+        readonly record struct ViewMetrics(
+            double Scale, Rect ContentLocal, double ImageWidth, double ImageHeight,
+            double ViewportW, double ViewportH, double ExtentW, double ExtentH);
+
+        ViewMetrics? GetMetrics()
         {
             var image = viewModel?.CanvasImage;
             if (image is null || RenderSize.Width <= 0 || RenderSize.Height <= 0)
@@ -212,9 +361,115 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (iw <= 0 || ih <= 0)
                 return null;
 
-            var scale = Math.Min(RenderSize.Width / iw, RenderSize.Height / ih);
-            var origin = new Point((RenderSize.Width - iw * scale) * 0.5, (RenderSize.Height - ih * scale) * 0.5);
-            return (scale, origin, iw, ih);
+            double vpW = RenderSize.Width, vpH = RenderSize.Height;
+            //ズーム1.0＝画像全体がちょうど収まるフィット表示
+            var fitScale = Math.Min(vpW / iw, vpH / ih);
+            var scale = fitScale * zoom;
+
+            //画像とすべてのピン/ジョイントを含む範囲。画面外のピンもスクロールで辿れるようにする。
+            //余白は付けない（フィット表示かつ画面外ピンが無ければスクロールの余地=0となり、バーを出さない）。
+            var content = GetContentLocalBounds(iw, ih);
+
+            return new ViewMetrics(scale, content, iw, ih, vpW, vpH, content.Width * scale, content.Height * scale);
+        }
+
+        //画像矩形とすべてのピン/ジョイントを内包するローカル座標の範囲（画像中心を原点とする座標系）
+        Rect GetContentLocalBounds(double iw, double ih)
+        {
+            double minX = -iw * 0.5, minY = -ih * 0.5, maxX = iw * 0.5, maxY = ih * 0.5;
+            foreach (var pin in pins)
+            {
+                var p = GetRestPoint(pin);
+                if (p.X < minX) minX = p.X;
+                if (p.Y < minY) minY = p.Y;
+                if (p.X > maxX) maxX = p.X;
+                if (p.Y > maxY) maxY = p.Y;
+            }
+            foreach (var bone in bones)
+            {
+                var j = GetJointPoint(bone);
+                if (j.X < minX) minX = j.X;
+                if (j.Y < minY) minY = j.Y;
+                if (j.X > maxX) maxX = j.X;
+                if (j.Y > maxY) maxY = j.Y;
+            }
+            return new Rect(new Point(minX, minY), new Point(maxX, maxY));
+        }
+
+        (double Scale, Point Origin, double ImageWidth, double ImageHeight)? GetLayout()
+        {
+            var metrics = GetMetrics();
+            if (metrics is null)
+                return null;
+            var m = metrics.Value;
+
+            //コンテンツがビューポートより小さいときは中央に寄せる
+            double padX = Math.Max(0, (m.ViewportW - m.ExtentW) * 0.5);
+            double padY = Math.Max(0, (m.ViewportH - m.ExtentH) * 0.5);
+            double offX = Math.Clamp(ScrollOffsetX, 0, Math.Max(0, m.ExtentW - m.ViewportW));
+            double offY = Math.Clamp(ScrollOffsetY, 0, Math.Max(0, m.ExtentH - m.ViewportH));
+
+            //LocalToDisplayの式（origin + (local + 画像半分)*scale）が、コンテンツ左上をスクロール位置に一致させるようoriginを決める
+            double originX = padX - offX - (m.ContentLocal.Left + m.ImageWidth * 0.5) * m.Scale;
+            double originY = padY - offY - (m.ContentLocal.Top + m.ImageHeight * 0.5) * m.Scale;
+            return (m.Scale, new Point(originX, originY), m.ImageWidth, m.ImageHeight);
+        }
+
+        /// <summary>ズーム/パンの結果に合わせてスクロールバーの範囲・可視性を更新する。全体表示への予約があれば中央寄せする。</summary>
+        void UpdateScrollInfo()
+        {
+            var metrics = GetMetrics();
+            if (metrics is null)
+            {
+                ScrollMaxX = 0;
+                ScrollMaxY = 0;
+                ScrollViewportW = 0;
+                ScrollViewportH = 0;
+                HScrollVisibility = Visibility.Collapsed;
+                VScrollVisibility = Visibility.Collapsed;
+                return;
+            }
+            var m = metrics.Value;
+            double maxX = Math.Max(0, m.ExtentW - m.ViewportW);
+            double maxY = Math.Max(0, m.ExtentH - m.ViewportH);
+
+            //先に最大値を反映してからオフセットを設定する（オフセットは最大値でクランプされるため）
+            ScrollMaxX = maxX;
+            ScrollMaxY = maxY;
+            ScrollViewportW = m.ViewportW;
+            ScrollViewportH = m.ViewportH;
+            HScrollVisibility = maxX > 0.5 ? Visibility.Visible : Visibility.Collapsed;
+            VScrollVisibility = maxY > 0.5 ? Visibility.Visible : Visibility.Collapsed;
+
+            if (pendingResetView)
+            {
+                //画像中心をビューポート中心に合わせるスクロール位置
+                double padX = Math.Max(0, (m.ViewportW - m.ExtentW) * 0.5);
+                double padY = Math.Max(0, (m.ViewportH - m.ExtentH) * 0.5);
+                double centerOffX = padX - m.ContentLocal.Left * m.Scale - m.ViewportW * 0.5;
+                double centerOffY = padY - m.ContentLocal.Top * m.Scale - m.ViewportH * 0.5;
+                //バインディングを壊さないようSetCurrentValueで設定する
+                SetCurrentValue(ScrollOffsetXProperty, Math.Clamp(centerOffX, 0, maxX));
+                SetCurrentValue(ScrollOffsetYProperty, Math.Clamp(centerOffY, 0, maxY));
+                pendingResetView = false;
+            }
+        }
+
+        /// <summary>ズームを等倍に戻し、画像を中央に表示する（全体表示に戻す）。</summary>
+        public void ResetView()
+        {
+            zoom = 1.0;
+            pendingResetView = true;
+            UpdateScrollInfo();
+            InvalidateVisual();
+        }
+
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+            base.OnRenderSizeChanged(sizeInfo);
+            //サイズ確定でビューポートが変わるため、スクロール範囲と（保留中なら）中央寄せを更新する
+            UpdateScrollInfo();
+            InvalidateVisual();
         }
 
         static Point DisplayToLocal(Point display, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
@@ -440,6 +695,44 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         #region マウス・キーボード操作
 
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            //Ctrl+ホイールのみズーム。修飾なしのホイールは外側のスクロール（プロパティ一覧）に委ねる
+            if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control)
+                return;
+            if (e.Delta == 0)
+                return;
+
+            var layout = GetLayout();
+            if (layout is null)
+                return;
+
+            var cursor = e.GetPosition(this);
+            //ズーム前にカーソル下のローカル座標を控え、ズーム後も同じ点がカーソル下に来るようスクロール位置を調整する
+            var anchor = DisplayToLocal(cursor, layout.Value);
+
+            var newZoom = Math.Clamp(zoom * (e.Delta > 0 ? ZoomStep : 1.0 / ZoomStep), MinZoom, MaxZoom);
+            if (newZoom == zoom)
+            {
+                e.Handled = true;
+                return;
+            }
+            zoom = newZoom;
+            UpdateScrollInfo();
+
+            var layout2 = GetLayout();
+            if (layout2 is not null)
+            {
+                //新スケールでのアンカーの表示位置を求め、カーソル位置とのズレをスクロールで打ち消す
+                var after = LocalToDisplay(anchor, layout2.Value);
+                SetCurrentValue(ScrollOffsetXProperty, Math.Clamp(ScrollOffsetX + (after.X - cursor.X), 0, ScrollMaxX));
+                SetCurrentValue(ScrollOffsetYProperty, Math.Clamp(ScrollOffsetY + (after.Y - cursor.Y), 0, ScrollMaxY));
+            }
+            InvalidateVisual();
+            e.Handled = true;
+        }
+
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
@@ -545,6 +838,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
+
+            if (isPanning)
+            {
+                var p = e.GetPosition(this);
+                var dxp = p.X - lastPanPosition.X;
+                var dyp = p.Y - lastPanPosition.Y;
+                //わずかな移動は中クリック（削除）とみなし、しきい値を超えて初めてパンを開始する
+                if (!panMoved && Math.Abs(dxp) < PanThreshold && Math.Abs(dyp) < PanThreshold)
+                    return;
+                panMoved = true;
+                //ドラッグ方向にコンテンツが動く＝スクロール位置は逆方向へ動かす
+                SetCurrentValue(ScrollOffsetXProperty, Math.Clamp(ScrollOffsetX - dxp, 0, ScrollMaxX));
+                SetCurrentValue(ScrollOffsetYProperty, Math.Clamp(ScrollOffsetY - dyp, 0, ScrollMaxY));
+                lastPanPosition = p;
+                InvalidateVisual();
+                return;
+            }
+
             if (viewModel is null)
                 return;
             var layout = GetLayout();
@@ -596,6 +907,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         protected override void OnLostMouseCapture(MouseEventArgs e)
         {
             base.OnLostMouseCapture(e);
+            if (isPanning)
+            {
+                isPanning = false;
+                panMoved = false;
+            }
             if (!isDragging)
                 return;
             isDragging = false;
@@ -686,16 +1002,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
             base.OnMouseDown(e);
-            //中クリックでも削除できるようにする（左右ボタンは専用ハンドラ側で処理する）
+            //中ボタン: ドラッグで表示位置を移動（パン）、ドラッグせず離したら削除として扱う（左右ボタンは専用ハンドラ側で処理する）
             if (e.ChangedButton != MouseButton.Middle)
                 return;
-            if (TryRemoveTargetAt(e.GetPosition(this)))
-            {
-                e.Handled = true;
+            //左ドラッグ中は割り込ませない
+            if (isDragging)
                 return;
+            isPanning = true;
+            panMoved = false;
+            lastPanPosition = e.GetPosition(this);
+            Focus();
+            CaptureMouse();
+            e.Handled = true;
+        }
+
+        protected override void OnMouseUp(MouseButtonEventArgs e)
+        {
+            base.OnMouseUp(e);
+            if (e.ChangedButton != MouseButton.Middle || !isPanning)
+                return;
+            isPanning = false;
+            ReleaseMouseCapture();
+            //ドラッグしていなければ中クリック＝削除（背景ならジョイントの選択解除）として扱う
+            if (!panMoved)
+            {
+                if (!TryRemoveTargetAt(e.GetPosition(this)))
+                    viewModel?.ClearBoneSelectionFromCanvas();
             }
-            //背景の中クリックはジョイントの選択解除
-            viewModel?.ClearBoneSelectionFromCanvas();
+            panMoved = false;
             e.Handled = true;
         }
 

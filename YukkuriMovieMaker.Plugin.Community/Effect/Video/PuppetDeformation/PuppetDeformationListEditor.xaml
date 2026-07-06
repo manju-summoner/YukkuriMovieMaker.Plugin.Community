@@ -34,13 +34,42 @@
 
         <!--ピン配置キャンバス-->
         <Grid Grid.Row="1">
-            <local:PuppetPinCanvas x:Name="pinCanvas" ToolTip="{x:Static local:Texts.PuppetDeformationCanvasTooltip}"/>
-            <Button Width="22" Height="22" Margin="2"
-                    HorizontalAlignment="Right" VerticalAlignment="Top"
-                    Opacity="0.75"
-                    Content="{DynamicResource {x:Static icons:IconKeys.Autorenew}}"
-                    ToolTip="{x:Static local:Texts.PuppetDeformationCanvasRefreshTooltip}"
-                    Command="{Binding RefreshImageCommand}"/>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <local:PuppetPinCanvas x:Name="pinCanvas" Grid.Row="0" Grid.Column="0" ToolTip="{x:Static local:Texts.PuppetDeformationCanvasTooltip}"/>
+            <!--表示範囲を移動するスクロールバー（スクロールの余地があるときだけ表示）-->
+            <ScrollBar Grid.Row="0" Grid.Column="1" Orientation="Vertical"
+                       Minimum="0"
+                       Maximum="{Binding ScrollMaxY, ElementName=pinCanvas}"
+                       ViewportSize="{Binding ScrollViewportH, ElementName=pinCanvas}"
+                       LargeChange="{Binding ScrollViewportH, ElementName=pinCanvas}"
+                       Value="{Binding ScrollOffsetY, ElementName=pinCanvas, Mode=TwoWay}"
+                       Visibility="{Binding VScrollVisibility, ElementName=pinCanvas}"/>
+            <ScrollBar Grid.Row="1" Grid.Column="0" Orientation="Horizontal"
+                       Minimum="0"
+                       Maximum="{Binding ScrollMaxX, ElementName=pinCanvas}"
+                       ViewportSize="{Binding ScrollViewportW, ElementName=pinCanvas}"
+                       LargeChange="{Binding ScrollViewportW, ElementName=pinCanvas}"
+                       Value="{Binding ScrollOffsetX, ElementName=pinCanvas, Mode=TwoWay}"
+                       Visibility="{Binding HScrollVisibility, ElementName=pinCanvas}"/>
+            <!--キャンバス上のオーバーレイボタン（全体表示に戻す / 画像を更新）-->
+            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal"
+                        HorizontalAlignment="Right" VerticalAlignment="Top" Margin="2">
+                <Button Width="22" Height="22" Margin="0,0,2,0" Opacity="0.75"
+                        Content="{DynamicResource {x:Static icons:IconKeys.FitToPage}}"
+                        ToolTip="{x:Static local:Texts.PuppetDeformationCanvasResetViewTooltip}"
+                        Click="ResetViewButton_Click"/>
+                <Button Width="22" Height="22" Opacity="0.75"
+                        Content="{DynamicResource {x:Static icons:IconKeys.Autorenew}}"
+                        ToolTip="{x:Static local:Texts.PuppetDeformationCanvasRefreshTooltip}"
+                        Command="{Binding RefreshImageCommand}"/>
+            </StackPanel>
         </Grid>
 
         <!--キャンバスの高さ変更つまみ-->

@@ -83,5 +83,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             PuppetDeformationEditorSettings.Default.CanvasHeight += e.VerticalChange;
         }
+
+        void ResetViewButton_Click(object sender, RoutedEventArgs e)
+        {
+            //ズームと表示位置を全体表示に戻す
+            pinCanvas.ResetView();
+        }
     }
 }
