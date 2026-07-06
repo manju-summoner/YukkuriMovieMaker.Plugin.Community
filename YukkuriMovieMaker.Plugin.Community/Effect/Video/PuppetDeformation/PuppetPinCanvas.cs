@@ -218,7 +218,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 AttachBones();
             }
             UpdateToolTip();
-            InvalidateVisual();
+            //別アイテムへ差し替わった時点で新VMが既にCanvasImageを持つ場合、CanvasImageのPropertyChangedは
+            //発火しないため、ここでも表示状態（リセット判定・スクロール範囲）を同期する（InvalidateVisualも兼ねる）
+            SyncViewToCurrentImage();
+        }
+
+        /// <summary>現在のCanvasImageに合わせて表示状態を同期する。別サイズなら全体表示に戻し、同サイズならスクロール範囲だけ更新する。</summary>
+        void SyncViewToCurrentImage()
+        {
+            var image = viewModel?.CanvasImage;
+            var size = image is null ? Size.Empty : new Size(image.PixelWidth, image.PixelHeight);
+            if (size != lastImageSize)
+            {
+                lastImageSize = size;
+                ResetView();
+            }
+            else
+            {
+                UpdateScrollInfo();
+                InvalidateVisual();
+            }
         }
 
         void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -226,18 +245,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (e.PropertyName == nameof(PuppetDeformationListEditorViewModel.CanvasImage))
             {
                 //別サイズの画像に差し替わったときだけ全体表示へ戻す（同サイズの再取得ではズーム/パンを保つ）
-                var image = viewModel?.CanvasImage;
-                var size = image is null ? Size.Empty : new Size(image.PixelWidth, image.PixelHeight);
-                if (size != lastImageSize)
-                {
-                    lastImageSize = size;
-                    ResetView();
-                }
-                else
-                {
-                    UpdateScrollInfo();
-                    InvalidateVisual();
-                }
+                SyncViewToCurrentImage();
             }
             else if (e.PropertyName == nameof(PuppetDeformationListEditorViewModel.CanvasPins))
             {
@@ -847,6 +855,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 //わずかな移動は中クリック（削除）とみなし、しきい値を超えて初めてパンを開始する
                 if (!panMoved && Math.Abs(dxp) < PanThreshold && Math.Abs(dyp) < PanThreshold)
                     return;
+                //パン開始時にホバー強調を消す（スクロールでカーソル下から外れた強調が残らないように）
+                if (!panMoved)
+                    ClearHover();
                 panMoved = true;
                 //ドラッグ方向にコンテンツが動く＝スクロール位置は逆方向へ動かす
                 SetCurrentValue(ScrollOffsetXProperty, Math.Clamp(ScrollOffsetX - dxp, 0, ScrollMaxX));
