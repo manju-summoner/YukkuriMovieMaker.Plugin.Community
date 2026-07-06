@@ -39,7 +39,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Skew
             else if (item.CenterPoint == SkewCenterPoint.Custom)
             {
                 centerX = (float)item.CenterX.GetValue(frame, length, fps);
-                centerY = (float)item.CenterX.GetValue(frame, length, fps);
+                centerY = (float)item.CenterY.GetValue(frame, length, fps);
             }
             else
             {
