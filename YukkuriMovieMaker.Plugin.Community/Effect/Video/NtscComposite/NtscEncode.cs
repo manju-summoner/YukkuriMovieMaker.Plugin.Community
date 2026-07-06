@@ -160,7 +160,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.NtscComposite
             }
 
             /// <summary>入力の無効領域はFIRタップ幅ぶん水平に広がって出力へ影響する</summary>
-            public new RawRect MapInvalidRect(int inputIndex, RawRect invalidInputRect)
+            public override RawRect MapInvalidRect(int inputIndex, RawRect invalidInputRect)
                 => new(
                     invalidInputRect.Left - NtscSignal.EncodeQHalfTaps,
                     invalidInputRect.Top,

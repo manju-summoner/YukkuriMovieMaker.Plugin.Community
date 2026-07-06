@@ -158,7 +158,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PixelSort
             }
 
             /// <summary>入力の無効領域はスパン走査の届く範囲まで広がって出力へ影響する</summary>
-            public new RawRect MapInvalidRect(int inputIndex, RawRect invalidInputRect)
+            public override RawRect MapInvalidRect(int inputIndex, RawRect invalidInputRect)
             {
                 var (marginX, marginY) = GetScanMargin();
                 return new RawRect(

@@ -109,7 +109,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.NtscComposite
             /// 基底クラスの恒等写像では解像度変換で無効領域がずれ、
             /// ダーティレクト部分更新時に古いピクセルが残るため必ず変換する。
             /// </summary>
-            public new RawRect MapInvalidRect(int inputIndex, RawRect invalidInputRect)
+            public override RawRect MapInvalidRect(int inputIndex, RawRect invalidInputRect)
                 => MapSourceToRaster(invalidInputRect);
 
             RawRect MapRasterToSource(RawRect rasterRect)

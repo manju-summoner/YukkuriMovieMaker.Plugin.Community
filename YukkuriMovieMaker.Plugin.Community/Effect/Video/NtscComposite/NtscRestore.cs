@@ -78,7 +78,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.NtscComposite
             /// 入力(ラスター座標)の無効領域をシーン座標へ変換する。
             /// 解像度変換があるため基底クラスの恒等写像のままでは部分更新で破綻する。
             /// </summary>
-            public new RawRect MapInvalidRect(int inputIndex, RawRect invalidInputRect)
+            public override RawRect MapInvalidRect(int inputIndex, RawRect invalidInputRect)
                 => MapRasterToSource(invalidInputRect);
 
             RawRect MapSourceToRaster(RawRect sourceRect)
