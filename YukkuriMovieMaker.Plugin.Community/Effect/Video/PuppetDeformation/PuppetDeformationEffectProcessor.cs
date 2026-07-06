@@ -131,8 +131,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
 
             //ボーンのジョイントを拘束点として追加する。
-            //回転していないジョイントはアンカーとして働き、回転はFKで子孫ジョイントを動かして画像を引っ張る。
-            //自身の回転はジョイント自体を動かさないため、currentには親チェーンの変換だけが乗る
+            //回転していないジョイントはアンカーとして働き、回転はFKでジョイントを動かして画像を引っ張る。
+            //ルート以外のジョイントは自身の回転（親ジョイント中心のセグメント回転）でも動き、ルートのジョイントは自身の回転では動かない
             for (var i = 0; i < boneCount; i++)
             {
                 if (samples.Count >= PuppetDeformationCustomEffect.MaxPins)
@@ -606,7 +606,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         /// <summary>
         /// ボーンの回転ハンドルをプレビューに追加する。
-        /// ジョイントから伸びるレバーの先端をドラッグすると角度が変わる。
+        /// ルート以外はジョイント自体がハンドルとなり、ドラッグすると親ジョイント（セグメントの根元）を中心に回る。
+        /// 分岐点から出る各セグメントは角度を子側が持つため、それぞれ独立して回転できる。
+        /// ルートはジョイントから伸びる固定レバーの先端をドラッグして全体を回す。
         /// </summary>
         void AddBoneControllers(
             List<VideoEffectController> controllers,
@@ -615,7 +617,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             List<PuppetBoneEvaluator.BoneSample> boneSamples,
             Matrix3x2[] boneWorlds)
         {
-            //子ボーンを持たないボーンのレバー長(px)
+            //ルートボーン（およびジョイントが親と重なるボーン）のレバー長(px)
             const float LeverLength = 80f;
 
             for (var i = 0; i < boneSamples.Count; i++)
@@ -625,24 +627,53 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 var world = boneWorlds[i];
                 var jointWorld = Vector2.Transform(s.Joint, world);
 
-                //レバー先端は子ボーンのジョイント。子がいない(またはジョイントが重なる)場合は+X方向の固定長レバー
-                var tipRest = s.Joint + new Vector2(LeverLength, 0f);
-                var hasChild = false;
-                for (var c = 0; c < boneSamples.Count; c++)
+                //親が解決できるボーンは「親ジョイント→自分」のセグメントとして扱う（評価側の親解決と同じ条件）
+                var parentIndex = -1;
+                if (s.ParentId != Guid.Empty && s.ParentId != s.Id)
                 {
-                    if (c == i || boneSamples[c].ParentId != s.Id)
-                        continue;
-                    hasChild = true;
-                    if (Vector2.DistanceSquared(boneSamples[c].Joint, s.Joint) > 1f)
+                    for (var c = 0; c < boneSamples.Count; c++)
                     {
-                        tipRest = boneSamples[c].Joint;
-                        break;
+                        if (c != i && boneSamples[c].Id == s.ParentId)
+                        {
+                            parentIndex = c;
+                            break;
+                        }
                     }
                 }
 
-                //回しても何も動かないボーン（無効、または子ボーンも割当ピンもない末端）はハンドルを出さずマーカーのみ表示する
-                var canRotate = bone.IsEnabled
-                    && (hasChild || pins.Any(p => p.IsEnabled && p.BoneId == s.Id));
+                var hasChild = false;
+                for (var c = 0; c < boneSamples.Count; c++)
+                {
+                    if (c != i && boneSamples[c].ParentId == s.Id)
+                    {
+                        hasChild = true;
+                        break;
+                    }
+                }
+                var hasPin = pins.Any(p => p.IsEnabled && p.BoneId == s.Id);
+
+                Vector2 pivotRest;
+                Vector2 tipRest;
+                bool canRotate;
+                if (parentIndex >= 0)
+                {
+                    //セグメント回転：回転中心は親ジョイント、ハンドルは自分のジョイント。
+                    //回すと自分のジョイント（拘束点）が動いて画像を引っ張るため、子やピンが無くても回す意味がある
+                    pivotRest = boneSamples[parentIndex].Joint;
+                    var jointMoves = Vector2.DistanceSquared(s.Joint, pivotRest) > 1f;
+                    //ジョイントが親と重なっている場合は+X方向の固定レバーで代用する
+                    tipRest = jointMoves ? s.Joint : pivotRest + new Vector2(LeverLength, 0f);
+                    canRotate = bone.IsEnabled && (jointMoves || hasChild || hasPin);
+                }
+                else
+                {
+                    //ルートは自身のジョイントを中心に全体を回す。子ジョイントは各セグメントのハンドルと重なるため固定レバーにする
+                    pivotRest = s.Joint;
+                    tipRest = s.Joint + new Vector2(LeverLength, 0f);
+                    canRotate = bone.IsEnabled && (hasChild || hasPin);
+                }
+
+                //回しても何も動かないボーン（無効、または回す対象が無い）はハンドルを出さずマーカーのみ表示する
                 if (!canRotate)
                 {
                     controllers.Add(new VideoEffectController(item, [
@@ -651,10 +682,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     continue;
                 }
 
+                //pivotは自身のローカル回転の不動点なので、自身のworldで変換しても親ワールドでの位置と一致する
+                var pivotWorld = Vector2.Transform(pivotRest, world);
                 var tipWorld = Vector2.Transform(tipRest, world);
 
                 controllers.Add(new VideoEffectController(item, [
-                    new ControllerPoint(new Vector3(jointWorld.X, jointWorld.Y, 0f)) { Shape = VideoControllerPointShape.SmallCircle },
+                    new ControllerPoint(new Vector3(pivotWorld.X, pivotWorld.Y, 0f)) { Shape = VideoControllerPointShape.SmallCircle },
                     new ControllerPoint(new Vector3(tipWorld.X, tipWorld.Y, 0f)),
                 ])
                 { Connection = VideoControllerPointConnection.Line });
@@ -663,10 +696,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     new Vector3(tipWorld.X, tipWorld.Y, 0f),
                     arg =>
                     {
-                        //先端の移動をジョイント周りの回転角に変換する。
+                        //先端の移動を回転中心（親ジョイント／ルートは自身のジョイント）周りの回転角に変換する。
                         //角度変更→次フレームでコントローラーが再構築されるため、各イベントの差分だけ加算すればよい
-                        var baseAngle = Math.Atan2(tipWorld.Y - jointWorld.Y, tipWorld.X - jointWorld.X);
-                        var movedAngle = Math.Atan2(tipWorld.Y + arg.Delta.Y - jointWorld.Y, tipWorld.X + arg.Delta.X - jointWorld.X);
+                        var baseAngle = Math.Atan2(tipWorld.Y - pivotWorld.Y, tipWorld.X - pivotWorld.X);
+                        var movedAngle = Math.Atan2(tipWorld.Y + arg.Delta.Y - pivotWorld.Y, tipWorld.X + arg.Delta.X - pivotWorld.X);
                         var deltaDeg = (movedAngle - baseAngle) * 180.0 / Math.PI;
                         deltaDeg = ((deltaDeg + 540.0) % 360.0) - 180.0;
                         bone.Angle.AddToEachValues(deltaDeg);

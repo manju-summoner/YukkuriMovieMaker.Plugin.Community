@@ -6,7 +6,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     /// <summary>
     /// ボーン階層のワールド変換を計算する純粋関数群。
-    /// 各ボーンはレスト空間上のジョイント位置を中心に回転し、親の変換が子に合成される。
+    /// 各ボーンは親→自分のセグメントとして扱い、レスト空間上の親ジョイント位置（セグメントの根元）を中心に回転する。
+    /// 親を持たないルートは自身のジョイント位置を中心に回転し、親の変換が子に合成される。
+    /// 分岐した各枝は角度を子側が持つため、互いに独立して回転できる。
     /// </summary>
     internal static class PuppetBoneEvaluator
     {
@@ -40,15 +42,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
                 states[index] = 1;
                 var bone = bones[index];
-                var world = Matrix3x2.CreateRotation(bone.AngleRadians, bone.Joint);
+                //回転の中心はセグメント（親→自分）の根元＝親のジョイント。親を持たないルートは自身のジョイントを中心に回る
+                var pivot = bone.Joint;
+                var parentWorld = Matrix3x2.Identity;
                 if (bone.ParentId != Guid.Empty
                     && bone.ParentId != bone.Id
                     && indexById.TryGetValue(bone.ParentId, out var parentIndex)
                     && parentIndex != index)
                 {
-                    //行ベクトル規約(v * M)のため、ローカル変換を先に適用してから親を掛ける
-                    world *= Compute(parentIndex);
+                    parentWorld = Compute(parentIndex);
+                    pivot = bones[parentIndex].Joint;
                 }
+                //行ベクトル規約(v * M)のため、ローカル変換を先に適用してから親を掛ける
+                var world = Matrix3x2.CreateRotation(bone.AngleRadians, pivot) * parentWorld;
                 result[index] = world;
                 states[index] = 2;
                 return world;
