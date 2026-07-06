@@ -37,6 +37,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         //ジョイント挿入のためにホバー中の親子リンクを強調する線と、挿入位置に出す半透明のプレビュー
         static readonly Pen BoneSegmentHighlightPen = CreateFrozenPen(Color.FromRgb(0xFF, 0xC1, 0x66), 3.0);
         static readonly System.Windows.Media.Brush BoneInsertGhostBrush = CreateFrozenBrush(Color.FromArgb(0xB0, 0xFF, 0xC1, 0x66));
+        //親子リンクの向き（親→子）を示す矢じりと、親を持たないルートジョイントを示す外周ひし形リング
+        static readonly System.Windows.Media.Brush BoneDirectionBrush = CreateFrozenBrush(Color.FromRgb(0xFF, 0x95, 0x00));
+        static readonly Pen BoneDirectionPen = CreateFrozenPen(Colors.White, 1.0);
+        static readonly Pen BoneRootRingPen = CreateFrozenPen(Color.FromRgb(0xFF, 0xC1, 0x66), 1.5);
+        //向き矢じりの大きさ(px)と、これより短いリンクには矢じりを描かない下限
+        const double BoneArrowSize = 5.0;
+        //ルートジョイントの外周リングを本体のひし形からどれだけ外に出すか(px)
+        const double BoneRootRingMargin = 3.0;
         static readonly Pen AssignedPinPen = CreateFrozenPen(Color.FromRgb(0xFF, 0x95, 0x00), 2.0);
         //ボーンと割当ピンをつなぐ点線
         static readonly Pen BonePinLinkPen = CreateFrozenDashedPen(Color.FromArgb(0xB0, 0xFF, 0x95, 0x00), 1.5);
@@ -313,6 +321,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 var from = LocalToDisplay(GetJointPoint(parent), layout);
                 var to = LocalToDisplay(GetJointPoint(bone), layout);
                 drawingContext.DrawLine(BoneLinkPen, from, to);
+
+                //親→子の向きを線の中間の矢じりで示す（短すぎるリンクには描かない）
+                var arrow = CreateArrowGeometry(from, to, BoneArrowSize);
+                if (arrow is not null)
+                    drawingContext.DrawGeometry(BoneDirectionBrush, BoneDirectionPen, arrow);
             }
 
             //ジョイント挿入のプレビュー：ホバー中の親子リンクを強調し、挿入位置に半透明のジョイントを描く
@@ -344,7 +357,50 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 var diamond = CreateDiamondGeometry(p, radius);
                 drawingContext.DrawGeometry(null, PinHaloPen, diamond);
                 drawingContext.DrawGeometry(bone.IsEnabled ? BoneFillBrush : DisabledBoneFillBrush, PinStrokePen, diamond);
+
+                //親を持たないルートジョイントは外周のひし形リングで区別する（選択リングは円なので形で見分けられる）
+                if (bone.Model.ParentId == Guid.Empty)
+                {
+                    var rootRing = CreateDiamondGeometry(p, radius + BoneRootRingMargin);
+                    drawingContext.DrawGeometry(null, BoneRootRingPen, rootRing);
+                }
             }
+        }
+
+        /// <summary>
+        /// 親子リンクの中点に、親(from)→子(to)の向きを指す矢じり（三角形）を作る。
+        /// リンクが矢じりを収められないほど短い場合はnullを返す。
+        /// </summary>
+        static StreamGeometry? CreateArrowGeometry(Point from, Point to, double size)
+        {
+            var dx = to.X - from.X;
+            var dy = to.Y - from.Y;
+            var length = Math.Sqrt(dx * dx + dy * dy);
+            //矢じり全長（2*size）が収まらないほど短いリンクには描かない
+            if (length < size * 2.5)
+                return null;
+
+            var ux = dx / length;
+            var uy = dy / length;
+            //進行方向に直交する単位ベクトル
+            var px = -uy;
+            var py = ux;
+            var mid = new Point((from.X + to.X) * 0.5, (from.Y + to.Y) * 0.5);
+            var tip = new Point(mid.X + ux * size, mid.Y + uy * size);
+            var baseCenter = new Point(mid.X - ux * size, mid.Y - uy * size);
+            var half = size * 0.75;
+            var left = new Point(baseCenter.X + px * half, baseCenter.Y + py * half);
+            var right = new Point(baseCenter.X - px * half, baseCenter.Y - py * half);
+
+            var geometry = new StreamGeometry();
+            using (var ctx = geometry.Open())
+            {
+                ctx.BeginFigure(tip, true, true);
+                ctx.LineTo(left, true, false);
+                ctx.LineTo(right, true, false);
+            }
+            geometry.Freeze();
+            return geometry;
         }
 
         static StreamGeometry CreateDiamondGeometry(Point center, double radius)
