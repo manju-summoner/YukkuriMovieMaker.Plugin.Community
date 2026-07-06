@@ -72,7 +72,7 @@
                 <Button Grid.Column="1" Padding="6" Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" ToolTip="{x:Static local:Texts.PuppetDeformationListRemoveBone}" Command="{Binding RemoveBoneCommand}"/>
             </Grid>
         </Grid>
-        <Grid Grid.Row="4" ClipToBounds="True">
+        <Grid Grid.Row="4" x:Name="editorArea" ClipToBounds="True" SizeChanged="EditorArea_SizeChanged">
             <c:PropertiesEditor x:Name="propertiesEditor" Margin="0,-22,0,0" Target="{Binding SelectedTarget}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="BeginEdit">
@@ -83,6 +83,12 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </c:PropertiesEditor>
+            <!--ジョイント/ピン未選択時は選択時と同じ高さを確保し、余白にメッセージを表示する-->
+            <TextBlock Text="{Binding NoSelectionMessage}"
+                       Visibility="{Binding HasNoSelection, Converter={StaticResource BoolToVisibility}}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Margin="12" TextWrapping="Wrap" TextAlignment="Center"
+                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
         </Grid>
     </Grid>
 </UserControl>
