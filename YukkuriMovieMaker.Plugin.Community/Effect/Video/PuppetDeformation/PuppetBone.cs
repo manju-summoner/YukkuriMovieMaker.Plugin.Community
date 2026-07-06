@@ -10,8 +10,9 @@ using YukkuriMovieMaker.UndoRedo;
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     /// <summary>
-    /// パペット変形のボーン。ジョイント（回転中心）を持ち、割り当てられたピンを回転・揺れで駆動する。
-    /// 親ボーンを持つ場合、親の回転が子のジョイントとピンにも伝わる（フォワードキネマティクス）。
+    /// パペット変形のボーン。親ジョイント→自分のジョイントを結ぶセグメントを表し、割り当てられたピンを回転・揺れで駆動する。
+    /// 回転は親ジョイント（セグメントの根元）を中心に行い、親の回転が子のジョイントとピンにも伝わる（フォワードキネマティクス）。
+    /// 親を持たないルートは自身のジョイントを中心に回転する。角度を子側が持つため、分岐した各枝は独立して回転できる。
     /// </summary>
     public class PuppetBone : Animatable
     {
