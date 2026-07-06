@@ -55,14 +55,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         public ImmutableList<PuppetBoneViewModel> CanvasBones { get => canvasBones; private set => Set(ref canvasBones, value); }
         ImmutableList<PuppetBoneViewModel> canvasBones = ImmutableList<PuppetBoneViewModel>.Empty;
 
-        public object? SelectedTarget { get => selectedTarget; set => Set(ref selectedTarget, value); }
+        public object? SelectedTarget { get => selectedTarget; set => Set(ref selectedTarget, value, nameof(SelectedTarget), nameof(HasNoSelection)); }
+
+        /// <summary>ジョイント/ピンが選択されていない（プロパティエディタが空）かどうか</summary>
+        public bool HasNoSelection => selectedTarget is null;
+
+        /// <summary>選択が無いときにプロパティエディタの余白へ表示するメッセージ</summary>
+        public string NoSelectionMessage => EditMode == PuppetDeformationEditMode.Bone
+            ? Texts.PuppetDeformationNoJointSelected
+            : Texts.PuppetDeformationNoPinSelected;
 
         public PuppetDeformationEditMode EditMode
         {
             get => editMode;
             set
             {
-                if (Set(ref editMode, value, nameof(EditMode), nameof(IsPinMode), nameof(IsBoneMode)))
+                if (Set(ref editMode, value, nameof(EditMode), nameof(IsPinMode), nameof(IsBoneMode), nameof(NoSelectionMessage)))
                     UpdateSelection();
             }
         }
