@@ -53,7 +53,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         float imageWidth;
         float imageHeight;
         int boneCount;
-        bool showBones;
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
@@ -68,7 +67,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var stiffness = (float)item.Stiffness.GetValue(frame, length, fps);
             var apply = item.ApplyDeformation;
             var algorithm = item.Algorithm;
-            var showBones = item.ShowBones;
 
             //ボーンを評価する。回転(角度+揺れ)を親から子へ合成したワールド変換を作り、割当ピンの移動先計算に使う
             var bones = item.Bones;
@@ -170,7 +168,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 || !PinSamplesMatchBuffer(samples);
             //ピンが割り当てられていないボーンの変化はGPU側に影響しないため、コントローラー再構築のみ行う
             var bonesDirty = isFirst
-                || this.showBones != showBones
                 || this.boneCount != boneCount
                 || !BoneSamplesMatchBuffer(boneSamples, boneIndexById);
 
@@ -219,7 +216,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (gpuDirty || bonesDirty || selectionChanged || assignmentChanged)
             {
                 FillBoneDataBuffer(boneSamples, boneIndexById);
-                cachedControllers = [.. BuildControllers(pins, samples, bones, boneSamples, boneWorlds, showBones)];
+                cachedControllers = [.. BuildControllers(pins, samples, bones, boneSamples, boneWorlds)];
             }
 
             SetWiring(useArap);
@@ -232,7 +229,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             this.imageHeight = imageHeight;
             this.apply = apply;
             this.boneCount = boneCount;
-            this.showBones = showBones;
 
             return effectDescription.DrawDescription with
             {
@@ -545,15 +541,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             List<PinSample> samples,
             ImmutableList<PuppetBone> bones,
             List<PuppetBoneEvaluator.BoneSample> boneSamples,
-            Matrix3x2[] boneWorlds,
-            bool showBones)
+            Matrix3x2[] boneWorlds)
         {
             //基準ピンの編集はアイテム編集UIのピン配置キャンバスで行うため、
             //プレビュー上は移動ピンの操作に絞って表示を簡素化する
             var controllers = new List<VideoEffectController>(samples.Count * 2 + boneSamples.Count * 2);
 
-            if (showBones)
-                AddBoneControllers(controllers, pins, bones, boneSamples, boneWorlds);
+            AddBoneControllers(controllers, pins, bones, boneSamples, boneWorlds);
 
             //選択ハイライトは複数選択の把握が目的のため、1本だけの選択では表示しない
             var selectedOffsetCount = pins.Count(p => p.IsOffsetSelected);

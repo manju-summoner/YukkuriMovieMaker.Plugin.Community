@@ -55,11 +55,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         }
         PuppetDeformationEditorPointsSync syncMode = PuppetDeformationEditorPointsSync.Distance;
 
-        [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationShowBonesName), Description = nameof(Texts.PuppetDeformationShowBonesDesc), Order = 6, ResourceType = typeof(Texts))]
-        [ToggleSlider]
-        public bool ShowBones { get => showBones; set => Set(ref showBones, value); }
-        bool showBones = true;
-
         [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Description = nameof(Texts.PuppetDeformationListPinsDesc), Order = 10, ResourceType = typeof(Texts))]
         [PuppetDeformationListEditor]
         public ImmutableList<PuppetDeformation> Pins

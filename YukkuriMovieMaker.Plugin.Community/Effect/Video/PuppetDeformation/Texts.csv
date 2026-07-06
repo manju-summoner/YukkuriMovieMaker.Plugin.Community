@@ -68,8 +68,6 @@ PuppetBoneJointXName,,ジョイントX,Joint X,关节X,關節X,조인트 X,Artic
 PuppetBoneJointXDesc,,回転の中心となるジョイントの位置 (X座標)。,Position of the joint that the bone rotates around (X).,作为旋转中心的关节位置 (X)。,作為旋轉中心的關節位置 (X)。,회전 중심이 되는 조인트의 위치 (X).,Posición de la articulación alrededor de la cual rota el hueso (X).,موضع المفصل الذي يدور حوله العظم (X).,Posisi sendi tempat tulang berputar (X).
 PuppetBoneJointYName,,ジョイントY,Joint Y,关节Y,關節Y,조인트 Y,Articulación Y,المفصل Y,Sendi Y
 PuppetBoneJointYDesc,,回転の中心となるジョイントの位置 (Y座標)。,Position of the joint that the bone rotates around (Y).,作为旋转中心的关节位置 (Y)。,作為旋轉中心的關節位置 (Y)。,회전 중심이 되는 조인트의 위치 (Y).,Posición de la articulación alrededor de la cual rota el hueso (Y).,موضع المفصل الذي يدور حوله العظم (Y).,Posisi sendi tempat tulang berputar (Y).
-PuppetDeformationShowBonesName,,ボーンを表示,Show Bones,显示骨骼,顯示骨骼,본 표시,Mostrar huesos,إظهار العظام,Tampilkan Tulang
-PuppetDeformationShowBonesDesc,,プレビューにボーンの回転ハンドルを表示します。ハンドルをドラッグすると角度を変更できます。,Shows bone rotation handles in the preview. Drag a handle to rotate the bone.,在预览中显示骨骼的旋转手柄。拖动手柄可更改角度。,在預覽中顯示骨骼的旋轉手柄。拖曳手柄可變更角度。,미리보기에 본의 회전 핸들을 표시합니다. 핸들을 드래그하면 각도를 변경할 수 있습니다.,Muestra los controles de rotación de huesos en la vista previa. Arrastra un control para rotar el hueso.,يعرض مقابض دوران العظام في المعاينة. اسحب المقبض لتدوير العظم.,Menampilkan gagang rotasi tulang di pratinjau. Seret gagang untuk memutar tulang.
 PuppetDeformationModePin,,ピン,Pins,图钉,圖釘,핀,Alfileres,دبابيس,Pin
 PuppetDeformationModeBone,,ボーン,Bones,骨骼,骨骼,본,Huesos,عظام,Tulang
 PuppetDeformationListAddBone,,ボーンを追加,Add Bone,添加骨骼,新增骨骼,본 추가,Agregar hueso,إضافة عظم,Tambah Tulang
