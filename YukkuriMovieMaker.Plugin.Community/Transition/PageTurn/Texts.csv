@@ -25,16 +25,5 @@ PageTurnEffectProgressName,,めくり度合い,Turn amount,翻页程度,翻頁�
 PageTurnEffectProgressDesc,,ページをめくる度合いです。100%で完全にめくれた状態になります。,How far the page is turned. At 100% the page is fully turned.,翻页的程度。100%时完全翻过。,翻頁的程度。100%時完全翻過。,페이지를 넘기는 정도입니다. 100%에서 완전히 넘겨집니다.,Grado en que se pasa la página. Al 100% la página está completamente pasada.,مقدار تقليب الصفحة. عند 100% تكون الصفحة مقلوبة بالكامل.,Seberapa jauh halaman dibalik. Pada 100% halaman terbalik sepenuhnya.
 InOutPageTurnEffectName,,ページをめくりながら登場退場,Appearing and exiting while turning the page,翻页时入/出场,在翻頁時登場退場,페이지를 넘기면서 등장 퇴장,Apareciendo y saliendo al pasar la página,الظهور والخروج أثناء تقليب الصفحة,Masuk dan keluar sambil membalik halaman
 InOutGroupName,,登場退場,Appearance and exit,入/出场,登場退場,등장 퇴장,Aparición y salida,ظهور ومغادرة,Masuk dan keluar
-InOutPageTurnEffectIsInEffectName,,登場時,Appearing,入场时,登場時,등장 시,En el momento de la aparición,أثناء الظهور,Masuk
-InOutPageTurnEffectIsInEffectDesc,,アイテムが登場する際にエフェクトを適用する,Apply effects when items appear,在物件出场时应用效果,在物件登場時應用特效,아이템이 등장할 때 이펙트 적용하기,Aplicar efecto cuando aparece un elemento,تطبيق التأثيرات عند ظهور العناصر,Terapkan efek saat item muncul
-InOutPageTurnEffectIsOutEffectName,,退場時,Exit,出场时,退場時,퇴장 시,Al salir,عند الخروج,Keluar
-InOutPageTurnEffectIsOutEffectDesc,,アイテムが退場する際にエフェクトを適用する,Apply effect when the item exits,在物件出场时应用效果,在物件退場時應用特效,아이템이 퇴장할 때 이펙트 적용하기,Aplicar efectos al salir de un elemento,تطبيق التأثير عند خروج العنصر,Terapkan efek saat item keluar
-InOutPageTurnEffectEffectTimeSecondsName,,効果時間,Duration,效果时间,效果時間,효과 시간,Duración del efecto,مدة التأثير,Durasi
-InOutPageTurnEffectEffectTimeSecondsDesc,,エフェクトが再生される秒数,Number of seconds the effect plays,效果播放的秒数,效果持續秒數,효과가 재생되는 시간(초),Número de segundos que dura un efecto,عدد الثواني التي يستمر فيها التأثير,Jumlah detik efek diputar
-InOutPageTurnEffectSecUnit,,秒,sec,秒,秒,초,Segundos,ثانية,dtk
-InOutPageTurnEffectEasingTypeName,,種類,Type,类型,種類,종류,Tipo,نوع,Tipe
-InOutPageTurnEffectEasingTypeDesc,,アニメーションの種類,Animation type,动画类型,動畫的種類,애니메이션의 종류,Tipo de animación,نوع الحركة,Jenis animasi
-InOutPageTurnEffectEasingModeName,,加減速,Easing,缓动,加減速,가감속,aceleración/deceleración,تيسير,Easing
-InOutPageTurnEffectEasingModeDesc,,アニメーションの加減速,Animation acceleration/deceleration,动画缓动,動畫的加減速,애니메이션 가속 / 감속,Aceleración/desaceleración de la animación,حركة تسارع / تباطؤ,Animasi akselerasi/deselerasi
 InPageTurnEffectLabel,,ページを戻しながら,while turning the page back,翻回页面时,在翻回頁面時,페이지를 되돌리면서,Al devolver la página,أثناء إعادة الصفحة,saat mengembalikan halaman
 OutPageTurnEffectLabel,,ページをめくりながら,while turning the page,翻页时,在翻頁時,페이지를 넘기면서,Al pasar la página,أثناء تقليب الصفحة,saat membalik halaman
