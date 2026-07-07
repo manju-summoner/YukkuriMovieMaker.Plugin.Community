@@ -4,7 +4,7 @@ CrossHatchShadingBasicGroup,,基本,Basic,基本,基本,기본,Básico,أساس�
 CrossHatchShadingColorGroup,,色,Color,颜色,顏色,색상,Color,اللون,Warna
 CrossHatchShadingDetailGroup,,詳細,Detail,详细,詳細,상세,Detalle,تفاصيل,Detail
 CrossHatchShadingStyleName,,スタイル,Style,样式,樣式,스타일,Estilo,النمط,Gaya
-CrossHatchShadingStyleDesc,,線の方向と階調と質感のプリセットを選びます。,Selects a preset of line direction tone and texture.,选择线条方向、色调与质感的预设。,選擇線條方向、色調與質感的預設。,선 방향과 계조와 질감의 프리셋을 선택합니다.,Selecciona un preset de dirección tono y textura de línea.,يختار إعدادًا مسبقًا لاتجاه الخط ودرجته وملمسه.,Memilih preset arah nada dan tekstur garis.
+CrossHatchShadingStyleDesc,,線の方向と階調と質感のプリセットを選びます。,"Selects a preset for line direction, tone, and texture.",选择线条方向、色调与质感的预设。,選擇線條方向、色調與質感的預設。,선 방향과 계조와 질감의 프리셋을 선택합니다.,Selecciona un preset de dirección tono y textura de línea.,يختار إعدادًا مسبقًا لاتجاه الخط ودرجته وملمسه.,Memilih preset arah nada dan tekstur garis.
 CrossHatchShadingAmountName,,適用量,Amount,应用量,套用量,적용량,Cantidad,المقدار,Jumlah
 CrossHatchShadingAmountDesc,,元映像とハッチ結果の合成量です。,Blends between the source and the hatched result.,混合原始画面与排线结果。,混合原始畫面與排線結果。,원본과 해칭 결과를 혼합합니다.,Mezcla entre el origen y el resultado de trama.,يمزج بين المصدر ونتيجة التظليل.,Mencampur sumber dengan hasil arsir.
 CrossHatchShadingDensityName,,密度,Density,密度,密度,밀도,Densidad,الكثافة,Kerapatan
