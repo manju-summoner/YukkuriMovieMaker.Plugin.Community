@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
+using YukkuriMovieMaker.UndoRedo;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 {
@@ -12,6 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         public const float RadiusLimit = 4096f;
 
         [JsonIgnore]
+        [IgnoreUndoRedo]
         public bool IsSelected { get => isSelected; set => Set(ref isSelected, value); }
         bool isSelected;
 
