@@ -1,0 +1,13 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id,
+InstantLoopAudioEffect,,瞬間ループ,Instant Loop,瞬间循环,瞬間循環,순간 루프,Bucle Instantáneo,تكرار فوري,Loop Instan
+TagLoop,,ループ,loop,循环,循環,루프,bucle,تكرار,loop
+TagStutter,,即リセット,stutter,卡顿,頓挫,스터터,tartamudeo,تقطع,stutter
+StartOffsetName,,開始位置,Start Offset,起始偏移,起始偏移,시작 오프셋,Desplazamiento Inicial,إزاحة البداية,Offset Awal
+StartOffsetDesc,,ループの折り返し先となる再生開始オフセット（ms）。音声先端が無音の場合はここでスキップできます。,Playback start offset for loop rewind point (ms). Use this to skip silence at the beginning of the audio.,循环折返点的起始偏移（ms）。如果音频开头有静音部分，可在此跳过。,循環折返點的起始偏移（ms）。若音訊開頭有靜音，可在此跳過。,루프 되감기 지점의 재생 시작 오프셋(ms). 음성 앞부분이 무음인 경우 여기서 건너뜁니다.,Desplazamiento de inicio para el punto de rebobinado del bucle (ms). Úselo para omitir el silencio al inicio del audio.,إزاحة بداية التشغيل لنقطة الترجيع في الحلقة (ms). استخدمه لتخطي الصمت في بداية الصوت.,Offset awal pemutaran untuk titik rewind loop (ms). Gunakan untuk melewati keheningan di awal audio.
+IntervalName,,再生間隔,Interval,播放间隔,播放間隔,재생 간격,Intervalo,مدة التشغيل,Interval
+IntervalDesc,,この長さ分だけ音声を再生したら余白に入ります（ms）。,Audio plays for this duration before entering the gap (ms).,播放此时长后进入静音余白（ms）。,播放此時長後進入靜音餘白（ms）。,이 길이만큼 음성을 재생한 후 여백으로 전환됩니다(ms).,El audio se reproduce durante esta duración antes de entrar en el silencio (ms).,يُشغَّل الصوت لهذه المدة قبل الدخول في فترة الصمت (ms).,Audio diputar selama durasi ini sebelum memasuki jeda (ms).
+GapName,,余白,Gap,余白,餘白,여백,Pausa,فترة صمت,Jeda
+GapDesc,,再生区間の直後に挟む無音時間（ms）。0なら余白なしで即折り返し。,"Silent pause inserted right after the playback section (ms). Set to 0 for no gap, instant rewind.","在播放区间后插入的静音时间（ms）。设为0则无余白，立即折返。","在播放區間後插入的靜音時間（ms）。設為0則無餘白，立即折返。","재생 구간 직후에 삽입되는 무음 시간(ms). 0이면 여백 없이 즉시 되감습니다.","Pausa silenciosa insertada justo después de la sección de reproducción (ms). Póngalo en 0 para rebobinado instantáneo sin pausa.","فترة صمت تُدرج مباشرة بعد قسم التشغيل (ms). اضبطها على 0 للترجيع الفوري بدون صمت.","Jeda senyap yang disisipkan tepat setelah bagian pemutaran (ms). Atur ke 0 untuk rewind instan tanpa jeda."
+RepeatCountName,,回数,Repeat Count,重复次数,重複次數,반복 횟수,Repeticiones,عدد التكرارات,Jumlah Pengulangan
+RepeatCountDesc,,ぶつ切りを繰り返す回数。0で音声終端まで無限ループ。,"Number of times to cut and repeat. Set to 0 for infinite loop until end of audio.",切断重复的次数。设为0则无限循环至音频结尾。,切斷重複的次數。設為0則無限循環至音訊結尾。,자르기를 반복하는 횟수. 0이면 음성 끝까지 무한 루프합니다.,Número de veces que se corta y repite. Póngalo en 0 para bucle infinito hasta el final del audio.,عدد مرات القطع والتكرار. اضبطه على 0 للتكرار اللانهائي حتى نهاية الصوت.,Jumlah kali pemotongan dan pengulangan. Atur ke 0 untuk loop tak terbatas hingga akhir audio.
+UnitCount,,回,times,次,次,회,veces,مرة,kali
