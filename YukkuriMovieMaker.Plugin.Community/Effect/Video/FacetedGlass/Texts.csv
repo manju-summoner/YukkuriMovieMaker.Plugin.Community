@@ -10,7 +10,7 @@ AmountDescription,,元映像と多面体ガラスの合成量です,Controls the
 CellSize,,面サイズ,Facet Size,面大小,面大小,면 크기,Tamaño de faceta,حجم الوجه,Ukuran Faset
 CellSizeDescription,,面ひとつあたりの平均サイズです,Sets the average size of each facet.,设置每个面的平均大小。,設定每個面的平均大小。,면 하나의 평균 크기입니다.,Define el tamaño medio de cada faceta.,يضبط متوسط حجم كل وجه.,Mengatur ukuran rata-rata setiap faset.
 Irregularity,,不規則さ,Irregularity,不规则度,不規則度,불규칙성,Irregularidad,عدم الانتظام,Ketidakteraturan
-IrregularityDescription,,0%で正六角形、100%で有機的な破片状の面になります,Morphs facets from regular hexagons (0%) to organic shards (100%).,0%为正六边形，100%为有机碎片状。,0%為正六邊形，100%為有機碎片狀。,0%는 정육각형, 100%는 유기적인 파편 모양이 됩니다.,Transforma las facetas de hexágonos (0%) a fragmentos orgánicos (100%).,يحول الأوجه من سداسيات منتظمة (0%) إلى شظايا عضوية (100%).,Mengubah faset dari heksagon teratur (0%) menjadi pecahan organik (100%).
+IrregularityDescription,,0%で正六角形、100%で有機的な破片状の面になります,Morphs facets from regular hexagons (0%) to organic shards (100%).,0%为正六边形，100%为有机碎片状。,0%為正六邊形，100%為有機碎片狀。,"0%는 정육각형, 100%는 유기적인 파편 모양이 됩니다.",Transforma las facetas de hexágonos (0%) a fragmentos orgánicos (100%).,يحول الأوجه من سداسيات منتظمة (0%) إلى شظايا عضوية (100%).,Mengubah faset dari heksagon teratur (0%) menjadi pecahan organik (100%).
 Relief,,凹凸,Relief,凹凸,凹凸,요철,Relieve,التضاريس,Relief
 ReliefDescription,,面ごとの傾きの強さです,Controls the tilt strength of each facet.,控制每个面的倾斜强度。,控制每個面的傾斜強度。,면마다의 기울기 강도입니다.,Controla la inclinación de cada faceta.,يتحكم في قوة ميل كل وجه.,Mengatur kekuatan kemiringan setiap faset.
 Rotation,,分割角度,Grid Rotation,分割角度,分割角度,분할 각도,Rotación de cuadrícula,دوران الشبكة,Rotasi Kisi
