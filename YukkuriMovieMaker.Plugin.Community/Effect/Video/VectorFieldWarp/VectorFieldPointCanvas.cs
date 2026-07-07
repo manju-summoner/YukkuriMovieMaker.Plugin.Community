@@ -365,10 +365,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 layout.Origin.X + (local.X * layout.ImageScale + layout.ImageWidth * 0.5) * layout.Scale,
                 layout.Origin.Y + (local.Y * layout.ImageScale + layout.ImageHeight * 0.5) * layout.Scale);
 
-        static Point GetPointPosition(VectorFieldPointItemViewModel point)
+        double GetDisplayValue(YukkuriMovieMaker.Commons.Animation animation)
+            => viewModel?.GetDisplayValue(animation) ?? animation.Values.FirstOrDefault()?.Value ?? 0;
+
+        Point GetPointPosition(VectorFieldPointItemViewModel point)
             => new(
-                point.Model.X.Values.FirstOrDefault()?.Value ?? 0,
-                point.Model.Y.Values.FirstOrDefault()?.Value ?? 0);
+                GetDisplayValue(point.Model.X),
+                GetDisplayValue(point.Model.Y));
 
         readonly record struct FieldSource(double X, double Y, double Radial, double Vortex, double Radius);
 
@@ -376,11 +379,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             => [.. points
                 .Where(p => p.IsEnabled)
                 .Select(p => new FieldSource(
-                    p.Model.X.Values.FirstOrDefault()?.Value ?? 0,
-                    p.Model.Y.Values.FirstOrDefault()?.Value ?? 0,
-                    p.Model.RadialStrength.Values.FirstOrDefault()?.Value ?? 0,
-                    p.Model.VortexStrength.Values.FirstOrDefault()?.Value ?? 0,
-                    Math.Max(p.Model.Radius.Values.FirstOrDefault()?.Value ?? 1, 1)))
+                    GetDisplayValue(p.Model.X),
+                    GetDisplayValue(p.Model.Y),
+                    GetDisplayValue(p.Model.RadialStrength),
+                    GetDisplayValue(p.Model.VortexStrength),
+                    Math.Max(GetDisplayValue(p.Model.Radius), 1)))
                 .Where(s => s.Radial != 0 || s.Vortex != 0)];
 
         static Vector EvaluateField(FieldSource[] sources, Point local)
@@ -464,7 +467,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             foreach (var point in points)
             {
                 var p = LocalToDisplay(GetPointPosition(point), layout);
-                var displayRadius = Math.Max(point.Model.Radius.Values.FirstOrDefault()?.Value ?? 1, 1) * layout.Scale * layout.ImageScale;
+                var displayRadius = Math.Max(GetDisplayValue(point.Model.Radius), 1) * layout.Scale * layout.ImageScale;
                 drawingContext.DrawEllipse(null, point.IsSelected ? SelectedRadiusPen : RadiusPen, p, displayRadius, displayRadius);
             }
 

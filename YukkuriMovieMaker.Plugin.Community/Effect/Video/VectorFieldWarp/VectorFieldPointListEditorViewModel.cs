@@ -271,16 +271,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     break;
                 if (!point.IsEnabled)
                     continue;
-                var radialStrength = Sanitize(GetAnimationValue(point.RadialStrength), -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0f);
-                var vortexStrength = Sanitize(GetAnimationValue(point.VortexStrength), -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0f);
+                var radialStrength = Sanitize(GetDisplayValue(point.RadialStrength), -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0f);
+                var vortexStrength = Sanitize(GetDisplayValue(point.VortexStrength), -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0f);
                 if (radialStrength == 0f && vortexStrength == 0f)
                     continue;
                 var offset = pointCount * FloatsPerPoint;
-                pointFloats[offset] = Sanitize(GetAnimationValue(point.X), -PositionLimit, PositionLimit, 0f);
-                pointFloats[offset + 1] = Sanitize(GetAnimationValue(point.Y), -PositionLimit, PositionLimit, 0f);
+                pointFloats[offset] = Sanitize(GetDisplayValue(point.X), -PositionLimit, PositionLimit, 0f);
+                pointFloats[offset + 1] = Sanitize(GetDisplayValue(point.Y), -PositionLimit, PositionLimit, 0f);
                 pointFloats[offset + 2] = radialStrength;
                 pointFloats[offset + 3] = vortexStrength;
-                pointFloats[offset + 4] = Sanitize(GetAnimationValue(point.Radius), 1f, VectorFieldPoint.RadiusLimit, 1f);
+                pointFloats[offset + 4] = Sanitize(GetDisplayValue(point.Radius), 1f, VectorFieldPoint.RadiusLimit, 1f);
                 pointFloats[offset + 5] = 0f;
                 pointFloats[offset + 6] = 0f;
                 pointFloats[offset + 7] = 0f;
@@ -288,8 +288,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             }
             Buffer.BlockCopy(pointFloats, 0, pointBytes, 0, pointBytes.Length);
 
-            var amount = Sanitize(GetAnimationValue(Effect.Amount) / 100, 0f, 1f, 0f);
-            var maxDisplacement = Sanitize(GetAnimationValue(Effect.MaxDisplacement), 0f, VectorFieldWarpCustomEffect.MaxDisplacementLimit, 0f);
+            var amount = Sanitize(GetDisplayValue(Effect.Amount) / 100, 0f, 1f, 0f);
+            var maxDisplacement = Sanitize(GetDisplayValue(Effect.MaxDisplacement), 0f, VectorFieldWarpCustomEffect.MaxDisplacementLimit, 0f);
             var steps = Math.Clamp(Effect.IntegrationSteps, 1, VectorFieldWarpCustomEffect.MaxIntegrationSteps);
             var margin = ComputePreviewMargin(amount, maxDisplacement);
 
@@ -311,7 +311,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             }
         }
 
-        double GetAnimationValue(Animation animation)
+        public double GetDisplayValue(Animation animation)
         {
             if (editorInfo is null)
                 return animation.Values.FirstOrDefault()?.Value ?? 0;
