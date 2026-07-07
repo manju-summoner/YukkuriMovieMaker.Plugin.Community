@@ -10,81 +10,56 @@
              mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="300">
     <Grid>
+        <Grid.Resources>
+            <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        </Grid.Resources>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="{Binding Source={x:Static local:VectorFieldWarpEditorSettings.Default}, Path=CanvasHeight, Mode=OneWay}"/>
+            <RowDefinition Height="8"/>
             <RowDefinition Height="26"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Margin="0,0,0,4">
-            <Grid.Effect>
-                <DropShadowEffect Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}" Opacity="1" BlurRadius="1" ShadowDepth="0" Direction="0"/>
-            </Grid.Effect>
-            <ItemsControl ItemsSource="{Binding VerticalLines}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Columns="{Binding Columns}" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Width="1" ClipToBounds="True">
-                            <Rectangle StrokeThickness="1" Width="2" Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" Margin="0,16,0,0" StrokeDashArray="4,4"/>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <ItemsControl ItemsSource="{Binding HorizontalLines}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Columns="1" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Height="1" ClipToBounds="True">
-                            <Rectangle StrokeThickness="1" Height="2" Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" Margin="16,0,0,0" StrokeDashArray="4,4"/>
-                        </Grid>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <ItemsControl ItemsSource="{Binding Items}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Columns="{Binding Columns}" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.Resources>
-                    <DataTemplate DataType="{x:Type local:VectorFieldPointItemViewModel}">
-                        <Viewbox StretchDirection="DownOnly">
-                            <Grid Width="48" Height="48">
-                                <c:ReadOnlyToggleButton Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding IsSelected, Mode=OneWay}" Command="{Binding SelectCommand}" CommandParameter="{Binding}" ToolTip="{Binding Label}">
-                                    <FrameworkElement.Resources>
-                                        <ResourceDictionary>
-                                            <Style x:Key="{x:Type Border}" TargetType="{x:Type Border}">
-                                                <Setter Property="CornerRadius" Value="{Binding ActualWidth, RelativeSource={RelativeSource Self}}"/>
-                                            </Style>
-                                        </ResourceDictionary>
-                                    </FrameworkElement.Resources>
-                                    <FrameworkElement.Style>
-                                        <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type c:ReadOnlyToggleButton}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsEnabled}" Value="False">
-                                                    <Setter Property="Opacity" Value="0.3"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                    <Setter Property="BorderThickness" Value="2" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </FrameworkElement.Style>
-                                </c:ReadOnlyToggleButton>
-                            </Grid>
-                        </Viewbox>
-                    </DataTemplate>
-                </ItemsControl.Resources>
-            </ItemsControl>
+
+        <Grid Grid.Row="0">
+            <local:VectorFieldPointCanvas x:Name="pointCanvas" ToolTip="{x:Static local:Texts.VectorFieldWarpCanvasTooltip}"/>
+            <ScrollBar Orientation="Vertical" Width="17"
+                       HorizontalAlignment="Right" VerticalAlignment="Stretch" Margin="0,0,0,17"
+                       Minimum="0"
+                       Maximum="{Binding ScrollMaxY, ElementName=pointCanvas}"
+                       ViewportSize="{Binding ScrollViewportH, ElementName=pointCanvas}"
+                       LargeChange="{Binding ScrollViewportH, ElementName=pointCanvas}"
+                       Value="{Binding ScrollOffsetY, ElementName=pointCanvas, Mode=TwoWay}"
+                       Visibility="{Binding VScrollVisibility, ElementName=pointCanvas}"/>
+            <ScrollBar Orientation="Horizontal" Height="17"
+                       VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Margin="0,0,17,0"
+                       Minimum="0"
+                       Maximum="{Binding ScrollMaxX, ElementName=pointCanvas}"
+                       ViewportSize="{Binding ScrollViewportW, ElementName=pointCanvas}"
+                       LargeChange="{Binding ScrollViewportW, ElementName=pointCanvas}"
+                       Value="{Binding ScrollOffsetX, ElementName=pointCanvas, Mode=TwoWay}"
+                       Visibility="{Binding HScrollVisibility, ElementName=pointCanvas}"/>
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right" VerticalAlignment="Top" Margin="2">
+                <Button Width="22" Height="22" Margin="0,0,2,0" Opacity="0.75"
+                        Content="{DynamicResource {x:Static icons:IconKeys.FitToPage}}"
+                        ToolTip="{x:Static local:Texts.VectorFieldWarpCanvasResetViewTooltip}"
+                        Click="ResetViewButton_Click"/>
+                <Button Width="22" Height="22" Opacity="0.75"
+                        Content="{DynamicResource {x:Static icons:IconKeys.Autorenew}}"
+                        ToolTip="{x:Static local:Texts.VectorFieldWarpCanvasRefreshTooltip}"
+                        Command="{Binding RefreshImageCommand}"/>
+            </StackPanel>
         </Grid>
-        <Grid Grid.Row="1">
+
+        <Thumb Grid.Row="1" Cursor="SizeNS" Margin="0,1" DragDelta="CanvasResizeThumb_DragDelta">
+            <Thumb.Template>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Border Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                </ControlTemplate>
+            </Thumb.Template>
+        </Thumb>
+
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="26"/>
@@ -92,7 +67,8 @@
             <Button Grid.Column="0" Content="{x:Static local:Texts.VectorFieldWarpAddPoint}" Command="{Binding AddPointCommand}"/>
             <Button Grid.Column="1" Padding="6" Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" ToolTip="{x:Static local:Texts.VectorFieldWarpRemovePoint}" Command="{Binding RemovePointCommand}"/>
         </Grid>
-        <Grid Grid.Row="2" ClipToBounds="True">
+
+        <Grid Grid.Row="3" x:Name="editorArea" ClipToBounds="True" SizeChanged="EditorArea_SizeChanged">
             <c:PropertiesEditor x:Name="propertiesEditor" Margin="0,-22,0,0" Target="{Binding SelectedTarget}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="BeginEdit">
@@ -103,6 +79,11 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </c:PropertiesEditor>
+            <TextBlock Text="{Binding NoSelectionMessage}"
+                       Visibility="{Binding HasNoSelection, Converter={StaticResource BoolToVisibility}}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Margin="12" TextWrapping="Wrap" TextAlignment="Center"
+                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
         </Grid>
     </Grid>
 </UserControl>
