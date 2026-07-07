@@ -28,6 +28,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         IEditorInfo? editorInfo;
         bool isCanvasImageInitialized;
+        int lastCanvasImageFrame = -1;
 
         BitmapSource? baseCanvasImage;
         byte[]? basePixels;
@@ -49,7 +50,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             editorInfo = info;
             if (isCanvasImageInitialized)
             {
-                ScheduleWarpUpdate();
+                if (info.ItemPosition.Frame != lastCanvasImageFrame)
+                    RefreshCanvasImage();
+                else
+                    ScheduleWarpUpdate();
                 return;
             }
             isCanvasImageInitialized = true;
@@ -112,6 +116,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         {
             if (editorInfo is null)
                 return;
+            lastCanvasImageFrame = editorInfo.ItemPosition.Frame;
             try
             {
                 using var itemVideoSource = editorInfo.CreateItemVideoSource(
