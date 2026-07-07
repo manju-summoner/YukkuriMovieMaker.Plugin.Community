@@ -1,0 +1,58 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+CrossHatchShadingEffectName,,クロスハッチ陰影,Cross Hatch Shading,交叉排线阴影,交叉排線陰影,크로스해치 음영,Sombreado de trama cruzada,تظليل بالخطوط المتقاطعة,Bayangan Arsir Silang
+CrossHatchShadingBasicGroup,,基本,Basic,基本,基本,기본,Básico,أساسي,Dasar
+CrossHatchShadingColorGroup,,色,Color,颜色,顏色,색상,Color,اللون,Warna
+CrossHatchShadingDetailGroup,,詳細,Detail,详细,詳細,상세,Detalle,تفاصيل,Detail
+CrossHatchShadingStyleName,,スタイル,Style,样式,樣式,스타일,Estilo,النمط,Gaya
+CrossHatchShadingStyleDesc,,線の方向と階調と質感のプリセットを選びます。,Selects a preset of line direction tone and texture.,选择线条方向、色调与质感的预设。,選擇線條方向、色調與質感的預設。,선 방향과 계조와 질감의 프리셋을 선택합니다.,Selecciona un preset de dirección tono y textura de línea.,يختار إعدادًا مسبقًا لاتجاه الخط ودرجته وملمسه.,Memilih preset arah nada dan tekstur garis.
+CrossHatchShadingAmountName,,適用量,Amount,应用量,套用量,적용량,Cantidad,المقدار,Jumlah
+CrossHatchShadingAmountDesc,,元映像とハッチ結果の合成量です。,Blends between the source and the hatched result.,混合原始画面与排线结果。,混合原始畫面與排線結果。,원본과 해칭 결과를 혼합합니다.,Mezcla entre el origen y el resultado de trama.,يمزج بين المصدر ونتيجة التظليل.,Mencampur sumber dengan hasil arsir.
+CrossHatchShadingDensityName,,密度,Density,密度,密度,밀도,Densidad,الكثافة,Kerapatan
+CrossHatchShadingDensityDesc,,線の間隔です。小さいほど線が密になります。,Spacing between lines. Smaller values pack lines tighter.,线条间隔。数值越小线条越密。,線條間隔。數值越小線條越密。,선 간격입니다. 값이 작을수록 선이 촘촘해집니다.,Espacio entre líneas. Valores menores las juntan más.,المسافة بين الخطوط. القيم الأصغر تقارب الخطوط.,Jarak antar garis. Nilai kecil merapatkan garis.
+CrossHatchShadingThicknessName,,太さ,Thickness,粗细,粗細,굵기,Grosor,السماكة,Ketebalan
+CrossHatchShadingThicknessDesc,,各ハッチ線の太さです。,Width of each hatch line.,每条排线的宽度。,每條排線的寬度。,각 해칭 선의 너비입니다.,Ancho de cada línea de trama.,عرض كل خط تظليل.,Lebar tiap garis arsir.
+CrossHatchShadingShadowDepthName,,陰影,Shadow,阴影,陰影,음영,Sombra,الظل,Bayangan
+CrossHatchShadingShadowDepthDesc,,暗部で線が増える強さです。,How strongly lines build up in dark areas.,暗部中线条增加的强度。,暗部中線條增加的強度。,어두운 영역에서 선이 늘어나는 강도입니다.,Cuánto se acumulan las líneas en zonas oscuras.,مدى تكاثف الخطوط في المناطق الداكنة.,Seberapa kuat garis menumpuk di area gelap.
+CrossHatchShadingFlowName,,流れ,Flow,流向,流向,흐름,Flujo,التدفق,Aliran
+CrossHatchShadingFlowDesc,,明暗の勾配へ線の向きを寄せる強さです。,How strongly line direction follows the luminance gradient.,线条方向顺应明暗梯度的强度。,線條方向順應明暗梯度的強度。,선 방향이 명암 기울기를 따르는 강도입니다.,Cuánto sigue la dirección de línea al gradiente de luz.,مدى اتباع اتجاه الخط لميل الإضاءة.,Seberapa kuat arah garis mengikuti gradien terang.
+CrossHatchShadingWobbleName,,手描き揺らぎ,Wobble,手绘抖动,手繪抖動,손그림 흔들림,Temblor,اهتزاز يدوي,Goyangan
+CrossHatchShadingWobbleDesc,,線の位置と太さを揺らして手描きの質感を加えます。,Perturbs line position and width for a hand-drawn feel.,抖动线条位置与粗细以增加手绘质感。,抖動線條位置與粗細以增加手繪質感。,선의 위치와 굵기를 흔들어 손그림 질감을 더합니다.,Perturba la posición y el grosor de las líneas para un aspecto dibujado a mano.,يهزّ موضع الخطوط وسمكها لإضفاء ملمس مرسوم يدويًا.,Menggoyangkan posisi dan ketebalan garis untuk kesan gambar tangan.
+CrossHatchShadingOutlineName,,輪郭,Outline,轮廓,輪廓,윤곽,Contorno,المخطط,Garis Tepi
+CrossHatchShadingOutlineDesc,,ハッチに重ねる輪郭線の強さです。,Strength of the contour lines added over the hatching.,叠加在排线上的轮廓线强度。,疊加在排線上的輪廓線強度。,해칭 위에 더해지는 윤곽선 강도입니다.,Intensidad de los contornos sobre la trama.,قوة خطوط الكفاف فوق التظليل.,Kekuatan garis kontur di atas arsiran.
+CrossHatchShadingInkColorName,,インク色,Ink Color,墨色,墨色,잉크 색,Color de tinta,لون الحبر,Warna Tinta
+CrossHatchShadingInkColorDesc,,ハッチ線と輪郭線の色です。,Color of the hatch and contour lines.,排线与轮廓线的颜色。,排線與輪廓線的顏色。,해칭과 윤곽선의 색입니다.,Color de las líneas de trama y contorno.,لون خطوط التظليل والكفاف.,Warna garis arsir dan kontur.
+CrossHatchShadingPaperColorName,,紙色,Paper Color,纸色,紙色,종이 색,Color de papel,لون الورق,Warna Kertas
+CrossHatchShadingPaperColorDesc,,紙または背景の色です。,Color of the paper or background.,纸张或背景的颜色。,紙張或背景的顏色。,종이 또는 배경의 색입니다.,Color del papel o fondo.,لون الورق أو الخلفية.,Warna kertas atau latar.
+CrossHatchShadingColorModeName,,色,Color,颜色,顏色,색상,Color,اللون,Warna
+CrossHatchShadingColorModeDesc,,出力色の作り方です。,How the output color is composed.,输出颜色的生成方式。,輸出顏色的生成方式。,출력 색을 만드는 방식입니다.,Cómo se compone el color de salida.,طريقة تكوين لون الإخراج.,Cara warna keluaran disusun.
+CrossHatchShadingLineLayersName,,線の層,Line Layers,线层,線層,선 레이어,Capas de línea,طبقات الخطوط,Lapis Garis
+CrossHatchShadingLineLayersDesc,,暗部に重ねる線方向の最大数です。,Maximum number of line directions stacked in shadows.,暗部叠加的线条方向最大数量。,暗部疊加的線條方向最大數量。,어두운 부분에 겹치는 선 방향의 최대 수입니다.,Número máximo de direcciones de línea en sombra.,أقصى عدد لاتجاهات الخطوط في الظل.,Jumlah maksimum arah garis pada bayangan.
+CrossHatchShadingToneSoftnessName,,階調の柔らかさ,Tone Softness,色调柔和度,色調柔和度,계조 부드러움,Suavidad de tono,نعومة التدرج,Kelembutan Nada
+CrossHatchShadingToneSoftnessDesc,,線層が現れる境界の柔らかさです。,Softness of the boundary where a line layer appears.,线层出现边界的柔和程度。,線層出現邊界的柔和程度。,선 레이어가 나타나는 경계의 부드러움입니다.,Suavidad del borde donde aparece una capa.,نعومة الحد الذي تظهر عنده طبقة الخط.,Kelembutan batas tempat lapis garis muncul.
+CrossHatchShadingGrainName,,粒状感,Grain,颗粒感,顆粒感,입자감,Grano,الحبيبات,Butiran
+CrossHatchShadingGrainDesc,,紙とインクの手続き的な粒状感です。,Procedural grain of the paper and ink.,纸张与墨水的程序化颗粒。,紙張與墨水的程序化顆粒。,종이와 잉크의 절차적 입자입니다.,Grano procedural del papel y la tinta.,حبيبات إجرائية للورق والحبر.,Butiran prosedural kertas dan tinta.
+CrossHatchShadingSeedName,,シード,Seed,种子,種子,시드,Semilla,البذرة,Seed
+CrossHatchShadingSeedDesc,,粒状感と線位相を固定する値です。,Fixed value for grain and line phase.,固定颗粒与线条相位的数值。,固定顆粒與線條相位的數值。,입자와 선 위상을 고정하는 값입니다.,Valor fijo para el grano y la fase de línea.,قيمة ثابتة للحبيبات وطور الخط.,Nilai tetap untuk butiran dan fase garis.
+CrossHatchShadingStylePen,,ペン画,Pen,钢笔,鋼筆,펜,Pluma,قلم,Pena
+CrossHatchShadingStylePenDesc,,ペン画やイラスト向けの細い線です。,Fine lines for pen drawing and illustration.,适合钢笔画与插画的细线。,適合鋼筆畫與插畫的細線。,펜화와 일러스트용 가는 선입니다.,Líneas finas para dibujo a pluma e ilustración.,خطوط رفيعة للرسم بالقلم والتوضيح.,Garis halus untuk gambar pena dan ilustrasi.
+CrossHatchShadingStyleEngraving,,版画,Engraving,版画,版畫,판화,Grabado,نقش,Ukiran
+CrossHatchShadingStyleEngravingDesc,,版画や紙幣風の斜め線です。,Slanted lines for engraving and banknote looks.,版画与纸币风格的斜线。,版畫與紙幣風格的斜線。,판화와 지폐풍 사선입니다.,Líneas inclinadas estilo grabado y billete.,خطوط مائلة بأسلوب النقش والأوراق النقدية.,Garis miring gaya ukiran dan uang kertas.
+CrossHatchShadingStyleManga,,漫画,Manga,漫画,漫畫,만화,Manga,مانغا,Manga
+CrossHatchShadingStyleMangaDesc,,漫画背景向けの陰影トーンです。,Shading tone for manga backgrounds.,适合漫画背景的阴影网点。,適合漫畫背景的陰影網點。,만화 배경용 음영 톤입니다.,Tono de sombreado para fondos de manga.,درجة تظليل لخلفيات المانغا.,Nada bayangan untuk latar manga.
+CrossHatchShadingStyleBlueprint,,設計図,Blueprint,蓝图,藍圖,청사진,Plano,مخطط أزرق,Cetak Biru
+CrossHatchShadingStyleBlueprintDesc,,設計図や技術資料風の直交線です。,Orthogonal lines for technical drawings.,设计图与技术资料风格的正交线。,設計圖與技術資料風格的正交線。,설계도와 기술 자료풍 직교선입니다.,Líneas ortogonales para dibujos técnicos.,خطوط متعامدة للرسومات التقنية.,Garis ortogonal untuk gambar teknik.
+CrossHatchShadingColorModeInkAndPaper,,インクと紙,Ink and Paper,墨与纸,墨與紙,잉크와 종이,Tinta y papel,الحبر والورق,Tinta dan Kertas
+CrossHatchShadingColorModeInkAndPaperDesc,,紙色とインク色だけで描きます。,Draws using only paper and ink colors.,仅用纸色与墨色绘制。,僅用紙色與墨色繪製。,종이색과 잉크색만으로 그립니다.,Dibuja solo con colores de papel y tinta.,يرسم بلوني الورق والحبر فقط.,Menggambar hanya dengan warna kertas dan tinta.
+CrossHatchShadingColorModePreserveSource,,元の色を残す,Preserve Source,保留原色,保留原色,원본 색 유지,Conservar origen,الحفاظ على المصدر,Pertahankan Sumber
+CrossHatchShadingColorModePreserveSourceDesc,,元映像の色を残してインク線を重ねます。,Keeps the source color and overlays ink lines.,保留原始颜色并叠加墨线。,保留原始顏色並疊加墨線。,원본 색을 남기고 잉크선을 덧그립니다.,Conserva el color original y superpone tinta.,يبقي اللون الأصلي ويضيف خطوط الحبر.,Menjaga warna asli dan menimpa garis tinta.
+CrossHatchShadingLineLayersAuto,,自動,Auto,自动,自動,자동,Automático,تلقائي,Otomatis
+CrossHatchShadingLineLayers1,,1,1,1,1,1,1,1,1
+CrossHatchShadingLineLayers2,,2,2,2,2,2,2,2,2
+CrossHatchShadingLineLayers3,,3,3,3,3,3,3,3,3
+CrossHatchShadingLineLayers4,,4,4,4,4,4,4,4,4
+TagCrossHatch,,クロスハッチ,cross hatch,交叉排线,交叉排線,크로스해치,trama cruzada,تظليل متقاطع,arsir silang
+TagHatching,,ハッチング,hatching,排线,排線,해칭,trama,تظليل,arsir
+TagPen,,ペン画,pen drawing,钢笔画,鋼筆畫,펜화,dibujo a pluma,رسم بالقلم,gambar pena
+TagEngraving,,版画,engraving,版画,版畫,판화,grabado,نقش,ukiran
+TagBlueprint,,設計図,blueprint,蓝图,藍圖,청사진,plano,مخطط أزرق,cetak biru
+TagManga,,漫画,manga,漫画,漫畫,만화,manga,مانغا,manga
