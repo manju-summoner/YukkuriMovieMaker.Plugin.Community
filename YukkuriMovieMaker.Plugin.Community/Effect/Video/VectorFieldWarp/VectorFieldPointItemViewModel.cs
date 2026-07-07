@@ -1,7 +1,6 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
@@ -11,7 +10,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         bool disposedValue;
 
         public VectorFieldPoint Model { get; }
-        public string Label { get; }
 
         public bool IsEnabled
         {
@@ -25,32 +23,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             set => Model.IsSelected = value;
         }
 
-        public ICommand SelectCommand { get; }
+        public event EventHandler? VisualChanged;
 
-        public event EventHandler? PositionChanged;
+        IEnumerable<Animation> VisualAnimations => [Model.X, Model.Y, Model.RadialStrength, Model.VortexStrength, Model.Radius];
 
-        public VectorFieldPointItemViewModel(VectorFieldPoint model, int index, ICommand selectCommand)
+        public VectorFieldPointItemViewModel(VectorFieldPoint model)
         {
             Model = model;
-            Label = $"#{index + 1}";
-            SelectCommand = selectCommand;
 
             SubscribeValues();
-            Model.X.PropertyChanged += Animation_PropertyChanged;
-            Model.Y.PropertyChanged += Animation_PropertyChanged;
+            foreach (var animation in VisualAnimations)
+                animation.PropertyChanged += Animation_PropertyChanged;
             Model.PropertyChanged += Model_PropertyChanged;
         }
 
         void SubscribeValues()
         {
-            foreach (var v in Model.X.Values) v.PropertyChanged += Position_PropertyChanged;
-            foreach (var v in Model.Y.Values) v.PropertyChanged += Position_PropertyChanged;
+            foreach (var animation in VisualAnimations)
+                foreach (var value in animation.Values)
+                    value.PropertyChanged += Value_PropertyChanged;
         }
 
         void UnsubscribeValues()
         {
-            foreach (var v in Model.X.Values) v.PropertyChanged -= Position_PropertyChanged;
-            foreach (var v in Model.Y.Values) v.PropertyChanged -= Position_PropertyChanged;
+            foreach (var animation in VisualAnimations)
+                foreach (var value in animation.Values)
+                    value.PropertyChanged -= Value_PropertyChanged;
         }
 
         void Animation_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -59,12 +57,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 return;
             UnsubscribeValues();
             SubscribeValues();
-            PositionChanged?.Invoke(this, EventArgs.Empty);
+            VisualChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        void Position_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        void Value_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            PositionChanged?.Invoke(this, EventArgs.Empty);
+            VisualChanged?.Invoke(this, EventArgs.Empty);
         }
 
         void Model_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -85,8 +83,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             if (disposedValue)
                 return;
             UnsubscribeValues();
-            Model.X.PropertyChanged -= Animation_PropertyChanged;
-            Model.Y.PropertyChanged -= Animation_PropertyChanged;
+            foreach (var animation in VisualAnimations)
+                animation.PropertyChanged -= Animation_PropertyChanged;
             Model.PropertyChanged -= Model_PropertyChanged;
             disposedValue = true;
             GC.SuppressFinalize(this);
