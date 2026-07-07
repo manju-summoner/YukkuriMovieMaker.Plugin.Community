@@ -41,26 +41,39 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FacetedGlass
                 (float)_item.LightElevation.GetValue(frame, length, fps),
                 _item.Seed);
 
-            if (_isFirst || _parameters != parameters)
-            {
+            if (_isFirst || _parameters.Amount != parameters.Amount)
                 _effect.Amount = parameters.Amount;
+            if (_isFirst || _parameters.CellSize != parameters.CellSize)
                 _effect.CellSize = parameters.CellSize;
+            if (_isFirst || _parameters.Irregularity != parameters.Irregularity)
                 _effect.Irregularity = parameters.Irregularity;
+            if (_isFirst || _parameters.Relief != parameters.Relief)
                 _effect.Relief = parameters.Relief;
+            if (_isFirst || _parameters.Rotation != parameters.Rotation)
                 _effect.Rotation = parameters.Rotation;
+            if (_isFirst || _parameters.Evolution != parameters.Evolution)
                 _effect.Evolution = parameters.Evolution;
+            if (_isFirst || _parameters.Refraction != parameters.Refraction)
                 _effect.Refraction = parameters.Refraction;
+            if (_isFirst || _parameters.RefractiveIndex != parameters.RefractiveIndex)
                 _effect.RefractiveIndex = parameters.RefractiveIndex;
+            if (_isFirst || _parameters.Dispersion != parameters.Dispersion)
                 _effect.Dispersion = parameters.Dispersion;
+            if (_isFirst || _parameters.Reflection != parameters.Reflection)
                 _effect.Reflection = parameters.Reflection;
+            if (_isFirst || _parameters.Glint != parameters.Glint)
                 _effect.Glint = parameters.Glint;
+            if (_isFirst || _parameters.BorderWidth != parameters.BorderWidth)
                 _effect.BorderWidth = parameters.BorderWidth;
+            if (_isFirst || _parameters.LightAngle != parameters.LightAngle)
                 _effect.LightAngle = parameters.LightAngle;
+            if (_isFirst || _parameters.LightElevation != parameters.LightElevation)
                 _effect.LightElevation = parameters.LightElevation;
+            if (_isFirst || _parameters.Seed != parameters.Seed)
                 _effect.Seed = parameters.Seed;
-                _parameters = parameters;
-                _isFirst = false;
-            }
+
+            _parameters = parameters;
+            _isFirst = false;
 
             return effectDescription.DrawDescription;
         }
