@@ -265,7 +265,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 return;
 
             var pointCount = 0;
-            foreach (var point in Effect.Points)
+            foreach (var point in Effect.IsEnabled ? Effect.Points : [])
             {
                 if (pointCount >= VectorFieldWarpCustomEffect.MaxPoints)
                     break;
@@ -424,7 +424,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 OnPropertyChanged(nameof(CanAddPoint));
                 ScheduleWarpUpdate();
             }
-            else if (e.PropertyName == nameof(VectorFieldWarpEffect.IntegrationSteps))
+            else if (e.PropertyName is nameof(VectorFieldWarpEffect.IntegrationSteps) or nameof(VectorFieldWarpEffect.IsEnabled))
             {
                 ScheduleWarpUpdate();
             }
