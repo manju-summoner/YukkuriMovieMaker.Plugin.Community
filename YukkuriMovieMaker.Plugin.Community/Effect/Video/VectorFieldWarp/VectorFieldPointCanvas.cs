@@ -172,8 +172,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         void SyncViewToCurrentImage()
         {
-            var image = viewModel?.CanvasImage;
-            var size = image is null ? Size.Empty : new Size(image.PixelWidth, image.PixelHeight);
+            var size = viewModel?.CanvasImage is null ? Size.Empty : viewModel.CanvasImageSize;
             if (size != lastImageSize)
             {
                 lastImageSize = size;
@@ -244,12 +243,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         ViewMetrics? GetMetrics()
         {
-            var image = viewModel?.CanvasImage;
-            if (image is null || RenderSize.Width <= 0 || RenderSize.Height <= 0)
+            if (viewModel?.CanvasImage is null || RenderSize.Width <= 0 || RenderSize.Height <= 0)
                 return null;
 
-            double iw = image.PixelWidth;
-            double ih = image.PixelHeight;
+            var size = viewModel.CanvasImageSize;
+            double iw = size.Width;
+            double ih = size.Height;
             if (iw <= 0 || ih <= 0)
                 return null;
 
