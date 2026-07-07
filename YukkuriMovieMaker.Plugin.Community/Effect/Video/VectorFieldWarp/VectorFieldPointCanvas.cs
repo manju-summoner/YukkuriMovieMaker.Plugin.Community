@@ -238,6 +238,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             double Scale, Rect ContentLocal, double ImageWidth, double ImageHeight,
             double ViewportW, double ViewportH, double ExtentW, double ExtentH, bool NeedH, bool NeedV);
 
+        readonly record struct CanvasLayout(double Scale, double ImageScale, Point Origin, double ImageWidth, double ImageHeight);
+
+        double GetImageScale() => Math.Max(viewModel?.CanvasImageScale ?? 1.0, 1e-6);
+
         ViewMetrics? GetMetrics()
         {
             var image = viewModel?.CanvasImage;
@@ -253,7 +257,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             var fitScale = Math.Min(fullW / iw, fullH / ih);
             var scale = fitScale * zoom;
 
-            var content = GetContentLocalBounds(iw, ih);
+            var content = GetContentLocalBounds(iw, ih, GetImageScale());
             double extentW = content.Width * scale;
             double extentH = content.Height * scale;
 
@@ -268,21 +272,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             return new ViewMetrics(scale, content, iw, ih, effW, effH, extentW, extentH, needH, needV);
         }
 
-        Rect GetContentLocalBounds(double iw, double ih)
+        Rect GetContentLocalBounds(double iw, double ih, double imageScale)
         {
             double minX = -iw * 0.5, minY = -ih * 0.5, maxX = iw * 0.5, maxY = ih * 0.5;
             foreach (var point in points)
             {
                 var p = GetPointPosition(point);
-                if (p.X < minX) minX = p.X;
-                if (p.Y < minY) minY = p.Y;
-                if (p.X > maxX) maxX = p.X;
-                if (p.Y > maxY) maxY = p.Y;
+                var x = p.X * imageScale;
+                var y = p.Y * imageScale;
+                if (x < minX) minX = x;
+                if (y < minY) minY = y;
+                if (x > maxX) maxX = x;
+                if (y > maxY) maxY = y;
             }
             return new Rect(new Point(minX, minY), new Point(maxX, maxY));
         }
 
-        (double Scale, Point Origin, double ImageWidth, double ImageHeight)? GetLayout()
+        CanvasLayout? GetLayout()
         {
             var metrics = GetMetrics();
             if (metrics is null)
@@ -296,7 +302,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
             double originX = padX - offX - (m.ContentLocal.Left + m.ImageWidth * 0.5) * m.Scale;
             double originY = padY - offY - (m.ContentLocal.Top + m.ImageHeight * 0.5) * m.Scale;
-            return (m.Scale, new Point(originX, originY), m.ImageWidth, m.ImageHeight);
+            return new CanvasLayout(m.Scale, GetImageScale(), new Point(originX, originY), m.ImageWidth, m.ImageHeight);
         }
 
         void UpdateScrollInfo()
@@ -350,15 +356,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             InvalidateVisual();
         }
 
-        static Point DisplayToLocal(Point display, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        static Point DisplayToLocal(Point display, CanvasLayout layout)
             => new(
-                (display.X - layout.Origin.X) / layout.Scale - layout.ImageWidth * 0.5,
-                (display.Y - layout.Origin.Y) / layout.Scale - layout.ImageHeight * 0.5);
+                ((display.X - layout.Origin.X) / layout.Scale - layout.ImageWidth * 0.5) / layout.ImageScale,
+                ((display.Y - layout.Origin.Y) / layout.Scale - layout.ImageHeight * 0.5) / layout.ImageScale);
 
-        static Point LocalToDisplay(Point local, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        static Point LocalToDisplay(Point local, CanvasLayout layout)
             => new(
-                layout.Origin.X + (local.X + layout.ImageWidth * 0.5) * layout.Scale,
-                layout.Origin.Y + (local.Y + layout.ImageHeight * 0.5) * layout.Scale);
+                layout.Origin.X + (local.X * layout.ImageScale + layout.ImageWidth * 0.5) * layout.Scale,
+                layout.Origin.Y + (local.Y * layout.ImageScale + layout.ImageHeight * 0.5) * layout.Scale);
 
         static Point GetPointPosition(VectorFieldPointItemViewModel point)
             => new(
@@ -413,7 +419,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             DrawPoints(drawingContext, l);
         }
 
-        void DrawFieldArrows(DrawingContext drawingContext, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout, Rect bounds)
+        void DrawFieldArrows(DrawingContext drawingContext, CanvasLayout layout, Rect bounds)
         {
             var sources = GetFieldSources();
             if (sources.Length == 0)
@@ -462,12 +468,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             }
         }
 
-        void DrawPoints(DrawingContext drawingContext, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        void DrawPoints(DrawingContext drawingContext, CanvasLayout layout)
         {
             foreach (var point in points)
             {
                 var p = LocalToDisplay(GetPointPosition(point), layout);
-                var displayRadius = Math.Max(point.Model.Radius.Values.FirstOrDefault()?.Value ?? 1, 1) * layout.Scale;
+                var displayRadius = Math.Max(point.Model.Radius.Values.FirstOrDefault()?.Value ?? 1, 1) * layout.Scale * layout.ImageScale;
                 drawingContext.DrawEllipse(null, point.IsSelected ? SelectedRadiusPen : RadiusPen, p, displayRadius, displayRadius);
             }
 
@@ -552,7 +558,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
             var pos = e.GetPosition(this);
 
-            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+            if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt)
             {
                 BeginPan(pos, e);
                 return;
@@ -628,8 +634,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 UpdateHover(pos, layout.Value);
                 return;
             }
-            var dx = (pos.X - lastDragPosition.X) / layout.Value.Scale;
-            var dy = (pos.Y - lastDragPosition.Y) / layout.Value.Scale;
+            var dx = (pos.X - lastDragPosition.X) / (layout.Value.Scale * layout.Value.ImageScale);
+            var dy = (pos.Y - lastDragPosition.Y) / (layout.Value.Scale * layout.Value.ImageScale);
             if (dx == 0 && dy == 0)
                 return;
 
@@ -681,7 +687,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             ClearHover();
         }
 
-        void UpdateHover(Point pos, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        void UpdateHover(Point pos, CanvasLayout layout)
         {
             var point = HitTestPoint(pos, layout);
             if (point == hoveredPoint)
@@ -767,7 +773,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             }
         }
 
-        VectorFieldPointItemViewModel? HitTestPoint(Point display, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        VectorFieldPointItemViewModel? HitTestPoint(Point display, CanvasLayout layout)
         {
             VectorFieldPointItemViewModel? nearest = null;
             var nearestDistSq = PointHitRadius * PointHitRadius;
