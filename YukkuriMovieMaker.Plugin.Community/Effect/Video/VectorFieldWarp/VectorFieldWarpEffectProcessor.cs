@@ -15,6 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         readonly VectorFieldWarpEffect item = item;
         readonly float[] pointData = new float[VectorFieldWarpCustomEffect.MaxPoints * FloatsPerPoint];
+        readonly byte[] pointDataBytes = new byte[VectorFieldWarpCustomEffect.MaxPoints * FloatsPerPoint * sizeof(float)];
 
         VectorFieldWarpCustomEffect? effect;
         bool isFirst = true;
@@ -75,9 +76,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 effect.MaxDisplacement = maxDisplacement;
             if (isFirst || pointDataChanged)
             {
-                var bytes = new byte[pointData.Length * sizeof(float)];
-                Buffer.BlockCopy(pointData, 0, bytes, 0, bytes.Length);
-                effect.PointData = bytes;
+                Buffer.BlockCopy(pointData, 0, pointDataBytes, 0, pointDataBytes.Length);
+                effect.PointData = pointDataBytes;
             }
 
             isFirst = false;
