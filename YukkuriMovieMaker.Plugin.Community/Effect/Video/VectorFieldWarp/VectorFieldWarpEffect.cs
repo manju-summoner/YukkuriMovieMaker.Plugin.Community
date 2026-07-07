@@ -52,13 +52,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             yield return Amount;
             yield return MaxDisplacement;
             foreach (var point in Points)
-            {
-                yield return point.X;
-                yield return point.Y;
-                yield return point.RadialStrength;
-                yield return point.VortexStrength;
-                yield return point.Radius;
-            }
+                yield return point;
         }
     }
 }
