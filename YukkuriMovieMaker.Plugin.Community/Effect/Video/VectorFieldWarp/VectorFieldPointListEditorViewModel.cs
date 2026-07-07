@@ -7,7 +7,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using Newtonsoft.Json;
 using YukkuriMovieMaker.Commons;
 
@@ -33,9 +32,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         BitmapSource? baseCanvasImage;
         VectorFieldWarpPreviewRenderer? previewRenderer;
         bool isPreviewRendererFailed;
-        bool isWarpUpdateScheduled;
+        bool isWarpPending;
+        bool isRenderingHooked;
 
-        readonly Dispatcher dispatcher;
         readonly AnimationWatcher amountWatcher;
         readonly AnimationWatcher maxDisplacementWatcher;
         readonly float[] pointFloats = new float[VectorFieldWarpCustomEffect.MaxPoints * FloatsPerPoint];
@@ -85,8 +84,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         public VectorFieldPointListEditorViewModel(ItemProperty[] itemProperties)
         {
             ItemProperties = itemProperties;
-
-            dispatcher = Dispatcher.CurrentDispatcher;
 
             Effect.PropertyChanged += Effect_PropertyChanged;
             amountWatcher = new AnimationWatcher(Effect.Amount, ScheduleWarpUpdate);
@@ -215,14 +212,40 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         void ScheduleWarpUpdate()
         {
-            if (disposedValue || isWarpUpdateScheduled)
+            if (disposedValue)
                 return;
-            isWarpUpdateScheduled = true;
-            dispatcher.BeginInvoke(DispatcherPriority.Input, () =>
+            isWarpPending = true;
+            HookRendering();
+        }
+
+        void HookRendering()
+        {
+            if (isRenderingHooked)
+                return;
+            isRenderingHooked = true;
+            CompositionTarget.Rendering += CompositionTarget_Rendering;
+        }
+
+        void UnhookRendering()
+        {
+            if (!isRenderingHooked)
+                return;
+            isRenderingHooked = false;
+            CompositionTarget.Rendering -= CompositionTarget_Rendering;
+        }
+
+        void CompositionTarget_Rendering(object? sender, EventArgs e)
+        {
+            if (disposedValue || previewRenderer is null || !isWarpPending)
             {
-                isWarpUpdateScheduled = false;
-                RenderWarpedImage();
-            });
+                isWarpPending = false;
+                UnhookRendering();
+                return;
+            }
+            isWarpPending = false;
+            RenderWarpedImage();
+            if (!isWarpPending)
+                UnhookRendering();
         }
 
         void RenderWarpedImage()
@@ -261,7 +284,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             try
             {
                 if (!previewRenderer.Render(pointBytes, pointCount, amount, maxDisplacement, steps))
-                    ScheduleWarpUpdate();
+                    isWarpPending = true;
             }
             catch
             {
@@ -448,6 +471,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             if (disposedValue) return;
             if (disposing)
             {
+                UnhookRendering();
                 amountWatcher.Dispose();
                 maxDisplacementWatcher.Dispose();
                 Effect.PropertyChanged -= Effect_PropertyChanged;
