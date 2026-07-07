@@ -1,0 +1,41 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+FacetedGlass,,多面体ガラス,Faceted Glass,多面玻璃,多面玻璃,다면 유리,Vidrio facetado,زجاج متعدد الأوجه,Kaca Bersegi
+BasicGroup,,基本,Basic,基本,基本,기본,Básico,أساسي,Dasar
+GeometryGroup,,面構造,Facet Geometry,面结构,面結構,면 구조,Geometría de facetas,هندسة الأوجه,Geometri Faset
+OpticsGroup,,光学,Optics,光学,光學,광학,Óptica,البصريات,Optik
+AppearanceGroup,,外観,Appearance,外观,外觀,외관,Apariencia,المظهر,Tampilan
+LightingGroup,,照明,Lighting,照明,照明,조명,Iluminación,الإضاءة,Pencahayaan
+Amount,,強さ,Amount,强度,強度,강도,Intensidad,القوة,Kekuatan
+AmountDescription,,元映像と多面体ガラスの合成量です,Controls the blend between the source and faceted glass.,控制原始画面与多面玻璃的混合量。,控制原始畫面與多面玻璃的混合量。,원본과 다면 유리의 합성량입니다.,Controla la mezcla con el vidrio facetado.,يتحكم في مزج المصدر مع الزجاج متعدد الأوجه.,Mengatur campuran sumber dan kaca bersegi.
+CellSize,,面サイズ,Facet Size,面大小,面大小,면 크기,Tamaño de faceta,حجم الوجه,Ukuran Faset
+CellSizeDescription,,面ひとつあたりの平均サイズです,Sets the average size of each facet.,设置每个面的平均大小。,設定每個面的平均大小。,면 하나의 평균 크기입니다.,Define el tamaño medio de cada faceta.,يضبط متوسط حجم كل وجه.,Mengatur ukuran rata-rata setiap faset.
+Irregularity,,不規則さ,Irregularity,不规则度,不規則度,불규칙성,Irregularidad,عدم الانتظام,Ketidakteraturan
+IrregularityDescription,,0%で正六角形、100%で有機的な破片状の面になります,Morphs facets from regular hexagons (0%) to organic shards (100%).,0%为正六边形，100%为有机碎片状。,0%為正六邊形，100%為有機碎片狀。,0%는 정육각형, 100%는 유기적인 파편 모양이 됩니다.,Transforma las facetas de hexágonos (0%) a fragmentos orgánicos (100%).,يحول الأوجه من سداسيات منتظمة (0%) إلى شظايا عضوية (100%).,Mengubah faset dari heksagon teratur (0%) menjadi pecahan organik (100%).
+Relief,,凹凸,Relief,凹凸,凹凸,요철,Relieve,التضاريس,Relief
+ReliefDescription,,面ごとの傾きの強さです,Controls the tilt strength of each facet.,控制每个面的倾斜强度。,控制每個面的傾斜強度。,면마다의 기울기 강도입니다.,Controla la inclinación de cada faceta.,يتحكم في قوة ميل كل وجه.,Mengatur kekuatan kemiringan setiap faset.
+Rotation,,分割角度,Grid Rotation,分割角度,分割角度,분할 각도,Rotación de cuadrícula,دوران الشبكة,Rotasi Kisi
+RotationDescription,,面分割全体の角度です,Rotates the entire facet layout.,旋转整个面分割。,旋轉整個面分割。,면 분할 전체를 회전합니다.,Gira toda la disposición de facetas.,يدير تخطيط الأوجه بالكامل.,Memutar seluruh tata letak faset.
+Evolution,,ゆらぎ,Evolution,流转,流轉,일렁임,Fluctuación,التموج,Fluktuasi
+EvolutionDescription,,面の傾きが呼吸するように変化します。アニメーションさせると生きたガラスになります,Facet tilts breathe and drift. Animate it to bring the glass to life.,面的倾斜如呼吸般变化。设置动画可让玻璃生动起来。,面的傾斜如呼吸般變化。設定動畫可讓玻璃生動起來。,면의 기울기가 숨 쉬듯 변화합니다. 애니메이션으로 살아있는 유리가 됩니다.,Las facetas respiran y derivan. Anímalo para dar vida al vidrio.,تتنفس ميول الأوجه وتنجرف. حرّكه لبث الحياة في الزجاج.,Kemiringan faset bernapas dan bergeser. Animasikan agar kaca menjadi hidup.
+Seed,,シード,Seed,种子,種子,시드,Semilla,البذرة,Seed
+SeedDescription,,面の配置と傾きを決定する固定値です,Sets the deterministic facet layout and tilt pattern.,设置确定性的面排列与倾斜。,設定確定性的面排列與傾斜。,결정론적 면 배치와 기울기를 정합니다.,Define el patrón determinista de facetas.,يضبط النمط الحتمي لتخطيط الأوجه وميلها.,Mengatur pola tata letak dan kemiringan faset yang deterministik.
+Refraction,,屈折,Refraction,折射,折射,굴절,Refracción,الانكسار,Refraksi
+RefractionDescription,,面法線による映像のずれ量です,Controls image displacement caused by facet refraction.,控制面法线产生的画面偏移。,控制面法線產生的畫面偏移。,면 법선에 의한 영상 이동량입니다.,Controla el desplazamiento por refracción.,يتحكم في إزاحة الصورة بسبب الانكسار.,Mengatur pergeseran gambar akibat refraksi.
+RefractiveIndex,,屈折率,Refractive Index,折射率,折射率,굴절률,Índice de refracción,معامل الانكسار,Indeks Refraksi
+RefractiveIndexDescription,,基準波長におけるガラスの屈折率です,Sets the glass index at the reference wavelength.,设置参考波长下的玻璃折射率。,設定參考波長下的玻璃折射率。,기준 파장에서 유리의 굴절률입니다.,Define el índice del vidrio en la longitud de referencia.,يضبط معامل انكسار الزجاج عند الطول المرجعي.,Mengatur indeks kaca pada panjang gelombang referensi.
+Dispersion,,分散,Dispersion,色散,色散,분산,Dispersión,التشتت,Dispersi
+DispersionDescription,,波長ごとの屈折率差による色分離です,Controls wavelength dependent color separation.,控制波长相关折射率差产生的分色。,控制波長相關折射率差產生的分色。,파장별 굴절률 차이에 의한 색 분리입니다.,Controla la separación cromática por longitud de onda.,يتحكم في فصل الألوان المعتمد على الطول الموجي.,Mengatur pemisahan warna berdasarkan panjang gelombang.
+Reflection,,反射,Reflection,反射,反射,반사,Reflexión,الانعكاس,Refleksi
+ReflectionDescription,,Fresnel反射と鏡面ハイライトの強さです,Controls Fresnel reflection and specular highlights.,控制Fresnel反射和镜面高光。,控制Fresnel反射和鏡面高光。,프레넬 반사와 정반사 하이라이트 강도입니다.,Controla la reflexión Fresnel y los brillos.,يتحكم في انعكاس فرينل واللمعان المرآتي.,Mengatur refleksi Fresnel dan sorotan spekular.
+Glint,,きらめき,Glint,闪光,閃光,반짝임,Destello,البريق,Kilauan
+GlintDescription,,面ごとに明滅する鋭い閃光の強さです。ゆらぎと連動します,Sets the sharp per-facet flashes that pulse with Evolution.,设置随流转明灭的面级锐利闪光。,設定隨流轉明滅的面級銳利閃光。,일렁임과 연동해 면마다 명멸하는 날카로운 섬광입니다.,Define los destellos por faceta que pulsan con la fluctuación.,يضبط الومضات الحادة لكل وجه التي تنبض مع التموج.,Mengatur kilatan tajam per faset yang berdenyut mengikuti fluktuasi.
+BorderWidth,,面境界,Facet Border,面边界,面邊界,면 경계,Borde de faceta,حدود الأوجه,Batas Faset
+BorderWidthDescription,,面の境界に現れる反射線の幅です,Sets the reflective line width at facet edges.,设置面边界反射线宽度。,設定面邊界反射線寬度。,면 경계의 반사선 폭입니다.,Define el ancho reflectante de los bordes.,يضبط عرض الخط العاكس عند حواف الأوجه.,Mengatur lebar garis reflektif pada tepi faset.
+LightAngle,,光源角度,Light Angle,光源角度,光源角度,광원 각도,Ángulo de luz,زاوية الضوء,Sudut Cahaya
+LightAngleDescription,,平面上の光源方向です,Sets the light direction in the image plane.,设置图像平面上的光源方向。,設定影像平面上的光源方向。,영상 평면의 광원 방향입니다.,Define la dirección de la luz en el plano.,يضبط اتجاه الضوء على مستوى الصورة.,Mengatur arah cahaya pada bidang gambar.
+LightElevation,,光源高度,Light Elevation,光源高度,光源高度,광원 고도,Elevación de luz,ارتفاع الضوء,Ketinggian Cahaya
+LightElevationDescription,,面に対する光源の高さです,Sets the elevation of the light above the surface.,设置光源相对表面的高度。,設定光源相對表面的高度。,표면 위 광원의 고도입니다.,Define la elevación de la luz sobre la superficie.,يضبط ارتفاع الضوء فوق السطح.,Mengatur ketinggian cahaya di atas permukaan.
+TagGlass,,ガラス,glass,玻璃,玻璃,유리,vidrio,زجاج,kaca
+TagPrism,,プリズム,prism,棱镜,稜鏡,프리즘,prisma,منشور,prisma
+TagRefraction,,屈折,refraction,折射,折射,굴절,refracción,انكسار,refraksi
+TagFacet,,多面体,facet,多面体,多面體,다면체,faceta,متعدد الأوجه,faset
