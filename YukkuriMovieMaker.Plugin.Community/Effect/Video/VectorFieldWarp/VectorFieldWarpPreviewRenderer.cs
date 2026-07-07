@@ -103,36 +103,49 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             d3dImage.Unlock();
         }
 
-        public void Render(byte[] pointData, int pointCount, float amount, float maxDisplacement, int integrationSteps)
+        static readonly Duration LockTimeout = new(TimeSpan.FromMilliseconds(1));
+
+        public bool Render(byte[] pointData, int pointCount, float amount, float maxDisplacement, int integrationSteps)
         {
             ObjectDisposedException.ThrowIf(disposedValue, this);
             if (inputBitmap is null || targetBitmap is null || d3d9Surface == IntPtr.Zero)
                 throw new InvalidOperationException();
 
-            effect.PointData = pointData;
-            effect.PointCount = pointCount;
-            effect.Amount = amount;
-            effect.MaxDisplacement = maxDisplacement;
-            effect.IntegrationSteps = integrationSteps;
+            if (!d3dImage.TryLock(LockTimeout))
+            {
+                d3dImage.Unlock();
+                return false;
+            }
+            try
+            {
+                effect.PointData = pointData;
+                effect.PointCount = pointCount;
+                effect.Amount = amount;
+                effect.MaxDisplacement = maxDisplacement;
+                effect.IntegrationSteps = integrationSteps;
 
-            var deviceContext = context.DeviceContext;
-            using var output = effect.Output;
-            deviceContext.Target = targetBitmap;
-            deviceContext.BeginDraw();
-            deviceContext.Clear(new Color4(0f, 0f, 0f, 0f));
-            deviceContext.DrawImage(
-                output,
-                new Vector2(0f, 0f),
-                new Vortice.Mathematics.Rect(-margin, -margin, OutputWidth, OutputHeight),
-                InterpolationMode.Linear,
-                CompositeMode.SourceCopy);
-            deviceContext.EndDraw();
-            deviceContext.Target = null;
-            devices.D3D.DeviceContext.Flush();
+                var deviceContext = context.DeviceContext;
+                using var output = effect.Output;
+                deviceContext.Target = targetBitmap;
+                deviceContext.BeginDraw();
+                deviceContext.Clear(new Color4(0f, 0f, 0f, 0f));
+                deviceContext.DrawImage(
+                    output,
+                    new Vector2(0f, 0f),
+                    new Vortice.Mathematics.Rect(-margin, -margin, OutputWidth, OutputHeight),
+                    InterpolationMode.Linear,
+                    CompositeMode.SourceCopy);
+                deviceContext.EndDraw();
+                deviceContext.Target = null;
+                devices.D3D.DeviceContext.Flush();
 
-            d3dImage.Lock();
-            d3dImage.AddDirtyRect(new Int32Rect(0, 0, OutputWidth, OutputHeight));
-            d3dImage.Unlock();
+                d3dImage.AddDirtyRect(new Int32Rect(0, 0, OutputWidth, OutputHeight));
+            }
+            finally
+            {
+                d3dImage.Unlock();
+            }
+            return true;
         }
 
         unsafe bool TryCreateD3D9Device()
