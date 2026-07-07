@@ -128,7 +128,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 CompositeMode.SourceCopy);
             deviceContext.EndDraw();
             deviceContext.Target = null;
-            deviceContext.Flush(out _, out _);
+            devices.D3D.DeviceContext.Flush();
 
             d3dImage.Lock();
             d3dImage.AddDirtyRect(new Int32Rect(0, 0, OutputWidth, OutputHeight));
