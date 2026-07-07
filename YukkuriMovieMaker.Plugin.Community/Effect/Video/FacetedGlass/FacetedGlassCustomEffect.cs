@@ -51,16 +51,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FacetedGlass
             private ConstantBuffer _cb;
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Amount)]
-            public float Amount { get => _cb.Amount; set { _cb.Amount = value; UpdateConstants(); } }
+            public float Amount { get => _cb.Amount; set { _cb.Amount = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.CellSize)]
             public float CellSize { get => _cb.CellSize; set { _cb.CellSize = Math.Max(value, 1f); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Irregularity)]
-            public float Irregularity { get => _cb.Irregularity; set { _cb.Irregularity = value; UpdateConstants(); } }
+            public float Irregularity { get => _cb.Irregularity; set { _cb.Irregularity = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Relief)]
-            public float Relief { get => _cb.Relief; set { _cb.Relief = value; UpdateConstants(); } }
+            public float Relief { get => _cb.Relief; set { _cb.Relief = Math.Clamp(value, 0f, 2f); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Rotation)]
             public float Rotation { get => _cb.Rotation; set { _cb.Rotation = value; UpdateConstants(); } }
@@ -69,7 +69,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FacetedGlass
             public float Evolution { get => _cb.Evolution; set { _cb.Evolution = value; UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Refraction)]
-            public float Refraction { get => _cb.Refraction; set { _cb.Refraction = value; UpdateConstants(); } }
+            public float Refraction { get => _cb.Refraction; set { _cb.Refraction = Math.Max(value, 0f); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.RefractiveIndex)]
             public float RefractiveIndex { get => _cb.RefractiveIndex; set { _cb.RefractiveIndex = value; UpdateConstants(); } }
