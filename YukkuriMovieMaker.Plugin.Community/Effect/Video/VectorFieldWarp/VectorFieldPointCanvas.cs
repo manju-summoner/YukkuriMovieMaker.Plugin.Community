@@ -172,7 +172,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         void SyncViewToCurrentImage()
         {
-            var size = viewModel?.CanvasImage is null ? Size.Empty : viewModel.CanvasImageSize;
+            var size = viewModel?.CanvasImage is null ? Size.Empty : viewModel.CanvasBaseSize;
             if (size != lastImageSize)
             {
                 lastImageSize = size;
@@ -187,7 +187,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(VectorFieldPointListEditorViewModel.CanvasImage))
+            if (e.PropertyName is nameof(VectorFieldPointListEditorViewModel.CanvasImage) or nameof(VectorFieldPointListEditorViewModel.CanvasImageSize))
             {
                 SyncViewToCurrentImage();
             }
@@ -451,17 +451,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     var right = tip - direction * FieldArrowHeadSize - normal * (FieldArrowHeadSize * 0.6);
 
                     drawingContext.PushOpacity(intensity);
-                    var geometry = new StreamGeometry();
-                    using (var ctx = geometry.Open())
-                    {
-                        ctx.BeginFigure(tail, false, false);
-                        ctx.LineTo(tip, true, true);
-                        ctx.LineTo(left, true, true);
-                        ctx.BeginFigure(tip, false, false);
-                        ctx.LineTo(right, true, true);
-                    }
-                    geometry.Freeze();
-                    drawingContext.DrawGeometry(null, FieldArrowPen, geometry);
+                    drawingContext.DrawLine(FieldArrowPen, tail, tip);
+                    drawingContext.DrawLine(FieldArrowPen, tip, left);
+                    drawingContext.DrawLine(FieldArrowPen, tip, right);
                     drawingContext.Pop();
                 }
             }
