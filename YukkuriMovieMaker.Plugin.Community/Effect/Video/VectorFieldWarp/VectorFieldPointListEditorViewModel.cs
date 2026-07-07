@@ -31,7 +31,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         bool isCanvasImageInitialized;
 
         BitmapSource? baseCanvasImage;
-        WriteableBitmap? warpedBitmap;
         VectorFieldWarpPreviewRenderer? previewRenderer;
         bool isPreviewRendererFailed;
         bool isWarpUpdateScheduled;
@@ -51,8 +50,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             RefreshCanvasImage();
         }
 
-        public BitmapSource? CanvasImage { get => canvasImage; private set => Set(ref canvasImage, value); }
-        BitmapSource? canvasImage;
+        public ImageSource? CanvasImage { get => canvasImage; private set => Set(ref canvasImage, value); }
+        ImageSource? canvasImage;
+
+        public Size CanvasImageSize { get => canvasImageSize; private set => Set(ref canvasImageSize, value); }
+        Size canvasImageSize = Size.Empty;
 
         public double CanvasImageScale => 1.0;
 
@@ -133,8 +135,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             if (source is null)
             {
                 baseCanvasImage = null;
-                warpedBitmap = null;
                 CanvasImage = null;
+                CanvasImageSize = Size.Empty;
                 return;
             }
 
@@ -147,8 +149,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             var renderer = EnsureRenderer();
             if (renderer is null)
             {
-                warpedBitmap = null;
                 CanvasImage = baseCanvasImage;
+                CanvasImageSize = new Size(width, height);
                 return;
             }
 
@@ -157,8 +159,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 var pixels = new byte[width * height * 4];
                 converted.CopyPixels(pixels, width * 4, 0);
                 renderer.SetSource(pixels, width, height, PreviewMargin);
-                warpedBitmap = new WriteableBitmap(renderer.OutputWidth, renderer.OutputHeight, 96, 96, PixelFormats.Pbgra32, null);
-                CanvasImage = warpedBitmap;
+                CanvasImage = renderer.ImageSource;
+                CanvasImageSize = new Size(renderer.OutputWidth, renderer.OutputHeight);
                 RenderWarpedImage();
             }
             catch
@@ -182,6 +184,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     isPreviewRendererFailed = true;
                     return null;
                 }
+                renderer.RedrawRequested += Renderer_RedrawRequested;
                 previewRenderer = renderer;
                 return renderer;
             }
@@ -192,13 +195,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             }
         }
 
+        void Renderer_RedrawRequested(object? sender, EventArgs e)
+        {
+            ScheduleWarpUpdate();
+        }
+
         void DisablePreviewRenderer()
         {
-            previewRenderer?.Dispose();
-            previewRenderer = null;
+            if (previewRenderer is not null)
+            {
+                previewRenderer.RedrawRequested -= Renderer_RedrawRequested;
+                previewRenderer.Dispose();
+                previewRenderer = null;
+            }
             isPreviewRendererFailed = true;
-            warpedBitmap = null;
             CanvasImage = baseCanvasImage;
+            CanvasImageSize = baseCanvasImage is null ? Size.Empty : new Size(baseCanvasImage.PixelWidth, baseCanvasImage.PixelHeight);
         }
 
         void ScheduleWarpUpdate()
@@ -206,7 +218,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             if (disposedValue || isWarpUpdateScheduled)
                 return;
             isWarpUpdateScheduled = true;
-            dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
+            dispatcher.BeginInvoke(DispatcherPriority.Render, () =>
             {
                 isWarpUpdateScheduled = false;
                 RenderWarpedImage();
@@ -215,7 +227,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         void RenderWarpedImage()
         {
-            if (disposedValue || previewRenderer is null || warpedBitmap is null)
+            if (disposedValue || previewRenderer is null)
                 return;
 
             var pointCount = 0;
@@ -248,13 +260,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
             try
             {
-                var buffer = previewRenderer.Render(pointBytes, pointCount, amount, maxDisplacement, steps);
-                warpedBitmap.WritePixels(
-                    new Int32Rect(0, 0, previewRenderer.OutputWidth, previewRenderer.OutputHeight),
-                    buffer,
-                    previewRenderer.OutputWidth * 4,
-                    0);
-                OnPropertyChanged(nameof(CanvasImage));
+                previewRenderer.Render(pointBytes, pointCount, amount, maxDisplacement, steps);
             }
             catch
             {
@@ -450,8 +456,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     item.VisualChanged -= Item_VisualChanged;
                     item.Dispose();
                 }
-                previewRenderer?.Dispose();
-                previewRenderer = null;
+                if (previewRenderer is not null)
+                {
+                    previewRenderer.RedrawRequested -= Renderer_RedrawRequested;
+                    previewRenderer.Dispose();
+                    previewRenderer = null;
+                }
             }
             disposedValue = true;
         }
