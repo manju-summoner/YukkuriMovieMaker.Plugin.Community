@@ -218,7 +218,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             if (disposedValue || isWarpUpdateScheduled)
                 return;
             isWarpUpdateScheduled = true;
-            dispatcher.BeginInvoke(DispatcherPriority.Render, () =>
+            dispatcher.BeginInvoke(DispatcherPriority.Input, () =>
             {
                 isWarpUpdateScheduled = false;
                 RenderWarpedImage();
@@ -260,7 +260,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
             try
             {
-                previewRenderer.Render(pointBytes, pointCount, amount, maxDisplacement, steps);
+                if (!previewRenderer.Render(pointBytes, pointCount, amount, maxDisplacement, steps))
+                    ScheduleWarpUpdate();
             }
             catch
             {
