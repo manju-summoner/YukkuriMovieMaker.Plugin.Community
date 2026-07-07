@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -15,8 +15,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 {
     internal sealed class VectorFieldPointListEditorViewModel : Bindable, IDisposable
     {
-        const int MaxComputeSize = 1280;
-        const double PreviewMargin = 256;
+        const int PreviewMargin = 256;
+        const int FloatsPerPoint = 8;
+        const float PositionLimit = 65536f;
 
         ImmutableList<VectorFieldPointItemViewModel> allViewModels = ImmutableList<VectorFieldPointItemViewModel>.Empty;
 
@@ -30,16 +31,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         bool isCanvasImageInitialized;
 
         BitmapSource? baseCanvasImage;
-        byte[]? basePixels;
-        int baseWidth;
-        int baseHeight;
-        double baseScale = 1.0;
+        WriteableBitmap? warpedBitmap;
+        VectorFieldWarpPreviewRenderer? previewRenderer;
+        bool isPreviewRendererFailed;
+        bool isWarpUpdateScheduled;
 
-        readonly DispatcherTimer warpTimer;
-        readonly TaskScheduler uiScheduler;
+        readonly Dispatcher dispatcher;
         readonly AnimationWatcher amountWatcher;
         readonly AnimationWatcher maxDisplacementWatcher;
-        int warpVersion;
+        readonly float[] pointFloats = new float[VectorFieldWarpCustomEffect.MaxPoints * FloatsPerPoint];
+        readonly byte[] pointBytes = new byte[VectorFieldWarpCustomEffect.MaxPoints * FloatsPerPoint * sizeof(float)];
 
         public void SetEditorInfo(IEditorInfo info)
         {
@@ -53,8 +54,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         public BitmapSource? CanvasImage { get => canvasImage; private set => Set(ref canvasImage, value); }
         BitmapSource? canvasImage;
 
-        public double CanvasImageScale { get => canvasImageScale; private set => Set(ref canvasImageScale, value); }
-        double canvasImageScale = 1.0;
+        public double CanvasImageScale => 1.0;
 
         public ImmutableList<VectorFieldPointItemViewModel> CanvasPoints { get => canvasPoints; private set => Set(ref canvasPoints, value); }
         ImmutableList<VectorFieldPointItemViewModel> canvasPoints = ImmutableList<VectorFieldPointItemViewModel>.Empty;
@@ -84,12 +84,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         {
             ItemProperties = itemProperties;
 
-            uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
-            warpTimer = new DispatcherTimer(DispatcherPriority.Background)
-            {
-                Interval = TimeSpan.FromMilliseconds(100),
-            };
-            warpTimer.Tick += WarpTimer_Tick;
+            dispatcher = Dispatcher.CurrentDispatcher;
 
             Effect.PropertyChanged += Effect_PropertyChanged;
             amountWatcher = new AnimationWatcher(Effect.Amount, ScheduleWarpUpdate);
@@ -138,187 +133,140 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             if (source is null)
             {
                 baseCanvasImage = null;
-                basePixels = null;
-                warpVersion++;
+                warpedBitmap = null;
                 CanvasImage = null;
-                CanvasImageScale = 1.0;
                 return;
             }
 
             var converted = new FormatConvertedBitmap(source, PixelFormats.Pbgra32, null, 0);
-            BitmapSource bitmap = converted;
-            var scale = Math.Min(1.0, (double)MaxComputeSize / Math.Max(1, Math.Max(converted.PixelWidth, converted.PixelHeight)));
-            if (scale < 1.0)
-                bitmap = new TransformedBitmap(converted, new ScaleTransform(scale, scale));
-            bitmap.Freeze();
+            converted.Freeze();
+            baseCanvasImage = converted;
 
-            baseWidth = bitmap.PixelWidth;
-            baseHeight = bitmap.PixelHeight;
-            baseScale = baseWidth / (double)converted.PixelWidth;
-            basePixels = new byte[baseWidth * baseHeight * 4];
-            bitmap.CopyPixels(basePixels, baseWidth * 4, 0);
-            baseCanvasImage = bitmap;
-            CanvasImageScale = baseScale;
-            UpdateWarpedImage();
+            var width = converted.PixelWidth;
+            var height = converted.PixelHeight;
+            var renderer = EnsureRenderer();
+            if (renderer is null)
+            {
+                warpedBitmap = null;
+                CanvasImage = baseCanvasImage;
+                return;
+            }
+
+            try
+            {
+                var pixels = new byte[width * height * 4];
+                converted.CopyPixels(pixels, width * 4, 0);
+                renderer.SetSource(pixels, width, height, PreviewMargin);
+                warpedBitmap = new WriteableBitmap(renderer.OutputWidth, renderer.OutputHeight, 96, 96, PixelFormats.Pbgra32, null);
+                CanvasImage = warpedBitmap;
+                RenderWarpedImage();
+            }
+            catch
+            {
+                DisablePreviewRenderer();
+            }
+        }
+
+        VectorFieldWarpPreviewRenderer? EnsureRenderer()
+        {
+            if (isPreviewRendererFailed)
+                return null;
+            if (previewRenderer is not null)
+                return previewRenderer;
+            try
+            {
+                var renderer = new VectorFieldWarpPreviewRenderer();
+                if (!renderer.IsEnabled)
+                {
+                    renderer.Dispose();
+                    isPreviewRendererFailed = true;
+                    return null;
+                }
+                previewRenderer = renderer;
+                return renderer;
+            }
+            catch
+            {
+                isPreviewRendererFailed = true;
+                return null;
+            }
+        }
+
+        void DisablePreviewRenderer()
+        {
+            previewRenderer?.Dispose();
+            previewRenderer = null;
+            isPreviewRendererFailed = true;
+            warpedBitmap = null;
+            CanvasImage = baseCanvasImage;
         }
 
         void ScheduleWarpUpdate()
         {
-            if (disposedValue)
+            if (disposedValue || isWarpUpdateScheduled)
                 return;
-            warpTimer.Stop();
-            warpTimer.Start();
+            isWarpUpdateScheduled = true;
+            dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
+            {
+                isWarpUpdateScheduled = false;
+                RenderWarpedImage();
+            });
         }
 
-        void WarpTimer_Tick(object? sender, EventArgs e)
+        void RenderWarpedImage()
         {
-            warpTimer.Stop();
-            UpdateWarpedImage();
-        }
-
-        void UpdateWarpedImage()
-        {
-            if (disposedValue || basePixels is null)
+            if (disposedValue || previewRenderer is null || warpedBitmap is null)
                 return;
 
-            var pixels = basePixels;
-            var width = baseWidth;
-            var height = baseHeight;
-            var scale = baseScale;
-            var sources = Effect.Points
-                .Where(p => p.IsEnabled)
-                .Select(p => new WarpSource(
-                    Sanitize(p.X.Values.FirstOrDefault()?.Value ?? 0, -65536, 65536, 0),
-                    Sanitize(p.Y.Values.FirstOrDefault()?.Value ?? 0, -65536, 65536, 0),
-                    Sanitize(p.RadialStrength.Values.FirstOrDefault()?.Value ?? 0, -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0),
-                    Sanitize(p.VortexStrength.Values.FirstOrDefault()?.Value ?? 0, -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0),
-                    Sanitize(p.Radius.Values.FirstOrDefault()?.Value ?? 1, 1, VectorFieldPoint.RadiusLimit, 1)))
-                .Where(s => s.Radial != 0 || s.Vortex != 0)
-                .ToArray();
-            var amount = Sanitize((Effect.Amount.Values.FirstOrDefault()?.Value ?? 0) / 100, 0, 1, 0);
-            var maxDisplacement = Sanitize(Effect.MaxDisplacement.Values.FirstOrDefault()?.Value ?? 0, 0, VectorFieldWarpCustomEffect.MaxDisplacementLimit, 0);
+            var pointCount = 0;
+            foreach (var point in Effect.Points)
+            {
+                if (pointCount >= VectorFieldWarpCustomEffect.MaxPoints)
+                    break;
+                if (!point.IsEnabled)
+                    continue;
+                var radialStrength = Sanitize(point.RadialStrength.Values.FirstOrDefault()?.Value ?? 0, -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0f);
+                var vortexStrength = Sanitize(point.VortexStrength.Values.FirstOrDefault()?.Value ?? 0, -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0f);
+                if (radialStrength == 0f && vortexStrength == 0f)
+                    continue;
+                var offset = pointCount * FloatsPerPoint;
+                pointFloats[offset] = Sanitize(point.X.Values.FirstOrDefault()?.Value ?? 0, -PositionLimit, PositionLimit, 0f);
+                pointFloats[offset + 1] = Sanitize(point.Y.Values.FirstOrDefault()?.Value ?? 0, -PositionLimit, PositionLimit, 0f);
+                pointFloats[offset + 2] = radialStrength;
+                pointFloats[offset + 3] = vortexStrength;
+                pointFloats[offset + 4] = Sanitize(point.Radius.Values.FirstOrDefault()?.Value ?? 1, 1f, VectorFieldPoint.RadiusLimit, 1f);
+                pointFloats[offset + 5] = 0f;
+                pointFloats[offset + 6] = 0f;
+                pointFloats[offset + 7] = 0f;
+                pointCount++;
+            }
+            Buffer.BlockCopy(pointFloats, 0, pointBytes, 0, pointBytes.Length);
+
+            var amount = Sanitize((Effect.Amount.Values.FirstOrDefault()?.Value ?? 0) / 100, 0f, 1f, 0f);
+            var maxDisplacement = Sanitize(Effect.MaxDisplacement.Values.FirstOrDefault()?.Value ?? 0, 0f, VectorFieldWarpCustomEffect.MaxDisplacementLimit, 0f);
             var steps = Math.Clamp(Effect.IntegrationSteps, 1, VectorFieldWarpCustomEffect.MaxIntegrationSteps);
 
-            var version = ++warpVersion;
-            Task.Run(() => ComputeWarpedImage(pixels, width, height, scale, sources, amount, maxDisplacement, steps))
-                .ContinueWith(
-                    task =>
-                    {
-                        if (task.Status == TaskStatus.RanToCompletion && version == warpVersion && !disposedValue)
-                            CanvasImage = task.Result;
-                    },
-                    uiScheduler);
-        }
-
-        readonly record struct WarpSource(double X, double Y, double Radial, double Vortex, double Radius);
-
-        static BitmapSource ComputeWarpedImage(byte[] source, int width, int height, double scale, WarpSource[] sources, double amount, double maxDisplacement, int steps)
-        {
-            var margin = (int)Math.Ceiling(PreviewMargin * scale);
-            var outputWidth = width + margin * 2;
-            var outputHeight = height + margin * 2;
-            var output = new byte[outputWidth * outputHeight * 4];
-
-            if (sources.Length == 0 || amount <= 0 || maxDisplacement <= 0)
+            try
             {
-                for (var y = 0; y < height; y++)
-                    Buffer.BlockCopy(source, y * width * 4, output, ((y + margin) * outputWidth + margin) * 4, width * 4);
+                var buffer = previewRenderer.Render(pointBytes, pointCount, amount, maxDisplacement, steps);
+                warpedBitmap.WritePixels(
+                    new Int32Rect(0, 0, previewRenderer.OutputWidth, previewRenderer.OutputHeight),
+                    buffer,
+                    previewRenderer.OutputWidth * 4,
+                    0);
+                OnPropertyChanged(nameof(CanvasImage));
             }
-            else
+            catch
             {
-                var stepSize = amount / steps;
-                var fullWidth = width / scale;
-                var fullHeight = height / scale;
-                Parallel.For(0, outputHeight, outputY =>
-                {
-                    for (var outputX = 0; outputX < outputWidth; outputX++)
-                    {
-                        var px = (outputX - margin - width * 0.5 + 0.5) / scale;
-                        var py = (outputY - margin - height * 0.5 + 0.5) / scale;
-
-                        for (var step = 0; step < steps; step++)
-                        {
-                            EvaluateField(sources, maxDisplacement, px, py, out var vx, out var vy);
-                            var mx = px - vx * stepSize * 0.5;
-                            var my = py - vy * stepSize * 0.5;
-                            EvaluateField(sources, maxDisplacement, mx, my, out vx, out vy);
-                            px -= vx * stepSize;
-                            py -= vy * stepSize;
-                        }
-
-                        if (px < -fullWidth * 0.5 || px >= fullWidth * 0.5 || py < -fullHeight * 0.5 || py >= fullHeight * 0.5)
-                            continue;
-
-                        var sx = px * scale + width * 0.5 - 0.5;
-                        var sy = py * scale + height * 0.5 - 0.5;
-                        SampleBilinear(source, width, height, sx, sy, output, (outputY * outputWidth + outputX) * 4);
-                    }
-                });
-            }
-
-            var bitmap = BitmapSource.Create(outputWidth, outputHeight, 96, 96, PixelFormats.Pbgra32, null, output, outputWidth * 4);
-            bitmap.Freeze();
-            return bitmap;
-        }
-
-        static void EvaluateField(WarpSource[] sources, double maxDisplacement, double x, double y, out double vx, out double vy)
-        {
-            vx = 0;
-            vy = 0;
-            foreach (var source in sources)
-            {
-                var dx = x - source.X;
-                var dy = y - source.Y;
-                var denominator = Math.Max(dx * dx + dy * dy + source.Radius * source.Radius, 1e-6);
-                var factor = source.Radius / denominator;
-                vx += factor * (source.Radial * dx - source.Vortex * dy);
-                vy += factor * (source.Radial * dy + source.Vortex * dx);
-            }
-            var length = Math.Sqrt(vx * vx + vy * vy);
-            if (length > maxDisplacement && length > 1e-6)
-            {
-                var factor = maxDisplacement / length;
-                vx *= factor;
-                vy *= factor;
+                DisablePreviewRenderer();
             }
         }
 
-        static void SampleBilinear(byte[] source, int width, int height, double x, double y, byte[] output, int outputIndex)
-        {
-            var x0 = (int)Math.Floor(x);
-            var y0 = (int)Math.Floor(y);
-            var fx = x - x0;
-            var fy = y - y0;
-            var x1 = Math.Clamp(x0 + 1, 0, width - 1);
-            var y1 = Math.Clamp(y0 + 1, 0, height - 1);
-            x0 = Math.Clamp(x0, 0, width - 1);
-            y0 = Math.Clamp(y0, 0, height - 1);
-
-            var i00 = (y0 * width + x0) * 4;
-            var i10 = (y0 * width + x1) * 4;
-            var i01 = (y1 * width + x0) * 4;
-            var i11 = (y1 * width + x1) * 4;
-            var w00 = (1 - fx) * (1 - fy);
-            var w10 = fx * (1 - fy);
-            var w01 = (1 - fx) * fy;
-            var w11 = fx * fy;
-
-            for (var channel = 0; channel < 4; channel++)
-            {
-                var value =
-                    source[i00 + channel] * w00 +
-                    source[i10 + channel] * w10 +
-                    source[i01 + channel] * w01 +
-                    source[i11 + channel] * w11;
-                output[outputIndex + channel] = (byte)Math.Clamp(value + 0.5, 0, 255);
-            }
-        }
-
-        static double Sanitize(double value, double minimum, double maximum, double fallback)
+        static float Sanitize(double value, float minimum, float maximum, float fallback)
         {
             if (!double.IsFinite(value))
                 return fallback;
-            return Math.Clamp(value, minimum, maximum);
+            return (float)Math.Clamp(value, minimum, maximum);
         }
 
         public void SelectFromCanvas(VectorFieldPointItemViewModel vm, bool toggle)
@@ -493,8 +441,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             if (disposedValue) return;
             if (disposing)
             {
-                warpTimer.Stop();
-                warpTimer.Tick -= WarpTimer_Tick;
                 amountWatcher.Dispose();
                 maxDisplacementWatcher.Dispose();
                 Effect.PropertyChanged -= Effect_PropertyChanged;
@@ -504,6 +450,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     item.VisualChanged -= Item_VisualChanged;
                     item.Dispose();
                 }
+                previewRenderer?.Dispose();
+                previewRenderer = null;
             }
             disposedValue = true;
         }
