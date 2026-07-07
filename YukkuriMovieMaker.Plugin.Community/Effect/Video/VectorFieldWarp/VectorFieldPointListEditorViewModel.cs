@@ -14,7 +14,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 {
     internal sealed class VectorFieldPointListEditorViewModel : Bindable, IDisposable
     {
-        const int PreviewMargin = 256;
+        const int PreviewMarginStep = 64;
         const int FloatsPerPoint = 8;
         const float PositionLimit = 65536f;
 
@@ -30,6 +30,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         bool isCanvasImageInitialized;
 
         BitmapSource? baseCanvasImage;
+        byte[]? basePixels;
+        int baseWidth;
+        int baseHeight;
+        int currentPreviewMargin = -1;
         VectorFieldWarpPreviewRenderer? previewRenderer;
         bool isPreviewRendererFailed;
         bool isWarpPending;
@@ -44,7 +48,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         {
             editorInfo = info;
             if (isCanvasImageInitialized)
+            {
+                ScheduleWarpUpdate();
                 return;
+            }
             isCanvasImageInitialized = true;
             RefreshCanvasImage();
         }
@@ -54,6 +61,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         public Size CanvasImageSize { get => canvasImageSize; private set => Set(ref canvasImageSize, value); }
         Size canvasImageSize = Size.Empty;
+
+        public Size CanvasBaseSize { get => canvasBaseSize; private set => Set(ref canvasBaseSize, value); }
+        Size canvasBaseSize = Size.Empty;
 
         public double CanvasImageScale => 1.0;
 
@@ -132,38 +142,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             if (source is null)
             {
                 baseCanvasImage = null;
+                basePixels = null;
+                currentPreviewMargin = -1;
                 CanvasImage = null;
                 CanvasImageSize = Size.Empty;
+                CanvasBaseSize = Size.Empty;
                 return;
             }
 
             var converted = new FormatConvertedBitmap(source, PixelFormats.Pbgra32, null, 0);
             converted.Freeze();
             baseCanvasImage = converted;
+            baseWidth = converted.PixelWidth;
+            baseHeight = converted.PixelHeight;
+            CanvasBaseSize = new Size(baseWidth, baseHeight);
 
-            var width = converted.PixelWidth;
-            var height = converted.PixelHeight;
             var renderer = EnsureRenderer();
             if (renderer is null)
             {
+                basePixels = null;
                 CanvasImage = baseCanvasImage;
-                CanvasImageSize = new Size(width, height);
+                CanvasImageSize = CanvasBaseSize;
                 return;
             }
 
-            try
-            {
-                var pixels = new byte[width * height * 4];
-                converted.CopyPixels(pixels, width * 4, 0);
-                renderer.SetSource(pixels, width, height, PreviewMargin);
-                CanvasImage = renderer.ImageSource;
-                CanvasImageSize = new Size(renderer.OutputWidth, renderer.OutputHeight);
-                RenderWarpedImage();
-            }
-            catch
-            {
-                DisablePreviewRenderer();
-            }
+            basePixels = new byte[baseWidth * baseHeight * 4];
+            converted.CopyPixels(basePixels, baseWidth * 4, 0);
+            currentPreviewMargin = -1;
+            RenderWarpedImage();
         }
 
         VectorFieldWarpPreviewRenderer? EnsureRenderer()
@@ -250,7 +256,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         void RenderWarpedImage()
         {
-            if (disposedValue || previewRenderer is null)
+            if (disposedValue || previewRenderer is null || basePixels is null)
                 return;
 
             var pointCount = 0;
@@ -260,16 +266,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     break;
                 if (!point.IsEnabled)
                     continue;
-                var radialStrength = Sanitize(point.RadialStrength.Values.FirstOrDefault()?.Value ?? 0, -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0f);
-                var vortexStrength = Sanitize(point.VortexStrength.Values.FirstOrDefault()?.Value ?? 0, -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0f);
+                var radialStrength = Sanitize(GetAnimationValue(point.RadialStrength), -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0f);
+                var vortexStrength = Sanitize(GetAnimationValue(point.VortexStrength), -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0f);
                 if (radialStrength == 0f && vortexStrength == 0f)
                     continue;
                 var offset = pointCount * FloatsPerPoint;
-                pointFloats[offset] = Sanitize(point.X.Values.FirstOrDefault()?.Value ?? 0, -PositionLimit, PositionLimit, 0f);
-                pointFloats[offset + 1] = Sanitize(point.Y.Values.FirstOrDefault()?.Value ?? 0, -PositionLimit, PositionLimit, 0f);
+                pointFloats[offset] = Sanitize(GetAnimationValue(point.X), -PositionLimit, PositionLimit, 0f);
+                pointFloats[offset + 1] = Sanitize(GetAnimationValue(point.Y), -PositionLimit, PositionLimit, 0f);
                 pointFloats[offset + 2] = radialStrength;
                 pointFloats[offset + 3] = vortexStrength;
-                pointFloats[offset + 4] = Sanitize(point.Radius.Values.FirstOrDefault()?.Value ?? 1, 1f, VectorFieldPoint.RadiusLimit, 1f);
+                pointFloats[offset + 4] = Sanitize(GetAnimationValue(point.Radius), 1f, VectorFieldPoint.RadiusLimit, 1f);
                 pointFloats[offset + 5] = 0f;
                 pointFloats[offset + 6] = 0f;
                 pointFloats[offset + 7] = 0f;
@@ -277,12 +283,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             }
             Buffer.BlockCopy(pointFloats, 0, pointBytes, 0, pointBytes.Length);
 
-            var amount = Sanitize((Effect.Amount.Values.FirstOrDefault()?.Value ?? 0) / 100, 0f, 1f, 0f);
-            var maxDisplacement = Sanitize(Effect.MaxDisplacement.Values.FirstOrDefault()?.Value ?? 0, 0f, VectorFieldWarpCustomEffect.MaxDisplacementLimit, 0f);
+            var amount = Sanitize(GetAnimationValue(Effect.Amount) / 100, 0f, 1f, 0f);
+            var maxDisplacement = Sanitize(GetAnimationValue(Effect.MaxDisplacement), 0f, VectorFieldWarpCustomEffect.MaxDisplacementLimit, 0f);
             var steps = Math.Clamp(Effect.IntegrationSteps, 1, VectorFieldWarpCustomEffect.MaxIntegrationSteps);
+            var margin = ComputePreviewMargin(amount, maxDisplacement);
 
             try
             {
+                if (margin != currentPreviewMargin)
+                {
+                    previewRenderer.SetSource(basePixels, baseWidth, baseHeight, margin);
+                    currentPreviewMargin = margin;
+                    CanvasImage = previewRenderer.ImageSource;
+                    CanvasImageSize = new Size(previewRenderer.OutputWidth, previewRenderer.OutputHeight);
+                }
                 if (!previewRenderer.Render(pointBytes, pointCount, amount, maxDisplacement, steps))
                     isWarpPending = true;
             }
@@ -290,6 +304,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             {
                 DisablePreviewRenderer();
             }
+        }
+
+        double GetAnimationValue(Animation animation)
+        {
+            if (editorInfo is null)
+                return animation.Values.FirstOrDefault()?.Value ?? 0;
+            return animation.GetValue(editorInfo.ItemPosition.Frame, editorInfo.ItemDuration.Frame, editorInfo.VideoInfo.FPS);
+        }
+
+        static int ComputePreviewMargin(float amount, float maxDisplacement)
+        {
+            var required = (int)Math.Ceiling(amount * maxDisplacement);
+            if (required <= 0)
+                return 0;
+            return (required + PreviewMarginStep - 1) / PreviewMarginStep * PreviewMarginStep;
         }
 
         static float Sanitize(double value, float minimum, float maximum, float fallback)
