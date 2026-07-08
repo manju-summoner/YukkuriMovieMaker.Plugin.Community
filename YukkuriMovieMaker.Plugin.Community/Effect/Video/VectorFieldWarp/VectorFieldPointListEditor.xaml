@@ -1,0 +1,89 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp.VectorFieldPointListEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             mc:Ignorable="d"
+             d:DesignHeight="400" d:DesignWidth="300">
+    <Grid>
+        <Grid.Resources>
+            <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{Binding Source={x:Static local:VectorFieldWarpEditorSettings.Default}, Path=CanvasHeight, Mode=OneWay}"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <local:VectorFieldPointCanvas x:Name="pointCanvas" ToolTip="{x:Static local:Texts.VectorFieldWarpCanvasTooltip}"/>
+            <ScrollBar Orientation="Vertical" Width="17"
+                       HorizontalAlignment="Right" VerticalAlignment="Stretch" Margin="0,0,0,17"
+                       Minimum="0"
+                       Maximum="{Binding ScrollMaxY, ElementName=pointCanvas}"
+                       ViewportSize="{Binding ScrollViewportH, ElementName=pointCanvas}"
+                       LargeChange="{Binding ScrollViewportH, ElementName=pointCanvas}"
+                       Value="{Binding ScrollOffsetY, ElementName=pointCanvas, Mode=TwoWay}"
+                       Visibility="{Binding VScrollVisibility, ElementName=pointCanvas}"/>
+            <ScrollBar Orientation="Horizontal" Height="17"
+                       VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Margin="0,0,17,0"
+                       Minimum="0"
+                       Maximum="{Binding ScrollMaxX, ElementName=pointCanvas}"
+                       ViewportSize="{Binding ScrollViewportW, ElementName=pointCanvas}"
+                       LargeChange="{Binding ScrollViewportW, ElementName=pointCanvas}"
+                       Value="{Binding ScrollOffsetX, ElementName=pointCanvas, Mode=TwoWay}"
+                       Visibility="{Binding HScrollVisibility, ElementName=pointCanvas}"/>
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right" VerticalAlignment="Top" Margin="2">
+                <Button Width="22" Height="22" Margin="0,0,2,0" Opacity="0.75"
+                        Content="{DynamicResource {x:Static icons:IconKeys.FitToPage}}"
+                        ToolTip="{x:Static local:Texts.VectorFieldWarpCanvasResetViewTooltip}"
+                        Click="ResetViewButton_Click"/>
+                <Button Width="22" Height="22" Opacity="0.75"
+                        Content="{DynamicResource {x:Static icons:IconKeys.Autorenew}}"
+                        ToolTip="{x:Static local:Texts.VectorFieldWarpCanvasRefreshTooltip}"
+                        Command="{Binding RefreshImageCommand}"/>
+            </StackPanel>
+        </Grid>
+
+        <Thumb Grid.Row="1" Cursor="SizeNS" Margin="0,1" DragDelta="CanvasResizeThumb_DragDelta">
+            <Thumb.Template>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Border Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+                </ControlTemplate>
+            </Thumb.Template>
+        </Thumb>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="26"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="{x:Static local:Texts.VectorFieldWarpAddPoint}" Command="{Binding AddPointCommand}"/>
+            <Button Grid.Column="1" Padding="6" Content="{DynamicResource {x:Static icons:IconKeys.Minus}}" ToolTip="{x:Static local:Texts.VectorFieldWarpRemovePoint}" Command="{Binding RemovePointCommand}"/>
+        </Grid>
+
+        <Grid Grid.Row="3" x:Name="editorArea" ClipToBounds="True" SizeChanged="EditorArea_SizeChanged">
+            <c:PropertiesEditor x:Name="propertiesEditor" Margin="0,-22,0,0" Target="{Binding SelectedTarget}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="BeginEdit">
+                        <i:InvokeCommandAction Command="{Binding OnBeginEditPointCommand}"/>
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="EndEdit">
+                        <i:InvokeCommandAction Command="{Binding OnEndEditPointCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </c:PropertiesEditor>
+            <TextBlock Text="{Binding NoSelectionMessage}"
+                       Visibility="{Binding HasNoSelection, Converter={StaticResource BoolToVisibility}}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Margin="12" TextWrapping="Wrap" TextAlignment="Center"
+                       Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+        </Grid>
+    </Grid>
+</UserControl>

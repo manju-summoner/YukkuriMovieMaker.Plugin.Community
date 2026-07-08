@@ -99,6 +99,9 @@
     <FxCompile Include="WaveClipping.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="CrossHatchShading.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="GradientMap.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
@@ -178,6 +181,18 @@
       <Filter>ソース ファイル</Filter>
     </FxCompile>
     <FxCompile Include="PuppetDeformationArap.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="Kaleidoscope.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="FacetedGlass.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="Dithering.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="VectorFieldWarp.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
   </ItemGroup>

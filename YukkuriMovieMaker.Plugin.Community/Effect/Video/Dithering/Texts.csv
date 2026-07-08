@@ -1,0 +1,27 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+Dithering,,ディザリング,Dithering,抖动,抖動,디더링,Tramado,التذبيب,Dithering
+TagDithering,,ディザ,Dither,抖动,抖動,디더,Tramado,تذبيب,Dither
+TagRetro,,レトロ,Retro,复古,復古,레트로,Retro,كلاسيكي,Retro
+TagPixelArt,,ドット絵,Pixel Art,像素画,像素畫,픽셀 아트,Pixel Art,فن البكسل,Pixel Art
+Mode,,モード,Mode,模式,模式,모드,Modo,الوضع,Mode
+ModeDescription,,ディザリングの色モード,Color mode of the dithering.,抖动的颜色模式。,抖動的顏色模式。,디더링의 색상 모드.,Modo de color del tramado.,وضع ألوان التذبيب.,Mode warna dithering.
+ModeRgb,,RGB,RGB,RGB,RGB,RGB,RGB,RGB,RGB
+ModeRgbDescription,,チャンネルごとに量子化します,Quantizes each channel independently.,对每个通道分别量子化。,對每個通道分別量子化。,채널별로 양자화합니다.,Cuantiza cada canal por separado.,يكمم كل قناة على حدة.,Mengkuantisasi setiap kanal secara terpisah.
+ModeGrayscale,,モノクロ,Monochrome,单色,單色,모노크롬,Monocromo,أحادي اللون,Monokrom
+ModeGrayscaleDescription,,輝度をモノクロで量子化します,Quantizes luminance in monochrome.,以单色量子化亮度。,以單色量子化亮度。,휘도를 모노크롬으로 양자화합니다.,Cuantiza la luminancia en monocromo.,يكمم الإضاءة بالأبيض والأسود.,Mengkuantisasi luminansi dalam monokrom.
+ModeDuotone,,デュオトーン,Duotone,双色调,雙色調,듀오톤,Duotono,ثنائي اللون,Duoton
+ModeDuotoneDescription,,輝度を2色の間に割り当てます,Maps luminance between two colors.,将亮度映射到两种颜色之间。,將亮度映射到兩種顏色之間。,휘도를 두 색상 사이에 매핑합니다.,Asigna la luminancia entre dos colores.,يوزع الإضاءة بين لونين.,Memetakan luminansi di antara dua warna.
+Levels,,階調数,Levels,色阶数,色階數,계조 수,Niveles,المستويات,Level
+LevelsDescription,,各チャンネルを量子化する階調の数,Number of tonal levels each channel is quantized to.,每个通道量化的色阶数量。,每個通道量化的色階數量。,각 채널을 양자화하는 계조 수.,Número de niveles tonales a los que se cuantiza cada canal.,عدد المستويات اللونية التي يتم تكميم كل قناة إليها.,Jumlah tingkat nada tempat setiap kanal dikuantisasi.
+Scale,,ドットサイズ,Dot Size,点大小,點大小,도트 크기,Tamaño de punto,حجم النقطة,Ukuran Titik
+ScaleDescription,,ディザパターン1マスの大きさ,Size of one cell of the dither pattern in pixels.,抖动图案单格的大小（像素）。,抖動圖案單格的大小（像素）。,디더 패턴 한 칸의 크기(픽셀).,Tamaño de una celda del patrón de tramado en píxeles.,حجم خلية واحدة من نمط التذبيب بالبكسل.,Ukuran satu sel pola dithering dalam piksel.
+Strength,,ディザ強度,Dither Strength,抖动强度,抖動強度,디더 강도,Intensidad de tramado,شدة التذبيب,Kekuatan Dithering
+StrengthDescription,,0でポスタリゼーション 100で完全なディザリングになります,At 0 it is posterization and at 100 it is full dithering.,0时为色调分离 100时为完全抖动。,0時為色調分離 100時為完全抖動。,0이면 포스터화 100이면 완전한 디더링이 됩니다.,En 0 es posterización y en 100 es tramado completo.,عند 0 يكون تحويلًا لونيًا وعند 100 يكون تذبيبًا كاملًا.,Pada 0 menjadi posterisasi dan pada 100 menjadi dithering penuh.
+DarkColor,,暗色,Dark Color,暗色,暗色,어두운 색,Color oscuro,اللون الداكن,Warna Gelap
+DarkColorDescription,,デュオトーンの暗部の色,Color for the dark tones in duotone.,双色调中暗部的颜色。,雙色調中暗部的顏色。,듀오톤에서 어두운 부분의 색.,Color de las zonas oscuras en duotono.,لون المناطق الداكنة في ثنائي اللون.,Warna bagian gelap pada duoton.
+LightColor,,明色,Light Color,亮色,亮色,밝은 색,Color claro,اللون الفاتح,Warna Terang
+LightColorDescription,,デュオトーンの明部の色,Color for the light tones in duotone.,双色调中亮部的颜色。,雙色調中亮部的顏色。,듀오톤에서 밝은 부분의 색.,Color de las zonas claras en duotono.,لون المناطق الفاتحة في ثنائي اللون.,Warna bagian terang pada duoton.
+BlendMode,,合成モード,Blend Mode,混合模式,混合模式,합성 모드,Modo de fusión,وضع المزج,Mode Campuran
+BlendModeDescription,,効果を元画像に合成する方法,How the effect is blended onto the source.,效果与原图像的混合方式。,效果與原圖像的混合方式。,효과를 원본에 합성하는 방식.,Cómo se fusiona el efecto sobre la fuente.,كيفية مزج التأثير على المصدر.,Cara efek dicampur ke sumber.
+Amount,,適用量,Amount,应用量,應用量,적용량,Cantidad,المقدار,Jumlah
+AmountDescription,,元画像と効果の合成比率,Blend ratio between the source and the effect.,原图像与效果的混合比例。,原圖像與效果的混合比例。,원본 이미지와 효과의 합성 비율.,Proporción de mezcla entre la fuente y el efecto.,نسبة المزج بين المصدر والتأثير.,Rasio pencampuran antara sumber dan efek.
