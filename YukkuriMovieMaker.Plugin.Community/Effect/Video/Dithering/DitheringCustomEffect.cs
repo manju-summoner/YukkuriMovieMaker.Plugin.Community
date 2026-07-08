@@ -1,6 +1,5 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Vortice;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
@@ -41,7 +40,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Dithering
             private ConstantBuffer _cb;
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Levels)]
-            public float Levels { get => _cb.Levels; set { _cb.Levels = Math.Clamp(value, 2f, 256f); UpdateConstants(); } }
+            public float Levels { get => _cb.Levels; set { _cb.Levels = MathF.Round(Math.Clamp(value, 2f, 256f)); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Scale)]
             public float Scale { get => _cb.Scale; set { _cb.Scale = Math.Clamp(value, 1f, 4096f); UpdateConstants(); } }
@@ -77,26 +76,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Dithering
                 drawInformation?.SetPixelShaderConstantBuffer(_cb);
             }
 
-            public override void MapInputRectsToOutputRect(
-                RawRect[] inputRects,
-                RawRect[] inputOpaqueSubRects,
-                out RawRect outputRect,
-                out RawRect outputOpaqueSubRect)
-            {
-                base.MapInputRectsToOutputRect(inputRects, inputOpaqueSubRects, out outputRect, out outputOpaqueSubRect);
-
-                if (inputRects.Length > 0)
-                {
-                    var r = inputRects[0];
-                    _cb.InputBounds = new Vector4(r.Left, r.Top, r.Right, r.Bottom);
-                    UpdateConstants();
-                }
-            }
-
             [StructLayout(LayoutKind.Sequential)]
             private struct ConstantBuffer
             {
-                public Vector4 InputBounds;
                 public float Levels;
                 public float Scale;
                 public float Strength;

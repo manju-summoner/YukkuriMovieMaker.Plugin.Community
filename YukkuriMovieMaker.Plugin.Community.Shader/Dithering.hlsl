@@ -3,13 +3,12 @@ SamplerState SourceSampler : register(s0);
 
 cbuffer Constants : register(b0)
 {
-    float4 inputBounds : packoffset(c0);
-    float levels : packoffset(c1.x);
-    float scale : packoffset(c1.y);
-    float strength : packoffset(c1.z);
-    int mode : packoffset(c1.w);
-    float4 darkColor : packoffset(c2);
-    float4 lightColor : packoffset(c3);
+    float levels : packoffset(c0.x);
+    float scale : packoffset(c0.y);
+    float strength : packoffset(c0.z);
+    int mode : packoffset(c0.w);
+    float4 darkColor : packoffset(c1);
+    float4 lightColor : packoffset(c2);
 };
 
 static const float3 LUMA = float3(0.299, 0.587, 0.114);
@@ -47,7 +46,7 @@ float4 main(
     if (source.a <= 0.0)
         return source;
 
-    float2 grid = floor((scenePosition.xy - inputBounds.xy) / max(scale, 1.0));
+    float2 grid = floor(scenePosition.xy / max(scale, 1.0));
     float threshold = lerp(0.5, BayerThreshold((uint2)(int2)grid), strength);
     float steps = max(levels - 1.0, 1.0);
 
