@@ -50,7 +50,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CrossFilter
         }
         private Color _lightColor = Colors.White;
 
-        [Display(GroupName = nameof(Texts.CrossFilterEffectName), Name = nameof(Texts.CrossFilterLightOnly), Description = nameof(Texts.CrossFilterLightOnlyDescription), Order = 8, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.CrossFilterEffectName), Name = nameof(Texts.CrossFilterSamples), Description = nameof(Texts.CrossFilterSamplesDescription), Order = 8, ResourceType = typeof(Texts))]
+        [AnimationSlider("F0", "", 1, 64)]
+        public Animation Samples { get; } = new Animation(24, 1, 64);
+
+        [Display(GroupName = nameof(Texts.CrossFilterEffectName), Name = nameof(Texts.CrossFilterLightOnly), Description = nameof(Texts.CrossFilterLightOnlyDescription), Order = 9, ResourceType = typeof(Texts))]
         [ToggleSlider]
         public bool LightOnly
         {
@@ -67,6 +71,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CrossFilter
             => new CrossFilterEffectProcessor(devices, this);
 
         protected override IEnumerable<IAnimatable> GetAnimatables()
-            => _animatables ??= [Strength, Threshold, Length, RayCount, Angle, Thickness, Dispersion];
+            => _animatables ??= [Strength, Threshold, Length, RayCount, Angle, Thickness, Dispersion, Samples];
     }
 }

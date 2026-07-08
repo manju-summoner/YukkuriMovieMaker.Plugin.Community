@@ -34,6 +34,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CrossFilter
                 (float)(_item.Angle.GetValue(frame, length, fps) * Math.PI / 180.0),
                 (float)(_item.Dispersion.GetValue(frame, length, fps) / 100.0),
                 (float)_item.Thickness.GetValue(frame, length, fps),
+                (float)Math.Round(_item.Samples.GetValue(frame, length, fps)),
                 lightColor.R / 255f,
                 lightColor.G / 255f,
                 lightColor.B / 255f,
@@ -53,6 +54,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CrossFilter
                 _effect.Dispersion = parameters.Dispersion;
             if (_isFirst || _parameters.Thickness != parameters.Thickness)
                 _effect.Thickness = parameters.Thickness;
+            if (_isFirst || _parameters.Samples != parameters.Samples)
+                _effect.Samples = parameters.Samples;
             if (_isFirst || _parameters.LightR != parameters.LightR)
                 _effect.LightR = parameters.LightR;
             if (_isFirst || _parameters.LightG != parameters.LightG)
@@ -103,6 +106,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CrossFilter
             float Angle,
             float Dispersion,
             float Thickness,
+            float Samples,
             float LightR,
             float LightG,
             float LightB,

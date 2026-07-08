@@ -22,6 +22,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CrossFilter
             LightR,
             LightG,
             LightB,
+            Samples,
         }
 
         public float Strength { set => SetValue((int)PropertyIndex.Strength, value); }
@@ -35,6 +36,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CrossFilter
         public float LightR { set => SetValue((int)PropertyIndex.LightR, value); }
         public float LightG { set => SetValue((int)PropertyIndex.LightG, value); }
         public float LightB { set => SetValue((int)PropertyIndex.LightB, value); }
+        public float Samples { set => SetValue((int)PropertyIndex.Samples, value); }
 
         [CustomEffect(1)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
@@ -74,12 +76,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CrossFilter
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.LightB)]
             public float LightB { get => _cb.LightB; set { _cb.LightB = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
 
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Samples)]
+            public float Samples { get => _cb.Samples; set { _cb.Samples = Math.Clamp(value, 1f, 64f); UpdateConstants(); } }
+
             public EffectImpl() : base(ShaderResourceUri.Get("CrossFilter"))
             {
                 _cb.Strength = 1f;
                 _cb.Threshold = 0.6f;
                 _cb.Length = 80f;
                 _cb.RayCount = 4f;
+                _cb.Samples = 24f;
                 _cb.LightR = 1f;
                 _cb.LightG = 1f;
                 _cb.LightB = 1f;
@@ -147,7 +153,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CrossFilter
                 public float LightR;
                 public float LightG;
                 public float LightB;
-                public float Pad0;
+                public float Samples;
             }
         }
     }

@@ -16,10 +16,10 @@ cbuffer Constants : register(b0)
     float lightR     : packoffset(c2.x);
     float lightG     : packoffset(c2.y);
     float lightB     : packoffset(c2.z);
-    float pad0       : packoffset(c2.w);
+    float sampleCount : packoffset(c2.w);
 };
 
-#define SAMPLES 24
+#define MAX_SAMPLES 64
 
 float4 SampleInput(float2 uv)
 {
@@ -39,6 +39,7 @@ float4 main(
         return source;
 
     int rays = (int)clamp(rayCount, 1.0f, 16.0f);
+    int samples = (int)clamp(sampleCount, 1.0f, (float)MAX_SAMPLES);
     float len = max(lengthPx, 1.0f);
     float knee = max(1.0f - threshold, 0.05f);
 
@@ -57,9 +58,9 @@ float4 main(
         float2 perp = float2(-dir.y, dir.x);
 
         [loop]
-        for (int i = 0; i < SAMPLES; i++)
+        for (int i = 0; i < samples; i++)
         {
-            float t = len * ((float)i + 0.5f) / (float)SAMPLES;
+            float t = len * ((float)i + 0.5f) / (float)samples;
             float2 basePx = posScene.xy + dir * t;
 
             float4 s;

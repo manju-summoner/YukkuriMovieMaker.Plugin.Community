@@ -14,6 +14,8 @@ CrossFilterThickness,,太さ,Thickness,粗细,粗細,두께,Grosor,السماك�
 CrossFilterThicknessDescription,,光の筋の太さ,Thickness of the light streaks,光芒的粗细,光芒的粗細,빛줄기의 두께,Grosor de los rayos de luz,سماكة خيوط الضوء,Ketebalan garis cahaya
 CrossFilterDispersion,,分散,Dispersion,色散,色散,분산,Dispersión,التشتت,Dispersi
 CrossFilterDispersionDescription,,波長による回折差。筋の先端が虹色に色づきます,Wavelength-dependent diffraction. Tints the streak tips with rainbow colors,波长引起的衍射差。使光芒尖端呈现彩虹色,波長引起的繞射差。使光芒尖端呈現彩虹色,파장에 따른 회절 차이. 줄기 끝이 무지개색으로 물듭니다,Difracción dependiente de la longitud de onda. Tiñe las puntas de los rayos con colores de arcoíris,حيود يعتمد على الطول الموجي. يلوّن أطراف الخيوط بألوان قوس قزح,Difraksi bergantung panjang gelombang. Mewarnai ujung garis dengan warna pelangi
+CrossFilterSamples,,サンプル数,Samples,采样数,取樣數,샘플 수,Muestras,عدد العينات,Jumlah sampel
+CrossFilterSamplesDescription,,光の筋のサンプル数 (多いほど高品質),Number of streak samples (more = higher quality),光芒采样数（越多越高质量）,光芒取樣數（越多品質越高）,빛줄기 샘플 수 (많을수록 품질 높음),Número de muestras de los rayos (más = mayor calidad),عدد عينات الخيوط (أكثر = جودة أعلى),Jumlah sampel garis cahaya (lebih banyak = kualitas lebih tinggi)
 CrossFilterLightColor,,光の色,Light color,光的颜色,光的顏色,빛의 색,Color de la luz,لون الضوء,Warna cahaya
 CrossFilterLightColorDescription,,光の筋に乗せる色,Tint applied to the light streaks,附加到光芒上的颜色,附加到光芒上的顏色,빛줄기에 입히는 색,Tinte aplicado a los rayos de luz,اللون المطبق على خيوط الضوء,Warna yang diterapkan pada garis cahaya
 CrossFilterLightOnly,,光のみ表示,Light only,仅显示光,僅顯示光,빛만 표시,Solo luz,الضوء فقط,Hanya cahaya
