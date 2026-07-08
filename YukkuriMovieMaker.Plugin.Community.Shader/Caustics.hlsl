@@ -172,6 +172,7 @@ float4 main(
     }
 
     col.rgb += light * col.a;
+    col.a = max(col.a, saturate(max(col.r, max(col.g, col.b))));
     col.rgb = min(col.rgb, float3(col.a, col.a, col.a));
     return col;
 }
