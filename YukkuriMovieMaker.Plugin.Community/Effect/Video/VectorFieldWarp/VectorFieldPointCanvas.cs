@@ -762,6 +762,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 return;
             if (e.Key == Key.Delete)
             {
+                if (isDragging || isPanning)
+                    return;
                 viewModel.RemoveSelectedPointsFromCanvas();
                 e.Handled = true;
             }
