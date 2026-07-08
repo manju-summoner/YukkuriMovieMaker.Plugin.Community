@@ -43,6 +43,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Caustics
 
             var flowRad = flowAngle * Math.PI / 180.0;
             var flowU = flowSpeed / 100.0;
+            var lightAlpha = lightColor.A / 255f;
 
             var parameters = new Parameters(
                 (float)(strength / 100.0),
@@ -51,15 +52,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Caustics
                 (float)Math.Pow(10.0, -2.2 * Math.Clamp(sharpness, 0.0, 100.0) / 100.0),
                 (float)(dispersion / 100.0 * 0.5),
                 (float)(focus / 100.0),
-                (float)(absorption / 100.0),
+                (float)(absorption / 100.0) * (absorptionColor.A / 255f),
                 (float)(Math.Cos(flowRad) * flowU),
                 (float)(Math.Sin(flowRad) * flowU),
                 1f - (float)(anisotropy / 100.0),
                 (float)(waveAngle * Math.PI / 180.0),
                 (float)(speed / 100.0),
-                lightColor.R / 255f,
-                lightColor.G / 255f,
-                lightColor.B / 255f,
+                lightColor.R / 255f * lightAlpha,
+                lightColor.G / 255f * lightAlpha,
+                lightColor.B / 255f * lightAlpha,
                 absorptionColor.R / 255f,
                 absorptionColor.G / 255f,
                 absorptionColor.B / 255f,
