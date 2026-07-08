@@ -1,0 +1,38 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+CausticsEffectName,,コースティクス,Caustics,焦散,焦散,커스틱,Cáusticas,الكوستيك,Kaustik
+CausticsStrength,,光の強さ,Light intensity,光强度,光強度,빛의 세기,Intensidad de luz,شدة الضوء,Intensitas cahaya
+CausticsStrengthDescription,,集束した光の明るさ,Brightness of the focused light,聚焦光的亮度,聚焦光的亮度,집속된 빛의 밝기,Brillo de la luz enfocada,سطوع الضوء المركز,Kecerahan cahaya terfokus
+CausticsDisplacement,,変位,Displacement,位移,位移,변위,Desplazamiento,الإزاحة,Perpindahan
+CausticsDisplacementDescription,,屈折による映像の揺らぎの大きさ,Amount of image distortion caused by refraction,折射引起的图像扭曲程度,折射引起的圖像扭曲程度,굴절에 의한 영상 왜곡의 크기,Cantidad de distorsión de la imagen por refracción,مقدار تشوه الصورة بسبب الانكسار,Besar distorsi gambar akibat pembiasan
+CausticsScale,,スケール,Scale,缩放,縮放,스케일,Escala,المقياس,Skala
+CausticsScaleDescription,,波の模様の大きさ,Size of the wave pattern,波纹图案的大小,波紋圖案的大小,물결 무늬의 크기,Tamaño del patrón de ondas,حجم نمط الموجات,Ukuran pola gelombang
+CausticsSpeed,,変化速度,Change speed,变化速度,變化速度,변화 속도,Velocidad de cambio,سرعة التغير,Kecepatan perubahan
+CausticsSpeedDescription,,波の形が変化する速さ,How fast the wave shape evolves,波形变化的速度,波形變化的速度,물결 모양이 변하는 속도,Velocidad a la que evoluciona la forma de las ondas,سرعة تطور شكل الموجات,Kecepatan perubahan bentuk gelombang
+CausticsDetailGroup,,コースティクス詳細,Caustics details,焦散详细,焦散詳細,커스틱 상세,Detalles de cáusticas,تفاصيل الكوستيك,Detail kaustik
+CausticsLightColor,,光の色,Light color,光的颜色,光的顏色,빛의 색,Color de la luz,لون الضوء,Warna cahaya
+CausticsLightColorDescription,,集束した光の色,Color of the focused light,聚焦光的颜色,聚焦光的顏色,집속된 빛의 색,Color de la luz enfocada,لون الضوء المركز,Warna cahaya terfokus
+CausticsSharpness,,シャープさ,Sharpness,锐度,銳度,선명도,Nitidez,الحدة,Ketajaman
+CausticsSharpnessDescription,,光の筋の細さ。高いほど細く鋭い糸状になります,Thinness of the light filaments. Higher values produce thinner and sharper threads,光丝的细度。越高越细越锐利,光絲的細度。越高越細越銳利,빛줄기의 가늘기. 높을수록 가늘고 날카로운 실 모양이 됩니다,Finura de los filamentos de luz. Valores altos producen hilos más finos y nítidos,رفع خيوط الضوء. القيم الأعلى تنتج خيوطًا أرفع وأحدّ,Ketipisan filamen cahaya. Nilai tinggi menghasilkan benang lebih tipis dan tajam
+CausticsFocus,,集束,Focus,聚焦,聚焦,집속,Convergencia,التركيز,Fokus
+CausticsFocusDescription,,光の集まりやすさ。高いほど模様が強く折り重なります,How strongly the light converges. Higher values fold the pattern more intensely,光的汇聚程度。越高图案折叠越强烈,光的匯聚程度。越高圖案折疊越強烈,빛이 모이는 정도. 높을수록 무늬가 강하게 겹칩니다,Grado de convergencia de la luz. Valores altos pliegan el patrón con más intensidad,مدى تقارب الضوء. القيم الأعلى تطوي النمط بشدة أكبر,Seberapa kuat cahaya berkumpul. Nilai tinggi melipat pola lebih intens
+CausticsDispersion,,分散,Dispersion,色散,色散,분산,Dispersión,التشتت,Dispersi
+CausticsDispersionDescription,,波長による屈折差。光の縁と映像に虹色のずれが生じます,Wavelength-dependent refraction. Adds rainbow fringes to the light and the image,波长引起的折射差。为光和图像添加彩虹色偏移,波長引起的折射差。為光和圖像添加彩虹色偏移,파장에 따른 굴절 차이. 빛과 영상에 무지개빛 어긋남이 생깁니다,Refracción dependiente de la longitud de onda. Añade franjas de arcoíris a la luz y la imagen,انكسار يعتمد على الطول الموجي. يضيف أهدابًا قزحية للضوء والصورة,Pembiasan bergantung panjang gelombang. Menambah pinggiran pelangi pada cahaya dan gambar
+CausticsAbsorption,,吸収,Absorption,吸收,吸收,흡수,Absorción,الامتصاص,Penyerapan
+CausticsAbsorptionDescription,,媒質による色の吸収の強さ,Strength of color absorption by the medium,介质对颜色的吸收强度,介質對顏色的吸收強度,매질에 의한 색 흡수의 세기,Intensidad de absorción de color por el medio,قوة امتصاص الوسط للألوان,Kekuatan penyerapan warna oleh medium
+CausticsAbsorptionColor,,吸収色,Absorption color,吸收色,吸收色,흡수색,Color de absorción,لون الامتصاص,Warna penyerapan
+CausticsAbsorptionColorDescription,,媒質を透過した光が近づく色,Color the transmitted light shifts toward,透射光趋近的颜色,透射光趨近的顏色,투과광이 가까워지는 색,Color hacia el que tiende la luz transmitida,اللون الذي يميل إليه الضوء النافذ,Warna yang didekati cahaya yang diteruskan
+CausticsFlowSpeed,,流れの速さ,Flow speed,流动速度,流動速度,흐름 속도,Velocidad de flujo,سرعة التدفق,Kecepatan aliran
+CausticsFlowSpeedDescription,,波の模様が平行移動する速さ,Speed at which the wave pattern translates,波纹图案平移的速度,波紋圖案平移的速度,물결 무늬가 평행 이동하는 속도,Velocidad de traslación del patrón de ondas,سرعة انتقال نمط الموجات,Kecepatan translasi pola gelombang
+CausticsFlowAngle,,流れの角度,Flow angle,流动角度,流動角度,흐름 각도,Ángulo de flujo,زاوية التدفق,Sudut aliran
+CausticsFlowAngleDescription,,波の模様が流れる方向,Direction in which the wave pattern flows,波纹图案流动的方向,波紋圖案流動的方向,물결 무늬가 흐르는 방향,Dirección en la que fluye el patrón de ondas,اتجاه تدفق نمط الموجات,Arah aliran pola gelombang
+CausticsAnisotropy,,異方性,Anisotropy,各向异性,各向異性,이방성,Anisotropía,التباين,Anisotropi
+CausticsAnisotropyDescription,,波を一方向に引き伸ばす度合い,Degree to which waves are stretched in one direction,波纹沿一个方向拉伸的程度,波紋沿一個方向拉伸的程度,물결을 한 방향으로 늘이는 정도,Grado de estiramiento de las ondas en una dirección,درجة تمدد الموجات في اتجاه واحد,Derajat peregangan gelombang ke satu arah
+CausticsWaveAngle,,波の角度,Wave angle,波纹角度,波紋角度,물결 각도,Ángulo de ondas,زاوية الموجات,Sudut gelombang
+CausticsWaveAngleDescription,,異方性で引き伸ばす方向,Direction of the anisotropic stretch,各向异性拉伸的方向,各向異性拉伸的方向,이방성으로 늘이는 방향,Dirección del estiramiento anisotrópico,اتجاه التمدد المتباين,Arah peregangan anisotropik
+CausticsLightOnly,,光のみ表示,Light only,仅显示光,僅顯示光,빛만 표시,Solo luz,الضوء فقط,Hanya cahaya
+CausticsLightOnlyDescription,,映像を消して光の模様だけを出力します,Outputs only the light pattern without the image,隐藏图像仅输出光的图案,隱藏圖像僅輸出光的圖案,영상을 지우고 빛의 무늬만 출력합니다,Genera solo el patrón de luz sin la imagen,يُخرج نمط الضوء فقط دون الصورة,Hanya mengeluarkan pola cahaya tanpa gambar
+CausticsSeed,,シード値,Seed,种子值,種子值,시드값,Semilla,قيمة البذرة,Nilai seed
+CausticsSeedDescription,,波の模様を決める乱数のシード値,Random seed that determines the wave pattern,决定波纹图案的随机种子,決定波紋圖案的隨機種子,물결 무늬를 결정하는 난수 시드값,Semilla aleatoria que determina el patrón de ondas,بذرة عشوائية تحدد نمط الموجات,Seed acak yang menentukan pola gelombang
+TagCaustics,,コースティクス,caustics,焦散,焦散,커스틱,cáusticas,كوستيك,kaustik
+TagWater,,水,water,水,水,물,agua,ماء,air
+TagLight,,光,light,光,光,빛,luz,ضوء,cahaya
