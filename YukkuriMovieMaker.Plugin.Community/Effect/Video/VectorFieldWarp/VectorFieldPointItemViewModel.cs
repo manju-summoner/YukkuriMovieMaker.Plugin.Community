@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Windows;
+using System.Windows.Threading;
 using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 {
     internal sealed class VectorFieldPointItemViewModel : Bindable, IDisposable
     {
+        readonly Dispatcher dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
         bool disposedValue;
 
         public VectorFieldPoint Model { get; }
@@ -57,12 +60,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 return;
             UnsubscribeValues();
             SubscribeValues();
-            VisualChanged?.Invoke(this, EventArgs.Empty);
+            RaiseVisualChanged();
         }
 
         void Value_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            VisualChanged?.Invoke(this, EventArgs.Empty);
+            RaiseVisualChanged();
         }
 
         void Model_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -70,12 +73,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             switch (e.PropertyName)
             {
                 case nameof(VectorFieldPoint.IsEnabled):
-                    OnPropertyChanged(nameof(IsEnabled));
+                    RaisePropertyChanged(nameof(IsEnabled));
                     break;
                 case nameof(VectorFieldPoint.IsSelected):
-                    OnPropertyChanged(nameof(IsSelected));
+                    RaisePropertyChanged(nameof(IsSelected));
                     break;
             }
+        }
+
+        void RaiseVisualChanged()
+        {
+            if (dispatcher.CheckAccess())
+                VisualChanged?.Invoke(this, EventArgs.Empty);
+            else
+                dispatcher.BeginInvoke(RaiseVisualChanged);
+        }
+
+        void RaisePropertyChanged(string propertyName)
+        {
+            if (dispatcher.CheckAccess())
+                OnPropertyChanged(propertyName);
+            else
+                dispatcher.BeginInvoke(() => OnPropertyChanged(propertyName));
         }
 
         public void Dispose()
