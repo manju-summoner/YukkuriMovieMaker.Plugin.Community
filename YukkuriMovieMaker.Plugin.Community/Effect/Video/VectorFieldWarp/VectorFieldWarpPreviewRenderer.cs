@@ -42,11 +42,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         public VectorFieldWarpPreviewRenderer()
         {
-            devices = new GraphicsDevices();
-            context = devices.CreateContext();
-            effect = new VectorFieldWarpCustomEffect(context);
-            IsEnabled = effect.IsEnabled && TryCreateD3D9Device();
-            d3dImage.IsFrontBufferAvailableChanged += D3DImage_IsFrontBufferAvailableChanged;
+            GraphicsDevices? createdDevices = null;
+            IGraphicsDevicesAndContext? createdContext = null;
+            VectorFieldWarpCustomEffect? createdEffect = null;
+            try
+            {
+                createdDevices = new GraphicsDevices();
+                createdContext = createdDevices.CreateContext();
+                createdEffect = new VectorFieldWarpCustomEffect(createdContext);
+                devices = createdDevices;
+                context = createdContext;
+                effect = createdEffect;
+                IsEnabled = effect.IsEnabled && TryCreateD3D9Device();
+                d3dImage.IsFrontBufferAvailableChanged += D3DImage_IsFrontBufferAvailableChanged;
+            }
+            catch
+            {
+                createdEffect?.Dispose();
+                createdContext?.Dispose();
+                createdDevices?.Dispose();
+                throw;
+            }
         }
 
         void D3DImage_IsFrontBufferAvailableChanged(object? sender, DependencyPropertyChangedEventArgs e)
