@@ -142,6 +142,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Caustics
 
             private int Padding()
             {
+                if (_cb.LightOnly != 0)
+                    return 0;
+
                 var margin = Math.Min(Math.Max(_cb.Displacement, 0f) * (1f + _cb.Dispersion) + 3f, 4096f);
                 return (int)Math.Ceiling(margin);
             }

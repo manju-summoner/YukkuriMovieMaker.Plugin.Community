@@ -151,8 +151,9 @@ float4 main(
 
     if (lightOnly != 0)
     {
-        float aL = saturate(max(light.r, max(light.g, light.b)));
-        return float4(min(light, float3(aL, aL, aL)), aL);
+        float3 clipped = light * source.a;
+        float aL = saturate(max(clipped.r, max(clipped.g, clipped.b)));
+        return float4(min(clipped, float3(aL, aL, aL)), aL);
     }
 
     float2 dpx = grad * displacement;
