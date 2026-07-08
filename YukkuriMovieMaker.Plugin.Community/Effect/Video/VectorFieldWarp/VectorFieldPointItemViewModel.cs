@@ -40,18 +40,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             Model.PropertyChanged += Model_PropertyChanged;
         }
 
+        //Animation.Valuesはリストごと置換されるため、購読時の値を保持して確実に解除する
+        readonly List<AnimationValue> subscribedValues = [];
+
         void SubscribeValues()
         {
             foreach (var animation in VisualAnimations)
                 foreach (var value in animation.Values)
+                {
                     value.PropertyChanged += Value_PropertyChanged;
+                    subscribedValues.Add(value);
+                }
         }
 
         void UnsubscribeValues()
         {
-            foreach (var animation in VisualAnimations)
-                foreach (var value in animation.Values)
-                    value.PropertyChanged -= Value_PropertyChanged;
+            foreach (var value in subscribedValues)
+                value.PropertyChanged -= Value_PropertyChanged;
+            subscribedValues.Clear();
         }
 
         void Animation_PropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -554,6 +554,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         {
             readonly Animation animation;
             readonly Action callback;
+            //Animation.Valuesはリストごと置換されるため、購読時のリストを保持して確実に解除する
+            ImmutableList<AnimationValue> subscribedValues = ImmutableList<AnimationValue>.Empty;
 
             public AnimationWatcher(Animation animation, Action callback)
             {
@@ -565,14 +567,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
             void Subscribe()
             {
-                foreach (var value in animation.Values)
+                subscribedValues = animation.Values;
+                foreach (var value in subscribedValues)
                     value.PropertyChanged += Value_PropertyChanged;
             }
 
             void Unsubscribe()
             {
-                foreach (var value in animation.Values)
+                foreach (var value in subscribedValues)
                     value.PropertyChanged -= Value_PropertyChanged;
+                subscribedValues = ImmutableList<AnimationValue>.Empty;
             }
 
             void Animation_PropertyChanged(object? sender, PropertyChangedEventArgs e)
