@@ -281,8 +281,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     continue;
                 velocityBound += 0.5f * MathF.Sqrt(radialStrength * radialStrength + vortexStrength * vortexStrength);
                 var offset = pointCount * FloatsPerPoint;
-                pointFloats[offset] = Sanitize(GetDisplayValue(point.X), -PositionLimit, PositionLimit, 0f);
-                pointFloats[offset + 1] = Sanitize(GetDisplayValue(point.Y), -PositionLimit, PositionLimit, 0f);
+                //シェーダーの制御点はシーン座標基準。プレビューは入力画像を(0,0)-(幅,高さ)に配置するため、
+                //画像中心原点のローカル座標へ画像中心のオフセットを加算して渡す
+                pointFloats[offset] = Sanitize(GetDisplayValue(point.X), -PositionLimit, PositionLimit, 0f) + baseWidth * 0.5f;
+                pointFloats[offset + 1] = Sanitize(GetDisplayValue(point.Y), -PositionLimit, PositionLimit, 0f) + baseHeight * 0.5f;
                 pointFloats[offset + 2] = radialStrength;
                 pointFloats[offset + 3] = vortexStrength;
                 pointFloats[offset + 4] = Sanitize(GetDisplayValue(point.Radius), 1f, VectorFieldPoint.RadiusLimit, 1f);

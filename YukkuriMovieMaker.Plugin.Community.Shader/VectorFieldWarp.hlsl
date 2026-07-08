@@ -18,11 +18,6 @@ cbuffer Constants : register(b0)
     float4 points[MaxPoints * 2] : packoffset(c2);
 };
 
-float2 LocalToScene(float2 localPosition)
-{
-    return localPosition + float2(inputLeft + inputWidth * 0.5f, inputTop + inputHeight * 0.5f);
-}
-
 float2 EvaluateField(float2 position)
 {
     float2 velocity = (float2) 0;
@@ -33,7 +28,10 @@ float2 EvaluateField(float2 position)
     {
         float4 parameters = points[index * 2];
         float radius = max(points[index * 2 + 1].x, 1.0f);
-        float2 delta = position - LocalToScene(parameters.xy);
+        //制御点はシーン座標（アイテムのローカル原点基準）。
+        //入力矩形の中心を基準にすると、前段エフェクトで境界が非対称に広がったときに
+        //タイムライン上のコントローラーと場の中心がズレるため使用しない
+        float2 delta = position - parameters.xy;
         float denominator = max(dot(delta, delta) + radius * radius, Epsilon);
         float factor = radius / denominator;
         float2 perpendicular = float2(-delta.y, delta.x);
