@@ -400,12 +400,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         public void MoveSelectedFromCanvas(double deltaX, double deltaY)
         {
-            foreach (var point in Effect.Points)
+            //複数アイテム選択時は、先頭アイテムの選択状態を基準に同じインデックスの制御点へ適用する
+            var points = Effect.Points;
+            for (var index = 0; index < points.Count; index++)
             {
-                if (!point.IsSelected)
+                if (!points[index].IsSelected)
                     continue;
-                point.X.AddToEachValues(deltaX);
-                point.Y.AddToEachValues(deltaY);
+                foreach (var itemProperty in ItemProperties)
+                {
+                    if (itemProperty.PropertyOwner is not VectorFieldWarpEffect effect || index >= effect.Points.Count)
+                        continue;
+                    var point = effect.Points[index];
+                    point.X.AddToEachValues(deltaX);
+                    point.Y.AddToEachValues(deltaY);
+                }
             }
         }
 
@@ -413,14 +421,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         void CommitStructuralChange(ImmutableList<VectorFieldPoint> newPoints)
         {
-            var clones = newPoints.Select(p =>
+            //複数アイテム選択時は全アイテムへ反映する。Animation等の参照共有を避けるためアイテムごとにクローンする
+            foreach (var itemProperty in ItemProperties)
             {
-                var clone = JsonConvert.DeserializeObject<VectorFieldPoint>(JsonConvert.SerializeObject(p))
-                            ?? VectorFieldPoint.Create(0, 0);
-                clone.IsSelected = p.IsSelected;
-                return clone;
-            }).ToImmutableList();
-            ItemProperties[0].SetValue(clones);
+                var clones = newPoints.Select(p =>
+                {
+                    var clone = JsonConvert.DeserializeObject<VectorFieldPoint>(JsonConvert.SerializeObject(p))
+                                ?? VectorFieldPoint.Create(0, 0);
+                    clone.IsSelected = p.IsSelected;
+                    return clone;
+                }).ToImmutableList();
+                itemProperty.SetValue(clones);
+            }
         }
 
         void Effect_PropertyChanged(object? sender, PropertyChangedEventArgs e)
