@@ -25,6 +25,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CrossFilter
             var fps = effectDescription.FPS;
 
             var lightColor = _item.LightColor;
+            var lightAlpha = lightColor.A / 255f;
 
             var parameters = new Parameters(
                 (float)(_item.Strength.GetValue(frame, length, fps) / 100.0),
@@ -35,9 +36,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CrossFilter
                 (float)(_item.Dispersion.GetValue(frame, length, fps) / 100.0),
                 (float)_item.Thickness.GetValue(frame, length, fps),
                 (float)Math.Round(_item.Samples.GetValue(frame, length, fps)),
-                lightColor.R / 255f,
-                lightColor.G / 255f,
-                lightColor.B / 255f,
+                lightColor.R / 255f * lightAlpha,
+                lightColor.G / 255f * lightAlpha,
+                lightColor.B / 255f * lightAlpha,
                 _item.LightOnly ? 1 : 0);
 
             if (_isFirst || _parameters.Strength != parameters.Strength)
