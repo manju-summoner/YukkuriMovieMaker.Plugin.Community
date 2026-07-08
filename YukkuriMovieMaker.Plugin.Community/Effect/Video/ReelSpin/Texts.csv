@@ -1,0 +1,12 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+ReelSpinEffectName,,リール回転,Reel Spin,转轮旋转,轉輪旋轉,릴 회전,Giro de carrete,دوران البكرة,Putaran Reel
+ReelSpinRotation,,回転位置,Position,旋转位置,旋轉位置,회전 위치,Posición de rotación,موضع الدوران,Posisi rotasi
+ReelSpinDirection,,方向,Direction,方向,方向,방향,Dirección,الاتجاه,Arah
+ReelSpinTile,,敷き詰め,Tile,平铺,平鋪,타일 배치,Mosaico,رصف,Ubin
+ReelSpinBlur,,ブラー,Motion blur,动态模糊,動態模糊,모션 블러,Desenfoque de movimiento,تمويه الحركة,Blur gerakan
+InOutReelSpinEffectName,,リール回転しながら登場退場,Reel Spin In/Out,转轴旋转时入/出场,在轉軸旋轉時登場退場,릴이 회전하면서 등장 퇴장,Apareciendo y saliendo mientras gira el carrete,الظهور والخروج أثناء دوران البكرة,Masuk dan keluar sambil berputar seperti reel
+InReelSpinEffectLabel,,リール回転しながら,while spinning like a reel,转轴旋转时,在轉軸旋轉時,릴이 회전하면서,Mientras gira el carrete,أثناء دوران البكرة,sambil berputar seperti reel
+OutReelSpinEffectLabel,,リール回転しながら,while spinning like a reel,转轴旋转时,在轉軸旋轉時,릴이 회전하면서,Mientras gira el carrete,أثناء دوران البكرة,sambil berputar seperti reel
+ReelSpinInOutGroupName,,登場退場,Appearance and exit,入/出场,登場退場,등장 퇴장,Aparición y salida,ظهور ومغادرة,Masuk dan keluar
+ReelSpinLaps,,回転数,Laps,圈数,圈數,회전 수,Número de vueltas,عدد اللفات,Jumlah putaran
+ReelSpinLapsUnit,,回,turns,圈,圈,회전,vueltas,لفة,putaran
