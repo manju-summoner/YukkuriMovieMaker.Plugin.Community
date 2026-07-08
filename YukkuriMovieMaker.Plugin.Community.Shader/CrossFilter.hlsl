@@ -98,8 +98,9 @@ float4 main(
         return float4(min(light, float3(aL, aL, aL)), aL);
     }
 
+    float3 sum = source.rgb + light;
     float4 result;
-    result.a = max(source.a, saturate(max(light.r, max(light.g, light.b))));
-    result.rgb = min(source.rgb + light, float3(result.a, result.a, result.a));
+    result.a = max(source.a, saturate(max(sum.r, max(sum.g, sum.b))));
+    result.rgb = min(sum, float3(result.a, result.a, result.a));
     return result;
 }
