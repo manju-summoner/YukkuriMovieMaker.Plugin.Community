@@ -71,7 +71,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void OnEndEdit(object? sender, EventArgs e) => EndEdit?.Invoke(this, EventArgs.Empty);
 
-        public void SetEditorInfo(IEditorInfo frame)
+        public void SetEditorInfo(IEditorInfo? frame)
         {
             if (DataContext is PuppetDeformationListEditorViewModel vm)
             {

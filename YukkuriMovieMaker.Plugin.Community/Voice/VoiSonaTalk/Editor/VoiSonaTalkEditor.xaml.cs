@@ -45,7 +45,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
             EndEdit?.Invoke(this, e);
         }
 
-        public void SetEditorInfo(IEditorInfo info)
+        public void SetEditorInfo(IEditorInfo? info)
         {
             this.info = info;
             if (DataContext is VoiSonaTalkEditorViewModel vm)
