@@ -8,7 +8,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CrossFilter
 {
-    [VideoEffect(nameof(Texts.CrossFilterEffectName), [VideoEffectCategories.Decoration], [nameof(Texts.TagCrossFilter), nameof(Texts.TagSparkle), nameof(Texts.TagLightStreak)], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [VideoEffect(nameof(Texts.CrossFilterEffectName), [VideoEffectCategories.Drawing], [nameof(Texts.TagCrossFilter), nameof(Texts.TagSparkle), nameof(Texts.TagLightStreak)], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public sealed class CrossFilterEffect : VideoEffectBase
     {
         public override string Label => Texts.CrossFilterEffectName;
