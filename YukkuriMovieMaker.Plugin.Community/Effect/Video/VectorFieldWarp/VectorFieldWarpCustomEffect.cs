@@ -24,6 +24,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         {
             const int HeaderByteSize = 32;
             const int PointByteSize = 32;
+            const int FloatsPerPoint = PointByteSize / sizeof(float);
             const int ConstantBufferByteSize = HeaderByteSize + MaxPoints * PointByteSize;
 
             ConstantBuffer constants;
@@ -125,7 +126,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             {
                 if (constants.PointCount <= 0 || constants.Amount <= 0f || constants.MaxDisplacement <= 0f)
                     return 0;
-                return (int)Math.Ceiling(constants.Amount * constants.MaxDisplacement);
+                var velocityBound = GetVelocityBound();
+                if (velocityBound <= 0f)
+                    return 0;
+                return (int)Math.Ceiling(constants.Amount * Math.Min(constants.MaxDisplacement, velocityBound));
+            }
+
+            float GetVelocityBound()
+            {
+                var floats = MemoryMarshal.Cast<byte, float>(pointData);
+                var count = Math.Clamp(constants.PointCount, 0, MaxPoints);
+                var bound = 0f;
+                for (var index = 0; index < count; index++)
+                {
+                    var radial = floats[index * FloatsPerPoint + 2];
+                    var vortex = floats[index * FloatsPerPoint + 3];
+                    bound += 0.5f * MathF.Sqrt(radial * radial + vortex * vortex);
+                }
+                return bound;
             }
 
             static RawRect Inflate(RawRect rect, int margin)

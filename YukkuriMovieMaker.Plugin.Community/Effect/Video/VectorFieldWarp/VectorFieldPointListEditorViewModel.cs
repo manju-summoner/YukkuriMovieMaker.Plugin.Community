@@ -265,6 +265,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 return;
 
             var pointCount = 0;
+            var velocityBound = 0f;
             foreach (var point in Effect.IsEnabled ? Effect.Points : [])
             {
                 if (pointCount >= VectorFieldWarpCustomEffect.MaxPoints)
@@ -275,6 +276,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 var vortexStrength = Sanitize(GetDisplayValue(point.VortexStrength), -VectorFieldPoint.StrengthLimit, VectorFieldPoint.StrengthLimit, 0f);
                 if (radialStrength == 0f && vortexStrength == 0f)
                     continue;
+                velocityBound += 0.5f * MathF.Sqrt(radialStrength * radialStrength + vortexStrength * vortexStrength);
                 var offset = pointCount * FloatsPerPoint;
                 pointFloats[offset] = Sanitize(GetDisplayValue(point.X), -PositionLimit, PositionLimit, 0f);
                 pointFloats[offset + 1] = Sanitize(GetDisplayValue(point.Y), -PositionLimit, PositionLimit, 0f);
@@ -291,7 +293,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             var amount = Sanitize(GetDisplayValue(Effect.Amount) / 100, 0f, 1f, 0f);
             var maxDisplacement = Sanitize(GetDisplayValue(Effect.MaxDisplacement), 0f, VectorFieldWarpCustomEffect.MaxDisplacementLimit, 0f);
             var steps = Math.Clamp(Effect.IntegrationSteps, 1, VectorFieldWarpCustomEffect.MaxIntegrationSteps);
-            var margin = ComputePreviewMargin(amount, maxDisplacement);
+            var margin = ComputePreviewMargin(amount, maxDisplacement, velocityBound);
 
             try
             {
@@ -318,9 +320,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             return animation.GetValue(editorInfo.ItemPosition.Frame, editorInfo.ItemDuration.Frame, editorInfo.VideoInfo.FPS);
         }
 
-        static int ComputePreviewMargin(float amount, float maxDisplacement)
+        static int ComputePreviewMargin(float amount, float maxDisplacement, float velocityBound)
         {
-            var required = (int)Math.Ceiling(amount * maxDisplacement);
+            var required = (int)Math.Ceiling(amount * Math.Min(maxDisplacement, velocityBound));
             if (required <= 0)
                 return 0;
             return (required + PreviewMarginStep - 1) / PreviewMarginStep * PreviewMarginStep;
