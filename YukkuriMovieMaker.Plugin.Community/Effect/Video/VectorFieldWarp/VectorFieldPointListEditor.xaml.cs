@@ -68,7 +68,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         void OnEndEdit(object? sender, EventArgs e) => EndEdit?.Invoke(this, EventArgs.Empty);
 
-        public void SetEditorInfo(IEditorInfo info)
+        public void SetEditorInfo(IEditorInfo? info)
         {
             if (DataContext is VectorFieldPointListEditorViewModel viewModel)
                 viewModel.SetEditorInfo(info);

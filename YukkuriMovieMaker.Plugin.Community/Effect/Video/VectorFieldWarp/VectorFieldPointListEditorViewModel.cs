@@ -45,9 +45,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         readonly float[] pointFloats = new float[VectorFieldWarpCustomEffect.MaxPoints * FloatsPerPoint];
         readonly byte[] pointBytes = new byte[VectorFieldWarpCustomEffect.MaxPoints * FloatsPerPoint * sizeof(float)];
 
-        public void SetEditorInfo(IEditorInfo info)
+        public void SetEditorInfo(IEditorInfo? info)
         {
             editorInfo = info;
+            //エディタのデタッチ時などにnullが渡される
+            if (info is null)
+                return;
             if (isCanvasImageInitialized)
             {
                 if (info.ItemPosition.Frame != lastCanvasImageFrame)
