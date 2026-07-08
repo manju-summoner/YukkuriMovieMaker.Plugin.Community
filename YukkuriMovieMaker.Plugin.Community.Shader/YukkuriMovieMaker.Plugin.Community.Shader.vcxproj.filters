@@ -99,6 +99,9 @@
     <FxCompile Include="WaveClipping.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="CrossHatchShading.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="GradientMap.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
