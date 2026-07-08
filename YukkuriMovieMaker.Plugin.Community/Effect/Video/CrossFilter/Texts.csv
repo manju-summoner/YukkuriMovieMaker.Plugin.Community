@@ -1,0 +1,23 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+CrossFilterEffectName,,光条,Cross Filter,光芒,光芒,크로스 필터,Filtro cruzado,شعاع النجمة,Filter silang
+CrossFilterStrength,,強度,Strength,强度,強度,강도,Intensidad,القوة,Kekuatan
+CrossFilterStrengthDescription,,光の筋の明るさ,Brightness of the light streaks,光芒的亮度,光芒的亮度,빛줄기의 밝기,Brillo de los rayos de luz,سطوع خيوط الضوء,Kecerahan garis cahaya
+CrossFilterThreshold,,しきい値,Threshold,阈值,閾值,임계값,Umbral,العتبة,Ambang
+CrossFilterThresholdDescription,,光の筋が発生する最小の明るさ,Minimum brightness that produces light streaks,产生光芒的最小亮度,產生光芒的最小亮度,빛줄기가 발생하는 최소 밝기,Brillo mínimo que produce rayos de luz,أدنى سطوع ينتج خيوط الضوء,Kecerahan minimum yang menghasilkan garis cahaya
+CrossFilterLength,,長さ,Length,长度,長度,길이,Longitud,الطول,Panjang
+CrossFilterLengthDescription,,光の筋が伸びる距離,Distance the light streaks extend,光芒延伸的距离,光芒延伸的距離,빛줄기가 뻗는 거리,Distancia a la que se extienden los rayos,المسافة التي تمتد إليها خيوط الضوء,Jarak perpanjangan garis cahaya
+CrossFilterRayCount,,本数,Ray count,光芒数量,光芒數量,줄기 수,Número de rayos,عدد الأشعة,Jumlah sinar
+CrossFilterRayCountDescription,,1つの光源から伸びる筋の数,Number of streaks radiating from each highlight,从每个光源延伸的光芒数量,從每個光源延伸的光芒數量,하나의 광원에서 뻗는 줄기의 수,Número de rayos que irradian de cada punto de luz,عدد الخيوط المنبعثة من كل نقطة ضوء,Jumlah garis yang memancar dari tiap titik cahaya
+CrossFilterAngle,,角度,Angle,角度,角度,각도,Ángulo,الزاوية,Sudut
+CrossFilterAngleDescription,,光の筋全体の回転角度,Rotation angle of the streak pattern,光芒整体的旋转角度,光芒整體的旋轉角度,빛줄기 전체의 회전 각도,Ángulo de rotación del patrón de rayos,زاوية دوران نمط الأشعة,Sudut rotasi pola garis cahaya
+CrossFilterThickness,,太さ,Thickness,粗细,粗細,두께,Grosor,السماكة,Ketebalan
+CrossFilterThicknessDescription,,光の筋の太さ,Thickness of the light streaks,光芒的粗细,光芒的粗細,빛줄기의 두께,Grosor de los rayos de luz,سماكة خيوط الضوء,Ketebalan garis cahaya
+CrossFilterDispersion,,分散,Dispersion,色散,色散,분산,Dispersión,التشتت,Dispersi
+CrossFilterDispersionDescription,,波長による回折差。筋の先端が虹色に色づきます,Wavelength-dependent diffraction. Tints the streak tips with rainbow colors,波长引起的衍射差。使光芒尖端呈现彩虹色,波長引起的繞射差。使光芒尖端呈現彩虹色,파장에 따른 회절 차이. 줄기 끝이 무지개색으로 물듭니다,Difracción dependiente de la longitud de onda. Tiñe las puntas de los rayos con colores de arcoíris,حيود يعتمد على الطول الموجي. يلوّن أطراف الخيوط بألوان قوس قزح,Difraksi bergantung panjang gelombang. Mewarnai ujung garis dengan warna pelangi
+CrossFilterLightColor,,光の色,Light color,光的颜色,光的顏色,빛의 색,Color de la luz,لون الضوء,Warna cahaya
+CrossFilterLightColorDescription,,光の筋に乗せる色,Tint applied to the light streaks,附加到光芒上的颜色,附加到光芒上的顏色,빛줄기에 입히는 색,Tinte aplicado a los rayos de luz,اللون المطبق على خيوط الضوء,Warna yang diterapkan pada garis cahaya
+CrossFilterLightOnly,,光のみ表示,Light only,仅显示光,僅顯示光,빛만 표시,Solo luz,الضوء فقط,Hanya cahaya
+CrossFilterLightOnlyDescription,,映像を消して光の筋だけを出力します,Outputs only the light streaks without the image,隐藏图像仅输出光芒,隱藏圖像僅輸出光芒,영상을 지우고 빛줄기만 출력합니다,Genera solo los rayos de luz sin la imagen,يُخرج خيوط الضوء فقط دون الصورة,Hanya mengeluarkan garis cahaya tanpa gambar
+TagCrossFilter,,クロスフィルター,cross filter,十字滤镜,十字濾鏡,크로스 필터,filtro cruzado,مرشح متقاطع,filter silang
+TagSparkle,,きらめき,sparkle,闪耀,閃耀,반짝임,destello,بريق,kilau
+TagLightStreak,,光条,light streak,光芒,光芒,빛줄기,rayo de luz,خيط ضوء,garis cahaya
