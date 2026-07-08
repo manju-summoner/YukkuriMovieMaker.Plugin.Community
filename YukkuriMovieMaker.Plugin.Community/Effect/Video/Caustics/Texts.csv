@@ -1,5 +1,5 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
-CausticsEffectName,,コースティクス,Caustics,焦散,焦散,커스틱,Cáusticas,الكوستيك,Kaustik
+CausticsEffectName,,集光模様,Caustics,焦散,焦散,커스틱,Cáusticas,الكوستيك,Kaustik
 CausticsStrength,,光の強さ,Light intensity,光强度,光強度,빛의 세기,Intensidad de luz,شدة الضوء,Intensitas cahaya
 CausticsStrengthDescription,,集束した光の明るさ,Brightness of the focused light,聚焦光的亮度,聚焦光的亮度,집속된 빛의 밝기,Brillo de la luz enfocada,سطوع الضوء المركز,Kecerahan cahaya terfokus
 CausticsDisplacement,,変位,Displacement,位移,位移,변위,Desplazamiento,الإزاحة,Perpindahan
@@ -8,7 +8,7 @@ CausticsScale,,スケール,Scale,缩放,縮放,스케일,Escala,المقياس,
 CausticsScaleDescription,,波の模様の大きさ,Size of the wave pattern,波纹图案的大小,波紋圖案的大小,물결 무늬의 크기,Tamaño del patrón de ondas,حجم نمط الموجات,Ukuran pola gelombang
 CausticsSpeed,,変化速度,Change speed,变化速度,變化速度,변화 속도,Velocidad de cambio,سرعة التغير,Kecepatan perubahan
 CausticsSpeedDescription,,波の形が変化する速さ,How fast the wave shape evolves,波形变化的速度,波形變化的速度,물결 모양이 변하는 속도,Velocidad a la que evoluciona la forma de las ondas,سرعة تطور شكل الموجات,Kecepatan perubahan bentuk gelombang
-CausticsDetailGroup,,コースティクス詳細,Caustics details,焦散详细,焦散詳細,커스틱 상세,Detalles de cáusticas,تفاصيل الكوستيك,Detail kaustik
+CausticsDetailGroup,,集光模様の詳細,Caustics details,焦散详细,焦散詳細,커스틱 상세,Detalles de cáusticas,تفاصيل الكوستيك,Detail kaustik
 CausticsLightColor,,光の色,Light color,光的颜色,光的顏色,빛의 색,Color de la luz,لون الضوء,Warna cahaya
 CausticsLightColorDescription,,集束した光の色,Color of the focused light,聚焦光的颜色,聚焦光的顏色,집속된 빛의 색,Color de la luz enfocada,لون الضوء المركز,Warna cahaya terfokus
 CausticsSharpness,,シャープさ,Sharpness,锐度,銳度,선명도,Nitidez,الحدة,Ketajaman
