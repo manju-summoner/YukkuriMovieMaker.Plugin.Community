@@ -19,12 +19,12 @@ float BayerThreshold(uint2 cell)
     uint y = cell.y & 7u;
     uint xc = x ^ y;
     uint v = 0u;
-    v = (v << 1) | ((y >> 2) & 1u);
-    v = (v << 1) | ((xc >> 2) & 1u);
-    v = (v << 1) | ((y >> 1) & 1u);
-    v = (v << 1) | ((xc >> 1) & 1u);
-    v = (v << 1) | ((y >> 0) & 1u);
     v = (v << 1) | ((xc >> 0) & 1u);
+    v = (v << 1) | ((y >> 0) & 1u);
+    v = (v << 1) | ((xc >> 1) & 1u);
+    v = (v << 1) | ((y >> 1) & 1u);
+    v = (v << 1) | ((xc >> 2) & 1u);
+    v = (v << 1) | ((y >> 2) & 1u);
     return (float(v) + 0.5) / 64.0;
 }
 
