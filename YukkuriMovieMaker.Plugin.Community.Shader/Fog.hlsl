@@ -28,7 +28,12 @@ cbuffer Constants : register(b0)
     float sunR        : packoffset(c4.x);
     float sunG        : packoffset(c4.y);
     float sunB        : packoffset(c4.z);
-    float pad0        : packoffset(c4.w);
+    float depthAmount : packoffset(c4.w);
+
+    float horizon     : packoffset(c5.x);
+    float hazeMix     : packoffset(c5.y);
+    float pad0        : packoffset(c5.z);
+    float pad1        : packoffset(c5.w);
 };
 
 #define SUN_STEPS 6
@@ -38,6 +43,36 @@ float4 SampleInput(float2 uv)
     if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f)
         return float4(0.0f, 0.0f, 0.0f, 0.0f);
     return InputTexture.SampleLevel(InputSampler, uv, 0);
+}
+
+float DarkChannel(float2 uv, float2 texel)
+{
+    float dark = 1.0f;
+
+    [unroll]
+    for (int dy = -1; dy <= 1; dy++)
+    {
+        [unroll]
+        for (int dx = -1; dx <= 1; dx++)
+        {
+            float2 p = clamp(uv + float2((float)dx, (float)dy) * texel * 2.0f, 0.0f, 1.0f);
+            float4 s = InputTexture.SampleLevel(InputSampler, p, 0);
+            float3 straight = (s.a > 1e-4f) ? s.rgb / s.a : float3(1.0f, 1.0f, 1.0f);
+            dark = min(dark, min(straight.r, min(straight.g, straight.b)));
+        }
+    }
+    return saturate(dark);
+}
+
+float EstimateDepth(float2 uv, float2 texel, float yn)
+{
+    float h = clamp(horizon, 0.02f, 0.98f);
+    float depthV = saturate((1.0f - yn) / max(1.0f - h, 1e-3f));
+
+    float dark = DarkChannel(uv, texel);
+    float depthD = saturate(-log(max(1.0f - 0.95f * dark, 0.05f)) * (1.0f / 3.0f));
+
+    return saturate(lerp(depthV, depthD, hazeMix));
 }
 
 float Noise3(float3 p)
@@ -106,8 +141,16 @@ float4 main(
     if (density <= 0.0f || source.a <= 0.0f)
         return source;
 
+    float yn = saturate((posScene.y - inputTop) / max(inputHeight, 1.0f));
+    float depthFactor = 1.0f;
+    if (depthAmount > 0.0f)
+    {
+        float depth = EstimateDepth(uv0.xy, uv0.zw, yn);
+        depthFactor = lerp(1.0f, depth, depthAmount);
+    }
+
     float d = DensityAt(posScene.xy);
-    float opticalDepth = d * density * 3.0f;
+    float opticalDepth = d * density * 3.0f * depthFactor;
     float transmittance = exp(-opticalDepth);
 
     float3 airlight = float3(fogR, fogG, fogB);
@@ -124,7 +167,7 @@ float4 main(
         {
             tau += DensityAt(posScene.xy + sunDir * (stepPx * (float)i));
         }
-        tau *= density * 3.0f * 0.35f;
+        tau *= density * 3.0f * 0.35f * depthFactor;
 
         float sunTransmittance = exp(-tau);
         airlight += float3(sunR, sunG, sunB) * (sunIntensity * sunTransmittance);

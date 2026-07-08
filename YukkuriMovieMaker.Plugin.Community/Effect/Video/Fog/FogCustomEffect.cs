@@ -28,6 +28,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
             SunR,
             SunG,
             SunB,
+            DepthAmount,
+            Horizon,
+            HazeMix,
         }
 
         public float Density { set => SetValue((int)PropertyIndex.Density, value); }
@@ -47,6 +50,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
         public float SunR { set => SetValue((int)PropertyIndex.SunR, value); }
         public float SunG { set => SetValue((int)PropertyIndex.SunG, value); }
         public float SunB { set => SetValue((int)PropertyIndex.SunB, value); }
+        public float DepthAmount { set => SetValue((int)PropertyIndex.DepthAmount, value); }
+        public float Horizon { set => SetValue((int)PropertyIndex.Horizon, value); }
+        public float HazeMix { set => SetValue((int)PropertyIndex.HazeMix, value); }
 
         [CustomEffect(1)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
@@ -104,6 +110,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.SunB)]
             public float SunB { get => _cb.SunB; set { _cb.SunB = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
 
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.DepthAmount)]
+            public float DepthAmount { get => _cb.DepthAmount; set { _cb.DepthAmount = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
+
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Horizon)]
+            public float Horizon { get => _cb.Horizon; set { _cb.Horizon = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
+
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.HazeMix)]
+            public float HazeMix { get => _cb.HazeMix; set { _cb.HazeMix = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
+
             public EffectImpl() : base(ShaderResourceUri.Get("Fog"))
             {
                 _cb.InvFeature = 1f / 150f;
@@ -113,6 +128,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
                 _cb.SunR = 1f;
                 _cb.SunG = 0.95f;
                 _cb.SunB = 0.85f;
+                _cb.Horizon = 0.4f;
+                _cb.HazeMix = 0.3f;
             }
 
             protected override void UpdateConstants()
@@ -136,8 +153,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
-                inputRects[0] = outputRect;
+                const int margin = 3;
+                inputRects[0] = new RawRect(
+                    Saturate((long)outputRect.Left - margin),
+                    Saturate((long)outputRect.Top - margin),
+                    Saturate((long)outputRect.Right + margin),
+                    Saturate((long)outputRect.Bottom + margin));
             }
+
+            private static int Saturate(long value) => (int)Math.Clamp(value, int.MinValue, int.MaxValue);
 
             [StructLayout(LayoutKind.Sequential)]
             private struct ConstantBuffer
@@ -161,7 +185,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
                 public float SunR;
                 public float SunG;
                 public float SunB;
+                public float DepthAmount;
+                public float Horizon;
+                public float HazeMix;
                 public float Pad0;
+                public float Pad1;
             }
         }
     }

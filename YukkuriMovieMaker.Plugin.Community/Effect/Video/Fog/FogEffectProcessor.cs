@@ -28,6 +28,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
             var scale = _item.Scale.GetValue(frame, length, fps);
             var unevenness = _item.Unevenness.GetValue(frame, length, fps);
             var gradient = _item.Gradient.GetValue(frame, length, fps);
+            var depthAmount = _item.DepthAmount.GetValue(frame, length, fps);
+            var horizon = _item.Horizon.GetValue(frame, length, fps);
+            var hazeDetect = _item.HazeDetect.GetValue(frame, length, fps);
             var flowSpeed = _item.FlowSpeed.GetValue(frame, length, fps);
             var flowAngle = _item.FlowAngle.GetValue(frame, length, fps);
             var changeSpeed = _item.ChangeSpeed.GetValue(frame, length, fps);
@@ -47,6 +50,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
                 1f / (1.5f * Math.Max((float)scale, 1f)),
                 (float)(unevenness / 100.0),
                 (float)(gradient / 100.0),
+                (float)(depthAmount / 100.0),
+                (float)(horizon / 100.0),
+                (float)(hazeDetect / 100.0),
                 (float)(Math.Cos(flowRad) * flowU),
                 (float)(Math.Sin(flowRad) * flowU),
                 (float)(changeSpeed / 100.0),
@@ -68,6 +74,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
                 _effect.Unevenness = parameters.Unevenness;
             if (_isFirst || _parameters.Gradient != parameters.Gradient)
                 _effect.Gradient = parameters.Gradient;
+            if (_isFirst || _parameters.DepthAmount != parameters.DepthAmount)
+                _effect.DepthAmount = parameters.DepthAmount;
+            if (_isFirst || _parameters.Horizon != parameters.Horizon)
+                _effect.Horizon = parameters.Horizon;
+            if (_isFirst || _parameters.HazeMix != parameters.HazeMix)
+                _effect.HazeMix = parameters.HazeMix;
             if (_isFirst || _parameters.FlowX != parameters.FlowX)
                 _effect.FlowX = parameters.FlowX;
             if (_isFirst || _parameters.FlowY != parameters.FlowY)
@@ -133,6 +145,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
             float InvFeature,
             float Unevenness,
             float Gradient,
+            float DepthAmount,
+            float Horizon,
+            float HazeMix,
             float FlowX,
             float FlowY,
             float BoilSpeed,
