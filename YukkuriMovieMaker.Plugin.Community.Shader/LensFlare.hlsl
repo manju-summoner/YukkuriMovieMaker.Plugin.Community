@@ -1,8 +1,16 @@
 // Procedural, physically motivated lens flare generator.
 // Coordinate space: scene position in px, origin = canvas center (cropped downstream).
 // Components:
-//   1. Direct light PSF: gaussian diffraction core + Lorentzian^1.5 scattering
-//      skirt (asymptotic ~r^-3 wings, matches measured lens PSFs).
+//   1. Direct light PSF: multi-scale gaussian stack (real PSFs are sums of
+//      gaussians of increasing width) + Lorentzian^1.5 scattering skirt
+//      (asymptotic ~r^-3 wings, matches measured lens PSFs). The core
+//      saturates toward white like an overexposed sensor.
+//   1b. Diffraction corona: iridescent ring hugging the source (red outside,
+//      blue inside), the small-angle diffraction pattern of the iris/sensor.
+//   1c. Anamorphic streak: horizontal cyan-blue streak from cylindrical
+//      lens elements (optional, off when streakBrightness = 0).
+//   1d. Shimmer glare fan: irregular fine rays radiating from the source,
+//      modeled as seamless integer-frequency fourier noise over the angle.
 //   2. Aperture diffraction starburst: an iris with N blades diffracts into
 //      N spikes when N is even (opposite edges overlap) and 2N when odd.
 //      Streak width is roughly constant in px; intensity ripples like sinc^2
@@ -34,12 +42,18 @@ cbuffer constants : register(b0)
 	float starBrightness : packoffset(c3.z);  // 1 = 100%
 	float seed : packoffset(c3.w);
 	float4 lightColor : packoffset(c4);       // straight rgb
+	float streakBrightness : packoffset(c5.x); // 1 = 100%
+	float shimmerBrightness : packoffset(c5.y); // 1 = 100%
+	float starWidth : packoffset(c5.z);       // 1 = 100%
+	float streakWidth : packoffset(c5.w);     // 1 = 100%
 };
 
 static const float PI = 3.14159265f;
 // relative diffraction scale per channel: lambda(620, 540, 465nm) / 540nm
 static const float3 LAMBDA = float3(1.148f, 1.0f, 0.861f);
 static const int MAX_GHOSTS = 24;
+// cyan-blue tint of anamorphic lens coatings
+static const float3 STREAK_TINT = float3(0.45f, 0.65f, 1.00f);
 
 float hash(float n)
 {
@@ -83,14 +97,68 @@ float4 main(
 
 	float3 col = 0.0f;
 
-	// ---- 1. direct light PSF ----
+	// ---- 1. direct light PSF (multi-scale gaussian stack) ----
 	{
 		float sigma = 10.0f * s;
 		float core = exp(-r * r / (2.0f * sigma * sigma));
 		// red scatters wider than blue
-		float3 t = (r / disp) / (3.0f * sigma);
+		float3 rl = r / disp;
+		// wider gaussians add the soft bloom that a single core lacks
+		float sigmaMid = 3.0f * sigma;
+		float sigmaWide = 8.0f * sigma;
+		float3 mid = exp(-rl * rl / (2.0f * sigmaMid * sigmaMid));
+		float3 wide = exp(-rl * rl / (2.0f * sigmaWide * sigmaWide));
+		float3 t = rl / (3.0f * sigma);
 		float3 skirt = 0.10f / pow(1.0f + t * t, 1.5f);
-		col += lightColor.rgb * intensity * (2.5f * core + skirt);
+		// overexposed sensor: the core saturates toward white, the outer
+		// glow carries the light color
+		float3 hot = lerp(lightColor.rgb, 1.0f, 0.65f * core);
+		col += hot * intensity * (2.5f * core + 0.45f * mid + 0.18f * wide + skirt);
+	}
+
+	// ---- 1b. diffraction corona: iridescent ring hugging the source ----
+	if (dispersion > 0.0f)
+	{
+		// stronger channel split than the glow so the ring reads as a rainbow
+		float3 dispCorona = 1.0f + (LAMBDA - 1.0f) * (1.6f * dispersion);
+		float3 rCorona = 30.0f * s * dispCorona; // red outside, blue inside
+		float wCorona = 7.0f * s;
+		float3 tc = (r - rCorona) / wCorona;
+		float3 ring = exp(-tc * tc);
+		col += lightColor.rgb * (0.30f * intensity * saturate(dispersion)) * ring;
+	}
+
+	// ---- 1c. anamorphic streak ----
+	if (streakBrightness > 0.0f)
+	{
+		// cyan-blue tint of anamorphic lens coatings
+		float wStreak = (1.6f + 0.010f * abs(dl.x)) * s * max(0.01f, streakWidth); // expands slightly outward
+		float vert = exp(-dl.y * dl.y / (wStreak * wStreak));
+		float lStreak = max(1.0f, 0.40f * canvasSize.x * s);
+		float u = abs(dl.x) / lStreak;
+		// exp body + lorentzian tail so the streak fades without a hard end
+		float fall = exp(-3.0f * u) + 0.08f / (1.0f + u * u * 4.0f);
+		col += lightColor.rgb * STREAK_TINT * (0.9f * intensity * streakBrightness) * vert * fall;
+	}
+
+	// ---- 1d. shimmer glare fan ----
+	if (shimmerBrightness > 0.0f)
+	{
+		float phi = atan2(dl.y, dl.x);
+		// integer frequencies keep the pattern seamless across +-PI
+		float ph1 = hash(seed * 91.7f + 71.3f) * 2.0f * PI;
+		float ph2 = hash(seed * 91.7f + 72.3f) * 2.0f * PI;
+		float ph3 = hash(seed * 91.7f + 73.3f) * 2.0f * PI;
+		float f = 0.5f + 0.30f * sin(phi * 27.0f + ph1)
+		               + 0.22f * sin(phi * 43.0f + ph2)
+		               + 0.15f * sin(phi * 61.0f + ph3);
+		f = saturate(f);
+		f = f * f * f; // sharpen into thin bright rays
+		float lFan = max(1.0f, 0.10f * minDim * s);
+		float3 rl = r / disp;
+		// ray length varies with the angular noise -> irregular fan
+		float3 ray = exp(-rl / (lFan * (0.3f + 0.7f * f)));
+		col += lightColor.rgb * (0.55f * intensity * shimmerBrightness) * f * ray;
 	}
 
 	// ---- 2. aperture diffraction starburst ----
@@ -103,7 +171,7 @@ float4 main(
 		float u = phi * m / (2.0f * PI);
 		float a = (frac(u + 0.5f) - 0.5f) * (2.0f * PI / m); // rad to nearest spike
 		float perp = abs(a) * r;                             // px offset from spike line
-		float w = (1.2f + 0.004f * r) * s;                   // nearly constant streak width
+		float w = (1.2f + 0.004f * r) * s * max(0.01f, starWidth); // nearly constant streak width
 		float spike = exp(-perp * perp / (w * w));
 		float lStar = max(1.0f, 0.30f * minDim * starLength * s);
 		float3 rStar = r / disp;

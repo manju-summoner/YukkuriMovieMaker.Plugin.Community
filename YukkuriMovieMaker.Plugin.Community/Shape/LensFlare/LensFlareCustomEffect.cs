@@ -90,6 +90,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
             set => SetValue((int)EffectImpl.Properties.StarBrightness, value);
             get => GetFloatValue((int)EffectImpl.Properties.StarBrightness);
         }
+        public float StarWidth
+        {
+            set => SetValue((int)EffectImpl.Properties.StarWidth, value);
+            get => GetFloatValue((int)EffectImpl.Properties.StarWidth);
+        }
+        public float StreakBrightness
+        {
+            set => SetValue((int)EffectImpl.Properties.StreakBrightness, value);
+            get => GetFloatValue((int)EffectImpl.Properties.StreakBrightness);
+        }
+        public float StreakWidth
+        {
+            set => SetValue((int)EffectImpl.Properties.StreakWidth, value);
+            get => GetFloatValue((int)EffectImpl.Properties.StreakWidth);
+        }
+        public float ShimmerBrightness
+        {
+            set => SetValue((int)EffectImpl.Properties.ShimmerBrightness, value);
+            get => GetFloatValue((int)EffectImpl.Properties.ShimmerBrightness);
+        }
         public float Seed
         {
             set => SetValue((int)EffectImpl.Properties.Seed, value);
@@ -126,6 +146,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
                 constants.ColorG = 1f;
                 constants.ColorB = 1f;
                 constants.ColorA = 1f;
+                constants.StreakBrightness = 0.5f;
+                constants.ShimmerBrightness = 1f;
+                constants.StarWidth = 1f;
+                constants.StreakWidth = 1f;
             }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.LightX)]
@@ -233,6 +257,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
                 set { constants.StarBrightness = Math.Max(0f, value); UpdateConstants(); }
             }
 
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.StarWidth)]
+            public float StarWidth
+            {
+                get => constants.StarWidth;
+                set { constants.StarWidth = Math.Max(0f, value); UpdateConstants(); }
+            }
+
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.StreakBrightness)]
+            public float StreakBrightness
+            {
+                get => constants.StreakBrightness;
+                set { constants.StreakBrightness = Math.Max(0f, value); UpdateConstants(); }
+            }
+
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.StreakWidth)]
+            public float StreakWidth
+            {
+                get => constants.StreakWidth;
+                set { constants.StreakWidth = Math.Max(0f, value); UpdateConstants(); }
+            }
+
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.ShimmerBrightness)]
+            public float ShimmerBrightness
+            {
+                get => constants.ShimmerBrightness;
+                set { constants.ShimmerBrightness = Math.Max(0f, value); UpdateConstants(); }
+            }
+
             [CustomEffectProperty(PropertyType.Float, (int)Properties.Seed)]
             public float Seed
             {
@@ -291,6 +343,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
                 public float ColorG;         // c4.y
                 public float ColorB;         // c4.z
                 public float ColorA;         // c4.w（未使用・アライメント用）
+
+                public float StreakBrightness; // c5.x
+                public float ShimmerBrightness;// c5.y
+                public float StarWidth;   // c5.z
+                public float StreakWidth; // c5.w
             }
 
             public enum Properties : int
@@ -314,6 +371,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
                 ColorR = 16,
                 ColorG = 17,
                 ColorB = 18,
+                StreakBrightness = 19,
+                ShimmerBrightness = 20,
+                StarWidth = 21,
+                StreakWidth = 22,
             }
         }
     }

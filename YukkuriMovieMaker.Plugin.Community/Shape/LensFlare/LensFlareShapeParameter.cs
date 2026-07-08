@@ -50,27 +50,43 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
         [AnimationSlider("F1", "%", 0, 400)]
         public Animation StarBrightness { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
-        [Display(Name = nameof(Texts.LensFlareShapeParameterGhostCountName), Description = nameof(Texts.LensFlareShapeParameterGhostCountDesc), Order = 40, ResourceType = typeof(Texts))]
+        [Display(Name = nameof(Texts.LensFlareShapeParameterStarWidthName), Description = nameof(Texts.LensFlareShapeParameterStarWidthDesc), Order = 40, ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 0, 400)]
+        public Animation StarWidth { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
+
+        [Display(Name = nameof(Texts.LensFlareShapeParameterStreakBrightnessName), Description = nameof(Texts.LensFlareShapeParameterStreakBrightnessDesc), Order = 41, ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 0, 400)]
+        public Animation StreakBrightness { get; } = new Animation(50, 0, YMM4Constants.VeryLargeValue);
+
+        [Display(Name = nameof(Texts.LensFlareShapeParameterStreakWidthName), Description = nameof(Texts.LensFlareShapeParameterStreakWidthDesc), Order = 42, ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 0, 400)]
+        public Animation StreakWidth { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
+
+        [Display(Name = nameof(Texts.LensFlareShapeParameterShimmerBrightnessName), Description = nameof(Texts.LensFlareShapeParameterShimmerBrightnessDesc), Order = 43, ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 0, 400)]
+        public Animation ShimmerBrightness { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
+
+        [Display(Name = nameof(Texts.LensFlareShapeParameterGhostCountName), Description = nameof(Texts.LensFlareShapeParameterGhostCountDesc), Order = 44, ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "", 0, 24)]
         public Animation GhostCount { get; } = new Animation(12, 0, 24);
 
-        [Display(Name = nameof(Texts.LensFlareShapeParameterGhostBrightnessName), Description = nameof(Texts.LensFlareShapeParameterGhostBrightnessDesc), Order = 41, ResourceType = typeof(Texts))]
+        [Display(Name = nameof(Texts.LensFlareShapeParameterGhostBrightnessName), Description = nameof(Texts.LensFlareShapeParameterGhostBrightnessDesc), Order = 45, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 400)]
         public Animation GhostBrightness { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
-        [Display(Name = nameof(Texts.LensFlareShapeParameterHaloRadiusName), Description = nameof(Texts.LensFlareShapeParameterHaloRadiusDesc), Order = 42, ResourceType = typeof(Texts))]
+        [Display(Name = nameof(Texts.LensFlareShapeParameterHaloRadiusName), Description = nameof(Texts.LensFlareShapeParameterHaloRadiusDesc), Order = 46, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 200)]
         public Animation HaloRadius { get; } = new Animation(60, 0, YMM4Constants.VeryLargeValue);
 
-        [Display(Name = nameof(Texts.LensFlareShapeParameterHaloBrightnessName), Description = nameof(Texts.LensFlareShapeParameterHaloBrightnessDesc), Order = 43, ResourceType = typeof(Texts))]
+        [Display(Name = nameof(Texts.LensFlareShapeParameterHaloBrightnessName), Description = nameof(Texts.LensFlareShapeParameterHaloBrightnessDesc), Order = 47, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 400)]
         public Animation HaloBrightness { get; } = new Animation(50, 0, YMM4Constants.VeryLargeValue);
 
-        [Display(Name = nameof(Texts.LensFlareShapeParameterDispersionName), Description = nameof(Texts.LensFlareShapeParameterDispersionDesc), Order = 44, ResourceType = typeof(Texts))]
+        [Display(Name = nameof(Texts.LensFlareShapeParameterDispersionName), Description = nameof(Texts.LensFlareShapeParameterDispersionDesc), Order = 48, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 200)]
         public Animation Dispersion { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
-        [Display(Name = nameof(Texts.LensFlareShapeParameterSeedName), Description = nameof(Texts.LensFlareShapeParameterSeedDesc), Order = 45, ResourceType = typeof(Texts))]
+        [Display(Name = nameof(Texts.LensFlareShapeParameterSeedName), Description = nameof(Texts.LensFlareShapeParameterSeedDesc), Order = 49, ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "", 0, 100)]
         public Animation Seed { get; } = new Animation(0, 0, YMM4Constants.VeryLargeValue);
 
@@ -86,7 +102,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
         }
 
         protected override IEnumerable<IAnimatable> GetAnimatables() =>
-            [X, Y, Intensity, Scale, BladeCount, Rotation, StarLength, StarBrightness, GhostCount, GhostBrightness, HaloRadius, HaloBrightness, Dispersion, Seed];
+            [X, Y, Intensity, Scale, BladeCount, Rotation, StarLength, StarBrightness, StarWidth, StreakBrightness, StreakWidth, ShimmerBrightness, GhostCount, GhostBrightness, HaloRadius, HaloBrightness, Dispersion, Seed];
 
         protected override void LoadSharedData(SharedDataStore sharedData)
         {
@@ -101,6 +117,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
             Rotation.CopyFrom(data.Rotation);
             StarLength.CopyFrom(data.StarLength);
             StarBrightness.CopyFrom(data.StarBrightness);
+            StarWidth.CopyFrom(data.StarWidth);
+            StreakBrightness.CopyFrom(data.StreakBrightness);
+            StreakWidth.CopyFrom(data.StreakWidth);
+            ShimmerBrightness.CopyFrom(data.ShimmerBrightness);
             GhostCount.CopyFrom(data.GhostCount);
             GhostBrightness.CopyFrom(data.GhostBrightness);
             HaloRadius.CopyFrom(data.HaloRadius);
@@ -126,6 +146,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
         public Animation Rotation { get; } = new Animation(0, -YMM4Constants.VeryLargeValue, YMM4Constants.VeryLargeValue);
         public Animation StarLength { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
         public Animation StarBrightness { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
+        public Animation StarWidth { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
+        public Animation StreakBrightness { get; } = new Animation(50, 0, YMM4Constants.VeryLargeValue);
+        public Animation StreakWidth { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
+        public Animation ShimmerBrightness { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
         public Animation GhostCount { get; } = new Animation(12, 0, 24);
         public Animation GhostBrightness { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
         public Animation HaloRadius { get; } = new Animation(60, 0, YMM4Constants.VeryLargeValue);
@@ -144,6 +168,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
             Rotation.CopyFrom(target.Rotation);
             StarLength.CopyFrom(target.StarLength);
             StarBrightness.CopyFrom(target.StarBrightness);
+            StarWidth.CopyFrom(target.StarWidth);
+            StreakBrightness.CopyFrom(target.StreakBrightness);
+            StreakWidth.CopyFrom(target.StreakWidth);
+            ShimmerBrightness.CopyFrom(target.ShimmerBrightness);
             GhostCount.CopyFrom(target.GhostCount);
             GhostBrightness.CopyFrom(target.GhostBrightness);
             HaloRadius.CopyFrom(target.HaloRadius);

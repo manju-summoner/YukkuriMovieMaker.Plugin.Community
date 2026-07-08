@@ -25,6 +25,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
 
         bool isFirst = true;
         double x, y, intensity, scale, bladeCount, rotation, starLength, starBrightness,
+            starWidth, streakBrightness, streakWidth, shimmerBrightness,
             ghostCount, ghostBrightness, haloRadius, haloBrightness, dispersion, seed;
         Color lightColor;
         System.Drawing.Size screenSize;
@@ -98,6 +99,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
             var rotation = parameter.Rotation.GetValue(frame, length, fps);
             var starLength = parameter.StarLength.GetValue(frame, length, fps);
             var starBrightness = parameter.StarBrightness.GetValue(frame, length, fps);
+            var starWidth = parameter.StarWidth.GetValue(frame, length, fps);
+            var streakBrightness = parameter.StreakBrightness.GetValue(frame, length, fps);
+            var streakWidth = parameter.StreakWidth.GetValue(frame, length, fps);
+            var shimmerBrightness = parameter.ShimmerBrightness.GetValue(frame, length, fps);
             var ghostCount = Math.Round(parameter.GhostCount.GetValue(frame, length, fps));
             var ghostBrightness = parameter.GhostBrightness.GetValue(frame, length, fps);
             var haloRadius = parameter.HaloRadius.GetValue(frame, length, fps);
@@ -138,6 +143,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
                 lensFlareEffect.StarLength = (float)(starLength / 100);
             if (isFirst || this.starBrightness != starBrightness)
                 lensFlareEffect.StarBrightness = (float)(starBrightness / 100);
+            if (isFirst || this.starWidth != starWidth)
+                lensFlareEffect.StarWidth = (float)(starWidth / 100);
+            if (isFirst || this.streakBrightness != streakBrightness)
+                lensFlareEffect.StreakBrightness = (float)(streakBrightness / 100);
+            if (isFirst || this.streakWidth != streakWidth)
+                lensFlareEffect.StreakWidth = (float)(streakWidth / 100);
+            if (isFirst || this.shimmerBrightness != shimmerBrightness)
+                lensFlareEffect.ShimmerBrightness = (float)(shimmerBrightness / 100);
             if (isFirst || this.ghostCount != ghostCount)
                 lensFlareEffect.GhostCount = (float)ghostCount;
             if (isFirst || this.ghostBrightness != ghostBrightness)
@@ -161,6 +174,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.LensFlare
             this.rotation = rotation;
             this.starLength = starLength;
             this.starBrightness = starBrightness;
+            this.starWidth = starWidth;
+            this.streakBrightness = streakBrightness;
+            this.streakWidth = streakWidth;
+            this.shimmerBrightness = shimmerBrightness;
             this.ghostCount = ghostCount;
             this.ghostBrightness = ghostBrightness;
             this.haloRadius = haloRadius;
