@@ -307,8 +307,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     CanvasImage = previewRenderer.ImageSource;
                     CanvasImageSize = new Size(previewRenderer.OutputWidth, previewRenderer.OutputHeight);
                 }
+                //ロックが取れず描画できなかった場合はCompositionTarget.Rendering経由で再試行する
+                //（SetBaseImageからの直接呼び出しではフック未登録のことがある）
                 if (!previewRenderer.Render(pointBytes, pointCount, amount, maxDisplacement, steps))
-                    isWarpPending = true;
+                    ScheduleWarpUpdate();
             }
             catch
             {
