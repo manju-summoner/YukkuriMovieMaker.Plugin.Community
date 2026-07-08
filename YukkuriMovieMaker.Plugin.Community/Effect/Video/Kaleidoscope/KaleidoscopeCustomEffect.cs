@@ -70,12 +70,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Kaleidoscope
             {
                 base.MapInputRectsToOutputRect(inputRects, inputOpaqueSubRects, out outputRect, out outputOpaqueSubRect);
 
-                if (inputRects.Length > 0)
-                {
-                    var r = inputRects[0];
-                    _cb.InputBounds = new Vector4(r.Left, r.Top, r.Right, r.Bottom);
-                    UpdateConstants();
-                }
+                inputRect = ClampInputRect(inputRect);
+                _cb.InputBounds = new Vector4(inputRect.Left, inputRect.Top, inputRect.Right, inputRect.Bottom);
+                UpdateConstants();
             }
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
