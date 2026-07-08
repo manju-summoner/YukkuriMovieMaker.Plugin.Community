@@ -173,6 +173,7 @@
 	  <Resource Include="$(ShaderDirPath)AnisotropicKuwaharaTensor.cso" Link="Resources\Shader\AnisotropicKuwaharaTensor.cso" />
 	  <Resource Include="$(ShaderDirPath)AnisotropicKuwaharaTensorBlur.cso" Link="Resources\Shader\AnisotropicKuwaharaTensorBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)AnisotropicKuwahara.cso" Link="Resources\Shader\AnisotropicKuwahara.cso" />
+	  <Resource Include="$(ShaderDirPath)Kaleidoscope.cso" Link="Resources\Shader\Kaleidoscope.cso" />
   </ItemGroup>
 
   <!-- internalsを参照するテスト（EdgeDetectionZeroStrengthOverlayTest等）はDEBUG限定のため、Releaseビルドには付与しない -->
