@@ -177,6 +177,7 @@
     <Resource Include="$(ShaderDirPath)Kaleidoscope.cso" Link="Resources\Shader\Kaleidoscope.cso" />
     <Resource Include="$(ShaderDirPath)FacetedGlass.cso" Link="Resources\Shader\FacetedGlass.cso" />
     <Resource Include="$(ShaderDirPath)Dithering.cso" Link="Resources\Shader\Dithering.cso" />
+    <Resource Include="$(ShaderDirPath)VectorFieldWarp.cso" Link="Resources\Shader\VectorFieldWarp.cso" />
   </ItemGroup>
 
   <!-- internalsを参照するテスト（EdgeDetectionZeroStrengthOverlayTest等）はDEBUG限定のため、Releaseビルドには付与しない -->
