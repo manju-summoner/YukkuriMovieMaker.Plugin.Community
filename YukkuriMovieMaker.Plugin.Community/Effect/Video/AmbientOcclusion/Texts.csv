@@ -1,0 +1,17 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+AmbientOcclusionEffectName,,環境遮蔽,Ambient Occlusion,环境光遮蔽,環境光遮蔽,앰비언트 오클루전,Oclusión ambiental,الانسداد المحيطي,Oklusi ambien
+AmbientOcclusionStrength,,強度,Strength,强度,強度,강도,Intensidad,القوة,Kekuatan
+AmbientOcclusionStrengthDescription,,陰の濃さ,Darkness of the occlusion shading,阴影的浓度,陰影的濃度,음영의 짙기,Oscuridad del sombreado,مدى قتامة التظليل,Kegelapan bayangan
+AmbientOcclusionRadius,,半径,Radius,半径,半徑,반경,Radio,نصف القطر,Radius
+AmbientOcclusionRadiusDescription,,遮蔽を評価する距離。大きいほど広い範囲のくぼみに陰が付きます,Distance over which occlusion is evaluated. Larger values shade broader recesses,评估遮蔽的距离。越大越能为更大范围的凹陷添加阴影,評估遮蔽的距離。越大越能為更大範圍的凹陷添加陰影,차폐를 평가하는 거리. 클수록 넓은 범위의 패임에 음영이 생깁니다,Distancia de evaluación de la oclusión. Valores altos sombrean huecos más amplios,مسافة تقييم الانسداد. القيم الأكبر تظلل التجاويف الأوسع,Jarak evaluasi oklusi. Nilai besar membayangi cekungan yang lebih luas
+AmbientOcclusionHeight,,高さ,Height,高度,高度,높이,Altura,الارتفاع,Ketinggian
+AmbientOcclusionHeightDescription,,明るさを起伏とみなす度合い。高いほど陰が強く出ます,How strongly brightness is treated as surface relief. Higher values deepen the shading,将亮度视为起伏的程度。越高阴影越强,將亮度視為起伏的程度。越高陰影越強,밝기를 기복으로 간주하는 정도. 높을수록 음영이 강해집니다,Cuánto se interpreta el brillo como relieve. Valores altos intensifican el sombreado,مدى اعتبار السطوع تضاريس. القيم الأعلى تعمّق التظليل,Seberapa besar kecerahan dianggap relief. Nilai tinggi memperdalam bayangan
+AmbientOcclusionShadowColor,,陰の色,Shadow color,阴影颜色,陰影顏色,음영 색,Color de sombra,لون الظل,Warna bayangan
+AmbientOcclusionShadowColorDescription,,くぼみに落とす陰の色,Color of the shading applied to recesses,凹陷处阴影的颜色,凹陷處陰影的顏色,패임에 드리우는 음영의 색,Color del sombreado en los huecos,لون التظليل في التجاويف,Warna bayangan pada cekungan
+AmbientOcclusionDirections,,方向数,Directions,方向数,方向數,방향 수,Direcciones,عدد الاتجاهات,Jumlah arah
+AmbientOcclusionDirectionsDescription,,遮蔽を走査する方向の数 (多いほど高品質),Number of directions scanned (more = higher quality),扫描遮蔽的方向数（越多越高质量）,掃描遮蔽的方向數（越多品質越高）,차폐를 주사하는 방향 수 (많을수록 품질 높음),Número de direcciones exploradas (más = mayor calidad),عدد الاتجاهات الممسوحة (أكثر = جودة أعلى),Jumlah arah pemindaian (lebih banyak = kualitas lebih tinggi)
+AmbientOcclusionSamples,,サンプル数,Samples,采样数,取樣數,샘플 수,Muestras,عدد العينات,Jumlah sampel
+AmbientOcclusionSamplesDescription,,方向ごとのサンプル数 (多いほど高品質),Number of samples per direction (more = higher quality),每个方向的采样数（越多越高质量）,每個方向的取樣數（越多品質越高）,방향당 샘플 수 (많을수록 품질 높음),Número de muestras por dirección (más = mayor calidad),عدد العينات لكل اتجاه (أكثر = جودة أعلى),Jumlah sampel per arah (lebih banyak = kualitas lebih tinggi)
+TagAmbientOcclusion,,環境遮蔽,ambient occlusion,环境光遮蔽,環境光遮蔽,앰비언트 오클루전,oclusión ambiental,انسداد محيطي,oklusi ambien
+TagShading,,陰影,shading,阴影,陰影,음영,sombreado,تظليل,bayangan
+TagDepth,,立体感,depth,立体感,立體感,입체감,profundidad,عمق,kedalaman
