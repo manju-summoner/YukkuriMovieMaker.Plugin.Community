@@ -115,7 +115,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
             _isFirst = false;
 
             var desc = effectDescription.DrawDescription;
-            if (parameters.DepthAmount <= 0)
+            var hasDepth = parameters.DepthAmount > 0;
+            if (!hasDepth)
+            {
+                var values = _item.DepthAmount.Values;
+                for (var i = 0; i < values.Count; i++)
+                {
+                    if (values[i].Value > 0)
+                    {
+                        hasDepth = true;
+                        break;
+                    }
+                }
+            }
+            if (!hasDepth)
                 return desc;
 
             var controller = new VideoEffectController(

@@ -8,7 +8,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value is double amount && amount > 0 ? Visibility.Visible : Visibility.Collapsed;
+            return value is true ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
