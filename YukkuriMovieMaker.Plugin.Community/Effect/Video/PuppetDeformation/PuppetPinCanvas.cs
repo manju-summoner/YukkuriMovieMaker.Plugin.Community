@@ -781,6 +781,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseLeftButtonDown(e);
+            //パン中はピンやジョイントの操作を開始しない
+            if (isPanning)
+            {
+                e.Handled = true;
+                return;
+            }
             Focus();
 
             if (viewModel is null)
@@ -1037,6 +1043,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         protected override void OnMouseRightButtonDown(MouseButtonEventArgs e)
         {
             base.OnMouseRightButtonDown(e);
+            //ドラッグ中は対象の削除を受け付けない
+            if (isDragging)
+            {
+                e.Handled = true;
+                return;
+            }
             if (TryRemoveTargetAt(e.GetPosition(this)))
             {
                 e.Handled = true;
