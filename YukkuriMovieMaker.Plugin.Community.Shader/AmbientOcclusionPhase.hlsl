@@ -63,5 +63,5 @@ float4 main(
     float albedoEdge = saturate(localization * energyGate * sensitivity);
 
     // 半透明の縁でバイリニア補間がアルファ重み付き平均になるよう事前乗算で保持する
-    return float4((1.0f - albedoEdge) * source.a, c * source.a, albedoEdge * source.a, source.a);
+    return float4((1.0f - albedoEdge) * source.a, albedoEdge * source.a, 0.0f, source.a);
 }

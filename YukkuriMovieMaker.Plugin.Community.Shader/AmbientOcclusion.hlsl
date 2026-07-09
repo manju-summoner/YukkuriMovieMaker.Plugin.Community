@@ -38,8 +38,26 @@ float4 SampleField(float2 uv)
     return FieldTexture.SampleLevel(FieldSampler, uv, 0);
 }
 
+float LumAt(float2 uv, float2 texel, float2 offsetPx, float fallback)
+{
+    float4 s = SampleInput(uv + offsetPx * texel);
+    if (s.a <= 1e-3f)
+        return fallback;
+    return dot(s.rgb / s.a, float3(0.2126f, 0.7152f, 0.0722f));
+}
+
+float FieldW(float2 uv, float2 texel, float2 offsetPx)
+{
+    float4 f = SampleField(uv + offsetPx * texel);
+    if (f.a <= 1e-3f)
+        return 1.0f;
+    return saturate(f.r / f.a);
+}
+
 // 高さ差は生の差分ではなく、区分ごとに塗り境界重み(w)でゲートした
 // 経路積分として累積する。抑制0では望遠鏡和により生の差分と一致する。
+// 高さは8bit中間テクスチャの量子化で縞状の陰が出るため元映像から直接読み、
+// 位相マップからはゲート値wのみを読む。
 float4 main(
     float4 pos      : SV_POSITION,
     float4 posScene : SCENE_POSITION,
@@ -51,9 +69,9 @@ float4 main(
     if (strength <= 0.0f || source.a <= 0.0f)
         return source;
 
-    float4 f0 = SampleField(uv1.xy);
-    float centerLum = (f0.a > 1e-3f) ? saturate(f0.g / f0.a) : 0.0f;
-    float centerW = (f0.a > 1e-3f) ? saturate(f0.r / f0.a) : 1.0f;
+    float2 texel = uv0.zw;
+    float centerLum = dot(source.rgb / source.a, float3(0.2126f, 0.7152f, 0.0722f));
+    float centerW = FieldW(uv1.xy, uv1.zw, float2(0.0f, 0.0f));
 
     int dirs = (int)clamp(directionCount, 2.0f, (float)MAX_DIRECTIONS);
     int steps = (int)clamp(stepCount, 1.0f, (float)MAX_STEPS);
@@ -79,11 +97,9 @@ float4 main(
         for (int j = 0; j < steps; j++)
         {
             float t = radius * ((float)j + 0.5f) / (float)steps;
-            float4 fm = SampleField(uv1.xy + dir * ((prevT + t) * 0.5f) * uv1.zw);
-            float4 fs = SampleField(uv1.xy + dir * t * uv1.zw);
-            float wMid = (fm.a > 1e-3f) ? saturate(fm.r / fm.a) : 1.0f;
-            float ws = (fs.a > 1e-3f) ? saturate(fs.r / fs.a) : 1.0f;
-            float lum = (fs.a > 1e-3f) ? saturate(fs.g / fs.a) : prevLum;
+            float wMid = FieldW(uv1.xy, uv1.zw, dir * ((prevT + t) * 0.5f));
+            float ws = FieldW(uv1.xy, uv1.zw, dir * t);
+            float lum = LumAt(uv0.xy, texel, dir * t, prevLum);
 
             float seg = lum - prevLum;
             float wSeg = min(ws, min(prevW, wMid));
