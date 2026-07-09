@@ -59,11 +59,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             var spacingFloor = minSpacing;
             for (var attempt = 0; attempt < 4; attempt++)
             {
-                var mesh = TryBuildOnce(field, width, height, maxTriangles, spacingFloor, epsilon);
+                var mesh = TryBuildOnce(field, width, height, maxTriangles, spacingFloor, epsilon, out var usedSpacing);
                 if (mesh is not null)
                     return mesh;
                 epsilon *= 1.5f;
-                spacingFloor *= 1.25f;
+                //εを粗くすると輪郭点数が減って予算由来のspacingが縮み得るが、
+                //FillSmallHoleによるラベル格子の書き換えは巻き戻せないため、
+                //spacingは試行間で単調非減少にし「前の試行で埋めた穴を後の試行が制約ループとして残す」矛盾を防ぐ
+                spacingFloor = MathF.Max(spacingFloor * 1.25f, usedSpacing);
             }
             return null;
         }
@@ -71,8 +74,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         static ArapContourMesh? TryBuildOnce(
             AlphaContourField field,
             float width, float height,
-            int maxTriangles, float spacingFloor, float epsilon)
+            int maxTriangles, float spacingFloor, float epsilon,
+            out float usedSpacing)
         {
+            usedSpacing = spacingFloor;
             //1. 輪郭をDouglas-Peuckerで簡略化する
             var simplified = new List<(List<Vector2> Points, int Label, double SignedArea)>(field.Loops.Count);
             foreach (var loop in field.Loops)
@@ -85,6 +90,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             var spacing = MathF.Max(
                 spacingFloor,
                 MathF.Sqrt(TrianglesPerArea * field.OpaquePixelCount / Math.Max(1, maxTriangles - boundaryPointCount * 3)));
+            usedSpacing = spacing;
             var maxEdge = spacing * MaxEdgeScale;
 
             //3. 小さな穴は捨てる（メッシュで覆っても透明テクセルは透明に描かれるため視覚的に無損失）。
