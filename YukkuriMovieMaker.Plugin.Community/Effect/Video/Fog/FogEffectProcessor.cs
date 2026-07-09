@@ -29,7 +29,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
             var unevenness = _item.Unevenness.GetValue(frame, length, fps);
             var gradient = _item.Gradient.GetValue(frame, length, fps);
             var depthAmount = _item.DepthAmount.GetValue(frame, length, fps);
-            var horizon = _item.Horizon.GetValue(frame, length, fps);
+            var vpX = _item.VanishingPointX.GetValue(frame, length, fps);
+            var vpY = _item.VanishingPointY.GetValue(frame, length, fps);
             var hazeDetect = _item.HazeDetect.GetValue(frame, length, fps);
             var flowSpeed = _item.FlowSpeed.GetValue(frame, length, fps);
             var flowAngle = _item.FlowAngle.GetValue(frame, length, fps);
@@ -51,7 +52,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
                 (float)(unevenness / 100.0),
                 (float)(gradient / 100.0),
                 (float)(depthAmount / 100.0),
-                (float)(horizon / 100.0),
+                (float)vpX,
+                (float)vpY,
                 (float)(hazeDetect / 100.0),
                 (float)(Math.Cos(flowRad) * flowU),
                 (float)(Math.Sin(flowRad) * flowU),
@@ -76,8 +78,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
                 _effect.Gradient = parameters.Gradient;
             if (_isFirst || _parameters.DepthAmount != parameters.DepthAmount)
                 _effect.DepthAmount = parameters.DepthAmount;
-            if (_isFirst || _parameters.Horizon != parameters.Horizon)
-                _effect.Horizon = parameters.Horizon;
+            if (_isFirst || _parameters.VpX != parameters.VpX)
+                _effect.VpX = parameters.VpX;
+            if (_isFirst || _parameters.VpY != parameters.VpY)
+                _effect.VpY = parameters.VpY;
             if (_isFirst || _parameters.HazeMix != parameters.HazeMix)
                 _effect.HazeMix = parameters.HazeMix;
             if (_isFirst || _parameters.FlowX != parameters.FlowX)
@@ -110,7 +114,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
             _parameters = parameters;
             _isFirst = false;
 
-            return effectDescription.DrawDescription;
+            var desc = effectDescription.DrawDescription;
+            if (parameters.DepthAmount <= 0)
+                return desc;
+
+            var controller = new VideoEffectController(
+                _item,
+                [
+                    new ControllerPoint(
+                        new((float)vpX, (float)vpY, 0f),
+                        arg =>
+                        {
+                            _item.VanishingPointX.AddToEachValues(arg.Delta.X);
+                            _item.VanishingPointY.AddToEachValues(arg.Delta.Y);
+                        })
+                ]);
+            return desc with { Controllers = [.. desc.Controllers, controller] };
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
@@ -146,7 +165,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
             float Unevenness,
             float Gradient,
             float DepthAmount,
-            float Horizon,
+            float VpX,
+            float VpY,
             float HazeMix,
             float FlowX,
             float FlowY,

@@ -34,27 +34,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation DepthAmount { get; } = new Animation(0, 0, 100);
 
-        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogHorizon), Description = nameof(Texts.FogHorizonDescription), Order = 5, ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "%", 0, 100)]
-        public Animation Horizon { get; } = new Animation(40, 0, 100);
+        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogVanishingPointX), Description = nameof(Texts.FogVanishingPointXDescription), Order = 5, ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "px", -500, 500)]
+        public Animation VanishingPointX { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
-        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogHazeDetect), Description = nameof(Texts.FogHazeDetectDescription), Order = 6, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogVanishingPointY), Description = nameof(Texts.FogVanishingPointYDescription), Order = 6, ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "px", -500, 500)]
+        public Animation VanishingPointY { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
+
+        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogHazeDetect), Description = nameof(Texts.FogHazeDetectDescription), Order = 7, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation HazeDetect { get; } = new Animation(30, 0, 100);
 
-        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogFlowSpeed), Description = nameof(Texts.FogFlowSpeedDescription), Order = 7, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogFlowSpeed), Description = nameof(Texts.FogFlowSpeedDescription), Order = 8, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", -200, 200)]
         public Animation FlowSpeed { get; } = new Animation(30, -1000, 1000);
 
-        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogFlowAngle), Description = nameof(Texts.FogFlowAngleDescription), Order = 8, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogFlowAngle), Description = nameof(Texts.FogFlowAngleDescription), Order = 9, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", 0, 360)]
         public Animation FlowAngle { get; } = new Animation(0, -36000, 36000);
 
-        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogChangeSpeed), Description = nameof(Texts.FogChangeSpeedDescription), Order = 9, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogChangeSpeed), Description = nameof(Texts.FogChangeSpeedDescription), Order = 10, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", -200, 200)]
         public Animation ChangeSpeed { get; } = new Animation(20, -1000, 1000);
 
-        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogColor), Description = nameof(Texts.FogColorDescription), Order = 10, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogColor), Description = nameof(Texts.FogColorDescription), Order = 11, ResourceType = typeof(Texts))]
         [ColorPicker]
         public Color FogColor
         {
@@ -63,15 +67,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
         }
         private Color _fogColor = Color.FromRgb(0xDC, 0xE1, 0xE6);
 
-        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogSunIntensity), Description = nameof(Texts.FogSunIntensityDescription), Order = 11, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogSunIntensity), Description = nameof(Texts.FogSunIntensityDescription), Order = 12, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation SunIntensity { get; } = new Animation(0, 0, 500);
 
-        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogSunAngle), Description = nameof(Texts.FogSunAngleDescription), Order = 12, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogSunAngle), Description = nameof(Texts.FogSunAngleDescription), Order = 13, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", 0, 360)]
         public Animation SunAngle { get; } = new Animation(270, -36000, 36000);
 
-        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogSunColor), Description = nameof(Texts.FogSunColorDescription), Order = 13, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogSunColor), Description = nameof(Texts.FogSunColorDescription), Order = 14, ResourceType = typeof(Texts))]
         [ColorPicker]
         public Color SunColor
         {
@@ -80,7 +84,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
         }
         private Color _sunColor = Color.FromRgb(0xFF, 0xF2, 0xD8);
 
-        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogSeed), Description = nameof(Texts.FogSeedDescription), Order = 14, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.FogEffectName), Name = nameof(Texts.FogSeed), Description = nameof(Texts.FogSeedDescription), Order = 15, ResourceType = typeof(Texts))]
         [Range(0, int.MaxValue)]
         [DefaultValue(0)]
         [TextBoxSlider("F0", "", 0, 10000)]
@@ -99,6 +103,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
             => new FogEffectProcessor(devices, this);
 
         protected override IEnumerable<IAnimatable> GetAnimatables()
-            => _animatables ??= [Density, Scale, Unevenness, Gradient, DepthAmount, Horizon, HazeDetect, FlowSpeed, FlowAngle, ChangeSpeed, SunIntensity, SunAngle];
+            => _animatables ??= [Density, Scale, Unevenness, Gradient, DepthAmount, VanishingPointX, VanishingPointY, HazeDetect, FlowSpeed, FlowAngle, ChangeSpeed, SunIntensity, SunAngle];
     }
 }

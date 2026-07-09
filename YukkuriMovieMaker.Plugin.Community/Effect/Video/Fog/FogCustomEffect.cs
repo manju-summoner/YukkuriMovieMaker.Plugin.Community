@@ -29,7 +29,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
             SunG,
             SunB,
             DepthAmount,
-            Horizon,
+            VpX,
+            VpY,
             HazeMix,
         }
 
@@ -51,7 +52,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
         public float SunG { set => SetValue((int)PropertyIndex.SunG, value); }
         public float SunB { set => SetValue((int)PropertyIndex.SunB, value); }
         public float DepthAmount { set => SetValue((int)PropertyIndex.DepthAmount, value); }
-        public float Horizon { set => SetValue((int)PropertyIndex.Horizon, value); }
+        public float VpX { set => SetValue((int)PropertyIndex.VpX, value); }
+        public float VpY { set => SetValue((int)PropertyIndex.VpY, value); }
         public float HazeMix { set => SetValue((int)PropertyIndex.HazeMix, value); }
 
         [CustomEffect(1)]
@@ -113,8 +115,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.DepthAmount)]
             public float DepthAmount { get => _cb.DepthAmount; set { _cb.DepthAmount = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
 
-            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Horizon)]
-            public float Horizon { get => _cb.Horizon; set { _cb.Horizon = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.VpX)]
+            public float VpX { get => _cb.VpX; set { _cb.VpX = Math.Clamp(value, -65536f, 65536f); UpdateConstants(); } }
+
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.VpY)]
+            public float VpY { get => _cb.VpY; set { _cb.VpY = Math.Clamp(value, -65536f, 65536f); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.HazeMix)]
             public float HazeMix { get => _cb.HazeMix; set { _cb.HazeMix = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
@@ -128,7 +133,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
                 _cb.SunR = 1f;
                 _cb.SunG = 0.95f;
                 _cb.SunB = 0.85f;
-                _cb.Horizon = 0.4f;
                 _cb.HazeMix = 0.3f;
             }
 
@@ -145,6 +149,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
                 var rect = ClampInputRect(inputRects[0]);
                 _cb.InputTop = rect.Top;
                 _cb.InputHeight = Math.Max(rect.Bottom - rect.Top, 1);
+                _cb.InputLeft = rect.Left;
+                _cb.InputWidth = Math.Max(rect.Right - rect.Left, 1);
                 UpdateConstants();
 
                 outputRect = inputRects[0];
@@ -186,10 +192,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
                 public float SunG;
                 public float SunB;
                 public float DepthAmount;
-                public float Horizon;
+                public float VpX;
+                public float VpY;
                 public float HazeMix;
+                public float InputLeft;
+                public float InputWidth;
                 public float Pad0;
                 public float Pad1;
+                public float Pad2;
             }
         }
     }

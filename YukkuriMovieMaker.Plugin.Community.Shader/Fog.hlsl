@@ -30,10 +30,15 @@ cbuffer Constants : register(b0)
     float sunB        : packoffset(c4.z);
     float depthAmount : packoffset(c4.w);
 
-    float horizon     : packoffset(c5.x);
-    float hazeMix     : packoffset(c5.y);
-    float pad0        : packoffset(c5.z);
-    float pad1        : packoffset(c5.w);
+    float vpX         : packoffset(c5.x);
+    float vpY         : packoffset(c5.y);
+    float hazeMix     : packoffset(c5.z);
+    float inputLeft   : packoffset(c5.w);
+
+    float inputWidth  : packoffset(c6.x);
+    float pad0        : packoffset(c6.y);
+    float pad1        : packoffset(c6.z);
+    float pad2        : packoffset(c6.w);
 };
 
 #define SUN_STEPS 6
@@ -64,13 +69,31 @@ float DarkChannel(float2 uv, float2 texel)
     return saturate(dark);
 }
 
-float EstimateDepth(float2 uv, float2 texel, float yn)
+float EstimateDepth(float2 uv, float2 texel, float2 scenePos)
 {
-    float h = clamp(horizon, 0.02f, 0.98f);
-    float depthV = saturate((1.0f - yn) / max(1.0f - h, 1e-3f));
+    float left = inputLeft;
+    float top = inputTop;
+    float right = inputLeft + max(inputWidth, 1.0f);
+    float bottom = inputTop + max(inputHeight, 1.0f);
 
-    float dark = DarkChannel(uv, texel);
-    float depthD = saturate(-log(max(1.0f - 0.95f * dark, 0.05f)) * (1.0f / 3.0f));
+    float2 vp = float2(
+        clamp((left + right) * 0.5f + vpX, left, right),
+        clamp((top + bottom) * 0.5f + vpY, top, bottom));
+
+    float dTL = distance(vp, float2(left, top));
+    float dTR = distance(vp, float2(right, top));
+    float dBL = distance(vp, float2(left, bottom));
+    float dBR = distance(vp, float2(right, bottom));
+    float refDist = max(max(dTL, dTR), max(dBL, dBR));
+
+    float depthV = saturate(1.0f - distance(scenePos, vp) / max(refDist, 1.0f));
+
+    float depthD = 0.0f;
+    if (hazeMix > 0.0f)
+    {
+        float dark = DarkChannel(uv, texel);
+        depthD = saturate(-log(max(1.0f - 0.95f * dark, 0.05f)) * (1.0f / 3.0f));
+    }
 
     return saturate(lerp(depthV, depthD, hazeMix));
 }
@@ -111,22 +134,30 @@ float Fbm(float2 p, float z, int octaves)
     return value;
 }
 
-float DensityAt(float2 scenePos)
+float DensityAt(float2 scenePos, int octaves)
 {
+    float yn = saturate((scenePos.y - inputTop) / max(inputHeight, 1.0f));
+    float hf = saturate(1.0f + gradient * (yn * 2.0f - 1.0f));
+
+    if (unevenness <= 0.0f)
+        return hf;
+
     float2 seedOfs = hash21(seed) * 512.0f;
     float2 p = scenePos * invFeature + seedOfs - float2(flowX, flowY) * time;
     float z = time * boilSpeed + seed * 3.7f;
 
-    float wx = Fbm(p * 0.5f + float2(13.1f, 71.7f), z * 0.7f, 3);
-    float wy = Fbm(p * 0.5f + float2(59.3f, 27.9f), z * 0.7f + 5.0f, 3);
-    float2 warped = p + (float2(wx, wy) * 2.0f - 1.0f) * 1.6f;
+    float2 warped = p;
+    if (octaves >= 4)
+    {
+        float wx = Fbm(p * 0.5f + float2(13.1f, 71.7f), z * 0.7f, 2);
+        float wy = Fbm(p * 0.5f + float2(59.3f, 27.9f), z * 0.7f + 5.0f, 2);
+        warped = p + (float2(wx, wy) * 2.0f - 1.0f) * 1.6f;
+    }
 
-    float m = Fbm(warped, z, 5);
+    float m = Fbm(warped, z, octaves);
     m = saturate(m * 1.6f - 0.25f);
-    m = pow(m, 1.0f + 3.0f * unevenness);
-
-    float yn = saturate((scenePos.y - inputTop) / max(inputHeight, 1.0f));
-    float hf = saturate(1.0f + gradient * (yn * 2.0f - 1.0f));
+    m = pow(m, 1.0f + 2.0f * unevenness);
+    m = lerp(1.0f, m, unevenness);
 
     return m * hf;
 }
@@ -141,15 +172,14 @@ float4 main(
     if (density <= 0.0f || source.a <= 0.0f)
         return source;
 
-    float yn = saturate((posScene.y - inputTop) / max(inputHeight, 1.0f));
     float depthFactor = 1.0f;
     if (depthAmount > 0.0f)
     {
-        float depth = EstimateDepth(uv0.xy, uv0.zw, yn);
+        float depth = EstimateDepth(uv0.xy, uv0.zw, posScene.xy);
         depthFactor = lerp(1.0f, depth, depthAmount);
     }
 
-    float d = DensityAt(posScene.xy);
+    float d = DensityAt(posScene.xy, 5);
     float opticalDepth = d * density * 3.0f * depthFactor;
     float transmittance = exp(-opticalDepth);
 
@@ -165,7 +195,7 @@ float4 main(
         [unroll]
         for (int i = 1; i <= SUN_STEPS; i++)
         {
-            tau += DensityAt(posScene.xy + sunDir * (stepPx * (float)i));
+            tau += DensityAt(posScene.xy + sunDir * (stepPx * (float)i), 3);
         }
         tau *= density * 3.0f * 0.35f * depthFactor;
 
