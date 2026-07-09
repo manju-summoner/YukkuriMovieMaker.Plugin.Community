@@ -16,7 +16,7 @@ cbuffer Constants : register(b0)
     float pad2       : packoffset(c1.w);
 };
 
-#define OCC_LEVELS 6
+#define OCC_LEVELS 9
 
 uint BlockSize(uint worldSize, uint level)
 {

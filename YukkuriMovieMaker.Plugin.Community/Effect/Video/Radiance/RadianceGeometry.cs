@@ -15,7 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
 
         public static int ProbeCount(int worldSize, int level) => Math.Max((worldSize + Spacing(level) - 1) / Spacing(level), 1);
 
-        public const int OccLevelCount = 6;
+        public const int OccLevelCount = 9;
 
         public static int OccBlockSize(int worldSize, int level) => Math.Max((worldSize + (1 << level) - 1) >> level, 1);
 

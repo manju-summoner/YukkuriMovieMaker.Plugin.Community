@@ -31,8 +31,8 @@ cbuffer Constants : register(b0)
 #define SIGMA 0.6f
 #define FALLOFF_SOFT 2.0f
 #define FINE_STEP 1.0f
-#define MAX_ITER 96
-#define OCC_LEVELS 6
+#define MAX_ITER 128
+#define OCC_LEVELS 9
 
 float4 SampleEmissionWorld(float4 uv0, float2 scenePos, float2 q)
 {
@@ -167,7 +167,7 @@ float4 main(
         gather += transmittance * f.rgb * (h / (t + FALLOFF_SOFT));
         transmittance *= exp(-f.a * SIGMA * h);
         t += h;
-        level = 1u;
+        level = (f.a > 0.003f || max(f.r, max(f.g, f.b)) > 0.003f) ? 0u : 1u;
     }
 
     float3 upper = float3(0.0f, 0.0f, 0.0f);
