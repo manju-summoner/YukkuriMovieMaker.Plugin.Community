@@ -14,14 +14,5 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 image.X / imageScale + imageBounds.Left,
                 image.Y / imageScale + imageBounds.Top);
 
-        public static Rect InflateByPixels(Rect imageBounds, double margin, double imageScale)
-        {
-            var itemMargin = margin / imageScale;
-            return new Rect(
-                imageBounds.Left - itemMargin,
-                imageBounds.Top - itemMargin,
-                imageBounds.Width + itemMargin * 2,
-                imageBounds.Height + itemMargin * 2);
-        }
     }
 }
