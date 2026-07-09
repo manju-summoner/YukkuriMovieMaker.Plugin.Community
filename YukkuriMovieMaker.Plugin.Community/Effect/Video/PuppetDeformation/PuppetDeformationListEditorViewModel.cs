@@ -47,6 +47,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         public System.Windows.Media.Imaging.BitmapSource? CanvasImage { get => canvasImage; private set => Set(ref canvasImage, value); }
         System.Windows.Media.Imaging.BitmapSource? canvasImage;
 
+        /// <summary>ピン配置キャンバスに表示する画像のアイテム座標上の範囲</summary>
+        public Rect CanvasImageBounds { get => canvasImageBounds; private set => Set(ref canvasImageBounds, value); }
+        Rect canvasImageBounds = Rect.Empty;
+
         /// <summary>ピン配置キャンバスに表示するピン一覧</summary>
         public ImmutableList<PuppetDeformationItemViewModel> CanvasPins { get => canvasPins; private set => Set(ref canvasPins, value); }
         ImmutableList<PuppetDeformationItemViewModel> canvasPins = ImmutableList<PuppetDeformationItemViewModel>.Empty;
@@ -176,6 +180,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     new ItemVideoSourceCreationParameter(VideoEffectSelection.UpTo(Effect)));
                 if (itemVideoSource is null)
                 {
+                    CanvasImageBounds = Rect.Empty;
                     CanvasImage = null;
                     return;
                 }
@@ -187,10 +192,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     time = editorInfo.VideoInfo.GetTimeFrom(editorInfo.ItemDuration.Frame - 1);
 
                 itemVideoSource.Update(time, Player.Video.TimelineSourceUsage.Paused);
-                CanvasImage = itemVideoSource.RenderBitmapSource();
+                var bounds = itemVideoSource.Devices.DeviceContext.GetImageLocalBounds(itemVideoSource.Output);
+                var image = itemVideoSource.RenderBitmapSource();
+                CanvasImageBounds = new Rect(bounds.Left, bounds.Top, image.PixelWidth, image.PixelHeight);
+                CanvasImage = image;
             }
             catch
             {
+                CanvasImageBounds = Rect.Empty;
                 CanvasImage = null;
             }
         }
