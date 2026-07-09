@@ -23,6 +23,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         /// 前景/背景の境界までのchamfer距離（3-4重み、値3≒1px）。
         /// 内部点の輪郭クリアランス判定と、三角形分類の高速パス
         /// （境界から十分離れた点はラベル参照だけで内外を即決できる）に使う。
+        /// 膨張「前」のラベルから計算するため、最終的な境界とは最大1pxずれる。
+        /// 参照側は閾値にその分のマージンを足すこと（膨張で埋めた画素の距離も更新されない）。
         /// </summary>
         public int[] BoundaryDistance { get; }
 
@@ -63,14 +65,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             if (width <= 0 || height <= 0 || opaque.Length < width * height)
                 return null;
 
-            var labels = LabelComponents(opaque, width, height);
-            DilatePreservingLabels(labels, width, height);
+            var labels = LabelComponents(opaque, width, height, out var opaqueBounds);
+            //距離変換は膨張前に計算し、膨張候補の絞り込みにも使う（境界とのずれは参照側がマージンで吸収）
+            var boundaryDistance = BuildBoundaryDistance(labels, width, height, opaqueBounds);
+            DilatePreservingLabels(labels, boundaryDistance, width, height, opaqueBounds);
 
-            var loops = TraceLoops(labels, width, height, maxBoundaryEdges, out var opaqueCount, out var opaqueBounds);
+            var loops = TraceLoops(labels, width, height, opaqueBounds, maxBoundaryEdges, out var opaqueCount);
             if (loops is null)
                 return null;
 
-            var boundaryDistance = BuildBoundaryDistance(labels, width, height, opaqueBounds);
             return new AlphaContourField(width, height, labels, boundaryDistance, loops, opaqueCount);
         }
 
@@ -174,24 +177,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             return dist;
         }
 
-        /// <summary>4連結の連結成分ラベリング（2パスunion-find）。0=透明、1..=成分</summary>
-        static int[] LabelComponents(bool[] opaque, int width, int height)
+        /// <summary>
+        /// 4連結の連結成分ラベリング（2パスunion-find）。0=透明、1..=成分。
+        /// 不透明ピクセルのバウンディングボックス（膨張前）も返し、以降の走査範囲の限定に使う。
+        /// </summary>
+        static int[] LabelComponents(bool[] opaque, int width, int height, out (int X0, int Y0, int X1, int Y1) opaqueBounds)
         {
             var labels = new int[width * height];
-            var parent = new List<int> { 0 };
+            var parent = new int[256];
+            var parentCount = 1;
+            int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
 
+            //経路半減付きFind（配列直接参照。ホットパスなのでList<int>は使わない）
             int Find(int l)
             {
-                var root = l;
-                while (parent[root] != root)
-                    root = parent[root];
-                while (parent[l] != root)
+                while (parent[l] != l)
                 {
-                    var next = parent[l];
-                    parent[l] = root;
-                    l = next;
+                    parent[l] = parent[parent[l]];
+                    l = parent[l];
                 }
-                return root;
+                return l;
             }
 
             for (var y = 0; y < height; y++)
@@ -201,12 +206,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     var i = y * width + x;
                     if (!opaque[i])
                         continue;
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+
                     var up = y > 0 ? labels[i - width] : 0;
                     var left = x > 0 ? labels[i - 1] : 0;
                     if (up == 0 && left == 0)
                     {
-                        parent.Add(parent.Count);
-                        labels[i] = parent.Count - 1;
+                        if (parentCount == parent.Length)
+                            Array.Resize(ref parent, parent.Length * 2);
+                        parent[parentCount] = parentCount;
+                        labels[i] = parentCount;
+                        parentCount++;
                     }
                     else if (up == 0 || left == 0)
                     {
@@ -224,10 +237,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 }
             }
 
-            for (var i = 0; i < labels.Length; i++)
+            opaqueBounds = maxX >= minX ? (minX, minY, maxX, maxY) : (0, 0, -1, -1);
+            if (maxX < minX)
+                return labels;
+
+            for (var y = minY; y <= maxY; y++)
             {
-                if (labels[i] != 0)
-                    labels[i] = Find(labels[i]);
+                var rowEnd = y * width + maxX;
+                for (var i = y * width + minX; i <= rowEnd; i++)
+                {
+                    if (labels[i] != 0)
+                        labels[i] = Find(labels[i]);
+                }
             }
             return labels;
         }
@@ -237,17 +258,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         /// ただし距離2以内（5x5）に異なるラベルが存在する場合は膨張させない。
         /// 8近傍だけの判定だと2pxの隙間が両側から埋まって異ラベル同士が隣接してしまうため、
         /// 5x5の安全判定により膨張後も異ラベル領域が決して隣接（8近傍）しないことを保証する。
+        /// 候補は距離場から「前景に8隣接する透明ピクセル（chamfer ≦ 4）」に絞り、近傍走査を境界リング分だけに抑える。
         /// </summary>
-        static void DilatePreservingLabels(int[] labels, int width, int height)
+        static void DilatePreservingLabels(int[] labels, int[] boundaryDistance, int width, int height, (int X0, int Y0, int X1, int Y1) opaqueBounds)
         {
+            if (opaqueBounds.X1 < opaqueBounds.X0)
+                return;
+            //膨張で増える範囲は前景バウンディングボックスの1px外側まで
+            var x0 = Math.Max(0, opaqueBounds.X0 - 1);
+            var y0 = Math.Max(0, opaqueBounds.Y0 - 1);
+            var x1 = Math.Min(width - 1, opaqueBounds.X1 + 1);
+            var y1 = Math.Min(height - 1, opaqueBounds.Y1 + 1);
+
             //取り込む対象は前景の境界リング分だけなので、遅延適用リストで済ませる（ラベル配列の複製を避ける）
             var additions = new List<(int Index, int Label)>();
-            for (var y = 0; y < height; y++)
+            for (var y = y0; y <= y1; y++)
             {
-                for (var x = 0; x < width; x++)
+                for (var x = x0; x <= x1; x++)
                 {
                     var i = y * width + x;
-                    if (labels[i] != 0)
+                    //chamfer距離が4を超える透明ピクセルは前景に8隣接していないため候補にならない
+                    if (labels[i] != 0 || boundaryDistance[i] > 4)
                         continue;
 
                     //成長条件: 8近傍に前景ラベルがあること
@@ -310,14 +341,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         /// <summary>
         /// 不透明ピクセル正方形の和集合の境界を追跡し、閉ループ群を返す。
         /// 対角接触の角（4エッジが集まる曖昧点）は右折優先で解決し、領域ごとにループを分離する。
+        /// 走査は膨張前バウンディングボックスの1px外側（膨張で増えうる範囲）に限定する。
         /// </summary>
         static List<Loop>? TraceLoops(
-            int[] labels, int width, int height, int maxBoundaryEdges,
-            out int opaqueCount, out (int X0, int Y0, int X1, int Y1) opaqueBounds)
+            int[] labels, int width, int height,
+            (int X0, int Y0, int X1, int Y1) opaqueBounds, int maxBoundaryEdges,
+            out int opaqueCount)
         {
             opaqueCount = 0;
-            opaqueBounds = (0, 0, -1, -1);
-            int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
+            if (opaqueBounds.X1 < opaqueBounds.X0)
+                return [];
+            var sx0 = Math.Max(0, opaqueBounds.X0 - 1);
+            var sy0 = Math.Max(0, opaqueBounds.Y0 - 1);
+            var sx1 = Math.Min(width - 1, opaqueBounds.X1 + 1);
+            var sy1 = Math.Min(height - 1, opaqueBounds.Y1 + 1);
             var cornersX = width + 1;
 
             //境界エッジをキー: (角index << 2) | 方向 → ラベル で収集する
@@ -327,18 +364,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             static long EdgeKey(int cornerX, int cornerY, int dir, int cornersX)
                 => (((long)cornerY * cornersX + cornerX) << 2) | (uint)dir;
 
-            for (var y = 0; y < height; y++)
+            for (var y = sy0; y <= sy1; y++)
             {
-                for (var x = 0; x < width; x++)
+                for (var x = sx0; x <= sx1; x++)
                 {
                     var label = labels[y * width + x];
                     if (label == 0)
                         continue;
                     opaqueCount++;
-                    if (x < minX) minX = x;
-                    if (x > maxX) maxX = x;
-                    if (y < minY) minY = y;
-                    if (y > maxY) maxY = y;
 
                     //上下左右の透明側にエッジを張る（進行方向の右側が自ピクセル）
                     if (y == 0 || labels[(y - 1) * width + x] == 0)
@@ -421,8 +454,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     SignedArea = SignedArea(points),
                 });
             }
-            if (opaqueCount > 0)
-                opaqueBounds = (minX, minY, maxX, maxY);
             return loops;
         }
 

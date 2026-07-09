@@ -225,8 +225,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             foreach (var (a, b) in constraintSegments)
                 polygonSegments.Add((triangulator.GetPoint(a), triangulator.GetPoint(b)));
 
-            //ポリゴンのずれ(ε) + 重心のピクセル量子化(≈1.2px) を上回る余白を持たせる（chamfer値3≒1px）
-            var fastPathThreshold = (int)((epsilon + 2.5f) * 3f);
+            //ポリゴンのずれ(ε) + 重心のピクセル量子化(≈1.2px) + 距離場が膨張前基準であるずれ(1px)
+            //を上回る余白を持たせる（chamfer値3≒1px）
+            var fastPathThreshold = (int)((epsilon + 3.5f) * 3f);
             var kept = new List<(int A, int B, int C)>();
             foreach (var (a, b, c) in triangulator.GetTriangles())
             {
