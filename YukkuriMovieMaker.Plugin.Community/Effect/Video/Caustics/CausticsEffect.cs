@@ -45,7 +45,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Caustics
 
         [Display(GroupName = nameof(Texts.CausticsDetailGroup), Name = nameof(Texts.CausticsFocus), Description = nameof(Texts.CausticsFocusDescription), Order = 12, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 200)]
-        public Animation Focus { get; } = new Animation(100, 0, 400);
+        public Animation Focus { get; } = new Animation(20, 0, 400);
 
         [Display(GroupName = nameof(Texts.CausticsDetailGroup), Name = nameof(Texts.CausticsDispersion), Description = nameof(Texts.CausticsDispersionDescription), Order = 13, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
@@ -74,7 +74,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Caustics
 
         [Display(GroupName = nameof(Texts.CausticsDetailGroup), Name = nameof(Texts.CausticsAnisotropy), Description = nameof(Texts.CausticsAnisotropyDescription), Order = 18, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 95)]
-        public Animation Anisotropy { get; } = new Animation(0, 0, 95);
+        public Animation Anisotropy { get; } = new Animation(50, 0, 95);
 
         [Display(GroupName = nameof(Texts.CausticsDetailGroup), Name = nameof(Texts.CausticsWaveAngle), Description = nameof(Texts.CausticsWaveAngleDescription), Order = 19, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "°", 0, 360)]
