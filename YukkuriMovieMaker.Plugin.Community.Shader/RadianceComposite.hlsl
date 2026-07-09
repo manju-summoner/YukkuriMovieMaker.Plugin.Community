@@ -9,6 +9,11 @@ cbuffer Constants : register(b0)
     float diffuse  : packoffset(c0.y);
     float ambient  : packoffset(c0.z);
     float pad0     : packoffset(c0.w);
+
+    float worldL   : packoffset(c1.x);
+    float worldT   : packoffset(c1.y);
+    float probeW   : packoffset(c1.z);
+    float probeH   : packoffset(c1.w);
 };
 
 float4 SampleInput(float2 uv)
@@ -18,11 +23,12 @@ float4 SampleInput(float2 uv)
     return InputTexture.SampleLevel(InputSampler, uv, 0);
 }
 
-float4 SampleRadiance(float2 uv)
+float3 SampleAtlas(float4 uv1, float2 scenePos, float2 q)
 {
+    float2 uv = uv1.xy + (q - scenePos) * uv1.zw;
     if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f)
-        return float4(0.0f, 0.0f, 0.0f, 0.0f);
-    return RadianceTexture.SampleLevel(RadianceSampler, uv, 0);
+        return float3(0.0f, 0.0f, 0.0f);
+    return RadianceTexture.SampleLevel(RadianceSampler, uv, 0).rgb;
 }
 
 float4 main(
@@ -33,7 +39,20 @@ float4 main(
 ) : SV_TARGET
 {
     float4 source = SampleInput(uv0.xy);
-    float3 light = SampleRadiance(uv1.xy).rgb * strength;
+
+    float px = clamp((posScene.x - worldL) / 2.0f - 0.5f, 0.0f, probeW - 1.0f);
+    float py = clamp((posScene.y - worldT) / 2.0f - 0.5f, 0.0f, probeH - 1.0f);
+
+    float3 light = float3(0.0f, 0.0f, 0.0f);
+    [unroll]
+    for (int d = 0; d < 4; d++)
+    {
+        float tileX = (float)(d % 2) * probeW;
+        float tileY = (float)(d / 2) * probeH;
+        float2 q = float2(worldL + tileX + px + 0.5f, worldT + tileY + py + 0.5f);
+        light += SampleAtlas(uv1, posScene.xy, q);
+    }
+    light *= strength;
 
     float3 surface = float3(0.0f, 0.0f, 0.0f);
     if (source.a > 1e-3f)

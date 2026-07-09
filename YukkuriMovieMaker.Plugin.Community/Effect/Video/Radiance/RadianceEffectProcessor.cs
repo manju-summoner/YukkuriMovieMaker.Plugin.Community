@@ -9,9 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
         IGraphicsDevicesAndContext devices,
         RadianceEffect item) : VideoEffectProcessorBase(devices)
     {
-        const int CascadeCount = 5;
-        static readonly float[] IntervalFractions = [0f, 1f / 81f, 1f / 27f, 1f / 9f, 1f / 3f, 1f];
-        const float GoldenAngle = 2.3999632f;
+        const int CascadeCount = RadianceGeometry.LevelCount;
 
         private readonly RadianceEffect _item = item;
         private RadianceEmissionCustomEffect? _emissionEffect;
@@ -71,8 +69,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                     var cascade = _cascadeEffects[i];
                     if (cascade is null)
                         continue;
-                    cascade.IntervalStart = parameters.Range * IntervalFractions[i];
-                    cascade.IntervalEnd = parameters.Range * IntervalFractions[i + 1];
+                    cascade.IntervalStart = parameters.Range * RadianceGeometry.IntervalBounds[i];
+                    cascade.IntervalEnd = parameters.Range * RadianceGeometry.IntervalBounds[i + 1];
                     cascade.TotalRange = parameters.Range;
                 }
                 _compositeEffect.RangePx = parameters.Range;
@@ -115,10 +113,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
             disposer.Collect(_compositeEffect);
 
             for (var i = 0; i < CascadeCount; i++)
-            {
-                _cascadeEffects[i]!.Phase = i * GoldenAngle;
-                _cascadeEffects[i]!.IsTop = i == CascadeCount - 1 ? 1 : 0;
-            }
+                _cascadeEffects[i]!.Level = i;
 
             using (var emissionOutput = _emissionEffect.Output)
             {

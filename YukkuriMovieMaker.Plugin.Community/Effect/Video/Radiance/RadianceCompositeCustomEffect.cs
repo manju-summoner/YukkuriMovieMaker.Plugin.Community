@@ -17,10 +17,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
         [CustomEffect(2)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
-            const float MaxRange = 4096f;
-
             private ConstantBuffer _cb = new() { Strength = 1f, Diffuse = 0.6f, Ambient = 1f };
             private float _rangePx = 300f;
+            private RawRect _atlasRect;
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.Strength)]
             public float Strength { get => _cb.Strength; set { _cb.Strength = Math.Clamp(value, 0f, 8f); UpdateConstants(); } }
@@ -32,7 +31,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
             public float Ambient { get => _cb.Ambient; set { _cb.Ambient = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.RangePx)]
-            public float RangePx { get => _rangePx; set { _rangePx = Math.Clamp(value, 1f, MaxRange); } }
+            public float RangePx { get => _rangePx; set => _rangePx = Math.Clamp(value, 1f, RadianceGeometry.MaxRange); }
 
             public EffectImpl() : base(ShaderResourceUri.Get("RadianceComposite"))
             {
@@ -42,8 +41,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
             {
                 drawInformation?.SetPixelShaderConstantBuffer(_cb);
             }
-
-            private int Padding() => (int)MathF.Ceiling(_rangePx) + 2;
 
             public override void MapInputRectsToOutputRect(RawRect[] inputRects, RawRect[] inputOpaqueSubRects, out RawRect outputRect, out RawRect outputOpaqueSubRect)
             {
@@ -59,23 +56,43 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                     return;
                 }
 
-                var pad = Padding();
+                var pad = RadianceGeometry.WorldPad(_rangePx);
+                var worldL = (long)inputRect.Left - pad;
+                var worldT = (long)inputRect.Top - pad;
+                var worldW = (long)inputRect.Right - inputRect.Left + pad * 2;
+                var worldH = (long)inputRect.Bottom - inputRect.Top + pad * 2;
+
+                var probeW = RadianceGeometry.ProbeCount((int)worldW, 0);
+                var probeH = RadianceGeometry.ProbeCount((int)worldH, 0);
+
+                _cb.WorldL = worldL;
+                _cb.WorldT = worldT;
+                _cb.ProbeW = probeW;
+                _cb.ProbeH = probeH;
+                UpdateConstants();
+
                 outputRect = new RawRect(
-                    Saturate((long)inputRect.Left - pad),
-                    Saturate((long)inputRect.Top - pad),
-                    Saturate((long)inputRect.Right + pad),
-                    Saturate((long)inputRect.Bottom + pad));
+                    Saturate(worldL),
+                    Saturate(worldT),
+                    Saturate(worldL + worldW),
+                    Saturate(worldT + worldH));
+
+                var tiles = RadianceGeometry.TilesSide(0);
+                _atlasRect = new RawRect(
+                    Saturate(worldL),
+                    Saturate(worldT),
+                    Saturate(worldL + (long)tiles * probeW),
+                    Saturate(worldT + (long)tiles * probeH));
             }
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
-                var padded = new RawRect(
+                inputRects[0] = new RawRect(
                     Saturate((long)outputRect.Left - 2),
                     Saturate((long)outputRect.Top - 2),
                     Saturate((long)outputRect.Right + 2),
                     Saturate((long)outputRect.Bottom + 2));
-                inputRects[0] = padded;
-                inputRects[1] = padded;
+                inputRects[1] = _atlasRect;
             }
 
             private static int Saturate(long value) => (int)Math.Clamp(value, int.MinValue, int.MaxValue);
@@ -87,6 +104,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                 public float Diffuse;
                 public float Ambient;
                 public float Pad0;
+                public float WorldL;
+                public float WorldT;
+                public float ProbeW;
+                public float ProbeH;
             }
 
             public enum Properties : int

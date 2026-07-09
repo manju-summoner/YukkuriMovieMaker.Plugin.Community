@@ -5,38 +5,40 @@ SamplerState UpperSampler : register(s1);
 
 cbuffer Constants : register(b0)
 {
-    float intervalStart : packoffset(c0.x);
-    float intervalEnd   : packoffset(c0.y);
-    float phase         : packoffset(c0.z);
-    float isTop         : packoffset(c0.w);
+    float worldL        : packoffset(c0.x);
+    float worldT        : packoffset(c0.y);
+    float spacing       : packoffset(c0.z);
+    float tilesSide     : packoffset(c0.w);
+
+    float probeW        : packoffset(c1.x);
+    float probeH        : packoffset(c1.y);
+    float intervalStart : packoffset(c1.z);
+    float intervalEnd   : packoffset(c1.w);
+
+    float upProbeW      : packoffset(c2.x);
+    float upProbeH      : packoffset(c2.y);
+    float isTop         : packoffset(c2.z);
+    float pad0          : packoffset(c2.w);
 };
 
-#define DIRECTIONS 8
-#define STEPS 4
+#define STEPS 12
 #define SIGMA 0.6f
 #define FALLOFF_SOFT 2.0f
-#define CONE_SPREAD 0.27f
 
-float4 SampleEmission(float2 uv)
+float4 SampleEmissionWorld(float4 uv0, float2 scenePos, float2 q)
 {
+    float2 uv = uv0.xy + (q - scenePos) * uv0.zw;
     if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f)
         return float4(0.0f, 0.0f, 0.0f, 0.0f);
     return EmissionTexture.SampleLevel(EmissionSampler, uv, 0);
 }
 
-float4 SampleUpper(float2 uv)
+float3 SampleUpperAtlas(float4 uv1, float2 scenePos, float2 q)
 {
+    float2 uv = uv1.xy + (q - scenePos) * uv1.zw;
     if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f)
-        return float4(0.0f, 0.0f, 0.0f, 0.0f);
-    return UpperTexture.SampleLevel(UpperSampler, uv, 0);
-}
-
-float4 ConeTap(float2 uvBase, float2 texel, float2 center, float2 tangent, float halfWidth)
-{
-    float4 a = SampleEmission(uvBase + (center - tangent * halfWidth) * texel);
-    float4 b = SampleEmission(uvBase + center * texel);
-    float4 c = SampleEmission(uvBase + (center + tangent * halfWidth) * texel);
-    return (a + b + c) / 3.0f;
+        return float3(0.0f, 0.0f, 0.0f);
+    return UpperTexture.SampleLevel(UpperSampler, uv, 0).rgb;
 }
 
 float4 main(
@@ -46,39 +48,67 @@ float4 main(
     float4 uv1      : TEXCOORD1
 ) : SV_TARGET
 {
-    float2 texel = uv0.zw;
+    int ts = (int)tilesSide;
+    int pw = (int)probeW;
+    int ph = (int)probeH;
+
+    float2 local = posScene.xy - float2(worldL, worldT);
+    int ix = clamp((int)floor(local.x), 0, ts * pw - 1);
+    int iy = clamp((int)floor(local.y), 0, ts * ph - 1);
+
+    int tileX = ix / pw;
+    int tileY = iy / ph;
+    int probeX = ix - tileX * pw;
+    int probeY = iy - tileY * ph;
+
+    int dirs = ts * ts;
+    int d = tileY * ts + tileX;
+
+    float ang = 6.2831853f * ((float)d + 0.5f) / (float)dirs;
+    float2 dir;
+    sincos(ang, dir.y, dir.x);
+    float2 tangent = float2(-dir.y, dir.x);
+    float tanHalf = tan(3.14159265f / (float)dirs);
+
+    float2 probeWorld = float2(worldL, worldT) + (float2((float)probeX, (float)probeY) + 0.5f) * spacing;
+
     float dt = max(intervalEnd - intervalStart, 1e-3f) / (float)STEPS;
-
+    float transmittance = 1.0f;
     float3 gather = float3(0.0f, 0.0f, 0.0f);
-    float vsum = 0.0f;
 
-    [unroll]
-    for (int k = 0; k < DIRECTIONS; k++)
+    [loop]
+    for (int j = 0; j < STEPS; j++)
     {
-        float ang = 6.2831853f * ((float)k + 0.5f) / (float)DIRECTIONS + phase;
-        float2 dir;
-        sincos(ang, dir.y, dir.x);
-        float2 tangent = float2(-dir.y, dir.x);
-
-        float transmittance = 1.0f;
-        float3 ray = float3(0.0f, 0.0f, 0.0f);
-
-        [unroll]
-        for (int j = 0; j < STEPS; j++)
-        {
-            float t = intervalStart + dt * ((float)j + 0.5f);
-            float4 f = ConeTap(uv0.xy, texel, dir * t, tangent, t * 0.4142f * CONE_SPREAD * 2.0f);
-            ray += transmittance * f.rgb * (dt / (t + FALLOFF_SOFT));
-            transmittance *= exp(-f.a * SIGMA * dt);
-        }
-
-        gather += ray;
-        vsum += transmittance;
+        float t = intervalStart + dt * ((float)j + 0.5f);
+        float2 q = probeWorld + dir * t;
+        float hw = t * tanHalf * 0.66f;
+        float4 f = (
+            SampleEmissionWorld(uv0, posScene.xy, q - tangent * hw) +
+            SampleEmissionWorld(uv0, posScene.xy, q) +
+            SampleEmissionWorld(uv0, posScene.xy, q + tangent * hw)) / 3.0f;
+        gather += transmittance * f.rgb * (dt / (t + FALLOFF_SOFT));
+        transmittance *= exp(-f.a * SIGMA * dt);
     }
 
-    float v = vsum / (float)DIRECTIONS;
-    float3 upper = (isTop > 0.5f) ? float3(0.0f, 0.0f, 0.0f) : SampleUpper(uv1.xy).rgb;
-    float3 radiance = saturate(gather + v * upper);
+    float3 upper = float3(0.0f, 0.0f, 0.0f);
+    if (isTop < 0.5f)
+    {
+        int upTs = ts * 2;
+        float ux = clamp((probeWorld.x - worldL) / (spacing * 2.0f) - 0.5f, 0.0f, upProbeW - 1.0f);
+        float uy = clamp((probeWorld.y - worldT) / (spacing * 2.0f) - 0.5f, 0.0f, upProbeH - 1.0f);
 
-    return float4(radiance, saturate(v));
+        [unroll]
+        for (int k = 0; k < 4; k++)
+        {
+            int dc = 4 * d + k;
+            int tcX = dc % upTs;
+            int tcY = dc / upTs;
+            float2 q = float2(worldL, worldT) + float2((float)tcX * upProbeW + ux + 0.5f, (float)tcY * upProbeH + uy + 0.5f);
+            upper += SampleUpperAtlas(uv1, posScene.xy, q);
+        }
+        upper *= 0.25f;
+    }
+
+    float3 radiance = saturate(gather + transmittance * upper);
+    return float4(radiance, 1.0f);
 }
