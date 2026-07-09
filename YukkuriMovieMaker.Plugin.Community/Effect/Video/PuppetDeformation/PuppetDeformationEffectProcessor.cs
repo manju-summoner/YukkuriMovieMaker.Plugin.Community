@@ -30,7 +30,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         readonly PuppetDeformationEffect item = item;
         readonly float[] pinDataBuffer = new float[PuppetDeformationCustomEffect.MaxPins * 4];
         readonly bool[] offsetSelectionCache = new bool[PuppetDeformationCustomEffect.MaxPins];
-        readonly float[] boneDataBuffer = new float[PuppetDeformationEffect.BoneCapacity * 4];
+        //1ボーンあたり (joint.x, joint.y, angle, parentIndex, scale) の5要素
+        readonly float[] boneDataBuffer = new float[PuppetDeformationEffect.BoneCapacity * 5];
         //ピンのボーン割当（ボーンindex、未割当は-1）。ハンドル表示の切替検知に使う
         readonly int[] pinBoneIndexCache = new int[PuppetDeformationCustomEffect.MaxPins];
 
@@ -102,12 +103,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 var jx = (float)bone.JointX.GetValue(frame, length, fps);
                 var jy = (float)bone.JointY.GetValue(frame, length, fps);
                 var angleRad = 0f;
+                var scale = 1f;
                 if (bone.IsEnabled)
                 {
                     var angleDeg = bone.Angle.GetValue(frame, length, fps);
                     angleRad = (float)(angleDeg * Math.PI / 180) + swayAngles[i];
+                    scale = (float)(bone.Scale.GetValue(frame, length, fps) / 100);
                 }
-                boneSamples.Add(new PuppetBoneEvaluator.BoneSample(bone.Id, bone.ParentId, new Vector2(jx, jy), angleRad));
+                boneSamples.Add(new PuppetBoneEvaluator.BoneSample(bone.Id, bone.ParentId, new Vector2(jx, jy), angleRad, scale));
                 boneIndexById.TryAdd(bone.Id, i);
             }
             var boneWorlds = PuppetBoneEvaluator.ComputeWorldTransforms(boneSamples);
@@ -305,10 +308,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 var s = samples[i];
                 var parentIndex = indexById.TryGetValue(s.ParentId, out var pi) ? pi : -1;
-                if (boneDataBuffer[i * 4 + 0] != s.Joint.X) return false;
-                if (boneDataBuffer[i * 4 + 1] != s.Joint.Y) return false;
-                if (boneDataBuffer[i * 4 + 2] != s.AngleRadians) return false;
-                if (boneDataBuffer[i * 4 + 3] != parentIndex) return false;
+                if (boneDataBuffer[i * 5 + 0] != s.Joint.X) return false;
+                if (boneDataBuffer[i * 5 + 1] != s.Joint.Y) return false;
+                if (boneDataBuffer[i * 5 + 2] != s.AngleRadians) return false;
+                if (boneDataBuffer[i * 5 + 3] != parentIndex) return false;
+                if (boneDataBuffer[i * 5 + 4] != s.Scale) return false;
             }
             return true;
         }
@@ -319,12 +323,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 var s = samples[i];
                 var parentIndex = indexById.TryGetValue(s.ParentId, out var pi) ? pi : -1;
-                boneDataBuffer[i * 4 + 0] = s.Joint.X;
-                boneDataBuffer[i * 4 + 1] = s.Joint.Y;
-                boneDataBuffer[i * 4 + 2] = s.AngleRadians;
-                boneDataBuffer[i * 4 + 3] = parentIndex;
+                boneDataBuffer[i * 5 + 0] = s.Joint.X;
+                boneDataBuffer[i * 5 + 1] = s.Joint.Y;
+                boneDataBuffer[i * 5 + 2] = s.AngleRadians;
+                boneDataBuffer[i * 5 + 3] = parentIndex;
+                boneDataBuffer[i * 5 + 4] = s.Scale;
             }
-            Array.Clear(boneDataBuffer, samples.Count * 4, (PuppetDeformationEffect.BoneCapacity - samples.Count) * 4);
+            Array.Clear(boneDataBuffer, samples.Count * 5, (PuppetDeformationEffect.BoneCapacity - samples.Count) * 5);
         }
 
         void FillPinDataBuffer(List<PinSample> samples)
