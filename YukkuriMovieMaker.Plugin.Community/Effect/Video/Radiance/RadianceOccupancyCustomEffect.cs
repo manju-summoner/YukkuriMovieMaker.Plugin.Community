@@ -18,6 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
             private ConstantBuffer _cb = new() { BuildLevel = 1f };
             private float _totalRange = 300f;
             private RawRect _worldRect;
+            private RawRect _atlasRect;
 
             [CustomEffectProperty(PropertyType.Int32, (int)Properties.BuildLevel)]
             public int BuildLevel { get => (int)_cb.BuildLevel; set { _cb.BuildLevel = Math.Clamp(value, 1, RadianceGeometry.OccLevelCount); UpdateConstants(); } }
@@ -45,6 +46,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                 if (inputRect.Right <= inputRect.Left || inputRect.Bottom <= inputRect.Top)
                 {
                     outputRect = inputRect;
+                    _atlasRect = inputRect;
                     return;
                 }
 
@@ -71,11 +73,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                     Saturate(worldT),
                     Saturate(worldL + RadianceGeometry.OccAtlasWidth((int)worldW)),
                     Saturate(worldT + RadianceGeometry.OccAtlasHeight((int)worldH)));
+                _atlasRect = outputRect;
             }
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
-                inputRects[0] = outputRect;
+                inputRects[0] = _atlasRect;
                 inputRects[1] = _worldRect;
             }
 
