@@ -148,6 +148,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 : default;
             var imageWidth = inputBounds.Right - inputBounds.Left;
             var imageHeight = inputBounds.Bottom - inputBounds.Top;
+            var inputCenter = new Vector2(
+                (inputBounds.Left + inputBounds.Right) * 0.5f,
+                (inputBounds.Top + inputBounds.Bottom) * 0.5f);
+            //HLSL・ARAPメッシュ・変形後Boundsは入力画像の中央を原点とする。
+            //プレビュー用コントローラーのアイテム座標は保ち、GPUに渡す拘束点だけを中央原点へ変換する。
+            var gpuSamples = ConvertToCenteredSamples(samples, inputCenter);
 
             var useArap = algorithm == PuppetDeformationAlgorithm.Arap
                 && arapEffect is not null
@@ -165,7 +171,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 || this.imageWidth != imageWidth
                 || this.imageHeight != imageHeight
                 || this.apply != apply
-                || !PinSamplesMatchBuffer(samples);
+                || !PinSamplesMatchBuffer(gpuSamples);
             //ピンが割り当てられていないボーンの変化はGPU側に影響しないため、コントローラー再構築のみ行う
             var bonesDirty = isFirst
                 || this.boneCount != boneCount
@@ -175,8 +181,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 if (useArap)
                 {
-                    FillPinDataBuffer(samples);
-                    UpdateArapEffect(samples, apply, imageWidth, imageHeight);
+                    FillPinDataBuffer(gpuSamples);
+                    UpdateArapEffect(gpuSamples, apply, imageWidth, imageHeight);
 
                     //終端のMLSエフェクトはパススルー(PinCount=0)として使う
                     effect.PinCount = 0;
@@ -187,7 +193,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 }
                 else
                 {
-                    gpuCache = BuildGpuCache(stiffness, imageWidth, imageHeight, samples);
+                    gpuCache = BuildGpuCache(stiffness, imageWidth, imageHeight, gpuSamples);
 
                     effect.PinData = gpuCache.PinData;
                     //変形オフ時はPinCount=0を送り、シェーダー側で変形せず入力をそのまま出力する。
@@ -234,6 +240,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 Controllers = cachedControllers
             };
+        }
+
+        static List<PinSample> ConvertToCenteredSamples(List<PinSample> samples, Vector2 inputCenter)
+        {
+            var result = new List<PinSample>(samples.Count);
+            foreach (var sample in samples)
+            {
+                result.Add(new PinSample(
+                    sample.PinIndex,
+                    sample.Rest - inputCenter,
+                    sample.Current - inputCenter,
+                    sample.IsEnabled));
+            }
+            return result;
         }
 
         bool UpdateOffsetSelectionCache(ImmutableList<PuppetDeformation> pins, int pinCount)
