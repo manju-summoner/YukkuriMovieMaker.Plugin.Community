@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
 {
@@ -8,7 +9,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value is true ? Visibility.Visible : Visibility.Collapsed;
+            if (value is double amount && amount > 0)
+                return Visibility.Visible;
+            if (parameter is Animation animation && animation.Values.Count > 1)
+                return Visibility.Visible;
+            return Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
