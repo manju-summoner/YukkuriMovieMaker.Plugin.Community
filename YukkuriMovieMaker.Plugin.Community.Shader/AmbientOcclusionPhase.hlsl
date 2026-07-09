@@ -46,7 +46,7 @@ float4 main(
 {
     float4 source = SampleInput(uv0.xy);
     if (source.a <= 1e-3f)
-        return float4(1.0f, 0.0f, 0.0f, 0.0f);
+        return float4(0.0f, 0.0f, 0.0f, 0.0f);
 
     float2 texel = uv0.zw;
     float c = dot(source.rgb / source.a, float3(0.2126f, 0.7152f, 0.0722f));
@@ -62,5 +62,6 @@ float4 main(
     float energyGate = saturate((fine + coarse) * 60.0f - 1.0f);
     float albedoEdge = saturate(localization * energyGate * sensitivity);
 
-    return float4(1.0f - albedoEdge, c, albedoEdge, source.a);
+    // 半透明の縁でバイリニア補間がアルファ重み付き平均になるよう事前乗算で保持する
+    return float4((1.0f - albedoEdge) * source.a, c * source.a, albedoEdge * source.a, source.a);
 }

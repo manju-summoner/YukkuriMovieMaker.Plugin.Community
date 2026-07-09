@@ -52,8 +52,8 @@ float4 main(
         return source;
 
     float4 f0 = SampleField(uv1.xy);
-    float centerLum = (f0.a > 1e-3f) ? f0.g : 0.0f;
-    float centerW = (f0.a > 1e-3f) ? f0.r : 1.0f;
+    float centerLum = (f0.a > 1e-3f) ? saturate(f0.g / f0.a) : 0.0f;
+    float centerW = (f0.a > 1e-3f) ? saturate(f0.r / f0.a) : 1.0f;
 
     int dirs = (int)clamp(directionCount, 2.0f, (float)MAX_DIRECTIONS);
     int steps = (int)clamp(stepCount, 1.0f, (float)MAX_STEPS);
@@ -81,9 +81,9 @@ float4 main(
             float t = radius * ((float)j + 0.5f) / (float)steps;
             float4 fm = SampleField(uv1.xy + dir * ((prevT + t) * 0.5f) * uv1.zw);
             float4 fs = SampleField(uv1.xy + dir * t * uv1.zw);
-            float wMid = (fm.a > 1e-3f) ? fm.r : 1.0f;
-            float ws = (fs.a > 1e-3f) ? fs.r : 1.0f;
-            float lum = (fs.a > 1e-3f) ? fs.g : prevLum;
+            float wMid = (fm.a > 1e-3f) ? saturate(fm.r / fm.a) : 1.0f;
+            float ws = (fs.a > 1e-3f) ? saturate(fs.r / fs.a) : 1.0f;
+            float lum = (fs.a > 1e-3f) ? saturate(fs.g / fs.a) : prevLum;
 
             float seg = lum - prevLum;
             float wSeg = min(ws, min(prevW, wMid));
