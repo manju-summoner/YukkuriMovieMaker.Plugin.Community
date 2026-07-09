@@ -77,8 +77,8 @@ float EstimateDepth(float2 uv, float2 texel, float2 scenePos)
     float bottom = inputTop + max(inputHeight, 1.0f);
 
     float2 vp = float2(
-        clamp((left + right) * 0.5f + vpX, left, right),
-        clamp((top + bottom) * 0.5f + vpY, top, bottom));
+        (left + right) * 0.5f + vpX,
+        (top + bottom) * 0.5f + vpY);
 
     float dTL = distance(vp, float2(left, top));
     float dTR = distance(vp, float2(right, top));
