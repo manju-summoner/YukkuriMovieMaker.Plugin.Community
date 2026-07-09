@@ -54,7 +54,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
             if (_isFirst || _parameters.Threshold != parameters.Threshold)
                 _emissionEffect.Threshold = parameters.Threshold;
             if (_isFirst || _parameters.EmissionGain != parameters.EmissionGain)
-                _emissionEffect.Gain = parameters.EmissionGain;
+            {
+                for (var i = 0; i < CascadeCount; i++)
+                {
+                    var cascade = _cascadeEffects[i];
+                    if (cascade is not null)
+                        cascade.Gain = parameters.EmissionGain;
+                }
+            }
             if (_isFirst || _parameters.Occlusion != parameters.Occlusion)
                 _emissionEffect.Occlusion = parameters.Occlusion;
             if (_isFirst || _parameters.TintR != parameters.TintR)

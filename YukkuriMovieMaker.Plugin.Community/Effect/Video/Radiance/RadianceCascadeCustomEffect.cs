@@ -13,11 +13,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
         public float IntervalStart { set => SetValue((int)EffectImpl.Properties.IntervalStart, value); }
         public float IntervalEnd { set => SetValue((int)EffectImpl.Properties.IntervalEnd, value); }
         public float TotalRange { set => SetValue((int)EffectImpl.Properties.TotalRange, value); }
+        public float Gain { set => SetValue((int)EffectImpl.Properties.Gain, value); }
 
         [CustomEffect(3)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
-            private ConstantBuffer _cb;
+            private ConstantBuffer _cb = new() { Gain = 1.5f };
             private int _level;
             private float _totalRange = 300f;
             private RawRect _emissionReadRect;
@@ -35,6 +36,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.TotalRange)]
             public float TotalRange { get => _totalRange; set => _totalRange = Math.Clamp(value, 1f, RadianceGeometry.MaxRange); }
+
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.Gain)]
+            public float Gain { get => _cb.Gain; set { _cb.Gain = Math.Clamp(value, 0f, 16f); UpdateConstants(); } }
 
             public EffectImpl() : base(ShaderResourceUri.Get("RadianceCascade"))
             {
@@ -138,9 +142,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                 public float IsTop;
                 public float WorldW;
                 public float WorldH;
+                public float Gain;
                 public float Pad0;
                 public float Pad1;
-                public float Pad2;
             }
 
             public enum Properties : int
@@ -149,6 +153,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                 IntervalStart = 1,
                 IntervalEnd = 2,
                 TotalRange = 3,
+                Gain = 4,
             }
         }
     }

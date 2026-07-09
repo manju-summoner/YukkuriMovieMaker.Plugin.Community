@@ -23,9 +23,9 @@ cbuffer Constants : register(b0)
     float worldW        : packoffset(c2.w);
 
     float worldH        : packoffset(c3.x);
-    float pad0          : packoffset(c3.y);
-    float pad1          : packoffset(c3.z);
-    float pad2          : packoffset(c3.w);
+    float gain          : packoffset(c3.y);
+    float pad0          : packoffset(c3.z);
+    float pad1          : packoffset(c3.w);
 };
 
 #define SIGMA 0.6f
@@ -168,7 +168,7 @@ float4 main(
         float step = clamp(t * FINE_GROW, FINE_STEP, FINE_MAX);
         float h = max(min(step, intervalEnd - t), 0.25f);
         float4 f = SampleEmissionWorld(uv0, posScene.xy, q);
-        gather += transmittance * f.rgb * (h / (t + FALLOFF_SOFT));
+        gather += transmittance * f.rgb * gain * (h / (t + FALLOFF_SOFT));
         transmittance *= exp(-f.a * SIGMA * h);
         t += h;
         level = (f.a > 0.003f || max(f.r, max(f.g, f.b)) > 0.003f) ? 0u : 1u;

@@ -37,7 +37,7 @@ float4 main(
     float e = saturate((lum - threshold) / max(1.0f - threshold, 1e-3f));
     e *= e;
 
-    float3 emission = saturate(straight * e * gain * float3(tintR, tintG, tintB));
+    float3 emission = saturate(straight * e * float3(tintR, tintG, tintB));
 
     return float4(emission * source.a, occlusion * source.a);
 }
