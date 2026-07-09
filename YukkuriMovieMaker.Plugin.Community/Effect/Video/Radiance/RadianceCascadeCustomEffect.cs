@@ -14,7 +14,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
         public float IntervalEnd { set => SetValue((int)EffectImpl.Properties.IntervalEnd, value); }
         public float TotalRange { set => SetValue((int)EffectImpl.Properties.TotalRange, value); }
 
-        [CustomEffect(2)]
+        [CustomEffect(3)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
             private ConstantBuffer _cb;
@@ -46,8 +46,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
 
             public override void MapInputRectsToOutputRect(RawRect[] inputRects, RawRect[] inputOpaqueSubRects, out RawRect outputRect, out RawRect outputOpaqueSubRect)
             {
-                if (inputRects.Length != 2)
-                    throw new ArgumentException("InputRects must be length of 2", nameof(inputRects));
+                if (inputRects.Length != 3)
+                    throw new ArgumentException("InputRects must be length of 3", nameof(inputRects));
 
                 var inputRect = ClampInputRect(inputRects[0]);
                 outputOpaqueSubRect = default;
@@ -108,6 +108,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
             {
                 inputRects[0] = _emissionReadRect;
                 inputRects[1] = _upperAtlasRect;
+                inputRects[2] = _emissionReadRect;
             }
 
             private static int Saturate(long value) => (int)Math.Clamp(value, int.MinValue, int.MaxValue);
