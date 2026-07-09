@@ -10,6 +10,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
         AmbientOcclusionEffect item) : VideoEffectProcessorBase(devices)
     {
         private readonly AmbientOcclusionEffect _item = item;
+        private AmbientOcclusionPhaseCustomEffect? _phaseEffect;
         private AmbientOcclusionCustomEffect? _effect;
 
         private bool _isFirst = true;
@@ -33,6 +34,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
                 (float)(_item.Height.GetValue(frame, length, fps) / 100.0),
                 (float)Math.Round(_item.Directions.GetValue(frame, length, fps)),
                 (float)Math.Round(_item.Samples.GetValue(frame, length, fps)),
+                (float)(_item.TextureSuppression.GetValue(frame, length, fps) / 100.0),
                 shadowColor.R / 255f,
                 shadowColor.G / 255f,
                 shadowColor.B / 255f);
@@ -47,6 +49,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
                 _effect.Directions = parameters.Directions;
             if (_isFirst || _parameters.Samples != parameters.Samples)
                 _effect.Samples = parameters.Samples;
+            if (_isFirst || _parameters.Suppression != parameters.Suppression)
+                _effect.Suppression = parameters.Suppression;
             if (_isFirst || _parameters.ShadowR != parameters.ShadowR)
                 _effect.ShadowR = parameters.ShadowR;
             if (_isFirst || _parameters.ShadowG != parameters.ShadowG)
@@ -62,14 +66,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
+            _phaseEffect = new AmbientOcclusionPhaseCustomEffect(devices);
             _effect = new AmbientOcclusionCustomEffect(devices);
-            if (!_effect.IsEnabled)
+            if (!_phaseEffect.IsEnabled || !_effect.IsEnabled)
             {
+                _phaseEffect.Dispose();
                 _effect.Dispose();
+                _phaseEffect = null;
                 _effect = null;
                 return null;
             }
+            disposer.Collect(_phaseEffect);
             disposer.Collect(_effect);
+
+            using (var phaseOutput = _phaseEffect.Output)
+                _effect.SetInput(1, phaseOutput, true);
 
             var output = _effect.Output;
             disposer.Collect(output);
@@ -78,12 +89,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
 
         protected override void setInput(ID2D1Image? input)
         {
+            _phaseEffect?.SetInput(0, input, true);
             _effect?.SetInput(0, input, true);
         }
 
         protected override void ClearEffectChain()
         {
+            _phaseEffect?.SetInput(0, null, true);
             _effect?.SetInput(0, null, true);
+            _effect?.SetInput(1, null, true);
             _isFirst = true;
         }
 
@@ -93,6 +107,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
             float HeightGain,
             float Directions,
             float Samples,
+            float Suppression,
             float ShadowR,
             float ShadowG,
             float ShadowB);

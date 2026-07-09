@@ -1,5 +1,7 @@
 Texture2D InputTexture : register(t0);
 SamplerState InputSampler : register(s0);
+Texture2D FieldTexture : register(t1);
+SamplerState FieldSampler : register(s1);
 
 cbuffer Constants : register(b0)
 {
@@ -12,6 +14,11 @@ cbuffer Constants : register(b0)
     float shadowR        : packoffset(c1.y);
     float shadowG        : packoffset(c1.z);
     float shadowB        : packoffset(c1.w);
+
+    float suppression    : packoffset(c2.x);
+    float pad0           : packoffset(c2.y);
+    float pad1           : packoffset(c2.z);
+    float pad2           : packoffset(c2.w);
 };
 
 #define MAX_DIRECTIONS 16
@@ -24,26 +31,29 @@ float4 SampleInput(float2 uv)
     return InputTexture.SampleLevel(InputSampler, uv, 0);
 }
 
-float LumAt(float2 uv, float2 texel, float2 offsetPx, float fallback)
+float4 SampleField(float2 uv)
 {
-    float4 s = SampleInput(uv + offsetPx * texel);
-    if (s.a <= 1e-3f)
-        return fallback;
-    return dot(s.rgb / s.a, float3(0.2126f, 0.7152f, 0.0722f));
+    if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f)
+        return float4(0.0f, 0.0f, 0.0f, 0.0f);
+    return FieldTexture.SampleLevel(FieldSampler, uv, 0);
 }
 
+// 高さ差は生の差分ではなく、区分ごとに塗り境界重み(w)でゲートした
+// 経路積分として累積する。抑制0では望遠鏡和により生の差分と一致する。
 float4 main(
     float4 pos      : SV_POSITION,
     float4 posScene : SCENE_POSITION,
-    float4 uv0      : TEXCOORD0
+    float4 uv0      : TEXCOORD0,
+    float4 uv1      : TEXCOORD1
 ) : SV_TARGET
 {
     float4 source = SampleInput(uv0.xy);
     if (strength <= 0.0f || source.a <= 0.0f)
         return source;
 
-    float2 texel = uv0.zw;
-    float centerLum = dot(source.rgb / source.a, float3(0.2126f, 0.7152f, 0.0722f));
+    float4 f0 = SampleField(uv1.xy);
+    float centerLum = (f0.a > 1e-3f) ? f0.g : 0.0f;
+    float centerW = (f0.a > 1e-3f) ? f0.r : 1.0f;
 
     int dirs = (int)clamp(directionCount, 2.0f, (float)MAX_DIRECTIONS);
     int steps = (int)clamp(stepCount, 1.0f, (float)MAX_STEPS);
@@ -60,13 +70,31 @@ float4 main(
         sincos(ang, dir.y, dir.x);
 
         float horizon = 0.0f;
+        float hRel = 0.0f;
+        float prevLum = centerLum;
+        float prevW = centerW;
+        float prevT = 0.0f;
+
         [loop]
         for (int j = 0; j < steps; j++)
         {
             float t = radius * ((float)j + 0.5f) / (float)steps;
-            float hs = LumAt(uv0.xy, texel, dir * t, centerLum);
-            float slope = (hs - centerLum) * amp / t;
+            float4 fm = SampleField(uv1.xy + dir * ((prevT + t) * 0.5f) * uv1.zw);
+            float4 fs = SampleField(uv1.xy + dir * t * uv1.zw);
+            float wMid = (fm.a > 1e-3f) ? fm.r : 1.0f;
+            float ws = (fs.a > 1e-3f) ? fs.r : 1.0f;
+            float lum = (fs.a > 1e-3f) ? fs.g : prevLum;
+
+            float seg = lum - prevLum;
+            float wSeg = min(ws, min(prevW, wMid));
+            hRel += seg * lerp(1.0f, wSeg, suppression);
+
+            float slope = hRel * amp / t;
             horizon = max(horizon, slope);
+
+            prevLum = lum;
+            prevW = ws;
+            prevT = t;
         }
 
         float occ = horizon / (1.0f + horizon);

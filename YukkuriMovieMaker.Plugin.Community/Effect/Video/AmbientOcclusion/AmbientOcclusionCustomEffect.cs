@@ -19,6 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
             ShadowR,
             ShadowG,
             ShadowB,
+            Suppression,
         }
 
         public float Strength { set => SetValue((int)PropertyIndex.Strength, value); }
@@ -29,8 +30,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
         public float ShadowR { set => SetValue((int)PropertyIndex.ShadowR, value); }
         public float ShadowG { set => SetValue((int)PropertyIndex.ShadowG, value); }
         public float ShadowB { set => SetValue((int)PropertyIndex.ShadowB, value); }
+        public float Suppression { set => SetValue((int)PropertyIndex.Suppression, value); }
 
-        [CustomEffect(1)]
+        [CustomEffect(2)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
             private ConstantBuffer _cb;
@@ -59,6 +61,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.ShadowB)]
             public float ShadowB { get => _cb.ShadowB; set { _cb.ShadowB = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
 
+            [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Suppression)]
+            public float Suppression { get => _cb.Suppression; set { _cb.Suppression = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
+
             public EffectImpl() : base(ShaderResourceUri.Get("AmbientOcclusion"))
             {
                 _cb.Strength = 0.5f;
@@ -83,8 +88,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
 
             public override void MapInputRectsToOutputRect(RawRect[] inputRects, RawRect[] inputOpaqueSubRects, out RawRect outputRect, out RawRect outputOpaqueSubRect)
             {
-                if (inputRects.Length != 1)
-                    throw new ArgumentException("InputRects must be length of 1", nameof(inputRects));
+                if (inputRects.Length != 2)
+                    throw new ArgumentException("InputRects must be length of 2", nameof(inputRects));
 
                 outputRect = inputRects[0];
                 outputOpaqueSubRect = default;
@@ -93,11 +98,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
                 var padding = Padding();
-                inputRects[0] = new RawRect(
+                var padded = new RawRect(
                     Saturate((long)outputRect.Left - padding),
                     Saturate((long)outputRect.Top - padding),
                     Saturate((long)outputRect.Right + padding),
                     Saturate((long)outputRect.Bottom + padding));
+                inputRects[0] = padded;
+                inputRects[1] = padded;
             }
 
             private static int Saturate(long value) => (int)Math.Clamp(value, int.MinValue, int.MaxValue);
@@ -113,6 +120,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
                 public float ShadowR;
                 public float ShadowG;
                 public float ShadowB;
+                public float Suppression;
+                public float Pad0;
+                public float Pad1;
+                public float Pad2;
             }
         }
     }

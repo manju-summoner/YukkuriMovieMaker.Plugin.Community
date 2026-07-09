@@ -179,6 +179,7 @@
     <Resource Include="$(ShaderDirPath)Dithering.cso" Link="Resources\Shader\Dithering.cso" />
     <Resource Include="$(ShaderDirPath)VectorFieldWarp.cso" Link="Resources\Shader\VectorFieldWarp.cso" />
     <Resource Include="$(ShaderDirPath)AmbientOcclusion.cso" Link="Resources\Shader\AmbientOcclusion.cso" />
+    <Resource Include="$(ShaderDirPath)AmbientOcclusionPhase.cso" Link="Resources\Shader\AmbientOcclusionPhase.cso" />
   </ItemGroup>
 
   <!-- internalsを参照するテスト（EdgeDetectionZeroStrengthOverlayTest等）はDEBUG限定のため、Releaseビルドには付与しない -->

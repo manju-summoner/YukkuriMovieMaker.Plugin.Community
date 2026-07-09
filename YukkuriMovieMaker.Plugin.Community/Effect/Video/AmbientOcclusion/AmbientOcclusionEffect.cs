@@ -25,7 +25,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
         [AnimationSlider("F1", "%", 0, 200)]
         public Animation Height { get; } = new Animation(50, 0, 400);
 
-        [Display(GroupName = nameof(Texts.AmbientOcclusionEffectName), Name = nameof(Texts.AmbientOcclusionShadowColor), Description = nameof(Texts.AmbientOcclusionShadowColorDescription), Order = 3, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.AmbientOcclusionEffectName), Name = nameof(Texts.AmbientOcclusionTextureSuppression), Description = nameof(Texts.AmbientOcclusionTextureSuppressionDescription), Order = 3, ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 0, 100)]
+        public Animation TextureSuppression { get; } = new Animation(50, 0, 100);
+
+        [Display(GroupName = nameof(Texts.AmbientOcclusionEffectName), Name = nameof(Texts.AmbientOcclusionShadowColor), Description = nameof(Texts.AmbientOcclusionShadowColorDescription), Order = 4, ResourceType = typeof(Texts))]
         [ColorPicker]
         public Color ShadowColor
         {
@@ -34,11 +38,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
         }
         private Color _shadowColor = Color.FromRgb(0x1A, 0x14, 0x20);
 
-        [Display(GroupName = nameof(Texts.AmbientOcclusionEffectName), Name = nameof(Texts.AmbientOcclusionDirections), Description = nameof(Texts.AmbientOcclusionDirectionsDescription), Order = 4, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.AmbientOcclusionEffectName), Name = nameof(Texts.AmbientOcclusionDirections), Description = nameof(Texts.AmbientOcclusionDirectionsDescription), Order = 5, ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "", 2, 16)]
         public Animation Directions { get; } = new Animation(8, 2, 16);
 
-        [Display(GroupName = nameof(Texts.AmbientOcclusionEffectName), Name = nameof(Texts.AmbientOcclusionSamples), Description = nameof(Texts.AmbientOcclusionSamplesDescription), Order = 5, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.AmbientOcclusionEffectName), Name = nameof(Texts.AmbientOcclusionSamples), Description = nameof(Texts.AmbientOcclusionSamplesDescription), Order = 6, ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "", 1, 12)]
         public Animation Samples { get; } = new Animation(6, 1, 12);
 
@@ -50,6 +54,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AmbientOcclusion
             => new AmbientOcclusionEffectProcessor(devices, this);
 
         protected override IEnumerable<IAnimatable> GetAnimatables()
-            => _animatables ??= [Strength, Radius, Height, Directions, Samples];
+            => _animatables ??= [Strength, Radius, Height, TextureSuppression, Directions, Samples];
     }
 }
