@@ -88,8 +88,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             var maxEdge = spacing * MaxEdgeScale;
 
             //3. 小さな穴は捨てる（メッシュで覆っても透明テクセルは透明に描かれるため視覚的に無損失）。
-            //   小さな島（外周）は描画から消えてしまうため保持する
-            simplified.RemoveAll(l => l.SignedArea < 0 && -l.SignedArea < spacing * spacing * 0.5);
+            //   小さな島（外周）は描画から消えてしまうため保持する。
+            //   捨てた穴はラベル格子上で埋めておき、分類の高速パス（ラベル参照）でも内側扱いになるようにする
+            for (var i = simplified.Count - 1; i >= 0; i--)
+            {
+                var (points, label, signedArea) = simplified[i];
+                if (signedArea >= 0 || -signedArea >= spacing * spacing * 0.5)
+                    continue;
+                FillSmallHole(field, points, label);
+                simplified.RemoveAt(i);
+            }
             if (simplified.Count == 0)
                 return null;
 
@@ -132,8 +140,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             if (rawPoints.Count < 3)
                 return null;
 
-            //5. 内部にヘックス格子点を撒く（輪郭の内側かつ輪郭セグメントからclearance以上）
-            var interiorPoints = BuildInteriorPoints(rawPoints, segments, field, spacing);
+            //5. 内部にヘックス格子点を撒く（輪郭の内側かつ境界からclearance以上。距離場のO(1)参照で判定）
+            var interiorPoints = BuildInteriorPoints(rawPoints, field, spacing);
 
             //6. Delaunay三角形分割（全点に決定論的ジッタを掛けて退化を避ける）
             float minX = float.MaxValue, minY = float.MaxValue, maxX = float.MinValue, maxY = float.MinValue;
@@ -208,19 +216,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             }
 
             //8. 外側の三角形を除去する。
-            //   重心の偶奇判定（制約ポリゴン基準）に加え、異なる部位のラベルを跨ぐ三角形は
-            //   無条件に除去する（細い隙間を跨いだ微小三角形による部位の溶接を防ぐ）
+            //   重心の内外判定は、境界から十分離れた重心なら距離場＋ラベル参照で即決し（大半がこちら）、
+            //   境界すれすれの重心だけ制約ポリゴンとの偶奇判定で精密に行う
+            //   （簡略化ポリゴンとピクセル境界のずれ ≦ ε による縁の誤判定を防ぐため）。
+            //   加えて、異なる部位のラベルを跨ぐ三角形は無条件に除去する
+            //   （細い隙間を跨いだ微小三角形による部位の溶接を防ぐ）
             var polygonSegments = new List<(Vector2 A, Vector2 B)>(constraintSegments.Count);
             foreach (var (a, b) in constraintSegments)
                 polygonSegments.Add((triangulator.GetPoint(a), triangulator.GetPoint(b)));
 
+            //ポリゴンのずれ(ε) + 重心のピクセル量子化(≈1.2px) を上回る余白を持たせる（chamfer値3≒1px）
+            var fastPathThreshold = (int)((epsilon + 2.5f) * 3f);
             var kept = new List<(int A, int B, int C)>();
             foreach (var (a, b, c) in triangulator.GetTriangles())
             {
                 if (SpansDifferentLabels(vertexLabels[a], vertexLabels[b], vertexLabels[c]))
                     continue;
                 var centroid = (triangulator.GetPoint(a) + triangulator.GetPoint(b) + triangulator.GetPoint(c)) / 3f;
-                if (!IsInsidePolygons(centroid, polygonSegments))
+                var px = Math.Clamp((int)MathF.Floor(centroid.X), 0, field.Width - 1);
+                var py = Math.Clamp((int)MathF.Floor(centroid.Y), 0, field.Height - 1);
+                var pixel = py * field.Width + px;
+                bool inside;
+                if (field.BoundaryDistance[pixel] >= fastPathThreshold)
+                    inside = field.Labels[pixel] != 0;
+                else
+                    inside = IsInsidePolygons(centroid, polygonSegments);
+                if (!inside)
                     continue;
                 kept.Add((a, b, c));
             }
@@ -395,12 +416,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
 
         /// <summary>
         /// 輪郭の内側にヘックス格子の内部点を撒く。
-        /// 輪郭セグメントからclearance未満の点は棄却する（境界帯の三角形品質を保つ）。
+        /// 内外と輪郭からのクリアランスは距離場＋ラベル格子のO(1)参照で判定する
+        /// （クリアランス ≧ 0.7h は境界のε誤差より十分大きいため、ピクセル境界基準の距離で問題ない）。
         /// 各点には所属する連結成分のラベルを付ける。
         /// </summary>
         static List<(Vector2 Point, int Label)> BuildInteriorPoints(
             List<Vector2> constraintPoints,
-            List<(int A, int B)> segments,
             AlphaContourField field,
             float spacing)
         {
@@ -413,11 +434,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 maxY = MathF.Max(maxY, p.Y);
             }
 
-            var polygonSegments = new List<(Vector2 A, Vector2 B)>(segments.Count);
-            foreach (var (a, b) in segments)
-                polygonSegments.Add((constraintPoints[a], constraintPoints[b]));
-
-            var clearanceSq = spacing * ContourClearanceScale * (spacing * ContourClearanceScale);
+            //chamfer距離の値3が約1pxに相当する
+            var minChamfer = (int)(spacing * ContourClearanceScale * 3f);
             var rowStep = spacing * HexRowScale;
             var result = new List<(Vector2, int)>();
             var row = 0;
@@ -426,29 +444,62 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 var xOffset = (row & 1) == 0 ? spacing * 0.5f : spacing;
                 for (var x = minX + xOffset; x < maxX; x += spacing)
                 {
-                    var p = new Vector2(x, y);
-                    if (!IsInsidePolygons(p, polygonSegments))
-                        continue;
-
-                    //輪郭セグメントとの距離チェック（再構築時に1回だけなので総当たりで足りる）
-                    var tooClose = false;
-                    foreach (var (a, b) in polygonSegments)
-                    {
-                        if (DistanceToSegmentSquared(p, a, b) < clearanceSq)
-                        {
-                            tooClose = true;
-                            break;
-                        }
-                    }
-                    if (tooClose)
-                        continue;
-
                     var px = Math.Clamp((int)MathF.Floor(x), 0, field.Width - 1);
                     var py = Math.Clamp((int)MathF.Floor(y), 0, field.Height - 1);
-                    result.Add((p, field.Labels[py * field.Width + px]));
+                    var pixel = py * field.Width + px;
+                    var label = field.Labels[pixel];
+                    if (label == 0 || field.BoundaryDistance[pixel] < minChamfer)
+                        continue;
+                    result.Add((new Vector2(x, y), label));
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// 捨てた小さな穴の内部をラベル格子上で埋める（穴の輪郭ポリゴンをスキャンライン充填）。
+        /// 距離場は更新しない: 穴の周囲は距離が小さいままなので分類は精密パスに落ち、正しく内側と判定される。
+        /// </summary>
+        static void FillSmallHole(AlphaContourField field, List<Vector2> polygon, int label)
+        {
+            float minX = float.MaxValue, minY = float.MaxValue, maxX = float.MinValue, maxY = float.MinValue;
+            foreach (var p in polygon)
+            {
+                minX = MathF.Min(minX, p.X);
+                minY = MathF.Min(minY, p.Y);
+                maxX = MathF.Max(maxX, p.X);
+                maxY = MathF.Max(maxY, p.Y);
+            }
+            var y0 = Math.Max(0, (int)MathF.Floor(minY));
+            var y1 = Math.Min(field.Height - 1, (int)MathF.Ceiling(maxY));
+            var x0 = Math.Max(0, (int)MathF.Floor(minX));
+            var x1 = Math.Min(field.Width - 1, (int)MathF.Ceiling(maxX));
+            var crossings = new List<float>();
+            for (var y = y0; y <= y1; y++)
+            {
+                var cy = y + 0.5f;
+                crossings.Clear();
+                for (var i = 0; i < polygon.Count; i++)
+                {
+                    var a = polygon[i];
+                    var b = polygon[(i + 1) % polygon.Count];
+                    if ((a.Y <= cy) == (b.Y <= cy))
+                        continue;
+                    crossings.Add(a.X + (cy - a.Y) / (b.Y - a.Y) * (b.X - a.X));
+                }
+                crossings.Sort();
+                for (var c = 0; c + 1 < crossings.Count; c += 2)
+                {
+                    var sx = Math.Max(x0, (int)MathF.Ceiling(crossings[c] - 0.5f));
+                    var ex = Math.Min(x1, (int)MathF.Floor(crossings[c + 1] - 0.5f));
+                    for (var x = sx; x <= ex; x++)
+                    {
+                        var pixel = y * field.Width + x;
+                        if (field.Labels[pixel] == 0)
+                            field.Labels[pixel] = label;
+                    }
+                }
+            }
         }
 
         /// <summary>偶奇規則による内外判定（+x方向レイキャスト）</summary>

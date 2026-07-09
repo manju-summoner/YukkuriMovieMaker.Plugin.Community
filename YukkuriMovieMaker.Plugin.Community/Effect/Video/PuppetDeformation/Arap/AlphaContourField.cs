@@ -19,6 +19,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         /// <summary>膨張後の連結成分ラベル（0=透明）。輪郭の内側判定・内部点のラベル付けに使う</summary>
         public int[] Labels { get; }
 
+        /// <summary>
+        /// 前景/背景の境界までのchamfer距離（3-4重み、値3≒1px）。
+        /// 内部点の輪郭クリアランス判定と、三角形分類の高速パス
+        /// （境界から十分離れた点はラベル参照だけで内外を即決できる）に使う。
+        /// </summary>
+        public int[] BoundaryDistance { get; }
+
         public List<Loop> Loops { get; }
 
         /// <summary>膨張後の不透明ピクセル数</summary>
@@ -37,11 +44,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             public required double SignedArea { get; init; }
         }
 
-        AlphaContourField(int width, int height, int[] labels, List<Loop> loops, int opaquePixelCount)
+        AlphaContourField(int width, int height, int[] labels, int[] boundaryDistance, List<Loop> loops, int opaquePixelCount)
         {
             Width = width;
             Height = height;
             Labels = labels;
+            BoundaryDistance = boundaryDistance;
             Loops = loops;
             OpaquePixelCount = opaquePixelCount;
         }
@@ -58,11 +66,112 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             var labels = LabelComponents(opaque, width, height);
             DilatePreservingLabels(labels, width, height);
 
-            var loops = TraceLoops(labels, width, height, maxBoundaryEdges, out var opaqueCount);
+            var loops = TraceLoops(labels, width, height, maxBoundaryEdges, out var opaqueCount, out var opaqueBounds);
             if (loops is null)
                 return null;
 
-            return new AlphaContourField(width, height, labels, loops, opaqueCount);
+            var boundaryDistance = BuildBoundaryDistance(labels, width, height, opaqueBounds);
+            return new AlphaContourField(width, height, labels, boundaryDistance, loops, opaqueCount);
+        }
+
+        /// <summary>
+        /// 前景/背景の境界までのchamfer距離変換（3-4重み、2パス）。
+        /// 前景・背景の両側で「最寄りの逆クラスピクセルまでの距離」を持つ。
+        /// 距離の参照は前景バウンディングボックス内でしか行われず、値も閾値比較にしか使われないため、
+        /// 計算はバウンディングボックス＋余白の領域に限定する（領域外は0=境界扱いのまま）。
+        /// 画像外・領域外は背景として扱う（前景の輪郭は画像端でも切れるため）。
+        /// </summary>
+        static int[] BuildBoundaryDistance(int[] labels, int width, int height, (int X0, int Y0, int X1, int Y1) opaqueBounds)
+        {
+            const int Orth = 3;
+            const int Diag = 4;
+            const int Inf = int.MaxValue / 2;
+            var dist = new int[width * height];
+
+            //前景の無い入力（呼び出し側で弾かれるが保険）
+            if (opaqueBounds.X1 < opaqueBounds.X0)
+                return dist;
+
+            const int Margin = 4;
+            var x0 = Math.Max(0, opaqueBounds.X0 - Margin);
+            var y0 = Math.Max(0, opaqueBounds.Y0 - Margin);
+            var x1 = Math.Min(width - 1, opaqueBounds.X1 + Margin);
+            var y1 = Math.Min(height - 1, opaqueBounds.Y1 + Margin);
+
+            //領域外（画像外含む）を背景とみなす近傍参照。内側ループでは使わない
+            int SampleChecked(int nx, int ny, bool fg, int weight)
+            {
+                if (nx < x0 || nx > x1 || ny < y0 || ny > y1)
+                    return fg ? weight : Inf;
+                var n = ny * width + nx;
+                if ((labels[n] != 0) != fg)
+                    return weight;
+                return dist[n] + weight;
+            }
+
+            //前進パス（左・上・左上・右上）
+            for (var y = y0; y <= y1; y++)
+            {
+                var isBorderRow = y == y0;
+                for (var x = x0; x <= x1; x++)
+                {
+                    var i = y * width + x;
+                    var fg = labels[i] != 0;
+                    int d;
+                    if (isBorderRow || x == x0 || x == x1)
+                    {
+                        d = SampleChecked(x - 1, y, fg, Orth);
+                        d = Math.Min(d, SampleChecked(x, y - 1, fg, Orth));
+                        d = Math.Min(d, SampleChecked(x - 1, y - 1, fg, Diag));
+                        d = Math.Min(d, SampleChecked(x + 1, y - 1, fg, Diag));
+                    }
+                    else
+                    {
+                        //内側は境界チェックなしの直線コード（ここが総ピクセル数分回る）
+                        d = (labels[i - 1] != 0) != fg ? Orth : dist[i - 1] + Orth;
+                        var up = i - width;
+                        var c = (labels[up] != 0) != fg ? Orth : dist[up] + Orth;
+                        if (c < d) d = c;
+                        c = (labels[up - 1] != 0) != fg ? Diag : dist[up - 1] + Diag;
+                        if (c < d) d = c;
+                        c = (labels[up + 1] != 0) != fg ? Diag : dist[up + 1] + Diag;
+                        if (c < d) d = c;
+                    }
+                    dist[i] = d;
+                }
+            }
+            //後退パス（右・下・右下・左下）
+            for (var y = y1; y >= y0; y--)
+            {
+                var isBorderRow = y == y1;
+                for (var x = x1; x >= x0; x--)
+                {
+                    var i = y * width + x;
+                    var fg = labels[i] != 0;
+                    var d = dist[i];
+                    if (isBorderRow || x == x0 || x == x1)
+                    {
+                        d = Math.Min(d, SampleChecked(x + 1, y, fg, Orth));
+                        d = Math.Min(d, SampleChecked(x, y + 1, fg, Orth));
+                        d = Math.Min(d, SampleChecked(x + 1, y + 1, fg, Diag));
+                        d = Math.Min(d, SampleChecked(x - 1, y + 1, fg, Diag));
+                    }
+                    else
+                    {
+                        var c = (labels[i + 1] != 0) != fg ? Orth : dist[i + 1] + Orth;
+                        if (c < d) d = c;
+                        var down = i + width;
+                        c = (labels[down] != 0) != fg ? Orth : dist[down] + Orth;
+                        if (c < d) d = c;
+                        c = (labels[down + 1] != 0) != fg ? Diag : dist[down + 1] + Diag;
+                        if (c < d) d = c;
+                        c = (labels[down - 1] != 0) != fg ? Diag : dist[down - 1] + Diag;
+                        if (c < d) d = c;
+                    }
+                    dist[i] = d;
+                }
+            }
+            return dist;
         }
 
         /// <summary>4連結の連結成分ラベリング（2パスunion-find）。0=透明、1..=成分</summary>
@@ -202,9 +311,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         /// 不透明ピクセル正方形の和集合の境界を追跡し、閉ループ群を返す。
         /// 対角接触の角（4エッジが集まる曖昧点）は右折優先で解決し、領域ごとにループを分離する。
         /// </summary>
-        static List<Loop>? TraceLoops(int[] labels, int width, int height, int maxBoundaryEdges, out int opaqueCount)
+        static List<Loop>? TraceLoops(
+            int[] labels, int width, int height, int maxBoundaryEdges,
+            out int opaqueCount, out (int X0, int Y0, int X1, int Y1) opaqueBounds)
         {
             opaqueCount = 0;
+            opaqueBounds = (0, 0, -1, -1);
+            int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
             var cornersX = width + 1;
 
             //境界エッジをキー: (角index << 2) | 方向 → ラベル で収集する
@@ -222,6 +335,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     if (label == 0)
                         continue;
                     opaqueCount++;
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
 
                     //上下左右の透明側にエッジを張る（進行方向の右側が自ピクセル）
                     if (y == 0 || labels[(y - 1) * width + x] == 0)
@@ -304,6 +421,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     SignedArea = SignedArea(points),
                 });
             }
+            if (opaqueCount > 0)
+                opaqueBounds = (minX, minY, maxX, maxY);
             return loops;
         }
 
