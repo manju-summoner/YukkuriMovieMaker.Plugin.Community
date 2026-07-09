@@ -144,8 +144,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     time = editorInfo.VideoInfo.GetTimeFrom(editorInfo.ItemDuration.Frame - 1);
 
                 itemVideoSource.Update(time, Player.Video.TimelineSourceUsage.Paused);
-                var bounds = itemVideoSource.Devices.DeviceContext.GetImageLocalBounds(itemVideoSource.Output);
-                var image = itemVideoSource.RenderBitmapSource();
+                var image = itemVideoSource.RenderBitmapSource(out var bounds);
                 SetBaseImage(image, new Rect(bounds.Left, bounds.Top, image.PixelWidth, image.PixelHeight));
             }
             catch
