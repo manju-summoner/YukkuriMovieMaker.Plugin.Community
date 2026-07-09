@@ -14,5 +14,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
         public static int WorldPad(float range) => (int)MathF.Ceiling(MathF.Min(Math.Clamp(range, 1f, MaxRange), 512f)) + 2;
 
         public static int ProbeCount(int worldSize, int level) => Math.Max((worldSize + Spacing(level) - 1) / Spacing(level), 1);
+
+        public const int OccLevelCount = 6;
+
+        public static int OccBlockSize(int worldSize, int level) => Math.Max((worldSize + (1 << level) - 1) >> level, 1);
+
+        public static int OccAtlasWidth(int worldW) => OccBlockSize(worldW, 1);
+
+        public static int OccAtlasHeight(int worldH)
+        {
+            var total = 0;
+            for (var level = 1; level <= OccLevelCount; level++)
+                total += OccBlockSize(worldH, level);
+            return total;
+        }
     }
 }

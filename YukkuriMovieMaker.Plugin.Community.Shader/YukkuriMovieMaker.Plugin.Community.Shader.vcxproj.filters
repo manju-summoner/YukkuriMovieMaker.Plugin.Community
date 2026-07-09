@@ -180,10 +180,7 @@
     <FxCompile Include="RadianceComposite.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-    <FxCompile Include="RadianceJfaSeed.hlsl">
-      <Filter>ソース ファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="RadianceJfaStep.hlsl">
+    <FxCompile Include="RadianceOccupancy.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
   </ItemGroup>

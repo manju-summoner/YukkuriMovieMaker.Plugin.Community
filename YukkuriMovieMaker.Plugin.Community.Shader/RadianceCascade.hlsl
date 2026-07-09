@@ -2,8 +2,8 @@ Texture2D EmissionTexture : register(t0);
 SamplerState EmissionSampler : register(s0);
 Texture2D UpperTexture : register(t1);
 SamplerState UpperSampler : register(s1);
-Texture2D JfaTexture : register(t2);
-SamplerState JfaSampler : register(s2);
+Texture2D OccupancyTexture : register(t2);
+SamplerState OccupancySampler : register(s2);
 
 cbuffer Constants : register(b0)
 {
@@ -20,15 +20,19 @@ cbuffer Constants : register(b0)
     float upProbeW      : packoffset(c2.x);
     float upProbeH      : packoffset(c2.y);
     float isTop         : packoffset(c2.z);
-    float pad0          : packoffset(c2.w);
+    float worldW        : packoffset(c2.w);
+
+    float worldH        : packoffset(c3.x);
+    float pad0          : packoffset(c3.y);
+    float pad1          : packoffset(c3.z);
+    float pad2          : packoffset(c3.w);
 };
 
 #define SIGMA 0.6f
 #define FALLOFF_SOFT 2.0f
-#define FINE_STEP 1.5f
-#define MAX_ITER 48
-#define SKIP_CAP 256.0f
-#define SDF_FAR 4096.0f
+#define FINE_STEP 1.0f
+#define MAX_ITER 96
+#define OCC_LEVELS 6
 
 float4 SampleEmissionWorld(float4 uv0, float2 scenePos, float2 q)
 {
@@ -38,24 +42,59 @@ float4 SampleEmissionWorld(float4 uv0, float2 scenePos, float2 q)
     return EmissionTexture.SampleLevel(EmissionSampler, uv, 0);
 }
 
-float SdfAt(float4 uv2, float2 scenePos, float2 q)
+uint OccBlockSize(uint worldSize, uint level)
 {
+    return max((worldSize + (1u << level) - 1u) >> level, 1u);
+}
+
+float OccupancyAt(float4 uv2, float2 scenePos, uint level, float2 q)
+{
+    uint ww = (uint)worldW;
+    uint wh = (uint)worldH;
+    uint bw = OccBlockSize(ww, level);
+    uint bh = OccBlockSize(wh, level);
+
+    float cell = (float)(1u << level);
     float2 origin = float2(worldL, worldT);
-    float2 snapped = floor(q - origin) + 0.5f + origin;
-    float2 uv = uv2.xy + (snapped - scenePos) * uv2.zw;
+    int bx = (int)floor((q.x - worldL) / cell);
+    int by = (int)floor((q.y - worldT) / cell);
+    bx = clamp(bx, 0, (int)bw - 1);
+    by = clamp(by, 0, (int)bh - 1);
+
+    uint top = 0u;
+    [unroll]
+    for (uint n = 1u; n <= (uint)OCC_LEVELS; n++)
+    {
+        if (n < level)
+            top += OccBlockSize(wh, n);
+    }
+
+    float2 pixel = origin + float2((float)bx + 0.5f, (float)(top + (uint)by) + 0.5f);
+    float2 uv = uv2.xy + (pixel - scenePos) * uv2.zw;
     if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f)
-        return SDF_FAR;
+        return 0.0f;
+    return OccupancyTexture.SampleLevel(OccupancySampler, uv, 0).r;
+}
 
-    float4 f = JfaTexture.SampleLevel(JfaSampler, uv, 0);
-    float hiX = round(f.r * 255.0f);
-    float loX = round(f.g * 255.0f);
-    float hiY = round(f.b * 255.0f);
-    float loY = round(f.a * 255.0f);
-    if (hiX >= 254.5f && hiY >= 254.5f)
-        return SDF_FAR;
+float CellExit(float2 q, float2 dir, uint level)
+{
+    float cell = (float)(1u << level);
+    float2 local = (q - float2(worldL, worldT)) / cell;
+    float2 frac = local - floor(local);
 
-    float2 seed = origin + float2(hiX * 256.0f + loX, hiY * 256.0f + loY) + 0.5f;
-    return length(q - seed);
+    float tx = 1e9f;
+    if (dir.x > 1e-6f)
+        tx = (1.0f - frac.x) * cell / dir.x;
+    else if (dir.x < -1e-6f)
+        tx = frac.x * cell / (-dir.x);
+
+    float ty = 1e9f;
+    if (dir.y > 1e-6f)
+        ty = (1.0f - frac.y) * cell / dir.y;
+    else if (dir.y < -1e-6f)
+        ty = frac.y * cell / (-dir.y);
+
+    return min(tx, ty) + 0.05f;
 }
 
 float3 SampleUpperAtlas(float4 uv1, float2 scenePos, float2 q)
@@ -74,21 +113,21 @@ float4 main(
     float4 uv2      : TEXCOORD2
 ) : SV_TARGET
 {
-    int ts = (int)tilesSide;
-    int pw = (int)probeW;
-    int ph = (int)probeH;
+    uint ts = (uint)tilesSide;
+    uint pw = (uint)probeW;
+    uint ph = (uint)probeH;
 
     float2 local = posScene.xy - float2(worldL, worldT);
-    int ix = clamp((int)floor(local.x), 0, ts * pw - 1);
-    int iy = clamp((int)floor(local.y), 0, ts * ph - 1);
+    uint ix = (uint)clamp((int)floor(local.x), 0, (int)(ts * pw) - 1);
+    uint iy = (uint)clamp((int)floor(local.y), 0, (int)(ts * ph) - 1);
 
-    int tileX = ix / pw;
-    int tileY = iy / ph;
-    int probeX = ix - tileX * pw;
-    int probeY = iy - tileY * ph;
+    uint tileX = ix / pw;
+    uint tileY = iy / ph;
+    uint probeX = ix - tileX * pw;
+    uint probeY = iy - tileY * ph;
 
-    int dirs = ts * ts;
-    int d = tileY * ts + tileX;
+    uint dirs = ts * ts;
+    uint d = tileY * ts + tileX;
 
     float ang = 6.2831853f * ((float)d + 0.5f) / (float)dirs;
     float2 dir;
@@ -99,6 +138,7 @@ float4 main(
     float transmittance = 1.0f;
     float3 gather = float3(0.0f, 0.0f, 0.0f);
     float t = intervalStart;
+    uint level = 3u;
 
     [loop]
     for (int j = 0; j < MAX_ITER; j++)
@@ -107,11 +147,18 @@ float4 main(
             break;
 
         float2 q = probeWorld + dir * t;
-        float sdf = SdfAt(uv2, posScene.xy, q) - 1.0f;
 
-        if (sdf > FINE_STEP)
+        if (level > 0u)
         {
-            t += max(min(min(sdf, SKIP_CAP), intervalEnd - t), 0.25f);
+            if (OccupancyAt(uv2, posScene.xy, level, q) < 0.5f)
+            {
+                t += max(min(CellExit(q, dir, level), intervalEnd - t), 0.05f);
+                level = min(level + 1u, (uint)OCC_LEVELS);
+            }
+            else
+            {
+                level--;
+            }
             continue;
         }
 
@@ -120,21 +167,22 @@ float4 main(
         gather += transmittance * f.rgb * (h / (t + FALLOFF_SOFT));
         transmittance *= exp(-f.a * SIGMA * h);
         t += h;
+        level = 1u;
     }
 
     float3 upper = float3(0.0f, 0.0f, 0.0f);
     if (isTop < 0.5f)
     {
-        int upTs = ts * 2;
+        uint upTs = ts * 2u;
         float ux = clamp((probeWorld.x - worldL) / (spacing * 2.0f) - 0.5f, 0.0f, upProbeW - 1.0f);
         float uy = clamp((probeWorld.y - worldT) / (spacing * 2.0f) - 0.5f, 0.0f, upProbeH - 1.0f);
 
         [unroll]
-        for (int k = 0; k < 4; k++)
+        for (uint k = 0u; k < 4u; k++)
         {
-            int dc = 4 * d + k;
-            int tcX = dc % upTs;
-            int tcY = dc / upTs;
+            uint dc = 4u * d + k;
+            uint tcX = dc % upTs;
+            uint tcY = dc / upTs;
             float2 q = float2(worldL, worldT) + float2((float)tcX * upProbeW + ux + 0.5f, (float)tcY * upProbeH + uy + 0.5f);
             upper += SampleUpperAtlas(uv1, posScene.xy, q);
         }

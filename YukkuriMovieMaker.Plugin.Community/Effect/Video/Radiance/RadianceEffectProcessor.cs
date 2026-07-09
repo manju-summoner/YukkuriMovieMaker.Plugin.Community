@@ -10,12 +10,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
         RadianceEffect item) : VideoEffectProcessorBase(devices)
     {
         const int CascadeCount = RadianceGeometry.LevelCount;
-        const int JfaCount = 10;
+        const int OccCount = RadianceGeometry.OccLevelCount;
 
         private readonly RadianceEffect _item = item;
         private RadianceEmissionCustomEffect? _emissionEffect;
-        private RadianceJfaSeedCustomEffect? _jfaSeedEffect;
-        private readonly RadianceJfaStepCustomEffect?[] _jfaStepEffects = new RadianceJfaStepCustomEffect?[JfaCount];
+        private readonly RadianceOccupancyCustomEffect?[] _occupancyEffects = new RadianceOccupancyCustomEffect?[OccCount];
         private readonly RadianceCascadeCustomEffect?[] _cascadeEffects = new RadianceCascadeCustomEffect?[CascadeCount];
         private RadianceCompositeCustomEffect? _compositeEffect;
 
@@ -76,8 +75,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                     cascade.IntervalEnd = parameters.Range * RadianceGeometry.IntervalBounds[i + 1];
                     cascade.TotalRange = parameters.Range;
                 }
-                if (_jfaSeedEffect is not null)
-                    _jfaSeedEffect.TotalRange = parameters.Range;
+                for (var i = 0; i < OccCount; i++)
+                {
+                    var occupancy = _occupancyEffects[i];
+                    if (occupancy is not null)
+                        occupancy.TotalRange = parameters.Range;
+                }
                 _compositeEffect.RangePx = parameters.Range;
             }
 
@@ -90,16 +93,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
             _emissionEffect = new RadianceEmissionCustomEffect(devices);
-            _jfaSeedEffect = new RadianceJfaSeedCustomEffect(devices);
-            for (var i = 0; i < JfaCount; i++)
-                _jfaStepEffects[i] = new RadianceJfaStepCustomEffect(devices);
+            for (var i = 0; i < OccCount; i++)
+                _occupancyEffects[i] = new RadianceOccupancyCustomEffect(devices);
             for (var i = 0; i < CascadeCount; i++)
                 _cascadeEffects[i] = new RadianceCascadeCustomEffect(devices);
             _compositeEffect = new RadianceCompositeCustomEffect(devices);
 
-            var allEnabled = _emissionEffect.IsEnabled && _jfaSeedEffect.IsEnabled && _compositeEffect.IsEnabled;
-            for (var i = 0; i < JfaCount; i++)
-                allEnabled &= _jfaStepEffects[i]!.IsEnabled;
+            var allEnabled = _emissionEffect.IsEnabled && _compositeEffect.IsEnabled;
+            for (var i = 0; i < OccCount; i++)
+                allEnabled &= _occupancyEffects[i]!.IsEnabled;
             for (var i = 0; i < CascadeCount; i++)
                 allEnabled &= _cascadeEffects[i]!.IsEnabled;
 
@@ -107,12 +109,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
             {
                 _emissionEffect.Dispose();
                 _emissionEffect = null;
-                _jfaSeedEffect.Dispose();
-                _jfaSeedEffect = null;
-                for (var i = 0; i < JfaCount; i++)
+                for (var i = 0; i < OccCount; i++)
                 {
-                    _jfaStepEffects[i]?.Dispose();
-                    _jfaStepEffects[i] = null;
+                    _occupancyEffects[i]?.Dispose();
+                    _occupancyEffects[i] = null;
                 }
                 for (var i = 0; i < CascadeCount; i++)
                 {
@@ -125,39 +125,37 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
             }
 
             disposer.Collect(_emissionEffect);
-            disposer.Collect(_jfaSeedEffect);
-            for (var i = 0; i < JfaCount; i++)
-                disposer.Collect(_jfaStepEffects[i]!);
+            for (var i = 0; i < OccCount; i++)
+                disposer.Collect(_occupancyEffects[i]!);
             for (var i = 0; i < CascadeCount; i++)
                 disposer.Collect(_cascadeEffects[i]!);
             disposer.Collect(_compositeEffect);
 
-            for (var i = 0; i < JfaCount; i++)
-                _jfaStepEffects[i]!.StepPx = 1 << (JfaCount - 1 - i);
+            for (var i = 0; i < OccCount; i++)
+                _occupancyEffects[i]!.BuildLevel = i + 1;
             for (var i = 0; i < CascadeCount; i++)
                 _cascadeEffects[i]!.Level = i;
 
             using (var emissionOutput = _emissionEffect.Output)
             {
-                _jfaSeedEffect.SetInput(0, emissionOutput, true);
+                _occupancyEffects[0]!.SetInput(0, emissionOutput, true);
+                for (var i = 0; i < OccCount; i++)
+                    _occupancyEffects[i]!.SetInput(1, emissionOutput, true);
                 for (var i = 0; i < CascadeCount; i++)
                     _cascadeEffects[i]!.SetInput(0, emissionOutput, true);
                 _cascadeEffects[CascadeCount - 1]!.SetInput(1, emissionOutput, true);
             }
 
-            using (var seedOutput = _jfaSeedEffect.Output)
-                _jfaStepEffects[0]!.SetInput(0, seedOutput, true);
-
-            for (var i = 1; i < JfaCount; i++)
+            for (var i = 1; i < OccCount; i++)
             {
-                using var prevOutput = _jfaStepEffects[i - 1]!.Output;
-                _jfaStepEffects[i]!.SetInput(0, prevOutput, true);
+                using var prevOutput = _occupancyEffects[i - 1]!.Output;
+                _occupancyEffects[i]!.SetInput(0, prevOutput, true);
             }
 
-            using (var jfaOutput = _jfaStepEffects[JfaCount - 1]!.Output)
+            using (var occupancyOutput = _occupancyEffects[OccCount - 1]!.Output)
             {
                 for (var i = 0; i < CascadeCount; i++)
-                    _cascadeEffects[i]!.SetInput(2, jfaOutput, true);
+                    _cascadeEffects[i]!.SetInput(2, occupancyOutput, true);
             }
 
             for (var i = CascadeCount - 2; i >= 0; i--)
@@ -183,9 +181,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
         protected override void ClearEffectChain()
         {
             _emissionEffect?.SetInput(0, null, true);
-            _jfaSeedEffect?.SetInput(0, null, true);
-            for (var i = 0; i < JfaCount; i++)
-                _jfaStepEffects[i]?.SetInput(0, null, true);
+            for (var i = 0; i < OccCount; i++)
+            {
+                _occupancyEffects[i]?.SetInput(0, null, true);
+                _occupancyEffects[i]?.SetInput(1, null, true);
+            }
             for (var i = 0; i < CascadeCount; i++)
             {
                 _cascadeEffects[i]?.SetInput(0, null, true);

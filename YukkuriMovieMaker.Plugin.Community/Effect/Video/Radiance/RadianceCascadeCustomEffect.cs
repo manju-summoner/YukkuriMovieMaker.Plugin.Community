@@ -22,6 +22,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
             private float _totalRange = 300f;
             private RawRect _emissionReadRect;
             private RawRect _upperAtlasRect;
+            private RawRect _occupancyRect;
 
             [CustomEffectProperty(PropertyType.Int32, (int)Properties.Level)]
             public int Level { get => _level; set => _level = Math.Clamp(value, 0, RadianceGeometry.LevelCount - 1); }
@@ -81,6 +82,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                 var upProbeH = RadianceGeometry.ProbeCount((int)worldH, upLevel);
                 _cb.UpProbeW = upProbeW;
                 _cb.UpProbeH = upProbeH;
+                _cb.WorldW = worldW;
+                _cb.WorldH = worldH;
                 UpdateConstants();
 
                 outputRect = new RawRect(
@@ -102,13 +105,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                     Saturate(worldT),
                     Saturate(worldL + (long)upTiles * upProbeW),
                     Saturate(worldT + (long)upTiles * upProbeH));
+
+                _occupancyRect = new RawRect(
+                    Saturate(worldL),
+                    Saturate(worldT),
+                    Saturate(worldL + RadianceGeometry.OccAtlasWidth((int)worldW)),
+                    Saturate(worldT + RadianceGeometry.OccAtlasHeight((int)worldH)));
             }
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
                 inputRects[0] = _emissionReadRect;
                 inputRects[1] = _upperAtlasRect;
-                inputRects[2] = _emissionReadRect;
+                inputRects[2] = _occupancyRect;
             }
 
             private static int Saturate(long value) => (int)Math.Clamp(value, int.MinValue, int.MaxValue);
@@ -127,7 +136,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                 public float UpProbeW;
                 public float UpProbeH;
                 public float IsTop;
+                public float WorldW;
+                public float WorldH;
                 public float Pad0;
+                public float Pad1;
+                public float Pad2;
             }
 
             public enum Properties : int

@@ -181,8 +181,7 @@
     <Resource Include="$(ShaderDirPath)RadianceEmission.cso" Link="Resources\Shader\RadianceEmission.cso" />
     <Resource Include="$(ShaderDirPath)RadianceCascade.cso" Link="Resources\Shader\RadianceCascade.cso" />
     <Resource Include="$(ShaderDirPath)RadianceComposite.cso" Link="Resources\Shader\RadianceComposite.cso" />
-    <Resource Include="$(ShaderDirPath)RadianceJfaSeed.cso" Link="Resources\Shader\RadianceJfaSeed.cso" />
-    <Resource Include="$(ShaderDirPath)RadianceJfaStep.cso" Link="Resources\Shader\RadianceJfaStep.cso" />
+    <Resource Include="$(ShaderDirPath)RadianceOccupancy.cso" Link="Resources\Shader\RadianceOccupancy.cso" />
   </ItemGroup>
 
   <!-- internalsを参照するテスト（EdgeDetectionZeroStrengthOverlayTest等）はDEBUG限定のため、Releaseビルドには付与しない -->
