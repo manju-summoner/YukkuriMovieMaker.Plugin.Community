@@ -135,6 +135,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                 _occupancyEffects[i]!.BuildLevel = i + 1;
             for (var i = 0; i < CascadeCount; i++)
                 _cascadeEffects[i]!.Level = i;
+            _cascadeEffects[0]!.Cached = true;
 
             using (var emissionOutput = _emissionEffect.Output)
             {
