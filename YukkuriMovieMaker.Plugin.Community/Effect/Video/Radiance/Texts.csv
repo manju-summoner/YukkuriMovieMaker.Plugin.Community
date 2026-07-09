@@ -1,0 +1,22 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+RadianceEffectName,,輻射光,Radiance,辐射光,輻射光,복사광,Radiancia,الإشعاع الضوئي,Radiansi
+RadianceStrength,,強度,Strength,强度,強度,강도,Intensidad,القوة,Kekuatan
+RadianceStrengthDescription,,周囲へ届く光の明るさ,Brightness of the light cast onto the surroundings,照射到周围的光的亮度,照射到周圍的光的亮度,주위에 닿는 빛의 밝기,Brillo de la luz proyectada al entorno,سطوع الضوء المنبعث إلى المحيط,Kecerahan cahaya yang menyinari sekitar
+RadianceRange,,到達距離,Range,到达距离,到達距離,도달 거리,Alcance,مدى الوصول,Jangkauan
+RadianceRangeDescription,,光が届く最大距離,Maximum distance the light travels,光能到达的最大距离,光能到達的最大距離,빛이 도달하는 최대 거리,Distancia máxima que recorre la luz,أقصى مسافة يصلها الضوء,Jarak maksimum cahaya menjangkau
+RadianceDiffuse,,拡散,Diffuse,漫反射,漫反射,확산,Difusión,الانتشار,Difusi
+RadianceDiffuseDescription,,面を照らす光と空気中で光る光の配合。100%で面だけを照らします,Balance between light on surfaces and glow in the air. At 100% only surfaces are lit,照亮表面的光与空气中发光的配比。100%时仅照亮表面,照亮表面的光與空氣中發光的配比。100%時僅照亮表面,면을 비추는 빛과 공기 중에 빛나는 빛의 배합. 100%면 면만 비춥니다,Equilibrio entre luz sobre superficies y brillo en el aire. Al 100% solo se iluminan superficies,التوازن بين إضاءة الأسطح والتوهج في الهواء. عند 100% تضاء الأسطح فقط,Perpaduan cahaya pada permukaan dan pendar di udara. Pada 100% hanya permukaan yang disinari
+RadianceAmbient,,環境光,Ambient,环境光,環境光,환경광,Luz ambiental,الضوء المحيطي,Cahaya ambien
+RadianceAmbientDescription,,光が届かない場所の明るさ。下げると光の当たる場所だけが浮かび上がります,Brightness of unlit areas. Lower values make only lit areas stand out,光照不到之处的亮度。调低后只有被照亮的地方会浮现,光照不到之處的亮度。調低後只有被照亮的地方會浮現,빛이 닿지 않는 곳의 밝기. 낮추면 빛이 닿는 곳만 떠오릅니다,Brillo de las zonas sin luz. Con valores bajos solo resaltan las zonas iluminadas,سطوع المناطق غير المضاءة. القيم المنخفضة تُبرز المناطق المضاءة فقط,Kecerahan area tanpa cahaya. Nilai rendah membuat hanya area tersinari yang menonjol
+RadianceEmissionGroup,,光源,Light source,光源,光源,광원,Fuente de luz,مصدر الضوء,Sumber cahaya
+RadianceThreshold,,発光しきい値,Emission threshold,发光阈值,發光閾值,발광 임계값,Umbral de emisión,عتبة الانبعاث,Ambang emisi
+RadianceThresholdDescription,,この明るさを超えた部分が光源になります,Pixels brighter than this become light sources,超过该亮度的部分将成为光源,超過該亮度的部分將成為光源,이 밝기를 넘는 부분이 광원이 됩니다,Los píxeles más brillantes que este valor se convierten en fuentes de luz,تصبح البكسلات الأسطع من هذه القيمة مصادر ضوء,Piksel yang lebih terang dari nilai ini menjadi sumber cahaya
+RadianceEmissionGain,,発光の強さ,Emission strength,发光强度,發光強度,발광 강도,Fuerza de emisión,قوة الانبعاث,Kekuatan emisi
+RadianceEmissionGainDescription,,光源が放つ光の量,Amount of light the sources emit,光源发出的光量,光源發出的光量,광원이 내뿜는 빛의 양,Cantidad de luz que emiten las fuentes,كمية الضوء المنبعثة من المصادر,Jumlah cahaya yang dipancarkan sumber
+RadianceLightColor,,発光色,Light color,发光颜色,發光顏色,발광 색,Color de la luz,لون الضوء,Warna cahaya
+RadianceLightColorDescription,,光に乗せる色。素材の色と掛け合わされます,Color applied to the light. Multiplied with the material color,叠加到光上的颜色。与素材颜色相乘,疊加到光上的顏色。與素材顏色相乘,빛에 입히는 색. 소재의 색과 곱해집니다,Color aplicado a la luz. Se multiplica con el color del material,اللون المطبق على الضوء. يُضرب في لون المادة,Warna yang diterapkan pada cahaya. Dikalikan dengan warna materi
+RadianceOcclusion,,遮蔽の強さ,Occlusion strength,遮蔽强度,遮蔽強度,차폐 강도,Fuerza de oclusión,قوة الحجب,Kekuatan oklusi
+RadianceOcclusionDescription,,不透明な部分が光を遮る度合い。0で光がすべてを透過します,How strongly opaque areas block the light. At 0 light passes through everything,不透明部分遮挡光的程度。为0时光穿透一切,不透明部分遮擋光的程度。為0時光穿透一切,불투명한 부분이 빛을 가리는 정도. 0이면 빛이 모든 것을 통과합니다,Grado en que las zonas opacas bloquean la luz. Con 0 la luz atraviesa todo,مدى حجب المناطق المعتمة للضوء. عند 0 يخترق الضوء كل شيء,Seberapa kuat area buram menghalangi cahaya. Pada 0 cahaya menembus semuanya
+TagGlobalIllumination,,大域照明,global illumination,全局光照,全域光照,전역 조명,iluminación global,إضاءة شاملة,pencahayaan global
+TagLighting,,ライティング,lighting,照明,照明,라이팅,iluminación,إضاءة,pencahayaan
+TagGlow,,発光,glow,发光,發光,발광,resplandor,توهج,pendar
