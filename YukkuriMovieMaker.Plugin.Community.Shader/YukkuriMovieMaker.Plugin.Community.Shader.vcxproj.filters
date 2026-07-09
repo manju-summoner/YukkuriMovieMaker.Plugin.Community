@@ -171,6 +171,12 @@
     <FxCompile Include="VectorFieldWarp.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="AmbientOcclusion.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="AmbientOcclusionPhase.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="Fog.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
