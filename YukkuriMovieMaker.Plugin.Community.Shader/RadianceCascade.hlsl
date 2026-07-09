@@ -76,7 +76,7 @@ float OccupancyAt(float4 uv2, float2 scenePos, uint level, float2 q)
     return OccupancyTexture.SampleLevel(OccupancySampler, uv, 0).r;
 }
 
-float CellExit(float2 q, float2 dir, uint level)
+float CellExit(float2 q, float2 dir, float2 invDir, uint level)
 {
     float cell = (float)(1u << level);
     float2 local = (q - float2(worldL, worldT)) / cell;
@@ -84,15 +84,15 @@ float CellExit(float2 q, float2 dir, uint level)
 
     float tx = 1e9f;
     if (dir.x > 1e-6f)
-        tx = (1.0f - frac.x) * cell / dir.x;
+        tx = (1.0f - frac.x) * cell * invDir.x;
     else if (dir.x < -1e-6f)
-        tx = frac.x * cell / (-dir.x);
+        tx = frac.x * cell * (-invDir.x);
 
     float ty = 1e9f;
     if (dir.y > 1e-6f)
-        ty = (1.0f - frac.y) * cell / dir.y;
+        ty = (1.0f - frac.y) * cell * invDir.y;
     else if (dir.y < -1e-6f)
-        ty = frac.y * cell / (-dir.y);
+        ty = frac.y * cell * (-invDir.y);
 
     return min(tx, ty) + 0.05f;
 }
@@ -132,6 +132,7 @@ float4 main(
     float ang = 6.2831853f * ((float)d + 0.5f) / (float)dirs;
     float2 dir;
     sincos(ang, dir.y, dir.x);
+    float2 invDir = 1.0f / dir;
 
     float2 probeWorld = float2(worldL, worldT) + (float2((float)probeX, (float)probeY) + 0.5f) * spacing;
 
@@ -152,7 +153,7 @@ float4 main(
         {
             if (OccupancyAt(uv2, posScene.xy, level, q) < 0.5f)
             {
-                t += max(min(CellExit(q, dir, level), intervalEnd - t), 0.05f);
+                t += max(min(CellExit(q, dir, invDir, level), intervalEnd - t), 0.05f);
                 level = min(level + 1u, (uint)OCC_LEVELS);
             }
             else
