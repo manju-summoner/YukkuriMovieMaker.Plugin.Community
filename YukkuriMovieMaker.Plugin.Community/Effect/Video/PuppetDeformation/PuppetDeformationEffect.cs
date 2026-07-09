@@ -46,6 +46,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         [AnimationSlider("F2", "", 0.5d, 4d)]
         public Animation Stiffness { get; } = new Animation(2.0, 0.1, 8.0);
 
+#if DEBUG
+        /// <summary>ARAPメッシュの分割状況をプレビューに重ねて表示する（デバッグビルド専用）</summary>
+        [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationShowDebugMeshName), Description = nameof(Texts.PuppetDeformationShowDebugMeshDesc), Order = 3, ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool ShowDebugMesh { get => showDebugMesh; set => Set(ref showDebugMesh, value); }
+        bool showDebugMesh;
+#endif
+
         [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationEditorSyncModeName), Description = nameof(Texts.PuppetDeformationEditorSyncModeDesc), Order = 5, ResourceType = typeof(Texts))]
         [EnumComboBox]
         public PuppetDeformationEditorPointsSync SyncMode

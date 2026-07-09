@@ -76,3 +76,5 @@ PuppetDeformationCanvasBoneTooltip,,クリック: ボーンを追加（選択中
 PuppetDeformationLabelBone,,ボーン,Bone,骨骼,骨骼,본,Hueso,عظم,Tulang
 PuppetDeformationNoJointSelected,,ジョイントが選択されていません,No joint selected,未选择关节,未選擇關節,선택된 조인트가 없습니다,Ninguna articulación seleccionada,لم يتم تحديد مفصل,Tidak ada sendi yang dipilih
 PuppetDeformationNoPinSelected,,ピンが選択されていません,No pin selected,未选择图钉,未選擇圖釘,선택된 핀이 없습니다,Ningún alfiler seleccionado,لم يتم تحديد دبوس,Tidak ada pin yang dipilih
+PuppetDeformationShowDebugMeshName,,メッシュを表示（デバッグ）,Show Mesh (Debug),显示网格（调试）,顯示網格（調試）,메시 표시(디버그),Mostrar malla (depuración),عرض الشبكة (تصحيح),Tampilkan Mesh (Debug)
+PuppetDeformationShowDebugMeshDesc,,剛体（ARAP）のメッシュ分割状況をプレビューに重ねて表示します。,Overlays the Rigid (ARAP) mesh wireframe on the preview.,将刚体（ARAP）的网格划分情况叠加显示在预览上。,將剛體（ARAP）的網格劃分情況疊加顯示在預覽上。,강체(ARAP)의 메시 분할 상태를 미리보기에 겹쳐 표시합니다.,Superpone la malla del modo Rígido (ARAP) sobre la vista previa.,يعرض شبكة الوضع الصلب (ARAP) فوق المعاينة.,Menampilkan wireframe mesh Kaku (ARAP) di atas pratinjau.

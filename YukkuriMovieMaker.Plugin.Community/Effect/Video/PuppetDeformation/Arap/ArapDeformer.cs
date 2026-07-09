@@ -15,7 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         const double PinWeightScale = 1e4;
         const double IdentityEpsilon = 1e-6;
 
-        readonly ArapGridMesh mesh;
+        readonly IArapMesh mesh;
         readonly Vector2[] pinRests;
         readonly BandCholesky cholesky;
 
@@ -42,7 +42,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         public int VertexCount => mesh.VertexCount;
 
         ArapDeformer(
-            ArapGridMesh mesh,
+            IArapMesh mesh,
             Vector2[] pinRests,
             BandCholesky cholesky,
             int[] neighborStart,
@@ -79,7 +79,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         /// メッシュとピンのレスト位置から行列を組み立てて分解する。
         /// 分解に失敗した場合（拘束なしで特異な場合など）はnullを返す。
         /// </summary>
-        public static ArapDeformer? TryCreate(ArapGridMesh mesh, IReadOnlyList<Vector2> pinRestPositions)
+        public static ArapDeformer? TryCreate(IArapMesh mesh, IReadOnlyList<Vector2> pinRestPositions)
         {
             if (pinRestPositions.Count == 0)
                 return null;
@@ -109,8 +109,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 neighborWeight[ib] = w;
             }
 
-            //バンド幅: グリッド隣接（±(cellsX+2)）とピン拘束の三角形内結合が収まる幅
-            var bandwidth = mesh.CellsX + 2;
+            //バンド幅: メッシュのエッジとピン拘束の三角形内結合が収まる幅（メッシュ側が番号付けに基づき保証する）
+            var bandwidth = mesh.SolverBandwidth;
             var cholesky = new BandCholesky(n, bandwidth);
 
             //ラプラシアン部分: L_ii = Σw, L_ij = -w。
