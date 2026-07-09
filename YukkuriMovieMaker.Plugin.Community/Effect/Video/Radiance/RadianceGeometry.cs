@@ -5,13 +5,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
         public const int LevelCount = 4;
         public const float MaxRange = 4096f;
 
+        public const float MaxWorldPad = 1024f;
+
         public static readonly float[] IntervalBounds = [0f, 1f / 85f, 5f / 85f, 21f / 85f, 1f];
 
         public static int Spacing(int level) => 2 << level;
 
         public static int TilesSide(int level) => 2 << level;
 
-        public static int WorldPad(float range) => (int)MathF.Ceiling(MathF.Min(Math.Clamp(range, 1f, MaxRange), 512f)) + 2;
+        // 余白は到達距離に追従させるが、大きな入力で確保領域が過大になり破綻するのを防ぐため上限で頭打ちにする
+        public static int WorldPad(float range) => (int)MathF.Ceiling(MathF.Min(Math.Clamp(range, 1f, MaxRange), MaxWorldPad)) + 2;
 
         public static int ProbeCount(int worldSize, int level) => Math.Max((worldSize + Spacing(level) - 1) / Spacing(level), 1);
 
