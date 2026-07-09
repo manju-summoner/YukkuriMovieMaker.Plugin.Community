@@ -524,15 +524,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         internal static Point ImageToLocalPoint(Point image, Rect imageLocal)
             => new(image.X + imageLocal.Left, image.Y + imageLocal.Top);
 
-        static Point GetRestPoint(PuppetDeformationItemViewModel pin)
-            => new(
-                pin.Model.RestX.Values.FirstOrDefault()?.Value ?? 0,
-                pin.Model.RestY.Values.FirstOrDefault()?.Value ?? 0);
+        double GetDisplayValue(YukkuriMovieMaker.Commons.Animation animation)
+            => viewModel?.GetDisplayValue(animation) ?? animation.Values.FirstOrDefault()?.Value ?? 0;
 
-        static Point GetJointPoint(PuppetBoneViewModel bone)
+        Point GetRestPoint(PuppetDeformationItemViewModel pin)
             => new(
-                bone.Model.JointX.Values.FirstOrDefault()?.Value ?? 0,
-                bone.Model.JointY.Values.FirstOrDefault()?.Value ?? 0);
+                GetDisplayValue(pin.Model.RestX),
+                GetDisplayValue(pin.Model.RestY));
+
+        Point GetJointPoint(PuppetBoneViewModel bone)
+            => new(
+                GetDisplayValue(bone.Model.JointX),
+                GetDisplayValue(bone.Model.JointY));
 
         #endregion
 

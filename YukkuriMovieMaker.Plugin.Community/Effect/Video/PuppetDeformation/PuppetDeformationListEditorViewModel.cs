@@ -30,15 +30,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         IEditorInfo? editorInfo;
         bool isCanvasImageInitialized;
+        int lastCanvasImageFrame = -1;
 
         public void SetEditorInfo(IEditorInfo info)
         {
             editorInfo = info;
 
-            //SetEditorInfoはUndo履歴の更新などで編集操作のたびに呼ばれる。
-            //毎回レンダリングするとデバイス生成が頻発するため、初回のみ取得し以降は更新ボタンに任せる
+            //同一フレームでは編集操作のたびに再描画せず、フレームが変わったときだけ画像を更新する
             if (isCanvasImageInitialized)
+            {
+                if (info.ItemPosition.Frame != lastCanvasImageFrame)
+                    RefreshCanvasImage();
                 return;
+            }
             isCanvasImageInitialized = true;
             RefreshCanvasImage();
         }
@@ -171,6 +175,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             if (editorInfo is null)
                 return;
+            lastCanvasImageFrame = editorInfo.ItemPosition.Frame;
             try
             {
                 //生成されるBitmapSourceはCPU側の完全なコピー(frozen BitmapImage)のため、
@@ -202,6 +207,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 CanvasImageBounds = Rect.Empty;
                 CanvasImage = null;
             }
+        }
+
+        public double GetDisplayValue(Animation animation)
+        {
+            if (editorInfo is null)
+                return animation.Values.FirstOrDefault()?.Value ?? 0;
+            return animation.GetValue(editorInfo.ItemPosition.Frame, editorInfo.ItemDuration.Frame, editorInfo.VideoInfo.FPS);
         }
 
         #region ピン配置キャンバス操作
