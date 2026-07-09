@@ -55,6 +55,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation DepthAmount { get; } = new Animation(0, 0, 100);
 
+        [Display(GroupName = nameof(Texts.FogDepthGroup), Name = nameof(Texts.FogHazeDetect), Description = nameof(Texts.FogHazeDetectDescription), Order = 11, ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 0, 100)]
+        [DepthSettingsVisible]
+        public Animation HazeDetect { get; } = new Animation(30, 0, 100);
+
         [Display(GroupName = nameof(Texts.FogDepthGroup), Name = nameof(Texts.FogVanishingPointX), Description = nameof(Texts.FogVanishingPointXDescription), Order = 12, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", -500, 500)]
         [DepthSettingsVisible]
@@ -64,11 +69,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Fog
         [AnimationSlider("F1", "px", -500, 500)]
         [DepthSettingsVisible]
         public Animation VanishingPointY { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
-
-        [Display(GroupName = nameof(Texts.FogDepthGroup), Name = nameof(Texts.FogHazeDetect), Description = nameof(Texts.FogHazeDetectDescription), Order = 14, ResourceType = typeof(Texts))]
-        [AnimationSlider("F1", "%", 0, 100)]
-        [DepthSettingsVisible]
-        public Animation HazeDetect { get; } = new Animation(30, 0, 100);
 
         [Display(GroupName = nameof(Texts.FogLightGroup), Name = nameof(Texts.FogSunIntensity), Description = nameof(Texts.FogSunIntensityDescription), Order = 20, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
