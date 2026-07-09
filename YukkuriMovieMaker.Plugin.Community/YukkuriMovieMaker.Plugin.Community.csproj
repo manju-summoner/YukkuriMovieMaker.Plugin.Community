@@ -178,6 +178,7 @@
     <Resource Include="$(ShaderDirPath)FacetedGlass.cso" Link="Resources\Shader\FacetedGlass.cso" />
     <Resource Include="$(ShaderDirPath)Dithering.cso" Link="Resources\Shader\Dithering.cso" />
     <Resource Include="$(ShaderDirPath)VectorFieldWarp.cso" Link="Resources\Shader\VectorFieldWarp.cso" />
+    <Resource Include="$(ShaderDirPath)Fog.cso" Link="Resources\Shader\Fog.cso" />
     <Resource Include="$(ShaderDirPath)CrossFilter.cso" Link="Resources\Shader\CrossFilter.cso" />
   </ItemGroup>
 
