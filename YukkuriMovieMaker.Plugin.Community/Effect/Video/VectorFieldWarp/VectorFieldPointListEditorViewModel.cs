@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -29,6 +30,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         IEditorInfo? editorInfo;
         bool isCanvasImageInitialized;
         int lastCanvasImageFrame = -1;
+        readonly object canvasImageRefreshLock = new();
+        CanvasImageRequest? pendingCanvasImageRequest;
+        bool isCanvasImageRefreshRunning;
+        int canvasImageRequestId;
 
         BitmapSource? baseCanvasImage;
         Rect baseCanvasBounds = Rect.Empty;
@@ -51,17 +56,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             editorInfo = info;
             //エディタのデタッチ時などにnullが渡される
             if (info is null)
+            {
+                InvalidateCanvasImageRequests();
                 return;
+            }
             if (isCanvasImageInitialized)
             {
                 if (info.ItemPosition.Frame != lastCanvasImageFrame)
-                    RefreshCanvasImage();
+                    QueueCanvasImageRefresh();
                 else
                     ScheduleWarpUpdate();
                 return;
             }
             isCanvasImageInitialized = true;
-            RefreshCanvasImage();
+            QueueCanvasImageRefresh();
         }
 
         public ImageSource? CanvasImage { get => canvasImage; private set => Set(ref canvasImage, value); }
@@ -115,47 +123,114 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
             AddPointCommand = new ActionCommand(_ => CanAddPoint, _ => AddPointFromCanvas(0, 0));
             RemovePointCommand = new ActionCommand(_ => selectedItem != null, _ => RemoveSelectedPointsFromCanvas());
-            RefreshImageCommand = new ActionCommand(_ => true, _ => RefreshCanvasImage());
+            RefreshImageCommand = new ActionCommand(_ => true, _ => QueueCanvasImageRefresh());
             OnBeginEditPointCommand = new ActionCommand(_ => true, _ => BeginEdit?.Invoke(this, EventArgs.Empty));
             OnEndEditPointCommand = new ActionCommand(_ => true, _ => EndEdit?.Invoke(this, EventArgs.Empty));
 
             RebuildViewModels();
         }
 
-        void RefreshCanvasImage()
+        void QueueCanvasImageRefresh()
         {
-            if (editorInfo is null)
+            var info = editorInfo;
+            if (info is null || disposedValue)
                 return;
-            lastCanvasImageFrame = editorInfo.ItemPosition.Frame;
-            try
+            lastCanvasImageFrame = info.ItemPosition.Frame;
+
+            var startWorker = false;
+            lock (canvasImageRefreshLock)
             {
-                using var itemVideoSource = editorInfo.CreateItemVideoSource(
-                    new ItemVideoSourceCreationParameter(VideoEffectSelection.UpTo(Effect)));
-                if (itemVideoSource is null)
+                pendingCanvasImageRequest = new CanvasImageRequest(info, Effect, ++canvasImageRequestId);
+                if (!isCanvasImageRefreshRunning)
                 {
-                    SetBaseImage(null, Rect.Empty);
-                    return;
+                    isCanvasImageRefreshRunning = true;
+                    startWorker = true;
+                }
+            }
+            if (startWorker)
+                _ = ProcessCanvasImageRequestsAsync();
+        }
+
+        void InvalidateCanvasImageRequests()
+        {
+            lock (canvasImageRefreshLock)
+            {
+                pendingCanvasImageRequest = null;
+                canvasImageRequestId++;
+            }
+        }
+
+        async Task ProcessCanvasImageRequestsAsync()
+        {
+            while (true)
+            {
+                CanvasImageRequest request;
+                lock (canvasImageRefreshLock)
+                {
+                    if (pendingCanvasImageRequest is not CanvasImageRequest pending)
+                    {
+                        isCanvasImageRefreshRunning = false;
+                        return;
+                    }
+                    request = pending;
+                    pendingCanvasImageRequest = null;
                 }
 
-                var time = editorInfo.ItemPosition.Time;
+                var result = await Task.Run(() => LoadCanvasImage(request.Info, request.Effect));
+
+                bool applyResult;
+                bool hasNextRequest;
+                lock (canvasImageRefreshLock)
+                {
+                    applyResult = !disposedValue && request.Id == canvasImageRequestId;
+                    hasNextRequest = !disposedValue && pendingCanvasImageRequest is not null;
+                    if (!hasNextRequest)
+                        isCanvasImageRefreshRunning = false;
+                }
+
+                if (applyResult)
+                    SetBaseImage(result);
+                if (!hasNextRequest)
+                    return;
+            }
+        }
+
+        static CanvasImageResult LoadCanvasImage(IEditorInfo info, VectorFieldWarpEffect effect)
+        {
+            try
+            {
+                using var itemVideoSource = info.CreateItemVideoSource(
+                    new ItemVideoSourceCreationParameter(VideoEffectSelection.UpTo(effect)));
+                if (itemVideoSource is null)
+                    return CanvasImageResult.Empty;
+
+                var time = info.ItemPosition.Time;
                 if (time < TimeSpan.Zero)
                     time = TimeSpan.Zero;
-                else if (editorInfo.ItemDuration.Time <= time && editorInfo.ItemDuration.Frame > 0)
-                    time = editorInfo.VideoInfo.GetTimeFrom(editorInfo.ItemDuration.Frame - 1);
+                else if (info.ItemDuration.Time <= time && info.ItemDuration.Frame > 0)
+                    time = info.VideoInfo.GetTimeFrom(info.ItemDuration.Frame - 1);
 
                 itemVideoSource.Update(time, Player.Video.TimelineSourceUsage.Paused);
                 var bounds = itemVideoSource.Devices.DeviceContext.GetImageLocalBounds(itemVideoSource.Output);
                 var image = itemVideoSource.RenderBitmapSource();
-                SetBaseImage(image, new Rect(bounds.Left, bounds.Top, image.PixelWidth, image.PixelHeight));
+                var converted = new FormatConvertedBitmap(image, PixelFormats.Pbgra32, null, 0);
+                converted.Freeze();
+                var pixels = new byte[converted.PixelWidth * converted.PixelHeight * 4];
+                converted.CopyPixels(pixels, converted.PixelWidth * 4, 0);
+                return new CanvasImageResult(
+                    converted,
+                    new Rect(bounds.Left, bounds.Top, converted.PixelWidth, converted.PixelHeight),
+                    pixels);
             }
             catch
             {
-                SetBaseImage(null, Rect.Empty);
+                return CanvasImageResult.Empty;
             }
         }
 
-        void SetBaseImage(BitmapSource? source, Rect imageBounds)
+        void SetBaseImage(CanvasImageResult result)
         {
+            var source = result.Image;
             if (source is null)
             {
                 baseCanvasImage = null;
@@ -170,12 +245,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 return;
             }
 
-            var converted = new FormatConvertedBitmap(source, PixelFormats.Pbgra32, null, 0);
-            converted.Freeze();
-            baseCanvasImage = converted;
-            baseWidth = converted.PixelWidth;
-            baseHeight = converted.PixelHeight;
-            baseCanvasBounds = imageBounds;
+            baseCanvasImage = source;
+            baseWidth = source.PixelWidth;
+            baseHeight = source.PixelHeight;
+            baseCanvasBounds = result.Bounds;
             CanvasBaseSize = new Size(baseWidth, baseHeight);
 
             var renderer = EnsureRenderer();
@@ -189,12 +262,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 return;
             }
 
-            basePixels = new byte[baseWidth * baseHeight * 4];
-            converted.CopyPixels(basePixels, baseWidth * 4, 0);
+            basePixels = result.Pixels;
             currentPreviewMargin = -1;
-            RenderWarpedImage();
-            //表示画像・サイズ・表示Boundsが揃った後に通知し、Canvasの表示リセットを新しいレイアウトで行う。
+            //重い入力画像の更新後もUIスレッド上では即座にGPU描画せず、次の描画タイミングへまとめる
+            CanvasImage = baseCanvasImage;
+            CanvasImageSize = CanvasBaseSize;
+            CanvasImageBounds = baseCanvasBounds;
             CanvasBaseBounds = baseCanvasBounds;
+            ScheduleWarpUpdate();
+        }
+
+        readonly record struct CanvasImageRequest(IEditorInfo Info, VectorFieldWarpEffect Effect, int Id);
+        readonly record struct CanvasImageResult(BitmapSource? Image, Rect Bounds, byte[]? Pixels)
+        {
+            public static CanvasImageResult Empty => new(null, Rect.Empty, null);
         }
 
         VectorFieldWarpPreviewRenderer? EnsureRenderer()
@@ -547,6 +628,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         void Dispose(bool disposing)
         {
             if (disposedValue) return;
+            disposedValue = true;
+            InvalidateCanvasImageRequests();
             if (disposing)
             {
                 UnhookRendering();
@@ -566,7 +649,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     previewRenderer = null;
                 }
             }
-            disposedValue = true;
         }
 
         public void Dispose()
