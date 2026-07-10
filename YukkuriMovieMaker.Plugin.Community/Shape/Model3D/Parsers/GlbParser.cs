@@ -348,6 +348,9 @@ internal sealed class GlbParser : IModelParser
                 int indAccIdx = prim.TryGetProperty("indices", out var indElem) ? indElem.GetInt32() : -1;
                 int matIdx = prim.TryGetProperty("material", out var matElem) ? matElem.GetInt32() : -1;
 
+                if (IsSparseAccessor(root, posAccIdx) || IsSparseAccessor(root, normAccIdx) || IsSparseAccessor(root, uvAccIdx)
+                    || IsSparseAccessor(root, colAccIdx) || IsSparseAccessor(root, indAccIdx)) continue;
+
                 var positions = ReadVector3Array(root, binData, posAccIdx);
                 if (positions == null || positions.Length == 0) continue;
 
@@ -638,6 +641,13 @@ internal sealed class GlbParser : IModelParser
         return true;
     }
 
+    private static bool IsSparseAccessor(JsonElement root, int index)
+    {
+        if (index < 0) return false;
+        if (!root.TryGetProperty("accessors", out var accessors) || index >= accessors.GetArrayLength()) return false;
+        return accessors[index].TryGetProperty("sparse", out _);
+    }
+
     private static bool GetAccessorInfo(JsonElement root, int index, out int buffView, out int offset, out int count, out int compType)
         => GetAccessorInfo(root, index, out buffView, out offset, out count, out compType, out _);
 
@@ -647,6 +657,7 @@ internal sealed class GlbParser : IModelParser
         if (!root.TryGetProperty("accessors", out var accessors) || index < 0 || index >= accessors.GetArrayLength()) return false;
 
         var acc = accessors[index];
+        if (acc.TryGetProperty("sparse", out _)) return false;
         if (acc.TryGetProperty("bufferView", out var bvElem)) buffView = bvElem.GetInt32();
         if (acc.TryGetProperty("byteOffset", out var offElem)) offset = offElem.GetInt32();
         if (acc.TryGetProperty("count", out var cntElem)) count = cntElem.GetInt32();
