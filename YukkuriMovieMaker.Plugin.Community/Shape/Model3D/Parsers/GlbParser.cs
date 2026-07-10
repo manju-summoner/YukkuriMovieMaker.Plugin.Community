@@ -19,7 +19,7 @@ internal sealed class GlbParser : IModelParser
     private static readonly string[] FileExtensions = [".glb", ".gltf"];
 
     public string Id => "Glb";
-    public int Version => 1;
+    public int Version => 2;
     public IReadOnlyList<string> Extensions => FileExtensions;
 
     public Model3DData Parse(string path)
@@ -27,7 +27,7 @@ internal sealed class GlbParser : IModelParser
         if (!File.Exists(path)) return new Model3DData();
 
         byte[]? binData = null;
-        string jsonStr = "";
+        string jsonStr;
 
         try
         {
@@ -35,31 +35,35 @@ internal sealed class GlbParser : IModelParser
             using var br = new BinaryReader(fs);
 
             var magic = br.ReadUInt32();
-            if (magic != GlbMagic)
+            if (magic == GlbMagic)
             {
-                return new Model3DData();
-            }
+                br.ReadUInt32();
+                var length = br.ReadUInt32();
 
-            br.ReadUInt32();
-            var length = br.ReadUInt32();
+                if (fs.Position + 8 > length) return new Model3DData();
+                var chunkLength = br.ReadInt32();
+                var chunkType = br.ReadUInt32();
 
-            if (fs.Position + 8 > length) return new Model3DData();
-            var chunkLength = br.ReadInt32();
-            var chunkType = br.ReadUInt32();
+                if (chunkType != JsonChunkType) return new Model3DData();
+                if (chunkLength < 0 || chunkLength > fs.Length - fs.Position) return new Model3DData();
+                var jsonBytes = br.ReadBytes(chunkLength);
+                jsonStr = Encoding.UTF8.GetString(jsonBytes);
 
-            if (chunkType != JsonChunkType) return new Model3DData();
-            if (chunkLength < 0 || chunkLength > fs.Length - fs.Position) return new Model3DData();
-            var jsonBytes = br.ReadBytes(chunkLength);
-            jsonStr = Encoding.UTF8.GetString(jsonBytes);
-
-            if (fs.Position < length)
-            {
-                var binLength = br.ReadInt32();
-                var binType = br.ReadUInt32();
-                if (binType == BinChunkType && binLength >= 0 && binLength <= fs.Length - fs.Position)
+                if (fs.Position < length)
                 {
-                    binData = br.ReadBytes(binLength);
+                    var binLength = br.ReadInt32();
+                    var binType = br.ReadUInt32();
+                    if (binType == BinChunkType && binLength >= 0 && binLength <= fs.Length - fs.Position)
+                    {
+                        binData = br.ReadBytes(binLength);
+                    }
                 }
+            }
+            else
+            {
+                fs.Position = 0;
+                using var textReader = new StreamReader(fs, Encoding.UTF8);
+                jsonStr = textReader.ReadToEnd();
             }
         }
         catch
@@ -77,6 +81,8 @@ internal sealed class GlbParser : IModelParser
         {
             using var doc = JsonDocument.Parse(jsonStr);
             var root = doc.RootElement;
+
+            binData ??= TryLoadExternalBuffer(root, path);
 
             if (root.TryGetProperty("extensionsRequired", out var exts))
             {
@@ -102,6 +108,7 @@ internal sealed class GlbParser : IModelParser
                     }
 
                     byte[]? imgBytes = null;
+                    string externalPath = string.Empty;
                     if (img.TryGetProperty("bufferView", out var bvProp))
                     {
                         if (binData != null && GetBufferViewInfo(root, bvProp.GetInt32(), out int bIdx, out int bOff, out int bLen, out _))
@@ -116,23 +123,33 @@ internal sealed class GlbParser : IModelParser
                     else if (img.TryGetProperty("uri", out var uriProp))
                     {
                         var uri = uriProp.GetString();
-                        int separator = uri?.IndexOf(',') ?? -1;
-                        if (uri is not null && uri.StartsWith("data:image") && separator >= 0)
+                        if (!string.IsNullOrEmpty(uri))
                         {
-                            try
+                            if (uri.StartsWith("data:image", StringComparison.Ordinal))
                             {
-                                imgBytes = Convert.FromBase64String(uri[(separator + 1)..]);
+                                int separator = uri.IndexOf(',');
+                                if (separator >= 0)
+                                {
+                                    try
+                                    {
+                                        imgBytes = Convert.FromBase64String(uri[(separator + 1)..]);
+                                    }
+                                    catch (FormatException)
+                                    {
+                                        imgBytes = null;
+                                    }
+                                }
                             }
-                            catch (FormatException)
+                            else if (!uri.StartsWith("data:", StringComparison.Ordinal))
                             {
-                                imgBytes = null;
+                                externalPath = ResolveExternalUri(uri, path);
                             }
                         }
                     }
 
                     images.Add(imgBytes != null
                         ? ModelHelper.WriteEmbeddedTexture(path, images.Count, ext, imgBytes)
-                        : string.Empty);
+                        : externalPath);
                 }
             }
 
@@ -613,6 +630,53 @@ internal sealed class GlbParser : IModelParser
         if (view.TryGetProperty("byteStride", out var strElem)) stride = strElem.GetInt32();
 
         return buffer != -1;
+    }
+
+    private static byte[]? TryLoadExternalBuffer(JsonElement root, string modelPath)
+    {
+        if (!root.TryGetProperty("buffers", out var buffers) || buffers.ValueKind != JsonValueKind.Array || buffers.GetArrayLength() == 0) return null;
+        if (!buffers[0].TryGetProperty("uri", out var uriProp)) return null;
+
+        var uri = uriProp.GetString();
+        if (string.IsNullOrEmpty(uri)) return null;
+
+        if (uri.StartsWith("data:", StringComparison.Ordinal))
+        {
+            int separator = uri.IndexOf(',');
+            if (separator < 0) return null;
+            try
+            {
+                return Convert.FromBase64String(uri[(separator + 1)..]);
+            }
+            catch (FormatException)
+            {
+                return null;
+            }
+        }
+
+        string binPath = ResolveExternalUri(uri, modelPath);
+        if (binPath.Length == 0) return null;
+        if (!Model3DSettings.Default.IsFileSizeAllowed(new FileInfo(binPath).Length)) return null;
+        return File.ReadAllBytes(binPath);
+    }
+
+    private static string ResolveExternalUri(string uri, string modelPath)
+    {
+        try
+        {
+            string decoded = Uri.UnescapeDataString(uri);
+            if (Path.IsPathRooted(decoded)) return string.Empty;
+
+            string directory = Path.GetFullPath(Path.GetDirectoryName(modelPath) ?? string.Empty);
+            string resolved = Path.GetFullPath(Path.Combine(directory, decoded));
+            if (!resolved.StartsWith(directory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) return string.Empty;
+
+            return File.Exists(resolved) ? resolved : string.Empty;
+        }
+        catch
+        {
+            return string.Empty;
+        }
     }
 
     private sealed record GlbContext(
