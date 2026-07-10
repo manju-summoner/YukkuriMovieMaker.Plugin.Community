@@ -361,7 +361,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         //ViewportW/Hはオーバーレイのスクロールバーぶんだけキャンバスサイズから狭めた「有効ビューポート」。
         //NeedH/NeedVはそれぞれ横/縦スクロールバーの要否。
         readonly record struct ViewMetrics(
-            double Scale, Rect ContentLocal, double ImageWidth, double ImageHeight,
+            double Scale, Rect ContentLocal, Rect ImageLocal,
             double ViewportW, double ViewportH, double ExtentW, double ExtentH, bool NeedH, bool NeedV);
 
         ViewMetrics? GetMetrics()
@@ -374,6 +374,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             double ih = image.PixelHeight;
             if (iw <= 0 || ih <= 0)
                 return null;
+            var imageLocal = viewModel!.CanvasImageBounds;
+            if (imageLocal.IsEmpty)
+                imageLocal = new Rect(-iw * 0.5, -ih * 0.5, iw, ih);
 
             //オーバーレイのスクロールバーはレイアウト領域を専有しないため、キャンバス全体がビューポート。
             //フィット倍率もこの一定サイズを基準にするので、バー要否でextentが変わらず点滅しない。
@@ -384,7 +387,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
             //画像とすべてのピン/ジョイントを含む範囲。画面外のピンもスクロールで辿れるようにする。
             //余白は付けない（フィット表示かつ画面外ピンが無ければスクロールの余地=0となり、バーを出さない）。
-            var content = GetContentLocalBounds(iw, ih);
+            var content = GetContentLocalBounds(imageLocal);
             double extentW = content.Width * scale;
             double extentH = content.Height * scale;
 
@@ -399,13 +402,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             double effW = fullW - (needV ? reserve : 0);
             double effH = fullH - (needH ? reserve : 0);
 
-            return new ViewMetrics(scale, content, iw, ih, effW, effH, extentW, extentH, needH, needV);
+            return new ViewMetrics(scale, content, imageLocal, effW, effH, extentW, extentH, needH, needV);
         }
 
-        //画像矩形とすべてのピン/ジョイントを内包するローカル座標の範囲（画像中心を原点とする座標系）
-        Rect GetContentLocalBounds(double iw, double ih)
+        //画像矩形とすべてのピン/ジョイントを内包するアイテム座標上の範囲
+        Rect GetContentLocalBounds(Rect imageLocal)
         {
-            double minX = -iw * 0.5, minY = -ih * 0.5, maxX = iw * 0.5, maxY = ih * 0.5;
+            double minX = imageLocal.Left, minY = imageLocal.Top, maxX = imageLocal.Right, maxY = imageLocal.Bottom;
             foreach (var pin in pins)
             {
                 var p = GetRestPoint(pin);
@@ -425,7 +428,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             return new Rect(new Point(minX, minY), new Point(maxX, maxY));
         }
 
-        (double Scale, Point Origin, double ImageWidth, double ImageHeight)? GetLayout()
+        (double Scale, Point Origin, Rect ImageLocal)? GetLayout()
         {
             var metrics = GetMetrics();
             if (metrics is null)
@@ -438,10 +441,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             double offX = Math.Clamp(ScrollOffsetX, 0, Math.Max(0, m.ExtentW - m.ViewportW));
             double offY = Math.Clamp(ScrollOffsetY, 0, Math.Max(0, m.ExtentH - m.ViewportH));
 
-            //LocalToDisplayの式（origin + (local + 画像半分)*scale）が、コンテンツ左上をスクロール位置に一致させるようoriginを決める
-            double originX = padX - offX - (m.ContentLocal.Left + m.ImageWidth * 0.5) * m.Scale;
-            double originY = padY - offY - (m.ContentLocal.Top + m.ImageHeight * 0.5) * m.Scale;
-            return (m.Scale, new Point(originX, originY), m.ImageWidth, m.ImageHeight);
+            //LocalToDisplayの式が、コンテンツ左上をスクロール位置に一致させるようoriginを決める
+            double originX = padX - offX - (m.ContentLocal.Left - m.ImageLocal.Left) * m.Scale;
+            double originY = padY - offY - (m.ContentLocal.Top - m.ImageLocal.Top) * m.Scale;
+            return (m.Scale, new Point(originX, originY), m.ImageLocal);
         }
 
         /// <summary>ズーム/パンの結果に合わせてスクロールバーの範囲・可視性を更新する。全体表示への予約があれば中央寄せする。</summary>
@@ -476,8 +479,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 //画像中心をビューポート中心に合わせるスクロール位置
                 double padX = Math.Max(0, (m.ViewportW - m.ExtentW) * 0.5);
                 double padY = Math.Max(0, (m.ViewportH - m.ExtentH) * 0.5);
-                double centerOffX = padX - m.ContentLocal.Left * m.Scale - m.ViewportW * 0.5;
-                double centerOffY = padY - m.ContentLocal.Top * m.Scale - m.ViewportH * 0.5;
+                double centerOffX = padX + (m.ImageLocal.Left + m.ImageLocal.Width * 0.5 - m.ContentLocal.Left) * m.Scale - m.ViewportW * 0.5;
+                double centerOffY = padY + (m.ImageLocal.Top + m.ImageLocal.Height * 0.5 - m.ContentLocal.Top) * m.Scale - m.ViewportH * 0.5;
                 //バインディングを壊さないようSetCurrentValueで設定する
                 SetCurrentValue(ScrollOffsetXProperty, Math.Clamp(centerOffX, 0, maxX));
                 SetCurrentValue(ScrollOffsetYProperty, Math.Clamp(centerOffY, 0, maxY));
@@ -502,15 +505,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             InvalidateVisual();
         }
 
-        static Point DisplayToLocal(Point display, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
-            => new(
-                (display.X - layout.Origin.X) / layout.Scale - layout.ImageWidth * 0.5,
-                (display.Y - layout.Origin.Y) / layout.Scale - layout.ImageHeight * 0.5);
+        static Point DisplayToLocal(Point display, (double Scale, Point Origin, Rect ImageLocal) layout)
+            => ImageToLocalPoint(new Point(
+                (display.X - layout.Origin.X) / layout.Scale,
+                (display.Y - layout.Origin.Y) / layout.Scale), layout.ImageLocal);
 
-        static Point LocalToDisplay(Point local, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
-            => new(
-                layout.Origin.X + (local.X + layout.ImageWidth * 0.5) * layout.Scale,
-                layout.Origin.Y + (local.Y + layout.ImageHeight * 0.5) * layout.Scale);
+        static Point LocalToDisplay(Point local, (double Scale, Point Origin, Rect ImageLocal) layout)
+        {
+            var image = LocalToImagePoint(local, layout.ImageLocal);
+            return new Point(
+                layout.Origin.X + image.X * layout.Scale,
+                layout.Origin.Y + image.Y * layout.Scale);
+        }
+
+        internal static Point LocalToImagePoint(Point local, Rect imageLocal)
+            => new(local.X - imageLocal.Left, local.Y - imageLocal.Top);
+
+        internal static Point ImageToLocalPoint(Point image, Rect imageLocal)
+            => new(image.X + imageLocal.Left, image.Y + imageLocal.Top);
 
         static Point GetRestPoint(PuppetDeformationItemViewModel pin)
             => new(
@@ -538,7 +550,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var l = layout.Value;
 
             var image = viewModel!.CanvasImage!;
-            drawingContext.DrawImage(image, new Rect(l.Origin, new Size(l.ImageWidth * l.Scale, l.ImageHeight * l.Scale)));
+            drawingContext.DrawImage(image, new Rect(l.Origin, new Size(l.ImageLocal.Width * l.Scale, l.ImageLocal.Height * l.Scale)));
 
             //編集中の対象を手前に描画する。ピン編集モード時はボーンを半透明にして脇役に回す
             if (IsBoneMode)
@@ -555,7 +567,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
         }
 
-        void DrawPins(DrawingContext drawingContext, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        void DrawPins(DrawingContext drawingContext, (double Scale, Point Origin, Rect ImageLocal) layout)
         {
             //ボーンモード時、選択中ボーンに割り当てられたピンをリングで示す
             var selectedBone = IsBoneMode ? bones.FirstOrDefault(b => b.IsSelected) : null;
@@ -577,7 +589,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
         }
 
-        void DrawBones(DrawingContext drawingContext, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        void DrawBones(DrawingContext drawingContext, (double Scale, Point Origin, Rect ImageLocal) layout)
         {
             if (bones.Count == 0)
                 return;
@@ -809,7 +821,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             e.Handled = true;
         }
 
-        void OnBoneModeLeftButtonDown(Point pos, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout, MouseButtonEventArgs e)
+        void OnBoneModeLeftButtonDown(Point pos, (double Scale, Point Origin, Rect ImageLocal) layout, MouseButtonEventArgs e)
         {
             if (viewModel is null)
                 return;
@@ -958,7 +970,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             ClearHover();
         }
 
-        void UpdateHover(Point pos, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        void UpdateHover(Point pos, (double Scale, Point Origin, Rect ImageLocal) layout)
         {
             PuppetBoneViewModel? bone = null;
             PuppetDeformationItemViewModel? pin = null;
@@ -1111,7 +1123,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
         }
 
-        PuppetDeformationItemViewModel? HitTestPin(Point display, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        PuppetDeformationItemViewModel? HitTestPin(Point display, (double Scale, Point Origin, Rect ImageLocal) layout)
         {
             PuppetDeformationItemViewModel? nearest = null;
             var nearestDistSq = PinHitRadius * PinHitRadius;
@@ -1131,7 +1143,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             return nearest;
         }
 
-        PuppetBoneViewModel? HitTestBone(Point display, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        PuppetBoneViewModel? HitTestBone(Point display, (double Scale, Point Origin, Rect ImageLocal) layout)
         {
             PuppetBoneViewModel? nearest = null;
             var nearestDistSq = BoneHitRadius * BoneHitRadius;
@@ -1155,7 +1167,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         /// 親子リンク（線分）へのヒットテスト。ヒットした場合は分割対象の子ボーンと、
         /// 線分上に投影した挿入位置（表示座標）を返す。ジョイント自体はここでは対象にしない。
         /// </summary>
-        (PuppetBoneViewModel Bone, Point Display)? HitTestBoneSegment(Point display, (double Scale, Point Origin, double ImageWidth, double ImageHeight) layout)
+        (PuppetBoneViewModel Bone, Point Display)? HitTestBoneSegment(Point display, (double Scale, Point Origin, Rect ImageLocal) layout)
         {
             PuppetBoneViewModel? nearest = null;
             var nearestProjection = default(Point);

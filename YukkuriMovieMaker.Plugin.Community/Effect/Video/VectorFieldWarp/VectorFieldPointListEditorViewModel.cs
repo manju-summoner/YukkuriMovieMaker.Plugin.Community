@@ -31,6 +31,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         int lastCanvasImageFrame = -1;
 
         BitmapSource? baseCanvasImage;
+        Rect baseCanvasBounds = Rect.Empty;
         byte[]? basePixels;
         int baseWidth;
         int baseHeight;
@@ -71,6 +72,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
         public Size CanvasBaseSize { get => canvasBaseSize; private set => Set(ref canvasBaseSize, value); }
         Size canvasBaseSize = Size.Empty;
+
+        public Rect CanvasBaseBounds { get => canvasBaseBounds; private set => Set(ref canvasBaseBounds, value); }
+        Rect canvasBaseBounds = Rect.Empty;
+
+        public Rect CanvasImageBounds { get => canvasImageBounds; private set => Set(ref canvasImageBounds, value); }
+        Rect canvasImageBounds = Rect.Empty;
 
         public double CanvasImageScale => 1.0;
 
@@ -126,7 +133,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     new ItemVideoSourceCreationParameter(VideoEffectSelection.UpTo(Effect)));
                 if (itemVideoSource is null)
                 {
-                    SetBaseImage(null);
+                    SetBaseImage(null, Rect.Empty);
                     return;
                 }
 
@@ -137,24 +144,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     time = editorInfo.VideoInfo.GetTimeFrom(editorInfo.ItemDuration.Frame - 1);
 
                 itemVideoSource.Update(time, Player.Video.TimelineSourceUsage.Paused);
-                SetBaseImage(itemVideoSource.RenderBitmapSource());
+                var bounds = itemVideoSource.Devices.DeviceContext.GetImageLocalBounds(itemVideoSource.Output);
+                var image = itemVideoSource.RenderBitmapSource();
+                SetBaseImage(image, new Rect(bounds.Left, bounds.Top, image.PixelWidth, image.PixelHeight));
             }
             catch
             {
-                SetBaseImage(null);
+                SetBaseImage(null, Rect.Empty);
             }
         }
 
-        void SetBaseImage(BitmapSource? source)
+        void SetBaseImage(BitmapSource? source, Rect imageBounds)
         {
             if (source is null)
             {
                 baseCanvasImage = null;
+                baseCanvasBounds = Rect.Empty;
                 basePixels = null;
                 currentPreviewMargin = -1;
                 CanvasImage = null;
                 CanvasImageSize = Size.Empty;
                 CanvasBaseSize = Size.Empty;
+                CanvasImageBounds = Rect.Empty;
+                CanvasBaseBounds = Rect.Empty;
                 return;
             }
 
@@ -163,6 +175,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             baseCanvasImage = converted;
             baseWidth = converted.PixelWidth;
             baseHeight = converted.PixelHeight;
+            baseCanvasBounds = imageBounds;
             CanvasBaseSize = new Size(baseWidth, baseHeight);
 
             var renderer = EnsureRenderer();
@@ -171,6 +184,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 basePixels = null;
                 CanvasImage = baseCanvasImage;
                 CanvasImageSize = CanvasBaseSize;
+                CanvasImageBounds = baseCanvasBounds;
+                CanvasBaseBounds = baseCanvasBounds;
                 return;
             }
 
@@ -178,6 +193,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             converted.CopyPixels(basePixels, baseWidth * 4, 0);
             currentPreviewMargin = -1;
             RenderWarpedImage();
+            //表示画像・サイズ・表示Boundsが揃った後に通知し、Canvasの表示リセットを新しいレイアウトで行う。
+            CanvasBaseBounds = baseCanvasBounds;
         }
 
         VectorFieldWarpPreviewRenderer? EnsureRenderer()
@@ -222,6 +239,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             isPreviewRendererFailed = true;
             CanvasImage = baseCanvasImage;
             CanvasImageSize = baseCanvasImage is null ? Size.Empty : new Size(baseCanvasImage.PixelWidth, baseCanvasImage.PixelHeight);
+            CanvasImageBounds = baseCanvasImage is null ? Rect.Empty : baseCanvasBounds;
         }
 
         void ScheduleWarpUpdate()
@@ -281,10 +299,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     continue;
                 velocityBound += 0.5f * MathF.Sqrt(radialStrength * radialStrength + vortexStrength * vortexStrength);
                 var offset = pointCount * FloatsPerPoint;
-                //シェーダーの制御点はシーン座標基準。プレビューは入力画像を(0,0)-(幅,高さ)に配置するため、
-                //画像中心原点のローカル座標へ画像中心のオフセットを加算して渡す
-                pointFloats[offset] = Sanitize(GetDisplayValue(point.X), -PositionLimit, PositionLimit, 0f) + baseWidth * 0.5f;
-                pointFloats[offset + 1] = Sanitize(GetDisplayValue(point.Y), -PositionLimit, PositionLimit, 0f) + baseHeight * 0.5f;
+                //プレビューの入力Bitmapは元画像のBounds左上を(0,0)へ移しているため、
+                //アイテム座標からBounds左上を差し引いたBitmap座標を渡す。
+                var itemPoint = new Point(
+                    Sanitize(GetDisplayValue(point.X), -PositionLimit, PositionLimit, 0f),
+                    Sanitize(GetDisplayValue(point.Y), -PositionLimit, PositionLimit, 0f));
+                var imagePoint = VectorFieldCoordinateMapper.ItemToImage(itemPoint, baseCanvasBounds, CanvasImageScale);
+                pointFloats[offset] = (float)imagePoint.X;
+                pointFloats[offset + 1] = (float)imagePoint.Y;
                 pointFloats[offset + 2] = radialStrength;
                 pointFloats[offset + 3] = vortexStrength;
                 pointFloats[offset + 4] = Sanitize(GetDisplayValue(point.Radius), 1f, VectorFieldPoint.RadiusLimit, 1f);
@@ -308,6 +330,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                     currentPreviewMargin = margin;
                     CanvasImage = previewRenderer.ImageSource;
                     CanvasImageSize = new Size(previewRenderer.OutputWidth, previewRenderer.OutputHeight);
+                    CanvasImageBounds = VectorFieldCoordinateMapper.InflateByPixels(baseCanvasBounds, margin, CanvasImageScale);
                 }
                 //ロックが取れず描画できなかった場合はCompositionTarget.Rendering経由で再試行する
                 //（SetBaseImageからの直接呼び出しではフック未登録のことがある）
