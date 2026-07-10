@@ -182,7 +182,7 @@ internal sealed class PlyParser : IModelParser
                     if (parts.Length >= 3)
                     {
                         currentElement = parts[1];
-                        int.TryParse(parts[2], out int count);
+                        int.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int count);
                         if (currentElement == "vertex") _vertexCount = count;
                         else if (currentElement == "face") _faceCount = count;
                     }
