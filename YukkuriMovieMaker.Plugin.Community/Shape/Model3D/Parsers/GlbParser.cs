@@ -343,10 +343,14 @@ internal sealed class GlbParser : IModelParser
 
                 int posAccIdx = posAccIdxElem.GetInt32();
                 int normAccIdx = attrs.TryGetProperty("NORMAL", out var normElem) ? normElem.GetInt32() : -1;
-                int uvAccIdx = attrs.TryGetProperty("TEXCOORD_0", out var uvElem) ? uvElem.GetInt32() : -1;
                 int colAccIdx = attrs.TryGetProperty("COLOR_0", out var colElem) ? colElem.GetInt32() : -1;
                 int indAccIdx = prim.TryGetProperty("indices", out var indElem) ? indElem.GetInt32() : -1;
                 int matIdx = prim.TryGetProperty("material", out var matElem) ? matElem.GetInt32() : -1;
+
+                int texCoordSet = GetBaseColorTexCoordSet(materials, matIdx);
+                int uvAccIdx = attrs.TryGetProperty("TEXCOORD_" + texCoordSet.ToString(System.Globalization.CultureInfo.InvariantCulture), out var uvElem)
+                    ? uvElem.GetInt32()
+                    : (attrs.TryGetProperty("TEXCOORD_0", out var uv0Elem) ? uv0Elem.GetInt32() : -1);
 
                 if (IsSparseAccessor(root, posAccIdx) || IsSparseAccessor(root, normAccIdx) || IsSparseAccessor(root, uvAccIdx)
                     || IsSparseAccessor(root, colAccIdx) || IsSparseAccessor(root, indAccIdx)) continue;
@@ -649,6 +653,20 @@ internal sealed class GlbParser : IModelParser
         long maxCount = (available - elementSize) / stride + 1;
         if (count > maxCount) count = (int)maxCount;
         return true;
+    }
+
+    private static int GetBaseColorTexCoordSet(JsonElement materials, int matIdx)
+    {
+        if (matIdx < 0 || materials.ValueKind != JsonValueKind.Array || matIdx >= materials.GetArrayLength()) return 0;
+
+        var mat = materials[matIdx];
+        if (mat.TryGetProperty("pbrMetallicRoughness", out var pbr)
+            && pbr.TryGetProperty("baseColorTexture", out var tex)
+            && tex.TryGetProperty("texCoord", out var texCoordProp))
+        {
+            return Math.Max(0, texCoordProp.GetInt32());
+        }
+        return 0;
     }
 
     private static bool IsSparseAccessor(JsonElement root, int index)
