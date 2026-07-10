@@ -13,6 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D;
 internal sealed class Model3DSource : IShapeSource
 {
     private static readonly Lock RenderLock = new();
+    private static readonly TimeSpan FileStampInterval = TimeSpan.FromMilliseconds(500);
 
     private readonly IGraphicsDevicesAndContext _devices;
     private readonly Model3DParameter _parameter;
@@ -26,6 +27,9 @@ internal sealed class Model3DSource : IShapeSource
     private GpuResourceCacheItem? _gpuResource;
     private string _file = string.Empty;
     private string _gpuResourceKey = string.Empty;
+    private readonly List<string> _watchedFiles = [];
+    private string _currentFileKey = string.Empty;
+    private DateTime _lastFileStampCheck = DateTime.MinValue;
     private int _width;
     private int _height;
     private Model3DRenderState _state;
@@ -55,8 +59,9 @@ internal sealed class Model3DSource : IShapeSource
         int width = ClampRenderSize(desc.ScreenSize.Width);
         int height = ClampRenderSize(desc.ScreenSize.Height);
         var state = CreateRenderState(frame, length, fps);
+        string fileKey = GetFileKey(file);
 
-        if (_file == file && _width == width && _height == height && _state == state) return;
+        if (_file == file && _width == width && _height == height && _state == state && _gpuResourceKey == fileKey) return;
 
         _file = file;
         _width = width;
@@ -66,7 +71,7 @@ internal sealed class Model3DSource : IShapeSource
         ID2D1CommandList newCommandList;
         try
         {
-            newCommandList = BuildCommandList(file, width, height, state);
+            newCommandList = BuildCommandList(file, fileKey, width, height, state);
         }
         catch
         {
@@ -103,11 +108,11 @@ internal sealed class Model3DSource : IShapeSource
             IsLightEnabled: _parameter.IsLightEnabled);
     }
 
-    private ID2D1CommandList BuildCommandList(string file, int width, int height, in Model3DRenderState state)
+    private ID2D1CommandList BuildCommandList(string file, string fileKey, int width, int height, in Model3DRenderState state)
     {
         var deviceContext = _devices.DeviceContext;
 
-        var resource = AcquireGpuResource(file);
+        var resource = AcquireGpuResource(file, fileKey);
         if (resource is null) return CreateEmptyCommandList(deviceContext);
 
         lock (RenderLock)
@@ -125,46 +130,100 @@ internal sealed class Model3DSource : IShapeSource
             : CreateEmptyCommandList(deviceContext);
     }
 
-    private GpuResourceCacheItem? AcquireGpuResource(string file)
+    private GpuResourceCacheItem? AcquireGpuResource(string file, string key)
     {
-        string key = CreateGpuResourceKey(file);
         if (_gpuResourceKey == key) return _gpuResource;
 
         _gpuResource?.Dispose();
         _gpuResource = null;
         _gpuResourceKey = key;
 
-        if (key.Length == 0) return null;
+        if (key.Length == 0)
+        {
+            _watchedFiles.Clear();
+            return null;
+        }
 
         try
         {
             var model = Model3DLoader.Load(file);
-            if (model.Vertices.Length == 0) return null;
+            UpdateWatchedFiles(model);
 
-            _gpuResource = _gpuResourceFactory.Create(_devices.D3D.Device, model);
+            if (model.Vertices.Length > 0)
+            {
+                _gpuResource = _gpuResourceFactory.Create(_devices.D3D.Device, model);
+            }
         }
         catch
         {
             _gpuResource = null;
         }
 
+        _gpuResourceKey = CreateGpuResourceKey(file);
+        _currentFileKey = _gpuResourceKey;
+        _lastFileStampCheck = DateTime.UtcNow;
+
         return _gpuResource;
     }
 
-    private static string CreateGpuResourceKey(string file)
+    private void UpdateWatchedFiles(Models.Model3DData model)
+    {
+        _watchedFiles.Clear();
+
+        foreach (var dependency in model.Dependencies)
+        {
+            _watchedFiles.Add(dependency);
+        }
+
+        foreach (var part in model.Parts)
+        {
+            AddWatchedTexture(part.TexturePath);
+            AddWatchedTexture(part.MetallicRoughnessTexturePath);
+        }
+    }
+
+    private void AddWatchedTexture(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return;
+        if (ModelHelper.IsEmbeddedTexturePath(path)) return;
+        _watchedFiles.Add(path);
+    }
+
+    private string GetFileKey(string file)
+    {
+        var now = DateTime.UtcNow;
+        if (_file == file && now - _lastFileStampCheck < FileStampInterval) return _currentFileKey;
+
+        _lastFileStampCheck = now;
+        _currentFileKey = CreateGpuResourceKey(file);
+        return _currentFileKey;
+    }
+
+    private string CreateGpuResourceKey(string file)
     {
         if (string.IsNullOrEmpty(file)) return string.Empty;
 
+        var builder = new System.Text.StringBuilder();
+        AppendFileStamp(builder, file);
+        foreach (var watched in _watchedFiles)
+        {
+            AppendFileStamp(builder, watched);
+        }
+        return builder.ToString();
+    }
+
+    private static void AppendFileStamp(System.Text.StringBuilder builder, string path)
+    {
+        long stamp = 0;
         try
         {
-            var info = new FileInfo(file);
-            long stamp = info.Exists ? info.LastWriteTimeUtc.Ticks : 0;
-            return $"{file}|{stamp}";
+            var info = new FileInfo(path);
+            stamp = info.Exists ? info.LastWriteTimeUtc.Ticks : 0;
         }
         catch
         {
-            return $"{file}|0";
         }
+        builder.Append(path).Append('|').Append(stamp).Append(';');
     }
 
     private static int ClampRenderSize(int size)
