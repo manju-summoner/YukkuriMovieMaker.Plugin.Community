@@ -16,4 +16,5 @@ internal static class RenderingConstants
     public const int CbSlotPerObject = 1;
     public const int CbSlotPerMaterial = 2;
     public const int SlotBaseColorTexture = 0;
+    public const int SlotMetallicRoughnessTexture = 1;
 }

@@ -23,13 +23,13 @@ internal sealed class Model3DRenderer : IDisposable
     private readonly ID3D11Buffer[] _vertexBufferBinding = new ID3D11Buffer[1];
     private readonly int[] _vertexStride = [Unsafe.SizeOf<Model3DVertex>()];
     private readonly int[] _vertexOffset = [0];
-    private readonly ID3D11ShaderResourceView[] _textureBinding = new ID3D11ShaderResourceView[1];
+    private readonly ID3D11ShaderResourceView[] _textureBinding = new ID3D11ShaderResourceView[2];
     private readonly ID3D11SamplerState[] _samplerBinding;
     private readonly ID3D11Buffer[] _perFrameBinding;
     private readonly ID3D11Buffer[] _perObjectBinding;
     private readonly ID3D11Buffer[] _perMaterialBinding;
     private readonly ID3D11RenderTargetView[] _emptyRenderTargets = new ID3D11RenderTargetView[1];
-    private readonly ID3D11ShaderResourceView[] _emptyTextures = new ID3D11ShaderResourceView[1];
+    private readonly ID3D11ShaderResourceView[] _emptyTextures = new ID3D11ShaderResourceView[2];
 
     private int[] _transparentOrder = [];
     private float[] _transparentDepth = [];
@@ -117,9 +117,9 @@ internal sealed class Model3DRenderer : IDisposable
         var part = model.Parts[index];
         if (part.IndexCount <= 0) return;
 
-        var partTexture = model.PartTextures[index];
-        _textureBinding[0] = partTexture ?? _resources.WhiteTextureView;
-        context.PSSetShaderResources(RenderingConstants.SlotBaseColorTexture, 1, _textureBinding);
+        _textureBinding[0] = model.PartTextures[index] ?? _resources.WhiteTextureView;
+        _textureBinding[1] = model.PartMetallicRoughnessTextures[index] ?? _resources.WhiteTextureView;
+        context.PSSetShaderResources(RenderingConstants.SlotBaseColorTexture, 2, _textureBinding);
 
         var perMaterial = new CBPerMaterial
         {
@@ -193,7 +193,7 @@ internal sealed class Model3DRenderer : IDisposable
 
     private void UnbindResources(ID3D11DeviceContext context)
     {
-        context.PSSetShaderResources(RenderingConstants.SlotBaseColorTexture, 1, _emptyTextures);
+        context.PSSetShaderResources(RenderingConstants.SlotBaseColorTexture, 2, _emptyTextures);
         context.OMSetRenderTargets(0, _emptyRenderTargets, null);
         context.RSSetState(null);
         context.OMSetDepthStencilState(null);

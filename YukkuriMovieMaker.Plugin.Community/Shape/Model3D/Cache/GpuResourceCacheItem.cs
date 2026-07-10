@@ -8,12 +8,14 @@ internal sealed class GpuResourceCacheItem : IDisposable
 {
     private int _disposed;
     private ID3D11ShaderResourceView?[]? _partTextures;
+    private ID3D11ShaderResourceView?[]? _partMetallicRoughnessTextures;
 
     public ID3D11Buffer VertexBuffer { get; }
     public ID3D11Buffer IndexBuffer { get; }
     public int IndexCount { get; }
     public Model3DPart[] Parts { get; }
     public ID3D11ShaderResourceView?[] PartTextures => _partTextures!;
+    public ID3D11ShaderResourceView?[] PartMetallicRoughnessTextures => _partMetallicRoughnessTextures!;
     public Vector3 ModelCenter { get; }
     public float ModelScale { get; }
     public int OpaquePartCount { get; }
@@ -24,6 +26,7 @@ internal sealed class GpuResourceCacheItem : IDisposable
         int indexCount,
         Model3DPart[] parts,
         ID3D11ShaderResourceView?[] textures,
+        ID3D11ShaderResourceView?[] metallicRoughnessTextures,
         Vector3 modelCenter,
         float modelScale,
         int opaquePartCount)
@@ -33,6 +36,7 @@ internal sealed class GpuResourceCacheItem : IDisposable
         IndexCount = indexCount;
         Parts = parts ?? throw new ArgumentNullException(nameof(parts));
         _partTextures = textures ?? throw new ArgumentNullException(nameof(textures));
+        _partMetallicRoughnessTextures = metallicRoughnessTextures ?? throw new ArgumentNullException(nameof(metallicRoughnessTextures));
         ModelCenter = modelCenter;
         ModelScale = modelScale;
         OpaquePartCount = opaquePartCount;
@@ -45,14 +49,20 @@ internal sealed class GpuResourceCacheItem : IDisposable
         SafeDispose(VertexBuffer);
         SafeDispose(IndexBuffer);
 
-        var textures = _partTextures;
-        _partTextures = null;
-        if (textures is null) return;
+        DisposeTextures(ref _partTextures);
+        DisposeTextures(ref _partMetallicRoughnessTextures);
+    }
 
-        for (int i = 0; i < textures.Length; i++)
+    private static void DisposeTextures(ref ID3D11ShaderResourceView?[]? textures)
+    {
+        var local = textures;
+        textures = null;
+        if (local is null) return;
+
+        for (int i = 0; i < local.Length; i++)
         {
-            SafeDispose(textures[i]);
-            textures[i] = null;
+            SafeDispose(local[i]);
+            local[i] = null;
         }
     }
 

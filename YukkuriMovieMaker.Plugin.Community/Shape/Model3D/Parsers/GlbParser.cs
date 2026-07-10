@@ -344,6 +344,7 @@ internal sealed class GlbParser : IModelParser
                 float metallic = Model3DPart.DefaultMetallic;
                 float roughness = Model3DPart.DefaultRoughness;
                 string texPath = string.Empty;
+                string metallicRoughnessTexPath = string.Empty;
 
                 if (matIdx >= 0 && materials.ValueKind == JsonValueKind.Array && matIdx < materials.GetArrayLength())
                 {
@@ -377,12 +378,27 @@ internal sealed class GlbParser : IModelParser
                                 }
                             }
                         }
+
+                        if (pbr.TryGetProperty("metallicRoughnessTexture", out var mrTexProp)
+                            && mrTexProp.TryGetProperty("index", out var mrTexIdxProp))
+                        {
+                            int mrTexIdx = mrTexIdxProp.GetInt32();
+                            if (mrTexIdx >= 0 && mrTexIdx < textures.Count)
+                            {
+                                int imgIdx = textures[mrTexIdx];
+                                if (imgIdx >= 0 && imgIdx < images.Count)
+                                {
+                                    metallicRoughnessTexPath = images[imgIdx];
+                                }
+                            }
+                        }
                     }
                 }
 
                 parts.Add(new Model3DPart
                 {
                     TexturePath = texPath,
+                    MetallicRoughnessTexturePath = metallicRoughnessTexPath,
                     IndexOffset = startIndex,
                     IndexCount = allIndices.Count - startIndex,
                     BaseColor = baseColor,

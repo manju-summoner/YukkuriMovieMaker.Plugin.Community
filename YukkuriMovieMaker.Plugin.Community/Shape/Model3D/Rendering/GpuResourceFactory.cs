@@ -17,6 +17,7 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
         ID3D11Buffer? vertexBuffer = null;
         ID3D11Buffer? indexBuffer = null;
         ID3D11ShaderResourceView?[]? textures = null;
+        ID3D11ShaderResourceView?[]? metallicRoughnessTextures = null;
         bool success = false;
 
         try
@@ -43,26 +44,17 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
 
             var parts = BoundingBoxUtility.CalculatePartCenters(model);
             textures = new ID3D11ShaderResourceView?[parts.Length];
+            metallicRoughnessTextures = new ID3D11ShaderResourceView?[parts.Length];
 
             for (int i = 0; i < parts.Length; i++)
             {
-                string texturePath = parts[i].TexturePath;
-                if (string.IsNullOrEmpty(texturePath) || !File.Exists(texturePath)) continue;
-
-                try
-                {
-                    var (view, textureBytes) = textureService.CreateShaderResourceView(texturePath, device);
-                    textures[i] = view;
-                    gpuBytes += textureBytes;
-                }
-                catch
-                {
-                }
+                gpuBytes += LoadTexture(device, parts[i].TexturePath, textures, i);
+                gpuBytes += LoadTexture(device, parts[i].MetallicRoughnessTexturePath, metallicRoughnessTextures, i);
             }
 
             if (!Model3DSettings.Default.IsGpuMemoryPerModelAllowed(gpuBytes)) return null;
 
-            int opaquePartCount = PartitionOpaqueFirst(parts, textures);
+            int opaquePartCount = PartitionOpaqueFirst(parts, textures, metallicRoughnessTextures);
 
             var item = new GpuResourceCacheItem(
                 vertexBuffer,
@@ -70,6 +62,7 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
                 model.Indices.Length,
                 parts,
                 textures,
+                metallicRoughnessTextures,
                 model.ModelCenter,
                 model.ModelScale,
                 opaquePartCount);
@@ -81,44 +74,72 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
         {
             if (!success)
             {
-                if (textures is not null)
-                {
-                    for (int i = 0; i < textures.Length; i++)
-                        SafeDispose(textures[i]);
-                }
+                DisposeTextures(textures);
+                DisposeTextures(metallicRoughnessTextures);
                 SafeDispose(indexBuffer);
                 SafeDispose(vertexBuffer);
             }
         }
     }
 
-    private static int PartitionOpaqueFirst(Model3DPart[] parts, ID3D11ShaderResourceView?[] textures)
+    private long LoadTexture(ID3D11Device device, string texturePath, ID3D11ShaderResourceView?[] target, int index)
     {
-        var opaque = new List<(Model3DPart Part, ID3D11ShaderResourceView? Texture)>(parts.Length);
-        var transparent = new List<(Model3DPart Part, ID3D11ShaderResourceView? Texture)>(parts.Length);
+        if (string.IsNullOrEmpty(texturePath) || !File.Exists(texturePath)) return 0;
+
+        try
+        {
+            var (view, textureBytes) = textureService.CreateShaderResourceView(texturePath, device);
+            target[index] = view;
+            return textureBytes;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    private static int PartitionOpaqueFirst(
+        Model3DPart[] parts,
+        ID3D11ShaderResourceView?[] textures,
+        ID3D11ShaderResourceView?[] metallicRoughnessTextures)
+    {
+        var opaque = new List<(Model3DPart Part, ID3D11ShaderResourceView? Texture, ID3D11ShaderResourceView? MetallicRoughness)>(parts.Length);
+        var transparent = new List<(Model3DPart Part, ID3D11ShaderResourceView? Texture, ID3D11ShaderResourceView? MetallicRoughness)>(parts.Length);
 
         for (int i = 0; i < parts.Length; i++)
         {
-            if (parts[i].IsOpaque) opaque.Add((parts[i], textures[i]));
-            else transparent.Add((parts[i], textures[i]));
+            if (parts[i].IsOpaque) opaque.Add((parts[i], textures[i], metallicRoughnessTextures[i]));
+            else transparent.Add((parts[i], textures[i], metallicRoughnessTextures[i]));
         }
 
         int index = 0;
-        foreach (var (part, texture) in opaque)
+        foreach (var (part, texture, metallicRoughness) in opaque)
         {
             parts[index] = part;
             textures[index] = texture;
+            metallicRoughnessTextures[index] = metallicRoughness;
             index++;
         }
 
-        foreach (var (part, texture) in transparent)
+        foreach (var (part, texture, metallicRoughness) in transparent)
         {
             parts[index] = part;
             textures[index] = texture;
+            metallicRoughnessTextures[index] = metallicRoughness;
             index++;
         }
 
         return opaque.Count;
+    }
+
+    private static void DisposeTextures(ID3D11ShaderResourceView?[]? textures)
+    {
+        if (textures is null) return;
+
+        for (int i = 0; i < textures.Length; i++)
+        {
+            SafeDispose(textures[i]);
+        }
     }
 
     private static void SafeDispose(IDisposable? disposable)

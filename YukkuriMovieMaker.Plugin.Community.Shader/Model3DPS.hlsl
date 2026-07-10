@@ -15,6 +15,7 @@ cbuffer CBPerMaterial : register(b2)
 };
 
 Texture2D BaseColorTexture : register(t0);
+Texture2D MetallicRoughnessTexture : register(t1);
 SamplerState BaseColorSampler : register(s0);
 
 struct PSIn
@@ -200,8 +201,9 @@ float4 main(PSIn input) : SV_Target
         return float4(saturate(surface.rgb) * alpha, alpha);
 
     float3 albedo = pow(abs(surface.rgb), Gamma);
-    float metallic = saturate(Metallic);
-    float roughness = clamp(Roughness, MinRoughness, 1.0f);
+    float4 metallicRoughness = MetallicRoughnessTexture.Sample(BaseColorSampler, input.uv);
+    float metallic = saturate(Metallic * metallicRoughness.b);
+    float roughness = clamp(Roughness * metallicRoughness.g, MinRoughness, 1.0f);
 
     float3 v = normalize(CameraPosition.xyz - input.worldPosition);
     float3 n = SafeNormalize(input.normal, v);

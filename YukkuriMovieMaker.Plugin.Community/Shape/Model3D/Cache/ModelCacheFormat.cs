@@ -47,6 +47,9 @@ internal static class ModelCacheFormat
         var textureBytes = Encoding.UTF8.GetBytes(part.TexturePath ?? string.Empty);
         writer.Write(textureBytes.Length);
         writer.Write(textureBytes);
+        var metallicRoughnessBytes = Encoding.UTF8.GetBytes(part.MetallicRoughnessTexturePath ?? string.Empty);
+        writer.Write(metallicRoughnessBytes.Length);
+        writer.Write(metallicRoughnessBytes);
         writer.Write(part.IndexOffset);
         writer.Write(part.IndexCount);
         writer.Write(part.BaseColor.X);
@@ -64,6 +67,12 @@ internal static class ModelCacheFormat
             throw new InvalidDataException($"Invalid texture path length: {textureLength}");
 
         string texturePath = Encoding.UTF8.GetString(reader.ReadBytes(textureLength));
+
+        int metallicRoughnessLength = reader.ReadInt32();
+        if (metallicRoughnessLength < 0 || metallicRoughnessLength > MaxTexturePathLength)
+            throw new InvalidDataException($"Invalid texture path length: {metallicRoughnessLength}");
+
+        string metallicRoughnessPath = Encoding.UTF8.GetString(reader.ReadBytes(metallicRoughnessLength));
         int indexOffset = reader.ReadInt32();
         int indexCount = reader.ReadInt32();
         var baseColor = new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
@@ -73,6 +82,7 @@ internal static class ModelCacheFormat
         return new Model3DPart
         {
             TexturePath = texturePath,
+            MetallicRoughnessTexturePath = metallicRoughnessPath,
             IndexOffset = indexOffset,
             IndexCount = indexCount,
             BaseColor = baseColor,

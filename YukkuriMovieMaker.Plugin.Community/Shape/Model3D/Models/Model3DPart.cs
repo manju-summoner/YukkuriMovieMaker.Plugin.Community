@@ -8,6 +8,7 @@ internal struct Model3DPart
     public const float DefaultRoughness = 1.0f;
 
     public string TexturePath;
+    public string MetallicRoughnessTexturePath;
     public int IndexOffset;
     public int IndexCount;
     public Vector4 BaseColor;
@@ -18,6 +19,7 @@ internal struct Model3DPart
     public Model3DPart()
     {
         TexturePath = string.Empty;
+        MetallicRoughnessTexturePath = string.Empty;
         IndexOffset = 0;
         IndexCount = 0;
         BaseColor = Vector4.One;
