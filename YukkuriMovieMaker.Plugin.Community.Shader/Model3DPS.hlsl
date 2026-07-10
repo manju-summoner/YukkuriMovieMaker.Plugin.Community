@@ -164,7 +164,7 @@ float3 CalculateDirectLighting(float3 albedo, float3 n, float3 v, float3 worldPo
     float nDotL = max(dot(n, l), 0.0f);
     float nDotV = max(dot(n, v), Epsilon);
 
-    float3 h = normalize(v + specularDirection);
+    float3 h = SafeNormalize(v + specularDirection, n);
     float distribution = DistributionGGX(n, h, specularRoughness);
     float geometry = GeometrySmith(n, v, specularDirection, specularRoughness);
     float3 fresnel = FresnelSchlick(max(dot(h, v), 0.0f), f0);
@@ -205,7 +205,7 @@ float4 main(PSIn input) : SV_Target
     float metallic = saturate(Metallic * metallicRoughness.b);
     float roughness = clamp(Roughness * metallicRoughness.g, MinRoughness, 1.0f);
 
-    float3 v = normalize(CameraPosition.xyz - input.worldPosition);
+    float3 v = SafeNormalize(CameraPosition.xyz - input.worldPosition, WorldUp);
     float3 n = SafeNormalize(input.normal, v);
     n = input.isFrontFace ? n : -n;
     float3 f0 = lerp(DielectricF0, albedo, metallic);
