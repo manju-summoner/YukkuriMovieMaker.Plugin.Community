@@ -14,17 +14,17 @@ internal sealed class StreamingCacheWriter : IStreamingCacheWriter
     private bool _committed;
     private bool _disposed;
 
+    private const string TempDirPrefix = ".tmp";
+    private static readonly TimeSpan StaleTempDirAge = TimeSpan.FromHours(1);
+
     public StreamingCacheWriter(string cacheDir, bool isSplit)
     {
         _cacheDir = cacheDir;
         _isSplit = isSplit;
-        _tempDir = Path.Combine(cacheDir, ".tmp");
+        _tempDir = Path.Combine(cacheDir, TempDirPrefix + "-" + Guid.NewGuid().ToString("N"));
         _committed = false;
 
-        if (Directory.Exists(_tempDir))
-        {
-            try { Directory.Delete(_tempDir, true); } catch { }
-        }
+        CleanStaleTempDirs(cacheDir);
         Directory.CreateDirectory(_tempDir);
 
         if (_isSplit)
@@ -136,6 +136,26 @@ internal sealed class StreamingCacheWriter : IStreamingCacheWriter
             if (Directory.Exists(_tempDir))
             {
                 Directory.Delete(_tempDir, true);
+            }
+        }
+        catch { }
+    }
+
+    private static void CleanStaleTempDirs(string cacheDir)
+    {
+        try
+        {
+            var threshold = DateTime.UtcNow - StaleTempDirAge;
+            foreach (var dir in Directory.GetDirectories(cacheDir, TempDirPrefix + "*"))
+            {
+                try
+                {
+                    if (Directory.GetCreationTimeUtc(dir) < threshold)
+                    {
+                        Directory.Delete(dir, true);
+                    }
+                }
+                catch { }
             }
         }
         catch { }
