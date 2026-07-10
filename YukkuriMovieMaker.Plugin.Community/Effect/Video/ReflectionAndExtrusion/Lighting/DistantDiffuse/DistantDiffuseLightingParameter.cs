@@ -34,7 +34,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
         public override ILightingProcessor CreateLightingProcessor(IVideoEffect owner, IGraphicsDevicesAndContext devices)
         {
-            return new DistantDiffuseLightingProcessor(devices, LightSource, Highlight, 0, SurfaceScale);
+            return (ILightingProcessor?)HighQualityLightingProcessor.TryCreateDistant(devices, LightSource, Highlight, 0, SurfaceScale)
+                ?? new DistantDiffuseLightingProcessor(devices, LightSource, Highlight, 0, SurfaceScale);
         }
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => base.GetAnimatables().Concat([LightSource, Highlight]);

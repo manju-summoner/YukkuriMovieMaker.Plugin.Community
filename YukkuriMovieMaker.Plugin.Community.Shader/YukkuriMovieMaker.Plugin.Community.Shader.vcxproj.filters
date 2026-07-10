@@ -30,7 +30,19 @@
     <FxCompile Include="BevelHeightmap.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="BevelSdfSeed.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="BevelSdfJump.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="BevelSdfResolve.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="BevelAndFlatComposite.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="BevelLighting.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
     <FxCompile Include="UnidirectionalBlur.hlsl">
