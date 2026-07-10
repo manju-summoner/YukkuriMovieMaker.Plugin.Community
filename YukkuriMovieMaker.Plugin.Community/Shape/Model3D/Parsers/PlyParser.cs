@@ -73,8 +73,11 @@ internal sealed class PlyParser : IModelParser
         {
             if (!ParseHeader()) return new Model3DData();
 
+            long remaining = _stream.Length - _stream.Position;
+            if (_vertexCount < 0 || _faceCount < 0 || _vertexCount > remaining || _faceCount > remaining) return new Model3DData();
+
             var vertices = new Model3DVertex[_vertexCount];
-            var indices = new List<int>(_faceCount * 3);
+            var indices = new List<int>((int)Math.Min((long)_faceCount * 3, remaining));
 
             try
             {
