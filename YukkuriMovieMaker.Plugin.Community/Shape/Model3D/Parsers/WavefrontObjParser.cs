@@ -90,6 +90,13 @@ internal sealed class WavefrontObjParser : IModelParser
                 totalF += counts[i].F;
             }
 
+            var limits = Model3DSettings.Default;
+            if (totalV > limits.MaxVertices || totalVt > limits.MaxVertices || totalVn > limits.MaxVertices
+                || (long)totalF * 3 > limits.MaxIndices)
+            {
+                return new Model3DData();
+            }
+
             rawV = (Vector3*)NativeMemory.Alloc((nuint)(totalV > 0 ? totalV : 1), (nuint)sizeof(Vector3));
             rawVt = (Vector2*)NativeMemory.Alloc((nuint)(totalVt > 0 ? totalVt : 1), (nuint)sizeof(Vector2));
             rawVn = (Vector3*)NativeMemory.Alloc((nuint)(totalVn > 0 ? totalVn : 1), (nuint)sizeof(Vector3));
