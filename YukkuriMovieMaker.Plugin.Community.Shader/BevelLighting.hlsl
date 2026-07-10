@@ -9,11 +9,23 @@ cbuffer constants : register(b0)
 	float exponent : packoffset(c1.z);
 	int lightMode : packoffset(c1.w);
 	int reflectionMode : packoffset(c2.x);
+	float shadowStrength : packoffset(c2.y);
+	float shadowDistance : packoffset(c2.z);
+	float shadowBias : packoffset(c2.w);
+	float shadowSoftness : packoffset(c3.x);
+	int shadowStepCount : packoffset(c3.y);
 };
+
+#define MAX_SHADOW_STEPS 8
 
 float Height(float2 uv)
 {
 	return saturate(HeightTexture.Sample(HeightSampler, uv).a);
+}
+
+float HeightLevel0(float2 uv)
+{
+	return saturate(HeightTexture.SampleLevel(HeightSampler, uv, 0).a);
 }
 
 float DistributionGgx(float noH, float roughness)
@@ -35,6 +47,55 @@ float3 SafeNormalize(float3 value, float3 fallback)
 {
 	float lengthSquared = dot(value, value);
 	return lengthSquared > 0.000001 ? value * rsqrt(lengthSquared) : fallback;
+}
+
+float CalculateSelfShadow(float2 uv, float2 texel, float2 scenePosition, float centerHeight, float3 lightDirection)
+{
+	if (shadowStrength <= 0.0 || shadowDistance <= 0.0 || surfaceScale <= 0.0)
+		return 1.0;
+
+	float2 planarVector;
+	float planarLength;
+	float marchDistance;
+	float heightSlope;
+	if (lightMode == 0)
+	{
+		planarVector = lightDirection.xy;
+		planarLength = length(planarVector);
+		if (planarLength <= 0.0001)
+			return 1.0;
+		marchDistance = shadowDistance;
+		heightSlope = lightDirection.z / planarLength;
+	}
+	else
+	{
+		planarVector = light.xy - scenePosition;
+		planarLength = length(planarVector);
+		if (planarLength <= 0.0001)
+			return 1.0;
+		marchDistance = min(planarLength, shadowDistance);
+		heightSlope = (light.z - centerHeight) / planarLength;
+	}
+
+	float2 marchDirection = planarVector / planarLength;
+	int steps = clamp(shadowStepCount, 4, MAX_SHADOW_STEPS);
+	float occlusion = 0.0;
+	[loop]
+	for (int stepIndex = 0; stepIndex < MAX_SHADOW_STEPS; stepIndex++)
+	{
+		if (stepIndex >= steps)
+			break;
+		float fraction = ((float)stepIndex + 1.0) / (float)steps;
+		float sampleDistance = marchDistance * fraction * fraction;
+		float sampleHeight = HeightLevel0(uv + marchDirection * sampleDistance * texel) * surfaceScale;
+		float rayHeight = centerHeight + heightSlope * sampleDistance;
+		float blocker = sampleHeight - rayHeight - shadowBias;
+		float sampleOcclusion = shadowSoftness > 0.0001
+			? smoothstep(0.0, shadowSoftness, blocker)
+			: step(0.0001, blocker);
+		occlusion = max(occlusion, sampleOcclusion);
+	}
+	return 1.0 - saturate(shadowStrength) * saturate(occlusion);
 }
 
 float4 main(
@@ -61,6 +122,8 @@ float4 main(
 	float lightLengthSquared = dot(lightVector, lightVector);
 	float3 lightDirection = SafeNormalize(lightVector, float3(0, 0, 1));
 	float noL = lightLengthSquared > 0.000001 ? saturate(dot(normal, lightDirection)) : 0.0;
+	float centerHeight = Height(uv0.xy) * surfaceScale;
+	float visibility = CalculateSelfShadow(uv0.xy, uv0.zw, posScene.xy, centerHeight, lightDirection);
 	float intensity;
 	if (reflectionMode == 0)
 	{
@@ -87,5 +150,6 @@ float4 main(
 	intensity = reflectionMode == 0
 		? saturate(intensity)
 		: max(intensity, 0.0) / (1.0 + max(intensity, 0.0));
+	intensity *= visibility;
 	return float4(intensity, intensity, intensity, intensity);
 }

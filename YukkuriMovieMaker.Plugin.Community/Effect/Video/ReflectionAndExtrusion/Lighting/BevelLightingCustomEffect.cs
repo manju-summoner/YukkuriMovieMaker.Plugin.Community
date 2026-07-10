@@ -16,6 +16,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         public float Exponent { get => GetFloatValue((int)EffectImpl.Properties.Exponent); set => SetValue((int)EffectImpl.Properties.Exponent, value); }
         public int LightMode { get => GetIntValue((int)EffectImpl.Properties.LightMode); set => SetValue((int)EffectImpl.Properties.LightMode, value); }
         public int ReflectionMode { get => GetIntValue((int)EffectImpl.Properties.ReflectionMode); set => SetValue((int)EffectImpl.Properties.ReflectionMode, value); }
+        public float ShadowStrength { get => GetFloatValue((int)EffectImpl.Properties.ShadowStrength); set => SetValue((int)EffectImpl.Properties.ShadowStrength, value); }
+        public float ShadowDistance { get => GetFloatValue((int)EffectImpl.Properties.ShadowDistance); set => SetValue((int)EffectImpl.Properties.ShadowDistance, value); }
+        public float ShadowBias { get => GetFloatValue((int)EffectImpl.Properties.ShadowBias); set => SetValue((int)EffectImpl.Properties.ShadowBias, value); }
+        public float ShadowSoftness { get => GetFloatValue((int)EffectImpl.Properties.ShadowSoftness); set => SetValue((int)EffectImpl.Properties.ShadowSoftness, value); }
+        public OcclusionQuality ShadowQuality { get => (OcclusionQuality)GetIntValue((int)EffectImpl.Properties.ShadowStepCount); set => SetValue((int)EffectImpl.Properties.ShadowStepCount, (int)value); }
 
         [CustomEffect(1)]
         sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
@@ -34,8 +39,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             public int LightMode { get => constants.LightMode; set { constants.LightMode = value; UpdateConstants(); } }
             [CustomEffectProperty(PropertyType.Int32, (int)Properties.ReflectionMode)]
             public int ReflectionMode { get => constants.ReflectionMode; set { constants.ReflectionMode = value; UpdateConstants(); } }
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.ShadowStrength)]
+            public float ShadowStrength { get => constants.ShadowStrength; set { constants.ShadowStrength = Math.Clamp(value, 0, 1); UpdateConstants(); } }
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.ShadowDistance)]
+            public float ShadowDistance { get => constants.ShadowDistance; set { constants.ShadowDistance = Math.Clamp(value, 0, 256); UpdateConstants(); } }
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.ShadowBias)]
+            public float ShadowBias { get => constants.ShadowBias; set { constants.ShadowBias = Math.Clamp(value, 0, 64); UpdateConstants(); } }
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.ShadowSoftness)]
+            public float ShadowSoftness { get => constants.ShadowSoftness; set { constants.ShadowSoftness = Math.Clamp(value, 0, 64); UpdateConstants(); } }
+            [CustomEffectProperty(PropertyType.Int32, (int)Properties.ShadowStepCount)]
+            public int ShadowStepCount { get => constants.ShadowStepCount; set { constants.ShadowStepCount = Math.Clamp(value, 4, 8); UpdateConstants(); } }
 
-            public EffectImpl() : base(ShaderResourceUri.Get("BevelLighting")) { }
+            public EffectImpl() : base(ShaderResourceUri.Get("BevelLighting")) { constants.ShadowStepCount = 4; }
 
             public override void SetDrawInfo(ID2D1DrawInfo drawInfo)
             {
@@ -46,12 +61,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             protected override void UpdateConstants() => drawInformation?.SetPixelShaderConstantBuffer(constants);
 
             public override RawRect MapInvalidRect(int inputIndex, RawRect invalidInputRect)
-                => new(invalidInputRect.Left - 1, invalidInputRect.Top - 1, invalidInputRect.Right + 1, invalidInputRect.Bottom + 1);
+                => Inflate(invalidInputRect, Padding());
 
             public override void MapOutputRectToInputRects(RawRect outputRect, RawRect[] inputRects)
             {
-                inputRects[0] = new RawRect(outputRect.Left - 1, outputRect.Top - 1, outputRect.Right + 1, outputRect.Bottom + 1);
+                inputRects[0] = Inflate(outputRect, Padding());
             }
+
+            int Padding() => constants.ShadowStrength > 0 ? (int)Math.Ceiling(constants.ShadowDistance) + 1 : 1;
+            static RawRect Inflate(RawRect rect, int amount) => new(Saturate((long)rect.Left - amount), Saturate((long)rect.Top - amount), Saturate((long)rect.Right + amount), Saturate((long)rect.Bottom + amount));
+            static int Saturate(long value) => (int)Math.Clamp(value, int.MinValue, int.MaxValue);
 
             [StructLayout(LayoutKind.Sequential)]
             struct ConstantBuffer
@@ -62,6 +81,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
                 public float Exponent;
                 public int LightMode;
                 public int ReflectionMode;
+                public float ShadowStrength;
+                public float ShadowDistance;
+                public float ShadowBias;
+                public float ShadowSoftness;
+                public int ShadowStepCount;
             }
 
             public enum Properties
@@ -72,6 +96,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
                 Exponent,
                 LightMode,
                 ReflectionMode,
+                ShadowStrength,
+                ShadowDistance,
+                ShadowBias,
+                ShadowSoftness,
+                ShadowStepCount,
             }
         }
     }

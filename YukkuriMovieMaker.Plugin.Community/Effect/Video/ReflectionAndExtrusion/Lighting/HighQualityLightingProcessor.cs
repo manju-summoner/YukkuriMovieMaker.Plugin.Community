@@ -11,6 +11,8 @@ using D2DAlphaMask = Vortice.Direct2D1.Effects.AlphaMask;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion.Lighting
 {
+    internal readonly record struct BevelSelfShadowSettings(float Strength, float Distance, float Bias, float Softness, OcclusionQuality Quality);
+
     internal sealed class HighQualityLightingProcessor : ILightingProcessor
     {
         readonly DisposeCollector disposer = new();
@@ -108,6 +110,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         }
 
         public void SetInput(ID2D1Image? input) => lighting.SetInput(0, input, true);
+
+        public void SetSelfShadowSettings(BevelSelfShadowSettings settings)
+        {
+            lighting.ShadowStrength = settings.Strength;
+            lighting.ShadowDistance = settings.Distance;
+            lighting.ShadowBias = settings.Bias;
+            lighting.ShadowSoftness = settings.Softness;
+            lighting.ShadowQuality = settings.Quality;
+        }
 
         public DrawDescription Update(EffectDescription desc)
         {

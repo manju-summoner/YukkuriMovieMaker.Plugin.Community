@@ -32,6 +32,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
         AlphaMask? alphaMask;
         LinearHdrCompositeCustomEffect? linearHdrComposite;
+        BevelAmbientOcclusionCustomEffect? ambientOcclusion;
 
         /*
          heightmap -> luminanceToAlpha -> invertAlpha -> hightOutput
@@ -95,12 +96,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             var highlightBlend = highlight.Blend;
             var isInvertAlpha = item.IsInvert;
             var isLinearHdrCompositeEnabled = item.IsLinearHdrCompositeEnabled && linearHdrComposite is not null;
+            var surfaceScale = lightingParameter.SurfaceScale.GetValue(frame, length, fps);
+            var distance = item.OcclusionDistance.GetValue(frame, length, fps);
+            var bias = item.OcclusionBias.GetValue(frame, length, fps);
+            var softness = item.OcclusionSoftness.GetValue(frame, length, fps);
+            var shadowStrength = item.SelfShadowStrength.GetValue(frame, length, fps) / 100;
+            var aoStrength = item.AmbientOcclusionStrength.GetValue(frame, length, fps) / 100;
 
             if (isFirst || this.blur != blur)
                 highlightBlur.StandardDeviation = (float)blur;
 
             if(isFirst || this.isInvertAlpha != isInvertAlpha)
                 invertAlpha.Invert = isInvertAlpha ? 1 : 0;
+
+            if (highlight is HighQualityLightingProcessor highQuality)
+                highQuality.SetSelfShadowSettings(new((float)shadowStrength, (float)distance, (float)bias, (float)softness, item.OcclusionQuality));
+
+            if (ambientOcclusion is not null)
+            {
+                ambientOcclusion.Strength = (float)aoStrength;
+                ambientOcclusion.Distance = (float)distance;
+                ambientOcclusion.Bias = (float)bias;
+                ambientOcclusion.Softness = (float)softness;
+                ambientOcclusion.SurfaceScale = (float)surfaceScale;
+                ambientOcclusion.Quality = item.OcclusionQuality;
+            }
 
             if (isFirst || this.highlightBlend != highlightBlend || this.isLinearHdrCompositeEnabled != isLinearHdrCompositeEnabled)
             {
@@ -155,6 +175,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             alphaMask?.SetInput(1, null, true);
             linearHdrComposite?.SetBaseInput(null);
             linearHdrComposite?.SetReflectionInput(null);
+            ambientOcclusion?.SetInput(0, null, true);
+            ambientOcclusion?.SetInput(1, null, true);
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
@@ -215,6 +237,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
                 linearHdrComposite = null;
             }
 
+            ambientOcclusion = new(devices);
+            if (ambientOcclusion.IsEnabled)
+                disposer.Collect(ambientOcclusion);
+            else
+            {
+                ambientOcclusion.Dispose();
+                ambientOcclusion = null;
+            }
+
             //接続（ハイトマップ）
             using(var image = luminanceToAlpha.Output)
                 invertAlpha.SetInput(0, image, true);
@@ -232,7 +263,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
                 linearHdrComposite?.SetReflectionInput(image);
             }
 
-            var output = alphaMask.Output;
+            ambientOcclusion?.SetInput(1, heightOutput, true);
+
+            ID2D1Image output;
+            if (ambientOcclusion is not null)
+            {
+                using var masked = alphaMask.Output;
+                ambientOcclusion.SetInput(0, masked, true);
+                output = ambientOcclusion.Output;
+            }
+            else
+            {
+                output = alphaMask.Output;
+            }
+
             disposer.Collect(output);
             return output;
         }
