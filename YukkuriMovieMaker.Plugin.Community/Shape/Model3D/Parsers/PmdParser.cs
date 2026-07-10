@@ -19,6 +19,7 @@ internal sealed class PmdParser : IStreamingModelParser
     private const int MaterialFlagBlockBytes = 2;
     private const int VertexBytes = 38;
     private const int IndexBytes = 2;
+    private const int MaterialBytes = 70;
     private const int StreamChunkLength = 4096;
     private const int StreamBufferBytes = 65536;
 
@@ -193,6 +194,7 @@ internal sealed class PmdParser : IStreamingModelParser
     {
         int count = reader.ReadInt32();
         if (count <= 0) return [];
+        if (!HasCapacity(reader.BaseStream, count, MaterialBytes)) throw new InvalidDataException(InvalidDataMessage);
 
         string modelDirectory = Path.GetDirectoryName(modelPath) ?? string.Empty;
         var parts = new List<Model3DPart>(count);

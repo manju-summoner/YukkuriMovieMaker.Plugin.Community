@@ -226,6 +226,7 @@ internal sealed class PmxParser : IStreamingModelParser
     {
         int count = reader.ReadInt32();
         if (count <= 0) return [];
+        if (!HasCapacity(reader.BaseStream, count, sizeof(int))) throw new InvalidDataException(InvalidDataMessage);
 
         string modelDirectory = Path.GetDirectoryName(modelPath) ?? string.Empty;
         var paths = new string[count];
@@ -243,6 +244,7 @@ internal sealed class PmxParser : IStreamingModelParser
     {
         int count = reader.ReadInt32();
         if (count <= 0) return [];
+        if (!HasCapacity(reader.BaseStream, count, sizeof(int))) throw new InvalidDataException(InvalidDataMessage);
 
         var parts = new List<Model3DPart>(count);
         int indexOffset = 0;
@@ -297,6 +299,7 @@ internal sealed class PmxParser : IStreamingModelParser
     {
         int length = reader.ReadInt32();
         if (length <= 0) return string.Empty;
+        if (!HasCapacity(reader.BaseStream, length, sizeof(byte))) throw new InvalidDataException(InvalidDataMessage);
         return encoding.GetString(reader.ReadBytes(length)).Trim().Replace("\0", string.Empty);
     }
 
