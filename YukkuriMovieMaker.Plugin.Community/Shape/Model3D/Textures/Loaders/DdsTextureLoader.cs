@@ -143,10 +143,10 @@ internal sealed class DdsTextureLoader : ITextureLoader
                         pixelVal = br.ReadUInt32();
                     }
 
-                    byte r = (byte)((pixelVal & pfRBitMask) >> rShift);
-                    byte g = (byte)((pixelVal & pfGBitMask) >> gShift);
-                    byte b = (byte)((pixelVal & pfBBitMask) >> bShift);
-                    byte a = pfABitMask != 0 ? (byte)((pixelVal & pfABitMask) >> aShift) : (byte)255;
+                    byte r = ScaleChannel(pixelVal, pfRBitMask, rShift);
+                    byte g = ScaleChannel(pixelVal, pfGBitMask, gShift);
+                    byte b = ScaleChannel(pixelVal, pfBBitMask, bShift);
+                    byte a = pfABitMask != 0 ? ScaleChannel(pixelVal, pfABitMask, aShift) : (byte)255;
 
                     int destIdx = (y * w + x) * 4;
                     pixels[destIdx] = b;
@@ -168,6 +168,15 @@ internal sealed class DdsTextureLoader : ITextureLoader
             rawData?.Dispose();
             throw new InvalidDataException("Failed to read DDS pixel data", ex);
         }
+    }
+
+    private static byte ScaleChannel(uint pixelVal, uint mask, int shift)
+    {
+        uint max = mask >> shift;
+        if (max == 0) return 0;
+
+        uint value = (pixelVal & mask) >> shift;
+        return (byte)((ulong)value * 255 / max);
     }
 
     private static int GetShift(uint mask)
