@@ -8,7 +8,7 @@ internal delegate void CacheChunkWriter(ReadOnlySpan<byte> data);
 internal interface IStreamingCacheWriter : IDisposable
 {
     void WriteHeader(CacheHeader header);
-    void WriteMetadata(int vertexCount, int indexCount, List<Model3DPart> parts, Vector3 center, float scale);
+    void WriteMetadata(int vertexCount, int indexCount, List<Model3DPart> parts, Vector3 center, float scale, IReadOnlyList<string> dependencies);
     void WriteVertexChunk(ReadOnlySpan<byte> vertexData);
     void WriteIndexChunk(ReadOnlySpan<byte> indexData);
     void Commit();

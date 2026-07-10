@@ -97,7 +97,7 @@ internal sealed class PmxParser : IStreamingModelParser
             var parts = ReadParts(reader, header, texturePaths);
             var (center, scale) = CalculateTransform(bounds);
 
-            cacheWriter.WriteMetadata(vertexCount, indexCount, parts, center, scale);
+            cacheWriter.WriteMetadata(vertexCount, indexCount, parts, center, scale, []);
             CopyToCache(vertexTempPath, cacheWriter.WriteVertexChunk);
             CopyToCache(indexTempPath, cacheWriter.WriteIndexChunk);
 

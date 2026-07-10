@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Numerics;
 using System.Text;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Models;
@@ -12,6 +12,7 @@ internal static class ModelCacheFormat
     public const int SplitChunkSize = 256 * 1024;
 
     private const int MaxTexturePathLength = 32_767;
+    private const int MaxDependencyCount = 4096;
 
     public static string GetSplitFileName(int index) => $"part.{index}.bin";
 
@@ -100,6 +101,47 @@ internal static class ModelCacheFormat
             Roughness = roughness,
             ForceTransparent = forceTransparent
         };
+    }
+
+    public static void WriteDependencies(BinaryWriter writer, IReadOnlyList<string> dependencies)
+    {
+        int count = Math.Min(dependencies.Count, MaxDependencyCount);
+        writer.Write(count);
+
+        for (int i = 0; i < count; i++)
+        {
+            string path = dependencies[i] ?? string.Empty;
+            writer.Write(path);
+            writer.Write(GetDependencyTicks(path));
+        }
+    }
+
+    public static List<(string Path, long Ticks)> ReadDependencies(BinaryReader reader)
+    {
+        int count = reader.ReadInt32();
+        if (count < 0 || count > MaxDependencyCount)
+            throw new InvalidDataException($"Invalid dependency count: {count}");
+
+        var dependencies = new List<(string, long)>(count);
+        for (int i = 0; i < count; i++)
+        {
+            string path = reader.ReadString();
+            long ticks = reader.ReadInt64();
+            dependencies.Add((path, ticks));
+        }
+        return dependencies;
+    }
+
+    public static long GetDependencyTicks(string path)
+    {
+        try
+        {
+            return File.Exists(path) ? File.GetLastWriteTimeUtc(path).Ticks : 0;
+        }
+        catch
+        {
+            return 0;
+        }
     }
 
     public static void WriteTransform(BinaryWriter writer, Vector3 center, float scale)

@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Numerics;
@@ -172,6 +172,7 @@ internal sealed class WavefrontObjParser : IModelParser
         var materialLib = new Dictionary<string, MaterialData>(StringComparer.OrdinalIgnoreCase);
         string baseDir = Path.GetDirectoryName(path) ?? string.Empty;
 
+        var dependencies = new List<string>();
         var seenLibs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var res in chunkResults)
         {
@@ -179,6 +180,13 @@ internal sealed class WavefrontObjParser : IModelParser
             {
                 if (!seenLibs.Add(mtlLib)) continue;
                 ParseMtl(baseDir, mtlLib, materialLib);
+
+                try
+                {
+                    string mtlPath = Path.GetFullPath(Path.Combine(baseDir, mtlLib));
+                    if (File.Exists(mtlPath)) dependencies.Add(mtlPath);
+                }
+                catch { }
             }
         }
 
@@ -248,6 +256,7 @@ internal sealed class WavefrontObjParser : IModelParser
             Vertices = vertices,
             Indices = indices,
             Parts = parts,
+            Dependencies = dependencies,
             ModelCenter = center,
             ModelScale = scale
         };
@@ -514,11 +523,14 @@ internal sealed class WavefrontObjParser : IModelParser
                 if (IsKeyword(ptr, end, "tllib"))
                 {
                     ptr += 5;
-                    while (ptr < end && *ptr <= 32 && *ptr != '\n') ptr++;
-                    var s = ptr;
-                    while (ptr < end && *ptr > 32 && *ptr != '\n') ptr++;
-                    var len = (int)(ptr - s);
-                    if (len > 0) result.MtlLib = Encoding.UTF8.GetString(s, len);
+                    while (ptr < end && *ptr != '\n')
+                    {
+                        while (ptr < end && *ptr <= 32 && *ptr != '\n') ptr++;
+                        var s = ptr;
+                        while (ptr < end && *ptr > 32 && *ptr != '\n') ptr++;
+                        var len = (int)(ptr - s);
+                        if (len > 0) result.MtlLibs.Add(Encoding.UTF8.GetString(s, len));
+                    }
                 }
                 else
                 {

@@ -102,7 +102,7 @@ internal sealed class PmdParser : IStreamingModelParser
             var parts = ReadParts(reader, path);
             var (center, scale) = CalculateTransform(bounds);
 
-            cacheWriter.WriteMetadata(vertexCount, indexCount, parts, center, scale);
+            cacheWriter.WriteMetadata(vertexCount, indexCount, parts, center, scale, []);
             CopyToCache(vertexTempPath, cacheWriter.WriteVertexChunk);
             CopyToCache(indexTempPath, cacheWriter.WriteIndexChunk);
 

@@ -45,7 +45,7 @@ internal sealed class StreamingCacheWriter : IStreamingCacheWriter
         ModelCacheFormat.WriteHeader(_writer!, header);
     }
 
-    public void WriteMetadata(int vertexCount, int indexCount, List<Model3DPart> parts, Vector3 center, float scale)
+    public void WriteMetadata(int vertexCount, int indexCount, List<Model3DPart> parts, Vector3 center, float scale, IReadOnlyList<string> dependencies)
     {
         EnsureNotDisposed();
         ModelCacheFormat.WriteCounts(_writer!, vertexCount, indexCount, parts.Count);
@@ -54,6 +54,7 @@ internal sealed class StreamingCacheWriter : IStreamingCacheWriter
             ModelCacheFormat.WritePart(_writer!, part);
 
         ModelCacheFormat.WriteTransform(_writer!, center, scale);
+        ModelCacheFormat.WriteDependencies(_writer!, dependencies);
     }
 
     public void WriteVertexChunk(ReadOnlySpan<byte> vertexData)

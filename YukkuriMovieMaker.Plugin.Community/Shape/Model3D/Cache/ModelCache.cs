@@ -72,7 +72,7 @@ internal sealed class ModelCache
             var header = new CacheHeader(originalTimestamp.ToBinary(), path, parserId, parserVersion, pluginVersion, fileHash);
 
             using var writer = CreateStreamingWriter(path, header);
-            writer.WriteMetadata(model.Vertices.Length, model.Indices.Length, model.Parts, model.ModelCenter, model.ModelScale);
+            writer.WriteMetadata(model.Vertices.Length, model.Indices.Length, model.Parts, model.ModelCenter, model.ModelScale, model.Dependencies);
             WriteBody(writer, model);
             writer.Commit();
         }
@@ -159,6 +159,15 @@ internal sealed class ModelCache
 
         var (center, scale) = ModelCacheFormat.ReadTransform(br);
 
+        var dependencies = ModelCacheFormat.ReadDependencies(br);
+        var dependencyPaths = new List<string>(dependencies.Count);
+        foreach (var (depPath, ticks) in dependencies)
+        {
+            if (ModelCacheFormat.GetDependencyTicks(depPath) != ticks)
+                throw new InvalidDataException($"Dependency changed: {depPath}");
+            dependencyPaths.Add(depPath);
+        }
+
         long requiredBytes = (long)vCount * sizeof(Model3DVertex) + (long)iCount * sizeof(int);
         if (requiredBytes > stream.Length - stream.Position)
             throw new InvalidDataException($"Cache body is truncated: expected {requiredBytes} bytes");
@@ -181,6 +190,7 @@ internal sealed class ModelCache
             Vertices = vertices,
             Indices = indices,
             Parts = parts,
+            Dependencies = dependencyPaths,
             ModelCenter = center,
             ModelScale = scale
         };

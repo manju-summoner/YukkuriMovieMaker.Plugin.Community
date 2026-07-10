@@ -79,13 +79,14 @@ internal sealed class GlbParser : IModelParser
         var allVertices = new List<Model3DVertex>();
         var allIndices = new List<int>();
         var parts = new List<Model3DPart>();
+        var dependencies = new List<string>();
 
         try
         {
             using var doc = JsonDocument.Parse(jsonStr);
             var root = doc.RootElement;
 
-            binData ??= TryLoadExternalBuffer(root, path);
+            binData ??= TryLoadExternalBuffer(root, path, dependencies);
 
             if (root.TryGetProperty("extensionsRequired", out var exts)
                 && exts.ValueKind == JsonValueKind.Array
@@ -142,6 +143,7 @@ internal sealed class GlbParser : IModelParser
                             else if (!uri.StartsWith("data:", StringComparison.Ordinal))
                             {
                                 externalPath = ResolveExternalUri(uri, path);
+                                if (externalPath.Length > 0) dependencies.Add(externalPath);
                             }
                         }
                     }
@@ -244,6 +246,7 @@ internal sealed class GlbParser : IModelParser
             Vertices = verticesArr,
             Indices = indicesArr,
             Parts = parts,
+            Dependencies = dependencies,
             ModelCenter = c,
             ModelScale = s
         };
@@ -711,7 +714,7 @@ internal sealed class GlbParser : IModelParser
 
     private static int GetSourceIndex(int[]? indices, int position) => indices?[position] ?? position;
 
-    private static byte[]? TryLoadExternalBuffer(JsonElement root, string modelPath)
+    private static byte[]? TryLoadExternalBuffer(JsonElement root, string modelPath, List<string> dependencies)
     {
         if (!root.TryGetProperty("buffers", out var buffers) || buffers.ValueKind != JsonValueKind.Array || buffers.GetArrayLength() == 0) return null;
         if (!buffers[0].TryGetProperty("uri", out var uriProp)) return null;
@@ -736,6 +739,7 @@ internal sealed class GlbParser : IModelParser
         string binPath = ResolveExternalUri(uri, modelPath);
         if (binPath.Length == 0) return null;
         if (!Model3DSettings.Default.IsFileSizeAllowed(new FileInfo(binPath).Length)) return null;
+        dependencies.Add(binPath);
         return File.ReadAllBytes(binPath);
     }
 
