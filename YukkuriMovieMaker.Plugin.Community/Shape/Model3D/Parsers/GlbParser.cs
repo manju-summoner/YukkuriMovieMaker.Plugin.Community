@@ -785,10 +785,12 @@ internal sealed class GlbParser : IModelParser
                 string binPath = ResolveExternalUri(uri, modelPath);
                 if (binPath.Length == 0) continue;
 
+                dependencies.Add(binPath);
+
                 try
                 {
+                    if (!File.Exists(binPath)) continue;
                     if (!Model3DSettings.Default.IsFileSizeAllowed(new FileInfo(binPath).Length)) continue;
-                    dependencies.Add(binPath);
                     result[i] = File.ReadAllBytes(binPath);
                 }
                 catch
@@ -810,7 +812,7 @@ internal sealed class GlbParser : IModelParser
             string resolved = Path.GetFullPath(Path.Combine(directory, decoded));
             if (!resolved.StartsWith(directory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) return string.Empty;
 
-            return File.Exists(resolved) ? resolved : string.Empty;
+            return resolved;
         }
         catch
         {
