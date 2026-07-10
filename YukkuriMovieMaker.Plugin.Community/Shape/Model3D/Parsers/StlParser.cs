@@ -36,6 +36,9 @@ internal sealed class StlParser : IModelParser
         int count = BitConverter.ToInt32(bytes, 80);
         if (count < 0 || bytes.Length < 84 + (long)count * 50) return new Model3DData();
 
+        var limits = Model3DSettings.Default;
+        if ((long)count * 3 > limits.MaxVertices || (long)count * 3 > limits.MaxIndices) return new Model3DData();
+
         int totalV = count * 3;
         var rawPositions = GC.AllocateUninitializedArray<Vector3>(totalV, true);
         var rawNormals = GC.AllocateUninitializedArray<Vector3>(totalV, true);
@@ -74,6 +77,7 @@ internal sealed class StlParser : IModelParser
     {
         var rawPositions = new List<Vector3>();
         var rawNormals = new List<Vector3>();
+        int maxVertices = Model3DSettings.Default.MaxVertices;
 
         using (var reader = new StreamReader(path))
         {
@@ -94,6 +98,7 @@ internal sealed class StlParser : IModelParser
                 }
                 else if (parts[0] == "vertex" && parts.Length >= 4)
                 {
+                    if (rawPositions.Count >= maxVertices) return new Model3DData();
                     float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float x);
                     float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float y);
                     float.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out float z);
