@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Numerics;
@@ -31,7 +32,7 @@ internal sealed class WavefrontObjParser : IModelParser
 
     private sealed class ChunkResult
     {
-        public List<SplitEvent> Events = new List<SplitEvent>();
+        public List<SplitEvent> Events = [];
         public string MtlLib = string.Empty;
     }
 
@@ -41,110 +42,119 @@ internal sealed class WavefrontObjParser : IModelParser
         using var accessor = mmf.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Read);
 
         byte* basePointer = null;
+        Vector3* rawV = null;
+        Vector2* rawVt = null;
+        Vector3* rawVn = null;
         accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref basePointer);
-        long fileSize = new FileInfo(path).Length;
 
         int processorCount = Environment.ProcessorCount;
-        var chunkBoundaries = new long[processorCount + 1];
-        long chunkSize = fileSize / processorCount;
-        chunkBoundaries[0] = 0;
-        chunkBoundaries[processorCount] = fileSize;
-
-        for (int i = 1; i < processorCount; i++)
-        {
-            long pos = i * chunkSize;
-            while (pos < fileSize && *(basePointer + pos) != '\n') pos++;
-            if (pos < fileSize) pos++;
-            chunkBoundaries[i] = pos;
-        }
-
-        var counts = new Counts[processorCount];
-
-        Parallel.For(0, processorCount, i =>
-        {
-            counts[i] = CountChunk(basePointer, chunkBoundaries[i], chunkBoundaries[i + 1]);
-        });
-
         var offsets = new Counts[processorCount];
-        int totalV = 0, totalVt = 0, totalVn = 0, totalF = 0;
-
-        for (int i = 0; i < processorCount; i++)
-        {
-            offsets[i].V = totalV;
-            offsets[i].Vt = totalVt;
-            offsets[i].Vn = totalVn;
-            offsets[i].F = totalF;
-
-            totalV += counts[i].V;
-            totalVt += counts[i].Vt;
-            totalVn += counts[i].Vn;
-            totalF += counts[i].F;
-        }
-
-        Vector3* rawV = (Vector3*)NativeMemory.Alloc((nuint)totalV, (nuint)sizeof(Vector3));
-        Vector2* rawVt = (Vector2*)NativeMemory.Alloc((nuint)(totalVt > 0 ? totalVt : 1), (nuint)sizeof(Vector2));
-        Vector3* rawVn = (Vector3*)NativeMemory.Alloc((nuint)(totalVn > 0 ? totalVn : 1), (nuint)sizeof(Vector3));
-
-        var sortArray = GC.AllocateUninitializedArray<SortableVertex>(totalF * 3, true);
         var chunkResults = new ChunkResult[processorCount];
+        int totalV = 0, totalVt = 0, totalVn = 0, totalF = 0;
+        Model3DVertex[] vertices;
+        int[] indices;
 
-        Parallel.For(0, processorCount, i =>
+        try
         {
-            chunkResults[i] = ParseChunk(basePointer, chunkBoundaries[i], chunkBoundaries[i + 1],
-                rawV + offsets[i].V,
-                rawVt + offsets[i].Vt,
-                rawVn + offsets[i].Vn,
-                sortArray,
-                offsets[i].F * 3);
-        });
+            long fileSize = new FileInfo(path).Length;
+            var chunkBoundaries = new long[processorCount + 1];
+            long chunkSize = fileSize / processorCount;
+            chunkBoundaries[0] = 0;
+            chunkBoundaries[processorCount] = fileSize;
 
-        accessor.SafeMemoryMappedViewHandle.ReleasePointer();
-
-        Array.Sort(sortArray);
-
-        int uniqueCount = 0;
-        if (sortArray.Length > 0)
-        {
-            uniqueCount = 1;
-            for (int i = 1; i < sortArray.Length; i++)
+            for (int i = 1; i < processorCount; i++)
             {
-                if (sortArray[i].CompareTo(sortArray[i - 1]) != 0)
+                long pos = i * chunkSize;
+                while (pos < fileSize && *(basePointer + pos) != '\n') pos++;
+                if (pos < fileSize) pos++;
+                chunkBoundaries[i] = pos;
+            }
+
+            var counts = new Counts[processorCount];
+
+            Parallel.For(0, processorCount, i =>
+            {
+                counts[i] = CountChunk(basePointer, chunkBoundaries[i], chunkBoundaries[i + 1]);
+            });
+
+            for (int i = 0; i < processorCount; i++)
+            {
+                offsets[i].V = totalV;
+                offsets[i].Vt = totalVt;
+                offsets[i].Vn = totalVn;
+                offsets[i].F = totalF;
+
+                totalV += counts[i].V;
+                totalVt += counts[i].Vt;
+                totalVn += counts[i].Vn;
+                totalF += counts[i].F;
+            }
+
+            rawV = (Vector3*)NativeMemory.Alloc((nuint)(totalV > 0 ? totalV : 1), (nuint)sizeof(Vector3));
+            rawVt = (Vector2*)NativeMemory.Alloc((nuint)(totalVt > 0 ? totalVt : 1), (nuint)sizeof(Vector2));
+            rawVn = (Vector3*)NativeMemory.Alloc((nuint)(totalVn > 0 ? totalVn : 1), (nuint)sizeof(Vector3));
+
+            var sortArray = GC.AllocateUninitializedArray<SortableVertex>(totalF * 3, true);
+
+            Parallel.For(0, processorCount, i =>
+            {
+                chunkResults[i] = ParseChunk(basePointer, chunkBoundaries[i], chunkBoundaries[i + 1],
+                    rawV + offsets[i].V,
+                    rawVt + offsets[i].Vt,
+                    rawVn + offsets[i].Vn,
+                    sortArray,
+                    offsets[i].F * 3);
+            });
+
+            Array.Sort(sortArray);
+
+            int uniqueCount = 0;
+            if (sortArray.Length > 0)
+            {
+                uniqueCount = 1;
+                for (int i = 1; i < sortArray.Length; i++)
                 {
-                    uniqueCount++;
+                    if (sortArray[i].CompareTo(sortArray[i - 1]) != 0)
+                    {
+                        uniqueCount++;
+                    }
+                }
+            }
+
+            vertices = GC.AllocateUninitializedArray<Model3DVertex>(uniqueCount, true);
+            indices = GC.AllocateUninitializedArray<int>(sortArray.Length, true);
+
+            if (uniqueCount > 0)
+            {
+                int currentIdx = 0;
+
+                var first = sortArray[0];
+                GetVertexData(first.V, first.Vt, first.Vn, totalV, totalVt, totalVn, rawV, rawVt, rawVn, out Vector3 p, out Vector2 uv, out Vector3 n);
+                vertices[0] = new Model3DVertex { Position = p, TexCoord = uv, Normal = n, Color = Vector4.One };
+                indices[first.OriginalIndex] = 0;
+
+                for (int i = 1; i < sortArray.Length; i++)
+                {
+                    var curr = sortArray[i];
+                    var prev = sortArray[i - 1];
+
+                    if (curr.CompareTo(prev) != 0)
+                    {
+                        currentIdx++;
+                        GetVertexData(curr.V, curr.Vt, curr.Vn, totalV, totalVt, totalVn, rawV, rawVt, rawVn, out p, out uv, out n);
+                        vertices[currentIdx] = new Model3DVertex { Position = p, TexCoord = uv, Normal = n, Color = Vector4.One };
+                    }
+                    indices[curr.OriginalIndex] = currentIdx;
                 }
             }
         }
-
-        var vertices = GC.AllocateUninitializedArray<Model3DVertex>(uniqueCount, true);
-        var indices = GC.AllocateUninitializedArray<int>(sortArray.Length, true);
-
-        if (uniqueCount > 0)
+        finally
         {
-            int currentIdx = 0;
-
-            var first = sortArray[0];
-            GetVertexData(first.V, first.Vt, first.Vn, totalV, totalVt, totalVn, rawV, rawVt, rawVn, out Vector3 p, out Vector2 uv, out Vector3 n);
-            vertices[0] = new Model3DVertex { Position = p, TexCoord = uv, Normal = n, Color = Vector4.One };
-            indices[first.OriginalIndex] = 0;
-
-            for (int i = 1; i < sortArray.Length; i++)
-            {
-                var curr = sortArray[i];
-                var prev = sortArray[i - 1];
-
-                if (curr.CompareTo(prev) != 0)
-                {
-                    currentIdx++;
-                    GetVertexData(curr.V, curr.Vt, curr.Vn, totalV, totalVt, totalVn, rawV, rawVt, rawVn, out p, out uv, out n);
-                    vertices[currentIdx] = new Model3DVertex { Position = p, TexCoord = uv, Normal = n, Color = Vector4.One };
-                }
-                indices[curr.OriginalIndex] = currentIdx;
-            }
+            NativeMemory.Free(rawVn);
+            NativeMemory.Free(rawVt);
+            NativeMemory.Free(rawV);
+            accessor.SafeMemoryMappedViewHandle.ReleasePointer();
         }
-
-        NativeMemory.Free(rawV);
-        NativeMemory.Free(rawVt);
-        NativeMemory.Free(rawVn);
 
         if (totalVn == 0 && indices.Length > 0)
         {
@@ -284,9 +294,9 @@ internal sealed class WavefrontObjParser : IModelParser
                     else if (keyword == "kd")
                     {
                         if (parts.Length >= 4 &&
-                            float.TryParse(parts[1], out float r) &&
-                            float.TryParse(parts[2], out float g) &&
-                            float.TryParse(parts[3], out float b))
+                            float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float r) &&
+                            float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float g) &&
+                            float.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out float b))
                         {
                             data.DiffuseColor = new Vector4(r, g, b, 1.0f);
                             lib[currentMat] = data;
@@ -334,6 +344,7 @@ internal sealed class WavefrontObjParser : IModelParser
 
             byte c1 = *ptr;
             ptr++;
+            if (ptr >= end) break;
 
             if (c1 == 'v')
             {
@@ -400,6 +411,7 @@ internal sealed class WavefrontObjParser : IModelParser
 
             byte c1 = *ptr;
             ptr++;
+            if (ptr >= end) break;
 
             if (c1 == 'v')
             {
@@ -463,7 +475,7 @@ internal sealed class WavefrontObjParser : IModelParser
             }
             else if (c1 == 'm')
             {
-                if (IsKeyword(ptr, "tllib"))
+                if (IsKeyword(ptr, end, "tllib"))
                 {
                     ptr += 5;
                     while (ptr < end && *ptr <= 32 && *ptr != '\n') ptr++;
@@ -484,7 +496,7 @@ internal sealed class WavefrontObjParser : IModelParser
                 else if (c1 == 'g') type = 1;
                 else if (c1 == 'u')
                 {
-                    if (IsKeyword(ptr, "semtl"))
+                    if (IsKeyword(ptr, end, "semtl"))
                     {
                         ptr += 5;
                         type = 2;
@@ -537,8 +549,10 @@ internal sealed class WavefrontObjParser : IModelParser
         }
     }
 
-    private static unsafe bool IsKeyword(byte* ptr, string keyword)
+    private static unsafe bool IsKeyword(byte* ptr, byte* end, string keyword)
     {
+        if (ptr + keyword.Length > end) return false;
+
         for (int i = 0; i < keyword.Length; i++)
         {
             if (*(ptr + i) != keyword[i]) return false;
