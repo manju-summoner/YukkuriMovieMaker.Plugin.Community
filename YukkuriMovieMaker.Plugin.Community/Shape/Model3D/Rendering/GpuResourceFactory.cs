@@ -58,13 +58,21 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
             textures = new ID3D11ShaderResourceView?[parts.Length];
             metallicRoughnessTextures = new ID3D11ShaderResourceView?[parts.Length];
 
+            var cachedTexturePaths = new List<string>();
+
             for (int i = 0; i < parts.Length; i++)
             {
-                gpuBytes += LoadTexture(device, parts[i].TexturePath, textures, i);
-                gpuBytes += LoadTexture(device, parts[i].MetallicRoughnessTexturePath, metallicRoughnessTextures, i);
+                gpuBytes += LoadTexture(device, parts[i].TexturePath, textures, i, cachedTexturePaths);
+                gpuBytes += LoadTexture(device, parts[i].MetallicRoughnessTexturePath, metallicRoughnessTextures, i, cachedTexturePaths);
+                if (!Model3DSettings.Default.IsGpuMemoryPerModelAllowed(gpuBytes)) break;
             }
 
-            if (!Model3DSettings.Default.IsGpuMemoryPerModelAllowed(gpuBytes)) return null;
+            if (!Model3DSettings.Default.IsGpuMemoryPerModelAllowed(gpuBytes))
+            {
+                foreach (var path in cachedTexturePaths)
+                    textureService.EvictGpuTexture(path, device);
+                return null;
+            }
 
             int opaquePartCount = PartitionOpaqueFirst(parts, textures, metallicRoughnessTextures);
 
@@ -93,7 +101,7 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
         }
     }
 
-    private long LoadTexture(ID3D11Device device, string texturePath, ID3D11ShaderResourceView?[] target, int index)
+    private long LoadTexture(ID3D11Device device, string texturePath, ID3D11ShaderResourceView?[] target, int index, List<string> cachedTexturePaths)
     {
         if (string.IsNullOrEmpty(texturePath) || !File.Exists(texturePath)) return 0;
 
@@ -101,6 +109,7 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
         {
             var (view, textureBytes) = textureService.CreateShaderResourceView(texturePath, device);
             target[index] = view;
+            if (textureBytes > 0) cachedTexturePaths.Add(texturePath);
             return textureBytes;
         }
         catch

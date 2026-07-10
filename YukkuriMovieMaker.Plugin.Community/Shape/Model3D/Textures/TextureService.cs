@@ -107,6 +107,16 @@ internal sealed class TextureService : ITextureService
         return CreateAndCacheGpuTexture(key, rawData, device);
     }
 
+    public void EvictGpuTexture(string path, ID3D11Device device)
+    {
+        if (string.IsNullOrEmpty(path) || device == null) return;
+
+        path = Path.GetFullPath(path).ToLowerInvariant();
+        if (GpuTextureCache.TryRemove((device.NativePointer, MakeContentKey(path)), out var tex))
+        {
+            SafeDispose(tex);
+        }
+    }
 
     private static string MakeContentKey(string path)
     {
