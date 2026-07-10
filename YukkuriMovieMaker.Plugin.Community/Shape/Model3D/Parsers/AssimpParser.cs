@@ -45,7 +45,7 @@ internal sealed class AssimpParser : IModelParser
     ];
 
     public string Id => "Assimp";
-    public int Version => 2;
+    public int Version => 1;
     public IReadOnlyList<string> Extensions => FileExtensions;
 
     public Model3DData Parse(string path)

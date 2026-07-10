@@ -21,7 +21,7 @@ internal sealed class PmxParser : IStreamingModelParser
     private static readonly string[] FileExtensions = [".pmx"];
 
     public string Id => "Pmx";
-    public int Version => 3;
+    public int Version => 1;
     public IReadOnlyList<string> Extensions => FileExtensions;
 
     public Model3DData Parse(string path)

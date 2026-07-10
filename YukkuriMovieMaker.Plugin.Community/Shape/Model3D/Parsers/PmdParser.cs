@@ -32,7 +32,7 @@ internal sealed class PmdParser : IStreamingModelParser
     }
 
     public string Id => "Pmd";
-    public int Version => 2;
+    public int Version => 1;
     public IReadOnlyList<string> Extensions => FileExtensions;
 
     public Model3DData Parse(string path)
