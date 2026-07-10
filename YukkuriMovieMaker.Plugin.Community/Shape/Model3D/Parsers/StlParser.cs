@@ -77,7 +77,8 @@ internal sealed class StlParser : IModelParser
     {
         var rawPositions = new List<Vector3>();
         var rawNormals = new List<Vector3>();
-        int maxVertices = Model3DSettings.Default.MaxVertices;
+        var limits = Model3DSettings.Default;
+        int maxVertices = Math.Min(limits.MaxVertices, limits.MaxIndices);
 
         using (var reader = new StreamReader(path))
         {
