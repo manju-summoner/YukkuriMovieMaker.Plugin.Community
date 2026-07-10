@@ -304,7 +304,23 @@ internal sealed class WavefrontObjParser : IModelParser
                             float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float g) &&
                             float.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out float b))
                         {
-                            data.DiffuseColor = new Vector4(r, g, b, 1.0f);
+                            data.DiffuseColor = new Vector4(r, g, b, data.DiffuseColor.W);
+                            lib[currentMat] = data;
+                        }
+                    }
+                    else if (keyword == "d")
+                    {
+                        if (float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float alpha))
+                        {
+                            data.DiffuseColor = new Vector4(data.DiffuseColor.X, data.DiffuseColor.Y, data.DiffuseColor.Z, Math.Clamp(alpha, 0.0f, 1.0f));
+                            lib[currentMat] = data;
+                        }
+                    }
+                    else if (keyword == "tr")
+                    {
+                        if (float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float transparency))
+                        {
+                            data.DiffuseColor = new Vector4(data.DiffuseColor.X, data.DiffuseColor.Y, data.DiffuseColor.Z, Math.Clamp(1.0f - transparency, 0.0f, 1.0f));
                             lib[currentMat] = data;
                         }
                     }
