@@ -81,6 +81,11 @@ internal sealed class DdsTextureLoader : ITextureLoader
             throw new InvalidDataException($"Invalid DDS dimensions: {width}x{height}");
         }
 
+        if ((long)width * height > 1024L * 1024 * 256)
+        {
+            throw new InvalidOperationException("Image dimensions too large");
+        }
+
         int rShift = GetShift(pfRBitMask);
         int gShift = GetShift(pfGBitMask);
         int bShift = GetShift(pfBBitMask);
