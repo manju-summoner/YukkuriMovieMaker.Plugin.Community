@@ -113,7 +113,7 @@ internal sealed class GlbParser : IModelParser
                     {
                         if (binData != null && GetBufferViewInfo(root, bvProp.GetInt32(), out int bIdx, out int bOff, out int bLen, out _))
                         {
-                            if (bIdx == 0 && bOff + bLen <= binData.Length)
+                            if (bIdx == 0 && bOff >= 0 && bLen > 0 && (long)bOff + bLen <= binData.Length)
                             {
                                 imgBytes = new byte[bLen];
                                 Array.Copy(binData, bOff, imgBytes, 0, bLen);
