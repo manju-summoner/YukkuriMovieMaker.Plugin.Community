@@ -40,6 +40,7 @@ internal sealed class GlbParser : IModelParser
             var chunkType = br.ReadUInt32();
 
             if (chunkType != 0x4E4F534A) return new Model3DData();
+            if (chunkLength < 0 || chunkLength > fs.Length - fs.Position) return new Model3DData();
             var jsonBytes = br.ReadBytes(chunkLength);
             jsonStr = Encoding.UTF8.GetString(jsonBytes);
 
@@ -47,7 +48,7 @@ internal sealed class GlbParser : IModelParser
             {
                 var binLength = br.ReadInt32();
                 var binType = br.ReadUInt32();
-                if (binType == 0x004E4942)
+                if (binType == 0x004E4942 && binLength >= 0 && binLength <= fs.Length - fs.Position)
                 {
                     binData = br.ReadBytes(binLength);
                 }
@@ -107,10 +108,17 @@ internal sealed class GlbParser : IModelParser
                     else if (img.TryGetProperty("uri", out var uriProp))
                     {
                         var uri = uriProp.GetString();
-                        if (!string.IsNullOrEmpty(uri) && uri.StartsWith("data:image"))
+                        int separator = uri?.IndexOf(',') ?? -1;
+                        if (uri is not null && uri.StartsWith("data:image") && separator >= 0)
                         {
-                            var base64 = uri.Substring(uri.IndexOf(",") + 1);
-                            imgBytes = Convert.FromBase64String(base64);
+                            try
+                            {
+                                imgBytes = Convert.FromBase64String(uri[(separator + 1)..]);
+                            }
+                            catch (FormatException)
+                            {
+                                imgBytes = null;
+                            }
                         }
                     }
 
@@ -177,10 +185,7 @@ internal sealed class GlbParser : IModelParser
             }
             else
             {
-                foreach (var nodeIdx in sceneNodes)
-                {
-                    TraverseNode(root, binData, nodeIdx, Matrix4x4.Identity, allVertices, allIndices, parts, nodes, materials, images, textures);
-                }
+                TraverseNodes(root, binData, sceneNodes, allVertices, allIndices, parts, nodes, materials, images, textures);
             }
         }
         catch
@@ -218,61 +223,75 @@ internal sealed class GlbParser : IModelParser
         };
     }
 
-    private static void TraverseNode(JsonElement root, byte[]? binData, int nodeIdx, Matrix4x4 parentTransform, List<Model3DVertex> vertices, List<int> indices, List<Model3DPart> parts, JsonElement nodes, JsonElement materials, List<string> images, List<int> textures)
+    private static void TraverseNodes(JsonElement root, byte[]? binData, List<int> rootNodes, List<Model3DVertex> vertices, List<int> indices, List<Model3DPart> parts, JsonElement nodes, JsonElement materials, List<string> images, List<int> textures)
     {
-        if (nodes.ValueKind != JsonValueKind.Array || nodeIdx < 0 || nodeIdx >= nodes.GetArrayLength()) return;
+        if (nodes.ValueKind != JsonValueKind.Array) return;
 
-        var node = nodes[nodeIdx];
-        Matrix4x4 localTransform;
+        int nodeCount = nodes.GetArrayLength();
+        var visited = new HashSet<int>();
+        var stack = new Stack<(int NodeIndex, Matrix4x4 ParentTransform)>();
 
+        for (int i = rootNodes.Count - 1; i >= 0; i--)
+        {
+            stack.Push((rootNodes[i], Matrix4x4.Identity));
+        }
+
+        while (stack.Count > 0)
+        {
+            var (nodeIdx, parentTransform) = stack.Pop();
+            if (nodeIdx < 0 || nodeIdx >= nodeCount || !visited.Add(nodeIdx)) continue;
+
+            var node = nodes[nodeIdx];
+            var worldTransform = GetLocalTransform(node) * parentTransform;
+
+            if (node.TryGetProperty("mesh", out var meshIdxProp))
+            {
+                ProcessMesh(root, binData, meshIdxProp.GetInt32(), worldTransform, vertices, indices, parts, materials, images, textures);
+            }
+
+            if (node.TryGetProperty("children", out var childrenProp) && childrenProp.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var childIdx in childrenProp.EnumerateArray())
+                {
+                    stack.Push((childIdx.GetInt32(), worldTransform));
+                }
+            }
+        }
+    }
+
+    private static Matrix4x4 GetLocalTransform(JsonElement node)
+    {
         if (node.TryGetProperty("matrix", out var matProp) && matProp.GetArrayLength() == 16)
         {
             var m = new float[16];
             int i = 0;
             foreach (var val in matProp.EnumerateArray()) m[i++] = val.GetSingle();
-            localTransform = new Matrix4x4(
+            return new Matrix4x4(
                 m[0], m[1], m[2], m[3],
                 m[4], m[5], m[6], m[7],
                 m[8], m[9], m[10], m[11],
                 m[12], m[13], m[14], m[15]
             );
         }
-        else
+
+        var s = Vector3.One;
+        var r = Quaternion.Identity;
+        var t = Vector3.Zero;
+
+        if (node.TryGetProperty("scale", out var sProp) && sProp.GetArrayLength() == 3)
         {
-            var s = Vector3.One;
-            var r = Quaternion.Identity;
-            var t = Vector3.Zero;
-
-            if (node.TryGetProperty("scale", out var sProp) && sProp.GetArrayLength() == 3)
-            {
-                s = new Vector3(sProp[0].GetSingle(), sProp[1].GetSingle(), sProp[2].GetSingle());
-            }
-            if (node.TryGetProperty("rotation", out var rProp) && rProp.GetArrayLength() == 4)
-            {
-                r = new Quaternion(rProp[0].GetSingle(), rProp[1].GetSingle(), rProp[2].GetSingle(), rProp[3].GetSingle());
-            }
-            if (node.TryGetProperty("translation", out var tProp) && tProp.GetArrayLength() == 3)
-            {
-                t = new Vector3(tProp[0].GetSingle(), tProp[1].GetSingle(), tProp[2].GetSingle());
-            }
-
-            localTransform = Matrix4x4.CreateScale(s) * Matrix4x4.CreateFromQuaternion(r) * Matrix4x4.CreateTranslation(t);
+            s = new Vector3(sProp[0].GetSingle(), sProp[1].GetSingle(), sProp[2].GetSingle());
+        }
+        if (node.TryGetProperty("rotation", out var rProp) && rProp.GetArrayLength() == 4)
+        {
+            r = new Quaternion(rProp[0].GetSingle(), rProp[1].GetSingle(), rProp[2].GetSingle(), rProp[3].GetSingle());
+        }
+        if (node.TryGetProperty("translation", out var tProp) && tProp.GetArrayLength() == 3)
+        {
+            t = new Vector3(tProp[0].GetSingle(), tProp[1].GetSingle(), tProp[2].GetSingle());
         }
 
-        var worldTransform = localTransform * parentTransform;
-
-        if (node.TryGetProperty("mesh", out var meshIdxProp))
-        {
-            ProcessMesh(root, binData, meshIdxProp.GetInt32(), worldTransform, vertices, indices, parts, materials, images, textures);
-        }
-
-        if (node.TryGetProperty("children", out var childrenProp) && childrenProp.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var childIdx in childrenProp.EnumerateArray())
-            {
-                TraverseNode(root, binData, childIdx.GetInt32(), worldTransform, vertices, indices, parts, nodes, materials, images, textures);
-            }
-        }
+        return Matrix4x4.CreateScale(s) * Matrix4x4.CreateFromQuaternion(r) * Matrix4x4.CreateTranslation(t);
     }
 
     private static void ProcessMesh(JsonElement root, byte[]? binData, int meshIdx, Matrix4x4 transform, List<Model3DVertex> allVertices, List<int> allIndices, List<Model3DPart> parts, JsonElement materials, List<string> images, List<int> textures)
@@ -416,10 +435,10 @@ internal sealed class GlbParser : IModelParser
         if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
         if (buffIdx != 0) return null;
 
-        if (stride == 0) stride = 12;
+        if (stride <= 0) stride = 12;
+        if (!TryClampAccessorCount(binData, viewOffset, offset, stride, 12, ref count, out int start)) return null;
 
         var result = new Vector3[count];
-        int start = viewOffset + offset;
 
         for (int i = 0; i < count; i++)
         {
@@ -441,10 +460,10 @@ internal sealed class GlbParser : IModelParser
         if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
         if (buffIdx != 0) return null;
 
-        if (stride == 0) stride = 8;
+        if (stride <= 0) stride = 8;
+        if (!TryClampAccessorCount(binData, viewOffset, offset, stride, 8, ref count, out int start)) return null;
 
         var result = new Vector2[count];
-        int start = viewOffset + offset;
 
         for (int i = 0; i < count; i++)
         {
@@ -466,10 +485,10 @@ internal sealed class GlbParser : IModelParser
         if (buffIdx != 0) return null;
 
         int elementSize = compType == 5121 ? 4 : (compType == 5123 ? 8 : 16);
-        if (stride == 0) stride = elementSize;
+        if (stride <= 0) stride = elementSize;
+        if (!TryClampAccessorCount(binData, viewOffset, offset, stride, elementSize, ref count, out int start)) return null;
 
         var result = new Vector4[count];
-        int start = viewOffset + offset;
 
         for (int i = 0; i < count; i++)
         {
@@ -511,11 +530,11 @@ internal sealed class GlbParser : IModelParser
         if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
         if (buffIdx != 0) return null;
 
-        var result = new int[count];
-        int start = viewOffset + offset;
-
         int elementSize = compType == 5121 ? 1 : (compType == 5123 ? 2 : 4);
-        if (stride == 0) stride = elementSize;
+        if (stride <= 0) stride = elementSize;
+        if (!TryClampAccessorCount(binData, viewOffset, offset, stride, elementSize, ref count, out int start)) return null;
+
+        var result = new int[count];
 
         for (int i = 0; i < count; i++)
         {
@@ -538,10 +557,25 @@ internal sealed class GlbParser : IModelParser
         return result;
     }
 
+    private static bool TryClampAccessorCount(byte[] binData, int viewOffset, int offset, int stride, int elementSize, ref int count, out int start)
+    {
+        start = 0;
+        if (viewOffset < 0 || offset < 0 || count < 0) return false;
+
+        long longStart = (long)viewOffset + offset;
+        long available = binData.Length - longStart;
+        if (longStart > int.MaxValue || available < elementSize) return false;
+
+        start = (int)longStart;
+        long maxCount = (available - elementSize) / stride + 1;
+        if (count > maxCount) count = (int)maxCount;
+        return true;
+    }
+
     private static bool GetAccessorInfo(JsonElement root, int index, out int buffView, out int offset, out int count, out int compType)
     {
         buffView = -1; offset = 0; count = 0; compType = 0;
-        if (!root.TryGetProperty("accessors", out var accessors) || index >= accessors.GetArrayLength()) return false;
+        if (!root.TryGetProperty("accessors", out var accessors) || index < 0 || index >= accessors.GetArrayLength()) return false;
 
         var acc = accessors[index];
         if (acc.TryGetProperty("bufferView", out var bvElem)) buffView = bvElem.GetInt32();
@@ -555,7 +589,7 @@ internal sealed class GlbParser : IModelParser
     private static bool GetBufferViewInfo(JsonElement root, int index, out int buffer, out int offset, out int length, out int stride)
     {
         buffer = -1; offset = 0; length = 0; stride = 0;
-        if (!root.TryGetProperty("bufferViews", out var views) || index >= views.GetArrayLength()) return false;
+        if (!root.TryGetProperty("bufferViews", out var views) || index < 0 || index >= views.GetArrayLength()) return false;
 
         var view = views[index];
         if (view.TryGetProperty("buffer", out var bufElem)) buffer = bufElem.GetInt32();
