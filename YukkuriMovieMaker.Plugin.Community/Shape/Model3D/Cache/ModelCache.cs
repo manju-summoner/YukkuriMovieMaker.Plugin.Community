@@ -159,6 +159,10 @@ internal sealed class ModelCache
 
         var (center, scale) = ModelCacheFormat.ReadTransform(br);
 
+        long requiredBytes = (long)vCount * sizeof(Model3DVertex) + (long)iCount * sizeof(int);
+        if (requiredBytes > stream.Length - stream.Position)
+            throw new InvalidDataException($"Cache body is truncated: expected {requiredBytes} bytes");
+
         var vertices = GC.AllocateUninitializedArray<Model3DVertex>(vCount, true);
         var indices = GC.AllocateUninitializedArray<int>(iCount, true);
 
@@ -199,6 +203,7 @@ internal sealed class ModelCache
     private sealed class MultiFileStream : Stream
     {
         private readonly string _baseDir;
+        private readonly long _length;
         private int _currentIndex;
         private FileStream? _currentStream;
         private long _position;
@@ -206,6 +211,14 @@ internal sealed class ModelCache
         public MultiFileStream(string baseDir)
         {
             _baseDir = baseDir;
+
+            for (int i = 0; ; i++)
+            {
+                var info = new FileInfo(Path.Combine(baseDir, ModelCacheFormat.GetSplitFileName(i)));
+                if (!info.Exists) break;
+                _length += info.Length;
+            }
+
             OpenNextStream();
         }
 
@@ -221,7 +234,7 @@ internal sealed class ModelCache
         public override bool CanRead => true;
         public override bool CanSeek => false;
         public override bool CanWrite => false;
-        public override long Length => throw new NotSupportedException();
+        public override long Length => _length;
         public override long Position { get => _position; set => throw new NotSupportedException(); }
 
         public override void Flush() { }
