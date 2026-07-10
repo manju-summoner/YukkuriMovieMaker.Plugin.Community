@@ -221,6 +221,9 @@ internal sealed class PlyParser : IModelParser
             return new PlyProperty { Name = normalizedName, Type = GetType(parts[1]) };
         }
 
+        private static bool IsVertexIndexProperty(string name)
+            => name is "vertex_indices" or "vertex_index";
+
         private static string NormalizePropertyName(string name)
         {
             name = name.ToLowerInvariant();
@@ -319,6 +322,7 @@ internal sealed class PlyParser : IModelParser
                     {
                         if (prop.Type == PlyType.List)
                         {
+                            bool isIndexList = IsVertexIndexProperty(prop.Name);
                             span = TrimLeft(span);
                             int end = span.IndexOfAny(' ', '\t');
                             var countSpan = end == -1 ? span : span.Slice(0, end);
@@ -331,14 +335,17 @@ internal sealed class PlyParser : IModelParser
                                     span = TrimLeft(span);
                                     end = span.IndexOfAny(' ', '\t');
                                     var idxSpan = end == -1 ? span : span.Slice(0, end);
-                                    int vIdx = int.Parse(idxSpan, NumberStyles.Integer, CultureInfo.InvariantCulture);
-                                    if (k == 0) v0 = vIdx;
-                                    else if (k >= 2) { indices.Add(v0); indices.Add(vPrev); indices.Add(vIdx); }
-                                    vPrev = vIdx;
+                                    if (isIndexList)
+                                    {
+                                        int vIdx = int.Parse(idxSpan, NumberStyles.Integer, CultureInfo.InvariantCulture);
+                                        if (k == 0) v0 = vIdx;
+                                        else if (k >= 2) { indices.Add(v0); indices.Add(vPrev); indices.Add(vIdx); }
+                                        vPrev = vIdx;
+                                    }
                                     if (end == -1) break;
                                     span = span.Slice(end + 1);
                                 }
-                                processed = true;
+                                if (isIndexList) processed = true;
                             }
                         }
                         else
@@ -411,13 +418,20 @@ internal sealed class PlyParser : IModelParser
                     if (prop.Type == PlyType.List)
                     {
                         int count = (int)ReadBinaryValue(prop.CountType);
-                        int v0 = 0, vPrev = 0;
-                        for (int k = 0; k < count; k++)
+                        if (IsVertexIndexProperty(prop.Name))
                         {
-                            int vIdx = (int)ReadBinaryValue(prop.ItemType);
-                            if (k == 0) v0 = vIdx;
-                            else if (k >= 2) { indices.Add(v0); indices.Add(vPrev); indices.Add(vIdx); }
-                            vPrev = vIdx;
+                            int v0 = 0, vPrev = 0;
+                            for (int k = 0; k < count; k++)
+                            {
+                                int vIdx = (int)ReadBinaryValue(prop.ItemType);
+                                if (k == 0) v0 = vIdx;
+                                else if (k >= 2) { indices.Add(v0); indices.Add(vPrev); indices.Add(vIdx); }
+                                vPrev = vIdx;
+                            }
+                        }
+                        else
+                        {
+                            for (int k = 0; k < count; k++) ReadBinaryValue(prop.ItemType);
                         }
                     }
                     else
