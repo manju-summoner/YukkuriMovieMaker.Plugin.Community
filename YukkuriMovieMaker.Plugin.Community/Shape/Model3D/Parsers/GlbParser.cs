@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Numerics;
 using System.Text;
 using System.Text.Json;
@@ -86,14 +86,14 @@ internal sealed class GlbParser : IModelParser
             using var doc = JsonDocument.Parse(jsonStr);
             var root = doc.RootElement;
 
-            binData ??= TryLoadExternalBuffer(root, path, dependencies);
-
             if (root.TryGetProperty("extensionsRequired", out var exts)
                 && exts.ValueKind == JsonValueKind.Array
                 && exts.GetArrayLength() > 0)
             {
                 return new Model3DData();
             }
+
+            var buffers = LoadBuffers(root, path, binData, dependencies);
 
             var images = new List<string>();
             if (root.TryGetProperty("images", out var imagesProp))
@@ -111,12 +111,13 @@ internal sealed class GlbParser : IModelParser
                     string externalPath = string.Empty;
                     if (img.TryGetProperty("bufferView", out var bvProp))
                     {
-                        if (binData != null && GetBufferViewInfo(root, bvProp.GetInt32(), out int bIdx, out int bOff, out int bLen, out _))
+                        if (GetBufferViewInfo(root, bvProp.GetInt32(), out int bIdx, out int bOff, out int bLen, out _)
+                            && GetBuffer(buffers, bIdx) is { } imgBuffer)
                         {
-                            if (bIdx == 0 && bOff >= 0 && bLen > 0 && (long)bOff + bLen <= binData.Length)
+                            if (bOff >= 0 && bLen > 0 && (long)bOff + bLen <= imgBuffer.Length)
                             {
                                 imgBytes = new byte[bLen];
-                                Array.Copy(binData, bOff, imgBytes, 0, bLen);
+                                Array.Copy(imgBuffer, bOff, imgBytes, 0, bLen);
                             }
                         }
                     }
@@ -201,7 +202,7 @@ internal sealed class GlbParser : IModelParser
                 }
             }
 
-            var context = new GlbContext(root, binData, nodes, materials, images, textures, allVertices, allIndices, parts);
+            var context = new GlbContext(root, buffers, nodes, materials, images, textures, allVertices, allIndices, parts);
 
             if (sceneNodes.Count == 0 && meshes.ValueKind == JsonValueKind.Array)
             {
@@ -326,7 +327,7 @@ internal sealed class GlbParser : IModelParser
 
     private static void ProcessMesh(GlbContext context, int meshIdx, Matrix4x4 transform)
     {
-        var (root, binData, _, materials, images, textures, allVertices, allIndices, parts) = context;
+        var (root, buffers, _, materials, images, textures, allVertices, allIndices, parts) = context;
         if (!root.TryGetProperty("meshes", out var meshes) || meshIdx < 0 || meshIdx >= meshes.GetArrayLength()) return;
 
         var mesh = meshes[meshIdx];
@@ -358,13 +359,13 @@ internal sealed class GlbParser : IModelParser
                 if (IsSparseAccessor(root, posAccIdx) || IsSparseAccessor(root, normAccIdx) || IsSparseAccessor(root, uvAccIdx)
                     || IsSparseAccessor(root, colAccIdx) || IsSparseAccessor(root, indAccIdx)) continue;
 
-                var positions = ReadVector3Array(root, binData, posAccIdx);
+                var positions = ReadVector3Array(root, buffers, posAccIdx);
                 if (positions == null || positions.Length == 0) continue;
 
-                var normals = normAccIdx >= 0 ? ReadVector3Array(root, binData, normAccIdx) : null;
-                var uvs = uvAccIdx >= 0 ? ReadVector2Array(root, binData, uvAccIdx) : null;
-                var colors = colAccIdx >= 0 ? ReadVector4Array(root, binData, colAccIdx) : null;
-                var indices = indAccIdx >= 0 ? ReadIntArray(root, binData, indAccIdx) : null;
+                var normals = normAccIdx >= 0 ? ReadVector3Array(root, buffers, normAccIdx) : null;
+                var uvs = uvAccIdx >= 0 ? ReadVector2Array(root, buffers, uvAccIdx) : null;
+                var colors = colAccIdx >= 0 ? ReadVector4Array(root, buffers, colAccIdx) : null;
+                var indices = indAccIdx >= 0 ? ReadIntArray(root, buffers, indAccIdx) : null;
 
                 int sourceIndexCount = indices?.Length ?? positions.Length;
                 int indexAddCount = mode == ModeTriangles ? sourceIndexCount : Math.Max(0, (sourceIndexCount - 2) * 3);
@@ -494,12 +495,11 @@ internal sealed class GlbParser : IModelParser
         }
     }
 
-    private static Vector3[]? ReadVector3Array(JsonElement root, byte[]? binData, int accessorIdx)
+    private static Vector3[]? ReadVector3Array(JsonElement root, byte[]?[] buffers, int accessorIdx)
     {
-        if (binData == null) return null;
         if (!GetAccessorInfo(root, accessorIdx, out int buffViewIdx, out int offset, out int count, out _)) return null;
         if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
-        if (buffIdx != 0) return null;
+        if (GetBuffer(buffers, buffIdx) is not { } binData) return null;
 
         if (stride <= 0) stride = 12;
         if (!TryClampAccessorCount(binData, viewOffset, offset, stride, 12, ref count, out int start)) return null;
@@ -519,12 +519,11 @@ internal sealed class GlbParser : IModelParser
         return result;
     }
 
-    private static Vector2[]? ReadVector2Array(JsonElement root, byte[]? binData, int accessorIdx)
+    private static Vector2[]? ReadVector2Array(JsonElement root, byte[]?[] buffers, int accessorIdx)
     {
-        if (binData == null) return null;
         if (!GetAccessorInfo(root, accessorIdx, out int buffViewIdx, out int offset, out int count, out int compType)) return null;
         if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
-        if (buffIdx != 0) return null;
+        if (GetBuffer(buffers, buffIdx) is not { } binData) return null;
 
         int componentSize = compType == ComponentTypeUByte ? 1 : (compType == ComponentTypeUShort ? 2 : 4);
         int elementSize = componentSize * 2;
@@ -560,12 +559,11 @@ internal sealed class GlbParser : IModelParser
         return result;
     }
 
-    private static Vector4[]? ReadVector4Array(JsonElement root, byte[]? binData, int accessorIdx)
+    private static Vector4[]? ReadVector4Array(JsonElement root, byte[]?[] buffers, int accessorIdx)
     {
-        if (binData == null) return null;
         if (!GetAccessorInfo(root, accessorIdx, out int buffViewIdx, out int offset, out int count, out int compType, out string type)) return null;
         if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
-        if (buffIdx != 0) return null;
+        if (GetBuffer(buffers, buffIdx) is not { } binData) return null;
 
         int componentCount = type == "VEC3" ? 3 : 4;
         int componentSize = compType == ComponentTypeUByte ? 1 : (compType == ComponentTypeUShort ? 2 : 4);
@@ -609,12 +607,11 @@ internal sealed class GlbParser : IModelParser
         return result;
     }
 
-    private static int[]? ReadIntArray(JsonElement root, byte[]? binData, int accessorIdx)
+    private static int[]? ReadIntArray(JsonElement root, byte[]?[] buffers, int accessorIdx)
     {
-        if (binData == null) return null;
         if (!GetAccessorInfo(root, accessorIdx, out int buffViewIdx, out int offset, out int count, out int compType)) return null;
         if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
-        if (buffIdx != 0) return null;
+        if (GetBuffer(buffers, buffIdx) is not { } binData) return null;
 
         int elementSize = compType == ComponentTypeUByte ? 1 : (compType == ComponentTypeUShort ? 2 : 4);
         if (stride <= 0) stride = elementSize;
@@ -714,33 +711,55 @@ internal sealed class GlbParser : IModelParser
 
     private static int GetSourceIndex(int[]? indices, int position) => indices?[position] ?? position;
 
-    private static byte[]? TryLoadExternalBuffer(JsonElement root, string modelPath, List<string> dependencies)
+    private static byte[]? GetBuffer(byte[]?[] buffers, int index)
+        => index >= 0 && index < buffers.Length ? buffers[index] : null;
+
+    private static byte[]?[] LoadBuffers(JsonElement root, string modelPath, byte[]? glbBinChunk, List<string> dependencies)
     {
-        if (!root.TryGetProperty("buffers", out var buffers) || buffers.ValueKind != JsonValueKind.Array || buffers.GetArrayLength() == 0) return null;
-        if (!buffers[0].TryGetProperty("uri", out var uriProp)) return null;
+        if (!root.TryGetProperty("buffers", out var buffersProp) || buffersProp.ValueKind != JsonValueKind.Array || buffersProp.GetArrayLength() == 0)
+            return [glbBinChunk];
 
-        var uri = uriProp.GetString();
-        if (string.IsNullOrEmpty(uri)) return null;
+        int count = buffersProp.GetArrayLength();
+        var result = new byte[]?[count];
+        result[0] = glbBinChunk;
 
-        if (uri.StartsWith("data:", StringComparison.Ordinal))
+        for (int i = 0; i < count; i++)
         {
-            int separator = uri.IndexOf(',');
-            if (separator < 0) return null;
-            try
+            if (result[i] != null) continue;
+            if (!buffersProp[i].TryGetProperty("uri", out var uriProp)) continue;
+
+            var uri = uriProp.GetString();
+            if (string.IsNullOrEmpty(uri)) continue;
+
+            if (uri.StartsWith("data:", StringComparison.Ordinal))
             {
-                return Convert.FromBase64String(uri[(separator + 1)..]);
+                int separator = uri.IndexOf(',');
+                if (separator < 0) continue;
+                try
+                {
+                    result[i] = Convert.FromBase64String(uri[(separator + 1)..]);
+                }
+                catch (FormatException)
+                {
+                }
             }
-            catch (FormatException)
+            else
             {
-                return null;
+                string binPath = ResolveExternalUri(uri, modelPath);
+                if (binPath.Length == 0) continue;
+
+                try
+                {
+                    if (!Model3DSettings.Default.IsFileSizeAllowed(new FileInfo(binPath).Length)) continue;
+                    dependencies.Add(binPath);
+                    result[i] = File.ReadAllBytes(binPath);
+                }
+                catch
+                {
+                }
             }
         }
-
-        string binPath = ResolveExternalUri(uri, modelPath);
-        if (binPath.Length == 0) return null;
-        if (!Model3DSettings.Default.IsFileSizeAllowed(new FileInfo(binPath).Length)) return null;
-        dependencies.Add(binPath);
-        return File.ReadAllBytes(binPath);
+        return result;
     }
 
     private static string ResolveExternalUri(string uri, string modelPath)
@@ -764,7 +783,7 @@ internal sealed class GlbParser : IModelParser
 
     private sealed record GlbContext(
         JsonElement Root,
-        byte[]? BinData,
+        byte[]?[] Buffers,
         JsonElement Nodes,
         JsonElement Materials,
         List<string> Images,
