@@ -66,9 +66,9 @@ internal sealed class PsdTextureLoader : ITextureLoader
             throw new NotSupportedException("Only 8-bit PSD supported");
         }
 
-        if (channels < 3)
+        if (channels < 3 || channels > 56)
         {
-            throw new NotSupportedException("PSD must have at least 3 channels");
+            throw new NotSupportedException($"PSD channel count {channels} not supported");
         }
 
         SkipSection(fs, br);
