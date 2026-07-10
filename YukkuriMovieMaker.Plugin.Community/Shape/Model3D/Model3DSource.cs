@@ -22,8 +22,9 @@ internal sealed class Model3DSource : IShapeSource
     private readonly Model3DRenderer _renderer;
 
     private ID2D1CommandList _commandList;
+    private GpuResourceCacheItem? _gpuResource;
     private string _file = string.Empty;
-    private string _gpuCacheKey = string.Empty;
+    private string _gpuResourceKey = string.Empty;
     private int _width;
     private int _height;
     private Model3DRenderState _state;
@@ -33,7 +34,7 @@ internal sealed class Model3DSource : IShapeSource
     {
         _devices = devices;
         _parameter = parameter;
-        _resources = D3DResourcesPool.Acquire(devices.D3D.Device);
+        _resources = new D3DResources(devices.D3D.Device);
         _renderer = new Model3DRenderer(_resources);
         _gpuResourceFactory = new GpuResourceFactory(_textureService);
         _commandList = CreateEmptyCommandList(devices.DeviceContext);
@@ -116,34 +117,20 @@ internal sealed class Model3DSource : IShapeSource
 
     private GpuResourceCacheItem? AcquireGpuResource(string file)
     {
-        var device = _devices.D3D.Device;
-        string cacheKey = string.IsNullOrEmpty(file) ? string.Empty : $"{device.NativePointer}|{file}";
+        string key = file ?? string.Empty;
+        if (_gpuResourceKey == key) return _gpuResource;
 
-        if (_gpuCacheKey != cacheKey)
-        {
-            ReleaseGpuResource();
-            _gpuCacheKey = cacheKey;
-        }
+        _gpuResource?.Dispose();
+        _gpuResource = null;
+        _gpuResourceKey = key;
 
-        if (cacheKey.Length == 0) return null;
-        if (GpuResourceCache.Instance.TryGetValue(cacheKey, out var cached)) return cached;
+        if (key.Length == 0) return null;
 
-        var model = Model3DLoader.Load(file);
+        var model = Model3DLoader.Load(key);
         if (model.Vertices.Length == 0) return null;
 
-        var resource = _gpuResourceFactory.Create(device, model);
-        if (resource is null) return null;
-
-        GpuResourceCache.Instance.AddOrUpdate(cacheKey, resource);
-        return resource;
-    }
-
-    private void ReleaseGpuResource()
-    {
-        if (_gpuCacheKey.Length == 0) return;
-
-        GpuResourceCache.Instance.ScheduleRelease(_gpuCacheKey);
-        _gpuCacheKey = string.Empty;
+        _gpuResource = _gpuResourceFactory.Create(_devices.D3D.Device, model);
+        return _gpuResource;
     }
 
     private static int ClampRenderSize(int size)
@@ -187,13 +174,11 @@ internal sealed class Model3DSource : IShapeSource
         if (_disposed) return;
         _disposed = true;
 
-        ReleaseGpuResource();
-
+        _gpuResource?.Dispose();
         _commandList.Dispose();
         _renderer.Dispose();
         _renderTargets.Dispose();
         _textureService.Dispose();
-
-        D3DResourcesPool.Release(_devices.D3D.Device);
+        _resources.Dispose();
     }
 }
