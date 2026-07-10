@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Numerics;
 using System.Text;
@@ -79,16 +80,16 @@ internal sealed class StlParser : IModelParser
 
                 if (parts[0] == "facet" && parts.Length >= 5 && parts[1] == "normal")
                 {
-                    float.TryParse(parts[2], out float nx);
-                    float.TryParse(parts[3], out float ny);
-                    float.TryParse(parts[4], out float nz);
+                    float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float nx);
+                    float.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out float ny);
+                    float.TryParse(parts[4], NumberStyles.Float, CultureInfo.InvariantCulture, out float nz);
                     currentNormal = new Vector3(nx, ny, nz);
                 }
                 else if (parts[0] == "vertex" && parts.Length >= 4)
                 {
-                    float.TryParse(parts[1], out float x);
-                    float.TryParse(parts[2], out float y);
-                    float.TryParse(parts[3], out float z);
+                    float.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out float x);
+                    float.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out float y);
+                    float.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out float z);
                     rawPositions.Add(new Vector3(x, y, z));
                     rawNormals.Add(currentNormal);
                 }

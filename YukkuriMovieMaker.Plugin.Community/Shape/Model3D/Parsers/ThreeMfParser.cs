@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Compression;
 using System.Numerics;
 using System.Xml;
@@ -66,16 +67,16 @@ internal sealed class ThreeMfParser : IModelParser
                     }
                     else if (reader.LocalName == "vertex")
                     {
-                        float x = float.Parse(reader.GetAttribute("x") ?? "0");
-                        float y = float.Parse(reader.GetAttribute("y") ?? "0");
-                        float z = float.Parse(reader.GetAttribute("z") ?? "0");
+                        float x = float.Parse(reader.GetAttribute("x") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture);
+                        float y = float.Parse(reader.GetAttribute("y") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture);
+                        float z = float.Parse(reader.GetAttribute("z") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture);
                         verts.Add(new Model3DVertex { Position = new Vector3(x, z, -y), Color = Vector4.One });
                     }
                     else if (reader.LocalName == "triangle")
                     {
-                        int v1 = int.Parse(reader.GetAttribute("v1") ?? "0") + vertexOffset;
-                        int v2 = int.Parse(reader.GetAttribute("v2") ?? "0") + vertexOffset;
-                        int v3 = int.Parse(reader.GetAttribute("v3") ?? "0") + vertexOffset;
+                        int v1 = int.Parse(reader.GetAttribute("v1") ?? "0", NumberStyles.Integer, CultureInfo.InvariantCulture) + vertexOffset;
+                        int v2 = int.Parse(reader.GetAttribute("v2") ?? "0", NumberStyles.Integer, CultureInfo.InvariantCulture) + vertexOffset;
+                        int v3 = int.Parse(reader.GetAttribute("v3") ?? "0", NumberStyles.Integer, CultureInfo.InvariantCulture) + vertexOffset;
 
                         string? pid = reader.GetAttribute("pid") ?? objectPid;
                         string? p1 = reader.GetAttribute("p1") ?? (string.IsNullOrEmpty(reader.GetAttribute("pid")) ? objectP1 : "");
