@@ -40,6 +40,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         public void SetEditorInfo(IEditorInfo? info)
         {
             editorInfo = info;
+            //エディタのデタッチ時などにnullが渡される
             if (info is null)
             {
                 InvalidateCanvasImageRequests();
@@ -55,6 +56,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
             isCanvasImageInitialized = true;
             QueueCanvasImageRefresh();
+        }
+
+        /// <summary>保留中の画像更新要求を無効化する（完了済みの生成結果も適用されなくなる）</summary>
+        void InvalidateCanvasImageRequests()
+        {
+            lock (canvasImageRefreshLock)
+            {
+                pendingCanvasImageRequest = null;
+                canvasImageRequestId++;
+            }
         }
 
         /// <summary>ピン配置キャンバスに表示する画像（パペット変形の直前までのエフェクト適用済み）</summary>
@@ -200,15 +211,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
             if (startWorker)
                 _ = ProcessCanvasImageRequestsAsync();
-        }
-
-        void InvalidateCanvasImageRequests()
-        {
-            lock (canvasImageRefreshLock)
-            {
-                pendingCanvasImageRequest = null;
-                canvasImageRequestId++;
-            }
         }
 
         async Task ProcessCanvasImageRequestsAsync()

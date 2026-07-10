@@ -31,6 +31,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         Blend? highlightBlendEffect;
 
         AlphaMask? alphaMask;
+        LinearHdrCompositeCustomEffect? linearHdrComposite;
+        BevelAmbientOcclusionCustomEffect? ambientOcclusion;
 
         /*
          heightmap -> luminanceToAlpha -> invertAlpha -> hightOutput
@@ -47,6 +49,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         LightingParameterBase? lightingParameter;
         Project.Blend highlightBlend;
         bool isInvertAlpha;
+        bool isLinearHdrCompositeEnabled;
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
@@ -92,6 +95,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             var blur = item.Blur.GetValue(frame, length, fps) / 3;
             var highlightBlend = highlight.Blend;
             var isInvertAlpha = item.IsInvert;
+            var isLinearHdrCompositeEnabled = item.IsLinearHdrCompositeEnabled && linearHdrComposite is not null;
+            var surfaceScale = lightingParameter.SurfaceScale.GetValue(frame, length, fps);
+            var distance = item.OcclusionDistance.GetValue(frame, length, fps);
+            var bias = item.OcclusionBias.GetValue(frame, length, fps);
+            var softness = item.OcclusionSoftness.GetValue(frame, length, fps);
+            var shadowStrength = item.SelfShadowStrength.GetValue(frame, length, fps) / 100;
+            var aoStrength = item.AmbientOcclusionStrength.GetValue(frame, length, fps) / 100;
 
             if (isFirst || this.blur != blur)
                 highlightBlur.StandardDeviation = (float)blur;
@@ -99,9 +109,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             if(isFirst || this.isInvertAlpha != isInvertAlpha)
                 invertAlpha.Invert = isInvertAlpha ? 1 : 0;
 
-            if (isFirst || this.highlightBlend != highlightBlend)
+            if (highlight is HighQualityLightingProcessor highQuality)
+                highQuality.SetSelfShadowSettings(new((float)shadowStrength, (float)distance, (float)bias, (float)softness, item.OcclusionQuality));
+
+            if (ambientOcclusion is not null)
             {
-                if (highlightBlend.IsCompositionEffect())
+                ambientOcclusion.Strength = (float)aoStrength;
+                ambientOcclusion.Distance = (float)distance;
+                ambientOcclusion.Bias = (float)bias;
+                ambientOcclusion.Softness = (float)softness;
+                ambientOcclusion.SurfaceScale = (float)surfaceScale;
+                ambientOcclusion.Quality = item.OcclusionQuality;
+            }
+
+            if (isFirst || this.highlightBlend != highlightBlend || this.isLinearHdrCompositeEnabled != isLinearHdrCompositeEnabled)
+            {
+                if (isLinearHdrCompositeEnabled)
+                {
+                    using var image = linearHdrComposite!.Output;
+                    alphaMask.SetInput(0, image, true);
+                    linearHdrComposite.BlendMode = highlightBlend;
+                }
+                else if (highlightBlend.IsCompositionEffect())
                 {
                     using (var image = highlightComposite.Output)
                         alphaMask.SetInput(0, image, true);
@@ -121,6 +150,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             this.blur = blur;
             this.highlightBlend = highlightBlend;
             this.isInvertAlpha = isInvertAlpha;
+            this.isLinearHdrCompositeEnabled = isLinearHdrCompositeEnabled;
 
             return effectDescription.DrawDescription;
         }
@@ -143,6 +173,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
             alphaMask?.SetInput(0, null, true);
             alphaMask?.SetInput(1, null, true);
+            linearHdrComposite?.SetBaseInput(null);
+            linearHdrComposite?.SetReflectionInput(null);
+            ambientOcclusion?.SetInput(0, null, true);
+            ambientOcclusion?.SetInput(1, null, true);
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
@@ -194,6 +228,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             alphaMask = new(devices.DeviceContext);
             disposer.Collect(alphaMask);
 
+            linearHdrComposite = new(devices);
+            if (linearHdrComposite.IsEnabled)
+                disposer.Collect(linearHdrComposite);
+            else
+            {
+                linearHdrComposite.Dispose();
+                linearHdrComposite = null;
+            }
+
+            ambientOcclusion = new(devices);
+            if (ambientOcclusion.IsEnabled)
+                disposer.Collect(ambientOcclusion);
+            else
+            {
+                ambientOcclusion.Dispose();
+                ambientOcclusion = null;
+            }
+
             //接続（ハイトマップ）
             using(var image = luminanceToAlpha.Output)
                 invertAlpha.SetInput(0, image, true);
@@ -208,9 +260,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             {
                 highlightComposite.SetInput(1, image, true);
                 highlightBlendEffect.SetInput(1, image, true);
+                linearHdrComposite?.SetReflectionInput(image);
             }
 
-            var output = alphaMask.Output;
+            ambientOcclusion?.SetInput(1, heightOutput, true);
+
+            ID2D1Image output;
+            if (ambientOcclusion is not null)
+            {
+                using var masked = alphaMask.Output;
+                ambientOcclusion.SetInput(0, masked, true);
+                output = ambientOcclusion.Output;
+            }
+            else
+            {
+                output = alphaMask.Output;
+            }
+
             disposer.Collect(output);
             return output;
         }
@@ -220,6 +286,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             highlightComposite?.SetInput(0, input, true);
             highlightBlendEffect?.SetInput(0, input, true);
             alphaMask?.SetInput(1, input, true);
+            linearHdrComposite?.SetBaseInput(input);
             heightmap?.SetInput(input);
         }
     }

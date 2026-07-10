@@ -6,6 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>Debug;Release;ReleaseLite;DebugLite</Configurations>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='ReleaseLite'">
+    <DefineConstants>$(DefineConstants);RELEASE;LITE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='DebugLite'">
+    <DefineConstants>$(DefineConstants);DEBUG;LITE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='ReleaseLite' OR '$(Configuration)'=='Release'">
     <!--Pdb内にソースコードのフルパスを含めない-->
@@ -131,7 +138,13 @@
 	  <Resource Include="$(ShaderDirPath)DiffuseAlpha.cso" Link="Resources\Shader\DiffuseAlpha.cso" />
 	  <Resource Include="$(ShaderDirPath)InvertAlpha.cso" Link="Resources\Shader\InvertAlpha.cso" />
 	  <Resource Include="$(ShaderDirPath)BevelHeightmap.cso" Link="Resources\Shader\BevelHeightmap.cso" />
+	  <Resource Include="$(ShaderDirPath)BevelSdfSeed.cso" Link="Resources\Shader\BevelSdfSeed.cso" />
+	  <Resource Include="$(ShaderDirPath)BevelSdfJump.cso" Link="Resources\Shader\BevelSdfJump.cso" />
+	  <Resource Include="$(ShaderDirPath)BevelSdfResolve.cso" Link="Resources\Shader\BevelSdfResolve.cso" />
 	  <Resource Include="$(ShaderDirPath)BevelAndFlatComposite.cso" Link="Resources\Shader\BevelAndFlatComposite.cso" />
+	  <Resource Include="$(ShaderDirPath)BevelLighting.cso" Link="Resources\Shader\BevelLighting.cso" />
+	  <Resource Include="$(ShaderDirPath)BevelAmbientOcclusion.cso" Link="Resources\Shader\BevelAmbientOcclusion.cso" />
+	  <Resource Include="$(ShaderDirPath)LinearHdrComposite.cso" Link="Resources\Shader\LinearHdrComposite.cso" />
 	  <Resource Include="$(ShaderDirPath)UnidirectionalBlur.cso" Link="Resources\Shader\UnidirectionalBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)LensBlur.cso" Link="Resources\Shader\LensBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)FishEyeLens.cso" Link="Resources\Shader\FishEyeLens.cso" />

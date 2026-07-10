@@ -34,7 +34,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
         public override ILightingProcessor CreateLightingProcessor(IVideoEffect owner, IGraphicsDevicesAndContext devices)
         {
-            return new PointSpecularLightingProcessor(owner, devices, LightSource, Highlight, new(1,1), SurfaceScale);
+            return (ILightingProcessor?)HighQualityLightingProcessor.TryCreatePoint(owner, devices, LightSource, Highlight, new(1, 1), SurfaceScale)
+                ?? new PointSpecularLightingProcessor(owner, devices, LightSource, Highlight, new(1, 1), SurfaceScale);
         }
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => base.GetAnimatables().Concat([LightSource, Highlight]);
