@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -60,8 +60,7 @@ internal sealed class PlyParser : IModelParser
         private int _vertexCount;
         private int _faceCount;
         private string _textureFile = "";
-        private readonly List<PlyProperty> _vertexProps = [];
-        private readonly List<PlyProperty> _faceProps = [];
+        private readonly List<PlyElement> _elements = [];
         private bool _indexLimitExceeded;
 
         public PlyReader(Stream stream)
@@ -189,14 +188,14 @@ internal sealed class PlyParser : IModelParser
                     {
                         currentElement = parts[1];
                         int.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int count);
-                        if (currentElement == "vertex") _vertexCount = count;
-                        else if (currentElement == "face") _faceCount = count;
+                        _elements.Add(new PlyElement { Name = currentElement, Count = count });
+                        if (currentElement == "vertex" && _vertexCount == 0) _vertexCount = count;
+                        else if (currentElement == "face" && _faceCount == 0) _faceCount = count;
                     }
                 }
                 else if (parts[0] == "property")
                 {
-                    if (currentElement == "vertex") _vertexProps.Add(ParseProperty(parts));
-                    else if (currentElement == "face") _faceProps.Add(ParseProperty(parts));
+                    if (_elements.Count > 0) _elements[^1].Props.Add(ParseProperty(parts));
                 }
             }
             return false;
@@ -262,8 +261,37 @@ internal sealed class PlyParser : IModelParser
         {
             using var reader = new StreamReader(_stream, Encoding.ASCII, false, 65536, true);
 
+            bool vertexDone = false, faceDone = false;
+            foreach (var element in _elements)
+            {
+                if (element.Name == "vertex" && !vertexDone)
+                {
+                    vertexDone = true;
+                    ReadAsciiVertices(reader, vertices, element);
+                }
+                else if (element.Name == "face" && !faceDone)
+                {
+                    faceDone = true;
+                    ReadAsciiFaces(reader, indices, element);
+                    if (_indexLimitExceeded) return;
+                }
+                else
+                {
+                    for (int skipped = 0; skipped < element.Count;)
+                    {
+                        var line = reader.ReadLine();
+                        if (line == null) return;
+                        if (string.IsNullOrWhiteSpace(line)) continue;
+                        skipped++;
+                    }
+                }
+            }
+        }
+
+        private void ReadAsciiVertices(StreamReader reader, Model3DVertex[] vertices, PlyElement element)
+        {
             int readV = 0;
-            while (readV < _vertexCount)
+            while (readV < element.Count && readV < vertices.Length)
             {
                 var line = reader.ReadLine();
                 if (line == null) break;
@@ -279,7 +307,7 @@ internal sealed class PlyParser : IModelParser
                     float r = 1, g = 1, b = 1, a = 1;
                     bool hasColor = false;
 
-                    foreach (var prop in _vertexProps)
+                    foreach (var prop in element.Props)
                     {
                         span = TrimLeft(span);
                         int end = span.IndexOfAny(' ', '\t');
@@ -312,10 +340,13 @@ internal sealed class PlyParser : IModelParser
                 }
                 catch { }
             }
+        }
 
+        private void ReadAsciiFaces(StreamReader reader, List<int> indices, PlyElement element)
+        {
             int maxIndices = Model3DSettings.Default.MaxIndices;
             int readF = 0;
-            while (readF < _faceCount)
+            while (readF < element.Count)
             {
                 var line = reader.ReadLine();
                 if (line == null) break;
@@ -325,7 +356,7 @@ internal sealed class PlyParser : IModelParser
                 {
                     var span = line.AsSpan();
                     bool processed = false;
-                    foreach (var prop in _faceProps)
+                    foreach (var prop in element.Props)
                     {
                         if (prop.Type == PlyType.List)
                         {
@@ -390,7 +421,44 @@ internal sealed class PlyParser : IModelParser
 
         private void ReadBinaryData(Model3DVertex[] vertices, List<int> indices)
         {
-            for (int i = 0; i < _vertexCount; i++)
+            bool vertexDone = false, faceDone = false;
+            foreach (var element in _elements)
+            {
+                if (element.Name == "vertex" && !vertexDone)
+                {
+                    vertexDone = true;
+                    ReadBinaryVertices(vertices, element);
+                }
+                else if (element.Name == "face" && !faceDone)
+                {
+                    faceDone = true;
+                    ReadBinaryFaces(indices, element);
+                    if (_indexLimitExceeded) return;
+                }
+                else
+                {
+                    for (int i = 0; i < element.Count; i++)
+                    {
+                        foreach (var prop in element.Props)
+                        {
+                            if (prop.Type == PlyType.List)
+                            {
+                                int count = (int)ReadBinaryValue(prop.CountType);
+                                for (int k = 0; k < count; k++) ReadBinaryValue(prop.ItemType);
+                            }
+                            else
+                            {
+                                ReadBinaryValue(prop.Type);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ReadBinaryVertices(Model3DVertex[] vertices, PlyElement element)
+        {
+            for (int i = 0; i < element.Count && i < vertices.Length; i++)
             {
                 Vector3 pos = Vector3.Zero;
                 Vector3 norm = Vector3.Zero;
@@ -399,7 +467,7 @@ internal sealed class PlyParser : IModelParser
                 float r = 1, g = 1, b = 1, a = 1;
                 bool hasColor = false;
 
-                foreach (var prop in _vertexProps)
+                foreach (var prop in element.Props)
                 {
                     double val = ReadBinaryValue(prop.Type);
                     switch (prop.Name)
@@ -421,11 +489,14 @@ internal sealed class PlyParser : IModelParser
                 if (hasColor) col = new Vector4(r, g, b, a);
                 vertices[i] = new Model3DVertex { Position = pos, Normal = norm, TexCoord = uv, Color = col };
             }
+        }
 
+        private void ReadBinaryFaces(List<int> indices, PlyElement element)
+        {
             int maxIndices = Model3DSettings.Default.MaxIndices;
-            for (int i = 0; i < _faceCount; i++)
+            for (int i = 0; i < element.Count; i++)
             {
-                foreach (var prop in _faceProps)
+                foreach (var prop in element.Props)
                 {
                     if (prop.Type == PlyType.List)
                     {
@@ -515,5 +586,7 @@ internal sealed class PlyParser : IModelParser
         private enum PlyType { Char, UChar, Short, UShort, Int, UInt, Float, Double, List }
 
         private sealed class PlyProperty { public string Name = ""; public PlyType Type; public PlyType CountType; public PlyType ItemType; }
+
+        private sealed class PlyElement { public string Name = ""; public int Count; public List<PlyProperty> Props { get; } = []; }
     }
 }
