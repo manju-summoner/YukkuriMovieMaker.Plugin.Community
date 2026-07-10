@@ -7,8 +7,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
 
 internal static class ModelHelper
 {
-    public delegate void CacheChunkWriter(ReadOnlySpan<byte> data);
-
     private const float MinimumExtent = 1e-6f;
     private const int StreamBufferBytes = 65536;
     private const string EmbeddedTextureDirectoryName = "YukkuriMovieMaker.Model3D";
@@ -73,14 +71,17 @@ internal static class ModelHelper
 
     public static unsafe void CalculateNormals(Model3DVertex[] vertices, int[] indices)
     {
+        uint vertexCount = (uint)vertices.Length;
+
         fixed (Model3DVertex* pVerts = vertices)
         fixed (int* pInds = indices)
         {
-            for (int i = 0; i < indices.Length; i += 3)
+            for (int i = 0; i + 2 < indices.Length; i += 3)
             {
                 int i1 = pInds[i];
                 int i2 = pInds[i + 1];
                 int i3 = pInds[i + 2];
+                if ((uint)i1 >= vertexCount || (uint)i2 >= vertexCount || (uint)i3 >= vertexCount) continue;
 
                 Vector3 p1 = pVerts[i1].Position;
                 Vector3 p2 = pVerts[i2].Position;
