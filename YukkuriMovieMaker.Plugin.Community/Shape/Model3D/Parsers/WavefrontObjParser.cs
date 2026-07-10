@@ -355,7 +355,7 @@ internal sealed class WavefrontObjParser : IModelParser
             if (c1 == 'v')
             {
                 byte c2 = *ptr;
-                if (c2 == ' ') counts.V++;
+                if (c2 == ' ' || c2 == '\t') counts.V++;
                 else if (c2 == 't') counts.Vt++;
                 else if (c2 == 'n') counts.Vn++;
                 while (ptr < end && *ptr != '\n') ptr++;
@@ -423,7 +423,7 @@ internal sealed class WavefrontObjParser : IModelParser
             if (c1 == 'v')
             {
                 byte c2 = *ptr;
-                if (c2 == ' ')
+                if (c2 == ' ' || c2 == '\t')
                 {
                     *currV++ = new Vector3(ParseFloat(ref ptr, end), ParseFloat(ref ptr, end), ParseFloat(ref ptr, end));
                 }
