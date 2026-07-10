@@ -207,6 +207,7 @@ internal sealed class PmdParser : IStreamingModelParser
             Skip(reader, MaterialFlagBlockBytes);
 
             int indexCount = reader.ReadInt32();
+            if (indexCount < 0) throw new InvalidDataException(InvalidDataMessage);
             string rawPath = ReadFixedText(reader, TexturePathBytes);
 
             parts.Add(new Model3DPart

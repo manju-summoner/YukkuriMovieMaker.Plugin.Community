@@ -266,6 +266,7 @@ internal sealed class PmxParser : IStreamingModelParser
             SkipText(reader);
 
             int indexCount = reader.ReadInt32();
+            if (indexCount < 0) throw new InvalidDataException(InvalidDataMessage);
 
             parts.Add(new Model3DPart
             {

@@ -81,6 +81,8 @@ internal static class ModelCacheFormat
         string metallicRoughnessPath = Encoding.UTF8.GetString(reader.ReadBytes(metallicRoughnessLength));
         int indexOffset = reader.ReadInt32();
         int indexCount = reader.ReadInt32();
+        if (indexOffset < 0 || indexCount < 0)
+            throw new InvalidDataException($"Invalid part index range: {indexOffset}, {indexCount}");
         var baseColor = new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
         float metallic = reader.ReadSingle();
         float roughness = reader.ReadSingle();
