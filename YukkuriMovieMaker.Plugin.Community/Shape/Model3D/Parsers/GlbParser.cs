@@ -87,15 +87,11 @@ internal sealed class GlbParser : IModelParser
 
             binData ??= TryLoadExternalBuffer(root, path);
 
-            if (root.TryGetProperty("extensionsRequired", out var exts))
+            if (root.TryGetProperty("extensionsRequired", out var exts)
+                && exts.ValueKind == JsonValueKind.Array
+                && exts.GetArrayLength() > 0)
             {
-                foreach (var ext in exts.EnumerateArray())
-                {
-                    if (ext.GetString() == "KHR_draco_mesh_compression")
-                    {
-                        return new Model3DData();
-                    }
-                }
+                return new Model3DData();
             }
 
             var images = new List<string>();
