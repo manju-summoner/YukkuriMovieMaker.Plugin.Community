@@ -28,7 +28,7 @@ internal sealed class StlParser : IModelParser
         if (isAscii)
         {
             string start = Encoding.ASCII.GetString(bytes, 0, Math.Min(bytes.Length, 100)).TrimStart();
-            if (!start.StartsWith("solid", StringComparison.OrdinalIgnoreCase)) isAscii = false;
+            if (!start.StartsWith("solid", StringComparison.OrdinalIgnoreCase) || HasBinaryLength(bytes)) isAscii = false;
         }
 
         if (isAscii) return ParseAscii(path);
@@ -61,6 +61,13 @@ internal sealed class StlParser : IModelParser
         }
 
         return ProcessVertices(rawPositions, rawNormals, totalV);
+    }
+
+    private static bool HasBinaryLength(byte[] bytes)
+    {
+        if (bytes.Length < 84) return false;
+        int count = BitConverter.ToInt32(bytes, 80);
+        return count > 0 && 84 + (long)count * 50 == bytes.Length;
     }
 
     private static Model3DData ParseAscii(string path)
