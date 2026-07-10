@@ -39,6 +39,21 @@ internal sealed class TgaTextureLoader : ITextureLoader
         byte pixelDepth = br.ReadByte();
         byte imageDescriptor = br.ReadByte();
 
+        if (imageType != 2 && imageType != 10)
+        {
+            throw new NotSupportedException($"TGA ImageType {imageType} not supported");
+        }
+
+        if (pixelDepth != 24 && pixelDepth != 32)
+        {
+            throw new NotSupportedException($"TGA PixelDepth {pixelDepth} not supported");
+        }
+
+        if (width <= 0 || height <= 0)
+        {
+            throw new InvalidDataException($"Invalid TGA dimensions: {width}x{height}");
+        }
+
         if (idLength > 0) br.ReadBytes(idLength);
         if (colorMapType == 1)
         {
@@ -70,7 +85,7 @@ internal sealed class TgaTextureLoader : ITextureLoader
                 while (currentPixel < pixelCount)
                 {
                     byte header = br.ReadByte();
-                    int count = (header & 0x7F) + 1;
+                    int count = Math.Min((header & 0x7F) + 1, pixelCount - currentPixel);
                     if ((header & 0x80) != 0)
                     {
                         byte b = br.ReadByte();
