@@ -7,6 +7,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Textures.Loaders;
 
 internal sealed class TgaTextureLoader : ITextureLoader
 {
+    private const byte UncompressedTrueColor = 2;
+    private const byte RleTrueColor = 10;
+    private const byte TopLeftOriginFlag = 0x20;
+    private const byte RlePacketFlag = 0x80;
+    private const long MaxPixelCount = 1024L * 1024 * 256;
+
     public int Priority => 100;
 
     public bool CanLoad(string path) => path.EndsWith(".tga", StringComparison.OrdinalIgnoreCase);
@@ -39,7 +45,7 @@ internal sealed class TgaTextureLoader : ITextureLoader
         byte pixelDepth = br.ReadByte();
         byte imageDescriptor = br.ReadByte();
 
-        if (imageType != 2 && imageType != 10)
+        if (imageType != UncompressedTrueColor && imageType != RleTrueColor)
         {
             throw new NotSupportedException($"TGA ImageType {imageType} not supported");
         }
@@ -54,7 +60,7 @@ internal sealed class TgaTextureLoader : ITextureLoader
             throw new InvalidDataException($"Invalid TGA dimensions: {width}x{height}");
         }
 
-        if ((long)width * height > 1024L * 1024 * 256)
+        if ((long)width * height > MaxPixelCount)
         {
             throw new InvalidOperationException("Image dimensions too large");
         }
@@ -74,7 +80,7 @@ internal sealed class TgaTextureLoader : ITextureLoader
 
         try
         {
-            if (imageType == 2)
+            if (imageType == UncompressedTrueColor)
             {
                 for (int i = 0; i < pixelCount; i++)
                 {
@@ -84,14 +90,14 @@ internal sealed class TgaTextureLoader : ITextureLoader
                     pixels[rawIdx++] = pixelDepth == 32 ? br.ReadByte() : (byte)255;
                 }
             }
-            else if (imageType == 10)
+            else if (imageType == RleTrueColor)
             {
                 int currentPixel = 0;
                 while (currentPixel < pixelCount)
                 {
                     byte header = br.ReadByte();
                     int count = Math.Min((header & 0x7F) + 1, pixelCount - currentPixel);
-                    if ((header & 0x80) != 0)
+                    if ((header & RlePacketFlag) != 0)
                     {
                         byte b = br.ReadByte();
                         byte g = br.ReadByte();
@@ -120,7 +126,7 @@ internal sealed class TgaTextureLoader : ITextureLoader
                 }
             }
 
-            bool isTopLeft = (imageDescriptor & 0x20) != 0;
+            bool isTopLeft = (imageDescriptor & TopLeftOriginFlag) != 0;
             if (!isTopLeft)
             {
                 byte[] tempRow = ArrayPool<byte>.Shared.Rent(stride);

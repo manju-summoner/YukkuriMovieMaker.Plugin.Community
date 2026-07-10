@@ -6,6 +6,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Textures.Loaders;
 
 internal sealed class DdsTextureLoader : ITextureLoader
 {
+    private const uint DdsMagic = 0x20534444;
+    private const uint HeaderSize = 124;
+    private const uint FourCcFlag = 0x4;
+    private const uint RgbFlag = 0x40;
+    private const uint PitchFlag = 0x8;
+    private const int MaxDimension = 65536;
+    private const long MaxPixelCount = 1024L * 1024 * 256;
+
     public int Priority => 90;
 
     public bool CanLoad(string path) => path.EndsWith(".dds", StringComparison.OrdinalIgnoreCase);
@@ -26,13 +34,13 @@ internal sealed class DdsTextureLoader : ITextureLoader
         using var br = new BinaryReader(fs);
 
         uint magic = br.ReadUInt32();
-        if (magic != 0x20534444)
+        if (magic != DdsMagic)
         {
             throw new InvalidDataException("Invalid DDS Magic");
         }
 
         uint size = br.ReadUInt32();
-        if (size != 124)
+        if (size != HeaderSize)
         {
             throw new InvalidDataException("Invalid DDS Header Size");
         }
@@ -57,8 +65,8 @@ internal sealed class DdsTextureLoader : ITextureLoader
         br.ReadBytes(16);
         br.ReadBytes(4);
 
-        bool isCompressed = (pfFlags & 0x4) != 0;
-        bool isRgb = (pfFlags & 0x40) != 0;
+        bool isCompressed = (pfFlags & FourCcFlag) != 0;
+        bool isRgb = (pfFlags & RgbFlag) != 0;
 
         if (isCompressed)
         {
@@ -76,12 +84,12 @@ internal sealed class DdsTextureLoader : ITextureLoader
             throw new NotSupportedException($"DDS BitCount {pfRGBBitCount} not supported");
         }
 
-        if (width == 0 || height == 0 || width > 65536 || height > 65536)
+        if (width == 0 || height == 0 || width > MaxDimension || height > MaxDimension)
         {
             throw new InvalidDataException($"Invalid DDS dimensions: {width}x{height}");
         }
 
-        if ((long)width * height > 1024L * 1024 * 256)
+        if ((long)width * height > MaxPixelCount)
         {
             throw new InvalidOperationException("Image dimensions too large");
         }
@@ -95,7 +103,7 @@ internal sealed class DdsTextureLoader : ITextureLoader
         int h = (int)height;
         int bytesPerPixel = (int)(pfRGBBitCount / 8);
 
-        bool hasPitchFlag = (flags & 0x8) != 0;
+        bool hasPitchFlag = (flags & PitchFlag) != 0;
         int fileStride = hasPitchFlag && pitchOrLinearSize > 0
             ? (int)pitchOrLinearSize
             : w * bytesPerPixel;

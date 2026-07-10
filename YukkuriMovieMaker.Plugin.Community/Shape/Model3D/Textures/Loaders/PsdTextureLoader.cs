@@ -7,6 +7,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Textures.Loaders;
 
 internal sealed class PsdTextureLoader : ITextureLoader
 {
+    private const uint PsdSignature = 0x38425053;
+    private const ushort SupportedVersion = 1;
+    private const ushort RgbColorMode = 3;
+    private const ushort SupportedDepth = 8;
+    private const ushort MinChannels = 3;
+    private const ushort MaxChannels = 56;
+    private const ushort RawCompression = 0;
+    private const ushort RleCompression = 1;
+    private const long MaxPixelCount = 1024L * 1024 * 256;
+
     public int Priority => 80;
 
     public bool CanLoad(string path) => path.EndsWith(".psd", StringComparison.OrdinalIgnoreCase);
@@ -27,13 +37,13 @@ internal sealed class PsdTextureLoader : ITextureLoader
         using var br = new BinaryReader(fs);
 
         uint signature = SwapUInt32(br.ReadUInt32());
-        if (signature != 0x38425053)
+        if (signature != PsdSignature)
         {
             throw new InvalidDataException("Invalid PSD Signature");
         }
 
         ushort version = SwapUInt16(br.ReadUInt16());
-        if (version != 1)
+        if (version != SupportedVersion)
         {
             throw new NotSupportedException("Only PSD Version 1 supported");
         }
@@ -51,22 +61,22 @@ internal sealed class PsdTextureLoader : ITextureLoader
         }
 
         long totalPixels = (long)width * height;
-        if (totalPixels > 1024L * 1024 * 256)
+        if (totalPixels > MaxPixelCount)
         {
             throw new InvalidOperationException("Image dimensions too large");
         }
 
-        if (mode != 3)
+        if (mode != RgbColorMode)
         {
             throw new NotSupportedException($"PSD ColorMode {mode} not supported");
         }
 
-        if (depth != 8)
+        if (depth != SupportedDepth)
         {
             throw new NotSupportedException("Only 8-bit PSD supported");
         }
 
-        if (channels < 3 || channels > 56)
+        if (channels < MinChannels || channels > MaxChannels)
         {
             throw new NotSupportedException($"PSD channel count {channels} not supported");
         }
@@ -91,11 +101,11 @@ internal sealed class PsdTextureLoader : ITextureLoader
 
         try
         {
-            if (compression == 0)
+            if (compression == RawCompression)
             {
                 ReadUncompressed(br, channelData, pixelCount, channels, usedChannels);
             }
-            else if (compression == 1)
+            else if (compression == RleCompression)
             {
                 ReadRleCompressed(br, fs, channelData, width, height, channels, usedChannels, pixelCount);
             }
