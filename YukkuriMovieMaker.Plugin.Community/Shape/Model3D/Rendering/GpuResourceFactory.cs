@@ -21,6 +21,11 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
                 || (long)part.IndexOffset + part.IndexCount > model.Indices.Length) return null;
         }
 
+        long vertexBytes = (long)model.Vertices.Length * Unsafe.SizeOf<Model3DVertex>();
+        long indexBytes = (long)model.Indices.Length * sizeof(int);
+        if (vertexBytes > int.MaxValue || indexBytes > int.MaxValue) return null;
+        if (!Model3DSettings.Default.IsGpuMemoryPerModelAllowed(vertexBytes + indexBytes)) return null;
+
         ID3D11Buffer? vertexBuffer = null;
         ID3D11Buffer? indexBuffer = null;
         ID3D11ShaderResourceView?[]? textures = null;
@@ -31,7 +36,7 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
         {
             long gpuBytes = 0;
 
-            int vertexBufferSize = model.Vertices.Length * Unsafe.SizeOf<Model3DVertex>();
+            int vertexBufferSize = (int)vertexBytes;
             fixed (Model3DVertex* pVertices = model.Vertices)
             {
                 vertexBuffer = device.CreateBuffer(
@@ -40,7 +45,7 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
             }
             gpuBytes += vertexBufferSize;
 
-            int indexBufferSize = model.Indices.Length * sizeof(int);
+            int indexBufferSize = (int)indexBytes;
             fixed (int* pIndices = model.Indices)
             {
                 indexBuffer = device.CreateBuffer(
