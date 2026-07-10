@@ -33,6 +33,8 @@ internal sealed class TextureRawData : IDisposable
         _pixels = pixels ?? throw new ArgumentNullException(nameof(pixels));
     }
 
+    public byte[]? TryGetPixels() => Volatile.Read(ref _pixels);
+
     public TextureRawData ToNonPooled()
     {
         var src = Pixels;

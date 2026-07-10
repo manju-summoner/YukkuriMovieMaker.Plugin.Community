@@ -52,8 +52,7 @@ internal sealed class TextureService : ITextureService
             if (_disposed) throw new ObjectDisposedException(nameof(TextureService));
         }
 
-        var raw = EnsureRawDataCached(path);
-        if (raw != null)
+        if (AcquireRawPixels(path) is { } raw)
         {
             var bmp = BitmapSource.Create(raw.Width, raw.Height, 96, 96, PixelFormats.Bgra32, null, raw.Pixels, raw.Stride);
             if (bmp.CanFreeze) bmp.Freeze();
@@ -71,7 +70,7 @@ internal sealed class TextureService : ITextureService
         return bitmap;
     }
 
-    public unsafe (ID3D11ShaderResourceView? Srv, long GpuBytes) CreateShaderResourceView(string path, ID3D11Device device)
+    public (ID3D11ShaderResourceView? Srv, long GpuBytes) CreateShaderResourceView(string path, ID3D11Device device)
     {
         if (string.IsNullOrEmpty(path)) return (null, 0);
         if (device == null) return (null, 0);
@@ -103,14 +102,26 @@ internal sealed class TextureService : ITextureService
             }
         }
 
-        var rawData = EnsureRawDataCached(path);
-        if (rawData == null) return (null, 0);
+        if (AcquireRawPixels(path) is not { } rawData) return (null, 0);
 
         return CreateAndCacheGpuTexture(key, rawData, device);
     }
 
+    private (byte[] Pixels, int Width, int Height, int Stride)? AcquireRawPixels(string path)
+    {
+        for (int attempt = 0; attempt < 3; attempt++)
+        {
+            var raw = EnsureRawDataCached(path);
+            if (raw == null) return null;
+
+            var pixels = raw.TryGetPixels();
+            if (pixels != null) return (pixels, raw.Width, raw.Height, raw.Stride);
+        }
+        return null;
+    }
+
     private unsafe (ID3D11ShaderResourceView? Srv, long GpuBytes) CreateAndCacheGpuTexture(
-        (nint DevicePtr, string Path) key, TextureRawData rawData, ID3D11Device device)
+        (nint DevicePtr, string Path) key, (byte[] Pixels, int Width, int Height, int Stride) rawData, ID3D11Device device)
     {
         int width = rawData.Width;
         int height = rawData.Height;
