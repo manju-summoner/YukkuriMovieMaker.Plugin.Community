@@ -103,7 +103,8 @@ internal sealed class WavefrontObjParser : IModelParser
                     rawVt + offsets[i].Vt,
                     rawVn + offsets[i].Vn,
                     sortArray,
-                    offsets[i].F * 3);
+                    offsets[i].F * 3,
+                    counts[i].F * 3);
             });
 
             Array.Sort(sortArray);
@@ -369,7 +370,7 @@ internal sealed class WavefrontObjParser : IModelParser
                         while (ptr < end && *ptr <= 32 && *ptr != '\n') ptr++;
                         if (ptr >= end || *ptr == '\n') break;
                         vInFace++;
-                        while (ptr < end && *ptr != ' ' && *ptr != '\n') ptr++;
+                        while (ptr < end && *ptr > 32) ptr++;
                     }
                     if (vInFace >= 3)
                     {
@@ -391,7 +392,7 @@ internal sealed class WavefrontObjParser : IModelParser
 
     private static unsafe ChunkResult ParseChunk(byte* start, long startOffset, long endOffset,
         Vector3* vPtr, Vector2* vtPtr, Vector3* vnPtr,
-        SortableVertex[] sortArray, int sortStartIndex)
+        SortableVertex[] sortArray, int sortStartIndex, int sortCount)
     {
         var result = new ChunkResult();
         byte* ptr = start + startOffset;
@@ -401,6 +402,7 @@ internal sealed class WavefrontObjParser : IModelParser
         Vector2* currVt = vtPtr;
         Vector3* currVn = vnPtr;
         int currentSortIdx = sortStartIndex;
+        int sortEndIndex = sortStartIndex + sortCount;
         int localFaceIdx = 0;
 
         while (ptr < end)
@@ -444,26 +446,11 @@ internal sealed class WavefrontObjParser : IModelParser
             {
                 if (*ptr <= 32)
                 {
-                    ParseVertexIndex(ref ptr, end, out int v1, out int vt1, out int vn1);
-                    ParseVertexIndex(ref ptr, end, out int v2, out int vt2, out int vn2);
-                    ParseVertexIndex(ref ptr, end, out int v3, out int vt3, out int vn3);
-
-                    sortArray[currentSortIdx] = new SortableVertex(v1, vt1, vn1, currentSortIdx);
-                    currentSortIdx++;
-                    sortArray[currentSortIdx] = new SortableVertex(v2, vt2, vn2, currentSortIdx);
-                    currentSortIdx++;
-                    sortArray[currentSortIdx] = new SortableVertex(v3, vt3, vn3, currentSortIdx);
-                    currentSortIdx++;
-                    localFaceIdx++;
-
-                    while (true)
+                    if (currentSortIdx + 3 <= sortEndIndex
+                        && TryParseFaceVertex(ref ptr, end, out int v1, out int vt1, out int vn1)
+                        && TryParseFaceVertex(ref ptr, end, out int v2, out int vt2, out int vn2)
+                        && TryParseFaceVertex(ref ptr, end, out int v3, out int vt3, out int vn3))
                     {
-                        while (ptr < end && *ptr <= 32 && *ptr != '\n') ptr++;
-                        if (ptr >= end || *ptr == '\n') break;
-
-                        v2 = v3; vt2 = vt3; vn2 = vn3;
-                        ParseVertexIndex(ref ptr, end, out v3, out vt3, out vn3);
-
                         sortArray[currentSortIdx] = new SortableVertex(v1, vt1, vn1, currentSortIdx);
                         currentSortIdx++;
                         sortArray[currentSortIdx] = new SortableVertex(v2, vt2, vn2, currentSortIdx);
@@ -471,7 +458,26 @@ internal sealed class WavefrontObjParser : IModelParser
                         sortArray[currentSortIdx] = new SortableVertex(v3, vt3, vn3, currentSortIdx);
                         currentSortIdx++;
                         localFaceIdx++;
+
+                        while (currentSortIdx + 3 <= sortEndIndex)
+                        {
+                            while (ptr < end && *ptr <= 32 && *ptr != '\n') ptr++;
+                            if (ptr >= end || *ptr == '\n') break;
+
+                            v2 = v3; vt2 = vt3; vn2 = vn3;
+                            if (!TryParseFaceVertex(ref ptr, end, out v3, out vt3, out vn3)) break;
+
+                            sortArray[currentSortIdx] = new SortableVertex(v1, vt1, vn1, currentSortIdx);
+                            currentSortIdx++;
+                            sortArray[currentSortIdx] = new SortableVertex(v2, vt2, vn2, currentSortIdx);
+                            currentSortIdx++;
+                            sortArray[currentSortIdx] = new SortableVertex(v3, vt3, vn3, currentSortIdx);
+                            currentSortIdx++;
+                            localFaceIdx++;
+                        }
                     }
+
+                    while (ptr < end && *ptr != '\n') ptr++;
                 }
                 else
                 {
@@ -527,17 +533,28 @@ internal sealed class WavefrontObjParser : IModelParser
                 while (ptr < end && *ptr != '\n') ptr++;
             }
         }
+
+        while (currentSortIdx < sortEndIndex)
+        {
+            sortArray[currentSortIdx] = new SortableVertex(0, 0, 0, currentSortIdx);
+            currentSortIdx++;
+        }
+
         return result;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static unsafe void ParseVertexIndex(ref byte* ptr, byte* end, out int v, out int vt, out int vn)
+    private static unsafe bool TryParseFaceVertex(ref byte* ptr, byte* end, out int v, out int vt, out int vn)
     {
-        while (ptr < end && *ptr <= 32 && *ptr != '\n') ptr++;
-
-        v = ParseInt(ref ptr, end);
+        v = 0;
         vt = 0;
         vn = 0;
+
+        while (ptr < end && *ptr <= 32 && *ptr != '\n') ptr++;
+        if (ptr >= end || *ptr == '\n') return false;
+
+        byte* tokenStart = ptr;
+        v = ParseInt(ref ptr, end);
 
         if (ptr < end && *ptr == '/')
         {
@@ -552,6 +569,11 @@ internal sealed class WavefrontObjParser : IModelParser
                 vn = ParseInt(ref ptr, end);
             }
         }
+
+        if (ptr != tokenStart) return true;
+
+        while (ptr < end && *ptr > 32) ptr++;
+        return false;
     }
 
     private static unsafe bool IsKeyword(byte* ptr, byte* end, string keyword)
