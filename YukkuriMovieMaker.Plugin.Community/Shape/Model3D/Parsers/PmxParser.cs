@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Text;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Cache;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Models;
+using static YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers.ModelHelper;
 
 namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
 
@@ -16,8 +17,6 @@ internal sealed class PmxParser : IStreamingModelParser
     private const int MaterialShadingBlockBytes = 28;
     private const int MaterialEdgeBlockBytes = 21;
     private const int MinVertexBytesWithoutBoneIndex = 37;
-    private const int StreamChunkLength = 4096;
-    private const int StreamBufferBytes = 65536;
 
     private static readonly string[] FileExtensions = [".pmx"];
 
@@ -50,7 +49,7 @@ internal sealed class PmxParser : IStreamingModelParser
         var texturePaths = ReadTexturePaths(reader, header, path);
         var parts = ReadParts(reader, header, texturePaths);
 
-        ModelHelper.CalculateBounds(vertices, out var center, out float scale);
+        CalculateBounds(vertices, out var center, out float scale);
 
         return new Model3DData
         {
@@ -79,24 +78,10 @@ internal sealed class PmxParser : IStreamingModelParser
             if (!HasCapacity(stream, vertexCount, MinVertexBytesWithoutBoneIndex + header.BoneIndexSize))
                 throw new InvalidDataException(InvalidDataMessage);
 
-            var bounds = new CullingBox();
+            CullingBox bounds;
             using (var vertexTemp = CreateTempStream(vertexTempPath))
             {
-                var chunk = new Model3DVertex[StreamChunkLength];
-                int length = 0;
-
-                for (int i = 0; i < vertexCount; i++)
-                {
-                    var vertex = ReadVertex(reader, header);
-                    bounds.Expand(vertex.Position);
-                    chunk[length++] = vertex;
-
-                    if (length != StreamChunkLength) continue;
-                    WriteVertices(vertexTemp, chunk, length);
-                    length = 0;
-                }
-
-                if (length > 0) WriteVertices(vertexTemp, chunk, length);
+                bounds = WriteVertexStream(vertexTemp, vertexCount, () => ReadVertex(reader, header));
             }
 
             int indexCount = reader.ReadInt32();
@@ -105,28 +90,16 @@ internal sealed class PmxParser : IStreamingModelParser
 
             using (var indexTemp = CreateTempStream(indexTempPath))
             {
-                var chunk = new int[StreamChunkLength];
-                int length = 0;
-
-                for (int i = 0; i < indexCount; i++)
-                {
-                    chunk[length++] = ReadVertexIndex(reader, header.VertexIndexSize);
-
-                    if (length != StreamChunkLength) continue;
-                    WriteIndices(indexTemp, chunk, length);
-                    length = 0;
-                }
-
-                if (length > 0) WriteIndices(indexTemp, chunk, length);
+                WriteIndexStream(indexTemp, indexCount, () => ReadVertexIndex(reader, header.VertexIndexSize));
             }
 
             var texturePaths = ReadTexturePaths(reader, header, path);
             var parts = ReadParts(reader, header, texturePaths);
-            var (center, scale) = ModelHelper.CalculateTransform(bounds);
+            var (center, scale) = CalculateTransform(bounds);
 
             cacheWriter.WriteMetadata(vertexCount, indexCount, parts, center, scale);
-            ModelHelper.CopyToCache(vertexTempPath, cacheWriter.WriteVertexChunk);
-            ModelHelper.CopyToCache(indexTempPath, cacheWriter.WriteIndexChunk);
+            CopyToCache(vertexTempPath, cacheWriter.WriteVertexChunk);
+            CopyToCache(indexTempPath, cacheWriter.WriteIndexChunk);
 
             return new Model3DData
             {
@@ -137,24 +110,9 @@ internal sealed class PmxParser : IStreamingModelParser
         }
         finally
         {
-            ModelHelper.TryDeleteFile(vertexTempPath);
-            ModelHelper.TryDeleteFile(indexTempPath);
+            TryDeleteFile(vertexTempPath);
+            TryDeleteFile(indexTempPath);
         }
-    }
-
-    private static FileStream CreateTempStream(string path)
-        => new(path, FileMode.Create, FileAccess.Write, FileShare.None, StreamBufferBytes);
-
-    private static unsafe void WriteVertices(Stream stream, Model3DVertex[] chunk, int length)
-    {
-        fixed (Model3DVertex* pointer = chunk)
-            stream.Write(new ReadOnlySpan<byte>(pointer, length * sizeof(Model3DVertex)));
-    }
-
-    private static unsafe void WriteIndices(Stream stream, int[] chunk, int length)
-    {
-        fixed (int* pointer = chunk)
-            stream.Write(new ReadOnlySpan<byte>(pointer, length * sizeof(int)));
     }
 
     private static bool TryReadHeader(BinaryReader reader, out PmxHeader header)
@@ -234,7 +192,7 @@ internal sealed class PmxParser : IStreamingModelParser
         for (int i = 0; i < count; i++)
         {
             string rawPath = ReadText(reader, header.Encoding);
-            paths[i] = rawPath.Contains('*') ? string.Empty : ModelHelper.ResolveTexturePath(rawPath, modelDirectory);
+            paths[i] = rawPath.Contains('*') ? string.Empty : ResolveTexturePath(rawPath, modelDirectory);
         }
 
         return paths;
@@ -317,14 +275,6 @@ internal sealed class PmxParser : IStreamingModelParser
     }
 
     private static void SkipText(BinaryReader reader) => Skip(reader, reader.ReadInt32());
-
-    private static void Skip(BinaryReader reader, int bytes)
-    {
-        if (bytes > 0) reader.BaseStream.Seek(bytes, SeekOrigin.Current);
-    }
-
-    private static bool HasCapacity(Stream stream, int count, int elementBytes)
-        => count >= 0 && (long)count * elementBytes <= stream.Length - stream.Position;
 
     private readonly record struct PmxHeader(
         Encoding Encoding,

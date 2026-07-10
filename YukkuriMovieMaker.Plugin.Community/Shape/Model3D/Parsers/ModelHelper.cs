@@ -9,7 +9,69 @@ internal static class ModelHelper
 {
     private const float MinimumExtent = 1e-6f;
     private const int StreamBufferBytes = 65536;
+    private const int StreamChunkLength = 4096;
     private const string EmbeddedTextureDirectoryName = "YukkuriMovieMaker.Model3D";
+
+    public static FileStream CreateTempStream(string path)
+        => new(path, FileMode.Create, FileAccess.Write, FileShare.None, StreamBufferBytes);
+
+    public static CullingBox WriteVertexStream(Stream stream, int vertexCount, Func<Model3DVertex> readVertex)
+    {
+        var bounds = new CullingBox();
+        var chunk = new Model3DVertex[StreamChunkLength];
+        int length = 0;
+
+        for (int i = 0; i < vertexCount; i++)
+        {
+            var vertex = readVertex();
+            bounds.Expand(vertex.Position);
+            chunk[length++] = vertex;
+
+            if (length != StreamChunkLength) continue;
+            WriteVertices(stream, chunk, length);
+            length = 0;
+        }
+
+        if (length > 0) WriteVertices(stream, chunk, length);
+        return bounds;
+    }
+
+    public static void WriteIndexStream(Stream stream, int indexCount, Func<int> readIndex)
+    {
+        var chunk = new int[StreamChunkLength];
+        int length = 0;
+
+        for (int i = 0; i < indexCount; i++)
+        {
+            chunk[length++] = readIndex();
+
+            if (length != StreamChunkLength) continue;
+            WriteIndices(stream, chunk, length);
+            length = 0;
+        }
+
+        if (length > 0) WriteIndices(stream, chunk, length);
+    }
+
+    private static unsafe void WriteVertices(Stream stream, Model3DVertex[] chunk, int length)
+    {
+        fixed (Model3DVertex* pointer = chunk)
+            stream.Write(new ReadOnlySpan<byte>(pointer, length * sizeof(Model3DVertex)));
+    }
+
+    private static unsafe void WriteIndices(Stream stream, int[] chunk, int length)
+    {
+        fixed (int* pointer = chunk)
+            stream.Write(new ReadOnlySpan<byte>(pointer, length * sizeof(int)));
+    }
+
+    public static void Skip(BinaryReader reader, int bytes)
+    {
+        if (bytes > 0) reader.BaseStream.Seek(bytes, SeekOrigin.Current);
+    }
+
+    public static bool HasCapacity(Stream stream, int count, int elementBytes)
+        => count >= 0 && (long)count * elementBytes <= stream.Length - stream.Position;
 
     public static string WriteEmbeddedTexture(string modelPath, int index, string extension, byte[] data)
     {

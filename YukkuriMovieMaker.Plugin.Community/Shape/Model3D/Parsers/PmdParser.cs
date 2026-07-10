@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Text;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Cache;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Models;
+using static YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers.ModelHelper;
 
 namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
 
@@ -20,8 +21,6 @@ internal sealed class PmdParser : IStreamingModelParser
     private const int VertexBytes = 38;
     private const int IndexBytes = 2;
     private const int MaterialBytes = 70;
-    private const int StreamChunkLength = 4096;
-    private const int StreamBufferBytes = 65536;
 
     private static readonly string[] FileExtensions = [".pmd"];
     private static readonly Encoding ShiftJis;
@@ -59,7 +58,7 @@ internal sealed class PmdParser : IStreamingModelParser
 
         var parts = ReadParts(reader, path);
 
-        ModelHelper.CalculateBounds(vertices, out var center, out float scale);
+        CalculateBounds(vertices, out var center, out float scale);
 
         return new Model3DData
         {
@@ -86,24 +85,10 @@ internal sealed class PmdParser : IStreamingModelParser
             int vertexCount = reader.ReadInt32();
             if (!HasCapacity(stream, vertexCount, VertexBytes)) throw new InvalidDataException(InvalidDataMessage);
 
-            var bounds = new CullingBox();
+            CullingBox bounds;
             using (var vertexTemp = CreateTempStream(vertexTempPath))
             {
-                var chunk = new Model3DVertex[StreamChunkLength];
-                int length = 0;
-
-                for (int i = 0; i < vertexCount; i++)
-                {
-                    var vertex = ReadVertex(reader);
-                    bounds.Expand(vertex.Position);
-                    chunk[length++] = vertex;
-
-                    if (length != StreamChunkLength) continue;
-                    WriteVertices(vertexTemp, chunk, length);
-                    length = 0;
-                }
-
-                if (length > 0) WriteVertices(vertexTemp, chunk, length);
+                bounds = WriteVertexStream(vertexTemp, vertexCount, () => ReadVertex(reader));
             }
 
             int indexCount = reader.ReadInt32();
@@ -111,27 +96,15 @@ internal sealed class PmdParser : IStreamingModelParser
 
             using (var indexTemp = CreateTempStream(indexTempPath))
             {
-                var chunk = new int[StreamChunkLength];
-                int length = 0;
-
-                for (int i = 0; i < indexCount; i++)
-                {
-                    chunk[length++] = reader.ReadUInt16();
-
-                    if (length != StreamChunkLength) continue;
-                    WriteIndices(indexTemp, chunk, length);
-                    length = 0;
-                }
-
-                if (length > 0) WriteIndices(indexTemp, chunk, length);
+                WriteIndexStream(indexTemp, indexCount, () => reader.ReadUInt16());
             }
 
             var parts = ReadParts(reader, path);
-            var (center, scale) = ModelHelper.CalculateTransform(bounds);
+            var (center, scale) = CalculateTransform(bounds);
 
             cacheWriter.WriteMetadata(vertexCount, indexCount, parts, center, scale);
-            ModelHelper.CopyToCache(vertexTempPath, cacheWriter.WriteVertexChunk);
-            ModelHelper.CopyToCache(indexTempPath, cacheWriter.WriteIndexChunk);
+            CopyToCache(vertexTempPath, cacheWriter.WriteVertexChunk);
+            CopyToCache(indexTempPath, cacheWriter.WriteIndexChunk);
 
             return new Model3DData
             {
@@ -142,24 +115,9 @@ internal sealed class PmdParser : IStreamingModelParser
         }
         finally
         {
-            ModelHelper.TryDeleteFile(vertexTempPath);
-            ModelHelper.TryDeleteFile(indexTempPath);
+            TryDeleteFile(vertexTempPath);
+            TryDeleteFile(indexTempPath);
         }
-    }
-
-    private static FileStream CreateTempStream(string path)
-        => new(path, FileMode.Create, FileAccess.Write, FileShare.None, StreamBufferBytes);
-
-    private static unsafe void WriteVertices(Stream stream, Model3DVertex[] chunk, int length)
-    {
-        fixed (Model3DVertex* pointer = chunk)
-            stream.Write(new ReadOnlySpan<byte>(pointer, length * sizeof(Model3DVertex)));
-    }
-
-    private static unsafe void WriteIndices(Stream stream, int[] chunk, int length)
-    {
-        fixed (int* pointer = chunk)
-            stream.Write(new ReadOnlySpan<byte>(pointer, length * sizeof(int)));
     }
 
     private static bool TryReadHeader(BinaryReader reader)
@@ -212,7 +170,7 @@ internal sealed class PmdParser : IStreamingModelParser
 
             parts.Add(new Model3DPart
             {
-                TexturePath = ResolveTexturePath(rawPath, modelDirectory),
+                TexturePath = ResolvePmdTexturePath(rawPath, modelDirectory),
                 IndexOffset = indexOffset,
                 IndexCount = indexCount,
                 BaseColor = diffuse
@@ -224,14 +182,14 @@ internal sealed class PmdParser : IStreamingModelParser
         return parts;
     }
 
-    private static string ResolveTexturePath(string rawPath, string modelDirectory)
+    private static string ResolvePmdTexturePath(string rawPath, string modelDirectory)
     {
         if (string.IsNullOrEmpty(rawPath)) return string.Empty;
 
         int sphereSeparator = rawPath.IndexOf('*');
         if (sphereSeparator >= 0) rawPath = rawPath[..sphereSeparator];
 
-        return ModelHelper.ResolveTexturePath(rawPath, modelDirectory);
+        return ResolveTexturePath(rawPath, modelDirectory);
     }
 
     private static string ReadFixedText(BinaryReader reader, int length)
@@ -240,12 +198,4 @@ internal sealed class PmdParser : IStreamingModelParser
         int terminator = Array.IndexOf(bytes, (byte)0);
         return ShiftJis.GetString(bytes, 0, terminator >= 0 ? terminator : bytes.Length);
     }
-
-    private static void Skip(BinaryReader reader, int bytes)
-    {
-        if (bytes > 0) reader.BaseStream.Seek(bytes, SeekOrigin.Current);
-    }
-
-    private static bool HasCapacity(Stream stream, int count, int elementBytes)
-        => count >= 0 && (long)count * elementBytes <= stream.Length - stream.Position;
 }
