@@ -19,7 +19,7 @@ internal sealed class GlbParser : IModelParser
     private static readonly string[] FileExtensions = [".glb", ".gltf"];
 
     public string Id => "Glb";
-    public int Version => 2;
+    public int Version => 3;
     public IReadOnlyList<string> Extensions => FileExtensions;
 
     public Model3DData Parse(string path)
@@ -512,15 +512,18 @@ internal sealed class GlbParser : IModelParser
     private static Vector4[]? ReadVector4Array(JsonElement root, byte[]? binData, int accessorIdx)
     {
         if (binData == null) return null;
-        if (!GetAccessorInfo(root, accessorIdx, out int buffViewIdx, out int offset, out int count, out int compType)) return null;
+        if (!GetAccessorInfo(root, accessorIdx, out int buffViewIdx, out int offset, out int count, out int compType, out string type)) return null;
         if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
         if (buffIdx != 0) return null;
 
-        int elementSize = compType == ComponentTypeUByte ? 4 : (compType == ComponentTypeUShort ? 8 : 16);
+        int componentCount = type == "VEC3" ? 3 : 4;
+        int componentSize = compType == ComponentTypeUByte ? 1 : (compType == ComponentTypeUShort ? 2 : 4);
+        int elementSize = componentSize * componentCount;
         if (stride <= 0) stride = elementSize;
         if (!TryClampAccessorCount(binData, viewOffset, offset, stride, elementSize, ref count, out int start)) return null;
 
         var result = new Vector4[count];
+        bool hasAlpha = componentCount == 4;
 
         for (int i = 0; i < count; i++)
         {
@@ -534,21 +537,21 @@ internal sealed class GlbParser : IModelParser
                 x = BitConverter.ToSingle(binData, p);
                 y = BitConverter.ToSingle(binData, p + 4);
                 z = BitConverter.ToSingle(binData, p + 8);
-                w = BitConverter.ToSingle(binData, p + 12);
+                if (hasAlpha) w = BitConverter.ToSingle(binData, p + 12);
             }
             else if (compType == ComponentTypeUByte)
             {
                 x = binData[p] / 255.0f;
                 y = binData[p + 1] / 255.0f;
                 z = binData[p + 2] / 255.0f;
-                w = binData[p + 3] / 255.0f;
+                if (hasAlpha) w = binData[p + 3] / 255.0f;
             }
             else if (compType == ComponentTypeUShort)
             {
                 x = BitConverter.ToUInt16(binData, p) / 65535.0f;
                 y = BitConverter.ToUInt16(binData, p + 2) / 65535.0f;
                 z = BitConverter.ToUInt16(binData, p + 4) / 65535.0f;
-                w = BitConverter.ToUInt16(binData, p + 6) / 65535.0f;
+                if (hasAlpha) w = BitConverter.ToUInt16(binData, p + 6) / 65535.0f;
             }
             result[i] = new Vector4(x, y, z, w);
         }
@@ -605,8 +608,11 @@ internal sealed class GlbParser : IModelParser
     }
 
     private static bool GetAccessorInfo(JsonElement root, int index, out int buffView, out int offset, out int count, out int compType)
+        => GetAccessorInfo(root, index, out buffView, out offset, out count, out compType, out _);
+
+    private static bool GetAccessorInfo(JsonElement root, int index, out int buffView, out int offset, out int count, out int compType, out string type)
     {
-        buffView = -1; offset = 0; count = 0; compType = 0;
+        buffView = -1; offset = 0; count = 0; compType = 0; type = string.Empty;
         if (!root.TryGetProperty("accessors", out var accessors) || index < 0 || index >= accessors.GetArrayLength()) return false;
 
         var acc = accessors[index];
@@ -614,6 +620,7 @@ internal sealed class GlbParser : IModelParser
         if (acc.TryGetProperty("byteOffset", out var offElem)) offset = offElem.GetInt32();
         if (acc.TryGetProperty("count", out var cntElem)) count = cntElem.GetInt32();
         if (acc.TryGetProperty("componentType", out var typeElem)) compType = typeElem.GetInt32();
+        if (acc.TryGetProperty("type", out var accTypeElem)) type = accTypeElem.GetString() ?? string.Empty;
 
         return buffView != -1;
     }
