@@ -34,7 +34,7 @@ internal sealed class StlParser : IModelParser
         if (isAscii) return ParseAscii(path);
 
         int count = BitConverter.ToInt32(bytes, 80);
-        if (bytes.Length < 84 + count * 50) return new Model3DData();
+        if (count < 0 || bytes.Length < 84 + (long)count * 50) return new Model3DData();
 
         int totalV = count * 3;
         var rawPositions = GC.AllocateUninitializedArray<Vector3>(totalV, true);
