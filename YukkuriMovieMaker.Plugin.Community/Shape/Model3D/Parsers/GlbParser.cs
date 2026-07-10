@@ -414,9 +414,18 @@ internal sealed class GlbParser : IModelParser
                 string texPath = string.Empty;
                 string metallicRoughnessTexPath = string.Empty;
 
+                bool forceTransparent = false;
+
                 if (matIdx >= 0 && materials.ValueKind == JsonValueKind.Array && matIdx < materials.GetArrayLength())
                 {
                     var mat = materials[matIdx];
+
+                    if (mat.TryGetProperty("alphaMode", out var alphaModeProp)
+                        && alphaModeProp.GetString() is "BLEND" or "MASK")
+                    {
+                        forceTransparent = true;
+                    }
+
                     if (mat.TryGetProperty("pbrMetallicRoughness", out var pbr))
                     {
                         if (pbr.TryGetProperty("baseColorFactor", out var colFactor) && colFactor.GetArrayLength() == 4)
@@ -471,7 +480,8 @@ internal sealed class GlbParser : IModelParser
                     IndexCount = allIndices.Count - startIndex,
                     BaseColor = baseColor,
                     Metallic = metallic,
-                    Roughness = roughness
+                    Roughness = roughness,
+                    ForceTransparent = forceTransparent
                 });
             }
         }

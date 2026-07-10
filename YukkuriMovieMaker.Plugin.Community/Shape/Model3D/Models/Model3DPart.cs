@@ -14,6 +14,7 @@ internal struct Model3DPart
     public Vector4 BaseColor;
     public float Metallic;
     public float Roughness;
+    public bool ForceTransparent;
     public Vector3 Center;
 
     public Model3DPart()
@@ -25,8 +26,9 @@ internal struct Model3DPart
         BaseColor = Vector4.One;
         Metallic = DefaultMetallic;
         Roughness = DefaultRoughness;
+        ForceTransparent = false;
         Center = Vector3.Zero;
     }
 
-    public readonly bool IsOpaque => BaseColor.W >= 1.0f;
+    public readonly bool IsOpaque => !ForceTransparent && BaseColor.W >= 1.0f;
 }
