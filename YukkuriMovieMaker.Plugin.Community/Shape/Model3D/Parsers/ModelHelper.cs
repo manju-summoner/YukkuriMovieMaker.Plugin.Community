@@ -155,6 +155,11 @@ internal static class ModelHelper
         fixed (Model3DVertex* pVerts = vertices)
         fixed (int* pInds = indices)
         {
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                pVerts[i].Normal = Vector3.Zero;
+            }
+
             for (int i = 0; i + 2 < indices.Length; i += 3)
             {
                 int i1 = pInds[i];
