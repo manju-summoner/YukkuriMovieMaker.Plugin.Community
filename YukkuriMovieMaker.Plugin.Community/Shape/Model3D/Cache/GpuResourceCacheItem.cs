@@ -1,6 +1,7 @@
 using System.Numerics;
 using Vortice.Direct3D11;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Models;
+using static YukkuriMovieMaker.Plugin.Community.Shape.Model3D.DisposeUtility;
 
 namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Cache;
 
@@ -60,19 +61,6 @@ internal sealed class GpuResourceCacheItem : IDisposable
         {
             SafeDispose(local[i]);
             local[i] = null;
-        }
-    }
-
-    private static void SafeDispose(IDisposable? disposable)
-    {
-        if (disposable is null) return;
-
-        try
-        {
-            disposable.Dispose();
-        }
-        catch
-        {
         }
     }
 }

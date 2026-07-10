@@ -6,6 +6,7 @@ using System.Windows.Media.Imaging;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Textures.Loaders;
+using static YukkuriMovieMaker.Plugin.Community.Shape.Model3D.DisposeUtility;
 
 namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Textures;
 
@@ -97,7 +98,7 @@ internal sealed class TextureService : ITextureService
             {
                 if (GpuTextureCache.TryRemove(key, out var stale))
                 {
-                    SafeDisposeCom(stale);
+                    SafeDispose(stale);
                 }
             }
         }
@@ -147,7 +148,7 @@ internal sealed class TextureService : ITextureService
                 {
                     if (GpuTextureCache.TryRemove(key, out var stale))
                     {
-                        SafeDisposeCom(stale);
+                        SafeDispose(stale);
                     }
                     return (null, 0);
                 }
@@ -162,7 +163,7 @@ internal sealed class TextureService : ITextureService
             {
                 if (GpuTextureCache.TryRemove(key, out var stale))
                 {
-                    SafeDisposeCom(stale);
+                    SafeDispose(stale);
                 }
                 return (null, 0);
             }
@@ -282,7 +283,7 @@ internal sealed class TextureService : ITextureService
         var removed = GpuTextureCache.RemoveWhere(k => k.DevicePtr == devicePtr);
         foreach (var (_, tex) in removed)
         {
-            SafeDisposeCom(tex);
+            SafeDispose(tex);
         }
     }
 
@@ -324,9 +325,4 @@ internal sealed class TextureService : ITextureService
         }
     }
 
-    private static void SafeDisposeCom(IDisposable? disposable)
-    {
-        if (disposable == null) return;
-        try { disposable.Dispose(); } catch { }
-    }
 }

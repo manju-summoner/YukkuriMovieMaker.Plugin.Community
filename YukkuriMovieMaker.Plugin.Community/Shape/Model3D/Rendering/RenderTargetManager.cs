@@ -1,6 +1,7 @@
 using Vortice.Direct3D11;
 using Vortice.DXGI;
 using YukkuriMovieMaker.Commons;
+using static YukkuriMovieMaker.Plugin.Community.Shape.Model3D.DisposeUtility;
 using D2D = Vortice.Direct2D1;
 
 namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Rendering;
@@ -116,21 +117,6 @@ internal sealed class RenderTargetManager : IDisposable
         SafeDispose(ref _depthStencilTexture);
         SafeDispose(ref _renderTargetView);
         SafeDispose(ref _renderTargetTexture);
-    }
-
-    private static void SafeDispose<T>(ref T? disposable) where T : class, IDisposable
-    {
-        var target = disposable;
-        disposable = null;
-        if (target is null) return;
-
-        try
-        {
-            target.Dispose();
-        }
-        catch
-        {
-        }
     }
 
     public void Dispose()

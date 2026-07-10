@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using static YukkuriMovieMaker.Plugin.Community.Shape.Model3D.DisposeUtility;
 
 namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Textures;
 
@@ -128,10 +129,5 @@ internal sealed class BoundedLruCache<TKey, TValue> where TKey : notnull
                 _order.RemoveLast();
             }
         }
-    }
-
-    private static void SafeDispose(IDisposable d)
-    {
-        try { d.Dispose(); } catch { }
     }
 }

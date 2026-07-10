@@ -4,6 +4,7 @@ using Vortice.Direct3D11;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Cache;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Models;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Textures;
+using static YukkuriMovieMaker.Plugin.Community.Shape.Model3D.DisposeUtility;
 
 namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Rendering;
 
@@ -138,17 +139,6 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
         for (int i = 0; i < textures.Length; i++)
         {
             SafeDispose(textures[i]);
-        }
-    }
-
-    private static void SafeDispose(IDisposable? disposable)
-    {
-        try
-        {
-            disposable?.Dispose();
-        }
-        catch
-        {
         }
     }
 }
