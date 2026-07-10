@@ -73,6 +73,21 @@ internal static class ModelHelper
     public static bool HasCapacity(Stream stream, int count, int elementBytes)
         => count >= 0 && (long)count * elementBytes <= stream.Length - stream.Position;
 
+    public static bool IsEmbeddedTexturePath(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return false;
+
+        try
+        {
+            string root = Path.GetFullPath(Path.Combine(Path.GetTempPath(), EmbeddedTextureDirectoryName));
+            return path.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public static string WriteEmbeddedTexture(string modelPath, int index, string extension, byte[] data)
     {
         try

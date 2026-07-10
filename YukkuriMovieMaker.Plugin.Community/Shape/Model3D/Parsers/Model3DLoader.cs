@@ -38,8 +38,11 @@ internal static class Model3DLoader
         var fileInfo = new FileInfo(path);
         if (!Model3DSettings.Default.IsFileSizeAllowed(fileInfo.Length)) return new Model3DData();
 
-        if (Cache.TryLoad(path, fileInfo.LastWriteTimeUtc, parser.Id, parser.Version, PluginVersion, out var cachedModel))
+        if (Cache.TryLoad(path, fileInfo.LastWriteTimeUtc, parser.Id, parser.Version, PluginVersion, out var cachedModel)
+            && !HasMissingEmbeddedTextures(cachedModel))
+        {
             return WithinLimits(cachedModel) ? cachedModel : new Model3DData();
+        }
 
         var model = parser is IStreamingModelParser streamingParser
             ? LoadStreaming(path, streamingParser, fileInfo) ?? ParseAndCache(path, parser, fileInfo)
@@ -92,6 +95,16 @@ internal static class Model3DLoader
             Cache.Save(path, model, fileInfo.LastWriteTimeUtc, parser.Id, parser.Version, PluginVersion);
 
         return model;
+    }
+
+    private static bool HasMissingEmbeddedTextures(Model3DData model)
+    {
+        foreach (var part in model.Parts)
+        {
+            if (ModelHelper.IsEmbeddedTexturePath(part.TexturePath) && !File.Exists(part.TexturePath)) return true;
+            if (ModelHelper.IsEmbeddedTexturePath(part.MetallicRoughnessTexturePath) && !File.Exists(part.MetallicRoughnessTexturePath)) return true;
+        }
+        return false;
     }
 
     private static bool WithinLimits(Model3DData model)
