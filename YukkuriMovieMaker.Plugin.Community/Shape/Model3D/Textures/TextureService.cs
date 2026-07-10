@@ -84,7 +84,7 @@ internal sealed class TextureService : ITextureService
         TrackDevice(devicePtr);
 
         path = Path.GetFullPath(path).ToLowerInvariant();
-        var key = (devicePtr, path);
+        var key = (devicePtr, MakeContentKey(path));
 
         if (GpuTextureCache.TryGetValue(key, out var cachedTex))
         {
@@ -107,11 +107,20 @@ internal sealed class TextureService : ITextureService
         return CreateAndCacheGpuTexture(key, rawData, device);
     }
 
+
+    private static string MakeContentKey(string path)
+    {
+        long ticks = 0;
+        try { ticks = File.GetLastWriteTimeUtc(path).Ticks; } catch { }
+        return path + "|" + ticks;
+    }
+
     private (byte[] Pixels, int Width, int Height, int Stride)? AcquireRawPixels(string path)
     {
+        string contentKey = MakeContentKey(path);
         for (int attempt = 0; attempt < 3; attempt++)
         {
-            var raw = EnsureRawDataCached(path);
+            var raw = EnsureRawDataCached(path, contentKey);
             if (raw == null) return null;
 
             var pixels = raw.TryGetPixels();
@@ -181,9 +190,9 @@ internal sealed class TextureService : ITextureService
         }
     }
 
-    private TextureRawData? EnsureRawDataCached(string path)
+    private TextureRawData? EnsureRawDataCached(string path, string contentKey)
     {
-        if (RawDataCache.TryGetValue(path, out var cached))
+        if (RawDataCache.TryGetValue(contentKey, out var cached))
         {
             return cached;
         }
@@ -193,19 +202,19 @@ internal sealed class TextureService : ITextureService
 
         if (loader.CanLoadRaw(path))
         {
-            return DecodeAndCacheRaw(path, loader);
+            return DecodeAndCacheRaw(path, contentKey, loader);
         }
 
-        return DecodeAndCacheFromBitmap(path, loader);
+        return DecodeAndCacheFromBitmap(path, contentKey, loader);
     }
 
-    private static TextureRawData DecodeAndCacheRaw(string path, ITextureLoader loader)
+    private static TextureRawData DecodeAndCacheRaw(string path, string contentKey, ITextureLoader loader)
     {
         using var pooled = loader.LoadRaw(path);
         var persistent = pooled.ToNonPooled();
 
         long bytes = persistent.DataLength;
-        var result = RawDataCache.GetOrAdd(path, bytes, _ => persistent);
+        var result = RawDataCache.GetOrAdd(contentKey, bytes, _ => persistent);
 
         if (!ReferenceEquals(result, persistent))
         {
@@ -215,7 +224,7 @@ internal sealed class TextureService : ITextureService
         return result;
     }
 
-    private static TextureRawData? DecodeAndCacheFromBitmap(string path, ITextureLoader loader)
+    private static TextureRawData? DecodeAndCacheFromBitmap(string path, string contentKey, ITextureLoader loader)
     {
         BitmapSource bitmapSource;
         try
@@ -244,7 +253,7 @@ internal sealed class TextureService : ITextureService
             Buffer.BlockCopy(pooledBuf, 0, pixels, 0, requiredSize);
             var rawData = new TextureRawData(pixels, width, height);
 
-            var result = RawDataCache.GetOrAdd(path, requiredSize, _ => rawData);
+            var result = RawDataCache.GetOrAdd(contentKey, requiredSize, _ => rawData);
 
             if (!ReferenceEquals(result, rawData))
             {
