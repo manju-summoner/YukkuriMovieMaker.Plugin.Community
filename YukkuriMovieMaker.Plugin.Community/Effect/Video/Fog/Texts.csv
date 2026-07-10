@@ -1,0 +1,39 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+FogEffectName,,霧,Fog,雾,霧,안개,Niebla,ضباب,Kabut
+FogDensity,,濃度,Density,浓度,濃度,농도,Densidad,الكثافة,Kepadatan
+FogDensityDescription,,霧の濃さ,Thickness of the fog,雾的浓度,霧的濃度,안개의 짙기,Espesor de la niebla,سماكة الضباب,Ketebalan kabut
+FogScale,,スケール,Scale,缩放,縮放,스케일,Escala,المقياس,Skala
+FogScaleDescription,,霧のむらの大きさ,Size of the fog billows,雾团的大小,霧團的大小,안개 뭉침의 크기,Tamaño de las volutas de niebla,حجم كتل الضباب,Ukuran gumpalan kabut
+FogUnevenness,,むら,Unevenness,不均匀度,不均勻度,얼룩,Irregularidad,التفاوت,Ketidakrataan
+FogUnevennessDescription,,濃淡の差。高いほど霧が塊状になり切れ間が生まれます,Contrast of the density. Higher values form distinct billows with clear gaps,浓淡差异。越高雾越呈块状且出现间隙,濃淡差異。越高霧越呈塊狀且出現間隙,농담의 차이. 높을수록 안개가 덩어리지고 틈이 생깁니다,Contraste de la densidad. Valores altos forman volutas definidas con claros,تباين الكثافة. القيم الأعلى تشكّل كتلًا واضحة مع فجوات,Kontras kepadatan. Nilai tinggi membentuk gumpalan jelas dengan celah
+FogGradient,,高低差,Gradient,高度梯度,高度梯度,고도차,Gradiente,التدرج,Gradien
+FogGradientDescription,,高さによる濃度の偏り。正で下に濃い地霧、負で上に濃い靄になります,Density bias by height. Positive values sink the fog to the bottom and negative values raise it to the top,按高度的浓度偏移。正值为底部浓的地雾，负值为顶部浓的霭,按高度的濃度偏移。正值為底部濃的地霧，負值為頂部濃的靄,"높이에 따른 농도 치우침. 양수는 아래가 짙은 땅안개, 음수는 위가 짙은 안개가 됩니다",Sesgo de densidad por altura. Los valores positivos hunden la niebla al fondo y los negativos la elevan,انحياز الكثافة حسب الارتفاع. القيم الموجبة تُغرق الضباب للأسفل والسالبة ترفعه للأعلى,Bias kepadatan menurut ketinggian. Nilai positif menenggelamkan kabut ke bawah dan negatif mengangkatnya ke atas
+FogDepthGroup,,奥行き,Depth,深度,深度,깊이,Profundidad,العمق,Kedalaman
+FogLightGroup,,光の設定,Light settings,光照设置,光照設定,빛 설정,Ajustes de luz,إعدادات الضوء,Pengaturan cahaya
+FogDepthAmount,,奥行き,Depth,深度,深度,깊이,Profundidad,العمق,Kedalaman
+FogDepthAmountDescription,,推定した奥行きに応じて遠くほど霧を濃くします,Estimates scene depth and thickens the fog with distance,根据估计的深度使远处的雾更浓,根據估計的深度使遠處的霧更濃,추정한 깊이에 따라 멀수록 안개를 짙게 합니다,Estima la profundidad de la escena y espesa la niebla con la distancia,يقدّر عمق المشهد ويكثّف الضباب مع المسافة,Memperkirakan kedalaman dan menebalkan kabut sesuai jarak
+FogVanishingPointX,,消失点X,Vanishing point X,消失点X,消失點X,소실점X,Punto de fuga X,نقطة التلاشي X,Titik hilang X
+FogVanishingPointXDescription,,最も遠いと見なす位置。プレビューのポイントをドラッグして指定できます,Position treated as the farthest point. Drag the point on the preview to set it,视为最远处的位置。可拖动预览上的点来指定,視為最遠處的位置。可拖動預覽上的點來指定,가장 멀다고 간주하는 위치. 미리보기의 포인트를 드래그하여 지정할 수 있습니다,Posición considerada la más lejana. Arrastre el punto en la vista previa,الموضع الذي يُعد الأبعد. اسحب النقطة على المعاينة لتحديدها,Posisi yang dianggap paling jauh. Seret titik pada pratinjau untuk mengaturnya
+FogVanishingPointY,,消失点Y,Vanishing point Y,消失点Y,消失點Y,소실점Y,Punto de fuga Y,نقطة التلاشي Y,Titik hilang Y
+FogVanishingPointYDescription,,素材中心からの縦方向の位置,Vertical position from the center of the item,距素材中心的垂直位置,距素材中心的垂直位置,소재 중심에서의 세로 위치,Posición vertical desde el centro del elemento,الموضع الرأسي من مركز العنصر,Posisi vertikal dari pusat item
+FogHazeDetect,,霞検出,Haze detection,霾检测,霾檢測,안개 감지,Detección de bruma,كشف السديم,Deteksi kabut tipis
+FogHazeDetectDescription,,元映像の霞み具合から奥行きを推定する割合,How much the depth estimate relies on haze already present in the image,根据原始画面的雾霾程度估计深度的比例,根據原始畫面的霧霾程度估計深度的比例,원본 영상의 뿌연 정도로 깊이를 추정하는 비율,Cuánto depende la estimación de profundidad de la bruma ya presente en la imagen,مدى اعتماد تقدير العمق على السديم الموجود في الصورة,Seberapa besar estimasi kedalaman bergantung pada kabut yang sudah ada di gambar
+FogFlowSpeed,,流れの速さ,Flow speed,流动速度,流動速度,흐름 속도,Velocidad de flujo,سرعة التدفق,Kecepatan aliran
+FogFlowSpeedDescription,,霧が平行移動する速さ,Speed at which the fog drifts,雾平移的速度,霧平移的速度,안개가 평행 이동하는 속도,Velocidad de deriva de la niebla,سرعة انجراف الضباب,Kecepatan hanyutan kabut
+FogFlowAngle,,流れの角度,Flow angle,流动角度,流動角度,흐름 각도,Ángulo de flujo,زاوية التدفق,Sudut aliran
+FogFlowAngleDescription,,霧が流れる方向,Direction in which the fog drifts,雾流动的方向,霧流動的方向,안개가 흐르는 방향,Dirección de deriva de la niebla,اتجاه انجراف الضباب,Arah hanyutan kabut
+FogChangeSpeed,,変化速度,Change speed,变化速度,變化速度,변화 속도,Velocidad de cambio,سرعة التغير,Kecepatan perubahan
+FogChangeSpeedDescription,,霧の形が変化する速さ,How fast the fog shape evolves,雾形变化的速度,霧形變化的速度,안개 모양이 변하는 속도,Velocidad a la que evoluciona la forma de la niebla,سرعة تطور شكل الضباب,Kecepatan perubahan bentuk kabut
+FogColor,,霧の色,Fog color,雾的颜色,霧的顏色,안개 색,Color de la niebla,لون الضباب,Warna kabut
+FogColorDescription,,霧の色。不透明度は濃度に反映されます,Color of the fog. Its opacity scales the density,雾的颜色。不透明度反映到浓度,霧的顏色。不透明度反映到濃度,안개 색. 불투명도는 농도에 반영됩니다,Color de la niebla. Su opacidad escala la densidad,لون الضباب. يؤثر عدم شفافيته على الكثافة,Warna kabut. Opasitasnya memengaruhi kepadatan
+FogSunIntensity,,光の強さ,Light intensity,光强度,光強度,빛의 세기,Intensidad de luz,شدة الضوء,Intensitas cahaya
+FogSunIntensityDescription,,霧を照らす光の強さ。霧の光源側が明るく縁取られます,Strength of the light illuminating the fog. The lit side of the billows becomes brighter,照亮雾的光强度。雾团朝光一侧会更明亮,照亮霧的光強度。霧團朝光一側會更明亮,안개를 비추는 빛의 세기. 안개의 광원 쪽이 밝게 물듭니다,Intensidad de la luz que ilumina la niebla. El lado iluminado de las volutas se aclara,شدة الضوء المضيء للضباب. يصبح الجانب المضاء من الكتل أكثر سطوعًا,Kekuatan cahaya yang menerangi kabut. Sisi gumpalan yang terkena cahaya menjadi lebih terang
+FogSunAngle,,光の角度,Light angle,光的角度,光的角度,빛의 각도,Ángulo de luz,زاوية الضوء,Sudut cahaya
+FogSunAngleDescription,,光が差し込む方向,Direction from which the light shines,光照射的方向,光照射的方向,빛이 비치는 방향,Dirección desde la que incide la luz,اتجاه سقوط الضوء,Arah datangnya cahaya
+FogSunColor,,光の色,Light color,光的颜色,光的顏色,빛의 색,Color de la luz,لون الضوء,Warna cahaya
+FogSunColorDescription,,霧を照らす光の色,Color of the light illuminating the fog,照亮雾的光的颜色,照亮霧的光的顏色,안개를 비추는 빛의 색,Color de la luz que ilumina la niebla,لون الضوء المضيء للضباب,Warna cahaya yang menerangi kabut
+FogSeed,,シード値,Seed,种子值,種子值,시드값,Semilla,قيمة البذرة,Nilai seed
+FogSeedDescription,,霧の形を決める乱数のシード値,Random seed that determines the fog shape,决定雾形的随机种子,決定霧形的隨機種子,안개 모양을 결정하는 난수 시드값,Semilla aleatoria que determina la forma de la niebla,بذرة عشوائية تحدد شكل الضباب,Seed acak yang menentukan bentuk kabut
+TagFog,,霧,fog,雾,霧,안개,niebla,ضباب,kabut
+TagMist,,もや,mist,薄雾,薄霧,연무,bruma,سديم,halimun
+TagWeather,,天候,weather,天气,天氣,날씨,clima,طقس,cuaca
