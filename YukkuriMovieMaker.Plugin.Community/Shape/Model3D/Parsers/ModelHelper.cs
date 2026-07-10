@@ -1,0 +1,202 @@
+using System.IO;
+using System.Numerics;
+using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Cache;
+using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Models;
+
+namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
+
+internal static class ModelHelper
+{
+    public delegate void CacheChunkWriter(ReadOnlySpan<byte> data);
+
+    private const float MinimumExtent = 1e-6f;
+    private const int StreamBufferBytes = 65536;
+    private const string EmbeddedTextureDirectoryName = "YukkuriMovieMaker.Model3D";
+
+    public static string WriteEmbeddedTexture(string modelPath, int index, string extension, byte[] data)
+    {
+        try
+        {
+            string directory = Path.Combine(Path.GetTempPath(), EmbeddedTextureDirectoryName, ModelCache.ComputePathHash(modelPath));
+            Directory.CreateDirectory(directory);
+
+            string filePath = Path.Combine(directory, index + extension);
+            File.WriteAllBytes(filePath, data);
+            return filePath;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    public static (Vector3 Center, float Scale) CalculateTransform(CullingBox bounds)
+    {
+        if (bounds.IsEmpty) return (Vector3.Zero, 1.0f);
+
+        var center = (bounds.Min + bounds.Max) * 0.5f;
+        var size = bounds.Max - bounds.Min;
+        float maxExtent = Math.Max(size.X, Math.Max(size.Y, size.Z));
+        float scale = maxExtent > MinimumExtent ? Model3DData.NormalizedSize / maxExtent : 1.0f;
+
+        return (center, scale);
+    }
+
+    public static string ResolveTexturePath(string rawPath, string modelDirectory)
+    {
+        if (string.IsNullOrEmpty(rawPath)) return string.Empty;
+
+        string normalized = rawPath.Replace('\\', Path.DirectorySeparatorChar);
+        return Path.IsPathRooted(normalized) ? normalized : Path.Combine(modelDirectory, normalized);
+    }
+
+    public static void CopyToCache(string tempPath, CacheChunkWriter write)
+    {
+        using var stream = new FileStream(tempPath, FileMode.Open, FileAccess.Read, FileShare.Read, StreamBufferBytes, FileOptions.SequentialScan);
+        var buffer = new byte[StreamBufferBytes];
+
+        int read;
+        while ((read = stream.Read(buffer)) > 0)
+            write(buffer.AsSpan(0, read));
+    }
+
+    public static void TryDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path)) File.Delete(path);
+        }
+        catch
+        {
+        }
+    }
+
+    public static unsafe void CalculateNormals(Model3DVertex[] vertices, int[] indices)
+    {
+        fixed (Model3DVertex* pVerts = vertices)
+        fixed (int* pInds = indices)
+        {
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                int i1 = pInds[i];
+                int i2 = pInds[i + 1];
+                int i3 = pInds[i + 2];
+
+                Vector3 p1 = pVerts[i1].Position;
+                Vector3 p2 = pVerts[i2].Position;
+                Vector3 p3 = pVerts[i3].Position;
+
+                Vector3 edge1 = p2 - p1;
+                Vector3 edge2 = p3 - p1;
+                Vector3 normal = Vector3.Cross(edge1, edge2);
+
+                pVerts[i1].Normal += normal;
+                pVerts[i2].Normal += normal;
+                pVerts[i3].Normal += normal;
+            }
+
+            int len = vertices.Length;
+            for (int i = 0; i < len; i++)
+            {
+                var n = pVerts[i].Normal;
+                float lenSq = n.LengthSquared();
+                if (lenSq > 1e-6f)
+                {
+                    pVerts[i].Normal = n / MathF.Sqrt(lenSq);
+                }
+            }
+        }
+    }
+
+    public static void CalculateBounds(Model3DVertex[] vertices, out Vector3 center, out float scale)
+    {
+        if (vertices.Length == 0)
+        {
+            center = Vector3.Zero;
+            scale = 1.0f;
+            return;
+        }
+
+        Vector3 min = new Vector3(float.MaxValue);
+        Vector3 max = new Vector3(-float.MaxValue);
+
+        if (Vector.IsHardwareAccelerated && vertices.Length >= Vector<float>.Count)
+        {
+            CalculateBoundsSimd(vertices, ref min, ref max);
+        }
+        else
+        {
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                var p = vertices[i].Position;
+                min = Vector3.Min(min, p);
+                max = Vector3.Max(max, p);
+            }
+        }
+
+        (center, scale) = CalculateTransform(new CullingBox(min, max));
+    }
+
+    private static unsafe void CalculateBoundsSimd(Model3DVertex[] vertices, ref Vector3 min, ref Vector3 max)
+    {
+        var minX = new Vector<float>(float.MaxValue);
+        var minY = new Vector<float>(float.MaxValue);
+        var minZ = new Vector<float>(float.MaxValue);
+        var maxX = new Vector<float>(-float.MaxValue);
+        var maxY = new Vector<float>(-float.MaxValue);
+        var maxZ = new Vector<float>(-float.MaxValue);
+
+        int vecSize = Vector<float>.Count;
+        int len = vertices.Length;
+        int i = 0;
+
+        float* xBuf = stackalloc float[vecSize];
+        float* yBuf = stackalloc float[vecSize];
+        float* zBuf = stackalloc float[vecSize];
+
+        fixed (Model3DVertex* p = vertices)
+        {
+            byte* ptr = (byte*)p;
+            int stride = sizeof(Model3DVertex);
+
+            for (; i <= len - vecSize; i += vecSize)
+            {
+                for (int j = 0; j < vecSize; j++)
+                {
+                    var v = *(Model3DVertex*)(ptr + (i + j) * stride);
+                    xBuf[j] = v.Position.X;
+                    yBuf[j] = v.Position.Y;
+                    zBuf[j] = v.Position.Z;
+                }
+
+                var vx = new Vector<float>(new Span<float>(xBuf, vecSize));
+                var vy = new Vector<float>(new Span<float>(yBuf, vecSize));
+                var vz = new Vector<float>(new Span<float>(zBuf, vecSize));
+
+                minX = Vector.Min(minX, vx);
+                minY = Vector.Min(minY, vy);
+                minZ = Vector.Min(minZ, vz);
+                maxX = Vector.Max(maxX, vx);
+                maxY = Vector.Max(maxY, vy);
+                maxZ = Vector.Max(maxZ, vz);
+            }
+        }
+
+        for (int k = 0; k < vecSize; k++)
+        {
+            if (minX[k] < min.X) min.X = minX[k];
+            if (minY[k] < min.Y) min.Y = minY[k];
+            if (minZ[k] < min.Z) min.Z = minZ[k];
+            if (maxX[k] > max.X) max.X = maxX[k];
+            if (maxY[k] > max.Y) max.Y = maxY[k];
+            if (maxZ[k] > max.Z) max.Z = maxZ[k];
+        }
+
+        for (; i < len; i++)
+        {
+            var p = vertices[i].Position;
+            min = Vector3.Min(min, p);
+            max = Vector3.Max(max, p);
+        }
+    }
+}
