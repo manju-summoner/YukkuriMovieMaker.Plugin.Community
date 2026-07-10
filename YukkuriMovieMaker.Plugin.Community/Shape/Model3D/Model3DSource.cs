@@ -62,7 +62,16 @@ internal sealed class Model3DSource : IShapeSource
         _height = height;
         _state = state;
 
-        var newCommandList = BuildCommandList(file, width, height, state);
+        ID2D1CommandList newCommandList;
+        try
+        {
+            newCommandList = BuildCommandList(file, width, height, state);
+        }
+        catch
+        {
+            return;
+        }
+
         var oldCommandList = _commandList;
         _commandList = newCommandList;
         oldCommandList.Dispose();
@@ -147,17 +156,37 @@ internal sealed class Model3DSource : IShapeSource
     private static ID2D1CommandList CreateEmptyCommandList(ID2D1DeviceContext deviceContext)
     {
         var commandList = deviceContext.CreateCommandList();
-        deviceContext.Target = commandList;
-        deviceContext.BeginDraw();
-        deviceContext.Clear(null);
+        try
+        {
+            deviceContext.Target = commandList;
+            deviceContext.BeginDraw();
+            try
+            {
+                deviceContext.Clear(null);
 
-        using (var transparent = deviceContext.CreateSolidColorBrush(new Vortice.Mathematics.Color4(0, 0, 0, 0)))
-            deviceContext.DrawRectangle(new Vortice.RawRectF(0, 0, 1, 1), transparent);
+                using var transparent = deviceContext.CreateSolidColorBrush(new Vortice.Mathematics.Color4(0, 0, 0, 0));
+                deviceContext.DrawRectangle(new Vortice.RawRectF(0, 0, 1, 1), transparent);
+            }
+            finally
+            {
+                try
+                {
+                    deviceContext.EndDraw();
+                }
+                finally
+                {
+                    deviceContext.Target = null;
+                }
+            }
 
-        deviceContext.EndDraw();
-        deviceContext.Target = null;
-        commandList.Close();
-        return commandList;
+            commandList.Close();
+            return commandList;
+        }
+        catch
+        {
+            commandList.Dispose();
+            throw;
+        }
     }
 
     private static ID2D1CommandList CreateCenteredBitmapCommandList(ID2D1DeviceContext deviceContext, ID2D1Bitmap1 bitmap)
@@ -165,16 +194,37 @@ internal sealed class Model3DSource : IShapeSource
         var size = bitmap.Size;
 
         var commandList = deviceContext.CreateCommandList();
-        deviceContext.Target = commandList;
-        deviceContext.BeginDraw();
-        deviceContext.Clear(null);
-        deviceContext.Transform = Matrix3x2.CreateTranslation(-size.Width / 2f, -size.Height / 2f);
-        deviceContext.DrawImage(bitmap);
-        deviceContext.Transform = Matrix3x2.Identity;
-        deviceContext.EndDraw();
-        deviceContext.Target = null;
-        commandList.Close();
-        return commandList;
+        try
+        {
+            deviceContext.Target = commandList;
+            deviceContext.BeginDraw();
+            try
+            {
+                deviceContext.Clear(null);
+                deviceContext.Transform = Matrix3x2.CreateTranslation(-size.Width / 2f, -size.Height / 2f);
+                deviceContext.DrawImage(bitmap);
+            }
+            finally
+            {
+                deviceContext.Transform = Matrix3x2.Identity;
+                try
+                {
+                    deviceContext.EndDraw();
+                }
+                finally
+                {
+                    deviceContext.Target = null;
+                }
+            }
+
+            commandList.Close();
+            return commandList;
+        }
+        catch
+        {
+            commandList.Dispose();
+            throw;
+        }
     }
 
     public void Dispose()
