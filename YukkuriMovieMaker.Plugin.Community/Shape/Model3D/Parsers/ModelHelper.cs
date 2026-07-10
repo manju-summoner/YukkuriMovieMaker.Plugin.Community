@@ -193,6 +193,53 @@ internal static class ModelHelper
         }
     }
 
+    public static void CalculateMissingNormals(Model3DVertex[] vertices, int[] indices)
+    {
+        uint vertexCount = (uint)vertices.Length;
+        var missing = new bool[vertices.Length];
+        bool anyMissing = false;
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            if (vertices[i].Normal == Vector3.Zero)
+            {
+                missing[i] = true;
+                anyMissing = true;
+            }
+        }
+
+        if (!anyMissing) return;
+
+        for (int i = 0; i + 2 < indices.Length; i += 3)
+        {
+            int i1 = indices[i];
+            int i2 = indices[i + 1];
+            int i3 = indices[i + 2];
+            if ((uint)i1 >= vertexCount || (uint)i2 >= vertexCount || (uint)i3 >= vertexCount) continue;
+            if (!missing[i1] && !missing[i2] && !missing[i3]) continue;
+
+            var normal = Vector3.Cross(
+                vertices[i2].Position - vertices[i1].Position,
+                vertices[i3].Position - vertices[i1].Position);
+
+            if (missing[i1]) vertices[i1].Normal += normal;
+            if (missing[i2]) vertices[i2].Normal += normal;
+            if (missing[i3]) vertices[i3].Normal += normal;
+        }
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            if (!missing[i]) continue;
+
+            var n = vertices[i].Normal;
+            float lenSq = n.LengthSquared();
+            if (lenSq > 1e-6f)
+            {
+                vertices[i].Normal = n / MathF.Sqrt(lenSq);
+            }
+        }
+    }
+
     public static void CalculateBounds(Model3DVertex[] vertices, out Vector3 center, out float scale)
     {
         if (vertices.Length == 0)

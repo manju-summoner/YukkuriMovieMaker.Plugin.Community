@@ -167,9 +167,10 @@ internal sealed class WavefrontObjParser : IModelParser
             accessor.SafeMemoryMappedViewHandle.ReleasePointer();
         }
 
-        if (totalVn == 0 && indices.Length > 0)
+        if (indices.Length > 0)
         {
-            ModelHelper.CalculateNormals(vertices, indices);
+            if (totalVn == 0) ModelHelper.CalculateNormals(vertices, indices);
+            else ModelHelper.CalculateMissingNormals(vertices, indices);
         }
 
         var materialLib = new Dictionary<string, MaterialData>(StringComparer.OrdinalIgnoreCase);
