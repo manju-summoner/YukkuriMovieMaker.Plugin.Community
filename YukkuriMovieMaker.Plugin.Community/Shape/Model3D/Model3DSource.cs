@@ -1,3 +1,4 @@
+using System.IO;
 using System.Numerics;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
@@ -126,7 +127,7 @@ internal sealed class Model3DSource : IShapeSource
 
     private GpuResourceCacheItem? AcquireGpuResource(string file)
     {
-        string key = file ?? string.Empty;
+        string key = CreateGpuResourceKey(file);
         if (_gpuResourceKey == key) return _gpuResource;
 
         _gpuResource?.Dispose();
@@ -137,7 +138,7 @@ internal sealed class Model3DSource : IShapeSource
 
         try
         {
-            var model = Model3DLoader.Load(key);
+            var model = Model3DLoader.Load(file);
             if (model.Vertices.Length == 0) return null;
 
             _gpuResource = _gpuResourceFactory.Create(_devices.D3D.Device, model);
@@ -148,6 +149,22 @@ internal sealed class Model3DSource : IShapeSource
         }
 
         return _gpuResource;
+    }
+
+    private static string CreateGpuResourceKey(string file)
+    {
+        if (string.IsNullOrEmpty(file)) return string.Empty;
+
+        try
+        {
+            var info = new FileInfo(file);
+            long stamp = info.Exists ? info.LastWriteTimeUtc.Ticks : 0;
+            return $"{file}|{stamp}";
+        }
+        catch
+        {
+            return $"{file}|0";
+        }
     }
 
     private static int ClampRenderSize(int size)
