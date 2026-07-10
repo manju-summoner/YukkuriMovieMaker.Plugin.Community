@@ -12,7 +12,6 @@ internal sealed class GpuResourceCacheItem : IDisposable
 
     public ID3D11Buffer VertexBuffer { get; }
     public ID3D11Buffer IndexBuffer { get; }
-    public int IndexCount { get; }
     public Model3DPart[] Parts { get; }
     public ID3D11ShaderResourceView?[] PartTextures => _partTextures!;
     public ID3D11ShaderResourceView?[] PartMetallicRoughnessTextures => _partMetallicRoughnessTextures!;
@@ -23,7 +22,6 @@ internal sealed class GpuResourceCacheItem : IDisposable
     public GpuResourceCacheItem(
         ID3D11Buffer vertexBuffer,
         ID3D11Buffer indexBuffer,
-        int indexCount,
         Model3DPart[] parts,
         ID3D11ShaderResourceView?[] textures,
         ID3D11ShaderResourceView?[] metallicRoughnessTextures,
@@ -33,7 +31,6 @@ internal sealed class GpuResourceCacheItem : IDisposable
     {
         VertexBuffer = vertexBuffer ?? throw new ArgumentNullException(nameof(vertexBuffer));
         IndexBuffer = indexBuffer ?? throw new ArgumentNullException(nameof(indexBuffer));
-        IndexCount = indexCount;
         Parts = parts ?? throw new ArgumentNullException(nameof(parts));
         _partTextures = textures ?? throw new ArgumentNullException(nameof(textures));
         _partMetallicRoughnessTextures = metallicRoughnessTextures ?? throw new ArgumentNullException(nameof(metallicRoughnessTextures));

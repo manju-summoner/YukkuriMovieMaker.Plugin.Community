@@ -59,7 +59,6 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
             var item = new GpuResourceCacheItem(
                 vertexBuffer,
                 indexBuffer,
-                model.Indices.Length,
                 parts,
                 textures,
                 metallicRoughnessTextures,
