@@ -350,6 +350,14 @@ internal sealed class GlbParser : IModelParser
                 if (IsSparseAccessor(root, posAccIdx) || IsSparseAccessor(root, normAccIdx) || IsSparseAccessor(root, uvAccIdx)
                     || IsSparseAccessor(root, colAccIdx) || IsSparseAccessor(root, indAccIdx)) continue;
 
+                int posAccCount = GetAccessorCount(root, posAccIdx);
+                if (posAccCount <= 0) continue;
+                if (posAccCount > limits.MaxVertices - allVertices.Count) return;
+
+                int srcAccCount = indAccIdx >= 0 ? GetAccessorCount(root, indAccIdx) : posAccCount;
+                int expandedAccCount = mode == ModeTriangles ? srcAccCount : Math.Max(0, (srcAccCount - 2) * 3);
+                if (expandedAccCount > limits.MaxIndices - allIndices.Count) return;
+
                 var positions = ReadVector3Array(root, buffers, posAccIdx);
                 if (positions == null || positions.Length == 0) continue;
 
@@ -697,6 +705,12 @@ internal sealed class GlbParser : IModelParser
         if (index < 0) return false;
         if (!root.TryGetProperty("accessors", out var accessors) || index >= accessors.GetArrayLength()) return false;
         return accessors[index].TryGetProperty("sparse", out _);
+    }
+
+    private static int GetAccessorCount(JsonElement root, int index)
+    {
+        if (!root.TryGetProperty("accessors", out var accessors) || index < 0 || index >= accessors.GetArrayLength()) return 0;
+        return accessors[index].TryGetProperty("count", out var countProp) ? countProp.GetInt32() : 0;
     }
 
     private static bool GetAccessorInfo(JsonElement root, int index, out int buffView, out int offset, out int count, out int compType)
