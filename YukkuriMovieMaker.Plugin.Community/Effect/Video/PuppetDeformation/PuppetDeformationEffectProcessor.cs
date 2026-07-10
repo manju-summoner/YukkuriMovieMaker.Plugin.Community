@@ -20,6 +20,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     internal sealed class PuppetDeformationEffectProcessor(IGraphicsDevicesAndContext devices, PuppetDeformationEffect item) : VideoEffectProcessorBase(devices)
     {
+        //反復回数は固定（品質は支持拘束が担保する。反復を増やしてもドラッグ操作が重くなるだけで品質は変わらない）
         const int ArapIterations = 6;
         const float ArapMinSpacing = 8f;
         //ボーンジョイント由来の拘束点を示すPinSample.PinIndex（item.Pinsに対応しない）
