@@ -141,7 +141,10 @@ float4 main(
 		float roughness = clamp(sqrt(2.0 / (max(exponent, 1.0) + 2.0)), 0.04, 1.0);
 		float distribution = DistributionGgx(noH, roughness);
 		float geometry = GeometrySchlickGgx(noV, roughness) * GeometrySchlickGgx(noL, roughness);
-		float fresnel = 0.04 + 0.96 * pow(1.0 - voH, 5.0);
+		// このエフェクトではreflectionConstantが見た目上の反射強度を表す。
+		// 物理F0(0.04)をそのまま掛けると既定値でほぼ透明になるため、
+		// Fresnelは正面1倍～輪郭4倍の形状係数として正規化する。
+		float fresnel = lerp(1.0, 4.0, pow(1.0 - voH, 5.0));
 		intensity = halfLengthSquared > 0.000001
 			? reflectionConstant * distribution * geometry * fresnel * noL / max(4.0 * noV * noL, 0.0001)
 			: 0.0;
