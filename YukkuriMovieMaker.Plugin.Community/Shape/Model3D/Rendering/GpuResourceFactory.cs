@@ -15,6 +15,12 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
         ArgumentNullException.ThrowIfNull(device);
         if (model.Vertices.Length == 0 || model.Indices.Length == 0) return null;
 
+        foreach (var part in model.Parts)
+        {
+            if (part.IndexOffset < 0 || part.IndexCount < 0
+                || (long)part.IndexOffset + part.IndexCount > model.Indices.Length) return null;
+        }
+
         ID3D11Buffer? vertexBuffer = null;
         ID3D11Buffer? indexBuffer = null;
         ID3D11ShaderResourceView?[]? textures = null;
