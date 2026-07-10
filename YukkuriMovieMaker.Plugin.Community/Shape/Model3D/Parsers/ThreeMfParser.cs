@@ -8,6 +8,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
 
 internal sealed class ThreeMfParser : IModelParser
 {
+    private const int MaxComponentDepth = 32;
+
     private static readonly string[] FileExtensions = [".3mf"];
 
     public string Id => "ThreeMf";
@@ -25,15 +27,17 @@ internal sealed class ThreeMfParser : IModelParser
             using var stream = modelEntry.Open();
             using var reader = XmlReader.Create(stream);
 
-            var verts = new List<Model3DVertex>();
+            var objects = new Dictionary<string, ObjectResource>();
+            var orderedObjects = new List<ObjectResource>();
+            var buildItems = new List<(string ObjectId, Matrix4x4 Transform)>();
             var colorMap = new Dictionary<string, Vector4>();
-            var groupedIndices = new Dictionary<Vector4, List<int>>();
 
             string currentResourcePid = "";
             int resourceIndex = 0;
+            ObjectResource? currentObject = null;
             string objectPid = "";
             string objectP1 = "";
-            int vertexOffset = 0;
+            bool inBuild = false;
 
             while (reader.Read())
             {
@@ -58,76 +62,128 @@ internal sealed class ThreeMfParser : IModelParser
                     }
                     else if (reader.LocalName == "object")
                     {
+                        currentObject = new ObjectResource();
+                        orderedObjects.Add(currentObject);
+                        string id = reader.GetAttribute("id") ?? "";
+                        if (id.Length > 0) objects[id] = currentObject;
                         objectPid = reader.GetAttribute("pid") ?? "";
                         objectP1 = reader.GetAttribute("p1") ?? "";
                     }
-                    else if (reader.LocalName == "mesh")
+                    else if (reader.LocalName == "component")
                     {
-                        vertexOffset = verts.Count;
+                        if (currentObject != null)
+                        {
+                            string objectId = reader.GetAttribute("objectid") ?? "";
+                            if (objectId.Length > 0)
+                            {
+                                currentObject.Components.Add((objectId, ParseTransform(reader.GetAttribute("transform"))));
+                            }
+                        }
                     }
                     else if (reader.LocalName == "vertex")
                     {
-                        float x = float.Parse(reader.GetAttribute("x") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture);
-                        float y = float.Parse(reader.GetAttribute("y") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture);
-                        float z = float.Parse(reader.GetAttribute("z") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture);
-                        verts.Add(new Model3DVertex { Position = new Vector3(x, z, -y), Color = Vector4.One });
+                        if (currentObject != null)
+                        {
+                            float x = float.Parse(reader.GetAttribute("x") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture);
+                            float y = float.Parse(reader.GetAttribute("y") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture);
+                            float z = float.Parse(reader.GetAttribute("z") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture);
+                            currentObject.Vertices.Add(new Vector3(x, y, z));
+                        }
                     }
                     else if (reader.LocalName == "triangle")
                     {
-                        int v1 = int.Parse(reader.GetAttribute("v1") ?? "0", NumberStyles.Integer, CultureInfo.InvariantCulture) + vertexOffset;
-                        int v2 = int.Parse(reader.GetAttribute("v2") ?? "0", NumberStyles.Integer, CultureInfo.InvariantCulture) + vertexOffset;
-                        int v3 = int.Parse(reader.GetAttribute("v3") ?? "0", NumberStyles.Integer, CultureInfo.InvariantCulture) + vertexOffset;
-
-                        string? pid = reader.GetAttribute("pid") ?? objectPid;
-                        string? p1 = reader.GetAttribute("p1") ?? (string.IsNullOrEmpty(reader.GetAttribute("pid")) ? objectP1 : "");
-
-                        Vector4 triColor = Vector4.One;
-                        if (!string.IsNullOrEmpty(pid) && !string.IsNullOrEmpty(p1))
+                        if (currentObject != null)
                         {
-                            if (colorMap.TryGetValue(pid + ":" + p1, out var col)) triColor = col;
+                            int v1 = int.Parse(reader.GetAttribute("v1") ?? "0", NumberStyles.Integer, CultureInfo.InvariantCulture);
+                            int v2 = int.Parse(reader.GetAttribute("v2") ?? "0", NumberStyles.Integer, CultureInfo.InvariantCulture);
+                            int v3 = int.Parse(reader.GetAttribute("v3") ?? "0", NumberStyles.Integer, CultureInfo.InvariantCulture);
+
+                            string? pid = reader.GetAttribute("pid") ?? objectPid;
+                            string? p1 = reader.GetAttribute("p1") ?? (string.IsNullOrEmpty(reader.GetAttribute("pid")) ? objectP1 : "");
+
+                            Vector4 triColor = Vector4.One;
+                            if (!string.IsNullOrEmpty(pid) && !string.IsNullOrEmpty(p1))
+                            {
+                                if (colorMap.TryGetValue(pid + ":" + p1, out var col)) triColor = col;
+                            }
+
+                            currentObject.Triangles.Add(new Triangle(v1, v2, v3, triColor));
                         }
-
-                        if (!groupedIndices.ContainsKey(triColor)) groupedIndices[triColor] = new List<int>();
-                        groupedIndices[triColor].Add(v1);
-                        groupedIndices[triColor].Add(v2);
-                        groupedIndices[triColor].Add(v3);
-
-                        if (v1 < verts.Count) { var v = verts[v1]; v.Color = triColor; verts[v1] = v; }
-                        if (v2 < verts.Count) { var v = verts[v2]; v.Color = triColor; verts[v2] = v; }
-                        if (v3 < verts.Count) { var v = verts[v3]; v.Color = triColor; verts[v3] = v; }
+                    }
+                    else if (reader.LocalName == "build")
+                    {
+                        inBuild = true;
+                    }
+                    else if (reader.LocalName == "item")
+                    {
+                        if (inBuild)
+                        {
+                            string objectId = reader.GetAttribute("objectid") ?? "";
+                            if (objectId.Length > 0)
+                            {
+                                buildItems.Add((objectId, ParseTransform(reader.GetAttribute("transform"))));
+                            }
+                        }
                     }
                 }
                 else if (reader.NodeType == XmlNodeType.EndElement)
                 {
-                    if (reader.LocalName == "object") { objectPid = ""; objectP1 = ""; }
+                    if (reader.LocalName == "object")
+                    {
+                        currentObject = null;
+                        objectPid = "";
+                        objectP1 = "";
+                    }
+                    else if (reader.LocalName == "build")
+                    {
+                        inBuild = false;
+                    }
                 }
             }
 
-            var vArray = verts.ToArray();
-            var allIndices = new List<int>();
-            var parts = new List<Model3DPart>();
-            ModelHelper.CalculateBounds(vArray, out Vector3 c, out float s);
+            var emitter = new SceneEmitter(objects);
 
-            foreach (var group in groupedIndices)
+            if (buildItems.Count > 0)
             {
-                parts.Add(new Model3DPart
+                foreach (var (objectId, transform) in buildItems)
                 {
-                    IndexOffset = allIndices.Count,
-                    IndexCount = group.Value.Count,
-                    BaseColor = group.Key
-                });
-                allIndices.AddRange(group.Value);
+                    emitter.EmitObject(objectId, transform);
+                }
+            }
+            else
+            {
+                foreach (var obj in orderedObjects)
+                {
+                    emitter.EmitResource(obj, Matrix4x4.Identity, [], 0);
+                }
             }
 
-            var iArray = allIndices.ToArray();
-            ModelHelper.CalculateNormals(vArray, iArray);
-
-            return new Model3DData { Vertices = vArray, Indices = iArray, Parts = parts, ModelCenter = c, ModelScale = s };
+            return emitter.Build();
         }
         catch
         {
             return new Model3DData();
         }
+    }
+
+    private static Matrix4x4 ParseTransform(string? text)
+    {
+        if (string.IsNullOrEmpty(text)) return Matrix4x4.Identity;
+
+        var parts = text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 12) return Matrix4x4.Identity;
+
+        Span<float> m = stackalloc float[12];
+        for (int i = 0; i < 12; i++)
+        {
+            if (!float.TryParse(parts[i], NumberStyles.Float, CultureInfo.InvariantCulture, out m[i])) return Matrix4x4.Identity;
+        }
+
+        return new Matrix4x4(
+            m[0], m[1], m[2], 0,
+            m[3], m[4], m[5], 0,
+            m[6], m[7], m[8], 0,
+            m[9], m[10], m[11], 1);
     }
 
     private static bool ParseColor(string hex, out Vector4 color)
@@ -158,5 +214,109 @@ internal sealed class ThreeMfParser : IModelParser
         }
         catch { }
         return false;
+    }
+
+    private readonly record struct Triangle(int V1, int V2, int V3, Vector4 Color);
+
+    private sealed class ObjectResource
+    {
+        public List<Vector3> Vertices { get; } = [];
+        public List<Triangle> Triangles { get; } = [];
+        public List<(string ObjectId, Matrix4x4 Transform)> Components { get; } = [];
+    }
+
+    private sealed class SceneEmitter(Dictionary<string, ObjectResource> objects)
+    {
+        private readonly List<Model3DVertex> _vertices = [];
+        private readonly Dictionary<Vector4, List<int>> _groupedIndices = [];
+
+        public void EmitObject(string objectId, Matrix4x4 transform)
+        {
+            if (objects.TryGetValue(objectId, out var obj))
+            {
+                EmitResource(obj, transform, [], 0);
+            }
+        }
+
+        public void EmitResource(ObjectResource obj, Matrix4x4 transform, HashSet<ObjectResource> stack, int depth)
+        {
+            if (depth > MaxComponentDepth || !stack.Add(obj)) return;
+
+            var limits = Model3DSettings.Default;
+
+            if (obj.Triangles.Count > 0 && obj.Vertices.Count <= limits.MaxVertices - _vertices.Count)
+            {
+                int offset = _vertices.Count;
+
+                foreach (var vertex in obj.Vertices)
+                {
+                    var p = Vector3.Transform(vertex, transform);
+                    _vertices.Add(new Model3DVertex { Position = new Vector3(p.X, p.Z, -p.Y), Color = Vector4.One });
+                }
+
+                foreach (var tri in obj.Triangles)
+                {
+                    int v1 = tri.V1 + offset;
+                    int v2 = tri.V2 + offset;
+                    int v3 = tri.V3 + offset;
+                    if (tri.V1 < 0 || tri.V2 < 0 || tri.V3 < 0) continue;
+                    if (v1 >= _vertices.Count || v2 >= _vertices.Count || v3 >= _vertices.Count) continue;
+
+                    if (!_groupedIndices.TryGetValue(tri.Color, out var group))
+                    {
+                        group = [];
+                        _groupedIndices[tri.Color] = group;
+                    }
+                    group.Add(v1);
+                    group.Add(v2);
+                    group.Add(v3);
+
+                    SetVertexColor(v1, tri.Color);
+                    SetVertexColor(v2, tri.Color);
+                    SetVertexColor(v3, tri.Color);
+                }
+            }
+
+            foreach (var (childId, childTransform) in obj.Components)
+            {
+                if (objects.TryGetValue(childId, out var child))
+                {
+                    EmitResource(child, childTransform * transform, stack, depth + 1);
+                }
+            }
+
+            stack.Remove(obj);
+        }
+
+        private void SetVertexColor(int index, Vector4 color)
+        {
+            var v = _vertices[index];
+            v.Color = color;
+            _vertices[index] = v;
+        }
+
+        public Model3DData Build()
+        {
+            var vArray = _vertices.ToArray();
+            var allIndices = new List<int>();
+            var parts = new List<Model3DPart>();
+            ModelHelper.CalculateBounds(vArray, out Vector3 c, out float s);
+
+            foreach (var group in _groupedIndices)
+            {
+                parts.Add(new Model3DPart
+                {
+                    IndexOffset = allIndices.Count,
+                    IndexCount = group.Value.Count,
+                    BaseColor = group.Key
+                });
+                allIndices.AddRange(group.Value);
+            }
+
+            var iArray = allIndices.ToArray();
+            ModelHelper.CalculateNormals(vArray, iArray);
+
+            return new Model3DData { Vertices = vArray, Indices = iArray, Parts = parts, ModelCenter = c, ModelScale = s };
+        }
     }
 }
