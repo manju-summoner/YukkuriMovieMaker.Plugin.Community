@@ -354,6 +354,9 @@ internal sealed class GlbParser : IModelParser
                 var colors = colAccIdx >= 0 ? ReadVector4Array(root, binData, colAccIdx) : null;
                 var indices = indAccIdx >= 0 ? ReadIntArray(root, binData, indAccIdx) : null;
 
+                int indexAddCount = indices?.Length ?? positions.Length;
+                if (positions.Length > limits.MaxVertices - allVertices.Count || indexAddCount > limits.MaxIndices - allIndices.Count) return;
+
                 int vertexOffset = allVertices.Count;
 
                 for (int i = 0; i < positions.Length; i++)
