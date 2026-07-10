@@ -3,6 +3,8 @@ using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Models;
 
 namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Cache;
 
+internal delegate void CacheChunkWriter(ReadOnlySpan<byte> data);
+
 internal interface IStreamingCacheWriter : IDisposable
 {
     void WriteHeader(CacheHeader header);

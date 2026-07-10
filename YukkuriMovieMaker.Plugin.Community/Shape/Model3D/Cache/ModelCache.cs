@@ -8,6 +8,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Cache;
 internal sealed class ModelCache
 {
     private const string CacheDirName = ".cache";
+    private const int MaxIoChunkBytes = 1 << 30;
 
     public IStreamingCacheWriter CreateStreamingWriter(string path, CacheHeader header)
     {
@@ -84,12 +85,23 @@ internal sealed class ModelCache
     {
         fixed (Model3DVertex* pV = model.Vertices)
         {
-            writer.WriteVertexChunk(new ReadOnlySpan<byte>(pV, model.Vertices.Length * sizeof(Model3DVertex)));
+            WriteChunked((byte*)pV, (long)model.Vertices.Length * sizeof(Model3DVertex), writer.WriteVertexChunk);
         }
 
         fixed (int* pI = model.Indices)
         {
-            writer.WriteIndexChunk(new ReadOnlySpan<byte>(pI, model.Indices.Length * sizeof(int)));
+            WriteChunked((byte*)pI, (long)model.Indices.Length * sizeof(int), writer.WriteIndexChunk);
+        }
+    }
+
+    private static unsafe void WriteChunked(byte* pointer, long length, CacheChunkWriter write)
+    {
+        long written = 0;
+        while (written < length)
+        {
+            int chunk = (int)Math.Min(length - written, MaxIoChunkBytes);
+            write(new ReadOnlySpan<byte>(pointer + written, chunk));
+            written += chunk;
         }
     }
 
@@ -152,12 +164,12 @@ internal sealed class ModelCache
 
         fixed (Model3DVertex* pV = vertices)
         {
-            ReadExact(stream, new Span<byte>(pV, vCount * sizeof(Model3DVertex)));
+            ReadExact(stream, (byte*)pV, (long)vCount * sizeof(Model3DVertex));
         }
 
         fixed (int* pI = indices)
         {
-            ReadExact(stream, new Span<byte>(pI, iCount * sizeof(int)));
+            ReadExact(stream, (byte*)pI, (long)iCount * sizeof(int));
         }
 
         return new Model3DData
@@ -170,17 +182,18 @@ internal sealed class ModelCache
         };
     }
 
-    private static void ReadExact(Stream stream, Span<byte> span)
+    private static unsafe void ReadExact(Stream stream, byte* pointer, long length)
     {
-        int totalRead = 0;
-        while (totalRead < span.Length)
+        long totalRead = 0;
+        while (totalRead < length)
         {
-            int read = stream.Read(span.Slice(totalRead));
+            int chunk = (int)Math.Min(length - totalRead, MaxIoChunkBytes);
+            int read = stream.Read(new Span<byte>(pointer + totalRead, chunk));
             if (read == 0) break;
             totalRead += read;
         }
-        if (totalRead != span.Length)
-            throw new InvalidDataException($"Expected {span.Length} bytes, read {totalRead}");
+        if (totalRead != length)
+            throw new InvalidDataException($"Expected {length} bytes, read {totalRead}");
     }
 
     private sealed class MultiFileStream : Stream
