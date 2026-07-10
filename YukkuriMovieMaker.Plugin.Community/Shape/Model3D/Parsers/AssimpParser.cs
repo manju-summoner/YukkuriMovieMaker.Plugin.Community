@@ -45,7 +45,7 @@ internal sealed class AssimpParser : IModelParser
     ];
 
     public string Id => "Assimp";
-    public int Version => 1;
+    public int Version => 2;
     public IReadOnlyList<string> Extensions => FileExtensions;
 
     public Model3DData Parse(string path)
@@ -98,6 +98,9 @@ internal sealed class AssimpParser : IModelParser
     {
         int vertexOffset = vertices.Count;
         int uvChannel = FindFirstTextureCoordinateChannel(mesh);
+        var normalTransform = Matrix4x4.Invert(transform, out var inverseTransform)
+            ? Matrix4x4.Transpose(inverseTransform)
+            : transform;
 
         for (int i = 0; i < mesh.VertexCount; i++)
         {
@@ -109,7 +112,7 @@ internal sealed class AssimpParser : IModelParser
             vertices.Add(new Model3DVertex
             {
                 Position = Vector3.Transform(new Vector3(rawPosition.X, rawPosition.Y, rawPosition.Z), transform),
-                Normal = Vector3.TransformNormal(new Vector3(rawNormal.X, rawNormal.Y, rawNormal.Z), transform),
+                Normal = Vector3.TransformNormal(new Vector3(rawNormal.X, rawNormal.Y, rawNormal.Z), normalTransform),
                 TexCoord = new Vector2(rawTexCoord.X, rawTexCoord.Y),
                 Color = new Vector4(rawColor.R, rawColor.G, rawColor.B, rawColor.A)
             });

@@ -357,6 +357,10 @@ internal sealed class GlbParser : IModelParser
                 int indexAddCount = indices?.Length ?? positions.Length;
                 if (positions.Length > limits.MaxVertices - allVertices.Count || indexAddCount > limits.MaxIndices - allIndices.Count) return;
 
+                var normalTransform = Matrix4x4.Invert(transform, out var inverseTransform)
+                    ? Matrix4x4.Transpose(inverseTransform)
+                    : transform;
+
                 int vertexOffset = allVertices.Count;
 
                 for (int i = 0; i < positions.Length; i++)
@@ -365,7 +369,7 @@ internal sealed class GlbParser : IModelParser
                     var n = Vector3.Zero;
                     if (normals != null && i < normals.Length)
                     {
-                        n = Vector3.TransformNormal(normals[i], transform);
+                        n = Vector3.TransformNormal(normals[i], normalTransform);
                     }
 
                     var v = new Model3DVertex
