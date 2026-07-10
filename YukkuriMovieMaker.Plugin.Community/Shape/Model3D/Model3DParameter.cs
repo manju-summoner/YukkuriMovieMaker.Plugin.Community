@@ -3,6 +3,7 @@ using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
+using YukkuriMovieMaker.ItemEditor.CustomVisibilityAttributes;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Shape;
 using YukkuriMovieMaker.Project;
@@ -55,6 +56,7 @@ internal sealed class Model3DParameter(SharedDataStore? sharedData) : ShapeParam
 
     [Display(GroupName = nameof(Texts.Group_Placement), Name = nameof(Texts.Fov), ResourceType = typeof(Texts))]
     [AnimationSlider("F0", "°", 1, 179)]
+    [ShowPropertyEditorWhen(nameof(Projection), ProjectionType.Perspective)]
     public Animation Fov { get; } = new(45, 1, 179);
 
     [Display(GroupName = nameof(Texts.Group_Placement), Name = nameof(Texts.Scale), ResourceType = typeof(Texts))]
