@@ -101,13 +101,11 @@ internal sealed class ThreeMfParser : IModelParser
                             string? pid = reader.GetAttribute("pid") ?? objectPid;
                             string? p1 = reader.GetAttribute("p1") ?? (string.IsNullOrEmpty(reader.GetAttribute("pid")) ? objectP1 : "");
 
-                            Vector4 triColor = Vector4.One;
-                            if (!string.IsNullOrEmpty(pid) && !string.IsNullOrEmpty(p1))
-                            {
-                                if (colorMap.TryGetValue(pid + ":" + p1, out var col)) triColor = col;
-                            }
+                            Vector4 c1 = ResolveColor(colorMap, pid, p1, Vector4.One);
+                            Vector4 c2 = ResolveColor(colorMap, pid, reader.GetAttribute("p2"), c1);
+                            Vector4 c3 = ResolveColor(colorMap, pid, reader.GetAttribute("p3"), c1);
 
-                            currentObject.Triangles.Add(new Triangle(v1, v2, v3, triColor));
+                            currentObject.Triangles.Add(new Triangle(v1, v2, v3, c1, c2, c3));
                         }
                     }
                     else if (reader.LocalName == "build")
@@ -216,7 +214,13 @@ internal sealed class ThreeMfParser : IModelParser
         return false;
     }
 
-    private readonly record struct Triangle(int V1, int V2, int V3, Vector4 Color);
+    private static Vector4 ResolveColor(Dictionary<string, Vector4> colorMap, string? pid, string? index, Vector4 fallback)
+    {
+        if (string.IsNullOrEmpty(pid) || string.IsNullOrEmpty(index)) return fallback;
+        return colorMap.TryGetValue(pid + ":" + index, out var color) ? color : fallback;
+    }
+
+    private readonly record struct Triangle(int V1, int V2, int V3, Vector4 Color1, Vector4 Color2, Vector4 Color3);
 
     private sealed class ObjectResource
     {
@@ -262,18 +266,18 @@ internal sealed class ThreeMfParser : IModelParser
                     if (tri.V1 < 0 || tri.V2 < 0 || tri.V3 < 0) continue;
                     if (v1 >= _vertices.Count || v2 >= _vertices.Count || v3 >= _vertices.Count) continue;
 
-                    if (!_groupedIndices.TryGetValue(tri.Color, out var group))
+                    if (!_groupedIndices.TryGetValue(tri.Color1, out var group))
                     {
                         group = [];
-                        _groupedIndices[tri.Color] = group;
+                        _groupedIndices[tri.Color1] = group;
                     }
                     group.Add(v1);
                     group.Add(v2);
                     group.Add(v3);
 
-                    SetVertexColor(v1, tri.Color);
-                    SetVertexColor(v2, tri.Color);
-                    SetVertexColor(v3, tri.Color);
+                    SetVertexColor(v1, tri.Color1);
+                    SetVertexColor(v2, tri.Color2);
+                    SetVertexColor(v3, tri.Color3);
                 }
             }
 
