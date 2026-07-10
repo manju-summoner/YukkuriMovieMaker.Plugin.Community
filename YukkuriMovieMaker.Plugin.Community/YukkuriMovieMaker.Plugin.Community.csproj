@@ -6,6 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>Debug;Release;ReleaseLite;DebugLite</Configurations>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='ReleaseLite'">
+    <DefineConstants>$(DefineConstants);RELEASE;LITE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='DebugLite'">
+    <DefineConstants>$(DefineConstants);DEBUG;LITE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='ReleaseLite' OR '$(Configuration)'=='Release'">
     <!--Pdb内にソースコードのフルパスを含めない-->
