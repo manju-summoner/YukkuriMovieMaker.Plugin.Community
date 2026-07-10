@@ -34,8 +34,8 @@ internal sealed class TgaTextureLoader : ITextureLoader
         byte colorMapEntrySize = br.ReadByte();
         br.ReadInt16();
         br.ReadInt16();
-        short width = br.ReadInt16();
-        short height = br.ReadInt16();
+        int width = br.ReadUInt16();
+        int height = br.ReadUInt16();
         byte pixelDepth = br.ReadByte();
         byte imageDescriptor = br.ReadByte();
 
@@ -49,9 +49,14 @@ internal sealed class TgaTextureLoader : ITextureLoader
             throw new NotSupportedException($"TGA PixelDepth {pixelDepth} not supported");
         }
 
-        if (width <= 0 || height <= 0)
+        if (width == 0 || height == 0)
         {
             throw new InvalidDataException($"Invalid TGA dimensions: {width}x{height}");
+        }
+
+        if ((long)width * height > 1024L * 1024 * 256)
+        {
+            throw new InvalidOperationException("Image dimensions too large");
         }
 
         if (idLength > 0) br.ReadBytes(idLength);
