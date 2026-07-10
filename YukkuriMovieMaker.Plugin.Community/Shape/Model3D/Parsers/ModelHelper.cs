@@ -15,10 +15,12 @@ internal static class ModelHelper
     {
         try
         {
-            string directory = Path.Combine(Path.GetTempPath(), EmbeddedTextureDirectoryName, ModelCache.ComputePathHash(modelPath));
+            string directory = Path.GetFullPath(Path.Combine(Path.GetTempPath(), EmbeddedTextureDirectoryName, ModelCache.ComputePathHash(modelPath)));
             Directory.CreateDirectory(directory);
 
-            string filePath = Path.Combine(directory, index + extension);
+            string filePath = Path.GetFullPath(Path.Combine(directory, index + extension));
+            if (!filePath.StartsWith(directory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) return string.Empty;
+
             File.WriteAllBytes(filePath, data);
             return filePath;
         }
