@@ -192,6 +192,7 @@ internal sealed class WavefrontObjParser : IModelParser
         int eventPtr = 0;
 
         string lastKey = string.Empty;
+        string lastMaterial = currentMat;
         int startIndex = 0;
 
         for (int f = 0; f < totalF; f++)
@@ -206,23 +207,28 @@ internal sealed class WavefrontObjParser : IModelParser
             }
 
             string key = $"{currentObj}|{currentGrp}|{currentMat}";
-            if (f == 0) lastKey = key;
+            if (f == 0)
+            {
+                lastKey = key;
+                lastMaterial = currentMat;
+            }
 
             if (key != lastKey)
             {
                 if (f > startIndex)
                 {
-                    AddPart(parts, materialLib, lastKey, startIndex, f);
+                    AddPart(parts, materialLib, lastMaterial, startIndex, f);
                 }
 
                 startIndex = f;
                 lastKey = key;
+                lastMaterial = currentMat;
             }
         }
 
         if (totalF > startIndex)
         {
-            AddPart(parts, materialLib, lastKey, startIndex, totalF);
+            AddPart(parts, materialLib, lastMaterial, startIndex, totalF);
         }
 
         ModelHelper.CalculateBounds(vertices, out Vector3 center, out float scale);
@@ -237,10 +243,9 @@ internal sealed class WavefrontObjParser : IModelParser
         };
     }
 
-    private static void AddPart(List<Model3DPart> parts, Dictionary<string, MaterialData> materialLib, string key, int startIndex, int endFace)
+    private static void AddPart(List<Model3DPart> parts, Dictionary<string, MaterialData> materialLib, string materialName, int startIndex, int endFace)
     {
-        var matName = key.Split('|')[2];
-        var m = materialLib.TryGetValue(matName, out var md) ? md : new MaterialData { DiffuseColor = Vector4.One };
+        var m = materialLib.TryGetValue(materialName, out var md) ? md : new MaterialData { DiffuseColor = Vector4.One };
 
         parts.Add(new Model3DPart
         {
