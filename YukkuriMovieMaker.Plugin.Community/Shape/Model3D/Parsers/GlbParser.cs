@@ -8,6 +8,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
 
 internal sealed class GlbParser : IModelParser
 {
+    private const uint GlbMagic = 0x46546C67;
+    private const uint JsonChunkType = 0x4E4F534A;
+    private const uint BinChunkType = 0x004E4942;
+    private const int ComponentTypeUByte = 5121;
+    private const int ComponentTypeUShort = 5123;
+    private const int ComponentTypeUInt = 5125;
+    private const int ComponentTypeFloat = 5126;
+
     private static readonly string[] FileExtensions = [".glb", ".gltf"];
 
     public string Id => "Glb";
@@ -27,7 +35,7 @@ internal sealed class GlbParser : IModelParser
             using var br = new BinaryReader(fs);
 
             var magic = br.ReadUInt32();
-            if (magic != 0x46546C67)
+            if (magic != GlbMagic)
             {
                 return new Model3DData();
             }
@@ -39,7 +47,7 @@ internal sealed class GlbParser : IModelParser
             var chunkLength = br.ReadInt32();
             var chunkType = br.ReadUInt32();
 
-            if (chunkType != 0x4E4F534A) return new Model3DData();
+            if (chunkType != JsonChunkType) return new Model3DData();
             if (chunkLength < 0 || chunkLength > fs.Length - fs.Position) return new Model3DData();
             var jsonBytes = br.ReadBytes(chunkLength);
             jsonStr = Encoding.UTF8.GetString(jsonBytes);
@@ -48,7 +56,7 @@ internal sealed class GlbParser : IModelParser
             {
                 var binLength = br.ReadInt32();
                 var binType = br.ReadUInt32();
-                if (binType == 0x004E4942 && binLength >= 0 && binLength <= fs.Length - fs.Position)
+                if (binType == BinChunkType && binLength >= 0 && binLength <= fs.Length - fs.Position)
                 {
                     binData = br.ReadBytes(binLength);
                 }
@@ -175,17 +183,19 @@ internal sealed class GlbParser : IModelParser
                 }
             }
 
+            var context = new GlbContext(root, binData, nodes, materials, images, textures, allVertices, allIndices, parts);
+
             if (sceneNodes.Count == 0 && meshes.ValueKind == JsonValueKind.Array)
             {
                 int meshCount = meshes.GetArrayLength();
                 for (int i = 0; i < meshCount; i++)
                 {
-                    ProcessMesh(root, binData, i, Matrix4x4.Identity, allVertices, allIndices, parts, materials, images, textures);
+                    ProcessMesh(context, i, Matrix4x4.Identity);
                 }
             }
             else
             {
-                TraverseNodes(root, binData, sceneNodes, allVertices, allIndices, parts, nodes, materials, images, textures);
+                TraverseNodes(context, sceneNodes);
             }
         }
         catch
@@ -223,8 +233,9 @@ internal sealed class GlbParser : IModelParser
         };
     }
 
-    private static void TraverseNodes(JsonElement root, byte[]? binData, List<int> rootNodes, List<Model3DVertex> vertices, List<int> indices, List<Model3DPart> parts, JsonElement nodes, JsonElement materials, List<string> images, List<int> textures)
+    private static void TraverseNodes(GlbContext context, List<int> rootNodes)
     {
+        var nodes = context.Nodes;
         if (nodes.ValueKind != JsonValueKind.Array) return;
 
         int nodeCount = nodes.GetArrayLength();
@@ -246,7 +257,7 @@ internal sealed class GlbParser : IModelParser
 
             if (node.TryGetProperty("mesh", out var meshIdxProp))
             {
-                ProcessMesh(root, binData, meshIdxProp.GetInt32(), worldTransform, vertices, indices, parts, materials, images, textures);
+                ProcessMesh(context, meshIdxProp.GetInt32(), worldTransform);
             }
 
             if (node.TryGetProperty("children", out var childrenProp) && childrenProp.ValueKind == JsonValueKind.Array)
@@ -294,8 +305,9 @@ internal sealed class GlbParser : IModelParser
         return Matrix4x4.CreateScale(s) * Matrix4x4.CreateFromQuaternion(r) * Matrix4x4.CreateTranslation(t);
     }
 
-    private static void ProcessMesh(JsonElement root, byte[]? binData, int meshIdx, Matrix4x4 transform, List<Model3DVertex> allVertices, List<int> allIndices, List<Model3DPart> parts, JsonElement materials, List<string> images, List<int> textures)
+    private static void ProcessMesh(GlbContext context, int meshIdx, Matrix4x4 transform)
     {
+        var (root, binData, _, materials, images, textures, allVertices, allIndices, parts) = context;
         if (!root.TryGetProperty("meshes", out var meshes) || meshIdx < 0 || meshIdx >= meshes.GetArrayLength()) return;
 
         var mesh = meshes[meshIdx];
@@ -487,7 +499,7 @@ internal sealed class GlbParser : IModelParser
         if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
         if (buffIdx != 0) return null;
 
-        int elementSize = compType == 5121 ? 4 : (compType == 5123 ? 8 : 16);
+        int elementSize = compType == ComponentTypeUByte ? 4 : (compType == ComponentTypeUShort ? 8 : 16);
         if (stride <= 0) stride = elementSize;
         if (!TryClampAccessorCount(binData, viewOffset, offset, stride, elementSize, ref count, out int start)) return null;
 
@@ -500,21 +512,21 @@ internal sealed class GlbParser : IModelParser
 
             float x = 0, y = 0, z = 0, w = 1;
 
-            if (compType == 5126)
+            if (compType == ComponentTypeFloat)
             {
                 x = BitConverter.ToSingle(binData, p);
                 y = BitConverter.ToSingle(binData, p + 4);
                 z = BitConverter.ToSingle(binData, p + 8);
                 w = BitConverter.ToSingle(binData, p + 12);
             }
-            else if (compType == 5121)
+            else if (compType == ComponentTypeUByte)
             {
                 x = binData[p] / 255.0f;
                 y = binData[p + 1] / 255.0f;
                 z = binData[p + 2] / 255.0f;
                 w = binData[p + 3] / 255.0f;
             }
-            else if (compType == 5123)
+            else if (compType == ComponentTypeUShort)
             {
                 x = BitConverter.ToUInt16(binData, p) / 65535.0f;
                 y = BitConverter.ToUInt16(binData, p + 2) / 65535.0f;
@@ -533,7 +545,7 @@ internal sealed class GlbParser : IModelParser
         if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
         if (buffIdx != 0) return null;
 
-        int elementSize = compType == 5121 ? 1 : (compType == 5123 ? 2 : 4);
+        int elementSize = compType == ComponentTypeUByte ? 1 : (compType == ComponentTypeUShort ? 2 : 4);
         if (stride <= 0) stride = elementSize;
         if (!TryClampAccessorCount(binData, viewOffset, offset, stride, elementSize, ref count, out int start)) return null;
 
@@ -544,15 +556,15 @@ internal sealed class GlbParser : IModelParser
             int p = start + i * stride;
             if (p + elementSize > binData.Length) break;
 
-            if (compType == 5121)
+            if (compType == ComponentTypeUByte)
             {
                 result[i] = binData[p];
             }
-            else if (compType == 5123)
+            else if (compType == ComponentTypeUShort)
             {
                 result[i] = BitConverter.ToUInt16(binData, p);
             }
-            else if (compType == 5125)
+            else if (compType == ComponentTypeUInt)
             {
                 result[i] = (int)BitConverter.ToUInt32(binData, p);
             }
@@ -602,4 +614,15 @@ internal sealed class GlbParser : IModelParser
 
         return buffer != -1;
     }
+
+    private sealed record GlbContext(
+        JsonElement Root,
+        byte[]? BinData,
+        JsonElement Nodes,
+        JsonElement Materials,
+        List<string> Images,
+        List<int> Textures,
+        List<Model3DVertex> Vertices,
+        List<int> Indices,
+        List<Model3DPart> Parts);
 }
