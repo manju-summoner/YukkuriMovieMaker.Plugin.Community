@@ -5,8 +5,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Cache;
 
 internal static class DiskTypeDetector
 {
-    private static readonly Dictionary<string, DiskType> _driveTypeCache = new Dictionary<string, DiskType>(StringComparer.OrdinalIgnoreCase);
-    private static readonly object _lock = new object();
+    private static readonly Dictionary<string, DiskType> DriveTypeCache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Lock CacheLock = new();
 
     public static DiskType GetDiskType(string path)
     {
@@ -19,9 +19,9 @@ internal static class DiskTypeDetector
 
             string driveLetter = root.TrimEnd('\\');
 
-            lock (_lock)
+            lock (CacheLock)
             {
-                if (_driveTypeCache.TryGetValue(driveLetter, out var cachedType))
+                if (DriveTypeCache.TryGetValue(driveLetter, out var cachedType))
                 {
                     return cachedType;
                 }
@@ -29,9 +29,9 @@ internal static class DiskTypeDetector
 
             var result = DetectDiskTypeViaIoctl(driveLetter);
 
-            lock (_lock)
+            lock (CacheLock)
             {
-                _driveTypeCache[driveLetter] = result;
+                DriveTypeCache[driveLetter] = result;
             }
             return result;
         }

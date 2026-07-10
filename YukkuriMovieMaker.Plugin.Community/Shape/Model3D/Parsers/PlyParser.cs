@@ -60,8 +60,8 @@ internal sealed class PlyParser : IModelParser
         private int _vertexCount;
         private int _faceCount;
         private string _textureFile = "";
-        private readonly List<PlyProperty> _vertexProps = new List<PlyProperty>();
-        private readonly List<PlyProperty> _faceProps = new List<PlyProperty>();
+        private readonly List<PlyProperty> _vertexProps = [];
+        private readonly List<PlyProperty> _faceProps = [];
 
         public PlyReader(Stream stream)
         {
@@ -150,7 +150,7 @@ internal sealed class PlyParser : IModelParser
 
             while (true)
             {
-                string line = ReadLineFromStream();
+                string? line = ReadLineFromStream();
                 if (line == null) break;
 
                 line = line.Trim();
@@ -193,7 +193,7 @@ internal sealed class PlyParser : IModelParser
             return false;
         }
 
-        private string ReadLineFromStream()
+        private string? ReadLineFromStream()
         {
             var bytes = new List<byte>();
             int b;
@@ -202,7 +202,7 @@ internal sealed class PlyParser : IModelParser
                 if (b == '\n') break;
                 bytes.Add((byte)b);
             }
-            if (bytes.Count == 0 && b == -1) return null!;
+            if (bytes.Count == 0 && b == -1) return null;
             return Encoding.ASCII.GetString(bytes.ToArray()).TrimEnd('\r');
         }
 

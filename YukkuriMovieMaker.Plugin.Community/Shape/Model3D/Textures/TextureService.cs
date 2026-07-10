@@ -14,9 +14,9 @@ internal sealed class TextureService : ITextureService
     private const long RawCacheMaxBytes = 512L * 1024 * 1024;
     private const long GpuCacheMaxBytes = 1024L * 1024 * 1024;
 
-    private static readonly BoundedLruCache<string, TextureRawData> s_rawDataCache = new(RawCacheMaxBytes);
-    private static readonly BoundedLruCache<(nint DevicePtr, string Path), ID3D11Texture2D> s_gpuTextureCache = new(GpuCacheMaxBytes);
-    private static readonly ConcurrentDictionary<nint, int> s_deviceRefCounts = new();
+    private static readonly BoundedLruCache<string, TextureRawData> RawDataCache = new(RawCacheMaxBytes);
+    private static readonly BoundedLruCache<(nint DevicePtr, string Path), ID3D11Texture2D> GpuTextureCache = new(GpuCacheMaxBytes);
+    private static readonly ConcurrentDictionary<nint, int> DeviceRefCounts = new();
 
     private readonly List<ITextureLoader> _loaders = [];
     private readonly HashSet<nint> _trackedDevices = [];
@@ -86,7 +86,7 @@ internal sealed class TextureService : ITextureService
         path = Path.GetFullPath(path).ToLowerInvariant();
         var key = (devicePtr, path);
 
-        if (s_gpuTextureCache.TryGetValue(key, out var cachedTex))
+        if (GpuTextureCache.TryGetValue(key, out var cachedTex))
         {
             try
             {
@@ -95,7 +95,7 @@ internal sealed class TextureService : ITextureService
             }
             catch
             {
-                if (s_gpuTextureCache.TryRemove(key, out var stale))
+                if (GpuTextureCache.TryRemove(key, out var stale))
                 {
                     SafeDisposeCom(stale);
                 }
@@ -133,7 +133,7 @@ internal sealed class TextureService : ITextureService
             var data = new SubresourceData(p, stride);
             var tex = device.CreateTexture2D(texDesc, new[] { data });
 
-            var cached = s_gpuTextureCache.GetOrAdd(key, gpuBytes, _ => tex);
+            var cached = GpuTextureCache.GetOrAdd(key, gpuBytes, _ => tex);
 
             if (!ReferenceEquals(cached, tex))
             {
@@ -145,7 +145,7 @@ internal sealed class TextureService : ITextureService
                 }
                 catch
                 {
-                    if (s_gpuTextureCache.TryRemove(key, out var stale))
+                    if (GpuTextureCache.TryRemove(key, out var stale))
                     {
                         SafeDisposeCom(stale);
                     }
@@ -160,7 +160,7 @@ internal sealed class TextureService : ITextureService
             }
             catch
             {
-                if (s_gpuTextureCache.TryRemove(key, out var stale))
+                if (GpuTextureCache.TryRemove(key, out var stale))
                 {
                     SafeDisposeCom(stale);
                 }
@@ -171,7 +171,7 @@ internal sealed class TextureService : ITextureService
 
     private TextureRawData? EnsureRawDataCached(string path)
     {
-        if (s_rawDataCache.TryGetValue(path, out var cached))
+        if (RawDataCache.TryGetValue(path, out var cached))
         {
             return cached;
         }
@@ -193,7 +193,7 @@ internal sealed class TextureService : ITextureService
         var persistent = pooled.ToNonPooled();
 
         long bytes = persistent.DataLength;
-        var result = s_rawDataCache.GetOrAdd(path, bytes, _ => persistent);
+        var result = RawDataCache.GetOrAdd(path, bytes, _ => persistent);
 
         if (!ReferenceEquals(result, persistent))
         {
@@ -232,7 +232,7 @@ internal sealed class TextureService : ITextureService
             Buffer.BlockCopy(pooledBuf, 0, pixels, 0, requiredSize);
             var rawData = new TextureRawData(pixels, width, height);
 
-            var result = s_rawDataCache.GetOrAdd(path, requiredSize, _ => rawData);
+            var result = RawDataCache.GetOrAdd(path, requiredSize, _ => rawData);
 
             if (!ReferenceEquals(result, rawData))
             {
@@ -272,14 +272,14 @@ internal sealed class TextureService : ITextureService
         {
             if (_trackedDevices.Add(devicePtr))
             {
-                s_deviceRefCounts.AddOrUpdate(devicePtr, 1, (_, c) => c + 1);
+                DeviceRefCounts.AddOrUpdate(devicePtr, 1, (_, c) => c + 1);
             }
         }
     }
 
     private static void EvictDevice(nint devicePtr)
     {
-        var removed = s_gpuTextureCache.RemoveWhere(k => k.DevicePtr == devicePtr);
+        var removed = GpuTextureCache.RemoveWhere(k => k.DevicePtr == devicePtr);
         foreach (var (_, tex) in removed)
         {
             SafeDisposeCom(tex);
@@ -300,10 +300,10 @@ internal sealed class TextureService : ITextureService
 
         foreach (var devicePtr in devicesToEvict)
         {
-            var newCount = s_deviceRefCounts.AddOrUpdate(devicePtr, 0, (_, c) => Math.Max(0, c - 1));
+            var newCount = DeviceRefCounts.AddOrUpdate(devicePtr, 0, (_, c) => Math.Max(0, c - 1));
             if (newCount <= 0)
             {
-                s_deviceRefCounts.TryRemove(devicePtr, out _);
+                DeviceRefCounts.TryRemove(devicePtr, out _);
                 EvictDevice(devicePtr);
             }
         }

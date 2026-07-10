@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
