@@ -17,10 +17,10 @@ internal struct SortableVertex : IComparable<SortableVertex>
 
     public int CompareTo(SortableVertex other)
     {
-        int c = V - other.V;
+        int c = V.CompareTo(other.V);
         if (c != 0) return c;
-        c = Vt - other.Vt;
+        c = Vt.CompareTo(other.Vt);
         if (c != 0) return c;
-        return Vn - other.Vn;
+        return Vn.CompareTo(other.Vn);
     }
 }
