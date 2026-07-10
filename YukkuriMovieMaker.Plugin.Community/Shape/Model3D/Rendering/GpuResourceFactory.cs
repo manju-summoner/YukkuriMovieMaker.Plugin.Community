@@ -21,6 +21,11 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
                 || (long)part.IndexOffset + part.IndexCount > model.Indices.Length) return null;
         }
 
+        foreach (var index in model.Indices)
+        {
+            if ((uint)index >= (uint)model.Vertices.Length) return null;
+        }
+
         long vertexBytes = (long)model.Vertices.Length * Unsafe.SizeOf<Model3DVertex>();
         long indexBytes = (long)model.Indices.Length * sizeof(int);
         if (vertexBytes > int.MaxValue || indexBytes > int.MaxValue) return null;
