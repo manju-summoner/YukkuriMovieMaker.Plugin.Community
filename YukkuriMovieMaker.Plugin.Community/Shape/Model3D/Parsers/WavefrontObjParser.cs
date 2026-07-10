@@ -292,7 +292,7 @@ internal sealed class WavefrontObjParser : IModelParser
                     var data = lib[currentMat];
                     if (keyword == "map_kd")
                     {
-                        string texPath = parts[1];
+                        string texPath = parts[^1];
                         if (!Path.IsPathRooted(texPath)) texPath = Path.Combine(baseDir, texPath);
                         data.TexturePath = texPath;
                         lib[currentMat] = data;
