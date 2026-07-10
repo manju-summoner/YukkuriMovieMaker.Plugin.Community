@@ -166,12 +166,12 @@ float4 main(
         }
 
         float step = clamp(t * FINE_GROW, FINE_STEP, FINE_MAX);
-        float h = max(min(step, intervalEnd - t), 0.25f);
+        float h = min(step, intervalEnd - t);
         float4 f = SampleEmissionWorld(uv0, posScene.xy, q);
         gather += transmittance * f.rgb * gain * (h / (t + FALLOFF_SOFT));
         transmittance *= exp(-f.a * SIGMA * h);
-        t += h;
-        level = (f.a > 0.003f || max(f.r, max(f.g, f.b)) > 0.003f) ? 0u : 1u;
+        t += max(h, 0.25f);
+        level = (f.a > 0.003f || max(f.r, max(f.g, f.b)) * gain > 0.003f) ? 0u : 1u;
     }
 
     float3 upper = float3(0.0f, 0.0f, 0.0f);

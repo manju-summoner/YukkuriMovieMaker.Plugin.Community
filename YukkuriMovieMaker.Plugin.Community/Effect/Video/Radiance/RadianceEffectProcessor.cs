@@ -61,6 +61,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                     if (cascade is not null)
                         cascade.Gain = parameters.EmissionGain;
                 }
+                for (var i = 0; i < OccCount; i++)
+                {
+                    var occupancy = _occupancyEffects[i];
+                    if (occupancy is not null)
+                        occupancy.Gain = parameters.EmissionGain;
+                }
             }
             if (_isFirst || _parameters.Occlusion != parameters.Occlusion)
                 _emissionEffect.Occlusion = parameters.Occlusion;

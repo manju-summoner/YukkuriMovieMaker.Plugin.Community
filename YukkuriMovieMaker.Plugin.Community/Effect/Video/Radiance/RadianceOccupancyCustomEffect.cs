@@ -11,11 +11,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
     {
         public int BuildLevel { set => SetValue((int)EffectImpl.Properties.BuildLevel, value); }
         public float TotalRange { set => SetValue((int)EffectImpl.Properties.TotalRange, value); }
+        public float Gain { set => SetValue((int)EffectImpl.Properties.Gain, value); }
 
         [CustomEffect(2)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
-            private ConstantBuffer _cb = new() { BuildLevel = 1f };
+            private ConstantBuffer _cb = new() { BuildLevel = 1f, Gain = 1.5f };
             private float _totalRange = 300f;
             private RawRect _worldRect;
             private RawRect _atlasRect;
@@ -25,6 +26,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.TotalRange)]
             public float TotalRange { get => _totalRange; set => _totalRange = Math.Clamp(value, 1f, RadianceGeometry.MaxRange); }
+
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.Gain)]
+            public float Gain { get => _cb.Gain; set { _cb.Gain = Math.Clamp(value, 0f, 16f); UpdateConstants(); } }
 
             public EffectImpl() : base(ShaderResourceUri.Get("RadianceOccupancy"))
             {
@@ -92,15 +96,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
                 public float WorldW;
                 public float WorldH;
                 public float BuildLevel;
+                public float Gain;
                 public float Pad0;
                 public float Pad1;
-                public float Pad2;
             }
 
             public enum Properties : int
             {
                 BuildLevel = 0,
                 TotalRange = 1,
+                Gain = 2,
             }
         }
     }

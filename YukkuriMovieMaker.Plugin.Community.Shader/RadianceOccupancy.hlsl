@@ -11,7 +11,7 @@ cbuffer Constants : register(b0)
     float worldH     : packoffset(c0.w);
 
     float buildLevel : packoffset(c1.x);
-    float pad0       : packoffset(c1.y);
+    float gain       : packoffset(c1.y);
     float pad1       : packoffset(c1.z);
     float pad2       : packoffset(c1.w);
 };
@@ -37,7 +37,7 @@ float EmissionOccupancy(float4 uv1, float2 scenePos, float2 q)
     if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f)
         return 0.0f;
     float4 f = EmissionTexture.SampleLevel(EmissionSampler, uv, 0);
-    return (f.a > 0.003f || max(f.r, max(f.g, f.b)) > 0.003f) ? 1.0f : 0.0f;
+    return (f.a > 0.003f || max(f.r, max(f.g, f.b)) * gain > 0.003f) ? 1.0f : 0.0f;
 }
 
 float4 main(
