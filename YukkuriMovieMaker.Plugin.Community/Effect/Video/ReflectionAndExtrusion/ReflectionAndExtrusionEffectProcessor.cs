@@ -31,6 +31,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         Blend? highlightBlendEffect;
 
         AlphaMask? alphaMask;
+        LinearHdrCompositeCustomEffect? linearHdrComposite;
 
         /*
          heightmap -> luminanceToAlpha -> invertAlpha -> hightOutput
@@ -47,6 +48,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         LightingParameterBase? lightingParameter;
         Project.Blend highlightBlend;
         bool isInvertAlpha;
+        bool isLinearHdrCompositeEnabled;
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
@@ -92,6 +94,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             var blur = item.Blur.GetValue(frame, length, fps) / 3;
             var highlightBlend = highlight.Blend;
             var isInvertAlpha = item.IsInvert;
+            var isLinearHdrCompositeEnabled = item.IsLinearHdrCompositeEnabled && linearHdrComposite is not null;
 
             if (isFirst || this.blur != blur)
                 highlightBlur.StandardDeviation = (float)blur;
@@ -99,9 +102,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             if(isFirst || this.isInvertAlpha != isInvertAlpha)
                 invertAlpha.Invert = isInvertAlpha ? 1 : 0;
 
-            if (isFirst || this.highlightBlend != highlightBlend)
+            if (isFirst || this.highlightBlend != highlightBlend || this.isLinearHdrCompositeEnabled != isLinearHdrCompositeEnabled)
             {
-                if (highlightBlend.IsCompositionEffect())
+                if (isLinearHdrCompositeEnabled)
+                {
+                    using var image = linearHdrComposite!.Output;
+                    alphaMask.SetInput(0, image, true);
+                    linearHdrComposite.BlendMode = highlightBlend;
+                }
+                else if (highlightBlend.IsCompositionEffect())
                 {
                     using (var image = highlightComposite.Output)
                         alphaMask.SetInput(0, image, true);
@@ -121,6 +130,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             this.blur = blur;
             this.highlightBlend = highlightBlend;
             this.isInvertAlpha = isInvertAlpha;
+            this.isLinearHdrCompositeEnabled = isLinearHdrCompositeEnabled;
 
             return effectDescription.DrawDescription;
         }
@@ -143,6 +153,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
             alphaMask?.SetInput(0, null, true);
             alphaMask?.SetInput(1, null, true);
+            linearHdrComposite?.SetBaseInput(null);
+            linearHdrComposite?.SetReflectionInput(null);
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
@@ -194,6 +206,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             alphaMask = new(devices.DeviceContext);
             disposer.Collect(alphaMask);
 
+            linearHdrComposite = new(devices);
+            if (linearHdrComposite.IsEnabled)
+                disposer.Collect(linearHdrComposite);
+            else
+            {
+                linearHdrComposite.Dispose();
+                linearHdrComposite = null;
+            }
+
             //接続（ハイトマップ）
             using(var image = luminanceToAlpha.Output)
                 invertAlpha.SetInput(0, image, true);
@@ -208,6 +229,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             {
                 highlightComposite.SetInput(1, image, true);
                 highlightBlendEffect.SetInput(1, image, true);
+                linearHdrComposite?.SetReflectionInput(image);
             }
 
             var output = alphaMask.Output;
@@ -220,6 +242,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             highlightComposite?.SetInput(0, input, true);
             highlightBlendEffect?.SetInput(0, input, true);
             alphaMask?.SetInput(1, input, true);
+            linearHdrComposite?.SetBaseInput(input);
             heightmap?.SetInput(input);
         }
     }

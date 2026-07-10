@@ -54,6 +54,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         public bool IsInvert { get => isInvert; set => Set(ref isInvert, value); }
         bool isInvert = false;
 
+        [Display(GroupName = nameof(Texts.Reflection), Name = nameof(Texts.LinearHdrComposite), Description = nameof(Texts.LinearHdrCompositeDesc), ResourceType = typeof(Texts), Order = 40)]
+        [ToggleSlider]
+        public bool IsLinearHdrCompositeEnabled { get => isLinearHdrCompositeEnabled; set => Set(ref isLinearHdrCompositeEnabled, value); }
+        bool isLinearHdrCompositeEnabled;
+
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
             var fps = exoOutputDescription.VideoInfo.FPS;

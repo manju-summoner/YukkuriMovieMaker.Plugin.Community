@@ -45,6 +45,9 @@
     <FxCompile Include="BevelLighting.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="LinearHdrComposite.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="UnidirectionalBlur.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>

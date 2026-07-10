@@ -136,6 +136,7 @@
 	  <Resource Include="$(ShaderDirPath)BevelSdfResolve.cso" Link="Resources\Shader\BevelSdfResolve.cso" />
 	  <Resource Include="$(ShaderDirPath)BevelAndFlatComposite.cso" Link="Resources\Shader\BevelAndFlatComposite.cso" />
 	  <Resource Include="$(ShaderDirPath)BevelLighting.cso" Link="Resources\Shader\BevelLighting.cso" />
+	  <Resource Include="$(ShaderDirPath)LinearHdrComposite.cso" Link="Resources\Shader\LinearHdrComposite.cso" />
 	  <Resource Include="$(ShaderDirPath)UnidirectionalBlur.cso" Link="Resources\Shader\UnidirectionalBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)LensBlur.cso" Link="Resources\Shader\LensBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)FishEyeLens.cso" Link="Resources\Shader\FishEyeLens.cso" />
