@@ -68,15 +68,15 @@ internal static class Model3DLoader
                 parser.StreamToCache(path, writer);
                 writer.Commit();
             }
-
-            return Cache.TryLoad(path, fileInfo.LastWriteTimeUtc, parser.Id, parser.Version, PluginVersion, out var model)
-                ? model
-                : null;
         }
         catch
         {
             return null;
         }
+
+        return Cache.TryLoad(path, fileInfo.LastWriteTimeUtc, parser.Id, parser.Version, PluginVersion, out var model)
+            ? model
+            : new Model3DData();
     }
 
     private static Model3DData ParseAndCache(string path, IModelParser parser, FileInfo fileInfo)
