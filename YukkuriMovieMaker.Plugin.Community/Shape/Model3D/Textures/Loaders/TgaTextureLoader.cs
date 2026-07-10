@@ -10,6 +10,7 @@ internal sealed class TgaTextureLoader : ITextureLoader
     private const byte UncompressedTrueColor = 2;
     private const byte RleTrueColor = 10;
     private const byte TopLeftOriginFlag = 0x20;
+    private const byte RightOriginFlag = 0x10;
     private const byte RlePacketFlag = 0x80;
     private const long MaxPixelCount = 1024L * 1024 * 256;
 
@@ -144,6 +145,23 @@ internal sealed class TgaTextureLoader : ITextureLoader
                 finally
                 {
                     ArrayPool<byte>.Shared.Return(tempRow);
+                }
+            }
+
+            if ((imageDescriptor & RightOriginFlag) != 0)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    int row = y * stride;
+                    for (int x = 0; x < width / 2; x++)
+                    {
+                        int left = row + x * 4;
+                        int right = row + (width - 1 - x) * 4;
+                        for (int k = 0; k < 4; k++)
+                        {
+                            (pixels[left + k], pixels[right + k]) = (pixels[right + k], pixels[left + k]);
+                        }
+                    }
                 }
             }
 
