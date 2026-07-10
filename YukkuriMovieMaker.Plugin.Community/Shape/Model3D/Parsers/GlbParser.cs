@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Numerics;
 using System.Text;
 using System.Text.Json;
@@ -80,6 +80,7 @@ internal sealed class GlbParser : IModelParser
         var allIndices = new List<int>();
         var parts = new List<Model3DPart>();
         var dependencies = new List<string>();
+        var missingNormalRanges = new List<(int Start, int Count)>();
 
         try
         {
@@ -202,7 +203,7 @@ internal sealed class GlbParser : IModelParser
                 }
             }
 
-            var context = new GlbContext(root, buffers, nodes, materials, images, textures, allVertices, allIndices, parts);
+            var context = new GlbContext(root, buffers, nodes, materials, images, textures, allVertices, allIndices, parts, missingNormalRanges);
 
             if (sceneNodes.Count == 0 && meshes.ValueKind == JsonValueKind.Array)
             {
@@ -225,19 +226,9 @@ internal sealed class GlbParser : IModelParser
         var verticesArr = allVertices.ToArray();
         var indicesArr = allIndices.ToArray();
 
-        bool calcNormals = true;
-        for (int i = 0; i < verticesArr.Length; i++)
+        foreach (var (start, count) in missingNormalRanges)
         {
-            if (verticesArr[i].Normal != Vector3.Zero)
-            {
-                calcNormals = false;
-                break;
-            }
-        }
-
-        if (calcNormals)
-        {
-            ModelHelper.CalculateNormals(verticesArr, indicesArr);
+            CalculateNormalsRange(verticesArr, indicesArr, start, count);
         }
 
         ModelHelper.CalculateBounds(verticesArr, out Vector3 c, out float s);
@@ -327,7 +318,7 @@ internal sealed class GlbParser : IModelParser
 
     private static void ProcessMesh(GlbContext context, int meshIdx, Matrix4x4 transform)
     {
-        var (root, buffers, _, materials, images, textures, allVertices, allIndices, parts) = context;
+        var (root, buffers, _, materials, images, textures, allVertices, allIndices, parts, missingNormalRanges) = context;
         if (!root.TryGetProperty("meshes", out var meshes) || meshIdx < 0 || meshIdx >= meshes.GetArrayLength()) return;
 
         var mesh = meshes[meshIdx];
@@ -397,6 +388,7 @@ internal sealed class GlbParser : IModelParser
                 }
 
                 int startIndex = allIndices.Count;
+                if (normals == null) missingNormalRanges.Add((startIndex, indexAddCount));
                 if (mode == ModeTriangles)
                 {
                     for (int i = 0; i < sourceIndexCount; i++)
@@ -655,6 +647,37 @@ internal sealed class GlbParser : IModelParser
         return true;
     }
 
+    private static void CalculateNormalsRange(Model3DVertex[] vertices, int[] indices, int start, int count)
+    {
+        var touched = new HashSet<int>();
+        int end = (int)Math.Min((long)start + count, indices.Length);
+
+        for (int i = start; i + 2 < end; i += 3)
+        {
+            int i0 = indices[i];
+            int i1 = indices[i + 1];
+            int i2 = indices[i + 2];
+            if (i0 < 0 || i1 < 0 || i2 < 0 || i0 >= vertices.Length || i1 >= vertices.Length || i2 >= vertices.Length) continue;
+
+            var normal = Vector3.Cross(
+                vertices[i1].Position - vertices[i0].Position,
+                vertices[i2].Position - vertices[i0].Position);
+
+            vertices[i0].Normal += normal;
+            vertices[i1].Normal += normal;
+            vertices[i2].Normal += normal;
+            touched.Add(i0);
+            touched.Add(i1);
+            touched.Add(i2);
+        }
+
+        foreach (var vi in touched)
+        {
+            var normal = vertices[vi].Normal;
+            if (normal.LengthSquared() > 1e-12f) vertices[vi].Normal = Vector3.Normalize(normal);
+        }
+    }
+
     private static int GetBaseColorTexCoordSet(JsonElement materials, int matIdx)
     {
         if (matIdx < 0 || materials.ValueKind != JsonValueKind.Array || matIdx >= materials.GetArrayLength()) return 0;
@@ -790,5 +813,6 @@ internal sealed class GlbParser : IModelParser
         List<int> Textures,
         List<Model3DVertex> Vertices,
         List<int> Indices,
-        List<Model3DPart> Parts);
+        List<Model3DPart> Parts,
+        List<(int Start, int Count)> MissingNormalRanges);
 }
