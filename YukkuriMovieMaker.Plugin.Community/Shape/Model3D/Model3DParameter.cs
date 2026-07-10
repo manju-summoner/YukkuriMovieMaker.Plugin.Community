@@ -5,6 +5,7 @@ using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.ItemEditor.CustomVisibilityAttributes;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
 using YukkuriMovieMaker.Plugin.Shape;
 using YukkuriMovieMaker.Project;
 
@@ -133,6 +134,48 @@ internal sealed class Model3DParameter(SharedDataStore? sharedData) : ShapeParam
     {
         if (TimelineResource.TryParseFromPath(File, TimelineResourceType.Other, out var resource))
             yield return resource;
+
+        foreach (var dependency in EnumerateDependencyFiles())
+        {
+            if (TimelineResource.TryParseFromPath(dependency, TimelineResourceType.Other, out var dependencyResource))
+                yield return dependencyResource;
+        }
+    }
+
+    private IEnumerable<string> EnumerateDependencyFiles()
+    {
+        if (string.IsNullOrEmpty(File) || !System.IO.File.Exists(File) || !Model3DLoader.IsSupported(File))
+            return [];
+
+        try
+        {
+            var model = Model3DLoader.Load(File);
+            var files = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var dependency in model.Dependencies)
+            {
+                if (System.IO.File.Exists(dependency)) files.Add(dependency);
+            }
+
+            foreach (var part in model.Parts)
+            {
+                AddTextureFile(files, part.TexturePath);
+                AddTextureFile(files, part.MetallicRoughnessTexturePath);
+            }
+
+            return files;
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static void AddTextureFile(HashSet<string> files, string path)
+    {
+        if (string.IsNullOrEmpty(path)) return;
+        if (ModelHelper.IsEmbeddedTexturePath(path)) return;
+        if (System.IO.File.Exists(path)) files.Add(path);
     }
 
     protected override void LoadSharedData(SharedDataStore store)
