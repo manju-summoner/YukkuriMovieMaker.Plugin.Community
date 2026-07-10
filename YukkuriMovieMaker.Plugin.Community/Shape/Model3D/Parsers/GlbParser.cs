@@ -302,8 +302,11 @@ internal sealed class GlbParser : IModelParser
 
         if (mesh.TryGetProperty("primitives", out var primitives))
         {
+            var limits = Model3DSettings.Default;
+
             foreach (var prim in primitives.EnumerateArray())
             {
+                if (allVertices.Count > limits.MaxVertices || allIndices.Count > limits.MaxIndices || parts.Count > limits.MaxParts) return;
                 if (!prim.TryGetProperty("attributes", out var attrs)) continue;
                 if (!attrs.TryGetProperty("POSITION", out var posAccIdxElem)) continue;
 
