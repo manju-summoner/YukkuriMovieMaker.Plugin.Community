@@ -56,7 +56,7 @@ internal sealed class WavefrontObjParser : IModelParser
 
         try
         {
-            long fileSize = new FileInfo(path).Length;
+            long fileSize = accessor.Capacity;
             var chunkBoundaries = new long[processorCount + 1];
             long chunkSize = fileSize / processorCount;
             chunkBoundaries[0] = 0;
