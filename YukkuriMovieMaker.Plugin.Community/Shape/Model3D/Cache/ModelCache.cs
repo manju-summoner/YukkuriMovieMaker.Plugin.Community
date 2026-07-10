@@ -36,13 +36,13 @@ internal sealed class ModelCache
             if (!Directory.Exists(cacheDir)) return false;
 
             bool isSplit;
-            if (File.Exists(Path.Combine(cacheDir, "model.bin"))) isSplit = false;
-            else if (File.Exists(Path.Combine(cacheDir, "part.0.bin"))) isSplit = true;
+            if (File.Exists(Path.Combine(cacheDir, ModelCacheFormat.SingleFileName))) isSplit = false;
+            else if (File.Exists(Path.Combine(cacheDir, ModelCacheFormat.GetSplitFileName(0)))) isSplit = true;
             else return false;
 
             Stream stream = isSplit
                 ? new MultiFileStream(cacheDir)
-                : new FileStream(Path.Combine(cacheDir, "model.bin"), FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan);
+                : new FileStream(Path.Combine(cacheDir, ModelCacheFormat.SingleFileName), FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan);
 
             string fileHash = ComputeFileHash(path);
 
@@ -67,38 +67,29 @@ internal sealed class ModelCache
     {
         try
         {
-            string root = Path.GetDirectoryName(path) ?? string.Empty;
-            string hash = ComputePathHash(path);
-            string cacheDir = Path.Combine(root, CacheDirName);
-            string modelCacheDir = Path.Combine(cacheDir, hash);
-
-            EnsureCacheDirectories(cacheDir, modelCacheDir);
-
-            bool isSplit = DiskTypeDetector.GetDiskType(root) == DiskType.Hdd;
-
             string fileHash = ComputeFileHash(path);
             var header = new CacheHeader(originalTimestamp.ToBinary(), path, parserId, parserVersion, pluginVersion, fileHash);
 
-            if (!isSplit)
-            {
-                string tempPath = Path.Combine(modelCacheDir, "model.bin.tmp");
-                string finalPath = Path.Combine(modelCacheDir, "model.bin");
-
-                WriteCacheFileSingle(tempPath, header, model);
-                File.Move(tempPath, finalPath, true);
-
-                CleanUpSplitFiles(modelCacheDir);
-            }
-            else
-            {
-                CleanUpSplitFiles(modelCacheDir);
-                WriteCacheFileSplit(modelCacheDir, header, model);
-                string singleFile = Path.Combine(modelCacheDir, "model.bin");
-                if (File.Exists(singleFile)) File.Delete(singleFile);
-            }
+            using var writer = CreateStreamingWriter(path, header);
+            writer.WriteMetadata(model.Vertices.Length, model.Indices.Length, model.Parts, model.ModelCenter, model.ModelScale);
+            WriteBody(writer, model);
+            writer.Commit();
         }
         catch
         {
+        }
+    }
+
+    private static unsafe void WriteBody(IStreamingCacheWriter writer, Model3DData model)
+    {
+        fixed (Model3DVertex* pV = model.Vertices)
+        {
+            writer.WriteVertexChunk(new ReadOnlySpan<byte>(pV, model.Vertices.Length * sizeof(Model3DVertex)));
+        }
+
+        fixed (int* pI = model.Indices)
+        {
+            writer.WriteIndexChunk(new ReadOnlySpan<byte>(pI, model.Indices.Length * sizeof(int)));
         }
     }
 
@@ -113,11 +104,6 @@ internal sealed class ModelCache
         {
             Directory.CreateDirectory(modelCacheDir);
         }
-    }
-
-    private static void CleanUpSplitFiles(string dir)
-    {
-        foreach (var f in Directory.GetFiles(dir, "part.*.bin")) File.Delete(f);
     }
 
     public static string ComputePathHash(string path)
@@ -197,42 +183,6 @@ internal sealed class ModelCache
             throw new InvalidDataException($"Expected {span.Length} bytes, read {totalRead}");
     }
 
-    private static void WriteCacheFileSingle(string path, CacheHeader header, Model3DData model)
-    {
-        using var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-        using var bw = new BinaryWriter(fs);
-        WriteData(bw, header, model);
-    }
-
-    private static void WriteCacheFileSplit(string dir, CacheHeader header, Model3DData model)
-    {
-        const int ChunkSize = 256 * 1024;
-        using var splitter = new SplitStream(dir, ChunkSize);
-        using var bw = new BinaryWriter(splitter);
-        WriteData(bw, header, model);
-    }
-
-    private static unsafe void WriteData(BinaryWriter bw, CacheHeader header, Model3DData model)
-    {
-        ModelCacheFormat.WriteHeader(bw, header);
-        ModelCacheFormat.WriteCounts(bw, model.Vertices.Length, model.Indices.Length, model.Parts.Count);
-
-        foreach (var part in model.Parts)
-            ModelCacheFormat.WritePart(bw, part);
-
-        ModelCacheFormat.WriteTransform(bw, model.ModelCenter, model.ModelScale);
-
-        fixed (Model3DVertex* pV = model.Vertices)
-        {
-            bw.Write(new ReadOnlySpan<byte>(pV, model.Vertices.Length * sizeof(Model3DVertex)));
-        }
-
-        fixed (int* pI = model.Indices)
-        {
-            bw.Write(new ReadOnlySpan<byte>(pI, model.Indices.Length * sizeof(int)));
-        }
-    }
-
     private sealed class MultiFileStream : Stream
     {
         private readonly string _baseDir;
@@ -249,7 +199,7 @@ internal sealed class ModelCache
         private void OpenNextStream()
         {
             _currentStream?.Dispose();
-            string path = Path.Combine(_baseDir, $"part.{_currentIndex}.bin");
+            string path = Path.Combine(_baseDir, ModelCacheFormat.GetSplitFileName(_currentIndex));
             _currentStream = File.Exists(path)
                 ? new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan)
                 : null;
@@ -291,70 +241,6 @@ internal sealed class ModelCache
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
         public override void SetLength(long value) => throw new NotSupportedException();
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                try { _currentStream?.Dispose(); } catch { }
-            }
-            base.Dispose(disposing);
-        }
-    }
-
-    private sealed class SplitStream : Stream
-    {
-        private readonly string _dir;
-        private readonly int _chunkSize;
-        private int _partIndex;
-        private FileStream? _currentStream;
-        private long _totalLength;
-
-        public SplitStream(string dir, int chunkSize)
-        {
-            _dir = dir;
-            _chunkSize = chunkSize;
-            NextPart();
-        }
-
-        private void NextPart()
-        {
-            _currentStream?.Dispose();
-            string path = Path.Combine(_dir, $"part.{_partIndex}.bin");
-            _currentStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
-            _partIndex++;
-        }
-
-        public override bool CanRead => false;
-        public override bool CanSeek => false;
-        public override bool CanWrite => true;
-        public override long Length => _totalLength;
-        public override long Position { get => _totalLength; set => throw new NotSupportedException(); }
-
-        public override void Flush() => _currentStream?.Flush();
-        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
-        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
-        public override void SetLength(long value) => throw new NotSupportedException();
-
-        public override void Write(byte[] buffer, int offset, int count) => Write(new ReadOnlySpan<byte>(buffer, offset, count));
-
-        public override void Write(ReadOnlySpan<byte> buffer)
-        {
-            int written = 0;
-            while (written < buffer.Length)
-            {
-                if (_currentStream!.Length >= _chunkSize)
-                {
-                    NextPart();
-                }
-
-                int remainingInChunk = (int)(_chunkSize - _currentStream!.Length);
-                int toWrite = Math.Min(remainingInChunk, buffer.Length - written);
-                _currentStream!.Write(buffer.Slice(written, toWrite));
-                written += toWrite;
-                _totalLength += toWrite;
-            }
-        }
 
         protected override void Dispose(bool disposing)
         {

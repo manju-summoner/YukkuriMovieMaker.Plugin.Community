@@ -7,7 +7,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Cache;
 
 internal static class ModelCacheFormat
 {
+    public const string SingleFileName = "model.bin";
+    public const string SplitFilePattern = "part.*.bin";
+    public const int SplitChunkSize = 256 * 1024;
+
     private const int MaxTexturePathLength = 32_767;
+
+    public static string GetSplitFileName(int index) => $"part.{index}.bin";
 
     public static void WriteHeader(BinaryWriter writer, CacheHeader header)
     {

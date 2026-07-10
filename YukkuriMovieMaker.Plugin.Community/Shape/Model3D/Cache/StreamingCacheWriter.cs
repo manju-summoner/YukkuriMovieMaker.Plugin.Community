@@ -9,17 +9,15 @@ internal sealed class StreamingCacheWriter : IStreamingCacheWriter
     private readonly string _cacheDir;
     private readonly string _tempDir;
     private readonly bool _isSplit;
-    private readonly int _splitChunkSize;
     private Stream? _stream;
     private BinaryWriter? _writer;
     private bool _committed;
     private bool _disposed;
 
-    public StreamingCacheWriter(string cacheDir, bool isSplit, int splitChunkSize = 256 * 1024)
+    public StreamingCacheWriter(string cacheDir, bool isSplit)
     {
         _cacheDir = cacheDir;
         _isSplit = isSplit;
-        _splitChunkSize = splitChunkSize;
         _tempDir = Path.Combine(cacheDir, ".tmp");
         _committed = false;
 
@@ -31,11 +29,11 @@ internal sealed class StreamingCacheWriter : IStreamingCacheWriter
 
         if (_isSplit)
         {
-            _stream = new SplitWriteStream(_tempDir, _splitChunkSize);
+            _stream = new SplitWriteStream(_tempDir, ModelCacheFormat.SplitChunkSize);
         }
         else
         {
-            string tempFile = Path.Combine(_tempDir, "model.bin");
+            string tempFile = Path.Combine(_tempDir, ModelCacheFormat.SingleFileName);
             _stream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 65536);
         }
         _writer = new BinaryWriter(_stream);
@@ -91,7 +89,7 @@ internal sealed class StreamingCacheWriter : IStreamingCacheWriter
                 CleanExistingSplitFiles(_cacheDir);
                 CleanExistingSingleFile(_cacheDir);
 
-                foreach (var tmpFile in Directory.GetFiles(_tempDir, "part.*.bin"))
+                foreach (var tmpFile in Directory.GetFiles(_tempDir, ModelCacheFormat.SplitFilePattern))
                 {
                     string fileName = Path.GetFileName(tmpFile);
                     string dest = Path.Combine(_cacheDir, fileName);
@@ -100,8 +98,8 @@ internal sealed class StreamingCacheWriter : IStreamingCacheWriter
             }
             else
             {
-                string tmpFile = Path.Combine(_tempDir, "model.bin");
-                string destFile = Path.Combine(_cacheDir, "model.bin");
+                string tmpFile = Path.Combine(_tempDir, ModelCacheFormat.SingleFileName);
+                string destFile = Path.Combine(_cacheDir, ModelCacheFormat.SingleFileName);
                 File.Move(tmpFile, destFile, true);
 
                 CleanExistingSplitFiles(_cacheDir);
@@ -147,7 +145,7 @@ internal sealed class StreamingCacheWriter : IStreamingCacheWriter
     {
         try
         {
-            foreach (var f in Directory.GetFiles(dir, "part.*.bin"))
+            foreach (var f in Directory.GetFiles(dir, ModelCacheFormat.SplitFilePattern))
             {
                 File.Delete(f);
             }
@@ -159,7 +157,7 @@ internal sealed class StreamingCacheWriter : IStreamingCacheWriter
     {
         try
         {
-            string singleFile = Path.Combine(dir, "model.bin");
+            string singleFile = Path.Combine(dir, ModelCacheFormat.SingleFileName);
             if (File.Exists(singleFile))
             {
                 File.Delete(singleFile);
@@ -211,7 +209,7 @@ internal sealed class StreamingCacheWriter : IStreamingCacheWriter
         private void NextPart()
         {
             _currentStream?.Dispose();
-            string path = Path.Combine(_dir, $"part.{_partIndex}.bin");
+            string path = Path.Combine(_dir, ModelCacheFormat.GetSplitFileName(_partIndex));
             _currentStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
             _partIndex++;
         }
