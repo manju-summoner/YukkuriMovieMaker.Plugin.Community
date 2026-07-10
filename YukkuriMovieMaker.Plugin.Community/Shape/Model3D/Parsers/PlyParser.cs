@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -62,6 +62,7 @@ internal sealed class PlyParser : IModelParser
         private string _textureFile = "";
         private readonly List<PlyProperty> _vertexProps = [];
         private readonly List<PlyProperty> _faceProps = [];
+        private bool _indexLimitExceeded;
 
         public PlyReader(Stream stream)
         {
@@ -90,6 +91,8 @@ internal sealed class PlyParser : IModelParser
             catch
             {
             }
+
+            if (_indexLimitExceeded) return new Model3DData();
 
             int vLength = vertices.Length;
             if (indices.Count > 0 && vLength > 0)
@@ -310,6 +313,7 @@ internal sealed class PlyParser : IModelParser
                 catch { }
             }
 
+            int maxIndices = Model3DSettings.Default.MaxIndices;
             int readF = 0;
             while (readF < _faceCount)
             {
@@ -342,7 +346,11 @@ internal sealed class PlyParser : IModelParser
                                     {
                                         int vIdx = int.Parse(idxSpan, NumberStyles.Integer, CultureInfo.InvariantCulture);
                                         if (k == 0) v0 = vIdx;
-                                        else if (k >= 2) { indices.Add(v0); indices.Add(vPrev); indices.Add(vIdx); }
+                                        else if (k >= 2)
+                                        {
+                                            if (indices.Count + 3 > maxIndices) { _indexLimitExceeded = true; return; }
+                                            indices.Add(v0); indices.Add(vPrev); indices.Add(vIdx);
+                                        }
                                         vPrev = vIdx;
                                     }
                                     if (end == -1) break;
@@ -414,6 +422,7 @@ internal sealed class PlyParser : IModelParser
                 vertices[i] = new Model3DVertex { Position = pos, Normal = norm, TexCoord = uv, Color = col };
             }
 
+            int maxIndices = Model3DSettings.Default.MaxIndices;
             for (int i = 0; i < _faceCount; i++)
             {
                 foreach (var prop in _faceProps)
@@ -428,7 +437,11 @@ internal sealed class PlyParser : IModelParser
                             {
                                 int vIdx = (int)ReadBinaryValue(prop.ItemType);
                                 if (k == 0) v0 = vIdx;
-                                else if (k >= 2) { indices.Add(v0); indices.Add(vPrev); indices.Add(vIdx); }
+                                else if (k >= 2)
+                                {
+                                    if (indices.Count + 3 > maxIndices) { _indexLimitExceeded = true; return; }
+                                    indices.Add(v0); indices.Add(vPrev); indices.Add(vIdx);
+                                }
                                 vPrev = vIdx;
                             }
                         }
