@@ -495,22 +495,39 @@ internal sealed class GlbParser : IModelParser
     private static Vector2[]? ReadVector2Array(JsonElement root, byte[]? binData, int accessorIdx)
     {
         if (binData == null) return null;
-        if (!GetAccessorInfo(root, accessorIdx, out int buffViewIdx, out int offset, out int count, out _)) return null;
+        if (!GetAccessorInfo(root, accessorIdx, out int buffViewIdx, out int offset, out int count, out int compType)) return null;
         if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
         if (buffIdx != 0) return null;
 
-        if (stride <= 0) stride = 8;
-        if (!TryClampAccessorCount(binData, viewOffset, offset, stride, 8, ref count, out int start)) return null;
+        int componentSize = compType == ComponentTypeUByte ? 1 : (compType == ComponentTypeUShort ? 2 : 4);
+        int elementSize = componentSize * 2;
+        if (stride <= 0) stride = elementSize;
+        if (!TryClampAccessorCount(binData, viewOffset, offset, stride, elementSize, ref count, out int start)) return null;
 
         var result = new Vector2[count];
 
         for (int i = 0; i < count; i++)
         {
             int p = start + i * stride;
-            if (p + 8 > binData.Length) break;
+            if (p + elementSize > binData.Length) break;
 
-            float x = BitConverter.ToSingle(binData, p);
-            float y = BitConverter.ToSingle(binData, p + 4);
+            float x = 0, y = 0;
+
+            if (compType == ComponentTypeFloat)
+            {
+                x = BitConverter.ToSingle(binData, p);
+                y = BitConverter.ToSingle(binData, p + 4);
+            }
+            else if (compType == ComponentTypeUByte)
+            {
+                x = binData[p] / 255.0f;
+                y = binData[p + 1] / 255.0f;
+            }
+            else if (compType == ComponentTypeUShort)
+            {
+                x = BitConverter.ToUInt16(binData, p) / 65535.0f;
+                y = BitConverter.ToUInt16(binData, p + 2) / 65535.0f;
+            }
             result[i] = new Vector2(x, 1.0f - y);
         }
         return result;
