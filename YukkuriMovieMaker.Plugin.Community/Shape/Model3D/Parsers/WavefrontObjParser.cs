@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Numerics;
@@ -33,7 +33,7 @@ internal sealed class WavefrontObjParser : IModelParser
     private sealed class ChunkResult
     {
         public List<SplitEvent> Events = [];
-        public string MtlLib = string.Empty;
+        public List<string> MtlLibs = [];
     }
 
     public unsafe Model3DData Parse(string path)
@@ -172,11 +172,13 @@ internal sealed class WavefrontObjParser : IModelParser
         var materialLib = new Dictionary<string, MaterialData>(StringComparer.OrdinalIgnoreCase);
         string baseDir = Path.GetDirectoryName(path) ?? string.Empty;
 
+        var seenLibs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var res in chunkResults)
         {
-            if (!string.IsNullOrEmpty(res.MtlLib))
+            foreach (var mtlLib in res.MtlLibs)
             {
-                ParseMtl(baseDir, res.MtlLib, materialLib);
+                if (!seenLibs.Add(mtlLib)) continue;
+                ParseMtl(baseDir, mtlLib, materialLib);
             }
         }
 
