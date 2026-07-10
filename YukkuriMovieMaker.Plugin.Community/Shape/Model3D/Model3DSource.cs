@@ -126,10 +126,18 @@ internal sealed class Model3DSource : IShapeSource
 
         if (key.Length == 0) return null;
 
-        var model = Model3DLoader.Load(key);
-        if (model.Vertices.Length == 0) return null;
+        try
+        {
+            var model = Model3DLoader.Load(key);
+            if (model.Vertices.Length == 0) return null;
 
-        _gpuResource = _gpuResourceFactory.Create(_devices.D3D.Device, model);
+            _gpuResource = _gpuResourceFactory.Create(_devices.D3D.Device, model);
+        }
+        catch
+        {
+            _gpuResource = null;
+        }
+
         return _gpuResource;
     }
 
