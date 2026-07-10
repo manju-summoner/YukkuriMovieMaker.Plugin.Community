@@ -30,18 +30,26 @@ internal sealed class D3DResources : IDisposable
     {
         Device = device ?? throw new ArgumentNullException(nameof(device));
 
-        var vertexShaderBytes = PackResourceReader.ReadAllBytes(ShaderResourceUri.Get(VertexShaderName));
-        var pixelShaderBytes = PackResourceReader.ReadAllBytes(ShaderResourceUri.Get(PixelShaderName));
+        try
+        {
+            var vertexShaderBytes = PackResourceReader.ReadAllBytes(ShaderResourceUri.Get(VertexShaderName));
+            var pixelShaderBytes = PackResourceReader.ReadAllBytes(ShaderResourceUri.Get(PixelShaderName));
 
-        VertexShader = Collect(device.CreateVertexShader(vertexShaderBytes));
-        PixelShader = Collect(device.CreatePixelShader(pixelShaderBytes));
-        InputLayout = Collect(CreateInputLayout(device, vertexShaderBytes));
-        RasterizerState = Collect(CreateRasterizerState(device));
-        DepthWriteState = Collect(CreateDepthStencilState(device, true));
-        DepthReadOnlyState = Collect(CreateDepthStencilState(device, false));
-        SamplerState = Collect(CreateSamplerState(device));
-        BlendState = Collect(CreateBlendState(device));
-        WhiteTextureView = Collect(CreateWhiteTexture(device));
+            VertexShader = Collect(device.CreateVertexShader(vertexShaderBytes));
+            PixelShader = Collect(device.CreatePixelShader(pixelShaderBytes));
+            InputLayout = Collect(CreateInputLayout(device, vertexShaderBytes));
+            RasterizerState = Collect(CreateRasterizerState(device));
+            DepthWriteState = Collect(CreateDepthStencilState(device, true));
+            DepthReadOnlyState = Collect(CreateDepthStencilState(device, false));
+            SamplerState = Collect(CreateSamplerState(device));
+            BlendState = Collect(CreateBlendState(device));
+            WhiteTextureView = Collect(CreateWhiteTexture(device));
+        }
+        catch
+        {
+            _disposer.Dispose();
+            throw;
+        }
     }
 
     private T Collect<T>(T resource) where T : IDisposable
