@@ -111,7 +111,10 @@ internal sealed class WavefrontObjParser : IModelParser
                     rawVn + offsets[i].Vn,
                     sortArray,
                     offsets[i].F * 3,
-                    counts[i].F * 3);
+                    counts[i].F * 3,
+                    offsets[i].V,
+                    offsets[i].Vt,
+                    offsets[i].Vn);
             });
 
             Array.Sort(sortArray);
@@ -349,19 +352,18 @@ internal sealed class WavefrontObjParser : IModelParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ResolveIndex(int idx, int definedCount) => idx < 0 ? definedCount + idx + 1 : idx;
+
     private static unsafe void GetVertexData(int vIdx, int vtIdx, int vnIdx, int vCount, int vtCount, int vnCount,
         Vector3* v, Vector2* vt, Vector3* vn, out Vector3 p, out Vector2 uv, out Vector3 n)
     {
         p = Vector3.Zero;
-        if (vIdx < 0) vIdx = vCount + vIdx + 1;
         if (vIdx > 0 && vIdx <= vCount) p = v[vIdx - 1];
 
         uv = Vector2.Zero;
-        if (vtIdx < 0) vtIdx = vtCount + vtIdx + 1;
         if (vtIdx > 0 && vtIdx <= vtCount) uv = vt[vtIdx - 1];
 
         n = Vector3.Zero;
-        if (vnIdx < 0) vnIdx = vnCount + vnIdx + 1;
         if (vnIdx > 0 && vnIdx <= vnCount) n = vn[vnIdx - 1];
     }
 
@@ -426,7 +428,8 @@ internal sealed class WavefrontObjParser : IModelParser
 
     private static unsafe ChunkResult ParseChunk(byte* start, long startOffset, long endOffset,
         Vector3* vPtr, Vector2* vtPtr, Vector3* vnPtr,
-        SortableVertex[] sortArray, int sortStartIndex, int sortCount)
+        SortableVertex[] sortArray, int sortStartIndex, int sortCount,
+        int vBase, int vtBase, int vnBase)
     {
         var result = new ChunkResult();
         byte* ptr = start + startOffset;
@@ -480,11 +483,19 @@ internal sealed class WavefrontObjParser : IModelParser
             {
                 if (*ptr <= 32)
                 {
+                    int definedV = vBase + (int)(currV - vPtr);
+                    int definedVt = vtBase + (int)(currVt - vtPtr);
+                    int definedVn = vnBase + (int)(currVn - vnPtr);
+
                     if (currentSortIdx + 3 <= sortEndIndex
                         && TryParseFaceVertex(ref ptr, end, out int v1, out int vt1, out int vn1)
                         && TryParseFaceVertex(ref ptr, end, out int v2, out int vt2, out int vn2)
                         && TryParseFaceVertex(ref ptr, end, out int v3, out int vt3, out int vn3))
                     {
+                        v1 = ResolveIndex(v1, definedV); vt1 = ResolveIndex(vt1, definedVt); vn1 = ResolveIndex(vn1, definedVn);
+                        v2 = ResolveIndex(v2, definedV); vt2 = ResolveIndex(vt2, definedVt); vn2 = ResolveIndex(vn2, definedVn);
+                        v3 = ResolveIndex(v3, definedV); vt3 = ResolveIndex(vt3, definedVt); vn3 = ResolveIndex(vn3, definedVn);
+
                         sortArray[currentSortIdx] = new SortableVertex(v1, vt1, vn1, currentSortIdx);
                         currentSortIdx++;
                         sortArray[currentSortIdx] = new SortableVertex(v2, vt2, vn2, currentSortIdx);
@@ -500,6 +511,7 @@ internal sealed class WavefrontObjParser : IModelParser
 
                             v2 = v3; vt2 = vt3; vn2 = vn3;
                             if (!TryParseFaceVertex(ref ptr, end, out v3, out vt3, out vn3)) break;
+                            v3 = ResolveIndex(v3, definedV); vt3 = ResolveIndex(vt3, definedVt); vn3 = ResolveIndex(vn3, definedVn);
 
                             sortArray[currentSortIdx] = new SortableVertex(v1, vt1, vn1, currentSortIdx);
                             currentSortIdx++;
