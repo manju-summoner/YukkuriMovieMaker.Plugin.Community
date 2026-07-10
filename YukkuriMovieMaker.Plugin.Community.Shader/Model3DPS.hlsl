@@ -194,13 +194,14 @@ float3 CalculateAmbientLighting(float3 albedo, float3 n, float3 v, float metalli
 
 float4 main(PSIn input) : SV_Target
 {
-    float4 surface = BaseColorTexture.Sample(BaseColorSampler, input.uv) * BaseColor * input.color;
+    float4 texSample = BaseColorTexture.Sample(BaseColorSampler, input.uv);
+    float4 surface = texSample * BaseColor * input.color;
     float alpha = surface.a;
 
     if (LightEnabled < 0.5f)
         return float4(saturate(surface.rgb) * alpha, alpha);
 
-    float3 albedo = pow(abs(surface.rgb), Gamma);
+    float3 albedo = pow(abs(texSample.rgb), Gamma) * saturate(BaseColor.rgb * input.color.rgb);
     float4 metallicRoughness = MetallicRoughnessTexture.Sample(BaseColorSampler, input.uv);
     float metallic = saturate(Metallic * metallicRoughness.b);
     float roughness = clamp(Roughness * metallicRoughness.g, MinRoughness, 1.0f);
