@@ -15,6 +15,9 @@ internal sealed class GlbParser : IModelParser
     private const int ComponentTypeUShort = 5123;
     private const int ComponentTypeUInt = 5125;
     private const int ComponentTypeFloat = 5126;
+    private const int ModeTriangles = 4;
+    private const int ModeTriangleStrip = 5;
+    private const int ModeTriangleFan = 6;
 
     private static readonly string[] FileExtensions = [".glb", ".gltf"];
 
@@ -339,6 +342,9 @@ internal sealed class GlbParser : IModelParser
                 if (!prim.TryGetProperty("attributes", out var attrs)) continue;
                 if (!attrs.TryGetProperty("POSITION", out var posAccIdxElem)) continue;
 
+                int mode = prim.TryGetProperty("mode", out var modeElem) ? modeElem.GetInt32() : ModeTriangles;
+                if (mode != ModeTriangles && mode != ModeTriangleStrip && mode != ModeTriangleFan) continue;
+
                 int posAccIdx = posAccIdxElem.GetInt32();
                 int normAccIdx = attrs.TryGetProperty("NORMAL", out var normElem) ? normElem.GetInt32() : -1;
                 int uvAccIdx = attrs.TryGetProperty("TEXCOORD_0", out var uvElem) ? uvElem.GetInt32() : -1;
@@ -354,7 +360,8 @@ internal sealed class GlbParser : IModelParser
                 var colors = colAccIdx >= 0 ? ReadVector4Array(root, binData, colAccIdx) : null;
                 var indices = indAccIdx >= 0 ? ReadIntArray(root, binData, indAccIdx) : null;
 
-                int indexAddCount = indices?.Length ?? positions.Length;
+                int sourceIndexCount = indices?.Length ?? positions.Length;
+                int indexAddCount = mode == ModeTriangles ? sourceIndexCount : Math.Max(0, (sourceIndexCount - 2) * 3);
                 if (positions.Length > limits.MaxVertices - allVertices.Count || indexAddCount > limits.MaxIndices - allIndices.Count) return;
 
                 var normalTransform = Matrix4x4.Invert(transform, out var inverseTransform)
@@ -383,18 +390,22 @@ internal sealed class GlbParser : IModelParser
                 }
 
                 int startIndex = allIndices.Count;
-                if (indices != null)
+                if (mode == ModeTriangles)
                 {
-                    foreach (var idx in indices)
+                    for (int i = 0; i < sourceIndexCount; i++)
                     {
-                        allIndices.Add(idx + vertexOffset);
+                        allIndices.Add(GetSourceIndex(indices, i) + vertexOffset);
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < positions.Length; i++)
+                    for (int i = 2; i < sourceIndexCount; i++)
                     {
-                        allIndices.Add(i + vertexOffset);
+                        int a = mode == ModeTriangleFan ? 0 : ((i & 1) == 0 ? i - 2 : i - 1);
+                        int b = mode == ModeTriangleFan ? i - 1 : ((i & 1) == 0 ? i - 1 : i - 2);
+                        allIndices.Add(GetSourceIndex(indices, a) + vertexOffset);
+                        allIndices.Add(GetSourceIndex(indices, b) + vertexOffset);
+                        allIndices.Add(GetSourceIndex(indices, i) + vertexOffset);
                     }
                 }
 
@@ -662,6 +673,8 @@ internal sealed class GlbParser : IModelParser
 
         return buffer != -1;
     }
+
+    private static int GetSourceIndex(int[]? indices, int position) => indices?[position] ?? position;
 
     private static byte[]? TryLoadExternalBuffer(JsonElement root, string modelPath)
     {
