@@ -10,9 +10,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Rendering;
 
 internal sealed class GpuResourceFactory(ITextureService textureService)
 {
-    public unsafe GpuResourceCacheItem? Create(ID3D11Device device, Model3DData model, out bool textureLoadFailed)
+    public unsafe GpuResourceCacheItem? Create(ID3D11Device device, Model3DData model)
     {
-        textureLoadFailed = false;
         ArgumentNullException.ThrowIfNull(device);
         if (model.Vertices.Length == 0 || model.Indices.Length == 0) return null;
 
@@ -67,14 +66,12 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
             var cachedTexturePaths = new List<string>();
             var countedTexturePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            bool anyTextureFailed = false;
             for (int i = 0; i < parts.Length; i++)
             {
-                gpuBytes += LoadTexture(device, parts[i].TexturePath, textures, i, cachedTexturePaths, countedTexturePaths, ref anyTextureFailed);
-                gpuBytes += LoadTexture(device, parts[i].MetallicRoughnessTexturePath, metallicRoughnessTextures, i, cachedTexturePaths, countedTexturePaths, ref anyTextureFailed);
+                gpuBytes += LoadTexture(device, parts[i].TexturePath, textures, i, cachedTexturePaths, countedTexturePaths);
+                gpuBytes += LoadTexture(device, parts[i].MetallicRoughnessTexturePath, metallicRoughnessTextures, i, cachedTexturePaths, countedTexturePaths);
                 if (!Model3DSettings.Default.IsGpuMemoryPerModelAllowed(gpuBytes)) break;
             }
-            textureLoadFailed = anyTextureFailed;
 
             if (!Model3DSettings.Default.IsGpuMemoryPerModelAllowed(gpuBytes))
             {
@@ -110,7 +107,7 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
         }
     }
 
-    private long LoadTexture(ID3D11Device device, string texturePath, ID3D11ShaderResourceView?[] target, int index, List<string> cachedTexturePaths, HashSet<string> countedTexturePaths, ref bool anyTextureFailed)
+    private long LoadTexture(ID3D11Device device, string texturePath, ID3D11ShaderResourceView?[] target, int index, List<string> cachedTexturePaths, HashSet<string> countedTexturePaths)
     {
         if (string.IsNullOrEmpty(texturePath) || !File.Exists(texturePath)) return 0;
 
@@ -118,7 +115,6 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
         {
             var (view, textureBytes) = textureService.CreateShaderResourceView(texturePath, device);
             target[index] = view;
-            if (view is null) anyTextureFailed = true;
             if (textureBytes > 0 && countedTexturePaths.Add(texturePath))
             {
                 cachedTexturePaths.Add(texturePath);
@@ -128,7 +124,6 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
         }
         catch
         {
-            anyTextureFailed = true;
             return 0;
         }
     }
