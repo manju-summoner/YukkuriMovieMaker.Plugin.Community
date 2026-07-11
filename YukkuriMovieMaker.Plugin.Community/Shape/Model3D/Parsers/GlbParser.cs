@@ -488,8 +488,9 @@ internal sealed class GlbParser : IModelParser
                         if (pbr.TryGetProperty("metallicRoughnessTexture", out var mrTexProp)
                             && mrTexProp.TryGetProperty("index", out var mrTexIdxProp))
                         {
+                            int mrTexCoord = mrTexProp.TryGetProperty("texCoord", out var mrTexCoordProp) ? mrTexCoordProp.GetInt32() : 0;
                             int mrTexIdx = mrTexIdxProp.GetInt32();
-                            if (mrTexIdx >= 0 && mrTexIdx < textures.Count)
+                            if (mrTexCoord == texCoordSet && mrTexIdx >= 0 && mrTexIdx < textures.Count)
                             {
                                 int imgIdx = textures[mrTexIdx];
                                 if (imgIdx >= 0 && imgIdx < images.Count)
