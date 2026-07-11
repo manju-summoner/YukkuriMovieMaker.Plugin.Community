@@ -25,6 +25,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
             double ScatterAngleDegree,
             double Speed,
             double Spread,
+            double WindAngleDegree,
+            double WindSpeed,
             double Gravity,
             double Turbulence,
             double Rotation,
@@ -130,11 +132,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
             var orderRange = orderMax - orderMin;
 
             var scatterAngle = (float)(parameter.ScatterAngleDegree * Math.PI / 180);
+            var windAngle = (float)(parameter.WindAngleDegree * Math.PI / 180);
             //%パラメータの実値へのマッピング（100%基準）
-            var speed = (float)(parameter.Speed * 2);            //px/s
-            var spread = (float)(parameter.Spread * 2);          //px/s
-            var gravity = (float)(parameter.Gravity * 6);        //px/s^2
-            var turbulence = (float)(parameter.Turbulence * 0.6);//px
+            var speed = (float)(parameter.Speed * 2);            //初速(px/s)
+            var spread = (float)(parameter.Spread * 2);          //初速(px/s)
+            var windSpeed = (float)(parameter.WindSpeed * 2);    //終端速度(px/s)
+            var gravity = (float)(parameter.Gravity * 2);        //終端速度(px/s)
+            var turbulence = (float)(parameter.Turbulence / 100 * 3);//渦の角速度(rad/s)
             var rotationSpeed = (float)(parameter.Rotation / 100 * 2 * Math.PI);//rad/s
             var lifetime = Math.Max(0.01, parameter.LifetimeSeconds);
 
@@ -155,15 +159,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
                 Shrink = Math.Clamp((float)(parameter.Shrink / 100), 0, 1),
                 Fade = Math.Clamp((float)(parameter.Fade / 100), 0, 1),
                 Seed = (parameter.Seed & 0xFFFF) / 65536f,
+                Wind = new Vector2(MathF.Cos(windAngle), MathF.Sin(windAngle)) * windSpeed,
             };
 
             //出力範囲：粒子の最大変位ぶん入力範囲を広げる。
-            //粒子毎の経過時間は寿命でクランプされる（寿命が尽きた粒子は描画されない）ため、
-            //変位の上限は寿命までの移動量で抑えられる
+            //粒子毎の経過時間は寿命でクランプされ、さらに移動時間はease-outで飽和する
+            //（寿命が尽きた粒子は描画されない）ため、変位の上限は寿命までの移動量で抑えられる。
+            //粒子は最大1.5倍まで膨張するためコーナー分も1.5倍で見積もる
             var totalSeconds = time.TotalSeconds;
             var tauMax = Math.Min(totalSeconds, lifetime);
-            var maxCorner = MathF.Max(gridRight - gridLeft, gridBottom - gridTop) / ParticlizeCustomEffect.MaxCellsPerAxis + (float)parameter.Size;
-            var expand = (float)((speed + spread) * tauMax + 0.5 * Math.Abs(gravity) * tauMax * tauMax + turbulence + maxCorner);
+            var maxCorner = (MathF.Max(gridRight - gridLeft, gridBottom - gridTop) / ParticlizeCustomEffect.MaxCellsPerAxis + (float)parameter.Size) * 1.5f;
+            var expand = (float)((speed + spread + windSpeed + Math.Abs(gravity)) * tauMax + maxCorner);
             var fullyDissolved = totalSeconds >= constants.DissolveSpan + lifetime;
             if (fullyDissolved)
             {

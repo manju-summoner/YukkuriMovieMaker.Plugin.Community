@@ -63,6 +63,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
         public double Spread { get => spread; set => Set(ref spread, value); }
         double spread = 50;
 
+        [Display(GroupName = nameof(Texts.ScatterGroup), Name = nameof(Texts.WindAngle), Description = nameof(Texts.WindAngleDesc), Order = 1050, ResourceType = typeof(Texts))]
+        [TextBoxSlider("F1", "°", -180, 180)]
+        [Range(-36000d, 36000d)]
+        [DefaultValue(0d)]
+        public double WindAngle { get => windAngle; set => Set(ref windAngle, value); }
+        double windAngle = 0;
+
+        [Display(GroupName = nameof(Texts.ScatterGroup), Name = nameof(Texts.WindSpeed), Description = nameof(Texts.WindSpeedDesc), Order = 1060, ResourceType = typeof(Texts))]
+        [TextBoxSlider("F1", "%", 0, 100)]
+        [Range(0d, 10000d)]
+        [DefaultValue(0d)]
+        public double WindSpeed { get => windSpeed; set => Set(ref windSpeed, value); }
+        double windSpeed = 0;
+
         [Display(GroupName = nameof(Texts.ScatterGroup), Name = nameof(Texts.Gravity), Description = nameof(Texts.GravityDesc), Order = 1100, ResourceType = typeof(Texts))]
         [TextBoxSlider("F1", "%", -100, 100)]
         [Range(-10000d, 10000d)]

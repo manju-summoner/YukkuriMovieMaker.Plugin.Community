@@ -42,18 +42,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
             public Vector2 DissolveDirection;
             public float OrderMin;
             public float OrderInvRange;
-            //c2: 飛散速度ベクトル(px/s)、拡散速度(px/s)、重力加速度(px/s^2)
+            //c2: 飛散の初速ベクトル(px/s)、拡散の初速(px/s)、重力の終端速度(px/s)
             public Vector2 ScatterVelocity;
             public float SpreadVelocity;
             public float Gravity;
-            //c3: 揺らぎ振幅(px)、回転速度(rad/s)、縮小量(0-1)、フェード量(0-1)
+            //c3: 渦の角速度(rad/s)、回転速度(rad/s)、縮小量(0-1)、フェード量(0-1)
             public float Turbulence;
             public float RotationSpeed;
             public float Shrink;
             public float Fade;
-            //c4: 乱数シード＋予約
+            //c4: 乱数シード、風の終端速度ベクトル(px/s)、予約
             public float Seed;
-            public float Pad1, Pad2, Pad3;
+            public Vector2 Wind;
+            public float Pad;
         }
 
         //Initializeはbase呼び出し（CreateEffect）中に走るため、頂点データはコンストラクタ引数を

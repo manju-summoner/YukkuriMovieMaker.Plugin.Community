@@ -29,6 +29,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
                 item.ScatterAngle,
                 item.Speed,
                 item.Spread,
+                item.WindAngle,
+                item.WindSpeed,
                 item.Gravity,
                 item.Turbulence,
                 item.Rotation,

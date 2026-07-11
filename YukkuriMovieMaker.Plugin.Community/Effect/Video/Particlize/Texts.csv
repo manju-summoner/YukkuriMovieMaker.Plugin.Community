@@ -27,6 +27,10 @@ Speed,,飛散速度,Scatter speed,飞散速度,飛散速度,비산 속도,Veloci
 SpeedDesc,,粒子が飛んでいく速さ,Speed at which particles fly away.,粒子飞出的速度。,粒子飛出的速度。,입자가 날아가는 속도.,Velocidad a la que vuelan las partículas.,سرعة تطاير الجسيمات.,Kecepatan partikel terbang.
 Spread,,拡散,Spread,扩散,擴散,확산,Difusión,انتشار,Sebaran
 SpreadDesc,,粒子ごとのランダムな飛散の強さ,Strength of random scatter per particle.,每个粒子随机飞散的强度。,每個粒子隨機飛散的強度。,입자별 무작위 비산의 강도.,Intensidad de la dispersión aleatoria por partícula.,قوة التناثر العشوائي لكل جسيم.,Kekuatan hamburan acak per partikel.
+WindAngle,,風向き,Wind direction,风向,風向,바람 방향,Dirección del viento,اتجاه الرياح,Arah angin
+WindAngleDesc,,粒子が風に流されていく方向,Direction in which particles are carried by the wind.,粒子随风飘动的方向。,粒子隨風飄動的方向。,입자가 바람에 흘러가는 방향.,Dirección en la que el viento arrastra las partículas.,الاتجاه الذي تنجرف فيه الجسيمات مع الرياح.,Arah partikel terbawa angin.
+WindSpeed,,風速,Wind speed,风速,風速,풍속,Velocidad del viento,سرعة الرياح,Kecepatan angin
+WindSpeedDesc,,風に流される強さ（静止から徐々に加速して風速に近づく）,Strength of the wind drift (particles gradually accelerate toward the wind speed).,随风飘动的强度（从静止逐渐加速接近风速）。,隨風飄動的強度（從靜止逐漸加速接近風速）。,바람에 흘러가는 강도(정지 상태에서 서서히 가속하여 풍속에 가까워짐).,Intensidad del arrastre del viento (las partículas aceleran gradualmente hacia la velocidad del viento).,قوة الانجراف مع الرياح (تتسارع الجسيمات تدريجيًا نحو سرعة الرياح).,Kekuatan hanyutan angin (partikel berangsur dipercepat mendekati kecepatan angin).
 Gravity,,重力,Gravity,重力,重力,중력,Gravedad,الجاذبية,Gravitasi
 GravityDesc,,粒子の落下の強さ,Strength of particle fall.,粒子下落的强度。,粒子下落的強度。,입자 낙하의 강도.,Intensidad de la caída de partículas.,قوة سقوط الجسيمات.,Kekuatan jatuh partikel.
 Turbulence,,揺らぎ,Turbulence,扰动,擾動,흔들림,Turbulencia,اضطراب,Turbulensi
