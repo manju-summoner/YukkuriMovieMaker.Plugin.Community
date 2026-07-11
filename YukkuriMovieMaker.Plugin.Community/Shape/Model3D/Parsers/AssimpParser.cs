@@ -126,12 +126,14 @@ internal sealed class AssimpParser : IModelParser
             ? Matrix4x4.Transpose(inverseTransform)
             : transform;
 
+        bool hasTransparentVertexColor = false;
         for (int i = 0; i < mesh.VertexCount; i++)
         {
             var rawPosition = mesh.Vertices[i];
             var rawNormal = mesh.HasNormals ? mesh.Normals[i] : new Vector3D(0, 0, 0);
             var rawTexCoord = uvChannel >= 0 ? mesh.TextureCoordinateChannels[uvChannel][i] : new Vector3D(0, 0, 0);
             var rawColor = mesh.HasVertexColors(0) ? mesh.VertexColorChannels[0][i] : new Color4D(1, 1, 1, 1);
+            if (rawColor.A < 1.0f) hasTransparentVertexColor = true;
 
             vertices.Add(new Model3DVertex
             {
@@ -148,6 +150,7 @@ internal sealed class AssimpParser : IModelParser
 
         part.IndexOffset = indexOffset;
         part.IndexCount = indices.Count - indexOffset;
+        part.ForceTransparent = hasTransparentVertexColor;
 
         parts.Add(part);
     }
