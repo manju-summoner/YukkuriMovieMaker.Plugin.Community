@@ -41,7 +41,7 @@ internal sealed class PlyParser : IModelParser
             var part = model.Parts[i];
             if (string.IsNullOrEmpty(part.TexturePath)) continue;
 
-            part.TexturePath = Path.Combine(dir, part.TexturePath);
+            part.TexturePath = ModelHelper.ResolveTexturePath(part.TexturePath, dir);
             model.Parts[i] = part;
         }
 
