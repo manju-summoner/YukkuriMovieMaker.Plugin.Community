@@ -230,9 +230,19 @@ internal sealed class PlyParser : IModelParser
         }
 
         private static float NormalizeColorComponent(float value, PlyType type)
-            => type is PlyType.Float or PlyType.Double
-                ? Math.Clamp(value, 0.0f, 1.0f)
-                : value / 255.0f;
+        {
+            float max = type switch
+            {
+                PlyType.Char => sbyte.MaxValue,
+                PlyType.Short => short.MaxValue,
+                PlyType.UShort => ushort.MaxValue,
+                PlyType.Int => int.MaxValue,
+                PlyType.UInt => uint.MaxValue,
+                PlyType.Float or PlyType.Double => 1.0f,
+                _ => byte.MaxValue,
+            };
+            return Math.Clamp(value / max, 0.0f, 1.0f);
+        }
 
         private static bool IsVertexIndexProperty(string name)
             => name is "vertex_indices" or "vertex_index";
