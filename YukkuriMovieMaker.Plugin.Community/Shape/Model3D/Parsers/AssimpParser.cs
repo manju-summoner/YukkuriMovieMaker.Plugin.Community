@@ -9,7 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
 internal sealed class AssimpParser : IModelParser
 {
     private const string DefaultEmbeddedTextureExtension = ".png";
-    private const long MaxEmbeddedPixelCount = 1024L * 1024 * 256;
+    private const long MaxEmbeddedTextureBytes = 512L * 1024 * 1024;
     private const PostProcessSteps ImportSteps =
         PostProcessSteps.Triangulate |
         PostProcessSteps.GenerateNormals |
@@ -216,7 +216,7 @@ internal sealed class AssimpParser : IModelParser
             int height = embedded.Height;
             var texels = embedded.NonCompressedData;
             if (width <= 0 || height <= 0 || texels == null) return string.Empty;
-            if ((long)width * height > MaxEmbeddedPixelCount || texels.Length < (long)width * height) return string.Empty;
+            if ((long)width * height * 4 > MaxEmbeddedTextureBytes || texels.Length < (long)width * height) return string.Empty;
 
             var pixels = new byte[width * height * 4];
             for (int i = 0; i < width * height; i++)
