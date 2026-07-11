@@ -102,9 +102,9 @@ internal sealed class AssimpParser : IModelParser
     private static void ProcessMesh(Mesh mesh, Matrix4x4 transform, Scene scene, List<Model3DVertex> vertices, List<int> indices, List<Model3DPart> parts, string modelPath)
     {
         var limits = Model3DSettings.Default;
-        if (parts.Count >= limits.MaxParts) return;
-        if (mesh.VertexCount > limits.MaxVertices - vertices.Count) return;
-        if ((long)mesh.FaceCount * 3 > limits.MaxIndices - indices.Count) return;
+        if (parts.Count >= limits.MaxParts) throw new ModelLimitExceededException();
+        if (mesh.VertexCount > limits.MaxVertices - vertices.Count) throw new ModelLimitExceededException();
+        if ((long)mesh.FaceCount * 3 > limits.MaxIndices - indices.Count) throw new ModelLimitExceededException();
 
         int vertexOffset = vertices.Count;
 
