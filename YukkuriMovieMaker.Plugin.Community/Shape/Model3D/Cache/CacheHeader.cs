@@ -3,7 +3,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Cache;
 internal readonly struct CacheHeader
 {
     public const int CurrentSignature = 0x4A424F04;
-    public const int CurrentVersion = 1;
+    public const int CurrentVersion = 2;
 
     public int Signature { get; }
     public int Version { get; }

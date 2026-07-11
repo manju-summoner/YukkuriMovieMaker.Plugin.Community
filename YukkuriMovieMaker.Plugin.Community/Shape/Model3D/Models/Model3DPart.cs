@@ -19,6 +19,8 @@ internal struct Model3DPart
     public bool IgnoreAlpha;
     public byte AddressU;
     public byte AddressV;
+    public byte AddressU2;
+    public byte AddressV2;
     public Vector3 Center;
 
     public Model3DPart()
@@ -35,6 +37,8 @@ internal struct Model3DPart
         IgnoreAlpha = false;
         AddressU = 0;
         AddressV = 0;
+        AddressU2 = 0;
+        AddressV2 = 0;
         Center = Vector3.Zero;
     }
 

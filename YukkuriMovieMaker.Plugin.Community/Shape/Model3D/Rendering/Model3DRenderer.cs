@@ -43,7 +43,7 @@ internal sealed class Model3DRenderer : IDisposable
         _perObject = new ConstantBuffer<CBPerObject>(resources.Device);
         _perMaterial = new ConstantBuffer<CBPerMaterial>(resources.Device);
 
-        _samplerBinding = [resources.SamplerState];
+        _samplerBinding = [resources.SamplerState, resources.SamplerState];
         _perFrameBinding = [_perFrame.Buffer];
         _perObjectBinding = [_perObject.Buffer];
         _perMaterialBinding = [_perMaterial.Buffer];
@@ -80,7 +80,7 @@ internal sealed class Model3DRenderer : IDisposable
 
         context.VSSetShader(_resources.VertexShader);
         context.PSSetShader(_resources.PixelShader);
-        context.PSSetSamplers(0, 1, _samplerBinding);
+        context.PSSetSamplers(0, 2, _samplerBinding);
 
         var perFrame = new CBPerFrame
         {
@@ -124,7 +124,8 @@ internal sealed class Model3DRenderer : IDisposable
         context.PSSetShaderResources(RenderingConstants.SlotBaseColorTexture, 2, _textureBinding);
 
         _samplerBinding[0] = _resources.GetSampler(part.AddressU, part.AddressV);
-        context.PSSetSamplers(0, 1, _samplerBinding);
+        _samplerBinding[1] = _resources.GetSampler(part.AddressU2, part.AddressV2);
+        context.PSSetSamplers(0, 2, _samplerBinding);
 
         var perMaterial = new CBPerMaterial
         {

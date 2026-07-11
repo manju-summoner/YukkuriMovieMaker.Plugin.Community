@@ -469,6 +469,8 @@ internal sealed class GlbParser : IModelParser
                 float alphaCutoff = 0.0f;
                 byte addressU = 0;
                 byte addressV = 0;
+                byte addressU2 = 0;
+                byte addressV2 = 0;
 
                 if (colors != null)
                 {
@@ -543,6 +545,8 @@ internal sealed class GlbParser : IModelParser
                                 if (texture.Source >= 0 && texture.Source < images.Count)
                                 {
                                     metallicRoughnessTexPath = images[texture.Source];
+                                    addressU2 = texture.U;
+                                    addressV2 = texture.V;
                                 }
                             }
                         }
@@ -562,7 +566,9 @@ internal sealed class GlbParser : IModelParser
                     ForceTransparent = forceTransparent,
                     IgnoreAlpha = !forceTransparent && alphaCutoff <= 0.0f,
                     AddressU = addressU,
-                    AddressV = addressV
+                    AddressV = addressV,
+                    AddressU2 = addressU2,
+                    AddressV2 = addressV2
                 });
             }
         }
