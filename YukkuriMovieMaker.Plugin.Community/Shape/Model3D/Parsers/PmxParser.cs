@@ -17,6 +17,7 @@ internal sealed class PmxParser : IStreamingModelParser
     private const int MaterialShadingBlockBytes = 28;
     private const int MaterialEdgeBlockBytes = 21;
     private const int MinVertexBytesWithoutBoneIndex = 37;
+    private const int MaxTextureCount = 65536;
 
     private static readonly string[] FileExtensions = [".pmx"];
 
@@ -188,6 +189,7 @@ internal sealed class PmxParser : IStreamingModelParser
     {
         int count = reader.ReadInt32();
         if (count <= 0) return [];
+        if (count > MaxTextureCount) throw new InvalidDataException(InvalidDataMessage);
         if (!HasCapacity(reader.BaseStream, count, sizeof(int))) throw new InvalidDataException(InvalidDataMessage);
 
         string modelDirectory = Path.GetDirectoryName(modelPath) ?? string.Empty;
