@@ -287,6 +287,8 @@ internal sealed class WavefrontObjParser : IModelParser
             string path = ModelHelper.ResolveTexturePath(mtlLib, baseDir);
             if (path.Length == 0 || !File.Exists(path)) return;
 
+            string mtlDir = Path.GetDirectoryName(path) ?? baseDir;
+
             using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var sr = new StreamReader(fs);
             string? line;
@@ -315,7 +317,7 @@ internal sealed class WavefrontObjParser : IModelParser
                     var data = lib[currentMat];
                     if (keyword == "map_kd")
                     {
-                        data.TexturePath = ModelHelper.ResolveTexturePath(parts[^1], baseDir);
+                        data.TexturePath = ModelHelper.ResolveTexturePath(parts[^1], mtlDir, baseDir);
                         lib[currentMat] = data;
                     }
                     else if (keyword == "kd")

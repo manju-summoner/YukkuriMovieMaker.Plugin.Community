@@ -120,6 +120,9 @@ internal static class ModelHelper
     }
 
     public static string ResolveTexturePath(string rawPath, string modelDirectory)
+        => ResolveTexturePath(rawPath, modelDirectory, modelDirectory);
+
+    public static string ResolveTexturePath(string rawPath, string baseDirectory, string containmentRoot)
     {
         if (string.IsNullOrEmpty(rawPath)) return string.Empty;
 
@@ -128,9 +131,10 @@ internal static class ModelHelper
             string normalized = rawPath.Replace('\\', Path.DirectorySeparatorChar);
             if (Path.IsPathRooted(normalized)) return string.Empty;
 
-            string directory = Path.TrimEndingDirectorySeparator(Path.GetFullPath(string.IsNullOrEmpty(modelDirectory) ? "." : modelDirectory));
-            string resolved = Path.GetFullPath(Path.Combine(directory, normalized));
-            if (!resolved.StartsWith(directory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) return string.Empty;
+            string baseFull = Path.TrimEndingDirectorySeparator(Path.GetFullPath(string.IsNullOrEmpty(baseDirectory) ? "." : baseDirectory));
+            string root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(string.IsNullOrEmpty(containmentRoot) ? "." : containmentRoot));
+            string resolved = Path.GetFullPath(Path.Combine(baseFull, normalized));
+            if (!resolved.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) return string.Empty;
 
             return resolved;
         }
