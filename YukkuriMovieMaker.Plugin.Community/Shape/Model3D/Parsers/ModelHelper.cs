@@ -123,8 +123,21 @@ internal static class ModelHelper
     {
         if (string.IsNullOrEmpty(rawPath)) return string.Empty;
 
-        string normalized = rawPath.Replace('\\', Path.DirectorySeparatorChar);
-        return Path.IsPathRooted(normalized) ? normalized : Path.Combine(modelDirectory, normalized);
+        try
+        {
+            string normalized = rawPath.Replace('\\', Path.DirectorySeparatorChar);
+            if (Path.IsPathRooted(normalized)) return string.Empty;
+
+            string directory = Path.TrimEndingDirectorySeparator(Path.GetFullPath(string.IsNullOrEmpty(modelDirectory) ? "." : modelDirectory));
+            string resolved = Path.GetFullPath(Path.Combine(directory, normalized));
+            if (!resolved.StartsWith(directory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) return string.Empty;
+
+            return resolved;
+        }
+        catch
+        {
+            return string.Empty;
+        }
     }
 
     public static void CopyToCache(string tempPath, CacheChunkWriter write)
