@@ -16,6 +16,10 @@ internal sealed class PsdTextureLoader : ITextureLoader
     private const ushort RawCompression = 0;
     private const ushort RleCompression = 1;
     private const long MaxPixelCount = 512L * 1024 * 1024 / 4;
+    private const int ChunkBytes = 65536;
+    private const int MaxRunLength = 128;
+
+    private static readonly byte[] ChannelToBgraOffset = [2, 1, 0, 3];
 
     public int Priority => 80;
 
@@ -89,57 +93,30 @@ internal sealed class PsdTextureLoader : ITextureLoader
 
         int pixelCount = (int)totalPixels;
         int usedChannels = Math.Min(channels, (ushort)4);
-        long requiredBytes = (long)pixelCount * usedChannels;
 
-        if (requiredBytes > int.MaxValue - 1024)
-        {
-            throw new InvalidOperationException("Texture data exceeds memory limits");
-        }
-
-        byte[] channelData = ArrayPool<byte>.Shared.Rent((int)requiredBytes);
-        TextureRawData? rawData = null;
-
+        var rawData = new TextureRawData(width, height);
         try
         {
             if (compression == RawCompression)
             {
-                ReadUncompressed(br, channelData, pixelCount, channels, usedChannels);
+                ReadUncompressed(br, rawData.Pixels, pixelCount, usedChannels);
             }
             else if (compression == RleCompression)
             {
-                ReadRleCompressed(br, fs, channelData, width, height, channels, usedChannels, pixelCount);
+                ReadRleCompressed(fs, rawData.Pixels, width, height, channels, usedChannels);
             }
             else
             {
                 throw new NotSupportedException("PSD Compression not supported");
             }
 
-            rawData = new TextureRawData(width, height);
-            byte[] pixels = rawData.Pixels;
-            int rOffset = 0;
-            int gOffset = pixelCount;
-            int bOffset = pixelCount * 2;
-            int aOffset = usedChannels > 3 ? pixelCount * 3 : -1;
-
-            for (int i = 0; i < pixelCount; i++)
-            {
-                int dest = i * 4;
-                pixels[dest] = channelData[bOffset + i];
-                pixels[dest + 1] = channelData[gOffset + i];
-                pixels[dest + 2] = channelData[rOffset + i];
-                pixels[dest + 3] = aOffset >= 0 ? channelData[aOffset + i] : (byte)255;
-            }
-
+            if (usedChannels < 4) FillOpaqueAlpha(rawData.Pixels, pixelCount);
             return rawData;
         }
         catch
         {
-            rawData?.Dispose();
+            rawData.Dispose();
             throw;
-        }
-        finally
-        {
-            ArrayPool<byte>.Shared.Return(channelData);
         }
     }
 
@@ -149,97 +126,118 @@ internal sealed class PsdTextureLoader : ITextureLoader
         if (len > 0) fs.Seek(len, SeekOrigin.Current);
     }
 
-    private static void ReadUncompressed(BinaryReader br, byte[] channelData, int pixelCount, int totalChannels, int usedChannels)
+    private static void ReadUncompressed(BinaryReader br, byte[] pixels, int pixelCount, int usedChannels)
     {
-        for (int ch = 0; ch < usedChannels; ch++)
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(ChunkBytes);
+        try
         {
-            int offset = ch * pixelCount;
-            int totalRead = 0;
-            while (totalRead < pixelCount)
+            for (int ch = 0; ch < usedChannels; ch++)
             {
-                int read = br.Read(channelData, offset + totalRead, pixelCount - totalRead);
-                if (read == 0) throw new EndOfStreamException();
-                totalRead += read;
+                int destOffset = ChannelToBgraOffset[ch];
+                int totalRead = 0;
+                while (totalRead < pixelCount)
+                {
+                    int read = br.Read(buffer, 0, Math.Min(ChunkBytes, pixelCount - totalRead));
+                    if (read == 0) throw new EndOfStreamException();
+
+                    for (int i = 0; i < read; i++)
+                    {
+                        pixels[(totalRead + i) * 4 + destOffset] = buffer[i];
+                    }
+                    totalRead += read;
+                }
             }
         }
-
-        if (totalChannels > usedChannels)
+        finally
         {
-            long skipBytes = (long)(totalChannels - usedChannels) * pixelCount;
-            br.BaseStream.Seek(skipBytes, SeekOrigin.Current);
+            ArrayPool<byte>.Shared.Return(buffer);
         }
     }
 
-    private static void ReadRleCompressed(BinaryReader br, FileStream fs, byte[] channelData, int width, int height, int totalChannels, int usedChannels, int pixelCount)
+    private static void ReadRleCompressed(FileStream fs, byte[] pixels, int width, int height, int totalChannels, int usedChannels)
     {
-        int totalScanlines = height * totalChannels;
-        long rleCountBytes = (long)totalScanlines * 2;
-        fs.Seek(rleCountBytes, SeekOrigin.Current);
+        long tableBytes = (long)height * totalChannels * 2;
+        if (tableBytes > fs.Length - fs.Position) throw new EndOfStreamException();
+        if (tableBytes > int.MaxValue) throw new InvalidOperationException("Texture data exceeds memory limits");
 
-        for (int ch = 0; ch < totalChannels; ch++)
+        byte[] table = ArrayPool<byte>.Shared.Rent((int)tableBytes);
+        byte[] run = ArrayPool<byte>.Shared.Rent(MaxRunLength);
+        try
         {
-            bool store = ch < usedChannels;
+            fs.ReadExactly(table, 0, (int)tableBytes);
 
-            for (int y = 0; y < height; y++)
+            for (int ch = 0; ch < usedChannels; ch++)
             {
-                int decoded = 0;
-                int rowOffset = store ? (ch * pixelCount) + (y * width) : 0;
-
-                while (decoded < width)
+                int destOffset = ChannelToBgraOffset[ch];
+                for (int y = 0; y < height; y++)
                 {
-                    int b = fs.ReadByte();
-                    if (b == -1) throw new EndOfStreamException();
-                    byte lenByte = (byte)b;
-
-                    if (lenByte == 128) continue;
-
-                    if (lenByte < 128)
-                    {
-                        int count = lenByte + 1;
-                        int remaining = width - decoded;
-                        if (count > remaining) count = remaining;
-
-                        if (store)
-                        {
-                            int destOffset = rowOffset + decoded;
-                            int read = br.Read(channelData, destOffset, count);
-                            if (read != count) throw new EndOfStreamException();
-                        }
-                        else
-                        {
-                            for (int i = 0; i < count; i++)
-                            {
-                                if (fs.ReadByte() == -1) throw new EndOfStreamException();
-                            }
-                        }
-
-                        decoded += count;
-                    }
-                    else
-                    {
-                        int count = (lenByte ^ 0xFF) + 2;
-                        int remaining = width - decoded;
-                        if (count > remaining) count = remaining;
-
-                        int val = fs.ReadByte();
-                        if (val == -1) throw new EndOfStreamException();
-
-                        if (store)
-                        {
-                            byte bVal = (byte)val;
-                            int start = rowOffset + decoded;
-                            int end = start + count;
-
-                            for (int k = start; k < end; k++)
-                            {
-                                channelData[k] = bVal;
-                            }
-                        }
-
-                        decoded += count;
-                    }
+                    int line = (ch * height + y) * 2;
+                    int lineBytes = (table[line] << 8) | table[line + 1];
+                    DecodeRleScanline(fs, pixels, (long)y * width, width, lineBytes, destOffset, run);
                 }
             }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(run);
+            ArrayPool<byte>.Shared.Return(table);
+        }
+    }
+
+    private static void DecodeRleScanline(FileStream fs, byte[] pixels, long pixelStart, int width, int lineBytes, int destOffset, byte[] run)
+    {
+        int decoded = 0;
+        int remaining = lineBytes;
+
+        while (decoded < width)
+        {
+            if (remaining <= 0) throw new InvalidDataException("Invalid PSD RLE scanline");
+
+            int b = fs.ReadByte();
+            if (b == -1) throw new EndOfStreamException();
+            remaining--;
+
+            if (b == 128) continue;
+
+            if (b < 128)
+            {
+                int count = b + 1;
+                if (count > remaining) throw new InvalidDataException("Invalid PSD RLE scanline");
+                fs.ReadExactly(run, 0, count);
+                remaining -= count;
+
+                int store = Math.Min(count, width - decoded);
+                for (int i = 0; i < store; i++)
+                {
+                    pixels[(pixelStart + decoded + i) * 4 + destOffset] = run[i];
+                }
+                decoded += count;
+            }
+            else
+            {
+                int count = 257 - b;
+                int val = fs.ReadByte();
+                if (val == -1) throw new EndOfStreamException();
+                remaining--;
+
+                byte fill = (byte)val;
+                int store = Math.Min(count, width - decoded);
+                for (int i = 0; i < store; i++)
+                {
+                    pixels[(pixelStart + decoded + i) * 4 + destOffset] = fill;
+                }
+                decoded += count;
+            }
+        }
+
+        if (remaining > 0) fs.Seek(remaining, SeekOrigin.Current);
+    }
+
+    private static void FillOpaqueAlpha(byte[] pixels, int pixelCount)
+    {
+        for (int i = 0; i < pixelCount; i++)
+        {
+            pixels[i * 4 + 3] = 255;
         }
     }
 
