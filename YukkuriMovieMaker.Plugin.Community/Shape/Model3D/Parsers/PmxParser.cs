@@ -77,6 +77,8 @@ internal sealed class PmxParser : IStreamingModelParser
             int vertexCount = reader.ReadInt32();
             if (!HasCapacity(stream, vertexCount, MinVertexBytesWithoutBoneIndex + header.BoneIndexSize))
                 throw new InvalidDataException(InvalidDataMessage);
+            if (vertexCount > Model3DSettings.Default.MaxVertices)
+                throw new ModelLimitExceededException();
 
             CullingBox bounds;
             using (var vertexTemp = CreateTempStream(vertexTempPath))
@@ -87,6 +89,8 @@ internal sealed class PmxParser : IStreamingModelParser
             int indexCount = reader.ReadInt32();
             if (!HasCapacity(stream, indexCount, header.VertexIndexSize))
                 throw new InvalidDataException(InvalidDataMessage);
+            if (indexCount > Model3DSettings.Default.MaxIndices)
+                throw new ModelLimitExceededException();
 
             using (var indexTemp = CreateTempStream(indexTempPath))
             {

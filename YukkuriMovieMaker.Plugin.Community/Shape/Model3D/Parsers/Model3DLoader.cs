@@ -69,6 +69,10 @@ internal static class Model3DLoader
                 writer.Commit();
             }
         }
+        catch (ModelLimitExceededException)
+        {
+            return new Model3DData();
+        }
         catch
         {
             return null;
