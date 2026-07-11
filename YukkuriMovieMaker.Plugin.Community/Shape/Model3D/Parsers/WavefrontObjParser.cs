@@ -201,16 +201,20 @@ internal sealed class WavefrontObjParser : IModelParser
         string currentGrp = "default";
         string currentMat = "default";
 
-        var allEvents = new List<(int globalFaceIndex, SplitEvent evt)>();
+        var allEvents = new List<(int globalFaceIndex, int sequence, SplitEvent evt)>();
         for (int i = 0; i < processorCount; i++)
         {
             int baseF = offsets[i].F;
             foreach (var e in chunkResults[i].Events)
             {
-                allEvents.Add((baseF + e.LocalFaceIndex, e));
+                allEvents.Add((baseF + e.LocalFaceIndex, allEvents.Count, e));
             }
         }
-        allEvents.Sort((a, b) => a.globalFaceIndex.CompareTo(b.globalFaceIndex));
+        allEvents.Sort((a, b) =>
+        {
+            int c = a.globalFaceIndex.CompareTo(b.globalFaceIndex);
+            return c != 0 ? c : a.sequence.CompareTo(b.sequence);
+        });
 
         int eventPtr = 0;
 
