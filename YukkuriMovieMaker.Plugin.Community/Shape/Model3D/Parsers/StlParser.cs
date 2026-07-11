@@ -125,7 +125,16 @@ internal sealed class StlParser : IModelParser
             if (c != 0) return c;
             c = va.Y.CompareTo(vb.Y);
             if (c != 0) return c;
-            return va.Z.CompareTo(vb.Z);
+            c = va.Z.CompareTo(vb.Z);
+            if (c != 0) return c;
+
+            var na = rawNormals[a];
+            var nb = rawNormals[b];
+            c = na.X.CompareTo(nb.X);
+            if (c != 0) return c;
+            c = na.Y.CompareTo(nb.Y);
+            if (c != 0) return c;
+            return na.Z.CompareTo(nb.Z);
         });
 
         var vertices = new List<Model3DVertex>(totalV);
@@ -144,17 +153,14 @@ internal sealed class StlParser : IModelParser
             {
                 int pIdx = pSort[i];
                 var p = rawPositions[pIdx];
+                var n = rawNormals[pIdx];
 
-                if (p != currP)
+                if (p != currP || n != currN)
                 {
                     uniqueIdx++;
                     currP = p;
-                    currN = rawNormals[pIdx];
+                    currN = n;
                     vertices.Add(new Model3DVertex { Position = currP, Normal = currN, TexCoord = Vector2.Zero, Color = Vector4.One });
-                }
-                else
-                {
-                    vertices[uniqueIdx] = new Model3DVertex { Position = vertices[uniqueIdx].Position, Normal = vertices[uniqueIdx].Normal + rawNormals[pIdx], TexCoord = Vector2.Zero, Color = Vector4.One };
                 }
                 indices[pIdx] = uniqueIdx;
             }
