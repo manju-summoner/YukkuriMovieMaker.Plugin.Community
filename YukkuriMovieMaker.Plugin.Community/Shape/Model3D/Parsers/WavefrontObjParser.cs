@@ -50,7 +50,7 @@ internal sealed class WavefrontObjParser : IModelParser
         int processorCount = Environment.ProcessorCount;
         var offsets = new Counts[processorCount];
         var chunkResults = new ChunkResult[processorCount];
-        int totalV = 0, totalVt = 0, totalVn = 0, totalF = 0;
+        long totalV = 0, totalVt = 0, totalVn = 0, totalF = 0;
         Model3DVertex[] vertices;
         int[] indices;
 
@@ -92,7 +92,7 @@ internal sealed class WavefrontObjParser : IModelParser
 
             var limits = Model3DSettings.Default;
             if (totalV > limits.MaxVertices || totalVt > limits.MaxVertices || totalVn > limits.MaxVertices
-                || (long)totalF * 3 > limits.MaxIndices)
+                || totalF * 3 > limits.MaxIndices)
             {
                 return new Model3DData();
             }
@@ -101,7 +101,7 @@ internal sealed class WavefrontObjParser : IModelParser
             rawVt = (Vector2*)NativeMemory.Alloc((nuint)(totalVt > 0 ? totalVt : 1), (nuint)sizeof(Vector2));
             rawVn = (Vector3*)NativeMemory.Alloc((nuint)(totalVn > 0 ? totalVn : 1), (nuint)sizeof(Vector3));
 
-            var sortArray = GC.AllocateUninitializedArray<SortableVertex>(totalF * 3, true);
+            var sortArray = GC.AllocateUninitializedArray<SortableVertex>((int)(totalF * 3), true);
 
             Parallel.For(0, processorCount, i =>
             {
@@ -110,11 +110,11 @@ internal sealed class WavefrontObjParser : IModelParser
                     rawVt + offsets[i].Vt,
                     rawVn + offsets[i].Vn,
                     sortArray,
-                    offsets[i].F * 3,
-                    counts[i].F * 3,
-                    offsets[i].V,
-                    offsets[i].Vt,
-                    offsets[i].Vn);
+                    (int)(offsets[i].F * 3),
+                    (int)(counts[i].F * 3),
+                    (int)offsets[i].V,
+                    (int)offsets[i].Vt,
+                    (int)offsets[i].Vn);
             });
 
             Array.Sort(sortArray);
@@ -145,7 +145,7 @@ internal sealed class WavefrontObjParser : IModelParser
                 int currentIdx = 0;
 
                 var first = sortArray[0];
-                GetVertexData(first.V, first.Vt, first.Vn, totalV, totalVt, totalVn, rawV, rawVt, rawVn, out Vector3 p, out Vector2 uv, out Vector3 n);
+                GetVertexData(first.V, first.Vt, first.Vn, (int)totalV, (int)totalVt, (int)totalVn, rawV, rawVt, rawVn, out Vector3 p, out Vector2 uv, out Vector3 n);
                 vertices[0] = new Model3DVertex { Position = p, TexCoord = uv, Normal = n, Color = Vector4.One };
                 indices[first.OriginalIndex] = 0;
 
@@ -157,7 +157,7 @@ internal sealed class WavefrontObjParser : IModelParser
                     if (curr.CompareTo(prev) != 0)
                     {
                         currentIdx++;
-                        GetVertexData(curr.V, curr.Vt, curr.Vn, totalV, totalVt, totalVn, rawV, rawVt, rawVn, out p, out uv, out n);
+                        GetVertexData(curr.V, curr.Vt, curr.Vn, (int)totalV, (int)totalVt, (int)totalVn, rawV, rawVt, rawVn, out p, out uv, out n);
                         vertices[currentIdx] = new Model3DVertex { Position = p, TexCoord = uv, Normal = n, Color = Vector4.One };
                     }
                     indices[curr.OriginalIndex] = currentIdx;
@@ -204,7 +204,7 @@ internal sealed class WavefrontObjParser : IModelParser
         var allEvents = new List<(int globalFaceIndex, int sequence, SplitEvent evt)>();
         for (int i = 0; i < processorCount; i++)
         {
-            int baseF = offsets[i].F;
+            int baseF = (int)offsets[i].F;
             foreach (var e in chunkResults[i].Events)
             {
                 allEvents.Add((baseF + e.LocalFaceIndex, allEvents.Count, e));
@@ -255,7 +255,7 @@ internal sealed class WavefrontObjParser : IModelParser
 
         if (totalF > startIndex)
         {
-            AddPart(parts, materialLib, lastMaterial, startIndex, totalF);
+            AddPart(parts, materialLib, lastMaterial, startIndex, (int)totalF);
         }
 
         ModelHelper.CalculateBounds(vertices, out Vector3 center, out float scale);
@@ -406,7 +406,7 @@ internal sealed class WavefrontObjParser : IModelParser
             {
                 if (*ptr <= 32)
                 {
-                    int vInFace = 0;
+                    long vInFace = 0;
                     while (ptr < end && *ptr != '\n')
                     {
                         while (ptr < end && *ptr <= 32 && *ptr != '\n') ptr++;
@@ -416,7 +416,7 @@ internal sealed class WavefrontObjParser : IModelParser
                     }
                     if (vInFace >= 3)
                     {
-                        counts.F += (vInFace - 2);
+                        counts.F += vInFace - 2;
                     }
                 }
                 else
