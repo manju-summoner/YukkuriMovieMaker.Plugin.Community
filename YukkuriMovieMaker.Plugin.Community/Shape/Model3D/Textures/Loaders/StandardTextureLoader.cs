@@ -6,7 +6,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Textures.Loaders;
 internal sealed class StandardTextureLoader : ITextureLoader
 {
     private const long MaxFileBytes = 256L * 1024 * 1024;
-    private const long MaxPixelCount = 1024L * 1024 * 256;
+    private const long MaxDecodedBytes = 512L * 1024 * 1024;
 
     public int Priority => 0;
 
@@ -27,7 +27,7 @@ internal sealed class StandardTextureLoader : ITextureLoader
         {
             var decoder = BitmapDecoder.Create(probe, BitmapCreateOptions.DelayCreation, BitmapCacheOption.None);
             var frame = decoder.Frames[0];
-            if ((long)frame.PixelWidth * frame.PixelHeight > MaxPixelCount)
+            if ((long)frame.PixelWidth * frame.PixelHeight * 4 > MaxDecodedBytes)
             {
                 throw new InvalidOperationException("Image dimensions too large");
             }
