@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Numerics;
 using System.Text;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Models;
@@ -117,7 +117,10 @@ internal static class ModelCacheFormat
 
     public static void WriteDependencies(BinaryWriter writer, IReadOnlyList<string> dependencies)
     {
-        int count = Math.Min(dependencies.Count, MaxDependencyCount);
+        if (dependencies.Count > MaxDependencyCount)
+            throw new InvalidDataException($"Too many dependencies: {dependencies.Count}");
+
+        int count = dependencies.Count;
         writer.Write(count);
 
         for (int i = 0; i < count; i++)
