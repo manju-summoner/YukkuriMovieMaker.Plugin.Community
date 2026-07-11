@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO.Compression;
 using System.Numerics;
 using System.Xml;
@@ -12,6 +12,7 @@ internal sealed class ThreeMfParser : IModelParser
     private const int MaxColorResources = 65536;
     private const int MaxBuildItems = 65536;
     private const int MaxObjects = 65536;
+    private const int MaxComponents = 65536;
 
     private static readonly string[] FileExtensions = [".3mf"];
 
@@ -46,6 +47,7 @@ internal sealed class ThreeMfParser : IModelParser
             var limits = Model3DSettings.Default;
             long totalVertices = 0;
             long totalTriangles = 0;
+            long totalComponents = 0;
 
             while (reader.Read())
             {
@@ -85,6 +87,7 @@ internal sealed class ThreeMfParser : IModelParser
                             string objectId = reader.GetAttribute("objectid") ?? "";
                             if (objectId.Length > 0)
                             {
+                                if (++totalComponents > MaxComponents) return new Model3DData();
                                 currentObject.Components.Add((objectId, ParseTransform(reader.GetAttribute("transform"))));
                             }
                         }
