@@ -14,9 +14,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
     /// - 発生時に確定する属性（初速・サイズ・寿命など）：発生時刻のアニメーション値＋通し番号kのハッシュ乱数から算出
     /// - 風・重力：フレーム毎に積分した累積ドリフトテーブルにより、飛行中の粒子にも時間変化が正確に反映される
     ///
+    /// 風・重力の変位は、線形抵抗 v' = -k(v - v_terminal) の解に従い、
+    /// 各フレームの終端速度を減衰カーネル (1 - e^(-k(t-s))) で重み付けして粒子ごとに積分する
+    /// （風・重力が一定なら従来の「終端速度へ漸近」の閉形式と厳密に一致する）。
+    ///
     /// テーブルと属性キャッシュはアニメーションのフィンガープリントで無効化する（編集されたら作り直し）。
     /// 頂点データはピン留めバッファに書き込み、ポインタ渡しでGPUへ直接コピーされる（CrashMeshBuilderと同じ方式）。
-    /// 発生時刻・ドリフト積分は「現在時刻からの相対値」で頂点へ焼き込むため、
+    /// 発生時刻・ドリフト変位は「現在時刻からの相対値」で頂点へ焼き込むため、
     /// タイムライン上の絶対時刻が大きくてもfloat精度が落ちない。
     /// </summary>
     internal sealed class ParticleOutputParticleBuilder
@@ -49,19 +53,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             float RotationSpeed,
             float SizeScale,
             float EndScale,
-            float Fade,
-            double DriftBirthX,
-            double DriftBirthY);
+            float Fade);
 
         //ピン留め頂点バッファ（GPUへのポインタ渡し用。再確保するとポインタが変わるため、Buildの戻り値を毎回使うこと）
         byte[] vertexData = GC.AllocateArray<byte>(ParticleOutputCustomEffect.InitialVertexBufferByteSize, pinned: true);
 
         //累積テーブル。インデックスは放出クロックのフレーム番号ef（te = ef/fps）。
-        //cumEmit[ef] = 時刻ef/fpsまでの累積発生数、cumDrift[ef] = 風・重力の速度ベクトルの累積積分(px)
+        //cumEmit[ef] = 時刻ef/fpsまでの累積発生数、driftV*PerFrame[ef] = そのフレームの風・重力の終端速度(px/s)
         readonly List<double> cumEmit = [0];
         readonly List<double> ratePerFrame = [];
-        readonly List<double> cumDriftX = [0];
-        readonly List<double> cumDriftY = [0];
         readonly List<double> driftVxPerFrame = [];
         readonly List<double> driftVyPerFrame = [];
 
@@ -116,13 +116,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 aliveBuffer.Reverse();
             }
 
-            var driftNow = GetDrift(te);
-
             //頂点データを書き込む。粒子が1つも無い場合は面積0のダミー1粒子で空描画にする
             var particleCount = Math.Max(1, aliveBuffer.Count);
             var byteCount = particleCount * 6 * VertexStride;
             EnsureVertexDataCapacity(byteCount);
-            var floats = MemoryMarshal.Cast<byte, float>(vertexData.AsSpan(0, byteCount));
 
             var minX = float.MaxValue;
             var minY = float.MaxValue;
@@ -131,41 +128,60 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
 
             if (aliveBuffer.Count == 0)
             {
-                floats.Clear();
+                //面積0のダミー1粒子で空描画にする。全ゼロだとシェーダーで 1/寿命=0 が 0/0=NaN を生むため、
+                //寿命など運動計算に使う属性は有効値にし、サイズ倍率0で描画されないようにする
+                var dummy = new Attr(
+                    Birth: 0, Lifetime: 1,
+                    OriginOffsetX: 0, OriginOffsetY: 0, VelocityX: 0, VelocityY: 0,
+                    Swirl: 0, RotationSpeed: 0, SizeScale: 0, EndScale: 1, Fade: 0);
+                var floats = MemoryMarshal.Cast<byte, float>(vertexData.AsSpan(0, byteCount));
+                var fi = 0;
+                WriteParticle(floats, ref fi, dummy, 0, 0, 0);
             }
             else
             {
-                var fi = 0;
-                foreach (var (_, attr) in aliveBuffer)
-                {
-                    var tau = (float)(te - attr.Birth);
-                    var birthRel = -tau;
-                    var driftRelX = (float)(attr.DriftBirthX - driftNow.X);
-                    var driftRelY = (float)(attr.DriftBirthY - driftNow.Y);
+                //粒子ごとに頂点書き込みとAABB要素（現在位置・半径）を計算する。
+                //ドリフト積分は粒子ごとに寿命分のフレームを走査するため、粒子数が多い場合は並列化する
+                var count = aliveBuffer.Count;
+                EnsureScratchCapacity(count);
+                if (count >= ParallelThreshold)
+                    Parallel.For(0, count, ProcessParticle);
+                else
+                    for (var i = 0; i < count; i++)
+                        ProcessParticle(i);
 
-                    WriteParticle(floats, ref fi, attr, birthRel, driftRelX, driftRelY);
+                for (var i = 0; i < count; i++)
+                {
+                    minX = MathF.Min(minX, scratchX[i] - scratchRadius[i]);
+                    minY = MathF.Min(minY, scratchY[i] - scratchRadius[i]);
+                    maxX = MathF.Max(maxX, scratchX[i] + scratchRadius[i]);
+                    maxY = MathF.Max(maxY, scratchY[i] + scratchRadius[i]);
+                }
+
+                void ProcessParticle(int i)
+                {
+                    var attr = aliveBuffer[i].Attr;
+                    var tau = (float)(te - attr.Birth);
+                    var (driftX, driftY) = ComputeDriftDisplacement(attr.Birth, te, 1.5 / attr.Lifetime);
+
+                    var floats = MemoryMarshal.Cast<byte, float>(vertexData.AsSpan(i * 6 * VertexStride, 6 * VertexStride));
+                    var fi = 0;
+                    WriteParticle(floats, ref fi, attr, -tau, (float)driftX, (float)driftY);
 
                     //出力範囲AABB：シェーダーと同じ式で現在位置と粒子半径を求める
                     var lifetimeInv = (float)(1 / attr.Lifetime);
                     var progress = Math.Clamp(tau * lifetimeInv, 0, 1);
                     var decay = 1.5f * lifetimeInv;
                     var tauD = (1 - MathF.Exp(-decay * tau)) / decay;
-                    var tauW = tau - tauD;
                     var swirl = attr.Swirl * tauD;
                     var (swirlSin, swirlCos) = MathF.SinCos(swirl);
-                    var driftEase = tau > 1e-4f ? tauW / tau : 0;
-                    var x = boundsCenter.X + attr.OriginOffsetX
+                    scratchX[i] = boundsCenter.X + attr.OriginOffsetX
                         + (attr.VelocityX * swirlCos - attr.VelocityY * swirlSin) * tauD
-                        - driftRelX * driftEase;
-                    var y = boundsCenter.Y + attr.OriginOffsetY
+                        + (float)driftX;
+                    scratchY[i] = boundsCenter.Y + attr.OriginOffsetY
                         + (attr.VelocityX * swirlSin + attr.VelocityY * swirlCos) * tauD
-                        - driftRelY * driftEase;
-                    var radius = cornerBase * attr.SizeScale * float.Lerp(1, attr.EndScale, progress);
-
-                    minX = MathF.Min(minX, x - radius);
-                    minY = MathF.Min(minY, y - radius);
-                    maxX = MathF.Max(maxX, x + radius);
-                    maxY = MathF.Max(maxY, y + radius);
+                        + (float)driftY;
+                    scratchRadius[i] = cornerBase * attr.SizeScale * float.Lerp(1, attr.EndScale, progress);
                 }
             }
 
@@ -180,18 +196,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 maxY);
         }
 
-        static void WriteParticle(Span<float> floats, ref int fi, in Attr attr, float birthRel, float driftRelX, float driftRelY)
+        static void WriteParticle(Span<float> floats, ref int fi, in Attr attr, float birthRel, float driftDispX, float driftDispY)
         {
             //三角形 (左上,右上,右下) と (左上,右下,左下)
-            WriteVertex(floats, ref fi, -1, -1, attr, birthRel, driftRelX, driftRelY);
-            WriteVertex(floats, ref fi, +1, -1, attr, birthRel, driftRelX, driftRelY);
-            WriteVertex(floats, ref fi, +1, +1, attr, birthRel, driftRelX, driftRelY);
-            WriteVertex(floats, ref fi, -1, -1, attr, birthRel, driftRelX, driftRelY);
-            WriteVertex(floats, ref fi, +1, +1, attr, birthRel, driftRelX, driftRelY);
-            WriteVertex(floats, ref fi, -1, +1, attr, birthRel, driftRelX, driftRelY);
+            WriteVertex(floats, ref fi, -1, -1, attr, birthRel, driftDispX, driftDispY);
+            WriteVertex(floats, ref fi, +1, -1, attr, birthRel, driftDispX, driftDispY);
+            WriteVertex(floats, ref fi, +1, +1, attr, birthRel, driftDispX, driftDispY);
+            WriteVertex(floats, ref fi, -1, -1, attr, birthRel, driftDispX, driftDispY);
+            WriteVertex(floats, ref fi, +1, +1, attr, birthRel, driftDispX, driftDispY);
+            WriteVertex(floats, ref fi, -1, +1, attr, birthRel, driftDispX, driftDispY);
         }
 
-        static void WriteVertex(Span<float> floats, ref int fi, float cornerX, float cornerY, in Attr attr, float birthRel, float driftRelX, float driftRelY)
+        static void WriteVertex(Span<float> floats, ref int fi, float cornerX, float cornerY, in Attr attr, float birthRel, float driftDispX, float driftDispY)
         {
             //レイアウトはParticleOutputVertex.hlslのVSIn・ParticleOutputCustomEffectのInputElementDescriptionと一致させること
             floats[fi++] = cornerX;
@@ -208,8 +224,61 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             floats[fi++] = attr.EndScale;
             floats[fi++] = attr.Fade;
             floats[fi++] = 0;
-            floats[fi++] = driftRelX;
-            floats[fi++] = driftRelY;
+            floats[fi++] = driftDispX;
+            floats[fi++] = driftDispY;
+        }
+
+        //粒子ごとのドリフト積分は寿命分のフレーム走査を伴うため、粒子数がこの値以上なら並列化する
+        const int ParallelThreshold = 1024;
+
+        float[] scratchX = [];
+        float[] scratchY = [];
+        float[] scratchRadius = [];
+
+        void EnsureScratchCapacity(int count)
+        {
+            if (scratchX.Length >= count)
+                return;
+            var newSize = Math.Max(1024, scratchX.Length);
+            while (newSize < count)
+                newSize *= 2;
+            scratchX = new float[newSize];
+            scratchY = new float[newSize];
+            scratchRadius = new float[newSize];
+        }
+
+        /// <summary>
+        /// 風・重力による粒子の変位(px)を計算する。
+        /// 線形抵抗 v' = -k(v - v_terminal) の解より、変位 = ∫ v_terminal(s) × (1 - e^(-k(te-s))) ds （s: 発生時刻から現在まで）。
+        /// 終端速度はフレーム内で一定（テーブルの値）として、セグメントごとに解析的に積分する。
+        /// 風・重力が一定なら v × (tau - tauD) となり、従来の閉形式と厳密に一致する。
+        /// </summary>
+        (double X, double Y) ComputeDriftDisplacement(double birth, double te, double k)
+        {
+            var efMax = driftVxPerFrame.Count - 1;
+            if (efMax < 0 || te <= birth)
+                return (0, 0);
+
+            var fps = tableFps;
+            var efTop = Math.Clamp((int)Math.Floor(te * fps), 0, efMax);
+            var efBirth = Math.Clamp((int)Math.Floor(birth * fps), 0, efTop);
+            var stepFactor = Math.Exp(-k / fps);
+
+            double dispX = 0, dispY = 0;
+            var e1 = 1.0;//セグメント終端の減衰係数 e^(-k(te-s1))。最新セグメントの終端はteなので1
+            for (var ef = efTop; ef >= efBirth; ef--)
+            {
+                var frameStart = (double)ef / fps;
+                var s0 = Math.Max(birth, frameStart);
+                var s1 = ef == efTop ? te : (double)(ef + 1) / fps;
+                var isFullStep = ef != efTop && s0 == frameStart;
+                var e0 = e1 * (isFullStep ? stepFactor : Math.Exp(-k * (s1 - s0)));
+                var weight = (s1 - s0) - (e1 - e0) / k;
+                dispX += driftVxPerFrame[ef] * weight;
+                dispY += driftVyPerFrame[ef] * weight;
+                e1 = e0;
+            }
+            return (dispX, dispY);
         }
 
         void EnsureVertexDataCapacity(int byteCount)
@@ -265,10 +334,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             cumEmit.Clear();
             cumEmit.Add(0);
             ratePerFrame.Clear();
-            cumDriftX.Clear();
-            cumDriftX.Add(0);
-            cumDriftY.Clear();
-            cumDriftY.Add(0);
             driftVxPerFrame.Clear();
             driftVyPerFrame.Clear();
             attrCache.Clear();
@@ -313,12 +378,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 var windAngle = SampleAt(item.WindAngle, ef) * Math.PI / 180;
                 var windSpeed = Math.Max(0, SampleAt(item.WindSpeed, ef));
                 var gravity = SampleAt(item.Gravity, ef);
-                var vx = Math.Cos(windAngle) * windSpeed;
-                var vy = Math.Sin(windAngle) * windSpeed + gravity;
-                driftVxPerFrame.Add(vx);
-                driftVyPerFrame.Add(vy);
-                cumDriftX.Add(cumDriftX[ef] + vx / tableFps);
-                cumDriftY.Add(cumDriftY[ef] + vy / tableFps);
+                driftVxPerFrame.Add(Math.Cos(windAngle) * windSpeed);
+                driftVyPerFrame.Add(Math.Sin(windAngle) * windSpeed + gravity);
             }
         }
 
@@ -349,16 +410,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             var rate = ratePerFrame[ef];
             var fraction = rate > 0 ? (k - cumEmit[ef]) / rate : 0;
             return (double)ef / tableFps + fraction;
-        }
-
-        /// <summary>時刻teまでの風・重力の累積ドリフト積分(px)。フレーム内は線形補間</summary>
-        (double X, double Y) GetDrift(double te)
-        {
-            if (te <= 0 || driftVxPerFrame.Count == 0)
-                return (0, 0);
-            var ef = Math.Clamp((int)Math.Floor(te * tableFps), 0, driftVxPerFrame.Count - 1);
-            var frac = te - (double)ef / tableFps;
-            return (cumDriftX[ef] + driftVxPerFrame[ef] * frac, cumDriftY[ef] + driftVyPerFrame[ef] * frac);
         }
 
         /// <summary>粒子kの発生時に確定する属性を計算する（キャッシュあり）</summary>
@@ -397,8 +448,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             var speedFactor = double.Lerp(1, 0.3 + 0.7 * h2, randomness);
             var velocity = speed * speedFactor;
 
-            var (driftBirthX, driftBirthY) = GetDrift(birth);
-
             var attr = new Attr(
                 birth,
                 lifetime,
@@ -410,9 +459,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 (float)(rotation * (h5 * 2 - 1)),
                 (float)(size * double.Lerp(1, 0.5 + h3, randomness)),
                 (float)endScale,
-                (float)fade,
-                driftBirthX,
-                driftBirthY);
+                (float)fade);
 
             //スクラブで無制限に溜まらないよう、上限を超えたら丸ごと捨てる（再計算は安価）
             if (attrCache.Count >= AttrCacheLimit)

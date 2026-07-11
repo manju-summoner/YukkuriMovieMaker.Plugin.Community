@@ -28,8 +28,8 @@ struct VSIn
     float4 velocitySwirlRotate : TEXCOORD1;
     //x: 1/寿命(1/s)、y: 寿命終了時のスケール、z: フェード量(0-1)、w: 予約
     float4 lifeScaleFade : TEXCOORD2;
-    //発生時点のドリフト積分-現在のドリフト積分（px）
-    float2 driftRel : TEXCOORD3;
+    //風・重力による現在までのドリフト変位（px。CPU側で減衰カーネルを積分済み）
+    float2 driftDisplacement : TEXCOORD3;
 };
 
 struct VSOut
@@ -50,10 +50,9 @@ VSOut main(VSIn input)
     float visible = (tau >= 0.0f && tau * lifetimeInv < 1.0f) ? 1.0f : 0.0f;
 
     //線形抵抗 v' = -k(v - v_terminal) の減衰運動（粒子化と同じモデル）。
-    //初速項の変位 = v0 * tauD（1/kに飽和）、風・重力項の変位はドリフト積分の差 × ease係数（終端速度へ漸近）
+    //初速項の変位 = v0 * tauD（1/kに飽和）。風・重力項の変位はCPU側で減衰カーネルを積分して頂点に焼き込み済み
     float decay = 1.5f * lifetimeInv;
     float tauD = (1.0f - exp(-decay * tau)) / decay;
-    float tauW = tau - tauD;
 
     //揺らぎ：初速の向きを粒子ごとの角速度で旋回させ、直進ではなく渦を巻く軌道にする
     float swirl = input.velocitySwirlRotate.z * tauD;
@@ -64,12 +63,8 @@ VSOut main(VSIn input)
         velocity.x * swirlCos - velocity.y * swirlSin,
         velocity.x * swirlSin + velocity.y * swirlCos);
 
-    //風・重力によるドリフト変位。driftRel = 積分(発生時) - 積分(現在) なので符号を反転して使う。
-    //ease係数 tauW/tau は風・重力が一定なら従来の「終端速度へ漸近」と厳密に一致する
-    float driftEase = tau > 1e-4f ? tauW / tau : 0.0f;
-    float2 driftDisplacement = -input.driftRel * driftEase;
 
-    float2 position = boundsCenterHalf.xy + input.birthSizeOrigin.zw + swirlVelocity * tauD + driftDisplacement;
+    float2 position = boundsCenterHalf.xy + input.birthSizeOrigin.zw + swirlVelocity * tauD + input.driftDisplacement;
 
     //フェードは「最初ゆっくり、最後ほど急」の曲線
     float fadeProgress = 1.0f - (1.0f - progress) * (1.0f - progress);
