@@ -9,6 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
 internal sealed class ThreeMfParser : IModelParser
 {
     private const int MaxComponentDepth = 32;
+    private const int MaxColorResources = 65536;
 
     private static readonly string[] FileExtensions = [".3mf"];
 
@@ -55,13 +56,13 @@ internal sealed class ThreeMfParser : IModelParser
                     else if (reader.LocalName == "base")
                     {
                         string val = reader.GetAttribute("displaycolor") ?? "#FFFFFFFF";
-                        if (ParseColor(val, out var col)) colorMap[currentResourcePid + ":" + resourceIndex] = col;
+                        if (colorMap.Count < MaxColorResources && ParseColor(val, out var col)) colorMap[currentResourcePid + ":" + resourceIndex] = col;
                         resourceIndex++;
                     }
                     else if (reader.LocalName == "color")
                     {
                         string val = reader.GetAttribute("color") ?? "#FFFFFFFF";
-                        if (ParseColor(val, out var col)) colorMap[currentResourcePid + ":" + resourceIndex] = col;
+                        if (colorMap.Count < MaxColorResources && ParseColor(val, out var col)) colorMap[currentResourcePid + ":" + resourceIndex] = col;
                         resourceIndex++;
                     }
                     else if (reader.LocalName == "object")
