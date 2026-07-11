@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
@@ -127,7 +127,7 @@ internal sealed class Model3DRenderer : IDisposable
             Metallic = part.Metallic,
             Roughness = part.Roughness,
             AlphaCutoff = part.AlphaCutoff,
-            ForceOpaque = isOpaquePass && part.AlphaCutoff <= 0.0f ? 1.0f : 0.0f
+            ForceOpaque = isOpaquePass && part.IgnoreAlpha && uiBaseColor.W >= 1.0f ? 1.0f : 0.0f
         };
         _perMaterial.Update(context, ref perMaterial);
         context.PSSetConstantBuffers(RenderingConstants.CbSlotPerMaterial, 1, _perMaterialBinding);

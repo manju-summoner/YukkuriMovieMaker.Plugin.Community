@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Numerics;
 using System.Text;
 using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Models;
@@ -67,6 +67,7 @@ internal static class ModelCacheFormat
         writer.Write(part.Roughness);
         writer.Write(part.AlphaCutoff);
         writer.Write(part.ForceTransparent);
+        writer.Write(part.IgnoreAlpha);
     }
 
     public static Model3DPart ReadPart(BinaryReader reader)
@@ -91,6 +92,7 @@ internal static class ModelCacheFormat
         float roughness = reader.ReadSingle();
         float alphaCutoff = reader.ReadSingle();
         bool forceTransparent = reader.ReadBoolean();
+        bool ignoreAlpha = reader.ReadBoolean();
 
         return new Model3DPart
         {
@@ -102,7 +104,8 @@ internal static class ModelCacheFormat
             Metallic = metallic,
             Roughness = roughness,
             AlphaCutoff = alphaCutoff,
-            ForceTransparent = forceTransparent
+            ForceTransparent = forceTransparent,
+            IgnoreAlpha = ignoreAlpha
         };
     }
 

@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Models;
 
@@ -16,6 +16,7 @@ internal struct Model3DPart
     public float Roughness;
     public float AlphaCutoff;
     public bool ForceTransparent;
+    public bool IgnoreAlpha;
     public Vector3 Center;
 
     public Model3DPart()
@@ -29,6 +30,7 @@ internal struct Model3DPart
         Roughness = DefaultRoughness;
         AlphaCutoff = 0.0f;
         ForceTransparent = false;
+        IgnoreAlpha = false;
         Center = Vector3.Zero;
     }
 

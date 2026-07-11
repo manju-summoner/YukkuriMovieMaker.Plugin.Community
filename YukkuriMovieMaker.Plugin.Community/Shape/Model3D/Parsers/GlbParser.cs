@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Numerics;
 using System.Text;
 using System.Text.Json;
@@ -512,7 +512,8 @@ internal sealed class GlbParser : IModelParser
                     Metallic = metallic,
                     Roughness = roughness,
                     AlphaCutoff = alphaCutoff,
-                    ForceTransparent = forceTransparent
+                    ForceTransparent = forceTransparent,
+                    IgnoreAlpha = !forceTransparent && alphaCutoff <= 0.0f
                 });
             }
         }
