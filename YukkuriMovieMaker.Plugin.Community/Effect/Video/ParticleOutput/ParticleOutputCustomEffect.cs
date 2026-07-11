@@ -11,83 +11,63 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
 {
     /// <summary>
     /// パーティクル出力エフェクトのD2Dカスタムエフェクト。
-    /// 静的な頂点バッファ（粒子スロット番号＋コーナーオフセット）を頂点シェーダーでラスタライズし、
-    /// 粒子の発生タイミング・軌道・回転・フェードは毎フレーム更新する定数バッファだけで計算する。
-    /// スロットは周期的に再利用され、スロット番号×世代番号のハッシュで乱数が決まるため、
-    /// タイムライン上のどの時刻から評価しても同じ絵になる（スクラブ安全）。
+    /// CPU側（<see cref="ParticleOutputParticleBuilder"/>）が毎フレーム構築する
+    /// 「生存中の粒子の発生時点の属性」を動的頂点バッファへ転送し、
+    /// 経過時間に応じた運動は頂点シェーダーが計算する。
+    /// 全パラメータのアニメーションに対応するため、粒子ごとの属性は定数ではなく頂点データで渡す。
+    ///
+    /// 頂点データはピン留め済みバッファの {ポインタ, バイト数, 世代カウンタ} だけをプロパティで渡し、
+    /// GPUの頂点バッファへ直接コピーする（毎フレームのblob確保・多重コピーを避ける。CrashMeshと同じ方式）。
     ///
     /// 頂点バッファはInitializeでのみ生成できる（Initialize外でCreateVertexBufferを呼ぶと
-    /// EndDrawがd2d1.dll内部で無限ループする）ため、スロット数はコンストラクタで確定し、
-    /// 変わったら呼び出し側がエフェクトごと作り直す。
-    /// 頂点データの生成は <see cref="ParticleOutputVertexBufferBuilder"/> を参照。
+    /// EndDrawがd2d1.dll内部で無限ループする）ため、バッファサイズはコンストラクタで確定し、
+    /// 容量が足りなくなったら呼び出し側がエフェクトごと作り直す。
     /// </summary>
     internal sealed class ParticleOutputCustomEffect : D2D1CustomShaderEffectBase
     {
-        /// <summary>同時に存在できる粒子（スロット）の最大数</summary>
+        /// <summary>同時に存在できる粒子の最大数</summary>
         public const int MaxParticles = 65536;
-        /// <summary>最大頂点数（スロット × 6頂点）</summary>
+        /// <summary>最大頂点数（粒子 × 6頂点）</summary>
         public const int MaxVertices = MaxParticles * 6;
-        /// <summary>頂点1つあたりのバイト数（スロット番号xy + コーナーオフセットxy）</summary>
-        public const int VertexStride = 16;
+        /// <summary>頂点1つあたりのバイト数（コーナーxy + 属性float14個）</summary>
+        public const int VertexStride = 64;
+        /// <summary>頂点バッファの初期バイト数（1024粒子が収まる大きさ）</summary>
+        public const int InitialVertexBufferByteSize = 1024 * 6 * VertexStride;
 
-        /// <summary>頂点シェーダーへ渡す粒子運動の定数。レイアウトはParticleOutputVertex.hlslのConstantsと一致させること。</summary>
+        /// <summary>頂点シェーダーへ渡す定数。レイアウトはParticleOutputVertex.hlslのConstantsと一致させること。</summary>
         [StructLayout(LayoutKind.Sequential)]
         public struct ConstantBuffer
         {
-            //c0: 経過時間(s)、発生間隔(s)、1/寿命(1/s)、ばらつき(0-1)
-            public float Time;
-            public float EmitInterval;
-            public float LifetimeInv;
-            public float Randomness;
-            //c1: 入力範囲の中心（シーン座標）、入力範囲の半径(px)
+            //c0: 入力範囲の中心（シーン座標）、入力範囲の半径(px)
             public Vector2 BoundsCenter;
             public Vector2 BoundsHalf;
-            //c2: 射出方向(rad)、拡散の半角(rad)、初速(px/s)、重力の終端速度(px/s)
-            public float EmitAngle;
-            public float SpreadHalfAngle;
-            public float Speed;
-            public float Gravity;
-            //c3: 揺らぎの角速度(rad/s)、回転速度の最大値(rad/s)、寿命終了時のスケール、フェード量(0-1)
-            public float Turbulence;
-            public float RotationSpeed;
-            public float EndScale;
-            public float Fade;
-            //c4: 乱数シード、風の終端速度ベクトル(px/s)、スロット数
-            public float Seed;
-            public Vector2 Wind;
-            public float SlotCount;
-            //c5: 粒子の半径(px)、発生範囲の半径(px)
-            public Vector2 PatchHalf;
-            public Vector2 EmitRange;
         }
 
-        //Initializeはbase呼び出し（CreateEffect）中に走るため、頂点データはコンストラクタ引数を
+        //Initializeはbase呼び出し（CreateEffect）中に走るため、バッファサイズはコンストラクタ引数を
         //ThreadStatic経由でEffectImpl.Initializeへ渡す（CreateEffectは同一スレッドで同期実行される）
         [ThreadStatic]
-        static byte[]? initializeVertexData;
+        static int initializeVertexBufferByteSize;
 
-        /// <summary>このエフェクトが保持する粒子スロット数</summary>
-        public int SlotCount { get; }
+        /// <summary>このエフェクトが保持する頂点バッファのバイト数。これを超える頂点データは描画できない。</summary>
+        public int VertexBufferByteSize { get; }
 
-        public ParticleOutputCustomEffect(IGraphicsDevicesAndContext devices, byte[] vertexData)
-            : base(CreateWithVertexData(devices, vertexData))
+        public ParticleOutputCustomEffect(IGraphicsDevicesAndContext devices, int vertexBufferByteSize)
+            : base(CreateWithVertexBufferSize(devices, vertexBufferByteSize))
         {
-            SlotCount = vertexData.Length / (VertexStride * 6);
+            VertexBufferByteSize = vertexBufferByteSize;
         }
 
-        static nint CreateWithVertexData(IGraphicsDevicesAndContext devices, byte[] vertexData)
+        static nint CreateWithVertexBufferSize(IGraphicsDevicesAndContext devices, int vertexBufferByteSize)
         {
-            initializeVertexData = vertexData;
-            try
-            {
-                return Create<EffectImpl>(devices);
-            }
-            finally
-            {
-                initializeVertexData = null;
-            }
+            initializeVertexBufferByteSize = vertexBufferByteSize;
+            return Create<EffectImpl>(devices);
         }
 
+        public float VertexCount
+        {
+            set => SetValue((int)EffectImpl.Properties.VertexCount, value);
+            get => GetFloatValue((int)EffectImpl.Properties.VertexCount);
+        }
         public float DeformedLeft
         {
             set => SetValue((int)EffectImpl.Properties.DeformedLeft, value);
@@ -115,7 +95,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             get => GetBoolValue((int)EffectImpl.Properties.NearestNeighbor);
         }
 
-        /// <summary>粒子運動の定数を設定する（Timeが毎フレーム変わるため同値スキップは発生しない）</summary>
+        long vertexDataGeneration;
+
+        /// <summary>
+        /// 頂点データの場所を設定する。
+        /// pointerはピン留め済み（移動しない）メモリを指し、次に本メソッドが呼ばれるか
+        /// エフェクトが破棄されるまで有効であり続けること。
+        /// 頂点レイアウトは <see cref="ParticleOutputParticleBuilder"/> を参照。
+        /// </summary>
+        public void SetVertexData(nint pointer, int byteCount)
+        {
+            //ポインタ・バイト数が前回と同じでもバッファの中身は毎フレーム変わる。
+            //D2DのSetValueは値が前回と同一だとsetter呼び出しを省略し、頂点バッファへのコピーが
+            //走らなくなるため、世代カウンタを含めて記述子の値を毎回変化させる
+            var descriptor = new byte[24];
+            MemoryMarshal.Write(descriptor.AsSpan(0, 8), (long)pointer);
+            MemoryMarshal.Write(descriptor.AsSpan(8, 8), (long)byteCount);
+            MemoryMarshal.Write(descriptor.AsSpan(16, 8), ++vertexDataGeneration);
+            SetValue((int)EffectImpl.Properties.VertexData, descriptor);
+        }
+
+        /// <summary>頂点シェーダーの定数を設定する</summary>
         public void SetConstants(in ConstantBuffer constants)
         {
             var bytes = new byte[Marshal.SizeOf<ConstantBuffer>()];
@@ -141,11 +141,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             static readonly Guid GUID_VertexShader = Guid.NewGuid();
 
             ID2D1VertexBuffer? vertexBuffer;
-            int vertexCount;
+            int vertexBufferByteSize;
 
+            nint _dataPointer;
+            int _dataByteCount;
+            long _dataGeneration;
+            int _uploadedByteCount;
+            bool _vertexDataDirty;
+            int _vertexCount;
             ConstantBuffer _constants;
             bool _nearestNeighbor;
             float _deformedLeft, _deformedTop, _deformedRight, _deformedBottom;
+
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.VertexCount)]
+            public float VertexCount
+            {
+                get => _vertexCount;
+                set => _vertexCount = Math.Clamp((int)value, 0, MaxVertices);
+            }
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.DeformedLeft)]
             public float DeformedLeft { get => _deformedLeft; set => _deformedLeft = ClampExtent(value); }
@@ -182,10 +195,42 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                         return;
                     vertexBuffer?.Dispose();
                     vertexBuffer = null;
+                    vertexBufferByteSize = 0;
+                    _dataPointer = 0;
+                    _dataByteCount = 0;
                 }
             }
 
-            /// <summary>粒子運動の定数（ConstantBufferをそのままバイト列にしたもの）</summary>
+            /// <summary>
+            /// 頂点データの場所（24バイト: long ポインタ + long バイト数 + long 世代カウンタ）。
+            /// 世代カウンタはSetValueの同値スキップを避けるためのもので、中身は使用しない。
+            /// ラッパーの <see cref="ParticleOutputCustomEffect.SetVertexData"/> から設定される。
+            /// </summary>
+            [CustomEffectProperty(PropertyType.Blob, (int)Properties.VertexData)]
+            public byte[] VertexData
+            {
+                get
+                {
+                    var descriptor = new byte[24];
+                    MemoryMarshal.Write(descriptor.AsSpan(0, 8), (long)_dataPointer);
+                    MemoryMarshal.Write(descriptor.AsSpan(8, 8), (long)_dataByteCount);
+                    MemoryMarshal.Write(descriptor.AsSpan(16, 8), _dataGeneration);
+                    return descriptor;
+                }
+                set
+                {
+                    if (value is null || value.Length < 16)
+                        return;
+                    _dataPointer = (nint)MemoryMarshal.Read<long>(value.AsSpan(0, 8));
+                    _dataByteCount = (int)MemoryMarshal.Read<long>(value.AsSpan(8, 8));
+                    if (value.Length >= 24)
+                        _dataGeneration = MemoryMarshal.Read<long>(value.AsSpan(16, 8));
+                    _vertexDataDirty = true;
+                    UpdateConstants();
+                }
+            }
+
+            /// <summary>頂点シェーダーの定数（ConstantBufferをそのままバイト列にしたもの）</summary>
             [CustomEffectProperty(PropertyType.Blob, (int)Properties.Constants)]
             public byte[] Constants
             {
@@ -215,20 +260,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 var vertexShaderBytes = PackResourceReader.ReadAllBytes(ShaderResourceUri.Get("ParticleOutputVertex"));
                 effectContext.LoadVertexShader(GUID_VertexShader, vertexShaderBytes, vertexShaderBytes.Length);
 
-                //頂点バッファの生成はInitialize中のみ可能。スロットは静的なので初期データ付きのStaticで作り、以後書き換えない。
-                //データはラッパーのコンストラクタからThreadStatic経由で受け取る。
-                var vertexData = initializeVertexData ?? new byte[6 * VertexStride];
-                vertexCount = Math.Clamp(vertexData.Length / VertexStride, 0, MaxVertices);
+                //頂点バッファの生成はInitialize中のみ可能。サイズはラッパーのコンストラクタからThreadStatic経由で受け取る。
+                vertexBufferByteSize = Math.Clamp(initializeVertexBufferByteSize, 6 * VertexStride, MaxVertices * VertexStride);
 
-                //インスタンスごとに内容が異なるためresourceIdは指定せず共有しない
+                //インスタンスごとに内容が異なるためresourceIdは指定せず共有しない。初期データは不要（data=[]）
                 vertexBuffer = effectContext.CreateVertexBuffer(
-                    new VertexBufferProperties(1, VertexUsage.Static, vertexData, vertexData.Length),
+                    new VertexBufferProperties(1, VertexUsage.Dynamic, [], vertexBufferByteSize),
                     null,
                     new CustomVertexBufferProperties(
                         vertexShaderBytes,
                         VertexStride,
                         new InputElementDescription("POSITION", 0, Format.R32G32_Float, 0, 0),
-                        new InputElementDescription("TEXCOORD", 0, Format.R32G32_Float, 0, 8)));
+                        new InputElementDescription("TEXCOORD", 0, Format.R32G32B32A32_Float, 0, 8),
+                        new InputElementDescription("TEXCOORD", 1, Format.R32G32B32A32_Float, 0, 24),
+                        new InputElementDescription("TEXCOORD", 2, Format.R32G32B32A32_Float, 0, 40),
+                        new InputElementDescription("TEXCOORD", 3, Format.R32G32_Float, 0, 56)));
             }
 
             public override void SetDrawInfo(ID2D1DrawInfo drawInfo)
@@ -247,21 +293,39 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 });
             }
 
-            protected override void UpdateConstants()
+            protected override unsafe void UpdateConstants()
             {
                 if (drawInformation is null || vertexBuffer is null)
                     return;
 
                 drawInformation.SetVertexShaderConstantBuffer(in _constants);
 
-                //頂点数0のVertexRangeはE_INVALIDARGになるため、頂点がある場合のみ設定する
-                if (vertexCount > 0)
+                if (_vertexDataDirty && _dataPointer != 0 && _dataByteCount > 0)
+                {
+                    vertexBuffer.Map(out var mapped, vertexBufferByteSize);
+                    try
+                    {
+                        var copyBytes = Math.Min(_dataByteCount, vertexBufferByteSize);
+                        Buffer.MemoryCopy((void*)_dataPointer, (void*)mapped, vertexBufferByteSize, copyBytes);
+                        _uploadedByteCount = copyBytes;
+                    }
+                    finally
+                    {
+                        vertexBuffer.Unmap();
+                    }
+                    _vertexDataDirty = false;
+                }
+
+                //頂点数0のVertexRangeはE_INVALIDARGになるため、頂点データが揃ってから設定する。
+                //転送済み範囲を超える頂点は未初期化データの描画になるため範囲をクランプする。
+                var drawCount = Math.Min(_vertexCount, _uploadedByteCount / VertexStride);
+                if (drawCount > 0)
                 {
                     drawInformation.SetVertexProcessing(
                         vertexBuffer,
                         VertexOptions.None,
                         null,
-                        new VertexRange(0, vertexCount),
+                        new VertexRange(0, drawCount),
                         GUID_VertexShader);
                 }
             }
@@ -271,7 +335,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 //粒子は入力画像全域からサンプリングするため、クランプせず全域を保持する
                 inputRect = inputRects[0];
 
-                //飛散後の粒子群のAABBが出力範囲。まだAABB未設定の場合は入力範囲を返す
+                //粒子群のAABBが出力範囲。まだAABB未設定の場合は入力範囲を返す
                 if (_deformedRight > _deformedLeft && _deformedBottom > _deformedTop)
                 {
                     outputRect = new RawRect(
@@ -321,6 +385,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 DeformedBottom = 4,
                 ReleaseResources = 5,
                 NearestNeighbor = 6,
+                VertexData = 7,
+                VertexCount = 8,
             }
         }
     }

@@ -1,5 +1,5 @@
 Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
-ParticleOutput,,パーティクル出力,Particle output,粒子输出,粒子輸出,파티클 출력,Salida de partículas,إخراج الجسيمات,Keluaran partikel
+ParticleOutput,,パーティクル,Particles,粒子,粒子,파티클,Partículas,جسيمات,Partikel
 TagParticle,,パーティクル,particle,粒子,粒子,파티클,partícula,جسيمات,partikel
 TagSparkle,,キラキラ,sparkle,闪耀,閃耀,반짝임,destello,بريق,kilau
 TagSnow,,雪,snow,雪,雪,눈,nieve,ثلج,salju
@@ -43,3 +43,7 @@ Fade,,フェード,Fade,淡出,淡出,페이드,Desvanecimiento,تلاشي,Pudar
 FadeDesc,,寿命の終わりで粒子を透明にする量,Amount by which particles fade out at the end of their lifetime.,粒子在寿命结束时变透明的程度。,粒子在壽命結束時變透明的程度。,수명이 끝날 때 입자가 투명해지는 정도.,Cantidad de desvanecimiento de las partículas al final de su vida útil.,مقدار تلاشي الجسيمات عند نهاية عمرها.,Besar partikel memudar di akhir masa hidupnya.
 ShowOriginal,,元の画像を表示,Show original image,显示原图像,顯示原圖像,원본 이미지 표시,Mostrar imagen original,عرض الصورة الأصلية,Tampilkan gambar asli
 ShowOriginalDesc,,粒子に加えて元の画像も表示する,Shows the original image in addition to the particles.,除粒子外同时显示原图像。,除粒子外同時顯示原圖像。,입자와 함께 원본 이미지도 표시합니다.,Muestra la imagen original además de las partículas.,يعرض الصورة الأصلية بالإضافة إلى الجسيمات.,Menampilkan gambar asli selain partikel.
+EmitX,,X,X,X,X,X,X,X,X
+EmitXDesc,,粒子が発生する位置のXオフセット（粒子は発生した瞬間の位置から飛ぶ）,X offset of the emission position. Particles fly from the position at the moment they are emitted.,粒子发射位置的X偏移（粒子从发射瞬间的位置飞出）。,粒子發射位置的X偏移（粒子從發射瞬間的位置飛出）。,입자가 발생하는 위치의 X 오프셋(입자는 발생한 순간의 위치에서 날아갑니다).,Desplazamiento X de la posición de emisión. Las partículas vuelan desde la posición del momento en que se emiten.,إزاحة X لموضع الانبعاث. تنطلق الجسيمات من موضع لحظة انبعاثها.,Offset X posisi emisi. Partikel terbang dari posisi saat dipancarkan.
+EmitY,,Y,Y,Y,Y,Y,Y,Y,Y
+EmitYDesc,,粒子が発生する位置のYオフセット（粒子は発生した瞬間の位置から飛ぶ）,Y offset of the emission position. Particles fly from the position at the moment they are emitted.,粒子发射位置的Y偏移（粒子从发射瞬间的位置飞出）。,粒子發射位置的Y偏移（粒子從發射瞬間的位置飛出）。,입자가 발생하는 위치의 Y 오프셋(입자는 발생한 순간의 위치에서 날아갑니다).,Desplazamiento Y de la posición de emisión. Las partículas vuelan desde la posición del momento en que se emiten.,إزاحة Y لموضع الانبعاث. تنطلق الجسيمات من موضع لحظة انبعاثها.,Offset Y posisi emisi. Partikel terbang dari posisi saat dipancarkan.

@@ -1,6 +1,7 @@
 //パーティクル出力エフェクトの頂点シェーダー。
-//頂点バッファは静的（粒子スロット番号＋コーナーオフセットのみ）で、粒子の発生・運動は毎フレームの定数だけで計算する。
-//スロットは周期的に再利用され、スロット番号×世代番号のハッシュで乱数を決めるため、どの時刻から評価しても同じ絵になる。
+//CPU側（ParticleOutputParticleBuilder）が毎フレーム、生存中の粒子の「発生時点で確定した属性」を
+//頂点データに焼き込み、本シェーダーは経過時間に応じた運動（減衰・渦・ドリフト・回転・縮小・フェード）を計算する。
+//発生時刻とドリフト積分は「現在時刻からの相対値」で渡されるため、タイムライン上の絶対時刻が大きくてもfloat精度が落ちない。
 
 //Direct2Dが自動供給するシーン→クリップ/入力テクセル変換（この規約の型のまま宣言すること）
 cbuffer Direct2DTransforms : register(b0)
@@ -13,26 +14,22 @@ cbuffer Direct2DTransforms : register(b0)
 
 cbuffer Constants : register(b1)
 {
-    //x: 経過時間(s)、y: 発生間隔(s)、z: 1/寿命(1/s)、w: ばらつき(0-1)
-    float4 timeRateLife : packoffset(c0);
     //xy: 入力範囲の中心（シーン座標）、zw: 入力範囲の半径（px）
-    float4 boundsCenterHalf : packoffset(c1);
-    //x: 射出方向(rad)、y: 拡散の半角(rad)、z: 初速(px/s)、w: 重力の終端速度(px/s)
-    float4 emission : packoffset(c2);
-    //x: 揺らぎの角速度(rad/s)、y: 回転速度の最大値(rad/s)、z: 寿命終了時のスケール、w: フェード量(0-1)
-    float4 motion : packoffset(c3);
-    //x: 乱数シード、yz: 風の終端速度ベクトル(px/s)、w: スロット数
-    float4 seedWind : packoffset(c4);
-    //xy: 粒子の半径（px）、zw: 発生範囲の半径（px）
-    float4 patchEmit : packoffset(c5);
+    float4 boundsCenterHalf : packoffset(c0);
 };
 
 struct VSIn
 {
-    //x: 粒子スロット番号、y: 予約
-    float2 slot : POSITION;
-    //粒子中心からのコーナー（-1～+1）
-    float2 corner : TEXCOORD;
+    //粒子中心からのコーナー（-1から+1）
+    float2 corner : POSITION;
+    //x: 発生時刻-現在時刻(s, 0以下)、y: サイズ倍率、zw: 発生位置オフセット（px）
+    float4 birthSizeOrigin : TEXCOORD0;
+    //xy: 初速ベクトル(px/s)、z: 渦の角速度(rad/s)、w: 回転の角速度(rad/s)
+    float4 velocitySwirlRotate : TEXCOORD1;
+    //x: 1/寿命(1/s)、y: 寿命終了時のスケール、z: フェード量(0-1)、w: 予約
+    float4 lifeScaleFade : TEXCOORD2;
+    //発生時点のドリフト積分-現在のドリフト積分（px）
+    float2 driftRel : TEXCOORD3;
 };
 
 struct VSOut
@@ -43,80 +40,48 @@ struct VSOut
     float4 texelSpaceInput0 : TEXCOORD0;
 };
 
-//スロット番号と世代番号とシードから決定論的な乱数[0,1)を作る
-float Hash(float2 p, float salt)
-{
-    return frac(sin(dot(p, float2(127.1f, 311.7f)) + salt * 269.5f + seedWind.x * 419.2f) * 43758.5453f);
-}
-
 VSOut main(VSIn input)
 {
-    float time = timeRateLife.x;
-    float emitInterval = timeRateLife.y;
-    float lifetimeInv = timeRateLife.z;
-    float randomness = timeRateLife.w;
-    float slotCount = seedWind.w;
+    float tau = -input.birthSizeOrigin.x;
+    float lifetimeInv = input.lifeScaleFade.x;
+    float progress = saturate(tau * lifetimeInv);
 
-    //このスロットの直近の発生時刻と世代番号。スロットsは s*間隔 を起点に 周期=スロット数*間隔 ごとに再発生する。
-    //周期は寿命より長い（CPU側でスロット数を寿命×レート以上に確保している）ため、生存中の再利用は起きない
-    float slot = input.slot.x;
-    float cycle = slotCount * emitInterval;
-    float generation = floor((time - slot * emitInterval) / cycle);
-    float birth = slot * emitInterval + generation * cycle;
-    float tau = time - birth;
-    float progress = tau * lifetimeInv;
-
-    //発生前（時刻0以前・世代が負）か、寿命が尽きた粒子は面積0にして描画しない。
-    //時刻0ちょうどはCPU側が出力範囲を縮退させるため、可視判定もtime>0で揃えて断片が描画されないようにする
-    float visible = (time > 0.0f && generation >= 0.0f && progress < 1.0f) ? 1.0f : 0.0f;
-    progress = saturate(progress);
-
-    float2 hashKey = float2(slot, generation);
-    float h1 = Hash(hashKey, 1.0f);
-    float h2 = Hash(hashKey, 2.0f);
-    float h3 = Hash(hashKey, 3.0f);
-    float h4 = Hash(hashKey, 4.0f);
-    float h5 = Hash(hashKey, 5.0f);
-    float h6 = Hash(hashKey, 6.0f);
-    float h7 = Hash(hashKey, 7.0f);
-
-    //発生位置：入力範囲の中心＋発生範囲内のランダムオフセット
-    float2 origin = boundsCenterHalf.xy + (float2(h6, h7) * 2.0f - 1.0f) * patchEmit.zw;
-
-    //初速：射出方向±拡散の半角、速さはばらつきに応じて30%～100%に分散させる
-    float direction = emission.x + (h1 * 2.0f - 1.0f) * emission.y;
-    float speed = emission.z * lerp(1.0f, 0.3f + 0.7f * h2, randomness);
-    float2 velocity = speed * float2(cos(direction), sin(direction));
+    //CPU側が生存中の粒子だけを書き込むが、境界の数値誤差で寿命を跨いだ場合に備えて面積0で保険をかける
+    float visible = (tau >= 0.0f && tau * lifetimeInv < 1.0f) ? 1.0f : 0.0f;
 
     //線形抵抗 v' = -k(v - v_terminal) の減衰運動（粒子化と同じモデル）。
-    //初速項の変位 = v0 * tauD（1/kに飽和）、風・重力項の変位 = v_terminal * (tau - tauD)（終端速度へ漸近）
+    //初速項の変位 = v0 * tauD（1/kに飽和）、風・重力項の変位はドリフト積分の差 × ease係数（終端速度へ漸近）
     float decay = 1.5f * lifetimeInv;
     float tauD = (1.0f - exp(-decay * tau)) / decay;
     float tauW = tau - tauD;
 
     //揺らぎ：初速の向きを粒子ごとの角速度で旋回させ、直進ではなく渦を巻く軌道にする
-    float swirl = motion.x * (h4 * 2.0f - 1.0f) * tauD;
+    float swirl = input.velocitySwirlRotate.z * tauD;
     float swirlSin = sin(swirl);
     float swirlCos = cos(swirl);
+    float2 velocity = input.velocitySwirlRotate.xy;
     float2 swirlVelocity = float2(
         velocity.x * swirlCos - velocity.y * swirlSin,
         velocity.x * swirlSin + velocity.y * swirlCos);
 
-    float2 driftVelocity = float2(seedWind.y, seedWind.z + emission.w);
-    float2 position = origin + swirlVelocity * tauD + driftVelocity * tauW;
+    //風・重力によるドリフト変位。driftRel = 積分(発生時) - 積分(現在) なので符号を反転して使う。
+    //ease係数 tauW/tau は風・重力が一定なら従来の「終端速度へ漸近」と厳密に一致する
+    float driftEase = tau > 1e-4f ? tauW / tau : 0.0f;
+    float2 driftDisplacement = -input.driftRel * driftEase;
+
+    float2 position = boundsCenterHalf.xy + input.birthSizeOrigin.zw + swirlVelocity * tauD + driftDisplacement;
 
     //フェードは「最初ゆっくり、最後ほど急」の曲線
     float fadeProgress = 1.0f - (1.0f - progress) * (1.0f - progress);
-    float alpha = 1.0f - motion.w * fadeProgress;
+    float alpha = 1.0f - input.lifeScaleFade.z * fadeProgress;
 
-    //回転とスケール。サイズは寿命に沿って開始1→終了endScaleへ線形補間し、ばらつきで0.5～1.5倍に分散させる
-    float angle = motion.y * tau * (h5 * 2.0f - 1.0f);
-    float sizeFactor = lerp(1.0f, 0.5f + h3, randomness);
-    float scale = sizeFactor * lerp(1.0f, motion.z, progress) * visible;
+    //回転とスケール。サイズは寿命に沿って開始1から終了endScaleへ線形補間する
+    float angle = input.velocitySwirlRotate.w * tau;
+    float scale = input.birthSizeOrigin.y * lerp(1.0f, input.lifeScaleFade.y, progress) * visible;
     float s = sin(angle);
     float c = cos(angle);
     //先に粒子の実サイズへスケールしてから回転する（回転後の非等方スケールは形が歪む）
-    float2 scaledCorner = input.corner * patchEmit.xy * scale;
+    float2 scaledCorner = input.corner * boundsCenterHalf.zw * scale;
     float2 corner = float2(
         scaledCorner.x * c - scaledCorner.y * s,
         scaledCorner.x * s + scaledCorner.y * c);

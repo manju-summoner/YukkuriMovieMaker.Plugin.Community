@@ -10,13 +10,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
     /// <summary>
     /// パーティクル出力エフェクトの描画プロセッサ。
     /// エフェクトチェーンは inputCache（Cached=true）→ ParticleOutputCustomEffect →（元画像表示時はComposite）→ terminal。
-    /// 頂点バッファ（スロット数）は静的なため、発生頻度×寿命から決まるスロット数が変わったらエフェクトごと作り直す。
+    /// 毎フレーム <see cref="ParticleOutputParticleBuilder"/> が生存粒子の頂点データを構築し、ポインタ渡しでGPUへ転送する。
+    /// 頂点バッファの容量が足りなくなったらカスタムエフェクトごと作り直す（CreateVertexBufferはInitialize中しか呼べないため）。
     /// 生成したD2DリソースはDisposeCollectorに登録する（寿命はプロセッサと同じ）。
     /// </summary>
     internal sealed class ParticleOutputEffectProcessor : VideoEffectProcessorBase
     {
         readonly IGraphicsDevicesAndContext devices;
         readonly ParticleOutputEffect item;
+        readonly ParticleOutputParticleBuilder builder = new();
 
         public ParticleOutputEffectProcessor(IGraphicsDevicesAndContext devices, ParticleOutputEffect item) : base(devices)
         {
@@ -57,12 +59,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             isFirst = false;
             this.interpolationMode = interpolationMode;
 
-            //スロット数 = 同時に生存しうる粒子数（発生頻度×寿命）。周期がちょうど寿命だと
-            //再利用時に前の粒子と入れ替わる瞬間が見えるため、+1して周期>寿命を保証する
-            var rate = Math.Clamp(item.Rate, 0.1, 2000);
-            var lifetime = Math.Clamp(item.Lifetime, 0.01, 20);
-            var slotCount = Math.Clamp((int)Math.Ceiling(rate * lifetime) + 1, 1, ParticleOutputCustomEffect.MaxParticles);
-            EnsureCapacity(slotCount);
+            var fps = effectDescription.FPS;
+            var lengthFrames = effectDescription.ItemDuration.Frame;
+            var preroll = Math.Clamp(item.Preroll, 0, 100);
+            var prerollFrames = (int)Math.Round(preroll * fps);
+            var te = effectDescription.ItemPosition.Time.TotalSeconds + preroll;
+
+            var result = builder.Build(item, te, fps, lengthFrames, prerollFrames, item.GetHashCode(), bounds);
+
+            EnsureCapacity(result.ByteCount);
             if (particle is null)
             {
                 //カスタムエフェクトを生成できない環境ではパススルー
@@ -70,73 +75,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 return effectDescription.DrawDescription;
             }
 
-            var time = effectDescription.ItemPosition.Time.TotalSeconds + Math.Max(0, item.Preroll);
-
-            var boundsCenter = new Vector2((bounds.Left + bounds.Right) * 0.5f, (bounds.Top + bounds.Bottom) * 0.5f);
-            var boundsHalf = new Vector2(
-                MathF.Max(0, (bounds.Right - bounds.Left) * 0.5f),
-                MathF.Max(0, (bounds.Bottom - bounds.Top) * 0.5f));
-            var patchHalf = boundsHalf * (float)(Math.Max(0.1, item.Size) / 100);
-            //発生範囲は中心からの最大距離(px)。縦横同じ幅の矩形分布
-            var emitRange = new Vector2((float)Math.Max(0, item.EmitRange));
-
-            var emitAngle = (float)(item.EmitAngle * Math.PI / 180);
-            var spreadHalf = (float)(Math.Clamp(item.SpreadAngle, 0, 360) * Math.PI / 180 / 2);
-            var windAngle = (float)(item.WindAngle * Math.PI / 180);
-            var speed = (float)Math.Max(0, item.Speed);
-            var gravity = (float)item.Gravity;
-            var windSpeed = (float)Math.Max(0, item.WindSpeed);
-            var endScale = (float)(Math.Max(0, item.EndScale) / 100);
-
-            var constants = new ParticleOutputCustomEffect.ConstantBuffer
+            particle.SetVertexData(result.Pointer, result.ByteCount);
+            particle.VertexCount = result.VertexCount;
+            particle.SetConstants(new ParticleOutputCustomEffect.ConstantBuffer
             {
-                Time = (float)time,
-                EmitInterval = (float)(1 / rate),
-                LifetimeInv = (float)(1 / lifetime),
-                Randomness = Math.Clamp((float)(item.Randomness / 100), 0, 1),
-                BoundsCenter = boundsCenter,
-                BoundsHalf = boundsHalf,
-                EmitAngle = emitAngle,
-                SpreadHalfAngle = spreadHalf,
-                Speed = speed,
-                Gravity = gravity,
-                Turbulence = (float)(Math.Max(0, item.Turbulence) / 100 * 3),//渦の角速度(rad/s)、100%=3rad/s
-                RotationSpeed = (float)(Math.Max(0, item.Rotation) * Math.PI / 180),
-                EndScale = endScale,
-                Fade = Math.Clamp((float)(item.Fade / 100), 0, 1),
-                Seed = (item.GetHashCode() & 0xFFFF) / 65536f,
-                Wind = new Vector2(MathF.Cos(windAngle), MathF.Sin(windAngle)) * windSpeed,
-                SlotCount = particle.SlotCount,
-                PatchHalf = patchHalf,
-                EmitRange = emitRange,
-            };
+                BoundsCenter = new Vector2((bounds.Left + bounds.Right) * 0.5f, (bounds.Top + bounds.Bottom) * 0.5f),
+                BoundsHalf = new Vector2(
+                    MathF.Max(0, (bounds.Right - bounds.Left) * 0.5f),
+                    MathF.Max(0, (bounds.Bottom - bounds.Top) * 0.5f)),
+            });
 
-            //出力範囲：入力範囲を粒子の最大変位ぶん広げる。
-            //初速項の変位はease-outで v0×寿命/1.5 に飽和し、風・重力項は経過時間（寿命でクランプ）に比例する。
-            //粒子はばらつきで最大1.5倍まで大きくなるため、コーナー分は1.5倍×サイズ変化で見積もる
-            if (time <= 0)
+            if (result.HasParticles)
             {
-                //まだ粒子が1つも存在しない。極小の出力範囲で空描画にする
+                particle.DeformedLeft = result.Left;
+                particle.DeformedTop = result.Top;
+                particle.DeformedRight = result.Right;
+                particle.DeformedBottom = result.Bottom;
+            }
+            else
+            {
+                //粒子が1つも無い。極小の出力範囲で空描画にする
                 particle.DeformedLeft = -1;
                 particle.DeformedTop = -1;
                 particle.DeformedRight = 1;
                 particle.DeformedBottom = 1;
             }
-            else
-            {
-                var tauMax = (float)Math.Min(time, lifetime);
-                var cornerRadius = patchHalf.Length() * 1.5f * MathF.Max(1, endScale);
-                var expand =
-                    speed * (float)lifetime / 1.5f
-                    + (windSpeed + MathF.Abs(gravity)) * tauMax
-                    + MathF.Max(emitRange.X, emitRange.Y)
-                    + cornerRadius;
-                particle.DeformedLeft = bounds.Left - expand;
-                particle.DeformedTop = bounds.Top - expand;
-                particle.DeformedRight = bounds.Right + expand;
-                particle.DeformedBottom = bounds.Bottom + expand;
-            }
-            particle.SetConstants(constants);
 
             terminal.SetInput(0, item.ShowOriginal ? compositeOutput : particleOutput, true);
             return effectDescription.DrawDescription;
@@ -144,20 +107,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            //環境がカスタムエフェクトに対応しているかを最小の頂点データで確認する
-            using (var probe = new ParticleOutputCustomEffect(devices, new byte[6 * ParticleOutputCustomEffect.VertexStride]))
+            //環境がカスタムエフェクトに対応しているかを確認しつつ、初期容量のエフェクトを作る
+            var probe = new ParticleOutputCustomEffect(devices, ParticleOutputCustomEffect.InitialVertexBufferByteSize);
+            if (!probe.IsEnabled)
             {
-                if (!probe.IsEnabled)
-                    return null;
+                probe.Dispose();
+                return null;
             }
+            particle = probe;
+            disposer.Collect(particle);
 
             //粒子描画のたびに上流を再評価しないよう、入力をキャッシュしておく
             inputCache = new AffineTransform2D(devices.DeviceContext) { Cached = true };
             disposer.Collect(inputCache);
 
+            using (var output = inputCache.Output)
+                particle.SetInput(0, output, true);
+            particleOutput = particle.Output;
+            disposer.Collect(particleOutput);
+
             //「元の画像を表示」用の合成ノード。粒子（下）の上に元画像（上）を重ねる
             composite = new Composite(devices.DeviceContext) { InputCount = 2 };
             disposer.Collect(composite);
+            composite.SetInput(0, particleOutput, true);
+            using (var cached = inputCache.Output)
+                composite.SetInput(1, cached, true);
             compositeOutput = composite.Output;
             disposer.Collect(compositeOutput);
 
@@ -200,29 +174,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
         }
 
         /// <summary>
-        /// スロット数に合った静的頂点バッファを持つカスタムエフェクトを用意する。
-        /// 頂点バッファはInitializeでしか生成できないため、スロット数が変わったらエフェクトごと作り直す。
+        /// 頂点データが収まる容量のカスタムエフェクトを用意する。
+        /// 頂点バッファはInitializeでしか生成できないため、容量が足りなくなったらエフェクトごと作り直す。
         /// </summary>
-        void EnsureCapacity(int slotCount)
+        void EnsureCapacity(int byteCount)
         {
-            if (particle is not null && particle.SlotCount == slotCount)
+            if (particle is null || particle.VertexBufferByteSize >= byteCount)
                 return;
 
-            var vertexData = ParticleOutputVertexBufferBuilder.Build(slotCount);
-            var newEffect = new ParticleOutputCustomEffect(devices, vertexData);
+            var newSize = particle.VertexBufferByteSize;
+            while (newSize < byteCount)
+                newSize *= 2;
+            newSize = Math.Min(newSize, ParticleOutputCustomEffect.MaxVertices * ParticleOutputCustomEffect.VertexStride);
+
+            var newEffect = new ParticleOutputCustomEffect(devices, newSize);
             if (!newEffect.IsEnabled)
             {
-                //作り直しに失敗した場合は現在のエフェクトのまま描画を続ける
+                //作り直しに失敗した場合は現在のエフェクトのまま描画を続ける（描画範囲はクランプされる）
                 newEffect.Dispose();
                 return;
             }
 
-            if (particle is not null)
-            {
-                particle.SetInput(0, null, true);
-                disposer.RemoveAndDispose(ref particleOutput);
-                disposer.RemoveAndDispose(ref particle);
-            }
+            particle.SetInput(0, null, true);
+            disposer.RemoveAndDispose(ref particleOutput);
+            disposer.RemoveAndDispose(ref particle);
 
             particle = newEffect;
             disposer.Collect(particle);
@@ -233,10 +208,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
 
             particle.NearestNeighbor = interpolationMode is InterpolationMode.NearestNeighbor;
 
-            //合成ノードへ配線し直す（下:粒子、上:元画像）
+            //合成ノードの下側（destination）を新しい粒子出力へ差し替える
             composite.SetInput(0, particleOutput, true);
-            using (var cached = inputCache.Output)
-                composite.SetInput(1, cached, true);
         }
     }
 }
