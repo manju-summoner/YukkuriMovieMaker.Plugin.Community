@@ -581,7 +581,7 @@ internal sealed class WavefrontObjParser : IModelParser
                 var len = (int)(ptr - s);
                 if (len > 0)
                 {
-                    result.Events.Add(new SplitEvent { LocalFaceIndex = localFaceIdx, Type = type, Name = Encoding.UTF8.GetString(s, len).Trim() });
+                    AddSplitEvent(result.Events, localFaceIdx, type, Encoding.UTF8.GetString(s, len).Trim());
                 }
             }
             else
@@ -597,6 +597,17 @@ internal sealed class WavefrontObjParser : IModelParser
         }
 
         return result;
+    }
+
+    private static void AddSplitEvent(List<SplitEvent> events, int localFaceIndex, byte type, string name)
+    {
+        for (int i = events.Count - 1; i >= 0 && events[i].LocalFaceIndex == localFaceIndex; i--)
+        {
+            if (events[i].Type != type) continue;
+            events[i] = new SplitEvent { LocalFaceIndex = localFaceIndex, Type = type, Name = name };
+            return;
+        }
+        events.Add(new SplitEvent { LocalFaceIndex = localFaceIndex, Type = type, Name = name });
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
