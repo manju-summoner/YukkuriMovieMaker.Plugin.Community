@@ -9,6 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
 internal sealed class AssimpParser : IModelParser
 {
     private const string DefaultEmbeddedTextureExtension = ".png";
+    private const long MaxEmbeddedPixelCount = 1024L * 1024 * 256;
     private const PostProcessSteps ImportSteps =
         PostProcessSteps.Triangulate |
         PostProcessSteps.GenerateNormals |
@@ -198,13 +199,49 @@ internal sealed class AssimpParser : IModelParser
         if ((uint)textureIndex >= (uint)scene.TextureCount) return string.Empty;
 
         var embedded = scene.Textures[textureIndex];
-        if (!embedded.IsCompressed) return string.Empty;
+        if (!embedded.IsCompressed) return WriteUncompressedEmbeddedTexture(embedded, textureIndex, modelPath);
 
         string extension = string.IsNullOrEmpty(embedded.CompressedFormatHint)
             ? DefaultEmbeddedTextureExtension
             : "." + embedded.CompressedFormatHint;
 
         return ModelHelper.WriteEmbeddedTexture(modelPath, textureIndex, extension, embedded.CompressedData);
+    }
+
+    private static string WriteUncompressedEmbeddedTexture(EmbeddedTexture embedded, int textureIndex, string modelPath)
+    {
+        try
+        {
+            int width = embedded.Width;
+            int height = embedded.Height;
+            var texels = embedded.NonCompressedData;
+            if (width <= 0 || height <= 0 || texels == null) return string.Empty;
+            if ((long)width * height > MaxEmbeddedPixelCount || texels.Length < (long)width * height) return string.Empty;
+
+            var pixels = new byte[width * height * 4];
+            for (int i = 0; i < width * height; i++)
+            {
+                var texel = texels[i];
+                int offset = i * 4;
+                pixels[offset] = texel.B;
+                pixels[offset + 1] = texel.G;
+                pixels[offset + 2] = texel.R;
+                pixels[offset + 3] = texel.A;
+            }
+
+            var bitmap = System.Windows.Media.Imaging.BitmapSource.Create(
+                width, height, 96, 96, System.Windows.Media.PixelFormats.Bgra32, null, pixels, width * 4);
+            var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
+
+            using var stream = new MemoryStream();
+            encoder.Save(stream);
+            return ModelHelper.WriteEmbeddedTexture(modelPath, textureIndex, ".png", stream.ToArray());
+        }
+        catch
+        {
+            return string.Empty;
+        }
     }
 
     private static string FindExternalTexture(string rawPath, string modelDirectory)
