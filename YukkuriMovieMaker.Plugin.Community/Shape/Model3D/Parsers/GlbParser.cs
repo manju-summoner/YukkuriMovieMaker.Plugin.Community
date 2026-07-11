@@ -423,6 +423,18 @@ internal sealed class GlbParser : IModelParser
 
                 bool forceTransparent = false;
 
+                if (colors != null)
+                {
+                    foreach (var vertexColor in colors)
+                    {
+                        if (vertexColor.W < 1.0f)
+                        {
+                            forceTransparent = true;
+                            break;
+                        }
+                    }
+                }
+
                 if (matIdx >= 0 && materials.ValueKind == JsonValueKind.Array && matIdx < materials.GetArrayLength())
                 {
                     var mat = materials[matIdx];

@@ -115,9 +115,11 @@ internal sealed class PlyParser : IModelParser
             }
 
             bool hasNormals = false;
+            bool hasTransparentVertex = false;
             for (int i = 0; i < _vertexCount; i++)
             {
                 if (vertices[i].Color.W < 0.001f) vertices[i].Color = new Vector4(vertices[i].Color.X, vertices[i].Color.Y, vertices[i].Color.Z, 1.0f);
+                else if (vertices[i].Color.W < 1.0f) hasTransparentVertex = true;
                 if (vertices[i].Normal.LengthSquared() > 0.001f) hasNormals = true;
             }
 
@@ -137,7 +139,8 @@ internal sealed class PlyParser : IModelParser
                 new Model3DPart
                 {
                     TexturePath = _textureFile,
-                    IndexCount = indices.Count
+                    IndexCount = indices.Count,
+                    ForceTransparent = hasTransparentVertex
                 }
             };
 

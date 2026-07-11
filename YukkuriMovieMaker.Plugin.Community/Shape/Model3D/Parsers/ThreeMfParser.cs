@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO.Compression;
 using System.Numerics;
 using System.Xml;
@@ -239,6 +239,7 @@ internal sealed class ThreeMfParser : IModelParser
     {
         private readonly List<Model3DVertex> _vertices = [];
         private readonly Dictionary<Vector4, List<int>> _groupedIndices = [];
+        private readonly HashSet<Vector4> _transparentGroups = [];
         private long _emittedIndexCount;
 
         public void EmitObject(string objectId, Matrix4x4 transform)
@@ -285,6 +286,11 @@ internal sealed class ThreeMfParser : IModelParser
                     group.Add(v3);
                     _emittedIndexCount += 3;
 
+                    if (tri.Color1.W < 1.0f || tri.Color2.W < 1.0f || tri.Color3.W < 1.0f)
+                    {
+                        _transparentGroups.Add(tri.Color1);
+                    }
+
                     SetVertexColor(v1, tri.Color1);
                     SetVertexColor(v2, tri.Color2);
                     SetVertexColor(v3, tri.Color3);
@@ -322,7 +328,8 @@ internal sealed class ThreeMfParser : IModelParser
                 {
                     IndexOffset = allIndices.Count,
                     IndexCount = group.Value.Count,
-                    BaseColor = group.Key
+                    BaseColor = group.Key,
+                    ForceTransparent = _transparentGroups.Contains(group.Key)
                 });
                 allIndices.AddRange(group.Value);
             }
