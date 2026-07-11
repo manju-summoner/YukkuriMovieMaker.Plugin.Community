@@ -156,6 +156,7 @@ public enum PortType
     Bool,
     Color,
     Brush,
+    Text,
     Unknown
 }
 
@@ -264,6 +265,14 @@ public static class EffectPortCollector
                 LabelKey = display.Name ?? TextNode.BrushName ?? prop.Name, DescKey = descKey,
                 ResourceType = resourceType,
                 DefaultValue = null
+            };
+
+        if (prop.PropertyType == typeof(string))
+            return new PortDefinition
+            {
+                PropName = prop.Name, PortType = PortType.Text,
+                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
+                DefaultValue = inst as string ?? ""
             };
 
         return new PortDefinition
@@ -386,6 +395,7 @@ public static class EffectNodeTypeBuilder
             PortType.Bool => typeof(bool),
             PortType.Color => typeof(Color),
             PortType.Brush => typeof(BrushWrapper),
+            PortType.Text => typeof(string),
             _ => typeof(float)
         };
 
@@ -412,6 +422,10 @@ public static class EffectNodeTypeBuilder
                 break;
             case PortType.Brush:
                 Attr.PortColor(pb, nameof(Colors.LawnGreen));
+                break;
+            case PortType.Text:
+                Attr.TextControl(pb, (string?)def.DefaultValue ?? "");
+                Attr.PortColor(pb, nameof(Colors.MediumSeaGreen));
                 break;
         }
     }
@@ -949,6 +963,9 @@ internal static class Attr
     private static readonly ConstructorInfo ColorCtor =
         typeof(ColorPortControlAttribute).GetConstructor(Type.EmptyTypes)!;
 
+    private static readonly ConstructorInfo TextCtor =
+        typeof(TextPortControlAttribute).GetConstructor(Type.EmptyTypes)!;
+
     public static void InputPort(PropertyBuilder pb, string label, string desc, Type? resourceType,
         bool isDynamic = false)
     {
@@ -997,5 +1014,11 @@ internal static class Attr
         var defP = typeof(ColorPortControlAttribute).GetProperty(nameof(ColorPortControlAttribute.DefaultColor))!;
         pb.SetCustomAttribute(new CustomAttributeBuilder(ColorCtor, [], [defP],
             [ColorStringConverter.ToString(defaultValue)]));
+    }
+
+    public static void TextControl(PropertyBuilder pb, string defaultValue)
+    {
+        var defP = typeof(TextPortControlAttribute).GetProperty(nameof(TextPortControlAttribute.Default))!;
+        pb.SetCustomAttribute(new CustomAttributeBuilder(TextCtor, [], [defP], [defaultValue]));
     }
 }

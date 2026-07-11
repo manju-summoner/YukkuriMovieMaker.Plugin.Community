@@ -8,8 +8,12 @@ public sealed class NodeGraph
     public readonly List<NodeConnection> Connections = [];
     public readonly Dictionary<Guid, NodeVisualState> VisualStates = new();
 
-    private bool _isInTransaction;
     public IReadOnlyDictionary<Guid, NodeLogic> Nodes => _nodes;
+
+    /// <summary>
+    ///     現在BeginEditとEndEditの間の未確定編集操作の途中かどうか。
+    /// </summary>
+    public bool IsInTransaction { get; private set; }
 
     public void UpdateGraph(NodeGraph graph)
     {
@@ -77,7 +81,7 @@ public sealed class NodeGraph
 
         OnGraphChanged(new VisualStateChangedEventArgs(nodeId, visual));
 
-        if (!_isInTransaction)
+        if (!IsInTransaction)
             Commit();
     }
 
@@ -223,6 +227,7 @@ public sealed class NodeGraph
 
     public void OnGraphChanged(GraphChangedEventArgs args)
     {
+        args.IsInTransaction = IsInTransaction;
         GraphChanged?.Invoke(this, args);
     }
 
@@ -236,7 +241,7 @@ public sealed class NodeGraph
     /// </summary>
     public void BeginEdit()
     {
-        _isInTransaction = true;
+        IsInTransaction = true;
     }
 
     /// <summary>
@@ -244,8 +249,8 @@ public sealed class NodeGraph
     /// </summary>
     public void EndEdit()
     {
-        if (!_isInTransaction) return;
-        _isInTransaction = false;
+        if (!IsInTransaction) return;
+        IsInTransaction = false;
 
         Commit();
         InvalidateAll();

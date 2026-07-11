@@ -83,7 +83,45 @@ public static class BezierParser
 
         Sort(curve);
 
+        EnforceXMonotonic(curve);
+
         return curve;
+    }
+
+    /// <summary>
+    ///     読み込んだ曲線データが非単調なハンドルを持っていた場合でも、
+    ///     各ノードのハンドルのXオフセットを隣接ノードとのX距離内にクランプすることで、
+    ///     P0.X &lt;= P1.X &lt;= P2.X &lt;= P3.X を強制する。
+    ///     テキスト経由で読み込まれたデータに対しても、UI操作時と同じ単調性の保証を適用するための処理。
+    /// </summary>
+    private static void EnforceXMonotonic(BezierCurve curve)
+    {
+        for (var i = 0; i < curve.Nodes.Count; i++)
+        {
+            var node = curve.Nodes[i];
+
+            var inOffset = node.InHandle.Offset;
+            inOffset.X = Math.Min(inOffset.X, 0);
+
+            if (i > 0)
+            {
+                var maxLength = node.Position.X - curve.Nodes[i - 1].Position.X;
+                inOffset.X = Math.Max(inOffset.X, -maxLength);
+            }
+
+            node.InHandle.Offset = inOffset;
+
+            var outOffset = node.OutHandle.Offset;
+            outOffset.X = Math.Max(outOffset.X, 0);
+
+            if (i < curve.Nodes.Count - 1)
+            {
+                var maxLength = curve.Nodes[i + 1].Position.X - node.Position.X;
+                outOffset.X = Math.Min(outOffset.X, maxLength);
+            }
+
+            node.OutHandle.Offset = outOffset;
+        }
     }
 
     private static bool TryParse(string[] values, out BezierNode node)

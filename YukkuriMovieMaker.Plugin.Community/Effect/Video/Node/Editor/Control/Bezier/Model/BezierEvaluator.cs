@@ -14,19 +14,10 @@ public static class BezierEvaluator
         if (nodes.Count < 2)
             return x;
 
-        for (var i = 0; i < nodes.Count - 1; i++)
+        foreach (var segment in curve.GetSegments())
         {
-            var a = nodes[i];
-            var b = nodes[i + 1];
-
-            if (x > b.Position.X)
+            if (x > segment.P3.X)
                 continue;
-
-            var segment = new BezierSegment(
-                a.Position,
-                a.OutControlPoint,
-                b.InControlPoint,
-                b.Position);
 
             return EvaluateSegment(segment, x);
         }

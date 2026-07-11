@@ -70,28 +70,48 @@ public static class BezierEditingUtility
         node.Position = position;
     }
 
+    /// <summary>
+    ///     入力側ハンドルを移動する。
+    ///     表示上のハンドル位置はクランプしない。S字防止のための制約は
+    ///     評価時(BezierEvaluator)側で内部的にのみ適用され、見た目のハンドル位置には影響しない。
+    ///     先頭の固定ノード(0,0)は左側に接続を持たないため、InHandleは常に無効(移動不可)。
+    /// </summary>
     public static void MoveInHandle(
+        BezierCurve curve,
         BezierNode node,
         Vector offset)
     {
-        offset.X = Math.Min(offset.X, 0);
+        var index = curve.Nodes.IndexOf(node);
+
+        if (index == 0)
+            return;
 
         node.InHandle.Offset = offset;
 
         if (node.Type == BezierNodeType.Smooth)
-            MirrorToOut(node);
+            MirrorToOut(curve, node);
     }
 
+    /// <summary>
+    ///     出力側ハンドルを移動する。
+    ///     表示上のハンドル位置はクランプしない。S字防止のための制約は
+    ///     評価時(BezierEvaluator)側で内部的にのみ適用され、見た目のハンドル位置には影響しない。
+    ///     末尾の固定ノード(1,1)は右側に接続を持たないため、OutHandleは常に無効(移動不可)。
+    /// </summary>
     public static void MoveOutHandle(
+        BezierCurve curve,
         BezierNode node,
         Vector offset)
     {
-        offset.X = Math.Max(offset.X, 0);
+        var index = curve.Nodes.IndexOf(node);
+
+        if (index == curve.Nodes.Count - 1)
+            return;
 
         node.OutHandle.Offset = offset;
 
         if (node.Type == BezierNodeType.Smooth)
-            MirrorToIn(node);
+            MirrorToIn(curve, node);
     }
 
     public static void DeleteNode(
@@ -105,6 +125,7 @@ public static class BezierEditingUtility
     }
 
     public static void SetNodeType(
+        BezierCurve curve,
         BezierNode node,
         BezierNodeType type)
     {
@@ -113,11 +134,16 @@ public static class BezierEditingUtility
 
         node.Type = type;
 
-        if (type == BezierNodeType.Smooth) MirrorToOut(node);
+        if (type == BezierNodeType.Smooth) MirrorToOut(curve, node);
     }
 
-    private static void MirrorToOut(BezierNode node)
+    private static void MirrorToOut(BezierCurve curve, BezierNode node)
     {
+        var index = curve.Nodes.IndexOf(node);
+
+        if (index == 0)
+            return;
+
         var length = node.OutHandle.Offset.Length;
 
         if (length < 1e-8)
@@ -134,13 +160,16 @@ public static class BezierEditingUtility
             v *= length;
         }
 
-        v.X = Math.Max(v.X, 0);
-
         node.OutHandle.Offset = v;
     }
 
-    private static void MirrorToIn(BezierNode node)
+    private static void MirrorToIn(BezierCurve curve, BezierNode node)
     {
+        var index = curve.Nodes.IndexOf(node);
+
+        if (index == curve.Nodes.Count - 1)
+            return;
+
         var length = node.InHandle.Offset.Length;
 
         if (length < 1e-8)
@@ -156,8 +185,6 @@ public static class BezierEditingUtility
             v.Normalize();
             v *= length;
         }
-
-        v.X = Math.Min(v.X, 0);
 
         node.InHandle.Offset = v;
     }
@@ -186,14 +213,16 @@ public static class BezierEditingUtility
 
         var node = new BezierNode(result.P0123)
         {
-            Type = BezierNodeType.Smooth
+            Type = BezierNodeType.Smooth,
+            InHandle =
+            {
+                Offset = result.P012 - result.P0123
+            },
+            OutHandle =
+            {
+                Offset = result.P123 - result.P0123
+            }
         };
-
-        node.InHandle.Offset =
-            result.P012 - result.P0123;
-
-        node.OutHandle.Offset =
-            result.P123 - result.P0123;
 
         curve.Nodes.Insert(segmentIndex + 1, node);
 

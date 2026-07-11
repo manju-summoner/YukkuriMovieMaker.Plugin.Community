@@ -3,6 +3,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
 public class GraphChangedEventArgs : EventArgs
 {
     public DateTime Timestamp { get; } = DateTime.Now;
+
+    public bool IsInTransaction { get; internal set; }
 }
 
 public class NodeAddedEventArgs : GraphChangedEventArgs

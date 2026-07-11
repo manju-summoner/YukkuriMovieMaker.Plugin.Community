@@ -3,6 +3,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.Bezier;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
@@ -183,6 +184,33 @@ public static class ControlRegistrations
                     TargetNullValue = Colors.White,
                     FallbackValue = Colors.White,
                     Converter = new ObjectToColorConverter()
+                });
+            factory.SetBinding(
+                PortControlBase.BeginEditCommandProperty,
+                new Binding(nameof(PortViewModel.BeginEditCommand)));
+
+            factory.SetBinding(
+                PortControlBase.EndEditCommandProperty,
+                new Binding(nameof(PortViewModel.EndEditCommand)));
+
+            template.VisualTree = factory;
+            return template;
+        });
+        ControlRegistry.Register<BezierPort>(attr =>
+        {
+            var bezierAttr = (BezierPortControlAttribute)attr;
+            var template = new DataTemplate();
+            var factory = new FrameworkElementFactory(typeof(BezierPort));
+
+            factory.SetValue(BezierPort.DefaultProperty, bezierAttr.Default);
+
+            factory.SetBinding(BezierPort.ValueProperty,
+                new Binding(nameof(PortViewModel.CurrentValue))
+                {
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    TargetNullValue = "",
+                    FallbackValue = ""
                 });
             factory.SetBinding(
                 PortControlBase.BeginEditCommandProperty,

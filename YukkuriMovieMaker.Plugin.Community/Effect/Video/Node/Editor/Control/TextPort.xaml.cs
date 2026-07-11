@@ -49,9 +49,13 @@ public partial class TextPort
         control.OnPropertyChanged(nameof(Value));
     }
 
-    internal void OnTextBoxLostFocus(object sender, RoutedEventArgs e)
+    internal void OnTextBoxGotFocus(object sender, RoutedEventArgs e)
     {
         BeginEditCommand?.Execute(null);
+    }
+
+    internal void OnTextBoxLostFocus(object sender, RoutedEventArgs e)
+    {
         EndEditCommand?.Execute(null);
     }
 
@@ -59,7 +63,6 @@ public partial class TextPort
     {
         if (e.Key == Key.Return)
         {
-            BeginEditCommand?.Execute(null);
             EndEditCommand?.Execute(null);
         }
     }

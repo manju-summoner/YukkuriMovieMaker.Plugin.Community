@@ -144,11 +144,16 @@ public sealed class BezierCurve
             var a = Nodes[i];
             var b = Nodes[i + 1];
 
-            yield return new BezierSegment(
-                a.Position,
-                a.OutControlPoint,
-                b.InControlPoint,
-                b.Position);
+            var p0 = a.Position;
+            var p3 = b.Position;
+
+            var p1 = a.OutControlPoint;
+            var p2 = b.InControlPoint;
+
+            p1.X = Math.Clamp(p1.X, p0.X, p3.X);
+            p2.X = Math.Clamp(p2.X, p0.X, p3.X);
+
+            yield return new BezierSegment(p0, p1, p2, p3);
         }
     }
 

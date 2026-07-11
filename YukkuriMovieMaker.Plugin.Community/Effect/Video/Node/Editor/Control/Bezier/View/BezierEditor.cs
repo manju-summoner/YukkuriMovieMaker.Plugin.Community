@@ -24,16 +24,21 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
                 FrameworkPropertyMetadataOptions.AffectsRender,
                 OnViewModelChanged));
 
-    private static readonly Media.Pen GridPen = CreatePen(Media.Brushes.Gainsboro, 1);
-    private static readonly Media.Pen BorderPen = CreatePen(Media.Brushes.Gray, 1);
-    private static readonly Media.Pen CurvePen = CreatePen(Media.Brushes.DodgerBlue, 2);
-    private static readonly Media.Pen HandlePen = CreatePen(Media.Brushes.Gray, 1);
+    private static readonly Media.Pen GridPen = CreatePen(SystemColors.ControlBrush, 1);
+    private static readonly Media.Pen BorderPen = CreatePen(SystemColors.ActiveBorderBrush, 1);
+    private static readonly Media.Pen CurvePen = CreatePen(SystemColors.AccentColorBrush, 2);
+    private static readonly Media.Pen HandlePen = CreatePen(SystemColors.ActiveBorderBrush, 1);
 
-    private static readonly Media.Brush NodeBrush = Media.Brushes.White;
-    private static readonly Media.Brush SelectedNodeBrush = Media.Brushes.DodgerBlue;
-    private static readonly Media.Brush HandleBrush = Media.Brushes.DodgerBlue;
+    private static readonly Media.Brush NodeBrush = SystemColors.ControlBrush;
+    private static readonly Media.Brush SelectedNodeBrush = SystemColors.AccentColorBrush;
+    private static readonly Media.Brush HandleBrush = SystemColors.AccentColorBrush;
 
     private BezierDragContext? _dragContext;
+
+    private Vector _panOffset;
+
+    private Point? _panStartMouse;
+    private Vector _panStartOffset;
 
     static BezierEditor()
     {
@@ -55,12 +60,9 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
 
     public Point ToScreen(Point p)
     {
-        var w = Math.Max(1, ActualWidth - MarginSize * 2);
-        var h = Math.Max(1, ActualHeight - MarginSize * 2);
+        var q = ToScreenBase(p);
 
-        return new Point(
-            MarginSize + p.X * w,
-            MarginSize + (1.0 - p.Y) * h);
+        return new Point(q.X + _panOffset.X, q.Y + _panOffset.Y);
     }
 
     public Point FromScreen(Point p)
@@ -68,9 +70,25 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
         var w = Math.Max(1, ActualWidth - MarginSize * 2);
         var h = Math.Max(1, ActualHeight - MarginSize * 2);
 
+        var q = new Point(p.X - _panOffset.X, p.Y - _panOffset.Y);
+
         return new Point(
-            (p.X - MarginSize) / w,
-            1.0 - (p.Y - MarginSize) / h);
+            (q.X - MarginSize) / w,
+            1.0 - (q.Y - MarginSize) / h);
+    }
+
+    /// <summary>
+    ///     パンオフセットを適用しないベース座標変換。
+    ///     パン可能範囲の算出(コンテンツの外接矩形の計算)に用いる。
+    /// </summary>
+    private Point ToScreenBase(Point p)
+    {
+        var w = Math.Max(1, ActualWidth - MarginSize * 2);
+        var h = Math.Max(1, ActualHeight - MarginSize * 2);
+
+        return new Point(
+            MarginSize + p.X * w,
+            MarginSize + (1.0 - p.Y) * h);
     }
 
     public event EventHandler? CurveChanged;
@@ -131,6 +149,16 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
 
         switch (e.ChangedButton)
         {
+            case MouseButton.Middle:
+            {
+                _panStartMouse = mouse;
+                _panStartOffset = _panOffset;
+
+                CaptureMouse();
+
+                e.Handled = true;
+                return;
+            }
             case MouseButton.Right:
             {
                 if (hit.Node is not null)
@@ -182,15 +210,9 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
                             hit.SegmentIndex,
                             hit.T);
                         CurveChanged?.Invoke(this, EventArgs.Empty);
+                        EditCompleted?.Invoke(this, EventArgs.Empty);
 
                         ViewModel.SelectedNode = node;
-
-                        _dragContext = new BezierDragContext(
-                            BezierHitType.Node,
-                            node,
-                            mouse);
-
-                        CaptureMouse();
 
                         InvalidateVisual();
                         break;
@@ -217,6 +239,20 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
             return;
 
         var mouse = e.GetPosition(this);
+
+        if (_panStartMouse is { } panStart)
+        {
+            var delta = mouse - panStart;
+            var newOffset = _panStartOffset + delta;
+
+            newOffset = ClampPanOffset(newOffset);
+
+            _panOffset = newOffset;
+
+            InvalidateVisual();
+            return;
+        }
+
         if (_dragContext is null)
         {
             var hit = BezierHitTester.HitTest(
@@ -256,12 +292,14 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
 
             case BezierHitType.InHandle:
                 BezierEditingUtility.MoveInHandle(
+                    ViewModel.Curve,
                     _dragContext.Node,
                     model - _dragContext.Node.Position);
                 break;
 
             case BezierHitType.OutHandle:
                 BezierEditingUtility.MoveOutHandle(
+                    ViewModel.Curve,
                     _dragContext.Node,
                     model - _dragContext.Node.Position);
                 break;
@@ -274,6 +312,14 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
     protected override void OnMouseUp(MouseButtonEventArgs e)
     {
         base.OnMouseUp(e);
+
+        if (_panStartMouse is not null)
+        {
+            _panStartMouse = null;
+
+            ReleaseMouseCapture();
+            return;
+        }
 
         if (_dragContext is null)
             return;
@@ -289,12 +335,107 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
     {
         base.OnMouseLeave(e);
 
+        if (_panStartMouse is not null)
+        {
+            _panStartMouse = null;
+            ReleaseMouseCapture();
+        }
+
         if (_dragContext is null)
             return;
 
         ReleaseMouseCapture();
 
         _dragContext = null;
+    }
+
+    /// <summary>
+    ///     パンオフセットを許容範囲内にクランプする。
+    ///     許容範囲は「曲線・グリッド・制御点ハンドルを含む最小矩形(回転なし)に、
+    ///     グリッドとコントロールの間の余白(MarginSize)を加えた大きさ」に基づき、
+    ///     コンテンツがコントロール表示領域からはみ出す分だけパンできるようにする。
+    ///     コンテンツがコントロール内に収まる場合はパンを許可しない(オフセットは0にクランプされる)。
+    /// </summary>
+    private Vector ClampPanOffset(Vector offset)
+    {
+        var contentRect = ComputeContentBounds();
+
+        var viewportWidth = ActualWidth;
+        var viewportHeight = ActualHeight;
+
+        double minX, maxX;
+
+        if (contentRect.Width <= viewportWidth)
+        {
+            minX = 0;
+            maxX = 0;
+        }
+        else
+        {
+            minX = viewportWidth - contentRect.Right;
+            maxX = -contentRect.Left;
+        }
+
+        double minY, maxY;
+
+        if (contentRect.Height <= viewportHeight)
+        {
+            minY = 0;
+            maxY = 0;
+        }
+        else
+        {
+            minY = viewportHeight - contentRect.Bottom;
+            maxY = -contentRect.Top;
+        }
+
+        return new Vector(
+            Math.Clamp(offset.X, minX, maxX),
+            Math.Clamp(offset.Y, minY, maxY));
+    }
+
+    /// <summary>
+    ///     曲線のノード・制御点ハンドル・グリッドを含む、パンオフセット適用前(ToScreenBase基準)の
+    ///     最小外接矩形に、グリッドとコントロールの間の余白(MarginSize)を加えたものを返す。
+    /// </summary>
+    private Rect ComputeContentBounds()
+    {
+        var gridWidth = Math.Max(1, ActualWidth - MarginSize * 2);
+        var gridHeight = Math.Max(1, ActualHeight - MarginSize * 2);
+
+        var minX = MarginSize;
+        var minY = MarginSize;
+        var maxX = MarginSize + gridWidth;
+        var maxY = MarginSize + gridHeight;
+
+        if (ViewModel is not null)
+            foreach (var node in ViewModel.Curve.Nodes)
+            {
+                var position = ToScreenBase(node.Position);
+                var inPoint = ToScreenBase(node.InControlPoint);
+                var outPoint = ToScreenBase(node.OutControlPoint);
+
+                foreach (var p in new[] { position, inPoint, outPoint })
+                {
+                    minX = Math.Min(minX, p.X);
+                    minY = Math.Min(minY, p.Y);
+                    maxX = Math.Max(maxX, p.X);
+                    maxY = Math.Max(maxY, p.Y);
+                }
+            }
+
+        return new Rect(
+            minX - MarginSize,
+            minY - MarginSize,
+            maxX - minX + MarginSize * 2,
+            maxY - minY + MarginSize * 2);
+    }
+
+    protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+    {
+        base.OnRenderSizeChanged(sizeInfo);
+
+        _panOffset = ClampPanOffset(_panOffset);
     }
 
     private void DrawGrid(Media.DrawingContext dc)
@@ -304,24 +445,28 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
 
         for (var i = 0; i <= 4; i++)
         {
-            var x = MarginSize + width * i / 4.0;
-            var y = MarginSize + height * i / 4.0;
+            var x = MarginSize + width * i / 4.0 + _panOffset.X;
+            var y = MarginSize + height * i / 4.0 + _panOffset.Y;
 
             dc.DrawLine(
                 GridPen,
-                new Point(x, MarginSize),
-                new Point(x, MarginSize + height));
+                new Point(x, MarginSize + _panOffset.Y),
+                new Point(x, MarginSize + height + _panOffset.Y));
 
             dc.DrawLine(
                 GridPen,
-                new Point(MarginSize, y),
-                new Point(MarginSize + width, y));
+                new Point(MarginSize + _panOffset.X, y),
+                new Point(MarginSize + width + _panOffset.X, y));
         }
 
         dc.DrawRectangle(
             null,
             BorderPen,
-            new Rect(MarginSize, MarginSize, width, height));
+            new Rect(
+                MarginSize + _panOffset.X,
+                MarginSize + _panOffset.Y,
+                width,
+                height));
     }
 
     private void DrawCurve(Media.DrawingContext dc)
@@ -361,8 +506,11 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
 
     private void DrawHandles(Media.DrawingContext dc)
     {
-        foreach (var node in ViewModel!.Curve.Nodes)
+        var nodes = ViewModel!.Curve.Nodes;
+
+        for (var i = 0; i < nodes.Count; i++)
         {
+            var node = nodes[i];
             var selected = node == ViewModel.SelectedNode;
 
             if (!selected)
@@ -370,7 +518,13 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
 
             var center = ToScreen(node.Position);
 
-            if (node.InHandle.Offset.Length > 1e-6)
+            var isFirst = i == 0;
+            var isLast = i == nodes.Count - 1;
+
+            var showIn = !isFirst && (isLast || node.InHandle.Offset.Length > 1e-6);
+            var showOut = !isLast && (isFirst || node.OutHandle.Offset.Length > 1e-6);
+
+            if (showIn)
             {
                 var input = ToScreen(node.InControlPoint);
 
@@ -384,7 +538,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
                     HandleRadius);
             }
 
-            if (node.OutHandle.Offset.Length > 1e-6)
+            if (showOut)
             {
                 var output = ToScreen(node.OutControlPoint);
 
@@ -452,6 +606,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
         smooth.Click += (_, _) =>
         {
             BezierEditingUtility.SetNodeType(
+                ViewModel!.Curve,
                 node,
                 BezierNodeType.Smooth);
 
@@ -473,6 +628,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
         corner.Click += (_, _) =>
         {
             BezierEditingUtility.SetNodeType(
+                ViewModel!.Curve,
                 node,
                 BezierNodeType.Corner);
 

@@ -6,10 +6,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.Be
 
 public sealed class BezierEditorViewModel : INotifyPropertyChanged
 {
-    private BezierHitResult? hover;
-
-    private BezierNode? selectedNode;
-
     public BezierEditorViewModel(BezierCurve curve)
     {
         Curve = curve;
@@ -19,13 +15,13 @@ public sealed class BezierEditorViewModel : INotifyPropertyChanged
 
     public BezierNode? SelectedNode
     {
-        get => selectedNode;
+        get;
         set
         {
-            if (selectedNode == value)
+            if (field == value)
                 return;
 
-            selectedNode = value;
+            field = value;
             OnPropertyChanged();
         }
     }
