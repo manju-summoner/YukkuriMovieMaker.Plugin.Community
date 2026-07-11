@@ -264,37 +264,36 @@ internal sealed class AssimpParser : IModelParser
 
         cleanPath = cleanPath.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
 
-        foreach (var candidate in EnumerateTextureCandidates(cleanPath, rawPath, modelDirectory))
+        if (string.IsNullOrEmpty(modelDirectory)) return string.Empty;
+
+        string root;
+        try
         {
-            if (File.Exists(candidate)) return candidate;
+            root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(modelDirectory));
+        }
+        catch
+        {
+            return string.Empty;
+        }
+
+        foreach (var candidate in EnumerateTextureCandidates(cleanPath, modelDirectory))
+        {
+            try
+            {
+                string full = Path.GetFullPath(candidate);
+                if (!full.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) continue;
+                if (File.Exists(full)) return full;
+            }
+            catch
+            {
+            }
         }
 
         return string.Empty;
     }
 
-    private static IEnumerable<string> EnumerateTextureCandidates(string cleanPath, string rawPath, string modelDirectory)
+    private static IEnumerable<string> EnumerateTextureCandidates(string cleanPath, string modelDirectory)
     {
-        bool isRooted = false;
-        try
-        {
-            isRooted = Path.IsPathRooted(cleanPath);
-        }
-        catch
-        {
-        }
-
-        if (isRooted)
-        {
-            yield return cleanPath;
-            if (rawPath != cleanPath) yield return rawPath;
-        }
-
-        if (string.IsNullOrEmpty(modelDirectory))
-        {
-            if (!isRooted) yield return cleanPath;
-            yield break;
-        }
-
         yield return Path.Combine(modelDirectory, cleanPath);
 
         string fileName = Path.GetFileName(cleanPath);
@@ -304,14 +303,6 @@ internal sealed class AssimpParser : IModelParser
 
         foreach (var subDirectory in TextureSubDirectories)
             yield return Path.Combine(modelDirectory, subDirectory, fileName);
-
-        string? parentDirectory = Directory.GetParent(modelDirectory)?.FullName;
-        if (parentDirectory is not null)
-        {
-            yield return Path.Combine(parentDirectory, fileName);
-            foreach (var subDirectory in TextureSubDirectories)
-                yield return Path.Combine(parentDirectory, subDirectory, fileName);
-        }
 
         string baseName = Path.GetFileNameWithoutExtension(fileName);
         foreach (var extension in TextureExtensionFallbacks)
