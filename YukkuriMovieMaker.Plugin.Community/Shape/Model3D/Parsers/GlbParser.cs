@@ -422,6 +422,7 @@ internal sealed class GlbParser : IModelParser
                 string metallicRoughnessTexPath = string.Empty;
 
                 bool forceTransparent = false;
+                float alphaCutoff = 0.0f;
 
                 if (colors != null)
                 {
@@ -439,10 +440,19 @@ internal sealed class GlbParser : IModelParser
                 {
                     var mat = materials[matIdx];
 
-                    if (mat.TryGetProperty("alphaMode", out var alphaModeProp)
-                        && alphaModeProp.GetString() is "BLEND" or "MASK")
+                    if (mat.TryGetProperty("alphaMode", out var alphaModeProp))
                     {
-                        forceTransparent = true;
+                        string? alphaMode = alphaModeProp.GetString();
+                        if (alphaMode == "BLEND")
+                        {
+                            forceTransparent = true;
+                        }
+                        else if (alphaMode == "MASK")
+                        {
+                            alphaCutoff = mat.TryGetProperty("alphaCutoff", out var cutoffProp)
+                                ? Math.Clamp(cutoffProp.GetSingle(), 0.0f, 1.0f)
+                                : 0.5f;
+                        }
                     }
 
                     if (mat.TryGetProperty("pbrMetallicRoughness", out var pbr))
@@ -500,6 +510,7 @@ internal sealed class GlbParser : IModelParser
                     BaseColor = baseColor,
                     Metallic = metallic,
                     Roughness = roughness,
+                    AlphaCutoff = alphaCutoff,
                     ForceTransparent = forceTransparent
                 });
             }

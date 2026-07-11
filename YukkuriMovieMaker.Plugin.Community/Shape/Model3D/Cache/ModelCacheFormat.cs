@@ -65,6 +65,7 @@ internal static class ModelCacheFormat
         writer.Write(part.BaseColor.W);
         writer.Write(part.Metallic);
         writer.Write(part.Roughness);
+        writer.Write(part.AlphaCutoff);
         writer.Write(part.ForceTransparent);
     }
 
@@ -88,6 +89,7 @@ internal static class ModelCacheFormat
         var baseColor = new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
         float metallic = reader.ReadSingle();
         float roughness = reader.ReadSingle();
+        float alphaCutoff = reader.ReadSingle();
         bool forceTransparent = reader.ReadBoolean();
 
         return new Model3DPart
@@ -99,6 +101,7 @@ internal static class ModelCacheFormat
             BaseColor = baseColor,
             Metallic = metallic,
             Roughness = roughness,
+            AlphaCutoff = alphaCutoff,
             ForceTransparent = forceTransparent
         };
     }

@@ -14,6 +14,7 @@ internal struct Model3DPart
     public Vector4 BaseColor;
     public float Metallic;
     public float Roughness;
+    public float AlphaCutoff;
     public bool ForceTransparent;
     public Vector3 Center;
 
@@ -26,6 +27,7 @@ internal struct Model3DPart
         BaseColor = Vector4.One;
         Metallic = DefaultMetallic;
         Roughness = DefaultRoughness;
+        AlphaCutoff = 0.0f;
         ForceTransparent = false;
         Center = Vector3.Zero;
     }

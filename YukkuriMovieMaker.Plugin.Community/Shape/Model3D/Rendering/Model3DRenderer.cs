@@ -125,7 +125,8 @@ internal sealed class Model3DRenderer : IDisposable
         {
             BaseColor = part.BaseColor * uiBaseColor,
             Metallic = part.Metallic,
-            Roughness = part.Roughness
+            Roughness = part.Roughness,
+            AlphaCutoff = part.AlphaCutoff
         };
         _perMaterial.Update(context, ref perMaterial);
         context.PSSetConstantBuffers(RenderingConstants.CbSlotPerMaterial, 1, _perMaterialBinding);

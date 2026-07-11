@@ -12,6 +12,7 @@ cbuffer CBPerMaterial : register(b2)
     float4 BaseColor;
     float Metallic;
     float Roughness;
+    float AlphaCutoff;
 };
 
 Texture2D BaseColorTexture : register(t0);
@@ -197,6 +198,12 @@ float4 main(PSIn input) : SV_Target
     float4 texSample = BaseColorTexture.Sample(BaseColorSampler, input.uv);
     float4 surface = texSample * BaseColor * input.color;
     float alpha = surface.a;
+
+    if (AlphaCutoff > 0.0f)
+    {
+        clip(alpha - AlphaCutoff);
+        alpha = 1.0f;
+    }
 
     if (LightEnabled < 0.5f)
         return float4(saturate(surface.rgb) * alpha, alpha);

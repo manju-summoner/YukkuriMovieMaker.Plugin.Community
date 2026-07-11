@@ -26,4 +26,5 @@ internal struct CBPerMaterial
     public Vector4 BaseColor;
     public float Metallic;
     public float Roughness;
+    public float AlphaCutoff;
 }
