@@ -221,15 +221,11 @@ internal sealed class TextureService : ITextureService
     private static TextureRawData? DecodeAndCacheRaw(string path, string contentKey, ITextureLoader loader)
     {
         using var pooled = loader.LoadRaw(path);
+
+        long bytes = pooled.DataLength;
+        if (bytes > RawCacheMaxBytes) return null;
+
         var persistent = pooled.ToNonPooled();
-
-        long bytes = persistent.DataLength;
-        if (bytes > RawCacheMaxBytes)
-        {
-            persistent.Dispose();
-            return null;
-        }
-
         var result = RawDataCache.GetOrAdd(contentKey, bytes, _ => persistent);
 
         if (!ReferenceEquals(result, persistent))
