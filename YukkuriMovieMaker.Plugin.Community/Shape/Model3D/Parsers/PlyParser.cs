@@ -445,6 +445,8 @@ internal sealed class PlyParser : IModelParser
                 }
                 else
                 {
+                    if (element.Props.Count == 0) continue;
+
                     for (int i = 0; i < element.Count; i++)
                     {
                         foreach (var prop in element.Props)
