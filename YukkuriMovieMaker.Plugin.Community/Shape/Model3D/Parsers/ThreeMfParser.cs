@@ -256,44 +256,35 @@ internal sealed class ThreeMfParser : IModelParser
 
             var limits = Model3DSettings.Default;
 
-            if (obj.Triangles.Count > 0 && obj.Vertices.Count <= limits.MaxVertices - _vertices.Count)
+            if (obj.Triangles.Count > 0)
             {
-                int offset = _vertices.Count;
-
-                foreach (var vertex in obj.Vertices)
-                {
-                    var p = Vector3.Transform(vertex, transform);
-                    _vertices.Add(new Model3DVertex { Position = new Vector3(p.X, p.Z, -p.Y), Color = Vector4.One });
-                }
+                var cornerMap = new Dictionary<(int Vertex, Vector4 Color), int>();
 
                 foreach (var tri in obj.Triangles)
                 {
                     if (_emittedIndexCount + 3 > limits.MaxIndices) break;
+                    if ((uint)tri.V1 >= (uint)obj.Vertices.Count
+                        || (uint)tri.V2 >= (uint)obj.Vertices.Count
+                        || (uint)tri.V3 >= (uint)obj.Vertices.Count) continue;
 
-                    int v1 = tri.V1 + offset;
-                    int v2 = tri.V2 + offset;
-                    int v3 = tri.V3 + offset;
-                    if (tri.V1 < 0 || tri.V2 < 0 || tri.V3 < 0) continue;
-                    if (v1 >= _vertices.Count || v2 >= _vertices.Count || v3 >= _vertices.Count) continue;
+                    if (!TryEmitCorner(obj, transform, cornerMap, limits, tri.V1, tri.Color1, out int i1)
+                        || !TryEmitCorner(obj, transform, cornerMap, limits, tri.V2, tri.Color2, out int i2)
+                        || !TryEmitCorner(obj, transform, cornerMap, limits, tri.V3, tri.Color3, out int i3)) break;
 
                     if (!_groupedIndices.TryGetValue(tri.Color1, out var group))
                     {
                         group = [];
                         _groupedIndices[tri.Color1] = group;
                     }
-                    group.Add(v1);
-                    group.Add(v2);
-                    group.Add(v3);
+                    group.Add(i1);
+                    group.Add(i2);
+                    group.Add(i3);
                     _emittedIndexCount += 3;
 
                     if (tri.Color1.W < 1.0f || tri.Color2.W < 1.0f || tri.Color3.W < 1.0f)
                     {
                         _transparentGroups.Add(tri.Color1);
                     }
-
-                    SetVertexColor(v1, tri.Color1);
-                    SetVertexColor(v2, tri.Color2);
-                    SetVertexColor(v3, tri.Color3);
                 }
             }
 
@@ -308,11 +299,21 @@ internal sealed class ThreeMfParser : IModelParser
             stack.Remove(obj);
         }
 
-        private void SetVertexColor(int index, Vector4 color)
+        private bool TryEmitCorner(ObjectResource obj, Matrix4x4 transform, Dictionary<(int Vertex, Vector4 Color), int> cornerMap, Model3DSettings limits, int vertexIndex, Vector4 color, out int emittedIndex)
         {
-            var v = _vertices[index];
-            v.Color = color;
-            _vertices[index] = v;
+            if (cornerMap.TryGetValue((vertexIndex, color), out emittedIndex)) return true;
+
+            if (_vertices.Count >= limits.MaxVertices)
+            {
+                emittedIndex = -1;
+                return false;
+            }
+
+            var p = Vector3.Transform(obj.Vertices[vertexIndex], transform);
+            emittedIndex = _vertices.Count;
+            _vertices.Add(new Model3DVertex { Position = new Vector3(p.X, p.Z, -p.Y), Color = color });
+            cornerMap[(vertexIndex, color)] = emittedIndex;
+            return true;
         }
 
         public Model3DData Build()
