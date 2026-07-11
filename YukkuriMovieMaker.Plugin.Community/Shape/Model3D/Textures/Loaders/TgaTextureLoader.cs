@@ -12,7 +12,7 @@ internal sealed class TgaTextureLoader : ITextureLoader
     private const byte TopLeftOriginFlag = 0x20;
     private const byte RightOriginFlag = 0x10;
     private const byte RlePacketFlag = 0x80;
-    private const long MaxPixelCount = 1024L * 1024 * 256;
+    private const long MaxPixelCount = 512L * 1024 * 1024 / 4;
 
     public int Priority => 100;
 

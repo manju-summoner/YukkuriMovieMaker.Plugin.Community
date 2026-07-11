@@ -15,7 +15,7 @@ internal sealed class PsdTextureLoader : ITextureLoader
     private const ushort MaxChannels = 56;
     private const ushort RawCompression = 0;
     private const ushort RleCompression = 1;
-    private const long MaxPixelCount = 1024L * 1024 * 256;
+    private const long MaxPixelCount = 512L * 1024 * 1024 / 4;
 
     public int Priority => 80;
 

@@ -12,7 +12,7 @@ internal sealed class DdsTextureLoader : ITextureLoader
     private const uint RgbFlag = 0x40;
     private const uint PitchFlag = 0x8;
     private const int MaxDimension = 65536;
-    private const long MaxPixelCount = 1024L * 1024 * 256;
+    private const long MaxPixelCount = 512L * 1024 * 1024 / 4;
 
     public int Priority => 90;
 
