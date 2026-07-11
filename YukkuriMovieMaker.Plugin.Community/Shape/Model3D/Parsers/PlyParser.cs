@@ -229,6 +229,11 @@ internal sealed class PlyParser : IModelParser
             return new PlyProperty { Name = normalizedName, Type = GetType(parts[1]) };
         }
 
+        private static float NormalizeColorComponent(float value, PlyType type)
+            => type is PlyType.Float or PlyType.Double
+                ? Math.Clamp(value, 0.0f, 1.0f)
+                : value / 255.0f;
+
         private static bool IsVertexIndexProperty(string name)
             => name is "vertex_indices" or "vertex_index";
 
@@ -328,10 +333,10 @@ internal sealed class PlyParser : IModelParser
                                 case "nz": norm.Z = val; break;
                                 case "u": uv.X = val; break;
                                 case "v": uv.Y = val; break;
-                                case "red": r = val / 255.0f; hasColor = true; break;
-                                case "green": g = val / 255.0f; hasColor = true; break;
-                                case "blue": b = val / 255.0f; hasColor = true; break;
-                                case "alpha": a = val / 255.0f; hasColor = true; break;
+                                case "red": r = NormalizeColorComponent(val, prop.Type); hasColor = true; break;
+                                case "green": g = NormalizeColorComponent(val, prop.Type); hasColor = true; break;
+                                case "blue": b = NormalizeColorComponent(val, prop.Type); hasColor = true; break;
+                                case "alpha": a = NormalizeColorComponent(val, prop.Type); hasColor = true; break;
                             }
                         }
                         if (end == -1) break;
@@ -483,10 +488,10 @@ internal sealed class PlyParser : IModelParser
                         case "nz": norm.Z = (float)val; break;
                         case "u": uv.X = (float)val; break;
                         case "v": uv.Y = (float)val; break;
-                        case "red": r = (float)val / 255.0f; hasColor = true; break;
-                        case "green": g = (float)val / 255.0f; hasColor = true; break;
-                        case "blue": b = (float)val / 255.0f; hasColor = true; break;
-                        case "alpha": a = (float)val / 255.0f; hasColor = true; break;
+                        case "red": r = NormalizeColorComponent((float)val, prop.Type); hasColor = true; break;
+                        case "green": g = NormalizeColorComponent((float)val, prop.Type); hasColor = true; break;
+                        case "blue": b = NormalizeColorComponent((float)val, prop.Type); hasColor = true; break;
+                        case "alpha": a = NormalizeColorComponent((float)val, prop.Type); hasColor = true; break;
                     }
                 }
                 if (hasColor) col = new Vector4(r, g, b, a);
