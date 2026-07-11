@@ -9,5 +9,6 @@ internal struct Model3DVertex
     public Vector3 Position;
     public Vector3 Normal;
     public Vector2 TexCoord;
+    public Vector2 TexCoord2;
     public Vector4 Color;
 }

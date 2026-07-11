@@ -73,7 +73,8 @@ internal sealed class D3DResources : IDisposable
             new("POSITION", 0, Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
             new("NORMAL", 0, Format.R32G32B32_Float, 12, 0, InputClassification.PerVertexData, 0),
             new("TEXCOORD", 0, Format.R32G32_Float, 24, 0, InputClassification.PerVertexData, 0),
-            new("COLOR", 0, Format.R32G32B32A32_Float, 32, 0, InputClassification.PerVertexData, 0)
+            new("TEXCOORD", 1, Format.R32G32_Float, 32, 0, InputClassification.PerVertexData, 0),
+            new("COLOR", 0, Format.R32G32B32A32_Float, 40, 0, InputClassification.PerVertexData, 0)
         ];
         return device.CreateInputLayout(elements, vertexShaderBytes);
     }

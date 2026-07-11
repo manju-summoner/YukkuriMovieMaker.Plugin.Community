@@ -26,6 +26,7 @@ struct PSIn
     float3 worldPosition : TEXCOORD1;
     float3 normal : NORMAL;
     float2 uv : TEXCOORD0;
+    float2 uv2 : TEXCOORD2;
     float4 color : COLOR;
     bool isFrontFace : SV_IsFrontFace;
 };
@@ -214,7 +215,7 @@ float4 main(PSIn input) : SV_Target
         return float4(saturate(surface.rgb) * alpha, alpha);
 
     float3 albedo = pow(abs(texSample.rgb), Gamma) * saturate(BaseColor.rgb * input.color.rgb);
-    float4 metallicRoughness = MetallicRoughnessTexture.Sample(BaseColorSampler, input.uv);
+    float4 metallicRoughness = MetallicRoughnessTexture.Sample(BaseColorSampler, input.uv2);
     float metallic = saturate(Metallic * metallicRoughness.b);
     float roughness = clamp(Roughness * metallicRoughness.g, MinRoughness, 1.0f);
 

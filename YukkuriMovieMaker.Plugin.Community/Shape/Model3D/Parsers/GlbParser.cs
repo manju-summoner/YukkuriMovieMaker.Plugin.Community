@@ -364,13 +364,13 @@ internal sealed class GlbParser : IModelParser
                 int indAccIdx = prim.TryGetProperty("indices", out var indElem) ? indElem.GetInt32() : -1;
                 int matIdx = prim.TryGetProperty("material", out var matElem) ? matElem.GetInt32() : -1;
 
-                int texCoordSet = GetBaseColorTexCoordSet(materials, matIdx);
-                int uvAccIdx = attrs.TryGetProperty("TEXCOORD_" + texCoordSet.ToString(System.Globalization.CultureInfo.InvariantCulture), out var uvElem)
-                    ? uvElem.GetInt32()
-                    : (attrs.TryGetProperty("TEXCOORD_0", out var uv0Elem) ? uv0Elem.GetInt32() : -1);
+                int texCoordSet = GetTextureTexCoordSet(materials, matIdx, "baseColorTexture");
+                int mrTexCoordSet = GetTextureTexCoordSet(materials, matIdx, "metallicRoughnessTexture");
+                int uvAccIdx = GetTexCoordAccessor(attrs, texCoordSet);
+                int uv2AccIdx = mrTexCoordSet == texCoordSet ? uvAccIdx : GetTexCoordAccessor(attrs, mrTexCoordSet);
 
                 if (IsSparseAccessor(root, posAccIdx) || IsSparseAccessor(root, normAccIdx) || IsSparseAccessor(root, uvAccIdx)
-                    || IsSparseAccessor(root, colAccIdx) || IsSparseAccessor(root, indAccIdx)) continue;
+                    || IsSparseAccessor(root, uv2AccIdx) || IsSparseAccessor(root, colAccIdx) || IsSparseAccessor(root, indAccIdx)) continue;
 
                 int posAccCount = GetAccessorCount(root, posAccIdx);
                 if (posAccCount <= 0) continue;
@@ -385,6 +385,7 @@ internal sealed class GlbParser : IModelParser
 
                 var normals = normAccIdx >= 0 ? ReadVector3Array(root, buffers, normAccIdx) : null;
                 var uvs = uvAccIdx >= 0 ? ReadVector2Array(root, buffers, uvAccIdx) : null;
+                var uv2s = uv2AccIdx == uvAccIdx ? uvs : (uv2AccIdx >= 0 ? ReadVector2Array(root, buffers, uv2AccIdx) : null);
                 var colors = colAccIdx >= 0 ? ReadVector4Array(root, buffers, colAccIdx) : null;
                 var indices = indAccIdx >= 0 ? ReadIntArray(root, buffers, indAccIdx) : null;
 
@@ -412,6 +413,7 @@ internal sealed class GlbParser : IModelParser
                         Position = p,
                         Normal = n,
                         TexCoord = (uvs != null && i < uvs.Length) ? uvs[i] : Vector2.Zero,
+                        TexCoord2 = (uv2s != null && i < uv2s.Length) ? uv2s[i] : Vector2.Zero,
                         Color = (colors != null && i < colors.Length) ? colors[i] : Vector4.One
                     };
                     allVertices.Add(v);
@@ -515,9 +517,8 @@ internal sealed class GlbParser : IModelParser
                         if (pbr.TryGetProperty("metallicRoughnessTexture", out var mrTexProp)
                             && mrTexProp.TryGetProperty("index", out var mrTexIdxProp))
                         {
-                            int mrTexCoord = mrTexProp.TryGetProperty("texCoord", out var mrTexCoordProp) ? mrTexCoordProp.GetInt32() : 0;
                             int mrTexIdx = mrTexIdxProp.GetInt32();
-                            if (mrTexCoord == texCoordSet && mrTexIdx >= 0 && mrTexIdx < textures.Count)
+                            if (mrTexIdx >= 0 && mrTexIdx < textures.Count)
                             {
                                 var texture = textures[mrTexIdx];
                                 if (texture.Source >= 0 && texture.Source < images.Count)
@@ -740,18 +741,27 @@ internal sealed class GlbParser : IModelParser
         }
     }
 
-    private static int GetBaseColorTexCoordSet(JsonElement materials, int matIdx)
+    private static int GetTextureTexCoordSet(JsonElement materials, int matIdx, string textureProperty)
     {
         if (matIdx < 0 || materials.ValueKind != JsonValueKind.Array || matIdx >= materials.GetArrayLength()) return 0;
 
         var mat = materials[matIdx];
         if (mat.TryGetProperty("pbrMetallicRoughness", out var pbr)
-            && pbr.TryGetProperty("baseColorTexture", out var tex)
+            && pbr.TryGetProperty(textureProperty, out var tex)
             && tex.TryGetProperty("texCoord", out var texCoordProp))
         {
             return Math.Max(0, texCoordProp.GetInt32());
         }
         return 0;
+    }
+
+    private static int GetTexCoordAccessor(JsonElement attrs, int texCoordSet)
+    {
+        if (attrs.TryGetProperty("TEXCOORD_" + texCoordSet.ToString(System.Globalization.CultureInfo.InvariantCulture), out var uvElem))
+        {
+            return uvElem.GetInt32();
+        }
+        return attrs.TryGetProperty("TEXCOORD_0", out var uv0Elem) ? uv0Elem.GetInt32() : -1;
     }
 
     private static byte MapWrapMode(int gltfWrapMode) => gltfWrapMode switch
