@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO.Compression;
 using System.Numerics;
 using System.Xml;
@@ -38,6 +38,10 @@ internal sealed class ThreeMfParser : IModelParser
             string objectPid = "";
             string objectP1 = "";
             bool inBuild = false;
+
+            var limits = Model3DSettings.Default;
+            long totalVertices = 0;
+            long totalTriangles = 0;
 
             while (reader.Read())
             {
@@ -84,6 +88,7 @@ internal sealed class ThreeMfParser : IModelParser
                     {
                         if (currentObject != null)
                         {
+                            if (++totalVertices > limits.MaxVertices) return new Model3DData();
                             float x = float.Parse(reader.GetAttribute("x") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture);
                             float y = float.Parse(reader.GetAttribute("y") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture);
                             float z = float.Parse(reader.GetAttribute("z") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture);
@@ -94,6 +99,7 @@ internal sealed class ThreeMfParser : IModelParser
                     {
                         if (currentObject != null)
                         {
+                            if (++totalTriangles * 3 > limits.MaxIndices) return new Model3DData();
                             int v1 = int.Parse(reader.GetAttribute("v1") ?? "0", NumberStyles.Integer, CultureInfo.InvariantCulture);
                             int v2 = int.Parse(reader.GetAttribute("v2") ?? "0", NumberStyles.Integer, CultureInfo.InvariantCulture);
                             int v3 = int.Parse(reader.GetAttribute("v3") ?? "0", NumberStyles.Integer, CultureInfo.InvariantCulture);
@@ -233,6 +239,7 @@ internal sealed class ThreeMfParser : IModelParser
     {
         private readonly List<Model3DVertex> _vertices = [];
         private readonly Dictionary<Vector4, List<int>> _groupedIndices = [];
+        private long _emittedIndexCount;
 
         public void EmitObject(string objectId, Matrix4x4 transform)
         {
@@ -260,6 +267,8 @@ internal sealed class ThreeMfParser : IModelParser
 
                 foreach (var tri in obj.Triangles)
                 {
+                    if (_emittedIndexCount + 3 > limits.MaxIndices) break;
+
                     int v1 = tri.V1 + offset;
                     int v2 = tri.V2 + offset;
                     int v3 = tri.V3 + offset;
@@ -274,6 +283,7 @@ internal sealed class ThreeMfParser : IModelParser
                     group.Add(v1);
                     group.Add(v2);
                     group.Add(v3);
+                    _emittedIndexCount += 3;
 
                     SetVertexColor(v1, tri.Color1);
                     SetVertexColor(v2, tri.Color2);
