@@ -15,8 +15,10 @@ internal sealed class TextureService : ITextureService
     private const long RawCacheMaxBytes = 512L * 1024 * 1024;
     private const long GpuCacheMaxBytes = 1024L * 1024 * 1024;
 
+    private sealed record CachedGpuTexture(ID3D11Texture2D Texture, bool HasTransparency);
+
     private static readonly BoundedLruCache<string, TextureRawData> RawDataCache = new(RawCacheMaxBytes);
-    private static readonly BoundedLruCache<(nint DevicePtr, string Path), ID3D11Texture2D> GpuTextureCache = new(GpuCacheMaxBytes);
+    private static readonly BoundedLruCache<(nint DevicePtr, string Path), CachedGpuTexture> GpuTextureCache = new(GpuCacheMaxBytes);
     private static readonly ConcurrentDictionary<nint, int> DeviceRefCounts = new();
 
     private readonly List<ITextureLoader> _loaders = [];
@@ -70,14 +72,14 @@ internal sealed class TextureService : ITextureService
         return bitmap;
     }
 
-    public (ID3D11ShaderResourceView? Srv, long GpuBytes) CreateShaderResourceView(string path, ID3D11Device device)
+    public (ID3D11ShaderResourceView? Srv, long GpuBytes, bool HasTransparency) CreateShaderResourceView(string path, ID3D11Device device)
     {
-        if (string.IsNullOrEmpty(path)) return (null, 0);
-        if (device == null) return (null, 0);
+        if (string.IsNullOrEmpty(path)) return (null, 0, false);
+        if (device == null) return (null, 0, false);
 
         lock (_lock)
         {
-            if (_disposed) return (null, 0);
+            if (_disposed) return (null, 0, false);
         }
 
         var devicePtr = device.NativePointer;
@@ -90,19 +92,19 @@ internal sealed class TextureService : ITextureService
         {
             try
             {
-                var srv = device.CreateShaderResourceView(cachedTex);
-                return (srv, cachedBytes);
+                var srv = device.CreateShaderResourceView(cachedTex.Texture);
+                return (srv, cachedBytes, cachedTex.HasTransparency);
             }
             catch
             {
                 if (GpuTextureCache.TryRemove(key, out var stale))
                 {
-                    SafeDispose(stale);
+                    SafeDispose(stale.Texture);
                 }
             }
         }
 
-        if (AcquireRawPixels(path) is not { } rawData) return (null, 0);
+        if (AcquireRawPixels(path) is not { } rawData) return (null, 0, false);
 
         return CreateAndCacheGpuTexture(key, rawData, device);
     }
@@ -114,7 +116,7 @@ internal sealed class TextureService : ITextureService
         path = Path.GetFullPath(path).ToLowerInvariant();
         if (GpuTextureCache.TryRemove((device.NativePointer, MakeContentKey(path)), out var tex))
         {
-            SafeDispose(tex);
+            SafeDispose(tex.Texture);
         }
     }
 
@@ -139,13 +141,14 @@ internal sealed class TextureService : ITextureService
         return null;
     }
 
-    private unsafe (ID3D11ShaderResourceView? Srv, long GpuBytes) CreateAndCacheGpuTexture(
+    private unsafe (ID3D11ShaderResourceView? Srv, long GpuBytes, bool HasTransparency) CreateAndCacheGpuTexture(
         (nint DevicePtr, string Path) key, (byte[] Pixels, int Width, int Height, int Stride) rawData, ID3D11Device device)
     {
         int width = rawData.Width;
         int height = rawData.Height;
         int stride = rawData.Stride;
         long gpuBytes = (long)width * height * 4;
+        bool hasTransparency = HasTransparentPixels(rawData);
 
         var texDesc = new Texture2DDescription
         {
@@ -162,42 +165,40 @@ internal sealed class TextureService : ITextureService
         fixed (byte* p = rawData.Pixels)
         {
             var data = new SubresourceData(p, stride);
-            var tex = device.CreateTexture2D(texDesc, new[] { data });
+            var entry = new CachedGpuTexture(device.CreateTexture2D(texDesc, new[] { data }), hasTransparency);
 
-            var cached = GpuTextureCache.GetOrAdd(key, gpuBytes, _ => tex);
+            var cached = GpuTextureCache.GetOrAdd(key, gpuBytes, _ => entry);
 
-            if (!ReferenceEquals(cached, tex))
+            if (!ReferenceEquals(cached, entry))
             {
-                tex.Dispose();
-                try
-                {
-                    var srv = device.CreateShaderResourceView(cached);
-                    return (srv, gpuBytes);
-                }
-                catch
-                {
-                    if (GpuTextureCache.TryRemove(key, out var stale))
-                    {
-                        SafeDispose(stale);
-                    }
-                    return (null, 0);
-                }
+                entry.Texture.Dispose();
             }
 
             try
             {
-                var srv = device.CreateShaderResourceView(tex);
-                return (srv, gpuBytes);
+                var srv = device.CreateShaderResourceView(cached.Texture);
+                return (srv, gpuBytes, cached.HasTransparency);
             }
             catch
             {
                 if (GpuTextureCache.TryRemove(key, out var stale))
                 {
-                    SafeDispose(stale);
+                    SafeDispose(stale.Texture);
                 }
-                return (null, 0);
+                return (null, 0, false);
             }
         }
+    }
+
+    private static bool HasTransparentPixels((byte[] Pixels, int Width, int Height, int Stride) rawData)
+    {
+        var pixels = rawData.Pixels;
+        long length = (long)rawData.Stride * rawData.Height;
+        for (long i = 3; i < length; i += 4)
+        {
+            if (pixels[i] < byte.MaxValue) return true;
+        }
+        return false;
     }
 
     private TextureRawData? EnsureRawDataCached(string path, string contentKey)
@@ -317,7 +318,7 @@ internal sealed class TextureService : ITextureService
         var removed = GpuTextureCache.RemoveWhere(k => k.DevicePtr == devicePtr);
         foreach (var (_, tex) in removed)
         {
-            SafeDispose(tex);
+            SafeDispose(tex.Texture);
         }
     }
 
