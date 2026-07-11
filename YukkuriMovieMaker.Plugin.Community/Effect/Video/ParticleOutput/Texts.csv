@@ -1,0 +1,45 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+ParticleOutput,,パーティクル出力,Particle output,粒子输出,粒子輸出,파티클 출력,Salida de partículas,إخراج الجسيمات,Keluaran partikel
+TagParticle,,パーティクル,particle,粒子,粒子,파티클,partícula,جسيمات,partikel
+TagSparkle,,キラキラ,sparkle,闪耀,閃耀,반짝임,destello,بريق,kilau
+TagSnow,,雪,snow,雪,雪,눈,nieve,ثلج,salju
+TagEmitter,,放出,emitter,发射,發射,방출,emisor,انبعاث,pemancar
+EmitGroup,,発生,Emission,发射,發射,발생,Emisión,انبعاث,Emisi
+ScatterGroup,,飛散,Scatter,飞散,飛散,비산,Dispersión,تناثر,Hamburan
+AppearanceGroup,,見た目,Appearance,外观,外觀,모양,Apariencia,المظهر,Tampilan
+SecUnit,,秒,s,秒,秒,초,s,ث,dtk
+PerSecUnit,,個/秒,/s,个/秒,個/秒,개/초,/s,/ث,/dtk
+Rate,,発生頻度,Emission rate,发射频率,發射頻率,발생 빈도,Frecuencia de emisión,معدل الانبعاث,Frekuensi emisi
+RateDesc,,1秒あたりに発生する粒子の数,Number of particles emitted per second.,每秒发射的粒子数量。,每秒發射的粒子數量。,초당 발생하는 파티클 수.,Número de partículas emitidas por segundo.,عدد الجسيمات المنبعثة في الثانية.,Jumlah partikel yang dipancarkan per detik.
+Lifetime,,寿命,Lifetime,寿命,壽命,수명,Vida útil,العمر,Masa hidup
+LifetimeDesc,,粒子が消えるまでの時間,Time until a particle disappears.,粒子消失前的时间。,粒子消失前的時間。,입자가 사라질 때까지의 시간.,Tiempo hasta que una partícula desaparece.,الوقت حتى يختفي الجسيم.,Waktu hingga partikel menghilang.
+Preroll,,事前再生,Preroll,预先播放,預先播放,사전 재생,Prerreproducción,تشغيل مسبق,Pra-putar
+PrerollDesc,,アイテムの開始時点で既に指定時間ぶん放出が進んだ状態にする,Starts with emission already advanced by this amount of time.,使项目开始时发射已进行指定的时间。,使項目開始時發射已進行指定的時間。,아이템 시작 시점에 지정한 시간만큼 방출이 진행된 상태로 만듭니다.,Comienza con la emisión ya avanzada este tiempo.,يبدأ والانبعاث متقدم بهذا المقدار من الوقت.,Mulai dengan emisi yang sudah berjalan selama waktu ini.
+Size,,粒子サイズ,Particle size,粒子大小,粒子大小,입자 크기,Tamaño de partícula,حجم الجسيمات,Ukuran partikel
+SizeDesc,,粒子1個の大きさ（元の画像に対する割合）,Size of each particle relative to the original image.,单个粒子的大小（相对于原图像的比例）。,單個粒子的大小（相對於原圖像的比例）。,입자 하나의 크기(원본 이미지 대비 비율).,Tamaño de cada partícula en relación con la imagen original.,حجم كل جسيم بالنسبة إلى الصورة الأصلية.,Ukuran setiap partikel relatif terhadap gambar asli.
+EmitRange,,発生範囲,Emission range,发射范围,發射範圍,발생 범위,Rango de emisión,نطاق الانبعاث,Rentang emisi
+EmitRangeDesc,,粒子が発生する範囲（中心からの最大距離。0で中心の1点から発生）,Area where particles are emitted as the maximum distance from the center. At 0 they emit from the center point.,粒子发射的范围（距中心的最大距离。为0时从中心一点发射）。,粒子發射的範圍（距中心的最大距離。為0時從中心一點發射）。,입자가 발생하는 범위(중심에서의 최대 거리. 0이면 중심 한 점에서 발생).,Área donde se emiten las partículas como distancia máxima desde el centro. Al 0 se emiten desde el punto central.,نطاق انبعاث الجسيمات كأقصى مسافة من المركز. عند 0 تنبعث من نقطة المركز.,Area tempat partikel dipancarkan sebagai jarak maksimum dari pusat. Pada 0 dipancarkan dari titik pusat.
+Randomness,,ばらつき,Randomness,随机性,隨機性,불규칙성,Aleatoriedad,عشوائية,Keacakan
+RandomnessDesc,,初速・サイズのランダムさ,Randomness of the initial speed and size.,初速与大小的随机程度。,初速與大小的隨機程度。,초기 속도와 크기의 무작위성.,Aleatoriedad de la velocidad inicial y el tamaño.,عشوائية السرعة الابتدائية والحجم.,Keacakan kecepatan awal dan ukuran.
+EmitAngle,,射出方向,Emit direction,射出方向,射出方向,사출 방향,Dirección de emisión,اتجاه الإطلاق,Arah pancaran
+EmitAngleDesc,,粒子を射出する方向,Direction in which particles are emitted.,粒子射出的方向。,粒子射出的方向。,입자를 사출하는 방향.,Dirección en la que se emiten las partículas.,الاتجاه الذي تُطلق فيه الجسيمات.,Arah partikel dipancarkan.
+SpreadAngle,,拡散角,Spread angle,扩散角,擴散角,확산각,Ángulo de dispersión,زاوية الانتشار,Sudut sebaran
+SpreadAngleDesc,,射出方向を中心とした広がりの角度,Angle of spread around the emit direction.,以射出方向为中心的扩散角度。,以射出方向為中心的擴散角度。,사출 방향을 중심으로 한 퍼짐 각도.,Ángulo de apertura alrededor de la dirección de emisión.,زاوية الانتشار حول اتجاه الإطلاق.,Sudut sebaran di sekitar arah pancaran.
+Speed,,初速,Initial speed,初速,初速,초기 속도,Velocidad inicial,السرعة الابتدائية,Kecepatan awal
+SpeedDesc,,粒子の発生時の速さ,Speed of particles when emitted.,粒子发射时的速度。,粒子發射時的速度。,입자가 발생할 때의 속도.,Velocidad de las partículas al emitirse.,سرعة الجسيمات عند انبعاثها.,Kecepatan partikel saat dipancarkan.
+Gravity,,重力,Gravity,重力,重力,중력,Gravedad,الجاذبية,Gravitasi
+GravityDesc,,落下の終端速度（負の値で上昇）,Terminal falling speed. Negative values make particles rise.,下落的最终速度（负值时上升）。,下落的最終速度（負值時上升）。,낙하의 종단 속도(음수면 상승).,Velocidad terminal de caída. Los valores negativos hacen subir las partículas.,السرعة النهائية للسقوط. القيم السالبة تجعل الجسيمات ترتفع.,Kecepatan terminal jatuh. Nilai negatif membuat partikel naik.
+WindAngle,,風向き,Wind direction,风向,風向,바람 방향,Dirección del viento,اتجاه الرياح,Arah angin
+WindAngleDesc,,風が吹く方向,Direction in which the wind blows.,风吹的方向。,風吹的方向。,바람이 부는 방향.,Dirección en la que sopla el viento.,الاتجاه الذي تهب فيه الرياح.,Arah angin bertiup.
+WindSpeed,,風速,Wind speed,风速,風速,풍속,Velocidad del viento,سرعة الرياح,Kecepatan angin
+WindSpeedDesc,,風に流される終端速度,Terminal speed at which particles drift with the wind.,随风漂流的最终速度。,隨風漂流的最終速度。,바람에 흘러가는 종단 속도.,Velocidad terminal a la que las partículas derivan con el viento.,السرعة النهائية التي تنجرف بها الجسيمات مع الرياح.,Kecepatan terminal partikel terbawa angin.
+Turbulence,,揺らぎ,Turbulence,扰动,擾動,흔들림,Turbulencia,اضطراب,Turbulensi
+TurbulenceDesc,,軌道が渦を巻くように揺らぐ量,Amount by which trajectories swirl.,轨迹旋转扰动的程度。,軌跡旋轉擾動的程度。,궤도가 소용돌이치듯 흔들리는 정도.,Cantidad de remolino en las trayectorias.,مقدار تموج المسارات بشكل دوامي.,Besar lintasan berputar seperti pusaran.
+Rotation,,回転,Rotation,旋转,旋轉,회전,Rotación,دوران,Rotasi
+RotationDesc,,粒子の回転速度の最大値（粒子ごとにランダム）,Maximum rotation speed of particles. Randomized per particle.,粒子旋转速度的最大值（每个粒子随机）。,粒子旋轉速度的最大值（每個粒子隨機）。,입자 회전 속도의 최대값(입자마다 무작위).,Velocidad máxima de rotación de las partículas. Aleatoria por partícula.,أقصى سرعة دوران للجسيمات. عشوائية لكل جسيم.,Kecepatan rotasi maksimum partikel. Acak per partikel.
+EndScale,,サイズ変化,End scale,大小变化,大小變化,크기 변화,Escala final,تغير الحجم,Perubahan ukuran
+EndScaleDesc,,寿命が尽きるときの大きさ（発生時に対する割合）,Size at the end of the lifetime relative to the initial size.,寿命结束时的大小（相对于发射时的比例）。,壽命結束時的大小（相對於發射時的比例）。,수명이 다할 때의 크기(발생 시 대비 비율).,Tamaño al final de la vida útil en relación con el tamaño inicial.,الحجم عند نهاية العمر بالنسبة إلى الحجم الابتدائي.,Ukuran di akhir masa hidup relatif terhadap ukuran awal.
+Fade,,フェード,Fade,淡出,淡出,페이드,Desvanecimiento,تلاشي,Pudar
+FadeDesc,,寿命の終わりで粒子を透明にする量,Amount by which particles fade out at the end of their lifetime.,粒子在寿命结束时变透明的程度。,粒子在壽命結束時變透明的程度。,수명이 끝날 때 입자가 투명해지는 정도.,Cantidad de desvanecimiento de las partículas al final de su vida útil.,مقدار تلاشي الجسيمات عند نهاية عمرها.,Besar partikel memudar di akhir masa hidupnya.
+ShowOriginal,,元の画像を表示,Show original image,显示原图像,顯示原圖像,원본 이미지 표시,Mostrar imagen original,عرض الصورة الأصلية,Tampilkan gambar asli
+ShowOriginalDesc,,粒子に加えて元の画像も表示する,Shows the original image in addition to the particles.,除粒子外同时显示原图像。,除粒子外同時顯示原圖像。,입자와 함께 원본 이미지도 표시합니다.,Muestra la imagen original además de las partículas.,يعرض الصورة الأصلية بالإضافة إلى الجسيمات.,Menampilkan gambar asli selain partikel.
