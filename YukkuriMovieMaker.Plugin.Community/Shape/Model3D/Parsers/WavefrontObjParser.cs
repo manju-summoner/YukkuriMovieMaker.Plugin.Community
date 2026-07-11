@@ -132,6 +132,11 @@ internal sealed class WavefrontObjParser : IModelParser
                 }
             }
 
+            if (uniqueCount > limits.MaxVertices)
+            {
+                return new Model3DData();
+            }
+
             vertices = GC.AllocateUninitializedArray<Model3DVertex>(uniqueCount, true);
             indices = GC.AllocateUninitializedArray<int>(sortArray.Length, true);
 
