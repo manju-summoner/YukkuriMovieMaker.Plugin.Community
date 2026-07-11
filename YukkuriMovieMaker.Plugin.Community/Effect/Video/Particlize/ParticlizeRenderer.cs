@@ -90,7 +90,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
         public void Update(EffectDescription effectDescription, ID2D1Image? input, TimeSpan time, in Parameter parameter)
         {
             var dc = devices.DeviceContext;
-            var bounds = dc.GetImageLocalBounds(input);
+            //上流に無限大のローカル境界を返すエフェクト（単色塗りつぶし等の生成系）があると
+            //頂点座標や描画範囲が非有限になり描画が破綻するため、有限範囲へクランプする
+            var bounds = ClampBounds(dc.GetImageLocalBounds(input));
 
             var interpolationMode = effectDescription.DrawDescription.ZoomInterpolationMode;
             if (isFirst || this.interpolationMode != interpolationMode)
@@ -191,16 +193,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
             terminal.SetInput(0, particlizeOutput, true);
         }
 
+        //入力境界のクランプ範囲。D2Dの最大ビットマップサイズ（通常16384）より十分大きく、float演算が壊れない値
+        const float MaxBoundsExtent = 1 << 22;
+
+        static Vortice.RawRectF ClampBounds(Vortice.RawRectF bounds)
+        {
+            return new Vortice.RawRectF(
+                ClampCoordinate(bounds.Left),
+                ClampCoordinate(bounds.Top),
+                ClampCoordinate(bounds.Right),
+                ClampCoordinate(bounds.Bottom));
+
+            static float ClampCoordinate(float value)
+                => float.IsNaN(value) ? 0f : Math.Clamp(value, -MaxBoundsExtent, MaxBoundsExtent);
+        }
+
         /// <summary>
         /// 入力範囲・粒子サイズに合った静的頂点バッファを持つカスタムエフェクトを用意する。
         /// 頂点バッファはInitializeでしか生成できないため、グリッドが変わったらエフェクトごと作り直す。
         /// </summary>
         void EnsureParticleGrid(Vortice.RawRectF bounds, double size)
         {
+            //境界がサブピクセルで揺れる入力で毎フレーム作り直しにならないよう、0.5px未満の差は同一グリッドとみなす
             if (hasGrid
                 && particlize is not null
-                && gridLeft == bounds.Left && gridTop == bounds.Top
-                && gridRight == bounds.Right && gridBottom == bounds.Bottom
+                && MathF.Abs(gridLeft - bounds.Left) < 0.5f && MathF.Abs(gridTop - bounds.Top) < 0.5f
+                && MathF.Abs(gridRight - bounds.Right) < 0.5f && MathF.Abs(gridBottom - bounds.Bottom) < 0.5f
                 && gridSize == size)
                 return;
 
