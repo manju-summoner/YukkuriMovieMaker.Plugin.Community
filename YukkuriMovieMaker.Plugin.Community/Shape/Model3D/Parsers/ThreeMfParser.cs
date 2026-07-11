@@ -328,8 +328,8 @@ internal sealed class ThreeMfParser : IModelParser
                 {
                     IndexOffset = allIndices.Count,
                     IndexCount = group.Value.Count,
-                    BaseColor = group.Key,
-                    ForceTransparent = _transparentGroups.Contains(group.Key)
+                    BaseColor = Vector4.One,
+                    ForceTransparent = _transparentGroups.Contains(group.Key) || group.Key.W < 1.0f
                 });
                 allIndices.AddRange(group.Value);
             }
