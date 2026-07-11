@@ -551,11 +551,11 @@ internal sealed class GlbParser : IModelParser
     private static Vector3[]? ReadVector3Array(JsonElement root, byte[]?[] buffers, int accessorIdx)
     {
         if (!GetAccessorInfo(root, accessorIdx, out int buffViewIdx, out int offset, out int count, out _)) return null;
-        if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
+        if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out int viewLength, out int stride)) return null;
         if (GetBuffer(buffers, buffIdx) is not { } binData) return null;
 
         if (stride <= 0) stride = 12;
-        if (!TryClampAccessorCount(binData, viewOffset, offset, stride, 12, ref count, out int start)) return null;
+        if (!TryClampAccessorCount(binData, viewOffset, viewLength, offset, stride, 12, ref count, out int start)) return null;
 
         var result = new Vector3[count];
 
@@ -575,13 +575,13 @@ internal sealed class GlbParser : IModelParser
     private static Vector2[]? ReadVector2Array(JsonElement root, byte[]?[] buffers, int accessorIdx)
     {
         if (!GetAccessorInfo(root, accessorIdx, out int buffViewIdx, out int offset, out int count, out int compType)) return null;
-        if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
+        if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out int viewLength, out int stride)) return null;
         if (GetBuffer(buffers, buffIdx) is not { } binData) return null;
 
         int componentSize = compType == ComponentTypeUByte ? 1 : (compType == ComponentTypeUShort ? 2 : 4);
         int elementSize = componentSize * 2;
         if (stride <= 0) stride = elementSize;
-        if (!TryClampAccessorCount(binData, viewOffset, offset, stride, elementSize, ref count, out int start)) return null;
+        if (!TryClampAccessorCount(binData, viewOffset, viewLength, offset, stride, elementSize, ref count, out int start)) return null;
 
         var result = new Vector2[count];
 
@@ -615,14 +615,14 @@ internal sealed class GlbParser : IModelParser
     private static Vector4[]? ReadVector4Array(JsonElement root, byte[]?[] buffers, int accessorIdx)
     {
         if (!GetAccessorInfo(root, accessorIdx, out int buffViewIdx, out int offset, out int count, out int compType, out string type)) return null;
-        if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
+        if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out int viewLength, out int stride)) return null;
         if (GetBuffer(buffers, buffIdx) is not { } binData) return null;
 
         int componentCount = type == "VEC3" ? 3 : 4;
         int componentSize = compType == ComponentTypeUByte ? 1 : (compType == ComponentTypeUShort ? 2 : 4);
         int elementSize = componentSize * componentCount;
         if (stride <= 0) stride = elementSize;
-        if (!TryClampAccessorCount(binData, viewOffset, offset, stride, elementSize, ref count, out int start)) return null;
+        if (!TryClampAccessorCount(binData, viewOffset, viewLength, offset, stride, elementSize, ref count, out int start)) return null;
 
         var result = new Vector4[count];
         bool hasAlpha = componentCount == 4;
@@ -663,12 +663,12 @@ internal sealed class GlbParser : IModelParser
     private static int[]? ReadIntArray(JsonElement root, byte[]?[] buffers, int accessorIdx)
     {
         if (!GetAccessorInfo(root, accessorIdx, out int buffViewIdx, out int offset, out int count, out int compType)) return null;
-        if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out _, out int stride)) return null;
+        if (!GetBufferViewInfo(root, buffViewIdx, out int buffIdx, out int viewOffset, out int viewLength, out int stride)) return null;
         if (GetBuffer(buffers, buffIdx) is not { } binData) return null;
 
         int elementSize = compType == ComponentTypeUByte ? 1 : (compType == ComponentTypeUShort ? 2 : 4);
         if (stride <= 0) stride = elementSize;
-        if (!TryClampAccessorCount(binData, viewOffset, offset, stride, elementSize, ref count, out int start)) return null;
+        if (!TryClampAccessorCount(binData, viewOffset, viewLength, offset, stride, elementSize, ref count, out int start)) return null;
 
         var result = new int[count];
 
@@ -693,13 +693,14 @@ internal sealed class GlbParser : IModelParser
         return result;
     }
 
-    private static bool TryClampAccessorCount(byte[] binData, int viewOffset, int offset, int stride, int elementSize, ref int count, out int start)
+    private static bool TryClampAccessorCount(byte[] binData, int viewOffset, int viewLength, int offset, int stride, int elementSize, ref int count, out int start)
     {
         start = 0;
-        if (viewOffset < 0 || offset < 0 || count < 0) return false;
+        if (viewOffset < 0 || viewLength < 0 || offset < 0 || count < 0) return false;
 
         long longStart = (long)viewOffset + offset;
-        long available = binData.Length - longStart;
+        long viewEnd = Math.Min((long)viewOffset + viewLength, binData.Length);
+        long available = viewEnd - longStart;
         if (longStart > int.MaxValue || available < elementSize) return false;
 
         start = (int)longStart;
