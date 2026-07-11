@@ -42,5 +42,8 @@ internal struct Model3DPart
         Center = Vector3.Zero;
     }
 
-    public readonly bool IsOpaque => !ForceTransparent && BaseColor.W >= 1.0f;
+    public readonly bool IsOpaque
+        => !ForceTransparent
+        && BaseColor.W >= 1.0f
+        && (IgnoreAlpha || AlphaCutoff > 0.0f || string.IsNullOrEmpty(TexturePath));
 }
