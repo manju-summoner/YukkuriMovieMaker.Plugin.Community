@@ -96,6 +96,11 @@ internal sealed class AssimpParser : IModelParser
 
     private static void ProcessMesh(Mesh mesh, Matrix4x4 transform, Scene scene, List<Model3DVertex> vertices, List<int> indices, List<Model3DPart> parts, string modelPath)
     {
+        var limits = Model3DSettings.Default;
+        if (parts.Count >= limits.MaxParts) return;
+        if (mesh.VertexCount > limits.MaxVertices - vertices.Count) return;
+        if ((long)mesh.FaceCount * 3 > limits.MaxIndices - indices.Count) return;
+
         int vertexOffset = vertices.Count;
         int uvChannel = FindFirstTextureCoordinateChannel(mesh);
         var normalTransform = Matrix4x4.Invert(transform, out var inverseTransform)
