@@ -149,6 +149,7 @@ internal sealed class Model3DSource : IShapeSource
             return null;
         }
 
+        bool textureLoadFailed = false;
         try
         {
             var model = Model3DLoader.Load(file);
@@ -156,7 +157,7 @@ internal sealed class Model3DSource : IShapeSource
 
             if (model.Vertices.Length > 0)
             {
-                _gpuResource = _gpuResourceFactory.Create(_devices.D3D.Device, model);
+                _gpuResource = _gpuResourceFactory.Create(_devices.D3D.Device, model, out textureLoadFailed);
             }
         }
         catch
@@ -165,6 +166,15 @@ internal sealed class Model3DSource : IShapeSource
             _gpuResourceKey = key + FailedKeySuffix;
             _retryAt = DateTime.UtcNow + LoadRetryInterval;
             return null;
+        }
+
+        if (textureLoadFailed)
+        {
+            _gpuResourceKey = CreateGpuResourceKey(file) + FailedKeySuffix;
+            _currentFileKey = _gpuResourceKey[..^FailedKeySuffix.Length];
+            _lastFileStampCheck = DateTime.UtcNow;
+            _retryAt = DateTime.UtcNow + LoadRetryInterval;
+            return _gpuResource;
         }
 
         _gpuResourceKey = CreateGpuResourceKey(file);
