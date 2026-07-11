@@ -276,6 +276,7 @@ internal sealed class AssimpParser : IModelParser
             return string.Empty;
         }
 
+        string fallback = string.Empty;
         foreach (var candidate in EnumerateTextureCandidates(cleanPath, modelDirectory))
         {
             try
@@ -283,13 +284,14 @@ internal sealed class AssimpParser : IModelParser
                 string full = Path.GetFullPath(candidate);
                 if (!full.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) continue;
                 if (File.Exists(full)) return full;
+                if (fallback.Length == 0) fallback = full;
             }
             catch
             {
             }
         }
 
-        return string.Empty;
+        return fallback;
     }
 
     private static IEnumerable<string> EnumerateTextureCandidates(string cleanPath, string modelDirectory)
