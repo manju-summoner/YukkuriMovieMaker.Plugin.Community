@@ -190,12 +190,8 @@ internal sealed class WavefrontObjParser : IModelParser
                 if (!seenLibs.Add(mtlLib)) continue;
                 ParseMtl(baseDir, mtlLib, materialLib);
 
-                try
-                {
-                    string mtlPath = Path.GetFullPath(Path.Combine(baseDir, mtlLib));
-                    if (File.Exists(mtlPath)) dependencies.Add(mtlPath);
-                }
-                catch { }
+                string mtlPath = ModelHelper.ResolveTexturePath(mtlLib, baseDir);
+                if (mtlPath.Length > 0) dependencies.Add(mtlPath);
             }
         }
 
@@ -288,8 +284,8 @@ internal sealed class WavefrontObjParser : IModelParser
     {
         try
         {
-            string path = Path.Combine(baseDir, mtlLib);
-            if (!File.Exists(path)) return;
+            string path = ModelHelper.ResolveTexturePath(mtlLib, baseDir);
+            if (path.Length == 0 || !File.Exists(path)) return;
 
             using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var sr = new StreamReader(fs);
