@@ -198,6 +198,12 @@
     <FxCompile Include="PuppetDeformationArapVertex.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="Particlize.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="ParticlizeVertex.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="PuppetDeformationArap.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>

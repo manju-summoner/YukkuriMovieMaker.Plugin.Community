@@ -1,0 +1,43 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+Particlize,,粒子化,Particlize,粒子化,粒子化,입자화,Particulización,تحويل إلى جسيمات,Partikelisasi
+InOutParticlize,,粒子化しながら登場退場,Enter and exit while particlizing,粒子化入/出场,粒子化登場退場,입자화하며 등장 퇴장,Entrada y salida con particulización,الدخول والخروج مع التحول إلى جسيمات,Masuk dan keluar sambil menjadi partikel
+InParticlizeLabel,,粒子が集まりながら,while gathering from particles,粒子聚集时,粒子聚集時,입자가 모이면서,mientras se agrupan las partículas,أثناء تجمع الجسيمات,sambil partikel berkumpul
+OutParticlizeLabel,,粒子化しながら,while particlizing,粒子化时,粒子化時,입자화하면서,mientras se particuliza,أثناء التحول إلى جسيمات,sambil menjadi partikel
+ParticlizeGroup,,粒子化,Particlize,粒子化,粒子化,입자화,Particulización,تحويل إلى جسيمات,Partikelisasi
+DissolveGroup,,消え方,Dissolve,消失方式,消失方式,사라지는 방식,Disolución,طريقة الاختفاء,Cara menghilang
+ScatterGroup,,飛散,Scatter,飞散,飛散,비산,Dispersión,تناثر,Hamburan
+SecUnit,,秒,s,秒,秒,초,s,ث,dtk
+StartTime,,再生開始,Start time,播放开始,播放開始,재생 시작,Tiempo de inicio,وقت البدء,Waktu mulai
+StartTimeDesc,,粒子化を開始する時間,Time at which particlization starts.,开始粒子化的时间。,開始粒子化的時間。,입자화를 시작하는 시간.,Momento en que comienza la particulización.,الوقت الذي يبدأ فيه التحول إلى جسيمات.,Waktu partikelisasi dimulai.
+PlaybackRate,,再生速度,Playback rate,播放速度,播放速度,재생 속도,Velocidad de reproducción,سرعة التشغيل,Kecepatan pemutaran
+PlaybackRateDesc,,粒子化の進行速度,Speed at which the particlization progresses.,粒子化的进行速度。,粒子化的進行速度。,입자화 진행 속도.,Velocidad a la que avanza la particulización.,سرعة تقدم التحول إلى جسيمات.,Kecepatan kemajuan partikelisasi.
+Size,,粒子サイズ,Particle size,粒子大小,粒子大小,입자 크기,Tamaño de partícula,حجم الجسيمات,Ukuran partikel
+SizeDesc,,粒子1個の大きさ,Size of each particle.,单个粒子的大小。,單個粒子的大小。,입자 하나의 크기.,Tamaño de cada partícula.,حجم كل جسيم.,Ukuran setiap partikel.
+DissolveTime,,期間,Duration,期间,期間,기간,Duración,المدة,Durasi
+DissolveTimeDesc,,端から端まで粒子化が伝わる時間,Time for particlization to travel across the image.,粒子化从一端传到另一端所需的时间。,粒子化從一端傳到另一端所需的時間。,입자화가 끝에서 끝까지 전파되는 시간.,Tiempo que tarda la particulización en recorrer la imagen.,الوقت اللازم لانتقال التحول عبر الصورة.,Waktu partikelisasi menjalar dari ujung ke ujung.
+Angle,,方向,Direction,方向,方向,방향,Dirección,الاتجاه,Arah
+AngleDesc,,粒子化が伝わっていく方向,Direction in which particlization travels.,粒子化传播的方向。,粒子化傳播的方向。,입자화가 전파되는 방향.,Dirección en la que avanza la particulización.,الاتجاه الذي ينتقل فيه التحول.,Arah penjalaran partikelisasi.
+Randomness,,ばらつき,Randomness,随机性,隨機性,불규칙성,Aleatoriedad,عشوائية,Keacakan
+RandomnessDesc,,粒子化する順序のランダムさ,Randomness of the particlization order.,粒子化顺序的随机程度。,粒子化順序的隨機程度。,입자화 순서의 무작위성.,Aleatoriedad del orden de particulización.,عشوائية ترتيب التحول إلى جسيمات.,Keacakan urutan partikelisasi.
+Lifetime,,寿命,Lifetime,寿命,壽命,수명,Vida útil,العمر,Masa hidup
+LifetimeDesc,,粒子が消えるまでの時間,Time until a particle disappears.,粒子消失前的时间。,粒子消失前的時間。,입자가 사라질 때까지의 시간.,Tiempo hasta que una partícula desaparece.,الوقت حتى يختفي الجسيم.,Waktu hingga partikel menghilang.
+ScatterAngle,,飛散方向,Scatter direction,飞散方向,飛散方向,비산 방향,Dirección de dispersión,اتجاه التناثر,Arah hamburan
+ScatterAngleDesc,,粒子が飛んでいく方向,Direction in which particles fly.,粒子飞出的方向。,粒子飛出的方向。,입자가 날아가는 방향.,Dirección en la que vuelan las partículas.,الاتجاه الذي تتطاير فيه الجسيمات.,Arah terbang partikel.
+Speed,,飛散速度,Scatter speed,飞散速度,飛散速度,비산 속도,Velocidad de dispersión,سرعة التناثر,Kecepatan hamburan
+SpeedDesc,,粒子が飛んでいく速さ,Speed at which particles fly away.,粒子飞出的速度。,粒子飛出的速度。,입자가 날아가는 속도.,Velocidad a la que vuelan las partículas.,سرعة تطاير الجسيمات.,Kecepatan partikel terbang.
+Spread,,拡散,Spread,扩散,擴散,확산,Difusión,انتشار,Sebaran
+SpreadDesc,,粒子ごとのランダムな飛散の強さ,Strength of random scatter per particle.,每个粒子随机飞散的强度。,每個粒子隨機飛散的強度。,입자별 무작위 비산의 강도.,Intensidad de la dispersión aleatoria por partícula.,قوة التناثر العشوائي لكل جسيم.,Kekuatan hamburan acak per partikel.
+Gravity,,重力,Gravity,重力,重力,중력,Gravedad,الجاذبية,Gravitasi
+GravityDesc,,粒子の落下の強さ,Strength of particle fall.,粒子下落的强度。,粒子下落的強度。,입자 낙하의 강도.,Intensidad de la caída de partículas.,قوة سقوط الجسيمات.,Kekuatan jatuh partikel.
+Turbulence,,揺らぎ,Turbulence,扰动,擾動,흔들림,Turbulencia,اضطراب,Turbulensi
+TurbulenceDesc,,漂うような揺らぎの強さ,Strength of drifting sway.,漂浮般扰动的强度。,漂浮般擾動的強度。,떠다니는 듯한 흔들림의 강도.,Intensidad del balanceo flotante.,قوة التمايل الانسيابي.,Kekuatan goyangan melayang.
+Rotation,,回転,Rotation,旋转,旋轉,회전,Rotación,دوران,Rotasi
+RotationDesc,,粒子の回転の強さ,Strength of particle rotation.,粒子旋转的强度。,粒子旋轉的強度。,입자 회전의 강도.,Intensidad de la rotación de partículas.,قوة دوران الجسيمات.,Kekuatan rotasi partikel.
+Shrink,,縮小,Shrink,缩小,縮小,축소,Encogimiento,تقلص,Penyusutan
+ShrinkDesc,,消えるまでに粒子が縮む量,How much particles shrink before disappearing.,粒子消失前缩小的程度。,粒子消失前縮小的程度。,사라질 때까지 입자가 줄어드는 정도.,Cuánto se encogen las partículas antes de desaparecer.,مقدار تقلص الجسيمات قبل الاختفاء.,Seberapa besar partikel menyusut sebelum hilang.
+Fade,,フェード,Fade,淡出,淡出,페이드,Fundido,تلاشي,Pudar
+FadeDesc,,消えるまでに粒子が透明になる量,How much particles fade before disappearing.,粒子消失前变透明的程度。,粒子消失前變透明的程度。,사라질 때까지 입자가 투명해지는 정도.,Cuánto se desvanecen las partículas antes de desaparecer.,مقدار تلاشي الجسيمات قبل الاختفاء.,Seberapa besar partikel memudar sebelum hilang.
+TagParticle,,粒子,Particle,粒子,粒子,입자,Partícula,جسيم,Partikel
+TagParticlize,,パーティクル,Particlize,粒子化,粒子化,파티클,Particulizar,تحويل إلى جسيمات,Partikelisasi
+TagDissolve,,ディゾルブ,Dissolve,溶解,溶解,디졸브,Disolver,إذابة,Larut
+TagDisappear,,消える,Disappear,消失,消失,사라짐,Desaparecer,اختفاء,Menghilang

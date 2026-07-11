@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
 	<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
@@ -191,6 +191,8 @@
 	  <Resource Include="$(ShaderDirPath)PuppetDeformation.cso" Link="Resources\Shader\PuppetDeformation.cso" />
 	  <Resource Include="$(ShaderDirPath)PuppetDeformationArap.cso" Link="Resources\Shader\PuppetDeformationArap.cso" />
 	  <Resource Include="$(ShaderDirPath)PuppetDeformationArapVertex.cso" Link="Resources\Shader\PuppetDeformationArapVertex.cso" />
+	  <Resource Include="$(ShaderDirPath)Particlize.cso" Link="Resources\Shader\Particlize.cso" />
+	  <Resource Include="$(ShaderDirPath)ParticlizeVertex.cso" Link="Resources\Shader\ParticlizeVertex.cso" />
 	  <Resource Include="$(ShaderDirPath)PartialOutline.cso" Link="Resources\Shader\PartialOutline.cso" />
 	  <Resource Include="$(ShaderDirPath)DirectionalColorKey.cso" Link="Resources\Shader\DirectionalColorKey.cso" />
 	  <Resource Include="$(ShaderDirPath)AnisotropicKuwaharaTensor.cso" Link="Resources\Shader\AnisotropicKuwaharaTensor.cso" />
