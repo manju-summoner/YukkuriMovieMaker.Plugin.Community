@@ -20,6 +20,9 @@ internal sealed class BoundedLruCache<TKey, TValue> where TKey : notnull
     }
 
     public bool TryGetValue(TKey key, out TValue value)
+        => TryGetValue(key, out value, out _);
+
+    public bool TryGetValue(TKey key, out TValue value, out long bytes)
     {
         lock (_lock)
         {
@@ -28,9 +31,11 @@ internal sealed class BoundedLruCache<TKey, TValue> where TKey : notnull
                 _order.Remove(entry.Node);
                 _order.AddFirst(entry.Node);
                 value = entry.Value;
+                bytes = entry.Bytes;
                 return true;
             }
             value = default!;
+            bytes = 0;
             return false;
         }
     }

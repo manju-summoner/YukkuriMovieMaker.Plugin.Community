@@ -86,12 +86,12 @@ internal sealed class TextureService : ITextureService
         path = Path.GetFullPath(path).ToLowerInvariant();
         var key = (devicePtr, MakeContentKey(path));
 
-        if (GpuTextureCache.TryGetValue(key, out var cachedTex))
+        if (GpuTextureCache.TryGetValue(key, out var cachedTex, out long cachedBytes))
         {
             try
             {
                 var srv = device.CreateShaderResourceView(cachedTex);
-                return (srv, 0);
+                return (srv, cachedBytes);
             }
             catch
             {
@@ -172,7 +172,7 @@ internal sealed class TextureService : ITextureService
                 try
                 {
                     var srv = device.CreateShaderResourceView(cached);
-                    return (srv, 0);
+                    return (srv, gpuBytes);
                 }
                 catch
                 {

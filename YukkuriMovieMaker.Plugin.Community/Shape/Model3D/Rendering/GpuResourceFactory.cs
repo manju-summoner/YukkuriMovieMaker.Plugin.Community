@@ -65,12 +65,13 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
             metallicRoughnessTextures = new ID3D11ShaderResourceView?[parts.Length];
 
             var cachedTexturePaths = new List<string>();
+            var countedTexturePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             bool anyTextureFailed = false;
             for (int i = 0; i < parts.Length; i++)
             {
-                gpuBytes += LoadTexture(device, parts[i].TexturePath, textures, i, cachedTexturePaths, ref anyTextureFailed);
-                gpuBytes += LoadTexture(device, parts[i].MetallicRoughnessTexturePath, metallicRoughnessTextures, i, cachedTexturePaths, ref anyTextureFailed);
+                gpuBytes += LoadTexture(device, parts[i].TexturePath, textures, i, cachedTexturePaths, countedTexturePaths, ref anyTextureFailed);
+                gpuBytes += LoadTexture(device, parts[i].MetallicRoughnessTexturePath, metallicRoughnessTextures, i, cachedTexturePaths, countedTexturePaths, ref anyTextureFailed);
                 if (!Model3DSettings.Default.IsGpuMemoryPerModelAllowed(gpuBytes)) break;
             }
             textureLoadFailed = anyTextureFailed;
@@ -109,7 +110,7 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
         }
     }
 
-    private long LoadTexture(ID3D11Device device, string texturePath, ID3D11ShaderResourceView?[] target, int index, List<string> cachedTexturePaths, ref bool anyTextureFailed)
+    private long LoadTexture(ID3D11Device device, string texturePath, ID3D11ShaderResourceView?[] target, int index, List<string> cachedTexturePaths, HashSet<string> countedTexturePaths, ref bool anyTextureFailed)
     {
         if (string.IsNullOrEmpty(texturePath) || !File.Exists(texturePath)) return 0;
 
@@ -118,8 +119,12 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
             var (view, textureBytes) = textureService.CreateShaderResourceView(texturePath, device);
             target[index] = view;
             if (view is null) anyTextureFailed = true;
-            if (textureBytes > 0) cachedTexturePaths.Add(texturePath);
-            return textureBytes;
+            if (textureBytes > 0 && countedTexturePaths.Add(texturePath))
+            {
+                cachedTexturePaths.Add(texturePath);
+                return textureBytes;
+            }
+            return 0;
         }
         catch
         {
