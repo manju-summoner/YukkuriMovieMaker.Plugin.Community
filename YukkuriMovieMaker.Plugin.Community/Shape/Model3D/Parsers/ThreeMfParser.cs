@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO.Compression;
 using System.Numerics;
 using System.Xml;
@@ -11,6 +11,7 @@ internal sealed class ThreeMfParser : IModelParser
     private const int MaxComponentDepth = 32;
     private const int MaxColorResources = 65536;
     private const int MaxBuildItems = 65536;
+
 
     private static readonly string[] FileExtensions = [".3mf"];
 
@@ -25,6 +26,7 @@ internal sealed class ThreeMfParser : IModelParser
             using var archive = ZipFile.OpenRead(path);
             var modelEntry = archive.GetEntry("3D/3dmodel.model");
             if (modelEntry == null) return new Model3DData();
+            if (modelEntry.Length > Model3DSettings.Default.MaxFileSizeBytes) return new Model3DData();
 
             using var stream = modelEntry.Open();
             using var reader = XmlReader.Create(stream);
