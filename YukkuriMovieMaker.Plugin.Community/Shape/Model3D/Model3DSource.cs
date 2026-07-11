@@ -227,6 +227,14 @@ internal sealed class Model3DSource : IShapeSource
         {
             AppendFileStamp(builder, watched);
         }
+
+        var limits = Model3DSettings.Default;
+        builder.Append(limits.MaxFileSizeMB).Append('|')
+            .Append(limits.MaxVertices).Append('|')
+            .Append(limits.MaxIndices).Append('|')
+            .Append(limits.MaxParts).Append('|')
+            .Append(limits.MaxGpuMemoryPerModelMB).Append(';');
+
         return builder.ToString();
     }
 
