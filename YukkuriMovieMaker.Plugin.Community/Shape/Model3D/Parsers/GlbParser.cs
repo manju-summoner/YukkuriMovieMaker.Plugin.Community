@@ -488,19 +488,19 @@ internal sealed class GlbParser : IModelParser
                 {
                     var mat = materials[matIdx];
 
-                    if (mat.TryGetProperty("alphaMode", out var alphaModeProp))
+                    string alphaMode = mat.TryGetProperty("alphaMode", out var alphaModeProp)
+                        ? alphaModeProp.GetString() ?? "OPAQUE"
+                        : "OPAQUE";
+
+                    if (alphaMode == "BLEND")
                     {
-                        string? alphaMode = alphaModeProp.GetString();
-                        if (alphaMode == "BLEND")
-                        {
-                            forceTransparent = true;
-                        }
-                        else if (alphaMode == "MASK")
-                        {
-                            alphaCutoff = mat.TryGetProperty("alphaCutoff", out var cutoffProp)
-                                ? Math.Clamp(cutoffProp.GetSingle(), 0.0f, 1.0f)
-                                : 0.5f;
-                        }
+                        forceTransparent = true;
+                    }
+                    else if (alphaMode == "MASK")
+                    {
+                        alphaCutoff = mat.TryGetProperty("alphaCutoff", out var cutoffProp)
+                            ? Math.Clamp(cutoffProp.GetSingle(), 0.0f, 1.0f)
+                            : 0.5f;
                     }
 
                     if (mat.TryGetProperty("pbrMetallicRoughness", out var pbr))
@@ -551,6 +551,8 @@ internal sealed class GlbParser : IModelParser
                             }
                         }
                     }
+
+                    if (alphaMode is not ("BLEND" or "MASK")) baseColor.W = 1.0f;
                 }
 
                 parts.Add(new Model3DPart
