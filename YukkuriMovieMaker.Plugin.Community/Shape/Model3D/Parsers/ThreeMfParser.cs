@@ -255,6 +255,7 @@ internal sealed class ThreeMfParser : IModelParser
         private readonly Dictionary<Vector4, List<int>> _groupedIndices = [];
         private readonly HashSet<Vector4> _transparentGroups = [];
         private long _emittedIndexCount;
+        private bool _limitExceeded;
 
         public void EmitObject(string objectId, Matrix4x4 transform)
         {
@@ -276,14 +277,22 @@ internal sealed class ThreeMfParser : IModelParser
 
                 foreach (var tri in obj.Triangles)
                 {
-                    if (_emittedIndexCount + 3 > limits.MaxIndices) break;
+                    if (_emittedIndexCount + 3 > limits.MaxIndices)
+                    {
+                        _limitExceeded = true;
+                        break;
+                    }
                     if ((uint)tri.V1 >= (uint)obj.Vertices.Count
                         || (uint)tri.V2 >= (uint)obj.Vertices.Count
                         || (uint)tri.V3 >= (uint)obj.Vertices.Count) continue;
 
                     if (!TryEmitCorner(obj, transform, cornerMap, limits, tri.V1, tri.Color1, out int i1)
                         || !TryEmitCorner(obj, transform, cornerMap, limits, tri.V2, tri.Color2, out int i2)
-                        || !TryEmitCorner(obj, transform, cornerMap, limits, tri.V3, tri.Color3, out int i3)) break;
+                        || !TryEmitCorner(obj, transform, cornerMap, limits, tri.V3, tri.Color3, out int i3))
+                    {
+                        _limitExceeded = true;
+                        break;
+                    }
 
                     if (!_groupedIndices.TryGetValue(tri.Color1, out var group))
                     {
@@ -332,6 +341,8 @@ internal sealed class ThreeMfParser : IModelParser
 
         public Model3DData Build()
         {
+            if (_limitExceeded) return new Model3DData();
+
             var vArray = _vertices.ToArray();
             var allIndices = new List<int>();
             var parts = new List<Model3DPart>();
