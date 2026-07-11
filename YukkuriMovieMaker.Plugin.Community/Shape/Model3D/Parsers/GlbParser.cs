@@ -760,6 +760,9 @@ internal sealed class GlbParser : IModelParser
         var result = new byte[]?[count];
         result[0] = glbBinChunk;
 
+        long maxTotalBytes = Model3DSettings.Default.MaxFileSizeBytes;
+        long totalBytes = glbBinChunk?.LongLength ?? 0;
+
         for (int i = 0; i < count; i++)
         {
             if (result[i] != null) continue;
@@ -774,7 +777,10 @@ internal sealed class GlbParser : IModelParser
                 if (separator < 0) continue;
                 try
                 {
-                    result[i] = Convert.FromBase64String(uri[(separator + 1)..]);
+                    var decoded = Convert.FromBase64String(uri[(separator + 1)..]);
+                    if (totalBytes + decoded.LongLength > maxTotalBytes) continue;
+                    totalBytes += decoded.LongLength;
+                    result[i] = decoded;
                 }
                 catch (FormatException)
                 {
@@ -790,7 +796,10 @@ internal sealed class GlbParser : IModelParser
                 try
                 {
                     if (!File.Exists(binPath)) continue;
-                    if (!Model3DSettings.Default.IsFileSizeAllowed(new FileInfo(binPath).Length)) continue;
+                    long length = new FileInfo(binPath).Length;
+                    if (!Model3DSettings.Default.IsFileSizeAllowed(length)) continue;
+                    if (totalBytes + length > maxTotalBytes) continue;
+                    totalBytes += length;
                     result[i] = File.ReadAllBytes(binPath);
                 }
                 catch
