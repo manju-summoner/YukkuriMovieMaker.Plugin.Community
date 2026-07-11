@@ -11,6 +11,7 @@ internal sealed class TgaTextureLoader : ITextureLoader
     private const byte RleTrueColor = 10;
     private const byte TopLeftOriginFlag = 0x20;
     private const byte RightOriginFlag = 0x10;
+    private const byte AttributeBitsMask = 0x0F;
     private const byte RlePacketFlag = 0x80;
     private const long MaxPixelCount = 512L * 1024 * 1024 / 4;
 
@@ -75,6 +76,7 @@ internal sealed class TgaTextureLoader : ITextureLoader
 
         int stride = width * 4;
         int pixelCount = width * height;
+        bool hasAlpha = pixelDepth == 32 && (imageDescriptor & AttributeBitsMask) != 0;
         var rawData = new TextureRawData(width, height);
         var pixels = rawData.Pixels;
         int rawIdx = 0;
@@ -88,7 +90,7 @@ internal sealed class TgaTextureLoader : ITextureLoader
                     pixels[rawIdx++] = br.ReadByte();
                     pixels[rawIdx++] = br.ReadByte();
                     pixels[rawIdx++] = br.ReadByte();
-                    pixels[rawIdx++] = pixelDepth == 32 ? br.ReadByte() : (byte)255;
+                    pixels[rawIdx++] = pixelDepth == 32 ? ReadAttributeByte(br, hasAlpha) : (byte)255;
                 }
             }
             else if (imageType == RleTrueColor)
@@ -103,7 +105,7 @@ internal sealed class TgaTextureLoader : ITextureLoader
                         byte b = br.ReadByte();
                         byte g = br.ReadByte();
                         byte r = br.ReadByte();
-                        byte a = pixelDepth == 32 ? br.ReadByte() : (byte)255;
+                        byte a = pixelDepth == 32 ? ReadAttributeByte(br, hasAlpha) : (byte)255;
                         for (int i = 0; i < count; i++)
                         {
                             pixels[rawIdx++] = b;
@@ -120,7 +122,7 @@ internal sealed class TgaTextureLoader : ITextureLoader
                             pixels[rawIdx++] = br.ReadByte();
                             pixels[rawIdx++] = br.ReadByte();
                             pixels[rawIdx++] = br.ReadByte();
-                            pixels[rawIdx++] = pixelDepth == 32 ? br.ReadByte() : (byte)255;
+                            pixels[rawIdx++] = pixelDepth == 32 ? ReadAttributeByte(br, hasAlpha) : (byte)255;
                             currentPixel++;
                         }
                     }
@@ -172,5 +174,11 @@ internal sealed class TgaTextureLoader : ITextureLoader
             rawData.Dispose();
             throw;
         }
+    }
+
+    private static byte ReadAttributeByte(BinaryReader br, bool hasAlpha)
+    {
+        byte value = br.ReadByte();
+        return hasAlpha ? value : (byte)255;
     }
 }
