@@ -184,20 +184,19 @@ internal sealed class GlbParser : IModelParser
             if (nodes.ValueKind != JsonValueKind.Array && meshes.ValueKind != JsonValueKind.Array) return new Model3DData();
 
             var sceneNodes = new List<int>();
-            if (root.TryGetProperty("scene", out var defaultSceneIdx))
+            bool sceneResolved = false;
+            if (root.TryGetProperty("scenes", out var scenes) && scenes.ValueKind == JsonValueKind.Array && scenes.GetArrayLength() > 0)
             {
-                if (root.TryGetProperty("scenes", out var scenes) && scenes.ValueKind == JsonValueKind.Array)
+                int idx = root.TryGetProperty("scene", out var defaultSceneIdx) ? defaultSceneIdx.GetInt32() : 0;
+                if (idx >= 0 && idx < scenes.GetArrayLength())
                 {
-                    var idx = defaultSceneIdx.GetInt32();
-                    if (idx >= 0 && idx < scenes.GetArrayLength())
+                    sceneResolved = true;
+                    var scene = scenes[idx];
+                    if (scene.TryGetProperty("nodes", out var sceneNodeIds) && sceneNodeIds.ValueKind == JsonValueKind.Array)
                     {
-                        var scene = scenes[idx];
-                        if (scene.TryGetProperty("nodes", out var sceneNodeIds) && sceneNodeIds.ValueKind == JsonValueKind.Array)
+                        foreach (var nodeVal in sceneNodeIds.EnumerateArray())
                         {
-                            foreach (var nodeVal in sceneNodeIds.EnumerateArray())
-                            {
-                                sceneNodes.Add(nodeVal.GetInt32());
-                            }
+                            sceneNodes.Add(nodeVal.GetInt32());
                         }
                     }
                 }
@@ -205,7 +204,7 @@ internal sealed class GlbParser : IModelParser
 
             var context = new GlbContext(root, buffers, nodes, materials, images, textures, allVertices, allIndices, parts, missingNormalRanges);
 
-            if (sceneNodes.Count == 0 && meshes.ValueKind == JsonValueKind.Array)
+            if (!sceneResolved && sceneNodes.Count == 0 && meshes.ValueKind == JsonValueKind.Array)
             {
                 int meshCount = meshes.GetArrayLength();
                 for (int i = 0; i < meshCount; i++)
