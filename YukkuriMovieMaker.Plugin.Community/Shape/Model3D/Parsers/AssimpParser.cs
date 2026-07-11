@@ -229,10 +229,26 @@ internal sealed class AssimpParser : IModelParser
 
     private static IEnumerable<string> EnumerateTextureCandidates(string cleanPath, string rawPath, string modelDirectory)
     {
-        yield return cleanPath;
-        if (rawPath != cleanPath) yield return rawPath;
+        bool isRooted = false;
+        try
+        {
+            isRooted = Path.IsPathRooted(cleanPath);
+        }
+        catch
+        {
+        }
 
-        if (string.IsNullOrEmpty(modelDirectory)) yield break;
+        if (isRooted)
+        {
+            yield return cleanPath;
+            if (rawPath != cleanPath) yield return rawPath;
+        }
+
+        if (string.IsNullOrEmpty(modelDirectory))
+        {
+            if (!isRooted) yield return cleanPath;
+            yield break;
+        }
 
         yield return Path.Combine(modelDirectory, cleanPath);
 
