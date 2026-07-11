@@ -66,8 +66,9 @@ VSOut main(VSIn input)
     float tau = time - birth;
     float progress = tau * lifetimeInv;
 
-    //‚Ü‚¾ˆê“x‚à”­¶‚µ‚Ä‚¢‚È‚¢i¢‘ã‚ª•‰j‚©AŽõ–½‚ªs‚«‚½—±Žq‚Í–ÊÏ0‚É‚µ‚Ä•`‰æ‚µ‚È‚¢
-    float visible = (generation >= 0.0f && progress < 1.0f) ? 1.0f : 0.0f;
+    //”­¶‘OiŽž0ˆÈ‘OE¢‘ã‚ª•‰j‚©AŽõ–½‚ªs‚«‚½—±Žq‚Í–ÊÏ0‚É‚µ‚Ä•`‰æ‚µ‚È‚¢B
+    //Žž0‚¿‚å‚¤‚Ç‚ÍCPU‘¤‚ªo—Í”ÍˆÍ‚ðk‘Þ‚³‚¹‚é‚½‚ßA‰ÂŽ‹”»’è‚àtime>0‚Å‘µ‚¦‚Ä’f•Ð‚ª•`‰æ‚³‚ê‚È‚¢‚æ‚¤‚É‚·‚é
+    float visible = (time > 0.0f && generation >= 0.0f && progress < 1.0f) ? 1.0f : 0.0f;
     progress = saturate(progress);
 
     float2 hashKey = float2(slot, generation);
