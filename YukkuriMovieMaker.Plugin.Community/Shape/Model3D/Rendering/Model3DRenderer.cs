@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
@@ -120,6 +120,9 @@ internal sealed class Model3DRenderer : IDisposable
         _textureBinding[0] = model.PartTextures[index] ?? _resources.WhiteTextureView;
         _textureBinding[1] = model.PartMetallicRoughnessTextures[index] ?? _resources.WhiteTextureView;
         context.PSSetShaderResources(RenderingConstants.SlotBaseColorTexture, 2, _textureBinding);
+
+        _samplerBinding[0] = _resources.GetSampler(part.AddressU, part.AddressV);
+        context.PSSetSamplers(0, 1, _samplerBinding);
 
         var perMaterial = new CBPerMaterial
         {

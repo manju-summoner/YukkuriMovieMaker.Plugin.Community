@@ -23,6 +23,7 @@ internal sealed class D3DResources : IDisposable
     public ID3D11DepthStencilState DepthWriteState { get; }
     public ID3D11DepthStencilState DepthReadOnlyState { get; }
     public ID3D11SamplerState SamplerState { get; }
+    private readonly ID3D11SamplerState[] _samplerStates = new ID3D11SamplerState[9];
     public ID3D11BlendState BlendState { get; }
     public ID3D11ShaderResourceView WhiteTextureView { get; }
 
@@ -41,7 +42,14 @@ internal sealed class D3DResources : IDisposable
             RasterizerState = Collect(CreateRasterizerState(device));
             DepthWriteState = Collect(CreateDepthStencilState(device, true));
             DepthReadOnlyState = Collect(CreateDepthStencilState(device, false));
-            SamplerState = Collect(CreateSamplerState(device));
+            for (int u = 0; u < 3; u++)
+            {
+                for (int v = 0; v < 3; v++)
+                {
+                    _samplerStates[u * 3 + v] = Collect(CreateSamplerState(device, ToAddressMode((byte)u), ToAddressMode((byte)v)));
+                }
+            }
+            SamplerState = _samplerStates[0];
             BlendState = Collect(CreateBlendState(device));
             WhiteTextureView = Collect(CreateWhiteTexture(device));
         }
@@ -83,11 +91,25 @@ internal sealed class D3DResources : IDisposable
             depthWriteEnabled ? DepthWriteMask.All : DepthWriteMask.Zero,
             ComparisonFunction.LessEqual));
 
-    private static ID3D11SamplerState CreateSamplerState(ID3D11Device device)
+    public ID3D11SamplerState GetSampler(byte addressU, byte addressV)
+    {
+        int u = addressU < 3 ? addressU : 0;
+        int v = addressV < 3 ? addressV : 0;
+        return _samplerStates[u * 3 + v];
+    }
+
+    private static TextureAddressMode ToAddressMode(byte mode) => mode switch
+    {
+        1 => TextureAddressMode.Clamp,
+        2 => TextureAddressMode.Mirror,
+        _ => TextureAddressMode.Wrap
+    };
+
+    private static ID3D11SamplerState CreateSamplerState(ID3D11Device device, TextureAddressMode addressU, TextureAddressMode addressV)
         => device.CreateSamplerState(new SamplerDescription(
             Filter.Anisotropic,
-            TextureAddressMode.Wrap,
-            TextureAddressMode.Wrap,
+            addressU,
+            addressV,
             TextureAddressMode.Wrap,
             0,
             MaxAnisotropy,

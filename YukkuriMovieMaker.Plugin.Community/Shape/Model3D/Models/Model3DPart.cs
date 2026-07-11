@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 
 namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Models;
 
@@ -17,6 +17,8 @@ internal struct Model3DPart
     public float AlphaCutoff;
     public bool ForceTransparent;
     public bool IgnoreAlpha;
+    public byte AddressU;
+    public byte AddressV;
     public Vector3 Center;
 
     public Model3DPart()
@@ -31,6 +33,8 @@ internal struct Model3DPart
         AlphaCutoff = 0.0f;
         ForceTransparent = false;
         IgnoreAlpha = false;
+        AddressU = 0;
+        AddressV = 0;
         Center = Vector3.Zero;
     }
 

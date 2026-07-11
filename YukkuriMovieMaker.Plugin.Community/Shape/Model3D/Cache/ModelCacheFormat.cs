@@ -68,6 +68,8 @@ internal static class ModelCacheFormat
         writer.Write(part.AlphaCutoff);
         writer.Write(part.ForceTransparent);
         writer.Write(part.IgnoreAlpha);
+        writer.Write(part.AddressU);
+        writer.Write(part.AddressV);
     }
 
     public static Model3DPart ReadPart(BinaryReader reader)
@@ -93,6 +95,8 @@ internal static class ModelCacheFormat
         float alphaCutoff = reader.ReadSingle();
         bool forceTransparent = reader.ReadBoolean();
         bool ignoreAlpha = reader.ReadBoolean();
+        byte addressU = reader.ReadByte();
+        byte addressV = reader.ReadByte();
 
         return new Model3DPart
         {
@@ -105,7 +109,9 @@ internal static class ModelCacheFormat
             Roughness = roughness,
             AlphaCutoff = alphaCutoff,
             ForceTransparent = forceTransparent,
-            IgnoreAlpha = ignoreAlpha
+            IgnoreAlpha = ignoreAlpha,
+            AddressU = addressU,
+            AddressV = addressV
         };
     }
 

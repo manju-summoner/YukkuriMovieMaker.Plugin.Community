@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Numerics;
 using System.Text;
 using System.Text.Json;
@@ -156,19 +156,33 @@ internal sealed class GlbParser : IModelParser
                 }
             }
 
-            var textures = new List<int>();
+            var samplers = new List<(byte U, byte V)>();
+            if (root.TryGetProperty("samplers", out var samplersProp) && samplersProp.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var sampler in samplersProp.EnumerateArray())
+                {
+                    byte u = sampler.TryGetProperty("wrapS", out var wrapS) ? MapWrapMode(wrapS.GetInt32()) : (byte)0;
+                    byte v = sampler.TryGetProperty("wrapT", out var wrapT) ? MapWrapMode(wrapT.GetInt32()) : (byte)0;
+                    samplers.Add((u, v));
+                }
+            }
+
+            var textures = new List<(int Source, byte U, byte V)>();
             if (root.TryGetProperty("textures", out var texProp))
             {
                 foreach (var tex in texProp.EnumerateArray())
                 {
-                    if (tex.TryGetProperty("source", out var srcProp))
+                    int source = tex.TryGetProperty("source", out var srcProp) ? srcProp.GetInt32() : -1;
+                    byte u = 0, v = 0;
+                    if (tex.TryGetProperty("sampler", out var samplerProp))
                     {
-                        textures.Add(srcProp.GetInt32());
+                        int samplerIdx = samplerProp.GetInt32();
+                        if (samplerIdx >= 0 && samplerIdx < samplers.Count)
+                        {
+                            (u, v) = samplers[samplerIdx];
+                        }
                     }
-                    else
-                    {
-                        textures.Add(-1);
-                    }
+                    textures.Add((source, u, v));
                 }
             }
 
@@ -423,6 +437,8 @@ internal sealed class GlbParser : IModelParser
 
                 bool forceTransparent = false;
                 float alphaCutoff = 0.0f;
+                byte addressU = 0;
+                byte addressV = 0;
 
                 if (colors != null)
                 {
@@ -476,10 +492,12 @@ internal sealed class GlbParser : IModelParser
                                 int bTexIdx = bTexIdxProp.GetInt32();
                                 if (bTexIdx >= 0 && bTexIdx < textures.Count)
                                 {
-                                    int imgIdx = textures[bTexIdx];
-                                    if (imgIdx >= 0 && imgIdx < images.Count)
+                                    var texture = textures[bTexIdx];
+                                    if (texture.Source >= 0 && texture.Source < images.Count)
                                     {
-                                        texPath = images[imgIdx];
+                                        texPath = images[texture.Source];
+                                        addressU = texture.U;
+                                        addressV = texture.V;
                                     }
                                 }
                             }
@@ -492,10 +510,10 @@ internal sealed class GlbParser : IModelParser
                             int mrTexIdx = mrTexIdxProp.GetInt32();
                             if (mrTexCoord == texCoordSet && mrTexIdx >= 0 && mrTexIdx < textures.Count)
                             {
-                                int imgIdx = textures[mrTexIdx];
-                                if (imgIdx >= 0 && imgIdx < images.Count)
+                                var texture = textures[mrTexIdx];
+                                if (texture.Source >= 0 && texture.Source < images.Count)
                                 {
-                                    metallicRoughnessTexPath = images[imgIdx];
+                                    metallicRoughnessTexPath = images[texture.Source];
                                 }
                             }
                         }
@@ -513,7 +531,9 @@ internal sealed class GlbParser : IModelParser
                     Roughness = roughness,
                     AlphaCutoff = alphaCutoff,
                     ForceTransparent = forceTransparent,
-                    IgnoreAlpha = !forceTransparent && alphaCutoff <= 0.0f
+                    IgnoreAlpha = !forceTransparent && alphaCutoff <= 0.0f,
+                    AddressU = addressU,
+                    AddressV = addressV
                 });
             }
         }
@@ -724,6 +744,13 @@ internal sealed class GlbParser : IModelParser
         return 0;
     }
 
+    private static byte MapWrapMode(int gltfWrapMode) => gltfWrapMode switch
+    {
+        33071 => 1,
+        33648 => 2,
+        _ => 0
+    };
+
     private static bool IsSparseAccessor(JsonElement root, int index)
     {
         if (index < 0) return false;
@@ -859,7 +886,7 @@ internal sealed class GlbParser : IModelParser
         JsonElement Nodes,
         JsonElement Materials,
         List<string> Images,
-        List<int> Textures,
+        List<(int Source, byte U, byte V)> Textures,
         List<Model3DVertex> Vertices,
         List<int> Indices,
         List<Model3DPart> Parts,
