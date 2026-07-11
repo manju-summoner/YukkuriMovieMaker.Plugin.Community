@@ -75,6 +75,10 @@ internal sealed class AssimpParser : IModelParser
                 ModelScale = scale
             };
         }
+        catch (IOException)
+        {
+            throw;
+        }
         catch
         {
             return new Model3DData();

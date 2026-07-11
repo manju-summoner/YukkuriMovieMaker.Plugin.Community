@@ -26,6 +26,10 @@ internal sealed class PlyParser : IModelParser
             var reader = new PlyReader(stream);
             model = reader.Read();
         }
+        catch (IOException)
+        {
+            throw;
+        }
         catch
         {
             return new Model3DData();

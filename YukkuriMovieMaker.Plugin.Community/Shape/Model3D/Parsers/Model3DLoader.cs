@@ -90,6 +90,10 @@ internal static class Model3DLoader
         {
             model = parser.Parse(path);
         }
+        catch (IOException)
+        {
+            throw;
+        }
         catch
         {
             return new Model3DData();

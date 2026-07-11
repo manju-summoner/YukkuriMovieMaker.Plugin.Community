@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO;
 using System.IO.Compression;
 using System.Numerics;
 using System.Xml;
@@ -172,6 +173,10 @@ internal sealed class ThreeMfParser : IModelParser
             }
 
             return emitter.Build();
+        }
+        catch (IOException)
+        {
+            throw;
         }
         catch
         {

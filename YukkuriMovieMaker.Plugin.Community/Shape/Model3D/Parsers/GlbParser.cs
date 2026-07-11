@@ -69,6 +69,10 @@ internal sealed class GlbParser : IModelParser
                 jsonStr = textReader.ReadToEnd();
             }
         }
+        catch (IOException)
+        {
+            throw;
+        }
         catch
         {
             return new Model3DData();
@@ -230,6 +234,10 @@ internal sealed class GlbParser : IModelParser
             {
                 TraverseNodes(context, sceneNodes);
             }
+        }
+        catch (IOException)
+        {
+            throw;
         }
         catch
         {
