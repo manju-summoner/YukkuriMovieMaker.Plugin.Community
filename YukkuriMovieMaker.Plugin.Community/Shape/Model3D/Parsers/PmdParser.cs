@@ -154,6 +154,7 @@ internal sealed class PmdParser : IStreamingModelParser
     {
         int count = reader.ReadInt32();
         if (count <= 0) return [];
+        if (count > Model3DSettings.Default.MaxParts) throw new ModelLimitExceededException();
         if (!HasCapacity(reader.BaseStream, count, MaterialBytes)) throw new InvalidDataException(InvalidDataMessage);
 
         string modelDirectory = Path.GetDirectoryName(modelPath) ?? string.Empty;
