@@ -311,7 +311,7 @@ internal sealed class WavefrontObjParser : IModelParser
 
                 if (keyword == "newmtl")
                 {
-                    currentMat = parts[1];
+                    currentMat = trim[parts[0].Length..].Trim();
                     if (!lib.ContainsKey(currentMat))
                     {
                         lib[currentMat] = new MaterialData { DiffuseColor = Vector4.One };
@@ -322,8 +322,12 @@ internal sealed class WavefrontObjParser : IModelParser
                     var data = lib[currentMat];
                     if (keyword == "map_kd")
                     {
-                        data.TexturePath = ModelHelper.ResolveTexturePath(parts[^1], mtlDir, baseDir);
-                        lib[currentMat] = data;
+                        string file = GetMapFilePath(parts);
+                        if (file.Length > 0)
+                        {
+                            data.TexturePath = ModelHelper.ResolveTexturePath(file, mtlDir, baseDir);
+                            lib[currentMat] = data;
+                        }
                     }
                     else if (keyword == "kd")
                     {
@@ -357,6 +361,21 @@ internal sealed class WavefrontObjParser : IModelParser
         }
         catch { }
     }
+
+    private static string GetMapFilePath(string[] tokens)
+    {
+        int start = 1;
+        while (start < tokens.Length && tokens[start].StartsWith('-'))
+        {
+            start++;
+            while (start < tokens.Length && IsMapOptionArgument(tokens[start])) start++;
+        }
+        return start < tokens.Length ? string.Join(' ', tokens, start, tokens.Length - start) : string.Empty;
+    }
+
+    private static bool IsMapOptionArgument(string token)
+        => token is "on" or "off"
+        || float.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture, out _);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ResolveIndex(int idx, int definedCount) => idx < 0 ? definedCount + idx + 1 : idx;
