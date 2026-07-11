@@ -14,6 +14,8 @@ internal sealed class Model3DSource : IShapeSource
 {
     private static readonly Lock RenderLock = new();
     private static readonly TimeSpan FileStampInterval = TimeSpan.FromMilliseconds(500);
+    private static readonly TimeSpan LoadRetryInterval = TimeSpan.FromSeconds(2);
+    private const string FailedKeySuffix = "|failed";
 
     private readonly IGraphicsDevicesAndContext _devices;
     private readonly Model3DParameter _parameter;
@@ -30,6 +32,7 @@ internal sealed class Model3DSource : IShapeSource
     private readonly List<string> _watchedFiles = [];
     private string _currentFileKey = string.Empty;
     private DateTime _lastFileStampCheck = DateTime.MinValue;
+    private DateTime _retryAt = DateTime.MinValue;
     private int _width;
     private int _height;
     private Model3DRenderState _state;
@@ -61,7 +64,9 @@ internal sealed class Model3DSource : IShapeSource
         var state = CreateRenderState(frame, length, fps);
         string fileKey = GetFileKey(file);
 
-        if (_file == file && _width == width && _height == height && _state == state && _gpuResourceKey == fileKey) return;
+        bool sameState = _file == file && _width == width && _height == height && _state == state;
+        if (sameState && _gpuResourceKey == fileKey) return;
+        if (sameState && _gpuResourceKey == fileKey + FailedKeySuffix && DateTime.UtcNow < _retryAt) return;
 
         _file = file;
         _width = width;
@@ -157,6 +162,9 @@ internal sealed class Model3DSource : IShapeSource
         catch
         {
             _gpuResource = null;
+            _gpuResourceKey = key + FailedKeySuffix;
+            _retryAt = DateTime.UtcNow + LoadRetryInterval;
+            return null;
         }
 
         _gpuResourceKey = CreateGpuResourceKey(file);
