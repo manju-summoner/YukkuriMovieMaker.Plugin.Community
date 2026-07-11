@@ -35,6 +35,7 @@ internal sealed class PmxParser : IStreamingModelParser
 
         int vertexCount = reader.ReadInt32();
         if (!HasCapacity(stream, vertexCount, MinVertexBytesWithoutBoneIndex + header.BoneIndexSize)) return new Model3DData();
+        if (vertexCount > Model3DSettings.Default.MaxVertices) return new Model3DData();
 
         var vertices = GC.AllocateUninitializedArray<Model3DVertex>(vertexCount, true);
         for (int i = 0; i < vertexCount; i++)
@@ -42,6 +43,7 @@ internal sealed class PmxParser : IStreamingModelParser
 
         int indexCount = reader.ReadInt32();
         if (!HasCapacity(stream, indexCount, header.VertexIndexSize)) return new Model3DData();
+        if (indexCount > Model3DSettings.Default.MaxIndices) return new Model3DData();
 
         var indices = GC.AllocateUninitializedArray<int>(indexCount, true);
         for (int i = 0; i < indexCount; i++)
