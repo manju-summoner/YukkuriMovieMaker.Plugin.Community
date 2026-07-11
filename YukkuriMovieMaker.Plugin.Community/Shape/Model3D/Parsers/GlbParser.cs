@@ -576,7 +576,7 @@ internal sealed class GlbParser : IModelParser
                 x = BitConverter.ToUInt16(binData, p) / 65535.0f;
                 y = BitConverter.ToUInt16(binData, p + 2) / 65535.0f;
             }
-            result[i] = new Vector2(x, 1.0f - y);
+            result[i] = new Vector2(x, y);
         }
         return result;
     }
