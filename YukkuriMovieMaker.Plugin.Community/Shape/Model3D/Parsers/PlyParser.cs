@@ -90,6 +90,7 @@ internal sealed class PlyParser : IModelParser
             }
             catch
             {
+                return new Model3DData();
             }
 
             if (_indexLimitExceeded) return new Model3DData();
