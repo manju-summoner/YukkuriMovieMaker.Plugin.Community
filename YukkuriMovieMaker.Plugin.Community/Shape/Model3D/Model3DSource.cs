@@ -68,11 +68,6 @@ internal sealed class Model3DSource : IShapeSource
         if (sameState && _gpuResourceKey == fileKey) return;
         if (sameState && _gpuResourceKey == fileKey + FailedKeySuffix && DateTime.UtcNow < _retryAt) return;
 
-        _file = file;
-        _width = width;
-        _height = height;
-        _state = state;
-
         ID2D1CommandList newCommandList;
         try
         {
@@ -82,6 +77,11 @@ internal sealed class Model3DSource : IShapeSource
         {
             return;
         }
+
+        _file = file;
+        _width = width;
+        _height = height;
+        _state = state;
 
         var oldCommandList = _commandList;
         _commandList = newCommandList;
