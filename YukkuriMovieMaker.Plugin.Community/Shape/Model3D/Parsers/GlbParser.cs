@@ -18,7 +18,6 @@ internal sealed class GlbParser : IModelParser
     private const int ModeTriangles = 4;
     private const int ModeTriangleStrip = 5;
     private const int ModeTriangleFan = 6;
-    private const long MaxEmbeddedImageBytes = 256L * 1024 * 1024;
 
     private static readonly string[] FileExtensions = [".glb", ".gltf"];
 
@@ -120,7 +119,7 @@ internal sealed class GlbParser : IModelParser
                         if (GetBufferViewInfo(root, bvProp.GetInt32(), out int bIdx, out int bOff, out int bLen, out _)
                             && GetBuffer(buffers, bIdx) is { } imgBuffer)
                         {
-                            if (bOff >= 0 && bLen > 0 && bLen <= MaxEmbeddedImageBytes && (long)bOff + bLen <= imgBuffer.Length)
+                            if (bOff >= 0 && bLen > 0 && bLen <= ModelHelper.MaxEmbeddedTextureBytes && (long)bOff + bLen <= imgBuffer.Length)
                             {
                                 imgBytes = new byte[bLen];
                                 Array.Copy(imgBuffer, bOff, imgBytes, 0, bLen);
@@ -135,7 +134,7 @@ internal sealed class GlbParser : IModelParser
                             if (uri.StartsWith("data:image", StringComparison.Ordinal))
                             {
                                 int separator = uri.IndexOf(',');
-                                if (separator >= 0)
+                                if (separator >= 0 && (long)(uri.Length - separator - 1) / 4 * 3 <= ModelHelper.MaxEmbeddedTextureBytes)
                                 {
                                     try
                                     {

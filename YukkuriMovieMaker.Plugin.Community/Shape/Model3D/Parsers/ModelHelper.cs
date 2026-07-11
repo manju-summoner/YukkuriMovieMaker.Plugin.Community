@@ -7,6 +7,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
 
 internal static class ModelHelper
 {
+    public const long MaxEmbeddedTextureBytes = 256L * 1024 * 1024;
+
     private const float MinimumExtent = 1e-6f;
     private const int StreamBufferBytes = 65536;
     private const int StreamChunkLength = 4096;
@@ -90,6 +92,8 @@ internal static class ModelHelper
 
     public static string WriteEmbeddedTexture(string modelPath, int index, string extension, byte[] data)
     {
+        if (data.LongLength > MaxEmbeddedTextureBytes) return string.Empty;
+
         try
         {
             string directory = Path.GetFullPath(Path.Combine(Path.GetTempPath(), EmbeddedTextureDirectoryName, ModelCache.ComputePathHash(modelPath)));
