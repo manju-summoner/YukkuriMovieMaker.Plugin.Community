@@ -102,7 +102,25 @@ internal sealed class AssimpParser : IModelParser
         if ((long)mesh.FaceCount * 3 > limits.MaxIndices - indices.Count) return;
 
         int vertexOffset = vertices.Count;
-        int uvChannel = FindFirstTextureCoordinateChannel(mesh);
+
+        var part = new Model3DPart();
+        int textureUvIndex = -1;
+        if (mesh.MaterialIndex >= 0 && mesh.MaterialIndex < scene.MaterialCount)
+        {
+            var material = scene.Materials[mesh.MaterialIndex];
+
+            if (material.HasColorDiffuse)
+            {
+                var diffuse = material.ColorDiffuse;
+                part.BaseColor = new Vector4(diffuse.R, diffuse.G, diffuse.B, diffuse.A);
+            }
+
+            part.TexturePath = FindTexturePath(material, scene, modelPath, out textureUvIndex);
+        }
+
+        int uvChannel = textureUvIndex >= 0 && mesh.HasTextureCoords(textureUvIndex)
+            ? textureUvIndex
+            : FindFirstTextureCoordinateChannel(mesh);
         var normalTransform = Matrix4x4.Invert(transform, out var inverseTransform)
             ? Matrix4x4.Transpose(inverseTransform)
             : transform;
@@ -127,24 +145,8 @@ internal sealed class AssimpParser : IModelParser
         foreach (var index in mesh.GetIndices())
             indices.Add(index + vertexOffset);
 
-        var part = new Model3DPart
-        {
-            IndexOffset = indexOffset,
-            IndexCount = indices.Count - indexOffset
-        };
-
-        if (mesh.MaterialIndex >= 0 && mesh.MaterialIndex < scene.MaterialCount)
-        {
-            var material = scene.Materials[mesh.MaterialIndex];
-
-            if (material.HasColorDiffuse)
-            {
-                var diffuse = material.ColorDiffuse;
-                part.BaseColor = new Vector4(diffuse.R, diffuse.G, diffuse.B, diffuse.A);
-            }
-
-            part.TexturePath = FindTexturePath(material, scene, modelPath);
-        }
+        part.IndexOffset = indexOffset;
+        part.IndexCount = indices.Count - indexOffset;
 
         parts.Add(part);
     }
@@ -158,15 +160,21 @@ internal sealed class AssimpParser : IModelParser
         return -1;
     }
 
-    private static string FindTexturePath(Material material, Scene scene, string modelPath)
+    private static string FindTexturePath(Material material, Scene scene, string modelPath, out int uvIndex)
     {
+        uvIndex = -1;
+
         foreach (var textureType in TextureTypePriority)
         {
             if (material.GetMaterialTextureCount(textureType) <= 0) continue;
             if (!material.GetMaterialTexture(textureType, 0, out var slot)) continue;
 
             string resolved = ResolveTextureSlot(slot, scene, modelPath);
-            if (!string.IsNullOrEmpty(resolved)) return resolved;
+            if (!string.IsNullOrEmpty(resolved))
+            {
+                uvIndex = slot.UVIndex;
+                return resolved;
+            }
         }
 
         return string.Empty;
