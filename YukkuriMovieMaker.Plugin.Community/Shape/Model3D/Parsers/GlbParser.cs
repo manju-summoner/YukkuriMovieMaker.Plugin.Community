@@ -235,6 +235,8 @@ internal sealed class GlbParser : IModelParser
             {
                 TraverseNodes(context, sceneNodes);
             }
+
+            if (context.LimitExceeded) return new Model3DData();
         }
         catch (IOException)
         {
@@ -340,6 +342,8 @@ internal sealed class GlbParser : IModelParser
 
     private static void ProcessMesh(GlbContext context, int meshIdx, Matrix4x4 transform)
     {
+        if (context.LimitExceeded) return;
+
         var (root, buffers, _, materials, images, textures, allVertices, allIndices, parts, missingNormalRanges) = context;
         if (!root.TryGetProperty("meshes", out var meshes) || meshIdx < 0 || meshIdx >= meshes.GetArrayLength()) return;
 
@@ -351,7 +355,11 @@ internal sealed class GlbParser : IModelParser
 
             foreach (var prim in primitives.EnumerateArray())
             {
-                if (allVertices.Count > limits.MaxVertices || allIndices.Count > limits.MaxIndices || parts.Count > limits.MaxParts) return;
+                if (allVertices.Count > limits.MaxVertices || allIndices.Count > limits.MaxIndices || parts.Count > limits.MaxParts)
+                {
+                    context.LimitExceeded = true;
+                    return;
+                }
                 if (!prim.TryGetProperty("attributes", out var attrs)) continue;
                 if (!attrs.TryGetProperty("POSITION", out var posAccIdxElem)) continue;
 
@@ -374,11 +382,19 @@ internal sealed class GlbParser : IModelParser
 
                 int posAccCount = GetAccessorCount(root, posAccIdx);
                 if (posAccCount <= 0) continue;
-                if (posAccCount > limits.MaxVertices - allVertices.Count) return;
+                if (posAccCount > limits.MaxVertices - allVertices.Count)
+                {
+                    context.LimitExceeded = true;
+                    return;
+                }
 
                 int srcAccCount = indAccIdx >= 0 ? GetAccessorCount(root, indAccIdx) : posAccCount;
                 int expandedAccCount = mode == ModeTriangles ? srcAccCount : Math.Max(0, (srcAccCount - 2) * 3);
-                if (expandedAccCount > limits.MaxIndices - allIndices.Count) return;
+                if (expandedAccCount > limits.MaxIndices - allIndices.Count)
+                {
+                    context.LimitExceeded = true;
+                    return;
+                }
 
                 var positions = ReadVector3Array(root, buffers, posAccIdx);
                 if (positions == null || positions.Length == 0) continue;
@@ -391,7 +407,11 @@ internal sealed class GlbParser : IModelParser
 
                 int sourceIndexCount = indices?.Length ?? positions.Length;
                 int indexAddCount = mode == ModeTriangles ? sourceIndexCount : Math.Max(0, (sourceIndexCount - 2) * 3);
-                if (positions.Length > limits.MaxVertices - allVertices.Count || indexAddCount > limits.MaxIndices - allIndices.Count) return;
+                if (positions.Length > limits.MaxVertices - allVertices.Count || indexAddCount > limits.MaxIndices - allIndices.Count)
+                {
+                    context.LimitExceeded = true;
+                    return;
+                }
 
                 var normalTransform = Matrix4x4.Invert(transform, out var inverseTransform)
                     ? Matrix4x4.Transpose(inverseTransform)
@@ -910,5 +930,8 @@ internal sealed class GlbParser : IModelParser
         List<Model3DVertex> Vertices,
         List<int> Indices,
         List<Model3DPart> Parts,
-        List<(int Start, int Count)> MissingNormalRanges);
+        List<(int Start, int Count)> MissingNormalRanges)
+    {
+        public bool LimitExceeded { get; set; }
+    }
 }
