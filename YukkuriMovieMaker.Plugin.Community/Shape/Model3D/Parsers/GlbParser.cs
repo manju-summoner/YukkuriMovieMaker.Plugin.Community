@@ -900,6 +900,10 @@ internal sealed class GlbParser : IModelParser
                     totalBytes += length;
                     result[i] = File.ReadAllBytes(binPath);
                 }
+                catch (IOException)
+                {
+                    throw;
+                }
                 catch
                 {
                 }

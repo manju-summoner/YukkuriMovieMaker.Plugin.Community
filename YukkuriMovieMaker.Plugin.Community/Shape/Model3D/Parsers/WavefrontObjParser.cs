@@ -359,6 +359,10 @@ internal sealed class WavefrontObjParser : IModelParser
                 }
             }
         }
+        catch (IOException)
+        {
+            throw;
+        }
         catch { }
     }
 

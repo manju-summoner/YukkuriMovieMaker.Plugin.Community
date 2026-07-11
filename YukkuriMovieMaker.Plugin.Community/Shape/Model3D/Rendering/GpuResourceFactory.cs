@@ -125,6 +125,10 @@ internal sealed class GpuResourceFactory(ITextureService textureService)
             }
             return 0;
         }
+        catch (IOException)
+        {
+            throw;
+        }
         catch
         {
             return 0;

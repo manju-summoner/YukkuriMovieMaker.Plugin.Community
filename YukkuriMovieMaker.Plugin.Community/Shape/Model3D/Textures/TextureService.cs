@@ -244,6 +244,10 @@ internal sealed class TextureService : ITextureService
         {
             bitmapSource = loader.Load(path);
         }
+        catch (IOException)
+        {
+            throw;
+        }
         catch
         {
             return null;
