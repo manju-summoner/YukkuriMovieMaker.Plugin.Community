@@ -11,7 +11,7 @@ internal sealed class ThreeMfParser : IModelParser
     private const int MaxComponentDepth = 32;
     private const int MaxColorResources = 65536;
     private const int MaxBuildItems = 65536;
-
+    private const int MaxObjects = 65536;
 
     private static readonly string[] FileExtensions = [".3mf"];
 
@@ -70,6 +70,7 @@ internal sealed class ThreeMfParser : IModelParser
                     }
                     else if (reader.LocalName == "object")
                     {
+                        if (orderedObjects.Count >= MaxObjects) return new Model3DData();
                         currentObject = new ObjectResource();
                         orderedObjects.Add(currentObject);
                         string id = reader.GetAttribute("id") ?? "";
