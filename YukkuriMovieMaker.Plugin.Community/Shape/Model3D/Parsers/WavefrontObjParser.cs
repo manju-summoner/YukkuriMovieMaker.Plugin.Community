@@ -290,6 +290,7 @@ internal sealed class WavefrontObjParser : IModelParser
         {
             string path = ModelHelper.ResolveTexturePath(mtlLib, baseDir);
             if (path.Length == 0 || !File.Exists(path)) return;
+            if (!Model3DSettings.Default.IsFileSizeAllowed(new FileInfo(path).Length)) return;
 
             string mtlDir = Path.GetDirectoryName(path) ?? baseDir;
 
