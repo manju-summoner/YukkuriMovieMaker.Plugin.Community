@@ -20,7 +20,7 @@ internal struct CBPerObject
     public Matrix4x4 World;
 }
 
-[StructLayout(LayoutKind.Sequential, Size = 32)]
+[StructLayout(LayoutKind.Sequential, Size = 48)]
 internal struct CBPerMaterial
 {
     public Vector4 BaseColor;
@@ -28,4 +28,5 @@ internal struct CBPerMaterial
     public float Roughness;
     public float AlphaCutoff;
     public float ForceOpaque;
+    public float UiAlpha;
 }

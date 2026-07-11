@@ -14,6 +14,7 @@ cbuffer CBPerMaterial : register(b2)
     float Roughness;
     float AlphaCutoff;
     float ForceOpaque;
+    float UiAlpha;
 };
 
 Texture2D BaseColorTexture : register(t0);
@@ -211,6 +212,7 @@ float4 main(PSIn input) : SV_Target
     {
         alpha = 1.0f;
     }
+    alpha *= UiAlpha;
 
     if (LightEnabled < 0.5f)
         return float4(saturate(surface.rgb) * alpha, alpha);

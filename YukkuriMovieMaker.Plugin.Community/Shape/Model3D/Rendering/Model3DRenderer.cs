@@ -105,16 +105,16 @@ internal sealed class Model3DRenderer : IDisposable
 
         context.OMSetDepthStencilState(_resources.DepthWriteState);
         for (int i = 0; i < opaquePartCount; i++)
-            DrawPart(context, model, i, state.BaseColor, true);
+            DrawPart(context, model, i, state.BaseColor);
 
         context.OMSetDepthStencilState(_resources.DepthReadOnlyState);
         foreach (int index in OrderTransparentPartsBackToFront(model, world * view, opaquePartCount))
-            DrawPart(context, model, index, state.BaseColor, false);
+            DrawPart(context, model, index, state.BaseColor);
 
         UnbindResources(context);
     }
 
-    private void DrawPart(ID3D11DeviceContext context, GpuResourceCacheItem model, int index, Vector4 uiBaseColor, bool isOpaquePass)
+    private void DrawPart(ID3D11DeviceContext context, GpuResourceCacheItem model, int index, Vector4 uiBaseColor)
     {
         var part = model.Parts[index];
         if (part.IndexCount <= 0) return;
@@ -127,13 +127,17 @@ internal sealed class Model3DRenderer : IDisposable
         _samplerBinding[1] = _resources.GetSampler(part.AddressU2, part.AddressV2);
         context.PSSetSamplers(0, 2, _samplerBinding);
 
+        var baseColor = part.BaseColor * uiBaseColor;
+        baseColor.W = part.BaseColor.W;
+
         var perMaterial = new CBPerMaterial
         {
-            BaseColor = part.BaseColor * uiBaseColor,
+            BaseColor = baseColor,
             Metallic = part.Metallic,
             Roughness = part.Roughness,
             AlphaCutoff = part.AlphaCutoff,
-            ForceOpaque = isOpaquePass && part.IgnoreAlpha && uiBaseColor.W >= 1.0f ? 1.0f : 0.0f
+            ForceOpaque = part.IgnoreAlpha ? 1.0f : 0.0f,
+            UiAlpha = uiBaseColor.W
         };
         _perMaterial.Update(context, ref perMaterial);
         context.PSSetConstantBuffers(RenderingConstants.CbSlotPerMaterial, 1, _perMaterialBinding);
