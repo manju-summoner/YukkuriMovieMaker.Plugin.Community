@@ -218,12 +218,18 @@ internal sealed class TextureService : ITextureService
         return DecodeAndCacheFromBitmap(path, contentKey, loader);
     }
 
-    private static TextureRawData DecodeAndCacheRaw(string path, string contentKey, ITextureLoader loader)
+    private static TextureRawData? DecodeAndCacheRaw(string path, string contentKey, ITextureLoader loader)
     {
         using var pooled = loader.LoadRaw(path);
         var persistent = pooled.ToNonPooled();
 
         long bytes = persistent.DataLength;
+        if (bytes > RawCacheMaxBytes)
+        {
+            persistent.Dispose();
+            return null;
+        }
+
         var result = RawDataCache.GetOrAdd(contentKey, bytes, _ => persistent);
 
         if (!ReferenceEquals(result, persistent))
@@ -252,8 +258,10 @@ internal sealed class TextureService : ITextureService
         int width = converted.PixelWidth;
         int height = converted.PixelHeight;
         int stride = width * 4;
-        int requiredSize = stride * height;
+        long requiredBytes = (long)stride * height;
+        if (requiredBytes <= 0 || requiredBytes > RawCacheMaxBytes) return null;
 
+        int requiredSize = (int)requiredBytes;
         byte[] pooledBuf = ArrayPool<byte>.Shared.Rent(requiredSize);
         try
         {
