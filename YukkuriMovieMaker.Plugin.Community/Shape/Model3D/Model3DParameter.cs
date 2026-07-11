@@ -120,8 +120,12 @@ internal sealed class Model3DParameter(SharedDataStore? sharedData) : ShapeParam
 
     public IEnumerable<string> GetFiles()
     {
-        if (!string.IsNullOrEmpty(File))
-            yield return File;
+        if (string.IsNullOrEmpty(File)) yield break;
+
+        yield return File;
+
+        foreach (var dependency in EnumerateDependencyFiles())
+            yield return dependency;
     }
 
     public void ReplaceFile(string from, string to)
