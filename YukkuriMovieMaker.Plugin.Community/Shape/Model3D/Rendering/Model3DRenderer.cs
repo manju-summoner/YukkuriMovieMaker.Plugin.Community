@@ -101,12 +101,14 @@ internal sealed class Model3DRenderer : IDisposable
         _perObject.Update(context, ref perObject);
         context.VSSetConstantBuffers(RenderingConstants.CbSlotPerObject, 1, _perObjectBinding);
 
+        int opaquePartCount = state.BaseColor.W >= 1.0f ? model.OpaquePartCount : 0;
+
         context.OMSetDepthStencilState(_resources.DepthWriteState);
-        for (int i = 0; i < model.OpaquePartCount; i++)
+        for (int i = 0; i < opaquePartCount; i++)
             DrawPart(context, model, i, state.BaseColor, true);
 
         context.OMSetDepthStencilState(_resources.DepthReadOnlyState);
-        foreach (int index in OrderTransparentPartsBackToFront(model, world * view))
+        foreach (int index in OrderTransparentPartsBackToFront(model, world * view, opaquePartCount))
             DrawPart(context, model, index, state.BaseColor, false);
 
         UnbindResources(context);
@@ -138,9 +140,9 @@ internal sealed class Model3DRenderer : IDisposable
         context.DrawIndexed(part.IndexCount, part.IndexOffset, 0);
     }
 
-    private Span<int> OrderTransparentPartsBackToFront(GpuResourceCacheItem model, Matrix4x4 worldView)
+    private Span<int> OrderTransparentPartsBackToFront(GpuResourceCacheItem model, Matrix4x4 worldView, int firstPartIndex)
     {
-        int count = model.Parts.Length - model.OpaquePartCount;
+        int count = model.Parts.Length - firstPartIndex;
         if (count <= 0) return [];
 
         if (_transparentOrder.Length < count)
@@ -151,7 +153,7 @@ internal sealed class Model3DRenderer : IDisposable
 
         for (int i = 0; i < count; i++)
         {
-            int index = model.OpaquePartCount + i;
+            int index = firstPartIndex + i;
             _transparentOrder[i] = index;
             _transparentDepth[i] = Vector3.Transform(model.Parts[index].Center, worldView).Z;
         }
