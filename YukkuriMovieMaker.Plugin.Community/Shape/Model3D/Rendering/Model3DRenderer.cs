@@ -103,16 +103,16 @@ internal sealed class Model3DRenderer : IDisposable
 
         context.OMSetDepthStencilState(_resources.DepthWriteState);
         for (int i = 0; i < model.OpaquePartCount; i++)
-            DrawPart(context, model, i, state.BaseColor);
+            DrawPart(context, model, i, state.BaseColor, true);
 
         context.OMSetDepthStencilState(_resources.DepthReadOnlyState);
         foreach (int index in OrderTransparentPartsBackToFront(model, world * view))
-            DrawPart(context, model, index, state.BaseColor);
+            DrawPart(context, model, index, state.BaseColor, false);
 
         UnbindResources(context);
     }
 
-    private void DrawPart(ID3D11DeviceContext context, GpuResourceCacheItem model, int index, Vector4 uiBaseColor)
+    private void DrawPart(ID3D11DeviceContext context, GpuResourceCacheItem model, int index, Vector4 uiBaseColor, bool isOpaquePass)
     {
         var part = model.Parts[index];
         if (part.IndexCount <= 0) return;
@@ -126,7 +126,8 @@ internal sealed class Model3DRenderer : IDisposable
             BaseColor = part.BaseColor * uiBaseColor,
             Metallic = part.Metallic,
             Roughness = part.Roughness,
-            AlphaCutoff = part.AlphaCutoff
+            AlphaCutoff = part.AlphaCutoff,
+            ForceOpaque = isOpaquePass && part.AlphaCutoff <= 0.0f ? 1.0f : 0.0f
         };
         _perMaterial.Update(context, ref perMaterial);
         context.PSSetConstantBuffers(RenderingConstants.CbSlotPerMaterial, 1, _perMaterialBinding);

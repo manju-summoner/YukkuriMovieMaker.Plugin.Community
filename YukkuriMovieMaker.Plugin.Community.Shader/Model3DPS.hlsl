@@ -13,6 +13,7 @@ cbuffer CBPerMaterial : register(b2)
     float Metallic;
     float Roughness;
     float AlphaCutoff;
+    float ForceOpaque;
 };
 
 Texture2D BaseColorTexture : register(t0);
@@ -202,6 +203,10 @@ float4 main(PSIn input) : SV_Target
     if (AlphaCutoff > 0.0f)
     {
         clip(alpha - AlphaCutoff);
+        alpha = 1.0f;
+    }
+    else if (ForceOpaque > 0.5f)
+    {
         alpha = 1.0f;
     }
 

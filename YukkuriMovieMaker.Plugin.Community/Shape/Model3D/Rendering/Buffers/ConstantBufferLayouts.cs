@@ -27,4 +27,5 @@ internal struct CBPerMaterial
     public float Metallic;
     public float Roughness;
     public float AlphaCutoff;
+    public float ForceOpaque;
 }
