@@ -188,15 +188,17 @@ internal sealed class Model3DRenderer : IDisposable
 
     internal static (Matrix4x4 View, Matrix4x4 Projection, Vector3 CameraPosition) CreateCamera(in Model3DRenderState state, int width, int height)
     {
+        bool isParallel = state.Projection == ProjectionType.Parallel;
         float fieldOfView = Math.Clamp(state.FieldOfView, RenderingConstants.MinFieldOfView, RenderingConstants.MaxFieldOfView) * DegreesToRadians;
-        float distance = height / (2.0f * MathF.Tan(fieldOfView * 0.5f));
+        float cameraFieldOfView = isParallel ? RenderingConstants.DefaultFieldOfView * DegreesToRadians : fieldOfView;
+        float distance = height / (2.0f * MathF.Tan(cameraFieldOfView * 0.5f));
         float nearPlane = distance * RenderingConstants.NearPlaneRatio;
         float farPlane = distance * RenderingConstants.FarPlaneRatio;
 
         var cameraPosition = new Vector3(0.0f, 0.0f, -distance);
         var view = Matrix4x4.CreateLookAt(cameraPosition, Vector3.Zero, Vector3.UnitY);
 
-        var projection = state.Projection == ProjectionType.Parallel
+        var projection = isParallel
             ? Matrix4x4.CreateOrthographic(width, height, nearPlane, farPlane)
             : Matrix4x4.CreatePerspectiveFieldOfView(fieldOfView, (float)width / height, nearPlane, farPlane);
 
