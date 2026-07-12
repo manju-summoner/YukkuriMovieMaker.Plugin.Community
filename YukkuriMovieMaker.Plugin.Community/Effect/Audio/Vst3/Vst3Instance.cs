@@ -170,12 +170,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                         SampleRate = hz,
                     };
                     var setupProcessing = Vst3Native.GetVtableMethod<Vst3Native.SetupProcessingDelegate>(processor, 7);
-                    setupProcessing(processor, ref setup);
+                    var succeeded = setupProcessing(processor, ref setup) == Vst3Native.ResultOk;
+                    if (!succeeded)
+                    {
+                        var fallback = setup with { SampleRate = sampleRate };
+                        setupProcessing(processor, ref fallback);
+                    }
                     Vst3Native.GetVtableMethod<Vst3Native.SetActiveDelegate>(component, 11)(component, 1);
                     isComponentActivated = true;
                     setProcessing(processor, 1);
-                    sampleRate = hz;
+                    if (succeeded)
+                        sampleRate = hz;
                     RefreshLatency();
+                    if (!succeeded)
+                        throw new InvalidOperationException($"IAudioProcessor::setupProcessing failed: {hz}Hz");
                 }
             });
         }

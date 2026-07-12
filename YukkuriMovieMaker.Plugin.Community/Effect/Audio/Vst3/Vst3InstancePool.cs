@@ -38,9 +38,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     entry.LeaseCount++;
                     return new Vst3InstanceLease(entry, transient, isProcessing: true, isTransient: true);
                 }
-                entry.HasProcessingLease = true;
                 entry.Instance!.EnsureSampleRate(sampleRate);
                 entry.Instance.RefreshLatency();
+                entry.HasProcessingLease = true;
                 entry.LeaseCount++;
                 return new Vst3InstanceLease(entry, entry.Instance, isProcessing: true, isTransient: false);
             }
