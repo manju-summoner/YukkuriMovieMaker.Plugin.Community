@@ -4,31 +4,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 {
     internal static class Vst3EditorProbe
     {
-        static readonly ConcurrentDictionary<string, Task<bool>> cache = new(StringComparer.OrdinalIgnoreCase);
+        static readonly ConcurrentDictionary<string, bool> cache = new(StringComparer.OrdinalIgnoreCase);
 
-        public static Task<bool> HasEditorAsync(string path)
+        public static bool GetHasEditor(string path)
         {
             if (string.IsNullOrWhiteSpace(path))
-                return Task.FromResult(false);
-            return cache.GetOrAdd(path, p => Task.Run(() => Probe(p)));
+                return false;
+            return !cache.TryGetValue(path, out var hasEditor) || hasEditor;
         }
 
-        static bool Probe(string path)
+        public static void SetHasEditor(string path, bool hasEditor)
         {
-            try
-            {
-                var hasView = false;
-                Vst3HostThread.Invoke(() =>
-                {
-                    using var session = new Vst3EditorSession(path, null, null);
-                    hasView = session.TryCreateView();
-                });
-                return hasView;
-            }
-            catch
-            {
-                return true;
-            }
+            cache[path] = hasEditor;
         }
     }
 }

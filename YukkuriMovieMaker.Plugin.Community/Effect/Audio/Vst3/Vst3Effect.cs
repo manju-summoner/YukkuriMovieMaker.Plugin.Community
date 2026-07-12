@@ -92,11 +92,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => [Mix];
 
-        async void UpdateHasEditor()
+        internal void UpdateHasEditor()
         {
-            var path = filePath;
-            var result = await Vst3EditorProbe.HasEditorAsync(path);
-            if (path != filePath || hasEditor == result)
+            var result = Vst3EditorProbe.GetHasEditor(filePath);
+            if (hasEditor == result)
                 return;
             hasEditor = result;
             OnPropertyChanged(nameof(HasEditor));
