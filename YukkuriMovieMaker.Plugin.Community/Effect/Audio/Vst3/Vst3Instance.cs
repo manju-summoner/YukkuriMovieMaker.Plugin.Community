@@ -33,9 +33,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         IntPtr view;
         bool isViewAttached;
         volatile bool isDisposed;
+        bool isInProcessCall;
         bool isComponentInitialized;
         bool isComponentActivated;
-        int processingLeases;
 
         public int LatencySamples { get; private set; }
 
@@ -179,39 +179,55 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             if (isDisposed)
                 return;
-            var getLatencySamples = Vst3Native.GetVtableMethod<Vst3Native.GetLatencySamplesDelegate>(processor, 6);
-            LatencySamples = (int)Math.Min(getLatencySamples(processor), (uint)(sampleRate * 4));
-        }
-
-        internal void SetProcessingLeased(bool leased)
-        {
-            if (leased)
-                Interlocked.Increment(ref processingLeases);
-            else
-                Interlocked.Decrement(ref processingLeases);
+            lock (processGate)
+            {
+                if (isDisposed)
+                    return;
+                var getLatencySamples = Vst3Native.GetVtableMethod<Vst3Native.GetLatencySamplesDelegate>(processor, 6);
+                LatencySamples = (int)Math.Min(getLatencySamples(processor), (uint)(sampleRate * 4));
+            }
         }
 
         public void QueueParameterChange(uint parameterId, double normalizedValue)
         {
             lock (pendingEditsGate)
                 pendingEdits[parameterId] = normalizedValue;
-            if (Volatile.Read(ref processingLeases) == 0)
+            if (Vst3HostThread.CheckAccess())
                 FlushPendingEdits();
         }
 
         void FlushPendingEdits()
         {
-            lock (processGate)
+            if (!Monitor.TryEnter(processGate))
+                return;
+            try
             {
-                if (isDisposed)
-                    return;
-                using var changes = DrainPendingEdits();
-                if (changes is null)
-                    return;
-                var data = processData;
-                data.NumSamples = 0;
-                data.InputParameterChanges = changes.Handle;
+                FlushPendingEditsCore();
+            }
+            finally
+            {
+                Monitor.Exit(processGate);
+            }
+        }
+
+        void FlushPendingEditsCore()
+        {
+            if (isDisposed || isInProcessCall)
+                return;
+            using var changes = DrainPendingEdits();
+            if (changes is null)
+                return;
+            var data = processData;
+            data.NumSamples = 0;
+            data.InputParameterChanges = changes.Handle;
+            isInProcessCall = true;
+            try
+            {
                 process(processor, ref data);
+            }
+            finally
+            {
+                isInProcessCall = false;
             }
         }
 
@@ -240,6 +256,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     return;
                 using var changes = DrainPendingEdits();
                 processData.InputParameterChanges = changes?.Handle ?? IntPtr.Zero;
+                isInProcessCall = true;
                 try
                 {
                     while (frames > 0)
@@ -256,6 +273,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 }
                 finally
                 {
+                    isInProcessCall = false;
                     processData.InputParameterChanges = IntPtr.Zero;
                 }
             }
@@ -447,6 +465,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             lock (processGate)
             {
+                FlushPendingEditsCore();
                 var componentGetState = Vst3Native.GetVtableMethod<Vst3Native.StreamDelegate>(component, 13);
                 using var componentStream = new Vst3BStream();
                 var componentState = componentGetState(component, componentStream.Handle) == Vst3Native.ResultOk

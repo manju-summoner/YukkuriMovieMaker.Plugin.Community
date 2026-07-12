@@ -36,13 +36,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                         entry.Path, sampleRate,
                         Vst3StateCodec.Decode(effect.PluginState),
                         Vst3StateCodec.Decode(effect.ControllerState));
-                    transient.SetProcessingLeased(true);
                     entry.AddTransient(transient);
                     return new Vst3InstanceLease(entry, transient, isProcessing: true, isTransient: true);
                 }
                 entry.HasProcessingLease = true;
-                entry.Instance!.SetProcessingLeased(true);
-                entry.Instance.EnsureSampleRate(sampleRate);
+                entry.Instance!.EnsureSampleRate(sampleRate);
                 entry.Instance.RefreshLatency();
                 entry.LeaseCount++;
                 return new Vst3InstanceLease(entry, entry.Instance, isProcessing: true, isTransient: false);
@@ -99,7 +97,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             {
                 lock (entry.Gate)
                     entry.RemoveTransient(instance);
-                instance.SetProcessingLeased(false);
                 instance.Dispose();
                 return;
             }
@@ -108,10 +105,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             lock (entry.Gate)
             {
                 if (isProcessing)
-                {
                     entry.HasProcessingLease = false;
-                    instance.SetProcessingLeased(false);
-                }
                 entry.LeaseCount--;
                 isIdle = entry.LeaseCount == 0;
                 if (isIdle && entry.IsRemoved)
@@ -152,6 +146,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     internal sealed class Vst3InstanceEntry(Vst3Effect effect)
     {
         readonly List<Vst3Instance> transients = [];
+        volatile Vst3Instance[] transientSnapshot = [];
 
         public object Gate { get; } = new();
         public Vst3Effect Effect { get; } = effect;
@@ -200,11 +195,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public void AddTransient(Vst3Instance instance)
         {
             transients.Add(instance);
+            transientSnapshot = [.. transients];
         }
 
         public void RemoveTransient(Vst3Instance instance)
         {
             transients.Remove(instance);
+            transientSnapshot = [.. transients];
         }
 
         public void MarkRemoved()
@@ -223,11 +220,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         void OnParameterPerformed(uint parameterId, double normalizedValue)
         {
-            lock (Gate)
-            {
-                foreach (var transient in transients)
-                    transient.QueueParameterChange(parameterId, normalizedValue);
-            }
+            foreach (var transient in transientSnapshot)
+                transient.QueueParameterChange(parameterId, normalizedValue);
         }
     }
 
