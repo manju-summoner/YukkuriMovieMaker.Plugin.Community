@@ -60,8 +60,9 @@ internal sealed class AssimpParser : IModelParser
             var vertices = new List<Model3DVertex>();
             var indices = new List<int>();
             var parts = new List<Model3DPart>();
+            var dependencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            ProcessNode(scene.RootNode, Matrix4x4.Identity, scene, vertices, indices, parts, path);
+            ProcessNode(scene.RootNode, Matrix4x4.Identity, scene, vertices, indices, parts, path, dependencies);
 
             var vertexArray = vertices.ToArray();
             ModelHelper.CalculateBounds(vertexArray, out var center, out float scale);
@@ -71,6 +72,7 @@ internal sealed class AssimpParser : IModelParser
                 Vertices = vertexArray,
                 Indices = indices.ToArray(),
                 Parts = parts,
+                Dependencies = [.. dependencies],
                 ModelCenter = center,
                 ModelScale = scale
             };
@@ -85,21 +87,21 @@ internal sealed class AssimpParser : IModelParser
         }
     }
 
-    private static void ProcessNode(Node node, Matrix4x4 parentTransform, Scene scene, List<Model3DVertex> vertices, List<int> indices, List<Model3DPart> parts, string modelPath)
+    private static void ProcessNode(Node node, Matrix4x4 parentTransform, Scene scene, List<Model3DVertex> vertices, List<int> indices, List<Model3DPart> parts, string modelPath, HashSet<string> dependencies)
     {
         var worldTransform = ToNumerics(node.Transform) * parentTransform;
 
         if (node.HasMeshes)
         {
             foreach (var meshIndex in node.MeshIndices)
-                ProcessMesh(scene.Meshes[meshIndex], worldTransform, scene, vertices, indices, parts, modelPath);
+                ProcessMesh(scene.Meshes[meshIndex], worldTransform, scene, vertices, indices, parts, modelPath, dependencies);
         }
 
         foreach (var child in node.Children)
-            ProcessNode(child, worldTransform, scene, vertices, indices, parts, modelPath);
+            ProcessNode(child, worldTransform, scene, vertices, indices, parts, modelPath, dependencies);
     }
 
-    private static void ProcessMesh(Mesh mesh, Matrix4x4 transform, Scene scene, List<Model3DVertex> vertices, List<int> indices, List<Model3DPart> parts, string modelPath)
+    private static void ProcessMesh(Mesh mesh, Matrix4x4 transform, Scene scene, List<Model3DVertex> vertices, List<int> indices, List<Model3DPart> parts, string modelPath, HashSet<string> dependencies)
     {
         var limits = Model3DSettings.Default;
         if (parts.Count >= limits.MaxParts) throw new ModelLimitExceededException();
@@ -120,7 +122,7 @@ internal sealed class AssimpParser : IModelParser
                 part.BaseColor = new Vector4(diffuse.R, diffuse.G, diffuse.B, diffuse.A);
             }
 
-            part.TexturePath = FindTexturePath(material, scene, modelPath, out textureUvIndex);
+            part.TexturePath = FindTexturePath(material, scene, modelPath, dependencies, out textureUvIndex);
         }
 
         int uvChannel = textureUvIndex >= 0 && mesh.HasTextureCoords(textureUvIndex)
@@ -168,7 +170,7 @@ internal sealed class AssimpParser : IModelParser
         return -1;
     }
 
-    private static string FindTexturePath(Material material, Scene scene, string modelPath, out int uvIndex)
+    private static string FindTexturePath(Material material, Scene scene, string modelPath, HashSet<string> dependencies, out int uvIndex)
     {
         uvIndex = -1;
 
@@ -177,7 +179,7 @@ internal sealed class AssimpParser : IModelParser
             if (material.GetMaterialTextureCount(textureType) <= 0) continue;
             if (!material.GetMaterialTexture(textureType, 0, out var slot)) continue;
 
-            string resolved = ResolveTextureSlot(slot, scene, modelPath);
+            string resolved = ResolveTextureSlot(slot, scene, modelPath, dependencies);
             if (!string.IsNullOrEmpty(resolved))
             {
                 uvIndex = slot.UVIndex;
@@ -188,7 +190,7 @@ internal sealed class AssimpParser : IModelParser
         return string.Empty;
     }
 
-    private static string ResolveTextureSlot(TextureSlot slot, Scene scene, string modelPath)
+    private static string ResolveTextureSlot(TextureSlot slot, Scene scene, string modelPath, HashSet<string> dependencies)
     {
         string rawPath = slot.FilePath;
         if (string.IsNullOrEmpty(rawPath)) return string.Empty;
@@ -197,7 +199,7 @@ internal sealed class AssimpParser : IModelParser
             return ExtractEmbeddedTexture(rawPath, scene, modelPath);
 
         string modelDirectory = Path.GetDirectoryName(modelPath) ?? string.Empty;
-        return FindExternalTexture(rawPath, modelDirectory);
+        return FindExternalTexture(rawPath, modelDirectory, dependencies);
     }
 
     private static string ExtractEmbeddedTexture(string rawPath, Scene scene, string modelPath)
@@ -251,7 +253,7 @@ internal sealed class AssimpParser : IModelParser
         }
     }
 
-    private static string FindExternalTexture(string rawPath, string modelDirectory)
+    private static string FindExternalTexture(string rawPath, string modelDirectory, HashSet<string> dependencies)
     {
         string cleanPath = rawPath;
         try
@@ -284,6 +286,7 @@ internal sealed class AssimpParser : IModelParser
         }
 
         string fallback = string.Empty;
+        var missingCandidates = new List<string>();
         foreach (var candidate in EnumerateTextureCandidates(cleanPath, modelDirectory))
         {
             try
@@ -292,10 +295,16 @@ internal sealed class AssimpParser : IModelParser
                 if (!full.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) continue;
                 if (File.Exists(full)) return full;
                 if (fallback.Length == 0) fallback = full;
+                missingCandidates.Add(full);
             }
             catch
             {
             }
+        }
+
+        foreach (var candidate in missingCandidates)
+        {
+            dependencies.Add(candidate);
         }
 
         return fallback;
