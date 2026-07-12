@@ -84,11 +84,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
                 var (componentState, controllerState) = plugin.GetState();
                 BeginEdit?.Invoke(this, EventArgs.Empty);
-                foreach (var target in ItemProperties!.Select(x => x.PropertyOwner).OfType<Vst3AudioEffect>())
-                {
-                    target.ComponentState = componentState;
-                    target.ControllerState = controllerState;
-                }
+                ApplyStateToMatchingEffects(
+                    ItemProperties!.Select(x => x.PropertyOwner).OfType<Vst3AudioEffect>(),
+                    effect.PluginPath,
+                    effect.ClassId,
+                    componentState,
+                    controllerState);
                 EndEdit?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
@@ -104,6 +105,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 // 切断済み要素に残り、フォーカスを取らないタイムライン背景からの
                 // RoutedCommandが最初のMouseDownで実行できない。親の有効な要素へ戻す。
                 FocusHelper.FocusWindowContent((DependencyObject?)owner ?? this);
+            }
+        }
+
+        internal static void ApplyStateToMatchingEffects(
+            IEnumerable<Vst3AudioEffect> effects,
+            string pluginPath,
+            string classId,
+            byte[]? componentState,
+            byte[]? controllerState)
+        {
+            foreach (var target in effects)
+            {
+                if (!string.Equals(target.PluginPath, pluginPath, StringComparison.OrdinalIgnoreCase)
+                    || !string.Equals(target.ClassId, classId, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                target.ComponentState = componentState;
+                target.ControllerState = controllerState;
             }
         }
     }
