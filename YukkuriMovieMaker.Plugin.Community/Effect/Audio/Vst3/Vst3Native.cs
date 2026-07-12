@@ -12,6 +12,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     internal static unsafe class Vst3Native
     {
         public const string DllName = "YukkuriMovieMaker.Vst3Bridge";
+        public const int RestartReloadComponent = 1 << 0;
+        public const int RestartIoChanged = 1 << 1;
+        public const int RestartLatencyChanged = 1 << 3;
 
         static Vst3Native()
         {
@@ -93,6 +96,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         [DllImport(DllName)]
         public static extern int Ymm4Vst3PluginGetLatencySamples(IntPtr plugin);
+
+        [DllImport(DllName)]
+        public static extern int Ymm4Vst3PluginConsumeRestartFlags(IntPtr plugin);
+
+#if DEBUG
+        [DllImport(DllName)]
+        public static extern void Ymm4Vst3PluginRequestRestartForTest(IntPtr plugin, int flags);
+#endif
 
         [DllImport(DllName)]
         public static extern int Ymm4Vst3PluginGetState(IntPtr plugin, out IntPtr componentData, out int componentSize, out IntPtr controllerData, out int controllerSize);

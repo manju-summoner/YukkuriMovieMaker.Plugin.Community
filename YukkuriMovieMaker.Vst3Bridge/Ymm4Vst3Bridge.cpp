@@ -70,8 +70,11 @@ namespace
     class BridgeComponentHandler : public U::Implements<U::Directly<IComponentHandler>>
     {
     public:
-        BridgeComponentHandler(ParameterChangeTransfer& transfer, std::atomic<bool>& paramValuesDirty)
-            : transfer(transfer), paramValuesDirty(paramValuesDirty)
+        BridgeComponentHandler(
+            ParameterChangeTransfer& transfer,
+            std::atomic<bool>& paramValuesDirty,
+            std::atomic<int32>& restartFlags)
+            : transfer(transfer), paramValuesDirty(paramValuesDirty), restartFlags(restartFlags)
         {
         }
 
@@ -87,6 +90,7 @@ namespace
 
         tresult PLUGIN_API restartComponent(int32 flags) override
         {
+            restartFlags.fetch_or(flags);
             // プリセット読み込み等で全パラメータが変わった場合は次のPumpで全転送する
             if (flags & kParamValuesChanged)
                 paramValuesDirty.store(true);
@@ -96,6 +100,7 @@ namespace
     private:
         ParameterChangeTransfer& transfer;
         std::atomic<bool>& paramValuesDirty;
+        std::atomic<int32>& restartFlags;
     };
 
     //------------------------------------------------------------------------
@@ -118,6 +123,7 @@ namespace
 
         ParameterChangeTransfer paramTransfer;
         std::atomic<bool> paramValuesDirty{ false };
+        std::atomic<int32> restartFlags{ 0 };
 
         HostProcessData processData;
         ParameterChanges inputParameterChanges;
@@ -394,7 +400,10 @@ YMM4VST3_API void* Ymm4Vst3PluginCreate(void* moduleHandle, const char* classIdH
     }
 
     plugin->paramTransfer.setMaxParameters(8192);
-    plugin->componentHandler = owned(new BridgeComponentHandler(plugin->paramTransfer, plugin->paramValuesDirty));
+    plugin->componentHandler = owned(new BridgeComponentHandler(
+        plugin->paramTransfer,
+        plugin->paramValuesDirty,
+        plugin->restartFlags));
     if (plugin->controller)
         plugin->controller->setComponentHandler(plugin->componentHandler);
 
@@ -590,6 +599,23 @@ YMM4VST3_API int32_t Ymm4Vst3PluginGetLatencySamples(void* pluginHandle)
         return 0;
     return plugin->processor->getLatencySamples();
 }
+
+YMM4VST3_API int32_t Ymm4Vst3PluginConsumeRestartFlags(void* pluginHandle)
+{
+    auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
+    if (!plugin)
+        return 0;
+    return plugin->restartFlags.exchange(0);
+}
+
+#if defined(DEVELOPMENT)
+YMM4VST3_API void Ymm4Vst3PluginRequestRestartForTest(void* pluginHandle, int32_t flags)
+{
+    auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
+    if (plugin)
+        plugin->restartFlags.fetch_or(flags);
+}
+#endif
 
 YMM4VST3_API int32_t Ymm4Vst3PluginGetState(
     void* pluginHandle,

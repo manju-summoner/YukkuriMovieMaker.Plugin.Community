@@ -70,6 +70,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             return Vst3Native.Ymm4Vst3PluginGetLatencySamples(handle);
         }
 
+        public int ConsumeRestartFlags()
+        {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+            return Vst3Native.Ymm4Vst3PluginConsumeRestartFlags(handle);
+        }
+
+#if DEBUG
+        internal void RequestRestartForTest(int flags)
+        {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+            Vst3Native.Ymm4Vst3PluginRequestRestartForTest(handle, flags);
+        }
+#endif
+
         /// <summary>
         /// パラメータを正規化値で設定する。次のProcess/Pumpでプロセッサへ反映される
         /// </summary>

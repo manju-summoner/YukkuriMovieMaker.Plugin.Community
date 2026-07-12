@@ -24,6 +24,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         float[] dryBuffer = [];
         float[] dryDelayBuffer = [];
         int dryDelayIndex;
+        byte[]? pendingComponentState;
+        byte[]? pendingControllerState;
+        bool hasPendingState;
         long position;
 
         public override int Hz => Input!.Hz;
@@ -90,6 +93,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     destBuffer[offset + i * 2] = dryBuffer[i * 2] * (1 - mix) + bufferL[i] * mix;
                     destBuffer[offset + i * 2 + 1] = dryBuffer[i * 2 + 1] * (1 - mix) + bufferR[i] * mix;
                 }
+                HandleRestartFlags(position + outCount);
             }
             else
             {
@@ -195,7 +199,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 var newPlugin = module.CreatePlugin(item.ClassId);
                 try
                 {
-                    newPlugin.SetState(item.ComponentState, item.ControllerState);
+                    newPlugin.SetState(
+                        hasPendingState ? pendingComponentState : item.ComponentState,
+                        hasPendingState ? pendingControllerState : item.ControllerState);
                     newPlugin.Setup(Input!.Hz, MaxBlockFrames);
                 }
                 catch
@@ -205,6 +211,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 }
                 plugin = newPlugin;
                 latencyFrames = Math.Max(0, plugin.GetLatencySamples());
+                pendingComponentState = null;
+                pendingControllerState = null;
+                hasPendingState = false;
                 disposer.Collect(plugin);
             }
             catch (Exception e)
@@ -214,5 +223,40 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 Log.Default.Write($"VST3プラグインの読み込みに失敗しました。path={item.PluginPath} classId={item.ClassId}", e);
             }
         }
+
+        void HandleRestartFlags(long nextPosition)
+        {
+            if (plugin is null)
+                return;
+            var flags = plugin.ConsumeRestartFlags();
+            if (!RequiresReload(flags))
+                return;
+
+            try
+            {
+                (pendingComponentState, pendingControllerState) = plugin.GetState();
+                hasPendingState = true;
+            }
+            catch (Exception e)
+            {
+                Log.Default.Write($"VST3プラグインの再初期化前の状態取得に失敗しました。path={item.PluginPath}", e);
+                pendingComponentState = item.ComponentState;
+                pendingControllerState = item.ControllerState;
+                hasPendingState = true;
+            }
+
+            disposer.RemoveAndDispose(ref plugin);
+            isLoadFailed = false;
+            isPrimed = false;
+            latencyFrames = 0;
+            dryDelayBuffer = [];
+            dryDelayIndex = 0;
+            Input!.Seek(nextPosition);
+        }
+
+        internal static bool RequiresReload(int flags) =>
+            (flags & (Vst3Native.RestartReloadComponent
+                | Vst3Native.RestartIoChanged
+                | Vst3Native.RestartLatencyChanged)) != 0;
     }
 }
