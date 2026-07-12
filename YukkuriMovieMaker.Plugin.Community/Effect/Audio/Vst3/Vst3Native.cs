@@ -99,6 +99,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public delegate int CanProcessSampleSizeDelegate(IntPtr self, int symbolicSampleSize);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        public delegate uint GetLatencySamplesDelegate(IntPtr self);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         public delegate int SetupProcessingDelegate(IntPtr self, ref ProcessSetup setup);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
