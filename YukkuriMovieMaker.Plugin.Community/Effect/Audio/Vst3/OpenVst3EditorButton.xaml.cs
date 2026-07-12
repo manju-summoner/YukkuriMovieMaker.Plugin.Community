@@ -71,7 +71,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             openEditors.Add(effect, window);
             BeginEdit?.Invoke(this, EventArgs.Empty);
 
-            void OnEditCompleted() => ApplyStates(lease, properties);
+            void OnEditCompleted()
+            {
+                if (lease.IsProcessingActive)
+                    return;
+                ApplyStates(lease, properties);
+            }
             instance.EditCompleted += OnEditCompleted;
 
             window.Closed += (_, _) =>

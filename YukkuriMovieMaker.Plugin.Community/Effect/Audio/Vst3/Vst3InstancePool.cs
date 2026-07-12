@@ -252,6 +252,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         public Vst3Instance Instance { get; }
 
+        public bool IsProcessingActive
+        {
+            get
+            {
+                lock (entry.Gate)
+                    return entry.HasProcessingLease;
+            }
+        }
+
         public (string ComponentState, string ControllerState) CaptureStates()
         {
             lock (entry.Gate)

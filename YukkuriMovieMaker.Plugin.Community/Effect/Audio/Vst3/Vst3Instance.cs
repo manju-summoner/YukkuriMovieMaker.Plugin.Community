@@ -13,6 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         readonly object outputForwardGate = new();
         readonly Dictionary<uint, double> pendingOutputParameters = [];
         bool isOutputForwardScheduled;
+        int editCompletedPending;
 
         Vst3Module module = null!;
         IntPtr component;
@@ -699,7 +700,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         void OnEditCompleted()
         {
-            EditCompleted?.Invoke();
+            if (Interlocked.Exchange(ref editCompletedPending, 1) == 1)
+                return;
+            Vst3HostThread.Post(() =>
+            {
+                Volatile.Write(ref editCompletedPending, 0);
+                if (isDisposed)
+                    return;
+                EditCompleted?.Invoke();
+            }, DispatcherPriority.Background);
         }
 
         void OnViewResizeRequested(int width, int height)
