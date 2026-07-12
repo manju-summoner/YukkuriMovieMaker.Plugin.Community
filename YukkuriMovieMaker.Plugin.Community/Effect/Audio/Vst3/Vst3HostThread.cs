@@ -16,10 +16,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             return dispatcher.CheckAccess();
         }
 
-        public static void Post(Action action)
+        public static void Post(Action action, DispatcherPriority priority = DispatcherPriority.Normal)
         {
             var dispatcher = Application.Current?.Dispatcher ?? GetFallbackDispatcher();
-            dispatcher.BeginInvoke(action);
+            dispatcher.BeginInvoke(priority, action);
         }
 
         public static void Invoke(Action action)

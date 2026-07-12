@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Windows.Threading;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 {
@@ -9,6 +10,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         readonly object processGate = new();
         readonly object pendingEditsGate = new();
         readonly Dictionary<uint, double> pendingEdits = [];
+        readonly object outputForwardGate = new();
+        readonly Dictionary<uint, double> pendingOutputParameters = [];
+        bool isOutputForwardScheduled;
 
         Vst3Module module = null!;
         IntPtr component;
@@ -280,16 +284,36 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
             if (performed is not null && isViewAttached)
             {
-                var target = controller;
-                Vst3HostThread.Post(() =>
+                var schedule = false;
+                lock (outputForwardGate)
                 {
-                    if (isDisposed)
-                        return;
-                    var setParamNormalized = Vst3Native.GetVtableMethod<Vst3Native.SetParamNormalizedDelegate>(target, 15);
                     foreach (var (id, value) in performed)
-                        setParamNormalized(target, id, value);
-                });
+                        pendingOutputParameters[id] = value;
+                    if (!isOutputForwardScheduled)
+                    {
+                        isOutputForwardScheduled = true;
+                        schedule = true;
+                    }
+                }
+                if (schedule)
+                    Vst3HostThread.Post(ForwardOutputParameters, DispatcherPriority.Background);
             }
+        }
+
+        void ForwardOutputParameters()
+        {
+            KeyValuePair<uint, double>[] values;
+            lock (outputForwardGate)
+            {
+                values = [.. pendingOutputParameters];
+                pendingOutputParameters.Clear();
+                isOutputForwardScheduled = false;
+            }
+            if (isDisposed || controller == IntPtr.Zero || values.Length == 0)
+                return;
+            var setParamNormalized = Vst3Native.GetVtableMethod<Vst3Native.SetParamNormalizedDelegate>(controller, 15);
+            foreach (var (id, value) in values)
+                setParamNormalized(controller, id, value);
         }
 
         void WriteProcessContext(long framePosition, in Vst3Transport transport)
