@@ -15,12 +15,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         static Vst3Native()
         {
-            NativeLibrary.SetDllImportResolver(typeof(Vst3Native).Assembly, (libraryName, _, _) =>
+            NativeLibrary.SetDllImportResolver(typeof(Vst3Native).Assembly, (libraryName, assembly, _) =>
             {
                 if (libraryName is not DllName)
                     return IntPtr.Zero;
+                var assemblyDirectory = Path.GetDirectoryName(assembly.Location);
                 string[] candidates =
                 [
+                    Path.Combine(assemblyDirectory ?? AppContext.BaseDirectory, $"{DllName}.dll"),
                     Path.Combine(AppDirectories.ResourceDirectory, "bin", "x64", $"{DllName}.dll"),
                     Path.Combine(AppContext.BaseDirectory, "Resources", "bin", "x64", $"{DllName}.dll"),
                 ];

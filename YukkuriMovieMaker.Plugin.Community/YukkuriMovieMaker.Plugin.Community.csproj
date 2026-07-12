@@ -25,6 +25,16 @@
     <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Controls\YukkuriMovieMaker.Controls.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\YukkuriMovieMaker.Vst3Bridge\YukkuriMovieMaker.Vst3Bridge.vcxproj"
+                      ReferenceOutputAssembly="false"
+                      AdditionalProperties="Platform=x64" />
+    <Content Include="..\YukkuriMovieMaker.Vst3Bridge\bin\$(Configuration)\YukkuriMovieMaker.Vst3Bridge.dll"
+             Link="YukkuriMovieMaker.Vst3Bridge.dll"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- YMM4のdllや、カスタムdllを参照。サードパーティー開発者向け。-->
   <ItemGroup Condition="'$(YMM4Proj)' == ''">
 	  <Reference Include="YukkuriMovieMaker.Controls">
