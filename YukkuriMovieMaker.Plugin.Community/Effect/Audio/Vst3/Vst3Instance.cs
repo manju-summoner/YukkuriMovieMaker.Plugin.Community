@@ -67,7 +67,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         void Initialize(string path, int initialSampleRate, byte[]? componentState, byte[]? controllerState)
         {
             sampleRate = initialSampleRate;
-            handler = new ComponentHandler(OnParameterEdited, OnEditCompleted);
+            handler = new ComponentHandler(OnParameterEdited, OnEditCompleted, OnRestartComponent);
             frame = new PlugFrame(OnViewResizeRequested);
             module = Vst3Module.Acquire(path);
 
@@ -698,6 +698,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             ParameterPerformed?.Invoke(parameterId, normalizedValue);
         }
 
+        void OnRestartComponent(int flags)
+        {
+            if ((flags & Vst3Native.RestartLatencyChanged) != 0)
+                Vst3HostThread.Post(RefreshLatency, DispatcherPriority.Background);
+            OnEditCompleted();
+        }
+
         void OnEditCompleted()
         {
             if (Interlocked.Exchange(ref editCompletedPending, 1) == 1)
@@ -720,11 +727,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             readonly Action<uint, double> performEditCallback;
             readonly Action editCompletedCallback;
+            readonly Action<int> restartCallback;
 
-            public ComponentHandler(Action<uint, double> performEditCallback, Action editCompletedCallback) : base(Vst3Native.IComponentHandlerUid)
+            public ComponentHandler(Action<uint, double> performEditCallback, Action editCompletedCallback, Action<int> restartCallback) : base(Vst3Native.IComponentHandlerUid)
             {
                 this.performEditCallback = performEditCallback;
                 this.editCompletedCallback = editCompletedCallback;
+                this.restartCallback = restartCallback;
                 BuildVtable(
                     new EditDelegate(BeginEdit),
                     new PerformEditDelegate(PerformEdit),
@@ -757,7 +766,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
             int RestartComponent(IntPtr self, int flags)
             {
-                editCompletedCallback();
+                restartCallback(flags);
                 return Vst3Native.ResultOk;
             }
         }

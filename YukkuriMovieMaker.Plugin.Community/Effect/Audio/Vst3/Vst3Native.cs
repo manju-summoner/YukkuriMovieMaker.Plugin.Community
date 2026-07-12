@@ -11,6 +11,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public const int BusDirectionOutput = 1;
         public const int SymbolicSampleSize32 = 0;
         public const int ProcessModeRealtime = 0;
+        public const int RestartLatencyChanged = 1 << 3;
         public const uint ProcessContextPlaying = 1u << 1;
         public const uint ProcessContextProjectTimeMusicValid = 1u << 9;
         public const uint ProcessContextTempoValid = 1u << 10;
