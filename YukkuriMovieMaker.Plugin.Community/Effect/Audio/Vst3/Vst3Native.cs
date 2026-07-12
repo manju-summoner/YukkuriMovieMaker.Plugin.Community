@@ -11,6 +11,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public const int BusDirectionOutput = 1;
         public const int SymbolicSampleSize32 = 0;
         public const int ProcessModeRealtime = 0;
+        public const uint ProcessContextPlaying = 1u << 1;
+        public const uint ProcessContextProjectTimeMusicValid = 1u << 9;
+        public const uint ProcessContextTempoValid = 1u << 10;
+        public const uint ProcessContextBarPositionValid = 1u << 11;
+        public const uint ProcessContextTimeSigValid = 1u << 13;
+        public const uint ProcessContextContTimeValid = 1u << 17;
         public const ulong SpeakerArrangementStereo = 0x3;
         public const string AudioModuleClassCategory = "Audio Module Class";
 
@@ -161,6 +167,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             public int NumChannels;
             public ulong SilenceFlags;
             public IntPtr ChannelBuffers;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct ProcessContext
+        {
+            public uint State;
+            public double SampleRate;
+            public long ProjectTimeSamples;
+            public long SystemTime;
+            public long ContinousTimeSamples;
+            public double ProjectTimeMusic;
+            public double BarPositionMusic;
+            public double CycleStartMusic;
+            public double CycleEndMusic;
+            public double Tempo;
+            public int TimeSigNumerator;
+            public int TimeSigDenominator;
+            public byte ChordKeyNote;
+            public byte ChordRootNote;
+            public short ChordMask;
+            public int SmpteOffsetSubframes;
+            public uint FrameRateFramesPerSecond;
+            public uint FrameRateFlags;
+            public int SamplesToNextClock;
         }
 
         [StructLayout(LayoutKind.Sequential)]

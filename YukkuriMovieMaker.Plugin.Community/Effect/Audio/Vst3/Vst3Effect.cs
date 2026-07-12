@@ -1,8 +1,10 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
+using YukkuriMovieMaker.ItemEditor.CustomVisibilityAttributes;
 using YukkuriMovieMaker.Player.Audio.Effects;
 using YukkuriMovieMaker.Plugin.Effects;
 
@@ -44,6 +46,35 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         [Display(GroupName = nameof(Texts.Vst3Effect), Name = nameof(Texts.MixName), Description = nameof(Texts.MixDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F0", "%", 0, 100)]
         public Animation Mix { get; } = new Animation(100, 0, 100);
+
+        [Display(GroupName = nameof(Texts.Vst3Effect), Name = nameof(Texts.IsTempoSyncEnabledName), Description = nameof(Texts.IsTempoSyncEnabledDesc), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool IsTempoSyncEnabled { get => isTempoSyncEnabled; set => Set(ref isTempoSyncEnabled, value); }
+        bool isTempoSyncEnabled;
+
+        [Display(GroupName = nameof(Texts.Vst3Effect), Name = nameof(Texts.TempoName), Description = nameof(Texts.TempoDesc), ResourceType = typeof(Texts))]
+        [TextBoxSlider("F1", "BPM", 20d, 300d)]
+        [DefaultValue(120d)]
+        [Range(1d, 999d)]
+        [ShowPropertyEditorWhen(nameof(IsTempoSyncEnabled), true)]
+        public double Tempo { get => tempo; set => Set(ref tempo, Math.Clamp(value, 1, 999)); }
+        double tempo = 120;
+
+        [Display(GroupName = nameof(Texts.Vst3Effect), Name = nameof(Texts.TimeSignatureNumeratorName), Description = nameof(Texts.TimeSignatureNumeratorDesc), ResourceType = typeof(Texts))]
+        [TextBoxSlider("F0", "", 1d, 16d)]
+        [DefaultValue(4)]
+        [Range(1, 64)]
+        [ShowPropertyEditorWhen(nameof(IsTempoSyncEnabled), true)]
+        public int TimeSignatureNumerator { get => timeSignatureNumerator; set => Set(ref timeSignatureNumerator, Math.Clamp(value, 1, 64)); }
+        int timeSignatureNumerator = 4;
+
+        [Display(GroupName = nameof(Texts.Vst3Effect), Name = nameof(Texts.TimeSignatureDenominatorName), Description = nameof(Texts.TimeSignatureDenominatorDesc), ResourceType = typeof(Texts))]
+        [TextBoxSlider("F0", "", 1d, 16d)]
+        [DefaultValue(4)]
+        [Range(1, 64)]
+        [ShowPropertyEditorWhen(nameof(IsTempoSyncEnabled), true)]
+        public int TimeSignatureDenominator { get => timeSignatureDenominator; set => Set(ref timeSignatureDenominator, Math.Clamp(value, 1, 64)); }
+        int timeSignatureDenominator = 4;
 
         public override IAudioEffectProcessor CreateAudioEffect(TimeSpan duration)
         {
