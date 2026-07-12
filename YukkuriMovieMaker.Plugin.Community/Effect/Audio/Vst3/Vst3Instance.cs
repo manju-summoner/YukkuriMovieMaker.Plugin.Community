@@ -33,6 +33,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         IntPtr view;
         bool isViewAttached;
         volatile bool isDisposed;
+        bool isComponentInitialized;
+        bool isComponentActivated;
         int processingLeases;
 
         public int LatencySamples { get; private set; }
@@ -74,6 +76,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var initialize = Vst3Native.GetVtableMethod<Vst3Native.InitializeDelegate>(component, 3);
             if (initialize(component, Vst3HostContext.Instance) != Vst3Native.ResultOk)
                 throw new InvalidOperationException($"IComponent::initialize failed: {path}");
+            isComponentInitialized = true;
 
             controller = CreateController(path, out isSingleComponent);
             ConnectComponents();
@@ -117,6 +120,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var setActive = Vst3Native.GetVtableMethod<Vst3Native.SetActiveDelegate>(component, 11);
             if (setActive(component, 1) != Vst3Native.ResultOk)
                 throw new InvalidOperationException($"IComponent::setActive failed: {path}");
+            isComponentActivated = true;
 
             RefreshLatency();
 
@@ -152,6 +156,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                         return;
                     setProcessing(processor, 0);
                     Vst3Native.GetVtableMethod<Vst3Native.SetActiveDelegate>(component, 11)(component, 0);
+                    isComponentActivated = false;
                     var setup = new Vst3Native.ProcessSetup
                     {
                         ProcessMode = Vst3Native.ProcessModeRealtime,
@@ -162,6 +167,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     var setupProcessing = Vst3Native.GetVtableMethod<Vst3Native.SetupProcessingDelegate>(processor, 7);
                     setupProcessing(processor, ref setup);
                     Vst3Native.GetVtableMethod<Vst3Native.SetActiveDelegate>(component, 11)(component, 1);
+                    isComponentActivated = true;
                     setProcessing(processor, 1);
                     sampleRate = hz;
                     RefreshLatency();
@@ -520,8 +526,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
             if (processor != IntPtr.Zero && setProcessing is not null)
                 setProcessing(processor, 0);
-            if (component != IntPtr.Zero && buffers is not null)
+            if (component != IntPtr.Zero && isComponentActivated)
+            {
                 Vst3Native.GetVtableMethod<Vst3Native.SetActiveDelegate>(component, 11)(component, 0);
+                isComponentActivated = false;
+            }
 
             DisconnectComponents();
 
@@ -534,7 +543,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             }
             if (component != IntPtr.Zero)
             {
-                Vst3Native.GetVtableMethod<Vst3Native.TerminateDelegate>(component, 4)(component);
+                if (isComponentInitialized)
+                    Vst3Native.GetVtableMethod<Vst3Native.TerminateDelegate>(component, 4)(component);
                 Vst3Native.GetVtableMethod<Vst3Native.ReleaseDelegate>(component, 2)(component);
                 component = IntPtr.Zero;
             }
