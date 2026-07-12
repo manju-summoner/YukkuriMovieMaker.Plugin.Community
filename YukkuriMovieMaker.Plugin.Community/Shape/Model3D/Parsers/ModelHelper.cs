@@ -102,8 +102,18 @@ internal static class ModelHelper
             string filePath = Path.GetFullPath(Path.Combine(directory, index + extension));
             if (!filePath.StartsWith(directory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) return string.Empty;
 
-            File.WriteAllBytes(filePath, data);
-            return filePath;
+            string tempPath = filePath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            try
+            {
+                File.WriteAllBytes(tempPath, data);
+                File.Move(tempPath, filePath, true);
+                return filePath;
+            }
+            catch
+            {
+                TryDeleteFile(tempPath);
+                return File.Exists(filePath) ? filePath : string.Empty;
+            }
         }
         catch
         {
