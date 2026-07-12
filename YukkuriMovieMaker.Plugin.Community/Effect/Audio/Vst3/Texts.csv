@@ -6,6 +6,8 @@ Vst3EffectPluginDesc,,適用するVST3プラグイン,VST3 plugin to apply,要�
 Vst3EffectOpenEditorName,,エディター,Editor,编辑器,編輯器,에디터,Editor,المحرر,Editor,
 Vst3EffectOpenEditorDesc,,プラグインのエディターを開き、パラメーターを編集します,Open the plugin editor to edit parameters,打开插件编辑器以编辑参数,開啟外掛程式編輯器以編輯參數,플러그인 에디터를 열어 파라미터를 편집합니다,Abre el editor del plugin para editar los parámetros,افتح محرر الملحق لتحرير المعلمات,Buka editor plugin untuk mengedit parameter,
 Vst3EffectOpenEditorButtonName,,エディターを開く,Open Editor,打开编辑器,開啟編輯器,에디터 열기,Abrir editor,فتح المحرر,Buka editor,
+Vst3EffectMixName,,ミックス,Mix,混合,混合,믹스,Mezcla,مزج,Campuran,
+Vst3EffectMixDesc,,原音と処理音のミックス比率,The mix ratio between the dry and processed audio,原始音频与处理音频的混合比例,原始音訊與處理音訊的混合比例,원본과 처리된 오디오의 믹스 비율,Proporción de mezcla entre el audio original y procesado,نسبة المزج بين الصوت الأصلي والمعالج,Rasio campuran antara audio asli dan hasil pemrosesan,
 Vst3EffectNoEditorMessage,,このプラグインにはエディターがありません。,This plugin does not have an editor.,该插件没有编辑器。,此外掛程式沒有編輯器。,이 플러그인에는 에디터가 없습니다.,Este plugin no tiene editor.,هذا الملحق لا يحتوي على محرر.,Plugin ini tidak memiliki editor.,
 Vst3EffectLoadErrorMessage,,プラグインの読み込みに失敗しました。詳細はログを確認してください。,Failed to load the plugin. Check the log for details.,插件加载失败。详情请查看日志。,外掛程式載入失敗。詳情請查看記錄。,플러그인 로드에 실패했습니다. 자세한 내용은 로그를 확인하세요.,No se pudo cargar el plugin. Consulta el registro para más detalles.,فشل تحميل الملحق. راجع السجل لمزيد من التفاصيل.,Gagal memuat plugin. Periksa log untuk detailnya.,
 Vst3SettingsDefaultDirectoriesName,,標準のVST3フォルダー,Default VST3 folders,默认VST3文件夹,預設VST3資料夾,기본 VST3 폴더,Carpetas VST3 predeterminadas,مجلدات VST3 الافتراضية,Folder VST3 default,

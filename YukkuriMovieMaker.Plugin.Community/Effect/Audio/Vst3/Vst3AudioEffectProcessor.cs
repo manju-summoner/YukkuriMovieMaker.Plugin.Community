@@ -21,6 +21,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         float[] bufferL = [];
         float[] bufferR = [];
         float[] primeBuffer = [];
+        float[] dryBuffer = [];
+        float[] dryDelayBuffer = [];
+        int dryDelayIndex;
         long position;
 
         public override int Hz => Input!.Hz;
@@ -49,6 +52,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var inputRead = Math.Max(0, Input!.Read(destBuffer, offset, outCount));
             Array.Clear(destBuffer, offset + inputRead, outCount - inputRead);
 
+            if (dryBuffer.Length < outCount)
+                dryBuffer = new float[outCount];
+            if (dryDelayBuffer.Length > 0)
+            {
+                for (var i = 0; i < outCount; i++)
+                {
+                    dryBuffer[i] = dryDelayBuffer[dryDelayIndex];
+                    dryDelayBuffer[dryDelayIndex] = destBuffer[offset + i];
+                    dryDelayIndex = (dryDelayIndex + 1) % dryDelayBuffer.Length;
+                }
+            }
+            else
+            {
+                Array.Copy(destBuffer, offset, dryBuffer, 0, outCount);
+            }
+
             var frames = outCount / 2;
             EnsureBuffers(frames);
             for (var i = 0; i < frames; i++)
@@ -59,10 +78,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
             if (plugin.Process(bufferL, bufferR, bufferL, bufferR, frames, (position + latencyFrames * 2L) / 2))
             {
+                var totalFrames = Duration / 2;
+                var startFrame = position / 2;
+                var endFrame = startFrame + Math.Max(0, frames - 1);
+                var mixStart = (float)(item.Mix.GetValue(startFrame, totalFrames, Hz) * 0.01);
+                var mixEnd = (float)(item.Mix.GetValue(endFrame, totalFrames, Hz) * 0.01);
+                var mixStep = frames > 1 ? (mixEnd - mixStart) / (frames - 1) : 0;
                 for (var i = 0; i < frames; i++)
                 {
-                    destBuffer[offset + i * 2] = bufferL[i];
-                    destBuffer[offset + i * 2 + 1] = bufferR[i];
+                    var mix = mixStart + mixStep * i;
+                    destBuffer[offset + i * 2] = dryBuffer[i * 2] * (1 - mix) + bufferL[i] * mix;
+                    destBuffer[offset + i * 2 + 1] = dryBuffer[i * 2 + 1] * (1 - mix) + bufferR[i] * mix;
                 }
             }
             else
@@ -89,6 +115,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             this.position = position;
             plugin?.Reset();
             isPrimed = false;
+            dryDelayIndex = 0;
             Input!.Seek(position);
         }
 
@@ -100,8 +127,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             if (isPrimed)
                 return;
             isPrimed = true;
-            if (plugin is null || latencyFrames <= 0)
+            if (plugin is null)
                 return;
+
+            dryDelayIndex = 0;
+            if (latencyFrames <= 0)
+            {
+                dryDelayBuffer = [];
+                return;
+            }
+
+            var delaySamples = latencyFrames * 2;
+            if (dryDelayBuffer.Length == delaySamples)
+                Array.Clear(dryDelayBuffer);
+            else
+                dryDelayBuffer = new float[delaySamples];
 
             var chunkFrames = Math.Min(latencyFrames, MaxBlockFrames);
             EnsureBuffers(chunkFrames);
@@ -114,6 +154,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 var frames = Math.Min(latencyFrames - processedFrames, chunkFrames);
                 var readCount = Math.Max(0, Input!.Read(primeBuffer, 0, frames * 2));
                 Array.Clear(primeBuffer, readCount, frames * 2 - readCount);
+                Array.Copy(primeBuffer, 0, dryDelayBuffer, processedFrames * 2, frames * 2);
                 for (var i = 0; i < frames; i++)
                 {
                     bufferL[i] = primeBuffer[i * 2];

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Plugin.Effects;
 
@@ -43,6 +44,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public byte[]? ControllerState { get => controllerState; set => Set(ref controllerState, value); }
         byte[]? controllerState;
 
+        [Display(GroupName = nameof(Texts.Vst3EffectName), Name = nameof(Texts.Vst3EffectMixName), Description = nameof(Texts.Vst3EffectMixDesc), Order = 120, ResourceType = typeof(Texts))]
+        [AnimationSlider("F0", "%", 0, 100)]
+        public Animation Mix { get; } = new Animation(100, 0, 100);
+
         public override Player.Audio.Effects.IAudioEffectProcessor CreateAudioEffect(TimeSpan duration)
         {
             return new Vst3AudioEffectProcessor(this);
@@ -53,6 +58,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             return [];
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [Mix];
     }
 }
