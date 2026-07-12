@@ -28,16 +28,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 var previous = filePath;
                 if (!Set(ref filePath, value, nameof(FilePath), nameof(Label)))
                     return;
-                if (!string.IsNullOrEmpty(previous) && !string.IsNullOrEmpty(filePath)
-                    && !string.Equals(previous, filePath, StringComparison.OrdinalIgnoreCase))
+                if (string.IsNullOrEmpty(filePath))
                 {
-                    PluginState = string.Empty;
-                    ControllerState = string.Empty;
+                    if (!string.IsNullOrEmpty(previous))
+                        detachedStatePath = previous;
+                }
+                else
+                {
+                    var statePath = !string.IsNullOrEmpty(previous) ? previous : detachedStatePath;
+                    detachedStatePath = null;
+                    if (statePath is not null && !string.Equals(statePath, filePath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        PluginState = string.Empty;
+                        ControllerState = string.Empty;
+                    }
                 }
                 UpdateHasEditor();
             }
         }
         string filePath = string.Empty;
+        string? detachedStatePath;
 
         public bool HasEditor => hasEditor;
         bool hasEditor;
