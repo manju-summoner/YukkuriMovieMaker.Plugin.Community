@@ -9,10 +9,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         readonly IntPtr processor;
         readonly IntPtr controller;
         readonly bool isSingleComponent;
+        const int FlushBlockFrames = 32;
+
         readonly ComponentHandler handler;
         readonly PlugFrame frame;
-        readonly Vst3Native.AudioBusBuffers[] flushInputs;
-        readonly Vst3Native.AudioBusBuffers[] flushOutputs;
+        readonly int inputBusCount;
+        readonly int outputBusCount;
+        Vst3ProcessBuffers? buffers;
         IntPtr view;
         bool isViewAttached;
         bool isDisposed;
@@ -46,18 +49,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 setComponentHandler(controller, handler.Handle);
 
                 var getBusCount = Vst3Native.GetVtableMethod<Vst3Native.GetBusCountDelegate>(component, 7);
-                flushInputs = new Vst3Native.AudioBusBuffers[getBusCount(component, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionInput)];
-                flushOutputs = new Vst3Native.AudioBusBuffers[getBusCount(component, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionOutput)];
+                inputBusCount = getBusCount(component, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionInput);
+                outputBusCount = getBusCount(component, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionOutput);
+                buffers = new Vst3ProcessBuffers(processor, inputBusCount, outputBusCount, FlushBlockFrames);
 
                 var setup = new Vst3Native.ProcessSetup
                 {
                     ProcessMode = Vst3Native.ProcessModeRealtime,
                     SymbolicSampleSize = Vst3Native.SymbolicSampleSize32,
-                    MaxSamplesPerBlock = 32,
+                    MaxSamplesPerBlock = FlushBlockFrames,
                     SampleRate = 48000,
                 };
                 var setupProcessing = Vst3Native.GetVtableMethod<Vst3Native.SetupProcessingDelegate>(processor, 7);
                 setupProcessing(processor, ref setup);
+
+                var activateBus = Vst3Native.GetVtableMethod<Vst3Native.ActivateBusDelegate>(component, 10);
+                if (inputBusCount > 0)
+                    activateBus(component, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionInput, 0, 1);
+                if (outputBusCount > 0)
+                    activateBus(component, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionOutput, 0, 1);
+
                 Vst3Native.GetVtableMethod<Vst3Native.SetActiveDelegate>(component, 11)(component, 1);
                 Vst3Native.GetVtableMethod<Vst3Native.SetProcessingDelegate>(processor, 8)(processor, 1);
             }
@@ -99,6 +110,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var getSize = Vst3Native.GetVtableMethod<Vst3Native.GetSizeDelegate>(view, 9);
             if (getSize(view, ref rect) != Vst3Native.ResultOk)
                 return (400, 300);
+            return (Math.Max(1, rect.Right - rect.Left), Math.Max(1, rect.Bottom - rect.Top));
+        }
+
+        public (int Width, int Height) CheckSizeConstraint(int width, int height)
+        {
+            if (!HasView)
+                return (width, height);
+            var rect = new Vst3Native.ViewRect { Left = 0, Top = 0, Right = width, Bottom = height };
+            var checkSizeConstraint = Vst3Native.GetVtableMethod<Vst3Native.CheckSizeConstraintDelegate>(view, 14);
+            if (checkSizeConstraint(view, ref rect) != Vst3Native.ResultOk)
+                return (width, height);
             return (Math.Max(1, rect.Right - rect.Left), Math.Max(1, rect.Bottom - rect.Top));
         }
 
@@ -183,6 +205,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             if (processor != IntPtr.Zero)
                 Vst3Native.GetVtableMethod<Vst3Native.ReleaseDelegate>(processor, 2)(processor);
 
+            buffers?.Dispose();
+            buffers = null;
             handler.Dispose();
             frame.Dispose();
             module.Release();
@@ -308,32 +332,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         void FlushParameterEdit(uint parameterId, double normalizedValue)
         {
-            if (isDisposed)
+            if (isDisposed || buffers is null)
                 return;
             using var changes = new Vst3ParameterChanges([new(parameterId, normalizedValue)]);
-            var inputsBuffer = GCHandle.Alloc(flushInputs, GCHandleType.Pinned);
-            var outputsBuffer = GCHandle.Alloc(flushOutputs, GCHandleType.Pinned);
-            try
+            var data = new Vst3Native.ProcessData
             {
-                var data = new Vst3Native.ProcessData
-                {
-                    ProcessMode = Vst3Native.ProcessModeRealtime,
-                    SymbolicSampleSize = Vst3Native.SymbolicSampleSize32,
-                    NumSamples = 0,
-                    NumInputs = flushInputs.Length,
-                    NumOutputs = flushOutputs.Length,
-                    Inputs = flushInputs.Length > 0 ? inputsBuffer.AddrOfPinnedObject() : IntPtr.Zero,
-                    Outputs = flushOutputs.Length > 0 ? outputsBuffer.AddrOfPinnedObject() : IntPtr.Zero,
-                    InputParameterChanges = changes.Handle,
-                };
-                var process = Vst3Native.GetVtableMethod<Vst3Native.ProcessDelegate>(processor, 9);
-                process(processor, ref data);
-            }
-            finally
-            {
-                inputsBuffer.Free();
-                outputsBuffer.Free();
-            }
+                ProcessMode = Vst3Native.ProcessModeRealtime,
+                SymbolicSampleSize = Vst3Native.SymbolicSampleSize32,
+                NumSamples = 0,
+                NumInputs = inputBusCount,
+                NumOutputs = outputBusCount,
+                Inputs = buffers.Inputs,
+                Outputs = buffers.Outputs,
+                InputParameterChanges = changes.Handle,
+            };
+            var process = Vst3Native.GetVtableMethod<Vst3Native.ProcessDelegate>(processor, 9);
+            process(processor, ref data);
         }
 
         void OnViewResizeRequested(int width, int height)

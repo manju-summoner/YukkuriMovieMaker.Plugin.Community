@@ -146,6 +146,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         public delegate int CanResizeDelegate(IntPtr self);
 
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        public delegate int CheckSizeConstraintDelegate(IntPtr self, ref ViewRect rect);
+
         [StructLayout(LayoutKind.Sequential)]
         public struct ViewRect
         {

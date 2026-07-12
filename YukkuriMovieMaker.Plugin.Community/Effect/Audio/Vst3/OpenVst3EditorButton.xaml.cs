@@ -59,9 +59,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             if (!session.TryCreateView())
             {
                 session.Dispose();
+                Vst3EditorProbe.SetHasEditor(effect.FilePath, false);
+                effect.UpdateHasEditor();
                 MessageBox.Show(Window.GetWindow(this), Texts.EditorNotAvailableMessage, Texts.Vst3Effect);
                 return;
             }
+            Vst3EditorProbe.SetHasEditor(effect.FilePath, true);
 
             var properties = ItemProperties;
             var window = new Vst3EditorWindow(session, Path.GetFileNameWithoutExtension(effect.FilePath))
@@ -88,7 +91,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 EndEdit?.Invoke(this, EventArgs.Empty);
                 session.Dispose();
             };
-            window.Show();
+            window.ShowEditor();
         }
 
         static void ApplyStates(Vst3EditorSession session, ItemProperty[] properties)
