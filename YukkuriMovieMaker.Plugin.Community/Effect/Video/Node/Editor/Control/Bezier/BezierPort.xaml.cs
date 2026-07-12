@@ -252,6 +252,7 @@ public partial class BezierPort
         BezierEasingPresets.Apply(ViewModel.Curve, preset);
 
         Editor.InvalidateVisual();
+        Editor.StartPreview();
 
         var serialized = BezierSerializer.Serialize(ViewModel.Curve);
 

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -7,12 +8,25 @@ using Media = System.Windows.Media;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.Bezier.View;
 
+internal sealed class TrailPoint
+{
+    public Point Position;
+
+    public double SpawnTime;
+}
+
 public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateConverter
 {
     private const double MarginSize = 20;
     private const double NodeRadius = 5;
     private const double HandleRadius = 4;
     private const double HitRadius = 8;
+
+    private const double PreviewWidth = 25;
+    private const double PreviewRadius = 10;
+    private const double PreviewDuration = 1.0;
+    private const double TrailInterval = 0.05;
+    private const double TrailLifetime = 2.0;
 
     public static readonly DependencyProperty ViewModelProperty =
         DependencyProperty.Register(
@@ -54,7 +68,12 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
                 FrameworkPropertyMetadataOptions.AffectsRender,
                 OnBrushPropertyChanged));
 
+    private readonly Stopwatch _previewWatch = new();
+    private readonly List<TrailPoint> _trail = [];
+
     private BezierDragContext? _dragContext;
+    private bool _isPreviewPlaying;
+    private double _lastTrailSpawnTime;
 
     private Vector _panOffset;
 
@@ -72,6 +91,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
     {
         SnapsToDevicePixels = true;
         UpdatePens();
+        EditCompleted += (_, _) => StartPreview();
     }
 
     public Media.Brush ControlBrush
@@ -119,7 +139,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
 
     public Point FromScreen(Point p)
     {
-        var w = Math.Max(1, ActualWidth - MarginSize * 2);
+        var w = Math.Max(1, ActualWidth - PreviewWidth - MarginSize * 2);
         var h = Math.Max(1, ActualHeight - MarginSize * 2);
 
         var q = new Point(p.X - _panOffset.X, p.Y - _panOffset.Y);
@@ -153,7 +173,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
     /// </summary>
     private Point ToScreenBase(Point p)
     {
-        var w = Math.Max(1, ActualWidth - MarginSize * 2);
+        var w = Math.Max(1, ActualWidth - PreviewWidth - MarginSize * 2);
         var h = Math.Max(1, ActualHeight - MarginSize * 2);
 
         return new Point(
@@ -191,6 +211,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
         DrawCurve(dc);
         DrawHandles(dc);
         DrawNodes(dc);
+        DrawPreview(dc);
     }
 
     private static void OnViewModelChanged(
@@ -198,6 +219,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
         DependencyPropertyChangedEventArgs e)
     {
         ((BezierEditor)d).InvalidateVisual();
+        ((BezierEditor)d).StartPreview();
     }
 
     protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -472,7 +494,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
     /// </summary>
     private Rect ComputeContentBounds()
     {
-        var gridWidth = Math.Max(1, ActualWidth - MarginSize * 2);
+        var gridWidth = Math.Max(1, ActualWidth - PreviewWidth - MarginSize * 2);
         var gridHeight = Math.Max(1, ActualHeight - MarginSize * 2);
 
         var minX = MarginSize;
@@ -510,9 +532,90 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
         _panOffset = ClampPanOffset(_panOffset);
     }
 
+    internal void StartPreview()
+    {
+        _trail.Clear();
+        _lastTrailSpawnTime = -TrailInterval;
+        _previewWatch.Restart();
+
+        if (!_isPreviewPlaying)
+        {
+            _isPreviewPlaying = true;
+            Media.CompositionTarget.Rendering += OnRendering;
+        }
+    }
+
+    private void OnRendering(object? sender, EventArgs e)
+    {
+        var elapsed = _previewWatch.Elapsed.TotalSeconds;
+
+        while (_lastTrailSpawnTime + TrailInterval <= Math.Min(elapsed, PreviewDuration))
+        {
+            _lastTrailSpawnTime += TrailInterval;
+            _trail.Add(new TrailPoint
+            {
+                Position = GetPreviewPosition(_lastTrailSpawnTime / PreviewDuration),
+                SpawnTime = _lastTrailSpawnTime
+            });
+        }
+
+        if (elapsed >= PreviewDuration && _lastTrailSpawnTime < PreviewDuration)
+        {
+            _lastTrailSpawnTime = PreviewDuration;
+            _trail.Add(new TrailPoint
+            {
+                Position = GetPreviewPosition(1.0),
+                SpawnTime = elapsed
+            });
+        }
+
+        _trail.RemoveAll(tp => elapsed - tp.SpawnTime > TrailLifetime);
+
+        if (elapsed >= PreviewDuration + TrailLifetime)
+        {
+            _isPreviewPlaying = false;
+            Media.CompositionTarget.Rendering -= OnRendering;
+        }
+
+        InvalidateVisual();
+    }
+
+    private Point GetPreviewPosition(double progress)
+    {
+        var x = ActualWidth - PreviewWidth / 2.0;
+        var value = ViewModel is not null
+            ? BezierEvaluator.Evaluate(ViewModel.Curve, progress)
+            : progress;
+        var h = Math.Max(1, ActualHeight - MarginSize * 2);
+        var y = MarginSize + (1.0 - value) * h;
+        return new Point(x, y);
+    }
+
+    private void DrawPreview(Media.DrawingContext dc)
+    {
+        if (!_isPreviewPlaying)
+            return;
+        var elapsed = _previewWatch.Elapsed.TotalSeconds;
+
+        foreach (var tp in _trail)
+        {
+            var age = elapsed - tp.SpawnTime;
+            var alpha = Math.Max(0.0, 1.0 - age / TrailLifetime) * 0.5;
+            dc.PushOpacity(alpha);
+            dc.DrawEllipse(AccentBrush, null, tp.Position, PreviewRadius, PreviewRadius);
+            dc.Pop();
+        }
+
+        if (elapsed < PreviewDuration)
+        {
+            var pos = GetPreviewPosition(elapsed / PreviewDuration);
+            dc.DrawEllipse(AccentBrush, null, pos, PreviewRadius, PreviewRadius);
+        }
+    }
+
     private void DrawGrid(Media.DrawingContext dc)
     {
-        var width = Math.Max(1, ActualWidth - MarginSize * 2);
+        var width = Math.Max(1, ActualWidth - PreviewWidth - MarginSize * 2);
         var height = Math.Max(1, ActualHeight - MarginSize * 2);
 
         for (var i = 0; i <= 4; i++)
