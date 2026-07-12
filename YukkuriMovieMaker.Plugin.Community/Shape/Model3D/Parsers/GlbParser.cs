@@ -22,7 +22,7 @@ internal sealed class GlbParser : IModelParser
     private static readonly string[] FileExtensions = [".glb", ".gltf"];
 
     public string Id => "Glb";
-    public int Version => 1;
+    public int Version => 2;
     public IReadOnlyList<string> Extensions => FileExtensions;
 
     public Model3DData Parse(string path)
@@ -235,7 +235,7 @@ internal sealed class GlbParser : IModelParser
                 TraverseNodes(context, sceneNodes);
             }
 
-            if (context.LimitExceeded) return new Model3DData();
+            if (context.LimitExceeded || context.UnsupportedFeature) return new Model3DData();
         }
         catch (IOException)
         {
@@ -377,7 +377,11 @@ internal sealed class GlbParser : IModelParser
                 int uv2AccIdx = mrTexCoordSet == texCoordSet ? uvAccIdx : GetTexCoordAccessor(attrs, mrTexCoordSet);
 
                 if (IsSparseAccessor(root, posAccIdx) || IsSparseAccessor(root, normAccIdx) || IsSparseAccessor(root, uvAccIdx)
-                    || IsSparseAccessor(root, uv2AccIdx) || IsSparseAccessor(root, colAccIdx) || IsSparseAccessor(root, indAccIdx)) continue;
+                    || IsSparseAccessor(root, uv2AccIdx) || IsSparseAccessor(root, colAccIdx) || IsSparseAccessor(root, indAccIdx))
+                {
+                    context.UnsupportedFeature = true;
+                    return;
+                }
 
                 int posAccCount = GetAccessorCount(root, posAccIdx);
                 if (posAccCount <= 0) continue;
@@ -471,18 +475,6 @@ internal sealed class GlbParser : IModelParser
                 byte addressV = 0;
                 byte addressU2 = 0;
                 byte addressV2 = 0;
-
-                if (colors != null)
-                {
-                    foreach (var vertexColor in colors)
-                    {
-                        if (vertexColor.W < 1.0f)
-                        {
-                            forceTransparent = true;
-                            break;
-                        }
-                    }
-                }
 
                 if (matIdx >= 0 && materials.ValueKind == JsonValueKind.Array && matIdx < materials.GetArrayLength())
                 {
@@ -944,5 +936,6 @@ internal sealed class GlbParser : IModelParser
         List<(int Start, int Count)> MissingNormalRanges)
     {
         public bool LimitExceeded { get; set; }
+        public bool UnsupportedFeature { get; set; }
     }
 }
