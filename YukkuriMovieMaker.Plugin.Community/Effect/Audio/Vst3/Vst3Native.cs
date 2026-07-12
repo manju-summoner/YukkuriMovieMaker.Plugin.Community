@@ -89,6 +89,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public static extern int Ymm4Vst3PluginPump(IntPtr plugin);
 
         [DllImport(DllName)]
+        public static extern int Ymm4Vst3PluginFlushOutputParameters(IntPtr plugin);
+
+        [DllImport(DllName)]
         public static extern int Ymm4Vst3PluginSetParameter(IntPtr plugin, uint paramId, double normalizedValue);
 
         [DllImport(DllName)]
@@ -103,6 +106,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 #if DEBUG
         [DllImport(DllName)]
         public static extern void Ymm4Vst3PluginRequestRestartForTest(IntPtr plugin, int flags);
+
+        [DllImport(DllName)]
+        public static extern double Ymm4Vst3PluginGetControllerParameterForTest(IntPtr plugin, uint paramId);
 #endif
 
         [DllImport(DllName)]

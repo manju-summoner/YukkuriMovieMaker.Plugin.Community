@@ -51,7 +51,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             host.ViewAttached += OnViewAttached;
             Content = host;
 
-            pumpTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+            pumpTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
             pumpTimer.Tick += (_, _) =>
             {
                 if (!plugin.IsDisposed)

@@ -15,6 +15,7 @@
 #include <cstring>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "public.sdk/source/vst/hosting/eventlist.h"
@@ -124,6 +125,8 @@ namespace
         ParameterChangeTransfer paramTransfer;
         std::atomic<bool> paramValuesDirty{ false };
         std::atomic<int32> restartFlags{ 0 };
+        std::mutex outputParamMutex;
+        std::unordered_map<ParamID, ParamValue> pendingOutputParams;
 
         HostProcessData processData;
         ParameterChanges inputParameterChanges;
@@ -196,6 +199,42 @@ namespace
         return count > 0 ? 0 : -1;
     }
 
+    void CaptureOutputParameters(BridgePlugin& plugin)
+    {
+        std::vector<std::pair<ParamID, ParamValue>> values;
+        const auto count = plugin.outputParameterChanges.getParameterCount();
+        values.reserve(count);
+        for (int32 i = 0; i < count; i++)
+        {
+            auto* queue = plugin.outputParameterChanges.getParameterData(i);
+            if (!queue || queue->getPointCount() <= 0)
+                continue;
+            int32 sampleOffset{};
+            ParamValue value{};
+            if (queue->getPoint(queue->getPointCount() - 1, sampleOffset, value) == kResultOk)
+                values.emplace_back(queue->getParameterId(), value);
+        }
+        if (values.empty())
+            return;
+        std::lock_guard lock(plugin.outputParamMutex);
+        for (const auto& [id, value] : values)
+            plugin.pendingOutputParams[id] = value;
+    }
+
+    int32 FlushOutputParameters(BridgePlugin& plugin)
+    {
+        std::unordered_map<ParamID, ParamValue> values;
+        {
+            std::lock_guard lock(plugin.outputParamMutex);
+            values.swap(plugin.pendingOutputParams);
+        }
+        if (!plugin.controller)
+            return 0;
+        for (const auto& [id, value] : values)
+            plugin.controller->setParamNormalized(id, value);
+        return static_cast<int32>(values.size());
+    }
+
     // 編集キューの内容をinputParameterChangesへ移し、1ブロック分processを回す
     bool ProcessBlock(
         BridgePlugin& plugin,
@@ -203,7 +242,8 @@ namespace
         float* outL, float* outR,
         int32 numFrames, int64_t projectTimeSamples, bool isPlaying,
         bool isTempoValid, double tempo,
-        int32 timeSigNumerator, int32 timeSigDenominator)
+        int32 timeSigNumerator, int32 timeSigDenominator,
+        bool captureOutputParameters)
     {
         auto& data = plugin.processData;
         data.numSamples = numFrames;
@@ -258,6 +298,8 @@ namespace
         auto result = plugin.processor->process(data);
 
         plugin.inputParameterChanges.clearQueue();
+        if (result == kResultOk && captureOutputParameters)
+            CaptureOutputParameters(plugin);
         plugin.outputParameterChanges.clearQueue();
         plugin.inputEvents.clear();
 
@@ -516,7 +558,8 @@ YMM4VST3_API int32_t Ymm4Vst3PluginProcessWithTransport(
             inL ? inL + offset : nullptr, inR ? inR + offset : nullptr,
             outL ? outL + offset : nullptr, outR ? outR + offset : nullptr,
             chunk, projectTimeSamples + offset, true,
-            isTempoValid != 0, tempo, timeSigNumerator, timeSigDenominator))
+            isTempoValid != 0, tempo, timeSigNumerator, timeSigDenominator,
+            false))
         {
             return 0;
         }
@@ -558,9 +601,19 @@ YMM4VST3_API int32_t Ymm4Vst3PluginPump(void* pluginHandle)
         *plugin,
         silenceL, silenceR, discardL, discardR,
         frames, plugin->pumpPosition, false,
-        false, 0, 0, 0);
+        false, 0, 0, 0,
+        true);
+    FlushOutputParameters(*plugin);
     plugin->pumpPosition += frames;
     return result ? 1 : 0;
+}
+
+YMM4VST3_API int32_t Ymm4Vst3PluginFlushOutputParameters(void* pluginHandle)
+{
+    auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
+    if (!plugin)
+        return 0;
+    return FlushOutputParameters(*plugin);
 }
 
 // パラメータを設定する（正規化値）。次のprocess/Pumpでプロセッサへ反映される
@@ -614,6 +667,14 @@ YMM4VST3_API void Ymm4Vst3PluginRequestRestartForTest(void* pluginHandle, int32_
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (plugin)
         plugin->restartFlags.fetch_or(flags);
+}
+
+YMM4VST3_API double Ymm4Vst3PluginGetControllerParameterForTest(void* pluginHandle, uint32_t paramId)
+{
+    auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
+    if (!plugin || !plugin->controller)
+        return -1;
+    return plugin->controller->getParamNormalized(paramId);
 }
 #endif
 

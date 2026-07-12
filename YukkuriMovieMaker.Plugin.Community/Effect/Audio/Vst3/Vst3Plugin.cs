@@ -61,6 +61,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             Vst3Native.Ymm4Vst3PluginPump(handle);
         }
 
+        public int FlushOutputParameters()
+        {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+            return Vst3Native.Ymm4Vst3PluginFlushOutputParameters(handle);
+        }
+
         /// <summary>
         /// プラグインが申告する処理遅延（フレーム数）。Setup後に取得する
         /// </summary>
@@ -81,6 +87,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
             Vst3Native.Ymm4Vst3PluginRequestRestartForTest(handle, flags);
+        }
+
+
+        internal double GetControllerParameterForTest(uint paramId)
+        {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+            return Vst3Native.Ymm4Vst3PluginGetControllerParameterForTest(handle, paramId);
         }
 #endif
 
