@@ -32,10 +32,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 entry.ApplyEffectStates();
                 if (entry.HasProcessingLease)
                 {
-                    var transient = new Vst3Instance(
-                        entry.Path, sampleRate,
-                        Vst3StateCodec.Decode(effect.PluginState),
-                        Vst3StateCodec.Decode(effect.ControllerState));
+                    var (componentState, controllerState) = entry.Instance!.CaptureStates();
+                    var transient = new Vst3Instance(entry.Path, sampleRate, componentState, controllerState);
                     entry.AddTransient(transient);
                     return new Vst3InstanceLease(entry, transient, isProcessing: true, isTransient: true);
                 }
