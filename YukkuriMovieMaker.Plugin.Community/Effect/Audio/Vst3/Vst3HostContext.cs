@@ -68,6 +68,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         static int CreateInstance(IntPtr self, IntPtr cid, IntPtr iid, out IntPtr obj)
         {
+            if (UidEquals(cid, Vst3Native.IMessageUid) && UidEquals(iid, Vst3Native.IMessageUid))
+            {
+                obj = new Vst3Message().Handle;
+                return Vst3Native.ResultOk;
+            }
+            if (UidEquals(cid, Vst3Native.IAttributeListUid) && UidEquals(iid, Vst3Native.IAttributeListUid))
+            {
+                obj = new Vst3AttributeList().Handle;
+                return Vst3Native.ResultOk;
+            }
             obj = IntPtr.Zero;
             return NoInterface;
         }

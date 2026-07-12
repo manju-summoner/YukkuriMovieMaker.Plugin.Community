@@ -5,6 +5,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     internal static class Vst3Native
     {
         public const int ResultOk = 0;
+        public const int ResultFalse = 1;
         public const int MediaTypeAudio = 0;
         public const int BusDirectionInput = 0;
         public const int BusDirectionOutput = 1;
@@ -28,6 +29,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public static readonly byte[] IPlugFrameUid = Uid(0x367FAF01, 0xAFA94693, 0x8D4DA2A0, 0xED0882A3);
         public static readonly byte[] IParameterChangesUid = Uid(0xA4779663, 0x0BB64A56, 0xB44384A8, 0x466FEB9D);
         public static readonly byte[] IParamValueQueueUid = Uid(0x01263A18, 0xED074F6F, 0x98C9D356, 0x4686F9BA);
+        public static readonly byte[] IMessageUid = Uid(0x936F033B, 0xC6C047DB, 0xBB0882F8, 0x13C1E613);
+        public static readonly byte[] IAttributeListUid = Uid(0x1E5F0AEB, 0xCC7F4533, 0xA2544011, 0x38AD5EE4);
 
         public static byte[] Uid(uint l1, uint l2, uint l3, uint l4) =>
         [
