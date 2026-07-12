@@ -1,4 +1,3 @@
-using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
@@ -13,7 +12,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         Vst3Native.ProcessDelegate process = null!;
         int[] inputChannelCounts = [];
         int[] outputChannelCounts = [];
-        IntPtr memory;
+        Vst3ProcessBuffers? buffers;
+        IntPtr contextMemory;
+        double sampleRate;
         Vst3Native.ProcessData processData;
         bool isDisposed;
         readonly object pendingEditsGate = new();
@@ -25,8 +26,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             Vst3HostThread.Invoke(() => Initialize(path, sampleRate, componentState));
         }
 
+        public int LatencySamples { get; private set; }
+
         void Initialize(string path, int sampleRate, byte[]? componentState)
         {
+            this.sampleRate = sampleRate;
             module = Vst3Module.Acquire(path);
             try
             {
@@ -58,16 +62,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 if (inputBusCount < 1 || outputBusCount < 1)
                     throw new InvalidOperationException($"Audio input and output busses are required: {path}");
 
-                var setBusArrangements = Vst3Native.GetVtableMethod<Vst3Native.SetBusArrangementsDelegate>(processor, 3);
-                var inputArrangements = new ulong[inputBusCount];
-                var outputArrangements = new ulong[outputBusCount];
-                Array.Fill(inputArrangements, Vst3Native.SpeakerArrangementStereo);
-                Array.Fill(outputArrangements, Vst3Native.SpeakerArrangementStereo);
-                setBusArrangements(processor, inputArrangements, inputBusCount, outputArrangements, outputBusCount);
-
-                var getBusArrangement = Vst3Native.GetVtableMethod<Vst3Native.GetBusArrangementDelegate>(processor, 4);
-                inputChannelCounts = GetChannelCounts(getBusArrangement, Vst3Native.BusDirectionInput, inputBusCount);
-                outputChannelCounts = GetChannelCounts(getBusArrangement, Vst3Native.BusDirectionOutput, outputBusCount);
+                buffers = new Vst3ProcessBuffers(processor, inputBusCount, outputBusCount, maxBlockFrames);
+                inputChannelCounts = buffers.InputChannelCounts;
+                outputChannelCounts = buffers.OutputChannelCounts;
                 if (inputChannelCounts[0] < 1 || outputChannelCounts[0] < 1)
                     throw new InvalidOperationException($"Main busses have no channels: {path}");
 
@@ -82,15 +79,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 if (setupProcessing(processor, ref setup) != Vst3Native.ResultOk)
                     throw new InvalidOperationException($"IAudioProcessor::setupProcessing failed: {path}");
 
-                memory = AllocateBuffers(out var inputs, out var outputs);
+                contextMemory = Marshal.AllocHGlobal(sizeof(Vst3Native.ProcessContext));
+                NativeMemory.Clear((void*)contextMemory, (nuint)sizeof(Vst3Native.ProcessContext));
                 processData = new Vst3Native.ProcessData
                 {
                     ProcessMode = Vst3Native.ProcessModeRealtime,
                     SymbolicSampleSize = Vst3Native.SymbolicSampleSize32,
                     NumInputs = inputBusCount,
                     NumOutputs = outputBusCount,
-                    Inputs = inputs,
-                    Outputs = outputs,
+                    Inputs = buffers.Inputs,
+                    Outputs = buffers.Outputs,
+                    ProcessContext = contextMemory,
                 };
 
                 var activateBus = Vst3Native.GetVtableMethod<Vst3Native.ActivateBusDelegate>(component, 10);
@@ -100,6 +99,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 var setActive = Vst3Native.GetVtableMethod<Vst3Native.SetActiveDelegate>(component, 11);
                 if (setActive(component, 1) != Vst3Native.ResultOk)
                     throw new InvalidOperationException($"IComponent::setActive failed: {path}");
+
+                var getLatencySamples = Vst3Native.GetVtableMethod<Vst3Native.GetLatencySamplesDelegate>(processor, 6);
+                LatencySamples = (int)Math.Min(getLatencySamples(processor), (uint)(sampleRate * 4));
 
                 setProcessing = Vst3Native.GetVtableMethod<Vst3Native.SetProcessingDelegate>(processor, 8);
                 process = Vst3Native.GetVtableMethod<Vst3Native.ProcessDelegate>(processor, 9);
@@ -118,7 +120,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 pendingEdits[parameterId] = normalizedValue;
         }
 
-        public void Process(float[] buffer, int offset, int frames)
+        public void Process(float[] buffer, int offset, int frames, long framePosition, in Vst3Transport transport)
         {
             if (isDisposed)
                 return;
@@ -130,16 +132,45 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 while (frames > 0)
                 {
                     var blockFrames = Math.Min(frames, maxBlockFrames);
+                    WriteProcessContext(framePosition, transport);
                     ProcessBlock(buffer, offset, blockFrames);
                     processData.InputParameterChanges = IntPtr.Zero;
                     offset += blockFrames * 2;
                     frames -= blockFrames;
+                    framePosition += blockFrames;
                 }
             }
             finally
             {
                 processData.InputParameterChanges = IntPtr.Zero;
             }
+        }
+
+        void WriteProcessContext(long framePosition, in Vst3Transport transport)
+        {
+            var state = Vst3Native.ProcessContextPlaying | Vst3Native.ProcessContextContTimeValid;
+            var context = new Vst3Native.ProcessContext
+            {
+                SampleRate = sampleRate,
+                ProjectTimeSamples = framePosition,
+                ContinousTimeSamples = framePosition,
+            };
+            if (transport.IsTempoValid)
+            {
+                var quarterNotes = framePosition / sampleRate * transport.Tempo / 60.0;
+                var barLength = transport.TimeSignatureNumerator * 4.0 / transport.TimeSignatureDenominator;
+                state |= Vst3Native.ProcessContextTempoValid
+                    | Vst3Native.ProcessContextTimeSigValid
+                    | Vst3Native.ProcessContextProjectTimeMusicValid
+                    | Vst3Native.ProcessContextBarPositionValid;
+                context.Tempo = transport.Tempo;
+                context.TimeSigNumerator = transport.TimeSignatureNumerator;
+                context.TimeSigDenominator = transport.TimeSignatureDenominator;
+                context.ProjectTimeMusic = quarterNotes;
+                context.BarPositionMusic = Math.Floor(quarterNotes / barLength) * barLength;
+            }
+            context.State = state;
+            *(Vst3Native.ProcessContext*)contextMemory = context;
         }
 
         Vst3ParameterChanges? DrainPendingEdits()
@@ -231,54 +262,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             }
         }
 
-        IntPtr AllocateBuffers(out IntPtr inputs, out IntPtr outputs)
-        {
-            var busStructSize = sizeof(Vst3Native.AudioBusBuffers);
-            var totalChannels = inputChannelCounts.Sum() + outputChannelCounts.Sum();
-            var totalBusses = inputChannelCounts.Length + outputChannelCounts.Length;
-            var size = totalBusses * busStructSize + totalChannels * (IntPtr.Size + maxBlockFrames * sizeof(float));
-            var block = Marshal.AllocHGlobal(size);
-            NativeMemory.Clear((void*)block, (nuint)size);
-
-            inputs = block;
-            outputs = block + inputChannelCounts.Length * busStructSize;
-            var pointerTable = outputs + outputChannelCounts.Length * busStructSize;
-            var sampleBuffers = pointerTable + totalChannels * IntPtr.Size;
-
-            var busses = (Vst3Native.AudioBusBuffers*)block;
-            var channels = (float**)pointerTable;
-            var samples = (float*)sampleBuffers;
-            foreach (var channelCount in inputChannelCounts.Concat(outputChannelCounts))
-            {
-                busses->NumChannels = channelCount;
-                busses->SilenceFlags = 0;
-                busses->ChannelBuffers = (IntPtr)channels;
-                busses++;
-                for (var i = 0; i < channelCount; i++)
-                {
-                    *channels++ = samples;
-                    samples += maxBlockFrames;
-                }
-            }
-            return block;
-        }
-
-        int[] GetChannelCounts(Vst3Native.GetBusArrangementDelegate getBusArrangement, int direction, int busCount)
-        {
-            var counts = new int[busCount];
-            for (var i = 0; i < busCount; i++)
-            {
-                ulong arrangement = 0;
-                if (getBusArrangement(processor, direction, i, ref arrangement) == Vst3Native.ResultOk)
-                    counts[i] = BitOperations.PopCount(arrangement);
-            }
-            return counts;
-        }
-
         void ReleaseNativeResources()
         {
-            if (memory != IntPtr.Zero)
-                Marshal.FreeHGlobal(memory);
+            buffers?.Dispose();
+            if (contextMemory != IntPtr.Zero)
+                Marshal.FreeHGlobal(contextMemory);
             if (processor != IntPtr.Zero)
                 Vst3Native.GetVtableMethod<Vst3Native.ReleaseDelegate>(processor, 2)(processor);
             if (component != IntPtr.Zero)
