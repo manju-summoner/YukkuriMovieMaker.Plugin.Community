@@ -89,7 +89,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 EndEdit?.Invoke(this, EventArgs.Empty);
                 lease.Dispose();
             };
-            window.ShowEditor();
+            try
+            {
+                window.ShowEditor();
+            }
+            catch (Exception)
+            {
+                window.Close();
+                MessageBox.Show(Window.GetWindow(this), Texts.PluginLoadFailedMessage, Texts.Vst3Effect);
+            }
         }
 
         static void ApplyStates(Vst3InstanceLease lease, ItemProperty[] properties, string filePath)
