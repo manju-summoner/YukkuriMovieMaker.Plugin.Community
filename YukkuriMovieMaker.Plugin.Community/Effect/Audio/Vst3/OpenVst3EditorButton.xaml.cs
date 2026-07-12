@@ -71,11 +71,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             openEditors.Add(effect, window);
             BeginEdit?.Invoke(this, EventArgs.Empty);
 
+            var filePath = effect.FilePath;
             void OnEditCompleted()
             {
                 if (lease.IsProcessingActive)
                     return;
-                ApplyStates(lease, properties);
+                ApplyStates(lease, properties, filePath);
             }
             instance.EditCompleted += OnEditCompleted;
 
@@ -84,19 +85,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 openEditors.Remove(effect);
                 instance.EditCompleted -= OnEditCompleted;
                 instance.ReleaseView();
-                ApplyStates(lease, properties);
+                ApplyStates(lease, properties, filePath);
                 EndEdit?.Invoke(this, EventArgs.Empty);
                 lease.Dispose();
             };
             window.ShowEditor();
         }
 
-        static void ApplyStates(Vst3InstanceLease lease, ItemProperty[] properties)
+        static void ApplyStates(Vst3InstanceLease lease, ItemProperty[] properties, string filePath)
         {
             var (componentState, controllerState) = lease.CaptureStates();
             foreach (var property in properties)
             {
-                if (property.PropertyOwner is not Vst3Effect target)
+                if (property.PropertyOwner is not Vst3Effect target
+                    || !string.Equals(target.FilePath, filePath, StringComparison.OrdinalIgnoreCase))
                     continue;
                 property.SetValue(componentState);
                 target.ControllerState = controllerState;
