@@ -126,6 +126,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public delegate int ConnectDelegate(IntPtr self, IntPtr other);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        public delegate int NotifyDelegate(IntPtr self, IntPtr message);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        public delegate int SetParamNormalizedDelegate(IntPtr self, uint id, double value);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         public delegate int IsPlatformTypeSupportedDelegate(IntPtr self, [MarshalAs(UnmanagedType.LPStr)] string type);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]

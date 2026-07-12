@@ -81,13 +81,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             return new Vst3EffectProcessor(this);
         }
 
-        internal event Action<uint, double>? ParameterEdited;
-
-        internal void NotifyParameterEdited(uint parameterId, double normalizedValue)
-        {
-            ParameterEdited?.Invoke(parameterId, normalizedValue);
-        }
-
         public override IEnumerable<string> CreateExoAudioFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription) => [];
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => [Mix];

@@ -4,15 +4,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 {
     internal class Vst3EffectProcessor(Vst3Effect effect) : AudioEffectProcessorBase
     {
-        const int BlockFrames = 512;
+        const int BlockFrames = Vst3Instance.BlockFrames;
 
         public override int Hz => Input?.Hz ?? throw new InvalidOperationException();
 
         public override long Duration => Input?.Duration ?? throw new InvalidOperationException();
 
-        Vst3Plugin? plugin;
-        bool isPluginCreated;
-        bool isSubscribed;
+        Vst3InstanceLease? lease;
+        bool isLeaseCreated;
         float[] dryBuffer = [];
         float[] primeBuffer = [];
         float[] delayLine = [];
@@ -27,7 +26,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 return 0;
             count -= count % 2;
 
-            EnsurePlugin();
+            EnsureLease();
+            var plugin = lease?.Instance;
             var read = Input.Read(destBuffer, offset, count);
             read -= read % 2;
 
@@ -85,7 +85,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             Input?.Seek(position);
             this.position = position;
             inputFramePosition = position / 2;
-            plugin?.Reset();
+            lease?.Instance.Reset();
             Prime();
         }
 
@@ -93,47 +93,36 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             if (disposing)
             {
-                if (isSubscribed)
-                {
-                    effect.ParameterEdited -= OnParameterEdited;
-                    isSubscribed = false;
-                }
-                plugin?.Dispose();
-                plugin = null;
+                lease?.Dispose();
+                lease = null;
             }
             base.Dispose(disposing);
         }
 
-        void OnParameterEdited(uint parameterId, double normalizedValue)
+        void EnsureLease()
         {
-            plugin?.QueueParameterChange(parameterId, normalizedValue);
-        }
-
-        void EnsurePlugin()
-        {
-            if (isPluginCreated)
+            if (isLeaseCreated)
                 return;
-            isPluginCreated = true;
+            isLeaseCreated = true;
             if (string.IsNullOrWhiteSpace(effect.FilePath))
                 return;
             try
             {
-                plugin = new Vst3Plugin(effect.FilePath, Hz, BlockFrames, DecodeState(effect.PluginState));
-                effect.ParameterEdited += OnParameterEdited;
-                isSubscribed = true;
+                lease = Vst3InstancePool.AcquireProcessing(effect, Hz);
                 inputFramePosition = position / 2;
                 Prime();
             }
             catch
             {
-                plugin = null;
+                lease = null;
             }
         }
 
         void Prime()
         {
-            if (Input is null || plugin is null)
+            if (Input is null || lease is null)
                 return;
+            var plugin = lease.Instance;
             var latency = plugin.LatencySamples;
             tailRemaining = latency * 2L;
             delayIndex = 0;
@@ -169,19 +158,5 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         Vst3Transport CreateTransport() =>
             new(effect.Tempo, effect.TimeSignatureNumerator, effect.TimeSignatureDenominator, effect.IsTempoSyncEnabled);
-
-        static byte[]? DecodeState(string state)
-        {
-            if (string.IsNullOrEmpty(state))
-                return null;
-            try
-            {
-                return Convert.FromBase64String(state);
-            }
-            catch (FormatException)
-            {
-                return null;
-            }
-        }
     }
 }

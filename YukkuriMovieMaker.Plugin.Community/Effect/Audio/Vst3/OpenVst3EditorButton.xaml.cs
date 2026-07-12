@@ -2,7 +2,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Threading;
 using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
@@ -37,14 +36,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 existing.Activate();
                 return;
             }
-            Vst3EditorSession session;
+            Vst3InstanceLease lease;
             Mouse.OverrideCursor = Cursors.Wait;
             try
             {
-                session = new Vst3EditorSession(
-                    effect.FilePath,
-                    DecodeState(effect.PluginState),
-                    DecodeState(effect.ControllerState));
+                lease = Vst3InstancePool.AcquireEditor(effect);
             }
             catch (Exception)
             {
@@ -56,9 +52,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 Mouse.OverrideCursor = null;
             }
 
-            if (!session.TryCreateView())
+            var instance = lease.Instance;
+            if (!instance.TryCreateView())
             {
-                session.Dispose();
+                lease.Dispose();
                 Vst3EditorProbe.SetHasEditor(effect.FilePath, false);
                 effect.UpdateHasEditor();
                 MessageBox.Show(Window.GetWindow(this), Texts.EditorNotAvailableMessage, Texts.Vst3Effect);
@@ -67,60 +64,38 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             Vst3EditorProbe.SetHasEditor(effect.FilePath, true);
 
             var properties = ItemProperties;
-            var window = new Vst3EditorWindow(session, Path.GetFileNameWithoutExtension(effect.FilePath))
+            var window = new Vst3EditorWindow(instance, Path.GetFileNameWithoutExtension(effect.FilePath))
             {
                 Owner = Window.GetWindow(this),
             };
             openEditors.Add(effect, window);
             BeginEdit?.Invoke(this, EventArgs.Empty);
 
-            session.ParameterPerformed += (parameterId, normalizedValue) =>
-            {
-                foreach (var property in properties)
-                {
-                    if (property.PropertyOwner is Vst3Effect target)
-                        target.NotifyParameterEdited(parameterId, normalizedValue);
-                }
-            };
-            session.EditCompleted += () => ApplyStates(session, properties);
+            void OnEditCompleted() => ApplyStates(lease, properties);
+            instance.EditCompleted += OnEditCompleted;
 
             window.Closed += (_, _) =>
             {
                 openEditors.Remove(effect);
-                ApplyStates(session, properties);
+                instance.EditCompleted -= OnEditCompleted;
+                instance.ReleaseView();
+                ApplyStates(lease, properties);
                 EndEdit?.Invoke(this, EventArgs.Empty);
-                session.Dispose();
+                lease.Dispose();
             };
             window.ShowEditor();
         }
 
-        static void ApplyStates(Vst3EditorSession session, ItemProperty[] properties)
+        static void ApplyStates(Vst3InstanceLease lease, ItemProperty[] properties)
         {
-            var (componentState, controllerState) = session.CaptureStates();
+            var (componentState, controllerState) = lease.CaptureStates();
             foreach (var property in properties)
             {
                 if (property.PropertyOwner is not Vst3Effect target)
                     continue;
-                property.SetValue(EncodeState(componentState));
-                target.ControllerState = EncodeState(controllerState);
+                property.SetValue(componentState);
+                target.ControllerState = controllerState;
             }
         }
-
-        static byte[]? DecodeState(string state)
-        {
-            if (string.IsNullOrEmpty(state))
-                return null;
-            try
-            {
-                return Convert.FromBase64String(state);
-            }
-            catch (FormatException)
-            {
-                return null;
-            }
-        }
-
-        static string EncodeState(byte[]? state) =>
-            state is null ? string.Empty : Convert.ToBase64String(state);
     }
 }

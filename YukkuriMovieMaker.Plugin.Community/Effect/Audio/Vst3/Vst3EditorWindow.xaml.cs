@@ -9,7 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     {
         static readonly IntPtr DpiAwarenessContextSystemAware = (IntPtr)(-2);
 
-        readonly Vst3EditorSession session;
+        readonly Vst3Instance session;
         readonly Vst3ViewHost viewHost;
         readonly bool canResize;
         bool isUserResizing;
@@ -17,7 +17,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         int targetClientHeight;
         int fitAttempts;
 
-        internal Vst3EditorWindow(Vst3EditorSession session, string title)
+        internal Vst3EditorWindow(Vst3Instance session, string title)
         {
             InitializeComponent();
             this.session = session;
@@ -219,7 +219,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         [DllImport("user32")]
         static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
 
-        sealed class Vst3ViewHost(Vst3EditorSession session) : HwndHost
+        sealed class Vst3ViewHost(Vst3Instance session) : HwndHost
         {
             const int WsChild = 0x40000000;
             const int WsVisible = 0x10000000;

@@ -10,6 +10,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         static readonly object gate = new();
         static Dispatcher? fallbackDispatcher;
 
+        public static bool CheckAccess()
+        {
+            var dispatcher = Application.Current?.Dispatcher ?? GetFallbackDispatcher();
+            return dispatcher.CheckAccess();
+        }
+
+        public static void Post(Action action)
+        {
+            var dispatcher = Application.Current?.Dispatcher ?? GetFallbackDispatcher();
+            dispatcher.BeginInvoke(action);
+        }
+
         public static void Invoke(Action action)
         {
             var dispatcher = Application.Current?.Dispatcher ?? GetFallbackDispatcher();
