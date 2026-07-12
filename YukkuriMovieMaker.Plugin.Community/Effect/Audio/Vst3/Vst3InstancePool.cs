@@ -147,6 +147,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     {
         readonly List<Vst3Instance> transients = [];
         volatile Vst3Instance[] transientSnapshot = [];
+        int lastSampleRate = 48000;
 
         public object Gate { get; } = new();
         public Vst3Effect Effect { get; } = effect;
@@ -162,6 +163,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             if (Instance is not null)
                 return;
+            lastSampleRate = sampleRate;
             Instance = new Vst3Instance(
                 Path, sampleRate,
                 Vst3StateCodec.Decode(Effect.PluginState),
@@ -179,6 +181,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var controllerState = Effect.ControllerState;
             if (appliedComponentState == componentState && appliedControllerState == controllerState)
                 return;
+            if (string.IsNullOrEmpty(componentState) && !string.IsNullOrEmpty(appliedComponentState))
+            {
+                if (LeaseCount > 0)
+                    return;
+                DisposeInstance();
+                EnsureInstance(lastSampleRate);
+                return;
+            }
             Instance.RestoreStates(Vst3StateCodec.Decode(componentState), Vst3StateCodec.Decode(controllerState));
             appliedComponentState = componentState;
             appliedControllerState = controllerState;
