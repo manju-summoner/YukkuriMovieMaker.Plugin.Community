@@ -124,7 +124,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 return;
             var plugin = lease.Instance;
             var latency = plugin.LatencySamples;
-            tailRemaining = latency * 2L;
+            tailRemaining = Math.Min(latency * 2L, Math.Max(0L, Duration - position));
             delayIndex = 0;
             if (latency <= 0)
             {
