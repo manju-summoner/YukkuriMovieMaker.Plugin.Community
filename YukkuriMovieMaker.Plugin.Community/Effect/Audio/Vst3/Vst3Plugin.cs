@@ -33,11 +33,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         /// プレーナー形式のL/Rバッファを処理する。projectTimeSamplesはフレーム（サンプル/チャンネル）単位。
         /// </summary>
         public bool Process(float[] inL, float[] inR, float[] outL, float[] outR, int numFrames, long projectTimeSamples)
+            => Process(inL, inR, outL, outR, numFrames, projectTimeSamples, Vst3Transport.Default);
+
+        public bool Process(float[] inL, float[] inR, float[] outL, float[] outR, int numFrames, long projectTimeSamples, in Vst3Transport transport)
         {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
             fixed (float* pInL = inL, pInR = inR, pOutL = outL, pOutR = outR)
             {
-                return Vst3Native.Ymm4Vst3PluginProcess(handle, pInL, pInR, pOutL, pOutR, numFrames, projectTimeSamples) != 0;
+                return Vst3Native.Ymm4Vst3PluginProcessWithTransport(
+                    handle,
+                    pInL, pInR, pOutL, pOutR,
+                    numFrames,
+                    projectTimeSamples,
+                    transport.Tempo,
+                    transport.TimeSignatureNumerator,
+                    transport.TimeSignatureDenominator,
+                    transport.IsTempoValid ? 1 : 0) != 0;
             }
         }
 
@@ -130,6 +141,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             Vst3Native.Ymm4Vst3PluginDestroy(handle);
             handle = IntPtr.Zero;
         }
+    }
+
+    internal readonly record struct Vst3Transport(
+        double Tempo,
+        int TimeSignatureNumerator,
+        int TimeSignatureDenominator,
+        bool IsTempoValid)
+    {
+        public static Vst3Transport Default { get; } = new(120, 4, 4, true);
     }
 
     /// <summary>

@@ -71,6 +71,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public static extern int Ymm4Vst3PluginProcess(IntPtr plugin, float* inL, float* inR, float* outL, float* outR, int numFrames, long projectTimeSamples);
 
         [DllImport(DllName)]
+        public static extern int Ymm4Vst3PluginProcessWithTransport(
+            IntPtr plugin,
+            float* inL, float* inR,
+            float* outL, float* outR,
+            int numFrames,
+            long projectTimeSamples,
+            double tempo,
+            int timeSignatureNumerator,
+            int timeSignatureDenominator,
+            int isTempoValid);
+
+        [DllImport(DllName)]
         public static extern int Ymm4Vst3PluginPump(IntPtr plugin);
 
         [DllImport(DllName)]

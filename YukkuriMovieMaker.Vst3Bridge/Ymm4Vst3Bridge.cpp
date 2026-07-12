@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <mutex>
@@ -194,7 +195,9 @@ namespace
         BridgePlugin& plugin,
         const float* inL, const float* inR,
         float* outL, float* outR,
-        int32 numFrames, int64_t projectTimeSamples, bool isPlaying)
+        int32 numFrames, int64_t projectTimeSamples, bool isPlaying,
+        bool isTempoValid, double tempo,
+        int32 timeSigNumerator, int32 timeSigDenominator)
     {
         auto& data = plugin.processData;
         data.numSamples = numFrames;
@@ -221,14 +224,30 @@ namespace
 
         plugin.processContext.projectTimeSamples = projectTimeSamples;
         plugin.processContext.continousTimeSamples = projectTimeSamples;
-        plugin.processContext.projectTimeMusic =
-            plugin.sampleRate > 0
-                ? projectTimeSamples / plugin.sampleRate * (plugin.processContext.tempo / 60.0)
-                : 0;
         plugin.processContext.state =
-            ProcessContext::kTempoValid | ProcessContext::kTimeSigValid |
-            ProcessContext::kContTimeValid | ProcessContext::kProjectTimeMusicValid |
-            (isPlaying ? ProcessContext::kPlaying : 0);
+            ProcessContext::kContTimeValid | (isPlaying ? ProcessContext::kPlaying : 0);
+        if (isTempoValid && plugin.sampleRate > 0 && tempo > 0 && timeSigNumerator > 0 && timeSigDenominator > 0)
+        {
+            plugin.processContext.tempo = tempo;
+            plugin.processContext.timeSigNumerator = timeSigNumerator;
+            plugin.processContext.timeSigDenominator = timeSigDenominator;
+            plugin.processContext.projectTimeMusic =
+                projectTimeSamples / plugin.sampleRate * (tempo / 60.0);
+            const auto barLength = timeSigNumerator * 4.0 / timeSigDenominator;
+            plugin.processContext.barPositionMusic =
+                std::floor(plugin.processContext.projectTimeMusic / barLength) * barLength;
+            plugin.processContext.state |=
+                ProcessContext::kTempoValid | ProcessContext::kTimeSigValid |
+                ProcessContext::kProjectTimeMusicValid | ProcessContext::kBarPositionValid;
+        }
+        else
+        {
+            plugin.processContext.tempo = 0;
+            plugin.processContext.timeSigNumerator = 0;
+            plugin.processContext.timeSigDenominator = 0;
+            plugin.processContext.projectTimeMusic = 0;
+            plugin.processContext.barPositionMusic = 0;
+        }
 
         auto result = plugin.processor->process(data);
 
@@ -445,11 +464,34 @@ YMM4VST3_API int32_t Ymm4Vst3PluginSetup(void* pluginHandle, double sampleRate, 
     return 1;
 }
 
+YMM4VST3_API int32_t Ymm4Vst3PluginProcessWithTransport(
+    void* pluginHandle,
+    const float* inL, const float* inR,
+    float* outL, float* outR,
+    int32_t numFrames, int64_t projectTimeSamples,
+    double tempo, int32_t timeSigNumerator, int32_t timeSigDenominator,
+    int32_t isTempoValid);
+
 YMM4VST3_API int32_t Ymm4Vst3PluginProcess(
     void* pluginHandle,
     const float* inL, const float* inR,
     float* outL, float* outR,
     int32_t numFrames, int64_t projectTimeSamples)
+{
+    return Ymm4Vst3PluginProcessWithTransport(
+        pluginHandle,
+        inL, inR, outL, outR,
+        numFrames, projectTimeSamples,
+        120.0, 4, 4, 1);
+}
+
+YMM4VST3_API int32_t Ymm4Vst3PluginProcessWithTransport(
+    void* pluginHandle,
+    const float* inL, const float* inR,
+    float* outL, float* outR,
+    int32_t numFrames, int64_t projectTimeSamples,
+    double tempo, int32_t timeSigNumerator, int32_t timeSigDenominator,
+    int32_t isTempoValid)
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin || !plugin->processingActive || numFrames < 0)
@@ -464,7 +506,8 @@ YMM4VST3_API int32_t Ymm4Vst3PluginProcess(
             *plugin,
             inL ? inL + offset : nullptr, inR ? inR + offset : nullptr,
             outL ? outL + offset : nullptr, outR ? outR + offset : nullptr,
-            chunk, projectTimeSamples + offset, true))
+            chunk, projectTimeSamples + offset, true,
+            isTempoValid != 0, tempo, timeSigNumerator, timeSigDenominator))
         {
             return 0;
         }
@@ -502,7 +545,11 @@ YMM4VST3_API int32_t Ymm4Vst3PluginPump(void* pluginHandle)
     float discardL[pumpFrames]{};
     float discardR[pumpFrames]{};
     auto frames = std::min(pumpFrames, plugin->maxBlockSize);
-    auto result = ProcessBlock(*plugin, silenceL, silenceR, discardL, discardR, frames, plugin->pumpPosition, false);
+    auto result = ProcessBlock(
+        *plugin,
+        silenceL, silenceR, discardL, discardR,
+        frames, plugin->pumpPosition, false,
+        false, 0, 0, 0);
     plugin->pumpPosition += frames;
     return result ? 1 : 0;
 }

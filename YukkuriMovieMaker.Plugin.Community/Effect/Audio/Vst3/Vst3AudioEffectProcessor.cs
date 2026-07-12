@@ -76,7 +76,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 bufferR[i] = destBuffer[offset + i * 2 + 1];
             }
 
-            if (plugin.Process(bufferL, bufferR, bufferL, bufferR, frames, (position + latencyFrames * 2L) / 2))
+            if (plugin.Process(bufferL, bufferR, bufferL, bufferR, frames, (position + latencyFrames * 2L) / 2, CreateTransport()))
             {
                 var totalFrames = Duration / 2;
                 var startFrame = position / 2;
@@ -160,10 +160,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     bufferL[i] = primeBuffer[i * 2];
                     bufferR[i] = primeBuffer[i * 2 + 1];
                 }
-                plugin.Process(bufferL, bufferR, bufferL, bufferR, frames, (position + processedFrames * 2L) / 2);
+                plugin.Process(bufferL, bufferR, bufferL, bufferR, frames, (position + processedFrames * 2L) / 2, CreateTransport());
                 processedFrames += frames;
             }
         }
+
+        Vst3Transport CreateTransport() => new(
+            item.Tempo,
+            item.TimeSignatureNumerator,
+            item.TimeSignatureDenominator,
+            item.IsTempoSyncEnabled);
 
         void EnsureBuffers(int frames)
         {
