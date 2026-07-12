@@ -434,7 +434,7 @@ internal sealed class WavefrontObjParser : IModelParser
                     while (ptr < end && *ptr != '\n')
                     {
                         while (ptr < end && *ptr <= 32 && *ptr != '\n') ptr++;
-                        if (ptr >= end || *ptr == '\n') break;
+                        if (ptr >= end || *ptr == '\n' || *ptr == '#') break;
                         vInFace++;
                         while (ptr < end && *ptr > 32) ptr++;
                     }
