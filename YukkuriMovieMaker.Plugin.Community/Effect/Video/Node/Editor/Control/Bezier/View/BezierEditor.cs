@@ -24,14 +24,35 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
                 FrameworkPropertyMetadataOptions.AffectsRender,
                 OnViewModelChanged));
 
-    private static readonly Media.Pen GridPen = CreatePen(SystemColors.ControlBrush, 1);
-    private static readonly Media.Pen BorderPen = CreatePen(SystemColors.ActiveBorderBrush, 1);
-    private static readonly Media.Pen CurvePen = CreatePen(SystemColors.AccentColorBrush, 2);
-    private static readonly Media.Pen HandlePen = CreatePen(SystemColors.ActiveBorderBrush, 1);
+    public static readonly DependencyProperty ControlBrushProperty =
+        DependencyProperty.Register(
+            nameof(ControlBrush),
+            typeof(Media.Brush),
+            typeof(BezierEditor),
+            new FrameworkPropertyMetadata(
+                SystemColors.ControlBrush,
+                FrameworkPropertyMetadataOptions.AffectsRender,
+                OnBrushPropertyChanged));
 
-    private static readonly Media.Brush NodeBrush = SystemColors.ControlBrush;
-    private static readonly Media.Brush SelectedNodeBrush = SystemColors.AccentColorBrush;
-    private static readonly Media.Brush HandleBrush = SystemColors.AccentColorBrush;
+    public static readonly DependencyProperty GridBrushProperty =
+        DependencyProperty.Register(
+            nameof(GridBrush),
+            typeof(Media.Brush),
+            typeof(BezierEditor),
+            new FrameworkPropertyMetadata(
+                SystemColors.ActiveBorderBrush,
+                FrameworkPropertyMetadataOptions.AffectsRender,
+                OnBrushPropertyChanged));
+
+    public static readonly DependencyProperty AccentBrushProperty =
+        DependencyProperty.Register(
+            nameof(AccentBrush),
+            typeof(Media.Brush),
+            typeof(BezierEditor),
+            new FrameworkPropertyMetadata(
+                SystemColors.AccentColorBrush,
+                FrameworkPropertyMetadataOptions.AffectsRender,
+                OnBrushPropertyChanged));
 
     private BezierDragContext? _dragContext;
 
@@ -50,7 +71,38 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
     public BezierEditor()
     {
         SnapsToDevicePixels = true;
+        UpdatePens();
     }
+
+    public Media.Brush ControlBrush
+    {
+        get => (Media.Brush)GetValue(ControlBrushProperty);
+        set => SetValue(ControlBrushProperty, value);
+    }
+
+    public Media.Brush GridBrush
+    {
+        get => (Media.Brush)GetValue(GridBrushProperty);
+        set => SetValue(GridBrushProperty, value);
+    }
+
+    public Media.Brush AccentBrush
+    {
+        get => (Media.Brush)GetValue(AccentBrushProperty);
+        set => SetValue(AccentBrushProperty, value);
+    }
+
+    private Media.Pen GridPen { get; set; } = null!;
+
+    private Media.Pen BorderPen { get; set; } = null!;
+
+    private Media.Pen CurvePen { get; set; } = null!;
+
+    private Media.Pen HandlePen { get; set; } = null!;
+
+    private Media.Brush NodeBrush => ControlBrush;
+    private Media.Brush SelectedNodeBrush => AccentBrush;
+    private Media.Brush HandleBrush => AccentBrush;
 
     public BezierEditorViewModel? ViewModel
     {
@@ -77,6 +129,24 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
             1.0 - (q.Y - MarginSize) / h);
     }
 
+    private static void OnBrushPropertyChanged(
+        DependencyObject d,
+        DependencyPropertyChangedEventArgs e)
+    {
+        var editor = (BezierEditor)d;
+
+        editor.UpdatePens();
+        editor.InvalidateVisual();
+    }
+
+    private void UpdatePens()
+    {
+        GridPen = CreatePen(GridBrush, 1);
+        BorderPen = CreatePen(GridBrush, 1);
+        CurvePen = CreatePen(AccentBrush, 2);
+        HandlePen = CreatePen(GridBrush, 1);
+    }
+
     /// <summary>
     ///     パンオフセットを適用しないベース座標変換。
     ///     パン可能範囲の算出(コンテンツの外接矩形の計算)に用いる。
@@ -97,7 +167,10 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
     private static Media.Pen CreatePen(Media.Brush brush, double thickness)
     {
         var pen = new Media.Pen(brush, thickness);
-        pen.Freeze();
+
+        if (pen.CanFreeze)
+            pen.Freeze();
+
         return pen;
     }
 
@@ -106,8 +179,8 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
         base.OnRender(dc);
 
         dc.DrawRectangle(
-            Media.Brushes.White,
-            new Media.Pen(Media.Brushes.Gray, 1),
+            ControlBrush,
+            new Media.Pen(GridBrush, 1),
             new Rect(0, 0, ActualWidth, ActualHeight));
 
         DrawGrid(dc);
@@ -116,7 +189,6 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
             return;
 
         DrawCurve(dc);
-        DrawMonotonicWarnings(dc);
         DrawHandles(dc);
         DrawNodes(dc);
     }
@@ -461,7 +533,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
 
         dc.DrawRectangle(
             null,
-            BorderPen,
+            GridPen,
             new Rect(
                 MarginSize + _panOffset.X,
                 MarginSize + _panOffset.Y,

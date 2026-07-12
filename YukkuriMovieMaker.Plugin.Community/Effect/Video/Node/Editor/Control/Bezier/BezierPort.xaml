@@ -33,11 +33,15 @@
                            Grid.Row="1"
                            Width="200"
                            Height="200"
-                           ViewModel="{Binding ViewModel, RelativeSource={RelativeSource AncestorType=local:BezierPort}}" />
+                           ViewModel="{Binding ViewModel, RelativeSource={RelativeSource AncestorType=local:BezierPort}}"
+                           ClipToBounds="True"
+                           ControlBrush="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+                           GridBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                           AccentBrush="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}" />
         <ComboBox Grid.Row="2"
                   ItemsSource="{Binding Presets, RelativeSource={RelativeSource AncestorType=local:BezierPort}}"
                   DisplayMemberPath="Name"
-                  SelectedItem="{Binding SelectedPresetItem, RelativeSource={RelativeSource AncestorType=local:BezierPort}}"
-                  SelectionChanged="OnPresetComboBoxSelectionChanged" ClipToBounds="True" />
+                  SelectedItem="{Binding SelectedPresetItem, RelativeSource={RelativeSource AncestorType=local:BezierPort}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Null}}"
+                  SelectionChanged="OnPresetComboBoxSelectionChanged" />
     </Grid>
 </controlbase:PortControlBase>

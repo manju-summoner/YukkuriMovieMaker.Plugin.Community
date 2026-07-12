@@ -44,7 +44,8 @@ public partial class BezierPort
 
         ViewModel = new BezierEditorViewModel(BezierParser.Deserialize(Value));
         _textBoxBuffer = Value;
-        SelectedPresetItem = Presets[0];
+
+        SelectedPresetItem = FindMatchingPreset(Value);
 
         Editor.CurveChanged += OnEditorCurveChanged;
         Editor.EditCompleted += OnEditorEditCompleted;
@@ -60,11 +61,12 @@ public partial class BezierPort
         }
     }
 
-    public object SelectedPresetItem
+    public object? SelectedPresetItem
     {
         get;
         set
         {
+            if (field == value) return;
             field = value;
             OnPropertyChanged();
         }
@@ -128,6 +130,33 @@ public partial class BezierPort
         }
     }
 
+    /// <summary>
+    ///     指定されたシリアライズ値に一致するプリセットを検索します。
+    /// </summary>
+    private BezierEasingPreset? FindMatchingPreset(string serializedValue)
+    {
+        try
+        {
+            BezierParser.Deserialize(serializedValue);
+
+            foreach (var preset in Presets)
+            {
+                var testCurve = new BezierCurve();
+                BezierEasingPresets.Apply(testCurve, preset);
+                var testSerialized = BezierSerializer.Serialize(testCurve);
+
+                if (testSerialized == serializedValue)
+                    return preset;
+            }
+        }
+        catch
+        {
+            // ignore
+        }
+
+        return null;
+    }
+
     private void OnEditorCurveChanged(object? sender, EventArgs e)
     {
     }
@@ -150,6 +179,8 @@ public partial class BezierPort
         {
             Value = serialized;
             TextBoxBuffer = serialized;
+
+            SelectedPresetItem = FindMatchingPreset(serialized);
         }
         finally
         {
