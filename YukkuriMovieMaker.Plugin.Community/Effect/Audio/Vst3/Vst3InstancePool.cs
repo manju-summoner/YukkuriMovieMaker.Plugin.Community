@@ -35,6 +35,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     var (componentState, controllerState) = entry.Instance!.CaptureStates();
                     var transient = new Vst3Instance(entry.Path, sampleRate, componentState, controllerState);
                     entry.AddTransient(transient);
+                    entry.LeaseCount++;
                     return new Vst3InstanceLease(entry, transient, isProcessing: true, isTransient: true);
                 }
                 entry.HasProcessingLease = true;
@@ -66,6 +67,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     entries.Remove(effect);
                     idleOrder.Remove(entry);
                     entry.MarkRemoved();
+                    lock (entry.Gate)
+                    {
+                        if (entry.LeaseCount == 0)
+                            entry.DisposeInstance();
+                    }
                     entry = null;
                 }
                 if (entry is null)
@@ -91,19 +97,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         static void ReleaseCore(Vst3InstanceEntry entry, Vst3Instance instance, bool isProcessing, bool isTransient)
         {
-            if (isTransient)
-            {
-                lock (entry.Gate)
-                    entry.RemoveTransient(instance);
-                instance.Dispose();
-                return;
-            }
-
             bool isIdle;
             lock (entry.Gate)
             {
-                if (isProcessing)
+                if (isTransient)
+                {
+                    entry.RemoveTransient(instance);
+                    instance.Dispose();
+                }
+                else if (isProcessing)
+                {
                     entry.HasProcessingLease = false;
+                }
                 entry.LeaseCount--;
                 isIdle = entry.LeaseCount == 0;
                 if (isIdle && entry.IsRemoved)
