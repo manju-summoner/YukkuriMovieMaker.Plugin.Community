@@ -267,7 +267,11 @@ internal sealed class ThreeMfParser : IModelParser
 
         public void EmitResource(ObjectResource obj, Matrix4x4 transform, HashSet<ObjectResource> stack, int depth)
         {
-            if (depth > MaxComponentDepth || !stack.Add(obj)) return;
+            if (depth > MaxComponentDepth || !stack.Add(obj))
+            {
+                _limitExceeded = true;
+                return;
+            }
 
             var limits = Model3DSettings.Default;
 
