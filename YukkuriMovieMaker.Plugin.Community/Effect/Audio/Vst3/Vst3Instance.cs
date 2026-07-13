@@ -14,6 +14,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         readonly Dictionary<uint, double> pendingOutputParameters = [];
         bool isOutputForwardScheduled;
         int editCompletedPending;
+        int rebuildPending;
 
         Vst3Module module = null!;
         IntPtr component;
@@ -708,9 +709,76 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         void OnRestartComponent(int flags)
         {
-            if ((flags & Vst3Native.RestartLatencyChanged) != 0)
+            if ((flags & (Vst3Native.RestartReloadComponent | Vst3Native.RestartIoChanged)) != 0)
+            {
+                if (Interlocked.Exchange(ref rebuildPending, 1) == 0)
+                    Vst3HostThread.Post(() =>
+                    {
+                        Volatile.Write(ref rebuildPending, 0);
+                        RebuildProcessingSetup();
+                    }, DispatcherPriority.Background);
+            }
+            else if ((flags & Vst3Native.RestartLatencyChanged) != 0)
+            {
                 Vst3HostThread.Post(RefreshLatency, DispatcherPriority.Background);
+            }
             OnEditCompleted();
+        }
+
+        void RebuildProcessingSetup()
+        {
+            if (isDisposed)
+                return;
+            lock (processGate)
+            {
+                if (isDisposed)
+                    return;
+                var getBusCount = Vst3Native.GetVtableMethod<Vst3Native.GetBusCountDelegate>(component, 7);
+                var inputBusCount = getBusCount(component, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionInput);
+                var outputBusCount = getBusCount(component, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionOutput);
+                if (inputBusCount < 1 || outputBusCount < 1)
+                    return;
+
+                setProcessing(processor, 0);
+                Vst3Native.GetVtableMethod<Vst3Native.SetActiveDelegate>(component, 11)(component, 0);
+                isComponentActivated = false;
+
+                var newBuffers = new Vst3ProcessBuffers(processor, inputBusCount, outputBusCount, BlockFrames);
+                if (newBuffers.InputChannelCounts[0] >= 1 && newBuffers.OutputChannelCounts[0] >= 1)
+                {
+                    buffers!.Dispose();
+                    buffers = newBuffers;
+                    inputChannelCounts = newBuffers.InputChannelCounts;
+                    outputChannelCounts = newBuffers.OutputChannelCounts;
+                    processData.NumInputs = inputBusCount;
+                    processData.NumOutputs = outputBusCount;
+                    processData.Inputs = newBuffers.Inputs;
+                    processData.Outputs = newBuffers.Outputs;
+                }
+                else
+                {
+                    newBuffers.Dispose();
+                }
+
+                var setup = new Vst3Native.ProcessSetup
+                {
+                    ProcessMode = Vst3Native.ProcessModeRealtime,
+                    SymbolicSampleSize = Vst3Native.SymbolicSampleSize32,
+                    MaxSamplesPerBlock = BlockFrames,
+                    SampleRate = sampleRate,
+                };
+                var setupProcessing = Vst3Native.GetVtableMethod<Vst3Native.SetupProcessingDelegate>(processor, 7);
+                setupProcessing(processor, ref setup);
+
+                var activateBus = Vst3Native.GetVtableMethod<Vst3Native.ActivateBusDelegate>(component, 10);
+                activateBus(component, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionInput, 0, 1);
+                activateBus(component, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionOutput, 0, 1);
+
+                Vst3Native.GetVtableMethod<Vst3Native.SetActiveDelegate>(component, 11)(component, 1);
+                isComponentActivated = true;
+                setProcessing(processor, 1);
+                RefreshLatency();
+            }
         }
 
         void OnEditCompleted()
