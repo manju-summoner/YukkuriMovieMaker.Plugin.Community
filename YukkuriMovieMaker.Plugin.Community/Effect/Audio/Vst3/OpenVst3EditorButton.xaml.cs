@@ -8,7 +8,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 {
     public partial class OpenVst3EditorButton : UserControl, IPropertyEditorControl
     {
-        static readonly Dictionary<Vst3Effect, Vst3EditorWindow> openEditors = [];
+        static readonly Dictionary<Vst3Effect, (string FilePath, Vst3EditorWindow Window)> openEditors = [];
 
         public event EventHandler? BeginEdit;
         public event EventHandler? EndEdit;
@@ -33,8 +33,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             }
             if (openEditors.TryGetValue(effect, out var existing))
             {
-                existing.Activate();
-                return;
+                if (string.Equals(existing.FilePath, effect.FilePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    existing.Window.Activate();
+                    return;
+                }
+                existing.Window.Close();
             }
             Vst3InstanceLease lease;
             Mouse.OverrideCursor = Cursors.Wait;
@@ -64,14 +68,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             Vst3EditorProbe.SetHasEditor(effect.FilePath, true);
 
             var properties = ItemProperties;
-            var window = new Vst3EditorWindow(instance, Path.GetFileNameWithoutExtension(effect.FilePath))
+            var filePath = effect.FilePath;
+            var window = new Vst3EditorWindow(instance, Path.GetFileNameWithoutExtension(filePath))
             {
                 Owner = Window.GetWindow(this),
             };
-            openEditors.Add(effect, window);
+            openEditors.Add(effect, (filePath, window));
             BeginEdit?.Invoke(this, EventArgs.Empty);
 
-            var filePath = effect.FilePath;
             void OnEditCompleted()
             {
                 if (lease.IsProcessingActive)
