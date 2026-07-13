@@ -72,17 +72,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             frame = new PlugFrame(OnViewResizeRequested);
             module = Vst3Module.Acquire(path);
 
-            component = module.CreateAudioComponent();
-
-            var queryInterface = Vst3Native.GetVtableMethod<Vst3Native.QueryInterfaceDelegate>(component, 0);
-            if (queryInterface(component, Vst3Native.IAudioProcessorUid, out processor) != Vst3Native.ResultOk
-                || processor == IntPtr.Zero)
-                throw new InvalidOperationException($"IAudioProcessor is not supported: {path}");
-
-            var initialize = Vst3Native.GetVtableMethod<Vst3Native.InitializeDelegate>(component, 3);
-            if (initialize(component, Vst3HostContext.Instance) != Vst3Native.ResultOk)
-                throw new InvalidOperationException($"IComponent::initialize failed: {path}");
-            isComponentInitialized = true;
+            var (inputBusCount, outputBusCount) = CreateValidComponent(path);
 
             controller = CreateController(path, out isSingleComponent);
             ConnectComponents();
@@ -91,22 +81,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             setComponentHandler(controller, handler.Handle);
 
             RestoreStatesCore(componentState, controllerState);
-
-            var canProcessSampleSize = Vst3Native.GetVtableMethod<Vst3Native.CanProcessSampleSizeDelegate>(processor, 5);
-            if (canProcessSampleSize(processor, Vst3Native.SymbolicSampleSize32) != Vst3Native.ResultOk)
-                throw new InvalidOperationException($"32bit processing is not supported: {path}");
-
-            var getBusCount = Vst3Native.GetVtableMethod<Vst3Native.GetBusCountDelegate>(component, 7);
-            var inputBusCount = getBusCount(component, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionInput);
-            var outputBusCount = getBusCount(component, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionOutput);
-            if (inputBusCount < 1 || outputBusCount < 1)
-                throw new InvalidOperationException($"Audio input and output busses are required: {path}");
-
-            buffers = new Vst3ProcessBuffers(processor, inputBusCount, outputBusCount, BlockFrames);
-            inputChannelCounts = buffers.InputChannelCounts;
-            outputChannelCounts = buffers.OutputChannelCounts;
-            if (inputChannelCounts[0] < 1 || outputChannelCounts[0] < 1)
-                throw new InvalidOperationException($"Main busses have no channels: {path}");
 
             var setup = new Vst3Native.ProcessSetup
             {
@@ -139,7 +113,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 SymbolicSampleSize = Vst3Native.SymbolicSampleSize32,
                 NumInputs = inputBusCount,
                 NumOutputs = outputBusCount,
-                Inputs = buffers.Inputs,
+                Inputs = buffers!.Inputs,
                 Outputs = buffers.Outputs,
                 OutputParameterChanges = outputChanges.Handle,
                 ProcessContext = contextMemory,
@@ -620,6 +594,66 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             frame?.Dispose();
             module?.Release();
             module = null!;
+        }
+
+        (int InputBusCount, int OutputBusCount) CreateValidComponent(string path)
+        {
+            foreach (var cid in module.EnumerateAudioClassIds())
+            {
+                var candidate = module.CreateInstance(cid, Vst3Native.IComponentUid);
+                if (candidate == IntPtr.Zero)
+                    continue;
+
+                var queryInterface = Vst3Native.GetVtableMethod<Vst3Native.QueryInterfaceDelegate>(candidate, 0);
+                if (queryInterface(candidate, Vst3Native.IAudioProcessorUid, out var candidateProcessor) != Vst3Native.ResultOk
+                    || candidateProcessor == IntPtr.Zero)
+                {
+                    Vst3Native.GetVtableMethod<Vst3Native.ReleaseDelegate>(candidate, 2)(candidate);
+                    continue;
+                }
+
+                var initialize = Vst3Native.GetVtableMethod<Vst3Native.InitializeDelegate>(candidate, 3);
+                if (initialize(candidate, Vst3HostContext.Instance) != Vst3Native.ResultOk)
+                {
+                    Vst3Native.GetVtableMethod<Vst3Native.ReleaseDelegate>(candidateProcessor, 2)(candidateProcessor);
+                    Vst3Native.GetVtableMethod<Vst3Native.ReleaseDelegate>(candidate, 2)(candidate);
+                    continue;
+                }
+
+                var canProcessSampleSize = Vst3Native.GetVtableMethod<Vst3Native.CanProcessSampleSizeDelegate>(candidateProcessor, 5);
+                var getBusCount = Vst3Native.GetVtableMethod<Vst3Native.GetBusCountDelegate>(candidate, 7);
+                var inputBusCount = getBusCount(candidate, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionInput);
+                var outputBusCount = getBusCount(candidate, Vst3Native.MediaTypeAudio, Vst3Native.BusDirectionOutput);
+                Vst3ProcessBuffers? candidateBuffers = null;
+                var isValid = canProcessSampleSize(candidateProcessor, Vst3Native.SymbolicSampleSize32) == Vst3Native.ResultOk
+                    && inputBusCount >= 1 && outputBusCount >= 1;
+                if (isValid)
+                {
+                    candidateBuffers = new Vst3ProcessBuffers(candidateProcessor, inputBusCount, outputBusCount, BlockFrames);
+                    if (candidateBuffers.InputChannelCounts[0] < 1 || candidateBuffers.OutputChannelCounts[0] < 1)
+                    {
+                        candidateBuffers.Dispose();
+                        candidateBuffers = null;
+                        isValid = false;
+                    }
+                }
+                if (!isValid)
+                {
+                    Vst3Native.GetVtableMethod<Vst3Native.TerminateDelegate>(candidate, 4)(candidate);
+                    Vst3Native.GetVtableMethod<Vst3Native.ReleaseDelegate>(candidateProcessor, 2)(candidateProcessor);
+                    Vst3Native.GetVtableMethod<Vst3Native.ReleaseDelegate>(candidate, 2)(candidate);
+                    continue;
+                }
+
+                component = candidate;
+                processor = candidateProcessor;
+                isComponentInitialized = true;
+                buffers = candidateBuffers;
+                inputChannelCounts = candidateBuffers!.InputChannelCounts;
+                outputChannelCounts = candidateBuffers.OutputChannelCounts;
+                return (inputBusCount, outputBusCount);
+            }
+            throw new InvalidOperationException($"No usable audio module class found: {path}");
         }
 
         IntPtr CreateController(string path, out bool isSingleComponent)

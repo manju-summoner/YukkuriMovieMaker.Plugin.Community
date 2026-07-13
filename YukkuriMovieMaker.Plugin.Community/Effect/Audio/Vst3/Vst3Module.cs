@@ -74,15 +74,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             }
         }
 
-        public IntPtr CreateAudioComponent()
+        public IEnumerable<byte[]> EnumerateAudioClassIds()
         {
             foreach (var (cid, _) in EnumerateAudioModuleClasses())
-            {
-                var component = CreateInstance(cid, Vst3Native.IComponentUid);
-                if (component != IntPtr.Zero)
-                    return component;
-            }
-            throw new InvalidOperationException($"No audio module class found: {modulePath}");
+                yield return cid;
         }
 
         public IntPtr CreateInstance(byte[] cid, byte[] iid)
