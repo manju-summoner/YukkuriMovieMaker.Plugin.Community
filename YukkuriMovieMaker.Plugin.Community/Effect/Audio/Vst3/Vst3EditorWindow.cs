@@ -23,6 +23,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         readonly Vst3View view;
         readonly Vst3ViewHost host;
         readonly Vst3EditorParameterForwarder parameterForwarder;
+        readonly Vst3EditorMeterForwarder meterForwarder;
         readonly DispatcherTimer pumpTimer;
         readonly bool isContentScaleSupported;
 
@@ -31,11 +32,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         /// </summary>
         readonly (int Width, int Height) baseSize;
 
-        public Vst3EditorWindow(Vst3Plugin plugin, Vst3View view, Vst3EditorParameterForwarder parameterForwarder)
+        public Vst3EditorWindow(
+            Vst3Plugin plugin,
+            Vst3View view,
+            Vst3EditorParameterForwarder parameterForwarder,
+            Vst3EditorMeterForwarder meterForwarder)
         {
             this.plugin = plugin;
             this.view = view;
             this.parameterForwarder = parameterForwarder;
+            this.meterForwarder = meterForwarder;
             isContentScaleSupported = view.IsContentScaleSupported;
             baseSize = view.GetSize();
 
@@ -53,11 +59,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             host.ViewAttached += OnViewAttached;
             Content = host;
 
-            pumpTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
+            pumpTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(33) };
             pumpTimer.Tick += (_, _) =>
             {
                 if (!plugin.IsDisposed)
+                {
                     parameterForwarder.PumpAndForward(plugin);
+                    meterForwarder.Apply(plugin);
+                }
             };
 
             SourceInitialized += OnSourceInitialized;
@@ -149,13 +158,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             pumpTimer.Stop();
             // 最後の編集をプロセッサ状態へ反映してからビューを外す
             if (!plugin.IsDisposed)
+            {
                 parameterForwarder.PumpAndForward(plugin);
+                meterForwarder.Apply(plugin);
+            }
             view.Dispose();
         }
 
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
+            meterForwarder.Dispose();
             host.Dispose();
         }
 

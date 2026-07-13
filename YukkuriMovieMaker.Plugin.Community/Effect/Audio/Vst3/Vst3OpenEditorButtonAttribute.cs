@@ -76,10 +76,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     return;
                 }
 
-                var parameterForwarder = new Vst3EditorParameterForwarder(effects.Where(x =>
+                var matchingEffects = effects.Where(x =>
                     string.Equals(x.PluginPath, effect.PluginPath, StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(x.ClassId, effect.ClassId, StringComparison.OrdinalIgnoreCase)));
-                var window = new Vst3EditorWindow(plugin, view, parameterForwarder)
+                    && string.Equals(x.ClassId, effect.ClassId, StringComparison.OrdinalIgnoreCase)).ToArray();
+                var parameterForwarder = new Vst3EditorParameterForwarder(matchingEffects);
+                //エディター位置は先頭の選択項目を基準にしているため、メーターもそのエフェクトだけを表示する
+                var meterForwarder = new Vst3EditorMeterForwarder(
+                    [effect],
+                    () => editorInfo?.ItemPosition.Time ?? TimeSpan.MaxValue);
+                var window = new Vst3EditorWindow(plugin, view, parameterForwarder, meterForwarder)
                 {
                     Owner = owner,
                     Title = string.IsNullOrEmpty(effect.PluginName) ? Texts.Vst3EffectName : effect.PluginName,

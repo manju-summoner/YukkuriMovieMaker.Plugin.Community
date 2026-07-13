@@ -9,6 +9,7 @@
 #include <objbase.h>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cmath>
 #include <cstdint>
@@ -123,6 +124,15 @@ namespace
         VST3::Hosting::Module::Ptr module;
     };
 
+    struct MeterParameterChange
+    {
+        ParamID id{};
+        ParamValue value{};
+        int64 samplePosition{};
+    };
+
+    constexpr size_t MeterParameterCapacity = 8192;
+
     struct BridgePlugin
     {
         VST3::Hosting::Module::Ptr module;
@@ -137,8 +147,9 @@ namespace
         std::atomic<int32> restartFlags{ 0 };
         std::mutex editorParamMutex;
         std::unordered_map<ParamID, ParamValue> pendingEditorParams;
-        std::mutex outputParamMutex;
-        std::unordered_map<ParamID, ParamValue> pendingOutputParams;
+        std::array<MeterParameterChange, MeterParameterCapacity> meterParameters{};
+        size_t meterParameterReadIndex = 0;
+        size_t meterParameterWriteIndex = 0;
 
         HostProcessData processData;
         ParameterChanges inputParameterChanges;
@@ -166,6 +177,11 @@ namespace
 
     using ViewResizeCallback = void(__stdcall*)(void* context, int32_t width, int32_t height);
     using ParameterChangeCallback = void(__stdcall*)(void* context, uint32_t paramId, double normalizedValue);
+    using MeterParameterChangeCallback = void(__stdcall*)(
+        void* context,
+        uint32_t paramId,
+        double normalizedValue,
+        int64 samplePosition);
 
     //------------------------------------------------------------------------
     // プラグイン都合のリサイズ要求をC#へ通知するIPlugFrame
@@ -212,11 +228,12 @@ namespace
         return count > 0 ? 0 : -1;
     }
 
-    void CaptureOutputParameters(BridgePlugin& plugin)
+    void CaptureOutputParameters(
+        BridgePlugin& plugin,
+        int64 projectTimeSamples,
+        bool captureMeterParameters)
     {
-        std::vector<std::pair<ParamID, ParamValue>> values;
         const auto count = plugin.outputParameterChanges.getParameterCount();
-        values.reserve(count);
         for (int32 i = 0; i < count; i++)
         {
             auto* queue = plugin.outputParameterChanges.getParameterData(i);
@@ -225,27 +242,23 @@ namespace
             int32 sampleOffset{};
             ParamValue value{};
             if (queue->getPoint(queue->getPointCount() - 1, sampleOffset, value) == kResultOk)
-                values.emplace_back(queue->getParameterId(), value);
+            {
+                const auto id = queue->getParameterId();
+                if (captureMeterParameters)
+                {
+                    plugin.meterParameters[plugin.meterParameterWriteIndex] =
+                        { id, value, projectTimeSamples + sampleOffset };
+                    const auto nextWriteIndex =
+                        (plugin.meterParameterWriteIndex + 1) % MeterParameterCapacity;
+                    if (nextWriteIndex == plugin.meterParameterReadIndex)
+                    {
+                        plugin.meterParameterReadIndex =
+                            (plugin.meterParameterReadIndex + 1) % MeterParameterCapacity;
+                    }
+                    plugin.meterParameterWriteIndex = nextWriteIndex;
+                }
+            }
         }
-        if (values.empty())
-            return;
-        std::lock_guard lock(plugin.outputParamMutex);
-        for (const auto& [id, value] : values)
-            plugin.pendingOutputParams[id] = value;
-    }
-
-    int32 FlushOutputParameters(BridgePlugin& plugin)
-    {
-        std::unordered_map<ParamID, ParamValue> values;
-        {
-            std::lock_guard lock(plugin.outputParamMutex);
-            values.swap(plugin.pendingOutputParams);
-        }
-        if (!plugin.controller)
-            return 0;
-        for (const auto& [id, value] : values)
-            plugin.controller->setParamNormalized(id, value);
-        return static_cast<int32>(values.size());
     }
 
     // 編集キューの内容をinputParameterChangesへ移し、1ブロック分processを回す
@@ -256,7 +269,7 @@ namespace
         int32 numFrames, int64_t projectTimeSamples, bool isPlaying,
         bool isTempoValid, double tempo,
         int32 timeSigNumerator, int32 timeSigDenominator,
-        bool captureOutputParameters)
+        bool captureMeterParameters)
     {
         auto& data = plugin.processData;
         data.numSamples = numFrames;
@@ -311,8 +324,13 @@ namespace
         auto result = plugin.processor->process(data);
 
         plugin.inputParameterChanges.clearQueue();
-        if (result == kResultOk && captureOutputParameters)
-            CaptureOutputParameters(plugin);
+        if (result == kResultOk && captureMeterParameters)
+        {
+            CaptureOutputParameters(
+                plugin,
+                projectTimeSamples,
+                captureMeterParameters);
+        }
         plugin.outputParameterChanges.clearQueue();
         plugin.inputEvents.clear();
 
@@ -536,7 +554,7 @@ YMM4VST3_API int32_t Ymm4Vst3PluginProcessWithTransport(
     float* outL, float* outR,
     int32_t numFrames, int64_t projectTimeSamples,
     double tempo, int32_t timeSigNumerator, int32_t timeSigDenominator,
-    int32_t isTempoValid);
+    int32_t isTempoValid, int32_t captureMeterParameters);
 
 YMM4VST3_API int32_t Ymm4Vst3PluginProcess(
     void* pluginHandle,
@@ -548,7 +566,7 @@ YMM4VST3_API int32_t Ymm4Vst3PluginProcess(
         pluginHandle,
         inL, inR, outL, outR,
         numFrames, projectTimeSamples,
-        120.0, 4, 4, 1);
+        120.0, 4, 4, 1, 1);
 }
 
 YMM4VST3_API int32_t Ymm4Vst3PluginProcessWithTransport(
@@ -557,7 +575,7 @@ YMM4VST3_API int32_t Ymm4Vst3PluginProcessWithTransport(
     float* outL, float* outR,
     int32_t numFrames, int64_t projectTimeSamples,
     double tempo, int32_t timeSigNumerator, int32_t timeSigDenominator,
-    int32_t isTempoValid)
+    int32_t isTempoValid, int32_t captureMeterParameters)
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin || !plugin->processingActive || numFrames < 0)
@@ -574,7 +592,7 @@ YMM4VST3_API int32_t Ymm4Vst3PluginProcessWithTransport(
             outL ? outL + offset : nullptr, outR ? outR + offset : nullptr,
             chunk, projectTimeSamples + offset, true,
             isTempoValid != 0, tempo, timeSigNumerator, timeSigDenominator,
-            false))
+            captureMeterParameters != 0))
         {
             return 0;
         }
@@ -620,18 +638,9 @@ YMM4VST3_API int32_t Ymm4Vst3PluginPump(void* pluginHandle)
         silenceL, silenceR, discardL, discardR,
         frames, plugin->pumpPosition, false,
         false, 0, 0, 0,
-        true);
-    FlushOutputParameters(*plugin);
+        false);
     plugin->pumpPosition += frames;
     return result ? 1 : 0;
-}
-
-YMM4VST3_API int32_t Ymm4Vst3PluginFlushOutputParameters(void* pluginHandle)
-{
-    auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
-    if (!plugin)
-        return 0;
-    return FlushOutputParameters(*plugin);
 }
 
 // GUI操作で変更されたパラメータをマネージド側へ転送する。
@@ -653,6 +662,27 @@ YMM4VST3_API int32_t Ymm4Vst3PluginDrainEditorParameterChanges(
     for (const auto& [id, value] : values)
         callback(context, id, value);
     return static_cast<int32_t>(values.size());
+}
+
+YMM4VST3_API int32_t Ymm4Vst3PluginDrainMeterParameterChanges(
+    void* pluginHandle,
+    MeterParameterChangeCallback callback,
+    void* context)
+{
+    auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
+    if (!plugin || !callback)
+        return 0;
+
+    int32_t count = 0;
+    while (plugin->meterParameterReadIndex != plugin->meterParameterWriteIndex)
+    {
+        const auto& change = plugin->meterParameters[plugin->meterParameterReadIndex];
+        callback(context, change.id, change.value, change.samplePosition);
+        plugin->meterParameterReadIndex =
+            (plugin->meterParameterReadIndex + 1) % MeterParameterCapacity;
+        count++;
+    }
+    return count;
 }
 
 // パラメータを設定する（正規化値）。次のprocess/Pumpでプロセッサへ反映される
@@ -690,6 +720,18 @@ YMM4VST3_API int32_t Ymm4Vst3PluginGetLatencySamples(void* pluginHandle)
     if (!plugin)
         return 0;
     return plugin->processor->getLatencySamples();
+}
+
+// メーター等のoutput parameterをGUIへ表示するため、コントローラーだけを更新する。
+YMM4VST3_API int32_t Ymm4Vst3PluginSetControllerParameter(
+    void* pluginHandle,
+    uint32_t paramId,
+    double normalizedValue)
+{
+    auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
+    if (!plugin || !plugin->controller)
+        return 0;
+    return plugin->controller->setParamNormalized(paramId, normalizedValue) == kResultOk ? 1 : 0;
 }
 
 YMM4VST3_API int32_t Ymm4Vst3PluginConsumeRestartFlags(void* pluginHandle)

@@ -55,6 +55,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void ParameterChangeCallback(IntPtr context, uint paramId, double normalizedValue);
 
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        public delegate void MeterParameterChangeCallback(
+            IntPtr context,
+            uint paramId,
+            double normalizedValue,
+            long samplePosition);
+
         [DllImport(DllName)]
         public static extern IntPtr Ymm4Vst3ModuleOpen([MarshalAs(UnmanagedType.LPUTF8Str)] string path, byte* errorBuf, int errorBufSize);
 
@@ -86,13 +93,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             double tempo,
             int timeSignatureNumerator,
             int timeSignatureDenominator,
-            int isTempoValid);
+            int isTempoValid,
+            int captureMeterParameters);
 
         [DllImport(DllName)]
         public static extern int Ymm4Vst3PluginPump(IntPtr plugin);
-
-        [DllImport(DllName)]
-        public static extern int Ymm4Vst3PluginFlushOutputParameters(IntPtr plugin);
 
         [DllImport(DllName)]
         public static extern int Ymm4Vst3PluginDrainEditorParameterChanges(
@@ -101,7 +106,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             IntPtr context);
 
         [DllImport(DllName)]
+        public static extern int Ymm4Vst3PluginDrainMeterParameterChanges(
+            IntPtr plugin,
+            MeterParameterChangeCallback callback,
+            IntPtr context);
+
+        [DllImport(DllName)]
         public static extern int Ymm4Vst3PluginSetParameter(IntPtr plugin, uint paramId, double normalizedValue);
+
+        [DllImport(DllName)]
+        public static extern int Ymm4Vst3PluginSetControllerParameter(IntPtr plugin, uint paramId, double normalizedValue);
 
         [DllImport(DllName)]
         public static extern int Ymm4Vst3PluginReset(IntPtr plugin);

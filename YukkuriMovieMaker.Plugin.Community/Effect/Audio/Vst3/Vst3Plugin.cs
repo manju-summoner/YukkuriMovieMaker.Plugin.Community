@@ -9,11 +9,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     /// </summary>
     internal sealed unsafe class Vst3Plugin : IDisposable
     {
+        readonly Vst3Native.MeterParameterChangeCallback meterParameterChangeCallback;
         IntPtr handle;
+        Action<uint, double, long>? meterParameterChanged;
 
         internal Vst3Plugin(IntPtr handle)
         {
             this.handle = handle;
+            meterParameterChangeCallback = OnMeterParameterChanged;
         }
 
         public bool IsDisposed => handle == IntPtr.Zero;
@@ -33,9 +36,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         /// プレーナー形式のL/Rバッファを処理する。projectTimeSamplesはフレーム（サンプル/チャンネル）単位。
         /// </summary>
         public bool Process(float[] inL, float[] inR, float[] outL, float[] outR, int numFrames, long projectTimeSamples)
-            => Process(inL, inR, outL, outR, numFrames, projectTimeSamples, Vst3Transport.Default);
+            => Process(inL, inR, outL, outR, numFrames, projectTimeSamples, Vst3Transport.Default, true);
 
-        public bool Process(float[] inL, float[] inR, float[] outL, float[] outR, int numFrames, long projectTimeSamples, in Vst3Transport transport)
+        public bool Process(
+            float[] inL,
+            float[] inR,
+            float[] outL,
+            float[] outR,
+            int numFrames,
+            long projectTimeSamples,
+            in Vst3Transport transport,
+            bool captureMeterParameters = true)
         {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
             fixed (float* pInL = inL, pInR = inR, pOutL = outL, pOutR = outR)
@@ -48,7 +59,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     transport.Tempo,
                     transport.TimeSignatureNumerator,
                     transport.TimeSignatureDenominator,
-                    transport.IsTempoValid ? 1 : 0) != 0;
+                    transport.IsTempoValid ? 1 : 0,
+                    captureMeterParameters ? 1 : 0) != 0;
             }
         }
 
@@ -61,12 +73,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             Vst3Native.Ymm4Vst3PluginPump(handle);
         }
 
-        public int FlushOutputParameters()
-        {
-            ObjectDisposedException.ThrowIf(IsDisposed, this);
-            return Vst3Native.Ymm4Vst3PluginFlushOutputParameters(handle);
-        }
-
         public int DrainEditorParameterChanges(Action<uint, double> onParameterChanged)
         {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
@@ -77,6 +83,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             GC.KeepAlive(callback);
             return count;
         }
+
+        public int DrainMeterParameterChanges(Action<uint, double, long> onParameterChanged)
+        {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+            ArgumentNullException.ThrowIfNull(onParameterChanged);
+            meterParameterChanged = onParameterChanged;
+            try
+            {
+                return Vst3Native.Ymm4Vst3PluginDrainMeterParameterChanges(
+                    handle,
+                    meterParameterChangeCallback,
+                    IntPtr.Zero);
+            }
+            finally
+            {
+                meterParameterChanged = null;
+                GC.KeepAlive(meterParameterChangeCallback);
+            }
+        }
+
+        void OnMeterParameterChanged(IntPtr _, uint paramId, double normalizedValue, long samplePosition) =>
+            meterParameterChanged?.Invoke(paramId, normalizedValue, samplePosition);
 
         /// <summary>
         /// プラグインが申告する処理遅延（フレーム数）。Setup後に取得する
@@ -121,6 +149,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
             Vst3Native.Ymm4Vst3PluginSetParameter(handle, paramId, normalizedValue);
+        }
+
+        /// <summary>
+        /// output parameterをGUIへ表示するため、コントローラーだけを更新する。
+        /// 音声プロセッサの入力パラメーターキューには追加しない。
+        /// </summary>
+        public bool SetControllerParameter(uint paramId, double normalizedValue)
+        {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+            return Vst3Native.Ymm4Vst3PluginSetControllerParameter(handle, paramId, normalizedValue) != 0;
         }
 
         /// <summary>

@@ -16,6 +16,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         readonly Vst3AudioEffect item;
         readonly Vst3ParameterSubscription parameterSubscription;
+        readonly Vst3MeterPublisher meterPublisher;
+        readonly Action<uint, double, long> meterParameterChanged;
         Vst3Plugin? plugin;
         bool isLoadFailed;
         bool isPrimed;
@@ -36,6 +38,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             this.item = item;
             parameterSubscription = item.ParameterChannel.Subscribe();
             disposer.Collect(parameterSubscription);
+            meterPublisher = item.MeterChannel.CreatePublisher();
+            disposer.Collect(meterPublisher);
+            meterParameterChanged = OnMeterParameterChanged;
         }
 
         public override int Hz => Input!.Hz;
@@ -92,6 +97,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
             if (plugin.Process(bufferL, bufferR, bufferL, bufferR, frames, (position + latencyFrames * 2L) / 2, CreateTransport()))
             {
+                plugin.DrainMeterParameterChanges(meterParameterChanged);
                 var totalFrames = Duration / 2;
                 var startFrame = position / 2;
                 var endFrame = startFrame + Math.Max(0, frames - 1);
@@ -129,6 +135,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             this.position = position;
             plugin?.Reset();
+            meterPublisher.Reset(position / 2, Hz);
             isPrimed = false;
             dryDelayIndex = 0;
             Input!.Seek(position);
@@ -175,7 +182,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     bufferL[i] = primeBuffer[i * 2];
                     bufferR[i] = primeBuffer[i * 2 + 1];
                 }
-                plugin.Process(bufferL, bufferR, bufferL, bufferR, frames, (position + processedFrames * 2L) / 2, CreateTransport());
+                plugin.Process(
+                    bufferL,
+                    bufferR,
+                    bufferL,
+                    bufferR,
+                    frames,
+                    (position + processedFrames * 2L) / 2,
+                    CreateTransport(),
+                    false);
                 processedFrames += frames;
             }
         }
@@ -185,6 +200,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             item.TimeSignatureNumerator,
             item.TimeSignatureDenominator,
             item.IsTempoSyncEnabled);
+
+        void OnMeterParameterChanged(uint paramId, double normalizedValue, long samplePosition) =>
+            meterPublisher.Publish(paramId, normalizedValue, samplePosition - latencyFrames, Hz);
 
         void EnsureBuffers(int frames)
         {
@@ -265,6 +283,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             dryDelayBuffer = [];
             dryDelayIndex = 0;
             Input!.Seek(nextPosition);
+            meterPublisher.Reset(nextPosition / 2, Hz);
         }
 
         internal static bool RequiresReload(int flags) =>
