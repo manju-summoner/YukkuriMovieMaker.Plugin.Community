@@ -84,7 +84,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             VerticalContentAlignment = VerticalAlignment.Center;
             ItemContainerStyle = new Style(typeof(ComboBoxItem))
             {
-                BasedOn = (Style)FindResource(typeof(ComboBoxItem)),
+                BasedOn = TryFindResource(typeof(ComboBoxItem)) as Style,
                 Setters =
                 {
                     new Setter(ComboBoxItem.PaddingProperty, new Thickness(0)),
