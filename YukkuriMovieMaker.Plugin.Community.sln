@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YukkuriMovieMaker.Plugin.Co
 	ProjectSection(ProjectDependencies) = postProject
 		{3A511980-F4FD-410F-BFE7-5FECCDB9D04E} = {3A511980-F4FD-410F-BFE7-5FECCDB9D04E}
 		{EFA4DB83-E2D2-47A1-B695-9B7DA2008609} = {EFA4DB83-E2D2-47A1-B695-9B7DA2008609}
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1} = {B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YukkuriMovieMaker.Generator", "YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj", "{D8C9EED5-8D7F-4548-8B3E-85679DFE18BF}"
@@ -14,6 +15,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YukkuriMovieMaker.Plugin.Community.Shader", "YukkuriMovieMaker.Plugin.Community.Shader\YukkuriMovieMaker.Plugin.Community.Shader.vcxproj", "{3A511980-F4FD-410F-BFE7-5FECCDB9D04E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YukkuriMovieMaker.Vst3Bridge", "YukkuriMovieMaker.Vst3Bridge\YukkuriMovieMaker.Vst3Bridge.vcxproj", "{EFA4DB83-E2D2-47A1-B695-9B7DA2008609}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YukkuriMovieMaker.Vst3Scanner", "YukkuriMovieMaker.Vst3Scanner\YukkuriMovieMaker.Vst3Scanner.vcxproj", "{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -73,6 +76,18 @@ Global
 		{EFA4DB83-E2D2-47A1-B695-9B7DA2008609}.Release|x64.Build.0 = Release|x64
 		{EFA4DB83-E2D2-47A1-B695-9B7DA2008609}.Release|x86.ActiveCfg = Release|x64
 		{EFA4DB83-E2D2-47A1-B695-9B7DA2008609}.Release|x86.Build.0 = Release|x64
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}.Debug|Any CPU.Build.0 = Debug|x64
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}.Debug|x64.ActiveCfg = Debug|x64
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}.Debug|x64.Build.0 = Debug|x64
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}.Debug|x86.ActiveCfg = Debug|x64
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}.Debug|x86.Build.0 = Debug|x64
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}.Release|Any CPU.ActiveCfg = Release|x64
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}.Release|Any CPU.Build.0 = Release|x64
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}.Release|x64.ActiveCfg = Release|x64
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}.Release|x64.Build.0 = Release|x64
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}.Release|x86.ActiveCfg = Release|x64
+		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

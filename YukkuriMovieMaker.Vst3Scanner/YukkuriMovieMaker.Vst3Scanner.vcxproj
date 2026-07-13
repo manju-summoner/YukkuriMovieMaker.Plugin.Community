@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLite|x64">
+      <Configuration>DebugLite</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLite|x64">
+      <Configuration>ReleaseLite</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{b64f7a52-6f83-4f0e-9c1d-4a52c8e3b7a1}</ProjectGuid>
+    <RootNamespace>YukkuriMovieMakerVst3Scanner</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>YukkuriMovieMaker.Vst3Scanner</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)'=='Debug' or '$(Configuration)'=='DebugLite'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release' or '$(Configuration)'=='ReleaseLite'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <TargetName>YukkuriMovieMaker.Vst3Scanner</TargetName>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)'=='Debug'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)'!='Debug'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\vst3sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' or '$(Configuration)'=='DebugLite'">
+    <ClCompile>
+      <PreprocessorDefinitions>_DEBUG;DEVELOPMENT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release' or '$(Configuration)'=='ReleaseLite'">
+    <ClCompile>
+      <PreprocessorDefinitions>NDEBUG;RELEASE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <Optimization>Full</Optimization>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Ymm4Vst3Scanner.cpp" />
+    <ClCompile Include="..\vst3sdk\pluginterfaces\base\conststringtable.cpp" />
+    <ClCompile Include="..\vst3sdk\pluginterfaces\base\coreiids.cpp" />
+    <ClCompile Include="..\vst3sdk\pluginterfaces\base\funknown.cpp" />
+    <ClCompile Include="..\vst3sdk\pluginterfaces\base\ustring.cpp" />
+    <ClCompile Include="..\vst3sdk\base\source\baseiids.cpp" />
+    <ClCompile Include="..\vst3sdk\base\source\fbuffer.cpp" />
+    <ClCompile Include="..\vst3sdk\base\source\fdebug.cpp" />
+    <ClCompile Include="..\vst3sdk\base\source\fdynlib.cpp" />
+    <ClCompile Include="..\vst3sdk\base\source\fobject.cpp" />
+    <ClCompile Include="..\vst3sdk\base\source\fstreamer.cpp" />
+    <ClCompile Include="..\vst3sdk\base\source\fstring.cpp" />
+    <ClCompile Include="..\vst3sdk\base\source\timer.cpp" />
+    <ClCompile Include="..\vst3sdk\base\source\updatehandler.cpp" />
+    <ClCompile Include="..\vst3sdk\base\thread\source\fcondition.cpp" />
+    <ClCompile Include="..\vst3sdk\base\thread\source\flock.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\common\commoniids.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\common\commonstringconvert.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\common\memorystream.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\common\threadchecker_win32.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\connectionproxy.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\eventlist.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\hostclasses.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\module.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\module_win32.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\parameterchanges.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\pluginterfacesupport.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\plugprovider.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\processdata.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\utility\stringconvert.cpp" />
+    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\vstinitiids.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -25,12 +25,23 @@
     <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Controls\YukkuriMovieMaker.Controls.csproj" />
   </ItemGroup>
 
+  <!-- dotnet CLI（MSBuildRuntimeType=Core）はvcxprojをビルドできないため、参照はVS/MSBuild.exeビルド時のみ。
+       dotnet test等はMSBuild.exeでビルド済みのバイナリを使う -->
   <ItemGroup>
     <ProjectReference Include="..\YukkuriMovieMaker.Vst3Bridge\YukkuriMovieMaker.Vst3Bridge.vcxproj"
+                      Condition="'$(MSBuildRuntimeType)' != 'Core'"
                       ReferenceOutputAssembly="false"
                       AdditionalProperties="Platform=x64" />
     <Content Include="..\YukkuriMovieMaker.Vst3Bridge\bin\$(Configuration)\YukkuriMovieMaker.Vst3Bridge.dll"
              Link="YukkuriMovieMaker.Vst3Bridge.dll"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+    <ProjectReference Include="..\YukkuriMovieMaker.Vst3Scanner\YukkuriMovieMaker.Vst3Scanner.vcxproj"
+                      Condition="'$(MSBuildRuntimeType)' != 'Core'"
+                      ReferenceOutputAssembly="false"
+                      AdditionalProperties="Platform=x64" />
+    <Content Include="..\YukkuriMovieMaker.Vst3Scanner\bin\$(Configuration)\YukkuriMovieMaker.Vst3Scanner.exe"
+             Link="YukkuriMovieMaker.Vst3Scanner.exe"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

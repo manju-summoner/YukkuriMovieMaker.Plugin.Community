@@ -48,28 +48,62 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 if (cache is not null && !refresh)
                     return cache;
 
-                var plugins = new List<Vst3EffectPluginInfo>();
-                foreach (var modulePath in EnumerateModulePaths())
-                {
-                    try
-                    {
-                        using var module = Vst3Module.Open(modulePath);
-                        foreach (var classInfo in module.GetAudioModuleClasses())
-                        {
-                            if (!classInfo.IsEffect)
-                                continue;
-                            plugins.Add(new Vst3EffectPluginInfo(modulePath, classInfo.ClassId, classInfo.Name, classInfo.Vendor));
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        // 壊れたモジュールや非対応アーキテクチャはスキップする
-                        Log.Default.Write($"VST3モジュールの走査に失敗しました。path={modulePath}", e);
-                    }
-                }
+                var modulePaths = EnumerateModulePaths().ToList();
+                var plugins = ScanIsolated(modulePaths) ?? ScanInProcess(modulePaths);
                 cache = plugins.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToArray();
                 return cache;
             }
+        }
+
+        /// <summary>
+        /// スキャナープロセスによる隔離スキャン。壊れたプラグインがあってもYMM4本体は巻き込まれない。
+        /// スキャナーEXEが見つからない・起動できない場合はnull
+        /// </summary>
+        static List<Vst3EffectPluginInfo>? ScanIsolated(List<string> modulePaths)
+        {
+            var scannerPath = Vst3ScannerProcess.FindScannerPath();
+            if (scannerPath is null)
+            {
+                Log.Default.Write($"{Vst3ScannerProcess.ExeName}が見つからないため、プロセス内でVST3をスキャンします。");
+                return null;
+            }
+            try
+            {
+                return Vst3ScannerProcess.Scan(scannerPath, modulePaths);
+            }
+            catch (Exception e)
+            {
+                Log.Default.Write("VST3スキャナープロセスの実行に失敗したため、プロセス内でVST3をスキャンします。", e);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// プロセス内スキャン（スキャナーEXEが使えない環境向けのフォールバック）。
+        /// モジュールを本体プロセスへロードするため、壊れたプラグインのクラッシュには巻き込まれる
+        /// </summary>
+        static List<Vst3EffectPluginInfo> ScanInProcess(List<string> modulePaths)
+        {
+            var plugins = new List<Vst3EffectPluginInfo>();
+            foreach (var modulePath in modulePaths)
+            {
+                try
+                {
+                    using var module = Vst3Module.Open(modulePath);
+                    foreach (var classInfo in module.GetAudioModuleClasses())
+                    {
+                        if (!classInfo.IsEffect)
+                            continue;
+                        plugins.Add(new Vst3EffectPluginInfo(modulePath, classInfo.ClassId, classInfo.Name, classInfo.Vendor));
+                    }
+                }
+                catch (Exception e)
+                {
+                    // 壊れたモジュールや非対応アーキテクチャはスキップする
+                    Log.Default.Write($"VST3モジュールの走査に失敗しました。path={modulePath}", e);
+                }
+            }
+            return plugins;
         }
 
         static IEnumerable<string> EnumerateModulePaths()
