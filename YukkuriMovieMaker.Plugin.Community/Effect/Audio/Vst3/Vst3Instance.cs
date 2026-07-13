@@ -232,16 +232,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             return new Vst3ParameterChanges(edits);
         }
 
-        public void Process(float[] buffer, int offset, int frames, long framePosition, in Vst3Transport transport)
+        public bool Process(float[] buffer, int offset, int frames, long framePosition, in Vst3Transport transport)
         {
             if (isDisposed)
-                return;
+                return false;
 
+            var succeeded = true;
             List<KeyValuePair<uint, double>>? performed = null;
             lock (processGate)
             {
                 if (isDisposed)
-                    return;
+                    return false;
                 using var changes = DrainPendingEdits();
                 processData.InputParameterChanges = changes?.Handle ?? IntPtr.Zero;
                 isInProcessCall = true;
@@ -251,7 +252,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     {
                         var blockFrames = Math.Min(frames, BlockFrames);
                         WriteProcessContext(framePosition, transport);
-                        ProcessBlock(buffer, offset, blockFrames);
+                        if (!ProcessBlock(buffer, offset, blockFrames))
+                            succeeded = false;
                         outputChanges!.Drain((id, value) => (performed ??= []).Add(new(id, value)));
                         processData.InputParameterChanges = IntPtr.Zero;
                         offset += blockFrames * 2;
@@ -282,6 +284,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 if (schedule)
                     Vst3HostThread.Post(ForwardOutputParameters, DispatcherPriority.Background);
             }
+            return succeeded;
         }
 
         void ForwardOutputParameters()
@@ -327,7 +330,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             *(Vst3Native.ProcessContext*)contextMemory = context;
         }
 
-        void ProcessBlock(float[] buffer, int offset, int frames)
+        bool ProcessBlock(float[] buffer, int offset, int frames)
         {
             var inputs = (Vst3Native.AudioBusBuffers*)processData.Inputs;
             var mainInput = (float**)inputs[0].ChannelBuffers;
@@ -350,7 +353,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
             processData.NumSamples = frames;
             if (process(processor, ref processData) != Vst3Native.ResultOk)
-                return;
+                return false;
 
             var outputs = (Vst3Native.AudioBusBuffers*)processData.Outputs;
             var mainOutput = (float**)outputs[0].ChannelBuffers;
@@ -373,6 +376,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     }
                 }
             }
+            return true;
         }
 
         public void Reset()

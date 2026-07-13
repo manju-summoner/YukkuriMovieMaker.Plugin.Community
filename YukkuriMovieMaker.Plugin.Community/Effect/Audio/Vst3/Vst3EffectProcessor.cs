@@ -59,8 +59,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                         Array.Copy(destBuffer, offset, dryBuffer, 0, read);
                     }
 
-                    plugin.Process(destBuffer, offset, read / 2, inputFramePosition, CreateTransport());
+                    var succeeded = plugin.Process(destBuffer, offset, read / 2, inputFramePosition, CreateTransport());
                     inputFramePosition += read / 2;
+                    if (!succeeded)
+                        Array.Copy(dryBuffer, 0, destBuffer, offset, read);
 
                     var total = Duration / 2;
                     for (var i = 0; i < read; i += BlockFrames * 2)
