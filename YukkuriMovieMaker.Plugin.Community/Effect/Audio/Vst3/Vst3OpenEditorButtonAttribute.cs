@@ -54,7 +54,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         void OnClick(object sender, RoutedEventArgs e)
         {
-            var effect = ItemProperties?.Select(x => x.PropertyOwner).OfType<Vst3AudioEffect>().FirstOrDefault();
+            var effects = ItemProperties?.Select(x => x.PropertyOwner).OfType<Vst3AudioEffect>().ToArray() ?? [];
+            var effect = effects.FirstOrDefault();
             if (effect is null || string.IsNullOrEmpty(effect.PluginPath) || string.IsNullOrEmpty(effect.ClassId))
                 return;
 
@@ -75,7 +76,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     return;
                 }
 
-                var window = new Vst3EditorWindow(plugin, view)
+                var parameterForwarder = new Vst3EditorParameterForwarder(effects.Where(x =>
+                    string.Equals(x.PluginPath, effect.PluginPath, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(x.ClassId, effect.ClassId, StringComparison.OrdinalIgnoreCase)));
+                var window = new Vst3EditorWindow(plugin, view, parameterForwarder)
                 {
                     Owner = owner,
                     Title = string.IsNullOrEmpty(effect.PluginName) ? Texts.Vst3EffectName : effect.PluginName,

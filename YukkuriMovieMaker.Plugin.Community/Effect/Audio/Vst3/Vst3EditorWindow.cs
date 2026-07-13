@@ -22,6 +22,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         readonly Vst3Plugin plugin;
         readonly Vst3View view;
         readonly Vst3ViewHost host;
+        readonly Vst3EditorParameterForwarder parameterForwarder;
         readonly DispatcherTimer pumpTimer;
         readonly bool isContentScaleSupported;
 
@@ -30,10 +31,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         /// </summary>
         readonly (int Width, int Height) baseSize;
 
-        public Vst3EditorWindow(Vst3Plugin plugin, Vst3View view)
+        public Vst3EditorWindow(Vst3Plugin plugin, Vst3View view, Vst3EditorParameterForwarder parameterForwarder)
         {
             this.plugin = plugin;
             this.view = view;
+            this.parameterForwarder = parameterForwarder;
             isContentScaleSupported = view.IsContentScaleSupported;
             baseSize = view.GetSize();
 
@@ -55,7 +57,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             pumpTimer.Tick += (_, _) =>
             {
                 if (!plugin.IsDisposed)
-                    plugin.Pump();
+                    parameterForwarder.PumpAndForward(plugin);
             };
 
             SourceInitialized += OnSourceInitialized;
@@ -147,7 +149,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             pumpTimer.Stop();
             // 最後の編集をプロセッサ状態へ反映してからビューを外す
             if (!plugin.IsDisposed)
-                plugin.Pump();
+                parameterForwarder.PumpAndForward(plugin);
             view.Dispose();
         }
 

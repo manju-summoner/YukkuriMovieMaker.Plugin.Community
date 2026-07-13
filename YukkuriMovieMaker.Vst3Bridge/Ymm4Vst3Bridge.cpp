@@ -74,8 +74,14 @@ namespace
         BridgeComponentHandler(
             ParameterChangeTransfer& transfer,
             std::atomic<bool>& paramValuesDirty,
-            std::atomic<int32>& restartFlags)
-            : transfer(transfer), paramValuesDirty(paramValuesDirty), restartFlags(restartFlags)
+            std::atomic<int32>& restartFlags,
+            std::mutex& editorParamMutex,
+            std::unordered_map<ParamID, ParamValue>& pendingEditorParams)
+            : transfer(transfer),
+              paramValuesDirty(paramValuesDirty),
+              restartFlags(restartFlags),
+              editorParamMutex(editorParamMutex),
+              pendingEditorParams(pendingEditorParams)
         {
         }
 
@@ -84,6 +90,8 @@ namespace
         tresult PLUGIN_API performEdit(ParamID id, ParamValue valueNormalized) override
         {
             transfer.addChange(id, valueNormalized, 0);
+            std::lock_guard lock(editorParamMutex);
+            pendingEditorParams[id] = valueNormalized;
             return kResultOk;
         }
 
@@ -102,6 +110,8 @@ namespace
         ParameterChangeTransfer& transfer;
         std::atomic<bool>& paramValuesDirty;
         std::atomic<int32>& restartFlags;
+        std::mutex& editorParamMutex;
+        std::unordered_map<ParamID, ParamValue>& pendingEditorParams;
     };
 
     //------------------------------------------------------------------------
@@ -125,6 +135,8 @@ namespace
         ParameterChangeTransfer paramTransfer;
         std::atomic<bool> paramValuesDirty{ false };
         std::atomic<int32> restartFlags{ 0 };
+        std::mutex editorParamMutex;
+        std::unordered_map<ParamID, ParamValue> pendingEditorParams;
         std::mutex outputParamMutex;
         std::unordered_map<ParamID, ParamValue> pendingOutputParams;
 
@@ -153,6 +165,7 @@ namespace
     };
 
     using ViewResizeCallback = void(__stdcall*)(void* context, int32_t width, int32_t height);
+    using ParameterChangeCallback = void(__stdcall*)(void* context, uint32_t paramId, double normalizedValue);
 
     //------------------------------------------------------------------------
     // プラグイン都合のリサイズ要求をC#へ通知するIPlugFrame
@@ -445,7 +458,9 @@ YMM4VST3_API void* Ymm4Vst3PluginCreate(void* moduleHandle, const char* classIdH
     plugin->componentHandler = owned(new BridgeComponentHandler(
         plugin->paramTransfer,
         plugin->paramValuesDirty,
-        plugin->restartFlags));
+        plugin->restartFlags,
+        plugin->editorParamMutex,
+        plugin->pendingEditorParams));
     if (plugin->controller)
         plugin->controller->setComponentHandler(plugin->componentHandler);
 
@@ -584,10 +599,13 @@ YMM4VST3_API int32_t Ymm4Vst3PluginPump(void* pluginHandle)
             ParameterInfo parameterInfo{};
             if (plugin->controller->getParameterInfo(i, parameterInfo) != kResultOk)
                 continue;
+            const auto value = plugin->controller->getParamNormalized(parameterInfo.id);
             plugin->paramTransfer.addChange(
                 parameterInfo.id,
-                plugin->controller->getParamNormalized(parameterInfo.id),
+                value,
                 0);
+            std::lock_guard lock(plugin->editorParamMutex);
+            plugin->pendingEditorParams[parameterInfo.id] = value;
         }
     }
 
@@ -614,6 +632,27 @@ YMM4VST3_API int32_t Ymm4Vst3PluginFlushOutputParameters(void* pluginHandle)
     if (!plugin)
         return 0;
     return FlushOutputParameters(*plugin);
+}
+
+// GUI操作で変更されたパラメータをマネージド側へ転送する。
+// 同じパラメータの連続変更は最新値へまとめ、コールバックはロック外で呼び出す。
+YMM4VST3_API int32_t Ymm4Vst3PluginDrainEditorParameterChanges(
+    void* pluginHandle,
+    ParameterChangeCallback callback,
+    void* context)
+{
+    auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
+    if (!plugin || !callback)
+        return 0;
+
+    std::unordered_map<ParamID, ParamValue> values;
+    {
+        std::lock_guard lock(plugin->editorParamMutex);
+        values.swap(plugin->pendingEditorParams);
+    }
+    for (const auto& [id, value] : values)
+        callback(context, id, value);
+    return static_cast<int32_t>(values.size());
 }
 
 // パラメータを設定する（正規化値）。次のprocess/Pumpでプロセッサへ反映される
@@ -667,6 +706,16 @@ YMM4VST3_API void Ymm4Vst3PluginRequestRestartForTest(void* pluginHandle, int32_
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (plugin)
         plugin->restartFlags.fetch_or(flags);
+}
+
+YMM4VST3_API void Ymm4Vst3PluginPerformEditForTest(
+    void* pluginHandle,
+    uint32_t paramId,
+    double normalizedValue)
+{
+    auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
+    if (plugin && plugin->componentHandler)
+        plugin->componentHandler->performEdit(paramId, normalizedValue);
 }
 
 YMM4VST3_API double Ymm4Vst3PluginGetControllerParameterForTest(void* pluginHandle, uint32_t paramId)

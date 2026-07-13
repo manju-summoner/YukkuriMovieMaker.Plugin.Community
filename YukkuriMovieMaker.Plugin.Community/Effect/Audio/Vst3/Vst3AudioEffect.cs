@@ -12,6 +12,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     [AudioEffect(nameof(Texts.Vst3EffectName), [nameof(Texts.Vst3EffectCategoryName)], ["VST", "VST3", "プラグイン", "plugin"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     internal class Vst3AudioEffect : AudioEffectBase
     {
+        internal Vst3ParameterChannel ParameterChannel { get; } = new();
+
         public override string Label => string.IsNullOrEmpty(PluginName) ? Texts.Vst3EffectName : $"{Texts.Vst3EffectName} {PluginName}";
 
         /// <summary>

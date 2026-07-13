@@ -67,6 +67,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             return Vst3Native.Ymm4Vst3PluginFlushOutputParameters(handle);
         }
 
+        public int DrainEditorParameterChanges(Action<uint, double> onParameterChanged)
+        {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+            ArgumentNullException.ThrowIfNull(onParameterChanged);
+            Vst3Native.ParameterChangeCallback callback = (_, paramId, normalizedValue) =>
+                onParameterChanged(paramId, normalizedValue);
+            var count = Vst3Native.Ymm4Vst3PluginDrainEditorParameterChanges(handle, callback, IntPtr.Zero);
+            GC.KeepAlive(callback);
+            return count;
+        }
+
         /// <summary>
         /// プラグインが申告する処理遅延（フレーム数）。Setup後に取得する
         /// </summary>
@@ -87,6 +98,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             ObjectDisposedException.ThrowIf(IsDisposed, this);
             Vst3Native.Ymm4Vst3PluginRequestRestartForTest(handle, flags);
+        }
+
+        internal void PerformEditForTest(uint paramId, double normalizedValue)
+        {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+            Vst3Native.Ymm4Vst3PluginPerformEditForTest(handle, paramId, normalizedValue);
         }
 
 

@@ -10,10 +10,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     /// プラグインが申告する処理遅延（getLatencySamples）は、開始・シーク時にレイテンシ分の
     /// 入力を先行投入して出力を読み捨てることで補正する（以後、入力は出力より先行して読む）。
     /// </summary>
-    internal class Vst3AudioEffectProcessor(Vst3AudioEffect item) : AudioEffectProcessorBase
+    internal class Vst3AudioEffectProcessor : AudioEffectProcessorBase
     {
         const int MaxBlockFrames = 4096;
 
+        readonly Vst3AudioEffect item;
+        readonly Vst3ParameterSubscription parameterSubscription;
         Vst3Plugin? plugin;
         bool isLoadFailed;
         bool isPrimed;
@@ -29,6 +31,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         bool hasPendingState;
         long position;
 
+        public Vst3AudioEffectProcessor(Vst3AudioEffect item)
+        {
+            this.item = item;
+            parameterSubscription = item.ParameterChannel.Subscribe();
+            disposer.Collect(parameterSubscription);
+        }
+
         public override int Hz => Input!.Hz;
         public override long Duration => Input!.Duration;
 
@@ -42,6 +51,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     position += readCount;
                 return readCount;
             }
+
+            parameterSubscription.ApplyTo(plugin);
 
             // 入力はレイテンシ分先読みしているため、出力可能量は自身の位置基準で決める
             var outCount = (int)Math.Min(count, Duration - position);
@@ -203,6 +214,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                         hasPendingState ? pendingComponentState : item.ComponentState,
                         hasPendingState ? pendingControllerState : item.ControllerState);
                     newPlugin.Setup(Input!.Hz, MaxBlockFrames);
+                    parameterSubscription.ReplayLatest();
+                    parameterSubscription.ApplyTo(newPlugin);
                 }
                 catch
                 {
