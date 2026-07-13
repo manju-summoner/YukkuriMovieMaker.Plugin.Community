@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using YukkuriMovieMaker.Plugin;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
@@ -21,9 +22,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public string[] AdditionalPluginDirectories { get => additionalPluginDirectories; set => Set(ref additionalPluginDirectories, value); }
         string[] additionalPluginDirectories = [];
 
+        /// <summary>
+        /// お気に入りに登録したVST3プラグインのクラスID
+        /// </summary>
+        public ImmutableList<string> FavoritePluginClassIds { get => favoritePluginClassIds; set => Set(ref favoritePluginClassIds, value); }
+        ImmutableList<string> favoritePluginClassIds = [];
+
         public override void Initialize()
         {
             additionalPluginDirectories ??= [];
+            favoritePluginClassIds ??= [];
         }
     }
 }
