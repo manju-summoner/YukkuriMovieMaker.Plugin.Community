@@ -33,7 +33,7 @@
                       ReferenceOutputAssembly="false"
                       AdditionalProperties="Platform=x64" />
     <Content Include="..\YukkuriMovieMaker.Vst3Bridge\bin\$(Configuration)\YukkuriMovieMaker.Vst3Bridge.dll"
-             Link="YukkuriMovieMaker.Vst3Bridge.dll"
+             Link="Resources\bin\x64\vst3\YukkuriMovieMaker.Vst3Bridge.dll"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
     <ProjectReference Include="..\YukkuriMovieMaker.Vst3Scanner\YukkuriMovieMaker.Vst3Scanner.vcxproj"
@@ -41,7 +41,7 @@
                       ReferenceOutputAssembly="false"
                       AdditionalProperties="Platform=x64" />
     <Content Include="..\YukkuriMovieMaker.Vst3Scanner\bin\$(Configuration)\YukkuriMovieMaker.Vst3Scanner.exe"
-             Link="YukkuriMovieMaker.Vst3Scanner.exe"
+             Link="Resources\bin\x64\vst3\YukkuriMovieMaker.Vst3Scanner.exe"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>

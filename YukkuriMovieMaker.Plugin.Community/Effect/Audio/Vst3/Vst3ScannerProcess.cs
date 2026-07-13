@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YukkuriMovieMaker.Commons;
@@ -29,14 +28,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         /// </summary>
         public static string? FindScannerPath()
         {
-            var assemblyDirectory = Path.GetDirectoryName(typeof(Vst3ScannerProcess).Assembly.Location);
-            string[] candidates =
-            [
-                Path.Combine(assemblyDirectory ?? AppContext.BaseDirectory, ExeName),
-                Path.Combine(AppDirectories.ResourceDirectory, "bin", "x64", ExeName),
-                Path.Combine(AppContext.BaseDirectory, "Resources", "bin", "x64", ExeName),
-            ];
-            return candidates.FirstOrDefault(File.Exists);
+            var path = Path.Combine(Vst3Native.Vst3BinaryDirectory, ExeName);
+            return File.Exists(path) ? path : null;
         }
 
         /// <summary>

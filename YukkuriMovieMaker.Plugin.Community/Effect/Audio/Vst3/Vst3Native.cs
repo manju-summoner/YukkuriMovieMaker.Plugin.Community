@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using YukkuriMovieMaker.Commons;
@@ -14,6 +13,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     {
         public const string DllName = "YukkuriMovieMaker.Vst3Bridge";
         internal const int RequiredBridgeApiVersion = 1;
+
+        /// <summary>
+        /// ブリッジDLL・スキャナーEXEの配置フォルダー
+        /// </summary>
+        internal static string Vst3BinaryDirectory => Path.Combine(AppDirectories.ResourceDirectory, "bin", "x64", "vst3");
         public const int RestartReloadComponent = 1 << 0;
         public const int RestartIoChanged = 1 << 1;
         public const int RestartLatencyChanged = 1 << 3;
@@ -23,33 +27,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         static Vst3Native()
         {
-            NativeLibrary.SetDllImportResolver(typeof(Vst3Native).Assembly, (libraryName, assembly, _) =>
+            NativeLibrary.SetDllImportResolver(typeof(Vst3Native).Assembly, (libraryName, _, _) =>
             {
                 if (libraryName is not DllName)
                     return IntPtr.Zero;
-                var assemblyDirectory = Path.GetDirectoryName(assembly.Location);
-                string[] candidates =
-                [
-                    Path.Combine(assemblyDirectory ?? AppContext.BaseDirectory, $"{DllName}.dll"),
-                    Path.Combine(AppDirectories.ResourceDirectory, "bin", "x64", $"{DllName}.dll"),
-                    Path.Combine(AppContext.BaseDirectory, "Resources", "bin", "x64", $"{DllName}.dll"),
-                ];
-                List<string> incompatiblePaths = [];
-                foreach (var path in candidates)
-                {
-                    if (!File.Exists(path) || !NativeLibrary.TryLoad(path, out var handle))
-                        continue;
-                    if (TryGetBridgeApiVersion(handle, out var version)
-                        && version == RequiredBridgeApiVersion)
-                        return handle;
-                    NativeLibrary.Free(handle);
-                    incompatiblePaths.Add($"{path} (API {version})");
-                }
-                if (incompatiblePaths.Count > 0)
-                    throw new DllNotFoundException(
-                        $"互換性のある{DllName}.dllが見つかりません。"
-                        + $"必要なAPIバージョン={RequiredBridgeApiVersion} 候補={string.Join(", ", incompatiblePaths)}");
-                return IntPtr.Zero;
+                var path = Path.Combine(Vst3BinaryDirectory, $"{DllName}.dll");
+                if (!File.Exists(path) || !NativeLibrary.TryLoad(path, out var handle))
+                    return IntPtr.Zero;
+                if (TryGetBridgeApiVersion(handle, out var version)
+                    && version == RequiredBridgeApiVersion)
+                    return handle;
+                NativeLibrary.Free(handle);
+                throw new DllNotFoundException(
+                    $"互換性のある{DllName}.dllが見つかりません。"
+                    + $"必要なAPIバージョン={RequiredBridgeApiVersion} 候補={path} (API {version})");
             });
         }
 
