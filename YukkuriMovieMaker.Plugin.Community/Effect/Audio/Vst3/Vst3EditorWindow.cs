@@ -260,9 +260,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var height = (int)Math.Round(rcBoundingBox.Height);
             if (width <= 0 || height <= 0 || (width == lastWidth && height == lastHeight))
                 return;
-            lastWidth = width;
-            lastHeight = height;
-            view.OnSize(width, height);
+            // アスペクト比固定等のプラグインは要求と異なるサイズを返すため、確定値でウィンドウを追従させる
+            var (appliedWidth, appliedHeight) = view.OnSize(width, height);
+            lastWidth = appliedWidth;
+            lastHeight = appliedHeight;
+            if (appliedWidth != width || appliedHeight != height)
+                onPluginResizeRequested(appliedWidth, appliedHeight);
         }
 
         static class NativeMethods
