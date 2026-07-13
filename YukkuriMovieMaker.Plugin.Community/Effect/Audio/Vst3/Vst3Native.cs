@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using YukkuriMovieMaker.Commons;
@@ -12,9 +13,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     internal static unsafe class Vst3Native
     {
         public const string DllName = "YukkuriMovieMaker.Vst3Bridge";
+        internal const int RequiredBridgeApiVersion = 1;
         public const int RestartReloadComponent = 1 << 0;
         public const int RestartIoChanged = 1 << 1;
         public const int RestartLatencyChanged = 1 << 3;
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        delegate int GetApiVersionCallback();
 
         static Vst3Native()
         {
@@ -29,13 +34,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     Path.Combine(AppDirectories.ResourceDirectory, "bin", "x64", $"{DllName}.dll"),
                     Path.Combine(AppContext.BaseDirectory, "Resources", "bin", "x64", $"{DllName}.dll"),
                 ];
+                List<string> incompatiblePaths = [];
                 foreach (var path in candidates)
                 {
-                    if (File.Exists(path) && NativeLibrary.TryLoad(path, out var handle))
+                    if (!File.Exists(path) || !NativeLibrary.TryLoad(path, out var handle))
+                        continue;
+                    if (TryGetBridgeApiVersion(handle, out var version)
+                        && version == RequiredBridgeApiVersion)
                         return handle;
+                    NativeLibrary.Free(handle);
+                    incompatiblePaths.Add($"{path} (API {version})");
                 }
+                if (incompatiblePaths.Count > 0)
+                    throw new DllNotFoundException(
+                        $"互換性のある{DllName}.dllが見つかりません。"
+                        + $"必要なAPIバージョン={RequiredBridgeApiVersion} 候補={string.Join(", ", incompatiblePaths)}");
                 return IntPtr.Zero;
             });
+        }
+
+        internal static bool TryGetBridgeApiVersion(IntPtr handle, out int version)
+        {
+            version = 0;
+            if (!NativeLibrary.TryGetExport(handle, nameof(Ymm4Vst3GetApiVersion), out var address))
+                return false;
+            version = Marshal.GetDelegateForFunctionPointer<GetApiVersionCallback>(address)();
+            return true;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -61,6 +85,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             uint paramId,
             double normalizedValue,
             long samplePosition);
+
+        [DllImport(DllName)]
+        public static extern int Ymm4Vst3GetApiVersion();
 
         [DllImport(DllName)]
         public static extern IntPtr Ymm4Vst3ModuleOpen([MarshalAs(UnmanagedType.LPUTF8Str)] string path, byte* errorBuf, int errorBufSize);

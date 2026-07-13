@@ -360,6 +360,13 @@ namespace
 // モジュール（.vst3ファイル）
 //------------------------------------------------------------------------
 
+// マネージド側がBridgeのABI互換性をロード時に検証するためのバージョン。
+// exportの追加・変更で古いDLLとの互換性が失われる場合は更新すること。
+YMM4VST3_API int32_t Ymm4Vst3GetApiVersion()
+{
+    return 1;
+}
+
 YMM4VST3_API void* Ymm4Vst3ModuleOpen(const char* utf8Path, char* errorBuf, int32_t errorBufSize)
 {
     EnsureInitialized();
