@@ -87,6 +87,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 });
 
                 string? currentModule = null;
+                // #ENDの前に異常終了したモジュールの不完全なクラスを結果に混ぜないよう、モジュール単位でバッファする
+                var pendingClasses = new List<Vst3EffectPluginInfo>();
                 while (true)
                 {
                     var readTask = process.StandardOutput.ReadLineAsync();
@@ -102,12 +104,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     if (line.StartsWith("#BEGIN\t", StringComparison.Ordinal))
                     {
                         currentModule = line["#BEGIN\t".Length..];
+                        pendingClasses.Clear();
                         // 子プロセスはstdinの順に処理するため、走査開始したモジュールを取り除く
                         if (remaining.Count > 0 && string.Equals(remaining.Peek(), currentModule, StringComparison.OrdinalIgnoreCase))
                             remaining.Dequeue();
                     }
                     else if (line.StartsWith("#END\t", StringComparison.Ordinal))
                     {
+                        results.AddRange(pendingClasses);
+                        pendingClasses.Clear();
                         currentModule = null;
                     }
                     else if (line.StartsWith("CLASS\t", StringComparison.Ordinal) && currentModule is not null)
@@ -118,7 +123,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                             continue;
                         var classInfo = new Vst3ClassInfo(fields[1], fields[2], fields[3], fields[4], fields[5], string.Empty);
                         if (classInfo.IsAudioModuleClass && classInfo.IsEffect)
-                            results.Add(new Vst3EffectPluginInfo(currentModule, classInfo.ClassId, classInfo.Name, classInfo.Vendor));
+                            pendingClasses.Add(new Vst3EffectPluginInfo(currentModule, classInfo.ClassId, classInfo.Name, classInfo.Vendor));
                     }
                     else if (line.StartsWith("#ERROR\t", StringComparison.Ordinal))
                     {
@@ -130,14 +135,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
                 if (!process.WaitForExit(5000))
                     Kill(process);
-                if (remaining.Count == 0)
-                    return false;
                 if (currentModule is not null)
                     return SkipCurrentModule(remaining, currentModule, $"スキャナーが異常終了しました。exitCode={process.ExitCode}");
-
-                // 走査中のモジュールが特定できない異常終了。無限に再起動しないよう中断する
-                Log.Default.Write($"VST3スキャナーが異常終了したため、残り{remaining.Count}件の走査を中断します。exitCode={process.ExitCode}");
-                return false;
+                if (remaining.Count == 0)
+                    return false;
+                // 走査を1件も開始できない異常終了。空の結果を正常扱いしないよう失敗として伝播させる
+                throw new InvalidOperationException($"VST3スキャナーが異常終了しました。残り{remaining.Count}件。exitCode={process.ExitCode}");
             }
             catch
             {
@@ -148,12 +151,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         static bool SkipCurrentModule(Queue<string> remaining, string? currentModule, string reason)
         {
+            // 1件も走査開始せずに失敗した場合は継続しても回復しない。
+            // 空の結果を正常なスキャン結果としてキャッシュしないよう、失敗として伝播させる
             if (currentModule is null)
-            {
-                // 1件も走査開始せずに失敗した場合は継続しても回復しない
-                Log.Default.Write($"VST3スキャナーの実行に失敗したため、残り{remaining.Count}件の走査を中断します。reason={reason}");
-                return false;
-            }
+                throw new InvalidOperationException($"VST3スキャナーが走査を開始できませんでした。reason={reason}");
             // 通常は#BEGIN時に取り除かれているが、取り除けていない場合の再起動ループをここで防ぐ
             if (remaining.Count > 0 && string.Equals(remaining.Peek(), currentModule, StringComparison.OrdinalIgnoreCase))
                 remaining.Dequeue();

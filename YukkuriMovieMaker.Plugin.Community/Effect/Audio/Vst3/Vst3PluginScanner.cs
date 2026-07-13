@@ -19,19 +19,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     internal static class Vst3PluginScanner
     {
         static readonly object lockObject = new();
-        static IReadOnlyList<Vst3EffectPluginInfo>? cache;
+        static volatile IReadOnlyList<Vst3EffectPluginInfo>? cache;
 
         /// <summary>
-        /// スキャン済みの結果。未スキャンならnull
+        /// スキャン済みの結果。未スキャンならnull。
+        /// スキャン実行中のUIスレッドからも呼ばれるため、スキャンを囲むロックは取らない
         /// </summary>
-        public static IReadOnlyList<Vst3EffectPluginInfo>? CachedPlugins
-        {
-            get
-            {
-                lock (lockObject)
-                    return cache;
-            }
-        }
+        public static IReadOnlyList<Vst3EffectPluginInfo>? CachedPlugins => cache;
 
         /// <summary>
         /// 標準のVST3検索フォルダー（存在しないものも含む）
