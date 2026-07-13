@@ -100,13 +100,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 plugin.DrainMeterParameterChanges(meterParameterChanged);
                 var totalFrames = Duration / 2;
                 var startFrame = position / 2;
-                var endFrame = startFrame + Math.Max(0, frames - 1);
-                var mixStart = (float)(item.Mix.GetValue(startFrame, totalFrames, Hz) * 0.01);
-                var mixEnd = (float)(item.Mix.GetValue(endFrame, totalFrames, Hz) * 0.01);
-                var mixStep = frames > 1 ? (mixEnd - mixStart) / (frames - 1) : 0;
                 for (var i = 0; i < frames; i++)
                 {
-                    var mix = mixStart + mixStep * i;
+                    // 始点終点の線形補間ではブロック内のキーフレームが失われるため、フレームごとに評価する
+                    var mix = (float)(item.Mix.GetValue(startFrame + i, totalFrames, Hz) * 0.01);
                     destBuffer[offset + i * 2] = dryBuffer[i * 2] * (1 - mix) + bufferL[i] * mix;
                     destBuffer[offset + i * 2 + 1] = dryBuffer[i * 2 + 1] * (1 - mix) + bufferR[i] * mix;
                 }
