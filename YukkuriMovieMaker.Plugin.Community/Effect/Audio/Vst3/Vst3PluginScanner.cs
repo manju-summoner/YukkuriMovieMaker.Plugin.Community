@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
@@ -38,8 +39,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public static IEnumerable<string> GetDefaultDirectories()
         {
             yield return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles), "VST3");
+            yield return Path.Combine(GetUserProgramFilesCommonPath(), "VST3");
             yield return Path.Combine(AppDirectories.PluginDirectory, "VST3");
         }
+
+        static readonly Guid UserProgramFilesCommonFolderId = new("BCBD3057-CA5C-4622-B42D-BC56DB0AE516");
+        const uint KnownFolderFlagDontVerify = 0x00004000;
+
+        /// <summary>
+        /// ユーザー単位インストールの標準フォルダー（FOLDERID_UserProgramFilesCommon。通常 %LOCALAPPDATA%\Programs\Common）
+        /// </summary>
+        static string GetUserProgramFilesCommonPath()
+        {
+            var pathPtr = IntPtr.Zero;
+            try
+            {
+                if (SHGetKnownFolderPath(UserProgramFilesCommonFolderId, KnownFolderFlagDontVerify, IntPtr.Zero, out pathPtr) == 0
+                    && Marshal.PtrToStringUni(pathPtr) is { Length: > 0 } path)
+                    return path;
+            }
+            finally
+            {
+                Marshal.FreeCoTaskMem(pathPtr);
+            }
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Common");
+        }
+
+        [DllImport("shell32.dll")]
+        static extern int SHGetKnownFolderPath([MarshalAs(UnmanagedType.LPStruct)] Guid rfid, uint dwFlags, IntPtr hToken, out IntPtr ppszPath);
 
         public static IReadOnlyList<Vst3EffectPluginInfo> GetEffectPlugins(bool refresh = false)
         {
@@ -120,10 +147,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 while (directories.Count > 0)
                 {
                     var directory = directories.Pop();
-                    IEnumerable<string> entries;
+                    string[] entries;
                     try
                     {
-                        entries = Directory.EnumerateFileSystemEntries(directory);
+                        // 遅延列挙のMoveNextでも例外が出るため、try内で実体化して漏れなく捕捉する
+                        entries = [.. Directory.EnumerateFileSystemEntries(directory)];
                     }
                     catch (Exception e) when (e is IOException or UnauthorizedAccessException)
                     {
