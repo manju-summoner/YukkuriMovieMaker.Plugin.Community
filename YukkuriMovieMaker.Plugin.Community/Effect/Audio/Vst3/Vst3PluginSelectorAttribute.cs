@@ -141,7 +141,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     return;
                 }
                 var items = (ItemsSource as IEnumerable<Vst3PluginItem>)?.ToList() ?? [];
-                var current = items.FirstOrDefault(x => x.ClassId == effect.ClassId && x.ModulePath == effect.PluginPath);
+                var current = items.FirstOrDefault(x => IsSameId(x.ClassId, effect.ClassId) && IsSameId(x.ModulePath, effect.PluginPath));
                 if (current is null)
                 {
                     current = new Vst3PluginItem(new Vst3EffectPluginInfo(effect.PluginPath, effect.ClassId, effect.PluginName, string.Empty));
@@ -158,50 +158,45 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         async void OnDropDownOpened(object? sender, EventArgs e)
         {
-            if (isScanRequested)
+            // スキャン済みなら、設定画面での再スキャンやお気に入り変更を反映するためキャッシュから一覧を作り直す
+            var cachedPlugins = isScanRequested ? Vst3PluginScanner.CachedPlugins : null;
+            if (cachedPlugins is not null)
             {
-                var selected = SelectedItem as Vst3PluginItem;
-                var items = (ItemsSource as IEnumerable<Vst3PluginItem>)?.OrderByDescending(x => x.IsFavorite).ToList() ?? [];
-                isUpdatingDisplay = true;
-                try
-                {
-                    ItemsSource = items;
-                    if (selected is not null)
-                        SelectedItem = items.FirstOrDefault(x => x.ClassId == selected.ClassId && x.ModulePath == selected.ModulePath);
-                }
-                finally
-                {
-                    isUpdatingDisplay = false;
-                }
+                ApplyItems(cachedPlugins);
                 return;
             }
             isScanRequested = true;
             try
             {
                 var plugins = await Task.Run(() => Vst3PluginScanner.GetEffectPlugins());
-                var selected = SelectedItem as Vst3PluginItem;
-                var items = plugins.Select(x => new Vst3PluginItem(x)).ToList();
-                // 現在の選択がスキャン結果に含まれない場合（アンインストール済み等）も表示は維持する
-                if (selected is not null && !items.Any(x => x.ClassId == selected.ClassId && x.ModulePath == selected.ModulePath))
-                    items.Insert(0, selected);
-                items = items.OrderByDescending(x => x.IsFavorite).ToList();
-                isUpdatingDisplay = true;
-                try
-                {
-                    ItemsSource = items;
-                    if (selected is not null)
-                        SelectedItem = items.FirstOrDefault(x => x.ClassId == selected.ClassId && x.ModulePath == selected.ModulePath);
-                }
-                finally
-                {
-                    isUpdatingDisplay = false;
-                }
+                ApplyItems(plugins);
             }
             catch (Exception ex)
             {
                 // 次回ドロップダウンで再試行できるようにする
                 isScanRequested = false;
                 Log.Default.Write("VST3プラグインのスキャンに失敗しました。", ex);
+            }
+        }
+
+        void ApplyItems(IReadOnlyList<Vst3EffectPluginInfo> plugins)
+        {
+            var selected = SelectedItem as Vst3PluginItem;
+            var items = plugins.Select(x => new Vst3PluginItem(x)).ToList();
+            // 現在の選択がスキャン結果に含まれない場合（アンインストール済み等）も表示は維持する
+            if (selected is not null && !items.Any(x => IsSameId(x.ClassId, selected.ClassId) && IsSameId(x.ModulePath, selected.ModulePath)))
+                items.Insert(0, selected);
+            items = items.OrderByDescending(x => x.IsFavorite).ToList();
+            isUpdatingDisplay = true;
+            try
+            {
+                ItemsSource = items;
+                if (selected is not null)
+                    SelectedItem = items.FirstOrDefault(x => IsSameId(x.ClassId, selected.ClassId) && IsSameId(x.ModulePath, selected.ModulePath));
+            }
+            finally
+            {
+                isUpdatingDisplay = false;
             }
         }
 
@@ -216,7 +211,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             BeginEdit?.Invoke(this, EventArgs.Empty);
             foreach (var effect in GetTargetEffects())
             {
-                if (effect.ClassId == info.ClassId && effect.PluginPath == info.ModulePath)
+                // 大文字小文字違いを別プラグイン扱いすると保存済み状態を破棄してしまうため、比較は非区別で行う
+                if (IsSameId(effect.ClassId, info.ClassId) && IsSameId(effect.PluginPath, info.ModulePath))
                     continue;
                 effect.PluginPath = info.ModulePath;
                 effect.ClassId = info.ClassId;
@@ -230,5 +226,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         IEnumerable<Vst3AudioEffect> GetTargetEffects()
             => ItemProperties?.Select(x => x.PropertyOwner).OfType<Vst3AudioEffect>() ?? [];
+
+        /// <summary>
+        /// ModulePath・ClassId（16進文字列）の同一性判定。Windowsのパスと16進表記は大文字小文字を区別しない
+        /// </summary>
+        internal static bool IsSameId(string a, string b)
+            => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
     }
 }
