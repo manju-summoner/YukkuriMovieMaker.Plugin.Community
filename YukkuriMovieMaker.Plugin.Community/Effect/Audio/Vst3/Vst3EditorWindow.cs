@@ -174,9 +174,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         protected override void OnClosed(EventArgs e)
         {
-            base.OnClosed(e);
+            // オーナーウィンドウの破棄経由で閉じられた場合はOnClosingを経由しないため、ここでも停止・保存・破棄する。
+            // また、Closedイベントのハンドラー（Vst3EditorSessionのプラグイン破棄）より先にビューと子ウィンドウを
+            // 破棄しないと、アンロード済みモジュールのビュー破棄処理を呼んでクラッシュする
+            pumpTimer.Stop();
+            if (!plugin.IsDisposed && !view.IsDisposed)
+                parameterForwarder.PumpAndForward(plugin);
+            view.Dispose();
             meterForwarder.Dispose();
             host.Dispose();
+            base.OnClosed(e);
         }
 
         static class NativeMethods
