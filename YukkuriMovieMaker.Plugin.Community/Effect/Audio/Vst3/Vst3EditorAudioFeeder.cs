@@ -67,6 +67,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         volatile bool isDisposed;
         long lastFedTimestamp;
 
+        // UIティックがゲート内でサンプリングした申告レイテンシ（フレーム数）。
+        // getLatencySamples等の制御系呼び出しはVST3の規約上UIスレッド限定のため、ワーカーはこの値を参照する
+        volatile int sampledLatencyFrames = -1;
+
         public Vst3EditorAudioFeeder(Func<IEditorInfo?> getEditorInfo, Vst3AudioEffect effect, Vst3Plugin plugin, int hz)
         {
             this.getEditorInfo = getEditorInfo;
@@ -118,6 +122,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                         wakeEvent.Set();
                 }
             }
+        }
+
+        /// <summary>
+        /// 申告レイテンシをサンプリングしてワーカーへ引き渡す。
+        /// UIスレッドからplugin.SyncRootを保持した状態で定期的に呼ぶこと
+        /// （制御系呼び出しはUIスレッド限定のため、ワーカー自身では取得しない）
+        /// </summary>
+        public void SampleLatency()
+        {
+            if (plugin.IsDisposed)
+                return;
+            sampledLatencyFrames = Math.Max(0, plugin.GetLatencySamples());
         }
 
         /// <summary>
@@ -191,13 +207,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             if (stream is null || displayTargetLocal < 0)
                 return false;
 
-            long latencySamples;
-            lock (plugin.SyncRoot)
-            {
-                if (plugin.IsDisposed)
-                    return false;
-                latencySamples = Math.Max(0, plugin.GetLatencySamples()) * 2L;
-            }
+            // レイテンシはUIティックがサンプリングした値を使う。初回サンプリングまでは処理しない
+            var latencyFrames = sampledLatencyFrames;
+            if (latencyFrames < 0)
+                return false;
+            var latencySamples = latencyFrames * 2L;
 
             // 実再生と同様に、申告レイテンシ分だけ入力を先行させて表示位置と実際に聴こえる音を一致させる。
             // 終端付近では超過分を無音として処理し、遅延出力を吐き切る（論理位置は終端を超えられる）
@@ -221,13 +235,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             if (isDiscontinuous)
             {
                 latencyLeadSamples = latencySamples;
-                lock (plugin.SyncRoot)
+                // 非連続な音声を投入する前に内部状態（ディレイライン等）をリセットし、移動前の音声の混入を防ぐ。
+                // リセット（内部でsetActiveサイクル）は制御系呼び出しのため、VST3の規約どおりUIスレッドで実行する。
+                // UIスレッドはワーカーを同期待ちしないため、ここでの待機はデッドロックしない
+                InvokeOnUiThread(() =>
                 {
-                    if (plugin.IsDisposed)
-                        return false;
-                    // 非連続な音声を投入する前に内部状態（ディレイライン等）をリセットし、移動前の音声の混入を防ぐ
-                    plugin.Reset();
-                }
+                    lock (plugin.SyncRoot)
+                    {
+                        if (!plugin.IsDisposed)
+                            plugin.Reset();
+                    }
+                });
                 // 高レイテンシのプラグインでも遅延ラインが満たされるよう、申告レイテンシ＋1チャンク分手前からプライムする
                 nextPosition = Math.Max(0, target - latencyLeadSamples - MaxChunkFrames * 2L);
                 nextPosition -= nextPosition % 2;
@@ -338,6 +356,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 source = null;
                 isSourceUnavailable = true;
             }
+        }
+
+        /// <summary>
+        /// UIスレッド限定の制御系呼び出しをディスパッチャーへ委譲する（UIスレッド上・テスト環境ではそのまま実行）
+        /// </summary>
+        static void InvokeOnUiThread(Action action)
+        {
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is not null && !dispatcher.CheckAccess() && !dispatcher.HasShutdownStarted)
+                dispatcher.Invoke(action);
+            else
+                action();
         }
 
         /// <summary>

@@ -227,8 +227,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             if (IsDisposed)
                 return;
-            Vst3Native.Ymm4Vst3PluginDestroy(handle);
+            var destroyingHandle = handle;
             handle = IntPtr.Zero;
+            // 破棄（内部でsetActive(false)やterminateを呼ぶ）もVST3の規約どおりUIスレッド（メインスレッド）で行う。
+            // 音声スレッドやバックグラウンドの停止処理から破棄されるため、UIスレッド外なら委譲する。
+            // ハンドルは先に無効化済みで以後の呼び出しは来ないため、完了を待つ必要はない
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is not null && !dispatcher.CheckAccess() && !dispatcher.HasShutdownStarted)
+                dispatcher.InvokeAsync(() => Vst3Native.Ymm4Vst3PluginDestroy(destroyingHandle));
+            else
+                Vst3Native.Ymm4Vst3PluginDestroy(destroyingHandle);
         }
     }
 

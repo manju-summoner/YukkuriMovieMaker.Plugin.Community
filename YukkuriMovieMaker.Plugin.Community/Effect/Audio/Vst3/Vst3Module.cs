@@ -7,11 +7,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     /// VST3モジュール（.vst3ファイル/バンドル）1つ分のラッパー。
     /// プラグインインスタンス生成後は、インスタンス側がネイティブ層でモジュール参照を保持するため、
     /// このラッパーを先に破棄しても問題ない。
-    /// 一度開いたモジュールのDLLはプロセス終了までピン留めされ、実行中にアンロードされることはない。
+    /// 一度プラグインインスタンスを生成したモジュールのDLLはプロセス終了までピン留めされ、実行中にアンロードされることはない。
     /// </summary>
     internal sealed unsafe class Vst3Module : IDisposable
     {
-        // 一度ロードしたモジュールはプロセス終了までアンロードしない（一般的なDAWと同じ方針）。
+        // 一度インスタンスを生成したモジュールはプロセス終了までアンロードしない（一般的なDAWと同じ方針）。
         // 全インスタンスの破棄でDLLがアンマップされると、プラグインが登録したままの
         // ウィンドウプロシージャやフックが無効な飛び先になり、以後のメッセージ配送で
         // クラッシュする（CFGのFAST_FAIL_GUARD_ICALL_CHECK_FAILURE。ZL Equalizer 2で実証）
@@ -19,10 +19,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         static readonly Dictionary<string, IntPtr> pinnedModules = new(StringComparer.OrdinalIgnoreCase);
 
         IntPtr handle;
+        readonly string path;
 
-        Vst3Module(IntPtr handle)
+        Vst3Module(IntPtr handle, string path)
         {
             this.handle = handle;
+            this.path = path;
         }
 
         public static Vst3Module Open(string path)
@@ -31,8 +33,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var handle = Vst3Native.Ymm4Vst3ModuleOpen(path, errorBuf, 1024);
             if (handle == IntPtr.Zero)
                 throw new InvalidOperationException($"VST3モジュールを開けませんでした。path={path} error={Vst3Native.FixedUtf8ToString(errorBuf, 1024)}");
-            PinModule(path);
-            return new Vst3Module(handle);
+            return new Vst3Module(handle, path);
         }
 
         /// <summary>
@@ -83,6 +84,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var plugin = Vst3Native.Ymm4Vst3PluginCreate(handle, classId, errorBuf, 1024);
             if (plugin == IntPtr.Zero)
                 throw new InvalidOperationException($"VST3プラグインを作成できませんでした。classId={classId} error={Vst3Native.FixedUtf8ToString(errorBuf, 1024)}");
+            // ピン留めはインスタンスを実際に生成したモジュールに限る
+            // （スキャンのプロセス内フォールバックは列挙のためだけにOpenするため、Openでのピン留めは不可）
+            PinModule(path);
             return new Vst3Plugin(plugin);
         }
 

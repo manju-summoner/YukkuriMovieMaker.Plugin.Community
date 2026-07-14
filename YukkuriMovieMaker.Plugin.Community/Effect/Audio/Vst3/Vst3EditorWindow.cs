@@ -85,6 +85,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     Monitor.TryEnter(plugin.SyncRoot, ref lockTaken);
                     if (!lockTaken)
                         return;
+                    // 制御系呼び出し（getLatencySamples）はUIスレッド限定のため、ここでサンプリングしてワーカーへ渡す
+                    this.audioFeeder?.SampleLatency();
                     var fed = this.audioFeeder?.IsActivelyFeeding == true;
                     parameterCount = parameterForwarder.PumpAndForward(plugin, pump: !fed);
                     if (fed)
