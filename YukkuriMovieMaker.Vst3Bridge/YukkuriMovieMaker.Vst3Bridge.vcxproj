@@ -75,6 +75,8 @@
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;DEVELOPMENT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Optimization>Disabled</Optimization>
+      <!-- VC++再頒布パッケージ未導入の環境でも動作させるためCRTを静的リンクする -->
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release' or '$(Configuration)'=='ReleaseLite'">
@@ -83,6 +85,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <Optimization>Full</Optimization>
+      <!-- VC++再頒布パッケージ未導入の環境でも動作させるためCRTを静的リンクする -->
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
