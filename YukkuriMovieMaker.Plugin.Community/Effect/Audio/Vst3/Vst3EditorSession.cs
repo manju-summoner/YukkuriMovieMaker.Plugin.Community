@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Threading;
+using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 {
@@ -45,6 +46,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         }
 
         /// <summary>
+        /// 現在接続中のボタンが持つ最新のIEditorInfoスナップショットを取得する。
+        /// IEditorInfoは値を固定したスナップショットで、PropertiesEditorの再構築でボタンごと差し替わるため、
+        /// 開いた時点のインスタンスを掴み続けると再生位置へ追従できない
+        /// </summary>
+        public static IEditorInfo? GetCurrentEditorInfo(Vst3AudioEffect effect) =>
+            sessions.TryGetValue(effect, out var session) ? session.attachedControl?.EditorInfo : null;
+
+        /// <summary>
         /// ボタンがプロパティエディタへ接続された。対象エフェクトのセッションのクローズ予約を取り消す
         /// </summary>
         public static void OnControlAttached(Vst3OpenEditorButton control)
@@ -70,6 +79,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         readonly string classId;
         readonly Vst3Plugin plugin;
         readonly Vst3EditorWindow window;
+        readonly IReadOnlyList<Vst3AudioEffect> parameterTargets;
         readonly byte[]? initialComponentState;
         readonly byte[]? initialControllerState;
         Vst3OpenEditorButton? attachedControl;
@@ -82,15 +92,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         bool isClosed;
 
         /// <summary>
-        /// セッションを開始する。pluginの所有権はセッションへ移り、ウィンドウが閉じたときに破棄される
+        /// セッションを開始する。pluginの所有権はセッションへ移り、ウィンドウが閉じたときに破棄される。
+        /// parameterTargetsはエディターの編集を配信している同一プラグインのエフェクト（複数選択時は複数）
         /// </summary>
-        public Vst3EditorSession(Vst3AudioEffect effect, Vst3OpenEditorButton control, Vst3Plugin plugin, Vst3EditorWindow window)
+        public Vst3EditorSession(Vst3AudioEffect effect, Vst3OpenEditorButton control, Vst3Plugin plugin, Vst3EditorWindow window, IReadOnlyList<Vst3AudioEffect> parameterTargets)
         {
             this.effect = effect;
             pluginPath = effect.PluginPath;
             classId = effect.ClassId;
             this.plugin = plugin;
             this.window = window;
+            this.parameterTargets = parameterTargets;
             attachedControl = control;
             // 未保存状態（ComponentState=null）へのUndoをエディターへ反映するため、開いた時点の状態を控える
             (initialComponentState, initialControllerState) = plugin.GetState();
@@ -209,8 +221,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                         // 反映で生じる変化を編集として保存し直さない（Undo直後に同じ状態を書き戻すのを防ぐ）
                         hasPendingEdits = false;
                         // 巻き戻し前のGUI編集値が残っていると、音声プロセッサ再生成時のReplayLatestが
-                        // 復元済み状態を上書きするため、パラメーターチャンネルも破棄する
-                        effect.ParameterChannel.Clear();
+                        // 復元済み状態を上書きするため、編集を配信していた全エフェクトのチャンネルを破棄する
+                        foreach (var channel in parameterTargets.Select(x => x.ParameterChannel).Distinct())
+                            channel.Clear();
                         // 未保存状態（null）へのUndoは、エディターを開いた時点の状態へ戻す
                         plugin.SetState(
                             effect.ComponentState ?? initialComponentState,

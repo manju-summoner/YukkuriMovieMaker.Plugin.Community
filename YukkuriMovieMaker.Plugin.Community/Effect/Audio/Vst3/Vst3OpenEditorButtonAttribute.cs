@@ -55,6 +55,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             editorInfo = info;
         }
 
+        /// <summary>
+        /// 最新のIEditorInfoスナップショット。
+        /// PropertiesEditorの再構築でボタンは差し替わるため、セッション側から現在接続中のボタンの値を引くのに使う
+        /// </summary>
+        internal IEditorInfo? EditorInfo => editorInfo;
+
         internal void RaiseBeginEdit() => BeginEdit?.Invoke(this, EventArgs.Empty);
         internal void RaiseEndEdit() => EndEdit?.Invoke(this, EventArgs.Empty);
 
@@ -93,16 +99,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     string.Equals(x.PluginPath, effect.PluginPath, StringComparison.OrdinalIgnoreCase)
                     && string.Equals(x.ClassId, effect.ClassId, StringComparison.OrdinalIgnoreCase)).ToArray();
                 var parameterForwarder = new Vst3EditorParameterForwarder(matchingEffects);
-                //エディター位置は先頭の選択項目を基準にしているため、メーターもそのエフェクトだけを表示する
+                //エディター位置は先頭の選択項目を基準にしているため、メーター・音声もそのエフェクトだけを対象にする。
+                //IEditorInfoはスナップショットかつボタンは再構築で差し替わるため、常にセッション経由で最新を引く
                 var meterForwarder = new Vst3EditorMeterForwarder(
                     [effect],
-                    () => editorInfo?.ItemPosition.Time ?? TimeSpan.MaxValue);
-                window = new Vst3EditorWindow(plugin, view, parameterForwarder, meterForwarder)
+                    () => (Vst3EditorSession.GetCurrentEditorInfo(effect) ?? editorInfo)?.ItemPosition.Time ?? TimeSpan.MaxValue);
+                var audioFeeder = editorInfo is null
+                    ? null
+                    : new Vst3EditorAudioFeeder(() => Vst3EditorSession.GetCurrentEditorInfo(effect) ?? editorInfo, effect, editorInfo.VideoInfo.Hz);
+                window = new Vst3EditorWindow(plugin, view, parameterForwarder, meterForwarder, audioFeeder)
                 {
                     Owner = owner,
                     Title = string.IsNullOrEmpty(effect.PluginName) ? Texts.Vst3EffectName : effect.PluginName,
                 };
-                _ = new Vst3EditorSession(effect, this, plugin, window);
+                _ = new Vst3EditorSession(effect, this, plugin, window, matchingEffects);
                 window.Closed += (_, _) =>
                 {
                     // HwndHost配下のネイティブビューを破棄すると、キーボードフォーカスが

@@ -24,6 +24,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         readonly Vst3ViewHost host;
         readonly Vst3EditorParameterForwarder parameterForwarder;
         readonly Vst3EditorMeterForwarder meterForwarder;
+        readonly Vst3EditorAudioFeeder? audioFeeder;
+        readonly Action<uint, double, long> fedMeterForward;
         readonly DispatcherTimer pumpTimer;
         readonly bool isContentScaleSupported;
 
@@ -42,12 +44,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             Vst3Plugin plugin,
             Vst3View view,
             Vst3EditorParameterForwarder parameterForwarder,
-            Vst3EditorMeterForwarder meterForwarder)
+            Vst3EditorMeterForwarder meterForwarder,
+            Vst3EditorAudioFeeder? audioFeeder = null)
         {
             this.plugin = plugin;
             this.view = view;
             this.parameterForwarder = parameterForwarder;
             this.meterForwarder = meterForwarder;
+            this.audioFeeder = audioFeeder;
+            fedMeterForward = (paramId, normalizedValue, _) => this.plugin.SetControllerParameter(paramId, normalizedValue);
             isContentScaleSupported = view.IsContentScaleSupported;
             baseSize = view.GetSize();
 
@@ -68,12 +73,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             pumpTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(33) };
             pumpTimer.Tick += (_, _) =>
             {
-                if (!plugin.IsDisposed)
+                if (plugin.IsDisposed)
+                    return;
+                // 再生・シークで位置が動いた場合は実音声を処理させ、波形等のGUI表示を追従させる
+                var fed = this.audioFeeder?.Feed(plugin) == true;
+                var parameterCount = parameterForwarder.PumpAndForward(plugin, pump: !fed);
+                if (fed)
                 {
-                    var parameterCount = parameterForwarder.PumpAndForward(plugin);
-                    meterForwarder.Apply(plugin);
-                    ParameterForwarded?.Invoke(parameterCount);
+                    // 実音声を処理した直後の出力パラメーター（メーター等）をそのままGUIへ反映する
+                    plugin.DrainMeterParameterChanges(fedMeterForward);
                 }
+                else
+                {
+                    meterForwarder.Apply(plugin);
+                }
+                ParameterForwarded?.Invoke(parameterCount);
             };
 
             SourceInitialized += OnSourceInitialized;
@@ -181,6 +195,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             if (!plugin.IsDisposed && !view.IsDisposed)
                 parameterForwarder.PumpAndForward(plugin);
             view.Dispose();
+            audioFeeder?.Dispose();
             meterForwarder.Dispose();
             host.Dispose();
             base.OnClosed(e);

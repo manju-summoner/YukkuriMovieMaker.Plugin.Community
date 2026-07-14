@@ -117,9 +117,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             channels = [.. effects.Select(x => x.ParameterChannel).Distinct()];
         }
 
-        public int PumpAndForward(Vst3Plugin plugin)
+        /// <summary>
+        /// エディターでの編集をプラグインの状態へ反映し、パラメーター変更を各チャンネルへ配信する。
+        /// 音声フィードで実音声のProcessを回したティックでは、無音プロセスは不要なのでpump=falseにする
+        /// </summary>
+        public int PumpAndForward(Vst3Plugin plugin, bool pump = true)
         {
-            plugin.Pump();
+            if (pump)
+                plugin.Pump();
             return plugin.DrainEditorParameterChanges((paramId, normalizedValue) =>
             {
                 foreach (var channel in channels)

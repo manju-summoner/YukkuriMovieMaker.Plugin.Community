@@ -608,7 +608,9 @@ YMM4VST3_API int32_t Ymm4Vst3PluginProcessWithTransport(
     return 1;
 }
 
-// エディタ表示中にパラメータ編集をプロセッサへ反映させるための無音プロセス
+// エディタ表示中にパラメータ編集をプロセッサへ反映させるためのフラッシュ処理。
+// 音声は処理しない（numSamples=0のパラメータフラッシュ契約）。無音を処理すると、
+// 停止中に音声フィードで表示した波形・アナライザーが無音で洗い流されてしまう
 YMM4VST3_API int32_t Ymm4Vst3PluginPump(void* pluginHandle)
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
@@ -634,19 +636,16 @@ YMM4VST3_API int32_t Ymm4Vst3PluginPump(void* pluginHandle)
         }
     }
 
-    constexpr int32 pumpFrames = 64;
-    float silenceL[pumpFrames]{};
-    float silenceR[pumpFrames]{};
-    float discardL[pumpFrames]{};
-    float discardR[pumpFrames]{};
-    auto frames = std::min(pumpFrames, plugin->maxBlockSize);
+    float silenceL[1]{};
+    float silenceR[1]{};
+    float discardL[1]{};
+    float discardR[1]{};
     auto result = ProcessBlock(
         *plugin,
         silenceL, silenceR, discardL, discardR,
-        frames, plugin->pumpPosition, false,
+        0, plugin->pumpPosition, false,
         false, 0, 0, 0,
         false);
-    plugin->pumpPosition += frames;
     return result ? 1 : 0;
 }
 
@@ -865,6 +864,7 @@ YMM4VST3_API int32_t Ymm4Vst3PluginSetState(
             plugin->processingActive = false;
             return 0;
         }
+        // setProcessingはkNotImplementedを返すプラグインがあるため、Setupと同様に戻り値は検証しない
         plugin->processor->setProcessing(true);
     }
     return 1;
