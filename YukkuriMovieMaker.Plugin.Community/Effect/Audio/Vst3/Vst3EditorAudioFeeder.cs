@@ -60,23 +60,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
             var displayTarget = (long)(editorInfo.ItemPosition.Time.TotalSeconds * hz) * 2;
             displayTarget = Math.Clamp(displayTarget - displayTarget % 2, 0, stream.Duration);
-            // 実再生と同様に、申告レイテンシ分だけ入力を先行させて表示位置と実際に聴こえる音を一致させる
-            var target = Math.Min(displayTarget + latencyLeadSamples, stream.Duration);
+            // 実再生と同様に、申告レイテンシ分だけ入力を先行させて表示位置と実際に聴こえる音を一致させる。
+            // 終端付近では超過分を無音として処理し、遅延出力を吐き切る（論理位置は終端を超えられる）
+            var latencySamples = Math.Max(0, plugin.GetLatencySamples()) * 2L;
+            var target = displayTarget + latencySamples;
             target -= target % 2;
-            if (target == nextPosition)
+            if (target == nextPosition && latencySamples == latencyLeadSamples)
                 return false;
 
             var startTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
 
-            // シーク（後退・大きなジャンプ）時は直前の1チャンク分から処理し直して表示を追従させる
-            if (nextPosition < 0 || target < nextPosition || target - nextPosition > MaxChunkFrames * 2L)
+            // シーク（後退・大きなジャンプ）と申告レイテンシの変更（kLatencyChanged）は、
+            // 内部状態をリセットして直前から処理し直す
+            if (nextPosition < 0
+                || latencySamples != latencyLeadSamples
+                || target < nextPosition
+                || target - nextPosition > MaxChunkFrames * 2L)
             {
-                latencyLeadSamples = Math.Max(0, plugin.GetLatencySamples()) * 2L;
-                target = Math.Min(displayTarget + latencyLeadSamples, stream.Duration);
-                target -= target % 2;
+                latencyLeadSamples = latencySamples;
                 // 非連続な音声を投入する前に内部状態（ディレイライン等）をリセットし、移動前の音声の混入を防ぐ
                 plugin.Reset();
-                nextPosition = Math.Max(0, target - MaxChunkFrames * 2L);
+                // 高レイテンシのプラグインでも遅延ラインが満たされるよう、申告レイテンシ＋1チャンク分手前からプライムする
+                nextPosition = Math.Max(0, target - latencyLeadSamples - MaxChunkFrames * 2L);
                 nextPosition -= nextPosition % 2;
             }
 
@@ -90,19 +95,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
             try
             {
-                if (stream.Position != nextPosition)
-                    stream.Seek(nextPosition);
                 if (readBuffer.Length < count)
                     readBuffer = new float[count];
-                var read = stream.Read(readBuffer, 0, count);
-                read -= read % 2;
-                if (read <= 0)
+                var available = (int)Math.Clamp(stream.Duration - nextPosition, 0, count);
+                available -= available % 2;
+                var read = 0;
+                if (available > 0)
                 {
-                    nextPosition = target;
-                    return false;
+                    if (stream.Position != nextPosition)
+                        stream.Seek(nextPosition);
+                    read = stream.Read(readBuffer, 0, available);
+                    read -= read % 2;
+                    read = Math.Max(0, read);
                 }
+                // 終端を超えた分（レイテンシの吐き切り）は無音で埋める
+                Array.Clear(readBuffer, read, count - read);
 
-                var frames = read / 2;
+                var frames = count / 2;
                 if (bufferL.Length < frames)
                 {
                     bufferL = new float[frames];
@@ -118,7 +127,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     frames,
                     nextPosition / 2,
                     new Vst3Transport(effect.Tempo, effect.TimeSignatureNumerator, effect.TimeSignatureDenominator, effect.IsTempoSyncEnabled));
-                nextPosition += read;
+                nextPosition += count;
 
                 // UIスレッドを継続的にブロックしないよう、処理時間の超過が続いたらフィードを停止する
                 var elapsed = System.Diagnostics.Stopwatch.GetElapsedTime(startTimestamp);
