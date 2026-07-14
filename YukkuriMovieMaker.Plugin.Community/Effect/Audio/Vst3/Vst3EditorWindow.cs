@@ -32,6 +32,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         /// </summary>
         readonly (int Width, int Height) baseSize;
 
+        /// <summary>
+        /// エディター操作の定期転送後に発生する。引数は転送したパラメーター変更の件数
+        /// （Vst3EditorSessionが編集の区切り検出に使用する）
+        /// </summary>
+        public event Action<int>? ParameterForwarded;
+
         public Vst3EditorWindow(
             Vst3Plugin plugin,
             Vst3View view,
@@ -64,8 +70,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             {
                 if (!plugin.IsDisposed)
                 {
-                    parameterForwarder.PumpAndForward(plugin);
+                    var parameterCount = parameterForwarder.PumpAndForward(plugin);
                     meterForwarder.Apply(plugin);
+                    ParameterForwarded?.Invoke(parameterCount);
                 }
             };
 
