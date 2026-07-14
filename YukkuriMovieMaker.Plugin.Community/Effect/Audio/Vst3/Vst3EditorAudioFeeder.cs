@@ -238,7 +238,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 // 非連続な音声を投入する前に内部状態（ディレイライン等）をリセットし、移動前の音声の混入を防ぐ。
                 // リセット（内部でsetActiveサイクル）は制御系呼び出しのため、VST3の規約どおりUIスレッドで実行する。
                 // UIスレッドはワーカーを同期待ちしないため、ここでの待機はデッドロックしない
-                InvokeOnUiThread(() =>
+                Vst3Plugin.InvokeOnUiThread(() =>
                 {
                     lock (plugin.SyncRoot)
                     {
@@ -356,18 +356,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 source = null;
                 isSourceUnavailable = true;
             }
-        }
-
-        /// <summary>
-        /// UIスレッド限定の制御系呼び出しをディスパッチャーへ委譲する（UIスレッド上・テスト環境ではそのまま実行）
-        /// </summary>
-        static void InvokeOnUiThread(Action action)
-        {
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is not null && !dispatcher.CheckAccess() && !dispatcher.HasShutdownStarted)
-                dispatcher.Invoke(action);
-            else
-                action();
         }
 
         /// <summary>

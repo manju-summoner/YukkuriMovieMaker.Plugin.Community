@@ -131,7 +131,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         protected override void seek(long position)
         {
             this.position = position;
-            plugin?.Reset();
+            if (plugin is { } resettingPlugin)
+            {
+                // リセット（内部でsetActiveサイクル）は制御系呼び出しのため、VST3の規約どおりUIスレッドで実行する。
+                // シークは音声スレッド（再生速度変更・書き出し・レベルメーター読み）からも呼ばれる
+                Vst3Plugin.InvokeOnUiThread(() =>
+                {
+                    if (!resettingPlugin.IsDisposed)
+                        resettingPlugin.Reset();
+                });
+            }
             meterPublisher.Reset(position / 2, Hz);
             isPrimed = false;
             dryDelayIndex = 0;
@@ -277,7 +286,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
             try
             {
-                (pendingComponentState, pendingControllerState) = plugin.GetState();
+                // 状態取得も制御系呼び出しのため、VST3の規約どおりUIスレッドで実行する
+                byte[]? componentState = null;
+                byte[]? controllerState = null;
+                var savingPlugin = plugin;
+                Vst3Plugin.InvokeOnUiThread(() =>
+                {
+                    if (!savingPlugin.IsDisposed)
+                        (componentState, controllerState) = savingPlugin.GetState();
+                });
+                pendingComponentState = componentState;
+                pendingControllerState = controllerState;
                 hasPendingState = true;
             }
             catch (Exception e)

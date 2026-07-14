@@ -16,6 +16,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         /// </summary>
         public object SyncRoot { get; } = new();
 
+        /// <summary>
+        /// UIスレッド限定の制御系呼び出し（setActiveサイクル・状態取得等）をディスパッチャーへ委譲する。
+        /// UIスレッド上・テスト環境ではそのまま実行する。
+        /// SyncRoot等のロックを保持したまま呼ぶと、UIスレッド側がそのロックを待った場合に
+        /// デッドロックするため、必ずロックの外から呼び、ロックは委譲先の中で取ること
+        /// </summary>
+        internal static void InvokeOnUiThread(Action action)
+        {
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is not null && !dispatcher.CheckAccess() && !dispatcher.HasShutdownStarted)
+                dispatcher.Invoke(action);
+            else
+                action();
+        }
+
         readonly Vst3Native.MeterParameterChangeCallback meterParameterChangeCallback;
         IntPtr handle;
         Action<uint, double, long>? meterParameterChanged;
@@ -231,12 +246,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             handle = IntPtr.Zero;
             // 破棄（内部でsetActive(false)やterminateを呼ぶ）もVST3の規約どおりUIスレッド（メインスレッド）で行う。
             // 音声スレッドやバックグラウンドの停止処理から破棄されるため、UIスレッド外なら委譲する。
-            // ハンドルは先に無効化済みで以後の呼び出しは来ないため、完了を待つ必要はない
+            // ハンドルは先に無効化済みで以後の呼び出しは来ないため、完了を待つ必要はない。
+            // 優先度は再生成（EnsurePluginのDispatcher.Invoke＝Send）に追い越されないようSendにし、
+            // 「旧インスタンスの破棄→再生成」の順序を保証する
             var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is not null && !dispatcher.CheckAccess() && !dispatcher.HasShutdownStarted)
-                dispatcher.InvokeAsync(() => Vst3Native.Ymm4Vst3PluginDestroy(destroyingHandle));
-            else
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
                 Vst3Native.Ymm4Vst3PluginDestroy(destroyingHandle);
+            }
+            else if (!dispatcher.HasShutdownStarted)
+            {
+                dispatcher.InvokeAsync(
+                    () => Vst3Native.Ymm4Vst3PluginDestroy(destroyingHandle),
+                    System.Windows.Threading.DispatcherPriority.Send);
+            }
+            // アプリ終了中（Dispatcherシャットダウン後）はUIスレッドへ委譲できない。
+            // 別スレッドでのネイティブ破棄は終了時クラッシュの原因になるため、破棄せず残して
+            // プロセス終了でOSに回収させる（モジュールはピン留め済みで、いずれにせよ終了まで残る）
         }
     }
 
