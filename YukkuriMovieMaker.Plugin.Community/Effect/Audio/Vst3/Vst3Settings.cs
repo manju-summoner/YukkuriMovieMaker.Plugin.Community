@@ -1,4 +1,6 @@
 using System.Collections.Immutable;
+using System.Threading.Tasks;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
@@ -32,6 +34,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             additionalPluginDirectories ??= [];
             favoritePluginClassIds ??= [];
+
+            // FontComboBoxのフォント一覧と同様、起動時に一覧を用意しておく。
+            // VST3のスキャンは重いためバックグラウンドで行い、以後の更新はセレクターの更新ボタンで行う
+            Task.Run(() =>
+            {
+                try
+                {
+                    Vst3PluginScanner.GetEffectPlugins();
+                }
+                catch (System.Exception e)
+                {
+                    Log.Default.Write("VST3プラグインの起動時スキャンに失敗しました。", e);
+                }
+            });
         }
     }
 }

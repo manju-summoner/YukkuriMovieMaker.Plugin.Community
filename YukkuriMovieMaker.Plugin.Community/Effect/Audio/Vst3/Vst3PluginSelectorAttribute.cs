@@ -8,6 +8,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
+using YukkuriMovieMaker.Resources.Icons;
 using LocalizationTexts = YukkuriMovieMaker.Resources.Localization.Texts;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
@@ -65,35 +66,55 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
     /// <summary>
     /// VST3エフェクトプラグインを選択するコンボボックス。
-    /// ドロップダウンを開いたときにVST3ディレクトリをスキャンする。
+    /// FontComboBoxと同じ操作感で、一覧は起動時スキャンのキャッシュを表示し、
+    /// 右側の更新ボタンを押したときだけ再スキャンする。
     /// </summary>
-    internal class Vst3PluginSelector : ComboBox, IPropertyEditorControl
+    internal class Vst3PluginSelector : Grid, IPropertyEditorControl
     {
         public event EventHandler? BeginEdit;
         public event EventHandler? EndEdit;
 
         public ItemProperty[]? ItemProperties { get; set; }
 
-        bool isScanRequested;
+        readonly ComboBox comboBox;
+        readonly Button reloadButton;
         bool isUpdatingDisplay;
+        bool isReloading;
 
         public Vst3PluginSelector()
         {
-            Padding = new Thickness(0);
-            HorizontalContentAlignment = HorizontalAlignment.Stretch;
-            VerticalContentAlignment = VerticalAlignment.Center;
-            ItemContainerStyle = new Style(typeof(ComboBoxItem))
+            ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(26) });
+
+            comboBox = new ComboBox
             {
-                BasedOn = TryFindResource(typeof(ComboBoxItem)) as Style,
-                Setters =
+                Padding = new Thickness(0),
+                HorizontalContentAlignment = HorizontalAlignment.Stretch,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                ItemContainerStyle = new Style(typeof(ComboBoxItem))
                 {
-                    new Setter(ComboBoxItem.PaddingProperty, new Thickness(0)),
-                    new Setter(ComboBoxItem.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch),
-                }
+                    BasedOn = TryFindResource(typeof(ComboBoxItem)) as Style,
+                    Setters =
+                    {
+                        new Setter(ComboBoxItem.PaddingProperty, new Thickness(0)),
+                        new Setter(ComboBoxItem.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch),
+                    }
+                },
+                ItemTemplate = CreateItemTemplate(),
             };
-            ItemTemplate = CreateItemTemplate();
-            DropDownOpened += OnDropDownOpened;
-            SelectionChanged += OnSelectionChanged;
+            comboBox.DropDownOpened += OnDropDownOpened;
+            comboBox.SelectionChanged += OnSelectionChanged;
+            SetColumn(comboBox, 0);
+            Children.Add(comboBox);
+
+            reloadButton = new Button
+            {
+                ToolTip = Texts.Vst3EffectReloadPluginsToolTip,
+            };
+            reloadButton.SetResourceReference(ContentControl.ContentProperty, IconKeys.Refresh);
+            reloadButton.Click += OnReloadButtonClick;
+            SetColumn(reloadButton, 1);
+            Children.Add(reloadButton);
         }
 
         static DataTemplate CreateItemTemplate()
@@ -137,18 +158,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             {
                 if (string.IsNullOrEmpty(effect.ClassId))
                 {
-                    SelectedItem = null;
+                    comboBox.SelectedItem = null;
                     return;
                 }
-                var items = (ItemsSource as IEnumerable<Vst3PluginItem>)?.ToList() ?? [];
+                var items = (comboBox.ItemsSource as IEnumerable<Vst3PluginItem>)?.ToList() ?? [];
                 var current = items.FirstOrDefault(x => IsSameId(x.ClassId, effect.ClassId) && IsSameId(x.ModulePath, effect.PluginPath));
                 if (current is null)
                 {
                     current = new Vst3PluginItem(new Vst3EffectPluginInfo(effect.PluginPath, effect.ClassId, effect.PluginName, string.Empty));
                     items.Insert(0, current);
-                    ItemsSource = items;
+                    comboBox.ItemsSource = items;
                 }
-                SelectedItem = current;
+                comboBox.SelectedItem = current;
             }
             finally
             {
@@ -158,30 +179,49 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         async void OnDropDownOpened(object? sender, EventArgs e)
         {
-            // スキャン済みなら、設定画面での再スキャンやお気に入り変更を反映するためキャッシュから一覧を作り直す
-            var cachedPlugins = isScanRequested ? Vst3PluginScanner.CachedPlugins : null;
-            if (cachedPlugins is not null)
+            // 一覧の更新は更新ボタンで行う。ここでは起動時スキャンの結果を表示へ反映するだけ
+            var plugins = Vst3PluginScanner.CachedPlugins;
+            if (plugins is null)
             {
-                ApplyItems(cachedPlugins);
-                return;
+                // 起動時スキャンが完了していない場合は完了を待つ（キャッシュ済みなら即返る）
+                try
+                {
+                    plugins = await Task.Run(() => Vst3PluginScanner.GetEffectPlugins());
+                }
+                catch (Exception ex)
+                {
+                    Log.Default.Write("VST3プラグインのスキャンに失敗しました。", ex);
+                    return;
+                }
             }
-            isScanRequested = true;
+            ApplyItems(plugins);
+        }
+
+        async void OnReloadButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (isReloading)
+                return;
+            isReloading = true;
+            reloadButton.Content = Application.Current.FindResource(IconKeys.LoadingAnimation);
             try
             {
-                var plugins = await Task.Run(() => Vst3PluginScanner.GetEffectPlugins());
+                var plugins = await Task.Run(() => Vst3PluginScanner.GetEffectPlugins(refresh: true));
                 ApplyItems(plugins);
             }
             catch (Exception ex)
             {
-                // 次回ドロップダウンで再試行できるようにする
-                isScanRequested = false;
-                Log.Default.Write("VST3プラグインのスキャンに失敗しました。", ex);
+                Log.Default.Write("VST3プラグインの再スキャンに失敗しました。", ex);
+            }
+            finally
+            {
+                reloadButton.Content = Application.Current.FindResource(IconKeys.Refresh);
+                isReloading = false;
             }
         }
 
         void ApplyItems(IReadOnlyList<Vst3EffectPluginInfo> plugins)
         {
-            var selected = SelectedItem as Vst3PluginItem;
+            var selected = comboBox.SelectedItem as Vst3PluginItem;
             var items = plugins.Select(x => new Vst3PluginItem(x)).ToList();
             // 現在の選択がスキャン結果に含まれない場合（アンインストール済み等）も表示は維持する
             if (selected is not null && !items.Any(x => IsSameId(x.ClassId, selected.ClassId) && IsSameId(x.ModulePath, selected.ModulePath)))
@@ -190,9 +230,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             isUpdatingDisplay = true;
             try
             {
-                ItemsSource = items;
+                comboBox.ItemsSource = items;
                 if (selected is not null)
-                    SelectedItem = items.FirstOrDefault(x => IsSameId(x.ClassId, selected.ClassId) && IsSameId(x.ModulePath, selected.ModulePath));
+                    comboBox.SelectedItem = items.FirstOrDefault(x => IsSameId(x.ClassId, selected.ClassId) && IsSameId(x.ModulePath, selected.ModulePath));
             }
             finally
             {
@@ -204,7 +244,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             if (isUpdatingDisplay || ItemProperties is null)
                 return;
-            if (SelectedItem is not Vst3PluginItem item)
+            if (comboBox.SelectedItem is not Vst3PluginItem item)
                 return;
             var info = item.Info;
 
