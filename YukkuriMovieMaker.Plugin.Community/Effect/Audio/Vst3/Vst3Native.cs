@@ -31,9 +31,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             {
                 if (libraryName is not DllName)
                     return IntPtr.Zero;
+                // IntPtr.Zeroを返すとCLRの既定探索が旧配置の残骸DLLをバージョン検査なしでロードしうるため、
+                // 所定のパスから読み込めない場合は例外で探索を打ち切る
                 var path = Path.Combine(Vst3BinaryDirectory, $"{DllName}.dll");
-                if (!File.Exists(path) || !NativeLibrary.TryLoad(path, out var handle))
-                    return IntPtr.Zero;
+                if (!File.Exists(path))
+                    throw new DllNotFoundException($"{DllName}.dllが見つかりません。path={path}");
+                if (!NativeLibrary.TryLoad(path, out var handle))
+                    throw new DllNotFoundException($"{DllName}.dllを読み込めませんでした。path={path}");
                 if (TryGetBridgeApiVersion(handle, out var version)
                     && version == RequiredBridgeApiVersion)
                     return handle;

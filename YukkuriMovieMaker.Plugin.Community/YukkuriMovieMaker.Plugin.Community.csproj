@@ -103,9 +103,9 @@
 	<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
   </ItemGroup>
 
-  <!--ビルド後、YMM4フォルダに関連ファイルをコピーする-->
+  <!--ビルド後、YMM4フォルダに関連ファイルをコピーする（Resources\bin\x64\vst3等のサブフォルダーも含む）-->
   <Target Condition="'$(YMM4Proj)' == ''" Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(TargetDir)&quot; &quot;$(YMM4DirPath)&quot; /y" />
+    <Exec Command="xcopy &quot;$(TargetDir)&quot; &quot;$(YMM4DirPath)&quot; /y /s" />
   </Target>
 
   <ItemGroup>

@@ -40,9 +40,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             var results = new List<Vst3EffectPluginInfo>();
             var remaining = new Queue<string>(modulePaths);
+            var hasCompletedAnyModule = false;
             while (remaining.Count > 0)
             {
-                if (!ScanCore(scannerPath, remaining, results))
+                if (!ScanCore(scannerPath, remaining, results, ref hasCompletedAnyModule))
                     break;
             }
             return results;
@@ -52,7 +53,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         /// 子プロセス1回分のスキャン。走査できたモジュールはremainingから取り除く。
         /// 継続すべき（スキップして再起動する）場合はtrueを返す
         /// </summary>
-        static bool ScanCore(string scannerPath, Queue<string> remaining, List<Vst3EffectPluginInfo> results)
+        static bool ScanCore(string scannerPath, Queue<string> remaining, List<Vst3EffectPluginInfo> results, ref bool hasCompletedAnyModule)
         {
             var startInfo = new ProcessStartInfo
             {
@@ -95,7 +96,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     if (!readTask.Wait(ModuleTimeout))
                     {
                         Kill(process);
-                        return SkipCurrentModule(remaining, currentModule, "モジュールが応答しません");
+                        return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, "モジュールが応答しません");
                     }
                     var line = readTask.Result;
                     if (line is null)
@@ -114,6 +115,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                         results.AddRange(pendingClasses);
                         pendingClasses.Clear();
                         currentModule = null;
+                        hasCompletedAnyModule = true;
                     }
                     else if (line.StartsWith("CLASS\t", StringComparison.Ordinal) && currentModule is not null)
                     {
@@ -136,11 +138,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 if (!process.WaitForExit(5000))
                     Kill(process);
                 if (currentModule is not null)
-                    return SkipCurrentModule(remaining, currentModule, $"スキャナーが異常終了しました。exitCode={process.ExitCode}");
+                    return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, $"スキャナーが異常終了しました。exitCode={process.ExitCode}");
                 if (remaining.Count == 0)
                     return false;
-                // 走査を1件も開始できない異常終了。空の結果を正常扱いしないよう失敗として伝播させる
-                throw new InvalidOperationException($"VST3スキャナーが異常終了しました。残り{remaining.Count}件。exitCode={process.ExitCode}");
+                return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, $"スキャナーが異常終了しました。exitCode={process.ExitCode}");
             }
             catch
             {
@@ -149,12 +150,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             }
         }
 
-        static bool SkipCurrentModule(Queue<string> remaining, string? currentModule, string reason)
+        static bool SkipCurrentModule(Queue<string> remaining, string? currentModule, bool hasCompletedAnyModule, string reason)
         {
-            // 1件も走査開始せずに失敗した場合は継続しても回復しない。
-            // 空の結果を正常なスキャン結果としてキャッシュしないよう、失敗として伝播させる
             if (currentModule is null)
+            {
+                // 走査済みモジュールがあるのに原因を特定できず失敗した場合、プロセス内フォールバックへ
+                // 進めると原因プラグインを本体へロードして隔離が破れるため、部分結果のまま打ち切る
+                if (hasCompletedAnyModule)
+                {
+                    Log.Default.Write($"VST3スキャナーが異常終了したため、残り{remaining.Count}件の走査を中断します。reason={reason}");
+                    return false;
+                }
+                // 1件も走査できずに失敗した場合はスキャナー自体の問題。
+                // 空の結果を正常なスキャン結果としてキャッシュしないよう、失敗として伝播させる
                 throw new InvalidOperationException($"VST3スキャナーが走査を開始できませんでした。reason={reason}");
+            }
             // 通常は#BEGIN時に取り除かれているが、取り除けていない場合の再起動ループをここで防ぐ
             if (remaining.Count > 0 && string.Equals(remaining.Peek(), currentModule, StringComparison.OrdinalIgnoreCase))
                 remaining.Dequeue();
