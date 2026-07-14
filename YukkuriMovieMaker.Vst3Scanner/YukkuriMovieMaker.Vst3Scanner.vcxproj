@@ -62,7 +62,6 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\vst3sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -95,36 +94,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Ymm4Vst3Scanner.cpp" />
-    <ClCompile Include="..\vst3sdk\pluginterfaces\base\conststringtable.cpp" />
-    <ClCompile Include="..\vst3sdk\pluginterfaces\base\coreiids.cpp" />
-    <ClCompile Include="..\vst3sdk\pluginterfaces\base\funknown.cpp" />
-    <ClCompile Include="..\vst3sdk\pluginterfaces\base\ustring.cpp" />
-    <ClCompile Include="..\vst3sdk\base\source\baseiids.cpp" />
-    <ClCompile Include="..\vst3sdk\base\source\fbuffer.cpp" />
-    <ClCompile Include="..\vst3sdk\base\source\fdebug.cpp" />
-    <ClCompile Include="..\vst3sdk\base\source\fdynlib.cpp" />
-    <ClCompile Include="..\vst3sdk\base\source\fobject.cpp" />
-    <ClCompile Include="..\vst3sdk\base\source\fstreamer.cpp" />
-    <ClCompile Include="..\vst3sdk\base\source\fstring.cpp" />
-    <ClCompile Include="..\vst3sdk\base\source\timer.cpp" />
-    <ClCompile Include="..\vst3sdk\base\source\updatehandler.cpp" />
-    <ClCompile Include="..\vst3sdk\base\thread\source\fcondition.cpp" />
-    <ClCompile Include="..\vst3sdk\base\thread\source\flock.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\common\commoniids.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\common\commonstringconvert.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\common\memorystream.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\common\threadchecker_win32.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\connectionproxy.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\eventlist.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\hostclasses.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\module.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\module_win32.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\parameterchanges.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\pluginterfacesupport.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\plugprovider.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\hosting\processdata.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\utility\stringconvert.cpp" />
-    <ClCompile Include="..\vst3sdk\public.sdk\source\vst\vstinitiids.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

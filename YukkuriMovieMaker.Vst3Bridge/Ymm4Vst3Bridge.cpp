@@ -5,6 +5,9 @@
 // 処理モデルはSDK付属サンプル audiohost / editorhost を踏襲している。
 //-----------------------------------------------------------------------------
 
+#define YMM4VST3_BRIDGE_EXPORTS
+#include "Ymm4Vst3BridgeApi.h"
+
 #include <windows.h>
 #include <objbase.h>
 
@@ -37,8 +40,6 @@
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;
-
-#define YMM4VST3_API extern "C" __declspec(dllexport)
 
 namespace
 {
@@ -364,7 +365,7 @@ namespace
 // exportの追加・変更で古いDLLとの互換性が失われる場合は更新すること。
 YMM4VST3_API int32_t Ymm4Vst3GetApiVersion()
 {
-    return 1;
+    return Ymm4Vst3ApiVersion;
 }
 
 YMM4VST3_API void* Ymm4Vst3ModuleOpen(const char* utf8Path, char* errorBuf, int32_t errorBufSize)
@@ -386,17 +387,6 @@ YMM4VST3_API void Ymm4Vst3ModuleClose(void* moduleHandle)
 {
     delete static_cast<BridgeModule*>(moduleHandle);
 }
-
-// C#側 Vst3Native.ClassInfo と同一レイアウトを保つこと
-struct Ymm4Vst3ClassInfo
-{
-    char classId[64];
-    char name[256];
-    char vendor[256];
-    char category[128];
-    char subCategories[256];
-    char version[64];
-};
 
 YMM4VST3_API int32_t Ymm4Vst3ModuleGetClassCount(void* moduleHandle)
 {

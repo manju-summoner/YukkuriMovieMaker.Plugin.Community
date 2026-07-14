@@ -94,6 +94,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Ymm4Vst3BridgeApi.h" />
     <ClCompile Include="Ymm4Vst3Bridge.cpp" />
     <ClCompile Include="..\vst3sdk\pluginterfaces\base\conststringtable.cpp" />
     <ClCompile Include="..\vst3sdk\pluginterfaces\base\coreiids.cpp" />
