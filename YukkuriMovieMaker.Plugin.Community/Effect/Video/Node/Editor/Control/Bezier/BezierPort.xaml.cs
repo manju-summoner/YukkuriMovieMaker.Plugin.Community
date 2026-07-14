@@ -8,11 +8,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.Be
 
 public partial class BezierPort
 {
-    /// <summary>
-    ///     初期状態(直線)を表すシリアライズ済み文字列。
-    ///     ValueProperty のデフォルト値、および BezierPortControlAttribute.GetDefaultValue の
-    ///     既定値として共通で用いる。
-    /// </summary>
     public static readonly string LinearDefault = CreateLinearDefault();
 
     public static readonly DependencyProperty ValueProperty =
@@ -61,7 +56,7 @@ public partial class BezierPort
         }
     }
 
-    public object? SelectedPresetItem
+    public BezierEasingPresetBase? SelectedPresetItem
     {
         get;
         set
@@ -72,7 +67,7 @@ public partial class BezierPort
         }
     }
 
-    public IReadOnlyList<BezierEasingPreset> Presets => BezierEasingPresets.All;
+    public IReadOnlyList<BezierEasingPresetBase> Presets => BezierEasingPresets.All;
 
     public string Value
     {
@@ -103,7 +98,7 @@ public partial class BezierPort
     private static string CreateLinearDefault()
     {
         var curve = new BezierCurve();
-        BezierEasingPresets.Apply(curve, BezierEasingPresets.All[0]);
+        BezierEasingPresets.All[0].Apply(curve);
         return BezierSerializer.Serialize(curve);
     }
 
@@ -130,10 +125,7 @@ public partial class BezierPort
         }
     }
 
-    /// <summary>
-    ///     指定されたシリアライズ値に一致するプリセットを検索します。
-    /// </summary>
-    private BezierEasingPreset? FindMatchingPreset(string serializedValue)
+    private BezierEasingPresetBase? FindMatchingPreset(string serializedValue)
     {
         try
         {
@@ -142,7 +134,7 @@ public partial class BezierPort
             foreach (var preset in Presets)
             {
                 var testCurve = new BezierCurve();
-                BezierEasingPresets.Apply(testCurve, preset);
+                preset.Apply(testCurve);
                 var testSerialized = BezierSerializer.Serialize(testCurve);
 
                 if (testSerialized == serializedValue)
@@ -190,10 +182,6 @@ public partial class BezierPort
         EndEditCommand?.Execute(null);
     }
 
-    /// <summary>
-    ///     テキストボックスの確定操作(LostFocus/Enter)から呼ばれる。
-    ///     編集中の1文字ごとにグラフへ通知することを避けるため、確定時にのみ Value へ反映する。
-    /// </summary>
     internal void OnTextBoxCommit()
     {
         if (_isApplyingValue)
@@ -237,11 +225,7 @@ public partial class BezierPort
         EndEditCommand?.Execute(null);
     }
 
-    /// <summary>
-    ///     コンボボックスでプリセットが選択された時に呼ばれる。
-    ///     プリセットの適用は単一の確定操作として即座にコミットする。
-    /// </summary>
-    internal void OnPresetSelected(BezierEasingPreset? preset)
+    internal void OnPresetSelected(BezierEasingPresetBase? preset)
     {
         if (preset == null)
             return;
@@ -249,7 +233,7 @@ public partial class BezierPort
         if (_isApplyingValue)
             return;
 
-        BezierEasingPresets.Apply(ViewModel.Curve, preset);
+        preset.Apply(ViewModel.Curve);
 
         Editor.InvalidateVisual();
         Editor.StartPreview();
@@ -294,6 +278,6 @@ public partial class BezierPort
 
     internal void OnPresetComboBoxSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        OnPresetSelected((sender as ComboBox)?.SelectedItem as BezierEasingPreset);
+        OnPresetSelected(sender is ComboBox { SelectedItem: BezierEasingPresetBase preset } ? preset : null);
     }
 }

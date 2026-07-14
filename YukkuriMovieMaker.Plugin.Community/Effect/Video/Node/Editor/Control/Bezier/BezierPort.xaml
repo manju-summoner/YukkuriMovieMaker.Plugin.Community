@@ -11,8 +11,18 @@
     d:DesignHeight="270" d:DesignWidth="220"
     d:DataContext="{d:DesignInstance local:BezierPort}">
     <UserControl.Resources>
-        <ResourceDictionary
-            Source="pack://application:,,,/YukkuriMovieMaker.Plugin.Community;component/Effect/Video/Node/Editor/View/Style/Style.xaml" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary
+                    Source="pack://application:,,,/YukkuriMovieMaker.Plugin.Community;component/Effect/Video/Node/Editor/View/Style/Style.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <CollectionViewSource x:Key="GroupedPresets"
+                                  Source="{Binding Presets, RelativeSource={RelativeSource AncestorType=local:BezierPort}}">
+                <CollectionViewSource.GroupDescriptions>
+                    <PropertyGroupDescription PropertyName="Category" />
+                </CollectionViewSource.GroupDescriptions>
+            </CollectionViewSource>
+        </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -39,9 +49,37 @@
                            GridBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                            AccentBrush="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}" />
         <ComboBox Grid.Row="2"
-                  ItemsSource="{Binding Presets, RelativeSource={RelativeSource AncestorType=local:BezierPort}}"
-                  DisplayMemberPath="Name"
+                  ItemsSource="{Binding Source={StaticResource GroupedPresets}}"
                   SelectedItem="{Binding SelectedPresetItem, RelativeSource={RelativeSource AncestorType=local:BezierPort}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Null}}"
-                  SelectionChanged="OnPresetComboBoxSelectionChanged" />
+                  SelectionChanged="OnPresetComboBoxSelectionChanged">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock x:Name="DisplayArea" Text="{Binding Name}" />
+
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ComboBoxItem}}"
+                                     Value="{x:Null}">
+                            <Setter TargetName="DisplayArea" Property="Text">
+                                <Setter.Value>
+                                    <MultiBinding StringFormat="{}{0} [{1}]">
+                                        <Binding Path="Category" />
+                                        <Binding Path="Name" />
+                                    </MultiBinding>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+            <ComboBox.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold" Margin="4,2" />
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+            </ComboBox.GroupStyle>
+        </ComboBox>
     </Grid>
 </controlbase:PortControlBase>
