@@ -832,6 +832,15 @@ YMM4VST3_API int32_t Ymm4Vst3PluginSetState(
     if (!plugin)
         return 0;
 
+    // setStateはSetup（setActive）前に行うのが契約のため、Setup済み・処理中のインスタンスへの復元
+    // （モードレスエディターのUndo/Redo反映）では処理を一時停止してから復元する
+    const bool wasProcessing = plugin->processingActive;
+    if (wasProcessing)
+    {
+        plugin->processor->setProcessing(false);
+        plugin->component->setActive(false);
+    }
+
     if (componentData && componentSize > 0)
     {
         auto stream = owned(new MemoryStream(const_cast<uint8_t*>(componentData), componentSize));
@@ -847,6 +856,16 @@ YMM4VST3_API int32_t Ymm4Vst3PluginSetState(
     {
         auto stream = owned(new MemoryStream(const_cast<uint8_t*>(controllerData), controllerSize));
         plugin->controller->setState(stream);
+    }
+
+    if (wasProcessing)
+    {
+        if (plugin->component->setActive(true) != kResultOk)
+        {
+            plugin->processingActive = false;
+            return 0;
+        }
+        plugin->processor->setProcessing(true);
     }
     return 1;
 }

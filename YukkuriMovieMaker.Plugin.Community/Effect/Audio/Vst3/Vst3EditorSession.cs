@@ -154,8 +154,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             if (StateEquals(effect.ComponentState, componentState) && StateEquals(effect.ControllerState, controllerState))
                 return;
 
-            // 接続が外れている間（コントロール再構築の隙間等）でも保存は行う。
-            // その場合Undoユニットの確定は次の操作に相乗りするが、データは失われない
+            // 接続が外れている間（コントロール再構築の隙間や、編集後500ms以内の選択解除によるクローズ）でも保存は行う。
+            // その場合Undoユニットの確定は次の操作に相乗りするが、データは失われない。
+            // ※PropertiesEditorはClearBindingsの前にBeginEdit/EndEditの購読を解除するため、切断時点での確定は構造的に不可能
             var targets = attachedControl?.GetTargetEffects().ToArray() is { Length: > 0 } bound ? bound : [effect];
             isSelfWriting = true;
             try
@@ -207,6 +208,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                             return;
                         // 反映で生じる変化を編集として保存し直さない（Undo直後に同じ状態を書き戻すのを防ぐ）
                         hasPendingEdits = false;
+                        // 巻き戻し前のGUI編集値が残っていると、音声プロセッサ再生成時のReplayLatestが
+                        // 復元済み状態を上書きするため、パラメーターチャンネルも破棄する
+                        effect.ParameterChannel.Clear();
                         // 未保存状態（null）へのUndoは、エディターを開いた時点の状態へ戻す
                         plugin.SetState(
                             effect.ComponentState ?? initialComponentState,

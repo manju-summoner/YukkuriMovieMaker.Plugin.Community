@@ -48,6 +48,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 subscriptions.Remove(subscription);
         }
 
+        /// <summary>
+        /// 配信済み・保留中のパラメーター値をすべて破棄する。
+        /// Undo/Redoで状態を巻き戻したとき、巻き戻し前のGUI編集値が
+        /// ReplayLatest経由で復元状態を上書きしないようにするために使う
+        /// </summary>
+        public void Clear()
+        {
+            lock (sync)
+            {
+                latestValues.Clear();
+                foreach (var subscription in subscriptions)
+                    subscription.ClearPending();
+            }
+        }
+
         void CopyLatestTo(Vst3ParameterSubscription subscription)
         {
             foreach (var (paramId, normalizedValue) in latestValues)
@@ -65,6 +80,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             if (!isDisposed)
                 pendingValues[paramId] = normalizedValue;
         }
+
+        internal void ClearPending() => pendingValues.Clear();
 
         public void ReplayLatest() => owner.ReplayLatest(this);
 
