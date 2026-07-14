@@ -162,7 +162,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             if (plugin.IsDisposed)
                 return;
-            var (componentState, controllerState) = plugin.GetState();
+            byte[]? componentState;
+            byte[]? controllerState;
+            // 音声フィードのワーカースレッドとプラグイン呼び出しを直列化する
+            lock (plugin.SyncRoot)
+                (componentState, controllerState) = plugin.GetState();
             if (StateEquals(effect.ComponentState, componentState) && StateEquals(effect.ControllerState, controllerState))
                 return;
 
@@ -224,10 +228,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                         // 復元済み状態を上書きするため、編集を配信していた全エフェクトのチャンネルを破棄する
                         foreach (var channel in parameterTargets.Select(x => x.ParameterChannel).Distinct())
                             channel.Clear();
-                        // 未保存状態（null）へのUndoは、エディターを開いた時点の状態へ戻す
-                        plugin.SetState(
-                            effect.ComponentState ?? initialComponentState,
-                            effect.ControllerState ?? initialControllerState);
+                        // 未保存状態（null）へのUndoは、エディターを開いた時点の状態へ戻す。
+                        // 音声フィードのワーカースレッドとプラグイン呼び出しを直列化する
+                        lock (plugin.SyncRoot)
+                        {
+                            plugin.SetState(
+                                effect.ComponentState ?? initialComponentState,
+                                effect.ControllerState ?? initialControllerState);
+                        }
                     });
                     break;
             }
@@ -243,7 +251,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             effect.PropertyChanged -= OnEffectPropertyChanged;
             window.ParameterForwarded -= OnParameterForwarded;
             window.Closed -= OnWindowClosed;
-            plugin.Dispose();
+            // 音声フィードのワーカーはJoinせず停止要求のみで閉じるため（Vst3EditorAudioFeeder.Dispose参照）、
+            // 破棄もSyncRootで直列化する。ワーカーは次のゲート取得時にIsDisposedを検知して自然終了する
+            lock (plugin.SyncRoot)
+                plugin.Dispose();
             sessions.Remove(effect);
         }
     }

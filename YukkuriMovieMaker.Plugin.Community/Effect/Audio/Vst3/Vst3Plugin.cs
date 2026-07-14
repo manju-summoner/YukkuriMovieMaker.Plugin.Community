@@ -6,9 +6,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     /// <summary>
     /// VST3プラグインインスタンス1つ分のラッパー。
     /// スレッドセーフではない。呼び出し側で同一インスタンスへの並行アクセスを避けること。
+    /// 複数スレッドから使用する場合はSyncRootで全呼び出しを直列化する
+    /// （エディター用インスタンスはUIスレッドと音声フィードのワーカースレッドが共有する）。
     /// </summary>
     internal sealed unsafe class Vst3Plugin : IDisposable
     {
+        /// <summary>
+        /// 複数スレッドからの呼び出しを直列化するためのゲート
+        /// </summary>
+        public object SyncRoot { get; } = new();
+
         readonly Vst3Native.MeterParameterChangeCallback meterParameterChangeCallback;
         IntPtr handle;
         Action<uint, double, long>? meterParameterChanged;

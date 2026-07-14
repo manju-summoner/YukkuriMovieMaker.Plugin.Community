@@ -79,6 +79,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var owner = Window.GetWindow(this);
             Vst3Plugin? plugin = null;
             Vst3View? view = null;
+            Vst3EditorAudioFeeder? audioFeeder = null;
             Vst3EditorWindow? window = null;
             try
             {
@@ -104,9 +105,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 var meterForwarder = new Vst3EditorMeterForwarder(
                     [effect],
                     () => (Vst3EditorSession.GetCurrentEditorInfo(effect) ?? editorInfo)?.ItemPosition.Time ?? TimeSpan.MaxValue);
-                var audioFeeder = editorInfo is null
+                audioFeeder = editorInfo is null
                     ? null
-                    : new Vst3EditorAudioFeeder(() => Vst3EditorSession.GetCurrentEditorInfo(effect) ?? editorInfo, effect, editorInfo.VideoInfo.Hz);
+                    : new Vst3EditorAudioFeeder(() => Vst3EditorSession.GetCurrentEditorInfo(effect) ?? editorInfo, effect, plugin, editorInfo.VideoInfo.Hz);
                 window = new Vst3EditorWindow(plugin, view, parameterForwarder, meterForwarder, audioFeeder)
                 {
                     Owner = owner,
@@ -133,8 +134,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 }
                 else
                 {
+                    // フィーダーはワーカースレッドを内包するため、プラグイン破棄より先に停止を要求し、
+                    // 破棄はワーカーの呼び出しと直列化する
+                    audioFeeder?.Dispose();
                     view?.Dispose();
-                    plugin?.Dispose();
+                    if (plugin is not null)
+                    {
+                        lock (plugin.SyncRoot)
+                            plugin.Dispose();
+                    }
                 }
             }
         }

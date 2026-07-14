@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -25,7 +26,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         readonly Vst3EditorParameterForwarder parameterForwarder;
         readonly Vst3EditorMeterForwarder meterForwarder;
         readonly Vst3EditorAudioFeeder? audioFeeder;
-        readonly Action<uint, double, long> fedMeterForward;
         readonly DispatcherTimer pumpTimer;
         readonly bool isContentScaleSupported;
 
@@ -52,7 +52,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             this.parameterForwarder = parameterForwarder;
             this.meterForwarder = meterForwarder;
             this.audioFeeder = audioFeeder;
-            fedMeterForward = (paramId, normalizedValue, _) => this.plugin.SetControllerParameter(paramId, normalizedValue);
             isContentScaleSupported = view.IsContentScaleSupported;
             baseSize = view.GetSize();
 
@@ -75,18 +74,35 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             {
                 if (plugin.IsDisposed)
                     return;
-                // 再生・シークで位置が動いた場合は実音声を処理させ、波形等のGUI表示を追従させる
-                var fed = this.audioFeeder?.Feed(plugin) == true;
-                var parameterCount = parameterForwarder.PumpAndForward(plugin, pump: !fed);
-                if (fed)
+                // 再生・シークで位置が動いた場合はワーカースレッドに実音声を処理させ、波形等のGUI表示を追従させる
+                this.audioFeeder?.UpdateTarget();
+
+                // ワーカーがProcess中ならこのティックはスキップし、UIをブロックしない（次ティックで回収される）
+                var parameterCount = 0;
+                var lockTaken = false;
+                try
                 {
-                    // 実音声を処理した直後の出力パラメーター（メーター等）をそのままGUIへ反映する
-                    plugin.DrainMeterParameterChanges(fedMeterForward);
+                    Monitor.TryEnter(plugin.SyncRoot, ref lockTaken);
+                    if (!lockTaken)
+                        return;
+                    var fed = this.audioFeeder?.IsActivelyFeeding == true;
+                    parameterCount = parameterForwarder.PumpAndForward(plugin, pump: !fed);
+                    if (fed)
+                    {
+                        // 実音声を処理した直後の出力パラメーター（メーター等）をそのままGUIへ反映する
+                        this.audioFeeder!.ApplyMeterValues();
+                    }
+                    else
+                    {
+                        meterForwarder.Apply(plugin);
+                    }
                 }
-                else
+                finally
                 {
-                    meterForwarder.Apply(plugin);
+                    if (lockTaken)
+                        Monitor.Exit(plugin.SyncRoot);
                 }
+                // セッションの編集確定（SaveStates→GetState）が再度ロックを取るため、解放後に通知する
                 ParameterForwarded?.Invoke(parameterCount);
             };
 
@@ -177,11 +193,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             if (e.Cancel)
                 return;
             pumpTimer.Stop();
+            // 音声フィードへ停止を要求する（Joinはしない。以降のプラグイン呼び出しはSyncRootで直列化済み）
+            audioFeeder?.Dispose();
             // 最後の編集をプロセッサ状態へ反映してからビューを外す
             if (!plugin.IsDisposed)
             {
-                parameterForwarder.PumpAndForward(plugin);
-                meterForwarder.Apply(plugin);
+                lock (plugin.SyncRoot)
+                {
+                    parameterForwarder.PumpAndForward(plugin);
+                    meterForwarder.Apply(plugin);
+                }
             }
             view.Dispose();
         }
@@ -189,13 +210,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         protected override void OnClosed(EventArgs e)
         {
             // オーナーウィンドウの破棄経由で閉じられた場合はOnClosingを経由しないため、ここでも停止・保存・破棄する。
+            // 音声フィードの停止要求はプラグイン破棄（Closedイベントハンドラー）より先に行う。
             // また、Closedイベントのハンドラー（Vst3EditorSessionのプラグイン破棄）より先にビューと子ウィンドウを
             // 破棄しないと、アンロード済みモジュールのビュー破棄処理を呼んでクラッシュする
             pumpTimer.Stop();
-            if (!plugin.IsDisposed && !view.IsDisposed)
-                parameterForwarder.PumpAndForward(plugin);
-            view.Dispose();
             audioFeeder?.Dispose();
+            if (!plugin.IsDisposed && !view.IsDisposed)
+            {
+                lock (plugin.SyncRoot)
+                    parameterForwarder.PumpAndForward(plugin);
+            }
+            view.Dispose();
             meterForwarder.Dispose();
             host.Dispose();
             base.OnClosed(e);
