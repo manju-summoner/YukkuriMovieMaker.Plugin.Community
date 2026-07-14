@@ -32,6 +32,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         IAudioStream? source;
         bool isSourceUnavailable;
         long nextPosition = -1;
+        long lastDisplayTarget = -1;
         long latencyLeadSamples;
         int overBudgetCount;
         float[] readBuffer = [];
@@ -71,11 +72,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var startTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
 
             // シーク（後退・大きなジャンプ）と申告レイテンシの変更（kLatencyChanged）は、
-            // 内部状態をリセットして直前から処理し直す
-            if (nextPosition < 0
+            // 内部状態をリセットして直前から処理し直す。
+            // 判定はフィード位置との距離ではなく表示位置の変化で行う。距離基準にすると、
+            // 申告レイテンシが1チャンクを超えるプラグインでプライム中の残量が毎ティック
+            // ジャンプ扱いになり、リセットと巻き戻しを繰り返して補正位置へ到達できない
+            var isDiscontinuous = nextPosition < 0
                 || latencySamples != latencyLeadSamples
-                || target < nextPosition
-                || target - nextPosition > MaxChunkFrames * 2L)
+                || displayTarget < lastDisplayTarget
+                || displayTarget - lastDisplayTarget > MaxChunkFrames * 2L
+                // フィードが実時間に追いつけず遅れが積み上がった場合は読み飛ばして追いつく
+                || target - nextPosition > latencySamples + MaxChunkFrames * 2L * 2;
+            lastDisplayTarget = displayTarget;
+            if (isDiscontinuous)
             {
                 latencyLeadSamples = latencySamples;
                 // 非連続な音声を投入する前に内部状態（ディレイライン等）をリセットし、移動前の音声の混入を防ぐ
