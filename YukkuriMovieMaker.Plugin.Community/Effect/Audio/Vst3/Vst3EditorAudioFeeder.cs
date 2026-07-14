@@ -18,6 +18,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         /// </summary>
         const int MaxChunkFrames = 8192;
 
+        /// <summary>
+        /// UIスレッドで実行するため、1回のFeedに使ってよい処理時間。
+        /// 超過が続く場合は重いエフェクト構成とみなしてフィードを停止する（表示は従来どおり凍結）
+        /// </summary>
+        const double MaxFeedMilliseconds = 8;
+        const int MaxOverBudgetCount = 10;
+
         // IEditorInfoは生成時点の値を固定したスナップショットのため、再生位置へ追従できるよう常に最新を取得する
         readonly Func<IEditorInfo?> getEditorInfo;
         readonly Vst3AudioEffect effect;
@@ -25,6 +32,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         IAudioStream? source;
         bool isSourceUnavailable;
         long nextPosition = -1;
+        long latencyLeadSamples;
+        int overBudgetCount;
         float[] readBuffer = [];
         float[] bufferL = [];
         float[] bufferR = [];
@@ -49,14 +58,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             if (stream is null)
                 return false;
 
-            var target = (long)(editorInfo.ItemPosition.Time.TotalSeconds * hz) * 2;
-            target = Math.Clamp(target - target % 2, 0, stream.Duration);
+            var displayTarget = (long)(editorInfo.ItemPosition.Time.TotalSeconds * hz) * 2;
+            displayTarget = Math.Clamp(displayTarget - displayTarget % 2, 0, stream.Duration);
+            // 実再生と同様に、申告レイテンシ分だけ入力を先行させて表示位置と実際に聴こえる音を一致させる
+            var target = Math.Min(displayTarget + latencyLeadSamples, stream.Duration);
+            target -= target % 2;
             if (target == nextPosition)
                 return false;
+
+            var startTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
 
             // シーク（後退・大きなジャンプ）時は直前の1チャンク分から処理し直して表示を追従させる
             if (nextPosition < 0 || target < nextPosition || target - nextPosition > MaxChunkFrames * 2L)
             {
+                latencyLeadSamples = Math.Max(0, plugin.GetLatencySamples()) * 2L;
+                target = Math.Min(displayTarget + latencyLeadSamples, stream.Duration);
+                target -= target % 2;
+                // 非連続な音声を投入する前に内部状態（ディレイライン等）をリセットし、移動前の音声の混入を防ぐ
+                plugin.Reset();
                 nextPosition = Math.Max(0, target - MaxChunkFrames * 2L);
                 nextPosition -= nextPosition % 2;
             }
@@ -100,6 +119,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     nextPosition / 2,
                     new Vst3Transport(effect.Tempo, effect.TimeSignatureNumerator, effect.TimeSignatureDenominator, effect.IsTempoSyncEnabled));
                 nextPosition += read;
+
+                // UIスレッドを継続的にブロックしないよう、処理時間の超過が続いたらフィードを停止する
+                var elapsed = System.Diagnostics.Stopwatch.GetElapsedTime(startTimestamp);
+                if (elapsed.TotalMilliseconds > MaxFeedMilliseconds)
+                {
+                    if (++overBudgetCount >= MaxOverBudgetCount)
+                    {
+                        Log.Default.Write($"音声処理が重いため、VST3エディターへの音声転送を停止します。elapsed={elapsed.TotalMilliseconds:F1}ms");
+                        Dispose();
+                    }
+                }
+                else
+                {
+                    overBudgetCount = 0;
+                }
                 return succeeded;
             }
             catch (Exception e)
