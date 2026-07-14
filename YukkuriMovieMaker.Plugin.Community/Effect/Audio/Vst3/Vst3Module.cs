@@ -7,9 +7,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     /// VST3モジュール（.vst3ファイル/バンドル）1つ分のラッパー。
     /// プラグインインスタンス生成後は、インスタンス側がネイティブ層でモジュール参照を保持するため、
     /// このラッパーを先に破棄しても問題ない。
+    /// 一度開いたモジュールのDLLはプロセス終了までピン留めされ、実行中にアンロードされることはない。
     /// </summary>
     internal sealed unsafe class Vst3Module : IDisposable
     {
+        // 一度ロードしたモジュールはプロセス終了までアンロードしない（一般的なDAWと同じ方針）。
+        // 全インスタンスの破棄でDLLがアンマップされると、プラグインが登録したままの
+        // ウィンドウプロシージャやフックが無効な飛び先になり、以後のメッセージ配送で
+        // クラッシュする（CFGのFAST_FAIL_GUARD_ICALL_CHECK_FAILURE。ZL Equalizer 2で実証）
+        static readonly object pinSync = new();
+        static readonly Dictionary<string, IntPtr> pinnedModules = new(StringComparer.OrdinalIgnoreCase);
+
         IntPtr handle;
 
         Vst3Module(IntPtr handle)
@@ -23,7 +31,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var handle = Vst3Native.Ymm4Vst3ModuleOpen(path, errorBuf, 1024);
             if (handle == IntPtr.Zero)
                 throw new InvalidOperationException($"VST3モジュールを開けませんでした。path={path} error={Vst3Native.FixedUtf8ToString(errorBuf, 1024)}");
+            PinModule(path);
             return new Vst3Module(handle);
+        }
+
+        /// <summary>
+        /// モジュールへの参照を1つ確保したままにして、プロセス終了までDLLをピン留めする
+        /// </summary>
+        static void PinModule(string path)
+        {
+            lock (pinSync)
+            {
+                if (pinnedModules.ContainsKey(path))
+                    return;
+                var errorBuf = stackalloc byte[1024];
+                var pin = Vst3Native.Ymm4Vst3ModuleOpen(path, errorBuf, 1024);
+                if (pin != IntPtr.Zero)
+                    pinnedModules[path] = pin;
+            }
         }
 
         /// <summary>

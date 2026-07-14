@@ -221,28 +221,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             }
             try
             {
-                using var module = Vst3Module.Open(item.PluginPath);
-                var newPlugin = module.CreatePlugin(item.ClassId);
-                try
-                {
-                    newPlugin.SetState(
-                        hasPendingState ? pendingComponentState : item.ComponentState,
-                        hasPendingState ? pendingControllerState : item.ControllerState);
-                    newPlugin.Setup(Input!.Hz, MaxBlockFrames);
-                    parameterSubscription.ReplayLatest();
-                    parameterSubscription.ApplyTo(newPlugin);
-                }
-                catch
-                {
-                    newPlugin.Dispose();
-                    throw;
-                }
-                plugin = newPlugin;
-                latencyFrames = Math.Max(0, plugin.GetLatencySamples());
-                pendingComponentState = null;
-                pendingControllerState = null;
-                hasPendingState = false;
-                disposer.Collect(plugin);
+                // VST3の規約どおり、モジュールロード〜セットアップはUIスレッド（メインスレッド）で行う。
+                // JUCE等のフレームワークは最初にインスタンス生成されたスレッドを「メッセージスレッド」として
+                // 固定するため、音声スレッドで生成するとエディター表示（UIスレッドのattach）が
+                // メッセージスレッドの応答待ちで永久にフリーズする。
+                // ※逆方向のデッドロックを防ぐため、UIスレッドが音声系スレッドの終了を同期待ちしないことが前提
+                //   （TimelineAudioPlayerのStopオフロード・Vst3EditorAudioFeederのJoin廃止）
+                var dispatcher = System.Windows.Application.Current?.Dispatcher;
+                if (dispatcher is not null && !dispatcher.CheckAccess() && !dispatcher.HasShutdownStarted)
+                    dispatcher.Invoke(CreatePlugin);
+                else
+                    CreatePlugin();
             }
             catch (Exception e)
             {
@@ -250,6 +239,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 isLoadFailed = true;
                 Log.Default.Write($"VST3プラグインの読み込みに失敗しました。path={item.PluginPath} classId={item.ClassId}", e);
             }
+        }
+
+        void CreatePlugin()
+        {
+            using var module = Vst3Module.Open(item.PluginPath);
+            var newPlugin = module.CreatePlugin(item.ClassId);
+            try
+            {
+                newPlugin.SetState(
+                    hasPendingState ? pendingComponentState : item.ComponentState,
+                    hasPendingState ? pendingControllerState : item.ControllerState);
+                newPlugin.Setup(Input!.Hz, MaxBlockFrames);
+                parameterSubscription.ReplayLatest();
+                parameterSubscription.ApplyTo(newPlugin);
+            }
+            catch
+            {
+                newPlugin.Dispose();
+                throw;
+            }
+            plugin = newPlugin;
+            latencyFrames = Math.Max(0, plugin.GetLatencySamples());
+            pendingComponentState = null;
+            pendingControllerState = null;
+            hasPendingState = false;
+            disposer.Collect(plugin);
         }
 
         void HandleRestartFlags(long nextPosition)
