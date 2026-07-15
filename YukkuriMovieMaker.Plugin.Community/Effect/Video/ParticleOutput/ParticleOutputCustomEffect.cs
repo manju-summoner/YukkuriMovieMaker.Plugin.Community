@@ -41,6 +41,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             //c0: 入力範囲の中心（シーン座標）、入力範囲の半径(px)
             public Vector2 BoundsCenter;
             public Vector2 BoundsHalf;
+            //c1: x=焦点距離(px)、y=near判定denominator、z=透視投影有効、w=予約
+            public Vector4 Perspective;
         }
 
         //Initializeはbase呼び出し（CreateEffect）中に走るため、バッファサイズはコンストラクタ引数を

@@ -16,6 +16,8 @@ cbuffer Constants : register(b1)
 {
     //xy: 入力範囲の中心（シーン座標）、zw: 入力範囲の半径（px）
     float4 boundsCenterHalf : packoffset(c0);
+    //x: 焦点距離(px)、y: near判定denominator、z: 透視投影有効、w: 予約
+    float4 perspective : packoffset(c1);
 };
 
 struct VSIn
@@ -26,7 +28,7 @@ struct VSIn
     float4 birthSizeOrigin : TEXCOORD0;
     //xy: 初速ベクトル(px/s)、z: 渦の角速度(rad/s)、w: 回転の角速度(rad/s)
     float4 velocitySwirlRotate : TEXCOORD1;
-    //x: 1/寿命(1/s)、y: 寿命終了時のスケール、z: フェード量(0-1)、w: 予約
+    //x: 1/寿命(1/s)、y: 寿命終了時のスケール、z: フェード量(0-1)、w: curl込み最終Z
     float4 lifeScaleFade : TEXCOORD2;
     //風・重力による現在までのドリフト変位（px。CPU側で減衰カーネルを積分済み）
     float2 driftDisplacement : TEXCOORD3;
@@ -66,13 +68,23 @@ VSOut main(VSIn input)
 
     float2 position = boundsCenterHalf.xy + input.birthSizeOrigin.zw + swirlVelocity * tauD + input.driftDisplacement;
 
+    //z>0を奥とする透視投影。0%時は分岐内へ入らず、旧2D経路と厳密に一致する。
+    float projection = 1.0f;
+    if (perspective.z > 0.0f)
+    {
+        float denominator = perspective.x + input.lifeScaleFade.w;
+        visible *= denominator > perspective.y ? 1.0f : 0.0f;
+        projection = min(20.0f, perspective.x / max(denominator, perspective.y));
+        position = boundsCenterHalf.xy + (position - boundsCenterHalf.xy) * projection;
+    }
+
     //フェードは「最初ゆっくり、最後ほど急」の曲線
     float fadeProgress = 1.0f - (1.0f - progress) * (1.0f - progress);
     float alpha = 1.0f - input.lifeScaleFade.z * fadeProgress;
 
     //回転とスケール。サイズは寿命に沿って開始1から終了endScaleへ線形補間する
     float angle = input.velocitySwirlRotate.w * tau;
-    float scale = input.birthSizeOrigin.y * lerp(1.0f, input.lifeScaleFade.y, progress) * visible;
+    float scale = input.birthSizeOrigin.y * lerp(1.0f, input.lifeScaleFade.y, progress) * projection * visible;
     float s = sin(angle);
     float c = cos(angle);
     //先に粒子の実サイズへスケールしてから回転する（回転後の非等方スケールは形が歪む）

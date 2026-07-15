@@ -9,7 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
 {
     /// <summary>
     /// パーティクル出力エフェクトの描画プロセッサ。
-    /// エフェクトチェーンは inputCache（Cached=true）→ ParticleOutputCustomEffect →（元画像表示時はComposite）→ terminal。
+    /// エフェクトチェーンは inputCache（Cached=true）→ ParticleOutputCustomEffect → terminal。
     /// 毎フレーム <see cref="ParticleOutputParticleBuilder"/> が生存粒子の頂点データを構築し、ポインタ渡しでGPUへ転送する。
     /// 頂点バッファの容量が足りなくなったらカスタムエフェクトごと作り直す（CreateVertexBufferはInitialize中しか呼べないため）。
     /// 生成したD2DリソースはDisposeCollectorに登録する（寿命はプロセッサと同じ）。
@@ -31,8 +31,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
         AffineTransform2D inputCache = null!;
         ParticleOutputCustomEffect? particle;
         ID2D1Image? particleOutput;
-        Composite composite = null!;
-        ID2D1Image? compositeOutput;
         AffineTransform2D terminal = null!;
 
         bool isFirst = true;
@@ -83,6 +81,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 BoundsHalf = new Vector2(
                     MathF.Max(0, (bounds.Right - bounds.Left) * 0.5f),
                     MathF.Max(0, (bounds.Bottom - bounds.Top) * 0.5f)),
+                Perspective = new Vector4(
+                    result.PerspectiveFocalLength,
+                    result.PerspectiveNearDenominator,
+                    result.PerspectiveFocalLength > 0 ? 1 : 0,
+                    0),
             });
 
             if (result.HasParticles)
@@ -101,7 +104,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 particle.DeformedBottom = 1;
             }
 
-            terminal.SetInput(0, item.ShowOriginal ? compositeOutput : particleOutput, true);
             return effectDescription.DrawDescription;
         }
 
@@ -126,18 +128,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             particleOutput = particle.Output;
             disposer.Collect(particleOutput);
 
-            //「元の画像を表示」用の合成ノード。粒子（下）の上に元画像（上）を重ねる
-            composite = new Composite(devices.DeviceContext) { InputCount = 2 };
-            disposer.Collect(composite);
-            composite.SetInput(0, particleOutput, true);
-            using (var cached = inputCache.Output)
-                composite.SetInput(1, cached, true);
-            compositeOutput = composite.Output;
-            disposer.Collect(compositeOutput);
-
-            //出力ノード。元画像表示の有無に応じてComposite/粒子出力を切り替える
+            //出力ノード。常に粒子出力を接続する
             terminal = new AffineTransform2D(devices.DeviceContext);
             disposer.Collect(terminal);
+            terminal.SetInput(0, particleOutput, true);
 
             var result = terminal.Output;
             disposer.Collect(result);
@@ -153,8 +147,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
         {
             inputCache?.SetInput(0, null, true);
             particle?.SetInput(0, null, true);
-            composite?.SetInput(0, null, true);
-            composite?.SetInput(1, null, true);
             terminal?.SetInput(0, null, true);
         }
 
@@ -208,8 +200,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
 
             particle.NearestNeighbor = interpolationMode is InterpolationMode.NearestNeighbor;
 
-            //合成ノードの下側（destination）を新しい粒子出力へ差し替える
-            composite.SetInput(0, particleOutput, true);
+            terminal.SetInput(0, particleOutput, true);
         }
     }
 }

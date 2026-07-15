@@ -5,8 +5,11 @@ TagSparkle,,キラキラ,sparkle,闪耀,閃耀,반짝임,destello,بريق,kilau
 TagSnow,,雪,snow,雪,雪,눈,nieve,ثلج,salju
 TagEmitter,,放出,emitter,发射,發射,방출,emisor,انبعاث,pemancar
 EmitGroup,,発生,Emission,发射,發射,발생,Emisión,انبعاث,Emisi
-ScatterGroup,,飛散,Scatter,飞散,飛散,비산,Dispersión,تناثر,Hamburan
 AppearanceGroup,,見た目,Appearance,外观,外觀,모양,Apariencia,المظهر,Tampilan
+LaunchGroup,,射出,Launch,射出,射出,사출,Lanzamiento,الإطلاق,Pancaran
+RandomGroup,,ランダム,Random,随机,隨機,랜덤,Aleatorio,عشوائي,Acak
+ForceFieldGroup,,力場,Force field,力场,力場,역장,Campo de fuerza,مجال القوة,Medan gaya
+CurlTurbulenceGroup,,カール乱流,Curl turbulence,卷曲湍流,捲曲亂流,컬 난류,Turbulencia curl,اضطراب الالتفاف,Turbulensi curl
 SecUnit,,秒,s,秒,秒,초,s,ث,dtk
 PerSecUnit,,個/秒,/s,个/秒,個/秒,개/초,/s,/ث,/dtk
 Rate,,発生頻度,Emission rate,发射频率,發射頻率,발생 빈도,Frecuencia de emisión,معدل الانبعاث,Frekuensi emisi
@@ -23,7 +26,7 @@ Randomness,,ばらつき,Randomness,随机性,隨機性,불규칙성,Aleatorieda
 RandomnessDesc,,初速・サイズのランダムさ,Randomness of the initial speed and size.,初速与大小的随机程度。,初速與大小的隨機程度。,초기 속도와 크기의 무작위성.,Aleatoriedad de la velocidad inicial y el tamaño.,عشوائية السرعة الابتدائية والحجم.,Keacakan kecepatan awal dan ukuran.
 EmitAngle,,射出方向,Emit direction,射出方向,射出方向,사출 방향,Dirección de emisión,اتجاه الإطلاق,Arah pancaran
 EmitAngleDesc,,粒子を射出する方向,Direction in which particles are emitted.,粒子射出的方向。,粒子射出的方向。,입자를 사출하는 방향.,Dirección en la que se emiten las partículas.,الاتجاه الذي تُطلق فيه الجسيمات.,Arah partikel dipancarkan.
-SpreadAngle,,拡散角,Spread angle,扩散角,擴散角,확산각,Ángulo de dispersión,زاوية الانتشار,Sudut sebaran
+SpreadAngle,,拡散水平角,Horizontal spread angle,水平扩散角,水平擴散角,수평 확산각,Ángulo de dispersión horizontal,زاوية الانتشار الأفقي,Sudut sebaran horizontal
 SpreadAngleDesc,,射出方向を中心とした広がりの角度,Angle of spread around the emit direction.,以射出方向为中心的扩散角度。,以射出方向為中心的擴散角度。,사출 방향을 중심으로 한 퍼짐 각도.,Ángulo de apertura alrededor de la dirección de emisión.,زاوية الانتشار حول اتجاه الإطلاق.,Sudut sebaran di sekitar arah pancaran.
 Speed,,初速,Initial speed,初速,初速,초기 속도,Velocidad inicial,السرعة الابتدائية,Kecepatan awal
 SpeedDesc,,粒子の発生時の速さ,Speed of particles when emitted.,粒子发射时的速度。,粒子發射時的速度。,입자가 발생할 때의 속도.,Velocidad de las partículas al emitirse.,سرعة الجسيمات عند انبعاثها.,Kecepatan partikel saat dipancarkan.
@@ -41,9 +44,21 @@ EndScale,,サイズ変化,End scale,大小变化,大小變化,크기 변화,Esca
 EndScaleDesc,,寿命が尽きるときの大きさ（発生時に対する割合）,Size at the end of the lifetime relative to the initial size.,寿命结束时的大小（相对于发射时的比例）。,壽命結束時的大小（相對於發射時的比例）。,수명이 다할 때의 크기(발생 시 대비 비율).,Tamaño al final de la vida útil en relación con el tamaño inicial.,الحجم عند نهاية العمر بالنسبة إلى الحجم الابتدائي.,Ukuran di akhir masa hidup relatif terhadap ukuran awal.
 Fade,,フェード,Fade,淡出,淡出,페이드,Desvanecimiento,تلاشي,Pudar
 FadeDesc,,寿命の終わりで粒子を透明にする量,Amount by which particles fade out at the end of their lifetime.,粒子在寿命结束时变透明的程度。,粒子在壽命結束時變透明的程度。,수명이 끝날 때 입자가 투명해지는 정도.,Cantidad de desvanecimiento de las partículas al final de su vida útil.,مقدار تلاشي الجسيمات عند نهاية عمرها.,Besar partikel memudar di akhir masa hidupnya.
-ShowOriginal,,元の画像を表示,Show original image,显示原图像,顯示原圖像,원본 이미지 표시,Mostrar imagen original,عرض الصورة الأصلية,Tampilkan gambar asli
-ShowOriginalDesc,,粒子に加えて元の画像も表示する,Shows the original image in addition to the particles.,除粒子外同时显示原图像。,除粒子外同時顯示原圖像。,입자와 함께 원본 이미지도 표시합니다.,Muestra la imagen original además de las partículas.,يعرض الصورة الأصلية بالإضافة إلى الجسيمات.,Menampilkan gambar asli selain partikel.
 EmitX,,X,X,X,X,X,X,X,X
 EmitXDesc,,粒子が発生する位置のXオフセット（粒子は発生した瞬間の位置から飛ぶ）,X offset of the emission position. Particles fly from the position at the moment they are emitted.,粒子发射位置的X偏移（粒子从发射瞬间的位置飞出）。,粒子發射位置的X偏移（粒子從發射瞬間的位置飛出）。,입자가 발생하는 위치의 X 오프셋(입자는 발생한 순간의 위치에서 날아갑니다).,Desplazamiento X de la posición de emisión. Las partículas vuelan desde la posición del momento en que se emiten.,إزاحة X لموضع الانبعاث. تنطلق الجسيمات من موضع لحظة انبعاثها.,Offset X posisi emisi. Partikel terbang dari posisi saat dipancarkan.
 EmitY,,Y,Y,Y,Y,Y,Y,Y,Y
 EmitYDesc,,粒子が発生する位置のYオフセット（粒子は発生した瞬間の位置から飛ぶ）,Y offset of the emission position. Particles fly from the position at the moment they are emitted.,粒子发射位置的Y偏移（粒子从发射瞬间的位置飞出）。,粒子發射位置的Y偏移（粒子從發射瞬間的位置飛出）。,입자가 발생하는 위치의 Y 오프셋(입자는 발생한 순간의 위치에서 날아갑니다).,Desplazamiento Y de la posición de emisión. Las partículas vuelan desde la posición del momento en que se emiten.,إزاحة Y لموضع الانبعاث. تنطلق الجسيمات من موضع لحظة انبعاثها.,Offset Y posisi emisi. Partikel terbang dari posisi saat dipancarkan.
+EmitZ,,Z,Z,Z,Z,Z,Z,Z,Z
+EmitZDesc,,粒子が発生する位置のZオフセット（正の値ほど奥）,Z offset of the emission position. Positive values move particles farther away.,粒子发射位置的Z偏移（正值越大越远）。,粒子發射位置的Z偏移（正值越大越遠）。,입자가 발생하는 위치의 Z 오프셋(양수일수록 멀어집니다).,Desplazamiento Z de la posición de emisión. Los valores positivos alejan las partículas.,إزاحة Z لموضع الانبعاث. القيم الموجبة تبعد الجسيمات.,Offset Z posisi emisi. Nilai positif menjauhkan partikel.
+EmitElevation,,射出仰角,Emit elevation,发射仰角,發射仰角,사출 고도각,Elevación de emisión,زاوية ارتفاع الإطلاق,Sudut elevasi pancaran
+EmitElevationDesc,,粒子を上下方向へ射出する角度,Vertical angle at which particles are emitted.,粒子上下发射的角度。,粒子上下發射的角度。,입자를 위아래 방향으로 사출하는 각도.,Ángulo vertical de emisión de las partículas.,الزاوية الرأسية لإطلاق الجسيمات.,Sudut vertikal pancaran partikel.
+ElevationSpreadAngle,,拡散仰角,Elevation spread angle,仰角扩散角,仰角擴散角,고도 확산각,Ángulo de dispersión de elevación,زاوية انتشار الارتفاع,Sudut sebaran elevasi
+ElevationSpreadAngleDesc,,射出仰角を中心とした上下方向の広がり,Vertical spread around the emit elevation.,以发射仰角为中心的上下扩散范围。,以發射仰角為中心的上下擴散範圍。,사출 고도각을 중심으로 한 상하 방향의 퍼짐.,Dispersión vertical alrededor de la elevación de emisión.,الانتشار الرأسي حول زاوية ارتفاع الإطلاق.,Sebaran vertikal di sekitar sudut elevasi.
+Perspective,,遠近感,Perspective,透视,透視,원근감,Perspectiva,المنظور,Perspektif
+PerspectiveDesc,,奥を小さく・手前を大きく見せる強さ（100%で焦点距離1000px相当）,Strength of perspective. At 100% the focal distance is equivalent to 1000 px.,远处缩小、近处放大的强度（100%相当于1000px焦距）。,遠處縮小、近處放大的強度（100%相當於1000px焦距）。,멀수록 작고 가까울수록 크게 보이게 하는 강도(100%는 초점 거리 1000px 상당).,Intensidad de la perspectiva. Al 100% la distancia focal equivale a 1000 px.,شدة المنظور. عند 100٪ تعادل المسافة البؤرية 1000 بكسل.,Kekuatan perspektif. Pada 100% jarak fokus setara 1000 px.
+CurlStrength,,強さ,Strength,强度,強度,강도,Intensidad,الشدة,Kekuatan
+CurlStrengthDesc,,粒子を有機的にうねらせる3次元乱流の変位量,Displacement produced by the three-dimensional curl turbulence.,三维卷曲湍流使粒子产生的位移量。,三維捲曲亂流使粒子產生的位移量。,입자를 유기적으로 휘게 하는 3차원 난류의 변위량.,Desplazamiento producido por la turbulencia curl tridimensional.,مقدار الإزاحة الناتج عن اضطراب الالتفاف ثلاثي الأبعاد.,Besarnya perpindahan oleh turbulensi curl tiga dimensi.
+CurlScale,,大きさ,Size,大小,大小,크기,Tamaño,الحجم,Ukuran
+CurlScaleDesc,,乱流の渦の代表的な大きさ,Representative size of turbulence vortices.,湍流涡旋的代表大小。,湍流渦旋的代表大小。,난류 소용돌이의 대표 크기.,Tamaño representativo de los remolinos de turbulencia.,الحجم النموذجي لدوامات الاضطراب.,Ukuran umum pusaran turbulensi.
+CurlSpeed,,速度,Speed,速度,速度,속도,Velocidad,السرعة,Kecepatan
+CurlSpeedDesc,,乱流の流れが時間とともに移動する速さ,Speed at which the turbulence field moves over time.,湍流场随时间移动的速度。,湍流場隨時間移動的速度。,난류 흐름이 시간에 따라 이동하는 속도.,Velocidad a la que el campo de turbulencia se desplaza con el tiempo.,سرعة تحرك مجال الاضطراب مع الزمن.,Kecepatan medan turbulensi bergerak seiring waktu.
