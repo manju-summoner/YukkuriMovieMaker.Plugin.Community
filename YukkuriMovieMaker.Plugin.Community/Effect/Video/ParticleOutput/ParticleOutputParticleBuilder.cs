@@ -9,7 +9,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
     /// パーティクル出力エフェクトの頂点データを毎フレーム構築する。
     ///
     /// 全パラメータのアニメーション対応とスクラブ安全（どのフレームから評価しても同じ絵）を両立するため、
-    /// 粒子の状態は一切保持せず、時刻から決定論的に導出する：
+    /// 粒子の結果は時刻から決定論的に導出する。移流キャッシュは計算の省略にのみ使い、
+    /// キャッシュmiss時も同じ固定ステップ列を再計算して同じ結果にする：
     /// - 発生タイミング：発生頻度をフレーム毎に積分した累積発生数テーブルから、通し番号kの粒子の発生時刻を逆引きする
     /// - 発生時に確定する属性（初速・サイズ・寿命など）：発生時刻のアニメーション値＋通し番号kのハッシュ乱数から算出
     /// - 風・重力：フレーム毎に積分した累積ドリフトテーブルにより、飛行中の粒子にも時間変化が正確に反映される
@@ -59,6 +60,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             float EndScale,
             float Fade);
 
+        /// <summary>放出クロックの整数フレーム境界における移流状態</summary>
+        readonly record struct AdvectionState(
+            long BoundaryFrame,
+            Vector3 CurlOffset,
+            double DriftX,
+            double DriftY,
+            double DriftVelocityX,
+            double DriftVelocityY);
+
+        /// <summary>粒子1個の描画時刻における移流結果</summary>
+        readonly record struct AdvectionResult(
+            Vector3 CurlOffset,
+            double DriftX,
+            double DriftY,
+            bool HasBoundaryState,
+            AdvectionState BoundaryState);
+
+        struct AdvectionIntegrationState
+        {
+            public Vector3 CurlOffset;
+            public double DriftX;
+            public double DriftY;
+            public double DriftVelocityX;
+            public double DriftVelocityY;
+        }
+
         //ピン留め頂点バッファ（GPUへのポインタ渡し用。再確保するとポインタが変わるため、Buildの戻り値を毎回使うこと）
         byte[] vertexData = GC.AllocateArray<byte>(ParticleOutputCustomEffect.InitialVertexBufferByteSize, pinned: true);
 
@@ -68,12 +95,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
         readonly List<double> ratePerFrame = [];
         readonly List<double> driftVxPerFrame = [];
         readonly List<double> driftVyPerFrame = [];
+        readonly List<double> curlStrengthPerFrame = [];
+        readonly List<double> curlScalePerFrame = [];
         readonly List<double> curlSpeedPerFrame = [];
         readonly List<double> cumCurlPhase = [0];
 
         //発生時に確定する属性のキャッシュ（キー：粒子の通し番号）。フィンガープリントが変わったら破棄する
         readonly Dictionary<long, Attr> attrCache = [];
         const int AttrCacheLimit = 1 << 17;
+
+        //移流キャッシュは生存粒子だけをcurrent/next間で引き継ぎ、死亡粒子を自然に追い出す。
+        Dictionary<long, AdvectionState> advectionCurrentCache = [];
+        Dictionary<long, AdvectionState> advectionNextCache = [];
+        bool hasAdvectionBounds;
+        RawRectF advectionBounds;
 
         int tableFps;
         long tableLength;
@@ -124,15 +159,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
 
             var currentFrame = (long)Math.Round(te * fps);
             var perspective = Math.Clamp(SampleAt(item.Perspective, currentFrame), 0, 1000);
-            var curlStrength = Math.Clamp(SampleAt(item.CurlStrength, currentFrame), 0, 10000);
-            var curlScale = Math.Clamp(SampleAt(item.CurlScale, currentFrame), 1, 100000);
+            var curlStrength = Math.Clamp(SampleAt(item.CurlStrength, currentFrame), 0, YMM4Constants.VeryLargeValue);
+            var curlScale = Math.Clamp(SampleAt(item.CurlScale, currentFrame), 1, YMM4Constants.VeryLargeValue);
             var curlPhase = GetCumulativeCurlPhase(te);
             var focalLength = perspective > 0 ? (float)(100000 / perspective) : 0f;
             var nearDenominator = perspective > 0 ? MathF.Max(1, focalLength * 0.05f) : 0f;
+            var isAdvection = item.CurlType == ParticleOutputCurlType.Advection;
+            var hasAdvectionActivity = isAdvection && HasAdvectionActivity(te);
 
             //Z運動とcurlが無ければ、遠近感の値にかかわらず投影は恒等なので旧2D経路を通す。
             //旧計算順を維持し、既定値goldenのbit一致を保証する。
-            var legacy2D = curlStrength == 0;
+            //移流は現在の強さが0でも過去のoffsetが残るため、生存期間の履歴全体が0の場合だけ旧経路へ戻す。
+            var legacy2D = isAdvection ? !hasAdvectionActivity : curlStrength == 0;
             if (legacy2D)
                 for (var i = 0; i < aliveBuffer.Count; i++)
                     if (aliveBuffer[i].Attr.OriginZ != 0 || aliveBuffer[i].Attr.VelocityZ != 0)
@@ -156,11 +194,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             if (count > 0)
             {
                 EnsureScratchCapacity(count);
-                if (count >= ParallelThreshold)
-                    Parallel.For(0, count, ComputeParticleState);
+                //流れタイプは履歴強さが0でも、3D基底運動があればゼロ移流状態としてこの経路を通す。
+                //うねり経路へ落とすと、境界直前にRoundされた現在値のcurl変位を先取りしてしまう。
+                if (isAdvection)
+                {
+                    InvalidateAdvectionIfBoundsChanged(bounds);
+                    PrepareAdvectionStartStates(count);
+                    if (count >= ParallelThreshold)
+                        Parallel.For(0, count, ComputeAdvectionParticleState);
+                    else
+                        for (var i = 0; i < count; i++)
+                            ComputeAdvectionParticleState(i);
+                    CommitAdvectionStates(count);
+                }
+                else if (count >= ParallelThreshold)
+                    Parallel.For(0, count, ComputeDisplacementParticleState);
                 else
                     for (var i = 0; i < count; i++)
-                        ComputeParticleState(i);
+                        ComputeDisplacementParticleState(i);
 
                 for (var i = 0; i < count; i++)
                 {
@@ -215,7 +266,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 visibleCount > 0 ? focalLength : 0,
                 visibleCount > 0 ? nearDenominator : 0);
 
-            void ComputeParticleState(int i)
+            void ComputeDisplacementParticleState(int i)
             {
                 var attr = aliveBuffer[i].Attr;
                 var tau = (float)(te - attr.Birth);
@@ -267,6 +318,41 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 scratchZ[i] = worldZ;
                 scratchVisible[i] = TryProject(
                     worldX, worldY, worldZ, radius, boundsCenter,
+                    focalLength, nearDenominator,
+                    out scratchX[i], out scratchY[i], out scratchRadius[i]);
+            }
+
+            void ComputeAdvectionParticleState(int i)
+            {
+                var attr = aliveBuffer[i].Attr;
+                var result = ComputeAdvection(
+                    attr,
+                    scratchHasAdvectionStart[i],
+                    scratchAdvectionStart[i],
+                    te,
+                    boundsCenter);
+                scratchAdvectionResult[i] = result;
+
+                var tau = (float)(te - attr.Birth);
+                var lifetimeInv = (float)(1 / attr.Lifetime);
+                var progress = Math.Clamp(tau * lifetimeInv, 0, 1);
+                var basePosition = ComputeBasePosition(attr, te, result.DriftX, result.DriftY, boundsCenter);
+                var world = basePosition + result.CurlOffset;
+                var driftX = (float)result.DriftX + result.CurlOffset.X;
+                var driftY = (float)result.DriftY + result.CurlOffset.Y;
+                var worldZ = world.Z;
+
+                if (!float.IsFinite(worldZ))
+                    worldZ = 0;
+                else if (worldZ == 0)
+                    worldZ = 0;//-0を+0へ正規化し、同一ZのKey順を保つ
+                var radius = cornerBase * attr.SizeScale * float.Lerp(1, attr.EndScale, progress);
+                scratchTau[i] = tau;
+                scratchDriftX[i] = driftX;
+                scratchDriftY[i] = driftY;
+                scratchZ[i] = worldZ;
+                scratchVisible[i] = TryProject(
+                    world.X, world.Y, worldZ, radius, boundsCenter,
                     focalLength, nearDenominator,
                     out scratchX[i], out scratchY[i], out scratchRadius[i]);
             }
@@ -367,6 +453,220 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             }
         }
 
+        bool HasAdvectionActivity(double te)
+        {
+            if (aliveBuffer.Count == 0 || curlStrengthPerFrame.Count == 0)
+                return false;
+
+            var firstFrame = Math.Clamp(FloorBoundaryFrame(aliveBuffer[0].Attr.Birth), 0, curlStrengthPerFrame.Count - 1);
+            var lastFrame = Math.Clamp(FloorBoundaryFrame(te), firstFrame, curlStrengthPerFrame.Count - 1);
+            for (var frame = firstFrame; frame <= lastFrame; frame++)
+                if (curlStrengthPerFrame[(int)frame] != 0)
+                    return true;
+            return false;
+        }
+
+        void InvalidateAdvectionIfBoundsChanged(RawRectF bounds)
+        {
+            if (hasAdvectionBounds && BoundsBitwiseEqual(advectionBounds, bounds))
+                return;
+
+            advectionCurrentCache.Clear();
+            advectionNextCache.Clear();
+            advectionBounds = bounds;
+            hasAdvectionBounds = true;
+        }
+
+        static bool BoundsBitwiseEqual(RawRectF x, RawRectF y)
+            => BitConverter.SingleToInt32Bits(x.Left) == BitConverter.SingleToInt32Bits(y.Left)
+            && BitConverter.SingleToInt32Bits(x.Top) == BitConverter.SingleToInt32Bits(y.Top)
+            && BitConverter.SingleToInt32Bits(x.Right) == BitConverter.SingleToInt32Bits(y.Right)
+            && BitConverter.SingleToInt32Bits(x.Bottom) == BitConverter.SingleToInt32Bits(y.Bottom);
+
+        void PrepareAdvectionStartStates(int count)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var hasState = advectionCurrentCache.TryGetValue(aliveBuffer[i].Key, out var state);
+                scratchHasAdvectionStart[i] = hasState;
+                scratchAdvectionStart[i] = state;
+            }
+        }
+
+        void CommitAdvectionStates(int count)
+        {
+            advectionNextCache.Clear();
+            for (var i = 0; i < count; i++)
+            {
+                var result = scratchAdvectionResult[i];
+                if (result.HasBoundaryState)
+                    advectionNextCache[aliveBuffer[i].Key] = result.BoundaryState;
+            }
+            (advectionCurrentCache, advectionNextCache) = (advectionNextCache, advectionCurrentCache);
+        }
+
+        AdvectionResult ComputeAdvection(in Attr attr, bool hasCachedState, in AdvectionState cachedState, double te, Vector2 boundsCenter)
+        {
+            var targetBoundaryFrame = FloorBoundaryFrame(te);
+            var useCachedState = hasCachedState
+                && cachedState.BoundaryFrame <= targetBoundaryFrame
+                && BoundaryTime(cachedState.BoundaryFrame) >= attr.Birth - 1e-12;
+
+            AdvectionIntegrationState state;
+            long boundaryFrame;
+            double stateTime;
+            var hasBoundaryState = false;
+
+            if (useCachedState)
+            {
+                state = new AdvectionIntegrationState
+                {
+                    CurlOffset = cachedState.CurlOffset,
+                    DriftX = cachedState.DriftX,
+                    DriftY = cachedState.DriftY,
+                    DriftVelocityX = cachedState.DriftVelocityX,
+                    DriftVelocityY = cachedState.DriftVelocityY,
+                };
+                boundaryFrame = cachedState.BoundaryFrame;
+                stateTime = BoundaryTime(boundaryFrame);
+                hasBoundaryState = true;
+            }
+            else
+            {
+                state = default;
+                stateTime = attr.Birth;
+                boundaryFrame = CeilingBoundaryFrame(attr.Birth);
+                if (boundaryFrame <= targetBoundaryFrame)
+                {
+                    var boundaryTime = BoundaryTime(boundaryFrame);
+                    if (boundaryTime > stateTime)
+                        AdvanceAdvectionSegment(ref state, attr, stateTime, boundaryTime, FloorBoundaryFrame(stateTime), boundsCenter);
+                    stateTime = boundaryTime;
+                    hasBoundaryState = true;
+                }
+            }
+
+            if (hasBoundaryState)
+            {
+                while (boundaryFrame < targetBoundaryFrame)
+                {
+                    var nextBoundaryFrame = boundaryFrame + 1;
+                    var nextTime = BoundaryTime(nextBoundaryFrame);
+                    AdvanceAdvectionSegment(ref state, attr, stateTime, nextTime, boundaryFrame, boundsCenter);
+                    boundaryFrame = nextBoundaryFrame;
+                    stateTime = nextTime;
+                }
+            }
+
+            var boundaryState = hasBoundaryState
+                ? new AdvectionState(
+                    boundaryFrame,
+                    state.CurlOffset,
+                    state.DriftX,
+                    state.DriftY,
+                    state.DriftVelocityX,
+                    state.DriftVelocityY)
+                : default;
+
+            var outputState = state;
+            if (te > stateTime)
+            {
+                //整数境界からの端数は、double時刻をframeへ戻さず保持済みの境界番号を左端値に使う。
+                //出生から最初の端数だけは出生側のフレーム番号を使う。
+                var outputParameterFrame = hasBoundaryState ? boundaryFrame : FloorBoundaryFrame(attr.Birth);
+                AdvanceAdvectionSegment(ref outputState, attr, stateTime, te, outputParameterFrame, boundsCenter);
+            }
+
+            return new AdvectionResult(
+                outputState.CurlOffset,
+                outputState.DriftX,
+                outputState.DriftY,
+                hasBoundaryState,
+                boundaryState);
+        }
+
+        void AdvanceAdvectionSegment(
+            ref AdvectionIntegrationState state,
+            in Attr attr,
+            double startTime,
+            double endTime,
+            long parameterFrame,
+            Vector2 boundsCenter)
+        {
+            var dt = endTime - startTime;
+            if (dt <= 0)
+                return;
+
+            var tableIndex = (int)Math.Clamp(parameterFrame, 0, curlStrengthPerFrame.Count - 1);
+            var curlStrength = curlStrengthPerFrame[tableIndex];
+            if (curlStrength != 0 && double.IsFinite(curlStrength))
+            {
+                var basePosition = ComputeBasePosition(attr, startTime, state.DriftX, state.DriftY, boundsCenter);
+                var samplePosition = basePosition + state.CurlOffset;
+                var curlScale = curlScalePerFrame[tableIndex];
+                var phase = (float)GetCumulativeCurlPhase(startTime);
+                if (IsFinite(samplePosition) && double.IsFinite(curlScale) && curlScale > 0 && float.IsFinite(phase))
+                {
+                    var q = new Vector3(
+                        samplePosition.X / (float)curlScale + phase * 0.7548777f,
+                        samplePosition.Y / (float)curlScale + phase * 0.5698403f,
+                        samplePosition.Z / (float)curlScale + phase * 0.4382891f);
+                    if (IsFinite(q))
+                    {
+                        var curl = ParticleOutputCurlNoise.EvaluateCurl(q);
+                        if (IsFinite(curl))
+                        {
+                            var candidate = state.CurlOffset + curl * ((float)curlStrength * (float)dt);
+                            if (IsFinite(candidate))
+                                state.CurlOffset = candidate;
+                        }
+                    }
+                }
+            }
+
+            var driftVx = double.IsFinite(driftVxPerFrame[tableIndex]) ? driftVxPerFrame[tableIndex] : 0;
+            var driftVy = double.IsFinite(driftVyPerFrame[tableIndex]) ? driftVyPerFrame[tableIndex] : 0;
+            var decay = 1.5 / attr.Lifetime;
+            var decayFactor = Math.Exp(-decay * dt);
+            var responseWeight = (1 - decayFactor) / decay;
+            var previousVelocityX = state.DriftVelocityX;
+            var previousVelocityY = state.DriftVelocityY;
+            state.DriftX += driftVx * dt + (previousVelocityX - driftVx) * responseWeight;
+            state.DriftY += driftVy * dt + (previousVelocityY - driftVy) * responseWeight;
+            state.DriftVelocityX = driftVx + (previousVelocityX - driftVx) * decayFactor;
+            state.DriftVelocityY = driftVy + (previousVelocityY - driftVy) * decayFactor;
+        }
+
+        static Vector3 ComputeBasePosition(in Attr attr, double time, double driftX, double driftY, Vector2 boundsCenter)
+        {
+            var tau = (float)(time - attr.Birth);
+            var lifetimeInv = (float)(1 / attr.Lifetime);
+            var decay = 1.5f * lifetimeInv;
+            var tauD = (1 - MathF.Exp(-decay * tau)) / decay;
+            var swirl = attr.Swirl * tauD;
+            var (swirlSin, swirlCos) = MathF.SinCos(swirl);
+            return new Vector3(
+                boundsCenter.X + attr.OriginOffsetX
+                    + (attr.VelocityX * swirlCos - attr.VelocityY * swirlSin) * tauD
+                    + (float)driftX,
+                boundsCenter.Y + attr.OriginOffsetY
+                    + (attr.VelocityX * swirlSin + attr.VelocityY * swirlCos) * tauD
+                    + (float)driftY,
+                attr.OriginZ + attr.VelocityZ * tauD);
+        }
+
+        long FloorBoundaryFrame(double time)
+            => (long)Math.Floor(time * tableFps);
+
+        long CeilingBoundaryFrame(double time)
+            => (long)Math.Ceiling(time * tableFps);
+
+        double BoundaryTime(long frame)
+            => (double)frame / tableFps;
+
+        static bool IsFinite(Vector3 value)
+            => float.IsFinite(value.X) && float.IsFinite(value.Y) && float.IsFinite(value.Z);
+
         internal static bool TryProject(
             float worldX, float worldY, float worldZ, float radius, Vector2 center,
             float focalLength, float nearDenominator,
@@ -436,6 +736,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
         float[] scratchDriftY = [];
         float[] scratchZ = [];
         bool[] scratchVisible = [];
+        bool[] scratchHasAdvectionStart = [];
+        AdvectionState[] scratchAdvectionStart = [];
+        AdvectionResult[] scratchAdvectionResult = [];
         SortEntry[] sortEntries = [];
         SortEntry[] sortEntriesBuffer = [];
 
@@ -491,6 +794,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             scratchDriftY = new float[newSize];
             scratchZ = new float[newSize];
             scratchVisible = new bool[newSize];
+            scratchHasAdvectionStart = new bool[newSize];
+            scratchAdvectionStart = new AdvectionState[newSize];
+            scratchAdvectionResult = new AdvectionResult[newSize];
             sortEntries = new SortEntry[newSize];
             sortEntriesBuffer = new SortEntry[newSize];
         }
@@ -568,6 +874,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             AddAnimation(ref hash, item.WindAngle);
             AddAnimation(ref hash, item.WindSpeed);
             AddAnimation(ref hash, item.Turbulence);
+            hash.Add((int)item.CurlType);
             AddAnimation(ref hash, item.CurlStrength);
             AddAnimation(ref hash, item.CurlScale);
             AddAnimation(ref hash, item.CurlSpeed);
@@ -591,10 +898,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             ratePerFrame.Clear();
             driftVxPerFrame.Clear();
             driftVyPerFrame.Clear();
+            curlStrengthPerFrame.Clear();
+            curlScalePerFrame.Clear();
             curlSpeedPerFrame.Clear();
             cumCurlPhase.Clear();
             cumCurlPhase.Add(0);
             attrCache.Clear();
+            advectionCurrentCache.Clear();
+            advectionNextCache.Clear();
+            hasAdvectionBounds = false;
         }
 
         static void AddAnimation(ref HashCode hash, Animation animation)
@@ -634,12 +946,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
                 cumEmit.Add(cumEmit[ef] + rate / tableFps);
 
                 var windAngle = SampleAt(item.WindAngle, ef) * Math.PI / 180;
-                var windSpeed = Math.Max(0, SampleAt(item.WindSpeed, ef));
-                var gravity = SampleAt(item.Gravity, ef);
+                var windSpeed = Math.Clamp(SampleAt(item.WindSpeed, ef), 0, YMM4Constants.VeryLargeValue);
+                var gravity = Math.Clamp(
+                    SampleAt(item.Gravity, ef),
+                    YMM4Constants.VerySmallValue,
+                    YMM4Constants.VeryLargeValue);
                 driftVxPerFrame.Add(Math.Cos(windAngle) * windSpeed);
                 driftVyPerFrame.Add(Math.Sin(windAngle) * windSpeed + gravity);
 
-                var curlSpeed = Math.Clamp(SampleAt(item.CurlSpeed, ef), -1000, 1000) / 100;
+                var curlStrength = Math.Clamp(SampleAt(item.CurlStrength, ef), 0, YMM4Constants.VeryLargeValue);
+                curlStrengthPerFrame.Add(double.IsFinite(curlStrength) ? curlStrength : 0);
+                var curlScale = Math.Clamp(SampleAt(item.CurlScale, ef), 1, YMM4Constants.VeryLargeValue);
+                curlScalePerFrame.Add(double.IsFinite(curlScale) ? curlScale : 1);
+                var curlSpeed = Math.Clamp(SampleAt(item.CurlSpeed, ef), 0, YMM4Constants.VeryLargeValue) / 100;
                 curlSpeedPerFrame.Add(curlSpeed);
                 cumCurlPhase.Add(cumCurlPhase[ef] + curlSpeed / tableFps);
             }
@@ -702,20 +1021,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             var bf = (long)Math.Round(birth * tableFps);
 
             var lifetime = Math.Clamp(SampleAt(item.Lifetime, bf), 0.01, MaxLifetimeSeconds);
-            var emitX = SampleAt(item.X, bf);
-            var emitY = SampleAt(item.Y, bf);
-            var emitZ = SampleAt(item.Z, bf);
-            var size = Math.Clamp(SampleAt(item.Size, bf), 0.1, 1000) / 100;
-            var emitRange = Math.Clamp(SampleAt(item.EmitRange, bf), 0, 10000);
+            var emitX = Math.Clamp(
+                SampleAt(item.X, bf),
+                YMM4Constants.VerySmallValue,
+                YMM4Constants.VeryLargeValue);
+            var emitY = Math.Clamp(
+                SampleAt(item.Y, bf),
+                YMM4Constants.VerySmallValue,
+                YMM4Constants.VeryLargeValue);
+            var emitZ = Math.Clamp(
+                SampleAt(item.Z, bf),
+                YMM4Constants.VerySmallValue,
+                YMM4Constants.VeryLargeValue);
+            var size = Math.Clamp(SampleAt(item.Size, bf), 0.1, YMM4Constants.VeryLargeValue) / 100;
+            var emitRange = Math.Clamp(SampleAt(item.EmitRange, bf), 0, YMM4Constants.VeryLargeValue);
             var randomness = Math.Clamp(SampleAt(item.Randomness, bf), 0, 100) / 100;
             var emitAngle = SampleAt(item.EmitAngle, bf) * Math.PI / 180;
             var emitElevation = SampleAt(item.EmitElevation, bf) * Math.PI / 180;
             var spreadHalf = Math.Clamp(SampleAt(item.SpreadAngle, bf), 0, 360) * Math.PI / 180 / 2;
             var elevationSpreadHalf = Math.Clamp(SampleAt(item.ElevationSpreadAngle, bf), 0, 180) * Math.PI / 180 / 2;
-            var speed = Math.Clamp(SampleAt(item.Speed, bf), 0, 10000);
-            var turbulence = Math.Clamp(SampleAt(item.Turbulence, bf), 0, 10000) / 100 * 3;//渦の角速度(rad/s)、100%=3rad/s
-            var rotation = Math.Clamp(SampleAt(item.Rotation, bf), 0, 36000) * Math.PI / 180;
-            var endScale = Math.Clamp(SampleAt(item.EndScale, bf), 0, 1000) / 100;
+            var speed = Math.Clamp(SampleAt(item.Speed, bf), 0, YMM4Constants.VeryLargeValue);
+            var turbulence = Math.Clamp(SampleAt(item.Turbulence, bf), 0, YMM4Constants.VeryLargeValue) / 100 * 3;//渦の角速度(rad/s)、100%=3rad/s
+            var rotation = Math.Clamp(SampleAt(item.Rotation, bf), 0, YMM4Constants.VeryLargeValue) * Math.PI / 180;
+            var endScale = Math.Clamp(SampleAt(item.EndScale, bf), 0, YMM4Constants.VeryLargeValue) / 100;
             var fade = Math.Clamp(SampleAt(item.Fade, bf), 0, 100) / 100;
 
             var h1 = Rand(k, 1);

@@ -57,8 +57,12 @@ ElevationSpreadAngleDesc,,射出仰角を中心とした上下方向の広がり
 Perspective,,遠近感,Perspective,透视,透視,원근감,Perspectiva,المنظور,Perspektif
 PerspectiveDesc,,奥を小さく・手前を大きく見せる強さ（100%で焦点距離1000px相当）,Strength of perspective. At 100% the focal distance is equivalent to 1000 px.,远处缩小、近处放大的强度（100%相当于1000px焦距）。,遠處縮小、近處放大的強度（100%相當於1000px焦距）。,멀수록 작고 가까울수록 크게 보이게 하는 강도(100%는 초점 거리 1000px 상당).,Intensidad de la perspectiva. Al 100% la distancia focal equivale a 1000 px.,شدة المنظور. عند 100٪ تعادل المسافة البؤرية 1000 بكسل.,Kekuatan perspektif. Pada 100% jarak fokus setara 1000 px.
 CurlStrength,,強さ,Strength,强度,強度,강도,Intensidad,الشدة,Kekuatan
-CurlStrengthDesc,,粒子を有機的にうねらせる3次元乱流の変位量,Displacement produced by the three-dimensional curl turbulence.,三维卷曲湍流使粒子产生的位移量。,三維捲曲亂流使粒子產生的位移量。,입자를 유기적으로 휘게 하는 3차원 난류의 변위량.,Desplazamiento producido por la turbulencia curl tridimensional.,مقدار الإزاحة الناتج عن اضطراب الالتفاف ثلاثي الأبعاد.,Besarnya perpindahan oleh turbulensi curl tiga dimensi.
+CurlStrengthDesc,,うねりでは変位量(px)、流れでは1秒あたりの速さ(px/s),Displacement in Undulation mode (px) or speed in Flow mode (px/s).,起伏模式下为位移量(px)，流动模式下为每秒速度(px/s)。,起伏模式下為位移量(px)，流動模式下為每秒速度(px/s)。,물결 모드에서는 변위량(px)이고 흐름 모드에서는 초당 속도(px/s)입니다.,Desplazamiento en el modo Ondulación (px) o velocidad en el modo Flujo (px/s).,الإزاحة في وضع التموج (px) أو السرعة في وضع التدفق (px/s).,Perpindahan dalam mode Gelombang (px) atau kecepatan dalam mode Aliran (px/s).
 CurlScale,,大きさ,Size,大小,大小,크기,Tamaño,الحجم,Ukuran
 CurlScaleDesc,,乱流の渦の代表的な大きさ,Representative size of turbulence vortices.,湍流涡旋的代表大小。,湍流渦旋的代表大小。,난류 소용돌이의 대표 크기.,Tamaño representativo de los remolinos de turbulencia.,الحجم النموذجي لدوامات الاضطراب.,Ukuran umum pusaran turbulensi.
-CurlSpeed,,速度,Speed,速度,速度,속도,Velocidad,السرعة,Kecepatan
-CurlSpeedDesc,,乱流の流れが時間とともに移動する速さ,Speed at which the turbulence field moves over time.,湍流场随时间移动的速度。,湍流場隨時間移動的速度。,난류 흐름이 시간에 따라 이동하는 속도.,Velocidad a la que el campo de turbulencia se desplaza con el tiempo.,سرعة تحرك مجال الاضطراب مع الزمن.,Kecepatan medan turbulensi bergerak seiring waktu.
+CurlSpeed,,変化速度,Evolution speed,演化速度,演化速度,변화 속도,Velocidad de evolución,سرعة التغير,Kecepatan evolusi
+CurlSpeedDesc,,乱流の模様が時間とともに変化する速さ,Speed at which the turbulence pattern evolves over time.,湍流图案随时间演化的速度。,湍流圖樣隨時間演化的速度。,난류 무늬가 시간에 따라 변화하는 속도입니다.,Velocidad a la que el patrón de turbulencia evoluciona con el tiempo.,سرعة تغير نمط الاضطراب بمرور الوقت.,Kecepatan pola turbulensi berevolusi seiring waktu.
+CurlType,,タイプ,Type,类型,類型,유형,Tipo,النوع,Tipe
+CurlTypeDesc,,カール乱流をうねりとして加えるか流れ場として積分するかを選択,Choose whether curl turbulence is added as undulation or integrated as a flow field.,选择将卷曲湍流作为起伏添加还是作为流场积分。,選擇將捲曲亂流作為起伏加入還是作為流場積分。,컬 난류를 물결로 더할지 흐름장으로 적분할지 선택합니다.,Elige si la turbulencia curl se añade como ondulación o se integra como un campo de flujo.,اختر ما إذا كان اضطراب الالتفاف يضاف كتموج أو يدمج كمجال تدفق.,Pilih apakah turbulensi curl ditambahkan sebagai gelombang atau diintegrasikan sebagai medan aliran.
+CurlTypeDisplacement,,うねり,Undulation,起伏,起伏,물결,Ondulación,تموج,Gelombang
+CurlTypeAdvection,,流れ,Flow,流动,流動,흐름,Flujo,تدفق,Aliran
