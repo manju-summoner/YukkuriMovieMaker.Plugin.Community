@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     {
         public ObservableCollection<string> AdditionalDirectories { get; } = [.. Vst3Settings.Default.AdditionalPluginDirectories];
 
-        public string DefaultDirectoriesText => string.Join(Environment.NewLine, Vst3PluginScanner.GetDefaultDirectories());
+        public IReadOnlyList<string> DefaultDirectories { get; } = [.. Vst3PluginScanner.GetDefaultDirectories()];
 
         public string? SelectedDirectory { get => selectedDirectory; set => Set(ref selectedDirectory, value); }
         string? selectedDirectory;

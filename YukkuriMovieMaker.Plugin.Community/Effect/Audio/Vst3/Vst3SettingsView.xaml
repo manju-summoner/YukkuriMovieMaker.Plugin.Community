@@ -30,14 +30,22 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Column="0" Content="{x:Static local:Texts.Vst3SettingsDefaultDirectoriesName}"/>
-                    <TextBox Grid.Column="1"
-                             Text="{Binding DefaultDirectoriesText, Mode=OneWay}"
-                             ToolTip="{Binding DefaultDirectoriesText}"
-                             IsReadOnly="True"
-                             BorderBrush="Transparent"
-                             TextWrapping="Wrap"
-                             TextAlignment="Right"
-                             VerticalContentAlignment="Center"/>
+                    <ItemsControl Grid.Column="1"
+                                  ItemsSource="{Binding DefaultDirectories}"
+                                  VerticalAlignment="Center">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Mode=OneWay}"
+                                         ToolTip="{Binding}"
+                                         IsReadOnly="True"
+                                         BorderBrush="Transparent"
+                                         Background="Transparent"
+                                         TextWrapping="Wrap"
+                                         TextAlignment="Right"
+                                         VerticalContentAlignment="Center"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </Grid>
 
                 <Label Grid.Row="1" Content="{x:Static local:Texts.Vst3SettingsAdditionalDirectoriesName}"/>
