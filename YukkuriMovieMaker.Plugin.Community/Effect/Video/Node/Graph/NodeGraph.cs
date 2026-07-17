@@ -17,6 +17,11 @@ public sealed class NodeGraph
 
     public void UpdateGraph(NodeGraph graph)
     {
+        // 旧ノードのD2Dリソースを解放してから差し替える。
+        // graph.Nodes は新しいインスタンス群なので Dispose しない。
+        foreach (var node in _nodes.Values)
+            node.Dispose();
+
         _nodes.Clear();
         foreach (var node in graph.Nodes) _nodes.Add(node.Key, node.Value);
 
@@ -54,6 +59,8 @@ public sealed class NodeGraph
             Disconnect(c.FromId, c.FromPort, c.ToId, c.ToPort);
         node.Invalidate();
         _nodes.Remove(nodeId);
+        // グラフから永久に取り除くのでD2Dリソースを解放する。
+        node.Dispose();
 
         OnGraphChanged(new NodeRemovedEventArgs(nodeId));
     }

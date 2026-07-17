@@ -189,6 +189,12 @@ public sealed class Processor : IVideoEffectProcessor
             if (_nodeEffect.InternalGraph != null!) _nodeEffect.InternalGraph.Committed -= OnGraphCommitted;
             _nodeEffect.GraphUpdated -= OnGraphUpdated;
 
+            // このProcessorが使用していたノードのD2Dリソースを解放する。
+            // ノードはD2Dリソースを遅延初期化するため、次回Calculate時に再生成される。
+            if (_nodeEffect.InternalGraph != null)
+                foreach (var node in _nodeEffect.InternalGraph.Nodes.Values)
+                    node.Dispose();
+
             ClearInput();
 
             _affineTransform?.SetInput(0, null, true);

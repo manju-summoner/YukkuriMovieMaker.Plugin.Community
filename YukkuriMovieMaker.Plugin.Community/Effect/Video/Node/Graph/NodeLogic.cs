@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
-public abstract class NodeLogic
+public abstract class NodeLogic : IDisposable
 {
     private readonly Dictionary<string, (InputsContainer container, PropertyChangedEventHandler handler)>
         _dynamicHandlers = new();
@@ -26,6 +26,16 @@ public abstract class NodeLogic
     public Guid Id { get; set; }
 
     protected EvaluationContext? EvaluationContext { get; private set; }
+
+    /// <summary>
+    ///     このノードが保持するDirect2Dリソースを解放します。
+    ///     サブクラスはオーバーライドしてD2Dフィールドをnullにし、base.Dispose()を呼ぶこと。
+    ///     複数回呼ばれても安全（冪等）に実装すること。
+    /// </summary>
+    public virtual void Dispose()
+    {
+        GC.SuppressFinalize(this);
+    }
 
     private void InitializePorts()
     {

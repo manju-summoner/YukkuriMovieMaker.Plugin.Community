@@ -23,7 +23,7 @@ public enum MaskMode
 public class CreateMaskNode : NodeLogic
 {
     private Guid _shaderId = Guid.Empty;
-    private VideoEffectsLoader _videoEffect = null!;
+    private VideoEffectsLoader? _videoEffect;
 
     [InputPort("入力画像", "マスク生成を行う基画像")]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
@@ -67,6 +67,15 @@ public class CreateMaskNode : NodeLogic
         set => SetOutput(value);
     }
 
+    public override void Dispose()
+    {
+        _videoEffect?.Dispose();
+        _videoEffect = null;
+        // _shaderId をリセットして次回 Calculate 時にシェーダーを再登録させる。
+        _shaderId = Guid.Empty;
+        base.Dispose();
+    }
+
     protected override Task Calculate()
     {
         if (EvaluationContext is null) return Task.FromException(new NullReferenceException(nameof(EvaluationContext)));
@@ -76,12 +85,13 @@ public class CreateMaskNode : NodeLogic
         if (_shaderId == Guid.Empty)
         {
             _shaderId = VideoEffectsLoader.RegisterShader("MaskCreate");
-            _videoEffect = VideoEffectsLoader.LoadEffectSync([
-                (typeof(int), "Mode"),
-                (typeof(float), "Offset"),
-                (typeof(int), "Invert")
-            ], _shaderId, EvaluationContext);
         }
+
+        _videoEffect ??= VideoEffectsLoader.LoadEffectSync([
+            (typeof(int), "Mode"),
+            (typeof(float), "Offset"),
+            (typeof(int), "Invert")
+        ], _shaderId, EvaluationContext);
 
         _videoEffect
             .SetValue(
@@ -99,7 +109,7 @@ public class CreateMaskNode : NodeLogic
 public class MaskClipNode : NodeLogic
 {
     private Guid _shaderId = Guid.Empty;
-    private VideoEffectsLoader _videoEffect = null!;
+    private VideoEffectsLoader? _videoEffect;
 
     [InputPort("入力画像", "マスクによるクリップの対象画像")]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
@@ -133,6 +143,14 @@ public class MaskClipNode : NodeLogic
         set => SetOutput(value);
     }
 
+    public override void Dispose()
+    {
+        _videoEffect?.Dispose();
+        _videoEffect = null;
+        _shaderId = Guid.Empty;
+        base.Dispose();
+    }
+
     protected override Task Calculate()
     {
         if (EvaluationContext is null) return Task.FromException(new NullReferenceException(nameof(EvaluationContext)));
@@ -144,10 +162,11 @@ public class MaskClipNode : NodeLogic
         if (_shaderId == Guid.Empty)
         {
             _shaderId = VideoEffectsLoader.RegisterShader("MaskClip");
-            _videoEffect = VideoEffectsLoader.LoadEffectSync([
-                (typeof(int), "Invert")
-            ], _shaderId, EvaluationContext, 2);
         }
+
+        _videoEffect ??= VideoEffectsLoader.LoadEffectSync([
+            (typeof(int), "Invert")
+        ], _shaderId, EvaluationContext, 2);
 
         _videoEffect
             .SetValue(
@@ -163,7 +182,7 @@ public class MaskClipNode : NodeLogic
 public class MaskThresholdNode : NodeLogic
 {
     private Guid _shaderId = Guid.Empty;
-    private VideoEffectsLoader _videoEffect = null!;
+    private VideoEffectsLoader? _videoEffect;
 
     [InputPort("入力マスク", "閾値の設定対象のマスク")]
     [PortColorSetting(nameof(Colors.MediumPurple))]
@@ -207,6 +226,14 @@ public class MaskThresholdNode : NodeLogic
         set => SetOutput(value);
     }
 
+    public override void Dispose()
+    {
+        _videoEffect?.Dispose();
+        _videoEffect = null;
+        _shaderId = Guid.Empty;
+        base.Dispose();
+    }
+
     protected override Task Calculate()
     {
         if (EvaluationContext is null) return Task.FromException(new NullReferenceException(nameof(EvaluationContext)));
@@ -216,12 +243,13 @@ public class MaskThresholdNode : NodeLogic
         if (_shaderId == Guid.Empty)
         {
             _shaderId = VideoEffectsLoader.RegisterShader("MaskThreshold");
-            _videoEffect = VideoEffectsLoader.LoadEffectSync([
-                (typeof(float), "Min"),
-                (typeof(float), "Max"),
-                (typeof(int), "Invert")
-            ], _shaderId, EvaluationContext);
         }
+
+        _videoEffect ??= VideoEffectsLoader.LoadEffectSync([
+            (typeof(float), "Min"),
+            (typeof(float), "Max"),
+            (typeof(int), "Invert")
+        ], _shaderId, EvaluationContext);
 
         _videoEffect
             .SetValue(

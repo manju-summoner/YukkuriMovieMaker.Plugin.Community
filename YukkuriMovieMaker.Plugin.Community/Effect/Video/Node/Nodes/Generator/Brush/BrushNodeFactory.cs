@@ -137,6 +137,7 @@ public static class BrushNodeTypeBuilder
 
         EmitBrushOutputPort(tb);
         EmitCalculate(tb, loaderField, lastDevicesField, pluginNameField, portDefsField);
+        EmitDispose(tb, loaderField);
 
         if (dynamicPropertyDefs.Count > 0)
             EmitOnInputValueChanged(tb, loaderField, dynamicPropertyDefs, containerBackFields);
@@ -228,6 +229,46 @@ public static class BrushNodeTypeBuilder
         var pb = EmitOutputProperty(tb, "Output", typeof(BrushWrapper));
         Attr.OutputPort(pb, nameof(TextUi.Output), "", typeof(TextUi));
         Attr.PortColor(pb, nameof(Colors.LawnGreen));
+    }
+
+    private static void EmitDispose(TypeBuilder tb, FieldBuilder loaderField)
+    {
+        var iDisposableDispose = typeof(IDisposable).GetMethod(nameof(IDisposable.Dispose))!;
+        var baseDispose = typeof(NodeLogic).GetMethod("Dispose", BindingFlags.Public | BindingFlags.Instance)!;
+
+        var m = tb.DefineMethod(
+            "Dispose",
+            MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
+            typeof(void),
+            Type.EmptyTypes);
+
+        var il = m.GetILGenerator();
+        var skipLabel = il.DefineLabel();
+        var afterLabel = il.DefineLabel();
+
+        // if (_loader != null) _loader.Dispose();
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldfld, loaderField);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Brfalse_S, skipLabel);
+        il.Emit(OpCodes.Callvirt, iDisposableDispose);
+        il.Emit(OpCodes.Br_S, afterLabel);
+        il.MarkLabel(skipLabel);
+        il.Emit(OpCodes.Pop);
+        il.MarkLabel(afterLabel);
+
+        // _loader = null;
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldnull);
+        il.Emit(OpCodes.Stfld, loaderField);
+
+        // base.Dispose();
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Call, baseDispose);
+        il.Emit(OpCodes.Ret);
+
+        tb.DefineMethodOverride(m,
+            typeof(NodeLogic).GetMethod("Dispose", BindingFlags.Public | BindingFlags.Instance)!);
     }
 
     /// <summary>

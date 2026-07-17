@@ -47,6 +47,13 @@ public class TranslateNode : NodeLogic
         set => SetOutput(value);
     }
 
+    public override void Dispose()
+    {
+        _effect?.Dispose();
+        _effect = null;
+        base.Dispose();
+    }
+
     protected override Task Calculate()
     {
         if (EvaluationContext is null)
@@ -108,6 +115,13 @@ public class ScaleNode : NodeLogic
         set => SetOutput(value);
     }
 
+    public override void Dispose()
+    {
+        _effect?.Dispose();
+        _effect = null;
+        base.Dispose();
+    }
+
     protected override Task Calculate()
     {
         if (EvaluationContext is null)
@@ -161,6 +175,13 @@ public class RotateNode : NodeLogic
     {
         get => GetOutput<ImageWrapper>();
         set => SetOutput(value);
+    }
+
+    public override void Dispose()
+    {
+        _effect?.Dispose();
+        _effect = null;
+        base.Dispose();
     }
 
     protected override Task Calculate()

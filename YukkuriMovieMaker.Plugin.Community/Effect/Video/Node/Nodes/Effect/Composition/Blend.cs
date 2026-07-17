@@ -80,6 +80,15 @@ public class BlendNode : NodeLogic
         set => SetOutput(value);
     }
 
+    public override void Dispose()
+    {
+        _blendEffect?.Dispose();
+        _blendEffect = null;
+        _compositeEffect?.Dispose();
+        _compositeEffect = null;
+        base.Dispose();
+    }
+
     protected override Task Calculate()
     {
         if (EvaluationContext is null) return Task.FromException(new NullReferenceException(nameof(EvaluationContext)));
