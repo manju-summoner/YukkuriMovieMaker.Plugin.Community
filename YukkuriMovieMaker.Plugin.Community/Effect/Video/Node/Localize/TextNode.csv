@@ -9,6 +9,7 @@ FunctionsCategoryName,関数カテゴリ名,関数,Functions,函数,函數,함�
 VideoEffectCategoryName,映像エフェクトカテゴリ名,映像エフェクト,Video Effects,视频效果,視訊效果,비디오 효과,Efectos de vídeo,تأثيرات الفيديو
 FunctionsCategoryName,関数カテゴリ名,関数,Functions,函数,函數,함수,Funciones,الدوال
 AdvancedCategoryName,高度カテゴリ名,高度,Advanced,高级,進階,고급,Advanced,متقدم
+TransformCategoryName,座標変換カテゴリ名,座標変換,Transform,坐标变换,座標變換,좌표 변환,Transformación,تحويل الإحداثيات
 
 BrushName,ブラシ名,ブラシ,Brush,画笔,筆刷,브러시,Pincel,فرشاة
 
@@ -272,3 +273,19 @@ RandomNodeDescription,乱数ノード説明,決定論的な乱数を生成しま
 
 NoiseNode,ノイズノード名,ノイズ,Noise,噪声,雜訊,노이즈,Noise,ضوضاء
 NoiseNodeDescription,ノイズノード説明,連続的に変化するノイズを生成します。,Generate continuous noise.,生成连续噪声。,產生連續雜訊。,연속적으로 변화하는 노이즈를 생성합니다.,Generate continuous noise.,توليد ضوضاء مستمرة
+
+TranslateNode,平行移動ノード名,平行移動,Translate,平移,平移,이동,Traslación,إزاحة
+TranslateNodeDescription,平行移動ノード説明,画像を指定量移動します。,Move image by specified amount.,移动图像。,移動圖像。,이미지를 지정량 이동합니다.,Move image.,تحريك الصورة
+TranslateX,X移動量入力,X移動量,X Offset,X偏移量,X偏移量,X 이동량,X Offset,إزاحة X
+TranslateY,Y移動量入力,Y移動量,Y Offset,Y偏移量,Y偏移量,Y 이동량,Y Offset,إزاحة Y
+
+ScaleNode,拡大縮小ノード名,拡大縮小,Scale,缩放,縮放,크기 조절,Escala,تحجيم
+ScaleNodeDescription,拡大縮小ノード説明,画像を指定倍率で拡大縮小します。,Scale image.,缩放图像。,縮放圖像。,이미지를 확대/축소합니다.,Scale image.,تحجيم الصورة
+ScaleX,X倍率入力,X倍率,Scale X,X缩放,X縮放,X 배율,Scale X,مقياس X
+ScaleY,Y倍率入力,Y倍率,Scale Y,Y缩放,Y縮放,Y 배율,Scale Y,مقياس Y
+
+RotateNode,回転ノード名,回転,Rotate,旋转,旋轉,회전,Rotación,دوران
+RotateNodeDescription,回転ノード説明,画像を指定角度回転します。,Rotate image.,旋转图像。,旋轉圖像。,이미지를 회전합니다.,Rotate image.,تدوير الصورة
+Angle,角度入力,角度,Angle,角度,角度,각도,Ángulo,زاوية
+
+TransformResultDescription,座標変換結果説明,変換後の画像です。,Transformed image.,,,,,

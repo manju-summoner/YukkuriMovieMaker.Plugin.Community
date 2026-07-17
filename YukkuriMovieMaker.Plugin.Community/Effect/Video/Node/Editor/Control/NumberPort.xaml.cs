@@ -64,6 +64,7 @@ public sealed partial class NumberPort
     public NumberPort()
     {
         InitializeComponent();
+        Update();
     }
 
     public bool IsFocusable

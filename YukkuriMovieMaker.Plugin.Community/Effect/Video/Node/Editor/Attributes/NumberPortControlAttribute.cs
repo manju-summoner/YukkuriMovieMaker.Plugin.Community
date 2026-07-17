@@ -29,7 +29,7 @@ public class NumberPortControlAttribute : PropertyControlBaseAttribute
     /// <summary>
     ///     デフォルト値
     /// </summary>
-    public float Default { get; set; } = 0f;
+    public float Default { get; set; }
 
     public override object GetDefaultValue()
     {
