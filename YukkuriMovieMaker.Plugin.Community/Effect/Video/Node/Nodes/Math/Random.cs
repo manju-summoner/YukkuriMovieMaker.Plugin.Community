@@ -43,7 +43,7 @@ internal static class NoiseUtility
 public class RandomNode : NodeLogic
 {
     [InputPort(nameof(TextNode.Seed), nameof(TextNode.SeedDescription), typeof(TextNode))]
-    [NumberPortControl(Min = int.MinValue, Max = int.MaxValue)]
+    [NumberPortControl(Min = int.MinValue, Max = int.MaxValue, Digits = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public int Seed
     {
@@ -52,7 +52,7 @@ public class RandomNode : NodeLogic
     }
 
     [InputPort(nameof(TextNode.Index), nameof(TextNode.IndexDescription), typeof(TextNode))]
-    [NumberPortControl(Min = int.MinValue, Max = int.MaxValue)]
+    [NumberPortControl(Min = int.MinValue, Max = int.MaxValue, Digits = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public int Index
     {
@@ -80,7 +80,7 @@ public class RandomNode : NodeLogic
 public class NoiseNode : NodeLogic
 {
     [InputPort(nameof(TextNode.Seed), nameof(TextNode.SeedDescription), typeof(TextNode))]
-    [NumberPortControl(Min = int.MinValue, Max = int.MaxValue)]
+    [NumberPortControl(Min = int.MinValue, Max = int.MaxValue, Digits = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public int Seed
     {
