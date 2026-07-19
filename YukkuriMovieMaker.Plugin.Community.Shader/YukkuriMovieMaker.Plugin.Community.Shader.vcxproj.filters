@@ -204,6 +204,12 @@
     <FxCompile Include="ParticlizeVertex.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="ParticleOutput.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="ParticleOutputVertex.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="PuppetDeformationArap.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
