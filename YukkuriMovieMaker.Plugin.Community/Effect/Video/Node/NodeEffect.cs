@@ -86,6 +86,7 @@ public sealed class Processor : IVideoEffectProcessor
     private readonly IGraphicsDevicesAndContext _devices;
     private readonly Lock _lock = new();
     private readonly NodeEffect _nodeEffect;
+    private ID2D1Image? _affineOutput;
 
     private AffineTransform2D? _affineTransform;
     private ID2D1Bitmap1? _blankBitmap;
@@ -201,11 +202,12 @@ public sealed class Processor : IVideoEffectProcessor
             _affineTransform?.Dispose();
             _affineTransform = null;
 
+            _affineOutput?.Dispose();
+            _affineOutput = null;
+            _outputImage = null;
+
             _blankBitmap?.Dispose();
             _blankBitmap = null;
-
-            _outputImage?.Dispose();
-            _outputImage = null;
         }
     }
 
@@ -347,6 +349,9 @@ public sealed class Processor : IVideoEffectProcessor
         };
 
         _affineTransform.SetInput(0, input, true);
-        _outputImage = _affineTransform.Output;
+
+        _affineOutput?.Dispose();
+        _affineOutput = _affineTransform.Output;
+        _outputImage = _affineOutput;
     }
 }

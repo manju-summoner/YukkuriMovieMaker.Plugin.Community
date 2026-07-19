@@ -46,6 +46,7 @@ public class BlendNode : NodeLogic
 {
     private Blend? _blendEffect;
     private Composite? _compositeEffect;
+    private ID2D1Image? _effectOutput;
 
     [InputPort("入力画像1", "1つめの合成する画像")]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
@@ -82,6 +83,8 @@ public class BlendNode : NodeLogic
 
     public override void Dispose()
     {
+        _effectOutput?.Dispose();
+        _effectOutput = null;
         _blendEffect?.Dispose();
         _blendEffect = null;
         _compositeEffect?.Dispose();
@@ -104,10 +107,9 @@ public class BlendNode : NodeLogic
             _compositeEffect.SetInput(0, InputImage1.Image, false);
             _compositeEffect.SetInput(1, InputImage2.Image, true);
 
-            Output = new ImageWrapper
-            {
-                Image = _compositeEffect.Output
-            };
+            _effectOutput?.Dispose();
+            _effectOutput = _compositeEffect.Output;
+            Output = new ImageWrapper { Image = _effectOutput };
 
             return Task.CompletedTask;
         }
@@ -116,7 +118,9 @@ public class BlendNode : NodeLogic
         _blendEffect.Mode = (Vortice.Direct2D1.BlendMode)(Mode - 1);
         _blendEffect.SetInput(0, InputImage1.Image, false);
         _blendEffect.SetInput(1, InputImage2.Image, true);
-        Output = new ImageWrapper { Image = _blendEffect.Output };
+        _effectOutput?.Dispose();
+        _effectOutput = _blendEffect.Output;
+        Output = new ImageWrapper { Image = _effectOutput };
 
         return Task.CompletedTask;
     }

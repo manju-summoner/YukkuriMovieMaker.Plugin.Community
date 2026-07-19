@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Windows.Media;
+using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
@@ -12,6 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.Tran
 public class TranslateNode : NodeLogic
 {
     private AffineTransform2D? _effect;
+    private ID2D1Image? _effectOutput;
 
     [InputPort("入力画像", "変換する画像")]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
@@ -49,6 +51,8 @@ public class TranslateNode : NodeLogic
 
     public override void Dispose()
     {
+        _effectOutput?.Dispose();
+        _effectOutput = null;
         _effect?.Dispose();
         _effect = null;
         base.Dispose();
@@ -67,10 +71,9 @@ public class TranslateNode : NodeLogic
         _effect.SetInput(0, Input.Image, false);
         _effect.TransformMatrix = Matrix3x2.CreateTranslation(X, Y);
 
-        Output = new ImageWrapper
-        {
-            Image = _effect.Output
-        };
+        _effectOutput?.Dispose();
+        _effectOutput = _effect.Output;
+        Output = new ImageWrapper { Image = _effectOutput };
 
         return Task.CompletedTask;
     }
@@ -80,6 +83,7 @@ public class TranslateNode : NodeLogic
 public class ScaleNode : NodeLogic
 {
     private AffineTransform2D? _effect;
+    private ID2D1Image? _effectOutput;
 
     [InputPort("入力画像", "変換する画像")]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
@@ -117,6 +121,8 @@ public class ScaleNode : NodeLogic
 
     public override void Dispose()
     {
+        _effectOutput?.Dispose();
+        _effectOutput = null;
         _effect?.Dispose();
         _effect = null;
         base.Dispose();
@@ -133,15 +139,11 @@ public class ScaleNode : NodeLogic
         _effect ??= new AffineTransform2D(EvaluationContext.Devices.DeviceContext);
 
         _effect.SetInput(0, Input.Image, false);
-        _effect.TransformMatrix = Matrix3x2.CreateScale(
-            ScaleX,
-            ScaleY
-        );
+        _effect.TransformMatrix = Matrix3x2.CreateScale(ScaleX, ScaleY);
 
-        Output = new ImageWrapper
-        {
-            Image = _effect.Output
-        };
+        _effectOutput?.Dispose();
+        _effectOutput = _effect.Output;
+        Output = new ImageWrapper { Image = _effectOutput };
 
         return Task.CompletedTask;
     }
@@ -151,6 +153,7 @@ public class ScaleNode : NodeLogic
 public class RotateNode : NodeLogic
 {
     private AffineTransform2D? _effect;
+    private ID2D1Image? _effectOutput;
 
     [InputPort("入力画像", "変換する画像")]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
@@ -179,6 +182,8 @@ public class RotateNode : NodeLogic
 
     public override void Dispose()
     {
+        _effectOutput?.Dispose();
+        _effectOutput = null;
         _effect?.Dispose();
         _effect = null;
         base.Dispose();
@@ -195,16 +200,11 @@ public class RotateNode : NodeLogic
         _effect ??= new AffineTransform2D(EvaluationContext.Devices.DeviceContext);
 
         _effect.SetInput(0, Input.Image, false);
+        _effect.TransformMatrix = Matrix3x2.CreateRotation(MathF.PI / 180 * Angle);
 
-        _effect.TransformMatrix =
-            Matrix3x2.CreateRotation(
-                MathF.PI / 180 * Angle
-            );
-
-        Output = new ImageWrapper
-        {
-            Image = _effect.Output
-        };
+        _effectOutput?.Dispose();
+        _effectOutput = _effect.Output;
+        Output = new ImageWrapper { Image = _effectOutput };
 
         return Task.CompletedTask;
     }
