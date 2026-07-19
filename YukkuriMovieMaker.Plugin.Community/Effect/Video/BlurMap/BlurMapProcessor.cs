@@ -93,7 +93,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.BlurMap
             if (isFirst || !this.bounds.Equals(bounds))
                 isChanged = true;
 
-            isChanged |= brushSource?.Update(effectDescription) ?? false;
+            isChanged |= brushSource?.Update(new BrushSourceDescription(effectDescription, bounds)) ?? false;
             if (!isChanged)
                 return effectDescription.DrawDescription;
 

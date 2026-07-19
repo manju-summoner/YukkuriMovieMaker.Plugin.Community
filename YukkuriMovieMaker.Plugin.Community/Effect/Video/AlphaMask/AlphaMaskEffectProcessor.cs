@@ -84,7 +84,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AlphaMask
             if (isFirst || !this.bounds.Equals(bounds))
                 isBrushChanged = true;
 
-            isBrushChanged |= source?.Update(effectDescription) ?? false;
+            isBrushChanged |= source?.Update(new BrushSourceDescription(effectDescription, bounds)) ?? false;
 
             if (isBrushChanged)
             {

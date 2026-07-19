@@ -113,7 +113,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InnerOutline
                 cropEffect.Rectangle = new Vector4(expandedBounds.Left, expandedBounds.Top, expandedBounds.Right, expandedBounds.Bottom);
 
             var bounds = dc.GetImageLocalBounds(outlineOutput);
-            var isBrushChanged = brushSource.Update(effectDescription);
+            var isBrushChanged = brushSource.Update(new BrushSourceDescription(effectDescription, bounds));
             if (isFirst || isBrushChanged || !this.bounds.Equals(bounds))
             {
                 if (brushCommandList != null)
