@@ -9,6 +9,7 @@ using System.Windows;
 using SharpGen.Runtime;
 using Vortice;
 using Vortice.Direct2D1;
+using Vortice.Direct2D1.Effects;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
@@ -29,6 +30,7 @@ public class VideoEffectsLoader : IDisposable
     private readonly ShaderEffect? _shaderEffect;
     private readonly EffectType _type;
     private readonly IVideoEffect? _videoEffect;
+    private DrawDescriptionApplicator? _drawDescriptionApplicator;
     private IVideoEffectProcessor? _processor;
     private IBrushSource? _source;
 
@@ -58,6 +60,8 @@ public class VideoEffectsLoader : IDisposable
         _processor?.ClearInput();
         _processor?.Dispose();
         _processor = null;
+        _drawDescriptionApplicator?.Dispose();
+        _drawDescriptionApplicator = null;
         _shaderEffect?.Output?.Dispose();
         for (var i = 0; i < _shaderEffect?.InputCount; i++)
             _shaderEffect?.SetInput(i, null, true);
@@ -348,11 +352,22 @@ public class VideoEffectsLoader : IDisposable
                 {
                     try
                     {
-                        if (_processor.Output.NativePointer == IntPtr.Zero)
+                        try
+                        {
+                            if (_processor.Output.NativePointer == IntPtr.Zero)
+                                _processor = _videoEffect.CreateVideoEffect(evaluationContext.Devices);
+                        }
+                        catch (InvalidOperationException)
+                        {
                             _processor = _videoEffect.CreateVideoEffect(evaluationContext.Devices);
+                        }
+
                         _processor.SetInput(image[0]);
-                        _processor.Update(evaluationContext.EffectDescription);
-                        output = _processor.Output;
+                        var drawDesc = _processor.Update(evaluationContext.EffectDescription);
+
+                        _drawDescriptionApplicator ??= new DrawDescriptionApplicator();
+                        output = _drawDescriptionApplicator.Apply(_processor.Output, drawDesc,
+                            evaluationContext.Devices);
                         return true;
                     }
                     catch
@@ -1205,5 +1220,81 @@ public static class DynamicEffectImplGenerator
         }
 
         protected abstract override void UpdateConstants();
+    }
+}
+
+internal sealed class DrawDescriptionApplicator : IDisposable
+{
+    private AffineTransform2D? _affine;
+    private ID2D1Image? _affineOutput;
+    private ColorMatrix? _colorMatrix;
+    private ID2D1Image? _matrixOutput;
+
+    public void Dispose()
+    {
+        _matrixOutput?.Dispose();
+        _matrixOutput = null;
+        _affineOutput?.Dispose();
+        _affineOutput = null;
+        _colorMatrix?.Dispose();
+        _colorMatrix = null;
+        _affine?.Dispose();
+        _affine = null;
+    }
+
+    public ID2D1Image Apply(
+        ID2D1Image input,
+        DrawDescription drawDesc,
+        IGraphicsDevicesAndContext devices)
+    {
+        _affine ??= new AffineTransform2D(devices.DeviceContext) { BorderMode = BorderMode.Soft };
+        _affine.TransformMatrix = BuildMatrix(drawDesc);
+        _affine.SetInput(0, input, true);
+
+        _affineOutput?.Dispose();
+        _affineOutput = _affine.Output;
+
+        var opacity = (float)drawDesc.Opacity;
+        if (MathF.Abs(opacity - 1f) < 1e-6f)
+            return _affineOutput;
+
+        _colorMatrix ??= new ColorMatrix(devices.DeviceContext)
+        {
+            AlphaMode = ColorMatrixAlphaMode.Premultiplied
+        };
+        _colorMatrix.Matrix = new Matrix5x4
+        {
+            M11 = opacity, M12 = 0, M13 = 0, M14 = 0,
+            M21 = 0, M22 = opacity, M23 = 0, M24 = 0,
+            M31 = 0, M32 = 0, M33 = opacity, M34 = 0,
+            M41 = 0, M42 = 0, M43 = 0, M44 = opacity,
+            M51 = 0, M52 = 0, M53 = 0, M54 = 0
+        };
+        _colorMatrix.SetInput(0, _affineOutput, true);
+
+        _matrixOutput?.Dispose();
+        _matrixOutput = _colorMatrix.Output;
+        return _matrixOutput;
+    }
+
+    private static Matrix3x2 BuildMatrix(DrawDescription desc)
+    {
+        var rx = desc.Rotation.X * MathF.PI / 180f;
+        var ry = desc.Rotation.Y * MathF.PI / 180f;
+        var rz = desc.Rotation.Z * MathF.PI / 180f;
+
+        var r3D = Matrix4x4.CreateRotationX(rx)
+                  * Matrix4x4.CreateRotationY(ry)
+                  * Matrix4x4.CreateRotationZ(rz);
+
+        var rot2D = new Matrix3x2(r3D.M11, r3D.M12, r3D.M21, r3D.M22, 0f, 0f);
+
+        var cx = desc.CenterPoint.X;
+        var cy = desc.CenterPoint.Y;
+
+        return Matrix3x2.CreateTranslation(-cx, -cy)
+               * Matrix3x2.CreateScale(desc.Zoom.X, desc.Zoom.Y)
+               * rot2D
+               * Matrix3x2.CreateTranslation(cx + desc.Draw.X, cy + desc.Draw.Y);
     }
 }
