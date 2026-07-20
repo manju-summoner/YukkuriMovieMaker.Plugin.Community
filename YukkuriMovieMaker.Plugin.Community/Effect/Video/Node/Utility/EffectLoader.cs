@@ -1249,6 +1249,7 @@ internal sealed class DrawDescriptionApplicator : IDisposable
     {
         _affine ??= new AffineTransform2D(devices.DeviceContext) { BorderMode = BorderMode.Soft };
         _affine.TransformMatrix = BuildMatrix(drawDesc);
+        _affine.InterPolationMode = (AffineTransform2DInterpolationMode)drawDesc.ZoomInterpolationMode;
         _affine.SetInput(0, input, true);
 
         _affineOutput?.Dispose();

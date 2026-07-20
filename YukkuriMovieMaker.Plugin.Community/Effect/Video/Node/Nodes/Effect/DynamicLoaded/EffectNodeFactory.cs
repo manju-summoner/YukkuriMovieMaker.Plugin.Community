@@ -212,14 +212,15 @@ public static class EffectPortCollector
         if (prop.PropertyType == typeof(Animation))
         {
             var slider = prop.GetCustomAttribute<AnimationSliderAttribute>();
-            var defaultValue = (inst as Animation)?.DefaultValue;
+            var anim = inst as Animation;
+            var defaultValue = anim?.DefaultValue;
             return new PortDefinition
             {
                 PropName = prop.Name, PortType = PortType.Float,
                 LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
                 DefaultValue = defaultValue,
-                Min = slider != null ? (float)slider.DefaultMin : float.NaN,
-                Max = slider != null ? (float)slider.DefaultMax : float.NaN,
+                Min = anim != null ? (float)anim.MinValue : float.NaN,
+                Max = anim != null ? (float)anim.MaxValue : float.NaN,
                 Digits = slider?.StringFormat != null ? ParseDigits(slider.StringFormat) : 2,
                 Unit = slider?.UnitText ?? ""
             };
