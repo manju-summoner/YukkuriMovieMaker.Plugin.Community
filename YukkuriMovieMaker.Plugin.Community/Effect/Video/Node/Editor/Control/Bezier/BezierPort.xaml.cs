@@ -37,10 +37,19 @@ public partial class BezierPort
     {
         InitializeComponent();
 
-        ViewModel = new BezierEditorViewModel(BezierParser.Deserialize(Value));
-        _textBoxBuffer = Value;
+        _isApplyingValue = true;
 
-        SelectedPresetItem = FindMatchingPreset(Value);
+        try
+        {
+            ViewModel = new BezierEditorViewModel(BezierParser.Deserialize(Value));
+            _textBoxBuffer = Value;
+
+            SelectedPresetItem = FindMatchingPreset(Value);
+        }
+        finally
+        {
+            _isApplyingValue = false;
+        }
 
         Editor.CurveChanged += OnEditorCurveChanged;
         Editor.EditCompleted += OnEditorEditCompleted;
@@ -118,6 +127,8 @@ public partial class BezierPort
 
             control.ViewModel = new BezierEditorViewModel(curve);
             control.TextBoxBuffer = newValue;
+
+            control.SelectedPresetItem = control.FindMatchingPreset(newValue);
         }
         finally
         {
