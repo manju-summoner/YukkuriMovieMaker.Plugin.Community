@@ -56,10 +56,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LineHighlight
             var isLoop = item.IsLoop;
             var loopInterval = item.LoopInterval.GetValue(frame, length, fps);
 
-            var animationPosition = isLoop ? effectDescription.ItemPosition.Time.TotalSeconds % (effectDuration + loopInterval) 
-                : effectDescription.ItemPosition.Time.TotalSeconds;
+            double animationPosition;
+            if (isLoop == false)
+            {
+                animationPosition = effectDescription.ItemPosition.Time.TotalSeconds;
+            }
+            else if(effectDuration + loopInterval != 0)
+            {
+                animationPosition = effectDescription.ItemPosition.Time.TotalSeconds % (effectDuration + loopInterval);
+            }
+            else
+            {
+                animationPosition = 0;
+            }
             var isAnimationActive = animationPosition < effectDuration;
-            var animationRate = Easing.GetValue(easingType, easingMode, Math.Min(animationPosition / effectDuration, 1));
+            var animationRate = effectDuration != 0 ? Easing.GetValue(easingType, easingMode, Math.Clamp(animationPosition / effectDuration, 0, 1)) : 0;
 
             if (isFirst || ((this.isAnimationActive == true || isAnimationActive == true) && (!this.bounds.Equals(bounds) || this.color != color
                 || this.strength != strength || this.fade != fade || this.size != size || this.blur != blur || this.angle != angle || this.animationRate != animationRate)))
