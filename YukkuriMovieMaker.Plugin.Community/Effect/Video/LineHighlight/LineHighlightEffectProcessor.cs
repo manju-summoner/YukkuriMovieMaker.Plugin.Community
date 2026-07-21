@@ -107,7 +107,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LineHighlight
                     };
                     var brushProperties = new BrushProperties(currentFade, moveMatrix * rotationMatrix);
                     GradientStop[] stops;
-                    if (size >= blur)
+                    if (size > blur)
                     {
                         stops = [
                             new GradientStop()
