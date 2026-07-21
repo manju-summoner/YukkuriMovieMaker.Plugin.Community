@@ -881,19 +881,28 @@ public static class EffectNodeCalculator
         if (propInfo.PropertyType == typeof(Animation))
         {
             if (propInfo.GetValue(target) is not Animation anim) return;
-            var valuesProp = typeof(Animation).GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
+
+            var valuesProp = typeof(Animation)
+                .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
+
             var values = valuesProp?.GetValue(anim) as ImmutableList<AnimationValue>;
             if (values == null) return;
+
             var doubleVal = Convert.ToDouble(value ?? 0);
+
             var newValues = values.Count > 0
                 ? values.SetItem(0, new AnimationValue(doubleVal))
                 : values.Add(new AnimationValue(doubleVal));
+
             valuesProp!.SetValue(anim, newValues);
         }
         else
         {
             if (!propInfo.CanWrite) return;
-            propInfo.SetValue(target, value);
+
+            propInfo.SetValue(
+                target,
+                PropertyValueTypeConverter.ConvertPropertyValue(propInfo.PropertyType, value));
         }
     }
 

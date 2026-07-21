@@ -63,6 +63,40 @@ public static class DynamicBrushNodeFactory
         return result.ToArray();
     }
 
+    internal static string? GetBrushName(string assemblyQualifiedName)
+    {
+        lock (Lock)
+        {
+            foreach (var (pluginName, type) in TypeCache)
+                if ((type.AssemblyQualifiedName ?? type.Name) == assemblyQualifiedName)
+                    return pluginName;
+            return null;
+        }
+    }
+
+    internal static Type? GetOrCreate(string pluginName)
+    {
+        lock (Lock)
+        {
+            if (TypeCache.TryGetValue(pluginName, out var cached))
+                return cached;
+        }
+
+        var pluginType = PluginLoader.BrushPlugins
+            .Select(p => p.GetType())
+            .FirstOrDefault(t => t.Name == pluginName);
+        if (pluginType == null) return null;
+
+        try
+        {
+            return GetOrCreate(pluginType);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private static Type GetOrCreate(Type pluginType)
     {
         lock (Lock)
@@ -672,7 +706,12 @@ public static class BrushNodeCalculator
         else
         {
             if (!propInfo.CanWrite) return;
-            propInfo.SetValue(target, value);
+
+            propInfo.SetValue(
+                target,
+                PropertyValueTypeConverter.ConvertPropertyValue(
+                    propInfo.PropertyType,
+                    value));
         }
     }
 

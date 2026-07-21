@@ -2,6 +2,7 @@ using System.Reflection;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.Brush;
 using PortDefinition = YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port.PortDefinition;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
@@ -63,6 +64,9 @@ public static class Serializer
             var effectName = EffectNodeFactory.GetEffectName(typeName);
             if (effectName != null)
                 snapshot.EffectTypeNames[typeName] = effectName;
+            var brushName = DynamicBrushNodeFactory.GetBrushName(typeName);
+            if (brushName != null)
+                snapshot.BrushTypeNames[typeName] = brushName;
         }
 
         return snapshot;
@@ -89,6 +93,13 @@ public static class Serializer
         foreach (var (_, effectName) in snapshot.EffectTypeNames)
         {
             var nodeType = EffectNodeFactory.GetOrCreate(effectName);
+            if (nodeType != null)
+                Registry.RegisterType(nodeType);
+        }
+
+        foreach (var (_, brushName) in snapshot.BrushTypeNames)
+        {
+            var nodeType = DynamicBrushNodeFactory.GetOrCreate(brushName);
             if (nodeType != null)
                 Registry.RegisterType(nodeType);
         }
@@ -148,9 +159,13 @@ public static class Serializer
         }
 
         foreach (var conn in snapshot.Connections)
+        {
+            if (!nodeMap.ContainsKey(conn.FromId) || !nodeMap.ContainsKey(conn.ToId))
+                continue;
             graph.Connect(
                 conn.FromId, conn.FromPort,
                 conn.ToId, conn.ToPort);
+        }
 
         return graph;
 

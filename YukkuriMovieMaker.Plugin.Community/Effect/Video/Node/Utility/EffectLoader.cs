@@ -206,7 +206,9 @@ public class VideoEffectsLoader : IDisposable
                         if (!propInfo.CanWrite)
                             throw new InvalidOperationException(string.Format(TextUi.PropertyReadOnly, propertyName));
                         // For non-Animation types, set the value to the property as usual
-                        propInfo.SetValue(targetObject, value);
+                        propInfo.SetValue(
+                            targetObject,
+                            PropertyValueTypeConverter.ConvertPropertyValue(propInfo.PropertyType, value));
                     }
 
                     await _videoEffect.EndEditAsync();
@@ -271,7 +273,9 @@ public class VideoEffectsLoader : IDisposable
                         if (!propInfo.CanWrite)
                             throw new InvalidOperationException(string.Format(TextUi.PropertyReadOnly, propertyName));
                         // For non-Animation types, set the value to the property as usual
-                        propInfo.SetValue(targetObject, value);
+                        propInfo.SetValue(
+                            targetObject,
+                            PropertyValueTypeConverter.ConvertPropertyValue(propInfo.PropertyType, value));
                     }
 
                     await _brushParameter.EndEditAsync();
