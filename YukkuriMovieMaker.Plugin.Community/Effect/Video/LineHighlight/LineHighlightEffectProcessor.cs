@@ -102,20 +102,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LineHighlight
                             new GradientStop()
                             {
                                 Position = 0,
-                                Color = new Color4(color.R, color.G, color.B, 0)
+                                Color = new Color4(color.R / 255f, color.G / 255f, color.B / 255f, 0)
                             },
                             new GradientStop(){
                                 Position = (float)(blur / size * 0.5),
-                                Color = new Color4(color.R, color.G, color.B, color.A)
+                                Color = new Color4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f)
                             },
                             new GradientStop(){
                                 Position = (float)(1 - blur / size * 0.5),
-                                Color = new Color4(color.R, color.G, color.B, color.A)
+                                Color = new Color4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f)
                             },
                             new GradientStop()
                             {
                                 Position = 1,
-                                Color = new Color4(color.R, color.G, color.B, 0)
+                                Color = new Color4(color.R / 255f, color.G / 255f, color.B / 255f, 0)
                             }
                         ];
                     }
@@ -125,16 +125,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LineHighlight
                             new GradientStop()
                             {
                                 Position = 0,
-                                Color = new Color4(color.R, color.G, color.B, 0)
+                                Color = new Color4(color.R / 255f, color.G / 255f, color.B / 255f, 0)
                             },
                             new GradientStop(){
                                 Position = 0.5f,
-                                Color = new Color4(color.R, color.G, color.B, color.A * (float)(size / blur))
+                                Color = new Color4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f * (float)(size / blur))
                             },
                             new GradientStop()
                             {
                                 Position = 1,
-                                Color = new Color4(color.R, color.G, color.B, 0)
+                                Color = new Color4(color.R / 255f, color.G / 255f, color.B / 255f, 0)
                             }
                         ];
                     }
