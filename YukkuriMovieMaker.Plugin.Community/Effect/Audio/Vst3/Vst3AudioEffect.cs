@@ -9,7 +9,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 {
-    [AudioEffect(nameof(Texts.Vst3EffectName), [nameof(Texts.Vst3EffectCategoryName)], ["VST", "VST3", "プラグイン", "plugin"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
+    [AudioEffect(nameof(Texts.Vst3EffectName), [AudioEffectCategories.Effect], ["VST", "VST3", "プラグイン", "plugin"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     internal class Vst3AudioEffect : AudioEffectBase
     {
         internal Vst3ParameterChannel ParameterChannel { get; } = new();
