@@ -19,7 +19,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         public ObservableCollection<Vst3EffectPluginInfo> Plugins { get; } = [];
 
-        public bool IsScanning { get => isScanning; set => Set(ref isScanning, value, nameof(IsScanning), nameof(ScanStatusText)); }
+        public bool IsScanning
+        {
+            get => isScanning;
+            set
+            {
+                // スキャン完了は入力イベント起点でないため、明示的に通知しないとボタンが無効のまま残る。
+                // CommandManagerはスレッド固有のため、UIスレッド外で再開された場合に備えてDispatcher経由で呼ぶ
+                if (Set(ref isScanning, value, nameof(IsScanning), nameof(ScanStatusText)))
+                    System.Windows.Application.Current?.Dispatcher.InvokeAsync(CommandManager.InvalidateRequerySuggested);
+            }
+        }
         bool isScanning;
 
         public string ScanStatusText => IsScanning
