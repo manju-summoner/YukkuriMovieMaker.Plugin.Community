@@ -5,6 +5,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Pattern.Arrow2
     internal class ArrowPatternBrush2Plugin : IBrushPlugin
     {
         public string Name => Texts.ArrowPattern2;
+        public string DefaultGroupName => YukkuriMovieMaker.Resources.Localization.Texts.BrushGroupJapanesePatternName;
+        public int DefaultOrder => 450;
 
         public IBrushParameter CreateBrushParameter()
         {
