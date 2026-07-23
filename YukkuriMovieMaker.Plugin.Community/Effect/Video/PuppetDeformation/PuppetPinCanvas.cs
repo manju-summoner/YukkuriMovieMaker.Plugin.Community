@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using YukkuriMovieMaker.Controls;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
@@ -25,7 +26,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         //親子リンク（線分）へのクリック判定距離。ジョイント判定を優先するためやや小さめにする
         const double BoneSegmentHitRadius = 6.0;
 
-        static readonly System.Windows.Media.Brush CheckerBrush = CreateCheckerBrush();
         static readonly System.Windows.Media.Brush PinFillBrush = CreateFrozenBrush(Color.FromRgb(0x2E, 0x86, 0xFF));
         static readonly System.Windows.Media.Brush DisabledPinFillBrush = CreateFrozenBrush(Color.FromArgb(0xA0, 0x80, 0x80, 0x80));
         static readonly Pen PinStrokePen = CreateFrozenPen(Colors.White, 1.5);
@@ -55,6 +55,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         static readonly Pen BoneSelectionPen = CreateFrozenPen(Color.FromRgb(0xFF, 0x95, 0x00), 2.0);
         //マウスオーバー時のマーカー拡大量(px)
         const double HoverRadiusBonus = 2.0;
+
+        readonly CheckerBackground checkerBackground;
 
         PuppetDeformationListEditorViewModel? viewModel;
         ImmutableList<PuppetDeformationItemViewModel> pins = [];
@@ -201,6 +203,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             Focusable = true;
             ClipToBounds = true;
+            checkerBackground = new CheckerBackground(this);
             //マーカー操作の邪魔にならないよう、ツールチップはパネルの下側に出す
             System.Windows.Controls.ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Bottom);
             DataContextChanged += OnDataContextChanged;
@@ -542,7 +545,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         protected override void OnRender(DrawingContext drawingContext)
         {
             var bounds = new Rect(RenderSize);
-            drawingContext.DrawRectangle(CheckerBrush, null, bounds);
+            drawingContext.DrawRectangle(checkerBackground.GetBrush(), null, bounds);
 
             var layout = GetLayout();
             if (layout is null)
@@ -1246,23 +1249,5 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             return pen;
         }
 
-        static System.Windows.Media.Brush CreateCheckerBrush()
-        {
-            var dark = CreateFrozenBrush(Color.FromRgb(0x2A, 0x2A, 0x2A));
-            var light = CreateFrozenBrush(Color.FromRgb(0x33, 0x33, 0x33));
-            var group = new DrawingGroup();
-            group.Children.Add(new GeometryDrawing(dark, null, new RectangleGeometry(new Rect(0, 0, 16, 16))));
-            group.Children.Add(new GeometryDrawing(light, null, new RectangleGeometry(new Rect(0, 0, 8, 8))));
-            group.Children.Add(new GeometryDrawing(light, null, new RectangleGeometry(new Rect(8, 8, 8, 8))));
-            var brush = new DrawingBrush(group)
-            {
-                TileMode = TileMode.Tile,
-                Viewport = new Rect(0, 0, 16, 16),
-                ViewportUnits = BrushMappingMode.Absolute,
-                Stretch = System.Windows.Media.Stretch.None,
-            };
-            brush.Freeze();
-            return brush;
-        }
     }
 }

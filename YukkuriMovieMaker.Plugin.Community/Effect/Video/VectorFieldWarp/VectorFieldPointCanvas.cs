@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using YukkuriMovieMaker.Controls;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 {
@@ -25,7 +26,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         const double FieldArrowHeadSize = 3.5;
         const double FieldArrowMinVelocity = 1e-3;
 
-        static readonly System.Windows.Media.Brush CheckerBrush = CreateCheckerBrush();
         static readonly System.Windows.Media.Brush PointFillBrush = CreateFrozenBrush(Color.FromRgb(0x2E, 0x86, 0xFF));
         static readonly System.Windows.Media.Brush DisabledPointFillBrush = CreateFrozenBrush(Color.FromArgb(0xA0, 0x80, 0x80, 0x80));
         static readonly Pen PointStrokePen = CreateFrozenPen(Colors.White, 1.5);
@@ -35,6 +35,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         static readonly Pen SelectedRadiusPen = CreateFrozenDashedPen(Color.FromArgb(0xC0, 0x2E, 0x86, 0xFF), 1.5);
         static readonly System.Windows.Media.Brush LabelBrush = CreateFrozenBrush(Colors.White);
         static readonly Pen FieldArrowPen = CreateFrozenPen(Color.FromArgb(0xC8, 0x4F, 0xD8, 0x8A), 1.2);
+
+        readonly CheckerBackground checkerBackground;
 
         VectorFieldPointListEditorViewModel? viewModel;
         ImmutableList<VectorFieldPointItemViewModel> points = [];
@@ -150,6 +152,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         {
             Focusable = true;
             ClipToBounds = true;
+            checkerBackground = new CheckerBackground(this);
             System.Windows.Controls.ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Bottom);
             DataContextChanged += OnDataContextChanged;
         }
@@ -412,7 +415,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         protected override void OnRender(DrawingContext drawingContext)
         {
             var bounds = new Rect(RenderSize);
-            drawingContext.DrawRectangle(CheckerBrush, null, bounds);
+            drawingContext.DrawRectangle(checkerBackground.GetBrush(), null, bounds);
 
             var layout = GetLayout();
             if (layout is null)
@@ -817,23 +820,5 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             return pen;
         }
 
-        static System.Windows.Media.Brush CreateCheckerBrush()
-        {
-            var dark = CreateFrozenBrush(Color.FromRgb(0x2A, 0x2A, 0x2A));
-            var light = CreateFrozenBrush(Color.FromRgb(0x33, 0x33, 0x33));
-            var group = new DrawingGroup();
-            group.Children.Add(new GeometryDrawing(dark, null, new RectangleGeometry(new Rect(0, 0, 16, 16))));
-            group.Children.Add(new GeometryDrawing(light, null, new RectangleGeometry(new Rect(0, 0, 8, 8))));
-            group.Children.Add(new GeometryDrawing(light, null, new RectangleGeometry(new Rect(8, 8, 8, 8))));
-            var brush = new DrawingBrush(group)
-            {
-                TileMode = TileMode.Tile,
-                Viewport = new Rect(0, 0, 16, 16),
-                ViewportUnits = BrushMappingMode.Absolute,
-                Stretch = System.Windows.Media.Stretch.None,
-            };
-            brush.Freeze();
-            return brush;
-        }
     }
 }
