@@ -12,7 +12,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     {
         public ObservableCollection<string> AdditionalDirectories { get; } = [.. Vst3Settings.Default.AdditionalPluginDirectories];
 
-        public IReadOnlyList<string> DefaultDirectories { get; } = [.. Vst3PluginScanner.GetDefaultDirectories()];
+        // YMM4管理外のフォルダー（Program Files等）は存在しない場合は項目ごと非表示にする。
+        // YMM4管理下のフォルダー（プラグインフォルダー配下）は存在しなくても表示し、ボタンで作成できるようにする
+        public IReadOnlyList<Vst3DefaultDirectoryViewModel> DefaultDirectories { get; } =
+            [.. Vst3PluginScanner.GetDefaultDirectoryInfos()
+                .Where(x => x.IsUserManaged || System.IO.Directory.Exists(x.Path))
+                .Select(x => new Vst3DefaultDirectoryViewModel(x.Path, canCreate: x.IsUserManaged))];
 
         public string? SelectedDirectory { get => selectedDirectory; set => Set(ref selectedDirectory, value); }
         string? selectedDirectory;
@@ -39,6 +44,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public ICommand AddDirectory { get; }
         public ICommand RemoveDirectory { get; }
         public ICommand Rescan { get; }
+        public ICommand OpenDirectory { get; }
 
         public Vst3SettingsViewModel()
         {
@@ -69,6 +75,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             Rescan = new ActionCommand(
                 _ => !IsScanning,
                 _ => _ = RescanAsync());
+            OpenDirectory = new ActionCommand(
+                item => item is Vst3DefaultDirectoryViewModel directory
+                    && (directory.CanCreate || System.IO.Directory.Exists(directory.Path)),
+                item =>
+                {
+                    if (item is not Vst3DefaultDirectoryViewModel directory)
+                        return;
+                    try
+                    {
+                        if (directory.CanCreate)
+                            System.IO.Directory.CreateDirectory(directory.Path);
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = directory.Path,
+                            UseShellExecute = true,
+                        });
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Default.Write("VST3フォルダーを開けませんでした。", e);
+                    }
+                });
 
             var cached = Vst3PluginScanner.CachedPlugins;
             if (cached is not null)
@@ -81,6 +109,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             {
                 _ = RescanAsync();
             }
+        }
+
+        /// <summary>
+        /// 標準のVST3フォルダー1件分の表示項目。
+        /// CanCreateがtrueの場合、フォルダーが存在しなくても「開く」ボタンで作成できる
+        /// </summary>
+        public class Vst3DefaultDirectoryViewModel(string path, bool canCreate)
+        {
+            public string Path { get; } = path;
+            public bool CanCreate { get; } = canCreate;
         }
 
         void SaveDirectories()

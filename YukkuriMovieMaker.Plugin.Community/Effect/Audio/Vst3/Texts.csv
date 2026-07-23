@@ -29,3 +29,4 @@ Vst3SettingsPluginNameColumn,,名前,Name,名称,名稱,이름,Nombre,الاسم
 Vst3SettingsPluginVendorColumn,,開発元,Vendor,开发商,開發者,개발사,Desarrollador,المطور,Vendor,
 Vst3SettingsPluginPathColumn,,パス,Path,路径,路徑,경로,Ruta,المسار,Jalur,
 Vst3EffectReloadPluginsToolTip,,プラグイン一覧を再読み込み,Reload the plugin list,重新加载插件列表,重新載入外掛程式清單,플러그인 목록 다시 로드,Recargar la lista de plugins,إعادة تحميل قائمة الملحقات,Muat ulang daftar plugin,
+Vst3SettingsOpenDirectoryToolTip,,フォルダーを開く,Open Folder,打开文件夹,開啟資料夾,폴더 열기,Abrir carpeta,فتح المجلد,Buka Folder,

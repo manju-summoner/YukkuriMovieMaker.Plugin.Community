@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
     <UserControl.DataContext>
@@ -35,14 +36,28 @@
                                   VerticalAlignment="Center">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <TextBox Text="{Binding Mode=OneWay}"
-                                         ToolTip="{Binding}"
-                                         IsReadOnly="True"
-                                         BorderBrush="Transparent"
-                                         Background="Transparent"
-                                         TextWrapping="Wrap"
-                                         TextAlignment="Right"
-                                         VerticalContentAlignment="Center"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0"
+                                             Text="{Binding Path, Mode=OneWay}"
+                                             ToolTip="{Binding Path}"
+                                             IsReadOnly="True"
+                                             BorderBrush="Transparent"
+                                             Background="Transparent"
+                                             TextWrapping="NoWrap"
+                                             TextAlignment="Right"
+                                             VerticalContentAlignment="Center"/>
+                                    <Button Grid.Column="1"
+                                            Width="26"
+                                            Padding="3"
+                                            Content="{DynamicResource {x:Static icons:IconKeys.FolderOpen}}"
+                                            ToolTip="{x:Static local:Texts.Vst3SettingsOpenDirectoryToolTip}"
+                                            CommandParameter="{Binding}"
+                                            Command="{Binding DataContext.OpenDirectory, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
