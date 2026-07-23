@@ -9,5 +9,8 @@
         public string Name => Texts.Browser;
 
         public bool AllowMultipleInstances => true;
+
+        public string DefaultGroupName => YukkuriMovieMaker.Resources.Localization.Texts.ToolGroupUtilityName;
+        public int DefaultOrder => 520;
     }
 }

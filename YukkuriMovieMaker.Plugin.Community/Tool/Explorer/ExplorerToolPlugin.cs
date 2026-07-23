@@ -13,5 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         public string Name => Texts.Explorer;
         public bool AllowMultipleInstances => true;
+        public string DefaultGroupName => YukkuriMovieMaker.Resources.Localization.Texts.ToolGroupUtilityName;
+        public int DefaultOrder => 510;
     }
 }
