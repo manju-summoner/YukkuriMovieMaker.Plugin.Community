@@ -8,6 +8,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YukkuriMovieMaker.Plugin.Co
 		{3A511980-F4FD-410F-BFE7-5FECCDB9D04E} = {3A511980-F4FD-410F-BFE7-5FECCDB9D04E}
 		{EFA4DB83-E2D2-47A1-B695-9B7DA2008609} = {EFA4DB83-E2D2-47A1-B695-9B7DA2008609}
 		{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1} = {B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3} = {7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YukkuriMovieMaker.Generator", "YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj", "{D8C9EED5-8D7F-4548-8B3E-85679DFE18BF}"
@@ -17,6 +18,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YukkuriMovieMaker.Vst3Bridge", "YukkuriMovieMaker.Vst3Bridge\YukkuriMovieMaker.Vst3Bridge.vcxproj", "{EFA4DB83-E2D2-47A1-B695-9B7DA2008609}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YukkuriMovieMaker.Vst3Scanner", "YukkuriMovieMaker.Vst3Scanner\YukkuriMovieMaker.Vst3Scanner.vcxproj", "{B64F7A52-6F83-4F0E-9C1D-4A52C8E3B7A1}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YukkuriMovieMaker.OfxScanner", "YukkuriMovieMaker.OfxScanner\YukkuriMovieMaker.OfxScanner.vcxproj", "{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +55,18 @@ Global
 		{D8C9EED5-8D7F-4548-8B3E-85679DFE18BF}.Release|x64.Build.0 = Release|Any CPU
 		{D8C9EED5-8D7F-4548-8B3E-85679DFE18BF}.Release|x86.ActiveCfg = Release|Any CPU
 		{D8C9EED5-8D7F-4548-8B3E-85679DFE18BF}.Release|x86.Build.0 = Release|Any CPU
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}.Debug|Any CPU.Build.0 = Debug|x64
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}.Debug|x64.ActiveCfg = Debug|x64
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}.Debug|x64.Build.0 = Debug|x64
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}.Debug|x86.ActiveCfg = Debug|x64
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}.Debug|x86.Build.0 = Debug|x64
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}.Release|Any CPU.ActiveCfg = Release|x64
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}.Release|Any CPU.Build.0 = Release|x64
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}.Release|x64.ActiveCfg = Release|x64
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}.Release|x64.Build.0 = Release|x64
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}.Release|x86.ActiveCfg = Release|x64
+		{7C3F4B6E-2D91-48A3-B8F0-5E2A9C14D7B3}.Release|x86.Build.0 = Release|x64
 		{3A511980-F4FD-410F-BFE7-5FECCDB9D04E}.Debug|Any CPU.ActiveCfg = Release|Win32
 		{3A511980-F4FD-410F-BFE7-5FECCDB9D04E}.Debug|Any CPU.Build.0 = Release|Win32
 		{3A511980-F4FD-410F-BFE7-5FECCDB9D04E}.Debug|x64.ActiveCfg = Debug|x64

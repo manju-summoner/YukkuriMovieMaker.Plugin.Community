@@ -46,6 +46,19 @@
              CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!-- OFXスキャナーEXE（スキャンの別プロセス隔離用）。
+       .NETランタイムに依存しないネイティブEXEのため、self-contained配布でも動作する -->
+  <ItemGroup>
+    <ProjectReference Include="..\YukkuriMovieMaker.OfxScanner\YukkuriMovieMaker.OfxScanner.vcxproj"
+                      Condition="'$(MSBuildRuntimeType)' != 'Core'"
+                      ReferenceOutputAssembly="false"
+                      AdditionalProperties="Platform=x64" />
+    <Content Include="..\YukkuriMovieMaker.OfxScanner\bin\$(Configuration)\YukkuriMovieMaker.OfxScanner.exe"
+             Link="Resources\bin\x64\ofx\YukkuriMovieMaker.OfxScanner.exe"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <!-- YMM4のdllや、カスタムdllを参照。サードパーティー開発者向け。-->
   <ItemGroup Condition="'$(YMM4Proj)' == ''">
 	  <Reference Include="YukkuriMovieMaker.Controls">
@@ -149,6 +162,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\License\VST 3 SDK.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\License\OpenFX.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SoundFonts\GeneralUser-GS.sf2">
