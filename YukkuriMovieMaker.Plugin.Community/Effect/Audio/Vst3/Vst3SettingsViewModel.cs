@@ -13,7 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         public ObservableCollection<string> AdditionalDirectories { get; } = [.. Vst3Settings.Default.AdditionalPluginDirectories];
 
         // YMM4管理外のフォルダー（Program Files等）は存在しない場合は項目ごと非表示にする。
-        // YMM4管理下のフォルダー（プラグインフォルダー配下）は存在しなくても表示し、ボタンで作成できるようにする
+        // YMM4管理下のフォルダー（user\resources配下）は存在しなくても表示し、ボタンで作成できるようにする
         public IReadOnlyList<Vst3DefaultDirectoryViewModel> DefaultDirectories { get; } =
             [.. Vst3PluginScanner.GetDefaultDirectoryInfos()
                 .Where(x => x.IsUserManaged || System.IO.Directory.Exists(x.Path))

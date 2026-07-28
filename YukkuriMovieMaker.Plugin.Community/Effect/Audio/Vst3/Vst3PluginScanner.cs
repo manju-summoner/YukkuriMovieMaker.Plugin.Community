@@ -35,13 +35,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         /// <summary>
         /// 標準のVST3検索フォルダー（存在しないものも含む）。
-        /// IsUserManagedはYMM4のプラグインフォルダー配下（YMM4が作成してよいフォルダー）かどうか
+        /// IsUserManagedはYMM4管理下（YMM4が作成してよいフォルダー）かどうか
         /// </summary>
         public static IEnumerable<(string Path, bool IsUserManaged)> GetDefaultDirectoryInfos()
         {
             yield return (Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles), "VST3"), false);
             yield return (Path.Combine(GetUserProgramFilesCommonPath(), "VST3"), false);
-            yield return (Path.Combine(AppDirectories.PluginDirectory, "VST3"), true);
+            // user\plugin はYMM4用プラグインのフォルダーのため、VST3プラグインは user\resources 配下に置く
+            yield return (Path.Combine(AppDirectories.UserResourceDirectory, "vst3"), true);
         }
 
         static readonly Guid UserProgramFilesCommonFolderId = new("BCBD3057-CA5C-4622-B42D-BC56DB0AE516");
