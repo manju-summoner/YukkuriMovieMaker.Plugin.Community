@@ -16,3 +16,4 @@ OpenFxSettingsPluginPathColumn,,パス,Path,路径,路徑,경로,Ruta,المسا
 OpenFxSettingsRescanButton,,再スキャン,Rescan,重新扫描,重新掃描,다시 스캔,Reescanear,إعادة الفحص,Pindai ulang,
 OpenFxSettingsScanningMessage,,スキャン中...,Scanning...,扫描中...,掃描中...,스캔 중...,Escaneando...,جارٍ الفحص...,Memindai...,
 OpenFxSettingsPluginCountMessage,0: plugin count,{0}個のプラグインを認識しています,{0} plugins detected,已识别{0}个插件,已辨識{0}個外掛程式,{0}개의 플러그인을 인식했습니다,Se detectaron {0} plugins,تم اكتشاف {0} من الملحقات,{0} plugin terdeteksi,
+OpenFxInOutTransitionEffectName,,場面切り替え（OpenFX）,Transition (OpenFX),场景切换（OpenFX）,場景切換（OpenFX）,장면 전환（OpenFX）,Transición (OpenFX),انتقال (OpenFX),Transisi (OpenFX),

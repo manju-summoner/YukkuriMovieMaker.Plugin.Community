@@ -91,11 +91,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
             if (string.IsNullOrEmpty(item.PluginPath) || string.IsNullOrEmpty(item.PluginId))
             {
-                // 選択解除されたらネイティブの入出力バッファを保持し続けない
+                // 選択解除されたらネイティブの入出力バッファを保持し続けない。
+                // 失敗状態も併せてリセットする（残すと同じプラグインの再選択がエッジ検出されず、
+                // クールダウンの残りフレームが素通しのまま消化されてしまう）
                 instance?.Dispose();
                 instance = null;
                 instancePluginPath = "";
                 instancePluginId = "";
+                attemptedPluginPath = "";
+                attemptedPluginId = "";
+                failureCooldownFrames = 0;
+                hasLoggedFailure = false;
                 ApplyPassthrough();
                 return effectDescription.DrawDescription;
             }

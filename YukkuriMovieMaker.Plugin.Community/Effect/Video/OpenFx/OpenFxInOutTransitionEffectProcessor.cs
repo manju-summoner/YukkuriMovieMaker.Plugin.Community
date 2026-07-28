@@ -6,38 +6,53 @@ using Vortice.Direct2D1.Effects;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
-using YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx;
+using YukkuriMovieMaker.Player.Video.Effects;
 
-namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 {
     /// <summary>
-    /// OpenFX場面切り替えの描画処理。
-    /// YMM4のGPUパイプライン（ID2D1Image）とOFXのCPUレンダリングを橋渡しする：
-    /// before/afterの2入力をGPUビットマップへ描画 → CPU読み出し → OFXプラグイン（トランジションコンテキスト）で
-    /// レンダリング → 結果をビットマップへ書き戻して出力ノード（AffineTransform2D）に接続する。
-    /// 進行度（緩急適用後）は毎フレーム Transition パラメータへ設定する。
-    /// プラグイン未選択・読み込み失敗時は進行50%を境に before / after を素通しする。
+    /// 「場面切り替え（OpenFX）」の描画処理。
+    /// 本体の「場面切り替え」（InOutTransitionEffect）と同じ時間制御でrate（表示率0～1）を求め、
+    /// アイテム画像と透過画像の2入力でOFXトランジションを駆動する：
+    /// 登場時は 透明→アイテム（進行度=rate）、退場時は アイテム→透明（進行度=1-rate）。
+    /// 反転はfrom/toの役割と進行度を同時反転する（＝トランジションの逆再生）。
+    /// 効果時間外・プラグイン未選択・失敗時は入力を素通しする。
     /// </summary>
-    internal sealed unsafe class OpenFxTransitionSource : ITransitionSource
+    internal sealed unsafe class OpenFxInOutTransitionEffectProcessor : VideoEffectProcessorBase
     {
         readonly IGraphicsDevicesAndContext devices;
-        readonly ID2D1Image before;
-        readonly ID2D1Image after;
-        readonly OpenFxTransitionParameter item;
+        readonly OpenFxInOutTransitionEffect item;
 
-        readonly AffineTransform2D transformEffect;
-        readonly ID2D1Image transformOutput;
-        // 素通し表示の状態（passthroughInputはtransformEffectへ接続中の素通し入力。nullなら出力ビットマップ接続中）
-        ID2D1Image? passthroughInput;
+        AffineTransform2D? transformEffect;
+        ID2D1Image? currentInput;
+        bool isPassthroughApplied;
+
+        // 透過側の入力。中身が常にゼロで書き換えられない（RenderTransitionの入力はReadOnlySpan）ため、
+        // プロセス全体で1本のgrow-onlyゼロ配列を共有してインスタンスごとの確保を避ける
+        static byte[] sharedTransparentBuffer = [];
+
+        static byte[] GetSharedTransparentBuffer(int minLength)
+        {
+            // CASループで常に大きい方の配列を残す（同時要求のサイズ競合で小さい方が後勝ちすると
+            // 次のフレームで再確保が走るため）。各スレッドは必ず要求長以上のゼロ配列を受け取る
+            while (true)
+            {
+                var current = sharedTransparentBuffer;
+                if (current.Length >= minLength)
+                    return current;
+                var grown = new byte[minLength];
+                if (System.Threading.Interlocked.CompareExchange(ref sharedTransparentBuffer, grown, current) == current)
+                    return grown;
+            }
+        }
 
         // GPU↔CPU転送用リソース（サイズ変更時に作り直す）
         ID2D1Bitmap1? gpuBitmap;
         ID2D1Bitmap1? cpuBitmap;
         int inputBitmapWidth;
         int inputBitmapHeight;
-        byte[] fromBuffer = [];
-        byte[] toBuffer = [];
-        // 出力はRoD（プラグイン宣言の定義域）サイズ。入力より大きくなるプラグインもある
+        byte[] sourceBuffer = [];
+        // 出力はRoD（プラグイン宣言の定義域）サイズ
         ID2D1Bitmap1? outputBitmap;
         int outputBitmapWidth;
         int outputBitmapHeight;
@@ -54,48 +69,106 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
         int failureCooldownFrames;
         bool hasLoggedFailure;
         const int FailureCooldownFrameCount = 120;
+        // 効果時間外の素通しが続いたら重いネイティブリソースを解放する
+        // （長いアイテムでは効果時間外が大半を占め、OFXのプール画像・変換バッファを保持し続けるのは無駄なため）
+        int passthroughFrames;
+        const int PassthroughReleaseFrameCount = 120;
 
-        public ID2D1Image Output => transformOutput;
-
-        public OpenFxTransitionSource(IGraphicsDevicesAndContext devices, ID2D1Image before, ID2D1Image after, OpenFxTransitionParameter item)
+        public OpenFxInOutTransitionEffectProcessor(IGraphicsDevicesAndContext devices, OpenFxInOutTransitionEffect item)
+            : base(devices)
         {
             this.devices = devices;
-            this.before = before;
-            this.after = after;
             this.item = item;
-
-            transformEffect = new AffineTransform2D(devices.DeviceContext);
-            transformOutput = transformEffect.Output;
-            ApplyPassthrough(before);
         }
 
-        void ITransitionSource.Update(TimelineItemSourceDescription desc)
+        protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            var frame = desc.ItemPosition.Frame;
-            var length = desc.ItemDuration.Frame;
-            var fps = desc.FPS;
+            transformEffect = new AffineTransform2D(devices.DeviceContext);
+            disposer.Collect(transformEffect);
+            var output = transformEffect.Output;
+            disposer.Collect(output);
+            return output;
+        }
 
-            var rawProgress = (double)frame / length;
-            var easedProgress = Easing.GetValue(item.EasingType, item.EasingMode, rawProgress);
-            // 素通し時は進行50%を境に切り替える（トランジションの体感に最も近い代替表示）
-            var passthrough = easedProgress < 0.5 ? before : after;
+        protected override void setInput(ID2D1Image? input)
+        {
+            currentInput = input;
+            // 既定は素通し。処理する場合はUpdateで出力ビットマップへ差し替える
+            if (transformEffect is not null)
+            {
+                transformEffect.SetInput(0, input, true);
+                transformEffect.TransformMatrix = Matrix3x2.Identity;
+            }
+            isPassthroughApplied = true;
+        }
+
+        protected override void ClearEffectChain()
+        {
+            currentInput = null;
+            transformEffect?.SetInput(0, null, true);
+        }
+
+        public override DrawDescription Update(EffectDescription effectDescription)
+        {
+            if (transformEffect is null || currentInput is null)
+                return effectDescription.DrawDescription;
 
             if (string.IsNullOrEmpty(item.PluginPath) || string.IsNullOrEmpty(item.PluginId))
             {
-                // 選択解除されたらネイティブの入出力バッファを保持し続けない。
+                // 選択解除されたらネイティブリソースを保持し続けない。
                 // 失敗状態も併せてリセットする（残すと同じプラグインの再選択がエッジ検出されず、
                 // クールダウンの残りフレームが素通しのまま消化されてしまう）
-                instance?.Dispose();
-                instance = null;
-                instancePluginPath = "";
-                instancePluginId = "";
+                ApplyPassthrough();
+                ReleaseRenderResources();
                 attemptedPluginPath = "";
                 attemptedPluginId = "";
                 failureCooldownFrames = 0;
                 hasLoggedFailure = false;
-                ApplyPassthrough(passthrough);
-                return;
+                return effectDescription.DrawDescription;
             }
+
+            // 本体の「場面切り替え」（InOutTransitionEffect）と同じ時間制御。
+            // rate=1（効果時間外・両効果無効）は素通しにする
+            var time = effectDescription.ItemPosition.Time;
+            var totalTime = effectDescription.ItemDuration.Time;
+            var span = item.EffectTimeSeconds;
+            var inRate = item.IsInEffect && span > 0 ? Math.Clamp(time.TotalSeconds / span, 0, 1) : 1;
+            var outRate = item.IsOutEffect && span > 0 ? Math.Clamp((totalTime - time).TotalSeconds / span, 0, 1) : 1;
+            double rate;
+            bool isOut = false;
+            bool reversed = false;
+            if (time.TotalSeconds < span && item.IsInEffect && inRate < outRate)
+            {
+                rate = Easing.GetValue(item.EasingType, item.EasingMode, time.TotalSeconds / span);
+                reversed = item.IsReversedInEffect;
+            }
+            else if ((totalTime - time).TotalSeconds < span && item.IsOutEffect && outRate < inRate)
+            {
+                rate = Easing.GetValue(item.EasingType, item.EasingMode, (totalTime - time).TotalSeconds / span);
+                isOut = true;
+                reversed = item.IsReversedOutEffect;
+            }
+            else
+            {
+                rate = 1;
+            }
+            if (rate >= 1)
+            {
+                // 効果時間外もクールダウンを減衰させる（失敗スロットリングの意味を毎フレーム減算に揃える）
+                if (failureCooldownFrames > 0)
+                    failureCooldownFrames--;
+                ApplyPassthrough();
+                // 素通しが続いたら重いネイティブリソースを解放する（次に効果時間へ入ったとき作り直される。
+                // カウンタは閾値で頭打ちにして解放は1回だけ行う）
+                if (passthroughFrames < PassthroughReleaseFrameCount)
+                {
+                    passthroughFrames++;
+                    if (passthroughFrames == PassthroughReleaseFrameCount)
+                        ReleaseRenderResources();
+                }
+                return effectDescription.DrawDescription;
+            }
+            passthroughFrames = 0;
 
             // プラグインが切り替わったら失敗状態を即座にリセットする（クールダウン中の切替でも待たせない）。
             // 読み込みに失敗し続けているプラグインで毎フレームリセットしないよう、「最後に試行した」識別子で
@@ -113,26 +186,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
             if (failureCooldownFrames > 0)
             {
                 failureCooldownFrames--;
-                ApplyPassthrough(passthrough);
-                return;
+                ApplyPassthrough();
+                return effectDescription.DrawDescription;
             }
 
-            // 2入力は同じ矩形へ描画してプラグインへ渡すため、両者を包含する矩形を使う
             var dc = devices.DeviceContext;
-            var beforeBounds = dc.GetImageLocalBounds(before);
-            var afterBounds = dc.GetImageLocalBounds(after);
-            var left = Math.Min(beforeBounds.Left, afterBounds.Left);
-            var top = Math.Min(beforeBounds.Top, afterBounds.Top);
-            var right = Math.Max(beforeBounds.Right, afterBounds.Right);
-            var bottom = Math.Max(beforeBounds.Bottom, afterBounds.Bottom);
-            var bounds = new Rect(left, top, right - left, bottom - top);
+            var bounds = dc.GetImageLocalBounds(currentInput);
             var width = (int)MathF.Ceiling(bounds.Right - bounds.Left);
             var height = (int)MathF.Ceiling(bounds.Bottom - bounds.Top);
             if (width <= 0 || height <= 0)
             {
-                ApplyPassthrough(passthrough);
-                return;
+                ApplyPassthrough();
+                return effectDescription.DrawDescription;
             }
+
+            var frame = effectDescription.ItemPosition.Frame;
+            var length = effectDescription.ItemDuration.Frame;
+            var fps = effectDescription.FPS;
 
             try
             {
@@ -144,19 +214,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
                     Log.Default.Write($"OFXプラグインの読み込みに失敗しました。id={item.PluginId} path={item.PluginPath}", e);
                 hasLoggedFailure = true;
                 failureCooldownFrames = FailureCooldownFrameCount;
-                ApplyPassthrough(passthrough);
-                return;
+                ApplyPassthrough();
+                return effectDescription.DrawDescription;
             }
             if (instance is null)
             {
-                ApplyPassthrough(passthrough);
-                return;
+                ApplyPassthrough();
+                return effectDescription.DrawDescription;
             }
 
             foreach (var parameter in item.Parameters)
                 parameter.ApplyTo(instance, frame, length, fps);
-            // 進行度はトランジションコンテキストの必須パラメータとしてホストが駆動する
-            instance.SetDoubleParam(OfxConstants.ImageEffectTransitionParamName, Math.Clamp(easedProgress, 0, 1));
+
+            // 登場時は 透明→アイテム（進行度=rate）、退場時は アイテム→透明（進行度=1-rate）。
+            // 反転時はfrom/toと進行度を同時に入れ替える（＝トランジションの逆再生）
+            var isItemToTransparent = isOut ^ reversed;
+            var progress = Math.Clamp(isItemToTransparent ? 1 - rate : rate, 0, 1);
+            instance.SetDoubleParam(OfxConstants.ImageEffectTransitionParamName, progress);
 
             OfxRectI renderWindow;
             try
@@ -164,8 +238,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
                 renderWindow = instance.GetRegionOfDefinition(frame);
                 EnsureInputResources(width, height);
                 EnsureOutputResources(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1);
-                ReadInputPixels(dc, before, bounds, width, height, fromBuffer);
-                ReadInputPixels(dc, after, bounds, width, height, toBuffer);
+                ReadInputPixels(dc, bounds, width, height);
+                var transparentBuffer = GetSharedTransparentBuffer(width * height * 4);
+                var fromBuffer = isItemToTransparent ? sourceBuffer : transparentBuffer;
+                var toBuffer = isItemToTransparent ? transparentBuffer : sourceBuffer;
                 if (isRenderUnsafe)
                 {
                     lock (OfxEffectInstance.UnsafeRenderLock)
@@ -186,8 +262,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
                     Log.Default.Write($"OFXプラグインのレンダリングに失敗しました。id={item.PluginId}", e);
                 hasLoggedFailure = true;
                 failureCooldownFrames = FailureCooldownFrameCount;
-                ApplyPassthrough(passthrough);
-                return;
+                ApplyPassthrough();
+                return effectDescription.DrawDescription;
             }
 
             hasLoggedFailure = false;
@@ -196,16 +272,44 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
             transformEffect.TransformMatrix = Matrix3x2.CreateTranslation(
                 bounds.Left + renderWindow.x1,
                 bounds.Top + (height - renderWindow.y2));
-            passthroughInput = null;
+            isPassthroughApplied = false;
+            return effectDescription.DrawDescription;
         }
 
-        void ApplyPassthrough(ID2D1Image input)
+        void ApplyPassthrough()
         {
-            if (ReferenceEquals(passthroughInput, input))
+            if (isPassthroughApplied || transformEffect is null)
                 return;
-            transformEffect.SetInput(0, input, true);
+            transformEffect.SetInput(0, currentInput, true);
             transformEffect.TransformMatrix = Matrix3x2.Identity;
-            passthroughInput = input;
+            isPassthroughApplied = true;
+        }
+
+        /// <summary>
+        /// OFXインスタンスと転送用リソースをまとめて解放する（素通し継続・選択解除・破棄時）。
+        /// outputBitmapをエフェクト入力に接続したまま破棄しないよう、先頭で素通し状態へ切り替える
+        /// </summary>
+        void ReleaseRenderResources()
+        {
+            // 呼び出し元の順序に依存せず接続中破棄を防ぐ（冪等。Dispose経路で一瞬currentInputが
+            // 再接続されても、直後にbase.DisposeのClearEffectChainが切り離すため安全）
+            ApplyPassthrough();
+            instance?.Dispose();
+            instance = null;
+            instancePluginPath = "";
+            instancePluginId = "";
+            gpuBitmap?.Dispose();
+            gpuBitmap = null;
+            cpuBitmap?.Dispose();
+            cpuBitmap = null;
+            outputBitmap?.Dispose();
+            outputBitmap = null;
+            inputBitmapWidth = 0;
+            inputBitmapHeight = 0;
+            outputBitmapWidth = 0;
+            outputBitmapHeight = 0;
+            sourceBuffer = [];
+            outputBuffer = [];
         }
 
         void EnsureInstance(int width, int height, int fps, int durationFrames)
@@ -253,10 +357,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
         void EnsureInputResources(int width, int height)
         {
             var bufferSize = width * height * 4;
-            if (fromBuffer.Length < bufferSize)
-                fromBuffer = new byte[bufferSize];
-            if (toBuffer.Length < bufferSize)
-                toBuffer = new byte[bufferSize];
+            if (sourceBuffer.Length < bufferSize)
+                sourceBuffer = new byte[bufferSize];
             if (inputBitmapWidth == width && inputBitmapHeight == height && gpuBitmap is not null)
                 return;
             gpuBitmap?.Dispose();
@@ -288,8 +390,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
             if (outputBitmapWidth == width && outputBitmapHeight == height && outputBitmap is not null)
                 return;
             // 差し替え前の出力ビットマップがエフェクト入力に残ったまま破棄しない
-            transformEffect.SetInput(0, null, true);
-            passthroughInput = null;
+            transformEffect?.SetInput(0, null, true);
+            isPassthroughApplied = false;
             outputBitmap?.Dispose();
             outputBitmap = null;
 
@@ -308,7 +410,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
                 outputBuffer = new byte[bufferSize];
         }
 
-        void ReadInputPixels(ID2D1DeviceContext dc, ID2D1Image input, Rect bounds, int width, int height, byte[] destinationBuffer)
+        void ReadInputPixels(ID2D1DeviceContext dc, Rect bounds, int width, int height)
         {
             // 呼び出し元が設定した描画先を壊さないよう退避して復元する
             var previousTarget = dc.Target;
@@ -318,7 +420,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
                 dc.BeginDraw();
                 dc.Clear(new Color4(0f, 0f, 0f, 0f));
                 dc.DrawImage(
-                    input,
+                    currentInput!,
                     new Vector2(-bounds.Left, -bounds.Top),
                     null,
                     InterpolationMode.NearestNeighbor,
@@ -336,7 +438,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
             try
             {
                 var source = (byte*)map.Bits;
-                fixed (byte* destination = destinationBuffer)
+                fixed (byte* destination = sourceBuffer)
                 {
                     var rowBytes = width * 4;
                     for (var y = 0; y < height; y++)
@@ -355,20 +457,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
             }
         }
 
-        void IDisposable.Dispose()
+        protected override void Dispose(bool disposing)
         {
-            // エフェクト入力に接続したまま出力ビットマップを破棄しないよう、先に切り離す
-            transformEffect.SetInput(0, null, true);
-            instance?.Dispose();
-            instance = null;
-            gpuBitmap?.Dispose();
-            gpuBitmap = null;
-            cpuBitmap?.Dispose();
-            cpuBitmap = null;
-            outputBitmap?.Dispose();
-            outputBitmap = null;
-            transformOutput.Dispose();
-            transformEffect.Dispose();
+            if (disposing)
+            {
+                // エフェクト入力に接続したまま出力ビットマップを破棄しないよう、先に切り離す
+                transformEffect?.SetInput(0, null, true);
+                ReleaseRenderResources();
+            }
+            base.Dispose(disposing);
         }
     }
 }

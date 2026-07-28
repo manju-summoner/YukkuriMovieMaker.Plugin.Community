@@ -20,7 +20,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
     {
         /// <summary>フィルターコンテキスト対応（映像エフェクト用）</summary>
         Filter,
-        /// <summary>トランジションコンテキスト対応（場面切替え用）</summary>
+        /// <summary>トランジションコンテキスト対応（場面切り替え用）</summary>
         Transition,
     }
 

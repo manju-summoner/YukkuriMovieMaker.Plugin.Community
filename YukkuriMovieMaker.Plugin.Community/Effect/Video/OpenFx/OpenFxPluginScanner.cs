@@ -9,7 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
     /// <summary>
     /// スキャンで見つかったOFXプラグイン1つ分の情報。
     /// SupportsFilter / SupportsTransition は対応コンテキストの宣言で、
-    /// 映像エフェクトの一覧はフィルター対応のみ・場面切替えの一覧はトランジション対応のみを表示する
+    /// 映像エフェクトの一覧はフィルター対応のみ・場面切り替えの一覧はトランジション対応のみを表示する
     /// </summary>
     internal record OpenFxPluginInfo(string BinaryPath, string Identifier, uint VersionMajor, uint VersionMinor, string Name, string Grouping, bool SupportsFilter, bool SupportsTransition)
     {
@@ -183,7 +183,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             bool isSingleInstance,
             bool needsTemporalClipAccess)
         {
-            // 対応済みのコンテキスト（フィルター＝映像エフェクト、トランジション＝場面切替え）を
+            // 対応済みのコンテキスト（フィルター＝映像エフェクト、トランジション＝場面切り替え）を
             // 1つも宣言しないプラグインは一覧に載せない
             var supportsFilter = supportedContexts.Contains(OfxConstants.ImageEffectContextFilter);
             var supportsTransition = supportedContexts.Contains(OfxConstants.ImageEffectContextTransition);

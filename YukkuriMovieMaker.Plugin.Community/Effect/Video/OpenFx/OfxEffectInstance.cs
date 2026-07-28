@@ -23,7 +23,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
     {
         /// <summary>
         /// kOfxImageEffectRenderUnsafe（同時レンダリング不可）を宣言するプラグイン用の全体ロック。
-        /// 映像エフェクト・場面切替えの双方から同じロックで直列化する
+        /// 映像エフェクト・場面切り替えの双方から同じロックで直列化する
         /// </summary>
         internal static readonly object UnsafeRenderLock = new();
 

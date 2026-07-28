@@ -14,7 +14,7 @@ using OfxHostTexts = YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx.Text
 namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
 {
     /// <summary>
-    /// OpenFX場面切替えのパラメータ。
+    /// OpenFX場面切り替えのパラメータ。
     /// パラメータUIは選択したプラグインのdescribeInContext（トランジションコンテキスト）結果から動的に構築する
     /// （OpenFxVideoEffectと同じVOICEPEAK方式）。進行度パラメータ（Transition）はホストが駆動するためUIには出さない
     /// </summary>
