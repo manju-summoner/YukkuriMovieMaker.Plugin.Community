@@ -17,3 +17,6 @@ OpenFxSettingsRescanButton,,再スキャン,Rescan,重新扫描,重新掃描,다
 OpenFxSettingsScanningMessage,,スキャン中...,Scanning...,扫描中...,掃描中...,스캔 중...,Escaneando...,جارٍ الفحص...,Memindai...,
 OpenFxSettingsPluginCountMessage,0: plugin count,{0}個のプラグインを認識しています,{0} plugins detected,已识别{0}个插件,已辨識{0}個外掛程式,{0}개의 플러그인을 인식했습니다,Se detectaron {0} plugins,تم اكتشاف {0} من الملحقات,{0} plugin terdeteksi,
 OpenFxInOutTransitionEffectName,,場面切り替え（OpenFX）,Transition (OpenFX),场景切换（OpenFX）,場景切換（OpenFX）,장면 전환（OpenFX）,Transición (OpenFX),انتقال (OpenFX),Transisi (OpenFX),
+OpenFxSettingsPluginUsageColumn,,対応機能,Supported features,支持的功能,支援的功能,지원 기능,Funciones compatibles,الميزات المدعومة,Fitur yang didukung,
+OpenFxSettingsPluginUsageFilter,,映像エフェクト,Video Effect,视频特效,影片特效,비디오 효과,Efecto de video,مؤثر الفيديو,Efek video,
+OpenFxSettingsPluginUsageTransition,,場面切り替え,Transition,场景切换,場景切換,장면 전환,Transición,انتقال,Transisi,

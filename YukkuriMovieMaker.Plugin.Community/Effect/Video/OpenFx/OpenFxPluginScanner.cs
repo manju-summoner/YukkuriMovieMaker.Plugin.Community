@@ -14,6 +14,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
     internal record OpenFxPluginInfo(string BinaryPath, string Identifier, uint VersionMajor, uint VersionMinor, string Name, string Grouping, bool SupportsFilter, bool SupportsTransition)
     {
         public string DisplayName => string.IsNullOrEmpty(Grouping) ? Name : $"{Name} ({Grouping})";
+
+        /// <summary>
+        /// 対応コンテキストの表示文字列（設定画面のプラグイン一覧用）。
+        /// トランジション専用プラグインが映像エフェクト側で選べない理由をユーザーが判別できるようにする
+        /// </summary>
+        public string SupportedUsagesText => string.Join(" / ", EnumerateUsageLabels());
+
+        IEnumerable<string> EnumerateUsageLabels()
+        {
+            if (SupportsFilter)
+                yield return Texts.OpenFxSettingsPluginUsageFilter;
+            if (SupportsTransition)
+                yield return Texts.OpenFxSettingsPluginUsageTransition;
+        }
     }
 
     /// <summary>
