@@ -43,8 +43,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var hasCompletedAnyModule = false;
             while (remaining.Count > 0)
             {
+                var countBeforeScan = remaining.Count;
                 if (!ScanCore(scannerPath, remaining, results, ref hasCompletedAnyModule))
                     break;
+                // 1件も消化せず戻ってきた場合は再起動しても同じ結果になるため、部分結果のまま打ち切る（無限ループ防止）。
+                // ここで例外にするとプロセス内フォールバックへ進み、原因プラグインを本体へロードして隔離が破れる
+                if (remaining.Count == countBeforeScan)
+                {
+                    Log.Default.Write($"VST3スキャナーが進捗しないため、残り{remaining.Count}件の走査を中断します。");
+                    break;
+                }
             }
             return results;
         }
@@ -154,12 +162,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             if (currentModule is null)
             {
-                // 走査済みモジュールがあるのに原因を特定できず失敗した場合、プロセス内フォールバックへ
-                // 進めると原因プラグインを本体へロードして隔離が破れるため、部分結果のまま打ち切る
+                // モジュールの走査中ではないタイミング（#ENDと次の#BEGINの間）で子プロセスが終了した場合、
+                // 疑わしいモジュールが特定できないため残りをそのまま再走査する
+                // （進捗しない再起動の打ち切りは Scan 側のガードが行う）
                 if (hasCompletedAnyModule)
                 {
-                    Log.Default.Write($"VST3スキャナーが異常終了したため、残り{remaining.Count}件の走査を中断します。reason={reason}");
-                    return false;
+                    Log.Default.Write($"VST3スキャナーが走査の合間に終了しました。残り{remaining.Count}件を再走査します。reason={reason}");
+                    return remaining.Count > 0;
                 }
                 // 1件も走査できずに失敗した場合はスキャナー自体の問題。
                 // 空の結果を正常なスキャン結果としてキャッシュしないよう、失敗として伝播させる
