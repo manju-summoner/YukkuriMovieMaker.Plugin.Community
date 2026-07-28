@@ -3,28 +3,28 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
-using YukkuriMovieMaker.Exo;
+using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Player.Video;
-using YukkuriMovieMaker.Plugin.Effects;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx;
+using YukkuriMovieMaker.Plugin.Transition;
+using OfxHostTexts = YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx.Texts;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
+namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
 {
     /// <summary>
-    /// OpenFX（OFX）プラグインを映像エフェクトとしてホストするエフェクト。
-    /// パラメータUIは選択したプラグインのdescribe結果から動的に構築する
-    /// （ImmutableListの再代入でプロパティエディタが再構築されるVOICEPEAK方式）。
+    /// OpenFX場面切替えのパラメータ。
+    /// パラメータUIは選択したプラグインのdescribeInContext（トランジションコンテキスト）結果から動的に構築する
+    /// （OpenFxVideoEffectと同じVOICEPEAK方式）。進行度パラメータ（Transition）はホストが駆動するためUIには出さない
     /// </summary>
-    [VideoEffect(nameof(Texts.OpenFxEffectName), [VideoEffectCategories.Filtering], ["OpenFX", "OFX", "プラグイン", "plugin"], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
-    internal class OpenFxVideoEffect : VideoEffectBase, IOpenFxPluginHost
+    internal sealed class OpenFxTransitionParameter : TransitionParameterBase, IOpenFxPluginHost
     {
-        public override string Label => string.IsNullOrEmpty(PluginName) ? Texts.OpenFxEffectName : $"{Texts.OpenFxEffectName} {PluginName}";
-
         /// <summary>
         /// プラグインバイナリ（.ofx）のパス
         /// </summary>
-        [Display(GroupName = nameof(Texts.OpenFxEffectName), Name = nameof(Texts.OpenFxEffectPluginName), Description = nameof(Texts.OpenFxEffectPluginDesc), Order = -100, ResourceType = typeof(Texts))]
-        [OpenFxPluginSelector]
+        [Display(Name = nameof(OfxHostTexts.OpenFxEffectPluginName), Description = nameof(OfxHostTexts.OpenFxEffectPluginDesc), Order = 0, ResourceType = typeof(OfxHostTexts))]
+        [OpenFxPluginSelector(OpenFxPluginListKind.Transition)]
         public string PluginPath { get => pluginPath; set => Set(ref pluginPath, value); }
         string pluginPath = string.Empty;
 
@@ -34,8 +34,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public string PluginId { get => pluginId; set => Set(ref pluginId, value); }
         string pluginId = string.Empty;
 
-        public string PluginName { get => pluginName; set => Set(ref pluginName, value, nameof(PluginName), nameof(Label)); }
+        public string PluginName { get => pluginName; set => Set(ref pluginName, value); }
         string pluginName = string.Empty;
+
+        [Display(Name = nameof(Texts.EasingTypeName), Description = nameof(Texts.EasingTypeDesc), Order = 0, ResourceType = typeof(Texts))]
+        [EnumComboBox]
+        public EasingType EasingType { get => easingType; set => Set(ref easingType, value); }
+        EasingType easingType = EasingType.Linear;
+
+        [Display(Name = nameof(Texts.EasingModeName), Description = nameof(Texts.EasingModeDesc), Order = 0, ResourceType = typeof(Texts))]
+        [EnumComboBox]
+        public EasingMode EasingMode { get => easingMode; set => Set(ref easingMode, value); }
+        EasingMode easingMode = EasingMode.InOut;
 
         /// <summary>
         /// プラグインのパラメータ（選択中プラグインのdescribe結果から構築）。
@@ -82,7 +92,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
         /// <summary>
         /// 選択中プラグインのdescribe結果からパラメータリストを構築し直す。
-        /// 同名・同型のパラメータの値は引き継がれる。プラグインが読み込めない場合は現状を維持する
+        /// 同名・同型のパラメータの値は引き継がれる
         /// </summary>
         internal void RebuildParameters()
         {
@@ -95,8 +105,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             {
                 var plugin = OpenFxPluginScanner.LoadPlugin(PluginPath, PluginId)
                     ?? throw new InvalidOperationException($"プラグインが見つかりません。id={PluginId} path={PluginPath}");
-                var descriptor = plugin.DescribeInContext(OfxConstants.ImageEffectContextFilter);
-                Parameters = OpenFxParameterFactory.Create(descriptor, Parameters);
+                var descriptor = plugin.DescribeInContext(OfxConstants.ImageEffectContextTransition);
+                // 進行度（Transition）はホストが毎フレーム設定するためUIから除外する
+                Parameters = OpenFxParameterFactory.Create(descriptor, Parameters, [OfxConstants.ImageEffectTransitionParamName]);
             }
             catch (Exception e)
             {
@@ -107,15 +118,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             }
         }
 
-        public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
-        {
-            return new OpenFxVideoEffectProcessor(devices, this);
-        }
-
-        public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
-        {
-            return [];
-        }
+        public override ITransitionSource CreateTransition(IGraphicsDevicesAndContext devices, ID2D1Image before, ID2D1Image after)
+            => new OpenFxTransitionSource(devices, before, after, this);
 
         protected override IEnumerable<IAnimatable> GetAnimatables() => Parameters;
     }

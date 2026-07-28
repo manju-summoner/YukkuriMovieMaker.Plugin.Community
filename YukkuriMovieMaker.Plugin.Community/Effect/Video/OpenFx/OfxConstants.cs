@@ -199,6 +199,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public const string ImageFieldDoubled = "OfxFieldDoubled";
         public const string ImageEffectOutputClipName = "Output";
         public const string ImageEffectSimpleSourceClipName = "Source";
+        public const string ImageEffectTransitionSourceFromClipName = "SourceFrom";
+        public const string ImageEffectTransitionSourceToClipName = "SourceTo";
+        // トランジションコンテキストの必須パラメータ（進行度0～1。ホストが毎フレーム設定する）
+        public const string ImageEffectTransitionParamName = "Transition";
 
         // パラメータ型（ofxParam.h）
         public const string ParamTypeInteger = "OfxParamTypeInteger";

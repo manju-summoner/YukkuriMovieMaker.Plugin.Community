@@ -22,7 +22,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public int Width { get; }
         public int Height { get; }
 
-        public OfxClipInstance(OfxClipDescriptor descriptor, int width, int height, double frameRate, double durationFrames)
+        public OfxClipInstance(OfxClipDescriptor descriptor, string context, int width, int height, double frameRate, double durationFrames)
         {
             Name = descriptor.Name;
             Width = width;
@@ -43,10 +43,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             Props.SetDoubleN(OfxConstants.ImageEffectPropUnmappedFrameRange, 0, Math.Max(0, durationFrames - 1));
             Props.SetInt(OfxConstants.ImageClipPropContinuousSamples, 0);
             Props.SetString(OfxConstants.ImageClipPropFieldOrder, OfxConstants.ImageFieldNone);
-            // ホストが画像を供給するのは Source / Output のみ。それ以外（オプションのMask等）を
-            // 接続済みと申告すると、プラグインが取得不能なクリップ画像を前提に動いてしまう
-            // （例: openfx-miscのマスク合成が「マスク量0」となり出力が素通しになる）
-            var isConnected = Name is OfxConstants.ImageEffectSimpleSourceClipName or OfxConstants.ImageEffectOutputClipName;
+            // ホストが画像を供給するクリップ（コンテキストの必須入力とOutput）のみ接続済みと申告する。
+            // それ以外（オプションのMask等）を接続済みと申告すると、プラグインが取得不能なクリップ画像を
+            // 前提に動いてしまう（例: openfx-miscのマスク合成が「マスク量0」となり出力が素通しになる）。
+            // 予約名と同名のオプションクリップを別コンテキストで定義するプラグインを誤申告しないよう、
+            // 名前だけでなく実行中のコンテキストで判定する
+            var isConnected = Name == OfxConstants.ImageEffectOutputClipName
+                || (context == OfxConstants.ImageEffectContextTransition
+                    ? Name is OfxConstants.ImageEffectTransitionSourceFromClipName or OfxConstants.ImageEffectTransitionSourceToClipName
+                    : Name == OfxConstants.ImageEffectSimpleSourceClipName);
             Props.SetInt(OfxConstants.ImageClipPropConnected, isConnected ? 1 : 0);
             // インスタンス生成完了時点の値を propReset の復元先にする（CopyFrom後の再スナップショット）
             Props.SealDefaults();

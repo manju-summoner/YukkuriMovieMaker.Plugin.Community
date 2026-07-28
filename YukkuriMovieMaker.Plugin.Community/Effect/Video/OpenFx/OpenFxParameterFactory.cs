@@ -16,8 +16,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// <summary>
         /// パラメータリストを構築する。previous に同名・同型のパラメータがあれば値を引き継ぐ
         /// （プラグインの再選択・プロジェクト読み込み後の再構築で値を失わないため）。
+        /// excludeNames にはホストが駆動するパラメータ（トランジションの進行度等）を指定してUIから除外する
         /// </summary>
-        public static ImmutableList<OfxParameterBase> Create(OfxEffectDescriptor contextDescriptor, ImmutableList<OfxParameterBase> previous)
+        public static ImmutableList<OfxParameterBase> Create(OfxEffectDescriptor contextDescriptor, ImmutableList<OfxParameterBase> previous, IReadOnlyCollection<string>? excludeNames = null)
         {
             var definitions = contextDescriptor.ParamSet.Parameters;
 
@@ -45,6 +46,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 if (definition.ParamType is OfxConstants.ParamTypeGroup or OfxConstants.ParamTypePage or OfxConstants.ParamTypePushButton)
                     continue;
                 if (definition.Props.GetIntOrDefault(OfxConstants.ParamPropSecret, 0) != 0)
+                    continue;
+                if (excludeNames is not null && excludeNames.Contains(definition.Name))
                     continue;
 
                 var parameter = Build(definition);

@@ -6,33 +6,38 @@ using Vortice.Direct2D1.Effects;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
-using YukkuriMovieMaker.Player.Video.Effects;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
+namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
 {
     /// <summary>
-    /// OpenFXエフェクトの描画処理。
+    /// OpenFX場面切替えの描画処理。
     /// YMM4のGPUパイプライン（ID2D1Image）とOFXのCPUレンダリングを橋渡しする：
-    /// 入力画像をGPUビットマップへ描画 → CPU読み出し → OFXプラグインでレンダリング →
-    /// 結果をビットマップへ書き戻して出力ノード（AffineTransform2D）に接続する。
-    /// プラグイン未選択・読み込み失敗時は入力を素通しする。
+    /// before/afterの2入力をGPUビットマップへ描画 → CPU読み出し → OFXプラグイン（トランジションコンテキスト）で
+    /// レンダリング → 結果をビットマップへ書き戻して出力ノード（AffineTransform2D）に接続する。
+    /// 進行度（緩急適用後）は毎フレーム Transition パラメータへ設定する。
+    /// プラグイン未選択・読み込み失敗時は進行50%を境に before / after を素通しする。
     /// </summary>
-    internal sealed unsafe class OpenFxVideoEffectProcessor : VideoEffectProcessorBase
+    internal sealed unsafe class OpenFxTransitionSource : ITransitionSource
     {
         readonly IGraphicsDevicesAndContext devices;
-        readonly OpenFxVideoEffect item;
+        readonly ID2D1Image before;
+        readonly ID2D1Image after;
+        readonly OpenFxTransitionParameter item;
 
-        AffineTransform2D? transformEffect;
-        ID2D1Image? currentInput;
-        bool isPassthroughApplied;
+        readonly AffineTransform2D transformEffect;
+        readonly ID2D1Image transformOutput;
+        // 素通し表示の状態（passthroughInputはtransformEffectへ接続中の素通し入力。nullなら出力ビットマップ接続中）
+        ID2D1Image? passthroughInput;
 
         // GPU↔CPU転送用リソース（サイズ変更時に作り直す）
         ID2D1Bitmap1? gpuBitmap;
         ID2D1Bitmap1? cpuBitmap;
         int inputBitmapWidth;
         int inputBitmapHeight;
-        byte[] sourceBuffer = [];
-        // 出力はRoD（プラグイン宣言の定義域）サイズ。ぼかし等では入力より大きくなる
+        byte[] fromBuffer = [];
+        byte[] toBuffer = [];
+        // 出力はRoD（プラグイン宣言の定義域）サイズ。入力より大きくなるプラグインもある
         ID2D1Bitmap1? outputBitmap;
         int outputBitmapWidth;
         int outputBitmapHeight;
@@ -50,44 +55,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         bool hasLoggedFailure;
         const int FailureCooldownFrameCount = 120;
 
-        public OpenFxVideoEffectProcessor(IGraphicsDevicesAndContext devices, OpenFxVideoEffect item)
-            : base(devices)
+        public ID2D1Image Output => transformOutput;
+
+        public OpenFxTransitionSource(IGraphicsDevicesAndContext devices, ID2D1Image before, ID2D1Image after, OpenFxTransitionParameter item)
         {
             this.devices = devices;
+            this.before = before;
+            this.after = after;
             this.item = item;
-        }
 
-        protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
-        {
             transformEffect = new AffineTransform2D(devices.DeviceContext);
-            disposer.Collect(transformEffect);
-            var output = transformEffect.Output;
-            disposer.Collect(output);
-            return output;
+            transformOutput = transformEffect.Output;
+            ApplyPassthrough(before);
         }
 
-        protected override void setInput(ID2D1Image? input)
+        void ITransitionSource.Update(TimelineItemSourceDescription desc)
         {
-            currentInput = input;
-            // 既定は素通し。処理する場合はUpdateで出力ビットマップへ差し替える
-            if (transformEffect is not null)
-            {
-                transformEffect.SetInput(0, input, true);
-                transformEffect.TransformMatrix = Matrix3x2.Identity;
-            }
-            isPassthroughApplied = true;
-        }
+            var frame = desc.ItemPosition.Frame;
+            var length = desc.ItemDuration.Frame;
+            var fps = desc.FPS;
 
-        protected override void ClearEffectChain()
-        {
-            currentInput = null;
-            transformEffect?.SetInput(0, null, true);
-        }
-
-        public override DrawDescription Update(EffectDescription effectDescription)
-        {
-            if (transformEffect is null || currentInput is null)
-                return effectDescription.DrawDescription;
+            var rawProgress = (double)frame / length;
+            var easedProgress = Easing.GetValue(item.EasingType, item.EasingMode, rawProgress);
+            // 素通し時は進行50%を境に切り替える（トランジションの体感に最も近い代替表示）
+            var passthrough = easedProgress < 0.5 ? before : after;
 
             if (string.IsNullOrEmpty(item.PluginPath) || string.IsNullOrEmpty(item.PluginId))
             {
@@ -96,8 +87,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 instance = null;
                 instancePluginPath = "";
                 instancePluginId = "";
-                ApplyPassthrough();
-                return effectDescription.DrawDescription;
+                ApplyPassthrough(passthrough);
+                return;
             }
 
             // プラグインが切り替わったら失敗状態を即座にリセットする（クールダウン中の切替でも待たせない）。
@@ -116,23 +107,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             if (failureCooldownFrames > 0)
             {
                 failureCooldownFrames--;
-                ApplyPassthrough();
-                return effectDescription.DrawDescription;
+                ApplyPassthrough(passthrough);
+                return;
             }
 
+            // 2入力は同じ矩形へ描画してプラグインへ渡すため、両者を包含する矩形を使う
             var dc = devices.DeviceContext;
-            var bounds = dc.GetImageLocalBounds(currentInput);
+            var beforeBounds = dc.GetImageLocalBounds(before);
+            var afterBounds = dc.GetImageLocalBounds(after);
+            var left = Math.Min(beforeBounds.Left, afterBounds.Left);
+            var top = Math.Min(beforeBounds.Top, afterBounds.Top);
+            var right = Math.Max(beforeBounds.Right, afterBounds.Right);
+            var bottom = Math.Max(beforeBounds.Bottom, afterBounds.Bottom);
+            var bounds = new Rect(left, top, right - left, bottom - top);
             var width = (int)MathF.Ceiling(bounds.Right - bounds.Left);
             var height = (int)MathF.Ceiling(bounds.Bottom - bounds.Top);
             if (width <= 0 || height <= 0)
             {
-                ApplyPassthrough();
-                return effectDescription.DrawDescription;
+                ApplyPassthrough(passthrough);
+                return;
             }
-
-            var frame = effectDescription.ItemPosition.Frame;
-            var length = effectDescription.ItemDuration.Frame;
-            var fps = effectDescription.FPS;
 
             try
             {
@@ -144,34 +138,36 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     Log.Default.Write($"OFXプラグインの読み込みに失敗しました。id={item.PluginId} path={item.PluginPath}", e);
                 hasLoggedFailure = true;
                 failureCooldownFrames = FailureCooldownFrameCount;
-                ApplyPassthrough();
-                return effectDescription.DrawDescription;
+                ApplyPassthrough(passthrough);
+                return;
             }
             if (instance is null)
             {
-                ApplyPassthrough();
-                return effectDescription.DrawDescription;
+                ApplyPassthrough(passthrough);
+                return;
             }
 
             foreach (var parameter in item.Parameters)
                 parameter.ApplyTo(instance, frame, length, fps);
+            // 進行度はトランジションコンテキストの必須パラメータとしてホストが駆動する
+            instance.SetDoubleParam(OfxConstants.ImageEffectTransitionParamName, Math.Clamp(easedProgress, 0, 1));
 
             OfxRectI renderWindow;
             try
             {
-                // ぼかし・グロー等は入力より大きな出力領域（RoD）を宣言するため、出力はRoDサイズで確保する
                 renderWindow = instance.GetRegionOfDefinition(frame);
                 EnsureInputResources(width, height);
                 EnsureOutputResources(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1);
-                ReadInputPixels(dc, bounds, width, height);
+                ReadInputPixels(dc, before, bounds, width, height, fromBuffer);
+                ReadInputPixels(dc, after, bounds, width, height, toBuffer);
                 if (isRenderUnsafe)
                 {
                     lock (OfxEffectInstance.UnsafeRenderLock)
-                        instance.Render(sourceBuffer, outputBuffer, frame, renderWindow);
+                        instance.RenderTransition(fromBuffer, toBuffer, outputBuffer, frame, renderWindow);
                 }
                 else
                 {
-                    instance.Render(sourceBuffer, outputBuffer, frame, renderWindow);
+                    instance.RenderTransition(fromBuffer, toBuffer, outputBuffer, frame, renderWindow);
                 }
                 fixed (byte* outputPointer = outputBuffer)
                 {
@@ -184,8 +180,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     Log.Default.Write($"OFXプラグインのレンダリングに失敗しました。id={item.PluginId}", e);
                 hasLoggedFailure = true;
                 failureCooldownFrames = FailureCooldownFrameCount;
-                ApplyPassthrough();
-                return effectDescription.DrawDescription;
+                ApplyPassthrough(passthrough);
+                return;
             }
 
             hasLoggedFailure = false;
@@ -194,17 +190,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             transformEffect.TransformMatrix = Matrix3x2.CreateTranslation(
                 bounds.Left + renderWindow.x1,
                 bounds.Top + (height - renderWindow.y2));
-            isPassthroughApplied = false;
-            return effectDescription.DrawDescription;
+            passthroughInput = null;
         }
 
-        void ApplyPassthrough()
+        void ApplyPassthrough(ID2D1Image input)
         {
-            if (isPassthroughApplied || transformEffect is null)
+            if (ReferenceEquals(passthroughInput, input))
                 return;
-            transformEffect.SetInput(0, currentInput, true);
+            transformEffect.SetInput(0, input, true);
             transformEffect.TransformMatrix = Matrix3x2.Identity;
-            isPassthroughApplied = true;
+            passthroughInput = input;
         }
 
         void EnsureInstance(int width, int height, int fps, int durationFrames)
@@ -230,11 +225,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
             var plugin = OpenFxPluginScanner.LoadPlugin(item.PluginPath, item.PluginId)
                 ?? throw new InvalidOperationException($"OFXプラグインが見つかりません。id={item.PluginId} path={item.PluginPath}");
-            var descriptor = plugin.DescribeInContext(OfxConstants.ImageEffectContextFilter);
+            var descriptor = plugin.DescribeInContext(OfxConstants.ImageEffectContextTransition);
             isRenderUnsafe = descriptor.Props.GetStringOrDefault(
                 OfxConstants.ImageEffectPluginRenderThreadSafety,
                 OfxConstants.ImageEffectRenderFullySafe) == OfxConstants.ImageEffectRenderUnsafe;
-            var created = new OfxEffectInstance(plugin, OfxConstants.ImageEffectContextFilter, width, height, fps, durationFrames);
+            var created = new OfxEffectInstance(plugin, OfxConstants.ImageEffectContextTransition, width, height, fps, durationFrames);
             try
             {
                 created.Create();
@@ -251,6 +246,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
         void EnsureInputResources(int width, int height)
         {
+            var bufferSize = width * height * 4;
+            if (fromBuffer.Length < bufferSize)
+                fromBuffer = new byte[bufferSize];
+            if (toBuffer.Length < bufferSize)
+                toBuffer = new byte[bufferSize];
             if (inputBitmapWidth == width && inputBitmapHeight == height && gpuBitmap is not null)
                 return;
             gpuBitmap?.Dispose();
@@ -260,7 +260,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
             var dc = devices.DeviceContext;
             // boundsはDIP・SizeIはピクセルのため、DPIは96固定にして1DIP=1pxで扱う
-            // （DirectionalColorKeyEffectProcessorと同じ流儀。dc.Dpiを渡すと高DPI環境で配置がずれる）
+            // （OpenFxVideoEffectProcessorと同じ流儀。dc.Dpiを渡すと高DPI環境で配置がずれる）
             var gpuProperties = new BitmapProperties1(
                 new PixelFormat(Vortice.DXGI.Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
                 96f,
@@ -275,10 +275,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             cpuBitmap = dc.CreateBitmap(new SizeI(width, height), cpuProperties);
             inputBitmapWidth = width;
             inputBitmapHeight = height;
-
-            var bufferSize = width * height * 4;
-            if (sourceBuffer.Length < bufferSize)
-                sourceBuffer = new byte[bufferSize];
         }
 
         void EnsureOutputResources(int width, int height)
@@ -286,8 +282,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             if (outputBitmapWidth == width && outputBitmapHeight == height && outputBitmap is not null)
                 return;
             // 差し替え前の出力ビットマップがエフェクト入力に残ったまま破棄しない
-            transformEffect?.SetInput(0, null, true);
-            isPassthroughApplied = false;
+            transformEffect.SetInput(0, null, true);
+            passthroughInput = null;
             outputBitmap?.Dispose();
             outputBitmap = null;
 
@@ -306,7 +302,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 outputBuffer = new byte[bufferSize];
         }
 
-        void ReadInputPixels(ID2D1DeviceContext dc, Rect bounds, int width, int height)
+        void ReadInputPixels(ID2D1DeviceContext dc, ID2D1Image input, Rect bounds, int width, int height, byte[] destinationBuffer)
         {
             // 呼び出し元が設定した描画先を壊さないよう退避して復元する
             var previousTarget = dc.Target;
@@ -316,7 +312,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 dc.BeginDraw();
                 dc.Clear(new Color4(0f, 0f, 0f, 0f));
                 dc.DrawImage(
-                    currentInput!,
+                    input,
                     new Vector2(-bounds.Left, -bounds.Top),
                     null,
                     InterpolationMode.NearestNeighbor,
@@ -334,7 +330,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             try
             {
                 var source = (byte*)map.Bits;
-                fixed (byte* destination = sourceBuffer)
+                fixed (byte* destination = destinationBuffer)
                 {
                     var rowBytes = width * 4;
                     for (var y = 0; y < height; y++)
@@ -353,31 +349,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             }
         }
 
-        void DisposeBitmaps()
+        void IDisposable.Dispose()
         {
+            // エフェクト入力に接続したまま出力ビットマップを破棄しないよう、先に切り離す
+            transformEffect.SetInput(0, null, true);
+            instance?.Dispose();
+            instance = null;
             gpuBitmap?.Dispose();
-            cpuBitmap?.Dispose();
-            outputBitmap?.Dispose();
             gpuBitmap = null;
+            cpuBitmap?.Dispose();
             cpuBitmap = null;
+            outputBitmap?.Dispose();
             outputBitmap = null;
-            inputBitmapWidth = 0;
-            inputBitmapHeight = 0;
-            outputBitmapWidth = 0;
-            outputBitmapHeight = 0;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                // エフェクト入力に接続したまま出力ビットマップを破棄しないよう、先に切り離す
-                transformEffect?.SetInput(0, null, true);
-                instance?.Dispose();
-                instance = null;
-                DisposeBitmaps();
-            }
-            base.Dispose(disposing);
+            transformOutput.Dispose();
+            transformEffect.Dispose();
         }
     }
 }

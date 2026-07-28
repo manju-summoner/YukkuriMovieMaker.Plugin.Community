@@ -21,13 +21,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
     /// </summary>
     internal sealed unsafe class OfxEffectInstance : OfxObject, IOfxImageEffectObject
     {
+        /// <summary>
+        /// kOfxImageEffectRenderUnsafe（同時レンダリング不可）を宣言するプラグイン用の全体ロック。
+        /// 映像エフェクト・場面切替えの双方から同じロックで直列化する
+        /// </summary>
+        internal static readonly object UnsafeRenderLock = new();
+
         readonly OfxImageEffectPlugin plugin;
         readonly List<OfxClipInstance> clips = [];
         readonly HashSet<string> changedParams = [];
         bool isCreated;
 
         // フレーム毎の大きなネイティブ確保を避けるため、クリップ画像はサイズが変わるまで使い回す
-        OfxImage? pooledSourceImage;
+        readonly Dictionary<string, OfxImage> pooledInputImages = [];
         OfxImage? pooledOutputImage;
         long renderSerial;
 
@@ -55,7 +61,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 throw new InvalidOperationException($"テンポラルアクセスを要求するプラグインは未対応です。plugin={plugin.Identifier}");
             if (!descriptor.SupportedPixelDepths.Contains(OfxConstants.BitDepthFloat))
                 throw new InvalidOperationException($"floatピクセル深度非対応のプラグインは未対応です。plugin={plugin.Identifier}");
-            foreach (var clipName in new[] { OfxConstants.ImageEffectSimpleSourceClipName, OfxConstants.ImageEffectOutputClipName })
+            foreach (var clipName in new[]
+            {
+                OfxConstants.ImageEffectSimpleSourceClipName,
+                OfxConstants.ImageEffectTransitionSourceFromClipName,
+                OfxConstants.ImageEffectTransitionSourceToClipName,
+                OfxConstants.ImageEffectOutputClipName,
+            })
             {
                 var clipDescriptor = descriptor.FindClip(clipName);
                 if (clipDescriptor is not null
@@ -93,7 +105,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             }
 
             foreach (var clipDescriptor in descriptor.Clips)
-                clips.Add(new OfxClipInstance(clipDescriptor, width, height, frameRate, durationFrames));
+                clips.Add(new OfxClipInstance(clipDescriptor, context, width, height, frameRate, durationFrames));
         }
 
         public OfxClipInstance? FindClip(string name) => clips.FirstOrDefault(c => c.Name == name);
@@ -238,18 +250,91 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// </summary>
         public void Render(ReadOnlySpan<byte> sourceBgraTopDown, Span<byte> outputBgraTopDown, double time, OfxRectI renderWindow)
         {
+            ValidateRenderWindow(renderWindow, outputBgraTopDown.Length);
+            ValidateInputBuffer(sourceBgraTopDown.Length);
+            Create();
+            NotifyChangedParams(time);
+
+            // プール画像は内容がレンダリング毎に変わるため、画像の同一性を表す識別子も毎回更新する
+            // （固定のままだと、識別子で画像をキャッシュするプラグインが前フレームの結果を返しうる）
+            renderSerial++;
+            var sourceImage = PrepareInputImage(OfxConstants.ImageEffectSimpleSourceClipName, sourceBgraTopDown);
+            var outputImage = PrepareOutputImage(renderWindow);
+            RunRenderSequence(
+                time,
+                renderWindow,
+                [(FindRequiredClip(OfxConstants.ImageEffectSimpleSourceClipName), sourceImage)],
+                outputImage);
+            OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height);
+        }
+
+        /// <summary>
+        /// トランジションコンテキストのレンダリング。SourceFrom / SourceTo の2入力（premultiplied BGRA・上から下への行順）を
+        /// 処理して同形式の出力を得る。進行度は事前に Transition パラメータ
+        /// （<see cref="OfxConstants.ImageEffectTransitionParamName"/>）へ設定しておくこと
+        /// </summary>
+        public void RenderTransition(ReadOnlySpan<byte> fromBgraTopDown, ReadOnlySpan<byte> toBgraTopDown, Span<byte> outputBgraTopDown, double time, OfxRectI renderWindow)
+        {
+            ValidateRenderWindow(renderWindow, outputBgraTopDown.Length);
+            ValidateInputBuffer(fromBgraTopDown.Length);
+            ValidateInputBuffer(toBgraTopDown.Length);
+            Create();
+            NotifyChangedParams(time);
+
+            renderSerial++;
+            var fromImage = PrepareInputImage(OfxConstants.ImageEffectTransitionSourceFromClipName, fromBgraTopDown);
+            var toImage = PrepareInputImage(OfxConstants.ImageEffectTransitionSourceToClipName, toBgraTopDown);
+            var outputImage = PrepareOutputImage(renderWindow);
+            RunRenderSequence(
+                time,
+                renderWindow,
+                [
+                    (FindRequiredClip(OfxConstants.ImageEffectTransitionSourceFromClipName), fromImage),
+                    (FindRequiredClip(OfxConstants.ImageEffectTransitionSourceToClipName), toImage),
+                ],
+                outputImage);
+            OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height);
+        }
+
+        void ValidateRenderWindow(OfxRectI renderWindow, int outputBufferLength)
+        {
             var outputWidth = renderWindow.x2 - renderWindow.x1;
             var outputHeight = renderWindow.y2 - renderWindow.y1;
             if (outputWidth <= 0 || outputHeight <= 0)
                 throw new ArgumentException("renderWindowが空です。");
-            if (sourceBgraTopDown.Length < (long)Width * Height * 4 || outputBgraTopDown.Length < (long)outputWidth * outputHeight * 4)
+            if (outputBufferLength < (long)outputWidth * outputHeight * 4)
                 throw new ArgumentException("画像バッファのサイズが不足しています。");
-            Create();
-            NotifyChangedParams(time);
+        }
 
-            // プール画像はフレーム間でゼロ初期化しない（renderWindow全域を埋めるのはプラグイン側の契約。
-            // 入力は毎回変換で全書き込みされる）
-            var sourceImage = pooledSourceImage ??= new OfxImage(Width, Height, 0, 0, $"{plugin.Identifier}/Source");
+        void ValidateInputBuffer(int inputBufferLength)
+        {
+            if (inputBufferLength < (long)Width * Height * 4)
+                throw new ArgumentException("画像バッファのサイズが不足しています。");
+        }
+
+        /// <summary>
+        /// クリップ名ごとのプール入力画像へBGRA入力を変換して詰める。
+        /// プール画像はフレーム間でゼロ初期化しない（入力は毎回変換で全書き込みされる）
+        /// </summary>
+        OfxImage PrepareInputImage(string clipName, ReadOnlySpan<byte> sourceBgraTopDown)
+        {
+            if (!pooledInputImages.TryGetValue(clipName, out var image))
+            {
+                image = new OfxImage(Width, Height, 0, 0, $"{plugin.Identifier}/{clipName}");
+                pooledInputImages.Add(clipName, image);
+            }
+            image.Props.SetString(OfxConstants.ImagePropUniqueIdentifier, $"{plugin.Identifier}/{clipName}#{renderSerial}");
+            OfxFrameConverter.BgraTopDownToRgbaBottomUp(sourceBgraTopDown, image.Data, Width, Height);
+            return image;
+        }
+
+        /// <summary>
+        /// renderWindowサイズのプール出力画像を用意する（renderWindow全域を埋めるのはプラグイン側の契約）
+        /// </summary>
+        OfxImage PrepareOutputImage(OfxRectI renderWindow)
+        {
+            var outputWidth = renderWindow.x2 - renderWindow.x1;
+            var outputHeight = renderWindow.y2 - renderWindow.y1;
             if (pooledOutputImage is null
                 || pooledOutputImage.Width != outputWidth
                 || pooledOutputImage.Height != outputHeight
@@ -260,21 +345,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 pooledOutputImage = null;
                 pooledOutputImage = new OfxImage(outputWidth, outputHeight, renderWindow.x1, renderWindow.y1, $"{plugin.Identifier}/Output");
             }
-            var outputImage = pooledOutputImage;
-            // プール画像は内容がレンダリング毎に変わるため、画像の同一性を表す識別子も毎回更新する
-            // （固定のままだと、識別子で画像をキャッシュするプラグインが前フレームの結果を返しうる）
-            renderSerial++;
-            sourceImage.Props.SetString(OfxConstants.ImagePropUniqueIdentifier, $"{plugin.Identifier}/Source#{renderSerial}");
-            outputImage.Props.SetString(OfxConstants.ImagePropUniqueIdentifier, $"{plugin.Identifier}/Output#{renderSerial}");
-            OfxFrameConverter.BgraTopDownToRgbaBottomUp(sourceBgraTopDown, sourceImage.Data, Width, Height);
+            pooledOutputImage.Props.SetString(OfxConstants.ImagePropUniqueIdentifier, $"{plugin.Identifier}/Output#{renderSerial}");
+            return pooledOutputImage;
+        }
 
-            var sourceClip = FindClip(OfxConstants.ImageEffectSimpleSourceClipName);
-            var outputClip = FindClip(OfxConstants.ImageEffectOutputClipName);
-            if (sourceClip is null || outputClip is null)
-                throw new InvalidOperationException($"フィルターに必要なクリップが定義されていません。plugin={plugin.Identifier}");
+        OfxClipInstance FindRequiredClip(string name)
+            => FindClip(name)
+                ?? throw new InvalidOperationException($"コンテキストに必要なクリップが定義されていません。plugin={plugin.Identifier} clip={name}");
 
-            sourceClip.CurrentImage = sourceImage;
-            sourceClip.CurrentTime = time;
+        /// <summary>
+        /// 入力・出力クリップへ画像を差し込み、Begin/EndSequenceRenderで括ってrenderアクションを駆動する
+        /// </summary>
+        void RunRenderSequence(double time, OfxRectI renderWindow, (OfxClipInstance Clip, OfxImage Image)[] inputs, OfxImage outputImage)
+        {
+            var outputClip = FindRequiredClip(OfxConstants.ImageEffectOutputClipName);
+
+            foreach (var (clip, image) in inputs)
+            {
+                clip.CurrentImage = image;
+                clip.CurrentTime = time;
+            }
             outputClip.CurrentImage = outputImage;
             outputClip.CurrentTime = time;
             try
@@ -303,11 +393,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             }
             finally
             {
-                sourceClip.CurrentImage = null;
+                foreach (var (clip, _) in inputs)
+                    clip.CurrentImage = null;
                 outputClip.CurrentImage = null;
             }
-
-            OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputWidth, outputHeight);
         }
 
         OfxPropertySet CreateRenderArgs(double time, OfxRectI renderWindow)
@@ -346,8 +435,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 if (status is not OfxStatus.OK and not OfxStatus.ReplyDefault)
                     OfxHostLog.Info($"kOfxActionDestroyInstance が失敗しました。plugin={plugin.Identifier} status={status}");
             }
-            pooledSourceImage?.Dispose();
-            pooledSourceImage = null;
+            foreach (var image in pooledInputImages.Values)
+                image.Dispose();
+            pooledInputImages.Clear();
             pooledOutputImage?.Dispose();
             pooledOutputImage = null;
             foreach (var clip in clips)

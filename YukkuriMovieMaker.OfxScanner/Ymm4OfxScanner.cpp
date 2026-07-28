@@ -1109,7 +1109,9 @@ namespace
     //=========================================================================
 
     // C#側 OfxHostDescriptor.CreateHostProperties と同じ能力宣言。
-    // describe結果が実行時ホストと食い違わないよう、必ず同期させること。
+    // describe結果が実行時ホストと食い違わないよう、必ず同期させること
+    // （特に対応コンテキストがずれると「一覧に出ないが実行時は対応」等の静かな不整合になる。
+    //   このEXEは別ビルド成果物のため、C#側の変更時は再ビルドも忘れないこと）。
     // ホストバージョンは起動引数（"major.minor.build.revision"）で親から受け取る
     void FillHostProperties(PropertySet& props, const int (&version)[4])
     {
@@ -1127,7 +1129,7 @@ namespace
         props.SetInt(kOfxImageEffectPropSupportsMultiResolution, 1);
         props.SetInt(kOfxImageEffectPropSupportsTiles, 0);
         props.SetInt(kOfxImageEffectPropTemporalClipAccess, 0);
-        props.SetStringN(kOfxImageEffectPropSupportedContexts, { kOfxImageEffectContextFilter });
+        props.SetStringN(kOfxImageEffectPropSupportedContexts, { kOfxImageEffectContextFilter, kOfxImageEffectContextTransition });
         props.SetStringN(kOfxImageEffectPropSupportedComponents, { kOfxImageComponentRGBA });
         props.SetStringN(kOfxImageEffectPropSupportedPixelDepths, { kOfxBitDepthFloat });
         props.SetInt(kOfxImageEffectPropSupportsMultipleClipDepths, 0);

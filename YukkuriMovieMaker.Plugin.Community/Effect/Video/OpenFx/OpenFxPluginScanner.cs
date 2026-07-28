@@ -7,9 +7,11 @@ using YukkuriMovieMaker.Commons;
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 {
     /// <summary>
-    /// スキャンで見つかったOFXプラグイン1つ分の情報
+    /// スキャンで見つかったOFXプラグイン1つ分の情報。
+    /// SupportsFilter / SupportsTransition は対応コンテキストの宣言で、
+    /// 映像エフェクトの一覧はフィルター対応のみ・場面切替えの一覧はトランジション対応のみを表示する
     /// </summary>
-    internal record OpenFxPluginInfo(string BinaryPath, string Identifier, uint VersionMajor, uint VersionMinor, string Name, string Grouping)
+    internal record OpenFxPluginInfo(string BinaryPath, string Identifier, uint VersionMajor, uint VersionMinor, string Name, string Grouping, bool SupportsFilter, bool SupportsTransition)
     {
         public string DisplayName => string.IsNullOrEmpty(Grouping) ? Name : $"{Name} ({Grouping})";
     }
@@ -181,8 +183,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             bool isSingleInstance,
             bool needsTemporalClipAccess)
         {
-            // 第一段階はフィルターコンテキストのみ対応
-            if (!supportedContexts.Contains(OfxConstants.ImageEffectContextFilter))
+            // 対応済みのコンテキスト（フィルター＝映像エフェクト、トランジション＝場面切替え）を
+            // 1つも宣言しないプラグインは一覧に載せない
+            var supportsFilter = supportedContexts.Contains(OfxConstants.ImageEffectContextFilter);
+            var supportsTransition = supportedContexts.Contains(OfxConstants.ImageEffectContextTransition);
+            if (!supportsFilter && !supportsTransition)
                 return null;
             if (!supportedPixelDepths.Contains(OfxConstants.BitDepthFloat))
                 return null;
@@ -194,7 +199,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             if (needsTemporalClipAccess)
                 return null;
             var name = label is { Length: > 0 } ? label : identifier.Split('.').Last();
-            return new OpenFxPluginInfo(binaryPath, identifier, versionMajor, versionMinor, name, grouping);
+            return new OpenFxPluginInfo(binaryPath, identifier, versionMajor, versionMinor, name, grouping, supportsFilter, supportsTransition);
         }
 
         static IEnumerable<string> EnumerateBinaryPaths()

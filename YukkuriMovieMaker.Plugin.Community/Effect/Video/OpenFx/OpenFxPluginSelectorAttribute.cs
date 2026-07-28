@@ -13,11 +13,22 @@ using LocalizationTexts = YukkuriMovieMaker.Resources.Localization.Texts;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 {
-    internal class OpenFxPluginSelectorAttribute : PropertyEditorAttribute2
+    /// <summary>
+    /// プラグイン一覧に表示する対応コンテキストの種別
+    /// </summary>
+    internal enum OpenFxPluginListKind
+    {
+        /// <summary>フィルターコンテキスト対応（映像エフェクト用）</summary>
+        Filter,
+        /// <summary>トランジションコンテキスト対応（場面切替え用）</summary>
+        Transition,
+    }
+
+    internal class OpenFxPluginSelectorAttribute(OpenFxPluginListKind kind = OpenFxPluginListKind.Filter) : PropertyEditorAttribute2
     {
         public override FrameworkElement Create()
         {
-            return new OpenFxPluginSelector();
+            return new OpenFxPluginSelector(kind);
         }
 
         public override void SetBindings(FrameworkElement control, ItemProperty[] itemProperties)
@@ -76,13 +87,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
         public ItemProperty[]? ItemProperties { get; set; }
 
+        readonly OpenFxPluginListKind kind;
         readonly ComboBox comboBox;
         readonly Button reloadButton;
         bool isUpdatingDisplay;
         bool isReloading;
 
-        public OpenFxPluginSelector()
+        public OpenFxPluginSelector(OpenFxPluginListKind kind = OpenFxPluginListKind.Filter)
         {
+            this.kind = kind;
             ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(26) });
 
@@ -150,22 +163,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
         public void UpdateDisplay()
         {
-            var effect = GetTargetEffects().FirstOrDefault();
-            if (effect is null)
+            var host = GetTargetHosts().FirstOrDefault();
+            if (host is null)
                 return;
             isUpdatingDisplay = true;
             try
             {
-                if (string.IsNullOrEmpty(effect.PluginId))
+                if (string.IsNullOrEmpty(host.PluginId))
                 {
                     comboBox.SelectedItem = null;
                     return;
                 }
                 var items = (comboBox.ItemsSource as IEnumerable<OpenFxPluginItem>)?.ToList() ?? [];
-                var current = items.FirstOrDefault(x => IsSameId(x.Identifier, effect.PluginId) && IsSameId(x.BinaryPath, effect.PluginPath));
+                var current = items.FirstOrDefault(x => IsSameId(x.Identifier, host.PluginId) && IsSameId(x.BinaryPath, host.PluginPath));
                 if (current is null)
                 {
-                    current = new OpenFxPluginItem(new OpenFxPluginInfo(effect.PluginPath, effect.PluginId, 0, 0, effect.PluginName, string.Empty));
+                    // スキャン前・アンインストール済みでも現在の選択を表示するための仮の情報
+                    current = new OpenFxPluginItem(new OpenFxPluginInfo(host.PluginPath, host.PluginId, 0, 0, host.PluginName, string.Empty, true, true));
                     items.Insert(0, current);
                     comboBox.ItemsSource = items;
                 }
@@ -222,7 +236,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         void ApplyItems(IReadOnlyList<OpenFxPluginInfo> plugins)
         {
             var selected = comboBox.SelectedItem as OpenFxPluginItem;
-            var items = plugins.Select(x => new OpenFxPluginItem(x)).ToList();
+            // 一覧には使用先のコンテキストへ対応するプラグインだけを表示する
+            var items = plugins
+                .Where(x => kind == OpenFxPluginListKind.Filter ? x.SupportsFilter : x.SupportsTransition)
+                .Select(x => new OpenFxPluginItem(x))
+                .ToList();
             // 現在の選択がスキャン結果に含まれない場合（アンインストール済み等）も表示は維持する
             if (selected is not null && !items.Any(x => IsSameId(x.Identifier, selected.Identifier) && IsSameId(x.BinaryPath, selected.BinaryPath)))
                 items.Insert(0, selected);
@@ -249,13 +267,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             var info = item.Info;
 
             BeginEdit?.Invoke(this, EventArgs.Empty);
-            foreach (var effect in GetTargetEffects())
-                effect.SelectPlugin(info);
+            foreach (var host in GetTargetHosts())
+                host.SelectPlugin(info);
             EndEdit?.Invoke(this, EventArgs.Empty);
         }
 
-        IEnumerable<OpenFxVideoEffect> GetTargetEffects()
-            => ItemProperties?.Select(x => x.PropertyOwner).OfType<OpenFxVideoEffect>() ?? [];
+        IEnumerable<IOpenFxPluginHost> GetTargetHosts()
+            => ItemProperties?.Select(x => x.PropertyOwner).OfType<IOpenFxPluginHost>() ?? [];
 
         /// <summary>
         /// BinaryPath・Identifierの同一性判定（Windowsのパスは大文字小文字を区別しない）
