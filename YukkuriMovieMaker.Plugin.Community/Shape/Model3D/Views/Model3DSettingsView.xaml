@@ -1,0 +1,52 @@
+﻿<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Views.Model3DSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:m="clr-namespace:YukkuriMovieMaker.Plugin.Community.Shape.Model3D"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             mc:Ignorable="d"
+             d:DesignWidth="450"
+             DataContext="{x:Static m:Model3DSettings.Default}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Expander Header="{x:Static m:Texts.Model3D}" IsExpanded="True">
+            <StackPanel>
+                <Grid Margin="0,2">
+                    <Label Content="{x:Static m:Texts.MaxFileSize}" ToolTip="{x:Static m:Texts.MaxFileSizeDescription}" VerticalAlignment="Center"/>
+                    <c:TextBoxSlider Value="{Binding MaxFileSizeMB, Mode=TwoWay}"
+                                     Min="10" Max="10240" DefaultMin="100" DefaultMax="2048" Delta="10"
+                                     StringFormat="F0" Unit="MB" Width="200"
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Label Content="{x:Static m:Texts.MaxGpuMemoryPerModel}" ToolTip="{x:Static m:Texts.MaxGpuMemoryPerModelDescription}" VerticalAlignment="Center"/>
+                    <c:TextBoxSlider Value="{Binding MaxGpuMemoryPerModelMB, Mode=TwoWay}"
+                                     Min="64" Max="32768" DefaultMin="256" DefaultMax="8192" Delta="64"
+                                     StringFormat="F0" Unit="MB" Width="200"
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Label Content="{x:Static m:Texts.MaxVertices}" ToolTip="{x:Static m:Texts.MaxVerticesDescription}" VerticalAlignment="Center"/>
+                    <c:TextBoxSlider Value="{Binding MaxVertices, Mode=TwoWay}"
+                                     Min="10000" Max="100000000" DefaultMin="1000000" DefaultMax="20000000" Delta="100000"
+                                     StringFormat="F0" Unit="" Width="200"
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Label Content="{x:Static m:Texts.MaxIndices}" ToolTip="{x:Static m:Texts.MaxIndicesDescription}" VerticalAlignment="Center"/>
+                    <c:TextBoxSlider Value="{Binding MaxIndices, Mode=TwoWay}"
+                                     Min="30000" Max="300000000" DefaultMin="3000000" DefaultMax="60000000" Delta="100000"
+                                     StringFormat="F0" Unit="" Width="200"
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Label Content="{x:Static m:Texts.MaxParts}" ToolTip="{x:Static m:Texts.MaxPartsDescription}" VerticalAlignment="Center"/>
+                    <c:TextBoxSlider Value="{Binding MaxParts, Mode=TwoWay}"
+                                     Min="10" Max="50000" DefaultMin="100" DefaultMax="20000" Delta="10"
+                                     StringFormat="F0" Unit="" Width="200"
+                                     HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
+            </StackPanel>
+        </Expander>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,334 @@
+using System.IO;
+using System.Numerics;
+using Vortice.Direct2D1;
+using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Cache;
+using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Parsers;
+using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Rendering;
+using YukkuriMovieMaker.Plugin.Community.Shape.Model3D.Textures;
+
+namespace YukkuriMovieMaker.Plugin.Community.Shape.Model3D;
+
+internal sealed class Model3DSource : IShapeSource
+{
+    private static readonly Lock RenderLock = new();
+    private static readonly TimeSpan FileStampInterval = TimeSpan.FromMilliseconds(500);
+    private static readonly TimeSpan LoadRetryInterval = TimeSpan.FromSeconds(2);
+    private const string FailedKeySuffix = "|failed";
+
+    private readonly IGraphicsDevicesAndContext _devices;
+    private readonly Model3DParameter _parameter;
+    private readonly TextureService _textureService = new();
+    private readonly RenderTargetManager _renderTargets = new();
+    private readonly GpuResourceFactory _gpuResourceFactory;
+    private readonly D3DResources _resources;
+    private readonly Model3DRenderer _renderer;
+
+    private ID2D1CommandList _commandList;
+    private GpuResourceCacheItem? _gpuResource;
+    private string _file = string.Empty;
+    private string _gpuResourceKey = string.Empty;
+    private readonly List<string> _watchedFiles = [];
+    private string _currentFileKey = string.Empty;
+    private DateTime _lastFileStampCheck = DateTime.MinValue;
+    private DateTime _retryAt = DateTime.MinValue;
+    private int _width;
+    private int _height;
+    private Model3DRenderState _state;
+    private bool _disposed;
+
+    public Model3DSource(IGraphicsDevicesAndContext devices, Model3DParameter parameter)
+    {
+        _devices = devices;
+        _parameter = parameter;
+        _resources = new D3DResources(devices.D3D.Device);
+        _renderer = new Model3DRenderer(_resources);
+        _gpuResourceFactory = new GpuResourceFactory(_textureService);
+        _commandList = CreateEmptyCommandList(devices.DeviceContext);
+    }
+
+    public ID2D1Image Output => _commandList;
+
+    public void Update(TimelineItemSourceDescription desc)
+    {
+        if (_disposed) return;
+
+        var fps = desc.FPS;
+        var frame = desc.ItemPosition.Frame;
+        var length = desc.ItemDuration.Frame;
+
+        var file = _parameter.File;
+        int width = ClampRenderSize(desc.ScreenSize.Width);
+        int height = ClampRenderSize(desc.ScreenSize.Height);
+        var state = CreateRenderState(frame, length, fps);
+        string fileKey = GetFileKey(file);
+
+        bool sameState = _file == file && _width == width && _height == height && _state == state;
+        if (sameState && _gpuResourceKey == fileKey) return;
+        if (sameState && _gpuResourceKey == fileKey + FailedKeySuffix && DateTime.UtcNow < _retryAt) return;
+
+        ID2D1CommandList newCommandList;
+        try
+        {
+            newCommandList = BuildCommandList(file, fileKey, width, height, state);
+        }
+        catch
+        {
+            return;
+        }
+
+        _file = file;
+        _width = width;
+        _height = height;
+        _state = state;
+
+        var oldCommandList = _commandList;
+        _commandList = newCommandList;
+        oldCommandList.Dispose();
+    }
+
+    private Model3DRenderState CreateRenderState(int frame, int length, int fps)
+    {
+        var baseColor = _parameter.BaseColor;
+
+        return new Model3DRenderState(
+            Position: new Vector3(
+                (float)_parameter.X.GetValue(frame, length, fps),
+                (float)_parameter.Y.GetValue(frame, length, fps),
+                (float)_parameter.Z.GetValue(frame, length, fps)),
+            Rotation: new Vector3(
+                (float)_parameter.RotationX.GetValue(frame, length, fps),
+                (float)_parameter.RotationY.GetValue(frame, length, fps),
+                (float)_parameter.RotationZ.GetValue(frame, length, fps)),
+            Scale: (float)(_parameter.Scale.GetValue(frame, length, fps) / 100.0),
+            FieldOfView: (float)_parameter.Fov.GetValue(frame, length, fps),
+            Projection: _parameter.Projection,
+            BaseColor: new Vector4(baseColor.ScR, baseColor.ScG, baseColor.ScB, baseColor.ScA),
+            LightPosition: new Vector3(
+                (float)_parameter.LightX.GetValue(frame, length, fps),
+                (float)_parameter.LightY.GetValue(frame, length, fps),
+                (float)_parameter.LightZ.GetValue(frame, length, fps)),
+            LightType: _parameter.LightType,
+            IsLightEnabled: _parameter.IsLightEnabled);
+    }
+
+    private ID2D1CommandList BuildCommandList(string file, string fileKey, int width, int height, in Model3DRenderState state)
+    {
+        var deviceContext = _devices.DeviceContext;
+
+        var resource = AcquireGpuResource(file, fileKey);
+        if (resource is null) return CreateEmptyCommandList(deviceContext);
+
+        lock (RenderLock)
+        {
+            if (!_renderTargets.EnsureSize(_devices, width, height))
+                return CreateEmptyCommandList(deviceContext);
+
+            var context = _devices.D3D.DeviceContext;
+            _renderer.Render(context, _renderTargets, resource, width, height, state);
+            context.Flush();
+        }
+
+        return _renderTargets.SharedBitmap is { } bitmap
+            ? CreateCenteredBitmapCommandList(deviceContext, bitmap)
+            : CreateEmptyCommandList(deviceContext);
+    }
+
+    private GpuResourceCacheItem? AcquireGpuResource(string file, string key)
+    {
+        if (_gpuResourceKey == key) return _gpuResource;
+
+        _gpuResource?.Dispose();
+        _gpuResource = null;
+        _gpuResourceKey = key;
+
+        if (key.Length == 0)
+        {
+            _watchedFiles.Clear();
+            return null;
+        }
+
+        try
+        {
+            var model = Model3DLoader.Load(file);
+            UpdateWatchedFiles(model);
+
+            if (model.Vertices.Length > 0)
+            {
+                _gpuResource = _gpuResourceFactory.Create(_devices.D3D.Device, model);
+            }
+        }
+        catch
+        {
+            _gpuResource = null;
+            _gpuResourceKey = key + FailedKeySuffix;
+            _retryAt = DateTime.UtcNow + LoadRetryInterval;
+            return null;
+        }
+
+        _gpuResourceKey = CreateGpuResourceKey(file);
+        _currentFileKey = _gpuResourceKey;
+        _lastFileStampCheck = DateTime.UtcNow;
+
+        return _gpuResource;
+    }
+
+    private void UpdateWatchedFiles(Models.Model3DData model)
+    {
+        _watchedFiles.Clear();
+
+        foreach (var dependency in model.Dependencies)
+        {
+            _watchedFiles.Add(dependency);
+        }
+
+        foreach (var part in model.Parts)
+        {
+            AddWatchedTexture(part.TexturePath);
+            AddWatchedTexture(part.MetallicRoughnessTexturePath);
+        }
+    }
+
+    private void AddWatchedTexture(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return;
+        if (ModelHelper.IsEmbeddedTexturePath(path)) return;
+        _watchedFiles.Add(path);
+    }
+
+    private string GetFileKey(string file)
+    {
+        var now = DateTime.UtcNow;
+        if (_file == file && now - _lastFileStampCheck < FileStampInterval) return _currentFileKey;
+
+        _lastFileStampCheck = now;
+        _currentFileKey = CreateGpuResourceKey(file);
+        return _currentFileKey;
+    }
+
+    private string CreateGpuResourceKey(string file)
+    {
+        if (string.IsNullOrEmpty(file)) return string.Empty;
+
+        var builder = new System.Text.StringBuilder();
+        AppendFileStamp(builder, file);
+        foreach (var watched in _watchedFiles)
+        {
+            AppendFileStamp(builder, watched);
+        }
+
+        var limits = Model3DSettings.Default;
+        builder.Append(limits.MaxFileSizeMB).Append('|')
+            .Append(limits.MaxVertices).Append('|')
+            .Append(limits.MaxIndices).Append('|')
+            .Append(limits.MaxParts).Append('|')
+            .Append(limits.MaxGpuMemoryPerModelMB).Append(';');
+
+        return builder.ToString();
+    }
+
+    private static void AppendFileStamp(System.Text.StringBuilder builder, string path)
+    {
+        long stamp = 0;
+        try
+        {
+            var info = new FileInfo(path);
+            stamp = info.Exists ? info.LastWriteTimeUtc.Ticks : 0;
+        }
+        catch
+        {
+        }
+        builder.Append(path).Append('|').Append(stamp).Append(';');
+    }
+
+    private static int ClampRenderSize(int size)
+        => Math.Clamp(size, RenderingConstants.MinRenderSize, RenderingConstants.MaxRenderSize);
+
+    private static ID2D1CommandList CreateEmptyCommandList(ID2D1DeviceContext deviceContext)
+    {
+        var commandList = deviceContext.CreateCommandList();
+        try
+        {
+            deviceContext.Target = commandList;
+            deviceContext.BeginDraw();
+            try
+            {
+                deviceContext.Clear(null);
+
+                using var transparent = deviceContext.CreateSolidColorBrush(new Vortice.Mathematics.Color4(0, 0, 0, 0));
+                deviceContext.DrawRectangle(new Vortice.RawRectF(0, 0, 1, 1), transparent);
+            }
+            finally
+            {
+                try
+                {
+                    deviceContext.EndDraw();
+                }
+                finally
+                {
+                    deviceContext.Target = null;
+                }
+            }
+
+            commandList.Close();
+            return commandList;
+        }
+        catch
+        {
+            commandList.Dispose();
+            throw;
+        }
+    }
+
+    private static ID2D1CommandList CreateCenteredBitmapCommandList(ID2D1DeviceContext deviceContext, ID2D1Bitmap1 bitmap)
+    {
+        var size = bitmap.Size;
+
+        var commandList = deviceContext.CreateCommandList();
+        try
+        {
+            deviceContext.Target = commandList;
+            deviceContext.BeginDraw();
+            try
+            {
+                deviceContext.Clear(null);
+                deviceContext.Transform = Matrix3x2.CreateTranslation(-size.Width / 2f, -size.Height / 2f);
+                deviceContext.DrawImage(bitmap);
+            }
+            finally
+            {
+                deviceContext.Transform = Matrix3x2.Identity;
+                try
+                {
+                    deviceContext.EndDraw();
+                }
+                finally
+                {
+                    deviceContext.Target = null;
+                }
+            }
+
+            commandList.Close();
+            return commandList;
+        }
+        catch
+        {
+            commandList.Dispose();
+            throw;
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+
+        _gpuResource?.Dispose();
+        _commandList.Dispose();
+        _renderer.Dispose();
+        _renderTargets.Dispose();
+        _textureService.Dispose();
+        _resources.Dispose();
+    }
+}

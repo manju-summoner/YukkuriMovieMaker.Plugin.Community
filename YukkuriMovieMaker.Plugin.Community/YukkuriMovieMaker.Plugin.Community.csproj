@@ -82,6 +82,7 @@
 
   <!-- nugetパッケージで公開されているライブラリはPackageReferenceで参照する。-->
   <ItemGroup>
+	<PackageReference Include="AssimpNet" Version="4.1.0" />
 	<PackageReference Include="LlmTornado" Version="3.8.60" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" />
@@ -135,7 +136,8 @@
     <None Remove="Effect\Video\UnidirectionalBlur\Texts.csv" />
     <None Remove="Resources\License\GeneralUserGS.txt" />
     <None Remove="Resources\SoundFonts\GeneralUser-GS.sf2" />
-    <None Remove="Shape\Pen\Texts.csv" />  
+    <None Remove="Shape\Pen\Texts.csv" />
+    <None Remove="Shape\Model3D\Texts.csv" />
   </ItemGroup>
 	
   <ItemGroup>
@@ -221,6 +223,8 @@
     <Resource Include="$(ShaderDirPath)AmbientOcclusionPhase.cso" Link="Resources\Shader\AmbientOcclusionPhase.cso" />
     <Resource Include="$(ShaderDirPath)Fog.cso" Link="Resources\Shader\Fog.cso" />
     <Resource Include="$(ShaderDirPath)CrossFilter.cso" Link="Resources\Shader\CrossFilter.cso" />
+    <Resource Include="$(ShaderDirPath)Model3DVS.cso" Link="Resources\Shader\Model3DVS.cso" />
+    <Resource Include="$(ShaderDirPath)Model3DPS.cso" Link="Resources\Shader\Model3DPS.cso" />
   </ItemGroup>
 
   <!-- internalsを参照するテスト（EdgeDetectionZeroStrengthOverlayTest等）はDEBUG限定のため、Releaseビルドには付与しない -->
