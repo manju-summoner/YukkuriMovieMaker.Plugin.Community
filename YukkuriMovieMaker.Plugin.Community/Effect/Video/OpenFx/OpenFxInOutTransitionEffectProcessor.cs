@@ -239,18 +239,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 return effectDescription.DrawDescription;
             }
 
-            foreach (var parameter in item.Parameters)
-                parameter.ApplyTo(instance, frame, length, fps);
-
             // 登場時は 透明→アイテム（進行度=rate）、退場時は アイテム→透明（進行度=1-rate）。
             // 反転時はfrom/toと進行度を同時に入れ替える（＝トランジションの逆再生）
             var isItemToTransparent = isOut ^ reversed;
             var progress = Math.Clamp(isItemToTransparent ? 1 - rate : rate, 0, 1);
-            instance.SetDoubleParam(OfxConstants.ImageEffectTransitionParamName, progress);
 
             OfxRectI renderWindow;
             try
             {
+                // パラメータ適用の失敗も描画失敗と同じクールダウン経路（パススルー＋ログ1回）に乗せる
+                foreach (var parameter in item.Parameters)
+                    parameter.ApplyTo(instance, frame, length, fps);
+                instance.SetDoubleParam(OfxConstants.ImageEffectTransitionParamName, progress);
+
                 // 入力サイズが上限付近のとき、RoD拡張でビットマップ上限を超えないよう上限も渡す
                 renderWindow = instance.GetRegionOfDefinition(frame, Math.Max(1, (int)dc.MaximumBitmapSize));
                 EnsureInputResources(width, height);

@@ -15,7 +15,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
     /// 問題のあったバイナリはスキップしてスキャンを継続する。
     /// プロトコルは Ymm4OfxScanner.cpp 冒頭のコメントを参照
     /// （Vst3ScannerProcessと同じ行ベースの流儀。子は生のdescribe結果を返し、
-    /// 対応可否の判定は親側の OpenFxPluginScanner.TryCreatePluginInfo で行う）。
+    /// 対応可否の判定は親側の OpenFxPluginScanner.CreatePluginInfo で行う）。
     /// </summary>
     internal static class OpenFxScannerProcess
     {

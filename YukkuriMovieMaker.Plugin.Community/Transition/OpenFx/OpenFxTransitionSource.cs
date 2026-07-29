@@ -169,14 +169,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
                 return;
             }
 
-            foreach (var parameter in item.Parameters)
-                parameter.ApplyTo(instance, frame, length, fps);
-            // 進行度はトランジションコンテキストの必須パラメータとしてホストが駆動する
-            instance.SetDoubleParam(OfxConstants.ImageEffectTransitionParamName, Math.Clamp(easedProgress, 0, 1));
-
             OfxRectI renderWindow;
             try
             {
+                // パラメータ適用の失敗も描画失敗と同じクールダウン経路（パススルー＋ログ1回）に乗せる
+                foreach (var parameter in item.Parameters)
+                    parameter.ApplyTo(instance, frame, length, fps);
+                // 進行度はトランジションコンテキストの必須パラメータとしてホストが駆動する
+                instance.SetDoubleParam(OfxConstants.ImageEffectTransitionParamName, Math.Clamp(easedProgress, 0, 1));
+
                 // 入力サイズが上限付近のとき、RoD拡張でビットマップ上限を超えないよう上限も渡す
                 renderWindow = instance.GetRegionOfDefinition(frame, Math.Max(1, (int)dc.MaximumBitmapSize));
                 EnsureInputResources(width, height);

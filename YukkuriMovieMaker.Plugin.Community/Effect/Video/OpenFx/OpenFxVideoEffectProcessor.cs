@@ -175,12 +175,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 return effectDescription.DrawDescription;
             }
 
-            foreach (var parameter in item.Parameters)
-                parameter.ApplyTo(instance, frame, length, fps);
-
             OfxRectI renderWindow;
             try
             {
+                // パラメータ適用の失敗も描画失敗と同じクールダウン経路（パススルー＋ログ1回）に乗せる
+                foreach (var parameter in item.Parameters)
+                    parameter.ApplyTo(instance, frame, length, fps);
+
                 // ぼかし・グロー等は入力より大きな出力領域（RoD）を宣言するため、出力はRoDサイズで確保する
                 // （入力サイズが上限付近のとき、RoD拡張でビットマップ上限を超えないよう上限も渡す）
                 renderWindow = instance.GetRegionOfDefinition(frame, Math.Max(1, (int)dc.MaximumBitmapSize));
