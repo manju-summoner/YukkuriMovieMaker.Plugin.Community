@@ -1,0 +1,19 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+rotate_for_seconds,指定秒間回転,指定秒間回転,Rotate for Specified Seconds,指定秒数旋转,指定秒數旋轉,지정 초 동안 회전,Rotar por segundos especificados,الدوران لعدد ثوانٍ محدد,Putar selama Detik yang Ditentukan
+seconds,秒,秒,Seconds,秒,秒,초,Segundos,ثوانٍ,Detik
+unit_seconds,秒（単位）,秒,s,秒,秒,초,s,ثانية,detik
+unit_times,回（単位）,回,rotations,次,次,회,veces,مرات,kali
+rotation_period,何秒間で指定回数回転するか（周期）,何秒間で指定回数回転するか（周期）,Time taken to complete specified rotations (Period),完成指定旋转次数所需的秒数（周期）,完成指定旋轉次數所需的秒數（週期）,지정된 횟수만큼 회전하는 데 걸리는 시간(주기),Segundos para completar las rotaciones especificadas (Período),عدد الثواني لإكمال عدد الدورات المحدد (الدورة),Berapa detik untuk berputar sesuai jumlah yang ditentukan (Periode)
+rotation_count,回数,回数,Rotations,次数,次數,횟수,Número de rotaciones,عدد المرات,Jumlah Putaran
+axis_x,X軸,X軸,X Axis,X轴,X軸,X축,Eje X,المحور X,Sumbu X
+axis_y,Y軸,Y軸,Y Axis,Y轴,Y軸,Y축,Eje Y,المحور Y,Sumbu Y
+axis_z,Z軸,Z軸,Z Axis,Z轴,Z軸,Z축,Eje Z,المحور Z,Sumbu Z
+x_rotations,X軸で何回転するか（小数・負数指定可）,X軸で何回転するか（小数・負数指定可）,Number of rotations on X axis (Decimals/Negatives allowed),X轴旋转圈数（可填小数/负数）,X軸旋轉圈數（可填小數/負數）,X축 회전 횟수 (소수 및 음수 지정 가능),Rotaciones en el eje X (se permiten decimales y números negativos),عدد الدورات على المحور X (يسمح بأرقام عشرية وسالبة),Jumlah putaran pada sumbu X (dapat menentukan desimal/negatif)
+y_rotations,Y軸で何回転するか（小数・負数指定可）,Y軸で何回転するか（小数・負数指定可）,Number of rotations on Y axis (Decimals/Negatives allowed),Y轴旋转圈数（可填小数/负数）,Y軸旋轉圈數（可填小數/負數）,Y축 회전 횟수 (소수 및 음수 지정 가능),Rotaciones en el eje Y (se permiten decimales y números negativos),عدد الدورات على المحور Y (يسمح بأرقام عشرية وسالبة),Jumlah putaran pada sumbu Y (dapat menentukan desimal/negatif)
+z_rotations,Z軸で何回転するか（小数・負数指定可）,Z軸で何回転するか（小数・負数指定可）,Number of rotations on Z axis (Decimals/Negatives allowed),Z轴旋转圈数（可填小数/负数）,Z軸旋轉圈數（可填小數/負數）,Z축 회전 횟수 (소수 및 음수 지정可能),Rotaciones en el eje Z (se permiten decimales y números negativos),عدد الدورات على المحور Z (يسمح بأرقام عشرية وسالبة),Jumlah putaran pada sumbu Z (dapat menentukan desimal/negatif)
+x_offset,Xオフセット,Xオフセット,X Offset,X 偏移,X 偏移,X 오프셋,Desplazamiento X,الإزاحة X,Offset X
+y_offset,Yオフセット,Yオフセット,Y Offset,Y 偏移,Y 偏移,Y 오프셋,Desplazamiento Y,الإزاحة Y,Offset Y
+z_offset,Zオフセット,Zオフセット,Z Offset,Z 偏移,Z 偏移,Z 오프셋,Desplazamiento Z,الإزاحة Z,Offset Z
+x_initial_angle_offset,Xの初期角度オフセット（度）,Xの初期角度オフセット（度）,Initial angle offset for X (degrees),X 初始角度偏移（度）,X 初始角度偏移（度）,X의 초기 각도 오프셋 (도),Desplazamiento del ángulo inicial X (grados),إزاحة الزاوية الأولية لـ X (بالدرجات),Offset sudut awal X (derajat)
+y_initial_angle_offset,Yの初期角度オフセット（度）,Yの初期角度オフセット（度）,Initial angle offset for Y (degrees),Y 初始角度偏移（度）,Y 初始角度偏移（度）,Y의 초기 각도 오프셋 (도),Desplazamiento del ángulo inicial Y (grados),إزاحة الزاوية الأولية لـ Y (بالدرجات),Offset sudut awal Y (derajat)
+z_initial_angle_offset,Zの初期角度オフセット（度）,Zの初期角度オフセット（度）,Initial angle offset for Z (degrees),Z 初始角度偏移（度）,Z 初始角度偏移（度）,Z의 초기 각도 오프셋 (도),Desplazamiento del ángulo inicial Z (grados),إزاحة الزاوية الأولية لـ Z (بالدرجات),Offset sudut awal Z (derajat)
