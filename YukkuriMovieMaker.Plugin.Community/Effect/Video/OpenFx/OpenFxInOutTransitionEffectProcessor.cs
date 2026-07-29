@@ -65,9 +65,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         string attemptedPluginPath = "";
         string attemptedPluginId = "";
         bool isRenderUnsafe;
-        // 失敗時は一定フレーム素通しにしてから再試行する（ログはひと続きの失敗で1回だけ）
+        // 失敗時は一定フレーム素通しにしてから再試行する（ログはひと続きの失敗で1回だけ）。
+        // ユーザーがパラメーター等を編集したら待ちを打ち切って即再試行する（原因を直しても素通しのままにならないように）
         int failureCooldownFrames;
         bool hasLoggedFailure;
+        volatile bool retryRequested;
         const int FailureCooldownFrameCount = 120;
         // 効果時間外の素通しが続いたら重いネイティブリソースを解放する
         // （長いアイテムでは効果時間外が大半を占め、OFXのプール画像・変換バッファを保持し続けるのは無駄なため）
@@ -79,6 +81,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         {
             this.devices = devices;
             this.item = item;
+            item.PropertyChanged += Item_PropertyChanged;
+        }
+
+        void Item_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            // 値の変化はUIスレッド、消費はレンダリングスレッドのためvolatileフラグで受け渡す
+            retryRequested = true;
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
@@ -182,13 +191,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 hasLoggedFailure = false;
             }
 
-            // 直近で失敗した場合は一定フレーム素通しにしてから再試行する（毎フレームの失敗連打を避ける）
+            // 直近で失敗した場合は一定フレーム素通しにしてから再試行する（毎フレームの失敗連打を避ける）。
+            // パラメーター等が編集された場合は待ちを打ち切って即再試行する
             if (failureCooldownFrames > 0)
             {
-                failureCooldownFrames--;
-                ApplyPassthrough();
-                return effectDescription.DrawDescription;
+                if (!retryRequested)
+                {
+                    failureCooldownFrames--;
+                    ApplyPassthrough();
+                    return effectDescription.DrawDescription;
+                }
+                failureCooldownFrames = 0;
             }
+            // ここから先は1回の試行として編集済みフラグを消費する（試行中の再編集は次のUpdateで再試行になる）
+            retryRequested = false;
 
             var dc = devices.DeviceContext;
             var bounds = dc.GetImageLocalBounds(currentInput);
@@ -235,7 +251,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             OfxRectI renderWindow;
             try
             {
-                renderWindow = instance.GetRegionOfDefinition(frame);
+                // 入力サイズが上限付近のとき、RoD拡張でビットマップ上限を超えないよう上限も渡す
+                renderWindow = instance.GetRegionOfDefinition(frame, Math.Max(1, (int)dc.MaximumBitmapSize));
                 EnsureInputResources(width, height);
                 EnsureOutputResources(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1);
                 ReadInputPixels(dc, bounds, width, height);
@@ -461,6 +478,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         {
             if (disposing)
             {
+                item.PropertyChanged -= Item_PropertyChanged;
                 // エフェクト入力に接続したまま出力ビットマップを破棄しないよう、先に切り離す
                 transformEffect?.SetInput(0, null, true);
                 ReleaseRenderResources();

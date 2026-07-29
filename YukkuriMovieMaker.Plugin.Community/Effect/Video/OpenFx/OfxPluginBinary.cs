@@ -159,6 +159,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 var mainEntry = (delegate* unmanaged[Cdecl]<nint, nint, nint, nint, int>)plugin->mainEntry;
                 return mainEntry(actionUtf8, handle, inArgs, outArgs);
             }
+            catch (ArithmeticException e)
+            {
+                // プラグイン内の整数ゼロ除算等のハードウェア例外はCLRがマネージド例外へ変換して
+                // ここへ届く（実測: openfx-misc ColorBarsのExtent=Size・サイズ0）。
+                // ホスト例外として漏らさず、アクションの失敗ステータスへ変換する
+                OfxHostLog.Info($"プラグイン内で演算例外が発生しました。plugin={Identifier} action={action}: {e.Message}");
+                return OfxStatus.Failed;
+            }
             finally
             {
                 Marshal.FreeCoTaskMem(actionUtf8);

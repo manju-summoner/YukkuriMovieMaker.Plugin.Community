@@ -199,69 +199,48 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 if (nThreads == 0)
                     nThreads = (uint)Environment.ProcessorCount;
 
-                // 仕様上ネストした multiThread は逐次実行になる。
-                // 極端なスレッド数の要求もタスクを量産せず逐次で処理する（呼び出し回数の契約は守る）
+                // ワーカーは必ず専用スレッドで実行し、呼び出し元スレッド（下にプラグインのネイティブフレームがある
+                // リバースP/Invoke混在スタック）では直接呼ばない。プラグイン内のゼロ除算等のハードウェア例外が
+                // 混在スタックを跨いで伝播すると、.NET 10のマネージドEHがディスパッチループに陥りStackOverflowで落ちる
+                // （openfx-misc ColorBarsのExtent=Size・サイズ0で実測。LegacyExceptionHandlingスイッチは.NET 10で削除済み）。
+                // 専用スレッドなら「マネージド起点スタック→ネイティブ1区間→フォールト」の形になり、通常のcatchで受け止められる。
+                // プール飽和時も進行が保証されるため、スレッドプールも使わない。
+                //
+                // 仕様上ネストした multiThread は逐次実行になる。極端なスレッド数の要求も逐次で処理する（呼び出し回数の契約は守る）
                 if (nThreads == 1 || isSpawnedThread || nThreads > 1024)
                 {
-                    var outerIsSpawned = isSpawnedThread;
-                    var outerIndex = spawnedThreadIndex;
-                    try
+                    for (var i = 0u; i < nThreads; i++)
                     {
-                        for (var i = 0u; i < nThreads; i++)
+                        var failure = RunWorkerOnDedicatedThread(function, i, nThreads, customArg);
+                        if (failure is not null)
                         {
-                            isSpawnedThread = true;
-                            spawnedThreadIndex = i;
-                            function(i, nThreads, customArg);
+                            OfxHostLog.Info($"multiThread ワーカーで例外: {failure}");
+                            return OfxStatus.Failed;
                         }
-                    }
-                    finally
-                    {
-                        isSpawnedThread = outerIsSpawned;
-                        spawnedThreadIndex = outerIndex;
                     }
                     return OfxStatus.OK;
                 }
 
-                // 呼び出しスレッド（多くはスレッドプール上のレンダリングスレッド）を遊ばせて待つと
-                // プール飽和時に注入待ちでストールするため、インデックス0は呼び出しスレッドで実行する
-                var tasks = new Task[nThreads - 1];
-                for (var i = 1u; i < nThreads; i++)
+                var threads = new Thread[nThreads];
+                var failures = new Exception?[nThreads];
+                for (var i = 0u; i < nThreads; i++)
                 {
                     var index = i;
-                    tasks[index - 1] = Task.Run(() =>
+                    threads[index] = new Thread(() => failures[index] = RunWorker(function, index, nThreads, customArg))
                     {
-                        isSpawnedThread = true;
-                        spawnedThreadIndex = index;
-                        try
-                        {
-                            function(index, nThreads, customArg);
-                        }
-                        finally
-                        {
-                            isSpawnedThread = false;
-                            spawnedThreadIndex = 0;
-                        }
-                    });
+                        IsBackground = true,
+                        Name = $"OFX multiThread worker {index}",
+                    };
+                    threads[index].Start();
                 }
-                try
+                // ワーカーがcustomArgへアクセスしたままプラグインへ制御を返さない（ネイティブ側のuse-after-free防止）
+                foreach (var thread in threads)
+                    thread.Join();
+                var firstFailure = Array.Find(failures, f => f is not null);
+                if (firstFailure is not null)
                 {
-                    isSpawnedThread = true;
-                    spawnedThreadIndex = 0;
-                    try
-                    {
-                        function(0, nThreads, customArg);
-                    }
-                    finally
-                    {
-                        isSpawnedThread = false;
-                        spawnedThreadIndex = 0;
-                    }
-                }
-                finally
-                {
-                    // インデックス0が失敗しても、ワーカーがcustomArgへアクセスしたまま
-                    // プラグインへ制御を返さない（ネイティブ側のuse-after-free防止）
-                    Task.WaitAll(tasks);
+                    OfxHostLog.Info($"multiThread ワーカーで例外: {firstFailure}");
+                    return OfxStatus.Failed;
                 }
                 return OfxStatus.OK;
             }
@@ -269,6 +248,50 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             {
                 OfxHostLog.Info($"multiThread で例外: {ex}");
                 return OfxStatus.Failed;
+            }
+        }
+
+        /// <summary>
+        /// ワーカー1つ分を専用スレッドで実行して完了を待つ（逐次実行用）。
+        /// ネストしたmultiThreadも呼び出し元と別スレッドになるため、
+        /// 「mutexを保持したままネストし、ネスト側ワーカーが同じmutexを取る」プラグインは
+        /// 再帰ロックが効かず待ちになる制約がある（同一スレッド実行はEHディスパッチループのSOEを踏むため不可。
+        /// 該当パターンのプラグインは現状未確認）
+        /// </summary>
+        static Exception? RunWorkerOnDedicatedThread(delegate* unmanaged[Cdecl]<uint, uint, nint, void> function, uint index, uint nThreads, nint customArg)
+        {
+            Exception? failure = null;
+            var thread = new Thread(() => failure = RunWorker(function, index, nThreads, customArg))
+            {
+                IsBackground = true,
+                Name = $"OFX multiThread worker {index}",
+            };
+            thread.Start();
+            thread.Join();
+            return failure;
+        }
+
+        /// <summary>
+        /// ワーカー本体。専用スレッド上（純粋なマネージド起点スタック）で呼ぶこと。
+        /// プラグイン内のハードウェア例外はここのcatchで受け止めて呼び出し側へ返す（伝播はネイティブ1区間だけを跨ぐ安全な形）
+        /// </summary>
+        static Exception? RunWorker(delegate* unmanaged[Cdecl]<uint, uint, nint, void> function, uint index, uint nThreads, nint customArg)
+        {
+            try
+            {
+                isSpawnedThread = true;
+                spawnedThreadIndex = index;
+                function(index, nThreads, customArg);
+                return null;
+            }
+            catch (Exception e)
+            {
+                return e;
+            }
+            finally
+            {
+                isSpawnedThread = false;
+                spawnedThreadIndex = 0;
             }
         }
 

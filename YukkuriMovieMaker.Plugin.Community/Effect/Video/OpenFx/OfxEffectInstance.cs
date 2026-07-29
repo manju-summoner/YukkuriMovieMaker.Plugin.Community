@@ -195,11 +195,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// <summary>
         /// プラグインが宣言する出力の定義域（RoD）を取得する。
         /// ぼかし・グロー等は入力より大きな領域を返すため、出力バッファはこの矩形で確保する。
-        /// アクション未対応・異常値の場合は入力と同じ矩形へフォールバックする
+        /// アクション未対応・異常値の場合は入力と同じ矩形へフォールバックする。
+        /// maxOutputSize には出力バッファの1辺の上限（D2Dの最大ビットマップサイズ等）を渡す。
+        /// プロジェクトサイズが上限に近い場合、RoD拡張が上限を超えるとビットマップを確保できず
+        /// レンダリング自体が失敗するため、プロジェクト矩形を優先して余白側から切り詰める
         /// </summary>
-        public OfxRectI GetRegionOfDefinition(double time)
+        public OfxRectI GetRegionOfDefinition(double time, int maxOutputSize = int.MaxValue)
         {
+            // フォールバック（プロジェクト矩形）も上限契約を守る
             var fallback = new OfxRectI { x1 = 0, y1 = 0, x2 = Width, y2 = Height };
+            ClampSpan(ref fallback.x1, ref fallback.x2, Width, maxOutputSize);
+            ClampSpan(ref fallback.y1, ref fallback.y2, Height, maxOutputSize);
             Create();
             // パラメータ変更から内部状態を更新するプラグインがあるため、RoDの問い合わせより先に通知する
             NotifyChangedParams(time);
@@ -228,6 +234,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 };
                 if (result.x2 <= result.x1 || result.y2 <= result.y1)
                     return fallback;
+                ClampSpan(ref result.x1, ref result.x2, Width, maxOutputSize);
+                ClampSpan(ref result.y1, ref result.y2, Height, maxOutputSize);
                 return result;
             }
             catch (Exception e)
@@ -235,6 +243,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 OfxHostLog.Info($"GetRegionOfDefinitionに失敗しました。plugin={plugin.Identifier}: {e.Message}");
                 return fallback;
             }
+        }
+
+        /// <summary>
+        /// RoDの1軸の範囲を上限サイズに収める。プロジェクト矩形（0..projectSize）を優先して残し、
+        /// 拡張分（余白）を切り詰める
+        /// </summary>
+        internal static void ClampSpan(ref int min, ref int max, int projectSize, int limit)
+        {
+            if (max - min <= limit)
+                return;
+            var margin = Math.Max(0, limit - projectSize);
+            var lo = Math.Max(min, -margin / 2);
+            var hi = lo + limit;
+            if (hi > max)
+            {
+                hi = max;
+                lo = hi - limit;
+            }
+            min = lo;
+            max = hi;
         }
 
         /// <summary>
@@ -293,6 +321,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     (FindRequiredClip(OfxConstants.ImageEffectTransitionSourceToClipName), toImage),
                 ],
                 outputImage);
+            OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height);
+        }
+
+        /// <summary>
+        /// ジェネレーターコンテキストのレンダリング。入力なしで premultiplied BGRA（上から下への行順）の出力を得る。
+        /// 出力バッファは renderWindow（OFX座標。通常は <see cref="GetRegionOfDefinition"/> の結果）のサイズ
+        /// </summary>
+        public void RenderGenerator(Span<byte> outputBgraTopDown, double time, OfxRectI renderWindow)
+        {
+            ValidateRenderWindow(renderWindow, outputBgraTopDown.Length);
+            Create();
+            NotifyChangedParams(time);
+
+            renderSerial++;
+            var outputImage = PrepareOutputImage(renderWindow);
+            RunRenderSequence(time, renderWindow, [], outputImage);
             OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height);
         }
 

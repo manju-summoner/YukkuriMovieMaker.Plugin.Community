@@ -6,20 +6,52 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 {
+    /// <summary>YMM4で使用できないOFXプラグインの非対応理由</summary>
+    internal enum OpenFxUnsupportedReason
+    {
+        /// <summary>対応コンテキスト（フィルター・トランジション・ジェネレーター）を1つも宣言していない</summary>
+        NoSupportedContext,
+        /// <summary>32bit float画像に非対応</summary>
+        FloatDepth,
+        /// <summary>単一インスタンス制約あり</summary>
+        SingleInstance,
+        /// <summary>前後フレームの取得（テンポラルアクセス）が必要</summary>
+        TemporalClipAccess,
+    }
+
     /// <summary>
     /// スキャンで見つかったOFXプラグイン1つ分の情報。
-    /// SupportsFilter / SupportsTransition は対応コンテキストの宣言で、
-    /// 映像エフェクトの一覧はフィルター対応のみ・場面切り替えの一覧はトランジション対応のみを表示する
+    /// SupportsFilter / SupportsTransition / SupportsGenerator は対応コンテキストの宣言で、
+    /// 映像エフェクトの一覧はフィルター対応のみ・場面切り替えの一覧はトランジション対応のみ・
+    /// 図形の一覧はジェネレーター対応のみを表示する。
+    /// UnsupportedReasonが非nullのプラグインはYMM4では使用できず、Supports*はすべてfalseになる
+    /// （設定画面の一覧にだけ「非対応」として表示し、各エフェクトの選択肢には現れない）
     /// </summary>
-    internal record OpenFxPluginInfo(string BinaryPath, string Identifier, uint VersionMajor, uint VersionMinor, string Name, string Grouping, bool SupportsFilter, bool SupportsTransition)
+    internal record OpenFxPluginInfo(string BinaryPath, string Identifier, uint VersionMajor, uint VersionMinor, string Name, string Grouping, bool SupportsFilter, bool SupportsTransition, bool SupportsGenerator, OpenFxUnsupportedReason? UnsupportedReason = null)
     {
         public string DisplayName => string.IsNullOrEmpty(Grouping) ? Name : $"{Name} ({Grouping})";
 
         /// <summary>
         /// 対応コンテキストの表示文字列（設定画面のプラグイン一覧用）。
-        /// トランジション専用プラグインが映像エフェクト側で選べない理由をユーザーが判別できるようにする
+        /// トランジション専用プラグインが映像エフェクト側で選べない理由や、
+        /// 認識はしているが使用できないプラグインをユーザーが判別できるようにする
         /// </summary>
-        public string SupportedUsagesText => string.Join(" / ", EnumerateUsageLabels());
+        public string SupportedUsagesText => UnsupportedReason is null
+            ? string.Join(" / ", EnumerateUsageLabels())
+            : Texts.OpenFxSettingsPluginUsageUnsupported;
+
+        /// <summary>非対応プラグインかどうか（設定画面のツールチップ有効化バインディング用）</summary>
+        public bool IsUnsupported => UnsupportedReason is not null;
+
+        /// <summary>非対応理由の説明（設定画面のツールチップ用）。対応プラグインではnull</summary>
+        public string? UnsupportedReasonText => UnsupportedReason switch
+        {
+            OpenFxUnsupportedReason.NoSupportedContext => Texts.OpenFxSettingsUnsupportedNoContextToolTip,
+            OpenFxUnsupportedReason.FloatDepth => Texts.OpenFxSettingsUnsupportedFloatDepthToolTip,
+            OpenFxUnsupportedReason.SingleInstance => Texts.OpenFxSettingsUnsupportedSingleInstanceToolTip,
+            OpenFxUnsupportedReason.TemporalClipAccess => Texts.OpenFxSettingsUnsupportedTemporalToolTip,
+            _ => null,
+        };
 
         IEnumerable<string> EnumerateUsageLabels()
         {
@@ -27,6 +59,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 yield return Texts.OpenFxSettingsPluginUsageFilter;
             if (SupportsTransition)
                 yield return Texts.OpenFxSettingsPluginUsageTransition;
+            if (SupportsGenerator)
+                yield return Texts.OpenFxSettingsPluginUsageShape;
         }
     }
 
@@ -159,7 +193,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 try
                 {
                     var descriptor = plugin.Describe();
-                    var info = TryCreatePluginInfo(
+                    plugins.Add(CreatePluginInfo(
                         binaryPath,
                         plugin.Identifier,
                         plugin.VersionMajor,
@@ -169,9 +203,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                         descriptor.SupportedContexts,
                         descriptor.SupportedPixelDepths,
                         descriptor.Props.GetIntOrDefault(OfxConstants.ImageEffectPluginPropSingleInstance, 0) != 0,
-                        descriptor.Props.GetIntOrDefault(OfxConstants.ImageEffectPropTemporalClipAccess, 0) != 0);
-                    if (info is not null)
-                        plugins.Add(info);
+                        descriptor.Props.GetIntOrDefault(OfxConstants.ImageEffectPropTemporalClipAccess, 0) != 0));
                 }
                 catch (Exception e)
                 {
@@ -182,10 +214,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         }
 
         /// <summary>
-        /// describe結果から対応可否を判定してプラグイン情報を作る（対応外ならnull）。
+        /// describe結果から対応可否を判定してプラグイン情報を作る。
+        /// 対応外のプラグインも設定画面の一覧へ「非対応」として表示するため、除外せずUnsupportedReasonを設定して返す。
         /// 隔離スキャン（ネイティブスキャナーが返す生のdescribe結果）とプロセス内スキャンの共通判定
         /// </summary>
-        internal static OpenFxPluginInfo? TryCreatePluginInfo(
+        internal static OpenFxPluginInfo CreatePluginInfo(
             string binaryPath,
             string identifier,
             uint versionMajor,
@@ -197,23 +230,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             bool isSingleInstance,
             bool needsTemporalClipAccess)
         {
-            // 対応済みのコンテキスト（フィルター＝映像エフェクト、トランジション＝場面切り替え）を
-            // 1つも宣言しないプラグインは一覧に載せない
+            // 対応済みのコンテキストはフィルター＝映像エフェクト、トランジション＝場面切り替え、ジェネレーター＝図形
             var supportsFilter = supportedContexts.Contains(OfxConstants.ImageEffectContextFilter);
             var supportsTransition = supportedContexts.Contains(OfxConstants.ImageEffectContextTransition);
-            if (!supportsFilter && !supportsTransition)
-                return null;
-            if (!supportedPixelDepths.Contains(OfxConstants.BitDepthFloat))
-                return null;
-            // エフェクト項目ごとにインスタンスを生成するため、単一インスタンス制約のプラグインは対応外
-            if (isSingleInstance)
-                return null;
-            // テンポラルアクセス（前後フレームの取得）は未対応。
-            // 対応と偽って現在フレームを返すと黙って誤った出力になるため一覧から除外する
-            if (needsTemporalClipAccess)
-                return null;
+            var supportsGenerator = supportedContexts.Contains(OfxConstants.ImageEffectContextGenerator);
+            // 非対応の判定基準：
+            // - 単一インスタンス制約：エフェクト項目ごとにインスタンスを生成するため対応できない
+            // - テンポラルアクセス（前後フレームの取得）：未対応。対応と偽って現在フレームを返すと黙って誤った出力になる
+            var unsupportedReason =
+                !supportsFilter && !supportsTransition && !supportsGenerator ? OpenFxUnsupportedReason.NoSupportedContext
+                : !supportedPixelDepths.Contains(OfxConstants.BitDepthFloat) ? OpenFxUnsupportedReason.FloatDepth
+                : isSingleInstance ? OpenFxUnsupportedReason.SingleInstance
+                : needsTemporalClipAccess ? OpenFxUnsupportedReason.TemporalClipAccess
+                : (OpenFxUnsupportedReason?)null;
+            if (unsupportedReason is not null)
+            {
+                // 非対応プラグインが各エフェクトの選択肢に現れないよう、対応フラグはすべて落とす
+                supportsFilter = supportsTransition = supportsGenerator = false;
+            }
             var name = label is { Length: > 0 } ? label : identifier.Split('.').Last();
-            return new OpenFxPluginInfo(binaryPath, identifier, versionMajor, versionMinor, name, grouping, supportsFilter, supportsTransition);
+            return new OpenFxPluginInfo(binaryPath, identifier, versionMajor, versionMinor, name, grouping, supportsFilter, supportsTransition, supportsGenerator, unsupportedReason);
         }
 
         static IEnumerable<string> EnumerateBinaryPaths()

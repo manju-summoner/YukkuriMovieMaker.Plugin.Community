@@ -144,7 +144,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     else if (line.StartsWith("#END\t", StringComparison.Ordinal))
                     {
                         // 同一IDの複数バージョン登録（後方互換用）は最新バージョンだけを一覧に載せる。
-                        // 対応可否の判定はプロセス内スキャンと同じ基準（TryCreatePluginInfo）で行う
+                        // 対応可否の判定はプロセス内スキャンと同じ基準（CreatePluginInfo）で行う
                         if (currentBinary is not null)
                         {
                             foreach (var group in pendingPlugins.GroupBy(p => p.Identifier, StringComparer.OrdinalIgnoreCase))
@@ -153,7 +153,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                                     .OrderByDescending(p => p.VersionMajor)
                                     .ThenByDescending(p => p.VersionMinor)
                                     .First();
-                                var info = OpenFxPluginScanner.TryCreatePluginInfo(
+                                results.Add(OpenFxPluginScanner.CreatePluginInfo(
                                     currentBinary,
                                     latest.Identifier,
                                     latest.VersionMajor,
@@ -163,9 +163,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                                     latest.SupportedContexts,
                                     latest.SupportedPixelDepths,
                                     latest.IsSingleInstance,
-                                    latest.NeedsTemporalClipAccess);
-                                if (info is not null)
-                                    results.Add(info);
+                                    latest.NeedsTemporalClipAccess));
                             }
                         }
                         pendingPlugins.Clear();

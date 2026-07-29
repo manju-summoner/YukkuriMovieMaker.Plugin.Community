@@ -97,7 +97,21 @@
                             <GridViewColumn Header="{x:Static local:Texts.OpenFxSettingsPluginGroupColumn}" DisplayMemberBinding="{Binding Grouping}" Width="140"/>
                             <!-- 幅は内容へフィットさせる（固定幅では「映像エフェクト / 場面切り替え」等の両対応表記が
                                  言語によってはみ出し、単一対応のみの環境では無駄に幅を取るため） -->
-                            <GridViewColumn Header="{x:Static local:Texts.OpenFxSettingsPluginUsageColumn}" DisplayMemberBinding="{Binding SupportedUsagesText}" Width="Auto"/>
+                            <GridViewColumn Header="{x:Static local:Texts.OpenFxSettingsPluginUsageColumn}" Width="Auto">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <!-- 非対応プラグインはツールチップで理由を表示する。
+                                             理由は長文になるため折り返し用のTextBlockを供給し、
+                                             対応プラグインでは空バルーンが出ないようIsEnabledで無効化する -->
+                                        <TextBlock Text="{Binding SupportedUsagesText}"
+                                                   ToolTipService.IsEnabled="{Binding IsUnsupported}">
+                                            <TextBlock.ToolTip>
+                                                <TextBlock Text="{Binding UnsupportedReasonText}" TextWrapping="Wrap" MaxWidth="400"/>
+                                            </TextBlock.ToolTip>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
                             <GridViewColumn Header="{x:Static local:Texts.OpenFxSettingsPluginPathColumn}" DisplayMemberBinding="{Binding BinaryPath}" Width="340"/>
                         </GridView>
                     </ListView.View>

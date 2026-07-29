@@ -1129,7 +1129,7 @@ namespace
         props.SetInt(kOfxImageEffectPropSupportsMultiResolution, 1);
         props.SetInt(kOfxImageEffectPropSupportsTiles, 0);
         props.SetInt(kOfxImageEffectPropTemporalClipAccess, 0);
-        props.SetStringN(kOfxImageEffectPropSupportedContexts, { kOfxImageEffectContextFilter, kOfxImageEffectContextTransition });
+        props.SetStringN(kOfxImageEffectPropSupportedContexts, { kOfxImageEffectContextFilter, kOfxImageEffectContextTransition, kOfxImageEffectContextGenerator });
         props.SetStringN(kOfxImageEffectPropSupportedComponents, { kOfxImageComponentRGBA });
         props.SetStringN(kOfxImageEffectPropSupportedPixelDepths, { kOfxBitDepthFloat });
         props.SetInt(kOfxImageEffectPropSupportsMultipleClipDepths, 0);

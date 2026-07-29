@@ -56,7 +56,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             props.SetInt(OfxConstants.ImageEffectPropSupportsMultiResolution, 1);
             props.SetInt(OfxConstants.ImageEffectPropSupportsTiles, 0);
             props.SetInt(OfxConstants.ImageEffectPropTemporalClipAccess, 0);
-            props.SetStringN(OfxConstants.ImageEffectPropSupportedContexts, OfxConstants.ImageEffectContextFilter, OfxConstants.ImageEffectContextTransition);
+            props.SetStringN(OfxConstants.ImageEffectPropSupportedContexts, OfxConstants.ImageEffectContextFilter, OfxConstants.ImageEffectContextTransition, OfxConstants.ImageEffectContextGenerator);
             props.SetStringN(OfxConstants.ImageEffectPropSupportedComponents, OfxConstants.ImageComponentRGBA);
             props.SetStringN(OfxConstants.ImageEffectPropSupportedPixelDepths, OfxConstants.BitDepthFloat);
             props.SetInt(OfxConstants.ImageEffectPropSupportsMultipleClipDepths, 0);

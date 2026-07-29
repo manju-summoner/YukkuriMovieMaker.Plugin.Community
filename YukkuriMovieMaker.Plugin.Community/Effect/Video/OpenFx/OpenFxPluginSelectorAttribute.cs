@@ -22,6 +22,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         Filter,
         /// <summary>トランジションコンテキスト対応（場面切り替え用）</summary>
         Transition,
+        /// <summary>ジェネレーターコンテキスト対応（図形用）</summary>
+        Generator,
     }
 
     internal class OpenFxPluginSelectorAttribute(OpenFxPluginListKind kind = OpenFxPluginListKind.Filter) : PropertyEditorAttribute2
@@ -35,6 +37,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         {
             if (control is not OpenFxPluginSelector editor)
                 return;
+            // エディタコントロールは属性の型単位でプール再利用されるため、生成時の種別が
+            // そのまま残らないよう、バインドのたびに使用先の種別を設定し直す
+            // （図形と場面切り替えを行き来すると、先に表示した方の一覧で固定される不具合の対策）
+            editor.Kind = kind;
             editor.ItemProperties = itemProperties;
             editor.UpdateDisplay();
         }
@@ -87,11 +93,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
         public ItemProperty[]? ItemProperties { get; set; }
 
-        readonly OpenFxPluginListKind kind;
+        OpenFxPluginListKind kind;
         readonly ComboBox comboBox;
         readonly Button reloadButton;
         bool isUpdatingDisplay;
         bool isReloading;
+
+        /// <summary>
+        /// 一覧に表示する対応コンテキストの種別。
+        /// コントロールは属性の型単位でプール再利用されるため、バインドのたびに設定し直される
+        /// </summary>
+        internal OpenFxPluginListKind Kind
+        {
+            get => kind;
+            set
+            {
+                if (kind == value)
+                    return;
+                kind = value;
+                // 旧種別で絞り込んだ一覧を破棄する（次のドロップダウン表示時に現在の種別で再構築される）
+                comboBox.ItemsSource = null;
+            }
+        }
 
         public OpenFxPluginSelector(OpenFxPluginListKind kind = OpenFxPluginListKind.Filter)
         {
@@ -179,7 +202,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 if (current is null)
                 {
                     // スキャン前・アンインストール済みでも現在の選択を表示するための仮の情報
-                    current = new OpenFxPluginItem(new OpenFxPluginInfo(host.PluginPath, host.PluginId, 0, 0, host.PluginName, string.Empty, true, true));
+                    current = new OpenFxPluginItem(new OpenFxPluginInfo(host.PluginPath, host.PluginId, 0, 0, host.PluginName, string.Empty, true, true, true));
                     items.Insert(0, current);
                     comboBox.ItemsSource = items;
                 }
@@ -238,7 +261,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             var selected = comboBox.SelectedItem as OpenFxPluginItem;
             // 一覧には使用先のコンテキストへ対応するプラグインだけを表示する
             var items = plugins
-                .Where(x => kind == OpenFxPluginListKind.Filter ? x.SupportsFilter : x.SupportsTransition)
+                .Where(x => kind switch
+                {
+                    OpenFxPluginListKind.Transition => x.SupportsTransition,
+                    OpenFxPluginListKind.Generator => x.SupportsGenerator,
+                    _ => x.SupportsFilter,
+                })
                 .Select(x => new OpenFxPluginItem(x))
                 .ToList();
             // 現在の選択がスキャン結果に含まれない場合（アンインストール済み等）も表示は維持する

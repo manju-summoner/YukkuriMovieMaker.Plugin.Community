@@ -16,9 +16,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// <summary>
         /// パラメータリストを構築する。previous に同名・同型のパラメータがあれば値を引き継ぐ
         /// （プラグインの再選択・プロジェクト読み込み後の再構築で値を失わないため）。
-        /// excludeNames にはホストが駆動するパラメータ（トランジションの進行度等）を指定してUIから除外する
+        /// excludeNames にはホストが駆動するパラメータ（トランジションの進行度等）を指定してUIから除外する。
+        /// startOrder は先頭パラメータの表示Order（ホスト側の静的パラメータの後ろに並べたい場合に指定する）
         /// </summary>
-        public static ImmutableList<OfxParameterBase> Create(OfxEffectDescriptor contextDescriptor, ImmutableList<OfxParameterBase> previous, IReadOnlyCollection<string>? excludeNames = null)
+        public static ImmutableList<OfxParameterBase> Create(OfxEffectDescriptor contextDescriptor, ImmutableList<OfxParameterBase> previous, IReadOnlyCollection<string>? excludeNames = null, int startOrder = 0)
         {
             var definitions = contextDescriptor.ParamSet.Parameters;
 
@@ -37,7 +38,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     StringComparer.Ordinal);
 
             var result = new List<OfxParameterBase>();
-            var order = 0;
+            var order = startOrder;
             foreach (var definition in definitions)
             {
                 // UIに出さない種別・非表示のパラメータはスキップする（描画時は既定値が使われる）。

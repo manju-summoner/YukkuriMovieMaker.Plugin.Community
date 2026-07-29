@@ -49,9 +49,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             // 予約名と同名のオプションクリップを別コンテキストで定義するプラグインを誤申告しないよう、
             // 名前だけでなく実行中のコンテキストで判定する
             var isConnected = Name == OfxConstants.ImageEffectOutputClipName
-                || (context == OfxConstants.ImageEffectContextTransition
-                    ? Name is OfxConstants.ImageEffectTransitionSourceFromClipName or OfxConstants.ImageEffectTransitionSourceToClipName
-                    : Name == OfxConstants.ImageEffectSimpleSourceClipName);
+                || context switch
+                {
+                    // ジェネレーターは入力なし（Sourceをオプション定義するプラグインがあっても供給しない）
+                    OfxConstants.ImageEffectContextGenerator => false,
+                    OfxConstants.ImageEffectContextTransition => Name is OfxConstants.ImageEffectTransitionSourceFromClipName or OfxConstants.ImageEffectTransitionSourceToClipName,
+                    _ => Name == OfxConstants.ImageEffectSimpleSourceClipName,
+                };
             Props.SetInt(OfxConstants.ImageClipPropConnected, isConnected ? 1 : 0);
             // インスタンス生成完了時点の値を propReset の復元先にする（CopyFrom後の再スナップショット）
             Props.SealDefaults();
