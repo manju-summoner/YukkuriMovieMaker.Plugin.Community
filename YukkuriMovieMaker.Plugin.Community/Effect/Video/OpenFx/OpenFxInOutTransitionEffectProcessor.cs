@@ -277,6 +277,45 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
                 // 入力サイズが上限付近のとき、RoD拡張でビットマップ上限を超えないよう上限も渡す
                 renderWindow = instance.GetRegionOfDefinition(frame, Math.Max(1, (int)dc.MaximumBitmapSize));
+
+                // 恒等（効果なし）宣言時はrenderを呼ばずに宣言されたクリップの内容を出力する（規格の契約。
+                // 恒等宣言後にrenderを呼ぶと、恒等フレームでは描画しない前提のプラグインで
+                // クリアされないプール出力バッファの前フレーム残像が表示され得る）。
+                // アイテム画像側のクリップなら入力を素通しし（GPU↔CPU転送も丸ごとスキップ）、
+                // 透明側のクリップ（登場の先頭・退場の末尾＝進行度0/1で発生）なら全面透明を直接出力する。
+                // それ以外のクリップ（プラグインが追加定義したMask等）への恒等は内容を供給していないため
+                // 恒等扱いにせず通常レンダリングへ倒す（姉妹ホストと同じ明示照合）
+                var identityClip = instance.GetIdentityClipName(frame, renderWindow);
+                var itemSideClipName = isItemToTransparent
+                    ? OfxConstants.ImageEffectTransitionSourceFromClipName
+                    : OfxConstants.ImageEffectTransitionSourceToClipName;
+                var transparentSideClipName = isItemToTransparent
+                    ? OfxConstants.ImageEffectTransitionSourceToClipName
+                    : OfxConstants.ImageEffectTransitionSourceFromClipName;
+                if (identityClip == itemSideClipName)
+                {
+                    hasLoggedFailure = false;
+                    ApplyPassthrough();
+                    return effectDescription.DrawDescription;
+                }
+                if (identityClip == transparentSideClipName)
+                {
+                    EnsureOutputResources(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1);
+                    // 出力バッファは毎フレームクリアされないプールのため、透明出力はここでゼロ埋めして転送する
+                    Array.Clear(outputBuffer, 0, outputBitmapWidth * outputBitmapHeight * 4);
+                    fixed (byte* outputPointer = outputBuffer)
+                    {
+                        outputBitmap!.CopyFromMemory((nint)outputPointer, outputBitmapWidth * 4);
+                    }
+                    hasLoggedFailure = false;
+                    transformEffect.SetInput(0, outputBitmap, true);
+                    transformEffect.TransformMatrix = Matrix3x2.CreateTranslation(
+                        bounds.Left + renderWindow.x1,
+                        bounds.Top + (height - renderWindow.y2));
+                    isPassthroughApplied = false;
+                    return effectDescription.DrawDescription;
+                }
+
                 EnsureInputResources(width, height);
                 EnsureOutputResources(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1);
                 ReadInputPixels(dc, bounds, width, height);

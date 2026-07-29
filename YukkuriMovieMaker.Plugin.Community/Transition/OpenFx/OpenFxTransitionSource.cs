@@ -207,6 +207,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
 
                 // 入力サイズが上限付近のとき、RoD拡張でビットマップ上限を超えないよう上限も渡す
                 renderWindow = instance.GetRegionOfDefinition(frame, Math.Max(1, (int)dc.MaximumBitmapSize));
+
+                // 恒等（効果なし）宣言時はGPU↔CPU転送とrenderを丸ごとスキップして該当入力を素通しする
+                // （クロスフェード等のトランジションは進行度0/1で恒等になる）
+                var identityClip = instance.GetIdentityClipName(frame, renderWindow);
+                if (identityClip is OfxConstants.ImageEffectTransitionSourceFromClipName
+                    or OfxConstants.ImageEffectTransitionSourceToClipName)
+                {
+                    hasLoggedFailure = false;
+                    ApplyPassthrough(identityClip == OfxConstants.ImageEffectTransitionSourceFromClipName ? before : after);
+                    return;
+                }
+
                 EnsureInputResources(width, height);
                 EnsureOutputResources(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1);
                 ReadInputPixels(dc, before, bounds, width, height, fromBuffer);

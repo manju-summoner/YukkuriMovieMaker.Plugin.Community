@@ -211,6 +211,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 // ぼかし・グロー等は入力より大きな出力領域（RoD）を宣言するため、出力はRoDサイズで確保する
                 // （入力サイズが上限付近のとき、RoD拡張でビットマップ上限を超えないよう上限も渡す）
                 renderWindow = instance.GetRegionOfDefinition(frame, Math.Max(1, (int)dc.MaximumBitmapSize));
+
+                // 恒等（効果なし）宣言時はGPU↔CPU転送とrenderを丸ごとスキップして入力を素通しする
+                if (instance.GetIdentityClipName(frame, renderWindow) == OfxConstants.ImageEffectSimpleSourceClipName)
+                {
+                    hasLoggedFailure = false;
+                    ApplyPassthrough();
+                    return effectDescription.DrawDescription;
+                }
+
                 EnsureInputResources(width, height);
                 EnsureOutputResources(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1);
                 ReadInputPixels(dc, bounds, width, height);

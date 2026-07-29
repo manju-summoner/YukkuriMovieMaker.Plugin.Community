@@ -169,7 +169,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             // これから問い合わせる結果は現時点までの全変更を反映するため、保留中の変更記録は消化済みにする
             // （createInstance中にプラグインがスレーブパラメータを設定した場合の重複問い合わせ防止。
             // アクション実行中の paramSetValue はこのクリアの後に記録され、次回の判定へ回る。
-            // getClipPreferences内でスレーブ値を書き換え続けるプラグインでも毎フレーム1回の再問い合わせで有界）
+            // getClipPreferences内でスレーブ値を書き換え続けるプラグインでも、再問い合わせは
+            // NotifyChangedParams の呼び出し（RoD・IsIdentity・renderの駆動時）ごとに高々1回＝
+            // 毎フレーム数回で有界）
             lock (paramsChangedForClipPreferences)
                 paramsChangedForClipPreferences.Clear();
             ClipPreferencesQueryCount++;
@@ -442,6 +444,58 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             }
             min = lo;
             max = hi;
+        }
+
+        /// <summary>
+        /// kOfxImageEffectActionIsIdentity で「恒等（効果なし）」かをプラグインへ問い合わせる。
+        /// 恒等の場合は出力の代わりに使う入力クリップ名を返す（呼び出し元はrenderを省略して素通しする）。
+        /// 非恒等（kOfxStatReplyDefault）・アクション失敗・不明なクリップ名の場合は null（通常レンダリング）。
+        /// 別時刻の指定（time slip）は本ホストが現在フレームの画像しか供給できない
+        /// （テンポラルアクセス非対応）ため、恒等扱いにせず null へ倒す。
+        /// renderWindow には実際にレンダリングする矩形（通常は <see cref="GetRegionOfDefinition"/> の結果）を渡す
+        /// </summary>
+        public string? GetIdentityClipName(double time, OfxRectI renderWindow)
+        {
+            // 恒等宣言はrenderWindowに対するもので、素通しは入力画像全体を表示する。
+            // renderWindow（通常はRoD）が入力矩形より狭い場合、通常レンダリングなら出力されない
+            // RoD外の画素まで素通しで表示されてしまうため、入力矩形全体を覆うときだけ恒等扱いにする
+            // （RoD拡張側は透明余白が増えるだけで視覚的に等価なので許容する）
+            if (renderWindow.x1 > 0 || renderWindow.y1 > 0 || renderWindow.x2 < Width || renderWindow.y2 < Height)
+                return null;
+            Create();
+            // パラメータ変更から内部状態を更新するプラグインがあるため、問い合わせより先に通知する
+            NotifyChangedParams(time);
+            try
+            {
+                using var inArgs = new OfxPropertySet { DebugName = "isIdentity.inArgs" };
+                inArgs.SetDouble(OfxConstants.PropTime, time);
+                inArgs.SetString(OfxConstants.ImageEffectPropFieldToRender, OfxConstants.ImageFieldNone);
+                inArgs.SetIntN(OfxConstants.ImageEffectPropRenderWindow, renderWindow.x1, renderWindow.y1, renderWindow.x2, renderWindow.y2);
+                inArgs.SetDoubleN(OfxConstants.ImageEffectPropRenderScale, 1, 1);
+                // outArgs は規格の既定値（クリップ名は空文字列・時刻は inArgs と同じ）で埋めてから渡す
+                using var outArgs = new OfxPropertySet { DebugName = "isIdentity.outArgs" };
+                outArgs.SetString(OfxConstants.PropName, "");
+                outArgs.SetDouble(OfxConstants.PropTime, time);
+                var status = plugin.CallAction(OfxConstants.ImageEffectActionIsIdentity, Handle, inArgs.Handle, outArgs.Handle);
+                if (status is not OfxStatus.OK)
+                    return null;
+                var clipName = outArgs.GetStringOrDefault(OfxConstants.PropName, "");
+                if (clipName.Length == 0
+                    || clipName == OfxConstants.ImageEffectOutputClipName
+                    || FindClip(clipName) is null)
+                {
+                    return null;
+                }
+                // 厳密比較を意図している（丸め等の微差もtime slip扱い＝安全側の通常レンダリングに倒す）
+                if (outArgs.GetDoubleOrDefault(OfxConstants.PropTime, time) != time)
+                    return null;
+                return clipName;
+            }
+            catch (Exception e)
+            {
+                OfxHostLog.Info($"IsIdentityの問い合わせに失敗しました。通常レンダリングを継続します。plugin={plugin.Identifier}: {e.Message}");
+                return null;
+            }
         }
 
 #if DEBUG
