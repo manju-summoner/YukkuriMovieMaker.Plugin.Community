@@ -186,24 +186,40 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.OpenFx
 
                 // サイズの倍率はフレーム0の縦横比から求めた単一値のため、縦横比がアニメーションしていると
                 // フレーム0以外のサイズはずれる（SizeとAspectRateのキーフレーム構造は独立でフレーム毎の対応が取れない既知の制限）。
-                // フレーム0のサイズが0のときは倍率（newSize / size）が0除算で定まらないため、
-                // フレーム0の縦横比から同等の倍率（サイズ→最大寸法の変換式にxScale/yScaleを掛けたもの）を再構成して適用し、
-                // 0のままだと復帰できないフレーム0の値のみ1px（newSize）を与える
-                // （フレーム0以外の意図的な0キーフレームは0×倍率=0のまま維持される）
-                if (size <= 0)
+                // フレーム0のサイズが0のときは倍率（newSize / size）が0除算で定まらず、
+                // フレーム0のサイズが1px未満のときはnewSize側だけが1px床で持ち上がり倍率が1 / sizeへ爆発する
+                // （例: size=0.001の縮小で1000倍）ため、これらのケースではフレーム0の縦横比から操作本来の倍率
+                // （サイズ→最大寸法の変換式にxScale/yScaleを掛けたもの）を再構成して適用し、
+                // 1px床を下回ったままだと復帰できないフレーム0の値のみ1px（newSize。既定のGetOutputSizeではこの経路で常に1）を与える
+                // （フレーム0以外の意図的な0キーフレームは0×倍率=0のまま維持される。
+                //   なお、この経路ではフレーム0のみ1pxへ復帰するため、フレーム0と他キーフレームの比は保存されない）
+                var aspect = AspectRate.GetValue(0, 1, 30);
+                var sizeScale = Math.Max(xScale * (1 - Math.Max(0, aspect / 100)), yScale * (1 + Math.Min(0, aspect / 100)));
+                // sizeが1px以上のときは常に通常経路（newSize / size）を使う（v4.54までと同一挙動）。
+                // 1px床を下回る縮小では倍率がnewSize / size = 1 / sizeとなって全キーフレームが比を保って一様に縮み、
+                // 1px床到達後は倍率1の不動点になる（操作本来の倍率を適用するとフレーム0だけが1pxに留まり、
+                // 操作の繰り返しで他のキーフレームだけが無制限に縮み続ける）。
+                // sizeが1px未満のときは1 / sizeが拡大（倍率爆発）へ転じるため通常経路は使えず、
+                // 再構成した操作本来の倍率を適用する（フレーム0が1pxへ復帰するため、以降の操作は1px以上の経路になる）
+                if (size <= 0 || (size < 1 && size * sizeScale < 1))
                 {
-                    var aspect = AspectRate.GetValue(0, 1, 30);
-                    var sizeScale = Math.Max(xScale * (1 - Math.Max(0, aspect / 100)), yScale * (1 + Math.Min(0, aspect / 100)));
+                    // 倍率0以下の退化した操作（Resize(0, 0)等）では、他のキーフレームが復帰不能な0へ潰れないよう倍率1（維持）とする
+                    if (sizeScale <= 0)
+                        sizeScale = 1;
                     if (Size.AnimationType is AnimationType.移動量指定)
                     {
                         var value = Size.Values[0];
-                        value.Value = value.Value <= 0 ? newSize : value.Value * sizeScale;
+                        var scaled = value.Value * sizeScale;
+                        value.Value = scaled < 1 ? newSize : scaled;
                     }
                     else
                     {
                         var values = Size.Values;
                         for (var i = 0; i < values.Count; i++)
-                            values[i].Value = IsFrame0Value(Size, i) && values[i].Value <= 0 ? newSize : values[i].Value * sizeScale;
+                        {
+                            var scaled = values[i].Value * sizeScale;
+                            values[i].Value = IsFrame0Value(Size, i) && scaled < 1 ? newSize : scaled;
+                        }
                     }
                 }
                 else
