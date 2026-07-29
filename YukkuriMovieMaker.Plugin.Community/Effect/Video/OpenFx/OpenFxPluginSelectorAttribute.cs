@@ -22,7 +22,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         Filter,
         /// <summary>トランジションコンテキスト対応（場面切り替え用）</summary>
         Transition,
-        /// <summary>ジェネレーターコンテキスト対応（図形用）</summary>
+        /// <summary>ジェネレーターコンテキスト対応（図形・ブラシ用）</summary>
         Generator,
     }
 
@@ -39,7 +39,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 return;
             // エディタコントロールは属性の型単位でプール再利用されるため、生成時の種別が
             // そのまま残らないよう、バインドのたびに使用先の種別を設定し直す
-            // （図形と場面切り替えを行き来すると、先に表示した方の一覧で固定される不具合の対策）
+            // （図形・ブラシ・場面切り替えなど種別の異なる使用先を行き来すると、
+            //   先に表示した方の一覧で固定される不具合の対策）
             editor.Kind = kind;
             editor.ItemProperties = itemProperties;
             editor.UpdateDisplay();

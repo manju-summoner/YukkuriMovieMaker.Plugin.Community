@@ -2,7 +2,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 {
     /// <summary>
     /// OFXプラグイン選択UI（<see cref="OpenFxPluginSelector"/>）の対象となるアイテム。
-    /// 映像エフェクト（OpenFxVideoEffect）と場面切り替え（OpenFxTransitionParameter）が実装する
+    /// 映像エフェクト（OpenFxVideoEffect）・場面切り替え（OpenFxTransitionParameter）・
+    /// 図形（OpenFxShapeParameter）・ブラシ（OpenFxBrushParameter）が実装する
     /// </summary>
     internal interface IOpenFxPluginHost
     {
