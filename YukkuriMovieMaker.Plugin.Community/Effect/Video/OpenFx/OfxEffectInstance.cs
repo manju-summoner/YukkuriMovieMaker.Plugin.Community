@@ -30,6 +30,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         readonly OfxImageEffectPlugin plugin;
         readonly List<OfxClipInstance> clips = [];
         readonly HashSet<string> changedParams = [];
+        readonly HashSet<string> loggedClipPreferencesWarnings = [];
+        // 前回の GetClipPreferences 以降に値が変わったパラメータ名（ホスト起点＝changedParams からの引き継ぎと、
+        // プラグイン起点＝paramSetValue 系のフックの両方）。プラグインはマルチスレッドスイートの
+        // ワーカースレッドからも paramSetValue を呼びうるため、このセット自身をロックして読み書きする
+        readonly HashSet<string> paramsChangedForClipPreferences = [];
+        string outputPreMultiplication = OfxConstants.ImagePreMultiplied;
         bool isCreated;
 
         // フレーム毎の大きなネイティブ確保を避けるため、クリップ画像はサイズが変わるまで使い回す
@@ -44,6 +50,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public int Height { get; }
         public double FrameRate { get; }
         public double DurationFrames { get; }
+
+        /// <summary>
+        /// GetClipPreferences でプラグインが宣言した出力のpremultiplication状態
+        /// （<see cref="OfxConstants.ImagePreMultiplied"/> / <see cref="OfxConstants.ImageUnPreMultiplied"/> /
+        /// <see cref="OfxConstants.ImageOpaque"/>。未宣言時は premultiplied）
+        /// </summary>
+        public string OutputPreMultiplication => outputPreMultiplication;
+
+        /// <summary>GetClipPreferences を問い合わせた回数（スレーブパラメータ契約のテスト用）</summary>
+        internal int ClipPreferencesQueryCount { get; private set; }
 
         public OfxEffectInstance(OfxImageEffectPlugin plugin, string context, int width, int height, double frameRate, double durationFrames)
         {
@@ -102,6 +118,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 param.Props.SetInt(OfxConstants.ParamPropAnimates, 0);
                 param.Props.SealDefaults();
                 param.EnsureInstanceValues();
+                // プラグインが paramSetValue 系で書き換えたスレーブパラメータも
+                // GetClipPreferences の再問い合わせ判定に含める（規格はホスト起点の変更に限定していない）
+                param.PluginValueSet = p =>
+                {
+                    lock (paramsChangedForClipPreferences)
+                        paramsChangedForClipPreferences.Add(p.Name);
+                };
             }
 
             foreach (var clipDescriptor in descriptor.Clips)
@@ -122,6 +145,124 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             if (status is not OfxStatus.OK and not OfxStatus.ReplyDefault)
                 throw new InvalidOperationException($"kOfxActionCreateInstance が失敗しました。plugin={plugin.Identifier} status={status}");
             isCreated = true;
+            QueryClipPreferences();
+        }
+
+        //====================================================================
+        // クリップ形式の希望（kOfxImageEffectActionGetClipPreferences）
+        //====================================================================
+
+        /// <summary>
+        /// kOfxImageEffectActionGetClipPreferences でクリップ形式の希望をプラグインへ問い合わせる。
+        /// 本ホストは RGBA float・PAR=1 固定のため、尊重するのは出力のpremultiplicationのみ
+        /// （unpremultiplied宣言はBGRA変換時にアルファを乗算し、opaque宣言はアルファを1へ確定する）。
+        /// それ以外の宣言外の要求（コンポーネント・深度・PAR・フレームレート・フィールド順の変更）は
+        /// ログへ記録して無視する。呼び出しはインスタンス生成後と、
+        /// kOfxImageEffectPropClipPreferencesSlaveParam に列挙されたパラメータの変更後（規格の契約）。
+        /// アクションが失敗（kOfxStatFailed / kOfxStatErrMemory 等）した場合は直前の宣言を維持する
+        /// （kOfxStatReplyDefault の「既定premultipliedへの復帰」とは非対称。再試行は次の問い合わせ契機まで行わない）
+        /// </summary>
+        void QueryClipPreferences()
+        {
+            if (!isCreated)
+                return;
+            // これから問い合わせる結果は現時点までの全変更を反映するため、保留中の変更記録は消化済みにする
+            // （createInstance中にプラグインがスレーブパラメータを設定した場合の重複問い合わせ防止。
+            // アクション実行中の paramSetValue はこのクリアの後に記録され、次回の判定へ回る。
+            // getClipPreferences内でスレーブ値を書き換え続けるプラグインでも毎フレーム1回の再問い合わせで有界）
+            lock (paramsChangedForClipPreferences)
+                paramsChangedForClipPreferences.Clear();
+            ClipPreferencesQueryCount++;
+            try
+            {
+                // outArgs はホストの既定値（現在クリップへ供給している形式）で埋めてから渡す
+                using var outArgs = new OfxPropertySet { DebugName = "getClipPreferences.outArgs" };
+                foreach (var clip in clips)
+                {
+                    outArgs.SetString(OfxConstants.ImageClipPropComponentsPrefix + clip.Name, OfxConstants.ImageComponentRGBA);
+                    outArgs.SetString(OfxConstants.ImageClipPropDepthPrefix + clip.Name, OfxConstants.BitDepthFloat);
+                    outArgs.SetDouble(OfxConstants.ImageClipPropPARPrefix + clip.Name, 1);
+                }
+                outArgs.SetDouble(OfxConstants.ImageEffectPropFrameRate, FrameRate);
+                outArgs.SetString(OfxConstants.ImageClipPropFieldOrder, OfxConstants.ImageFieldNone);
+                outArgs.SetString(OfxConstants.ImageEffectPropPreMultiplication, OfxConstants.ImagePreMultiplied);
+                outArgs.SetInt(OfxConstants.ImageClipPropContinuousSamples, 0);
+                outArgs.SetInt(OfxConstants.ImageEffectFrameVarying, 0);
+
+                var status = plugin.CallAction(OfxConstants.ImageEffectActionGetClipPreferences, Handle, 0, outArgs.Handle);
+                if (status is OfxStatus.ReplyDefault)
+                {
+                    // 未処理＝既定値の使用（規格）。以前の宣言が残っていれば既定へ戻す
+                    ApplyOutputPreMultiplication(OfxConstants.ImagePreMultiplied);
+                    return;
+                }
+                if (status is not OfxStatus.OK)
+                {
+                    LogClipPreferencesWarningOnce("status", $"kOfxImageEffectActionGetClipPreferences が失敗しました。現在の形式を継続します。plugin={plugin.Identifier} status={status}");
+                    return;
+                }
+
+                // 供給できない形式の要求は無視する（本ホストはRGBA float・PAR=1のみ宣言しており、
+                // 規格上プラグインはホスト宣言の範囲から選ぶ契約。宣言外の要求＝規格違反）
+                foreach (var clip in clips)
+                {
+                    var components = outArgs.GetStringOrDefault(OfxConstants.ImageClipPropComponentsPrefix + clip.Name, OfxConstants.ImageComponentRGBA);
+                    if (components != OfxConstants.ImageComponentRGBA)
+                        LogClipPreferencesWarningOnce($"components:{clip.Name}", $"GetClipPreferencesのRGBA以外のコンポーネント要求は未対応のため無視します。plugin={plugin.Identifier} clip={clip.Name} components={components}");
+                    var depth = outArgs.GetStringOrDefault(OfxConstants.ImageClipPropDepthPrefix + clip.Name, OfxConstants.BitDepthFloat);
+                    if (depth != OfxConstants.BitDepthFloat)
+                        LogClipPreferencesWarningOnce($"depth:{clip.Name}", $"GetClipPreferencesのfloat以外のピクセル深度要求は未対応のため無視します。plugin={plugin.Identifier} clip={clip.Name} depth={depth}");
+                    var pixelAspectRatio = outArgs.GetDoubleOrDefault(OfxConstants.ImageClipPropPARPrefix + clip.Name, 1);
+                    if (pixelAspectRatio != 1)
+                        LogClipPreferencesWarningOnce($"par:{clip.Name}", $"GetClipPreferencesのピクセルアスペクト比の変更要求は未対応のため無視します。plugin={plugin.Identifier} clip={clip.Name} par={pixelAspectRatio.ToString(CultureInfo.InvariantCulture)}");
+                }
+                var preferredFrameRate = outArgs.GetDoubleOrDefault(OfxConstants.ImageEffectPropFrameRate, FrameRate);
+                if (preferredFrameRate != FrameRate)
+                    LogClipPreferencesWarningOnce("frameRate", $"GetClipPreferencesのフレームレート変更要求は未対応のため無視します（kOfxImageEffectPropSetableFrameRate=0）。plugin={plugin.Identifier}");
+                var fieldOrder = outArgs.GetStringOrDefault(OfxConstants.ImageClipPropFieldOrder, OfxConstants.ImageFieldNone);
+                if (fieldOrder != OfxConstants.ImageFieldNone)
+                    LogClipPreferencesWarningOnce("fieldOrder", $"GetClipPreferencesのフィールド順変更要求は未対応のため無視します（kOfxImageEffectPropSetableFielding=0）。plugin={plugin.Identifier}");
+                // ContinuousSamples / FrameVarying はキャッシュ制御のヒント。本ホストは毎フレーム再レンダリングするため読み捨てる
+
+                var preMultiplication = outArgs.GetStringOrDefault(OfxConstants.ImageEffectPropPreMultiplication, OfxConstants.ImagePreMultiplied);
+                if (preMultiplication is OfxConstants.ImagePreMultiplied or OfxConstants.ImageUnPreMultiplied or OfxConstants.ImageOpaque)
+                    ApplyOutputPreMultiplication(preMultiplication);
+                else
+                    LogClipPreferencesWarningOnce("premultiplication", $"GetClipPreferencesのpremultiplication宣言が不正なため無視します。plugin={plugin.Identifier} value={preMultiplication}");
+            }
+            catch (Exception e)
+            {
+                LogClipPreferencesWarningOnce("exception", $"GetClipPreferencesに失敗しました。現在の形式を継続します。plugin={plugin.Identifier}: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 出力のpremultiplication宣言を反映する（出力クリップのプロパティと、BGRA変換時の扱いの両方）。
+        /// クリップ側は保持フィールドではなく実際の格納値と比較する（プラグインが propReset 等で
+        /// クリップ側だけ既定値へ戻していても、問い合わせのたびに宣言と同期させるため。
+        /// 値が同じ間は書き込まず、propGetString 用のネイティブ文字列キャッシュの無駄な再確保を避ける）
+        /// </summary>
+        void ApplyOutputPreMultiplication(string preMultiplication)
+        {
+            outputPreMultiplication = preMultiplication;
+            var outputClip = FindClip(OfxConstants.ImageEffectOutputClipName);
+            if (outputClip is not null
+                && outputClip.Props.GetStringOrDefault(OfxConstants.ImageEffectPropPreMultiplication, "") != preMultiplication)
+            {
+                outputClip.Props.SetString(OfxConstants.ImageEffectPropPreMultiplication, preMultiplication);
+            }
+        }
+
+        /// <summary>
+        /// GetClipPreferences関連の警告を同一の要因（key）につき1回だけログへ記録する
+        /// （スレーブパラメータのアニメーション中は毎フレーム再問い合わせになるため、ログの氾濫を防ぐ。
+        /// keyにはPAR値のような可変値を含めないこと。値をキーにすると再問い合わせのたびに
+        /// 別内容と判定され、抑制が効かないままHashSetも際限なく増える）
+        /// </summary>
+        void LogClipPreferencesWarningOnce(string key, string message)
+        {
+            if (loggedClipPreferencesWarnings.Add(key))
+                OfxHostLog.Info(message);
         }
 
         //====================================================================
@@ -169,23 +310,61 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// </summary>
         void NotifyChangedParams(double time)
         {
-            if (changedParams.Count == 0)
-                return;
-            using var bracketArgs = new OfxPropertySet { DebugName = "instanceChanged.bracketArgs" };
-            bracketArgs.SetString(OfxConstants.PropChangeReason, OfxConstants.ChangeUserEdited);
-            plugin.CallAction(OfxConstants.ActionBeginInstanceChanged, Handle, bracketArgs.Handle, 0);
-            foreach (var name in changedParams)
+            if (changedParams.Count != 0)
             {
-                using var args = new OfxPropertySet { DebugName = "instanceChanged.inArgs" };
-                args.SetString(OfxConstants.PropType, OfxConstants.TypeParameter);
-                args.SetString(OfxConstants.PropName, name);
-                args.SetString(OfxConstants.PropChangeReason, OfxConstants.ChangeUserEdited);
-                args.SetDouble(OfxConstants.PropTime, time);
-                args.SetDoubleN(OfxConstants.ImageEffectPropRenderScale, 1, 1);
-                plugin.CallAction(OfxConstants.ActionInstanceChanged, Handle, args.Handle, 0);
+                using var bracketArgs = new OfxPropertySet { DebugName = "instanceChanged.bracketArgs" };
+                bracketArgs.SetString(OfxConstants.PropChangeReason, OfxConstants.ChangeUserEdited);
+                plugin.CallAction(OfxConstants.ActionBeginInstanceChanged, Handle, bracketArgs.Handle, 0);
+                foreach (var name in changedParams)
+                {
+                    using var args = new OfxPropertySet { DebugName = "instanceChanged.inArgs" };
+                    args.SetString(OfxConstants.PropType, OfxConstants.TypeParameter);
+                    args.SetString(OfxConstants.PropName, name);
+                    args.SetString(OfxConstants.PropChangeReason, OfxConstants.ChangeUserEdited);
+                    args.SetDouble(OfxConstants.PropTime, time);
+                    args.SetDoubleN(OfxConstants.ImageEffectPropRenderScale, 1, 1);
+                    plugin.CallAction(OfxConstants.ActionInstanceChanged, Handle, args.Handle, 0);
+                }
+                plugin.CallAction(OfxConstants.ActionEndInstanceChanged, Handle, bracketArgs.Handle, 0);
+                // ホスト起点の変更を GetClipPreferences の再問い合わせ判定へ引き継いでからクリアする
+                lock (paramsChangedForClipPreferences)
+                {
+                    foreach (var name in changedParams)
+                        paramsChangedForClipPreferences.Add(name);
+                }
+                changedParams.Clear();
             }
-            plugin.CallAction(OfxConstants.ActionEndInstanceChanged, Handle, bracketArgs.Handle, 0);
-            changedParams.Clear();
+            // プラグイン起点の変更（paramSetValue 系フック）だけのこともあるため、通知の有無に関わらず判定する
+            RequeryClipPreferencesIfSlaveParamChanged();
+        }
+
+        /// <summary>
+        /// 前回の GetClipPreferences 以降に変更されたパラメータ（ホスト起点・プラグイン起点の両方）に
+        /// スレーブ宣言（kOfxImageEffectPropClipPreferencesSlaveParam）のパラメータが含まれる場合のみ
+        /// 再問い合わせする（規格の契約。スレーブ外の変更はクリップ形式に影響しないため破棄する）
+        /// </summary>
+        void RequeryClipPreferencesIfSlaveParamChanged()
+        {
+            // Props（別ロックを持つ）へはロックの外から触れるよう、変更名はスナップショットで取り出す。
+            // スナップショット後〜問い合わせまでの間に入った paramSetValue の取りこぼしは、
+            // プラグインのワーカーがアクション実行中しか動かない前提で許容する
+            // （この区間はアクションが走っていない。常駐スレッドを持つ規格違反プラグインのみ該当）
+            string[] changedNames;
+            lock (paramsChangedForClipPreferences)
+            {
+                if (paramsChangedForClipPreferences.Count == 0)
+                    return;
+                changedNames = [.. paramsChangedForClipPreferences];
+                paramsChangedForClipPreferences.Clear();
+            }
+            foreach (var slaveParam in Props.GetStrings(OfxConstants.ImageEffectPropClipPreferencesSlaveParam))
+            {
+                if (Array.IndexOf(changedNames, slaveParam) >= 0)
+                {
+                    QueryClipPreferences();
+                    return;
+                }
+            }
         }
 
         //====================================================================
@@ -311,7 +490,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 renderWindow,
                 [(FindRequiredClip(OfxConstants.ImageEffectSimpleSourceClipName), sourceImage)],
                 outputImage);
-            OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height);
+            OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height, outputPreMultiplication);
         }
 
         /// <summary>
@@ -340,7 +519,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     (FindRequiredClip(OfxConstants.ImageEffectTransitionSourceToClipName), toImage),
                 ],
                 outputImage);
-            OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height);
+            OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height, outputPreMultiplication);
         }
 
         /// <summary>
@@ -357,7 +536,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             renderSerial++;
             var outputImage = PrepareOutputImage(renderWindow);
             RunRenderSequence(time, renderWindow, [], outputImage);
-            OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height);
+            OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height, outputPreMultiplication);
         }
 
         void ValidateRenderWindow(OfxRectI renderWindow, int outputBufferLength)
@@ -410,6 +589,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 pooledOutputImage = new OfxImage(outputWidth, outputHeight, renderWindow.x1, renderWindow.y1, $"{plugin.Identifier}/Output");
             }
             pooledOutputImage.Props.SetString(OfxConstants.ImagePropUniqueIdentifier, $"{plugin.Identifier}/Output#{renderSerial}");
+            // 出力画像のpremultiplicationはGetClipPreferencesの宣言に追従させる（クリップと画像で矛盾させない）。
+            // 値が同じ間は書き込まず、propGetString 用のネイティブ文字列キャッシュの毎フレーム再確保を避ける
+            if (pooledOutputImage.Props.GetStringOrDefault(OfxConstants.ImageEffectPropPreMultiplication, "") != outputPreMultiplication)
+                pooledOutputImage.Props.SetString(OfxConstants.ImageEffectPropPreMultiplication, outputPreMultiplication);
             return pooledOutputImage;
         }
 

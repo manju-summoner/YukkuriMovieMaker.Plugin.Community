@@ -237,8 +237,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             return OfxStatus.ErrBadHandle;
         }
 
-        static int ReadValues(OfxParam param, nint* slots, int slotCount)
+        static int ReadValues(OfxParam param, nint* slots, int slotCount, out bool changed)
         {
+            // ホスト側の SetXxxParam と同様、実際に値が変わったときだけ変更扱いにする
+            // （同じ値を書き直すプラグインで PluginValueSet フックが毎フレーム発火するのを防ぐ）
+            changed = false;
             var dimension = param.Dimension;
             if (dimension == 0)
                 return OfxStatus.ErrUnsupported;
@@ -246,20 +249,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 return OfxStatus.Failed;
             if (param.IsStringType)
             {
-                param.StringValue = Marshal.PtrToStringUTF8(slots[0]) ?? "";
+                var value = Marshal.PtrToStringUTF8(slots[0]) ?? "";
+                changed = !string.Equals(param.StringValue, value, StringComparison.Ordinal);
+                param.StringValue = value;
                 return OfxStatus.OK;
             }
             if (param.DoubleValues is { } doubles)
             {
                 // 可変長引数のdouble値は汎用レジスタ側にも複製されているためビット再解釈で取り出す
                 for (var i = 0; i < dimension; i++)
-                    doubles[i] = BitConverter.Int64BitsToDouble(slots[i]);
+                {
+                    var value = BitConverter.Int64BitsToDouble(slots[i]);
+                    changed |= doubles[i] != value;
+                    doubles[i] = value;
+                }
                 return OfxStatus.OK;
             }
             if (param.IntValues is { } ints)
             {
                 for (var i = 0; i < dimension; i++)
-                    ints[i] = (int)slots[i];
+                {
+                    var value = (int)slots[i];
+                    changed |= ints[i] != value;
+                    ints[i] = value;
+                }
                 return OfxStatus.OK;
             }
             return OfxStatus.ErrBadHandle;
@@ -366,7 +379,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 if (found is null)
                     return OfxStatus.ErrBadHandle;
                 var slots = stackalloc nint[4] { a1, a2, a3, a4 };
-                return ReadValues(found, slots, 4);
+                var status = ReadValues(found, slots, 4, out var changed);
+                if (status == OfxStatus.OK && changed)
+                    found.NotifyPluginValueSet();
+                return status;
             }
             catch (Exception ex)
             {
@@ -385,7 +401,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 if (found is null)
                     return OfxStatus.ErrBadHandle;
                 var slots = stackalloc nint[4] { a2, a3, a4, a5 };
-                return ReadValues(found, slots, 4);
+                var status = ReadValues(found, slots, 4, out var changed);
+                if (status == OfxStatus.OK && changed)
+                    found.NotifyPluginValueSet();
+                return status;
             }
             catch (Exception ex)
             {
@@ -452,12 +471,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     return OfxStatus.ErrBadHandle;
                 if (to.ParamType != from.ParamType)
                     return OfxStatus.ErrValue;
+                var changed = false;
                 if (from.DoubleValues is { } fromDoubles && to.DoubleValues is { } toDoubles)
-                    fromDoubles.CopyTo(toDoubles, 0);
+                {
+                    for (var i = 0; i < Math.Min(fromDoubles.Length, toDoubles.Length); i++)
+                    {
+                        changed |= toDoubles[i] != fromDoubles[i];
+                        toDoubles[i] = fromDoubles[i];
+                    }
+                }
                 if (from.IntValues is { } fromInts && to.IntValues is { } toInts)
-                    fromInts.CopyTo(toInts, 0);
+                {
+                    for (var i = 0; i < Math.Min(fromInts.Length, toInts.Length); i++)
+                    {
+                        changed |= toInts[i] != fromInts[i];
+                        toInts[i] = fromInts[i];
+                    }
+                }
                 if (from.StringValue is not null)
+                {
+                    changed |= !string.Equals(to.StringValue, from.StringValue, StringComparison.Ordinal);
                     to.StringValue = from.StringValue;
+                }
+                if (changed)
+                    to.NotifyPluginValueSet();
                 return OfxStatus.OK;
             }
             catch (Exception ex)

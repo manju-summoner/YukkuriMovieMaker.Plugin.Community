@@ -22,6 +22,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public string? StringValue { get; set; }
         nint nativeStringCache;
 
+        /// <summary>
+        /// プラグインが paramSetValue / paramSetValueAtTime / paramCopy で値を書き換えたときの通知先
+        /// （エフェクトインスタンスが設定する）。GetClipPreferences のスレーブパラメータ変更を
+        /// プラグイン起点の変更でも検知するために使う。
+        /// マルチスレッドスイートのワーカースレッドから呼ばれうるため、通知先はスレッドセーフにすること
+        /// </summary>
+        public Action<OfxParam>? PluginValueSet { get; set; }
+
+        /// <summary>
+        /// <see cref="PluginValueSet"/> を例外を漏らさず呼ぶ。
+        /// 値の書き込み自体は完了しているため、通知の失敗でスイート関数のステータスを失敗にしない
+        /// </summary>
+        public void NotifyPluginValueSet()
+        {
+            try
+            {
+                PluginValueSet?.Invoke(this);
+            }
+            catch (Exception ex)
+            {
+                OfxHostLog.Info($"PluginValueSet の通知で例外: {ex}");
+            }
+        }
+
         public OfxParam(string name, string paramType)
         {
             Name = name;

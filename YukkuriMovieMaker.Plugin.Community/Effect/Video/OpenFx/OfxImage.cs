@@ -5,8 +5,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 {
     /// <summary>
     /// クリップから供給する画像（clipGetImage が返す画像プロパティセットの実体）。
-    /// ピクセル形式は RGBA float・下から上への行順（OFX標準の左下原点）・premultiplied。
-    /// バッファはこのオブジェクトが所有する。
+    /// ピクセル形式は RGBA float・下から上への行順（OFX標準の左下原点）。
+    /// premultiplicationは既定でpremultiplied（出力画像はGetClipPreferencesの宣言に応じて
+    /// <see cref="OfxEffectInstance"/> がプロパティを上書きする）。バッファはこのオブジェクトが所有する。
     /// </summary>
     internal sealed unsafe class OfxImage : OfxObject
     {

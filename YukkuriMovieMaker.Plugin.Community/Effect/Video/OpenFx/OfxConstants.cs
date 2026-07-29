@@ -153,6 +153,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public const string ImageEffectPropComponents = "OfxImageEffectPropComponents";
         public const string ImagePropUniqueIdentifier = "OfxImagePropUniqueIdentifier";
         public const string ImageClipPropContinuousSamples = "OfxImageClipPropContinuousSamples";
+        // GetClipPreferences の outArgs でクリップ毎に使うプロパティ名のプレフィックス
+        // （プレフィックス＋クリップ名。ofxImageEffect.h のアクション説明で規定される命名で、#define は存在しない）
+        public const string ImageClipPropComponentsPrefix = "OfxImageClipPropComponents_";
+        public const string ImageClipPropDepthPrefix = "OfxImageClipPropDepth_";
+        public const string ImageClipPropPARPrefix = "OfxImageClipPropPAR_";
         public const string ImageClipPropUnmappedPixelDepth = "OfxImageClipPropUnmappedPixelDepth";
         public const string ImageClipPropUnmappedComponents = "OfxImageClipPropUnmappedComponents";
         public const string ImageEffectPropPreMultiplication = "OfxImageEffectPropPreMultiplication";
