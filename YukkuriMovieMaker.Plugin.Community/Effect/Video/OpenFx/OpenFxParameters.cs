@@ -42,6 +42,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         internal abstract void ApplyTo(OfxEffectInstance instance, int frame, int length, int fps);
 
         /// <summary>
+        /// ApplyToがインスタンスへ設定するのと同じ実効値（クランプ・丸め適用後。Animationは指定フレームの評価値）を列挙へ追加する。
+        /// 失敗後の再試行判定（前回失敗時と同じ試行入力かどうかの比較）に使う
+        /// </summary>
+        internal abstract void CollectValues(ICollection<object?> values, int frame, int length, int fps);
+
+        /// <summary>
         /// Animationプロパティの差し替え（ファクトリの値引き継ぎ・デシリアライズ）用のセッター処理。
         /// 自動プロパティのセッターはUndoRedoableのSetを通らないため、
         /// Undo/Redoイベントの購読をここで明示的に付け替える。
@@ -100,6 +106,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             else
                 instance.SetDoubleParam(Name, value);
         }
+
+        internal override void CollectValues(ICollection<object?> values, int frame, int length, int fps)
+        {
+            var value = Math.Clamp(Value.GetValue(frame, length, fps), Min, Max);
+            values.Add(IsInteger ? (int)Math.Round(value) : value);
+        }
     }
 
     /// <summary>
@@ -147,6 +159,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 instance.SetIntParam(Name, (int)Math.Round(x), (int)Math.Round(y));
             else
                 instance.SetDoubleParam(Name, x, y);
+        }
+
+        internal override void CollectValues(ICollection<object?> values, int frame, int length, int fps)
+        {
+            var x = Math.Clamp(X.GetValue(frame, length, fps), MinX, MaxX);
+            var y = Math.Clamp(Y.GetValue(frame, length, fps), MinY, MaxY);
+            if (IsInteger)
+            {
+                values.Add((int)Math.Round(x));
+                values.Add((int)Math.Round(y));
+            }
+            else
+            {
+                values.Add(x);
+                values.Add(y);
+            }
         }
     }
 
@@ -206,6 +234,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             else
                 instance.SetDoubleParam(Name, x, y, z);
         }
+
+        internal override void CollectValues(ICollection<object?> values, int frame, int length, int fps)
+        {
+            var x = Math.Clamp(X.GetValue(frame, length, fps), MinX, MaxX);
+            var y = Math.Clamp(Y.GetValue(frame, length, fps), MinY, MaxY);
+            var z = Math.Clamp(Z.GetValue(frame, length, fps), MinZ, MaxZ);
+            if (IsInteger)
+            {
+                values.Add((int)Math.Round(x));
+                values.Add((int)Math.Round(y));
+                values.Add((int)Math.Round(z));
+            }
+            else
+            {
+                values.Add(x);
+                values.Add(y);
+                values.Add(z);
+            }
+        }
     }
 
     /// <summary>
@@ -228,6 +275,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             else
                 instance.SetDoubleParam(Name, Value.R / 255.0, Value.G / 255.0, Value.B / 255.0);
         }
+
+        internal override void CollectValues(ICollection<object?> values, int frame, int length, int fps)
+        {
+            values.Add(HasAlpha ? Value : Color.FromRgb(Value.R, Value.G, Value.B));
+        }
     }
 
     /// <summary>
@@ -243,6 +295,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         internal override void ApplyTo(OfxEffectInstance instance, int frame, int length, int fps)
         {
             instance.SetBoolParam(Name, Value);
+        }
+
+        internal override void CollectValues(ICollection<object?> values, int frame, int length, int fps)
+        {
+            values.Add(Value);
         }
     }
 
@@ -263,6 +320,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         {
             instance.SetIntParam(Name, Math.Clamp(Value, 0, Math.Max(0, Options.Count - 1)));
         }
+
+        internal override void CollectValues(ICollection<object?> values, int frame, int length, int fps)
+        {
+            values.Add(Math.Clamp(Value, 0, Math.Max(0, Options.Count - 1)));
+        }
     }
 
     /// <summary>
@@ -278,6 +340,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         internal override void ApplyTo(OfxEffectInstance instance, int frame, int length, int fps)
         {
             instance.SetStringParam(Name, Value);
+        }
+
+        internal override void CollectValues(ICollection<object?> values, int frame, int length, int fps)
+        {
+            values.Add(Value);
         }
     }
 }

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Vortice.DCommon;
 using Vortice.Direct2D1;
@@ -40,12 +42,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.OpenFx
         string attemptedPluginPath = "";
         string attemptedPluginId = "";
         bool isRenderUnsafe;
-        // 失敗時は一定フレーム透明にしてから再試行する（ログはひと続きの失敗で1回だけ）。
-        // ユーザーがパラメーター等を編集したら待ちを打ち切って即再試行する（原因を直しても透明のままにならないように）
-        int failureCooldownFrames;
+        // 直近の失敗時の試行入力（プラグイン・サイズ・fps/アイテム長・OFXパラメータ評価値。nullなら失敗状態ではない）。
+        // 同じ入力での再試行は同じ失敗を繰り返すだけのため、入力が変わるまで透明のまま試行しない。
+        // レンダリング失敗はOFX時刻（フレーム）でも結果が変わり得るため、failedAttemptFrameが一致する間だけ抑止する
+        // （読み込み失敗はフレーム非依存＝null。ログはひと続きの失敗で1回だけ）
+        object?[]? failedAttemptValues;
+        int? failedAttemptFrame;
         bool hasLoggedFailure;
-        volatile bool retryRequested;
-        const int FailureCooldownFrameCount = 120;
+        int attemptCount;
+        // 試行入力の収集バッファ（毎フレームのList/配列割り当てを避けるため再利用する。Updateスレッドでのみ使用）
+        readonly List<object?> attemptValuesBuffer = [];
+        // CollectAttemptValuesの先頭に並ぶ、プラグイン読み込みの成否に関わる値の個数
+        // （プラグインパス/ID・インスタンスサイズ・fps/アイテム長）
+        const int LoadRelevantValueCount = 6;
 
         // 出力の総ピクセル数の上限（8K・7680x4320までは等倍で許容）。
         // 1辺のクランプだけでは16384x16384のような指定でRGBA floatの中間バッファが数GiBに達するため
@@ -57,7 +66,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.OpenFx
         {
             this.devices = devices;
             this.parameter = parameter;
-            parameter.PropertyChanged += Parameter_PropertyChanged;
 
             var dc = devices.DeviceContext;
             transformEffect = new AffineTransform2D(dc);
@@ -86,15 +94,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.OpenFx
             if (string.IsNullOrEmpty(parameter.PluginPath) || string.IsNullOrEmpty(parameter.PluginId))
             {
                 // 選択解除されたらネイティブの出力バッファを保持し続けない。
-                // 失敗状態も併せてリセットする（残すと同じプラグインの再選択がエッジ検出されず、
-                // クールダウンの残りフレームが透明のまま消化されてしまう）
+                // 失敗状態も併せてリセットする（残すと同じプラグインを同じ設定で再選択したときに
+                // 前回の失敗入力と一致して再試行されない。再選択は明示的な操作のため試行し直す）
                 instance?.Dispose();
                 instance = null;
                 instancePluginPath = "";
                 instancePluginId = "";
                 attemptedPluginPath = "";
                 attemptedPluginId = "";
-                failureCooldownFrames = 0;
+                failedAttemptValues = null;
+                failedAttemptFrame = null;
                 hasLoggedFailure = false;
                 ApplyEmpty();
                 // 出力ビットマップ（最大8K相当）とバッファも解放する。
@@ -107,30 +116,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.OpenFx
                 return;
             }
 
-            // プラグインが切り替わったら失敗状態を即座にリセットする（クールダウン中の切替でも待たせない）
+            // プラグインが切り替わったら失敗状態を即座にリセットする（失敗ログを新しいプラグインで出し直すため）
             if (!string.Equals(attemptedPluginPath, parameter.PluginPath, StringComparison.OrdinalIgnoreCase)
                 || !string.Equals(attemptedPluginId, parameter.PluginId, StringComparison.OrdinalIgnoreCase))
             {
                 attemptedPluginPath = parameter.PluginPath;
                 attemptedPluginId = parameter.PluginId;
-                failureCooldownFrames = 0;
+                failedAttemptValues = null;
+                failedAttemptFrame = null;
                 hasLoggedFailure = false;
             }
-
-            // 直近で失敗した場合は一定フレーム透明にしてから再試行する（毎フレームの失敗連打を避ける）。
-            // パラメーター等が編集された場合は待ちを打ち切って即再試行する
-            if (failureCooldownFrames > 0)
-            {
-                if (!retryRequested)
-                {
-                    failureCooldownFrames--;
-                    ApplyEmpty();
-                    return;
-                }
-                failureCooldownFrames = 0;
-            }
-            // ここから先は1回の試行として編集済みフラグを消費する（試行中の再編集は次のUpdateで再試行になる）
-            retryRequested = false;
 
             var dc = devices.DeviceContext;
             var (rawWidth, rawHeight) = parameter.GetOutputSize(frame, length, fps);
@@ -151,6 +146,42 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.OpenFx
                 height = Math.Max(1, (int)(height * scale));
             }
 
+            // 直近の失敗と同じ入力での再試行は同じ失敗を繰り返すだけのためスキップし、入力が変わったら即再試行する
+            // （毎フレームの失敗連打を避けつつ、原因を直したときに透明のまま固まらないように）。
+            // 読み込み失敗（failedAttemptFrame=null）は読み込みの成否に関わる先頭の値だけで比較する
+            // （OFXパラメータは読み込みに影響しない。アニメーション中の値の変化で壊れたプラグインの
+            //   ロードを毎フレーム再試行しないように）。レンダリング失敗はOFX時刻でも結果が変わり得るため
+            // 全値＋同一フレームの間だけ抑止する。スナップショットは試行前に採取したものを失敗時にそのまま保存する
+            // （レンダリング中のUIスレッド編集を「試行済みで失敗」と誤記録しないため）。
+            // パラメータリストはUIスレッドで差し替わり得るため1回だけ読み、スナップショットと適用で共有する
+            var ofxParameters = parameter.Parameters;
+            var canCompareAttempt = true;
+            try
+            {
+                CollectAttemptValues(ofxParameters, width, height, fps, length, frame);
+            }
+            catch
+            {
+                // 試行値の評価自体が失敗する場合（Min>Max等の壊れたメタデータ）は比較不能＝毎回試行に倒す
+                // （同じ計算を行うApplyToも失敗するため、レンダリング失敗経路の透明出力＋ログ1回に乗る）
+                canCompareAttempt = false;
+                attemptValuesBuffer.Clear();
+            }
+            if (canCompareAttempt && failedAttemptValues is not null)
+            {
+                var isSameFailedAttempt = failedAttemptFrame is null
+                    ? attemptValuesBuffer.Take(failedAttemptValues.Length).SequenceEqual(failedAttemptValues)
+                    : failedAttemptFrame == frame && attemptValuesBuffer.SequenceEqual(failedAttemptValues);
+                if (isSameFailedAttempt)
+                {
+                    ApplyEmpty();
+                    return;
+                }
+                failedAttemptValues = null;
+                failedAttemptFrame = null;
+            }
+            attemptCount++;
+
             try
             {
                 EnsureInstance(width, height, fps, length);
@@ -160,7 +191,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.OpenFx
                 if (!hasLoggedFailure)
                     Log.Default.Write($"OFXプラグインの読み込みに失敗しました。id={parameter.PluginId} path={parameter.PluginPath}", e);
                 hasLoggedFailure = true;
-                failureCooldownFrames = FailureCooldownFrameCount;
+                failedAttemptValues = canCompareAttempt ? [.. attemptValuesBuffer.Take(LoadRelevantValueCount)] : null;
+                failedAttemptFrame = null;
                 ApplyEmpty();
                 return;
             }
@@ -173,8 +205,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.OpenFx
             OfxRectI renderWindow;
             try
             {
-                // パラメータ適用の失敗も描画失敗と同じクールダウン経路（透明出力＋ログ1回）に乗せる
-                foreach (var ofxParameter in parameter.Parameters)
+                // パラメータ適用の失敗も描画失敗と同じ失敗経路（透明出力＋ログ1回）に乗せる
+                foreach (var ofxParameter in ofxParameters)
                     ofxParameter.ApplyTo(instance, frame, length, fps);
 
                 // ジェネレーターもRoD（定義域）を宣言できるため、出力はRoDサイズで確保する
@@ -202,7 +234,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.OpenFx
                 if (!hasLoggedFailure)
                     Log.Default.Write($"OFXプラグインのレンダリングに失敗しました。id={parameter.PluginId}", e);
                 hasLoggedFailure = true;
-                failureCooldownFrames = FailureCooldownFrameCount;
+                failedAttemptValues = canCompareAttempt ? [.. attemptValuesBuffer] : null;
+                failedAttemptFrame = frame;
                 ApplyEmpty();
                 return;
             }
@@ -261,7 +294,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.OpenFx
         void EnsureInstance(int width, int height, int fps, int durationFrames)
         {
             // 失敗状態のリセットはUpdate側のエッジ検出で行う（ここで毎回リセットすると
-            // クールダウン明けの再試行のたびにログが出てしまう）
+            // 入力変更による再試行のたびにログが出てしまう）
             var isSamePlugin =
                 string.Equals(instancePluginPath, parameter.PluginPath, StringComparison.OrdinalIgnoreCase)
                 && string.Equals(instancePluginId, parameter.PluginId, StringComparison.OrdinalIgnoreCase);
@@ -325,15 +358,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.OpenFx
                 outputBuffer = new byte[bufferSize];
         }
 
-        void Parameter_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        /// <summary>
+        /// 今回のOFX試行の成否に影響しうる入力（プラグイン・サイズ・fps/アイテム長・OFXパラメータ評価値）を
+        /// attemptValuesBufferへ集める。先頭 <see cref="LoadRelevantValueCount"/> 個は
+        /// プラグイン読み込みの成否に関わる値（並び順に意味がある）。
+        /// 前回失敗時の値と一致する場合は再試行をスキップする
+        /// </summary>
+        void CollectAttemptValues(IEnumerable<OfxParameterBase> ofxParameters, int width, int height, int fps, int length, int frame)
         {
-            // 値の変化はUIスレッド、消費はレンダリングスレッドのためvolatileフラグで受け渡す
-            retryRequested = true;
+            var values = attemptValuesBuffer;
+            values.Clear();
+            values.Add(parameter.PluginPath);
+            values.Add(parameter.PluginId);
+            values.Add(width);
+            values.Add(height);
+            values.Add(fps);
+            values.Add(length);
+            foreach (var ofxParameter in ofxParameters)
+                ofxParameter.CollectValues(values, frame, length, fps);
         }
+
+        /// <summary>OFX試行（インスタンス生成〜レンダリング）を開始した回数（テスト用）</summary>
+        internal int AttemptCount => attemptCount;
 
         public void Dispose()
         {
-            parameter.PropertyChanged -= Parameter_PropertyChanged;
             // エフェクト入力に接続したまま出力ビットマップを破棄しないよう、先に切り離す
             transformEffect.SetInput(0, null, true);
             instance?.Dispose();

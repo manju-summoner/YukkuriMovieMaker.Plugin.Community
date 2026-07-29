@@ -265,6 +265,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             max = hi;
         }
 
+#if DEBUG
+        /// <summary>
+        /// レンダリング失敗経路のテスト用フォールトインジェクション。
+        /// trueの間、Render / RenderTransition / RenderGenerator が例外を投げる
+        /// </summary>
+        internal static bool ThrowOnRenderForTest;
+#endif
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        static void ThrowIfRenderFaultInjected()
+        {
+#if DEBUG
+            if (ThrowOnRenderForTest)
+                throw new InvalidOperationException("テスト用のレンダリング失敗（ThrowOnRenderForTest）");
+#endif
+        }
+
         /// <summary>
         /// premultiplied BGRA（上から下への行順）の入力を処理して同形式の出力を得る（出力は入力と同じ矩形）。
         /// </summary>
@@ -278,6 +295,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// </summary>
         public void Render(ReadOnlySpan<byte> sourceBgraTopDown, Span<byte> outputBgraTopDown, double time, OfxRectI renderWindow)
         {
+            ThrowIfRenderFaultInjected();
             ValidateRenderWindow(renderWindow, outputBgraTopDown.Length);
             ValidateInputBuffer(sourceBgraTopDown.Length);
             Create();
@@ -303,6 +321,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// </summary>
         public void RenderTransition(ReadOnlySpan<byte> fromBgraTopDown, ReadOnlySpan<byte> toBgraTopDown, Span<byte> outputBgraTopDown, double time, OfxRectI renderWindow)
         {
+            ThrowIfRenderFaultInjected();
             ValidateRenderWindow(renderWindow, outputBgraTopDown.Length);
             ValidateInputBuffer(fromBgraTopDown.Length);
             ValidateInputBuffer(toBgraTopDown.Length);
@@ -330,6 +349,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// </summary>
         public void RenderGenerator(Span<byte> outputBgraTopDown, double time, OfxRectI renderWindow)
         {
+            ThrowIfRenderFaultInjected();
             ValidateRenderWindow(renderWindow, outputBgraTopDown.Length);
             Create();
             NotifyChangedParams(time);
