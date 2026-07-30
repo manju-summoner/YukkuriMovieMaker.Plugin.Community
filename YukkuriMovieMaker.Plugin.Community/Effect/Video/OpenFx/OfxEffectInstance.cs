@@ -174,7 +174,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             if (!isCpuRenderSupported
                 && (!OpenFxSettings.Default.UseGpuRendering
                     || (!IsGpuBackendSupported(gpuBackend, descriptor.Props)
-                        && (gpuBackendFactory is null || !IsCudaRenderingDeclared(descriptor.Props)))))
+                        && (gpuBackendFactory is null || !IsSupportedGpuRenderingDeclared(descriptor.Props)))))
             {
                 throw new InvalidOperationException($"CPUレンダリング非対応かつ利用可能なGPUバックエンドがないプラグインは未対応です。plugin={plugin.Identifier}");
             }
@@ -264,7 +264,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 height,
                 frameRate,
                 durationFrames,
-                gpuBackendFactory: () => OfxGpuRenderBackendFactory.Create(devices));
+                gpuBackendFactory: () => OfxGpuRenderBackendFactory.Create(devices, plugin.DescribeInContext(context).Props));
         }
 
         public OfxClipInstance? FindClip(string name) => clips.FirstOrDefault(c => c.Name == name);
@@ -826,9 +826,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 preservePreparedSnapshotForCpuFallback = preparedDirectRenderSnapshot == snapshot;
                 return false;
             }
-            catch (CudaException e)
+            catch (OpenClInteropUnavailableException)
             {
-                HandleBackendGpuFailure(e.FallbackStatus, e);
+                // D3D11共有だけの失敗。OpenCLプラグインは既存のCPU転送経路で再試行できる。
+                preservePreparedSnapshotForCpuFallback = preparedDirectRenderSnapshot == snapshot;
+                return false;
+            }
+            catch (Exception e) when (IsBackendException(e))
+            {
+                HandleBackendGpuFailure(GetFallbackStatus(e), e);
                 preservePreparedSnapshotForCpuFallback = true;
                 return false;
             }
@@ -969,9 +975,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
                     throw new InvalidOperationException($"kOfxImageEffectActionRender が失敗しました。plugin={plugin.Identifier} status={gpuStatus}");
                 }
-                catch (CudaException e)
+                catch (Exception e) when (IsBackendException(e))
                 {
-                    FallBackToCpu(e.FallbackStatus, snapshot, time, renderWindow, inputs, outputImage, e);
+                    FallBackToCpu(GetFallbackStatus(e), snapshot, time, renderWindow, inputs, outputImage, e);
                     return;
                 }
             }
@@ -1074,7 +1080,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 || gpuBackendFactory is null
                 || Volatile.Read(ref hasAttemptedGpuBackendCreation)
                 || !OpenFxSettings.Default.UseGpuRendering
-                || !IsCudaRenderingDeclared(Props))
+                || !IsSupportedGpuRenderingDeclared(Props))
             {
                 return;
             }
@@ -1135,7 +1141,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             {
                 gpuBackend?.Synchronize();
             }
-            catch (CudaException)
+            catch (Exception e) when (IsBackendException(e))
             {
                 // 元のbackend例外を維持する。同期できなくても画像解放とCPUフォールバックを続行する。
             }
@@ -1158,12 +1164,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 || declaration.Equals("needed", StringComparison.OrdinalIgnoreCase);
         }
 
-        static bool IsCudaRenderingDeclared(OfxPropertySet props)
+        static bool IsSupportedGpuRenderingDeclared(OfxPropertySet props)
         {
-            var declaration = props.GetStringOrDefault(OfxConstants.ImageEffectPropCudaRenderSupported, "false");
+            return IsDeclared(props, OfxConstants.ImageEffectPropCudaRenderSupported)
+                || IsDeclared(props, OfxConstants.ImageEffectPropOpenCLRenderSupported);
+        }
+
+        static bool IsDeclared(OfxPropertySet props, string property)
+        {
+            var declaration = props.GetStringOrDefault(property, "false");
             return declaration.Equals("true", StringComparison.OrdinalIgnoreCase)
                 || declaration.Equals("needed", StringComparison.OrdinalIgnoreCase);
         }
+
+        static bool IsBackendException(Exception exception)
+            => exception is CudaException or CudaUnavailableException or OpenClException or OpenClUnavailableException;
+
+        static int GetFallbackStatus(Exception exception)
+            => exception switch
+            {
+                CudaException cuda => cuda.FallbackStatus,
+                OpenClException openCl => openCl.FallbackStatus,
+                _ => OfxStatus.GPURenderFailed,
+            };
 
         bool IsCpuRenderSupported()
             => !Props.GetStringOrDefault(OfxConstants.ImageEffectPropCPURenderSupported, "true")

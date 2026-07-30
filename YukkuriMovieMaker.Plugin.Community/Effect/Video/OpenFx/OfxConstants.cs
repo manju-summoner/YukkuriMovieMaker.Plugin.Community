@@ -69,6 +69,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public const string InteractSuite = "OfxInteractSuite";
         public const string ProgressSuite = "OfxProgressSuite";
         public const string TimeLineSuite = "OfxTimeLineSuite";
+        public const string OpenCLProgramSuite = "OfxOpenCLProgramSuite";
 
         // 汎用プロパティ（ofxCore.h）
         public const string PropAPIVersion = "OfxPropAPIVersion";

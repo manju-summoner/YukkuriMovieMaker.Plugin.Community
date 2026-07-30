@@ -41,6 +41,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
         public bool SupportsOpenGL => IsEnabled(OpenGL);
         public bool SupportsCuda => IsEnabled(Cuda);
+        public bool SupportsOpenCLBuffer => IsEnabled(OpenCLRender);
         public bool SupportsOpenCL => IsEnabled(OpenCLRender) || IsEnabled(OpenCL);
         public bool SupportsCPU => !CPU.Equals("false", StringComparison.OrdinalIgnoreCase);
     }
@@ -195,9 +196,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     if (plugin.UnsupportedReason is not null and not OpenFxUnsupportedReason.GpuOnly)
                         return plugin;
                     var gpuOnlyUnsupported = !plugin.GpuSupport.SupportsCPU
-                        && !(useGpuRendering
-                            && plugin.GpuSupport.SupportsCuda
-                            && OfxGpuRenderBackendFactory.HasRegisteredBackend);
+                        && !(useGpuRendering && OfxGpuRenderBackendFactory.IsDeclaredBackendAvailable(
+                            plugin.GpuSupport.SupportsCuda,
+                            plugin.GpuSupport.SupportsOpenCLBuffer));
                     return plugin with
                     {
                         SupportsFilter = !gpuOnlyUnsupported && plugin.DeclaredSupportsFilter,
@@ -342,9 +343,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 : isSingleInstance ? OpenFxUnsupportedReason.SingleInstance
                 : needsTemporalClipAccess ? OpenFxUnsupportedReason.TemporalClipAccess
                 : !gpuSupport.SupportsCPU
-                    && !(useGpuRendering.Value
-                        && gpuSupport.SupportsCuda
-                        && OfxGpuRenderBackendFactory.HasRegisteredBackend)
+                    && !(useGpuRendering.Value && OfxGpuRenderBackendFactory.IsDeclaredBackendAvailable(
+                        gpuSupport.SupportsCuda,
+                        gpuSupport.SupportsOpenCLBuffer))
                     ? OpenFxUnsupportedReason.GpuOnly
                 : (OpenFxUnsupportedReason?)null;
             if (unsupportedReason is not null)

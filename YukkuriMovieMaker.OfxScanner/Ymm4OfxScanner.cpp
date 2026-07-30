@@ -1138,6 +1138,12 @@ namespace
         return kOfxStatOK;
     }
     OfxTimeLineSuiteV1 timeLineSuite = { GetTime, GotoTime, GetTimeBounds };
+    OfxStatus CompileOpenCLProgramForScanner(const char*, int, void*)
+    {
+        // スキャナーはdescribeまでしか実行せずOpenCL contextを持たない。
+        return kOfxStatFailed;
+    }
+    OfxOpenCLProgramSuiteV1 openCLProgramSuite = { CompileOpenCLProgramForScanner };
 
     //=========================================================================
     // ホスト
@@ -1148,7 +1154,7 @@ namespace
     // （特に対応コンテキストがずれると「一覧に出ないが実行時は対応」等の静かな不整合になる。
     //   このEXEは別ビルド成果物のため、C#側の変更時は再ビルドも忘れないこと）。
     // ホストバージョンは起動引数（"major.minor.build.revision"）で親から受け取る
-    void FillHostProperties(PropertySet& props, const int (&version)[4], bool cudaAvailable)
+    void FillHostProperties(PropertySet& props, const int (&version)[4], bool cudaAvailable, bool openCLAvailable)
     {
         props.SetString(kOfxPropType, kOfxTypeImageEffectHost);
         props.SetString(kOfxPropName, "net.manjubox.YukkuriMovieMaker4");
@@ -1179,7 +1185,7 @@ namespace
         props.SetString(kOfxImageEffectPropOpenGLRenderSupported, "false");
         props.SetString(kOfxImageEffectPropCudaRenderSupported, cudaAvailable ? "true" : "false");
         props.SetString(kOfxImageEffectPropCudaStreamSupported, cudaAvailable ? "true" : "false");
-        props.SetString(kOfxImageEffectPropOpenCLRenderSupported, "false");
+        props.SetString(kOfxImageEffectPropOpenCLRenderSupported, openCLAvailable ? "true" : "false");
         props.SetString(kOfxImageEffectPropOpenCLSupported, "false");
         props.SetString(kOfxImageEffectPropMetalRenderSupported, "false");
         // ホストはCPUレンダリングを常時提供する（1.5.1でこのプロパティを照会するプラグイン対策。C#ホストと一致させること）
@@ -1223,6 +1229,8 @@ namespace
             return &progressSuite;
         if (name == kOfxTimeLineSuite && suiteVersion == 1)
             return &timeLineSuite;
+        if (name == kOfxOpenCLProgramSuite && suiteVersion == 1)
+            return &openCLProgramSuite;
         return nullptr;
     }
 
@@ -1388,12 +1396,14 @@ int wmain(int argc, wchar_t* argv[])
 
     // 第1引数: ホストのバージョン（"major.minor.build.revision"。省略時は0.0.0.0）
     // 第2引数: CUDAバックエンドの実可用性（"true" / "false"）
+    // 第3引数: OpenCLバックエンドの実可用性（"true" / "false"）
     int version[4] = { 0, 0, 0, 0 };
     if (argc >= 2)
         swscanf_s(argv[1], L"%d.%d.%d.%d", &version[0], &version[1], &version[2], &version[3]);
 
     const bool cudaAvailable = argc >= 3 && wcscmp(argv[2], L"true") == 0;
-    FillHostProperties(hostProps, version, cudaAvailable);
+    const bool openCLAvailable = argc >= 4 && wcscmp(argv[3], L"true") == 0;
+    FillHostProperties(hostProps, version, cudaAvailable, openCLAvailable);
     host.host = reinterpret_cast<OfxPropertySetHandle>(&hostProps);
 
     std::string line;

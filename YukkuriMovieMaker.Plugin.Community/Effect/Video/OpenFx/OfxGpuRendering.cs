@@ -102,60 +102,95 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         {
             var available = CudaDriver.TryInitialize(out var failureReason);
             if (!available)
-                LogUnavailableOnce(failureReason);
+                LogUnavailableOnce("CUDA", failureReason, ref hasLoggedCudaUnavailable);
             return available;
         }, LazyThreadSafetyMode.ExecutionAndPublication);
-        static int hasLoggedUnavailable;
-
-        /// <summary>
-        /// 実GPUバックエンドが登録されているか。
-        /// 実GPUを必要とするテストはこの値でGPUなし環境を自動スキップする。
-        /// </summary>
-        public static bool HasRegisteredBackend => hasCudaBackend.Value;
-
-        public static IOfxGpuRenderBackend? Create(IGraphicsDevicesAndContext devices)
+        static readonly Lazy<bool> hasOpenClBackend = new(() =>
         {
-            var backend = CreateCore();
-            if (backend is null)
-                return null;
-            try
-            {
-                backend.Initialize(devices);
-                return backend;
-            }
-            catch (Exception e) when (IsUnavailableException(e))
+            var available = OpenClDriver.TryInitialize(out var failureReason);
+            if (!available)
+                LogUnavailableOnce("OpenCL", failureReason, ref hasLoggedOpenClUnavailable);
+            return available;
+        }, LazyThreadSafetyMode.ExecutionAndPublication);
+        static int hasLoggedCudaUnavailable;
+        static int hasLoggedOpenClUnavailable;
+
+        public static bool HasCudaBackend => hasCudaBackend.Value;
+        public static bool HasOpenClBackend => hasOpenClBackend.Value;
+        public static bool IsDeclaredBackendAvailable(bool supportsCuda, bool supportsOpenClBuffer)
+        {
+            if (supportsCuda && HasCudaBackend)
+                return true;
+            return supportsOpenClBuffer && HasOpenClBackend;
+        }
+
+        public static IOfxGpuRenderBackend? Create(IGraphicsDevicesAndContext devices, OfxPropertySet? pluginProps = null)
+        {
+            foreach (var backend in CreateCandidates(pluginProps))
             {
                 try
                 {
-                    // Initialize途中まで作られた共有資源も解放する。
-                    // 実装は部分初期化状態で呼ばれても安全でなければならない。
-                    backend.ReleaseDeviceResources();
+                    backend.Initialize(devices);
+                    return backend;
                 }
-                finally
+                catch (Exception e) when (IsUnavailableException(e))
                 {
-                    backend.Dispose();
+                    try
+                    {
+                        // Initialize途中まで作られた共有資源も解放する。
+                        // 実装は部分初期化状態で呼ばれても安全でなければならない。
+                        backend.ReleaseDeviceResources();
+                    }
+                    finally
+                    {
+                        backend.Dispose();
+                    }
+                    LogBackendUnavailableOnce(backend.Kind, e.Message);
                 }
-                LogUnavailableOnce(e.Message);
-                return null;
             }
+            return null;
         }
 
-        static IOfxGpuRenderBackend? CreateCore()
-            => HasRegisteredBackend ? new CudaGpuRenderBackend() : null;
+        static IEnumerable<IOfxGpuRenderBackend> CreateCandidates(OfxPropertySet? pluginProps)
+        {
+            var cudaDeclared = pluginProps is null || IsDeclared(pluginProps, OfxConstants.ImageEffectPropCudaRenderSupported);
+            var openClDeclared = pluginProps is null || IsDeclared(pluginProps, OfxConstants.ImageEffectPropOpenCLRenderSupported);
+            if (cudaDeclared && HasCudaBackend)
+                yield return new CudaGpuRenderBackend();
+            if (openClDeclared && HasOpenClBackend)
+                yield return new OpenClGpuRenderBackend();
+        }
+
+        static bool IsDeclared(OfxPropertySet props, string name)
+        {
+            var value = props.GetStringOrDefault(name, "false");
+            return value.Equals("true", StringComparison.OrdinalIgnoreCase)
+                || value.Equals("needed", StringComparison.OrdinalIgnoreCase);
+        }
 
         static bool IsUnavailableException(Exception e)
             => e is CudaException
+                or OpenClException
                 or CudaUnavailableException
+                or OpenClUnavailableException
                 or DllNotFoundException
                 or EntryPointNotFoundException
                 or BadImageFormatException
                 or SharpGenException;
 
-        static void LogUnavailableOnce(string? reason)
+        static void LogBackendUnavailableOnce(OfxGpuRenderKind kind, string? reason)
         {
-            if (Interlocked.Exchange(ref hasLoggedUnavailable, 1) != 0)
+            if (kind == OfxGpuRenderKind.Cuda)
+                LogUnavailableOnce("CUDA", reason, ref hasLoggedCudaUnavailable);
+            else
+                LogUnavailableOnce("OpenCL", reason, ref hasLoggedOpenClUnavailable);
+        }
+
+        static void LogUnavailableOnce(string backend, string? reason, ref int logged)
+        {
+            if (Interlocked.Exchange(ref logged, 1) != 0)
                 return;
-            OfxHostLog.Info($"OpenFX CUDAバックエンドを利用できないためCPUレンダリングを使用します。reason={reason}");
+            OfxHostLog.Info($"OpenFX {backend}バックエンドを利用できないためCPUレンダリングを使用します。reason={reason}");
         }
     }
 
@@ -1049,7 +1084,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         {
             resources.ReferenceCount--;
             if (resources.ReferenceCount < 0)
-                throw new InvalidOperationException("CUDA共有変換資源の参照数が不正です。");
+            {
+                resources.ReferenceCount = 0;
+                OfxHostLog.Info("CUDA共有変換資源の参照数が不正なため0へ補正しました。");
+            }
             // 参照数0でも通常のインスタンス破棄では保持する。サイズ変更で次の
             // インスタンスが直ちに作られる場合にPTX JITとscratch再確保を繰り返さないため。
             _ = device;
@@ -1521,8 +1559,938 @@ RGBA_DONE:
 """;
     }
 
+    /// <summary>
+    /// OpenCLバッファ版のOpenFX GPUバックエンド。
+    /// contextはデバイス単位で常駐し、in-order queueはインスタンスごとに所有する。
+    /// </summary>
+    internal sealed unsafe class OpenClGpuRenderBackend : IOfxGpuRenderBackend, IOfxD3D11InteropBackend
+    {
+        static readonly object openClLock = new();
+        static readonly Dictionary<OpenClContextKey, ResidentContextEntry> residentContexts = [];
+        static readonly Dictionary<OpenClContextKey, long> residentContextGenerations = [];
+        static readonly Dictionary<nint, SharedConversionResources> residentConversionResources = [];
+        static long nextResidentContextGeneration;
+        [ThreadStatic] static OpenClGpuRenderBackend? currentBackend;
+
+        nint device;
+        nint context;
+        nint queue;
+        OpenClContextKey contextKey;
+        long residentContextGeneration;
+        OpenClDriver.OpenClD3D11SharingFunctions? d3d11Sharing;
+        SharedConversionResources? conversionResources;
+        SharedConversionResources? residentConversionResourcesGeneration;
+        readonly Dictionary<nint, RegisteredD3D11Resource> registeredD3D11Resources = [];
+        bool isD3D11InteropAvailable;
+        bool hasLoggedInteropFailure;
+        bool hasResidentContextLease;
+        bool isReleased;
+        bool invalidatesResidentContext;
+
+        static OpenClGpuRenderBackend()
+        {
+            AppDomain.CurrentDomain.ProcessExit += (_, _) => ReleaseResidentContextsAtProcessExit();
+        }
+
+#if DEBUG
+        internal static bool ForceUnavailableForTest { get; set; }
+        internal static bool ForceD3D11InteropUnavailableForTest { get; set; }
+        internal static bool ForceConversionProgramFailureForTest { get; set; }
+        internal static long CompletedRenderActionCount => Interlocked.Read(ref completedRenderActionCount);
+        static long completedRenderActionCount;
+        internal static long CompletedD3D11InteropCount => Interlocked.Read(ref completedD3D11InteropCount);
+        static long completedD3D11InteropCount;
+        internal static string? LastD3D11SharingExtensionForTest { get; private set; }
+        internal static long ResidentContextCreationCountForTest
+            => Interlocked.Read(ref residentContextCreationCount);
+        static long residentContextCreationCount;
+        internal static long ConversionProgramBuildCountForTest
+            => Interlocked.Read(ref conversionProgramBuildCount);
+        static long conversionProgramBuildCount;
+        internal static int ResidentContextCountForTest
+        {
+            get
+            {
+                lock (openClLock)
+                    return residentContexts.Count;
+            }
+        }
+        internal int RegisteredD3D11ResourceCountForTest
+        {
+            get
+            {
+                lock (openClLock)
+                    return registeredD3D11Resources.Count;
+            }
+        }
+        internal long D3D11ResourceRegistrationCountForTest
+            => Interlocked.Read(ref d3d11ResourceRegistrationCount);
+        long d3d11ResourceRegistrationCount;
+        internal string? D3D11SharingExtensionForTest
+            => d3d11Sharing?.Kind.ToString().ToUpperInvariant();
+#endif
+
+        public OfxGpuRenderKind Kind => OfxGpuRenderKind.OpenCLBuffer;
+        public bool IsAvailable
+        {
+            get
+            {
+                // 軽量プローブだがstatic lockで整合読み取りする。OpenCL描画は元々このlockで全体直列化されており、新たな直列化ではない。
+                lock (openClLock)
+                    return context != 0 && queue != 0 && !isReleased;
+            }
+        }
+        public nint CommandQueue => queue;
+        public bool IsD3D11InteropAvailable
+        {
+            get
+            {
+                lock (openClLock)
+                {
+#if DEBUG
+                    if (ForceD3D11InteropUnavailableForTest)
+                        return false;
+#endif
+                    return IsAvailable && isD3D11InteropAvailable;
+                }
+            }
+        }
+        internal nint Context => context;
+        internal nint Device => device;
+        internal static OpenClGpuRenderBackend? Current => currentBackend;
+
+        public void Initialize(IGraphicsDevicesAndContext devices)
+        {
+            lock (openClLock)
+            {
+                if (isReleased)
+                    throw new ObjectDisposedException(nameof(OpenClGpuRenderBackend));
+                if (context != 0)
+                    return;
+#if DEBUG
+                if (ForceUnavailableForTest)
+                    throw new OpenClException(OpenClDriver.DeviceNotFound, "テスト用OpenCL初期化", "");
+#endif
+                device = OpenClDriver.SelectFirstGpuDevice();
+                if (OpenClDriver.TrySelectD3D11Device(
+                    devices.DXGI.Adapter.NativePointer,
+                    out var platform,
+                    out var d3d11Device,
+                    out var sharing,
+                    out var interopFailureReason))
+                {
+                    device = d3d11Device;
+                    d3d11Sharing = sharing;
+#if DEBUG
+                    LastD3D11SharingExtensionForTest = sharing!.Kind.ToString().ToUpperInvariant();
+#endif
+                    contextKey = new OpenClContextKey(
+                        device,
+                        devices.D3D.Device.NativePointer,
+                        sharing!.Kind);
+                    try
+                    {
+                        context = AcquireResidentContext(
+                            contextKey,
+                            () => OpenClDriver.CreateD3D11Context(
+                                platform,
+                                device,
+                                devices.D3D.Device.NativePointer),
+                            out residentContextGeneration);
+                        hasResidentContextLease = true;
+                    }
+                    catch (OpenClException e)
+                    {
+                        d3d11Sharing = null;
+                        context = 0;
+                        LogInteropFailureOnce(e.Message);
+                    }
+                }
+                else
+                {
+                    LogInteropFailureOnce(interopFailureReason ?? "対応するOpenCL D3D11共有デバイスがありません。");
+                }
+
+                if (context == 0)
+                {
+                    device = OpenClDriver.SelectFirstGpuDevice();
+                    contextKey = new OpenClContextKey(device, 0, null);
+                    context = AcquireResidentContext(
+                        contextKey,
+                        () => OpenClDriver.CreateContext(device),
+                        out residentContextGeneration);
+                    hasResidentContextLease = true;
+                }
+
+                try
+                {
+                    queue = OpenClDriver.CreateCommandQueue(context, device);
+                    if (d3d11Sharing is not null)
+                    {
+                        try
+                        {
+                            conversionResources = AcquireSharedConversionResources(context, device);
+                            residentConversionResourcesGeneration = conversionResources;
+                            isD3D11InteropAvailable = true;
+                        }
+                        catch (OpenClException e)
+                        {
+                            conversionResources = null;
+                            isD3D11InteropAvailable = false;
+                            LogInteropFailureOnce(e.Message);
+                        }
+                    }
+                }
+                catch
+                {
+                    // CUDA側と揃えた意図的設計。一過性失敗でも常駐context世代を無効化して安全側へ倒す。
+                    invalidatesResidentContext = true;
+                    ReleaseDeviceResources();
+                    throw;
+                }
+            }
+        }
+
+        public IOfxImageStorage CreateImageStorage(int width, int height, int offsetX, int offsetY, bool isOutput)
+        {
+            _ = offsetX;
+            _ = offsetY;
+            var rowBytes = checked(width * 4 * sizeof(float));
+            var byteCount = checked((nuint)((long)rowBytes * height));
+            return WithBackend(() =>
+            {
+                var buffer = OpenClDriver.CreateBuffer(context, byteCount);
+                try
+                {
+                    if (isOutput)
+                        OpenClDriver.ZeroBuffer(queue, buffer, byteCount);
+                    return (IOfxImageStorage)new OpenClBufferStorage(this, buffer, rowBytes);
+                }
+                catch
+                {
+                    OpenClDriver.ReleaseBuffer(buffer);
+                    throw;
+                }
+            });
+        }
+
+        public void Upload(OfxImage cpuImage, OfxImage gpuImage)
+        {
+            ValidateTransfer(cpuImage, gpuImage);
+            var byteCount = checked((nuint)((long)cpuImage.RowBytes * cpuImage.Height));
+            WithBackend(() => OpenClDriver.WriteBuffer(queue, gpuImage.Storage.DataPointer, (nint)cpuImage.Data, byteCount));
+        }
+
+        public void Download(OfxImage gpuImage, OfxImage cpuImage)
+        {
+            ValidateTransfer(cpuImage, gpuImage);
+            var byteCount = checked((nuint)((long)cpuImage.RowBytes * cpuImage.Height));
+            WithBackend(() => OpenClDriver.ReadBuffer(queue, gpuImage.Storage.DataPointer, (nint)cpuImage.Data, byteCount));
+        }
+
+        public void UploadFromD3D11(nint d3d11Resource, OfxImage gpuImage)
+        {
+            ValidateInteropImage(gpuImage);
+            ExecuteInterop(d3d11Resource, image =>
+            {
+                var resources = EnsureCurrentSharedConversionResources();
+                OpenClDriver.SetKernelArgument(resources.BgraToRgbaKernel, 0, image);
+                OpenClDriver.SetKernelArgument(resources.BgraToRgbaKernel, 1, gpuImage.Storage.DataPointer);
+                OpenClDriver.SetKernelArgument(resources.BgraToRgbaKernel, 2, gpuImage.Width);
+                OpenClDriver.SetKernelArgument(resources.BgraToRgbaKernel, 3, gpuImage.Height);
+                OpenClDriver.EnqueueKernel2D(queue, resources.BgraToRgbaKernel, gpuImage.Width, gpuImage.Height);
+            });
+        }
+
+        public void DownloadToD3D11(OfxImage gpuImage, nint d3d11Resource, string preMultiplication)
+        {
+            ValidateInteropImage(gpuImage);
+            ExecuteInterop(d3d11Resource, image =>
+            {
+                var mode = preMultiplication switch
+                {
+                    OfxConstants.ImageUnPreMultiplied => 1,
+                    OfxConstants.ImageOpaque => 2,
+                    _ => 0,
+                };
+                var resources = EnsureCurrentSharedConversionResources();
+                OpenClDriver.SetKernelArgument(resources.RgbaToBgraKernel, 0, gpuImage.Storage.DataPointer);
+                OpenClDriver.SetKernelArgument(resources.RgbaToBgraKernel, 1, image);
+                OpenClDriver.SetKernelArgument(resources.RgbaToBgraKernel, 2, gpuImage.Width);
+                OpenClDriver.SetKernelArgument(resources.RgbaToBgraKernel, 3, gpuImage.Height);
+                OpenClDriver.SetKernelArgument(resources.RgbaToBgraKernel, 4, mode);
+                OpenClDriver.EnqueueKernel2D(queue, resources.RgbaToBgraKernel, gpuImage.Width, gpuImage.Height);
+            });
+#if DEBUG
+            Interlocked.Increment(ref completedD3D11InteropCount);
+#endif
+        }
+
+        public int ExecuteWithContext(Func<int> actionBody)
+            => WithBackend(actionBody);
+
+        public int ExecuteAction(OfxGpuRenderAction action, OfxPropertySet inArgs, Func<int> actionBody)
+        {
+            _ = inArgs;
+            return WithBackend(() =>
+            {
+                var status = actionBody();
+                if (status is not OfxStatus.OK and not OfxStatus.ReplyDefault)
+                    OpenClDriver.Finish(queue);
+#if DEBUG
+                if (action == OfxGpuRenderAction.Render && status == OfxStatus.OK)
+                    Interlocked.Increment(ref completedRenderActionCount);
+#endif
+                return status;
+            });
+        }
+
+        public void Synchronize()
+            => WithBackend(() => OpenClDriver.Finish(queue));
+
+        public void OnRenderFailed(int status)
+        {
+            _ = status;
+            Synchronize();
+        }
+
+        public void OnBackendFailed()
+        {
+            lock (openClLock)
+            {
+                // Disposeとの順序に関係なく、失敗した世代の常駐資源を同じlock区間で無効化する。
+                invalidatesResidentContext = true;
+                ReleaseDeviceResources();
+            }
+        }
+
+        public void ReleaseDeviceResources()
+        {
+            lock (openClLock)
+            {
+                if (isReleased)
+                {
+                    if (invalidatesResidentContext)
+                        InvalidateResidentContextAfterBackendFailure();
+                    return;
+                }
+                isReleased = true;
+                ReleaseD3D11Resources();
+                if (queue != 0)
+                {
+                    try
+                    {
+                        OpenClDriver.Finish(queue);
+                    }
+                    catch (OpenClException e)
+                    {
+                        OfxHostLog.Info($"OpenCL command queueの同期に失敗しました。{e.Message}");
+                    }
+                    try
+                    {
+                        OpenClDriver.ReleaseCommandQueue(queue);
+                    }
+                    catch (OpenClException e)
+                    {
+                        OfxHostLog.Info($"OpenCL command queueの解放に失敗しました。{e.Message}");
+                    }
+                    finally
+                    {
+                        queue = 0;
+                    }
+                }
+                if (conversionResources is not null)
+                {
+                    try
+                    {
+                        ReleaseSharedConversionResources(context, conversionResources);
+                    }
+                    catch (Exception e)
+                    {
+                        OfxHostLog.Info($"OpenCL共有変換資源のlease解放に失敗しました。{e.Message}");
+                    }
+                    conversionResources = null;
+                }
+                if (invalidatesResidentContext)
+                    InvalidateResidentContextAfterBackendFailure();
+                if (hasResidentContextLease && context != 0)
+                {
+                    ReleaseResidentContextLease(contextKey, context, residentContextGeneration);
+                }
+                hasResidentContextLease = false;
+                context = 0;
+                d3d11Sharing = null;
+                isD3D11InteropAvailable = false;
+            }
+        }
+
+        public void Dispose() => ReleaseDeviceResources();
+
+        internal nint CompileProgram(string source)
+            => WithBackend(() => OpenClDriver.CompileProgram(context, device, source));
+
+        public void ReleaseD3D11Resource(nint d3d11Resource)
+        {
+            lock (openClLock)
+            {
+                if (!registeredD3D11Resources.TryGetValue(d3d11Resource, out var registered))
+                    return;
+                try
+                {
+                    if (queue != 0)
+                        OpenClDriver.Finish(queue);
+                    OpenClDriver.ReleaseBuffer(registered.Image);
+                    registeredD3D11Resources.Remove(d3d11Resource);
+                    Marshal.Release(registered.D3D11Resource);
+                }
+                catch (Exception e)
+                {
+                    // 失敗entryとCOM参照はcacheに残し、backend全体の後続解放で再回収する。
+                    isD3D11InteropAvailable = false;
+                    OfxHostLog.Info($"OpenFX OpenCL共有D3D11資源の解放に失敗しました。error={e.Message}");
+                }
+            }
+        }
+
+        public void ReleaseD3D11Resources()
+        {
+            lock (openClLock)
+            {
+                if (registeredD3D11Resources.Count == 0)
+                    return;
+                try
+                {
+                    if (queue != 0)
+                        OpenClDriver.Finish(queue);
+                }
+                catch (OpenClException e)
+                {
+                    OfxHostLog.Info($"OpenFX OpenCL共有D3D11資源cacheの同期に失敗しました。error={e.Message}");
+                }
+                foreach (var registered in registeredD3D11Resources.Values)
+                {
+                    try
+                    {
+                        OpenClDriver.ReleaseBuffer(registered.Image);
+                    }
+                    catch (OpenClException e)
+                    {
+                        OfxHostLog.Info($"OpenFX OpenCL共有D3D11資源の解放に失敗しました。error={e.Message}");
+                    }
+                    Marshal.Release(registered.D3D11Resource);
+                }
+                registeredD3D11Resources.Clear();
+            }
+        }
+
+        internal void ReleaseBuffer(nint buffer)
+        {
+            lock (openClLock)
+            {
+                if (buffer == 0)
+                    return;
+                try
+                {
+                    OpenClDriver.ReleaseBuffer(buffer);
+                }
+                catch (OpenClException e)
+                {
+                    OfxHostLog.Info($"OpenCL bufferの解放に失敗しました。{e.Message}");
+                }
+            }
+        }
+
+        T WithBackend<T>(Func<T> action)
+        {
+            lock (openClLock)
+            {
+                if (!IsAvailable)
+                    throw new OpenClException(OpenClDriver.DeviceNotFound, "OpenCL backend", "利用できません。");
+                EnsureCurrentResidentContext();
+                var previous = currentBackend;
+                currentBackend = this;
+                try
+                {
+                    return action();
+                }
+                finally
+                {
+                    currentBackend = previous;
+                }
+            }
+        }
+
+        void WithBackend(Action action)
+            => WithBackend(() =>
+            {
+                action();
+                return 0;
+            });
+
+        static void ValidateTransfer(OfxImage cpuImage, OfxImage gpuImage)
+        {
+            if (!cpuImage.Storage.IsCpuAccessible
+                || gpuImage.Storage.IsCpuAccessible
+                || cpuImage.Width != gpuImage.Width
+                || cpuImage.Height != gpuImage.Height
+                || cpuImage.RowBytes != gpuImage.RowBytes)
+            {
+                throw new ArgumentException("OpenCL画像転送の形式が一致しません。");
+            }
+        }
+
+        void ExecuteInterop(nint d3d11Resource, Action<nint> operation)
+        {
+            lock (openClLock)
+            {
+                if (!IsD3D11InteropAvailable || d3d11Sharing is null || conversionResources is null)
+                    throw new OpenClInteropUnavailableException("OpenCLとD3D11のinteropを利用できません。");
+                EnsureCurrentResidentContext();
+                _ = EnsureCurrentSharedConversionResources();
+
+                RegisteredD3D11Resource registered;
+                try
+                {
+                    registered = GetOrRegisterD3D11Resource(d3d11Resource);
+                }
+                catch (OpenClException e)
+                {
+                    DisableInterop(e.Message);
+                    throw new OpenClInteropUnavailableException(e.Message, e);
+                }
+
+                var acquired = false;
+                var releaseEnqueued = false;
+                try
+                {
+                    d3d11Sharing.Acquire(queue, registered.Image);
+                    acquired = true;
+                    operation(registered.Image);
+                    d3d11Sharing.Release(queue, registered.Image);
+                    releaseEnqueued = true;
+                    // releaseの完了まで待ち、D3D11へ所有権を返してからD2D出力へ接続する。
+                    OpenClDriver.Finish(queue);
+                }
+                catch (Exception e)
+                {
+                    if (acquired && !releaseEnqueued)
+                    {
+                        try
+                        {
+                            d3d11Sharing.Release(queue, registered.Image);
+                            OpenClDriver.Finish(queue);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                    DisableInterop(e.Message);
+                    throw;
+                }
+            }
+        }
+
+        RegisteredD3D11Resource GetOrRegisterD3D11Resource(nint d3d11Resource)
+        {
+            if (registeredD3D11Resources.TryGetValue(d3d11Resource, out var registered))
+                return registered;
+
+            Marshal.AddRef(d3d11Resource);
+            try
+            {
+                registered = new RegisteredD3D11Resource(
+                    d3d11Resource,
+                    d3d11Sharing!.CreateTexture(context, d3d11Resource));
+                registeredD3D11Resources.Add(d3d11Resource, registered);
+#if DEBUG
+                Interlocked.Increment(ref d3d11ResourceRegistrationCount);
+#endif
+                return registered;
+            }
+            catch
+            {
+                Marshal.Release(d3d11Resource);
+                throw;
+            }
+        }
+
+        void DisableInterop(string reason)
+        {
+            isD3D11InteropAvailable = false;
+            ReleaseD3D11Resources();
+            LogInteropFailureOnce(reason);
+        }
+
+        void LogInteropFailureOnce(string reason)
+        {
+            if (hasLoggedInteropFailure)
+                return;
+            hasLoggedInteropFailure = true;
+            OfxHostLog.Info($"OpenFX OpenCL×D3D11 interopを利用できないためCPU転送経路を使用します。reason={reason}");
+        }
+
+        static nint AcquireResidentContext(OpenClContextKey key, Func<nint> create, out long generation)
+        {
+            ReleaseInactiveContextsForOtherD3D11Devices(key);
+            if (residentContexts.TryGetValue(key, out var resident))
+            {
+                OpenClDriver.RetainContext(resident.Context);
+                resident.ActiveBackendCount++;
+                generation = residentContextGenerations[key];
+                return resident.Context;
+            }
+            var context = create();
+            generation = ++nextResidentContextGeneration;
+            try
+            {
+                // resident cacheの所有参照とは別に、backend leaseごとの参照を持たせる。
+                // TDR無効化でcache参照を解放しても兄弟backendのcontext handleを失効させない。
+                OpenClDriver.RetainContext(context);
+            }
+            catch
+            {
+                OpenClDriver.ReleaseContext(context);
+                throw;
+            }
+#if DEBUG
+            Interlocked.Increment(ref residentContextCreationCount);
+#endif
+            residentContexts.Add(key, new ResidentContextEntry(context) { ActiveBackendCount = 1 });
+            residentContextGenerations.Add(key, generation);
+            return context;
+        }
+
+        static void ReleaseResidentContextLease(OpenClContextKey key, nint context, long expectedGeneration)
+        {
+            if (residentContexts.TryGetValue(key, out var resident)
+                && resident.Context == context
+                && residentContextGenerations.TryGetValue(key, out var generation)
+                && generation == expectedGeneration)
+            {
+                if (resident.ActiveBackendCount > 0)
+                    resident.ActiveBackendCount--;
+                if (resident.ActiveBackendCount == 0
+                    && residentContexts.Keys.Any(other => other.Device == key.Device && other != key))
+                {
+                    ReleaseResidentContext(key, resident, generation);
+                }
+            }
+            // static cacheから既に外れた失敗世代でもbackend自身のretain参照は必ず解放する。
+            try
+            {
+                OpenClDriver.ReleaseContext(context);
+            }
+            catch (OpenClException e)
+            {
+                OfxHostLog.Info($"OpenCL context leaseの解放に失敗しました。{e.Message}");
+            }
+        }
+
+        static void ReleaseInactiveContextsForOtherD3D11Devices(OpenClContextKey requestedKey)
+        {
+            foreach (var pair in residentContexts
+                .Where(pair => pair.Key.Device == requestedKey.Device
+                    && pair.Key != requestedKey
+                    && pair.Value.ActiveBackendCount == 0)
+                .ToArray())
+            {
+                ReleaseResidentContext(pair.Key, pair.Value, residentContextGenerations[pair.Key]);
+            }
+        }
+
+        static void ReleaseResidentContext(OpenClContextKey key, ResidentContextEntry resident, long expectedGeneration)
+        {
+            if (!residentContexts.TryGetValue(key, out var current)
+                || !ReferenceEquals(current, resident)
+                || !residentContextGenerations.TryGetValue(key, out var generation)
+                || generation != expectedGeneration)
+            {
+                return;
+            }
+            InvalidateResidentConversionResources(resident.Context);
+            residentContexts.Remove(key);
+            residentContextGenerations.Remove(key);
+            try
+            {
+                OpenClDriver.ReleaseContext(resident.Context);
+            }
+            catch (OpenClException e)
+            {
+                OfxHostLog.Info($"OpenCL常駐contextの解放に失敗しました。{e.Message}");
+            }
+        }
+
+        static SharedConversionResources AcquireSharedConversionResources(nint context, nint device)
+        {
+#if DEBUG
+            if (ForceConversionProgramFailureForTest)
+                throw new OpenClException(-11, "テスト用OpenCL変換programコンパイル", "");
+#endif
+            if (residentConversionResources.TryGetValue(context, out var resources))
+            {
+                resources.ReferenceCount++;
+                return resources;
+            }
+
+            resources = new SharedConversionResources();
+            try
+            {
+                resources.Program = OpenClDriver.CompileProgram(context, device, ConversionKernelSource);
+#if DEBUG
+                Interlocked.Increment(ref conversionProgramBuildCount);
+#endif
+                resources.BgraToRgbaKernel = OpenClDriver.CreateKernel(resources.Program, "ymm4_bgra_to_rgba");
+                resources.RgbaToBgraKernel = OpenClDriver.CreateKernel(resources.Program, "ymm4_rgba_to_bgra");
+                resources.ReferenceCount = 1;
+                residentConversionResources.Add(context, resources);
+                return resources;
+            }
+            catch
+            {
+                ReleaseConversionResources(resources);
+                throw;
+            }
+        }
+
+        static void ReleaseSharedConversionResources(nint context, SharedConversionResources resources)
+        {
+            resources.ReferenceCount--;
+            if (resources.ReferenceCount < 0)
+            {
+                resources.ReferenceCount = 0;
+                OfxHostLog.Info("OpenCL共有変換資源の参照数が不正なため0へ補正しました。");
+            }
+            // 通常Disposeでは常駐させ、次のbackend生成でprogram buildを再実行しない。
+            _ = context;
+        }
+
+        SharedConversionResources EnsureCurrentSharedConversionResources()
+        {
+            var resources = conversionResources
+                ?? throw new InvalidOperationException("OpenCL共有変換資源が初期化されていません。");
+            if (!resources.IsInvalidated)
+                return resources;
+            throw new OpenClUnavailableException("OpenCL共有変換資源は無効化されています。新しい描画グラフで再構築してください。");
+        }
+
+        void EnsureCurrentResidentContext()
+        {
+            if (residentContextGeneration == 0
+                || !residentContexts.TryGetValue(contextKey, out var resident)
+                || resident.Context != context
+                || !residentContextGenerations.TryGetValue(contextKey, out var generation)
+                || generation != residentContextGeneration)
+            {
+                throw new OpenClUnavailableException("OpenCL常駐contextは無効化されています。新しい描画グラフで再構築してください。");
+            }
+        }
+
+        void InvalidateResidentContextAfterBackendFailure()
+        {
+            var expectedResources = residentConversionResourcesGeneration;
+            if (residentContextGeneration == 0
+                || !residentContexts.TryGetValue(contextKey, out var resident)
+                || resident.Context != context && context != 0
+                || !residentContextGenerations.TryGetValue(contextKey, out var generation)
+                || generation != residentContextGeneration
+                || (expectedResources is not null
+                    && (!residentConversionResources.TryGetValue(resident.Context, out var currentResources)
+                        || !ReferenceEquals(currentResources, expectedResources))))
+            {
+                // 古いbackendの遅延通知で、既に再構築された新世代を無効化しない。
+                return;
+            }
+            InvalidateResidentConversionResources(resident.Context);
+            residentContexts.Remove(contextKey);
+            residentContextGenerations.Remove(contextKey);
+            try
+            {
+                // resident cacheが所有する参照だけを解放する。backend leaseは各backendが解放する。
+                OpenClDriver.ReleaseContext(resident.Context);
+            }
+            catch (OpenClException e)
+            {
+                OfxHostLog.Info($"OpenCL常駐contextの無効化に失敗しました。{e.Message}");
+            }
+        }
+
+        static void InvalidateResidentConversionResources(nint context)
+        {
+            if (!residentConversionResources.Remove(context, out var resources))
+                return;
+            resources.IsInvalidated = true;
+            ReleaseConversionResources(resources);
+        }
+
+        static void ReleaseConversionResources(SharedConversionResources resources)
+        {
+            resources.IsInvalidated = true;
+            if (resources.BgraToRgbaKernel != 0)
+            {
+                try { OpenClDriver.ReleaseKernel(resources.BgraToRgbaKernel); } catch { }
+                resources.BgraToRgbaKernel = 0;
+            }
+            if (resources.RgbaToBgraKernel != 0)
+            {
+                try { OpenClDriver.ReleaseKernel(resources.RgbaToBgraKernel); } catch { }
+                resources.RgbaToBgraKernel = 0;
+            }
+            if (resources.Program != 0)
+            {
+                try { OpenClDriver.ReleaseProgram(resources.Program); } catch { }
+                resources.Program = 0;
+            }
+        }
+
+        static void ValidateInteropImage(OfxImage gpuImage)
+        {
+            if (gpuImage.Storage.IsCpuAccessible
+                || gpuImage.Storage.DataPointer == 0
+                || gpuImage.Width <= 0
+                || gpuImage.Height <= 0
+                || gpuImage.RowBytes != gpuImage.Width * 4 * sizeof(float))
+            {
+                throw new InvalidOperationException("OpenCL interop画像の形式がRGBA floatリニア画像ではありません。");
+            }
+        }
+
+        static void ReleaseResidentContextsAtProcessExit()
+        {
+            lock (openClLock)
+            {
+                foreach (var resources in residentConversionResources.Values)
+                {
+                    resources.IsInvalidated = true;
+                    ReleaseConversionResources(resources);
+                }
+                residentConversionResources.Clear();
+                foreach (var resident in residentContexts.Values)
+                {
+                    try
+                    {
+                        OpenClDriver.ReleaseContext(resident.Context);
+                    }
+                    catch
+                    {
+                    }
+                }
+                residentContexts.Clear();
+                residentContextGenerations.Clear();
+            }
+        }
+
+        readonly record struct OpenClContextKey(
+            nint Device,
+            nint D3D11Device,
+            OpenClD3D11SharingKind? SharingKind);
+
+        readonly record struct RegisteredD3D11Resource(nint D3D11Resource, nint Image);
+
+        sealed class ResidentContextEntry(nint context)
+        {
+            public nint Context { get; } = context;
+            public int ActiveBackendCount { get; set; }
+        }
+
+        sealed class SharedConversionResources
+        {
+            public int ReferenceCount;
+            public bool IsInvalidated;
+            public nint Program;
+            public nint BgraToRgbaKernel;
+            public nint RgbaToBgraKernel;
+        }
+
+        sealed class OpenClBufferStorage : IOfxImageStorage
+        {
+            OpenClGpuRenderBackend? owner;
+            nint buffer;
+
+            public nint DataPointer => buffer;
+            public nint OpenCLImage => 0;
+            public int RowBytes { get; }
+            public bool IsCpuAccessible => false;
+
+            public OpenClBufferStorage(OpenClGpuRenderBackend owner, nint buffer, int rowBytes)
+            {
+                this.owner = owner;
+                this.buffer = buffer;
+                RowBytes = rowBytes;
+            }
+
+            public void Dispose()
+            {
+                var oldBuffer = Interlocked.Exchange(ref buffer, 0);
+                var oldOwner = Interlocked.Exchange(ref owner, null);
+                if (oldBuffer != 0)
+                    oldOwner?.ReleaseBuffer(oldBuffer);
+            }
+        }
+
+        const string ConversionKernelSource = """
+inline float ymm4_to_unorm(float value)
+{
+    float scaled = value * 255.0f + 0.5f;
+    if (!(scaled > 0.0f))
+        return 0.0f;
+    if (scaled >= 255.0f)
+        return 1.0f;
+    return floor(scaled) * (1.0f / 255.0f);
+}
+
+const sampler_t ymm4_sampler =
+    CLK_NORMALIZED_COORDS_FALSE |
+    CLK_ADDRESS_NONE |
+    CLK_FILTER_NEAREST;
+
+__kernel void ymm4_bgra_to_rgba(
+    read_only image2d_t source,
+    __global float4* destination,
+    int width,
+    int height)
+{
+    int x = (int)get_global_id(0);
+    int y = (int)get_global_id(1);
+    if (x >= width || y >= height)
+        return;
+    // read_imagef/write_imagefがchannel orderを吸収するため、D3D11共有imageの形式に依存しない。
+    float4 rgba = read_imagef(source, ymm4_sampler, (int2)(x, y));
+    destination[(height - 1 - y) * width + x] = rgba;
+}
+
+__kernel void ymm4_rgba_to_bgra(
+    __global const float4* source,
+    write_only image2d_t destination,
+    int width,
+    int height,
+    int mode)
+{
+    int x = (int)get_global_id(0);
+    int y = (int)get_global_id(1);
+    if (x >= width || y >= height)
+        return;
+    float4 rgba = source[(height - 1 - y) * width + x];
+    if (mode == 1)
+        rgba.xyz *= rgba.w;
+    if (mode == 2)
+        rgba.w = 1.0f;
+    rgba = (float4)(
+        ymm4_to_unorm(rgba.x),
+        ymm4_to_unorm(rgba.y),
+        ymm4_to_unorm(rgba.z),
+        ymm4_to_unorm(rgba.w));
+    write_imagef(destination, (int2)(x, y), rgba);
+}
+""";
+    }
+
     /// <summary>CUDAドライバーまたは対応デバイスを利用できない。</summary>
     internal sealed class CudaUnavailableException(string message) : Exception(message)
+    {
+    }
+
+    /// <summary>OpenCL contextまたは共有資源が無効化され、描画グラフの再構築が必要。</summary>
+    internal sealed class OpenClUnavailableException(string message) : Exception(message)
     {
     }
 
@@ -1535,6 +2503,20 @@ RGBA_DONE:
         }
 
         public CudaInteropUnavailableException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+    }
+
+    /// <summary>OpenCLのD3D11共有だけが利用できず、CPU転送OpenCL経路へ切り替え可能な失敗。</summary>
+    internal sealed class OpenClInteropUnavailableException : Exception
+    {
+        public OpenClInteropUnavailableException(string message)
+            : base(message)
+        {
+        }
+
+        public OpenClInteropUnavailableException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

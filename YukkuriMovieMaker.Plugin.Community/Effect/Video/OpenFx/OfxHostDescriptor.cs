@@ -68,11 +68,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             props.SetInt(OfxConstants.ImageEffectInstancePropSequentialRender, 0);
             // CUDA Driver APIを実際に初期化できる環境だけ能力を宣言する。
             // スキャナー子プロセスにも同じ値を起動引数で渡す。
-            var cudaAvailable = OfxGpuRenderBackendFactory.HasRegisteredBackend ? "true" : "false";
+            var cudaAvailable = OfxGpuRenderBackendFactory.HasCudaBackend ? "true" : "false";
+            var openClAvailable = OfxGpuRenderBackendFactory.HasOpenClBackend ? "true" : "false";
             props.SetString(OfxConstants.ImageEffectPropOpenGLRenderSupported, "false");
             props.SetString(OfxConstants.ImageEffectPropCudaRenderSupported, cudaAvailable);
             props.SetString(OfxConstants.ImageEffectPropCudaStreamSupported, cudaAvailable);
-            props.SetString(OfxConstants.ImageEffectPropOpenCLRenderSupported, "false");
+            props.SetString(OfxConstants.ImageEffectPropOpenCLRenderSupported, openClAvailable);
             props.SetString(OfxConstants.ImageEffectPropOpenCLSupported, "false");
             props.SetString(OfxConstants.ImageEffectPropMetalRenderSupported, "false");
             // ホストはCPUレンダリングを常時提供する（1.5.1でこのプロパティを照会するプラグイン対策。ネイティブスキャナーと一致させること）
@@ -123,6 +124,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                         return OfxProgressSuite.Pointer;
                     case OfxConstants.TimeLineSuite when suiteVersion == 1:
                         return OfxTimeLineSuite.Pointer;
+                    case OfxConstants.OpenCLProgramSuite when suiteVersion == 1:
+                        return OfxOpenClProgramSuite.Pointer;
                     default:
                         OfxHostLog.Debug($"未対応のスイート要求: {name} v{suiteVersion}");
                         return 0;

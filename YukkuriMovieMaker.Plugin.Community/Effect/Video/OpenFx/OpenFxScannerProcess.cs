@@ -99,7 +99,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             // バージョンで挙動を変えるプラグインのdescribe結果がスキャンと実行時で食い違わないようにする
             var hostVersion = typeof(OpenFxScannerProcess).Assembly.GetName().Version ?? new Version(0, 0, 0, 0);
             startInfo.ArgumentList.Add(hostVersion.ToString(4));
-            startInfo.ArgumentList.Add(OfxGpuRenderBackendFactory.HasRegisteredBackend ? "true" : "false");
+            startInfo.ArgumentList.Add(OfxGpuRenderBackendFactory.HasCudaBackend ? "true" : "false");
+            startInfo.ArgumentList.Add(OfxGpuRenderBackendFactory.HasOpenClBackend ? "true" : "false");
             using var process = Process.Start(startInfo)
                 ?? throw new InvalidOperationException($"OFXスキャナーを起動できませんでした。path={scannerPath}");
             try
