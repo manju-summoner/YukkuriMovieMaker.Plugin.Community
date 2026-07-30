@@ -25,6 +25,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         string[] additionalPluginDirectories = [];
 
         /// <summary>
+        /// GPU/CPUの両方へ対応するOpenFXプラグインでGPUレンダリングを優先するか。
+        /// falseの場合は利用可能なCUDAバックエンドがあってもCPU経路だけを使用する。
+        /// </summary>
+        public bool UseGpuRendering { get => useGpuRendering; set => Set(ref useGpuRendering, value); }
+        bool useGpuRendering = true;
+
+        /// <summary>
         /// お気に入りに登録したOFXプラグインのID
         /// </summary>
         public ImmutableList<string> FavoritePluginIds { get => favoritePluginIds; set => Set(ref favoritePluginIds, value); }

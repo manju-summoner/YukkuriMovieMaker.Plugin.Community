@@ -222,19 +222,42 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
                 EnsureInputResources(width, height);
                 EnsureOutputResources(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1);
-                ReadInputPixels(dc, bounds, width, height);
-                if (isRenderUnsafe)
+                DrawInputToGpuBitmap(dc, bounds);
+                var renderedWithInterop = false;
+                var canUseD3D11Interop = instance.CanUseD3D11Interop;
+                if (canUseD3D11Interop && isRenderUnsafe)
                 {
                     lock (OfxEffectInstance.UnsafeRenderLock)
+                        renderedWithInterop = OfxD3D11Interop.WithResources(
+                            instance,
+                            gpuBitmap!,
+                            outputBitmap!,
+                            (source, output) => instance.TryRenderD3D11(source, output, frame, renderWindow));
+                }
+                else if (canUseD3D11Interop)
+                {
+                    renderedWithInterop = OfxD3D11Interop.WithResources(
+                        instance,
+                        gpuBitmap!,
+                        outputBitmap!,
+                        (source, output) => instance.TryRenderD3D11(source, output, frame, renderWindow));
+                }
+                if (!renderedWithInterop)
+                {
+                    ReadInputPixels(width, height);
+                    if (isRenderUnsafe)
+                    {
+                        lock (OfxEffectInstance.UnsafeRenderLock)
+                            instance.Render(sourceBuffer, outputBuffer, frame, renderWindow);
+                    }
+                    else
+                    {
                         instance.Render(sourceBuffer, outputBuffer, frame, renderWindow);
-                }
-                else
-                {
-                    instance.Render(sourceBuffer, outputBuffer, frame, renderWindow);
-                }
-                fixed (byte* outputPointer = outputBuffer)
-                {
-                    outputBitmap!.CopyFromMemory((nint)outputPointer, outputBitmapWidth * 4);
+                    }
+                    fixed (byte* outputPointer = outputBuffer)
+                    {
+                        outputBitmap!.CopyFromMemory((nint)outputPointer, outputBitmapWidth * 4);
+                    }
                 }
             }
             catch (Exception e)
@@ -317,7 +340,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             isRenderUnsafe = descriptor.Props.GetStringOrDefault(
                 OfxConstants.ImageEffectPluginRenderThreadSafety,
                 OfxConstants.ImageEffectRenderFullySafe) == OfxConstants.ImageEffectRenderUnsafe;
-            var created = new OfxEffectInstance(plugin, OfxConstants.ImageEffectContextFilter, width, height, fps, durationFrames);
+            var created = OfxEffectInstance.CreateWithGpuBackend(
+                plugin,
+                OfxConstants.ImageEffectContextFilter,
+                width,
+                height,
+                fps,
+                durationFrames,
+                devices);
             try
             {
                 created.Create();
@@ -336,6 +366,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         {
             if (inputBitmapWidth == width && inputBitmapHeight == height && gpuBitmap is not null)
                 return;
+            OfxD3D11Interop.ReleaseResource(instance, gpuBitmap);
             gpuBitmap?.Dispose();
             gpuBitmap = null;
             cpuBitmap?.Dispose();
@@ -371,6 +402,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             // 差し替え前の出力ビットマップがエフェクト入力に残ったまま破棄しない
             transformEffect?.SetInput(0, null, true);
             isPassthroughApplied = false;
+            OfxD3D11Interop.ReleaseResource(instance, outputBitmap);
             outputBitmap?.Dispose();
             outputBitmap = null;
 
@@ -379,7 +411,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 new PixelFormat(Vortice.DXGI.Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
                 96f,
                 96f,
-                BitmapOptions.None);
+                BitmapOptions.Target);
             outputBitmap = dc.CreateBitmap(new SizeI(width, height), outputProperties);
             outputBitmapWidth = width;
             outputBitmapHeight = height;
@@ -389,7 +421,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 outputBuffer = new byte[bufferSize];
         }
 
-        void ReadInputPixels(ID2D1DeviceContext dc, Rect bounds, int width, int height)
+        void DrawInputToGpuBitmap(ID2D1DeviceContext dc, Rect bounds)
         {
             // 呼び出し元が設定した描画先を壊さないよう退避して復元する
             var previousTarget = dc.Target;
@@ -411,7 +443,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 dc.Target = previousTarget;
                 previousTarget?.Dispose();
             }
+        }
 
+        void ReadInputPixels(int width, int height)
+        {
             cpuBitmap!.CopyFromBitmap(gpuBitmap!);
             var map = cpuBitmap.Map(MapOptions.Read);
             try

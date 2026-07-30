@@ -44,9 +44,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             var version = typeof(OfxHostDescriptor).Assembly.GetName().Version ?? new Version(0, 0, 0, 0);
             props.SetIntN(OfxConstants.PropVersion, version.Major, version.Minor, version.Build, version.Revision);
             props.SetString(OfxConstants.PropVersionLabel, version.ToString());
-            // 実装済みのOFX APIバージョン（1.4相当。1.5固有のDrawSuite等は未実装）。
-            // kOfxPropAPIVersion の型は int×N（例: 1.4 → {1,4}）
-            props.SetIntN(OfxConstants.PropAPIVersion, 1, 4);
+            // CPURenderSupportedを含むOFX 1.5.1の能力を扱うため1.5.1を宣言する。
+            // DrawSuiteはオーバーレイ非対応ホストでは必須でなく、未対応能力は個別プロパティでfalseを宣言する。
+            // kOfxPropAPIVersion の型は int×N（例: 1.5.1 → {1,5,1}）
+            props.SetIntN(OfxConstants.PropAPIVersion, 1, 5, 1);
 
             // 画像エフェクトホストとしての能力
             props.SetInt(OfxConstants.ImageEffectHostPropIsBackground, 0);
@@ -65,6 +66,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             props.SetInt(OfxConstants.ImageEffectPropSetableFielding, 0);
             props.SetInt(OfxConstants.ImageEffectPropRenderQualityDraft, 0);
             props.SetInt(OfxConstants.ImageEffectInstancePropSequentialRender, 0);
+            // CUDA Driver APIを実際に初期化できる環境だけ能力を宣言する。
+            // スキャナー子プロセスにも同じ値を起動引数で渡す。
+            var cudaAvailable = OfxGpuRenderBackendFactory.HasRegisteredBackend ? "true" : "false";
+            props.SetString(OfxConstants.ImageEffectPropOpenGLRenderSupported, "false");
+            props.SetString(OfxConstants.ImageEffectPropCudaRenderSupported, cudaAvailable);
+            props.SetString(OfxConstants.ImageEffectPropCudaStreamSupported, cudaAvailable);
+            props.SetString(OfxConstants.ImageEffectPropOpenCLRenderSupported, "false");
+            props.SetString(OfxConstants.ImageEffectPropOpenCLSupported, "false");
+            props.SetString(OfxConstants.ImageEffectPropMetalRenderSupported, "false");
+            // ホストはCPUレンダリングを常時提供する（1.5.1でこのプロパティを照会するプラグイン対策。ネイティブスキャナーと一致させること）
+            props.SetString(OfxConstants.ImageEffectPropCPURenderSupported, "true");
             props.SetPointer(OfxConstants.PropHostOSHandle, 0);
             // OFXの標準座標系（Y軸上向き・左下原点）をそのまま宣言する。D2DとのY軸変換はホスト側で行う
             props.SetString(OfxConstants.ImageEffectHostPropNativeOrigin, OfxConstants.HostNativeOriginBottomLeft);
@@ -107,6 +119,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                         return OfxMessageSuite.PointerV1;
                     case OfxConstants.MessageSuite when suiteVersion == 2:
                         return OfxMessageSuite.PointerV2;
+                    case OfxConstants.ProgressSuite when suiteVersion == 1:
+                        return OfxProgressSuite.Pointer;
+                    case OfxConstants.TimeLineSuite when suiteVersion == 1:
+                        return OfxTimeLineSuite.Pointer;
                     default:
                         OfxHostLog.Debug($"未対応のスイート要求: {name} v{suiteVersion}");
                         return 0;

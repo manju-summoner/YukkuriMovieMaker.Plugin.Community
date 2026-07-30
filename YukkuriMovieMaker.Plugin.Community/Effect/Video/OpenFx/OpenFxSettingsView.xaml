@@ -20,12 +20,18 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="26"/>
                     <RowDefinition Height="88"/>
                     <RowDefinition Height="26"/>
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0">
+                <CheckBox Grid.Row="0"
+                          Margin="5,2"
+                          Content="{x:Static local:Texts.OpenFxSettingsUseGpuRendering}"
+                          IsChecked="{Binding UseGpuRendering}"/>
+
+                <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition/>
@@ -63,11 +69,11 @@
                     </ItemsControl>
                 </Grid>
 
-                <Label Grid.Row="1" Content="{x:Static local:Texts.OpenFxSettingsAdditionalDirectoriesName}"/>
-                <ListBox Grid.Row="2"
+                <Label Grid.Row="2" Content="{x:Static local:Texts.OpenFxSettingsAdditionalDirectoriesName}"/>
+                <ListBox Grid.Row="3"
                          ItemsSource="{Binding AdditionalDirectories}"
                          SelectedItem="{Binding SelectedDirectory}"/>
-                <Grid Grid.Row="3">
+                <Grid Grid.Row="4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="100"/>
@@ -112,6 +118,7 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
+                            <GridViewColumn Header="{x:Static local:Texts.OpenFxSettingsPluginGpuColumn}" DisplayMemberBinding="{Binding GpuSupportText}" Width="150"/>
                             <GridViewColumn Header="{x:Static local:Texts.OpenFxSettingsPluginPathColumn}" DisplayMemberBinding="{Binding BinaryPath}" Width="340"/>
                         </GridView>
                     </ListView.View>

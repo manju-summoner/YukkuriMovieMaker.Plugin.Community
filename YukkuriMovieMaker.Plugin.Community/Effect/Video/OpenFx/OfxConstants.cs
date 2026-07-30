@@ -21,6 +21,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public const int ReplyNo = 13;
         public const int ReplyDefault = 14;
         public const int ErrImageFormat = 1000;
+        public const int GPUOutOfMemory = 1001;
+        public const int GPURenderFailed = 1002;
     }
 
     /// <summary>
@@ -65,6 +67,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public const string MultiThreadSuite = "OfxMultiThreadSuite";
         public const string MessageSuite = "OfxMessageSuite";
         public const string InteractSuite = "OfxInteractSuite";
+        public const string ProgressSuite = "OfxProgressSuite";
+        public const string TimeLineSuite = "OfxTimeLineSuite";
 
         // 汎用プロパティ（ofxCore.h）
         public const string PropAPIVersion = "OfxPropAPIVersion";
@@ -178,6 +182,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public const string ImageEffectFrameVarying = "OfxImageEffectFrameVarying";
         public const string ImageEffectPropRenderScale = "OfxImageEffectPropRenderScale";
         public const string ImageEffectPropRenderQualityDraft = "OfxImageEffectPropRenderQualityDraft";
+        public const string ImageEffectPropOpenGLRenderSupported = "OfxImageEffectPropOpenGLRenderSupported";
+        public const string ImageEffectPropCudaRenderSupported = "OfxImageEffectPropCudaRenderSupported";
+        public const string ImageEffectPropCudaStreamSupported = "OfxImageEffectPropCudaStreamSupported";
+        public const string ImageEffectPropOpenCLRenderSupported = "OfxImageEffectPropOpenCLRenderSupported";
+        public const string ImageEffectPropOpenCLSupported = "OfxImageEffectPropOpenCLSupported";
+        public const string ImageEffectPropMetalRenderSupported = "OfxImageEffectPropMetalRenderSupported";
+        public const string ImageEffectPropCPURenderSupported = "OfxImageEffectPropCPURenderSupported";
+        public const string ImageEffectPropOpenGLEnabled = "OfxImageEffectPropOpenGLEnabled";
+        public const string ImageEffectPropCudaEnabled = "OfxImageEffectPropCudaEnabled";
+        public const string ImageEffectPropCudaStream = "OfxImageEffectPropCudaStream";
+        public const string ImageEffectPropOpenCLEnabled = "OfxImageEffectPropOpenCLEnabled";
+        public const string ImageEffectPropOpenCLCommandQueue = "OfxImageEffectPropOpenCLCommandQueue";
+        public const string ImageEffectPropOpenCLImage = "OfxImageEffectPropOpenCLImage";
+        public const string ImageEffectPropOpenGLTextureIndex = "OfxImageEffectPropOpenGLTextureIndex";
+        public const string ImageEffectPropOpenGLTextureTarget = "OfxImageEffectPropOpenGLTextureTarget";
         public const string ImageEffectPropProjectExtent = "OfxImageEffectPropProjectExtent";
         public const string ImageEffectPropProjectSize = "OfxImageEffectPropProjectSize";
         public const string ImageEffectPropProjectOffset = "OfxImageEffectPropProjectOffset";

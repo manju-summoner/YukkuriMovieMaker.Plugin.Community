@@ -11,7 +11,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
     /// </summary>
     internal sealed unsafe class OfxImage : OfxObject
     {
-        void* data;
+        sealed class CpuImageStorage : IOfxImageStorage
+        {
+            void* data;
+
+            public nint DataPointer => (nint)data;
+            public nint OpenCLImage => 0;
+            public int RowBytes { get; }
+            public bool IsCpuAccessible => true;
+
+            public CpuImageStorage(int width, int height)
+            {
+                RowBytes = width * 4 * sizeof(float);
+                data = NativeMemory.AllocZeroed((nuint)((long)RowBytes * height));
+            }
+
+            public void Dispose()
+            {
+                if (data is not null)
+                {
+                    NativeMemory.Free(data);
+                    data = null;
+                }
+            }
+        }
+
+        readonly IOfxImageStorage storage;
 
         public OfxPropertySet Props { get; }
         public int Width { get; }
@@ -21,16 +46,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public int OffsetX { get; }
         public int OffsetY { get; }
 
-        public int RowBytes => Width * 4 * sizeof(float);
-        public float* Data => (float*)data;
+        public int RowBytes => storage.RowBytes;
+        public float* Data => storage.IsCpuAccessible
+            ? (float*)storage.DataPointer
+            : throw new InvalidOperationException("GPU画像のデータはCPUから直接参照できません。");
+        public IOfxImageStorage Storage => storage;
 
         public OfxImage(int width, int height, int offsetX, int offsetY, string uniqueIdentifier)
+            : this(width, height, offsetX, offsetY, uniqueIdentifier, new CpuImageStorage(width, height))
+        {
+        }
+
+        public OfxImage(int width, int height, int offsetX, int offsetY, string uniqueIdentifier, IOfxImageStorage storage)
         {
             Width = width;
             Height = height;
             OffsetX = offsetX;
             OffsetY = offsetY;
-            data = NativeMemory.AllocZeroed((nuint)((long)RowBytes * height));
+            this.storage = storage ?? throw new ArgumentNullException(nameof(storage));
             Props = new OfxPropertySet { DebugName = $"image({uniqueIdentifier})" };
             Props.SetString(OfxConstants.PropType, OfxConstants.TypeImage);
             Props.SetString(OfxConstants.ImageEffectPropPixelDepth, OfxConstants.BitDepthFloat);
@@ -38,9 +71,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             Props.SetString(OfxConstants.ImageEffectPropPreMultiplication, OfxConstants.ImagePreMultiplied);
             Props.SetDoubleN(OfxConstants.ImageEffectPropRenderScale, 1, 1);
             Props.SetDouble(OfxConstants.ImagePropPixelAspectRatio, 1);
-            Props.SetPointer(OfxConstants.ImagePropData, (nint)data);
+            Props.SetPointer(OfxConstants.ImagePropData, storage.DataPointer);
+            if (storage.OpenCLImage != 0)
+                Props.SetPointer(OfxConstants.ImageEffectPropOpenCLImage, storage.OpenCLImage);
             Props.SetIntN(OfxConstants.ImagePropBounds, offsetX, offsetY, offsetX + width, offsetY + height);
             Props.SetIntN(OfxConstants.ImagePropRegionOfDefinition, offsetX, offsetY, offsetX + width, offsetY + height);
+            // GPU画像でも常に存在する規格プロパティ。OpenCL Imageだけは値0になる。
             Props.SetInt(OfxConstants.ImagePropRowBytes, RowBytes);
             Props.SetString(OfxConstants.ImagePropField, OfxConstants.ImageFieldNone);
             Props.SetString(OfxConstants.ImagePropUniqueIdentifier, uniqueIdentifier);
@@ -51,11 +87,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public override void Dispose()
         {
             Props.Dispose();
-            if (data is not null)
-            {
-                NativeMemory.Free(data);
-                data = null;
-            }
+            storage.Dispose();
             base.Dispose();
         }
     }

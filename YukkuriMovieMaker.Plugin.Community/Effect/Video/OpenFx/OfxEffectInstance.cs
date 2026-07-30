@@ -1,7 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
+using Vortice.Direct3D11;
+using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 {
@@ -41,7 +46,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         // フレーム毎の大きなネイティブ確保を避けるため、クリップ画像はサイズが変わるまで使い回す
         readonly Dictionary<string, OfxImage> pooledInputImages = [];
         OfxImage? pooledOutputImage;
+        readonly Dictionary<string, OfxImage> pooledGpuInputImages = [];
+        OfxImage? pooledGpuOutputImage;
+        readonly object gpuBackendLock = new();
+        readonly Func<IOfxGpuRenderBackend?>? gpuBackendFactory;
+        IOfxGpuRenderBackend? gpuBackend;
+        bool hasAttemptedGpuBackendCreation;
+        bool hasLoggedGpuFailure;
+        bool hasLoggedD3D11SurfaceFailure;
+        bool isD3D11SurfaceUnavailable;
+        bool createInstanceUsedGpuContext;
+        bool isDisposed;
         long renderSerial;
+        long parameterVersion;
+        long currentTimeBits;
+        GpuAttemptSnapshot? failedGpuSnapshot;
+        long gpuFailureParameterVersion = -1;
+        int consecutivePluginGpuFailures;
+        int consecutivePluginGpuFailuresAcrossParameters;
+        bool hasAbandonedGpuRendering;
+        bool lastUseGpuRendering;
+        bool hasGpuBackendFailed;
+        int gpuSettingChangePending;
+        GpuAttemptSnapshot? preparedDirectRenderSnapshot;
+        const int MaxConsecutivePluginGpuFailures = 3;
+        const int MaxConsecutivePluginGpuFailuresAcrossParameters = 10;
 
         public OfxPropertySet Props { get; }
         public OfxParamSet ParamSet { get; } = new();
@@ -50,6 +79,58 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         public int Height { get; }
         public double FrameRate { get; }
         public double DurationFrames { get; }
+        /// <summary>TimeLine Suiteが返す、現在駆動中のOFX時刻</summary>
+        public double CurrentTime
+        {
+            get => BitConverter.Int64BitsToDouble(Volatile.Read(ref currentTimeBits));
+            private set => Volatile.Write(ref currentTimeBits, BitConverter.DoubleToInt64Bits(value));
+        }
+
+        internal bool CanUseD3D11Interop
+        {
+            get
+            {
+                UpdateGpuSettingState();
+                if (!OpenFxSettings.Default.UseGpuRendering || isD3D11SurfaceUnavailable)
+                {
+                    return false;
+                }
+                lock (gpuBackendLock)
+                {
+                    if (failedGpuSnapshot is not null || hasAbandonedGpuRendering)
+                        return false;
+                }
+                EnsureGpuBackend();
+                return gpuBackend is IOfxD3D11InteropBackend { IsD3D11InteropAvailable: true }
+                    && IsGpuBackendSupported(gpuBackend, Props);
+            }
+        }
+
+#if DEBUG
+        internal bool HasPreparedDirectRenderSnapshotForTest => preparedDirectRenderSnapshot is not null;
+        internal long RenderSerialForTest => renderSerial;
+        internal static int RenderIterationsForTest { get; set; } = 1;
+#endif
+
+        internal void OnD3D11SurfaceUnavailable(SharpGen.Runtime.SharpGenException exception)
+            => OnD3D11SurfaceUnavailable(exception.Message);
+
+        internal void OnD3D11SurfaceUnavailable(string error)
+        {
+            isD3D11SurfaceUnavailable = true;
+            if (gpuBackend is IOfxD3D11InteropBackend interop)
+                interop.ReleaseD3D11Resources();
+            if (hasLoggedD3D11SurfaceFailure)
+                return;
+            hasLoggedD3D11SurfaceFailure = true;
+            OfxHostLog.Info($"OpenFX用D3D11リソースを取得できないため、このエフェクトインスタンスではCPU経路を使用します。error={error}");
+        }
+
+        internal void ReleaseD3D11Resource(nint d3d11Resource)
+        {
+            if (gpuBackend is IOfxD3D11InteropBackend interop)
+                interop.ReleaseD3D11Resource(d3d11Resource);
+        }
 
         /// <summary>
         /// GetClipPreferences でプラグインが宣言した出力のpremultiplication状態
@@ -61,9 +142,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// <summary>GetClipPreferences を問い合わせた回数（スレーブパラメータ契約のテスト用）</summary>
         internal int ClipPreferencesQueryCount { get; private set; }
 
-        public OfxEffectInstance(OfxImageEffectPlugin plugin, string context, int width, int height, double frameRate, double durationFrames)
+        public OfxEffectInstance(
+            OfxImageEffectPlugin plugin,
+            string context,
+            int width,
+            int height,
+            double frameRate,
+            double durationFrames,
+            IOfxGpuRenderBackend? gpuBackend = null,
+            Func<IOfxGpuRenderBackend?>? gpuBackendFactory = null)
         {
             this.plugin = plugin;
+            this.gpuBackend = gpuBackend;
+            this.gpuBackendFactory = gpuBackendFactory;
+            lastUseGpuRendering = OpenFxSettings.Default.UseGpuRendering;
             Width = width;
             Height = height;
             FrameRate = frameRate;
@@ -77,6 +169,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 throw new InvalidOperationException($"テンポラルアクセスを要求するプラグインは未対応です。plugin={plugin.Identifier}");
             if (!descriptor.SupportedPixelDepths.Contains(OfxConstants.BitDepthFloat))
                 throw new InvalidOperationException($"floatピクセル深度非対応のプラグインは未対応です。plugin={plugin.Identifier}");
+            var isCpuRenderSupported = !descriptor.Props.GetStringOrDefault(OfxConstants.ImageEffectPropCPURenderSupported, "true")
+                .Equals("false", StringComparison.OrdinalIgnoreCase);
+            if (!isCpuRenderSupported
+                && (!OpenFxSettings.Default.UseGpuRendering
+                    || (!IsGpuBackendSupported(gpuBackend, descriptor.Props)
+                        && (gpuBackendFactory is null || !IsCudaRenderingDeclared(descriptor.Props)))))
+            {
+                throw new InvalidOperationException($"CPUレンダリング非対応かつ利用可能なGPUバックエンドがないプラグインは未対応です。plugin={plugin.Identifier}");
+            }
             foreach (var clipName in new[]
             {
                 OfxConstants.ImageEffectSimpleSourceClipName,
@@ -89,6 +190,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 if (clipDescriptor is not null
                     && !clipDescriptor.Props.GetStrings(OfxConstants.ImageEffectPropSupportedComponents).Contains(OfxConstants.ImageComponentRGBA))
                     throw new InvalidOperationException($"RGBA非対応のクリップを持つプラグインは未対応です。plugin={plugin.Identifier} clip={clipName}");
+            }
+            if (!isCpuRenderSupported && !IsGpuBackendSupported(gpuBackend, descriptor.Props))
+            {
+                hasAttemptedGpuBackendCreation = true;
+                var created = gpuBackendFactory!();
+                if (!IsGpuBackendSupported(created, descriptor.Props))
+                {
+                    created?.ReleaseDeviceResources();
+                    created?.Dispose();
+                    throw new InvalidOperationException($"CPUレンダリング非対応かつGPUバックエンドの生成に失敗したプラグインは未対応です。plugin={plugin.Identifier}");
+                }
+                Volatile.Write(ref this.gpuBackend, created);
             }
             Props = new OfxPropertySet { DebugName = $"effectInstance({plugin.Identifier})" };
             Props.CopyFrom(descriptor.Props);
@@ -129,6 +242,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
             foreach (var clipDescriptor in descriptor.Clips)
                 clips.Add(new OfxClipInstance(clipDescriptor, context, width, height, frameRate, durationFrames));
+            OpenFxSettings.Default.PropertyChanged += OnOpenFxSettingsPropertyChanged;
+        }
+
+        /// <summary>
+        /// 5ホスト共通の生成入口。バックエンド初期化後にインスタンス構築が失敗してもGPU資源を漏らさない。
+        /// </summary>
+        public static OfxEffectInstance CreateWithGpuBackend(
+            OfxImageEffectPlugin plugin,
+            string context,
+            int width,
+            int height,
+            double frameRate,
+            double durationFrames,
+            IGraphicsDevicesAndContext devices)
+        {
+            return new OfxEffectInstance(
+                plugin,
+                context,
+                width,
+                height,
+                frameRate,
+                durationFrames,
+                gpuBackendFactory: () => OfxGpuRenderBackendFactory.Create(devices));
         }
 
         public OfxClipInstance? FindClip(string name) => clips.FirstOrDefault(c => c.Name == name);
@@ -141,7 +277,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         {
             if (isCreated)
                 return;
-            var status = plugin.CallAction(OfxConstants.ActionCreateInstance, Handle, 0, 0);
+            UpdateGpuSettingState();
+            EnsureGpuBackend();
+            createInstanceUsedGpuContext = IsGpuBackendSupported(gpuBackend, Props);
+            var status = CallInstanceAction(OfxConstants.ActionCreateInstance, 0, 0, createInstanceUsedGpuContext);
             if (status is not OfxStatus.OK and not OfxStatus.ReplyDefault)
                 throw new InvalidOperationException($"kOfxActionCreateInstance が失敗しました。plugin={plugin.Identifier} status={status}");
             isCreated = true;
@@ -275,24 +414,36 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         {
             if (FindParam(name) is not { DoubleValues: { } doubles })
                 return;
+            var changed = false;
             for (var i = 0; i < Math.Min(values.Length, doubles.Length); i++)
             {
                 if (doubles[i] != values[i])
+                {
                     changedParams.Add(name);
+                    changed = true;
+                }
                 doubles[i] = values[i];
             }
+            if (changed)
+                parameterVersion++;
         }
 
         public void SetIntParam(string name, params int[] values)
         {
             if (FindParam(name) is not { IntValues: { } ints })
                 return;
+            var changed = false;
             for (var i = 0; i < Math.Min(values.Length, ints.Length); i++)
             {
                 if (ints[i] != values[i])
+                {
                     changedParams.Add(name);
+                    changed = true;
+                }
                 ints[i] = values[i];
             }
+            if (changed)
+                parameterVersion++;
         }
 
         public void SetBoolParam(string name, bool value) => SetIntParam(name, value ? 1 : 0);
@@ -302,7 +453,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             if (FindParam(name) is not { IsStringType: true } param)
                 return;
             if (!string.Equals(param.StringValue, value, StringComparison.Ordinal))
+            {
                 changedParams.Add(name);
+                parameterVersion++;
+            }
             param.StringValue = value;
         }
 
@@ -312,11 +466,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// </summary>
         void NotifyChangedParams(double time)
         {
+            CurrentTime = time;
             if (changedParams.Count != 0)
             {
                 using var bracketArgs = new OfxPropertySet { DebugName = "instanceChanged.bracketArgs" };
                 bracketArgs.SetString(OfxConstants.PropChangeReason, OfxConstants.ChangeUserEdited);
-                plugin.CallAction(OfxConstants.ActionBeginInstanceChanged, Handle, bracketArgs.Handle, 0);
+                CallInstanceAction(OfxConstants.ActionBeginInstanceChanged, bracketArgs.Handle, 0);
                 foreach (var name in changedParams)
                 {
                     using var args = new OfxPropertySet { DebugName = "instanceChanged.inArgs" };
@@ -325,9 +480,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     args.SetString(OfxConstants.PropChangeReason, OfxConstants.ChangeUserEdited);
                     args.SetDouble(OfxConstants.PropTime, time);
                     args.SetDoubleN(OfxConstants.ImageEffectPropRenderScale, 1, 1);
-                    plugin.CallAction(OfxConstants.ActionInstanceChanged, Handle, args.Handle, 0);
+                    CallInstanceAction(OfxConstants.ActionInstanceChanged, args.Handle, 0);
                 }
-                plugin.CallAction(OfxConstants.ActionEndInstanceChanged, Handle, bracketArgs.Handle, 0);
+                CallInstanceAction(OfxConstants.ActionEndInstanceChanged, bracketArgs.Handle, 0);
                 // ホスト起点の変更を GetClipPreferences の再問い合わせ判定へ引き継いでからクリアする
                 lock (paramsChangedForClipPreferences)
                 {
@@ -383,6 +538,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// </summary>
         public OfxRectI GetRegionOfDefinition(double time, int maxOutputSize = int.MaxValue)
         {
+            CurrentTime = time;
             // フォールバック（プロジェクト矩形）も上限契約を守る
             var fallback = new OfxRectI { x1 = 0, y1 = 0, x2 = Width, y2 = Height };
             ClampSpan(ref fallback.x1, ref fallback.x2, Width, maxOutputSize);
@@ -456,6 +612,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// </summary>
         public string? GetIdentityClipName(double time, OfxRectI renderWindow)
         {
+            CurrentTime = time;
             // 恒等宣言はrenderWindowに対するもので、素通しは入力画像全体を表示する。
             // renderWindow（通常はRoD）が入力矩形より狭い場合、通常レンダリングなら出力されない
             // RoD外の画素まで素通しで表示されてしまうため、入力矩形全体を覆うときだけ恒等扱いにする
@@ -504,6 +661,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// trueの間、Render / RenderTransition / RenderGenerator が例外を投げる
         /// </summary>
         internal static bool ThrowOnRenderForTest;
+        /// <summary>
+        /// GPU失敗後のCPU再試行も失敗する経路を検証するためのステータス注入。
+        /// null以外の間、CPUのrenderアクション結果を指定値へ置き換える。
+        /// </summary>
+        static readonly System.Threading.AsyncLocal<int?> cpuRenderStatusForTest = new();
+        internal static int? CpuRenderStatusForTest
+        {
+            get => cpuRenderStatusForTest.Value;
+            set => cpuRenderStatusForTest.Value = value;
+        }
 #endif
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -531,12 +698,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             ThrowIfRenderFaultInjected();
             ValidateRenderWindow(renderWindow, outputBgraTopDown.Length);
             ValidateInputBuffer(sourceBgraTopDown.Length);
-            Create();
-            NotifyChangedParams(time);
-
-            // プール画像は内容がレンダリング毎に変わるため、画像の同一性を表す識別子も毎回更新する
-            // （固定のままだと、識別子で画像をキャッシュするプラグインが前フレームの結果を返しうる）
-            renderSerial++;
+            PrepareCpuRender(time, renderWindow);
             var sourceImage = PrepareInputImage(OfxConstants.ImageEffectSimpleSourceClipName, sourceBgraTopDown);
             var outputImage = PrepareOutputImage(renderWindow);
             RunRenderSequence(
@@ -546,6 +708,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 outputImage);
             OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height, outputPreMultiplication);
         }
+
+        /// <summary>
+        /// D3D11のBGRA8入力・出力テクスチャをCPUへ戻さずCUDAでレンダリングする。
+        /// interopを利用できない場合はfalseを返し、呼び出し元が既存CPU転送経路へ切り替える。
+        /// </summary>
+        public bool TryRenderD3D11(nint sourceResource, nint outputResource, double time, OfxRectI renderWindow)
+            => TryRenderD3D11Core(
+                [(FindRequiredClip(OfxConstants.ImageEffectSimpleSourceClipName), sourceResource)],
+                outputResource,
+                time,
+                renderWindow);
 
         /// <summary>
         /// トランジションコンテキストのレンダリング。SourceFrom / SourceTo の2入力（premultiplied BGRA・上から下への行順）を
@@ -558,10 +731,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             ValidateRenderWindow(renderWindow, outputBgraTopDown.Length);
             ValidateInputBuffer(fromBgraTopDown.Length);
             ValidateInputBuffer(toBgraTopDown.Length);
-            Create();
-            NotifyChangedParams(time);
-
-            renderSerial++;
+            PrepareCpuRender(time, renderWindow);
             var fromImage = PrepareInputImage(OfxConstants.ImageEffectTransitionSourceFromClipName, fromBgraTopDown);
             var toImage = PrepareInputImage(OfxConstants.ImageEffectTransitionSourceToClipName, toBgraTopDown);
             var outputImage = PrepareOutputImage(renderWindow);
@@ -576,6 +746,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height, outputPreMultiplication);
         }
 
+        public bool TryRenderTransitionD3D11(nint fromResource, nint toResource, nint outputResource, double time, OfxRectI renderWindow)
+            => TryRenderD3D11Core(
+                [
+                    (FindRequiredClip(OfxConstants.ImageEffectTransitionSourceFromClipName), fromResource),
+                    (FindRequiredClip(OfxConstants.ImageEffectTransitionSourceToClipName), toResource),
+                ],
+                outputResource,
+                time,
+                renderWindow);
+
         /// <summary>
         /// ジェネレーターコンテキストのレンダリング。入力なしで premultiplied BGRA（上から下への行順）の出力を得る。
         /// 出力バッファは renderWindow（OFX座標。通常は <see cref="GetRegionOfDefinition"/> の結果）のサイズ
@@ -584,13 +764,106 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         {
             ThrowIfRenderFaultInjected();
             ValidateRenderWindow(renderWindow, outputBgraTopDown.Length);
-            Create();
-            NotifyChangedParams(time);
-
-            renderSerial++;
+            PrepareCpuRender(time, renderWindow);
             var outputImage = PrepareOutputImage(renderWindow);
             RunRenderSequence(time, renderWindow, [], outputImage);
             OfxFrameConverter.RgbaBottomUpToBgraTopDown(outputImage.Data, outputBgraTopDown, outputImage.Width, outputImage.Height, outputPreMultiplication);
+        }
+
+        public bool TryRenderGeneratorD3D11(nint outputResource, double time, OfxRectI renderWindow)
+            => TryRenderD3D11Core([], outputResource, time, renderWindow);
+
+        bool TryRenderD3D11Core(
+            (OfxClipInstance Clip, nint Resource)[] inputs,
+            nint outputResource,
+            double time,
+            OfxRectI renderWindow)
+        {
+            var snapshot = CaptureGpuAttemptSnapshot(time, renderWindow);
+            if (!CanUseGpuBackend(snapshot)
+                || gpuBackend is not IOfxD3D11InteropBackend { IsD3D11InteropAvailable: true } interop)
+                return false;
+
+            var preservePreparedSnapshotForCpuFallback = false;
+            try
+            {
+                ThrowIfRenderFaultInjected();
+                ValidateD3D11Resources(inputs, outputResource, renderWindow);
+                Create();
+                NotifyChangedParams(time);
+                renderSerial++;
+                preparedDirectRenderSnapshot = snapshot;
+
+                var gpuInputs = new (OfxClipInstance Clip, OfxImage Image)[inputs.Length];
+                for (var i = 0; i < inputs.Length; i++)
+                {
+                    var (clip, resource) = inputs[i];
+                    var gpuImage = PrepareGpuInputImage(clip.Name, Width, Height, 0, 0);
+                    interop.UploadFromD3D11(resource, gpuImage);
+                    gpuInputs[i] = (clip, gpuImage);
+                }
+
+                var gpuOutput = PrepareGpuOutputImage(renderWindow);
+                var status = RunRenderSequenceIterations(time, renderWindow, gpuInputs, gpuOutput, gpuBackend);
+                if (status == OfxStatus.OK)
+                {
+                    interop.DownloadToD3D11(gpuOutput, outputResource, outputPreMultiplication);
+                    ResetPluginGpuFailures();
+                    return true;
+                }
+                if (!IsGpuFailureStatus(status))
+                {
+                    throw new InvalidOperationException($"kOfxImageEffectActionRender が失敗しました。plugin={plugin.Identifier} status={status}");
+                }
+
+                HandlePluginGpuFailure(status, snapshot);
+                preservePreparedSnapshotForCpuFallback = true;
+                return false;
+            }
+            catch (CudaInteropUnavailableException)
+            {
+                // D3D11共有だけの失敗。CUDAプラグインは既存のCPU転送経路で再試行できる。
+                preservePreparedSnapshotForCpuFallback = preparedDirectRenderSnapshot == snapshot;
+                return false;
+            }
+            catch (CudaException e)
+            {
+                HandleBackendGpuFailure(e.FallbackStatus, e);
+                preservePreparedSnapshotForCpuFallback = true;
+                return false;
+            }
+            catch (D3D11TextureValidationException e)
+            {
+                OnD3D11SurfaceUnavailable(e.Message);
+                return false;
+            }
+            finally
+            {
+                if (!preservePreparedSnapshotForCpuFallback)
+                    preparedDirectRenderSnapshot = null;
+            }
+        }
+
+        void HandlePluginGpuFailure(int status, GpuAttemptSnapshot snapshot)
+        {
+            gpuBackend!.OnRenderFailed(status);
+            ReleaseGpuImages();
+            RecordPluginGpuFailure(snapshot);
+            LogGpuFailureOnce(status);
+            if (!IsCpuRenderSupported())
+                throw new InvalidOperationException($"GPUレンダリングが失敗し、プラグインはCPUレンダリング非対応です。plugin={plugin.Identifier} status={status}");
+        }
+
+        void HandleBackendGpuFailure(int status, Exception exception)
+        {
+            SynchronizeGpuBackendBestEffort();
+            ReleaseGpuImages();
+            gpuBackend!.OnBackendFailed();
+            lock (gpuBackendLock)
+                hasGpuBackendFailed = true;
+            LogGpuFailureOnce(status, exception);
+            if (!IsCpuRenderSupported())
+                throw new InvalidOperationException($"GPUレンダリングが失敗し、プラグインはCPUレンダリング非対応です。plugin={plugin.Identifier} status={status}", exception);
         }
 
         void ValidateRenderWindow(OfxRectI renderWindow, int outputBufferLength)
@@ -655,10 +928,397 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 ?? throw new InvalidOperationException($"コンテキストに必要なクリップが定義されていません。plugin={plugin.Identifier} clip={name}");
 
         /// <summary>
-        /// 入力・出力クリップへ画像を差し込み、Begin/EndSequenceRenderで括ってrenderアクションを駆動する
+        /// GPUが利用可能ならGPU画像でレンダリングし、GPU固有失敗時だけ同一呼び出し内でCPUへ再試行する。
+        /// GPU成功時はCPU出力画像へダウンロードし、後段の既存BGRA変換を共通利用する。
         /// </summary>
         void RunRenderSequence(double time, OfxRectI renderWindow, (OfxClipInstance Clip, OfxImage Image)[] inputs, OfxImage outputImage)
         {
+            var snapshot = CaptureGpuAttemptSnapshot(time, renderWindow);
+            if (CanUseGpuBackend(snapshot))
+            {
+                var backend = gpuBackend!;
+                try
+                {
+                    var gpuInputs = new (OfxClipInstance Clip, OfxImage Image)[inputs.Length];
+                    for (var i = 0; i < inputs.Length; i++)
+                    {
+                        var (clip, cpuImage) = inputs[i];
+                        var gpuImage = PrepareGpuInputImage(
+                            clip.Name,
+                            cpuImage.Width,
+                            cpuImage.Height,
+                            cpuImage.OffsetX,
+                            cpuImage.OffsetY);
+                        backend.Upload(cpuImage, gpuImage);
+                        gpuInputs[i] = (clip, gpuImage);
+                    }
+                    var gpuOutput = PrepareGpuOutputImage(renderWindow);
+                    var gpuStatus = RunRenderSequenceIterations(time, renderWindow, gpuInputs, gpuOutput, backend);
+                    if (gpuStatus == OfxStatus.OK)
+                    {
+                        backend.Download(gpuOutput, outputImage);
+                        ResetPluginGpuFailures();
+                        return;
+                    }
+
+                    if (IsGpuFailureStatus(gpuStatus))
+                    {
+                        FallBackToCpu(gpuStatus, snapshot, time, renderWindow, inputs, outputImage);
+                        return;
+                    }
+
+                    throw new InvalidOperationException($"kOfxImageEffectActionRender が失敗しました。plugin={plugin.Identifier} status={gpuStatus}");
+                }
+                catch (CudaException e)
+                {
+                    FallBackToCpu(e.FallbackStatus, snapshot, time, renderWindow, inputs, outputImage, e);
+                    return;
+                }
+            }
+
+            if (!IsCpuRenderSupported())
+                throw new InvalidOperationException($"GPUレンダリングを利用できず、プラグインはCPUレンダリング非対応です。plugin={plugin.Identifier}");
+            var status = RunRenderSequenceIterations(time, renderWindow, inputs, outputImage, null);
+            if (status != OfxStatus.OK)
+                throw new InvalidOperationException($"kOfxImageEffectActionRender が失敗しました。plugin={plugin.Identifier} status={status}");
+        }
+
+        bool CanUseGpuBackend(GpuAttemptSnapshot snapshot)
+        {
+            UpdateGpuSettingState();
+            if (!OpenFxSettings.Default.UseGpuRendering)
+                return false;
+            EnsureGpuBackend();
+            lock (gpuBackendLock)
+            {
+                return !hasAbandonedGpuRendering
+                    && IsGpuBackendSupported(gpuBackend, Props)
+                    && (gpuFailureParameterVersion != snapshot.ParameterVersion
+                        || consecutivePluginGpuFailures < MaxConsecutivePluginGpuFailures)
+                    && failedGpuSnapshot != snapshot;
+            }
+        }
+
+        void RecordPluginGpuFailure(GpuAttemptSnapshot snapshot)
+        {
+            lock (gpuBackendLock)
+            {
+                failedGpuSnapshot = snapshot;
+                consecutivePluginGpuFailuresAcrossParameters++;
+                if (consecutivePluginGpuFailuresAcrossParameters >= MaxConsecutivePluginGpuFailuresAcrossParameters)
+                    hasAbandonedGpuRendering = true;
+                if (gpuFailureParameterVersion == snapshot.ParameterVersion)
+                {
+                    consecutivePluginGpuFailures++;
+                }
+                else
+                {
+                    gpuFailureParameterVersion = snapshot.ParameterVersion;
+                    consecutivePluginGpuFailures = 1;
+                }
+            }
+        }
+
+        void ResetPluginGpuFailures()
+        {
+            lock (gpuBackendLock)
+            {
+                failedGpuSnapshot = null;
+                gpuFailureParameterVersion = -1;
+                consecutivePluginGpuFailures = 0;
+                consecutivePluginGpuFailuresAcrossParameters = 0;
+                hasAbandonedGpuRendering = false;
+            }
+        }
+
+        void UpdateGpuSettingState()
+        {
+            var hasPendingChange = Volatile.Read(ref gpuSettingChangePending) != 0;
+            var useGpuRendering = OpenFxSettings.Default.UseGpuRendering;
+            if (!hasPendingChange && Volatile.Read(ref lastUseGpuRendering) == useGpuRendering)
+                return;
+            lock (gpuBackendLock)
+            {
+                useGpuRendering = OpenFxSettings.Default.UseGpuRendering;
+                Volatile.Write(ref gpuSettingChangePending, 0);
+                lastUseGpuRendering = useGpuRendering;
+                ResetPluginGpuFailures();
+                if (!useGpuRendering)
+                {
+                    if (gpuBackend is IOfxD3D11InteropBackend interop)
+                        interop.ReleaseD3D11Resources();
+                    return;
+                }
+                if (hasGpuBackendFailed && gpuBackend is not null)
+                {
+                    gpuBackend.ReleaseDeviceResources();
+                    gpuBackend.Dispose();
+                    Volatile.Write(ref gpuBackend, null);
+                    hasGpuBackendFailed = false;
+                }
+                if (gpuBackend is null)
+                    hasAttemptedGpuBackendCreation = false;
+            }
+        }
+
+        void OnOpenFxSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(OpenFxSettings.UseGpuRendering))
+                return;
+            Volatile.Write(ref gpuSettingChangePending, 1);
+        }
+
+        void EnsureGpuBackend()
+        {
+            if (Volatile.Read(ref gpuBackend) is not null
+                || gpuBackendFactory is null
+                || Volatile.Read(ref hasAttemptedGpuBackendCreation)
+                || !OpenFxSettings.Default.UseGpuRendering
+                || !IsCudaRenderingDeclared(Props))
+            {
+                return;
+            }
+            lock (gpuBackendLock)
+            {
+                if (gpuBackend is not null || hasAttemptedGpuBackendCreation)
+                    return;
+                hasAttemptedGpuBackendCreation = true;
+                var created = gpuBackendFactory();
+                if (created is null)
+                    return;
+                if (IsGpuBackendSupported(created, Props))
+                {
+                    Volatile.Write(ref gpuBackend, created);
+                    hasGpuBackendFailed = false;
+                    return;
+                }
+                created.ReleaseDeviceResources();
+                created.Dispose();
+            }
+        }
+
+        void FallBackToCpu(
+            int gpuStatus,
+            GpuAttemptSnapshot snapshot,
+            double time,
+            OfxRectI renderWindow,
+            (OfxClipInstance Clip, OfxImage Image)[] inputs,
+            OfxImage outputImage,
+            Exception? backendException = null)
+        {
+            if (backendException is null)
+            {
+                gpuBackend!.OnRenderFailed(gpuStatus);
+                ReleaseGpuImages();
+                RecordPluginGpuFailure(snapshot);
+            }
+            else
+            {
+                SynchronizeGpuBackendBestEffort();
+                ReleaseGpuImages();
+                gpuBackend!.OnBackendFailed();
+                lock (gpuBackendLock)
+                    hasGpuBackendFailed = true;
+            }
+            LogGpuFailureOnce(gpuStatus, backendException);
+            if (!IsCpuRenderSupported())
+                throw new InvalidOperationException($"GPUレンダリングが失敗し、プラグインはCPUレンダリング非対応です。plugin={plugin.Identifier} status={gpuStatus}", backendException);
+            // GPU画像をCurrentImageから外した後、同じ時刻・同じ入力でCPU画像へ差し替えて再試行する。
+            var cpuStatus = RunRenderSequenceIterations(time, renderWindow, inputs, outputImage, null);
+            if (cpuStatus != OfxStatus.OK)
+                throw new InvalidOperationException($"GPU失敗後のCPUフォールバックも失敗しました。plugin={plugin.Identifier} gpuStatus={gpuStatus} cpuStatus={cpuStatus}", backendException);
+        }
+
+        void SynchronizeGpuBackendBestEffort()
+        {
+            try
+            {
+                gpuBackend?.Synchronize();
+            }
+            catch (CudaException)
+            {
+                // 元のbackend例外を維持する。同期できなくても画像解放とCPUフォールバックを続行する。
+            }
+        }
+
+        static bool IsGpuBackendSupported(IOfxGpuRenderBackend? backend, OfxPropertySet props)
+        {
+            if (backend is not { IsAvailable: true })
+                return false;
+            var supportProperty = backend.Kind switch
+            {
+                OfxGpuRenderKind.OpenGL => OfxConstants.ImageEffectPropOpenGLRenderSupported,
+                OfxGpuRenderKind.Cuda => OfxConstants.ImageEffectPropCudaRenderSupported,
+                OfxGpuRenderKind.OpenCLBuffer => OfxConstants.ImageEffectPropOpenCLRenderSupported,
+                OfxGpuRenderKind.OpenCLImage => OfxConstants.ImageEffectPropOpenCLSupported,
+                _ => throw new InvalidOperationException($"未対応のGPU系統です。kind={backend.Kind}"),
+            };
+            var declaration = props.GetStringOrDefault(supportProperty, "false");
+            return declaration.Equals("true", StringComparison.OrdinalIgnoreCase)
+                || declaration.Equals("needed", StringComparison.OrdinalIgnoreCase);
+        }
+
+        static bool IsCudaRenderingDeclared(OfxPropertySet props)
+        {
+            var declaration = props.GetStringOrDefault(OfxConstants.ImageEffectPropCudaRenderSupported, "false");
+            return declaration.Equals("true", StringComparison.OrdinalIgnoreCase)
+                || declaration.Equals("needed", StringComparison.OrdinalIgnoreCase);
+        }
+
+        bool IsCpuRenderSupported()
+            => !Props.GetStringOrDefault(OfxConstants.ImageEffectPropCPURenderSupported, "true")
+                .Equals("false", StringComparison.OrdinalIgnoreCase);
+
+        static bool IsGpuFailureStatus(int status)
+            => status is OfxStatus.GPURenderFailed or OfxStatus.GPUOutOfMemory;
+
+        void PrepareCpuRender(double time, OfxRectI renderWindow)
+        {
+            var snapshot = CaptureGpuAttemptSnapshot(time, renderWindow);
+            if (preparedDirectRenderSnapshot == snapshot)
+            {
+                preparedDirectRenderSnapshot = null;
+                return;
+            }
+            preparedDirectRenderSnapshot = null;
+            Create();
+            NotifyChangedParams(time);
+            // プール画像は内容がレンダリング毎に変わるため、画像の同一性を表す識別子も毎回更新する。
+            renderSerial++;
+        }
+
+        GpuAttemptSnapshot CaptureGpuAttemptSnapshot(double time, OfxRectI renderWindow)
+            => new(time, renderWindow.x1, renderWindow.y1, renderWindow.x2, renderWindow.y2, parameterVersion);
+
+        void ValidateD3D11Resources(
+            (OfxClipInstance Clip, nint Resource)[] inputs,
+            nint outputResource,
+            OfxRectI renderWindow)
+        {
+            ValidateNonEmptyRenderWindow(renderWindow);
+            foreach (var (_, resource) in inputs)
+                ValidateD3D11TextureSize(resource, Width, Height);
+            ValidateD3D11TextureSize(
+                outputResource,
+                renderWindow.x2 - renderWindow.x1,
+                renderWindow.y2 - renderWindow.y1);
+        }
+
+        static void ValidateNonEmptyRenderWindow(OfxRectI renderWindow)
+        {
+            if (renderWindow.x2 <= renderWindow.x1 || renderWindow.y2 <= renderWindow.y1)
+                throw new ArgumentException("renderWindowが空です。");
+        }
+
+        static void ValidateD3D11TextureSize(nint resource, int expectedWidth, int expectedHeight)
+        {
+            if (resource == 0)
+                throw new D3D11TextureValidationException("D3D11テクスチャがnullです。");
+            Marshal.AddRef(resource);
+            using var texture = new ID3D11Texture2D(resource);
+            var description = texture.Description;
+            if (description.Width != expectedWidth || description.Height != expectedHeight)
+            {
+                throw new D3D11TextureValidationException(
+                    $"D3D11テクスチャのサイズが一致しません。expected={expectedWidth}x{expectedHeight} actual={description.Width}x{description.Height}");
+            }
+        }
+
+        int CallInstanceAction(string action, nint inArgs, nint outArgs, bool? useGpuContext = null)
+        {
+            if (useGpuContext != false && IsGpuBackendSupported(gpuBackend, Props))
+                return gpuBackend!.ExecuteWithContext(() => plugin.CallAction(action, Handle, inArgs, outArgs));
+            return plugin.CallAction(action, Handle, inArgs, outArgs);
+        }
+
+        sealed class D3D11TextureValidationException(string message) : ArgumentException(message)
+        {
+        }
+
+        readonly record struct GpuAttemptSnapshot(
+            double Time,
+            int X1,
+            int Y1,
+            int X2,
+            int Y2,
+            long ParameterVersion);
+
+        void LogGpuFailureOnce(int status, Exception? backendException = null)
+        {
+            if (hasLoggedGpuFailure)
+                return;
+            hasLoggedGpuFailure = true;
+            OfxHostLog.Info($"OpenFX GPUレンダリングが失敗したためCPUで再試行します。plugin={plugin.Identifier} backend={gpuBackend?.Kind} status={status} error={backendException?.Message}");
+        }
+
+        OfxImage PrepareGpuInputImage(string clipName, int width, int height, int offsetX, int offsetY)
+        {
+            if (!pooledGpuInputImages.TryGetValue(clipName, out var image)
+                || image.Width != width
+                || image.Height != height
+                || image.OffsetX != offsetX
+                || image.OffsetY != offsetY)
+            {
+                image?.Dispose();
+                image = new OfxImage(
+                    width,
+                    height,
+                    offsetX,
+                    offsetY,
+                    $"{plugin.Identifier}/{clipName}/GPU",
+                    gpuBackend!.CreateImageStorage(width, height, offsetX, offsetY, false));
+                pooledGpuInputImages[clipName] = image;
+            }
+            image.Props.SetString(OfxConstants.ImagePropUniqueIdentifier, $"{plugin.Identifier}/{clipName}/GPU#{renderSerial}");
+            return image;
+        }
+
+        OfxImage PrepareGpuOutputImage(OfxRectI renderWindow)
+        {
+            var width = renderWindow.x2 - renderWindow.x1;
+            var height = renderWindow.y2 - renderWindow.y1;
+            if (pooledGpuOutputImage is null
+                || pooledGpuOutputImage.Width != width
+                || pooledGpuOutputImage.Height != height
+                || pooledGpuOutputImage.OffsetX != renderWindow.x1
+                || pooledGpuOutputImage.OffsetY != renderWindow.y1)
+            {
+                pooledGpuOutputImage?.Dispose();
+                pooledGpuOutputImage = new OfxImage(
+                    width,
+                    height,
+                    renderWindow.x1,
+                    renderWindow.y1,
+                    $"{plugin.Identifier}/Output/GPU",
+                    gpuBackend!.CreateImageStorage(width, height, renderWindow.x1, renderWindow.y1, true));
+            }
+            pooledGpuOutputImage.Props.SetString(OfxConstants.ImagePropUniqueIdentifier, $"{plugin.Identifier}/Output/GPU#{renderSerial}");
+            if (pooledGpuOutputImage.Props.GetStringOrDefault(OfxConstants.ImageEffectPropPreMultiplication, "") != outputPreMultiplication)
+                pooledGpuOutputImage.Props.SetString(OfxConstants.ImageEffectPropPreMultiplication, outputPreMultiplication);
+            return pooledGpuOutputImage;
+        }
+
+        void ReleaseGpuImages()
+        {
+            foreach (var image in pooledGpuInputImages.Values)
+                image.Dispose();
+            pooledGpuInputImages.Clear();
+            pooledGpuOutputImage?.Dispose();
+            pooledGpuOutputImage = null;
+        }
+
+        /// <summary>
+        /// 入力・出力クリップへ画像を差し込み、Begin/EndSequenceRenderで括って1回のrenderアクションを駆動する。
+        /// renderのステータスは呼び出し元がGPUフォールバック判定に使うため、そのまま返す。
+        /// </summary>
+        int RunSingleRenderSequence(
+            double time,
+            OfxRectI renderWindow,
+            (OfxClipInstance Clip, OfxImage Image)[] inputs,
+            OfxImage outputImage,
+            IOfxGpuRenderBackend? activeGpuBackend)
+        {
+            CurrentTime = time;
             var outputClip = FindRequiredClip(OfxConstants.ImageEffectOutputClipName);
 
             foreach (var (clip, image) in inputs)
@@ -670,27 +1330,44 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             outputClip.CurrentTime = time;
             try
             {
-                using var sequenceArgs = CreateSequenceRenderArgs(time);
-                var beginStatus = plugin.CallAction(OfxConstants.ImageEffectActionBeginSequenceRender, Handle, sequenceArgs.Handle, 0);
+                using var sequenceArgs = CreateSequenceRenderArgs(time, activeGpuBackend);
+                var beginStatus = ExecuteAction(
+                    activeGpuBackend,
+                    OfxGpuRenderAction.BeginSequenceRender,
+                    sequenceArgs,
+                    () => plugin.CallAction(OfxConstants.ImageEffectActionBeginSequenceRender, Handle, sequenceArgs.Handle, 0));
+                if (activeGpuBackend is not null && IsGpuFailureStatus(beginStatus))
+                    return beginStatus;
                 if (beginStatus is not OfxStatus.OK and not OfxStatus.ReplyDefault)
                     throw new InvalidOperationException($"kOfxImageEffectActionBeginSequenceRender が失敗しました。plugin={plugin.Identifier} status={beginStatus}");
 
+                var renderStatus = OfxStatus.Failed;
+                var endStatus = OfxStatus.OK;
                 try
                 {
-                    using var renderArgs = CreateRenderArgs(time, renderWindow);
-                    var status = plugin.CallAction(OfxConstants.ImageEffectActionRender, Handle, renderArgs.Handle, 0);
+                    using var renderArgs = CreateRenderArgs(time, renderWindow, activeGpuBackend);
+                    renderStatus = ExecuteRenderAction(activeGpuBackend, renderArgs);
                     // renderは必須実装のため kOfxStatReplyDefault（未処理）も失敗として扱う
                     // （成功扱いすると未描画のプール出力バッファがそのまま表示される）
-                    if (status is not OfxStatus.OK)
-                        throw new InvalidOperationException($"kOfxImageEffectActionRender が失敗しました。plugin={plugin.Identifier} status={status}");
                 }
                 finally
                 {
                     // renderが失敗してもBegin/Endの対応を崩さない（シーケンス状態を持つプラグインが復帰不能になるため）
-                    var endStatus = plugin.CallAction(OfxConstants.ImageEffectActionEndSequenceRender, Handle, sequenceArgs.Handle, 0);
+                    endStatus = ExecuteAction(
+                        activeGpuBackend,
+                        OfxGpuRenderAction.EndSequenceRender,
+                        sequenceArgs,
+                        () => plugin.CallAction(OfxConstants.ImageEffectActionEndSequenceRender, Handle, sequenceArgs.Handle, 0));
                     if (endStatus is not OfxStatus.OK and not OfxStatus.ReplyDefault)
                         OfxHostLog.Info($"kOfxImageEffectActionEndSequenceRender が失敗しました。plugin={plugin.Identifier} status={endStatus}");
                 }
+                if (activeGpuBackend is not null
+                    && renderStatus == OfxStatus.OK
+                    && IsGpuFailureStatus(endStatus))
+                {
+                    return endStatus;
+                }
+                return renderStatus;
             }
             finally
             {
@@ -700,7 +1377,49 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             }
         }
 
-        OfxPropertySet CreateRenderArgs(double time, OfxRectI renderWindow)
+        int RunRenderSequenceIterations(
+            double time,
+            OfxRectI renderWindow,
+            (OfxClipInstance Clip, OfxImage Image)[] inputs,
+            OfxImage outputImage,
+            IOfxGpuRenderBackend? activeGpuBackend)
+        {
+#if DEBUG
+            var iterations = Math.Max(1, RenderIterationsForTest);
+#else
+            const int iterations = 1;
+#endif
+            var status = OfxStatus.OK;
+            for (var i = 0; i < iterations; i++)
+            {
+                status = RunSingleRenderSequence(time, renderWindow, inputs, outputImage, activeGpuBackend);
+                if (status != OfxStatus.OK)
+                    break;
+            }
+            return status;
+        }
+
+        static int ExecuteAction(
+            IOfxGpuRenderBackend? backend,
+            OfxGpuRenderAction action,
+            OfxPropertySet inArgs,
+            Func<int> actionBody)
+            => backend is null ? actionBody() : backend.ExecuteAction(action, inArgs, actionBody);
+
+        int ExecuteRenderAction(IOfxGpuRenderBackend? backend, OfxPropertySet renderArgs)
+        {
+#if DEBUG
+            if (backend is null && CpuRenderStatusForTest is { } status)
+                return status;
+#endif
+            return ExecuteAction(
+                backend,
+                OfxGpuRenderAction.Render,
+                renderArgs,
+                () => plugin.CallAction(OfxConstants.ImageEffectActionRender, Handle, renderArgs.Handle, 0));
+        }
+
+        OfxPropertySet CreateRenderArgs(double time, OfxRectI renderWindow, IOfxGpuRenderBackend? activeGpuBackend)
         {
             var args = new OfxPropertySet { DebugName = "render.inArgs" };
             args.SetDouble(OfxConstants.PropTime, time);
@@ -710,10 +1429,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             args.SetInt(OfxConstants.ImageEffectPropSequentialRenderStatus, 0);
             args.SetInt(OfxConstants.ImageEffectPropInteractiveRenderStatus, 0);
             args.SetInt(OfxConstants.ImageEffectPropRenderQualityDraft, 0);
+            SetGpuRenderArgs(args, activeGpuBackend);
             return args;
         }
 
-        OfxPropertySet CreateSequenceRenderArgs(double time)
+        OfxPropertySet CreateSequenceRenderArgs(double time, IOfxGpuRenderBackend? activeGpuBackend)
         {
             var args = new OfxPropertySet { DebugName = "sequenceRender.inArgs" };
             args.SetDoubleN(OfxConstants.ImageEffectPropFrameRange, time, time);
@@ -723,24 +1443,64 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             args.SetInt(OfxConstants.ImageEffectPropSequentialRenderStatus, 0);
             args.SetInt(OfxConstants.ImageEffectPropInteractiveRenderStatus, 0);
             args.SetInt(OfxConstants.ImageEffectPropRenderQualityDraft, 0);
+            SetGpuRenderArgs(args, activeGpuBackend);
             return args;
+        }
+
+        void SetGpuRenderArgs(OfxPropertySet args, IOfxGpuRenderBackend? activeGpuBackend)
+        {
+            args.SetInt(OfxConstants.ImageEffectPropOpenGLEnabled, activeGpuBackend?.Kind == OfxGpuRenderKind.OpenGL ? 1 : 0);
+            args.SetInt(OfxConstants.ImageEffectPropCudaEnabled, activeGpuBackend?.Kind == OfxGpuRenderKind.Cuda ? 1 : 0);
+            args.SetInt(
+                OfxConstants.ImageEffectPropOpenCLEnabled,
+                activeGpuBackend?.Kind is OfxGpuRenderKind.OpenCLBuffer or OfxGpuRenderKind.OpenCLImage ? 1 : 0);
+            if (activeGpuBackend?.CommandQueue is { } commandQueue && commandQueue != 0)
+            {
+                if (activeGpuBackend.Kind == OfxGpuRenderKind.Cuda
+                    && Props.GetStringOrDefault(OfxConstants.ImageEffectPropCudaStreamSupported, "false")
+                        .Equals("true", StringComparison.OrdinalIgnoreCase))
+                    args.SetPointer(OfxConstants.ImageEffectPropCudaStream, commandQueue);
+                else if (activeGpuBackend.Kind is OfxGpuRenderKind.OpenCLBuffer or OfxGpuRenderKind.OpenCLImage)
+                    args.SetPointer(OfxConstants.ImageEffectPropOpenCLCommandQueue, commandQueue);
+            }
         }
 
         public override void Dispose()
         {
+            if (isDisposed)
+                return;
+            isDisposed = true;
+            OpenFxSettings.Default.PropertyChanged -= OnOpenFxSettingsPropertyChanged;
             // destroyInstanceで画像ポインタへ触るプラグインに備え、画像の解放はアクションの後に行う
             if (isCreated)
             {
                 isCreated = false;
-                var status = plugin.CallAction(OfxConstants.ActionDestroyInstance, Handle, 0, 0);
-                if (status is not OfxStatus.OK and not OfxStatus.ReplyDefault)
-                    OfxHostLog.Info($"kOfxActionDestroyInstance が失敗しました。plugin={plugin.Identifier} status={status}");
+                try
+                {
+                    var status = CallInstanceAction(OfxConstants.ActionDestroyInstance, 0, 0, createInstanceUsedGpuContext);
+                    if (status is not OfxStatus.OK and not OfxStatus.ReplyDefault)
+                        OfxHostLog.Info($"kOfxActionDestroyInstance が失敗しました。plugin={plugin.Identifier} status={status}");
+                }
+                catch (Exception e)
+                {
+                    // CUDAコンテキスト喪失後はdestroyInstance自体が失敗しうる。
+                    // 画像・クリップ・パラメーター・バックエンドの解放は中断しない。
+                    OfxHostLog.Info($"kOfxActionDestroyInstance の実行中に例外が発生しました。plugin={plugin.Identifier} error={e.Message}");
+                }
             }
             foreach (var image in pooledInputImages.Values)
                 image.Dispose();
             pooledInputImages.Clear();
             pooledOutputImage?.Dispose();
             pooledOutputImage = null;
+            ReleaseGpuImages();
+            if (gpuBackend is not null)
+            {
+                // 通常破棄ではstream・GPU画像・D3D11登録cacheなどインスタンス固有資源だけを解放する。
+                // device単位のprimary context・変換module・scratchはTDR相当の無効化かプロセス終了まで常駐する。
+                gpuBackend.ReleaseDeviceResources();
+                gpuBackend.Dispose();
+            }
             foreach (var clip in clips)
                 clip.Dispose();
             clips.Clear();

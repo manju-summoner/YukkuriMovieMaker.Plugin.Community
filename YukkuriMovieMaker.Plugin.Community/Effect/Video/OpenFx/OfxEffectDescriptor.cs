@@ -113,6 +113,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             Props.SetInt(OfxConstants.ImageEffectPropSupportsMultipleClipPARs, 0);
             Props.SetEmpty(OfxConstants.ImageEffectPropClipPreferencesSlaveParam, OfxPropertyType.String);
             Props.SetPointer(OfxConstants.ImageEffectPluginPropOverlayInteractV1, 0);
+            // GPUレンダリング能力はプラグインがdescribeで上書きする。
+            // ここではofxGPURender.hが定めるプラグインdescriptorの既定値だけを宣言する
+            Props.SetString(OfxConstants.ImageEffectPropOpenGLRenderSupported, "false");
+            Props.SetString(OfxConstants.ImageEffectPropCudaRenderSupported, "false");
+            Props.SetString(OfxConstants.ImageEffectPropCudaStreamSupported, "false");
+            Props.SetString(OfxConstants.ImageEffectPropOpenCLRenderSupported, "false");
+            Props.SetString(OfxConstants.ImageEffectPropOpenCLSupported, "false");
+            Props.SetString(OfxConstants.ImageEffectPropMetalRenderSupported, "false");
+            Props.SetString(OfxConstants.ImageEffectPropCPURenderSupported, "true");
             Props.SetString(OfxConstants.PluginPropFilePath, ResolveBundlePath(binaryPath));
         }
 

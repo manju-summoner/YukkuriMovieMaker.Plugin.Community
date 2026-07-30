@@ -266,18 +266,38 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.OpenFx
                 // RoD拡張（±1024px）が乗ると総ピクセル上限を超え得るため、renderWindowにも上限を適用する
                 renderWindow = OpenFxShapeSource.ClampRenderWindowArea(renderWindow, width, height, OpenFxShapeSource.MaxOutputPixels);
                 EnsureOutputResources(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1);
-                if (isRenderUnsafe)
+                var renderedWithInterop = false;
+                var canUseD3D11Interop = instance.CanUseD3D11Interop;
+                if (canUseD3D11Interop && isRenderUnsafe)
                 {
                     lock (OfxEffectInstance.UnsafeRenderLock)
+                        renderedWithInterop = OfxD3D11Interop.WithResource(
+                            instance,
+                            outputBitmap!,
+                            output => instance.TryRenderGeneratorD3D11(output, frame, renderWindow));
+                }
+                else if (canUseD3D11Interop)
+                {
+                    renderedWithInterop = OfxD3D11Interop.WithResource(
+                        instance,
+                        outputBitmap!,
+                        output => instance.TryRenderGeneratorD3D11(output, frame, renderWindow));
+                }
+                if (!renderedWithInterop)
+                {
+                    if (isRenderUnsafe)
+                    {
+                        lock (OfxEffectInstance.UnsafeRenderLock)
+                            instance.RenderGenerator(outputBuffer, frame, renderWindow);
+                    }
+                    else
+                    {
                         instance.RenderGenerator(outputBuffer, frame, renderWindow);
-                }
-                else
-                {
-                    instance.RenderGenerator(outputBuffer, frame, renderWindow);
-                }
-                fixed (byte* outputPointer = outputBuffer)
-                {
-                    outputBitmap!.CopyFromMemory((nint)outputPointer, outputBitmapWidth * 4);
+                    }
+                    fixed (byte* outputPointer = outputBuffer)
+                    {
+                        outputBitmap!.CopyFromMemory((nint)outputPointer, outputBitmapWidth * 4);
+                    }
                 }
             }
             catch (Exception e)
@@ -406,7 +426,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.OpenFx
             isRenderUnsafe = descriptor.Props.GetStringOrDefault(
                 OfxConstants.ImageEffectPluginRenderThreadSafety,
                 OfxConstants.ImageEffectRenderFullySafe) == OfxConstants.ImageEffectRenderUnsafe;
-            var created = new OfxEffectInstance(plugin, OfxConstants.ImageEffectContextGenerator, width, height, fps, durationFrames);
+            var created = OfxEffectInstance.CreateWithGpuBackend(
+                plugin,
+                OfxConstants.ImageEffectContextGenerator,
+                width,
+                height,
+                fps,
+                durationFrames,
+                devices);
             try
             {
                 created.Create();
@@ -426,6 +453,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.OpenFx
             if (outputBitmapWidth == width && outputBitmapHeight == height && outputBitmap is not null)
                 return;
             // 旧ビットマップを参照するブラシは次のブラシ作成時に破棄される（D2Dの参照カウントで生存が管理される）
+            OfxD3D11Interop.ReleaseResource(instance, outputBitmap);
             outputBitmap?.Dispose();
             outputBitmap = null;
 
@@ -434,7 +462,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.OpenFx
                 new PixelFormat(Vortice.DXGI.Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
                 96f,
                 96f,
-                BitmapOptions.None);
+                BitmapOptions.Target);
             outputBitmap = dc.CreateBitmap(new SizeI(width, height), outputProperties);
             outputBitmapWidth = width;
             outputBitmapHeight = height;

@@ -17,6 +17,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         SingleInstance,
         /// <summary>前後フレームの取得（テンポラルアクセス）が必要</summary>
         TemporalClipAccess,
+        /// <summary>CPUレンダリング非対応で、利用可能なCUDAバックエンドにも対応していない</summary>
+        GpuOnly,
+    }
+
+    /// <summary>describeで得たGPU/CPUレンダリング宣言（ofxGPURender.hの生文字列）</summary>
+    internal record OpenFxGpuSupport(
+        string OpenGL,
+        string Cuda,
+        string CudaStream,
+        string OpenCLRender,
+        string OpenCL,
+        string Metal,
+        string CPU)
+    {
+        public static OpenFxGpuSupport Default { get; } = new("false", "false", "false", "false", "false", "false", "true");
+
+        static bool IsEnabled(string value)
+            // 一部の既存プラグインがCUDA/OpenCLにもOpenGL由来の"needed"を流用するため、
+            // 規格値ではない系統でも互換性優先で有効宣言として扱う。
+            => value.Equals("true", StringComparison.OrdinalIgnoreCase)
+                || value.Equals("needed", StringComparison.OrdinalIgnoreCase);
+
+        public bool SupportsOpenGL => IsEnabled(OpenGL);
+        public bool SupportsCuda => IsEnabled(Cuda);
+        public bool SupportsOpenCL => IsEnabled(OpenCLRender) || IsEnabled(OpenCL);
+        public bool SupportsCPU => !CPU.Equals("false", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -27,8 +53,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
     /// UnsupportedReasonが非nullのプラグインはYMM4では使用できず、Supports*はすべてfalseになる
     /// （設定画面の一覧にだけ「非対応」として表示し、各エフェクトの選択肢には現れない）
     /// </summary>
-    internal record OpenFxPluginInfo(string BinaryPath, string Identifier, uint VersionMajor, uint VersionMinor, string Name, string Grouping, bool SupportsFilter, bool SupportsTransition, bool SupportsGenerator, OpenFxUnsupportedReason? UnsupportedReason = null)
+    internal record OpenFxPluginInfo(string BinaryPath, string Identifier, uint VersionMajor, uint VersionMinor, string Name, string Grouping, bool SupportsFilter, bool SupportsTransition, bool SupportsGenerator, OpenFxUnsupportedReason? UnsupportedReason = null, OpenFxGpuSupport? DeclaredGpuSupport = null)
     {
+        internal bool DeclaredSupportsFilter { get; init; } = SupportsFilter;
+        internal bool DeclaredSupportsTransition { get; init; } = SupportsTransition;
+        internal bool DeclaredSupportsGenerator { get; init; } = SupportsGenerator;
+        public OpenFxGpuSupport GpuSupport => DeclaredGpuSupport ?? OpenFxGpuSupport.Default;
         public string DisplayName => string.IsNullOrEmpty(Grouping) ? Name : $"{Name} ({Grouping})";
 
         /// <summary>
@@ -50,8 +80,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             OpenFxUnsupportedReason.FloatDepth => Texts.OpenFxSettingsUnsupportedFloatDepthToolTip,
             OpenFxUnsupportedReason.SingleInstance => Texts.OpenFxSettingsUnsupportedSingleInstanceToolTip,
             OpenFxUnsupportedReason.TemporalClipAccess => Texts.OpenFxSettingsUnsupportedTemporalToolTip,
+            OpenFxUnsupportedReason.GpuOnly => Texts.OpenFxSettingsUnsupportedGpuOnlyToolTip,
             _ => null,
         };
+
+        /// <summary>設定画面へ表示するGPUレンダリング宣言</summary>
+        public string GpuSupportText
+        {
+            get
+            {
+                var labels = new List<string>(3);
+                if (GpuSupport.SupportsOpenGL)
+                    labels.Add("OpenGL");
+                if (GpuSupport.SupportsCuda)
+                    labels.Add("CUDA");
+                if (GpuSupport.SupportsOpenCL)
+                    labels.Add("OpenCL");
+                return labels.Count > 0 ? string.Join(" / ", labels) : "-";
+            }
+        }
 
         IEnumerable<string> EnumerateUsageLabels()
         {
@@ -72,6 +119,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
     {
         static readonly object lockObject = new();
         static volatile IReadOnlyList<OpenFxPluginInfo>? cache;
+        static bool cachedUseGpuRendering;
 
         /// <summary>
         /// スキャン済みの結果。未スキャンならnull。
@@ -98,8 +146,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         {
             lock (lockObject)
             {
+                var useGpuRendering = OpenFxSettings.Default.UseGpuRendering;
                 if (cache is not null && !refresh)
+                {
+                    // CUDA可否はプロセス中不変のLazy値なので、設定だけをキャッシュ済みdescribe結果から再評価する。
+                    if (cachedUseGpuRendering != useGpuRendering)
+                    {
+                        ReevaluateGpuOnlySupport(useGpuRendering);
+                        cachedUseGpuRendering = useGpuRendering;
+                    }
                     return cache;
+                }
 
                 // ルート同士が入れ子（追加フォルダーに既定フォルダーの配下を指定等）でも同じバイナリを二重スキャンしない
                 // （表記ゆれで重複が残らないようフルパスへ正規化してから比較する）
@@ -111,8 +168,45 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 cache = plugins
                     .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
                     .ToArray();
+                cachedUseGpuRendering = useGpuRendering;
                 return cache;
             }
+        }
+
+        /// <summary>キャッシュ済みdescribe結果からGPU専用プラグインの対応可否だけを再評価する。</summary>
+        public static IReadOnlyList<OpenFxPluginInfo>? ReevaluateCachedPlugins()
+        {
+            lock (lockObject)
+            {
+                if (cache is null)
+                    return null;
+                var useGpuRendering = OpenFxSettings.Default.UseGpuRendering;
+                ReevaluateGpuOnlySupport(useGpuRendering);
+                cachedUseGpuRendering = useGpuRendering;
+                return cache;
+            }
+        }
+
+        static void ReevaluateGpuOnlySupport(bool useGpuRendering)
+        {
+            cache = cache!
+                .Select(plugin =>
+                {
+                    if (plugin.UnsupportedReason is not null and not OpenFxUnsupportedReason.GpuOnly)
+                        return plugin;
+                    var gpuOnlyUnsupported = !plugin.GpuSupport.SupportsCPU
+                        && !(useGpuRendering
+                            && plugin.GpuSupport.SupportsCuda
+                            && OfxGpuRenderBackendFactory.HasRegisteredBackend);
+                    return plugin with
+                    {
+                        SupportsFilter = !gpuOnlyUnsupported && plugin.DeclaredSupportsFilter,
+                        SupportsTransition = !gpuOnlyUnsupported && plugin.DeclaredSupportsTransition,
+                        SupportsGenerator = !gpuOnlyUnsupported && plugin.DeclaredSupportsGenerator,
+                        UnsupportedReason = gpuOnlyUnsupported ? OpenFxUnsupportedReason.GpuOnly : null,
+                    };
+                })
+                .ToArray();
         }
 
         /// <summary>
@@ -203,7 +297,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                         descriptor.SupportedContexts,
                         descriptor.SupportedPixelDepths,
                         descriptor.Props.GetIntOrDefault(OfxConstants.ImageEffectPluginPropSingleInstance, 0) != 0,
-                        descriptor.Props.GetIntOrDefault(OfxConstants.ImageEffectPropTemporalClipAccess, 0) != 0));
+                        descriptor.Props.GetIntOrDefault(OfxConstants.ImageEffectPropTemporalClipAccess, 0) != 0,
+                        GetGpuSupport(descriptor.Props)));
                 }
                 catch (Exception e)
                 {
@@ -228,8 +323,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             IReadOnlyCollection<string> supportedContexts,
             IReadOnlyCollection<string> supportedPixelDepths,
             bool isSingleInstance,
-            bool needsTemporalClipAccess)
+            bool needsTemporalClipAccess,
+            OpenFxGpuSupport? gpuSupport = null,
+            bool? useGpuRendering = null)
         {
+            gpuSupport ??= OpenFxGpuSupport.Default;
+            useGpuRendering ??= OpenFxSettings.Default.UseGpuRendering;
             // 対応済みのコンテキストはフィルター＝映像エフェクト、トランジション＝場面切り替え、ジェネレーター＝図形
             var supportsFilter = supportedContexts.Contains(OfxConstants.ImageEffectContextFilter);
             var supportsTransition = supportedContexts.Contains(OfxConstants.ImageEffectContextTransition);
@@ -242,6 +341,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 : !supportedPixelDepths.Contains(OfxConstants.BitDepthFloat) ? OpenFxUnsupportedReason.FloatDepth
                 : isSingleInstance ? OpenFxUnsupportedReason.SingleInstance
                 : needsTemporalClipAccess ? OpenFxUnsupportedReason.TemporalClipAccess
+                : !gpuSupport.SupportsCPU
+                    && !(useGpuRendering.Value
+                        && gpuSupport.SupportsCuda
+                        && OfxGpuRenderBackendFactory.HasRegisteredBackend)
+                    ? OpenFxUnsupportedReason.GpuOnly
                 : (OpenFxUnsupportedReason?)null;
             if (unsupportedReason is not null)
             {
@@ -249,8 +353,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 supportsFilter = supportsTransition = supportsGenerator = false;
             }
             var name = label is { Length: > 0 } ? label : identifier.Split('.').Last();
-            return new OpenFxPluginInfo(binaryPath, identifier, versionMajor, versionMinor, name, grouping, supportsFilter, supportsTransition, supportsGenerator, unsupportedReason);
+            return new OpenFxPluginInfo(binaryPath, identifier, versionMajor, versionMinor, name, grouping, supportsFilter, supportsTransition, supportsGenerator, unsupportedReason, gpuSupport)
+            {
+                DeclaredSupportsFilter = supportedContexts.Contains(OfxConstants.ImageEffectContextFilter),
+                DeclaredSupportsTransition = supportedContexts.Contains(OfxConstants.ImageEffectContextTransition),
+                DeclaredSupportsGenerator = supportedContexts.Contains(OfxConstants.ImageEffectContextGenerator),
+            };
         }
+
+        static OpenFxGpuSupport GetGpuSupport(OfxPropertySet props)
+            => new(
+                props.GetStringOrDefault(OfxConstants.ImageEffectPropOpenGLRenderSupported, "false"),
+                props.GetStringOrDefault(OfxConstants.ImageEffectPropCudaRenderSupported, "false"),
+                props.GetStringOrDefault(OfxConstants.ImageEffectPropCudaStreamSupported, "false"),
+                props.GetStringOrDefault(OfxConstants.ImageEffectPropOpenCLRenderSupported, "false"),
+                props.GetStringOrDefault(OfxConstants.ImageEffectPropOpenCLSupported, "false"),
+                props.GetStringOrDefault(OfxConstants.ImageEffectPropMetalRenderSupported, "false"),
+                props.GetStringOrDefault(OfxConstants.ImageEffectPropCPURenderSupported, "true"));
 
         static IEnumerable<string> EnumerateBinaryPaths()
         {

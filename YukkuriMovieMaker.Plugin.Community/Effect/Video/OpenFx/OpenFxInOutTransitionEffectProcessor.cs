@@ -50,6 +50,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
         // GPU↔CPU転送用リソース（サイズ変更時に作り直す）
         ID2D1Bitmap1? gpuBitmap;
+        ID2D1Bitmap1? transparentGpuBitmap;
         ID2D1Bitmap1? cpuBitmap;
         int inputBitmapWidth;
         int inputBitmapHeight;
@@ -318,22 +319,58 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
                 EnsureInputResources(width, height);
                 EnsureOutputResources(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1);
-                ReadInputPixels(dc, bounds, width, height);
-                var transparentBuffer = GetSharedTransparentBuffer(width * height * 4);
-                var fromBuffer = isItemToTransparent ? sourceBuffer : transparentBuffer;
-                var toBuffer = isItemToTransparent ? transparentBuffer : sourceBuffer;
-                if (isRenderUnsafe)
+                DrawInputToGpuBitmap(dc, bounds);
+                var renderedWithInterop = false;
+                if (instance.CanUseD3D11Interop)
                 {
-                    lock (OfxEffectInstance.UnsafeRenderLock)
-                        instance.RenderTransition(fromBuffer, toBuffer, outputBuffer, frame, renderWindow);
+                    EnsureTransparentGpuBitmap(width, height);
+                    var fromBitmap = isItemToTransparent ? gpuBitmap! : transparentGpuBitmap!;
+                    var toBitmap = isItemToTransparent ? transparentGpuBitmap! : gpuBitmap!;
+                    if (isRenderUnsafe)
+                    {
+                        lock (OfxEffectInstance.UnsafeRenderLock)
+                            renderedWithInterop = OfxD3D11Interop.WithResources(
+                                instance,
+                                fromBitmap,
+                                toBitmap,
+                                outputBitmap!,
+                                (from, to, output) => instance.TryRenderTransitionD3D11(from, to, output, frame, renderWindow));
+                    }
+                    else
+                    {
+                        renderedWithInterop = OfxD3D11Interop.WithResources(
+                            instance,
+                            fromBitmap,
+                            toBitmap,
+                            outputBitmap!,
+                            (from, to, output) => instance.TryRenderTransitionD3D11(from, to, output, frame, renderWindow));
+                    }
                 }
                 else
                 {
-                    instance.RenderTransition(fromBuffer, toBuffer, outputBuffer, frame, renderWindow);
+                    OfxD3D11Interop.ReleaseResource(instance, transparentGpuBitmap);
+                    transparentGpuBitmap?.Dispose();
+                    transparentGpuBitmap = null;
                 }
-                fixed (byte* outputPointer = outputBuffer)
+                if (!renderedWithInterop)
                 {
-                    outputBitmap!.CopyFromMemory((nint)outputPointer, outputBitmapWidth * 4);
+                    ReadInputPixels(width, height);
+                    var transparentBuffer = GetSharedTransparentBuffer(width * height * 4);
+                    var fromBuffer = isItemToTransparent ? sourceBuffer : transparentBuffer;
+                    var toBuffer = isItemToTransparent ? transparentBuffer : sourceBuffer;
+                    if (isRenderUnsafe)
+                    {
+                        lock (OfxEffectInstance.UnsafeRenderLock)
+                            instance.RenderTransition(fromBuffer, toBuffer, outputBuffer, frame, renderWindow);
+                    }
+                    else
+                    {
+                        instance.RenderTransition(fromBuffer, toBuffer, outputBuffer, frame, renderWindow);
+                    }
+                    fixed (byte* outputPointer = outputBuffer)
+                    {
+                        outputBitmap!.CopyFromMemory((nint)outputPointer, outputBitmapWidth * 4);
+                    }
                 }
             }
             catch (Exception e)
@@ -406,6 +443,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             instancePluginId = "";
             gpuBitmap?.Dispose();
             gpuBitmap = null;
+            transparentGpuBitmap?.Dispose();
+            transparentGpuBitmap = null;
             cpuBitmap?.Dispose();
             cpuBitmap = null;
             outputBitmap?.Dispose();
@@ -445,7 +484,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             isRenderUnsafe = descriptor.Props.GetStringOrDefault(
                 OfxConstants.ImageEffectPluginRenderThreadSafety,
                 OfxConstants.ImageEffectRenderFullySafe) == OfxConstants.ImageEffectRenderUnsafe;
-            var created = new OfxEffectInstance(plugin, OfxConstants.ImageEffectContextTransition, width, height, fps, durationFrames);
+            var created = OfxEffectInstance.CreateWithGpuBackend(
+                plugin,
+                OfxConstants.ImageEffectContextTransition,
+                width,
+                height,
+                fps,
+                durationFrames,
+                devices);
             try
             {
                 created.Create();
@@ -467,8 +513,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 sourceBuffer = new byte[bufferSize];
             if (inputBitmapWidth == width && inputBitmapHeight == height && gpuBitmap is not null)
                 return;
+            OfxD3D11Interop.ReleaseResource(instance, gpuBitmap);
             gpuBitmap?.Dispose();
             gpuBitmap = null;
+            OfxD3D11Interop.ReleaseResource(instance, transparentGpuBitmap);
+            transparentGpuBitmap?.Dispose();
+            transparentGpuBitmap = null;
             cpuBitmap?.Dispose();
             cpuBitmap = null;
 
@@ -491,6 +541,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             inputBitmapHeight = height;
         }
 
+        void EnsureTransparentGpuBitmap(int width, int height)
+        {
+            if (transparentGpuBitmap is not null)
+                return;
+            var properties = new BitmapProperties1(
+                new PixelFormat(Vortice.DXGI.Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
+                96f,
+                96f,
+                BitmapOptions.Target);
+            transparentGpuBitmap = devices.DeviceContext.CreateBitmap(new SizeI(width, height), properties);
+            ClearBitmap(devices.DeviceContext, transparentGpuBitmap);
+        }
+
         void EnsureOutputResources(int width, int height)
         {
             if (outputBitmapWidth == width && outputBitmapHeight == height && outputBitmap is not null)
@@ -498,6 +561,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             // 差し替え前の出力ビットマップがエフェクト入力に残ったまま破棄しない
             transformEffect?.SetInput(0, null, true);
             isPassthroughApplied = false;
+            OfxD3D11Interop.ReleaseResource(instance, outputBitmap);
             outputBitmap?.Dispose();
             outputBitmap = null;
 
@@ -506,7 +570,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 new PixelFormat(Vortice.DXGI.Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
                 96f,
                 96f,
-                BitmapOptions.None);
+                BitmapOptions.Target);
             outputBitmap = dc.CreateBitmap(new SizeI(width, height), outputProperties);
             outputBitmapWidth = width;
             outputBitmapHeight = height;
@@ -516,7 +580,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 outputBuffer = new byte[bufferSize];
         }
 
-        void ReadInputPixels(ID2D1DeviceContext dc, Rect bounds, int width, int height)
+        void DrawInputToGpuBitmap(ID2D1DeviceContext dc, Rect bounds)
         {
             // 呼び出し元が設定した描画先を壊さないよう退避して復元する
             var previousTarget = dc.Target;
@@ -538,7 +602,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 dc.Target = previousTarget;
                 previousTarget?.Dispose();
             }
+        }
 
+        void ReadInputPixels(int width, int height)
+        {
             cpuBitmap!.CopyFromBitmap(gpuBitmap!);
             var map = cpuBitmap.Map(MapOptions.Read);
             try
@@ -560,6 +627,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             finally
             {
                 cpuBitmap.Unmap();
+            }
+        }
+
+        static void ClearBitmap(ID2D1DeviceContext dc, ID2D1Bitmap1 bitmap)
+        {
+            var previousTarget = dc.Target;
+            try
+            {
+                dc.Target = bitmap;
+                dc.BeginDraw();
+                dc.Clear(new Color4(0f, 0f, 0f, 0f));
+                dc.EndDraw();
+            }
+            finally
+            {
+                dc.Target = previousTarget;
+                previousTarget?.Dispose();
             }
         }
 

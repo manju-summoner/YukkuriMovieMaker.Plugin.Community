@@ -16,6 +16,7 @@
 //   stdin : スキャン対象バイナリパスを1行1件で受け取り、EOFで終了する
 //   stdout: #BEGIN <path>
 //           PLUGIN <id> <verMajor> <verMinor> <label> <grouping> <contexts('|'区切り)> <pixelDepths('|'区切り)> <singleInstance(0/1)> <temporalClipAccess(0/1)>
+//                  <OpenGL> <CUDA> <CUDAStream> <OpenCLRender> <OpenCL> <Metal> <CPU>（GPU関連値はtrue/false/needed）
 //           #END <path>
 //           バイナリを開けない場合・プラグインのdescribe失敗は #ERROR <message>（バイナリ単位で継続）
 //           プラグインが標準出力へ書き込む可能性があるため、親は不明な行を無視する
@@ -42,6 +43,9 @@
 #include "openfx/include/ofxImageEffect.h"
 #include "openfx/include/ofxMemory.h"
 #include "openfx/include/ofxMultiThread.h"
+#include "openfx/include/ofxGPURender.h"
+#include "openfx/include/ofxProgress.h"
+#include "openfx/include/ofxTimeLine.h"
 #include "openfx/include/ofxMessage.h"
 
 namespace
@@ -662,6 +666,14 @@ namespace
         props.SetInt(kOfxImageEffectPropSupportsMultipleClipPARs, 0);
         props.SetEmpty(kOfxImageEffectPropClipPreferencesSlaveParam, PropKind::String);
         props.SetPointer(kOfxImageEffectPluginPropOverlayInteractV1, nullptr);
+        // C#側 OfxEffectDescriptor と同じ、ofxGPURender.h準拠のプラグインdescriptor既定値
+        props.SetString(kOfxImageEffectPropOpenGLRenderSupported, "false");
+        props.SetString(kOfxImageEffectPropCudaRenderSupported, "false");
+        props.SetString(kOfxImageEffectPropCudaStreamSupported, "false");
+        props.SetString(kOfxImageEffectPropOpenCLRenderSupported, "false");
+        props.SetString(kOfxImageEffectPropOpenCLSupported, "false");
+        props.SetString(kOfxImageEffectPropMetalRenderSupported, "false");
+        props.SetString(kOfxImageEffectPropCPURenderSupported, "true");
         props.SetString(kOfxPluginPropFilePath, ResolveBundlePath(binaryPath));
         props.SealDefaults();
     }
@@ -1104,6 +1116,29 @@ namespace
     OfxMessageSuiteV1 messageSuiteV1 = { Message };
     OfxMessageSuiteV2 messageSuiteV2 = { Message, SetPersistentMessage, ClearPersistentMessage };
 
+    // ofxProgress.h / ofxTimeLine.h のV1 ABI。スキャナーには実インスタンスやタイムラインがないため、
+    // Progressは受理し、TimeLine照会はスキャン時の中立値（時刻0、範囲0..0）を返す。
+    OfxStatus ProgressStart(void*, const char*) { return kOfxStatOK; }
+    OfxStatus ProgressUpdate(void*, double) { return kOfxStatOK; }
+    OfxStatus ProgressEnd(void*) { return kOfxStatOK; }
+    OfxProgressSuiteV1 progressSuite = { ProgressStart, ProgressUpdate, ProgressEnd };
+
+    OfxStatus GetTime(void*, double* time)
+    {
+        if (time == nullptr) return kOfxStatErrValue;
+        *time = 0.0;
+        return kOfxStatOK;
+    }
+    OfxStatus GotoTime(void*, double) { return kOfxStatFailed; }
+    OfxStatus GetTimeBounds(void*, double* firstTime, double* lastTime)
+    {
+        if (firstTime == nullptr || lastTime == nullptr) return kOfxStatErrValue;
+        *firstTime = 0.0;
+        *lastTime = 0.0;
+        return kOfxStatOK;
+    }
+    OfxTimeLineSuiteV1 timeLineSuite = { GetTime, GotoTime, GetTimeBounds };
+
     //=========================================================================
     // ホスト
     //=========================================================================
@@ -1113,7 +1148,7 @@ namespace
     // （特に対応コンテキストがずれると「一覧に出ないが実行時は対応」等の静かな不整合になる。
     //   このEXEは別ビルド成果物のため、C#側の変更時は再ビルドも忘れないこと）。
     // ホストバージョンは起動引数（"major.minor.build.revision"）で親から受け取る
-    void FillHostProperties(PropertySet& props, const int (&version)[4])
+    void FillHostProperties(PropertySet& props, const int (&version)[4], bool cudaAvailable)
     {
         props.SetString(kOfxPropType, kOfxTypeImageEffectHost);
         props.SetString(kOfxPropName, "net.manjubox.YukkuriMovieMaker4");
@@ -1122,7 +1157,10 @@ namespace
         props.SetString(kOfxPropVersionLabel,
             std::to_string(version[0]) + "." + std::to_string(version[1])
             + "." + std::to_string(version[2]) + "." + std::to_string(version[3]));
-        props.SetIntN(kOfxPropAPIVersion, { 1, 4 });
+        // CUDA能力はOFX 1.5で追加された。DrawSuiteはoverlays=falseでは必須でなく、
+        // 未対応GPU APIは下の個別プロパティでfalseを明示する。
+        // kOfxImageEffectPropCPURenderSupportedを含むOFX 1.5.1の能力を扱う。
+        props.SetIntN(kOfxPropAPIVersion, { 1, 5, 1 });
 
         props.SetInt(kOfxImageEffectHostPropIsBackground, 0);
         props.SetInt(kOfxImageEffectPropSupportsOverlays, 0);
@@ -1138,6 +1176,14 @@ namespace
         props.SetInt(kOfxImageEffectPropSetableFielding, 0);
         props.SetInt(kOfxImageEffectPropRenderQualityDraft, 0);
         props.SetInt(kOfxImageEffectInstancePropSequentialRender, 0);
+        props.SetString(kOfxImageEffectPropOpenGLRenderSupported, "false");
+        props.SetString(kOfxImageEffectPropCudaRenderSupported, cudaAvailable ? "true" : "false");
+        props.SetString(kOfxImageEffectPropCudaStreamSupported, cudaAvailable ? "true" : "false");
+        props.SetString(kOfxImageEffectPropOpenCLRenderSupported, "false");
+        props.SetString(kOfxImageEffectPropOpenCLSupported, "false");
+        props.SetString(kOfxImageEffectPropMetalRenderSupported, "false");
+        // ホストはCPUレンダリングを常時提供する（1.5.1でこのプロパティを照会するプラグイン対策。C#ホストと一致させること）
+        props.SetString(kOfxImageEffectPropCPURenderSupported, "true");
         props.SetPointer(kOfxPropHostOSHandle, nullptr);
         props.SetString(kOfxImageEffectHostPropNativeOrigin, kOfxHostNativeOriginBottomLeft);
 
@@ -1173,6 +1219,10 @@ namespace
             return &messageSuiteV1;
         if (name == kOfxMessageSuite && suiteVersion == 2)
             return &messageSuiteV2;
+        if (name == kOfxProgressSuite && suiteVersion == 1)
+            return &progressSuite;
+        if (name == kOfxTimeLineSuite && suiteVersion == 1)
+            return &timeLineSuite;
         return nullptr;
     }
 
@@ -1314,7 +1364,14 @@ namespace
                 + "\t" + Sanitize(JoinWithPipe(props.GetStrings(kOfxImageEffectPropSupportedContexts)))
                 + "\t" + Sanitize(JoinWithPipe(props.GetStrings(kOfxImageEffectPropSupportedPixelDepths)))
                 + "\t" + std::to_string(props.GetIntOrDefault(kOfxImageEffectPluginPropSingleInstance, 0) != 0 ? 1 : 0)
-                + "\t" + std::to_string(props.GetIntOrDefault(kOfxImageEffectPropTemporalClipAccess, 0) != 0 ? 1 : 0));
+                + "\t" + std::to_string(props.GetIntOrDefault(kOfxImageEffectPropTemporalClipAccess, 0) != 0 ? 1 : 0)
+                + "\t" + Sanitize(props.GetStringOrDefault(kOfxImageEffectPropOpenGLRenderSupported, "false"))
+                + "\t" + Sanitize(props.GetStringOrDefault(kOfxImageEffectPropCudaRenderSupported, "false"))
+                + "\t" + Sanitize(props.GetStringOrDefault(kOfxImageEffectPropCudaStreamSupported, "false"))
+                + "\t" + Sanitize(props.GetStringOrDefault(kOfxImageEffectPropOpenCLRenderSupported, "false"))
+                + "\t" + Sanitize(props.GetStringOrDefault(kOfxImageEffectPropOpenCLSupported, "false"))
+                + "\t" + Sanitize(props.GetStringOrDefault(kOfxImageEffectPropMetalRenderSupported, "false"))
+                + "\t" + Sanitize(props.GetStringOrDefault(kOfxImageEffectPropCPURenderSupported, "true")));
             // descriptor はプラグインが kOfxActionUnload まで参照しうるため、プロセス終了まで保持する
             descriptor.release();
         }
@@ -1330,11 +1387,13 @@ int wmain(int argc, wchar_t* argv[])
     _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 
     // 第1引数: ホストのバージョン（"major.minor.build.revision"。省略時は0.0.0.0）
+    // 第2引数: CUDAバックエンドの実可用性（"true" / "false"）
     int version[4] = { 0, 0, 0, 0 };
     if (argc >= 2)
         swscanf_s(argv[1], L"%d.%d.%d.%d", &version[0], &version[1], &version[2], &version[3]);
 
-    FillHostProperties(hostProps, version);
+    const bool cudaAvailable = argc >= 3 && wcscmp(argv[2], L"true") == 0;
+    FillHostProperties(hostProps, version, cudaAvailable);
     host.host = reinterpret_cast<OfxPropertySetHandle>(&hostProps);
 
     std::string line;

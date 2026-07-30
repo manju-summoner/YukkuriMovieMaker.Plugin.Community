@@ -9,6 +9,172 @@ using System.Threading.Tasks;
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 {
     /// <summary>
+    /// OfxProgressSuiteV1 の最小ホスト実装。YMM4では進捗UIを出さず、処理継続を返す。
+    /// </summary>
+    internal static unsafe class OfxProgressSuite
+    {
+        [StructLayout(LayoutKind.Sequential)]
+        struct SuiteNative
+        {
+            public nint progressStart;
+            public nint progressUpdate;
+            public nint progressEnd;
+        }
+
+        static readonly object initSync = new();
+        static nint suitePointer;
+
+        public static nint Pointer
+        {
+            get
+            {
+                lock (initSync)
+                {
+                    if (suitePointer != 0)
+                        return suitePointer;
+                    var suite = (SuiteNative*)NativeMemory.AllocZeroed((nuint)sizeof(SuiteNative));
+                    suite->progressStart = (nint)(delegate* unmanaged[Cdecl]<nint, byte*, int>)&ProgressStart;
+                    suite->progressUpdate = (nint)(delegate* unmanaged[Cdecl]<nint, double, int>)&ProgressUpdate;
+                    suite->progressEnd = (nint)(delegate* unmanaged[Cdecl]<nint, int>)&ProgressEnd;
+                    suitePointer = (nint)suite;
+                }
+                return suitePointer;
+            }
+        }
+
+        static bool IsValidInstance(nint effectInstance)
+            => OfxHandleTable.Get<OfxEffectInstance>(effectInstance) is not null;
+
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+        static int ProgressStart(nint effectInstance, byte* label)
+        {
+            try
+            {
+                return IsValidInstance(effectInstance) ? OfxStatus.OK : OfxStatus.ErrBadHandle;
+            }
+            catch
+            {
+                return OfxStatus.Failed;
+            }
+        }
+
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+        static int ProgressUpdate(nint effectInstance, double progress)
+        {
+            try
+            {
+                return IsValidInstance(effectInstance) ? OfxStatus.OK : OfxStatus.ErrBadHandle;
+            }
+            catch
+            {
+                return OfxStatus.Failed;
+            }
+        }
+
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+        static int ProgressEnd(nint effectInstance)
+        {
+            try
+            {
+                return IsValidInstance(effectInstance) ? OfxStatus.OK : OfxStatus.ErrBadHandle;
+            }
+            catch
+            {
+                return OfxStatus.Failed;
+            }
+        }
+    }
+
+    /// <summary>
+    /// OfxTimeLineSuiteV1 のホスト実装。時刻移動はYMM4のレンダリング駆動と競合するため非対応。
+    /// </summary>
+    internal static unsafe class OfxTimeLineSuite
+    {
+        [StructLayout(LayoutKind.Sequential)]
+        struct SuiteNative
+        {
+            public nint getTime;
+            public nint gotoTime;
+            public nint getTimeBounds;
+        }
+
+        static readonly object initSync = new();
+        static nint suitePointer;
+
+        public static nint Pointer
+        {
+            get
+            {
+                lock (initSync)
+                {
+                    if (suitePointer != 0)
+                        return suitePointer;
+                    var suite = (SuiteNative*)NativeMemory.AllocZeroed((nuint)sizeof(SuiteNative));
+                    suite->getTime = (nint)(delegate* unmanaged[Cdecl]<nint, double*, int>)&GetTime;
+                    suite->gotoTime = (nint)(delegate* unmanaged[Cdecl]<nint, double, int>)&GotoTime;
+                    suite->getTimeBounds = (nint)(delegate* unmanaged[Cdecl]<nint, double*, double*, int>)&GetTimeBounds;
+                    suitePointer = (nint)suite;
+                }
+                return suitePointer;
+            }
+        }
+
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+        static int GetTime(nint instance, double* time)
+        {
+            try
+            {
+                var effect = OfxHandleTable.Get<OfxEffectInstance>(instance);
+                if (effect is null)
+                    return OfxStatus.ErrBadHandle;
+                if (time is null)
+                    return OfxStatus.ErrValue;
+                *time = effect.CurrentTime;
+                return OfxStatus.OK;
+            }
+            catch
+            {
+                return OfxStatus.Failed;
+            }
+        }
+
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+        static int GotoTime(nint instance, double time)
+        {
+            try
+            {
+                return OfxHandleTable.Get<OfxEffectInstance>(instance) is null
+                    ? OfxStatus.ErrBadHandle
+                    : OfxStatus.Failed;
+            }
+            catch
+            {
+                return OfxStatus.Failed;
+            }
+        }
+
+        [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+        static int GetTimeBounds(nint instance, double* firstTime, double* lastTime)
+        {
+            try
+            {
+                var effect = OfxHandleTable.Get<OfxEffectInstance>(instance);
+                if (effect is null)
+                    return OfxStatus.ErrBadHandle;
+                if (firstTime is null || lastTime is null)
+                    return OfxStatus.ErrValue;
+                *firstTime = 0;
+                *lastTime = Math.Max(0, effect.DurationFrames - 1);
+                return OfxStatus.OK;
+            }
+            catch
+            {
+                return OfxStatus.Failed;
+            }
+        }
+    }
+
+    /// <summary>
     /// OfxMemorySuiteV1 のホスト実装（ofxMemory.h と一致させること）
     /// </summary>
     internal static unsafe class OfxMemorySuite

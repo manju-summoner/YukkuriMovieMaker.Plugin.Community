@@ -29,7 +29,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             string[] SupportedContexts,
             string[] SupportedPixelDepths,
             bool IsSingleInstance,
-            bool NeedsTemporalClipAccess);
+            bool NeedsTemporalClipAccess,
+            OpenFxGpuSupport GpuSupport);
 
         public const string ExeName = "YukkuriMovieMaker.OfxScanner.exe";
 
@@ -98,6 +99,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             // バージョンで挙動を変えるプラグインのdescribe結果がスキャンと実行時で食い違わないようにする
             var hostVersion = typeof(OpenFxScannerProcess).Assembly.GetName().Version ?? new Version(0, 0, 0, 0);
             startInfo.ArgumentList.Add(hostVersion.ToString(4));
+            startInfo.ArgumentList.Add(OfxGpuRenderBackendFactory.HasRegisteredBackend ? "true" : "false");
             using var process = Process.Start(startInfo)
                 ?? throw new InvalidOperationException($"OFXスキャナーを起動できませんでした。path={scannerPath}");
             try
@@ -163,7 +165,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                                     latest.SupportedContexts,
                                     latest.SupportedPixelDepths,
                                     latest.IsSingleInstance,
-                                    latest.NeedsTemporalClipAccess));
+                                    latest.NeedsTemporalClipAccess,
+                                    latest.GpuSupport));
                             }
                         }
                         pendingPlugins.Clear();
@@ -172,7 +175,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     }
                     else if (line.StartsWith("PLUGIN\t", StringComparison.Ordinal) && currentBinary is not null)
                     {
-                        // PLUGIN <id> <verMajor> <verMinor> <label> <grouping> <contexts('|'区切り)> <pixelDepths('|'区切り)> <singleInstance> <temporalClipAccess>
+                        // PLUGIN <id> <verMajor> <verMinor> <label> <grouping> <contexts> <pixelDepths> <singleInstance> <temporalClipAccess>
+                        //        <OpenGL> <CUDA> <CUDAStream> <OpenCLRender> <OpenCL> <Metal> <CPU>
                         var fields = line.Split('\t');
                         if (fields.Length < 10
                             || !uint.TryParse(fields[2], out var versionMajor)
@@ -187,7 +191,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                             fields[6].Split('|', StringSplitOptions.RemoveEmptyEntries),
                             fields[7].Split('|', StringSplitOptions.RemoveEmptyEntries),
                             fields[8] == "1",
-                            fields[9] == "1"));
+                            fields[9] == "1",
+                            fields.Length >= 17
+                                ? new OpenFxGpuSupport(fields[10], fields[11], fields[12], fields[13], fields[14], fields[15], fields[16])
+                                : OpenFxGpuSupport.Default));
                     }
                     else if (line.StartsWith("#ERROR\t", StringComparison.Ordinal))
                     {

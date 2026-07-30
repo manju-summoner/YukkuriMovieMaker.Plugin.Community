@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
@@ -11,6 +12,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
     class OpenFxSettingsViewModel : Bindable
     {
         public ObservableCollection<string> AdditionalDirectories { get; } = [.. OpenFxSettings.Default.AdditionalPluginDirectories];
+
+        public bool UseGpuRendering
+        {
+            get => OpenFxSettings.Default.UseGpuRendering;
+            set
+            {
+                if (OpenFxSettings.Default.UseGpuRendering == value)
+                    return;
+                OpenFxSettings.Default.UseGpuRendering = value;
+                OpenFxSettings.Default.Save();
+                OnPropertyChanged();
+                // スキャン中は同じロックの解放を待つため、UIスレッドを塞がないようバックグラウンドで再評価する。
+                _ = ReevaluatePluginsAsync(Interlocked.Increment(ref pluginReevaluationVersion));
+            }
+        }
 
         // YMM4管理外のフォルダー（Program Files等）は存在しない場合は項目ごと非表示にする。
         // YMM4管理下のフォルダー（プラグインフォルダー配下）は存在しなくても表示し、ボタンで作成できるようにする
@@ -36,6 +52,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             }
         }
         bool isScanning;
+        long pluginReevaluationVersion;
 
         public string ScanStatusText => IsScanning
             ? Texts.OpenFxSettingsScanningMessage
@@ -131,16 +148,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         {
             if (IsScanning)
                 return;
+            var version = Interlocked.Increment(ref pluginReevaluationVersion);
             IsScanning = true;
             try
             {
-                var plugins = await Task.Run(() => OpenFxPluginScanner.GetEffectPlugins(refresh: true));
+                await Task.Run(() => OpenFxPluginScanner.GetEffectPlugins(refresh: true));
+                // スキャン中に設定が切り替わっても、完了時点の設定で必ず最終評価する。
+                var plugins = OpenFxPluginScanner.ReevaluateCachedPlugins();
                 // 継続がUIスレッド外で再開されてもコレクション更新が失敗しないようにする
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    Plugins.Clear();
-                    foreach (var plugin in plugins)
-                        Plugins.Add(plugin);
+                    if (version == Interlocked.Read(ref pluginReevaluationVersion))
+                        ReplacePlugins(plugins);
                 });
             }
             catch (Exception e)
@@ -151,6 +170,35 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             {
                 IsScanning = false;
             }
+        }
+
+        async Task ReevaluatePluginsAsync(long version)
+        {
+            try
+            {
+                var plugins = await Task.Run(OpenFxPluginScanner.ReevaluateCachedPlugins);
+                if (plugins is null)
+                    return;
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (version == Interlocked.Read(ref pluginReevaluationVersion))
+                        ReplacePlugins(plugins);
+                });
+            }
+            catch (Exception e)
+            {
+                Log.Default.Write("OFXプラグインのGPU対応可否の再評価に失敗しました。", e);
+            }
+        }
+
+        void ReplacePlugins(IReadOnlyList<OpenFxPluginInfo>? plugins)
+        {
+            if (plugins is null)
+                return;
+            Plugins.Clear();
+            foreach (var plugin in plugins)
+                Plugins.Add(plugin);
+            OnPropertyChanged(nameof(ScanStatusText));
         }
     }
 }
