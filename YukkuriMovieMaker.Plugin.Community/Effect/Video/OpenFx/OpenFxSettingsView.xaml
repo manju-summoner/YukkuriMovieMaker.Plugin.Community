@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx"
              xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
     <UserControl.DataContext>
@@ -26,10 +27,13 @@
                     <RowDefinition Height="26"/>
                 </Grid.RowDefinitions>
 
-                <CheckBox Grid.Row="0"
-                          Margin="5,2"
-                          Content="{x:Static local:Texts.OpenFxSettingsUseGpuRendering}"
-                          IsChecked="{Binding UseGpuRendering}"/>
+                <Grid Grid.Row="0">
+                    <Label Content="{x:Static local:Texts.OpenFxSettingsUseGpuRendering}"/>
+                    <c:ToggleSlider Margin="5,2"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Value="{Binding UseGpuRendering}"/>
+                </Grid>
 
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
