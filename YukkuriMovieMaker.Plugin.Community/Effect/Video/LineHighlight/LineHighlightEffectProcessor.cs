@@ -73,7 +73,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LineHighlight
             var animationRate = effectDuration != 0 ? Math.Clamp(Easing.GetValue(easingType, easingMode, Math.Clamp(animationPosition / effectDuration, 0, 1)), 0, 1) : 0;
 
             if (isFirst || ((this.isAnimationActive == true || isAnimationActive == true) && (!this.bounds.Equals(bounds) || this.color != color
-                || this.strength != strength || this.fade != fade || this.size != size || this.blur != blur || this.angle != angle || this.animationRate != animationRate)))
+                || this.fade != fade || this.size != size || this.blur != blur || this.angle != angle || this.animationRate != animationRate)))
             {
                 if (commandList is not null)
                 {
