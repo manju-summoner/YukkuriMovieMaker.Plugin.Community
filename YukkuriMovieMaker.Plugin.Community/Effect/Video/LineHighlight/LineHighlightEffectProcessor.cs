@@ -96,7 +96,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LineHighlight
                     float moveBegin = rotedEdges.Min(x => x.Y);
                     float moveEnd = rotedEdges.Max(x => x.Y);
                     var moveMatrix = Matrix3x2.CreateTranslation(
-                        new Vector2((float)((moveBegin - (size / 2 + blur / 2)) * (1 - animationRate) + (moveEnd + (size / 2 + blur / 2)) * animationRate)));
+                        new Vector2(0, (float)((moveBegin - (size / 2 + blur / 2)) * (1 - animationRate) + (moveEnd + (size / 2 + blur / 2)) * animationRate)));
                     double fadeRate = animationRate < 0.5 ? animationRate * 2 : 1 - (animationRate - 0.5) * 2;
                     float currentFade = (float)(fadeRate + (1 - fadeRate) * fade);
 
