@@ -83,6 +83,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         [AnimationSlider("F1", "px", -500.0, 500.0)]
         public Animation JointY { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
+        [Display(GroupName = nameof(Texts.PuppetBoneGroupName), Name = nameof(Texts.PuppetBoneScaleName), Description = nameof(Texts.PuppetBoneScaleDesc), Order = 10, ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 50.0, 200.0)]
+        public Animation Scale { get; } = new Animation(100, 1, 1000);
+
         public static PuppetBone Create(double jointX, double jointY, Guid parentId)
         {
             var bone = new PuppetBone { ParentId = parentId };
@@ -91,6 +95,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             return bone;
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [Angle, SwayAngle, JointX, JointY];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [Angle, SwayAngle, JointX, JointY, Scale];
     }
 }

@@ -12,7 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
     /// </summary>
     internal static class PuppetBoneEvaluator
     {
-        public readonly record struct BoneSample(Guid Id, Guid ParentId, Vector2 Joint, float AngleRadians);
+        public readonly record struct BoneSample(Guid Id, Guid ParentId, Vector2 Joint, float AngleRadians, float Scale = 1f);
 
         /// <summary>
         /// 各ボーンのワールド変換を計算する（入力と同じインデックス順）。
@@ -45,6 +45,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 //回転の中心はセグメント（親→自分）の根元＝親のジョイント。親を持たないルートは自身のジョイントを中心に回る
                 var pivot = bone.Joint;
                 var parentWorld = Matrix3x2.Identity;
+                var hasParent = false;
                 if (bone.ParentId != Guid.Empty
                     && bone.ParentId != bone.Id
                     && indexById.TryGetValue(bone.ParentId, out var parentIndex)
@@ -52,9 +53,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 {
                     parentWorld = Compute(parentIndex);
                     pivot = bones[parentIndex].Joint;
+                    hasParent = true;
+                }
+                var local = Matrix3x2.CreateRotation(bone.AngleRadians, pivot);
+                if (bone.Scale != 1f)
+                {
+                    //伸縮。セグメントは親ジョイント→自ジョイントの軸方向にのみ伸縮し、太さは保つ。
+                    //ルートおよび軸が定義できない（ジョイントが親と重なる）場合は全方向に拡縮する
+                    var axis = bone.Joint - pivot;
+                    Matrix3x2 scale;
+                    if (hasParent && axis.LengthSquared() > 1e-6f)
+                    {
+                        var axisAngle = MathF.Atan2(axis.Y, axis.X);
+                        scale = Matrix3x2.CreateRotation(-axisAngle, pivot)
+                              * Matrix3x2.CreateScale(bone.Scale, 1f, pivot)
+                              * Matrix3x2.CreateRotation(axisAngle, pivot);
+                    }
+                    else
+                    {
+                        scale = Matrix3x2.CreateScale(bone.Scale, pivot);
+                    }
+                    //伸縮を先に適用し、伸びた状態のセグメントを回転させる
+                    local = scale * local;
                 }
                 //行ベクトル規約(v * M)のため、ローカル変換を先に適用してから親を掛ける
-                var world = Matrix3x2.CreateRotation(bone.AngleRadians, pivot) * parentWorld;
+                var world = local * parentWorld;
                 result[index] = world;
                 states[index] = 2;
                 return world;
