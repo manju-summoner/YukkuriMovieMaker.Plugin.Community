@@ -72,6 +72,12 @@ void FieldDeriv(float2 base, float z, float m00, float m01, float m10, float m11
     grad = float2(0.0f, 0.0f);
     hess = float3(0.0f, 0.0f, 0.0f);
     float amp = 0.5f;
+    // Hessianは周波数の2乗で効くため、ampのままだと寄与がオクターブ毎に2倍ずつ増えて
+    // 最細オクターブが支配し、光の網目がサブピクセル幅の粒に崩れる。
+    // 勾配と同様に寄与がオクターブ間で一定になるよう、別係数で1/4ずつ減衰させる。
+    // この結果hessはgradより帯域制限された場の2階微分になるが、同一ノイズ由来のため
+    // 屈折変位との相関は保たれる。
+    float hessAmp = 0.5f;
     float2 p = float2(m00 * base.x + m01 * base.y, m10 * base.x + m11 * base.y);
     float zz = z;
 
@@ -86,7 +92,7 @@ void FieldDeriv(float2 base, float z, float m00, float m01, float m10, float m11
         NoiseDeriv(float3(p, zz), g, h);
 
         grad += amp * float2(m00 * g.x + m10 * g.y, m01 * g.x + m11 * g.y);
-        hess += amp * float3(
+        hess += hessAmp * float3(
             m00 * m00 * h.x + 2.0f * m00 * m10 * h.z + m10 * m10 * h.y,
             m01 * m01 * h.x + 2.0f * m01 * m11 * h.z + m11 * m11 * h.y,
             m00 * m01 * h.x + (m00 * m11 + m10 * m01) * h.z + m10 * m11 * h.y);
@@ -100,6 +106,7 @@ void FieldDeriv(float2 base, float z, float m00, float m01, float m10, float m11
         p = pn + hash21((float)oct + seed * 0.618f) * 37.0f;
         zz = zz * 2.0f + 17.0f;
         amp *= 0.5f;
+        hessAmp *= 0.25f; // Hessian用の減衰。理由は宣言部のコメントを参照
     }
 }
 
