@@ -4,14 +4,14 @@ SamplerState InputSampler : register(s0);
 cbuffer Constants : register(b0)
 {
     float threshold : packoffset(c0.x);
-    float gain      : packoffset(c0.y);
-    float occlusion : packoffset(c0.z);
-    float pad0      : packoffset(c0.w);
+    float occlusion : packoffset(c0.y);
+    float pad0      : packoffset(c0.z);
+    float pad1      : packoffset(c0.w);
 
     float tintR     : packoffset(c1.x);
     float tintG     : packoffset(c1.y);
     float tintB     : packoffset(c1.z);
-    float pad1      : packoffset(c1.w);
+    float pad2      : packoffset(c1.w);
 };
 
 float4 SampleInput(float2 uv)
