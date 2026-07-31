@@ -207,6 +207,9 @@
     <FxCompile Include="CrossFilter.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="Caustics.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Hash.hlsli">

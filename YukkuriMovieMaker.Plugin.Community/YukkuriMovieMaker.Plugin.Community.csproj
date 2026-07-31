@@ -221,6 +221,7 @@
     <Resource Include="$(ShaderDirPath)AmbientOcclusionPhase.cso" Link="Resources\Shader\AmbientOcclusionPhase.cso" />
     <Resource Include="$(ShaderDirPath)Fog.cso" Link="Resources\Shader\Fog.cso" />
     <Resource Include="$(ShaderDirPath)CrossFilter.cso" Link="Resources\Shader\CrossFilter.cso" />
+    <Resource Include="$(ShaderDirPath)Caustics.cso" Link="Resources\Shader\Caustics.cso" />
   </ItemGroup>
 
   <!-- internalsを参照するテスト（EdgeDetectionZeroStrengthOverlayTest等）はDEBUG限定のため、Releaseビルドには付与しない -->
