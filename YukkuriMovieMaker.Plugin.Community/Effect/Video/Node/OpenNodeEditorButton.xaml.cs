@@ -17,7 +17,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
 public partial class OpenNodeEditorButton : IPropertyEditorControl2
 {
     private EventHandler<CommittedEventArgs>? _committedHandler;
+    private IEditorInfo? _editorInfo;
     private EventHandler? _graphUpdatedHandler;
+    private NodeEditorViewModel? _lastResolvedViewModel;
 
     public OpenNodeEditorButton()
     {
@@ -30,6 +32,17 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
 
     public void SetEditorInfo(IEditorInfo info)
     {
+        _editorInfo = info;
+
+        // 既にNode Editorパネルでこのアイテムのグラフを開いている場合は、開いたままのタブにも
+        // 最新の IEditorInfo を反映する（例: 再生位置の更新など）。
+        // まだ一度も Button_Click を経ておらず _lastResolvedViewModel が無い場合は、
+        // 次にボタンが押されたとき（Button_Click内）に最新値が渡るので何もしない。
+        if (_lastResolvedViewModel == null) return;
+        if (ItemProperties is not { Length: > 0 } || ItemProperties[0].Item is not NodeEffect pluginItem) return;
+        if (pluginItem.InternalGraph is not { } graph) return;
+
+        _lastResolvedViewModel.UpdateEditorInfo(graph, info);
     }
 
     private void Button_Click(object sender, RoutedEventArgs e)
@@ -62,7 +75,9 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         var vm =
             toolAreaViewModel?.GetType().GetProperty("ViewModel")?.GetValue(toolAreaViewModel) as NodeEditorViewModel;
 
-        vm?.OpenGraph(pluginItem.InternalGraph!);
+        _lastResolvedViewModel = vm;
+
+        vm?.OpenGraph(pluginItem.InternalGraph!, editorInfo: _editorInfo);
 
         if (vm != null)
         {
@@ -112,7 +127,7 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
             }
 
             vm?.OnGraphUpdated();
-            vm?.OpenGraph(newGraph);
+            vm?.OpenGraph(newGraph, editorInfo: _editorInfo);
         };
 
         pluginItem.InternalGraph!.Committed += _committedHandler;
@@ -121,7 +136,17 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         layout?.IsSelectedChanged += (_, _) =>
         {
             if (!layout.IsSelected)
+            {
                 toolAreaViewModel?.GetType().GetProperty("ViewModel")?.SetValue(toolAreaViewModel, vm);
+            }
+            else
+            {
+                // タブが選択された（例: タイムライン側でUndo/Redoした後にNode Editorタブへ戻ってきた）
+                // タイミングで、表示中のグラフを現在状態から作り直す。
+                // Undo/Redo が NodeEffect.Graph のセッタを経由せずグラフを直接書き換える実装だと、
+                // GraphUpdated イベントが発火せず表示が古いままになりうるための保険。
+                vm?.RefreshAllOpenGraphs();
+            }
         };
 
         if (vm is null) return;
@@ -144,11 +169,17 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         layout.IsActiveChanged += (_, _) =>
         {
             if (layout.IsActive)
+            {
                 foreach (var kb in nodeBindings)
                     parentWindow.InputBindings.Add(kb);
+                // フォーカスを取り戻したタイミングでも同様に再同期しておく。
+                vm.RefreshAllOpenGraphs();
+            }
             else
+            {
                 foreach (var kb in nodeBindings)
                     parentWindow.InputBindings.Remove(kb);
+            }
         };
     }
 }

@@ -15,9 +15,32 @@ public class ContainerFactory
 {
     private static readonly Lock Lock = new();
     private static readonly Dictionary<string, Type> TypeCache = new();
+    private static readonly Dictionary<string, PortDefinition[]> PortDefsRegistry = new();
 
     // ModuleBuilder を内部保持して、EffectNodeCalculator から ModuleBuilder なしで呼べるようにする
     private static ModuleBuilder? _moduleBuilder;
+
+    public static PortDefinition[] GetPortDefs(string name)
+    {
+        return PortDefsRegistry.TryGetValue(name, out var d) ? d : [];
+    }
+
+    /// <summary>
+    ///     Unknown型でカスタムエディタが見つかったポートに、元のインスタンスが持っていた実際の値を
+    ///     初期値として書き込む。EffectNodeCalculator.SeedDefaultValues の InputsContainer 版。
+    ///     InputsContainer は NodeLogic.Inputs を持たないため、バッキングフィールドへ直接書き込む。
+    /// </summary>
+    public static void SeedUnknownDefaults(InputsContainer self, PortDefinition[] portDefs)
+    {
+        var type = self.GetType();
+        foreach (var def in portDefs)
+        {
+            if (def.PortType != PortType.Unknown) continue;
+            if (def.DefaultValue == null) continue;
+            var field = type.GetField($"_{def.PropName}", BindingFlags.NonPublic | BindingFlags.Instance);
+            field?.SetValue(self, def.DefaultValue);
+        }
+    }
 
     /// <summary>
     ///     EffectNodeTypeBuilder.Build から呼ばれ、ModuleBuilder を登録する。
@@ -69,17 +92,15 @@ public class ContainerFactory
                     property,
                     property.GetCustomAttribute<DisplayAttribute>()!,
                     property.GetValue(effectPropertyInst)))
-            .Where(x => x is not null)
-            .Cast<PortDefinition>()
             .ToList();
 
         lock (Lock)
         {
-            return TypeCache.TryGetValue(name, out var cached) ? cached : CreateOrGenerate(name, ports, mod);
+            return TypeCache.TryGetValue(name, out var cached) ? cached : CreateOrGenerate(name, type, ports, mod);
         }
     }
 
-    private static PortDefinition? TryMakePortDefinition(PropertyInfo prop, DisplayAttribute display, object? inst)
+    private static PortDefinition TryMakePortDefinition(PropertyInfo prop, DisplayAttribute display, object? inst)
     {
         var labelKey = display.Name ?? prop.Name;
         var descKey = display.Description ?? "";
@@ -161,7 +182,27 @@ public class ContainerFactory
                 DefaultValue = null
             };
 
-        return null;
+        // Float/Enum/Bool/Color/Brush（こちらで用意した既知のコントロールで扱える型）のいずれにも
+        // 該当しない場合。ここで初めてカスタムエディタ（PropertyEditorAttribute2）を探す＝
+        // こちらの既知コントロールが常に優先され、カスタムエディタは最後の手段（フォールバック）。
+        var editorAttrData = prop.GetCustomAttributesData()
+            .FirstOrDefault(ad => typeof(PropertyEditorAttribute2).IsAssignableFrom(ad.AttributeType));
+        var editorAttrInstance = editorAttrData == null ? null : Attr.CreateEditorAttributeInstance(editorAttrData);
+
+        return new PortDefinition
+        {
+            PropName = prop.Name,
+            PortType = PortType.Unknown,
+            LabelKey = labelKey,
+            DescKey = descKey,
+            ResourceType = resourceType,
+            // 実際のインスタンスが持っていた値をそのまま初期値として引き継ぐ。
+            // null のままだと、非null前提で実装されているエディタ側で例外になる。
+            DefaultValue = inst,
+            UnknownClrType = prop.PropertyType,
+            EditorAttributeData = editorAttrData,
+            EditorAttributeInstance = editorAttrInstance
+        };
 
         static int ParseDigits(string format)
         {
@@ -172,13 +213,31 @@ public class ContainerFactory
         }
     }
 
-    private static Type CreateOrGenerate(string name, List<PortDefinition> ports, ModuleBuilder mod)
+    private static Type CreateOrGenerate(string name, Type originalType, List<PortDefinition> ports, ModuleBuilder mod)
     {
         var flatName = name.Replace('.', '_');
+        PortDefsRegistry[flatName] = ports.ToArray();
+
         var tb = mod.DefineType(
             $"DynamicContainer_{flatName}",
             TypeAttributes.Public,
             typeof(InputsContainer));
+
+        var portDefsField = tb.DefineField("_portDefs", typeof(PortDefinition[]),
+            FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
+        // CustomEditorPort が「本物のインスタンス」を用意してカスタムエディタに渡すために使う。
+        var originalTypeField = tb.DefineField("_originalOwnerType", typeof(Type),
+            FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
+
+        var cctor = tb.DefineTypeInitializer();
+        var cctorIl = cctor.GetILGenerator();
+        cctorIl.Emit(OpCodes.Ldstr, flatName);
+        cctorIl.Emit(OpCodes.Call, typeof(ContainerFactory).GetMethod(nameof(GetPortDefs))!);
+        cctorIl.Emit(OpCodes.Stsfld, portDefsField);
+        cctorIl.Emit(OpCodes.Ldtoken, originalType);
+        cctorIl.Emit(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!);
+        cctorIl.Emit(OpCodes.Stsfld, originalTypeField);
+        cctorIl.Emit(OpCodes.Ret);
 
         foreach (var port in ports)
         {
@@ -188,6 +247,9 @@ public class ContainerFactory
                 PortType.Bool => typeof(bool),
                 PortType.Color => typeof(Color),
                 PortType.Brush => typeof(BrushWrapper),
+                // Unknown の場合、floatに丸めてしまうと元の値が壊れる（型が合わないため）。
+                // 必ず元プロパティの実際のCLR型を使う。
+                PortType.Unknown => port.UnknownClrType ?? typeof(float),
                 _ => typeof(float)
             };
 
@@ -218,10 +280,32 @@ public class ContainerFactory
                 case PortType.Brush:
                     Attr.PortColor(pb, nameof(Colors.LawnGreen));
                     break;
+                case PortType.Unknown:
+                    // こちらで用意した既知のコントロールが使えない型でも、元プロパティ側に
+                    // PropertyEditorAttribute2 継承属性が付いていれば、それを引き継いで
+                    // CustomEditorPort による編集を可能にする。見つからない場合は
+                    // 今までどおり接続専用（編集UIなし）のポートになる。
+                    // ここで失敗しても、コンテナ（グループ）全体の生成を巻き添えで失敗させない。
+                    if (port.EditorAttributeData != null)
+                        try
+                        {
+                            Attr.CustomEditorControl(pb, port.EditorAttributeData);
+                            Attr.PortColor(pb, nameof(Colors.Gray));
+                        }
+                        catch (Exception ex)
+                        {
+#if DEBUG
+                            Console.WriteLine(
+                                $@"[ContainerFactory] Failed to attach custom editor to '{port.PropName}': " +
+                                $@"{ex.GetType().Name}: {ex.Message}");
+#endif
+                        }
+
+                    break;
             }
         }
 
-        EmitConstructor(tb);
+        EmitConstructor(tb, portDefsField);
 
         var type = tb.CreateType()
                    ?? throw new InvalidOperationException();
@@ -269,7 +353,7 @@ public class ContainerFactory
         return pb;
     }
 
-    private static void EmitConstructor(TypeBuilder tb)
+    private static void EmitConstructor(TypeBuilder tb, FieldBuilder portDefsField)
     {
         var baseCtor = typeof(InputsContainer).GetConstructor(
             BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null)!;
@@ -281,6 +365,13 @@ public class ContainerFactory
         var il = ctor.GetILGenerator();
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Call, baseCtor);
+
+        // Unknown型でカスタムエディタが見つかったポートには、元のインスタンスが持っていた
+        // 実際の値を初期値として書き込む（EffectNodeCalculator.SeedDefaultValues 相当）。
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldsfld, portDefsField);
+        il.Emit(OpCodes.Call, typeof(ContainerFactory).GetMethod(nameof(SeedUnknownDefaults))!);
+
         il.Emit(OpCodes.Ret);
     }
 }

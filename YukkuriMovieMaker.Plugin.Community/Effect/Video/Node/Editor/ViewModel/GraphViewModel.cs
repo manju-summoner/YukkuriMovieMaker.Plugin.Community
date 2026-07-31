@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
@@ -17,10 +18,11 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 {
     private readonly NodeGraph _graph;
 
-    public GraphViewModel(NodeGraph graph, NodeEditorViewModel nodeEditorViewModel)
+    public GraphViewModel(NodeGraph graph, NodeEditorViewModel nodeEditorViewModel, IEditorInfo? editorInfo = null)
     {
         _graph = graph;
         ParentEditor = nodeEditorViewModel;
+        EditorInfo = editorInfo;
 
         _graph.GraphChanged += OnGraphChanged;
         nodeEditorViewModel.GraphUpdated += (_, _) => SyncFromGraph();
@@ -36,6 +38,19 @@ public sealed class GraphViewModel : INotifyPropertyChanged
     public NodeEditorViewModel ParentEditor { get; }
     public ObservableCollection<NodeViewModel> Nodes { get; } = [];
     public ObservableCollection<ConnectionViewModel> Connections { get; } = [];
+
+    /// <summary>
+    ///     このグラフを開いた OpenNodeEditorButton (IPropertyEditorControl2.SetEditorInfo) から
+    ///     渡された IEditorInfo。Node Editor パネルを直接操作しているだけの場合や、
+    ///     まだ一度もアイテム経由で開かれていない場合は null。
+    ///     値が変わっても既存の NodeViewModel/PortViewModel には遡って反映されない
+    ///     （SyncFromGraph による再構築のタイミングで新しい値が反映される）。
+    /// </summary>
+    public IEditorInfo? EditorInfo
+    {
+        get;
+        internal set => SetField(ref field, value);
+    }
 
     public PortViewModel? DraggingFromPort
     {
@@ -86,6 +101,19 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    /// <summary>
+    ///     グラフの現在状態から Nodes/Connections を作り直す。
+    ///     通常は GraphChanged/GraphUpdated イベント経由で自動的に呼ばれるが、
+    ///     Undo/Redo がプロパティセッタを経由せずグラフを書き換えるような実装だと、
+    ///     そのイベントチェーンが発火せず、パネルの表示が古いままになることがある。
+    ///     そのための保険として、パネルがアクティブになったタイミングなどで
+    ///     外部から明示的に呼び直せるようにしておく。
+    /// </summary>
+    public void Refresh()
+    {
+        SyncFromGraph();
+    }
+
     private void UpdatePortValue(ValueChangedEventArgs e)
     {
         var node = Nodes.FirstOrDefault(n => n.Id == e.NodeId);
@@ -104,7 +132,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 
         foreach (var node in _graph.Nodes.Values)
         {
-            var vm = new NodeViewModel(node, _graph, ParentEditor);
+            var vm = new NodeViewModel(node, _graph, this);
             Nodes.Add(vm);
             nodeViewModels[node.Id] = vm;
         }
@@ -127,7 +155,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         {
             case NodeAddedEventArgs added:
             {
-                var vm = new NodeViewModel(added.Node, _graph, ParentEditor);
+                var vm = new NodeViewModel(added.Node, _graph, this);
                 Nodes.Add(vm);
                 foreach (var port in vm.InputPorts)
                     port.ApplyDefaultToGraph();

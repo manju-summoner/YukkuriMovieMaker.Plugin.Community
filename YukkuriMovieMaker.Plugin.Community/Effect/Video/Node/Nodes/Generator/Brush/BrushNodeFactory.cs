@@ -114,7 +114,8 @@ public static class DynamicBrushNodeFactory
             var labelKey = pluginInstance.Name;
 
             var generated =
-                BrushNodeTypeBuilder.Build(ModBuilder, pluginType.Name, labelKey, staticPortDefs, dynamicParams);
+                BrushNodeTypeBuilder.Build(ModBuilder, pluginType.Name, parameterInstance.GetType(), labelKey,
+                    staticPortDefs, dynamicParams);
             TypeCache[pluginType.Name] = generated;
             return generated;
         }
@@ -126,6 +127,7 @@ public static class BrushNodeTypeBuilder
     public static Type Build(
         ModuleBuilder mod,
         string pluginName,
+        Type originalParameterType,
         string labelKey,
         List<PortDefinition> staticPortDefs,
         List<(PortDefinition, PropertyInfo, object)> dynamicPropertyDefs)
@@ -153,6 +155,9 @@ public static class BrushNodeTypeBuilder
             FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
         var portDefsField = tb.DefineField("_portDefs", typeof(PortDefinition[]),
             FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
+        // CustomEditorPort が「本物のパラメータインスタンス」を用意してカスタムエディタに渡すために使う。
+        var originalTypeField = tb.DefineField("_originalOwnerType", typeof(Type),
+            FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
         var containerBackFields = dynamicPropertyDefs.Select(props =>
             tb.DefineField($"_{props.Item2.Name}", typeof(InputsContainer), FieldAttributes.Private)).ToList();
 
@@ -163,6 +168,9 @@ public static class BrushNodeTypeBuilder
         cil.Emit(OpCodes.Ldstr, pluginName);
         cil.Emit(OpCodes.Call, typeof(BrushNodeCalculator).GetMethod(nameof(BrushNodeCalculator.GetPortDefs))!);
         cil.Emit(OpCodes.Stsfld, portDefsField);
+        cil.Emit(OpCodes.Ldtoken, originalParameterType);
+        cil.Emit(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!);
+        cil.Emit(OpCodes.Stsfld, originalTypeField);
         cil.Emit(OpCodes.Ret);
 
         foreach (var def in staticPortDefs) EmitParameterPort(tb, def);
@@ -201,6 +209,14 @@ public static class BrushNodeTypeBuilder
 
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Call, baseCtor);
+
+        // Unknown型でカスタムエディタが見つかったポートには、元のブラシパラメータインスタンスが
+        // 持っていた実際の値を初期値として書き込む（EffectNodeFactory側と同様）。
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldsfld, portDefsField);
+        il.Emit(OpCodes.Call,
+            typeof(EffectNodeCalculator).GetMethod(nameof(EffectNodeCalculator.SeedDefaultValues))!);
+
         il.Emit(OpCodes.Ret);
 
         return tb.CreateType()
@@ -218,6 +234,9 @@ public static class BrushNodeTypeBuilder
             // EffectPortCollector が PortType.Brush を返した場合も Float にフォールバックしておき、
             // 想定外の構造でも型生成自体は失敗しないようにする。
             PortType.Brush => typeof(float),
+            // Unknown の場合、floatに丸めてしまうと元の値が壊れる（型が合わないため）。
+            // 必ず元プロパティの実際のCLR型を使う。
+            PortType.Unknown => def.UnknownClrType ?? typeof(float),
             _ => typeof(float)
         };
 
@@ -247,6 +266,28 @@ public static class BrushNodeTypeBuilder
                 // 万一発生した場合でも float ポートとして最低限機能するようにしておく。
                 Attr.NumberControl(pb, def.Min, def.Max, def.Digits, def.Unit, 0f);
                 Attr.PortColor(pb, nameof(Colors.DarkOrange));
+                break;
+            case PortType.Unknown:
+                // こちらで用意した既知のコントロールが使えない型でも、元プロパティ側に
+                // PropertyEditorAttribute2 継承属性が付いていれば、それを引き継いで
+                // CustomEditorPort による編集を可能にする。見つからない場合は
+                // 今までどおり接続専用（編集UIなし）のポートになる。
+                // ここで失敗しても、ノード（ブラシ全体）の生成自体を巻き添えで失敗させない。
+                if (def.EditorAttributeData != null)
+                    try
+                    {
+                        Attr.CustomEditorControl(pb, def.EditorAttributeData);
+                        Attr.PortColor(pb, nameof(Colors.Gray));
+                    }
+                    catch (Exception ex)
+                    {
+#if DEBUG
+                        Console.WriteLine(
+                            $@"[BrushNodeTypeBuilder] Failed to attach custom editor to '{def.PropName}': " +
+                            $@"{ex.GetType().Name}: {ex.Message}");
+#endif
+                    }
+
                 break;
         }
     }

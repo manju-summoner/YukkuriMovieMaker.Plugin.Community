@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
@@ -14,11 +15,12 @@ public sealed class TabViewModel : INotifyPropertyChanged
         NodeGraph graph,
         string title,
         NodeEditorViewModel nodeEditorViewModel,
-        Action<TabViewModel>? closeAction = null)
+        Action<TabViewModel>? closeAction = null,
+        IEditorInfo? editorInfo = null)
     {
         Graph = graph;
         Title = title;
-        GraphViewModel = new GraphViewModel(graph, nodeEditorViewModel);
+        GraphViewModel = new GraphViewModel(graph, nodeEditorViewModel, editorInfo);
         _closeAction = closeAction;
 
         CloseCommand = new RelayCommand(Close, () => _closeAction != null);
@@ -30,6 +32,15 @@ public sealed class TabViewModel : INotifyPropertyChanged
     public NodeGraph Graph { get; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    ///     開いた後に IEditorInfo が更新された場合（OpenNodeEditorButton.SetEditorInfo の再呼び出し等）に、
+    ///     このタブのグラフへ最新の値を反映する。
+    /// </summary>
+    internal void SetEditorInfo(IEditorInfo? info)
+    {
+        GraphViewModel.EditorInfo = info;
+    }
 
     private void Close()
     {

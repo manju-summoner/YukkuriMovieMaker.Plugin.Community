@@ -1,7 +1,9 @@
 using System.ComponentModel;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
@@ -14,6 +16,7 @@ public sealed class PortViewModel : INotifyPropertyChanged
     internal readonly Guid NodeId;
 
     private object? _currentValue;
+    private IEditorInfo? _editorInfo;
 
     public PortViewModel(
         string name,
@@ -23,6 +26,10 @@ public sealed class PortViewModel : INotifyPropertyChanged
         Type valueType,
         PortDirection direction,
         PropertyControlBaseAttribute? controlAttribute,
+        PropertyEditorAttribute2? editorAttribute,
+        object? editorPropertyOwner,
+        PropertyInfo? editorPropertyInfo,
+        IEditorInfo? editorInfo,
         NodeGraph graph,
         Guid nodeId)
     {
@@ -33,6 +40,10 @@ public sealed class PortViewModel : INotifyPropertyChanged
         ValueType = valueType;
         Direction = direction;
         ControlAttribute = controlAttribute;
+        EditorAttribute = controlAttribute == null ? editorAttribute : null;
+        EditorPropertyOwner = EditorAttribute == null ? null : editorPropertyOwner;
+        EditorPropertyInfo = EditorAttribute == null ? null : editorPropertyInfo;
+        _editorInfo = editorInfo;
         _graph = graph;
         NodeId = nodeId;
 
@@ -75,7 +86,50 @@ public sealed class PortViewModel : INotifyPropertyChanged
     }
 
     public PropertyControlBaseAttribute? ControlAttribute { get; }
-    public bool HasControl => ControlAttribute != null && Direction == PortDirection.Input;
+
+    /// <summary>
+    ///     ポートとして固定に実装されているコントロール（NumberPort等）以外を使いたい場合の拡張ポイント。
+    ///     プロパティに YMM4 標準の PropertyEditorAttribute2 継承属性（IPropertyEditorControl を実装した
+    ///     コントロールを返すもの）が付与されている場合にセットされる。
+    ///     ControlAttribute（このNode拡張独自の属性）が付いている場合はそちらを優先し、こちらは null のままになる。
+    /// </summary>
+    public PropertyEditorAttribute2? EditorAttribute { get; }
+
+    /// <summary>
+    ///     EditorAttribute を使う場合の、実際にこのプロパティを所有しているインスタンス
+    ///     （ノード本体、またはネストしたコンテナのインスタンス）。
+    ///     PropertyEditorAttribute2.SetBindings には合成した仮のラッパーではなく、必ずこの
+    ///     「本物のインスタンス」と EditorPropertyInfo を渡す。多くのカスタムエディタ
+    ///     （特に別ウィンドウを開いて編集する類のもの）は、渡された ItemProperty.PropertyOwner /
+    ///     .Item に対して「編集中フラグを立てる」「他のプロパティも読む」「特定の型にキャストする」
+    ///     といった、1つの値の読み書きだけに留まらない操作をすることがあるため、合成ラッパーでは
+    ///     壊れてしまう。
+    /// </summary>
+    internal object? EditorPropertyOwner { get; }
+
+    /// <summary>EditorPropertyOwner 上で、実際にこのポートに対応するプロパティを指す PropertyInfo。</summary>
+    internal PropertyInfo? EditorPropertyInfo { get; }
+
+    /// <summary>
+    ///     EditorAttribute が示すコントロールが IPropertyEditorControl2 を実装している場合に渡す
+    ///     IEditorInfo。OpenNodeEditorButton.SetEditorInfo で受け取った値が、
+    ///     NodeEditorViewModel → TabViewModel → GraphViewModel → NodeViewModel を経由してここまで伝播する。
+    ///     Node Editor パネルを直接開いた場合など、対応するアイテムが分からない状況では null のままになる。
+    /// </summary>
+    public IEditorInfo? EditorInfo
+    {
+        get => _editorInfo;
+        internal set
+        {
+            if (!Equals(_editorInfo, value))
+            {
+                _editorInfo = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool HasControl => (ControlAttribute != null || EditorAttribute != null) && Direction == PortDirection.Input;
 
     public ICommand BeginEditCommand { get; }
     public ICommand EndEditCommand { get; }

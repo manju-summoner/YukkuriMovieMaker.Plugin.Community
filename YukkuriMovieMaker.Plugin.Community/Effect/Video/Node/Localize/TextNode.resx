@@ -68,7 +68,7 @@
 <data name="FunctionsCategoryName" xml:space="preserve"><value>関数</value></data>
 <data name="VideoEffectCategoryName" xml:space="preserve"><value>映像エフェクト</value></data>
 <data name="AdvancedCategoryName" xml:space="preserve"><value>高度</value></data>
-  <data name="TransformCategoryName" xml:space="preserve"><value>座標変換</value></data>
+<data name="TransformCategoryName" xml:space="preserve"><value>座標変換</value></data>
 <data name="BrushName" xml:space="preserve"><value>ブラシ</value></data>
 <data name="AddNode" xml:space="preserve"><value>加算</value></data>
 <data name="AddNodeDescription" xml:space="preserve"><value>2つの数を加算します。</value></data>
@@ -260,16 +260,16 @@
 <data name="RandomNodeDescription" xml:space="preserve"><value>決定論的な乱数を生成します。</value></data>
 <data name="NoiseNode" xml:space="preserve"><value>ノイズ</value></data>
 <data name="NoiseNodeDescription" xml:space="preserve"><value>連続的に変化するノイズを生成します。</value></data>
-  <data name="TranslateNode" xml:space="preserve"><value>平行移動</value></data>
-  <data name="TranslateNodeDescription" xml:space="preserve"><value>画像を指定量移動します。</value></data>
-  <data name="TranslateX" xml:space="preserve"><value>X移動量</value></data>
-  <data name="TranslateY" xml:space="preserve"><value>Y移動量</value></data>
-  <data name="ScaleNode" xml:space="preserve"><value>拡大縮小</value></data>
-  <data name="ScaleNodeDescription" xml:space="preserve"><value>画像を指定倍率で拡大縮小します。</value></data>
-  <data name="ScaleX" xml:space="preserve"><value>X倍率</value></data>
-  <data name="ScaleY" xml:space="preserve"><value>Y倍率</value></data>
-  <data name="RotateNode" xml:space="preserve"><value>回転</value></data>
-  <data name="RotateNodeDescription" xml:space="preserve"><value>画像を指定角度回転します。</value></data>
-  <data name="Angle" xml:space="preserve"><value>角度</value></data>
-  <data name="TransformResultDescription" xml:space="preserve"><value>変換後の画像です。</value></data>
+<data name="TranslateNode" xml:space="preserve"><value>平行移動</value></data>
+<data name="TranslateNodeDescription" xml:space="preserve"><value>画像を指定量移動します。</value></data>
+<data name="TranslateX" xml:space="preserve"><value>X移動量</value></data>
+<data name="TranslateY" xml:space="preserve"><value>Y移動量</value></data>
+<data name="ScaleNode" xml:space="preserve"><value>拡大縮小</value></data>
+<data name="ScaleNodeDescription" xml:space="preserve"><value>画像を指定倍率で拡大縮小します。</value></data>
+<data name="ScaleX" xml:space="preserve"><value>X倍率</value></data>
+<data name="ScaleY" xml:space="preserve"><value>Y倍率</value></data>
+<data name="RotateNode" xml:space="preserve"><value>回転</value></data>
+<data name="RotateNodeDescription" xml:space="preserve"><value>画像を指定角度回転します。</value></data>
+<data name="Angle" xml:space="preserve"><value>角度</value></data>
+<data name="TransformResultDescription" xml:space="preserve"><value>変換後の画像です。</value></data>
 </root>

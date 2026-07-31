@@ -94,7 +94,7 @@ public static class EffectNodeFactory
             var resourceType = veAttr?.ResourceType;
 
             var generated =
-                EffectNodeTypeBuilder.Build(ModBuilder, effectType.Name, categoryKey, labelKey, resourceType,
+                EffectNodeTypeBuilder.Build(ModBuilder, effectType, categoryKey, labelKey, resourceType,
                     staticPortDefs, dynamicParams);
             TypeCache[effectType.Name] = generated;
             return generated;
@@ -147,6 +147,31 @@ public sealed class PortDefinition
     public int Digits { get; init; } = 2;
     public string Unit { get; init; } = "";
     public Type? EnumType { get; init; }
+
+    /// <summary>
+    ///     PortType.Unknown（Float/Enum/Bool/Color/Brush/Text のいずれにも該当しないプロパティ）の場合の、
+    ///     元プロパティの実際のCLR型。生成するポートのプロパティ型として使う（floatに丸めない）。
+    /// </summary>
+    public Type? UnknownClrType { get; init; }
+
+    /// <summary>
+    ///     PortType.Unknown の元プロパティに、YMM4標準の PropertyEditorAttribute2 継承属性が
+    ///     付いていた場合、その適用情報（コンストラクタ引数・名前付き引数を含む）。
+    ///     NumberPortControl等、こちらで用意した既知のコントロールで扱える型（Float/Enum/Bool/Color/Text）
+    ///     には設定されない＝それらは対象外。
+    /// </summary>
+    public CustomAttributeData? EditorAttributeData { get; init; }
+
+    /// <summary>
+    ///     EditorAttributeData を基に、ビルド時（TryMakePortDefinition の時点）で直接インスタンス化
+    ///     しておいた PropertyEditorAttribute2。
+    ///     CustomAttributeBuilder で生成後の型に属性を複製し、後から GetCustomAttribute で
+    ///     再インスタンス化する方式は、元の属性が「別アセンブリの internal 型」（YMM4本体組み込みの
+    ///     エディタ等）だとアクセス例外で失敗することがある。こちらは属性の型のコンストラクタ／
+    ///     プロパティ／フィールドを直接 Invoke/SetValue して構築するため、アセンブリ境界に左右されない。
+    ///     NodeViewModel.ResolveEditorAttribute から参照される。
+    /// </summary>
+    public PropertyEditorAttribute2? EditorAttributeInstance { get; init; }
 }
 
 public enum PortType
@@ -190,7 +215,15 @@ public static class EffectPortCollector
             var propInstance = prop.GetValue(obj);
             var def = TryMakePortDefinition(prop, displayAttr, propInstance);
 
-            if (propInstance is not null
+            // PropertyEditorAttribute2 が付いている場合は「1つの値を1つのカスタムエディタで編集する」
+            // ポートとして必ず static 側で扱う。そうしないと、値の型がたまたま入れ子の [Display]
+            // プロパティを公開している（複合的な設定値の型でよくある）だけで dynamic container
+            // （ContainerFactory）側に回されてしまい、元プロパティの PropertyEditorAttribute2 が
+            // 失われた上、中身がバラバラの空ポート群に化けてしまう。
+            var hasCustomEditor = def.PortType == PortType.Unknown && def.EditorAttributeData != null;
+
+            if (!hasCustomEditor
+                && propInstance is not null
                 && prop.PropertyType != typeof(Plugin.Brush.Brush)
                 && propInstance.GetType().GetProperties()
                     .Any(info => info.GetCustomAttribute<DisplayAttribute>() != null))
@@ -276,11 +309,32 @@ public static class EffectPortCollector
                 DefaultValue = inst as string ?? ""
             };
 
+        // Float/Enum/Bool/Color/Brush/Text（こちらで用意した既知のコントロールで扱える型）
+        // のいずれにも該当しない場合。ここで初めてカスタムエディタ（PropertyEditorAttribute2）を
+        // 探す＝こちらの既知コントロールが常に優先され、カスタムエディタは最後の手段（フォールバック）。
+        var editorAttrData = prop.GetCustomAttributesData()
+            .FirstOrDefault(ad => typeof(PropertyEditorAttribute2).IsAssignableFrom(ad.AttributeType));
+        var editorAttrInstance = editorAttrData == null ? null : Attr.CreateEditorAttributeInstance(editorAttrData);
+
+#if DEBUG
+        if (editorAttrData != null)
+            Console.WriteLine(
+                $@"[EffectPortCollector] '{prop.Name}' (type={prop.PropertyType.FullName}) uses custom editor " +
+                $@"{editorAttrData.AttributeType.FullName} (instance={(editorAttrInstance != null ? "OK" : "FAILED")})");
+#endif
+
         return new PortDefinition
         {
             PropName = prop.Name, PortType = PortType.Unknown,
             LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
-            DefaultValue = null
+            // 実際の効果インスタンスが持っていた値をそのまま初期値として引き継ぐ。
+            // null のままにすると、GradientStopsEditor 等、非null前提で実装されている
+            // エディタ側でいきなり例外になる（カスタムエディタが見つからない場合は
+            // どのみち編集には使われないので、渡しておいても無害）。
+            DefaultValue = inst,
+            UnknownClrType = prop.PropertyType,
+            EditorAttributeData = editorAttrData,
+            EditorAttributeInstance = editorAttrInstance
         };
     }
 
@@ -297,13 +351,14 @@ public static class EffectNodeTypeBuilder
 {
     public static Type Build(
         ModuleBuilder mod,
-        string effectName,
+        Type effectType,
         string categoryKey,
         string labelKey,
         Type? resourceType,
         List<PortDefinition> staticPortDefs,
         List<(PortDefinition, PropertyInfo, object)> dynamicPropertyDefs)
     {
+        var effectName = effectType.Name;
         var typeName = $"DynamicEffectNode_{effectName}";
         var tb = mod.DefineType(
             typeName,
@@ -327,6 +382,11 @@ public static class EffectNodeTypeBuilder
             FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
         var portDefsField = tb.DefineField("_portDefs", typeof(PortDefinition[]),
             FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
+        // CustomEditorPort が「本物の効果インスタンス」を用意してカスタムエディタに渡すために使う
+        // （動的生成した型そのものは、MeshDeformationEditorViewModel のように具体的な効果クラスへ
+        // キャストするエディタからは受け付けてもらえないため）。
+        var originalTypeField = tb.DefineField("_originalOwnerType", typeof(Type),
+            FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
         var containerBackFields = dynamicPropertyDefs.Select(props =>
             tb.DefineField($"_{props.Item2.Name}", typeof(InputsContainer), FieldAttributes.Private)).ToList();
 
@@ -337,6 +397,9 @@ public static class EffectNodeTypeBuilder
         cil.Emit(OpCodes.Ldstr, effectName);
         cil.Emit(OpCodes.Call, typeof(EffectNodeCalculator).GetMethod(nameof(EffectNodeCalculator.GetPortDefs))!);
         cil.Emit(OpCodes.Stsfld, portDefsField);
+        cil.Emit(OpCodes.Ldtoken, effectType);
+        cil.Emit(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!);
+        cil.Emit(OpCodes.Stsfld, originalTypeField);
         cil.Emit(OpCodes.Ret);
 
         EmitImageInputPort(tb);
@@ -376,6 +439,16 @@ public static class EffectNodeTypeBuilder
 
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Call, baseCtor);
+
+        // Unknown型でカスタムエディタが見つかったポートには、元の効果インスタンスが
+        // 持っていた実際の値を初期値として書き込む。null のままだと、非null前提で
+        // 実装されているエディタ（GradientStopsEditor等）が即座に例外を投げる。
+        // 既に LocalValue がある場合（スナップショット復元等）は上書きしない。
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldsfld, portDefsField);
+        il.Emit(OpCodes.Call,
+            typeof(EffectNodeCalculator).GetMethod(nameof(EffectNodeCalculator.SeedDefaultValues))!);
+
         il.Emit(OpCodes.Ret);
 
         return tb.CreateType()
@@ -398,6 +471,9 @@ public static class EffectNodeTypeBuilder
             PortType.Color => typeof(Color),
             PortType.Brush => typeof(BrushWrapper),
             PortType.Text => typeof(string),
+            // Unknown の場合、floatに丸めてしまうと元の値が壊れる（型が合わないため）。
+            // 必ず元プロパティの実際のCLR型を使う。
+            PortType.Unknown => def.UnknownClrType ?? typeof(float),
             _ => typeof(float)
         };
 
@@ -428,6 +504,28 @@ public static class EffectNodeTypeBuilder
             case PortType.Text:
                 Attr.TextControl(pb, (string?)def.DefaultValue ?? "");
                 Attr.PortColor(pb, nameof(Colors.MediumSeaGreen));
+                break;
+            case PortType.Unknown:
+                // こちらで用意した既知のコントロールが使えない型でも、元プロパティ側に
+                // PropertyEditorAttribute2 継承属性（プラグイン独自のプロパティエディタ）が
+                // 付いていれば、それをそのまま引き継いで CustomEditorPort による編集を可能にする。
+                // 見つからない場合は今までどおり接続専用（編集UIなし）のポートになる。
+                // ここで失敗しても、ノード（エフェクト全体）の生成自体を巻き添えで失敗させない。
+                if (def.EditorAttributeData != null)
+                    try
+                    {
+                        Attr.CustomEditorControl(pb, def.EditorAttributeData);
+                        Attr.PortColor(pb, nameof(Colors.Gray));
+                    }
+                    catch (Exception ex)
+                    {
+#if DEBUG
+                        Console.WriteLine(
+                            $@"[EffectNodeTypeBuilder] Failed to attach custom editor to '{def.PropName}': " +
+                            $@"{ex.GetType().Name}: {ex.Message}");
+#endif
+                    }
+
                 break;
         }
     }
@@ -693,6 +791,25 @@ public static class EffectNodeCalculator
     public static PortDefinition[] GetPortDefs(string effectName)
     {
         return PortDefsRegistry.TryGetValue(effectName, out var d) ? d : [];
+    }
+
+    /// <summary>
+    ///     Unknown型でカスタムエディタ（PropertyEditorAttribute2）が見つかったポートに、
+    ///     元の効果／ブラシパラメータインスタンスが持っていた実際の値を初期値として書き込む。
+    ///     既に LocalValue が設定されている場合（スナップショットからの復元等）は上書きしない。
+    ///     NodeLogic 派生型（EffectNodeTypeBuilder / BrushNodeTypeBuilder の両方が生成する型）の
+    ///     コンストラクタから、base.ctor() の直後に一度だけ呼ばれる。
+    /// </summary>
+    public static void SeedDefaultValues(NodeLogic self, PortDefinition[] portDefs)
+    {
+        foreach (var def in portDefs)
+        {
+            if (def.PortType != PortType.Unknown) continue;
+            if (def.DefaultValue == null) continue;
+            if (!self.Inputs.TryGetValue(def.PropName, out var port)) continue;
+            if (port.LocalValue != null) continue;
+            port.SetValue(def.DefaultValue);
+        }
     }
 
     public static void RefreshDynamicContainer(
@@ -1071,5 +1188,113 @@ internal static class Attr
     {
         var defP = typeof(TextPortControlAttribute).GetProperty(nameof(TextPortControlAttribute.Default))!;
         pb.SetCustomAttribute(new CustomAttributeBuilder(TextCtor, [], [defP], [defaultValue]));
+    }
+
+    /// <summary>
+    ///     CustomAttributeData を基に、PropertyEditorAttribute2 のインスタンスを直接構築する。
+    ///     Constructor.Invoke / PropertyInfo.SetValue / FieldInfo.SetValue はいずれも通常の
+    ///     アクセス修飾子を無視して呼び出せるため、元の属性が別アセンブリの internal 型であっても
+    ///     問題なくインスタンス化できる（CustomAttributeBuilder で複製して後から
+    ///     GetCustomAttribute で再構築する方式とは異なり、アセンブリ境界に左右されない）。
+    /// </summary>
+    public static PropertyEditorAttribute2? CreateEditorAttributeInstance(CustomAttributeData attributeData)
+    {
+        try
+        {
+            var ctorArgs = attributeData.ConstructorArguments.Select(UnwrapTypedArgument).ToArray();
+            if (attributeData.Constructor.Invoke(ctorArgs) is not PropertyEditorAttribute2 instance)
+                return null;
+
+            foreach (var named in attributeData.NamedArguments)
+            {
+                var value = UnwrapTypedArgument(named.TypedValue);
+                if (named.IsField)
+                    ((FieldInfo)named.MemberInfo).SetValue(instance, value);
+                else
+                    ((PropertyInfo)named.MemberInfo).SetValue(instance, value);
+            }
+
+            return instance;
+        }
+        catch (Exception ex)
+        {
+#if DEBUG
+            Console.WriteLine(
+                $@"[Attr.CreateEditorAttributeInstance] Failed to construct {attributeData.AttributeType.FullName}: " +
+                $@"{ex.GetType().Name}: {ex.Message}");
+#endif
+            return null;
+        }
+    }
+
+    /// <summary>
+    ///     元プロパティに付いていた PropertyEditorAttribute2 継承属性を、CustomAttributeData を基に
+    ///     生成後のプロパティへそのまま複製・付与する。
+    ///     属性のコンストラクタ引数・名前付き引数（プロパティ／フィールド）は、CLRの仕様上
+    ///     プリミティブ型・string・Type・enum・およびそれらの1次元配列に限られるため、
+    ///     元の属性がどんな型であっても機械的に再現できる。
+    /// </summary>
+    public static void CustomEditorControl(PropertyBuilder pb, CustomAttributeData attributeData)
+    {
+        var ctorArgs = attributeData.ConstructorArguments
+            .Select(UnwrapTypedArgument)
+            .ToArray();
+
+        var namedProperties = new List<PropertyInfo>();
+        var namedPropertyValues = new List<object?>();
+        var namedFields = new List<FieldInfo>();
+        var namedFieldValues = new List<object?>();
+
+        foreach (var named in attributeData.NamedArguments)
+        {
+            var value = UnwrapTypedArgument(named.TypedValue);
+            if (named.IsField)
+            {
+                namedFields.Add((FieldInfo)named.MemberInfo);
+                namedFieldValues.Add(value);
+            }
+            else
+            {
+                namedProperties.Add((PropertyInfo)named.MemberInfo);
+                namedPropertyValues.Add(value);
+            }
+        }
+
+        try
+        {
+            var builder = new CustomAttributeBuilder(
+                attributeData.Constructor,
+                ctorArgs,
+                namedProperties.ToArray(),
+                namedPropertyValues.ToArray(),
+                namedFields.ToArray(),
+                namedFieldValues.ToArray());
+
+            pb.SetCustomAttribute(builder);
+        }
+        catch (Exception ex)
+        {
+#if DEBUG
+            Console.WriteLine(
+                $@"[Attr.CustomEditorControl] Failed to re-emit {attributeData.AttributeType.FullName} " +
+                $@"onto property '{pb.Name}': {ex.GetType().Name}: {ex.Message}");
+#endif
+            throw;
+        }
+    }
+
+    private static object? UnwrapTypedArgument(CustomAttributeTypedArgument arg)
+    {
+        if (arg.Value is IReadOnlyCollection<CustomAttributeTypedArgument> arrayValues)
+        {
+            var elementType = arg.ArgumentType.GetElementType()!;
+            var array = Array.CreateInstance(elementType, arrayValues.Count);
+            var i = 0;
+            foreach (var element in arrayValues)
+                array.SetValue(UnwrapTypedArgument(element), i++);
+            return array;
+        }
+
+        return arg.Value;
     }
 }

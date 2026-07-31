@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Media;
+using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
@@ -59,9 +60,9 @@ public class DynamicPortTestNode : NodeLogic
     }
 
     private readonly AddInputs _addInputs = new();
+    private readonly SingleInputs _singleInputs = new();
 
     private TestMode _mode = TestMode.Single;
-    private readonly SingleInputs _singleInputs = new();
 
     [InputPort("モード", "Single: A のみ / Add: A + B")]
     [EnumPortControl(Items = typeof(TestMode))]
@@ -69,6 +70,15 @@ public class DynamicPortTestNode : NodeLogic
     public TestMode Mode
     {
         get => GetInput<TestMode>();
+        set => SetInput(value);
+    }
+
+    [InputPort("値", "説明")]
+    [ToggleSlider]
+    [PortColorSetting]
+    public bool Value
+    {
+        get => GetInput<bool>();
         set => SetInput(value);
     }
 

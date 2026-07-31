@@ -4,27 +4,31 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
 public sealed class NodeViewModel : INotifyPropertyChanged
 {
     private readonly NodeGraph _graph;
+    private readonly GraphViewModel _graphViewModel;
     internal readonly NodeLogic NodeLogic;
 
     private double _x;
     private double _y;
 
-    public NodeViewModel(NodeLogic nodeLogic, NodeGraph graph, NodeEditorViewModel nodeEditorViewModel)
+    public NodeViewModel(NodeLogic nodeLogic, NodeGraph graph, GraphViewModel graphViewModel)
     {
         NodeLogic = nodeLogic;
         _graph = graph;
-        ParentEditor = nodeEditorViewModel;
+        _graphViewModel = graphViewModel;
+        ParentEditor = graphViewModel.ParentEditor;
 
         Id = nodeLogic.Id;
 
@@ -67,6 +71,7 @@ public sealed class NodeViewModel : INotifyPropertyChanged
                 {
                     portVm.Name,
                     ControlAttributeType = portVm.ControlAttribute?.ControlType,
+                    EditorAttributeType = portVm.EditorAttribute?.GetType(),
                     Connections = graph.Connections
                         .Where(c => c.ToId == Id && c.ToPort == portVm.Name)
                         .Select(c => new { c.FromId, c.FromPort })
@@ -99,6 +104,7 @@ public sealed class NodeViewModel : INotifyPropertyChanged
             {
                 if (!newPortsByName.TryGetValue(saved.Name, out var newPortVm)) continue;
                 if (newPortVm.ControlAttribute?.ControlType != saved.ControlAttributeType) continue;
+                if (newPortVm.EditorAttribute?.GetType() != saved.EditorAttributeType) continue;
 
                 foreach (var conn in saved.Connections)
                     graph.Connect(conn.FromId, conn.FromPort, Id, saved.Name);
@@ -191,21 +197,25 @@ public sealed class NodeViewModel : INotifyPropertyChanged
         {
             var port = node.Inputs[name];
             PropertyInfo? prop;
+            object? editorPropertyOwner;
             if (name.Contains('.'))
             {
                 var parts = name.Split('.', 2);
                 var containerProp = node.GetType().GetProperty(parts[0]);
                 var containerInstance = containerProp?.GetValue(node);
                 prop = containerInstance?.GetType().GetProperty(parts[1]);
+                editorPropertyOwner = containerInstance;
             }
             else
             {
                 prop = node.GetType().GetProperty(name);
+                editorPropertyOwner = node;
             }
 
             var portAttr = prop?.GetCustomAttribute<InputPortAttribute>();
             var portColorAttr = prop?.GetCustomAttribute<PortColorSettingAttribute>();
             var controlAttr = prop?.GetCustomAttribute<PropertyControlBaseAttribute>();
+            var editorAttr = controlAttr == null ? ResolveEditorAttribute(prop) : null;
 
             yield return new PortViewModel(
                 name,
@@ -215,10 +225,41 @@ public sealed class NodeViewModel : INotifyPropertyChanged
                 port.ValueType,
                 PortDirection.Input,
                 controlAttr,
+                editorAttr,
+                editorPropertyOwner,
+                prop,
+                _graphViewModel.EditorInfo,
                 graph,
                 node.Id
             );
         }
+    }
+
+    /// <summary>
+    ///     プロパティに付与された PropertyEditorAttribute2 継承属性を解決する。
+    ///     通常は GetCustomAttribute で十分だが、Reflection.Emit で動的生成された型
+    ///     （EffectNodeFactory / BrushNodeFactory / ContainerFactory が生成する型）の場合、
+    ///     元の属性が「別アセンブリの internal 型」（YMM4本体組み込みのエディタ等、こちらが
+    ///     InternalsVisibleTo を付与できない相手）だと、CustomAttributeBuilder で複製した属性を
+    ///     GetCustomAttribute で再インスタンス化する際にアクセス例外で失敗することがある。
+    ///     そのため、動的生成側でビルド時に直接インスタンス化して静的フィールド（_portDefs）に
+    ///     保持してある PropertyEditorAttribute2 インスタンスがあれば、そちらを優先して使う。
+    ///     手書きの NodeLogic クラス（通常のコンパイル時属性）には _portDefs が存在しないため、
+    ///     その場合は今までどおり GetCustomAttribute で解決する。
+    /// </summary>
+    private static PropertyEditorAttribute2? ResolveEditorAttribute(PropertyInfo? prop)
+    {
+        if (prop == null) return null;
+
+        var portDefsField = prop.DeclaringType?.GetField("_portDefs", BindingFlags.NonPublic | BindingFlags.Static);
+        if (portDefsField?.GetValue(null) is PortDefinition[] portDefs)
+        {
+            var match = portDefs.FirstOrDefault(d => d.PropName == prop.Name);
+            if (match?.EditorAttributeInstance != null)
+                return match.EditorAttributeInstance;
+        }
+
+        return prop.GetCustomAttribute<PropertyEditorAttribute2>();
     }
 
     private IEnumerable<PortViewModel> CreateOutputPorts(NodeLogic node, NodeGraph graph)
@@ -236,6 +277,10 @@ public sealed class NodeViewModel : INotifyPropertyChanged
                 portColorAttr?.Color ?? nameof(Colors.SlateGray),
                 port.ValueType,
                 PortDirection.Output,
+                null,
+                null,
+                null,
+                null,
                 null,
                 graph,
                 node.Id
@@ -257,7 +302,10 @@ public sealed class NodeViewModel : INotifyPropertyChanged
                 subGraph
             )
             {
-                OpenSubGraphCommand = new RelayCommand(() => { ParentEditor.OpenGraph(subGraph, name); }),
+                OpenSubGraphCommand = new RelayCommand(() =>
+                {
+                    ParentEditor.OpenGraph(subGraph, name, _graphViewModel.EditorInfo);
+                }),
                 OnGraphChangedCommand = new RelayCommand<GraphChangedEventArgs>(args =>
                 {
                     if (args != null) _graph.OnGraphChanged(args);
