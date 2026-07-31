@@ -19,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.LineHighlight
         public Color Color { get => color; set => Set(ref color, value); }
         Color color = Colors.White;
 
-        [Display(GroupName = nameof(Texts.LineHighlight), Name = nameof(Texts.Strength), Description = nameof(Texts.Strength), ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.LineHighlight), Name = nameof(Texts.Strength), Description = nameof(Texts.StrengthDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation Strength { get; } = new Animation(100, 0, YMM4Constants.VeryLargeValue);
 
