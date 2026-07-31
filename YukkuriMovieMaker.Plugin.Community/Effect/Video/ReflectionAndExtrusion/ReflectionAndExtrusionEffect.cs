@@ -54,6 +54,36 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
         public bool IsInvert { get => isInvert; set => Set(ref isInvert, value); }
         bool isInvert = false;
 
+        [Display(GroupName = nameof(Texts.Reflection), Name = nameof(Texts.LinearHdrComposite), Description = nameof(Texts.LinearHdrCompositeDesc), ResourceType = typeof(Texts), Order = 40)]
+        [ToggleSlider]
+        public bool IsLinearHdrCompositeEnabled { get => isLinearHdrCompositeEnabled; set => Set(ref isLinearHdrCompositeEnabled, value); }
+        bool isLinearHdrCompositeEnabled;
+
+        [Display(GroupName = nameof(Texts.Occlusion), Name = nameof(Texts.SelfShadowStrength), Description = nameof(Texts.SelfShadowDesc), ResourceType = typeof(Texts), Order = 50)]
+        [AnimationSlider("F1", "%", 0, 100)]
+        public Animation SelfShadowStrength { get; } = new(0, 0, 100);
+
+        [Display(GroupName = nameof(Texts.Occlusion), Name = nameof(Texts.AmbientOcclusionStrength), Description = nameof(Texts.AmbientOcclusionDesc), ResourceType = typeof(Texts), Order = 51)]
+        [AnimationSlider("F1", "%", 0, 100)]
+        public Animation AmbientOcclusionStrength { get; } = new(0, 0, 100);
+
+        [Display(GroupName = nameof(Texts.Occlusion), Name = nameof(Texts.OcclusionDistance), ResourceType = typeof(Texts), Order = 52)]
+        [AnimationSlider("F1", "px", 1, 128)]
+        public Animation OcclusionDistance { get; } = new(16, 1, 128);
+
+        [Display(GroupName = nameof(Texts.Occlusion), Name = nameof(Texts.OcclusionBias), ResourceType = typeof(Texts), Order = 53)]
+        [AnimationSlider("F1", "px", 0, 10)]
+        public Animation OcclusionBias { get; } = new(0.5, 0, 10);
+
+        [Display(GroupName = nameof(Texts.Occlusion), Name = nameof(Texts.OcclusionSoftness), ResourceType = typeof(Texts), Order = 54)]
+        [AnimationSlider("F1", "px", 0, 10)]
+        public Animation OcclusionSoftness { get; } = new(1, 0, 10);
+
+        [Display(GroupName = nameof(Texts.Occlusion), Name = nameof(Texts.OcclusionQuality), ResourceType = typeof(Texts), Order = 55)]
+        [EnumComboBox]
+        public OcclusionQuality OcclusionQuality { get => occlusionQuality; set => Set(ref occlusionQuality, value); }
+        OcclusionQuality occlusionQuality = OcclusionQuality.Medium;
+
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
             var fps = exoOutputDescription.VideoInfo.FPS;
@@ -73,7 +103,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
                     $"\r\n";
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [Lighting, Heightmap, Blur];
+        protected override IEnumerable<IAnimatable> GetAnimatables() =>
+        [
+            Lighting, Heightmap, Blur, SelfShadowStrength, AmbientOcclusionStrength,
+            OcclusionDistance, OcclusionBias, OcclusionSoftness,
+        ];
 
         public override void BeginEdit()
         {

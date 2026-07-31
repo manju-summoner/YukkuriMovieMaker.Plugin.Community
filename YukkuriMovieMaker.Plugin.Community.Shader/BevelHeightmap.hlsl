@@ -9,8 +9,13 @@ cbuffer constants : register(b0)
 
 float CalculateHeight(float4 uv0)
 {
-	float range = ceil(thickness);
-	float distance = thickness;
+	if (thickness <= 0.0)
+		return 0.0;
+
+	// 1px未満でも画素中心でベベルを表現できるよう、距離場の最小幅を1pxにする。
+	float effectiveThickness = max(thickness, 1.0);
+	float range = ceil(effectiveThickness);
+	float distance = effectiveThickness;
 
 	[loop]
 		for (int yi = -range; yi <= range; yi++)
@@ -21,13 +26,18 @@ float CalculateHeight(float4 uv0)
 					float2 delta = float2(xi, yi);
 					float2 uv1 = uv0.xy + delta * uv0.zw;
 
-					if (length(delta) > thickness)
+					float pixelDistance = length(delta);
+					if (pixelDistance > effectiveThickness)
 						continue;
 
 					float4 color = InputTexture.Sample(InputSampler, uv1.xy);
-					if (color.a == 0)
+					float coverage = saturate(color.a);
+					if (coverage < 1)
 					{
-						distance = min(distance, length(delta));
+						// coverage=0.5を輪郭とみなし、画素中心から輪郭までの
+						// サブピクセル距離を線形coverageから近似する。
+						float boundaryDistance = max(0.0, pixelDistance + coverage - 0.5);
+						distance = min(distance, boundaryDistance);
 						if (distance == 0)
 							break;
 					}
@@ -37,10 +47,7 @@ float CalculateHeight(float4 uv0)
 		}
 
 	float height;
-	if (thickness != 0)
-		height = distance / thickness;
-	else
-		height = distance == 0 ? 0 : 1;
+	height = saturate(distance / effectiveThickness);
 	
 	if (mode == 0) 
 	{

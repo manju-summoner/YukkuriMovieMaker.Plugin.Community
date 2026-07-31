@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Newtonsoft.Json;
@@ -30,22 +31,51 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         IEditorInfo? editorInfo;
         bool isCanvasImageInitialized;
+        int lastCanvasImageFrame = -1;
+        readonly object canvasImageRefreshLock = new();
+        CanvasImageRequest? pendingCanvasImageRequest;
+        bool isCanvasImageRefreshRunning;
+        int canvasImageRequestId;
 
-        public void SetEditorInfo(IEditorInfo info)
+        public void SetEditorInfo(IEditorInfo? info)
         {
             editorInfo = info;
 
-            //SetEditorInfoはUndo履歴の更新などで編集操作のたびに呼ばれる。
-            //毎回レンダリングするとデバイス生成が頻発するため、初回のみ取得し以降は更新ボタンに任せる
-            if (isCanvasImageInitialized)
+            //エディタのデタッチ時などにnullが渡される
+            if (info is null)
+            {
+                InvalidateCanvasImageRequests();
                 return;
+            }
+
+            //同一フレームでは編集操作のたびに再描画せず、フレームが変わったときだけ画像を更新する
+            if (isCanvasImageInitialized)
+            {
+                if (info.ItemPosition.Frame != lastCanvasImageFrame)
+                    QueueCanvasImageRefresh();
+                return;
+            }
             isCanvasImageInitialized = true;
-            RefreshCanvasImage();
+            QueueCanvasImageRefresh();
+        }
+
+        /// <summary>保留中の画像更新要求を無効化する（完了済みの生成結果も適用されなくなる）</summary>
+        void InvalidateCanvasImageRequests()
+        {
+            lock (canvasImageRefreshLock)
+            {
+                pendingCanvasImageRequest = null;
+                canvasImageRequestId++;
+            }
         }
 
         /// <summary>ピン配置キャンバスに表示する画像（パペット変形の直前までのエフェクト適用済み）</summary>
         public System.Windows.Media.Imaging.BitmapSource? CanvasImage { get => canvasImage; private set => Set(ref canvasImage, value); }
         System.Windows.Media.Imaging.BitmapSource? canvasImage;
+
+        /// <summary>ピン配置キャンバスに表示する画像のアイテム座標上の範囲</summary>
+        public Rect CanvasImageBounds { get => canvasImageBounds; private set => Set(ref canvasImageBounds, value); }
+        Rect canvasImageBounds = Rect.Empty;
 
         /// <summary>ピン配置キャンバスに表示するピン一覧</summary>
         public ImmutableList<PuppetDeformationItemViewModel> CanvasPins { get => canvasPins; private set => Set(ref canvasPins, value); }
@@ -154,7 +184,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 _ => canvasBones.Any(b => b.IsSelected),
                 _ => RemoveSelectedBoneFromCanvas());
 
-            RefreshImageCommand = new ActionCommand(_ => true, _ => RefreshCanvasImage());
+            RefreshImageCommand = new ActionCommand(_ => true, _ => QueueCanvasImageRefresh());
 
             OnBeginEditPointCommand = new ActionCommand(_ => true, _ => OnBeginEditPoint());
             OnEndEditPointCommand = new ActionCommand(_ => true, _ => OnEndEditPoint());
@@ -163,36 +193,105 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             RebuildBoneViewModels();
         }
 
-        void RefreshCanvasImage()
+        void QueueCanvasImageRefresh()
         {
-            if (editorInfo is null)
+            var info = editorInfo;
+            if (info is null || disposedValue)
                 return;
+            lastCanvasImageFrame = info.ItemPosition.Frame;
+
+            var startWorker = false;
+            lock (canvasImageRefreshLock)
+            {
+                pendingCanvasImageRequest = new CanvasImageRequest(info, Effect, ++canvasImageRequestId);
+                if (!isCanvasImageRefreshRunning)
+                {
+                    isCanvasImageRefreshRunning = true;
+                    startWorker = true;
+                }
+            }
+            if (startWorker)
+                _ = ProcessCanvasImageRequestsAsync();
+        }
+
+        async Task ProcessCanvasImageRequestsAsync()
+        {
+            while (true)
+            {
+                CanvasImageRequest request;
+                lock (canvasImageRefreshLock)
+                {
+                    if (pendingCanvasImageRequest is not CanvasImageRequest pending)
+                    {
+                        isCanvasImageRefreshRunning = false;
+                        return;
+                    }
+                    request = pending;
+                    pendingCanvasImageRequest = null;
+                }
+
+                var result = await Task.Run(() => LoadCanvasImage(request.Info, request.Effect));
+
+                bool applyResult;
+                bool hasNextRequest;
+                lock (canvasImageRefreshLock)
+                {
+                    applyResult = !disposedValue && request.Id == canvasImageRequestId;
+                    hasNextRequest = !disposedValue && pendingCanvasImageRequest is not null;
+                    if (!hasNextRequest)
+                        isCanvasImageRefreshRunning = false;
+                }
+
+                if (applyResult)
+                {
+                    CanvasImageBounds = result.Bounds;
+                    CanvasImage = result.Image;
+                }
+                if (!hasNextRequest)
+                    return;
+            }
+        }
+
+        static CanvasImageResult LoadCanvasImage(IEditorInfo info, PuppetDeformationEffect effect)
+        {
             try
             {
                 //生成されるBitmapSourceはCPU側の完全なコピー(frozen BitmapImage)のため、
                 //デバイス一式を含むソースはレンダリング後すぐ破棄する。
                 //保持するとエディタを開いたままアプリを終了した際に未解放オブジェクトとして残る
-                using var itemVideoSource = editorInfo.CreateItemVideoSource(
-                    new ItemVideoSourceCreationParameter(VideoEffectSelection.UpTo(Effect)));
+                using var itemVideoSource = info.CreateItemVideoSource(
+                    new ItemVideoSourceCreationParameter(VideoEffectSelection.UpTo(effect)));
                 if (itemVideoSource is null)
-                {
-                    CanvasImage = null;
-                    return;
-                }
+                    return CanvasImageResult.Empty;
 
-                var time = editorInfo.ItemPosition.Time;
+                var time = info.ItemPosition.Time;
                 if (time < TimeSpan.Zero)
                     time = TimeSpan.Zero;
-                else if (editorInfo.ItemDuration.Time <= time && editorInfo.ItemDuration.Frame > 0)
-                    time = editorInfo.VideoInfo.GetTimeFrom(editorInfo.ItemDuration.Frame - 1);
+                else if (info.ItemDuration.Time <= time && info.ItemDuration.Frame > 0)
+                    time = info.VideoInfo.GetTimeFrom(info.ItemDuration.Frame - 1);
 
                 itemVideoSource.Update(time, Player.Video.TimelineSourceUsage.Paused);
-                CanvasImage = itemVideoSource.RenderBitmapSource();
+                var bounds = itemVideoSource.Devices.DeviceContext.GetImageLocalBounds(itemVideoSource.Output);
+                var image = itemVideoSource.RenderBitmapSource();
+                return new CanvasImageResult(image, new Rect(bounds.Left, bounds.Top, image.PixelWidth, image.PixelHeight));
             }
             catch
             {
-                CanvasImage = null;
+                return CanvasImageResult.Empty;
             }
+        }
+
+        readonly record struct CanvasImageRequest(IEditorInfo Info, PuppetDeformationEffect Effect, int Id);
+        readonly record struct CanvasImageResult(System.Windows.Media.Imaging.BitmapSource? Image, Rect Bounds)
+        {
+            public static CanvasImageResult Empty => new(null, Rect.Empty);
+        }
+
+        public double GetDisplayValue(Animation animation)
+        {
+            if (editorInfo is null)
+                return animation.Values.FirstOrDefault()?.Value ?? 0;
+            return animation.GetValue(editorInfo.ItemPosition.Frame, editorInfo.ItemDuration.Frame, editorInfo.VideoInfo.FPS);
         }
 
         #region ピン配置キャンバス操作
@@ -771,6 +870,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         void Dispose(bool disposing)
         {
             if (disposedValue) return;
+            disposedValue = true;
+            InvalidateCanvasImageRequests();
             if (disposing)
             {
                 Effect.PropertyChanged -= Effect_PropertyChanged;
@@ -785,7 +886,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     bone.Dispose();
                 }
             }
-            disposedValue = true;
         }
 
         public void Dispose()

@@ -14,8 +14,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
     {
         const double PinWeightScale = 1e4;
         const double IdentityEpsilon = 1e-6;
+        //支持拘束の半径（平均エッジ長に対する倍率）と重み（ラプラシアン対角平均に対する倍率）
+        const double SupportRadiusScale = 2.5;
+        const double SupportWeightScale = 4.0;
 
-        readonly ArapGridMesh mesh;
+        readonly IArapMesh mesh;
         readonly Vector2[] pinRests;
         readonly BandCholesky cholesky;
 
@@ -31,6 +34,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         readonly Vector2[] pinAttachRests;
         readonly double pinWeight;
 
+        //支持拘束: ピン周辺の頂点を初期値のrigid-MLS場（滑らか）へ弱く引き寄せ、
+        //点拘束近傍へのひずみ集中（トゲ状のアーティファクト）を抑える。
+        //剛体運動ではMLS場が厳密解なので、この拘束は結果を歪めない
+        readonly int[] supportVertices;
+        readonly double[] supportWeights;
+
         //エッジを持たない頂点（マスクで除去された領域）。対角1の恒等行としてレスト位置に固定する
         readonly bool[] isIsolated;
         //ピンの無い連結成分の頂点。動かしようがないためレスト位置にアンカーする
@@ -38,11 +47,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
 
         //作業バッファ（Solve間で再利用）
         readonly double[] qx, qy, bx, by, rotCos, rotSin;
+        readonly double[] supportTargetX, supportTargetY;
 
         public int VertexCount => mesh.VertexCount;
 
         ArapDeformer(
-            ArapGridMesh mesh,
+            IArapMesh mesh,
             Vector2[] pinRests,
             BandCholesky cholesky,
             int[] neighborStart,
@@ -52,7 +62,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             Vector2[] pinAttachRests,
             double pinWeight,
             bool[] isIsolated,
-            bool[] isAnchored)
+            bool[] isAnchored,
+            int[] supportVertices,
+            double[] supportWeights)
         {
             this.mesh = mesh;
             this.pinRests = pinRests;
@@ -65,6 +77,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             this.pinWeight = pinWeight;
             this.isIsolated = isIsolated;
             this.isAnchored = isAnchored;
+            this.supportVertices = supportVertices;
+            this.supportWeights = supportWeights;
 
             var n = mesh.VertexCount;
             qx = new double[n];
@@ -73,13 +87,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             by = new double[n];
             rotCos = new double[n];
             rotSin = new double[n];
+            supportTargetX = new double[supportVertices.Length];
+            supportTargetY = new double[supportVertices.Length];
         }
 
         /// <summary>
         /// メッシュとピンのレスト位置から行列を組み立てて分解する。
         /// 分解に失敗した場合（拘束なしで特異な場合など）はnullを返す。
         /// </summary>
-        public static ArapDeformer? TryCreate(ArapGridMesh mesh, IReadOnlyList<Vector2> pinRestPositions)
+        public static ArapDeformer? TryCreate(IArapMesh mesh, IReadOnlyList<Vector2> pinRestPositions)
         {
             if (pinRestPositions.Count == 0)
                 return null;
@@ -109,8 +125,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 neighborWeight[ib] = w;
             }
 
-            //バンド幅: グリッド隣接（±(cellsX+2)）とピン拘束の三角形内結合が収まる幅
-            var bandwidth = mesh.CellsX + 2;
+            //バンド幅: メッシュのエッジとピン拘束の三角形内結合が収まる幅（メッシュ側が番号付けに基づき保証する）
+            var bandwidth = mesh.SolverBandwidth;
             var cholesky = new BandCholesky(n, bandwidth);
 
             //ラプラシアン部分: L_ii = Σw, L_ij = -w。
@@ -172,6 +188,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     cholesky.Add(i, i, pinWeight);
             }
 
+            //支持拘束（対角のみの加算なのでバンド幅に影響しない）
+            var (supportVertices, supportWeights) = BuildSupports(
+                mesh, attachRests, isIsolated, isAnchored, SupportWeightScale * diagSum / connectedCount);
+            for (var s = 0; s < supportVertices.Length; s++)
+                cholesky.Add(supportVertices[s], supportVertices[s], supportWeights[s]);
+
             if (!cholesky.Factorize())
                 return null;
 
@@ -179,7 +201,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             for (var i = 0; i < rests.Length; i++)
                 rests[i] = pinRestPositions[i];
 
-            return new ArapDeformer(mesh, rests, cholesky, neighborStart, neighborIndex, neighborWeight, attachments, attachRests, pinWeight, isIsolated, isAnchored);
+            return new ArapDeformer(mesh, rests, cholesky, neighborStart, neighborIndex, neighborWeight, attachments, attachRests, pinWeight, isIsolated, isAnchored, supportVertices, supportWeights);
         }
 
         /// <summary>
@@ -221,6 +243,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 var d = ForwardRigidMls(rests[i], pinTargets);
                 qx[i] = d.X;
                 qy[i] = d.Y;
+            }
+
+            //支持拘束の目標はMLS場の値。剛体運動では厳密解と一致し、
+            //大変位ではピン近傍を滑らかな場に沿わせてトゲ状のひずみ集中を防ぐ
+            for (var s = 0; s < supportVertices.Length; s++)
+            {
+                supportTargetX[s] = qx[supportVertices[s]];
+                supportTargetY[s] = qy[supportVertices[s]];
             }
 
             for (var it = 0; it < iterations; it++)
@@ -291,6 +321,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     bx[v1] += pinWeight * b1 * tx; by[v1] += pinWeight * b1 * ty;
                     bx[v2] += pinWeight * b2 * tx; by[v2] += pinWeight * b2 * ty;
                 }
+                for (var s = 0; s < supportVertices.Length; s++)
+                {
+                    var v = supportVertices[s];
+                    bx[v] += supportWeights[s] * supportTargetX[s];
+                    by[v] += supportWeights[s] * supportTargetY[s];
+                }
                 for (var i = 0; i < n; i++)
                 {
                     if (isIsolated[i])
@@ -314,6 +350,50 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
 
             for (var i = 0; i < n; i++)
                 result[i] = new Vector2((float)qx[i], (float)qy[i]);
+        }
+
+        /// <summary>
+        /// 各ピンのアタッチ点から支持半径内にある頂点と、距離減衰付きの支持重みを列挙する。
+        /// 孤立頂点（恒等行）とアンカー済み頂点は対象外。複数ピンの半径が重なる頂点は重複して列挙されるが、
+        /// 支持目標が頂点自身のMLS場の値で共通なため、重みの加算として正しく合成される。
+        /// </summary>
+        static (int[] Vertices, double[] Weights) BuildSupports(
+            IArapMesh mesh,
+            Vector2[] pinCenters,
+            bool[] isIsolated,
+            bool[] isAnchored,
+            double weightScale)
+        {
+            var edges = mesh.Edges;
+            if (edges.Length == 0 || pinCenters.Length == 0)
+                return ([], []);
+
+            var rests = mesh.RestPositions;
+            var avgEdgeLength = 0.0;
+            foreach (var (a, b, _) in edges)
+                avgEdgeLength += Vector2.Distance(rests[a], rests[b]);
+            avgEdgeLength /= edges.Length;
+            var radius = avgEdgeLength * SupportRadiusScale;
+            if (radius <= 0)
+                return ([], []);
+
+            var vertices = new List<int>();
+            var weights = new List<double>();
+            foreach (var center in pinCenters)
+            {
+                for (var i = 0; i < rests.Length; i++)
+                {
+                    if (isIsolated[i] || isAnchored[i])
+                        continue;
+                    var distance = Vector2.Distance(rests[i], center);
+                    if (distance >= radius)
+                        continue;
+                    var falloff = 1.0 - distance / radius;
+                    vertices.Add(i);
+                    weights.Add(weightScale * falloff * falloff);
+                }
+            }
+            return ([.. vertices], [.. weights]);
         }
 
         /// <summary>

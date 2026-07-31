@@ -1,0 +1,100 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3.Vst3SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800">
+    <UserControl.DataContext>
+        <local:Vst3SettingsViewModel/>
+    </UserControl.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Expander Grid.Row="0" Header="VST3" IsExpanded="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="26"/>
+                    <RowDefinition Height="88"/>
+                    <RowDefinition Height="26"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="{x:Static local:Texts.Vst3SettingsDefaultDirectoriesName}"/>
+                    <ItemsControl Grid.Column="1"
+                                  ItemsSource="{Binding DefaultDirectories}"
+                                  VerticalAlignment="Center">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Mode=OneWay}"
+                                         ToolTip="{Binding}"
+                                         IsReadOnly="True"
+                                         BorderBrush="Transparent"
+                                         Background="Transparent"
+                                         TextWrapping="Wrap"
+                                         TextAlignment="Right"
+                                         VerticalContentAlignment="Center"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+
+                <Label Grid.Row="1" Content="{x:Static local:Texts.Vst3SettingsAdditionalDirectoriesName}"/>
+                <ListBox Grid.Row="2"
+                         ItemsSource="{Binding AdditionalDirectories}"
+                         SelectedItem="{Binding SelectedDirectory}"/>
+                <Grid Grid.Row="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="1"
+                            Content="{x:Static local:Texts.Vst3SettingsAddDirectoryButton}"
+                            Command="{Binding AddDirectory}"/>
+                    <Button Grid.Column="2"
+                            Content="{x:Static local:Texts.Vst3SettingsRemoveDirectoryButton}"
+                            Command="{Binding RemoveDirectory}"/>
+                </Grid>
+            </Grid>
+        </Expander>
+
+        <Expander Grid.Row="1" Header="{x:Static local:Texts.Vst3SettingsPluginListName}" IsExpanded="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition Height="26"/>
+                </Grid.RowDefinitions>
+
+                <ListView Grid.Row="0" ItemsSource="{Binding Plugins}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="{x:Static local:Texts.Vst3SettingsPluginNameColumn}" DisplayMemberBinding="{Binding Name}" Width="180"/>
+                            <GridViewColumn Header="{x:Static local:Texts.Vst3SettingsPluginVendorColumn}" DisplayMemberBinding="{Binding Vendor}" Width="140"/>
+                            <GridViewColumn Header="{x:Static local:Texts.Vst3SettingsPluginPathColumn}" DisplayMemberBinding="{Binding ModulePath}" Width="340"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding ScanStatusText}" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1"
+                            Content="{x:Static local:Texts.Vst3SettingsRescanButton}"
+                            Command="{Binding Rescan}"/>
+                </Grid>
+            </Grid>
+        </Expander>
+    </Grid>
+</UserControl>
