@@ -127,8 +127,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                         return;
                     var length = Math.Min(value.Length, _vertexData.Length);
                     Array.Copy(value, _vertexData, length);
-                    //前回より短いデータが来た場合も、前回転送済みの範囲は上書きし直す
-                    _uploadedByteCount = Math.Max(_uploadedByteCount, length);
+                    //VertexCountで参照する実データ分だけをGPUへ転送する
+                    _uploadedByteCount = length;
                     _vertexDataDirty = true;
                     UpdateConstants();
                 }

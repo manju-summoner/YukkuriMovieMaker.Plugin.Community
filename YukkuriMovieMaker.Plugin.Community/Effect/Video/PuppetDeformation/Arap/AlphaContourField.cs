@@ -17,7 +17,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         public int Height { get; }
 
         /// <summary>膨張後の連結成分ラベル（0=透明）。輪郭の内側判定・内部点のラベル付けに使う</summary>
-        public int[] Labels { get; }
+        public ushort[] Labels { get; }
 
         /// <summary>
         /// 前景/背景の境界までのchamfer距離（3-4重み、値3≒1px）。
@@ -26,7 +26,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         /// 膨張「前」のラベルから計算するため、最終的な境界とは最大1pxずれる。
         /// 参照側は閾値にその分のマージンを足すこと（膨張で埋めた画素の距離も更新されない）。
         /// </summary>
-        public int[] BoundaryDistance { get; }
+        public ushort[] BoundaryDistance { get; }
 
         public List<Loop> Loops { get; }
 
@@ -46,7 +46,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             public required double SignedArea { get; init; }
         }
 
-        AlphaContourField(int width, int height, int[] labels, int[] boundaryDistance, List<Loop> loops, int opaquePixelCount)
+        AlphaContourField(int width, int height, ushort[] labels, ushort[] boundaryDistance, List<Loop> loops, int opaquePixelCount)
         {
             Width = width;
             Height = height;
@@ -66,6 +66,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 return null;
 
             var labels = LabelComponents(opaque, width, height, out var opaqueBounds);
+            if (labels is null)
+                return null;
             //距離変換は膨張前に計算し、膨張候補の絞り込みにも使う（境界とのずれは参照側がマージンで吸収）
             var boundaryDistance = BuildBoundaryDistance(labels, width, height, opaqueBounds);
             DilatePreservingLabels(labels, boundaryDistance, width, height, opaqueBounds);
@@ -84,12 +86,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         /// 計算はバウンディングボックス＋余白の領域に限定する（領域外は0=境界扱いのまま）。
         /// 画像外・領域外は背景として扱う（前景の輪郭は画像端でも切れるため）。
         /// </summary>
-        static int[] BuildBoundaryDistance(int[] labels, int width, int height, (int X0, int Y0, int X1, int Y1) opaqueBounds)
+        static ushort[] BuildBoundaryDistance(ushort[] labels, int width, int height, (int X0, int Y0, int X1, int Y1) opaqueBounds)
         {
             const int Orth = 3;
             const int Diag = 4;
-            const int Inf = int.MaxValue / 2;
-            var dist = new int[width * height];
+            const int Inf = ushort.MaxValue;
+            var dist = new ushort[width * height];
 
             //前景の無い入力（呼び出し側で弾かれるが保険）
             if (opaqueBounds.X1 < opaqueBounds.X0)
@@ -140,7 +142,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                         c = (labels[up + 1] != 0) != fg ? Diag : dist[up + 1] + Diag;
                         if (c < d) d = c;
                     }
-                    dist[i] = d;
+                    dist[i] = (ushort)Math.Min(d, ushort.MaxValue);
                 }
             }
             //後退パス（右・下・右下・左下）
@@ -151,7 +153,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 {
                     var i = y * width + x;
                     var fg = labels[i] != 0;
-                    var d = dist[i];
+                    var d = (int)dist[i];
                     if (isBorderRow || x == x0 || x == x1)
                     {
                         d = Math.Min(d, SampleChecked(x + 1, y, fg, Orth));
@@ -171,7 +173,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                         c = (labels[down - 1] != 0) != fg ? Diag : dist[down - 1] + Diag;
                         if (c < d) d = c;
                     }
-                    dist[i] = d;
+                    dist[i] = (ushort)Math.Min(d, ushort.MaxValue);
                 }
             }
             return dist;
@@ -181,12 +183,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         /// 4連結の連結成分ラベリング（2パスunion-find）。0=透明、1..=成分。
         /// 不透明ピクセルのバウンディングボックス（膨張前）も返し、以降の走査範囲の限定に使う。
         /// </summary>
-        static int[] LabelComponents(bool[] opaque, int width, int height, out (int X0, int Y0, int X1, int Y1) opaqueBounds)
+        static ushort[]? LabelComponents(bool[] opaque, int width, int height, out (int X0, int Y0, int X1, int Y1) opaqueBounds)
         {
-            var labels = new int[width * height];
+            var labels = new ushort[width * height];
             var parent = new int[256];
             var parentCount = 1;
             int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
+            opaqueBounds = (0, 0, -1, -1);
 
             //経路半減付きFind（配列直接参照。ホットパスなのでList<int>は使わない）
             int Find(int l)
@@ -215,15 +218,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     var left = x > 0 ? labels[i - 1] : 0;
                     if (up == 0 && left == 0)
                     {
+                        //病的なノイズ画像では16-bitラベルの上限に達する前に輪郭メッシュを諦め、
+                        //呼び出し側のグリッド＋三角形マスクへフォールバックする。
+                        if (parentCount == ushort.MaxValue)
+                            return null;
                         if (parentCount == parent.Length)
                             Array.Resize(ref parent, parent.Length * 2);
                         parent[parentCount] = parentCount;
-                        labels[i] = parentCount;
+                        labels[i] = (ushort)parentCount;
                         parentCount++;
                     }
                     else if (up == 0 || left == 0)
                     {
-                        labels[i] = up | left;
+                        labels[i] = (ushort)(up | left);
                     }
                     else
                     {
@@ -232,7 +239,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                         var root = Math.Min(ru, rl);
                         parent[ru] = root;
                         parent[rl] = root;
-                        labels[i] = root;
+                        labels[i] = (ushort)root;
                     }
                 }
             }
@@ -247,7 +254,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 for (var i = y * width + minX; i <= rowEnd; i++)
                 {
                     if (labels[i] != 0)
-                        labels[i] = Find(labels[i]);
+                        labels[i] = (ushort)Find(labels[i]);
                 }
             }
             return labels;
@@ -260,7 +267,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         /// 5x5の安全判定により膨張後も異ラベル領域が決して隣接（8近傍）しないことを保証する。
         /// 候補は距離場から「前景に8隣接する透明ピクセル（chamfer ≦ 4）」に絞り、近傍走査を境界リング分だけに抑える。
         /// </summary>
-        static void DilatePreservingLabels(int[] labels, int[] boundaryDistance, int width, int height, (int X0, int Y0, int X1, int Y1) opaqueBounds)
+        static void DilatePreservingLabels(ushort[] labels, ushort[] boundaryDistance, int width, int height, (int X0, int Y0, int X1, int Y1) opaqueBounds)
         {
             if (opaqueBounds.X1 < opaqueBounds.X0)
                 return;
@@ -332,7 +339,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 }
             }
             foreach (var (index, label) in additions)
-                labels[index] = label;
+                labels[index] = (ushort)label;
         }
 
         //方向: 0=+x, 1=+y, 2=-x, 3=-y。輪郭は「進行方向の右側が不透明領域」になる向きに辿る
@@ -344,7 +351,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         /// 走査は膨張前バウンディングボックスの1px外側（膨張で増えうる範囲）に限定する。
         /// </summary>
         static List<Loop>? TraceLoops(
-            int[] labels, int width, int height,
+            ushort[] labels, int width, int height,
             (int X0, int Y0, int X1, int Y1) opaqueBounds, int maxBoundaryEdges,
             out int opaqueCount)
         {

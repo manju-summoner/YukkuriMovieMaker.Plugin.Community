@@ -15,6 +15,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     internal sealed class PuppetDeformationListEditorViewModel : Bindable, IDisposable
     {
+        static readonly System.Reflection.PropertyInfo BonesProperty
+            = typeof(PuppetDeformationEffect).GetProperty(nameof(PuppetDeformationEffect.Bones))!;
+
         readonly ICommand selectRestCommand;
         readonly ICommand selectOffsetCommand;
 
@@ -472,33 +475,100 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             BeginEdit?.Invoke(this, EventArgs.Empty);
             var pin = pinVm.Model;
             pin.BoneId = pin.BoneId == bone.Id ? Guid.Empty : bone.Id;
+            CommitPinsChange(Effect.Pins, skipSource: true);
             EndEdit?.Invoke(this, EventArgs.Empty);
         }
 
         void CommitBonesChange(ImmutableList<PuppetBone> newBones)
         {
-            var cloned = newBones.Select(b =>
+            //複数アイテム選択時は、既存ボーンをインデックスで対応付けて各アイテム固有のIdを維持する
+            var sourceOldBones = Effect.Bones;
+            foreach (var itemProperty in ItemProperties)
             {
-                var clone = JsonConvert.DeserializeObject<PuppetBone>(JsonConvert.SerializeObject(b)) ?? new PuppetBone();
-                clone.IsSelected = b.IsSelected;
-                return clone;
-            }).ToImmutableList();
-            Effect.Bones = cloned;
+                if (itemProperty.PropertyOwner is not PuppetDeformationEffect effect)
+                    continue;
+
+                var targetOldBones = effect.Bones;
+                var targetIdBySourceId = new Dictionary<Guid, Guid>();
+                foreach (var sourceBone in newBones)
+                {
+                    var sourceOldIndex = sourceOldBones.FindIndex(b => b.Id == sourceBone.Id);
+                    var targetId = sourceOldIndex >= 0 && sourceOldIndex < targetOldBones.Count
+                        ? targetOldBones[sourceOldIndex].Id
+                        : ReferenceEquals(effect, Effect) ? sourceBone.Id : Guid.NewGuid();
+                    targetIdBySourceId[sourceBone.Id] = targetId;
+                }
+
+                var clonedBones = newBones.Select(b =>
+                {
+                    var clone = JsonConvert.DeserializeObject<PuppetBone>(JsonConvert.SerializeObject(b)) ?? new PuppetBone();
+                    clone.IsSelected = b.IsSelected;
+                    clone.Id = targetIdBySourceId[b.Id];
+                    clone.ParentId = b.ParentId != Guid.Empty && targetIdBySourceId.TryGetValue(b.ParentId, out var parentId)
+                        ? parentId
+                        : Guid.Empty;
+                    return clone;
+                }).ToImmutableList();
+
+                itemProperty.SetValue(BonesProperty, clonedBones);
+
+                //先頭アイテムのピンは直接編集済みなので、同値のクローンへ差し替えない
+                if (ReferenceEquals(effect, Effect))
+                    continue;
+
+                var targetPinBoneIds = new Dictionary<Guid, Guid>();
+                var correspondingBoneCount = System.Math.Min(targetOldBones.Count, sourceOldBones.Count);
+                for (var i = 0; i < correspondingBoneCount; i++)
+                {
+                    if (targetIdBySourceId.TryGetValue(sourceOldBones[i].Id, out var targetBoneId))
+                        targetPinBoneIds[targetOldBones[i].Id] = targetBoneId;
+                }
+
+                var clonedPins = ClonePinsWithMappedBoneIds(effect.Pins, targetPinBoneIds);
+                itemProperty.SetValue(clonedPins);
+            }
         }
 
         #endregion
 
         void CommitStructuralChange(ImmutableList<PuppetDeformation> newPins)
+            => CommitPinsChange(newPins, skipSource: false);
+
+        void CommitPinsChange(ImmutableList<PuppetDeformation> newPins, bool skipSource)
         {
-            var cloned = newPins.Select(p =>
+            //複数アイテム間でAnimation等の参照を共有しないよう、アイテムごとにクローンする
+            var sourceBones = Effect.Bones;
+            foreach (var itemProperty in ItemProperties)
+            {
+                if (itemProperty.PropertyOwner is not PuppetDeformationEffect effect
+                    || skipSource && ReferenceEquals(effect, Effect))
+                    continue;
+
+                //ボーン列の同じインデックスを対応付け、ターゲット固有のIdへ変換する
+                var targetBoneIds = new Dictionary<Guid, Guid>();
+                var correspondingBoneCount = System.Math.Min(sourceBones.Count, effect.Bones.Count);
+                for (var i = 0; i < correspondingBoneCount; i++)
+                    targetBoneIds[sourceBones[i].Id] = effect.Bones[i].Id;
+
+                itemProperty.SetValue(ClonePinsWithMappedBoneIds(newPins, targetBoneIds));
+            }
+        }
+
+        static ImmutableList<PuppetDeformation> ClonePinsWithMappedBoneIds(
+            ImmutableList<PuppetDeformation> pins,
+            IReadOnlyDictionary<Guid, Guid> targetBoneIds)
+        {
+            return pins.Select(p =>
             {
                 var clone = JsonConvert.DeserializeObject<PuppetDeformation>(JsonConvert.SerializeObject(p))
                             ?? PuppetDeformation.Create(0, 0);
                 clone.IsRestSelected = p.IsRestSelected;
                 clone.IsOffsetSelected = p.IsOffsetSelected;
+                clone.BoneId = targetBoneIds.TryGetValue(p.BoneId, out var targetBoneId)
+                    ? targetBoneId
+                    : Guid.Empty;
                 return clone;
             }).ToImmutableList();
-            ItemProperties[0].SetValue(cloned);
         }
 
         void HandleSelect(object? arg, bool isOffset)

@@ -54,12 +54,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             if (field is null || field.Loops.Count == 0 || field.OpaquePixelCount == 0)
                 return null;
 
+            //読み戻しマスクを縮小しても、メッシュ座標と間隔・簡略化精度は画像ローカルpx基準に保つ
+            var scaleX = width / maskWidth;
+            var scaleY = height / maskHeight;
+            var coordinateScale = MathF.Max(scaleX, scaleY);
+
             //予算超過時は簡略化を粗く・間隔を広くして再試行する
-            var epsilon = InitialSimplifyEpsilon;
-            var spacingFloor = minSpacing;
+            var epsilon = InitialSimplifyEpsilon / coordinateScale;
+            var spacingFloor = minSpacing / coordinateScale;
             for (var attempt = 0; attempt < 4; attempt++)
             {
-                var mesh = TryBuildOnce(field, width, height, maxTriangles, spacingFloor, epsilon, out var usedSpacing);
+                var mesh = TryBuildOnce(field, width, height, scaleX, scaleY, coordinateScale, maxTriangles, spacingFloor, epsilon, out var usedSpacing);
                 if (mesh is not null)
                     return mesh;
                 epsilon *= 1.5f;
@@ -73,7 +78,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
 
         static ArapContourMesh? TryBuildOnce(
             AlphaContourField field,
-            float width, float height,
+            float width, float height, float scaleX, float scaleY, float coordinateScale,
             int maxTriangles, float spacingFloor, float epsilon,
             out float usedSpacing)
         {
@@ -280,7 +285,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             for (var i = 0; i < order.Length; i++)
             {
                 var p = triangulator.GetPoint(order[i]);
-                restPositions[i] = new Vector2(p.X - halfW, p.Y - halfH);
+                restPositions[i] = new Vector2(p.X * scaleX - halfW, p.Y * scaleY - halfH);
             }
 
             var triangleIndices = new int[kept.Count * 3];
@@ -301,7 +306,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             if (bandwidth > MaxSolverBandwidth)
                 return null;
 
-            return new ArapContourMesh(width, height, restPositions, triangleIndices, bandwidth, spacing);
+            return new ArapContourMesh(width, height, restPositions, triangleIndices, bandwidth, spacing * coordinateScale);
         }
 
         static bool SpansDifferentLabels(int la, int lb, int lc)
@@ -503,7 +508,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     {
                         var pixel = y * field.Width + x;
                         if (field.Labels[pixel] == 0)
-                            field.Labels[pixel] = label;
+                            field.Labels[pixel] = (ushort)label;
                     }
                 }
             }

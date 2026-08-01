@@ -27,6 +27,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         const int JointPinIndex = -1;
         //アルファ読み戻しを行う入力サイズの上限（これを超える場合は切り離しをスキップ）
         const int ArapAlphaReadbackMaxSize = 4096;
+        internal const float ArapRestReuseTolerance = 0.5f;
 
         readonly PuppetDeformationEffect item = item;
         readonly float[] pinDataBuffer = new float[PuppetDeformationCustomEffect.MaxPins * 4];
@@ -38,6 +39,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         PuppetDeformationCustomEffect? effect;
         PuppetDeformationArapCustomEffect? arapEffect;
+        Vortice.Direct2D1.Effects.AffineTransform2D? terminal;
         ID2D1DeviceContext? deviceContext;
         PinGpuCache? gpuCache;
         ImmutableList<VideoEffectController> cachedControllers = ImmutableList<VideoEffectController>.Empty;
@@ -46,6 +48,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         IArapMesh? arapMesh;
         ArapDeformer? arapDeformer;
         Vector2[]? arapRests;
+        Vector2[]? arapRestCandidates;
         Vector2[]? deformedPositions;
         byte[]? arapVertexData;
         bool useArapWiring;
@@ -199,12 +202,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     FillPinDataBuffer(gpuSamples);
                     UpdateArapEffect(gpuSamples, apply, imageWidth, imageHeight);
 
-                    //終端のMLSエフェクトはパススルー(PinCount=0)として使う
-                    effect.PinCount = 0;
-                    effect.TightLocalLeft = 0;
-                    effect.TightLocalTop = 0;
-                    effect.TightLocalRight = 0;
-                    effect.TightLocalBottom = 0;
                 }
                 else
                 {
@@ -355,32 +352,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             //メッシュは画像サイズに依存する。透明領域で隔てられた部位を独立して変形できるよう、
             //アルファ輪郭に沿ったメッシュを構築する（構築できない場合はグリッド＋三角形間引きへフォールバック）。
             //アルファは再構築時点の入力から取得する（動画では以後のアルファ変化に追従しない）
-            if (arapMesh is null || arapMesh.Width != width || arapMesh.Height != height)
+            if (arapMesh is null || !ArapMeshSizeNearlyEqual(arapMesh, width, height))
             {
                 arapMesh = BuildArapMesh(width, height);
                 arapDeformer = null;
                 deformedPositions = new Vector2[arapMesh.VertexCount];
             }
-            arapVertexData ??= new byte[PuppetDeformationArapCustomEffect.MaxVertices * PuppetDeformationArapCustomEffect.VertexStride];
 
-            //ピンのレスト位置が変わったら行列分解を作り直す
-            var restsChanged = arapRests is null || arapRests.Length != samples.Count;
-            if (!restsChanged)
-            {
-                for (var i = 0; i < samples.Count; i++)
-                {
-                    if (arapRests![i] != samples[i].Rest)
-                    {
-                        restsChanged = true;
-                        break;
-                    }
-                }
-            }
+            arapRestCandidates = arapRestCandidates is { Length: var length } && length == samples.Count
+                ? arapRestCandidates
+                : new Vector2[samples.Count];
+            for (var i = 0; i < samples.Count; i++)
+                arapRestCandidates[i] = samples[i].Rest;
+
+            //ピンの所属三角形・重心座標・支持拘束はrest依存なので、大きく動いた場合は再分解が必要。
+            //一方、0.5px未満の移動では前回のアタッチ位置を再利用し、アニメーション時の毎フレーム分解を避ける。
+            var restsChanged = !ArapRestsNearlyEqual(arapRests, arapRestCandidates);
             if (arapDeformer is null || restsChanged)
             {
-                arapRests = new Vector2[samples.Count];
-                for (var i = 0; i < samples.Count; i++)
-                    arapRests[i] = samples[i].Rest;
+                arapRests = (Vector2[])arapRestCandidates.Clone();
                 arapDeformer = ArapDeformer.TryCreate(arapMesh, arapRests);
             }
 
@@ -393,13 +383,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             {
                 var targets = new Vector2[samples.Count];
                 for (var i = 0; i < samples.Count; i++)
-                    targets[i] = apply ? samples[i].Current : samples[i].Rest;
+                {
+                    //再利用中もrest移動自体を変形量にしない。現在のrestからの変位だけを
+                    //キャッシュ済みアタッチ位置へ適用し、変形OFF時の恒等性も維持する。
+                    var displacement = apply ? samples[i].Current - samples[i].Rest : Vector2.Zero;
+                    targets[i] = arapRests![i] + displacement;
+                }
                 arapDeformer.Solve(targets, ArapIterations, deformedPositions!);
             }
 
             //三角形リストへ展開して頂点データを書き込み、変形後のAABBを求める
             var deformed = deformedPositions!;
             var triangleIndices = arapMesh.TriangleIndices;
+            var vertexByteCount = triangleIndices.Length * PuppetDeformationArapCustomEffect.VertexStride;
+            if (arapVertexData is null || arapVertexData.Length != vertexByteCount)
+                arapVertexData = new byte[vertexByteCount];
             var vertexFloats = MemoryMarshal.Cast<byte, float>(arapVertexData.AsSpan());
             var o = 0;
             foreach (var v in triangleIndices)
@@ -423,13 +421,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
             //ラスタライズの丸め対策に1pxの余白を持たせる
             const float margin = 1f;
-            arapEffect.VertexCount = triangleIndices.Length;
             arapEffect.VertexData = arapVertexData;
+            arapEffect.VertexCount = triangleIndices.Length;
             arapEffect.TightLocalLeft = minX - margin;
             arapEffect.TightLocalTop = minY - margin;
             arapEffect.TightLocalRight = maxX + margin;
             arapEffect.TightLocalBottom = maxY + margin;
         }
+
+        internal static bool ArapRestsNearlyEqual(IReadOnlyList<Vector2>? cached, IReadOnlyList<Vector2> current)
+        {
+            if (cached is null || cached.Count != current.Count)
+                return false;
+            for (var i = 0; i < current.Count; i++)
+            {
+                if (MathF.Abs(cached[i].X - current[i].X) >= ArapRestReuseTolerance
+                    || MathF.Abs(cached[i].Y - current[i].Y) >= ArapRestReuseTolerance)
+                    return false;
+            }
+            return true;
+        }
+
+        internal static bool ArapMeshSizeNearlyEqual(IArapMesh mesh, float width, float height)
+            => MathF.Abs(mesh.Width - width) < 0.5f && MathF.Abs(mesh.Height - height) < 0.5f;
 
         /// <summary>
         /// 画像サイズに応じたARAPメッシュを構築する。
@@ -466,14 +480,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var keep = new bool[mesh.FullTriangleCount];
             var halfW = width * 0.5f;
             var halfH = height * 0.5f;
+            var scaleX = width / w;
+            var scaleY = height / h;
             for (var y = 0; y < h; y++)
             {
-                var ly = y + 0.5f - halfH;
+                var ly = (y + 0.5f) * scaleY - halfH;
                 for (var x = 0; x < w; x++)
                 {
                     if (!opaque[y * w + x])
                         continue;
-                    keep[mesh.GetFullTriangleIndexAt(new Vector2(x + 0.5f - halfW, ly))] = true;
+                    keep[mesh.GetFullTriangleIndexAt(new Vector2((x + 0.5f) * scaleX - halfW, ly))] = true;
                 }
             }
             return keep;
@@ -488,20 +504,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             if (deviceContext is null || input is null)
                 return null;
 
-            var w = (int)MathF.Ceiling(width);
-            var h = (int)MathF.Ceiling(height);
-            if (w <= 0 || h <= 0 || w > ArapAlphaReadbackMaxSize || h > ArapAlphaReadbackMaxSize)
+            var sourceW = (int)MathF.Ceiling(width);
+            var sourceH = (int)MathF.Ceiling(height);
+            if (sourceW <= 0 || sourceH <= 0 || sourceW > ArapAlphaReadbackMaxSize || sourceH > ArapAlphaReadbackMaxSize)
                 return null;
+            //前景の細線と透明な隙間のトポロジーを保つため、上限内は全サイズを等倍で分類する。
+            //読み戻しバッファはアルファ専用のA8として、4096角でもGPU/CPUそれぞれ16MBに抑える。
+            var w = sourceW;
+            var h = sourceH;
 
             var bounds = deviceContext.GetImageLocalBounds(input);
 
             var gpuProps = new BitmapProperties1(
-                new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied),
+                new PixelFormat(Format.A8_UNorm, Vortice.DCommon.AlphaMode.Straight),
                 deviceContext.Dpi.Width,
                 deviceContext.Dpi.Height,
                 BitmapOptions.Target);
             var cpuProps = new BitmapProperties1(
-                new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied),
+                new PixelFormat(Format.A8_UNorm, Vortice.DCommon.AlphaMode.Straight),
                 deviceContext.Dpi.Width,
                 deviceContext.Dpi.Height,
                 BitmapOptions.CpuRead | BitmapOptions.CannotDraw);
@@ -509,17 +529,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             using var gpuBitmap = deviceContext.CreateBitmap(new SizeI(w, h), gpuProps);
             using var cpuBitmap = deviceContext.CreateBitmap(new SizeI(w, h), cpuProps);
 
-            deviceContext.Target = gpuBitmap;
-            deviceContext.BeginDraw();
-            deviceContext.Clear(new Color4(0f, 0f, 0f, 0f));
-            deviceContext.DrawImage(
-                input,
-                new Vector2(-bounds.Left, -bounds.Top),
-                null,
-                InterpolationMode.NearestNeighbor,
-                CompositeMode.SourceCopy);
-            deviceContext.EndDraw();
-            deviceContext.Target = null;
+            var previousTarget = deviceContext.Target;
+            var previousTransform = deviceContext.Transform;
+            try
+            {
+                deviceContext.Target = gpuBitmap;
+                var scaleX = w / width;
+                var scaleY = h / height;
+                deviceContext.Transform = Matrix3x2.CreateScale(scaleX, scaleY)
+                    * Matrix3x2.CreateTranslation(-bounds.Left * scaleX, -bounds.Top * scaleY);
+                deviceContext.BeginDraw();
+                deviceContext.Clear(new Color4(0f, 0f, 0f, 0f));
+                deviceContext.DrawImage(
+                    input,
+                    null,
+                    null,
+                    InterpolationMode.NearestNeighbor,
+                    CompositeMode.SourceCopy);
+                deviceContext.EndDraw().CheckError();
+            }
+            finally
+            {
+                deviceContext.Transform = previousTransform;
+                deviceContext.Target = previousTarget;
+                previousTarget?.Dispose();
+            }
 
             cpuBitmap.CopyFromBitmap(gpuBitmap);
 
@@ -533,8 +567,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     var row = ptr + (long)y * map.Pitch;
                     for (var x = 0; x < w; x++)
                     {
-                        //B8G8R8A8のアルファは4バイト目。少しでも不透明なら前景として扱う
-                        opaque[y * w + x] = row[x * 4 + 3] != 0;
+                        //A8の値が少しでも不透明なら前景として扱う
+                        opaque[y * w + x] = row[x] != 0;
                     }
                 }
             }
@@ -566,31 +600,39 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
             //ワイヤーフレームはメッシュと同じ中央原点座標で描き、入力画像のシーン座標へオフセットする
             var commandList = deviceContext.CreateCommandList();
-            deviceContext.Target = commandList;
-            deviceContext.BeginDraw();
-            deviceContext.Clear(null);
-            using (var brush = deviceContext.CreateSolidColorBrush(new Color4(0.2f, 1f, 0.5f, 0.85f)))
+            var previousTarget = deviceContext.Target;
+            try
             {
-                //三角形リストから重複なしのエッジを描く
-                var indices = arapMesh.TriangleIndices;
-                var deformed = deformedPositions;
-                var drawn = new HashSet<long>();
-                void DrawEdge(int a, int b)
+                deviceContext.Target = commandList;
+                deviceContext.BeginDraw();
+                deviceContext.Clear(null);
+                using (var brush = deviceContext.CreateSolidColorBrush(new Color4(0.2f, 1f, 0.5f, 0.85f)))
                 {
-                    var key = a < b ? ((long)a << 32) | (uint)b : ((long)b << 32) | (uint)a;
-                    if (!drawn.Add(key))
-                        return;
-                    deviceContext.DrawLine(deformed[a] + inputCenter, deformed[b] + inputCenter, brush, 1f);
+                    //三角形リストから重複なしのエッジを描く
+                    var indices = arapMesh.TriangleIndices;
+                    var deformed = deformedPositions;
+                    var drawn = new HashSet<long>();
+                    void DrawEdge(int a, int b)
+                    {
+                        var key = a < b ? ((long)a << 32) | (uint)b : ((long)b << 32) | (uint)a;
+                        if (!drawn.Add(key))
+                            return;
+                        deviceContext.DrawLine(deformed[a] + inputCenter, deformed[b] + inputCenter, brush, 1f);
+                    }
+                    for (var t = 0; t < indices.Length; t += 3)
+                    {
+                        DrawEdge(indices[t], indices[t + 1]);
+                        DrawEdge(indices[t + 1], indices[t + 2]);
+                        DrawEdge(indices[t + 2], indices[t]);
+                    }
                 }
-                for (var t = 0; t < indices.Length; t += 3)
-                {
-                    DrawEdge(indices[t], indices[t + 1]);
-                    DrawEdge(indices[t + 1], indices[t + 2]);
-                    DrawEdge(indices[t + 2], indices[t]);
-                }
+                deviceContext.EndDraw().CheckError();
             }
-            deviceContext.EndDraw();
-            deviceContext.Target = null;
+            finally
+            {
+                deviceContext.Target = previousTarget;
+                previousTarget?.Dispose();
+            }
             commandList.Close();
 
             debugMeshComposite.InputCount = 2;
@@ -624,19 +666,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void ApplyWiring()
         {
-            if (effect is null)
+            if (effect is null || terminal is null)
                 return;
 
             if (useArapWiring && arapEffect is not null)
             {
                 arapEffect.SetInput(0, input, true);
                 using var arapOutput = arapEffect.Output;
-                effect.SetInput(0, arapOutput, true);
+                terminal.SetInput(0, arapOutput, true);
+                //ARAP出力を終端へ直接つなぎ、MLSシェーダーのパススルーと4096pxクランプを通さない
+                effect.SetInput(0, null, true);
             }
             else
             {
                 arapEffect?.SetInput(0, null, true);
                 effect.SetInput(0, input, true);
+                using var mlsOutput = effect.Output;
+                terminal.SetInput(0, mlsOutput, true);
             }
         }
 
@@ -941,18 +987,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 disposer.Collect(arapEffect);
             }
 
+            //アルゴリズム切替時も返却するID2D1Imageを固定するための軽量な終端。
+            //ARAP時はカスタムMLSを介さず、ここへARAP出力を直接接続する。
+            terminal = new Vortice.Direct2D1.Effects.AffineTransform2D(devices.DeviceContext);
+            disposer.Collect(terminal);
+            using (var effectOutput = effect.Output)
+                terminal.SetInput(0, effectOutput, true);
+
 #if DEBUG
             //デバッグ用メッシュ表示: 最終出力の上にワイヤーフレームを合成できるようCompositeを挟む。
             //非表示時はInputCount=1のパススルーとして働く
             debugMeshComposite = new D2DEffects.Composite(devices.DeviceContext) { InputCount = 1 };
             disposer.Collect(debugMeshComposite);
-            using (var effectOutput = effect.Output)
-                debugMeshComposite.SetInput(0, effectOutput, true);
+            using (var terminalOutput = terminal.Output)
+                debugMeshComposite.SetInput(0, terminalOutput, true);
             var output = debugMeshComposite.Output;
             disposer.Collect(output);
             return output;
 #else
-            var output = effect.Output;
+            var output = terminal.Output;
             disposer.Collect(output);
             return output;
 #endif
@@ -967,6 +1020,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             effect?.SetInput(0, null, true);
             arapEffect?.SetInput(0, null, true);
+            terminal?.SetInput(0, null, true);
 #if DEBUG
             //Compositeのinput0はeffect.Output（内部接続）なので外さない。コマンドリストのみ解放する
             HideDebugMeshOverlay();
@@ -990,9 +1044,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 deviceContext = null;
                 effect = null;
                 arapEffect = null;
+                terminal = null;
                 arapMesh = null;
                 arapDeformer = null;
                 arapRests = null;
+                arapRestCandidates = null;
                 deformedPositions = null;
                 arapVertexData = null;
             }
