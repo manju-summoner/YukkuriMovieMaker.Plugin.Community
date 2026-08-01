@@ -61,7 +61,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         internal static string OfxBinaryDirectory => Path.Combine(AppDirectories.ResourceDirectory, "bin", "x64", "ofx");
 
         /// <summary>
-        /// スキャナーEXEのパス。見つからない場合はnull（プロセス内スキャンへフォールバックする）
+        /// スキャナーEXEのパス。見つからない場合はnull
         /// </summary>
         public static string? FindScannerPath()
         {
@@ -120,10 +120,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             startInfo.ArgumentList.Add(OfxGpuRenderBackendFactory.HasOpenClBackend ? "true" : "false");
             using var process = Process.Start(startInfo)
                 ?? throw new InvalidOperationException($"OFXスキャナーを起動できませんでした。path={scannerPath}");
+            Task<string>? standardErrorTask = null;
             try
             {
-                // stderrは読み捨て、stdinは別タスクで書き込む（同期書き込みはパイプ詰まりでデッドロックする）
-                _ = process.StandardError.BaseStream.CopyToAsync(Stream.Null);
+                standardErrorTask = ScannerStandardError.CaptureAsync(process.StandardError.BaseStream);
+                // stderrは上限付きで保持しつつ最後まで排出し、stdinは別タスクで書き込む
+                // （いずれも同期処理するとパイプ詰まりでデッドロックする）
                 var input = string.Join('\n', remaining) + '\n';
                 _ = Task.Run(async () =>
                 {
@@ -148,7 +150,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     if (currentBinaryStopwatch is not null && currentBinaryStopwatch.Elapsed >= currentBinaryDeadline)
                     {
                         Kill(process);
-                        return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, "バイナリの総走査時間が上限を超えました");
+                        var reason = ScannerStandardError.AppendToReason("バイナリの総走査時間が上限を超えました", standardErrorTask);
+                        return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, reason);
                     }
                     var readTask = process.StandardOutput.ReadLineAsync();
                     var waitTimeout = currentBinaryStopwatch is null
@@ -162,9 +165,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                         var reason = currentBinaryStopwatch is not null && currentBinaryStopwatch.Elapsed >= currentBinaryDeadline
                             ? "バイナリの総走査時間が上限を超えました"
                             : "バイナリが応答しません";
+                        reason = ScannerStandardError.AppendToReason(reason, standardErrorTask);
                         return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, reason);
                     }
-                    var line = readTask.Result;
+                    var line = readTask.GetAwaiter().GetResult();
                     if (line is null)
                         break;
 
@@ -181,7 +185,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     else if (line.StartsWith("#END\t", StringComparison.Ordinal))
                     {
                         // 同一IDの複数バージョン登録（後方互換用）は最新バージョンだけを一覧に載せる。
-                        // 対応可否の判定はプロセス内スキャンと同じ基準（CreatePluginInfo）で行う
+                        // 対応可否は親プロセスの共通判定（CreatePluginInfo）で行う
                         if (currentBinary is not null)
                         {
                             foreach (var group in pendingPlugins.GroupBy(p => p.Identifier, StringComparer.OrdinalIgnoreCase))
@@ -243,16 +247,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
                 if (!process.WaitForExit(5000))
                     Kill(process);
+                int? exitCode = process.HasExited ? process.ExitCode : null;
+                string GetAbnormalExitReason() => ScannerStandardError.AppendToReason(
+                    $"スキャナーが異常終了しました。exitCode={exitCode?.ToString() ?? "(不明)"}",
+                    standardErrorTask);
                 if (currentBinary is not null)
-                    return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, $"スキャナーが異常終了しました。exitCode={process.ExitCode}");
+                    return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, GetAbnormalExitReason());
                 if (remaining.Count == 0)
+                {
+                    if (exitCode is not 0)
+                        Log.Default.Write($"OFX{GetAbnormalExitReason()}");
                     return false;
-                return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, $"スキャナーが異常終了しました。exitCode={process.ExitCode}");
+                }
+                return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, GetAbnormalExitReason());
             }
-            catch
+            catch (Exception e) when (e is not OutOfMemoryException and not OperationCanceledException)
             {
                 Kill(process);
-                throw;
+                if (e is ScannerFailureException)
+                    throw;
+                var reason = standardErrorTask is null
+                    ? $"{e.Message} stderr=(取得できませんでした)"
+                    : ScannerStandardError.AppendToReason(e.Message, standardErrorTask);
+                throw new InvalidOperationException(reason, e);
+            }
+            finally
+            {
+                if (!process.HasExited)
+                    Kill(process);
             }
         }
 
@@ -273,9 +295,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     Log.Default.Write($"OFXスキャナーが走査の合間に終了しました。残り{remaining.Count}件を再走査します。reason={reason}");
                     return remaining.Count > 0;
                 }
-                // 1件も走査できずに失敗した場合はスキャナー自体の問題。
+                // #BEGINを1度も受信しないまま失敗した場合はスキャナー自体の問題。
                 // 空の結果を正常なスキャン結果としてキャッシュしないよう、失敗として伝播させる
-                throw new InvalidOperationException($"OFXスキャナーが走査を開始できませんでした。reason={reason}");
+                throw new ScannerFailureException($"OFXスキャナーが走査を開始できませんでした。reason={reason}");
             }
             // 通常は#BEGIN時に取り除かれているが、取り除けていない場合の再起動ループをここで防ぐ
             if (remaining.Count > 0 && string.Equals(remaining.Peek(), currentBinary, StringComparison.OrdinalIgnoreCase))

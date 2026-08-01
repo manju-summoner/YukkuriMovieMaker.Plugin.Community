@@ -152,9 +152,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             IsScanning = true;
             try
             {
-                await Task.Run(() => OpenFxPluginScanner.GetEffectPlugins(refresh: true));
-                // スキャン中に設定が切り替わっても、完了時点の設定で必ず最終評価する。
-                var plugins = OpenFxPluginScanner.ReevaluateCachedPlugins();
+                var plugins = await Task.Run(() => OpenFxPluginScanner.GetEffectPlugins(refresh: true));
                 // 継続がUIスレッド外で再開されてもコレクション更新が失敗しないようにする
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {

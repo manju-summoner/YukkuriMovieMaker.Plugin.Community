@@ -71,14 +71,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         static extern int SHGetKnownFolderPath([MarshalAs(UnmanagedType.LPStruct)] Guid rfid, uint dwFlags, IntPtr hToken, out IntPtr ppszPath);
 
         public static IReadOnlyList<Vst3EffectPluginInfo> GetEffectPlugins(bool refresh = false)
+            => GetEffectPlugins(refresh, () =>
+            {
+                var modulePaths = EnumerateModulePaths().ToList();
+                return ScanIsolated(Vst3ScannerProcess.FindScannerPath(), modulePaths);
+            });
+
+        internal static IReadOnlyList<Vst3EffectPluginInfo> GetEffectPlugins(
+            bool refresh,
+            Func<List<Vst3EffectPluginInfo>?> scan)
         {
             lock (lockObject)
             {
                 if (cache is not null && !refresh)
                     return cache;
 
-                var modulePaths = EnumerateModulePaths().ToList();
-                var plugins = ScanIsolated(modulePaths) ?? ScanInProcess(modulePaths);
+                var plugins = scan();
+                if (plugins is null)
+                    return cache ?? [];
                 cache = plugins.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToArray();
                 return cache;
             }
@@ -86,14 +96,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         /// <summary>
         /// スキャナープロセスによる隔離スキャン。壊れたプラグインがあってもYMM4本体は巻き込まれない。
-        /// スキャナーEXEが見つからない・起動できない場合はnull
+        /// スキャナーEXEが見つからない・起動できない場合は失敗（null）を返し、呼び出し側はキャッシュしない。
+        /// ユーザーのVST3モジュールを本体プロセスへロードするフォールバックは行わない。
         /// </summary>
-        static List<Vst3EffectPluginInfo>? ScanIsolated(List<string> modulePaths)
+        internal static List<Vst3EffectPluginInfo>? ScanIsolated(string? scannerPath, IReadOnlyList<string> modulePaths)
         {
-            var scannerPath = Vst3ScannerProcess.FindScannerPath();
             if (scannerPath is null)
             {
-                Log.Default.Write($"{Vst3ScannerProcess.ExeName}が見つからないため、プロセス内でVST3をスキャンします。");
+                Log.Default.Write($"{Vst3ScannerProcess.ExeName}が見つからないため、VST3スキャンを中止します。");
                 return null;
             }
             try
@@ -102,37 +112,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             }
             catch (Exception e)
             {
-                Log.Default.Write("VST3スキャナープロセスの実行に失敗したため、プロセス内でVST3をスキャンします。", e);
+                Log.Default.Write("VST3スキャナープロセスの実行に失敗したため、VST3スキャンを中止します。", e);
                 return null;
             }
-        }
-
-        /// <summary>
-        /// プロセス内スキャン（スキャナーEXEが使えない環境向けのフォールバック）。
-        /// モジュールを本体プロセスへロードするため、壊れたプラグインのクラッシュには巻き込まれる
-        /// </summary>
-        static List<Vst3EffectPluginInfo> ScanInProcess(List<string> modulePaths)
-        {
-            var plugins = new List<Vst3EffectPluginInfo>();
-            foreach (var modulePath in modulePaths)
-            {
-                try
-                {
-                    using var module = Vst3Module.Open(modulePath);
-                    foreach (var classInfo in module.GetAudioModuleClasses())
-                    {
-                        if (!classInfo.IsEffect)
-                            continue;
-                        plugins.Add(new Vst3EffectPluginInfo(modulePath, classInfo.ClassId, classInfo.Name, classInfo.Vendor));
-                    }
-                }
-                catch (Exception e)
-                {
-                    // 壊れたモジュールや非対応アーキテクチャはスキップする
-                    Log.Default.Write($"VST3モジュールの走査に失敗しました。path={modulePath}", e);
-                }
-            }
-            return plugins;
         }
 
         static IEnumerable<string> EnumerateModulePaths()

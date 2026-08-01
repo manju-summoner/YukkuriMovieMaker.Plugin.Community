@@ -84,8 +84,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var plugin = Vst3Native.Ymm4Vst3PluginCreate(handle, classId, errorBuf, 1024);
             if (plugin == IntPtr.Zero)
                 throw new InvalidOperationException($"VST3プラグインを作成できませんでした。classId={classId} error={Vst3Native.FixedUtf8ToString(errorBuf, 1024)}");
-            // ピン留めはインスタンスを実際に生成したモジュールに限る
-            // （スキャンのプロセス内フォールバックは列挙のためだけにOpenするため、Openでのピン留めは不可）
+            // ピン留めはインスタンスを実際に生成したモジュールに限る。
+            // 一覧スキャンは隔離プロセスで行うため、本体でのOpenは実利用時だけになる。
             PinModule(path);
             return new Vst3Plugin(plugin);
         }

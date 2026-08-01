@@ -24,7 +24,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         static readonly TimeSpan ModuleTimeout = TimeSpan.FromSeconds(30);
 
         /// <summary>
-        /// スキャナーEXEのパス。見つからない場合はnull（プロセス内スキャンへフォールバックする）
+        /// スキャナーEXEのパス。見つからない場合はnull
         /// </summary>
         public static string? FindScannerPath()
         {
@@ -46,8 +46,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 var countBeforeScan = remaining.Count;
                 if (!ScanCore(scannerPath, remaining, results, ref hasCompletedAnyModule))
                     break;
-                // 1件も消化せず戻ってきた場合は再起動しても同じ結果になるため、部分結果のまま打ち切る（無限ループ防止）。
-                // ここで例外にするとプロセス内フォールバックへ進み、原因プラグインを本体へロードして隔離が破れる
+                // 1件も消化せず戻ってきた場合は、無限再起動を防ぐため部分結果のまま打ち切る。
+                // #BEGINを1度も受信しないまま失敗した場合だけSkipCurrentModuleから伝播し、空結果のキャッシュを防ぐ。
                 if (remaining.Count == countBeforeScan)
                 {
                     Log.Default.Write($"VST3スキャナーが進捗しないため、残り{remaining.Count}件の走査を中断します。");
@@ -77,10 +77,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             };
             using var process = Process.Start(startInfo)
                 ?? throw new InvalidOperationException($"VST3スキャナーを起動できませんでした。path={scannerPath}");
+            Task<string>? standardErrorTask = null;
             try
             {
-                // stderrは読み捨て、stdinは別タスクで書き込む（同期書き込みはパイプ詰まりでデッドロックする）
-                _ = process.StandardError.BaseStream.CopyToAsync(Stream.Null);
+                standardErrorTask = ScannerStandardError.CaptureAsync(process.StandardError.BaseStream);
+                // stderrは上限付きで保持しつつ最後まで排出し、stdinは別タスクで書き込む
+                // （いずれも同期処理するとパイプ詰まりでデッドロックする）
                 var input = string.Join('\n', remaining) + '\n';
                 _ = Task.Run(async () =>
                 {
@@ -104,9 +106,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     if (!readTask.Wait(ModuleTimeout))
                     {
                         Kill(process);
-                        return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, "モジュールが応答しません");
+                        var reason = ScannerStandardError.AppendToReason("モジュールが応答しません", standardErrorTask);
+                        return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, reason);
                     }
-                    var line = readTask.Result;
+                    var line = readTask.GetAwaiter().GetResult();
                     if (line is null)
                         break;
 
@@ -145,16 +148,34 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
                 if (!process.WaitForExit(5000))
                     Kill(process);
+                int? exitCode = process.HasExited ? process.ExitCode : null;
+                string GetAbnormalExitReason() => ScannerStandardError.AppendToReason(
+                    $"スキャナーが異常終了しました。exitCode={exitCode?.ToString() ?? "(不明)"}",
+                    standardErrorTask);
                 if (currentModule is not null)
-                    return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, $"スキャナーが異常終了しました。exitCode={process.ExitCode}");
+                    return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, GetAbnormalExitReason());
                 if (remaining.Count == 0)
+                {
+                    if (exitCode is not 0)
+                        Log.Default.Write($"VST3{GetAbnormalExitReason()}");
                     return false;
-                return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, $"スキャナーが異常終了しました。exitCode={process.ExitCode}");
+                }
+                return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, GetAbnormalExitReason());
             }
-            catch
+            catch (Exception e) when (e is not OutOfMemoryException and not OperationCanceledException)
             {
                 Kill(process);
-                throw;
+                if (e is ScannerFailureException)
+                    throw;
+                var reason = standardErrorTask is null
+                    ? $"{e.Message} stderr=(取得できませんでした)"
+                    : ScannerStandardError.AppendToReason(e.Message, standardErrorTask);
+                throw new InvalidOperationException(reason, e);
+            }
+            finally
+            {
+                if (!process.HasExited)
+                    Kill(process);
             }
         }
 
@@ -170,9 +191,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     Log.Default.Write($"VST3スキャナーが走査の合間に終了しました。残り{remaining.Count}件を再走査します。reason={reason}");
                     return remaining.Count > 0;
                 }
-                // 1件も走査できずに失敗した場合はスキャナー自体の問題。
+                // #BEGINを1度も受信しないまま失敗した場合はスキャナー自体の問題。
                 // 空の結果を正常なスキャン結果としてキャッシュしないよう、失敗として伝播させる
-                throw new InvalidOperationException($"VST3スキャナーが走査を開始できませんでした。reason={reason}");
+                throw new ScannerFailureException($"VST3スキャナーが走査を開始できませんでした。reason={reason}");
             }
             // 通常は#BEGIN時に取り除かれているが、取り除けていない場合の再起動ループをここで防ぐ
             if (remaining.Count > 0 && string.Equals(remaining.Peek(), currentModule, StringComparison.OrdinalIgnoreCase))

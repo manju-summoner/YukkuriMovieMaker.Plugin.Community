@@ -144,6 +144,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             => GetDefaultDirectoryInfos().Select(x => x.Path);
 
         public static IReadOnlyList<OpenFxPluginInfo> GetEffectPlugins(bool refresh = false)
+            => GetEffectPlugins(refresh, () =>
+            {
+                // ルート同士が入れ子（追加フォルダーに既定フォルダーの配下を指定等）でも同じバイナリを二重スキャンしない
+                // （表記ゆれで重複が残らないようフルパスへ正規化してから比較する）
+                var binaryPaths = EnumerateBinaryPaths()
+                    .Select(Path.GetFullPath)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                return ScanIsolated(OpenFxScannerProcess.FindScannerPath(), binaryPaths);
+            });
+
+        internal static IReadOnlyList<OpenFxPluginInfo> GetEffectPlugins(
+            bool refresh,
+            Func<List<OpenFxPluginInfo>?> scan)
         {
             lock (lockObject)
             {
@@ -159,13 +173,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     return cache;
                 }
 
-                // ルート同士が入れ子（追加フォルダーに既定フォルダーの配下を指定等）でも同じバイナリを二重スキャンしない
-                // （表記ゆれで重複が残らないようフルパスへ正規化してから比較する）
-                var binaryPaths = EnumerateBinaryPaths()
-                    .Select(Path.GetFullPath)
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-                var plugins = ScanIsolated(binaryPaths) ?? ScanInProcess(binaryPaths);
+                var plugins = scan();
+                if (plugins is null)
+                    return cache ?? [];
                 cache = plugins
                     .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
                     .ToArray();
@@ -212,14 +222,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
         /// <summary>
         /// スキャナープロセスによる隔離スキャン。壊れたプラグインがあってもYMM4本体は巻き込まれない。
-        /// スキャナーEXEが見つからない・起動できない場合はnull
+        /// スキャナーEXEが見つからない・起動できない場合は失敗（null）を返し、呼び出し側はキャッシュしない。
+        /// ユーザーのOFXバイナリを本体プロセスへロードするフォールバックは行わない。
         /// </summary>
-        static List<OpenFxPluginInfo>? ScanIsolated(List<string> binaryPaths)
+        internal static List<OpenFxPluginInfo>? ScanIsolated(string? scannerPath, IReadOnlyList<string> binaryPaths)
         {
-            var scannerPath = OpenFxScannerProcess.FindScannerPath();
             if (scannerPath is null)
             {
-                Log.Default.Write($"{OpenFxScannerProcess.ExeName}が見つからないため、プロセス内でOFXをスキャンします。");
+                Log.Default.Write($"{OpenFxScannerProcess.ExeName}が見つからないため、OFXスキャンを中止します。");
                 return null;
             }
             try
@@ -228,7 +238,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             }
             catch (Exception e)
             {
-                Log.Default.Write("OFXスキャナープロセスの実行に失敗したため、プロセス内でOFXをスキャンします。", e);
+                Log.Default.Write("OFXスキャナープロセスの実行に失敗したため、OFXスキャンを中止します。", e);
                 return null;
             }
         }
@@ -247,72 +257,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         }
 
         /// <summary>
-        /// プロセス内スキャン（スキャナーEXEが使えない環境向けのフォールバック）。
-        /// バイナリのロードとdescribeを本体プロセスで行うため、壊れたプラグインのクラッシュには巻き込まれる
-        /// </summary>
-        static List<OpenFxPluginInfo> ScanInProcess(List<string> binaryPaths)
-        {
-            var plugins = new List<OpenFxPluginInfo>();
-            foreach (var binaryPath in binaryPaths)
-            {
-                try
-                {
-                    plugins.AddRange(ScanBinary(
-                        binaryPath,
-                        error => Log.Default.Write($"OFXプラグインのdescribeに失敗しました。path={binaryPath} error={error}")));
-                }
-                catch (Exception e)
-                {
-                    // 壊れたバイナリや非対応アーキテクチャはスキップする
-                    Log.Default.Write($"OFXバイナリの走査に失敗しました。path={binaryPath}", e);
-                }
-            }
-            return plugins;
-        }
-
-        /// <summary>
-        /// バイナリ1つ分をスキャンして対応プラグインを列挙する。
-        /// describeに失敗したプラグインは reportError へ通知してスキップする（バイナリのロード失敗は例外）
-        /// </summary>
-        internal static IEnumerable<OpenFxPluginInfo> ScanBinary(string binaryPath, Action<string> reportError)
-        {
-            var plugins = new List<OpenFxPluginInfo>();
-            var binary = OfxPluginBinary.Load(binaryPath);
-            // 同一IDの複数バージョン登録（後方互換用）は最新バージョンだけを一覧に載せる
-            foreach (var group in binary.EnumerateImageEffectPlugins().GroupBy(p => p.Identifier, StringComparer.OrdinalIgnoreCase))
-            {
-                var plugin = group
-                    .OrderByDescending(p => p.VersionMajor)
-                    .ThenByDescending(p => p.VersionMinor)
-                    .First();
-                try
-                {
-                    var descriptor = plugin.Describe();
-                    plugins.Add(CreatePluginInfo(
-                        binaryPath,
-                        plugin.Identifier,
-                        plugin.VersionMajor,
-                        plugin.VersionMinor,
-                        descriptor.Label,
-                        descriptor.Grouping,
-                        descriptor.SupportedContexts,
-                        descriptor.SupportedPixelDepths,
-                        descriptor.Props.GetIntOrDefault(OfxConstants.ImageEffectPluginPropSingleInstance, 0) != 0,
-                        descriptor.Props.GetIntOrDefault(OfxConstants.ImageEffectPropTemporalClipAccess, 0) != 0,
-                        GetGpuSupport(descriptor.Props)));
-                }
-                catch (Exception e)
-                {
-                    reportError($"plugin={plugin.Identifier} {e.Message}");
-                }
-            }
-            return plugins;
-        }
-
-        /// <summary>
         /// describe結果から対応可否を判定してプラグイン情報を作る。
         /// 対応外のプラグインも設定画面の一覧へ「非対応」として表示するため、除外せずUnsupportedReasonを設定して返す。
-        /// 隔離スキャン（ネイティブスキャナーが返す生のdescribe結果）とプロセス内スキャンの共通判定
+        /// ネイティブスキャナーが返す生のdescribe結果に対する共通判定
         /// </summary>
         internal static OpenFxPluginInfo CreatePluginInfo(
             string binaryPath,
