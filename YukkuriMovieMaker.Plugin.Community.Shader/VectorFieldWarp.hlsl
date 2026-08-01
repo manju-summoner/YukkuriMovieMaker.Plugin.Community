@@ -73,6 +73,8 @@ float4 main(
     if (source.x < inputLeft || source.x >= inputRight || source.y < inputTop || source.y >= inputBottom)
         return (float4) 0;
 
-    float2 uv = uv0.xy + (source - scenePosition.xy) * uv0.zw;
+    //バイリニア補間が有効矩形外の未定義テクセルを参照しないよう0.5px内側へ制限する
+    float2 clamped = clamp(source, float2(inputLeft, inputTop) + 0.5f, float2(inputRight, inputBottom) - 0.5f);
+    float2 uv = uv0.xy + (clamped - scenePosition.xy) * uv0.zw;
     return InputTexture.SampleLevel(InputSampler, uv, 0);
 }

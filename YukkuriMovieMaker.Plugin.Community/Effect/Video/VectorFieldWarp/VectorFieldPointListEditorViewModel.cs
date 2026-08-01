@@ -183,7 +183,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             try
             {
                 using var itemVideoSource = info.CreateItemVideoSource(
-                    new ItemVideoSourceCreationParameter(VideoEffectSelection.UpToIncluding(effect)));
+                    new ItemVideoSourceCreationParameter(VideoEffectSelection.UpToIncluding(effect)) { ApplyItemTransform = false });
                 if (itemVideoSource is null)
                     return CanvasImageResult.Empty;
 

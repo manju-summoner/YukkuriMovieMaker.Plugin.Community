@@ -3,7 +3,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
     internal static class RadianceGeometry
     {
         public const int LevelCount = 4;
-        public const float MaxRange = 4096f;
+        //Range=800でもFull HDの中間領域は約3524x2684、15パスで1億px級になる。
+        //それ以上はVRAM使用量とフェッチ数が急増するため、UI表示上限と同じ値で制限する。
+        public const float MaxRange = 800f;
 
         public static readonly float[] IntervalBounds = [0f, 1f / 85f, 5f / 85f, 21f / 85f, 1f];
 

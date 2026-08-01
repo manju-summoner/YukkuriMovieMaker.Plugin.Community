@@ -19,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Radiance
 
         [Display(GroupName = nameof(Texts.RadianceEffectName), Name = nameof(Texts.RadianceRange), Description = nameof(Texts.RadianceRangeDescription), Order = 1, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "px", 10, 800)]
-        public Animation Range { get; } = new Animation(300, 10, 2000);
+        public Animation Range { get; } = new Animation(300, 10, 800);
 
         [Display(GroupName = nameof(Texts.RadianceEffectName), Name = nameof(Texts.RadianceDiffuse), Description = nameof(Texts.RadianceDiffuseDescription), Order = 2, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]

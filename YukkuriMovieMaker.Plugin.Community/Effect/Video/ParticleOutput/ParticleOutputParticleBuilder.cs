@@ -468,7 +468,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
 
         void InvalidateAdvectionIfBoundsChanged(RawRectF bounds)
         {
-            if (hasAdvectionBounds && BoundsBitwiseEqual(advectionBounds, bounds))
+            if (hasAdvectionBounds && BoundsNearlyEqual(advectionBounds, bounds))
                 return;
 
             advectionCurrentCache.Clear();
@@ -477,11 +477,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ParticleOutput
             hasAdvectionBounds = true;
         }
 
-        static bool BoundsBitwiseEqual(RawRectF x, RawRectF y)
-            => BitConverter.SingleToInt32Bits(x.Left) == BitConverter.SingleToInt32Bits(y.Left)
-            && BitConverter.SingleToInt32Bits(x.Top) == BitConverter.SingleToInt32Bits(y.Top)
-            && BitConverter.SingleToInt32Bits(x.Right) == BitConverter.SingleToInt32Bits(y.Right)
-            && BitConverter.SingleToInt32Bits(x.Bottom) == BitConverter.SingleToInt32Bits(y.Bottom);
+        internal static bool BoundsNearlyEqual(RawRectF x, RawRectF y)
+            => MathF.Abs(x.Left - y.Left) < 0.5f
+            && MathF.Abs(x.Top - y.Top) < 0.5f
+            && MathF.Abs(x.Right - y.Right) < 0.5f
+            && MathF.Abs(x.Bottom - y.Bottom) < 0.5f;
 
         void PrepareAdvectionStartStates(int count)
         {

@@ -42,6 +42,8 @@ float3 SoftLight(float3 baseColor, float3 blendColor)
 
 float3 BlendLinear(float3 baseColor, float3 reflection, int mode)
 {
+    //対応値はReflectionAndExtrusionEffectProcessor.IsLinearHdrBlendSupportedと同期すること。
+    //未対応値はC#側でDirect2Dの非HDR合成へフォールバックする。
     if (mode == 0) return reflection;
     if (mode == 1 || mode == 104) return baseColor + reflection;
     if (mode == 2) return baseColor - reflection;
@@ -71,7 +73,7 @@ float3 BlendLinear(float3 baseColor, float3 reflection, int mode)
         return step(0.5, vivid);
     }
     if (mode == 111) return baseColor + reflection - 2.0 * baseColor * reflection;
-    return baseColor + reflection;
+    return baseColor + reflection; //C#側の対応判定とずれた場合の防御用
 }
 
 float4 main(float4 pos : SV_POSITION, float4 posScene : SCENE_POSITION, float4 uv0 : TEXCOORD0, float4 uv1 : TEXCOORD1) : SV_Target

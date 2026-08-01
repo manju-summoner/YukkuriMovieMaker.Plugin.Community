@@ -136,7 +136,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.NtscComposite
             //入力画像の実際の矩形をラスター化・復元パスへ伝える
             if (input is not null)
             {
-                var bounds = devices.DeviceContext.GetImageLocalBounds(input);
+                var bounds = ClampBounds(devices.DeviceContext.GetImageLocalBounds(input));
                 var rect = new Vector4(bounds.Left, bounds.Top, bounds.Right, bounds.Bottom);
                 if (isFirst || sourceRect != rect)
                 {
@@ -199,5 +199,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.NtscComposite
 
             return desc;
         }
+
+        //入力境界のクランプ範囲。D2Dの最大ビットマップサイズより十分大きく、矩形演算が有限値に収まる値
+        const float MaxBoundsExtent = 1 << 22;
+
+        internal static Vortice.RawRectF ClampBounds(Vortice.RawRectF bounds)
+            => new(
+                ClampCoordinate(bounds.Left),
+                ClampCoordinate(bounds.Top),
+                ClampCoordinate(bounds.Right),
+                ClampCoordinate(bounds.Bottom));
+
+        static float ClampCoordinate(float value)
+            => float.IsNaN(value) ? 0f : Math.Clamp(value, -MaxBoundsExtent, MaxBoundsExtent);
     }
 }

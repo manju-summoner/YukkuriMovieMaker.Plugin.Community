@@ -1,4 +1,5 @@
 using Vortice;
+using System.Runtime.InteropServices;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
 {
@@ -29,7 +30,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
             var halfX = spacingX * 0.5f;
             var halfY = spacingY * 0.5f;
 
-            var floats = new float[countX * countY * 6 * 4];
+            var bytes = new byte[countX * countY * 6 * ParticlizeCustomEffect.VertexStride];
+            var floats = MemoryMarshal.Cast<byte, float>(bytes.AsSpan());
             var fi = 0;
             for (var y = 0; y < countY; y++)
             {
@@ -47,12 +49,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
                 }
             }
 
-            var bytes = new byte[floats.Length * sizeof(float)];
-            Buffer.BlockCopy(floats, 0, bytes, 0, bytes.Length);
             return bytes;
         }
 
-        static void Write(float[] buffer, ref int i, float centerX, float centerY, float cornerX, float cornerY)
+        static void Write(Span<float> buffer, ref int i, float centerX, float centerY, float cornerX, float cornerY)
         {
             buffer[i++] = centerX;
             buffer[i++] = centerY;

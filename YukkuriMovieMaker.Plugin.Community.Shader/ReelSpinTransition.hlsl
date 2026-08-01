@@ -127,7 +127,12 @@ float4 main(
                 k = floor(q.x / inputWidth);
                 target = float2(q.x - k * inputWidth, Wrap(q.y - k * slope, inputHeight));
             }
-            color += IsBeforeCell(k) ? SampleBefore(target, pNow, uv0) : SampleAfter(target, pNow, uv1);
+            // grouped配置だけ、進行方向にかかわらず着地セルが負側へ進むよう正規化する。
+            // alternate配置は従来どおり元のセル番号で偶奇判定する。
+            float patternCell = pattern < 0.5f
+                ? k
+                : k * (yBrick ? sign(dir.y) : sign(dir.x));
+            color += IsBeforeCell(patternCell) ? SampleBefore(target, pNow, uv0) : SampleAfter(target, pNow, uv1);
         }
         else
         {

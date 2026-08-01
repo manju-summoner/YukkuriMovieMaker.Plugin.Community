@@ -85,8 +85,8 @@ float4 main(
             float wB = 1.0f / (1.0f + (u / fB) * (u / fB));
 
             acc += s.rgb * mask * float3(wR, wG, wB);
-            if (k == 0)
-                norm += wG;
+            //全レイの重みで正規化し、光条数を変えても総光量が増減しないようにする
+            norm += wG;
         }
     }
 

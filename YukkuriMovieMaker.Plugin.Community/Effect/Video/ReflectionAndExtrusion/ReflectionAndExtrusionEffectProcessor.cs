@@ -95,7 +95,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
             var blur = item.Blur.GetValue(frame, length, fps) / 3;
             var highlightBlend = highlight.Blend;
             var isInvertAlpha = item.IsInvert;
-            var isLinearHdrCompositeEnabled = item.IsLinearHdrCompositeEnabled && linearHdrComposite is not null;
+            var isLinearHdrCompositeEnabled = item.IsLinearHdrCompositeEnabled
+                && linearHdrComposite is not null
+                && IsLinearHdrBlendSupported(highlightBlend);
             var surfaceScale = lightingParameter.SurfaceScale.GetValue(frame, length, fps);
             var distance = item.OcclusionDistance.GetValue(frame, length, fps);
             var bias = item.OcclusionBias.GetValue(frame, length, fps);
@@ -154,6 +156,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
             return effectDescription.DrawDescription;
         }
+
+        /// <summary>
+        /// LinearHdrComposite.hlsl の BlendLinear が実装している値だけを許可する。
+        /// シェーダー側の分岐を変更するときはこの一覧も同時に更新すること。
+        /// </summary>
+        internal static bool IsLinearHdrBlendSupported(Project.Blend blend)
+            => blend is Project.Blend.Normal
+            or Project.Blend.Add
+            or Project.Blend.Subtract
+            or Project.Blend.Multiply
+            or Project.Blend.Screen
+            or Project.Blend.Overlay
+            or Project.Blend.Lighter
+            or Project.Blend.Darker
+            or Project.Blend.LinearBurn
+            or Project.Blend.LinearLight
+            or Project.Blend.Difference
+            or Project.Blend.ColorBurn
+            or Project.Blend.ColorDodge
+            or Project.Blend.LinearDodge
+            or Project.Blend.SoftLight
+            or Project.Blend.HardLight
+            or Project.Blend.VividLight
+            or Project.Blend.PinLight
+            or Project.Blend.HardMix
+            or Project.Blend.Exclusion;
 
         protected override void ClearEffectChain()
         {

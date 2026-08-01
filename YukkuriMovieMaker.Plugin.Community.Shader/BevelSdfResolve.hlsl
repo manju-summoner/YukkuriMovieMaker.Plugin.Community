@@ -10,16 +10,9 @@ cbuffer constants : register(b0)
 	int mode : packoffset(c1.y);
 };
 
-bool IsValid(float4 seed)
+bool IsValid(float2 seed)
 {
-	return seed.r >= 0.0;
-}
-
-float2 DecodeSeed(float4 seed)
-{
-	return float2(
-		(seed.r * 256.0 + seed.g) * 16.0 - 1.0,
-		(seed.b * 256.0 + seed.a) * 16.0 - 1.0);
+	return max(abs(seed.x), abs(seed.y)) < 30000.0;
 }
 
 float ApplyBevelProfile(float height)
@@ -47,15 +40,21 @@ float4 main(
 ) : SV_Target
 {
 	float sourceAlpha = saturate(SourceTexture.Sample(SourceSampler, uv1.xy).a);
-	float4 seed = SeedTexture.Sample(SeedSampler, uv0.xy);
+	float4 seeds = SeedTexture.Sample(SeedSampler, uv0.xy);
+	float2 normalSeed = seeds.rg;
+	float2 lowCoverageSeed = seeds.ba;
 	float height = 0.0;
-	if (sourceAlpha > 0.0 && thickness > 0.0)
+	bool isThresholdInterior = sourceAlpha >= 0.5;
+	bool isLowCoverageInterior = sourceAlpha > (1.0 / 255.0) && sourceAlpha < 0.5 && IsValid(lowCoverageSeed);
+	//通常領域と低被覆領域は、それぞれ独立して伝播した距離場だけを使う。
+	//低被覆シードが無い通常図形のAA外縁は対象外とし、外側ベベルを抑える。
+	if ((isThresholdInterior || isLowCoverageInterior) && thickness > 0.0)
 	{
 		float normalizedDistance = 1.0;
+		float2 seed = isThresholdInterior ? normalSeed : lowCoverageSeed;
 		if (IsValid(seed))
 		{
-			float2 pixel = posScene.xy - sourceRect.xy;
-			float distanceToEdge = length(DecodeSeed(seed) - pixel);
+			float distanceToEdge = length(seed);
 			normalizedDistance = saturate(distanceToEdge / max(thickness, 1.0));
 		}
 		height = ApplyBevelProfile(normalizedDistance);

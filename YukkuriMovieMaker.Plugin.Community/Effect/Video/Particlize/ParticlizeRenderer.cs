@@ -214,11 +214,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
         /// </summary>
         void EnsureParticleGrid(Vortice.RawRectF bounds, double size)
         {
-            //境界がサブピクセルで揺れる入力で毎フレーム作り直しにならないよう、0.5px未満の差は同一グリッドとみなす
             if (hasGrid
                 && particlize is not null
-                && MathF.Abs(gridLeft - bounds.Left) < 0.5f && MathF.Abs(gridTop - bounds.Top) < 0.5f
-                && MathF.Abs(gridRight - bounds.Right) < 0.5f && MathF.Abs(gridBottom - bounds.Bottom) < 0.5f
+                && GridBoundsNearlyEqual(new(gridLeft, gridTop, gridRight, gridBottom), bounds)
                 && gridSize == size)
                 return;
 
@@ -254,5 +252,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Particlize
             gridBottom = bounds.Bottom;
             gridSize = size;
         }
+
+        internal static bool GridBoundsNearlyEqual(Vortice.RawRectF cached, Vortice.RawRectF current)
+            => MathF.Abs(cached.Left - current.Left) < 0.5f
+                && MathF.Abs(cached.Top - current.Top) < 0.5f
+                && MathF.Abs(cached.Right - current.Right) < 0.5f
+                && MathF.Abs(cached.Bottom - current.Bottom) < 0.5f;
     }
 }
