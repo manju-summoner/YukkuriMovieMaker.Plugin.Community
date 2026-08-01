@@ -12,7 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
     internal static unsafe class Vst3Native
     {
         public const string DllName = "YukkuriMovieMaker.Vst3Bridge";
-        internal const int RequiredBridgeApiVersion = 1;
+        internal const int RequiredBridgeApiVersion = 2;
 
         /// <summary>
         /// ブリッジDLL・スキャナーEXEの配置フォルダー

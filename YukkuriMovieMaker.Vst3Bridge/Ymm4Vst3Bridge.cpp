@@ -363,12 +363,16 @@ namespace
 
 // マネージド側がBridgeのABI互換性をロード時に検証するためのバージョン。
 // exportの追加・変更で古いDLLとの互換性が失われる場合は更新すること。
-YMM4VST3_API int32_t Ymm4Vst3GetApiVersion()
+YMM4VST3_API int32_t Ymm4Vst3GetApiVersion() try
 {
     return Ymm4Vst3ApiVersion;
 }
+catch (...)
+{
+    return 0;
+}
 
-YMM4VST3_API void* Ymm4Vst3ModuleOpen(const char* utf8Path, char* errorBuf, int32_t errorBufSize)
+YMM4VST3_API void* Ymm4Vst3ModuleOpen(const char* utf8Path, char* errorBuf, int32_t errorBufSize) try
 {
     EnsureInitialized();
     if (!utf8Path)
@@ -382,21 +386,32 @@ YMM4VST3_API void* Ymm4Vst3ModuleOpen(const char* utf8Path, char* errorBuf, int3
     }
     return new BridgeModule{ module };
 }
+catch (...)
+{
+    return nullptr;
+}
 
-YMM4VST3_API void Ymm4Vst3ModuleClose(void* moduleHandle)
+YMM4VST3_API void Ymm4Vst3ModuleClose(void* moduleHandle) try
 {
     delete static_cast<BridgeModule*>(moduleHandle);
 }
+catch (...)
+{
+}
 
-YMM4VST3_API int32_t Ymm4Vst3ModuleGetClassCount(void* moduleHandle)
+YMM4VST3_API int32_t Ymm4Vst3ModuleGetClassCount(void* moduleHandle) try
 {
     auto* bridgeModule = static_cast<BridgeModule*>(moduleHandle);
     if (!bridgeModule)
         return 0;
     return static_cast<int32_t>(bridgeModule->module->getFactory().classCount());
 }
+catch (...)
+{
+    return 0;
+}
 
-YMM4VST3_API int32_t Ymm4Vst3ModuleGetClassInfo(void* moduleHandle, int32_t index, Ymm4Vst3ClassInfo* info)
+YMM4VST3_API int32_t Ymm4Vst3ModuleGetClassInfo(void* moduleHandle, int32_t index, Ymm4Vst3ClassInfo* info) try
 {
     auto* bridgeModule = static_cast<BridgeModule*>(moduleHandle);
     if (!bridgeModule || !info)
@@ -414,12 +429,16 @@ YMM4VST3_API int32_t Ymm4Vst3ModuleGetClassInfo(void* moduleHandle, int32_t inde
     CopyUtf8(info->version, sizeof(info->version), classInfo.version());
     return 1;
 }
+catch (...)
+{
+    return 0;
+}
 
 //------------------------------------------------------------------------
 // プラグインインスタンス
 //------------------------------------------------------------------------
 
-YMM4VST3_API void* Ymm4Vst3PluginCreate(void* moduleHandle, const char* classIdHex, char* errorBuf, int32_t errorBufSize)
+YMM4VST3_API void* Ymm4Vst3PluginCreate(void* moduleHandle, const char* classIdHex, char* errorBuf, int32_t errorBufSize) try
 {
     EnsureInitialized();
     auto* bridgeModule = static_cast<BridgeModule*>(moduleHandle);
@@ -489,8 +508,12 @@ YMM4VST3_API void* Ymm4Vst3PluginCreate(void* moduleHandle, const char* classIdH
 
     return plugin.release();
 }
+catch (...)
+{
+    return nullptr;
+}
 
-YMM4VST3_API int32_t Ymm4Vst3PluginSetup(void* pluginHandle, double sampleRate, int32_t maxBlockSize)
+YMM4VST3_API int32_t Ymm4Vst3PluginSetup(void* pluginHandle, double sampleRate, int32_t maxBlockSize) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin || sampleRate <= 0 || maxBlockSize <= 0)
@@ -538,11 +561,28 @@ YMM4VST3_API int32_t Ymm4Vst3PluginSetup(void* pluginHandle, double sampleRate, 
     for (int32 i = 0; i < numOutBuses; i++)
         component->activateBus(kAudio, kOutput, i, i == plugin->mainOutBus);
 
-    if (component->setActive(true) != kResultOk)
+    try
+    {
+        if (component->setActive(true) != kResultOk)
+            return 0;
+        //SDK標準のAudioEffectは未実装を返すため、戻り値は従来どおり互換扱いにする。
+        //例外だけは下のcatchで確実に巻き戻す。
+        processor->setProcessing(true);
+        plugin->processingActive = true;
+        return 1;
+    }
+    catch (...)
+    {
+        //processing開始後の失敗では、処理停止→component非アクティブ化の順で巻き戻す。
+        plugin->processingActive = false;
+        try { processor->setProcessing(false); } catch (...) {}
+        try { component->setActive(false); } catch (...) {}
         return 0;
-    processor->setProcessing(true);
-    plugin->processingActive = true;
-    return 1;
+    }
+}
+catch (...)
+{
+    return 0;
 }
 
 YMM4VST3_API int32_t Ymm4Vst3PluginProcessWithTransport(
@@ -557,13 +597,17 @@ YMM4VST3_API int32_t Ymm4Vst3PluginProcess(
     void* pluginHandle,
     const float* inL, const float* inR,
     float* outL, float* outR,
-    int32_t numFrames, int64_t projectTimeSamples)
+    int32_t numFrames, int64_t projectTimeSamples) try
 {
     return Ymm4Vst3PluginProcessWithTransport(
         pluginHandle,
         inL, inR, outL, outR,
         numFrames, projectTimeSamples,
         120.0, 4, 4, 1, 1);
+}
+catch (...)
+{
+    return 0;
 }
 
 YMM4VST3_API int32_t Ymm4Vst3PluginProcessWithTransport(
@@ -572,7 +616,7 @@ YMM4VST3_API int32_t Ymm4Vst3PluginProcessWithTransport(
     float* outL, float* outR,
     int32_t numFrames, int64_t projectTimeSamples,
     double tempo, int32_t timeSigNumerator, int32_t timeSigDenominator,
-    int32_t isTempoValid, int32_t captureMeterParameters)
+    int32_t isTempoValid, int32_t captureMeterParameters) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin || !plugin->processingActive || numFrames < 0)
@@ -597,11 +641,15 @@ YMM4VST3_API int32_t Ymm4Vst3PluginProcessWithTransport(
     }
     return 1;
 }
+catch (...)
+{
+    return 0;
+}
 
 // エディタ表示中にパラメータ編集をプロセッサへ反映させるためのフラッシュ処理。
 // 音声は処理しない（numSamples=0のパラメータフラッシュ契約）。無音を処理すると、
 // 停止中に音声フィードで表示した波形・アナライザーが無音で洗い流されてしまう
-YMM4VST3_API int32_t Ymm4Vst3PluginPump(void* pluginHandle)
+YMM4VST3_API int32_t Ymm4Vst3PluginPump(void* pluginHandle) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin || !plugin->processingActive)
@@ -638,13 +686,17 @@ YMM4VST3_API int32_t Ymm4Vst3PluginPump(void* pluginHandle)
         false);
     return result ? 1 : 0;
 }
+catch (...)
+{
+    return 0;
+}
 
 // GUI操作で変更されたパラメータをマネージド側へ転送する。
 // 同じパラメータの連続変更は最新値へまとめ、コールバックはロック外で呼び出す。
 YMM4VST3_API int32_t Ymm4Vst3PluginDrainEditorParameterChanges(
     void* pluginHandle,
     ParameterChangeCallback callback,
-    void* context)
+    void* context) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin || !callback)
@@ -659,11 +711,15 @@ YMM4VST3_API int32_t Ymm4Vst3PluginDrainEditorParameterChanges(
         callback(context, id, value);
     return static_cast<int32_t>(values.size());
 }
+catch (...)
+{
+    return 0;
+}
 
 YMM4VST3_API int32_t Ymm4Vst3PluginDrainMeterParameterChanges(
     void* pluginHandle,
     MeterParameterChangeCallback callback,
-    void* context)
+    void* context) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin || !callback)
@@ -680,95 +736,149 @@ YMM4VST3_API int32_t Ymm4Vst3PluginDrainMeterParameterChanges(
     }
     return count;
 }
+catch (...)
+{
+    return 0;
+}
 
-// パラメータを設定する（正規化値）。次のprocess/Pumpでプロセッサへ反映される
-YMM4VST3_API int32_t Ymm4Vst3PluginSetParameter(void* pluginHandle, uint32_t paramId, double normalizedValue)
+// パラメータを設定する（正規化値）。音声スレッドではプロセッサ入力キューだけを更新する。
+// コントローラーの更新はUIスレッドからYmm4Vst3PluginSetControllerParameterを通して行う。
+YMM4VST3_API int32_t Ymm4Vst3PluginSetParameter(void* pluginHandle, uint32_t paramId, double normalizedValue) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin)
         return 0;
-    if (plugin->controller)
-        plugin->controller->setParamNormalized(paramId, normalizedValue);
     plugin->paramTransfer.addChange(paramId, normalizedValue, 0);
     return 1;
 }
+catch (...)
+{
+    return 0;
+}
 
 // シーク時のリセット。内部バッファ（ディレイライン等）をクリアする
-YMM4VST3_API int32_t Ymm4Vst3PluginReset(void* pluginHandle)
+YMM4VST3_API int32_t Ymm4Vst3PluginReset(void* pluginHandle) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin || !plugin->processingActive)
         return 0;
+    plugin->processingActive = false;
     plugin->processor->setProcessing(false);
     plugin->component->setActive(false);
     if (plugin->component->setActive(true) != kResultOk)
-    {
-        plugin->processingActive = false;
         return 0;
-    }
     plugin->processor->setProcessing(true);
+    plugin->processingActive = true;
     return 1;
 }
+catch (...)
+{
+    auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
+    if (plugin)
+    {
+        //停止・再アクティブ化の途中で失敗しても、処理可能と誤認しない。
+        //既知の停止状態へ倒してから、再開処理が最後まで完了した場合だけ復帰させる。
+        plugin->processingActive = false;
+        try { plugin->processor->setProcessing(false); } catch (...) {}
+        try { plugin->component->setActive(false); } catch (...) {}
+        try
+        {
+            if (plugin->component->setActive(true) == kResultOk)
+            {
+                plugin->processor->setProcessing(true);
+                plugin->processingActive = true;
+            }
+        }
+        catch (...)
+        {
+            try { plugin->processor->setProcessing(false); } catch (...) {}
+            try { plugin->component->setActive(false); } catch (...) {}
+        }
+    }
+    return 0;
+}
 
-YMM4VST3_API int32_t Ymm4Vst3PluginGetLatencySamples(void* pluginHandle)
+YMM4VST3_API int32_t Ymm4Vst3PluginGetLatencySamples(void* pluginHandle) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin)
         return 0;
     return plugin->processor->getLatencySamples();
 }
+catch (...)
+{
+    return 0;
+}
 
 // メーター等のoutput parameterをGUIへ表示するため、コントローラーだけを更新する。
 YMM4VST3_API int32_t Ymm4Vst3PluginSetControllerParameter(
     void* pluginHandle,
     uint32_t paramId,
-    double normalizedValue)
+    double normalizedValue) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin || !plugin->controller)
         return 0;
     return plugin->controller->setParamNormalized(paramId, normalizedValue) == kResultOk ? 1 : 0;
 }
+catch (...)
+{
+    return 0;
+}
 
-YMM4VST3_API int32_t Ymm4Vst3PluginConsumeRestartFlags(void* pluginHandle)
+YMM4VST3_API int32_t Ymm4Vst3PluginConsumeRestartFlags(void* pluginHandle) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin)
         return 0;
     return plugin->restartFlags.exchange(0);
 }
+catch (...)
+{
+    return 0;
+}
 
 #if defined(DEVELOPMENT)
-YMM4VST3_API void Ymm4Vst3PluginRequestRestartForTest(void* pluginHandle, int32_t flags)
+YMM4VST3_API void Ymm4Vst3PluginRequestRestartForTest(void* pluginHandle, int32_t flags) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (plugin)
         plugin->restartFlags.fetch_or(flags);
 }
+catch (...)
+{
+}
 
 YMM4VST3_API void Ymm4Vst3PluginPerformEditForTest(
     void* pluginHandle,
     uint32_t paramId,
-    double normalizedValue)
+    double normalizedValue) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (plugin && plugin->componentHandler)
         plugin->componentHandler->performEdit(paramId, normalizedValue);
 }
+catch (...)
+{
+}
 
-YMM4VST3_API double Ymm4Vst3PluginGetControllerParameterForTest(void* pluginHandle, uint32_t paramId)
+YMM4VST3_API double Ymm4Vst3PluginGetControllerParameterForTest(void* pluginHandle, uint32_t paramId) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin || !plugin->controller)
         return -1;
     return plugin->controller->getParamNormalized(paramId);
 }
+catch (...)
+{
+    return -1;
+}
 #endif
 
 YMM4VST3_API int32_t Ymm4Vst3PluginGetState(
     void* pluginHandle,
     void** componentData, int32_t* componentSize,
-    void** controllerData, int32_t* controllerSize)
+    void** controllerData, int32_t* controllerSize) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin || !componentData || !componentSize || !controllerData || !controllerSize)
@@ -806,16 +916,42 @@ YMM4VST3_API int32_t Ymm4Vst3PluginGetState(
         if (plugin->controller->getState(controllerStream) == kResultOk)
         {
             if (!copyToCoTaskMem(*controllerStream, controllerData, controllerSize))
+            {
+                if (*componentData)
+                {
+                    ::CoTaskMemFree(*componentData);
+                    *componentData = nullptr;
+                    *componentSize = 0;
+                }
                 return 0;
+            }
         }
     }
     return 1;
+}
+catch (...)
+{
+    if (componentData && *componentData)
+    {
+        ::CoTaskMemFree(*componentData);
+        *componentData = nullptr;
+    }
+    if (componentSize)
+        *componentSize = 0;
+    if (controllerData && *controllerData)
+    {
+        ::CoTaskMemFree(*controllerData);
+        *controllerData = nullptr;
+    }
+    if (controllerSize)
+        *controllerSize = 0;
+    return 0;
 }
 
 YMM4VST3_API int32_t Ymm4Vst3PluginSetState(
     void* pluginHandle,
     const uint8_t* componentData, int32_t componentSize,
-    const uint8_t* controllerData, int32_t controllerSize)
+    const uint8_t* controllerData, int32_t controllerSize) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin)
@@ -859,38 +995,74 @@ YMM4VST3_API int32_t Ymm4Vst3PluginSetState(
     }
     return 1;
 }
+catch (...)
+{
+    auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
+    if (plugin && plugin->processingActive)
+    {
+        // setState系が例外を投げても、停止済みのcomponentを処理可能と誤認しない。
+        // 既知の停止状態へ倒してから、再アクティブ化が最後まで成功した場合だけ復帰させる。
+        plugin->processingActive = false;
+        try { plugin->processor->setProcessing(false); } catch (...) {}
+        try { plugin->component->setActive(false); } catch (...) {}
+        try
+        {
+            if (plugin->component->setActive(true) == kResultOk)
+            {
+                plugin->processor->setProcessing(true);
+                plugin->processingActive = true;
+            }
+        }
+        catch (...)
+        {
+            try { plugin->processor->setProcessing(false); } catch (...) {}
+            try { plugin->component->setActive(false); } catch (...) {}
+        }
+    }
+    return 0;
+}
 
-YMM4VST3_API void Ymm4Vst3PluginDestroy(void* pluginHandle)
+YMM4VST3_API void Ymm4Vst3PluginDestroy(void* pluginHandle) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin)
         return;
     if (plugin->processingActive)
     {
-        plugin->processor->setProcessing(false);
-        plugin->component->setActive(false);
+        try { plugin->processor->setProcessing(false); } catch (...) {}
+        try { plugin->component->setActive(false); } catch (...) {}
         plugin->processingActive = false;
     }
-    plugin->processData.unprepare();
+    try { plugin->processData.unprepare(); } catch (...) {}
     if (plugin->controller)
-        plugin->controller->setComponentHandler(nullptr);
-    plugin->processor = nullptr;
-    plugin->component = nullptr;
-    plugin->controller = nullptr;
-    plugin->provider = nullptr; // PlugProviderの破棄でterminateされる
-    delete plugin;
+    {
+        try { plugin->controller->setComponentHandler(nullptr); } catch (...) {}
+    }
+    //各解放を個別に隔離し、プラグイン側の終了処理が失敗しても残りを必ず試行する。
+    try { plugin->processor = nullptr; } catch (...) {}
+    try { plugin->component = nullptr; } catch (...) {}
+    try { plugin->controller = nullptr; } catch (...) {}
+    try { plugin->componentHandler = nullptr; } catch (...) {}
+    try { plugin->provider = nullptr; } catch (...) {} // PlugProviderの破棄でterminateされる
+    try { delete plugin; } catch (...) {}
+}
+catch (...)
+{
 }
 
-YMM4VST3_API void Ymm4Vst3Free(void* buffer)
+YMM4VST3_API void Ymm4Vst3Free(void* buffer) try
 {
     ::CoTaskMemFree(buffer);
+}
+catch (...)
+{
 }
 
 //------------------------------------------------------------------------
 // エディタビュー
 //------------------------------------------------------------------------
 
-YMM4VST3_API void* Ymm4Vst3ViewCreate(void* pluginHandle)
+YMM4VST3_API void* Ymm4Vst3ViewCreate(void* pluginHandle) try
 {
     auto* plugin = static_cast<BridgePlugin*>(pluginHandle);
     if (!plugin || !plugin->controller)
@@ -905,8 +1077,12 @@ YMM4VST3_API void* Ymm4Vst3ViewCreate(void* pluginHandle)
         return nullptr;
     return bridgeView.release();
 }
+catch (...)
+{
+    return nullptr;
+}
 
-YMM4VST3_API int32_t Ymm4Vst3ViewGetSize(void* viewHandle, int32_t* width, int32_t* height)
+YMM4VST3_API int32_t Ymm4Vst3ViewGetSize(void* viewHandle, int32_t* width, int32_t* height) try
 {
     auto* bridgeView = static_cast<BridgeView*>(viewHandle);
     if (!bridgeView || !width || !height)
@@ -918,9 +1094,13 @@ YMM4VST3_API int32_t Ymm4Vst3ViewGetSize(void* viewHandle, int32_t* width, int32
     *height = rect.getHeight();
     return 1;
 }
+catch (...)
+{
+    return 0;
+}
 
 // IPlugViewContentScaleSupportを実装しているか（高DPI対応の判定）
-YMM4VST3_API int32_t Ymm4Vst3ViewIsContentScaleSupported(void* viewHandle)
+YMM4VST3_API int32_t Ymm4Vst3ViewIsContentScaleSupported(void* viewHandle) try
 {
     auto* bridgeView = static_cast<BridgeView*>(viewHandle);
     if (!bridgeView)
@@ -928,17 +1108,25 @@ YMM4VST3_API int32_t Ymm4Vst3ViewIsContentScaleSupported(void* viewHandle)
     FUnknownPtr<IPlugViewContentScaleSupport> scaleSupport(bridgeView->view);
     return scaleSupport ? 1 : 0;
 }
+catch (...)
+{
+    return 0;
+}
 
 
-YMM4VST3_API int32_t Ymm4Vst3ViewCanResize(void* viewHandle)
+YMM4VST3_API int32_t Ymm4Vst3ViewCanResize(void* viewHandle) try
 {
     auto* bridgeView = static_cast<BridgeView*>(viewHandle);
     if (!bridgeView)
         return 0;
     return bridgeView->view->canResize() == kResultTrue ? 1 : 0;
 }
+catch (...)
+{
+    return 0;
+}
 
-YMM4VST3_API int32_t Ymm4Vst3ViewAttach(void* viewHandle, void* hwnd, ViewResizeCallback resizeCallback, void* callbackContext)
+YMM4VST3_API int32_t Ymm4Vst3ViewAttach(void* viewHandle, void* hwnd, ViewResizeCallback resizeCallback, void* callbackContext) try
 {
     auto* bridgeView = static_cast<BridgeView*>(viewHandle);
     if (!bridgeView || !hwnd || bridgeView->attached)
@@ -950,9 +1138,13 @@ YMM4VST3_API int32_t Ymm4Vst3ViewAttach(void* viewHandle, void* hwnd, ViewResize
     bridgeView->attached = true;
     return 1;
 }
+catch (...)
+{
+    return 0;
+}
 
 // ウィンドウ側都合のリサイズ。制約を適用した実サイズをin/outで返す
-YMM4VST3_API int32_t Ymm4Vst3ViewOnSize(void* viewHandle, int32_t* width, int32_t* height)
+YMM4VST3_API int32_t Ymm4Vst3ViewOnSize(void* viewHandle, int32_t* width, int32_t* height) try
 {
     auto* bridgeView = static_cast<BridgeView*>(viewHandle);
     if (!bridgeView || !width || !height || !bridgeView->attached)
@@ -965,9 +1157,13 @@ YMM4VST3_API int32_t Ymm4Vst3ViewOnSize(void* viewHandle, int32_t* width, int32_
     *height = rect.getHeight();
     return 1;
 }
+catch (...)
+{
+    return 0;
+}
 
 // 高DPI用のコンテンツスケール通知。プラグインが対応していない場合は0を返す
-YMM4VST3_API int32_t Ymm4Vst3ViewSetContentScale(void* viewHandle, float scaleFactor)
+YMM4VST3_API int32_t Ymm4Vst3ViewSetContentScale(void* viewHandle, float scaleFactor) try
 {
     auto* bridgeView = static_cast<BridgeView*>(viewHandle);
     if (!bridgeView || scaleFactor <= 0)
@@ -977,14 +1173,26 @@ YMM4VST3_API int32_t Ymm4Vst3ViewSetContentScale(void* viewHandle, float scaleFa
         return 0;
     return scaleSupport->setContentScaleFactor(scaleFactor) == kResultTrue ? 1 : 0;
 }
+catch (...)
+{
+    return 0;
+}
 
-YMM4VST3_API void Ymm4Vst3ViewDestroy(void* viewHandle)
+YMM4VST3_API void Ymm4Vst3ViewDestroy(void* viewHandle) try
 {
     auto* bridgeView = static_cast<BridgeView*>(viewHandle);
     if (!bridgeView)
         return;
     if (bridgeView->attached)
-        bridgeView->view->removed();
-    bridgeView->view->setFrame(nullptr);
-    delete bridgeView;
+    {
+        try { bridgeView->view->removed(); } catch (...) {}
+        bridgeView->attached = false;
+    }
+    try { bridgeView->view->setFrame(nullptr); } catch (...) {}
+    try { bridgeView->view = nullptr; } catch (...) {}
+    try { bridgeView->frame = nullptr; } catch (...) {}
+    try { delete bridgeView; } catch (...) {}
+}
+catch (...)
+{
 }

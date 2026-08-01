@@ -140,6 +140,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             var roots = GetDefaultDirectories()
                 .Concat(Vst3Settings.Default.AdditionalPluginDirectories)
                 .Where(x => !string.IsNullOrWhiteSpace(x));
+            return EnumerateModulePaths(roots);
+        }
+
+        internal static IEnumerable<string> EnumerateModulePaths(IEnumerable<string> roots)
+        {
             foreach (var root in roots.Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 // .vst3はバンドル形式（フォルダ）と単一ファイルの両方がある。
@@ -167,7 +172,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                             if (isVst3)
                                 yield return entry;
                             else
+                            {
+                                // ジャンクション・シンボリックリンクは辿らない（親を指すリンクによる無限ループ防止）
+                                FileAttributes attributes;
+                                try
+                                {
+                                    attributes = File.GetAttributes(entry);
+                                }
+                                catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+                                {
+                                    continue;
+                                }
+                                if (attributes.HasFlag(FileAttributes.ReparsePoint))
+                                    continue;
                                 directories.Push(entry);
+                            }
                         }
                         else if (isVst3)
                         {

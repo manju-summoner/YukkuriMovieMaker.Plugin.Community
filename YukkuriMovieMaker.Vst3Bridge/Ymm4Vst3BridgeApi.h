@@ -9,7 +9,7 @@
 #define YMM4VST3_API extern "C"
 #endif
 
-inline constexpr std::int32_t Ymm4Vst3ApiVersion = 1;
+inline constexpr std::int32_t Ymm4Vst3ApiVersion = 2;
 
 // C#側 Vst3Native.NativeClassInfo と同一レイアウトを保つこと
 struct Ymm4Vst3ClassInfo
