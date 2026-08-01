@@ -1,0 +1,19 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+Kaleidoscope,,万華鏡,Kaleidoscope,万花筒,萬花筒,만화경,Caleidoscopio,منظار الأشكال,Kaleidoskop
+TagKaleidoscope,,万華鏡,Kaleidoscope,万花筒,萬花筒,만화경,Caleidoscopio,منظار الأشكال,Kaleidoskop
+TagMirror,,鏡,Mirror,镜像,鏡像,거울,Espejo,مرآة,Cermin
+TagSymmetry,,対称,Symmetry,对称,對稱,대칭,Simetría,تناظر,Simetri
+Segments,,分割数,Segments,分割数,分割數,분할 수,Segmentos,القطاعات,Segmen
+SegmentsDescription,,中心から放射状に鏡映する分割数,Number of segments mirrored radially around the center.,围绕中心径向镜像的分割数。,圍繞中心徑向鏡像的分割數。,중심을 기준으로 방사형으로 반사되는 분할 수.,Número de segmentos reflejados radialmente alrededor del centro.,عدد القطاعات المنعكسة شعاعيًا حول المركز.,Jumlah segmen yang dicerminkan secara radial di sekitar pusat.
+Rotation,,回転,Rotation,旋转,旋轉,회전,Rotación,تدوير,Rotasi
+RotationDescription,,万華鏡模様の回転角度,Rotation angle of the kaleidoscope pattern.,万花筒图案的旋转角度。,萬花筒圖案的旋轉角度。,만화경 무늬의 회전 각도.,Ángulo de rotación del patrón del caleidoscopio.,زاوية دوران نمط منظار الأشكال.,Sudut rotasi pola kaleidoskop.
+Zoom,,ズーム,Zoom,缩放,縮放,확대,Zoom,تكبير,Zoom
+ZoomDescription,,サンプリング半径の拡大率,Scale factor of the sampling radius.,采样半径的缩放比例。,取樣半徑的縮放比例。,샘플링 반경의 확대 비율.,Factor de escala del radio de muestreo.,معامل تحجيم نصف قطر أخذ العينات.,Faktor skala radius pengambilan sampel.
+CenterX,,中心X,Center X,中心X,中心X,중심 X,Centro X,المركز الأفقي,Pusat X
+CenterXDescription,,万華鏡の中心の水平位置,Horizontal position of the kaleidoscope center.,万花筒中心的水平位置。,萬花筒中心的水平位置。,만화경 중심의 수평 위치.,Posición horizontal del centro del caleidoscopio.,الموضع الأفقي لمركز منظار الأشكال.,Posisi horizontal pusat kaleidoskop.
+CenterY,,中心Y,Center Y,中心Y,中心Y,중심 Y,Centro Y,المركز الرأسي,Pusat Y
+CenterYDescription,,万華鏡の中心の垂直位置,Vertical position of the kaleidoscope center.,万花筒中心的垂直位置。,萬花筒中心的垂直位置。,만화경 중심의 수직 위치.,Posición vertical del centro del caleidoscopio.,الموضع العمودي لمركز منظار الأشكال.,Posisi vertikal pusat kaleidoskop.
+Amount,,適用量,Amount,应用量,應用量,적용량,Cantidad,المقدار,Jumlah
+AmountDescription,,元画像と効果の合成比率,Blend ratio between the source and the effect.,原图像与效果的混合比例。,原圖像與效果的混合比例。,원본 이미지와 효과의 합성 비율.,Proporción de mezcla entre la fuente y el efecto.,نسبة المزج بين المصدر والتأثير.,Rasio pencampuran antara sumber dan efek.
+Mirror,,ミラーリング,Mirror,镜像,鏡像,미러링,Espejo,انعكاس,Pencerminan
+MirrorDescription,,各分割を鏡映するか回転コピーにするかを切り替えます,Toggles whether each segment is mirrored or a rotated copy.,切换每个分割是镜像还是旋转副本。,切換每個分割是鏡像還是旋轉副本。,각 분할을 반사할지 회전 복사할지 전환합니다.,Alterna si cada segmento se refleja o es una copia rotada.,يبدل ما إذا كان كل قطاع منعكسًا أو نسخة مدورة.,Beralih apakah setiap segmen dicerminkan atau salinan yang diputar.

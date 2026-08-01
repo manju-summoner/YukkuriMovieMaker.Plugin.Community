@@ -71,7 +71,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ThreeDimensional
             this.attenuation = attenuation;
             this.color1 = color1;
             this.color2 = color2;
-            return effectDescription.DrawDescription;
+
+            //x, y はIsAbsolutePoint補正後のローカル座標なので、そのまま制御点の座標として使える
+            var controller =
+                new VideoEffectController(
+                    item,
+                    [
+                        new ControllerPoint(
+                            new((float)x, (float)y, 0f),
+                            arg =>
+                            {
+                                item.X.AddToEachValues(arg.Delta.X);
+                                item.Y.AddToEachValues(arg.Delta.Y);
+                            })
+                    ]);
+
+            return effectDescription.DrawDescription with
+            {
+                Controllers = [.. effectDescription.DrawDescription.Controllers, controller],
+            };
         }
 
         protected override void ClearEffectChain()

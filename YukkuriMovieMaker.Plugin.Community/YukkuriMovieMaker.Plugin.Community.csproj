@@ -6,6 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>Debug;Release;ReleaseLite;DebugLite</Configurations>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='ReleaseLite'">
+    <DefineConstants>$(DefineConstants);RELEASE;LITE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='DebugLite'">
+    <DefineConstants>$(DefineConstants);DEBUG;LITE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='ReleaseLite' OR '$(Configuration)'=='Release'">
     <!--Pdb内にソースコードのフルパスを含めない-->
@@ -16,6 +23,27 @@
   <ItemGroup Condition="'$(YMM4Proj)' != ''">
     <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Commons\YukkuriMovieMaker.Plugin.csproj" />
     <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Controls\YukkuriMovieMaker.Controls.csproj" />
+  </ItemGroup>
+
+  <!-- dotnet CLI（MSBuildRuntimeType=Core）はvcxprojをビルドできないため、参照はVS/MSBuild.exeビルド時のみ。
+       dotnet test等はMSBuild.exeでビルド済みのバイナリを使う -->
+  <ItemGroup>
+    <ProjectReference Include="..\YukkuriMovieMaker.Vst3Bridge\YukkuriMovieMaker.Vst3Bridge.vcxproj"
+                      Condition="'$(MSBuildRuntimeType)' != 'Core'"
+                      ReferenceOutputAssembly="false"
+                      AdditionalProperties="Platform=x64" />
+    <Content Include="..\YukkuriMovieMaker.Vst3Bridge\bin\$(Configuration)\YukkuriMovieMaker.Vst3Bridge.dll"
+             Link="Resources\bin\x64\vst3\YukkuriMovieMaker.Vst3Bridge.dll"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+    <ProjectReference Include="..\YukkuriMovieMaker.Vst3Scanner\YukkuriMovieMaker.Vst3Scanner.vcxproj"
+                      Condition="'$(MSBuildRuntimeType)' != 'Core'"
+                      ReferenceOutputAssembly="false"
+                      AdditionalProperties="Platform=x64" />
+    <Content Include="..\YukkuriMovieMaker.Vst3Scanner\bin\$(Configuration)\YukkuriMovieMaker.Vst3Scanner.exe"
+             Link="Resources\bin\x64\vst3\YukkuriMovieMaker.Vst3Scanner.exe"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!-- YMM4のdllや、カスタムdllを参照。サードパーティー開発者向け。-->
@@ -75,9 +103,9 @@
 	<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
   </ItemGroup>
 
-  <!--ビルド後、YMM4フォルダに関連ファイルをコピーする-->
+  <!--ビルド後、YMM4フォルダに関連ファイルをコピーする（Resources\bin\x64\vst3等のサブフォルダーも含む）-->
   <Target Condition="'$(YMM4Proj)' == ''" Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(TargetDir)&quot; &quot;$(YMM4DirPath)&quot; /y" />
+    <Exec Command="xcopy &quot;$(TargetDir)&quot; &quot;$(YMM4DirPath)&quot; /y /s" />
   </Target>
 
   <ItemGroup>
@@ -120,6 +148,9 @@
     <Content Include="Resources\License\MeltySynth.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\License\VST 3 SDK.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\SoundFonts\GeneralUser-GS.sf2">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -131,7 +162,13 @@
 	  <Resource Include="$(ShaderDirPath)DiffuseAlpha.cso" Link="Resources\Shader\DiffuseAlpha.cso" />
 	  <Resource Include="$(ShaderDirPath)InvertAlpha.cso" Link="Resources\Shader\InvertAlpha.cso" />
 	  <Resource Include="$(ShaderDirPath)BevelHeightmap.cso" Link="Resources\Shader\BevelHeightmap.cso" />
+	  <Resource Include="$(ShaderDirPath)BevelSdfSeed.cso" Link="Resources\Shader\BevelSdfSeed.cso" />
+	  <Resource Include="$(ShaderDirPath)BevelSdfJump.cso" Link="Resources\Shader\BevelSdfJump.cso" />
+	  <Resource Include="$(ShaderDirPath)BevelSdfResolve.cso" Link="Resources\Shader\BevelSdfResolve.cso" />
 	  <Resource Include="$(ShaderDirPath)BevelAndFlatComposite.cso" Link="Resources\Shader\BevelAndFlatComposite.cso" />
+	  <Resource Include="$(ShaderDirPath)BevelLighting.cso" Link="Resources\Shader\BevelLighting.cso" />
+	  <Resource Include="$(ShaderDirPath)BevelAmbientOcclusion.cso" Link="Resources\Shader\BevelAmbientOcclusion.cso" />
+	  <Resource Include="$(ShaderDirPath)LinearHdrComposite.cso" Link="Resources\Shader\LinearHdrComposite.cso" />
 	  <Resource Include="$(ShaderDirPath)UnidirectionalBlur.cso" Link="Resources\Shader\UnidirectionalBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)LensBlur.cso" Link="Resources\Shader\LensBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)FishEyeLens.cso" Link="Resources\Shader\FishEyeLens.cso" />
@@ -166,8 +203,29 @@
 	  <Resource Include="$(ShaderDirPath)PixelizeTransition.cso" Link="Resources\Shader\PixelizeTransition.cso" />
 	  <Resource Include="$(ShaderDirPath)FillSamegroundShader.cso" Link="Resources\Shader\FillSamegroundShader.cso" />
 	  <Resource Include="$(ShaderDirPath)PuppetDeformation.cso" Link="Resources\Shader\PuppetDeformation.cso" />
+	  <Resource Include="$(ShaderDirPath)PuppetDeformationArap.cso" Link="Resources\Shader\PuppetDeformationArap.cso" />
+	  <Resource Include="$(ShaderDirPath)PuppetDeformationArapVertex.cso" Link="Resources\Shader\PuppetDeformationArapVertex.cso" />
+	  <Resource Include="$(ShaderDirPath)ParticleOutput.cso" Link="Resources\Shader\ParticleOutput.cso" />
+	  <Resource Include="$(ShaderDirPath)ParticleOutputVertex.cso" Link="Resources\Shader\ParticleOutputVertex.cso" />
 	  <Resource Include="$(ShaderDirPath)PartialOutline.cso" Link="Resources\Shader\PartialOutline.cso" />
 	  <Resource Include="$(ShaderDirPath)DirectionalColorKey.cso" Link="Resources\Shader\DirectionalColorKey.cso" />
+	  <Resource Include="$(ShaderDirPath)AnisotropicKuwaharaTensor.cso" Link="Resources\Shader\AnisotropicKuwaharaTensor.cso" />
+	  <Resource Include="$(ShaderDirPath)AnisotropicKuwaharaTensorBlur.cso" Link="Resources\Shader\AnisotropicKuwaharaTensorBlur.cso" />
+	  <Resource Include="$(ShaderDirPath)AnisotropicKuwahara.cso" Link="Resources\Shader\AnisotropicKuwahara.cso" />
+	  <Resource Include="$(ShaderDirPath)CrossHatchShading.cso" Link="Resources\Shader\CrossHatchShading.cso" />
+    <Resource Include="$(ShaderDirPath)Kaleidoscope.cso" Link="Resources\Shader\Kaleidoscope.cso" />
+    <Resource Include="$(ShaderDirPath)FacetedGlass.cso" Link="Resources\Shader\FacetedGlass.cso" />
+    <Resource Include="$(ShaderDirPath)Dithering.cso" Link="Resources\Shader\Dithering.cso" />
+    <Resource Include="$(ShaderDirPath)VectorFieldWarp.cso" Link="Resources\Shader\VectorFieldWarp.cso" />
+    <Resource Include="$(ShaderDirPath)AmbientOcclusion.cso" Link="Resources\Shader\AmbientOcclusion.cso" />
+    <Resource Include="$(ShaderDirPath)AmbientOcclusionPhase.cso" Link="Resources\Shader\AmbientOcclusionPhase.cso" />
+    <Resource Include="$(ShaderDirPath)Fog.cso" Link="Resources\Shader\Fog.cso" />
+    <Resource Include="$(ShaderDirPath)CrossFilter.cso" Link="Resources\Shader\CrossFilter.cso" />
+    <Resource Include="$(ShaderDirPath)Caustics.cso" Link="Resources\Shader\Caustics.cso" />
+    <Resource Include="$(ShaderDirPath)RadianceEmission.cso" Link="Resources\Shader\RadianceEmission.cso" />
+    <Resource Include="$(ShaderDirPath)RadianceCascade.cso" Link="Resources\Shader\RadianceCascade.cso" />
+    <Resource Include="$(ShaderDirPath)RadianceComposite.cso" Link="Resources\Shader\RadianceComposite.cso" />
+    <Resource Include="$(ShaderDirPath)RadianceOccupancy.cso" Link="Resources\Shader\RadianceOccupancy.cso" />
   </ItemGroup>
 
   <!-- internalsを参照するテスト（EdgeDetectionZeroStrengthOverlayTest等）はDEBUG限定のため、Releaseビルドには付与しない -->

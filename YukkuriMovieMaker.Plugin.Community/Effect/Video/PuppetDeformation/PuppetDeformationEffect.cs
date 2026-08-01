@@ -13,13 +13,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
     public sealed class PuppetDeformationEffect : VideoEffectBase
     {
         public const int PinCapacity = PuppetDeformationCustomEffect.MaxPins;
+        public const int BoneCapacity = 64;
 
         public override string Label
         {
             get
             {
                 var active = Pins.Count(p => p.IsEnabled);
-                return $"{Texts.PuppetDeformationEffectName} - {Texts.PuppetDeformationLabelMove}: {active} {Texts.PuppetDeformationLabelAnchor}: {Pins.Count}";
+                var label = $"{Texts.PuppetDeformationEffectName} - {Texts.PuppetDeformationLabelMove}: {active} {Texts.PuppetDeformationLabelAnchor}: {Pins.Count}";
+                if (Bones.Count > 0)
+                    label += $" {Texts.PuppetDeformationLabelBone}: {Bones.Count}";
+                return label;
             }
         }
 
@@ -28,7 +32,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         public bool ApplyDeformation { get => applyDeformation; set => Set(ref applyDeformation, value); }
         bool applyDeformation = true;
 
-        [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationStiffnessName), Description = nameof(Texts.PuppetDeformationStiffnessDesc), Order = 1, ResourceType = typeof(Texts))]
+#if DEBUG
+        /// <summary>ARAPメッシュの分割状況をプレビューに重ねて表示する（デバッグビルド専用）</summary>
+        [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationShowDebugMeshName), Description = nameof(Texts.PuppetDeformationShowDebugMeshDesc), Order = 1, ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool ShowDebugMesh { get => showDebugMesh; set => Set(ref showDebugMesh, value); }
+        bool showDebugMesh;
+#endif
+
+        [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationAlgorithmName), Description = nameof(Texts.PuppetDeformationAlgorithmDesc), Order = 2, ResourceType = typeof(Texts))]
+        [EnumComboBox]
+        public PuppetDeformationAlgorithm Algorithm
+        {
+            get => algorithm;
+            set => Set(ref algorithm, value);
+        }
+        PuppetDeformationAlgorithm algorithm = PuppetDeformationAlgorithm.Arap;
+
+        [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationStiffnessName), Description = nameof(Texts.PuppetDeformationStiffnessDesc), Order = 3, ResourceType = typeof(Texts))]
+        [PuppetDeformationMlsOnlyVisible]
         [AnimationSlider("F2", "", 0.5d, 4d)]
         public Animation Stiffness { get; } = new Animation(2.0, 0.1, 8.0);
 
@@ -54,6 +76,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         }
         ImmutableList<PuppetDeformation> pins = ImmutableList<PuppetDeformation>.Empty;
 
+        /// <summary>ボーン一覧。編集UIはピン一覧と同じPuppetDeformationListEditorが担当する</summary>
+        public ImmutableList<PuppetBone> Bones
+        {
+            get => bones;
+            set
+            {
+                if (Set(ref bones, value ?? ImmutableList<PuppetBone>.Empty))
+                    OnPropertyChanged(nameof(Label));
+            }
+        }
+        ImmutableList<PuppetBone> bones = ImmutableList<PuppetBone>.Empty;
+
         public PuppetDeformationEffect()
         {
             Pins = ImmutableList.Create(
@@ -73,12 +107,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             yield return Stiffness;
             foreach (var pin in Pins)
-            {
-                yield return pin.RestX;
-                yield return pin.RestY;
-                yield return pin.OffsetX;
-                yield return pin.OffsetY;
-            }
+                yield return pin;
+            foreach (var bone in Bones)
+                yield return bone;
         }
     }
 }

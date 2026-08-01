@@ -1,3 +1,12 @@
 [submodule "YukkuriMovieMaker.Generator"]
 	path = YukkuriMovieMaker.Generator
 	url = https://github.com/manju-summoner/YukkuriMovieMaker.Generator
+[submodule "vst3sdk/pluginterfaces"]
+	path = vst3sdk/pluginterfaces
+	url = https://github.com/steinbergmedia/vst3_pluginterfaces
+[submodule "vst3sdk/base"]
+	path = vst3sdk/base
+	url = https://github.com/steinbergmedia/vst3_base
+[submodule "vst3sdk/public.sdk"]
+	path = vst3sdk/public.sdk
+	url = https://github.com/steinbergmedia/vst3_public_sdk

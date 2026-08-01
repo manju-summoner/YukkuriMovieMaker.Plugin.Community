@@ -1,44 +1,47 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
+using YukkuriMovieMaker.UndoRedo;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 {
     public class PuppetDeformation : Animatable
     {
         [JsonIgnore]
+        [IgnoreUndoRedo]
         public bool IsRestSelected { get => isRestSelected; set => Set(ref isRestSelected, value); }
         bool isRestSelected = false;
 
         [JsonIgnore]
+        [IgnoreUndoRedo]
         public bool IsOffsetSelected { get => isOffsetSelected; set => Set(ref isOffsetSelected, value); }
         bool isOffsetSelected = false;
 
+        /// <summary>このピンを駆動するボーンのId。Guid.Emptyで割り当てなし</summary>
+        public Guid BoneId { get => boneId; set => Set(ref boneId, value); }
+        Guid boneId = Guid.Empty;
+
         [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationEnabledName), Description = nameof(Texts.PuppetDeformationEnabledDesc), Order = 0, ResourceType = typeof(Texts))]
-        [PuppetDeformationOffsetVisible]
         [ToggleSlider(PropertyEditorSize = PropertyEditorSize.FullWidth)]
         public bool IsEnabled { get => isEnabled; set => Set(ref isEnabled, value); }
         bool isEnabled = true;
 
         [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationRestXName), Description = nameof(Texts.PuppetDeformationRestXDesc), Order = 1, ResourceType = typeof(Texts))]
-        [PuppetDeformationRestVisible]
         [AnimationSlider("F1", "px", -500.0, 500.0)]
         public Animation RestX { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationRestYName), Description = nameof(Texts.PuppetDeformationRestYDesc), Order = 2, ResourceType = typeof(Texts))]
-        [PuppetDeformationRestVisible]
         [AnimationSlider("F1", "px", -500.0, 500.0)]
         public Animation RestY { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationOffsetXName), Description = nameof(Texts.PuppetDeformationOffsetXDesc), Order = 3, ResourceType = typeof(Texts))]
-        [PuppetDeformationOffsetVisible]
         [AnimationSlider("F1", "px", -500.0, 500.0)]
         public Animation OffsetX { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
         [Display(GroupName = nameof(Texts.PuppetDeformationEffectName), Name = nameof(Texts.PuppetDeformationOffsetYName), Description = nameof(Texts.PuppetDeformationOffsetYDesc), Order = 4, ResourceType = typeof(Texts))]
-        [PuppetDeformationOffsetVisible]
         [AnimationSlider("F1", "px", -500.0, 500.0)]
         public Animation OffsetY { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
