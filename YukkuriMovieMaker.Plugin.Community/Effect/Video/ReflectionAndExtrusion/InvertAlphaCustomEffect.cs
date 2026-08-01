@@ -44,12 +44,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ReflectionAndExtrusion
 
             }
 
-            public override void SetDrawInfo(ID2D1DrawInfo drawInfo)
-            {
-                base.SetDrawInfo(drawInfo);
-                drawInfo.SetOutputBuffer(BufferPrecision.PerChannel16Float, ChannelDepth.Four);
-            }
-
             protected override void UpdateConstants()
             {
                 drawInformation?.SetPixelShaderConstantBuffer(constants);
