@@ -588,14 +588,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             {
                 dc.Target = gpuBitmap;
                 dc.BeginDraw();
-                dc.Clear(new Color4(0f, 0f, 0f, 0f));
-                dc.DrawImage(
-                    currentInput!,
-                    new Vector2(-bounds.Left, -bounds.Top),
-                    null,
-                    InterpolationMode.NearestNeighbor,
-                    CompositeMode.SourceCopy);
-                dc.EndDraw();
+                var succeeded = false;
+                try
+                {
+                    dc.Clear(new Color4(0f, 0f, 0f, 0f));
+                    dc.DrawImage(
+                        currentInput!,
+                        new Vector2(-bounds.Left, -bounds.Top),
+                        null,
+                        InterpolationMode.NearestNeighbor,
+                        CompositeMode.SourceCopy);
+                    succeeded = true;
+                }
+                finally
+                {
+                    try
+                    {
+                        dc.EndDraw().CheckError();
+                    }
+                    catch (Exception e) when (!succeeded)
+                    {
+                        Log.Default.Write("OpenFX場面切り替え入力描画のEndDrawに失敗しました。", e);
+                    }
+                }
             }
             finally
             {
@@ -637,8 +652,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             {
                 dc.Target = bitmap;
                 dc.BeginDraw();
-                dc.Clear(new Color4(0f, 0f, 0f, 0f));
-                dc.EndDraw();
+                var succeeded = false;
+                try
+                {
+                    dc.Clear(new Color4(0f, 0f, 0f, 0f));
+                    succeeded = true;
+                }
+                finally
+                {
+                    try
+                    {
+                        dc.EndDraw().CheckError();
+                    }
+                    catch (Exception e) when (!succeeded)
+                    {
+                        Log.Default.Write("OpenFX透明入力描画のEndDrawに失敗しました。", e);
+                    }
+                }
             }
             finally
             {

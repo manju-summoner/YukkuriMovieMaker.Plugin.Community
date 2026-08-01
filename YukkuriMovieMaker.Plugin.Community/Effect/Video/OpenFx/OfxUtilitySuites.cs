@@ -676,12 +676,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         }
 
         /// <summary>
-        /// printf形式の書式を最小限（%d %i %u %x %f %e %g %s %c %%）だけ解釈して整形する。
+        /// printf形式の書式を最小限（%d %i %u %x %f %e %g %c %%）だけ解釈して整形する。
+        /// %sを含む場合は安全のため引数を展開せず、書式文字列をそのまま返す。
         /// 解釈できない書式が現れた場合は以降を書式文字列のまま返す。
         /// </summary>
         internal static string FormatMessage(byte* format, nint a4, nint a5, nint a6, nint a7)
         {
             var formatString = Marshal.PtrToStringUTF8((nint)format) ?? "";
+            // 可変長引数の実数はホスト側では判別できず、未指定スロットが任意の値になり得る。
+            // %s は値をポインターとして逆参照する必要があり、安全な事前検証もできないため、
+            // 文字列変換を含むメッセージは一切展開せず書式文字列をそのまま返す。
+            if (ContainsStringConversion(formatString))
+                return formatString;
             var slots = stackalloc nint[4] { a4, a5, a6, a7 };
             var slotIndex = 0;
             var builder = new StringBuilder(formatString.Length + 32);
@@ -733,10 +739,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                         builder.Append(BitConverter.Int64BitsToDouble(slot));
                         slotIndex++;
                         break;
-                    case 's':
-                        builder.Append(Marshal.PtrToStringUTF8(slot) ?? "");
-                        slotIndex++;
-                        break;
                     case 'c':
                         builder.Append((char)(int)slot);
                         slotIndex++;
@@ -749,6 +751,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 i = j;
             }
             return builder.ToString();
+        }
+
+        static bool ContainsStringConversion(string format)
+        {
+            for (var i = 0; i < format.Length; i++)
+            {
+                if (format[i] != '%' || i + 1 >= format.Length)
+                    continue;
+                var j = i + 1;
+                while (j < format.Length && (char.IsDigit(format[j]) || format[j] is '-' or '+' or ' ' or '#' or '.' or 'l' or 'h'))
+                    j++;
+                if (j >= format.Length)
+                    return false;
+                if (format[j] == 's')
+                    return true;
+                i = j;
+            }
+            return false;
         }
     }
 }

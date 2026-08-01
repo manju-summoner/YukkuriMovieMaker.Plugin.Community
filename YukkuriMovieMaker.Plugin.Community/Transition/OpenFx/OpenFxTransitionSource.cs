@@ -466,14 +466,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.OpenFx
             {
                 dc.Target = target;
                 dc.BeginDraw();
-                dc.Clear(new Color4(0f, 0f, 0f, 0f));
-                dc.DrawImage(
-                    input,
-                    new Vector2(-bounds.Left, -bounds.Top),
-                    null,
-                    InterpolationMode.NearestNeighbor,
-                    CompositeMode.SourceCopy);
-                dc.EndDraw();
+                var succeeded = false;
+                try
+                {
+                    dc.Clear(new Color4(0f, 0f, 0f, 0f));
+                    dc.DrawImage(
+                        input,
+                        new Vector2(-bounds.Left, -bounds.Top),
+                        null,
+                        InterpolationMode.NearestNeighbor,
+                        CompositeMode.SourceCopy);
+                    succeeded = true;
+                }
+                finally
+                {
+                    try
+                    {
+                        dc.EndDraw().CheckError();
+                    }
+                    catch (Exception e) when (!succeeded)
+                    {
+                        Log.Default.Write("OpenFXトランジション入力描画のEndDrawに失敗しました。", e);
+                    }
+                }
             }
             finally
             {

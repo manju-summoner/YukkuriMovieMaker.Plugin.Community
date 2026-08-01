@@ -1267,7 +1267,8 @@ namespace
 
         // 一度ロードしたバイナリはアンロードしない（プラグインが登録したままの
         // コールバックが無効な飛び先になる事故を避けるため。プロセス終了で回収される）
-        auto library = LoadLibraryW(widePath.c_str());
+        // フルパスでロードし、同梱依存DLLはバイナリ自身のディレクトリから解決する。
+        auto library = LoadLibraryExW(widePath.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
         if (library == nullptr)
         {
             WriteLine("#ERROR\tバイナリを読み込めませんでした。win32Error=" + std::to_string(GetLastError()));

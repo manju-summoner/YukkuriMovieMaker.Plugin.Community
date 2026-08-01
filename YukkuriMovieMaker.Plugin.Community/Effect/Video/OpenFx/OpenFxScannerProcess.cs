@@ -37,7 +37,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         /// <summary>
         /// 1行も出力がないままこの時間が経過したバイナリはハングとみなしてスキップする
         /// </summary>
-        static readonly TimeSpan BinaryTimeout = TimeSpan.FromSeconds(30);
+        static readonly TimeSpan OutputLineTimeout = TimeSpan.FromSeconds(30);
+
+        /// <summary>
+        /// 進捗がまだないバイナリへ与える初期予算。
+        /// </summary>
+        static readonly TimeSpan BinaryInitialTimeout = TimeSpan.FromTicks(OutputLineTimeout.Ticks * 4);
+
+        /// <summary>
+        /// PLUGIN行1件ごとの延長幅。約180件を含むopenfx-miscでも初回初期化込みで十分な予算になるよう2秒とする。
+        /// stdoutの雑多な出力では延長せず、実プラグインの記述完了だけを進捗として扱う。
+        /// </summary>
+        static readonly TimeSpan BinaryProgressExtension = TimeSpan.FromSeconds(2);
+
+        /// <summary>
+        /// 出力を続けるだけの異常な走査を有限時間で止めるための絶対上限。
+        /// </summary>
+        static readonly TimeSpan BinaryMaximumTimeout = TimeSpan.FromMinutes(10);
 
         /// <summary>
         /// スキャナーEXEの配置フォルダー
@@ -86,6 +102,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             var startInfo = new ProcessStartInfo
             {
                 FileName = scannerPath,
+                WorkingDirectory = Path.GetDirectoryName(Path.GetFullPath(scannerPath)) ?? OfxBinaryDirectory,
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardInput = true,
@@ -122,15 +139,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 });
 
                 string? currentBinary = null;
+                Stopwatch? currentBinaryStopwatch = null;
+                TimeSpan currentBinaryDeadline = BinaryInitialTimeout;
                 // #ENDの前に異常終了したバイナリの不完全な結果を混ぜないよう、バイナリ単位でバッファする
                 var pendingPlugins = new List<ScannedPlugin>();
                 while (true)
                 {
-                    var readTask = process.StandardOutput.ReadLineAsync();
-                    if (!readTask.Wait(BinaryTimeout))
+                    if (currentBinaryStopwatch is not null && currentBinaryStopwatch.Elapsed >= currentBinaryDeadline)
                     {
                         Kill(process);
-                        return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, "バイナリが応答しません");
+                        return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, "バイナリの総走査時間が上限を超えました");
+                    }
+                    var readTask = process.StandardOutput.ReadLineAsync();
+                    var waitTimeout = currentBinaryStopwatch is null
+                        ? OutputLineTimeout
+                        : TimeSpan.FromTicks(Math.Min(
+                            OutputLineTimeout.Ticks,
+                            Math.Max(1, (currentBinaryDeadline - currentBinaryStopwatch.Elapsed).Ticks)));
+                    if (!readTask.Wait(waitTimeout))
+                    {
+                        Kill(process);
+                        var reason = currentBinaryStopwatch is not null && currentBinaryStopwatch.Elapsed >= currentBinaryDeadline
+                            ? "バイナリの総走査時間が上限を超えました"
+                            : "バイナリが応答しません";
+                        return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, reason);
                     }
                     var line = readTask.Result;
                     if (line is null)
@@ -139,6 +171,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     if (line.StartsWith("#BEGIN\t", StringComparison.Ordinal))
                     {
                         currentBinary = line["#BEGIN\t".Length..];
+                        currentBinaryStopwatch = Stopwatch.StartNew();
+                        currentBinaryDeadline = BinaryInitialTimeout;
                         pendingPlugins.Clear();
                         // 子プロセスはstdinの順に処理するため、走査開始したバイナリを取り除く
                         if (remaining.Count > 0 && string.Equals(remaining.Peek(), currentBinary, StringComparison.OrdinalIgnoreCase))
@@ -172,6 +206,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                         }
                         pendingPlugins.Clear();
                         currentBinary = null;
+                        currentBinaryStopwatch = null;
                         hasCompletedAnyBinary = true;
                     }
                     else if (line.StartsWith("PLUGIN\t", StringComparison.Ordinal) && currentBinary is not null)
@@ -196,6 +231,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                             fields.Length >= 17
                                 ? new OpenFxGpuSupport(fields[10], fields[11], fields[12], fields[13], fields[14], fields[15], fields[16])
                                 : OpenFxGpuSupport.Default));
+                        currentBinaryDeadline = ExtendBinaryDeadline(currentBinaryDeadline);
                     }
                     else if (line.StartsWith("#ERROR\t", StringComparison.Ordinal))
                     {
@@ -219,6 +255,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 throw;
             }
         }
+
+        internal static TimeSpan ExtendBinaryDeadline(TimeSpan currentDeadline)
+            => TimeSpan.FromTicks(Math.Min(
+                BinaryMaximumTimeout.Ticks,
+                currentDeadline.Ticks + BinaryProgressExtension.Ticks));
 
         static bool SkipCurrentBinary(Queue<string> remaining, string? currentBinary, bool hasCompletedAnyBinary, string reason)
         {
