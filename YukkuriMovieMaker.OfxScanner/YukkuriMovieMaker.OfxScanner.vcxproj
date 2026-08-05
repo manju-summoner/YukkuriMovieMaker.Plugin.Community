@@ -95,6 +95,9 @@
   <ItemGroup>
     <ClCompile Include="Ymm4OfxScanner.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ScannerVersion.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

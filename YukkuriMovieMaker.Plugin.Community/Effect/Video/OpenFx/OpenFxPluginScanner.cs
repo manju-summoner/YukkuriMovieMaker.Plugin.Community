@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,10 +40,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             => value.Equals("true", StringComparison.OrdinalIgnoreCase)
                 || value.Equals("needed", StringComparison.OrdinalIgnoreCase);
 
+        [JsonIgnore]
         public bool SupportsOpenGL => IsEnabled(OpenGL);
+        [JsonIgnore]
         public bool SupportsCuda => IsEnabled(Cuda);
+        [JsonIgnore]
         public bool SupportsOpenCLBuffer => IsEnabled(OpenCLRender);
+        [JsonIgnore]
         public bool SupportsOpenCL => IsEnabled(OpenCLRender) || IsEnabled(OpenCL);
+        [JsonIgnore]
         public bool SupportsCPU => !CPU.Equals("false", StringComparison.OrdinalIgnoreCase);
     }
 
@@ -114,13 +120,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
     /// <summary>
     /// OFXプラグイン（.ofxバンドル）をシステムのOFXディレクトリから列挙する。
-    /// 全バイナリをロードしてdescribeまで行うため初回は時間がかかる。結果はセッション内でキャッシュされる。
+    /// 全バイナリをロードしてdescribeまで行うため初回は時間がかかる。生のdescribe結果はセッション内とディスクへキャッシュされる。
     /// </summary>
     internal static class OpenFxPluginScanner
     {
         static readonly object lockObject = new();
         static volatile IReadOnlyList<OpenFxPluginInfo>? cache;
+        static IReadOnlyList<OpenFxPluginInfo>? incompleteCache;
         static bool cachedUseGpuRendering;
+        static bool incompleteCacheUseGpuRendering;
+        static long lastAutomaticScanAttemptTick = -1;
+        const long AutomaticScanRetryIntervalMilliseconds = 30_000;
+        // PLUGIN行のフィールド構成やOpenFxScannedPluginInfoのレイアウトを変えた場合は上げること。
+        const int PersistentCacheFormatVersion = 1;
+        internal static IPersistentPluginScanCacheStorage<OpenFxScannedPluginInfo> PersistentCacheStorage { get; set; } = new OpenFxScanCacheSettingsStorage();
 
         /// <summary>
         /// スキャン済みの結果。未スキャンならnull。
@@ -144,69 +157,157 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             => GetDefaultDirectoryInfos().Select(x => x.Path);
 
         public static IReadOnlyList<OpenFxPluginInfo> GetEffectPlugins(bool refresh = false)
-            => GetEffectPlugins(refresh, () =>
-            {
-                // ルート同士が入れ子（追加フォルダーに既定フォルダーの配下を指定等）でも同じバイナリを二重スキャンしない
-                // （表記ゆれで重複が残らないようフルパスへ正規化してから比較する）
-                var binaryPaths = EnumerateBinaryPaths()
-                    .Select(Path.GetFullPath)
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-                return ScanIsolated(OpenFxScannerProcess.FindScannerPath(), binaryPaths);
-            });
+        {
+            var scannerPath = new Lazy<string?>(OpenFxScannerProcess.FindScannerPath);
+            return GetEffectPlugins(
+                refresh,
+                EnumerateBinaries,
+                PersistentCacheStorage,
+                binaryPaths => ScanIsolatedDetailed(scannerPath.Value, binaryPaths),
+                OpenFxSettings.Default.UseGpuRendering,
+                OfxGpuRenderBackendFactory.IsDeclaredBackendAvailable,
+                () => OpenFxScannerProcess.GetEnvironmentFingerprint(scannerPath.Value));
+        }
 
         internal static IReadOnlyList<OpenFxPluginInfo> GetEffectPlugins(
             bool refresh,
-            Func<List<OpenFxPluginInfo>?> scan)
+            Func<PluginModuleEnumerationResult> enumerateBinaries,
+            IPersistentPluginScanCacheStorage<OpenFxScannedPluginInfo> persistentCacheStorage,
+            Func<IReadOnlyList<string>, PluginModuleScanResult<OpenFxScannedPluginInfo>?> scan,
+            bool useGpuRendering,
+            Func<bool, bool, bool> isDeclaredBackendAvailable,
+            Func<string?> getEnvironmentFingerprint)
         {
             lock (lockObject)
             {
-                var useGpuRendering = OpenFxSettings.Default.UseGpuRendering;
                 if (cache is not null && !refresh)
                 {
-                    // CUDA可否はプロセス中不変のLazy値なので、設定だけをキャッシュ済みdescribe結果から再評価する。
                     if (cachedUseGpuRendering != useGpuRendering)
                     {
-                        ReevaluateGpuOnlySupport(useGpuRendering);
+                        cache = ReevaluateGpuOnlySupport(cache, useGpuRendering, isDeclaredBackendAvailable);
                         cachedUseGpuRendering = useGpuRendering;
                     }
                     return cache;
                 }
+                var now = Environment.TickCount64;
+                if (!refresh
+                    && incompleteCache is not null
+                    && lastAutomaticScanAttemptTick >= 0
+                    && now - lastAutomaticScanAttemptTick < AutomaticScanRetryIntervalMilliseconds)
+                {
+                    if (incompleteCacheUseGpuRendering != useGpuRendering)
+                    {
+                        incompleteCache = ReevaluateGpuOnlySupport(incompleteCache, useGpuRendering, isDeclaredBackendAvailable);
+                        incompleteCacheUseGpuRendering = useGpuRendering;
+                    }
+                    return incompleteCache;
+                }
 
-                var plugins = scan();
-                if (plugins is null)
-                    return cache ?? [];
-                cache = plugins
+                var result = PersistentPluginScanCache.Scan(
+                    refresh,
+                    enumerateBinaries(),
+                    persistentCacheStorage,
+                    PersistentCacheFormatVersion,
+                    "OFXバイナリ",
+                    scan,
+                    x => x.BinaryPath,
+                    (x, path) => x with { BinaryPath = path },
+                    x => x is not null
+                        && x.Identifier is not null
+                        && x.Label is not null
+                        && x.Grouping is not null
+                        && x.SupportedContexts is not null
+                        && x.SupportedPixelDepths is not null
+                        && x.GpuSupport is
+                        {
+                            OpenGL: not null,
+                            Cuda: not null,
+                            CudaStream: not null,
+                            OpenCLRender: not null,
+                            OpenCL: not null,
+                            Metal: not null,
+                            CPU: not null,
+                    },
+                    getSignaturePath: GetSignaturePath,
+                    includeAdjacentDllsInSignature: IsStandaloneBinary,
+                    getEnvironmentFingerprint: getEnvironmentFingerprint,
+                    arePluginsEqual: AreScannedPluginsEqual);
+                if (!result.IsComplete)
+                {
+                    // 明示的な再走査の後は、直前の自動失敗による抑止時刻を残さない（次の自動呼び出しを妨げない）
+                    lastAutomaticScanAttemptTick = refresh ? -1L : Environment.TickCount64;
+                    if (cache is not null)
+                    {
+                        // refresh失敗でここへ来た場合もGPU設定の変更を反映してから返す
+                        if (cachedUseGpuRendering != useGpuRendering)
+                        {
+                            cache = ReevaluateGpuOnlySupport(cache, useGpuRendering, isDeclaredBackendAvailable);
+                            cachedUseGpuRendering = useGpuRendering;
+                        }
+                        return cache;
+                    }
+                    incompleteCache = result.Plugins
+                        .Select(x => CreatePluginInfo(x, useGpuRendering, isDeclaredBackendAvailable))
+                        .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+                        .ToArray();
+                    incompleteCacheUseGpuRendering = useGpuRendering;
+                    return incompleteCache;
+                }
+
+                cache = result.Plugins
+                    .Select(x => CreatePluginInfo(x, useGpuRendering, isDeclaredBackendAvailable))
                     .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
                     .ToArray();
                 cachedUseGpuRendering = useGpuRendering;
+                incompleteCache = null;
                 return cache;
             }
         }
+
+        static bool AreScannedPluginsEqual(OpenFxScannedPluginInfo left, OpenFxScannedPluginInfo right)
+            => left.BinaryPath == right.BinaryPath
+                && left.Identifier == right.Identifier
+                && left.VersionMajor == right.VersionMajor
+                && left.VersionMinor == right.VersionMinor
+                && left.Label == right.Label
+                && left.Grouping == right.Grouping
+                && left.SupportedContexts.SequenceEqual(right.SupportedContexts, StringComparer.Ordinal)
+                && left.SupportedPixelDepths.SequenceEqual(right.SupportedPixelDepths, StringComparer.Ordinal)
+                && left.IsSingleInstance == right.IsSingleInstance
+                && left.NeedsTemporalClipAccess == right.NeedsTemporalClipAccess
+                && left.GpuSupport == right.GpuSupport;
 
         /// <summary>キャッシュ済みdescribe結果からGPU専用プラグインの対応可否だけを再評価する。</summary>
         public static IReadOnlyList<OpenFxPluginInfo>? ReevaluateCachedPlugins()
         {
             lock (lockObject)
             {
-                if (cache is null)
-                    return null;
                 var useGpuRendering = OpenFxSettings.Default.UseGpuRendering;
-                ReevaluateGpuOnlySupport(useGpuRendering);
-                cachedUseGpuRendering = useGpuRendering;
-                return cache;
+                if (cache is not null)
+                {
+                    cache = ReevaluateGpuOnlySupport(cache, useGpuRendering, OfxGpuRenderBackendFactory.IsDeclaredBackendAvailable);
+                    cachedUseGpuRendering = useGpuRendering;
+                    return cache;
+                }
+                if (incompleteCache is null)
+                    return null;
+                incompleteCache = ReevaluateGpuOnlySupport(incompleteCache, useGpuRendering, OfxGpuRenderBackendFactory.IsDeclaredBackendAvailable);
+                incompleteCacheUseGpuRendering = useGpuRendering;
+                return incompleteCache;
             }
         }
 
-        static void ReevaluateGpuOnlySupport(bool useGpuRendering)
-        {
-            cache = cache!
+        static IReadOnlyList<OpenFxPluginInfo> ReevaluateGpuOnlySupport(
+            IReadOnlyList<OpenFxPluginInfo> plugins,
+            bool useGpuRendering,
+            Func<bool, bool, bool> isDeclaredBackendAvailable)
+            => plugins
                 .Select(plugin =>
                 {
                     if (plugin.UnsupportedReason is not null and not OpenFxUnsupportedReason.GpuOnly)
                         return plugin;
                     var gpuOnlyUnsupported = !plugin.GpuSupport.SupportsCPU
-                        && !(useGpuRendering && OfxGpuRenderBackendFactory.IsDeclaredBackendAvailable(
+                        && !(useGpuRendering && isDeclaredBackendAvailable(
                             plugin.GpuSupport.SupportsCuda,
                             plugin.GpuSupport.SupportsOpenCLBuffer));
                     return plugin with
@@ -218,14 +319,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     };
                 })
                 .ToArray();
-        }
 
         /// <summary>
         /// スキャナープロセスによる隔離スキャン。壊れたプラグインがあってもYMM4本体は巻き込まれない。
         /// スキャナーEXEが見つからない・起動できない場合は失敗（null）を返し、呼び出し側はキャッシュしない。
         /// ユーザーのOFXバイナリを本体プロセスへロードするフォールバックは行わない。
         /// </summary>
-        internal static List<OpenFxPluginInfo>? ScanIsolated(string? scannerPath, IReadOnlyList<string> binaryPaths)
+        internal static PluginModuleScanResult<OpenFxScannedPluginInfo>? ScanIsolatedDetailed(string? scannerPath, IReadOnlyList<string> binaryPaths)
         {
             if (scannerPath is null)
             {
@@ -234,7 +334,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             }
             try
             {
-                return OpenFxScannerProcess.Scan(scannerPath, binaryPaths);
+                return OpenFxScannerProcess.ScanDetailed(scannerPath, binaryPaths);
             }
             catch (Exception e)
             {
@@ -273,10 +373,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             bool isSingleInstance,
             bool needsTemporalClipAccess,
             OpenFxGpuSupport? gpuSupport = null,
-            bool? useGpuRendering = null)
+            bool? useGpuRendering = null,
+            Func<bool, bool, bool>? isDeclaredBackendAvailable = null)
         {
             gpuSupport ??= OpenFxGpuSupport.Default;
             useGpuRendering ??= OpenFxSettings.Default.UseGpuRendering;
+            isDeclaredBackendAvailable ??= OfxGpuRenderBackendFactory.IsDeclaredBackendAvailable;
             // 対応済みのコンテキストはフィルター＝映像エフェクト、トランジション＝場面切り替え、ジェネレーター＝図形
             var supportsFilter = supportedContexts.Contains(OfxConstants.ImageEffectContextFilter);
             var supportsTransition = supportedContexts.Contains(OfxConstants.ImageEffectContextTransition);
@@ -290,7 +392,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 : isSingleInstance ? OpenFxUnsupportedReason.SingleInstance
                 : needsTemporalClipAccess ? OpenFxUnsupportedReason.TemporalClipAccess
                 : !gpuSupport.SupportsCPU
-                    && !(useGpuRendering.Value && OfxGpuRenderBackendFactory.IsDeclaredBackendAvailable(
+                    && !(useGpuRendering.Value && isDeclaredBackendAvailable(
                         gpuSupport.SupportsCuda,
                         gpuSupport.SupportsOpenCLBuffer))
                     ? OpenFxUnsupportedReason.GpuOnly
@@ -309,6 +411,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             };
         }
 
+        static OpenFxPluginInfo CreatePluginInfo(
+            OpenFxScannedPluginInfo plugin,
+            bool? useGpuRendering = null,
+            Func<bool, bool, bool>? isDeclaredBackendAvailable = null)
+            => CreatePluginInfo(
+                plugin.BinaryPath,
+                plugin.Identifier,
+                plugin.VersionMajor,
+                plugin.VersionMinor,
+                plugin.Label,
+                plugin.Grouping,
+                plugin.SupportedContexts,
+                plugin.SupportedPixelDepths,
+                plugin.IsSingleInstance,
+                plugin.NeedsTemporalClipAccess,
+                plugin.GpuSupport,
+                useGpuRendering,
+                isDeclaredBackendAvailable);
+
         static OpenFxGpuSupport GetGpuSupport(OfxPropertySet props)
             => new(
                 props.GetStringOrDefault(OfxConstants.ImageEffectPropOpenGLRenderSupported, "false"),
@@ -319,15 +440,51 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 props.GetStringOrDefault(OfxConstants.ImageEffectPropMetalRenderSupported, "false"),
                 props.GetStringOrDefault(OfxConstants.ImageEffectPropCPURenderSupported, "true"));
 
-        static IEnumerable<string> EnumerateBinaryPaths()
+        static PluginModuleEnumerationResult EnumerateBinaries()
         {
-            var roots = GetDefaultDirectories()
-                .Concat(OpenFxSettings.Default.AdditionalPluginDirectories)
-                .Where(x => !string.IsNullOrWhiteSpace(x));
+            var roots = PersistentPluginScanCache.NormalizePaths(
+                GetDefaultDirectories().Concat(OpenFxSettings.Default.AdditionalPluginDirectories),
+                "OFX検索フォルダー");
+            var existingRoots = roots.Where(Directory.Exists).ToArray();
+            var rootsWithTransientErrors = new List<string>();
+            var rootsWithPermanentErrors = new List<string>();
+            var binaryPaths = PersistentPluginScanCache.NormalizePaths(
+                EnumerateBinaryPaths(existingRoots, rootsWithTransientErrors, rootsWithPermanentErrors),
+                "OFXバイナリ");
+            return new PluginModuleEnumerationResult(binaryPaths, roots)
+            {
+                RootsWithTransientEnumerationErrors = rootsWithTransientErrors,
+                RootsWithPermanentEnumerationErrors = rootsWithPermanentErrors,
+            };
+        }
+
+        internal static string GetSignaturePath(string binaryPath)
+        {
+            var directory = Directory.GetParent(Path.GetFullPath(binaryPath));
+            while (directory is not null)
+            {
+                if (directory.Name.EndsWith(".ofx.bundle", StringComparison.OrdinalIgnoreCase))
+                    return directory.FullName;
+                directory = directory.Parent;
+            }
+            return binaryPath;
+        }
+
+        static bool IsStandaloneBinary(string binaryPath)
+            => string.Equals(GetSignaturePath(binaryPath), binaryPath, StringComparison.OrdinalIgnoreCase);
+
+        internal static IReadOnlyList<string> EnumerateBinaryPaths(
+            IEnumerable<string> roots,
+            ICollection<string>? rootsWithTransientErrors = null,
+            ICollection<string>? rootsWithPermanentErrors = null)
+        {
+            var results = new List<string>();
             foreach (var root in roots.Where(Directory.Exists).Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 // OFXプラグインはバンドル形式（<名前>.ofx.bundle\Contents\Win64\<名前>.ofx）が標準。
                 // 直接置かれた .ofx 単体ファイルも受け付ける
+                var hasTransientEnumerationError = false;
+                var hasPermanentEnumerationError = false;
                 var directories = new Stack<string>();
                 directories.Push(root);
                 while (directories.Count > 0)
@@ -341,55 +498,76 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     }
                     catch (Exception e) when (e is IOException or UnauthorizedAccessException)
                     {
+                        RecordEnumerationError(e, ref hasTransientEnumerationError, ref hasPermanentEnumerationError);
                         continue;
                     }
                     foreach (var entry in entries)
                     {
-                        if (Directory.Exists(entry))
+                        // Directory.Existsはアクセス拒否・一時的なIO障害で例外を投げずfalseを返すため、
+                        // 例外を検出できる属性取得でファイル/フォルダーを分類する
+                        FileAttributes attributes;
+                        try
+                        {
+                            attributes = File.GetAttributes(entry);
+                        }
+                        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+                        {
+                            RecordEnumerationError(e, ref hasTransientEnumerationError, ref hasPermanentEnumerationError);
+                            continue;
+                        }
+                        if (attributes.HasFlag(FileAttributes.Directory))
                         {
                             if (entry.EndsWith(".ofx.bundle", StringComparison.OrdinalIgnoreCase))
                             {
                                 // バンドルは固定の相対パスを読むだけで再帰しないため、
                                 // バンドル自体がジャンクション等のリンクでも受け付けてよい
-                                var win64 = Path.Combine(entry, "Contents", "Win64");
-                                if (Directory.Exists(win64))
-                                {
-                                    string[] binaries;
-                                    try
-                                    {
-                                        binaries = Directory.GetFiles(win64, "*.ofx");
-                                    }
-                                    catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-                                    {
-                                        continue;
-                                    }
-                                    foreach (var binary in binaries)
-                                        yield return binary;
-                                }
-                            }
-                            else
-                            {
-                                // ジャンクション・シンボリックリンクは辿らない（親を指すリンクによる無限ループ防止）
-                                FileAttributes attributes;
+                                string[] binaries;
                                 try
                                 {
-                                    attributes = File.GetAttributes(entry);
+                                    binaries = Directory.GetFiles(Path.Combine(entry, "Contents", "Win64"), "*.ofx");
+                                }
+                                catch (DirectoryNotFoundException)
+                                {
+                                    // Win64フォルダーを持たないバンドルは対象外（正常系）
+                                    continue;
                                 }
                                 catch (Exception e) when (e is IOException or UnauthorizedAccessException)
                                 {
+                                    RecordEnumerationError(e, ref hasTransientEnumerationError, ref hasPermanentEnumerationError);
                                     continue;
                                 }
-                                if (attributes.HasFlag(FileAttributes.ReparsePoint))
-                                    continue;
+                                results.AddRange(binaries);
+                            }
+                            // ジャンクション・シンボリックリンクは辿らない（親を指すリンクによる無限ループ防止）
+                            else if (!attributes.HasFlag(FileAttributes.ReparsePoint))
+                            {
                                 directories.Push(entry);
                             }
                         }
                         else if (entry.EndsWith(".ofx", StringComparison.OrdinalIgnoreCase))
                         {
-                            yield return entry;
+                            results.Add(entry);
                         }
                     }
                 }
+                if (hasTransientEnumerationError)
+                    rootsWithTransientErrors?.Add(root);
+                if (hasPermanentEnumerationError)
+                    rootsWithPermanentErrors?.Add(root);
+            }
+            return results;
+        }
+
+        static void RecordEnumerationError(Exception exception, ref bool hasTransientError, ref bool hasPermanentError)
+        {
+            switch (PersistentPluginScanCache.ClassifyEnumerationException(exception))
+            {
+                case PluginModuleEnumerationErrorKind.Permanent:
+                    hasPermanentError = true;
+                    break;
+                case PluginModuleEnumerationErrorKind.Transient:
+                    hasTransientError = true;
+                    break;
             }
         }
     }

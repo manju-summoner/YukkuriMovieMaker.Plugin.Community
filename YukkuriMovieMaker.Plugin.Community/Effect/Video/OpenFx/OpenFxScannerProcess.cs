@@ -9,6 +9,20 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 {
+    /// <summary>子プロセスが返した1プラグイン分の生のdescribe結果</summary>
+    internal sealed record OpenFxScannedPluginInfo(
+        string BinaryPath,
+        string Identifier,
+        uint VersionMajor,
+        uint VersionMinor,
+        string Label,
+        string Grouping,
+        string[] SupportedContexts,
+        string[] SupportedPixelDepths,
+        bool IsSingleInstance,
+        bool NeedsTemporalClipAccess,
+        OpenFxGpuSupport GpuSupport);
+
     /// <summary>
     /// OFXバイナリの走査をYukkuriMovieMaker.OfxScanner.exe（ネイティブの別プロセス）で行う。
     /// 壊れたプラグインのクラッシュ・ハングからYMM4本体を隔離し、
@@ -19,20 +33,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
     /// </summary>
     internal static class OpenFxScannerProcess
     {
-        /// <summary>子プロセスが返した1プラグイン分の生のdescribe結果</summary>
-        sealed record ScannedPlugin(
-            string Identifier,
-            uint VersionMajor,
-            uint VersionMinor,
-            string Label,
-            string Grouping,
-            string[] SupportedContexts,
-            string[] SupportedPixelDepths,
-            bool IsSingleInstance,
-            bool NeedsTemporalClipAccess,
-            OpenFxGpuSupport GpuSupport);
-
         public const string ExeName = "YukkuriMovieMaker.OfxScanner.exe";
+
+        internal static (string HostVersion, bool HasCudaBackend, bool HasOpenClBackend) GetHostEnvironment()
+            => (
+                (typeof(OpenFxScannerProcess).Assembly.GetName().Version ?? new Version(0, 0, 0, 0)).ToString(4),
+                OfxGpuRenderBackendFactory.HasCudaBackend,
+                OfxGpuRenderBackendFactory.HasOpenClBackend);
+
+        internal static string GetEnvironmentFingerprint(string? scannerPath)
+        {
+            // describeへ渡すスキャン入力（スキャナー実体・ホストバージョン・GPU可否）を漏れなく指紋へ含める。
+            // HostVersionは現状固定値だが、渡す値を変えた場合に指紋が自動追従するようにする
+            var environment = GetHostEnvironment();
+            return $"scanner:{PersistentPluginScanCache.GetScannerFileVersion(scannerPath)}|host:{environment.HostVersion}|{environment.HasCudaBackend.ToString().ToLowerInvariant()}|{environment.HasOpenClBackend.ToString().ToLowerInvariant()}";
+        }
 
         /// <summary>
         /// 1行も出力がないままこの時間が経過したバイナリはハングとみなしてスキップする
@@ -70,18 +85,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         }
 
         /// <summary>
-        /// バイナリ群を走査して対応プラグインを列挙する。
-        /// 子プロセスがクラッシュ・ハングした場合は該当バイナリをスキップして再起動し、最後まで走査する
+        /// バイナリ単位の完了・スキップ状態を含め、生のdescribe結果を列挙する。
+        /// #BEGINを受け取らずに打ち切った残りのバイナリはどちらにも含めない。
         /// </summary>
-        public static List<OpenFxPluginInfo> Scan(string scannerPath, IReadOnlyList<string> binaryPaths)
+        internal static PluginModuleScanResult<OpenFxScannedPluginInfo> ScanDetailed(string scannerPath, IReadOnlyList<string> binaryPaths)
         {
-            var results = new List<OpenFxPluginInfo>();
+            var results = new List<OpenFxScannedPluginInfo>();
+            var completedBinaryPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var skippedBinaryPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var timeoutSkippedBinaryPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var remaining = new Queue<string>(binaryPaths);
             var hasCompletedAnyBinary = false;
             while (remaining.Count > 0)
             {
                 var countBeforeScan = remaining.Count;
-                if (!ScanCore(scannerPath, remaining, results, ref hasCompletedAnyBinary))
+                if (!ScanCore(scannerPath, remaining, results, completedBinaryPaths, skippedBinaryPaths, timeoutSkippedBinaryPaths, ref hasCompletedAnyBinary))
                     break;
                 // 1件も消化せず戻ってきた場合は再起動しても同じ結果になるため打ち切る（無限ループ防止）
                 if (remaining.Count == countBeforeScan)
@@ -90,14 +108,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     break;
                 }
             }
-            return results;
+            return new PluginModuleScanResult<OpenFxScannedPluginInfo>(results, completedBinaryPaths, skippedBinaryPaths)
+            {
+                TimeoutSkippedModulePaths = timeoutSkippedBinaryPaths,
+            };
         }
 
         /// <summary>
         /// 子プロセス1回分のスキャン。走査できたバイナリはremainingから取り除く。
         /// 継続すべき（スキップして再起動する）場合はtrueを返す
         /// </summary>
-        static bool ScanCore(string scannerPath, Queue<string> remaining, List<OpenFxPluginInfo> results, ref bool hasCompletedAnyBinary)
+        static bool ScanCore(
+            string scannerPath,
+            Queue<string> remaining,
+            List<OpenFxScannedPluginInfo> results,
+            HashSet<string> completedBinaryPaths,
+            HashSet<string> skippedBinaryPaths,
+            HashSet<string> timeoutSkippedBinaryPaths,
+            ref bool hasCompletedAnyBinary)
         {
             var startInfo = new ProcessStartInfo
             {
@@ -114,10 +142,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             };
             // ホストのバージョン宣言をC#ホスト（OfxHostDescriptor）と一致させる。
             // バージョンで挙動を変えるプラグインのdescribe結果がスキャンと実行時で食い違わないようにする
-            var hostVersion = typeof(OpenFxScannerProcess).Assembly.GetName().Version ?? new Version(0, 0, 0, 0);
-            startInfo.ArgumentList.Add(hostVersion.ToString(4));
-            startInfo.ArgumentList.Add(OfxGpuRenderBackendFactory.HasCudaBackend ? "true" : "false");
-            startInfo.ArgumentList.Add(OfxGpuRenderBackendFactory.HasOpenClBackend ? "true" : "false");
+            var hostEnvironment = GetHostEnvironment();
+            startInfo.ArgumentList.Add(hostEnvironment.HostVersion);
+            startInfo.ArgumentList.Add(hostEnvironment.HasCudaBackend ? "true" : "false");
+            startInfo.ArgumentList.Add(hostEnvironment.HasOpenClBackend ? "true" : "false");
             using var process = Process.Start(startInfo)
                 ?? throw new InvalidOperationException($"OFXスキャナーを起動できませんでした。path={scannerPath}");
             Task<string>? standardErrorTask = null;
@@ -144,14 +172,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 Stopwatch? currentBinaryStopwatch = null;
                 TimeSpan currentBinaryDeadline = BinaryInitialTimeout;
                 // #ENDの前に異常終了したバイナリの不完全な結果を混ぜないよう、バイナリ単位でバッファする
-                var pendingPlugins = new List<ScannedPlugin>();
+                var pendingPlugins = new List<OpenFxScannedPluginInfo>();
                 while (true)
                 {
                     if (currentBinaryStopwatch is not null && currentBinaryStopwatch.Elapsed >= currentBinaryDeadline)
                     {
                         Kill(process);
                         var reason = ScannerStandardError.AppendToReason("バイナリの総走査時間が上限を超えました", standardErrorTask);
-                        return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, reason);
+                        return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, skippedBinaryPaths, timeoutSkippedBinaryPaths, true, reason);
                     }
                     var readTask = process.StandardOutput.ReadLineAsync();
                     var waitTimeout = currentBinaryStopwatch is null
@@ -166,7 +194,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                             ? "バイナリの総走査時間が上限を超えました"
                             : "バイナリが応答しません";
                         reason = ScannerStandardError.AppendToReason(reason, standardErrorTask);
-                        return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, reason);
+                        return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, skippedBinaryPaths, timeoutSkippedBinaryPaths, true, reason);
                     }
                     var line = readTask.GetAwaiter().GetResult();
                     if (line is null)
@@ -194,19 +222,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                                     .OrderByDescending(p => p.VersionMajor)
                                     .ThenByDescending(p => p.VersionMinor)
                                     .First();
-                                results.Add(OpenFxPluginScanner.CreatePluginInfo(
-                                    currentBinary,
-                                    latest.Identifier,
-                                    latest.VersionMajor,
-                                    latest.VersionMinor,
-                                    latest.Label,
-                                    latest.Grouping,
-                                    latest.SupportedContexts,
-                                    latest.SupportedPixelDepths,
-                                    latest.IsSingleInstance,
-                                    latest.NeedsTemporalClipAccess,
-                                    latest.GpuSupport));
+                                results.Add(latest with { BinaryPath = currentBinary });
                             }
+                            completedBinaryPaths.Add(currentBinary);
                         }
                         pendingPlugins.Clear();
                         currentBinary = null;
@@ -222,7 +240,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                             || !uint.TryParse(fields[2], out var versionMajor)
                             || !uint.TryParse(fields[3], out var versionMinor))
                             continue;
-                        pendingPlugins.Add(new ScannedPlugin(
+                        pendingPlugins.Add(new OpenFxScannedPluginInfo(
+                            currentBinary,
                             fields[1],
                             versionMajor,
                             versionMinor,
@@ -252,14 +271,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     $"スキャナーが異常終了しました。exitCode={exitCode?.ToString() ?? "(不明)"}",
                     standardErrorTask);
                 if (currentBinary is not null)
-                    return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, GetAbnormalExitReason());
+                    return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, skippedBinaryPaths, timeoutSkippedBinaryPaths, false, GetAbnormalExitReason());
                 if (remaining.Count == 0)
                 {
                     if (exitCode is not 0)
                         Log.Default.Write($"OFX{GetAbnormalExitReason()}");
                     return false;
                 }
-                return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, GetAbnormalExitReason());
+                return SkipCurrentBinary(remaining, currentBinary, hasCompletedAnyBinary, skippedBinaryPaths, timeoutSkippedBinaryPaths, false, GetAbnormalExitReason());
             }
             catch (Exception e) when (e is not OutOfMemoryException and not OperationCanceledException)
             {
@@ -283,7 +302,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 BinaryMaximumTimeout.Ticks,
                 currentDeadline.Ticks + BinaryProgressExtension.Ticks));
 
-        static bool SkipCurrentBinary(Queue<string> remaining, string? currentBinary, bool hasCompletedAnyBinary, string reason)
+        static bool SkipCurrentBinary(
+            Queue<string> remaining,
+            string? currentBinary,
+            bool hasCompletedAnyBinary,
+            HashSet<string> skippedBinaryPaths,
+            HashSet<string> timeoutSkippedBinaryPaths,
+            bool isTimeout,
+            string reason)
         {
             if (currentBinary is null)
             {
@@ -302,6 +328,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             // 通常は#BEGIN時に取り除かれているが、取り除けていない場合の再起動ループをここで防ぐ
             if (remaining.Count > 0 && string.Equals(remaining.Peek(), currentBinary, StringComparison.OrdinalIgnoreCase))
                 remaining.Dequeue();
+            skippedBinaryPaths.Add(currentBinary);
+            if (isTimeout)
+                timeoutSkippedBinaryPaths.Add(currentBinary);
             Log.Default.Write($"OFXバイナリの走査をスキップします。path={currentBinary} reason={reason}");
             return remaining.Count > 0;
         }

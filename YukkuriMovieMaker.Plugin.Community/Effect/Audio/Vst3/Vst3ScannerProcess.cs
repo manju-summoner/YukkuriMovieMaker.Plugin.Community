@@ -32,19 +32,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             return File.Exists(path) ? path : null;
         }
 
+        internal static string GetEnvironmentFingerprint(string? scannerPath)
+            => $"scanner:{PersistentPluginScanCache.GetScannerFileVersion(scannerPath)}";
+
         /// <summary>
-        /// モジュール群を走査してエフェクトプラグインを列挙する。
-        /// 子プロセスがクラッシュ・ハングした場合は該当モジュールをスキップして再起動し、最後まで走査する
+        /// モジュール単位の完了・スキップ状態を含めてエフェクトプラグインを列挙する。
+        /// #BEGINを受け取らずに打ち切った残りのモジュールはどちらにも含めない。
         /// </summary>
-        public static List<Vst3EffectPluginInfo> Scan(string scannerPath, IReadOnlyList<string> modulePaths)
+        internal static PluginModuleScanResult<Vst3EffectPluginInfo> ScanDetailed(string scannerPath, IReadOnlyList<string> modulePaths)
         {
             var results = new List<Vst3EffectPluginInfo>();
+            var completedModulePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var skippedModulePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var timeoutSkippedModulePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var remaining = new Queue<string>(modulePaths);
             var hasCompletedAnyModule = false;
             while (remaining.Count > 0)
             {
                 var countBeforeScan = remaining.Count;
-                if (!ScanCore(scannerPath, remaining, results, ref hasCompletedAnyModule))
+                if (!ScanCore(scannerPath, remaining, results, completedModulePaths, skippedModulePaths, timeoutSkippedModulePaths, ref hasCompletedAnyModule))
                     break;
                 // 1件も消化せず戻ってきた場合は、無限再起動を防ぐため部分結果のまま打ち切る。
                 // #BEGINを1度も受信しないまま失敗した場合だけSkipCurrentModuleから伝播し、空結果のキャッシュを防ぐ。
@@ -54,14 +60,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     break;
                 }
             }
-            return results;
+            return new PluginModuleScanResult<Vst3EffectPluginInfo>(results, completedModulePaths, skippedModulePaths)
+            {
+                TimeoutSkippedModulePaths = timeoutSkippedModulePaths,
+            };
         }
 
         /// <summary>
         /// 子プロセス1回分のスキャン。走査できたモジュールはremainingから取り除く。
         /// 継続すべき（スキップして再起動する）場合はtrueを返す
         /// </summary>
-        static bool ScanCore(string scannerPath, Queue<string> remaining, List<Vst3EffectPluginInfo> results, ref bool hasCompletedAnyModule)
+        static bool ScanCore(
+            string scannerPath,
+            Queue<string> remaining,
+            List<Vst3EffectPluginInfo> results,
+            HashSet<string> completedModulePaths,
+            HashSet<string> skippedModulePaths,
+            HashSet<string> timeoutSkippedModulePaths,
+            ref bool hasCompletedAnyModule)
         {
             var startInfo = new ProcessStartInfo
             {
@@ -107,7 +123,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     {
                         Kill(process);
                         var reason = ScannerStandardError.AppendToReason("モジュールが応答しません", standardErrorTask);
-                        return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, reason);
+                        return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, skippedModulePaths, timeoutSkippedModulePaths, true, reason);
                     }
                     var line = readTask.GetAwaiter().GetResult();
                     if (line is null)
@@ -125,6 +141,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     {
                         results.AddRange(pendingClasses);
                         pendingClasses.Clear();
+                        if (currentModule is not null)
+                            completedModulePaths.Add(currentModule);
                         currentModule = null;
                         hasCompletedAnyModule = true;
                     }
@@ -153,14 +171,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     $"スキャナーが異常終了しました。exitCode={exitCode?.ToString() ?? "(不明)"}",
                     standardErrorTask);
                 if (currentModule is not null)
-                    return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, GetAbnormalExitReason());
+                    return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, skippedModulePaths, timeoutSkippedModulePaths, false, GetAbnormalExitReason());
                 if (remaining.Count == 0)
                 {
                     if (exitCode is not 0)
                         Log.Default.Write($"VST3{GetAbnormalExitReason()}");
                     return false;
                 }
-                return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, GetAbnormalExitReason());
+                return SkipCurrentModule(remaining, currentModule, hasCompletedAnyModule, skippedModulePaths, timeoutSkippedModulePaths, false, GetAbnormalExitReason());
             }
             catch (Exception e) when (e is not OutOfMemoryException and not OperationCanceledException)
             {
@@ -179,7 +197,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             }
         }
 
-        static bool SkipCurrentModule(Queue<string> remaining, string? currentModule, bool hasCompletedAnyModule, string reason)
+        static bool SkipCurrentModule(
+            Queue<string> remaining,
+            string? currentModule,
+            bool hasCompletedAnyModule,
+            HashSet<string> skippedModulePaths,
+            HashSet<string> timeoutSkippedModulePaths,
+            bool isTimeout,
+            string reason)
         {
             if (currentModule is null)
             {
@@ -198,6 +223,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             // 通常は#BEGIN時に取り除かれているが、取り除けていない場合の再起動ループをここで防ぐ
             if (remaining.Count > 0 && string.Equals(remaining.Peek(), currentModule, StringComparison.OrdinalIgnoreCase))
                 remaining.Dequeue();
+            skippedModulePaths.Add(currentModule);
+            if (isTimeout)
+                timeoutSkippedModulePaths.Add(currentModule);
             Log.Default.Write($"VST3モジュールの走査をスキップします。path={currentModule} reason={reason}");
             return remaining.Count > 0;
         }
