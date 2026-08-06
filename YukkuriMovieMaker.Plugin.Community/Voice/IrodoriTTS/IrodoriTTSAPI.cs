@@ -10,8 +10,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.IrodoriTTS;
 
 internal static class IrodoriTTSAPI
 {
-    const string DefaultTTSCheckpoint = "Aratako/Irodori-TTS-500M-v2";
-    const string DefaultVoiceDesignCheckpoint = "Aratako/Irodori-TTS-500M-v2-VoiceDesign";
+    const string DefaultTTSCheckpoint = "Aratako/Irodori-TTS-500M-v3";
+    const string DefaultVoiceDesignCheckpoint = "Aratako/Irodori-TTS-600M-v3-VoiceDesign";
     const string DefaultDevice = "cuda";
     const string DefaultPrecision = "fp32";
 
@@ -95,11 +95,13 @@ internal static class IrodoriTTSAPI
         var vdCheckpoint = string.IsNullOrWhiteSpace(checkpoint) ? DefaultVoiceDesignCheckpoint : checkpoint;
 
         // gradio_app_voicedesign.py の _run_generation に対応
-        // 23 params: checkpoint, model_device, model_precision, codec_device, codec_precision,
-        //   enable_watermark (hidden State), text, caption, num_steps, num_candidates,
-        //   seed_raw, cfg_guidance_mode, cfg_scale_text, cfg_scale_caption, cfg_scale_raw,
-        //   cfg_min_t, cfg_max_t, context_kv_cache, max_text_len_raw, max_caption_len_raw,
-        //   truncation_factor_raw, rescale_k_raw, rescale_sigma_raw
+        // 30 params: checkpoint, model_device, model_precision, codec_device, codec_precision,
+        //   text, caption, ref_wav, num_steps, num_candidates, seed_raw,
+        //   seconds_raw, duration_scale, t_schedule_mode, sway_coeff,
+        //   cfg_guidance_mode, cfg_scale_text, cfg_scale_caption, cfg_scale_speaker,
+        //   cfg_scale_raw, cfg_min_t, cfg_max_t, context_kv_cache,
+        //   speaker_kv_scale_raw, max_text_len_raw, max_caption_len_raw,
+        //   truncation_factor_raw, rescale_k_raw, rescale_sigma_raw, lora_adapter_raw
         var data = new JArray
         {
             vdCheckpoint,              // checkpoint
@@ -107,24 +109,31 @@ internal static class IrodoriTTSAPI
             DefaultPrecision,          // model_precision
             DefaultDevice,             // codec_device
             DefaultPrecision,          // codec_precision
-            false,                     // enable_watermark (hidden State component)
             text,                      // text
             caption,                   // caption
+            JValue.CreateNull(),       // ref_wav（VoiceDesignでは参照音声なし）
             numSteps,                  // num_steps
             1,                         // num_candidates
             seed,                      // seed_raw
+            "",                        // seconds_raw（空欄 = 自動）
+            1.0,                       // duration_scale
+            "linear",                  // t_schedule_mode
+            -1.0,                      // sway_coeff
             "independent",             // cfg_guidance_mode
-            2.0,                       // cfg_scale_text (VoiceDesign default)
-            4.0,                       // cfg_scale_caption (VoiceDesign default)
+            3.0,                       // cfg_scale_text
+            4.0,                       // cfg_scale_caption
+            5.0,                       // cfg_scale_speaker
             "",                        // cfg_scale_raw
             0.5,                       // cfg_min_t
             1.0,                       // cfg_max_t
             true,                      // context_kv_cache
+            "",                        // speaker_kv_scale_raw
             "",                        // max_text_len_raw
             "",                        // max_caption_len_raw
             "",                        // truncation_factor_raw
             "",                        // rescale_k_raw
             "",                        // rescale_sigma_raw
+            ""                         // lora_adapter_raw
         };
 
         var result = await CallGradioAsync(baseUrl, "_run_generation", data);
