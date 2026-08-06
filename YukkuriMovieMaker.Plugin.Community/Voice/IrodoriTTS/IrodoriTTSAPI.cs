@@ -10,7 +10,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.IrodoriTTS;
 
 internal static class IrodoriTTSAPI
 {
-    const string DefaultTTSCheckpoint = "Aratako/Irodori-TTS-500M-v3";
+    const string DefaultTTSCheckpoint = "Aratako/Irodori-TTS-500M-v2";
     const string DefaultVoiceDesignCheckpoint = "Aratako/Irodori-TTS-600M-v3-VoiceDesign";
     const string DefaultDevice = "cuda";
     const string DefaultPrecision = "fp32";
