@@ -3,11 +3,13 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.IrodoriTTS;
 
@@ -49,6 +51,72 @@ internal static class IrodoriTTSAPI
 
     static readonly TimeSpan detectTimeout = TimeSpan.FromSeconds(10);
 
+    /// <summary>
+    /// 合成要求POSTおよび参照音声アップロードの上限。共有HttpClientの既定Timeoutと同じ100秒を既定値とする。
+    /// テスト用に差し替え可能。
+    /// </summary>
+    internal static TimeSpan SynthesisSubmitTimeout { get; set; } = TimeSpan.FromSeconds(100);
+
+    /// <summary>
+    /// SSEストリームの無進捗（行を受信しない状態）がこの時間続いたら打ち切る。
+    /// 初回のモデルダウンロード（数GB）中はサーバーが長時間無言になりうるため、既定値は30分とする。
+    /// SSE全体の絶対上限は<see cref="SynthesisTotalTimeout"/>で独立に適用される。
+    /// テスト用に差し替え可能。有効範囲は正の値または<see cref="Timeout.InfiniteTimeSpan"/>で、
+    /// <see cref="CancellationTokenSource"/>の制約に従う。
+    /// </summary>
+    internal static TimeSpan SynthesisResponseTimeout { get; set; } = TimeSpan.FromMinutes(30);
+
+    /// <summary>
+    /// SSE全体の絶対上限。<see cref="SynthesisResponseTimeout"/>の無進捗タイムアウトと独立に適用する。
+    /// テスト用に差し替え可能。有効範囲は正の値または<see cref="Timeout.InfiniteTimeSpan"/>で、
+    /// <see cref="CancellationTokenSource"/>の制約に従う。
+    /// </summary>
+    internal static TimeSpan SynthesisTotalTimeout { get; set; } = TimeSpan.FromHours(2);
+
+    /// <summary>
+    /// 生成音声ダウンロードの上限。長い音声や低速回線を考慮し、共有HttpClientの100秒より長い値とする。
+    /// テスト用に差し替え可能。
+    /// </summary>
+    internal static TimeSpan AudioDownloadTimeout { get; set; } = TimeSpan.FromMinutes(10);
+
+    /// <summary>
+    /// 合成要求用のHTTPハンドラーを差し替えるテスト用フック。nullの場合は
+    /// <see cref="YMMSettings.Default"/>のプロキシ設定からハンドラーを構築する。
+    /// 呼び出しごとに新しいインスタンスを返すこと。破棄は呼び出し側のHttpClientが行う。
+    /// </summary>
+    internal static Func<HttpMessageHandler>? SynthesisHandlerFactory { get; set; }
+
+    internal static HttpClient CreateSynthesisClient()
+    {
+        var handler = SynthesisHandlerFactory?.Invoke();
+        if (handler is null)
+        {
+            var proxySettings = YMMSettings.Default.Proxy;
+            var credentials = proxySettings.HasCredentials
+                ? new NetworkCredential(proxySettings.UserName, proxySettings.Password)
+                : null;
+            var proxy = proxySettings.Mode is ProxyMode.Enable && !string.IsNullOrEmpty(proxySettings.Url)
+                ? new WebProxy(proxySettings.Url, true, null, credentials)
+                : null;
+            handler = new HttpClientHandler
+            {
+                UseProxy = proxySettings.Mode is not ProxyMode.Disable,
+                Proxy = proxy,
+                Credentials = credentials,
+                DefaultProxyCredentials = credentials,
+                UseDefaultCredentials = credentials is null,
+            };
+        }
+
+        // 合成フロー（info判別・参照音声アップロード・合成要求POST・SSE読取・結果ダウンロード）を
+        // 同一クライアントで送り、Cookie（スティッキーセッション等）を共有する。
+        // HttpClient.TimeoutはResponseHeadersReadでもストリーム読取に効くため無制限にし、各工程を個別のCTSで制御する。
+        return new HttpClient(handler)
+        {
+            Timeout = Timeout.InfiniteTimeSpan,
+        };
+    }
+
     // baseUrl（末尾スラッシュ除去済み）→ 最後に判別できたAPI情報。
     // 一過性のinfo取得失敗で既存ユーザーの合成を壊さないためのフォールバック用
     static readonly ConcurrentDictionary<string, IrodoriTTSApiInfo> infoCache = new();
@@ -74,7 +142,7 @@ internal static class IrodoriTTSAPI
     /// 同じサーバーで前回判別できた情報→それも無ければ現行上流（v4）形式の順でフォールバックする
     /// （infoと合成APIは同一サーバーのため、infoが継続的に取れない状況では合成自体も失敗する見込み）。
     /// </summary>
-    internal static async Task<IrodoriTTSApiInfo> DetectApiInfoAsync(string baseUrl)
+    internal static async Task<IrodoriTTSApiInfo> DetectApiInfoAsync(HttpClient client, string baseUrl)
     {
         const int maxAttempts = 3;
         var key = baseUrl.TrimEnd('/');
@@ -84,7 +152,6 @@ internal static class IrodoriTTSAPI
             string json;
             try
             {
-                var client = HttpClientFactory.Client;
                 using var cts = new CancellationTokenSource(detectTimeout);
                 json = await client.GetStringAsync($"{key}/gradio_api/info", cts.Token);
             }
@@ -240,17 +307,18 @@ internal static class IrodoriTTSAPI
         string outputPath,
         string checkpoint = "")
     {
-        var info = await DetectApiInfoAsync(baseUrl);
+        using var client = CreateSynthesisClient();
+        var info = await DetectApiInfoAsync(client, baseUrl);
 
         // ref-wav を Gradio にアップロード（セキュリティ制約回避）
-        var uploadedPath = await UploadFileAsync(baseUrl, refFilePath);
+        var uploadedPath = await UploadFileAsync(client, baseUrl, refFilePath);
         var uploadedAudio = new JObject { ["path"] = uploadedPath, ["meta"] = new JObject { ["_type"] = "gradio.FileData" } };
 
         var ttsCheckpoint = ResolveCheckpoint(checkpoint, info, isVoiceDesign: false);
         var data = CreateSynthesizeData(info, ttsCheckpoint, text, uploadedAudio, numSteps, cfgScaleText, cfgScaleSpeaker);
 
-        var result = await CallGradioAsync(baseUrl, "_run_generation", data);
-        await DownloadFirstAudioResult(result, outputPath);
+        var result = await CallGradioAsync(client, baseUrl, "_run_generation", data);
+        await DownloadFirstAudioResult(client, result, outputPath);
     }
 
     internal static JArray CreateSynthesizeData(
@@ -360,13 +428,14 @@ internal static class IrodoriTTSAPI
         string outputPath,
         string checkpoint = "")
     {
-        var info = await DetectApiInfoAsync(baseUrl);
+        using var client = CreateSynthesisClient();
+        var info = await DetectApiInfoAsync(client, baseUrl);
 
         var vdCheckpoint = ResolveCheckpoint(checkpoint, info, isVoiceDesign: true);
         var data = CreateVoiceDesignData(info, vdCheckpoint, text, caption, seed, numSteps);
 
-        var result = await CallGradioAsync(baseUrl, "_run_generation", data);
-        await DownloadFirstAudioResult(result, outputPath);
+        var result = await CallGradioAsync(client, baseUrl, "_run_generation", data);
+        await DownloadFirstAudioResult(client, result, outputPath);
     }
 
     internal static JArray CreateVoiceDesignData(
@@ -461,74 +530,112 @@ internal static class IrodoriTTSAPI
         ];
     }
 
-    static async Task<JArray> CallGradioAsync(string baseUrl, string apiName, JArray data)
+    internal static async Task<JArray> CallGradioAsync(HttpClient client, string baseUrl, string apiName, JArray data)
     {
         var url = $"{baseUrl.TrimEnd('/')}/gradio_api/call/{apiName}";
-        var client = HttpClientFactory.Client;
 
         // Step 1: POST to submit
         var payload = new JObject { ["data"] = data };
         using var request = new HttpRequestMessage(HttpMethod.Post, url);
         request.Content = new StringContent(payload.ToString(), Encoding.UTF8, "application/json");
 
-        using var postResponse = await client.SendAsync(request);
-        postResponse.EnsureSuccessStatusCode();
-
-        var postBody = await postResponse.Content.ReadAsStringAsync();
-        var postResult = JObject.Parse(postBody);
-        var eventId = postResult["event_id"]?.ToString()
-            ?? throw new InvalidOperationException("No event_id in Gradio response.");
-
-        // Step 2: GET SSE stream for result
-        var resultUrl = $"{url}/{eventId}";
-        using var getResponse = await client.GetAsync(resultUrl, HttpCompletionOption.ResponseHeadersRead);
-        getResponse.EnsureSuccessStatusCode();
-
-        using var stream = await getResponse.Content.ReadAsStreamAsync();
-        using var reader = new StreamReader(stream);
-
-        string? currentEvent = null;
-        while (await reader.ReadLineAsync() is { } line)
+        string eventId;
+        var submitTimeout = SynthesisSubmitTimeout;
+        using (var submitCts = new CancellationTokenSource(submitTimeout))
         {
-            if (line.StartsWith("event: "))
+            try
             {
-                currentEvent = line["event: ".Length..];
+                using var postResponse = await client.SendAsync(request, submitCts.Token);
+                postResponse.EnsureSuccessStatusCode();
+
+                var postBody = await postResponse.Content.ReadAsStringAsync(submitCts.Token);
+                var postResult = JObject.Parse(postBody);
+                eventId = postResult["event_id"]?.ToString()
+                    ?? throw new InvalidOperationException("No event_id in Gradio response.");
             }
-            else if (line.StartsWith("data: ") && currentEvent == "complete")
+            catch (OperationCanceledException ex) when (submitCts.IsCancellationRequested)
             {
-                var dataStr = line["data: ".Length..];
-                return JArray.Parse(dataStr);
-            }
-            else if (currentEvent == "error" && line.StartsWith("data: "))
-            {
-                var errorData = line["data: ".Length..];
-                throw new InvalidOperationException($"Gradio error: {errorData}");
+                throw new TimeoutException($"Irodori-TTS request submission timed out after {submitTimeout}.", ex);
             }
         }
 
-        throw new InvalidOperationException("Gradio stream ended without a complete event.");
+        // Step 2: GET SSE stream for result
+        var resultUrl = $"{url}/{eventId}";
+        var responseTimeout = SynthesisResponseTimeout;
+        var totalTimeout = SynthesisTotalTimeout;
+        using var responseCts = new CancellationTokenSource(responseTimeout);
+        using var totalCts = new CancellationTokenSource(totalTimeout);
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(responseCts.Token, totalCts.Token);
+        try
+        {
+            using var getResponse = await client.GetAsync(resultUrl, HttpCompletionOption.ResponseHeadersRead, linkedCts.Token);
+            getResponse.EnsureSuccessStatusCode();
+
+            using var stream = await getResponse.Content.ReadAsStreamAsync(linkedCts.Token);
+            using var reader = new StreamReader(stream);
+
+            string? currentEvent = null;
+            while (await reader.ReadLineAsync(linkedCts.Token) is { } line)
+            {
+                // 行受信直後から再設定までにタイマーが発火すると延長されない極小の競合窓があるが、
+                // タイムアウト境界上の無進捗として許容する。
+                responseCts.CancelAfter(responseTimeout);
+                if (line.StartsWith("event: "))
+                {
+                    currentEvent = line["event: ".Length..];
+                }
+                else if (line.StartsWith("data: ") && currentEvent == "complete")
+                {
+                    var dataStr = line["data: ".Length..];
+                    return JArray.Parse(dataStr);
+                }
+                else if (currentEvent == "error" && line.StartsWith("data: "))
+                {
+                    var errorData = line["data: ".Length..];
+                    throw new InvalidOperationException($"Gradio error: {errorData}");
+                }
+            }
+
+            throw new InvalidOperationException("Gradio stream ended without a complete event.");
+        }
+        catch (OperationCanceledException ex) when (responseCts.IsCancellationRequested)
+        {
+            throw new TimeoutException($"Irodori-TTS synthesis produced no response for {responseTimeout}.", ex);
+        }
+        catch (OperationCanceledException ex) when (totalCts.IsCancellationRequested)
+        {
+            throw new TimeoutException($"Irodori-TTS synthesis did not complete within {totalTimeout}.", ex);
+        }
     }
 
-    static async Task<string> UploadFileAsync(string baseUrl, string filePath)
+    static async Task<string> UploadFileAsync(HttpClient client, string baseUrl, string filePath)
     {
         var url = $"{baseUrl.TrimEnd('/')}/gradio_api/upload";
-        var client = HttpClientFactory.Client;
 
         using var content = new MultipartFormDataContent();
         using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
         var streamContent = new StreamContent(fileStream);
         content.Add(streamContent, "files", Path.GetFileName(filePath));
 
-        using var response = await client.PostAsync(url, content);
-        response.EnsureSuccessStatusCode();
+        var timeout = SynthesisSubmitTimeout;
+        using var cts = new CancellationTokenSource(timeout);
+        try
+        {
+            using var response = await client.PostAsync(url, content, cts.Token);
+            response.EnsureSuccessStatusCode();
 
-        var responseText = await response.Content.ReadAsStringAsync();
-        var paths = JArray.Parse(responseText);
-        return paths[0]?.ToString()
-            ?? throw new InvalidOperationException("Failed to upload file to Gradio.");
+            var responseText = await response.Content.ReadAsStringAsync(cts.Token);
+            var paths = JArray.Parse(responseText);
+            return paths[0]?.ToString()
+                ?? throw new InvalidOperationException("Failed to upload file to Gradio.");
+        }
+        catch (OperationCanceledException ex) when (cts.IsCancellationRequested)
+        {
+            throw new TimeoutException($"Irodori-TTS reference audio upload timed out after {timeout}.", ex);
+        }
     }
 
-    static async Task DownloadFirstAudioResult(JArray result, string outputPath)
+    static async Task DownloadFirstAudioResult(HttpClient client, JArray result, string outputPath)
     {
         // Gradio returns update objects: {"value": {"url": "...", "path": "..."}, "__type__": "update"}
         // Find the first item with a non-null value containing audio file info
@@ -546,17 +653,25 @@ internal static class IrodoriTTSAPI
             var url = fileData["url"]?.ToString();
             if (!string.IsNullOrEmpty(url))
             {
-                var client = HttpClientFactory.Client;
-                using var audioResponse = await client.GetAsync(url);
-                audioResponse.EnsureSuccessStatusCode();
+                var timeout = AudioDownloadTimeout;
+                using var cts = new CancellationTokenSource(timeout);
+                try
+                {
+                    using var audioResponse = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                    audioResponse.EnsureSuccessStatusCode();
 
-                var directory = Path.GetDirectoryName(outputPath);
-                if (!string.IsNullOrEmpty(directory))
-                    Directory.CreateDirectory(directory);
+                    var directory = Path.GetDirectoryName(outputPath);
+                    if (!string.IsNullOrEmpty(directory))
+                        Directory.CreateDirectory(directory);
 
-                using var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None);
-                await audioResponse.Content.CopyToAsync(fileStream);
-                return;
+                    using var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                    await audioResponse.Content.CopyToAsync(fileStream, cts.Token);
+                    return;
+                }
+                catch (OperationCanceledException ex) when (cts.IsCancellationRequested)
+                {
+                    throw new TimeoutException($"Irodori-TTS audio download timed out after {timeout}.", ex);
+                }
             }
 
             // Fallback to local file path
