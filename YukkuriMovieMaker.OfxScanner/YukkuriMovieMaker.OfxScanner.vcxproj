@@ -37,7 +37,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -83,7 +83,8 @@
       <PreprocessorDefinitions>NDEBUG;RELEASE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <Optimization>Full</Optimization>
+      <!-- 最適化・LTCGは無効。最適化済みコードはセキュリティソフトのML誤検知を招きやすく（VirusTotal実測で/Od＋LTCGなしが検知最少）、スキャナーは処理時間の大半がプラグイン側のため性能影響は無い -->
+      <Optimization>Disabled</Optimization>
       <!-- VC++再頒布パッケージ未導入の環境でも動作させるためCRTを静的リンクする -->
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <!-- ソース不変ならバイナリを再現可能にする（セキュリティベンダーへ誤検知解除申請済みのハッシュをリビルド後も維持するため）。cl側の/Breproは未文書化オプション -->
@@ -92,8 +93,6 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <!-- 既定の/LTCG:incrementalは前回ビルドの.iobj/.ipdbがコード配置に影響し再現性を壊すため、非インクリメンタルLTCGを明示する -->
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <!-- /Brepro: タイムスタンプ・PDB署名を内容由来にする。/PDBALTPATH: EXEに埋め込まれるPDBパスからビルド環境の絶対パスを除く -->
       <AdditionalOptions>/Brepro /PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
     </Link>
