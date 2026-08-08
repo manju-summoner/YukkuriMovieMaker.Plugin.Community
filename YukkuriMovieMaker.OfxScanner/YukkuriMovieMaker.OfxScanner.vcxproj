@@ -86,10 +86,16 @@
       <Optimization>Full</Optimization>
       <!-- VC++再頒布パッケージ未導入の環境でも動作させるためCRTを静的リンクする -->
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <!-- ソース不変ならバイナリを再現可能にする（セキュリティベンダーへ誤検知解除申請済みのハッシュをリビルド後も維持するため）。cl側の/Breproは未文書化オプション -->
+      <AdditionalOptions>/Brepro %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <!-- 既定の/LTCG:incrementalは前回ビルドの.iobj/.ipdbがコード配置に影響し再現性を壊すため、非インクリメンタルLTCGを明示する -->
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <!-- /Brepro: タイムスタンプ・PDB署名を内容由来にする。/PDBALTPATH: EXEに埋め込まれるPDBパスからビルド環境の絶対パスを除く -->
+      <AdditionalOptions>/Brepro /PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

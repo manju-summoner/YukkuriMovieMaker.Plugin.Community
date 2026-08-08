@@ -1,3 +1,5 @@
+#pragma code_page(65001)
+// このファイルはUTF-8で保存すること（Visual Studioのリソースエディタで開くとエンコーディングやpragmaが書き換えられるため、テキストエディタで編集すること）
 #include <winver.h>
 
 VS_VERSION_INFO VERSIONINFO
@@ -17,9 +19,13 @@ BEGIN
     BEGIN
         BLOCK "041104B0"
         BEGIN
+            VALUE "CompanyName", "饅頭遣い\0"
             VALUE "FileDescription", "YukkuriMovieMaker OpenFX Scanner\0"
             VALUE "FileVersion", "1.0.0.0\0"
-            VALUE "ProductName", "YukkuriMovieMaker\0"
+            VALUE "InternalName", "YukkuriMovieMaker.OfxScanner\0"
+            VALUE "LegalCopyright", "Copyright (c) 2017- 饅頭遣い\0"
+            VALUE "OriginalFilename", "YukkuriMovieMaker.OfxScanner.exe\0"
+            VALUE "ProductName", "ゆっくりMovieMaker\0"
             VALUE "ProductVersion", "1.0.0.0\0"
         END
     END
