@@ -50,7 +50,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             Click += OnClick;
         }
 
-        public void SetEditorInfo(IEditorInfo info)
+        public void SetEditorInfo(IEditorInfo? info)
         {
             editorInfo = info;
         }
