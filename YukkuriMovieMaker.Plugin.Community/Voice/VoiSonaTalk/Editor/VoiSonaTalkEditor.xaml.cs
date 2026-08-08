@@ -49,7 +49,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
         {
             this.info = info;
             if (DataContext is VoiSonaTalkEditorViewModel vm)
+            {
+                // アイテム選択解除などでEditorInfoが外れたときは再生を止める
+                if (info is null)
+                    vm.StopPlayback();
                 vm.Info = info;
+            }
         }
 
         private void OnPronounceChanged()
@@ -58,8 +63,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
         }
         void UpdateViewModel()
         {
+            // 旧ViewModelは破棄されるため、再生停止に加えて進行中の再生開始処理も打ち切る
             if (DataContext is VoiSonaTalkEditorViewModel vm)
-                vm.StopPlayback();
+                vm.Close();
 
             if (Pronounce is not null)
             {

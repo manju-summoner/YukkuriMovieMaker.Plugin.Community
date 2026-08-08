@@ -23,6 +23,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
         AudioPlayer? player;
         bool isPlaying = false;
         bool isBusy = false;
+        bool isClosed;
+        // StopPlaybackのたびに進める世代番号（UIスレッド専用）。CreateVoiceFileAsyncのawait中に停止・差し替えが起きた場合、
+        // 復帰後の世代照合で古い再生開始処理を打ち切るために使う
+        int playbackGeneration;
         readonly ICommand playFromCommand;
 
         ImmutableList<VoiSonaTalkEditorAcousticPhraseViewModel> acousticPhrases = [];
@@ -56,19 +60,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
             await playbackControlSemaphore.WaitAsync();
             try
             {
+                if (isClosed)
+                    return;
+
                 if (IsPlaying)
                 {
                     StopPlayback();
                     return;
                 }
 
+                // 例外などで解放されずに残った旧stream/playerの破棄と、世代の確定を兼ねて開始前に必ず停止する
+                StopPlayback();
+                var generation = playbackGeneration;
+
                 IsBusy = true;
                 SetWordPlaybackStatus(VoiSonaTalkEditorPlayButtonStatus.Busy);
                 try
                 {
-                    await (Info?.VoiceItemEdit?.CreateVoiceFileAsync() ?? Task.CompletedTask);
+                    // await中にInfoが差し替わっても、同一アイテムの組で処理を続けるためローカルに捕捉する
+                    var info = Info;
+                    await (info?.VoiceItemEdit?.CreateVoiceFileAsync() ?? Task.CompletedTask);
+                    if (isClosed || generation != playbackGeneration)
+                        return;
 
-                    stream = Info?.CreateItemAudioSource(new ItemAudioSourceCreationParameter(AudioEffectSelection.None) { RangeMode = ItemAudioSourceRangeMode.FullContentRange });
+                    stream = info?.CreateItemAudioSource(new ItemAudioSourceCreationParameter(AudioEffectSelection.None) { RangeMode = ItemAudioSourceRangeMode.FullContentRange });
                     if (stream is null)
                         return;
 
@@ -86,6 +101,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
                         SetWordPlaybackStatus(VoiSonaTalkEditorPlayButtonStatus.Idle);
                 }
             }
+            catch (Exception ex)
+            {
+                // ActionCommand経由の呼び出しはasync void相当のため、例外を漏らすとアプリごと落ちる
+                Log.Default.Write("VoiSonaTalk intonation editor playback failed", ex);
+            }
             finally
             {
                 playbackControlSemaphore.Release();
@@ -97,8 +117,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
             StopPlayback();
         }
 
+        /// <summary>
+        /// エディタから切り離されるときに呼ぶ。再生を停止し、進行中の再生開始処理も打ち切る。
+        /// </summary>
+        public void Close()
+        {
+            isClosed = true;
+            StopPlayback();
+        }
+
         public void StopPlayback()
         {
+            playbackGeneration++;
             player?.StreamEnded -= Player_StreamEnded;
             player?.Dispose();
             player = null;
