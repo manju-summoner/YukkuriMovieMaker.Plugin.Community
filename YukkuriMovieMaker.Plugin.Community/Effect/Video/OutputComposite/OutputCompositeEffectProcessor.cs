@@ -20,10 +20,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            sink = new D2DEffects.AffineTransform2D(devices.DeviceContext)
-            {
-                Cached = true
-            };
+            //Cachedを有効にすると出力が中間ビットマップにラスタライズされ、
+            //後続のカスタムシェーダー（縁取りの膨張など）がそれを補間サンプリングする。
+            //テキストのようにバウンズが非整数の素材ではピクセルグリッドが半ピクセルずれて輪郭がぼけ、
+            //縁取りが本来より太くなるため有効にしない。
+            sink = new D2DEffects.AffineTransform2D(devices.DeviceContext);
             disposer.Collect(sink);
 
             compositeEffect = new D2DEffects.Composite(devices.DeviceContext) { InputCount = 2 };
