@@ -215,12 +215,7 @@ public static class EffectPortCollector
             var propInstance = prop.GetValue(obj);
             var def = TryMakePortDefinition(prop, displayAttr, propInstance);
 
-            // PropertyEditorAttribute2 が付いている場合は「1つの値を1つのカスタムエディタで編集する」
-            // ポートとして必ず static 側で扱う。そうしないと、値の型がたまたま入れ子の [Display]
-            // プロパティを公開している（複合的な設定値の型でよくある）だけで dynamic container
-            // （ContainerFactory）側に回されてしまい、元プロパティの PropertyEditorAttribute2 が
-            // 失われた上、中身がバラバラの空ポート群に化けてしまう。
-            var hasCustomEditor = def.PortType == PortType.Unknown && def.EditorAttributeData != null;
+            var hasCustomEditor = def is { PortType: PortType.Unknown, EditorAttributeData: not null };
 
             if (!hasCustomEditor
                 && propInstance is not null
@@ -309,9 +304,6 @@ public static class EffectPortCollector
                 DefaultValue = inst as string ?? ""
             };
 
-        // Float/Enum/Bool/Color/Brush/Text（こちらで用意した既知のコントロールで扱える型）
-        // のいずれにも該当しない場合。ここで初めてカスタムエディタ（PropertyEditorAttribute2）を
-        // 探す＝こちらの既知コントロールが常に優先され、カスタムエディタは最後の手段（フォールバック）。
         var editorAttrData = prop.GetCustomAttributesData()
             .FirstOrDefault(ad => typeof(PropertyEditorAttribute2).IsAssignableFrom(ad.AttributeType));
         var editorAttrInstance = editorAttrData == null ? null : Attr.CreateEditorAttributeInstance(editorAttrData);
@@ -327,10 +319,6 @@ public static class EffectPortCollector
         {
             PropName = prop.Name, PortType = PortType.Unknown,
             LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
-            // 実際の効果インスタンスが持っていた値をそのまま初期値として引き継ぐ。
-            // null のままにすると、GradientStopsEditor 等、非null前提で実装されている
-            // エディタ側でいきなり例外になる（カスタムエディタが見つからない場合は
-            // どのみち編集には使われないので、渡しておいても無害）。
             DefaultValue = inst,
             UnknownClrType = prop.PropertyType,
             EditorAttributeData = editorAttrData,
@@ -382,9 +370,6 @@ public static class EffectNodeTypeBuilder
             FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
         var portDefsField = tb.DefineField("_portDefs", typeof(PortDefinition[]),
             FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
-        // CustomEditorPort が「本物の効果インスタンス」を用意してカスタムエディタに渡すために使う
-        // （動的生成した型そのものは、MeshDeformationEditorViewModel のように具体的な効果クラスへ
-        // キャストするエディタからは受け付けてもらえないため）。
         var originalTypeField = tb.DefineField("_originalOwnerType", typeof(Type),
             FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
         var containerBackFields = dynamicPropertyDefs.Select(props =>
@@ -440,10 +425,6 @@ public static class EffectNodeTypeBuilder
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Call, baseCtor);
 
-        // Unknown型でカスタムエディタが見つかったポートには、元の効果インスタンスが
-        // 持っていた実際の値を初期値として書き込む。null のままだと、非null前提で
-        // 実装されているエディタ（GradientStopsEditor等）が即座に例外を投げる。
-        // 既に LocalValue がある場合（スナップショット復元等）は上書きしない。
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Ldsfld, portDefsField);
         il.Emit(OpCodes.Call,
@@ -471,8 +452,6 @@ public static class EffectNodeTypeBuilder
             PortType.Color => typeof(Color),
             PortType.Brush => typeof(BrushWrapper),
             PortType.Text => typeof(string),
-            // Unknown の場合、floatに丸めてしまうと元の値が壊れる（型が合わないため）。
-            // 必ず元プロパティの実際のCLR型を使う。
             PortType.Unknown => def.UnknownClrType ?? typeof(float),
             _ => typeof(float)
         };
@@ -506,11 +485,6 @@ public static class EffectNodeTypeBuilder
                 Attr.PortColor(pb, nameof(Colors.MediumSeaGreen));
                 break;
             case PortType.Unknown:
-                // こちらで用意した既知のコントロールが使えない型でも、元プロパティ側に
-                // PropertyEditorAttribute2 継承属性（プラグイン独自のプロパティエディタ）が
-                // 付いていれば、それをそのまま引き継いで CustomEditorPort による編集を可能にする。
-                // 見つからない場合は今までどおり接続専用（編集UIなし）のポートになる。
-                // ここで失敗しても、ノード（エフェクト全体）の生成自体を巻き添えで失敗させない。
                 if (def.EditorAttributeData != null)
                     try
                     {
@@ -993,7 +967,7 @@ public static class EffectNodeCalculator
         }
     }
 
-    private static void SetSubPropertyDirect(object target, PropertyInfo propInfo, object? value)
+    internal static void SetSubPropertyDirect(object target, PropertyInfo propInfo, object? value)
     {
         if (propInfo.PropertyType == typeof(Animation))
         {

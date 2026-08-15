@@ -58,6 +58,7 @@ public sealed class PortViewModel : INotifyPropertyChanged
 
         BeginEditCommand = new RelayCommand(() => _graph.BeginEdit());
         EndEditCommand = new RelayCommand(() => _graph.EndEdit());
+        NotifyPreviewUpdateCommand = new RelayCommand(() => _graph.NotifyPreviewUpdate(NodeId));
     }
 
     public string Name { get; }
@@ -133,6 +134,8 @@ public sealed class PortViewModel : INotifyPropertyChanged
 
     public ICommand BeginEditCommand { get; }
     public ICommand EndEditCommand { get; }
+
+    public ICommand NotifyPreviewUpdateCommand { get; }
 
     public bool IsConnected
     {

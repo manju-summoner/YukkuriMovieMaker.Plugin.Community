@@ -184,5 +184,8 @@
             <_Parameter1>YukkuriMovieMaker.Tests</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="Effect\Video\Node\Editor\Control\CustomEditor\ControlReplacement\EnumValueToDisplayIndexConverter.cs"/>
+    </ItemGroup>
 
 </Project>

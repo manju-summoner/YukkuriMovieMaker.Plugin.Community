@@ -128,12 +128,17 @@ public partial class ColorPort
         set => SetValue(BValueProperty, value);
     }
 
+    public event EventHandler? ValueChanging;
+
     private static object CoerceHue(DependencyObject d, object value)
     {
         var hue = (double)value;
-        if (hue < 0) return 0.0;
-        if (hue >= 360) return 359.999;
-        return hue;
+        return hue switch
+        {
+            < 0 => 0.0,
+            >= 360 => 359.999,
+            _ => hue
+        };
     }
 
     private static object CoerceSaturation(DependencyObject d, object value)
@@ -170,6 +175,8 @@ public partial class ColorPort
         cp._suppress = true;
         cp.UpdateAllPropertiesFromColor(newColor);
         cp._suppress = false;
+
+        cp.ValueChanging?.Invoke(cp, EventArgs.Empty);
     }
 
     private void UpdateAllPropertiesFromColor(Color color)

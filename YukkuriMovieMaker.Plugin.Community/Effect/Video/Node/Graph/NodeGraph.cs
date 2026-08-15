@@ -8,6 +8,8 @@ public sealed class NodeGraph
     public readonly List<NodeConnection> Connections = [];
     public readonly Dictionary<Guid, NodeVisualState> VisualStates = new();
 
+    public PreviewNotifier PreviewNotifier { get; } = new();
+
     public IReadOnlyDictionary<Guid, NodeLogic> Nodes => _nodes;
 
     /// <summary>
@@ -116,7 +118,7 @@ public sealed class NodeGraph
     }
 
     /// <summary>
-    ///     指定したIDの管理対象のノードの入力プロパティ名を指定して、その値を更新します
+    ///     指定したIDの管理対象のノードの入力プロパティ名を指定して、その値を更新します。
     /// </summary>
     /// <param name="nodeId">入力を更新するノードのID</param>
     /// <param name="inputName">値が更新される入力プロパティ名</param>
@@ -127,7 +129,20 @@ public sealed class NodeGraph
         input.SetValue(value);
         _nodes[nodeId].OnInputValueChanged(inputName, value);
 
+        PreviewNotifier.Notify();
         OnGraphChanged(new ValueChangedEventArgs(nodeId, inputName, value));
+    }
+
+    /// <summary>
+    ///     NodeGraph の外側で、指定ノードの値が直接書き換わったことを通知します
+    /// </summary>
+    public void NotifyPreviewUpdate(Guid nodeId)
+    {
+        if (_nodes.TryGetValue(nodeId, out var node))
+            node.Invalidate();
+
+        PreviewNotifier.Notify();
+        OnGraphChanged(new GraphChangedEventArgs());
     }
 
     /// <summary>
@@ -252,12 +267,17 @@ public sealed class NodeGraph
     }
 
     /// <summary>
-    ///     このグラフに対して行われた編集操作を完了し、確定します
+    ///     このグラフに対して行われた編集操作を完了し、確定します。
+    ///     値の「確定」に相当し、PreviewNotifier 経由のプレビュー更新に加えて、
+    ///     Commit（Undo履歴の記録）と全ノードの再計算を行う。
     /// </summary>
     public void EndEdit()
     {
         if (!IsInTransaction) return;
         IsInTransaction = false;
+
+        PreviewNotifier.Notify();
+        OnGraphChanged(new GraphChangedEventArgs());
 
         Commit();
         InvalidateAll();

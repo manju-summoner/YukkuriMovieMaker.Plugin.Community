@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Windows;
 using System.Windows.Threading;
+using Newtonsoft.Json;
 using Vortice.DCommon;
 using Vortice.Direct2D1;
 using Vortice.Direct2D1.Effects;
@@ -29,7 +30,6 @@ public sealed class NodeEffect : VideoEffectBase
 {
     private readonly Dispatcher _uiDispatcher = Application.Current.Dispatcher;
     private GraphSnapshot _graph = new();
-    internal NodeGraph? InternalGraph;
     public override string Label => TextUi.Node;
 
     [Display(Name = nameof(TextUi.NodeEditor), GroupName = nameof(TextUi.Node),
@@ -52,6 +52,20 @@ public sealed class NodeEffect : VideoEffectBase
     {
         get => _graph;
         set => Set(ref _graph, value, nameof(Graph));
+    }
+
+    [JsonIgnore]
+    internal NodeGraph? InternalGraph
+    {
+        get;
+        set
+        {
+            if (field != null)
+                UnSubscribeChildUndoRedoable(field.PreviewNotifier);
+            field = value;
+            if (field != null)
+                SubscribeChildUndoRedoable(field.PreviewNotifier);
+        }
     }
 
     public event EventHandler? GraphUpdated;
@@ -187,7 +201,9 @@ public sealed class Processor : IVideoEffectProcessor
     {
         lock (_lock)
         {
-            if (_nodeEffect.InternalGraph != null!) _nodeEffect.InternalGraph.Committed -= OnGraphCommitted;
+            if (_nodeEffect.InternalGraph != null!)
+                _nodeEffect.InternalGraph.Committed -= OnGraphCommitted;
+
             _nodeEffect.GraphUpdated -= OnGraphUpdated;
 
             // このProcessorが使用していたノードのD2Dリソースを解放する。

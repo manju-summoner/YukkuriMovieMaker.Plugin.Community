@@ -30,14 +30,10 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
     public event EventHandler? BeginEdit;
     public event EventHandler? EndEdit;
 
-    public void SetEditorInfo(IEditorInfo info)
+    public void SetEditorInfo(IEditorInfo? info)
     {
         _editorInfo = info;
 
-        // 既にNode Editorパネルでこのアイテムのグラフを開いている場合は、開いたままのタブにも
-        // 最新の IEditorInfo を反映する（例: 再生位置の更新など）。
-        // まだ一度も Button_Click を経ておらず _lastResolvedViewModel が無い場合は、
-        // 次にボタンが押されたとき（Button_Click内）に最新値が渡るので何もしない。
         if (_lastResolvedViewModel == null) return;
         if (ItemProperties is not { Length: > 0 } || ItemProperties[0].Item is not NodeEffect pluginItem) return;
         if (pluginItem.InternalGraph is not { } graph) return;
@@ -141,10 +137,6 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
             }
             else
             {
-                // タブが選択された（例: タイムライン側でUndo/Redoした後にNode Editorタブへ戻ってきた）
-                // タイミングで、表示中のグラフを現在状態から作り直す。
-                // Undo/Redo が NodeEffect.Graph のセッタを経由せずグラフを直接書き換える実装だと、
-                // GraphUpdated イベントが発火せず表示が古いままになりうるための保険。
                 vm?.RefreshAllOpenGraphs();
             }
         };

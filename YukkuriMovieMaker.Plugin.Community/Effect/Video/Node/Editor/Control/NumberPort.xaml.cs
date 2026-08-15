@@ -288,6 +288,7 @@ public sealed partial class NumberPort
         if (e.Key is not Key.Return) return;
         Update();
         _isEditing = false;
+        EndEditCommand?.Execute(null);
     }
 
     [GeneratedRegex("[^0-9.-]+")]
