@@ -21,16 +21,42 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputSwitch
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            //Cachedを有効にすると出力が中間ビットマップにラスタライズされ、
-            //後続のカスタムシェーダー（縁取りの膨張など）がそれを補間サンプリングする。
-            //テキストのようにバウンズが非整数の素材ではピクセルグリッドが半ピクセルずれて輪郭がぼけ、
-            //縁取りが本来より太くなるため有効にしない。
-            sink = new D2DEffects.AffineTransform2D(devices.DeviceContext);
+            //上流チェーンの再評価を抑えるためキャッシュする。
+            //Cachedのままエフェクトの出力を後続へ渡すと、出力が中間ビットマップにラスタライズされ、
+            //後続のカスタムシェーダー（縁取りの膨張など）がそれを補間サンプリングするため、
+            //テキストのようにバウンズが非整数の素材では輪郭がぼけて縁取りが太くなる。
+            //CommandListに包んでから渡すことで、キャッシュを効かせたままこの影響を断つ。
+            sink = new D2DEffects.AffineTransform2D(devices.DeviceContext)
+            {
+                Cached = true
+            };
             disposer.Collect(sink);
 
             var output = sink.Output;
             disposer.Collect(output);
-            return output;
+
+            return Record(devices, output);
+        }
+
+        /// <summary>
+        /// 画像をCommandListに記録する。CommandListはエフェクトを参照で保持するため、
+        /// 入力を設定する前に記録しても内容は常に最新のものになる。
+        /// </summary>
+        ID2D1CommandList Record(IGraphicsDevicesAndContext devices, ID2D1Image image)
+        {
+            var dc = devices.DeviceContext;
+            var commandList = dc.CreateCommandList();
+            disposer.Collect(commandList);
+
+            dc.Target = commandList;
+            dc.BeginDraw();
+            dc.Clear(null);
+            dc.DrawImage(image);
+            dc.EndDraw();
+            dc.Target = null;
+            commandList.Close();
+
+            return commandList;
         }
 
         public override DrawDescription Update(EffectDescription effectDescription)
@@ -82,21 +108,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputSwitch
             if (branchCommandList is not null)
                 disposer.RemoveAndDispose(ref branchCommandList);
 
-            var dc = devices.DeviceContext;
-            var commandList = dc.CreateCommandList();
-            disposer.Collect(commandList);
-
-            dc.Target = commandList;
-            dc.BeginDraw();
-            dc.Clear(null);
-            dc.DrawImage(image);
-            dc.EndDraw();
-            dc.Target = null;
-            commandList.Close();
-
-            branchCommandList = commandList;
+            branchCommandList = Record(devices, image);
             lastBranchSource = image;
-            return commandList;
+            return branchCommandList;
         }
 
         protected override void setInput(ID2D1Image? input)

@@ -33,11 +33,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputBranch
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            //Cachedを有効にすると出力が中間ビットマップにラスタライズされ、
-            //後続のカスタムシェーダー（縁取りの膨張など）がそれを補間サンプリングする。
-            //テキストのようにバウンズが非整数の素材ではピクセルグリッドが半ピクセルずれて輪郭がぼけ、
-            //縁取りが本来より太くなるため有効にしない。
-            transformEffect = new AffineTransform2D(devices.DeviceContext);
+            //上流チェーンの再評価を抑えるためキャッシュする。
+            //Cachedのままエフェクトの出力を後続へ渡すと、出力が中間ビットマップにラスタライズされ、
+            //後続のカスタムシェーダー（縁取りの膨張など）がそれを補間サンプリングするため、
+            //テキストのようにバウンズが非整数の素材では輪郭がぼけて縁取りが太くなる。
+            //下のCommandListに包んでから渡すことで、キャッシュを効かせたままこの影響を断つ。
+            transformEffect = new AffineTransform2D(devices.DeviceContext)
+            {
+                Cached = true
+            };
             disposer.Collect(transformEffect);
 
             var transformOutput = transformEffect.Output;
