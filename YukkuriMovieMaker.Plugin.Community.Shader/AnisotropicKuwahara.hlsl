@@ -60,7 +60,11 @@ float4 main(
 	float disc = sqrt(max((gxx - gyy) * (gxx - gyy) + 4.0f * gxy * gxy, 0.0f));
 	float lambda1 = 0.5f * (tr + disc); // 大(勾配方向)
 	float lambda2 = 0.5f * (tr - disc); // 小(エッジ接線方向)
-	float A = (lambda1 + lambda2 > 1e-6f) ? (lambda1 - lambda2) / (lambda1 + lambda2) : 0.0f;
+	// テンソルは半正定値なので理論上 A は [0,1] に収まるが、中間バッファが 8bpc UNORM で
+	// 量子化されて半正定値性が崩れると lambda2 が負に振れ、A が 1 を大きく超えることがある。
+	// A が暴れると長軸が MapOutputRectToInputRects で宣言した余白を超えてサンプリングし、
+	// 入力矩形外の未定義テクセルを読んで出力に NaN/巨大値が混入するため saturate で抑える。
+	float A = (tr > 1e-6f) ? saturate((lambda1 - lambda2) / tr) : 0.0f;
 
 	// 勾配方向の固有ベクトル (gxy, lambda1 - gxx)。ほぼ等方なら向きは任意。
 	float2 grad = float2(gxy, lambda1 - gxx);
@@ -123,7 +127,8 @@ float4 main(
 		float sigma = sqrt(sigma2);
 		// 分散が小さい(=均質な)扇形ほど大きい重み。HARDNESS で std を O(1) に
 		// スケールし、std がしきい値を超えるエッジ跨ぎ扇形を q に応じて抑制する。
-		float weight = 1.0f / (1.0f + pow(HARDNESS * sigma, q));
+		// pow(0, 0) は exp2(0 * log2(0)) = NaN になるため底に下限を入れる(q>=1 では影響しない)
+		float weight = 1.0f / (1.0f + pow(max(HARDNESS * sigma, 1e-8f), q));
 		result += weight * mean;
 		totalW += weight;
 	}
