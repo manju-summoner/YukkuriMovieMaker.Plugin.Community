@@ -24,6 +24,9 @@ public static class EffectNodeFactory
     private static readonly Lock Lock = new();
     private static readonly Dictionary<string, Type> TypeCache = new();
 
+    // 同じ型を複数カテゴリーの追加メニューに出すための、生成型ごとのカテゴリー別 NodeAttribute
+    private static readonly Dictionary<Type, NodeAttribute[]> MenuCategoryAttributes = new();
+
     private static readonly AssemblyBuilder AsmBuilder =
         AssemblyBuilder.DefineDynamicAssembly(
             new AssemblyName("DynamicEffectNodes"),
@@ -96,8 +99,27 @@ public static class EffectNodeFactory
             var generated =
                 EffectNodeTypeBuilder.Build(ModBuilder, effectType, categoryKey, labelKey, resourceType,
                     staticPortDefs, dynamicParams);
+
+            var allCategories = veAttr?.Categories.Where(c => !string.IsNullOrEmpty(c)).Distinct().ToArray();
+            if (allCategories is not { Length: > 0 })
+                allCategories = [categoryKey];
+            MenuCategoryAttributes[generated] = allCategories
+                .Select(c => new NodeAttribute(
+                    "NodeEffectKey_EffectCategoryName/NodeEffectKey_VideoEffectCategoryName" +
+                    (string.IsNullOrEmpty(c) ? "" : "/" + c),
+                    labelKey, labelKey, resourceType))
+                .ToArray();
+
             TypeCache[effectType.Name] = generated;
             return generated;
+        }
+    }
+
+    internal static NodeAttribute[]? GetMenuCategoryAttributes(Type nodeType)
+    {
+        lock (Lock)
+        {
+            return MenuCategoryAttributes.GetValueOrDefault(nodeType);
         }
     }
 

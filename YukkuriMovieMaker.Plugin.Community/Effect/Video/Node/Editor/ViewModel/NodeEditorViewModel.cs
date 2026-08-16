@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters;
@@ -13,6 +14,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
@@ -127,6 +129,43 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
 
         var menu = new ContextMenu();
 
+        var searchBox = new TextBox { MinWidth = 220, Margin = new Thickness(6, 4, 6, 4) };
+        var searchHost = new MenuItem { Header = searchBox, StaysOpenOnClick = true, Focusable = false };
+        menu.Items.Add(searchHost);
+        menu.Items.Add(new Separator());
+
+        menu.PreviewGotKeyboardFocus += (_, e) =>
+        {
+            if (!ReferenceEquals(e.NewFocus, searchBox))
+            {
+                e.Handled = true;
+                searchBox.Focus();
+            }
+        };
+
+        searchBox.TextChanged += (_, _) => Rebuild();
+        searchHost.Loaded += (_, _) =>
+            searchBox.Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, searchBox.Focus);
+        Rebuild();
+
+        menu.IsOpen = true;
+        return;
+
+        void Rebuild()
+        {
+            while (menu.Items.Count > 2)
+                menu.Items.RemoveAt(2);
+
+            var keyword = searchBox.Text.Trim();
+            if (keyword.Length == 0)
+                AddCategoryTreeItems(menu);
+            else
+                AddSearchResultItems(menu, keyword);
+        }
+    }
+
+    private void AddCategoryTreeItems(ContextMenu menu)
+    {
         var categoryMap = new Dictionary<string, MenuItem>();
 
         foreach (var category in _nodeCategories.OrderBy(c => c.Key))
@@ -159,27 +198,46 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
             }
 
             foreach (var nodeInfo in category.Value.OrderBy(n => n.Label))
-            {
-                var nodeItem = new MenuItem
-                {
-                    Header = nodeInfo.Label,
-                    ToolTip = nodeInfo.Description,
-                    Command = SelectedTab.GraphViewModel.AddNodeCommand,
-                    CommandParameter = nodeInfo.Type,
-                    VerticalContentAlignment = VerticalAlignment.Center,
-                    Icon = new Rectangle
-                    {
-                        Width = 5,
-                        Height = 12,
-                        Fill = ColorToBrushConverter.Convert(nodeInfo.Color)
-                    }
-                };
+                parent!.Items.Add(CreateNodeMenuItem(nodeInfo, nodeInfo.Label));
+        }
+    }
 
-                parent!.Items.Add(nodeItem);
-            }
+    private void AddSearchResultItems(ContextMenu menu, string keyword)
+    {
+        var matches = _nodeCategories
+            .SelectMany(c => c.Value)
+            .Where(n => n.Label.Contains(keyword, StringComparison.CurrentCultureIgnoreCase)
+                        || n.Description.Contains(keyword, StringComparison.CurrentCultureIgnoreCase))
+            .OrderBy(n => n.Category)
+            .ThenBy(n => n.Label);
+
+        var found = false;
+        foreach (var nodeInfo in matches)
+        {
+            found = true;
+            menu.Items.Add(CreateNodeMenuItem(nodeInfo, $"{nodeInfo.Category} / {nodeInfo.Label}"));
         }
 
-        menu.IsOpen = true;
+        if (!found)
+            menu.Items.Add(new MenuItem { Header = "(該当なし)", IsEnabled = false });
+    }
+
+    private MenuItem CreateNodeMenuItem(NodeTypeInfo nodeInfo, string header)
+    {
+        return new MenuItem
+        {
+            Header = header,
+            ToolTip = nodeInfo.Description,
+            Command = SelectedTab!.GraphViewModel.AddNodeCommand,
+            CommandParameter = nodeInfo.Type,
+            VerticalContentAlignment = VerticalAlignment.Center,
+            Icon = new Rectangle
+            {
+                Width = 5,
+                Height = 12,
+                Fill = ColorToBrushConverter.Convert(nodeInfo.Color)
+            }
+        };
     }
 
     private static Dictionary<string, List<NodeTypeInfo>> CollectNodeTypes()
@@ -228,34 +286,42 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
     {
         foreach (var t in types)
         {
-            NodeTypeInfo info;
-            try
+            var attrs = EffectNodeFactory.GetMenuCategoryAttributes(t);
+            if (attrs is not { Length: > 0 })
             {
                 var attr = t.GetCustomAttribute<NodeAttribute>();
                 if (attr == null) continue;
-                info = new NodeTypeInfo
+                attrs = [attr];
+            }
+
+            foreach (var attr in attrs)
+            {
+                NodeTypeInfo info;
+                try
                 {
-                    Type = t,
-                    Category = attr.GetCategoryName(),
-                    Label = attr.GetLabel(),
-                    Description = attr.GetDescription(),
-                    Color = attr.GetCategoryColor()
-                };
-            }
-            catch
-            {
-                continue;
-            }
+                    info = new NodeTypeInfo
+                    {
+                        Type = t,
+                        Category = attr.GetCategoryName(),
+                        Label = attr.GetLabel(),
+                        Description = attr.GetDescription(),
+                        Color = attr.GetCategoryColor()
+                    };
+                }
+                catch
+                {
+                    continue;
+                }
 
-            if (!_nodeCategories.TryGetValue(info.Category, out var list))
-            {
-                list = [];
-                _nodeCategories[info.Category] = list;
-            }
+                if (!_nodeCategories.TryGetValue(info.Category, out var list))
+                {
+                    list = [];
+                    _nodeCategories[info.Category] = list;
+                }
 
-            // 同一型の二重登録を防ぐ
-            if (list.All(n => n.Type != info.Type))
-                list.Add(info);
+                if (list.All(n => n.Type != info.Type))
+                    list.Add(info);
+            }
         }
     }
 
