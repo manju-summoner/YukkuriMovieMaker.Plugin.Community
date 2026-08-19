@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+                id="root"
+                xmlns="">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+        <xsd:element name="root" msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" use="required" type="xsd:string"/>
+                            <xsd:attribute name="type" type="xsd:string"/>
+                            <xsd:attribute name="mimetype" type="xsd:string"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias" type="xsd:string"/>
+                            <xsd:attribute name="name" type="xsd:string"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
+    <data name="EffectCategoryName" xml:space="preserve"><value>Efectos</value></data>
+    <data name="CompositionCategoryName" xml:space="preserve"><value>Composición</value></data>
+    <data name="MathCategoryName" xml:space="preserve"><value>Matemáticas</value></data>
+    <data name="BasicCategoryName" xml:space="preserve"><value>Básico</value></data>
+    <data name="GeneratorCategoryName" xml:space="preserve"><value>Generador</value></data>
+    <data name="BrushCategoryName" xml:space="preserve"><value>Pincel</value></data>
+    <data name="FunctionsCategoryName" xml:space="preserve"><value>Funciones</value></data>
+    <data name="VideoEffectCategoryName" xml:space="preserve"><value>Efectos de vídeo</value></data>
+    <data name="AdvancedCategoryName" xml:space="preserve"><value>Advanced</value></data>
+    <data name="TransformCategoryName" xml:space="preserve"><value>Transformación</value></data>
+    <data name="BrushName" xml:space="preserve"><value>Pincel</value></data>
+    <data name="Value" xml:space="preserve"><value>Value</value></data>
+    <data name="ValueDescription" xml:space="preserve"><value>Input value.</value></data>
+    <data name="ResultDescription" xml:space="preserve"><value>Calculation result.</value></data>
+    <data name="AbsNode" xml:space="preserve"><value>Valor absoluto</value></data>
+    <data name="AbsNodeDescription" xml:space="preserve"><value>Calculate absolute value.</value></data>
+    <data name="SignNode" xml:space="preserve"><value>Signo</value></data>
+    <data name="SignNodeDescription" xml:space="preserve"><value>Return sign.</value></data>
+    <data name="MinNode" xml:space="preserve"><value>Mínimo</value></data>
+    <data name="MinNodeDescription" xml:space="preserve"><value>Return minimum.</value></data>
+    <data name="MaxNode" xml:space="preserve"><value>Máximo</value></data>
+    <data name="MaxNodeDescription" xml:space="preserve"><value>Return maximum.</value></data>
+    <data name="ClampNode" xml:space="preserve"><value>Clamp</value></data>
+    <data name="ClampNodeDescription" xml:space="preserve"><value>Clamp to range.</value></data>
+    <data name="LerpNode" xml:space="preserve"><value>Interpolación lineal</value></data>
+    <data name="LerpNodeDescription" xml:space="preserve"><value>Linear interpolation.</value></data>
+    <data name="SqrtNode" xml:space="preserve"><value>Raíz cuadrada</value></data>
+    <data name="SqrtNodeDescription" xml:space="preserve"><value>Square root.</value></data>
+    <data name="PowerNode" xml:space="preserve"><value>Potencia</value></data>
+    <data name="PowerNodeDescription" xml:space="preserve"><value>Power.</value></data>
+    <data name="FloorNode" xml:space="preserve"><value>Floor</value></data>
+    <data name="FloorNodeDescription" xml:space="preserve"><value>Floor.</value></data>
+    <data name="CeilingNode" xml:space="preserve"><value>Ceiling</value></data>
+    <data name="CeilingNodeDescription" xml:space="preserve"><value>Ceiling.</value></data>
+    <data name="RoundNode" xml:space="preserve"><value>Round</value></data>
+    <data name="RoundNodeDescription" xml:space="preserve"><value>Round.</value></data>
+    <data name="FractionNode" xml:space="preserve"><value>Fraction</value></data>
+    <data name="FractionNodeDescription" xml:space="preserve"><value>Fractional part.</value></data>
+    <data name="SinNode" xml:space="preserve"><value>Sin</value></data>
+    <data name="SinNodeDescription" xml:space="preserve"><value>Calculate sine.</value></data>
+    <data name="CosNode" xml:space="preserve"><value>Cos</value></data>
+    <data name="CosNodeDescription" xml:space="preserve"><value>Calculate cosine.</value></data>
+    <data name="TanNode" xml:space="preserve"><value>Tan</value></data>
+    <data name="TanNodeDescription" xml:space="preserve"><value>Calculate tangent.</value></data>
+    <data name="Atan2Node" xml:space="preserve"><value>Atan2</value></data>
+    <data name="Atan2NodeDescription" xml:space="preserve"><value>Calculate atan2.</value></data>
+    <data name="DegreesToRadiansNode" xml:space="preserve"><value>Degrees to Radians</value></data>
+    <data name="DegreesToRadiansNodeDescription" xml:space="preserve"><value>Convert degrees to radians.</value></data>
+    <data name="RadiansToDegreesNode" xml:space="preserve"><value>Radians to Degrees</value></data>
+    <data name="RadiansToDegreesNodeDescription" xml:space="preserve"><value>Convert radians to degrees.</value></data>
+    <data name="Minimum" xml:space="preserve"><value>Minimum</value></data>
+    <data name="MinimumDescription" xml:space="preserve"><value>Minimum value.</value></data>
+    <data name="Maximum" xml:space="preserve"><value>Maximum</value></data>
+    <data name="MaximumDescription" xml:space="preserve"><value>Maximum value.</value></data>
+    <data name="StartValue" xml:space="preserve"><value>Start Value</value></data>
+    <data name="StartValueDescription" xml:space="preserve"><value>Interpolation start value.</value></data>
+    <data name="EndValue" xml:space="preserve"><value>End Value</value></data>
+    <data name="EndValueDescription" xml:space="preserve"><value>Interpolation end value.</value></data>
+    <data name="InterpolationFactor" xml:space="preserve"><value>Interpolation Factor</value></data>
+    <data name="InterpolationFactorDescription" xml:space="preserve"><value>Interpolation factor.</value></data>
+    <data name="Base" xml:space="preserve"><value>Base</value></data>
+    <data name="BaseDescription" xml:space="preserve"><value>Base value.</value></data>
+    <data name="Exponent" xml:space="preserve"><value>Exponent</value></data>
+    <data name="ExponentDescription" xml:space="preserve"><value>Exponent value.</value></data>
+    <data name="YValue" xml:space="preserve"><value>Y</value></data>
+    <data name="YValueDescription" xml:space="preserve"><value>Y value.</value></data>
+    <data name="XValue" xml:space="preserve"><value>X</value></data>
+    <data name="XValueDescription" xml:space="preserve"><value>X value.</value></data>
+    <data name="Length" xml:space="preserve"><value>Length</value></data>
+    <data name="LengthDescription" xml:space="preserve"><value>Period length.</value></data>
+    <data name="Edge" xml:space="preserve"><value>Edge</value></data>
+    <data name="EdgeDescription" xml:space="preserve"><value>Threshold value.</value></data>
+    <data name="Tolerance" xml:space="preserve"><value>Tolerance</value></data>
+    <data name="ToleranceDescription" xml:space="preserve"><value>Tolerance for comparison.</value></data>
+    <data name="Condition" xml:space="preserve"><value>Condition</value></data>
+    <data name="ConditionDescription" xml:space="preserve"><value>Condition.</value></data>
+    <data name="TrueValue" xml:space="preserve"><value>True Value</value></data>
+    <data name="TrueValueDescription" xml:space="preserve"><value>Value when true.</value></data>
+    <data name="FalseValue" xml:space="preserve"><value>False Value</value></data>
+    <data name="FalseValueDescription" xml:space="preserve"><value>Value when false.</value></data>
+    <data name="ModuloNode" xml:space="preserve"><value>Modulo</value></data>
+    <data name="ReciprocalNode" xml:space="preserve"><value>Reciprocal</value></data>
+    <data name="OneMinusNode" xml:space="preserve"><value>One Minus</value></data>
+    <data name="SaturateNode" xml:space="preserve"><value>Saturate</value></data>
+    <data name="InverseLerpNode" xml:space="preserve"><value>Inverse Lerp</value></data>
+    <data name="SmoothStepNode" xml:space="preserve"><value>SmoothStep</value></data>
+    <data name="StepNode" xml:space="preserve"><value>Step</value></data>
+    <data name="RepeatNode" xml:space="preserve"><value>Repeat</value></data>
+    <data name="PingPongNode" xml:space="preserve"><value>PingPong</value></data>
+    <data name="WrapNode" xml:space="preserve"><value>Wrap</value></data>
+    <data name="ExpNode" xml:space="preserve"><value>Exponential</value></data>
+    <data name="Exp2Node" xml:space="preserve"><value>Power of Two</value></data>
+    <data name="LogNode" xml:space="preserve"><value>Natural Logarithm</value></data>
+    <data name="Log2Node" xml:space="preserve"><value>Log Base 2</value></data>
+    <data name="Log10Node" xml:space="preserve"><value>Log Base 10</value></data>
+    <data name="AsinNode" xml:space="preserve"><value>Arc Sine</value></data>
+    <data name="AcosNode" xml:space="preserve"><value>Arc Cosine</value></data>
+    <data name="AtanNode" xml:space="preserve"><value>Arc Tangent</value></data>
+    <data name="EqualNode" xml:space="preserve"><value>Equal</value></data>
+    <data name="NotEqualNode" xml:space="preserve"><value>Not Equal</value></data>
+    <data name="GreaterNode" xml:space="preserve"><value>Greater</value></data>
+    <data name="GreaterEqualNode" xml:space="preserve"><value>Greater or Equal</value></data>
+    <data name="LessNode" xml:space="preserve"><value>Less</value></data>
+    <data name="LessEqualNode" xml:space="preserve"><value>Less or Equal</value></data>
+    <data name="SelectNode" xml:space="preserve"><value>Select</value></data>
+    <data name="Seed" xml:space="preserve"><value>Seed</value></data>
+    <data name="SeedDescription" xml:space="preserve"><value>Seed value for random generation.</value></data>
+    <data name="Index" xml:space="preserve"><value>Index</value></data>
+    <data name="IndexDescription" xml:space="preserve"><value>Random index.</value></data>
+    <data name="Parameter" xml:space="preserve"><value>Parameter</value></data>
+    <data name="ParameterDescription" xml:space="preserve"><value>Position for evaluating continuous noise.</value></data>
+    <data name="RandomNode" xml:space="preserve"><value>Random</value></data>
+    <data name="RandomNodeDescription" xml:space="preserve"><value>Generate deterministic random value.</value></data>
+    <data name="NoiseNode" xml:space="preserve"><value>Noise</value></data>
+    <data name="NoiseNodeDescription" xml:space="preserve"><value>Generate continuous noise.</value></data>
+    <data name="TranslateNode" xml:space="preserve"><value>Traslación</value></data>
+    <data name="TranslateNodeDescription" xml:space="preserve"><value>Move image.</value></data>
+    <data name="TranslateX" xml:space="preserve"><value>X Offset</value></data>
+    <data name="TranslateY" xml:space="preserve"><value>Y Offset</value></data>
+    <data name="ScaleNode" xml:space="preserve"><value>Escala</value></data>
+    <data name="ScaleNodeDescription" xml:space="preserve"><value>Scale image.</value></data>
+    <data name="ScaleX" xml:space="preserve"><value>Scale X</value></data>
+    <data name="ScaleY" xml:space="preserve"><value>Scale Y</value></data>
+    <data name="RotateNode" xml:space="preserve"><value>Rotación</value></data>
+    <data name="RotateNodeDescription" xml:space="preserve"><value>Rotate image.</value></data>
+    <data name="Angle" xml:space="preserve"><value>Ángulo</value></data>
+</root>

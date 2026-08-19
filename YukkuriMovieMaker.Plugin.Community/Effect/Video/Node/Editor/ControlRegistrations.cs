@@ -147,7 +147,7 @@ public static class ControlRegistrations
             var template = new DataTemplate();
             var factory = new FrameworkElementFactory(typeof(FilePathPort));
 
-            factory.SetValue(FilePathPort.AllowExtensionProperty, fileAttr.AllowExtension);
+            factory.SetValue(FilePathPort.AllowExtensionProperty, fileAttr.GetAllowExtensionList());
             factory.SetValue(FilePathPort.DefaultProperty, fileAttr.Default);
 
             factory.SetBinding(FilePathPort.ValueProperty,

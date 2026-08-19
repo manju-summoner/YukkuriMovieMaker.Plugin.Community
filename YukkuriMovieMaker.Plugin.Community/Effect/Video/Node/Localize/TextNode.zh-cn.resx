@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+                id="root"
+                xmlns="">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+        <xsd:element name="root" msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" use="required" type="xsd:string"/>
+                            <xsd:attribute name="type" type="xsd:string"/>
+                            <xsd:attribute name="mimetype" type="xsd:string"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias" type="xsd:string"/>
+                            <xsd:attribute name="name" type="xsd:string"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
+    <data name="EffectCategoryName" xml:space="preserve"><value>效果</value></data>
+    <data name="CompositionCategoryName" xml:space="preserve"><value>合成</value></data>
+    <data name="MathCategoryName" xml:space="preserve"><value>数学</value></data>
+    <data name="BasicCategoryName" xml:space="preserve"><value>基础</value></data>
+    <data name="GeneratorCategoryName" xml:space="preserve"><value>生成</value></data>
+    <data name="BrushCategoryName" xml:space="preserve"><value>画笔</value></data>
+    <data name="FunctionsCategoryName" xml:space="preserve"><value>函数</value></data>
+    <data name="VideoEffectCategoryName" xml:space="preserve"><value>视频效果</value></data>
+    <data name="AdvancedCategoryName" xml:space="preserve"><value>高级</value></data>
+    <data name="TransformCategoryName" xml:space="preserve"><value>坐标变换</value></data>
+    <data name="BrushName" xml:space="preserve"><value>画笔</value></data>
+    <data name="Value" xml:space="preserve"><value>值</value></data>
+    <data name="ValueDescription" xml:space="preserve"><value>输入值。</value></data>
+    <data name="ResultDescription" xml:space="preserve"><value>运算结果。</value></data>
+    <data name="AbsNode" xml:space="preserve"><value>绝对值</value></data>
+    <data name="AbsNodeDescription" xml:space="preserve"><value>计算绝对值。</value></data>
+    <data name="SignNode" xml:space="preserve"><value>符号</value></data>
+    <data name="SignNodeDescription" xml:space="preserve"><value>返回数值符号。</value></data>
+    <data name="MinNode" xml:space="preserve"><value>最小值</value></data>
+    <data name="MinNodeDescription" xml:space="preserve"><value>返回较小值。</value></data>
+    <data name="MaxNode" xml:space="preserve"><value>最大值</value></data>
+    <data name="MaxNodeDescription" xml:space="preserve"><value>返回较大值。</value></data>
+    <data name="ClampNode" xml:space="preserve"><value>限制</value></data>
+    <data name="ClampNodeDescription" xml:space="preserve"><value>限制到指定范围。</value></data>
+    <data name="LerpNode" xml:space="preserve"><value>线性插值</value></data>
+    <data name="LerpNodeDescription" xml:space="preserve"><value>线性插值。</value></data>
+    <data name="SqrtNode" xml:space="preserve"><value>平方根</value></data>
+    <data name="SqrtNodeDescription" xml:space="preserve"><value>计算平方根。</value></data>
+    <data name="PowerNode" xml:space="preserve"><value>幂</value></data>
+    <data name="PowerNodeDescription" xml:space="preserve"><value>计算幂。</value></data>
+    <data name="FloorNode" xml:space="preserve"><value>向下取整</value></data>
+    <data name="FloorNodeDescription" xml:space="preserve"><value>向下取整。</value></data>
+    <data name="CeilingNode" xml:space="preserve"><value>向上取整</value></data>
+    <data name="CeilingNodeDescription" xml:space="preserve"><value>向上取整。</value></data>
+    <data name="RoundNode" xml:space="preserve"><value>四舍五入</value></data>
+    <data name="RoundNodeDescription" xml:space="preserve"><value>四舍五入。</value></data>
+    <data name="FractionNode" xml:space="preserve"><value>小数部分</value></data>
+    <data name="FractionNodeDescription" xml:space="preserve"><value>返回小数部分。</value></data>
+    <data name="SinNode" xml:space="preserve"><value>正弦</value></data>
+    <data name="SinNodeDescription" xml:space="preserve"><value>计算正弦。</value></data>
+    <data name="CosNode" xml:space="preserve"><value>余弦</value></data>
+    <data name="CosNodeDescription" xml:space="preserve"><value>计算余弦。</value></data>
+    <data name="TanNode" xml:space="preserve"><value>正切</value></data>
+    <data name="TanNodeDescription" xml:space="preserve"><value>计算正切。</value></data>
+    <data name="Atan2Node" xml:space="preserve"><value>Atan2</value></data>
+    <data name="Atan2NodeDescription" xml:space="preserve"><value>计算 atan2。</value></data>
+    <data name="DegreesToRadiansNode" xml:space="preserve"><value>角度转弧度</value></data>
+    <data name="DegreesToRadiansNodeDescription" xml:space="preserve"><value>角度转弧度。</value></data>
+    <data name="RadiansToDegreesNode" xml:space="preserve"><value>弧度转角度</value></data>
+    <data name="RadiansToDegreesNodeDescription" xml:space="preserve"><value>弧度转角度。</value></data>
+    <data name="Minimum" xml:space="preserve"><value>最小值</value></data>
+    <data name="MinimumDescription" xml:space="preserve"><value>最小值。</value></data>
+    <data name="Maximum" xml:space="preserve"><value>最大值</value></data>
+    <data name="MaximumDescription" xml:space="preserve"><value>最大值。</value></data>
+    <data name="StartValue" xml:space="preserve"><value>起始值</value></data>
+    <data name="StartValueDescription" xml:space="preserve"><value>插值起始值。</value></data>
+    <data name="EndValue" xml:space="preserve"><value>结束值</value></data>
+    <data name="EndValueDescription" xml:space="preserve"><value>插值结束值。</value></data>
+    <data name="InterpolationFactor" xml:space="preserve"><value>插值系数</value></data>
+    <data name="InterpolationFactorDescription" xml:space="preserve"><value>插值系数。</value></data>
+    <data name="Base" xml:space="preserve"><value>底数</value></data>
+    <data name="BaseDescription" xml:space="preserve"><value>底数。</value></data>
+    <data name="Exponent" xml:space="preserve"><value>指数</value></data>
+    <data name="ExponentDescription" xml:space="preserve"><value>指数。</value></data>
+    <data name="YValue" xml:space="preserve"><value>Y</value></data>
+    <data name="YValueDescription" xml:space="preserve"><value>Y值。</value></data>
+    <data name="XValue" xml:space="preserve"><value>X</value></data>
+    <data name="XValueDescription" xml:space="preserve"><value>X值。</value></data>
+    <data name="Length" xml:space="preserve"><value>长度</value></data>
+    <data name="LengthDescription" xml:space="preserve"><value>周期长度。</value></data>
+    <data name="Edge" xml:space="preserve"><value>阈值</value></data>
+    <data name="EdgeDescription" xml:space="preserve"><value>阈值。</value></data>
+    <data name="Tolerance" xml:space="preserve"><value>容差</value></data>
+    <data name="ToleranceDescription" xml:space="preserve"><value>比较时允许误差。</value></data>
+    <data name="Condition" xml:space="preserve"><value>条件</value></data>
+    <data name="ConditionDescription" xml:space="preserve"><value>判定条件。</value></data>
+    <data name="TrueValue" xml:space="preserve"><value>真值</value></data>
+    <data name="TrueValueDescription" xml:space="preserve"><value>条件为真时的值。</value></data>
+    <data name="FalseValue" xml:space="preserve"><value>假值</value></data>
+    <data name="FalseValueDescription" xml:space="preserve"><value>条件为假时的值。</value></data>
+    <data name="ModuloNode" xml:space="preserve"><value>取余</value></data>
+    <data name="ReciprocalNode" xml:space="preserve"><value>倒数</value></data>
+    <data name="OneMinusNode" xml:space="preserve"><value>一减去</value></data>
+    <data name="SaturateNode" xml:space="preserve"><value>饱和</value></data>
+    <data name="InverseLerpNode" xml:space="preserve"><value>逆线性插值</value></data>
+    <data name="SmoothStepNode" xml:space="preserve"><value>SmoothStep</value></data>
+    <data name="StepNode" xml:space="preserve"><value>阶跃</value></data>
+    <data name="RepeatNode" xml:space="preserve"><value>重复</value></data>
+    <data name="PingPongNode" xml:space="preserve"><value>PingPong</value></data>
+    <data name="WrapNode" xml:space="preserve"><value>循环</value></data>
+    <data name="ExpNode" xml:space="preserve"><value>指数</value></data>
+    <data name="Exp2Node" xml:space="preserve"><value>2次幂</value></data>
+    <data name="LogNode" xml:space="preserve"><value>自然对数</value></data>
+    <data name="Log2Node" xml:space="preserve"><value>以2为底对数</value></data>
+    <data name="Log10Node" xml:space="preserve"><value>常用对数</value></data>
+    <data name="AsinNode" xml:space="preserve"><value>反正弦</value></data>
+    <data name="AcosNode" xml:space="preserve"><value>反余弦</value></data>
+    <data name="AtanNode" xml:space="preserve"><value>反正切</value></data>
+    <data name="EqualNode" xml:space="preserve"><value>相等</value></data>
+    <data name="NotEqualNode" xml:space="preserve"><value>不相等</value></data>
+    <data name="GreaterNode" xml:space="preserve"><value>大于</value></data>
+    <data name="GreaterEqualNode" xml:space="preserve"><value>大于等于</value></data>
+    <data name="LessNode" xml:space="preserve"><value>小于</value></data>
+    <data name="LessEqualNode" xml:space="preserve"><value>小于等于</value></data>
+    <data name="SelectNode" xml:space="preserve"><value>选择</value></data>
+    <data name="Seed" xml:space="preserve"><value>种子</value></data>
+    <data name="SeedDescription" xml:space="preserve"><value>随机数种子。</value></data>
+    <data name="Index" xml:space="preserve"><value>索引</value></data>
+    <data name="IndexDescription" xml:space="preserve"><value>随机数索引。</value></data>
+    <data name="Parameter" xml:space="preserve"><value>参数</value></data>
+    <data name="ParameterDescription" xml:space="preserve"><value>连续噪声的位置。</value></data>
+    <data name="RandomNode" xml:space="preserve"><value>随机数</value></data>
+    <data name="RandomNodeDescription" xml:space="preserve"><value>生成确定性随机数。</value></data>
+    <data name="NoiseNode" xml:space="preserve"><value>噪声</value></data>
+    <data name="NoiseNodeDescription" xml:space="preserve"><value>生成连续噪声。</value></data>
+    <data name="TranslateNode" xml:space="preserve"><value>平移</value></data>
+    <data name="TranslateNodeDescription" xml:space="preserve"><value>移动图像。</value></data>
+    <data name="TranslateX" xml:space="preserve"><value>X偏移量</value></data>
+    <data name="TranslateY" xml:space="preserve"><value>Y偏移量</value></data>
+    <data name="ScaleNode" xml:space="preserve"><value>缩放</value></data>
+    <data name="ScaleNodeDescription" xml:space="preserve"><value>缩放图像。</value></data>
+    <data name="ScaleX" xml:space="preserve"><value>X缩放</value></data>
+    <data name="ScaleY" xml:space="preserve"><value>Y缩放</value></data>
+    <data name="RotateNode" xml:space="preserve"><value>旋转</value></data>
+    <data name="RotateNodeDescription" xml:space="preserve"><value>旋转图像。</value></data>
+    <data name="Angle" xml:space="preserve"><value>角度</value></data>
+</root>

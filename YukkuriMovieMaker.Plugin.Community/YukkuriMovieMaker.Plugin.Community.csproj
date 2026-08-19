@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)'=='ReleaseLite' OR '$(Configuration)'=='Release'">
         <!--Pdb内にソースコードのフルパスを含めない-->
@@ -56,6 +57,9 @@
         <Reference Include="SharpGen.Runtime.COM">
             <HintPath>$(YMM4DirPath)SharpGen.Runtime.COM.dll</HintPath>
         </Reference>
+        <Reference Include="Vortice.MediaFoundation">
+            <HintPath>$(YMM4DirPath)Vortice.MediaFoundation.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
     <!-- nugetパッケージで公開されているライブラリはPackageReferenceで参照する。-->
@@ -67,6 +71,8 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
         <PackageReference Include="NAudio" Version="2.3.0"/>
         <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142"/>
+        <PackageReference Include="SkiaSharp" Version="4.151.1"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="4.151.1"/>
         <PackageReference Include="VirtualizingWrapPanel" Version="2.5.1"/>
         <PackageReference Include="Whisper.net" Version="1.9.0"/>
         <PackageReference Include="Whisper.net.Runtime" Version="1.9.0"/>
@@ -183,9 +189,6 @@
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
             <_Parameter1>YukkuriMovieMaker.Tests</_Parameter1>
         </AssemblyAttribute>
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Remove="Effect\Video\Node\Editor\Control\CustomEditor\ControlReplacement\EnumValueToDisplayIndexConverter.cs"/>
     </ItemGroup>
 
 </Project>

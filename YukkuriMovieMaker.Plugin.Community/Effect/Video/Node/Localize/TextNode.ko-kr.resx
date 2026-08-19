@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+                id="root"
+                xmlns="">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+        <xsd:element name="root" msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" use="required" type="xsd:string"/>
+                            <xsd:attribute name="type" type="xsd:string"/>
+                            <xsd:attribute name="mimetype" type="xsd:string"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias" type="xsd:string"/>
+                            <xsd:attribute name="name" type="xsd:string"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
+    <data name="EffectCategoryName" xml:space="preserve"><value>효과</value></data>
+    <data name="CompositionCategoryName" xml:space="preserve"><value>합성</value></data>
+    <data name="MathCategoryName" xml:space="preserve"><value>수학</value></data>
+    <data name="BasicCategoryName" xml:space="preserve"><value>기본</value></data>
+    <data name="GeneratorCategoryName" xml:space="preserve"><value>생성기</value></data>
+    <data name="BrushCategoryName" xml:space="preserve"><value>브러시</value></data>
+    <data name="FunctionsCategoryName" xml:space="preserve"><value>함수</value></data>
+    <data name="VideoEffectCategoryName" xml:space="preserve"><value>비디오 효과</value></data>
+    <data name="AdvancedCategoryName" xml:space="preserve"><value>고급</value></data>
+    <data name="TransformCategoryName" xml:space="preserve"><value>좌표 변환</value></data>
+    <data name="BrushName" xml:space="preserve"><value>브러시</value></data>
+    <data name="Value" xml:space="preserve"><value>값</value></data>
+    <data name="ValueDescription" xml:space="preserve"><value>입력값입니다.</value></data>
+    <data name="ResultDescription" xml:space="preserve"><value>연산 결과입니다.</value></data>
+    <data name="AbsNode" xml:space="preserve"><value>절댓값</value></data>
+    <data name="AbsNodeDescription" xml:space="preserve"><value>절댓값을 계산합니다.</value></data>
+    <data name="SignNode" xml:space="preserve"><value>부호</value></data>
+    <data name="SignNodeDescription" xml:space="preserve"><value>부호를 반환합니다.</value></data>
+    <data name="MinNode" xml:space="preserve"><value>최솟값</value></data>
+    <data name="MinNodeDescription" xml:space="preserve"><value>작은 값을 반환합니다.</value></data>
+    <data name="MaxNode" xml:space="preserve"><value>최댓값</value></data>
+    <data name="MaxNodeDescription" xml:space="preserve"><value>큰 값을 반환합니다.</value></data>
+    <data name="ClampNode" xml:space="preserve"><value>클램프</value></data>
+    <data name="ClampNodeDescription" xml:space="preserve"><value>범위로 제한합니다.</value></data>
+    <data name="LerpNode" xml:space="preserve"><value>선형 보간</value></data>
+    <data name="LerpNodeDescription" xml:space="preserve"><value>선형 보간합니다.</value></data>
+    <data name="SqrtNode" xml:space="preserve"><value>제곱근</value></data>
+    <data name="SqrtNodeDescription" xml:space="preserve"><value>제곱근을 계산합니다.</value></data>
+    <data name="PowerNode" xml:space="preserve"><value>거듭제곱</value></data>
+    <data name="PowerNodeDescription" xml:space="preserve"><value>거듭제곱을 계산합니다.</value></data>
+    <data name="FloorNode" xml:space="preserve"><value>버림</value></data>
+    <data name="FloorNodeDescription" xml:space="preserve"><value>버림합니다.</value></data>
+    <data name="CeilingNode" xml:space="preserve"><value>올림</value></data>
+    <data name="CeilingNodeDescription" xml:space="preserve"><value>올림합니다.</value></data>
+    <data name="RoundNode" xml:space="preserve"><value>반올림</value></data>
+    <data name="RoundNodeDescription" xml:space="preserve"><value>반올림합니다.</value></data>
+    <data name="FractionNode" xml:space="preserve"><value>소수 부분</value></data>
+    <data name="FractionNodeDescription" xml:space="preserve"><value>소수 부분을 반환합니다.</value></data>
+    <data name="SinNode" xml:space="preserve"><value>사인</value></data>
+    <data name="SinNodeDescription" xml:space="preserve"><value>사인을 계산합니다.</value></data>
+    <data name="CosNode" xml:space="preserve"><value>코사인</value></data>
+    <data name="CosNodeDescription" xml:space="preserve"><value>코사인을 계산합니다.</value></data>
+    <data name="TanNode" xml:space="preserve"><value>탄젠트</value></data>
+    <data name="TanNodeDescription" xml:space="preserve"><value>탄젠트를 계산합니다.</value></data>
+    <data name="Atan2Node" xml:space="preserve"><value>Atan2</value></data>
+    <data name="Atan2NodeDescription" xml:space="preserve"><value>atan2를 계산합니다.</value></data>
+    <data name="DegreesToRadiansNode" xml:space="preserve"><value>도→라디안</value></data>
+    <data name="DegreesToRadiansNodeDescription" xml:space="preserve"><value>도를 라디안으로 변환합니다.</value></data>
+    <data name="RadiansToDegreesNode" xml:space="preserve"><value>라디안→도</value></data>
+    <data name="RadiansToDegreesNodeDescription" xml:space="preserve"><value>라디안을 도로 변환합니다.</value></data>
+    <data name="Minimum" xml:space="preserve"><value>최솟값</value></data>
+    <data name="MinimumDescription" xml:space="preserve"><value>최솟값입니다.</value></data>
+    <data name="Maximum" xml:space="preserve"><value>최댓값</value></data>
+    <data name="MaximumDescription" xml:space="preserve"><value>최댓값입니다.</value></data>
+    <data name="StartValue" xml:space="preserve"><value>시작값</value></data>
+    <data name="StartValueDescription" xml:space="preserve"><value>보간 시작값입니다.</value></data>
+    <data name="EndValue" xml:space="preserve"><value>끝값</value></data>
+    <data name="EndValueDescription" xml:space="preserve"><value>보간 끝값입니다.</value></data>
+    <data name="InterpolationFactor" xml:space="preserve"><value>보간 계수</value></data>
+    <data name="InterpolationFactorDescription" xml:space="preserve"><value>보간 계수입니다.</value></data>
+    <data name="Base" xml:space="preserve"><value>밑</value></data>
+    <data name="BaseDescription" xml:space="preserve"><value>밑입니다.</value></data>
+    <data name="Exponent" xml:space="preserve"><value>지수</value></data>
+    <data name="ExponentDescription" xml:space="preserve"><value>지수입니다.</value></data>
+    <data name="YValue" xml:space="preserve"><value>Y</value></data>
+    <data name="YValueDescription" xml:space="preserve"><value>Y값입니다.</value></data>
+    <data name="XValue" xml:space="preserve"><value>X</value></data>
+    <data name="XValueDescription" xml:space="preserve"><value>X값입니다.</value></data>
+    <data name="Length" xml:space="preserve"><value>길이</value></data>
+    <data name="LengthDescription" xml:space="preserve"><value>주기 길이입니다.</value></data>
+    <data name="Edge" xml:space="preserve"><value>임계값</value></data>
+    <data name="EdgeDescription" xml:space="preserve"><value>임계값입니다.</value></data>
+    <data name="Tolerance" xml:space="preserve"><value>허용 오차</value></data>
+    <data name="ToleranceDescription" xml:space="preserve"><value>비교 허용 오차입니다.</value></data>
+    <data name="Condition" xml:space="preserve"><value>조건</value></data>
+    <data name="ConditionDescription" xml:space="preserve"><value>조건입니다.</value></data>
+    <data name="TrueValue" xml:space="preserve"><value>참일 때</value></data>
+    <data name="TrueValueDescription" xml:space="preserve"><value>참일 때의 값입니다.</value></data>
+    <data name="FalseValue" xml:space="preserve"><value>거짓일 때</value></data>
+    <data name="FalseValueDescription" xml:space="preserve"><value>거짓일 때의 값입니다.</value></data>
+    <data name="ModuloNode" xml:space="preserve"><value>나머지</value></data>
+    <data name="ReciprocalNode" xml:space="preserve"><value>역수</value></data>
+    <data name="OneMinusNode" xml:space="preserve"><value>1에서 빼기</value></data>
+    <data name="SaturateNode" xml:space="preserve"><value>포화</value></data>
+    <data name="InverseLerpNode" xml:space="preserve"><value>역보간</value></data>
+    <data name="SmoothStepNode" xml:space="preserve"><value>SmoothStep</value></data>
+    <data name="StepNode" xml:space="preserve"><value>스텝</value></data>
+    <data name="RepeatNode" xml:space="preserve"><value>반복</value></data>
+    <data name="PingPongNode" xml:space="preserve"><value>PingPong</value></data>
+    <data name="WrapNode" xml:space="preserve"><value>랩</value></data>
+    <data name="ExpNode" xml:space="preserve"><value>지수</value></data>
+    <data name="Exp2Node" xml:space="preserve"><value>2의 거듭제곱</value></data>
+    <data name="LogNode" xml:space="preserve"><value>자연로그</value></data>
+    <data name="Log2Node" xml:space="preserve"><value>밑이 2인 로그</value></data>
+    <data name="Log10Node" xml:space="preserve"><value>상용로그</value></data>
+    <data name="AsinNode" xml:space="preserve"><value>아크사인</value></data>
+    <data name="AcosNode" xml:space="preserve"><value>아크코사인</value></data>
+    <data name="AtanNode" xml:space="preserve"><value>아크탄젠트</value></data>
+    <data name="EqualNode" xml:space="preserve"><value>같음</value></data>
+    <data name="NotEqualNode" xml:space="preserve"><value>같지 않음</value></data>
+    <data name="GreaterNode" xml:space="preserve"><value>큼</value></data>
+    <data name="GreaterEqualNode" xml:space="preserve"><value>크거나 같음</value></data>
+    <data name="LessNode" xml:space="preserve"><value>작음</value></data>
+    <data name="LessEqualNode" xml:space="preserve"><value>작거나 같음</value></data>
+    <data name="SelectNode" xml:space="preserve"><value>선택</value></data>
+    <data name="Seed" xml:space="preserve"><value>시드</value></data>
+    <data name="SeedDescription" xml:space="preserve"><value>난수 생성 시드입니다.</value></data>
+    <data name="Index" xml:space="preserve"><value>인덱스</value></data>
+    <data name="IndexDescription" xml:space="preserve"><value>난수 인덱스입니다.</value></data>
+    <data name="Parameter" xml:space="preserve"><value>매개변수</value></data>
+    <data name="ParameterDescription" xml:space="preserve"><value>연속 노이즈를 평가할 위치입니다.</value></data>
+    <data name="RandomNode" xml:space="preserve"><value>난수</value></data>
+    <data name="RandomNodeDescription" xml:space="preserve"><value>결정론적 난수를 생성합니다.</value></data>
+    <data name="NoiseNode" xml:space="preserve"><value>노이즈</value></data>
+    <data name="NoiseNodeDescription" xml:space="preserve"><value>연속적으로 변화하는 노이즈를 생성합니다.</value></data>
+    <data name="TranslateNode" xml:space="preserve"><value>이동</value></data>
+    <data name="TranslateNodeDescription" xml:space="preserve"><value>이미지를 지정량 이동합니다.</value></data>
+    <data name="TranslateX" xml:space="preserve"><value>X 이동량</value></data>
+    <data name="TranslateY" xml:space="preserve"><value>Y 이동량</value></data>
+    <data name="ScaleNode" xml:space="preserve"><value>크기 조절</value></data>
+    <data name="ScaleNodeDescription" xml:space="preserve"><value>이미지를 확대/축소합니다.</value></data>
+    <data name="ScaleX" xml:space="preserve"><value>X 배율</value></data>
+    <data name="ScaleY" xml:space="preserve"><value>Y 배율</value></data>
+    <data name="RotateNode" xml:space="preserve"><value>회전</value></data>
+    <data name="RotateNodeDescription" xml:space="preserve"><value>이미지를 회전합니다.</value></data>
+    <data name="Angle" xml:space="preserve"><value>각도</value></data>
+</root>

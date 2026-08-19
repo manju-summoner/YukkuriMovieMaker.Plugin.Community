@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+                id="root"
+                xmlns="">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+        <xsd:element name="root" msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" use="required" type="xsd:string"/>
+                            <xsd:attribute name="type" type="xsd:string"/>
+                            <xsd:attribute name="mimetype" type="xsd:string"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias" type="xsd:string"/>
+                            <xsd:attribute name="name" type="xsd:string"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="CurrentCulture" xml:space="preserve"><value>zh-cn</value></data>
+    <data name="Node" xml:space="preserve"><value>节点</value></data>
+    <data name="NodeEditor" xml:space="preserve"><value>节点编辑器</value></data>
+    <data name="OutputImageIsNull" xml:space="preserve"><value>输出图像为空</value></data>
+    <data name="ItemPropertiesNotSet" xml:space="preserve"><value>未设置项目属性。</value></data>
+    <data name="UnableLoadEffect" xml:space="preserve"><value>无法加载效果</value></data>
+    <data name="UnableGenerateEffect" xml:space="preserve"><value>无法生成效果</value></data>
+    <data name="PropertyNotFound" xml:space="preserve"><value>未找到指定属性 {0}</value></data>
+    <data name="PropertyReadOnly" xml:space="preserve"><value>属性 {0} 是只读的</value></data>
+    <data name="UnableCreateAnimationInstance" xml:space="preserve"><value>无法创建动画类型的实例</value></data>
+    <data name="AnimationValuesPropertyError" xml:space="preserve"><value>未找到动画对象的 Values 属性或为只读</value></data>
+    <data name="ShaderResourceIdEmpty" xml:space="preserve"><value>着色器资源 ID 为空</value></data>
+    <data name="ShaderResourceNotFound" xml:space="preserve"><value>未找到着色器资源 *.{0}</value></data>
+    <data name="CannotCreateEffectInstance" xml:space="preserve"><value>无法创建效果实例</value></data>
+    <data name="CannotCastToShaderEffect" xml:space="preserve"><value>无法转换为 ShaderEffect</value></data>
+    <data name="IndexOutOfRange" xml:space="preserve"><value>指定索引超出范围</value></data>
+    <data name="CannotCreateType" xml:space="preserve"><value>无法创建类型</value></data>
+    <data name="Input" xml:space="preserve"><value>输入</value></data>
+    <data name="Output" xml:space="preserve"><value>输出</value></data>
+</root>
