@@ -55,6 +55,19 @@ public sealed class NodeViewModel : INotifyPropertyChanged
         _x = visualState?.X ?? 0;
         _y = visualState?.Y ?? 0;
 
+        IsError = nodeLogic.HasError;
+        nodeLogic.ErrorStateChanged += (sender, _) =>
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.BeginInvoke(() => IsError = ((NodeLogic)sender!).HasError);
+                return;
+            }
+
+            IsError = ((NodeLogic)sender!).HasError;
+        };
+
         nodeLogic.NeedToReinitializeInputPorts += (sender, @event) =>
         {
             var dispatcher = Application.Current?.Dispatcher;
@@ -120,6 +133,12 @@ public sealed class NodeViewModel : INotifyPropertyChanged
     {
         get;
         internal set => SetField(ref field, value);
+    }
+
+    public bool IsError
+    {
+        get;
+        private set => SetField(ref field, value);
     }
 
     public string DisplayName { get; }

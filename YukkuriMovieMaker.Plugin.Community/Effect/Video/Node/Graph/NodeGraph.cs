@@ -178,10 +178,14 @@ public sealed class NodeGraph
     /// <param name="outputName">接続が追加される出力プロパティ名</param>
     /// <param name="to">接続が設定される入力プロパティを持つノードのID</param>
     /// <param name="inputName">接続が設定される入力プロパティ名</param>
-    public void Connect(
+    /// <returns>接続を追加した場合はtrue。循環接続になるため拒否した場合はfalse。</returns>
+    public bool Connect(
         Guid from, string outputName,
         Guid to, string inputName)
     {
+        if (WouldCreateCycle(from, to))
+            return false;
+
         var output = _nodes[from].Outputs[outputName];
         var input = _nodes[to].Inputs[inputName];
 
@@ -197,6 +201,37 @@ public sealed class NodeGraph
             new NodeConnection { FromId = from, FromPort = outputName, ToId = to, ToPort = inputName });
 
         OnGraphChanged(new ConnectionChangedEventArgs(from, outputName, to, inputName));
+        return true;
+    }
+
+    /// <summary>
+    ///     指定したノード間に新たに接続（from → to）を追加した場合に、
+    ///     グラフが循環（あるノードが自分自身に依存する状態）になるかどうかを判定する。
+    ///     既存の接続を to から辿って from に到達できるなら、新しい接続によって循環が生じる。
+    /// </summary>
+    /// <param name="from">接続の出力側ノードのID</param>
+    /// <param name="to">接続の入力側ノードのID</param>
+    /// <returns>循環接続になる場合はtrue</returns>
+    public bool WouldCreateCycle(Guid from, Guid to)
+    {
+        if (from == to) return true;
+
+        var visited = new HashSet<Guid>();
+        var stack = new Stack<Guid>();
+        stack.Push(to);
+
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+            if (current == from) return true;
+            if (!visited.Add(current)) continue;
+
+            foreach (var connection in Connections)
+                if (connection.FromId == current)
+                    stack.Push(connection.ToId);
+        }
+
+        return false;
     }
 
     /// <summary>

@@ -54,6 +54,10 @@
                                     Value="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}" />
                             <Setter Property="BorderThickness" Value="2" />
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding IsError}" Value="True">
+                            <Setter Property="BorderBrush" Value="Red" />
+                            <Setter Property="BorderThickness" Value="2" />
+                        </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </Border.Style>

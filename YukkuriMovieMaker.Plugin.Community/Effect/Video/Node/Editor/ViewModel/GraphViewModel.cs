@@ -237,6 +237,9 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         var from = p1.Direction == PortDirection.Output ? p1 : p2;
         var to = p1.Direction == PortDirection.Input ? p1 : p2;
 
+        if (_graph.WouldCreateCycle(from.NodeId, to.NodeId))
+            return;
+
         _graph.BeginEdit();
         _graph.Connect(
             from.NodeId, from.Name,

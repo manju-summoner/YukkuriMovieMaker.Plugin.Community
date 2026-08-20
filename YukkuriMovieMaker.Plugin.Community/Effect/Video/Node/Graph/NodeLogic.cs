@@ -25,6 +25,9 @@ public abstract class NodeLogic : IDisposable
 
     public Guid Id { get; set; }
 
+    public bool HasError { get; private set; }
+    public Exception? LastError { get; private set; }
+
     protected EvaluationContext? EvaluationContext { get; private set; }
 
     /// <summary>
@@ -36,6 +39,8 @@ public abstract class NodeLogic : IDisposable
     {
         GC.SuppressFinalize(this);
     }
+
+    public event EventHandler? ErrorStateChanged;
 
     private void InitializePorts()
     {
@@ -135,16 +140,38 @@ public abstract class NodeLogic : IDisposable
         {
             await Calculate().ConfigureAwait(false);
             success = true;
+            SetError(null);
         }
-        catch (NullReferenceException)
+        catch (NullReferenceException ex)
         {
-            if (context != null) throw;
+            // context が null の場合の NullReferenceException は、
+            // フル評価コンテキストなしでの評価（プレビュー等）における想定内の未準備状態として、
+            // 元の実装通り握りつぶす。エラー表示の対象にもしない。
+            if (context != null)
+            {
+                SetError(ex);
+                throw;
+            }
+        }
+        catch (Exception ex)
+        {
+            SetError(ex);
+            throw;
         }
         finally
         {
             EvaluationContext = null;
             if (success) _isEvaluated = true;
         }
+    }
+
+    private void SetError(Exception? ex)
+    {
+        var hadError = HasError;
+        HasError = ex != null;
+        LastError = ex;
+        if (hadError != HasError)
+            ErrorStateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void Invalidate()
