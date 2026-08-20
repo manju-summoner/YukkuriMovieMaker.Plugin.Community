@@ -1,194 +1,188 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
-                id="root"
-                xmlns="">
-        <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
-        <xsd:element name="root" msdata:IsDataSet="true">
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
             <xsd:complexType>
-                <xsd:choice maxOccurs="unbounded">
-                    <xsd:element name="metadata">
-                        <xsd:complexType>
-                            <xsd:sequence>
-                                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
-                            </xsd:sequence>
-                            <xsd:attribute name="name" use="required" type="xsd:string"/>
-                            <xsd:attribute name="type" type="xsd:string"/>
-                            <xsd:attribute name="mimetype" type="xsd:string"/>
-                            <xsd:attribute ref="xml:space"/>
-                        </xsd:complexType>
-                    </xsd:element>
-                    <xsd:element name="assembly">
-                        <xsd:complexType>
-                            <xsd:attribute name="alias" type="xsd:string"/>
-                            <xsd:attribute name="name" type="xsd:string"/>
-                        </xsd:complexType>
-                    </xsd:element>
-                    <xsd:element name="data">
-                        <xsd:complexType>
-                            <xsd:sequence>
-                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
-                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
-                            </xsd:sequence>
-                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
-                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
-                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
-                            <xsd:attribute ref="xml:space"/>
-                        </xsd:complexType>
-                    </xsd:element>
-                    <xsd:element name="resheader">
-                        <xsd:complexType>
-                            <xsd:sequence>
-                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
-                            </xsd:sequence>
-                            <xsd:attribute name="name" type="xsd:string" use="required"/>
-                        </xsd:complexType>
-                    </xsd:element>
-                </xsd:choice>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
-        </xsd:element>
-    </xsd:schema>
-    <resheader name="resmimetype">
-        <value>text/microsoft-resx</value>
-    </resheader>
-    <resheader name="version">
-        <value>2.0</value>
-    </resheader>
-    <resheader name="reader">
-        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
-            PublicKeyToken=b77a5c561934e089
-        </value>
-    </resheader>
-    <resheader name="writer">
-        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
-            PublicKeyToken=b77a5c561934e089
-        </value>
-    </resheader>
-    <data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
-    <data name="EffectCategoryName" xml:space="preserve"><value>التأثيرات</value></data>
-    <data name="CompositionCategoryName" xml:space="preserve"><value>التركيب</value></data>
-    <data name="MathCategoryName" xml:space="preserve"><value>الرياضيات</value></data>
-    <data name="BasicCategoryName" xml:space="preserve"><value>أساسي</value></data>
-    <data name="GeneratorCategoryName" xml:space="preserve"><value>مولّد</value></data>
-    <data name="BrushCategoryName" xml:space="preserve"><value>فرشاة</value></data>
-    <data name="FunctionsCategoryName" xml:space="preserve"><value>الدوال</value></data>
-    <data name="VideoEffectCategoryName" xml:space="preserve"><value>تأثيرات الفيديو</value></data>
-    <data name="AdvancedCategoryName" xml:space="preserve"><value>متقدم</value></data>
-    <data name="TransformCategoryName" xml:space="preserve"><value>تحويل الإحداثيات</value></data>
-    <data name="BrushName" xml:space="preserve"><value>فرشاة</value></data>
-    <data name="Value" xml:space="preserve"><value>القيمة</value></data>
-    <data name="ValueDescription" xml:space="preserve"><value>قيمة الإدخال</value></data>
-    <data name="ResultDescription" xml:space="preserve"><value>نتيجة العملية</value></data>
-    <data name="AbsNode" xml:space="preserve"><value>القيمة المطلقة</value></data>
-    <data name="AbsNodeDescription" xml:space="preserve"><value>احسب القيمة المطلقة.</value></data>
-    <data name="SignNode" xml:space="preserve"><value>الإشارة</value></data>
-    <data name="SignNodeDescription" xml:space="preserve"><value>إرجاع الإشارة.</value></data>
-    <data name="MinNode" xml:space="preserve"><value>القيمة الصغرى</value></data>
-    <data name="MinNodeDescription" xml:space="preserve"><value>إرجاع الأصغر.</value></data>
-    <data name="MaxNode" xml:space="preserve"><value>القيمة الكبرى</value></data>
-    <data name="MaxNodeDescription" xml:space="preserve"><value>إرجاع الأكبر.</value></data>
-    <data name="ClampNode" xml:space="preserve"><value>تقييد</value></data>
-    <data name="ClampNodeDescription" xml:space="preserve"><value>تقييد ضمن المجال.</value></data>
-    <data name="LerpNode" xml:space="preserve"><value>استيفاء خطي</value></data>
-    <data name="LerpNodeDescription" xml:space="preserve"><value>استيفاء خطي.</value></data>
-    <data name="SqrtNode" xml:space="preserve"><value>الجذر التربيعي</value></data>
-    <data name="SqrtNodeDescription" xml:space="preserve"><value>احسب الجذر التربيعي.</value></data>
-    <data name="PowerNode" xml:space="preserve"><value>الأس</value></data>
-    <data name="PowerNodeDescription" xml:space="preserve"><value>احسب الأس.</value></data>
-    <data name="FloorNode" xml:space="preserve"><value>التقريب للأسفل</value></data>
-    <data name="FloorNodeDescription" xml:space="preserve"><value>تقريب للأسفل.</value></data>
-    <data name="CeilingNode" xml:space="preserve"><value>التقريب للأعلى</value></data>
-    <data name="CeilingNodeDescription" xml:space="preserve"><value>تقريب للأعلى.</value></data>
-    <data name="RoundNode" xml:space="preserve"><value>التقريب</value></data>
-    <data name="RoundNodeDescription" xml:space="preserve"><value>تقريب.</value></data>
-    <data name="FractionNode" xml:space="preserve"><value>الجزء الكسري</value></data>
-    <data name="FractionNodeDescription" xml:space="preserve"><value>إرجاع الجزء الكسري.</value></data>
-    <data name="SinNode" xml:space="preserve"><value>جيب</value></data>
-    <data name="SinNodeDescription" xml:space="preserve"><value>احسب الجيب.</value></data>
-    <data name="CosNode" xml:space="preserve"><value>جيب التمام</value></data>
-    <data name="CosNodeDescription" xml:space="preserve"><value>احسب جيب التمام.</value></data>
-    <data name="TanNode" xml:space="preserve"><value>الظل</value></data>
-    <data name="TanNodeDescription" xml:space="preserve"><value>احسب الظل.</value></data>
-    <data name="Atan2Node" xml:space="preserve"><value>Atan2</value></data>
-    <data name="Atan2NodeDescription" xml:space="preserve"><value>احسب atan2.</value></data>
-    <data name="DegreesToRadiansNode" xml:space="preserve"><value>درجات إلى راديان</value></data>
-    <data name="DegreesToRadiansNodeDescription" xml:space="preserve"><value>تحويل الدرجات إلى راديان.</value></data>
-    <data name="RadiansToDegreesNode" xml:space="preserve"><value>راديان إلى درجات</value></data>
-    <data name="RadiansToDegreesNodeDescription" xml:space="preserve"><value>تحويل الراديان إلى درجات.</value></data>
-    <data name="Minimum" xml:space="preserve"><value>الحد الأدنى</value></data>
-    <data name="MinimumDescription" xml:space="preserve"><value>الحد الأدنى.</value></data>
-    <data name="Maximum" xml:space="preserve"><value>الحد الأقصى</value></data>
-    <data name="MaximumDescription" xml:space="preserve"><value>الحد الأقصى.</value></data>
-    <data name="StartValue" xml:space="preserve"><value>قيمة البداية</value></data>
-    <data name="StartValueDescription" xml:space="preserve"><value>قيمة بداية الاستيفاء.</value></data>
-    <data name="EndValue" xml:space="preserve"><value>قيمة النهاية</value></data>
-    <data name="EndValueDescription" xml:space="preserve"><value>قيمة نهاية الاستيفاء.</value></data>
-    <data name="InterpolationFactor" xml:space="preserve"><value>معامل الاستيفاء</value></data>
-    <data name="InterpolationFactorDescription" xml:space="preserve"><value>معامل الاستيفاء.</value></data>
-    <data name="Base" xml:space="preserve"><value>الأساس</value></data>
-    <data name="BaseDescription" xml:space="preserve"><value>الأساس.</value></data>
-    <data name="Exponent" xml:space="preserve"><value>الأس</value></data>
-    <data name="ExponentDescription" xml:space="preserve"><value>الأس.</value></data>
-    <data name="YValue" xml:space="preserve"><value>Y</value></data>
-    <data name="YValueDescription" xml:space="preserve"><value>قيمة Y.</value></data>
-    <data name="XValue" xml:space="preserve"><value>X</value></data>
-    <data name="XValueDescription" xml:space="preserve"><value>قيمة X.</value></data>
-    <data name="Length" xml:space="preserve"><value>الطول</value></data>
-    <data name="LengthDescription" xml:space="preserve"><value>طول الدورة</value></data>
-    <data name="Edge" xml:space="preserve"><value>العتبة</value></data>
-    <data name="EdgeDescription" xml:space="preserve"><value>قيمة العتبة</value></data>
-    <data name="Tolerance" xml:space="preserve"><value>التفاوت</value></data>
-    <data name="ToleranceDescription" xml:space="preserve"><value>هامش المقارنة</value></data>
-    <data name="Condition" xml:space="preserve"><value>الشرط</value></data>
-    <data name="ConditionDescription" xml:space="preserve"><value>الشرط</value></data>
-    <data name="TrueValue" xml:space="preserve"><value>عند الصحة</value></data>
-    <data name="TrueValueDescription" xml:space="preserve"><value>القيمة عند تحقق الشرط</value></data>
-    <data name="FalseValue" xml:space="preserve"><value>عند الخطأ</value></data>
-    <data name="FalseValueDescription" xml:space="preserve"><value>القيمة عند عدم تحقق الشرط</value></data>
-    <data name="ModuloNode" xml:space="preserve"><value>باقي القسمة</value></data>
-    <data name="ReciprocalNode" xml:space="preserve"><value>المقلوب</value></data>
-    <data name="OneMinusNode" xml:space="preserve"><value>واحد ناقص</value></data>
-    <data name="SaturateNode" xml:space="preserve"><value>تشبيع</value></data>
-    <data name="InverseLerpNode" xml:space="preserve"><value>استيفاء عكسي</value></data>
-    <data name="SmoothStepNode" xml:space="preserve"><value>SmoothStep</value></data>
-    <data name="StepNode" xml:space="preserve"><value>خطوة</value></data>
-    <data name="RepeatNode" xml:space="preserve"><value>تكرار</value></data>
-    <data name="PingPongNode" xml:space="preserve"><value>PingPong</value></data>
-    <data name="WrapNode" xml:space="preserve"><value>التفاف</value></data>
-    <data name="ExpNode" xml:space="preserve"><value>الدالة الأسية</value></data>
-    <data name="Exp2Node" xml:space="preserve"><value>قوة العدد 2</value></data>
-    <data name="LogNode" xml:space="preserve"><value>اللوغاريتم الطبيعي</value></data>
-    <data name="Log2Node" xml:space="preserve"><value>لوغاريتم للأساس 2</value></data>
-    <data name="Log10Node" xml:space="preserve"><value>لوغاريتم للأساس 10</value></data>
-    <data name="AsinNode" xml:space="preserve"><value>جيب عكسي</value></data>
-    <data name="AcosNode" xml:space="preserve"><value>جيب تمام عكسي</value></data>
-    <data name="AtanNode" xml:space="preserve"><value>ظل عكسي</value></data>
-    <data name="EqualNode" xml:space="preserve"><value>يساوي</value></data>
-    <data name="NotEqualNode" xml:space="preserve"><value>لا يساوي</value></data>
-    <data name="GreaterNode" xml:space="preserve"><value>أكبر من</value></data>
-    <data name="GreaterEqualNode" xml:space="preserve"><value>أكبر من أو يساوي</value></data>
-    <data name="LessNode" xml:space="preserve"><value>أقل من</value></data>
-    <data name="LessEqualNode" xml:space="preserve"><value>أقل من أو يساوي</value></data>
-    <data name="SelectNode" xml:space="preserve"><value>اختيار</value></data>
-    <data name="Seed" xml:space="preserve"><value>البذرة</value></data>
-    <data name="SeedDescription" xml:space="preserve"><value>قيمة البذرة لتوليد الأعداد العشوائية</value></data>
-    <data name="Index" xml:space="preserve"><value>الفهرس</value></data>
-    <data name="IndexDescription" xml:space="preserve"><value>فهرس العدد العشوائي</value></data>
-    <data name="Parameter" xml:space="preserve"><value>المعامل</value></data>
-    <data name="ParameterDescription" xml:space="preserve"><value>موضع تقييم الضوضاء المستمرة</value></data>
-    <data name="RandomNode" xml:space="preserve"><value>عشوائي</value></data>
-    <data name="RandomNodeDescription" xml:space="preserve"><value>توليد قيمة عشوائية حتمية</value></data>
-    <data name="NoiseNode" xml:space="preserve"><value>ضوضاء</value></data>
-    <data name="NoiseNodeDescription" xml:space="preserve"><value>توليد ضوضاء مستمرة</value></data>
-    <data name="TranslateNode" xml:space="preserve"><value>إزاحة</value></data>
-    <data name="TranslateNodeDescription" xml:space="preserve"><value>تحريك الصورة</value></data>
-    <data name="TranslateX" xml:space="preserve"><value>إزاحة X</value></data>
-    <data name="TranslateY" xml:space="preserve"><value>إزاحة Y</value></data>
-    <data name="ScaleNode" xml:space="preserve"><value>تحجيم</value></data>
-    <data name="ScaleNodeDescription" xml:space="preserve"><value>تحجيم الصورة</value></data>
-    <data name="ScaleX" xml:space="preserve"><value>مقياس X</value></data>
-    <data name="ScaleY" xml:space="preserve"><value>مقياس Y</value></data>
-    <data name="RotateNode" xml:space="preserve"><value>دوران</value></data>
-    <data name="RotateNodeDescription" xml:space="preserve"><value>تدوير الصورة</value></data>
-    <data name="Angle" xml:space="preserve"><value>زاوية</value></data>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
+<data name="EffectCategoryName" xml:space="preserve"><value>التأثيرات</value></data>
+<data name="CompositionCategoryName" xml:space="preserve"><value>التركيب</value></data>
+<data name="MathCategoryName" xml:space="preserve"><value>الرياضيات</value></data>
+<data name="BasicCategoryName" xml:space="preserve"><value>أساسي</value></data>
+<data name="GeneratorCategoryName" xml:space="preserve"><value>مولّد</value></data>
+<data name="BrushCategoryName" xml:space="preserve"><value>فرشاة</value></data>
+<data name="FunctionsCategoryName" xml:space="preserve"><value>الدوال</value></data>
+<data name="VideoEffectCategoryName" xml:space="preserve"><value>تأثيرات الفيديو</value></data>
+<data name="AdvancedCategoryName" xml:space="preserve"><value>متقدم</value></data>
+<data name="TransformCategoryName" xml:space="preserve"><value>تحويل الإحداثيات</value></data>
+<data name="BrushName" xml:space="preserve"><value>فرشاة</value></data>
+<data name="Value" xml:space="preserve"><value>القيمة</value></data>
+<data name="ValueDescription" xml:space="preserve"><value>قيمة الإدخال</value></data>
+<data name="ResultDescription" xml:space="preserve"><value>نتيجة العملية</value></data>
+<data name="AbsNode" xml:space="preserve"><value>القيمة المطلقة</value></data>
+<data name="AbsNodeDescription" xml:space="preserve"><value>احسب القيمة المطلقة.</value></data>
+<data name="SignNode" xml:space="preserve"><value>الإشارة</value></data>
+<data name="SignNodeDescription" xml:space="preserve"><value>إرجاع الإشارة.</value></data>
+<data name="MinNode" xml:space="preserve"><value>القيمة الصغرى</value></data>
+<data name="MinNodeDescription" xml:space="preserve"><value>إرجاع الأصغر.</value></data>
+<data name="MaxNode" xml:space="preserve"><value>القيمة الكبرى</value></data>
+<data name="MaxNodeDescription" xml:space="preserve"><value>إرجاع الأكبر.</value></data>
+<data name="ClampNode" xml:space="preserve"><value>تقييد</value></data>
+<data name="ClampNodeDescription" xml:space="preserve"><value>تقييد ضمن المجال.</value></data>
+<data name="LerpNode" xml:space="preserve"><value>استيفاء خطي</value></data>
+<data name="LerpNodeDescription" xml:space="preserve"><value>استيفاء خطي.</value></data>
+<data name="SqrtNode" xml:space="preserve"><value>الجذر التربيعي</value></data>
+<data name="SqrtNodeDescription" xml:space="preserve"><value>احسب الجذر التربيعي.</value></data>
+<data name="PowerNode" xml:space="preserve"><value>الأس</value></data>
+<data name="PowerNodeDescription" xml:space="preserve"><value>احسب الأس.</value></data>
+<data name="FloorNode" xml:space="preserve"><value>التقريب للأسفل</value></data>
+<data name="FloorNodeDescription" xml:space="preserve"><value>تقريب للأسفل.</value></data>
+<data name="CeilingNode" xml:space="preserve"><value>التقريب للأعلى</value></data>
+<data name="CeilingNodeDescription" xml:space="preserve"><value>تقريب للأعلى.</value></data>
+<data name="RoundNode" xml:space="preserve"><value>التقريب</value></data>
+<data name="RoundNodeDescription" xml:space="preserve"><value>تقريب.</value></data>
+<data name="FractionNode" xml:space="preserve"><value>الجزء الكسري</value></data>
+<data name="FractionNodeDescription" xml:space="preserve"><value>إرجاع الجزء الكسري.</value></data>
+<data name="SinNode" xml:space="preserve"><value>جيب</value></data>
+<data name="SinNodeDescription" xml:space="preserve"><value>احسب الجيب.</value></data>
+<data name="CosNode" xml:space="preserve"><value>جيب التمام</value></data>
+<data name="CosNodeDescription" xml:space="preserve"><value>احسب جيب التمام.</value></data>
+<data name="TanNode" xml:space="preserve"><value>الظل</value></data>
+<data name="TanNodeDescription" xml:space="preserve"><value>احسب الظل.</value></data>
+<data name="Atan2Node" xml:space="preserve"><value>Atan2</value></data>
+<data name="Atan2NodeDescription" xml:space="preserve"><value>احسب atan2.</value></data>
+<data name="DegreesToRadiansNode" xml:space="preserve"><value>درجات إلى راديان</value></data>
+<data name="DegreesToRadiansNodeDescription" xml:space="preserve"><value>تحويل الدرجات إلى راديان.</value></data>
+<data name="RadiansToDegreesNode" xml:space="preserve"><value>راديان إلى درجات</value></data>
+<data name="RadiansToDegreesNodeDescription" xml:space="preserve"><value>تحويل الراديان إلى درجات.</value></data>
+<data name="Minimum" xml:space="preserve"><value>الحد الأدنى</value></data>
+<data name="MinimumDescription" xml:space="preserve"><value>الحد الأدنى.</value></data>
+<data name="Maximum" xml:space="preserve"><value>الحد الأقصى</value></data>
+<data name="MaximumDescription" xml:space="preserve"><value>الحد الأقصى.</value></data>
+<data name="StartValue" xml:space="preserve"><value>قيمة البداية</value></data>
+<data name="StartValueDescription" xml:space="preserve"><value>قيمة بداية الاستيفاء.</value></data>
+<data name="EndValue" xml:space="preserve"><value>قيمة النهاية</value></data>
+<data name="EndValueDescription" xml:space="preserve"><value>قيمة نهاية الاستيفاء.</value></data>
+<data name="InterpolationFactor" xml:space="preserve"><value>معامل الاستيفاء</value></data>
+<data name="InterpolationFactorDescription" xml:space="preserve"><value>معامل الاستيفاء.</value></data>
+<data name="Base" xml:space="preserve"><value>الأساس</value></data>
+<data name="BaseDescription" xml:space="preserve"><value>الأساس.</value></data>
+<data name="Exponent" xml:space="preserve"><value>الأس</value></data>
+<data name="ExponentDescription" xml:space="preserve"><value>الأس.</value></data>
+<data name="YValue" xml:space="preserve"><value>Y</value></data>
+<data name="YValueDescription" xml:space="preserve"><value>قيمة Y.</value></data>
+<data name="XValue" xml:space="preserve"><value>X</value></data>
+<data name="XValueDescription" xml:space="preserve"><value>قيمة X.</value></data>
+<data name="Length" xml:space="preserve"><value>الطول</value></data>
+<data name="LengthDescription" xml:space="preserve"><value>طول الدورة</value></data>
+<data name="Edge" xml:space="preserve"><value>العتبة</value></data>
+<data name="EdgeDescription" xml:space="preserve"><value>قيمة العتبة</value></data>
+<data name="Tolerance" xml:space="preserve"><value>التفاوت</value></data>
+<data name="ToleranceDescription" xml:space="preserve"><value>هامش المقارنة</value></data>
+<data name="Condition" xml:space="preserve"><value>الشرط</value></data>
+<data name="ConditionDescription" xml:space="preserve"><value>الشرط</value></data>
+<data name="TrueValue" xml:space="preserve"><value>عند الصحة</value></data>
+<data name="TrueValueDescription" xml:space="preserve"><value>القيمة عند تحقق الشرط</value></data>
+<data name="FalseValue" xml:space="preserve"><value>عند الخطأ</value></data>
+<data name="FalseValueDescription" xml:space="preserve"><value>القيمة عند عدم تحقق الشرط</value></data>
+<data name="ModuloNode" xml:space="preserve"><value>باقي القسمة</value></data>
+<data name="ReciprocalNode" xml:space="preserve"><value>المقلوب</value></data>
+<data name="OneMinusNode" xml:space="preserve"><value>واحد ناقص</value></data>
+<data name="SaturateNode" xml:space="preserve"><value>تشبيع</value></data>
+<data name="InverseLerpNode" xml:space="preserve"><value>استيفاء عكسي</value></data>
+<data name="SmoothStepNode" xml:space="preserve"><value>SmoothStep</value></data>
+<data name="StepNode" xml:space="preserve"><value>خطوة</value></data>
+<data name="RepeatNode" xml:space="preserve"><value>تكرار</value></data>
+<data name="PingPongNode" xml:space="preserve"><value>PingPong</value></data>
+<data name="WrapNode" xml:space="preserve"><value>التفاف</value></data>
+<data name="ExpNode" xml:space="preserve"><value>الدالة الأسية</value></data>
+<data name="Exp2Node" xml:space="preserve"><value>قوة العدد 2</value></data>
+<data name="LogNode" xml:space="preserve"><value>اللوغاريتم الطبيعي</value></data>
+<data name="Log2Node" xml:space="preserve"><value>لوغاريتم للأساس 2</value></data>
+<data name="Log10Node" xml:space="preserve"><value>لوغاريتم للأساس 10</value></data>
+<data name="AsinNode" xml:space="preserve"><value>جيب عكسي</value></data>
+<data name="AcosNode" xml:space="preserve"><value>جيب تمام عكسي</value></data>
+<data name="AtanNode" xml:space="preserve"><value>ظل عكسي</value></data>
+<data name="EqualNode" xml:space="preserve"><value>يساوي</value></data>
+<data name="NotEqualNode" xml:space="preserve"><value>لا يساوي</value></data>
+<data name="GreaterNode" xml:space="preserve"><value>أكبر من</value></data>
+<data name="GreaterEqualNode" xml:space="preserve"><value>أكبر من أو يساوي</value></data>
+<data name="LessNode" xml:space="preserve"><value>أقل من</value></data>
+<data name="LessEqualNode" xml:space="preserve"><value>أقل من أو يساوي</value></data>
+<data name="SelectNode" xml:space="preserve"><value>اختيار</value></data>
+<data name="Seed" xml:space="preserve"><value>البذرة</value></data>
+<data name="SeedDescription" xml:space="preserve"><value>قيمة البذرة لتوليد الأعداد العشوائية</value></data>
+<data name="Index" xml:space="preserve"><value>الفهرس</value></data>
+<data name="IndexDescription" xml:space="preserve"><value>فهرس العدد العشوائي</value></data>
+<data name="Parameter" xml:space="preserve"><value>المعامل</value></data>
+<data name="ParameterDescription" xml:space="preserve"><value>موضع تقييم الضوضاء المستمرة</value></data>
+<data name="RandomNode" xml:space="preserve"><value>عشوائي</value></data>
+<data name="RandomNodeDescription" xml:space="preserve"><value>توليد قيمة عشوائية حتمية</value></data>
+<data name="NoiseNode" xml:space="preserve"><value>ضوضاء</value></data>
+<data name="NoiseNodeDescription" xml:space="preserve"><value>توليد ضوضاء مستمرة</value></data>
+<data name="TranslateNode" xml:space="preserve"><value>إزاحة</value></data>
+<data name="TranslateNodeDescription" xml:space="preserve"><value>تحريك الصورة</value></data>
+<data name="TranslateX" xml:space="preserve"><value>إزاحة X</value></data>
+<data name="TranslateY" xml:space="preserve"><value>إزاحة Y</value></data>
+<data name="ScaleNode" xml:space="preserve"><value>تحجيم</value></data>
+<data name="ScaleNodeDescription" xml:space="preserve"><value>تحجيم الصورة</value></data>
+<data name="ScaleX" xml:space="preserve"><value>مقياس X</value></data>
+<data name="ScaleY" xml:space="preserve"><value>مقياس Y</value></data>
+<data name="RotateNode" xml:space="preserve"><value>دوران</value></data>
+<data name="RotateNodeDescription" xml:space="preserve"><value>تدوير الصورة</value></data>
+<data name="Angle" xml:space="preserve"><value>زاوية</value></data>
 </root>
