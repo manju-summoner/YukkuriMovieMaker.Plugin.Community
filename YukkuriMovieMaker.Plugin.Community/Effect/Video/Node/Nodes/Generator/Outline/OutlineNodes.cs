@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Media;
 using SkiaSharp;
+using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
@@ -198,11 +199,17 @@ public class TextOutlineNode : NodeLogic
     }
 
     [InputPort("フォント名", "使用するフォントファミリー名（空欄の場合は既定のフォント）")]
-    [TextPortControl(Default = "")]
+    [FontComboBox]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public string FontFamily
     {
-        get => GetInput<string>() ?? "";
+        get
+        {
+            var name = GetInput<string>();
+            if (string.IsNullOrEmpty(name))
+                name = "メイリオ";
+            return name;
+        }
         set => SetInput(value);
     }
 

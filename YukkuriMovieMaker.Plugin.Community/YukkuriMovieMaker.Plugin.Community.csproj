@@ -24,9 +24,6 @@
         <Reference Include="AvalonDock">
             <HintPath>$(YMM4DirPath)AvalonDock.dll</HintPath>
         </Reference>
-        <Reference Include="YukkuriMovieMaker">
-            <HintPath>$(YMM4DirPath)YukkuriMovieMaker.dll</HintPath>
-        </Reference>
         <Reference Include="YukkuriMovieMaker.Controls">
             <HintPath>$(YMM4DirPath)YukkuriMovieMaker.Controls.dll</HintPath>
         </Reference>
