@@ -299,9 +299,19 @@ public class ShapeOutlineNode : NodeLogic
             .GetAwaiter()
             .GetResult();
 
-        return value is T typed
-            ? typed
-            : default!;
+        if (value is null)
+            return default!;
+        if (value is T typed)
+            return typed;
+
+        try
+        {
+            return (T)Convert.ChangeType(value, typeof(T));
+        }
+        catch
+        {
+            return default!;
+        }
     }
 
     private static SKPoint[] BuildStarPoints(float cx, float cy, float outerRx, float outerRy, float innerRx,
