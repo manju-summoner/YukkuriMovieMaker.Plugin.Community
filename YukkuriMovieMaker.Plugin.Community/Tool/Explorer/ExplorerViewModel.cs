@@ -1100,10 +1100,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         void StartSidebarSync(string targetLocation, CancellationToken parentToken)
         {
-            sidebarSyncCts?.Cancel();
-            sidebarSyncCts?.Dispose();
-            sidebarSyncCts = CancellationTokenSource.CreateLinkedTokenSource(parentToken, disposeCts.Token);
-            _ = SyncSidebarToLocationAsync(targetLocation, sidebarSyncCts.Token);
+            //Dispatcherへ積まれた処理はDispose後に届くことがあり、そのまま進むと破棄済みCTSを操作してしまう
+            if (disposedValue) return;
+
+            var newCts = CancellationTokenSource.CreateLinkedTokenSource(parentToken, disposeCts.Token);
+            var token = newCts.Token;
+            CancelAndDispose(Interlocked.Exchange(ref sidebarSyncCts, newCts));
+
+            //差し替えとDisposeが競合した場合、Disposeが回収し損ねた分をここで片付ける
+            if (disposedValue)
+            {
+                CancelAndDispose(Interlocked.Exchange(ref sidebarSyncCts, null));
+                return;
+            }
+
+            _ = SyncSidebarToLocationSafeAsync(targetLocation, token);
         }
 
         private void UpdateFilteredItems()
@@ -1173,30 +1184,54 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             watcher = null;
         }
 
+        /// <summary>
+        /// 破棄済みのCancellationTokenSourceのCancelはObjectDisposedExceptionを投げるため、
+        /// Disposeと競合しても安全に取り消せるようにする
+        /// </summary>
+        static void CancelAndDispose(CancellationTokenSource? cts)
+        {
+            if (cts is null) return;
+            try { cts.Cancel(); }
+            catch (ObjectDisposedException) { }
+            cts.Dispose();
+        }
+
         async Task RefreshInternalAsync()
         {
-            var oldCts = refreshCts;
-            oldCts?.Cancel();
-            refreshCts = new CancellationTokenSource();
-            oldCts?.Dispose();
-
-            isLoading = true;
-            RaiseCommandExecutable();
-
-            var token = refreshCts.Token;
+            //fire-and-forgetで呼ばれるため、ここで例外を外へ出すとTaskがfaultedのまま放置され、
+            //ファイナライザースレッド経由の未観測例外として報告されてしまう。全体をtryで覆って必ず内側で処理する
             try
             {
-                await RefreshCoreAsync(token);
+                //Dispatcherへ積まれた処理はDispose後に届くことがあり、そのまま進むと破棄済みCTSを操作してしまう
+                if (disposedValue) return;
+
+                var newCts = new CancellationTokenSource();
+                var token = newCts.Token;
+                CancelAndDispose(Interlocked.Exchange(ref refreshCts, newCts));
+
+                //差し替えとDisposeが競合した場合、Disposeが回収し損ねた分をここで片付ける
+                if (disposedValue)
+                {
+                    CancelAndDispose(Interlocked.Exchange(ref refreshCts, null));
+                    return;
+                }
+
+                isLoading = true;
+                try
+                {
+                    RaiseCommandExecutable();
+                    await RefreshCoreAsync(token);
+                }
+                finally
+                {
+                    isLoading = false;
+                    RaiseCommandExecutable();
+                }
             }
             catch (OperationCanceledException) { }
             catch (Exception e)
             {
                 Log.Default.Write("ExplorerViewModel.Refresh", e);
-            }
-            finally
-            {
-                isLoading = false;
-                RaiseCommandExecutable();
             }
         }
 
@@ -1385,6 +1420,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     watcher?.Dispose();
                     watcher = null;
                 }
+            }
+        }
+
+        /// <summary>
+        /// fire-and-forgetで呼ぶため、例外を外へ出すとTaskがfaultedのまま放置され、
+        /// ファイナライザースレッド経由の未観測例外として報告されてしまう
+        /// </summary>
+        async Task SyncSidebarToLocationSafeAsync(string targetLocation, CancellationToken token)
+        {
+            try
+            {
+                await SyncSidebarToLocationAsync(targetLocation, token);
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception e)
+            {
+                Log.Default.Write("ExplorerViewModel.SyncSidebar", e);
             }
         }
 
@@ -1778,11 +1830,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         #region IDisposable Support
 
-        private bool disposedValue;
+        private volatile bool disposedValue;
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
+                //Dispatcherへ積まれた処理が破棄後に走ることがあるため、破棄の開始時点で印を付けて弾けるようにする
+                disposedValue = true;
+
                 if (disposing)
                 {
                     // マネージド状態を破棄します (マネージド オブジェクト)
@@ -1803,18 +1858,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     foreach (var item in SidebarItems)
                         UnsubscribeSidebarItem(item);
 
+                    //disposeCtsはsidebarSyncCtsのリンク元のため、子を破棄してから破棄する
                     disposeCts.Cancel();
+                    CancelAndDispose(Interlocked.Exchange(ref refreshCts, null));
+                    CancelAndDispose(Interlocked.Exchange(ref sidebarSyncCts, null));
                     disposeCts.Dispose();
-                    refreshCts?.Cancel();
-                    refreshCts?.Dispose();
-                    sidebarSyncCts?.Cancel();
-                    sidebarSyncCts?.Dispose();
                 }
                 StopFileSystemWatcher();
 
                 // アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします
                 // 大きなフィールドを null に設定します
-                disposedValue = true;
             }
         }
 
