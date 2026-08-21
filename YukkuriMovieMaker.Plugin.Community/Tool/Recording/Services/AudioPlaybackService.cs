@@ -6,7 +6,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
 {
     public sealed class AudioPlaybackService : IDisposable
     {
-        private WaveOutEvent? playbackOutput;
+        private WaveOut? playbackOutput;
         private AudioFileReader? playbackReader;
 
         public bool IsPlaying { get; private set; }
@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
             Stop();
 
             playbackReader = new AudioFileReader(filePath);
-            playbackOutput = new WaveOutEvent();
+            playbackOutput = new WaveOut();
             playbackOutput.Volume = GetYmmVolume();
             playbackOutput.PlaybackStopped += OnPlaybackStopped;
             playbackOutput.Init(playbackReader);

@@ -17,7 +17,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 {
     public partial class RecordedVoiceAudioSelectorWindow : Window, INotifyPropertyChanged
     {
-        private WaveOutEvent? player;
+        private WaveOut? player;
         private AudioFileReader? reader;
 
         private readonly RecordPathService recordPathService;
@@ -362,7 +362,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             try
             {
                 reader = new AudioFileReader(SelectedItem.Path);
-                player = new WaveOutEvent();
+                player = new WaveOut();
                 player.Volume = GetYmmVolume();
                 player.PlaybackStopped += OnPlaybackStopped;
                 player.Init(reader);
