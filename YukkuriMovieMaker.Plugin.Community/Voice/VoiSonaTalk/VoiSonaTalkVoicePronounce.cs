@@ -19,6 +19,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
 
         public double[]? PhonemeDurations { get; set => Set(ref field, value); }
 
+        // ユーザーが指定した音素長（負値=自動）。実測値のPhonemeDurationsを指定長として送り返すと
+        // 全音素が固定されて話速などのパラメーターが効かなくなるため、指定長は実測値と分けて保持する
+        public double[]? RequestedPhonemeDurations { get; set => Set(ref field, value); }
+
         public void BeginEdit()
         {
 

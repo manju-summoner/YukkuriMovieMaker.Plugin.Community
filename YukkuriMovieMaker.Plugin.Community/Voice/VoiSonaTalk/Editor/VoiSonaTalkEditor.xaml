@@ -323,7 +323,7 @@
                                             <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
                                         <TextBox Grid.Row="0"
-                                                 Text="{Binding Duration, Mode=TwoWay, StringFormat=F2, UpdateSourceTrigger=LostFocus}"
+                                                 Text="{Binding Duration, Mode=TwoWay, Converter={local:VoiSonaTalkEditorPhonemeDurationTextConverter}, UpdateSourceTrigger=LostFocus}"
                                                  HorizontalContentAlignment="Center"
                                                  BorderBrush="Transparent"
                                                  Background="Transparent"
