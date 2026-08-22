@@ -176,7 +176,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         void SyncViewToCurrentImage()
         {
             var bounds = viewModel?.CanvasImage is null ? Rect.Empty : viewModel.CanvasBaseBounds;
-            if (bounds != lastBaseImageBounds)
+            //boundsはfloat由来でサブピクセルの揺れがあるため、0.5px未満の変化ではズーム/パンをリセットしない
+            if (!AreBoundsClose(bounds, lastBaseImageBounds))
             {
                 lastBaseImageBounds = bounds;
                 ResetView();
@@ -186,6 +187,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 UpdateScrollInfo();
                 InvalidateVisual();
             }
+        }
+
+        static bool AreBoundsClose(Rect a, Rect b)
+        {
+            if (a.IsEmpty || b.IsEmpty)
+                return a.IsEmpty == b.IsEmpty;
+            return Math.Abs(a.X - b.X) < 0.5
+                && Math.Abs(a.Y - b.Y) < 0.5
+                && Math.Abs(a.Width - b.Width) < 0.5
+                && Math.Abs(a.Height - b.Height) < 0.5;
         }
 
         void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
