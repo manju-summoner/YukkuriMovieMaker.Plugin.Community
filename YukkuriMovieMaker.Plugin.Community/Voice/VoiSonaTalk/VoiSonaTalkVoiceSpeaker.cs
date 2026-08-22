@@ -51,7 +51,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
                 return null;
 
             // 言語を確定
-            string lang = voiceInfo.Languages.Contains(param.Version) ? param.Version : voiceInfo.Languages.FirstOrDefault() ?? string.Empty;
+            string lang = voiceInfo.Languages.Contains(param.Language) ? param.Language : voiceInfo.Languages.FirstOrDefault() ?? string.Empty;
             if (string.IsNullOrEmpty(lang))
                 return null;
 

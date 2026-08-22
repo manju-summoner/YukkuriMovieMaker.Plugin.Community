@@ -38,8 +38,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk
             return infos;
         }
 
+#if DEBUG
+        // VoiSona Talkエンジン無しでリクエスト内容を検証するためのテスト用フック
+        internal static volatile Func<SpeechSynthesisRequest, Task<SpeechSynthesisInformation?>>? SpeechSynthesisOverrideForTesting;
+#endif
+
         public static async Task<SpeechSynthesisInformation?> SpeechSynthesisAsync(SpeechSynthesisRequest request)
         {
+#if DEBUG
+            if (SpeechSynthesisOverrideForTesting is { } overrideForTesting)
+                return await overrideForTesting(request);
+#endif
             var api = await CreateAPIAsync();
             if (api is null)
                 return null;
