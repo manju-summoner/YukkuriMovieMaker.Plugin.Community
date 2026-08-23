@@ -1,6 +1,7 @@
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 
@@ -8,7 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 ///     グラフの出力を受け取るノード。
 ///     ノードエディタ上では出力端子として機能し、グラフの評価結果をまとめて返す。
 /// </summary>
-[Node(typeof(FunctionCategory), "戻値", "ノードのグラフの計算結果を受け取ります。")]
+[Node(typeof(FunctionCategory), nameof(TextNode.ReturnNode), nameof(TextNode.ReturnNodeDescription), typeof(TextNode))]
 public class ReturnNode : NodeLogic
 {
     private PortDefinition[] _portDefinitions = Array.Empty<PortDefinition>();

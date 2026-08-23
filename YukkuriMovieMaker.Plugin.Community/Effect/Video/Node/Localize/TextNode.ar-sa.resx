@@ -70,9 +70,26 @@
 <data name="AdvancedCategoryName" xml:space="preserve"><value>متقدم</value></data>
 <data name="TransformCategoryName" xml:space="preserve"><value>تحويل الإحداثيات</value></data>
 <data name="BrushName" xml:space="preserve"><value>فرشاة</value></data>
+<data name="AddNode" xml:space="preserve"><value>جمع</value></data>
+<data name="AddNodeDescription" xml:space="preserve"><value>اجمع رقمين.</value></data>
+<data name="SubtractNode" xml:space="preserve"><value>طرح</value></data>
+<data name="SubtractNodeDescription" xml:space="preserve"><value>اطرح القيمة اليمنى من اليسرى.</value></data>
+<data name="MultiplyNode" xml:space="preserve"><value>ضرب</value></data>
+<data name="MultiplyNodeDescription" xml:space="preserve"><value>اضرب رقمين.</value></data>
+<data name="DivideNode" xml:space="preserve"><value>قسمة</value></data>
+<data name="DivideNodeDescription" xml:space="preserve"><value>اقسم القيمة اليسرى على اليمنى.</value></data>
 <data name="Value" xml:space="preserve"><value>القيمة</value></data>
 <data name="ValueDescription" xml:space="preserve"><value>قيمة الإدخال</value></data>
+<data name="LeftOperand" xml:space="preserve"><value>الطرف الأيسر</value></data>
+<data name="LeftOperandDescription" xml:space="preserve"><value>القيمة في الجانب الأيسر من العملية.</value></data>
+<data name="RightOperand" xml:space="preserve"><value>الطرف الأيمن</value></data>
+<data name="RightOperandDescription" xml:space="preserve"><value>القيمة في الجانب الأيمن من العملية.</value></data>
+<data name="Result" xml:space="preserve"><value>النتيجة</value></data>
 <data name="ResultDescription" xml:space="preserve"><value>نتيجة العملية</value></data>
+<data name="AddResultDescription" xml:space="preserve"><value>نتيجة الجمع.</value></data>
+<data name="SubtractResultDescription" xml:space="preserve"><value>نتيجة الطرح.</value></data>
+<data name="MultiplyResultDescription" xml:space="preserve"><value>نتيجة الضرب.</value></data>
+<data name="DivideResultDescription" xml:space="preserve"><value>نتيجة القسمة.</value></data>
 <data name="AbsNode" xml:space="preserve"><value>القيمة المطلقة</value></data>
 <data name="AbsNodeDescription" xml:space="preserve"><value>احسب القيمة المطلقة.</value></data>
 <data name="SignNode" xml:space="preserve"><value>الإشارة</value></data>
@@ -127,6 +144,24 @@
 <data name="YValueDescription" xml:space="preserve"><value>قيمة Y.</value></data>
 <data name="XValue" xml:space="preserve"><value>X</value></data>
 <data name="XValueDescription" xml:space="preserve"><value>قيمة X.</value></data>
+<data name="AbsResultDescription" xml:space="preserve"><value>القيمة المطلقة.</value></data>
+<data name="SignResultDescription" xml:space="preserve"><value>الإشارة.</value></data>
+<data name="MinResultDescription" xml:space="preserve"><value>القيمة الصغرى.</value></data>
+<data name="MaxResultDescription" xml:space="preserve"><value>القيمة الكبرى.</value></data>
+<data name="ClampResultDescription" xml:space="preserve"><value>القيمة بعد التقييد.</value></data>
+<data name="LerpResultDescription" xml:space="preserve"><value>نتيجة الاستيفاء.</value></data>
+<data name="SqrtResultDescription" xml:space="preserve"><value>الجذر التربيعي.</value></data>
+<data name="PowerResultDescription" xml:space="preserve"><value>نتيجة الأس.</value></data>
+<data name="FloorResultDescription" xml:space="preserve"><value>نتيجة التقريب للأسفل.</value></data>
+<data name="CeilingResultDescription" xml:space="preserve"><value>نتيجة التقريب للأعلى.</value></data>
+<data name="RoundResultDescription" xml:space="preserve"><value>القيمة بعد التقريب.</value></data>
+<data name="FractionResultDescription" xml:space="preserve"><value>الجزء العشري.</value></data>
+<data name="SinResultDescription" xml:space="preserve"><value>قيمة الجيب.</value></data>
+<data name="CosResultDescription" xml:space="preserve"><value>قيمة جيب التمام.</value></data>
+<data name="TanResultDescription" xml:space="preserve"><value>قيمة الظل.</value></data>
+<data name="Atan2ResultDescription" xml:space="preserve"><value>نتيجة Atan2.</value></data>
+<data name="DegreesToRadiansResultDescription" xml:space="preserve"><value>القيمة بالراديان.</value></data>
+<data name="RadiansToDegreesResultDescription" xml:space="preserve"><value>القيمة بالدرجات.</value></data>
 <data name="Length" xml:space="preserve"><value>الطول</value></data>
 <data name="LengthDescription" xml:space="preserve"><value>طول الدورة</value></data>
 <data name="Edge" xml:space="preserve"><value>العتبة</value></data>
@@ -139,31 +174,82 @@
 <data name="TrueValueDescription" xml:space="preserve"><value>القيمة عند تحقق الشرط</value></data>
 <data name="FalseValue" xml:space="preserve"><value>عند الخطأ</value></data>
 <data name="FalseValueDescription" xml:space="preserve"><value>القيمة عند عدم تحقق الشرط</value></data>
+<data name="ComparisonResultDescription" xml:space="preserve"><value>نتيجة المقارنة.</value></data>
 <data name="ModuloNode" xml:space="preserve"><value>باقي القسمة</value></data>
+<data name="ModuloNodeDescription" xml:space="preserve"><value>احسب باقي القسمة.</value></data>
+<data name="ModuloResultDescription" xml:space="preserve"><value>باقي القسمة.</value></data>
 <data name="ReciprocalNode" xml:space="preserve"><value>المقلوب</value></data>
+<data name="ReciprocalNodeDescription" xml:space="preserve"><value>احسب المقلوب.</value></data>
+<data name="ReciprocalResultDescription" xml:space="preserve"><value>المقلوب.</value></data>
 <data name="OneMinusNode" xml:space="preserve"><value>واحد ناقص</value></data>
+<data name="OneMinusNodeDescription" xml:space="preserve"><value>اطرح القيمة المدخلة من واحد.</value></data>
+<data name="OneMinusResultDescription" xml:space="preserve"><value>نتيجة الحساب.</value></data>
 <data name="SaturateNode" xml:space="preserve"><value>تشبيع</value></data>
+<data name="SaturateNodeDescription" xml:space="preserve"><value>تقييد ضمن النطاق 0 إلى 1.</value></data>
+<data name="SaturateResultDescription" xml:space="preserve"><value>القيمة بعد التقييد.</value></data>
 <data name="InverseLerpNode" xml:space="preserve"><value>استيفاء عكسي</value></data>
+<data name="InverseLerpNodeDescription" xml:space="preserve"><value>احسب معامل الاستيفاء.</value></data>
+<data name="InverseLerpResultDescription" xml:space="preserve"><value>معامل الاستيفاء.</value></data>
 <data name="SmoothStepNode" xml:space="preserve"><value>SmoothStep</value></data>
+<data name="SmoothStepNodeDescription" xml:space="preserve"><value>استيفاء سلس.</value></data>
+<data name="SmoothStepResultDescription" xml:space="preserve"><value>نتيجة الاستيفاء.</value></data>
 <data name="StepNode" xml:space="preserve"><value>خطوة</value></data>
+<data name="StepNodeDescription" xml:space="preserve"><value>إرجاع 0 أو 1 حسب العتبة.</value></data>
+<data name="StepResultDescription" xml:space="preserve"><value>نتيجة الخطوة.</value></data>
 <data name="RepeatNode" xml:space="preserve"><value>تكرار</value></data>
+<data name="RepeatNodeDescription" xml:space="preserve"><value>تكرار بدورة ثابتة.</value></data>
+<data name="RepeatResultDescription" xml:space="preserve"><value>نتيجة التكرار.</value></data>
 <data name="PingPongNode" xml:space="preserve"><value>PingPong</value></data>
+<data name="PingPongNodeDescription" xml:space="preserve"><value>إنشاء حركة تذبذب.</value></data>
+<data name="PingPongResultDescription" xml:space="preserve"><value>قيمة التذبذب.</value></data>
 <data name="WrapNode" xml:space="preserve"><value>التفاف</value></data>
+<data name="WrapNodeDescription" xml:space="preserve"><value>التفاف القيمة داخل النطاق.</value></data>
+<data name="WrapResultDescription" xml:space="preserve"><value>القيمة بعد الالتفاف.</value></data>
 <data name="ExpNode" xml:space="preserve"><value>الدالة الأسية</value></data>
+<data name="ExpNodeDescription" xml:space="preserve"><value>احسب أس العدد e.</value></data>
+<data name="ExpResultDescription" xml:space="preserve"><value>نتيجة الحساب الأسي.</value></data>
 <data name="Exp2Node" xml:space="preserve"><value>قوة العدد 2</value></data>
+<data name="Exp2NodeDescription" xml:space="preserve"><value>احسب قوة العدد 2.</value></data>
+<data name="Exp2ResultDescription" xml:space="preserve"><value>نتيجة الحساب.</value></data>
 <data name="LogNode" xml:space="preserve"><value>اللوغاريتم الطبيعي</value></data>
+<data name="LogNodeDescription" xml:space="preserve"><value>احسب اللوغاريتم الطبيعي.</value></data>
+<data name="LogResultDescription" xml:space="preserve"><value>اللوغاريتم الطبيعي.</value></data>
 <data name="Log2Node" xml:space="preserve"><value>لوغاريتم للأساس 2</value></data>
+<data name="Log2NodeDescription" xml:space="preserve"><value>احسب اللوغاريتم بالأساس 2.</value></data>
+<data name="Log2ResultDescription" xml:space="preserve"><value>اللوغاريتم بالأساس 2.</value></data>
 <data name="Log10Node" xml:space="preserve"><value>لوغاريتم للأساس 10</value></data>
+<data name="Log10NodeDescription" xml:space="preserve"><value>احسب اللوغاريتم بالأساس 10.</value></data>
+<data name="Log10ResultDescription" xml:space="preserve"><value>اللوغاريتم بالأساس 10.</value></data>
 <data name="AsinNode" xml:space="preserve"><value>جيب عكسي</value></data>
+<data name="AsinNodeDescription" xml:space="preserve"><value>احسب دالة الجيب العكسي.</value></data>
+<data name="AsinResultDescription" xml:space="preserve"><value>الجيب العكسي.</value></data>
 <data name="AcosNode" xml:space="preserve"><value>جيب تمام عكسي</value></data>
+<data name="AcosNodeDescription" xml:space="preserve"><value>احسب دالة جيب التمام العكسي.</value></data>
+<data name="AcosResultDescription" xml:space="preserve"><value>جيب التمام العكسي.</value></data>
 <data name="AtanNode" xml:space="preserve"><value>ظل عكسي</value></data>
+<data name="AtanNodeDescription" xml:space="preserve"><value>احسب الظل العكسي.</value></data>
+<data name="AtanResultDescription" xml:space="preserve"><value>الظل العكسي.</value></data>
 <data name="EqualNode" xml:space="preserve"><value>يساوي</value></data>
+<data name="EqualNodeDescription" xml:space="preserve"><value>تحقق مما إذا كانت القيمتان متساويتين.</value></data>
+<data name="EqualResultDescription" xml:space="preserve"><value>نتيجة المقارنة.</value></data>
 <data name="NotEqualNode" xml:space="preserve"><value>لا يساوي</value></data>
+<data name="NotEqualNodeDescription" xml:space="preserve"><value>تحقق مما إذا كانت القيمتان غير متساويتين.</value></data>
+<data name="NotEqualResultDescription" xml:space="preserve"><value>نتيجة المقارنة.</value></data>
 <data name="GreaterNode" xml:space="preserve"><value>أكبر من</value></data>
+<data name="GreaterNodeDescription" xml:space="preserve"><value>تحقق مما إذا كان الطرف الأيسر أكبر من الأيمن.</value></data>
+<data name="GreaterResultDescription" xml:space="preserve"><value>نتيجة المقارنة.</value></data>
 <data name="GreaterEqualNode" xml:space="preserve"><value>أكبر من أو يساوي</value></data>
+<data name="GreaterEqualNodeDescription" xml:space="preserve"><value>تحقق مما إذا كان الطرف الأيسر أكبر من أو يساوي الأيمن.</value></data>
+<data name="GreaterEqualResultDescription" xml:space="preserve"><value>نتيجة المقارنة.</value></data>
 <data name="LessNode" xml:space="preserve"><value>أقل من</value></data>
+<data name="LessNodeDescription" xml:space="preserve"><value>تحقق مما إذا كان الطرف الأيسر أصغر من الأيمن.</value></data>
+<data name="LessResultDescription" xml:space="preserve"><value>نتيجة المقارنة.</value></data>
 <data name="LessEqualNode" xml:space="preserve"><value>أقل من أو يساوي</value></data>
+<data name="LessEqualNodeDescription" xml:space="preserve"><value>تحقق مما إذا كان الطرف الأيسر أصغر من أو يساوي الأيمن.</value></data>
+<data name="LessEqualResultDescription" xml:space="preserve"><value>نتيجة المقارنة.</value></data>
 <data name="SelectNode" xml:space="preserve"><value>اختيار</value></data>
+<data name="SelectNodeDescription" xml:space="preserve"><value>اختر قيمة حسب الشرط.</value></data>
+<data name="SelectResultDescription" xml:space="preserve"><value>القيمة المختارة.</value></data>
 <data name="Seed" xml:space="preserve"><value>البذرة</value></data>
 <data name="SeedDescription" xml:space="preserve"><value>قيمة البذرة لتوليد الأعداد العشوائية</value></data>
 <data name="Index" xml:space="preserve"><value>الفهرس</value></data>
@@ -185,4 +271,228 @@
 <data name="RotateNode" xml:space="preserve"><value>دوران</value></data>
 <data name="RotateNodeDescription" xml:space="preserve"><value>تدوير الصورة</value></data>
 <data name="Angle" xml:space="preserve"><value>زاوية</value></data>
+<data name="TransformResultDescription" xml:space="preserve"><value>الصورة بعد التحويل.</value></data>
+<data name="FillRuleNonZero" xml:space="preserve"><value>غير صفري</value></data>
+<data name="FillRuleEvenOdd" xml:space="preserve"><value>زوجي-فردي</value></data>
+<data name="ShapeRect" xml:space="preserve"><value>مستطيل</value></data>
+<data name="ShapeRoundRect" xml:space="preserve"><value>مستطيل بزوايا دائرية</value></data>
+<data name="ShapeOval" xml:space="preserve"><value>بيضاوي</value></data>
+<data name="ShapePolygon" xml:space="preserve"><value>مضلع</value></data>
+<data name="ShapeStar" xml:space="preserve"><value>نجمة</value></data>
+<data name="ShapeLine" xml:space="preserve"><value>خط مستقيم</value></data>
+<data name="PathOpUnion" xml:space="preserve"><value>اتحاد</value></data>
+<data name="PathOpIntersect" xml:space="preserve"><value>تقاطع</value></data>
+<data name="PathOpDifference" xml:space="preserve"><value>فرق</value></data>
+<data name="PathOpReverseDifference" xml:space="preserve"><value>الفرق العكسي</value></data>
+<data name="PathOpXor" xml:space="preserve"><value>الفرق المتماثل</value></data>
+<data name="ChannelHue" xml:space="preserve"><value>درجة اللون</value></data>
+<data name="ChannelSaturation" xml:space="preserve"><value>التشبع</value></data>
+<data name="ChannelValue" xml:space="preserve"><value>القيمة</value></data>
+<data name="ChannelRed" xml:space="preserve"><value>أحمر</value></data>
+<data name="ChannelGreen" xml:space="preserve"><value>أخضر</value></data>
+<data name="ChannelBlue" xml:space="preserve"><value>أزرق</value></data>
+<data name="ChannelAlpha" xml:space="preserve"><value>الشفافية</value></data>
+<data name="BlendNormal" xml:space="preserve"><value>عادي</value></data>
+<data name="BlendMultiply" xml:space="preserve"><value>ضرب</value></data>
+<data name="BlendScreen" xml:space="preserve"><value>شاشة</value></data>
+<data name="BlendDarken" xml:space="preserve"><value>تغميق</value></data>
+<data name="BlendLighten" xml:space="preserve"><value>تفتيح</value></data>
+<data name="BlendDissolve" xml:space="preserve"><value>إذابة</value></data>
+<data name="BlendColorBurn" xml:space="preserve"><value>تغميق اللون</value></data>
+<data name="BlendLinearBurn" xml:space="preserve"><value>تغميق خطي</value></data>
+<data name="BlendDarkerColor" xml:space="preserve"><value>لون أغمق</value></data>
+<data name="BlendLighterColor" xml:space="preserve"><value>لون أفتح</value></data>
+<data name="BlendColorDodge" xml:space="preserve"><value>تفتيح اللون</value></data>
+<data name="BlendLinearDodge" xml:space="preserve"><value>تفتيح خطي</value></data>
+<data name="BlendOverlay" xml:space="preserve"><value>تراكب</value></data>
+<data name="BlendSoftLight" xml:space="preserve"><value>ضوء ناعم</value></data>
+<data name="BlendHardLight" xml:space="preserve"><value>ضوء قوي</value></data>
+<data name="BlendVividLight" xml:space="preserve"><value>ضوء حيوي</value></data>
+<data name="BlendLinearLight" xml:space="preserve"><value>ضوء خطي</value></data>
+<data name="BlendPinLight" xml:space="preserve"><value>ضوء دبوسي</value></data>
+<data name="BlendHardMix" xml:space="preserve"><value>مزيج قوي</value></data>
+<data name="BlendDifferenceAbs" xml:space="preserve"><value>الفرق</value></data>
+<data name="BlendExclusion" xml:space="preserve"><value>استبعاد</value></data>
+<data name="BlendColor" xml:space="preserve"><value>لون</value></data>
+<data name="BlendLuminosity" xml:space="preserve"><value>الإضاءة</value></data>
+<data name="BlendSubtract" xml:space="preserve"><value>طرح</value></data>
+<data name="BlendDivision" xml:space="preserve"><value>قسمة</value></data>
+<data name="OutlineCategoryName" xml:space="preserve"><value>الخط الخارجي</value></data>
+<data name="ImageSourceCategoryName" xml:space="preserve"><value>مصدر الصورة</value></data>
+<data name="OutlinePortLabel" xml:space="preserve"><value>الخط الخارجي</value></data>
+<data name="InputImagePortLabel" xml:space="preserve"><value>صورة الإدخال</value></data>
+<data name="OutputImagePortLabel" xml:space="preserve"><value>صورة الإخراج</value></data>
+<data name="MaskPortLabel" xml:space="preserve"><value>القناع</value></data>
+<data name="InvertPortLabel" xml:space="preserve"><value>عكس</value></data>
+<data name="FilePathPortLabel" xml:space="preserve"><value>مسار الملف</value></data>
+<data name="RotationPortLabel" xml:space="preserve"><value>الدوران</value></data>
+<data name="TransformInputImageDescription" xml:space="preserve"><value>الصورة المراد تحويلها</value></data>
+<data name="TransformOutputImageDescription" xml:space="preserve"><value>نتيجة التحويل</value></data>
+<data name="MoveAmountX" xml:space="preserve"><value>X</value></data>
+<data name="MoveAmountXDescription" xml:space="preserve"><value>مقدار الإزاحة في اتجاه X</value></data>
+<data name="MoveAmountY" xml:space="preserve"><value>Y</value></data>
+<data name="MoveAmountYDescription" xml:space="preserve"><value>مقدار الإزاحة في اتجاه Y</value></data>
+<data name="ScaleRatioX" xml:space="preserve"><value>مقياس X</value></data>
+<data name="ScaleRatioXDescription" xml:space="preserve"><value>نسبة المقياس في اتجاه X</value></data>
+<data name="ScaleRatioY" xml:space="preserve"><value>مقياس Y</value></data>
+<data name="ScaleRatioYDescription" xml:space="preserve"><value>نسبة المقياس في اتجاه Y</value></data>
+<data name="AngleDescription" xml:space="preserve"><value>زاوية الدوران</value></data>
+<data name="OutlineRasterizeNode" xml:space="preserve"><value>تحويل الخط الخارجي إلى نقاط</value></data>
+<data name="OutlineRasterizeNodeDescription" xml:space="preserve"><value>رسم بيانات الخط الخارجي بالتعبئة والخط وتحويلها إلى ID2D1Image.</value></data>
+<data name="OutlineRasterizeInputDescription" xml:space="preserve"><value>بيانات الخط الخارجي المراد تحويلها إلى نقاط</value></data>
+<data name="StrokeWidthLabel" xml:space="preserve"><value>عرض الخط</value></data>
+<data name="StrokeWidthDescription" xml:space="preserve"><value>سُمك الخط</value></data>
+<data name="StrokeOffsetXLabel" xml:space="preserve"><value>إزاحة الخط X</value></data>
+<data name="StrokeOffsetXDescription" xml:space="preserve"><value>مقدار إزاحة موضع رسم الخط في اتجاه X</value></data>
+<data name="StrokeOffsetYLabel" xml:space="preserve"><value>إزاحة الخط Y</value></data>
+<data name="StrokeOffsetYDescription" xml:space="preserve"><value>مقدار إزاحة موضع رسم الخط في اتجاه Y</value></data>
+<data name="StrokeBrushLabel" xml:space="preserve"><value>فرشاة الخط</value></data>
+<data name="StrokeBrushDescription" xml:space="preserve"><value>الفرشاة المستخدمة لرسم الخط</value></data>
+<data name="FillBrushLabel" xml:space="preserve"><value>فرشاة التعبئة</value></data>
+<data name="FillBrushDescription" xml:space="preserve"><value>الفرشاة المستخدمة للتعبئة</value></data>
+<data name="SelfIntersectRuleLabel" xml:space="preserve"><value>قاعدة التقاطع الذاتي</value></data>
+<data name="SelfIntersectRuleDescription" xml:space="preserve"><value>طريقة تحديد الداخل والخارج عند التقاطع الذاتي</value></data>
+<data name="RasterizeOutputDescription" xml:space="preserve"><value>نتيجة التحويل إلى نقاط</value></data>
+<data name="PathTransformNode" xml:space="preserve"><value>تحويل إحداثيات المسار</value></data>
+<data name="PathTransformNodeDescription" xml:space="preserve"><value>تطبيق تحويلات إحداثية مثل الإزاحة والتحجيم والدوران والقص على الخط الخارجي.</value></data>
+<data name="PathTransformInputDescription" xml:space="preserve"><value>الخط الخارجي المراد تحويل إحداثياته</value></data>
+<data name="PathMoveXLabel" xml:space="preserve"><value>إزاحة X</value></data>
+<data name="PathMoveXDescription" xml:space="preserve"><value>مقدار الإزاحة في اتجاه X</value></data>
+<data name="PathMoveYLabel" xml:space="preserve"><value>إزاحة Y</value></data>
+<data name="PathMoveYDescription" xml:space="preserve"><value>مقدار الإزاحة في اتجاه Y</value></data>
+<data name="PathScaleXLabel" xml:space="preserve"><value>نسبة التحجيم X</value></data>
+<data name="PathScaleXDescription" xml:space="preserve"><value>نسبة التحجيم في اتجاه X</value></data>
+<data name="PathScaleYLabel" xml:space="preserve"><value>نسبة التحجيم Y</value></data>
+<data name="PathScaleYDescription" xml:space="preserve"><value>نسبة التحجيم في اتجاه Y</value></data>
+<data name="PathRotationDescription" xml:space="preserve"><value>زاوية الدوران</value></data>
+<data name="SkewXLabel" xml:space="preserve"><value>القص X</value></data>
+<data name="SkewXDescription" xml:space="preserve"><value>مقدار القص في اتجاه X</value></data>
+<data name="SkewYLabel" xml:space="preserve"><value>القص Y</value></data>
+<data name="SkewYDescription" xml:space="preserve"><value>مقدار القص في اتجاه Y</value></data>
+<data name="OriginXLabel" xml:space="preserve"><value>نقطة الأصل X</value></data>
+<data name="OriginXDescription" xml:space="preserve"><value>إحداثي X المستخدم كنقطة أصل للتحجيم والدوران والقص</value></data>
+<data name="OriginYLabel" xml:space="preserve"><value>نقطة الأصل Y</value></data>
+<data name="OriginYDescription" xml:space="preserve"><value>إحداثي Y المستخدم كنقطة أصل للتحجيم والدوران والقص</value></data>
+<data name="PathTransformOutputDescription" xml:space="preserve"><value>الخط الخارجي بعد تحويل الإحداثيات</value></data>
+<data name="ShapeCenterXLabel" xml:space="preserve"><value>المركز X</value></data>
+<data name="ShapeCenterXDescription" xml:space="preserve"><value>إحداثي X لمركز الشكل (نقطة البداية في حالة الخط المستقيم)</value></data>
+<data name="ShapeCenterYLabel" xml:space="preserve"><value>المركز Y</value></data>
+<data name="ShapeCenterYDescription" xml:space="preserve"><value>إحداثي Y لمركز الشكل (نقطة البداية في حالة الخط المستقيم)</value></data>
+<data name="ShapeWidthLabel" xml:space="preserve"><value>العرض</value></data>
+<data name="ShapeWidthDescription" xml:space="preserve"><value>عرض الشكل (المسافة في اتجاه X حتى نقطة النهاية في حالة الخط المستقيم)</value></data>
+<data name="ShapeHeightLabel" xml:space="preserve"><value>الارتفاع</value></data>
+<data name="ShapeHeightDescription" xml:space="preserve"><value>ارتفاع الشكل (المسافة في اتجاه Y حتى نقطة النهاية في حالة الخط المستقيم)</value></data>
+<data name="ShapeRotationDescription" xml:space="preserve"><value>زاوية تدوير الشكل حول مركزه (نقطة البداية)</value></data>
+<data name="ShapeCornerRadiusLabel" xml:space="preserve"><value>نصف قطر الزاوية</value></data>
+<data name="ShapeCornerRadiusDescription" xml:space="preserve"><value>نصف قطر زوايا المستطيل ذي الزوايا الدائرية</value></data>
+<data name="PolygonSidesDescription" xml:space="preserve"><value>عدد رؤوس المضلع</value></data>
+<data name="VertexCountLabel" xml:space="preserve"><value>عدد الرؤوس</value></data>
+<data name="StarSidesDescription" xml:space="preserve"><value>عدد الرؤوس الخارجية للنجمة</value></data>
+<data name="InnerRadiusRatioLabel" xml:space="preserve"><value>نسبة نصف القطر الداخلي</value></data>
+<data name="InnerRadiusRatioDescription" xml:space="preserve"><value>نصف قطر الرؤوس الداخلية للنجمة (كنسبة إلى الخارجية)</value></data>
+<data name="ShapeOutlineNode" xml:space="preserve"><value>إنشاء الخط الخارجي للشكل</value></data>
+<data name="ShapeOutlineNodeDescription" xml:space="preserve"><value>إنشاء بيانات الخط الخارجي للشكل من النوع المحدد.</value></data>
+<data name="ShapeKindLabel" xml:space="preserve"><value>النوع</value></data>
+<data name="ShapeKindDescription" xml:space="preserve"><value>نوع الشكل المراد إنشاؤه</value></data>
+<data name="ShapeParamsLabel" xml:space="preserve"><value>المعاملات</value></data>
+<data name="ShapeParamsDescription" xml:space="preserve"><value>مجموعة المدخلات حسب نوع الشكل</value></data>
+<data name="ShapeOutlineOutputDescription" xml:space="preserve"><value>بيانات الخط الخارجي للشكل الذي تم إنشاؤه</value></data>
+<data name="TextOutlineNode" xml:space="preserve"><value>إنشاء الخط الخارجي للنص</value></data>
+<data name="TextOutlineNodeDescription" xml:space="preserve"><value>إنشاء بيانات الخط الخارجي للنص المحدد.</value></data>
+<data name="TextOutlineTextLabel" xml:space="preserve"><value>النص</value></data>
+<data name="TextOutlineTextDescription" xml:space="preserve"><value>النص المراد تحويله إلى خط خارجي</value></data>
+<data name="FontFamilyLabel" xml:space="preserve"><value>اسم الخط</value></data>
+<data name="FontFamilyDescription" xml:space="preserve"><value>اسم عائلة الخط المستخدم (الخط الافتراضي إذا تُرك فارغًا)</value></data>
+<data name="FontSizeLabel" xml:space="preserve"><value>الحجم</value></data>
+<data name="FontSizeDescription" xml:space="preserve"><value>حجم الخط</value></data>
+<data name="BoldLabel" xml:space="preserve"><value>عريض</value></data>
+<data name="BoldDescription" xml:space="preserve"><value>ما إذا كان سيتم جعل النص عريضًا</value></data>
+<data name="ItalicLabel" xml:space="preserve"><value>مائل</value></data>
+<data name="ItalicDescription" xml:space="preserve"><value>ما إذا كان سيتم جعل النص مائلاً</value></data>
+<data name="TextOriginXLabel" xml:space="preserve"><value>نقطة الأصل X</value></data>
+<data name="TextOriginXDescription" xml:space="preserve"><value>إحداثي X لنقطة أصل خط الأساس للنص</value></data>
+<data name="TextOriginYLabel" xml:space="preserve"><value>نقطة الأصل Y</value></data>
+<data name="TextOriginYDescription" xml:space="preserve"><value>إحداثي Y لنقطة أصل خط الأساس للنص</value></data>
+<data name="TextOutlineOutputDescription" xml:space="preserve"><value>بيانات الخط الخارجي للنص الذي تم إنشاؤه</value></data>
+<data name="PathCombineNode" xml:space="preserve"><value>دمج المسارات</value></data>
+<data name="PathCombineNodeDescription" xml:space="preserve"><value>دمج خطين خارجيين باستخدام العملية المحددة.</value></data>
+<data name="PathInput1Label" xml:space="preserve"><value>المسار 1</value></data>
+<data name="PathInput1Description" xml:space="preserve"><value>الخط الخارجي الأول المراد دمجه</value></data>
+<data name="PathInput2Label" xml:space="preserve"><value>المسار 2</value></data>
+<data name="PathInput2Description" xml:space="preserve"><value>الخط الخارجي الثاني المراد دمجه</value></data>
+<data name="PathCombineOperationLabel" xml:space="preserve"><value>العملية</value></data>
+<data name="PathCombineOperationDescription" xml:space="preserve"><value>العملية المنطقية المطبقة على المسارين</value></data>
+<data name="PathCombineOutputDescription" xml:space="preserve"><value>بيانات الخط الخارجي الناتجة عن الدمج</value></data>
+<data name="LoadImageNode" xml:space="preserve"><value>تحميل الصورة</value></data>
+<data name="LoadImageNodeDescription" xml:space="preserve"><value>تحميل صورة من الملف المحدد.</value></data>
+<data name="LoadImageFilePathDescription" xml:space="preserve"><value>ملف الصورة المراد تحميله</value></data>
+<data name="LoadImageOutputDescription" xml:space="preserve"><value>الصورة التي تم تحميلها</value></data>
+<data name="LoadVideoFrameNode" xml:space="preserve"><value>تحميل إطار الفيديو</value></data>
+<data name="LoadVideoFrameNodeDescription" xml:space="preserve"><value>تحميل إطار معين من ملف الفيديو المحدد كصورة.</value></data>
+<data name="LoadVideoFrameFilePathDescription" xml:space="preserve"><value>ملف الفيديو المراد تحميله</value></data>
+<data name="FrameIndexLabel" xml:space="preserve"><value>رقم الإطار</value></data>
+<data name="FrameIndexDescription" xml:space="preserve"><value>رقم الإطار المراد تحميله (يبدأ من 0)</value></data>
+<data name="LoadVideoFrameOutputDescription" xml:space="preserve"><value>صورة الإطار الذي تم تحميله</value></data>
+<data name="EasingNode" xml:space="preserve"><value>التسهيل</value></data>
+<data name="EasingNodeDescription" xml:space="preserve"><value>تقييم معامل الوقت باستخدام منحنى بيزيه وتعيينه إلى نطاق الحد الأدنى إلى الأقصى</value></data>
+<data name="TimeStartLabel" xml:space="preserve"><value>بداية الوقت</value></data>
+<data name="TimeStartDescription" xml:space="preserve"><value>وقت البداية المستخدم لتطبيع معامل الوقت</value></data>
+<data name="TimeEndLabel" xml:space="preserve"><value>نهاية الوقت</value></data>
+<data name="TimeEndDescription" xml:space="preserve"><value>وقت النهاية المستخدم لتطبيع معامل الوقت</value></data>
+<data name="TimeParameterLabel" xml:space="preserve"><value>معامل الوقت</value></data>
+<data name="TimeParameterDescription" xml:space="preserve"><value>الوقت المراد تقييمه</value></data>
+<data name="EasingMaxLabel" xml:space="preserve"><value>الحد الأقصى</value></data>
+<data name="EasingMaxDescription" xml:space="preserve"><value>الحد الأعلى لقيمة الإخراج</value></data>
+<data name="EasingMinLabel" xml:space="preserve"><value>الحد الأدنى</value></data>
+<data name="EasingMinDescription" xml:space="preserve"><value>الحد الأدنى لقيمة الإخراج</value></data>
+<data name="BezierCurveLabel" xml:space="preserve"><value>منحنى بيزيه</value></data>
+<data name="BezierCurveDescription" xml:space="preserve"><value>منحنى يحدد القيمة للوقت المطبَّع من البداية إلى النهاية</value></data>
+<data name="EasingResultLabel" xml:space="preserve"><value>القيمة</value></data>
+<data name="EasingResultDescription" xml:space="preserve"><value>نتيجة التقييم</value></data>
+<data name="AlphaNode" xml:space="preserve"><value>العتامة</value></data>
+<data name="AlphaNodeDescription" xml:space="preserve"><value>تعيين عتامة الصورة.</value></data>
+<data name="AlphaInputDescription" xml:space="preserve"><value>الصورة المراد تغيير عتامتها</value></data>
+<data name="OpacityLabel" xml:space="preserve"><value>العتامة</value></data>
+<data name="OpacityDescription" xml:space="preserve"><value>درجة شفافية الصورة</value></data>
+<data name="AlphaOutputDescription" xml:space="preserve"><value>نتيجة الشفافية</value></data>
+<data name="CreateMaskNode" xml:space="preserve"><value>إنشاء قناع</value></data>
+<data name="CreateMaskNodeDescription" xml:space="preserve"><value>إنشاء صورة من عنصر الصورة المحددة</value></data>
+<data name="MaskInputImageDescription" xml:space="preserve"><value>الصورة الأساسية المستخدمة لإنشاء القناع</value></data>
+<data name="MaskModeLabel" xml:space="preserve"><value>الوضع</value></data>
+<data name="MaskModeDescription" xml:space="preserve"><value>عنصر الصورة المستخدم لإنشاء القناع</value></data>
+<data name="MaskOffsetLabel" xml:space="preserve"><value>الإزاحة</value></data>
+<data name="MaskOffsetDescription" xml:space="preserve"><value>الإزاحة المضافة إلى قيمة القناع</value></data>
+<data name="MaskInvertDescription" xml:space="preserve"><value>ما إذا كان سيتم عكس القناع</value></data>
+<data name="MaskOutputDescription" xml:space="preserve"><value>القناع الذي تم إنشاؤه</value></data>
+<data name="MaskClipNode" xml:space="preserve"><value>قص بالقناع</value></data>
+<data name="MaskClipNodeDescription" xml:space="preserve"><value>قص الصورة باستخدام القناع</value></data>
+<data name="MaskClipInputImageDescription" xml:space="preserve"><value>الصورة المراد قصها بواسطة القناع</value></data>
+<data name="MaskClipMaskDescription" xml:space="preserve"><value>القناع المستخدم للقص</value></data>
+<data name="MaskClipOutputDescription" xml:space="preserve"><value>نتيجة القص بالقناع</value></data>
+<data name="MaskThresholdNode" xml:space="preserve"><value>عتبة القناع</value></data>
+<data name="MaskThresholdNodeDescription" xml:space="preserve"><value>تعيين نطاق شدة القناع</value></data>
+<data name="MaskThresholdInputLabel" xml:space="preserve"><value>القناع المدخل</value></data>
+<data name="MaskThresholdInputDescription" xml:space="preserve"><value>القناع الذي سيتم تطبيق العتبة عليه</value></data>
+<data name="MaskMinLabel" xml:space="preserve"><value>الحد الأدنى</value></data>
+<data name="MaskMinDescription" xml:space="preserve"><value>الحد الأدنى للعتبة</value></data>
+<data name="MaskMaxLabel" xml:space="preserve"><value>الحد الأقصى</value></data>
+<data name="MaskMaxDescription" xml:space="preserve"><value>الحد الأعلى للعتبة</value></data>
+<data name="MaskThresholdOutputLabel" xml:space="preserve"><value>القناع الناتج</value></data>
+<data name="MaskThresholdOutputDescription" xml:space="preserve"><value>القناع بعد تطبيق العتبة</value></data>
+<data name="MaskToImageNode" xml:space="preserve"><value>إظهار القناع</value></data>
+<data name="MaskToImageNodeDescription" xml:space="preserve"><value>تحويل شدة القناع إلى صورة بالأبيض والأسود</value></data>
+<data name="MaskDevelopTargetDescription" xml:space="preserve"><value>القناع المراد إظهاره</value></data>
+<data name="MaskImageOutputLabel" xml:space="preserve"><value>الصورة</value></data>
+<data name="MaskImageOutputDescription" xml:space="preserve"><value>الصورة الناتجة عن إظهار القناع</value></data>
+<data name="BlendNode" xml:space="preserve"><value>دمج</value></data>
+<data name="BlendNodeDescription" xml:space="preserve"><value>دمج صورتين باستخدام الوضع المحدد.</value></data>
+<data name="BlendInputImage1Description" xml:space="preserve"><value>الصورة الأولى المراد دمجها</value></data>
+<data name="BlendInputImage2Description" xml:space="preserve"><value>الصورة الثانية المراد دمجها</value></data>
+<data name="BlendModeDescription" xml:space="preserve"><value>وضع الدمج</value></data>
+<data name="BlendOutputDescription" xml:space="preserve"><value>نتيجة الدمج</value></data>
+<data name="ArgumentsNode" xml:space="preserve"><value>المعاملات</value></data>
+<data name="ArgumentsNodeDescription" xml:space="preserve"><value>توفير قيم إدخال الرسم البياني.</value></data>
+<data name="ReturnNode" xml:space="preserve"><value>القيمة المُعادة</value></data>
+<data name="ReturnNodeDescription" xml:space="preserve"><value>استقبال نتيجة حساب الرسم البياني للعقد.</value></data>
+<data name="NoMatchingResults" xml:space="preserve"><value>(لا توجد نتائج)</value></data>
 </root>

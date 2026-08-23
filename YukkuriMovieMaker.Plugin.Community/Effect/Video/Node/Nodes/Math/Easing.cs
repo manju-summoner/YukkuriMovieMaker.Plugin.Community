@@ -3,13 +3,14 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.Bezier.Model;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Math;
 
-[Node(typeof(MathBasicCategory), "イージング", "時間パラメーターをベジェ曲線で評価し、最小～最大の範囲に写像する")]
+[Node(typeof(MathBasicCategory), nameof(TextNode.EasingNode), nameof(TextNode.EasingNodeDescription), typeof(TextNode))]
 public class EasingNode : NodeLogic
 {
-    [InputPort("時間始端", "時間パラメーターの正規化に用いる開始時刻")]
+    [InputPort(nameof(TextNode.TimeStartLabel), nameof(TextNode.TimeStartDescription), typeof(TextNode))]
     [NumberPortControl(Digits = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float TimeStart
@@ -18,7 +19,7 @@ public class EasingNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("時間終端", "時間パラメーターの正規化に用いる終了時刻")]
+    [InputPort(nameof(TextNode.TimeEndLabel), nameof(TextNode.TimeEndDescription), typeof(TextNode))]
     [NumberPortControl(Digits = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float TimeEnd
@@ -27,7 +28,7 @@ public class EasingNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("時間パラメーター", "評価対象の時刻")]
+    [InputPort(nameof(TextNode.TimeParameterLabel), nameof(TextNode.TimeParameterDescription), typeof(TextNode))]
     [NumberPortControl(Digits = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Time
@@ -36,7 +37,7 @@ public class EasingNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("最大", "出力値の上限")]
+    [InputPort(nameof(TextNode.EasingMaxLabel), nameof(TextNode.EasingMaxDescription), typeof(TextNode))]
     [NumberPortControl(Digits = 3)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Max
@@ -45,7 +46,7 @@ public class EasingNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("最小", "出力値の下限")]
+    [InputPort(nameof(TextNode.EasingMinLabel), nameof(TextNode.EasingMinDescription), typeof(TextNode))]
     [NumberPortControl(Digits = 3)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Min
@@ -54,7 +55,7 @@ public class EasingNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("ベジェ曲線", "時間始端から時間終端までの正規化された時間に対する値を定義する曲線")]
+    [InputPort(nameof(TextNode.BezierCurveLabel), nameof(TextNode.BezierCurveDescription), typeof(TextNode))]
     [BezierPortControl]
     [PortColorSetting(nameof(Colors.LawnGreen))]
     public string Curve
@@ -63,7 +64,7 @@ public class EasingNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("値", "評価結果")]
+    [OutputPort(nameof(TextNode.EasingResultLabel), nameof(TextNode.EasingResultDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Result
     {

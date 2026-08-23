@@ -1,4 +1,5 @@
 using System.Windows;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.Bezier.Model;
 
@@ -174,7 +175,7 @@ public sealed class BezierCurve
     public void RemoveNode(BezierNode node)
     {
         if (node.IsFixed)
-            throw new InvalidOperationException("固定ノードは削除できません。");
+            throw new InvalidOperationException(TextUi.BezierFixedNodeDeleteError);
 
         Nodes.Remove(node);
     }

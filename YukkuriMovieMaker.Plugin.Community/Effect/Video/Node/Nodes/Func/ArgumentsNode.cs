@@ -1,10 +1,12 @@
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 
-[Node(typeof(FunctionCategory), "引数", "グラフの入力値を提供します。")]
+[Node(typeof(FunctionCategory), nameof(TextNode.ArgumentsNode), nameof(TextNode.ArgumentsNodeDescription),
+    typeof(TextNode))]
 public class ArgumentsNode : NodeLogic
 {
     private PortDefinition[] _portDefinitions = Array.Empty<PortDefinition>();

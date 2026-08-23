@@ -6,6 +6,7 @@
              xmlns:viewModel="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel"
              xmlns:converters="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters"
              xmlns:view="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View"
+             xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize"
              mc:Ignorable="d"
              MinWidth="220"
              d:DataContext="{d:DesignInstance viewModel:NodeViewModel}"
@@ -156,7 +157,7 @@
                                    VerticalAlignment="Center"
                                    Margin="0,0,8,0" />
                         <!-- ボタン -->
-                        <Button Content="Open SubGraph"
+                        <Button Content="{x:Static loc:TextUi.OpenSubGraphButton}"
                                 Command="{Binding OpenSubGraphCommand}"
                                 HorizontalAlignment="Left" />
                     </StackPanel>

@@ -11,6 +11,7 @@ using System.Windows.Threading;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
+using YukkuriMovieMaker.Resources.Localization;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.CustomEditor.ControlReplacement;
 
@@ -50,7 +51,7 @@ internal static class ControlReplacementEngine
                 var animation = ResolveAnimation(oldControl);
                 if (animation == null) return false;
                 var animationType = animation.GetType().GetProperty("AnimationType")?.GetValue(animation);
-                return animationType?.ToString() == "なし";
+                return animationType?.ToString() == Texts.AnimationSliderNoneMenuHeader;
             },
             Configure = static (oldControl, newControl) =>
             {

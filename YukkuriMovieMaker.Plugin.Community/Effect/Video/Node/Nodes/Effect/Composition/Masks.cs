@@ -3,6 +3,7 @@ using System.Windows.Media;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 
@@ -10,22 +11,36 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.Comp
 
 public enum MaskMode
 {
-    [Display(Name = "色相")] Hue,
-    [Display(Name = "彩度")] Saturation,
-    [Display(Name = "明度")] Value,
-    [Display(Name = "赤")] Red,
-    [Display(Name = "緑")] Green,
-    [Display(Name = "青")] Blue,
-    [Display(Name = "透明度")] Alpha
+    [Display(Name = nameof(TextNode.ChannelHue), ResourceType = typeof(TextNode))]
+    Hue,
+
+    [Display(Name = nameof(TextNode.ChannelSaturation), ResourceType = typeof(TextNode))]
+    Saturation,
+
+    [Display(Name = nameof(TextNode.ChannelValue), ResourceType = typeof(TextNode))]
+    Value,
+
+    [Display(Name = nameof(TextNode.ChannelRed), ResourceType = typeof(TextNode))]
+    Red,
+
+    [Display(Name = nameof(TextNode.ChannelGreen), ResourceType = typeof(TextNode))]
+    Green,
+
+    [Display(Name = nameof(TextNode.ChannelBlue), ResourceType = typeof(TextNode))]
+    Blue,
+
+    [Display(Name = nameof(TextNode.ChannelAlpha), ResourceType = typeof(TextNode))]
+    Alpha
 }
 
-[Node(typeof(CompositionCategory), "マスク生成", "指定した画像の要素から画像を生成します")]
+[Node(typeof(CompositionCategory), nameof(TextNode.CreateMaskNode), nameof(TextNode.CreateMaskNodeDescription),
+    typeof(TextNode))]
 public class CreateMaskNode : NodeLogic
 {
     private Guid _shaderId = Guid.Empty;
     private VideoEffectsLoader? _videoEffect;
 
-    [InputPort("入力画像", "マスク生成を行う基画像")]
+    [InputPort(nameof(TextNode.InputImagePortLabel), nameof(TextNode.MaskInputImageDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? InputImage
     {
@@ -33,7 +48,7 @@ public class CreateMaskNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("モード", "Mode")]
+    [InputPort(nameof(TextNode.MaskModeLabel), nameof(TextNode.MaskModeDescription), typeof(TextNode))]
     [EnumPortControl(Default = 0, IsEditable = false, Items = typeof(MaskMode))]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public int Mode
@@ -42,7 +57,7 @@ public class CreateMaskNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("オフセット", "Offset")]
+    [InputPort(nameof(TextNode.MaskOffsetLabel), nameof(TextNode.MaskOffsetDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Offset
@@ -51,7 +66,7 @@ public class CreateMaskNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("反転", "Invert")]
+    [InputPort(nameof(TextNode.InvertPortLabel), nameof(TextNode.MaskInvertDescription), typeof(TextNode))]
     [BoolPortControl]
     public bool Invert
     {
@@ -59,7 +74,7 @@ public class CreateMaskNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("マスク", "Mask")]
+    [OutputPort(nameof(TextNode.MaskPortLabel), nameof(TextNode.MaskOutputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public MaskWrapper? Mask
     {
@@ -105,13 +120,14 @@ public class CreateMaskNode : NodeLogic
     }
 }
 
-[Node(typeof(CompositionCategory), "マスククリップ", "マスクで画像をクリップします")]
+[Node(typeof(CompositionCategory), nameof(TextNode.MaskClipNode), nameof(TextNode.MaskClipNodeDescription),
+    typeof(TextNode))]
 public class MaskClipNode : NodeLogic
 {
     private Guid _shaderId = Guid.Empty;
     private VideoEffectsLoader? _videoEffect;
 
-    [InputPort("入力画像", "マスクによるクリップの対象画像")]
+    [InputPort(nameof(TextNode.InputImagePortLabel), nameof(TextNode.MaskClipInputImageDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? InputImage
     {
@@ -119,7 +135,7 @@ public class MaskClipNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("マスク", "クリップするマスク")]
+    [InputPort(nameof(TextNode.MaskPortLabel), nameof(TextNode.MaskClipMaskDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public MaskWrapper? Mask
     {
@@ -127,7 +143,7 @@ public class MaskClipNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("反転", "Invert")]
+    [InputPort(nameof(TextNode.InvertPortLabel), nameof(TextNode.MaskInvertDescription), typeof(TextNode))]
     [BoolPortControl]
     public bool Invert
     {
@@ -135,7 +151,7 @@ public class MaskClipNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("出力画像", "マスクでクリップした結果")]
+    [OutputPort(nameof(TextNode.OutputImagePortLabel), nameof(TextNode.MaskClipOutputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? Output
     {
@@ -178,13 +194,15 @@ public class MaskClipNode : NodeLogic
     }
 }
 
-[Node(typeof(CompositionCategory), "マスクの閾値", "マスクの強度の範囲を設定します")]
+[Node(typeof(CompositionCategory), nameof(TextNode.MaskThresholdNode), nameof(TextNode.MaskThresholdNodeDescription),
+    typeof(TextNode))]
 public class MaskThresholdNode : NodeLogic
 {
     private Guid _shaderId = Guid.Empty;
     private VideoEffectsLoader? _videoEffect;
 
-    [InputPort("入力マスク", "閾値の設定対象のマスク")]
+    [InputPort(nameof(TextNode.MaskThresholdInputLabel), nameof(TextNode.MaskThresholdInputDescription),
+        typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public MaskWrapper? InputMask
     {
@@ -192,7 +210,7 @@ public class MaskThresholdNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("最小値", "Min")]
+    [InputPort(nameof(TextNode.MaskMinLabel), nameof(TextNode.MaskMinDescription), typeof(TextNode))]
     [NumberPortControl(Min = 0, Max = 100, Digits = 1, Unit = "%")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Min
@@ -201,7 +219,7 @@ public class MaskThresholdNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("最大値", "Max")]
+    [InputPort(nameof(TextNode.MaskMaxLabel), nameof(TextNode.MaskMaxDescription), typeof(TextNode))]
     [NumberPortControl(Min = 0, Max = 100, Digits = 1, Unit = "%")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Max
@@ -210,7 +228,7 @@ public class MaskThresholdNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("反転", "Invert")]
+    [InputPort(nameof(TextNode.InvertPortLabel), nameof(TextNode.MaskInvertDescription), typeof(TextNode))]
     [BoolPortControl]
     public bool Invert
     {
@@ -218,7 +236,8 @@ public class MaskThresholdNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("出力マスク", "Mask")]
+    [OutputPort(nameof(TextNode.MaskThresholdOutputLabel), nameof(TextNode.MaskThresholdOutputDescription),
+        typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public MaskWrapper? OutputMask
     {
@@ -263,10 +282,11 @@ public class MaskThresholdNode : NodeLogic
     }
 }
 
-[Node(typeof(CompositionCategory), "マスク現像", "マスクの強度を白黒画像に落とし込みます")]
+[Node(typeof(CompositionCategory), nameof(TextNode.MaskToImageNode), nameof(TextNode.MaskToImageNodeDescription),
+    typeof(TextNode))]
 public class MaskToImageNode : NodeLogic
 {
-    [InputPort("マスク", "現像対象のマスク")]
+    [InputPort(nameof(TextNode.MaskPortLabel), nameof(TextNode.MaskDevelopTargetDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public MaskWrapper? Mask
     {
@@ -274,7 +294,7 @@ public class MaskToImageNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("画像", "マスクの現像画像")]
+    [OutputPort(nameof(TextNode.MaskImageOutputLabel), nameof(TextNode.MaskImageOutputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? Output
     {

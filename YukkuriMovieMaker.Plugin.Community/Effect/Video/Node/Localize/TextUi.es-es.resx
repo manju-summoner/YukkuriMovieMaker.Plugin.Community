@@ -77,4 +77,37 @@
 <data name="CannotCreateType" xml:space="preserve"><value>No se puede crear el tipo</value></data>
 <data name="Input" xml:space="preserve"><value>Aporte</value></data>
 <data name="Output" xml:space="preserve"><value>Producción</value></data>
+<data name="ColorRgbHeader" xml:space="preserve"><value>RGB</value></data>
+<data name="ColorRedLabel" xml:space="preserve"><value>R:</value></data>
+<data name="ColorGreenLabel" xml:space="preserve"><value>G:</value></data>
+<data name="ColorBlueLabel" xml:space="preserve"><value>B:</value></data>
+<data name="ColorAlphaLabel" xml:space="preserve"><value>A:</value></data>
+<data name="ColorHsvHeader" xml:space="preserve"><value>HSV</value></data>
+<data name="ColorHueLabel" xml:space="preserve"><value>H:</value></data>
+<data name="ColorSaturationLabel" xml:space="preserve"><value>S:</value></data>
+<data name="ColorValueLabel" xml:space="preserve"><value>V:</value></data>
+<data name="SelectFileButton" xml:space="preserve"><value>Seleccionar</value></data>
+<data name="OpenSubGraphButton" xml:space="preserve"><value>Abrir subgrafo</value></data>
+<data name="AddNodeMenu" xml:space="preserve"><value>Añadir nodo</value></data>
+<data name="CopyMenu" xml:space="preserve"><value>Copiar</value></data>
+<data name="CutMenu" xml:space="preserve"><value>Cortar</value></data>
+<data name="PasteMenu" xml:space="preserve"><value>Pegar</value></data>
+<data name="DeleteMenu" xml:space="preserve"><value>Eliminar</value></data>
+<data name="EditMenu" xml:space="preserve"><value>Editar</value></data>
+<data name="ModeMenu" xml:space="preserve"><value>Modo</value></data>
+<data name="RectSelectionMenu" xml:space="preserve"><value>Selección rectangular</value></data>
+<data name="LassoSelectionMenu" xml:space="preserve"><value>Selección de lazo</value></data>
+<data name="PanMenu" xml:space="preserve"><value>Desplazar</value></data>
+<data name="ViewMenu" xml:space="preserve"><value>Ver</value></data>
+<data name="ZoomInMenu" xml:space="preserve"><value>Acercar</value></data>
+<data name="ZoomOutMenu" xml:space="preserve"><value>Alejar</value></data>
+<data name="ResetZoomMenu" xml:space="preserve"><value>Restablecer zoom</value></data>
+<data name="FitMenu" xml:space="preserve"><value>Ajustar</value></data>
+<data name="CloseTabToolTip" xml:space="preserve"><value>Cerrar pestaña</value></data>
+<data name="ModeStatusLabel" xml:space="preserve"><value>Modo:</value></data>
+<data name="OpenNodeEditorButtonLabel" xml:space="preserve"><value>Abrir editor de nodos...</value></data>
+<data name="BezierSmoothMenu" xml:space="preserve"><value>Suave</value></data>
+<data name="BezierCornerMenu" xml:space="preserve"><value>Vértice</value></data>
+<data name="BezierFixedNodeDeleteError" xml:space="preserve"><value>No se puede eliminar un nodo fijo.</value></data>
+<data name="BezierMinKeyframesError" xml:space="preserve"><value>Se requieren al menos dos fotogramas clave.</value></data>
 </root>

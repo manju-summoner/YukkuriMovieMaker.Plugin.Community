@@ -70,9 +70,26 @@
 <data name="AdvancedCategoryName" xml:space="preserve"><value>고급</value></data>
 <data name="TransformCategoryName" xml:space="preserve"><value>좌표 변환</value></data>
 <data name="BrushName" xml:space="preserve"><value>브러시</value></data>
+<data name="AddNode" xml:space="preserve"><value>더하기</value></data>
+<data name="AddNodeDescription" xml:space="preserve"><value>두 수를 더합니다.</value></data>
+<data name="SubtractNode" xml:space="preserve"><value>빼기</value></data>
+<data name="SubtractNodeDescription" xml:space="preserve"><value>왼쪽 항에서 오른쪽 항을 뺍니다.</value></data>
+<data name="MultiplyNode" xml:space="preserve"><value>곱하기</value></data>
+<data name="MultiplyNodeDescription" xml:space="preserve"><value>두 수를 곱합니다.</value></data>
+<data name="DivideNode" xml:space="preserve"><value>나누기</value></data>
+<data name="DivideNodeDescription" xml:space="preserve"><value>왼쪽 항을 오른쪽 항으로 나눕니다.</value></data>
 <data name="Value" xml:space="preserve"><value>값</value></data>
 <data name="ValueDescription" xml:space="preserve"><value>입력값입니다.</value></data>
+<data name="LeftOperand" xml:space="preserve"><value>왼쪽 항</value></data>
+<data name="LeftOperandDescription" xml:space="preserve"><value>연산의 왼쪽 값입니다.</value></data>
+<data name="RightOperand" xml:space="preserve"><value>오른쪽 항</value></data>
+<data name="RightOperandDescription" xml:space="preserve"><value>연산의 오른쪽 값입니다.</value></data>
+<data name="Result" xml:space="preserve"><value>결과</value></data>
 <data name="ResultDescription" xml:space="preserve"><value>연산 결과입니다.</value></data>
+<data name="AddResultDescription" xml:space="preserve"><value>덧셈 결과입니다.</value></data>
+<data name="SubtractResultDescription" xml:space="preserve"><value>뺄셈 결과입니다.</value></data>
+<data name="MultiplyResultDescription" xml:space="preserve"><value>곱셈 결과입니다.</value></data>
+<data name="DivideResultDescription" xml:space="preserve"><value>나눗셈 결과입니다.</value></data>
 <data name="AbsNode" xml:space="preserve"><value>절댓값</value></data>
 <data name="AbsNodeDescription" xml:space="preserve"><value>절댓값을 계산합니다.</value></data>
 <data name="SignNode" xml:space="preserve"><value>부호</value></data>
@@ -127,6 +144,24 @@
 <data name="YValueDescription" xml:space="preserve"><value>Y값입니다.</value></data>
 <data name="XValue" xml:space="preserve"><value>X</value></data>
 <data name="XValueDescription" xml:space="preserve"><value>X값입니다.</value></data>
+<data name="AbsResultDescription" xml:space="preserve"><value>절댓값입니다.</value></data>
+<data name="SignResultDescription" xml:space="preserve"><value>부호입니다.</value></data>
+<data name="MinResultDescription" xml:space="preserve"><value>최솟값입니다.</value></data>
+<data name="MaxResultDescription" xml:space="preserve"><value>최댓값입니다.</value></data>
+<data name="ClampResultDescription" xml:space="preserve"><value>클램프된 값입니다.</value></data>
+<data name="LerpResultDescription" xml:space="preserve"><value>보간 결과입니다.</value></data>
+<data name="SqrtResultDescription" xml:space="preserve"><value>제곱근입니다.</value></data>
+<data name="PowerResultDescription" xml:space="preserve"><value>거듭제곱 결과입니다.</value></data>
+<data name="FloorResultDescription" xml:space="preserve"><value>버림 결과입니다.</value></data>
+<data name="CeilingResultDescription" xml:space="preserve"><value>올림 결과입니다.</value></data>
+<data name="RoundResultDescription" xml:space="preserve"><value>반올림된 값입니다.</value></data>
+<data name="FractionResultDescription" xml:space="preserve"><value>소수 부분입니다.</value></data>
+<data name="SinResultDescription" xml:space="preserve"><value>사인값입니다.</value></data>
+<data name="CosResultDescription" xml:space="preserve"><value>코사인값입니다.</value></data>
+<data name="TanResultDescription" xml:space="preserve"><value>탄젠트값입니다.</value></data>
+<data name="Atan2ResultDescription" xml:space="preserve"><value>Atan2의 결과입니다.</value></data>
+<data name="DegreesToRadiansResultDescription" xml:space="preserve"><value>라디안값입니다.</value></data>
+<data name="RadiansToDegreesResultDescription" xml:space="preserve"><value>각도값입니다.</value></data>
 <data name="Length" xml:space="preserve"><value>길이</value></data>
 <data name="LengthDescription" xml:space="preserve"><value>주기 길이입니다.</value></data>
 <data name="Edge" xml:space="preserve"><value>임계값</value></data>
@@ -139,31 +174,82 @@
 <data name="TrueValueDescription" xml:space="preserve"><value>참일 때의 값입니다.</value></data>
 <data name="FalseValue" xml:space="preserve"><value>거짓일 때</value></data>
 <data name="FalseValueDescription" xml:space="preserve"><value>거짓일 때의 값입니다.</value></data>
+<data name="ComparisonResultDescription" xml:space="preserve"><value>비교 결과입니다.</value></data>
 <data name="ModuloNode" xml:space="preserve"><value>나머지</value></data>
+<data name="ModuloNodeDescription" xml:space="preserve"><value>나머지를 구합니다.</value></data>
+<data name="ModuloResultDescription" xml:space="preserve"><value>나머지입니다.</value></data>
 <data name="ReciprocalNode" xml:space="preserve"><value>역수</value></data>
+<data name="ReciprocalNodeDescription" xml:space="preserve"><value>역수를 구합니다.</value></data>
+<data name="ReciprocalResultDescription" xml:space="preserve"><value>역수입니다.</value></data>
 <data name="OneMinusNode" xml:space="preserve"><value>1에서 빼기</value></data>
+<data name="OneMinusNodeDescription" xml:space="preserve"><value>1에서 입력값을 뺍니다.</value></data>
+<data name="OneMinusResultDescription" xml:space="preserve"><value>계산 결과입니다.</value></data>
 <data name="SaturateNode" xml:space="preserve"><value>포화</value></data>
+<data name="SaturateNodeDescription" xml:space="preserve"><value>0~1 범위로 제한합니다.</value></data>
+<data name="SaturateResultDescription" xml:space="preserve"><value>제한된 값입니다.</value></data>
 <data name="InverseLerpNode" xml:space="preserve"><value>역보간</value></data>
+<data name="InverseLerpNodeDescription" xml:space="preserve"><value>보간 계수를 구합니다.</value></data>
+<data name="InverseLerpResultDescription" xml:space="preserve"><value>보간 계수입니다.</value></data>
 <data name="SmoothStepNode" xml:space="preserve"><value>SmoothStep</value></data>
+<data name="SmoothStepNodeDescription" xml:space="preserve"><value>부드럽게 보간합니다.</value></data>
+<data name="SmoothStepResultDescription" xml:space="preserve"><value>보간 결과입니다.</value></data>
 <data name="StepNode" xml:space="preserve"><value>스텝</value></data>
+<data name="StepNodeDescription" xml:space="preserve"><value>임계값을 기준으로 0 또는 1을 반환합니다.</value></data>
+<data name="StepResultDescription" xml:space="preserve"><value>스텝 결과입니다.</value></data>
 <data name="RepeatNode" xml:space="preserve"><value>반복</value></data>
+<data name="RepeatNodeDescription" xml:space="preserve"><value>일정 주기로 반복합니다.</value></data>
+<data name="RepeatResultDescription" xml:space="preserve"><value>반복 결과입니다.</value></data>
 <data name="PingPongNode" xml:space="preserve"><value>PingPong</value></data>
+<data name="PingPongNodeDescription" xml:space="preserve"><value>왕복 운동을 생성합니다.</value></data>
+<data name="PingPongResultDescription" xml:space="preserve"><value>왕복값입니다.</value></data>
 <data name="WrapNode" xml:space="preserve"><value>랩</value></data>
+<data name="WrapNodeDescription" xml:space="preserve"><value>범위 안으로 되감습니다.</value></data>
+<data name="WrapResultDescription" xml:space="preserve"><value>되감긴 값입니다.</value></data>
 <data name="ExpNode" xml:space="preserve"><value>지수</value></data>
+<data name="ExpNodeDescription" xml:space="preserve"><value>e의 거듭제곱을 구합니다.</value></data>
+<data name="ExpResultDescription" xml:space="preserve"><value>지수 계산 결과입니다.</value></data>
 <data name="Exp2Node" xml:space="preserve"><value>2의 거듭제곱</value></data>
+<data name="Exp2NodeDescription" xml:space="preserve"><value>2의 거듭제곱을 구합니다.</value></data>
+<data name="Exp2ResultDescription" xml:space="preserve"><value>계산 결과입니다.</value></data>
 <data name="LogNode" xml:space="preserve"><value>자연로그</value></data>
+<data name="LogNodeDescription" xml:space="preserve"><value>자연로그를 구합니다.</value></data>
+<data name="LogResultDescription" xml:space="preserve"><value>자연로그입니다.</value></data>
 <data name="Log2Node" xml:space="preserve"><value>밑이 2인 로그</value></data>
+<data name="Log2NodeDescription" xml:space="preserve"><value>밑이 2인 로그를 구합니다.</value></data>
+<data name="Log2ResultDescription" xml:space="preserve"><value>밑이 2인 로그입니다.</value></data>
 <data name="Log10Node" xml:space="preserve"><value>상용로그</value></data>
+<data name="Log10NodeDescription" xml:space="preserve"><value>밑이 10인 로그를 구합니다.</value></data>
+<data name="Log10ResultDescription" xml:space="preserve"><value>밑이 10인 로그입니다.</value></data>
 <data name="AsinNode" xml:space="preserve"><value>아크사인</value></data>
+<data name="AsinNodeDescription" xml:space="preserve"><value>아크사인을 구합니다.</value></data>
+<data name="AsinResultDescription" xml:space="preserve"><value>아크사인입니다.</value></data>
 <data name="AcosNode" xml:space="preserve"><value>아크코사인</value></data>
+<data name="AcosNodeDescription" xml:space="preserve"><value>아크코사인을 구합니다.</value></data>
+<data name="AcosResultDescription" xml:space="preserve"><value>아크코사인입니다.</value></data>
 <data name="AtanNode" xml:space="preserve"><value>아크탄젠트</value></data>
+<data name="AtanNodeDescription" xml:space="preserve"><value>아크탄젠트를 구합니다.</value></data>
+<data name="AtanResultDescription" xml:space="preserve"><value>아크탄젠트입니다.</value></data>
 <data name="EqualNode" xml:space="preserve"><value>같음</value></data>
+<data name="EqualNodeDescription" xml:space="preserve"><value>두 값이 같은지 판정합니다.</value></data>
+<data name="EqualResultDescription" xml:space="preserve"><value>비교 결과입니다.</value></data>
 <data name="NotEqualNode" xml:space="preserve"><value>같지 않음</value></data>
+<data name="NotEqualNodeDescription" xml:space="preserve"><value>두 값이 다른지 판정합니다.</value></data>
+<data name="NotEqualResultDescription" xml:space="preserve"><value>비교 결과입니다.</value></data>
 <data name="GreaterNode" xml:space="preserve"><value>큼</value></data>
+<data name="GreaterNodeDescription" xml:space="preserve"><value>왼쪽 항이 오른쪽 항보다 큰지 판정합니다.</value></data>
+<data name="GreaterResultDescription" xml:space="preserve"><value>비교 결과입니다.</value></data>
 <data name="GreaterEqualNode" xml:space="preserve"><value>크거나 같음</value></data>
+<data name="GreaterEqualNodeDescription" xml:space="preserve"><value>왼쪽 항이 오른쪽 항 이상인지 판정합니다.</value></data>
+<data name="GreaterEqualResultDescription" xml:space="preserve"><value>비교 결과입니다.</value></data>
 <data name="LessNode" xml:space="preserve"><value>작음</value></data>
+<data name="LessNodeDescription" xml:space="preserve"><value>왼쪽 항이 오른쪽 항보다 작은지 판정합니다.</value></data>
+<data name="LessResultDescription" xml:space="preserve"><value>비교 결과입니다.</value></data>
 <data name="LessEqualNode" xml:space="preserve"><value>작거나 같음</value></data>
+<data name="LessEqualNodeDescription" xml:space="preserve"><value>왼쪽 항이 오른쪽 항 이하인지 판정합니다.</value></data>
+<data name="LessEqualResultDescription" xml:space="preserve"><value>비교 결과입니다.</value></data>
 <data name="SelectNode" xml:space="preserve"><value>선택</value></data>
+<data name="SelectNodeDescription" xml:space="preserve"><value>조건에 따라 값을 선택합니다.</value></data>
+<data name="SelectResultDescription" xml:space="preserve"><value>선택된 값입니다.</value></data>
 <data name="Seed" xml:space="preserve"><value>시드</value></data>
 <data name="SeedDescription" xml:space="preserve"><value>난수 생성 시드입니다.</value></data>
 <data name="Index" xml:space="preserve"><value>인덱스</value></data>
@@ -185,4 +271,228 @@
 <data name="RotateNode" xml:space="preserve"><value>회전</value></data>
 <data name="RotateNodeDescription" xml:space="preserve"><value>이미지를 회전합니다.</value></data>
 <data name="Angle" xml:space="preserve"><value>각도</value></data>
+<data name="TransformResultDescription" xml:space="preserve"><value>변환된 이미지입니다.</value></data>
+<data name="FillRuleNonZero" xml:space="preserve"><value>비제로</value></data>
+<data name="FillRuleEvenOdd" xml:space="preserve"><value>홀짝</value></data>
+<data name="ShapeRect" xml:space="preserve"><value>사각형</value></data>
+<data name="ShapeRoundRect" xml:space="preserve"><value>둥근 사각형</value></data>
+<data name="ShapeOval" xml:space="preserve"><value>타원</value></data>
+<data name="ShapePolygon" xml:space="preserve"><value>다각형</value></data>
+<data name="ShapeStar" xml:space="preserve"><value>별</value></data>
+<data name="ShapeLine" xml:space="preserve"><value>직선</value></data>
+<data name="PathOpUnion" xml:space="preserve"><value>합집합</value></data>
+<data name="PathOpIntersect" xml:space="preserve"><value>교집합</value></data>
+<data name="PathOpDifference" xml:space="preserve"><value>차집합</value></data>
+<data name="PathOpReverseDifference" xml:space="preserve"><value>역차집합</value></data>
+<data name="PathOpXor" xml:space="preserve"><value>배타적 논리합</value></data>
+<data name="ChannelHue" xml:space="preserve"><value>색상</value></data>
+<data name="ChannelSaturation" xml:space="preserve"><value>채도</value></data>
+<data name="ChannelValue" xml:space="preserve"><value>명도</value></data>
+<data name="ChannelRed" xml:space="preserve"><value>빨강</value></data>
+<data name="ChannelGreen" xml:space="preserve"><value>초록</value></data>
+<data name="ChannelBlue" xml:space="preserve"><value>파랑</value></data>
+<data name="ChannelAlpha" xml:space="preserve"><value>투명도</value></data>
+<data name="BlendNormal" xml:space="preserve"><value>표준</value></data>
+<data name="BlendMultiply" xml:space="preserve"><value>곱하기</value></data>
+<data name="BlendScreen" xml:space="preserve"><value>스크린</value></data>
+<data name="BlendDarken" xml:space="preserve"><value>어둡게 하기</value></data>
+<data name="BlendLighten" xml:space="preserve"><value>밝게 하기</value></data>
+<data name="BlendDissolve" xml:space="preserve"><value>디졸브</value></data>
+<data name="BlendColorBurn" xml:space="preserve"><value>색상 번</value></data>
+<data name="BlendLinearBurn" xml:space="preserve"><value>선형 번</value></data>
+<data name="BlendDarkerColor" xml:space="preserve"><value>어두운 색상</value></data>
+<data name="BlendLighterColor" xml:space="preserve"><value>밝은 색상</value></data>
+<data name="BlendColorDodge" xml:space="preserve"><value>색상 닷지</value></data>
+<data name="BlendLinearDodge" xml:space="preserve"><value>선형 닷지</value></data>
+<data name="BlendOverlay" xml:space="preserve"><value>오버레이</value></data>
+<data name="BlendSoftLight" xml:space="preserve"><value>소프트 라이트</value></data>
+<data name="BlendHardLight" xml:space="preserve"><value>하드 라이트</value></data>
+<data name="BlendVividLight" xml:space="preserve"><value>선명한 라이트</value></data>
+<data name="BlendLinearLight" xml:space="preserve"><value>선형 라이트</value></data>
+<data name="BlendPinLight" xml:space="preserve"><value>핀 라이트</value></data>
+<data name="BlendHardMix" xml:space="preserve"><value>하드 혼합</value></data>
+<data name="BlendDifferenceAbs" xml:space="preserve"><value>차이</value></data>
+<data name="BlendExclusion" xml:space="preserve"><value>제외</value></data>
+<data name="BlendColor" xml:space="preserve"><value>색상</value></data>
+<data name="BlendLuminosity" xml:space="preserve"><value>광도</value></data>
+<data name="BlendSubtract" xml:space="preserve"><value>빼기</value></data>
+<data name="BlendDivision" xml:space="preserve"><value>나누기</value></data>
+<data name="OutlineCategoryName" xml:space="preserve"><value>아웃라인</value></data>
+<data name="ImageSourceCategoryName" xml:space="preserve"><value>이미지 소스</value></data>
+<data name="OutlinePortLabel" xml:space="preserve"><value>아웃라인</value></data>
+<data name="InputImagePortLabel" xml:space="preserve"><value>입력 이미지</value></data>
+<data name="OutputImagePortLabel" xml:space="preserve"><value>출력 이미지</value></data>
+<data name="MaskPortLabel" xml:space="preserve"><value>마스크</value></data>
+<data name="InvertPortLabel" xml:space="preserve"><value>반전</value></data>
+<data name="FilePathPortLabel" xml:space="preserve"><value>파일 경로</value></data>
+<data name="RotationPortLabel" xml:space="preserve"><value>회전</value></data>
+<data name="TransformInputImageDescription" xml:space="preserve"><value>변환할 이미지</value></data>
+<data name="TransformOutputImageDescription" xml:space="preserve"><value>변환 결과</value></data>
+<data name="MoveAmountX" xml:space="preserve"><value>X</value></data>
+<data name="MoveAmountXDescription" xml:space="preserve"><value>X 방향 이동량</value></data>
+<data name="MoveAmountY" xml:space="preserve"><value>Y</value></data>
+<data name="MoveAmountYDescription" xml:space="preserve"><value>Y 방향 이동량</value></data>
+<data name="ScaleRatioX" xml:space="preserve"><value>배율 X</value></data>
+<data name="ScaleRatioXDescription" xml:space="preserve"><value>X 방향 배율</value></data>
+<data name="ScaleRatioY" xml:space="preserve"><value>배율 Y</value></data>
+<data name="ScaleRatioYDescription" xml:space="preserve"><value>Y 방향 배율</value></data>
+<data name="AngleDescription" xml:space="preserve"><value>회전 각도</value></data>
+<data name="OutlineRasterizeNode" xml:space="preserve"><value>아웃라인 래스터화</value></data>
+<data name="OutlineRasterizeNodeDescription" xml:space="preserve"><value>아웃라인 데이터를 채우기와 선으로 그려 ID2D1Image로 변환합니다.</value></data>
+<data name="OutlineRasterizeInputDescription" xml:space="preserve"><value>래스터화할 아웃라인 데이터</value></data>
+<data name="StrokeWidthLabel" xml:space="preserve"><value>선 너비</value></data>
+<data name="StrokeWidthDescription" xml:space="preserve"><value>선의 굵기</value></data>
+<data name="StrokeOffsetXLabel" xml:space="preserve"><value>선 오프셋 X</value></data>
+<data name="StrokeOffsetXDescription" xml:space="preserve"><value>선 그리기 위치의 X 방향 이동량</value></data>
+<data name="StrokeOffsetYLabel" xml:space="preserve"><value>선 오프셋 Y</value></data>
+<data name="StrokeOffsetYDescription" xml:space="preserve"><value>선 그리기 위치의 Y 방향 이동량</value></data>
+<data name="StrokeBrushLabel" xml:space="preserve"><value>선 브러시</value></data>
+<data name="StrokeBrushDescription" xml:space="preserve"><value>선을 그리는 데 사용하는 브러시</value></data>
+<data name="FillBrushLabel" xml:space="preserve"><value>채우기 브러시</value></data>
+<data name="FillBrushDescription" xml:space="preserve"><value>채우기에 사용하는 브러시</value></data>
+<data name="SelfIntersectRuleLabel" xml:space="preserve"><value>자기 교차 규칙</value></data>
+<data name="SelfIntersectRuleDescription" xml:space="preserve"><value>자기 교차 시 내외부 판정 방법</value></data>
+<data name="RasterizeOutputDescription" xml:space="preserve"><value>래스터화 결과</value></data>
+<data name="PathTransformNode" xml:space="preserve"><value>패스 좌표 변환</value></data>
+<data name="PathTransformNodeDescription" xml:space="preserve"><value>아웃라인에 이동, 배율, 회전, 기울이기 등의 좌표 변환을 적용합니다.</value></data>
+<data name="PathTransformInputDescription" xml:space="preserve"><value>좌표 변환할 아웃라인</value></data>
+<data name="PathMoveXLabel" xml:space="preserve"><value>이동 X</value></data>
+<data name="PathMoveXDescription" xml:space="preserve"><value>X 방향 이동량</value></data>
+<data name="PathMoveYLabel" xml:space="preserve"><value>이동 Y</value></data>
+<data name="PathMoveYDescription" xml:space="preserve"><value>Y 방향 이동량</value></data>
+<data name="PathScaleXLabel" xml:space="preserve"><value>확대율 X</value></data>
+<data name="PathScaleXDescription" xml:space="preserve"><value>X 방향 확대율</value></data>
+<data name="PathScaleYLabel" xml:space="preserve"><value>확대율 Y</value></data>
+<data name="PathScaleYDescription" xml:space="preserve"><value>Y 방향 확대율</value></data>
+<data name="PathRotationDescription" xml:space="preserve"><value>회전 각도</value></data>
+<data name="SkewXLabel" xml:space="preserve"><value>기울이기 X</value></data>
+<data name="SkewXDescription" xml:space="preserve"><value>X 방향 기울이기 양</value></data>
+<data name="SkewYLabel" xml:space="preserve"><value>기울이기 Y</value></data>
+<data name="SkewYDescription" xml:space="preserve"><value>Y 방향 기울이기 양</value></data>
+<data name="OriginXLabel" xml:space="preserve"><value>기준 X</value></data>
+<data name="OriginXDescription" xml:space="preserve"><value>확대/축소, 회전, 기울이기의 기준이 되는 X 좌표</value></data>
+<data name="OriginYLabel" xml:space="preserve"><value>기준 Y</value></data>
+<data name="OriginYDescription" xml:space="preserve"><value>확대/축소, 회전, 기울이기의 기준이 되는 Y 좌표</value></data>
+<data name="PathTransformOutputDescription" xml:space="preserve"><value>좌표 변환된 아웃라인</value></data>
+<data name="ShapeCenterXLabel" xml:space="preserve"><value>중심 X</value></data>
+<data name="ShapeCenterXDescription" xml:space="preserve"><value>도형 중심의 X 좌표(직선인 경우 시작점)</value></data>
+<data name="ShapeCenterYLabel" xml:space="preserve"><value>중심 Y</value></data>
+<data name="ShapeCenterYDescription" xml:space="preserve"><value>도형 중심의 Y 좌표(직선인 경우 시작점)</value></data>
+<data name="ShapeWidthLabel" xml:space="preserve"><value>너비</value></data>
+<data name="ShapeWidthDescription" xml:space="preserve"><value>도형의 너비(직선인 경우 끝점까지의 X 방향 거리)</value></data>
+<data name="ShapeHeightLabel" xml:space="preserve"><value>높이</value></data>
+<data name="ShapeHeightDescription" xml:space="preserve"><value>도형의 높이(직선인 경우 끝점까지의 Y 방향 거리)</value></data>
+<data name="ShapeRotationDescription" xml:space="preserve"><value>도형을 중심(시작점) 기준으로 회전시키는 각도</value></data>
+<data name="ShapeCornerRadiusLabel" xml:space="preserve"><value>모서리 반경</value></data>
+<data name="ShapeCornerRadiusDescription" xml:space="preserve"><value>둥근 사각형 모서리의 반경</value></data>
+<data name="PolygonSidesDescription" xml:space="preserve"><value>다각형의 꼭짓점 수</value></data>
+<data name="VertexCountLabel" xml:space="preserve"><value>꼭짓점 수</value></data>
+<data name="StarSidesDescription" xml:space="preserve"><value>별 모양의 바깥쪽 꼭짓점 수</value></data>
+<data name="InnerRadiusRatioLabel" xml:space="preserve"><value>내경 비율</value></data>
+<data name="InnerRadiusRatioDescription" xml:space="preserve"><value>별 모양 안쪽 꼭짓점의 반경(바깥쪽에 대한 비율)</value></data>
+<data name="ShapeOutlineNode" xml:space="preserve"><value>도형 아웃라인 생성</value></data>
+<data name="ShapeOutlineNodeDescription" xml:space="preserve"><value>지정한 종류의 도형 아웃라인 데이터를 생성합니다.</value></data>
+<data name="ShapeKindLabel" xml:space="preserve"><value>종류</value></data>
+<data name="ShapeKindDescription" xml:space="preserve"><value>생성할 도형의 종류</value></data>
+<data name="ShapeParamsLabel" xml:space="preserve"><value>매개변수</value></data>
+<data name="ShapeParamsDescription" xml:space="preserve"><value>도형 종류에 따른 입력 그룹</value></data>
+<data name="ShapeOutlineOutputDescription" xml:space="preserve"><value>생성된 도형의 아웃라인 데이터</value></data>
+<data name="TextOutlineNode" xml:space="preserve"><value>텍스트 아웃라인 생성</value></data>
+<data name="TextOutlineNodeDescription" xml:space="preserve"><value>지정한 문자열의 아웃라인 데이터를 생성합니다.</value></data>
+<data name="TextOutlineTextLabel" xml:space="preserve"><value>텍스트</value></data>
+<data name="TextOutlineTextDescription" xml:space="preserve"><value>아웃라인으로 만들 문자열</value></data>
+<data name="FontFamilyLabel" xml:space="preserve"><value>글꼴 이름</value></data>
+<data name="FontFamilyDescription" xml:space="preserve"><value>사용할 글꼴 패밀리 이름(비워두면 기본 글꼴)</value></data>
+<data name="FontSizeLabel" xml:space="preserve"><value>크기</value></data>
+<data name="FontSizeDescription" xml:space="preserve"><value>글꼴 크기</value></data>
+<data name="BoldLabel" xml:space="preserve"><value>굵게</value></data>
+<data name="BoldDescription" xml:space="preserve"><value>굵게 표시할지 여부</value></data>
+<data name="ItalicLabel" xml:space="preserve"><value>기울임꼴</value></data>
+<data name="ItalicDescription" xml:space="preserve"><value>기울임꼴로 표시할지 여부</value></data>
+<data name="TextOriginXLabel" xml:space="preserve"><value>기준점 X</value></data>
+<data name="TextOriginXDescription" xml:space="preserve"><value>문자열 베이스라인 기준점의 X 좌표</value></data>
+<data name="TextOriginYLabel" xml:space="preserve"><value>기준점 Y</value></data>
+<data name="TextOriginYDescription" xml:space="preserve"><value>문자열 베이스라인 기준점의 Y 좌표</value></data>
+<data name="TextOutlineOutputDescription" xml:space="preserve"><value>생성된 문자열의 아웃라인 데이터</value></data>
+<data name="PathCombineNode" xml:space="preserve"><value>패스 결합</value></data>
+<data name="PathCombineNodeDescription" xml:space="preserve"><value>두 아웃라인을 지정한 연산 방법으로 결합합니다.</value></data>
+<data name="PathInput1Label" xml:space="preserve"><value>패스 1</value></data>
+<data name="PathInput1Description" xml:space="preserve"><value>결합할 첫 번째 아웃라인</value></data>
+<data name="PathInput2Label" xml:space="preserve"><value>패스 2</value></data>
+<data name="PathInput2Description" xml:space="preserve"><value>결합할 두 번째 아웃라인</value></data>
+<data name="PathCombineOperationLabel" xml:space="preserve"><value>연산</value></data>
+<data name="PathCombineOperationDescription" xml:space="preserve"><value>두 패스에 적용할 불리언 연산</value></data>
+<data name="PathCombineOutputDescription" xml:space="preserve"><value>결합 결과 아웃라인 데이터</value></data>
+<data name="LoadImageNode" xml:space="preserve"><value>이미지 불러오기</value></data>
+<data name="LoadImageNodeDescription" xml:space="preserve"><value>지정한 파일에서 이미지를 불러옵니다.</value></data>
+<data name="LoadImageFilePathDescription" xml:space="preserve"><value>불러올 이미지 파일</value></data>
+<data name="LoadImageOutputDescription" xml:space="preserve"><value>불러온 이미지</value></data>
+<data name="LoadVideoFrameNode" xml:space="preserve"><value>동영상 프레임 불러오기</value></data>
+<data name="LoadVideoFrameNodeDescription" xml:space="preserve"><value>지정한 동영상 파일에서 임의의 프레임을 이미지로 불러옵니다.</value></data>
+<data name="LoadVideoFrameFilePathDescription" xml:space="preserve"><value>불러올 동영상 파일</value></data>
+<data name="FrameIndexLabel" xml:space="preserve"><value>프레임 번호</value></data>
+<data name="FrameIndexDescription" xml:space="preserve"><value>불러올 프레임 번호(0부터 시작)</value></data>
+<data name="LoadVideoFrameOutputDescription" xml:space="preserve"><value>불러온 프레임 이미지</value></data>
+<data name="EasingNode" xml:space="preserve"><value>이징</value></data>
+<data name="EasingNodeDescription" xml:space="preserve"><value>시간 매개변수를 베지어 곡선으로 평가하여 최소~최대 범위로 매핑합니다</value></data>
+<data name="TimeStartLabel" xml:space="preserve"><value>시간 시작점</value></data>
+<data name="TimeStartDescription" xml:space="preserve"><value>시간 매개변수를 정규화하는 데 사용하는 시작 시각</value></data>
+<data name="TimeEndLabel" xml:space="preserve"><value>시간 종료점</value></data>
+<data name="TimeEndDescription" xml:space="preserve"><value>시간 매개변수를 정규화하는 데 사용하는 종료 시각</value></data>
+<data name="TimeParameterLabel" xml:space="preserve"><value>시간 매개변수</value></data>
+<data name="TimeParameterDescription" xml:space="preserve"><value>평가 대상 시각</value></data>
+<data name="EasingMaxLabel" xml:space="preserve"><value>최대</value></data>
+<data name="EasingMaxDescription" xml:space="preserve"><value>출력값의 상한</value></data>
+<data name="EasingMinLabel" xml:space="preserve"><value>최소</value></data>
+<data name="EasingMinDescription" xml:space="preserve"><value>출력값의 하한</value></data>
+<data name="BezierCurveLabel" xml:space="preserve"><value>베지어 곡선</value></data>
+<data name="BezierCurveDescription" xml:space="preserve"><value>시간 시작점부터 종료점까지의 정규화된 시간에 대한 값을 정의하는 곡선</value></data>
+<data name="EasingResultLabel" xml:space="preserve"><value>값</value></data>
+<data name="EasingResultDescription" xml:space="preserve"><value>평가 결과</value></data>
+<data name="AlphaNode" xml:space="preserve"><value>불투명도</value></data>
+<data name="AlphaNodeDescription" xml:space="preserve"><value>이미지의 불투명도를 설정합니다.</value></data>
+<data name="AlphaInputDescription" xml:space="preserve"><value>불투명도를 변경할 이미지</value></data>
+<data name="OpacityLabel" xml:space="preserve"><value>불투명도</value></data>
+<data name="OpacityDescription" xml:space="preserve"><value>이미지의 투명도</value></data>
+<data name="AlphaOutputDescription" xml:space="preserve"><value>투명도 적용 결과</value></data>
+<data name="CreateMaskNode" xml:space="preserve"><value>마스크 생성</value></data>
+<data name="CreateMaskNodeDescription" xml:space="preserve"><value>지정한 이미지의 요소로부터 이미지를 생성합니다</value></data>
+<data name="MaskInputImageDescription" xml:space="preserve"><value>마스크 생성에 사용하는 원본 이미지</value></data>
+<data name="MaskModeLabel" xml:space="preserve"><value>모드</value></data>
+<data name="MaskModeDescription" xml:space="preserve"><value>마스크 생성에 사용하는 이미지 요소</value></data>
+<data name="MaskOffsetLabel" xml:space="preserve"><value>오프셋</value></data>
+<data name="MaskOffsetDescription" xml:space="preserve"><value>마스크 값에 더하는 오프셋</value></data>
+<data name="MaskInvertDescription" xml:space="preserve"><value>마스크를 반전할지 여부</value></data>
+<data name="MaskOutputDescription" xml:space="preserve"><value>생성된 마스크</value></data>
+<data name="MaskClipNode" xml:space="preserve"><value>마스크 클립</value></data>
+<data name="MaskClipNodeDescription" xml:space="preserve"><value>마스크로 이미지를 클립합니다</value></data>
+<data name="MaskClipInputImageDescription" xml:space="preserve"><value>마스크로 클립할 대상 이미지</value></data>
+<data name="MaskClipMaskDescription" xml:space="preserve"><value>클립에 사용할 마스크</value></data>
+<data name="MaskClipOutputDescription" xml:space="preserve"><value>마스크로 클립한 결과</value></data>
+<data name="MaskThresholdNode" xml:space="preserve"><value>마스크 임계값</value></data>
+<data name="MaskThresholdNodeDescription" xml:space="preserve"><value>마스크 강도의 범위를 설정합니다</value></data>
+<data name="MaskThresholdInputLabel" xml:space="preserve"><value>입력 마스크</value></data>
+<data name="MaskThresholdInputDescription" xml:space="preserve"><value>임계값을 설정할 대상 마스크</value></data>
+<data name="MaskMinLabel" xml:space="preserve"><value>최소값</value></data>
+<data name="MaskMinDescription" xml:space="preserve"><value>임계값의 하한</value></data>
+<data name="MaskMaxLabel" xml:space="preserve"><value>최대값</value></data>
+<data name="MaskMaxDescription" xml:space="preserve"><value>임계값의 상한</value></data>
+<data name="MaskThresholdOutputLabel" xml:space="preserve"><value>출력 마스크</value></data>
+<data name="MaskThresholdOutputDescription" xml:space="preserve"><value>임계값을 적용한 마스크</value></data>
+<data name="MaskToImageNode" xml:space="preserve"><value>마스크 현상</value></data>
+<data name="MaskToImageNodeDescription" xml:space="preserve"><value>마스크의 강도를 흑백 이미지로 변환합니다</value></data>
+<data name="MaskDevelopTargetDescription" xml:space="preserve"><value>현상 대상 마스크</value></data>
+<data name="MaskImageOutputLabel" xml:space="preserve"><value>이미지</value></data>
+<data name="MaskImageOutputDescription" xml:space="preserve"><value>마스크를 현상한 이미지</value></data>
+<data name="BlendNode" xml:space="preserve"><value>합성</value></data>
+<data name="BlendNodeDescription" xml:space="preserve"><value>두 이미지를 지정한 모드로 합성합니다.</value></data>
+<data name="BlendInputImage1Description" xml:space="preserve"><value>합성할 첫 번째 이미지</value></data>
+<data name="BlendInputImage2Description" xml:space="preserve"><value>합성할 두 번째 이미지</value></data>
+<data name="BlendModeDescription" xml:space="preserve"><value>합성 모드</value></data>
+<data name="BlendOutputDescription" xml:space="preserve"><value>합성 결과</value></data>
+<data name="ArgumentsNode" xml:space="preserve"><value>인수</value></data>
+<data name="ArgumentsNodeDescription" xml:space="preserve"><value>그래프의 입력값을 제공합니다.</value></data>
+<data name="ReturnNode" xml:space="preserve"><value>반환값</value></data>
+<data name="ReturnNodeDescription" xml:space="preserve"><value>노드 그래프의 계산 결과를 받습니다.</value></data>
+<data name="NoMatchingResults" xml:space="preserve"><value>(해당 없음)</value></data>
 </root>

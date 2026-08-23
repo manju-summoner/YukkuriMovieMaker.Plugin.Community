@@ -59,4 +59,55 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 <data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
+<data name="Node" xml:space="preserve"><value>Node</value></data>
+<data name="NodeEditor" xml:space="preserve"><value>Editor Node</value></data>
+<data name="OutputImageIsNull" xml:space="preserve"><value>Gambar keluaran bernilai null.</value></data>
+<data name="ItemPropertiesNotSet" xml:space="preserve"><value>Properti item belum diatur.</value></data>
+<data name="UnableLoadEffect" xml:space="preserve"><value>Tidak dapat memuat efek</value></data>
+<data name="UnableGenerateEffect" xml:space="preserve"><value>Tidak dapat menghasilkan efek</value></data>
+<data name="PropertyNotFound" xml:space="preserve"><value>Properti {0} yang ditentukan tidak ditemukan.</value></data>
+<data name="PropertyReadOnly" xml:space="preserve"><value>Properti {0} bersifat hanya-baca.</value></data>
+<data name="UnableCreateAnimationInstance" xml:space="preserve"><value>Tidak dapat membuat instance dari tipe Animation.</value></data>
+<data name="AnimationValuesPropertyError" xml:space="preserve"><value>Properti Values pada objek Animation tidak ditemukan atau bersifat hanya-baca.</value></data>
+<data name="ShaderResourceIdEmpty" xml:space="preserve"><value>ID sumber daya shader kosong.</value></data>
+<data name="ShaderResourceNotFound" xml:space="preserve"><value>Sumber daya shader *.{0} tidak ditemukan.</value></data>
+<data name="CannotCreateEffectInstance" xml:space="preserve"><value>Tidak dapat membuat instance efek</value></data>
+<data name="CannotCastToShaderEffect" xml:space="preserve"><value>Tidak dapat mengonversi ke ShaderEffect</value></data>
+<data name="IndexOutOfRange" xml:space="preserve"><value>Indeks yang ditentukan berada di luar rentang.</value></data>
+<data name="CannotCreateType" xml:space="preserve"><value>Tidak dapat membuat tipe</value></data>
+<data name="Input" xml:space="preserve"><value>Input</value></data>
+<data name="Output" xml:space="preserve"><value>Output</value></data>
+<data name="ColorRgbHeader" xml:space="preserve"><value>RGB</value></data>
+<data name="ColorRedLabel" xml:space="preserve"><value>R:</value></data>
+<data name="ColorGreenLabel" xml:space="preserve"><value>G:</value></data>
+<data name="ColorBlueLabel" xml:space="preserve"><value>B:</value></data>
+<data name="ColorAlphaLabel" xml:space="preserve"><value>A:</value></data>
+<data name="ColorHsvHeader" xml:space="preserve"><value>HSV</value></data>
+<data name="ColorHueLabel" xml:space="preserve"><value>H:</value></data>
+<data name="ColorSaturationLabel" xml:space="preserve"><value>S:</value></data>
+<data name="ColorValueLabel" xml:space="preserve"><value>V:</value></data>
+<data name="SelectFileButton" xml:space="preserve"><value>Pilih</value></data>
+<data name="OpenSubGraphButton" xml:space="preserve"><value>Buka SubGraph</value></data>
+<data name="AddNodeMenu" xml:space="preserve"><value>Tambah Node</value></data>
+<data name="CopyMenu" xml:space="preserve"><value>Salin</value></data>
+<data name="CutMenu" xml:space="preserve"><value>Potong</value></data>
+<data name="PasteMenu" xml:space="preserve"><value>Tempel</value></data>
+<data name="DeleteMenu" xml:space="preserve"><value>Hapus</value></data>
+<data name="EditMenu" xml:space="preserve"><value>Edit</value></data>
+<data name="ModeMenu" xml:space="preserve"><value>Mode</value></data>
+<data name="RectSelectionMenu" xml:space="preserve"><value>Seleksi Persegi</value></data>
+<data name="LassoSelectionMenu" xml:space="preserve"><value>Seleksi Laso</value></data>
+<data name="PanMenu" xml:space="preserve"><value>Geser</value></data>
+<data name="ViewMenu" xml:space="preserve"><value>Tampilan</value></data>
+<data name="ZoomInMenu" xml:space="preserve"><value>Perbesar</value></data>
+<data name="ZoomOutMenu" xml:space="preserve"><value>Perkecil</value></data>
+<data name="ResetZoomMenu" xml:space="preserve"><value>Reset Zoom</value></data>
+<data name="FitMenu" xml:space="preserve"><value>Sesuaikan</value></data>
+<data name="CloseTabToolTip" xml:space="preserve"><value>Tutup Tab</value></data>
+<data name="ModeStatusLabel" xml:space="preserve"><value>Mode:</value></data>
+<data name="OpenNodeEditorButtonLabel" xml:space="preserve"><value>Buka Editor Node...</value></data>
+<data name="BezierSmoothMenu" xml:space="preserve"><value>Halus</value></data>
+<data name="BezierCornerMenu" xml:space="preserve"><value>Sudut</value></data>
+<data name="BezierFixedNodeDeleteError" xml:space="preserve"><value>Tidak dapat menghapus node tetap.</value></data>
+<data name="BezierMinKeyframesError" xml:space="preserve"><value>Diperlukan minimal dua keyframe.</value></data>
 </root>

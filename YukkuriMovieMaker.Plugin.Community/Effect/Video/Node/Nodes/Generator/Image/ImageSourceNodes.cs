@@ -4,19 +4,21 @@ using Vortice.Direct2D1;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.Image;
 
-[Node(typeof(ImageSourceCategory), "画像読み込み", "指定したファイルから画像を読み込みます。")]
+[Node(typeof(ImageSourceCategory), nameof(TextNode.LoadImageNode), nameof(TextNode.LoadImageNodeDescription),
+    typeof(TextNode))]
 public class LoadImageNode : NodeLogic
 {
     private ID2D1Image? _image;
     private string? _loadedPath;
     private DateTime _loadedWriteTimeUtc;
 
-    [InputPort("ファイルパス", "読み込む画像ファイル")]
+    [InputPort(nameof(TextNode.FilePathPortLabel), nameof(TextNode.LoadImageFilePathDescription), typeof(TextNode))]
     [FilePathPortControl(AllowExtension = ["画像ファイル|.png;.jpg;.jpeg;.bmp;.gif;.tiff;.tif;.webp"])]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public string FilePath
@@ -25,7 +27,7 @@ public class LoadImageNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("出力画像", "読み込んだ画像")]
+    [OutputPort(nameof(TextNode.OutputImagePortLabel), nameof(TextNode.LoadImageOutputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? Output
     {
@@ -62,13 +64,15 @@ public class LoadImageNode : NodeLogic
     }
 }
 
-[Node(typeof(ImageSourceCategory), "動画フレーム読み込み", "指定した動画ファイルから任意のフレームを画像として読み込みます。")]
+[Node(typeof(ImageSourceCategory), nameof(TextNode.LoadVideoFrameNode), nameof(TextNode.LoadVideoFrameNodeDescription),
+    typeof(TextNode))]
 public class LoadVideoFrameNode : NodeLogic
 {
     private string? _loadedPath;
     private ImageLoader.VideoLoader? _loader;
 
-    [InputPort("ファイルパス", "読み込む動画ファイル")]
+    [InputPort(nameof(TextNode.FilePathPortLabel), nameof(TextNode.LoadVideoFrameFilePathDescription),
+        typeof(TextNode))]
     [FilePathPortControl(AllowExtension = ["動画ファイル|.mp4;.mov;.avi;.wmv;.mkv;.webm;.m4v"])]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public string FilePath
@@ -77,7 +81,7 @@ public class LoadVideoFrameNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("フレーム番号", "読み込むフレームの番号（0始まり）")]
+    [InputPort(nameof(TextNode.FrameIndexLabel), nameof(TextNode.FrameIndexDescription), typeof(TextNode))]
     [NumberPortControl(Min = 0, Max = 1_000_000, Digits = 0, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float FrameIndex
@@ -86,7 +90,8 @@ public class LoadVideoFrameNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("出力画像", "読み込んだフレーム画像")]
+    [OutputPort(nameof(TextNode.OutputImagePortLabel), nameof(TextNode.LoadVideoFrameOutputDescription),
+        typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? Output
     {

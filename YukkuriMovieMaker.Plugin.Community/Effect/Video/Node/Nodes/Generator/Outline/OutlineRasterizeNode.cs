@@ -7,6 +7,7 @@ using Vortice.Mathematics;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 using AlphaMode = Vortice.DCommon.AlphaMode;
 using BezierSegment = Vortice.Direct2D1.BezierSegment;
@@ -19,11 +20,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.O
 
 public enum FillRuleKind
 {
-    [Display(Name = "非ゼロ")] NonZero,
-    [Display(Name = "奇偶")] EvenOdd
+    [Display(Name = nameof(TextNode.FillRuleNonZero), ResourceType = typeof(TextNode))]
+    NonZero,
+
+    [Display(Name = nameof(TextNode.FillRuleEvenOdd), ResourceType = typeof(TextNode))]
+    EvenOdd
 }
 
-[Node(typeof(OutlineCategory), "アウトラインのラスタライズ", "アウトラインデータを塗り・線で描画してID2D1Imageに変換します。")]
+[Node(typeof(OutlineCategory), nameof(TextNode.OutlineRasterizeNode), nameof(TextNode.OutlineRasterizeNodeDescription),
+    typeof(TextNode))]
 public class OutlineRasterizeNode : NodeLogic
 {
     private const float Padding = 2f;
@@ -32,7 +37,7 @@ public class OutlineRasterizeNode : NodeLogic
     private int _bitmapHeight = -1;
     private int _bitmapWidth = -1;
 
-    [InputPort("アウトライン", "ラスタライズするアウトラインデータ")]
+    [InputPort(nameof(TextNode.OutlinePortLabel), nameof(TextNode.OutlineRasterizeInputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public OutlineWrapper? Outline
     {
@@ -40,7 +45,7 @@ public class OutlineRasterizeNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("線幅", "ストロークの太さ")]
+    [InputPort(nameof(TextNode.StrokeWidthLabel), nameof(TextNode.StrokeWidthDescription), typeof(TextNode))]
     [NumberPortControl(Min = 0, Max = 2000, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float StrokeWidth
@@ -49,7 +54,7 @@ public class OutlineRasterizeNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("ストロークオフセットX", "ストロークの描画位置のX方向のずらし量")]
+    [InputPort(nameof(TextNode.StrokeOffsetXLabel), nameof(TextNode.StrokeOffsetXDescription), typeof(TextNode))]
     [NumberPortControl(Min = -4000, Max = 4000, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float StrokeOffsetX
@@ -58,7 +63,7 @@ public class OutlineRasterizeNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("ストロークオフセットY", "ストロークの描画位置のY方向のずらし量")]
+    [InputPort(nameof(TextNode.StrokeOffsetYLabel), nameof(TextNode.StrokeOffsetYDescription), typeof(TextNode))]
     [NumberPortControl(Min = -4000, Max = 4000, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float StrokeOffsetY
@@ -67,7 +72,7 @@ public class OutlineRasterizeNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("ストロークブラシ", "線の描画に使用するブラシ")]
+    [InputPort(nameof(TextNode.StrokeBrushLabel), nameof(TextNode.StrokeBrushDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.LawnGreen))]
     public BrushWrapper? StrokeBrush
     {
@@ -75,7 +80,7 @@ public class OutlineRasterizeNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("フィルブラシ", "塗りつぶしに使用するブラシ")]
+    [InputPort(nameof(TextNode.FillBrushLabel), nameof(TextNode.FillBrushDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.LawnGreen))]
     public BrushWrapper? FillBrush
     {
@@ -83,7 +88,8 @@ public class OutlineRasterizeNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("自己交差ルール", "自己交差時の内外判定方法")]
+    [InputPort(nameof(TextNode.SelfIntersectRuleLabel), nameof(TextNode.SelfIntersectRuleDescription),
+        typeof(TextNode))]
     [EnumPortControl(Default = 0, IsEditable = false, Items = typeof(FillRuleKind))]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public int FillRule
@@ -92,7 +98,7 @@ public class OutlineRasterizeNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("出力画像", "ラスタライズ結果")]
+    [OutputPort(nameof(TextNode.OutputImagePortLabel), nameof(TextNode.RasterizeOutputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? Output
     {

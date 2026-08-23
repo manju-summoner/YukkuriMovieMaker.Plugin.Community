@@ -4,32 +4,38 @@ using SkiaSharp;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.Outline;
 
 public enum PathCombineKind
 {
-    [Display(Name = "結合")] Union,
+    [Display(Name = nameof(TextNode.PathOpUnion), ResourceType = typeof(TextNode))]
+    Union,
 
-    [Display(Name = "交差")] Intersect,
+    [Display(Name = nameof(TextNode.PathOpIntersect), ResourceType = typeof(TextNode))]
+    Intersect,
 
-    [Display(Name = "差分")] Difference,
+    [Display(Name = nameof(TextNode.PathOpDifference), ResourceType = typeof(TextNode))]
+    Difference,
 
-    [Display(Name = "逆差分")] ReverseDifference,
+    [Display(Name = nameof(TextNode.PathOpReverseDifference), ResourceType = typeof(TextNode))]
+    ReverseDifference,
 
-    [Display(Name = "排他的論理和")] Xor
+    [Display(Name = nameof(TextNode.PathOpXor), ResourceType = typeof(TextNode))]
+    Xor
 }
 
 [Node(
     typeof(OutlineCategory),
-    "パス結合",
-    "2つのアウトラインを指定した演算方法で結合します。")]
+    nameof(TextNode.PathCombineNode),
+    nameof(TextNode.PathCombineNodeDescription), typeof(TextNode))]
 public class PathCombineNode : NodeLogic
 {
     private SKPath? _path;
 
-    [InputPort("パス1", "結合する1つ目のアウトライン")]
+    [InputPort(nameof(TextNode.PathInput1Label), nameof(TextNode.PathInput1Description), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public OutlineWrapper? Input1
     {
@@ -37,7 +43,7 @@ public class PathCombineNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("パス2", "結合する2つ目のアウトライン")]
+    [InputPort(nameof(TextNode.PathInput2Label), nameof(TextNode.PathInput2Description), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public OutlineWrapper? Input2
     {
@@ -45,7 +51,8 @@ public class PathCombineNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("演算", "2つのパスに適用するブール演算")]
+    [InputPort(nameof(TextNode.PathCombineOperationLabel), nameof(TextNode.PathCombineOperationDescription),
+        typeof(TextNode))]
     [EnumPortControl(
         Default = 0,
         IsEditable = false,
@@ -57,7 +64,7 @@ public class PathCombineNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("アウトライン", "結合結果のアウトラインデータ")]
+    [OutputPort(nameof(TextNode.OutlinePortLabel), nameof(TextNode.PathCombineOutputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public OutlineWrapper? Output
     {

@@ -3,19 +3,20 @@ using SkiaSharp;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.Outline;
 
 [Node(
     typeof(OutlineCategory),
-    "パス座標変換",
-    "アウトラインに平行移動、拡大縮小、回転、せん断などの座標変換を適用します。")]
+    nameof(TextNode.PathTransformNode),
+    nameof(TextNode.PathTransformNodeDescription), typeof(TextNode))]
 public class PathTransformNode : NodeLogic
 {
     private SKPath? _path;
 
-    [InputPort("アウトライン", "座標変換するアウトライン")]
+    [InputPort(nameof(TextNode.OutlinePortLabel), nameof(TextNode.PathTransformInputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public OutlineWrapper? Input
     {
@@ -23,7 +24,7 @@ public class PathTransformNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("移動X", "X方向への移動量")]
+    [InputPort(nameof(TextNode.PathMoveXLabel), nameof(TextNode.PathMoveXDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float TranslateX
@@ -32,7 +33,7 @@ public class PathTransformNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("移動Y", "Y方向への移動量")]
+    [InputPort(nameof(TextNode.PathMoveYLabel), nameof(TextNode.PathMoveYDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float TranslateY
@@ -41,7 +42,7 @@ public class PathTransformNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("拡大率X", "X方向の拡大率")]
+    [InputPort(nameof(TextNode.PathScaleXLabel), nameof(TextNode.PathScaleXDescription), typeof(TextNode))]
     [NumberPortControl(Min = -100, Max = 100, Default = 1)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float ScaleX
@@ -50,7 +51,7 @@ public class PathTransformNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("拡大率Y", "Y方向の拡大率")]
+    [InputPort(nameof(TextNode.PathScaleYLabel), nameof(TextNode.PathScaleYDescription), typeof(TextNode))]
     [NumberPortControl(Min = -100, Max = 100, Default = 1)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float ScaleY
@@ -59,7 +60,7 @@ public class PathTransformNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("回転", "回転角度")]
+    [InputPort(nameof(TextNode.RotationPortLabel), nameof(TextNode.PathRotationDescription), typeof(TextNode))]
     [NumberPortControl(Min = -3600, Max = 3600, Default = 0, Unit = "deg")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Rotation
@@ -68,7 +69,7 @@ public class PathTransformNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("せん断X", "X方向のせん断量")]
+    [InputPort(nameof(TextNode.SkewXLabel), nameof(TextNode.SkewXDescription), typeof(TextNode))]
     [NumberPortControl(Min = -10, Max = 10, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float SkewX
@@ -77,7 +78,7 @@ public class PathTransformNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("せん断Y", "Y方向のせん断量")]
+    [InputPort(nameof(TextNode.SkewYLabel), nameof(TextNode.SkewYDescription), typeof(TextNode))]
     [NumberPortControl(Min = -10, Max = 10, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float SkewY
@@ -86,7 +87,7 @@ public class PathTransformNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("基準X", "拡大縮小・回転・せん断の基準となるX座標")]
+    [InputPort(nameof(TextNode.OriginXLabel), nameof(TextNode.OriginXDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float OriginX
@@ -95,7 +96,7 @@ public class PathTransformNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("基準Y", "拡大縮小・回転・せん断の基準となるY座標")]
+    [InputPort(nameof(TextNode.OriginYLabel), nameof(TextNode.OriginYDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float OriginY
@@ -104,7 +105,7 @@ public class PathTransformNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("アウトライン", "座標変換後のアウトライン")]
+    [OutputPort(nameof(TextNode.OutlinePortLabel), nameof(TextNode.PathTransformOutputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public OutlineWrapper? Output
     {

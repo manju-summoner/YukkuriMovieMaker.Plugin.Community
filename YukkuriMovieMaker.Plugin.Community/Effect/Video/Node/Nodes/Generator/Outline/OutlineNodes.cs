@@ -6,23 +6,35 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.Outline;
 
 public enum ShapeKind
 {
-    [Display(Name = "矩形")] Rect,
-    [Display(Name = "角丸矩形")] RoundRect,
-    [Display(Name = "楕円")] Oval,
-    [Display(Name = "多角形")] Polygon,
-    [Display(Name = "星形")] Star,
-    [Display(Name = "直線")] Line
+    [Display(Name = nameof(TextNode.ShapeRect), ResourceType = typeof(TextNode))]
+    Rect,
+
+    [Display(Name = nameof(TextNode.ShapeRoundRect), ResourceType = typeof(TextNode))]
+    RoundRect,
+
+    [Display(Name = nameof(TextNode.ShapeOval), ResourceType = typeof(TextNode))]
+    Oval,
+
+    [Display(Name = nameof(TextNode.ShapePolygon), ResourceType = typeof(TextNode))]
+    Polygon,
+
+    [Display(Name = nameof(TextNode.ShapeStar), ResourceType = typeof(TextNode))]
+    Star,
+
+    [Display(Name = nameof(TextNode.ShapeLine), ResourceType = typeof(TextNode))]
+    Line
 }
 
 public class ShapeCommonInputs : InputsContainer
 {
-    [InputPort("中心X", "図形の中心のX座標（直線の場合は始点）")]
+    [InputPort(nameof(TextNode.ShapeCenterXLabel), nameof(TextNode.ShapeCenterXDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float CenterX
@@ -31,7 +43,7 @@ public class ShapeCommonInputs : InputsContainer
         set => Set(ref field, value);
     }
 
-    [InputPort("中心Y", "図形の中心のY座標（直線の場合は始点）")]
+    [InputPort(nameof(TextNode.ShapeCenterYLabel), nameof(TextNode.ShapeCenterYDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float CenterY
@@ -40,7 +52,7 @@ public class ShapeCommonInputs : InputsContainer
         set => Set(ref field, value);
     }
 
-    [InputPort("幅", "図形の幅（直線の場合は終点までのX方向距離）")]
+    [InputPort(nameof(TextNode.ShapeWidthLabel), nameof(TextNode.ShapeWidthDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000, Default = 200)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Width
@@ -49,7 +61,7 @@ public class ShapeCommonInputs : InputsContainer
         set => Set(ref field, value);
     }
 
-    [InputPort("高さ", "図形の高さ（直線の場合は終点までのY方向距離）")]
+    [InputPort(nameof(TextNode.ShapeHeightLabel), nameof(TextNode.ShapeHeightDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000, Default = 200)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Height
@@ -58,7 +70,7 @@ public class ShapeCommonInputs : InputsContainer
         set => Set(ref field, value);
     }
 
-    [InputPort("回転", "図形を中心（始点）周りに回転させる角度")]
+    [InputPort(nameof(TextNode.RotationPortLabel), nameof(TextNode.ShapeRotationDescription), typeof(TextNode))]
     [NumberPortControl(Min = -3600, Max = 3600, Default = 0, Unit = "deg")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Rotation
@@ -76,7 +88,8 @@ public class RoundRectInputs : ShapeCommonInputs
 {
     private float _cornerRadius;
 
-    [InputPort("角丸半径", "角丸矩形の角の半径")]
+    [InputPort(nameof(TextNode.ShapeCornerRadiusLabel), nameof(TextNode.ShapeCornerRadiusDescription),
+        typeof(TextNode))]
     [NumberPortControl(Min = 0, Max = 4000, Default = 20)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float CornerRadius
@@ -94,7 +107,7 @@ public class PolygonInputs : ShapeCommonInputs
 {
     private float _sides;
 
-    [InputPort("頂点数", "多角形の頂点数")]
+    [InputPort(nameof(TextNode.VertexCountLabel), nameof(TextNode.PolygonSidesDescription), typeof(TextNode))]
     [NumberPortControl(Min = 3, Max = 64, Digits = 0, Default = 5)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Sides
@@ -109,7 +122,7 @@ public class StarInputs : ShapeCommonInputs
     private float _innerRadiusRatio;
     private float _sides;
 
-    [InputPort("頂点数", "星形の外側の頂点数")]
+    [InputPort(nameof(TextNode.VertexCountLabel), nameof(TextNode.StarSidesDescription), typeof(TextNode))]
     [NumberPortControl(Min = 3, Max = 64, Digits = 0, Default = 5)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Sides
@@ -118,7 +131,7 @@ public class StarInputs : ShapeCommonInputs
         set => Set(ref _sides, value);
     }
 
-    [InputPort("内径比", "星形の内側の頂点半径（外側に対する割合）")]
+    [InputPort(nameof(TextNode.InnerRadiusRatioLabel), nameof(TextNode.InnerRadiusRatioDescription), typeof(TextNode))]
     [NumberPortControl(Min = 0, Max = 100, Default = 50, Unit = "%")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float InnerRadiusRatio
@@ -132,7 +145,8 @@ public class LineInputs : ShapeCommonInputs
 {
 }
 
-[Node(typeof(OutlineCategory), "図形アウトライン生成", "指定した種類の図形のアウトラインデータを生成します。")]
+[Node(typeof(OutlineCategory), nameof(TextNode.ShapeOutlineNode), nameof(TextNode.ShapeOutlineNodeDescription),
+    typeof(TextNode))]
 public class ShapeOutlineNode : NodeLogic
 {
     private readonly LineInputs _lineInputs = new();
@@ -145,7 +159,7 @@ public class ShapeOutlineNode : NodeLogic
     private ShapeKind _kind = ShapeKind.Rect;
     private SKPath? _path;
 
-    [InputPort("種類", "生成する図形の種類")]
+    [InputPort(nameof(TextNode.ShapeKindLabel), nameof(TextNode.ShapeKindDescription), typeof(TextNode))]
     [EnumPortControl(Default = 0, IsEditable = false, Items = typeof(ShapeKind))]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public ShapeKind Kind
@@ -155,7 +169,8 @@ public class ShapeOutlineNode : NodeLogic
     }
 
 
-    [InputPort("パラメータ", "図形の種類に応じた入力群", isDynamic: true)]
+    [InputPort(nameof(TextNode.ShapeParamsLabel), nameof(TextNode.ShapeParamsDescription), typeof(TextNode),
+        true)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public InputsContainer Params
     {
@@ -163,7 +178,7 @@ public class ShapeOutlineNode : NodeLogic
         set => SetDynamicContainer(value);
     }
 
-    [OutputPort("アウトライン", "生成された図形のアウトラインデータ")]
+    [OutputPort(nameof(TextNode.OutlinePortLabel), nameof(TextNode.ShapeOutlineOutputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public OutlineWrapper? Output
     {
@@ -338,12 +353,13 @@ public class ShapeOutlineNode : NodeLogic
     }
 }
 
-[Node(typeof(OutlineCategory), "文字アウトライン生成", "指定した文字列のアウトラインデータを生成します。")]
+[Node(typeof(OutlineCategory), nameof(TextNode.TextOutlineNode), nameof(TextNode.TextOutlineNodeDescription),
+    typeof(TextNode))]
 public class TextOutlineNode : NodeLogic
 {
     private SKPath? _path;
 
-    [InputPort("テキスト", "アウトライン化する文字列")]
+    [InputPort(nameof(TextNode.TextOutlineTextLabel), nameof(TextNode.TextOutlineTextDescription), typeof(TextNode))]
     [TextPortControl(Default = "テキスト")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public string Text
@@ -352,7 +368,7 @@ public class TextOutlineNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("フォント名", "使用するフォントファミリー名（空欄の場合は既定のフォント）")]
+    [InputPort(nameof(TextNode.FontFamilyLabel), nameof(TextNode.FontFamilyDescription), typeof(TextNode))]
     [FontComboBox]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public string FontFamily
@@ -367,7 +383,7 @@ public class TextOutlineNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("サイズ", "フォントサイズ")]
+    [InputPort(nameof(TextNode.FontSizeLabel), nameof(TextNode.FontSizeDescription), typeof(TextNode))]
     [NumberPortControl(Min = 1, Max = 2000, Default = 64)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Size
@@ -376,7 +392,7 @@ public class TextOutlineNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("太字", "太字にするかどうか")]
+    [InputPort(nameof(TextNode.BoldLabel), nameof(TextNode.BoldDescription), typeof(TextNode))]
     [BoolPortControl(Default = false)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public bool Bold
@@ -385,7 +401,7 @@ public class TextOutlineNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("斜体", "斜体にするかどうか")]
+    [InputPort(nameof(TextNode.ItalicLabel), nameof(TextNode.ItalicDescription), typeof(TextNode))]
     [BoolPortControl(Default = false)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public bool Italic
@@ -394,7 +410,7 @@ public class TextOutlineNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("原点X", "文字列のベースライン原点のX座標")]
+    [InputPort(nameof(TextNode.TextOriginXLabel), nameof(TextNode.TextOriginXDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float OriginX
@@ -403,7 +419,7 @@ public class TextOutlineNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("原点Y", "文字列のベースライン原点のY座標")]
+    [InputPort(nameof(TextNode.TextOriginYLabel), nameof(TextNode.TextOriginYDescription), typeof(TextNode))]
     [NumberPortControl(Min = -40000, Max = 40000, Default = 0)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float OriginY
@@ -412,7 +428,7 @@ public class TextOutlineNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("アウトライン", "生成された文字列のアウトラインデータ")]
+    [OutputPort(nameof(TextNode.OutlinePortLabel), nameof(TextNode.TextOutlineOutputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public OutlineWrapper? Output
     {

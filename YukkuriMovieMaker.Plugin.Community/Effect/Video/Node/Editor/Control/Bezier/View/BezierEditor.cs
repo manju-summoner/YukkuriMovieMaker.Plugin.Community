@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.Bezier.Model;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.Bezier.ViewModel;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using Media = System.Windows.Media;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.Bezier.View;
@@ -773,7 +774,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
 
         var smooth = new MenuItem
         {
-            Header = "Smooth",
+            Header = TextUi.BezierSmoothMenu,
             IsCheckable = true,
             IsChecked = node.Type == BezierNodeType.Smooth
         };
@@ -795,7 +796,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
 
         var corner = new MenuItem
         {
-            Header = "Corner",
+            Header = TextUi.BezierCornerMenu,
             IsCheckable = true,
             IsChecked = node.Type == BezierNodeType.Corner
         };
@@ -819,7 +820,7 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
 
         var delete = new MenuItem
         {
-            Header = "Delete",
+            Header = TextUi.DeleteMenu,
             IsEnabled = !node.IsFixed
         };
 

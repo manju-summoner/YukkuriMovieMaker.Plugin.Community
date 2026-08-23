@@ -4,6 +4,7 @@
                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                        xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control"
+                       xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize"
                        mc:Ignorable="d"
                        d:DesignHeight="Auto" d:DesignWidth="Auto">
     <UserControl.Resources>
@@ -68,9 +69,9 @@
                     <ContentControl x:Name="ColorPickerHost" Grid.Column="0" />
 
                     <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                        <TextBlock Text="RGB" FontWeight="Bold" Margin="0,0,0,5" />
+                        <TextBlock Text="{x:Static loc:TextUi.ColorRgbHeader}" FontWeight="Bold" Margin="0,0,0,5" />
                         <StackPanel Orientation="Horizontal" Margin="0,5">
-                            <TextBlock Text="R:" Width="20" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Static loc:TextUi.ColorRedLabel}" Width="20" VerticalAlignment="Center" />
                             <TextBox
                                 Text="{Binding Red, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}"
                                 Width="50" VerticalContentAlignment="Center" />
@@ -78,7 +79,8 @@
                                     Value="{Binding Red, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
-                            <TextBlock Text="G:" Width="20" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Static loc:TextUi.ColorGreenLabel}" Width="20"
+                                       VerticalAlignment="Center" />
                             <TextBox
                                 Text="{Binding Green, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}"
                                 Width="50" VerticalContentAlignment="Center" />
@@ -86,7 +88,8 @@
                                     Value="{Binding Green, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
-                            <TextBlock Text="B:" Width="20" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Static loc:TextUi.ColorBlueLabel}" Width="20"
+                                       VerticalAlignment="Center" />
                             <TextBox
                                 Text="{Binding Blue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}"
                                 Width="50" VerticalContentAlignment="Center" />
@@ -94,7 +97,8 @@
                                     Value="{Binding Blue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
-                            <TextBlock Text="A:" Width="20" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Static loc:TextUi.ColorAlphaLabel}" Width="20"
+                                       VerticalAlignment="Center" />
                             <TextBox
                                 Text="{Binding Alpha, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}"
                                 Width="50" VerticalContentAlignment="Center" />
@@ -104,9 +108,9 @@
 
                         <Separator Margin="0,10" />
 
-                        <TextBlock Text="HSV" FontWeight="Bold" Margin="0,0,0,5" />
+                        <TextBlock Text="{x:Static loc:TextUi.ColorHsvHeader}" FontWeight="Bold" Margin="0,0,0,5" />
                         <StackPanel Orientation="Horizontal" Margin="0,5">
-                            <TextBlock Text="H:" Width="20" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Static loc:TextUi.ColorHueLabel}" Width="20" VerticalAlignment="Center" />
                             <TextBox
                                 Text="{Binding Hue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, StringFormat={}{0:F1}}"
                                 Width="50" VerticalContentAlignment="Center" />
@@ -114,7 +118,8 @@
                                     Value="{Binding Hue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
-                            <TextBlock Text="S:" Width="20" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Static loc:TextUi.ColorSaturationLabel}" Width="20"
+                                       VerticalAlignment="Center" />
                             <TextBox
                                 Text="{Binding Saturation, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, StringFormat={}{0:P0}}"
                                 Width="50" VerticalContentAlignment="Center" />
@@ -122,7 +127,8 @@
                                     Value="{Binding Saturation, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,5">
-                            <TextBlock Text="V:" Width="20" VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Static loc:TextUi.ColorValueLabel}" Width="20"
+                                       VerticalAlignment="Center" />
                             <TextBox
                                 Text="{Binding BValue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, StringFormat={}{0:P0}}"
                                 Width="50" VerticalContentAlignment="Center" />

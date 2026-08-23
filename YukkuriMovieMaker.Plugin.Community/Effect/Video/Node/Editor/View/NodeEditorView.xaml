@@ -6,6 +6,7 @@
              xmlns:viewModel="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel"
              xmlns:view="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View"
              xmlns:converters="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters"
+             xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="850"
              d:DataContext="{d:DesignInstance viewModel:NodeEditorViewModel}">
@@ -19,35 +20,41 @@
             <RowDefinition Height="20" />
         </Grid.RowDefinitions>
         <Menu Grid.Row="0">
-            <MenuItem Header="Edit">
-                <MenuItem Header="Copy" Command="{Binding CopyCommand}" InputGestureText="Ctrl+C" />
-                <MenuItem Header="Cut" Command="{Binding CutCommand}" InputGestureText="Ctrl+X" />
-                <MenuItem Header="Paste" Command="{Binding PasteCommand}" InputGestureText="Ctrl+V" />
+            <MenuItem Header="{x:Static loc:TextUi.EditMenu}">
+                <MenuItem Header="{x:Static loc:TextUi.CopyMenu}" Command="{Binding CopyCommand}"
+                          InputGestureText="Ctrl+C" />
+                <MenuItem Header="{x:Static loc:TextUi.CutMenu}" Command="{Binding CutCommand}"
+                          InputGestureText="Ctrl+X" />
+                <MenuItem Header="{x:Static loc:TextUi.PasteMenu}" Command="{Binding PasteCommand}"
+                          InputGestureText="Ctrl+V" />
                 <Separator />
-                <MenuItem Header="Mode">
-                    <MenuItem Header="Rect Selection"
+                <MenuItem Header="{x:Static loc:TextUi.ModeMenu}">
+                    <MenuItem Header="{x:Static loc:TextUi.RectSelectionMenu}"
                               IsCheckable="True"
                               IsChecked="{Binding CurrentMode, 
                                   Converter={StaticResource EnumToBoolConverter}, 
                                   ConverterParameter=RectSelection}" />
-                    <MenuItem Header="Lasso Selection"
+                    <MenuItem Header="{x:Static loc:TextUi.LassoSelectionMenu}"
                               IsCheckable="True"
                               IsChecked="{Binding CurrentMode, 
                                   Converter={StaticResource EnumToBoolConverter}, 
                                   ConverterParameter=LassoSelection}" />
-                    <MenuItem Header="Pan"
+                    <MenuItem Header="{x:Static loc:TextUi.PanMenu}"
                               IsCheckable="True"
                               IsChecked="{Binding CurrentMode, 
                                   Converter={StaticResource EnumToBoolConverter}, 
                                   ConverterParameter=Pan}" />
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="View">
-                <MenuItem Header="Zoom +" Command="{Binding ZoomUpCommand}" InputGestureText="Ctrl++" />
-                <MenuItem Header="Zoom -" Command="{Binding ZoomDownCommand}" InputGestureText="Ctrl+-" />
-                <MenuItem Header="Reset Zoom" Command="{Binding ResetZoomCommand}" InputGestureText="Ctrl+0" />
+            <MenuItem Header="{x:Static loc:TextUi.ViewMenu}">
+                <MenuItem Header="{x:Static loc:TextUi.ZoomInMenu}" Command="{Binding ZoomUpCommand}"
+                          InputGestureText="Ctrl++" />
+                <MenuItem Header="{x:Static loc:TextUi.ZoomOutMenu}" Command="{Binding ZoomDownCommand}"
+                          InputGestureText="Ctrl+-" />
+                <MenuItem Header="{x:Static loc:TextUi.ResetZoomMenu}" Command="{Binding ResetZoomCommand}"
+                          InputGestureText="Ctrl+0" />
                 <Separator />
-                <MenuItem Header="Fit" Command="{Binding FitToScreenCommand}" />
+                <MenuItem Header="{x:Static loc:TextUi.FitMenu}" Command="{Binding FitToScreenCommand}" />
             </MenuItem>
         </Menu>
         <TabControl Grid.Row="1" ItemsSource="{Binding Tabs}"
@@ -66,7 +73,7 @@
                                 Height="20"
                                 Padding="0"
                                 VerticalAlignment="Center"
-                                ToolTip="Close Tab">
+                                ToolTip="{x:Static loc:TextUi.CloseTabToolTip}">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Background" Value="Transparent" />
@@ -88,7 +95,7 @@
         <StatusBar Grid.Row="2">
             <StatusBarItem>
                 <TextBlock>
-                    <Run Text="Mode:" />
+                    <Run Text="{x:Static loc:TextUi.ModeStatusLabel}" />
                     <Run Text="{Binding CurrentMode}" />
                 </TextBlock>
             </StatusBarItem>

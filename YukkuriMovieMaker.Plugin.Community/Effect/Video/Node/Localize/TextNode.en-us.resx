@@ -272,4 +272,227 @@
 <data name="RotateNodeDescription" xml:space="preserve"><value>Rotate image.</value></data>
 <data name="Angle" xml:space="preserve"><value>Angle</value></data>
 <data name="TransformResultDescription" xml:space="preserve"><value>Transformed image.</value></data>
+<data name="FillRuleNonZero" xml:space="preserve"><value>Nonzero</value></data>
+<data name="FillRuleEvenOdd" xml:space="preserve"><value>Even-Odd</value></data>
+<data name="ShapeRect" xml:space="preserve"><value>Rectangle</value></data>
+<data name="ShapeRoundRect" xml:space="preserve"><value>Rounded Rectangle</value></data>
+<data name="ShapeOval" xml:space="preserve"><value>Ellipse</value></data>
+<data name="ShapePolygon" xml:space="preserve"><value>Polygon</value></data>
+<data name="ShapeStar" xml:space="preserve"><value>Star</value></data>
+<data name="ShapeLine" xml:space="preserve"><value>Line</value></data>
+<data name="PathOpUnion" xml:space="preserve"><value>Union</value></data>
+<data name="PathOpIntersect" xml:space="preserve"><value>Intersect</value></data>
+<data name="PathOpDifference" xml:space="preserve"><value>Difference</value></data>
+<data name="PathOpReverseDifference" xml:space="preserve"><value>Reverse Difference</value></data>
+<data name="PathOpXor" xml:space="preserve"><value>Exclusive Or</value></data>
+<data name="ChannelHue" xml:space="preserve"><value>Hue</value></data>
+<data name="ChannelSaturation" xml:space="preserve"><value>Saturation</value></data>
+<data name="ChannelValue" xml:space="preserve"><value>Value</value></data>
+<data name="ChannelRed" xml:space="preserve"><value>Red</value></data>
+<data name="ChannelGreen" xml:space="preserve"><value>Green</value></data>
+<data name="ChannelBlue" xml:space="preserve"><value>Blue</value></data>
+<data name="ChannelAlpha" xml:space="preserve"><value>Alpha</value></data>
+<data name="BlendNormal" xml:space="preserve"><value>Normal</value></data>
+<data name="BlendMultiply" xml:space="preserve"><value>Multiply</value></data>
+<data name="BlendScreen" xml:space="preserve"><value>Screen</value></data>
+<data name="BlendDarken" xml:space="preserve"><value>Darken</value></data>
+<data name="BlendLighten" xml:space="preserve"><value>Lighten</value></data>
+<data name="BlendDissolve" xml:space="preserve"><value>Dissolve</value></data>
+<data name="BlendColorBurn" xml:space="preserve"><value>Color Burn</value></data>
+<data name="BlendLinearBurn" xml:space="preserve"><value>Linear Burn</value></data>
+<data name="BlendDarkerColor" xml:space="preserve"><value>Darker Color</value></data>
+<data name="BlendLighterColor" xml:space="preserve"><value>Lighter Color</value></data>
+<data name="BlendColorDodge" xml:space="preserve"><value>Color Dodge</value></data>
+<data name="BlendLinearDodge" xml:space="preserve"><value>Linear Dodge</value></data>
+<data name="BlendOverlay" xml:space="preserve"><value>Overlay</value></data>
+<data name="BlendSoftLight" xml:space="preserve"><value>Soft Light</value></data>
+<data name="BlendHardLight" xml:space="preserve"><value>Hard Light</value></data>
+<data name="BlendVividLight" xml:space="preserve"><value>Vivid Light</value></data>
+<data name="BlendLinearLight" xml:space="preserve"><value>Linear Light</value></data>
+<data name="BlendPinLight" xml:space="preserve"><value>Pin Light</value></data>
+<data name="BlendHardMix" xml:space="preserve"><value>Hard Mix</value></data>
+<data name="BlendDifferenceAbs" xml:space="preserve"><value>Difference</value></data>
+<data name="BlendExclusion" xml:space="preserve"><value>Exclusion</value></data>
+<data name="BlendColor" xml:space="preserve"><value>Color</value></data>
+<data name="BlendLuminosity" xml:space="preserve"><value>Luminosity</value></data>
+<data name="BlendSubtract" xml:space="preserve"><value>Subtract</value></data>
+<data name="BlendDivision" xml:space="preserve"><value>Divide</value></data>
+<data name="OutlineCategoryName" xml:space="preserve"><value>Outline</value></data>
+<data name="ImageSourceCategoryName" xml:space="preserve"><value>Image Source</value></data>
+<data name="OutlinePortLabel" xml:space="preserve"><value>Outline</value></data>
+<data name="InputImagePortLabel" xml:space="preserve"><value>Input Image</value></data>
+<data name="OutputImagePortLabel" xml:space="preserve"><value>Output Image</value></data>
+<data name="MaskPortLabel" xml:space="preserve"><value>Mask</value></data>
+<data name="InvertPortLabel" xml:space="preserve"><value>Invert</value></data>
+<data name="FilePathPortLabel" xml:space="preserve"><value>File Path</value></data>
+<data name="RotationPortLabel" xml:space="preserve"><value>Rotation</value></data>
+<data name="TransformInputImageDescription" xml:space="preserve"><value>Image to transform</value></data>
+<data name="TransformOutputImageDescription" xml:space="preserve"><value>Transform result</value></data>
+<data name="MoveAmountX" xml:space="preserve"><value>X</value></data>
+<data name="MoveAmountXDescription" xml:space="preserve"><value>Amount to move in the X direction</value></data>
+<data name="MoveAmountY" xml:space="preserve"><value>Y</value></data>
+<data name="MoveAmountYDescription" xml:space="preserve"><value>Amount to move in the Y direction</value></data>
+<data name="ScaleRatioX" xml:space="preserve"><value>Scale X</value></data>
+<data name="ScaleRatioXDescription" xml:space="preserve"><value>Scale ratio in the X direction</value></data>
+<data name="ScaleRatioY" xml:space="preserve"><value>Scale Y</value></data>
+<data name="ScaleRatioYDescription" xml:space="preserve"><value>Scale ratio in the Y direction</value></data>
+<data name="AngleDescription" xml:space="preserve"><value>Rotation angle</value></data>
+<data name="OutlineRasterizeNode" xml:space="preserve"><value>Rasterize Outline</value></data>
+<data name="OutlineRasterizeNodeDescription" xml:space="preserve"><value>Renders outline data as fill and stroke, converting it to an ID2D1Image.</value></data>
+<data name="OutlineRasterizeInputDescription" xml:space="preserve"><value>Outline data to rasterize</value></data>
+<data name="StrokeWidthLabel" xml:space="preserve"><value>Stroke Width</value></data>
+<data name="StrokeWidthDescription" xml:space="preserve"><value>Thickness of the stroke</value></data>
+<data name="StrokeOffsetXLabel" xml:space="preserve"><value>Stroke Offset X</value></data>
+<data name="StrokeOffsetXDescription" xml:space="preserve"><value>Amount to shift the stroke's drawing position in the X direction</value></data>
+<data name="StrokeOffsetYLabel" xml:space="preserve"><value>Stroke Offset Y</value></data>
+<data name="StrokeOffsetYDescription" xml:space="preserve"><value>Amount to shift the stroke's drawing position in the Y direction</value></data>
+<data name="StrokeBrushLabel" xml:space="preserve"><value>Stroke Brush</value></data>
+<data name="StrokeBrushDescription" xml:space="preserve"><value>Brush used to draw the line</value></data>
+<data name="FillBrushLabel" xml:space="preserve"><value>Fill Brush</value></data>
+<data name="FillBrushDescription" xml:space="preserve"><value>Brush used for the fill</value></data>
+<data name="SelfIntersectRuleLabel" xml:space="preserve"><value>Self-Intersection Rule</value></data>
+<data name="SelfIntersectRuleDescription" xml:space="preserve"><value>Method for determining inside/outside at self-intersections</value></data>
+<data name="RasterizeOutputDescription" xml:space="preserve"><value>Rasterization result</value></data>
+<data name="PathTransformNode" xml:space="preserve"><value>Transform Path</value></data>
+<data name="PathTransformNodeDescription" xml:space="preserve"><value>Applies coordinate transforms such as translation, scaling, rotation, and shear to the outline.</value></data>
+<data name="PathTransformInputDescription" xml:space="preserve"><value>Outline to transform</value></data>
+<data name="PathMoveXLabel" xml:space="preserve"><value>Translate X</value></data>
+<data name="PathMoveXDescription" xml:space="preserve"><value>Amount to move in the X direction</value></data>
+<data name="PathMoveYLabel" xml:space="preserve"><value>Translate Y</value></data>
+<data name="PathMoveYDescription" xml:space="preserve"><value>Amount to move in the Y direction</value></data>
+<data name="PathScaleXLabel" xml:space="preserve"><value>Scale X</value></data>
+<data name="PathScaleXDescription" xml:space="preserve"><value>Scale ratio in the X direction</value></data>
+<data name="PathScaleYLabel" xml:space="preserve"><value>Scale Y</value></data>
+<data name="PathScaleYDescription" xml:space="preserve"><value>Scale ratio in the Y direction</value></data>
+<data name="PathRotationDescription" xml:space="preserve"><value>Rotation angle</value></data>
+<data name="SkewXLabel" xml:space="preserve"><value>Skew X</value></data>
+<data name="SkewXDescription" xml:space="preserve"><value>Amount of shear in the X direction</value></data>
+<data name="SkewYLabel" xml:space="preserve"><value>Skew Y</value></data>
+<data name="SkewYDescription" xml:space="preserve"><value>Amount of shear in the Y direction</value></data>
+<data name="OriginXLabel" xml:space="preserve"><value>Origin X</value></data>
+<data name="OriginXDescription" xml:space="preserve"><value>X coordinate used as the origin for scale, rotation, and shear</value></data>
+<data name="OriginYLabel" xml:space="preserve"><value>Origin Y</value></data>
+<data name="OriginYDescription" xml:space="preserve"><value>Y coordinate used as the origin for scale, rotation, and shear</value></data>
+<data name="PathTransformOutputDescription" xml:space="preserve"><value>Outline after coordinate transformation</value></data>
+<data name="ShapeCenterXLabel" xml:space="preserve"><value>Center X</value></data>
+<data name="ShapeCenterXDescription" xml:space="preserve"><value>X coordinate of the shape's center (start point for a line)</value></data>
+<data name="ShapeCenterYLabel" xml:space="preserve"><value>Center Y</value></data>
+<data name="ShapeCenterYDescription" xml:space="preserve"><value>Y coordinate of the shape's center (start point for a line)</value></data>
+<data name="ShapeWidthLabel" xml:space="preserve"><value>Width</value></data>
+<data name="ShapeWidthDescription" xml:space="preserve"><value>Width of the shape (X-direction distance to the endpoint for a line)</value></data>
+<data name="ShapeHeightLabel" xml:space="preserve"><value>Height</value></data>
+<data name="ShapeHeightDescription" xml:space="preserve"><value>Height of the shape (Y-direction distance to the endpoint for a line)</value></data>
+<data name="ShapeRotationDescription" xml:space="preserve"><value>Angle to rotate the shape around its center (start point)</value></data>
+<data name="ShapeCornerRadiusLabel" xml:space="preserve"><value>Corner Radius</value></data>
+<data name="ShapeCornerRadiusDescription" xml:space="preserve"><value>Radius of the rounded rectangle's corners</value></data>
+<data name="PolygonSidesDescription" xml:space="preserve"><value>Number of vertices of the polygon</value></data>
+<data name="VertexCountLabel" xml:space="preserve"><value>Vertex Count</value></data>
+<data name="StarSidesDescription" xml:space="preserve"><value>Number of outer vertices of the star</value></data>
+<data name="InnerRadiusRatioLabel" xml:space="preserve"><value>Inner Radius Ratio</value></data>
+<data name="InnerRadiusRatioDescription" xml:space="preserve"><value>Radius of the star's inner vertices (as a ratio to the outer radius)</value></data>
+<data name="ShapeOutlineNode" xml:space="preserve"><value>Generate Shape Outline</value></data>
+<data name="ShapeOutlineNodeDescription" xml:space="preserve"><value>Generates outline data for the specified shape type.</value></data>
+<data name="ShapeKindLabel" xml:space="preserve"><value>Kind</value></data>
+<data name="ShapeKindDescription" xml:space="preserve"><value>Type of shape to generate</value></data>
+<data name="ShapeParamsLabel" xml:space="preserve"><value>Parameters</value></data>
+<data name="ShapeParamsDescription" xml:space="preserve"><value>Set of inputs that depend on the shape type</value></data>
+<data name="ShapeOutlineOutputDescription" xml:space="preserve"><value>Outline data of the generated shape</value></data>
+<data name="TextOutlineNode" xml:space="preserve"><value>Generate Text Outline</value></data>
+<data name="TextOutlineNodeDescription" xml:space="preserve"><value>Generates outline data for the specified text string.</value></data>
+<data name="TextOutlineTextLabel" xml:space="preserve"><value>Text</value></data>
+<data name="TextOutlineTextDescription" xml:space="preserve"><value>Text string to outline</value></data>
+<data name="FontFamilyLabel" xml:space="preserve"><value>Font Family</value></data>
+<data name="FontFamilyDescription" xml:space="preserve"><value>Font family name to use (default font if left blank)</value></data>
+<data name="FontSizeLabel" xml:space="preserve"><value>Size</value></data>
+<data name="FontSizeDescription" xml:space="preserve"><value>Font size</value></data>
+<data name="BoldLabel" xml:space="preserve"><value>Bold</value></data>
+<data name="BoldDescription" xml:space="preserve"><value>Whether to make the text bold</value></data>
+<data name="ItalicLabel" xml:space="preserve"><value>Italic</value></data>
+<data name="ItalicDescription" xml:space="preserve"><value>Whether to make the text italic</value></data>
+<data name="TextOriginXLabel" xml:space="preserve"><value>Origin X</value></data>
+<data name="TextOriginXDescription" xml:space="preserve"><value>X coordinate of the text baseline origin</value></data>
+<data name="TextOriginYLabel" xml:space="preserve"><value>Origin Y</value></data>
+<data name="TextOriginYDescription" xml:space="preserve"><value>Y coordinate of the text baseline origin</value></data>
+<data name="TextOutlineOutputDescription" xml:space="preserve"><value>Outline data of the generated text string</value></data>
+<data name="PathCombineNode" xml:space="preserve"><value>Combine Paths</value></data>
+<data name="PathCombineNodeDescription" xml:space="preserve"><value>Combines two outlines using the specified operation.</value></data>
+<data name="PathInput1Label" xml:space="preserve"><value>Path 1</value></data>
+<data name="PathInput1Description" xml:space="preserve"><value>First outline to combine</value></data>
+<data name="PathInput2Label" xml:space="preserve"><value>Path 2</value></data>
+<data name="PathInput2Description" xml:space="preserve"><value>Second outline to combine</value></data>
+<data name="PathCombineOperationLabel" xml:space="preserve"><value>Operation</value></data>
+<data name="PathCombineOperationDescription" xml:space="preserve"><value>Boolean operation to apply to the two paths</value></data>
+<data name="PathCombineOutputDescription" xml:space="preserve"><value>Outline data resulting from the combination</value></data>
+<data name="LoadImageNode" xml:space="preserve"><value>Load Image</value></data>
+<data name="LoadImageNodeDescription" xml:space="preserve"><value>Loads an image from the specified file.</value></data>
+<data name="LoadImageFilePathDescription" xml:space="preserve"><value>Image file to load</value></data>
+<data name="LoadImageOutputDescription" xml:space="preserve"><value>Loaded image</value></data>
+<data name="LoadVideoFrameNode" xml:space="preserve"><value>Load Video Frame</value></data>
+<data name="LoadVideoFrameNodeDescription" xml:space="preserve"><value>Loads an arbitrary frame from the specified video file as an image.</value></data>
+<data name="LoadVideoFrameFilePathDescription" xml:space="preserve"><value>Video file to load</value></data>
+<data name="FrameIndexLabel" xml:space="preserve"><value>Frame Index</value></data>
+<data name="FrameIndexDescription" xml:space="preserve"><value>Number of the frame to load (starting from 0)</value></data>
+<data name="LoadVideoFrameOutputDescription" xml:space="preserve"><value>Loaded frame image</value></data>
+<data name="EasingNode" xml:space="preserve"><value>Easing</value></data>
+<data name="EasingNodeDescription" xml:space="preserve"><value>Evaluates the time parameter using a Bezier curve and maps it to the min-max range</value></data>
+<data name="TimeStartLabel" xml:space="preserve"><value>Time Start</value></data>
+<data name="TimeStartDescription" xml:space="preserve"><value>Start time used to normalize the time parameter</value></data>
+<data name="TimeEndLabel" xml:space="preserve"><value>Time End</value></data>
+<data name="TimeEndDescription" xml:space="preserve"><value>End time used to normalize the time parameter</value></data>
+<data name="TimeParameterLabel" xml:space="preserve"><value>Time Parameter</value></data>
+<data name="TimeParameterDescription" xml:space="preserve"><value>Time to evaluate</value></data>
+<data name="EasingMaxLabel" xml:space="preserve"><value>Max</value></data>
+<data name="EasingMaxDescription" xml:space="preserve"><value>Upper bound of the output value</value></data>
+<data name="EasingMinLabel" xml:space="preserve"><value>Min</value></data>
+<data name="EasingMinDescription" xml:space="preserve"><value>Lower bound of the output value</value></data>
+<data name="BezierCurveLabel" xml:space="preserve"><value>Bezier Curve</value></data>
+<data name="BezierCurveDescription" xml:space="preserve"><value>Curve defining the output value for the normalized time from start to end</value></data>
+<data name="EasingResultLabel" xml:space="preserve"><value>Value</value></data>
+<data name="EasingResultDescription" xml:space="preserve"><value>Evaluation result</value></data>
+<data name="AlphaNode" xml:space="preserve"><value>Opacity</value></data>
+<data name="AlphaNodeDescription" xml:space="preserve"><value>Sets the opacity of the image.</value></data>
+<data name="AlphaInputDescription" xml:space="preserve"><value>Image whose opacity will be changed</value></data>
+<data name="OpacityLabel" xml:space="preserve"><value>Opacity</value></data>
+<data name="OpacityDescription" xml:space="preserve"><value>Transparency level of the image</value></data>
+<data name="AlphaOutputDescription" xml:space="preserve"><value>Transparency result</value></data>
+<data name="CreateMaskNode" xml:space="preserve"><value>Create Mask</value></data>
+<data name="CreateMaskNodeDescription" xml:space="preserve"><value>Generates an image from an element of the specified image</value></data>
+<data name="MaskInputImageDescription" xml:space="preserve"><value>Base image used to generate the mask</value></data>
+<data name="MaskModeLabel" xml:space="preserve"><value>Mode</value></data>
+<data name="MaskModeDescription" xml:space="preserve"><value>Image element used to generate the mask</value></data>
+<data name="MaskOffsetLabel" xml:space="preserve"><value>Offset</value></data>
+<data name="MaskOffsetDescription" xml:space="preserve"><value>Offset added to the mask value</value></data>
+<data name="MaskInvertDescription" xml:space="preserve"><value>Whether to invert the mask</value></data>
+<data name="MaskOutputDescription" xml:space="preserve"><value>Generated mask</value></data>
+<data name="MaskClipNode" xml:space="preserve"><value>Mask Clip</value></data>
+<data name="MaskClipNodeDescription" xml:space="preserve"><value>Clips the image using a mask</value></data>
+<data name="MaskClipInputImageDescription" xml:space="preserve"><value>Image to be clipped by the mask</value></data>
+<data name="MaskClipMaskDescription" xml:space="preserve"><value>Mask used for clipping</value></data>
+<data name="MaskClipOutputDescription" xml:space="preserve"><value>Result of clipping with the mask</value></data>
+<data name="MaskThresholdNode" xml:space="preserve"><value>Mask Threshold</value></data>
+<data name="MaskThresholdNodeDescription" xml:space="preserve"><value>Sets the intensity range of the mask</value></data>
+<data name="MaskThresholdInputLabel" xml:space="preserve"><value>Input Mask</value></data>
+<data name="MaskThresholdInputDescription" xml:space="preserve"><value>Mask to which the threshold is applied</value></data>
+<data name="MaskMinLabel" xml:space="preserve"><value>Min</value></data>
+<data name="MaskMinDescription" xml:space="preserve"><value>Lower bound of the threshold</value></data>
+<data name="MaskMaxLabel" xml:space="preserve"><value>Max</value></data>
+<data name="MaskMaxDescription" xml:space="preserve"><value>Upper bound of the threshold</value></data>
+<data name="MaskThresholdOutputLabel" xml:space="preserve"><value>Output Mask</value></data>
+<data name="MaskThresholdOutputDescription" xml:space="preserve"><value>Mask with the threshold applied</value></data>
+<data name="MaskToImageNode" xml:space="preserve"><value>Develop Mask</value></data>
+<data name="MaskToImageNodeDescription" xml:space="preserve"><value>Converts the mask's intensity into a black-and-white image</value></data>
+<data name="MaskDevelopTargetDescription" xml:space="preserve"><value>Mask to be developed</value></data>
+<data name="MaskImageOutputLabel" xml:space="preserve"><value>Image</value></data>
+<data name="MaskImageOutputDescription" xml:space="preserve"><value>Image developed from the mask</value></data>
+<data name="BlendNode" xml:space="preserve"><value>Blend</value></data>
+<data name="BlendNodeDescription" xml:space="preserve"><value>Blends two images using the specified mode.</value></data>
+<data name="BlendInputImage1Description" xml:space="preserve"><value>First image to blend</value></data>
+<data name="BlendInputImage2Description" xml:space="preserve"><value>Second image to blend</value></data>
+<data name="BlendModeDescription" xml:space="preserve"><value>Blend mode</value></data>
+<data name="BlendOutputDescription" xml:space="preserve"><value>Blend result</value></data>
+<data name="ArgumentsNode" xml:space="preserve"><value>Arguments</value></data>
+<data name="ArgumentsNodeDescription" xml:space="preserve"><value>Provides the graph's input values.</value></data>
+<data name="ReturnNode" xml:space="preserve"><value>Return Value</value></data>
+<data name="ReturnNodeDescription" xml:space="preserve"><value>Receives the calculation result of the node graph.</value></data>
+<data name="NoMatchingResults" xml:space="preserve"><value>(No results)</value></data>
 </root>

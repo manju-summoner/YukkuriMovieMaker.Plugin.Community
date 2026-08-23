@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View;
 
@@ -229,7 +230,7 @@ public sealed class AddNodePopup : Popup
         if (!found)
             host.Children.Add(new TextBlock
             {
-                Text = "(該当なし)",
+                Text = TextNode.NoMatchingResults,
                 Foreground = SystemColors.GrayTextBrush,
                 Margin = new Thickness(8, 4, 4, 4)
             });

@@ -5,6 +5,7 @@ using Vortice.Direct2D1.Effects;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 using Blend = Vortice.Direct2D1.Effects.Blend;
 
@@ -12,43 +13,96 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.Comp
 
 public enum BlendMode
 {
-    [Display(Name = "通常")] Normal,
-    [Display(Name = "乗算")] Multiply,
-    [Display(Name = "スクリーン")] Screen,
-    [Display(Name = "比較（暗）")] Darken,
-    [Display(Name = "比較（明）")] Lighten,
-    [Display(Name = "ディザ")] Dissolve,
-    [Display(Name = "焼き込みカラー")] ColorBurn,
-    [Display(Name = "焼き込み（リニア）")] LinearBurn,
-    [Display(Name = "暗いカラー")] DarkerColor,
-    [Display(Name = "明るいカラー")] LighterColor,
-    [Display(Name = "覆い焼きカラー")] ColorDodge,
-    [Display(Name = "覆い焼き（リニア）")] LinearDodge,
-    [Display(Name = "オーバーレイ")] Overlay,
-    [Display(Name = "ソフトライト")] SoftLight,
-    [Display(Name = "ハードライト")] HardLight,
-    [Display(Name = "ビビッドライト")] VividLight,
-    [Display(Name = "リニアライト")] LinearLight,
-    [Display(Name = "ピンライト")] PinLight,
-    [Display(Name = "ハードミックス")] HardMix,
-    [Display(Name = "差の絶対値")] Difference,
-    [Display(Name = "除外")] Exclusion,
-    [Display(Name = "色相")] Hue,
-    [Display(Name = "彩度")] Saturation,
-    [Display(Name = "カラー")] Color,
-    [Display(Name = "輝度")] Luminosity,
-    [Display(Name = "減算")] Subtract,
-    [Display(Name = "除算")] Division
+    [Display(Name = nameof(TextNode.BlendNormal), ResourceType = typeof(TextNode))]
+    Normal,
+
+    [Display(Name = nameof(TextNode.BlendMultiply), ResourceType = typeof(TextNode))]
+    Multiply,
+
+    [Display(Name = nameof(TextNode.BlendScreen), ResourceType = typeof(TextNode))]
+    Screen,
+
+    [Display(Name = nameof(TextNode.BlendDarken), ResourceType = typeof(TextNode))]
+    Darken,
+
+    [Display(Name = nameof(TextNode.BlendLighten), ResourceType = typeof(TextNode))]
+    Lighten,
+
+    [Display(Name = nameof(TextNode.BlendDissolve), ResourceType = typeof(TextNode))]
+    Dissolve,
+
+    [Display(Name = nameof(TextNode.BlendColorBurn), ResourceType = typeof(TextNode))]
+    ColorBurn,
+
+    [Display(Name = nameof(TextNode.BlendLinearBurn), ResourceType = typeof(TextNode))]
+    LinearBurn,
+
+    [Display(Name = nameof(TextNode.BlendDarkerColor), ResourceType = typeof(TextNode))]
+    DarkerColor,
+
+    [Display(Name = nameof(TextNode.BlendLighterColor), ResourceType = typeof(TextNode))]
+    LighterColor,
+
+    [Display(Name = nameof(TextNode.BlendColorDodge), ResourceType = typeof(TextNode))]
+    ColorDodge,
+
+    [Display(Name = nameof(TextNode.BlendLinearDodge), ResourceType = typeof(TextNode))]
+    LinearDodge,
+
+    [Display(Name = nameof(TextNode.BlendOverlay), ResourceType = typeof(TextNode))]
+    Overlay,
+
+    [Display(Name = nameof(TextNode.BlendSoftLight), ResourceType = typeof(TextNode))]
+    SoftLight,
+
+    [Display(Name = nameof(TextNode.BlendHardLight), ResourceType = typeof(TextNode))]
+    HardLight,
+
+    [Display(Name = nameof(TextNode.BlendVividLight), ResourceType = typeof(TextNode))]
+    VividLight,
+
+    [Display(Name = nameof(TextNode.BlendLinearLight), ResourceType = typeof(TextNode))]
+    LinearLight,
+
+    [Display(Name = nameof(TextNode.BlendPinLight), ResourceType = typeof(TextNode))]
+    PinLight,
+
+    [Display(Name = nameof(TextNode.BlendHardMix), ResourceType = typeof(TextNode))]
+    HardMix,
+
+    [Display(Name = nameof(TextNode.BlendDifferenceAbs), ResourceType = typeof(TextNode))]
+    Difference,
+
+    [Display(Name = nameof(TextNode.BlendExclusion), ResourceType = typeof(TextNode))]
+    Exclusion,
+
+    [Display(Name = nameof(TextNode.ChannelHue), ResourceType = typeof(TextNode))]
+    Hue,
+
+    [Display(Name = nameof(TextNode.ChannelSaturation), ResourceType = typeof(TextNode))]
+    Saturation,
+
+    [Display(Name = nameof(TextNode.BlendColor), ResourceType = typeof(TextNode))]
+    Color,
+
+    [Display(Name = nameof(TextNode.BlendLuminosity), ResourceType = typeof(TextNode))]
+    Luminosity,
+
+    [Display(Name = nameof(TextNode.BlendSubtract), ResourceType = typeof(TextNode))]
+    Subtract,
+
+    [Display(Name = nameof(TextNode.BlendDivision), ResourceType = typeof(TextNode))]
+    Division
 }
 
-[Node(typeof(CompositionCategory), "合成", "2枚の画像を指定したモードで合成します。")]
+[Node(typeof(CompositionCategory), nameof(TextNode.BlendNode), nameof(TextNode.BlendNodeDescription), typeof(TextNode))]
 public class BlendNode : NodeLogic
 {
     private Blend? _blendEffect;
     private Composite? _compositeEffect;
     private ID2D1Image? _effectOutput;
 
-    [InputPort("入力画像1", "1つめの合成する画像")]
+    [InputPort(nameof(TextNode.InputImagePortLabel), nameof(TextNode.BlendInputImage1Description), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? InputImage1
     {
@@ -56,7 +110,7 @@ public class BlendNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("入力画像2", "2つめの合成する画像")]
+    [InputPort(nameof(TextNode.InputImagePortLabel), nameof(TextNode.BlendInputImage2Description), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? InputImage2
     {
@@ -64,7 +118,7 @@ public class BlendNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("モード", "合成モード")]
+    [InputPort(nameof(TextNode.MaskModeLabel), nameof(TextNode.BlendModeDescription), typeof(TextNode))]
     [EnumPortControl(Default = 0, IsEditable = false, Items = typeof(BlendMode))]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public int Mode
@@ -73,7 +127,7 @@ public class BlendNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("出力画像", "合成結果")]
+    [OutputPort(nameof(TextNode.OutputImagePortLabel), nameof(TextNode.BlendOutputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public ImageWrapper? Output
     {

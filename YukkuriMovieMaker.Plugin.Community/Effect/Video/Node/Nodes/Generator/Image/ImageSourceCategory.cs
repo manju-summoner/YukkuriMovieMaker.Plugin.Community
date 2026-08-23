@@ -5,6 +5,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.I
 
 public sealed class ImageSourceCategory : INodeCategory
 {
-    public string Category => "NodeEffectKey_GeneratorCategoryName/画像読み込み";
+    public string Category => "NodeEffectKey_GeneratorCategoryName/NodeEffectKey_ImageSourceCategoryName";
     public string Color => nameof(Colors.MediumSeaGreen);
 }

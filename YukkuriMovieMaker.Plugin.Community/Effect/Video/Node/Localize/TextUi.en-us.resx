@@ -77,4 +77,37 @@
 <data name="CannotCreateType" xml:space="preserve"><value>Cannot create the type</value></data>
 <data name="Input" xml:space="preserve"><value>Input</value></data>
 <data name="Output" xml:space="preserve"><value>Output</value></data>
+<data name="ColorRgbHeader" xml:space="preserve"><value>RGB</value></data>
+<data name="ColorRedLabel" xml:space="preserve"><value>R:</value></data>
+<data name="ColorGreenLabel" xml:space="preserve"><value>G:</value></data>
+<data name="ColorBlueLabel" xml:space="preserve"><value>B:</value></data>
+<data name="ColorAlphaLabel" xml:space="preserve"><value>A:</value></data>
+<data name="ColorHsvHeader" xml:space="preserve"><value>HSV</value></data>
+<data name="ColorHueLabel" xml:space="preserve"><value>H:</value></data>
+<data name="ColorSaturationLabel" xml:space="preserve"><value>S:</value></data>
+<data name="ColorValueLabel" xml:space="preserve"><value>V:</value></data>
+<data name="SelectFileButton" xml:space="preserve"><value>Select</value></data>
+<data name="OpenSubGraphButton" xml:space="preserve"><value>Open SubGraph</value></data>
+<data name="AddNodeMenu" xml:space="preserve"><value>Add Node</value></data>
+<data name="CopyMenu" xml:space="preserve"><value>Copy</value></data>
+<data name="CutMenu" xml:space="preserve"><value>Cut</value></data>
+<data name="PasteMenu" xml:space="preserve"><value>Paste</value></data>
+<data name="DeleteMenu" xml:space="preserve"><value>Delete</value></data>
+<data name="EditMenu" xml:space="preserve"><value>Edit</value></data>
+<data name="ModeMenu" xml:space="preserve"><value>Mode</value></data>
+<data name="RectSelectionMenu" xml:space="preserve"><value>Rect Selection</value></data>
+<data name="LassoSelectionMenu" xml:space="preserve"><value>Lasso Selection</value></data>
+<data name="PanMenu" xml:space="preserve"><value>Pan</value></data>
+<data name="ViewMenu" xml:space="preserve"><value>View</value></data>
+<data name="ZoomInMenu" xml:space="preserve"><value>Zoom +</value></data>
+<data name="ZoomOutMenu" xml:space="preserve"><value>Zoom -</value></data>
+<data name="ResetZoomMenu" xml:space="preserve"><value>Reset Zoom</value></data>
+<data name="FitMenu" xml:space="preserve"><value>Fit</value></data>
+<data name="CloseTabToolTip" xml:space="preserve"><value>Close Tab</value></data>
+<data name="ModeStatusLabel" xml:space="preserve"><value>Mode:</value></data>
+<data name="OpenNodeEditorButtonLabel" xml:space="preserve"><value>Open Node Editor...</value></data>
+<data name="BezierSmoothMenu" xml:space="preserve"><value>Smooth</value></data>
+<data name="BezierCornerMenu" xml:space="preserve"><value>Corner</value></data>
+<data name="BezierFixedNodeDeleteError" xml:space="preserve"><value>Cannot delete a fixed node.</value></data>
+<data name="BezierMinKeyframesError" xml:space="preserve"><value>At least two keyframes are required.</value></data>
 </root>

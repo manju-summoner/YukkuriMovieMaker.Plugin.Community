@@ -5,17 +5,19 @@ using Vortice.Direct2D1.Effects;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.Transform;
 
-[Node(typeof(TransformCategory), "平行移動", "画像を指定した距離だけ移動します。")]
+[Node(typeof(TransformCategory), nameof(TextNode.TranslateNode), nameof(TextNode.TranslateNodeDescription),
+    typeof(TextNode))]
 public class TranslateNode : NodeLogic
 {
     private AffineTransform2D? _effect;
     private ID2D1Image? _effectOutput;
 
-    [InputPort("入力画像", "変換する画像")]
+    [InputPort(nameof(TextNode.InputImagePortLabel), nameof(TextNode.TransformInputImageDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? Input
     {
@@ -23,7 +25,7 @@ public class TranslateNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("X", "X方向の移動量")]
+    [InputPort(nameof(TextNode.MoveAmountX), nameof(TextNode.MoveAmountXDescription), typeof(TextNode))]
     [NumberPortControl(Default = 0f, Digits = 2, Unit = "px")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float X
@@ -32,7 +34,7 @@ public class TranslateNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("Y", "Y方向の移動量")]
+    [InputPort(nameof(TextNode.MoveAmountY), nameof(TextNode.MoveAmountYDescription), typeof(TextNode))]
     [NumberPortControl(Default = 0f, Digits = 2, Unit = "px")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Y
@@ -41,7 +43,8 @@ public class TranslateNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("出力画像", "変換結果")]
+    [OutputPort(nameof(TextNode.OutputImagePortLabel), nameof(TextNode.TransformOutputImageDescription),
+        typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? Output
     {
@@ -79,13 +82,13 @@ public class TranslateNode : NodeLogic
     }
 }
 
-[Node(typeof(TransformCategory), "拡大縮小", "画像を指定倍率で拡大縮小します。")]
+[Node(typeof(TransformCategory), nameof(TextNode.ScaleNode), nameof(TextNode.ScaleNodeDescription), typeof(TextNode))]
 public class ScaleNode : NodeLogic
 {
     private AffineTransform2D? _effect;
     private ID2D1Image? _effectOutput;
 
-    [InputPort("入力画像", "変換する画像")]
+    [InputPort(nameof(TextNode.InputImagePortLabel), nameof(TextNode.TransformInputImageDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? Input
     {
@@ -93,7 +96,7 @@ public class ScaleNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("倍率X", "X方向倍率")]
+    [InputPort(nameof(TextNode.ScaleRatioX), nameof(TextNode.ScaleRatioXDescription), typeof(TextNode))]
     [NumberPortControl(Min = 0f, Default = 1, Digits = 3, Unit = "x")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float ScaleX
@@ -102,7 +105,7 @@ public class ScaleNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("倍率Y", "Y方向倍率")]
+    [InputPort(nameof(TextNode.ScaleRatioY), nameof(TextNode.ScaleRatioYDescription), typeof(TextNode))]
     [NumberPortControl(Min = 0f, Default = 1, Digits = 3, Unit = "x")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float ScaleY
@@ -111,7 +114,8 @@ public class ScaleNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("出力画像", "変換結果")]
+    [OutputPort(nameof(TextNode.OutputImagePortLabel), nameof(TextNode.TransformOutputImageDescription),
+        typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? Output
     {
@@ -149,13 +153,13 @@ public class ScaleNode : NodeLogic
     }
 }
 
-[Node(typeof(TransformCategory), "回転", "画像を指定角度回転します。")]
+[Node(typeof(TransformCategory), nameof(TextNode.RotateNode), nameof(TextNode.RotateNodeDescription), typeof(TextNode))]
 public class RotateNode : NodeLogic
 {
     private AffineTransform2D? _effect;
     private ID2D1Image? _effectOutput;
 
-    [InputPort("入力画像", "変換する画像")]
+    [InputPort(nameof(TextNode.InputImagePortLabel), nameof(TextNode.TransformInputImageDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? Input
     {
@@ -163,7 +167,7 @@ public class RotateNode : NodeLogic
         set => SetInput(value);
     }
 
-    [InputPort("角度", "回転角度")]
+    [InputPort(nameof(TextNode.Angle), nameof(TextNode.AngleDescription), typeof(TextNode))]
     [NumberPortControl(Default = 0f, Digits = 2, Unit = "°")]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Angle
@@ -172,7 +176,8 @@ public class RotateNode : NodeLogic
         set => SetInput(value);
     }
 
-    [OutputPort("出力画像", "変換結果")]
+    [OutputPort(nameof(TextNode.OutputImagePortLabel), nameof(TextNode.TransformOutputImageDescription),
+        typeof(TextNode))]
     [PortColorSetting(nameof(Colors.CornflowerBlue))]
     public ImageWrapper? Output
     {

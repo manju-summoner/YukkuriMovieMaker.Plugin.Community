@@ -1,4 +1,5 @@
 using System.Windows;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.Bezier.Model
 {
@@ -113,7 +114,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.Be
             string name, string category, params Point[] keyframes)
         {
             if (keyframes.Length < 2)
-                throw new ArgumentException("少なくとも2つのキーフレームが必要です。");
+                throw new ArgumentException(TextUi.BezierMinKeyframesError);
 
             var defs = new List<BezierNodeDefinition>();
             var n = keyframes.Length;

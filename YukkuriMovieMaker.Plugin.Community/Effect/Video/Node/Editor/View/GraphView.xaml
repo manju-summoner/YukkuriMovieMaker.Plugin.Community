@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View"
              xmlns:viewModel="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel"
+             xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance viewModel:GraphViewModel}"
@@ -17,12 +18,16 @@
              ContextMenuOpening="OnContextMenuOpening">
     <UserControl.ContextMenu>
         <ContextMenu>
-            <MenuItem Header="Add Node" Command="{Binding ParentEditor.AddNodeCommand}" />
+            <MenuItem Header="{x:Static loc:TextUi.AddNodeMenu}" Command="{Binding ParentEditor.AddNodeCommand}" />
             <Separator />
-            <MenuItem Header="Copy" Command="{Binding ParentEditor.CopyCommand}" InputGestureText="Ctrl+C" />
-            <MenuItem Header="Cut" Command="{Binding ParentEditor.CutCommand}" InputGestureText="Ctrl+X" />
-            <MenuItem Header="Paste" Command="{Binding ParentEditor.PasteCommand}" InputGestureText="Ctrl+V" />
-            <MenuItem Header="Delete" Command="{Binding ParentEditor.DeleteSelectedCommand}" InputGestureText="Delete" />
+            <MenuItem Header="{x:Static loc:TextUi.CopyMenu}" Command="{Binding ParentEditor.CopyCommand}"
+                      InputGestureText="Ctrl+C" />
+            <MenuItem Header="{x:Static loc:TextUi.CutMenu}" Command="{Binding ParentEditor.CutCommand}"
+                      InputGestureText="Ctrl+X" />
+            <MenuItem Header="{x:Static loc:TextUi.PasteMenu}" Command="{Binding ParentEditor.PasteCommand}"
+                      InputGestureText="Ctrl+V" />
+            <MenuItem Header="{x:Static loc:TextUi.DeleteMenu}" Command="{Binding ParentEditor.DeleteSelectedCommand}"
+                      InputGestureText="Delete" />
         </ContextMenu>
     </UserControl.ContextMenu>
     <Grid x:Name="RootGrid" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
