@@ -18,12 +18,13 @@ public sealed class ConnectionViewModel : INotifyPropertyChanged
         ToPortName = connection.ToPort;
 
         if (nodeViewModels.TryGetValue(FromNodeId, out var fromNode))
-            FromPort = fromNode.OutputPorts.First(p => p.Name == FromPortName);
+            FromPort = fromNode.OutputPorts.FirstOrDefault(p => p.Name == FromPortName);
 
         if (nodeViewModels.TryGetValue(ToNodeId, out var toNode))
         {
-            ToPort = toNode.InputPorts.First(p => p.Name == ToPortName);
-            ToPort.IsConnected = true;
+            ToPort = toNode.InputPorts.FirstOrDefault(p => p.Name == ToPortName);
+            if (ToPort != null)
+                ToPort.IsConnected = true;
         }
 
         if (FromPort != null)
@@ -91,14 +92,8 @@ public sealed class ConnectionViewModel : INotifyPropertyChanged
                     : reverseY ? new Point(1, 1) : new Point(1, 0)
             };
 
-            var fromColor = (Color)(FromPort.Color.StartsWith('#')
-                ? ColorConverter.ConvertFromString(FromPort.Color)
-                : typeof(Colors).GetProperty(FromPort.Color)?.GetValue(null) ??
-                  throw new InvalidOperationException($"Unknown color: {FromPort.Color}"));
-            var toColor = (Color)(ToPort.Color.StartsWith('#')
-                ? ColorConverter.ConvertFromString(ToPort.Color)
-                : typeof(Colors).GetProperty(ToPort.Color)?.GetValue(null) ??
-                  throw new InvalidOperationException($"Unknown color: {ToPort.Color}"));
+            var fromColor = ResolveColor(FromPort.Color);
+            var toColor = ResolveColor(ToPort.Color);
             brush.GradientStops.Add(new GradientStop(fromColor, 0.4));
             brush.GradientStops.Add(new GradientStop(toColor, 0.6));
             return brush;
@@ -106,6 +101,24 @@ public sealed class ConnectionViewModel : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    private static Color ResolveColor(string colorName)
+    {
+        try
+        {
+            if (colorName.StartsWith('#'))
+                return (Color)ColorConverter.ConvertFromString(colorName)!;
+
+            if (typeof(Colors).GetProperty(colorName)?.GetValue(null) is Color color)
+                return color;
+        }
+        catch
+        {
+            // 未知の色名・不正なフォーマットは既定色にフォールバックする。
+        }
+
+        return Colors.SlateGray;
+    }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {

@@ -11,6 +11,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.Brush;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
 
@@ -42,6 +43,18 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
     }
 
     private void Button_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Button_Click_Core();
+        }
+        catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
+        {
+            Debug.WriteLine($"[OpenNodeEditorButton] Failed to open node editor: {ex}");
+        }
+    }
+
+    private void Button_Click_Core()
     {
         if (ItemProperties is null) throw new InvalidOperationException(TextUi.ItemPropertiesNotSet);
 
@@ -106,24 +119,31 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         var previousGraph = pluginItem.InternalGraph;
         _graphUpdatedHandler = (_, _) =>
         {
-            var newGraph = pluginItem.InternalGraph;
-            if (newGraph == null!) return;
-
-            if (_committedHandler != null)
+            try
             {
-                newGraph.Committed -= _committedHandler;
-                newGraph.Committed += _committedHandler;
-            }
+                var newGraph = pluginItem.InternalGraph;
+                if (newGraph == null!) return;
 
-            if (!ReferenceEquals(previousGraph, newGraph))
+                if (_committedHandler != null)
+                {
+                    newGraph.Committed -= _committedHandler;
+                    newGraph.Committed += _committedHandler;
+                }
+
+                if (!ReferenceEquals(previousGraph, newGraph))
+                {
+                    if (previousGraph != null)
+                        vm?.CloseGraphTab(previousGraph);
+                    previousGraph = newGraph;
+                }
+
+                vm?.OnGraphUpdated();
+                vm?.OpenGraph(newGraph, editorInfo: _editorInfo);
+            }
+            catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
             {
-                if (previousGraph != null)
-                    vm?.CloseGraphTab(previousGraph);
-                previousGraph = newGraph;
+                Debug.WriteLine($"[OpenNodeEditorButton] GraphUpdated handler failed: {ex}");
             }
-
-            vm?.OnGraphUpdated();
-            vm?.OpenGraph(newGraph, editorInfo: _editorInfo);
         };
 
         pluginItem.InternalGraph!.Committed += _committedHandler;
@@ -131,13 +151,16 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
 
         layout?.IsSelectedChanged += (_, _) =>
         {
-            if (!layout.IsSelected)
+            try
             {
-                toolAreaViewModel?.GetType().GetProperty("ViewModel")?.SetValue(toolAreaViewModel, vm);
+                if (!layout.IsSelected)
+                    toolAreaViewModel?.GetType().GetProperty("ViewModel")?.SetValue(toolAreaViewModel, vm);
+                else
+                    vm?.RefreshAllOpenGraphs();
             }
-            else
+            catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
             {
-                vm?.RefreshAllOpenGraphs();
+                Debug.WriteLine($"[OpenNodeEditorButton] IsSelectedChanged handler failed: {ex}");
             }
         };
 
@@ -160,17 +183,24 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
 
         layout.IsActiveChanged += (_, _) =>
         {
-            if (layout.IsActive)
+            try
             {
-                foreach (var kb in nodeBindings)
-                    parentWindow.InputBindings.Add(kb);
-                // フォーカスを取り戻したタイミングでも同様に再同期しておく。
-                vm.RefreshAllOpenGraphs();
+                if (layout.IsActive)
+                {
+                    foreach (var kb in nodeBindings)
+                        parentWindow.InputBindings.Add(kb);
+                    // フォーカスを取り戻したタイミングでも同様に再同期しておく。
+                    vm.RefreshAllOpenGraphs();
+                }
+                else
+                {
+                    foreach (var kb in nodeBindings)
+                        parentWindow.InputBindings.Remove(kb);
+                }
             }
-            else
+            catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
             {
-                foreach (var kb in nodeBindings)
-                    parentWindow.InputBindings.Remove(kb);
+                Debug.WriteLine($"[OpenNodeEditorButton] IsActiveChanged handler failed: {ex}");
             }
         };
     }

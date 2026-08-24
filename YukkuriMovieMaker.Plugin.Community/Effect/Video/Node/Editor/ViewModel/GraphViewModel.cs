@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
@@ -9,6 +10,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
 using VisualStateChangedEventArgs =
     YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events.VisualStateChangedEventArgs;
 
@@ -132,7 +134,18 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 
         foreach (var node in _graph.Nodes.Values)
         {
-            var vm = new NodeViewModel(node, _graph, this);
+            NodeViewModel vm;
+            try
+            {
+                vm = new NodeViewModel(node, _graph, this);
+            }
+            catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
+            {
+                // 属性不備等で1ノードの構築に失敗しても、他のノードの表示は継続する。
+                Debug.WriteLine($"[GraphViewModel] Failed to build NodeViewModel for {node.Id}: {ex}");
+                continue;
+            }
+
             Nodes.Add(vm);
             nodeViewModels[node.Id] = vm;
         }
@@ -144,6 +157,9 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         Connections.Clear();
         foreach (var conn in _graph.Connections)
         {
+            if (!nodeViewModels.ContainsKey(conn.FromId) || !nodeViewModels.ContainsKey(conn.ToId))
+                continue;
+
             var vm = new ConnectionViewModel(conn, nodeViewModels);
             Connections.Add(vm);
         }
@@ -155,7 +171,17 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         {
             case NodeAddedEventArgs added:
             {
-                var vm = new NodeViewModel(added.Node, _graph, this);
+                NodeViewModel vm;
+                try
+                {
+                    vm = new NodeViewModel(added.Node, _graph, this);
+                }
+                catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
+                {
+                    Debug.WriteLine($"[GraphViewModel] Failed to build NodeViewModel for {added.NodeId}: {ex}");
+                    break;
+                }
+
                 Nodes.Add(vm);
                 foreach (var port in vm.InputPorts)
                     port.ApplyDefaultToGraph();
@@ -197,16 +223,21 @@ public sealed class GraphViewModel : INotifyPropertyChanged
         if (nodeType == null) return;
 
         _graph.BeginEdit();
+        try
+        {
+            var node = (NodeLogic)Activator.CreateInstance(nodeType)!;
+            node.Id = Guid.NewGuid();
 
-        var node = (NodeLogic)Activator.CreateInstance(nodeType)!;
-        node.Id = Guid.NewGuid();
+            _graph.AddNode(node);
 
-        _graph.AddNode(node);
-
-        var pos = PendingContextPoint ?? new Point(100, 100);
-        _graph.SetVisualState(node.Id, pos.X, pos.Y);
-
-        _graph.EndEdit();
+            var pos = PendingContextPoint ?? new Point(100, 100);
+            _graph.SetVisualState(node.Id, pos.X, pos.Y);
+        }
+        finally
+        {
+            // 途中で例外が起きても IsInTransaction が固着しないようにする。
+            _graph.EndEdit();
+        }
     }
 
     internal void DeleteSelectedNode()
@@ -222,8 +253,14 @@ public sealed class GraphViewModel : INotifyPropertyChanged
     private void DeleteNode(Guid nodeId)
     {
         _graph.BeginEdit();
-        _graph.RemoveNode(nodeId);
-        _graph.EndEdit();
+        try
+        {
+            _graph.RemoveNode(nodeId);
+        }
+        finally
+        {
+            _graph.EndEdit();
+        }
     }
 
     private void ConnectPorts((PortViewModel A, PortViewModel B) ports)
@@ -241,22 +278,34 @@ public sealed class GraphViewModel : INotifyPropertyChanged
             return;
 
         _graph.BeginEdit();
-        _graph.Connect(
-            from.NodeId, from.Name,
-            to.NodeId, to.Name
-        );
-        _graph.EndEdit();
+        try
+        {
+            _graph.Connect(
+                from.NodeId, from.Name,
+                to.NodeId, to.Name
+            );
+        }
+        finally
+        {
+            _graph.EndEdit();
+        }
     }
 
     private void Disconnect(ConnectionViewModel? connection)
     {
         if (connection == null) return;
         _graph.BeginEdit();
-        _graph.Disconnect(
-            connection.FromNodeId, connection.FromPortName,
-            connection.ToNodeId, connection.ToPortName
-        );
-        _graph.EndEdit();
+        try
+        {
+            _graph.Disconnect(
+                connection.FromNodeId, connection.FromPortName,
+                connection.ToNodeId, connection.ToPortName
+            );
+        }
+        finally
+        {
+            _graph.EndEdit();
+        }
     }
 
     public void ClearSelection()

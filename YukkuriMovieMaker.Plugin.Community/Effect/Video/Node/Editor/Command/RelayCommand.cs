@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Windows.Input;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Command;
 
@@ -21,12 +23,28 @@ public class RelayCommand : ICommand
 
     public bool CanExecute(object? parameter)
     {
-        return _canExecute?.Invoke() ?? true;
+        if (_canExecute == null) return true;
+        try
+        {
+            return _canExecute();
+        }
+        catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
+        {
+            Debug.WriteLine($"[RelayCommand] CanExecute threw: {ex}");
+            return false;
+        }
     }
 
     public void Execute(object? parameter)
     {
-        _execute();
+        try
+        {
+            _execute();
+        }
+        catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
+        {
+            Debug.WriteLine($"[RelayCommand] Execute threw: {ex}");
+        }
     }
 }
 
@@ -49,11 +67,27 @@ public class RelayCommand<T> : ICommand
 
     public bool CanExecute(object? parameter)
     {
-        return _canExecute?.Invoke((T?)parameter) ?? true;
+        if (_canExecute == null) return true;
+        try
+        {
+            return _canExecute((T?)parameter);
+        }
+        catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
+        {
+            Debug.WriteLine($"[RelayCommand<{typeof(T).Name}>] CanExecute threw: {ex}");
+            return false;
+        }
     }
 
     public void Execute(object? parameter)
     {
-        _execute((T?)parameter);
+        try
+        {
+            _execute((T?)parameter);
+        }
+        catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
+        {
+            Debug.WriteLine($"[RelayCommand<{typeof(T).Name}>] Execute threw: {ex}");
+        }
     }
 }

@@ -1,4 +1,5 @@
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
@@ -125,9 +126,11 @@ public sealed class NodeGraph
     /// <param name="value">更新する新しい値</param>
     public void SetInputValue(Guid nodeId, string inputName, object? value)
     {
-        var input = _nodes[nodeId].Inputs[inputName];
+        if (!_nodes.TryGetValue(nodeId, out var node)) return;
+        if (!node.Inputs.TryGetValue(inputName, out var input)) return;
+
         input.SetValue(value);
-        _nodes[nodeId].OnInputValueChanged(inputName, value);
+        node.OnInputValueChanged(inputName, value);
 
         PreviewNotifier.Notify();
         OnGraphChanged(new ValueChangedEventArgs(nodeId, inputName, value));
@@ -186,8 +189,10 @@ public sealed class NodeGraph
         if (WouldCreateCycle(from, to))
             return false;
 
-        var output = _nodes[from].Outputs[outputName];
-        var input = _nodes[to].Inputs[inputName];
+        if (!_nodes.TryGetValue(from, out var fromNode) || !fromNode.Outputs.TryGetValue(outputName, out var output))
+            return false;
+        if (!_nodes.TryGetValue(to, out var toNode) || !toNode.Inputs.TryGetValue(inputName, out var input))
+            return false;
 
         var existing = Connections
             .Where(c => c.ToId == to && c.ToPort == inputName)
@@ -245,9 +250,9 @@ public sealed class NodeGraph
         Guid from, string outputName,
         Guid to, string inputName)
     {
-        var output = _nodes[from].Outputs[outputName];
-        var input = _nodes[to].Inputs[inputName];
-        input.DisConnect(output);
+        if (TryGetPorts(from, outputName, to, inputName, out var output, out var input))
+            input.DisConnect(output);
+
         Connections.RemoveAll(c =>
             c.FromId == from &&
             c.FromPort == outputName &&
@@ -262,14 +267,31 @@ public sealed class NodeGraph
         Guid from, string outputName,
         Guid to, string inputName)
     {
-        var output = _nodes[from].Outputs[outputName];
-        var input = _nodes[to].Inputs[inputName];
-        input.DisConnect(output);
+        if (TryGetPorts(from, outputName, to, inputName, out var output, out var input))
+            input.DisConnect(output);
+
         Connections.RemoveAll(c =>
             c.FromId == from &&
             c.FromPort == outputName &&
             c.ToId == to &&
             c.ToPort == inputName);
+    }
+
+    private bool TryGetPorts(
+        Guid from, string outputName, Guid to, string inputName,
+        out OutputPort output, out InputPort input)
+    {
+        output = null!;
+        input = null!;
+
+        if (!_nodes.TryGetValue(from, out var fromNode) || !fromNode.Outputs.TryGetValue(outputName, out var o))
+            return false;
+        if (!_nodes.TryGetValue(to, out var toNode) || !toNode.Inputs.TryGetValue(inputName, out var i))
+            return false;
+
+        output = o;
+        input = i;
+        return true;
     }
 
     /// <summary>

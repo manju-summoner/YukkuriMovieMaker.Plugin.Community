@@ -1,8 +1,10 @@
+using System.Diagnostics;
 using System.Reflection;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.Brush;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
 using PortDefinition = YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port.PortDefinition;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
@@ -109,52 +111,68 @@ public static class Serializer
             var type = Registry.AllNodes.GetValueOrDefault(nodeSnap.TypeName)
                        ?? Type.GetType(nodeSnap.TypeName);
             if (type == null) continue;
-            var node = (NodeLogic)Activator.CreateInstance(type)!;
-            node.Id = nodeSnap.Id;
 
-            nodeMap[node.Id] = node;
-
-            switch (node)
+            try
             {
-                case ArgumentsNode argsNode when nodeSnap.PortDefinitions.Count != 0:
+                var node = (NodeLogic)Activator.CreateInstance(type)!;
+                node.Id = nodeSnap.Id;
+
+                switch (node)
                 {
-                    var portDefs = RestorePortDefinitions(nodeSnap.PortDefinitions);
-                    argsNode.Initialize(portDefs);
-                    break;
+                    case ArgumentsNode argsNode when nodeSnap.PortDefinitions.Count != 0:
+                    {
+                        var portDefs = RestorePortDefinitions(nodeSnap.PortDefinitions);
+                        argsNode.Initialize(portDefs);
+                        break;
+                    }
+                    case ReturnNode retNode when nodeSnap.PortDefinitions.Count != 0:
+                    {
+                        var portDefs = RestorePortDefinitions(nodeSnap.PortDefinitions);
+                        retNode.Initialize(portDefs);
+                        break;
+                    }
                 }
-                case ReturnNode retNode when nodeSnap.PortDefinitions.Count != 0:
-                {
-                    var portDefs = RestorePortDefinitions(nodeSnap.PortDefinitions);
-                    retNode.Initialize(portDefs);
-                    break;
-                }
+
+                if (node is ISerializableNode serializable && nodeSnap.CustomData.Any())
+                    serializable.DeserializeCustomData(nodeSnap.CustomData);
+
+                graph.AddNode(node);
+                graph.SetVisualState(node.Id, nodeSnap.X, nodeSnap.Y);
+                nodeMap[node.Id] = node;
             }
-
-            if (node is ISerializableNode serializable && nodeSnap.CustomData.Any())
-                serializable.DeserializeCustomData(nodeSnap.CustomData);
-
-            graph.AddNode(node);
-            graph.SetVisualState(node.Id, nodeSnap.X, nodeSnap.Y);
+            catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
+            {
+                // 型不整合や壊れたカスタムデータでノード単体の復元が失敗しても、
+                // 他のノードは復元を継続する（プロジェクト全体のロード失敗を避ける）。
+                Debug.WriteLine($"[Serializer] Failed to restore node {nodeSnap.Id} ({nodeSnap.TypeName}): {ex}");
+            }
         }
 
         foreach (var nodeSnap in snapshot.Nodes)
         {
             if (!nodeMap.TryGetValue(nodeSnap.Id, out var node)) continue;
 
-            node.SyncDynamicInputs();
-
-            foreach (var input in nodeSnap.InputsValues)
+            try
             {
-                if (!node.Inputs.ContainsKey(input.Key)) continue;
-                graph.SetInputValue(node.Id, input.Key, input.Value);
+                node.SyncDynamicInputs();
+
+                foreach (var input in nodeSnap.InputsValues)
+                {
+                    if (!node.Inputs.ContainsKey(input.Key)) continue;
+                    graph.SetInputValue(node.Id, input.Key, input.Value);
+                }
+
+                foreach (var subGraphKvp in nodeSnap.SubGraphs)
+                {
+                    var subGraph = Restore(subGraphKvp.Value);
+                    graph.SetSubgraph(node.Id, subGraphKvp.Key, subGraph);
+
+                    AutoBindSubGraphNodes(node, subGraphKvp.Key, subGraph);
+                }
             }
-
-            foreach (var subGraphKvp in nodeSnap.SubGraphs)
+            catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
             {
-                var subGraph = Restore(subGraphKvp.Value);
-                graph.SetSubgraph(node.Id, subGraphKvp.Key, subGraph);
-
-                AutoBindSubGraphNodes(node, subGraphKvp.Key, subGraph);
+                Debug.WriteLine($"[Serializer] Failed to restore inputs/subgraphs for node {nodeSnap.Id}: {ex}");
             }
         }
 
