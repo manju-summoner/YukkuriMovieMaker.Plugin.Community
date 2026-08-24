@@ -26,14 +26,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services
                 selectedBaseDirectory = RecordingSettings.Default.OutputDirectory;
             if (string.IsNullOrWhiteSpace(selectedBaseDirectory))
                 throw new InvalidOperationException(Texts.OutputFolderUnavailable);
-
-            Directory.CreateDirectory(selectedBaseDirectory);
+            
             return selectedBaseDirectory;
         }
 
         public string CreateRecordFilePath()
         {
             var recordsDirectory = GetRecordsDirectory();
+            Directory.CreateDirectory(recordsDirectory);
             var fileName = $"Record_{DateTime.Now:yyyyMMdd_HHmmss}";
             var filePath = Path.Combine(recordsDirectory, $"{fileName}.wav");
             var sequence = 1;

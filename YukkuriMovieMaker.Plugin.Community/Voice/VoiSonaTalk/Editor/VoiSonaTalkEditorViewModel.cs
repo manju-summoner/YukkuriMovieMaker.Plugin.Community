@@ -23,6 +23,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
         AudioPlayer? player;
         bool isPlaying = false;
         bool isBusy = false;
+        bool isClosed;
+        // StopPlaybackのたびに進める世代番号（UIスレッド専用）。CreateVoiceFileAsyncのawait中に停止・差し替えが起きた場合、
+        // 復帰後の世代照合で古い再生開始処理を打ち切るために使う
+        int playbackGeneration;
         readonly ICommand playFromCommand;
 
         ImmutableList<VoiSonaTalkEditorAcousticPhraseViewModel> acousticPhrases = [];
@@ -56,24 +60,37 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
             await playbackControlSemaphore.WaitAsync();
             try
             {
+                if (isClosed)
+                    return;
+
                 if (IsPlaying)
                 {
                     StopPlayback();
                     return;
                 }
 
+                // 例外などで解放されずに残った旧stream/playerの破棄と、世代の確定を兼ねて開始前に必ず停止する
+                StopPlayback();
+                var generation = playbackGeneration;
+
                 IsBusy = true;
                 SetWordPlaybackStatus(VoiSonaTalkEditorPlayButtonStatus.Busy);
                 try
                 {
-                    await (Info?.VoiceItemEdit?.CreateVoiceFileAsync() ?? Task.CompletedTask);
+                    // await中にInfoが差し替わっても、同一アイテムの組で処理を続けるためローカルに捕捉する
+                    var info = Info;
+                    await (info?.VoiceItemEdit?.CreateVoiceFileAsync() ?? Task.CompletedTask);
+                    if (isClosed || generation != playbackGeneration)
+                        return;
 
-                    stream = Info?.CreateItemAudioSource(new ItemAudioSourceCreationParameter(AudioEffectSelection.None) { RangeMode = ItemAudioSourceRangeMode.FullContentRange });
+                    stream = info?.CreateItemAudioSource(new ItemAudioSourceCreationParameter(AudioEffectSelection.None) { RangeMode = ItemAudioSourceRangeMode.FullContentRange });
                     if (stream is null)
                         return;
 
                     stream.Seek(GetPlaybackStartTime(startWord));
-                    player = new AudioPlayer(stream) { Volume = YMMSettings.Default.Volume / 100d };
+                    // オブジェクト初期化子だとVolumeの評価が例外を投げたとき構築済みプレイヤーがフィールドに入らず失われるため、先に評価する
+                    var volume = YMMSettings.Default.Volume / 100d;
+                    player = new AudioPlayer(stream) { Volume = volume };
                     player.StreamEnded += Player_StreamEnded;
                     player.Play();
                     IsPlaying = true;
@@ -84,6 +101,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
                     IsBusy = false;
                     if (!IsPlaying)
                         SetWordPlaybackStatus(VoiSonaTalkEditorPlayButtonStatus.Idle);
+                }
+            }
+            catch (Exception ex)
+            {
+                // ActionCommand経由の呼び出しはasync void相当のため、例外を漏らすとアプリごと落ちる
+                Log.Default.Write("VoiSonaTalk intonation editor playback failed", ex);
+                try
+                {
+                    // 作成済みのstream/playerを次回再生やエディタクローズまで持ち越さないよう、ここでも破棄する
+                    StopPlayback();
+                }
+                catch (Exception stopEx)
+                {
+                    // 後始末の例外もここで漏らすとアプリごと落ちるため握りつぶす
+                    Log.Default.Write("VoiSonaTalk intonation editor playback cleanup failed", stopEx);
                 }
             }
             finally
@@ -97,13 +129,47 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
             StopPlayback();
         }
 
+        /// <summary>
+        /// エディタから切り離されるときに呼ぶ。再生を停止し、進行中の再生開始処理も打ち切る。
+        /// </summary>
+        public void Close()
+        {
+            isClosed = true;
+            StopPlayback();
+        }
+
         public void StopPlayback()
         {
-            player?.StreamEnded -= Player_StreamEnded;
-            player?.Dispose();
+            playbackGeneration++;
+            // 音声デバイス異常時はDisposeが例外を投げうる。壊れた参照が残ると以後の再生が全て同じ破棄失敗を繰り返すため、
+            // 参照のクリアを先に確定させ、破棄の例外はログして飲み込む
+            var oldPlayer = player;
+            var oldStream = stream;
             player = null;
-            stream?.Dispose();
             stream = null;
+            if (oldPlayer is not null)
+            {
+                try
+                {
+                    oldPlayer.StreamEnded -= Player_StreamEnded;
+                    oldPlayer.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Log.Default.Write("VoiSonaTalk intonation editor player dispose failed", ex);
+                }
+            }
+            if (oldStream is not null)
+            {
+                try
+                {
+                    oldStream.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Log.Default.Write("VoiSonaTalk intonation editor stream dispose failed", ex);
+                }
+            }
             IsPlaying = false;
             SetWordPlaybackStatus(VoiSonaTalkEditorPlayButtonStatus.Idle);
         }

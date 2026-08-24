@@ -183,7 +183,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSameground
                 disposer.Collect(brushSource);
                 brushUpdated = true;
             }
-            brushUpdated |= brushSource?.Update(effectDescription) ?? false;
+            brushUpdated |= brushSource?.Update(new BrushSourceDescription(effectDescription, bounds)) ?? false;
 
 
             bool needsMaskUpdate = isFirst

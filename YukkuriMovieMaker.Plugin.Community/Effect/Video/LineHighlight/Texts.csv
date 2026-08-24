@@ -1,0 +1,25 @@
+﻿Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+LineHighlight,,ラインハイライト,Line Highlight,线条高亮,線條高亮,라인 하이라이트,Resaltado de línea,تمييز الخط,Sorotan Garis
+SecUnit,,秒,sec,秒,秒,초,Segundos,ثانية,dtk,
+Color,,色,Color,色彩,色彩,색상,Color,لون,Warna
+ColorDesc,,光の色,Light Color,光的颜色,光的顏色,빛 색상,Color de la luz,لون الضوء,Warna Cahaya
+Strength,,強度,Strength,强度,強度,강도,Fuerza,قوة,Kekuatan
+StrengthDesc,,光の強さ,Strength of light,发光强度,光的強度,빛의 강도,Intensidad de luz,شدة الضوء,Kekuatan cahaya
+Fade,,フェード,Fade,淡化,淡化,페이드,Desvanecimiento,تلاشي,Fade
+FadeDesc,,ハイライトをフェードさせる際の不透明度,Highlight Fade Opacity,高亮淡化时的不透明度,高亮淡化時的不透明度,하이라이트 페이드 불투명도,Opacidad del desvanecimiento del resaltado,عتامة تلاشي التمييز,Opasitas Fade Sorotan
+Size,,サイズ,Size,大小,大小,크기,Tamaño,الحجم,Ukuran
+SizeDesc,,ハイライトの大きさ,Highlight Size,高亮大小,高亮大小,하이라이트 크기,Tamaño del resaltado,حجم التمييز,Ukuran Sorotan
+Blur,,ぼかし,Blur,模糊,模糊,블러,Desenfoque,تشويش,Keburaman
+BlurDesc,,ハイライトのぼかし,Highlight Blur,高亮模糊,高亮模糊,하이라이트 흐림,Desenfoque del resaltado,تمويه التمييز,Keburaman Sorotan
+Angle,,角度,Angle,角度,角度,각도,Ángulo,زاوية,Sudut
+AngleDesc,,ハイライトの角度,Highlight Angle,高亮角度,高亮角度,하이라이트 각도,Ángulo del resaltado,زاوية التمييز,Sudut Sorotan
+EasingType,,種類,Type,类型,種類,종류,Tipo,نوع,Tipe
+EasingTypeDesc,,アニメーションの種類,Animation type,动画类型,動畫的種類,애니메이션의 종류,Tipo de animación,نوع الحركة,Jenis animasi
+EasingMode,,加減速,Easing,缓动,加減速,가감속,aceleración/deceleración,تيسير,Easing
+EasingModeDesc,,アニメーションの加減速,Animation acceleration/deceleration,动画缓动,動畫的加減速,애니메이션 가속 / 감속,Aceleración/desaceleración de la animación,حركة تسارع / تباطؤ,Animasi akselerasi/deselerasi
+EffectDuration,,効果時間,Duration,效果时间,效果時間,효과 시간,Duración del efecto,مدة التأثير,Durasi
+EffectDurationDesc,,エフェクトが再生される秒数,Number of seconds the effect plays,效果播放秒数,效果持續秒數,효과가 재생되는 시간(초),Número de segundos que dura un efecto,عدد الثواني التي يستمر فيها التأثير,Jumlah detik efek diputar
+IsLoop,,ループ,Loop,循环,循環,반복,Bucle,تكرار,Perulangan
+IsLoopDesc,,アニメーションを繰り返す,Repeat Animation,重复动画,重複動畫,애니메이션 반복,Repetir animación,تكرار الرسوم المتحركة,Ulangi Animasi
+LoopInterval,,インターバル,Interval,间隔,間隔,간격,Intervalo,فاصل,Interval
+LoopIntervalDesc,,アニメーションを繰り返す間隔,Animation Repeat Interval,动画重复间隔,動畫重複間隔,애니메이션 반복 간격,Intervalo de repetición de la animación,الفاصل بين تكرار الرسوم المتحركة,Interval Pengulangan Animasi

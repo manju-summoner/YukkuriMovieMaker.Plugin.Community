@@ -71,7 +71,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
                 property.PropertyOwner.GetType().GetProperty("IsEditing")?.SetValue(property.PropertyOwner, false);
             EndEdit?.Invoke(this, EventArgs.Empty);
         }
-        public void SetEditorInfo(IEditorInfo info)
+        public void SetEditorInfo(IEditorInfo? info)
         {
             editorInfo = info;
         }

@@ -1,0 +1,36 @@
+#pragma code_page(65001)
+// このファイルはUTF-8で保存すること（Visual Studioのリソースエディタで開くとエンコーディングやpragmaが書き換えられるため、テキストエディタで編集すること）
+#include <winver.h>
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+#ifdef _DEBUG
+ FILEFLAGS VS_FF_DEBUG
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_APP
+ FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041104B0"
+        BEGIN
+            VALUE "CompanyName", "饅頭遣い\0"
+            VALUE "FileDescription", "YukkuriMovieMaker VST3 Scanner\0"
+            VALUE "FileVersion", "1.0.0.0\0"
+            VALUE "InternalName", "YukkuriMovieMaker.Vst3Scanner\0"
+            VALUE "LegalCopyright", "Copyright (c) 2017- 饅頭遣い\0"
+            VALUE "OriginalFilename", "YukkuriMovieMaker.Vst3Scanner.exe\0"
+            VALUE "ProductName", "ゆっくりMovieMaker\0"
+            VALUE "ProductVersion", "1.0.0.0\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0411, 1200
+    END
+END

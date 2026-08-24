@@ -10,6 +10,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public bool IsSaved { get; set; } = true;
         public bool WordWrap { get; set; } = false;
         public bool ShowLineNumbers { get; set; } = false;
+        public bool IsMarkdownEnabled { get; set; } = false;
         public Dictionary<string, NotepadEmbeddedImage> Images { get; set; } = [];
     }
 }

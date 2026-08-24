@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <ItemGroup Label="ProjectConfigurations">
+        <ProjectConfiguration Include="Debug|x64">
+            <Configuration>Debug</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="DebugLite|x64">
+            <Configuration>DebugLite</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="Release|x64">
+            <Configuration>Release</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="ReleaseLite|x64">
+            <Configuration>ReleaseLite</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+    </ItemGroup>
+    <PropertyGroup Label="Globals">
+        <VCProjectVersion>16.0</VCProjectVersion>
+        <Keyword>Win32Proj</Keyword>
+        <ProjectGuid>{7c3f4b6e-2d91-48a3-b8f0-5e2a9c14d7b3}</ProjectGuid>
+        <RootNamespace>YukkuriMovieMakerOfxScanner</RootNamespace>
+        <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+        <ProjectName>YukkuriMovieMaker.OfxScanner</ProjectName>
+    </PropertyGroup>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
+    <PropertyGroup Condition="'$(Configuration)'=='Debug' or '$(Configuration)'=='DebugLite'" Label="Configuration">
+        <ConfigurationType>Application</ConfigurationType>
+        <UseDebugLibraries>true</UseDebugLibraries>
+        <PlatformToolset>v145</PlatformToolset>
+        <CharacterSet>Unicode</CharacterSet>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)'=='Release' or '$(Configuration)'=='ReleaseLite'" Label="Configuration">
+        <ConfigurationType>Application</ConfigurationType>
+        <UseDebugLibraries>false</UseDebugLibraries>
+        <PlatformToolset>v145</PlatformToolset>
+        <WholeProgramOptimization>false</WholeProgramOptimization>
+        <CharacterSet>Unicode</CharacterSet>
+    </PropertyGroup>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
+    <ImportGroup Label="ExtensionSettings">
+    </ImportGroup>
+    <ImportGroup Label="Shared">
+    </ImportGroup>
+    <ImportGroup Label="PropertySheets">
+        <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+    </ImportGroup>
+    <PropertyGroup Label="UserMacros"/>
+    <PropertyGroup>
+        <TargetName>YukkuriMovieMaker.OfxScanner</TargetName>
+        <OutDir>$(ProjectDir)bin\$(Configuration)\</OutDir>
+        <IntDir>$(ProjectDir)obj\$(Configuration)\</IntDir>
+        <LinkIncremental Condition="'$(Configuration)'=='Debug'">true</LinkIncremental>
+        <LinkIncremental Condition="'$(Configuration)'!='Debug'">false</LinkIncremental>
+    </PropertyGroup>
+    <ItemDefinitionGroup>
+        <ClCompile>
+            <WarningLevel>Level3</WarningLevel>
+            <SDLCheck>true</SDLCheck>
+            <ConformanceMode>true</ConformanceMode>
+            <LanguageStandard>stdcpp17</LanguageStandard>
+            <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+            <PreprocessorDefinitions>NOMINMAX;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+        </ClCompile>
+        <Link>
+            <SubSystem>Console</SubSystem>
+            <GenerateDebugInformation>true</GenerateDebugInformation>
+        </Link>
+    </ItemDefinitionGroup>
+    <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' or '$(Configuration)'=='DebugLite'">
+        <ClCompile>
+            <PreprocessorDefinitions>_DEBUG;DEVELOPMENT=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <Optimization>Disabled</Optimization>
+            <!-- VC++再頒布パッケージ未導入の環境でも動作させるためCRTを静的リンクする -->
+            <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+        </ClCompile>
+    </ItemDefinitionGroup>
+    <ItemDefinitionGroup Condition="'$(Configuration)'=='Release' or '$(Configuration)'=='ReleaseLite'">
+        <ClCompile>
+            <PreprocessorDefinitions>NDEBUG;RELEASE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <FunctionLevelLinking>true</FunctionLevelLinking>
+            <IntrinsicFunctions>true</IntrinsicFunctions>
+            <!-- 最適化・LTCGは無効。最適化済みコードはセキュリティソフトのML誤検知を招きやすく（VirusTotal実測で/Od＋LTCGなしが検知最少）、スキャナーは処理時間の大半がプラグイン側のため性能影響は無い -->
+            <Optimization>Disabled</Optimization>
+            <!-- VC++再頒布パッケージ未導入の環境でも動作させるためCRTを静的リンクする -->
+            <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+            <!-- ソース不変ならバイナリを再現可能にする（セキュリティベンダーへ誤検知解除申請済みのハッシュをリビルド後も維持するため）。cl側の/Breproは未文書化オプション -->
+            <AdditionalOptions>/Brepro %(AdditionalOptions)</AdditionalOptions>
+        </ClCompile>
+        <Link>
+            <EnableCOMDATFolding>true</EnableCOMDATFolding>
+            <OptimizeReferences>true</OptimizeReferences>
+            <!-- /Brepro: タイムスタンプ・PDB署名を内容由来にする。/PDBALTPATH: EXEに埋め込まれるPDBパスからビルド環境の絶対パスを除く -->
+            <AdditionalOptions>/Brepro /PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
+        </Link>
+    </ItemDefinitionGroup>
+    <ItemGroup>
+        <ClCompile Include="Ymm4OfxScanner.cpp"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ResourceCompile Include="ScannerVersion.rc"/>
+    </ItemGroup>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
+    <ImportGroup Label="ExtensionTargets">
+    </ImportGroup>
+</Project>

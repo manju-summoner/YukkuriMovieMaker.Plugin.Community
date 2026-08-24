@@ -1,0 +1,16 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+PixelSortEffectName,,ピクセルソート,Pixel sort,像素排序,像素排序,픽셀 정렬,Ordenación de píxeles,فرز البكسل,Sortir piksel
+PixelSortEffectDirectionName,,方向,Direction,方向,方向,방향,Dirección,الاتجاه,Arah
+PixelSortEffectDirectionDesc,,明るいピクセルが流れていく方向です。,Direction in which bright pixels flow.,亮像素流动的方向。,亮像素流動的方向。,밝은 픽셀이 흘러가는 방향입니다.,Dirección hacia la que fluyen los píxeles brillantes.,الاتجاه الذي تتدفق نحوه البكسلات الساطعة.,Arah aliran piksel terang.
+PixelSortEffectThresholdLowName,,しきい値(下限),Lower threshold,阈值(下限),閾值(下限),임계값(하한),Umbral inferior,العتبة الدنيا,Ambang bawah
+PixelSortEffectThresholdLowDesc,,並べ替えの対象とする輝度の下限です。,Minimum luminance of pixels to be sorted.,参与排序的亮度下限。,參與排序的亮度下限。,정렬 대상이 되는 휘도의 하한입니다.,Luminancia mínima de los píxeles que se ordenan.,الحد الأدنى لسطوع البكسلات المشمولة بالفرز.,Luminans minimum piksel yang diurutkan.
+PixelSortEffectThresholdHighName,,しきい値(上限),Upper threshold,阈值(上限),閾值(上限),임계값(상한),Umbral superior,العتبة العليا,Ambang atas
+PixelSortEffectThresholdHighDesc,,並べ替えの対象とする輝度の上限です。,Maximum luminance of pixels to be sorted.,参与排序的亮度上限。,參與排序的亮度上限。,정렬 대상이 되는 휘도의 상한입니다.,Luminancia máxima de los píxeles que se ordenan.,الحد الأقصى لسطوع البكسلات المشمولة بالفرز.,Luminans maksimum piksel yang diurutkan.
+PixelSortEffectSpanLengthName,,区間の長さ,Span length,区间长度,區間長度,구간 길이,Longitud del tramo,طول المقطع,Panjang segmen
+PixelSortEffectSpanLengthDesc,,一度に並べ替える区間の最大長です。,Maximum length of each sorted span.,单次排序区间的最大长度。,單次排序區間的最大長度。,한 번에 정렬하는 구간의 최대 길이입니다.,Longitud máxima de cada tramo ordenado.,الطول الأقصى لكل مقطع يتم فرزه.,Panjang maksimum setiap segmen yang diurutkan.
+PixelSortEffectStrengthName,,強さ,Strength,强度,強度,강도,Intensidad,الشدة,Kekuatan
+PixelSortEffectStrengthDesc,,元の映像と並べ替え結果の合成率です。,Blend ratio between the original and sorted image.,原始画面与排序结果的混合比例。,原始畫面與排序結果的混合比例。,원본 영상과 정렬 결과의 합성 비율입니다.,Proporción de mezcla entre la imagen original y la ordenada.,نسبة المزج بين الصورة الأصلية والصورة المفروزة.,Rasio campuran antara gambar asli dan hasil urutan.
+PixelSortDirectionDownName,,下,Down,下,下,아래,Abajo,أسفل,Bawah
+PixelSortDirectionUpName,,上,Up,上,上,위,Arriba,أعلى,Atas
+PixelSortDirectionRightName,,右,Right,右,右,오른쪽,Derecha,يمين,Kanan
+PixelSortDirectionLeftName,,左,Left,左,左,왼쪽,Izquierda,يسار,Kiri

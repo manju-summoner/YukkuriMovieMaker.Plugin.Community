@@ -156,7 +156,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PartialOutline
                 else
                     return effectDescription.DrawDescription;
             }
-            var isBrushChanged = brushSource.Update(effectDescription) || !Equals(this.brushType, newBrushType);
+            var isBrushChanged = brushSource.Update(new BrushSourceDescription(effectDescription, currentOutlineBounds)) || !Equals(this.brushType, newBrushType);
             if (isFirst || isBrushChanged || !this.outlineBounds.Equals(currentOutlineBounds))
             {
                 if (brushCommandList != null)

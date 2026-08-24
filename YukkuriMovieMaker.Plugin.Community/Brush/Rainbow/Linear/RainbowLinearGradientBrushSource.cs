@@ -7,20 +7,27 @@ using YukkuriMovieMaker.Plugin.Community.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear
 {
-    internal class RainbowLinearGradientBrushSource(IGraphicsDevicesAndContext devices, RainbowLinearGradientBrushParameter rainbowBrushParameter) : IBrushSource
+    internal class RainbowLinearGradientBrushSource(IGraphicsDevicesAndContext devices, RainbowLinearGradientBrushParameter rainbowBrushParameter) : IBrushSource2
     {
         public ID2D1Brush Brush => brush ?? throw new NullReferenceException(nameof(brush));
         readonly DisposeCollector disposer = new();
 
         bool isFirst = true;
         double width, offset, saturation, brightness, angle;
+        CoordinateMode coordinateMode;
+        Vortice.RawRectF bounds;
         RainbowColorSpace colorSpace;
         Vortice.Direct2D1.ExtendMode extendMode;
 
         ID2D1GradientStopCollection? stopCollection;
         ID2D1LinearGradientBrush? brush;
 
-        public bool Update(TimelineItemSourceDescription desc)
+        public bool Update(BrushSourceDescription desc)
+        {
+            return Update(desc.TimelineItemSourceDescription, desc.Bounds);
+        }
+
+        bool Update(TimelineItemSourceDescription desc, Vortice.RawRectF bounds)
         {
             var isChanged = false;
             var frame = desc.ItemPosition.Frame;
@@ -32,8 +39,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear
             var saturation = rainbowBrushParameter.Saturation.GetValue(frame, length, fps);
             var brightness = rainbowBrushParameter.Brightness.GetValue(frame, length, fps);
             var angle = rainbowBrushParameter.Angle.GetValue(frame, length, fps);
+            var coordinateMode = rainbowBrushParameter.CoordinateMode;
             var colorSpace = rainbowBrushParameter.ColorSpace;
             var extendMode = rainbowBrushParameter.ExtendMode.ToD2DExtendMode();
+            var points = LinearGradientBrushHelper.CalculatePoints(coordinateMode, width, offset, angle, bounds);
 
             if (isFirst || this.saturation != saturation || this.brightness != brightness || this.colorSpace != colorSpace || this.extendMode != extendMode)
             {
@@ -50,8 +59,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear
                 brush = devices.DeviceContext.CreateLinearGradientBrush(
                     new LinearGradientBrushProperties
                     {
-                        StartPoint = Vector2.Transform(new((float)-width / 2 + (float)offset, 0), Matrix3x2.CreateRotation((float)angle / 180 * MathF.PI)),
-                        EndPoint = Vector2.Transform(new((float)width / 2 + (float)offset, 0), Matrix3x2.CreateRotation((float)angle / 180 * MathF.PI))
+                        StartPoint = points.StartPoint,
+                        EndPoint = points.EndPoint
                     },
                     stopCollection);
                 disposer.Collect(brush);
@@ -59,13 +68,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear
                 isChanged = true;
 
             }
-            if(isFirst || !isChanged && (this.width != width || this.angle != angle || this.offset != offset) )
+            if(isFirst || !isChanged && (this.width != width || this.angle != angle || this.offset != offset || this.coordinateMode != coordinateMode || (coordinateMode is CoordinateMode.Relative && !this.bounds.Equals(bounds))) )
             {
                 if(brush is null)
                     throw new InvalidOperationException("brush is null");
 
-                brush.StartPoint = Vector2.Transform(new((float)-width / 2 + (float)offset, 0), Matrix3x2.CreateRotation((float)angle / 180 * MathF.PI));
-                brush.EndPoint = Vector2.Transform(new((float)width / 2 + (float)offset, 0), Matrix3x2.CreateRotation((float)angle / 180 * MathF.PI));
+                brush.StartPoint = points.StartPoint;
+                brush.EndPoint = points.EndPoint;
                 isChanged = true;
             }
 
@@ -75,6 +84,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Linear
             this.saturation = saturation;
             this.brightness = brightness;
             this.angle = angle;
+            this.coordinateMode = coordinateMode;
+            this.bounds = bounds;
             this.colorSpace = colorSpace;
             this.extendMode = extendMode;
 

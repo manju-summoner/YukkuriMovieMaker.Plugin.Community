@@ -45,7 +45,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             Unloaded += OnUnloaded;
         }
 
-        public void SetEditorInfo(IEditorInfo info)
+        public void SetEditorInfo(IEditorInfo? info)
         {
             // This editor does not require editor-specific context.
         }

@@ -123,6 +123,10 @@
                                       IsCheckable="True"
                                       IsChecked="{Binding ShowLineNumbers, Mode=TwoWay}"
                                       Icon="{DynamicResource {x:Static icons:IconKeys.FormatListNumbered}}"/>
+                            <MenuItem Header="{x:Static local:Texts.MarkdownMode}"
+                                      IsCheckable="True"
+                                      IsChecked="{Binding IsMarkdownEnabled, Mode=TwoWay}"
+                                      Icon="{DynamicResource {x:Static icons:IconKeys.LanguageMarkdown}}"/>
                         </ContextMenu>
                     </controls:DropDownButton.ContextMenu>
                 </controls:DropDownButton>
@@ -164,6 +168,7 @@
                 <local:NotepadImageDisplayBehavior ImageScale="{Binding Zoom}"/>
                 <local:NotepadImageInputBehavior/>
                 <local:NotepadSearchBehavior/>
+                <local:NotepadMarkdownBehavior IsMarkdown="{Binding IsMarkdownEnabled}"/>
             </i:Interaction.Behaviors>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="PreviewMouseWheel">

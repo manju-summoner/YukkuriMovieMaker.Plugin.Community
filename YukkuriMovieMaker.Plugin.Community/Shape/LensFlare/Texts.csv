@@ -1,0 +1,41 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+ShapeTypeLensFlareName,,レンズフレア,Lens flare,镜头光晕,鏡頭光暈,렌즈 플레어,Destello de lente,توهج العدسة,Lens flare
+ShapeTypeLensFlareDesc,,レンズフレア,Lens flare,镜头光晕,鏡頭光暈,렌즈 플레어,Destello de lente,توهج العدسة,Lens flare
+LensFlareShapeParameterXName,,X,X,X,X,X,X,X,X
+LensFlareShapeParameterXDesc,,光源の位置X,Light position X,光源位置X,光源位置X,광원 위치 X,Posición X de la fuente de luz,موضع مصدر الضوء X,Posisi sumber cahaya X
+LensFlareShapeParameterYName,,Y,Y,Y,Y,Y,Y,Y,Y
+LensFlareShapeParameterYDesc,,光源の位置Y,Light position Y,光源位置Y,光源位置Y,광원 위치 Y,Posición Y de la fuente de luz,موضع مصدر الضوء Y,Posisi sumber cahaya Y
+LensFlareShapeParameterIntensityName,,明るさ,Brightness,亮度,亮度,밝기,Brillo,السطوع,Kecerahan
+LensFlareShapeParameterIntensityDesc,,光源の明るさ,Brightness of the light source,光源的亮度,光源的亮度,광원의 밝기,Brillo de la fuente de luz,سطوع مصدر الضوء,Kecerahan sumber cahaya
+LensFlareShapeParameterScaleName,,大きさ,Size,大小,大小,크기,Tamaño,الحجم,Ukuran
+LensFlareShapeParameterScaleDesc,,フレア全体の大きさ,Overall size of the flare,光晕整体的大小,光暈整體的大小,플레어 전체의 크기,Tamaño general del destello,الحجم الكلي للتوهج,Ukuran keseluruhan flare
+LensFlareShapeParameterColorName,,色,Color,颜色,顏色,색,Color,اللون,Warna
+LensFlareShapeParameterColorDesc,,光源の色,Color of the light source,光源的颜色,光源的顏色,광원의 색,Color de la fuente de luz,لون مصدر الضوء,Warna sumber cahaya
+LensFlareShapeParameterBladeCountName,,絞り羽根,Aperture blades,光圈叶片,光圈葉片,조리개 날개,Palas del diafragma,شفرات الفتحة,Bilah aperture
+LensFlareShapeParameterBladeCountDesc,,絞り羽根の枚数。光条の本数とゴーストの形が変わります,Number of aperture blades. Changes the number of streaks and the ghost shapes,光圈叶片的数量。会改变光芒数量和鬼影形状,光圈葉片的數量。會改變光芒數量和鬼影形狀,조리개 날개의 수. 빛줄기 개수와 고스트 모양이 바뀝니다,Número de palas del diafragma. Cambia el número de rayos y la forma de los reflejos,عدد شفرات الفتحة. يغير عدد الأشعة وشكل الأشباح,Jumlah bilah aperture. Mengubah jumlah sinar dan bentuk ghost
+LensFlareShapeParameterRotationName,,回転,Rotation,旋转,旋轉,회전,Rotación,الدوران,Rotasi
+LensFlareShapeParameterRotationDesc,,絞り（光条・ゴースト）の回転角度,Rotation angle of the aperture (streaks and ghosts),光圈（光芒・鬼影）的旋转角度,光圈（光芒・鬼影）的旋轉角度,조리개(빛줄기・고스트)의 회전 각도,Ángulo de rotación del diafragma (rayos y reflejos),زاوية دوران الفتحة (الأشعة والأشباح),Sudut rotasi aperture (sinar dan ghost)
+LensFlareShapeParameterStarLengthName,,光条の長さ,Streak length,光芒长度,光芒長度,빛줄기 길이,Longitud de los rayos,طول الأشعة,Panjang sinar
+LensFlareShapeParameterStarLengthDesc,,絞りの回折による光条の長さ,Length of the diffraction streaks caused by the aperture,由光圈衍射产生的光芒的长度,由光圈繞射產生的光芒的長度,조리개 회절로 생기는 빛줄기의 길이,Longitud de los rayos de difracción causados por el diafragma,طول أشعة الحيود الناتجة عن الفتحة,Panjang sinar difraksi yang disebabkan oleh aperture
+LensFlareShapeParameterStarBrightnessName,,光条の明るさ,Streak brightness,光芒亮度,光芒亮度,빛줄기 밝기,Brillo de los rayos,سطوع الأشعة,Kecerahan sinar
+LensFlareShapeParameterStarBrightnessDesc,,光条の明るさ,Brightness of the diffraction streaks,光芒的亮度,光芒的亮度,빛줄기의 밝기,Brillo de los rayos de difracción,سطوع أشعة الحيود,Kecerahan sinar difraksi
+LensFlareShapeParameterGhostCountName,,ゴーストの数,Ghost count,鬼影数量,鬼影數量,고스트 개수,Número de reflejos,عدد الأشباح,Jumlah ghost
+LensFlareShapeParameterGhostCountDesc,,レンズ内部の反射で生じるゴーストの数,Number of ghosts caused by reflections inside the lens,由镜头内部反射产生的鬼影数量,由鏡頭內部反射產生的鬼影數量,렌즈 내부 반사로 생기는 고스트의 개수,Número de reflejos causados por las reflexiones internas del objetivo,عدد الأشباح الناتجة عن الانعكاسات داخل العدسة,Jumlah ghost yang disebabkan oleh pantulan di dalam lensa
+LensFlareShapeParameterGhostBrightnessName,,ゴーストの明るさ,Ghost brightness,鬼影亮度,鬼影亮度,고스트 밝기,Brillo de los reflejos,سطوع الأشباح,Kecerahan ghost
+LensFlareShapeParameterGhostBrightnessDesc,,ゴーストの明るさ,Brightness of the ghosts,鬼影的亮度,鬼影的亮度,고스트의 밝기,Brillo de los reflejos,سطوع الأشباح,Kecerahan ghost
+LensFlareShapeParameterHaloRadiusName,,ハローの大きさ,Halo size,光环大小,光環大小,헤일로 크기,Tamaño del halo,حجم الهالة,Ukuran halo
+LensFlareShapeParameterHaloRadiusDesc,,画面中心を囲む虹色のハローの半径,Radius of the rainbow halo around the center of the screen,围绕画面中心的彩虹光环的半径,圍繞畫面中心的彩虹光環的半徑,화면 중심을 둘러싼 무지개 헤일로의 반지름,Radio del halo de arcoíris alrededor del centro de la pantalla,نصف قطر الهالة القزحية حول مركز الشاشة,Radius halo pelangi di sekitar pusat layar
+LensFlareShapeParameterHaloBrightnessName,,ハローの明るさ,Halo brightness,光环亮度,光環亮度,헤일로 밝기,Brillo del halo,سطوع الهالة,Kecerahan halo
+LensFlareShapeParameterHaloBrightnessDesc,,ハローの明るさ,Brightness of the halo,光环的亮度,光環的亮度,헤일로의 밝기,Brillo del halo,سطوع الهالة,Kecerahan halo
+LensFlareShapeParameterDispersionName,,色収差,Chromatic aberration,色差,色差,색수차,Aberración cromática,زيغ لوني,Aberasi kromatik
+LensFlareShapeParameterDispersionDesc,,波長による色ずれの強さ,Strength of the wavelength-dependent color fringing,由波长引起的色偏强度,由波長引起的色偏強度,파장에 따른 색 번짐의 강도,Intensidad de la separación cromática según la longitud de onda,قوة التفرق اللوني حسب الطول الموجي,Kekuatan pemisahan warna berdasarkan panjang gelombang
+LensFlareShapeParameterSeedName,,シード,Seed,种子,種子,시드,Semilla,البذرة,Seed
+LensFlareShapeParameterSeedDesc,,ゴーストの配置を決めるシード値,Seed value that determines the ghost layout,决定鬼影排列的种子值,決定鬼影排列的種子值,고스트 배치를 결정하는 시드 값,Valor de semilla que determina la disposición de los reflejos,قيمة البذرة التي تحدد ترتيب الأشباح,Nilai seed yang menentukan tata letak ghost
+LensFlareShapeParameterStreakBrightnessName,,ストリーク,Streak,横向光条,橫向光條,스트릭,Rayo anamórfico,الشعاع الأفقي,Streak
+LensFlareShapeParameterStreakBrightnessDesc,,光源から横に伸びるアナモルフィックストリークの明るさ,Brightness of the horizontal anamorphic streak extending from the light source,从光源横向延伸的横向光条的亮度,從光源橫向延伸的橫向光條的亮度,광원에서 가로로 뻗는 아나모픽 스트릭의 밝기,Brillo del rayo anamórfico horizontal que se extiende desde la fuente de luz,سطوع الشعاع الأفقي الأنامورفي الممتد من مصدر الضوء,Kecerahan streak anamorfik horizontal yang memanjang dari sumber cahaya
+LensFlareShapeParameterShimmerBrightnessName,,シマー,Shimmer,细碎光芒,細碎光芒,시머,Destellos finos,وميض,Shimmer
+LensFlareShapeParameterShimmerBrightnessDesc,,光源から放射状に伸びる不規則な細い光線の明るさ,Brightness of the irregular fine rays radiating from the light source,从光源呈放射状延伸的不规则细光线的亮度,從光源呈放射狀延伸的不規則細光線的亮度,광원에서 방사형으로 뻗는 불규칙한 가는 광선의 밝기,Brillo de los rayos finos e irregulares que irradian desde la fuente de luz,سطوع الأشعة الدقيقة غير المنتظمة المنبعثة من مصدر الضوء,Kecerahan sinar halus tak beraturan yang memancar dari sumber cahaya
+LensFlareShapeParameterStarWidthName,,光条の太さ,Streak width,光芒粗细,光芒粗細,빛줄기 굵기,Grosor de los rayos,سمك الأشعة,Ketebalan sinar
+LensFlareShapeParameterStarWidthDesc,,光条の太さ,Thickness of the diffraction streaks,光芒的粗细,光芒的粗細,빛줄기의 굵기,Grosor de los rayos de difracción,سمك أشعة الحيود,Ketebalan sinar difraksi
+LensFlareShapeParameterStreakWidthName,,ストリークの太さ,Anamorphic streak width,横向光条粗细,橫向光條粗細,스트릭 굵기,Grosor del rayo anamórfico,سمك الشعاع الأفقي,Ketebalan streak anamorfik
+LensFlareShapeParameterStreakWidthDesc,,アナモルフィックストリークの太さ,Thickness of the anamorphic streak,横向光条的粗细,橫向光條的粗細,아나모픽 스트릭의 굵기,Grosor del rayo anamórfico,سمك الشعاع الأفقي الأنامورفي,Ketebalan streak anamorfik

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -55,7 +56,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.InOutCrop
         {
             yield return $"_name=アニメーション効果\r\n" +
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
-                $"track0={effectDuration:F2}\r\n" +
+                $"track0={effectDuration.ToString("F2", CultureInfo.InvariantCulture)}\r\n" +
                 $"track1={(int)inCropDirection}\r\n" +
                 $"track2={(int)outCropDirection}\r\n" +
                 $"check0={(centering ? 1 : 0)}\r\n" +

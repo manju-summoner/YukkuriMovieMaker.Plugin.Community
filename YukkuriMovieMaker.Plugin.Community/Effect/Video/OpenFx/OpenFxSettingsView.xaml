@@ -1,0 +1,143 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx.OpenFxSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Plugin"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800">
+    <UserControl.DataContext>
+        <local:OpenFxSettingsViewModel/>
+    </UserControl.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Expander Grid.Row="0" Header="OpenFX" IsExpanded="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="26"/>
+                    <RowDefinition Height="88"/>
+                    <RowDefinition Height="26"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Label Content="{x:Static local:Texts.OpenFxSettingsUseGpuRendering}"/>
+                    <c:ToggleSlider Margin="5,2"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Value="{Binding UseGpuRendering}"/>
+                </Grid>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="{x:Static local:Texts.OpenFxSettingsDefaultDirectoriesName}"/>
+                    <ItemsControl Grid.Column="1"
+                                  ItemsSource="{Binding DefaultDirectories}"
+                                  VerticalAlignment="Center">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0"
+                                             Text="{Binding Path, Mode=OneWay}"
+                                             ToolTip="{Binding Path}"
+                                             IsReadOnly="True"
+                                             BorderBrush="Transparent"
+                                             Background="Transparent"
+                                             TextWrapping="NoWrap"
+                                             TextAlignment="Right"
+                                             VerticalContentAlignment="Center"/>
+                                    <Button Grid.Column="1"
+                                            Width="26"
+                                            Padding="3"
+                                            Content="{DynamicResource {x:Static icons:IconKeys.FolderOpen}}"
+                                            ToolTip="{x:Static local:Texts.OpenFxSettingsOpenDirectoryToolTip}"
+                                            CommandParameter="{Binding}"
+                                            Command="{Binding DataContext.OpenDirectory, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+
+                <Label Grid.Row="2" Content="{x:Static local:Texts.OpenFxSettingsAdditionalDirectoriesName}"/>
+                <ListBox Grid.Row="3"
+                         ItemsSource="{Binding AdditionalDirectories}"
+                         SelectedItem="{Binding SelectedDirectory}"/>
+                <Grid Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="1"
+                            Content="{x:Static local:Texts.OpenFxSettingsAddDirectoryButton}"
+                            Command="{Binding AddDirectory}"/>
+                    <Button Grid.Column="2"
+                            Content="{x:Static local:Texts.OpenFxSettingsRemoveDirectoryButton}"
+                            Command="{Binding RemoveDirectory}"/>
+                </Grid>
+            </Grid>
+        </Expander>
+
+        <Expander Grid.Row="1" Header="{x:Static local:Texts.OpenFxSettingsPluginListName}" IsExpanded="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition Height="26"/>
+                </Grid.RowDefinitions>
+
+                <ListView Grid.Row="0" ItemsSource="{Binding Plugins}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="{x:Static local:Texts.OpenFxSettingsPluginNameColumn}" DisplayMemberBinding="{Binding Name}" Width="180"/>
+                            <GridViewColumn Header="{x:Static local:Texts.OpenFxSettingsPluginGroupColumn}" DisplayMemberBinding="{Binding Grouping}" Width="140"/>
+                            <!-- 幅は内容へフィットさせる（固定幅では「映像エフェクト / 場面切り替え」等の両対応表記が
+                                 言語によってはみ出し、単一対応のみの環境では無駄に幅を取るため） -->
+                            <GridViewColumn Header="{x:Static local:Texts.OpenFxSettingsPluginUsageColumn}" Width="Auto">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <!-- 非対応プラグインはツールチップで理由を表示する。
+                                             理由は長文になるため折り返し用のTextBlockを供給し、
+                                             対応プラグインでは空バルーンが出ないようIsEnabledで無効化する -->
+                                        <TextBlock Text="{Binding SupportedUsagesText}"
+                                                   ToolTipService.IsEnabled="{Binding IsUnsupported}">
+                                            <TextBlock.ToolTip>
+                                                <TextBlock Text="{Binding UnsupportedReasonText}" TextWrapping="Wrap" MaxWidth="400"/>
+                                            </TextBlock.ToolTip>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="{x:Static local:Texts.OpenFxSettingsPluginGpuColumn}" DisplayMemberBinding="{Binding GpuSupportText}" Width="150"/>
+                            <GridViewColumn Header="{x:Static local:Texts.OpenFxSettingsPluginPathColumn}" DisplayMemberBinding="{Binding BinaryPath}" Width="340"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding ScanStatusText}" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1"
+                            Content="{x:Static local:Texts.OpenFxSettingsRescanButton}"
+                            Command="{Binding Rescan}"/>
+                </Grid>
+            </Grid>
+        </Expander>
+    </Grid>
+</UserControl>

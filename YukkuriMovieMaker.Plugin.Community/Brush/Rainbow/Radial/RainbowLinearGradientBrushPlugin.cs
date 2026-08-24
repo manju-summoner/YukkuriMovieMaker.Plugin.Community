@@ -10,6 +10,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Brush.Rainbow.Radial
     internal class RainbowRadialGradientBrushPlugin : IBrushPlugin
     {
         public string Name => Texts.RainbowRadialGradient;
+        public string DefaultGroupName => YukkuriMovieMaker.Resources.Localization.Texts.BrushGroupGradientName;
+        public int DefaultOrder => 230;
 
         public IBrushParameter CreateBrushParameter()
         {

@@ -12,5 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
 
         public string Name => Texts.Notepad;
         public bool AllowMultipleInstances => true;
+        public string DefaultGroupName => YukkuriMovieMaker.Resources.Localization.Texts.ToolGroupUtilityName;
+        public int DefaultOrder => 540;
     }
 }

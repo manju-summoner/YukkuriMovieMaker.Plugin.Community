@@ -20,6 +20,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
+            //上流チェーンの再評価を抑えるためキャッシュする。
+            //Cachedのままエフェクトの出力を後続へ渡すと、出力が中間ビットマップにラスタライズされ、
+            //後続のカスタムシェーダー（縁取りの膨張など）がそれを補間サンプリングするため、
+            //テキストのようにバウンズが非整数の素材では輪郭がぼけて縁取りが太くなる。
+            //CommandListに包んでから渡すことで、キャッシュを効かせたままこの影響を断つ。
             sink = new D2DEffects.AffineTransform2D(devices.DeviceContext)
             {
                 Cached = true
@@ -43,7 +48,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OutputComposite
 
             var output = sink.Output;
             disposer.Collect(output);
-            return output;
+
+            //CommandListはエフェクトを参照で保持するため、入力を設定する前に記録しても内容は常に最新のものになる
+            var dc = devices.DeviceContext;
+            var commandList = dc.CreateCommandList();
+            disposer.Collect(commandList);
+
+            dc.Target = commandList;
+            dc.BeginDraw();
+            dc.Clear(null);
+            dc.DrawImage(output);
+            dc.EndDraw();
+            dc.Target = null;
+            commandList.Close();
+
+            return commandList;
         }
 
         public override DrawDescription Update(EffectDescription effectDescription)

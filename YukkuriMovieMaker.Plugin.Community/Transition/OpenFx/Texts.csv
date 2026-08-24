@@ -1,0 +1,6 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+OpenFxTransitionName,,OpenFX,OpenFX,OpenFX,OpenFX,OpenFX,OpenFX,OpenFX,OpenFX
+EasingTypeName,,緩急,Easing Type,缓动类型,緩動類型,이징 유형,Tipo de suavizado,نوع التخفيف,Jenis Easing
+EasingTypeDesc,,場面切り替えの進行の緩急の種類を選択します。,Selects the easing curve type for the transition progress.,选择场景切换进度的缓动曲线类型。,選擇場景切換進度的緩動曲線類型。,장면 전환 진행의 이징 곡선 유형을 선택합니다.,Selecciona el tipo de curva de suavizado para el progreso de la transición.,يحدد نوع منحنى التخفيف لتقدم الانتقال.,Memilih jenis kurva easing untuk kemajuan transisi.
+EasingModeName,,加減速,Easing Mode,加减速模式,加減速模式,이징 모드,Modo de suavizado,وضع التخفيف,Mode Easing
+EasingModeDesc,,場面切り替えの進行の加減速の方向を選択します。,Selects the acceleration direction of the easing.,选择缓动的加减速方向。,選擇緩動的加減速方向。,이징의 가속·감속 방향을 선택합니다.,Selecciona la dirección de aceleración del suavizado.,يحدد اتجاه التسارع للتخفيف.,Memilih arah akselerasi easing.

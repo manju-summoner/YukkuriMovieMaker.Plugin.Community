@@ -15,6 +15,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
         public bool IsExoMaskSupported => false;
 
         public string Name => Texts.Pen;
+        public string DefaultGroupName => YukkuriMovieMaker.Resources.Localization.Texts.ShapeGroupBasicName;
+        public int DefaultOrder => 220;
 
         public IShapeParameter CreateShapeParameter(SharedDataStore? sharedData)
         {

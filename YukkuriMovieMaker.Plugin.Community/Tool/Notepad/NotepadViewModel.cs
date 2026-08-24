@@ -29,6 +29,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
         public double Zoom { get; set => Set(ref field, Math.Max(0.25, value), nameof(Zoom), nameof(FontSize)); } = 1.0;
         public bool WordWrap { get; set => Set(ref field, value); } = false;
         public bool ShowLineNumbers { get; set => Set(ref field, value); } = false;
+        public bool IsMarkdownEnabled { get; set => Set(ref field, value); } = false;
 
         public OpenFileDialogViewModel OpenFileDialog { get; } = new();
         public SaveFileDialogViewModel SaveFileDialog { get; } = new();
@@ -89,7 +90,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                 x =>
                 {
                     var filePath = x as string;
-                    var preferredExt = NotepadDocumentSerializer.DetermineSaveExtension(Text);
+                    var preferredExt = DeterminePreferredSaveExtension(FilePath, Text, IsMarkdownEnabled);
 
                     if (string.IsNullOrEmpty(filePath) || !MatchesPreferredExtension(filePath, preferredExt))
                     {
@@ -120,7 +121,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     {
                         Zoom = Zoom,
                         WordWrap = WordWrap,
-                        ShowLineNumbers = ShowLineNumbers
+                        ShowLineNumbers = ShowLineNumbers,
+                        IsMarkdownEnabled = IsMarkdownEnabled,
                     };
                     var toolState = new ToolState()
                     {
@@ -165,6 +167,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             IsSaved = state.IsSaved;
             WordWrap = state.WordWrap;
             ShowLineNumbers = state.ShowLineNumbers;
+            IsMarkdownEnabled = state.IsMarkdownEnabled;
         }
 
         public ToolState SaveState()
@@ -180,6 +183,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
                     IsSaved = IsSaved,
                     WordWrap = WordWrap,
                     ShowLineNumbers = ShowLineNumbers,
+                    IsMarkdownEnabled = IsMarkdownEnabled,
                     Images = CollectEmbeddedImages(Text)
                 }),
             };
@@ -219,15 +223,40 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             }
         }
 
+        private static string DeterminePreferredSaveExtension(string currentFilePath, string text, bool isMarkdownEnabled)
+        {
+            if (NotepadDocumentSerializer.ContainsImages(text))
+                return NotepadDocumentSerializer.PackageExtension;
+
+            // 既存ファイルを編集中なら、その拡張子を維持する（Markdown表示トグルで保存先を変えない）
+            var currentExt = Path.GetExtension(currentFilePath);
+            if (string.Equals(currentExt, NotepadDocumentSerializer.MarkdownExtension, StringComparison.OrdinalIgnoreCase))
+                return NotepadDocumentSerializer.MarkdownExtension;
+            if (string.Equals(currentExt, NotepadDocumentSerializer.PlainTextExtension, StringComparison.OrdinalIgnoreCase))
+                return NotepadDocumentSerializer.PlainTextExtension;
+
+            // 新規作成時のみ、Markdownモードに応じて既定拡張子を決める
+            if (isMarkdownEnabled)
+                return NotepadDocumentSerializer.MarkdownExtension;
+            return NotepadDocumentSerializer.PlainTextExtension;
+        }
+
         private static string BuildOpenFilter() =>
-            $"{Texts.NotepadDocument}|*.txt;*{NotepadDocumentSerializer.PackageExtension}|" +
-            $"{Texts.TextFile}|*.txt|" +
+            $"{Texts.NotepadDocument}|*.txt;*.md;*{NotepadDocumentSerializer.PackageExtension}|" +
+            $"{Texts.TextFile}|*.txt;*.md|" +
+            $"{Texts.MarkdownFile}|*.md|" +
             $"{Texts.RichNotepadFile}|*{NotepadDocumentSerializer.PackageExtension}";
 
         private static string BuildSaveFilter(string preferredExtension) =>
-            string.Equals(preferredExtension, NotepadDocumentSerializer.PackageExtension, StringComparison.OrdinalIgnoreCase)
-                ? $"{Texts.RichNotepadFile}|*{NotepadDocumentSerializer.PackageExtension}"
-                : $"{Texts.TextFile}|*.txt";
+            preferredExtension switch
+            {
+                NotepadDocumentSerializer.PackageExtension =>
+                    $"{Texts.RichNotepadFile}|*{NotepadDocumentSerializer.PackageExtension}",
+                NotepadDocumentSerializer.MarkdownExtension =>
+                    $"{Texts.MarkdownFile}|*{NotepadDocumentSerializer.MarkdownExtension}|{Texts.TextFile}|*.txt",
+                _ =>
+                    $"{Texts.TextFile}|*.txt",
+            };
 
         private static string BuildDefaultFileName(string preferredExtension) =>
             $"{Texts.Untitled}{preferredExtension}";
@@ -236,8 +265,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Notepad
             string.Equals(Path.GetExtension(filePath), preferredExtension, StringComparison.OrdinalIgnoreCase);
 
         private static string EnsureExtension(string filePath, string preferredExtension) =>
-            MatchesPreferredExtension(filePath, preferredExtension)
+            IsSupportedSaveExtension(Path.GetExtension(filePath))
                 ? filePath
                 : Path.ChangeExtension(filePath, preferredExtension);
+
+        private static bool IsSupportedSaveExtension(string extension) =>
+            string.Equals(extension, NotepadDocumentSerializer.PlainTextExtension, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(extension, NotepadDocumentSerializer.MarkdownExtension, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(extension, NotepadDocumentSerializer.PackageExtension, StringComparison.OrdinalIgnoreCase);
     }
 }
