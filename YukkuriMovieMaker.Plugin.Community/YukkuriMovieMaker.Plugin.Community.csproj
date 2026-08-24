@@ -21,8 +21,8 @@
     </PropertyGroup>
 
     <ItemGroup Condition="'$(YMM4Proj)' != ''">
-        <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Commons\YukkuriMovieMaker.Plugin.csproj"/>
-        <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Controls\YukkuriMovieMaker.Controls.csproj"/>
+        <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Commons\YukkuriMovieMaker.Plugin.csproj" />
+        <ProjectReference Include="$(YMM4Proj)YukkuriMovieMaker.Controls\YukkuriMovieMaker.Controls.csproj" />
     </ItemGroup>
 
     <!-- dotnet CLI（MSBuildRuntimeType=Core）はvcxprojをビルドできないため、参照はVS/MSBuild.exeビルド時のみ。
@@ -31,19 +31,19 @@
         <ProjectReference Include="..\YukkuriMovieMaker.Vst3Bridge\YukkuriMovieMaker.Vst3Bridge.vcxproj"
                           Condition="'$(MSBuildRuntimeType)' != 'Core'"
                           ReferenceOutputAssembly="false"
-                          AdditionalProperties="Platform=x64"/>
+                          AdditionalProperties="Platform=x64" />
         <Content Include="..\YukkuriMovieMaker.Vst3Bridge\bin\$(Configuration)\YukkuriMovieMaker.Vst3Bridge.dll"
                  Link="Resources\bin\x64\vst3\YukkuriMovieMaker.Vst3Bridge.dll"
                  CopyToOutputDirectory="PreserveNewest"
-                 CopyToPublishDirectory="PreserveNewest"/>
+                 CopyToPublishDirectory="PreserveNewest" />
         <ProjectReference Include="..\YukkuriMovieMaker.Vst3Scanner\YukkuriMovieMaker.Vst3Scanner.vcxproj"
                           Condition="'$(MSBuildRuntimeType)' != 'Core'"
                           ReferenceOutputAssembly="false"
-                          AdditionalProperties="Platform=x64"/>
+                          AdditionalProperties="Platform=x64" />
         <Content Include="..\YukkuriMovieMaker.Vst3Scanner\bin\$(Configuration)\YukkuriMovieMaker.Vst3Scanner.exe"
                  Link="Resources\bin\x64\vst3\YukkuriMovieMaker.Vst3Scanner.exe"
                  CopyToOutputDirectory="PreserveNewest"
-                 CopyToPublishDirectory="PreserveNewest"/>
+                 CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
 
     <!-- OFXスキャナーEXE（スキャンの別プロセス隔離用）。
@@ -52,11 +52,11 @@
         <ProjectReference Include="..\YukkuriMovieMaker.OfxScanner\YukkuriMovieMaker.OfxScanner.vcxproj"
                           Condition="'$(MSBuildRuntimeType)' != 'Core'"
                           ReferenceOutputAssembly="false"
-                          AdditionalProperties="Platform=x64"/>
+                          AdditionalProperties="Platform=x64" />
         <Content Include="..\YukkuriMovieMaker.OfxScanner\bin\$(Configuration)\YukkuriMovieMaker.OfxScanner.exe"
                  Link="Resources\bin\x64\ofx\YukkuriMovieMaker.OfxScanner.exe"
                  CopyToOutputDirectory="PreserveNewest"
-                 CopyToPublishDirectory="PreserveNewest"/>
+                 CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
 
     <!-- YMM4のdllや、カスタムdllを参照。サードパーティー開発者向け。-->
@@ -101,62 +101,62 @@
 
     <!-- nugetパッケージで公開されているライブラリはPackageReferenceで参照する。-->
     <ItemGroup>
-        <PackageReference Include="LlmTornado" Version="3.8.60"/>
-        <PackageReference Include="MathNet.Numerics" Version="5.0.0"/>
-        <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4"/>
-        <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4022.49"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
-        <PackageReference Include="NAudio" Version="2.3.0"/>
-        <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142"/>
-        <PackageReference Include="VirtualizingWrapPanel" Version="2.5.2"/>
-        <PackageReference Include="Whisper.net" Version="1.9.1"/>
-        <PackageReference Include="Whisper.net.Runtime" Version="1.9.1"/>
-        <PackageReference Include="Whisper.net.Runtime.Cuda.Windows" Version="1.9.1"/>
-        <PackageReference Include="Whisper.net.Runtime.NoAvx" Version="1.9.1"/>
-        <PackageReference Include="Whisper.net.Runtime.OpenVino" Version="1.9.1"/>
-        <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.1"/>
-        <PackageReference Include="YamlDotNet" Version="18.0.0"/>
-        <PackageReference Include="System.Management" Version="10.0.9"/>
-        <PackageReference Include="ComputeSharp" Version="3.2.0"/>
-        <PackageReference Include="MeltySynth" Version="2.4.1"/>
-        <PackageReference Include="AvalonEdit" Version="6.3.1.120"/>
+        <PackageReference Include="LlmTornado" Version="3.8.60" />
+        <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+        <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" />
+        <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4022.49" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+        <PackageReference Include="NAudio" Version="2.3.0" />
+        <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
+        <PackageReference Include="VirtualizingWrapPanel" Version="2.5.2" />
+        <PackageReference Include="Whisper.net" Version="1.9.1" />
+        <PackageReference Include="Whisper.net.Runtime" Version="1.9.1" />
+        <PackageReference Include="Whisper.net.Runtime.Cuda.Windows" Version="1.9.1" />
+        <PackageReference Include="Whisper.net.Runtime.NoAvx" Version="1.9.1" />
+        <PackageReference Include="Whisper.net.Runtime.OpenVino" Version="1.9.1" />
+        <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.1" />
+        <PackageReference Include="YamlDotNet" Version="18.0.0" />
+        <PackageReference Include="System.Management" Version="10.0.9" />
+        <PackageReference Include="ComputeSharp" Version="3.2.0" />
+        <PackageReference Include="MeltySynth" Version="2.4.1" />
+        <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
         <PackageReference Include="SkiaSharp" Version="4.151.1"/>
         <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="4.151.1"/>
     </ItemGroup>
 
     <!--ビルド後、YMM4フォルダに関連ファイルをコピーする（Resources\bin\x64\vst3等のサブフォルダーも含む）-->
     <Target Condition="'$(YMM4Proj)' == ''" Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="xcopy &quot;$(TargetDir)&quot; &quot;$(YMM4DirPath)&quot; /y /s"/>
+        <Exec Command="xcopy &quot;$(TargetDir)&quot; &quot;$(YMM4DirPath)&quot; /y /s" />
     </Target>
 
     <ItemGroup>
-        <Folder Include="FileWriter\"/>
-        <Folder Include="Tachie\"/>
+        <Folder Include="FileWriter\" />
+        <Folder Include="Tachie\" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="$(GeneratorDirPath)YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-        <AdditionalFiles Include="**/*.csv"/>
+        <ProjectReference Include="$(GeneratorDirPath)YukkuriMovieMaker.Generator\YukkuriMovieMaker.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <AdditionalFiles Include="**/*.csv" />
     </ItemGroup>
 
     <ItemGroup>
-        <Resource Include="Voice\IrodoriTTS\EmojiPalette\Emoji\*.png"/>
+        <Resource Include="Voice\IrodoriTTS\EmojiPalette\Emoji\*.png" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="Brush\Rainbow\Linear\Texts.csv"/>
-        <None Remove="Brush\Rainbow\Radial\Texts.csv"/>
-        <None Remove="Effect\Audio\DecibelVolume\Texts.csv"/>
-        <None Remove="Effect\Video\ColorBlindness\Texts.csv"/>
-        <None Remove="Effect\Video\EdgeDetection\Texts.csv"/>
-        <None Remove="Effect\Video\EdgeTrimming\Texts.csv"/>
-        <None Remove="Effect\Video\FishEyeLens\Texts.csv"/>
-        <None Remove="Effect\Video\LensBlur\Texts.csv"/>
-        <None Remove="Effect\Video\LuminanceKey\Texts.csv"/>
-        <None Remove="Effect\Video\UnidirectionalBlur\Texts.csv"/>
-        <None Remove="Resources\License\GeneralUserGS.txt"/>
-        <None Remove="Resources\SoundFonts\GeneralUser-GS.sf2"/>
-        <None Remove="Shape\Pen\Texts.csv"/>
+        <None Remove="Brush\Rainbow\Linear\Texts.csv" />
+        <None Remove="Brush\Rainbow\Radial\Texts.csv" />
+        <None Remove="Effect\Audio\DecibelVolume\Texts.csv" />
+        <None Remove="Effect\Video\ColorBlindness\Texts.csv" />
+        <None Remove="Effect\Video\EdgeDetection\Texts.csv" />
+        <None Remove="Effect\Video\EdgeTrimming\Texts.csv" />
+        <None Remove="Effect\Video\FishEyeLens\Texts.csv" />
+        <None Remove="Effect\Video\LensBlur\Texts.csv" />
+        <None Remove="Effect\Video\LuminanceKey\Texts.csv" />
+        <None Remove="Effect\Video\UnidirectionalBlur\Texts.csv" />
+        <None Remove="Resources\License\GeneralUserGS.txt" />
+        <None Remove="Resources\SoundFonts\GeneralUser-GS.sf2" />
+        <None Remove="Shape\Pen\Texts.csv" />
     </ItemGroup>
 
     <ItemGroup>
@@ -181,81 +181,81 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Resource Include="$(ShaderDirPath)EdgeTrimming.cso" Link="Resources\Shader\EdgeTrimming.cso"/>
-        <Resource Include="$(ShaderDirPath)LuminanceKey.cso" Link="Resources\Shader\LuminanceKey.cso"/>
-        <Resource Include="$(ShaderDirPath)DiffuseAlpha.cso" Link="Resources\Shader\DiffuseAlpha.cso"/>
-        <Resource Include="$(ShaderDirPath)InvertAlpha.cso" Link="Resources\Shader\InvertAlpha.cso"/>
-        <Resource Include="$(ShaderDirPath)BevelHeightmap.cso" Link="Resources\Shader\BevelHeightmap.cso"/>
-        <Resource Include="$(ShaderDirPath)BevelAndFlatComposite.cso" Link="Resources\Shader\BevelAndFlatComposite.cso"/>
-        <Resource Include="$(ShaderDirPath)UnidirectionalBlur.cso" Link="Resources\Shader\UnidirectionalBlur.cso"/>
-        <Resource Include="$(ShaderDirPath)LensBlur.cso" Link="Resources\Shader\LensBlur.cso"/>
-        <Resource Include="$(ShaderDirPath)FishEyeLens.cso" Link="Resources\Shader\FishEyeLens.cso"/>
-        <Resource Include="$(ShaderDirPath)Binarization.cso" Link="Resources\Shader\Binarization.cso"/>
-        <Resource Include="$(ShaderDirPath)CircularBlur.cso" Link="Resources\Shader\CircularBlur.cso"/>
-        <Resource Include="$(ShaderDirPath)ColorCorrection.cso" Link="Resources\Shader\ColorCorrection.cso"/>
-        <Resource Include="$(ShaderDirPath)ColorShift.cso" Link="Resources\Shader\ColorShift.cso"/>
-        <Resource Include="$(ShaderDirPath)LongShadow.cso" Link="Resources\Shader\LongShadow.cso"/>
-        <Resource Include="$(ShaderDirPath)Ripple.cso" Link="Resources\Shader\Ripple.cso"/>
-        <Resource Include="$(ShaderDirPath)SpiralTransform.cso" Link="Resources\Shader\SpiralTransform.cso"/>
-        <Resource Include="$(ShaderDirPath)RectangleGlitchNoise.cso" Link="Resources\Shader\RectangleGlitchNoise.cso"/>
-        <Resource Include="$(ShaderDirPath)StripeGlitchNoise.cso" Link="Resources\Shader\StripeGlitchNoise.cso"/>
-        <Resource Include="$(ShaderDirPath)ThreeDimensional.cso" Link="Resources\Shader\ThreeDimensional.cso"/>
-        <Resource Include="$(ShaderDirPath)Wave.cso" Link="Resources\Shader\Wave.cso"/>
-        <Resource Include="$(ShaderDirPath)ReelSpin.cso" Link="Resources\Shader\ReelSpin.cso"/>
-        <Resource Include="$(ShaderDirPath)ColorBlindness.cso" Link="Resources\Shader\ColorBlindness.cso"/>
-        <Resource Include="$(ShaderDirPath)VignetteBlur.cso" Link="Resources\Shader\VignetteBlur.cso"/>
-        <Resource Include="$(ShaderDirPath)VignetteRadialBlur.cso" Link="Resources\Shader\VignetteRadialBlur.cso"/>
-        <Resource Include="$(ShaderDirPath)VignetteCircularBlur.cso" Link="Resources\Shader\VignetteCircularBlur.cso"/>
-        <Resource Include="$(ShaderDirPath)BlurMap.cso" Link="Resources\Shader\BlurMap.cso"/>
-        <Resource Include="$(ShaderDirPath)Stretch.cso" Link="Resources\Shader\Stretch.cso"/>
-        <Resource Include="$(ShaderDirPath)AfterImage.cso" Link="Resources\Shader\AfterImage.cso"/>
-        <Resource Include="$(ShaderDirPath)WaveClipping.cso" Link="Resources\Shader\WaveClipping.cso"/>
-        <Resource Include="$(ShaderDirPath)GradientMap.cso" Link="Resources\Shader\GradientMap.cso"/>
-        <Resource Include="$(ShaderDirPath)GodRay.cso" Link="Resources\Shader\GodRay.cso"/>
-        <Resource Include="$(ShaderDirPath)HeatHaze.cso" Link="Resources\Shader\HeatHaze.cso"/>
-        <Resource Include="$(ShaderDirPath)PerspectiveShadow.cso" Link="Resources\Shader\PerspectiveShadow.cso"/>
-        <Resource Include="$(ShaderDirPath)OutputMapComposite.cso" Link="Resources\Shader\OutputMapComposite.cso"/>
-        <Resource Include="$(ShaderDirPath)ChannelRouter.cso" Link="Resources\Shader\ChannelRouter.cso"/>
-        <Resource Include="$(ShaderDirPath)Tritone.cso" Link="Resources\Shader\Tritone.cso"/>
-        <Resource Include="$(ShaderDirPath)Lut.cso" Link="Resources\Shader\Lut.cso"/>
-        <Resource Include="$(ShaderDirPath)EdgeGlow.cso" Link="Resources\Shader\EdgeGlow.cso"/>
-        <Resource Include="$(ShaderDirPath)PixelizeTransition.cso" Link="Resources\Shader\PixelizeTransition.cso"/>
-        <Resource Include="$(ShaderDirPath)PageTurnTransition.cso" Link="Resources\Shader\PageTurnTransition.cso"/>
-        <Resource Include="$(ShaderDirPath)ReelSpinTransition.cso" Link="Resources\Shader\ReelSpinTransition.cso"/>
-        <Resource Include="$(ShaderDirPath)MotionBlur.cso" Link="Resources\Shader\MotionBlur.cso"/>
-        <Resource Include="$(ShaderDirPath)NtscRasterize.cso" Link="Resources\Shader\NtscRasterize.cso"/>
-        <Resource Include="$(ShaderDirPath)NtscEncode.cso" Link="Resources\Shader\NtscEncode.cso"/>
-        <Resource Include="$(ShaderDirPath)NtscDecode.cso" Link="Resources\Shader\NtscDecode.cso"/>
-        <Resource Include="$(ShaderDirPath)NtscRestore.cso" Link="Resources\Shader\NtscRestore.cso"/>
-        <Resource Include="$(ShaderDirPath)PixelSortCS.cso" Link="Resources\Shader\PixelSortCS.cso"/>
-        <Resource Include="$(ShaderDirPath)LensFlare.cso" Link="Resources\Shader\LensFlare.cso"/>
-        <Resource Include="$(ShaderDirPath)FillSamegroundShader.cso" Link="Resources\Shader\FillSamegroundShader.cso"/>
-        <Resource Include="$(ShaderDirPath)PuppetDeformation.cso" Link="Resources\Shader\PuppetDeformation.cso"/>
-        <Resource Include="$(ShaderDirPath)PuppetDeformationArap.cso" Link="Resources\Shader\PuppetDeformationArap.cso"/>
-        <Resource Include="$(ShaderDirPath)PuppetDeformationArapVertex.cso" Link="Resources\Shader\PuppetDeformationArapVertex.cso"/>
-        <Resource Include="$(ShaderDirPath)Particlize.cso" Link="Resources\Shader\Particlize.cso"/>
-        <Resource Include="$(ShaderDirPath)ParticlizeVertex.cso" Link="Resources\Shader\ParticlizeVertex.cso"/>
-        <Resource Include="$(ShaderDirPath)ParticleOutput.cso" Link="Resources\Shader\ParticleOutput.cso"/>
-        <Resource Include="$(ShaderDirPath)ParticleOutputVertex.cso" Link="Resources\Shader\ParticleOutputVertex.cso"/>
-        <Resource Include="$(ShaderDirPath)PartialOutline.cso" Link="Resources\Shader\PartialOutline.cso"/>
-        <Resource Include="$(ShaderDirPath)DirectionalColorKey.cso" Link="Resources\Shader\DirectionalColorKey.cso"/>
-        <Resource Include="$(ShaderDirPath)AnisotropicKuwaharaTensor.cso" Link="Resources\Shader\AnisotropicKuwaharaTensor.cso"/>
-        <Resource Include="$(ShaderDirPath)AnisotropicKuwaharaTensorBlur.cso" Link="Resources\Shader\AnisotropicKuwaharaTensorBlur.cso"/>
-        <Resource Include="$(ShaderDirPath)AnisotropicKuwahara.cso" Link="Resources\Shader\AnisotropicKuwahara.cso"/>
-        <Resource Include="$(ShaderDirPath)CrossHatchShading.cso" Link="Resources\Shader\CrossHatchShading.cso"/>
-        <Resource Include="$(ShaderDirPath)Kaleidoscope.cso" Link="Resources\Shader\Kaleidoscope.cso"/>
-        <Resource Include="$(ShaderDirPath)FacetedGlass.cso" Link="Resources\Shader\FacetedGlass.cso"/>
-        <Resource Include="$(ShaderDirPath)Dithering.cso" Link="Resources\Shader\Dithering.cso"/>
-        <Resource Include="$(ShaderDirPath)VectorFieldWarp.cso" Link="Resources\Shader\VectorFieldWarp.cso"/>
-        <Resource Include="$(ShaderDirPath)AmbientOcclusion.cso" Link="Resources\Shader\AmbientOcclusion.cso"/>
-        <Resource Include="$(ShaderDirPath)AmbientOcclusionPhase.cso" Link="Resources\Shader\AmbientOcclusionPhase.cso"/>
-        <Resource Include="$(ShaderDirPath)Fog.cso" Link="Resources\Shader\Fog.cso"/>
-        <Resource Include="$(ShaderDirPath)CrossFilter.cso" Link="Resources\Shader\CrossFilter.cso"/>
-        <Resource Include="$(ShaderDirPath)Caustics.cso" Link="Resources\Shader\Caustics.cso"/>
-        <Resource Include="$(ShaderDirPath)RadianceEmission.cso" Link="Resources\Shader\RadianceEmission.cso"/>
-        <Resource Include="$(ShaderDirPath)RadianceCascade.cso" Link="Resources\Shader\RadianceCascade.cso"/>
-        <Resource Include="$(ShaderDirPath)RadianceComposite.cso" Link="Resources\Shader\RadianceComposite.cso"/>
-        <Resource Include="$(ShaderDirPath)RadianceOccupancy.cso" Link="Resources\Shader\RadianceOccupancy.cso"/>
+        <Resource Include="$(ShaderDirPath)EdgeTrimming.cso" Link="Resources\Shader\EdgeTrimming.cso" />
+        <Resource Include="$(ShaderDirPath)LuminanceKey.cso" Link="Resources\Shader\LuminanceKey.cso" />
+        <Resource Include="$(ShaderDirPath)DiffuseAlpha.cso" Link="Resources\Shader\DiffuseAlpha.cso" />
+        <Resource Include="$(ShaderDirPath)InvertAlpha.cso" Link="Resources\Shader\InvertAlpha.cso" />
+        <Resource Include="$(ShaderDirPath)BevelHeightmap.cso" Link="Resources\Shader\BevelHeightmap.cso" />
+        <Resource Include="$(ShaderDirPath)BevelAndFlatComposite.cso" Link="Resources\Shader\BevelAndFlatComposite.cso" />
+        <Resource Include="$(ShaderDirPath)UnidirectionalBlur.cso" Link="Resources\Shader\UnidirectionalBlur.cso" />
+        <Resource Include="$(ShaderDirPath)LensBlur.cso" Link="Resources\Shader\LensBlur.cso" />
+        <Resource Include="$(ShaderDirPath)FishEyeLens.cso" Link="Resources\Shader\FishEyeLens.cso" />
+        <Resource Include="$(ShaderDirPath)Binarization.cso" Link="Resources\Shader\Binarization.cso" />
+        <Resource Include="$(ShaderDirPath)CircularBlur.cso" Link="Resources\Shader\CircularBlur.cso" />
+        <Resource Include="$(ShaderDirPath)ColorCorrection.cso" Link="Resources\Shader\ColorCorrection.cso" />
+        <Resource Include="$(ShaderDirPath)ColorShift.cso" Link="Resources\Shader\ColorShift.cso" />
+        <Resource Include="$(ShaderDirPath)LongShadow.cso" Link="Resources\Shader\LongShadow.cso" />
+        <Resource Include="$(ShaderDirPath)Ripple.cso" Link="Resources\Shader\Ripple.cso" />
+        <Resource Include="$(ShaderDirPath)SpiralTransform.cso" Link="Resources\Shader\SpiralTransform.cso" />
+        <Resource Include="$(ShaderDirPath)RectangleGlitchNoise.cso" Link="Resources\Shader\RectangleGlitchNoise.cso" />
+        <Resource Include="$(ShaderDirPath)StripeGlitchNoise.cso" Link="Resources\Shader\StripeGlitchNoise.cso" />
+        <Resource Include="$(ShaderDirPath)ThreeDimensional.cso" Link="Resources\Shader\ThreeDimensional.cso" />
+        <Resource Include="$(ShaderDirPath)Wave.cso" Link="Resources\Shader\Wave.cso" />
+        <Resource Include="$(ShaderDirPath)ReelSpin.cso" Link="Resources\Shader\ReelSpin.cso" />
+        <Resource Include="$(ShaderDirPath)ColorBlindness.cso" Link="Resources\Shader\ColorBlindness.cso" />
+        <Resource Include="$(ShaderDirPath)VignetteBlur.cso" Link="Resources\Shader\VignetteBlur.cso" />
+        <Resource Include="$(ShaderDirPath)VignetteRadialBlur.cso" Link="Resources\Shader\VignetteRadialBlur.cso" />
+        <Resource Include="$(ShaderDirPath)VignetteCircularBlur.cso" Link="Resources\Shader\VignetteCircularBlur.cso" />
+        <Resource Include="$(ShaderDirPath)BlurMap.cso" Link="Resources\Shader\BlurMap.cso" />
+        <Resource Include="$(ShaderDirPath)Stretch.cso" Link="Resources\Shader\Stretch.cso" />
+        <Resource Include="$(ShaderDirPath)AfterImage.cso" Link="Resources\Shader\AfterImage.cso" />
+        <Resource Include="$(ShaderDirPath)WaveClipping.cso" Link="Resources\Shader\WaveClipping.cso" />
+        <Resource Include="$(ShaderDirPath)GradientMap.cso" Link="Resources\Shader\GradientMap.cso" />
+        <Resource Include="$(ShaderDirPath)GodRay.cso" Link="Resources\Shader\GodRay.cso" />
+        <Resource Include="$(ShaderDirPath)HeatHaze.cso" Link="Resources\Shader\HeatHaze.cso" />
+        <Resource Include="$(ShaderDirPath)PerspectiveShadow.cso" Link="Resources\Shader\PerspectiveShadow.cso" />
+        <Resource Include="$(ShaderDirPath)OutputMapComposite.cso" Link="Resources\Shader\OutputMapComposite.cso" />
+        <Resource Include="$(ShaderDirPath)ChannelRouter.cso" Link="Resources\Shader\ChannelRouter.cso" />
+        <Resource Include="$(ShaderDirPath)Tritone.cso" Link="Resources\Shader\Tritone.cso" />
+        <Resource Include="$(ShaderDirPath)Lut.cso" Link="Resources\Shader\Lut.cso" />
+        <Resource Include="$(ShaderDirPath)EdgeGlow.cso" Link="Resources\Shader\EdgeGlow.cso" />
+        <Resource Include="$(ShaderDirPath)PixelizeTransition.cso" Link="Resources\Shader\PixelizeTransition.cso" />
+        <Resource Include="$(ShaderDirPath)PageTurnTransition.cso" Link="Resources\Shader\PageTurnTransition.cso" />
+        <Resource Include="$(ShaderDirPath)ReelSpinTransition.cso" Link="Resources\Shader\ReelSpinTransition.cso" />
+        <Resource Include="$(ShaderDirPath)MotionBlur.cso" Link="Resources\Shader\MotionBlur.cso" />
+        <Resource Include="$(ShaderDirPath)NtscRasterize.cso" Link="Resources\Shader\NtscRasterize.cso" />
+        <Resource Include="$(ShaderDirPath)NtscEncode.cso" Link="Resources\Shader\NtscEncode.cso" />
+        <Resource Include="$(ShaderDirPath)NtscDecode.cso" Link="Resources\Shader\NtscDecode.cso" />
+        <Resource Include="$(ShaderDirPath)NtscRestore.cso" Link="Resources\Shader\NtscRestore.cso" />
+        <Resource Include="$(ShaderDirPath)PixelSortCS.cso" Link="Resources\Shader\PixelSortCS.cso" />
+        <Resource Include="$(ShaderDirPath)LensFlare.cso" Link="Resources\Shader\LensFlare.cso" />
+        <Resource Include="$(ShaderDirPath)FillSamegroundShader.cso" Link="Resources\Shader\FillSamegroundShader.cso" />
+        <Resource Include="$(ShaderDirPath)PuppetDeformation.cso" Link="Resources\Shader\PuppetDeformation.cso" />
+        <Resource Include="$(ShaderDirPath)PuppetDeformationArap.cso" Link="Resources\Shader\PuppetDeformationArap.cso" />
+        <Resource Include="$(ShaderDirPath)PuppetDeformationArapVertex.cso" Link="Resources\Shader\PuppetDeformationArapVertex.cso" />
+        <Resource Include="$(ShaderDirPath)Particlize.cso" Link="Resources\Shader\Particlize.cso" />
+        <Resource Include="$(ShaderDirPath)ParticlizeVertex.cso" Link="Resources\Shader\ParticlizeVertex.cso" />
+        <Resource Include="$(ShaderDirPath)ParticleOutput.cso" Link="Resources\Shader\ParticleOutput.cso" />
+        <Resource Include="$(ShaderDirPath)ParticleOutputVertex.cso" Link="Resources\Shader\ParticleOutputVertex.cso" />
+        <Resource Include="$(ShaderDirPath)PartialOutline.cso" Link="Resources\Shader\PartialOutline.cso" />
+        <Resource Include="$(ShaderDirPath)DirectionalColorKey.cso" Link="Resources\Shader\DirectionalColorKey.cso" />
+        <Resource Include="$(ShaderDirPath)AnisotropicKuwaharaTensor.cso" Link="Resources\Shader\AnisotropicKuwaharaTensor.cso" />
+        <Resource Include="$(ShaderDirPath)AnisotropicKuwaharaTensorBlur.cso" Link="Resources\Shader\AnisotropicKuwaharaTensorBlur.cso" />
+        <Resource Include="$(ShaderDirPath)AnisotropicKuwahara.cso" Link="Resources\Shader\AnisotropicKuwahara.cso" />
+        <Resource Include="$(ShaderDirPath)CrossHatchShading.cso" Link="Resources\Shader\CrossHatchShading.cso" />
+        <Resource Include="$(ShaderDirPath)Kaleidoscope.cso" Link="Resources\Shader\Kaleidoscope.cso" />
+        <Resource Include="$(ShaderDirPath)FacetedGlass.cso" Link="Resources\Shader\FacetedGlass.cso" />
+        <Resource Include="$(ShaderDirPath)Dithering.cso" Link="Resources\Shader\Dithering.cso" />
+        <Resource Include="$(ShaderDirPath)VectorFieldWarp.cso" Link="Resources\Shader\VectorFieldWarp.cso" />
+        <Resource Include="$(ShaderDirPath)AmbientOcclusion.cso" Link="Resources\Shader\AmbientOcclusion.cso" />
+        <Resource Include="$(ShaderDirPath)AmbientOcclusionPhase.cso" Link="Resources\Shader\AmbientOcclusionPhase.cso" />
+        <Resource Include="$(ShaderDirPath)Fog.cso" Link="Resources\Shader\Fog.cso" />
+        <Resource Include="$(ShaderDirPath)CrossFilter.cso" Link="Resources\Shader\CrossFilter.cso" />
+        <Resource Include="$(ShaderDirPath)Caustics.cso" Link="Resources\Shader\Caustics.cso" />
+        <Resource Include="$(ShaderDirPath)RadianceEmission.cso" Link="Resources\Shader\RadianceEmission.cso" />
+        <Resource Include="$(ShaderDirPath)RadianceCascade.cso" Link="Resources\Shader\RadianceCascade.cso" />
+        <Resource Include="$(ShaderDirPath)RadianceComposite.cso" Link="Resources\Shader\RadianceComposite.cso" />
+        <Resource Include="$(ShaderDirPath)RadianceOccupancy.cso" Link="Resources\Shader\RadianceOccupancy.cso" />
         <Resource Include="$(ShaderDirPath)MaskClip.cso" Link="Resources\Shader\MaskClip.cso"/>
         <Resource Include="$(ShaderDirPath)MaskCreate.cso" Link="Resources\Shader\MaskCreate.cso"/>
         <Resource Include="$(ShaderDirPath)MaskThreshold.cso" Link="Resources\Shader\MaskThreshold.cso"/>

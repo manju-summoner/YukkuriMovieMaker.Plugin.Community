@@ -58,13 +58,11 @@ namespace
     {
         if (value.empty())
             return {};
-        auto requiredSize = WideCharToMultiByte(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), nullptr, 0,
-                                                nullptr, nullptr);
+        auto requiredSize = WideCharToMultiByte(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), nullptr, 0, nullptr, nullptr);
         if (requiredSize <= 0)
             return "<UTF-8変換失敗>";
         std::string result(static_cast<size_t>(requiredSize), '\0');
-        if (WideCharToMultiByte(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), result.data(), requiredSize,
-                                nullptr, nullptr) <= 0)
+        if (WideCharToMultiByte(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), result.data(), requiredSize, nullptr, nullptr) <= 0)
             return "<UTF-8変換失敗>";
         return result;
     }
@@ -77,8 +75,7 @@ namespace
         if (requiredSize <= 0)
             return {};
         std::wstring result(static_cast<size_t>(requiredSize), L'\0');
-        if (MultiByteToWideChar(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), result.data(),
-                                requiredSize) <= 0)
+        if (MultiByteToWideChar(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), result.data(), requiredSize) <= 0)
             return {};
         return result;
     }
@@ -168,25 +165,10 @@ namespace
         // ホスト側からの構築用
         //---------------------------------------------------------------------
 
-        void SetInt(const char* name, int value, int index = 0)
-        {
-            Entry(name, PropKind::Int).SetAt(*this, name, index, value);
-        }
-
-        void SetDouble(const char* name, double value, int index = 0)
-        {
-            Entry(name, PropKind::Double).SetAt(*this, name, index, value);
-        }
-
-        void SetPointer(const char* name, void* value, int index = 0)
-        {
-            Entry(name, PropKind::Pointer).SetAt(*this, name, index, value);
-        }
-
-        void SetString(const char* name, const std::string& value, int index = 0)
-        {
-            Entry(name, PropKind::String).SetAt(*this, name, index, value);
-        }
+        void SetInt(const char* name, int value, int index = 0) { Entry(name, PropKind::Int).SetAt(*this, name, index, value); }
+        void SetDouble(const char* name, double value, int index = 0) { Entry(name, PropKind::Double).SetAt(*this, name, index, value); }
+        void SetPointer(const char* name, void* value, int index = 0) { Entry(name, PropKind::Pointer).SetAt(*this, name, index, value); }
+        void SetString(const char* name, const std::string& value, int index = 0) { Entry(name, PropKind::String).SetAt(*this, name, index, value); }
 
         void SetIntN(const char* name, std::initializer_list<int> values)
         {
@@ -369,31 +351,15 @@ namespace
         {
             PropEntry& entry;
 
-            void SetAt(PropertySet&, const char*, int index, int value)
-            {
-                Fill(entry.ints, index, 0);
-                entry.ints[index] = value;
-            }
-
-            void SetAt(PropertySet&, const char*, int index, double value)
-            {
-                Fill(entry.doubles, index, 0.0);
-                entry.doubles[index] = value;
-            }
-
-            void SetAt(PropertySet&, const char*, int index, void* value)
-            {
-                Fill(entry.pointers, index, static_cast<void*>(nullptr));
-                entry.pointers[index] = value;
-            }
-
+            void SetAt(PropertySet&, const char*, int index, int value) { Fill(entry.ints, index, 0); entry.ints[index] = value; }
+            void SetAt(PropertySet&, const char*, int index, double value) { Fill(entry.doubles, index, 0.0); entry.doubles[index] = value; }
+            void SetAt(PropertySet&, const char*, int index, void* value) { Fill(entry.pointers, index, static_cast<void*>(nullptr)); entry.pointers[index] = value; }
             void SetAt(PropertySet&, const char*, int index, const std::string& value)
             {
                 while (static_cast<int>(entry.strings.size()) <= index)
                     entry.strings.emplace_back();
                 entry.strings[index] = value;
             }
-
             void SetAt(PropertySet& owner, const char* name, int index, const char* value)
             {
                 SetAt(owner, name, index, std::string(value != nullptr ? value : ""));
@@ -428,7 +394,7 @@ namespace
 
         EntryRef Entry(const char* name, PropKind kind)
         {
-            return EntryRef{RawEntry(name, kind)};
+            return EntryRef{ RawEntry(name, kind) };
         }
 
         OfxStatus FindEntry(const char* name, int index, const PropEntry*& entry) const
@@ -571,13 +537,13 @@ namespace
             if (type == kOfxParamTypeDouble)
                 props.SetInt(kOfxParamPropShowTimeMarker, 0);
             if (type == kOfxParamTypeDouble2D || type == kOfxParamTypeInteger2D)
-                props.SetStringN(kOfxParamPropDimensionLabel, {"x", "y"});
+                props.SetStringN(kOfxParamPropDimensionLabel, { "x", "y" });
             else if (type == kOfxParamTypeDouble3D)
-                props.SetStringN(kOfxParamPropDimensionLabel, {"x", "y", "z"});
+                props.SetStringN(kOfxParamPropDimensionLabel, { "x", "y", "z" });
             else if (type == kOfxParamTypeRGB)
-                props.SetStringN(kOfxParamPropDimensionLabel, {"r", "g", "b"});
+                props.SetStringN(kOfxParamPropDimensionLabel, { "r", "g", "b" });
             else if (type == kOfxParamTypeRGBA)
-                props.SetStringN(kOfxParamPropDimensionLabel, {"r", "g", "b", "a"});
+                props.SetStringN(kOfxParamPropDimensionLabel, { "r", "g", "b", "a" });
         }
         else if (IsIntParamType(type))
         {
@@ -593,9 +559,9 @@ namespace
                 }
             }
             if (type == kOfxParamTypeInteger2D)
-                props.SetStringN(kOfxParamPropDimensionLabel, {"x", "y"});
+                props.SetStringN(kOfxParamPropDimensionLabel, { "x", "y" });
             else if (type == kOfxParamTypeInteger3D)
-                props.SetStringN(kOfxParamPropDimensionLabel, {"x", "y", "z"});
+                props.SetStringN(kOfxParamPropDimensionLabel, { "x", "y", "z" });
             else if (type == kOfxParamTypeChoice)
                 props.SetEmpty(kOfxParamPropChoiceOption, PropKind::String);
         }
@@ -683,9 +649,9 @@ namespace
         props.SetString(kOfxPropShortLabel, "");
         props.SetString(kOfxPropLongLabel, "");
         props.SetString(kOfxPropPluginDescription, "");
-        props.SetIntN(kOfxPropVersion, {0});
+        props.SetIntN(kOfxPropVersion, { 0 });
         props.SetString(kOfxPropVersionLabel, "");
-        props.SetStringN(kOfxPropIcon, {"", ""});
+        props.SetStringN(kOfxPropIcon, { "", "" });
         props.SetEmpty(kOfxImageEffectPropSupportedContexts, PropKind::String);
         props.SetEmpty(kOfxImageEffectPropSupportedPixelDepths, PropKind::String);
         props.SetString(kOfxImageEffectPluginPropGrouping, "");
@@ -729,84 +695,72 @@ namespace
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeSet(name, PropKind::Pointer, index, value);
     }
-
     OfxStatus PropSetString(OfxPropertySetHandle properties, const char* name, int index, const char* value)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeSet(name, PropKind::String, index, value);
     }
-
     OfxStatus PropSetDouble(OfxPropertySetHandle properties, const char* name, int index, double value)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeSet(name, PropKind::Double, index, value);
     }
-
     OfxStatus PropSetInt(OfxPropertySetHandle properties, const char* name, int index, int value)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeSet(name, PropKind::Int, index, value);
     }
-
     OfxStatus PropSetPointerN(OfxPropertySetHandle properties, const char* name, int count, void* const* value)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeSetN(name, PropKind::Pointer, count, value);
     }
-
     OfxStatus PropSetStringN(OfxPropertySetHandle properties, const char* name, int count, const char* const* value)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeSetN(name, PropKind::String, count, value);
     }
-
     OfxStatus PropSetDoubleN(OfxPropertySetHandle properties, const char* name, int count, const double* value)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeSetN(name, PropKind::Double, count, value);
     }
-
     OfxStatus PropSetIntN(OfxPropertySetHandle properties, const char* name, int count, const int* value)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeSetN(name, PropKind::Int, count, value);
     }
-
     OfxStatus PropGetPointer(OfxPropertySetHandle properties, const char* name, int index, void** value)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeGetPointer(name, index, value);
     }
-
     OfxStatus PropGetString(OfxPropertySetHandle properties, const char* name, int index, char** value)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeGetString(name, index, value);
     }
-
     OfxStatus PropGetDouble(OfxPropertySetHandle properties, const char* name, int index, double* value)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeGetDouble(name, index, value);
     }
-
     OfxStatus PropGetInt(OfxPropertySetHandle properties, const char* name, int index, int* value)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeGetInt(name, index, value);
     }
-
     OfxStatus PropGetPointerN(OfxPropertySetHandle properties, const char* name, int count, void** value)
     {
         if (count < 0)
@@ -818,7 +772,6 @@ namespace
         }
         return kOfxStatOK;
     }
-
     OfxStatus PropGetStringN(OfxPropertySetHandle properties, const char* name, int count, char** value)
     {
         if (count < 0)
@@ -830,7 +783,6 @@ namespace
         }
         return kOfxStatOK;
     }
-
     OfxStatus PropGetDoubleN(OfxPropertySetHandle properties, const char* name, int count, double* value)
     {
         if (count < 0)
@@ -842,7 +794,6 @@ namespace
         }
         return kOfxStatOK;
     }
-
     OfxStatus PropGetIntN(OfxPropertySetHandle properties, const char* name, int count, int* value)
     {
         if (count < 0)
@@ -854,14 +805,12 @@ namespace
         }
         return kOfxStatOK;
     }
-
     OfxStatus PropReset(OfxPropertySetHandle properties, const char* name)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
         if (name == nullptr) return kOfxStatErrValue;
         return AsPropertySet(properties)->NativeReset(name);
     }
-
     OfxStatus PropGetDimension(OfxPropertySetHandle properties, const char* name, int* count)
     {
         if (properties == nullptr) return kOfxStatErrBadHandle;
@@ -886,14 +835,12 @@ namespace
         *propHandle = reinterpret_cast<OfxPropertySetHandle>(&AsEffect(imageEffect)->props);
         return kOfxStatOK;
     }
-
     OfxStatus EffectGetParamSet(OfxImageEffectHandle imageEffect, OfxParamSetHandle* paramSet)
     {
         if (imageEffect == nullptr || paramSet == nullptr) return kOfxStatErrBadHandle;
         *paramSet = reinterpret_cast<OfxParamSetHandle>(&AsEffect(imageEffect)->paramSet);
         return kOfxStatOK;
     }
-
     OfxStatus EffectClipDefine(OfxImageEffectHandle imageEffect, const char* name, OfxPropertySetHandle* propertySet)
     {
         if (imageEffect == nullptr || name == nullptr) return kOfxStatErrBadHandle;
@@ -919,38 +866,31 @@ namespace
             *propertySet = reinterpret_cast<OfxPropertySetHandle>(&clip->props);
         return kOfxStatOK;
     }
-
     OfxStatus EffectClipGetHandle(OfxImageEffectHandle, const char*, OfxImageClipHandle*, OfxPropertySetHandle*)
     {
         // インスタンス専用API。describeでは呼ばれない
         return kOfxStatErrBadHandle;
     }
-
     OfxStatus EffectClipGetPropertySet(OfxImageClipHandle, OfxPropertySetHandle*)
     {
         return kOfxStatErrBadHandle;
     }
-
     OfxStatus EffectClipGetImage(OfxImageClipHandle, OfxTime, const OfxRectD*, OfxPropertySetHandle*)
     {
         return kOfxStatErrBadHandle;
     }
-
     OfxStatus EffectClipReleaseImage(OfxPropertySetHandle)
     {
         return kOfxStatErrBadHandle;
     }
-
     OfxStatus EffectClipGetRegionOfDefinition(OfxImageClipHandle, OfxTime, OfxRectD*)
     {
         return kOfxStatErrBadHandle;
     }
-
     int EffectAbort(OfxImageEffectHandle)
     {
         return 0;
     }
-
     OfxStatus EffectImageMemoryAlloc(OfxImageEffectHandle, size_t nBytes, OfxImageMemoryHandle* memoryHandle)
     {
         if (memoryHandle == nullptr) return kOfxStatErrBadHandle;
@@ -959,20 +899,17 @@ namespace
         *memoryHandle = reinterpret_cast<OfxImageMemoryHandle>(memory);
         return kOfxStatOK;
     }
-
     OfxStatus EffectImageMemoryFree(OfxImageMemoryHandle memoryHandle)
     {
         std::free(memoryHandle);
         return kOfxStatOK;
     }
-
     OfxStatus EffectImageMemoryLock(OfxImageMemoryHandle memoryHandle, void** returnedPtr)
     {
         if (returnedPtr == nullptr) return kOfxStatErrBadHandle;
         *returnedPtr = memoryHandle;
         return kOfxStatOK;
     }
-
     OfxStatus EffectImageMemoryUnlock(OfxImageMemoryHandle)
     {
         return kOfxStatOK;
@@ -987,8 +924,7 @@ namespace
 
     //------------------------------------------------------------------ Parameter
 
-    OfxStatus ParamDefine(OfxParamSetHandle paramSet, const char* paramType, const char* name,
-                          OfxPropertySetHandle* propertySet)
+    OfxStatus ParamDefine(OfxParamSetHandle paramSet, const char* paramType, const char* name, OfxPropertySetHandle* propertySet)
     {
         if (paramSet == nullptr || paramType == nullptr || name == nullptr) return kOfxStatErrBadHandle;
         if (!IsKnownParamType(paramType))
@@ -1008,9 +944,7 @@ namespace
         set->params.push_back(std::move(param));
         return kOfxStatOK;
     }
-
-    OfxStatus ParamGetHandle(OfxParamSetHandle paramSet, const char* name, OfxParamHandle* param,
-                             OfxPropertySetHandle* propertySet)
+    OfxStatus ParamGetHandle(OfxParamSetHandle paramSet, const char* name, OfxParamHandle* param, OfxPropertySetHandle* propertySet)
     {
         if (paramSet == nullptr || name == nullptr || param == nullptr) return kOfxStatErrBadHandle;
         auto set = AsParamSet(paramSet);
@@ -1026,7 +960,6 @@ namespace
         }
         return kOfxStatErrUnknown;
     }
-
     OfxStatus ParamSetGetPropertySet(OfxParamSetHandle paramSet, OfxPropertySetHandle* propHandle)
     {
         // パラメータセット自体のプロパティは未定義（セットごとの空プロパティを返す）
@@ -1034,14 +967,12 @@ namespace
         *propHandle = reinterpret_cast<OfxPropertySetHandle>(&AsParamSet(paramSet)->props);
         return kOfxStatOK;
     }
-
     OfxStatus ParamGetPropertySet(OfxParamHandle param, OfxPropertySetHandle* propHandle)
     {
         if (param == nullptr || propHandle == nullptr) return kOfxStatErrBadHandle;
         *propHandle = reinterpret_cast<OfxPropertySetHandle>(&AsParam(param)->props);
         return kOfxStatOK;
     }
-
     // 値の取得・設定はインスタンス専用API。describeでは呼ばれない
     OfxStatus ParamGetValue(OfxParamHandle, ...) { return kOfxStatErrBadHandle; }
     OfxStatus ParamGetValueAtTime(OfxParamHandle, OfxTime, ...) { return kOfxStatErrBadHandle; }
@@ -1049,24 +980,17 @@ namespace
     OfxStatus ParamGetIntegral(OfxParamHandle, OfxTime, OfxTime, ...) { return kOfxStatErrBadHandle; }
     OfxStatus ParamSetValue(OfxParamHandle, ...) { return kOfxStatErrBadHandle; }
     OfxStatus ParamSetValueAtTime(OfxParamHandle, OfxTime, ...) { return kOfxStatErrBadHandle; }
-
     OfxStatus ParamGetNumKeys(OfxParamHandle, unsigned int* numberOfKeys)
     {
         if (numberOfKeys != nullptr)
             *numberOfKeys = 0;
         return kOfxStatOK;
     }
-
     OfxStatus ParamGetKeyTime(OfxParamHandle, unsigned int, OfxTime*) { return kOfxStatErrBadIndex; }
     OfxStatus ParamGetKeyIndex(OfxParamHandle, OfxTime, int, int*) { return kOfxStatFailed; }
     OfxStatus ParamDeleteKey(OfxParamHandle, OfxTime) { return kOfxStatErrBadIndex; }
     OfxStatus ParamDeleteAllKeys(OfxParamHandle) { return kOfxStatOK; }
-
-    OfxStatus ParamCopy(OfxParamHandle, OfxParamHandle, OfxTime, const OfxRangeD*)
-    {
-        return kOfxStatErrMissingHostFeature;
-    }
-
+    OfxStatus ParamCopy(OfxParamHandle, OfxParamHandle, OfxTime, const OfxRangeD*) { return kOfxStatErrMissingHostFeature; }
     OfxStatus ParamEditBegin(OfxParamSetHandle, const char*) { return kOfxStatOK; }
     OfxStatus ParamEditEnd(OfxParamSetHandle) { return kOfxStatOK; }
 
@@ -1089,14 +1013,13 @@ namespace
         *allocatedData = memory;
         return kOfxStatOK;
     }
-
     OfxStatus MemoryFree(void* allocatedData)
     {
         std::free(allocatedData);
         return kOfxStatOK;
     }
 
-    OfxMemorySuiteV1 memorySuite = {MemoryAlloc, MemoryFree};
+    OfxMemorySuiteV1 memorySuite = { MemoryAlloc, MemoryFree };
 
     OfxStatus MultiThread(OfxThreadFunctionV1 func, unsigned int nThreads, void* customArg)
     {
@@ -1109,26 +1032,22 @@ namespace
             func(i, nThreads, customArg);
         return kOfxStatOK;
     }
-
     OfxStatus MultiThreadNumCPUs(unsigned int* nCPUs)
     {
         if (nCPUs == nullptr) return kOfxStatFailed;
         *nCPUs = 1;
         return kOfxStatOK;
     }
-
     OfxStatus MultiThreadIndex(unsigned int* threadIndex)
     {
         if (threadIndex == nullptr) return kOfxStatFailed;
         *threadIndex = 0;
         return kOfxStatOK;
     }
-
     int MultiThreadIsSpawnedThread()
     {
         return 0;
     }
-
     OfxStatus MutexCreate(OfxMutexHandle* mutex, int lockCount)
     {
         if (mutex == nullptr) return kOfxStatFailed;
@@ -1139,7 +1058,6 @@ namespace
         *mutex = reinterpret_cast<OfxMutexHandle>(section);
         return kOfxStatOK;
     }
-
     OfxStatus MutexDestroy(OfxMutexHandle mutex)
     {
         if (mutex == nullptr) return kOfxStatErrBadHandle;
@@ -1148,21 +1066,18 @@ namespace
         delete section;
         return kOfxStatOK;
     }
-
     OfxStatus MutexLock(OfxMutexHandle mutex)
     {
         if (mutex == nullptr) return kOfxStatErrBadHandle;
         EnterCriticalSection(reinterpret_cast<CRITICAL_SECTION*>(mutex));
         return kOfxStatOK;
     }
-
     OfxStatus MutexUnLock(OfxMutexHandle mutex)
     {
         if (mutex == nullptr) return kOfxStatErrBadHandle;
         LeaveCriticalSection(reinterpret_cast<CRITICAL_SECTION*>(mutex));
         return kOfxStatOK;
     }
-
     OfxStatus MutexTryLock(OfxMutexHandle mutex)
     {
         if (mutex == nullptr) return kOfxStatErrBadHandle;
@@ -1189,26 +1104,24 @@ namespace
         }
         return kOfxStatOK;
     }
-
     OfxStatus SetPersistentMessage(void*, const char*, const char*, const char*, ...)
     {
         return kOfxStatOK;
     }
-
     OfxStatus ClearPersistentMessage(void*)
     {
         return kOfxStatOK;
     }
 
-    OfxMessageSuiteV1 messageSuiteV1 = {Message};
-    OfxMessageSuiteV2 messageSuiteV2 = {Message, SetPersistentMessage, ClearPersistentMessage};
+    OfxMessageSuiteV1 messageSuiteV1 = { Message };
+    OfxMessageSuiteV2 messageSuiteV2 = { Message, SetPersistentMessage, ClearPersistentMessage };
 
     // ofxProgress.h / ofxTimeLine.h のV1 ABI。スキャナーには実インスタンスやタイムラインがないため、
     // Progressは受理し、TimeLine照会はスキャン時の中立値（時刻0、範囲0..0）を返す。
     OfxStatus ProgressStart(void*, const char*) { return kOfxStatOK; }
     OfxStatus ProgressUpdate(void*, double) { return kOfxStatOK; }
     OfxStatus ProgressEnd(void*) { return kOfxStatOK; }
-    OfxProgressSuiteV1 progressSuite = {ProgressStart, ProgressUpdate, ProgressEnd};
+    OfxProgressSuiteV1 progressSuite = { ProgressStart, ProgressUpdate, ProgressEnd };
 
     OfxStatus GetTime(void*, double* time)
     {
@@ -1216,9 +1129,7 @@ namespace
         *time = 0.0;
         return kOfxStatOK;
     }
-
     OfxStatus GotoTime(void*, double) { return kOfxStatFailed; }
-
     OfxStatus GetTimeBounds(void*, double* firstTime, double* lastTime)
     {
         if (firstTime == nullptr || lastTime == nullptr) return kOfxStatErrValue;
@@ -1226,16 +1137,13 @@ namespace
         *lastTime = 0.0;
         return kOfxStatOK;
     }
-
-    OfxTimeLineSuiteV1 timeLineSuite = {GetTime, GotoTime, GetTimeBounds};
-
+    OfxTimeLineSuiteV1 timeLineSuite = { GetTime, GotoTime, GetTimeBounds };
     OfxStatus CompileOpenCLProgramForScanner(const char*, int, void*)
     {
         // スキャナーはdescribeまでしか実行せずOpenCL contextを持たない。
         return kOfxStatFailed;
     }
-
-    OfxOpenCLProgramSuiteV1 openCLProgramSuite = {CompileOpenCLProgramForScanner};
+    OfxOpenCLProgramSuiteV1 openCLProgramSuite = { CompileOpenCLProgramForScanner };
 
     //=========================================================================
     // ホスト
@@ -1251,26 +1159,23 @@ namespace
         props.SetString(kOfxPropType, kOfxTypeImageEffectHost);
         props.SetString(kOfxPropName, "net.manjubox.YukkuriMovieMaker4");
         props.SetString(kOfxPropLabel, "YukkuriMovieMaker4");
-        props.SetIntN(kOfxPropVersion, {version[0], version[1], version[2], version[3]});
+        props.SetIntN(kOfxPropVersion, { version[0], version[1], version[2], version[3] });
         props.SetString(kOfxPropVersionLabel,
-                        std::to_string(version[0]) + "." + std::to_string(version[1])
-                        + "." + std::to_string(version[2]) + "." + std::to_string(version[3]));
+            std::to_string(version[0]) + "." + std::to_string(version[1])
+            + "." + std::to_string(version[2]) + "." + std::to_string(version[3]));
         // CUDA能力はOFX 1.5で追加された。DrawSuiteはoverlays=falseでは必須でなく、
         // 未対応GPU APIは下の個別プロパティでfalseを明示する。
         // kOfxImageEffectPropCPURenderSupportedを含むOFX 1.5.1の能力を扱う。
-        props.SetIntN(kOfxPropAPIVersion, {1, 5, 1});
+        props.SetIntN(kOfxPropAPIVersion, { 1, 5, 1 });
 
         props.SetInt(kOfxImageEffectHostPropIsBackground, 0);
         props.SetInt(kOfxImageEffectPropSupportsOverlays, 0);
         props.SetInt(kOfxImageEffectPropSupportsMultiResolution, 1);
         props.SetInt(kOfxImageEffectPropSupportsTiles, 0);
         props.SetInt(kOfxImageEffectPropTemporalClipAccess, 0);
-        props.SetStringN(kOfxImageEffectPropSupportedContexts, {
-                             kOfxImageEffectContextFilter, kOfxImageEffectContextTransition,
-                             kOfxImageEffectContextGenerator
-                         });
-        props.SetStringN(kOfxImageEffectPropSupportedComponents, {kOfxImageComponentRGBA});
-        props.SetStringN(kOfxImageEffectPropSupportedPixelDepths, {kOfxBitDepthFloat});
+        props.SetStringN(kOfxImageEffectPropSupportedContexts, { kOfxImageEffectContextFilter, kOfxImageEffectContextTransition, kOfxImageEffectContextGenerator });
+        props.SetStringN(kOfxImageEffectPropSupportedComponents, { kOfxImageComponentRGBA });
+        props.SetStringN(kOfxImageEffectPropSupportedPixelDepths, { kOfxBitDepthFloat });
         props.SetInt(kOfxImageEffectPropSupportsMultipleClipDepths, 0);
         props.SetInt(kOfxImageEffectPropSupportsMultipleClipPARs, 0);
         props.SetInt(kOfxImageEffectPropSetableFrameRate, 0);
@@ -1297,7 +1202,7 @@ namespace
         props.SetInt(kOfxParamHostPropSupportsCustomInteract, 0);
         props.SetInt(kOfxParamHostPropMaxParameters, -1);
         props.SetInt(kOfxParamHostPropMaxPages, 0);
-        props.SetIntN(kOfxParamHostPropPageRowColumnCount, {0, 0});
+        props.SetIntN(kOfxParamHostPropPageRowColumnCount, { 0, 0 });
         props.SealDefaults();
     }
 
@@ -1330,7 +1235,7 @@ namespace
     }
 
     PropertySet hostProps;
-    OfxHost host = {nullptr, FetchSuite};
+    OfxHost host = { nullptr, FetchSuite };
 
     //=========================================================================
     // バイナリ走査
@@ -1374,8 +1279,7 @@ namespace
         using GetNumberOfPluginsProc = int (*)();
         using GetPluginProc = OfxPlugin* (*)(int);
         using SetHostBinaryProc = OfxStatus (*)(const OfxHost*);
-        auto getNumberOfPlugins = reinterpret_cast<GetNumberOfPluginsProc>(GetProcAddress(
-            library, "OfxGetNumberOfPlugins"));
+        auto getNumberOfPlugins = reinterpret_cast<GetNumberOfPluginsProc>(GetProcAddress(library, "OfxGetNumberOfPlugins"));
         auto getPlugin = reinterpret_cast<GetPluginProc>(GetProcAddress(library, "OfxGetPlugin"));
         if (getNumberOfPlugins == nullptr || getPlugin == nullptr)
         {
@@ -1386,8 +1290,7 @@ namespace
 
         // OfxSetHost はOFX 1.4以降の任意エクスポート。列挙より先に呼ぶ決まり。
         // kOfxStatFailed が返った場合は「このホスト向けではない」ため黙ってスキップする
-        if (auto setHostBinary = reinterpret_cast<SetHostBinaryProc>(GetProcAddress(library, "OfxSetHost"));
-            setHostBinary != nullptr)
+        if (auto setHostBinary = reinterpret_cast<SetHostBinaryProc>(GetProcAddress(library, "OfxSetHost")); setHostBinary != nullptr)
         {
             if (setHostBinary(&host) == kOfxStatFailed)
             {
@@ -1421,16 +1324,15 @@ namespace
         auto isNewer = [](const OfxPlugin* a, const OfxPlugin* b)
         {
             return a->pluginVersionMajor != b->pluginVersionMajor
-                       ? a->pluginVersionMajor > b->pluginVersionMajor
-                       : a->pluginVersionMinor > b->pluginVersionMinor;
+                ? a->pluginVersionMajor > b->pluginVersionMajor
+                : a->pluginVersionMinor > b->pluginVersionMinor;
         };
         for (auto plugin : candidates)
         {
             auto isLatest = true;
             for (auto other : candidates)
             {
-                if (other != plugin && _stricmp(other->pluginIdentifier, plugin->pluginIdentifier) == 0 && isNewer(
-                    other, plugin))
+                if (other != plugin && _stricmp(other->pluginIdentifier, plugin->pluginIdentifier) == 0 && isNewer(other, plugin))
                 {
                     isLatest = false;
                     break;
@@ -1444,9 +1346,7 @@ namespace
             auto loadStatus = plugin->mainEntry(kOfxActionLoad, nullptr, nullptr, nullptr);
             if (loadStatus != kOfxStatOK && loadStatus != kOfxStatReplyDefault)
             {
-                WriteLine(
-                    "#ERROR\tplugin=" + Sanitize(identifier) + " kOfxActionLoadが失敗しました。status=" + std::to_string(
-                        loadStatus));
+                WriteLine("#ERROR\tplugin=" + Sanitize(identifier) + " kOfxActionLoadが失敗しました。status=" + std::to_string(loadStatus));
                 continue;
             }
 
@@ -1459,9 +1359,7 @@ namespace
                 nullptr);
             if (describeStatus != kOfxStatOK)
             {
-                WriteLine(
-                    "#ERROR\tplugin=" + Sanitize(identifier) + " kOfxActionDescribeが失敗しました。status=" + std::to_string(
-                        describeStatus));
+                WriteLine("#ERROR\tplugin=" + Sanitize(identifier) + " kOfxActionDescribeが失敗しました。status=" + std::to_string(describeStatus));
                 continue;
             }
 
@@ -1500,7 +1398,7 @@ int wmain(int argc, wchar_t* argv[])
     // 第1引数: ホストのバージョン（"major.minor.build.revision"。省略時は0.0.0.0）
     // 第2引数: CUDAバックエンドの実可用性（"true" / "false"）
     // 第3引数: OpenCLバックエンドの実可用性（"true" / "false"）
-    int version[4] = {0, 0, 0, 0};
+    int version[4] = { 0, 0, 0, 0 };
     if (argc >= 2)
         swscanf_s(argv[1], L"%d.%d.%d.%d", &version[0], &version[1], &version[2], &version[3]);
 
