@@ -416,6 +416,10 @@
 <data name="TextOriginXDescription" xml:space="preserve"><value>字符串基线原点的X坐标</value></data>
 <data name="TextOriginYLabel" xml:space="preserve"><value>原点Y</value></data>
 <data name="TextOriginYDescription" xml:space="preserve"><value>字符串基线原点的Y坐标</value></data>
+  <data name="TextHorizontalOffsetLabel" xml:space="preserve"><value>水平偏移</value></data>
+  <data name="TextHorizontalOffsetDescription" xml:space="preserve"><value>default 0.00: centered)</value></data>
+  <data name="TextVerticalOffsetLabel" xml:space="preserve"><value>垂直偏移</value></data>
+  <data name="TextVerticalOffsetDescription" xml:space="preserve"><value>default 0.00: centered)</value></data>
 <data name="TextOutlineOutputDescription" xml:space="preserve"><value>生成的字符串轮廓数据</value></data>
 <data name="PathCombineNode" xml:space="preserve"><value>路径结合</value></data>
 <data name="PathCombineNodeDescription" xml:space="preserve"><value>以指定的运算方式结合两个轮廓。</value></data>

@@ -416,6 +416,10 @@
 <data name="TextOriginXDescription" xml:space="preserve"><value>Koordinat X titik asal garis dasar teks</value></data>
 <data name="TextOriginYLabel" xml:space="preserve"><value>Titik Asal Y</value></data>
 <data name="TextOriginYDescription" xml:space="preserve"><value>Koordinat Y titik asal garis dasar teks</value></data>
+  <data name="TextHorizontalOffsetLabel" xml:space="preserve"><value>Offset Horizontal</value></data>
+  <data name="TextHorizontalOffsetDescription" xml:space="preserve"><value>텍스트 외접 사각형에 대한 수평 기준점 비율(-1.00: 왼쪽 정렬 〜 1.00: 오른쪽 정렬</value></data>
+  <data name="TextVerticalOffsetLabel" xml:space="preserve"><value>Offset Vertikal</value></data>
+  <data name="TextVerticalOffsetDescription" xml:space="preserve"><value>텍스트 외접 사각형에 대한 수직 기준점 비율(-1.00: 위쪽 정렬 〜 1.00: 아래쪽 정렬</value></data>
 <data name="TextOutlineOutputDescription" xml:space="preserve"><value>Data garis luar string teks yang dihasilkan</value></data>
 <data name="PathCombineNode" xml:space="preserve"><value>Gabungkan Jalur</value></data>
 <data name="PathCombineNodeDescription" xml:space="preserve"><value>Menggabungkan dua garis luar menggunakan operasi yang ditentukan.</value></data>

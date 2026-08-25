@@ -416,6 +416,10 @@
 <data name="TextOriginXDescription" xml:space="preserve"><value>إحداثي X لنقطة أصل خط الأساس للنص</value></data>
 <data name="TextOriginYLabel" xml:space="preserve"><value>نقطة الأصل Y</value></data>
 <data name="TextOriginYDescription" xml:space="preserve"><value>إحداثي Y لنقطة أصل خط الأساس للنص</value></data>
+  <data name="TextHorizontalOffsetLabel" xml:space="preserve"><value>الإزاحة الأفقية</value></data>
+  <data name="TextHorizontalOffsetDescription" xml:space="preserve"><value>預設0.00:置中)</value></data>
+  <data name="TextVerticalOffsetLabel" xml:space="preserve"><value>الإزاحة الرأسية</value></data>
+  <data name="TextVerticalOffsetDescription" xml:space="preserve"><value>預設0.00:置中)</value></data>
 <data name="TextOutlineOutputDescription" xml:space="preserve"><value>بيانات الخط الخارجي للنص الذي تم إنشاؤه</value></data>
 <data name="PathCombineNode" xml:space="preserve"><value>دمج المسارات</value></data>
 <data name="PathCombineNodeDescription" xml:space="preserve"><value>دمج خطين خارجيين باستخدام العملية المحددة.</value></data>

@@ -416,6 +416,10 @@
 <data name="TextOriginXDescription" xml:space="preserve"><value>文字列のベースライン原点のX座標</value></data>
 <data name="TextOriginYLabel" xml:space="preserve"><value>原点Y</value></data>
 <data name="TextOriginYDescription" xml:space="preserve"><value>文字列のベースライン原点のY座標</value></data>
+  <data name="TextHorizontalOffsetLabel" xml:space="preserve"><value>横オフセット</value></data>
+  <data name="TextHorizontalOffsetDescription" xml:space="preserve"><value>文字列外接矩形に対する水平方向の基準点比率(-1.00:左揃え 〜 1.00:右揃え、既定値0.00:中央)</value></data>
+  <data name="TextVerticalOffsetLabel" xml:space="preserve"><value>縦オフセット</value></data>
+  <data name="TextVerticalOffsetDescription" xml:space="preserve"><value>文字列外接矩形に対する垂直方向の基準点比率(-1.00:上揃え 〜 1.00:下揃え、既定値0.00:中央)</value></data>
 <data name="TextOutlineOutputDescription" xml:space="preserve"><value>生成された文字列のアウトラインデータ</value></data>
 <data name="PathCombineNode" xml:space="preserve"><value>パス結合</value></data>
 <data name="PathCombineNodeDescription" xml:space="preserve"><value>2つのアウトラインを指定した演算方法で結合します。</value></data>

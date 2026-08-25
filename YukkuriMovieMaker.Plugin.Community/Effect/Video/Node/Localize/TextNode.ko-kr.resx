@@ -416,6 +416,10 @@
 <data name="TextOriginXDescription" xml:space="preserve"><value>문자열 베이스라인 기준점의 X 좌표</value></data>
 <data name="TextOriginYLabel" xml:space="preserve"><value>기준점 Y</value></data>
 <data name="TextOriginYDescription" xml:space="preserve"><value>문자열 베이스라인 기준점의 Y 좌표</value></data>
+  <data name="TextHorizontalOffsetLabel" xml:space="preserve"><value>가로 오프셋</value></data>
+  <data name="TextHorizontalOffsetDescription" xml:space="preserve"><value>默认0.00:居中)</value></data>
+  <data name="TextVerticalOffsetLabel" xml:space="preserve"><value>세로 오프셋</value></data>
+  <data name="TextVerticalOffsetDescription" xml:space="preserve"><value>默认0.00:居中)</value></data>
 <data name="TextOutlineOutputDescription" xml:space="preserve"><value>생성된 문자열의 아웃라인 데이터</value></data>
 <data name="PathCombineNode" xml:space="preserve"><value>패스 결합</value></data>
 <data name="PathCombineNodeDescription" xml:space="preserve"><value>두 아웃라인을 지정한 연산 방법으로 결합합니다.</value></data>

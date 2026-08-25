@@ -245,7 +245,7 @@ public class ShapeOutlineNode : NodeLogic
                 builder.AddRoundRect(
                     new SKRect(centerX - width / 2f, centerY - height / 2f, centerX + width / 2f,
                         centerY + height / 2f),
-                    System.Math.Max(0, cornerRadius), System.Math.Max(0, cornerRadius));
+                    Math.Max(0, cornerRadius), Math.Max(0, cornerRadius));
 
                 break;
             }
@@ -261,7 +261,7 @@ public class ShapeOutlineNode : NodeLogic
 
             case ShapeKind.Polygon:
             {
-                var sides = System.Math.Max(3, (int)GetDynamicValue<float>("Sides"));
+                var sides = Math.Max(3, (int)GetDynamicValue<float>("Sides"));
 
                 builder.AddPoly(
                     BuildStarPoints(centerX, centerY, width / 2f, height / 2f,
@@ -271,8 +271,8 @@ public class ShapeOutlineNode : NodeLogic
             }
             case ShapeKind.Star:
             {
-                var sides = System.Math.Max(3, (int)GetDynamicValue<float>("Sides"));
-                var innerRadiusRatio = System.Math.Clamp(
+                var sides = Math.Max(3, (int)GetDynamicValue<float>("Sides"));
+                var innerRadiusRatio = Math.Clamp(
                     GetDynamicValue<float>("InnerRadiusRatio") / 100f, 0f, 1f);
 
                 builder.AddPoly(
@@ -428,6 +428,26 @@ public class TextOutlineNode : NodeLogic
         set => SetInput(value);
     }
 
+    [InputPort(nameof(TextNode.TextHorizontalOffsetLabel), nameof(TextNode.TextHorizontalOffsetDescription),
+        typeof(TextNode))]
+    [NumberPortControl(Min = -1f, Max = 1f, Default = 0f)]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
+    public float HorizontalOffset
+    {
+        get => GetInput<float>();
+        set => SetInput(value);
+    }
+
+    [InputPort(nameof(TextNode.TextVerticalOffsetLabel), nameof(TextNode.TextVerticalOffsetDescription),
+        typeof(TextNode))]
+    [NumberPortControl(Min = -1f, Max = 1f, Default = 0f)]
+    [PortColorSetting(nameof(Colors.DarkOrange))]
+    public float VerticalOffset
+    {
+        get => GetInput<float>();
+        set => SetInput(value);
+    }
+
     [OutputPort(nameof(TextNode.OutlinePortLabel), nameof(TextNode.TextOutlineOutputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
     public OutlineWrapper? Output
@@ -444,9 +464,17 @@ public class TextOutlineNode : NodeLogic
         using var typeface = SKTypeface.FromFamilyName(
             string.IsNullOrWhiteSpace(FontFamily) ? null : FontFamily,
             weight, SKFontStyleWidth.Normal, slant);
-        using var font = new SKFont(typeface, System.Math.Max(1f, Size));
+        using var font = new SKFont(typeface, Math.Max(1f, Size));
 
-        var path = font.GetTextPath(Text, new SKPoint(OriginX, OriginY));
+        var path = font.GetTextPath(Text, new SKPoint(0f, 0f));
+        var bounds = path.Bounds;
+
+        var horizontalRatio = Math.Clamp((HorizontalOffset + 1f) / 2f, 0f, 1f);
+        var verticalRatio = Math.Clamp((VerticalOffset + 1f) / 2f, 0f, 1f);
+        var anchorX = bounds.Left + (bounds.Right - bounds.Left) * horizontalRatio;
+        var anchorY = bounds.Top + (bounds.Bottom - bounds.Top) * verticalRatio;
+
+        path.Transform(SKMatrix.CreateTranslation(OriginX - anchorX, OriginY - anchorY));
 
         _path?.Dispose();
         _path = path;

@@ -2,18 +2,13 @@ using System.ComponentModel.DataAnnotations;
 using System.Numerics;
 using SkiaSharp;
 using Vortice.Direct2D1;
-using Vortice.DXGI;
-using Vortice.Mathematics;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
-using AlphaMode = Vortice.DCommon.AlphaMode;
 using BezierSegment = Vortice.Direct2D1.BezierSegment;
 using Colors = System.Windows.Media.Colors;
-using D2DColor = Vortice.Mathematics.Color;
-using D2DPixelFormat = Vortice.DCommon.PixelFormat;
 using QuadraticBezierSegment = Vortice.Direct2D1.QuadraticBezierSegment;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.Outline;
@@ -31,11 +26,7 @@ public enum FillRuleKind
     typeof(TextNode))]
 public class OutlineRasterizeNode : NodeLogic
 {
-    private const float Padding = 2f;
-
-    private ID2D1Bitmap1? _bitmap;
-    private int _bitmapHeight = -1;
-    private int _bitmapWidth = -1;
+    private ID2D1CommandList? _commandList;
 
     [InputPort(nameof(TextNode.OutlinePortLabel), nameof(TextNode.OutlineRasterizeInputDescription), typeof(TextNode))]
     [PortColorSetting(nameof(Colors.MediumPurple))]
@@ -130,65 +121,32 @@ public class OutlineRasterizeNode : NodeLogic
             sink.Close();
         }
 
-        var bounds = Outline.Path.Bounds;
-        var left = bounds.Left;
-        var top = bounds.Top;
-        var right = bounds.Right;
-        var bottom = bounds.Bottom;
-
-        if (hasStroke)
-        {
-            var halfStroke = StrokeWidth / 2f;
-            left = System.Math.Min(left, bounds.Left - halfStroke + StrokeOffsetX);
-            top = System.Math.Min(top, bounds.Top - halfStroke + StrokeOffsetY);
-            right = System.Math.Max(right, bounds.Right + halfStroke + StrokeOffsetX);
-            bottom = System.Math.Max(bottom, bounds.Bottom + halfStroke + StrokeOffsetY);
-        }
-
-        left = MathF.Min(left, 0f) - Padding;
-        top = MathF.Min(top, 0f) - Padding;
-        right = MathF.Max(right, 0f) + Padding;
-        bottom = MathF.Max(bottom, 0f) + Padding;
-
-        var width = System.Math.Max(1, (int)MathF.Ceiling(right - left));
-        var height = System.Math.Max(1, (int)MathF.Ceiling(bottom - top));
-        var translateX = -left;
-        var translateY = -top;
-
-        if (_bitmap is null || _bitmapWidth != width || _bitmapHeight != height)
-        {
-            _bitmap?.Dispose();
-            var bitmapProperties = new BitmapProperties1(
-                new D2DPixelFormat(Format.B8G8R8A8_UNorm, AlphaMode.Premultiplied),
-                96, 96, BitmapOptions.Target);
-            _bitmap = deviceContext.CreateBitmap(new SizeI(width, height), IntPtr.Zero, 0, bitmapProperties);
-            _bitmapWidth = width;
-            _bitmapHeight = height;
-        }
-
+        var commandList = deviceContext.CreateCommandList();
         var previousTarget = deviceContext.Target;
-        deviceContext.Target = _bitmap;
+        deviceContext.Target = commandList;
         deviceContext.BeginDraw();
-        deviceContext.Clear(new D2DColor(0, 0, 0, 0));
 
         if (hasFill)
         {
-            deviceContext.Transform = Matrix3x2.CreateTranslation(translateX, translateY);
+            deviceContext.Transform = Matrix3x2.Identity;
             deviceContext.FillGeometry(pathGeometry, FillBrush!.Brush!);
         }
 
         if (hasStroke)
         {
-            deviceContext.Transform =
-                Matrix3x2.CreateTranslation(translateX + StrokeOffsetX, translateY + StrokeOffsetY);
+            deviceContext.Transform = Matrix3x2.CreateTranslation(StrokeOffsetX, StrokeOffsetY);
             deviceContext.DrawGeometry(pathGeometry, StrokeBrush!.Brush!, StrokeWidth);
         }
 
         deviceContext.EndDraw();
         deviceContext.Transform = Matrix3x2.Identity;
         deviceContext.Target = previousTarget;
+        commandList.Close();
 
-        Output = new ImageWrapper { Image = _bitmap };
+        _commandList?.Dispose();
+        _commandList = commandList;
+
+        Output = new ImageWrapper { Image = _commandList };
         return Task.CompletedTask;
     }
 
@@ -254,10 +212,8 @@ public class OutlineRasterizeNode : NodeLogic
 
     public override void Dispose()
     {
-        _bitmap?.Dispose();
-        _bitmap = null;
-        _bitmapWidth = -1;
-        _bitmapHeight = -1;
+        _commandList?.Dispose();
+        _commandList = null;
         base.Dispose();
     }
 }

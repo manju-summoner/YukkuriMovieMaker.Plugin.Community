@@ -416,6 +416,10 @@
 <data name="TextOriginXDescription" xml:space="preserve"><value>X coordinate of the text baseline origin</value></data>
 <data name="TextOriginYLabel" xml:space="preserve"><value>Origin Y</value></data>
 <data name="TextOriginYDescription" xml:space="preserve"><value>Y coordinate of the text baseline origin</value></data>
+  <data name="TextHorizontalOffsetLabel" xml:space="preserve"><value>Horizontal Offset</value></data>
+  <data name="TextHorizontalOffsetDescription" xml:space="preserve"><value>Horizontal anchor ratio within the text bounding box (-1.00: left-aligned to 1.00: right-aligned</value></data>
+  <data name="TextVerticalOffsetLabel" xml:space="preserve"><value>Vertical Offset</value></data>
+  <data name="TextVerticalOffsetDescription" xml:space="preserve"><value>Vertical anchor ratio within the text bounding box (-1.00: top-aligned to 1.00: bottom-aligned</value></data>
 <data name="TextOutlineOutputDescription" xml:space="preserve"><value>Outline data of the generated text string</value></data>
 <data name="PathCombineNode" xml:space="preserve"><value>Combine Paths</value></data>
 <data name="PathCombineNodeDescription" xml:space="preserve"><value>Combines two outlines using the specified operation.</value></data>
