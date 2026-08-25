@@ -69,9 +69,9 @@
 <data name="VideoEffectCategoryName" xml:space="preserve"><value>تأثيرات الفيديو</value></data>
 <data name="AdvancedCategoryName" xml:space="preserve"><value>متقدم</value></data>
 <data name="TransformCategoryName" xml:space="preserve"><value>تحويل الإحداثيات</value></data>
-  <data name="ValueCategoryName" xml:space="preserve"><value>القيمة</value></data>
-  <data name="StringCategoryName" xml:space="preserve"><value>سلسلة</value></data>
-  <data name="ColorCategoryName" xml:space="preserve"><value>اللون</value></data>
+<data name="ValueCategoryName" xml:space="preserve"><value>القيمة</value></data>
+<data name="StringCategoryName" xml:space="preserve"><value>سلسلة</value></data>
+<data name="ColorCategoryName" xml:space="preserve"><value>اللون</value></data>
 <data name="BrushName" xml:space="preserve"><value>فرشاة</value></data>
 <data name="AddNode" xml:space="preserve"><value>جمع</value></data>
 <data name="AddNodeDescription" xml:space="preserve"><value>اجمع رقمين.</value></data>
@@ -416,10 +416,10 @@
 <data name="TextOriginXDescription" xml:space="preserve"><value>إحداثي X لنقطة أصل خط الأساس للنص</value></data>
 <data name="TextOriginYLabel" xml:space="preserve"><value>نقطة الأصل Y</value></data>
 <data name="TextOriginYDescription" xml:space="preserve"><value>إحداثي Y لنقطة أصل خط الأساس للنص</value></data>
-  <data name="TextHorizontalOffsetLabel" xml:space="preserve"><value>الإزاحة الأفقية</value></data>
-  <data name="TextHorizontalOffsetDescription" xml:space="preserve"><value>預設0.00:置中)</value></data>
-  <data name="TextVerticalOffsetLabel" xml:space="preserve"><value>الإزاحة الرأسية</value></data>
-  <data name="TextVerticalOffsetDescription" xml:space="preserve"><value>預設0.00:置中)</value></data>
+<data name="TextHorizontalOffsetLabel" xml:space="preserve"><value>الإزاحة الأفقية</value></data>
+<data name="TextHorizontalOffsetDescription" xml:space="preserve"><value>預設0.00:置中)</value></data>
+<data name="TextVerticalOffsetLabel" xml:space="preserve"><value>الإزاحة الرأسية</value></data>
+<data name="TextVerticalOffsetDescription" xml:space="preserve"><value>預設0.00:置中)</value></data>
 <data name="TextOutlineOutputDescription" xml:space="preserve"><value>بيانات الخط الخارجي للنص الذي تم إنشاؤه</value></data>
 <data name="PathCombineNode" xml:space="preserve"><value>دمج المسارات</value></data>
 <data name="PathCombineNodeDescription" xml:space="preserve"><value>دمج خطين خارجيين باستخدام العملية المحددة.</value></data>
@@ -502,137 +502,137 @@
 <data name="ReturnNode" xml:space="preserve"><value>القيمة المُعادة</value></data>
 <data name="ReturnNodeDescription" xml:space="preserve"><value>استقبال نتيجة حساب الرسم البياني للعقد.</value></data>
 <data name="NoMatchingResults" xml:space="preserve"><value>(لا توجد نتائج)</value></data>
-  <data name="NumberNode" xml:space="preserve"><value>رقم</value></data>
-  <data name="NumberNodeDescription" xml:space="preserve"><value>إخراج قيمة رقمية.</value></data>
-  <data name="StringNode" xml:space="preserve"><value>سلسلة</value></data>
-  <data name="StringNodeDescription" xml:space="preserve"><value>إخراج سلسلة.</value></data>
-  <data name="BooleanNode" xml:space="preserve"><value>منطقي</value></data>
-  <data name="BooleanNodeDescription" xml:space="preserve"><value>إخراج قيمة منطقية.</value></data>
-  <data name="ColorNode" xml:space="preserve"><value>اللون</value></data>
-  <data name="ColorNodeDescription" xml:space="preserve"><value>إخراج لون.</value></data>
-  <data name="UnicodeToCharNode" xml:space="preserve"><value>يونيكود إلى حرف</value></data>
-  <data name="UnicodeToCharNodeDescription" xml:space="preserve"><value>تحويل نقطة رمز يونيكود إلى حرف.</value></data>
-  <data name="CharToUnicodeNode" xml:space="preserve"><value>حرف إلى يونيكود</value></data>
-  <data name="CharToUnicodeNodeDescription" xml:space="preserve"><value>تحويل حرف إلى نقطة رمز يونيكود.</value></data>
-  <data name="StringNthCharNode" xml:space="preserve"><value>الحصول على الحرف n</value></data>
-  <data name="StringNthCharNodeDescription" xml:space="preserve"><value>يحصل على الحرف في موضع محدد في سلسلة.</value></data>
-  <data name="StringEncodeNode" xml:space="preserve"><value>ترميز السلسلة</value></data>
-  <data name="StringEncodeNodeDescription" xml:space="preserve"><value>ترميز سلسلة إلى مصفوفة بايت باستخدام الترميز المحدد.</value></data>
-  <data name="StringDecodeNode" xml:space="preserve"><value>فك ترميز السلسلة</value></data>
-  <data name="StringDecodeNodeDescription" xml:space="preserve"><value>فك ترميز مصفوفة بايت إلى سلسلة باستخدام الترميز المحدد.</value></data>
-  <data name="NumberToStringNode" xml:space="preserve"><value>رقم إلى سلسلة</value></data>
-  <data name="NumberToStringNodeDescription" xml:space="preserve"><value>تحويل رقم إلى سلسلة.</value></data>
-  <data name="StringConcatNode" xml:space="preserve"><value>دمج السلاسل</value></data>
-  <data name="StringConcatNodeDescription" xml:space="preserve"><value>دمج عدة سلاسل.</value></data>
-  <data name="RGBToColorNode" xml:space="preserve"><value>آر جي بي إلى لون</value></data>
-  <data name="RGBToColorNodeDescription" xml:space="preserve"><value>تحويل قيم آر جي بي إلى لون.</value></data>
-  <data name="HSVToColorNode" xml:space="preserve"><value>إتش إس في إلى لون</value></data>
-  <data name="HSVToColorNodeDescription" xml:space="preserve"><value>تحويل قيم إتش إس في إلى لون.</value></data>
-  <data name="CMYKToColorNode" xml:space="preserve"><value>سي إم واي كي إلى لون</value></data>
-  <data name="CMYKToColorNodeDescription" xml:space="preserve"><value>تحويل قيم سي إم واي كي إلى لون.</value></data>
-  <data name="YCbCrToColorNode" xml:space="preserve"><value>واي سي بي سي آر إلى لون</value></data>
-  <data name="YCbCrToColorNodeDescription" xml:space="preserve"><value>تحويل قيم واي سي بي سي آر إلى لون.</value></data>
-  <data name="LabToColorNode" xml:space="preserve"><value>لاب إلى لون</value></data>
-  <data name="LabToColorNodeDescription" xml:space="preserve"><value>تحويل قيم لاب إلى لون.</value></data>
-  <data name="OklchToColorNode" xml:space="preserve"><value>أوكلتش إلى لون</value></data>
-  <data name="OklchToColorNodeDescription" xml:space="preserve"><value>تحويل قيم أوكلتش إلى لون.</value></data>
-  <data name="HWBToColorNode" xml:space="preserve"><value>إتش دبليو بي إلى لون</value></data>
-  <data name="HWBToColorNodeDescription" xml:space="preserve"><value>تحويل قيم إتش دبليو بي إلى لون.</value></data>
-  <data name="ColorToRGBNode" xml:space="preserve"><value>لون إلى آر جي بي</value></data>
-  <data name="ColorToRGBNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم آر جي بي.</value></data>
-  <data name="ColorToHSVNode" xml:space="preserve"><value>لون إلى إتش إس في</value></data>
-  <data name="ColorToHSVNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم إتش إس في.</value></data>
-  <data name="ColorToCMYKNode" xml:space="preserve"><value>لون إلى سي إم واي كي</value></data>
-  <data name="ColorToCMYKNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم سي إم واي كي.</value></data>
-  <data name="ColorToYCbCrNode" xml:space="preserve"><value>لون إلى واي سي بي سي آر</value></data>
-  <data name="ColorToYCbCrNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم واي سي بي سي آر.</value></data>
-  <data name="ColorToLabNode" xml:space="preserve"><value>لون إلى لاب</value></data>
-  <data name="ColorToLabNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم لاب.</value></data>
-  <data name="ColorToOklchNode" xml:space="preserve"><value>لون إلى أوكلتش</value></data>
-  <data name="ColorToOklchNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم أوكلتش.</value></data>
-  <data name="ColorToHWBNode" xml:space="preserve"><value>لون إلى إتش دبليو بي</value></data>
-  <data name="ColorToHWBNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم إتش دبليو بي.</value></data>
-  <data name="CodePoint" xml:space="preserve"><value>نقطة الرمز</value></data>
-  <data name="CodePointDescription" xml:space="preserve"><value>نقطة رمز Unicode (عدد صحيح).</value></data>
-  <data name="Character" xml:space="preserve"><value>حرف</value></data>
-  <data name="CharacterDescription" xml:space="preserve"><value>حرف واحد. يتم تجاهل جميع الأحرف التي تأتي بعد الحرف الأول.</value></data>
-  <data name="Text" xml:space="preserve"><value>نص</value></data>
-  <data name="TextDescription" xml:space="preserve"><value>السلسلة النصية المستهدفة.</value></data>
-  <data name="Bytes" xml:space="preserve"><value>بايتات</value></data>
-  <data name="BytesDescription" xml:space="preserve"><value>مصفوفة من البايتات.</value></data>
-  <data name="Encoding" xml:space="preserve"><value>الترميز</value></data>
-  <data name="EncodingDescription" xml:space="preserve"><value>نوع ترميز الأحرف المطلوب استخدامه.</value></data>
-  <data name="EncodingUtf8" xml:space="preserve"><value>UTF-8</value></data>
-  <data name="EncodingUtf16" xml:space="preserve"><value>UTF-16</value></data>
-  <data name="EncodingUtf32" xml:space="preserve"><value>UTF-32</value></data>
-  <data name="EncodingShiftJis" xml:space="preserve"><value>Shift_JIS</value></data>
-  <data name="EncodingAscii" xml:space="preserve"><value>ASCII</value></data>
-  <data name="StringConcatInput1" xml:space="preserve"><value>السلسلة 1</value></data>
-  <data name="StringConcatInput2" xml:space="preserve"><value>السلسلة 2</value></data>
-  <data name="StringConcatInput3" xml:space="preserve"><value>السلسلة 3</value></data>
-  <data name="StringConcatInput4" xml:space="preserve"><value>السلسلة 4</value></data>
-  <data name="StringConcatSeparator" xml:space="preserve"><value>الفاصل</value></data>
-  <data name="StringConcatSeparatorDescription" xml:space="preserve"><value>السلسلة النصية التي يتم إدراجها بين كل قيمة عند دمجها.</value></data>
-  <data name="Red" xml:space="preserve"><value>أحمر</value></data>
-  <data name="RedDescription" xml:space="preserve"><value>قناة الأحمر (0-255).</value></data>
-  <data name="Green" xml:space="preserve"><value>أخضر</value></data>
-  <data name="GreenDescription" xml:space="preserve"><value>قناة الأخضر (0-255).</value></data>
-  <data name="Blue" xml:space="preserve"><value>أزرق</value></data>
-  <data name="BlueDescription" xml:space="preserve"><value>قناة الأزرق (0-255).</value></data>
-  <data name="ColorValue" xml:space="preserve"><value>لون</value></data>
-  <data name="ColorValueDescription" xml:space="preserve"><value>قيمة اللون.</value></data>
-  <data name="Hue" xml:space="preserve"><value>درجة اللون</value></data>
-  <data name="HueDescription" xml:space="preserve"><value>درجة اللون (0-360 درجة).</value></data>
-  <data name="Saturation" xml:space="preserve"><value>التشبع</value></data>
-  <data name="SaturationDescription" xml:space="preserve"><value>التشبع (0-100%).</value></data>
-  <data name="Brightness" xml:space="preserve"><value>السطوع</value></data>
-  <data name="BrightnessDescription" xml:space="preserve"><value>مكوّن السطوع/القيمة في HSV (0-100%).</value></data>
-  <data name="CmykCyan" xml:space="preserve"><value>سماوي</value></data>
-  <data name="CmykCyanDescription" xml:space="preserve"><value>قناة السماوي (0-100%).</value></data>
-  <data name="CmykMagenta" xml:space="preserve"><value>أرجواني</value></data>
-  <data name="CmykMagentaDescription" xml:space="preserve"><value>قناة الأرجواني (0-100%).</value></data>
-  <data name="CmykYellow" xml:space="preserve"><value>أصفر</value></data>
-  <data name="CmykYellowDescription" xml:space="preserve"><value>قناة الأصفر (0-100%).</value></data>
-  <data name="CmykKey" xml:space="preserve"><value>الأسود (Key)</value></data>
-  <data name="CmykKeyDescription" xml:space="preserve"><value>قناة المفتاح/الأسود (0-100%).</value></data>
-  <data name="Luma" xml:space="preserve"><value>اللمعان (Y)</value></data>
-  <data name="LumaDescription" xml:space="preserve"><value>BT.601 전체 범위)입니다.</value></data>
-  <data name="ChromaBlue" xml:space="preserve"><value>التلون الأزرق (Cb)</value></data>
-  <data name="ChromaBlueDescription" xml:space="preserve"><value>BT.601 전체 범위)입니다.</value></data>
-  <data name="ChromaRed" xml:space="preserve"><value>التلون الأحمر (Cr)</value></data>
-  <data name="ChromaRedDescription" xml:space="preserve"><value>BT.601 전체 범위)입니다.</value></data>
-  <data name="LabLightness" xml:space="preserve"><value>الإضاءة (L)</value></data>
-  <data name="LabLightnessDescription" xml:space="preserve"><value>قناة الإضاءة في CIE Lab (0-100).</value></data>
-  <data name="LabA" xml:space="preserve"><value>المكوّن a</value></data>
-  <data name="LabADescription" xml:space="preserve"><value>녹색-빨간색 축(-128~127)입니다.</value></data>
-  <data name="LabB" xml:space="preserve"><value>المكوّن b</value></data>
-  <data name="LabBDescription" xml:space="preserve"><value>파란색-노란색 축(-128~127)입니다.</value></data>
-  <data name="OklchLightness" xml:space="preserve"><value>الإضاءة (L)</value></data>
-  <data name="OklchLightnessDescription" xml:space="preserve"><value>قناة الإضاءة في Oklch (0-1).</value></data>
-  <data name="OklchChroma" xml:space="preserve"><value>التلون (C)</value></data>
-  <data name="OklchChromaDescription" xml:space="preserve"><value>5 en la práctica).</value></data>
-  <data name="HwbWhiteness" xml:space="preserve"><value>البياض (W)</value></data>
-  <data name="HwbWhitenessDescription" xml:space="preserve"><value>قناة البياض (0-100%).</value></data>
-  <data name="HwbBlackness" xml:space="preserve"><value>السواد (B)</value></data>
-  <data name="HwbBlacknessDescription" xml:space="preserve"><value>قناة السواد (0-100%).</value></data>
-  <data name="MaxFractionDigits" xml:space="preserve"><value>الحد الأقصى لخانات الجزء العشري</value></data>
-  <data name="MaxFractionDigitsDescription" xml:space="preserve"><value>الحد الأقصى لعدد خانات الجزء العشري.</value></data>
-  <data name="Alignment" xml:space="preserve"><value>المحاذاة</value></data>
-  <data name="AlignmentDescription" xml:space="preserve"><value>محاذاة سلسلة الإخراج.</value></data>
-  <data name="AlignmentWidthDescription" xml:space="preserve"><value>عرض الأحرف المستخدم للمحاذاة.</value></data>
-  <data name="AlignmentLeft" xml:space="preserve"><value>محاذاة لليسار</value></data>
-  <data name="AlignmentCenter" xml:space="preserve"><value>محاذاة للوسط</value></data>
-  <data name="AlignmentRight" xml:space="preserve"><value>محاذاة لليمين</value></data>
-  <data name="MinIntegerDigits" xml:space="preserve"><value>الحد الأدنى لخانات الجزء الصحيح</value></data>
-  <data name="MinIntegerDigitsDescription" xml:space="preserve"><value>الحد الأدنى لعدد خانات الجزء الصحيح.</value></data>
-  <data name="FractionDigits" xml:space="preserve"><value>خانات الجزء العشري</value></data>
-  <data name="FractionDigitsDescription" xml:space="preserve"><value>عدد الخانات بعد الفاصلة العشرية.</value></data>
-  <data name="IntegerPadding" xml:space="preserve"><value>حشو الجزء الصحيح</value></data>
-  <data name="IntegerPaddingDescription" xml:space="preserve"><value>الحرف المستخدم لملء خانات الجزء الصحيح الناقصة.</value></data>
-  <data name="IntegerPaddingZero" xml:space="preserve"><value>أصفار</value></data>
-  <data name="IntegerPaddingSpace" xml:space="preserve"><value>مسافات</value></data>
-  <data name="ZeroFormat" xml:space="preserve"><value>إظهار الصفر</value></data>
-  <data name="ZeroFormatDescription" xml:space="preserve"><value>ما إذا كان سيتم عرض الصفر البادئ عند عرض قيمة عشرية أقل من 1.</value></data>
-  <data name="ZeroFormatInclude" xml:space="preserve"><value>إظهار الصفر</value></data>
-  <data name="ZeroFormatOmit" xml:space="preserve"><value>حذف الصفر</value></data>
+<data name="NumberNode" xml:space="preserve"><value>رقم</value></data>
+<data name="NumberNodeDescription" xml:space="preserve"><value>إخراج قيمة رقمية.</value></data>
+<data name="StringNode" xml:space="preserve"><value>سلسلة</value></data>
+<data name="StringNodeDescription" xml:space="preserve"><value>إخراج سلسلة.</value></data>
+<data name="BooleanNode" xml:space="preserve"><value>منطقي</value></data>
+<data name="BooleanNodeDescription" xml:space="preserve"><value>إخراج قيمة منطقية.</value></data>
+<data name="ColorNode" xml:space="preserve"><value>اللون</value></data>
+<data name="ColorNodeDescription" xml:space="preserve"><value>إخراج لون.</value></data>
+<data name="UnicodeToCharNode" xml:space="preserve"><value>يونيكود إلى حرف</value></data>
+<data name="UnicodeToCharNodeDescription" xml:space="preserve"><value>تحويل نقطة رمز يونيكود إلى حرف.</value></data>
+<data name="CharToUnicodeNode" xml:space="preserve"><value>حرف إلى يونيكود</value></data>
+<data name="CharToUnicodeNodeDescription" xml:space="preserve"><value>تحويل حرف إلى نقطة رمز يونيكود.</value></data>
+<data name="StringNthCharNode" xml:space="preserve"><value>الحصول على الحرف n</value></data>
+<data name="StringNthCharNodeDescription" xml:space="preserve"><value>يحصل على الحرف في موضع محدد في سلسلة.</value></data>
+<data name="StringEncodeNode" xml:space="preserve"><value>ترميز السلسلة</value></data>
+<data name="StringEncodeNodeDescription" xml:space="preserve"><value>ترميز سلسلة إلى مصفوفة بايت باستخدام الترميز المحدد.</value></data>
+<data name="StringDecodeNode" xml:space="preserve"><value>فك ترميز السلسلة</value></data>
+<data name="StringDecodeNodeDescription" xml:space="preserve"><value>فك ترميز مصفوفة بايت إلى سلسلة باستخدام الترميز المحدد.</value></data>
+<data name="NumberToStringNode" xml:space="preserve"><value>رقم إلى سلسلة</value></data>
+<data name="NumberToStringNodeDescription" xml:space="preserve"><value>تحويل رقم إلى سلسلة.</value></data>
+<data name="StringConcatNode" xml:space="preserve"><value>دمج السلاسل</value></data>
+<data name="StringConcatNodeDescription" xml:space="preserve"><value>دمج عدة سلاسل.</value></data>
+<data name="RGBToColorNode" xml:space="preserve"><value>آر جي بي إلى لون</value></data>
+<data name="RGBToColorNodeDescription" xml:space="preserve"><value>تحويل قيم آر جي بي إلى لون.</value></data>
+<data name="HSVToColorNode" xml:space="preserve"><value>إتش إس في إلى لون</value></data>
+<data name="HSVToColorNodeDescription" xml:space="preserve"><value>تحويل قيم إتش إس في إلى لون.</value></data>
+<data name="CMYKToColorNode" xml:space="preserve"><value>سي إم واي كي إلى لون</value></data>
+<data name="CMYKToColorNodeDescription" xml:space="preserve"><value>تحويل قيم سي إم واي كي إلى لون.</value></data>
+<data name="YCbCrToColorNode" xml:space="preserve"><value>واي سي بي سي آر إلى لون</value></data>
+<data name="YCbCrToColorNodeDescription" xml:space="preserve"><value>تحويل قيم واي سي بي سي آر إلى لون.</value></data>
+<data name="LabToColorNode" xml:space="preserve"><value>لاب إلى لون</value></data>
+<data name="LabToColorNodeDescription" xml:space="preserve"><value>تحويل قيم لاب إلى لون.</value></data>
+<data name="OklchToColorNode" xml:space="preserve"><value>أوكلتش إلى لون</value></data>
+<data name="OklchToColorNodeDescription" xml:space="preserve"><value>تحويل قيم أوكلتش إلى لون.</value></data>
+<data name="HWBToColorNode" xml:space="preserve"><value>إتش دبليو بي إلى لون</value></data>
+<data name="HWBToColorNodeDescription" xml:space="preserve"><value>تحويل قيم إتش دبليو بي إلى لون.</value></data>
+<data name="ColorToRGBNode" xml:space="preserve"><value>لون إلى آر جي بي</value></data>
+<data name="ColorToRGBNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم آر جي بي.</value></data>
+<data name="ColorToHSVNode" xml:space="preserve"><value>لون إلى إتش إس في</value></data>
+<data name="ColorToHSVNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم إتش إس في.</value></data>
+<data name="ColorToCMYKNode" xml:space="preserve"><value>لون إلى سي إم واي كي</value></data>
+<data name="ColorToCMYKNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم سي إم واي كي.</value></data>
+<data name="ColorToYCbCrNode" xml:space="preserve"><value>لون إلى واي سي بي سي آر</value></data>
+<data name="ColorToYCbCrNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم واي سي بي سي آر.</value></data>
+<data name="ColorToLabNode" xml:space="preserve"><value>لون إلى لاب</value></data>
+<data name="ColorToLabNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم لاب.</value></data>
+<data name="ColorToOklchNode" xml:space="preserve"><value>لون إلى أوكلتش</value></data>
+<data name="ColorToOklchNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم أوكلتش.</value></data>
+<data name="ColorToHWBNode" xml:space="preserve"><value>لون إلى إتش دبليو بي</value></data>
+<data name="ColorToHWBNodeDescription" xml:space="preserve"><value>تحويل لون إلى قيم إتش دبليو بي.</value></data>
+<data name="CodePoint" xml:space="preserve"><value>نقطة الرمز</value></data>
+<data name="CodePointDescription" xml:space="preserve"><value>نقطة رمز Unicode (عدد صحيح).</value></data>
+<data name="Character" xml:space="preserve"><value>حرف</value></data>
+<data name="CharacterDescription" xml:space="preserve"><value>حرف واحد. يتم تجاهل جميع الأحرف التي تأتي بعد الحرف الأول.</value></data>
+<data name="Text" xml:space="preserve"><value>نص</value></data>
+<data name="TextDescription" xml:space="preserve"><value>السلسلة النصية المستهدفة.</value></data>
+<data name="Bytes" xml:space="preserve"><value>بايتات</value></data>
+<data name="BytesDescription" xml:space="preserve"><value>مصفوفة من البايتات.</value></data>
+<data name="Encoding" xml:space="preserve"><value>الترميز</value></data>
+<data name="EncodingDescription" xml:space="preserve"><value>نوع ترميز الأحرف المطلوب استخدامه.</value></data>
+<data name="EncodingUtf8" xml:space="preserve"><value>UTF-8</value></data>
+<data name="EncodingUtf16" xml:space="preserve"><value>UTF-16</value></data>
+<data name="EncodingUtf32" xml:space="preserve"><value>UTF-32</value></data>
+<data name="EncodingShiftJis" xml:space="preserve"><value>Shift_JIS</value></data>
+<data name="EncodingAscii" xml:space="preserve"><value>ASCII</value></data>
+<data name="StringConcatInput1" xml:space="preserve"><value>السلسلة 1</value></data>
+<data name="StringConcatInput2" xml:space="preserve"><value>السلسلة 2</value></data>
+<data name="StringConcatInput3" xml:space="preserve"><value>السلسلة 3</value></data>
+<data name="StringConcatInput4" xml:space="preserve"><value>السلسلة 4</value></data>
+<data name="StringConcatSeparator" xml:space="preserve"><value>الفاصل</value></data>
+<data name="StringConcatSeparatorDescription" xml:space="preserve"><value>السلسلة النصية التي يتم إدراجها بين كل قيمة عند دمجها.</value></data>
+<data name="Red" xml:space="preserve"><value>أحمر</value></data>
+<data name="RedDescription" xml:space="preserve"><value>قناة الأحمر (0-255).</value></data>
+<data name="Green" xml:space="preserve"><value>أخضر</value></data>
+<data name="GreenDescription" xml:space="preserve"><value>قناة الأخضر (0-255).</value></data>
+<data name="Blue" xml:space="preserve"><value>أزرق</value></data>
+<data name="BlueDescription" xml:space="preserve"><value>قناة الأزرق (0-255).</value></data>
+<data name="ColorValue" xml:space="preserve"><value>لون</value></data>
+<data name="ColorValueDescription" xml:space="preserve"><value>قيمة اللون.</value></data>
+<data name="Hue" xml:space="preserve"><value>درجة اللون</value></data>
+<data name="HueDescription" xml:space="preserve"><value>درجة اللون (0-360 درجة).</value></data>
+<data name="Saturation" xml:space="preserve"><value>التشبع</value></data>
+<data name="SaturationDescription" xml:space="preserve"><value>التشبع (0-100%).</value></data>
+<data name="Brightness" xml:space="preserve"><value>السطوع</value></data>
+<data name="BrightnessDescription" xml:space="preserve"><value>مكوّن السطوع/القيمة في HSV (0-100%).</value></data>
+<data name="CmykCyan" xml:space="preserve"><value>سماوي</value></data>
+<data name="CmykCyanDescription" xml:space="preserve"><value>قناة السماوي (0-100%).</value></data>
+<data name="CmykMagenta" xml:space="preserve"><value>أرجواني</value></data>
+<data name="CmykMagentaDescription" xml:space="preserve"><value>قناة الأرجواني (0-100%).</value></data>
+<data name="CmykYellow" xml:space="preserve"><value>أصفر</value></data>
+<data name="CmykYellowDescription" xml:space="preserve"><value>قناة الأصفر (0-100%).</value></data>
+<data name="CmykKey" xml:space="preserve"><value>الأسود (Key)</value></data>
+<data name="CmykKeyDescription" xml:space="preserve"><value>قناة المفتاح/الأسود (0-100%).</value></data>
+<data name="Luma" xml:space="preserve"><value>اللمعان (Y)</value></data>
+<data name="LumaDescription" xml:space="preserve"><value>BT.601 전체 범위)입니다.</value></data>
+<data name="ChromaBlue" xml:space="preserve"><value>التلون الأزرق (Cb)</value></data>
+<data name="ChromaBlueDescription" xml:space="preserve"><value>BT.601 전체 범위)입니다.</value></data>
+<data name="ChromaRed" xml:space="preserve"><value>التلون الأحمر (Cr)</value></data>
+<data name="ChromaRedDescription" xml:space="preserve"><value>BT.601 전체 범위)입니다.</value></data>
+<data name="LabLightness" xml:space="preserve"><value>الإضاءة (L)</value></data>
+<data name="LabLightnessDescription" xml:space="preserve"><value>قناة الإضاءة في CIE Lab (0-100).</value></data>
+<data name="LabA" xml:space="preserve"><value>المكوّن a</value></data>
+<data name="LabADescription" xml:space="preserve"><value>녹색-빨간색 축(-128~127)입니다.</value></data>
+<data name="LabB" xml:space="preserve"><value>المكوّن b</value></data>
+<data name="LabBDescription" xml:space="preserve"><value>파란색-노란색 축(-128~127)입니다.</value></data>
+<data name="OklchLightness" xml:space="preserve"><value>الإضاءة (L)</value></data>
+<data name="OklchLightnessDescription" xml:space="preserve"><value>قناة الإضاءة في Oklch (0-1).</value></data>
+<data name="OklchChroma" xml:space="preserve"><value>التلون (C)</value></data>
+<data name="OklchChromaDescription" xml:space="preserve"><value>5 en la práctica).</value></data>
+<data name="HwbWhiteness" xml:space="preserve"><value>البياض (W)</value></data>
+<data name="HwbWhitenessDescription" xml:space="preserve"><value>قناة البياض (0-100%).</value></data>
+<data name="HwbBlackness" xml:space="preserve"><value>السواد (B)</value></data>
+<data name="HwbBlacknessDescription" xml:space="preserve"><value>قناة السواد (0-100%).</value></data>
+<data name="MaxFractionDigits" xml:space="preserve"><value>الحد الأقصى لخانات الجزء العشري</value></data>
+<data name="MaxFractionDigitsDescription" xml:space="preserve"><value>الحد الأقصى لعدد خانات الجزء العشري.</value></data>
+<data name="Alignment" xml:space="preserve"><value>المحاذاة</value></data>
+<data name="AlignmentDescription" xml:space="preserve"><value>محاذاة سلسلة الإخراج.</value></data>
+<data name="AlignmentWidthDescription" xml:space="preserve"><value>عرض الأحرف المستخدم للمحاذاة.</value></data>
+<data name="AlignmentLeft" xml:space="preserve"><value>محاذاة لليسار</value></data>
+<data name="AlignmentCenter" xml:space="preserve"><value>محاذاة للوسط</value></data>
+<data name="AlignmentRight" xml:space="preserve"><value>محاذاة لليمين</value></data>
+<data name="MinIntegerDigits" xml:space="preserve"><value>الحد الأدنى لخانات الجزء الصحيح</value></data>
+<data name="MinIntegerDigitsDescription" xml:space="preserve"><value>الحد الأدنى لعدد خانات الجزء الصحيح.</value></data>
+<data name="FractionDigits" xml:space="preserve"><value>خانات الجزء العشري</value></data>
+<data name="FractionDigitsDescription" xml:space="preserve"><value>عدد الخانات بعد الفاصلة العشرية.</value></data>
+<data name="IntegerPadding" xml:space="preserve"><value>حشو الجزء الصحيح</value></data>
+<data name="IntegerPaddingDescription" xml:space="preserve"><value>الحرف المستخدم لملء خانات الجزء الصحيح الناقصة.</value></data>
+<data name="IntegerPaddingZero" xml:space="preserve"><value>أصفار</value></data>
+<data name="IntegerPaddingSpace" xml:space="preserve"><value>مسافات</value></data>
+<data name="ZeroFormat" xml:space="preserve"><value>إظهار الصفر</value></data>
+<data name="ZeroFormatDescription" xml:space="preserve"><value>ما إذا كان سيتم عرض الصفر البادئ عند عرض قيمة عشرية أقل من 1.</value></data>
+<data name="ZeroFormatInclude" xml:space="preserve"><value>إظهار الصفر</value></data>
+<data name="ZeroFormatOmit" xml:space="preserve"><value>حذف الصفر</value></data>
 </root>

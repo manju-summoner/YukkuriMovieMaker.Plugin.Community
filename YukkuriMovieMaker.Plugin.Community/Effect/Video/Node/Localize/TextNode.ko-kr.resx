@@ -69,9 +69,9 @@
 <data name="VideoEffectCategoryName" xml:space="preserve"><value>비디오 효과</value></data>
 <data name="AdvancedCategoryName" xml:space="preserve"><value>고급</value></data>
 <data name="TransformCategoryName" xml:space="preserve"><value>좌표 변환</value></data>
-  <data name="ValueCategoryName" xml:space="preserve"><value>값</value></data>
-  <data name="StringCategoryName" xml:space="preserve"><value>문자열</value></data>
-  <data name="ColorCategoryName" xml:space="preserve"><value>색상</value></data>
+<data name="ValueCategoryName" xml:space="preserve"><value>값</value></data>
+<data name="StringCategoryName" xml:space="preserve"><value>문자열</value></data>
+<data name="ColorCategoryName" xml:space="preserve"><value>색상</value></data>
 <data name="BrushName" xml:space="preserve"><value>브러시</value></data>
 <data name="AddNode" xml:space="preserve"><value>더하기</value></data>
 <data name="AddNodeDescription" xml:space="preserve"><value>두 수를 더합니다.</value></data>
@@ -416,10 +416,10 @@
 <data name="TextOriginXDescription" xml:space="preserve"><value>문자열 베이스라인 기준점의 X 좌표</value></data>
 <data name="TextOriginYLabel" xml:space="preserve"><value>기준점 Y</value></data>
 <data name="TextOriginYDescription" xml:space="preserve"><value>문자열 베이스라인 기준점의 Y 좌표</value></data>
-  <data name="TextHorizontalOffsetLabel" xml:space="preserve"><value>가로 오프셋</value></data>
-  <data name="TextHorizontalOffsetDescription" xml:space="preserve"><value>默认0.00:居中)</value></data>
-  <data name="TextVerticalOffsetLabel" xml:space="preserve"><value>세로 오프셋</value></data>
-  <data name="TextVerticalOffsetDescription" xml:space="preserve"><value>默认0.00:居中)</value></data>
+<data name="TextHorizontalOffsetLabel" xml:space="preserve"><value>가로 오프셋</value></data>
+<data name="TextHorizontalOffsetDescription" xml:space="preserve"><value>默认0.00:居中)</value></data>
+<data name="TextVerticalOffsetLabel" xml:space="preserve"><value>세로 오프셋</value></data>
+<data name="TextVerticalOffsetDescription" xml:space="preserve"><value>默认0.00:居中)</value></data>
 <data name="TextOutlineOutputDescription" xml:space="preserve"><value>생성된 문자열의 아웃라인 데이터</value></data>
 <data name="PathCombineNode" xml:space="preserve"><value>패스 결합</value></data>
 <data name="PathCombineNodeDescription" xml:space="preserve"><value>두 아웃라인을 지정한 연산 방법으로 결합합니다.</value></data>
@@ -502,137 +502,137 @@
 <data name="ReturnNode" xml:space="preserve"><value>반환값</value></data>
 <data name="ReturnNodeDescription" xml:space="preserve"><value>노드 그래프의 계산 결과를 받습니다.</value></data>
 <data name="NoMatchingResults" xml:space="preserve"><value>(해당 없음)</value></data>
-  <data name="NumberNode" xml:space="preserve"><value>숫자</value></data>
-  <data name="NumberNodeDescription" xml:space="preserve"><value>숫자를 출력합니다.</value></data>
-  <data name="StringNode" xml:space="preserve"><value>문자열</value></data>
-  <data name="StringNodeDescription" xml:space="preserve"><value>문자열을 출력합니다.</value></data>
-  <data name="BooleanNode" xml:space="preserve"><value>불리언</value></data>
-  <data name="BooleanNodeDescription" xml:space="preserve"><value>불리언 값을 출력합니다.</value></data>
-  <data name="ColorNode" xml:space="preserve"><value>색상</value></data>
-  <data name="ColorNodeDescription" xml:space="preserve"><value>색상을 출력합니다.</value></data>
-  <data name="UnicodeToCharNode" xml:space="preserve"><value>유니코드를 문자로</value></data>
-  <data name="UnicodeToCharNodeDescription" xml:space="preserve"><value>유니코드 코드 포인트를 문자로 변환합니다.</value></data>
-  <data name="CharToUnicodeNode" xml:space="preserve"><value>문자를 유니코드로</value></data>
-  <data name="CharToUnicodeNodeDescription" xml:space="preserve"><value>문자를 유니코드 코드 포인트로 변환합니다.</value></data>
-  <data name="StringNthCharNode" xml:space="preserve"><value>n번째 문자 가져오기</value></data>
-  <data name="StringNthCharNodeDescription" xml:space="preserve"><value>문자열에서 지정된 위치의 문자를 가져옵니다.</value></data>
-  <data name="StringEncodeNode" xml:space="preserve"><value>문자열 인코딩</value></data>
-  <data name="StringEncodeNodeDescription" xml:space="preserve"><value>지정된 인코딩으로 문자열을 바이트 배열로 변환합니다.</value></data>
-  <data name="StringDecodeNode" xml:space="preserve"><value>문자열 디코딩</value></data>
-  <data name="StringDecodeNodeDescription" xml:space="preserve"><value>지정된 인코딩으로 바이트 배열을 문자열로 변환합니다.</value></data>
-  <data name="NumberToStringNode" xml:space="preserve"><value>숫자를 문자열로</value></data>
-  <data name="NumberToStringNodeDescription" xml:space="preserve"><value>숫자를 문자열로 변환합니다.</value></data>
-  <data name="StringConcatNode" xml:space="preserve"><value>문자열 연결</value></data>
-  <data name="StringConcatNodeDescription" xml:space="preserve"><value>여러 문자열을 연결합니다.</value></data>
-  <data name="RGBToColorNode" xml:space="preserve"><value>RGB를 색상으로</value></data>
-  <data name="RGBToColorNodeDescription" xml:space="preserve"><value>RGB 값을 색상으로 변환합니다.</value></data>
-  <data name="HSVToColorNode" xml:space="preserve"><value>HSV를 색상으로</value></data>
-  <data name="HSVToColorNodeDescription" xml:space="preserve"><value>HSV 값을 색상으로 변환합니다.</value></data>
-  <data name="CMYKToColorNode" xml:space="preserve"><value>CMYK를 색상으로</value></data>
-  <data name="CMYKToColorNodeDescription" xml:space="preserve"><value>CMYK 값을 색상으로 변환합니다.</value></data>
-  <data name="YCbCrToColorNode" xml:space="preserve"><value>YCbCr를 색상으로</value></data>
-  <data name="YCbCrToColorNodeDescription" xml:space="preserve"><value>YCbCr 값을 색상으로 변환합니다.</value></data>
-  <data name="LabToColorNode" xml:space="preserve"><value>Lab를 색상으로</value></data>
-  <data name="LabToColorNodeDescription" xml:space="preserve"><value>Lab 값을 색상으로 변환합니다.</value></data>
-  <data name="OklchToColorNode" xml:space="preserve"><value>Oklch를 색상으로</value></data>
-  <data name="OklchToColorNodeDescription" xml:space="preserve"><value>Oklch 값을 색상으로 변환합니다.</value></data>
-  <data name="HWBToColorNode" xml:space="preserve"><value>HWB를 색상으로</value></data>
-  <data name="HWBToColorNodeDescription" xml:space="preserve"><value>HWB 값을 색상으로 변환합니다.</value></data>
-  <data name="ColorToRGBNode" xml:space="preserve"><value>색상을 RGB로</value></data>
-  <data name="ColorToRGBNodeDescription" xml:space="preserve"><value>색상을 RGB 값으로 변환합니다.</value></data>
-  <data name="ColorToHSVNode" xml:space="preserve"><value>색상을 HSV로</value></data>
-  <data name="ColorToHSVNodeDescription" xml:space="preserve"><value>색상을 HSV 값으로 변환합니다.</value></data>
-  <data name="ColorToCMYKNode" xml:space="preserve"><value>색상을 CMYK로</value></data>
-  <data name="ColorToCMYKNodeDescription" xml:space="preserve"><value>색상을 CMYK 값으로 변환합니다.</value></data>
-  <data name="ColorToYCbCrNode" xml:space="preserve"><value>색상을 YCbCr로</value></data>
-  <data name="ColorToYCbCrNodeDescription" xml:space="preserve"><value>색상을 YCbCr 값으로 변환합니다.</value></data>
-  <data name="ColorToLabNode" xml:space="preserve"><value>색상을 Lab로</value></data>
-  <data name="ColorToLabNodeDescription" xml:space="preserve"><value>색상을 Lab 값으로 변환합니다.</value></data>
-  <data name="ColorToOklchNode" xml:space="preserve"><value>색상을 Oklch로</value></data>
-  <data name="ColorToOklchNodeDescription" xml:space="preserve"><value>색상을 Oklch 값으로 변환합니다.</value></data>
-  <data name="ColorToHWBNode" xml:space="preserve"><value>색상을 HWB로</value></data>
-  <data name="ColorToHWBNodeDescription" xml:space="preserve"><value>색상을 HWB 값으로 변환합니다.</value></data>
-  <data name="CodePoint" xml:space="preserve"><value>코드 포인트</value></data>
-  <data name="CodePointDescription" xml:space="preserve"><value>유니코드 코드 포인트(정수)。</value></data>
-  <data name="Character" xml:space="preserve"><value>문자</value></data>
-  <data name="CharacterDescription" xml:space="preserve"><value>단일 문자 문자열입니다. 첫 번째 문자 이후의 문자는 모두 무시됩니다.</value></data>
-  <data name="Text" xml:space="preserve"><value>텍스트</value></data>
-  <data name="TextDescription" xml:space="preserve"><value>대상 문자열입니다.</value></data>
-  <data name="Bytes" xml:space="preserve"><value>바이트 배열</value></data>
-  <data name="BytesDescription" xml:space="preserve"><value>바이트 배열입니다.</value></data>
-  <data name="Encoding" xml:space="preserve"><value>인코딩</value></data>
-  <data name="EncodingDescription" xml:space="preserve"><value>사용할 문자 인코딩 유형입니다.</value></data>
-  <data name="EncodingUtf8" xml:space="preserve"><value>UTF-8</value></data>
-  <data name="EncodingUtf16" xml:space="preserve"><value>UTF-16</value></data>
-  <data name="EncodingUtf32" xml:space="preserve"><value>UTF-32</value></data>
-  <data name="EncodingShiftJis" xml:space="preserve"><value>Shift_JIS</value></data>
-  <data name="EncodingAscii" xml:space="preserve"><value>ASCII</value></data>
-  <data name="StringConcatInput1" xml:space="preserve"><value>문자열 1</value></data>
-  <data name="StringConcatInput2" xml:space="preserve"><value>문자열 2</value></data>
-  <data name="StringConcatInput3" xml:space="preserve"><value>문자열 3</value></data>
-  <data name="StringConcatInput4" xml:space="preserve"><value>문자열 4</value></data>
-  <data name="StringConcatSeparator" xml:space="preserve"><value>구분자</value></data>
-  <data name="StringConcatSeparatorDescription" xml:space="preserve"><value>각 값을 연결할 때 각 값 사이에 삽입되는 문자열입니다.</value></data>
-  <data name="Red" xml:space="preserve"><value>빨강</value></data>
-  <data name="RedDescription" xml:space="preserve"><value>빨강 채널(0-255)입니다.</value></data>
-  <data name="Green" xml:space="preserve"><value>초록</value></data>
-  <data name="GreenDescription" xml:space="preserve"><value>초록 채널(0-255)입니다.</value></data>
-  <data name="Blue" xml:space="preserve"><value>파랑</value></data>
-  <data name="BlueDescription" xml:space="preserve"><value>파랑 채널(0-255)입니다.</value></data>
-  <data name="ColorValue" xml:space="preserve"><value>색상</value></data>
-  <data name="ColorValueDescription" xml:space="preserve"><value>색상 값입니다.</value></data>
-  <data name="Hue" xml:space="preserve"><value>색조</value></data>
-  <data name="HueDescription" xml:space="preserve"><value>색조(0-360도)입니다.</value></data>
-  <data name="Saturation" xml:space="preserve"><value>채도</value></data>
-  <data name="SaturationDescription" xml:space="preserve"><value>채도(0-100%)입니다.</value></data>
-  <data name="Brightness" xml:space="preserve"><value>밝기</value></data>
-  <data name="BrightnessDescription" xml:space="preserve"><value>HSV의 밝기/값 구성 요소(0-100%)입니다.</value></data>
-  <data name="CmykCyan" xml:space="preserve"><value>시안</value></data>
-  <data name="CmykCyanDescription" xml:space="preserve"><value>시안 채널(0-100%)입니다.</value></data>
-  <data name="CmykMagenta" xml:space="preserve"><value>마젠타</value></data>
-  <data name="CmykMagentaDescription" xml:space="preserve"><value>마젠타 채널(0-100%)입니다.</value></data>
-  <data name="CmykYellow" xml:space="preserve"><value>노랑</value></data>
-  <data name="CmykYellowDescription" xml:space="preserve"><value>노랑 채널(0-100%)입니다.</value></data>
-  <data name="CmykKey" xml:space="preserve"><value>키 플레이트(검정)</value></data>
-  <data name="CmykKeyDescription" xml:space="preserve"><value>키/검정 채널(0-100%)입니다.</value></data>
-  <data name="Luma" xml:space="preserve"><value>휘도(Y)</value></data>
-  <data name="LumaDescription" xml:space="preserve"><value>亮度通道（0-255，BT.601 全範圍）。</value></data>
-  <data name="ChromaBlue" xml:space="preserve"><value>청색 색차(Cb)</value></data>
-  <data name="ChromaBlueDescription" xml:space="preserve"><value>Cb 色度通道（0-255，BT.601 全範圍）。</value></data>
-  <data name="ChromaRed" xml:space="preserve"><value>적색 색차(Cr)</value></data>
-  <data name="ChromaRedDescription" xml:space="preserve"><value>Cr 色度通道（0-255，BT.601 全範圍）。</value></data>
-  <data name="LabLightness" xml:space="preserve"><value>명도(L)</value></data>
-  <data name="LabLightnessDescription" xml:space="preserve"><value>CIE Lab 명도 채널(0-100)입니다.</value></data>
-  <data name="LabA" xml:space="preserve"><value>a 성분</value></data>
-  <data name="LabADescription" xml:space="preserve"><value>CIE Lab a* 通道，綠-紅軸（-128 至 127）。</value></data>
-  <data name="LabB" xml:space="preserve"><value>b 성분</value></data>
-  <data name="LabBDescription" xml:space="preserve"><value>CIE Lab b* 通道，藍-黃軸（-128 至 127）。</value></data>
-  <data name="OklchLightness" xml:space="preserve"><value>명도(L)</value></data>
-  <data name="OklchLightnessDescription" xml:space="preserve"><value>Oklch 명도 채널(0-1)입니다.</value></data>
-  <data name="OklchChroma" xml:space="preserve"><value>채도(C)</value></data>
-  <data name="OklchChromaDescription" xml:space="preserve"><value>Oklch 채도 채널(실제로는 약 0~0.5)입니다.</value></data>
-  <data name="HwbWhiteness" xml:space="preserve"><value>백색도(W)</value></data>
-  <data name="HwbWhitenessDescription" xml:space="preserve"><value>백색도 채널(0-100%)입니다.</value></data>
-  <data name="HwbBlackness" xml:space="preserve"><value>흑색도(B)</value></data>
-  <data name="HwbBlacknessDescription" xml:space="preserve"><value>흑색도 채널(0-100%)입니다.</value></data>
-  <data name="MaxFractionDigits" xml:space="preserve"><value>최대 소수 자릿수</value></data>
-  <data name="MaxFractionDigitsDescription" xml:space="preserve"><value>소수 부분의 최대 자릿수입니다.</value></data>
-  <data name="Alignment" xml:space="preserve"><value>정렬</value></data>
-  <data name="AlignmentDescription" xml:space="preserve"><value>출력 문자열의 정렬 방식입니다.</value></data>
-  <data name="AlignmentWidthDescription" xml:space="preserve"><value>정렬에 사용하는 문자 너비입니다.</value></data>
-  <data name="AlignmentLeft" xml:space="preserve"><value>왼쪽 정렬</value></data>
-  <data name="AlignmentCenter" xml:space="preserve"><value>가운데 정렬</value></data>
-  <data name="AlignmentRight" xml:space="preserve"><value>오른쪽 정렬</value></data>
-  <data name="MinIntegerDigits" xml:space="preserve"><value>최소 정수 자릿수</value></data>
-  <data name="MinIntegerDigitsDescription" xml:space="preserve"><value>정수 부분의 최소 자릿수입니다.</value></data>
-  <data name="FractionDigits" xml:space="preserve"><value>소수 자릿수</value></data>
-  <data name="FractionDigitsDescription" xml:space="preserve"><value>소수점 이하 자릿수입니다.</value></data>
-  <data name="IntegerPadding" xml:space="preserve"><value>정수 부분 채우기</value></data>
-  <data name="IntegerPaddingDescription" xml:space="preserve"><value>정수 부분의 부족한 자릿수를 채우는 문자입니다.</value></data>
-  <data name="IntegerPaddingZero" xml:space="preserve"><value>0으로 채우기</value></data>
-  <data name="IntegerPaddingSpace" xml:space="preserve"><value>공백으로 채우기</value></data>
-  <data name="ZeroFormat" xml:space="preserve"><value>0 표시</value></data>
-  <data name="ZeroFormatDescription" xml:space="preserve"><value>1 미만의 소수를 표시할 때 정수 부분의 0을 표시할지 여부입니다.</value></data>
-  <data name="ZeroFormatInclude" xml:space="preserve"><value>0 표시</value></data>
-  <data name="ZeroFormatOmit" xml:space="preserve"><value>0 생략</value></data>
+<data name="NumberNode" xml:space="preserve"><value>숫자</value></data>
+<data name="NumberNodeDescription" xml:space="preserve"><value>숫자를 출력합니다.</value></data>
+<data name="StringNode" xml:space="preserve"><value>문자열</value></data>
+<data name="StringNodeDescription" xml:space="preserve"><value>문자열을 출력합니다.</value></data>
+<data name="BooleanNode" xml:space="preserve"><value>불리언</value></data>
+<data name="BooleanNodeDescription" xml:space="preserve"><value>불리언 값을 출력합니다.</value></data>
+<data name="ColorNode" xml:space="preserve"><value>색상</value></data>
+<data name="ColorNodeDescription" xml:space="preserve"><value>색상을 출력합니다.</value></data>
+<data name="UnicodeToCharNode" xml:space="preserve"><value>유니코드를 문자로</value></data>
+<data name="UnicodeToCharNodeDescription" xml:space="preserve"><value>유니코드 코드 포인트를 문자로 변환합니다.</value></data>
+<data name="CharToUnicodeNode" xml:space="preserve"><value>문자를 유니코드로</value></data>
+<data name="CharToUnicodeNodeDescription" xml:space="preserve"><value>문자를 유니코드 코드 포인트로 변환합니다.</value></data>
+<data name="StringNthCharNode" xml:space="preserve"><value>n번째 문자 가져오기</value></data>
+<data name="StringNthCharNodeDescription" xml:space="preserve"><value>문자열에서 지정된 위치의 문자를 가져옵니다.</value></data>
+<data name="StringEncodeNode" xml:space="preserve"><value>문자열 인코딩</value></data>
+<data name="StringEncodeNodeDescription" xml:space="preserve"><value>지정된 인코딩으로 문자열을 바이트 배열로 변환합니다.</value></data>
+<data name="StringDecodeNode" xml:space="preserve"><value>문자열 디코딩</value></data>
+<data name="StringDecodeNodeDescription" xml:space="preserve"><value>지정된 인코딩으로 바이트 배열을 문자열로 변환합니다.</value></data>
+<data name="NumberToStringNode" xml:space="preserve"><value>숫자를 문자열로</value></data>
+<data name="NumberToStringNodeDescription" xml:space="preserve"><value>숫자를 문자열로 변환합니다.</value></data>
+<data name="StringConcatNode" xml:space="preserve"><value>문자열 연결</value></data>
+<data name="StringConcatNodeDescription" xml:space="preserve"><value>여러 문자열을 연결합니다.</value></data>
+<data name="RGBToColorNode" xml:space="preserve"><value>RGB를 색상으로</value></data>
+<data name="RGBToColorNodeDescription" xml:space="preserve"><value>RGB 값을 색상으로 변환합니다.</value></data>
+<data name="HSVToColorNode" xml:space="preserve"><value>HSV를 색상으로</value></data>
+<data name="HSVToColorNodeDescription" xml:space="preserve"><value>HSV 값을 색상으로 변환합니다.</value></data>
+<data name="CMYKToColorNode" xml:space="preserve"><value>CMYK를 색상으로</value></data>
+<data name="CMYKToColorNodeDescription" xml:space="preserve"><value>CMYK 값을 색상으로 변환합니다.</value></data>
+<data name="YCbCrToColorNode" xml:space="preserve"><value>YCbCr를 색상으로</value></data>
+<data name="YCbCrToColorNodeDescription" xml:space="preserve"><value>YCbCr 값을 색상으로 변환합니다.</value></data>
+<data name="LabToColorNode" xml:space="preserve"><value>Lab를 색상으로</value></data>
+<data name="LabToColorNodeDescription" xml:space="preserve"><value>Lab 값을 색상으로 변환합니다.</value></data>
+<data name="OklchToColorNode" xml:space="preserve"><value>Oklch를 색상으로</value></data>
+<data name="OklchToColorNodeDescription" xml:space="preserve"><value>Oklch 값을 색상으로 변환합니다.</value></data>
+<data name="HWBToColorNode" xml:space="preserve"><value>HWB를 색상으로</value></data>
+<data name="HWBToColorNodeDescription" xml:space="preserve"><value>HWB 값을 색상으로 변환합니다.</value></data>
+<data name="ColorToRGBNode" xml:space="preserve"><value>색상을 RGB로</value></data>
+<data name="ColorToRGBNodeDescription" xml:space="preserve"><value>색상을 RGB 값으로 변환합니다.</value></data>
+<data name="ColorToHSVNode" xml:space="preserve"><value>색상을 HSV로</value></data>
+<data name="ColorToHSVNodeDescription" xml:space="preserve"><value>색상을 HSV 값으로 변환합니다.</value></data>
+<data name="ColorToCMYKNode" xml:space="preserve"><value>색상을 CMYK로</value></data>
+<data name="ColorToCMYKNodeDescription" xml:space="preserve"><value>색상을 CMYK 값으로 변환합니다.</value></data>
+<data name="ColorToYCbCrNode" xml:space="preserve"><value>색상을 YCbCr로</value></data>
+<data name="ColorToYCbCrNodeDescription" xml:space="preserve"><value>색상을 YCbCr 값으로 변환합니다.</value></data>
+<data name="ColorToLabNode" xml:space="preserve"><value>색상을 Lab로</value></data>
+<data name="ColorToLabNodeDescription" xml:space="preserve"><value>색상을 Lab 값으로 변환합니다.</value></data>
+<data name="ColorToOklchNode" xml:space="preserve"><value>색상을 Oklch로</value></data>
+<data name="ColorToOklchNodeDescription" xml:space="preserve"><value>색상을 Oklch 값으로 변환합니다.</value></data>
+<data name="ColorToHWBNode" xml:space="preserve"><value>색상을 HWB로</value></data>
+<data name="ColorToHWBNodeDescription" xml:space="preserve"><value>색상을 HWB 값으로 변환합니다.</value></data>
+<data name="CodePoint" xml:space="preserve"><value>코드 포인트</value></data>
+<data name="CodePointDescription" xml:space="preserve"><value>유니코드 코드 포인트(정수)。</value></data>
+<data name="Character" xml:space="preserve"><value>문자</value></data>
+<data name="CharacterDescription" xml:space="preserve"><value>단일 문자 문자열입니다. 첫 번째 문자 이후의 문자는 모두 무시됩니다.</value></data>
+<data name="Text" xml:space="preserve"><value>텍스트</value></data>
+<data name="TextDescription" xml:space="preserve"><value>대상 문자열입니다.</value></data>
+<data name="Bytes" xml:space="preserve"><value>바이트 배열</value></data>
+<data name="BytesDescription" xml:space="preserve"><value>바이트 배열입니다.</value></data>
+<data name="Encoding" xml:space="preserve"><value>인코딩</value></data>
+<data name="EncodingDescription" xml:space="preserve"><value>사용할 문자 인코딩 유형입니다.</value></data>
+<data name="EncodingUtf8" xml:space="preserve"><value>UTF-8</value></data>
+<data name="EncodingUtf16" xml:space="preserve"><value>UTF-16</value></data>
+<data name="EncodingUtf32" xml:space="preserve"><value>UTF-32</value></data>
+<data name="EncodingShiftJis" xml:space="preserve"><value>Shift_JIS</value></data>
+<data name="EncodingAscii" xml:space="preserve"><value>ASCII</value></data>
+<data name="StringConcatInput1" xml:space="preserve"><value>문자열 1</value></data>
+<data name="StringConcatInput2" xml:space="preserve"><value>문자열 2</value></data>
+<data name="StringConcatInput3" xml:space="preserve"><value>문자열 3</value></data>
+<data name="StringConcatInput4" xml:space="preserve"><value>문자열 4</value></data>
+<data name="StringConcatSeparator" xml:space="preserve"><value>구분자</value></data>
+<data name="StringConcatSeparatorDescription" xml:space="preserve"><value>각 값을 연결할 때 각 값 사이에 삽입되는 문자열입니다.</value></data>
+<data name="Red" xml:space="preserve"><value>빨강</value></data>
+<data name="RedDescription" xml:space="preserve"><value>빨강 채널(0-255)입니다.</value></data>
+<data name="Green" xml:space="preserve"><value>초록</value></data>
+<data name="GreenDescription" xml:space="preserve"><value>초록 채널(0-255)입니다.</value></data>
+<data name="Blue" xml:space="preserve"><value>파랑</value></data>
+<data name="BlueDescription" xml:space="preserve"><value>파랑 채널(0-255)입니다.</value></data>
+<data name="ColorValue" xml:space="preserve"><value>색상</value></data>
+<data name="ColorValueDescription" xml:space="preserve"><value>색상 값입니다.</value></data>
+<data name="Hue" xml:space="preserve"><value>색조</value></data>
+<data name="HueDescription" xml:space="preserve"><value>색조(0-360도)입니다.</value></data>
+<data name="Saturation" xml:space="preserve"><value>채도</value></data>
+<data name="SaturationDescription" xml:space="preserve"><value>채도(0-100%)입니다.</value></data>
+<data name="Brightness" xml:space="preserve"><value>밝기</value></data>
+<data name="BrightnessDescription" xml:space="preserve"><value>HSV의 밝기/값 구성 요소(0-100%)입니다.</value></data>
+<data name="CmykCyan" xml:space="preserve"><value>시안</value></data>
+<data name="CmykCyanDescription" xml:space="preserve"><value>시안 채널(0-100%)입니다.</value></data>
+<data name="CmykMagenta" xml:space="preserve"><value>마젠타</value></data>
+<data name="CmykMagentaDescription" xml:space="preserve"><value>마젠타 채널(0-100%)입니다.</value></data>
+<data name="CmykYellow" xml:space="preserve"><value>노랑</value></data>
+<data name="CmykYellowDescription" xml:space="preserve"><value>노랑 채널(0-100%)입니다.</value></data>
+<data name="CmykKey" xml:space="preserve"><value>키 플레이트(검정)</value></data>
+<data name="CmykKeyDescription" xml:space="preserve"><value>키/검정 채널(0-100%)입니다.</value></data>
+<data name="Luma" xml:space="preserve"><value>휘도(Y)</value></data>
+<data name="LumaDescription" xml:space="preserve"><value>亮度通道（0-255，BT.601 全範圍）。</value></data>
+<data name="ChromaBlue" xml:space="preserve"><value>청색 색차(Cb)</value></data>
+<data name="ChromaBlueDescription" xml:space="preserve"><value>Cb 色度通道（0-255，BT.601 全範圍）。</value></data>
+<data name="ChromaRed" xml:space="preserve"><value>적색 색차(Cr)</value></data>
+<data name="ChromaRedDescription" xml:space="preserve"><value>Cr 色度通道（0-255，BT.601 全範圍）。</value></data>
+<data name="LabLightness" xml:space="preserve"><value>명도(L)</value></data>
+<data name="LabLightnessDescription" xml:space="preserve"><value>CIE Lab 명도 채널(0-100)입니다.</value></data>
+<data name="LabA" xml:space="preserve"><value>a 성분</value></data>
+<data name="LabADescription" xml:space="preserve"><value>CIE Lab a* 通道，綠-紅軸（-128 至 127）。</value></data>
+<data name="LabB" xml:space="preserve"><value>b 성분</value></data>
+<data name="LabBDescription" xml:space="preserve"><value>CIE Lab b* 通道，藍-黃軸（-128 至 127）。</value></data>
+<data name="OklchLightness" xml:space="preserve"><value>명도(L)</value></data>
+<data name="OklchLightnessDescription" xml:space="preserve"><value>Oklch 명도 채널(0-1)입니다.</value></data>
+<data name="OklchChroma" xml:space="preserve"><value>채도(C)</value></data>
+<data name="OklchChromaDescription" xml:space="preserve"><value>Oklch 채도 채널(실제로는 약 0~0.5)입니다.</value></data>
+<data name="HwbWhiteness" xml:space="preserve"><value>백색도(W)</value></data>
+<data name="HwbWhitenessDescription" xml:space="preserve"><value>백색도 채널(0-100%)입니다.</value></data>
+<data name="HwbBlackness" xml:space="preserve"><value>흑색도(B)</value></data>
+<data name="HwbBlacknessDescription" xml:space="preserve"><value>흑색도 채널(0-100%)입니다.</value></data>
+<data name="MaxFractionDigits" xml:space="preserve"><value>최대 소수 자릿수</value></data>
+<data name="MaxFractionDigitsDescription" xml:space="preserve"><value>소수 부분의 최대 자릿수입니다.</value></data>
+<data name="Alignment" xml:space="preserve"><value>정렬</value></data>
+<data name="AlignmentDescription" xml:space="preserve"><value>출력 문자열의 정렬 방식입니다.</value></data>
+<data name="AlignmentWidthDescription" xml:space="preserve"><value>정렬에 사용하는 문자 너비입니다.</value></data>
+<data name="AlignmentLeft" xml:space="preserve"><value>왼쪽 정렬</value></data>
+<data name="AlignmentCenter" xml:space="preserve"><value>가운데 정렬</value></data>
+<data name="AlignmentRight" xml:space="preserve"><value>오른쪽 정렬</value></data>
+<data name="MinIntegerDigits" xml:space="preserve"><value>최소 정수 자릿수</value></data>
+<data name="MinIntegerDigitsDescription" xml:space="preserve"><value>정수 부분의 최소 자릿수입니다.</value></data>
+<data name="FractionDigits" xml:space="preserve"><value>소수 자릿수</value></data>
+<data name="FractionDigitsDescription" xml:space="preserve"><value>소수점 이하 자릿수입니다.</value></data>
+<data name="IntegerPadding" xml:space="preserve"><value>정수 부분 채우기</value></data>
+<data name="IntegerPaddingDescription" xml:space="preserve"><value>정수 부분의 부족한 자릿수를 채우는 문자입니다.</value></data>
+<data name="IntegerPaddingZero" xml:space="preserve"><value>0으로 채우기</value></data>
+<data name="IntegerPaddingSpace" xml:space="preserve"><value>공백으로 채우기</value></data>
+<data name="ZeroFormat" xml:space="preserve"><value>0 표시</value></data>
+<data name="ZeroFormatDescription" xml:space="preserve"><value>1 미만의 소수를 표시할 때 정수 부분의 0을 표시할지 여부입니다.</value></data>
+<data name="ZeroFormatInclude" xml:space="preserve"><value>0 표시</value></data>
+<data name="ZeroFormatOmit" xml:space="preserve"><value>0 생략</value></data>
 </root>
