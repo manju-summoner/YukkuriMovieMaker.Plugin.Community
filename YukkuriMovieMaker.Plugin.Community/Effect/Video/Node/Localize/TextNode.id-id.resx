@@ -69,6 +69,9 @@
 <data name="VideoEffectCategoryName" xml:space="preserve"><value>Efek Video</value></data>
 <data name="AdvancedCategoryName" xml:space="preserve"><value>Lanjutan</value></data>
 <data name="TransformCategoryName" xml:space="preserve"><value>Transformasi Koordinat</value></data>
+  <data name="ValueCategoryName" xml:space="preserve"><value>Nilai</value></data>
+  <data name="StringCategoryName" xml:space="preserve"><value>String</value></data>
+  <data name="ColorCategoryName" xml:space="preserve"><value>Warna</value></data>
 <data name="BrushName" xml:space="preserve"><value>Kuas</value></data>
 <data name="AddNode" xml:space="preserve"><value>Tambah</value></data>
 <data name="AddNodeDescription" xml:space="preserve"><value>Menjumlahkan dua angka.</value></data>
@@ -495,4 +498,137 @@
 <data name="ReturnNode" xml:space="preserve"><value>Nilai Kembalian</value></data>
 <data name="ReturnNodeDescription" xml:space="preserve"><value>Menerima hasil perhitungan graf node.</value></data>
 <data name="NoMatchingResults" xml:space="preserve"><value>(Tidak ada hasil)</value></data>
+  <data name="NumberNode" xml:space="preserve"><value>Angka</value></data>
+  <data name="NumberNodeDescription" xml:space="preserve"><value>Mengeluarkan nilai angka.</value></data>
+  <data name="StringNode" xml:space="preserve"><value>String</value></data>
+  <data name="StringNodeDescription" xml:space="preserve"><value>Mengeluarkan string.</value></data>
+  <data name="BooleanNode" xml:space="preserve"><value>Boolean</value></data>
+  <data name="BooleanNodeDescription" xml:space="preserve"><value>Mengeluarkan nilai boolean.</value></data>
+  <data name="ColorNode" xml:space="preserve"><value>Warna</value></data>
+  <data name="ColorNodeDescription" xml:space="preserve"><value>Mengeluarkan warna.</value></data>
+  <data name="UnicodeToCharNode" xml:space="preserve"><value>Unicode ke Karakter</value></data>
+  <data name="UnicodeToCharNodeDescription" xml:space="preserve"><value>Mengonversi titik kode Unicode menjadi karakter.</value></data>
+  <data name="CharToUnicodeNode" xml:space="preserve"><value>Karakter ke Unicode</value></data>
+  <data name="CharToUnicodeNodeDescription" xml:space="preserve"><value>Mengonversi karakter menjadi titik kode Unicode.</value></data>
+  <data name="StringNthCharNode" xml:space="preserve"><value>Ambil Karakter ke-n</value></data>
+  <data name="StringNthCharNodeDescription" xml:space="preserve"><value>Mendapatkan karakter pada posisi tertentu dalam string.</value></data>
+  <data name="StringEncodeNode" xml:space="preserve"><value>Enkode String</value></data>
+  <data name="StringEncodeNodeDescription" xml:space="preserve"><value>Mengkodekan string menjadi array byte menggunakan encoding yang ditentukan.</value></data>
+  <data name="StringDecodeNode" xml:space="preserve"><value>Dekode String</value></data>
+  <data name="StringDecodeNodeDescription" xml:space="preserve"><value>Mendekode array byte menjadi string menggunakan encoding yang ditentukan.</value></data>
+  <data name="NumberToStringNode" xml:space="preserve"><value>Angka ke String</value></data>
+  <data name="NumberToStringNodeDescription" xml:space="preserve"><value>Mengonversi angka menjadi string.</value></data>
+  <data name="StringConcatNode" xml:space="preserve"><value>Gabungkan String</value></data>
+  <data name="StringConcatNodeDescription" xml:space="preserve"><value>Menggabungkan beberapa string.</value></data>
+  <data name="RGBToColorNode" xml:space="preserve"><value>RGB ke Warna</value></data>
+  <data name="RGBToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai RGB menjadi warna.</value></data>
+  <data name="HSVToColorNode" xml:space="preserve"><value>HSV ke Warna</value></data>
+  <data name="HSVToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai HSV menjadi warna.</value></data>
+  <data name="CMYKToColorNode" xml:space="preserve"><value>CMYK ke Warna</value></data>
+  <data name="CMYKToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai CMYK menjadi warna.</value></data>
+  <data name="YCbCrToColorNode" xml:space="preserve"><value>YCbCr ke Warna</value></data>
+  <data name="YCbCrToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai YCbCr menjadi warna.</value></data>
+  <data name="LabToColorNode" xml:space="preserve"><value>Lab ke Warna</value></data>
+  <data name="LabToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai Lab menjadi warna.</value></data>
+  <data name="OklchToColorNode" xml:space="preserve"><value>Oklch ke Warna</value></data>
+  <data name="OklchToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai Oklch menjadi warna.</value></data>
+  <data name="HWBToColorNode" xml:space="preserve"><value>HWB ke Warna</value></data>
+  <data name="HWBToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai HWB menjadi warna.</value></data>
+  <data name="ColorToRGBNode" xml:space="preserve"><value>Warna ke RGB</value></data>
+  <data name="ColorToRGBNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai RGB.</value></data>
+  <data name="ColorToHSVNode" xml:space="preserve"><value>Warna ke HSV</value></data>
+  <data name="ColorToHSVNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai HSV.</value></data>
+  <data name="ColorToCMYKNode" xml:space="preserve"><value>Warna ke CMYK</value></data>
+  <data name="ColorToCMYKNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai CMYK.</value></data>
+  <data name="ColorToYCbCrNode" xml:space="preserve"><value>Warna ke YCbCr</value></data>
+  <data name="ColorToYCbCrNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai YCbCr.</value></data>
+  <data name="ColorToLabNode" xml:space="preserve"><value>Warna ke Lab</value></data>
+  <data name="ColorToLabNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai Lab.</value></data>
+  <data name="ColorToOklchNode" xml:space="preserve"><value>Warna ke Oklch</value></data>
+  <data name="ColorToOklchNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai Oklch.</value></data>
+  <data name="ColorToHWBNode" xml:space="preserve"><value>Warna ke HWB</value></data>
+  <data name="ColorToHWBNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai HWB.</value></data>
+  <data name="CodePoint" xml:space="preserve"><value>Titik kode</value></data>
+  <data name="CodePointDescription" xml:space="preserve"><value>Titik kode Unicode (bilangan bulat).</value></data>
+  <data name="Character" xml:space="preserve"><value>Karakter</value></data>
+  <data name="CharacterDescription" xml:space="preserve"><value>Satu karakter. Semua karakter setelah karakter pertama akan diabaikan.</value></data>
+  <data name="Text" xml:space="preserve"><value>Teks</value></data>
+  <data name="TextDescription" xml:space="preserve"><value>String target.</value></data>
+  <data name="Bytes" xml:space="preserve"><value>Byte</value></data>
+  <data name="BytesDescription" xml:space="preserve"><value>Array byte.</value></data>
+  <data name="Encoding" xml:space="preserve"><value>Encoding</value></data>
+  <data name="EncodingDescription" xml:space="preserve"><value>Jenis pengodean karakter yang akan digunakan.</value></data>
+  <data name="EncodingUtf8" xml:space="preserve"><value>UTF-8</value></data>
+  <data name="EncodingUtf16" xml:space="preserve"><value>UTF-16</value></data>
+  <data name="EncodingUtf32" xml:space="preserve"><value>UTF-32</value></data>
+  <data name="EncodingShiftJis" xml:space="preserve"><value>Shift_JIS</value></data>
+  <data name="EncodingAscii" xml:space="preserve"><value>ASCII</value></data>
+  <data name="StringConcatInput1" xml:space="preserve"><value>String 1</value></data>
+  <data name="StringConcatInput2" xml:space="preserve"><value>String 2</value></data>
+  <data name="StringConcatInput3" xml:space="preserve"><value>String 3</value></data>
+  <data name="StringConcatInput4" xml:space="preserve"><value>String 4</value></data>
+  <data name="StringConcatSeparator" xml:space="preserve"><value>الفاصل</value></data>
+  <data name="StringConcatSeparatorDescription" xml:space="preserve"><value>String yang disisipkan di antara setiap nilai saat menggabungkannya.</value></data>
+  <data name="Red" xml:space="preserve"><value>Merah</value></data>
+  <data name="RedDescription" xml:space="preserve"><value>Kanal merah (0-255).</value></data>
+  <data name="Green" xml:space="preserve"><value>Hijau</value></data>
+  <data name="GreenDescription" xml:space="preserve"><value>Kanal hijau (0-255).</value></data>
+  <data name="Blue" xml:space="preserve"><value>Biru</value></data>
+  <data name="BlueDescription" xml:space="preserve"><value>Kanal biru (0-255).</value></data>
+  <data name="ColorValue" xml:space="preserve"><value>Warna</value></data>
+  <data name="ColorValueDescription" xml:space="preserve"><value>Nilai warna.</value></data>
+  <data name="Hue" xml:space="preserve"><value>Nada</value></data>
+  <data name="HueDescription" xml:space="preserve"><value>Nada (0-360 derajat).</value></data>
+  <data name="Saturation" xml:space="preserve"><value>Saturasi</value></data>
+  <data name="SaturationDescription" xml:space="preserve"><value>Saturasi (0-100%).</value></data>
+  <data name="Brightness" xml:space="preserve"><value>Kecerahan</value></data>
+  <data name="BrightnessDescription" xml:space="preserve"><value>Komponen kecerahan/nilai HSV (0-100%).</value></data>
+  <data name="CmykCyan" xml:space="preserve"><value>Sian</value></data>
+  <data name="CmykCyanDescription" xml:space="preserve"><value>Kanal sian (0-100%).</value></data>
+  <data name="CmykMagenta" xml:space="preserve"><value>Magenta</value></data>
+  <data name="CmykMagentaDescription" xml:space="preserve"><value>Kanal magenta (0-100%).</value></data>
+  <data name="CmykYellow" xml:space="preserve"><value>Kuning</value></data>
+  <data name="CmykYellowDescription" xml:space="preserve"><value>Kanal kuning (0-100%).</value></data>
+  <data name="CmykKey" xml:space="preserve"><value>Key (Hitam)</value></data>
+  <data name="CmykKeyDescription" xml:space="preserve"><value>Kanal key/hitam (0-100%).</value></data>
+  <data name="Luma" xml:space="preserve"><value>Luma (Y)</value></data>
+  <data name="LumaDescription" xml:space="preserve"><value>El canal de luminancia (0-255</value></data>
+  <data name="ChromaBlue" xml:space="preserve"><value>Kroma biru (Cb)</value></data>
+  <data name="ChromaBlueDescription" xml:space="preserve"><value>El canal de crominancia Cb (0-255</value></data>
+  <data name="ChromaRed" xml:space="preserve"><value>Kroma merah (Cr)</value></data>
+  <data name="ChromaRedDescription" xml:space="preserve"><value>El canal de crominancia Cr (0-255</value></data>
+  <data name="LabLightness" xml:space="preserve"><value>Kecerahan (L)</value></data>
+  <data name="LabLightnessDescription" xml:space="preserve"><value>Kanal kecerahan CIE Lab (0-100).</value></data>
+  <data name="LabA" xml:space="preserve"><value>Komponen a</value></data>
+  <data name="LabADescription" xml:space="preserve"><value>El canal a* de CIE Lab</value></data>
+  <data name="LabB" xml:space="preserve"><value>Komponen b</value></data>
+  <data name="LabBDescription" xml:space="preserve"><value>El canal b* de CIE Lab</value></data>
+  <data name="OklchLightness" xml:space="preserve"><value>Kecerahan (L)</value></data>
+  <data name="OklchLightnessDescription" xml:space="preserve"><value>Kanal kecerahan Oklch (0-1).</value></data>
+  <data name="OklchChroma" xml:space="preserve"><value>Kroma (C)</value></data>
+  <data name="OklchChromaDescription" xml:space="preserve"><value>قناة التلون في Oklch (حوالي 0-0.5 عمليًا).</value></data>
+  <data name="HwbWhiteness" xml:space="preserve"><value>Keputihan (W)</value></data>
+  <data name="HwbWhitenessDescription" xml:space="preserve"><value>Kanal keputihan (0-100%).</value></data>
+  <data name="HwbBlackness" xml:space="preserve"><value>Kehitaman (B)</value></data>
+  <data name="HwbBlacknessDescription" xml:space="preserve"><value>Kanal kehitaman (0-100%).</value></data>
+  <data name="MaxFractionDigits" xml:space="preserve"><value>Jumlah digit pecahan maksimum</value></data>
+  <data name="MaxFractionDigitsDescription" xml:space="preserve"><value>Jumlah maksimum digit pecahan.</value></data>
+  <data name="Alignment" xml:space="preserve"><value>Perataan</value></data>
+  <data name="AlignmentDescription" xml:space="preserve"><value>Perataan string keluaran.</value></data>
+  <data name="AlignmentWidthDescription" xml:space="preserve"><value>Lebar karakter yang digunakan untuk perataan.</value></data>
+  <data name="AlignmentLeft" xml:space="preserve"><value>Rata kiri</value></data>
+  <data name="AlignmentCenter" xml:space="preserve"><value>Rata tengah</value></data>
+  <data name="AlignmentRight" xml:space="preserve"><value>Rata kanan</value></data>
+  <data name="MinIntegerDigits" xml:space="preserve"><value>Jumlah digit bilangan bulat minimum</value></data>
+  <data name="MinIntegerDigitsDescription" xml:space="preserve"><value>Jumlah minimum digit bilangan bulat.</value></data>
+  <data name="FractionDigits" xml:space="preserve"><value>Jumlah digit pecahan</value></data>
+  <data name="FractionDigitsDescription" xml:space="preserve"><value>Jumlah digit setelah titik desimal.</value></data>
+  <data name="IntegerPadding" xml:space="preserve"><value>Padding bagian bilangan bulat</value></data>
+  <data name="IntegerPaddingDescription" xml:space="preserve"><value>Karakter yang digunakan untuk mengisi digit bilangan bulat yang kurang.</value></data>
+  <data name="IntegerPaddingZero" xml:space="preserve"><value>Nol</value></data>
+  <data name="IntegerPaddingSpace" xml:space="preserve"><value>Spasi</value></data>
+  <data name="ZeroFormat" xml:space="preserve"><value>Tampilan nol</value></data>
+  <data name="ZeroFormatDescription" xml:space="preserve"><value>Apakah nol di depan ditampilkan saat menampilkan nilai pecahan kurang dari 1.</value></data>
+  <data name="ZeroFormatInclude" xml:space="preserve"><value>Tampilkan nol</value></data>
+  <data name="ZeroFormatOmit" xml:space="preserve"><value>Abaikan nol</value></data>
 </root>

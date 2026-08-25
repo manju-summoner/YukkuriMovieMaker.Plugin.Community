@@ -9,6 +9,9 @@ FunctionsCategoryName,関数カテゴリ名,関数,Functions,函数,函數,함�
 VideoEffectCategoryName,映像エフェクトカテゴリ名,映像エフェクト,Video Effects,视频效果,視訊效果,비디오 효과,Efectos de vídeo,تأثيرات الفيديو,Efek Video
 AdvancedCategoryName,高度カテゴリ名,高度,Advanced,高级,進階,고급,Advanced,متقدم,Lanjutan
 TransformCategoryName,座標変換カテゴリ名,座標変換,Transform,坐标变换,座標變換,좌표 변환,Transformación,تحويل الإحداثيات,Transformasi Koordinat
+ValueCategoryName,値カテゴリ名,値,Value,值,值,값,Valor,القيمة,Nilai
+StringCategoryName,文字列カテゴリ名,文字列,String,字符串,字串,문자열,Cadena,سلسلة,String
+ColorCategoryName,色カテゴリ名,色,Color,颜色,顏色,색상,Color,اللون,Warna
 BrushName,ブラシ名,ブラシ,Brush,画笔,筆刷,브러시,Pincel,فرشاة,Kuas
 AddNode,加算ノード名,加算,Add,加法,加法,더하기,Sumar,جمع,Tambah
 AddNodeDescription,加算ノード説明,2つの数を加算します。,Add two numbers.,将两个数相加。,將兩個數相加。,두 수를 더합니다.,Suma dos números.,اجمع رقمين.,Menjumlahkan dua angka.
@@ -435,3 +438,136 @@ ArgumentsNodeDescription,,グラフの入力値を提供します。,Provides th
 ReturnNode,,戻値,Return Value,返回值,返回值,반환값,Valor de retorno,القيمة المُعادة,Nilai Kembalian
 ReturnNodeDescription,,ノードのグラフの計算結果を受け取ります。,Receives the calculation result of the node graph.,接收节点图的计算结果。,接收節點圖的計算結果。,노드 그래프의 계산 결과를 받습니다.,Recibe el resultado del cálculo del grafo de nodos.,استقبال نتيجة حساب الرسم البياني للعقد.,Menerima hasil perhitungan graf node.
 NoMatchingResults,,(該当なし),(No results),(无匹配项),(無符合項目),(해당 없음),(Sin resultados),(لا توجد نتائج),(Tidak ada hasil)
+NumberNode,数値ノード名,数値,Number,数值,數值,숫자,Número,رقم,Angka
+NumberNodeDescription,数値ノード説明,数値を出力します。,Outputs a numeric value.,输出数值。,輸出數值。,숫자를 출력합니다.,Genera un valor numérico.,إخراج قيمة رقمية.,Mengeluarkan nilai angka.
+StringNode,文字列ノード名,文字列,String,字符串,字串,문자열,Cadena,سلسلة,String
+StringNodeDescription,文字列ノード説明,文字列を出力します。,Outputs a string.,输出字符串。,輸出字串。,문자열을 출력합니다.,Genera una cadena.,إخراج سلسلة.,Mengeluarkan string.
+BooleanNode,真偽値ノード名,真偽値,Boolean,布尔值,布林值,불리언,Booleano,منطقي,Boolean
+BooleanNodeDescription,真偽値ノード説明,真偽値を出力します。,Outputs a boolean value.,输出布尔值。,輸出布林值。,불리언 값을 출력합니다.,Genera un valor booleano.,إخراج قيمة منطقية.,Mengeluarkan nilai boolean.
+ColorNode,色ノード名,色,Color,颜色,顏色,색상,Color,اللون,Warna
+ColorNodeDescription,色ノード説明,色を出力します。,Outputs a color.,输出颜色。,輸出顏色。,색상을 출력합니다.,Genera un color.,إخراج لون.,Mengeluarkan warna.
+UnicodeToCharNode,ユニコードから文字ノード名,ユニコードから文字,Unicode to Character,Unicode转字符,Unicode轉字元,유니코드를 문자로,Unicode a carácter,يونيكود إلى حرف,Unicode ke Karakter
+UnicodeToCharNodeDescription,ユニコードから文字ノード説明,Unicodeコードポイントを文字に変換します。,Converts a Unicode code point to a character.,将Unicode码点转换为字符。,將Unicode碼點轉換為字元。,유니코드 코드 포인트를 문자로 변환합니다.,Convierte un punto de código Unicode a un carácter.,تحويل نقطة رمز يونيكود إلى حرف.,Mengonversi titik kode Unicode menjadi karakter.
+CharToUnicodeNode,文字からユニコードノード名,文字からユニコード,Character to Unicode,字符转Unicode,字元轉Unicode,문자를 유니코드로,Carácter a Unicode,حرف إلى يونيكود,Karakter ke Unicode
+CharToUnicodeNodeDescription,文字からユニコードノード説明,文字をUnicodeコードポイントに変換します。,Converts a character to a Unicode code point.,将字符转换为Unicode码点。,將字元轉換為Unicode碼點。,문자를 유니코드 코드 포인트로 변환합니다.,Convierte un carácter a un punto de código Unicode.,تحويل حرف إلى نقطة رمز يونيكود.,Mengonversi karakter menjadi titik kode Unicode.
+StringNthCharNode,文字列のn文字目ノード名,n文字目取得,Get Nth Character,获取第n个字符,取得第n個字元,n번째 문자 가져오기,Obtener enésimo carácter,الحصول على الحرف n,Ambil Karakter ke-n
+StringNthCharNodeDescription,文字列のn文字目ノード説明,文字列の指定位置の文字を取得します。,Gets the character at a specified position in a string.,获取字符串中指定位置的字符。,取得字串中指定位置的字元。,문자열에서 지정된 위치의 문자를 가져옵니다.,Obtiene el carácter en una posición especificada de una cadena.,يحصل على الحرف في موضع محدد في سلسلة.,Mendapatkan karakter pada posisi tertentu dalam string.
+StringEncodeNode,文字列エンコードノード名,文字列エンコード,String Encode,字符串编码,字串編碼,문자열 인코딩,Codificar cadena,ترميز السلسلة,Enkode String
+StringEncodeNodeDescription,文字列エンコードノード説明,文字列を指定のエンコーディングでバイト列に変換します。,Encodes a string to a byte array using specified encoding.,使用指定编码将字符串转换为字节数组。,使用指定編碼將字串轉換為位元組陣列。,지정된 인코딩으로 문자열을 바이트 배열로 변환합니다.,Codifica una cadena a una matriz de bytes usando la codificación especificada.,ترميز سلسلة إلى مصفوفة بايت باستخدام الترميز المحدد.,Mengkodekan string menjadi array byte menggunakan encoding yang ditentukan.
+StringDecodeNode,文字列デコードノード名,文字列デコード,String Decode,字符串解码,字串解碼,문자열 디코딩,Decodificar cadena,فك ترميز السلسلة,Dekode String
+StringDecodeNodeDescription,文字列デコードノード説明,バイト列を指定のエンコーディングで文字列に変換します。,Decodes a byte array to a string using specified encoding.,使用指定编码将字节数组转换为字符串。,使用指定編碼將位元組陣列轉換為字串。,지정된 인코딩으로 바이트 배열을 문자열로 변환합니다.,Decodifica una matriz de bytes a una cadena usando la codificación especificada.,فك ترميز مصفوفة بايت إلى سلسلة باستخدام الترميز المحدد.,Mendekode array byte menjadi string menggunakan encoding yang ditentukan.
+NumberToStringNode,数字から文字列ノード名,数字から文字列,Number to String,数字转字符串,數字轉字串,숫자를 문자열로,Número a cadena,رقم إلى سلسلة,Angka ke String
+NumberToStringNodeDescription,数字から文字列ノード説明,数値を文字列に変換します。,Converts a number to a string.,将数字转换为字符串。,將數字轉換為字串。,숫자를 문자열로 변환합니다.,Convierte un número a una cadena.,تحويل رقم إلى سلسلة.,Mengonversi angka menjadi string.
+StringConcatNode,文字列結合ノード名,文字列結合,String Concatenate,字符串连接,字串串接,문자열 연결,Concatenar cadenas,دمج السلاسل,Gabungkan String
+StringConcatNodeDescription,文字列結合ノード説明,複数の文字列を連結します。,Concatenates multiple strings.,连接多个字符串。,串接多個字串。,여러 문자열을 연결합니다.,Concatena múltiples cadenas.,دمج عدة سلاسل.,Menggabungkan beberapa string.
+RGBToColorNode,RGB値から色ノード名,RGBから色,RGB to Color,RGB转颜色,RGB轉顏色,RGB를 색상으로,RGB a color,آر جي بي إلى لون,RGB ke Warna
+RGBToColorNodeDescription,RGB値から色ノード説明,RGB値を色に変換します。,Converts RGB values to a color.,将RGB值转换为颜色。,將RGB值轉換為顏色。,RGB 값을 색상으로 변환합니다.,Convierte valores RGB a un color.,تحويل قيم آر جي بي إلى لون.,Mengonversi nilai RGB menjadi warna.
+HSVToColorNode,HSV値から色ノード名,HSVから色,HSV to Color,HSV转颜色,HSV轉顏色,HSV를 색상으로,HSV a color,إتش إس في إلى لون,HSV ke Warna
+HSVToColorNodeDescription,HSV値から色ノード説明,HSV値を色に変換します。,Converts HSV values to a color.,将HSV值转换为颜色。,將HSV值轉換為顏色。,HSV 값을 색상으로 변환합니다.,Convierte valores HSV a un color.,تحويل قيم إتش إس في إلى لون.,Mengonversi nilai HSV menjadi warna.
+CMYKToColorNode,CMYK値から色ノード名,CMYKから色,CMYK to Color,CMYK转颜色,CMYK轉顏色,CMYK를 색상으로,CMYK a color,سي إم واي كي إلى لون,CMYK ke Warna
+CMYKToColorNodeDescription,CMYK値から色ノード説明,CMYK値を色に変換します。,Converts CMYK values to a color.,将CMYK值转换为颜色。,將CMYK值轉換為顏色。,CMYK 값을 색상으로 변환합니다.,Convierte valores CMYK a un color.,تحويل قيم سي إم واي كي إلى لون.,Mengonversi nilai CMYK menjadi warna.
+YCbCrToColorNode,YCbCr値から色ノード名,YCbCrから色,YCbCr to Color,YCbCr转颜色,YCbCr轉顏色,YCbCr를 색상으로,YCbCr a color,واي سي بي سي آر إلى لون,YCbCr ke Warna
+YCbCrToColorNodeDescription,YCbCr値から色ノード説明,YCbCr値を色に変換します。,Converts YCbCr values to a color.,将YCbCr值转换为颜色。,將YCbCr值轉換為顏色。,YCbCr 값을 색상으로 변환합니다.,Convierte valores YCbCr a un color.,تحويل قيم واي سي بي سي آر إلى لون.,Mengonversi nilai YCbCr menjadi warna.
+LabToColorNode,Lab値から色ノード名,Labから色,Lab to Color,Lab转颜色,Lab轉顏色,Lab를 색상으로,Lab a color,لاب إلى لون,Lab ke Warna
+LabToColorNodeDescription,Lab値から色ノード説明,Lab値を色に変換します。,Converts Lab values to a color.,将Lab值转换为颜色。,將Lab值轉換為顏色。,Lab 값을 색상으로 변환합니다.,Convierte valores Lab a un color.,تحويل قيم لاب إلى لون.,Mengonversi nilai Lab menjadi warna.
+OklchToColorNode,Oklch値から色ノード名,Oklchから色,Oklch to Color,Oklch转颜色,Oklch轉顏色,Oklch를 색상으로,Oklch a color,أوكلتش إلى لون,Oklch ke Warna
+OklchToColorNodeDescription,Oklch値から色ノード説明,Oklch値を色に変換します。,Converts Oklch values to a color.,将Oklch值转换为颜色。,將Oklch值轉換為顏色。,Oklch 값을 색상으로 변환합니다.,Convierte valores Oklch a un color.,تحويل قيم أوكلتش إلى لون.,Mengonversi nilai Oklch menjadi warna.
+HWBToColorNode,HWB値から色ノード名,HWBから色,HWB to Color,HWB转颜色,HWB轉顏色,HWB를 색상으로,HWB a color,إتش دبليو بي إلى لون,HWB ke Warna
+HWBToColorNodeDescription,HWB値から色ノード説明,HWB値を色に変換します。,Converts HWB values to a color.,将HWB值转换为颜色。,將HWB值轉換為顏色。,HWB 값을 색상으로 변환합니다.,Convierte valores HWB a un color.,تحويل قيم إتش دبليو بي إلى لون.,Mengonversi nilai HWB menjadi warna.
+ColorToRGBNode,色からRGB値ノード名,色からRGB,Color to RGB,颜色转RGB,顏色轉RGB,색상을 RGB로,Color a RGB,لون إلى آر جي بي,Warna ke RGB
+ColorToRGBNodeDescription,色からRGB値ノード説明,色をRGB値に変換します。,Converts a color to RGB values.,将颜色转换为RGB值。,將顏色轉換為RGB值。,색상을 RGB 값으로 변환합니다.,Convierte un color a valores RGB.,تحويل لون إلى قيم آر جي بي.,Mengonversi warna menjadi nilai RGB.
+ColorToHSVNode,色からHSV値ノード名,色からHSV,Color to HSV,颜色转HSV,顏色轉HSV,색상을 HSV로,Color a HSV,لون إلى إتش إس في,Warna ke HSV
+ColorToHSVNodeDescription,色からHSV値ノード説明,色をHSV値に変換します。,Converts a color to HSV values.,将颜色转换为HSV值。,將顏色轉換為HSV值。,색상을 HSV 값으로 변환합니다.,Convierte un color a valores HSV.,تحويل لون إلى قيم إتش إس في.,Mengonversi warna menjadi nilai HSV.
+ColorToCMYKNode,色からCMYK値ノード名,色からCMYK,Color to CMYK,颜色转CMYK,顏色轉CMYK,색상을 CMYK로,Color a CMYK,لون إلى سي إم واي كي,Warna ke CMYK
+ColorToCMYKNodeDescription,色からCMYK値ノード説明,色をCMYK値に変換します。,Converts a color to CMYK values.,将颜色转换为CMYK值。,將顏色轉換為CMYK值。,색상을 CMYK 값으로 변환합니다.,Convierte un color a valores CMYK.,تحويل لون إلى قيم سي إم واي كي.,Mengonversi warna menjadi nilai CMYK.
+ColorToYCbCrNode,色からYCbCr値ノード名,色からYCbCr,Color to YCbCr,颜色转YCbCr,顏色轉YCbCr,색상을 YCbCr로,Color a YCbCr,لون إلى واي سي بي سي آر,Warna ke YCbCr
+ColorToYCbCrNodeDescription,色からYCbCr値ノード説明,色をYCbCr値に変換します。,Converts a color to YCbCr values.,将颜色转换为YCbCr值。,將顏色轉換為YCbCr值。,색상을 YCbCr 값으로 변환합니다.,Convierte un color a valores YCbCr.,تحويل لون إلى قيم واي سي بي سي آر.,Mengonversi warna menjadi nilai YCbCr.
+ColorToLabNode,色からLab値ノード名,色からLab,Color to Lab,颜色转Lab,顏色轉Lab,색상을 Lab로,Color a Lab,لون إلى لاب,Warna ke Lab
+ColorToLabNodeDescription,色からLab値ノード説明,色をLab値に変換します。,Converts a color to Lab values.,将颜色转换为Lab值。,將顏色轉換為Lab值。,색상을 Lab 값으로 변환합니다.,Convierte un color a valores Lab.,تحويل لون إلى قيم لاب.,Mengonversi warna menjadi nilai Lab.
+ColorToOklchNode,色からOklch値ノード名,色からOklch,Color to Oklch,颜色转Oklch,顏色轉Oklch,색상을 Oklch로,Color a Oklch,لون إلى أوكلتش,Warna ke Oklch
+ColorToOklchNodeDescription,色からOklch値ノード説明,色をOklch値に変換します。,Converts a color to Oklch values.,将颜色转换为Oklch值。,將顏色轉換為Oklch值。,색상을 Oklch 값으로 변환합니다.,Convierte un color a valores Oklch.,تحويل لون إلى قيم أوكلتش.,Mengonversi warna menjadi nilai Oklch.
+ColorToHWBNode,色からHWB値ノード名,色からHWB,Color to HWB,颜色转HWB,顏色轉HWB,색상을 HWB로,Color a HWB,لون إلى إتش دبليو بي,Warna ke HWB
+ColorToHWBNodeDescription,色からHWB値ノード説明,色をHWB値に変換します。,Converts a color to HWB values.,将颜色转换为HWB值。,將顏色轉換為HWB值。,색상을 HWB 값으로 변환합니다.,Convierte un color a valores HWB.,تحويل لون إلى قيم إتش دبليو بي.,Mengonversi warna menjadi nilai HWB.
+CodePoint,コードポイント入力ラベル,コードポイント,Code Point,码点,碼點,코드 포인트,Punto de código,نقطة الرمز,Titik kode
+CodePointDescription,コードポイント入力説明,Unicodeコードポイント(整数)。,A Unicode code point (integer).,Unicode 代码点（整数）。,Unicode 碼點（整數）。,유니코드 코드 포인트(정수)。,Un punto de código Unicode (entero).,نقطة رمز Unicode (عدد صحيح).,Titik kode Unicode (bilangan bulat).
+Character,文字入力ラベル,文字,Character,字符,字元,문자,Carácter,حرف,Karakter
+CharacterDescription,文字入力説明,1文字の文字列。先頭以外は無視されます。,A single character. Any characters beyond the first are ignored.,单个字符。第一个字符之后的所有字符都会被忽略。,單一字元。第一個字元之後的所有字元都會被忽略。,단일 문자 문자열입니다. 첫 번째 문자 이후의 문자는 모두 무시됩니다.,Un solo carácter. Se ignoran todos los caracteres posteriores al primero.,حرف واحد. يتم تجاهل جميع الأحرف التي تأتي بعد الحرف الأول.,Satu karakter. Semua karakter setelah karakter pertama akan diabaikan.
+Text,文字列入力ラベル,文字列,Text,文本,文字列,텍스트,Texto,نص,Teks
+TextDescription,文字列入力説明,対象の文字列。,The target string.,目标字符串。,目標字串。,대상 문자열입니다.,La cadena de destino.,السلسلة النصية المستهدفة.,String target.
+Bytes,バイト列ポートラベル,バイト列,Bytes,字节数组,位元組陣列,바이트 배열,Bytes,بايتات,Byte
+BytesDescription,バイト列ポート説明,バイト配列。,A byte array.,字节数组。,位元組陣列。,바이트 배열입니다.,Una matriz de bytes.,مصفوفة من البايتات.,Array byte.
+Encoding,エンコーディング選択ラベル,エンコーディング,Encoding,编码,編碼,인코딩,Codificación,الترميز,Encoding
+EncodingDescription,エンコーディング選択説明,文字エンコーディングの種類。,The character encoding to use.,要使用的字符编码类型。,要使用的字元編碼類型。,사용할 문자 인코딩 유형입니다.,El tipo de codificación de caracteres que se utilizará.,نوع ترميز الأحرف المطلوب استخدامه.,Jenis pengodean karakter yang akan digunakan.
+EncodingUtf8,エンコーディング選択肢,UTF-8,UTF-8,UTF-8,UTF-8,UTF-8,UTF-8,UTF-8,UTF-8
+EncodingUtf16,エンコーディング選択肢,UTF-16,UTF-16,UTF-16,UTF-16,UTF-16,UTF-16,UTF-16,UTF-16
+EncodingUtf32,エンコーディング選択肢,UTF-32,UTF-32,UTF-32,UTF-32,UTF-32,UTF-32,UTF-32,UTF-32
+EncodingShiftJis,エンコーディング選択肢,Shift_JIS,Shift_JIS,Shift_JIS,Shift_JIS,Shift_JIS,Shift_JIS,Shift_JIS,Shift_JIS
+EncodingAscii,エンコーディング選択肢,ASCII,ASCII,ASCII,ASCII,ASCII,ASCII,ASCII,ASCII
+StringConcatInput1,文字列結合の入力1ラベル,文字列1,String 1,字符串 1,字串 1,문자열 1,Cadena 1,السلسلة 1,String 1
+StringConcatInput2,文字列結合の入力2ラベル,文字列2,String 2,字符串 2,字串 2,문자열 2,Cadena 2,السلسلة 2,String 2
+StringConcatInput3,文字列結合の入力3ラベル,文字列3,String 3,字符串 3,字串 3,문자열 3,Cadena 3,السلسلة 3,String 3
+StringConcatInput4,文字列結合の入力4ラベル,文字列4,String 4,字符串 4,字串 4,문자열 4,Cadena 4,السلسلة 4,String 4
+StringConcatSeparator,文字列結合の区切り文字ラベル,区切り文字,Separator,分隔符,分隔符,구분자,Separador,الفاصل,الفاصل
+StringConcatSeparatorDescription,文字列結合の区切り文字説明,連結時に各文字列の間に挿入する文字列。,The string inserted between each value when joining.,连接时插入到各值之间的字符串。,串接時插入於各值之間的字串。,각 값을 연결할 때 각 값 사이에 삽입되는 문자열입니다.,La cadena que se inserta entre cada valor al unirlos.,السلسلة النصية التي يتم إدراجها بين كل قيمة عند دمجها.,String yang disisipkan di antara setiap nilai saat menggabungkannya.
+Red,赤成分ラベル,赤,Red,红,紅,빨강,Rojo,أحمر,Merah
+RedDescription,赤成分説明,赤成分(0-255)。,The red channel (0-255).,红色通道（0-255）。,紅色通道（0-255）。,빨강 채널(0-255)입니다.,El canal rojo (0-255).,قناة الأحمر (0-255).,Kanal merah (0-255).
+Green,緑成分ラベル,緑,Green,绿,綠,초록,Verde,أخضر,Hijau
+GreenDescription,緑成分説明,緑成分(0-255)。,The green channel (0-255).,绿色通道（0-255）。,綠色通道（0-255）。,초록 채널(0-255)입니다.,El canal verde (0-255).,قناة الأخضر (0-255).,Kanal hijau (0-255).
+Blue,青成分ラベル,青,Blue,蓝,藍,파랑,Azul,أزرق,Biru
+BlueDescription,青成分説明,青成分(0-255)。,The blue channel (0-255).,蓝色通道（0-255）。,藍色通道（0-255）。,파랑 채널(0-255)입니다.,El canal azul (0-255).,قناة الأزرق (0-255).,Kanal biru (0-255).
+ColorValue,色ポートラベル,色,Color,颜色,顏色,색상,Color,لون,Warna
+ColorValueDescription,色ポート説明,色の値。,The color value.,颜色值。,顏色值。,색상 값입니다.,El valor del color.,قيمة اللون.,Nilai warna.
+Hue,色相ラベル,色相,Hue,色相,色相,색조,Tono,درجة اللون,Nada
+HueDescription,色相説明,色相(0-360度)。,The hue (0-360 degrees).,色相（0-360度）。,色相（0-360 度）。,색조(0-360도)입니다.,El tono (0-360 grados).,درجة اللون (0-360 درجة).,Nada (0-360 derajat).
+Saturation,彩度ラベル,彩度,Saturation,饱和度,飽和度,채도,Saturación,التشبع,Saturasi
+SaturationDescription,彩度説明,彩度(0-100%)。,The saturation (0-100%).,饱和度（0-100%）。,飽和度（0-100%）。,채도(0-100%)입니다.,La saturación (0-100%).,التشبع (0-100%).,Saturasi (0-100%).
+Brightness,明度ラベル,明度,Brightness,明度,明度,밝기,Brillo,السطوع,Kecerahan
+BrightnessDescription,明度説明,明度(HSVのV、0-100%)。,The brightness/value component of HSV (0-100%).,明度（HSV 的 V 分量，0-100%）。,明度（HSV 的 V 分量，0-100%）。,HSV의 밝기/값 구성 요소(0-100%)입니다.,El componente de brillo/valor de HSV (0-100%).,مكوّن السطوع/القيمة في HSV (0-100%).,Komponen kecerahan/nilai HSV (0-100%).
+CmykCyan,CMYK シアンラベル,シアン,Cyan,青色,青色,시안,Cian,سماوي,Sian
+CmykCyanDescription,CMYK シアン説明,シアン成分(0-100%)。,The cyan channel (0-100%).,青色通道（0-100%）。,青色通道（0-100%）。,시안 채널(0-100%)입니다.,El canal cian (0-100%).,قناة السماوي (0-100%).,Kanal sian (0-100%).
+CmykMagenta,CMYK マゼンタラベル,マゼンタ,Magenta,品红,洋紅,마젠타,Magenta,أرجواني,Magenta
+CmykMagentaDescription,CMYK マゼンタ説明,マゼンタ成分(0-100%)。,The magenta channel (0-100%).,品红通道（0-100%）。,洋紅通道（0-100%）。,마젠타 채널(0-100%)입니다.,El canal magenta (0-100%).,قناة الأرجواني (0-100%).,Kanal magenta (0-100%).
+CmykYellow,CMYK イエローラベル,イエロー,Yellow,黄色,黃色,노랑,Amarillo,أصفر,Kuning
+CmykYellowDescription,CMYK イエロー説明,イエロー成分(0-100%)。,The yellow channel (0-100%).,黄色通道（0-100%）。,黃色通道（0-100%）。,노랑 채널(0-100%)입니다.,El canal amarillo (0-100%).,قناة الأصفر (0-100%).,Kanal kuning (0-100%).
+CmykKey,CMYK キープレートラベル,キープレート(黒),Key (Black),黑版,黑版,키 플레이트(검정),Clave (negro),الأسود (Key),Key (Hitam)
+CmykKeyDescription,CMYK キープレート説明,キープレート(黒)成分(0-100%)。,The key/black channel (0-100%).,黑版通道（0-100%）。,黑版通道（0-100%）。,키/검정 채널(0-100%)입니다.,El canal clave/negro (0-100%).,قناة المفتاح/الأسود (0-100%).,Kanal key/hitam (0-100%).
+Luma,YCbCr輝度ラベル,輝度(Y),Luma (Y),亮度（Y）,亮度（Y）,휘도(Y),Luma (Y),اللمعان (Y),Luma (Y)
+LumaDescription,YCbCr輝度説明,輝度成分(0-255、BT.601フルレンジ)。,The luma channel (0-255, BT.601 full range).,亮度通道（0-255，BT.601 全范围）。,亮度通道（0-255，BT.601 全範圍）。,휘도 채널(0-255, BT.601 전체 범위)입니다.,El canal de luminancia (0-255, rango completo BT.601).,قناة اللمعان (0-255، النطاق الكامل BT.601).,Kanal luma (0-255, rentang penuh BT.601).
+ChromaBlue,YCbCr Cbラベル,青色差(Cb),Chroma Blue (Cb),蓝色色度（Cb）,藍色色度（Cb）,청색 색차(Cb),Crominancia azul (Cb),التلون الأزرق (Cb),Kroma biru (Cb)
+ChromaBlueDescription,YCbCr Cb説明,青色差成分(0-255、BT.601フルレンジ)。,The Cb chroma channel (0-255, BT.601 full range).,Cb 色度通道（0-255，BT.601 全范围）。,Cb 色度通道（0-255，BT.601 全範圍）。,Cb 색차 채널(0-255, BT.601 전체 범위)입니다.,El canal de crominancia Cb (0-255, rango completo BT.601).,قناة التلون Cb (0-255، النطاق الكامل BT.601).,Kanal kroma Cb (0-255, rentang penuh BT.601).
+ChromaRed,YCbCr Crラベル,赤色差(Cr),Chroma Red (Cr),红色色度（Cr）,紅色色度（Cr）,적색 색차(Cr),Crominancia roja (Cr),التلون الأحمر (Cr),Kroma merah (Cr)
+ChromaRedDescription,YCbCr Cr説明,赤色差成分(0-255、BT.601フルレンジ)。,The Cr chroma channel (0-255, BT.601 full range).,Cr 色度通道（0-255，BT.601 全范围）。,Cr 色度通道（0-255，BT.601 全範圍）。,Cr 색차 채널(0-255, BT.601 전체 범위)입니다.,El canal de crominancia Cr (0-255, rango completo BT.601).,قناة التلون Cr (0-255، النطاق الكامل BT.601).,Kanal kroma Cr (0-255, rentang penuh BT.601).
+LabLightness,Lab明度ラベル,明度(L),Lightness (L),明度（L）,明度（L）,명도(L),Luminosidad (L),الإضاءة (L),Kecerahan (L)
+LabLightnessDescription,Lab明度説明,CIE Lab明度成分(0-100)。,The CIE Lab lightness channel (0-100).,CIE Lab 明度通道（0-100）。,CIE Lab 明度通道（0-100）。,CIE Lab 명도 채널(0-100)입니다.,El canal de luminosidad CIE Lab (0-100).,قناة الإضاءة في CIE Lab (0-100).,Kanal kecerahan CIE Lab (0-100).
+LabA,Lab a*ラベル,a成分,a,a 分量,a 分量,a 성분,Componente a,المكوّن a,Komponen a
+LabADescription,Lab a*説明,CIE Lab a*成分(緑-赤軸、-128〜127)。,The CIE Lab a* channel, green-red axis (-128 to 127).,CIE Lab a* 通道，绿-红轴（-128 至 127）。,CIE Lab a* 通道，綠-紅軸（-128 至 127）。,CIE Lab a* 채널, 녹색-빨간색 축(-128~127)입니다.,El canal a* de CIE Lab, eje verde-rojo (-128 a 127).,قناة a* في CIE Lab، محور الأخضر-الأحمر (-128 إلى 127).,Kanal a* CIE Lab, sumbu hijau-merah (-128 hingga 127).
+LabB,Lab b*ラベル,b成分,b,b 分量,b 分量,b 성분,Componente b,المكوّن b,Komponen b
+LabBDescription,Lab b*説明,CIE Lab b*成分(青-黄軸、-128〜127)。,The CIE Lab b* channel, blue-yellow axis (-128 to 127).,CIE Lab b* 通道，蓝-黄轴（-128 至 127）。,CIE Lab b* 通道，藍-黃軸（-128 至 127）。,CIE Lab b* 채널, 파란색-노란색 축(-128~127)입니다.,El canal b* de CIE Lab, eje azul-amarillo (-128 a 127).,قناة b* في CIE Lab، محور الأزرق-الأصفر (-128 إلى 127).,Kanal b* CIE Lab, sumbu biru-kuning (-128 hingga 127).
+OklchLightness,Oklch明度ラベル,明度(L),Lightness (L),明度（L）,明度（L）,명도(L),Luminosidad (L),الإضاءة (L),Kecerahan (L)
+OklchLightnessDescription,Oklch明度説明,Oklch明度成分(0-1)。,The Oklch lightness channel (0-1).,Oklch 明度通道（0-1）。,Oklch 明度通道（0-1）。,Oklch 명도 채널(0-1)입니다.,El canal de luminosidad Oklch (0-1).,قناة الإضاءة في Oklch (0-1).,Kanal kecerahan Oklch (0-1).
+OklchChroma,Oklch彩度ラベル,彩度(C),Chroma (C),色度（C）,色度（C）,채도(C),Cromaticidad (C),التلون (C),Kroma (C)
+OklchChromaDescription,Oklch彩度説明,Oklch彩度成分(理論上0-0.5程度)。,The Oklch chroma channel (roughly 0-0.5 in practice).,Oklch 色度通道（实际约为 0-0.5）。,Oklch 色度通道（實際約為 0-0.5）。,Oklch 채도 채널(실제로는 약 0~0.5)입니다.,El canal de cromaticidad Oklch (aproximadamente 0-0,5 en la práctica).,قناة التلون في Oklch (حوالي 0-0.5 عمليًا).,Kanal kroma Oklch (sekitar 0-0,5 dalam praktik).
+HwbWhiteness,HWB白色度ラベル,白色度(W),Whiteness (W),白度（W）,白度（W）,백색도(W),Blancura (W),البياض (W),Keputihan (W)
+HwbWhitenessDescription,HWB白色度説明,白色度成分(0-100%)。,The whiteness channel (0-100%).,白度通道（0-100%）。,白度通道（0-100%）。,백색도 채널(0-100%)입니다.,El canal de blancura (0-100%).,قناة البياض (0-100%).,Kanal keputihan (0-100%).
+HwbBlackness,HWB黒色度ラベル,黒色度(B),Blackness (B),黑度（B）,黑度（B）,흑색도(B),Negrura (B),السواد (B),Kehitaman (B)
+HwbBlacknessDescription,HWB黒色度説明,黒色度成分(0-100%)。,The blackness channel (0-100%).,黑度通道（0-100%）。,黑度通道（0-100%）。,흑색도 채널(0-100%)입니다.,El canal de negrura (0-100%).,قناة السواد (0-100%).,Kanal kehitaman (0-100%).
+MaxFractionDigits,最大少数桁数入力ラベル,最大少数桁数,Maximum Fraction Digits,最大小数位数,最大小數位數,최대 소수 자릿수,Dígitos decimales máximos,الحد الأقصى لخانات الجزء العشري,Jumlah digit pecahan maksimum
+MaxFractionDigitsDescription,最大少数桁数入力説明,小数部の最大桁数。,The maximum number of fractional digits.,小数部分的最大位数。,小數部分的最大位數。,소수 부분의 최대 자릿수입니다.,El número máximo de dígitos decimales.,الحد الأقصى لعدد خانات الجزء العشري.,Jumlah maksimum digit pecahan.
+Alignment,位置揃え入力ラベル,位置揃え,Alignment,对齐方式,對齊方式,정렬,Alineación,المحاذاة,Perataan
+AlignmentDescription,位置揃え入力説明,出力文字列の位置揃え。,The alignment of the output string.,输出字符串的对齐方式。,輸出字串的對齊方式。,출력 문자열의 정렬 방식입니다.,La alineación de la cadena de salida.,محاذاة سلسلة الإخراج.,Perataan string keluaran.
+AlignmentWidthDescription,位置揃え幅入力説明,位置揃えに使用する文字幅。,The character width used for alignment.,用于对齐的字符宽度。,用於對齊的字元寬度。,정렬에 사용하는 문자 너비입니다.,El ancho de caracteres utilizado para la alineación.,عرض الأحرف المستخدم للمحاذاة.,Lebar karakter yang digunakan untuk perataan.
+AlignmentLeft,左揃え,左揃え,Left,左对齐,靠左對齊,왼쪽 정렬,Alineación a la izquierda,محاذاة لليسار,Rata kiri
+AlignmentCenter,中央揃え,中央揃え,Center,居中对齐,置中對齊,가운데 정렬,Alineación centrada,محاذاة للوسط,Rata tengah
+AlignmentRight,右揃え,右揃え,Right,右对齐,靠右對齊,오른쪽 정렬,Alineación a la derecha,محاذاة لليمين,Rata kanan
+MinIntegerDigits,最小整数桁数入力ラベル,最小整数桁数,Minimum Integer Digits,最小整数位数,最小整數位數,최소 정수 자릿수,Dígitos enteros mínimos,الحد الأدنى لخانات الجزء الصحيح,Jumlah digit bilangan bulat minimum
+MinIntegerDigitsDescription,最小整数桁数入力説明,整数部の最小桁数。,The minimum number of integer digits.,整数部分的最小位数。,整數部分的最小位數。,정수 부분의 최소 자릿수입니다.,El número mínimo de dígitos enteros.,الحد الأدنى لعدد خانات الجزء الصحيح.,Jumlah minimum digit bilangan bulat.
+FractionDigits,小数桁数入力ラベル,小数桁数,Fraction Digits,小数位数,小數位數,소수 자릿수,Dígitos decimales,خانات الجزء العشري,Jumlah digit pecahan
+FractionDigitsDescription,小数桁数入力説明,小数点以下の桁数。,The number of digits after the decimal point.,小数点后的位数。,小數點後的位數。,소수점 이하 자릿수입니다.,El número de dígitos después del punto decimal.,عدد الخانات بعد الفاصلة العشرية.,Jumlah digit setelah titik desimal.
+IntegerPadding,整数部埋め入力ラベル,整数部の埋め,Integer Padding,整数部分填充,整數部分填充,정수 부분 채우기,Relleno de la parte entera,حشو الجزء الصحيح,Padding bagian bilangan bulat
+IntegerPaddingDescription,整数部埋め入力説明,整数部の不足桁を埋める文字。,The character used to fill missing integer digits.,用于填充整数部分不足位数的字符。,用於填充整數部分不足位數的字元。,정수 부분의 부족한 자릿수를 채우는 문자입니다.,El carácter utilizado para rellenar los dígitos enteros que faltan.,الحرف المستخدم لملء خانات الجزء الصحيح الناقصة.,Karakter yang digunakan untuk mengisi digit bilangan bulat yang kurang.
+IntegerPaddingZero,0埋め,0埋め,Zero,用0填充,以0填充,0으로 채우기,Ceros,أصفار,Nol
+IntegerPaddingSpace,空白埋め,空白埋め,Space,用空格填充,以空格填充,공백으로 채우기,Espacios,مسافات,Spasi
+ZeroFormat,0表示入力ラベル,0の表示,Zero Display,0的显示,0的顯示,0 표시,Mostrar cero,إظهار الصفر,Tampilan nol
+ZeroFormatDescription,0表示入力説明,0未満の小数を表示する際に整数部の0を表示するかどうか。,Whether to display the leading zero when displaying a fractional value less than 1.,显示小于1的小数时是否显示整数部分的0。,顯示小於1的小數時是否顯示整數部分的0。,1 미만의 소수를 표시할 때 정수 부분의 0을 표시할지 여부입니다.,Indica si se muestra el cero inicial al mostrar un valor decimal menor que 1.,ما إذا كان سيتم عرض الصفر البادئ عند عرض قيمة عشرية أقل من 1.,Apakah nol di depan ditampilkan saat menampilkan nilai pecahan kurang dari 1.
+ZeroFormatInclude,0を表示,0を表示,Include Zero,显示0,顯示0,0 표시,Mostrar cero,إظهار الصفر,Tampilkan nol
+ZeroFormatOmit,0を省略,0を省略,Omit Zero,省略0,省略0,0 생략,Omitir cero,حذف الصفر,Abaikan nol

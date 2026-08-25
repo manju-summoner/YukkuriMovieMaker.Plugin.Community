@@ -69,6 +69,9 @@
 <data name="VideoEffectCategoryName" xml:space="preserve"><value>视频效果</value></data>
 <data name="AdvancedCategoryName" xml:space="preserve"><value>高级</value></data>
 <data name="TransformCategoryName" xml:space="preserve"><value>坐标变换</value></data>
+  <data name="ValueCategoryName" xml:space="preserve"><value>值</value></data>
+  <data name="StringCategoryName" xml:space="preserve"><value>字符串</value></data>
+  <data name="ColorCategoryName" xml:space="preserve"><value>颜色</value></data>
 <data name="BrushName" xml:space="preserve"><value>画笔</value></data>
 <data name="AddNode" xml:space="preserve"><value>加法</value></data>
 <data name="AddNodeDescription" xml:space="preserve"><value>将两个数相加。</value></data>
@@ -495,4 +498,137 @@
 <data name="ReturnNode" xml:space="preserve"><value>返回值</value></data>
 <data name="ReturnNodeDescription" xml:space="preserve"><value>接收节点图的计算结果。</value></data>
 <data name="NoMatchingResults" xml:space="preserve"><value>(无匹配项)</value></data>
+  <data name="NumberNode" xml:space="preserve"><value>数值</value></data>
+  <data name="NumberNodeDescription" xml:space="preserve"><value>输出数值。</value></data>
+  <data name="StringNode" xml:space="preserve"><value>字符串</value></data>
+  <data name="StringNodeDescription" xml:space="preserve"><value>输出字符串。</value></data>
+  <data name="BooleanNode" xml:space="preserve"><value>布尔值</value></data>
+  <data name="BooleanNodeDescription" xml:space="preserve"><value>输出布尔值。</value></data>
+  <data name="ColorNode" xml:space="preserve"><value>颜色</value></data>
+  <data name="ColorNodeDescription" xml:space="preserve"><value>输出颜色。</value></data>
+  <data name="UnicodeToCharNode" xml:space="preserve"><value>Unicode转字符</value></data>
+  <data name="UnicodeToCharNodeDescription" xml:space="preserve"><value>将Unicode码点转换为字符。</value></data>
+  <data name="CharToUnicodeNode" xml:space="preserve"><value>字符转Unicode</value></data>
+  <data name="CharToUnicodeNodeDescription" xml:space="preserve"><value>将字符转换为Unicode码点。</value></data>
+  <data name="StringNthCharNode" xml:space="preserve"><value>获取第n个字符</value></data>
+  <data name="StringNthCharNodeDescription" xml:space="preserve"><value>获取字符串中指定位置的字符。</value></data>
+  <data name="StringEncodeNode" xml:space="preserve"><value>字符串编码</value></data>
+  <data name="StringEncodeNodeDescription" xml:space="preserve"><value>使用指定编码将字符串转换为字节数组。</value></data>
+  <data name="StringDecodeNode" xml:space="preserve"><value>字符串解码</value></data>
+  <data name="StringDecodeNodeDescription" xml:space="preserve"><value>使用指定编码将字节数组转换为字符串。</value></data>
+  <data name="NumberToStringNode" xml:space="preserve"><value>数字转字符串</value></data>
+  <data name="NumberToStringNodeDescription" xml:space="preserve"><value>将数字转换为字符串。</value></data>
+  <data name="StringConcatNode" xml:space="preserve"><value>字符串连接</value></data>
+  <data name="StringConcatNodeDescription" xml:space="preserve"><value>连接多个字符串。</value></data>
+  <data name="RGBToColorNode" xml:space="preserve"><value>RGB转颜色</value></data>
+  <data name="RGBToColorNodeDescription" xml:space="preserve"><value>将RGB值转换为颜色。</value></data>
+  <data name="HSVToColorNode" xml:space="preserve"><value>HSV转颜色</value></data>
+  <data name="HSVToColorNodeDescription" xml:space="preserve"><value>将HSV值转换为颜色。</value></data>
+  <data name="CMYKToColorNode" xml:space="preserve"><value>CMYK转颜色</value></data>
+  <data name="CMYKToColorNodeDescription" xml:space="preserve"><value>将CMYK值转换为颜色。</value></data>
+  <data name="YCbCrToColorNode" xml:space="preserve"><value>YCbCr转颜色</value></data>
+  <data name="YCbCrToColorNodeDescription" xml:space="preserve"><value>将YCbCr值转换为颜色。</value></data>
+  <data name="LabToColorNode" xml:space="preserve"><value>Lab转颜色</value></data>
+  <data name="LabToColorNodeDescription" xml:space="preserve"><value>将Lab值转换为颜色。</value></data>
+  <data name="OklchToColorNode" xml:space="preserve"><value>Oklch转颜色</value></data>
+  <data name="OklchToColorNodeDescription" xml:space="preserve"><value>将Oklch值转换为颜色。</value></data>
+  <data name="HWBToColorNode" xml:space="preserve"><value>HWB转颜色</value></data>
+  <data name="HWBToColorNodeDescription" xml:space="preserve"><value>将HWB值转换为颜色。</value></data>
+  <data name="ColorToRGBNode" xml:space="preserve"><value>颜色转RGB</value></data>
+  <data name="ColorToRGBNodeDescription" xml:space="preserve"><value>将颜色转换为RGB值。</value></data>
+  <data name="ColorToHSVNode" xml:space="preserve"><value>颜色转HSV</value></data>
+  <data name="ColorToHSVNodeDescription" xml:space="preserve"><value>将颜色转换为HSV值。</value></data>
+  <data name="ColorToCMYKNode" xml:space="preserve"><value>颜色转CMYK</value></data>
+  <data name="ColorToCMYKNodeDescription" xml:space="preserve"><value>将颜色转换为CMYK值。</value></data>
+  <data name="ColorToYCbCrNode" xml:space="preserve"><value>颜色转YCbCr</value></data>
+  <data name="ColorToYCbCrNodeDescription" xml:space="preserve"><value>将颜色转换为YCbCr值。</value></data>
+  <data name="ColorToLabNode" xml:space="preserve"><value>颜色转Lab</value></data>
+  <data name="ColorToLabNodeDescription" xml:space="preserve"><value>将颜色转换为Lab值。</value></data>
+  <data name="ColorToOklchNode" xml:space="preserve"><value>颜色转Oklch</value></data>
+  <data name="ColorToOklchNodeDescription" xml:space="preserve"><value>将颜色转换为Oklch值。</value></data>
+  <data name="ColorToHWBNode" xml:space="preserve"><value>颜色转HWB</value></data>
+  <data name="ColorToHWBNodeDescription" xml:space="preserve"><value>将颜色转换为HWB值。</value></data>
+  <data name="CodePoint" xml:space="preserve"><value>码点</value></data>
+  <data name="CodePointDescription" xml:space="preserve"><value>Unicode 代码点（整数）。</value></data>
+  <data name="Character" xml:space="preserve"><value>字符</value></data>
+  <data name="CharacterDescription" xml:space="preserve"><value>单个字符。第一个字符之后的所有字符都会被忽略。</value></data>
+  <data name="Text" xml:space="preserve"><value>文本</value></data>
+  <data name="TextDescription" xml:space="preserve"><value>目标字符串。</value></data>
+  <data name="Bytes" xml:space="preserve"><value>字节数组</value></data>
+  <data name="BytesDescription" xml:space="preserve"><value>字节数组。</value></data>
+  <data name="Encoding" xml:space="preserve"><value>编码</value></data>
+  <data name="EncodingDescription" xml:space="preserve"><value>要使用的字符编码类型。</value></data>
+  <data name="EncodingUtf8" xml:space="preserve"><value>UTF-8</value></data>
+  <data name="EncodingUtf16" xml:space="preserve"><value>UTF-16</value></data>
+  <data name="EncodingUtf32" xml:space="preserve"><value>UTF-32</value></data>
+  <data name="EncodingShiftJis" xml:space="preserve"><value>Shift_JIS</value></data>
+  <data name="EncodingAscii" xml:space="preserve"><value>ASCII</value></data>
+  <data name="StringConcatInput1" xml:space="preserve"><value>字符串 1</value></data>
+  <data name="StringConcatInput2" xml:space="preserve"><value>字符串 2</value></data>
+  <data name="StringConcatInput3" xml:space="preserve"><value>字符串 3</value></data>
+  <data name="StringConcatInput4" xml:space="preserve"><value>字符串 4</value></data>
+  <data name="StringConcatSeparator" xml:space="preserve"><value>分隔符</value></data>
+  <data name="StringConcatSeparatorDescription" xml:space="preserve"><value>连接时插入到各值之间的字符串。</value></data>
+  <data name="Red" xml:space="preserve"><value>红</value></data>
+  <data name="RedDescription" xml:space="preserve"><value>红色通道（0-255）。</value></data>
+  <data name="Green" xml:space="preserve"><value>绿</value></data>
+  <data name="GreenDescription" xml:space="preserve"><value>绿色通道（0-255）。</value></data>
+  <data name="Blue" xml:space="preserve"><value>蓝</value></data>
+  <data name="BlueDescription" xml:space="preserve"><value>蓝色通道（0-255）。</value></data>
+  <data name="ColorValue" xml:space="preserve"><value>颜色</value></data>
+  <data name="ColorValueDescription" xml:space="preserve"><value>颜色值。</value></data>
+  <data name="Hue" xml:space="preserve"><value>色相</value></data>
+  <data name="HueDescription" xml:space="preserve"><value>色相（0-360度）。</value></data>
+  <data name="Saturation" xml:space="preserve"><value>饱和度</value></data>
+  <data name="SaturationDescription" xml:space="preserve"><value>饱和度（0-100%）。</value></data>
+  <data name="Brightness" xml:space="preserve"><value>明度</value></data>
+  <data name="BrightnessDescription" xml:space="preserve"><value>明度（HSV 的 V 分量，0-100%）。</value></data>
+  <data name="CmykCyan" xml:space="preserve"><value>青色</value></data>
+  <data name="CmykCyanDescription" xml:space="preserve"><value>青色通道（0-100%）。</value></data>
+  <data name="CmykMagenta" xml:space="preserve"><value>品红</value></data>
+  <data name="CmykMagentaDescription" xml:space="preserve"><value>品红通道（0-100%）。</value></data>
+  <data name="CmykYellow" xml:space="preserve"><value>黄色</value></data>
+  <data name="CmykYellowDescription" xml:space="preserve"><value>黄色通道（0-100%）。</value></data>
+  <data name="CmykKey" xml:space="preserve"><value>黑版</value></data>
+  <data name="CmykKeyDescription" xml:space="preserve"><value>黑版通道（0-100%）。</value></data>
+  <data name="Luma" xml:space="preserve"><value>亮度（Y）</value></data>
+  <data name="LumaDescription" xml:space="preserve"><value>BT.601 full range).</value></data>
+  <data name="ChromaBlue" xml:space="preserve"><value>蓝色色度（Cb）</value></data>
+  <data name="ChromaBlueDescription" xml:space="preserve"><value>BT.601 full range).</value></data>
+  <data name="ChromaRed" xml:space="preserve"><value>红色色度（Cr）</value></data>
+  <data name="ChromaRedDescription" xml:space="preserve"><value>BT.601 full range).</value></data>
+  <data name="LabLightness" xml:space="preserve"><value>明度（L）</value></data>
+  <data name="LabLightnessDescription" xml:space="preserve"><value>CIE Lab 明度通道（0-100）。</value></data>
+  <data name="LabA" xml:space="preserve"><value>a 分量</value></data>
+  <data name="LabADescription" xml:space="preserve"><value>green-red axis (-128 to 127).</value></data>
+  <data name="LabB" xml:space="preserve"><value>b 分量</value></data>
+  <data name="LabBDescription" xml:space="preserve"><value>blue-yellow axis (-128 to 127).</value></data>
+  <data name="OklchLightness" xml:space="preserve"><value>明度（L）</value></data>
+  <data name="OklchLightnessDescription" xml:space="preserve"><value>Oklch 明度通道（0-1）。</value></data>
+  <data name="OklchChroma" xml:space="preserve"><value>色度（C）</value></data>
+  <data name="OklchChromaDescription" xml:space="preserve"><value>Oklch 色度通道（实际约为 0-0.5）。</value></data>
+  <data name="HwbWhiteness" xml:space="preserve"><value>白度（W）</value></data>
+  <data name="HwbWhitenessDescription" xml:space="preserve"><value>白度通道（0-100%）。</value></data>
+  <data name="HwbBlackness" xml:space="preserve"><value>黑度（B）</value></data>
+  <data name="HwbBlacknessDescription" xml:space="preserve"><value>黑度通道（0-100%）。</value></data>
+  <data name="MaxFractionDigits" xml:space="preserve"><value>最大小数位数</value></data>
+  <data name="MaxFractionDigitsDescription" xml:space="preserve"><value>小数部分的最大位数。</value></data>
+  <data name="Alignment" xml:space="preserve"><value>对齐方式</value></data>
+  <data name="AlignmentDescription" xml:space="preserve"><value>输出字符串的对齐方式。</value></data>
+  <data name="AlignmentWidthDescription" xml:space="preserve"><value>用于对齐的字符宽度。</value></data>
+  <data name="AlignmentLeft" xml:space="preserve"><value>左对齐</value></data>
+  <data name="AlignmentCenter" xml:space="preserve"><value>居中对齐</value></data>
+  <data name="AlignmentRight" xml:space="preserve"><value>右对齐</value></data>
+  <data name="MinIntegerDigits" xml:space="preserve"><value>最小整数位数</value></data>
+  <data name="MinIntegerDigitsDescription" xml:space="preserve"><value>整数部分的最小位数。</value></data>
+  <data name="FractionDigits" xml:space="preserve"><value>小数位数</value></data>
+  <data name="FractionDigitsDescription" xml:space="preserve"><value>小数点后的位数。</value></data>
+  <data name="IntegerPadding" xml:space="preserve"><value>整数部分填充</value></data>
+  <data name="IntegerPaddingDescription" xml:space="preserve"><value>用于填充整数部分不足位数的字符。</value></data>
+  <data name="IntegerPaddingZero" xml:space="preserve"><value>用0填充</value></data>
+  <data name="IntegerPaddingSpace" xml:space="preserve"><value>用空格填充</value></data>
+  <data name="ZeroFormat" xml:space="preserve"><value>0的显示</value></data>
+  <data name="ZeroFormatDescription" xml:space="preserve"><value>显示小于1的小数时是否显示整数部分的0。</value></data>
+  <data name="ZeroFormatInclude" xml:space="preserve"><value>显示0</value></data>
+  <data name="ZeroFormatOmit" xml:space="preserve"><value>省略0</value></data>
 </root>

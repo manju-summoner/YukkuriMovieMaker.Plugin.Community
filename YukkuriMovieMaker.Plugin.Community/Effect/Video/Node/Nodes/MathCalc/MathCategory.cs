@@ -1,7 +1,7 @@
 using System.Windows.Media;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Math;
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.MathCalc;
 
 public sealed class MathBasicCategory : INodeCategory
 {

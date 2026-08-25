@@ -69,6 +69,9 @@
 <data name="VideoEffectCategoryName" xml:space="preserve"><value>Efectos de vídeo</value></data>
 <data name="AdvancedCategoryName" xml:space="preserve"><value>Advanced</value></data>
 <data name="TransformCategoryName" xml:space="preserve"><value>Transformación</value></data>
+  <data name="ValueCategoryName" xml:space="preserve"><value>Valor</value></data>
+  <data name="StringCategoryName" xml:space="preserve"><value>Cadena</value></data>
+  <data name="ColorCategoryName" xml:space="preserve"><value>Color</value></data>
 <data name="BrushName" xml:space="preserve"><value>Pincel</value></data>
 <data name="AddNode" xml:space="preserve"><value>Sumar</value></data>
 <data name="AddNodeDescription" xml:space="preserve"><value>Suma dos números.</value></data>
@@ -495,4 +498,137 @@
 <data name="ReturnNode" xml:space="preserve"><value>Valor de retorno</value></data>
 <data name="ReturnNodeDescription" xml:space="preserve"><value>Recibe el resultado del cálculo del grafo de nodos.</value></data>
 <data name="NoMatchingResults" xml:space="preserve"><value>(Sin resultados)</value></data>
+  <data name="NumberNode" xml:space="preserve"><value>Número</value></data>
+  <data name="NumberNodeDescription" xml:space="preserve"><value>Genera un valor numérico.</value></data>
+  <data name="StringNode" xml:space="preserve"><value>Cadena</value></data>
+  <data name="StringNodeDescription" xml:space="preserve"><value>Genera una cadena.</value></data>
+  <data name="BooleanNode" xml:space="preserve"><value>Booleano</value></data>
+  <data name="BooleanNodeDescription" xml:space="preserve"><value>Genera un valor booleano.</value></data>
+  <data name="ColorNode" xml:space="preserve"><value>Color</value></data>
+  <data name="ColorNodeDescription" xml:space="preserve"><value>Genera un color.</value></data>
+  <data name="UnicodeToCharNode" xml:space="preserve"><value>Unicode a carácter</value></data>
+  <data name="UnicodeToCharNodeDescription" xml:space="preserve"><value>Convierte un punto de código Unicode a un carácter.</value></data>
+  <data name="CharToUnicodeNode" xml:space="preserve"><value>Carácter a Unicode</value></data>
+  <data name="CharToUnicodeNodeDescription" xml:space="preserve"><value>Convierte un carácter a un punto de código Unicode.</value></data>
+  <data name="StringNthCharNode" xml:space="preserve"><value>Obtener enésimo carácter</value></data>
+  <data name="StringNthCharNodeDescription" xml:space="preserve"><value>Obtiene el carácter en una posición especificada de una cadena.</value></data>
+  <data name="StringEncodeNode" xml:space="preserve"><value>Codificar cadena</value></data>
+  <data name="StringEncodeNodeDescription" xml:space="preserve"><value>Codifica una cadena a una matriz de bytes usando la codificación especificada.</value></data>
+  <data name="StringDecodeNode" xml:space="preserve"><value>Decodificar cadena</value></data>
+  <data name="StringDecodeNodeDescription" xml:space="preserve"><value>Decodifica una matriz de bytes a una cadena usando la codificación especificada.</value></data>
+  <data name="NumberToStringNode" xml:space="preserve"><value>Número a cadena</value></data>
+  <data name="NumberToStringNodeDescription" xml:space="preserve"><value>Convierte un número a una cadena.</value></data>
+  <data name="StringConcatNode" xml:space="preserve"><value>Concatenar cadenas</value></data>
+  <data name="StringConcatNodeDescription" xml:space="preserve"><value>Concatena múltiples cadenas.</value></data>
+  <data name="RGBToColorNode" xml:space="preserve"><value>RGB a color</value></data>
+  <data name="RGBToColorNodeDescription" xml:space="preserve"><value>Convierte valores RGB a un color.</value></data>
+  <data name="HSVToColorNode" xml:space="preserve"><value>HSV a color</value></data>
+  <data name="HSVToColorNodeDescription" xml:space="preserve"><value>Convierte valores HSV a un color.</value></data>
+  <data name="CMYKToColorNode" xml:space="preserve"><value>CMYK a color</value></data>
+  <data name="CMYKToColorNodeDescription" xml:space="preserve"><value>Convierte valores CMYK a un color.</value></data>
+  <data name="YCbCrToColorNode" xml:space="preserve"><value>YCbCr a color</value></data>
+  <data name="YCbCrToColorNodeDescription" xml:space="preserve"><value>Convierte valores YCbCr a un color.</value></data>
+  <data name="LabToColorNode" xml:space="preserve"><value>Lab a color</value></data>
+  <data name="LabToColorNodeDescription" xml:space="preserve"><value>Convierte valores Lab a un color.</value></data>
+  <data name="OklchToColorNode" xml:space="preserve"><value>Oklch a color</value></data>
+  <data name="OklchToColorNodeDescription" xml:space="preserve"><value>Convierte valores Oklch a un color.</value></data>
+  <data name="HWBToColorNode" xml:space="preserve"><value>HWB a color</value></data>
+  <data name="HWBToColorNodeDescription" xml:space="preserve"><value>Convierte valores HWB a un color.</value></data>
+  <data name="ColorToRGBNode" xml:space="preserve"><value>Color a RGB</value></data>
+  <data name="ColorToRGBNodeDescription" xml:space="preserve"><value>Convierte un color a valores RGB.</value></data>
+  <data name="ColorToHSVNode" xml:space="preserve"><value>Color a HSV</value></data>
+  <data name="ColorToHSVNodeDescription" xml:space="preserve"><value>Convierte un color a valores HSV.</value></data>
+  <data name="ColorToCMYKNode" xml:space="preserve"><value>Color a CMYK</value></data>
+  <data name="ColorToCMYKNodeDescription" xml:space="preserve"><value>Convierte un color a valores CMYK.</value></data>
+  <data name="ColorToYCbCrNode" xml:space="preserve"><value>Color a YCbCr</value></data>
+  <data name="ColorToYCbCrNodeDescription" xml:space="preserve"><value>Convierte un color a valores YCbCr.</value></data>
+  <data name="ColorToLabNode" xml:space="preserve"><value>Color a Lab</value></data>
+  <data name="ColorToLabNodeDescription" xml:space="preserve"><value>Convierte un color a valores Lab.</value></data>
+  <data name="ColorToOklchNode" xml:space="preserve"><value>Color a Oklch</value></data>
+  <data name="ColorToOklchNodeDescription" xml:space="preserve"><value>Convierte un color a valores Oklch.</value></data>
+  <data name="ColorToHWBNode" xml:space="preserve"><value>Color a HWB</value></data>
+  <data name="ColorToHWBNodeDescription" xml:space="preserve"><value>Convierte un color a valores HWB.</value></data>
+  <data name="CodePoint" xml:space="preserve"><value>Punto de código</value></data>
+  <data name="CodePointDescription" xml:space="preserve"><value>Un punto de código Unicode (entero).</value></data>
+  <data name="Character" xml:space="preserve"><value>Carácter</value></data>
+  <data name="CharacterDescription" xml:space="preserve"><value>Un solo carácter. Se ignoran todos los caracteres posteriores al primero.</value></data>
+  <data name="Text" xml:space="preserve"><value>Texto</value></data>
+  <data name="TextDescription" xml:space="preserve"><value>La cadena de destino.</value></data>
+  <data name="Bytes" xml:space="preserve"><value>Bytes</value></data>
+  <data name="BytesDescription" xml:space="preserve"><value>Una matriz de bytes.</value></data>
+  <data name="Encoding" xml:space="preserve"><value>Codificación</value></data>
+  <data name="EncodingDescription" xml:space="preserve"><value>El tipo de codificación de caracteres que se utilizará.</value></data>
+  <data name="EncodingUtf8" xml:space="preserve"><value>UTF-8</value></data>
+  <data name="EncodingUtf16" xml:space="preserve"><value>UTF-16</value></data>
+  <data name="EncodingUtf32" xml:space="preserve"><value>UTF-32</value></data>
+  <data name="EncodingShiftJis" xml:space="preserve"><value>Shift_JIS</value></data>
+  <data name="EncodingAscii" xml:space="preserve"><value>ASCII</value></data>
+  <data name="StringConcatInput1" xml:space="preserve"><value>Cadena 1</value></data>
+  <data name="StringConcatInput2" xml:space="preserve"><value>Cadena 2</value></data>
+  <data name="StringConcatInput3" xml:space="preserve"><value>Cadena 3</value></data>
+  <data name="StringConcatInput4" xml:space="preserve"><value>Cadena 4</value></data>
+  <data name="StringConcatSeparator" xml:space="preserve"><value>Separador</value></data>
+  <data name="StringConcatSeparatorDescription" xml:space="preserve"><value>La cadena que se inserta entre cada valor al unirlos.</value></data>
+  <data name="Red" xml:space="preserve"><value>Rojo</value></data>
+  <data name="RedDescription" xml:space="preserve"><value>El canal rojo (0-255).</value></data>
+  <data name="Green" xml:space="preserve"><value>Verde</value></data>
+  <data name="GreenDescription" xml:space="preserve"><value>El canal verde (0-255).</value></data>
+  <data name="Blue" xml:space="preserve"><value>Azul</value></data>
+  <data name="BlueDescription" xml:space="preserve"><value>El canal azul (0-255).</value></data>
+  <data name="ColorValue" xml:space="preserve"><value>Color</value></data>
+  <data name="ColorValueDescription" xml:space="preserve"><value>El valor del color.</value></data>
+  <data name="Hue" xml:space="preserve"><value>Tono</value></data>
+  <data name="HueDescription" xml:space="preserve"><value>El tono (0-360 grados).</value></data>
+  <data name="Saturation" xml:space="preserve"><value>Saturación</value></data>
+  <data name="SaturationDescription" xml:space="preserve"><value>La saturación (0-100%).</value></data>
+  <data name="Brightness" xml:space="preserve"><value>Brillo</value></data>
+  <data name="BrightnessDescription" xml:space="preserve"><value>El componente de brillo/valor de HSV (0-100%).</value></data>
+  <data name="CmykCyan" xml:space="preserve"><value>Cian</value></data>
+  <data name="CmykCyanDescription" xml:space="preserve"><value>El canal cian (0-100%).</value></data>
+  <data name="CmykMagenta" xml:space="preserve"><value>Magenta</value></data>
+  <data name="CmykMagentaDescription" xml:space="preserve"><value>El canal magenta (0-100%).</value></data>
+  <data name="CmykYellow" xml:space="preserve"><value>Amarillo</value></data>
+  <data name="CmykYellowDescription" xml:space="preserve"><value>El canal amarillo (0-100%).</value></data>
+  <data name="CmykKey" xml:space="preserve"><value>Clave (negro)</value></data>
+  <data name="CmykKeyDescription" xml:space="preserve"><value>El canal clave/negro (0-100%).</value></data>
+  <data name="Luma" xml:space="preserve"><value>Luma (Y)</value></data>
+  <data name="LumaDescription" xml:space="preserve"><value>휘도 채널(0-255</value></data>
+  <data name="ChromaBlue" xml:space="preserve"><value>Crominancia azul (Cb)</value></data>
+  <data name="ChromaBlueDescription" xml:space="preserve"><value>Cb 색차 채널(0-255</value></data>
+  <data name="ChromaRed" xml:space="preserve"><value>Crominancia roja (Cr)</value></data>
+  <data name="ChromaRedDescription" xml:space="preserve"><value>Cr 색차 채널(0-255</value></data>
+  <data name="LabLightness" xml:space="preserve"><value>Luminosidad (L)</value></data>
+  <data name="LabLightnessDescription" xml:space="preserve"><value>El canal de luminosidad CIE Lab (0-100).</value></data>
+  <data name="LabA" xml:space="preserve"><value>Componente a</value></data>
+  <data name="LabADescription" xml:space="preserve"><value>CIE Lab a* 채널</value></data>
+  <data name="LabB" xml:space="preserve"><value>Componente b</value></data>
+  <data name="LabBDescription" xml:space="preserve"><value>CIE Lab b* 채널</value></data>
+  <data name="OklchLightness" xml:space="preserve"><value>Luminosidad (L)</value></data>
+  <data name="OklchLightnessDescription" xml:space="preserve"><value>El canal de luminosidad Oklch (0-1).</value></data>
+  <data name="OklchChroma" xml:space="preserve"><value>Cromaticidad (C)</value></data>
+  <data name="OklchChromaDescription" xml:space="preserve"><value>El canal de cromaticidad Oklch (aproximadamente 0-0</value></data>
+  <data name="HwbWhiteness" xml:space="preserve"><value>Blancura (W)</value></data>
+  <data name="HwbWhitenessDescription" xml:space="preserve"><value>El canal de blancura (0-100%).</value></data>
+  <data name="HwbBlackness" xml:space="preserve"><value>Negrura (B)</value></data>
+  <data name="HwbBlacknessDescription" xml:space="preserve"><value>El canal de negrura (0-100%).</value></data>
+  <data name="MaxFractionDigits" xml:space="preserve"><value>Dígitos decimales máximos</value></data>
+  <data name="MaxFractionDigitsDescription" xml:space="preserve"><value>El número máximo de dígitos decimales.</value></data>
+  <data name="Alignment" xml:space="preserve"><value>Alineación</value></data>
+  <data name="AlignmentDescription" xml:space="preserve"><value>La alineación de la cadena de salida.</value></data>
+  <data name="AlignmentWidthDescription" xml:space="preserve"><value>El ancho de caracteres utilizado para la alineación.</value></data>
+  <data name="AlignmentLeft" xml:space="preserve"><value>Alineación a la izquierda</value></data>
+  <data name="AlignmentCenter" xml:space="preserve"><value>Alineación centrada</value></data>
+  <data name="AlignmentRight" xml:space="preserve"><value>Alineación a la derecha</value></data>
+  <data name="MinIntegerDigits" xml:space="preserve"><value>Dígitos enteros mínimos</value></data>
+  <data name="MinIntegerDigitsDescription" xml:space="preserve"><value>El número mínimo de dígitos enteros.</value></data>
+  <data name="FractionDigits" xml:space="preserve"><value>Dígitos decimales</value></data>
+  <data name="FractionDigitsDescription" xml:space="preserve"><value>El número de dígitos después del punto decimal.</value></data>
+  <data name="IntegerPadding" xml:space="preserve"><value>Relleno de la parte entera</value></data>
+  <data name="IntegerPaddingDescription" xml:space="preserve"><value>El carácter utilizado para rellenar los dígitos enteros que faltan.</value></data>
+  <data name="IntegerPaddingZero" xml:space="preserve"><value>Ceros</value></data>
+  <data name="IntegerPaddingSpace" xml:space="preserve"><value>Espacios</value></data>
+  <data name="ZeroFormat" xml:space="preserve"><value>Mostrar cero</value></data>
+  <data name="ZeroFormatDescription" xml:space="preserve"><value>Indica si se muestra el cero inicial al mostrar un valor decimal menor que 1.</value></data>
+  <data name="ZeroFormatInclude" xml:space="preserve"><value>Mostrar cero</value></data>
+  <data name="ZeroFormatOmit" xml:space="preserve"><value>Omitir cero</value></data>
 </root>

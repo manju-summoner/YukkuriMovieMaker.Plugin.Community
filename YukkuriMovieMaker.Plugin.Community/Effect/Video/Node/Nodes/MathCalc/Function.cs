@@ -4,7 +4,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Math;
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.MathCalc;
 
 [Node(typeof(MathFunctionsCategory), nameof(TextNode.AbsNode), nameof(TextNode.AbsNodeDescription), typeof(TextNode))]
 public class AbsNode : NodeLogic

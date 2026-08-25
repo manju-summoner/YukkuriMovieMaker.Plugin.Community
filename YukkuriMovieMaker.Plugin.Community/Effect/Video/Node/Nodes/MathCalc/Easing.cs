@@ -5,7 +5,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 
-namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Math;
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.MathCalc;
 
 [Node(typeof(MathBasicCategory), nameof(TextNode.EasingNode), nameof(TextNode.EasingNodeDescription), typeof(TextNode))]
 public class EasingNode : NodeLogic
@@ -76,11 +76,11 @@ public class EasingNode : NodeLogic
     {
         var duration = TimeEnd - TimeStart;
 
-        var t = System.Math.Abs(duration) < 1e-8f
+        var t = Math.Abs(duration) < 1e-8f
             ? 0f
             : (Time - TimeStart) / duration;
 
-        t = System.Math.Clamp(t, 0f, 1f);
+        t = Math.Clamp(t, 0f, 1f);
 
         var curve = BezierParser.Deserialize(Curve);
         var y = (float)BezierEvaluator.Evaluate(curve, t);
