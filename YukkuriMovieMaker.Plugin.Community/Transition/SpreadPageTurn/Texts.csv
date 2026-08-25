@@ -1,0 +1,25 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+SpreadPageTurnTransitionPluginName,,見開きめくり,Spread page turn,对开页翻页,對開頁翻頁,펼침면 넘기기,Pasar página doble,تقليب صفحة مزدوجة,Balik halaman ganda
+SpreadPageTurnPageName,,めくるページ,Page to turn,翻动的页面,翻動的頁面,넘길 페이지,Página a pasar,الصفحة المراد تقليبها,Halaman yang dibalik
+SpreadPageTurnPageDesc,,見開きのどちら側のページをめくるかを選択します。,Selects which page of the spread is turned.,选择翻动对开页的哪一侧页面。,選擇翻動對開頁的哪一側頁面。,펼침면의 어느 쪽 페이지를 넘길지 선택합니다.,Selecciona qué página de la doble página se pasa.,يحدد أي صفحة من الصفحة المزدوجة يتم تقليبها.,Memilih halaman mana dari halaman ganda yang dibalik.
+SpreadPageTurnPageRightName,,右のページ,Right page,右页,右頁,오른쪽 페이지,Página derecha,الصفحة اليمنى,Halaman kanan
+SpreadPageTurnPageLeftName,,左のページ,Left page,左页,左頁,왼쪽 페이지,Página izquierda,الصفحة اليسرى,Halaman kiri
+SpreadPageTurnPageBottomName,,下のページ,Bottom page,下页,下頁,아래쪽 페이지,Página inferior,الصفحة السفلية,Halaman bawah
+SpreadPageTurnPageTopName,,上のページ,Top page,上页,上頁,위쪽 페이지,Página superior,الصفحة العلوية,Halaman atas
+SpreadPageTurnRadiusName,,丸みの半径,Curl radius,卷曲半径,捲曲半徑,말림 반지름,Radio de curvatura,نصف قطر الالتفاف,Radius gulungan
+SpreadPageTurnRadiusDesc,,めくれたページの丸みの半径です（px）。,Radius of the page curl (px).,翻起页面的卷曲半径（px）。,翻起頁面的捲曲半徑（px）。,넘겨지는 페이지의 말림 반지름입니다(px).,Radio de la curvatura de la página (px).,نصف قطر التفاف الصفحة (px).,Radius lengkungan halaman (px).
+SpreadPageTurnShadowName,,影の濃さ,Shadow opacity,阴影浓度,陰影濃度,그림자 진하기,Opacidad de la sombra,كثافة الظل,Kepekatan bayangan
+SpreadPageTurnShadowDesc,,ページが落とす影の濃さです。,Opacity of the shadow cast by the page.,页面投下的阴影浓度。,頁面投下的陰影濃度。,페이지가 드리우는 그림자의 진하기입니다.,Opacidad de la sombra proyectada por la página.,كثافة الظل الذي تلقيه الصفحة.,Kepekatan bayangan yang dijatuhkan halaman.
+SpreadPageTurnBackLightnessName,,裏面の明るさ,Back side brightness,背面亮度,背面亮度,뒷면 밝기,Brillo del reverso,سطوع الوجه الخلفي,Kecerahan sisi belakang
+SpreadPageTurnBackLightnessDesc,,めくれたページの裏面を白に近づける度合いです。,How much the back side of the page is whitened.,翻起页面背面接近白色的程度。,翻起頁面背面接近白色的程度。,넘겨진 페이지 뒷면을 흰색에 가깝게 하는 정도입니다.,Grado en que el reverso de la página se acerca al blanco.,درجة تفتيح الوجه الخلفي للصفحة نحو الأبيض.,Seberapa putih sisi belakang halaman.
+EasingTypeName,,緩急,Easing Type,缓动类型,緩動類型,이징 유형,Tipo de suavizado,نوع التخفيف,Jenis Easing
+EasingTypeDesc,,アニメーションの緩急の種類を選択します。,Selects the easing curve type for the animation.,选择动画缓动曲线的类型。,選擇動畫緩動曲線的類型。,애니메이션 이징 곡선 유형을 선택합니다.,Selecciona el tipo de curva de suavizado para la animación.,يحدد نوع منحنى التخفيف للحركة.,Memilih jenis kurva easing untuk animasi.
+EasingModeName,,加減速,Easing Mode,加减速模式,加減速模式,이징 모드,Modo de suavizado,وضع التخفيف,Mode Easing
+EasingModeDesc,,アニメーションの加減速の方向を選択します。,Selects the acceleration direction of the easing.,选择缓动的加减速方向。,選擇緩動的加減速方向。,이징의 가속·감속 방향을 선택합니다.,Selecciona la dirección de aceleración del suavizado.,يحدد اتجاه التسارع للتخفيف.,Memilih arah akselerasi easing.
+SpreadPageTurnEffectName,,見開きめくり,Spread page turn,对开页翻页,對開頁翻頁,펼침면 넘기기,Pasar página doble,تقليب صفحة مزدوجة,Balik halaman ganda
+SpreadPageTurnEffectProgressName,,めくり度合い,Turn amount,翻页程度,翻頁程度,넘김 정도,Grado de paso,مقدار التقليب,Tingkat balik
+SpreadPageTurnEffectProgressDesc,,ページをめくる度合いです。100%で完全にめくれた状態になります。,How far the page is turned. At 100% the page is fully turned.,翻页的程度。100%时完全翻过。,翻頁的程度。100%時完全翻過。,페이지를 넘기는 정도입니다. 100%에서 완전히 넘겨집니다.,Grado en que se pasa la página. Al 100% la página está completamente pasada.,مقدار تقليب الصفحة. عند 100% تكون الصفحة مقلوبة بالكامل.,Seberapa jauh halaman dibalik. Pada 100% halaman terbalik sepenuhnya.
+InOutSpreadPageTurnEffectName,,見開きをめくりながら登場退場,Appearing and exiting while turning the spread,对开页翻页时入/出场,在對開頁翻頁時登場退場,펼침면을 넘기면서 등장 퇴장,Apareciendo y saliendo al pasar la página doble,الظهور والخروج أثناء تقليب الصفحة المزدوجة,Masuk dan keluar sambil membalik halaman ganda
+InOutGroupName,,登場退場,Appearance and exit,入/出场,登場退場,등장 퇴장,Aparición y salida,ظهور ومغادرة,Masuk dan keluar
+InSpreadPageTurnEffectLabel,,見開きを戻しながら,while turning the spread back,翻回对开页时,在翻回對開頁時,펼침면을 되돌리면서,Al devolver la página doble,أثناء إعادة الصفحة المزدوجة,saat mengembalikan halaman ganda
+OutSpreadPageTurnEffectLabel,,見開きをめくりながら,while turning the spread,翻动对开页时,在翻動對開頁時,펼침면을 넘기면서,Al pasar la página doble,أثناء تقليب الصفحة المزدوجة,saat membalik halaman ganda
