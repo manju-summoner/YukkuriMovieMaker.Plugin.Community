@@ -715,9 +715,8 @@ public static class BrushNodeCalculator
                 }
             }
 
-            if (loader.Update(out var brush, ctx.EffectDescription))
-                self.GetType().GetProperty("Output")?.SetValue(self, new BrushWrapper { Brush = brush });
-
+            self.GetType().GetProperty("Output")?.SetValue(self,
+                loader.Update(out var brush, ctx.EffectDescription) ? new BrushWrapper { Brush = brush } : null);
             return Task.CompletedTask;
         }
         catch (Exception exception)

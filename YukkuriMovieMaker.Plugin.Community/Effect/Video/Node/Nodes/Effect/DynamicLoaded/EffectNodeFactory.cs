@@ -68,7 +68,9 @@ public static class EffectNodeFactory
 
         lock (Lock)
         {
-            if (TypeCache.TryGetValue(effectType.Name, out var cached))
+            var effectKey = effectType.AssemblyQualifiedName ?? effectType.FullName ?? effectType.Name;
+
+            if (TypeCache.TryGetValue(effectKey, out var cached))
             {
 #if DEBUG
                 Console.WriteLine($@"[EffectNodeFactory]   cache hit: {effectType.Name}");
@@ -97,7 +99,7 @@ public static class EffectNodeFactory
             var resourceType = veAttr?.ResourceType;
 
             var generated =
-                EffectNodeTypeBuilder.Build(ModBuilder, effectType, categoryKey, labelKey, resourceType,
+                EffectNodeTypeBuilder.Build(ModBuilder, effectType, effectKey, categoryKey, labelKey, resourceType,
                     staticPortDefs, dynamicParams);
 
             var allCategories = veAttr?.Categories.Where(c => !string.IsNullOrEmpty(c)).Distinct().ToArray();
@@ -110,7 +112,7 @@ public static class EffectNodeFactory
                     labelKey, labelKey, resourceType))
                 .ToArray();
 
-            TypeCache[effectType.Name] = generated;
+            TypeCache[effectKey] = generated;
             return generated;
         }
     }
@@ -142,7 +144,8 @@ public static class EffectNodeFactory
                 return cached;
         }
 
-        var effectType = PluginLoader.VideoEffects.FirstOrDefault(t => t.Name == effectName);
+        var effectType = PluginLoader.VideoEffects.FirstOrDefault(t =>
+            (t.AssemblyQualifiedName ?? t.FullName ?? t.Name) == effectName);
         if (effectType == null) return null;
 
         try
@@ -362,6 +365,7 @@ public static class EffectNodeTypeBuilder
     public static Type Build(
         ModuleBuilder mod,
         Type effectType,
+        string effectKey,
         string categoryKey,
         string labelKey,
         Type? resourceType,
@@ -369,7 +373,10 @@ public static class EffectNodeTypeBuilder
         List<(PortDefinition, PropertyInfo, object)> dynamicPropertyDefs)
     {
         var effectName = effectType.Name;
-        var typeName = $"DynamicEffectNode_{effectName}";
+        // 生成する CLR 型の名前は表示用の effectName をベースにしつつ、
+        // effectKey（AssemblyQualifiedName 等の衝突しないキー）のハッシュを付与して、
+        // 別アセンブリ/別名前空間に同名の効果クラスが存在してもモジュール内で型名が衝突しないようにする。
+        var typeName = $"DynamicEffectNode_{effectName}_{(uint)effectKey.GetHashCode():x8}";
         var tb = mod.DefineType(
             typeName,
             TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.BeforeFieldInit,
@@ -385,7 +392,7 @@ public static class EffectNodeTypeBuilder
 
         var loaderField = tb.DefineField("_videoEffect", typeof(VideoEffectsLoader), FieldAttributes.Private);
 
-        EffectNodeCalculator.RegisterPortDefs(effectName, staticPortDefs.ToArray(),
+        EffectNodeCalculator.RegisterPortDefs(effectKey, staticPortDefs.ToArray(),
             dynamicPropertyDefs.Select(d => d.Item2.Name).ToArray());
 
         var effectNameField = tb.DefineField("_effectNameCache", typeof(string),
@@ -399,9 +406,9 @@ public static class EffectNodeTypeBuilder
 
         var cctor = tb.DefineTypeInitializer();
         var cil = cctor.GetILGenerator();
-        cil.Emit(OpCodes.Ldstr, effectName);
+        cil.Emit(OpCodes.Ldstr, effectKey);
         cil.Emit(OpCodes.Stsfld, effectNameField);
-        cil.Emit(OpCodes.Ldstr, effectName);
+        cil.Emit(OpCodes.Ldstr, effectKey);
         cil.Emit(OpCodes.Call, typeof(EffectNodeCalculator).GetMethod(nameof(EffectNodeCalculator.GetPortDefs))!);
         cil.Emit(OpCodes.Stsfld, portDefsField);
         cil.Emit(OpCodes.Ldtoken, effectType);
@@ -978,6 +985,11 @@ public static class EffectNodeCalculator
                 return Task.CompletedTask;
             }
 
+            // Update が false を返すケース（対象プラグイン内で例外が握りつぶされた場合を含む）で
+            // ここを素通りすると、OutputPort には前回成功時の _cachedValue が残ったまま
+            // EvaluateInternal 側は成功扱い（HasError=false）になり、ノードはエラー表示にならずに
+            // 古いフレームを下流へ流し続けてしまう。出力を明示的に無効化した上で例外を投げ、
+            // 呼び出し元 (NodeLogic.EvaluateInternal) の catch で HasError を正しく立てさせる。
             self.GetType().GetProperty("Output")?.SetValue(self, new ImageWrapper { Image = null });
             return Task.FromException(
                 new InvalidOperationException("動的エフェクトの更新に失敗しました（loader.Update が false を返しました）。"));

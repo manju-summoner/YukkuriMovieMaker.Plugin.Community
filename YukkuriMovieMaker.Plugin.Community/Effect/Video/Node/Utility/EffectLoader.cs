@@ -168,9 +168,6 @@ public class VideoEffectsLoader : IDisposable
                     }
                     else if (propInfo.PropertyType == typeof(Plugin.Brush.Brush))
                     {
-                        // Brush の Brush プロパティは getter のみで、オブジェクト全体の差し替えはできない。
-                        // 既存の Brush インスタンスを取得し、その Parameter プロパティのみを直接更新する。
-                        // Type は変更しない（変更すると EndEditAsync が Parameter を上書きしてしまうため）。
                         if (propInfo.GetValue(targetObject) is not Plugin.Brush.Brush brushObj)
                             throw new InvalidOperationException(
                                 string.Format(TextUi.PropertyReadOnly, propertyName));
@@ -193,13 +190,22 @@ public class VideoEffectsLoader : IDisposable
                                 $@"sameRef={ReferenceEquals(brushObj.Parameter, brushParameter)}");
 #endif
                         }
-#if DEBUG
                         else
                         {
+                            var defaultParameter =
+                                Activator.CreateInstance(brushObj.Type) as IBrushParameter;
+                            if (defaultParameter != null)
+                            {
+                                brushObj.BeginEdit();
+                                brushObj.Parameter = defaultParameter;
+                                await brushObj.EndEditAsync();
+                            }
+#if DEBUG
                             Console.WriteLine(
-                                $@"  Brush.SetValue: value is NOT IBrushParameter (actual={value?.GetType().FullName ?? "null"})");
-                        }
+                                $@"  Brush.SetValue: value is NOT IBrushParameter (actual={value?.GetType().FullName ?? "null"}), " +
+                                $@"reset to default={defaultParameter?.GetType().Name ?? "null"}");
 #endif
+                        }
                     }
                     else
                     {
@@ -461,8 +467,13 @@ public class VideoEffectsLoader : IDisposable
 
     public static VideoEffectsLoader LoadEffectSync(string name)
     {
+        // EffectNodeFactory はキャッシュ衝突を避けるため AssemblyQualifiedName 等の
+        // 衝突しないキーを渡してくる。単純な type.Name 一致だけでは同名クラスの別効果を
+        // 誤って読み込みかねないため、Type 側にも同じ規則でフォールバックして比較する。
         return new VideoEffectsLoader(
-            Activator.CreateInstance(PluginLoader.VideoEffects.ToList().First(type => type.Name == name)) as
+            Activator.CreateInstance(PluginLoader.VideoEffects.ToList()
+                    .First(type => (type.AssemblyQualifiedName ?? type.FullName ?? type.Name) == name
+                                   || type.Name == name)) as
                 IVideoEffect);
     }
 

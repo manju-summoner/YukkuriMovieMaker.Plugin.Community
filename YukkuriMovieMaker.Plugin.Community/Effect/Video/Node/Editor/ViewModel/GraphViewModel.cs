@@ -129,6 +129,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged
     private void SyncFromGraph()
     {
         var nodeViewModels = new Dictionary<Guid, NodeViewModel>();
+        ClearSelection();
 
         // 破棄前に古い VM のイベント購読を解除する。NodeLogic はここで再生成されず
         // 使い回されるため、解除しないと同じ NodeLogic に購読が積み重なっていく。
@@ -503,26 +504,32 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 
         var idMapping = new Dictionary<Guid, Guid>();
 
-        foreach (var node in nodes)
+        _graph.BeginEdit();
+        try
         {
-            var oldId = node.Id;
-            var newId = Guid.NewGuid();
+            foreach (var node in nodes)
+            {
+                var oldId = node.Id;
+                var newId = Guid.NewGuid();
 
-            idMapping[oldId] = newId;
-            node.Id = newId;
+                idMapping[oldId] = newId;
+                node.Id = newId;
 
-            _graph.AddNode(node);
+                _graph.AddNode(node);
 
-            if (tempGraph.VisualStates.TryGetValue(oldId, out var oldVisualState))
-                _graph.SetVisualState(newId, oldVisualState.X + dx, oldVisualState.Y + dy);
+                if (tempGraph.VisualStates.TryGetValue(oldId, out var oldVisualState))
+                    _graph.SetVisualState(newId, oldVisualState.X + dx, oldVisualState.Y + dy);
+            }
+
+            foreach (var conn in tempGraph.Connections)
+                if (idMapping.TryGetValue(conn.FromId, out var newFromId) &&
+                    idMapping.TryGetValue(conn.ToId, out var newToId))
+                    _graph.Connect(newFromId, conn.FromPort, newToId, conn.ToPort);
         }
-
-        foreach (var conn in tempGraph.Connections)
-            if (idMapping.TryGetValue(conn.FromId, out var newFromId) &&
-                idMapping.TryGetValue(conn.ToId, out var newToId))
-                _graph.Connect(newFromId, conn.FromPort, newToId, conn.ToPort);
-
-        _graph.Commit();
+        finally
+        {
+            _graph.EndEdit();
+        }
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

@@ -48,7 +48,7 @@ public class Alpha : NodeLogic
 
         _opacityEffect ??= new Opacity(EvaluationContext.Devices.DeviceContext);
         _opacityEffect.Value = Opacity / 100f;
-        _opacityEffect.SetInput(0, InputImage.Image, false);
+        _opacityEffect.SetInput(0, InputImage.Image, true);
         _effectOutput?.Dispose();
         _effectOutput = _opacityEffect.Output;
         Output = new ImageWrapper { Image = _effectOutput };
