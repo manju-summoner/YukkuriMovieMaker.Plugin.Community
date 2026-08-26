@@ -257,5 +257,13 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
                 Debug.WriteLine($"[OpenNodeEditorButton] IsActiveChanged handler failed: {ex}");
             }
         };
+
+        if (layout.IsActive)
+        {
+            foreach (var kb in nodeBindings)
+                parentWindow.InputBindings.Add(kb);
+
+            vm.RefreshAllOpenGraphs();
+        }
     }
 }

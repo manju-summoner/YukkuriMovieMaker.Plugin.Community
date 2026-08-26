@@ -141,34 +141,6 @@ public static class ControlRegistrations
             template.VisualTree = factory;
             return template;
         });
-        ControlRegistry.Register<FilePathPort>(attr =>
-        {
-            var fileAttr = (FilePathPortControlAttribute)attr;
-            var template = new DataTemplate();
-            var factory = new FrameworkElementFactory(typeof(FilePathPort));
-
-            factory.SetValue(FilePathPort.AllowExtensionProperty, fileAttr.GetAllowExtensionList());
-            factory.SetValue(FilePathPort.DefaultProperty, fileAttr.Default);
-
-            factory.SetBinding(FilePathPort.ValueProperty,
-                new Binding(nameof(PortViewModel.CurrentValue))
-                {
-                    Mode = BindingMode.TwoWay,
-                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                    TargetNullValue = "",
-                    FallbackValue = ""
-                });
-            factory.SetBinding(
-                PortControlBase.BeginEditCommandProperty,
-                new Binding(nameof(PortViewModel.BeginEditCommand)));
-
-            factory.SetBinding(
-                PortControlBase.EndEditCommandProperty,
-                new Binding(nameof(PortViewModel.EndEditCommand)));
-
-            template.VisualTree = factory;
-            return template;
-        });
         ControlRegistry.Register<ColorPort>(attr =>
         {
             var colorAttr = (ColorPortControlAttribute)attr;

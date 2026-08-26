@@ -1,12 +1,14 @@
 using System.IO;
 using System.Windows.Media;
 using Vortice.Direct2D1;
+using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
+using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.Image;
 
@@ -19,7 +21,7 @@ public class LoadImageNode : NodeLogic
     private DateTime _loadedWriteTimeUtc;
 
     [InputPort(nameof(TextNode.FilePathPortLabel), nameof(TextNode.LoadImageFilePathDescription), typeof(TextNode))]
-    [FilePathPortControl(AllowExtension = ["画像ファイル|.png;.jpg;.jpeg;.bmp;.gif;.tiff;.tif;.webp"])]
+    [FileSelector(FileGroupType.ImageItem)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public string FilePath
     {
@@ -73,7 +75,7 @@ public class LoadVideoFrameNode : NodeLogic
 
     [InputPort(nameof(TextNode.FilePathPortLabel), nameof(TextNode.LoadVideoFrameFilePathDescription),
         typeof(TextNode))]
-    [FilePathPortControl(AllowExtension = ["動画ファイル|.mp4;.mov;.avi;.wmv;.mkv;.webm;.m4v"])]
+    [FileSelector(FileGroupType.VideoItem)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public string FilePath
     {
@@ -116,7 +118,7 @@ public class LoadVideoFrameNode : NodeLogic
         if (_loader is null)
             return Task.FromException(new NullReferenceException(nameof(FilePath)));
 
-        var frame = System.Math.Clamp((int)FrameIndex, 0, System.Math.Max(0, _loader.Length - 1));
+        var frame = Math.Clamp((int)FrameIndex, 0, Math.Max(0, _loader.Length - 1));
         Output = new ImageWrapper { Image = _loader.LoadImage(frame) };
         return Task.CompletedTask;
     }

@@ -2,6 +2,8 @@ using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
@@ -372,11 +374,10 @@ public static class EffectNodeTypeBuilder
         List<PortDefinition> staticPortDefs,
         List<(PortDefinition, PropertyInfo, object)> dynamicPropertyDefs)
     {
-        var effectName = effectType.Name;
-        // 生成する CLR 型の名前は表示用の effectName をベースにしつつ、
-        // effectKey（AssemblyQualifiedName 等の衝突しないキー）のハッシュを付与して、
-        // 別アセンブリ/別名前空間に同名の効果クラスが存在してもモジュール内で型名が衝突しないようにする。
-        var typeName = $"DynamicEffectNode_{effectName}_{(uint)effectKey.GetHashCode():x8}";
+        var effectName = effectKey;
+        var typeName = $"DynamicEffectNode_{Convert.ToHexString(
+            SHA256.HashData(
+                Encoding.UTF8.GetBytes(effectName)))[..32]}";
         var tb = mod.DefineType(
             typeName,
             TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.BeforeFieldInit,

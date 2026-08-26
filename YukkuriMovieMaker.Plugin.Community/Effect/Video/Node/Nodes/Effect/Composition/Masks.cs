@@ -113,8 +113,9 @@ public class CreateMaskNode : NodeLogic
                 Mode,
                 Offset,
                 Invert ? 1 : 0);
-        if (_videoEffect.Update(out var output, EvaluationContext, InputImage?.Image))
-            Mask = new MaskWrapper { Mask = output };
+        Mask = _videoEffect.Update(out var output, EvaluationContext, InputImage?.Image)
+            ? new MaskWrapper { Mask = output }
+            : null;
 
         return Task.CompletedTask;
     }

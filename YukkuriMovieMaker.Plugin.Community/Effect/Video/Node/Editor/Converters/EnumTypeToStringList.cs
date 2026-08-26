@@ -15,11 +15,15 @@ public class EnumTypeToStringList : IValueConverter
 
         return type.GetFields()
             .Where(field => field.IsStatic)
-            .Select(field => (Field: field, Attributes: field.GetCustomAttributes(typeof(DisplayAttribute), false)))
-            .Where(x => x.Attributes.Length != 0)
+            .Select(field => (
+                Field: field,
+                Attributes: field.GetCustomAttributes(typeof(DisplayAttribute), false)
+            ))
             .Select(x => new EnumPortItem(
                 System.Convert.ToInt32(x.Field.GetRawConstantValue()),
-                ((DisplayAttribute)x.Attributes[0]).GetName() ?? x.Field.Name))
+                x.Attributes.Length != 0
+                    ? ((DisplayAttribute)x.Attributes[0]).GetName() ?? x.Field.Name
+                    : x.Field.Name))
             .ToList();
     }
 

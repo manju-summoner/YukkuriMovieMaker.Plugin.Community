@@ -31,7 +31,6 @@ internal static class ControlReplacementEngine
     [
         new()
         {
-            // ColorPicker.Value と ColorPort.SelectedColor はどちらも Color 型。
             SourceTypeFullName = "YukkuriMovieMaker.Controls.ColorPicker",
             SourceValuePropertyName = "Value",
             TargetValueProperty = ColorPort.SelectedColorProperty,
@@ -134,22 +133,6 @@ internal static class ControlReplacementEngine
             TargetValueProperty = BoolPort.ValueProperty,
             CreateReplacement = static () => new BoolPort(),
             Description = "ToggleSlider → BoolPort"
-        },
-        new()
-        {
-            SourceTypeFullName = "YukkuriMovieMaker.Controls.FileSelector",
-            SourceValuePropertyName = "Value",
-            TargetValueProperty = FilePathPort.ValueProperty,
-            CreateReplacement = static () => new FilePathPort(),
-            Description = "FileSelector → FilePathPort"
-        },
-        new()
-        {
-            SourceTypeFullName = "YukkuriMovieMaker.Controls.DirectorySelector",
-            SourceValuePropertyName = "Value",
-            TargetValueProperty = FilePathPort.ValueProperty,
-            CreateReplacement = static () => new FilePathPort(),
-            Description = "DirectorySelector → FilePathPort"
         },
         new()
         {

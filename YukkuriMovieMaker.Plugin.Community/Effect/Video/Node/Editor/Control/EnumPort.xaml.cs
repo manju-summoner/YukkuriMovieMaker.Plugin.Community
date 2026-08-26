@@ -36,8 +36,6 @@ public partial class EnumPort
             typeof(EnumPort),
             new PropertyMetadata(false));
 
-    private bool _isUserInteraction;
-
     public EnumPort()
     {
         InitializeComponent();
@@ -77,16 +75,8 @@ public partial class EnumPort
         control.OnPropertyChanged(nameof(Value));
     }
 
-    private void ComboBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-        _isUserInteraction = true;
-    }
-
     private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (!_isUserInteraction) return;
-        _isUserInteraction = false;
-
         BeginEditCommand?.Execute(null);
         EndEditCommand?.Execute(null);
     }

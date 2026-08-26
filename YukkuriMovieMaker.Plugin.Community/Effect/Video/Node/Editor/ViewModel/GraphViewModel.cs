@@ -253,15 +253,18 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 
     internal void DeleteSelectedNode()
     {
+        var nodeIds = SelectedNodes
+            .Where(nodeVm =>
+                nodeVm.NodeLogic.GetType() != typeof(ArgumentsNode) &&
+                nodeVm.NodeLogic.GetType() != typeof(ReturnNode))
+            .Select(vm => vm.Id)
+            .ToList();
+
         _graph.BeginEdit();
         try
         {
-            foreach (var guid in SelectedNodes
-                         .Where(nodeVm =>
-                             nodeVm.NodeLogic.GetType() != typeof(ArgumentsNode) &&
-                             nodeVm.NodeLogic.GetType() != typeof(ReturnNode))
-                         .Select(vm => vm.Id))
-                _graph.RemoveNode(guid);
+            foreach (var nodeId in nodeIds)
+                _graph.RemoveNode(nodeId);
         }
         finally
         {

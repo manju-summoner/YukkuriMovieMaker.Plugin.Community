@@ -126,98 +126,105 @@ public class VideoEffectsLoader : IDisposable
 #endif
                     _videoEffect.BeginEdit();
 
-                    // Recursively search for properties with DisplayAttribute within the _videoEffect hierarchy,
-                    // and match the property name (identifier) with the argument propertyName
-                    var result = FindPropertyByDisplay(_videoEffect, propertyName);
-                    if (result == null)
-                        throw new ArgumentException(string.Format(TextUi.PropertyNotFound, propertyName),
-                            nameof(propertyName));
-
-                    var (targetObject, propInfo) = result.Value;
-
-                    // If the property type is Animation, update the Values property of the Animation object directly
-                    if (propInfo.PropertyType == typeof(Animation))
+                    try
                     {
-                        // Retrieve the Animation object. If it does not exist, create a new one
-                        if (propInfo.GetValue(targetObject) is not Animation animObj)
+                        // Recursively search for properties with DisplayAttribute within the _videoEffect hierarchy,
+                        // and match the property name (identifier) with the argument propertyName
+                        var result = FindPropertyByDisplay(_videoEffect, propertyName);
+                        if (result == null)
+                            throw new ArgumentException(string.Format(TextUi.PropertyNotFound, propertyName),
+                                nameof(propertyName));
+
+                        var (targetObject, propInfo) = result.Value;
+
+                        // If the property type is Animation, update the Values property of the Animation object directly
+                        if (propInfo.PropertyType == typeof(Animation))
+                        {
+                            // Retrieve the Animation object. If it does not exist, create a new one
+                            if (propInfo.GetValue(targetObject) is not Animation animObj)
+                            {
+                                if (!propInfo.CanWrite)
+                                    throw new InvalidOperationException(
+                                        string.Format(TextUi.PropertyReadOnly, propertyName));
+                                animObj = Activator.CreateInstance<Animation>()
+                                          ?? throw new InvalidOperationException(
+                                              TextUi.UnableCreateAnimationInstance);
+                                // Set the Animation object to the target property only if it did not exist
+                                propInfo.SetValue(targetObject, animObj);
+                            }
+
+                            // Retrieve the Values property of the Animation object
+                            var valuesProp = animObj.GetType()
+                                .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
+                            if (valuesProp == null || !valuesProp.CanRead || !valuesProp.CanWrite)
+                                throw new InvalidOperationException(
+                                    TextUi.AnimationValuesPropertyError);
+
+                            // Create a new AnimationValue and add it to the existing list
+                            var newList =
+                                ImmutableList<AnimationValue>.Empty.Add(
+                                    new AnimationValue(Convert.ToDouble(value ?? 0)));
+                            // Update the Values property of the Animation object directly
+                            animObj.BeginEdit();
+                            valuesProp.SetValue(animObj, newList);
+                            await animObj.EndEditAsync();
+                        }
+                        else if (propInfo.PropertyType == typeof(Plugin.Brush.Brush))
+                        {
+                            if (propInfo.GetValue(targetObject) is not Plugin.Brush.Brush brushObj)
+                                throw new InvalidOperationException(
+                                    string.Format(TextUi.PropertyReadOnly, propertyName));
+
+#if DEBUG
+                            Console.WriteLine(
+                                $@"  Brush.SetValue: incoming={value?.GetType().Name ?? "null"}, " +
+                                $@"currentParameter={brushObj.Parameter.GetType().Name}, " +
+                                $@"Type={brushObj.Type.Name}");
+#endif
+
+                            if (value is IBrushParameter brushParameter)
+                            {
+                                brushObj.BeginEdit();
+                                brushObj.Parameter = brushParameter;
+                                await brushObj.EndEditAsync();
+#if DEBUG
+                                Console.WriteLine(
+                                    $@"  Brush.SetValue: after assign, Parameter={brushObj.Parameter.GetType().Name}, " +
+                                    $@"sameRef={ReferenceEquals(brushObj.Parameter, brushParameter)}");
+#endif
+                            }
+                            else
+                            {
+                                var defaultParameter =
+                                    Activator.CreateInstance(brushObj.Type) as IBrushParameter;
+                                if (defaultParameter != null)
+                                {
+                                    brushObj.BeginEdit();
+                                    brushObj.Parameter = defaultParameter;
+                                    await brushObj.EndEditAsync();
+                                }
+#if DEBUG
+                                Console.WriteLine(
+                                    $@"  Brush.SetValue: value is NOT IBrushParameter (actual={value?.GetType().FullName ?? "null"}), " +
+                                    $@"reset to default={defaultParameter?.GetType().Name ?? "null"}");
+#endif
+                            }
+                        }
+                        else
                         {
                             if (!propInfo.CanWrite)
                                 throw new InvalidOperationException(
                                     string.Format(TextUi.PropertyReadOnly, propertyName));
-                            animObj = Activator.CreateInstance<Animation>()
-                                      ?? throw new InvalidOperationException(
-                                          TextUi.UnableCreateAnimationInstance);
-                            // Set the Animation object to the target property only if it did not exist
-                            propInfo.SetValue(targetObject, animObj);
+                            // For non-Animation types, set the value to the property as usual
+                            propInfo.SetValue(
+                                targetObject,
+                                PropertyValueTypeConverter.ConvertPropertyValue(propInfo.PropertyType, value));
                         }
-
-                        // Retrieve the Values property of the Animation object
-                        var valuesProp = animObj.GetType()
-                            .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
-                        if (valuesProp == null || !valuesProp.CanRead || !valuesProp.CanWrite)
-                            throw new InvalidOperationException(
-                                TextUi.AnimationValuesPropertyError);
-
-                        // Create a new AnimationValue and add it to the existing list
-                        var newList =
-                            ImmutableList<AnimationValue>.Empty.Add(new AnimationValue(Convert.ToDouble(value ?? 0)));
-                        // Update the Values property of the Animation object directly
-                        animObj.BeginEdit();
-                        valuesProp.SetValue(animObj, newList);
-                        await animObj.EndEditAsync();
                     }
-                    else if (propInfo.PropertyType == typeof(Plugin.Brush.Brush))
+                    finally
                     {
-                        if (propInfo.GetValue(targetObject) is not Plugin.Brush.Brush brushObj)
-                            throw new InvalidOperationException(
-                                string.Format(TextUi.PropertyReadOnly, propertyName));
-
-#if DEBUG
-                        Console.WriteLine(
-                            $@"  Brush.SetValue: incoming={value?.GetType().Name ?? "null"}, " +
-                            $@"currentParameter={brushObj.Parameter.GetType().Name}, " +
-                            $@"Type={brushObj.Type.Name}");
-#endif
-
-                        if (value is IBrushParameter brushParameter)
-                        {
-                            brushObj.BeginEdit();
-                            brushObj.Parameter = brushParameter;
-                            await brushObj.EndEditAsync();
-#if DEBUG
-                            Console.WriteLine(
-                                $@"  Brush.SetValue: after assign, Parameter={brushObj.Parameter.GetType().Name}, " +
-                                $@"sameRef={ReferenceEquals(brushObj.Parameter, brushParameter)}");
-#endif
-                        }
-                        else
-                        {
-                            var defaultParameter =
-                                Activator.CreateInstance(brushObj.Type) as IBrushParameter;
-                            if (defaultParameter != null)
-                            {
-                                brushObj.BeginEdit();
-                                brushObj.Parameter = defaultParameter;
-                                await brushObj.EndEditAsync();
-                            }
-#if DEBUG
-                            Console.WriteLine(
-                                $@"  Brush.SetValue: value is NOT IBrushParameter (actual={value?.GetType().FullName ?? "null"}), " +
-                                $@"reset to default={defaultParameter?.GetType().Name ?? "null"}");
-#endif
-                        }
+                        await _videoEffect.EndEditAsync();
                     }
-                    else
-                    {
-                        if (!propInfo.CanWrite)
-                            throw new InvalidOperationException(string.Format(TextUi.PropertyReadOnly, propertyName));
-                        // For non-Animation types, set the value to the property as usual
-                        propInfo.SetValue(
-                            targetObject,
-                            PropertyValueTypeConverter.ConvertPropertyValue(propInfo.PropertyType, value));
-                    }
-
-                    await _videoEffect.EndEditAsync();
                 }
                     break;
                 case EffectType.BrushEffect when _brushParameter != null:

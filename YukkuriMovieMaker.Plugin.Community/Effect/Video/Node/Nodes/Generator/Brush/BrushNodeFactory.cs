@@ -84,7 +84,8 @@ public static class DynamicBrushNodeFactory
 
         var pluginType = PluginLoader.BrushPlugins
             .Select(p => p.GetType())
-            .FirstOrDefault(t => t.Name == pluginName);
+            .FirstOrDefault(t => (t.AssemblyQualifiedName ?? t.FullName ?? t.Name) == pluginName);
+
         if (pluginType == null) return null;
 
         try
@@ -101,7 +102,11 @@ public static class DynamicBrushNodeFactory
     {
         lock (Lock)
         {
-            if (TypeCache.TryGetValue(pluginType.Name, out var cached))
+            var pluginName = pluginType.AssemblyQualifiedName
+                             ?? pluginType.FullName
+                             ?? pluginType.Name;
+
+            if (TypeCache.TryGetValue(pluginName, out var cached))
                 return cached;
 
             var pluginInstance = Activator.CreateInstance(pluginType) as IBrushPlugin
@@ -114,9 +119,9 @@ public static class DynamicBrushNodeFactory
             var labelKey = pluginInstance.Name;
 
             var generated =
-                BrushNodeTypeBuilder.Build(ModBuilder, pluginType.Name, parameterInstance.GetType(), labelKey,
+                BrushNodeTypeBuilder.Build(ModBuilder, pluginName, parameterInstance.GetType(), labelKey,
                     staticPortDefs, dynamicParams);
-            TypeCache[pluginType.Name] = generated;
+            TypeCache[pluginName] = generated;
             return generated;
         }
     }
