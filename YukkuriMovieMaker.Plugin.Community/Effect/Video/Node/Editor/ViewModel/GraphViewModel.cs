@@ -130,6 +130,11 @@ public sealed class GraphViewModel : INotifyPropertyChanged
     {
         var nodeViewModels = new Dictionary<Guid, NodeViewModel>();
 
+        // 破棄前に古い VM のイベント購読を解除する。NodeLogic はここで再生成されず
+        // 使い回されるため、解除しないと同じ NodeLogic に購読が積み重なっていく。
+        foreach (var oldVm in Nodes)
+            oldVm.Dispose();
+
         Nodes.Clear();
 
         foreach (var node in _graph.Nodes.Values)
@@ -191,7 +196,12 @@ public sealed class GraphViewModel : INotifyPropertyChanged
             case NodeRemovedEventArgs removed:
             {
                 var node = Nodes.FirstOrDefault(n => n.Id == removed.NodeId);
-                if (node != null) Nodes.Remove(node);
+                if (node != null)
+                {
+                    node.Dispose();
+                    Nodes.Remove(node);
+                }
+
                 break;
             }
 

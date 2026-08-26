@@ -973,8 +973,14 @@ public static class EffectNodeCalculator
             }
 
             if (loader.Update(out var output, ctx, inputImage.Image))
+            {
                 self.GetType().GetProperty("Output")?.SetValue(self, new ImageWrapper { Image = output });
-            return Task.CompletedTask;
+                return Task.CompletedTask;
+            }
+
+            self.GetType().GetProperty("Output")?.SetValue(self, new ImageWrapper { Image = null });
+            return Task.FromException(
+                new InvalidOperationException("動的エフェクトの更新に失敗しました（loader.Update が false を返しました）。"));
         }
         catch (Exception exception)
         {

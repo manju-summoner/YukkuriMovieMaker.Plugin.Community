@@ -14,11 +14,14 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicL
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
-public sealed class NodeViewModel : INotifyPropertyChanged
+public sealed class NodeViewModel : INotifyPropertyChanged, IDisposable
 {
+    private readonly EventHandler _errorStateChangedHandler;
     private readonly NodeGraph _graph;
     private readonly GraphViewModel _graphViewModel;
+    private readonly EventHandler<NeedToReinitializeInputPortsEvent> _needToReinitializeInputPortsHandler;
     internal readonly NodeLogic NodeLogic;
+    private bool _isDisposed;
 
     private double _x;
     private double _y;
@@ -56,7 +59,7 @@ public sealed class NodeViewModel : INotifyPropertyChanged
         _y = visualState?.Y ?? 0;
 
         IsError = nodeLogic.HasError;
-        nodeLogic.ErrorStateChanged += (sender, _) =>
+        _errorStateChangedHandler = (sender, _) =>
         {
             var dispatcher = Application.Current?.Dispatcher;
             if (dispatcher != null && !dispatcher.CheckAccess())
@@ -67,8 +70,9 @@ public sealed class NodeViewModel : INotifyPropertyChanged
 
             IsError = ((NodeLogic)sender!).HasError;
         };
+        nodeLogic.ErrorStateChanged += _errorStateChangedHandler;
 
-        nodeLogic.NeedToReinitializeInputPorts += (sender, @event) =>
+        _needToReinitializeInputPortsHandler = (sender, @event) =>
         {
             var dispatcher = Application.Current?.Dispatcher;
             if (dispatcher != null && !dispatcher.CheckAccess())
@@ -139,6 +143,7 @@ public sealed class NodeViewModel : INotifyPropertyChanged
 
             graph.OnGraphChanged(new ConnectionChangedEventArgs(null, null, Id, null));
         };
+        nodeLogic.NeedToReinitializeInputPorts += _needToReinitializeInputPortsHandler;
     }
 
     public NodeEditorViewModel ParentEditor { get; }
@@ -204,6 +209,15 @@ public sealed class NodeViewModel : INotifyPropertyChanged
     {
         get;
         internal set => SetField(ref field, value);
+    }
+
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
+        NodeLogic.ErrorStateChanged -= _errorStateChangedHandler;
+        NodeLogic.NeedToReinitializeInputPorts -= _needToReinitializeInputPortsHandler;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

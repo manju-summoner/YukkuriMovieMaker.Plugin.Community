@@ -5,6 +5,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
 public sealed class NodeGraph
 {
+    private static readonly HashSet<Type> NumericPortTypes =
+    [
+        typeof(int), typeof(uint), typeof(long), typeof(ulong),
+        typeof(short), typeof(ushort), typeof(byte), typeof(sbyte),
+        typeof(float), typeof(double), typeof(decimal)
+    ];
+
     private readonly Dictionary<Guid, NodeLogic> _nodes = new();
     public readonly List<NodeConnection> Connections = [];
     public readonly Dictionary<Guid, NodeVisualState> VisualStates = new();
@@ -181,7 +188,7 @@ public sealed class NodeGraph
     /// <param name="outputName">接続が追加される出力プロパティ名</param>
     /// <param name="to">接続が設定される入力プロパティを持つノードのID</param>
     /// <param name="inputName">接続が設定される入力プロパティ名</param>
-    /// <returns>接続を追加した場合はtrue。循環接続になるため拒否した場合はfalse。</returns>
+    /// <returns>接続を追加した場合はtrue。循環接続または型が非互換のため拒否した場合はfalse。</returns>
     public bool Connect(
         Guid from, string outputName,
         Guid to, string inputName)
@@ -192,6 +199,9 @@ public sealed class NodeGraph
         if (!_nodes.TryGetValue(from, out var fromNode) || !fromNode.Outputs.TryGetValue(outputName, out var output))
             return false;
         if (!_nodes.TryGetValue(to, out var toNode) || !toNode.Inputs.TryGetValue(inputName, out var input))
+            return false;
+
+        if (!ArePortTypesCompatible(output.ValueType, input.ValueType))
             return false;
 
         var existing = Connections
@@ -207,6 +217,22 @@ public sealed class NodeGraph
 
         OnGraphChanged(new ConnectionChangedEventArgs(from, outputName, to, inputName));
         return true;
+    }
+
+    /// <summary>
+    ///     出力ポートの型を入力ポートへ接続してよいかどうかを判定する。
+    /// </summary>
+    /// <param name="outputType">接続元の出力ポートの値の型</param>
+    /// <param name="inputType">接続先の入力ポートの値の型</param>
+    /// <returns>接続を許可できる場合はtrue</returns>
+    private static bool ArePortTypesCompatible(Type outputType, Type inputType)
+    {
+        if (outputType == inputType) return true;
+        if (inputType.IsAssignableFrom(outputType)) return true;
+
+        var outputIsNumericLike = NumericPortTypes.Contains(outputType) || outputType.IsEnum;
+        var inputIsNumericLike = NumericPortTypes.Contains(inputType) || inputType.IsEnum;
+        return outputIsNumericLike && inputIsNumericLike;
     }
 
     /// <summary>

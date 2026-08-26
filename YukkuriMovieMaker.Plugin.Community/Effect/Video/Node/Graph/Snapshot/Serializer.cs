@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
+using Newtonsoft.Json.Linq;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
@@ -158,8 +159,9 @@ public static class Serializer
 
                 foreach (var input in nodeSnap.InputsValues)
                 {
-                    if (!node.Inputs.ContainsKey(input.Key)) continue;
-                    graph.SetInputValue(node.Id, input.Key, input.Value);
+                    if (!node.Inputs.TryGetValue(input.Key, out var port)) continue;
+                    var restoredValue = RestoreInputValue(port.ValueType, input.Value);
+                    graph.SetInputValue(node.Id, input.Key, restoredValue);
                 }
 
                 foreach (var subGraphKvp in nodeSnap.SubGraphs)
@@ -186,6 +188,28 @@ public static class Serializer
         }
 
         return graph;
+
+        object? RestoreInputValue(Type targetType, object? rawValue)
+        {
+            if (rawValue is null) return null;
+
+            try
+            {
+                if (rawValue is JToken token)
+                    return token.ToObject(targetType);
+
+                if (targetType.IsInstanceOfType(rawValue))
+                    return rawValue;
+
+                return PropertyValueTypeConverter.ConvertPropertyValue(targetType, rawValue);
+            }
+            catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
+            {
+                Debug.WriteLine(
+                    $"[Serializer] Failed to convert restored input value to {targetType}: {ex}");
+                return null;
+            }
+        }
 
         PortDefinition[] RestorePortDefinitions(Dictionary<string, PortDefinitionSnapshot> snapshots)
         {
