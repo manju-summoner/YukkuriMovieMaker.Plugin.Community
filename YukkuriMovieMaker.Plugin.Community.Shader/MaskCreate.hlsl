@@ -17,18 +17,21 @@ float3 RGBtoHSL(float3 color)
 
     float maxc = max(r, max(g, b));
     float minc = min(r, min(g, b));
+    float delta = maxc - minc;
 
     float h;
-    if (minc == b)
-        h = 60 * (g - r) / maxc - minc + 60;
-    else if (minc == r)
-        h = 60 * (b - g) / maxc - minc + 180;
+    if (delta == 0.0)
+        h = 0.0;
+    else if (maxc == r)
+        h = 60 * (g - b) / delta + (g < b ? 360 : 0);
+    else if (maxc == g)
+        h = 60 * (b - r) / delta + 120;
     else
-        h = 60 * (r - b) / maxc - minc + 300;
+        h = 60 * (r - g) / delta + 240;
 
     float l = maxc;
 
-    float s = maxc - minc;
+    float s = delta;
 
     return float3(h, s, l);
 }

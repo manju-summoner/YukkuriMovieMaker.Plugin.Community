@@ -194,6 +194,8 @@ public abstract class NodeLogic : IDisposable
         if (value is T typed) return typed;
         try
         {
+            if (typeof(T).IsEnum)
+                return (T)Enum.ToObject(typeof(T), value);
             return (T?)Convert.ChangeType(value, typeof(T));
         }
         catch
@@ -209,6 +211,8 @@ public abstract class NodeLogic : IDisposable
         if (value is T typed) return typed;
         try
         {
+            if (typeof(T).IsEnum)
+                return (T)Enum.ToObject(typeof(T), value);
             return (T?)Convert.ChangeType(value, typeof(T));
         }
         catch

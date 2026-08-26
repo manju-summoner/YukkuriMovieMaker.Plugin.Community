@@ -88,7 +88,10 @@ public sealed class NodeViewModel : INotifyPropertyChanged
                     Connections = graph.Connections
                         .Where(c => c.ToId == Id && c.ToPort == portVm.Name)
                         .Select(c => new { c.FromId, c.FromPort })
-                        .ToList()
+                        .ToList(),
+                    LocalValue = logic.Inputs.TryGetValue(portVm.Name, out var oldPort)
+                        ? oldPort.LocalValue
+                        : null
                 }).ToList();
 
             var prefix = @event.PropName + ".";
@@ -119,8 +122,19 @@ public sealed class NodeViewModel : INotifyPropertyChanged
                 if (newPortVm.ControlAttribute?.ControlType != saved.ControlAttributeType) continue;
                 if (newPortVm.EditorAttribute?.GetType() != saved.EditorAttributeType) continue;
 
-                foreach (var conn in saved.Connections)
-                    graph.Connect(conn.FromId, conn.FromPort, Id, saved.Name);
+                if (saved.Connections.Count > 0)
+                {
+                    foreach (var conn in saved.Connections)
+                        graph.Connect(conn.FromId, conn.FromPort, Id, saved.Name);
+                }
+                else if (saved.Name.StartsWith(prefix))
+                {
+                    var subName = saved.Name[prefix.Length..];
+                    var restoreValue = saved.LocalValue
+                                       ?? @event.NewContainer.GetType().GetProperty(subName)
+                                           ?.GetValue(@event.NewContainer);
+                    graph.SetInputValue(Id, saved.Name, restoreValue);
+                }
             }
 
             graph.OnGraphChanged(new ConnectionChangedEventArgs(null, null, Id, null));

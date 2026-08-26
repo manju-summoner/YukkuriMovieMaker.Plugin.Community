@@ -180,7 +180,7 @@ public static class ControlRegistrations
             factory.SetBinding(ColorPort.SelectedColorProperty,
                 new Binding(nameof(PortViewModel.CurrentValue))
                 {
-                    Mode = BindingMode.OneWay,
+                    Mode = BindingMode.TwoWay,
                     TargetNullValue = Colors.White,
                     FallbackValue = Colors.White,
                     Converter = new ObjectToColorConverter()

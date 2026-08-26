@@ -47,6 +47,11 @@ public enum NumberZeroFormatKind
 
 internal static class StringEncodingUtility
 {
+    static StringEncodingUtility()
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+    }
+
     public static Encoding Resolve(StringEncodingKind kind)
     {
         return kind switch

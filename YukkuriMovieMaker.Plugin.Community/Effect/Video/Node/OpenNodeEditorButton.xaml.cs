@@ -6,12 +6,16 @@ using AvalonDock;
 using AvalonDock.Layout;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.Brush;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
+using PortDefinition = YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port.PortDefinition;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
 
@@ -21,6 +25,8 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
     private IEditorInfo? _editorInfo;
     private EventHandler? _graphUpdatedHandler;
     private NodeEditorViewModel? _lastResolvedViewModel;
+    private NodeGraph? _subscribedGraph;
+    private NodeEffect? _subscribedNodeEffect;
 
     public OpenNodeEditorButton()
     {
@@ -40,6 +46,48 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         if (pluginItem.InternalGraph is not { } graph) return;
 
         _lastResolvedViewModel.UpdateEditorInfo(graph, info);
+    }
+
+    private static void EnsureInternalGraph(NodeEffect pluginItem)
+    {
+        if (pluginItem.InternalGraph != null) return;
+
+        if (pluginItem.Graph.Nodes.Count > 0)
+        {
+            pluginItem.InternalGraph = Serializer.Restore(pluginItem.Graph);
+        }
+        else
+        {
+            var graph = new NodeGraph();
+
+            var inputNode = new ArgumentsNode(
+                new PortDefinition("InputImage", typeof(ImageWrapper)),
+                new PortDefinition("FrameIndex", typeof(int))
+            )
+            {
+                Id = Guid.NewGuid()
+            };
+
+            var outputNode = new ReturnNode(
+                new PortDefinition("OutputImage", typeof(ImageWrapper))
+            )
+            {
+                Id = Guid.NewGuid()
+            };
+
+            graph.AddNode(inputNode);
+            graph.AddNode(outputNode);
+
+            graph.SetVisualState(inputNode.Id, 100, 100);
+            graph.SetVisualState(outputNode.Id, 500, 100);
+
+            graph.Connect(inputNode.Id, "InputImage", outputNode.Id, "OutputImage");
+
+            pluginItem.InternalGraph = graph;
+            pluginItem.Graph = Serializer.Create(graph);
+        }
+
+        pluginItem.InvokeGraphUpdated();
     }
 
     private void Button_Click(object sender, RoutedEventArgs e)
@@ -86,6 +134,8 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
 
         _lastResolvedViewModel = vm;
 
+        EnsureInternalGraph(pluginItem);
+
         vm?.OpenGraph(pluginItem.InternalGraph!, editorInfo: _editorInfo);
 
         if (vm != null)
@@ -96,10 +146,10 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
             vm.AddDynamicNodeTypes(dynamicBrushTypes);
         }
 
-        if (_committedHandler != null)
-            pluginItem.InternalGraph!.Committed -= _committedHandler;
-        if (_graphUpdatedHandler != null)
-            pluginItem.GraphUpdated -= _graphUpdatedHandler;
+        if (_subscribedGraph != null && _committedHandler != null)
+            _subscribedGraph.Committed -= _committedHandler;
+        if (_subscribedNodeEffect != null && _graphUpdatedHandler != null)
+            _subscribedNodeEffect.GraphUpdated -= _graphUpdatedHandler;
 
         _committedHandler = async void (_, _) =>
         {
@@ -130,6 +180,8 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
                     newGraph.Committed += _committedHandler;
                 }
 
+                _subscribedGraph = newGraph;
+
                 if (!ReferenceEquals(previousGraph, newGraph))
                 {
                     if (previousGraph != null)
@@ -148,6 +200,8 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
 
         pluginItem.InternalGraph!.Committed += _committedHandler;
         pluginItem.GraphUpdated += _graphUpdatedHandler;
+        _subscribedGraph = pluginItem.InternalGraph;
+        _subscribedNodeEffect = pluginItem;
 
         layout?.IsSelectedChanged += (_, _) =>
         {
