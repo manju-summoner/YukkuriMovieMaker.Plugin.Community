@@ -7,6 +7,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
     internal static class MlsDeformBounds
     {
         const float Epsilon = 1e-6f;
+        //シェーダー(PuppetDeformation.hlsl)と同一の定数。数式は常にシェーダーと揃えること
+        const float DistEpsilonSq = 0.0625f;
+        const float WeightFloor = 1e-16f;
         const float HalfTexel = 0.5f;
         const int GridResolution = 96;
         const float SearchExpansionFactor = 1.5f;
@@ -34,7 +37,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
             float alpha = Math.Clamp(stiffness, 0.1f, 8.0f);
             float scale = Math.Max(imageWidth, imageHeight);
-            float scaleInvSq = 1f / (scale * scale);
 
             float marginedMinX = -halfW + HalfTexel;
             float marginedMinY = -halfH + HalfTexel;
@@ -87,7 +89,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 {
                     float vx = searchMinX + searchWidth * ((float)col / GridResolution);
 
-                    var source = InverseMlsMap(new Vector2(vx, vy), restLocal, currentLocal, n, alpha, scaleInvSq);
+                    var source = InverseMlsMap(new Vector2(vx, vy), restLocal, currentLocal, n, alpha);
 
                     if (source.X >= marginedMinX && source.X <= marginedMaxX
                         && source.Y >= marginedMinY && source.Y <= marginedMaxY)
@@ -109,28 +111,36 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             return (outMinX - cellW, outMinY - cellH, outMaxX + cellW, outMaxY + cellH);
         }
 
-        static Vector2 InverseMlsMap(
+        internal static Vector2 InverseMlsMap(
             Vector2 v,
             IReadOnlyList<Vector2> restLocal,
             IReadOnlyList<Vector2> currentLocal,
             int n,
-            float alpha,
-            float scaleInvSq)
+            float alpha)
         {
+            //weightsはまず距離²の置き場として使い、次のループで重みへ変換して使い回す
             Span<float> weights = stackalloc float[n];
-            float totalW = 0f;
-            float pStarX = 0f, pStarY = 0f;
-            float qStarX = 0f, qStarY = 0f;
             float minDistSq = float.MaxValue;
-            int nearest = 0;
 
             for (int i = 0; i < n; i++)
             {
                 float dx = currentLocal[i].X - v.X;
                 float dy = currentLocal[i].Y - v.Y;
-                float distSq = (dx * dx + dy * dy) * scaleInvSq + Epsilon;
-                if (distSq < minDistSq) { minDistSq = distSq; nearest = i; }
-                float wi = MathF.Pow(distSq, -alpha);
+                float distSq = dx * dx + dy * dy + DistEpsilonSq;
+                weights[i] = distSq;
+                minDistSq = Math.Min(minDistSq, distSq);
+            }
+
+            //重みは最近傍ピンとの距離比(最大1)で持つ。絶対重みpow(distSq, -alpha)は
+            //ピン至近でfloatを溢れるが、全重みの一様スケーリングは写像を変えないため比で置き換えられる。
+            //下限(WeightFloor)は高剛性時のfr成分二乗アンダーフローによる縮退判定の誤発火を防ぐ
+            float totalW = 0f;
+            float pStarX = 0f, pStarY = 0f;
+            float qStarX = 0f, qStarY = 0f;
+
+            for (int i = 0; i < n; i++)
+            {
+                float wi = MathF.Max(MathF.Pow(minDistSq / weights[i], alpha), WeightFloor);
                 weights[i] = wi;
                 totalW += wi;
                 pStarX += wi * currentLocal[i].X;
@@ -139,9 +149,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 qStarY += wi * restLocal[i].Y;
             }
 
-            if (minDistSq < Epsilon * 4f || float.IsInfinity(totalW))
-                return restLocal[nearest];
-
+            //最近傍ピンの重みが常に1なのでtotalW >= 1が保証される
             float invW = 1f / totalW;
             pStarX *= invW; pStarY *= invW;
             qStarX *= invW; qStarY *= invW;
@@ -152,6 +160,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
             float frX = 0f;
             float frY = 0f;
+            float mu = 0f;
 
             for (int i = 0; i < n; i++)
             {
@@ -169,11 +178,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 float wi = weights[i];
                 frX += wi * (dotPV * qHatX - dotPperpV * qHatY);
                 frY += wi * (dotPV * qHatY + dotPperpV * qHatX);
+                mu += wi * (pHatX * pHatX + pHatY * pHatY);
             }
 
             float frLen = MathF.Sqrt(frX * frX + frY * frY);
 
-            if (frLen < Epsilon)
+            //縮退判定は重みの一様スケーリングに不変な相対量で行う(frはmu*vHatLenと同じスケールを持ち、
+            //比がEpsilon未満ならrest側の配置が潰れているとみなす)。絶対閾値だと重みの取り方で発火条件が変わる。
+            //<=が必須: mu=0(全currentピン一致)やvHatLen=0では両辺が0になり、<だとelse側で0除算のNaNが出る
+            if (frLen <= Epsilon * mu * vHatLen)
                 return new Vector2(v.X - pStarX + qStarX, v.Y - pStarY + qStarY);
 
             float normScale = vHatLen / frLen;

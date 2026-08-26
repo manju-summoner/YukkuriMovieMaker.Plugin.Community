@@ -3,6 +3,12 @@ SamplerState InputSampler : register(s0);
 
 static const int MaxPins = 256;
 static const float Epsilon = 1e-6f;
+//ピン直上での0除算を避ける距離の下駄((0.25px)^2)。全ピンの距離をsqrt(|d|^2+0.0625)へ軟化するもので、
+//ピン直上では約0.25px離れた点相当の重み比になる。大きくするほどピン直上の補間残差(低剛性ほど顕著)が増えるためサブピクセルに抑える
+static const float DistEpsilonSq = 0.0625f;
+//比重みの下限。高剛性では遠方ピンの比重みが極小になり、frの成分二乗がfloatの
+//非正規化数域を割り込んで縮退判定が誤発火する(ピン周囲で回転が失われ段差が出る)ため、下限で押し上げる
+static const float WeightFloor = 1e-16f;
 
 cbuffer Constants : register(b0)
 {
@@ -56,77 +62,78 @@ float4 main(
     else
     {
         float alpha = clamp(stiffness, 0.1f, 8.0f);
-        float scale = max(inputWidth, inputHeight);
-        float scaleInvSq = 1.0f / (scale * scale);
-
-        float totalW = 0.0f;
-        float2 pStar = (float2)0;
-        float2 qStar = (float2)0;
 
         float minDistSq = 1e30f;
-        float2 nearestRest = (float2)0;
 
         [loop]
         for (int i = 0; i < n; i++)
         {
             float2 ci = GetCurrentScene(i);
-            float2 ri = GetRestScene(i);
             float2 d = ci - v;
-            float distSq = dot(d, d) * scaleInvSq + Epsilon;
-            if (distSq < minDistSq)
-            {
-                minDistSq = distSq;
-                nearestRest = ri;
-            }
-            float w = pow(distSq, -alpha);
+            minDistSq = min(minDistSq, dot(d, d) + DistEpsilonSq);
+        }
+
+        //重みは最近傍ピンとの距離比(最大1)で持つ。絶対重みpow(distSq, -alpha)は
+        //ピン至近でfloatを溢れるが、全重みの一様スケーリングは写像を変えないため比で置き換えられる
+        float totalW = 0.0f;
+        float2 pStar = (float2)0;
+        float2 qStar = (float2)0;
+
+        [loop]
+        for (int j = 0; j < n; j++)
+        {
+            float2 ci = GetCurrentScene(j);
+            float2 ri = GetRestScene(j);
+            float2 d = ci - v;
+            float distSq = dot(d, d) + DistEpsilonSq;
+            float w = max(pow(minDistSq / distSq, alpha), WeightFloor);
             totalW += w;
             pStar += w * ci;
             qStar += w * ri;
         }
 
-        if (minDistSq < Epsilon * 4.0f || isinf(totalW))
+        //最近傍ピンの重みが常に1なのでtotalW >= 1が保証される
+        float invTotalW = 1.0f / totalW;
+        pStar *= invTotalW;
+        qStar *= invTotalW;
+
+        float2 vHat = v - pStar;
+        float vHatLen = length(vHat);
+
+        float frX = 0.0f;
+        float frY = 0.0f;
+        float mu = 0.0f;
+
+        [loop]
+        for (int k = 0; k < n; k++)
         {
-            source = nearestRest;
+            float2 ci = GetCurrentScene(k);
+            float2 ri = GetRestScene(k);
+            float2 d = ci - v;
+            float distSq = dot(d, d) + DistEpsilonSq;
+            float w = max(pow(minDistSq / distSq, alpha), WeightFloor);
+
+            float2 pHat = ci - pStar;
+            float2 qHat = ri - qStar;
+            float2 pHatPerp = float2(-pHat.y, pHat.x);
+
+            float dotPV = dot(pHat, vHat);
+            float dotPperpV = dot(pHatPerp, vHat);
+
+            frX += w * (dotPV * qHat.x - dotPperpV * qHat.y);
+            frY += w * (dotPV * qHat.y + dotPperpV * qHat.x);
+            mu += w * dot(pHat, pHat);
         }
+
+        float frLen = length(float2(frX, frY));
+
+        //縮退判定は重みの一様スケーリングに不変な相対量で行う(frはmu*vHatLenと同じスケールを持ち、
+        //比がEpsilon未満ならrest側の配置が潰れているとみなす)。絶対閾値だと重みの取り方で発火条件が変わる。
+        //<=が必須: mu=0(全currentピン一致)やvHatLen=0では両辺が0になり、<だとelse側で0除算のNaNが出る
+        if (frLen <= Epsilon * mu * vHatLen)
+            source = v - pStar + qStar;
         else
-        {
-            float invTotalW = 1.0f / totalW;
-            pStar *= invTotalW;
-            qStar *= invTotalW;
-
-            float2 vHat = v - pStar;
-            float vHatLen = length(vHat);
-
-            float frX = 0.0f;
-            float frY = 0.0f;
-
-            [loop]
-            for (int j = 0; j < n; j++)
-            {
-                float2 ci = GetCurrentScene(j);
-                float2 ri = GetRestScene(j);
-                float2 d = ci - v;
-                float distSq = dot(d, d) * scaleInvSq + Epsilon;
-                float w = pow(distSq, -alpha);
-
-                float2 pHat = ci - pStar;
-                float2 qHat = ri - qStar;
-                float2 pHatPerp = float2(-pHat.y, pHat.x);
-
-                float dotPV = dot(pHat, vHat);
-                float dotPperpV = dot(pHatPerp, vHat);
-
-                frX += w * (dotPV * qHat.x - dotPperpV * qHat.y);
-                frY += w * (dotPV * qHat.y + dotPperpV * qHat.x);
-            }
-
-            float frLen = length(float2(frX, frY));
-
-            if (frLen < Epsilon)
-                source = float2(v.x - pStar.x + qStar.x, v.y - pStar.y + qStar.y);
-            else
-                source = (vHatLen / frLen) * float2(frX, frY) + qStar;
-        }
+            source = (vHatLen / frLen) * float2(frX, frY) + qStar;
     }
 
     float srcRight = inputLeft + inputWidth;
