@@ -39,6 +39,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.PageTurn
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
         {
             ConstantBuffer constants;
+            //MapInputRectsToOutputRectより先にMapInvalidRectが呼ばれても
+            //無効化漏れにならないよう、初期値は全域相当に倒す
+            RawRect lastOutputRect = new(-1_000_000, -1_000_000, 1_000_000, 1_000_000);
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.Progress)]
             public float Progress
@@ -113,7 +116,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.PageTurn
 
                 if (inputRect.Right <= inputRect.Left || inputRect.Bottom <= inputRect.Top)
                 {
-                    outputRect = inputRect;
+                    outputRect = lastOutputRect = inputRect;
                     outputOpaqueSubRect = default;
                     return;
                 }
@@ -136,8 +139,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Transition.PageTurn
                 constants.Input1Bottom = rect1.Bottom - inputRect.Top;
                 UpdateConstants();
 
-                outputRect = ExpandOutputRect(inputRect);
+                outputRect = lastOutputRect = ExpandOutputRect(inputRect);
                 outputOpaqueSubRect = default;
+            }
+
+            public override RawRect MapInvalidRect(int inputIndex, RawRect invalidInputRect)
+            {
+                //めくり返し面が入力画像の任意の位置を参照するため、出力全域を無効化する。
+                //出力矩形は入力矩形の外へ拡張されることがあるため、直近に報告した出力矩形を返す。
+                return lastOutputRect;
             }
 
             //めくられたページは入力矩形の外（めくり始めの位置の反対側）へ移動するため、
