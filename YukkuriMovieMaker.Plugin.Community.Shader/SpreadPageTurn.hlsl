@@ -1,7 +1,10 @@
-// Spread page turn (book-style page curl).
+// Spread page turn (book-style page turn).
 // The input is treated as a two-page spread whose fold (spine) is fixed at the
-// center. One half page curls over a cylinder parallel to the spine and lands
-// on the opposite half while staying attached at the spine.
+// center. One half page turns over the spine and lands on the opposite half
+// while staying attached at it, in one of two styles:
+//   curl : the page bends over a cylinder parallel to the spine
+//   fold : the page is a rigid flat board hinged at the spine, rotating by
+//          theta = pi * progress with optional perspective foreshortening
 // The curl radius follows a bell schedule (zero at both ends of the animation)
 // so the page starts perfectly flat and lands perfectly flat; without it the
 // roll would persist at the spine and pop out at progress 1.
@@ -41,6 +44,8 @@ cbuffer Constants : register(b0)
     float inputTop      : packoffset(c1.w);
     float inputWidth    : packoffset(c2.x);
     float inputHeight   : packoffset(c2.y);
+    float style         : packoffset(c2.z); // 0: curl, 1: fold (rigid flap)
+    float invDistance   : packoffset(c2.w); // 1 / camera distance in px (fold style; 0 = orthographic)
     // valid rect (left, top, right, bottom) of each input in scene px
     // relative to (inputLeft, inputTop). The texture may be larger than the
     // image (pooled/atlased intermediate), so uv range checks are NOT enough:
@@ -121,6 +126,121 @@ float4 main(
 
     float u = dot(pNow - center, axis);
 
+    float4 base;
+    float4 top = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    float topOcc = 0.0f;
+
+    if (style >= 0.5f)
+    {
+        // ---- fold: a rigid flat board hinged at the spine.
+        // Screen coord of paper point (s, y): u' = s*cos(theta) / shrink,
+        // v' = y / shrink with shrink = 1 - s*sin(theta)*q. q = 1/D comes from
+        // the camera field of view with the same convention as the camera
+        // effects (D = screenHeight/2 / tan(fov/2)); points at or behind the
+        // camera plane (shrink <= 0) are rejected below. The inverse is
+        // closed-form, so the board is rendered by per-pixel inverse mapping.
+        float theta = PI * progress;
+        float sinT = sin(theta);
+        float cosT = cos(theta);
+        // single precision sin(pi) is not exactly 0 and the error gets
+        // amplified by strong perspective on huge inputs (the landed edge
+        // falls short by up to a few px); snap the endpoints so progress 0/1
+        // stay pixel exact
+        if (progress <= 0.0f || progress >= 1.0f)
+        {
+            sinT = 0.0f;
+            cosT = progress >= 1.0f ? -1.0f : 1.0f;
+        }
+        float q = invDistance;
+
+        float2 perp = float2(-axis.y, axis.x);
+        float v = dot(pNow - center, perp);
+        float C = abs(perp.x) * w + abs(perp.y) * h; // cross extent of the page
+
+        // the whole turning half is uncovered the moment the board lifts;
+        // the board itself hides it again by occlusion
+        base = (u >= 0.0f) ? SampleAfter(pNow, pNow, uv1) : SampleBefore(pNow, pNow, uv0);
+
+        // soft shadow ahead of the board's projected free edge; its reach
+        // scales with the board's lift so it vanishes at both endpoints
+        float uEdge = S * cosT / max(1.0f - S * sinT * q, 0.1f);
+        float range = 0.4f * S * sinT;
+        if (range > 0.5f)
+        {
+            float dist = (cosT >= 0.0f) ? (u - uEdge) : (uEdge - u);
+            if (dist >= 0.0f)
+            {
+                float sh = shadow * 0.75f * saturate(1.0f - dist / range);
+                base.rgb *= 1.0f - sh;
+            }
+        }
+
+        // rim coverage forcing at both endpoints so that progress 0/1 match
+        // before/after exactly including the 1px anti-aliased page edges.
+        // The front (rising) and back (descending) faces are mutually
+        // exclusive in theta, so one shared rim/feather path serves both
+        float rim = max(saturate((0.02f - progress) / 0.02f),
+                        saturate((progress - 0.98f) / 0.02f));
+
+        float denom = cosT + u * sinT * q;
+        if (abs(denom) > 1e-4f)
+        {
+            float s = u / denom; // paper arc length from the spine
+            float shrink = 1.0f - s * sinT * q;
+            // reject points at or beyond 10x magnification toward the camera so
+            // the drawn reach matches the output-rect expansion cap; the cut is
+            // faded below so no hard edge appears
+            if (s >= 0.0f && s <= S && shrink >= 0.1f)
+            {
+                float vPage = v * shrink;
+                // 1px anti-aliasing at the free edge and the cross edges,
+                // both measured in screen pixels
+                float featherEdge = saturate((S - s) * abs(cosT) / (shrink * shrink));
+                float featherCross = saturate((0.5f * C - abs(vPage)) / shrink);
+                float featherNear = saturate((shrink - 0.1f) * 50.0f);
+                float feather = max(min(featherEdge, min(featherCross, featherNear)), rim);
+                if (feather > 0.0f)
+                {
+                    float4 color;
+                    float occ;
+                    if (cosT >= 0.0f)
+                    {
+                        // front face while rising
+                        float2 posFront = center + axis * s + perp * vPage;
+                        color = SampleBefore(posFront, pNow, uv0);
+                        occ = backMode < 0.5f ? 1.0f : color.a;
+                    }
+                    else if (backMode < 0.5f)
+                    {
+                        // back face while descending (see BackFace for the
+                        // occlusion rules)
+                        float2 posBack = center - axis * s + perp * vPage;
+                        color = SampleAfter(posBack, pNow, uv1);
+                        occ = 1.0f;
+                    }
+                    else
+                    {
+                        float2 posFront = center + axis * s + perp * vPage;
+                        float4 front = SampleBefore(posFront, pNow, uv0);
+                        color = float4(Whiten(front), front.a);
+                        occ = front.a;
+                    }
+                    // simple tilt lighting; sin(theta) is 0 at both endpoints
+                    // so progress 0/1 stay pixel exact
+                    color.rgb *= lerp(1.0f, 0.6f, sinT);
+                    top = color * feather;
+                    topOcc = occ * feather;
+                }
+            }
+        }
+
+        return top + (1.0f - topOcc) * base;
+    }
+
+    // ---- curl
+    float4 mid = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    float midOcc = 0.0f;
+
     // the radius peaks mid-turn (capped so the roll fits within the half page)
     // and returns to zero at both ends
     float r = min(radius, S / PI) * sin(PI * progress);
@@ -133,7 +253,6 @@ float4 main(
     float t = max(S * (1.0f - progress) - 0.5f * PI * r, 0.0f);
 
     // base layer
-    float4 base;
     if (u >= t)
     {
         base = SampleAfter(pNow, pNow, uv1);
@@ -151,10 +270,6 @@ float4 main(
     // frame; force full coverage there so progress 1 matches "after" exactly
     float wEnd = backMode < 0.5f ? saturate((progress - 0.98f) / 0.02f) : 0.0f;
 
-    float4 top = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    float topOcc = 0.0f;
-    float4 mid = float4(0.0f, 0.0f, 0.0f, 0.0f);
-    float midOcc = 0.0f;
     if (u <= t)
     {
         // fold-back: the sheet past the crest, lying flat on the other side

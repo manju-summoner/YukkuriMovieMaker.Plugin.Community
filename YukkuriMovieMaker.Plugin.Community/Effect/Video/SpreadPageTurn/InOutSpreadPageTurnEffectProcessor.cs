@@ -20,8 +20,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.SpreadPageTurn
         D2D.Effects.Crop crop = null!;
 
         bool isFirst = true;
-        float progress, radius, shadow, backLightness;
+        float progress, radius, shadow, backLightness, invDistance;
         SpreadPageTurnPage page;
+        SpreadPageTurnStyle style;
         RawRectF inputBounds;
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
@@ -81,9 +82,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.SpreadPageTurn
             //登場・退場のうち近い方の進行度を採用する（基底InOutEffectBaseのGetEasingValue = 1 - eased）。
             var progress = (float)GetEasingValue(effectDescription, 1, 0);
             var radius = (float)item.Radius;
+            var invDistance = SpreadPageTurnCustomEffect.CalculateInvDistance(item.Fov, effectDescription.ScreenSize.Height);
             var shadow = (float)item.Shadow / 100f;
             var backLightness = (float)item.BackLightness / 100f;
             var page = item.Page;
+            var style = item.Style;
 
             //after(透明)の矩形を入力画像の矩形に合わせる
             if (input is not null)
@@ -98,19 +101,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.SpreadPageTurn
                 effect.Progress = progress;
             if (isFirst || this.radius != radius)
                 effect.Radius = radius;
+            if (isFirst || this.invDistance != invDistance)
+                effect.InvDistance = invDistance;
             if (isFirst || this.shadow != shadow)
                 effect.Shadow = shadow;
             if (isFirst || this.backLightness != backLightness)
                 effect.BackLightness = backLightness;
             if (isFirst || this.page != page)
                 effect.Page = (int)page;
+            if (isFirst || this.style != style)
+                //enum値はShowPropertyEditorWhenの都合で1始まりのため、シェーダーの0/1へ明示的に写像する
+                effect.Style = style == SpreadPageTurnStyle.Fold ? 1 : 0;
 
             isFirst = false;
             this.progress = progress;
             this.radius = radius;
+            this.invDistance = invDistance;
             this.shadow = shadow;
             this.backLightness = backLightness;
             this.page = page;
+            this.style = style;
 
             return desc;
         }

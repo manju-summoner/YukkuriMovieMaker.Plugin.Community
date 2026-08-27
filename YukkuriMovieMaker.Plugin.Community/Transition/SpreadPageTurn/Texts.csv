@@ -23,3 +23,9 @@ InOutSpreadPageTurnEffectName,,見開きをめくりながら登場退場,Appear
 InOutGroupName,,登場退場,Appearance and exit,入/出场,登場退場,등장 퇴장,Aparición y salida,ظهور ومغادرة,Masuk dan keluar
 InSpreadPageTurnEffectLabel,,見開きを戻しながら,while turning the spread back,翻回对开页时,在翻回對開頁時,펼침면을 되돌리면서,Al devolver la página doble,أثناء إعادة الصفحة المزدوجة,saat mengembalikan halaman ganda
 OutSpreadPageTurnEffectLabel,,見開きをめくりながら,while turning the spread,翻动对开页时,在翻動對開頁時,펼침면을 넘기면서,Al pasar la página doble,أثناء تقليب الصفحة المزدوجة,saat membalik halaman ganda
+SpreadPageTurnStyleName,,めくり方,Turn style,翻页方式,翻頁方式,넘김 방식,Estilo de paso,أسلوب التقليب,Gaya balik
+SpreadPageTurnStyleDesc,,ページのめくり方を選択します。,Selects how the page turns.,选择翻页的方式。,選擇翻頁的方式。,페이지를 넘기는 방식을 선택합니다.,Selecciona cómo se pasa la página.,يحدد طريقة تقليب الصفحة.,Memilih cara halaman dibalik.
+SpreadPageTurnStyleCurlName,,カール,Curl,卷曲,捲曲,컬,Curvatura,التفاف,Gulungan
+SpreadPageTurnStyleFoldName,,折りたたみ,Fold,折叠,摺疊,접기,Plegado,طي,Lipatan
+SpreadPageTurnFovName,,視野角,Field of view,视野角,視野角,시야각,Campo de visión,مجال الرؤية,Sudut pandang
+SpreadPageTurnFovDesc,,折りたたみの遠近感です。垂直方向の視野角で指定し、0°で平行投影になります。,Perspective of the fold given as the vertical field of view. Set to 0° for orthographic projection.,折叠的透视感。以垂直视野角指定，设为0°时使用正交投影。,摺疊的透視感。以垂直視野角指定，設為0°時使用正交投影。,접기 방식의 원근감입니다. 수직 시야각으로 지정하며 0°로 설정하면 직교 투영이 됩니다.,Perspectiva del plegado indicada como campo de visión vertical. Ajústalo a 0° para proyección ortográfica.,منظور الطي، يحدد بمجال الرؤية الرأسي. اضبطه على 0° لاستخدام الإسقاط المتعامد.,Perspektif lipatan ditentukan dengan sudut pandang vertikal. Atur ke 0° untuk proyeksi ortografis.
