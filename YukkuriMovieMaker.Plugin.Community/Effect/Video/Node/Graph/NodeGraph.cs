@@ -49,6 +49,8 @@ public sealed class NodeGraph
     /// <param name="node">管理対象に追加するノードの演算実体</param>
     public void AddNode(NodeLogic node)
     {
+        node.SyncDynamicInputs();
+
         _nodes[node.Id] = node;
 
         OnGraphChanged(new NodeAddedEventArgs(node.Id, node));

@@ -49,7 +49,9 @@
             <TextBox Width="75" Height="25"
                      Text="{Binding SelectedColor, RelativeSource={RelativeSource AncestorType=local:ColorPort},
                      Converter={StaticResource ColorToHexConverter}, Mode=TwoWay}"
-                     VerticalContentAlignment="Center" FontFamily="Consolas" />
+                     VerticalContentAlignment="Center" FontFamily="Consolas"
+                     GotFocus="HexTextBox_OnGotFocus" LostFocus="HexTextBox_OnLostFocus"
+                     KeyDown="HexTextBox_OnKeyDown" />
         </StackPanel>
         <Popup x:Name="Popup" AllowsTransparency="True" PlacementTarget="{Binding ElementName=BtnColor}"
                Placement="Bottom" StaysOpen="False" Closed="Popup_OnClosed">

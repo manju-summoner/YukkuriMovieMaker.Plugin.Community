@@ -141,6 +141,9 @@ public sealed class NodeViewModel : INotifyPropertyChanged, IDisposable
                 }
             }
 
+            foreach (var portVm in InputPorts)
+                portVm.ApplyDefaultToGraph();
+
             graph.OnGraphChanged(new ConnectionChangedEventArgs(null, null, Id, null));
         };
         nodeLogic.NeedToReinitializeInputPorts += _needToReinitializeInputPortsHandler;

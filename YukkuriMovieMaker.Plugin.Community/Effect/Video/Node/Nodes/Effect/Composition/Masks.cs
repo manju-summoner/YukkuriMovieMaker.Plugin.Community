@@ -221,7 +221,7 @@ public class MaskThresholdNode : NodeLogic
     }
 
     [InputPort(nameof(TextNode.MaskMaxLabel), nameof(TextNode.MaskMaxDescription), typeof(TextNode))]
-    [NumberPortControl(Min = 0, Max = 100, Digits = 1, Unit = "%")]
+    [NumberPortControl(Min = 0, Max = 100, Digits = 1, Unit = "%", Default = 100f)]
     [PortColorSetting(nameof(Colors.DarkOrange))]
     public float Max
     {

@@ -164,6 +164,15 @@ public static class Serializer
                     graph.SetInputValue(node.Id, input.Key, restoredValue);
                 }
 
+                node.SyncDynamicInputs();
+
+                foreach (var input in nodeSnap.InputsValues)
+                {
+                    if (!node.Inputs.TryGetValue(input.Key, out var port)) continue;
+                    var restoredValue = RestoreInputValue(port.ValueType, input.Value);
+                    graph.SetInputValue(node.Id, input.Key, restoredValue);
+                }
+
                 foreach (var subGraphKvp in nodeSnap.SubGraphs)
                 {
                     var subGraph = Restore(subGraphKvp.Value);

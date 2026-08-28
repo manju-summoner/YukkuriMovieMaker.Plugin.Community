@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -301,6 +302,29 @@ public partial class ColorPort
     private void UIElement_OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
         e.Handled = true;
+    }
+
+    private void HexTextBox_OnGotFocus(object sender, RoutedEventArgs e)
+    {
+        BeginEditCommand?.Execute(null);
+    }
+
+    private void HexTextBox_OnLostFocus(object sender, RoutedEventArgs e)
+    {
+        CommitHexTextBox(sender);
+    }
+
+    private void HexTextBox_OnKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Return) return;
+        CommitHexTextBox(sender);
+    }
+
+    private void CommitHexTextBox(object sender)
+    {
+        if (sender is TextBox box)
+            BindingOperations.GetBindingExpression(box, TextBox.TextProperty)?.UpdateSource();
+        EndEditCommand?.Execute(null);
     }
 }
 

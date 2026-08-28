@@ -31,7 +31,7 @@ float3 RGBtoHSL(float3 color)
 
     float l = maxc;
 
-    float s = delta;
+    float s = maxc == 0.0 ? 0.0 : delta / maxc;
 
     return float3(h, s, l);
 }
