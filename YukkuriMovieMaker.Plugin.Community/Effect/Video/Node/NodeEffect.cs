@@ -10,6 +10,7 @@ using Vortice.Direct2D1.Effects;
 using Vortice.DXGI;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
@@ -92,6 +93,61 @@ public sealed class NodeEffect : VideoEffectBase
     public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
     {
         return new Processor(devices, this);
+    }
+
+    private static IEnumerable<(InputPort Port, string Path)> EnumerateFilePathPorts(NodeGraph graph)
+    {
+        foreach (var node in graph.Nodes.Values)
+        {
+            foreach (var prop in node.GetType().GetProperties())
+            {
+                if (!Attribute.IsDefined(prop, typeof(FileSelectorAttribute))) continue;
+                if (!node.Inputs.TryGetValue(prop.Name, out var port)) continue;
+                if (port.LocalValue is string { Length: > 0 } path)
+                    yield return (port, path);
+            }
+
+            foreach (var entry in node.SubGraphs.Values.SelectMany(EnumerateFilePathPorts))
+                yield return entry;
+        }
+    }
+
+    public override IEnumerable<string> GetFiles()
+    {
+        if (InternalGraph is null)
+            return base.GetFiles();
+
+        return EnumerateFilePathPorts(InternalGraph)
+            .Select(p => p.Path)
+            .Distinct()
+            .ToList();
+    }
+
+    public override void ReplaceFile(string from, string to)
+    {
+        if (InternalGraph is null)
+        {
+            base.ReplaceFile(from, to);
+            return;
+        }
+
+        var matches = EnumerateFilePathPorts(InternalGraph)
+            .Where(p => p.Path == from)
+            .ToList();
+
+        if (matches.Count == 0)
+            return;
+
+        InternalGraph.BeginEdit();
+        try
+        {
+            foreach (var match in matches)
+                match.Port.SetValue(to);
+        }
+        finally
+        {
+            InternalGraph.EndEdit();
+        }
     }
 }
 

@@ -16,18 +16,21 @@ using VisualStateChangedEventArgs =
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
-public sealed class GraphViewModel : INotifyPropertyChanged
+public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
 {
     private readonly NodeGraph _graph;
+    private readonly EventHandler _graphUpdatedHandler;
+    private bool _isDisposed;
 
     public GraphViewModel(NodeGraph graph, NodeEditorViewModel nodeEditorViewModel, IEditorInfo? editorInfo = null)
     {
         _graph = graph;
         ParentEditor = nodeEditorViewModel;
         EditorInfo = editorInfo;
+        _graphUpdatedHandler = (_, _) => SyncFromGraph();
 
         _graph.GraphChanged += OnGraphChanged;
-        nodeEditorViewModel.GraphUpdated += (_, _) => SyncFromGraph();
+        ParentEditor.GraphUpdated += _graphUpdatedHandler;
 
         SyncFromGraph();
 
@@ -100,6 +103,23 @@ public sealed class GraphViewModel : INotifyPropertyChanged
     public double Width { get; set; }
 
     public double Height { get; set; }
+
+    /// <summary>
+    ///     タブを閉じる際に呼び出す。_graph.GraphChanged と ParentEditor.GraphUpdated への
+    ///     購読を解除しないと、閉じた後もこの VM がグラフ変更に反応し続けてしまう。
+    /// </summary>
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
+        _graph.GraphChanged -= OnGraphChanged;
+        ParentEditor.GraphUpdated -= _graphUpdatedHandler;
+
+        foreach (var node in Nodes)
+            node.Dispose();
+        Nodes.Clear();
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -423,8 +443,16 @@ public sealed class GraphViewModel : INotifyPropertyChanged
 
     public void EndNodeDrag()
     {
-        foreach (var nodeVm in SelectedNodes)
-            nodeVm.CommitPosition();
+        _graph.BeginEdit();
+        try
+        {
+            foreach (var nodeVm in SelectedNodes)
+                nodeVm.CommitPosition();
+        }
+        finally
+        {
+            _graph.EndEdit();
+        }
     }
 
     public Point TransformToCanvas(Point screenPoint)

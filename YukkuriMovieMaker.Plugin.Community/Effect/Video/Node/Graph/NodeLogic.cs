@@ -195,7 +195,7 @@ public abstract class NodeLogic : IDisposable
         try
         {
             if (typeof(T).IsEnum)
-                return (T)Enum.ToObject(typeof(T), value);
+                return (T)Enum.ToObject(typeof(T), Convert.ToInt64(value));
             return (T?)Convert.ChangeType(value, typeof(T));
         }
         catch
@@ -212,7 +212,7 @@ public abstract class NodeLogic : IDisposable
         try
         {
             if (typeof(T).IsEnum)
-                return (T)Enum.ToObject(typeof(T), value);
+                return (T)Enum.ToObject(typeof(T), Convert.ToInt64(value));
             return (T?)Convert.ChangeType(value, typeof(T));
         }
         catch

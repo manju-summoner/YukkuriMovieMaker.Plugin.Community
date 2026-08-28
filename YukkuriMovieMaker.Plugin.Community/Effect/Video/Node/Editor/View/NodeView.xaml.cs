@@ -29,8 +29,8 @@ public partial class NodeView
         _isMouseDown = true;
         _isDragging = false;
 
-        if (FindParent<GraphView>(this)?.DataContext is GraphViewModel graphVm)
-            _mouseDownPos = graphVm.TransformToCanvas(PointToScreen(e.GetPosition(this)));
+        if (FindParent<GraphView>(this) is { DataContext: GraphViewModel graphVm } graphView)
+            _mouseDownPos = graphVm.TransformToCanvas(e.GetPosition(graphView));
 
         e.Handled = true;
         Focus();
@@ -41,9 +41,9 @@ public partial class NodeView
     {
         if (!_isMouseDown) return;
         if (DataContext is not NodeViewModel vm) return;
-        if (FindParent<GraphView>(this)?.DataContext is not GraphViewModel graphVm) return;
+        if (FindParent<GraphView>(this) is not { DataContext: GraphViewModel graphVm } graphView) return;
 
-        var currentPos = graphVm.TransformToCanvas(PointToScreen(e.GetPosition(this)));
+        var currentPos = graphVm.TransformToCanvas(e.GetPosition(graphView));
         var delta = currentPos - _mouseDownPos;
 
         if (!_isDragging)

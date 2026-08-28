@@ -227,7 +227,9 @@ public class ShapeOutlineNode : NodeLogic
 
         var builder = new SKPathBuilder();
 
-        switch (_kind)
+        var kind = Kind;
+
+        switch (kind)
         {
             case ShapeKind.Rect:
             {

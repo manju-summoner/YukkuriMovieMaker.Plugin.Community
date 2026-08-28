@@ -486,9 +486,13 @@ public class VideoEffectsLoader : IDisposable
 
     public static VideoEffectsLoader LoadBrushSync(string name, EvaluationContext evaluationContext)
     {
+        // LoadEffectSync と同様、DynamicBrushNodeFactory は AssemblyQualifiedName 等の
+        // 衝突しないキーを name として渡してくる。type.Name だけの一致判定では
+        // 常に不一致になり Update が一度も成功しない状態になるため、同じフォールバック規則で比較する。
         return new VideoEffectsLoader(
             Activator.CreateInstance(PluginLoader.BrushPlugins.Select(plugin => plugin.GetType())
-                    .First(type => type.Name == name)) as
+                    .First(type => (type.AssemblyQualifiedName ?? type.FullName ?? type.Name) == name
+                                   || type.Name == name)) as
                 IBrushPlugin, evaluationContext);
     }
 

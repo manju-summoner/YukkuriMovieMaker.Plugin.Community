@@ -7,7 +7,7 @@ using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel;
 
-public sealed class TabViewModel : INotifyPropertyChanged
+public sealed class TabViewModel : INotifyPropertyChanged, IDisposable
 {
     private readonly Action<TabViewModel>? _closeAction;
 
@@ -30,6 +30,11 @@ public sealed class TabViewModel : INotifyPropertyChanged
     public GraphViewModel GraphViewModel { get; }
     public ICommand CloseCommand { get; }
     public NodeGraph Graph { get; }
+
+    public void Dispose()
+    {
+        GraphViewModel.Dispose();
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

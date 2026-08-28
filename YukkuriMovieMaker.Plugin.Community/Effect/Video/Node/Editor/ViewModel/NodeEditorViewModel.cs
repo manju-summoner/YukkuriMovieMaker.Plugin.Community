@@ -223,6 +223,7 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
     {
         var index = Tabs.IndexOf(tab);
         Tabs.Remove(tab);
+        tab.Dispose();
 
         if (SelectedTab == tab)
         {

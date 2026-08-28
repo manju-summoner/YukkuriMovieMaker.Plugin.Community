@@ -2,6 +2,8 @@ using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
@@ -137,7 +139,9 @@ public static class BrushNodeTypeBuilder
         List<PortDefinition> staticPortDefs,
         List<(PortDefinition, PropertyInfo, object)> dynamicPropertyDefs)
     {
-        var typeName = $"DynamicBrushNode_{pluginName}";
+        var typeName = $"DynamicBrushNode_{Convert.ToHexString(
+            SHA256.HashData(
+                Encoding.UTF8.GetBytes(pluginName)))[..32]}";
         var tb = mod.DefineType(
             typeName,
             TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.BeforeFieldInit,
