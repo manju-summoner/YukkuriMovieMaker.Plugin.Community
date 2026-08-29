@@ -157,8 +157,14 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
             {
                 if (pluginItem.InternalGraph == null) return;
                 BeginEdit?.Invoke(this, EventArgs.Empty);
-                pluginItem.InternalGraphSnapshot = await Serializer.CreateAsync(pluginItem.InternalGraph);
-                EndEdit?.Invoke(this, EventArgs.Empty);
+                try
+                {
+                    pluginItem.InternalGraphSnapshot = await Serializer.CreateAsync(pluginItem.InternalGraph);
+                }
+                finally
+                {
+                    EndEdit?.Invoke(this, EventArgs.Empty);
+                }
             }
             catch (Exception exception)
             {

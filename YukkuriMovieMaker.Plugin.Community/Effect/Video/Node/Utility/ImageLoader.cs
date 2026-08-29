@@ -22,6 +22,7 @@ public static class ImageLoader
         dc.EndDraw();
         dc.Target = null;
         commandList.Close();
+        source.Dispose();
         return commandList;
     }
 

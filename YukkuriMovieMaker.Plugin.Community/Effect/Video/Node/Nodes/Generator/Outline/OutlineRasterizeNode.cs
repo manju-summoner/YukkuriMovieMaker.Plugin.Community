@@ -125,23 +125,27 @@ public class OutlineRasterizeNode : NodeLogic
         var previousTarget = deviceContext.Target;
         deviceContext.Target = commandList;
         deviceContext.BeginDraw();
-
-        if (hasFill)
+        try
         {
+            if (hasFill)
+            {
+                deviceContext.Transform = Matrix3x2.Identity;
+                deviceContext.FillGeometry(pathGeometry, FillBrush!.Brush!);
+            }
+
+            if (hasStroke)
+            {
+                deviceContext.Transform = Matrix3x2.CreateTranslation(StrokeOffsetX, StrokeOffsetY);
+                deviceContext.DrawGeometry(pathGeometry, StrokeBrush!.Brush!, StrokeWidth);
+            }
+        }
+        finally
+        {
+            deviceContext.EndDraw();
             deviceContext.Transform = Matrix3x2.Identity;
-            deviceContext.FillGeometry(pathGeometry, FillBrush!.Brush!);
+            deviceContext.Target = previousTarget;
+            commandList.Close();
         }
-
-        if (hasStroke)
-        {
-            deviceContext.Transform = Matrix3x2.CreateTranslation(StrokeOffsetX, StrokeOffsetY);
-            deviceContext.DrawGeometry(pathGeometry, StrokeBrush!.Brush!, StrokeWidth);
-        }
-
-        deviceContext.EndDraw();
-        deviceContext.Transform = Matrix3x2.Identity;
-        deviceContext.Target = previousTarget;
-        commandList.Close();
 
         _commandList?.Dispose();
         _commandList = commandList;

@@ -50,17 +50,17 @@ public partial class ColorPort
     public static readonly DependencyProperty HueProperty =
         DependencyProperty.Register(nameof(Hue), typeof(double), typeof(ColorPort),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                OnComponentChanged, CoerceHue));
+                OnHsvComponentChanged, CoerceHue));
 
     public static readonly DependencyProperty SaturationProperty =
         DependencyProperty.Register(nameof(Saturation), typeof(double), typeof(ColorPort),
             new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                OnComponentChanged, CoerceSaturation));
+                OnHsvComponentChanged, CoerceSaturation));
 
     public static readonly DependencyProperty BValueProperty =
         DependencyProperty.Register(nameof(BValue), typeof(double), typeof(ColorPort),
             new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-                OnComponentChanged, CoerceValue));
+                OnHsvComponentChanged, CoerceValue));
 
     private bool _suppress;
 
@@ -164,6 +164,44 @@ public partial class ColorPort
         cp._suppress = true;
         cp.SelectedColor = Color.FromArgb(cp.Alpha, cp.Red, cp.Green, cp.Blue);
         cp._suppress = false;
+    }
+
+    private static void OnHsvComponentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var cp = (ColorPort)d;
+        if (cp._suppress)
+            return;
+
+        cp._suppress = true;
+        var newColor = HsvToColor(cp.Hue, cp.Saturation, cp.BValue, cp.Alpha);
+        cp.Red = newColor.R;
+        cp.Green = newColor.G;
+        cp.Blue = newColor.B;
+        cp.SelectedColor = newColor;
+        cp._suppress = false;
+    }
+
+    private static Color HsvToColor(double hue, double saturation, double value, byte alpha)
+    {
+        var c = value * saturation;
+        var x = c * (1 - Math.Abs(hue / 60.0 % 2 - 1));
+        var m = value - c;
+
+        var (r, g, b) = hue switch
+        {
+            < 60 => (c, x, 0.0),
+            < 120 => (x, c, 0.0),
+            < 180 => (0.0, c, x),
+            < 240 => (0.0, x, c),
+            < 300 => (x, 0.0, c),
+            _ => (c, 0.0, x)
+        };
+
+        return Color.FromArgb(
+            alpha,
+            (byte)Math.Round((r + m) * 255),
+            (byte)Math.Round((g + m) * 255),
+            (byte)Math.Round((b + m) * 255));
     }
 
     private static void OnSelectedColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

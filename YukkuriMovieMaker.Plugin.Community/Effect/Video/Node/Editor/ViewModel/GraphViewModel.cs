@@ -483,23 +483,23 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
                 nodeVm.NodeLogic.GetType() != typeof(ArgumentsNode) && nodeVm.NodeLogic.GetType() != typeof(ReturnNode))
             .Select(n => n.Id)
             .ToHashSet();
-        var tempGraph = new NodeGraph();
 
-        foreach (var id in selectedIds)
+        var fullSnapshot = Serializer.Create(_graph);
+        var tempGraph = new GraphSnapshot();
+
+        tempGraph.Nodes.AddRange(fullSnapshot.Nodes.Where(n => selectedIds.Contains(n.Id)));
+        tempGraph.Connections.AddRange(fullSnapshot.Connections.Where(c =>
+            selectedIds.Contains(c.FromId) && selectedIds.Contains(c.ToId)));
+
+        foreach (var typeName in tempGraph.Nodes.Select(n => n.TypeName).Distinct())
         {
-            var node = _graph.GetNode(id);
-            if (node != null)
-            {
-                tempGraph.AddNode(node);
-                if (_graph.VisualStates.TryGetValue(id, out var visualState)) tempGraph.VisualStates[id] = visualState;
-            }
+            if (fullSnapshot.EffectTypeNames.TryGetValue(typeName, out var effectName))
+                tempGraph.EffectTypeNames[typeName] = effectName;
+            if (fullSnapshot.BrushTypeNames.TryGetValue(typeName, out var brushName))
+                tempGraph.BrushTypeNames[typeName] = brushName;
         }
 
-        foreach (var conn in _graph.Connections)
-            if (selectedIds.Contains(conn.FromId) && selectedIds.Contains(conn.ToId))
-                tempGraph.Connections.Add(conn);
-
-        clipboard = Serializer.Create(tempGraph);
+        clipboard = tempGraph;
         CommandManager.InvalidateRequerySuggested();
     }
 

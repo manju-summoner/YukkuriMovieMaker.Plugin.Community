@@ -404,10 +404,12 @@ public sealed class Processor : IVideoEffectProcessor
         if (_blankBitmap == null) CreateBlankBitmap();
 
         var deviceContext = _devices.DeviceContext;
+        var previousTarget = deviceContext.Target;
         deviceContext.Target = _blankBitmap;
         deviceContext.BeginDraw();
         deviceContext.Clear(new Color(0, 0, 0, 0));
         deviceContext.EndDraw();
+        deviceContext.Target = previousTarget;
 
         _outputImage = _blankBitmap;
     }
