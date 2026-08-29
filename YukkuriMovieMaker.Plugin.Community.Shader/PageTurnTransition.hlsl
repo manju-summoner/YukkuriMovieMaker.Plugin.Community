@@ -68,6 +68,47 @@ float3 Whiten(float4 color)
     return lerp(color.rgb, color.aaa, backLightness);
 }
 
+// number of taps used to smear the sheet's alpha into a soft shadow
+static const int ShadowTaps = 20;
+
+// per-pixel phase for the shadow taps, from the R2 low discrepancy sequence.
+// Without it every pixel samples the same distances and the penumbra comes out
+// as bands one tap spacing wide; offsetting the phase turns those steps into
+// fine dithering instead
+float ShadowJitter(float2 pixel)
+{
+    return frac(dot(pixel, float2(0.7548776662f, 0.5698402909f)));
+}
+
+// How much of the light reaching this pixel is blocked by the sheet floating
+// above it. The sheet's material at page position p covers the pixel directly,
+// and material within "reach" of it casts a fading penumbra. The page turn
+// mirrors the sheet about the crest, so the page-space direction that leads
+// back under the sheet is +dir for every layer here.
+// The page's own alpha is the occluder, so a transparent image casts a shadow
+// shaped like its content; for an opaque page the taps degenerate into the
+// plain distance falloff from the page rect edge (the previous behavior).
+float SheetCoverage(float2 p, float2 current, float4 uv0, float2 dir, float reach, float jitter)
+{
+    if (shadow <= 0.0f)
+        return 0.0f;
+    // conservative rejection: when the whole tap segment's bounding box misses
+    // the page every tap is transparent, so skip them (at progress 0 that is the
+    // entire screen)
+    float2 tail = p + dir * reach;
+    if (max(p.x, tail.x) < input0Rect.x || min(p.x, tail.x) > input0Rect.z ||
+        max(p.y, tail.y) < input0Rect.y || min(p.y, tail.y) > input0Rect.w)
+        return 0.0f;
+    float cov = SampleBefore(p, current, uv0).a;
+    [unroll]
+    for (int i = 0; i < ShadowTaps; i++)
+    {
+        float k = ((float)i + jitter) / (float)ShadowTaps;
+        cov = max(cov, SampleBefore(p + dir * (k * reach), current, uv0).a * (1.0f - k));
+    }
+    return saturate(cov);
+}
+
 float4 main(
     float4 pos      : SV_POSITION,
     float4 posScene : SCENE_POSITION,
@@ -78,6 +119,7 @@ float4 main(
     float w = inputWidth;
     float h = inputHeight;
     float2 pNow = float2(posScene.x - inputLeft, posScene.y - inputTop);
+    float jitter = ShadowJitter(pNow);
 
     // starting point (corner or edge), turn direction, and the distance the
     // curl has to travel across the page
@@ -120,9 +162,16 @@ float4 main(
     else
     {
         base = SampleAfter(pNow, pNow, uv1);
-        // shadow cast by the roll onto the revealed area
-        float sh = shadow * saturate(1.0f - (-d) / (2.0f * r));
-        base.rgb *= 1.0f - sh;
+        // shadow cast by the roll onto the revealed area. The paper wrapped on
+        // the roll is drawn from page positions behind the crest (the arcs
+        // sample crest - arc * dir with arc up to pi*r), so the occluder is
+        // looked up at the crest and smeared backwards
+        float fall = saturate(1.0f - (-d) / (2.0f * r));
+        if (fall > 0.0f)
+        {
+            float sh = shadow * fall * SheetCoverage(pNow - dir * d, pNow, uv0, -dir, PI * r, jitter);
+            base.rgb *= 1.0f - sh;
+        }
     }
 
     float4 top = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -131,6 +180,16 @@ float4 main(
     {
         // fold-back: source point is mirrored about the top of the roll
         float2 pSrc = pNow - dir * (PI * r + 2.0f * d);
+
+        // the fold-back sheet shadows the flat page under it as well as ahead
+        // of its free edge; where the sheet's own content is transparent the
+        // page below shows through and must stay unshaded
+        if (fade > 0.0f)
+        {
+            float sh = shadow * 0.75f * SheetCoverage(pSrc, pNow, uv0, dir, r, jitter) * fade;
+            base.rgb *= 1.0f - sh;
+        }
+
         float inside = InsideDistance(pSrc);
         if (inside > 0.0f)
         {
@@ -138,12 +197,6 @@ float4 main(
             color.rgb = Whiten(color);
             color *= saturate(inside); // 1px edge anti-aliasing
             top = color * fade;
-        }
-        else
-        {
-            // soft shadow of the fold edge falling on the flat page
-            float sh = shadow * 0.75f * saturate(1.0f + inside / r) * fade;
-            base.rgb *= 1.0f - sh;
         }
     }
     else if (d >= -r)
@@ -155,7 +208,7 @@ float4 main(
 
         // fold-back sheet hanging above the roll (mirror source extended below the crest)
         float2 pFold = pNow - dir * (PI * r + 2.0f * d);
-        float foldInside = InsideDistance(pFold);
+        float foldCoverage = fade > 0.0f ? SheetCoverage(pFold, pNow, uv0, dir, r, jitter) : 0.0f;
 
         // upper arc: back face going over the top of the cylinder
         {
@@ -174,7 +227,7 @@ float4 main(
             color *= saturate(r - u);
 
             // shadow of the fold-back sheet hanging above
-            float sh = shadow * 0.75f * saturate(1.0f + foldInside / r);
+            float sh = shadow * 0.75f * foldCoverage;
             color.rgb *= 1.0f - sh;
 
             mid = color * fade;

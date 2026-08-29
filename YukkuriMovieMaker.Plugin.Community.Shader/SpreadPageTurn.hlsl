@@ -83,6 +83,63 @@ float3 Whiten(float4 color)
     return lerp(color.rgb, color.aaa, backLightness);
 }
 
+// number of taps used to smear the sheet's alpha into a soft shadow
+static const int ShadowTaps = 20;
+
+// per-pixel phase for the shadow taps, from the R2 low discrepancy sequence.
+// Without it every pixel samples the same distances and the penumbra comes out
+// as bands one tap spacing wide; offsetting the phase turns those steps into
+// fine dithering instead
+float ShadowJitter(float2 pixel)
+{
+    return frac(dot(pixel, float2(0.7548776662f, 0.5698402909f)));
+}
+
+// How much of the light reaching this pixel is blocked by the sheet above it.
+// The shadow follows the same occupancy rule as the sheet itself: the
+// transition's sheet is opaque paper, so its shadow is the geometric silhouette
+// and only the area past the free edge (outside > 0) gets a fading penumbra;
+// the single-image effect's sheet exists only where the front face has content,
+// so its shadow is that alpha smeared toward the spine (-axis in page space)
+// and faded over reach. For an opaque page both paths agree.
+// posFront is the front-face source position of the sheet covering this pixel.
+float SheetShadowCoverage(float2 posFront, float2 current, float4 uv0, float2 axis, float reach, float outside, float jitter)
+{
+    if (shadow <= 0.0f)
+        return 0.0f;
+    if (backMode < 0.5f)
+        return saturate(1.0f - max(outside, 0.0f) / max(reach, 1.0f));
+    // conservative rejection: when the whole tap segment's bounding box misses
+    // the page every tap is transparent (the static half is mostly like this
+    // mid-turn), so skip them
+    float2 tail = posFront - axis * reach;
+    if (max(posFront.x, tail.x) < input0Rect.x || min(posFront.x, tail.x) > input0Rect.z ||
+        max(posFront.y, tail.y) < input0Rect.y || min(posFront.y, tail.y) > input0Rect.w)
+        return 0.0f;
+    float cov = SampleBefore(posFront, current, uv0).a;
+    [unroll]
+    for (int i = 0; i < ShadowTaps; i++)
+    {
+        float k = ((float)i + jitter) / (float)ShadowTaps;
+        cov = max(cov, SampleBefore(posFront - axis * (k * reach), current, uv0).a * (1.0f - k));
+    }
+    return saturate(cov);
+}
+
+// front-face alpha of the rigid board whose overhead shadow lands on the page
+// at the given distance from the spine. The board is hinged at the spine and
+// tilted by theta, so the paper point above that page point is at arc length
+// s = side / |cos(theta)|; clamping to the free edge keeps the lookup defined
+// when the board stands nearly edge-on
+float BoardShadowAlpha(float side, float cosAbs, float S, float2 center, float2 axis, float2 perp,
+                       float v, float2 current, float4 uv0)
+{
+    if (side < 0.0f)
+        return 0.0f;
+    float s = min(side / cosAbs, S);
+    return SampleBefore(center + axis * s + perp * v, current, uv0).a;
+}
+
 // back face of the sheet at paper arc length s (measured from the spine):
 // premultiplied color and the sheet's occupancy
 void BackFace(float s, float u, float2 axis, float2 pNow, float4 uv0, float4 uv1,
@@ -113,6 +170,7 @@ float4 main(
     float w = inputWidth;
     float h = inputHeight;
     float2 pNow = float2(posScene.x - inputLeft, posScene.y - inputTop);
+    float jitter = ShadowJitter(pNow);
 
     float2 center = 0.5f * float2(w, h);
     float2 axis; // unit vector from the spine into the turning half
@@ -161,17 +219,44 @@ float4 main(
         // the board itself hides it again by occlusion
         base = (u >= 0.0f) ? SampleAfter(pNow, pNow, uv1) : SampleBefore(pNow, pNow, uv0);
 
-        // soft shadow ahead of the board's projected free edge; its reach
-        // scales with the board's lift so it vanishes at both endpoints
+        // soft shadow of the board on the page below; its reach scales with the
+        // board's lift so it vanishes at both endpoints
         float uEdge = S * cosT / max(1.0f - S * sinT * q, 0.1f);
         float range = 0.4f * S * sinT;
-        if (range > 0.5f)
+        if (range > 0.5f && shadow > 0.0f)
         {
-            float dist = (cosT >= 0.0f) ? (u - uEdge) : (uEdge - u);
-            if (dist >= 0.0f)
+            float side = (cosT >= 0.0f) ? u : -u; // distance from the spine toward the board
+            float dist = side - abs(uEdge);       // >0: ahead of the board's projected free edge
+            if (side >= 0.0f && (backMode >= 0.5f || dist >= 0.0f))
             {
-                float sh = shadow * 0.75f * saturate(1.0f - dist / range);
-                base.rgb *= 1.0f - sh;
+                float falloff = saturate(1.0f - max(dist, 0.0f) / range);
+                if (falloff > 0.0f)
+                {
+                    float sh = shadow * 0.75f * falloff;
+                    if (backMode >= 0.5f)
+                    {
+                        // the board exists only where its content is opaque, so the
+                        // shadow takes the shape of that content, smeared toward the
+                        // spine so that the content under the board also darkens the
+                        // area its projected free edge sweeps over.
+                        // The taps step through page space but read paper space via
+                        // s = side / |cos(theta)|, so the paper-space stride grows as
+                        // the board stands up. Flooring |cos(theta)| keeps a few taps
+                        // inside the paper, without which the near edge-on frames
+                        // break up into per-pixel speckle
+                        float cosAbs = max(abs(cosT), 2.5f * range / ((float)ShadowTaps * S));
+                        float cov = BoardShadowAlpha(side, cosAbs, S, center, axis, perp, v, pNow, uv0);
+                        [unroll]
+                        for (int i = 0; i < ShadowTaps; i++)
+                        {
+                            float k = ((float)i + jitter) / (float)ShadowTaps;
+                            cov = max(cov, BoardShadowAlpha(side - k * range, cosAbs, S, center, axis, perp,
+                                                            v, pNow, uv0) * (1.0f - k));
+                        }
+                        sh *= cov;
+                    }
+                    base.rgb *= 1.0f - sh;
+                }
             }
         }
 
@@ -274,6 +359,17 @@ float4 main(
     {
         // fold-back: the sheet past the crest, lying flat on the other side
         float s = 2.0f * t + PI * r - u;
+
+        // shadow of the sheet on the flat page below it and ahead of its free
+        // edge (the sheet floats ~2r above the surface, so scale with r)
+        if (r > 0.0f)
+        {
+            float sh = shadow * 0.75f
+                     * SheetShadowCoverage(pNow + axis * (s - u), pNow, uv0, axis, r, s - S, jitter)
+                     * saturate(r);
+            base.rgb *= 1.0f - sh;
+        }
+
         if (s <= S)
         {
             float4 color;
@@ -282,13 +378,6 @@ float4 main(
             float feather = max(saturate(S - s), wEnd); // 1px free edge anti-aliasing
             top = color * feather;
             topOcc = occ * feather;
-        }
-        else
-        {
-            // soft shadow of the approaching free edge on the flat page
-            // (the sheet floats ~2r above the surface, so scale with r)
-            float sh = shadow * 0.75f * saturate(1.0f - (s - S) / max(r, 1.0f)) * saturate(r);
-            base.rgb *= 1.0f - sh;
         }
     }
     else if (r > 0.5f && u <= t + r)
@@ -325,7 +414,8 @@ float4 main(
             color.rgb *= shade;
 
             // shadow of the upper arc hanging above
-            float sh = shadow * 0.75f * saturate(1.0f + (S - sUp) / max(r, 1.0f));
+            float sh = shadow * 0.75f
+                     * SheetShadowCoverage(pNow + axis * (sUp - u), pNow, uv0, axis, r, sUp - S, jitter);
             color.rgb *= 1.0f - sh;
 
             float feather = saturate(S - sLo) * silhouette;
