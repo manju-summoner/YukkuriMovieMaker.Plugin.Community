@@ -48,6 +48,20 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         _lastResolvedViewModel.UpdateEditorInfo(graph, info);
     }
 
+    public void ReleaseSubscriptions()
+    {
+        if (_subscribedGraph != null && _committedHandler != null)
+            _subscribedGraph.Committed -= _committedHandler;
+        if (_subscribedNodeEffect != null && _graphUpdatedHandler != null)
+            _subscribedNodeEffect.GraphUpdated -= _graphUpdatedHandler;
+
+        _committedHandler = null;
+        _graphUpdatedHandler = null;
+        _subscribedGraph = null;
+        _subscribedNodeEffect = null;
+        _lastResolvedViewModel = null;
+    }
+
     private static void EnsureInternalGraph(NodeEffect pluginItem)
     {
         if (pluginItem.InternalGraph != null) return;

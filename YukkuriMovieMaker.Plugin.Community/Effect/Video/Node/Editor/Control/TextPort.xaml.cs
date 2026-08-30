@@ -63,7 +63,8 @@ public partial class TextPort
     {
         if (e.Key == Key.Return)
         {
-            EndEditCommand?.Execute(null);
+            Keyboard.ClearFocus();
+            e.Handled = true;
         }
     }
 }

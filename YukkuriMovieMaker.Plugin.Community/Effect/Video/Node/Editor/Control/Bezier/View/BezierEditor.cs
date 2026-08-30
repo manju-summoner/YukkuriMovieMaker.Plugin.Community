@@ -439,9 +439,11 @@ public class BezierEditor : System.Windows.Controls.Control, IBezierCoordinateCo
         if (_dragContext is null)
             return;
 
-        ReleaseMouseCapture();
-
         _dragContext = null;
+
+        ReleaseMouseCapture();
+        EditCompleted?.Invoke(this, EventArgs.Empty);
+        InvalidateVisual();
     }
 
     /// <summary>

@@ -66,7 +66,7 @@ public class ContainerFactory
         _moduleBuilder ??= mod;
 
         var type = effectPropertyInst.GetType();
-        var name = type.FullName ?? type.Name;
+        var name = type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
 
         lock (Lock)
         {
@@ -215,7 +215,7 @@ public class ContainerFactory
 
     private static Type CreateOrGenerate(string name, Type originalType, List<PortDefinition> ports, ModuleBuilder mod)
     {
-        var flatName = name.Replace('.', '_');
+        var flatName = string.Concat(name.Select(c => char.IsLetterOrDigit(c) ? c : '_'));
         PortDefsRegistry[flatName] = ports.ToArray();
 
         var tb = mod.DefineType(

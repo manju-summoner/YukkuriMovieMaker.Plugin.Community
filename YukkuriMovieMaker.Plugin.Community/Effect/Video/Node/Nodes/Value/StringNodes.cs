@@ -331,8 +331,11 @@ public class NumberToStringNode : NodeLogic
             NumberIntegerPaddingKind.Zero =>
                 new string('0', minIntegerDigits),
 
+            // '#' だけだと有効桁が無い場合（0 など）に最下位桁まで省略されてしまうため、
+            // 最下位桁だけは '0' プレースホルダーにして必ず 1 桁は出力されるようにする。
+            // 不足する上位桁は後段のロジックで空白に置き換える。
             NumberIntegerPaddingKind.Space =>
-                new string('#', minIntegerDigits),
+                new string('#', minIntegerDigits - 1) + "0",
 
             _ =>
                 new string('0', minIntegerDigits)

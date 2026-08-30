@@ -22,6 +22,7 @@ internal class OpenNodeEditorAttribute : PropertyEditorAttribute2
     {
         if (control is not OpenNodeEditorButton editor)
             return;
+        editor.ReleaseSubscriptions();
         editor.ItemProperties = null;
     }
 }
