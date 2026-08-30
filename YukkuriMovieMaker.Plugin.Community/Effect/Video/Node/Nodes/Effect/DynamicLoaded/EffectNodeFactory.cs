@@ -324,12 +324,17 @@ public static class EffectPortCollector
             };
 
         if (prop.PropertyType == typeof(string))
-            return new PortDefinition
-            {
-                PropName = prop.Name, PortType = PortType.Text,
-                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
-                DefaultValue = inst as string ?? ""
-            };
+        {
+            var hasCustomEditor = prop.GetCustomAttributesData()
+                .Any(ad => typeof(PropertyEditorAttribute2).IsAssignableFrom(ad.AttributeType));
+            if (!hasCustomEditor)
+                return new PortDefinition
+                {
+                    PropName = prop.Name, PortType = PortType.Text,
+                    LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
+                    DefaultValue = inst as string ?? ""
+                };
+        }
 
         var editorAttrData = prop.GetCustomAttributesData()
             .FirstOrDefault(ad => typeof(PropertyEditorAttribute2).IsAssignableFrom(ad.AttributeType));
@@ -849,9 +854,7 @@ public static class EffectNodeCalculator
             if (containerType == null) return;
 
             var currentContainer = (InputsContainer?)containerFieldInfo.GetValue(self);
-            var rawName = subObject.GetType().FullName ?? subObject.GetType().Name;
-            var expectedName = $"DynamicContainer_{rawName.Replace('.', '_')}";
-            if (currentContainer?.GetType().Name == expectedName) return;
+            if (currentContainer?.GetType() == containerType) return;
 
             var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
             if (newContainer == null) return;

@@ -114,13 +114,24 @@ public sealed class NodeEffect : VideoEffectBase
 
     public override IEnumerable<string> GetFiles()
     {
-        if (InternalGraph is null)
-            return base.GetFiles();
+        if (InternalGraph is not null)
+            return EnumerateFilePathPorts(InternalGraph)
+                .Select(p => p.Path)
+                .Distinct()
+                .ToList();
 
-        return EnumerateFilePathPorts(InternalGraph)
-            .Select(p => p.Path)
-            .Distinct()
-            .ToList();
+        try
+        {
+            var tempGraph = Serializer.Restore(_graph);
+            return EnumerateFilePathPorts(tempGraph)
+                .Select(p => p.Path)
+                .Distinct()
+                .ToList();
+        }
+        catch (Exception)
+        {
+            return base.GetFiles();
+        }
     }
 
     public override void ReplaceFile(string from, string to)
