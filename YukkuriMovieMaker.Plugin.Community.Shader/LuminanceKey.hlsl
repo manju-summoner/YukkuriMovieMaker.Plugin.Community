@@ -32,7 +32,7 @@ float4 main(
 	{
 		//‚µ‚«‚¢’l•”•ª‚ð“§‰ß
 		if (smoothness == 0)
-			alpha = abs(luminance - threshold) < 1 / 255 ? 0 : 1;
+			alpha = abs(luminance - threshold) < 1.0 / 255.0 ? 0 : 1;
 		else
 			alpha = saturate(abs(luminance - threshold) / smoothness);
 	}
