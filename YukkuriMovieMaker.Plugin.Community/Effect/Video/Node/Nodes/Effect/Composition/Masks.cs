@@ -188,8 +188,9 @@ public class MaskClipNode : NodeLogic
         _videoEffect
             .SetValue(
                 Invert ? 1 : 0);
-        if (_videoEffect.Update(out var output, EvaluationContext, InputImage?.Image, Mask?.Mask))
-            Output = new ImageWrapper { Image = output };
+        Output = _videoEffect.Update(out var output, EvaluationContext, InputImage?.Image, Mask?.Mask)
+            ? new ImageWrapper { Image = output }
+            : null;
 
         return Task.CompletedTask;
     }

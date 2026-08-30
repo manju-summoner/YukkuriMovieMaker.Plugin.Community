@@ -25,6 +25,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
 public class VideoEffectsLoader : IDisposable
 {
     private static readonly ConcurrentDictionary<string, byte[]> ShaderDictionaries = [];
+    private static readonly ConcurrentDictionary<string, Guid> ShaderIdsByName = [];
     private readonly IBrushParameter? _brushParameter;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private readonly ShaderEffect? _shaderEffect;
@@ -519,6 +520,9 @@ public class VideoEffectsLoader : IDisposable
 
     public static Guid RegisterShader(string shaderName)
     {
+        if (ShaderIdsByName.TryGetValue(shaderName, out var existingId))
+            return existingId;
+
         byte[] shader;
 
         using (var resourceStream = Application.GetResourceStream(ShaderResourceUri.Get(shaderName))?.Stream)
@@ -533,8 +537,11 @@ public class VideoEffectsLoader : IDisposable
         }
 
         var id = Guid.NewGuid();
-        ShaderDictionaries.TryAdd(id.ToString("N"), shader);
-        return id;
+        var resolvedId = ShaderIdsByName.GetOrAdd(shaderName, id);
+        if (resolvedId == id)
+            ShaderDictionaries.TryAdd(id.ToString("N"), shader);
+
+        return resolvedId;
     }
 
     public static byte[] GetShader(string id)
