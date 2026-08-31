@@ -45,10 +45,10 @@ internal sealed class GpuAudioProcessor(EffectsSettings effects, int sampleRate)
             gpuBuffer.CopyFrom(buffer);
 
             if (enableCompression)
-                _device.For(buffer.Length, new CompressionShader(gpuBuffer, compressionThreshold, compressionRatio));
+                _device.For(buffer.Length, new CompressionShader(gpuBuffer, compressionThreshold, compressionRatio, buffer.Length));
 
             if (limiterThreshold > 0f)
-                _device.For(buffer.Length, new LimiterShader(gpuBuffer, limiterThreshold));
+                _device.For(buffer.Length, new LimiterShader(gpuBuffer, limiterThreshold, buffer.Length));
 
             if (_effects.EnableReverb)
             {
