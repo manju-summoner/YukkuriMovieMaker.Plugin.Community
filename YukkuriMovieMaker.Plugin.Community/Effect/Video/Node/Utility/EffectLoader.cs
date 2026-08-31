@@ -789,6 +789,7 @@ public class VideoEffectsLoader : IDisposable
 public static class DynamicEffectImplGenerator
 {
     private static readonly Dictionary<string, Type> TypeCache = new();
+    private static readonly Lock TypeCacheLock = new();
 
     public static Type GenerateEffectImpl(List<(Type type, string name)> fields, string shaderId,
         ModuleBuilder moduleBuild, int inputImageNum)
@@ -796,6 +797,15 @@ public static class DynamicEffectImplGenerator
         // Ensure unique type name based on shader name and field definitions
         var typeName = $"ShaderEffectImpl_{shaderId}_{string.Join("_", fields.Select(f => f.type.Name + f.name))}";
 
+        lock (TypeCacheLock)
+        {
+            return GenerateEffectImplCore(typeName, fields, shaderId, moduleBuild, inputImageNum);
+        }
+    }
+
+    private static Type GenerateEffectImplCore(string typeName, List<(Type type, string name)> fields,
+        string shaderId, ModuleBuilder moduleBuild, int inputImageNum)
+    {
         if (TypeCache.TryGetValue(typeName, out var value)) return value;
 
         // Define the EffectImpl class

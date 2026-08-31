@@ -602,9 +602,7 @@ public static class BrushNodeCalculator
             if (containerType == null) return;
 
             var currentContainer = (InputsContainer?)containerFieldInfo.GetValue(self);
-            var rawName = subObject.GetType().FullName ?? subObject.GetType().Name;
-            var expectedName = $"DynamicContainer_{rawName.Replace('.', '_')}";
-            if (currentContainer?.GetType().Name == expectedName) return;
+            if (currentContainer?.GetType() == containerType) return;
 
             var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
             if (newContainer == null) return;

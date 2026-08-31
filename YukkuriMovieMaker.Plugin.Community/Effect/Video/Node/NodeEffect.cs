@@ -31,7 +31,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
 public sealed class NodeEffect : VideoEffectBase
 {
     private readonly Dispatcher _uiDispatcher = Application.Current.Dispatcher;
+
+    /// <summary>
+    ///     Graph の差し替え(UpdateGraph)と Processor の評価(Update)を同じ境界で排他するためのロック。
+    /// </summary>
+    internal readonly Lock GraphLock = new();
+
     private GraphSnapshot _graph = new();
+
     public override string Label => TextUi.Node;
 
     [Display(Name = nameof(TextUi.NodeEditor), GroupName = nameof(TextUi.Node),
@@ -45,7 +52,11 @@ public sealed class NodeEffect : VideoEffectBase
             Set(ref _graph, value);
             if (InternalGraph is null) return;
             var tempGraph = Serializer.Restore(value);
-            InternalGraph.UpdateGraph(tempGraph);
+            lock (GraphLock)
+            {
+                InternalGraph.UpdateGraph(tempGraph);
+            }
+
             InvokeGraphUpdated();
         }
     }
@@ -147,7 +158,26 @@ public sealed class NodeEffect : VideoEffectBase
     {
         if (InternalGraph is null)
         {
-            base.ReplaceFile(from, to);
+            try
+            {
+                var tempGraph = Serializer.Restore(_graph);
+                var savedMatches = EnumerateFilePathPorts(tempGraph)
+                    .Where(p => p.Path == from)
+                    .ToList();
+
+                if (savedMatches.Count == 0)
+                    return;
+
+                foreach (var match in savedMatches)
+                    match.Port.SetValue(to);
+
+                Graph = Serializer.Create(tempGraph);
+            }
+            catch (Exception)
+            {
+                base.ReplaceFile(from, to);
+            }
+
             return;
         }
 
@@ -174,7 +204,7 @@ public sealed class NodeEffect : VideoEffectBase
 public sealed class Processor : IVideoEffectProcessor
 {
     private readonly IGraphicsDevicesAndContext _devices;
-    private readonly Lock _lock = new();
+    private readonly Lock _lock;
     private readonly NodeEffect _nodeEffect;
     private ID2D1Image? _affineOutput;
 
@@ -194,6 +224,7 @@ public sealed class Processor : IVideoEffectProcessor
     {
         _devices = devices;
         _nodeEffect = effect;
+        _lock = effect.GraphLock;
 
         InitializeGraph();
         CreateBlankBitmap();

@@ -546,7 +546,15 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
                 idMapping[oldId] = newId;
                 node.Id = newId;
 
+                var dynamicValues = node.Inputs
+                    .Where(kv => kv.Key.Contains('.') && kv.Value.LocalValue != null)
+                    .ToDictionary(kv => kv.Key, kv => kv.Value.LocalValue);
+
                 _graph.AddNode(node);
+
+                foreach (var (key, value) in dynamicValues)
+                    if (node.Inputs.TryGetValue(key, out var port))
+                        port.SetValue(value);
 
                 if (tempGraph.VisualStates.TryGetValue(oldId, out var oldVisualState))
                     _graph.SetVisualState(newId, oldVisualState.X + dx, oldVisualState.Y + dy);

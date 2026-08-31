@@ -182,9 +182,22 @@ public class ContainerFactory
                 DefaultValue = null
             };
 
-        // Float/Enum/Bool/Color/Brush（こちらで用意した既知のコントロールで扱える型）のいずれにも
-        // 該当しない場合。ここで初めてカスタムエディタ（PropertyEditorAttribute2）を探す＝
-        // こちらの既知コントロールが常に優先され、カスタムエディタは最後の手段（フォールバック）。
+        if (prop.PropertyType == typeof(string))
+        {
+            var hasCustomEditor = prop.GetCustomAttributesData()
+                .Any(ad => typeof(PropertyEditorAttribute2).IsAssignableFrom(ad.AttributeType));
+            if (!hasCustomEditor)
+                return new PortDefinition
+                {
+                    PropName = prop.Name,
+                    PortType = PortType.Text,
+                    LabelKey = labelKey,
+                    DescKey = descKey,
+                    ResourceType = resourceType,
+                    DefaultValue = inst as string ?? ""
+                };
+        }
+
         var editorAttrData = prop.GetCustomAttributesData()
             .FirstOrDefault(ad => typeof(PropertyEditorAttribute2).IsAssignableFrom(ad.AttributeType));
         var editorAttrInstance = editorAttrData == null ? null : Attr.CreateEditorAttributeInstance(editorAttrData);
@@ -247,6 +260,7 @@ public class ContainerFactory
                 PortType.Bool => typeof(bool),
                 PortType.Color => typeof(Color),
                 PortType.Brush => typeof(BrushWrapper),
+                PortType.Text => typeof(string),
                 // Unknown の場合、floatに丸めてしまうと元の値が壊れる（型が合わないため）。
                 // 必ず元プロパティの実際のCLR型を使う。
                 PortType.Unknown => port.UnknownClrType ?? typeof(float),
@@ -279,6 +293,10 @@ public class ContainerFactory
                     break;
                 case PortType.Brush:
                     Attr.PortColor(pb, nameof(Colors.LawnGreen));
+                    break;
+                case PortType.Text:
+                    Attr.TextControl(pb, (string?)port.DefaultValue ?? "");
+                    Attr.PortColor(pb, nameof(Colors.MediumSeaGreen));
                     break;
                 case PortType.Unknown:
                     // こちらで用意した既知のコントロールが使えない型でも、元プロパティ側に
