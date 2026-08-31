@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
@@ -49,9 +50,35 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Wave
                 $"_disable={(IsEnabled ? 0 : 1)}\r\n" +
                 $"横幅={Amplitude.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
                 $"高さ={WaveLength2.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"周期={Period.ToExoString(keyFrameIndex, "F2", fps, x => x * 4)}\r\n" +
-                $"縦ラスター={(Angle1.Values[0].Value is 0 ? 0 : 1)}\r\n" +
+                $"周期={ToExoPeriodString(keyFrameIndex, fps)}\r\n" +
+                $"縦ラスター={ToExoVerticalRaster(Angle1.Values[0].Value)}\r\n" +
                 $"ランダム振幅=0\r\n";
+        }
+
+        /// <summary>
+        /// 「移動量指定」は2つ目の値が1フレームあたりの移動量で、逆数を取っても意味を成さないため固定値で出力する。
+        /// それ以外でも逆数は線形変換ではないので、キーフレームの区間の途中はAviUtl側の直線補間とずれる。
+        /// </summary>
+        string ToExoPeriodString(int keyFrameIndex, int fps)
+            => Period.AnimationType is AnimationType.移動量指定
+                ? ToExoPeriod(Period.GetFirstValue()).ToString("F2", CultureInfo.InvariantCulture)
+                : Period.ToExoString(keyFrameIndex, "F2", fps, ToExoPeriod);
+
+        /// <summary>
+        /// YMM4の「周期」は1周期にかかる秒数、AviUtlの「周期」は100で毎秒1波長ぶん進む値なので逆数になる。
+        /// AviUtl側のトラックバーの範囲は±4000。
+        /// </summary>
+        static double ToExoPeriod(double period)
+            => period is 0 ? 0 : Math.Clamp(100 / period, -4000, 4000);
+
+        /// <summary>
+        /// AviUtlの「ラスター」は縦横どちらかにしか波を進められないので、波の進行方向に近いほうの軸を選ぶ。
+        /// 進行方向がx軸寄りなら列ごとに縦方向へずれるので「縦ラスター」になる。
+        /// </summary>
+        static int ToExoVerticalRaster(double angle1)
+        {
+            var radians = angle1 / 180 * Math.PI;
+            return Math.Abs(Math.Cos(radians)) >= Math.Abs(Math.Sin(radians)) ? 1 : 0;
         }
 
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
