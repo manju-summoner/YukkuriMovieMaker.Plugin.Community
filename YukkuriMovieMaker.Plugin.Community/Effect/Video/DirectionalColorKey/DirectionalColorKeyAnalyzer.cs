@@ -1,5 +1,5 @@
 using System.Numerics;
-using ComputeSharp;
+using ComputeWeave;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 {
