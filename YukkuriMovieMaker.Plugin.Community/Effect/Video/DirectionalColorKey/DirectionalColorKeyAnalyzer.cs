@@ -31,7 +31,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private int height;
         private int pixelCount;
 
-        private const int MaxClusters = 4;
+        private const int MaxClusters = ClusterAccumulateConstants.MaxClusters;
         private const int SmoothRadius = DirectionSmoothConstants.Radius;
         private const int SmoothIterations = 5;
         private const int LloydIterations = 12;

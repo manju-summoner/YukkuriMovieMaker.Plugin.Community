@@ -13,6 +13,12 @@ internal static class DirectionSmoothConstants
     public const int SpaceTableCount = SpaceTableStride * SpaceTableStride;
 }
 
+internal static class ClusterAccumulateConstants
+{
+    public const int MaxClusters = 4;
+    public const int SlotCount = MaxClusters * 3 + MaxClusters;
+}
+
 internal static class DirectionFieldConstants
 {
     // 方向ベクトルは長さ0の無効方向か長さ1の単位方向のいずれかを取る。
@@ -680,42 +686,61 @@ internal readonly partial struct ClusterAssignAccumulateShader(
     private readonly int width = width;
     private readonly int height = height;
 
+    [GroupShared(ClusterAccumulateConstants.SlotCount)]
+    private static readonly int[] partialAccumulators = null!;
+
     public void Execute()
     {
+        int accumulatorLength = clusterCount * 3 + clusterCount;
+
+        for (int slot = GroupIds.Index; slot < accumulatorLength; slot += GroupSize.Count)
+            partialAccumulators[slot] = 0;
+
+        Hlsl.GroupMemoryBarrierWithGroupSync();
+
         int x = ThreadIds.X;
         int y = ThreadIds.Y;
-        if (x >= width || y >= height)
-            return;
 
-        int index = y * width + x;
-        int triple = index * 3;
-
-        float nl = directions[triple + 0];
-        float na = directions[triple + 1];
-        float nb = directions[triple + 2];
-
-        if (nl * nl + na * na + nb * nb < DirectionFieldConstants.ValidLengthSquaredThreshold)
-            return;
-
-        int best = 0;
-        float bestDot = -2f;
-
-        for (int c = 0; c < clusterCount; c++)
+        if (x < width && y < height)
         {
-            int cBase = c * 3;
-            float dot = nl * centers[cBase + 0] + na * centers[cBase + 1] + nb * centers[cBase + 2];
-            if (dot > bestDot)
+            int triple = (y * width + x) * 3;
+
+            float nl = directions[triple + 0];
+            float na = directions[triple + 1];
+            float nb = directions[triple + 2];
+
+            if (nl * nl + na * na + nb * nb >= DirectionFieldConstants.ValidLengthSquaredThreshold)
             {
-                bestDot = dot;
-                best = c;
+                int best = 0;
+                float bestDot = -2f;
+
+                for (int c = 0; c < clusterCount; c++)
+                {
+                    int cBase = c * 3;
+                    float dot = nl * centers[cBase + 0] + na * centers[cBase + 1] + nb * centers[cBase + 2];
+                    if (dot > bestDot)
+                    {
+                        bestDot = dot;
+                        best = c;
+                    }
+                }
+
+                int sumBase = best * 3;
+                Hlsl.InterlockedAdd(ref partialAccumulators[sumBase + 0], (int)Hlsl.Round(nl * fixedPointScale));
+                Hlsl.InterlockedAdd(ref partialAccumulators[sumBase + 1], (int)Hlsl.Round(na * fixedPointScale));
+                Hlsl.InterlockedAdd(ref partialAccumulators[sumBase + 2], (int)Hlsl.Round(nb * fixedPointScale));
+                Hlsl.InterlockedAdd(ref partialAccumulators[clusterCount * 3 + best], 1);
             }
         }
 
-        int sumBase = best * 3;
-        Hlsl.InterlockedAdd(ref accumulators[sumBase + 0], (int)Hlsl.Round(nl * fixedPointScale));
-        Hlsl.InterlockedAdd(ref accumulators[sumBase + 1], (int)Hlsl.Round(na * fixedPointScale));
-        Hlsl.InterlockedAdd(ref accumulators[sumBase + 2], (int)Hlsl.Round(nb * fixedPointScale));
-        Hlsl.InterlockedAdd(ref accumulators[clusterCount * 3 + best], 1);
+        Hlsl.GroupMemoryBarrierWithGroupSync();
+
+        for (int slot = GroupIds.Index; slot < accumulatorLength; slot += GroupSize.Count)
+        {
+            int value = partialAccumulators[slot];
+            if (value != 0)
+                Hlsl.InterlockedAdd(ref accumulators[slot], value);
+        }
     }
 }
 
