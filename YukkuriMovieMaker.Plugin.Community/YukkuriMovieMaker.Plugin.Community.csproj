@@ -195,6 +195,7 @@
 	  <Resource Include="$(ShaderDirPath)EdgeGlow.cso" Link="Resources\Shader\EdgeGlow.cso" />
 	  <Resource Include="$(ShaderDirPath)PixelizeTransition.cso" Link="Resources\Shader\PixelizeTransition.cso" />
 	  <Resource Include="$(ShaderDirPath)PageTurnTransition.cso" Link="Resources\Shader\PageTurnTransition.cso" />
+	  <Resource Include="$(ShaderDirPath)SpreadPageTurn.cso" Link="Resources\Shader\SpreadPageTurn.cso" />
 	  <Resource Include="$(ShaderDirPath)ReelSpinTransition.cso" Link="Resources\Shader\ReelSpinTransition.cso" />
 	  <Resource Include="$(ShaderDirPath)MotionBlur.cso" Link="Resources\Shader\MotionBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)NtscRasterize.cso" Link="Resources\Shader\NtscRasterize.cso" />
