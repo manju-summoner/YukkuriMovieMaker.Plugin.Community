@@ -10,13 +10,13 @@ cbuffer constants : register(b0)
 	float phase : packoffset(c1.x);
 };
 
+static const float pi = 3.141592653589f;
+
+//波の進行方向へposを投影し、波長で正規化した位相[rad]を返す。
+//2*piを掛けているので、投影距離がwaveLengthだけ進むとちょうど1周期になる。
 float GetPosition(float2 direction, float2 pos, float waveLength)
 {
-	float2 posDirection = dot(direction, pos);
-	float position = waveLength == 0 ? 0 : length(posDirection) / waveLength;
-
-	float t = atan2(posDirection.x, posDirection.y);
-	return -3.14 / 2 < t && t < 3.14 / 2 ? position : -position;
+	return waveLength == 0 ? 0 : 2 * pi * dot(direction, pos) / waveLength;
 }
 
 float4 main(
@@ -25,8 +25,6 @@ float4 main(
 	float4 uv : TEXCOORD0
 ) : SV_TARGET
 {
-	const float pi = 3.141592653589f;
-
 	float freq = 1;
 	float2 direction = float2(cos(angle), sin(angle));
 	float2 direction2 = float2(cos(angle + angle2), sin(angle + angle2));
