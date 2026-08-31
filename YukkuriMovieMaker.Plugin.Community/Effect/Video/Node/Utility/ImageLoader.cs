@@ -15,12 +15,13 @@ public static class ImageLoader
                      new ImageFileSource(dc.CreateEmptyBitmap());
         var commandList = dc.CreateCommandList();
 
+        var previousTarget = dc.Target;
         dc.Target = commandList;
         dc.BeginDraw();
         var size = source.Output.Size;
         dc.DrawImage(source.Output, new Vector2((int)((0f - size.Width) / 2f), (int)((0f - size.Height) / 2f)));
         dc.EndDraw();
-        dc.Target = null;
+        dc.Target = previousTarget;
         commandList.Close();
         source.Dispose();
         return commandList;

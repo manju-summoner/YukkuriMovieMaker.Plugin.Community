@@ -26,9 +26,11 @@ public class VideoEffectsLoader : IDisposable
 {
     private static readonly ConcurrentDictionary<string, byte[]> ShaderDictionaries = [];
     private static readonly ConcurrentDictionary<string, Guid> ShaderIdsByName = [];
+    private static readonly Lock ShaderRegistrationLock = new();
     private readonly IBrushParameter? _brushParameter;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private readonly ShaderEffect? _shaderEffect;
+    private readonly Lock _stateLock = new();
     private readonly EffectType _type;
     private readonly IVideoEffect? _videoEffect;
     private DrawDescriptionApplicator? _drawDescriptionApplicator;
@@ -58,18 +60,22 @@ public class VideoEffectsLoader : IDisposable
 
     public void Dispose()
     {
-        _processor?.ClearInput();
-        _processor?.Dispose();
-        _processor = null;
-        _drawDescriptionApplicator?.Dispose();
-        _drawDescriptionApplicator = null;
-        _shaderEffect?.Output?.Dispose();
-        for (var i = 0; i < _shaderEffect?.InputCount; i++)
-            _shaderEffect?.SetInput(i, null, true);
-        _shaderEffect?.Dispose();
-        _source?.Brush.Dispose();
-        _source?.Dispose();
-        _source = null;
+        lock (_stateLock)
+        {
+            _processor?.ClearInput();
+            _processor?.Dispose();
+            _processor = null;
+            _drawDescriptionApplicator?.Dispose();
+            _drawDescriptionApplicator = null;
+            _shaderEffect?.Output?.Dispose();
+            for (var i = 0; i < _shaderEffect?.InputCount; i++)
+                _shaderEffect?.SetInput(i, null, true);
+            _shaderEffect?.Dispose();
+            _source?.Brush.Dispose();
+            _source?.Dispose();
+            _source = null;
+        }
+
         GC.SuppressFinalize(this);
     }
 
@@ -85,7 +91,7 @@ public class VideoEffectsLoader : IDisposable
         {
             case EffectType.ShaderEffect when _shaderEffect != null:
             {
-                lock (_shaderEffect)
+                lock (_stateLock)
                 {
                     for (var i = 0; i < values.Length; i++) _shaderEffect.SetValueByIndex(i, values[i]);
                 }
@@ -113,7 +119,7 @@ public class VideoEffectsLoader : IDisposable
             switch (_type)
             {
                 case EffectType.ShaderEffect when _shaderEffect != null:
-                    lock (_shaderEffect)
+                    lock (_stateLock)
                     {
                         _shaderEffect.SetValueByName(propertyName, value);
                     }
@@ -231,68 +237,75 @@ public class VideoEffectsLoader : IDisposable
                 case EffectType.BrushEffect when _brushParameter != null:
                 {
                     _brushParameter.BeginEdit();
-                    // Recursively search for properties with DisplayAttribute within the _brushParameter hierarchy,
-                    // and match the property name (identifier) with the argument propertyName
-                    var result = FindPropertyByDisplay(_brushParameter, propertyName);
-                    if (result == null)
+                    try
                     {
+                        // Recursively search for properties with DisplayAttribute within the _brushParameter hierarchy,
+                        // and match the property name (identifier) with the argument propertyName
+                        var result = FindPropertyByDisplay(_brushParameter, propertyName);
+                        if (result == null)
+                        {
 #if DEBUG
-                        Console.WriteLine(
-                            $@"  BrushEffect SetValue FAILED for '{propertyName}'. " +
-                            $@"_brushParameter type={_brushParameter.GetType().Name}, direct properties: " +
-                            string.Join(", ", _brushParameter.GetType()
-                                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                .Select(p =>
-                                    $"{p.Name}({(p.GetCustomAttribute<DisplayAttribute>() != null ? "Display" : "no-Display")})")));
+                            Console.WriteLine(
+                                $@"  BrushEffect SetValue FAILED for '{propertyName}'. " +
+                                $@"_brushParameter type={_brushParameter.GetType().Name}, direct properties: " +
+                                string.Join(", ", _brushParameter.GetType()
+                                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                    .Select(p =>
+                                        $"{p.Name}({(p.GetCustomAttribute<DisplayAttribute>() != null ? "Display" : "no-Display")})")));
 #endif
-                        throw new ArgumentException(string.Format(TextUi.PropertyNotFound, propertyName),
-                            nameof(propertyName));
-                    }
+                            throw new ArgumentException(string.Format(TextUi.PropertyNotFound, propertyName),
+                                nameof(propertyName));
+                        }
 
-                    var (targetObject, propInfo) = result.Value;
+                        var (targetObject, propInfo) = result.Value;
 
-                    // If the property type is Animation, update the Values property of the Animation object directly
-                    if (propInfo.PropertyType == typeof(Animation))
-                    {
-                        // Retrieve the Animation object. If it does not exist, create a new one
-                        if (propInfo.GetValue(targetObject) is not Animation animObj)
+                        // If the property type is Animation, update the Values property of the Animation object directly
+                        if (propInfo.PropertyType == typeof(Animation))
+                        {
+                            // Retrieve the Animation object. If it does not exist, create a new one
+                            if (propInfo.GetValue(targetObject) is not Animation animObj)
+                            {
+                                if (!propInfo.CanWrite)
+                                    throw new InvalidOperationException(
+                                        string.Format(TextUi.PropertyReadOnly, propertyName));
+                                animObj = Activator.CreateInstance<Animation>()
+                                          ?? throw new InvalidOperationException(
+                                              TextUi.UnableCreateAnimationInstance);
+                                // Set the Animation object to the target property only if it did not exist
+                                propInfo.SetValue(targetObject, animObj);
+                            }
+
+                            // Retrieve the Values property of the Animation object
+                            var valuesProp = animObj.GetType()
+                                .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
+                            if (valuesProp == null || !valuesProp.CanRead || !valuesProp.CanWrite)
+                                throw new InvalidOperationException(
+                                    TextUi.AnimationValuesPropertyError);
+
+                            // Create a new AnimationValue and add it to the existing list
+                            var newList =
+                                ImmutableList<AnimationValue>.Empty.Add(
+                                    new AnimationValue(Convert.ToDouble(value ?? 0)));
+                            // Update the Values property of the Animation object directly
+                            animObj.BeginEdit();
+                            valuesProp.SetValue(animObj, newList);
+                            await animObj.EndEditAsync();
+                        }
+                        else
                         {
                             if (!propInfo.CanWrite)
                                 throw new InvalidOperationException(
                                     string.Format(TextUi.PropertyReadOnly, propertyName));
-                            animObj = Activator.CreateInstance<Animation>()
-                                      ?? throw new InvalidOperationException(
-                                          TextUi.UnableCreateAnimationInstance);
-                            // Set the Animation object to the target property only if it did not exist
-                            propInfo.SetValue(targetObject, animObj);
+                            // For non-Animation types, set the value to the property as usual
+                            propInfo.SetValue(
+                                targetObject,
+                                PropertyValueTypeConverter.ConvertPropertyValue(propInfo.PropertyType, value));
                         }
-
-                        // Retrieve the Values property of the Animation object
-                        var valuesProp = animObj.GetType()
-                            .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
-                        if (valuesProp == null || !valuesProp.CanRead || !valuesProp.CanWrite)
-                            throw new InvalidOperationException(
-                                TextUi.AnimationValuesPropertyError);
-
-                        // Create a new AnimationValue and add it to the existing list
-                        var newList =
-                            ImmutableList<AnimationValue>.Empty.Add(new AnimationValue(Convert.ToDouble(value ?? 0)));
-                        // Update the Values property of the Animation object directly
-                        animObj.BeginEdit();
-                        valuesProp.SetValue(animObj, newList);
-                        await animObj.EndEditAsync();
                     }
-                    else
+                    finally
                     {
-                        if (!propInfo.CanWrite)
-                            throw new InvalidOperationException(string.Format(TextUi.PropertyReadOnly, propertyName));
-                        // For non-Animation types, set the value to the property as usual
-                        propInfo.SetValue(
-                            targetObject,
-                            PropertyValueTypeConverter.ConvertPropertyValue(propInfo.PropertyType, value));
+                        await _brushParameter.EndEditAsync();
                     }
-
-                    await _brushParameter.EndEditAsync();
                 }
                     break;
             }
@@ -364,12 +377,12 @@ public class VideoEffectsLoader : IDisposable
         {
             case EffectType.VideoEffect when _videoEffect != null:
             {
-                _processor ??= _videoEffect.CreateVideoEffect(evaluationContext.Devices);
                 if (image[0] == null) return false;
-                lock (_processor)
+                lock (_stateLock)
                 {
                     try
                     {
+                        _processor ??= _videoEffect.CreateVideoEffect(evaluationContext.Devices);
                         try
                         {
                             if (_processor.Output.NativePointer == IntPtr.Zero)
@@ -396,7 +409,7 @@ public class VideoEffectsLoader : IDisposable
             }
             case EffectType.ShaderEffect when _shaderEffect != null:
             {
-                lock (_shaderEffect)
+                lock (_stateLock)
                 {
                     try
                     {
@@ -425,7 +438,7 @@ public class VideoEffectsLoader : IDisposable
         {
             case EffectType.BrushEffect when _brushParameter != null:
             {
-                lock (_brushParameter)
+                lock (_stateLock)
                 {
                     try
                     {
@@ -449,7 +462,7 @@ public class VideoEffectsLoader : IDisposable
     public VideoEffectsLoader SetInputImageMargin(Rect margin)
     {
         if (_type != EffectType.ShaderEffect || _shaderEffect == null) return this;
-        lock (_shaderEffect)
+        lock (_stateLock)
         {
             _shaderEffect?.SetInputImageMargin(margin);
         }
@@ -460,7 +473,7 @@ public class VideoEffectsLoader : IDisposable
     public VideoEffectsLoader SetOutputImageMargin(params Rect[] margin)
     {
         if (_type != EffectType.ShaderEffect || _shaderEffect == null) return this;
-        lock (_shaderEffect)
+        lock (_stateLock)
         {
             _shaderEffect?.SetOutputImageMargin(margin);
         }
@@ -523,25 +536,30 @@ public class VideoEffectsLoader : IDisposable
         if (ShaderIdsByName.TryGetValue(shaderName, out var existingId))
             return existingId;
 
-        byte[] shader;
-
-        using (var resourceStream = Application.GetResourceStream(ShaderResourceUri.Get(shaderName))?.Stream)
+        lock (ShaderRegistrationLock)
         {
-            if (resourceStream == null) return Guid.Empty;
+            if (ShaderIdsByName.TryGetValue(shaderName, out existingId))
+                return existingId;
 
-            using (var memoryStream = new MemoryStream())
+            byte[] shader;
+
+            using (var resourceStream = Application.GetResourceStream(ShaderResourceUri.Get(shaderName))?.Stream)
             {
-                resourceStream.CopyTo(memoryStream);
-                shader = memoryStream.ToArray();
+                if (resourceStream == null) return Guid.Empty;
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    resourceStream.CopyTo(memoryStream);
+                    shader = memoryStream.ToArray();
+                }
             }
+
+            var id = Guid.NewGuid();
+            ShaderDictionaries[id.ToString("N")] = shader;
+            ShaderIdsByName[shaderName] = id;
+
+            return id;
         }
-
-        var id = Guid.NewGuid();
-        var resolvedId = ShaderIdsByName.GetOrAdd(shaderName, id);
-        if (resolvedId == id)
-            ShaderDictionaries.TryAdd(id.ToString("N"), shader);
-
-        return resolvedId;
     }
 
     public static byte[] GetShader(string id)

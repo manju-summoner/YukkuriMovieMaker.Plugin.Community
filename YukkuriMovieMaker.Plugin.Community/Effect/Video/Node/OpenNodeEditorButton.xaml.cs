@@ -21,11 +21,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node;
 
 public partial class OpenNodeEditorButton : IPropertyEditorControl2
 {
+    private Window? _boundWindow;
     private EventHandler<CommittedEventArgs>? _committedHandler;
     private IEditorInfo? _editorInfo;
     private EventHandler? _graphUpdatedHandler;
     private NodeEditorViewModel? _lastResolvedViewModel;
+    private EventHandler? _layoutIsActiveChangedHandler;
+    private KeyBinding[]? _nodeBindings;
     private NodeGraph? _subscribedGraph;
+    private LayoutAnchorable? _subscribedLayout;
     private NodeEffect? _subscribedNodeEffect;
 
     public OpenNodeEditorButton()
@@ -54,12 +58,28 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
             _subscribedGraph.Committed -= _committedHandler;
         if (_subscribedNodeEffect != null && _graphUpdatedHandler != null)
             _subscribedNodeEffect.GraphUpdated -= _graphUpdatedHandler;
+        ReleaseShortcutBindings();
 
         _committedHandler = null;
         _graphUpdatedHandler = null;
         _subscribedGraph = null;
         _subscribedNodeEffect = null;
         _lastResolvedViewModel = null;
+    }
+
+    private void ReleaseShortcutBindings()
+    {
+        if (_subscribedLayout != null && _layoutIsActiveChangedHandler != null)
+            _subscribedLayout.IsActiveChanged -= _layoutIsActiveChangedHandler;
+
+        if (_boundWindow != null && _nodeBindings != null)
+            foreach (var kb in _nodeBindings)
+                _boundWindow.InputBindings.Remove(kb);
+
+        _subscribedLayout = null;
+        _layoutIsActiveChangedHandler = null;
+        _nodeBindings = null;
+        _boundWindow = null;
     }
 
     private static void EnsureInternalGraph(NodeEffect pluginItem)
@@ -241,6 +261,11 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         if (vm is null) return;
         if (layout is null) return;
 
+        // 既存のショートカット登録・ハンドラを解除してから積み直す。
+        // 解除しないと、パネルを閉じずにボタンを複数回押した場合や
+        // プロパティエディタが再生成された場合に古いハンドラ・ショートカットが残り続ける。
+        ReleaseShortcutBindings();
+
         var nodeBindings = new[]
         {
             new KeyBinding(vm.ZoomUpCommand, Key.Add, ModifierKeys.Control),
@@ -255,7 +280,11 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
             new KeyBinding(vm.PasteCommand, Key.V, ModifierKeys.Control)
         };
 
-        layout.IsActiveChanged += (_, _) =>
+        _nodeBindings = nodeBindings;
+        _boundWindow = parentWindow;
+        _subscribedLayout = layout;
+
+        _layoutIsActiveChangedHandler = (_, _) =>
         {
             try
             {
@@ -277,6 +306,7 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
                 Debug.WriteLine($"[OpenNodeEditorButton] IsActiveChanged handler failed: {ex}");
             }
         };
+        layout.IsActiveChanged += _layoutIsActiveChangedHandler;
 
         if (layout.IsActive)
         {

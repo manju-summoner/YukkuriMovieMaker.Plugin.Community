@@ -29,6 +29,7 @@ public partial class GraphView
     {
         InitializeComponent();
         Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
         DataContextChanged += OnDataContextChanged;
         SizeChanged += OnSizeChanged;
     }
@@ -63,24 +64,56 @@ public partial class GraphView
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         var layer = AdornerLayer.GetAdornerLayer(RootGrid);
-        if (layer != null && Mode != GraphControlMode.Pan)
+        if (layer is null) return;
+
+        RemoveAdorners(layer);
+
+        if (Mode == GraphControlMode.Pan) return;
+
+        _connectionAdorner = new ConnectionAdorner(RootGrid);
+        layer.Add(_connectionAdorner);
+        _connectionAdorner.DataContext = DataContext;
+
+        switch (Mode)
         {
-            _connectionAdorner = new ConnectionAdorner(RootGrid);
-            layer.Add(_connectionAdorner);
-            _connectionAdorner.DataContext = DataContext;
+            case GraphControlMode.RectSelection:
+                _selectionAdorner = new RectSelectionAdorner(RootGrid);
+                break;
+            case GraphControlMode.LassoSelection:
+                _selectionAdorner = new LassoSelectionAdorner(RootGrid);
+                break;
+        }
 
-            switch (Mode)
-            {
-                case GraphControlMode.RectSelection:
-                    _selectionAdorner = new RectSelectionAdorner(RootGrid);
-                    break;
-                case GraphControlMode.LassoSelection:
-                    _selectionAdorner = new LassoSelectionAdorner(RootGrid);
-                    break;
-            }
+        if (_selectionAdorner != null)
+            layer.Add(_selectionAdorner);
+    }
 
-            if (_selectionAdorner != null)
-                layer.Add(_selectionAdorner);
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        var layer = AdornerLayer.GetAdornerLayer(RootGrid);
+        if (layer != null)
+        {
+            RemoveAdorners(layer);
+        }
+        else
+        {
+            _connectionAdorner = null;
+            _selectionAdorner = null;
+        }
+    }
+
+    private void RemoveAdorners(AdornerLayer layer)
+    {
+        if (_connectionAdorner != null)
+        {
+            layer.Remove(_connectionAdorner);
+            _connectionAdorner = null;
+        }
+
+        if (_selectionAdorner != null)
+        {
+            layer.Remove(_selectionAdorner);
+            _selectionAdorner = null;
         }
     }
 

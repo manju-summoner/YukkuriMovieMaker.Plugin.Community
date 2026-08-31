@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Numerics;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 using Newtonsoft.Json;
@@ -95,13 +96,21 @@ public sealed class NodeEffect : VideoEffectBase
         return new Processor(devices, this);
     }
 
+    private static bool IsFileSelectorProperty(PropertyInfo prop)
+    {
+        return Attribute.IsDefined(prop, typeof(FileSelectorAttribute)) ||
+               prop.GetCustomAttributes(true)
+                   .Any(attr => attr is PropertyEditorAttribute2 &&
+                                attr.GetType().Name.Contains("FileSelector", StringComparison.Ordinal));
+    }
+
     private static IEnumerable<(InputPort Port, string Path)> EnumerateFilePathPorts(NodeGraph graph)
     {
         foreach (var node in graph.Nodes.Values)
         {
             foreach (var prop in node.GetType().GetProperties())
             {
-                if (!Attribute.IsDefined(prop, typeof(FileSelectorAttribute))) continue;
+                if (!IsFileSelectorProperty(prop)) continue;
                 if (!node.Inputs.TryGetValue(prop.Name, out var port)) continue;
                 if (port.LocalValue is string { Length: > 0 } path)
                     yield return (port, path);

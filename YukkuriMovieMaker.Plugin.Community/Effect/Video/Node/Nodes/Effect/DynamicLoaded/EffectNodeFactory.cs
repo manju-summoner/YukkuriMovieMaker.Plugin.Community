@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -785,8 +786,8 @@ public static class EffectNodeTypeBuilder
 
 public static class EffectNodeCalculator
 {
-    private static readonly Dictionary<string, PortDefinition[]> PortDefsRegistry = new();
-    private static readonly Dictionary<string, string[]> DynamicPropNamesRegistry = new();
+    private static readonly ConcurrentDictionary<string, PortDefinition[]> PortDefsRegistry = new();
+    private static readonly ConcurrentDictionary<string, string[]> DynamicPropNamesRegistry = new();
 
     public static void RegisterPortDefs(
         string effectName,
