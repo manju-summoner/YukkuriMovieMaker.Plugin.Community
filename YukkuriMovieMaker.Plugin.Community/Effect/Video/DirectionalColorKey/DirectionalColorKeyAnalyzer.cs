@@ -23,8 +23,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private ReadWriteBuffer<int>? histogramBuffer;
         private ReadWriteBuffer<int>? foregroundBufferA;
         private ReadWriteBuffer<int>? foregroundBufferB;
-        private ReadWriteBuffer<int>? validBufferA;
-        private ReadWriteBuffer<int>? validBufferB;
+        private ReadWriteBuffer<float>? srgbToLinearBuffer;
+        private ReadWriteBuffer<float>? premultipliedLinearBuffer;
         private int[]? foregroundReadback;
 
         private int width;
@@ -43,7 +43,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private const int AdoptReach = SmoothRadius * SmoothIterations;
         private const int GuardReach = SmoothRadius * SmoothIterations;
         private const float IncrementalChangeCeiling = 0.25f;
-        private const int PropagateReach = 4;
+        private const int SrgbTableLength = 256;
         private const int PropagateIterations = 16;
         private const float LineSigmaSquared = 0.1225f;
 
@@ -220,25 +220,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             var bgraGpu = EnsureBgraBuffer();
             var colorLabGpu = EnsureColorLabBuffer();
             var foregroundSource = EnsureForegroundBufferA();
-            var validSource = EnsureValidBufferA();
             var foregroundTarget = EnsureForegroundBufferB();
-            var validTarget = EnsureValidBufferB();
+            var srgbToLinear = EnsureSrgbToLinearBuffer();
+            var premultipliedLinear = EnsurePremultipliedLinearBuffer();
 
             device.For(width, height, new ForegroundSeedShader(
-                bgraGpu, colorLabGpu, foregroundSource, validSource,
+                bgraGpu, colorLabGpu, foregroundSource,
                 backgroundLab.X, backgroundLab.Y, backgroundLab.Z,
                 referencePerp, width, height));
 
             for (int iteration = 0; iteration < PropagateIterations; iteration++)
             {
                 device.For(width, height, new ForegroundPropagateShader(
-                    foregroundSource, validSource, bgraGpu,
-                    foregroundTarget, validTarget,
+                    foregroundSource, bgraGpu, srgbToLinear, premultipliedLinear,
+                    foregroundTarget,
                     backgroundSrgb.X, backgroundSrgb.Y, backgroundSrgb.Z,
-                    PropagateReach, LineSigmaSquared, width, height));
+                    LineSigmaSquared, width, height));
 
                 (foregroundSource, foregroundTarget) = (foregroundTarget, foregroundSource);
-                (validSource, validTarget) = (validTarget, validSource);
             }
 
             foregroundSource.CopyTo(foregroundReadback.AsSpan(0, pixelCount));
@@ -278,24 +277,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             return foregroundBufferB;
         }
 
-        private ReadWriteBuffer<int> EnsureValidBufferA()
+        private IReadOnlyBuffer<float> EnsureSrgbToLinearBuffer()
         {
-            if (validBufferA is null || validBufferA.Length < pixelCount)
+            if (srgbToLinearBuffer is null)
             {
-                validBufferA?.Dispose();
-                validBufferA = device.AllocateReadWriteBuffer<int>(pixelCount);
+                srgbToLinearBuffer = device.AllocateReadWriteBuffer<float>(SrgbTableLength);
+                device.For(SrgbTableLength, new SrgbToLinearTableShader(srgbToLinearBuffer));
             }
-            return validBufferA;
+            return srgbToLinearBuffer.AsReadOnly();
         }
 
-        private ReadWriteBuffer<int> EnsureValidBufferB()
+        private IReadOnlyBuffer<float> EnsurePremultipliedLinearBuffer()
         {
-            if (validBufferB is null || validBufferB.Length < pixelCount)
+            if (premultipliedLinearBuffer is null)
             {
-                validBufferB?.Dispose();
-                validBufferB = device.AllocateReadWriteBuffer<int>(pixelCount);
+                premultipliedLinearBuffer = device.AllocateReadWriteBuffer<float>(PremultipliedLinearConstants.TableLength);
+                device.For(PremultipliedLinearConstants.TableLength, new PremultipliedLinearTableShader(premultipliedLinearBuffer));
             }
-            return validBufferB;
+            return premultipliedLinearBuffer.AsReadOnly();
         }
 
         private bool TryRunIncrementalSmooth(
@@ -655,8 +654,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             computeMaskBuffer?.Dispose();
             foregroundBufferA?.Dispose();
             foregroundBufferB?.Dispose();
-            validBufferA?.Dispose();
-            validBufferB?.Dispose();
             bgraBuffer = null;
             previousBgraBuffer = null;
             colorLabBuffer = null;
@@ -669,13 +666,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             computeMaskBuffer = null;
             foregroundBufferA = null;
             foregroundBufferB = null;
-            validBufferA = null;
-            validBufferB = null;
         }
 
         public void Dispose()
         {
             DisposeFrameBuffers();
+            srgbToLinearBuffer?.Dispose();
+            premultipliedLinearBuffer?.Dispose();
+            srgbToLinearBuffer = null;
+            premultipliedLinearBuffer = null;
             centerBuffer?.Dispose();
             accumBuffer?.Dispose();
             countBuffer?.Dispose();
