@@ -178,7 +178,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
         {
             if (e.PropertyName == nameof(pronounce.TSML))
                 UpdateAcousticPhrases();
-            if (e.PropertyName == nameof(pronounce.Phonemes) || e.PropertyName == nameof(pronounce.PhonemeDurations))
+            if (e.PropertyName == nameof(pronounce.Phonemes) || e.PropertyName == nameof(pronounce.PhonemeDurations) || e.PropertyName == nameof(pronounce.RequestedPhonemeDurations))
                 UpdatePhonemes();
         }
 

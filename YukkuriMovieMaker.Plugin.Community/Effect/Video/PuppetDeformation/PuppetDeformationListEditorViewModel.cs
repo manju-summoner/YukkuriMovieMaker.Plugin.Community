@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -28,17 +29,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         PuppetDeformationEditMode editMode = PuppetDeformationEditMode.Pin;
 
         bool isMutatingSelection;
-        bool disposedValue;
+        volatile bool disposedValue;
 
         EditSnapshot? activeSnapshot;
 
         IEditorInfo? editorInfo;
         bool isCanvasImageInitialized;
         int lastCanvasImageFrame = -1;
+        int lastReceivedEditorFrame = -1;
         readonly object canvasImageRefreshLock = new();
         CanvasImageRequest? pendingCanvasImageRequest;
         bool isCanvasImageRefreshRunning;
         int canvasImageRequestId;
+        CancellationTokenSource? frameRefreshDebounceCts;
+
+        //フレーム変化起因の再描画を遅延させる時間。
+        //再生・シーク中はフレーム変化が連続するため、変化が止まるまで再描画を抑止する
+        //（アイテム画像のフル再レンダリングはグループ制御などでGPU負荷が大きく、毎フレーム実行するとGPUハングの原因になる）
+        internal int FrameRefreshDebounceMilliseconds { get; set; } = 300;
 
         public void SetEditorInfo(IEditorInfo? info)
         {
@@ -46,19 +54,78 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             //エディタのデタッチ時などにnullが渡される
             if (info is null)
             {
+                CancelPendingDebouncedRefresh();
                 InvalidateCanvasImageRequests();
                 return;
             }
 
             //同一フレームでは編集操作のたびに再描画せず、フレームが変わったときだけ画像を更新する
+            var frame = info.ItemPosition.Frame;
             if (isCanvasImageInitialized)
             {
-                if (info.ItemPosition.Frame != lastCanvasImageFrame)
-                    QueueCanvasImageRefresh();
+                //ループ再生では描画済みフレームへ戻る遷移があるため、遷移の検知は「直前に受信したフレーム」と比較する
+                //（描画済みフレームとの比較だと、そのフレームを通過するたびにデバウンスを迂回してしまう）。
+                //キャンバスが未追従（デタッチ中にフレームが進んだ等）の場合も追いつかせる
+                if (frame != lastReceivedEditorFrame || frame != lastCanvasImageFrame)
+                    ScheduleDebouncedCanvasImageRefresh();
+                lastReceivedEditorFrame = frame;
                 return;
             }
             isCanvasImageInitialized = true;
+            lastReceivedEditorFrame = frame;
             QueueCanvasImageRefresh();
+        }
+
+        void ScheduleDebouncedCanvasImageRefresh()
+        {
+            if (disposedValue)
+                return;
+            var newCts = new CancellationTokenSource();
+            var token = newCts.Token;
+            CancelAndDispose(Interlocked.Exchange(ref frameRefreshDebounceCts, newCts));
+            //Disposeと競合したら自分で片付ける
+            if (disposedValue)
+            {
+                CancelAndDispose(Interlocked.Exchange(ref frameRefreshDebounceCts, null));
+                return;
+            }
+            _ = DebounceCanvasImageRefreshAsync(token);
+        }
+
+        async Task DebounceCanvasImageRefreshAsync(CancellationToken token)
+        {
+            //未観測例外はリリースビルドでアプリを終了させるため、本体全体をtryで覆う
+            try
+            {
+                await Task.Delay(FrameRefreshDebounceMilliseconds, token);
+                if (disposedValue || token.IsCancellationRequested)
+                    return;
+                //即時経路のQueueCanvasImageRefreshは自分の予約を取り消すため、発火側はCoreを直接呼んで競合を避ける
+                QueueCanvasImageRefreshCore();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch
+            {
+            }
+        }
+
+        void CancelPendingDebouncedRefresh()
+            => CancelAndDispose(Interlocked.Exchange(ref frameRefreshDebounceCts, null));
+
+        static void CancelAndDispose(CancellationTokenSource? cts)
+        {
+            if (cts is null)
+                return;
+            try
+            {
+                cts.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            cts.Dispose();
         }
 
         /// <summary>保留中の画像更新要求を無効化する（完了済みの生成結果も適用されなくなる）</summary>
@@ -197,6 +264,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void QueueCanvasImageRefresh()
         {
+            //即時の再描画がデバウンス予約を追い越した場合、その後の発火で同じ内容を二重に描画しないよう予約を破棄する
+            CancelPendingDebouncedRefresh();
+            QueueCanvasImageRefreshCore();
+        }
+
+        void QueueCanvasImageRefreshCore()
+        {
             var info = editorInfo;
             if (info is null || disposedValue)
                 return;
@@ -276,12 +350,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
                 itemVideoSource.Update(time, Player.Video.TimelineSourceUsage.Paused);
                 var image = itemVideoSource.RenderBitmapSource(out var bounds);
-                return new CanvasImageResult(image, new Rect(bounds.Left, bounds.Top, image.PixelWidth, image.PixelHeight));
+                //巨大なアイテムでは縮小レンダリングされ、画像のピクセル数とローカル座標上のサイズが一致しない。
+                //ピン座標と対応させるため、表示範囲はローカル座標のboundsから求める
+                return new CanvasImageResult(image, CreateImageLocalBounds(bounds, image));
             }
             catch
             {
                 return CanvasImageResult.Empty;
             }
+        }
+
+        static Rect CreateImageLocalBounds(Vortice.RawRectF bounds, System.Windows.Media.Imaging.BitmapSource image)
+        {
+            double left = bounds.Left;
+            double top = bounds.Top;
+            var width = bounds.Right - (double)bounds.Left;
+            var height = bounds.Bottom - (double)bounds.Top;
+            if (!double.IsFinite(left))
+                left = 0;
+            if (!double.IsFinite(top))
+                top = 0;
+            if (!double.IsFinite(width) || width <= 0)
+                width = image.PixelWidth;
+            if (!double.IsFinite(height) || height <= 0)
+                height = image.PixelHeight;
+            return new Rect(left, top, width, height);
         }
 
         readonly record struct CanvasImageRequest(IEditorInfo Info, PuppetDeformationEffect Effect, int Id);
@@ -941,6 +1034,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         {
             if (disposedValue) return;
             disposedValue = true;
+            CancelPendingDebouncedRefresh();
             InvalidateCanvasImageRequests();
             if (disposing)
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -21,18 +22,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         VectorFieldPointItemViewModel? selectedItem;
 
         bool isMutatingSelection;
-        bool disposedValue;
+        volatile bool disposedValue;
 
         IEditorInfo? editorInfo;
         bool isCanvasImageInitialized;
         int lastCanvasImageFrame = -1;
+        int lastReceivedEditorFrame = -1;
         readonly object canvasImageRefreshLock = new();
         CanvasImageRequest? pendingCanvasImageRequest;
         bool isCanvasImageRefreshRunning;
         int canvasImageRequestId;
+        CancellationTokenSource? frameRefreshDebounceCts;
 
         readonly AnimationWatcher amountWatcher;
         readonly AnimationWatcher maxDisplacementWatcher;
+
+        //フレーム変化起因の再描画を遅延させる時間。
+        //再生・シーク中はフレーム変化が連続するため、変化が止まるまで再描画を抑止する
+        //（アイテム画像のフル再レンダリングはグループ制御などでGPU負荷が大きく、毎フレーム実行するとGPUハングの原因になる）
+        internal int FrameRefreshDebounceMilliseconds { get; set; } = 300;
 
         public void SetEditorInfo(IEditorInfo? info)
         {
@@ -40,19 +48,78 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
             //エディタのデタッチ時などにnullが渡される
             if (info is null)
             {
+                CancelPendingDebouncedRefresh();
                 InvalidateCanvasImageRequests();
                 return;
             }
+            var frame = info.ItemPosition.Frame;
             if (isCanvasImageInitialized)
             {
-                if (info.ItemPosition.Frame != lastCanvasImageFrame)
-                    QueueCanvasImageRefresh();
+                //ループ再生では描画済みフレームへ戻る遷移があるため、遷移の検知は「直前に受信したフレーム」と比較する
+                //（描画済みフレームとの比較だと、そのフレームを通過するたびにデバウンスを迂回してしまう）
+                if (frame != lastReceivedEditorFrame)
+                    ScheduleDebouncedCanvasImageRefresh();
                 else
+                    //同一フレームでの編集（Undo/Redo等）の反映は即時に行う
                     QueueCanvasImageRefresh();
+                lastReceivedEditorFrame = frame;
                 return;
             }
             isCanvasImageInitialized = true;
+            lastReceivedEditorFrame = frame;
             QueueCanvasImageRefresh();
+        }
+
+        void ScheduleDebouncedCanvasImageRefresh()
+        {
+            if (disposedValue)
+                return;
+            var newCts = new CancellationTokenSource();
+            var token = newCts.Token;
+            CancelAndDispose(Interlocked.Exchange(ref frameRefreshDebounceCts, newCts));
+            //Disposeと競合したら自分で片付ける
+            if (disposedValue)
+            {
+                CancelAndDispose(Interlocked.Exchange(ref frameRefreshDebounceCts, null));
+                return;
+            }
+            _ = DebounceCanvasImageRefreshAsync(token);
+        }
+
+        async Task DebounceCanvasImageRefreshAsync(CancellationToken token)
+        {
+            //未観測例外はリリースビルドでアプリを終了させるため、本体全体をtryで覆う
+            try
+            {
+                await Task.Delay(FrameRefreshDebounceMilliseconds, token);
+                if (disposedValue || token.IsCancellationRequested)
+                    return;
+                //即時経路のQueueCanvasImageRefreshは自分の予約を取り消すため、発火側はCoreを直接呼んで競合を避ける
+                QueueCanvasImageRefreshCore();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch
+            {
+            }
+        }
+
+        void CancelPendingDebouncedRefresh()
+            => CancelAndDispose(Interlocked.Exchange(ref frameRefreshDebounceCts, null));
+
+        static void CancelAndDispose(CancellationTokenSource? cts)
+        {
+            if (cts is null)
+                return;
+            try
+            {
+                cts.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            cts.Dispose();
         }
 
         public ImageSource? CanvasImage { get => canvasImage; private set => Set(ref canvasImage, value); }
@@ -70,7 +137,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         public Rect CanvasImageBounds { get => canvasImageBounds; private set => Set(ref canvasImageBounds, value); }
         Rect canvasImageBounds = Rect.Empty;
 
-        public double CanvasImageScale => 1.0;
+        /// <summary>キャンバス画像のピクセル数／ローカル座標上のサイズの比。縮小レンダリング時は1未満になる。</summary>
+        public double CanvasImageScale { get => canvasImageScale; private set => Set(ref canvasImageScale, value); }
+        double canvasImageScale = 1.0;
 
         public ImmutableList<VectorFieldPointItemViewModel> CanvasPoints { get => canvasPoints; private set => Set(ref canvasPoints, value); }
         ImmutableList<VectorFieldPointItemViewModel> canvasPoints = ImmutableList<VectorFieldPointItemViewModel>.Empty;
@@ -114,6 +183,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         }
 
         void QueueCanvasImageRefresh()
+        {
+            //即時の再描画がデバウンス予約を追い越した場合、その後の発火で同じ内容を二重に描画しないよう予約を破棄する
+            CancelPendingDebouncedRefresh();
+            QueueCanvasImageRefreshCore();
+        }
+
+        void QueueCanvasImageRefreshCore()
         {
             var info = editorInfo;
             if (info is null || disposedValue)
@@ -195,9 +271,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
 
                 itemVideoSource.Update(time, Player.Video.TimelineSourceUsage.Paused);
                 var image = itemVideoSource.RenderBitmapSource(out var bounds);
-                return new CanvasImageResult(
-                    image,
-                    new Rect(bounds.Left, bounds.Top, image.PixelWidth, image.PixelHeight));
+                //巨大なアイテムでは縮小レンダリングされ、画像のピクセル数とローカル座標上のサイズが一致しない。
+                //ポイント座標と対応させるため、表示範囲はローカル座標のboundsから求める
+                return new CanvasImageResult(image, CreateImageLocalBounds(bounds, image));
             }
             catch
             {
@@ -215,15 +291,49 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
                 CanvasBaseSize = Size.Empty;
                 CanvasImageBounds = Rect.Empty;
                 CanvasBaseBounds = Rect.Empty;
+                CanvasImageScale = 1.0;
                 return;
             }
 
             var size = new Size(source.PixelWidth, source.PixelHeight);
+            //縮小レンダリング時のピクセル数とローカル座標の対応比。キャンバス側の座標変換に使う
+            CanvasImageScale = ComputeCanvasImageScale(source.PixelWidth, source.PixelHeight, result.Bounds);
             CanvasImage = source;
             CanvasImageSize = size;
             CanvasBaseSize = size;
             CanvasImageBounds = result.Bounds;
             CanvasBaseBounds = result.Bounds;
+        }
+
+        /// <summary>
+        /// キャンバス画像のピクセル数とローカル座標上のサイズの比を求める。
+        /// 縮小レンダリングは両軸に同じ倍率を使うが、生成されるビットマップの各寸法は
+        /// 切り上げと1px下限の補正を受けるため、比が歪みにくい長辺から算出する。
+        /// </summary>
+        internal static double ComputeCanvasImageScale(int pixelWidth, int pixelHeight, Rect bounds)
+        {
+            if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
+                return 1.0;
+            return bounds.Width >= bounds.Height
+                ? pixelWidth / bounds.Width
+                : pixelHeight / bounds.Height;
+        }
+
+        static Rect CreateImageLocalBounds(Vortice.RawRectF bounds, BitmapSource image)
+        {
+            double left = bounds.Left;
+            double top = bounds.Top;
+            var width = bounds.Right - (double)bounds.Left;
+            var height = bounds.Bottom - (double)bounds.Top;
+            if (!double.IsFinite(left))
+                left = 0;
+            if (!double.IsFinite(top))
+                top = 0;
+            if (!double.IsFinite(width) || width <= 0)
+                width = image.PixelWidth;
+            if (!double.IsFinite(height) || height <= 0)
+                height = image.PixelHeight;
+            return new Rect(left, top, width, height);
         }
 
         readonly record struct CanvasImageRequest(IEditorInfo Info, VectorFieldWarpEffect Effect, int Id);
@@ -422,6 +532,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.VectorFieldWarp
         {
             if (disposedValue) return;
             disposedValue = true;
+            CancelPendingDebouncedRefresh();
             InvalidateCanvasImageRequests();
             if (disposing)
             {

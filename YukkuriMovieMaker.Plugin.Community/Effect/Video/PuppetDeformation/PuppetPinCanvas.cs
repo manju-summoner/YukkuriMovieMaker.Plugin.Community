@@ -234,8 +234,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         void SyncViewToCurrentImage()
         {
             var image = viewModel?.CanvasImage;
-            var size = image is null ? Size.Empty : new Size(image.PixelWidth, image.PixelHeight);
-            if (size != lastImageSize)
+            //縮小レンダリング時はピクセル数が表示サイズと一致しないため、ローカル座標上のサイズで比較する
+            var size = image is null
+                ? Size.Empty
+                : viewModel!.CanvasImageBounds is { IsEmpty: false, Width: > 0, Height: > 0 } imageBounds
+                    ? new Size(imageBounds.Width, imageBounds.Height)
+                    : new Size(image.PixelWidth, image.PixelHeight);
+            //boundsはfloat由来でサブピクセルの揺れがあるため、0.5px未満の変化ではズーム/パンをリセットしない
+            if (!AreSizesClose(size, lastImageSize))
             {
                 lastImageSize = size;
                 ResetView();
@@ -245,6 +251,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 UpdateScrollInfo();
                 InvalidateVisual();
             }
+        }
+
+        static bool AreSizesClose(Size a, Size b)
+        {
+            if (a.IsEmpty || b.IsEmpty)
+                return a.IsEmpty == b.IsEmpty;
+            return Math.Abs(a.Width - b.Width) < 0.5 && Math.Abs(a.Height - b.Height) < 0.5;
         }
 
         void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -380,12 +393,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var imageLocal = viewModel!.CanvasImageBounds;
             if (imageLocal.IsEmpty)
                 imageLocal = new Rect(-iw * 0.5, -ih * 0.5, iw, ih);
+            if (imageLocal.Width <= 0 || imageLocal.Height <= 0)
+                return null;
 
             //オーバーレイのスクロールバーはレイアウト領域を専有しないため、キャンバス全体がビューポート。
             //フィット倍率もこの一定サイズを基準にするので、バー要否でextentが変わらず点滅しない。
             double fullW = RenderSize.Width, fullH = RenderSize.Height;
-            //ズーム1.0＝画像全体がちょうど収まるフィット表示
-            var fitScale = Math.Min(fullW / iw, fullH / ih);
+            //ズーム1.0＝画像全体がちょうど収まるフィット表示。
+            //縮小レンダリング時はピクセル数が表示サイズと一致しないため、ローカル座標上のサイズを基準にする
+            var fitScale = Math.Min(fullW / imageLocal.Width, fullH / imageLocal.Height);
             var scale = fitScale * zoom;
 
             //画像とすべてのピン/ジョイントを含む範囲。画面外のピンもスクロールで辿れるようにする。

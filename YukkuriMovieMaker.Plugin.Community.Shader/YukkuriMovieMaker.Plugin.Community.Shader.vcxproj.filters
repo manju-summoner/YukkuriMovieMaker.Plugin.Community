@@ -132,6 +132,9 @@
     <FxCompile Include="PageTurnTransition.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="SpreadPageTurn.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="MotionBlur.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>

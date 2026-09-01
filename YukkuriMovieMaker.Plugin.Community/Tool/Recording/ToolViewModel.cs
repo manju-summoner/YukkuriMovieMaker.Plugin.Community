@@ -590,15 +590,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Recording
             }));
         }
 
-        void OnPlaybackStopped(object? sender, NAudio.Wave.StoppedEventArgs e)
+        void OnPlaybackStopped(object? sender, EventArgs e)
         {
             void HandlePlaybackStopped()
             {
                 OnPropertyChanged(nameof(IsPlaying));
                 OnPropertyChanged(nameof(CanSuspend));
                 RaiseCommandStates();
-                if (e.Exception is not null)
-                    ShowError(string.Format(Texts.PlaybackError, e.Exception.Message));
             }
 
             var dispatcher = Application.Current?.Dispatcher;

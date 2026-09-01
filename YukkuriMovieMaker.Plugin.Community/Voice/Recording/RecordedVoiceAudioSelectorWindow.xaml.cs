@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using Forms = System.Windows.Forms;
 using NAudio.Wave;
+using YukkuriMovieMaker.Player.Audio;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services;
@@ -17,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 {
     public partial class RecordedVoiceAudioSelectorWindow : Window, INotifyPropertyChanged
     {
-        private WaveOutEvent? player;
+        private AudioPlayer? player;
         private AudioFileReader? reader;
 
         private readonly RecordPathService recordPathService;
@@ -315,7 +316,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
 
             if (currentPlayer is not null)
             {
-                currentPlayer.PlaybackStopped -= OnPlaybackStopped;
+                // 購読解除はStop()/Dispose()より先に行うこと。
+                // AudioPlayerのisManualStoppingはStop()が返った時点でfalseに戻るが、
+                // StreamEndedはSynchronizationContextへPostされてUIスレッドに戻ってから走るため、
+                // 手動停止をこのフラグでは抑止できない。停止後にStreamEndedが走るのを防いでいるのは
+                // ここで先に解除していることによる。
+                currentPlayer.StreamEnded -= OnStreamEnded;
                 currentPlayer.Stop();
                 currentPlayer.Dispose();
             }
@@ -324,11 +330,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             Raise(nameof(IsPlaying));
         }
 
-        private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
+        private void OnStreamEnded(object? sender, EventArgs e)
         {
             if (player is not null)
             {
-                player.PlaybackStopped -= OnPlaybackStopped;
+                player.StreamEnded -= OnStreamEnded;
                 player.Dispose();
                 player = null;
             }
@@ -362,10 +368,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
             try
             {
                 reader = new AudioFileReader(SelectedItem.Path);
-                player = new WaveOutEvent();
-                player.Volume = GetYmmVolume();
-                player.PlaybackStopped += OnPlaybackStopped;
-                player.Init(reader);
+                // 音量はAudioPlayerがVolumeSampleProviderでサンプルに掛ける。
+                // WaveOut.VolumeはwaveOutSetVolumeを直接呼ぶため、Init()前に設定すると
+                // ハンドルではなくデバイス番号0への操作と解釈され、
+                // YMM4自体の音量（OSの音量ミキサーのYMM4）が変わってしまっていた。
+                player = new AudioPlayer(reader) { Volume = GetYmmVolume() };
+                // StreamEndedはAudioPlayerを構築したスレッドのSynchronizationContextへPostされる。
+                // contextが無いと再生スレッド上で同期実行され、経路によってはハンドラからのDispose()が
+                // 自スレッドのJoinになりうるため、AudioPlayerの構築とPlay()はUIスレッドから行うこと。
+                player.StreamEnded += OnStreamEnded;
                 player.Play();
                 Raise(nameof(IsPlaying));
             }

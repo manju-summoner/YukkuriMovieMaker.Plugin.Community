@@ -44,7 +44,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Wave
             var angle1 = item.Angle1.GetValue(frame, length, fps) / 180 * Math.PI;
             var angle2 = item.Angle2.GetValue(frame, length, fps) / 180 * Math.PI;
             var amplitude = item.Amplitude.GetValue(frame, length, fps);
-            var waveLength = item.WaveLength.GetValue(frame, length, fps);
+            var waveLength = item.WaveLength2.GetValue(frame, length, fps);
             var period = item.Period.GetValue(frame, length, fps);
             var phase = period is 0 ? 0 : time.TotalSeconds / period;
 

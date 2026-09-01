@@ -28,35 +28,17 @@
   <!-- dotnet CLI（MSBuildRuntimeType=Core）はvcxprojをビルドできないため、参照はVS/MSBuild.exeビルド時のみ。
        dotnet test等はMSBuild.exeでビルド済みのバイナリを使う -->
   <ItemGroup>
-    <ProjectReference Include="..\YukkuriMovieMaker.Vst3Bridge\YukkuriMovieMaker.Vst3Bridge.vcxproj"
-                      Condition="'$(MSBuildRuntimeType)' != 'Core'"
-                      ReferenceOutputAssembly="false"
-                      AdditionalProperties="Platform=x64" />
-    <Content Include="..\YukkuriMovieMaker.Vst3Bridge\bin\$(Configuration)\YukkuriMovieMaker.Vst3Bridge.dll"
-             Link="Resources\bin\x64\vst3\YukkuriMovieMaker.Vst3Bridge.dll"
-             CopyToOutputDirectory="PreserveNewest"
-             CopyToPublishDirectory="PreserveNewest" />
-    <ProjectReference Include="..\YukkuriMovieMaker.Vst3Scanner\YukkuriMovieMaker.Vst3Scanner.vcxproj"
-                      Condition="'$(MSBuildRuntimeType)' != 'Core'"
-                      ReferenceOutputAssembly="false"
-                      AdditionalProperties="Platform=x64" />
-    <Content Include="..\YukkuriMovieMaker.Vst3Scanner\bin\$(Configuration)\YukkuriMovieMaker.Vst3Scanner.exe"
-             Link="Resources\bin\x64\vst3\YukkuriMovieMaker.Vst3Scanner.exe"
-             CopyToOutputDirectory="PreserveNewest"
-             CopyToPublishDirectory="PreserveNewest" />
+    <ProjectReference Include="..\YukkuriMovieMaker.Vst3Bridge\YukkuriMovieMaker.Vst3Bridge.vcxproj" Condition="'$(MSBuildRuntimeType)' != 'Core'" ReferenceOutputAssembly="false" AdditionalProperties="Platform=x64" />
+    <Content Include="..\YukkuriMovieMaker.Vst3Bridge\bin\$(Configuration)\YukkuriMovieMaker.Vst3Bridge.dll" Link="Resources\bin\x64\vst3\YukkuriMovieMaker.Vst3Bridge.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <ProjectReference Include="..\YukkuriMovieMaker.Vst3Scanner\YukkuriMovieMaker.Vst3Scanner.vcxproj" Condition="'$(MSBuildRuntimeType)' != 'Core'" ReferenceOutputAssembly="false" AdditionalProperties="Platform=x64" />
+    <Content Include="..\YukkuriMovieMaker.Vst3Scanner\bin\$(Configuration)\YukkuriMovieMaker.Vst3Scanner.exe" Link="Resources\bin\x64\vst3\YukkuriMovieMaker.Vst3Scanner.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!-- OFXスキャナーEXE（スキャンの別プロセス隔離用）。
        .NETランタイムに依存しないネイティブEXEのため、self-contained配布でも動作する -->
   <ItemGroup>
-    <ProjectReference Include="..\YukkuriMovieMaker.OfxScanner\YukkuriMovieMaker.OfxScanner.vcxproj"
-                      Condition="'$(MSBuildRuntimeType)' != 'Core'"
-                      ReferenceOutputAssembly="false"
-                      AdditionalProperties="Platform=x64" />
-    <Content Include="..\YukkuriMovieMaker.OfxScanner\bin\$(Configuration)\YukkuriMovieMaker.OfxScanner.exe"
-             Link="Resources\bin\x64\ofx\YukkuriMovieMaker.OfxScanner.exe"
-             CopyToOutputDirectory="PreserveNewest"
-             CopyToPublishDirectory="PreserveNewest" />
+    <ProjectReference Include="..\YukkuriMovieMaker.OfxScanner\YukkuriMovieMaker.OfxScanner.vcxproj" Condition="'$(MSBuildRuntimeType)' != 'Core'" ReferenceOutputAssembly="false" AdditionalProperties="Platform=x64" />
+    <Content Include="..\YukkuriMovieMaker.OfxScanner\bin\$(Configuration)\YukkuriMovieMaker.OfxScanner.exe" Link="Resources\bin\x64\ofx\YukkuriMovieMaker.OfxScanner.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!-- YMM4のdllや、カスタムdllを参照。サードパーティー開発者向け。-->
@@ -95,25 +77,25 @@
 
   <!-- nugetパッケージで公開されているライブラリはPackageReferenceで参照する。-->
   <ItemGroup>
-	<PackageReference Include="LlmTornado" Version="3.8.60" />
+	<PackageReference Include="LlmTornado" Version="3.8.67" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4022.49" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="NAudio" Version="2.3.0" />
+    <PackageReference Include="NAudio" Version="3.0.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
-    <PackageReference Include="VirtualizingWrapPanel" Version="2.5.2" />
+    <PackageReference Include="VirtualizingWrapPanel" Version="2.5.4" />
     <PackageReference Include="Whisper.net" Version="1.9.1" />
     <PackageReference Include="Whisper.net.Runtime" Version="1.9.1" />
     <PackageReference Include="Whisper.net.Runtime.Cuda.Windows" Version="1.9.1" />
     <PackageReference Include="Whisper.net.Runtime.NoAvx" Version="1.9.1" />
     <PackageReference Include="Whisper.net.Runtime.OpenVino" Version="1.9.1" />
     <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.1" />
-    <PackageReference Include="YamlDotNet" Version="18.0.0" />
-	<PackageReference Include="System.Management" Version="10.0.9" />
-	<PackageReference Include="ComputeWeave" Version="2.3.0" />
-	<PackageReference Include="MeltySynth" Version="2.4.1" />
-	<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
+    <PackageReference Include="YamlDotNet" Version="18.1.0" />
+    <PackageReference Include="System.Management" Version="10.0.11" />
+    <PackageReference Include="ComputeWeave" Version="2.3.0" />
+    <PackageReference Include="MeltySynth" Version="2.4.1" />
+    <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
   </ItemGroup>
 
   <!--ビルド後、YMM4フォルダに関連ファイルをコピーする（Resources\bin\x64\vst3等のサブフォルダーも含む）-->
@@ -213,6 +195,7 @@
 	  <Resource Include="$(ShaderDirPath)EdgeGlow.cso" Link="Resources\Shader\EdgeGlow.cso" />
 	  <Resource Include="$(ShaderDirPath)PixelizeTransition.cso" Link="Resources\Shader\PixelizeTransition.cso" />
 	  <Resource Include="$(ShaderDirPath)PageTurnTransition.cso" Link="Resources\Shader\PageTurnTransition.cso" />
+	  <Resource Include="$(ShaderDirPath)SpreadPageTurn.cso" Link="Resources\Shader\SpreadPageTurn.cso" />
 	  <Resource Include="$(ShaderDirPath)ReelSpinTransition.cso" Link="Resources\Shader\ReelSpinTransition.cso" />
 	  <Resource Include="$(ShaderDirPath)MotionBlur.cso" Link="Resources\Shader\MotionBlur.cso" />
 	  <Resource Include="$(ShaderDirPath)NtscRasterize.cso" Link="Resources\Shader\NtscRasterize.cso" />
