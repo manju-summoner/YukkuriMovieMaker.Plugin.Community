@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -131,13 +132,13 @@ public sealed partial class NumberPort
     {
         var control = (NumberPort)d;
         if (!control._isEditing)
-            control.Text = ((float)e.NewValue).ToString("F" + control.Digits);
+            control.Text = ((float)e.NewValue).ToString("F" + control.Digits, CultureInfo.InvariantCulture);
     }
 
     private static void OnConfigChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (NumberPort)d;
-        control.Text = control.Value.ToString("F" + control.Digits);
+        control.Text = control.Value.ToString("F" + control.Digits, CultureInfo.InvariantCulture);
     }
 
     private static void OnUnitChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -157,7 +158,7 @@ public sealed partial class NumberPort
         else
             try
             {
-                v = float.Parse(Text);
+                v = float.Parse(Text, CultureInfo.InvariantCulture);
             }
             catch (Exception)
             {
@@ -179,7 +180,7 @@ public sealed partial class NumberPort
         }
         else
         {
-            Text = newValue.ToString("F" + Digits);
+            Text = newValue.ToString("F" + Digits, CultureInfo.InvariantCulture);
         }
 
         Keyboard.ClearFocus();

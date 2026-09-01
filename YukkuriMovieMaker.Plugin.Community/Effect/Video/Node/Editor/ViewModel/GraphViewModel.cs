@@ -158,36 +158,38 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
 
         Nodes.Clear();
 
-        foreach (var node in _graph.Nodes.Values)
+        lock (_graph.GraphLock)
         {
-            NodeViewModel vm;
-            try
+            foreach (var node in _graph.Nodes.Values)
             {
-                vm = new NodeViewModel(node, _graph, this);
+                NodeViewModel vm;
+                try
+                {
+                    vm = new NodeViewModel(node, _graph, this);
+                }
+                catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
+                {
+                    Debug.WriteLine($"[GraphViewModel] Failed to build NodeViewModel for {node.Id}: {ex}");
+                    continue;
+                }
+
+                Nodes.Add(vm);
+                nodeViewModels[node.Id] = vm;
             }
-            catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
+
+            foreach (var node in Nodes)
+            foreach (var port in node.InputPorts)
+                port.IsConnected = false;
+
+            Connections.Clear();
+            foreach (var conn in _graph.Connections)
             {
-                // 属性不備等で1ノードの構築に失敗しても、他のノードの表示は継続する。
-                Debug.WriteLine($"[GraphViewModel] Failed to build NodeViewModel for {node.Id}: {ex}");
-                continue;
+                if (!nodeViewModels.ContainsKey(conn.FromId) || !nodeViewModels.ContainsKey(conn.ToId))
+                    continue;
+
+                var vm = new ConnectionViewModel(conn, nodeViewModels);
+                Connections.Add(vm);
             }
-
-            Nodes.Add(vm);
-            nodeViewModels[node.Id] = vm;
-        }
-
-        foreach (var node in Nodes)
-        foreach (var port in node.InputPorts)
-            port.IsConnected = false;
-
-        Connections.Clear();
-        foreach (var conn in _graph.Connections)
-        {
-            if (!nodeViewModels.ContainsKey(conn.FromId) || !nodeViewModels.ContainsKey(conn.ToId))
-                continue;
-
-            var vm = new ConnectionViewModel(conn, nodeViewModels);
-            Connections.Add(vm);
         }
     }
 
@@ -253,21 +255,23 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
     {
         if (nodeType == null) return;
 
-        _graph.BeginEdit();
-        try
+        lock (_graph.GraphLock)
         {
-            var node = (NodeLogic)Activator.CreateInstance(nodeType)!;
-            node.Id = Guid.NewGuid();
+            _graph.BeginEdit();
+            try
+            {
+                var node = (NodeLogic)Activator.CreateInstance(nodeType)!;
+                node.Id = Guid.NewGuid();
 
-            _graph.AddNode(node);
+                _graph.AddNode(node);
 
-            var pos = PendingContextPoint ?? new Point(100, 100);
-            _graph.SetVisualState(node.Id, pos.X, pos.Y);
-        }
-        finally
-        {
-            // 途中で例外が起きても IsInTransaction が固着しないようにする。
-            _graph.EndEdit();
+                var pos = PendingContextPoint ?? new Point(100, 100);
+                _graph.SetVisualState(node.Id, pos.X, pos.Y);
+            }
+            finally
+            {
+                _graph.EndEdit();
+            }
         }
     }
 
@@ -280,28 +284,34 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
             .Select(vm => vm.Id)
             .ToList();
 
-        _graph.BeginEdit();
-        try
+        lock (_graph.GraphLock)
         {
-            foreach (var nodeId in nodeIds)
-                _graph.RemoveNode(nodeId);
-        }
-        finally
-        {
-            _graph.EndEdit();
+            _graph.BeginEdit();
+            try
+            {
+                foreach (var nodeId in nodeIds)
+                    _graph.RemoveNode(nodeId);
+            }
+            finally
+            {
+                _graph.EndEdit();
+            }
         }
     }
 
     private void DeleteNode(Guid nodeId)
     {
-        _graph.BeginEdit();
-        try
+        lock (_graph.GraphLock)
         {
-            _graph.RemoveNode(nodeId);
-        }
-        finally
-        {
-            _graph.EndEdit();
+            _graph.BeginEdit();
+            try
+            {
+                _graph.RemoveNode(nodeId);
+            }
+            finally
+            {
+                _graph.EndEdit();
+            }
         }
     }
 
@@ -316,37 +326,43 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
         var from = p1.Direction == PortDirection.Output ? p1 : p2;
         var to = p1.Direction == PortDirection.Input ? p1 : p2;
 
-        if (_graph.WouldCreateCycle(from.NodeId, to.NodeId))
-            return;
+        lock (_graph.GraphLock)
+        {
+            if (_graph.WouldCreateCycle(from.NodeId, to.NodeId))
+                return;
 
-        _graph.BeginEdit();
-        try
-        {
-            _graph.Connect(
-                from.NodeId, from.Name,
-                to.NodeId, to.Name
-            );
-        }
-        finally
-        {
-            _graph.EndEdit();
+            _graph.BeginEdit();
+            try
+            {
+                _graph.Connect(
+                    from.NodeId, from.Name,
+                    to.NodeId, to.Name
+                );
+            }
+            finally
+            {
+                _graph.EndEdit();
+            }
         }
     }
 
     private void Disconnect(ConnectionViewModel? connection)
     {
         if (connection == null) return;
-        _graph.BeginEdit();
-        try
+        lock (_graph.GraphLock)
         {
-            _graph.Disconnect(
-                connection.FromNodeId, connection.FromPortName,
-                connection.ToNodeId, connection.ToPortName
-            );
-        }
-        finally
-        {
-            _graph.EndEdit();
+            _graph.BeginEdit();
+            try
+            {
+                _graph.Disconnect(
+                    connection.FromNodeId, connection.FromPortName,
+                    connection.ToNodeId, connection.ToPortName
+                );
+            }
+            finally
+            {
+                _graph.EndEdit();
+            }
         }
     }
 
@@ -443,15 +459,18 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
 
     public void EndNodeDrag()
     {
-        _graph.BeginEdit();
-        try
+        lock (_graph.GraphLock)
         {
-            foreach (var nodeVm in SelectedNodes)
-                nodeVm.CommitPosition();
-        }
-        finally
-        {
-            _graph.EndEdit();
+            _graph.BeginEdit();
+            try
+            {
+                foreach (var nodeVm in SelectedNodes)
+                    nodeVm.CommitPosition();
+            }
+            finally
+            {
+                _graph.EndEdit();
+            }
         }
     }
 
@@ -484,7 +503,12 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
             .Select(n => n.Id)
             .ToHashSet();
 
-        var fullSnapshot = Serializer.Create(_graph);
+        GraphSnapshot fullSnapshot;
+        lock (_graph.GraphLock)
+        {
+            fullSnapshot = Serializer.Create(_graph);
+        }
+
         var tempGraph = new GraphSnapshot();
 
         tempGraph.Nodes.AddRange(fullSnapshot.Nodes.Where(n => selectedIds.Contains(n.Id)));
@@ -535,39 +559,42 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
 
         var idMapping = new Dictionary<Guid, Guid>();
 
-        _graph.BeginEdit();
-        try
+        lock (_graph.GraphLock)
         {
-            foreach (var node in nodes)
+            _graph.BeginEdit();
+            try
             {
-                var oldId = node.Id;
-                var newId = Guid.NewGuid();
+                foreach (var node in nodes)
+                {
+                    var oldId = node.Id;
+                    var newId = Guid.NewGuid();
 
-                idMapping[oldId] = newId;
-                node.Id = newId;
+                    idMapping[oldId] = newId;
+                    node.Id = newId;
 
-                var dynamicValues = node.Inputs
-                    .Where(kv => kv.Key.Contains('.') && kv.Value.LocalValue != null)
-                    .ToDictionary(kv => kv.Key, kv => kv.Value.LocalValue);
+                    var dynamicValues = node.Inputs
+                        .Where(kv => kv.Key.Contains('.') && kv.Value.LocalValue != null)
+                        .ToDictionary(kv => kv.Key, kv => kv.Value.LocalValue);
 
-                _graph.AddNode(node);
+                    _graph.AddNode(node);
 
-                foreach (var (key, value) in dynamicValues)
-                    if (node.Inputs.TryGetValue(key, out var port))
-                        port.SetValue(value);
+                    foreach (var (key, value) in dynamicValues)
+                        if (node.Inputs.TryGetValue(key, out var port))
+                            port.SetValue(value);
 
-                if (tempGraph.VisualStates.TryGetValue(oldId, out var oldVisualState))
-                    _graph.SetVisualState(newId, oldVisualState.X + dx, oldVisualState.Y + dy);
+                    if (tempGraph.VisualStates.TryGetValue(oldId, out var oldVisualState))
+                        _graph.SetVisualState(newId, oldVisualState.X + dx, oldVisualState.Y + dy);
+                }
+
+                foreach (var conn in tempGraph.Connections)
+                    if (idMapping.TryGetValue(conn.FromId, out var newFromId) &&
+                        idMapping.TryGetValue(conn.ToId, out var newToId))
+                        _graph.Connect(newFromId, conn.FromPort, newToId, conn.ToPort);
             }
-
-            foreach (var conn in tempGraph.Connections)
-                if (idMapping.TryGetValue(conn.FromId, out var newFromId) &&
-                    idMapping.TryGetValue(conn.ToId, out var newToId))
-                    _graph.Connect(newFromId, conn.FromPort, newToId, conn.ToPort);
-        }
-        finally
-        {
-            _graph.EndEdit();
+            finally
+            {
+                _graph.EndEdit();
+            }
         }
     }
 

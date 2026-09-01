@@ -14,6 +14,7 @@ public sealed class NodeGraph
 
     private readonly Dictionary<Guid, NodeLogic> _nodes = new();
     public readonly List<NodeConnection> Connections = [];
+    public readonly Lock GraphLock = new();
     public readonly Dictionary<Guid, NodeVisualState> VisualStates = new();
 
     public PreviewNotifier PreviewNotifier { get; } = new();

@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control;
 
@@ -77,6 +76,9 @@ public partial class EnumPort
 
     private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (sender is not ComboBox { IsKeyboardFocusWithin: true })
+            return;
+
         BeginEditCommand?.Execute(null);
         EndEditCommand?.Execute(null);
     }

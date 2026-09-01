@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Windows;
 using System.Windows.Media;
 using SkiaSharp;
 using YukkuriMovieMaker.Controls;
@@ -219,6 +220,19 @@ public class ShapeOutlineNode : NodeLogic
 
     protected override Task Calculate()
     {
+        var kind = Kind;
+
+        if (kind != _kind)
+        {
+            _kind = kind;
+
+            var newContainer = GetCurrentInputs();
+            SwapDynamicContainer(nameof(Params), newContainer);
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null)
+                _ = dispatcher.BeginInvoke(() => SetDynamicContainer(newContainer, nameof(Params)));
+        }
+
         var centerX = GetDynamicValue<float>("CenterX");
         var centerY = GetDynamicValue<float>("CenterY");
         var width = GetDynamicValue<float>("Width");
@@ -226,8 +240,6 @@ public class ShapeOutlineNode : NodeLogic
         var rotation = GetDynamicValue<float>("Rotation");
 
         var builder = new SKPathBuilder();
-
-        var kind = Kind;
 
         switch (kind)
         {

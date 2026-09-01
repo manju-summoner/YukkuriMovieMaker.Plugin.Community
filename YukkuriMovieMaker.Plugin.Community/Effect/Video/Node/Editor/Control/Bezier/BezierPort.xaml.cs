@@ -208,7 +208,12 @@ public partial class BezierPort
 
         try
         {
-            curve = BezierParser.Deserialize(_textBoxBuffer);
+            if (!BezierParser.TryDeserializeStrict(_textBoxBuffer, out curve))
+            {
+                TextBoxBuffer = Value;
+                EndEditCommand?.Execute(null);
+                return;
+            }
         }
         catch
         {

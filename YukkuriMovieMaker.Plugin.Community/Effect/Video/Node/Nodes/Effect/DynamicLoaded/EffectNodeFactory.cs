@@ -1100,7 +1100,7 @@ public static class EffectNodeCalculator
         return def.PortType switch
         {
             PortType.Enum when def.EnumType != null =>
-                raw is int i ? Enum.ToObject(def.EnumType, i) : raw,
+                ConvertToEnumValue(def.EnumType, raw),
             PortType.Float =>
                 raw is float f ? f : raw != null ? Convert.ToSingle(raw) : (object)0f,
             PortType.Color =>
@@ -1109,6 +1109,20 @@ public static class EffectNodeCalculator
                 ConvertBrush(raw),
             _ => raw
         };
+    }
+
+    private static object? ConvertToEnumValue(Type enumType, object? raw)
+    {
+        if (raw == null) return null;
+        if (enumType.IsInstanceOfType(raw)) return raw;
+        try
+        {
+            return Enum.ToObject(enumType, Convert.ToInt64(raw));
+        }
+        catch
+        {
+            return raw;
+        }
     }
 
     private static IBrushParameter? ConvertBrush(object? raw)

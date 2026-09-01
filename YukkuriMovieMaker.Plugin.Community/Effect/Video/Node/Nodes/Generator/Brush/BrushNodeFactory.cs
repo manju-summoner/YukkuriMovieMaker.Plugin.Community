@@ -240,12 +240,8 @@ public static class BrushNodeTypeBuilder
             PortType.Enum => typeof(int),
             PortType.Bool => typeof(bool),
             PortType.Color => typeof(Color),
-            // ブラシパラメータ内に Brush 型（ネストされた Brush プロパティ）が現れることは想定していない。
-            // EffectPortCollector が PortType.Brush を返した場合も Float にフォールバックしておき、
-            // 想定外の構造でも型生成自体は失敗しないようにする。
             PortType.Brush => typeof(float),
-            // Unknown の場合、floatに丸めてしまうと元の値が壊れる（型が合わないため）。
-            // 必ず元プロパティの実際のCLR型を使う。
+            PortType.Text => typeof(string),
             PortType.Unknown => def.UnknownClrType ?? typeof(float),
             _ => typeof(float)
         };
@@ -276,6 +272,10 @@ public static class BrushNodeTypeBuilder
                 // 万一発生した場合でも float ポートとして最低限機能するようにしておく。
                 Attr.NumberControl(pb, def.Min, def.Max, def.Digits, def.Unit, 0f);
                 Attr.PortColor(pb, nameof(Colors.DarkOrange));
+                break;
+            case PortType.Text:
+                Attr.TextControl(pb, (string?)def.DefaultValue ?? "");
+                Attr.PortColor(pb, nameof(Colors.MediumSeaGreen));
                 break;
             case PortType.Unknown:
                 // こちらで用意した既知のコントロールが使えない型でも、元プロパティ側に
@@ -825,12 +825,32 @@ public static class BrushNodeCalculator
         return def.PortType switch
         {
             PortType.Enum when def.EnumType != null =>
-                raw is int i ? Enum.ToObject(def.EnumType, i) : raw,
+                ConvertToEnumValue(def.EnumType, raw),
             PortType.Float =>
                 raw is float f ? f : raw != null ? Convert.ToSingle(raw) : (object)0f,
             PortType.Color =>
                 raw ?? Colors.White,
             _ => raw
         };
+    }
+
+    /// <summary>
+    ///     enum ポートへ Number ノード等（float/double/int といった数値系出力）を接続した場合、
+    ///     raw が int 以外の数値型で届くことがある。NodeLogic.GetInput&lt;T&gt; と同様に
+    ///     Convert.ToInt64 経由で変換してから Enum.ToObject に渡す。変換できない値は
+    ///     ノードをエラーにせず、そのまま呼び出し元に返す。
+    /// </summary>
+    private static object? ConvertToEnumValue(Type enumType, object? raw)
+    {
+        if (raw == null) return null;
+        if (enumType.IsInstanceOfType(raw)) return raw;
+        try
+        {
+            return Enum.ToObject(enumType, Convert.ToInt64(raw));
+        }
+        catch
+        {
+            return raw;
+        }
     }
 }

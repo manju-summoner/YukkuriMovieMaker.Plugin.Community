@@ -124,6 +124,53 @@ public static class BezierParser
         }
     }
 
+    public static bool TryDeserializeStrict(string text, out BezierCurve curve)
+    {
+        curve = new BezierCurve();
+        curve.Nodes.Clear();
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            AddFixedNodes(curve);
+            return true;
+        }
+
+        var body = text.StartsWith("V1|") ? text[3..] : text;
+
+        var hasRecord = false;
+
+        foreach (var record in body.Split(';'))
+        {
+            if (string.IsNullOrWhiteSpace(record))
+                continue;
+
+            var values = record.Split(',');
+
+            if (values.Length != 7 || !TryParse(values, out var node))
+            {
+                curve = new BezierCurve();
+                return false;
+            }
+
+            hasRecord = true;
+            curve.Nodes.Add(node);
+        }
+
+        if (!hasRecord)
+        {
+            curve = new BezierCurve();
+            return false;
+        }
+
+        EnsureFixedNodes(curve);
+
+        Sort(curve);
+
+        EnforceXMonotonic(curve);
+
+        return true;
+    }
+
     private static bool TryParse(string[] values, out BezierNode node)
     {
         node = new BezierNode();

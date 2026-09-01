@@ -32,10 +32,7 @@ public sealed class NodeEffect : VideoEffectBase
 {
     private readonly Dispatcher _uiDispatcher = Application.Current.Dispatcher;
 
-    /// <summary>
-    ///     Graph の差し替え(UpdateGraph)と Processor の評価(Update)を同じ境界で排他するためのロック。
-    /// </summary>
-    internal readonly Lock GraphLock = new();
+    internal readonly Lock ProcessorInitializationLock = new();
 
     private GraphSnapshot _graph = new();
 
@@ -52,7 +49,7 @@ public sealed class NodeEffect : VideoEffectBase
             Set(ref _graph, value);
             if (InternalGraph is null) return;
             var tempGraph = Serializer.Restore(value);
-            lock (GraphLock)
+            lock (InternalGraph.GraphLock)
             {
                 InternalGraph.UpdateGraph(tempGraph);
             }
@@ -224,9 +221,10 @@ public sealed class Processor : IVideoEffectProcessor
     {
         _devices = devices;
         _nodeEffect = effect;
-        _lock = effect.GraphLock;
 
-        InitializeGraph();
+        var graph = InitializeGraph();
+        _lock = graph.GraphLock;
+
         CreateBlankBitmap();
 
         _nodeEffect.GraphUpdated += OnGraphUpdated;
@@ -335,83 +333,92 @@ public sealed class Processor : IVideoEffectProcessor
     }
 
     /// <summary>
-    ///     グラフの初期化
+    ///     グラフの初期化。自分が InternalGraph に割り当てたグラフをそのまま返す。
     /// </summary>
-    private void InitializeGraph()
+    private NodeGraph InitializeGraph()
     {
-        if (_nodeEffect.Graph.Nodes.Count > 0)
+        lock (_nodeEffect.ProcessorInitializationLock)
         {
-            _nodeEffect.InternalGraph = Serializer.Restore(_nodeEffect.Graph);
+            NodeGraph graph;
 
-            _inputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ArgumentsNode>().FirstOrDefault() ??
-                         new ArgumentsNode(
-                             new PortDefinition("InputImage", typeof(ImageWrapper)),
-                             new PortDefinition("FrameIndex", typeof(int))
-                         )
-                         {
-                             Id = Guid.NewGuid()
-                         };
-            _outputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ReturnNode>().FirstOrDefault() ??
-                          new ReturnNode(
-                              new PortDefinition("OutputImage", typeof(ImageWrapper))
-                          )
-                          {
-                              Id = Guid.NewGuid()
-                          };
-        }
-        else
-        {
-            _nodeEffect.InternalGraph = new NodeGraph();
-
-            _inputNode = new ArgumentsNode(
-                new PortDefinition("InputImage", typeof(ImageWrapper)),
-                new PortDefinition("FrameIndex", typeof(int))
-            )
+            if (_nodeEffect.Graph.Nodes.Count > 0)
             {
-                Id = Guid.NewGuid()
-            };
+                graph = Serializer.Restore(_nodeEffect.Graph);
+                _nodeEffect.InternalGraph = graph;
 
-            _outputNode = new ReturnNode(
-                new PortDefinition("OutputImage", typeof(ImageWrapper))
-            )
+                _inputNode = graph.Nodes.Values.OfType<ArgumentsNode>().FirstOrDefault() ??
+                             new ArgumentsNode(
+                                 new PortDefinition("InputImage", typeof(ImageWrapper)),
+                                 new PortDefinition("FrameIndex", typeof(int))
+                             )
+                             {
+                                 Id = Guid.NewGuid()
+                             };
+                _outputNode = graph.Nodes.Values.OfType<ReturnNode>().FirstOrDefault() ??
+                              new ReturnNode(
+                                  new PortDefinition("OutputImage", typeof(ImageWrapper))
+                              )
+                              {
+                                  Id = Guid.NewGuid()
+                              };
+            }
+            else
             {
-                Id = Guid.NewGuid()
-            };
+                graph = new NodeGraph();
+                _nodeEffect.InternalGraph = graph;
 
-            _nodeEffect.InternalGraph.AddNode(_inputNode);
-            _nodeEffect.InternalGraph.AddNode(_outputNode);
+                _inputNode = new ArgumentsNode(
+                    new PortDefinition("InputImage", typeof(ImageWrapper)),
+                    new PortDefinition("FrameIndex", typeof(int))
+                )
+                {
+                    Id = Guid.NewGuid()
+                };
 
-            _nodeEffect.InternalGraph.SetVisualState(_inputNode.Id, 100, 100);
-            _nodeEffect.InternalGraph.SetVisualState(_outputNode.Id, 500, 100);
+                _outputNode = new ReturnNode(
+                    new PortDefinition("OutputImage", typeof(ImageWrapper))
+                )
+                {
+                    Id = Guid.NewGuid()
+                };
 
-            _nodeEffect.InternalGraph.Connect(_inputNode.Id, "InputImage", _outputNode.Id, "OutputImage");
+                graph.AddNode(_inputNode);
+                graph.AddNode(_outputNode);
 
-            _nodeEffect.Graph = Serializer.Create(_nodeEffect.InternalGraph);
+                graph.SetVisualState(_inputNode.Id, 100, 100);
+                graph.SetVisualState(_outputNode.Id, 500, 100);
 
-            _inputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ArgumentsNode>().First();
-            _outputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ReturnNode>().First();
+                graph.Connect(_inputNode.Id, "InputImage", _outputNode.Id, "OutputImage");
+
+                _nodeEffect.Graph = Serializer.Create(graph);
+
+                _inputNode = graph.Nodes.Values.OfType<ArgumentsNode>().First();
+                _outputNode = graph.Nodes.Values.OfType<ReturnNode>().First();
+            }
+
+            graph.Committed -= OnGraphCommitted;
+            graph.Committed += OnGraphCommitted;
+
+            _nodeEffect.InvokeGraphUpdated();
+
+            return graph;
         }
-
-        if (_nodeEffect.InternalGraph != null!)
-        {
-            _nodeEffect.InternalGraph.Committed -= OnGraphCommitted;
-            _nodeEffect.InternalGraph.Committed += OnGraphCommitted;
-        }
-
-        _nodeEffect.InvokeGraphUpdated();
     }
 
     private void OnGraphUpdated(object? sender, EventArgs e)
     {
-        if (_nodeEffect.InternalGraph == null!) return;
+        lock (_lock)
+        {
+            if (_nodeEffect.InternalGraph == null!) return;
 
-        _nodeEffect.InternalGraph.Committed -= OnGraphCommitted;
-        _nodeEffect.InternalGraph.Committed += OnGraphCommitted;
+            _nodeEffect.InternalGraph.Committed -= OnGraphCommitted;
+            _nodeEffect.InternalGraph.Committed += OnGraphCommitted;
 
-        _inputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ArgumentsNode>().FirstOrDefault()
-                     ?? _inputNode;
-        _outputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ReturnNode>().FirstOrDefault()
-                      ?? _outputNode;
+            _inputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ArgumentsNode>().FirstOrDefault()
+                         ?? _inputNode;
+            _outputNode = _nodeEffect.InternalGraph.Nodes.Values.OfType<ReturnNode>().FirstOrDefault()
+                          ?? _outputNode;
+        }
     }
 
     private async void OnGraphCommitted(object? sender, CommittedEventArgs e)
