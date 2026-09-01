@@ -116,11 +116,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     scan,
                     x => x.ModulePath,
                     (x, path) => x with { ModulePath = path },
-                    x => x is not null
-                        && x.ModulePath is not null
-                        && x.ClassId is not null
-                        && x.Name is not null
-                        && x.Vendor is not null,
+                    IsValidPlugin,
                     getEnvironmentFingerprint: getEnvironmentFingerprint);
                 if (!result.IsComplete)
                 {
@@ -138,6 +134,41 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                 return cache;
             }
         }
+
+        /// <summary>
+        /// スキャンせずに、現時点で分かっているプラグイン一覧を返す。
+        /// このセッションでスキャンが完了していればその結果、そうでなければ前回までに保存した結果
+        /// （フォルダー列挙もスキャナー起動も行わないため、プラグインの増減は更新ボタンによる再走査まで反映されない）。
+        /// 失敗した再走査の部分結果は保存結果より情報が少ない（スキャナー起動失敗時は空になる）ため、
+        /// 完了した結果が無い間は常に保存結果へ戻る。スキャン実行中に呼ばれた場合はその完了を待つ
+        /// </summary>
+        public static IReadOnlyList<Vst3EffectPluginInfo> GetKnownPlugins()
+            => GetKnownPlugins(PersistentCacheStorage);
+
+        internal static IReadOnlyList<Vst3EffectPluginInfo> GetKnownPlugins(
+            IPersistentPluginScanCacheStorage<Vst3EffectPluginInfo> persistentCacheStorage)
+        {
+            lock (lockObject)
+            {
+                if (cache is not null)
+                    return cache;
+                return PersistentPluginScanCache.LoadPersistedPlugins(
+                        persistentCacheStorage,
+                        PersistentCacheFormatVersion,
+                        "VST3モジュール",
+                        (x, path) => x with { ModulePath = path },
+                        IsValidPlugin)
+                    .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+            }
+        }
+
+        static bool IsValidPlugin(Vst3EffectPluginInfo? x)
+            => x is not null
+                && x.ModulePath is not null
+                && x.ClassId is not null
+                && x.Name is not null
+                && x.Vendor is not null;
 
         /// <summary>
         /// スキャナープロセスによる隔離スキャン。壊れたプラグインがあってもYMM4本体は巻き込まれない。

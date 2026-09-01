@@ -84,7 +84,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
     /// <summary>
     /// OFXプラグインを選択するコンボボックス。
-    /// Vst3PluginSelectorと同じ操作感で、一覧は起動時スキャンのキャッシュを表示し、
+    /// Vst3PluginSelectorと同じ操作感で、一覧はスキャン済みの結果（未スキャンなら前回の保存結果）を表示し、
     /// 右側の更新ボタンを押したときだけ再スキャンする。
     /// </summary>
     internal class OpenFxPluginSelector : Grid, IPropertyEditorControl
@@ -217,18 +217,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
         async void OnDropDownOpened(object? sender, EventArgs e)
         {
-            // 一覧の更新は更新ボタンで行う。ここでは起動時スキャンの結果を表示へ反映するだけ
+            // 一覧の更新（スキャン）は更新ボタンで行う。ここでは既知の一覧を表示へ反映するだけ
             var plugins = OpenFxPluginScanner.CachedPlugins;
             if (plugins is null)
             {
-                // 起動時スキャンが完了していない場合は完了を待つ（キャッシュ済みなら即返る）
+                // 未スキャンなら前回の保存結果を読む。更新ボタンによるスキャンの実行中なら完了を待つ
                 try
                 {
-                    plugins = await Task.Run(() => OpenFxPluginScanner.GetEffectPlugins());
+                    plugins = await Task.Run(OpenFxPluginScanner.GetKnownPlugins);
                 }
                 catch (Exception ex)
                 {
-                    Log.Default.Write("OFXプラグインのスキャンに失敗しました。", ex);
+                    Log.Default.Write("OFXプラグイン一覧の読み込みに失敗しました。", ex);
                     return;
                 }
             }
@@ -243,7 +243,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             reloadButton.Content = Application.Current.FindResource(IconKeys.LoadingAnimation);
             try
             {
-                var plugins = await Task.Run(() => OpenFxPluginScanner.GetEffectPlugins(refresh: true));
+                var plugins = await Task.Run(() =>
+                {
+                    OpenFxPluginScanner.GetEffectPlugins(refresh: true);
+                    // 再走査が失敗した場合の不完了な一覧で表示を空にせず、完了した結果か保存結果を表示する
+                    return OpenFxPluginScanner.GetKnownPlugins();
+                });
                 ApplyItems(plugins);
             }
             catch (Exception ex)

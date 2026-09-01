@@ -66,7 +66,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
     /// <summary>
     /// VST3エフェクトプラグインを選択するコンボボックス。
-    /// FontComboBoxと同じ操作感で、一覧は起動時スキャンのキャッシュを表示し、
+    /// FontComboBoxと同じ操作感で、一覧はスキャン済みの結果（未スキャンなら前回の保存結果）を表示し、
     /// 右側の更新ボタンを押したときだけ再スキャンする。
     /// </summary>
     internal class Vst3PluginSelector : Grid, IPropertyEditorControl
@@ -179,18 +179,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
 
         async void OnDropDownOpened(object? sender, EventArgs e)
         {
-            // 一覧の更新は更新ボタンで行う。ここでは起動時スキャンの結果を表示へ反映するだけ
+            // 一覧の更新（スキャン）は更新ボタンで行う。ここでは既知の一覧を表示へ反映するだけ
             var plugins = Vst3PluginScanner.CachedPlugins;
             if (plugins is null)
             {
-                // 起動時スキャンが完了していない場合は完了を待つ（キャッシュ済みなら即返る）
+                // 未スキャンなら前回の保存結果を読む。更新ボタンによるスキャンの実行中なら完了を待つ
                 try
                 {
-                    plugins = await Task.Run(() => Vst3PluginScanner.GetEffectPlugins());
+                    plugins = await Task.Run(Vst3PluginScanner.GetKnownPlugins);
                 }
                 catch (Exception ex)
                 {
-                    Log.Default.Write("VST3プラグインのスキャンに失敗しました。", ex);
+                    Log.Default.Write("VST3プラグイン一覧の読み込みに失敗しました。", ex);
                     return;
                 }
             }
@@ -205,7 +205,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             reloadButton.Content = Application.Current.FindResource(IconKeys.LoadingAnimation);
             try
             {
-                var plugins = await Task.Run(() => Vst3PluginScanner.GetEffectPlugins(refresh: true));
+                var plugins = await Task.Run(() =>
+                {
+                    Vst3PluginScanner.GetEffectPlugins(refresh: true);
+                    // 再走査が失敗した場合の不完了な一覧で表示を空にせず、完了した結果か保存結果を表示する
+                    return Vst3PluginScanner.GetKnownPlugins();
+                });
                 ApplyItems(plugins);
             }
             catch (Exception ex)

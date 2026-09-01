@@ -212,22 +212,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     scan,
                     x => x.BinaryPath,
                     (x, path) => x with { BinaryPath = path },
-                    x => x is not null
-                        && x.Identifier is not null
-                        && x.Label is not null
-                        && x.Grouping is not null
-                        && x.SupportedContexts is not null
-                        && x.SupportedPixelDepths is not null
-                        && x.GpuSupport is
-                        {
-                            OpenGL: not null,
-                            Cuda: not null,
-                            CudaStream: not null,
-                            OpenCLRender: not null,
-                            OpenCL: not null,
-                            Metal: not null,
-                            CPU: not null,
-                    },
+                    IsValidScannedPlugin,
                     getSignaturePath: GetSignaturePath,
                     includeAdjacentDllsInSignature: IsStandaloneBinary,
                     getEnvironmentFingerprint: getEnvironmentFingerprint,
@@ -276,6 +261,65 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 && left.IsSingleInstance == right.IsSingleInstance
                 && left.NeedsTemporalClipAccess == right.NeedsTemporalClipAccess
                 && left.GpuSupport == right.GpuSupport;
+
+        static bool IsValidScannedPlugin(OpenFxScannedPluginInfo? x)
+            => x is not null
+                && x.Identifier is not null
+                && x.Label is not null
+                && x.Grouping is not null
+                && x.SupportedContexts is not null
+                && x.SupportedPixelDepths is not null
+                && x.GpuSupport is
+                {
+                    OpenGL: not null,
+                    Cuda: not null,
+                    CudaStream: not null,
+                    OpenCLRender: not null,
+                    OpenCL: not null,
+                    Metal: not null,
+                    CPU: not null,
+                };
+
+        /// <summary>
+        /// スキャンせずに、現時点で分かっているプラグイン一覧を現在のGPU設定で評価して返す。
+        /// このセッションでスキャンが完了していればその結果、そうでなければ前回までに保存した結果
+        /// （フォルダー列挙もスキャナー起動も行わないため、プラグインの増減は更新ボタンによる再走査まで反映されない）。
+        /// 失敗した再走査の部分結果は保存結果より情報が少ない（スキャナー起動失敗時は空になる）ため、
+        /// 完了した結果が無い間は常に保存結果へ戻る。スキャン実行中に呼ばれた場合はその完了を待つ
+        /// </summary>
+        public static IReadOnlyList<OpenFxPluginInfo> GetKnownPlugins()
+            => GetKnownPlugins(
+                PersistentCacheStorage,
+                OpenFxSettings.Default.UseGpuRendering,
+                OfxGpuRenderBackendFactory.IsDeclaredBackendAvailable);
+
+        internal static IReadOnlyList<OpenFxPluginInfo> GetKnownPlugins(
+            IPersistentPluginScanCacheStorage<OpenFxScannedPluginInfo> persistentCacheStorage,
+            bool useGpuRendering,
+            Func<bool, bool, bool> isDeclaredBackendAvailable)
+        {
+            lock (lockObject)
+            {
+                if (cache is not null)
+                {
+                    if (cachedUseGpuRendering != useGpuRendering)
+                    {
+                        cache = ReevaluateGpuOnlySupport(cache, useGpuRendering, isDeclaredBackendAvailable);
+                        cachedUseGpuRendering = useGpuRendering;
+                    }
+                    return cache;
+                }
+                return PersistentPluginScanCache.LoadPersistedPlugins(
+                        persistentCacheStorage,
+                        PersistentCacheFormatVersion,
+                        "OFXバイナリ",
+                        (x, path) => x with { BinaryPath = path },
+                        IsValidScannedPlugin)
+                    .Select(x => CreatePluginInfo(x, useGpuRendering, isDeclaredBackendAvailable))
+                    .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+            }
+        }
 
         /// <summary>キャッシュ済みdescribe結果からGPU専用プラグインの対応可否だけを再評価する。</summary>
         public static IReadOnlyList<OpenFxPluginInfo>? ReevaluateCachedPlugins()

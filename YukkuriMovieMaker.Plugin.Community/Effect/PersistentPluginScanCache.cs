@@ -353,6 +353,45 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect
             }
         }
 
+        /// <summary>
+        /// 保存済みスキャン結果からプラグイン一覧を復元する。
+        /// フォルダー列挙・署名比較・スキャナー起動のいずれも行わないため、モジュールの増減や更新は反映されない
+        /// （反映は<see cref="Scan{TPlugin}"/>による再走査で行う）。
+        /// 保存形式が異なる場合は復元できないため空を返す。失敗エントリと不正なプラグインを含むエントリは
+        /// <see cref="Scan{TPlugin}"/>と同様に一覧へ含めない。
+        /// 環境フィンガープリントは照合しない（表示用途では旧環境の結果でも役に立ち、
+        /// 照合すると環境変化後の再走査が失敗したときに一覧が空になるため。取得にはドライバー初期化を伴う場合もある）
+        /// </summary>
+        public static IReadOnlyList<TPlugin> LoadPersistedPlugins<TPlugin>(
+            IPersistentPluginScanCacheStorage<TPlugin> storage,
+            int formatVersion,
+            string logName,
+            Func<TPlugin, string, TPlugin> setModulePath,
+            Func<TPlugin, bool> isValidPlugin)
+        {
+            PersistentPluginScanCacheState<TPlugin> stored;
+            try
+            {
+                stored = storage.Load() ?? new PersistentPluginScanCacheState<TPlugin>();
+            }
+            catch (Exception e) when (e is not OutOfMemoryException)
+            {
+                // この経路では再走査しないため、Scanの読み込み失敗とは別の文言で記録する
+                Log.Default.Write($"{logName}の保存済みスキャン結果を読み込めないため、再走査までは一覧を空として扱います。", e);
+                return [];
+            }
+            if (stored.FormatVersion != formatVersion)
+                return [];
+            var plugins = new List<TPlugin>();
+            foreach (var (path, entry) in NormalizeEntries(stored.Entries))
+            {
+                if (entry.Failed || entry.Plugins is null || entry.Plugins.Any(x => !isValidPlugin(x)))
+                    continue;
+                plugins.AddRange(entry.Plugins.Select(x => setModulePath(x, path)));
+            }
+            return plugins;
+        }
+
         static PersistentPluginScanCacheState<TPlugin> LoadOrCreateEmpty<TPlugin>(
             IPersistentPluginScanCacheStorage<TPlugin> storage,
             string logName)

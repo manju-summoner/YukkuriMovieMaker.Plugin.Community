@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Threading.Tasks;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin;
 
@@ -46,19 +45,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             // ホスト側の診断ログをYMM4のログへ流す（スキャナー子プロセスでは設定しない）
             OfxHostLog.Sink = message => Log.Default.Write(message);
 
-            // VST3と同様、起動時にバックグラウンドで一覧を用意しておく。
-            // 以後の更新はセレクターの更新ボタン・設定画面の再スキャンで行う
-            Task.Run(() =>
-            {
-                try
-                {
-                    OpenFxPluginScanner.GetEffectPlugins();
-                }
-                catch (System.Exception e)
-                {
-                    Log.Default.Write("OFXプラグインの起動時スキャンに失敗しました。", e);
-                }
-            });
+            // VST3と同様、起動時にはプラグインのスキャンを行わない。
+            // 一覧はセレクターの更新ボタン・設定画面の再スキャンを押したときだけ更新し、それまでは前回の保存結果を表示する
         }
     }
 }
