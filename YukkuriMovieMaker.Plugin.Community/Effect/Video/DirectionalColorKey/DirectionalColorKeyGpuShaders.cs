@@ -13,27 +13,6 @@ internal static class DirectionSmoothConstants
     public const int SpaceTableCount = SpaceTableStride * SpaceTableStride;
 }
 
-internal static class ForegroundPropagateConstants
-{
-    public const int GroupSize = 8;
-    public const int Radius = 4;
-    public const int TileSize = GroupSize + Radius * 2;
-    public const int TileCount = TileSize * TileSize;
-}
-
-internal static class PremultipliedLinearConstants
-{
-    public const int AlphaCount = 256;
-    public const int ChannelCount = 256;
-    public const int TableLength = AlphaCount * ChannelCount;
-}
-
-internal static class ClusterAccumulateConstants
-{
-    public const int MaxClusters = 4;
-    public const int SlotCount = MaxClusters * 3 + MaxClusters;
-}
-
 internal static class DirectionFieldConstants
 {
     // 方向ベクトルは長さ0の無効方向か長さ1の単位方向のいずれかを取る。
@@ -44,7 +23,7 @@ internal static class DirectionFieldConstants
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
 internal readonly partial struct DisplacementFieldShader(
-    ReadOnlyBuffer<int> bgra,
+    IReadOnlyBuffer<int> bgra,
     ReadWriteBuffer<float> colorLab,
     ReadWriteBuffer<float> directions,
     float backgroundL,
@@ -54,7 +33,7 @@ internal readonly partial struct DisplacementFieldShader(
     int width,
     int height) : IComputeShader
 {
-    private readonly ReadOnlyBuffer<int> bgra = bgra;
+    private readonly IReadOnlyBuffer<int> bgra = bgra;
     private readonly ReadWriteBuffer<float> colorLab = colorLab;
     private readonly ReadWriteBuffer<float> directions = directions;
     private readonly float backgroundL = backgroundL;
@@ -119,8 +98,8 @@ internal readonly partial struct DisplacementFieldShader(
 
         float len = Hlsl.Sqrt(dl * dl + da * da + db * db);
 
-        if (len < noiseThreshold || len <= 1e-6f)
-        {
+		if (len < noiseThreshold || len <= 1e-6f)
+		{
             directions[triple + 0] = 0f;
             directions[triple + 1] = 0f;
             directions[triple + 2] = 0f;
@@ -304,13 +283,13 @@ internal readonly partial struct DirectionSmoothShader(
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
 internal readonly partial struct ChangeSeedShader(
-    ReadOnlyBuffer<int> bgra,
+    IReadOnlyBuffer<int> bgra,
     ReadWriteBuffer<int> previousBgra,
     ReadWriteBuffer<int> seedMask,
     int width,
     int height) : IComputeShader
 {
-    private readonly ReadOnlyBuffer<int> bgra = bgra;
+    private readonly IReadOnlyBuffer<int> bgra = bgra;
     private readonly ReadWriteBuffer<int> previousBgra = previousBgra;
     private readonly ReadWriteBuffer<int> seedMask = seedMask;
     private readonly int width = width;
@@ -644,6 +623,52 @@ internal readonly partial struct CopyDirectionsShader(
     }
 }
 
+// packed byte から線形値への変換は256通りしかない。
+// 伝播ループが近傍ごとに同じ変換を繰り返さないよう、同一の式で表を一度だけ作る。
+[ThreadGroupSize(DefaultThreadGroupSizes.X)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct SrgbToLinearTableShader(
+    ReadWriteBuffer<float> table) : IComputeShader
+{
+    private readonly ReadWriteBuffer<float> table = table;
+
+    public void Execute()
+    {
+        int index = ThreadIds.X;
+        if (index >= 256)
+            return;
+
+        float srgb = index * (1f / 255f);
+
+        table[index] = srgb <= 0.04045f ? srgb / 12.92f : Hlsl.Pow((srgb + 0.055f) / 1.055f, 2.4f);
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct CopyPackedShader(
+    IReadOnlyBuffer<int> source,
+    ReadWriteBuffer<int> target,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly IReadOnlyBuffer<int> source = source;
+    private readonly ReadWriteBuffer<int> target = target;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int index = y * width + x;
+        target[index] = source[index];
+    }
+}
+
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
 internal readonly partial struct MaskCountShader(
@@ -841,7 +866,7 @@ internal readonly partial struct ProjectionHistogramShader(
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
 internal readonly partial struct ForegroundSeedShader(
-    ReadOnlyBuffer<int> bgra,
+    IReadOnlyBuffer<int> bgra,
     ReadWriteBuffer<float> colorLab,
     ReadWriteBuffer<int> foreground,
     float backgroundL,
@@ -851,7 +876,7 @@ internal readonly partial struct ForegroundSeedShader(
     int width,
     int height) : IComputeShader
 {
-    private readonly ReadOnlyBuffer<int> bgra = bgra;
+    private readonly IReadOnlyBuffer<int> bgra = bgra;
     private readonly ReadWriteBuffer<float> colorLab = colorLab;
     private readonly ReadWriteBuffer<int> foreground = foreground;
     private readonly float backgroundL = backgroundL;
@@ -919,9 +944,91 @@ internal readonly partial struct ForegroundSeedShader(
 
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
+internal readonly partial struct SharedTextureToBufferShader(
+    IReadWriteNormalizedTexture2D<float4> source,
+    ReadWriteBuffer<int> bgra,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly IReadWriteNormalizedTexture2D<float4> source = source;
+    private readonly ReadWriteBuffer<int> bgra = bgra;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        float4 value = source[x, y];
+
+        int b = (int)(Hlsl.Saturate(value.Z) * 255f + 0.5f);
+        int g = (int)(Hlsl.Saturate(value.Y) * 255f + 0.5f);
+        int r = (int)(Hlsl.Saturate(value.X) * 255f + 0.5f);
+        int a = (int)(Hlsl.Saturate(value.W) * 255f + 0.5f);
+
+        bgra[y * width + x] = (a << 24) | (r << 16) | (g << 8) | b;
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct BufferToSharedTextureShader(
+    IReadOnlyBuffer<int> bgra,
+    IReadWriteNormalizedTexture2D<float4> destination,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly IReadOnlyBuffer<int> bgra = bgra;
+    private readonly IReadWriteNormalizedTexture2D<float4> destination = destination;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int packed = bgra[y * width + x];
+
+        destination[x, y] = new float4(
+            ((packed >> 16) & 0xFF) / 255f,
+            ((packed >> 8) & 0xFF) / 255f,
+            ((packed >> 0) & 0xFF) / 255f,
+            ((packed >> 24) & 0xFF) / 255f);
+    }
+}
+
+internal static class PremultipliedLinearConstants
+{
+    public const int AlphaCount = 256;
+    public const int ChannelCount = 256;
+    public const int TableLength = AlphaCount * ChannelCount;
+}
+
+internal static class ClusterAccumulateConstants
+{
+    public const int MaxClusters = 4;
+    public const int SlotCount = MaxClusters * 3 + MaxClusters;
+}
+
+internal static class ForegroundPropagateConstants
+{
+    public const int GroupSize = 8;
+    public const int Radius = 4;
+    public const int TileSize = GroupSize + Radius * 2;
+    public const int TileCount = TileSize * TileSize;
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
 internal readonly partial struct ForegroundPropagateShader(
     ReadWriteBuffer<int> sourceForeground,
-    ReadOnlyBuffer<int> bgra,
+    IReadOnlyBuffer<int> bgra,
     IReadOnlyBuffer<float> srgbToLinear,
     IReadOnlyBuffer<float> premultipliedLinear,
     ReadWriteBuffer<int> targetForeground,
@@ -933,7 +1040,7 @@ internal readonly partial struct ForegroundPropagateShader(
     int height) : IComputeShader
 {
     private readonly ReadWriteBuffer<int> sourceForeground = sourceForeground;
-    private readonly ReadOnlyBuffer<int> bgra = bgra;
+    private readonly IReadOnlyBuffer<int> bgra = bgra;
     private readonly IReadOnlyBuffer<float> srgbToLinear = srgbToLinear;
     private readonly IReadOnlyBuffer<float> premultipliedLinear = premultipliedLinear;
     private readonly ReadWriteBuffer<int> targetForeground = targetForeground;
@@ -1099,25 +1206,6 @@ internal readonly partial struct ForegroundPropagateShader(
         }
 
         targetForeground[index] = 0;
-    }
-}
-
-[ThreadGroupSize(DefaultThreadGroupSizes.X)]
-[GeneratedComputeShaderDescriptor]
-internal readonly partial struct SrgbToLinearTableShader(
-    ReadWriteBuffer<float> table) : IComputeShader
-{
-    private readonly ReadWriteBuffer<float> table = table;
-
-    public void Execute()
-    {
-        int index = ThreadIds.X;
-        if (index >= 256)
-            return;
-
-        float srgb = index * (1f / 255f);
-
-        table[index] = srgb <= 0.04045f ? srgb / 12.92f : Hlsl.Pow((srgb + 0.055f) / 1.055f, 2.4f);
     }
 }
 
