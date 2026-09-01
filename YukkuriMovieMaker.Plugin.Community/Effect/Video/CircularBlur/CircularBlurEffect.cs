@@ -42,7 +42,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.CircularBlur
                 $"範囲={Angle.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
                 $"X={X.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
                 $"Y={Y.ToExoString(keyFrameIndex, "F1", fps)}\r\n" +
-                $"サイズを固定={(IsHardBorderMode ? 1 : 0)}\r\n";
+                $"サイズ固定={(IsHardBorderMode ? 1 : 0)}\r\n";
         }
 
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices) => new CircularBlurEffectProcessor(devices, this);
