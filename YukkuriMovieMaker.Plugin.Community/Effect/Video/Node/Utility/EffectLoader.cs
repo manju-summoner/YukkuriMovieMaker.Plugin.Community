@@ -576,6 +576,8 @@ public class VideoEffectsLoader : IDisposable
 
     public abstract class ShaderEffect : D2D1CustomShaderEffectBase
     {
+        private static readonly Dictionary<string, Type> EffectTypeCache = new();
+        private static readonly Lock EffectTypeCacheLock = new();
         private int _propertiesCount;
 
         public ShaderEffect(nint ptr) : base(ptr)
@@ -647,6 +649,20 @@ public class VideoEffectsLoader : IDisposable
 
         private static Type GenerateEffectType(string className, List<(Type, string)> properties, string shaderId,
             int inputImageNum)
+        {
+            lock (EffectTypeCacheLock)
+            {
+                if (EffectTypeCache.TryGetValue(className, out var cachedType))
+                    return cachedType;
+
+                var generatedType = GenerateEffectTypeCore(className, properties, shaderId, inputImageNum);
+                EffectTypeCache[className] = generatedType;
+                return generatedType;
+            }
+        }
+
+        private static Type GenerateEffectTypeCore(string className, List<(Type, string)> properties,
+            string shaderId, int inputImageNum)
         {
             AssemblyName assemblyName = new("DynamicID2D1PropertiesAssembly");
 #if ASM_EXPORT

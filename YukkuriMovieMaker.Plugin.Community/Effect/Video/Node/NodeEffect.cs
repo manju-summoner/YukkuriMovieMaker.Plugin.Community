@@ -313,6 +313,11 @@ public sealed class Processor : IVideoEffectProcessor
 
             // このProcessorが使用していたノードのD2Dリソースを解放する。
             // ノードはD2Dリソースを遅延初期化するため、次回Calculate時に再生成される。
+            // グラフは同一 NodeEffect の複数 Processor 間で共有されうるため（InitializeGraph
+            // 参照）、ここでの解放は他の Processor が参照しているノードにも及ぶ。ただし
+            // Dispose/Update は同じ _lock（共有グラフの GraphLock）で排他されているため、
+            // 他 Processor の評価中に解放が割り込むことはなく、その Processor の次回
+            // Calculate 時にリソースが再生成されるだけで済む。
             if (_nodeEffect.InternalGraph != null)
                 foreach (var node in _nodeEffect.InternalGraph.Nodes.Values)
                     node.Dispose();
@@ -339,6 +344,17 @@ public sealed class Processor : IVideoEffectProcessor
     {
         lock (_nodeEffect.ProcessorInitializationLock)
         {
+            if (_nodeEffect.InternalGraph is { } existingGraph)
+            {
+                _inputNode = existingGraph.Nodes.Values.OfType<ArgumentsNode>().First();
+                _outputNode = existingGraph.Nodes.Values.OfType<ReturnNode>().First();
+
+                existingGraph.Committed -= OnGraphCommitted;
+                existingGraph.Committed += OnGraphCommitted;
+
+                return existingGraph;
+            }
+
             NodeGraph graph;
 
             if (_nodeEffect.Graph.Nodes.Count > 0)

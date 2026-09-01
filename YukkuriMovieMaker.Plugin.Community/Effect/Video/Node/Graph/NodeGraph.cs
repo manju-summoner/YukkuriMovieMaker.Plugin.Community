@@ -1,5 +1,6 @@
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Snapshot;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
@@ -15,6 +16,12 @@ public sealed class NodeGraph
     private readonly Dictionary<Guid, NodeLogic> _nodes = new();
     public readonly List<NodeConnection> Connections = [];
     public readonly Lock GraphLock = new();
+    public readonly Dictionary<string, string> UnresolvedBrushTypeNames = new();
+
+    public readonly List<ConnectionSnapshot> UnresolvedConnections = [];
+    public readonly Dictionary<string, string> UnresolvedEffectTypeNames = new();
+
+    public readonly List<NodeSnapshot> UnresolvedNodes = [];
     public readonly Dictionary<Guid, NodeVisualState> VisualStates = new();
 
     public PreviewNotifier PreviewNotifier { get; } = new();
@@ -42,6 +49,20 @@ public sealed class NodeGraph
         VisualStates.Clear();
         foreach (var graphVisualState in graph.VisualStates)
             VisualStates.Add(graphVisualState.Key, graphVisualState.Value);
+
+        UnresolvedNodes.Clear();
+        UnresolvedNodes.AddRange(graph.UnresolvedNodes);
+
+        UnresolvedConnections.Clear();
+        UnresolvedConnections.AddRange(graph.UnresolvedConnections);
+
+        UnresolvedEffectTypeNames.Clear();
+        foreach (var kv in graph.UnresolvedEffectTypeNames)
+            UnresolvedEffectTypeNames[kv.Key] = kv.Value;
+
+        UnresolvedBrushTypeNames.Clear();
+        foreach (var kv in graph.UnresolvedBrushTypeNames)
+            UnresolvedBrushTypeNames[kv.Key] = kv.Value;
     }
 
     /// <summary>

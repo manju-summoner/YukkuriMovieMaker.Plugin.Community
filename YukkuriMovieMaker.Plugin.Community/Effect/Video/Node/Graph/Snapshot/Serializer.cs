@@ -61,6 +61,9 @@ public static class Serializer
                 ToPort = c.ToPort
             }));
 
+        snapshot.Nodes.AddRange(graph.UnresolvedNodes);
+        snapshot.Connections.AddRange(graph.UnresolvedConnections);
+
         foreach (var nodeSnap in snapshot.Nodes)
         {
             var typeName = nodeSnap.TypeName;
@@ -71,6 +74,11 @@ public static class Serializer
             if (brushName != null)
                 snapshot.BrushTypeNames[typeName] = brushName;
         }
+
+        foreach (var (typeName, effectName) in graph.UnresolvedEffectTypeNames)
+            snapshot.EffectTypeNames.TryAdd(typeName, effectName);
+        foreach (var (typeName, brushName) in graph.UnresolvedBrushTypeNames)
+            snapshot.BrushTypeNames.TryAdd(typeName, brushName);
 
         return snapshot;
 
@@ -111,7 +119,17 @@ public static class Serializer
         {
             var type = Registry.AllNodes.GetValueOrDefault(nodeSnap.TypeName)
                        ?? Type.GetType(nodeSnap.TypeName);
-            if (type == null) continue;
+            if (type == null)
+            {
+                Debug.WriteLine(
+                    $"[Serializer] Type not found for node {nodeSnap.Id} ({nodeSnap.TypeName}); preserving snapshot as unresolved.");
+                graph.UnresolvedNodes.Add(nodeSnap);
+                if (snapshot.EffectTypeNames.TryGetValue(nodeSnap.TypeName, out var effectName))
+                    graph.UnresolvedEffectTypeNames[nodeSnap.TypeName] = effectName;
+                if (snapshot.BrushTypeNames.TryGetValue(nodeSnap.TypeName, out var brushName))
+                    graph.UnresolvedBrushTypeNames[nodeSnap.TypeName] = brushName;
+                continue;
+            }
 
             try
             {
@@ -187,13 +205,20 @@ public static class Serializer
             }
         }
 
+        var unresolvedNodeIds = new HashSet<Guid>(graph.UnresolvedNodes.Select(n => n.Id));
+
         foreach (var conn in snapshot.Connections)
         {
-            if (!nodeMap.ContainsKey(conn.FromId) || !nodeMap.ContainsKey(conn.ToId))
+            if (nodeMap.ContainsKey(conn.FromId) && nodeMap.ContainsKey(conn.ToId))
+            {
+                graph.Connect(
+                    conn.FromId, conn.FromPort,
+                    conn.ToId, conn.ToPort);
                 continue;
-            graph.Connect(
-                conn.FromId, conn.FromPort,
-                conn.ToId, conn.ToPort);
+            }
+
+            if (unresolvedNodeIds.Contains(conn.FromId) || unresolvedNodeIds.Contains(conn.ToId))
+                graph.UnresolvedConnections.Add(conn);
         }
 
         return graph;
