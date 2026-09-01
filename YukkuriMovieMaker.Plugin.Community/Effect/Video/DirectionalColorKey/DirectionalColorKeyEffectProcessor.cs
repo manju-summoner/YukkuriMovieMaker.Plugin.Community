@@ -19,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
         private readonly IGraphicsDevicesAndContext devices;
         private readonly DirectionalColorKeyEffect item;
-        private readonly DirectionalColorKeyAnalyzer? analyzer = DirectionalColorKeyAnalyzer.TryCreate();
+        private readonly DirectionalColorKeyAnalyzer? analyzer;
 
         private DirectionalColorKeyCustomEffect? effect;
 
@@ -60,11 +60,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         {
             this.devices = devices;
             this.item = item;
-            if (analyzer is not null)
-                disposer.Collect(analyzer);
 
             var scheduler = ComputeExternalQueueScheduler.Create();
             interopProvider = DirectionalColorKeyInteropProvider.TryCreate(devices, scheduler, out var interopDevice);
+
+            analyzer = interopDevice is null
+                ? DirectionalColorKeyAnalyzer.TryCreate()
+                : DirectionalColorKeyAnalyzer.TryCreate(interopDevice);
+
+            if (analyzer is not null)
+                disposer.Collect(analyzer);
 
             if (interopProvider is null || interopDevice is null)
             {
