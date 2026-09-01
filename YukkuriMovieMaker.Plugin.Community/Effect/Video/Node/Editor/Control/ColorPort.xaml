@@ -1,0 +1,145 @@
+<local:PortControlBase x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.ColorPort"
+                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                       xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control"
+                       xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize"
+                       mc:Ignorable="d"
+                       d:DesignHeight="Auto" d:DesignWidth="Auto">
+    <UserControl.Resources>
+        <local:ColorToHexConverter x:Key="ColorToHexConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <StackPanel Orientation="Horizontal" Margin="10">
+            <Button x:Name="BtnColor" Width="20" Height="20" Click="btnColor_Click"
+                    BorderThickness="1" Margin="0" Style="{x:Null}">
+                <Button.Background>
+                    <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,10,10" ViewportUnits="Absolute">
+                        <DrawingBrush.Drawing>
+                            <DrawingGroup>
+                                <GeometryDrawing Brush="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+                                    <GeometryDrawing.Geometry>
+                                        <RectangleGeometry Rect="0,0,10,10" />
+                                    </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+                                <GeometryDrawing Brush="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}">
+                                    <GeometryDrawing.Geometry>
+                                        <GeometryGroup>
+                                            <RectangleGeometry Rect="0,0,5,5" />
+                                            <RectangleGeometry Rect="5,5,5,5" />
+                                        </GeometryGroup>
+                                    </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+
+                                <GeometryDrawing>
+                                    <GeometryDrawing.Brush>
+                                        <SolidColorBrush
+                                            Color="{Binding SelectedColor, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=OneWay}" />
+                                    </GeometryDrawing.Brush>
+                                    <GeometryDrawing.Geometry>
+                                        <RectangleGeometry Rect="0,0,10,10" />
+                                    </GeometryDrawing.Geometry>
+                                </GeometryDrawing>
+                            </DrawingGroup>
+                        </DrawingBrush.Drawing>
+                    </DrawingBrush>
+                </Button.Background>
+            </Button>
+            <TextBox Width="75" Height="25"
+                     Text="{Binding SelectedColor, RelativeSource={RelativeSource AncestorType=local:ColorPort},
+                     Converter={StaticResource ColorToHexConverter}, Mode=TwoWay}"
+                     VerticalContentAlignment="Center" FontFamily="Consolas"
+                     GotFocus="HexTextBox_OnGotFocus" LostFocus="HexTextBox_OnLostFocus"
+                     KeyDown="HexTextBox_OnKeyDown" />
+        </StackPanel>
+        <Popup x:Name="Popup" AllowsTransparency="True" PlacementTarget="{Binding ElementName=BtnColor}"
+               Placement="Bottom" StaysOpen="False" Closed="Popup_OnClosed">
+            <Border BorderThickness="1" Padding="10"
+                    Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+                    BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <!-- This is the focusable element not to make the popup close when clicking inside -->
+                    <Grid Grid.ColumnSpan="3" Background="Transparent" IsHitTestVisible="True" Focusable="True"
+                          PreviewMouseDown="UIElement_OnPreviewMouseDown" />
+
+                    <ContentControl x:Name="ColorPickerHost" Grid.Column="0" />
+
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                        <TextBlock Text="{x:Static loc:TextUi.ColorRgbHeader}" FontWeight="Bold" Margin="0,0,0,5" />
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="{x:Static loc:TextUi.ColorRedLabel}" Width="20" VerticalAlignment="Center" />
+                            <TextBox
+                                Text="{Binding Red, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}"
+                                Width="50" VerticalContentAlignment="Center" />
+                            <Slider Minimum="0" Maximum="255" Width="150" Margin="5,0,0,0"
+                                    Value="{Binding Red, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="{x:Static loc:TextUi.ColorGreenLabel}" Width="20"
+                                       VerticalAlignment="Center" />
+                            <TextBox
+                                Text="{Binding Green, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}"
+                                Width="50" VerticalContentAlignment="Center" />
+                            <Slider Minimum="0" Maximum="255" Width="150" Margin="5,0,0,0"
+                                    Value="{Binding Green, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="{x:Static loc:TextUi.ColorBlueLabel}" Width="20"
+                                       VerticalAlignment="Center" />
+                            <TextBox
+                                Text="{Binding Blue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}"
+                                Width="50" VerticalContentAlignment="Center" />
+                            <Slider Minimum="0" Maximum="255" Width="150" Margin="5,0,0,0"
+                                    Value="{Binding Blue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="{x:Static loc:TextUi.ColorAlphaLabel}" Width="20"
+                                       VerticalAlignment="Center" />
+                            <TextBox
+                                Text="{Binding Alpha, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}"
+                                Width="50" VerticalContentAlignment="Center" />
+                            <Slider Minimum="0" Maximum="255" Width="150" Margin="5,0,0,0"
+                                    Value="{Binding Alpha, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
+                        </StackPanel>
+
+                        <Separator Margin="0,10" />
+
+                        <TextBlock Text="{x:Static loc:TextUi.ColorHsvHeader}" FontWeight="Bold" Margin="0,0,0,5" />
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="{x:Static loc:TextUi.ColorHueLabel}" Width="20" VerticalAlignment="Center" />
+                            <TextBox
+                                Text="{Binding Hue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, StringFormat={}{0:F1}}"
+                                Width="50" VerticalContentAlignment="Center" />
+                            <Slider Minimum="0" Maximum="359" Width="150" Margin="5,0,0,0"
+                                    Value="{Binding Hue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="{x:Static loc:TextUi.ColorSaturationLabel}" Width="20"
+                                       VerticalAlignment="Center" />
+                            <TextBox
+                                Text="{Binding Saturation, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, StringFormat={}{0:P0}}"
+                                Width="50" VerticalContentAlignment="Center" />
+                            <Slider Minimum="0" Maximum="1" Width="150" Margin="5,0,0,0"
+                                    Value="{Binding Saturation, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                            <TextBlock Text="{x:Static loc:TextUi.ColorValueLabel}" Width="20"
+                                       VerticalAlignment="Center" />
+                            <TextBox
+                                Text="{Binding BValue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay, StringFormat={}{0:P0}}"
+                                Width="50" VerticalContentAlignment="Center" />
+                            <Slider Minimum="0" Maximum="1" Width="150" Margin="5,0,0,0"
+                                    Value="{Binding BValue, RelativeSource={RelativeSource AncestorType=local:ColorPort}, Mode=TwoWay}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Popup>
+    </Grid>
+</local:PortControlBase>

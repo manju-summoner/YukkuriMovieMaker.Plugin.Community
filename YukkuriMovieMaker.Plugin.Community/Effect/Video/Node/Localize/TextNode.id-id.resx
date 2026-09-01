@@ -1,0 +1,638 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>id-id</value></data>
+<data name="EffectCategoryName" xml:space="preserve"><value>Efek</value></data>
+<data name="CompositionCategoryName" xml:space="preserve"><value>Komposisi</value></data>
+<data name="MathCategoryName" xml:space="preserve"><value>Matematika</value></data>
+<data name="BasicCategoryName" xml:space="preserve"><value>Dasar</value></data>
+<data name="GeneratorCategoryName" xml:space="preserve"><value>Generator</value></data>
+<data name="BrushCategoryName" xml:space="preserve"><value>Kuas</value></data>
+<data name="FunctionsCategoryName" xml:space="preserve"><value>Fungsi</value></data>
+<data name="VideoEffectCategoryName" xml:space="preserve"><value>Efek Video</value></data>
+<data name="AdvancedCategoryName" xml:space="preserve"><value>Lanjutan</value></data>
+<data name="TransformCategoryName" xml:space="preserve"><value>Transformasi Koordinat</value></data>
+<data name="ValueCategoryName" xml:space="preserve"><value>Nilai</value></data>
+<data name="StringCategoryName" xml:space="preserve"><value>String</value></data>
+<data name="ColorCategoryName" xml:space="preserve"><value>Warna</value></data>
+<data name="BrushName" xml:space="preserve"><value>Kuas</value></data>
+<data name="AddNode" xml:space="preserve"><value>Tambah</value></data>
+<data name="AddNodeDescription" xml:space="preserve"><value>Menjumlahkan dua angka.</value></data>
+<data name="SubtractNode" xml:space="preserve"><value>Kurang</value></data>
+<data name="SubtractNodeDescription" xml:space="preserve"><value>Mengurangkan operand kanan dari operand kiri.</value></data>
+<data name="MultiplyNode" xml:space="preserve"><value>Kali</value></data>
+<data name="MultiplyNodeDescription" xml:space="preserve"><value>Mengalikan dua angka.</value></data>
+<data name="DivideNode" xml:space="preserve"><value>Bagi</value></data>
+<data name="DivideNodeDescription" xml:space="preserve"><value>Membagi operand kiri dengan operand kanan.</value></data>
+<data name="Value" xml:space="preserve"><value>Nilai</value></data>
+<data name="ValueDescription" xml:space="preserve"><value>Nilai input.</value></data>
+<data name="LeftOperand" xml:space="preserve"><value>Operand kiri</value></data>
+<data name="LeftOperandDescription" xml:space="preserve"><value>Nilai di sisi kiri operasi.</value></data>
+<data name="RightOperand" xml:space="preserve"><value>Operand kanan</value></data>
+<data name="RightOperandDescription" xml:space="preserve"><value>Nilai di sisi kanan operasi.</value></data>
+<data name="Result" xml:space="preserve"><value>Hasil</value></data>
+<data name="ResultDescription" xml:space="preserve"><value>Hasil operasi.</value></data>
+<data name="AddResultDescription" xml:space="preserve"><value>Hasil penjumlahan.</value></data>
+<data name="SubtractResultDescription" xml:space="preserve"><value>Hasil pengurangan.</value></data>
+<data name="MultiplyResultDescription" xml:space="preserve"><value>Hasil perkalian.</value></data>
+<data name="DivideResultDescription" xml:space="preserve"><value>Hasil pembagian.</value></data>
+<data name="AbsNode" xml:space="preserve"><value>Nilai Absolut</value></data>
+<data name="AbsNodeDescription" xml:space="preserve"><value>Menghitung nilai absolut.</value></data>
+<data name="SignNode" xml:space="preserve"><value>Tanda</value></data>
+<data name="SignNodeDescription" xml:space="preserve"><value>Mengembalikan tanda dari nilai.</value></data>
+<data name="MinNode" xml:space="preserve"><value>Nilai Minimum</value></data>
+<data name="MinNodeDescription" xml:space="preserve"><value>Mengembalikan nilai yang lebih kecil dari dua nilai.</value></data>
+<data name="MaxNode" xml:space="preserve"><value>Nilai Maksimum</value></data>
+<data name="MaxNodeDescription" xml:space="preserve"><value>Mengembalikan nilai yang lebih besar dari dua nilai.</value></data>
+<data name="ClampNode" xml:space="preserve"><value>Clamp</value></data>
+<data name="ClampNodeDescription" xml:space="preserve"><value>Membatasi nilai ke rentang tertentu.</value></data>
+<data name="LerpNode" xml:space="preserve"><value>Interpolasi Linear</value></data>
+<data name="LerpNodeDescription" xml:space="preserve"><value>Melakukan interpolasi linear antara dua nilai.</value></data>
+<data name="SqrtNode" xml:space="preserve"><value>Akar Kuadrat</value></data>
+<data name="SqrtNodeDescription" xml:space="preserve"><value>Menghitung akar kuadrat.</value></data>
+<data name="PowerNode" xml:space="preserve"><value>Pangkat</value></data>
+<data name="PowerNodeDescription" xml:space="preserve"><value>Menghitung pangkat.</value></data>
+<data name="FloorNode" xml:space="preserve"><value>Pembulatan ke Bawah</value></data>
+<data name="FloorNodeDescription" xml:space="preserve"><value>Membulatkan ke bawah.</value></data>
+<data name="CeilingNode" xml:space="preserve"><value>Pembulatan ke Atas</value></data>
+<data name="CeilingNodeDescription" xml:space="preserve"><value>Membulatkan ke atas.</value></data>
+<data name="RoundNode" xml:space="preserve"><value>Pembulatan</value></data>
+<data name="RoundNodeDescription" xml:space="preserve"><value>Membulatkan ke bilangan terdekat.</value></data>
+<data name="FractionNode" xml:space="preserve"><value>Bagian Desimal</value></data>
+<data name="FractionNodeDescription" xml:space="preserve"><value>Mengembalikan bagian desimal.</value></data>
+<data name="SinNode" xml:space="preserve"><value>Sinus</value></data>
+<data name="SinNodeDescription" xml:space="preserve"><value>Menghitung sinus.</value></data>
+<data name="CosNode" xml:space="preserve"><value>Kosinus</value></data>
+<data name="CosNodeDescription" xml:space="preserve"><value>Menghitung kosinus.</value></data>
+<data name="TanNode" xml:space="preserve"><value>Tangen</value></data>
+<data name="TanNodeDescription" xml:space="preserve"><value>Menghitung tangen.</value></data>
+<data name="Atan2Node" xml:space="preserve"><value>Atan2</value></data>
+<data name="Atan2NodeDescription" xml:space="preserve"><value>Menghitung arctangen dua variabel.</value></data>
+<data name="DegreesToRadiansNode" xml:space="preserve"><value>Derajat→Radian</value></data>
+<data name="DegreesToRadiansNodeDescription" xml:space="preserve"><value>Mengonversi derajat ke radian.</value></data>
+<data name="RadiansToDegreesNode" xml:space="preserve"><value>Radian→Derajat</value></data>
+<data name="RadiansToDegreesNodeDescription" xml:space="preserve"><value>Mengonversi radian ke derajat.</value></data>
+<data name="Minimum" xml:space="preserve"><value>Minimum</value></data>
+<data name="MinimumDescription" xml:space="preserve"><value>Nilai batas bawah.</value></data>
+<data name="Maximum" xml:space="preserve"><value>Maksimum</value></data>
+<data name="MaximumDescription" xml:space="preserve"><value>Nilai batas atas.</value></data>
+<data name="StartValue" xml:space="preserve"><value>Nilai Awal</value></data>
+<data name="StartValueDescription" xml:space="preserve"><value>Nilai awal interpolasi.</value></data>
+<data name="EndValue" xml:space="preserve"><value>Nilai Akhir</value></data>
+<data name="EndValueDescription" xml:space="preserve"><value>Nilai akhir interpolasi.</value></data>
+<data name="InterpolationFactor" xml:space="preserve"><value>Faktor Interpolasi</value></data>
+<data name="InterpolationFactorDescription" xml:space="preserve"><value>Faktor interpolasi.</value></data>
+<data name="Base" xml:space="preserve"><value>Basis</value></data>
+<data name="BaseDescription" xml:space="preserve"><value>Basis.</value></data>
+<data name="Exponent" xml:space="preserve"><value>Eksponen</value></data>
+<data name="ExponentDescription" xml:space="preserve"><value>Eksponen.</value></data>
+<data name="YValue" xml:space="preserve"><value>Y</value></data>
+<data name="YValueDescription" xml:space="preserve"><value>Koordinat Y.</value></data>
+<data name="XValue" xml:space="preserve"><value>X</value></data>
+<data name="XValueDescription" xml:space="preserve"><value>Koordinat X.</value></data>
+<data name="AbsResultDescription" xml:space="preserve"><value>Nilai absolut.</value></data>
+<data name="SignResultDescription" xml:space="preserve"><value>Tanda.</value></data>
+<data name="MinResultDescription" xml:space="preserve"><value>Nilai minimum.</value></data>
+<data name="MaxResultDescription" xml:space="preserve"><value>Nilai maksimum.</value></data>
+<data name="ClampResultDescription" xml:space="preserve"><value>Nilai setelah clamp.</value></data>
+<data name="LerpResultDescription" xml:space="preserve"><value>Hasil interpolasi.</value></data>
+<data name="SqrtResultDescription" xml:space="preserve"><value>Akar kuadrat.</value></data>
+<data name="PowerResultDescription" xml:space="preserve"><value>Hasil pangkat.</value></data>
+<data name="FloorResultDescription" xml:space="preserve"><value>Hasil pembulatan ke bawah.</value></data>
+<data name="CeilingResultDescription" xml:space="preserve"><value>Hasil pembulatan ke atas.</value></data>
+<data name="RoundResultDescription" xml:space="preserve"><value>Nilai yang dibulatkan.</value></data>
+<data name="FractionResultDescription" xml:space="preserve"><value>Bagian desimal.</value></data>
+<data name="SinResultDescription" xml:space="preserve"><value>Nilai sinus.</value></data>
+<data name="CosResultDescription" xml:space="preserve"><value>Nilai kosinus.</value></data>
+<data name="TanResultDescription" xml:space="preserve"><value>Nilai tangen.</value></data>
+<data name="Atan2ResultDescription" xml:space="preserve"><value>Hasil Atan2.</value></data>
+<data name="DegreesToRadiansResultDescription" xml:space="preserve"><value>Nilai radian.</value></data>
+<data name="RadiansToDegreesResultDescription" xml:space="preserve"><value>Nilai derajat.</value></data>
+<data name="Length" xml:space="preserve"><value>Panjang</value></data>
+<data name="LengthDescription" xml:space="preserve"><value>Panjang periode.</value></data>
+<data name="Edge" xml:space="preserve"><value>Ambang</value></data>
+<data name="EdgeDescription" xml:space="preserve"><value>Nilai ambang.</value></data>
+<data name="Tolerance" xml:space="preserve"><value>Toleransi</value></data>
+<data name="ToleranceDescription" xml:space="preserve"><value>Toleransi saat perbandingan.</value></data>
+<data name="Condition" xml:space="preserve"><value>Kondisi</value></data>
+<data name="ConditionDescription" xml:space="preserve"><value>Kondisi penentu.</value></data>
+<data name="TrueValue" xml:space="preserve"><value>Jika Benar</value></data>
+<data name="TrueValueDescription" xml:space="preserve"><value>Nilai saat kondisi benar.</value></data>
+<data name="FalseValue" xml:space="preserve"><value>Jika Salah</value></data>
+<data name="FalseValueDescription" xml:space="preserve"><value>Nilai saat kondisi salah.</value></data>
+<data name="ComparisonResultDescription" xml:space="preserve"><value>Hasil perbandingan.</value></data>
+<data name="ModuloNode" xml:space="preserve"><value>Modulo</value></data>
+<data name="ModuloNodeDescription" xml:space="preserve"><value>Menghitung sisa pembagian.</value></data>
+<data name="ModuloResultDescription" xml:space="preserve"><value>Sisa pembagian.</value></data>
+<data name="ReciprocalNode" xml:space="preserve"><value>Kebalikan</value></data>
+<data name="ReciprocalNodeDescription" xml:space="preserve"><value>Menghitung nilai kebalikan.</value></data>
+<data name="ReciprocalResultDescription" xml:space="preserve"><value>Nilai kebalikan.</value></data>
+<data name="OneMinusNode" xml:space="preserve"><value>1 Dikurangi</value></data>
+<data name="OneMinusNodeDescription" xml:space="preserve"><value>Mengurangkan nilai input dari 1.</value></data>
+<data name="OneMinusResultDescription" xml:space="preserve"><value>Hasil perhitungan.</value></data>
+<data name="SaturateNode" xml:space="preserve"><value>Saturate</value></data>
+<data name="SaturateNodeDescription" xml:space="preserve"><value>Membatasi ke rentang 0–1.</value></data>
+<data name="SaturateResultDescription" xml:space="preserve"><value>Nilai setelah dibatasi.</value></data>
+<data name="InverseLerpNode" xml:space="preserve"><value>Interpolasi Balik</value></data>
+<data name="InverseLerpNodeDescription" xml:space="preserve"><value>Menghitung faktor interpolasi.</value></data>
+<data name="InverseLerpResultDescription" xml:space="preserve"><value>Faktor interpolasi.</value></data>
+<data name="SmoothStepNode" xml:space="preserve"><value>SmoothStep</value></data>
+<data name="SmoothStepNodeDescription" xml:space="preserve"><value>Melakukan interpolasi halus.</value></data>
+<data name="SmoothStepResultDescription" xml:space="preserve"><value>Hasil interpolasi.</value></data>
+<data name="StepNode" xml:space="preserve"><value>Step</value></data>
+<data name="StepNodeDescription" xml:space="preserve"><value>Mengembalikan 0 atau 1 berdasarkan ambang.</value></data>
+<data name="StepResultDescription" xml:space="preserve"><value>Hasil step.</value></data>
+<data name="RepeatNode" xml:space="preserve"><value>Pengulangan</value></data>
+<data name="RepeatNodeDescription" xml:space="preserve"><value>Mengulang dengan periode tetap.</value></data>
+<data name="RepeatResultDescription" xml:space="preserve"><value>Hasil pengulangan.</value></data>
+<data name="PingPongNode" xml:space="preserve"><value>PingPong</value></data>
+<data name="PingPongNodeDescription" xml:space="preserve"><value>Menghasilkan gerakan bolak-balik.</value></data>
+<data name="PingPongResultDescription" xml:space="preserve"><value>Nilai bolak-balik.</value></data>
+<data name="WrapNode" xml:space="preserve"><value>Wrap</value></data>
+<data name="WrapNodeDescription" xml:space="preserve"><value>Melipat nilai kembali ke dalam rentang.</value></data>
+<data name="WrapResultDescription" xml:space="preserve"><value>Nilai setelah dilipat.</value></data>
+<data name="ExpNode" xml:space="preserve"><value>Fungsi Eksponensial</value></data>
+<data name="ExpNodeDescription" xml:space="preserve"><value>Menghitung pangkat e.</value></data>
+<data name="ExpResultDescription" xml:space="preserve"><value>Hasil perhitungan eksponensial.</value></data>
+<data name="Exp2Node" xml:space="preserve"><value>Pangkat 2</value></data>
+<data name="Exp2NodeDescription" xml:space="preserve"><value>Menghitung pangkat 2.</value></data>
+<data name="Exp2ResultDescription" xml:space="preserve"><value>Hasil perhitungan.</value></data>
+<data name="LogNode" xml:space="preserve"><value>Logaritma Natural</value></data>
+<data name="LogNodeDescription" xml:space="preserve"><value>Menghitung logaritma natural.</value></data>
+<data name="LogResultDescription" xml:space="preserve"><value>Logaritma natural.</value></data>
+<data name="Log2Node" xml:space="preserve"><value>Logaritma Basis 2</value></data>
+<data name="Log2NodeDescription" xml:space="preserve"><value>Menghitung logaritma basis 2.</value></data>
+<data name="Log2ResultDescription" xml:space="preserve"><value>Logaritma basis 2.</value></data>
+<data name="Log10Node" xml:space="preserve"><value>Logaritma Basis 10</value></data>
+<data name="Log10NodeDescription" xml:space="preserve"><value>Menghitung logaritma basis 10.</value></data>
+<data name="Log10ResultDescription" xml:space="preserve"><value>Logaritma basis 10.</value></data>
+<data name="AsinNode" xml:space="preserve"><value>Arcsinus</value></data>
+<data name="AsinNodeDescription" xml:space="preserve"><value>Menghitung arcsinus.</value></data>
+<data name="AsinResultDescription" xml:space="preserve"><value>Arcsinus.</value></data>
+<data name="AcosNode" xml:space="preserve"><value>Arckosinus</value></data>
+<data name="AcosNodeDescription" xml:space="preserve"><value>Menghitung arckosinus.</value></data>
+<data name="AcosResultDescription" xml:space="preserve"><value>Arckosinus.</value></data>
+<data name="AtanNode" xml:space="preserve"><value>Arctangen</value></data>
+<data name="AtanNodeDescription" xml:space="preserve"><value>Menghitung arctangen.</value></data>
+<data name="AtanResultDescription" xml:space="preserve"><value>Arctangen.</value></data>
+<data name="EqualNode" xml:space="preserve"><value>Sama Dengan</value></data>
+<data name="EqualNodeDescription" xml:space="preserve"><value>Memeriksa apakah dua nilai sama.</value></data>
+<data name="EqualResultDescription" xml:space="preserve"><value>Hasil perbandingan.</value></data>
+<data name="NotEqualNode" xml:space="preserve"><value>Tidak Sama Dengan</value></data>
+<data name="NotEqualNodeDescription" xml:space="preserve"><value>Memeriksa apakah dua nilai tidak sama.</value></data>
+<data name="NotEqualResultDescription" xml:space="preserve"><value>Hasil perbandingan.</value></data>
+<data name="GreaterNode" xml:space="preserve"><value>Lebih Besar</value></data>
+<data name="GreaterNodeDescription" xml:space="preserve"><value>Memeriksa apakah sisi kiri lebih besar dari sisi kanan.</value></data>
+<data name="GreaterResultDescription" xml:space="preserve"><value>Hasil perbandingan.</value></data>
+<data name="GreaterEqualNode" xml:space="preserve"><value>Lebih Besar atau Sama Dengan</value></data>
+<data name="GreaterEqualNodeDescription" xml:space="preserve"><value>Memeriksa apakah sisi kiri lebih besar atau sama dengan sisi kanan.</value></data>
+<data name="GreaterEqualResultDescription" xml:space="preserve"><value>Hasil perbandingan.</value></data>
+<data name="LessNode" xml:space="preserve"><value>Lebih Kecil</value></data>
+<data name="LessNodeDescription" xml:space="preserve"><value>Memeriksa apakah sisi kiri lebih kecil dari sisi kanan.</value></data>
+<data name="LessResultDescription" xml:space="preserve"><value>Hasil perbandingan.</value></data>
+<data name="LessEqualNode" xml:space="preserve"><value>Lebih Kecil atau Sama Dengan</value></data>
+<data name="LessEqualNodeDescription" xml:space="preserve"><value>Memeriksa apakah sisi kiri lebih kecil atau sama dengan sisi kanan.</value></data>
+<data name="LessEqualResultDescription" xml:space="preserve"><value>Hasil perbandingan.</value></data>
+<data name="SelectNode" xml:space="preserve"><value>Pilih</value></data>
+<data name="SelectNodeDescription" xml:space="preserve"><value>Memilih nilai berdasarkan kondisi.</value></data>
+<data name="SelectResultDescription" xml:space="preserve"><value>Nilai yang dipilih.</value></data>
+<data name="Seed" xml:space="preserve"><value>Seed</value></data>
+<data name="SeedDescription" xml:space="preserve"><value>Nilai seed untuk pembangkitan angka acak.</value></data>
+<data name="Index" xml:space="preserve"><value>Indeks</value></data>
+<data name="IndexDescription" xml:space="preserve"><value>Indeks untuk mengambil angka acak.</value></data>
+<data name="Parameter" xml:space="preserve"><value>Parameter</value></data>
+<data name="ParameterDescription" xml:space="preserve"><value>Posisi untuk mengevaluasi noise kontinu.</value></data>
+<data name="RandomNode" xml:space="preserve"><value>Angka Acak</value></data>
+<data name="RandomNodeDescription" xml:space="preserve"><value>Menghasilkan angka acak deterministik.</value></data>
+<data name="NoiseNode" xml:space="preserve"><value>Noise</value></data>
+<data name="NoiseNodeDescription" xml:space="preserve"><value>Menghasilkan noise yang berubah secara kontinu.</value></data>
+<data name="TranslateNode" xml:space="preserve"><value>Translasi</value></data>
+<data name="TranslateNodeDescription" xml:space="preserve"><value>Menggeser gambar sejauh jumlah yang ditentukan.</value></data>
+<data name="TranslateX" xml:space="preserve"><value>Pergeseran X</value></data>
+<data name="TranslateY" xml:space="preserve"><value>Pergeseran Y</value></data>
+<data name="ScaleNode" xml:space="preserve"><value>Skala</value></data>
+<data name="ScaleNodeDescription" xml:space="preserve"><value>Mengubah skala gambar sesuai rasio yang ditentukan.</value></data>
+<data name="ScaleX" xml:space="preserve"><value>Rasio X</value></data>
+<data name="ScaleY" xml:space="preserve"><value>Rasio Y</value></data>
+<data name="RotateNode" xml:space="preserve"><value>Rotasi</value></data>
+<data name="RotateNodeDescription" xml:space="preserve"><value>Memutar gambar sesuai sudut yang ditentukan.</value></data>
+<data name="Angle" xml:space="preserve"><value>Sudut</value></data>
+<data name="TransformResultDescription" xml:space="preserve"><value>Gambar setelah transformasi.</value></data>
+<data name="FillRuleNonZero" xml:space="preserve"><value>Bukan Nol</value></data>
+<data name="FillRuleEvenOdd" xml:space="preserve"><value>Genap-Ganjil</value></data>
+<data name="ShapeRect" xml:space="preserve"><value>Persegi Panjang</value></data>
+<data name="ShapeRoundRect" xml:space="preserve"><value>Persegi Panjang Bersudut Bulat</value></data>
+<data name="ShapeOval" xml:space="preserve"><value>Elips</value></data>
+<data name="ShapePolygon" xml:space="preserve"><value>Poligon</value></data>
+<data name="ShapeStar" xml:space="preserve"><value>Bintang</value></data>
+<data name="ShapeLine" xml:space="preserve"><value>Garis</value></data>
+<data name="PathOpUnion" xml:space="preserve"><value>Gabungan</value></data>
+<data name="PathOpIntersect" xml:space="preserve"><value>Irisan</value></data>
+<data name="PathOpDifference" xml:space="preserve"><value>Selisih</value></data>
+<data name="PathOpReverseDifference" xml:space="preserve"><value>Selisih Terbalik</value></data>
+<data name="PathOpXor" xml:space="preserve"><value>Or Eksklusif</value></data>
+<data name="ChannelHue" xml:space="preserve"><value>Rona</value></data>
+<data name="ChannelSaturation" xml:space="preserve"><value>Saturasi</value></data>
+<data name="ChannelValue" xml:space="preserve"><value>Nilai</value></data>
+<data name="ChannelRed" xml:space="preserve"><value>Merah</value></data>
+<data name="ChannelGreen" xml:space="preserve"><value>Hijau</value></data>
+<data name="ChannelBlue" xml:space="preserve"><value>Biru</value></data>
+<data name="ChannelAlpha" xml:space="preserve"><value>Alfa</value></data>
+<data name="BlendNormal" xml:space="preserve"><value>Normal</value></data>
+<data name="BlendMultiply" xml:space="preserve"><value>Kalikan</value></data>
+<data name="BlendScreen" xml:space="preserve"><value>Layar</value></data>
+<data name="BlendDarken" xml:space="preserve"><value>Gelapkan</value></data>
+<data name="BlendLighten" xml:space="preserve"><value>Terangkan</value></data>
+<data name="BlendDissolve" xml:space="preserve"><value>Larutkan</value></data>
+<data name="BlendColorBurn" xml:space="preserve"><value>Bakar Warna</value></data>
+<data name="BlendLinearBurn" xml:space="preserve"><value>Bakar Linear</value></data>
+<data name="BlendDarkerColor" xml:space="preserve"><value>Warna Lebih Gelap</value></data>
+<data name="BlendLighterColor" xml:space="preserve"><value>Warna Lebih Terang</value></data>
+<data name="BlendColorDodge" xml:space="preserve"><value>Hindari Warna</value></data>
+<data name="BlendLinearDodge" xml:space="preserve"><value>Hindari Linear</value></data>
+<data name="BlendOverlay" xml:space="preserve"><value>Overlay</value></data>
+<data name="BlendSoftLight" xml:space="preserve"><value>Cahaya Lembut</value></data>
+<data name="BlendHardLight" xml:space="preserve"><value>Cahaya Keras</value></data>
+<data name="BlendVividLight" xml:space="preserve"><value>Cahaya Cerah</value></data>
+<data name="BlendLinearLight" xml:space="preserve"><value>Cahaya Linear</value></data>
+<data name="BlendPinLight" xml:space="preserve"><value>Cahaya Titik</value></data>
+<data name="BlendHardMix" xml:space="preserve"><value>Campuran Keras</value></data>
+<data name="BlendDifferenceAbs" xml:space="preserve"><value>Selisih Nilai</value></data>
+<data name="BlendExclusion" xml:space="preserve"><value>Pengecualian</value></data>
+<data name="BlendColor" xml:space="preserve"><value>Warna</value></data>
+<data name="BlendLuminosity" xml:space="preserve"><value>Luminositas</value></data>
+<data name="BlendSubtract" xml:space="preserve"><value>Kurangi</value></data>
+<data name="BlendDivision" xml:space="preserve"><value>Bagi</value></data>
+<data name="OutlineCategoryName" xml:space="preserve"><value>Garis Luar</value></data>
+<data name="ImageSourceCategoryName" xml:space="preserve"><value>Sumber Gambar</value></data>
+<data name="OutlinePortLabel" xml:space="preserve"><value>Garis Luar</value></data>
+<data name="InputImagePortLabel" xml:space="preserve"><value>Gambar Masukan</value></data>
+<data name="OutputImagePortLabel" xml:space="preserve"><value>Gambar Keluaran</value></data>
+<data name="MaskPortLabel" xml:space="preserve"><value>Masker</value></data>
+<data name="InvertPortLabel" xml:space="preserve"><value>Balik</value></data>
+<data name="FilePathPortLabel" xml:space="preserve"><value>Jalur File</value></data>
+<data name="RotationPortLabel" xml:space="preserve"><value>Rotasi</value></data>
+<data name="TransformInputImageDescription" xml:space="preserve"><value>Gambar yang akan ditransformasikan</value></data>
+<data name="TransformOutputImageDescription" xml:space="preserve"><value>Hasil transformasi</value></data>
+<data name="MoveAmountX" xml:space="preserve"><value>X</value></data>
+<data name="MoveAmountXDescription" xml:space="preserve"><value>Jumlah pergeseran arah X</value></data>
+<data name="MoveAmountY" xml:space="preserve"><value>Y</value></data>
+<data name="MoveAmountYDescription" xml:space="preserve"><value>Jumlah pergeseran arah Y</value></data>
+<data name="ScaleRatioX" xml:space="preserve"><value>Skala X</value></data>
+<data name="ScaleRatioXDescription" xml:space="preserve"><value>Rasio skala arah X</value></data>
+<data name="ScaleRatioY" xml:space="preserve"><value>Skala Y</value></data>
+<data name="ScaleRatioYDescription" xml:space="preserve"><value>Rasio skala arah Y</value></data>
+<data name="AngleDescription" xml:space="preserve"><value>Sudut rotasi</value></data>
+<data name="OutlineRasterizeNode" xml:space="preserve"><value>Rasterisasi Garis Luar</value></data>
+<data name="OutlineRasterizeNodeDescription" xml:space="preserve"><value>Menggambar data garis luar dengan isian dan garis tepi, lalu mengonversinya menjadi ID2D1Image.</value></data>
+<data name="OutlineRasterizeInputDescription" xml:space="preserve"><value>Data garis luar yang akan dirasterisasi</value></data>
+<data name="StrokeWidthLabel" xml:space="preserve"><value>Lebar Garis</value></data>
+<data name="StrokeWidthDescription" xml:space="preserve"><value>Ketebalan garis</value></data>
+<data name="StrokeOffsetXLabel" xml:space="preserve"><value>Offset Garis X</value></data>
+<data name="StrokeOffsetXDescription" xml:space="preserve"><value>Jumlah pergeseran posisi gambar garis arah X</value></data>
+<data name="StrokeOffsetYLabel" xml:space="preserve"><value>Offset Garis Y</value></data>
+<data name="StrokeOffsetYDescription" xml:space="preserve"><value>Jumlah pergeseran posisi gambar garis arah Y</value></data>
+<data name="StrokeBrushLabel" xml:space="preserve"><value>Kuas Garis</value></data>
+<data name="StrokeBrushDescription" xml:space="preserve"><value>Kuas yang digunakan untuk menggambar garis</value></data>
+<data name="FillBrushLabel" xml:space="preserve"><value>Kuas Isian</value></data>
+<data name="FillBrushDescription" xml:space="preserve"><value>Kuas yang digunakan untuk mengisi</value></data>
+<data name="SelfIntersectRuleLabel" xml:space="preserve"><value>Aturan Perpotongan Sendiri</value></data>
+<data name="SelfIntersectRuleDescription" xml:space="preserve"><value>Metode penentuan area dalam/luar saat perpotongan sendiri</value></data>
+<data name="RasterizeOutputDescription" xml:space="preserve"><value>Hasil rasterisasi</value></data>
+<data name="PathTransformNode" xml:space="preserve"><value>Transformasi Koordinat Jalur</value></data>
+<data name="PathTransformNodeDescription" xml:space="preserve"><value>Menerapkan transformasi koordinat seperti translasi, skala, rotasi, dan miring pada garis luar.</value></data>
+<data name="PathTransformInputDescription" xml:space="preserve"><value>Garis luar yang akan ditransformasikan</value></data>
+<data name="PathMoveXLabel" xml:space="preserve"><value>Geser X</value></data>
+<data name="PathMoveXDescription" xml:space="preserve"><value>Jumlah pergeseran arah X</value></data>
+<data name="PathMoveYLabel" xml:space="preserve"><value>Geser Y</value></data>
+<data name="PathMoveYDescription" xml:space="preserve"><value>Jumlah pergeseran arah Y</value></data>
+<data name="PathScaleXLabel" xml:space="preserve"><value>Rasio Skala X</value></data>
+<data name="PathScaleXDescription" xml:space="preserve"><value>Rasio skala arah X</value></data>
+<data name="PathScaleYLabel" xml:space="preserve"><value>Rasio Skala Y</value></data>
+<data name="PathScaleYDescription" xml:space="preserve"><value>Rasio skala arah Y</value></data>
+<data name="PathRotationDescription" xml:space="preserve"><value>Sudut rotasi</value></data>
+<data name="SkewXLabel" xml:space="preserve"><value>Miring X</value></data>
+<data name="SkewXDescription" xml:space="preserve"><value>Jumlah kemiringan arah X</value></data>
+<data name="SkewYLabel" xml:space="preserve"><value>Miring Y</value></data>
+<data name="SkewYDescription" xml:space="preserve"><value>Jumlah kemiringan arah Y</value></data>
+<data name="OriginXLabel" xml:space="preserve"><value>Titik Acuan X</value></data>
+<data name="OriginXDescription" xml:space="preserve"><value>Koordinat X yang digunakan sebagai acuan skala, rotasi, dan kemiringan</value></data>
+<data name="OriginYLabel" xml:space="preserve"><value>Titik Acuan Y</value></data>
+<data name="OriginYDescription" xml:space="preserve"><value>Koordinat Y yang digunakan sebagai acuan skala, rotasi, dan kemiringan</value></data>
+<data name="PathTransformOutputDescription" xml:space="preserve"><value>Garis luar setelah transformasi koordinat</value></data>
+<data name="ShapeCenterXLabel" xml:space="preserve"><value>Pusat X</value></data>
+<data name="ShapeCenterXDescription" xml:space="preserve"><value>Koordinat X pusat bentuk (titik awal untuk garis)</value></data>
+<data name="ShapeCenterYLabel" xml:space="preserve"><value>Pusat Y</value></data>
+<data name="ShapeCenterYDescription" xml:space="preserve"><value>Koordinat Y pusat bentuk (titik awal untuk garis)</value></data>
+<data name="ShapeWidthLabel" xml:space="preserve"><value>Lebar</value></data>
+<data name="ShapeWidthDescription" xml:space="preserve"><value>Lebar bentuk (jarak arah X ke titik akhir untuk garis)</value></data>
+<data name="ShapeHeightLabel" xml:space="preserve"><value>Tinggi</value></data>
+<data name="ShapeHeightDescription" xml:space="preserve"><value>Tinggi bentuk (jarak arah Y ke titik akhir untuk garis)</value></data>
+<data name="ShapeRotationDescription" xml:space="preserve"><value>Sudut rotasi bentuk mengelilingi pusatnya (titik awal)</value></data>
+<data name="ShapeCornerRadiusLabel" xml:space="preserve"><value>Radius Sudut</value></data>
+<data name="ShapeCornerRadiusDescription" xml:space="preserve"><value>Radius sudut persegi panjang bersudut bulat</value></data>
+<data name="PolygonSidesDescription" xml:space="preserve"><value>Jumlah titik sudut poligon</value></data>
+<data name="VertexCountLabel" xml:space="preserve"><value>Jumlah Titik Sudut</value></data>
+<data name="StarSidesDescription" xml:space="preserve"><value>Jumlah titik sudut luar bintang</value></data>
+<data name="InnerRadiusRatioLabel" xml:space="preserve"><value>Rasio Radius Dalam</value></data>
+<data name="InnerRadiusRatioDescription" xml:space="preserve"><value>Radius titik sudut dalam bintang (rasio terhadap luar)</value></data>
+<data name="ShapeOutlineNode" xml:space="preserve"><value>Buat Garis Luar Bentuk</value></data>
+<data name="ShapeOutlineNodeDescription" xml:space="preserve"><value>Menghasilkan data garis luar untuk jenis bentuk yang ditentukan.</value></data>
+<data name="ShapeKindLabel" xml:space="preserve"><value>Jenis</value></data>
+<data name="ShapeKindDescription" xml:space="preserve"><value>Jenis bentuk yang akan dibuat</value></data>
+<data name="ShapeParamsLabel" xml:space="preserve"><value>Parameter</value></data>
+<data name="ShapeParamsDescription" xml:space="preserve"><value>Sekumpulan input sesuai jenis bentuk</value></data>
+<data name="ShapeOutlineOutputDescription" xml:space="preserve"><value>Data garis luar bentuk yang dihasilkan</value></data>
+<data name="TextOutlineNode" xml:space="preserve"><value>Buat Garis Luar Teks</value></data>
+<data name="TextOutlineNodeDescription" xml:space="preserve"><value>Menghasilkan data garis luar untuk string teks yang ditentukan.</value></data>
+<data name="TextOutlineTextLabel" xml:space="preserve"><value>Teks</value></data>
+<data name="TextOutlineTextDescription" xml:space="preserve"><value>String teks yang akan dijadikan garis luar</value></data>
+<data name="FontFamilyLabel" xml:space="preserve"><value>Nama Font</value></data>
+<data name="FontFamilyDescription" xml:space="preserve"><value>Nama family font yang digunakan (font default jika dikosongkan)</value></data>
+<data name="FontSizeLabel" xml:space="preserve"><value>Ukuran</value></data>
+<data name="FontSizeDescription" xml:space="preserve"><value>Ukuran font</value></data>
+<data name="BoldLabel" xml:space="preserve"><value>Tebal</value></data>
+<data name="BoldDescription" xml:space="preserve"><value>Apakah teks ditebalkan</value></data>
+<data name="ItalicLabel" xml:space="preserve"><value>Miring</value></data>
+<data name="ItalicDescription" xml:space="preserve"><value>Apakah teks dimiringkan</value></data>
+<data name="TextOriginXLabel" xml:space="preserve"><value>Titik Asal X</value></data>
+<data name="TextOriginXDescription" xml:space="preserve"><value>Koordinat X titik asal garis dasar teks</value></data>
+<data name="TextOriginYLabel" xml:space="preserve"><value>Titik Asal Y</value></data>
+<data name="TextOriginYDescription" xml:space="preserve"><value>Koordinat Y titik asal garis dasar teks</value></data>
+<data name="TextHorizontalOffsetLabel" xml:space="preserve"><value>Offset Horizontal</value></data>
+<data name="TextHorizontalOffsetDescription" xml:space="preserve"><value>텍스트 외접 사각형에 대한 수평 기준점 비율(-1.00: 왼쪽 정렬 〜 1.00: 오른쪽 정렬</value></data>
+<data name="TextVerticalOffsetLabel" xml:space="preserve"><value>Offset Vertikal</value></data>
+<data name="TextVerticalOffsetDescription" xml:space="preserve"><value>텍스트 외접 사각형에 대한 수직 기준점 비율(-1.00: 위쪽 정렬 〜 1.00: 아래쪽 정렬</value></data>
+<data name="TextOutlineOutputDescription" xml:space="preserve"><value>Data garis luar string teks yang dihasilkan</value></data>
+<data name="PathCombineNode" xml:space="preserve"><value>Gabungkan Jalur</value></data>
+<data name="PathCombineNodeDescription" xml:space="preserve"><value>Menggabungkan dua garis luar menggunakan operasi yang ditentukan.</value></data>
+<data name="PathInput1Label" xml:space="preserve"><value>Jalur 1</value></data>
+<data name="PathInput1Description" xml:space="preserve"><value>Garis luar pertama yang akan digabungkan</value></data>
+<data name="PathInput2Label" xml:space="preserve"><value>Jalur 2</value></data>
+<data name="PathInput2Description" xml:space="preserve"><value>Garis luar kedua yang akan digabungkan</value></data>
+<data name="PathCombineOperationLabel" xml:space="preserve"><value>Operasi</value></data>
+<data name="PathCombineOperationDescription" xml:space="preserve"><value>Operasi boolean yang diterapkan pada kedua jalur</value></data>
+<data name="PathCombineOutputDescription" xml:space="preserve"><value>Data garis luar hasil penggabungan</value></data>
+<data name="LoadImageNode" xml:space="preserve"><value>Muat Gambar</value></data>
+<data name="LoadImageNodeDescription" xml:space="preserve"><value>Memuat gambar dari file yang ditentukan.</value></data>
+<data name="LoadImageFilePathDescription" xml:space="preserve"><value>File gambar yang akan dimuat</value></data>
+<data name="LoadImageOutputDescription" xml:space="preserve"><value>Gambar yang dimuat</value></data>
+<data name="LoadVideoFrameNode" xml:space="preserve"><value>Muat Frame Video</value></data>
+<data name="LoadVideoFrameNodeDescription" xml:space="preserve"><value>Memuat frame tertentu dari file video yang ditentukan sebagai gambar.</value></data>
+<data name="LoadVideoFrameFilePathDescription" xml:space="preserve"><value>File video yang akan dimuat</value></data>
+<data name="FrameIndexLabel" xml:space="preserve"><value>Indeks Frame</value></data>
+<data name="FrameIndexDescription" xml:space="preserve"><value>Nomor frame yang akan dimuat (mulai dari 0)</value></data>
+<data name="LoadVideoFrameOutputDescription" xml:space="preserve"><value>Gambar frame yang dimuat</value></data>
+<data name="EasingNode" xml:space="preserve"><value>Easing</value></data>
+<data name="EasingNodeDescription" xml:space="preserve"><value>Mengevaluasi parameter waktu dengan kurva Bezier dan memetakannya ke rentang minimum-maksimum</value></data>
+<data name="TimeStartLabel" xml:space="preserve"><value>Awal Waktu</value></data>
+<data name="TimeStartDescription" xml:space="preserve"><value>Waktu awal yang digunakan untuk menormalkan parameter waktu</value></data>
+<data name="TimeEndLabel" xml:space="preserve"><value>Akhir Waktu</value></data>
+<data name="TimeEndDescription" xml:space="preserve"><value>Waktu akhir yang digunakan untuk menormalkan parameter waktu</value></data>
+<data name="TimeParameterLabel" xml:space="preserve"><value>Parameter Waktu</value></data>
+<data name="TimeParameterDescription" xml:space="preserve"><value>Waktu yang akan dievaluasi</value></data>
+<data name="EasingMaxLabel" xml:space="preserve"><value>Maks</value></data>
+<data name="EasingMaxDescription" xml:space="preserve"><value>Batas atas nilai keluaran</value></data>
+<data name="EasingMinLabel" xml:space="preserve"><value>Min</value></data>
+<data name="EasingMinDescription" xml:space="preserve"><value>Batas bawah nilai keluaran</value></data>
+<data name="BezierCurveLabel" xml:space="preserve"><value>Kurva Bezier</value></data>
+<data name="BezierCurveDescription" xml:space="preserve"><value>Kurva yang mendefinisikan nilai untuk waktu ternormalisasi dari awal hingga akhir</value></data>
+<data name="EasingResultLabel" xml:space="preserve"><value>Nilai</value></data>
+<data name="EasingResultDescription" xml:space="preserve"><value>Hasil evaluasi</value></data>
+<data name="AlphaNode" xml:space="preserve"><value>Opasitas</value></data>
+<data name="AlphaNodeDescription" xml:space="preserve"><value>Mengatur opasitas gambar.</value></data>
+<data name="AlphaInputDescription" xml:space="preserve"><value>Gambar yang opasitasnya akan diubah</value></data>
+<data name="OpacityLabel" xml:space="preserve"><value>Opasitas</value></data>
+<data name="OpacityDescription" xml:space="preserve"><value>Tingkat transparansi gambar</value></data>
+<data name="AlphaOutputDescription" xml:space="preserve"><value>Hasil transparansi</value></data>
+<data name="CreateMaskNode" xml:space="preserve"><value>Buat Masker</value></data>
+<data name="CreateMaskNodeDescription" xml:space="preserve"><value>Menghasilkan gambar dari elemen gambar yang ditentukan</value></data>
+<data name="MaskInputImageDescription" xml:space="preserve"><value>Gambar dasar yang digunakan untuk membuat masker</value></data>
+<data name="MaskModeLabel" xml:space="preserve"><value>Mode</value></data>
+<data name="MaskModeDescription" xml:space="preserve"><value>Elemen gambar yang digunakan untuk membuat masker</value></data>
+<data name="MaskOffsetLabel" xml:space="preserve"><value>Offset</value></data>
+<data name="MaskOffsetDescription" xml:space="preserve"><value>Offset yang ditambahkan ke nilai masker</value></data>
+<data name="MaskInvertDescription" xml:space="preserve"><value>Apakah masker dibalik</value></data>
+<data name="MaskOutputDescription" xml:space="preserve"><value>Masker yang dihasilkan</value></data>
+<data name="MaskClipNode" xml:space="preserve"><value>Klip Masker</value></data>
+<data name="MaskClipNodeDescription" xml:space="preserve"><value>Mengklip gambar menggunakan masker</value></data>
+<data name="MaskClipInputImageDescription" xml:space="preserve"><value>Gambar yang akan diklip menggunakan masker</value></data>
+<data name="MaskClipMaskDescription" xml:space="preserve"><value>Masker yang digunakan untuk klip</value></data>
+<data name="MaskClipOutputDescription" xml:space="preserve"><value>Hasil klip menggunakan masker</value></data>
+<data name="MaskThresholdNode" xml:space="preserve"><value>Ambang Masker</value></data>
+<data name="MaskThresholdNodeDescription" xml:space="preserve"><value>Mengatur rentang intensitas masker</value></data>
+<data name="MaskThresholdInputLabel" xml:space="preserve"><value>Masker Masukan</value></data>
+<data name="MaskThresholdInputDescription" xml:space="preserve"><value>Masker yang akan diterapkan ambang batas</value></data>
+<data name="MaskMinLabel" xml:space="preserve"><value>Nilai Min</value></data>
+<data name="MaskMinDescription" xml:space="preserve"><value>Batas bawah ambang batas</value></data>
+<data name="MaskMaxLabel" xml:space="preserve"><value>Nilai Maks</value></data>
+<data name="MaskMaxDescription" xml:space="preserve"><value>Batas atas ambang batas</value></data>
+<data name="MaskThresholdOutputLabel" xml:space="preserve"><value>Masker Keluaran</value></data>
+<data name="MaskThresholdOutputDescription" xml:space="preserve"><value>Masker dengan ambang batas diterapkan</value></data>
+<data name="MaskToImageNode" xml:space="preserve"><value>Kembangkan Masker</value></data>
+<data name="MaskToImageNodeDescription" xml:space="preserve"><value>Mengonversi intensitas masker menjadi gambar hitam-putih</value></data>
+<data name="MaskDevelopTargetDescription" xml:space="preserve"><value>Masker yang akan dikembangkan</value></data>
+<data name="MaskImageOutputLabel" xml:space="preserve"><value>Gambar</value></data>
+<data name="MaskImageOutputDescription" xml:space="preserve"><value>Gambar hasil pengembangan masker</value></data>
+<data name="BlendNode" xml:space="preserve"><value>Gabung</value></data>
+<data name="BlendNodeDescription" xml:space="preserve"><value>Menggabungkan dua gambar menggunakan mode yang ditentukan.</value></data>
+<data name="BlendInputImage1Description" xml:space="preserve"><value>Gambar pertama yang akan digabungkan</value></data>
+<data name="BlendInputImage2Description" xml:space="preserve"><value>Gambar kedua yang akan digabungkan</value></data>
+<data name="BlendModeDescription" xml:space="preserve"><value>Mode Gabung</value></data>
+<data name="BlendOutputDescription" xml:space="preserve"><value>Hasil penggabungan</value></data>
+<data name="ArgumentsNode" xml:space="preserve"><value>Argumen</value></data>
+<data name="ArgumentsNodeDescription" xml:space="preserve"><value>Menyediakan nilai masukan grafik.</value></data>
+<data name="ReturnNode" xml:space="preserve"><value>Nilai Kembalian</value></data>
+<data name="ReturnNodeDescription" xml:space="preserve"><value>Menerima hasil perhitungan graf node.</value></data>
+<data name="NoMatchingResults" xml:space="preserve"><value>(Tidak ada hasil)</value></data>
+<data name="NumberNode" xml:space="preserve"><value>Angka</value></data>
+<data name="NumberNodeDescription" xml:space="preserve"><value>Mengeluarkan nilai angka.</value></data>
+<data name="StringNode" xml:space="preserve"><value>String</value></data>
+<data name="StringNodeDescription" xml:space="preserve"><value>Mengeluarkan string.</value></data>
+<data name="BooleanNode" xml:space="preserve"><value>Boolean</value></data>
+<data name="BooleanNodeDescription" xml:space="preserve"><value>Mengeluarkan nilai boolean.</value></data>
+<data name="ColorNode" xml:space="preserve"><value>Warna</value></data>
+<data name="ColorNodeDescription" xml:space="preserve"><value>Mengeluarkan warna.</value></data>
+<data name="UnicodeToCharNode" xml:space="preserve"><value>Unicode ke Karakter</value></data>
+<data name="UnicodeToCharNodeDescription" xml:space="preserve"><value>Mengonversi titik kode Unicode menjadi karakter.</value></data>
+<data name="CharToUnicodeNode" xml:space="preserve"><value>Karakter ke Unicode</value></data>
+<data name="CharToUnicodeNodeDescription" xml:space="preserve"><value>Mengonversi karakter menjadi titik kode Unicode.</value></data>
+<data name="StringNthCharNode" xml:space="preserve"><value>Ambil Karakter ke-n</value></data>
+<data name="StringNthCharNodeDescription" xml:space="preserve"><value>Mendapatkan karakter pada posisi tertentu dalam string.</value></data>
+<data name="StringEncodeNode" xml:space="preserve"><value>Enkode String</value></data>
+<data name="StringEncodeNodeDescription" xml:space="preserve"><value>Mengkodekan string menjadi array byte menggunakan encoding yang ditentukan.</value></data>
+<data name="StringDecodeNode" xml:space="preserve"><value>Dekode String</value></data>
+<data name="StringDecodeNodeDescription" xml:space="preserve"><value>Mendekode array byte menjadi string menggunakan encoding yang ditentukan.</value></data>
+<data name="NumberToStringNode" xml:space="preserve"><value>Angka ke String</value></data>
+<data name="NumberToStringNodeDescription" xml:space="preserve"><value>Mengonversi angka menjadi string.</value></data>
+<data name="StringConcatNode" xml:space="preserve"><value>Gabungkan String</value></data>
+<data name="StringConcatNodeDescription" xml:space="preserve"><value>Menggabungkan beberapa string.</value></data>
+<data name="RGBToColorNode" xml:space="preserve"><value>RGB ke Warna</value></data>
+<data name="RGBToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai RGB menjadi warna.</value></data>
+<data name="HSVToColorNode" xml:space="preserve"><value>HSV ke Warna</value></data>
+<data name="HSVToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai HSV menjadi warna.</value></data>
+<data name="CMYKToColorNode" xml:space="preserve"><value>CMYK ke Warna</value></data>
+<data name="CMYKToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai CMYK menjadi warna.</value></data>
+<data name="YCbCrToColorNode" xml:space="preserve"><value>YCbCr ke Warna</value></data>
+<data name="YCbCrToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai YCbCr menjadi warna.</value></data>
+<data name="LabToColorNode" xml:space="preserve"><value>Lab ke Warna</value></data>
+<data name="LabToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai Lab menjadi warna.</value></data>
+<data name="OklchToColorNode" xml:space="preserve"><value>Oklch ke Warna</value></data>
+<data name="OklchToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai Oklch menjadi warna.</value></data>
+<data name="HWBToColorNode" xml:space="preserve"><value>HWB ke Warna</value></data>
+<data name="HWBToColorNodeDescription" xml:space="preserve"><value>Mengonversi nilai HWB menjadi warna.</value></data>
+<data name="ColorToRGBNode" xml:space="preserve"><value>Warna ke RGB</value></data>
+<data name="ColorToRGBNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai RGB.</value></data>
+<data name="ColorToHSVNode" xml:space="preserve"><value>Warna ke HSV</value></data>
+<data name="ColorToHSVNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai HSV.</value></data>
+<data name="ColorToCMYKNode" xml:space="preserve"><value>Warna ke CMYK</value></data>
+<data name="ColorToCMYKNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai CMYK.</value></data>
+<data name="ColorToYCbCrNode" xml:space="preserve"><value>Warna ke YCbCr</value></data>
+<data name="ColorToYCbCrNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai YCbCr.</value></data>
+<data name="ColorToLabNode" xml:space="preserve"><value>Warna ke Lab</value></data>
+<data name="ColorToLabNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai Lab.</value></data>
+<data name="ColorToOklchNode" xml:space="preserve"><value>Warna ke Oklch</value></data>
+<data name="ColorToOklchNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai Oklch.</value></data>
+<data name="ColorToHWBNode" xml:space="preserve"><value>Warna ke HWB</value></data>
+<data name="ColorToHWBNodeDescription" xml:space="preserve"><value>Mengonversi warna menjadi nilai HWB.</value></data>
+<data name="CodePoint" xml:space="preserve"><value>Titik kode</value></data>
+<data name="CodePointDescription" xml:space="preserve"><value>Titik kode Unicode (bilangan bulat).</value></data>
+<data name="Character" xml:space="preserve"><value>Karakter</value></data>
+<data name="CharacterDescription" xml:space="preserve"><value>Satu karakter. Semua karakter setelah karakter pertama akan diabaikan.</value></data>
+<data name="Text" xml:space="preserve"><value>Teks</value></data>
+<data name="TextDescription" xml:space="preserve"><value>String target.</value></data>
+<data name="Bytes" xml:space="preserve"><value>Byte</value></data>
+<data name="BytesDescription" xml:space="preserve"><value>Array byte.</value></data>
+<data name="Encoding" xml:space="preserve"><value>Encoding</value></data>
+<data name="EncodingDescription" xml:space="preserve"><value>Jenis pengodean karakter yang akan digunakan.</value></data>
+<data name="EncodingUtf8" xml:space="preserve"><value>UTF-8</value></data>
+<data name="EncodingUtf16" xml:space="preserve"><value>UTF-16</value></data>
+<data name="EncodingUtf32" xml:space="preserve"><value>UTF-32</value></data>
+<data name="EncodingShiftJis" xml:space="preserve"><value>Shift_JIS</value></data>
+<data name="EncodingAscii" xml:space="preserve"><value>ASCII</value></data>
+<data name="StringConcatInput1" xml:space="preserve"><value>String 1</value></data>
+<data name="StringConcatInput2" xml:space="preserve"><value>String 2</value></data>
+<data name="StringConcatInput3" xml:space="preserve"><value>String 3</value></data>
+<data name="StringConcatInput4" xml:space="preserve"><value>String 4</value></data>
+<data name="StringConcatSeparator" xml:space="preserve"><value>الفاصل</value></data>
+<data name="StringConcatSeparatorDescription" xml:space="preserve"><value>String yang disisipkan di antara setiap nilai saat menggabungkannya.</value></data>
+<data name="Red" xml:space="preserve"><value>Merah</value></data>
+<data name="RedDescription" xml:space="preserve"><value>Kanal merah (0-255).</value></data>
+<data name="Green" xml:space="preserve"><value>Hijau</value></data>
+<data name="GreenDescription" xml:space="preserve"><value>Kanal hijau (0-255).</value></data>
+<data name="Blue" xml:space="preserve"><value>Biru</value></data>
+<data name="BlueDescription" xml:space="preserve"><value>Kanal biru (0-255).</value></data>
+<data name="ColorValue" xml:space="preserve"><value>Warna</value></data>
+<data name="ColorValueDescription" xml:space="preserve"><value>Nilai warna.</value></data>
+<data name="Hue" xml:space="preserve"><value>Nada</value></data>
+<data name="HueDescription" xml:space="preserve"><value>Nada (0-360 derajat).</value></data>
+<data name="Saturation" xml:space="preserve"><value>Saturasi</value></data>
+<data name="SaturationDescription" xml:space="preserve"><value>Saturasi (0-100%).</value></data>
+<data name="Brightness" xml:space="preserve"><value>Kecerahan</value></data>
+<data name="BrightnessDescription" xml:space="preserve"><value>Komponen kecerahan/nilai HSV (0-100%).</value></data>
+<data name="CmykCyan" xml:space="preserve"><value>Sian</value></data>
+<data name="CmykCyanDescription" xml:space="preserve"><value>Kanal sian (0-100%).</value></data>
+<data name="CmykMagenta" xml:space="preserve"><value>Magenta</value></data>
+<data name="CmykMagentaDescription" xml:space="preserve"><value>Kanal magenta (0-100%).</value></data>
+<data name="CmykYellow" xml:space="preserve"><value>Kuning</value></data>
+<data name="CmykYellowDescription" xml:space="preserve"><value>Kanal kuning (0-100%).</value></data>
+<data name="CmykKey" xml:space="preserve"><value>Key (Hitam)</value></data>
+<data name="CmykKeyDescription" xml:space="preserve"><value>Kanal key/hitam (0-100%).</value></data>
+<data name="Luma" xml:space="preserve"><value>Luma (Y)</value></data>
+<data name="LumaDescription" xml:space="preserve"><value>El canal de luminancia (0-255</value></data>
+<data name="ChromaBlue" xml:space="preserve"><value>Kroma biru (Cb)</value></data>
+<data name="ChromaBlueDescription" xml:space="preserve"><value>El canal de crominancia Cb (0-255</value></data>
+<data name="ChromaRed" xml:space="preserve"><value>Kroma merah (Cr)</value></data>
+<data name="ChromaRedDescription" xml:space="preserve"><value>El canal de crominancia Cr (0-255</value></data>
+<data name="LabLightness" xml:space="preserve"><value>Kecerahan (L)</value></data>
+<data name="LabLightnessDescription" xml:space="preserve"><value>Kanal kecerahan CIE Lab (0-100).</value></data>
+<data name="LabA" xml:space="preserve"><value>Komponen a</value></data>
+<data name="LabADescription" xml:space="preserve"><value>El canal a* de CIE Lab</value></data>
+<data name="LabB" xml:space="preserve"><value>Komponen b</value></data>
+<data name="LabBDescription" xml:space="preserve"><value>El canal b* de CIE Lab</value></data>
+<data name="OklchLightness" xml:space="preserve"><value>Kecerahan (L)</value></data>
+<data name="OklchLightnessDescription" xml:space="preserve"><value>Kanal kecerahan Oklch (0-1).</value></data>
+<data name="OklchChroma" xml:space="preserve"><value>Kroma (C)</value></data>
+<data name="OklchChromaDescription" xml:space="preserve"><value>قناة التلون في Oklch (حوالي 0-0.5 عمليًا).</value></data>
+<data name="HwbWhiteness" xml:space="preserve"><value>Keputihan (W)</value></data>
+<data name="HwbWhitenessDescription" xml:space="preserve"><value>Kanal keputihan (0-100%).</value></data>
+<data name="HwbBlackness" xml:space="preserve"><value>Kehitaman (B)</value></data>
+<data name="HwbBlacknessDescription" xml:space="preserve"><value>Kanal kehitaman (0-100%).</value></data>
+<data name="MaxFractionDigits" xml:space="preserve"><value>Jumlah digit pecahan maksimum</value></data>
+<data name="MaxFractionDigitsDescription" xml:space="preserve"><value>Jumlah maksimum digit pecahan.</value></data>
+<data name="Alignment" xml:space="preserve"><value>Perataan</value></data>
+<data name="AlignmentDescription" xml:space="preserve"><value>Perataan string keluaran.</value></data>
+<data name="AlignmentWidthDescription" xml:space="preserve"><value>Lebar karakter yang digunakan untuk perataan.</value></data>
+<data name="AlignmentLeft" xml:space="preserve"><value>Rata kiri</value></data>
+<data name="AlignmentCenter" xml:space="preserve"><value>Rata tengah</value></data>
+<data name="AlignmentRight" xml:space="preserve"><value>Rata kanan</value></data>
+<data name="MinIntegerDigits" xml:space="preserve"><value>Jumlah digit bilangan bulat minimum</value></data>
+<data name="MinIntegerDigitsDescription" xml:space="preserve"><value>Jumlah minimum digit bilangan bulat.</value></data>
+<data name="FractionDigits" xml:space="preserve"><value>Jumlah digit pecahan</value></data>
+<data name="FractionDigitsDescription" xml:space="preserve"><value>Jumlah digit setelah titik desimal.</value></data>
+<data name="IntegerPadding" xml:space="preserve"><value>Padding bagian bilangan bulat</value></data>
+<data name="IntegerPaddingDescription" xml:space="preserve"><value>Karakter yang digunakan untuk mengisi digit bilangan bulat yang kurang.</value></data>
+<data name="IntegerPaddingZero" xml:space="preserve"><value>Nol</value></data>
+<data name="IntegerPaddingSpace" xml:space="preserve"><value>Spasi</value></data>
+<data name="ZeroFormat" xml:space="preserve"><value>Tampilan nol</value></data>
+<data name="ZeroFormatDescription" xml:space="preserve"><value>Apakah nol di depan ditampilkan saat menampilkan nilai pecahan kurang dari 1.</value></data>
+<data name="ZeroFormatInclude" xml:space="preserve"><value>Tampilkan nol</value></data>
+<data name="ZeroFormatOmit" xml:space="preserve"><value>Abaikan nol</value></data>
+</root>

@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ko-kr</value></data>
+<data name="Node" xml:space="preserve"><value>노드</value></data>
+<data name="NodeEditor" xml:space="preserve"><value>노드 편집기</value></data>
+<data name="OutputImageIsNull" xml:space="preserve"><value>출력 이미지가 null입니다</value></data>
+<data name="ItemPropertiesNotSet" xml:space="preserve"><value>아이템 속성이 설정되지 않았습니다.</value></data>
+<data name="UnableLoadEffect" xml:space="preserve"><value>효과를 로드할 수 없습니다</value></data>
+<data name="UnableGenerateEffect" xml:space="preserve"><value>효과를 생성할 수 없습니다</value></data>
+<data name="PropertyNotFound" xml:space="preserve"><value>지정된 속성 {0}을(를) 찾을 수 없습니다</value></data>
+<data name="PropertyReadOnly" xml:space="preserve"><value>속성 {0}은(는) 읽기 전용입니다</value></data>
+<data name="UnableCreateAnimationInstance" xml:space="preserve"><value>애니메이션 타입의 인스턴스를 생성할 수 없습니다</value></data>
+<data name="AnimationValuesPropertyError" xml:space="preserve"><value>Animation 객체의 Values 속성을 찾을 수 없거나 읽기 전용입니다</value></data>
+<data name="ShaderResourceIdEmpty" xml:space="preserve"><value>셰이더 리소스 ID가 비어 있습니다</value></data>
+<data name="ShaderResourceNotFound" xml:space="preserve"><value>셰이더 리소스 *.{0}를 찾을 수 없습니다</value></data>
+<data name="CannotCreateEffectInstance" xml:space="preserve"><value>효과 인스턴스를 생성할 수 없습니다</value></data>
+<data name="CannotCastToShaderEffect" xml:space="preserve"><value>ShaderEffect로 캐스팅할 수 없습니다</value></data>
+<data name="IndexOutOfRange" xml:space="preserve"><value>지정된 인덱스가 범위를 벗어났습니다</value></data>
+<data name="CannotCreateType" xml:space="preserve"><value>타입을 생성할 수 없습니다</value></data>
+<data name="Input" xml:space="preserve"><value>입력</value></data>
+<data name="Output" xml:space="preserve"><value>출력</value></data>
+<data name="ColorRgbHeader" xml:space="preserve"><value>RGB</value></data>
+<data name="ColorRedLabel" xml:space="preserve"><value>R:</value></data>
+<data name="ColorGreenLabel" xml:space="preserve"><value>G:</value></data>
+<data name="ColorBlueLabel" xml:space="preserve"><value>B:</value></data>
+<data name="ColorAlphaLabel" xml:space="preserve"><value>A:</value></data>
+<data name="ColorHsvHeader" xml:space="preserve"><value>HSV</value></data>
+<data name="ColorHueLabel" xml:space="preserve"><value>H:</value></data>
+<data name="ColorSaturationLabel" xml:space="preserve"><value>S:</value></data>
+<data name="ColorValueLabel" xml:space="preserve"><value>V:</value></data>
+<data name="SelectFileButton" xml:space="preserve"><value>선택</value></data>
+<data name="OpenSubGraphButton" xml:space="preserve"><value>서브그래프 열기</value></data>
+<data name="AddNodeMenu" xml:space="preserve"><value>노드 추가</value></data>
+<data name="CopyMenu" xml:space="preserve"><value>복사</value></data>
+<data name="CutMenu" xml:space="preserve"><value>잘라내기</value></data>
+<data name="PasteMenu" xml:space="preserve"><value>붙여넣기</value></data>
+<data name="DeleteMenu" xml:space="preserve"><value>삭제</value></data>
+<data name="EditMenu" xml:space="preserve"><value>편집</value></data>
+<data name="ModeMenu" xml:space="preserve"><value>모드</value></data>
+<data name="RectSelectionMenu" xml:space="preserve"><value>사각형 선택</value></data>
+<data name="LassoSelectionMenu" xml:space="preserve"><value>올가미 선택</value></data>
+<data name="PanMenu" xml:space="preserve"><value>이동</value></data>
+<data name="ViewMenu" xml:space="preserve"><value>보기</value></data>
+<data name="ZoomInMenu" xml:space="preserve"><value>확대</value></data>
+<data name="ZoomOutMenu" xml:space="preserve"><value>축소</value></data>
+<data name="ResetZoomMenu" xml:space="preserve"><value>확대/축소 재설정</value></data>
+<data name="FitMenu" xml:space="preserve"><value>화면에 맞추기</value></data>
+<data name="CloseTabToolTip" xml:space="preserve"><value>탭 닫기</value></data>
+<data name="ModeStatusLabel" xml:space="preserve"><value>모드:</value></data>
+<data name="OpenNodeEditorButtonLabel" xml:space="preserve"><value>노드 에디터 열기...</value></data>
+<data name="BezierSmoothMenu" xml:space="preserve"><value>부드럽게</value></data>
+<data name="BezierCornerMenu" xml:space="preserve"><value>코너</value></data>
+<data name="BezierFixedNodeDeleteError" xml:space="preserve"><value>고정된 노드는 삭제할 수 없습니다.</value></data>
+<data name="BezierMinKeyframesError" xml:space="preserve"><value>최소 2개의 키프레임이 필요합니다.</value></data>
+</root>

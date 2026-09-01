@@ -1,0 +1,24 @@
+<local:PortControlBase x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control.EnumPort"
+                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                       xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Control"
+                       xmlns:converters="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters"
+                       mc:Ignorable="d"
+                       d:DesignHeight="300" d:DesignWidth="300">
+    <local:PortControlBase.Resources>
+        <converters:EnumTypeToStringList x:Key="EnumTypeToStringListConverter" />
+    </local:PortControlBase.Resources>
+    <Grid>
+        <ComboBox
+            ItemsSource="{Binding Items, Converter={StaticResource EnumTypeToStringListConverter}, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
+            DisplayMemberPath="Label"
+            SelectedValuePath="Value"
+            SelectedValue="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
+            VerticalContentAlignment="Center"
+            IsEditable="{Binding IsEditable, RelativeSource={RelativeSource AncestorType=local:EnumPort}}"
+            SelectionChanged="ComboBox_SelectionChanged"
+            FontSize="10" />
+    </Grid>
+</local:PortControlBase>

@@ -1,0 +1,81 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View.GraphView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View"
+             xmlns:viewModel="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel"
+             xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance viewModel:GraphViewModel}"
+             MouseLeftButtonDown="OnMouseLeftButtonDown"
+             MouseMove="OnMouseMove"
+             MouseLeftButtonUp="OnMouseLeftButtonUp"
+             MouseWheel="OnMouseWheel"
+             MouseDown="OnMouseDown"
+             MouseUp="OnMouseUp"
+             ContextMenuOpening="OnContextMenuOpening">
+    <UserControl.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="{x:Static loc:TextUi.AddNodeMenu}" Command="{Binding ParentEditor.AddNodeCommand}" />
+            <Separator />
+            <MenuItem Header="{x:Static loc:TextUi.CopyMenu}" Command="{Binding ParentEditor.CopyCommand}"
+                      InputGestureText="Ctrl+C" />
+            <MenuItem Header="{x:Static loc:TextUi.CutMenu}" Command="{Binding ParentEditor.CutCommand}"
+                      InputGestureText="Ctrl+X" />
+            <MenuItem Header="{x:Static loc:TextUi.PasteMenu}" Command="{Binding ParentEditor.PasteCommand}"
+                      InputGestureText="Ctrl+V" />
+            <MenuItem Header="{x:Static loc:TextUi.DeleteMenu}" Command="{Binding ParentEditor.DeleteSelectedCommand}"
+                      InputGestureText="Delete" />
+        </ContextMenu>
+    </UserControl.ContextMenu>
+    <Grid x:Name="RootGrid" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+        <Canvas>
+            <Canvas.LayoutTransform>
+                <ScaleTransform ScaleX="{Binding Zoom}" ScaleY="{Binding Zoom}" />
+            </Canvas.LayoutTransform>
+            <Canvas.RenderTransform>
+                <TranslateTransform X="{Binding PanX}" Y="{Binding PanY}" />
+            </Canvas.RenderTransform>
+
+            <ItemsControl ItemsSource="{Binding Connections, UpdateSourceTrigger=PropertyChanged}"
+                          IsHitTestVisible="False">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Path Stroke="{Binding Brush}"
+                              StrokeThickness="2"
+                              Data="{Binding Geometry}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <ItemsControl ItemsSource="{Binding Nodes}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="Canvas.Left" Value="{Binding X}" />
+                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <local:NodeView />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Canvas>
+    </Grid>
+</UserControl>

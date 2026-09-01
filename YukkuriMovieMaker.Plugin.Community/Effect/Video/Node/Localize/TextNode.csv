@@ -1,0 +1,577 @@
+﻿Key,Comment,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+EffectCategoryName,エフェクトカテゴリ名,エフェクト,Effects,效果,效果,효과,Efectos,التأثيرات,Efek
+CompositionCategoryName,合成カテゴリ名,合成,Composition,合成,合成,합성,Composición,التركيب,Komposisi
+MathCategoryName,数学カテゴリ名,数学,Math,数学,數學,수학,Matemáticas,الرياضيات,Matematika
+BasicCategoryName,基本カテゴリ名,基本,Basic,基础,基礎,기본,Básico,أساسي,Dasar
+GeneratorCategoryName,生成カテゴリ名,生成,Generator,生成,生成,생성기,Generador,مولّد,Generator
+BrushCategoryName,ブラシカテゴリ名,ブラシ,Brush,画笔,筆刷,브러시,Pincel,فرشاة,Kuas
+FunctionsCategoryName,関数カテゴリ名,関数,Functions,函数,函數,함수,Funciones,الدوال,Fungsi
+VideoEffectCategoryName,映像エフェクトカテゴリ名,映像エフェクト,Video Effects,视频效果,視訊效果,비디오 효과,Efectos de vídeo,تأثيرات الفيديو,Efek Video
+AdvancedCategoryName,高度カテゴリ名,高度,Advanced,高级,進階,고급,Advanced,متقدم,Lanjutan
+TransformCategoryName,座標変換カテゴリ名,座標変換,Transform,坐标变换,座標變換,좌표 변환,Transformación,تحويل الإحداثيات,Transformasi Koordinat
+ValueCategoryName,値カテゴリ名,値,Value,值,值,값,Valor,القيمة,Nilai
+StringCategoryName,文字列カテゴリ名,文字列,String,字符串,字串,문자열,Cadena,سلسلة,String
+ColorCategoryName,色カテゴリ名,色,Color,颜色,顏色,색상,Color,اللون,Warna
+BrushName,ブラシ名,ブラシ,Brush,画笔,筆刷,브러시,Pincel,فرشاة,Kuas
+AddNode,加算ノード名,加算,Add,加法,加法,더하기,Sumar,جمع,Tambah
+AddNodeDescription,加算ノード説明,2つの数を加算します。,Add two numbers.,将两个数相加。,將兩個數相加。,두 수를 더합니다.,Suma dos números.,اجمع رقمين.,Menjumlahkan dua angka.
+SubtractNode,減算ノード名,減算,Subtract,减法,減法,빼기,Restar,طرح,Kurang
+SubtractNodeDescription,減算ノード説明,左項から右項を減算します。,Subtract B from A.,从左项减去右项。,從左項減去右項。,왼쪽 항에서 오른쪽 항을 뺍니다.,Resta B de A.,اطرح القيمة اليمنى من اليسرى.,Mengurangkan operand kanan dari operand kiri.
+MultiplyNode,乗算ノード名,乗算,Multiply,乘法,乘法,곱하기,Multiplicar,ضرب,Kali
+MultiplyNodeDescription,乗算ノード説明,2つの数を乗算します。,Multiply two numbers.,将两个数相乘。,將兩個數相乘。,두 수를 곱합니다.,Multiplica dos números.,اضرب رقمين.,Mengalikan dua angka.
+DivideNode,除算ノード名,除算,Divide,除法,除法,나누기,Dividir,قسمة,Bagi
+DivideNodeDescription,除算ノード説明,左項を右項で除算します。,Divide A by B.,用左项除以右项。,用左項除以右項。,왼쪽 항을 오른쪽 항으로 나눕니다.,Divide A entre B.,اقسم القيمة اليسرى على اليمنى.,Membagi operand kiri dengan operand kanan.
+Value,値入力,値,Value,值,值,값,Value,القيمة,Nilai
+ValueDescription,値入力説明,入力値です。,Input value.,输入值。,輸入值。,입력값입니다.,Input value.,قيمة الإدخال,Nilai input.
+LeftOperand,左項,左項,Left operand,左项,左項,왼쪽 항,Operando izquierdo,الطرف الأيسر,Operand kiri
+LeftOperandDescription,左項説明,演算の左側の値です。,Left operand,运算左侧的值。,運算左側的值。,연산의 왼쪽 값입니다.,Valor del lado izquierdo de la operación.,القيمة في الجانب الأيسر من العملية.,Nilai di sisi kiri operasi.
+RightOperand,右項,右項,Right operand,右项,右項,오른쪽 항,Operando derecho,الطرف الأيمن,Operand kanan
+RightOperandDescription,右項説明,演算の右側の値です。,Right operand,运算右侧的值。,運算右側的值。,연산의 오른쪽 값입니다.,Valor del lado derecho de la operación.,القيمة في الجانب الأيمن من العملية.,Nilai di sisi kanan operasi.
+Result,結果,結果,Result,结果,結果,결과,Resultado,النتيجة,Hasil
+ResultDescription,結果出力説明,演算結果です。,Calculation result.,运算结果。,運算結果。,연산 결과입니다.,Calculation result.,نتيجة العملية,Hasil operasi.
+AddResultDescription,加算結果説明,加算結果です。,Sum,加法结果。,加法結果。,덧셈 결과입니다.,Suma.,نتيجة الجمع.,Hasil penjumlahan.
+SubtractResultDescription,減算結果説明,減算結果です。,A minus B,减法结果。,減法結果。,뺄셈 결과입니다.,A menos B.,نتيجة الطرح.,Hasil pengurangan.
+MultiplyResultDescription,乗算結果説明,乗算結果です。,Product,乘法结果。,乘法結果。,곱셈 결과입니다.,Producto.,نتيجة الضرب.,Hasil perkalian.
+DivideResultDescription,除算結果説明,除算結果です。,Quotient of A divided by B,除法结果。,除法結果。,나눗셈 결과입니다.,Cociente de A dividido entre B.,نتيجة القسمة.,Hasil pembagian.
+AbsNode,絶対値ノード名,絶対値,Absolute Value,绝对值,絕對值,절댓값,Valor absoluto,القيمة المطلقة,Nilai Absolut
+AbsNodeDescription,絶対値ノード説明,絶対値を求めます。,Calculate absolute value.,计算绝对值。,計算絕對值。,절댓값을 계산합니다.,Calculate absolute value.,احسب القيمة المطلقة.,Menghitung nilai absolut.
+SignNode,符号ノード名,符号,Sign,符号,符號,부호,Signo,الإشارة,Tanda
+SignNodeDescription,符号ノード説明,値の符号を返します。,Return sign of value.,返回数值符号。,回傳數值符號。,부호를 반환합니다.,Return sign.,إرجاع الإشارة.,Mengembalikan tanda dari nilai.
+MinNode,最小値ノード名,最小値,Minimum,最小值,最小值,최솟값,Mínimo,القيمة الصغرى,Nilai Minimum
+MinNodeDescription,最小値ノード説明,2つの値の小さい方を返します。,Return smaller value.,返回较小值。,回傳較小值。,작은 값을 반환합니다.,Return minimum.,إرجاع الأصغر.,Mengembalikan nilai yang lebih kecil dari dua nilai.
+MaxNode,最大値ノード名,最大値,Maximum,最大值,最大值,최댓값,Máximo,القيمة الكبرى,Nilai Maksimum
+MaxNodeDescription,最大値ノード説明,2つの値の大きい方を返します。,Return larger value.,返回较大值。,回傳較大值。,큰 값을 반환합니다.,Return maximum.,إرجاع الأكبر.,Mengembalikan nilai yang lebih besar dari dua nilai.
+ClampNode,クランプノード名,クランプ,Clamp,限制,限制,클램프,Clamp,تقييد,Clamp
+ClampNodeDescription,クランプノード説明,指定範囲に制限します。,Clamp to range.,限制到指定范围。,限制到指定範圍。,범위로 제한합니다.,Clamp to range.,تقييد ضمن المجال.,Membatasi nilai ke rentang tertentu.
+LerpNode,線形補間ノード名,線形補間,Lerp,线性插值,線性插值,선형 보간,Interpolación lineal,استيفاء خطي,Interpolasi Linear
+LerpNodeDescription,線形補間ノード説明,2つの値を線形補間します。,Linear interpolation.,线性插值。,線性插值。,선형 보간합니다.,Linear interpolation.,استيفاء خطي.,Melakukan interpolasi linear antara dua nilai.
+SqrtNode,平方根ノード名,平方根,Square Root,平方根,平方根,제곱근,Raíz cuadrada,الجذر التربيعي,Akar Kuadrat
+SqrtNodeDescription,平方根ノード説明,平方根を求めます。,Calculate square root.,计算平方根。,計算平方根。,제곱근을 계산합니다.,Square root.,احسب الجذر التربيعي.,Menghitung akar kuadrat.
+PowerNode,累乗ノード名,累乗,Power,幂,冪次,거듭제곱,Potencia,الأس,Pangkat
+PowerNodeDescription,累乗ノード説明,累乗を求めます。,Raise to power.,计算幂。,計算冪次。,거듭제곱을 계산합니다.,Power.,احسب الأس.,Menghitung pangkat.
+FloorNode,切り捨てノード名,切り捨て,Floor,向下取整,無條件捨去,버림,Floor,التقريب للأسفل,Pembulatan ke Bawah
+FloorNodeDescription,切り捨てノード説明,切り捨てます。,Round down.,向下取整。,無條件捨去。,버림합니다.,Floor.,تقريب للأسفل.,Membulatkan ke bawah.
+CeilingNode,切り上げノード名,切り上げ,Ceiling,向上取整,無條件進位,올림,Ceiling,التقريب للأعلى,Pembulatan ke Atas
+CeilingNodeDescription,切り上げノード説明,切り上げます。,Round up.,向上取整。,無條件進位。,올림합니다.,Ceiling.,تقريب للأعلى.,Membulatkan ke atas.
+RoundNode,四捨五入ノード名,四捨五入,Round,四舍五入,四捨五入,반올림,Round,التقريب,Pembulatan
+RoundNodeDescription,四捨五入ノード説明,四捨五入します。,Round value.,四舍五入。,四捨五入。,반올림합니다.,Round.,تقريب.,Membulatkan ke bilangan terdekat.
+FractionNode,小数部ノード名,小数部,Fraction,小数部分,小數部分,소수 부분,Fraction,الجزء الكسري,Bagian Desimal
+FractionNodeDescription,小数部ノード説明,小数部を返します。,Return fractional part.,返回小数部分。,回傳小數部分。,소수 부분을 반환합니다.,Fractional part.,إرجاع الجزء الكسري.,Mengembalikan bagian desimal.
+SinNode,サインノード名,サイン,Sin,正弦,正弦,사인,Sin,جيب,Sinus
+SinNodeDescription,サインノード説明,サインを求めます。,Calculate sine.,计算正弦。,計算正弦。,사인을 계산합니다.,Calculate sine.,احسب الجيب.,Menghitung sinus.
+CosNode,コサインノード名,コサイン,Cos,余弦,餘弦,코사인,Cos,جيب التمام,Kosinus
+CosNodeDescription,コサインノード説明,コサインを求めます。,Calculate cosine.,计算余弦。,計算餘弦。,코사인을 계산합니다.,Calculate cosine.,احسب جيب التمام.,Menghitung kosinus.
+TanNode,タンジェントノード名,タンジェント,Tan,正切,正切,탄젠트,Tan,الظل,Tangen
+TanNodeDescription,タンジェントノード説明,タンジェントを求めます。,Calculate tangent.,计算正切。,計算正切。,탄젠트를 계산합니다.,Calculate tangent.,احسب الظل.,Menghitung tangen.
+Atan2Node,逆正接2ノード名,Atan2,Atan2,Atan2,Atan2,Atan2,Atan2,Atan2,Atan2
+Atan2NodeDescription,逆正接2ノード説明,2変数逆正接を求めます。,Calculate atan2.,计算 atan2。,計算 atan2。,atan2를 계산합니다.,Calculate atan2.,احسب atan2.,Menghitung arctangen dua variabel.
+DegreesToRadiansNode,度ラジアン変換ノード名,度→ラジアン,Degrees to Radians,角度转弧度,角度轉弧度,도→라디안,Degrees to Radians,درجات إلى راديان,Derajat→Radian
+DegreesToRadiansNodeDescription,度ラジアン変換説明,度をラジアンへ変換します。,Convert degrees to radians.,角度转弧度。,角度轉弧度。,도를 라디안으로 변환합니다.,Convert degrees to radians.,تحويل الدرجات إلى راديان.,Mengonversi derajat ke radian.
+RadiansToDegreesNode,ラジアン度変換ノード名,ラジアン→度,Radians to Degrees,弧度转角度,弧度轉角度,라디안→도,Radians to Degrees,راديان إلى درجات,Radian→Derajat
+RadiansToDegreesNodeDescription,ラジアン度変換説明,ラジアンを度へ変換します。,Convert radians to degrees.,弧度转角度。,弧度轉角度。,라디안을 도로 변환합니다.,Convert radians to degrees.,تحويل الراديان إلى درجات.,Mengonversi radian ke derajat.
+Minimum,最小値入力,最小値,Minimum,最小值,最小值,최솟값,Minimum,الحد الأدنى,Minimum
+MinimumDescription,最小値入力説明,下限値です。,Minimum value.,最小值。,最小值。,최솟값입니다.,Minimum value.,الحد الأدنى.,Nilai batas bawah.
+Maximum,最大値入力,最大値,Maximum,最大值,最大值,최댓값,Maximum,الحد الأقصى,Maksimum
+MaximumDescription,最大値入力説明,上限値です。,Maximum value.,最大值。,最大值。,최댓값입니다.,Maximum value.,الحد الأقصى.,Nilai batas atas.
+StartValue,開始値入力,開始値,Start Value,起始值,起始值,시작값,Start Value,قيمة البداية,Nilai Awal
+StartValueDescription,開始値説明,補間開始値です。,Interpolation start value.,插值起始值。,插值起始值。,보간 시작값입니다.,Interpolation start value.,قيمة بداية الاستيفاء.,Nilai awal interpolasi.
+EndValue,終了値入力,終了値,End Value,结束值,結束值,끝값,End Value,قيمة النهاية,Nilai Akhir
+EndValueDescription,終了値説明,補間終了値です。,Interpolation end value.,插值结束值。,插值結束值。,보간 끝값입니다.,Interpolation end value.,قيمة نهاية الاستيفاء.,Nilai akhir interpolasi.
+InterpolationFactor,補間係数入力,補間係数,Interpolation Factor,插值系数,插值係數,보간 계수,Interpolation Factor,معامل الاستيفاء,Faktor Interpolasi
+InterpolationFactorDescription,補間係数説明,補間係数です。,Interpolation factor.,插值系数。,插值係數。,보간 계수입니다.,Interpolation factor.,معامل الاستيفاء.,Faktor interpolasi.
+Base,底入力,底,Base,底数,底數,밑,Base,الأساس,Basis
+BaseDescription,底説明,底です。,Base value.,底数。,底數。,밑입니다.,Base value.,الأساس.,Basis.
+Exponent,指数入力,指数,Exponent,指数,指數,지수,Exponent,الأس,Eksponen
+ExponentDescription,指数説明,指数です。,Exponent value.,指数。,指數。,지수입니다.,Exponent value.,الأس.,Eksponen.
+YValue,Y入力,Y,Y,Y,Y,Y,Y,Y,Y
+YValueDescription,Y入力説明,Y座標です。,Y value.,Y值。,Y值。,Y값입니다.,Y value.,قيمة Y.,Koordinat Y.
+XValue,X入力,X,X,X,X,X,X,X,X
+XValueDescription,X入力説明,X座標です。,X value.,X值。,X值。,X값입니다.,X value.,قيمة X.,Koordinat X.
+AbsResultDescription,絶対値結果説明,絶対値です。,Absolute value.,绝对值。,絕對值。,절댓값입니다.,Valor absoluto.,القيمة المطلقة.,Nilai absolut.
+SignResultDescription,符号結果説明,符号です。,Sign.,符号。,符號。,부호입니다.,Signo.,الإشارة.,Tanda.
+MinResultDescription,最小値結果説明,最小値です。,Minimum value.,最小值。,最小值。,최솟값입니다.,Valor mínimo.,القيمة الصغرى.,Nilai minimum.
+MaxResultDescription,最大値結果説明,最大値です。,Maximum value.,最大值。,最大值。,최댓값입니다.,Valor máximo.,القيمة الكبرى.,Nilai maksimum.
+ClampResultDescription,クランプ結果説明,クランプ後の値です。,Clamped value.,限制后的值。,限制後的值。,클램프된 값입니다.,Valor limitado.,القيمة بعد التقييد.,Nilai setelah clamp.
+LerpResultDescription,線形補間結果説明,補間結果です。,Interpolated value.,插值结果。,插值結果。,보간 결과입니다.,Valor interpolado.,نتيجة الاستيفاء.,Hasil interpolasi.
+SqrtResultDescription,平方根結果説明,平方根です。,Square root.,平方根。,平方根。,제곱근입니다.,Raíz cuadrada.,الجذر التربيعي.,Akar kuadrat.
+PowerResultDescription,累乗結果説明,累乗結果です。,Power result.,幂运算结果。,冪次結果。,거듭제곱 결과입니다.,Resultado de la potencia.,نتيجة الأس.,Hasil pangkat.
+FloorResultDescription,切り捨て結果説明,切り捨て結果です。,Floor result.,向下取整结果。,無條件捨去結果。,버림 결과입니다.,Resultado del redondeo hacia abajo.,نتيجة التقريب للأسفل.,Hasil pembulatan ke bawah.
+CeilingResultDescription,切り上げ結果説明,切り上げ結果です。,Ceiling result.,向上取整结果。,無條件進位結果。,올림 결과입니다.,Resultado del redondeo hacia arriba.,نتيجة التقريب للأعلى.,Hasil pembulatan ke atas.
+RoundResultDescription,四捨五入結果説明,四捨五入結果です。,Rounded value.,四舍五入后的值。,四捨五入後的值。,반올림된 값입니다.,Valor redondeado.,القيمة بعد التقريب.,Nilai yang dibulatkan.
+FractionResultDescription,小数部結果説明,小数部です。,Fractional part.,小数部分。,小數部分。,소수 부분입니다.,Parte decimal.,الجزء العشري.,Bagian desimal.
+SinResultDescription,サイン結果説明,サイン値です。,Sine value.,正弦值。,正弦值。,사인값입니다.,Valor del seno.,قيمة الجيب.,Nilai sinus.
+CosResultDescription,コサイン結果説明,コサイン値です。,Cosine value.,余弦值。,餘弦值。,코사인값입니다.,Valor del coseno.,قيمة جيب التمام.,Nilai kosinus.
+TanResultDescription,タンジェント結果説明,タンジェント値です。,Tangent value.,正切值。,正切值。,탄젠트값입니다.,Valor de la tangente.,قيمة الظل.,Nilai tangen.
+Atan2ResultDescription,Atan2結果説明,Atan2の結果です。,Atan2 result.,Atan2 的结果。,Atan2 的結果。,Atan2의 결과입니다.,Resultado de Atan2.,نتيجة Atan2.,Hasil Atan2.
+DegreesToRadiansResultDescription,度ラジアン変換結果説明,ラジアン値です。,Radians.,弧度值。,弧度值。,라디안값입니다.,Valor en radianes.,القيمة بالراديان.,Nilai radian.
+RadiansToDegreesResultDescription,ラジアン度変換結果説明,度数値です。,Degrees.,角度值。,角度值。,각도값입니다.,Valor en grados.,القيمة بالدرجات.,Nilai derajat.
+Length,長さ入力,長さ,Length,长度,長度,길이,Length,الطول,Panjang
+LengthDescription,長さ入力説明,周期の長さです。,Period length.,周期长度。,週期長度。,주기 길이입니다.,Period length.,طول الدورة,Panjang periode.
+Edge,しきい値入力,しきい値,Edge,阈值,臨界值,임계값,Edge,العتبة,Ambang
+EdgeDescription,しきい値入力説明,しきい値です。,Threshold value.,阈值。,臨界值。,임계값입니다.,Threshold value.,قيمة العتبة,Nilai ambang.
+Tolerance,許容誤差入力,許容誤差,Tolerance,容差,容許誤差,허용 오차,Tolerance,التفاوت,Toleransi
+ToleranceDescription,許容誤差入力説明,比較時の許容誤差です。,Tolerance for comparison.,比较时允许误差。,比較時容許誤差。,비교 허용 오차입니다.,Tolerance for comparison.,هامش المقارنة,Toleransi saat perbandingan.
+Condition,条件入力,条件,Condition,条件,條件,조건,Condition,الشرط,Kondisi
+ConditionDescription,条件入力説明,判定条件です。,Condition.,判定条件。,判定條件。,조건입니다.,Condition.,الشرط,Kondisi penentu.
+TrueValue,真の場合,真の場合,True Value,真值,真值,참일 때,True Value,عند الصحة,Jika Benar
+TrueValueDescription,真入力説明,条件が真のときの値です。,Value when true.,条件为真时的值。,條件為真時的值。,참일 때의 값입니다.,Value when true.,القيمة عند تحقق الشرط,Nilai saat kondisi benar.
+FalseValue,偽の場合,偽の場合,False Value,假值,假值,거짓일 때,False Value,عند الخطأ,Jika Salah
+FalseValueDescription,偽入力説明,条件が偽のときの値です。,Value when false.,条件为假时的值。,條件為假時的值。,거짓일 때의 값입니다.,Value when false.,القيمة عند عدم تحقق الشرط,Nilai saat kondisi salah.
+ComparisonResultDescription,比較結果説明,比較結果です。,Comparison result.,比较结果。,比較結果。,비교 결과입니다.,Resultado de la comparación.,نتيجة المقارنة.,Hasil perbandingan.
+ModuloNode,剰余ノード名,剰余,Modulo,取余,取餘,나머지,Modulo,باقي القسمة,Modulo
+ModuloNodeDescription,剰余ノード説明,剰余を求めます。,Calculate remainder.,求余数。,求餘數。,나머지를 구합니다.,Calcula el resto.,احسب باقي القسمة.,Menghitung sisa pembagian.
+ModuloResultDescription,剰余結果説明,剰余です。,Remainder.,余数。,餘數。,나머지입니다.,Resto.,باقي القسمة.,Sisa pembagian.
+ReciprocalNode,逆数ノード名,逆数,Reciprocal,倒数,倒數,역수,Reciprocal,المقلوب,Kebalikan
+ReciprocalNodeDescription,逆数ノード説明,逆数を求めます。,Calculate reciprocal.,求倒数。,求倒數。,역수를 구합니다.,Calcula el recíproco.,احسب المقلوب.,Menghitung nilai kebalikan.
+ReciprocalResultDescription,逆数結果説明,逆数です。,Reciprocal.,倒数。,倒數。,역수입니다.,Recíproco.,المقلوب.,Nilai kebalikan.
+OneMinusNode,1減算ノード名,1から減算,One Minus,一减去,一減去,1에서 빼기,One Minus,واحد ناقص,1 Dikurangi
+OneMinusNodeDescription,1減算ノード説明,1から入力値を引きます。,Subtract value from one.,用1减去输入值。,用1減去輸入值。,1에서 입력값을 뺍니다.,Resta el valor de entrada a uno.,اطرح القيمة المدخلة من واحد.,Mengurangkan nilai input dari 1.
+OneMinusResultDescription,1減算結果説明,計算結果です。,Calculation result.,计算结果。,計算結果。,계산 결과입니다.,Resultado del cálculo.,نتيجة الحساب.,Hasil perhitungan.
+SaturateNode,Saturateノード名,Saturate,Saturate,饱和,飽和,포화,Saturate,تشبيع,Saturate
+SaturateNodeDescription,Saturateノード説明,0～1の範囲へ制限します。,Clamp to 0-1.,限制在0到1之间。,限制在0到1之間。,0~1 범위로 제한합니다.,Limita al rango 0-1.,تقييد ضمن النطاق 0 إلى 1.,Membatasi ke rentang 0–1.
+SaturateResultDescription,Saturate結果説明,制限後の値です。,Clamped value.,限制后的值。,限制後的值。,제한된 값입니다.,Valor limitado.,القيمة بعد التقييد.,Nilai setelah dibatasi.
+InverseLerpNode,逆補間ノード名,逆補間,Inverse Lerp,逆线性插值,逆線性插值,역보간,Inverse Lerp,استيفاء عكسي,Interpolasi Balik
+InverseLerpNodeDescription,逆補間ノード説明,補間係数を求めます。,Calculate interpolation factor.,求插值系数。,求插值係數。,보간 계수를 구합니다.,Calcula el factor de interpolación.,احسب معامل الاستيفاء.,Menghitung faktor interpolasi.
+InverseLerpResultDescription,逆補間結果説明,補間係数です。,Interpolation factor.,插值系数。,插值係數。,보간 계수입니다.,Factor de interpolación.,معامل الاستيفاء.,Faktor interpolasi.
+SmoothStepNode,SmoothStepノード名,SmoothStep,SmoothStep,SmoothStep,SmoothStep,SmoothStep,SmoothStep,SmoothStep,SmoothStep
+SmoothStepNodeDescription,SmoothStepノード説明,滑らかに補間します。,Smooth interpolation.,平滑插值。,平滑插值。,부드럽게 보간합니다.,Interpola suavemente.,استيفاء سلس.,Melakukan interpolasi halus.
+SmoothStepResultDescription,SmoothStep結果説明,補間結果です。,Interpolated value.,插值结果。,插值結果。,보간 결과입니다.,Valor interpolado.,نتيجة الاستيفاء.,Hasil interpolasi.
+StepNode,ステップノード名,ステップ,Step,阶跃,階躍,스텝,Step,خطوة,Step
+StepNodeDescription,ステップノード説明,しきい値で0または1を返します。,Return 0 or 1 by threshold.,根据阈值返回0或1。,依臨界值返回0或1。,임계값을 기준으로 0 또는 1을 반환합니다.,Devuelve 0 o 1 según el umbral.,إرجاع 0 أو 1 حسب العتبة.,Mengembalikan 0 atau 1 berdasarkan ambang.
+StepResultDescription,ステップ結果説明,ステップ結果です。,Step result.,阶跃结果。,階躍結果。,스텝 결과입니다.,Resultado del step.,نتيجة الخطوة.,Hasil step.
+RepeatNode,繰り返しノード名,繰り返し,Repeat,重复,重複,반복,Repeat,تكرار,Pengulangan
+RepeatNodeDescription,繰り返しノード説明,一定周期で繰り返します。,Repeat periodically.,按固定周期重复。,依固定週期重複。,일정 주기로 반복합니다.,Se repite con un período fijo.,تكرار بدورة ثابتة.,Mengulang dengan periode tetap.
+RepeatResultDescription,繰り返し結果説明,繰り返し結果です。,Repeated value.,重复结果。,重複結果。,반복 결과입니다.,Valor repetido.,نتيجة التكرار.,Hasil pengulangan.
+PingPongNode,PingPongノード名,PingPong,PingPong,PingPong,PingPong,PingPong,PingPong,PingPong,PingPong
+PingPongNodeDescription,PingPongノード説明,往復運動を生成します。,Generate ping-pong motion.,生成往复运动。,產生往復運動。,왕복 운동을 생성합니다.,Genera un movimiento de ida y vuelta.,إنشاء حركة تذبذب.,Menghasilkan gerakan bolak-balik.
+PingPongResultDescription,PingPong結果説明,往復値です。,Ping-pong value.,往复值。,往復值。,왕복값입니다.,Valor de ida y vuelta.,قيمة التذبذب.,Nilai bolak-balik.
+WrapNode,折り返しノード名,折り返し,Wrap,循环,循環,랩,Wrap,التفاف,Wrap
+WrapNodeDescription,折り返しノード説明,範囲内へ折り返します。,Wrap into range.,循环回到范围内。,循環回到範圍內。,범위 안으로 되감습니다.,Envuelve el valor dentro del rango.,التفاف القيمة داخل النطاق.,Melipat nilai kembali ke dalam rentang.
+WrapResultDescription,折り返し結果説明,折り返し後の値です。,Wrapped value.,循环后的值。,循環後的值。,되감긴 값입니다.,Valor envuelto.,القيمة بعد الالتفاف.,Nilai setelah dilipat.
+ExpNode,指数ノード名,指数関数,Exponential,指数,指數,지수,Exponential,الدالة الأسية,Fungsi Eksponensial
+ExpNodeDescription,指数ノード説明,eの累乗を求めます。,Calculate exponential.,求e的幂。,求e的冪。,e의 거듭제곱을 구합니다.,Calcula la potencia de e.,احسب أس العدد e.,Menghitung pangkat e.
+ExpResultDescription,指数結果説明,指数計算結果です。,Exponential result.,指数计算结果。,指數計算結果。,지수 계산 결과입니다.,Resultado exponencial.,نتيجة الحساب الأسي.,Hasil perhitungan eksponensial.
+Exp2Node,2指数ノード名,2の累乗,Power of Two,2次幂,2次冪,2의 거듭제곱,Power of Two,قوة العدد 2,Pangkat 2
+Exp2NodeDescription,2指数ノード説明,2の累乗を求めます。,Calculate power of two.,求2的幂。,求2的冪。,2의 거듭제곱을 구합니다.,Calcula la potencia de 2.,احسب قوة العدد 2.,Menghitung pangkat 2.
+Exp2ResultDescription,2指数結果説明,計算結果です。,Calculation result.,计算结果。,計算結果。,계산 결과입니다.,Resultado del cálculo.,نتيجة الحساب.,Hasil perhitungan.
+LogNode,自然対数ノード名,自然対数,Natural Logarithm,自然对数,自然對數,자연로그,Natural Logarithm,اللوغاريتم الطبيعي,Logaritma Natural
+LogNodeDescription,自然対数ノード説明,自然対数を求めます。,Calculate natural logarithm.,求自然对数。,求自然對數。,자연로그를 구합니다.,Calcula el logaritmo natural.,احسب اللوغاريتم الطبيعي.,Menghitung logaritma natural.
+LogResultDescription,自然対数結果説明,自然対数です。,Natural logarithm.,自然对数。,自然對數。,자연로그입니다.,Logaritmo natural.,اللوغاريتم الطبيعي.,Logaritma natural.
+Log2Node,2進対数ノード名,2進対数,Log Base 2,以2为底对数,以2為底對數,밑이 2인 로그,Log Base 2,لوغاريتم للأساس 2,Logaritma Basis 2
+Log2NodeDescription,2進対数ノード説明,2進対数を求めます。,Calculate base-2 logarithm.,求以2为底的对数。,求以2為底的對數。,밑이 2인 로그를 구합니다.,Calcula el logaritmo en base 2.,احسب اللوغاريتم بالأساس 2.,Menghitung logaritma basis 2.
+Log2ResultDescription,2進対数結果説明,2進対数です。,Base-2 logarithm.,以2为底的对数。,以2為底的對數。,밑이 2인 로그입니다.,Logaritmo en base 2.,اللوغاريتم بالأساس 2.,Logaritma basis 2.
+Log10Node,常用対数ノード名,常用対数,Log Base 10,常用对数,常用對數,상용로그,Log Base 10,لوغاريتم للأساس 10,Logaritma Basis 10
+Log10NodeDescription,常用対数ノード説明,常用対数を求めます。,Calculate base-10 logarithm.,求以10为底的对数。,求以10為底的對數。,밑이 10인 로그를 구합니다.,Calcula el logaritmo en base 10.,احسب اللوغاريتم بالأساس 10.,Menghitung logaritma basis 10.
+Log10ResultDescription,常用対数結果説明,常用対数です。,Base-10 logarithm.,以10为底的对数。,以10為底的對數。,밑이 10인 로그입니다.,Logaritmo en base 10.,اللوغاريتم بالأساس 10.,Logaritma basis 10.
+AsinNode,逆正弦ノード名,逆正弦,Arc Sine,反正弦,反正弦,아크사인,Arc Sine,جيب عكسي,Arcsinus
+AsinNodeDescription,逆正弦ノード説明,逆正弦を求めます。,Calculate arc sine.,求反正弦。,求反正弦。,아크사인을 구합니다.,Calcula el arcoseno.,احسب دالة الجيب العكسي.,Menghitung arcsinus.
+AsinResultDescription,逆正弦結果説明,逆正弦です。,Arc sine.,反正弦。,反正弦。,아크사인입니다.,Arcoseno.,الجيب العكسي.,Arcsinus.
+AcosNode,逆余弦ノード名,逆余弦,Arc Cosine,反余弦,反餘弦,아크코사인,Arc Cosine,جيب تمام عكسي,Arckosinus
+AcosNodeDescription,逆余弦ノード説明,逆余弦を求めます。,Calculate arc cosine.,求反余弦。,求反餘弦。,아크코사인을 구합니다.,Calcula el arcocoseno.,احسب دالة جيب التمام العكسي.,Menghitung arckosinus.
+AcosResultDescription,逆余弦結果説明,逆余弦です。,Arc cosine.,反余弦。,反餘弦。,아크코사인입니다.,Arcocoseno.,جيب التمام العكسي.,Arckosinus.
+AtanNode,逆正接ノード名,逆正接,Arc Tangent,反正切,反正切,아크탄젠트,Arc Tangent,ظل عكسي,Arctangen
+AtanNodeDescription,逆正接ノード説明,逆正接を求めます。,Calculate arc tangent.,求反正切。,求反正切。,아크탄젠트를 구합니다.,Calcula el arcotangente.,احسب الظل العكسي.,Menghitung arctangen.
+AtanResultDescription,逆正接結果説明,逆正接です。,Arc tangent.,反正切。,反正切。,아크탄젠트입니다.,Arcotangente.,الظل العكسي.,Arctangen.
+EqualNode,等しいノード名,等しい,Equal,相等,相等,같음,Equal,يساوي,Sama Dengan
+EqualNodeDescription,等しいノード説明,2つの値が等しいか判定します。,Compare equality.,判断两个值是否相等。,判斷兩個值是否相等。,두 값이 같은지 판정합니다.,Comprueba si dos valores son iguales.,تحقق مما إذا كانت القيمتان متساويتين.,Memeriksa apakah dua nilai sama.
+EqualResultDescription,等しい結果説明,比較結果です。,Comparison result.,比较结果。,比較結果。,비교 결과입니다.,Resultado de la comparación.,نتيجة المقارنة.,Hasil perbandingan.
+NotEqualNode,等しくないノード名,等しくない,Not Equal,不相等,不相等,같지 않음,Not Equal,لا يساوي,Tidak Sama Dengan
+NotEqualNodeDescription,等しくないノード説明,2つの値が等しくないか判定します。,Compare inequality.,判断两个值是否不相等。,判斷兩個值是否不相等。,두 값이 다른지 판정합니다.,Comprueba si dos valores son distintos.,تحقق مما إذا كانت القيمتان غير متساويتين.,Memeriksa apakah dua nilai tidak sama.
+NotEqualResultDescription,等しくない結果説明,比較結果です。,Comparison result.,比较结果。,比較結果。,비교 결과입니다.,Resultado de la comparación.,نتيجة المقارنة.,Hasil perbandingan.
+GreaterNode,より大きいノード名,より大きい,Greater,大于,大於,큼,Greater,أكبر من,Lebih Besar
+GreaterNodeDescription,より大きいノード説明,左辺が右辺より大きいか判定します。,Compare greater than.,判断左边是否大于右边。,判斷左邊是否大於右邊。,왼쪽 항이 오른쪽 항보다 큰지 판정합니다.,Comprueba si el lado izquierdo es mayor que el derecho.,تحقق مما إذا كان الطرف الأيسر أكبر من الأيمن.,Memeriksa apakah sisi kiri lebih besar dari sisi kanan.
+GreaterResultDescription,より大きい結果説明,比較結果です。,Comparison result.,比较结果。,比較結果。,비교 결과입니다.,Resultado de la comparación.,نتيجة المقارنة.,Hasil perbandingan.
+GreaterEqualNode,以上ノード名,以上,Greater or Equal,大于等于,大於等於,크거나 같음,Greater or Equal,أكبر من أو يساوي,Lebih Besar atau Sama Dengan
+GreaterEqualNodeDescription,以上ノード説明,左辺が右辺以上か判定します。,Compare greater or equal.,判断左边是否大于等于右边。,判斷左邊是否大於等於右邊。,왼쪽 항이 오른쪽 항 이상인지 판정합니다.,Comprueba si el lado izquierdo es mayor o igual que el derecho.,تحقق مما إذا كان الطرف الأيسر أكبر من أو يساوي الأيمن.,Memeriksa apakah sisi kiri lebih besar atau sama dengan sisi kanan.
+GreaterEqualResultDescription,以上結果説明,比較結果です。,Comparison result.,比较结果。,比較結果。,비교 결과입니다.,Resultado de la comparación.,نتيجة المقارنة.,Hasil perbandingan.
+LessNode,より小さいノード名,より小さい,Less,小于,小於,작음,Less,أقل من,Lebih Kecil
+LessNodeDescription,より小さいノード説明,左辺が右辺より小さいか判定します。,Compare less than.,判断左边是否小于右边。,判斷左邊是否小於右邊。,왼쪽 항이 오른쪽 항보다 작은지 판정합니다.,Comprueba si el lado izquierdo es menor que el derecho.,تحقق مما إذا كان الطرف الأيسر أصغر من الأيمن.,Memeriksa apakah sisi kiri lebih kecil dari sisi kanan.
+LessResultDescription,より小さい結果説明,比較結果です。,Comparison result.,比较结果。,比較結果。,비교 결과입니다.,Resultado de la comparación.,نتيجة المقارنة.,Hasil perbandingan.
+LessEqualNode,以下ノード名,以下,Less or Equal,小于等于,小於等於,작거나 같음,Less or Equal,أقل من أو يساوي,Lebih Kecil atau Sama Dengan
+LessEqualNodeDescription,以下ノード説明,左辺が右辺以下か判定します。,Compare less or equal.,判断左边是否小于等于右边。,判斷左邊是否小於等於右邊。,왼쪽 항이 오른쪽 항 이하인지 판정합니다.,Comprueba si el lado izquierdo es menor o igual que el derecho.,تحقق مما إذا كان الطرف الأيسر أصغر من أو يساوي الأيمن.,Memeriksa apakah sisi kiri lebih kecil atau sama dengan sisi kanan.
+LessEqualResultDescription,以下結果説明,比較結果です。,Comparison result.,比较结果。,比較結果。,비교 결과입니다.,Resultado de la comparación.,نتيجة المقارنة.,Hasil perbandingan.
+SelectNode,選択ノード名,選択,Select,选择,選擇,선택,Select,اختيار,Pilih
+SelectNodeDescription,選択ノード説明,条件に応じて値を選択します。,Select value by condition.,根据条件选择值。,依條件選擇值。,조건에 따라 값을 선택합니다.,Selecciona un valor según la condición.,اختر قيمة حسب الشرط.,Memilih nilai berdasarkan kondisi.
+SelectResultDescription,選択結果説明,選択された値です。,Selected value.,选中的值。,選中的值。,선택된 값입니다.,Valor seleccionado.,القيمة المختارة.,Nilai yang dipilih.
+Seed,シード入力,シード,Seed,种子,種子,시드,Seed,البذرة,Seed
+SeedDescription,シード入力説明,乱数生成のシード値です。,Seed value for random generation.,随机数种子。,亂數種子。,난수 생성 시드입니다.,Seed value for random generation.,قيمة البذرة لتوليد الأعداد العشوائية,Nilai seed untuk pembangkitan angka acak.
+Index,インデックス入力,インデックス,Index,索引,索引,인덱스,Index,الفهرس,Indeks
+IndexDescription,インデックス入力説明,乱数を取得するインデックスです。,Random index.,随机数索引。,亂數索引。,난수 인덱스입니다.,Random index.,فهرس العدد العشوائي,Indeks untuk mengambil angka acak.
+Parameter,パラメーター入力,パラメーター,Parameter,参数,參數,매개변수,Parameter,المعامل,Parameter
+ParameterDescription,パラメーター入力説明,連続ノイズを評価する位置です。,Position for evaluating continuous noise.,连续噪声的位置。,連續雜訊的位置。,연속 노이즈를 평가할 위치입니다.,Position for evaluating continuous noise.,موضع تقييم الضوضاء المستمرة,Posisi untuk mengevaluasi noise kontinu.
+RandomNode,乱数ノード名,乱数,Random,随机数,亂數,난수,Random,عشوائي,Angka Acak
+RandomNodeDescription,乱数ノード説明,決定論的な乱数を生成します。,Generate deterministic random value.,生成确定性随机数。,產生決定性的亂數。,결정론적 난수를 생성합니다.,Generate deterministic random value.,توليد قيمة عشوائية حتمية,Menghasilkan angka acak deterministik.
+NoiseNode,ノイズノード名,ノイズ,Noise,噪声,雜訊,노이즈,Noise,ضوضاء,Noise
+NoiseNodeDescription,ノイズノード説明,連続的に変化するノイズを生成します。,Generate continuous noise.,生成连续噪声。,產生連續雜訊。,연속적으로 변화하는 노이즈를 생성합니다.,Generate continuous noise.,توليد ضوضاء مستمرة,Menghasilkan noise yang berubah secara kontinu.
+TranslateNode,平行移動ノード名,平行移動,Translate,平移,平移,이동,Traslación,إزاحة,Translasi
+TranslateNodeDescription,平行移動ノード説明,画像を指定量移動します。,Move image by specified amount.,移动图像。,移動圖像。,이미지를 지정량 이동합니다.,Move image.,تحريك الصورة,Menggeser gambar sejauh jumlah yang ditentukan.
+TranslateX,X移動量入力,X移動量,X Offset,X偏移量,X偏移量,X 이동량,X Offset,إزاحة X,Pergeseran X
+TranslateY,Y移動量入力,Y移動量,Y Offset,Y偏移量,Y偏移量,Y 이동량,Y Offset,إزاحة Y,Pergeseran Y
+ScaleNode,拡大縮小ノード名,拡大縮小,Scale,缩放,縮放,크기 조절,Escala,تحجيم,Skala
+ScaleNodeDescription,拡大縮小ノード説明,画像を指定倍率で拡大縮小します。,Scale image.,缩放图像。,縮放圖像。,이미지를 확대/축소합니다.,Scale image.,تحجيم الصورة,Mengubah skala gambar sesuai rasio yang ditentukan.
+ScaleX,X倍率入力,X倍率,Scale X,X缩放,X縮放,X 배율,Scale X,مقياس X,Rasio X
+ScaleY,Y倍率入力,Y倍率,Scale Y,Y缩放,Y縮放,Y 배율,Scale Y,مقياس Y,Rasio Y
+RotateNode,回転ノード名,回転,Rotate,旋转,旋轉,회전,Rotación,دوران,Rotasi
+RotateNodeDescription,回転ノード説明,画像を指定角度回転します。,Rotate image.,旋转图像。,旋轉圖像。,이미지를 회전합니다.,Rotate image.,تدوير الصورة,Memutar gambar sesuai sudut yang ditentukan.
+Angle,角度入力,角度,Angle,角度,角度,각도,Ángulo,زاوية,Sudut
+TransformResultDescription,座標変換結果説明,変換後の画像です。,Transformed image.,变换后的图像。,變換後的影像。,변환된 이미지입니다.,Imagen transformada.,الصورة بعد التحويل.,Gambar setelah transformasi.
+FillRuleNonZero,塗りつぶし規則:非ゼロ,非ゼロ,Nonzero,非零,非零,비제로,No cero,غير صفري,Bukan Nol
+FillRuleEvenOdd,塗りつぶし規則:奇偶,奇偶,Even-Odd,奇偶,奇偶,홀짝,Par-impar,زوجي-فردي,Genap-Ganjil
+ShapeRect,図形種別:矩形,矩形,Rectangle,矩形,矩形,사각형,Rectángulo,مستطيل,Persegi Panjang
+ShapeRoundRect,図形種別:角丸矩形,角丸矩形,Rounded Rectangle,圆角矩形,圓角矩形,둥근 사각형,Rectángulo redondeado,مستطيل بزوايا دائرية,Persegi Panjang Bersudut Bulat
+ShapeOval,図形種別:楕円,楕円,Ellipse,椭圆,橢圓,타원,Elipse,بيضاوي,Elips
+ShapePolygon,図形種別:多角形,多角形,Polygon,多边形,多邊形,다각형,Polígono,مضلع,Poligon
+ShapeStar,図形種別:星形,星形,Star,星形,星形,별,Estrella,نجمة,Bintang
+ShapeLine,図形種別:直線,直線,Line,直线,直線,직선,Línea,خط مستقيم,Garis
+PathOpUnion,パス演算:結合,結合,Union,并集,聯集,합집합,Unión,اتحاد,Gabungan
+PathOpIntersect,パス演算:交差,交差,Intersect,交集,交集,교집합,Intersección,تقاطع,Irisan
+PathOpDifference,パス演算:差分,差分,Difference,差集,差集,차집합,Diferencia,فرق,Selisih
+PathOpReverseDifference,パス演算:逆差分,逆差分,Reverse Difference,反向差集,反向差集,역차집합,Diferencia inversa,الفرق العكسي,Selisih Terbalik
+PathOpXor,パス演算:排他的論理和,排他的論理和,Exclusive Or,异或,互斥或,배타적 논리합,O exclusivo,الفرق المتماثل,Or Eksklusif
+ChannelHue,チャンネル:色相,色相,Hue,色相,色相,색상,Tono,درجة اللون,Rona
+ChannelSaturation,チャンネル:彩度,彩度,Saturation,饱和度,飽和度,채도,Saturación,التشبع,Saturasi
+ChannelValue,チャンネル:明度,明度,Value,明度,明度,명도,Valor,القيمة,Nilai
+ChannelRed,チャンネル:赤,赤,Red,红,紅,빨강,Rojo,أحمر,Merah
+ChannelGreen,チャンネル:緑,緑,Green,绿,綠,초록,Verde,أخضر,Hijau
+ChannelBlue,チャンネル:青,青,Blue,蓝,藍,파랑,Azul,أزرق,Biru
+ChannelAlpha,チャンネル:透明度,透明度,Alpha,透明度,透明度,투명도,Alfa,الشفافية,Alfa
+BlendNormal,合成モード:通常,通常,Normal,正常,正常,표준,Normal,عادي,Normal
+BlendMultiply,合成モード:乗算,乗算,Multiply,正片叠底,色彩增值,곱하기,Multiplicar,ضرب,Kalikan
+BlendScreen,合成モード:スクリーン,スクリーン,Screen,滤色,濾色,스크린,Trama,شاشة,Layar
+BlendDarken,合成モード:比較(暗),比較（暗）,Darken,变暗,變暗,어둡게 하기,Oscurecer,تغميق,Gelapkan
+BlendLighten,合成モード:比較(明),比較（明）,Lighten,变亮,變亮,밝게 하기,Aclarar,تفتيح,Terangkan
+BlendDissolve,合成モード:ディザ,ディザ,Dissolve,溶解,溶解,디졸브,Disolver,إذابة,Larutkan
+BlendColorBurn,合成モード:焼き込みカラー,焼き込みカラー,Color Burn,颜色加深,顏色加深,색상 번,Subexposición de color,تغميق اللون,Bakar Warna
+BlendLinearBurn,合成モード:焼き込み(リニア),焼き込み（リニア）,Linear Burn,线性加深,線性加深,선형 번,Subexposición lineal,تغميق خطي,Bakar Linear
+BlendDarkerColor,合成モード:暗いカラー,暗いカラー,Darker Color,深色,深色,어두운 색상,Color más oscuro,لون أغمق,Warna Lebih Gelap
+BlendLighterColor,合成モード:明るいカラー,明るいカラー,Lighter Color,浅色,淺色,밝은 색상,Color más claro,لون أفتح,Warna Lebih Terang
+BlendColorDodge,合成モード:覆い焼きカラー,覆い焼きカラー,Color Dodge,颜色减淡,顏色加亮,색상 닷지,Sobreexposición de color,تفتيح اللون,Hindari Warna
+BlendLinearDodge,合成モード:覆い焼き(リニア),覆い焼き（リニア）,Linear Dodge,线性减淡,線性加亮,선형 닷지,Sobreexposición lineal,تفتيح خطي,Hindari Linear
+BlendOverlay,合成モード:オーバーレイ,オーバーレイ,Overlay,叠加,覆蓋,오버레이,Superposición,تراكب,Overlay
+BlendSoftLight,合成モード:ソフトライト,ソフトライト,Soft Light,柔光,柔光,소프트 라이트,Luz suave,ضوء ناعم,Cahaya Lembut
+BlendHardLight,合成モード:ハードライト,ハードライト,Hard Light,强光,實光,하드 라이트,Luz fuerte,ضوء قوي,Cahaya Keras
+BlendVividLight,合成モード:ビビッドライト,ビビッドライト,Vivid Light,亮光,強烈光源,선명한 라이트,Luz intensa,ضوء حيوي,Cahaya Cerah
+BlendLinearLight,合成モード:リニアライト,リニアライト,Linear Light,线性光,線性光源,선형 라이트,Luz lineal,ضوء خطي,Cahaya Linear
+BlendPinLight,合成モード:ピンライト,ピンライト,Pin Light,点光,靈光,핀 라이트,Luz focalizada,ضوء دبوسي,Cahaya Titik
+BlendHardMix,合成モード:ハードミックス,ハードミックス,Hard Mix,实色混合,實色疊印混合,하드 혼합,Mezcla fuerte,مزيج قوي,Campuran Keras
+BlendDifferenceAbs,合成モード:差の絶対値,差の絶対値,Difference,差值,差異,차이,Diferencia,الفرق,Selisih Nilai
+BlendExclusion,合成モード:除外,除外,Exclusion,排除,排除,제외,Exclusión,استبعاد,Pengecualian
+BlendColor,合成モード:カラー,カラー,Color,颜色,顏色,색상,Color,لون,Warna
+BlendLuminosity,合成モード:輝度,輝度,Luminosity,明度,明度,광도,Luminosidad,الإضاءة,Luminositas
+BlendSubtract,合成モード:減算,減算,Subtract,减去,減去,빼기,Restar,طرح,Kurangi
+BlendDivision,合成モード:除算,除算,Divide,划分,分割,나누기,Dividir,قسمة,Bagi
+OutlineCategoryName,カテゴリ名:アウトライン,アウトライン,Outline,轮廓,輪廓,아웃라인,Contorno,الخط الخارجي,Garis Luar
+ImageSourceCategoryName,カテゴリ名:画像読み込み,画像読み込み,Image Source,图像来源,影像來源,이미지 소스,Origen de imagen,مصدر الصورة,Sumber Gambar
+OutlinePortLabel,汎用:アウトラインポート,アウトライン,Outline,轮廓,輪廓,아웃라인,Contorno,الخط الخارجي,Garis Luar
+InputImagePortLabel,汎用:入力画像ポート,入力画像,Input Image,输入图像,輸入影像,입력 이미지,Imagen de entrada,صورة الإدخال,Gambar Masukan
+OutputImagePortLabel,汎用:出力画像ポート,出力画像,Output Image,输出图像,輸出影像,출력 이미지,Imagen de salida,صورة الإخراج,Gambar Keluaran
+MaskPortLabel,汎用:マスクポート,マスク,Mask,蒙版,遮罩,마스크,Máscara,القناع,Masker
+InvertPortLabel,,反転,Invert,反转,反轉,반전,Invertir,عكس,Balik
+FilePathPortLabel,,ファイルパス,File Path,文件路径,檔案路徑,파일 경로,Ruta de archivo,مسار الملف,Jalur File
+RotationPortLabel,,回転,Rotation,旋转,旋轉,회전,Rotación,الدوران,Rotasi
+TransformInputImageDescription,,変換する画像,Image to transform,要变换的图像,要變換的影像,변환할 이미지,Imagen a transformar,الصورة المراد تحويلها,Gambar yang akan ditransformasikan
+TransformOutputImageDescription,,変換結果,Transform result,变换结果,變換結果,변환 결과,Resultado de la transformación,نتيجة التحويل,Hasil transformasi
+MoveAmountX,,X,X,X,X,X,X,X,X
+MoveAmountXDescription,,X方向の移動量,Amount to move in the X direction,X方向的移动量,X方向的移動量,X 방향 이동량,Cantidad de movimiento en X,مقدار الإزاحة في اتجاه X,Jumlah pergeseran arah X
+MoveAmountY,,Y,Y,Y,Y,Y,Y,Y,Y
+MoveAmountYDescription,,Y方向の移動量,Amount to move in the Y direction,Y方向的移动量,Y方向的移動量,Y 방향 이동량,Cantidad de movimiento en Y,مقدار الإزاحة في اتجاه Y,Jumlah pergeseran arah Y
+ScaleRatioX,,倍率X,Scale X,缩放X,縮放X,배율 X,Escala X,مقياس X,Skala X
+ScaleRatioXDescription,,X方向倍率,Scale ratio in the X direction,X方向缩放比例,X方向縮放比例,X 방향 배율,Relación de escala en X,نسبة المقياس في اتجاه X,Rasio skala arah X
+ScaleRatioY,,倍率Y,Scale Y,缩放Y,縮放Y,배율 Y,Escala Y,مقياس Y,Skala Y
+ScaleRatioYDescription,,Y方向倍率,Scale ratio in the Y direction,Y方向缩放比例,Y方向縮放比例,Y 방향 배율,Relación de escala en Y,نسبة المقياس في اتجاه Y,Rasio skala arah Y
+AngleDescription,,回転角度,Rotation angle,旋转角度,旋轉角度,회전 각도,Ángulo de rotación,زاوية الدوران,Sudut rotasi
+OutlineRasterizeNode,,アウトラインのラスタライズ,Rasterize Outline,轮廓栅格化,輪廓點陣化,아웃라인 래스터화,Rasterizar contorno,تحويل الخط الخارجي إلى نقاط,Rasterisasi Garis Luar
+OutlineRasterizeNodeDescription,,アウトラインデータを塗り・線で描画してID2D1Imageに変換します。,"Renders outline data as fill and stroke, converting it to an ID2D1Image.","将轮廓数据以填充和描边方式绘制,转换为ID2D1Image。","將輪廓資料以填色與線條繪製,轉換為ID2D1Image。",아웃라인 데이터를 채우기와 선으로 그려 ID2D1Image로 변환합니다.,"Dibuja los datos de contorno con relleno y trazo, convirtiéndolos en un ID2D1Image.",رسم بيانات الخط الخارجي بالتعبئة والخط وتحويلها إلى ID2D1Image.,"Menggambar data garis luar dengan isian dan garis tepi, lalu mengonversinya menjadi ID2D1Image."
+OutlineRasterizeInputDescription,,ラスタライズするアウトラインデータ,Outline data to rasterize,要栅格化的轮廓数据,要點陣化的輪廓資料,래스터화할 아웃라인 데이터,Datos de contorno a rasterizar,بيانات الخط الخارجي المراد تحويلها إلى نقاط,Data garis luar yang akan dirasterisasi
+StrokeWidthLabel,,線幅,Stroke Width,描边宽度,線條寬度,선 너비,Ancho de trazo,عرض الخط,Lebar Garis
+StrokeWidthDescription,,ストロークの太さ,Thickness of the stroke,描边的粗细,線條的粗細,선의 굵기,Grosor del trazo,سُمك الخط,Ketebalan garis
+StrokeOffsetXLabel,,ストロークオフセットX,Stroke Offset X,描边偏移X,線條偏移X,선 오프셋 X,Desplazamiento de trazo X,إزاحة الخط X,Offset Garis X
+StrokeOffsetXDescription,,ストロークの描画位置のX方向のずらし量,Amount to shift the stroke's drawing position in the X direction,描边绘制位置在X方向的偏移量,線條繪製位置在X方向的偏移量,선 그리기 위치의 X 방향 이동량,Cantidad de desplazamiento en X de la posición del trazo,مقدار إزاحة موضع رسم الخط في اتجاه X,Jumlah pergeseran posisi gambar garis arah X
+StrokeOffsetYLabel,,ストロークオフセットY,Stroke Offset Y,描边偏移Y,線條偏移Y,선 오프셋 Y,Desplazamiento de trazo Y,إزاحة الخط Y,Offset Garis Y
+StrokeOffsetYDescription,,ストロークの描画位置のY方向のずらし量,Amount to shift the stroke's drawing position in the Y direction,描边绘制位置在Y方向的偏移量,線條繪製位置在Y方向的偏移量,선 그리기 위치의 Y 방향 이동량,Cantidad de desplazamiento en Y de la posición del trazo,مقدار إزاحة موضع رسم الخط في اتجاه Y,Jumlah pergeseran posisi gambar garis arah Y
+StrokeBrushLabel,,ストロークブラシ,Stroke Brush,描边画笔,線條筆刷,선 브러시,Pincel de trazo,فرشاة الخط,Kuas Garis
+StrokeBrushDescription,,線の描画に使用するブラシ,Brush used to draw the line,用于描边的画笔,用於繪製線條的筆刷,선을 그리는 데 사용하는 브러시,Pincel usado para dibujar la línea,الفرشاة المستخدمة لرسم الخط,Kuas yang digunakan untuk menggambar garis
+FillBrushLabel,,フィルブラシ,Fill Brush,填充画笔,填色筆刷,채우기 브러시,Pincel de relleno,فرشاة التعبئة,Kuas Isian
+FillBrushDescription,,塗りつぶしに使用するブラシ,Brush used for the fill,用于填充的画笔,用於填色的筆刷,채우기에 사용하는 브러시,Pincel usado para el relleno,الفرشاة المستخدمة للتعبئة,Kuas yang digunakan untuk mengisi
+SelfIntersectRuleLabel,,自己交差ルール,Self-Intersection Rule,自相交规则,自相交規則,자기 교차 규칙,Regla de autointersección,قاعدة التقاطع الذاتي,Aturan Perpotongan Sendiri
+SelfIntersectRuleDescription,,自己交差時の内外判定方法,Method for determining inside/outside at self-intersections,自相交时的内外判定方法,自相交時的內外判定方法,자기 교차 시 내외부 판정 방법,Método para determinar dentro/fuera en autointersecciones,طريقة تحديد الداخل والخارج عند التقاطع الذاتي,Metode penentuan area dalam/luar saat perpotongan sendiri
+RasterizeOutputDescription,,ラスタライズ結果,Rasterization result,栅格化结果,點陣化結果,래스터화 결과,Resultado de la rasterización,نتيجة التحويل إلى نقاط,Hasil rasterisasi
+PathTransformNode,,パス座標変換,Transform Path,路径坐标变换,路徑座標變換,패스 좌표 변환,Transformar coordenadas de ruta,تحويل إحداثيات المسار,Transformasi Koordinat Jalur
+PathTransformNodeDescription,,アウトラインに平行移動、拡大縮小、回転、せん断などの座標変換を適用します。,"Applies coordinate transforms such as translation, scaling, rotation, and shear to the outline.",对轮廓应用平移、缩放、旋转、错切等坐标变换。,對輪廓套用平移、縮放、旋轉、傾斜等座標變換。,"아웃라인에 이동, 배율, 회전, 기울이기 등의 좌표 변환을 적용합니다.","Aplica transformaciones de coordenadas como traslación, escala, rotación y sesgo al contorno.",تطبيق تحويلات إحداثية مثل الإزاحة والتحجيم والدوران والقص على الخط الخارجي.,"Menerapkan transformasi koordinat seperti translasi, skala, rotasi, dan miring pada garis luar."
+PathTransformInputDescription,,座標変換するアウトライン,Outline to transform,要进行坐标变换的轮廓,要進行座標變換的輪廓,좌표 변환할 아웃라인,Contorno a transformar,الخط الخارجي المراد تحويل إحداثياته,Garis luar yang akan ditransformasikan
+PathMoveXLabel,,移動X,Translate X,移动X,移動X,이동 X,Trasladar X,إزاحة X,Geser X
+PathMoveXDescription,,X方向への移動量,Amount to move in the X direction,X方向的移动量,X方向的移動量,X 방향 이동량,Cantidad de traslación en X,مقدار الإزاحة في اتجاه X,Jumlah pergeseran arah X
+PathMoveYLabel,,移動Y,Translate Y,移动Y,移動Y,이동 Y,Trasladar Y,إزاحة Y,Geser Y
+PathMoveYDescription,,Y方向への移動量,Amount to move in the Y direction,Y方向的移动量,Y方向的移動量,Y 방향 이동량,Cantidad de traslación en Y,مقدار الإزاحة في اتجاه Y,Jumlah pergeseran arah Y
+PathScaleXLabel,,拡大率X,Scale X,缩放率X,縮放率X,확대율 X,Escala X,نسبة التحجيم X,Rasio Skala X
+PathScaleXDescription,,X方向の拡大率,Scale ratio in the X direction,X方向的缩放比例,X方向的縮放比例,X 방향 확대율,Relación de escala en X,نسبة التحجيم في اتجاه X,Rasio skala arah X
+PathScaleYLabel,,拡大率Y,Scale Y,缩放率Y,縮放率Y,확대율 Y,Escala Y,نسبة التحجيم Y,Rasio Skala Y
+PathScaleYDescription,,Y方向の拡大率,Scale ratio in the Y direction,Y方向的缩放比例,Y方向的縮放比例,Y 방향 확대율,Relación de escala en Y,نسبة التحجيم في اتجاه Y,Rasio skala arah Y
+PathRotationDescription,,回転角度,Rotation angle,旋转角度,旋轉角度,회전 각도,Ángulo de rotación,زاوية الدوران,Sudut rotasi
+SkewXLabel,,せん断X,Skew X,错切X,傾斜X,기울이기 X,Sesgo X,القص X,Miring X
+SkewXDescription,,X方向のせん断量,Amount of shear in the X direction,X方向的错切量,X方向的傾斜量,X 방향 기울이기 양,Cantidad de sesgo en X,مقدار القص في اتجاه X,Jumlah kemiringan arah X
+SkewYLabel,,せん断Y,Skew Y,错切Y,傾斜Y,기울이기 Y,Sesgo Y,القص Y,Miring Y
+SkewYDescription,,Y方向のせん断量,Amount of shear in the Y direction,Y方向的错切量,Y方向的傾斜量,Y 방향 기울이기 양,Cantidad de sesgo en Y,مقدار القص في اتجاه Y,Jumlah kemiringan arah Y
+OriginXLabel,,基準X,Origin X,基准X,基準X,기준 X,Origen X,نقطة الأصل X,Titik Acuan X
+OriginXDescription,,拡大縮小・回転・せん断の基準となるX座標,"X coordinate used as the origin for scale, rotation, and shear",缩放、旋转、错切的基准X坐标,縮放、旋轉、傾斜的基準X座標,"확대/축소, 회전, 기울이기의 기준이 되는 X 좌표","Coordenada X usada como origen para escala, rotación y sesgo",إحداثي X المستخدم كنقطة أصل للتحجيم والدوران والقص,"Koordinat X yang digunakan sebagai acuan skala, rotasi, dan kemiringan"
+OriginYLabel,,基準Y,Origin Y,基准Y,基準Y,기준 Y,Origen Y,نقطة الأصل Y,Titik Acuan Y
+OriginYDescription,,拡大縮小・回転・せん断の基準となるY座標,"Y coordinate used as the origin for scale, rotation, and shear",缩放、旋转、错切的基准Y坐标,縮放、旋轉、傾斜的基準Y座標,"확대/축소, 회전, 기울이기의 기준이 되는 Y 좌표","Coordenada Y usada como origen para escala, rotación y sesgo",إحداثي Y المستخدم كنقطة أصل للتحجيم والدوران والقص,"Koordinat Y yang digunakan sebagai acuan skala, rotasi, dan kemiringan"
+PathTransformOutputDescription,,座標変換後のアウトライン,Outline after coordinate transformation,坐标变换后的轮廓,座標變換後的輪廓,좌표 변환된 아웃라인,Contorno tras la transformación de coordenadas,الخط الخارجي بعد تحويل الإحداثيات,Garis luar setelah transformasi koordinat
+ShapeCenterXLabel,,中心X,Center X,中心X,中心X,중심 X,Centro X,المركز X,Pusat X
+ShapeCenterXDescription,,図形の中心のX座標（直線の場合は始点）,X coordinate of the shape's center (start point for a line),图形中心的X坐标(直线时为起点),圖形中心的X座標(直線時為起點),도형 중심의 X 좌표(직선인 경우 시작점),Coordenada X del centro de la figura (punto inicial en el caso de una línea),إحداثي X لمركز الشكل (نقطة البداية في حالة الخط المستقيم),Koordinat X pusat bentuk (titik awal untuk garis)
+ShapeCenterYLabel,,中心Y,Center Y,中心Y,中心Y,중심 Y,Centro Y,المركز Y,Pusat Y
+ShapeCenterYDescription,,図形の中心のY座標（直線の場合は始点）,Y coordinate of the shape's center (start point for a line),图形中心的Y坐标(直线时为起点),圖形中心的Y座標(直線時為起點),도형 중심의 Y 좌표(직선인 경우 시작점),Coordenada Y del centro de la figura (punto inicial en el caso de una línea),إحداثي Y لمركز الشكل (نقطة البداية في حالة الخط المستقيم),Koordinat Y pusat bentuk (titik awal untuk garis)
+ShapeWidthLabel,,幅,Width,宽度,寬度,너비,Ancho,العرض,Lebar
+ShapeWidthDescription,,図形の幅（直線の場合は終点までのX方向距離）,Width of the shape (X-direction distance to the endpoint for a line),图形的宽度(直线时为到终点的X方向距离),圖形的寬度(直線時為到終點的X方向距離),도형의 너비(직선인 경우 끝점까지의 X 방향 거리),Ancho de la figura (distancia en X hasta el punto final en el caso de una línea),عرض الشكل (المسافة في اتجاه X حتى نقطة النهاية في حالة الخط المستقيم),Lebar bentuk (jarak arah X ke titik akhir untuk garis)
+ShapeHeightLabel,,高さ,Height,高度,高度,높이,Alto,الارتفاع,Tinggi
+ShapeHeightDescription,,図形の高さ（直線の場合は終点までのY方向距離）,Height of the shape (Y-direction distance to the endpoint for a line),图形的高度(直线时为到终点的Y方向距离),圖形的高度(直線時為到終點的Y方向距離),도형의 높이(직선인 경우 끝점까지의 Y 방향 거리),Alto de la figura (distancia en Y hasta el punto final en el caso de una línea),ارتفاع الشكل (المسافة في اتجاه Y حتى نقطة النهاية في حالة الخط المستقيم),Tinggi bentuk (jarak arah Y ke titik akhir untuk garis)
+ShapeRotationDescription,,図形を中心（始点）周りに回転させる角度,Angle to rotate the shape around its center (start point),以图形中心(起点)为轴旋转的角度,以圖形中心(起點)為軸旋轉的角度,도형을 중심(시작점) 기준으로 회전시키는 각도,Ángulo para rotar la figura alrededor de su centro (punto inicial),زاوية تدوير الشكل حول مركزه (نقطة البداية),Sudut rotasi bentuk mengelilingi pusatnya (titik awal)
+ShapeCornerRadiusLabel,,角丸半径,Corner Radius,圆角半径,圓角半徑,모서리 반경,Radio de esquina,نصف قطر الزاوية,Radius Sudut
+ShapeCornerRadiusDescription,,角丸矩形の角の半径,Radius of the rounded rectangle's corners,圆角矩形的圆角半径,圓角矩形的圓角半徑,둥근 사각형 모서리의 반경,Radio de las esquinas del rectángulo redondeado,نصف قطر زوايا المستطيل ذي الزوايا الدائرية,Radius sudut persegi panjang bersudut bulat
+PolygonSidesDescription,,多角形の頂点数,Number of vertices of the polygon,多边形的顶点数,多邊形的頂點數,다각형의 꼭짓점 수,Número de vértices del polígono,عدد رؤوس المضلع,Jumlah titik sudut poligon
+VertexCountLabel,,頂点数,Vertex Count,顶点数,頂點數,꼭짓점 수,Número de vértices,عدد الرؤوس,Jumlah Titik Sudut
+StarSidesDescription,,星形の外側の頂点数,Number of outer vertices of the star,星形的外侧顶点数,星形的外側頂點數,별 모양의 바깥쪽 꼭짓점 수,Número de vértices exteriores de la estrella,عدد الرؤوس الخارجية للنجمة,Jumlah titik sudut luar bintang
+InnerRadiusRatioLabel,,内径比,Inner Radius Ratio,内径比,內徑比,내경 비율,Relación de radio interior,نسبة نصف القطر الداخلي,Rasio Radius Dalam
+InnerRadiusRatioDescription,,星形の内側の頂点半径（外側に対する割合）,Radius of the star's inner vertices (as a ratio to the outer radius),星形内侧顶点半径(相对于外侧的比例),星形內側頂點半徑(相對於外側的比例),별 모양 안쪽 꼭짓점의 반경(바깥쪽에 대한 비율),Radio de los vértices interiores de la estrella (proporción respecto al exterior),نصف قطر الرؤوس الداخلية للنجمة (كنسبة إلى الخارجية),Radius titik sudut dalam bintang (rasio terhadap luar)
+ShapeOutlineNode,,図形アウトライン生成,Generate Shape Outline,生成图形轮廓,生成圖形輪廓,도형 아웃라인 생성,Generar contorno de figura,إنشاء الخط الخارجي للشكل,Buat Garis Luar Bentuk
+ShapeOutlineNodeDescription,,指定した種類の図形のアウトラインデータを生成します。,Generates outline data for the specified shape type.,生成指定种类图形的轮廓数据。,生成指定種類圖形的輪廓資料。,지정한 종류의 도형 아웃라인 데이터를 생성합니다.,Genera datos de contorno para el tipo de figura especificado.,إنشاء بيانات الخط الخارجي للشكل من النوع المحدد.,Menghasilkan data garis luar untuk jenis bentuk yang ditentukan.
+ShapeKindLabel,,種類,Kind,种类,種類,종류,Tipo,النوع,Jenis
+ShapeKindDescription,,生成する図形の種類,Type of shape to generate,要生成的图形种类,要生成的圖形種類,생성할 도형의 종류,Tipo de figura a generar,نوع الشكل المراد إنشاؤه,Jenis bentuk yang akan dibuat
+ShapeParamsLabel,,パラメータ,Parameters,参数,參數,매개변수,Parámetros,المعاملات,Parameter
+ShapeParamsDescription,,図形の種類に応じた入力群,Set of inputs that depend on the shape type,根据图形种类而定的输入组,依圖形種類而定的輸入組,도형 종류에 따른 입력 그룹,Conjunto de entradas según el tipo de figura,مجموعة المدخلات حسب نوع الشكل,Sekumpulan input sesuai jenis bentuk
+ShapeOutlineOutputDescription,,生成された図形のアウトラインデータ,Outline data of the generated shape,生成的图形轮廓数据,生成的圖形輪廓資料,생성된 도형의 아웃라인 데이터,Datos de contorno de la figura generada,بيانات الخط الخارجي للشكل الذي تم إنشاؤه,Data garis luar bentuk yang dihasilkan
+TextOutlineNode,,文字アウトライン生成,Generate Text Outline,生成文字轮廓,生成文字輪廓,텍스트 아웃라인 생성,Generar contorno de texto,إنشاء الخط الخارجي للنص,Buat Garis Luar Teks
+TextOutlineNodeDescription,,指定した文字列のアウトラインデータを生成します。,Generates outline data for the specified text string.,生成指定字符串的轮廓数据。,生成指定字串的輪廓資料。,지정한 문자열의 아웃라인 데이터를 생성합니다.,Genera datos de contorno para la cadena de texto especificada.,إنشاء بيانات الخط الخارجي للنص المحدد.,Menghasilkan data garis luar untuk string teks yang ditentukan.
+TextOutlineTextLabel,,テキスト,Text,文本,文字,텍스트,Texto,النص,Teks
+TextOutlineTextDescription,,アウトライン化する文字列,Text string to outline,要转换为轮廓的字符串,要轉換為輪廓的字串,아웃라인으로 만들 문자열,Cadena de texto a convertir en contorno,النص المراد تحويله إلى خط خارجي,String teks yang akan dijadikan garis luar
+FontFamilyLabel,,フォント名,Font Family,字体名称,字型名稱,글꼴 이름,Familia de fuente,اسم الخط,Nama Font
+FontFamilyDescription,,使用するフォントファミリー名（空欄の場合は既定のフォント）,Font family name to use (default font if left blank),使用的字体家族名称(留空则使用默认字体),使用的字型家族名稱(留空則使用預設字型),사용할 글꼴 패밀리 이름(비워두면 기본 글꼴),Nombre de la familia de fuente a usar (fuente predeterminada si se deja en blanco),اسم عائلة الخط المستخدم (الخط الافتراضي إذا تُرك فارغًا),Nama family font yang digunakan (font default jika dikosongkan)
+FontSizeLabel,,サイズ,Size,大小,大小,크기,Tamaño,الحجم,Ukuran
+FontSizeDescription,,フォントサイズ,Font size,字体大小,字型大小,글꼴 크기,Tamaño de fuente,حجم الخط,Ukuran font
+BoldLabel,,太字,Bold,粗体,粗體,굵게,Negrita,عريض,Tebal
+BoldDescription,,太字にするかどうか,Whether to make the text bold,是否加粗,是否加粗,굵게 표시할지 여부,Si se debe poner en negrita,ما إذا كان سيتم جعل النص عريضًا,Apakah teks ditebalkan
+ItalicLabel,,斜体,Italic,斜体,斜體,기울임꼴,Cursiva,مائل,Miring
+ItalicDescription,,斜体にするかどうか,Whether to make the text italic,是否斜体,是否斜體,기울임꼴로 표시할지 여부,Si se debe poner en cursiva,ما إذا كان سيتم جعل النص مائلاً,Apakah teks dimiringkan
+TextOriginXLabel,,原点X,Origin X,原点X,原點X,기준점 X,Origen X,نقطة الأصل X,Titik Asal X
+TextOriginXDescription,,文字列のベースライン原点のX座標,X coordinate of the text baseline origin,字符串基线原点的X坐标,字串基線原點的X座標,문자열 베이스라인 기준점의 X 좌표,Coordenada X del origen de la línea base del texto,إحداثي X لنقطة أصل خط الأساس للنص,Koordinat X titik asal garis dasar teks
+TextOriginYLabel,,原点Y,Origin Y,原点Y,原點Y,기준점 Y,Origen Y,نقطة الأصل Y,Titik Asal Y
+TextOriginYDescription,,文字列のベースライン原点のY座標,Y coordinate of the text baseline origin,字符串基线原点的Y坐标,字串基線原點的Y座標,문자열 베이스라인 기준점의 Y 좌표,Coordenada Y del origen de la línea base del texto,إحداثي Y لنقطة أصل خط الأساس للنص,Koordinat Y titik asal garis dasar teks
+TextHorizontalOffsetLabel,,横オフセット,Horizontal Offset,水平偏移,水平偏移,가로 오프셋,Desplazamiento horizontal,الإزاحة الأفقية,Offset Horizontal
+TextHorizontalOffsetDescription,,文字列外接矩形に対する水平方向の基準点比率(-1.00:左揃え 〜 1.00:右揃え、既定値0.00:中央),Horizontal anchor ratio within the text bounding box (-1.00: left-aligned to 1.00: right-aligned, default 0.00: centered),文本外接矩形的水平基准点比例(-1.00:左对齐 〜 1.00:右对齐,默认0.00:居中),文字外接矩形的水平基準點比例(-1.00:靠左 〜 1.00:靠右,預設0.00:置中),텍스트 외접 사각형에 대한 수평 기준점 비율(-1.00: 왼쪽 정렬 〜 1.00: 오른쪽 정렬, 기본값 0.00: 가운데),Relación del punto de anclaje horizontal dentro del rectángulo del texto (-1.00: alineado a la izquierda a 1.00: alineado a la derecha, valor predeterminado 0.00: centrado),نسبة نقطة الارتكاز الأفقية داخل المستطيل المحيط بالنص (-1.00: محاذاة لليسار إلى 1.00: محاذاة لليمين، القيمة الافتراضية 0.00: توسيط),Rasio titik acuan horizontal dalam kotak pembatas teks (-1.00: rata kiri hingga 1.00: rata kanan, default 0.00: tengah)
+TextVerticalOffsetLabel,,縦オフセット,Vertical Offset,垂直偏移,垂直偏移,세로 오프셋,Desplazamiento vertical,الإزاحة الرأسية,Offset Vertikal
+TextVerticalOffsetDescription,,文字列外接矩形に対する垂直方向の基準点比率(-1.00:上揃え 〜 1.00:下揃え、既定値0.00:中央),Vertical anchor ratio within the text bounding box (-1.00: top-aligned to 1.00: bottom-aligned, default 0.00: centered),文本外接矩形的垂直基准点比例(-1.00:顶对齐 〜 1.00:底对齐,默认0.00:居中),文字外接矩形的垂直基準點比例(-1.00:靠上 〜 1.00:靠下,預設0.00:置中),텍스트 외접 사각형에 대한 수직 기준점 비율(-1.00: 위쪽 정렬 〜 1.00: 아래쪽 정렬, 기본값 0.00: 가운데),Relación del punto de anclaje vertical dentro del rectángulo del texto (-1.00: alineado arriba a 1.00: alineado abajo, valor predeterminado 0.00: centrado),نسبة نقطة الارتكاز الرأسية داخل المستطيل المحيط بالنص (-1.00: محاذاة للأعلى إلى 1.00: محاذاة للأسفل، القيمة الافتراضية 0.00: توسيط),Rasio titik acuan vertikal dalam kotak pembatas teks (-1.00: rata atas hingga 1.00: rata bawah, default 0.00: tengah)
+TextOutlineOutputDescription,,生成された文字列のアウトラインデータ,Outline data of the generated text string,生成的字符串轮廓数据,生成的字串輪廓資料,생성된 문자열의 아웃라인 데이터,Datos de contorno de la cadena de texto generada,بيانات الخط الخارجي للنص الذي تم إنشاؤه,Data garis luar string teks yang dihasilkan
+PathCombineNode,,パス結合,Combine Paths,路径结合,路徑結合,패스 결합,Combinar rutas,دمج المسارات,Gabungkan Jalur
+PathCombineNodeDescription,,2つのアウトラインを指定した演算方法で結合します。,Combines two outlines using the specified operation.,以指定的运算方式结合两个轮廓。,以指定的運算方式結合兩個輪廓。,두 아웃라인을 지정한 연산 방법으로 결합합니다.,Combina dos contornos usando la operación especificada.,دمج خطين خارجيين باستخدام العملية المحددة.,Menggabungkan dua garis luar menggunakan operasi yang ditentukan.
+PathInput1Label,,パス1,Path 1,路径1,路徑1,패스 1,Ruta 1,المسار 1,Jalur 1
+PathInput1Description,,結合する1つ目のアウトライン,First outline to combine,要结合的第1个轮廓,要結合的第1個輪廓,결합할 첫 번째 아웃라인,Primer contorno a combinar,الخط الخارجي الأول المراد دمجه,Garis luar pertama yang akan digabungkan
+PathInput2Label,,パス2,Path 2,路径2,路徑2,패스 2,Ruta 2,المسار 2,Jalur 2
+PathInput2Description,,結合する2つ目のアウトライン,Second outline to combine,要结合的第2个轮廓,要結合的第2個輪廓,결합할 두 번째 아웃라인,Segundo contorno a combinar,الخط الخارجي الثاني المراد دمجه,Garis luar kedua yang akan digabungkan
+PathCombineOperationLabel,,演算,Operation,运算,運算,연산,Operación,العملية,Operasi
+PathCombineOperationDescription,,2つのパスに適用するブール演算,Boolean operation to apply to the two paths,应用于两个路径的布尔运算,套用於兩個路徑的布林運算,두 패스에 적용할 불리언 연산,Operación booleana aplicada a las dos rutas,العملية المنطقية المطبقة على المسارين,Operasi boolean yang diterapkan pada kedua jalur
+PathCombineOutputDescription,,結合結果のアウトラインデータ,Outline data resulting from the combination,结合结果的轮廓数据,結合結果的輪廓資料,결합 결과 아웃라인 데이터,Datos de contorno resultantes de la combinación,بيانات الخط الخارجي الناتجة عن الدمج,Data garis luar hasil penggabungan
+LoadImageNode,,画像読み込み,Load Image,加载图像,載入影像,이미지 불러오기,Cargar imagen,تحميل الصورة,Muat Gambar
+LoadImageNodeDescription,,指定したファイルから画像を読み込みます。,Loads an image from the specified file.,从指定文件加载图像。,從指定檔案載入影像。,지정한 파일에서 이미지를 불러옵니다.,Carga una imagen desde el archivo especificado.,تحميل صورة من الملف المحدد.,Memuat gambar dari file yang ditentukan.
+LoadImageFilePathDescription,,読み込む画像ファイル,Image file to load,要加载的图像文件,要載入的影像檔案,불러올 이미지 파일,Archivo de imagen a cargar,ملف الصورة المراد تحميله,File gambar yang akan dimuat
+LoadImageOutputDescription,,読み込んだ画像,Loaded image,已加载的图像,已載入的影像,불러온 이미지,Imagen cargada,الصورة التي تم تحميلها,Gambar yang dimuat
+LoadVideoFrameNode,,動画フレーム読み込み,Load Video Frame,加载视频帧,載入影片畫格,동영상 프레임 불러오기,Cargar fotograma de vídeo,تحميل إطار الفيديو,Muat Frame Video
+LoadVideoFrameNodeDescription,,指定した動画ファイルから任意のフレームを画像として読み込みます。,Loads an arbitrary frame from the specified video file as an image.,从指定视频文件中加载任意帧作为图像。,從指定影片檔案載入任意畫格作為影像。,지정한 동영상 파일에서 임의의 프레임을 이미지로 불러옵니다.,Carga un fotograma cualquiera del archivo de vídeo especificado como imagen.,تحميل إطار معين من ملف الفيديو المحدد كصورة.,Memuat frame tertentu dari file video yang ditentukan sebagai gambar.
+LoadVideoFrameFilePathDescription,,読み込む動画ファイル,Video file to load,要加载的视频文件,要載入的影片檔案,불러올 동영상 파일,Archivo de vídeo a cargar,ملف الفيديو المراد تحميله,File video yang akan dimuat
+FrameIndexLabel,,フレーム番号,Frame Index,帧编号,畫格編號,프레임 번호,Índice de fotograma,رقم الإطار,Indeks Frame
+FrameIndexDescription,,読み込むフレームの番号（0始まり）,Number of the frame to load (starting from 0),要加载的帧编号(从0开始),要載入的畫格編號(從0開始),불러올 프레임 번호(0부터 시작),Número del fotograma a cargar (comenzando en 0),رقم الإطار المراد تحميله (يبدأ من 0),Nomor frame yang akan dimuat (mulai dari 0)
+LoadVideoFrameOutputDescription,,読み込んだフレーム画像,Loaded frame image,已加载的帧图像,已載入的畫格影像,불러온 프레임 이미지,Imagen del fotograma cargado,صورة الإطار الذي تم تحميله,Gambar frame yang dimuat
+EasingNode,,イージング,Easing,缓动,緩動,이징,Suavizado,التسهيل,Easing
+EasingNodeDescription,,時間パラメーターをベジェ曲線で評価し、最小～最大の範囲に写像する,Evaluates the time parameter using a Bezier curve and maps it to the min-max range,"以贝塞尔曲线评估时间参数,并映射到最小～最大范围","以貝茲曲線評估時間參數,並對映到最小～最大範圍",시간 매개변수를 베지어 곡선으로 평가하여 최소~최대 범위로 매핑합니다,Evalúa el parámetro de tiempo con una curva Bézier y lo asigna al rango mínimo-máximo,تقييم معامل الوقت باستخدام منحنى بيزيه وتعيينه إلى نطاق الحد الأدنى إلى الأقصى,Mengevaluasi parameter waktu dengan kurva Bezier dan memetakannya ke rentang minimum-maksimum
+TimeStartLabel,,時間始端,Time Start,时间起点,時間起點,시간 시작점,Inicio de tiempo,بداية الوقت,Awal Waktu
+TimeStartDescription,,時間パラメーターの正規化に用いる開始時刻,Start time used to normalize the time parameter,用于归一化时间参数的开始时刻,用於正規化時間參數的開始時刻,시간 매개변수를 정규화하는 데 사용하는 시작 시각,Hora de inicio usada para normalizar el parámetro de tiempo,وقت البداية المستخدم لتطبيع معامل الوقت,Waktu awal yang digunakan untuk menormalkan parameter waktu
+TimeEndLabel,,時間終端,Time End,时间终点,時間終點,시간 종료점,Fin de tiempo,نهاية الوقت,Akhir Waktu
+TimeEndDescription,,時間パラメーターの正規化に用いる終了時刻,End time used to normalize the time parameter,用于归一化时间参数的结束时刻,用於正規化時間參數的結束時刻,시간 매개변수를 정규화하는 데 사용하는 종료 시각,Hora de fin usada para normalizar el parámetro de tiempo,وقت النهاية المستخدم لتطبيع معامل الوقت,Waktu akhir yang digunakan untuk menormalkan parameter waktu
+TimeParameterLabel,,時間パラメーター,Time Parameter,时间参数,時間參數,시간 매개변수,Parámetro de tiempo,معامل الوقت,Parameter Waktu
+TimeParameterDescription,,評価対象の時刻,Time to evaluate,要评估的时刻,要評估的時刻,평가 대상 시각,Hora a evaluar,الوقت المراد تقييمه,Waktu yang akan dievaluasi
+EasingMaxLabel,,最大,Max,最大,最大,최대,Máximo,الحد الأقصى,Maks
+EasingMaxDescription,,出力値の上限,Upper bound of the output value,输出值的上限,輸出值的上限,출력값의 상한,Límite superior del valor de salida,الحد الأعلى لقيمة الإخراج,Batas atas nilai keluaran
+EasingMinLabel,,最小,Min,最小,最小,최소,Mínimo,الحد الأدنى,Min
+EasingMinDescription,,出力値の下限,Lower bound of the output value,输出值的下限,輸出值的下限,출력값의 하한,Límite inferior del valor de salida,الحد الأدنى لقيمة الإخراج,Batas bawah nilai keluaran
+BezierCurveLabel,,ベジェ曲線,Bezier Curve,贝塞尔曲线,貝茲曲線,베지어 곡선,Curva Bézier,منحنى بيزيه,Kurva Bezier
+BezierCurveDescription,,時間始端から時間終端までの正規化された時間に対する値を定義する曲線,Curve defining the output value for the normalized time from start to end,定义从时间起点到终点的归一化时间所对应值的曲线,定義從時間起點到終點的正規化時間所對應值的曲線,시간 시작점부터 종료점까지의 정규화된 시간에 대한 값을 정의하는 곡선,Curva que define el valor para el tiempo normalizado desde el inicio hasta el fin,منحنى يحدد القيمة للوقت المطبَّع من البداية إلى النهاية,Kurva yang mendefinisikan nilai untuk waktu ternormalisasi dari awal hingga akhir
+EasingResultLabel,,値,Value,值,值,값,Valor,القيمة,Nilai
+EasingResultDescription,,評価結果,Evaluation result,评估结果,評估結果,평가 결과,Resultado de la evaluación,نتيجة التقييم,Hasil evaluasi
+AlphaNode,,不透明度,Opacity,不透明度,不透明度,불투명도,Opacidad,العتامة,Opasitas
+AlphaNodeDescription,,画像の不透明度を設定します。,Sets the opacity of the image.,设置图像的不透明度。,設定影像的不透明度。,이미지의 불투명도를 설정합니다.,Establece la opacidad de la imagen.,تعيين عتامة الصورة.,Mengatur opasitas gambar.
+AlphaInputDescription,,不透明度の変更対象画像,Image whose opacity will be changed,要更改不透明度的图像,要變更不透明度的影像,불투명도를 변경할 이미지,Imagen cuya opacidad se modificará,الصورة المراد تغيير عتامتها,Gambar yang opasitasnya akan diubah
+OpacityLabel,,不透明度,Opacity,不透明度,不透明度,불투명도,Opacidad,العتامة,Opasitas
+OpacityDescription,,画像の透過度,Transparency level of the image,图像的透明度,影像的透明度,이미지의 투명도,Nivel de transparencia de la imagen,درجة شفافية الصورة,Tingkat transparansi gambar
+AlphaOutputDescription,,透過結果,Transparency result,透明化结果,透明化結果,투명도 적용 결과,Resultado de la transparencia,نتيجة الشفافية,Hasil transparansi
+CreateMaskNode,,マスク生成,Create Mask,生成蒙版,生成遮罩,마스크 생성,Crear máscara,إنشاء قناع,Buat Masker
+CreateMaskNodeDescription,,指定した画像の要素から画像を生成します,Generates an image from an element of the specified image,从指定图像的要素生成图像,從指定影像的要素生成影像,지정한 이미지의 요소로부터 이미지를 생성합니다,Genera una imagen a partir de un elemento de la imagen especificada,إنشاء صورة من عنصر الصورة المحددة,Menghasilkan gambar dari elemen gambar yang ditentukan
+MaskInputImageDescription,,マスク生成を行う基画像,Base image used to generate the mask,用于生成蒙版的基础图像,用於生成遮罩的基礎影像,마스크 생성에 사용하는 원본 이미지,Imagen base usada para generar la máscara,الصورة الأساسية المستخدمة لإنشاء القناع,Gambar dasar yang digunakan untuk membuat masker
+MaskModeLabel,,モード,Mode,模式,模式,모드,Modo,الوضع,Mode
+MaskModeDescription,,マスク生成に使用する画像要素,Image element used to generate the mask,用于生成蒙版的图像要素,用於生成遮罩的影像要素,마스크 생성에 사용하는 이미지 요소,Elemento de imagen usado para generar la máscara,عنصر الصورة المستخدم لإنشاء القناع,Elemen gambar yang digunakan untuk membuat masker
+MaskOffsetLabel,,オフセット,Offset,偏移,偏移,오프셋,Desplazamiento,الإزاحة,Offset
+MaskOffsetDescription,,マスクの値に加えるオフセット,Offset added to the mask value,加到蒙版值上的偏移量,加到遮罩值上的偏移量,마스크 값에 더하는 오프셋,Desplazamiento añadido al valor de la máscara,الإزاحة المضافة إلى قيمة القناع,Offset yang ditambahkan ke nilai masker
+MaskInvertDescription,,マスクを反転するかどうか,Whether to invert the mask,是否反转蒙版,是否反轉遮罩,마스크를 반전할지 여부,Si se debe invertir la máscara,ما إذا كان سيتم عكس القناع,Apakah masker dibalik
+MaskOutputDescription,,生成されたマスク,Generated mask,生成的蒙版,生成的遮罩,생성된 마스크,Máscara generada,القناع الذي تم إنشاؤه,Masker yang dihasilkan
+MaskClipNode,,マスククリップ,Mask Clip,蒙版裁剪,遮罩裁剪,마스크 클립,Recorte por máscara,قص بالقناع,Klip Masker
+MaskClipNodeDescription,,マスクで画像をクリップします,Clips the image using a mask,使用蒙版裁剪图像,使用遮罩裁剪影像,마스크로 이미지를 클립합니다,Recorta la imagen usando una máscara,قص الصورة باستخدام القناع,Mengklip gambar menggunakan masker
+MaskClipInputImageDescription,,マスクによるクリップの対象画像,Image to be clipped by the mask,要通过蒙版裁剪的图像,要透過遮罩裁剪的影像,마스크로 클립할 대상 이미지,Imagen que se recortará con la máscara,الصورة المراد قصها بواسطة القناع,Gambar yang akan diklip menggunakan masker
+MaskClipMaskDescription,,クリップするマスク,Mask used for clipping,用于裁剪的蒙版,用於裁剪的遮罩,클립에 사용할 마스크,Máscara usada para el recorte,القناع المستخدم للقص,Masker yang digunakan untuk klip
+MaskClipOutputDescription,,マスクでクリップした結果,Result of clipping with the mask,使用蒙版裁剪的结果,使用遮罩裁剪的結果,마스크로 클립한 결과,Resultado del recorte con la máscara,نتيجة القص بالقناع,Hasil klip menggunakan masker
+MaskThresholdNode,,マスクの閾値,Mask Threshold,蒙版阈值,遮罩閾值,마스크 임계값,Umbral de máscara,عتبة القناع,Ambang Masker
+MaskThresholdNodeDescription,,マスクの強度の範囲を設定します,Sets the intensity range of the mask,设置蒙版强度的范围,設定遮罩強度的範圍,마스크 강도의 범위를 설정합니다,Establece el rango de intensidad de la máscara,تعيين نطاق شدة القناع,Mengatur rentang intensitas masker
+MaskThresholdInputLabel,,入力マスク,Input Mask,输入蒙版,輸入遮罩,입력 마스크,Máscara de entrada,القناع المدخل,Masker Masukan
+MaskThresholdInputDescription,,閾値の設定対象のマスク,Mask to which the threshold is applied,要设置阈值的蒙版,要設定閾值的遮罩,임계값을 설정할 대상 마스크,Máscara a la que se aplica el umbral,القناع الذي سيتم تطبيق العتبة عليه,Masker yang akan diterapkan ambang batas
+MaskMinLabel,,最小値,Min,最小值,最小值,최소값,Mínimo,الحد الأدنى,Nilai Min
+MaskMinDescription,,しきい値の下限,Lower bound of the threshold,阈值的下限,閾值的下限,임계값의 하한,Límite inferior del umbral,الحد الأدنى للعتبة,Batas bawah ambang batas
+MaskMaxLabel,,最大値,Max,最大值,最大值,최대값,Máximo,الحد الأقصى,Nilai Maks
+MaskMaxDescription,,しきい値の上限,Upper bound of the threshold,阈值的上限,閾值的上限,임계값의 상한,Límite superior del umbral,الحد الأعلى للعتبة,Batas atas ambang batas
+MaskThresholdOutputLabel,,出力マスク,Output Mask,输出蒙版,輸出遮罩,출력 마스크,Máscara de salida,القناع الناتج,Masker Keluaran
+MaskThresholdOutputDescription,,しきい値を適用したマスク,Mask with the threshold applied,已应用阈值的蒙版,已套用閾值的遮罩,임계값을 적용한 마스크,Máscara con el umbral aplicado,القناع بعد تطبيق العتبة,Masker dengan ambang batas diterapkan
+MaskToImageNode,,マスク現像,Develop Mask,蒙版显影,遮罩顯影,마스크 현상,Revelar máscara,إظهار القناع,Kembangkan Masker
+MaskToImageNodeDescription,,マスクの強度を白黒画像に落とし込みます,Converts the mask's intensity into a black-and-white image,将蒙版的强度转换为黑白图像,將遮罩的強度轉換為黑白影像,마스크의 강도를 흑백 이미지로 변환합니다,Convierte la intensidad de la máscara en una imagen en blanco y negro,تحويل شدة القناع إلى صورة بالأبيض والأسود,Mengonversi intensitas masker menjadi gambar hitam-putih
+MaskDevelopTargetDescription,,現像対象のマスク,Mask to be developed,要显影的蒙版,要顯影的遮罩,현상 대상 마스크,Máscara a revelar,القناع المراد إظهاره,Masker yang akan dikembangkan
+MaskImageOutputLabel,,画像,Image,图像,影像,이미지,Imagen,الصورة,Gambar
+MaskImageOutputDescription,,マスクの現像画像,Image developed from the mask,蒙版的显影图像,遮罩的顯影影像,마스크를 현상한 이미지,Imagen revelada de la máscara,الصورة الناتجة عن إظهار القناع,Gambar hasil pengembangan masker
+BlendNode,,合成,Blend,合成,合成,합성,Combinar,دمج,Gabung
+BlendNodeDescription,,2枚の画像を指定したモードで合成します。,Blends two images using the specified mode.,以指定的模式合成两张图像。,以指定的模式合成兩張影像。,두 이미지를 지정한 모드로 합성합니다.,Combina dos imágenes usando el modo especificado.,دمج صورتين باستخدام الوضع المحدد.,Menggabungkan dua gambar menggunakan mode yang ditentukan.
+BlendInputImage1Description,,1つめの合成する画像,First image to blend,要合成的第1张图像,要合成的第1張影像,합성할 첫 번째 이미지,Primera imagen a combinar,الصورة الأولى المراد دمجها,Gambar pertama yang akan digabungkan
+BlendInputImage2Description,,2つめの合成する画像,Second image to blend,要合成的第2张图像,要合成的第2張影像,합성할 두 번째 이미지,Segunda imagen a combinar,الصورة الثانية المراد دمجها,Gambar kedua yang akan digabungkan
+BlendModeDescription,,合成モード,Blend mode,合成模式,合成模式,합성 모드,Modo de combinación,وضع الدمج,Mode Gabung
+BlendOutputDescription,,合成結果,Blend result,合成结果,合成結果,합성 결과,Resultado de la combinación,نتيجة الدمج,Hasil penggabungan
+ArgumentsNode,,引数,Arguments,参数,參數,인수,Argumentos,المعاملات,Argumen
+ArgumentsNodeDescription,,グラフの入力値を提供します。,Provides the graph's input values.,提供图的输入值。,提供圖的輸入值。,그래프의 입력값을 제공합니다.,Proporciona los valores de entrada del grafo.,توفير قيم إدخال الرسم البياني.,Menyediakan nilai masukan grafik.
+ReturnNode,,戻値,Return Value,返回值,返回值,반환값,Valor de retorno,القيمة المُعادة,Nilai Kembalian
+ReturnNodeDescription,,ノードのグラフの計算結果を受け取ります。,Receives the calculation result of the node graph.,接收节点图的计算结果。,接收節點圖的計算結果。,노드 그래프의 계산 결과를 받습니다.,Recibe el resultado del cálculo del grafo de nodos.,استقبال نتيجة حساب الرسم البياني للعقد.,Menerima hasil perhitungan graf node.
+NoMatchingResults,,(該当なし),(No results),(无匹配项),(無符合項目),(해당 없음),(Sin resultados),(لا توجد نتائج),(Tidak ada hasil)
+NumberNode,数値ノード名,数値,Number,数值,數值,숫자,Número,رقم,Angka
+NumberNodeDescription,数値ノード説明,数値を出力します。,Outputs a numeric value.,输出数值。,輸出數值。,숫자를 출력합니다.,Genera un valor numérico.,إخراج قيمة رقمية.,Mengeluarkan nilai angka.
+StringNode,文字列ノード名,文字列,String,字符串,字串,문자열,Cadena,سلسلة,String
+StringNodeDescription,文字列ノード説明,文字列を出力します。,Outputs a string.,输出字符串。,輸出字串。,문자열을 출력합니다.,Genera una cadena.,إخراج سلسلة.,Mengeluarkan string.
+BooleanNode,真偽値ノード名,真偽値,Boolean,布尔值,布林值,불리언,Booleano,منطقي,Boolean
+BooleanNodeDescription,真偽値ノード説明,真偽値を出力します。,Outputs a boolean value.,输出布尔值。,輸出布林值。,불리언 값을 출력합니다.,Genera un valor booleano.,إخراج قيمة منطقية.,Mengeluarkan nilai boolean.
+ColorNode,色ノード名,色,Color,颜色,顏色,색상,Color,اللون,Warna
+ColorNodeDescription,色ノード説明,色を出力します。,Outputs a color.,输出颜色。,輸出顏色。,색상을 출력합니다.,Genera un color.,إخراج لون.,Mengeluarkan warna.
+UnicodeToCharNode,ユニコードから文字ノード名,ユニコードから文字,Unicode to Character,Unicode转字符,Unicode轉字元,유니코드를 문자로,Unicode a carácter,يونيكود إلى حرف,Unicode ke Karakter
+UnicodeToCharNodeDescription,ユニコードから文字ノード説明,Unicodeコードポイントを文字に変換します。,Converts a Unicode code point to a character.,将Unicode码点转换为字符。,將Unicode碼點轉換為字元。,유니코드 코드 포인트를 문자로 변환합니다.,Convierte un punto de código Unicode a un carácter.,تحويل نقطة رمز يونيكود إلى حرف.,Mengonversi titik kode Unicode menjadi karakter.
+CharToUnicodeNode,文字からユニコードノード名,文字からユニコード,Character to Unicode,字符转Unicode,字元轉Unicode,문자를 유니코드로,Carácter a Unicode,حرف إلى يونيكود,Karakter ke Unicode
+CharToUnicodeNodeDescription,文字からユニコードノード説明,文字をUnicodeコードポイントに変換します。,Converts a character to a Unicode code point.,将字符转换为Unicode码点。,將字元轉換為Unicode碼點。,문자를 유니코드 코드 포인트로 변환합니다.,Convierte un carácter a un punto de código Unicode.,تحويل حرف إلى نقطة رمز يونيكود.,Mengonversi karakter menjadi titik kode Unicode.
+StringNthCharNode,文字列のn文字目ノード名,n文字目取得,Get Nth Character,获取第n个字符,取得第n個字元,n번째 문자 가져오기,Obtener enésimo carácter,الحصول على الحرف n,Ambil Karakter ke-n
+StringNthCharNodeDescription,文字列のn文字目ノード説明,文字列の指定位置の文字を取得します。,Gets the character at a specified position in a string.,获取字符串中指定位置的字符。,取得字串中指定位置的字元。,문자열에서 지정된 위치의 문자를 가져옵니다.,Obtiene el carácter en una posición especificada de una cadena.,يحصل على الحرف في موضع محدد في سلسلة.,Mendapatkan karakter pada posisi tertentu dalam string.
+StringEncodeNode,文字列エンコードノード名,文字列エンコード,String Encode,字符串编码,字串編碼,문자열 인코딩,Codificar cadena,ترميز السلسلة,Enkode String
+StringEncodeNodeDescription,文字列エンコードノード説明,文字列を指定のエンコーディングでバイト列に変換します。,Encodes a string to a byte array using specified encoding.,使用指定编码将字符串转换为字节数组。,使用指定編碼將字串轉換為位元組陣列。,지정된 인코딩으로 문자열을 바이트 배열로 변환합니다.,Codifica una cadena a una matriz de bytes usando la codificación especificada.,ترميز سلسلة إلى مصفوفة بايت باستخدام الترميز المحدد.,Mengkodekan string menjadi array byte menggunakan encoding yang ditentukan.
+StringDecodeNode,文字列デコードノード名,文字列デコード,String Decode,字符串解码,字串解碼,문자열 디코딩,Decodificar cadena,فك ترميز السلسلة,Dekode String
+StringDecodeNodeDescription,文字列デコードノード説明,バイト列を指定のエンコーディングで文字列に変換します。,Decodes a byte array to a string using specified encoding.,使用指定编码将字节数组转换为字符串。,使用指定編碼將位元組陣列轉換為字串。,지정된 인코딩으로 바이트 배열을 문자열로 변환합니다.,Decodifica una matriz de bytes a una cadena usando la codificación especificada.,فك ترميز مصفوفة بايت إلى سلسلة باستخدام الترميز المحدد.,Mendekode array byte menjadi string menggunakan encoding yang ditentukan.
+NumberToStringNode,数字から文字列ノード名,数字から文字列,Number to String,数字转字符串,數字轉字串,숫자를 문자열로,Número a cadena,رقم إلى سلسلة,Angka ke String
+NumberToStringNodeDescription,数字から文字列ノード説明,数値を文字列に変換します。,Converts a number to a string.,将数字转换为字符串。,將數字轉換為字串。,숫자를 문자열로 변환합니다.,Convierte un número a una cadena.,تحويل رقم إلى سلسلة.,Mengonversi angka menjadi string.
+StringConcatNode,文字列結合ノード名,文字列結合,String Concatenate,字符串连接,字串串接,문자열 연결,Concatenar cadenas,دمج السلاسل,Gabungkan String
+StringConcatNodeDescription,文字列結合ノード説明,複数の文字列を連結します。,Concatenates multiple strings.,连接多个字符串。,串接多個字串。,여러 문자열을 연결합니다.,Concatena múltiples cadenas.,دمج عدة سلاسل.,Menggabungkan beberapa string.
+RGBToColorNode,RGB値から色ノード名,RGBから色,RGB to Color,RGB转颜色,RGB轉顏色,RGB를 색상으로,RGB a color,آر جي بي إلى لون,RGB ke Warna
+RGBToColorNodeDescription,RGB値から色ノード説明,RGB値を色に変換します。,Converts RGB values to a color.,将RGB值转换为颜色。,將RGB值轉換為顏色。,RGB 값을 색상으로 변환합니다.,Convierte valores RGB a un color.,تحويل قيم آر جي بي إلى لون.,Mengonversi nilai RGB menjadi warna.
+HSVToColorNode,HSV値から色ノード名,HSVから色,HSV to Color,HSV转颜色,HSV轉顏色,HSV를 색상으로,HSV a color,إتش إس في إلى لون,HSV ke Warna
+HSVToColorNodeDescription,HSV値から色ノード説明,HSV値を色に変換します。,Converts HSV values to a color.,将HSV值转换为颜色。,將HSV值轉換為顏色。,HSV 값을 색상으로 변환합니다.,Convierte valores HSV a un color.,تحويل قيم إتش إس في إلى لون.,Mengonversi nilai HSV menjadi warna.
+CMYKToColorNode,CMYK値から色ノード名,CMYKから色,CMYK to Color,CMYK转颜色,CMYK轉顏色,CMYK를 색상으로,CMYK a color,سي إم واي كي إلى لون,CMYK ke Warna
+CMYKToColorNodeDescription,CMYK値から色ノード説明,CMYK値を色に変換します。,Converts CMYK values to a color.,将CMYK值转换为颜色。,將CMYK值轉換為顏色。,CMYK 값을 색상으로 변환합니다.,Convierte valores CMYK a un color.,تحويل قيم سي إم واي كي إلى لون.,Mengonversi nilai CMYK menjadi warna.
+YCbCrToColorNode,YCbCr値から色ノード名,YCbCrから色,YCbCr to Color,YCbCr转颜色,YCbCr轉顏色,YCbCr를 색상으로,YCbCr a color,واي سي بي سي آر إلى لون,YCbCr ke Warna
+YCbCrToColorNodeDescription,YCbCr値から色ノード説明,YCbCr値を色に変換します。,Converts YCbCr values to a color.,将YCbCr值转换为颜色。,將YCbCr值轉換為顏色。,YCbCr 값을 색상으로 변환합니다.,Convierte valores YCbCr a un color.,تحويل قيم واي سي بي سي آر إلى لون.,Mengonversi nilai YCbCr menjadi warna.
+LabToColorNode,Lab値から色ノード名,Labから色,Lab to Color,Lab转颜色,Lab轉顏色,Lab를 색상으로,Lab a color,لاب إلى لون,Lab ke Warna
+LabToColorNodeDescription,Lab値から色ノード説明,Lab値を色に変換します。,Converts Lab values to a color.,将Lab值转换为颜色。,將Lab值轉換為顏色。,Lab 값을 색상으로 변환합니다.,Convierte valores Lab a un color.,تحويل قيم لاب إلى لون.,Mengonversi nilai Lab menjadi warna.
+OklchToColorNode,Oklch値から色ノード名,Oklchから色,Oklch to Color,Oklch转颜色,Oklch轉顏色,Oklch를 색상으로,Oklch a color,أوكلتش إلى لون,Oklch ke Warna
+OklchToColorNodeDescription,Oklch値から色ノード説明,Oklch値を色に変換します。,Converts Oklch values to a color.,将Oklch值转换为颜色。,將Oklch值轉換為顏色。,Oklch 값을 색상으로 변환합니다.,Convierte valores Oklch a un color.,تحويل قيم أوكلتش إلى لون.,Mengonversi nilai Oklch menjadi warna.
+HWBToColorNode,HWB値から色ノード名,HWBから色,HWB to Color,HWB转颜色,HWB轉顏色,HWB를 색상으로,HWB a color,إتش دبليو بي إلى لون,HWB ke Warna
+HWBToColorNodeDescription,HWB値から色ノード説明,HWB値を色に変換します。,Converts HWB values to a color.,将HWB值转换为颜色。,將HWB值轉換為顏色。,HWB 값을 색상으로 변환합니다.,Convierte valores HWB a un color.,تحويل قيم إتش دبليو بي إلى لون.,Mengonversi nilai HWB menjadi warna.
+ColorToRGBNode,色からRGB値ノード名,色からRGB,Color to RGB,颜色转RGB,顏色轉RGB,색상을 RGB로,Color a RGB,لون إلى آر جي بي,Warna ke RGB
+ColorToRGBNodeDescription,色からRGB値ノード説明,色をRGB値に変換します。,Converts a color to RGB values.,将颜色转换为RGB值。,將顏色轉換為RGB值。,색상을 RGB 값으로 변환합니다.,Convierte un color a valores RGB.,تحويل لون إلى قيم آر جي بي.,Mengonversi warna menjadi nilai RGB.
+ColorToHSVNode,色からHSV値ノード名,色からHSV,Color to HSV,颜色转HSV,顏色轉HSV,색상을 HSV로,Color a HSV,لون إلى إتش إس في,Warna ke HSV
+ColorToHSVNodeDescription,色からHSV値ノード説明,色をHSV値に変換します。,Converts a color to HSV values.,将颜色转换为HSV值。,將顏色轉換為HSV值。,색상을 HSV 값으로 변환합니다.,Convierte un color a valores HSV.,تحويل لون إلى قيم إتش إس في.,Mengonversi warna menjadi nilai HSV.
+ColorToCMYKNode,色からCMYK値ノード名,色からCMYK,Color to CMYK,颜色转CMYK,顏色轉CMYK,색상을 CMYK로,Color a CMYK,لون إلى سي إم واي كي,Warna ke CMYK
+ColorToCMYKNodeDescription,色からCMYK値ノード説明,色をCMYK値に変換します。,Converts a color to CMYK values.,将颜色转换为CMYK值。,將顏色轉換為CMYK值。,색상을 CMYK 값으로 변환합니다.,Convierte un color a valores CMYK.,تحويل لون إلى قيم سي إم واي كي.,Mengonversi warna menjadi nilai CMYK.
+ColorToYCbCrNode,色からYCbCr値ノード名,色からYCbCr,Color to YCbCr,颜色转YCbCr,顏色轉YCbCr,색상을 YCbCr로,Color a YCbCr,لون إلى واي سي بي سي آر,Warna ke YCbCr
+ColorToYCbCrNodeDescription,色からYCbCr値ノード説明,色をYCbCr値に変換します。,Converts a color to YCbCr values.,将颜色转换为YCbCr值。,將顏色轉換為YCbCr值。,색상을 YCbCr 값으로 변환합니다.,Convierte un color a valores YCbCr.,تحويل لون إلى قيم واي سي بي سي آر.,Mengonversi warna menjadi nilai YCbCr.
+ColorToLabNode,色からLab値ノード名,色からLab,Color to Lab,颜色转Lab,顏色轉Lab,색상을 Lab로,Color a Lab,لون إلى لاب,Warna ke Lab
+ColorToLabNodeDescription,色からLab値ノード説明,色をLab値に変換します。,Converts a color to Lab values.,将颜色转换为Lab值。,將顏色轉換為Lab值。,색상을 Lab 값으로 변환합니다.,Convierte un color a valores Lab.,تحويل لون إلى قيم لاب.,Mengonversi warna menjadi nilai Lab.
+ColorToOklchNode,色からOklch値ノード名,色からOklch,Color to Oklch,颜色转Oklch,顏色轉Oklch,색상을 Oklch로,Color a Oklch,لون إلى أوكلتش,Warna ke Oklch
+ColorToOklchNodeDescription,色からOklch値ノード説明,色をOklch値に変換します。,Converts a color to Oklch values.,将颜色转换为Oklch值。,將顏色轉換為Oklch值。,색상을 Oklch 값으로 변환합니다.,Convierte un color a valores Oklch.,تحويل لون إلى قيم أوكلتش.,Mengonversi warna menjadi nilai Oklch.
+ColorToHWBNode,色からHWB値ノード名,色からHWB,Color to HWB,颜色转HWB,顏色轉HWB,색상을 HWB로,Color a HWB,لون إلى إتش دبليو بي,Warna ke HWB
+ColorToHWBNodeDescription,色からHWB値ノード説明,色をHWB値に変換します。,Converts a color to HWB values.,将颜色转换为HWB值。,將顏色轉換為HWB值。,색상을 HWB 값으로 변환합니다.,Convierte un color a valores HWB.,تحويل لون إلى قيم إتش دبليو بي.,Mengonversi warna menjadi nilai HWB.
+CodePoint,コードポイント入力ラベル,コードポイント,Code Point,码点,碼點,코드 포인트,Punto de código,نقطة الرمز,Titik kode
+CodePointDescription,コードポイント入力説明,Unicodeコードポイント(整数)。,A Unicode code point (integer).,Unicode 代码点（整数）。,Unicode 碼點（整數）。,유니코드 코드 포인트(정수)。,Un punto de código Unicode (entero).,نقطة رمز Unicode (عدد صحيح).,Titik kode Unicode (bilangan bulat).
+Character,文字入力ラベル,文字,Character,字符,字元,문자,Carácter,حرف,Karakter
+CharacterDescription,文字入力説明,1文字の文字列。先頭以外は無視されます。,A single character. Any characters beyond the first are ignored.,单个字符。第一个字符之后的所有字符都会被忽略。,單一字元。第一個字元之後的所有字元都會被忽略。,단일 문자 문자열입니다. 첫 번째 문자 이후의 문자는 모두 무시됩니다.,Un solo carácter. Se ignoran todos los caracteres posteriores al primero.,حرف واحد. يتم تجاهل جميع الأحرف التي تأتي بعد الحرف الأول.,Satu karakter. Semua karakter setelah karakter pertama akan diabaikan.
+Text,文字列入力ラベル,文字列,Text,文本,文字列,텍스트,Texto,نص,Teks
+TextDescription,文字列入力説明,対象の文字列。,The target string.,目标字符串。,目標字串。,대상 문자열입니다.,La cadena de destino.,السلسلة النصية المستهدفة.,String target.
+Bytes,バイト列ポートラベル,バイト列,Bytes,字节数组,位元組陣列,바이트 배열,Bytes,بايتات,Byte
+BytesDescription,バイト列ポート説明,バイト配列。,A byte array.,字节数组。,位元組陣列。,바이트 배열입니다.,Una matriz de bytes.,مصفوفة من البايتات.,Array byte.
+Encoding,エンコーディング選択ラベル,エンコーディング,Encoding,编码,編碼,인코딩,Codificación,الترميز,Encoding
+EncodingDescription,エンコーディング選択説明,文字エンコーディングの種類。,The character encoding to use.,要使用的字符编码类型。,要使用的字元編碼類型。,사용할 문자 인코딩 유형입니다.,El tipo de codificación de caracteres que se utilizará.,نوع ترميز الأحرف المطلوب استخدامه.,Jenis pengodean karakter yang akan digunakan.
+EncodingUtf8,エンコーディング選択肢,UTF-8,UTF-8,UTF-8,UTF-8,UTF-8,UTF-8,UTF-8,UTF-8
+EncodingUtf16,エンコーディング選択肢,UTF-16,UTF-16,UTF-16,UTF-16,UTF-16,UTF-16,UTF-16,UTF-16
+EncodingUtf32,エンコーディング選択肢,UTF-32,UTF-32,UTF-32,UTF-32,UTF-32,UTF-32,UTF-32,UTF-32
+EncodingShiftJis,エンコーディング選択肢,Shift_JIS,Shift_JIS,Shift_JIS,Shift_JIS,Shift_JIS,Shift_JIS,Shift_JIS,Shift_JIS
+EncodingAscii,エンコーディング選択肢,ASCII,ASCII,ASCII,ASCII,ASCII,ASCII,ASCII,ASCII
+StringConcatInput1,文字列結合の入力1ラベル,文字列1,String 1,字符串 1,字串 1,문자열 1,Cadena 1,السلسلة 1,String 1
+StringConcatInput2,文字列結合の入力2ラベル,文字列2,String 2,字符串 2,字串 2,문자열 2,Cadena 2,السلسلة 2,String 2
+StringConcatInput3,文字列結合の入力3ラベル,文字列3,String 3,字符串 3,字串 3,문자열 3,Cadena 3,السلسلة 3,String 3
+StringConcatInput4,文字列結合の入力4ラベル,文字列4,String 4,字符串 4,字串 4,문자열 4,Cadena 4,السلسلة 4,String 4
+StringConcatSeparator,文字列結合の区切り文字ラベル,区切り文字,Separator,分隔符,分隔符,구분자,Separador,الفاصل,الفاصل
+StringConcatSeparatorDescription,文字列結合の区切り文字説明,連結時に各文字列の間に挿入する文字列。,The string inserted between each value when joining.,连接时插入到各值之间的字符串。,串接時插入於各值之間的字串。,각 값을 연결할 때 각 값 사이에 삽입되는 문자열입니다.,La cadena que se inserta entre cada valor al unirlos.,السلسلة النصية التي يتم إدراجها بين كل قيمة عند دمجها.,String yang disisipkan di antara setiap nilai saat menggabungkannya.
+Red,赤成分ラベル,赤,Red,红,紅,빨강,Rojo,أحمر,Merah
+RedDescription,赤成分説明,赤成分(0-255)。,The red channel (0-255).,红色通道（0-255）。,紅色通道（0-255）。,빨강 채널(0-255)입니다.,El canal rojo (0-255).,قناة الأحمر (0-255).,Kanal merah (0-255).
+Green,緑成分ラベル,緑,Green,绿,綠,초록,Verde,أخضر,Hijau
+GreenDescription,緑成分説明,緑成分(0-255)。,The green channel (0-255).,绿色通道（0-255）。,綠色通道（0-255）。,초록 채널(0-255)입니다.,El canal verde (0-255).,قناة الأخضر (0-255).,Kanal hijau (0-255).
+Blue,青成分ラベル,青,Blue,蓝,藍,파랑,Azul,أزرق,Biru
+BlueDescription,青成分説明,青成分(0-255)。,The blue channel (0-255).,蓝色通道（0-255）。,藍色通道（0-255）。,파랑 채널(0-255)입니다.,El canal azul (0-255).,قناة الأزرق (0-255).,Kanal biru (0-255).
+ColorValue,色ポートラベル,色,Color,颜色,顏色,색상,Color,لون,Warna
+ColorValueDescription,色ポート説明,色の値。,The color value.,颜色值。,顏色值。,색상 값입니다.,El valor del color.,قيمة اللون.,Nilai warna.
+Hue,色相ラベル,色相,Hue,色相,色相,색조,Tono,درجة اللون,Nada
+HueDescription,色相説明,色相(0-360度)。,The hue (0-360 degrees).,色相（0-360度）。,色相（0-360 度）。,색조(0-360도)입니다.,El tono (0-360 grados).,درجة اللون (0-360 درجة).,Nada (0-360 derajat).
+Saturation,彩度ラベル,彩度,Saturation,饱和度,飽和度,채도,Saturación,التشبع,Saturasi
+SaturationDescription,彩度説明,彩度(0-100%)。,The saturation (0-100%).,饱和度（0-100%）。,飽和度（0-100%）。,채도(0-100%)입니다.,La saturación (0-100%).,التشبع (0-100%).,Saturasi (0-100%).
+Brightness,明度ラベル,明度,Brightness,明度,明度,밝기,Brillo,السطوع,Kecerahan
+BrightnessDescription,明度説明,明度(HSVのV、0-100%)。,The brightness/value component of HSV (0-100%).,明度（HSV 的 V 分量，0-100%）。,明度（HSV 的 V 分量，0-100%）。,HSV의 밝기/값 구성 요소(0-100%)입니다.,El componente de brillo/valor de HSV (0-100%).,مكوّن السطوع/القيمة في HSV (0-100%).,Komponen kecerahan/nilai HSV (0-100%).
+CmykCyan,CMYK シアンラベル,シアン,Cyan,青色,青色,시안,Cian,سماوي,Sian
+CmykCyanDescription,CMYK シアン説明,シアン成分(0-100%)。,The cyan channel (0-100%).,青色通道（0-100%）。,青色通道（0-100%）。,시안 채널(0-100%)입니다.,El canal cian (0-100%).,قناة السماوي (0-100%).,Kanal sian (0-100%).
+CmykMagenta,CMYK マゼンタラベル,マゼンタ,Magenta,品红,洋紅,마젠타,Magenta,أرجواني,Magenta
+CmykMagentaDescription,CMYK マゼンタ説明,マゼンタ成分(0-100%)。,The magenta channel (0-100%).,品红通道（0-100%）。,洋紅通道（0-100%）。,마젠타 채널(0-100%)입니다.,El canal magenta (0-100%).,قناة الأرجواني (0-100%).,Kanal magenta (0-100%).
+CmykYellow,CMYK イエローラベル,イエロー,Yellow,黄色,黃色,노랑,Amarillo,أصفر,Kuning
+CmykYellowDescription,CMYK イエロー説明,イエロー成分(0-100%)。,The yellow channel (0-100%).,黄色通道（0-100%）。,黃色通道（0-100%）。,노랑 채널(0-100%)입니다.,El canal amarillo (0-100%).,قناة الأصفر (0-100%).,Kanal kuning (0-100%).
+CmykKey,CMYK キープレートラベル,キープレート(黒),Key (Black),黑版,黑版,키 플레이트(검정),Clave (negro),الأسود (Key),Key (Hitam)
+CmykKeyDescription,CMYK キープレート説明,キープレート(黒)成分(0-100%)。,The key/black channel (0-100%).,黑版通道（0-100%）。,黑版通道（0-100%）。,키/검정 채널(0-100%)입니다.,El canal clave/negro (0-100%).,قناة المفتاح/الأسود (0-100%).,Kanal key/hitam (0-100%).
+Luma,YCbCr輝度ラベル,輝度(Y),Luma (Y),亮度（Y）,亮度（Y）,휘도(Y),Luma (Y),اللمعان (Y),Luma (Y)
+LumaDescription,YCbCr輝度説明,輝度成分(0-255、BT.601フルレンジ)。,The luma channel (0-255, BT.601 full range).,亮度通道（0-255，BT.601 全范围）。,亮度通道（0-255，BT.601 全範圍）。,휘도 채널(0-255, BT.601 전체 범위)입니다.,El canal de luminancia (0-255, rango completo BT.601).,قناة اللمعان (0-255، النطاق الكامل BT.601).,Kanal luma (0-255, rentang penuh BT.601).
+ChromaBlue,YCbCr Cbラベル,青色差(Cb),Chroma Blue (Cb),蓝色色度（Cb）,藍色色度（Cb）,청색 색차(Cb),Crominancia azul (Cb),التلون الأزرق (Cb),Kroma biru (Cb)
+ChromaBlueDescription,YCbCr Cb説明,青色差成分(0-255、BT.601フルレンジ)。,The Cb chroma channel (0-255, BT.601 full range).,Cb 色度通道（0-255，BT.601 全范围）。,Cb 色度通道（0-255，BT.601 全範圍）。,Cb 색차 채널(0-255, BT.601 전체 범위)입니다.,El canal de crominancia Cb (0-255, rango completo BT.601).,قناة التلون Cb (0-255، النطاق الكامل BT.601).,Kanal kroma Cb (0-255, rentang penuh BT.601).
+ChromaRed,YCbCr Crラベル,赤色差(Cr),Chroma Red (Cr),红色色度（Cr）,紅色色度（Cr）,적색 색차(Cr),Crominancia roja (Cr),التلون الأحمر (Cr),Kroma merah (Cr)
+ChromaRedDescription,YCbCr Cr説明,赤色差成分(0-255、BT.601フルレンジ)。,The Cr chroma channel (0-255, BT.601 full range).,Cr 色度通道（0-255，BT.601 全范围）。,Cr 色度通道（0-255，BT.601 全範圍）。,Cr 색차 채널(0-255, BT.601 전체 범위)입니다.,El canal de crominancia Cr (0-255, rango completo BT.601).,قناة التلون Cr (0-255، النطاق الكامل BT.601).,Kanal kroma Cr (0-255, rentang penuh BT.601).
+LabLightness,Lab明度ラベル,明度(L),Lightness (L),明度（L）,明度（L）,명도(L),Luminosidad (L),الإضاءة (L),Kecerahan (L)
+LabLightnessDescription,Lab明度説明,CIE Lab明度成分(0-100)。,The CIE Lab lightness channel (0-100).,CIE Lab 明度通道（0-100）。,CIE Lab 明度通道（0-100）。,CIE Lab 명도 채널(0-100)입니다.,El canal de luminosidad CIE Lab (0-100).,قناة الإضاءة في CIE Lab (0-100).,Kanal kecerahan CIE Lab (0-100).
+LabA,Lab a*ラベル,a成分,a,a 分量,a 分量,a 성분,Componente a,المكوّن a,Komponen a
+LabADescription,Lab a*説明,CIE Lab a*成分(緑-赤軸、-128〜127)。,The CIE Lab a* channel, green-red axis (-128 to 127).,CIE Lab a* 通道，绿-红轴（-128 至 127）。,CIE Lab a* 通道，綠-紅軸（-128 至 127）。,CIE Lab a* 채널, 녹색-빨간색 축(-128~127)입니다.,El canal a* de CIE Lab, eje verde-rojo (-128 a 127).,قناة a* في CIE Lab، محور الأخضر-الأحمر (-128 إلى 127).,Kanal a* CIE Lab, sumbu hijau-merah (-128 hingga 127).
+LabB,Lab b*ラベル,b成分,b,b 分量,b 分量,b 성분,Componente b,المكوّن b,Komponen b
+LabBDescription,Lab b*説明,CIE Lab b*成分(青-黄軸、-128〜127)。,The CIE Lab b* channel, blue-yellow axis (-128 to 127).,CIE Lab b* 通道，蓝-黄轴（-128 至 127）。,CIE Lab b* 通道，藍-黃軸（-128 至 127）。,CIE Lab b* 채널, 파란색-노란색 축(-128~127)입니다.,El canal b* de CIE Lab, eje azul-amarillo (-128 a 127).,قناة b* في CIE Lab، محور الأزرق-الأصفر (-128 إلى 127).,Kanal b* CIE Lab, sumbu biru-kuning (-128 hingga 127).
+OklchLightness,Oklch明度ラベル,明度(L),Lightness (L),明度（L）,明度（L）,명도(L),Luminosidad (L),الإضاءة (L),Kecerahan (L)
+OklchLightnessDescription,Oklch明度説明,Oklch明度成分(0-1)。,The Oklch lightness channel (0-1).,Oklch 明度通道（0-1）。,Oklch 明度通道（0-1）。,Oklch 명도 채널(0-1)입니다.,El canal de luminosidad Oklch (0-1).,قناة الإضاءة في Oklch (0-1).,Kanal kecerahan Oklch (0-1).
+OklchChroma,Oklch彩度ラベル,彩度(C),Chroma (C),色度（C）,色度（C）,채도(C),Cromaticidad (C),التلون (C),Kroma (C)
+OklchChromaDescription,Oklch彩度説明,Oklch彩度成分(理論上0-0.5程度)。,The Oklch chroma channel (roughly 0-0.5 in practice).,Oklch 色度通道（实际约为 0-0.5）。,Oklch 色度通道（實際約為 0-0.5）。,Oklch 채도 채널(실제로는 약 0~0.5)입니다.,El canal de cromaticidad Oklch (aproximadamente 0-0,5 en la práctica).,قناة التلون في Oklch (حوالي 0-0.5 عمليًا).,Kanal kroma Oklch (sekitar 0-0,5 dalam praktik).
+HwbWhiteness,HWB白色度ラベル,白色度(W),Whiteness (W),白度（W）,白度（W）,백색도(W),Blancura (W),البياض (W),Keputihan (W)
+HwbWhitenessDescription,HWB白色度説明,白色度成分(0-100%)。,The whiteness channel (0-100%).,白度通道（0-100%）。,白度通道（0-100%）。,백색도 채널(0-100%)입니다.,El canal de blancura (0-100%).,قناة البياض (0-100%).,Kanal keputihan (0-100%).
+HwbBlackness,HWB黒色度ラベル,黒色度(B),Blackness (B),黑度（B）,黑度（B）,흑색도(B),Negrura (B),السواد (B),Kehitaman (B)
+HwbBlacknessDescription,HWB黒色度説明,黒色度成分(0-100%)。,The blackness channel (0-100%).,黑度通道（0-100%）。,黑度通道（0-100%）。,흑색도 채널(0-100%)입니다.,El canal de negrura (0-100%).,قناة السواد (0-100%).,Kanal kehitaman (0-100%).
+MaxFractionDigits,最大少数桁数入力ラベル,最大少数桁数,Maximum Fraction Digits,最大小数位数,最大小數位數,최대 소수 자릿수,Dígitos decimales máximos,الحد الأقصى لخانات الجزء العشري,Jumlah digit pecahan maksimum
+MaxFractionDigitsDescription,最大少数桁数入力説明,小数部の最大桁数。,The maximum number of fractional digits.,小数部分的最大位数。,小數部分的最大位數。,소수 부분의 최대 자릿수입니다.,El número máximo de dígitos decimales.,الحد الأقصى لعدد خانات الجزء العشري.,Jumlah maksimum digit pecahan.
+Alignment,位置揃え入力ラベル,位置揃え,Alignment,对齐方式,對齊方式,정렬,Alineación,المحاذاة,Perataan
+AlignmentDescription,位置揃え入力説明,出力文字列の位置揃え。,The alignment of the output string.,输出字符串的对齐方式。,輸出字串的對齊方式。,출력 문자열의 정렬 방식입니다.,La alineación de la cadena de salida.,محاذاة سلسلة الإخراج.,Perataan string keluaran.
+AlignmentWidthDescription,位置揃え幅入力説明,位置揃えに使用する文字幅。,The character width used for alignment.,用于对齐的字符宽度。,用於對齊的字元寬度。,정렬에 사용하는 문자 너비입니다.,El ancho de caracteres utilizado para la alineación.,عرض الأحرف المستخدم للمحاذاة.,Lebar karakter yang digunakan untuk perataan.
+AlignmentLeft,左揃え,左揃え,Left,左对齐,靠左對齊,왼쪽 정렬,Alineación a la izquierda,محاذاة لليسار,Rata kiri
+AlignmentCenter,中央揃え,中央揃え,Center,居中对齐,置中對齊,가운데 정렬,Alineación centrada,محاذاة للوسط,Rata tengah
+AlignmentRight,右揃え,右揃え,Right,右对齐,靠右對齊,오른쪽 정렬,Alineación a la derecha,محاذاة لليمين,Rata kanan
+MinIntegerDigits,最小整数桁数入力ラベル,最小整数桁数,Minimum Integer Digits,最小整数位数,最小整數位數,최소 정수 자릿수,Dígitos enteros mínimos,الحد الأدنى لخانات الجزء الصحيح,Jumlah digit bilangan bulat minimum
+MinIntegerDigitsDescription,最小整数桁数入力説明,整数部の最小桁数。,The minimum number of integer digits.,整数部分的最小位数。,整數部分的最小位數。,정수 부분의 최소 자릿수입니다.,El número mínimo de dígitos enteros.,الحد الأدنى لعدد خانات الجزء الصحيح.,Jumlah minimum digit bilangan bulat.
+FractionDigits,小数桁数入力ラベル,小数桁数,Fraction Digits,小数位数,小數位數,소수 자릿수,Dígitos decimales,خانات الجزء العشري,Jumlah digit pecahan
+FractionDigitsDescription,小数桁数入力説明,小数点以下の桁数。,The number of digits after the decimal point.,小数点后的位数。,小數點後的位數。,소수점 이하 자릿수입니다.,El número de dígitos después del punto decimal.,عدد الخانات بعد الفاصلة العشرية.,Jumlah digit setelah titik desimal.
+IntegerPadding,整数部埋め入力ラベル,整数部の埋め,Integer Padding,整数部分填充,整數部分填充,정수 부분 채우기,Relleno de la parte entera,حشو الجزء الصحيح,Padding bagian bilangan bulat
+IntegerPaddingDescription,整数部埋め入力説明,整数部の不足桁を埋める文字。,The character used to fill missing integer digits.,用于填充整数部分不足位数的字符。,用於填充整數部分不足位數的字元。,정수 부분의 부족한 자릿수를 채우는 문자입니다.,El carácter utilizado para rellenar los dígitos enteros que faltan.,الحرف المستخدم لملء خانات الجزء الصحيح الناقصة.,Karakter yang digunakan untuk mengisi digit bilangan bulat yang kurang.
+IntegerPaddingZero,0埋め,0埋め,Zero,用0填充,以0填充,0으로 채우기,Ceros,أصفار,Nol
+IntegerPaddingSpace,空白埋め,空白埋め,Space,用空格填充,以空格填充,공백으로 채우기,Espacios,مسافات,Spasi
+ZeroFormat,0表示入力ラベル,0の表示,Zero Display,0的显示,0的顯示,0 표시,Mostrar cero,إظهار الصفر,Tampilan nol
+ZeroFormatDescription,0表示入力説明,0未満の小数を表示する際に整数部の0を表示するかどうか。,Whether to display the leading zero when displaying a fractional value less than 1.,显示小于1的小数时是否显示整数部分的0。,顯示小於1的小數時是否顯示整數部分的0。,1 미만의 소수를 표시할 때 정수 부분의 0을 표시할지 여부입니다.,Indica si se muestra el cero inicial al mostrar un valor decimal menor que 1.,ما إذا كان سيتم عرض الصفر البادئ عند عرض قيمة عشرية أقل من 1.,Apakah nol di depan ditampilkan saat menampilkan nilai pecahan kurang dari 1.
+ZeroFormatInclude,0を表示,0を表示,Include Zero,显示0,顯示0,0 표시,Mostrar cero,إظهار الصفر,Tampilkan nol
+ZeroFormatOmit,0を省略,0を省略,Omit Zero,省略0,省略0,0 생략,Omitir cero,حذف الصفر,Abaikan nol

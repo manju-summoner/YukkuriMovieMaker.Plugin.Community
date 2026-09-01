@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>ar-sa</value></data>
+<data name="Node" xml:space="preserve"><value>العقد</value></data>
+<data name="NodeEditor" xml:space="preserve"><value>محرر العقد</value></data>
+<data name="OutputImageIsNull" xml:space="preserve"><value>صورة الإخراج فارغة</value></data>
+<data name="ItemPropertiesNotSet" xml:space="preserve"><value>خصائص العنصر غير محددة.</value></data>
+<data name="UnableLoadEffect" xml:space="preserve"><value>غير قادر على تحميل التأثير</value></data>
+<data name="UnableGenerateEffect" xml:space="preserve"><value>غير قادر على إنشاء التأثير</value></data>
+<data name="PropertyNotFound" xml:space="preserve"><value>لم يتم العثور على الخاصية {0} المحددة</value></data>
+<data name="PropertyReadOnly" xml:space="preserve"><value>الخاصية {0} للقراءة فقط</value></data>
+<data name="UnableCreateAnimationInstance" xml:space="preserve"><value>تعذر إنشاء نسخة من نوع Animation</value></data>
+<data name="AnimationValuesPropertyError" xml:space="preserve"><value>خاصية Values لكائن Animation غير موجودة أو للقراءة فقط</value></data>
+<data name="ShaderResourceIdEmpty" xml:space="preserve"><value>معرّف مورد الشادر فارغ</value></data>
+<data name="ShaderResourceNotFound" xml:space="preserve"><value>لم يتم العثور على مورد الشادر *.{0}</value></data>
+<data name="CannotCreateEffectInstance" xml:space="preserve"><value>تعذر إنشاء نسخة التأثير</value></data>
+<data name="CannotCastToShaderEffect" xml:space="preserve"><value>لا يمكن التحويل إلى ShaderEffect</value></data>
+<data name="IndexOutOfRange" xml:space="preserve"><value>الفهرس المحدد خارج النطاق</value></data>
+<data name="CannotCreateType" xml:space="preserve"><value>تعذر إنشاء النوع</value></data>
+<data name="Input" xml:space="preserve"><value>مدخل</value></data>
+<data name="Output" xml:space="preserve"><value>الناتج</value></data>
+<data name="ColorRgbHeader" xml:space="preserve"><value>RGB</value></data>
+<data name="ColorRedLabel" xml:space="preserve"><value>R:</value></data>
+<data name="ColorGreenLabel" xml:space="preserve"><value>G:</value></data>
+<data name="ColorBlueLabel" xml:space="preserve"><value>B:</value></data>
+<data name="ColorAlphaLabel" xml:space="preserve"><value>A:</value></data>
+<data name="ColorHsvHeader" xml:space="preserve"><value>HSV</value></data>
+<data name="ColorHueLabel" xml:space="preserve"><value>H:</value></data>
+<data name="ColorSaturationLabel" xml:space="preserve"><value>S:</value></data>
+<data name="ColorValueLabel" xml:space="preserve"><value>V:</value></data>
+<data name="SelectFileButton" xml:space="preserve"><value>اختيار</value></data>
+<data name="OpenSubGraphButton" xml:space="preserve"><value>فتح الرسم البياني الفرعي</value></data>
+<data name="AddNodeMenu" xml:space="preserve"><value>إضافة عقدة</value></data>
+<data name="CopyMenu" xml:space="preserve"><value>نسخ</value></data>
+<data name="CutMenu" xml:space="preserve"><value>قص</value></data>
+<data name="PasteMenu" xml:space="preserve"><value>لصق</value></data>
+<data name="DeleteMenu" xml:space="preserve"><value>حذف</value></data>
+<data name="EditMenu" xml:space="preserve"><value>تحرير</value></data>
+<data name="ModeMenu" xml:space="preserve"><value>الوضع</value></data>
+<data name="RectSelectionMenu" xml:space="preserve"><value>تحديد مستطيل</value></data>
+<data name="LassoSelectionMenu" xml:space="preserve"><value>تحديد بالحبل</value></data>
+<data name="PanMenu" xml:space="preserve"><value>تحريك</value></data>
+<data name="ViewMenu" xml:space="preserve"><value>عرض</value></data>
+<data name="ZoomInMenu" xml:space="preserve"><value>تكبير</value></data>
+<data name="ZoomOutMenu" xml:space="preserve"><value>تصغير</value></data>
+<data name="ResetZoomMenu" xml:space="preserve"><value>إعادة تعيين التكبير</value></data>
+<data name="FitMenu" xml:space="preserve"><value>ملاءمة</value></data>
+<data name="CloseTabToolTip" xml:space="preserve"><value>إغلاق التبويب</value></data>
+<data name="ModeStatusLabel" xml:space="preserve"><value>الوضع:</value></data>
+<data name="OpenNodeEditorButtonLabel" xml:space="preserve"><value>فتح محرر العقد...</value></data>
+<data name="BezierSmoothMenu" xml:space="preserve"><value>سلس</value></data>
+<data name="BezierCornerMenu" xml:space="preserve"><value>زاوية</value></data>
+<data name="BezierFixedNodeDeleteError" xml:space="preserve"><value>لا يمكن حذف عقدة ثابتة.</value></data>
+<data name="BezierMinKeyframesError" xml:space="preserve"><value>يلزم توفر إطارين رئيسيين على الأقل.</value></data>
+</root>

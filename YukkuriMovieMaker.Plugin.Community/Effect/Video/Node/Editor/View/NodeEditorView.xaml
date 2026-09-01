@@ -1,0 +1,104 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View.NodeEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewModel="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel"
+             xmlns:view="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.View"
+             xmlns:converters="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters"
+             xmlns:loc="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="850"
+             d:DataContext="{d:DesignInstance viewModel:NodeEditorViewModel}">
+    <UserControl.Resources>
+        <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="20" />
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0">
+            <MenuItem Header="{x:Static loc:TextUi.EditMenu}">
+                <MenuItem Header="{x:Static loc:TextUi.CopyMenu}" Command="{Binding CopyCommand}"
+                          InputGestureText="Ctrl+C" />
+                <MenuItem Header="{x:Static loc:TextUi.CutMenu}" Command="{Binding CutCommand}"
+                          InputGestureText="Ctrl+X" />
+                <MenuItem Header="{x:Static loc:TextUi.PasteMenu}" Command="{Binding PasteCommand}"
+                          InputGestureText="Ctrl+V" />
+                <Separator />
+                <MenuItem Header="{x:Static loc:TextUi.ModeMenu}">
+                    <MenuItem Header="{x:Static loc:TextUi.RectSelectionMenu}"
+                              IsCheckable="True"
+                              IsChecked="{Binding CurrentMode, 
+                                  Converter={StaticResource EnumToBoolConverter}, 
+                                  ConverterParameter=RectSelection}" />
+                    <MenuItem Header="{x:Static loc:TextUi.LassoSelectionMenu}"
+                              IsCheckable="True"
+                              IsChecked="{Binding CurrentMode, 
+                                  Converter={StaticResource EnumToBoolConverter}, 
+                                  ConverterParameter=LassoSelection}" />
+                    <MenuItem Header="{x:Static loc:TextUi.PanMenu}"
+                              IsCheckable="True"
+                              IsChecked="{Binding CurrentMode, 
+                                  Converter={StaticResource EnumToBoolConverter}, 
+                                  ConverterParameter=Pan}" />
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="{x:Static loc:TextUi.ViewMenu}">
+                <MenuItem Header="{x:Static loc:TextUi.ZoomInMenu}" Command="{Binding ZoomUpCommand}"
+                          InputGestureText="Ctrl++" />
+                <MenuItem Header="{x:Static loc:TextUi.ZoomOutMenu}" Command="{Binding ZoomDownCommand}"
+                          InputGestureText="Ctrl+-" />
+                <MenuItem Header="{x:Static loc:TextUi.ResetZoomMenu}" Command="{Binding ResetZoomCommand}"
+                          InputGestureText="Ctrl+0" />
+                <Separator />
+                <MenuItem Header="{x:Static loc:TextUi.FitMenu}" Command="{Binding FitToScreenCommand}" />
+            </MenuItem>
+        </Menu>
+        <TabControl Grid.Row="1" ItemsSource="{Binding Tabs}"
+                    SelectedItem="{Binding SelectedTab}"
+                    Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Title}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0" />
+                        <Button Command="{Binding CloseCommand}"
+                                Content="×"
+                                FontSize="14"
+                                Width="20"
+                                Height="20"
+                                Padding="0"
+                                VerticalAlignment="Center"
+                                ToolTip="{x:Static loc:TextUi.CloseTabToolTip}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <view:GraphView DataContext="{Binding GraphViewModel}"
+                                    Mode="{Binding DataContext.CurrentMode, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    ClipToBounds="True" />
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+        <StatusBar Grid.Row="2">
+            <StatusBarItem>
+                <TextBlock>
+                    <Run Text="{x:Static loc:TextUi.ModeStatusLabel}" />
+                    <Run Text="{Binding CurrentMode}" />
+                </TextBlock>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</UserControl>

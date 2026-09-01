@@ -1,0 +1,638 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+<data name="CurrentCulture" xml:space="preserve"><value>es-es</value></data>
+<data name="EffectCategoryName" xml:space="preserve"><value>Efectos</value></data>
+<data name="CompositionCategoryName" xml:space="preserve"><value>Composición</value></data>
+<data name="MathCategoryName" xml:space="preserve"><value>Matemáticas</value></data>
+<data name="BasicCategoryName" xml:space="preserve"><value>Básico</value></data>
+<data name="GeneratorCategoryName" xml:space="preserve"><value>Generador</value></data>
+<data name="BrushCategoryName" xml:space="preserve"><value>Pincel</value></data>
+<data name="FunctionsCategoryName" xml:space="preserve"><value>Funciones</value></data>
+<data name="VideoEffectCategoryName" xml:space="preserve"><value>Efectos de vídeo</value></data>
+<data name="AdvancedCategoryName" xml:space="preserve"><value>Advanced</value></data>
+<data name="TransformCategoryName" xml:space="preserve"><value>Transformación</value></data>
+<data name="ValueCategoryName" xml:space="preserve"><value>Valor</value></data>
+<data name="StringCategoryName" xml:space="preserve"><value>Cadena</value></data>
+<data name="ColorCategoryName" xml:space="preserve"><value>Color</value></data>
+<data name="BrushName" xml:space="preserve"><value>Pincel</value></data>
+<data name="AddNode" xml:space="preserve"><value>Sumar</value></data>
+<data name="AddNodeDescription" xml:space="preserve"><value>Suma dos números.</value></data>
+<data name="SubtractNode" xml:space="preserve"><value>Restar</value></data>
+<data name="SubtractNodeDescription" xml:space="preserve"><value>Resta B de A.</value></data>
+<data name="MultiplyNode" xml:space="preserve"><value>Multiplicar</value></data>
+<data name="MultiplyNodeDescription" xml:space="preserve"><value>Multiplica dos números.</value></data>
+<data name="DivideNode" xml:space="preserve"><value>Dividir</value></data>
+<data name="DivideNodeDescription" xml:space="preserve"><value>Divide A entre B.</value></data>
+<data name="Value" xml:space="preserve"><value>Value</value></data>
+<data name="ValueDescription" xml:space="preserve"><value>Input value.</value></data>
+<data name="LeftOperand" xml:space="preserve"><value>Operando izquierdo</value></data>
+<data name="LeftOperandDescription" xml:space="preserve"><value>Valor del lado izquierdo de la operación.</value></data>
+<data name="RightOperand" xml:space="preserve"><value>Operando derecho</value></data>
+<data name="RightOperandDescription" xml:space="preserve"><value>Valor del lado derecho de la operación.</value></data>
+<data name="Result" xml:space="preserve"><value>Resultado</value></data>
+<data name="ResultDescription" xml:space="preserve"><value>Calculation result.</value></data>
+<data name="AddResultDescription" xml:space="preserve"><value>Suma.</value></data>
+<data name="SubtractResultDescription" xml:space="preserve"><value>A menos B.</value></data>
+<data name="MultiplyResultDescription" xml:space="preserve"><value>Producto.</value></data>
+<data name="DivideResultDescription" xml:space="preserve"><value>Cociente de A dividido entre B.</value></data>
+<data name="AbsNode" xml:space="preserve"><value>Valor absoluto</value></data>
+<data name="AbsNodeDescription" xml:space="preserve"><value>Calculate absolute value.</value></data>
+<data name="SignNode" xml:space="preserve"><value>Signo</value></data>
+<data name="SignNodeDescription" xml:space="preserve"><value>Return sign.</value></data>
+<data name="MinNode" xml:space="preserve"><value>Mínimo</value></data>
+<data name="MinNodeDescription" xml:space="preserve"><value>Return minimum.</value></data>
+<data name="MaxNode" xml:space="preserve"><value>Máximo</value></data>
+<data name="MaxNodeDescription" xml:space="preserve"><value>Return maximum.</value></data>
+<data name="ClampNode" xml:space="preserve"><value>Clamp</value></data>
+<data name="ClampNodeDescription" xml:space="preserve"><value>Clamp to range.</value></data>
+<data name="LerpNode" xml:space="preserve"><value>Interpolación lineal</value></data>
+<data name="LerpNodeDescription" xml:space="preserve"><value>Linear interpolation.</value></data>
+<data name="SqrtNode" xml:space="preserve"><value>Raíz cuadrada</value></data>
+<data name="SqrtNodeDescription" xml:space="preserve"><value>Square root.</value></data>
+<data name="PowerNode" xml:space="preserve"><value>Potencia</value></data>
+<data name="PowerNodeDescription" xml:space="preserve"><value>Power.</value></data>
+<data name="FloorNode" xml:space="preserve"><value>Floor</value></data>
+<data name="FloorNodeDescription" xml:space="preserve"><value>Floor.</value></data>
+<data name="CeilingNode" xml:space="preserve"><value>Ceiling</value></data>
+<data name="CeilingNodeDescription" xml:space="preserve"><value>Ceiling.</value></data>
+<data name="RoundNode" xml:space="preserve"><value>Round</value></data>
+<data name="RoundNodeDescription" xml:space="preserve"><value>Round.</value></data>
+<data name="FractionNode" xml:space="preserve"><value>Fraction</value></data>
+<data name="FractionNodeDescription" xml:space="preserve"><value>Fractional part.</value></data>
+<data name="SinNode" xml:space="preserve"><value>Sin</value></data>
+<data name="SinNodeDescription" xml:space="preserve"><value>Calculate sine.</value></data>
+<data name="CosNode" xml:space="preserve"><value>Cos</value></data>
+<data name="CosNodeDescription" xml:space="preserve"><value>Calculate cosine.</value></data>
+<data name="TanNode" xml:space="preserve"><value>Tan</value></data>
+<data name="TanNodeDescription" xml:space="preserve"><value>Calculate tangent.</value></data>
+<data name="Atan2Node" xml:space="preserve"><value>Atan2</value></data>
+<data name="Atan2NodeDescription" xml:space="preserve"><value>Calculate atan2.</value></data>
+<data name="DegreesToRadiansNode" xml:space="preserve"><value>Degrees to Radians</value></data>
+<data name="DegreesToRadiansNodeDescription" xml:space="preserve"><value>Convert degrees to radians.</value></data>
+<data name="RadiansToDegreesNode" xml:space="preserve"><value>Radians to Degrees</value></data>
+<data name="RadiansToDegreesNodeDescription" xml:space="preserve"><value>Convert radians to degrees.</value></data>
+<data name="Minimum" xml:space="preserve"><value>Minimum</value></data>
+<data name="MinimumDescription" xml:space="preserve"><value>Minimum value.</value></data>
+<data name="Maximum" xml:space="preserve"><value>Maximum</value></data>
+<data name="MaximumDescription" xml:space="preserve"><value>Maximum value.</value></data>
+<data name="StartValue" xml:space="preserve"><value>Start Value</value></data>
+<data name="StartValueDescription" xml:space="preserve"><value>Interpolation start value.</value></data>
+<data name="EndValue" xml:space="preserve"><value>End Value</value></data>
+<data name="EndValueDescription" xml:space="preserve"><value>Interpolation end value.</value></data>
+<data name="InterpolationFactor" xml:space="preserve"><value>Interpolation Factor</value></data>
+<data name="InterpolationFactorDescription" xml:space="preserve"><value>Interpolation factor.</value></data>
+<data name="Base" xml:space="preserve"><value>Base</value></data>
+<data name="BaseDescription" xml:space="preserve"><value>Base value.</value></data>
+<data name="Exponent" xml:space="preserve"><value>Exponent</value></data>
+<data name="ExponentDescription" xml:space="preserve"><value>Exponent value.</value></data>
+<data name="YValue" xml:space="preserve"><value>Y</value></data>
+<data name="YValueDescription" xml:space="preserve"><value>Y value.</value></data>
+<data name="XValue" xml:space="preserve"><value>X</value></data>
+<data name="XValueDescription" xml:space="preserve"><value>X value.</value></data>
+<data name="AbsResultDescription" xml:space="preserve"><value>Valor absoluto.</value></data>
+<data name="SignResultDescription" xml:space="preserve"><value>Signo.</value></data>
+<data name="MinResultDescription" xml:space="preserve"><value>Valor mínimo.</value></data>
+<data name="MaxResultDescription" xml:space="preserve"><value>Valor máximo.</value></data>
+<data name="ClampResultDescription" xml:space="preserve"><value>Valor limitado.</value></data>
+<data name="LerpResultDescription" xml:space="preserve"><value>Valor interpolado.</value></data>
+<data name="SqrtResultDescription" xml:space="preserve"><value>Raíz cuadrada.</value></data>
+<data name="PowerResultDescription" xml:space="preserve"><value>Resultado de la potencia.</value></data>
+<data name="FloorResultDescription" xml:space="preserve"><value>Resultado del redondeo hacia abajo.</value></data>
+<data name="CeilingResultDescription" xml:space="preserve"><value>Resultado del redondeo hacia arriba.</value></data>
+<data name="RoundResultDescription" xml:space="preserve"><value>Valor redondeado.</value></data>
+<data name="FractionResultDescription" xml:space="preserve"><value>Parte decimal.</value></data>
+<data name="SinResultDescription" xml:space="preserve"><value>Valor del seno.</value></data>
+<data name="CosResultDescription" xml:space="preserve"><value>Valor del coseno.</value></data>
+<data name="TanResultDescription" xml:space="preserve"><value>Valor de la tangente.</value></data>
+<data name="Atan2ResultDescription" xml:space="preserve"><value>Resultado de Atan2.</value></data>
+<data name="DegreesToRadiansResultDescription" xml:space="preserve"><value>Valor en radianes.</value></data>
+<data name="RadiansToDegreesResultDescription" xml:space="preserve"><value>Valor en grados.</value></data>
+<data name="Length" xml:space="preserve"><value>Length</value></data>
+<data name="LengthDescription" xml:space="preserve"><value>Period length.</value></data>
+<data name="Edge" xml:space="preserve"><value>Edge</value></data>
+<data name="EdgeDescription" xml:space="preserve"><value>Threshold value.</value></data>
+<data name="Tolerance" xml:space="preserve"><value>Tolerance</value></data>
+<data name="ToleranceDescription" xml:space="preserve"><value>Tolerance for comparison.</value></data>
+<data name="Condition" xml:space="preserve"><value>Condition</value></data>
+<data name="ConditionDescription" xml:space="preserve"><value>Condition.</value></data>
+<data name="TrueValue" xml:space="preserve"><value>True Value</value></data>
+<data name="TrueValueDescription" xml:space="preserve"><value>Value when true.</value></data>
+<data name="FalseValue" xml:space="preserve"><value>False Value</value></data>
+<data name="FalseValueDescription" xml:space="preserve"><value>Value when false.</value></data>
+<data name="ComparisonResultDescription" xml:space="preserve"><value>Resultado de la comparación.</value></data>
+<data name="ModuloNode" xml:space="preserve"><value>Modulo</value></data>
+<data name="ModuloNodeDescription" xml:space="preserve"><value>Calcula el resto.</value></data>
+<data name="ModuloResultDescription" xml:space="preserve"><value>Resto.</value></data>
+<data name="ReciprocalNode" xml:space="preserve"><value>Reciprocal</value></data>
+<data name="ReciprocalNodeDescription" xml:space="preserve"><value>Calcula el recíproco.</value></data>
+<data name="ReciprocalResultDescription" xml:space="preserve"><value>Recíproco.</value></data>
+<data name="OneMinusNode" xml:space="preserve"><value>One Minus</value></data>
+<data name="OneMinusNodeDescription" xml:space="preserve"><value>Resta el valor de entrada a uno.</value></data>
+<data name="OneMinusResultDescription" xml:space="preserve"><value>Resultado del cálculo.</value></data>
+<data name="SaturateNode" xml:space="preserve"><value>Saturate</value></data>
+<data name="SaturateNodeDescription" xml:space="preserve"><value>Limita al rango 0-1.</value></data>
+<data name="SaturateResultDescription" xml:space="preserve"><value>Valor limitado.</value></data>
+<data name="InverseLerpNode" xml:space="preserve"><value>Inverse Lerp</value></data>
+<data name="InverseLerpNodeDescription" xml:space="preserve"><value>Calcula el factor de interpolación.</value></data>
+<data name="InverseLerpResultDescription" xml:space="preserve"><value>Factor de interpolación.</value></data>
+<data name="SmoothStepNode" xml:space="preserve"><value>SmoothStep</value></data>
+<data name="SmoothStepNodeDescription" xml:space="preserve"><value>Interpola suavemente.</value></data>
+<data name="SmoothStepResultDescription" xml:space="preserve"><value>Valor interpolado.</value></data>
+<data name="StepNode" xml:space="preserve"><value>Step</value></data>
+<data name="StepNodeDescription" xml:space="preserve"><value>Devuelve 0 o 1 según el umbral.</value></data>
+<data name="StepResultDescription" xml:space="preserve"><value>Resultado del step.</value></data>
+<data name="RepeatNode" xml:space="preserve"><value>Repeat</value></data>
+<data name="RepeatNodeDescription" xml:space="preserve"><value>Se repite con un período fijo.</value></data>
+<data name="RepeatResultDescription" xml:space="preserve"><value>Valor repetido.</value></data>
+<data name="PingPongNode" xml:space="preserve"><value>PingPong</value></data>
+<data name="PingPongNodeDescription" xml:space="preserve"><value>Genera un movimiento de ida y vuelta.</value></data>
+<data name="PingPongResultDescription" xml:space="preserve"><value>Valor de ida y vuelta.</value></data>
+<data name="WrapNode" xml:space="preserve"><value>Wrap</value></data>
+<data name="WrapNodeDescription" xml:space="preserve"><value>Envuelve el valor dentro del rango.</value></data>
+<data name="WrapResultDescription" xml:space="preserve"><value>Valor envuelto.</value></data>
+<data name="ExpNode" xml:space="preserve"><value>Exponential</value></data>
+<data name="ExpNodeDescription" xml:space="preserve"><value>Calcula la potencia de e.</value></data>
+<data name="ExpResultDescription" xml:space="preserve"><value>Resultado exponencial.</value></data>
+<data name="Exp2Node" xml:space="preserve"><value>Power of Two</value></data>
+<data name="Exp2NodeDescription" xml:space="preserve"><value>Calcula la potencia de 2.</value></data>
+<data name="Exp2ResultDescription" xml:space="preserve"><value>Resultado del cálculo.</value></data>
+<data name="LogNode" xml:space="preserve"><value>Natural Logarithm</value></data>
+<data name="LogNodeDescription" xml:space="preserve"><value>Calcula el logaritmo natural.</value></data>
+<data name="LogResultDescription" xml:space="preserve"><value>Logaritmo natural.</value></data>
+<data name="Log2Node" xml:space="preserve"><value>Log Base 2</value></data>
+<data name="Log2NodeDescription" xml:space="preserve"><value>Calcula el logaritmo en base 2.</value></data>
+<data name="Log2ResultDescription" xml:space="preserve"><value>Logaritmo en base 2.</value></data>
+<data name="Log10Node" xml:space="preserve"><value>Log Base 10</value></data>
+<data name="Log10NodeDescription" xml:space="preserve"><value>Calcula el logaritmo en base 10.</value></data>
+<data name="Log10ResultDescription" xml:space="preserve"><value>Logaritmo en base 10.</value></data>
+<data name="AsinNode" xml:space="preserve"><value>Arc Sine</value></data>
+<data name="AsinNodeDescription" xml:space="preserve"><value>Calcula el arcoseno.</value></data>
+<data name="AsinResultDescription" xml:space="preserve"><value>Arcoseno.</value></data>
+<data name="AcosNode" xml:space="preserve"><value>Arc Cosine</value></data>
+<data name="AcosNodeDescription" xml:space="preserve"><value>Calcula el arcocoseno.</value></data>
+<data name="AcosResultDescription" xml:space="preserve"><value>Arcocoseno.</value></data>
+<data name="AtanNode" xml:space="preserve"><value>Arc Tangent</value></data>
+<data name="AtanNodeDescription" xml:space="preserve"><value>Calcula el arcotangente.</value></data>
+<data name="AtanResultDescription" xml:space="preserve"><value>Arcotangente.</value></data>
+<data name="EqualNode" xml:space="preserve"><value>Equal</value></data>
+<data name="EqualNodeDescription" xml:space="preserve"><value>Comprueba si dos valores son iguales.</value></data>
+<data name="EqualResultDescription" xml:space="preserve"><value>Resultado de la comparación.</value></data>
+<data name="NotEqualNode" xml:space="preserve"><value>Not Equal</value></data>
+<data name="NotEqualNodeDescription" xml:space="preserve"><value>Comprueba si dos valores son distintos.</value></data>
+<data name="NotEqualResultDescription" xml:space="preserve"><value>Resultado de la comparación.</value></data>
+<data name="GreaterNode" xml:space="preserve"><value>Greater</value></data>
+<data name="GreaterNodeDescription" xml:space="preserve"><value>Comprueba si el lado izquierdo es mayor que el derecho.</value></data>
+<data name="GreaterResultDescription" xml:space="preserve"><value>Resultado de la comparación.</value></data>
+<data name="GreaterEqualNode" xml:space="preserve"><value>Greater or Equal</value></data>
+<data name="GreaterEqualNodeDescription" xml:space="preserve"><value>Comprueba si el lado izquierdo es mayor o igual que el derecho.</value></data>
+<data name="GreaterEqualResultDescription" xml:space="preserve"><value>Resultado de la comparación.</value></data>
+<data name="LessNode" xml:space="preserve"><value>Less</value></data>
+<data name="LessNodeDescription" xml:space="preserve"><value>Comprueba si el lado izquierdo es menor que el derecho.</value></data>
+<data name="LessResultDescription" xml:space="preserve"><value>Resultado de la comparación.</value></data>
+<data name="LessEqualNode" xml:space="preserve"><value>Less or Equal</value></data>
+<data name="LessEqualNodeDescription" xml:space="preserve"><value>Comprueba si el lado izquierdo es menor o igual que el derecho.</value></data>
+<data name="LessEqualResultDescription" xml:space="preserve"><value>Resultado de la comparación.</value></data>
+<data name="SelectNode" xml:space="preserve"><value>Select</value></data>
+<data name="SelectNodeDescription" xml:space="preserve"><value>Selecciona un valor según la condición.</value></data>
+<data name="SelectResultDescription" xml:space="preserve"><value>Valor seleccionado.</value></data>
+<data name="Seed" xml:space="preserve"><value>Seed</value></data>
+<data name="SeedDescription" xml:space="preserve"><value>Seed value for random generation.</value></data>
+<data name="Index" xml:space="preserve"><value>Index</value></data>
+<data name="IndexDescription" xml:space="preserve"><value>Random index.</value></data>
+<data name="Parameter" xml:space="preserve"><value>Parameter</value></data>
+<data name="ParameterDescription" xml:space="preserve"><value>Position for evaluating continuous noise.</value></data>
+<data name="RandomNode" xml:space="preserve"><value>Random</value></data>
+<data name="RandomNodeDescription" xml:space="preserve"><value>Generate deterministic random value.</value></data>
+<data name="NoiseNode" xml:space="preserve"><value>Noise</value></data>
+<data name="NoiseNodeDescription" xml:space="preserve"><value>Generate continuous noise.</value></data>
+<data name="TranslateNode" xml:space="preserve"><value>Traslación</value></data>
+<data name="TranslateNodeDescription" xml:space="preserve"><value>Move image.</value></data>
+<data name="TranslateX" xml:space="preserve"><value>X Offset</value></data>
+<data name="TranslateY" xml:space="preserve"><value>Y Offset</value></data>
+<data name="ScaleNode" xml:space="preserve"><value>Escala</value></data>
+<data name="ScaleNodeDescription" xml:space="preserve"><value>Scale image.</value></data>
+<data name="ScaleX" xml:space="preserve"><value>Scale X</value></data>
+<data name="ScaleY" xml:space="preserve"><value>Scale Y</value></data>
+<data name="RotateNode" xml:space="preserve"><value>Rotación</value></data>
+<data name="RotateNodeDescription" xml:space="preserve"><value>Rotate image.</value></data>
+<data name="Angle" xml:space="preserve"><value>Ángulo</value></data>
+<data name="TransformResultDescription" xml:space="preserve"><value>Imagen transformada.</value></data>
+<data name="FillRuleNonZero" xml:space="preserve"><value>No cero</value></data>
+<data name="FillRuleEvenOdd" xml:space="preserve"><value>Par-impar</value></data>
+<data name="ShapeRect" xml:space="preserve"><value>Rectángulo</value></data>
+<data name="ShapeRoundRect" xml:space="preserve"><value>Rectángulo redondeado</value></data>
+<data name="ShapeOval" xml:space="preserve"><value>Elipse</value></data>
+<data name="ShapePolygon" xml:space="preserve"><value>Polígono</value></data>
+<data name="ShapeStar" xml:space="preserve"><value>Estrella</value></data>
+<data name="ShapeLine" xml:space="preserve"><value>Línea</value></data>
+<data name="PathOpUnion" xml:space="preserve"><value>Unión</value></data>
+<data name="PathOpIntersect" xml:space="preserve"><value>Intersección</value></data>
+<data name="PathOpDifference" xml:space="preserve"><value>Diferencia</value></data>
+<data name="PathOpReverseDifference" xml:space="preserve"><value>Diferencia inversa</value></data>
+<data name="PathOpXor" xml:space="preserve"><value>O exclusivo</value></data>
+<data name="ChannelHue" xml:space="preserve"><value>Tono</value></data>
+<data name="ChannelSaturation" xml:space="preserve"><value>Saturación</value></data>
+<data name="ChannelValue" xml:space="preserve"><value>Valor</value></data>
+<data name="ChannelRed" xml:space="preserve"><value>Rojo</value></data>
+<data name="ChannelGreen" xml:space="preserve"><value>Verde</value></data>
+<data name="ChannelBlue" xml:space="preserve"><value>Azul</value></data>
+<data name="ChannelAlpha" xml:space="preserve"><value>Alfa</value></data>
+<data name="BlendNormal" xml:space="preserve"><value>Normal</value></data>
+<data name="BlendMultiply" xml:space="preserve"><value>Multiplicar</value></data>
+<data name="BlendScreen" xml:space="preserve"><value>Trama</value></data>
+<data name="BlendDarken" xml:space="preserve"><value>Oscurecer</value></data>
+<data name="BlendLighten" xml:space="preserve"><value>Aclarar</value></data>
+<data name="BlendDissolve" xml:space="preserve"><value>Disolver</value></data>
+<data name="BlendColorBurn" xml:space="preserve"><value>Subexposición de color</value></data>
+<data name="BlendLinearBurn" xml:space="preserve"><value>Subexposición lineal</value></data>
+<data name="BlendDarkerColor" xml:space="preserve"><value>Color más oscuro</value></data>
+<data name="BlendLighterColor" xml:space="preserve"><value>Color más claro</value></data>
+<data name="BlendColorDodge" xml:space="preserve"><value>Sobreexposición de color</value></data>
+<data name="BlendLinearDodge" xml:space="preserve"><value>Sobreexposición lineal</value></data>
+<data name="BlendOverlay" xml:space="preserve"><value>Superposición</value></data>
+<data name="BlendSoftLight" xml:space="preserve"><value>Luz suave</value></data>
+<data name="BlendHardLight" xml:space="preserve"><value>Luz fuerte</value></data>
+<data name="BlendVividLight" xml:space="preserve"><value>Luz intensa</value></data>
+<data name="BlendLinearLight" xml:space="preserve"><value>Luz lineal</value></data>
+<data name="BlendPinLight" xml:space="preserve"><value>Luz focalizada</value></data>
+<data name="BlendHardMix" xml:space="preserve"><value>Mezcla fuerte</value></data>
+<data name="BlendDifferenceAbs" xml:space="preserve"><value>Diferencia</value></data>
+<data name="BlendExclusion" xml:space="preserve"><value>Exclusión</value></data>
+<data name="BlendColor" xml:space="preserve"><value>Color</value></data>
+<data name="BlendLuminosity" xml:space="preserve"><value>Luminosidad</value></data>
+<data name="BlendSubtract" xml:space="preserve"><value>Restar</value></data>
+<data name="BlendDivision" xml:space="preserve"><value>Dividir</value></data>
+<data name="OutlineCategoryName" xml:space="preserve"><value>Contorno</value></data>
+<data name="ImageSourceCategoryName" xml:space="preserve"><value>Origen de imagen</value></data>
+<data name="OutlinePortLabel" xml:space="preserve"><value>Contorno</value></data>
+<data name="InputImagePortLabel" xml:space="preserve"><value>Imagen de entrada</value></data>
+<data name="OutputImagePortLabel" xml:space="preserve"><value>Imagen de salida</value></data>
+<data name="MaskPortLabel" xml:space="preserve"><value>Máscara</value></data>
+<data name="InvertPortLabel" xml:space="preserve"><value>Invertir</value></data>
+<data name="FilePathPortLabel" xml:space="preserve"><value>Ruta de archivo</value></data>
+<data name="RotationPortLabel" xml:space="preserve"><value>Rotación</value></data>
+<data name="TransformInputImageDescription" xml:space="preserve"><value>Imagen a transformar</value></data>
+<data name="TransformOutputImageDescription" xml:space="preserve"><value>Resultado de la transformación</value></data>
+<data name="MoveAmountX" xml:space="preserve"><value>X</value></data>
+<data name="MoveAmountXDescription" xml:space="preserve"><value>Cantidad de movimiento en X</value></data>
+<data name="MoveAmountY" xml:space="preserve"><value>Y</value></data>
+<data name="MoveAmountYDescription" xml:space="preserve"><value>Cantidad de movimiento en Y</value></data>
+<data name="ScaleRatioX" xml:space="preserve"><value>Escala X</value></data>
+<data name="ScaleRatioXDescription" xml:space="preserve"><value>Relación de escala en X</value></data>
+<data name="ScaleRatioY" xml:space="preserve"><value>Escala Y</value></data>
+<data name="ScaleRatioYDescription" xml:space="preserve"><value>Relación de escala en Y</value></data>
+<data name="AngleDescription" xml:space="preserve"><value>Ángulo de rotación</value></data>
+<data name="OutlineRasterizeNode" xml:space="preserve"><value>Rasterizar contorno</value></data>
+<data name="OutlineRasterizeNodeDescription" xml:space="preserve"><value>Dibuja los datos de contorno con relleno y trazo, convirtiéndolos en un ID2D1Image.</value></data>
+<data name="OutlineRasterizeInputDescription" xml:space="preserve"><value>Datos de contorno a rasterizar</value></data>
+<data name="StrokeWidthLabel" xml:space="preserve"><value>Ancho de trazo</value></data>
+<data name="StrokeWidthDescription" xml:space="preserve"><value>Grosor del trazo</value></data>
+<data name="StrokeOffsetXLabel" xml:space="preserve"><value>Desplazamiento de trazo X</value></data>
+<data name="StrokeOffsetXDescription" xml:space="preserve"><value>Cantidad de desplazamiento en X de la posición del trazo</value></data>
+<data name="StrokeOffsetYLabel" xml:space="preserve"><value>Desplazamiento de trazo Y</value></data>
+<data name="StrokeOffsetYDescription" xml:space="preserve"><value>Cantidad de desplazamiento en Y de la posición del trazo</value></data>
+<data name="StrokeBrushLabel" xml:space="preserve"><value>Pincel de trazo</value></data>
+<data name="StrokeBrushDescription" xml:space="preserve"><value>Pincel usado para dibujar la línea</value></data>
+<data name="FillBrushLabel" xml:space="preserve"><value>Pincel de relleno</value></data>
+<data name="FillBrushDescription" xml:space="preserve"><value>Pincel usado para el relleno</value></data>
+<data name="SelfIntersectRuleLabel" xml:space="preserve"><value>Regla de autointersección</value></data>
+<data name="SelfIntersectRuleDescription" xml:space="preserve"><value>Método para determinar dentro/fuera en autointersecciones</value></data>
+<data name="RasterizeOutputDescription" xml:space="preserve"><value>Resultado de la rasterización</value></data>
+<data name="PathTransformNode" xml:space="preserve"><value>Transformar coordenadas de ruta</value></data>
+<data name="PathTransformNodeDescription" xml:space="preserve"><value>Aplica transformaciones de coordenadas como traslación, escala, rotación y sesgo al contorno.</value></data>
+<data name="PathTransformInputDescription" xml:space="preserve"><value>Contorno a transformar</value></data>
+<data name="PathMoveXLabel" xml:space="preserve"><value>Trasladar X</value></data>
+<data name="PathMoveXDescription" xml:space="preserve"><value>Cantidad de traslación en X</value></data>
+<data name="PathMoveYLabel" xml:space="preserve"><value>Trasladar Y</value></data>
+<data name="PathMoveYDescription" xml:space="preserve"><value>Cantidad de traslación en Y</value></data>
+<data name="PathScaleXLabel" xml:space="preserve"><value>Escala X</value></data>
+<data name="PathScaleXDescription" xml:space="preserve"><value>Relación de escala en X</value></data>
+<data name="PathScaleYLabel" xml:space="preserve"><value>Escala Y</value></data>
+<data name="PathScaleYDescription" xml:space="preserve"><value>Relación de escala en Y</value></data>
+<data name="PathRotationDescription" xml:space="preserve"><value>Ángulo de rotación</value></data>
+<data name="SkewXLabel" xml:space="preserve"><value>Sesgo X</value></data>
+<data name="SkewXDescription" xml:space="preserve"><value>Cantidad de sesgo en X</value></data>
+<data name="SkewYLabel" xml:space="preserve"><value>Sesgo Y</value></data>
+<data name="SkewYDescription" xml:space="preserve"><value>Cantidad de sesgo en Y</value></data>
+<data name="OriginXLabel" xml:space="preserve"><value>Origen X</value></data>
+<data name="OriginXDescription" xml:space="preserve"><value>Coordenada X usada como origen para escala, rotación y sesgo</value></data>
+<data name="OriginYLabel" xml:space="preserve"><value>Origen Y</value></data>
+<data name="OriginYDescription" xml:space="preserve"><value>Coordenada Y usada como origen para escala, rotación y sesgo</value></data>
+<data name="PathTransformOutputDescription" xml:space="preserve"><value>Contorno tras la transformación de coordenadas</value></data>
+<data name="ShapeCenterXLabel" xml:space="preserve"><value>Centro X</value></data>
+<data name="ShapeCenterXDescription" xml:space="preserve"><value>Coordenada X del centro de la figura (punto inicial en el caso de una línea)</value></data>
+<data name="ShapeCenterYLabel" xml:space="preserve"><value>Centro Y</value></data>
+<data name="ShapeCenterYDescription" xml:space="preserve"><value>Coordenada Y del centro de la figura (punto inicial en el caso de una línea)</value></data>
+<data name="ShapeWidthLabel" xml:space="preserve"><value>Ancho</value></data>
+<data name="ShapeWidthDescription" xml:space="preserve"><value>Ancho de la figura (distancia en X hasta el punto final en el caso de una línea)</value></data>
+<data name="ShapeHeightLabel" xml:space="preserve"><value>Alto</value></data>
+<data name="ShapeHeightDescription" xml:space="preserve"><value>Alto de la figura (distancia en Y hasta el punto final en el caso de una línea)</value></data>
+<data name="ShapeRotationDescription" xml:space="preserve"><value>Ángulo para rotar la figura alrededor de su centro (punto inicial)</value></data>
+<data name="ShapeCornerRadiusLabel" xml:space="preserve"><value>Radio de esquina</value></data>
+<data name="ShapeCornerRadiusDescription" xml:space="preserve"><value>Radio de las esquinas del rectángulo redondeado</value></data>
+<data name="PolygonSidesDescription" xml:space="preserve"><value>Número de vértices del polígono</value></data>
+<data name="VertexCountLabel" xml:space="preserve"><value>Número de vértices</value></data>
+<data name="StarSidesDescription" xml:space="preserve"><value>Número de vértices exteriores de la estrella</value></data>
+<data name="InnerRadiusRatioLabel" xml:space="preserve"><value>Relación de radio interior</value></data>
+<data name="InnerRadiusRatioDescription" xml:space="preserve"><value>Radio de los vértices interiores de la estrella (proporción respecto al exterior)</value></data>
+<data name="ShapeOutlineNode" xml:space="preserve"><value>Generar contorno de figura</value></data>
+<data name="ShapeOutlineNodeDescription" xml:space="preserve"><value>Genera datos de contorno para el tipo de figura especificado.</value></data>
+<data name="ShapeKindLabel" xml:space="preserve"><value>Tipo</value></data>
+<data name="ShapeKindDescription" xml:space="preserve"><value>Tipo de figura a generar</value></data>
+<data name="ShapeParamsLabel" xml:space="preserve"><value>Parámetros</value></data>
+<data name="ShapeParamsDescription" xml:space="preserve"><value>Conjunto de entradas según el tipo de figura</value></data>
+<data name="ShapeOutlineOutputDescription" xml:space="preserve"><value>Datos de contorno de la figura generada</value></data>
+<data name="TextOutlineNode" xml:space="preserve"><value>Generar contorno de texto</value></data>
+<data name="TextOutlineNodeDescription" xml:space="preserve"><value>Genera datos de contorno para la cadena de texto especificada.</value></data>
+<data name="TextOutlineTextLabel" xml:space="preserve"><value>Texto</value></data>
+<data name="TextOutlineTextDescription" xml:space="preserve"><value>Cadena de texto a convertir en contorno</value></data>
+<data name="FontFamilyLabel" xml:space="preserve"><value>Familia de fuente</value></data>
+<data name="FontFamilyDescription" xml:space="preserve"><value>Nombre de la familia de fuente a usar (fuente predeterminada si se deja en blanco)</value></data>
+<data name="FontSizeLabel" xml:space="preserve"><value>Tamaño</value></data>
+<data name="FontSizeDescription" xml:space="preserve"><value>Tamaño de fuente</value></data>
+<data name="BoldLabel" xml:space="preserve"><value>Negrita</value></data>
+<data name="BoldDescription" xml:space="preserve"><value>Si se debe poner en negrita</value></data>
+<data name="ItalicLabel" xml:space="preserve"><value>Cursiva</value></data>
+<data name="ItalicDescription" xml:space="preserve"><value>Si se debe poner en cursiva</value></data>
+<data name="TextOriginXLabel" xml:space="preserve"><value>Origen X</value></data>
+<data name="TextOriginXDescription" xml:space="preserve"><value>Coordenada X del origen de la línea base del texto</value></data>
+<data name="TextOriginYLabel" xml:space="preserve"><value>Origen Y</value></data>
+<data name="TextOriginYDescription" xml:space="preserve"><value>Coordenada Y del origen de la línea base del texto</value></data>
+<data name="TextHorizontalOffsetLabel" xml:space="preserve"><value>Desplazamiento horizontal</value></data>
+<data name="TextHorizontalOffsetDescription" xml:space="preserve"><value>文字外接矩形的水平基準點比例(-1.00:靠左 〜 1.00:靠右</value></data>
+<data name="TextVerticalOffsetLabel" xml:space="preserve"><value>Desplazamiento vertical</value></data>
+<data name="TextVerticalOffsetDescription" xml:space="preserve"><value>文字外接矩形的垂直基準點比例(-1.00:靠上 〜 1.00:靠下</value></data>
+<data name="TextOutlineOutputDescription" xml:space="preserve"><value>Datos de contorno de la cadena de texto generada</value></data>
+<data name="PathCombineNode" xml:space="preserve"><value>Combinar rutas</value></data>
+<data name="PathCombineNodeDescription" xml:space="preserve"><value>Combina dos contornos usando la operación especificada.</value></data>
+<data name="PathInput1Label" xml:space="preserve"><value>Ruta 1</value></data>
+<data name="PathInput1Description" xml:space="preserve"><value>Primer contorno a combinar</value></data>
+<data name="PathInput2Label" xml:space="preserve"><value>Ruta 2</value></data>
+<data name="PathInput2Description" xml:space="preserve"><value>Segundo contorno a combinar</value></data>
+<data name="PathCombineOperationLabel" xml:space="preserve"><value>Operación</value></data>
+<data name="PathCombineOperationDescription" xml:space="preserve"><value>Operación booleana aplicada a las dos rutas</value></data>
+<data name="PathCombineOutputDescription" xml:space="preserve"><value>Datos de contorno resultantes de la combinación</value></data>
+<data name="LoadImageNode" xml:space="preserve"><value>Cargar imagen</value></data>
+<data name="LoadImageNodeDescription" xml:space="preserve"><value>Carga una imagen desde el archivo especificado.</value></data>
+<data name="LoadImageFilePathDescription" xml:space="preserve"><value>Archivo de imagen a cargar</value></data>
+<data name="LoadImageOutputDescription" xml:space="preserve"><value>Imagen cargada</value></data>
+<data name="LoadVideoFrameNode" xml:space="preserve"><value>Cargar fotograma de vídeo</value></data>
+<data name="LoadVideoFrameNodeDescription" xml:space="preserve"><value>Carga un fotograma cualquiera del archivo de vídeo especificado como imagen.</value></data>
+<data name="LoadVideoFrameFilePathDescription" xml:space="preserve"><value>Archivo de vídeo a cargar</value></data>
+<data name="FrameIndexLabel" xml:space="preserve"><value>Índice de fotograma</value></data>
+<data name="FrameIndexDescription" xml:space="preserve"><value>Número del fotograma a cargar (comenzando en 0)</value></data>
+<data name="LoadVideoFrameOutputDescription" xml:space="preserve"><value>Imagen del fotograma cargado</value></data>
+<data name="EasingNode" xml:space="preserve"><value>Suavizado</value></data>
+<data name="EasingNodeDescription" xml:space="preserve"><value>Evalúa el parámetro de tiempo con una curva Bézier y lo asigna al rango mínimo-máximo</value></data>
+<data name="TimeStartLabel" xml:space="preserve"><value>Inicio de tiempo</value></data>
+<data name="TimeStartDescription" xml:space="preserve"><value>Hora de inicio usada para normalizar el parámetro de tiempo</value></data>
+<data name="TimeEndLabel" xml:space="preserve"><value>Fin de tiempo</value></data>
+<data name="TimeEndDescription" xml:space="preserve"><value>Hora de fin usada para normalizar el parámetro de tiempo</value></data>
+<data name="TimeParameterLabel" xml:space="preserve"><value>Parámetro de tiempo</value></data>
+<data name="TimeParameterDescription" xml:space="preserve"><value>Hora a evaluar</value></data>
+<data name="EasingMaxLabel" xml:space="preserve"><value>Máximo</value></data>
+<data name="EasingMaxDescription" xml:space="preserve"><value>Límite superior del valor de salida</value></data>
+<data name="EasingMinLabel" xml:space="preserve"><value>Mínimo</value></data>
+<data name="EasingMinDescription" xml:space="preserve"><value>Límite inferior del valor de salida</value></data>
+<data name="BezierCurveLabel" xml:space="preserve"><value>Curva Bézier</value></data>
+<data name="BezierCurveDescription" xml:space="preserve"><value>Curva que define el valor para el tiempo normalizado desde el inicio hasta el fin</value></data>
+<data name="EasingResultLabel" xml:space="preserve"><value>Valor</value></data>
+<data name="EasingResultDescription" xml:space="preserve"><value>Resultado de la evaluación</value></data>
+<data name="AlphaNode" xml:space="preserve"><value>Opacidad</value></data>
+<data name="AlphaNodeDescription" xml:space="preserve"><value>Establece la opacidad de la imagen.</value></data>
+<data name="AlphaInputDescription" xml:space="preserve"><value>Imagen cuya opacidad se modificará</value></data>
+<data name="OpacityLabel" xml:space="preserve"><value>Opacidad</value></data>
+<data name="OpacityDescription" xml:space="preserve"><value>Nivel de transparencia de la imagen</value></data>
+<data name="AlphaOutputDescription" xml:space="preserve"><value>Resultado de la transparencia</value></data>
+<data name="CreateMaskNode" xml:space="preserve"><value>Crear máscara</value></data>
+<data name="CreateMaskNodeDescription" xml:space="preserve"><value>Genera una imagen a partir de un elemento de la imagen especificada</value></data>
+<data name="MaskInputImageDescription" xml:space="preserve"><value>Imagen base usada para generar la máscara</value></data>
+<data name="MaskModeLabel" xml:space="preserve"><value>Modo</value></data>
+<data name="MaskModeDescription" xml:space="preserve"><value>Elemento de imagen usado para generar la máscara</value></data>
+<data name="MaskOffsetLabel" xml:space="preserve"><value>Desplazamiento</value></data>
+<data name="MaskOffsetDescription" xml:space="preserve"><value>Desplazamiento añadido al valor de la máscara</value></data>
+<data name="MaskInvertDescription" xml:space="preserve"><value>Si se debe invertir la máscara</value></data>
+<data name="MaskOutputDescription" xml:space="preserve"><value>Máscara generada</value></data>
+<data name="MaskClipNode" xml:space="preserve"><value>Recorte por máscara</value></data>
+<data name="MaskClipNodeDescription" xml:space="preserve"><value>Recorta la imagen usando una máscara</value></data>
+<data name="MaskClipInputImageDescription" xml:space="preserve"><value>Imagen que se recortará con la máscara</value></data>
+<data name="MaskClipMaskDescription" xml:space="preserve"><value>Máscara usada para el recorte</value></data>
+<data name="MaskClipOutputDescription" xml:space="preserve"><value>Resultado del recorte con la máscara</value></data>
+<data name="MaskThresholdNode" xml:space="preserve"><value>Umbral de máscara</value></data>
+<data name="MaskThresholdNodeDescription" xml:space="preserve"><value>Establece el rango de intensidad de la máscara</value></data>
+<data name="MaskThresholdInputLabel" xml:space="preserve"><value>Máscara de entrada</value></data>
+<data name="MaskThresholdInputDescription" xml:space="preserve"><value>Máscara a la que se aplica el umbral</value></data>
+<data name="MaskMinLabel" xml:space="preserve"><value>Mínimo</value></data>
+<data name="MaskMinDescription" xml:space="preserve"><value>Límite inferior del umbral</value></data>
+<data name="MaskMaxLabel" xml:space="preserve"><value>Máximo</value></data>
+<data name="MaskMaxDescription" xml:space="preserve"><value>Límite superior del umbral</value></data>
+<data name="MaskThresholdOutputLabel" xml:space="preserve"><value>Máscara de salida</value></data>
+<data name="MaskThresholdOutputDescription" xml:space="preserve"><value>Máscara con el umbral aplicado</value></data>
+<data name="MaskToImageNode" xml:space="preserve"><value>Revelar máscara</value></data>
+<data name="MaskToImageNodeDescription" xml:space="preserve"><value>Convierte la intensidad de la máscara en una imagen en blanco y negro</value></data>
+<data name="MaskDevelopTargetDescription" xml:space="preserve"><value>Máscara a revelar</value></data>
+<data name="MaskImageOutputLabel" xml:space="preserve"><value>Imagen</value></data>
+<data name="MaskImageOutputDescription" xml:space="preserve"><value>Imagen revelada de la máscara</value></data>
+<data name="BlendNode" xml:space="preserve"><value>Combinar</value></data>
+<data name="BlendNodeDescription" xml:space="preserve"><value>Combina dos imágenes usando el modo especificado.</value></data>
+<data name="BlendInputImage1Description" xml:space="preserve"><value>Primera imagen a combinar</value></data>
+<data name="BlendInputImage2Description" xml:space="preserve"><value>Segunda imagen a combinar</value></data>
+<data name="BlendModeDescription" xml:space="preserve"><value>Modo de combinación</value></data>
+<data name="BlendOutputDescription" xml:space="preserve"><value>Resultado de la combinación</value></data>
+<data name="ArgumentsNode" xml:space="preserve"><value>Argumentos</value></data>
+<data name="ArgumentsNodeDescription" xml:space="preserve"><value>Proporciona los valores de entrada del grafo.</value></data>
+<data name="ReturnNode" xml:space="preserve"><value>Valor de retorno</value></data>
+<data name="ReturnNodeDescription" xml:space="preserve"><value>Recibe el resultado del cálculo del grafo de nodos.</value></data>
+<data name="NoMatchingResults" xml:space="preserve"><value>(Sin resultados)</value></data>
+<data name="NumberNode" xml:space="preserve"><value>Número</value></data>
+<data name="NumberNodeDescription" xml:space="preserve"><value>Genera un valor numérico.</value></data>
+<data name="StringNode" xml:space="preserve"><value>Cadena</value></data>
+<data name="StringNodeDescription" xml:space="preserve"><value>Genera una cadena.</value></data>
+<data name="BooleanNode" xml:space="preserve"><value>Booleano</value></data>
+<data name="BooleanNodeDescription" xml:space="preserve"><value>Genera un valor booleano.</value></data>
+<data name="ColorNode" xml:space="preserve"><value>Color</value></data>
+<data name="ColorNodeDescription" xml:space="preserve"><value>Genera un color.</value></data>
+<data name="UnicodeToCharNode" xml:space="preserve"><value>Unicode a carácter</value></data>
+<data name="UnicodeToCharNodeDescription" xml:space="preserve"><value>Convierte un punto de código Unicode a un carácter.</value></data>
+<data name="CharToUnicodeNode" xml:space="preserve"><value>Carácter a Unicode</value></data>
+<data name="CharToUnicodeNodeDescription" xml:space="preserve"><value>Convierte un carácter a un punto de código Unicode.</value></data>
+<data name="StringNthCharNode" xml:space="preserve"><value>Obtener enésimo carácter</value></data>
+<data name="StringNthCharNodeDescription" xml:space="preserve"><value>Obtiene el carácter en una posición especificada de una cadena.</value></data>
+<data name="StringEncodeNode" xml:space="preserve"><value>Codificar cadena</value></data>
+<data name="StringEncodeNodeDescription" xml:space="preserve"><value>Codifica una cadena a una matriz de bytes usando la codificación especificada.</value></data>
+<data name="StringDecodeNode" xml:space="preserve"><value>Decodificar cadena</value></data>
+<data name="StringDecodeNodeDescription" xml:space="preserve"><value>Decodifica una matriz de bytes a una cadena usando la codificación especificada.</value></data>
+<data name="NumberToStringNode" xml:space="preserve"><value>Número a cadena</value></data>
+<data name="NumberToStringNodeDescription" xml:space="preserve"><value>Convierte un número a una cadena.</value></data>
+<data name="StringConcatNode" xml:space="preserve"><value>Concatenar cadenas</value></data>
+<data name="StringConcatNodeDescription" xml:space="preserve"><value>Concatena múltiples cadenas.</value></data>
+<data name="RGBToColorNode" xml:space="preserve"><value>RGB a color</value></data>
+<data name="RGBToColorNodeDescription" xml:space="preserve"><value>Convierte valores RGB a un color.</value></data>
+<data name="HSVToColorNode" xml:space="preserve"><value>HSV a color</value></data>
+<data name="HSVToColorNodeDescription" xml:space="preserve"><value>Convierte valores HSV a un color.</value></data>
+<data name="CMYKToColorNode" xml:space="preserve"><value>CMYK a color</value></data>
+<data name="CMYKToColorNodeDescription" xml:space="preserve"><value>Convierte valores CMYK a un color.</value></data>
+<data name="YCbCrToColorNode" xml:space="preserve"><value>YCbCr a color</value></data>
+<data name="YCbCrToColorNodeDescription" xml:space="preserve"><value>Convierte valores YCbCr a un color.</value></data>
+<data name="LabToColorNode" xml:space="preserve"><value>Lab a color</value></data>
+<data name="LabToColorNodeDescription" xml:space="preserve"><value>Convierte valores Lab a un color.</value></data>
+<data name="OklchToColorNode" xml:space="preserve"><value>Oklch a color</value></data>
+<data name="OklchToColorNodeDescription" xml:space="preserve"><value>Convierte valores Oklch a un color.</value></data>
+<data name="HWBToColorNode" xml:space="preserve"><value>HWB a color</value></data>
+<data name="HWBToColorNodeDescription" xml:space="preserve"><value>Convierte valores HWB a un color.</value></data>
+<data name="ColorToRGBNode" xml:space="preserve"><value>Color a RGB</value></data>
+<data name="ColorToRGBNodeDescription" xml:space="preserve"><value>Convierte un color a valores RGB.</value></data>
+<data name="ColorToHSVNode" xml:space="preserve"><value>Color a HSV</value></data>
+<data name="ColorToHSVNodeDescription" xml:space="preserve"><value>Convierte un color a valores HSV.</value></data>
+<data name="ColorToCMYKNode" xml:space="preserve"><value>Color a CMYK</value></data>
+<data name="ColorToCMYKNodeDescription" xml:space="preserve"><value>Convierte un color a valores CMYK.</value></data>
+<data name="ColorToYCbCrNode" xml:space="preserve"><value>Color a YCbCr</value></data>
+<data name="ColorToYCbCrNodeDescription" xml:space="preserve"><value>Convierte un color a valores YCbCr.</value></data>
+<data name="ColorToLabNode" xml:space="preserve"><value>Color a Lab</value></data>
+<data name="ColorToLabNodeDescription" xml:space="preserve"><value>Convierte un color a valores Lab.</value></data>
+<data name="ColorToOklchNode" xml:space="preserve"><value>Color a Oklch</value></data>
+<data name="ColorToOklchNodeDescription" xml:space="preserve"><value>Convierte un color a valores Oklch.</value></data>
+<data name="ColorToHWBNode" xml:space="preserve"><value>Color a HWB</value></data>
+<data name="ColorToHWBNodeDescription" xml:space="preserve"><value>Convierte un color a valores HWB.</value></data>
+<data name="CodePoint" xml:space="preserve"><value>Punto de código</value></data>
+<data name="CodePointDescription" xml:space="preserve"><value>Un punto de código Unicode (entero).</value></data>
+<data name="Character" xml:space="preserve"><value>Carácter</value></data>
+<data name="CharacterDescription" xml:space="preserve"><value>Un solo carácter. Se ignoran todos los caracteres posteriores al primero.</value></data>
+<data name="Text" xml:space="preserve"><value>Texto</value></data>
+<data name="TextDescription" xml:space="preserve"><value>La cadena de destino.</value></data>
+<data name="Bytes" xml:space="preserve"><value>Bytes</value></data>
+<data name="BytesDescription" xml:space="preserve"><value>Una matriz de bytes.</value></data>
+<data name="Encoding" xml:space="preserve"><value>Codificación</value></data>
+<data name="EncodingDescription" xml:space="preserve"><value>El tipo de codificación de caracteres que se utilizará.</value></data>
+<data name="EncodingUtf8" xml:space="preserve"><value>UTF-8</value></data>
+<data name="EncodingUtf16" xml:space="preserve"><value>UTF-16</value></data>
+<data name="EncodingUtf32" xml:space="preserve"><value>UTF-32</value></data>
+<data name="EncodingShiftJis" xml:space="preserve"><value>Shift_JIS</value></data>
+<data name="EncodingAscii" xml:space="preserve"><value>ASCII</value></data>
+<data name="StringConcatInput1" xml:space="preserve"><value>Cadena 1</value></data>
+<data name="StringConcatInput2" xml:space="preserve"><value>Cadena 2</value></data>
+<data name="StringConcatInput3" xml:space="preserve"><value>Cadena 3</value></data>
+<data name="StringConcatInput4" xml:space="preserve"><value>Cadena 4</value></data>
+<data name="StringConcatSeparator" xml:space="preserve"><value>Separador</value></data>
+<data name="StringConcatSeparatorDescription" xml:space="preserve"><value>La cadena que se inserta entre cada valor al unirlos.</value></data>
+<data name="Red" xml:space="preserve"><value>Rojo</value></data>
+<data name="RedDescription" xml:space="preserve"><value>El canal rojo (0-255).</value></data>
+<data name="Green" xml:space="preserve"><value>Verde</value></data>
+<data name="GreenDescription" xml:space="preserve"><value>El canal verde (0-255).</value></data>
+<data name="Blue" xml:space="preserve"><value>Azul</value></data>
+<data name="BlueDescription" xml:space="preserve"><value>El canal azul (0-255).</value></data>
+<data name="ColorValue" xml:space="preserve"><value>Color</value></data>
+<data name="ColorValueDescription" xml:space="preserve"><value>El valor del color.</value></data>
+<data name="Hue" xml:space="preserve"><value>Tono</value></data>
+<data name="HueDescription" xml:space="preserve"><value>El tono (0-360 grados).</value></data>
+<data name="Saturation" xml:space="preserve"><value>Saturación</value></data>
+<data name="SaturationDescription" xml:space="preserve"><value>La saturación (0-100%).</value></data>
+<data name="Brightness" xml:space="preserve"><value>Brillo</value></data>
+<data name="BrightnessDescription" xml:space="preserve"><value>El componente de brillo/valor de HSV (0-100%).</value></data>
+<data name="CmykCyan" xml:space="preserve"><value>Cian</value></data>
+<data name="CmykCyanDescription" xml:space="preserve"><value>El canal cian (0-100%).</value></data>
+<data name="CmykMagenta" xml:space="preserve"><value>Magenta</value></data>
+<data name="CmykMagentaDescription" xml:space="preserve"><value>El canal magenta (0-100%).</value></data>
+<data name="CmykYellow" xml:space="preserve"><value>Amarillo</value></data>
+<data name="CmykYellowDescription" xml:space="preserve"><value>El canal amarillo (0-100%).</value></data>
+<data name="CmykKey" xml:space="preserve"><value>Clave (negro)</value></data>
+<data name="CmykKeyDescription" xml:space="preserve"><value>El canal clave/negro (0-100%).</value></data>
+<data name="Luma" xml:space="preserve"><value>Luma (Y)</value></data>
+<data name="LumaDescription" xml:space="preserve"><value>휘도 채널(0-255</value></data>
+<data name="ChromaBlue" xml:space="preserve"><value>Crominancia azul (Cb)</value></data>
+<data name="ChromaBlueDescription" xml:space="preserve"><value>Cb 색차 채널(0-255</value></data>
+<data name="ChromaRed" xml:space="preserve"><value>Crominancia roja (Cr)</value></data>
+<data name="ChromaRedDescription" xml:space="preserve"><value>Cr 색차 채널(0-255</value></data>
+<data name="LabLightness" xml:space="preserve"><value>Luminosidad (L)</value></data>
+<data name="LabLightnessDescription" xml:space="preserve"><value>El canal de luminosidad CIE Lab (0-100).</value></data>
+<data name="LabA" xml:space="preserve"><value>Componente a</value></data>
+<data name="LabADescription" xml:space="preserve"><value>CIE Lab a* 채널</value></data>
+<data name="LabB" xml:space="preserve"><value>Componente b</value></data>
+<data name="LabBDescription" xml:space="preserve"><value>CIE Lab b* 채널</value></data>
+<data name="OklchLightness" xml:space="preserve"><value>Luminosidad (L)</value></data>
+<data name="OklchLightnessDescription" xml:space="preserve"><value>El canal de luminosidad Oklch (0-1).</value></data>
+<data name="OklchChroma" xml:space="preserve"><value>Cromaticidad (C)</value></data>
+<data name="OklchChromaDescription" xml:space="preserve"><value>El canal de cromaticidad Oklch (aproximadamente 0-0</value></data>
+<data name="HwbWhiteness" xml:space="preserve"><value>Blancura (W)</value></data>
+<data name="HwbWhitenessDescription" xml:space="preserve"><value>El canal de blancura (0-100%).</value></data>
+<data name="HwbBlackness" xml:space="preserve"><value>Negrura (B)</value></data>
+<data name="HwbBlacknessDescription" xml:space="preserve"><value>El canal de negrura (0-100%).</value></data>
+<data name="MaxFractionDigits" xml:space="preserve"><value>Dígitos decimales máximos</value></data>
+<data name="MaxFractionDigitsDescription" xml:space="preserve"><value>El número máximo de dígitos decimales.</value></data>
+<data name="Alignment" xml:space="preserve"><value>Alineación</value></data>
+<data name="AlignmentDescription" xml:space="preserve"><value>La alineación de la cadena de salida.</value></data>
+<data name="AlignmentWidthDescription" xml:space="preserve"><value>El ancho de caracteres utilizado para la alineación.</value></data>
+<data name="AlignmentLeft" xml:space="preserve"><value>Alineación a la izquierda</value></data>
+<data name="AlignmentCenter" xml:space="preserve"><value>Alineación centrada</value></data>
+<data name="AlignmentRight" xml:space="preserve"><value>Alineación a la derecha</value></data>
+<data name="MinIntegerDigits" xml:space="preserve"><value>Dígitos enteros mínimos</value></data>
+<data name="MinIntegerDigitsDescription" xml:space="preserve"><value>El número mínimo de dígitos enteros.</value></data>
+<data name="FractionDigits" xml:space="preserve"><value>Dígitos decimales</value></data>
+<data name="FractionDigitsDescription" xml:space="preserve"><value>El número de dígitos después del punto decimal.</value></data>
+<data name="IntegerPadding" xml:space="preserve"><value>Relleno de la parte entera</value></data>
+<data name="IntegerPaddingDescription" xml:space="preserve"><value>El carácter utilizado para rellenar los dígitos enteros que faltan.</value></data>
+<data name="IntegerPaddingZero" xml:space="preserve"><value>Ceros</value></data>
+<data name="IntegerPaddingSpace" xml:space="preserve"><value>Espacios</value></data>
+<data name="ZeroFormat" xml:space="preserve"><value>Mostrar cero</value></data>
+<data name="ZeroFormatDescription" xml:space="preserve"><value>Indica si se muestra el cero inicial al mostrar un valor decimal menor que 1.</value></data>
+<data name="ZeroFormatInclude" xml:space="preserve"><value>Mostrar cero</value></data>
+<data name="ZeroFormatOmit" xml:space="preserve"><value>Omitir cero</value></data>
+</root>

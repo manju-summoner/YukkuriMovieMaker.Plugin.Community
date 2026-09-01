@@ -1,0 +1,52 @@
+﻿Key,Comment,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+Node,ノード,ノード,Node,节点,節點,노드,Nodo,العقد,Node
+NodeEditor,ノードエディタ,ノードエディタ,Node Editor,节点编辑器,節點編輯器,노드 편집기,Editor de nodos,محرر العقد,Editor Node
+OutputImageIsNull,出力画像が null の場合のエラーメッセージ,出力画像が null です,Output image is null.,输出图像为空,輸出影像為空,출력 이미지가 null입니다,La imagen de salida es nula,صورة الإخراج فارغة,Gambar keluaran bernilai null.
+ItemPropertiesNotSet,アイテムプロパティが設定されていないエラーメッセージ,アイテムプロパティが設定されていません,Item Properties is not set.,未设置项目属性。,未設定項目屬性。,아이템 속성이 설정되지 않았습니다.,Las propiedades del elemento no están establecidas.,خصائص العنصر غير محددة.,Properti item belum diatur.
+UnableLoadEffect,エフェクト読み込み失敗のエラーメッセージ,エフェクトを読み込めません,Unable load effect,无法加载效果,無法加載效果,효과를 로드할 수 없습니다,No se puede cargar el efecto,غير قادر على تحميل التأثير,Tidak dapat memuat efek
+UnableGenerateEffect,エフェクト生成失敗のエラーメッセージ,エフェクトを生成できません,Unable generate effect,无法生成效果,無法生成效果,효과를 생성할 수 없습니다,No se puede generar el efecto,غير قادر على إنشاء التأثير,Tidak dapat menghasilkan efek
+PropertyNotFound,指定プロパティが存在しないエラー,指定されたプロパティ {0} が見つかりません,The specified property {0} was not found.,未找到指定属性 {0},未找到指定屬性 {0},지정된 속성 {0}을(를) 찾을 수 없습니다,No se encontró la propiedad {0},لم يتم العثور على الخاصية {0} المحددة,Properti {0} yang ditentukan tidak ditemukan.
+PropertyReadOnly,読み取り専用プロパティエラー,プロパティ {0} は読み取り専用です,The property {0} is read-only.,属性 {0} 是只读的,屬性 {0} 是只讀,속성 {0}은(는) 읽기 전용입니다,La propiedad {0} es de solo lectura,الخاصية {0} للقراءة فقط,Properti {0} bersifat hanya-baca.
+UnableCreateAnimationInstance,アニメーション型インスタンス生成失敗,アニメーション型のインスタンスを作成できません,Unable to create an instance of Animation type.,无法创建动画类型的实例,無法建立動畫類型的實例,애니메이션 타입의 인스턴스를 생성할 수 없습니다,No se puede crear una instancia del tipo de animación,تعذر إنشاء نسخة من نوع Animation,Tidak dapat membuat instance dari tipe Animation.
+AnimationValuesPropertyError,アニメーションの Values プロパティ関連エラー,Animation オブジェクトの Values プロパティが見つからないか読み取り専用です,The Values property of the Animation object was not found or is read-only.,未找到动画对象的 Values 属性或为只读,找不到 Animation 对象的 Values 屬性或為只讀,Animation 객체의 Values 속성을 찾을 수 없거나 읽기 전용입니다,La propiedad Values del objeto Animation no se encontró o es de solo lectura,خاصية Values لكائن Animation غير موجودة أو للقراءة فقط,Properti Values pada objek Animation tidak ditemukan atau bersifat hanya-baca.
+ShaderResourceIdEmpty,シェーダリソース ID が空のエラー,シェーダリソース ID が空です,Shader resource id is empty.,着色器资源 ID 为空,著色器資源 ID 為空,셰이더 리소스 ID가 비어 있습니다,El ID del recurso del shader está vacío,معرّف مورد الشادر فارغ,ID sumber daya shader kosong.
+ShaderResourceNotFound,シェーダリソース未検出エラー,シェーダリソース *.{0} が見つかりません,The shader resource *.{0} not found.,未找到着色器资源 *.{0},找不到著色器資源 *.{0},셰이더 리소스 *.{0}를 찾을 수 없습니다,No se encontró el recurso del shader *.{0},لم يتم العثور على مورد الشادر *.{0},Sumber daya shader *.{0} tidak ditemukan.
+CannotCreateEffectInstance,エフェクトインスタンス生成失敗,エフェクトインスタンスを作成できません,Cannot create effect instance,无法创建效果实例,無法建立效果實例,효과 인스턴스를 생성할 수 없습니다,No se puede crear la instancia del efecto,تعذر إنشاء نسخة التأثير,Tidak dapat membuat instance efek
+CannotCastToShaderEffect,ShaderEffect 型変換失敗,ShaderEffect にキャストできません,Cannot cast to ShaderEffect,无法转换为 ShaderEffect,無法轉換為 ShaderEffect,ShaderEffect로 캐스팅할 수 없습니다,No se puede convertir a ShaderEffect,لا يمكن التحويل إلى ShaderEffect,Tidak dapat mengonversi ke ShaderEffect
+IndexOutOfRange,インデックス範囲外エラー,指定されたインデックスが範囲外です,The specified index is out of range.,指定索引超出范围,指定索引超出範圍,지정된 인덱스가 범위를 벗어났습니다,El índice especificado está fuera de rango,الفهرس المحدد خارج النطاق,Indeks yang ditentukan berada di luar rentang.
+CannotCreateType,型生成失敗,型を作成できません,Cannot create the type,无法创建类型,無法建立類型,타입을 생성할 수 없습니다,No se puede crear el tipo,تعذر إنشاء النوع,Tidak dapat membuat tipe
+Input,入力,入力,Input,输入,輸入,입력,Aporte,مدخل,Input
+Output,出力,出力,Output,输出,輸出,출력,Producción,الناتج,Output
+ColorRgbHeader,RGBセクション見出し,RGB,RGB,RGB,RGB,RGB,RGB,RGB,RGB
+ColorRedLabel,赤成分ラベル,R:,R:,R:,R:,R:,R:,R:,R:
+ColorGreenLabel,緑成分ラベル,G:,G:,G:,G:,G:,G:,G:,G:
+ColorBlueLabel,青成分ラベル,B:,B:,B:,B:,B:,B:,B:,B:
+ColorAlphaLabel,アルファ成分ラベル,A:,A:,A:,A:,A:,A:,A:,A:
+ColorHsvHeader,HSVセクション見出し,HSV,HSV,HSV,HSV,HSV,HSV,HSV,HSV
+ColorHueLabel,色相ラベル,H:,H:,H:,H:,H:,H:,H:,H:
+ColorSaturationLabel,彩度ラベル,S:,S:,S:,S:,S:,S:,S:,S:
+ColorValueLabel,明度ラベル,V:,V:,V:,V:,V:,V:,V:,V:
+SelectFileButton,ファイル選択ボタン,選択,Select,选择,選擇,선택,Seleccionar,اختيار,Pilih
+OpenSubGraphButton,サブグラフを開くボタン,サブグラフを開く,Open SubGraph,打开子图,開啟子圖,서브그래프 열기,Abrir subgrafo,فتح الرسم البياني الفرعي,Buka SubGraph
+AddNodeMenu,ノード追加メニュー,ノードを追加,Add Node,添加节点,新增節點,노드 추가,Añadir nodo,إضافة عقدة,Tambah Node
+CopyMenu,コピーメニュー,コピー,Copy,复制,複製,복사,Copiar,نسخ,Salin
+CutMenu,切り取りメニュー,切り取り,Cut,剪切,剪下,잘라내기,Cortar,قص,Potong
+PasteMenu,貼り付けメニュー,貼り付け,Paste,粘贴,貼上,붙여넣기,Pegar,لصق,Tempel
+DeleteMenu,削除メニュー,削除,Delete,删除,刪除,삭제,Eliminar,حذف,Hapus
+EditMenu,編集メニュー見出し,編集,Edit,编辑,編輯,편집,Editar,تحرير,Edit
+ModeMenu,モードサブメニュー見出し,モード,Mode,模式,模式,모드,Modo,الوضع,Mode
+RectSelectionMenu,矩形選択モード,矩形選択,Rect Selection,矩形选择,矩形選取,사각형 선택,Selección rectangular,تحديد مستطيل,Seleksi Persegi
+LassoSelectionMenu,なげなわ選択モード,なげなわ選択,Lasso Selection,套索选择,套索選取,올가미 선택,Selección de lazo,تحديد بالحبل,Seleksi Laso
+PanMenu,パンモード,パン,Pan,平移,平移,이동,Desplazar,تحريك,Geser
+ViewMenu,表示メニュー見出し,表示,View,视图,檢視,보기,Ver,عرض,Tampilan
+ZoomInMenu,拡大メニュー,拡大,Zoom +,放大,放大,확대,Acercar,تكبير,Perbesar
+ZoomOutMenu,縮小メニュー,縮小,Zoom -,缩小,縮小,축소,Alejar,تصغير,Perkecil
+ResetZoomMenu,ズームリセットメニュー,ズームをリセット,Reset Zoom,重置缩放,重置縮放,확대/축소 재설정,Restablecer zoom,إعادة تعيين التكبير,Reset Zoom
+FitMenu,画面に合わせるメニュー,画面に合わせる,Fit,适应窗口,符合視窗,화면에 맞추기,Ajustar,ملاءمة,Sesuaikan
+CloseTabToolTip,タブを閉じるツールチップ,タブを閉じる,Close Tab,关闭标签页,關閉分頁,탭 닫기,Cerrar pestaña,إغلاق التبويب,Tutup Tab
+ModeStatusLabel,ステータスバーのモード表示ラベル,モード:,Mode:,模式:,模式:,모드:,Modo:,الوضع:,Mode:
+OpenNodeEditorButtonLabel,ノードエディタを開くボタン,ノードエディタを開く...,Open Node Editor...,打开节点编辑器...,開啟節點編輯器...,노드 에디터 열기...,Abrir editor de nodos...,فتح محرر العقد...,Buka Editor Node...
+BezierSmoothMenu,ベジェ編集:スムーズメニュー,スムーズ,Smooth,平滑,平滑,부드럽게,Suave,سلس,Halus
+BezierCornerMenu,ベジェ編集:コーナーメニュー,コーナー,Corner,尖角,尖角,코너,Vértice,زاوية,Sudut
+BezierFixedNodeDeleteError,ベジェ編集:固定ノード削除エラー,固定ノードは削除できません。,Cannot delete a fixed node.,无法删除固定节点。,無法刪除固定節點。,고정된 노드는 삭제할 수 없습니다.,No se puede eliminar un nodo fijo.,لا يمكن حذف عقدة ثابتة.,Tidak dapat menghapus node tetap.
+BezierMinKeyframesError,ベジェ編集:キーフレーム不足エラー,少なくとも2つのキーフレームが必要です。,At least two keyframes are required.,至少需要两个关键帧。,至少需要兩個關鍵影格。,최소 2개의 키프레임이 필요합니다.,Se requieren al menos dos fotogramas clave.,يلزم توفر إطارين رئيسيين على الأقل.,Diperlukan minimal dua keyframe.

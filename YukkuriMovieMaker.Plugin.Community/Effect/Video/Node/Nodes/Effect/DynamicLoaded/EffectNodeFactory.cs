@@ -1,0 +1,1333 @@
+using System.Collections.Concurrent;
+using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Security.Cryptography;
+using System.Text;
+using System.Windows;
+using System.Windows.Media;
+using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Controls;
+using YukkuriMovieMaker.Plugin.Brush;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.Converters;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Localize;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.ValueTypes;
+using YukkuriMovieMaker.Plugin.Effects;
+
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
+
+public static class EffectNodeFactory
+{
+    private static readonly Lock Lock = new();
+    private static readonly Dictionary<string, Type> TypeCache = new();
+
+    // 同じ型を複数カテゴリーの追加メニューに出すための、生成型ごとのカテゴリー別 NodeAttribute
+    private static readonly Dictionary<Type, NodeAttribute[]> MenuCategoryAttributes = new();
+
+    private static readonly AssemblyBuilder AsmBuilder =
+        AssemblyBuilder.DefineDynamicAssembly(
+            new AssemblyName("DynamicEffectNodes"),
+            AssemblyBuilderAccess.Run);
+
+    private static readonly ModuleBuilder ModBuilder =
+        AsmBuilder.DefineDynamicModule("MainModule");
+
+    public static Type[] Create()
+    {
+        var result = new List<Type>();
+        foreach (var effectType in PluginLoader.VideoEffects)
+            try
+            {
+                var nodeType = GetOrCreate(effectType);
+                Registry.RegisterType(nodeType);
+                result.Add(nodeType);
+#if DEBUG
+                Console.WriteLine($@"[EffectNodeFactory] OK: {effectType.Name} -> {nodeType.FullName}");
+#endif
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                Console.WriteLine($@"[EffectNodeFactory] FAIL: {effectType.Name} -- {ex.GetType().Name}: {ex.Message}");
+#endif
+            }
+#if DEBUG
+        Console.WriteLine(
+            $@"[EffectNodeFactory] Generated {result.Count} / {PluginLoader.VideoEffects.Count()} effects.");
+#endif
+        return result.ToArray();
+    }
+
+    private static Type GetOrCreate(Type effectType)
+    {
+        if (effectType.GetCustomAttribute<ObsoleteAttribute>() != null)
+            throw new InvalidOperationException($"{effectType.Name} is obsolete");
+
+        lock (Lock)
+        {
+            var effectKey = effectType.AssemblyQualifiedName ?? effectType.FullName ?? effectType.Name;
+
+            if (TypeCache.TryGetValue(effectKey, out var cached))
+            {
+#if DEBUG
+                Console.WriteLine($@"[EffectNodeFactory]   cache hit: {effectType.Name}");
+#endif
+                return cached;
+            }
+
+            var effectInstance = Activator.CreateInstance(effectType) as IVideoEffect
+                                 ?? throw new InvalidOperationException($"Cannot instantiate {effectType.Name}");
+
+            var (staticPortDefs, dynamicParams) = EffectPortCollector.Collect(effectInstance);
+
+#if DEBUG
+            Console.WriteLine(
+                $@"[EffectNodeFactory]   {effectType.Name}: {staticPortDefs.Count + dynamicParams.Count} port(s) collected (including {dynamicParams.Count} dynamics)");
+            foreach (var d in staticPortDefs)
+                Console.WriteLine($@"[EffectNodeFactory]     {d.PortType,-6} {d.PropName} (label={d.LabelKey})");
+            foreach (var d in dynamicParams)
+                Console.WriteLine(
+                    $@"[EffectNodeFactory]     {d.Item1.PortType,-6} {d.Item1.PropName} (Dynamic, label={d.Item1.LabelKey})");
+#endif
+
+            var veAttr = effectType.GetCustomAttribute<VideoEffectAttribute>();
+            var categoryKey = veAttr?.Categories.FirstOrDefault() ?? "Effect";
+            var labelKey = veAttr?.Name ?? effectType.Name;
+            var resourceType = veAttr?.ResourceType;
+
+            var generated =
+                EffectNodeTypeBuilder.Build(ModBuilder, effectType, effectKey, categoryKey, labelKey, resourceType,
+                    staticPortDefs, dynamicParams);
+
+            var allCategories = veAttr?.Categories.Where(c => !string.IsNullOrEmpty(c)).Distinct().ToArray();
+            if (allCategories is not { Length: > 0 })
+                allCategories = [categoryKey];
+            MenuCategoryAttributes[generated] = allCategories
+                .Select(c => new NodeAttribute(
+                    "NodeEffectKey_EffectCategoryName/NodeEffectKey_VideoEffectCategoryName" +
+                    (string.IsNullOrEmpty(c) ? "" : "/" + c),
+                    labelKey, labelKey, resourceType))
+                .ToArray();
+
+            TypeCache[effectKey] = generated;
+            return generated;
+        }
+    }
+
+    internal static NodeAttribute[]? GetMenuCategoryAttributes(Type nodeType)
+    {
+        lock (Lock)
+        {
+            return MenuCategoryAttributes.GetValueOrDefault(nodeType);
+        }
+    }
+
+    internal static string? GetEffectName(string assemblyQualifiedName)
+    {
+        lock (Lock)
+        {
+            foreach (var (effectName, type) in TypeCache)
+                if ((type.AssemblyQualifiedName ?? type.Name) == assemblyQualifiedName)
+                    return effectName;
+            return null;
+        }
+    }
+
+    internal static Type? GetOrCreate(string effectName)
+    {
+        lock (Lock)
+        {
+            if (TypeCache.TryGetValue(effectName, out var cached))
+                return cached;
+        }
+
+        var effectType = PluginLoader.VideoEffects.FirstOrDefault(t =>
+            (t.AssemblyQualifiedName ?? t.FullName ?? t.Name) == effectName);
+        if (effectType == null) return null;
+
+        try
+        {
+            return GetOrCreate(effectType);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+}
+
+public sealed class PortDefinition
+{
+    public required string PropName { get; init; }
+    public required PortType PortType { get; init; }
+    public required string LabelKey { get; init; }
+    public required string DescKey { get; init; }
+    public Type? ResourceType { get; init; }
+    public object? DefaultValue { get; init; }
+    public float Min { get; init; } = float.NaN;
+    public float Max { get; init; } = float.NaN;
+    public int Digits { get; init; } = 2;
+    public string Unit { get; init; } = "";
+    public Type? EnumType { get; init; }
+
+    /// <summary>
+    ///     PortType.Unknown（Float/Enum/Bool/Color/Brush/Text のいずれにも該当しないプロパティ）の場合の、
+    ///     元プロパティの実際のCLR型。生成するポートのプロパティ型として使う（floatに丸めない）。
+    /// </summary>
+    public Type? UnknownClrType { get; init; }
+
+    /// <summary>
+    ///     PortType.Unknown の元プロパティに、YMM4標準の PropertyEditorAttribute2 継承属性が
+    ///     付いていた場合、その適用情報（コンストラクタ引数・名前付き引数を含む）。
+    ///     NumberPortControl等、こちらで用意した既知のコントロールで扱える型（Float/Enum/Bool/Color/Text）
+    ///     には設定されない＝それらは対象外。
+    /// </summary>
+    public CustomAttributeData? EditorAttributeData { get; init; }
+
+    /// <summary>
+    ///     EditorAttributeData を基に、ビルド時（TryMakePortDefinition の時点）で直接インスタンス化
+    ///     しておいた PropertyEditorAttribute2。
+    ///     CustomAttributeBuilder で生成後の型に属性を複製し、後から GetCustomAttribute で
+    ///     再インスタンス化する方式は、元の属性が「別アセンブリの internal 型」（YMM4本体組み込みの
+    ///     エディタ等）だとアクセス例外で失敗することがある。こちらは属性の型のコンストラクタ／
+    ///     プロパティ／フィールドを直接 Invoke/SetValue して構築するため、アセンブリ境界に左右されない。
+    ///     NodeViewModel.ResolveEditorAttribute から参照される。
+    /// </summary>
+    public PropertyEditorAttribute2? EditorAttributeInstance { get; init; }
+}
+
+public enum PortType
+{
+    Float,
+    Enum,
+    Bool,
+    Color,
+    Brush,
+    Text,
+    Unknown
+}
+
+public static class EffectPortCollector
+{
+    public static (List<PortDefinition>, List<(PortDefinition, PropertyInfo, object)>) Collect(object root)
+    {
+        List<PortDefinition> staticResult = [];
+        List<(PortDefinition, PropertyInfo, object)> dynamicResult = [];
+        CollectRecursive(root, staticResult, dynamicResult);
+        return (staticResult, dynamicResult);
+    }
+
+    private static void CollectRecursive(
+        object obj,
+        List<PortDefinition> staticResult,
+        List<(PortDefinition, PropertyInfo, object)> dynamicResult,
+        HashSet<object>? visited = null)
+    {
+        visited ??= new HashSet<object>(ReferenceEqualityComparer.Instance);
+        if (!visited.Add(obj)) return;
+
+        foreach (var prop in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (prop.GetIndexParameters().Length > 0) continue;
+            if (prop.GetCustomAttribute<ObsoleteAttribute>() != null) continue;
+
+            var displayAttr = prop.GetCustomAttribute<DisplayAttribute>();
+            if (displayAttr == null) continue;
+
+            var propInstance = prop.GetValue(obj);
+            var def = TryMakePortDefinition(prop, displayAttr, propInstance);
+
+            var hasCustomEditor = def is { PortType: PortType.Unknown, EditorAttributeData: not null };
+
+            if (!hasCustomEditor
+                && propInstance is not null
+                && prop.PropertyType != typeof(Plugin.Brush.Brush)
+                && propInstance.GetType().GetProperties()
+                    .Any(info => info.GetCustomAttribute<DisplayAttribute>() != null))
+            {
+                dynamicResult.Add((def, prop, propInstance));
+                continue;
+            }
+
+            staticResult.Add(def);
+        }
+    }
+
+    private static PortDefinition TryMakePortDefinition(PropertyInfo prop, DisplayAttribute display, object? inst)
+    {
+        var labelKey = display.Name ?? display.GroupName ?? prop.Name;
+        var descKey = display.Description ?? "";
+        var resourceType = display.ResourceType;
+
+        if (prop.PropertyType == typeof(Animation))
+        {
+            var slider = prop.GetCustomAttribute<AnimationSliderAttribute>();
+            var anim = inst as Animation;
+            var defaultValue = anim?.DefaultValue;
+            return new PortDefinition
+            {
+                PropName = prop.Name, PortType = PortType.Float,
+                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
+                DefaultValue = defaultValue,
+                Min = anim != null ? (float)anim.MinValue : float.NaN,
+                Max = anim != null ? (float)anim.MaxValue : float.NaN,
+                Digits = slider?.StringFormat != null ? ParseDigits(slider.StringFormat) : 2,
+                Unit = slider?.UnitText ?? ""
+            };
+        }
+
+        if (prop.PropertyType.IsEnum)
+            return new PortDefinition
+            {
+                PropName = prop.Name, PortType = PortType.Enum,
+                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
+                DefaultValue = inst, EnumType = prop.PropertyType
+            };
+
+        if (prop.PropertyType == typeof(bool))
+            return new PortDefinition
+            {
+                PropName = prop.Name, PortType = PortType.Bool,
+                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
+                DefaultValue = inst
+            };
+
+        if (prop.PropertyType == typeof(float) || prop.PropertyType == typeof(double) ||
+            prop.PropertyType == typeof(int))
+            return new PortDefinition
+            {
+                PropName = prop.Name, PortType = PortType.Float,
+                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
+                DefaultValue = inst
+            };
+
+        if (prop.PropertyType == typeof(Color))
+            return new PortDefinition
+            {
+                PropName = prop.Name, PortType = PortType.Color,
+                LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
+                DefaultValue = inst is Color c ? c : Colors.White
+            };
+
+        if (prop.PropertyType == typeof(Plugin.Brush.Brush))
+            return new PortDefinition
+            {
+                PropName = prop.Name, PortType = PortType.Brush,
+                LabelKey = display.Name ?? TextNode.BrushName ?? prop.Name, DescKey = descKey,
+                ResourceType = resourceType,
+                DefaultValue = null
+            };
+
+        if (prop.PropertyType == typeof(string))
+        {
+            var hasCustomEditor = prop.GetCustomAttributesData()
+                .Any(ad => typeof(PropertyEditorAttribute2).IsAssignableFrom(ad.AttributeType));
+            if (!hasCustomEditor)
+                return new PortDefinition
+                {
+                    PropName = prop.Name, PortType = PortType.Text,
+                    LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
+                    DefaultValue = inst as string ?? ""
+                };
+        }
+
+        var editorAttrData = prop.GetCustomAttributesData()
+            .FirstOrDefault(ad => typeof(PropertyEditorAttribute2).IsAssignableFrom(ad.AttributeType));
+        var editorAttrInstance = editorAttrData == null ? null : Attr.CreateEditorAttributeInstance(editorAttrData);
+
+#if DEBUG
+        if (editorAttrData != null)
+            Console.WriteLine(
+                $@"[EffectPortCollector] '{prop.Name}' (type={prop.PropertyType.FullName}) uses custom editor " +
+                $@"{editorAttrData.AttributeType.FullName} (instance={(editorAttrInstance != null ? "OK" : "FAILED")})");
+#endif
+
+        return new PortDefinition
+        {
+            PropName = prop.Name, PortType = PortType.Unknown,
+            LabelKey = labelKey, DescKey = descKey, ResourceType = resourceType,
+            DefaultValue = inst,
+            UnknownClrType = prop.PropertyType,
+            EditorAttributeData = editorAttrData,
+            EditorAttributeInstance = editorAttrInstance
+        };
+    }
+
+    private static int ParseDigits(string format)
+    {
+        if (format.Length >= 2 && (format[0] == 'F' || format[0] == 'f')
+                               && int.TryParse(format[1..], out var d))
+            return d;
+        return 2;
+    }
+}
+
+public static class EffectNodeTypeBuilder
+{
+    public static Type Build(
+        ModuleBuilder mod,
+        Type effectType,
+        string effectKey,
+        string categoryKey,
+        string labelKey,
+        Type? resourceType,
+        List<PortDefinition> staticPortDefs,
+        List<(PortDefinition, PropertyInfo, object)> dynamicPropertyDefs)
+    {
+        var effectName = effectKey;
+        var typeName = $"DynamicEffectNode_{Convert.ToHexString(
+            SHA256.HashData(
+                Encoding.UTF8.GetBytes(effectName)))[..32]}";
+        var tb = mod.DefineType(
+            typeName,
+            TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.BeforeFieldInit,
+            typeof(NodeLogic));
+
+        tb.SetCustomAttribute(new CustomAttributeBuilder(
+            typeof(NodeAttribute).GetConstructors()[1],
+            [
+                "NodeEffectKey_EffectCategoryName/NodeEffectKey_VideoEffectCategoryName" +
+                (string.IsNullOrEmpty(categoryKey) ? "" : "/" + categoryKey),
+                labelKey, labelKey, resourceType
+            ]));
+
+        var loaderField = tb.DefineField("_videoEffect", typeof(VideoEffectsLoader), FieldAttributes.Private);
+
+        EffectNodeCalculator.RegisterPortDefs(effectKey, staticPortDefs.ToArray(),
+            dynamicPropertyDefs.Select(d => d.Item2.Name).ToArray());
+
+        var effectNameField = tb.DefineField("_effectNameCache", typeof(string),
+            FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
+        var portDefsField = tb.DefineField("_portDefs", typeof(PortDefinition[]),
+            FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
+        var originalTypeField = tb.DefineField("_originalOwnerType", typeof(Type),
+            FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.InitOnly);
+        var containerBackFields = dynamicPropertyDefs.Select(props =>
+            tb.DefineField($"_{props.Item2.Name}", typeof(InputsContainer), FieldAttributes.Private)).ToList();
+
+        var cctor = tb.DefineTypeInitializer();
+        var cil = cctor.GetILGenerator();
+        cil.Emit(OpCodes.Ldstr, effectKey);
+        cil.Emit(OpCodes.Stsfld, effectNameField);
+        cil.Emit(OpCodes.Ldstr, effectKey);
+        cil.Emit(OpCodes.Call, typeof(EffectNodeCalculator).GetMethod(nameof(EffectNodeCalculator.GetPortDefs))!);
+        cil.Emit(OpCodes.Stsfld, portDefsField);
+        cil.Emit(OpCodes.Ldtoken, effectType);
+        cil.Emit(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle))!);
+        cil.Emit(OpCodes.Stsfld, originalTypeField);
+        cil.Emit(OpCodes.Ret);
+
+        EmitImageInputPort(tb);
+        foreach (var def in staticPortDefs) EmitParameterPort(tb, def);
+        for (var index = 0; index < dynamicPropertyDefs.Count; index++)
+            EmitContainerPort(tb, dynamicPropertyDefs[index], containerBackFields[index]);
+
+        EmitImageOutputPort(tb);
+        EmitCalculate(tb, loaderField, effectNameField, portDefsField);
+        EmitDispose(tb, loaderField);
+
+        if (dynamicPropertyDefs.Count > 0)
+            EmitOnInputValueChanged(tb, loaderField, effectNameField, dynamicPropertyDefs, containerBackFields);
+
+        var baseCtor = typeof(NodeLogic).GetConstructor(
+            BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null)!;
+
+        var ctor = tb.DefineConstructor(
+            MethodAttributes.Public | MethodAttributes.HideBySig |
+            MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
+            CallingConventions.Standard, Type.EmptyTypes);
+        var il = ctor.GetILGenerator();
+
+        for (var i = 0; i < dynamicPropertyDefs.Count; i++)
+        {
+            var def = dynamicPropertyDefs[i];
+            var field = containerBackFields[i];
+            var containerType = ContainerFactory.CreateOrGenerate(def.Item3, mod);
+            var containerCtor = containerType?.GetConstructor(Type.EmptyTypes);
+            if (containerCtor == null)
+                throw new InvalidOperationException($"No parameterless ctor: {containerType}");
+
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Newobj, containerCtor);
+            il.Emit(OpCodes.Stfld, field);
+        }
+
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Call, baseCtor);
+
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldsfld, portDefsField);
+        il.Emit(OpCodes.Call,
+            typeof(EffectNodeCalculator).GetMethod(nameof(EffectNodeCalculator.SeedDefaultValues))!);
+
+        il.Emit(OpCodes.Ret);
+
+        return tb.CreateType()
+               ?? throw new InvalidOperationException($"Failed to create type for {effectName}");
+    }
+
+    private static void EmitImageInputPort(TypeBuilder tb)
+    {
+        var pb = EmitInputProperty(tb, "InputImage", typeof(ImageWrapper));
+        Attr.InputPort(pb, nameof(TextUi.Input), "", typeof(TextUi));
+        Attr.PortColor(pb, nameof(Colors.CornflowerBlue));
+    }
+
+    private static void EmitParameterPort(TypeBuilder tb, PortDefinition def)
+    {
+        var clrType = def.PortType switch
+        {
+            PortType.Enum => typeof(int),
+            PortType.Bool => typeof(bool),
+            PortType.Color => typeof(Color),
+            PortType.Brush => typeof(BrushWrapper),
+            PortType.Text => typeof(string),
+            PortType.Unknown => def.UnknownClrType ?? typeof(float),
+            _ => typeof(float)
+        };
+
+        var pb = EmitInputProperty(tb, def.PropName, clrType);
+        Attr.InputPort(pb, def.LabelKey, def.DescKey, def.ResourceType);
+
+        switch (def.PortType)
+        {
+            case PortType.Float:
+                Attr.NumberControl(pb, def.Min, def.Max, def.Digits, def.Unit,
+                    def.DefaultValue is null ? 0f : Convert.ToSingle(def.DefaultValue));
+                Attr.PortColor(pb, nameof(Colors.DarkOrange));
+                break;
+            case PortType.Enum:
+                Attr.EnumControl(pb, def.EnumType!, Convert.ToInt32((Enum?)def.DefaultValue));
+                Attr.PortColor(pb, nameof(Colors.DarkOrange));
+                break;
+            case PortType.Bool:
+                Attr.BoolControl(pb, (bool)(def.DefaultValue ?? false));
+                break;
+            case PortType.Color:
+                Attr.ColorControl(pb, (Color)(def.DefaultValue ?? Colors.White));
+                Attr.PortColor(pb, nameof(Colors.MediumPurple));
+                break;
+            case PortType.Brush:
+                Attr.PortColor(pb, nameof(Colors.LawnGreen));
+                break;
+            case PortType.Text:
+                Attr.TextControl(pb, (string?)def.DefaultValue ?? "");
+                Attr.PortColor(pb, nameof(Colors.MediumSeaGreen));
+                break;
+            case PortType.Unknown:
+                if (def.EditorAttributeData != null)
+                    try
+                    {
+                        Attr.CustomEditorControl(pb, def.EditorAttributeData);
+                        Attr.PortColor(pb, nameof(Colors.Gray));
+                    }
+                    catch (Exception ex)
+                    {
+#if DEBUG
+                        Console.WriteLine(
+                            $@"[EffectNodeTypeBuilder] Failed to attach custom editor to '{def.PropName}': " +
+                            $@"{ex.GetType().Name}: {ex.Message}");
+#endif
+                    }
+
+                break;
+        }
+    }
+
+    private static void EmitContainerPort(TypeBuilder tb, (PortDefinition port, PropertyInfo prop, object _) info,
+        FieldInfo field)
+    {
+        var pb = EmitContainerProperty(tb, info.prop.Name, field);
+        Attr.InputPort(pb, info.port.LabelKey, info.port.DescKey, info.port.ResourceType, true);
+    }
+
+    private static void EmitImageOutputPort(TypeBuilder tb)
+    {
+        var pb = EmitOutputProperty(tb, "Output", typeof(ImageWrapper));
+        Attr.OutputPort(pb, nameof(TextUi.Output), "", typeof(TextUi));
+        Attr.PortColor(pb, nameof(Colors.CornflowerBlue));
+    }
+
+    /// <summary>
+    ///     OnInputValueChanged override を Emit する。
+    ///     _videoEffect が null の場合は LoadEffectSync で初期化する。
+    ///     各 Dynamic プロパティについて RefreshDynamicContainer を呼ぶ。
+    /// </summary>
+    private static void EmitDispose(TypeBuilder tb, FieldBuilder loaderField)
+    {
+        var iDisposableDispose = typeof(IDisposable).GetMethod(nameof(IDisposable.Dispose))!;
+        var baseDispose = typeof(NodeLogic).GetMethod("Dispose", BindingFlags.Public | BindingFlags.Instance)!;
+
+        var m = tb.DefineMethod(
+            "Dispose",
+            MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig,
+            typeof(void),
+            Type.EmptyTypes);
+
+        var il = m.GetILGenerator();
+        var skipLabel = il.DefineLabel();
+        var afterLabel = il.DefineLabel();
+
+        // if (_videoEffect != null) _videoEffect.Dispose();
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldfld, loaderField);
+        il.Emit(OpCodes.Dup);
+        il.Emit(OpCodes.Brfalse_S, skipLabel);
+        il.Emit(OpCodes.Callvirt, iDisposableDispose);
+        il.Emit(OpCodes.Br_S, afterLabel);
+        il.MarkLabel(skipLabel);
+        il.Emit(OpCodes.Pop);
+        il.MarkLabel(afterLabel);
+
+        // _videoEffect = null;
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldnull);
+        il.Emit(OpCodes.Stfld, loaderField);
+
+        // base.Dispose();
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Call, baseDispose);
+        il.Emit(OpCodes.Ret);
+
+        tb.DefineMethodOverride(m,
+            typeof(NodeLogic).GetMethod("Dispose", BindingFlags.Public | BindingFlags.Instance)!);
+    }
+
+    private static void EmitOnInputValueChanged(
+        TypeBuilder tb,
+        FieldBuilder loaderField,
+        FieldBuilder effectNameField,
+        List<(PortDefinition, PropertyInfo, object)> dynamicPropertyDefs,
+        List<FieldBuilder> containerBackFields)
+    {
+        var refreshMethod = typeof(EffectNodeCalculator)
+            .GetMethod(nameof(EffectNodeCalculator.RefreshDynamicContainer),
+                BindingFlags.Public | BindingFlags.Static)!;
+        var loadEffectSyncMethod = typeof(VideoEffectsLoader)
+            .GetMethod(nameof(VideoEffectsLoader.LoadEffectSync),
+                BindingFlags.Public | BindingFlags.Static,
+                null, [typeof(string)], null)!;
+
+        var m = tb.DefineMethod("OnInputValueChanged",
+            MethodAttributes.Family | MethodAttributes.Virtual | MethodAttributes.HideBySig |
+            MethodAttributes.FamORAssem,
+            typeof(void), [typeof(string), typeof(object)]);
+
+        var il = m.GetILGenerator();
+
+        // if (_videoEffect == null) _videoEffect = VideoEffectsLoader.LoadEffectSync(_effectNameCache);
+        var notNullLabel = il.DefineLabel();
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldfld, loaderField);
+        il.Emit(OpCodes.Brtrue_S, notNullLabel);
+        il.Emit(OpCodes.Ldarg_0); // obj for Stfld
+        il.Emit(OpCodes.Ldsfld, effectNameField); // string
+        il.Emit(OpCodes.Call, loadEffectSyncMethod); // VideoEffectsLoader
+        il.Emit(OpCodes.Stfld, loaderField);
+        il.MarkLabel(notNullLabel);
+
+        // EffectNodeCalculator.RefreshDynamicContainer(
+        //     this, _videoEffect, portName, value, "PropName", "_PropName");
+        for (var i = 0; i < dynamicPropertyDefs.Count; i++)
+        {
+            var def = dynamicPropertyDefs[i];
+            var containerFieldName = containerBackFields[i].Name;
+
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Ldfld, loaderField);
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Ldarg_2);
+            il.Emit(OpCodes.Ldstr, def.Item2.Name);
+            il.Emit(OpCodes.Ldstr, containerFieldName);
+            il.Emit(OpCodes.Call, refreshMethod);
+        }
+
+        il.Emit(OpCodes.Ret);
+
+        tb.DefineMethodOverride(m,
+            typeof(NodeLogic).GetMethod("OnInputValueChanged",
+                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)!);
+    }
+
+    private static PropertyBuilder EmitInputProperty(TypeBuilder tb, string name, Type t)
+    {
+        var getMethod = typeof(NodeLogic)
+            .GetMethod("GetInput", BindingFlags.NonPublic | BindingFlags.Instance)!
+            .MakeGenericMethod(t);
+        var setMethod = typeof(NodeLogic)
+            .GetMethod("SetInput", BindingFlags.NonPublic | BindingFlags.Instance)!
+            .MakeGenericMethod(t);
+
+        var getter = tb.DefineMethod($"get_{name}",
+            MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+            t, Type.EmptyTypes);
+        var gil = getter.GetILGenerator();
+        gil.Emit(OpCodes.Ldarg_0);
+        gil.Emit(OpCodes.Ldstr, name);
+        gil.Emit(OpCodes.Call, getMethod);
+        gil.Emit(OpCodes.Ret);
+
+        var setter = tb.DefineMethod($"set_{name}",
+            MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+            null, [t]);
+        var sil = setter.GetILGenerator();
+        sil.Emit(OpCodes.Ldarg_0);
+        sil.Emit(OpCodes.Ldarg_1);
+        sil.Emit(OpCodes.Ldstr, name);
+        sil.Emit(OpCodes.Call, setMethod);
+        sil.Emit(OpCodes.Ret);
+
+        var pb = tb.DefineProperty(name, PropertyAttributes.None, t, null);
+        pb.SetGetMethod(getter);
+        pb.SetSetMethod(setter);
+        return pb;
+    }
+
+    private static PropertyBuilder EmitContainerProperty(TypeBuilder tb, string name, FieldInfo field)
+    {
+        var setMethod = typeof(NodeLogic)
+            .GetMethod(nameof(NodeLogic.SetDynamicContainer),
+                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public)!;
+
+        var getter = tb.DefineMethod($"get_{name}",
+            MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+            typeof(InputsContainer), Type.EmptyTypes);
+        var gil = getter.GetILGenerator();
+        gil.Emit(OpCodes.Ldarg_0);
+        gil.Emit(OpCodes.Ldfld, field);
+        gil.Emit(OpCodes.Ret);
+
+        var setter = tb.DefineMethod($"set_{name}",
+            MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+            null, [typeof(InputsContainer)]);
+        var sil = setter.GetILGenerator();
+        sil.Emit(OpCodes.Ldarg_0);
+        sil.Emit(OpCodes.Ldarg_1);
+        sil.Emit(OpCodes.Ldstr, name);
+        sil.Emit(OpCodes.Call, setMethod);
+        sil.Emit(OpCodes.Ldarg_0);
+        sil.Emit(OpCodes.Ldarg_1);
+        sil.Emit(OpCodes.Stfld, field);
+        sil.Emit(OpCodes.Ret);
+
+        var pb = tb.DefineProperty(name, PropertyAttributes.None, typeof(InputsContainer), null);
+        pb.SetGetMethod(getter);
+        pb.SetSetMethod(setter);
+        return pb;
+    }
+
+    private static PropertyBuilder EmitOutputProperty(TypeBuilder tb, string name, Type t)
+    {
+        var getMethod = typeof(NodeLogic)
+            .GetMethod("GetOutput", BindingFlags.NonPublic | BindingFlags.Instance)!
+            .MakeGenericMethod(t);
+        var setOutputMethod = typeof(NodeLogic)
+            .GetMethod("SetOutput", BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+        var getter = tb.DefineMethod($"get_{name}",
+            MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+            t, Type.EmptyTypes);
+        var gil = getter.GetILGenerator();
+        gil.Emit(OpCodes.Ldarg_0);
+        gil.Emit(OpCodes.Ldstr, name);
+        gil.Emit(OpCodes.Call, getMethod);
+        gil.Emit(OpCodes.Ret);
+
+        var setter = tb.DefineMethod($"set_{name}",
+            MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+            null, [t]);
+        var sil = setter.GetILGenerator();
+        sil.Emit(OpCodes.Ldarg_0);
+        sil.Emit(OpCodes.Ldarg_1);
+        if (t.IsValueType) sil.Emit(OpCodes.Box, t);
+        sil.Emit(OpCodes.Ldstr, name);
+        sil.Emit(OpCodes.Call, setOutputMethod);
+        sil.Emit(OpCodes.Ret);
+
+        var pb = tb.DefineProperty(name, PropertyAttributes.None, t, null);
+        pb.SetGetMethod(getter);
+        pb.SetSetMethod(setter);
+        return pb;
+    }
+
+    private static void EmitCalculate(
+        TypeBuilder tb,
+        FieldBuilder loaderField,
+        FieldBuilder effectNameField,
+        FieldBuilder portDefsField)
+    {
+        var calcTarget = typeof(EffectNodeCalculator)
+            .GetMethod(nameof(EffectNodeCalculator.Calculate), BindingFlags.Public | BindingFlags.Static)!;
+
+        var m = tb.DefineMethod("Calculate",
+            MethodAttributes.Family | MethodAttributes.Virtual | MethodAttributes.HideBySig,
+            typeof(Task), Type.EmptyTypes);
+
+        var il = m.GetILGenerator();
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldsfld, effectNameField);
+        il.Emit(OpCodes.Ldsfld, portDefsField);
+        il.Emit(OpCodes.Ldarg_0);
+        il.Emit(OpCodes.Ldflda, loaderField);
+        il.Emit(OpCodes.Call, calcTarget);
+        il.Emit(OpCodes.Ret);
+
+        tb.DefineMethodOverride(m,
+            typeof(NodeLogic).GetMethod("Calculate", BindingFlags.NonPublic | BindingFlags.Instance)!);
+    }
+}
+
+public static class EffectNodeCalculator
+{
+    private static readonly ConcurrentDictionary<string, PortDefinition[]> PortDefsRegistry = new();
+    private static readonly ConcurrentDictionary<string, string[]> DynamicPropNamesRegistry = new();
+
+    public static void RegisterPortDefs(
+        string effectName,
+        PortDefinition[] defs,
+        string[] dynamicPropNames)
+    {
+        PortDefsRegistry[effectName] = defs;
+        DynamicPropNamesRegistry[effectName] = dynamicPropNames;
+    }
+
+    public static PortDefinition[] GetPortDefs(string effectName)
+    {
+        return PortDefsRegistry.TryGetValue(effectName, out var d) ? d : [];
+    }
+
+    /// <summary>
+    ///     Unknown型でカスタムエディタ（PropertyEditorAttribute2）が見つかったポートに、
+    ///     元の効果／ブラシパラメータインスタンスが持っていた実際の値を初期値として書き込む。
+    ///     既に LocalValue が設定されている場合（スナップショットからの復元等）は上書きしない。
+    ///     NodeLogic 派生型（EffectNodeTypeBuilder / BrushNodeTypeBuilder の両方が生成する型）の
+    ///     コンストラクタから、base.ctor() の直後に一度だけ呼ばれる。
+    /// </summary>
+    public static void SeedDefaultValues(NodeLogic self, PortDefinition[] portDefs)
+    {
+        foreach (var def in portDefs)
+        {
+            if (def.PortType != PortType.Unknown) continue;
+            if (def.DefaultValue == null) continue;
+            if (!self.Inputs.TryGetValue(def.PropName, out var port)) continue;
+            if (port.LocalValue != null) continue;
+            port.SetValue(def.DefaultValue);
+        }
+    }
+
+    public static void RefreshDynamicContainer(
+        NodeLogic self,
+        VideoEffectsLoader loader,
+        string changedPortName,
+        object? changedValue,
+        string dynamicPropName,
+        string containerFieldName)
+    {
+        if (changedPortName == "InputImage") return;
+
+        var containerFieldInfo = self.GetType().GetField(containerFieldName,
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        if (containerFieldInfo == null) return;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await loader.SetValue(changedPortName, changedValue)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                // ignore
+            }
+
+            var subObject = GetEffectSubObject(loader, dynamicPropName);
+            if (subObject == null) return;
+
+            var containerType = ContainerFactory.CreateOrGenerate(subObject);
+            if (containerType == null) return;
+
+            var currentContainer = (InputsContainer?)containerFieldInfo.GetValue(self);
+            if (currentContainer?.GetType() == containerType) return;
+
+            var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
+            if (newContainer == null) return;
+
+            containerFieldInfo.SetValue(self, newContainer);
+
+            // **
+            // NOTE
+            // **
+            //
+            // NeedToReinitializeInputPorts の発火は UI スレッドから行う。
+            // Task.Run スレッドから dispatcher.Invoke（ブロッキング）を呼ぶと
+            // NodeViewModel ハンドラ内の処理でフリーズするため BeginInvoke を使う。
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher == null) return;
+            _ = dispatcher.BeginInvoke(() => self.SetDynamicContainer(newContainer, dynamicPropName));
+        });
+    }
+
+    public static Task Calculate(
+        NodeLogic self,
+        string effectName,
+        PortDefinition[] portDefs,
+        ref VideoEffectsLoader? loaderRef)
+    {
+        var ctx = (EvaluationContext?)typeof(NodeLogic)
+            .GetProperty("EvaluationContext", BindingFlags.NonPublic | BindingFlags.Instance)!
+            .GetValue(self);
+
+        if (ctx is null)
+            return Task.FromException(new NullReferenceException("EvaluationContext"));
+
+        var inputImage = self.GetType().GetProperty("InputImage")?.GetValue(self) as ImageWrapper;
+        if (inputImage?.Image is null || inputImage.Image.NativePointer == nint.Zero)
+            return Task.FromException(new NullReferenceException("InputImage"));
+
+        loaderRef ??= VideoEffectsLoader.LoadEffectSync(effectName);
+
+        var loader = loaderRef;
+        var dynamicPropNames = DynamicPropNamesRegistry.TryGetValue(effectName, out var names) ? names : [];
+        return Task.Run(async () =>
+        {
+            var prev = SynchronizationContext.Current;
+            SynchronizationContext.SetSynchronizationContext(null);
+            try
+            {
+                await CalculateAsync(self, portDefs, dynamicPropNames, loader, ctx, inputImage)
+                    .ConfigureAwait(false);
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(prev);
+            }
+        });
+    }
+
+    private static Task CalculateAsync(
+        NodeLogic self,
+        PortDefinition[] portDefs,
+        string[] dynamicPropNames,
+        VideoEffectsLoader loader,
+        EvaluationContext ctx,
+        ImageWrapper inputImage)
+    {
+        try
+        {
+            lock (loader)
+            {
+                foreach (var def in portDefs)
+                {
+                    var value = GetPortValue(self, def, ctx);
+#if DEBUG
+                    if (def.PortType == PortType.Brush)
+                        Console.WriteLine(
+                            $@"  CalculateAsync Brush port '{def.PropName}': value={value?.GetType().Name ?? "null"}");
+#endif
+                    loader.SetValue(def.PropName, value)
+                        .GetAwaiter()
+                        .GetResult();
+                }
+            }
+
+            foreach (var propName in dynamicPropNames)
+            {
+                var subObject = GetEffectSubObject(loader, propName);
+                if (subObject == null) continue;
+
+                var prefix = propName + ".";
+
+                var effectSubPropNames = subObject.GetType()
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.GetCustomAttribute<DisplayAttribute>() != null)
+                    .Select(p => prefix + p.Name)
+                    .ToHashSet();
+
+                var registeredKeys = self.Inputs.Keys
+                    .Where(k => k.StartsWith(prefix))
+                    .ToHashSet();
+
+                if (!effectSubPropNames.SetEquals(registeredKeys))
+                {
+                    var containerType = ContainerFactory.CreateOrGenerate(subObject);
+                    if (containerType != null)
+                    {
+                        var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
+                        if (newContainer != null)
+                            typeof(NodeLogic)
+                                .GetMethod("SwapDynamicContainer",
+                                    BindingFlags.NonPublic | BindingFlags.Instance)
+                                ?.Invoke(self, [propName, newContainer]);
+                    }
+                }
+
+                lock (loader)
+                {
+                    foreach (var kv in self.Inputs)
+                    {
+                        if (!kv.Key.StartsWith(prefix)) continue;
+                        var subPropName = kv.Key.Substring(prefix.Length);
+                        var subProp = subObject.GetType().GetProperty(subPropName,
+                            BindingFlags.Public | BindingFlags.Instance);
+                        if (subProp == null) continue;
+                        var raw = kv.Value.GetValue(ctx).GetAwaiter().GetResult();
+                        SetSubPropertyDirect(subObject, subProp, raw);
+                    }
+                }
+            }
+
+            if (loader.Update(out var output, ctx, inputImage.Image))
+            {
+                self.GetType().GetProperty("Output")?.SetValue(self, new ImageWrapper { Image = output });
+                return Task.CompletedTask;
+            }
+
+            // Update が false を返すケース（対象プラグイン内で例外が握りつぶされた場合を含む）で
+            // ここを素通りすると、OutputPort には前回成功時の _cachedValue が残ったまま
+            // EvaluateInternal 側は成功扱い（HasError=false）になり、ノードはエラー表示にならずに
+            // 古いフレームを下流へ流し続けてしまう。出力を明示的に無効化した上で例外を投げ、
+            // 呼び出し元 (NodeLogic.EvaluateInternal) の catch で HasError を正しく立てさせる。
+            self.GetType().GetProperty("Output")?.SetValue(self, new ImageWrapper { Image = null });
+            return Task.FromException(
+                new InvalidOperationException("動的エフェクトの更新に失敗しました（loader.Update が false を返しました）。"));
+        }
+        catch (Exception exception)
+        {
+#if DEBUG
+            Console.WriteLine(
+                $@"  CalculateAsync EXCEPTION: {exception.GetType().Name}: {exception.Message}" +
+                (exception.InnerException != null
+                    ? $@" --> Inner: {exception.InnerException.GetType().Name}: {exception.InnerException.Message}"
+                    : ""));
+#endif
+            return Task.FromException(exception);
+        }
+    }
+
+    internal static void SetSubPropertyDirect(object target, PropertyInfo propInfo, object? value)
+    {
+        if (propInfo.PropertyType == typeof(Animation))
+        {
+            if (propInfo.GetValue(target) is not Animation anim) return;
+
+            var valuesProp = typeof(Animation)
+                .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
+
+            var values = valuesProp?.GetValue(anim) as ImmutableList<AnimationValue>;
+            if (values == null) return;
+
+            var doubleVal = Convert.ToDouble(value ?? 0);
+
+            var newValues = values.Count > 0
+                ? values.SetItem(0, new AnimationValue(doubleVal))
+                : values.Add(new AnimationValue(doubleVal));
+
+            valuesProp!.SetValue(anim, newValues);
+        }
+        else
+        {
+            if (!propInfo.CanWrite) return;
+
+            propInfo.SetValue(
+                target,
+                PropertyValueTypeConverter.ConvertPropertyValue(propInfo.PropertyType, value));
+        }
+    }
+
+    private static object? GetEffectSubObject(VideoEffectsLoader loader, string propName)
+    {
+        var effectField = typeof(VideoEffectsLoader)
+            .GetField("_videoEffect", BindingFlags.NonPublic | BindingFlags.Instance);
+        var effectInstance = effectField?.GetValue(loader);
+        if (effectInstance == null) return null;
+
+        var result = FindPropertyByDisplay(effectInstance, propName);
+        if (result == null) return null;
+
+        var (target, propInfo) = result.Value;
+        try
+        {
+            return propInfo.GetValue(target);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static (object target, PropertyInfo property)? FindPropertyByDisplay(object? obj, string name,
+        HashSet<object>? visited = null)
+    {
+        if (obj == null) return null;
+        visited ??= new HashSet<object>(ReferenceEqualityComparer.Instance);
+        if (!visited.Add(obj)) return null;
+        foreach (var prop in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (prop.GetIndexParameters().Length > 0) continue;
+            var displayAttr = prop.GetCustomAttribute<DisplayAttribute>();
+            if (displayAttr != null && prop.Name == name) return (obj, prop);
+            if (!prop.CanRead || !prop.PropertyType.IsClass || prop.PropertyType == typeof(string)) continue;
+            object? sub;
+            try
+            {
+                sub = prop.GetValue(obj);
+            }
+            catch
+            {
+                continue;
+            }
+
+            if (sub == null) continue;
+            var result = FindPropertyByDisplay(sub, name, visited);
+            if (result != null) return result;
+        }
+
+        return null;
+    }
+
+    private static object? GetPortValue(NodeLogic self, PortDefinition def, EvaluationContext? ctx)
+    {
+        if (!self.Inputs.TryGetValue(def.PropName, out var port)) return null;
+        var raw = port.GetValue(ctx).GetAwaiter().GetResult();
+        return def.PortType switch
+        {
+            PortType.Enum when def.EnumType != null =>
+                ConvertToEnumValue(def.EnumType, raw),
+            PortType.Float =>
+                raw is float f ? f : raw != null ? Convert.ToSingle(raw) : (object)0f,
+            PortType.Color =>
+                raw ?? Colors.White,
+            PortType.Brush =>
+                ConvertBrush(raw),
+            _ => raw
+        };
+    }
+
+    private static object? ConvertToEnumValue(Type enumType, object? raw)
+    {
+        if (raw == null) return null;
+        if (enumType.IsInstanceOfType(raw)) return raw;
+        try
+        {
+            return Enum.ToObject(enumType, Convert.ToInt64(raw));
+        }
+        catch
+        {
+            return raw;
+        }
+    }
+
+    private static IBrushParameter? ConvertBrush(object? raw)
+    {
+#if DEBUG
+        Console.WriteLine(
+            $@"  ConvertBrush: raw={raw?.GetType().Name ?? "null"}, " +
+            $@"isBrushWrapper={raw is BrushWrapper}, " +
+            $@"innerBrushIsNull={(raw as BrushWrapper)?.Brush == null}");
+#endif
+        if (raw is not BrushWrapper wrapper)
+            return null;
+
+        return wrapper.Brush == null ? null : NodeBrushFactory.Create(wrapper);
+    }
+}
+
+internal static class Attr
+{
+    private static readonly ConstructorInfo InputPortCtor =
+        typeof(InputPortAttribute).GetConstructor(
+            [typeof(string), typeof(string), typeof(Type), typeof(bool)])!;
+
+    private static readonly ConstructorInfo OutputPortCtor =
+        typeof(OutputPortAttribute).GetConstructor([typeof(string), typeof(string), typeof(Type)])!;
+
+    private static readonly ConstructorInfo PortColorCtor =
+        typeof(PortColorSettingAttribute).GetConstructor([typeof(string)])!;
+
+    private static readonly ConstructorInfo NumberCtor =
+        typeof(NumberPortControlAttribute).GetConstructor(Type.EmptyTypes)!;
+
+    private static readonly ConstructorInfo EnumCtor =
+        typeof(EnumPortControlAttribute).GetConstructor(Type.EmptyTypes)!;
+
+    private static readonly ConstructorInfo BoolCtor =
+        typeof(BoolPortControlAttribute).GetConstructor(Type.EmptyTypes)!;
+
+    private static readonly ConstructorInfo ColorCtor =
+        typeof(ColorPortControlAttribute).GetConstructor(Type.EmptyTypes)!;
+
+    private static readonly ConstructorInfo TextCtor =
+        typeof(TextPortControlAttribute).GetConstructor(Type.EmptyTypes)!;
+
+    public static void InputPort(PropertyBuilder pb, string label, string desc, Type? resourceType,
+        bool isDynamic = false)
+    {
+        pb.SetCustomAttribute(new CustomAttributeBuilder(InputPortCtor, [label, desc, resourceType!, isDynamic]));
+    }
+
+    public static void OutputPort(PropertyBuilder pb, string label, string desc, Type? resourceType)
+    {
+        pb.SetCustomAttribute(new CustomAttributeBuilder(OutputPortCtor, [label, desc, resourceType!]));
+    }
+
+    public static void PortColor(PropertyBuilder pb, string colorName)
+    {
+        pb.SetCustomAttribute(new CustomAttributeBuilder(PortColorCtor, [colorName]));
+    }
+
+    public static void NumberControl(PropertyBuilder pb, float min, float max, int digits, string unit,
+        float defaultValue)
+    {
+        var minP = typeof(NumberPortControlAttribute).GetProperty(nameof(NumberPortControlAttribute.Min))!;
+        var maxP = typeof(NumberPortControlAttribute).GetProperty(nameof(NumberPortControlAttribute.Max))!;
+        var digP = typeof(NumberPortControlAttribute).GetProperty(nameof(NumberPortControlAttribute.Digits))!;
+        var unitP = typeof(NumberPortControlAttribute).GetProperty(nameof(NumberPortControlAttribute.Unit))!;
+        var defaultP = typeof(NumberPortControlAttribute).GetProperty(nameof(NumberPortControlAttribute.Default))!;
+        pb.SetCustomAttribute(new CustomAttributeBuilder(NumberCtor, [], [minP, maxP, digP, unitP, defaultP],
+            [min, max, digits, unit, defaultValue]));
+    }
+
+    public static void EnumControl(PropertyBuilder pb, Type enumType, int defaultValue)
+    {
+        var itemsP = typeof(EnumPortControlAttribute).GetProperty(nameof(EnumPortControlAttribute.Items))!;
+        var editP = typeof(EnumPortControlAttribute).GetProperty(nameof(EnumPortControlAttribute.IsEditable))!;
+        var defP = typeof(EnumPortControlAttribute).GetProperty(nameof(EnumPortControlAttribute.Default))!;
+        pb.SetCustomAttribute(new CustomAttributeBuilder(EnumCtor, [], [itemsP, editP, defP],
+            [enumType, false, defaultValue]));
+    }
+
+    public static void BoolControl(PropertyBuilder pb, bool defaultValue)
+    {
+        var defP = typeof(BoolPortControlAttribute).GetProperty(nameof(BoolPortControlAttribute.Default))!;
+        pb.SetCustomAttribute(new CustomAttributeBuilder(BoolCtor, [], [defP], [defaultValue]));
+    }
+
+    public static void ColorControl(PropertyBuilder pb, Color defaultValue)
+    {
+        var defP = typeof(ColorPortControlAttribute).GetProperty(nameof(ColorPortControlAttribute.DefaultColor))!;
+        pb.SetCustomAttribute(new CustomAttributeBuilder(ColorCtor, [], [defP],
+            [ColorStringConverter.ToString(defaultValue)]));
+    }
+
+    public static void TextControl(PropertyBuilder pb, string defaultValue)
+    {
+        var defP = typeof(TextPortControlAttribute).GetProperty(nameof(TextPortControlAttribute.Default))!;
+        pb.SetCustomAttribute(new CustomAttributeBuilder(TextCtor, [], [defP], [defaultValue]));
+    }
+
+    /// <summary>
+    ///     CustomAttributeData を基に、PropertyEditorAttribute2 のインスタンスを直接構築する。
+    ///     Constructor.Invoke / PropertyInfo.SetValue / FieldInfo.SetValue はいずれも通常の
+    ///     アクセス修飾子を無視して呼び出せるため、元の属性が別アセンブリの internal 型であっても
+    ///     問題なくインスタンス化できる（CustomAttributeBuilder で複製して後から
+    ///     GetCustomAttribute で再構築する方式とは異なり、アセンブリ境界に左右されない）。
+    /// </summary>
+    public static PropertyEditorAttribute2? CreateEditorAttributeInstance(CustomAttributeData attributeData)
+    {
+        try
+        {
+            var ctorArgs = attributeData.ConstructorArguments.Select(UnwrapTypedArgument).ToArray();
+            if (attributeData.Constructor.Invoke(ctorArgs) is not PropertyEditorAttribute2 instance)
+                return null;
+
+            foreach (var named in attributeData.NamedArguments)
+            {
+                var value = UnwrapTypedArgument(named.TypedValue);
+                if (named.IsField)
+                    ((FieldInfo)named.MemberInfo).SetValue(instance, value);
+                else
+                    ((PropertyInfo)named.MemberInfo).SetValue(instance, value);
+            }
+
+            return instance;
+        }
+        catch (Exception ex)
+        {
+#if DEBUG
+            Console.WriteLine(
+                $@"[Attr.CreateEditorAttributeInstance] Failed to construct {attributeData.AttributeType.FullName}: " +
+                $@"{ex.GetType().Name}: {ex.Message}");
+#endif
+            return null;
+        }
+    }
+
+    /// <summary>
+    ///     元プロパティに付いていた PropertyEditorAttribute2 継承属性を、CustomAttributeData を基に
+    ///     生成後のプロパティへそのまま複製・付与する。
+    ///     属性のコンストラクタ引数・名前付き引数（プロパティ／フィールド）は、CLRの仕様上
+    ///     プリミティブ型・string・Type・enum・およびそれらの1次元配列に限られるため、
+    ///     元の属性がどんな型であっても機械的に再現できる。
+    /// </summary>
+    public static void CustomEditorControl(PropertyBuilder pb, CustomAttributeData attributeData)
+    {
+        var ctorArgs = attributeData.ConstructorArguments
+            .Select(UnwrapTypedArgument)
+            .ToArray();
+
+        var namedProperties = new List<PropertyInfo>();
+        var namedPropertyValues = new List<object?>();
+        var namedFields = new List<FieldInfo>();
+        var namedFieldValues = new List<object?>();
+
+        foreach (var named in attributeData.NamedArguments)
+        {
+            var value = UnwrapTypedArgument(named.TypedValue);
+            if (named.IsField)
+            {
+                namedFields.Add((FieldInfo)named.MemberInfo);
+                namedFieldValues.Add(value);
+            }
+            else
+            {
+                namedProperties.Add((PropertyInfo)named.MemberInfo);
+                namedPropertyValues.Add(value);
+            }
+        }
+
+        try
+        {
+            var builder = new CustomAttributeBuilder(
+                attributeData.Constructor,
+                ctorArgs,
+                namedProperties.ToArray(),
+                namedPropertyValues.ToArray(),
+                namedFields.ToArray(),
+                namedFieldValues.ToArray());
+
+            pb.SetCustomAttribute(builder);
+        }
+        catch (Exception ex)
+        {
+#if DEBUG
+            Console.WriteLine(
+                $@"[Attr.CustomEditorControl] Failed to re-emit {attributeData.AttributeType.FullName} " +
+                $@"onto property '{pb.Name}': {ex.GetType().Name}: {ex.Message}");
+#endif
+            throw;
+        }
+    }
+
+    private static object? UnwrapTypedArgument(CustomAttributeTypedArgument arg)
+    {
+        if (arg.Value is IReadOnlyCollection<CustomAttributeTypedArgument> arrayValues)
+        {
+            var elementType = arg.ArgumentType.GetElementType()!;
+            var array = Array.CreateInstance(elementType, arrayValues.Count);
+            var i = 0;
+            foreach (var element in arrayValues)
+                array.SetValue(UnwrapTypedArgument(element), i++);
+            return array;
+        }
+
+        return arg.Value;
+    }
+}
