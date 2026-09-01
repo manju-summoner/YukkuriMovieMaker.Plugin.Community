@@ -47,8 +47,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         readonly FillSametypeResourceSet? resourceSet;
         readonly FillSametypeInteropHost? interopHost;
         ExternalTextureLease<ExternalDirect3D11TextureView>? maskLease;
-        int interopWidth, interopHeight;
-        int interopSourceWidth, interopSourceHeight;
 
         ID2D1Bitmap1? candidateBitmap;
         ID2D1Bitmap1? candidateStagingBitmap;
@@ -184,11 +182,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             interopDomain?.Dispose();
             interopProvider?.Dispose();
             scheduler?.Dispose();
-
-            interopWidth = 0;
-            interopHeight = 0;
-            interopSourceWidth = 0;
-            interopSourceHeight = 0;
         }
 
         // 判定済みの前景を共有テクスチャへ直接描き、計算キューがそれを読む。CPUを経由しない。
@@ -217,36 +210,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
 
         bool TryEnsureInteropSource(int width, int height)
         {
-            if (interopSourceWidth == width && interopSourceHeight == height)
-                return true;
-
-            interopSourceWidth = 0;
-            interopSourceHeight = 0;
-
-            if (!resourceSet!.TryEnsureSource(width, height, out _))
-                return false;
-
-            interopSourceWidth = width;
-            interopSourceHeight = height;
-
-            return true;
+            return resourceSet!.TryEnsureSource(width, height, out _);
         }
 
-        bool TryEnsureInteropMask(int width, int height)
+        bool TryEnsureInteropMask(int width, int height, out bool changed)
         {
-            if (interopWidth == width && interopHeight == height)
-                return true;
-
-            maskLease?.Dispose();
-            maskLease = null;
-            interopWidth = 0;
-            interopHeight = 0;
-
-            if (!resourceSet!.TryEnsureMask(width, height, out _))
+            if (!resourceSet!.TryEnsureMask(width, height, out changed))
                 return false;
 
-            interopWidth = width;
-            interopHeight = height;
+            if (changed)
+            {
+                maskLease?.Dispose();
+                maskLease = null;
+            }
 
             return true;
         }
@@ -488,7 +464,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
                 || !ColorWithinTolerance(matchColor, lastMatchColor, toleranceRaw)
                 || !lastBounds.Equals(bounds);
 
-            bool useInterop = IsInteropAvailable && TryEnsureInteropMask(width, height);
+            bool maskReplaced = false;
+            bool useInterop = IsInteropAvailable && TryEnsureInteropMask(width, height, out maskReplaced);
+
+            if (maskReplaced)
+                pipeline.InvalidateMatchCache();
 
             int components;
             if (foregroundChanged)
