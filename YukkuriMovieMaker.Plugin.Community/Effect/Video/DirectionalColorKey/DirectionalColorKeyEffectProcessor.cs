@@ -38,7 +38,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private readonly DirectionalColorKeyResourceSet? resourceSet;
         private readonly DirectionalColorKeyInteropHost? interopHost;
         private ExternalTextureLease<ExternalDirect3D11TextureView>? foregroundLease;
-        private int interopWidth, interopHeight;
 
         private bool isFirst = true;
         private bool hasAnalysisCache;
@@ -190,12 +189,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             int pixelCount = width * height;
 
+            bool sharedTexturesReplaced = false;
+            bool useInterop = IsInteropAvailable && TryEnsureInteropTextures(width, height, out sharedTexturesReplaced);
+
             bool sourcePossiblyChanged = isFirst
                 || !hasAnalysisCache
+                || sharedTexturesReplaced
                 || lastFrame != frame
                 || !lastBounds.Equals(bounds);
-
-            bool useInterop = IsInteropAvailable && TryEnsureInteropTextures(width, height);
 
             bool contentChanged = sourcePossiblyChanged && (useInterop
                 ? CaptureSourceThroughSharedTexture(bounds, width, height)
@@ -203,6 +204,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             bool analysisDirty = isFirst
                 || !hasAnalysisCache
+                || sharedTexturesReplaced
                 || !lastBounds.Equals(bounds)
                 || contentChanged
                 || backgroundColor != currentBackground
@@ -328,22 +330,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             return new Vector4(center.X, center.Y, center.Z, lambda);
         }
 
-        private bool TryEnsureInteropTextures(int width, int height)
+        private bool TryEnsureInteropTextures(int width, int height, out bool changed)
         {
-            if (interopWidth == width && interopHeight == height)
-                return true;
+            changed = false;
 
-            foregroundLease?.Dispose();
-            foregroundLease = null;
-            interopWidth = 0;
-            interopHeight = 0;
-
-            if (!resourceSet!.TryEnsureSource(width, height, out _) ||
-                !resourceSet.TryEnsureForeground(width, height, out _))
+            if (!resourceSet!.TryEnsureSource(width, height, out bool sourceReplaced))
                 return false;
 
-            interopWidth = width;
-            interopHeight = height;
+            if (!resourceSet.TryEnsureForeground(width, height, out bool foregroundReplaced))
+                return false;
+
+            changed = sourceReplaced || foregroundReplaced;
+
+            if (foregroundReplaced)
+            {
+                foregroundLease?.Dispose();
+                foregroundLease = null;
+            }
 
             return true;
         }
