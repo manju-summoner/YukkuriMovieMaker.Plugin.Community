@@ -56,7 +56,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         ID2D1Bitmap1? seedStagingBitmap;
         readonly byte[] seedPixel = new byte[4];
 
-        readonly FillSametypePipeline pipeline = new();
+        readonly FillSametypePipeline pipeline;
         int[]? foregroundBuffer;
         int[]? maskBuffer;
         int bufferPixelCount;
@@ -79,10 +79,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
 
             transparentBrush = devices.DeviceContext.CreateSolidColorBrush(new Color4(0f, 0f, 0f, 0f));
             disposer.Collect(transparentBrush);
-            disposer.Collect(pipeline);
 
             var interopScheduler = ComputeExternalQueueScheduler.Create();
             interopProvider = FillSametypeInteropProvider.TryCreate(devices, interopScheduler, out var interopDevice);
+
+            pipeline = interopDevice is null ? new FillSametypePipeline() : new FillSametypePipeline(interopDevice);
+            disposer.Collect(pipeline);
 
             if (interopProvider is null || interopDevice is null)
             {

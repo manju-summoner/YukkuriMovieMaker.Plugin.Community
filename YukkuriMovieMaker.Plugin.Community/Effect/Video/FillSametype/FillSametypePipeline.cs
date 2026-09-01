@@ -34,8 +34,13 @@ internal sealed class FillSametypePipeline : IDisposable
     int momentCapacity;
 
     public FillSametypePipeline()
+        : this(GraphicsDevice.GetDefault())
     {
-        device = GraphicsDevice.GetDefault();
+    }
+
+    public FillSametypePipeline(GraphicsDevice device)
+    {
+        this.device = device;
     }
 
     public bool IsForeground(int index)
