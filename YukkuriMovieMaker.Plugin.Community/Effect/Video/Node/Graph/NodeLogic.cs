@@ -4,6 +4,7 @@ using System.Windows;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Events;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Port;
+using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph;
 
@@ -11,6 +12,16 @@ public abstract class NodeLogic : IDisposable
 {
     private readonly Dictionary<string, (InputsContainer container, PropertyChangedEventHandler handler)>
         _dynamicHandlers = new();
+
+    /// <summary>
+    ///     動的ポート（Params.* 等）向けに復元しようとしたが、対象のコンテナがまだ確定しておらず
+    ///     Inputs に該当ポートが存在しなかった値を、変換前の生の値のまま退避しておく置き場。
+    ///     RefreshDynamicContainer は非同期（fire-and-forget）で走るため、Serializer.Restore が
+    ///     値を適用しようとした時点ではコンテナがまだ古いままのことがある。ここに退避しておけば、
+    ///     後で（VMの有無にかかわらず）SwapDynamicContainer が実際に呼ばれた時点で自動的に
+    ///     対象の型へ変換のうえ適用され、値が失われない。
+    /// </summary>
+    private readonly Dictionary<string, object?> _pendingDynamicValues = new();
 
     public readonly Dictionary<string, InputPort> Inputs = new();
     public readonly Dictionary<string, OutputPort> Outputs = new();
@@ -241,6 +252,36 @@ public abstract class NodeLogic : IDisposable
         foreach (var key in Inputs.Keys.Where(k => k.StartsWith(prefix)).ToList())
             Inputs.Remove(key);
         SubscribeDynamicContainer(name, newContainer, newContainer.GetType());
+        ApplyPendingDynamicValues(prefix);
+    }
+
+    internal void QueuePendingDynamicValue(string key, object? rawValue)
+    {
+        _pendingDynamicValues[key] = rawValue;
+    }
+
+    private void ApplyPendingDynamicValues(string prefix)
+    {
+        foreach (var key in _pendingDynamicValues.Keys.Where(k => k.StartsWith(prefix)).ToList())
+        {
+            if (!Inputs.TryGetValue(key, out var port))
+                continue;
+
+            try
+            {
+                var converted = PropertyValueTypeConverter.ConvertRestoredValue(port.ValueType,
+                    _pendingDynamicValues[key]);
+                port.SetValue(converted);
+            }
+            catch
+            {
+                // ignore
+            }
+            finally
+            {
+                _pendingDynamicValues.Remove(key);
+            }
+        }
     }
 
     public event EventHandler<NeedToReinitializeInputPortsEvent>? NeedToReinitializeInputPorts;

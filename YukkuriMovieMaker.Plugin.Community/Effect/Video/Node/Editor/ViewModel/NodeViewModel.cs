@@ -221,6 +221,9 @@ public sealed class NodeViewModel : INotifyPropertyChanged, IDisposable
 
         NodeLogic.ErrorStateChanged -= _errorStateChangedHandler;
         NodeLogic.NeedToReinitializeInputPorts -= _needToReinitializeInputPortsHandler;
+
+        foreach (var subGraph in SubGraphs)
+            subGraph.Dispose();
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

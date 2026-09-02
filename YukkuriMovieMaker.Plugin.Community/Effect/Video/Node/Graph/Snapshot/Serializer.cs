@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Reflection;
-using Newtonsoft.Json.Linq;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Graph.Attributes;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Effect.DynamicLoaded;
 using YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Func;
@@ -121,6 +120,8 @@ public static class Serializer
                        ?? Type.GetType(nodeSnap.TypeName);
             if (type == null)
             {
+                // 外部エフェクト・ブラシが一時的に利用できない環境等で型解決に失敗したノード。
+                // ここで捨てずに退避し、再保存時にそのまま書き戻せるようにする。
                 Debug.WriteLine(
                     $"[Serializer] Type not found for node {nodeSnap.Id} ({nodeSnap.TypeName}); preserving snapshot as unresolved.");
                 graph.UnresolvedNodes.Add(nodeSnap);
@@ -177,16 +178,12 @@ public static class Serializer
 
                 foreach (var input in nodeSnap.InputsValues)
                 {
-                    if (!node.Inputs.TryGetValue(input.Key, out var port)) continue;
-                    var restoredValue = RestoreInputValue(port.ValueType, input.Value);
-                    graph.SetInputValue(node.Id, input.Key, restoredValue);
-                }
+                    if (!node.Inputs.TryGetValue(input.Key, out var port))
+                    {
+                        node.QueuePendingDynamicValue(input.Key, input.Value);
+                        continue;
+                    }
 
-                node.SyncDynamicInputs();
-
-                foreach (var input in nodeSnap.InputsValues)
-                {
-                    if (!node.Inputs.TryGetValue(input.Key, out var port)) continue;
                     var restoredValue = RestoreInputValue(port.ValueType, input.Value);
                     graph.SetInputValue(node.Id, input.Key, restoredValue);
                 }
@@ -217,6 +214,7 @@ public static class Serializer
                 continue;
             }
 
+            // 未解決ノードに繋がる接続は、再保存時に失われないよう退避する。
             if (unresolvedNodeIds.Contains(conn.FromId) || unresolvedNodeIds.Contains(conn.ToId))
                 graph.UnresolvedConnections.Add(conn);
         }
@@ -225,17 +223,9 @@ public static class Serializer
 
         object? RestoreInputValue(Type targetType, object? rawValue)
         {
-            if (rawValue is null) return null;
-
             try
             {
-                if (rawValue is JToken token)
-                    return token.ToObject(targetType);
-
-                if (targetType.IsInstanceOfType(rawValue))
-                    return rawValue;
-
-                return PropertyValueTypeConverter.ConvertPropertyValue(targetType, rawValue);
+                return PropertyValueTypeConverter.ConvertRestoredValue(targetType, rawValue);
             }
             catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
             {

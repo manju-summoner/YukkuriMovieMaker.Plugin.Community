@@ -1,4 +1,5 @@
 using System.Windows.Media;
+using Newtonsoft.Json.Linq;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Utility;
 
@@ -20,5 +21,18 @@ public static class PropertyValueTypeConverter
             return ColorConverter.ConvertFromString(colorString);
 
         return Convert.ChangeType(value, targetType);
+    }
+
+    public static object? ConvertRestoredValue(Type targetType, object? rawValue)
+    {
+        if (rawValue is null) return null;
+
+        if (rawValue is JToken token)
+            return token.ToObject(targetType);
+
+        if (targetType.IsInstanceOfType(rawValue))
+            return rawValue;
+
+        return ConvertPropertyValue(targetType, rawValue);
     }
 }

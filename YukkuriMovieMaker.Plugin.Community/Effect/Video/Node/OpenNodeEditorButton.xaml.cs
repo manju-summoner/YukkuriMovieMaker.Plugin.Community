@@ -27,6 +27,7 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
     private EventHandler? _graphUpdatedHandler;
     private NodeEditorViewModel? _lastResolvedViewModel;
     private EventHandler? _layoutIsActiveChangedHandler;
+    private EventHandler? _layoutIsSelectedChangedHandler;
     private KeyBinding[]? _nodeBindings;
     private NodeGraph? _subscribedGraph;
     private LayoutAnchorable? _subscribedLayout;
@@ -71,6 +72,8 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
     {
         if (_subscribedLayout != null && _layoutIsActiveChangedHandler != null)
             _subscribedLayout.IsActiveChanged -= _layoutIsActiveChangedHandler;
+        if (_subscribedLayout != null && _layoutIsSelectedChangedHandler != null)
+            _subscribedLayout.IsSelectedChanged -= _layoutIsSelectedChangedHandler;
 
         if (_boundWindow != null && _nodeBindings != null)
             foreach (var kb in _nodeBindings)
@@ -78,6 +81,7 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
 
         _subscribedLayout = null;
         _layoutIsActiveChangedHandler = null;
+        _layoutIsSelectedChangedHandler = null;
         _nodeBindings = null;
         _boundWindow = null;
     }
@@ -243,21 +247,6 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         _subscribedGraph = pluginItem.InternalGraph;
         _subscribedNodeEffect = pluginItem;
 
-        layout?.IsSelectedChanged += (_, _) =>
-        {
-            try
-            {
-                if (!layout.IsSelected)
-                    toolAreaViewModel?.GetType().GetProperty("ViewModel")?.SetValue(toolAreaViewModel, vm);
-                else
-                    vm?.RefreshAllOpenGraphs();
-            }
-            catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
-            {
-                Debug.WriteLine($"[OpenNodeEditorButton] IsSelectedChanged handler failed: {ex}");
-            }
-        };
-
         if (vm is null) return;
         if (layout is null) return;
 
@@ -283,6 +272,22 @@ public partial class OpenNodeEditorButton : IPropertyEditorControl2
         _nodeBindings = nodeBindings;
         _boundWindow = parentWindow;
         _subscribedLayout = layout;
+
+        _layoutIsSelectedChangedHandler = (_, _) =>
+        {
+            try
+            {
+                if (!layout.IsSelected)
+                    toolAreaViewModel?.GetType().GetProperty("ViewModel")?.SetValue(toolAreaViewModel, vm);
+                else
+                    vm.RefreshAllOpenGraphs();
+            }
+            catch (Exception ex) when (!ExceptionPolicy.IsFatal(ex))
+            {
+                Debug.WriteLine($"[OpenNodeEditorButton] IsSelectedChanged handler failed: {ex}");
+            }
+        };
+        layout.IsSelectedChanged += _layoutIsSelectedChangedHandler;
 
         _layoutIsActiveChangedHandler = (_, _) =>
         {

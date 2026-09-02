@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -18,12 +20,14 @@ public partial class GraphView
             new PropertyMetadata(GraphControlMode.RectSelection, OnModeChanged));
 
     private ConnectionAdorner? _connectionAdorner;
+    private NotifyCollectionChangedEventHandler? _connectionsChangedHandler;
 
     private bool _isPanning;
     private bool _isSelecting;
     private Point _panStart;
     private SelectionAdornerBase? _selectionAdorner;
     private Point _selectionStart;
+    private ObservableCollection<ConnectionViewModel>? _subscribedConnections;
 
     public GraphView()
     {
@@ -32,6 +36,7 @@ public partial class GraphView
         Unloaded += OnUnloaded;
         DataContextChanged += OnDataContextChanged;
         SizeChanged += OnSizeChanged;
+        LostMouseCapture += OnLostMouseCapture;
     }
 
     public GraphControlMode Mode
@@ -90,6 +95,8 @@ public partial class GraphView
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
+        UnsubscribeConnections();
+
         var layer = AdornerLayer.GetAdornerLayer(RootGrid);
         if (layer != null)
         {
@@ -119,14 +126,27 @@ public partial class GraphView
 
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
+        UnsubscribeConnections();
+
         if (e.NewValue is GraphViewModel vm)
         {
-            vm.Connections.CollectionChanged += (_, _) =>
+            _connectionsChangedHandler = (_, _) =>
             {
                 Dispatcher.BeginInvoke(new Action(() => { _connectionAdorner?.InvalidateVisual(); }),
                     DispatcherPriority.Loaded);
             };
+            _subscribedConnections = vm.Connections;
+            _subscribedConnections.CollectionChanged += _connectionsChangedHandler;
         }
+    }
+
+    private void UnsubscribeConnections()
+    {
+        if (_subscribedConnections != null && _connectionsChangedHandler != null)
+            _subscribedConnections.CollectionChanged -= _connectionsChangedHandler;
+
+        _subscribedConnections = null;
+        _connectionsChangedHandler = null;
     }
 
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -138,7 +158,8 @@ public partial class GraphView
         _isSelecting = true;
         _selectionStart = e.GetPosition(this);
 
-        vm.ClearSelection();
+        if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            vm.ClearSelection();
         if (Mode is GraphControlMode.RectSelection && _selectionAdorner is RectSelectionAdorner rectSelectionAdorner)
             rectSelectionAdorner.Update(_selectionStart, _selectionStart);
         else if (Mode is GraphControlMode.LassoSelection &&
@@ -210,23 +231,52 @@ public partial class GraphView
 
         if (_isSelecting)
         {
-            ReleaseMouseCapture();
-            _isSelecting = false;
             var add = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
+            var mode = Mode;
+            var selectionAdorner = _selectionAdorner;
 
-            switch (Mode)
+            _isSelecting = false;
+            ReleaseMouseCapture();
+
+            switch (mode)
             {
-                case GraphControlMode.RectSelection when _selectionAdorner is RectSelectionAdorner rectSelectionAdorner:
+                case GraphControlMode.RectSelection when selectionAdorner is RectSelectionAdorner rectSelectionAdorner:
                     vm.ApplyRectSelection(rectSelectionAdorner.CurrentRect, add);
                     break;
                 case GraphControlMode.LassoSelection
-                    when _selectionAdorner is LassoSelectionAdorner lassoSelectionAdorner:
+                    when selectionAdorner is LassoSelectionAdorner lassoSelectionAdorner:
                     vm.ApplyLassoSelection(lassoSelectionAdorner.Points, add);
                     break;
             }
 
-            _selectionAdorner?.Clear();
+            selectionAdorner?.Clear();
         }
+    }
+
+    private void OnLostMouseCapture(object sender, MouseEventArgs e)
+    {
+        _isPanning = false;
+
+        if (!_isSelecting) return;
+
+        _isSelecting = false;
+
+        if (DataContext is not GraphViewModel vm) return;
+
+        var add = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
+        var selectionAdorner = _selectionAdorner;
+
+        switch (Mode)
+        {
+            case GraphControlMode.RectSelection when selectionAdorner is RectSelectionAdorner rectSelectionAdorner:
+                vm.ApplyRectSelection(rectSelectionAdorner.CurrentRect, add);
+                break;
+            case GraphControlMode.LassoSelection when selectionAdorner is LassoSelectionAdorner lassoSelectionAdorner:
+                vm.ApplyLassoSelection(lassoSelectionAdorner.Points, add);
+                break;
+        }
+
+        selectionAdorner?.Clear();
     }
 
     private void OnMouseWheel(object sender, MouseWheelEventArgs e)

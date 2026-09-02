@@ -437,18 +437,20 @@ public sealed class Processor : IVideoEffectProcessor
         }
     }
 
-    private async void OnGraphCommitted(object? sender, CommittedEventArgs e)
+    private void OnGraphCommitted(object? sender, CommittedEventArgs e)
     {
         try
         {
             if (_nodeEffect.InternalGraph == null!) return;
 
+            GraphSnapshot snapshot;
             lock (_lock)
             {
                 _nodeEffect.InternalGraph.InvalidateAll();
+                snapshot = Serializer.Create(_nodeEffect.InternalGraph);
             }
 
-            _nodeEffect.InternalGraphSnapshot = await Serializer.CreateAsync(_nodeEffect.InternalGraph);
+            _nodeEffect.InternalGraphSnapshot = snapshot;
         }
         catch (Exception exception)
         {
