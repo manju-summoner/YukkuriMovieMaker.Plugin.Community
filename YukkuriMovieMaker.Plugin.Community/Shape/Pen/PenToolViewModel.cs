@@ -235,10 +235,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
                     var bitmap = new RenderTargetBitmap(info.VideoInfo.Width, info.VideoInfo.Height, 96, 96, PixelFormats.Pbgra32);
                     bitmap.Render(canvas);
 
-                    using var stream = new System.IO.FileStream(dialog.FileName, System.IO.FileMode.Create);
-                    var encoder = new PngBitmapEncoder();
-                    encoder.Frames.Add(BitmapFrame.Create(bitmap));
-                    encoder.Save(stream);
+                    if (!PenToolFile.TryOpen(dialog.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write, Texts.SaveFileFailed, stream =>
+                    {
+                        var encoder = new PngBitmapEncoder();
+                        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                        encoder.Save(stream);
+                    }, out var errorMessage))
+                    {
+                        MessageBox.Show(errorMessage, Texts.PenToolWindowTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             });
             ExportIsfCommand = new ActionCommand(_=>true, _=>
@@ -250,8 +255,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
                 };
                 if(dialog.ShowDialog() == true)
                 {
-                    using var stream = new System.IO.FileStream(dialog.FileName, System.IO.FileMode.Create);
-                    Strokes.Save(stream);
+                    if (!PenToolFile.TryOpen(dialog.FileName, System.IO.FileMode.Create, System.IO.FileAccess.Write, Texts.SaveFileFailed, Strokes.Save, out var errorMessage))
+                    {
+                        MessageBox.Show(errorMessage, Texts.PenToolWindowTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             });
             ImportIsfCommand = new ActionCommand(_=>true, _=>
@@ -263,12 +270,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
                 };
                 if(dialog.ShowDialog() == true)
                 {
-                    using var stream = new System.IO.FileStream(dialog.FileName, System.IO.FileMode.Open);
+                    //読み込みに失敗したときに描画中のストロークを失わないよう、置き換えは読み込みが完了してから行う
+                    if (!PenToolFile.TryLoadStrokes(dialog.FileName, Texts.LoadFileFailed, out var loaded, out var errorMessage))
+                    {
+                        MessageBox.Show(errorMessage, Texts.PenToolWindowTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
                     isUndoRedoing = true;
                     try
                     {
                         Strokes.Clear();
-                        Strokes.Add(new StrokeCollection(stream));
+                        Strokes.Add(loaded);
                     }
                     finally
                     {
