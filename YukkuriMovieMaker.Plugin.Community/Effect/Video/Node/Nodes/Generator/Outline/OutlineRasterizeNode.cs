@@ -123,6 +123,7 @@ public class OutlineRasterizeNode : NodeLogic
 
         var commandList = deviceContext.CreateCommandList();
         var previousTarget = deviceContext.Target;
+        var previousTransform = deviceContext.Transform;
         deviceContext.Target = commandList;
         deviceContext.BeginDraw();
         try
@@ -142,7 +143,7 @@ public class OutlineRasterizeNode : NodeLogic
         finally
         {
             deviceContext.EndDraw();
-            deviceContext.Transform = Matrix3x2.Identity;
+            deviceContext.Transform = previousTransform;
             deviceContext.Target = previousTarget;
             commandList.Close();
         }

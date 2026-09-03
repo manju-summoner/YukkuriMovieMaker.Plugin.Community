@@ -14,14 +14,14 @@ public partial class NodeView
 
     private bool _isMouseDown;
     private Point _mouseDownPos;
-    private Canvas? _rootCanvas;
 
     public NodeView()
     {
         InitializeComponent();
 
-        Loaded += (_, _) => _rootCanvas = FindParent<Canvas>(this);
+        Loaded += (_, _) => FindParent<Canvas>(this);
         SizeChanged += OnSizeChanged;
+        LostMouseCapture += OnLostMouseCapture;
     }
 
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -68,40 +68,54 @@ public partial class NodeView
     {
         if (!_isMouseDown) return;
 
-        ReleaseMouseCapture();
-
-        if (_isDragging)
-        {
-            if (FindParent<GraphView>(this)?.DataContext is GraphViewModel graphVm)
-                graphVm.EndNodeDrag();
-        }
-        else
-        {
-            if (DataContext is NodeViewModel vm &&
-                FindParent<GraphView>(this)?.DataContext is GraphViewModel graphVm)
-            {
-                if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
-                {
-                    if (graphVm.SelectedNodes.Contains(vm))
-                    {
-                        graphVm.SelectedNodes.Remove(vm);
-                        vm.IsSelected = false;
-                    }
-                    else
-                    {
-                        graphVm.AddToSelection(vm);
-                    }
-                }
-                else
-                {
-                    graphVm.SelectSingle(vm);
-                }
-            }
-        }
+        var wasDragging = _isDragging;
+        var vm = DataContext as NodeViewModel;
+        var graphVm = FindParent<GraphView>(this)?.DataContext as GraphViewModel;
 
         _isMouseDown = false;
         _isDragging = false;
+
+        ReleaseMouseCapture();
+
+        if (wasDragging)
+        {
+            graphVm?.EndNodeDrag();
+        }
+        else if (vm != null && graphVm != null)
+        {
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+            {
+                if (graphVm.SelectedNodes.Contains(vm))
+                {
+                    graphVm.SelectedNodes.Remove(vm);
+                    vm.IsSelected = false;
+                }
+                else
+                {
+                    graphVm.AddToSelection(vm);
+                }
+            }
+            else
+            {
+                graphVm.SelectSingle(vm);
+            }
+        }
+
         e.Handled = true;
+    }
+
+    private void OnLostMouseCapture(object sender, MouseEventArgs e)
+    {
+        if (!_isMouseDown) return;
+
+        var wasDragging = _isDragging;
+        var graphVm = FindParent<GraphView>(this)?.DataContext as GraphViewModel;
+
+        _isMouseDown = false;
+        _isDragging = false;
+
+        if (wasDragging)
+            graphVm?.EndNodeDrag();
     }
 
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)

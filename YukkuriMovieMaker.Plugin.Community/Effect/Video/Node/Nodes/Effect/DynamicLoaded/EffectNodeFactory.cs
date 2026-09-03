@@ -848,30 +848,35 @@ public static class EffectNodeCalculator
                 // ignore
             }
 
-            var subObject = GetEffectSubObject(loader, dynamicPropName);
-            if (subObject == null) return;
+            lock (self.DynamicContainerLock)
+            {
+                var subObject = GetEffectSubObject(loader, dynamicPropName);
+                if (subObject == null) return;
 
-            var containerType = ContainerFactory.CreateOrGenerate(subObject);
-            if (containerType == null) return;
+                var containerType = ContainerFactory.CreateOrGenerate(subObject);
+                if (containerType == null) return;
 
-            var currentContainer = (InputsContainer?)containerFieldInfo.GetValue(self);
-            if (currentContainer?.GetType() == containerType) return;
+                var currentContainer = (InputsContainer?)containerFieldInfo.GetValue(self);
+                if (currentContainer?.GetType() == containerType) return;
 
-            var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
-            if (newContainer == null) return;
+                var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
+                if (newContainer == null) return;
 
-            containerFieldInfo.SetValue(self, newContainer);
+                containerFieldInfo.SetValue(self, newContainer);
+            }
 
-            // **
-            // NOTE
-            // **
-            //
             // NeedToReinitializeInputPorts の発火は UI スレッドから行う。
             // Task.Run スレッドから dispatcher.Invoke（ブロッキング）を呼ぶと
             // NodeViewModel ハンドラ内の処理でフリーズするため BeginInvoke を使う。
+            // ディスパッチ実行時点でバッキングフィールドを読み直すのは、CalculateAsync
+            // 側が先にこの評価時点までの間に別インスタンスへ差し替えている可能性があるため。
             var dispatcher = Application.Current?.Dispatcher;
             if (dispatcher == null) return;
-            _ = dispatcher.BeginInvoke(() => self.SetDynamicContainer(newContainer, dynamicPropName));
+            _ = dispatcher.BeginInvoke(() =>
+            {
+                if (containerFieldInfo.GetValue(self) is InputsContainer latest)
+                    self.SetDynamicContainer(latest, dynamicPropName);
+            });
         });
     }
 
@@ -945,27 +950,55 @@ public static class EffectNodeCalculator
 
                 var prefix = propName + ".";
 
-                var effectSubPropNames = subObject.GetType()
-                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(p => p.GetCustomAttribute<DisplayAttribute>() != null)
-                    .Select(p => prefix + p.Name)
-                    .ToHashSet();
-
-                var registeredKeys = self.Inputs.Keys
-                    .Where(k => k.StartsWith(prefix))
-                    .ToHashSet();
-
-                if (!effectSubPropNames.SetEquals(registeredKeys))
+                lock (self.DynamicContainerLock)
                 {
-                    var containerType = ContainerFactory.CreateOrGenerate(subObject);
-                    if (containerType != null)
+                    var effectSubPropNames = subObject.GetType()
+                        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                        .Where(p => p.GetCustomAttribute<DisplayAttribute>() != null)
+                        .Select(p => prefix + p.Name)
+                        .ToHashSet();
+
+                    var registeredKeys = self.Inputs.Keys
+                        .Where(k => k.StartsWith(prefix))
+                        .ToHashSet();
+
+                    if (!effectSubPropNames.SetEquals(registeredKeys))
                     {
-                        var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
-                        if (newContainer != null)
-                            typeof(NodeLogic)
-                                .GetMethod("SwapDynamicContainer",
-                                    BindingFlags.NonPublic | BindingFlags.Instance)
-                                ?.Invoke(self, [propName, newContainer]);
+                        var containerType = ContainerFactory.CreateOrGenerate(subObject);
+                        if (containerType != null)
+                        {
+                            var newContainer = (InputsContainer?)Activator.CreateInstance(containerType);
+                            if (newContainer != null)
+                            {
+                                typeof(NodeLogic)
+                                    .GetMethod("SwapDynamicContainer",
+                                        BindingFlags.NonPublic | BindingFlags.Instance)
+                                    ?.Invoke(self, [propName, newContainer]);
+
+                                foreach (var subProp in subObject.GetType()
+                                             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                             .Where(p => p.GetCustomAttribute<DisplayAttribute>() != null))
+                                {
+                                    var key = prefix + subProp.Name;
+                                    if (!self.Inputs.TryGetValue(key, out var port)) continue;
+                                    var currentValue = GetSubPropertyDirect(subObject, subProp);
+                                    if (currentValue != null)
+                                        port.SetValue(currentValue);
+                                }
+
+                                var containerFieldInfo = self.GetType().GetField($"_{propName}",
+                                    BindingFlags.NonPublic | BindingFlags.Instance);
+                                containerFieldInfo?.SetValue(self, newContainer);
+
+                                var dispatcher = Application.Current?.Dispatcher;
+                                if (dispatcher != null)
+                                    _ = dispatcher.BeginInvoke(() =>
+                                    {
+                                        if (containerFieldInfo?.GetValue(self) is InputsContainer latest)
+                                            self.SetDynamicContainer(latest, propName);
+                                    });
+                            }
+                        }
                     }
                 }
 
@@ -1010,6 +1043,21 @@ public static class EffectNodeCalculator
 #endif
             return Task.FromException(exception);
         }
+    }
+
+    internal static object? GetSubPropertyDirect(object target, PropertyInfo propInfo)
+    {
+        var raw = propInfo.GetValue(target);
+
+        if (propInfo.PropertyType != typeof(Animation)) return raw;
+
+        if (raw is not Animation anim) return null;
+
+        var valuesProp = typeof(Animation)
+            .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
+        var values = valuesProp?.GetValue(anim) as ImmutableList<AnimationValue>;
+
+        return values is { Count: > 0 } ? values[0].Value : null;
     }
 
     internal static void SetSubPropertyDirect(object target, PropertyInfo propInfo, object? value)
