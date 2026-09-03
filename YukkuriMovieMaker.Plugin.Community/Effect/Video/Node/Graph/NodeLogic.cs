@@ -23,6 +23,8 @@ public abstract class NodeLogic : IDisposable
     /// </summary>
     private readonly Dictionary<string, object?> _pendingDynamicValues = new();
 
+    internal readonly Lock DynamicContainerLock = new();
+
     public readonly Dictionary<string, InputPort> Inputs = new();
     public readonly Dictionary<string, OutputPort> Outputs = new();
     public readonly Dictionary<string, NodeGraph> SubGraphs = new();

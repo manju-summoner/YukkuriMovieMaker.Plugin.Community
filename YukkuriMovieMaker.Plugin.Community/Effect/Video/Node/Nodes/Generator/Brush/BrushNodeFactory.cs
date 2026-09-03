@@ -24,7 +24,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Nodes.Generator.B
 ///     全 IBrushPlugin を動的にノード化するファクトリ。
 ///     EffectNodeFactory と同じ Reflection.Emit ベースの仕組みを IBrushPlugin に対して適用する。
 ///     既存の EffectPortCollector / ContainerFactory / Attr をそのまま再利用し、
-///     入力ポートの収集・動的サブオブジェクトの扱いはエフェクトノードと完全に共通化する。
+///     入力ポートの収集・動的サブオブジェクトの扱いはエフェクトノードと共通化する。
 /// </summary>
 public static class DynamicBrushNodeFactory
 {
@@ -265,11 +265,9 @@ public static class BrushNodeTypeBuilder
                 break;
             case PortType.Color:
                 Attr.ColorControl(pb, (Color)(def.DefaultValue ?? Colors.White));
-                Attr.PortColor(pb, nameof(Colors.MediumPurple));
+                Attr.PortColor(pb, nameof(Colors.Gold));
                 break;
             case PortType.Brush:
-                // IBrushParameter の中に Brush 型がネストすることは通常想定されないが、
-                // 万一発生した場合でも float ポートとして最低限機能するようにしておく。
                 Attr.NumberControl(pb, def.Min, def.Max, def.Digits, def.Unit, 0f);
                 Attr.PortColor(pb, nameof(Colors.DarkOrange));
                 break;
@@ -278,11 +276,6 @@ public static class BrushNodeTypeBuilder
                 Attr.PortColor(pb, nameof(Colors.MediumSeaGreen));
                 break;
             case PortType.Unknown:
-                // こちらで用意した既知のコントロールが使えない型でも、元プロパティ側に
-                // PropertyEditorAttribute2 継承属性が付いていれば、それを引き継いで
-                // CustomEditorPort による編集を可能にする。見つからない場合は
-                // 今までどおり接続専用（編集UIなし）のポートになる。
-                // ここで失敗しても、ノード（ブラシ全体）の生成自体を巻き添えで失敗させない。
                 if (def.EditorAttributeData != null)
                     try
                     {
@@ -358,9 +351,6 @@ public static class BrushNodeTypeBuilder
 
     /// <summary>
     ///     OnInputValueChanged override を Emit する。
-    ///     EffectNodeTypeBuilder.EmitOnInputValueChanged と同じ構造だが、対象が
-    ///     VideoEffectsLoader（IVideoEffect 経由）ではなく BrushNodeCalculator が管理する
-    ///     IBrushParameter 経由のローダーである点のみ異なる。
     /// </summary>
     private static void EmitOnInputValueChanged(
         TypeBuilder tb,
@@ -379,10 +369,6 @@ public static class BrushNodeTypeBuilder
 
         var il = m.GetILGenerator();
 
-        // _loader が null（まだ一度も Calculate が走っていない）場合は、
-        // ローダーが存在しないのでコンテナの再評価はスキップする。
-        // エフェクトノードと異なり、ブラシのローダーは EvaluationContext.Devices が
-        // 必要なため LoadEffectSync のような同期初期化ができない。
         var skipLabel = il.DefineLabel();
         il.Emit(OpCodes.Ldarg_0);
         il.Emit(OpCodes.Ldfld, loaderField);
@@ -542,11 +528,6 @@ public static class BrushNodeTypeBuilder
     }
 }
 
-/// <summary>
-///     動的ブラシノードの実行時ロジック。EffectNodeCalculator と対になるブラシ専用版。
-///     IVideoEffect 経由ではなく IBrushPlugin / IBrushParameter 経由で値を反映し、
-///     最終的に ID2D1Brush を BrushWrapper に詰めて出力する。
-/// </summary>
 public static class BrushNodeCalculator
 {
     private static readonly ConcurrentDictionary<string, PortDefinition[]> PortDefsRegistry = new();
@@ -566,10 +547,6 @@ public static class BrushNodeCalculator
         return PortDefsRegistry.TryGetValue(pluginName, out var d) ? d : [];
     }
 
-    /// <summary>
-    ///     EffectNodeCalculator.RefreshDynamicContainer と同じ構造だが、対象が _videoEffect ではなく
-    ///     _brushParameter であるため、サブオブジェクトの探索元を GetParameterSubObject に差し替えた独立実装。
-    /// </summary>
     public static void RefreshDynamicContainer(
         NodeLogic self,
         VideoEffectsLoader loader,
@@ -612,10 +589,6 @@ public static class BrushNodeCalculator
                 containerFieldInfo.SetValue(self, newContainer);
             }
 
-            // NeedToReinitializeInputPorts の発火は UI スレッドから行う必要がある。
-            // Task.Run スレッドから dispatcher.Invoke（ブロッキング）を呼ぶとフリーズするため BeginInvoke を使う。
-            // ディスパッチ実行時点でバッキングフィールドを読み直すのは、CalculateAsync
-            // 側が先にこの評価時点までの間に別インスタンスへ差し替えている可能性があるため。
             var dispatcher = Application.Current?.Dispatcher;
             if (dispatcher == null) return;
             _ = dispatcher.BeginInvoke(() =>
@@ -640,7 +613,6 @@ public static class BrushNodeCalculator
         if (ctx is null)
             return Task.FromException(new NullReferenceException("EvaluationContext"));
 
-        // SolidColorBrushNode / NoiseNode と同様、デバイスが変わった場合はローダーを作り直す。
         if (loaderRef == null || !ReferenceEquals(lastDevicesRef, ctx.Devices))
         {
             loaderRef?.Dispose();
@@ -783,9 +755,10 @@ public static class BrushNodeCalculator
         if (raw is not Animation anim) return null;
 
         var valuesProp = typeof(Animation).GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
-        var values = valuesProp?.GetValue(anim) as ImmutableList<AnimationValue>;
 
-        return values is { Count: > 0 } ? values[0].Value : null;
+        return valuesProp?.GetValue(anim) is ImmutableList<AnimationValue> { Count: > 0 } values
+            ? values[0].Value
+            : null;
     }
 
     private static void SetSubPropertyDirect(object target, PropertyInfo propInfo, object? value)
@@ -794,13 +767,12 @@ public static class BrushNodeCalculator
         {
             if (propInfo.GetValue(target) is not Animation anim) return;
             var valuesProp = typeof(Animation).GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
-            var values = valuesProp?.GetValue(anim) as ImmutableList<AnimationValue>;
-            if (values == null) return;
+            if (valuesProp?.GetValue(anim) is not ImmutableList<AnimationValue> values) return;
             var doubleVal = Convert.ToDouble(value ?? 0);
             var newValues = values.Count > 0
                 ? values.SetItem(0, new AnimationValue(doubleVal))
                 : values.Add(new AnimationValue(doubleVal));
-            valuesProp!.SetValue(anim, newValues);
+            valuesProp.SetValue(anim, newValues);
         }
         else
         {
@@ -814,10 +786,6 @@ public static class BrushNodeCalculator
         }
     }
 
-    /// <summary>
-    ///     VideoEffectsLoader 内の _brushParameter フィールドから、指定した [Display] プロパティ名に
-    ///     対応するネストされたサブオブジェクトを取得する。
-    /// </summary>
     private static object? GetParameterSubObject(VideoEffectsLoader loader, string propName)
     {
         var paramField = typeof(VideoEffectsLoader)
@@ -885,12 +853,6 @@ public static class BrushNodeCalculator
         };
     }
 
-    /// <summary>
-    ///     enum ポートへ Number ノード等（float/double/int といった数値系出力）を接続した場合、
-    ///     raw が int 以外の数値型で届くことがある。NodeLogic.GetInput&lt;T&gt; と同様に
-    ///     Convert.ToInt64 経由で変換してから Enum.ToObject に渡す。変換できない値は
-    ///     ノードをエラーにせず、そのまま呼び出し元に返す。
-    /// </summary>
     private static object? ConvertToEnumValue(Type enumType, object? raw)
     {
         if (raw == null) return null;

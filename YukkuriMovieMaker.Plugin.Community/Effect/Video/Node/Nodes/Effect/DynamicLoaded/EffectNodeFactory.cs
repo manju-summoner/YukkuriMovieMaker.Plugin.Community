@@ -27,7 +27,6 @@ public static class EffectNodeFactory
     private static readonly Lock Lock = new();
     private static readonly Dictionary<string, Type> TypeCache = new();
 
-    // 同じ型を複数カテゴリーの追加メニューに出すための、生成型ごとのカテゴリー別 NodeAttribute
     private static readonly Dictionary<Type, NodeAttribute[]> MenuCategoryAttributes = new();
 
     private static readonly AssemblyBuilder AsmBuilder =
@@ -176,29 +175,8 @@ public sealed class PortDefinition
     public string Unit { get; init; } = "";
     public Type? EnumType { get; init; }
 
-    /// <summary>
-    ///     PortType.Unknown（Float/Enum/Bool/Color/Brush/Text のいずれにも該当しないプロパティ）の場合の、
-    ///     元プロパティの実際のCLR型。生成するポートのプロパティ型として使う（floatに丸めない）。
-    /// </summary>
     public Type? UnknownClrType { get; init; }
-
-    /// <summary>
-    ///     PortType.Unknown の元プロパティに、YMM4標準の PropertyEditorAttribute2 継承属性が
-    ///     付いていた場合、その適用情報（コンストラクタ引数・名前付き引数を含む）。
-    ///     NumberPortControl等、こちらで用意した既知のコントロールで扱える型（Float/Enum/Bool/Color/Text）
-    ///     には設定されない＝それらは対象外。
-    /// </summary>
     public CustomAttributeData? EditorAttributeData { get; init; }
-
-    /// <summary>
-    ///     EditorAttributeData を基に、ビルド時（TryMakePortDefinition の時点）で直接インスタンス化
-    ///     しておいた PropertyEditorAttribute2。
-    ///     CustomAttributeBuilder で生成後の型に属性を複製し、後から GetCustomAttribute で
-    ///     再インスタンス化する方式は、元の属性が「別アセンブリの internal 型」（YMM4本体組み込みの
-    ///     エディタ等）だとアクセス例外で失敗することがある。こちらは属性の型のコンストラクタ／
-    ///     プロパティ／フィールドを直接 Invoke/SetValue して構築するため、アセンブリ境界に左右されない。
-    ///     NodeViewModel.ResolveEditorAttribute から参照される。
-    /// </summary>
     public PropertyEditorAttribute2? EditorAttributeInstance { get; init; }
 }
 
@@ -511,7 +489,7 @@ public static class EffectNodeTypeBuilder
                 break;
             case PortType.Color:
                 Attr.ColorControl(pb, (Color)(def.DefaultValue ?? Colors.White));
-                Attr.PortColor(pb, nameof(Colors.MediumPurple));
+                Attr.PortColor(pb, nameof(Colors.Gold));
                 break;
             case PortType.Brush:
                 Attr.PortColor(pb, nameof(Colors.LawnGreen));
@@ -803,13 +781,6 @@ public static class EffectNodeCalculator
         return PortDefsRegistry.TryGetValue(effectName, out var d) ? d : [];
     }
 
-    /// <summary>
-    ///     Unknown型でカスタムエディタ（PropertyEditorAttribute2）が見つかったポートに、
-    ///     元の効果／ブラシパラメータインスタンスが持っていた実際の値を初期値として書き込む。
-    ///     既に LocalValue が設定されている場合（スナップショットからの復元等）は上書きしない。
-    ///     NodeLogic 派生型（EffectNodeTypeBuilder / BrushNodeTypeBuilder の両方が生成する型）の
-    ///     コンストラクタから、base.ctor() の直後に一度だけ呼ばれる。
-    /// </summary>
     public static void SeedDefaultValues(NodeLogic self, PortDefinition[] portDefs)
     {
         foreach (var def in portDefs)
@@ -865,11 +836,6 @@ public static class EffectNodeCalculator
                 containerFieldInfo.SetValue(self, newContainer);
             }
 
-            // NeedToReinitializeInputPorts の発火は UI スレッドから行う。
-            // Task.Run スレッドから dispatcher.Invoke（ブロッキング）を呼ぶと
-            // NodeViewModel ハンドラ内の処理でフリーズするため BeginInvoke を使う。
-            // ディスパッチ実行時点でバッキングフィールドを読み直すのは、CalculateAsync
-            // 側が先にこの評価時点までの間に別インスタンスへ差し替えている可能性があるため。
             var dispatcher = Application.Current?.Dispatcher;
             if (dispatcher == null) return;
             _ = dispatcher.BeginInvoke(() =>
@@ -1023,11 +989,6 @@ public static class EffectNodeCalculator
                 return Task.CompletedTask;
             }
 
-            // Update が false を返すケース（対象プラグイン内で例外が握りつぶされた場合を含む）で
-            // ここを素通りすると、OutputPort には前回成功時の _cachedValue が残ったまま
-            // EvaluateInternal 側は成功扱い（HasError=false）になり、ノードはエラー表示にならずに
-            // 古いフレームを下流へ流し続けてしまう。出力を明示的に無効化した上で例外を投げ、
-            // 呼び出し元 (NodeLogic.EvaluateInternal) の catch で HasError を正しく立てさせる。
             self.GetType().GetProperty("Output")?.SetValue(self, new ImageWrapper { Image = null });
             return Task.FromException(
                 new InvalidOperationException("動的エフェクトの更新に失敗しました（loader.Update が false を返しました）。"));
@@ -1055,9 +1016,10 @@ public static class EffectNodeCalculator
 
         var valuesProp = typeof(Animation)
             .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
-        var values = valuesProp?.GetValue(anim) as ImmutableList<AnimationValue>;
 
-        return values is { Count: > 0 } ? values[0].Value : null;
+        return valuesProp?.GetValue(anim) is ImmutableList<AnimationValue> { Count: > 0 } values
+            ? values[0].Value
+            : null;
     }
 
     internal static void SetSubPropertyDirect(object target, PropertyInfo propInfo, object? value)
@@ -1069,8 +1031,7 @@ public static class EffectNodeCalculator
             var valuesProp = typeof(Animation)
                 .GetProperty("Values", BindingFlags.Public | BindingFlags.Instance);
 
-            var values = valuesProp?.GetValue(anim) as ImmutableList<AnimationValue>;
-            if (values == null) return;
+            if (valuesProp?.GetValue(anim) is not ImmutableList<AnimationValue> values) return;
 
             var doubleVal = Convert.ToDouble(value ?? 0);
 
@@ -1078,7 +1039,7 @@ public static class EffectNodeCalculator
                 ? values.SetItem(0, new AnimationValue(doubleVal))
                 : values.Add(new AnimationValue(doubleVal));
 
-            valuesProp!.SetValue(anim, newValues);
+            valuesProp.SetValue(anim, newValues);
         }
         else
         {
@@ -1271,13 +1232,6 @@ internal static class Attr
         pb.SetCustomAttribute(new CustomAttributeBuilder(TextCtor, [], [defP], [defaultValue]));
     }
 
-    /// <summary>
-    ///     CustomAttributeData を基に、PropertyEditorAttribute2 のインスタンスを直接構築する。
-    ///     Constructor.Invoke / PropertyInfo.SetValue / FieldInfo.SetValue はいずれも通常の
-    ///     アクセス修飾子を無視して呼び出せるため、元の属性が別アセンブリの internal 型であっても
-    ///     問題なくインスタンス化できる（CustomAttributeBuilder で複製して後から
-    ///     GetCustomAttribute で再構築する方式とは異なり、アセンブリ境界に左右されない）。
-    /// </summary>
     public static PropertyEditorAttribute2? CreateEditorAttributeInstance(CustomAttributeData attributeData)
     {
         try
@@ -1308,13 +1262,6 @@ internal static class Attr
         }
     }
 
-    /// <summary>
-    ///     元プロパティに付いていた PropertyEditorAttribute2 継承属性を、CustomAttributeData を基に
-    ///     生成後のプロパティへそのまま複製・付与する。
-    ///     属性のコンストラクタ引数・名前付き引数（プロパティ／フィールド）は、CLRの仕様上
-    ///     プリミティブ型・string・Type・enum・およびそれらの1次元配列に限られるため、
-    ///     元の属性がどんな型であっても機械的に再現できる。
-    /// </summary>
     public static void CustomEditorControl(PropertyBuilder pb, CustomAttributeData attributeData)
     {
         var ctorArgs = attributeData.ConstructorArguments

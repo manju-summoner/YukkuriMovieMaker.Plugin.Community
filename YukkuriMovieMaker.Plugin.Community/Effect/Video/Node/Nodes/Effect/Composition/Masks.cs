@@ -277,8 +277,9 @@ public class MaskThresholdNode : NodeLogic
                 Min / 100f,
                 Max / 100f,
                 Invert ? 1 : 0);
-        if (_videoEffect.Update(out var output, EvaluationContext, InputMask?.Mask))
-            OutputMask = new MaskWrapper { Mask = output };
+        OutputMask = _videoEffect.Update(out var output, EvaluationContext, InputMask?.Mask)
+            ? new MaskWrapper { Mask = output }
+            : null;
 
         return Task.CompletedTask;
     }

@@ -289,7 +289,7 @@ public class ContainerFactory
                     break;
                 case PortType.Color:
                     Attr.ColorControl(pb, (Color)(port.DefaultValue ?? Colors.White));
-                    Attr.PortColor(pb, nameof(Colors.MediumPurple));
+                    Attr.PortColor(pb, nameof(Colors.Gold));
                     break;
                 case PortType.Brush:
                     Attr.PortColor(pb, nameof(Colors.LawnGreen));
