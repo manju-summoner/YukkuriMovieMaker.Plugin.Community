@@ -346,6 +346,80 @@ public static class EffectPortCollector
     }
 }
 
+internal static class DynamicPropertyFlattener
+{
+    internal static bool IsLeafProperty(PropertyInfo prop, object? value)
+    {
+        if (value is null) return true;
+
+        var t = prop.PropertyType;
+        if (t == typeof(Animation)) return true;
+        if (t.IsEnum) return true;
+        if (t == typeof(bool)) return true;
+        if (t == typeof(float) || t == typeof(double) || t == typeof(int)) return true;
+        if (t == typeof(Color)) return true;
+        if (t == typeof(BrushWrapper)) return true;
+        if (prop.GetCustomAttributesData()
+            .Any(ad => typeof(PropertyEditorAttribute2).IsAssignableFrom(ad.AttributeType)))
+            return true;
+
+        return value.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .All(p => p.GetCustomAttribute<DisplayAttribute>() == null);
+    }
+
+    internal static void CollectLeaves(object obj, string prefix, List<Leaf> leaves,
+        HashSet<object>? visited = null)
+    {
+        visited ??= new HashSet<object>(ReferenceEqualityComparer.Instance);
+        if (!visited.Add(obj)) return;
+
+        foreach (var prop in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (prop.GetIndexParameters().Length > 0) continue;
+            if (prop.GetCustomAttribute<ObsoleteAttribute>() != null) continue;
+            if (prop.GetCustomAttribute<DisplayAttribute>() == null) continue;
+
+            object? value;
+            try
+            {
+                value = prop.GetValue(obj);
+            }
+            catch
+            {
+                continue;
+            }
+
+            var path = prefix + prop.Name;
+
+            if (!IsLeafProperty(prop, value))
+            {
+                CollectLeaves(value!, path + ".", leaves, visited);
+                continue;
+            }
+
+            leaves.Add(new Leaf(path, obj, prop));
+        }
+    }
+
+    internal static (object Owner, PropertyInfo Property)? ResolveLeaf(object root, string dottedPath)
+    {
+        var segments = dottedPath.Split('.');
+        var current = root;
+        for (var i = 0; i < segments.Length - 1; i++)
+        {
+            var prop = current.GetType().GetProperty(segments[i], BindingFlags.Public | BindingFlags.Instance);
+            var next = prop?.GetValue(current);
+            if (next == null) return null;
+            current = next;
+        }
+
+        var leafProp = current.GetType().GetProperty(segments[^1], BindingFlags.Public | BindingFlags.Instance);
+        return leafProp == null ? null : (current, leafProp);
+    }
+
+    internal readonly record struct Leaf(string Path, object Owner, PropertyInfo Property);
+}
+
 public static class EffectNodeTypeBuilder
 {
     public static Type Build(
@@ -918,10 +992,11 @@ public static class EffectNodeCalculator
 
                 lock (self.DynamicContainerLock)
                 {
-                    var effectSubPropNames = subObject.GetType()
-                        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                        .Where(p => p.GetCustomAttribute<DisplayAttribute>() != null)
-                        .Select(p => prefix + p.Name)
+                    var currentLeaves = new List<DynamicPropertyFlattener.Leaf>();
+                    DynamicPropertyFlattener.CollectLeaves(subObject, "", currentLeaves);
+
+                    var effectSubPropNames = currentLeaves
+                        .Select(leaf => prefix + leaf.Path)
                         .ToHashSet();
 
                     var registeredKeys = self.Inputs.Keys
@@ -941,13 +1016,11 @@ public static class EffectNodeCalculator
                                         BindingFlags.NonPublic | BindingFlags.Instance)
                                     ?.Invoke(self, [propName, newContainer]);
 
-                                foreach (var subProp in subObject.GetType()
-                                             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                             .Where(p => p.GetCustomAttribute<DisplayAttribute>() != null))
+                                foreach (var leaf in currentLeaves)
                                 {
-                                    var key = prefix + subProp.Name;
+                                    var key = prefix + leaf.Path;
                                     if (!self.Inputs.TryGetValue(key, out var port)) continue;
-                                    var currentValue = GetSubPropertyDirect(subObject, subProp);
+                                    var currentValue = GetSubPropertyDirect(leaf.Owner, leaf.Property);
                                     if (currentValue != null)
                                         port.SetValue(currentValue);
                                 }
@@ -966,19 +1039,18 @@ public static class EffectNodeCalculator
                             }
                         }
                     }
-                }
 
-                lock (loader)
-                {
-                    foreach (var kv in self.Inputs)
+                    lock (loader)
                     {
-                        if (!kv.Key.StartsWith(prefix)) continue;
-                        var subPropName = kv.Key.Substring(prefix.Length);
-                        var subProp = subObject.GetType().GetProperty(subPropName,
-                            BindingFlags.Public | BindingFlags.Instance);
-                        if (subProp == null) continue;
-                        var raw = kv.Value.GetValue(ctx).GetAwaiter().GetResult();
-                        SetSubPropertyDirect(subObject, subProp, raw);
+                        foreach (var kv in self.Inputs)
+                        {
+                            if (!kv.Key.StartsWith(prefix)) continue;
+                            var subPropName = kv.Key.Substring(prefix.Length);
+                            var resolved = DynamicPropertyFlattener.ResolveLeaf(subObject, subPropName);
+                            if (resolved == null) continue;
+                            var raw = kv.Value.GetValue(ctx).GetAwaiter().GetResult();
+                            SetSubPropertyDirect(resolved.Value.Owner, resolved.Value.Property, raw);
+                        }
                     }
                 }
             }

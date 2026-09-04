@@ -19,6 +19,7 @@ public partial class CustomEditorPort
 {
     private PropertyEditorAttribute2? _appliedAttribute;
     private FrameworkElement? _hostedControl;
+    private PropertyInfo? _shadowEditedProperty;
 
     private object? _shadowInstance;
     private object? _shadowRealOwner;
@@ -91,6 +92,7 @@ public partial class CustomEditorPort
             {
                 _shadowInstance = shadow;
                 _shadowRealOwner = port.EditorPropertyOwner;
+                _shadowEditedProperty = shadowProperty;
                 item = shadow;
                 propertyOwner = shadow;
                 propertyInfo = shadowProperty;
@@ -121,6 +123,7 @@ public partial class CustomEditorPort
             fallbackHost?.Detach();
             _shadowInstance = null;
             _shadowRealOwner = null;
+            _shadowEditedProperty = null;
             ShowError(port, ex);
             return;
         }
@@ -173,6 +176,7 @@ public partial class CustomEditorPort
         _valueHost = null;
         _shadowInstance = null;
         _shadowRealOwner = null;
+        _shadowEditedProperty = null;
         HostPresenter.Content = null;
     }
 
@@ -242,74 +246,80 @@ public partial class CustomEditorPort
     private static void CopyProperties(object from, object to, int portId)
     {
         var fromProps = from.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        var toType = to.GetType();
-        var fromNode = from as NodeLogic;
-        var toNode = to as NodeLogic;
 
         foreach (var fromProp in fromProps)
         {
             if (fromProp.Name is "InputImage" or "Output") continue;
             if (!fromProp.CanRead) continue;
 
-            var toProp = toType.GetProperty(fromProp.Name, BindingFlags.Public | BindingFlags.Instance);
-            if (toProp == null) continue;
+            CopyProperty(from, fromProp, to, portId);
+        }
+    }
 
-            try
+    private static void CopyProperty(object from, PropertyInfo fromProp, object to, int portId)
+    {
+        var toType = to.GetType();
+        var fromNode = from as NodeLogic;
+        var toNode = to as NodeLogic;
+
+        var toProp = toType.GetProperty(fromProp.Name, BindingFlags.Public | BindingFlags.Instance);
+        if (toProp == null) return;
+
+        try
+        {
+            object? value;
+            if (fromNode != null && fromNode.Inputs.TryGetValue(fromProp.Name, out var fromPort))
             {
-                object? value;
-                if (fromNode != null && fromNode.Inputs.TryGetValue(fromProp.Name, out var fromPort))
-                {
-                    if (fromPort.IsConnected) continue;
-                    value = fromPort.LocalValue;
-                }
-                else
-                {
-                    value = fromProp.GetValue(from);
-                }
+                if (fromPort.IsConnected) return;
+                value = fromPort.LocalValue;
+            }
+            else
+            {
+                value = fromProp.GetValue(from);
+            }
 
-                if (fromProp.PropertyType == typeof(Animation) && toProp.PropertyType != typeof(Animation))
+            if (fromProp.PropertyType == typeof(Animation) && toProp.PropertyType != typeof(Animation))
+            {
+                if (toProp.CanWrite && value is Animation sourceAnimation)
                 {
-                    if (toProp.CanWrite && value is Animation sourceAnimation)
-                    {
-                        var current = sourceAnimation.Values.Count > 0
-                            ? sourceAnimation.Values[0].Value
-                            : sourceAnimation.DefaultValue;
-                        SetProperty(to, toProp, toNode,
-                            PropertyValueTypeConverter.ConvertPropertyValue(toProp.PropertyType, current));
-                    }
-
-                    continue;
-                }
-
-                if (toProp.PropertyType == typeof(Animation) && fromProp.PropertyType != typeof(Animation))
-                {
-                    EffectNodeCalculator.SetSubPropertyDirect(to, toProp, value);
-                    continue;
-                }
-
-                if (toProp.CanWrite)
-                {
+                    var current = sourceAnimation.Values.Count > 0
+                        ? sourceAnimation.Values[0].Value
+                        : sourceAnimation.DefaultValue;
                     SetProperty(to, toProp, toNode,
-                        PropertyValueTypeConverter.ConvertPropertyValue(toProp.PropertyType, value));
-                    continue;
+                        PropertyValueTypeConverter.ConvertPropertyValue(toProp.PropertyType, current));
                 }
 
-                if (value == null) continue;
-
-                var currentTarget = toProp.GetValue(to);
-                if (currentTarget == null) continue;
-
-                var copyFromMethod = toProp.PropertyType.GetMethod("CopyFrom", [value.GetType()]);
-                copyFromMethod?.Invoke(currentTarget, [value]);
+                return;
             }
-            catch (Exception ex)
+
+            if (toProp.PropertyType == typeof(Animation) && fromProp.PropertyType != typeof(Animation))
             {
-#if DEBUG
-                var inner = ex.InnerException != null ? $" / Inner: {ex.InnerException}" : "";
-                Debug.WriteLine(
-                    $"[CustomEditorPort:{portId:X8}] CopyProperties: {fromProp.Name} のコピーに失敗: {ex.Message}{inner}");
-#endif
+                EffectNodeCalculator.SetSubPropertyDirect(to, toProp, value);
+                return;
             }
+
+            if (toProp.CanWrite)
+            {
+                SetProperty(to, toProp, toNode,
+                    PropertyValueTypeConverter.ConvertPropertyValue(toProp.PropertyType, value));
+                return;
+            }
+
+            if (value == null) return;
+
+            var currentTarget = toProp.GetValue(to);
+            if (currentTarget == null) return;
+
+            var copyFromMethod = toProp.PropertyType.GetMethod("CopyFrom", [value.GetType()]);
+            copyFromMethod?.Invoke(currentTarget, [value]);
+        }
+        catch (Exception ex)
+        {
+#if DEBUG
+            var inner = ex.InnerException != null ? $" / Inner: {ex.InnerException}" : "";
+            Debug.WriteLine(
+                $"[CustomEditorPort:{portId:X8}] CopyProperties: {fromProp.Name} のコピーに失敗: {ex.Message}{inner}");
+#endif
         }
     }
 
@@ -331,13 +341,13 @@ public partial class CustomEditorPort
 
     private void CopyBackFromShadow()
     {
-        if (_shadowInstance == null || _shadowRealOwner == null) return;
+        if (_shadowInstance == null || _shadowRealOwner == null || _shadowEditedProperty == null) return;
 
 #if DEBUG
         Debug.WriteLine(
-            $"[CustomEditorPort:{GetHashCode():X8}] CopyBackFromShadow: {_shadowInstance.GetType().Name} -> {_shadowRealOwner.GetType().Name}");
+            $"[CustomEditorPort:{GetHashCode():X8}] CopyBackFromShadow: {_shadowInstance.GetType().Name}.{_shadowEditedProperty.Name} -> {_shadowRealOwner.GetType().Name}");
 #endif
-        CopyProperties(_shadowInstance, _shadowRealOwner, GetHashCode());
+        CopyProperty(_shadowInstance, _shadowEditedProperty, _shadowRealOwner, GetHashCode());
     }
 
     private void RefreshShadowFromReal()

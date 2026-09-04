@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows.Media;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
@@ -66,7 +68,8 @@ public class ContainerFactory
         _moduleBuilder ??= mod;
 
         var type = effectPropertyInst.GetType();
-        var name = type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
+        var baseName = type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
+        var name = BuildStructuralKey(baseName, effectPropertyInst);
 
         lock (Lock)
         {
@@ -74,24 +77,18 @@ public class ContainerFactory
                 return cached;
         }
 
-        var properties = new List<PropertyInfo>();
-        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
-        {
-            var attribute = property.GetCustomAttribute<DisplayAttribute>();
-            if (attribute is null)
-                continue;
+        var leaves = new List<DynamicPropertyFlattener.Leaf>();
+        DynamicPropertyFlattener.CollectLeaves(effectPropertyInst, "", leaves);
 
-            properties.Add(property);
-        }
-
-        if (properties.Count == 0)
+        if (leaves.Count == 0)
             return null;
 
-        var ports = properties.Select(property =>
-                TryMakePortDefinition(
-                    property,
-                    property.GetCustomAttribute<DisplayAttribute>()!,
-                    property.GetValue(effectPropertyInst)))
+        var ports = leaves
+            .Select(leaf => TryMakePortDefinition(
+                leaf.Property,
+                leaf.Property.GetCustomAttribute<DisplayAttribute>()!,
+                leaf.Property.GetValue(leaf.Owner),
+                leaf.Path))
             .ToList();
 
         lock (Lock)
@@ -100,7 +97,40 @@ public class ContainerFactory
         }
     }
 
-    private static PortDefinition TryMakePortDefinition(PropertyInfo prop, DisplayAttribute display, object? inst)
+    private static string BuildStructuralKey(string baseName, object obj, HashSet<object>? visited = null)
+    {
+        visited ??= new HashSet<object>(ReferenceEqualityComparer.Instance);
+        if (!visited.Add(obj)) return baseName;
+
+        var sb = new StringBuilder(baseName);
+        foreach (var prop in obj.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                     .OrderBy(p => p.MetadataToken))
+        {
+            if (prop.GetIndexParameters().Length > 0) continue;
+            if (prop.GetCustomAttribute<DisplayAttribute>() == null) continue;
+
+            object? value;
+            try
+            {
+                value = prop.GetValue(obj);
+            }
+            catch
+            {
+                continue;
+            }
+
+            if (value == null || DynamicPropertyFlattener.IsLeafProperty(prop, value)) continue;
+
+            var childName = value.GetType().AssemblyQualifiedName ?? value.GetType().FullName ??
+                value.GetType().Name;
+            sb.Append('|').Append(prop.Name).Append(':').Append(BuildStructuralKey(childName, value, visited));
+        }
+
+        return sb.ToString();
+    }
+
+    private static PortDefinition TryMakePortDefinition(PropertyInfo prop, DisplayAttribute display, object? inst,
+        string portName)
     {
         var labelKey = display.Name ?? prop.Name;
         var descKey = display.Description ?? "";
@@ -112,7 +142,7 @@ public class ContainerFactory
             var defaultValue = (inst as Animation)?.DefaultValue;
             return new PortDefinition
             {
-                PropName = prop.Name,
+                PropName = portName,
                 PortType = PortType.Float,
                 LabelKey = labelKey,
                 DescKey = descKey,
@@ -128,7 +158,7 @@ public class ContainerFactory
         if (prop.PropertyType.IsEnum)
             return new PortDefinition
             {
-                PropName = prop.Name,
+                PropName = portName,
                 PortType = PortType.Enum,
                 LabelKey = labelKey,
                 DescKey = descKey,
@@ -140,7 +170,7 @@ public class ContainerFactory
         if (prop.PropertyType == typeof(bool))
             return new PortDefinition
             {
-                PropName = prop.Name,
+                PropName = portName,
                 PortType = PortType.Bool,
                 LabelKey = labelKey,
                 DescKey = descKey,
@@ -152,7 +182,7 @@ public class ContainerFactory
             prop.PropertyType == typeof(int))
             return new PortDefinition
             {
-                PropName = prop.Name,
+                PropName = portName,
                 PortType = PortType.Float,
                 LabelKey = labelKey,
                 DescKey = descKey,
@@ -163,7 +193,7 @@ public class ContainerFactory
         if (prop.PropertyType == typeof(Color))
             return new PortDefinition
             {
-                PropName = prop.Name,
+                PropName = portName,
                 PortType = PortType.Color,
                 LabelKey = labelKey,
                 DescKey = descKey,
@@ -174,7 +204,7 @@ public class ContainerFactory
         if (prop.PropertyType == typeof(BrushWrapper))
             return new PortDefinition
             {
-                PropName = prop.Name,
+                PropName = portName,
                 PortType = PortType.Brush,
                 LabelKey = display.Name ?? TextNode.BrushName ?? prop.Name,
                 DescKey = descKey,
@@ -189,7 +219,7 @@ public class ContainerFactory
             if (!hasCustomEditor)
                 return new PortDefinition
                 {
-                    PropName = prop.Name,
+                    PropName = portName,
                     PortType = PortType.Text,
                     LabelKey = labelKey,
                     DescKey = descKey,
@@ -204,7 +234,7 @@ public class ContainerFactory
 
         return new PortDefinition
         {
-            PropName = prop.Name,
+            PropName = portName,
             PortType = PortType.Unknown,
             LabelKey = labelKey,
             DescKey = descKey,
@@ -228,7 +258,7 @@ public class ContainerFactory
 
     private static Type CreateOrGenerate(string name, Type originalType, List<PortDefinition> ports, ModuleBuilder mod)
     {
-        var flatName = string.Concat(name.Select(c => char.IsLetterOrDigit(c) ? c : '_'));
+        var flatName = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(name)))[..32];
         PortDefsRegistry[flatName] = ports.ToArray();
 
         var tb = mod.DefineType(
