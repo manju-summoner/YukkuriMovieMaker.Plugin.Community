@@ -74,18 +74,19 @@ public partial class PortView
     private void OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         var graph = FindParent<GraphView>(this)?.DataContext as GraphViewModel;
+        var source = graph?.DraggingFromPort;
 
         if (IsMouseCaptured)
             ReleaseMouseCapture();
 
         if (graph == null) return;
-        if (graph.DraggingFromPort == null) return;
+        if (source == null) return;
 
         var targetPortView = HitTestPortView(e);
         var target = targetPortView?.DataContext as PortViewModel ?? DataContext as PortViewModel;
 
         if (target != null)
-            graph.ConnectPortsCommand.Execute((graph.DraggingFromPort, target));
+            graph.ConnectPortsCommand.Execute((source, target));
 
         graph.DraggingFromPort = null;
         graph.TemporaryEndPoint = null;
