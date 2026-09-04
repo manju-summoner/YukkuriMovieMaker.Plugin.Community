@@ -1,4 +1,4 @@
-namespace YukkuriMovieMaker.Plugin.Community.Shape.StringSpectrum
+namespace YukkuriMovieMaker.Plugin.Community.Shape.Spectrum
 {
     internal static class SpectrumResampler
     {

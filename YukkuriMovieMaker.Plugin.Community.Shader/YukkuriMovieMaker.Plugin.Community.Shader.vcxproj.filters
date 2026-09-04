@@ -240,6 +240,9 @@
     <FxCompile Include="StringSpectrum.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="RippleSpectrum.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Hash.hlsli">
