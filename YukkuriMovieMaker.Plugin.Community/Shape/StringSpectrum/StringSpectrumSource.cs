@@ -77,13 +77,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.StringSpectrum
 
             var seconds = desc.ItemPosition.Time.TotalSeconds;
             var baseFrequency = _parameter.BaseFrequency.GetValue(frame, length, fps);
-            var normalize = modes > 0 ? 1.0 / Math.Sqrt(modes) : 0.0;
+
+            var scale = 0.0;
+            if (modes > 0)
+            {
+                var magnitude = 0.0;
+                for (var i = 0; i < modes; i++)
+                    magnitude += Math.Abs(_values[i]);
+
+                var normalize = 1.0 / Math.Sqrt(modes);
+                scale = normalize / Math.Max(magnitude * normalize, 1.0);
+            }
 
             var amplitudes = MemoryMarshal.Cast<byte, float>(_modeBytes.AsSpan());
             for (var i = 0; i < modes; i++)
             {
                 var turn = seconds * baseFrequency * (i + 1);
-                amplitudes[i] = (float)(_values[i] * Math.Cos(2.0 * Math.PI * (turn - Math.Floor(turn))) * normalize);
+                amplitudes[i] = (float)(_values[i] * Math.Cos(2.0 * Math.PI * (turn - Math.Floor(turn))) * scale);
             }
             amplitudes[modes..].Clear();
 
@@ -117,7 +127,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.StringSpectrum
             _effect.Modes = _modeBytes;
 
             var halfWidth = parameters.Width * 0.5f + 1f;
-            var halfHeight = parameters.Amplitude + parameters.Thickness * 0.5f + 2f;
+            var steepest = parameters.Amplitude * Math.PI * modes / width;
+            var halfHeight = (float)(parameters.Amplitude + (parameters.Thickness * 0.5 + 2.0) * Math.Sqrt(1.0 + steepest * steepest));
             var cropRect = new Vector4(-halfWidth, -halfHeight, halfWidth, halfHeight);
             if (_isFirst || _cropRect != cropRect)
             {
