@@ -11,6 +11,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.RippleSpectrum
 {
     internal sealed class RippleSpectrumSource : IAudioSpectrumSource
     {
+        private const int WindowLimit = RippleSpectrumCustomEffect.MaxWindow;
+
         private readonly DisposeCollector _disposer = new();
         private readonly RippleSpectrumParameter _parameter;
         private readonly byte[] _valueBytes = new byte[RippleSpectrumCustomEffect.ValueByteSize];
@@ -68,20 +70,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.RippleSpectrum
             var fps = desc.FPS;
             var color = _parameter.RippleColor;
 
-            var count = SpectrumResampler.Resample(spectrum, MemoryMarshal.Cast<byte, float>(_valueBytes.AsSpan()));
-
             var reach = _parameter.Reach.GetValue(frame, length, fps);
+
+            var slots = MemoryMarshal.Cast<byte, float>(_valueBytes.AsSpan());
+            var capacity = Math.Clamp((int)reach, 1, slots.Length);
+            var count = SpectrumResampler.Resample(spectrum, slots[..capacity]);
+            slots[capacity..].Clear();
+
             var maxThickness = _parameter.MaxThickness.GetValue(frame, length, fps);
-            var minThickness = Math.Min(_parameter.MinThickness.GetValue(frame, length, fps), maxThickness);
             var seconds = desc.ItemPosition.Time.TotalSeconds;
             var travel = seconds * _parameter.Speed.GetValue(frame, length, fps);
 
             var window = 0;
             if (count > 1)
             {
-                var overlap = (int)Math.Ceiling(maxThickness * count / (2.0 * reach)) + 1;
-                window = Math.Clamp(overlap, 1, Math.Min(8, count - 1));
+                var affordable = 2.0 * ((WindowLimit - 1.5) * reach / count - 2.0);
+                maxThickness = Math.Min(maxThickness, Math.Max(affordable, 0.0));
+
+                var overlap = (int)Math.Ceiling(0.5 + (maxThickness * 0.5 + 2.0) * count / reach) + 1;
+                window = Math.Clamp(overlap, 1, Math.Min(WindowLimit, count - 1));
             }
+
+            var minThickness = Math.Min(_parameter.MinThickness.GetValue(frame, length, fps), maxThickness);
 
             var parameters = new Parameters(
                 (float)_parameter.InnerRadius.GetValue(frame, length, fps),

@@ -9,6 +9,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.RippleSpectrum
     internal sealed class RippleSpectrumCustomEffect(IGraphicsDevicesAndContext devices) : D2D1CustomShaderEffectBase(Create<EffectImpl>(devices))
     {
         public const int MaxValues = 256;
+        public const int MaxWindow = 64;
         public const int ValueByteSize = MaxValues * sizeof(float);
 
         private enum PropertyIndex
@@ -72,7 +73,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.RippleSpectrum
             public float MaxThickness { get => _cb.MaxThickness; set { _cb.MaxThickness = Math.Max(value, 0f); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Window)]
-            public float Window { get => _cb.Window; set { _cb.Window = Math.Clamp(value, 0f, 8f); UpdateConstants(); } }
+            public float Window { get => _cb.Window; set { _cb.Window = Math.Clamp(value, 0f, MaxWindow); UpdateConstants(); } }
 
             [CustomEffectProperty(PropertyType.Float, (int)PropertyIndex.Decay)]
             public float Decay { get => _cb.Decay; set { _cb.Decay = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
