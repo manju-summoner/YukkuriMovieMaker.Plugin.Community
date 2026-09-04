@@ -1,0 +1,18 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+RippleSpectrum,,波紋,Ripples,波纹,波紋,물결,Ondas,تموجات,Riak
+InnerRadius,,内側の半径,Inner Radius,内半径,內半徑,안쪽 반지름,Radio interior,نصف القطر الداخلي,Radius Dalam
+InnerRadiusDescription,,輪が生まれる位置までの距離です,Distance to the position where a ring is born.,波纹产生位置的距离。,波紋產生位置的距離。,고리가 생겨나는 위치까지의 거리입니다.,Distancia a la posición donde nace un anillo.,المسافة إلى الموضع الذي تنشأ فيه الحلقة.,Jarak ke posisi tempat cincin muncul.
+Reach,,届く距離,Reach,扩散距离,擴散距離,퍼지는 거리,Alcance,المدى,Jangkauan
+ReachDescription,,輪が外へ進む距離です。輪の本数はこの距離のピクセル数までに収まります,Distance a ring travels outward. The number of rings is limited to this distance in pixels.,波纹向外扩散的距离。波纹数量上限为该距离的像素数。,波紋向外擴散的距離。波紋數量上限為該距離的像素數。,고리가 밖으로 진행하는 거리입니다. 고리의 개수는 이 거리의 픽셀 수까지로 제한됩니다.,Distancia que un anillo recorre hacia fuera. El número de anillos se limita a esa distancia en píxeles.,المسافة التي تنتقل بها الحلقة للخارج. يقتصر عدد الحلقات على هذه المسافة بالبكسل.,Jarak cincin bergerak keluar. Jumlah cincin dibatasi hingga jarak ini dalam piksel.
+Speed,,速さ,Speed,速度,速度,속도,Velocidad,السرعة,Kecepatan
+SpeedDescription,,1秒あたりに輪が進む回数です。負の値で内へ向かいます,Number of times a ring travels the full reach per second. Negative values move inward.,每秒波纹完成扩散的次数。负值向内收缩。,每秒波紋完成擴散的次數。負值向內收縮。,1초당 고리가 전체 거리를 진행하는 횟수입니다. 음수면 안쪽으로 향합니다.,Número de veces por segundo que un anillo recorre todo el alcance. Los valores negativos se mueven hacia dentro.,عدد المرات التي تقطع فيها الحلقة كامل المدى في الثانية. القيم السالبة تتحرك للداخل.,Jumlah kali cincin menempuh seluruh jangkauan per detik. Nilai negatif bergerak ke dalam.
+MinThickness,,最小の太さ,Minimum Thickness,最小粗细,最小粗細,최소 두께,Grosor mínimo,أدنى سماكة,Ketebalan Minimum
+MinThicknessDescription,,値が0のときの輪の太さです,Thickness of a ring when the value is zero.,数值为0时波纹的粗细。,數值為0時波紋的粗細。,값이 0일 때 고리의 두께입니다.,Grosor de un anillo cuando el valor es cero.,سماكة الحلقة عندما تكون القيمة صفرا.,Ketebalan cincin saat nilainya nol.
+MaxThickness,,最大の太さ,Maximum Thickness,最大粗细,最大粗細,최대 두께,Grosor máximo,أقصى سماكة,Ketebalan Maksimum
+MaxThicknessDescription,,値が最大のときの輪の太さです。輪が重なりすぎる設定では自動で抑えられます,Thickness of a ring at the maximum value. It is reduced automatically when too many rings would overlap.,数值最大时波纹的粗细。当波纹重叠过多时会自动收窄。,數值最大時波紋的粗細。當波紋重疊過多時會自動收窄。,값이 최대일 때 고리의 두께입니다. 고리가 지나치게 겹치는 설정에서는 자동으로 줄어듭니다.,Grosor de un anillo con el valor máximo. Se reduce automáticamente cuando demasiados anillos se superpondrían.,سماكة الحلقة عند القيمة القصوى. تُقلَّل تلقائيا عندما تتداخل حلقات كثيرة جدا.,Ketebalan cincin pada nilai maksimum. Otomatis dikurangi bila terlalu banyak cincin bertumpuk.
+ValueFollow,,値による濃さ,Value Opacity,数值影响浓度,數值影響濃度,값에 따른 농도,Opacidad por valor,العتامة حسب القيمة,Opasitas menurut Nilai
+ValueFollowDescription,,音の大きさで輪の濃さを変える度合いです,How strongly the loudness changes the opacity of a ring.,音量对波纹浓度的影响程度。,音量對波紋濃度的影響程度。,소리 크기가 고리의 농도를 바꾸는 정도입니다.,Cuánto cambia el volumen la opacidad de un anillo.,مدى تأثير شدة الصوت على عتامة الحلقة.,Seberapa besar kekuatan suara mengubah opasitas cincin.
+Decay,,外へ向かう減衰,Outward Fade,向外衰减,向外衰減,밖으로 감쇠,Desvanecido hacia fuera,التلاشي للخارج,Peredupan ke Luar
+DecayDescription,,外へ進むほど輪を薄くする度合いです,How much a ring fades as it travels outward.,波纹向外扩散时变淡的程度。,波紋向外擴散時變淡的程度。,밖으로 진행할수록 고리가 흐려지는 정도입니다.,Cuánto se desvanece un anillo al alejarse.,مقدار تلاشي الحلقة أثناء انتقالها للخارج.,Seberapa pudar cincin saat bergerak keluar.
+RippleColor,,色,Colour,颜色,顏色,색,Color,اللون,Warna
+RippleColorDescription,,輪の色です,Colour of the rings.,波纹的颜色。,波紋的顏色。,고리의 색입니다.,Color de los anillos.,لون الحلقات.,Warna cincin.

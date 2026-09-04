@@ -1,0 +1,14 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+StringSpectrum,,弦の振動,Vibrating String,弦振动,弦振動,현의 진동,Cuerda vibrante,وتر مهتز,Getaran Dawai
+StringWidth,,弦の長さ,String Length,弦长,弦長,현의 길이,Longitud de cuerda,طول الوتر,Panjang Dawai
+StringWidthDescription,,両端を固定する弦の長さです,Length of the string fixed at both ends.,两端固定的弦的长度。,兩端固定的弦的長度。,양 끝이 고정된 현의 길이입니다.,Longitud de la cuerda fijada en ambos extremos.,طول الوتر المثبت من طرفيه.,Panjang dawai yang terikat di kedua ujung.
+Amplitude,,振幅,Amplitude,振幅,振幅,진폭,Amplitud,السعة,Amplitudo
+AmplitudeDescription,,弦が中心から離れる最大の距離です,Largest distance the string leaves the centre line.,弦偏离中心线的最大距离。,弦偏離中心線的最大距離。,현이 중심선에서 벗어나는 최대 거리입니다.,Distancia máxima que la cuerda se aleja de la línea central.,أكبر مسافة يبتعد بها الوتر عن الخط المركزي.,Jarak terjauh dawai meninggalkan garis tengah.
+BaseFrequency,,基本振動数,Base Frequency,基频,基頻,기본 진동수,Frecuencia base,التردد الأساسي,Frekuensi Dasar
+BaseFrequencyDescription,,1秒あたりの1次モードの往復回数です。n次モードはn倍の速さで振動します,Cycles per second of the first mode. Mode n vibrates n times as fast.,一次模态每秒的往复次数。n次模态以n倍速度振动。,一次模態每秒的往復次數。n次模態以n倍速度振動。,1초당 1차 모드의 왕복 횟수입니다. n차 모드는 n배 빠르게 진동합니다.,Ciclos por segundo del primer modo. El modo n vibra n veces más rápido.,دورات في الثانية للنمط الأول. النمط n يهتز أسرع بمقدار n مرة.,Siklus per detik mode pertama. Mode n bergetar n kali lebih cepat.
+ModeLimit,,モードの数,Mode Count,模态数量,模態數量,모드 수,Número de modos,عدد الأنماط,Jumlah Mode
+ModeLimitDescription,,重ね合わせる振動モードの上限です。低い帯ほど大きな波になります,Upper limit of the vibration modes superposed. Lower bands form the larger waves.,叠加的振动模态上限。频带越低波形越大。,疊加的振動模態上限。頻帶越低波形越大。,겹치는 진동 모드의 상한입니다. 낮은 대역일수록 큰 파가 됩니다.,Límite superior de los modos de vibración superpuestos. Las bandas bajas forman las ondas mayores.,الحد الأقصى لأنماط الاهتزاز المتراكبة. النطاقات المنخفضة تشكل الموجات الأكبر.,Batas atas mode getaran yang ditumpangkan. Pita rendah membentuk gelombang lebih besar.
+Thickness,,線の太さ,Line Thickness,线条粗细,線條粗細,선 두께,Grosor de línea,سماكة الخط,Ketebalan Garis
+ThicknessDescription,,弦の太さです,Thickness of the string.,弦的粗细。,弦的粗細。,현의 두께입니다.,Grosor de la cuerda.,سماكة الوتر.,Ketebalan dawai.
+StringColor,,色,Colour,颜色,顏色,색,Color,اللون,Warna
+StringColorDescription,,弦の色です,Colour of the string.,弦的颜色。,弦的顏色。,현의 색입니다.,Color de la cuerda.,لون الوتر.,Warna dawai.
