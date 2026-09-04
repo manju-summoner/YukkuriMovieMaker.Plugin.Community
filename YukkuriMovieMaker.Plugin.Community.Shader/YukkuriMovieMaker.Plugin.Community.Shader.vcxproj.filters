@@ -237,9 +237,15 @@
     <FxCompile Include="RadianceOccupancy.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="StringSpectrum.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Hash.hlsli">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
+    <None Include="Spectrum.hlsli">
       <Filter>ヘッダー ファイル</Filter>
     </None>
   </ItemGroup>

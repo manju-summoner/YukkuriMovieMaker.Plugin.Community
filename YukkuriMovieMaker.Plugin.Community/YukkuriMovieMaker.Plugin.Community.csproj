@@ -231,6 +231,7 @@
     <Resource Include="$(ShaderDirPath)RadianceCascade.cso" Link="Resources\Shader\RadianceCascade.cso" />
     <Resource Include="$(ShaderDirPath)RadianceComposite.cso" Link="Resources\Shader\RadianceComposite.cso" />
     <Resource Include="$(ShaderDirPath)RadianceOccupancy.cso" Link="Resources\Shader\RadianceOccupancy.cso" />
+    <Resource Include="$(ShaderDirPath)StringSpectrum.cso" Link="Resources\Shader\StringSpectrum.cso" />
   </ItemGroup>
 
   <!-- テストがinternalsを参照できるかを構成に依存させないため、全構成で付与する。ただし本体側のDEBUG限定テストフックに依存するテストは引き続きDEBUG限定 -->
