@@ -1,0 +1,14 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+MetaballSpectrum,,メタボール,Metaballs,融合球,融合球,메타볼,Metabolas,كرات ميتا,Metaball
+FieldWidth,,幅,Width,宽度,寬度,너비,Anchura,العرض,Lebar
+FieldWidthDescription,,塊が並ぶ範囲の横幅です,Width of the area the blobs occupy.,融合球分布区域的宽度。,融合球分佈區域的寬度。,덩어리가 놓이는 영역의 너비입니다.,Anchura del área que ocupan las metabolas.,عرض المنطقة التي تشغلها الكرات.,Lebar area yang ditempati gumpalan.
+FieldHeight,,高さ,Height,高度,高度,높이,Altura,الارتفاع,Tinggi
+FieldHeightDescription,,値が最大のときに塊が伸びる高さです,Height a blob reaches at the maximum value.,数值最大时融合球伸展的高度。,數值最大時融合球伸展的高度。,값이 최대일 때 덩어리가 뻗는 높이입니다.,Altura que alcanza una metabola con el valor máximo.,الارتفاع الذي تصل إليه الكرة عند القيمة القصوى.,Tinggi yang dicapai gumpalan pada nilai maksimum.
+BlobRadius,,塊の半径,Blob Radius,球半径,球半徑,덩어리 반지름,Radio de metabola,نصف قطر الكرة,Radius Gumpalan
+BlobRadiusDescription,,塊が影響を及ぼす範囲です。大きくすると隣と融合しやすくなります。列の幅に対して上限があります,Range a blob influences. Larger values make neighbours merge more readily. It is capped relative to the column width.,融合球的影响范围。数值越大越容易与相邻的融合。上限取决于列宽。,融合球的影響範圍。數值越大越容易與相鄰的融合。上限取決於列寬。,덩어리가 영향을 미치는 범위입니다. 크게 하면 옆과 잘 융합됩니다. 열 너비에 대한 상한이 있습니다.,Rango de influencia de una metabola. Valores mayores facilitan la fusión con las vecinas. Está limitado en relación con el ancho de columna.,نطاق تأثير الكرة. القيم الأكبر تجعل الاندماج مع المجاورات أسهل. وهو محدود نسبة إلى عرض العمود.,Rentang pengaruh gumpalan. Nilai lebih besar mempermudah penyatuan dengan tetangga. Dibatasi relatif terhadap lebar kolom.
+Threshold,,融合のしきい値,Merge Threshold,融合阈值,融合閾值,융합 임계값,Umbral de fusión,عتبة الاندماج,Ambang Penyatuan
+ThresholdDescription,,表面と見なす密度です。低くすると塊が太り、高くすると細ります,"Density treated as the surface. Lower values fatten the blobs, higher values thin them.",视为表面的密度。数值越低融合球越粗，越高越细。,視為表面的密度。數值越低融合球越粗，越高越細。,표면으로 보는 밀도입니다. 낮추면 덩어리가 굵어지고 높이면 얇아집니다.,Densidad considerada como superficie. Valores bajos engrosan las metabolas y valores altos las adelgazan.,الكثافة التي تُعد سطحا. القيم المنخفضة تسمّن الكرات والمرتفعة ترققها.,"Kepadatan yang dianggap permukaan. Nilai rendah menebalkan gumpalan, nilai tinggi menipiskannya."
+IsBipolar,,両側に描く,Draw Both Sides,双向绘制,雙向繪製,양쪽에 그리기,Dibujar ambos lados,الرسم في الاتجاهين,Gambar Dua Sisi
+IsBipolarDescription,,中心線から上下に伸ばします。波形の符号を活かす場合に使います,Extends upward and downward from the centre line. Use this to keep the sign of a waveform.,从中心线向上下伸展。用于保留波形的符号。,從中心線向上下伸展。用於保留波形的符號。,중심선에서 위아래로 뻗습니다. 파형의 부호를 살릴 때 사용합니다.,Se extiende hacia arriba y hacia abajo desde la línea central. Úselo para conservar el signo de una forma de onda.,يمتد لأعلى ولأسفل من الخط المركزي. استخدمه للحفاظ على إشارة الموجة.,Memanjang ke atas dan ke bawah dari garis tengah. Gunakan untuk mempertahankan tanda gelombang.
+MetaballColor,,色,Colour,颜色,顏色,색,Color,اللون,Warna
+MetaballColorDescription,,塊の色です,Colour of the blobs.,融合球的颜色。,融合球的顏色。,덩어리의 색입니다.,Color de las metabolas.,لون الكرات.,Warna gumpalan.
