@@ -1,0 +1,34 @@
+Key,Parameter,ja-jp,en-us,zh-cn,zh-tw,ko-kr,es-es,ar-sa,id-id
+ColorTransferEffectName,,色調転写,Color transfer,色调转移,色調轉移,색조 전사,Transferencia de color,نقل الألوان,Transfer warna
+ColorTransferDetailGroup,,色調転写の詳細,Color transfer details,色调转移的详细设置,色調轉移的詳細設定,색조 전사 세부 설정,Detalles de la transferencia de color,تفاصيل نقل الألوان,Detail transfer warna
+ColorTransferReference,,参照の取得元,Reference source,参考来源,參考來源,참조 원본,Origen de referencia,مصدر المرجع,Sumber referensi
+ColorTransferReferenceDescription,,色を合わせる相手の取り方,How the image to match is obtained,匹配对象的获取方式,匹配對象的取得方式,색을 맞출 대상을 가져오는 방법,Cómo se obtiene la imagen de referencia,كيفية الحصول على الصورة المرجعية,Cara memperoleh gambar referensi
+ColorTransferReferenceScene,,シーン,Scene,场景,場景,장면,Escena,مشهد,Adegan
+ColorTransferReferenceSceneDescription,,別のシーンを描画して基準にする,Renders another scene and uses it as the reference,绘制其他场景作为基准,繪製其他場景作為基準,다른 장면을 그려 기준으로 삼습니다,Dibuja otra escena y la usa como referencia,يرسم مشهدا آخر ويستخدمه كمرجع,Menggambar adegan lain sebagai acuan
+ColorTransferReferenceBranch,,分岐,Branch,分支,分支,분기,Rama,فرع,Cabang
+ColorTransferReferenceBranchDescription,,同じアイテム内で分岐した映像を基準にする,Uses an image branched inside the same item,使用同一项目内分支出的影像作为基准,使用同一項目內分歧出的影像作為基準,같은 아이템 안에서 분기한 영상을 기준으로 삼습니다,Usa una imagen ramificada dentro del mismo elemento,يستخدم صورة متفرعة داخل العنصر نفسه,Menggunakan gambar yang dicabangkan di dalam item yang sama
+ColorTransferScene,,参照するシーン,Reference scene,参考场景,參考場景,참조 장면,Escena de referencia,المشهد المرجعي,Adegan referensi
+ColorTransferSceneDescription,,色の基準にするシーン。自分のシーンを選ぶと自分を除いた画面が基準になります,Scene used as the color reference. Choosing the item's own scene uses the screen without the item itself,作为色彩基准的场景。选择自身所在的场景时以排除自身的画面为基准,作為色彩基準的場景。選擇自身所在的場景時以排除自身的畫面為基準,색의 기준이 되는 장면입니다. 자신의 장면을 고르면 자신을 제외한 화면이 기준이 됩니다,Escena usada como referencia de color. Al elegir la escena propia se toma la pantalla sin el propio elemento,المشهد المستخدم كمرجع للألوان. عند اختيار مشهد العنصر نفسه تؤخذ الشاشة بدون العنصر,Adegan yang dijadikan acuan warna. Memilih adegan sendiri memakai layar tanpa item itu sendiri
+ColorTransferTimeOffset,,参照時刻のずれ,Reference time offset,参考时刻偏移,參考時刻偏移,참조 시각 오프셋,Desfase del tiempo de referencia,إزاحة زمن المرجع,Selisih waktu referensi
+ColorTransferTimeOffsetDescription,,参照シーンを描画する時刻のずらし量,How far the reference scene is shifted in time,绘制参考场景的时刻偏移量,繪製參考場景的時刻偏移量,참조 장면을 그리는 시각의 이동량,Desplazamiento temporal al dibujar la escena de referencia,مقدار إزاحة زمن رسم المشهد المرجعي,Besar pergeseran waktu penggambaran adegan referensi
+ColorTransferBranchIndex,,参照する分岐,Reference branch,参考分支,參考分支,참조 분기,Rama de referencia,فرع المرجع,Cabang referensi
+ColorTransferBranchIndexDescription,,同じアイテム内で先に分岐した番号。0で無効になります,Number branched earlier in the same item. 0 disables the effect,同一项目内先前分支的编号。设为0则不生效,同一項目內先前分歧的編號。設為0則不生效,같은 아이템 안에서 먼저 분기한 번호입니다. 0이면 적용되지 않습니다,Número ramificado antes en el mismo elemento. Con 0 no se aplica,الرقم المتفرع سابقا داخل العنصر نفسه. القيمة 0 تعطل التأثير,Nomor yang dicabangkan lebih dulu di item yang sama. Nilai 0 menonaktifkan efek
+ColorTransferMode,,合わせ方,Matching,匹配方式,匹配方式,맞추는 방식,Ajuste,طريقة المطابقة,Metode pencocokan
+ColorTransferModeDescription,,参照の色分布へ合わせる方法,How the color distribution is matched,匹配色彩分布的方式,匹配色彩分布的方式,색 분포를 맞추는 방법,Forma de ajustar la distribución de color,طريقة مطابقة توزيع الألوان,Cara mencocokkan distribusi warna
+ColorTransferModeMean,,平均,Mean,平均,平均,평균,Media,المتوسط,Rata-rata
+ColorTransferModeMeanDescription,,色の平均だけを合わせます,Matches only the average color,仅匹配平均色,僅匹配平均色,평균 색만 맞춥니다,Ajusta solo el color medio,يطابق متوسط اللون فقط,Hanya mencocokkan warna rata-rata
+ColorTransferModeMeanAndVariance,,平均と分散,Mean and variance,平均与方差,平均與變異數,평균과 분산,Media y varianza,المتوسط والتباين,Rata-rata dan varians
+ColorTransferModeMeanAndVarianceDescription,,色の平均と広がりを合わせます,Matches the average color and its spread,匹配平均色及其分布范围,匹配平均色及其分布範圍,평균 색과 퍼짐을 맞춥니다,Ajusta el color medio y su dispersión,يطابق متوسط اللون ومدى انتشاره,Mencocokkan warna rata-rata dan sebarannya
+ColorTransferModeHistogram,,ヒストグラム,Histogram,直方图,直方圖,히스토그램,Histograma,المدرج التكراري,Histogram
+ColorTransferModeHistogramDescription,,色の分布全体を合わせます,Matches the whole color distribution,匹配整个色彩分布,匹配整個色彩分布,색 분포 전체를 맞춥니다,Ajusta toda la distribución de color,يطابق توزيع الألوان بالكامل,Mencocokkan seluruh distribusi warna
+ColorTransferLightnessAmount,,明度の適用量,Lightness amount,明度应用量,明度套用量,명도 적용량,Cantidad de luminosidad,مقدار الإضاءة,Jumlah kecerahan
+ColorTransferLightnessAmountDescription,,明るさを参照へ寄せる度合い,How far the lightness moves toward the reference,明度向参考靠拢的程度,明度向參考靠攏的程度,밝기를 참조에 맞추는 정도,Cuánto se acerca la luminosidad a la referencia,مدى اقتراب الإضاءة من المرجع,Seberapa jauh kecerahan mendekati referensi
+ColorTransferColorAmount,,色の適用量,Color amount,色彩应用量,色彩套用量,색 적용량,Cantidad de color,مقدار اللون,Jumlah warna
+ColorTransferColorAmountDescription,,色みを参照へ寄せる度合い,How far the hue and saturation move toward the reference,色调向参考靠拢的程度,色調向參考靠攏的程度,색감을 참조에 맞추는 정도,Cuánto se acercan el tono y la saturación a la referencia,مدى اقتراب درجة اللون من المرجع,Seberapa jauh rona warna mendekati referensi
+ColorTransferMaximumGain,,変化の上限,Maximum gain,变化上限,變化上限,변화 상한,Ganancia máxima,الحد الأقصى للتغيير,Batas perubahan
+ColorTransferMaximumGainDescription,,階調を伸縮させる倍率の上限,Upper limit of the factor that stretches or compresses tones,拉伸或压缩色阶的倍率上限,拉伸或壓縮色階的倍率上限,계조를 늘리거나 줄이는 배율의 상한,Límite del factor que estira o comprime los tonos,الحد الأعلى لمعامل تمديد التدرجات أو ضغطها,Batas atas faktor peregangan atau pemampatan gradasi
+ColorTransferSampleSize,,解析の解像度,Analysis resolution,分析分辨率,分析解析度,분석 해상도,Resolución de análisis,دقة التحليل,Resolusi analisis
+ColorTransferSampleSizeDescription,,色分布を調べるときの縮小後の長辺,Long side after the image is reduced for analysis,分析时缩小后的长边像素数,分析時縮小後的長邊像素數,분석을 위해 축소한 뒤의 긴 변,Lado largo tras reducir la imagen para el análisis,الضلع الطويل بعد تصغير الصورة للتحليل,Sisi panjang setelah gambar diperkecil untuk analisis
+TagColorTransfer,,色調転写,Color transfer,色调转移,色調轉移,색조 전사,Transferencia de color,نقل الألوان,Transfer warna
+TagColorMatch,,カラーマッチ,Color match,色彩匹配,色彩匹配,컬러 매치,Coincidencia de color,مطابقة الألوان,Pencocokan warna
+TagGrading,,カラーグレーディング,Color grading,调色,調色,컬러 그레이딩,Etalonaje de color,تدريج الألوان,Gradasi warna
