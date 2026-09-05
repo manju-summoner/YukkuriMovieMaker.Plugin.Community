@@ -5,6 +5,10 @@ ColorTransferReference,,参照の取得元,Reference source,参考来源,參考�
 ColorTransferReferenceDescription,,色を合わせる相手の取り方,How the image to match is obtained,匹配对象的获取方式,匹配對象的取得方式,색을 맞출 대상을 가져오는 방법,Cómo se obtiene la imagen de referencia,كيفية الحصول على الصورة المرجعية,Cara memperoleh gambar referensi
 ColorTransferReferenceScene,,シーン,Scene,场景,場景,장면,Escena,مشهد,Adegan
 ColorTransferReferenceSceneDescription,,別のシーンを描画して基準にする,Renders another scene and uses it as the reference,绘制其他场景作为基准,繪製其他場景作為基準,다른 장면을 그려 기준으로 삼습니다,Dibuja otra escena y la usa como referencia,يرسم مشهدا آخر ويستخدمه كمرجع,Menggambar adegan lain sebagai acuan
+ColorTransferReferenceFile,,ファイル,File,文件,檔案,파일,Archivo,ملف,Berkas
+ColorTransferReferenceFileDescription,,画像や動画のファイルを基準にする,Uses an image or video file as the reference,使用图像或视频文件作为基准,使用圖像或影片檔案作為基準,이미지나 동영상 파일을 기준으로 삼습니다,Usa un archivo de imagen o vídeo como referencia,يستخدم ملف صورة أو فيديو كمرجع,Menggunakan berkas gambar atau video sebagai acuan
+ColorTransferFilePath,,参照するファイル,Reference file,参考文件,參考檔案,참조 파일,Archivo de referencia,ملف المرجع,Berkas referensi
+ColorTransferFilePathDescription,,色の基準にする画像や動画。動画は参照時刻のずれで位置が決まります,Image or video used as the color reference. For video the frame is chosen by the reference time offset,作为色彩基准的图像或视频。视频按参考时刻偏移选择帧,作為色彩基準的圖像或影片。影片按參考時刻偏移選擇影格,색의 기준이 되는 이미지나 동영상입니다. 동영상은 참조 시각 오프셋으로 프레임이 정해집니다,Imagen o vídeo usado como referencia de color. En vídeo el fotograma lo elige el desfase de tiempo,صورة أو فيديو يستخدم كمرجع للألوان. في الفيديو يتحدد الإطار بإزاحة زمن المرجع,Gambar atau video yang dijadikan acuan warna. Untuk video frame ditentukan oleh selisih waktu referensi
 ColorTransferReferenceBranch,,分岐,Branch,分支,分支,분기,Rama,فرع,Cabang
 ColorTransferReferenceBranchDescription,,同じアイテム内で分岐した映像を基準にする,Uses an image branched inside the same item,使用同一项目内分支出的影像作为基准,使用同一項目內分歧出的影像作為基準,같은 아이템 안에서 분기한 영상을 기준으로 삼습니다,Usa una imagen ramificada dentro del mismo elemento,يستخدم صورة متفرعة داخل العنصر نفسه,Menggunakan gambar yang dicabangkan di dalam item yang sama
 ColorTransferScene,,参照するシーン,Reference scene,参考场景,參考場景,참조 장면,Escena de referencia,المشهد المرجعي,Adegan referensi

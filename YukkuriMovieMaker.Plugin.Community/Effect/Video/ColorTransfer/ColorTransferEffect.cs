@@ -6,6 +6,7 @@ using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.ItemEditor.CustomVisibilityAttributes;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Effects;
+using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
 {
@@ -25,15 +26,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
         public Guid SceneId { get => _sceneId; set => Set(ref _sceneId, value); }
         private Guid _sceneId;
 
-        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferTimeOffset), Description = nameof(Texts.ColorTransferTimeOffsetDescription), Order = 2, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferFilePath), Description = nameof(Texts.ColorTransferFilePathDescription), Order = 2, ResourceType = typeof(Texts))]
+        [FileSelector(FileGroupType.Texture, ShowThumbnail = true)]
+        [ShowPropertyEditorWhen(nameof(Reference), ColorTransferReference.File)]
+        public string FilePath { get => _filePath; set => Set(ref _filePath, value ?? string.Empty); }
+        private string _filePath = string.Empty;
+
+        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferTimeOffset), Description = nameof(Texts.ColorTransferTimeOffsetDescription), Order = 3, ResourceType = typeof(Texts))]
         [TimeSpanRange]
         [TimeSpanDefaultValue]
         [TimeSpanEditor]
-        [ShowPropertyEditorWhen(nameof(Reference), ColorTransferReference.Scene)]
+        [ShowPropertyEditorWhen(nameof(Reference), ColorTransferReference.Scene | ColorTransferReference.File)]
         public TimeSpan TimeOffset { get => _timeOffset; set => Set(ref _timeOffset, value); }
         private TimeSpan _timeOffset = TimeSpan.Zero;
 
-        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferBranchIndex), Description = nameof(Texts.ColorTransferBranchIndexDescription), Order = 3, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferBranchIndex), Description = nameof(Texts.ColorTransferBranchIndexDescription), Order = 4, ResourceType = typeof(Texts))]
         [TextBoxSlider("F0", "", 0, 16)]
         [Range(0, 1024)]
         [DefaultValue(1)]
@@ -45,22 +52,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
         }
         private int _branchIndex = 1;
 
-        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferMode), Description = nameof(Texts.ColorTransferModeDescription), Order = 4, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferMode), Description = nameof(Texts.ColorTransferModeDescription), Order = 5, ResourceType = typeof(Texts))]
         [EnumComboBox]
         public ColorTransferMode Mode { get => _mode; set => Set(ref _mode, value); }
         private ColorTransferMode _mode = ColorTransferMode.MeanAndVariance;
 
-        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferLightnessAmount), Description = nameof(Texts.ColorTransferLightnessAmountDescription), Order = 5, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferLightnessAmount), Description = nameof(Texts.ColorTransferLightnessAmountDescription), Order = 6, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation LightnessAmount { get; } = new Animation(100, 0, 100);
 
-        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferColorAmount), Description = nameof(Texts.ColorTransferColorAmountDescription), Order = 6, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferColorAmount), Description = nameof(Texts.ColorTransferColorAmountDescription), Order = 7, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation ColorAmount { get; } = new Animation(100, 0, 100);
 
-        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferPositionAmount), Description = nameof(Texts.ColorTransferPositionAmountDescription), Order = 7, ResourceType = typeof(Texts))]
+        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferPositionAmount), Description = nameof(Texts.ColorTransferPositionAmountDescription), Order = 8, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
-        [ShowPropertyEditorWhen(nameof(Reference), ColorTransferReference.Scene)]
+        [ShowPropertyEditorWhen(nameof(Reference), ColorTransferReference.Scene | ColorTransferReference.File)]
         public Animation PositionAmount { get; } = new Animation(0, 0, 100);
 
         [Display(GroupName = nameof(Texts.ColorTransferDetailGroup), Name = nameof(Texts.ColorTransferMaximumGain), Description = nameof(Texts.ColorTransferMaximumGainDescription), Order = 10, ResourceType = typeof(Texts))]
