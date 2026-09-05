@@ -110,11 +110,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             else
                 _hasTransfer = false;
 
-            ApplyMapping(effectDescription);
+            var effectivePositionAmount = _hasTransfer && reference != ColorTransferReference.Branch ? positionAmount : 0f;
+            if (effectivePositionAmount > 0f)
+                ApplyMapping(effectDescription);
+
             ApplyAmounts(
                 _hasTransfer ? lightnessAmount : 0f,
                 _hasTransfer ? colorAmount : 0f,
-                _hasTransfer && reference != ColorTransferReference.Branch ? positionAmount : 0f);
+                effectivePositionAmount);
 
             _parameters = parameters;
             _isFirst = false;
