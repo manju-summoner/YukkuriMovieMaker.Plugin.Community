@@ -58,6 +58,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation ColorAmount { get; } = new Animation(100, 0, 100);
 
+        [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferPositionAmount), Description = nameof(Texts.ColorTransferPositionAmountDescription), Order = 7, ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "%", 0, 100)]
+        [ShowPropertyEditorWhen(nameof(Reference), ColorTransferReference.Scene)]
+        public Animation PositionAmount { get; } = new Animation(0, 0, 100);
+
         [Display(GroupName = nameof(Texts.ColorTransferDetailGroup), Name = nameof(Texts.ColorTransferMaximumGain), Description = nameof(Texts.ColorTransferMaximumGainDescription), Order = 10, ResourceType = typeof(Texts))]
         [TextBoxSlider("F1", "", 1, 16)]
         [Range(1, 64)]
@@ -89,6 +94,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             => new ColorTransferEffectProcessor(devices, this);
 
         protected override IEnumerable<IAnimatable> GetAnimatables()
-            => _animatables ??= [LightnessAmount, ColorAmount];
+            => _animatables ??= [LightnessAmount, ColorAmount, PositionAmount];
     }
 }

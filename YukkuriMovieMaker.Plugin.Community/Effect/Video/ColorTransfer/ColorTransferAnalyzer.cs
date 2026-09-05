@@ -7,6 +7,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
     {
         public const int LutSize = 128;
         public const int LutByteSize = LutSize * 16;
+        public const int GridSize = 16;
+        public const int LocalDeltaByteSize = GridSize * GridSize * 16;
 
         private const int Channels = 3;
         private const int Bins = 256;
@@ -30,6 +32,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
         private readonly byte[] _lutBytes = new byte[LutByteSize];
         private readonly double[] _domainMinimum = new double[Channels];
         private readonly double[] _domainSpan = new double[Channels];
+        private readonly byte[] _localDeltaBytes = new byte[LocalDeltaByteSize];
 
         public Vector3 DomainMinimum { get; private set; }
 
@@ -37,9 +40,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
 
         public byte[] LutBytes => _lutBytes;
 
+        public byte[] LocalDeltaBytes => _localDeltaBytes;
+
         public bool Analyze(
             ReadOnlySpan<int> sourcePixels,
             ReadOnlySpan<int> referencePixels,
+            int referenceWidth,
+            int referenceHeight,
             ColorTransferMode mode,
             double maximumGain)
         {
@@ -47,8 +54,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
 
             _source.Reset();
             _reference.Reset();
-            _source.Accumulate(sourcePixels, useHistogram);
-            _reference.Accumulate(referencePixels, useHistogram);
+            _source.Accumulate(sourcePixels, 0, 0, useHistogram);
+            _reference.Accumulate(referencePixels, referenceWidth, referenceHeight, useHistogram);
 
             if (_source.Weight <= 0.0 || _reference.Weight <= 0.0)
                 return false;
@@ -79,6 +86,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
                 BuildCurve(channel, mode, gain);
 
             PackLut();
+            PackLocalDelta();
             return true;
         }
 
@@ -171,6 +179,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             return table;
         }
 
+        private void PackLocalDelta()
+        {
+            var destination = _localDeltaBytes.AsSpan();
+            for (var cell = 0; cell < GridSize * GridSize; cell++)
+            {
+                var offset = cell * 16;
+                var weight = _reference.GridWeight[cell];
+                for (var channel = 0; channel < Channels; channel++)
+                {
+                    var delta = weight > 0.0
+                        ? _reference.GridSum[cell * Channels + channel] / weight - _reference.Mean[channel]
+                        : 0.0;
+                    BinaryPrimitives.WriteSingleLittleEndian(destination[(offset + channel * 4)..], (float)delta);
+                }
+                BinaryPrimitives.WriteSingleLittleEndian(destination[(offset + 12)..], 0f);
+            }
+        }
+
         private static float[] CreateOpaqueLinearTable()
         {
             var table = new float[256];
@@ -187,10 +213,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             public readonly double[] Deviation = new double[Channels];
             public readonly double[] Minimum = new double[Channels];
             public readonly double[] Maximum = new double[Channels];
+            public readonly double[] GridWeight = new double[GridSize * GridSize];
+            public readonly double[] GridSum = new double[GridSize * GridSize * Channels];
 
             private readonly double[] _sum = new double[Channels];
             private readonly double[] _square = new double[Channels];
             private readonly double[] _histogram = new double[Channels * Bins];
+            private int[] _columnCell = [];
+            private int _columnCellWidth;
             private readonly double[] _cumulated = new double[Channels * (Bins + 1)];
             private readonly double[] _scratch = new double[Bins];
 
@@ -200,6 +230,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
                 Array.Clear(_sum);
                 Array.Clear(_square);
                 Array.Clear(_histogram);
+                Array.Clear(GridWeight);
+                Array.Clear(GridSum);
                 for (var channel = 0; channel < Channels; channel++)
                 {
                     Minimum[channel] = double.MaxValue;
@@ -207,8 +239,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
                 }
             }
 
-            public void Accumulate(ReadOnlySpan<int> pixels, bool useHistogram)
+            public void Accumulate(ReadOnlySpan<int> pixels, int width, int height, bool useHistogram)
             {
+                var useGrid = width > 0 && height > 0 && pixels.Length == width * height;
+                if (useGrid)
+                    EnsureColumnCells(width);
+
+                var gridWeight = GridWeight;
+                var gridSum = GridSum;
+                var columnCell = _columnCell;
+                var columns = useGrid ? width : pixels.Length;
+                var column = 0;
+                var rowIndex = 0;
+                var cellRow = 0;
+
                 var weightSum = Weight;
                 var sum0 = _sum[0];
                 var sum1 = _sum[1];
@@ -235,66 +279,83 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
                 foreach (var pixel in pixels)
                 {
                     var alpha = (int)((uint)pixel >> 24);
-                    if (alpha < MinimumAlpha)
-                        continue;
-
-                    float blue, green, red;
-                    if (alpha == 255)
+                    if (alpha >= MinimumAlpha)
                     {
-                        blue = opaque[pixel & 0xFF];
-                        green = opaque[(pixel >> 8) & 0xFF];
-                        red = opaque[(pixel >> 16) & 0xFF];
+                        float blue, green, red;
+                        if (alpha == 255)
+                        {
+                            blue = opaque[pixel & 0xFF];
+                            green = opaque[(pixel >> 8) & 0xFF];
+                            red = opaque[(pixel >> 16) & 0xFF];
+                        }
+                        else
+                        {
+                            var inverse = 1f / alpha;
+                            blue = SrgbToLinear((pixel & 0xFF) * inverse);
+                            green = SrgbToLinear(((pixel >> 8) & 0xFF) * inverse);
+                            red = SrgbToLinear(((pixel >> 16) & 0xFF) * inverse);
+                        }
+
+                        var l = 0.4122214708f * red + 0.5363325363f * green + 0.0514459929f * blue;
+                        var m = 0.2119034982f * red + 0.6806995451f * green + 0.1073969566f * blue;
+                        var s = 0.0883024619f * red + 0.2817188376f * green + 0.6299787005f * blue;
+
+                        var lRoot = MathF.Cbrt(l);
+                        var mRoot = MathF.Cbrt(m);
+                        var sRoot = MathF.Cbrt(s);
+
+                        var weight = alpha / 255.0;
+
+                        double value0 = 0.2104542553f * lRoot + 0.7936177850f * mRoot - 0.0040720468f * sRoot;
+                        sum0 += value0 * weight;
+                        square0 += value0 * value0 * weight;
+                        if (value0 < minimum0)
+                            minimum0 = value0;
+                        if (value0 > maximum0)
+                            maximum0 = value0;
+
+                        double value1 = 1.9779984951f * lRoot - 2.4285922050f * mRoot + 0.4505937099f * sRoot;
+                        sum1 += value1 * weight;
+                        square1 += value1 * value1 * weight;
+                        if (value1 < minimum1)
+                            minimum1 = value1;
+                        if (value1 > maximum1)
+                            maximum1 = value1;
+
+                        double value2 = 0.0259040371f * lRoot + 0.7827717662f * mRoot - 0.8086757660f * sRoot;
+                        sum2 += value2 * weight;
+                        square2 += value2 * value2 * weight;
+                        if (value2 < minimum2)
+                            minimum2 = value2;
+                        if (value2 > maximum2)
+                            maximum2 = value2;
+
+                        if (useHistogram)
+                        {
+                            histogram[Math.Clamp((int)((value0 - low0) / span0 * Bins), 0, Bins - 1)] += weight;
+                            histogram[Bins + Math.Clamp((int)((value1 - low1) / span1 * Bins), 0, Bins - 1)] += weight;
+                            histogram[Bins * 2 + Math.Clamp((int)((value2 - low2) / span2 * Bins), 0, Bins - 1)] += weight;
+                        }
+
+                        if (useGrid)
+                        {
+                            var cell = cellRow + columnCell[column];
+                            gridWeight[cell] += weight;
+                            gridSum[cell * Channels] += value0 * weight;
+                            gridSum[cell * Channels + 1] += value1 * weight;
+                            gridSum[cell * Channels + 2] += value2 * weight;
+                        }
+
+                        weightSum += weight;
                     }
-                    else
+
+                    if (++column == columns)
                     {
-                        var inverse = 1f / alpha;
-                        blue = SrgbToLinear((pixel & 0xFF) * inverse);
-                        green = SrgbToLinear(((pixel >> 8) & 0xFF) * inverse);
-                        red = SrgbToLinear(((pixel >> 16) & 0xFF) * inverse);
+                        column = 0;
+                        rowIndex++;
+                        if (useGrid)
+                            cellRow = Math.Min(rowIndex * GridSize / height, GridSize - 1) * GridSize;
                     }
-
-                    var l = 0.4122214708f * red + 0.5363325363f * green + 0.0514459929f * blue;
-                    var m = 0.2119034982f * red + 0.6806995451f * green + 0.1073969566f * blue;
-                    var s = 0.0883024619f * red + 0.2817188376f * green + 0.6299787005f * blue;
-
-                    var lRoot = MathF.Cbrt(l);
-                    var mRoot = MathF.Cbrt(m);
-                    var sRoot = MathF.Cbrt(s);
-
-                    var weight = alpha / 255.0;
-
-                    double value0 = 0.2104542553f * lRoot + 0.7936177850f * mRoot - 0.0040720468f * sRoot;
-                    sum0 += value0 * weight;
-                    square0 += value0 * value0 * weight;
-                    if (value0 < minimum0)
-                        minimum0 = value0;
-                    if (value0 > maximum0)
-                        maximum0 = value0;
-
-                    double value1 = 1.9779984951f * lRoot - 2.4285922050f * mRoot + 0.4505937099f * sRoot;
-                    sum1 += value1 * weight;
-                    square1 += value1 * value1 * weight;
-                    if (value1 < minimum1)
-                        minimum1 = value1;
-                    if (value1 > maximum1)
-                        maximum1 = value1;
-
-                    double value2 = 0.0259040371f * lRoot + 0.7827717662f * mRoot - 0.8086757660f * sRoot;
-                    sum2 += value2 * weight;
-                    square2 += value2 * value2 * weight;
-                    if (value2 < minimum2)
-                        minimum2 = value2;
-                    if (value2 > maximum2)
-                        maximum2 = value2;
-
-                    if (useHistogram)
-                    {
-                        histogram[Math.Clamp((int)((value0 - low0) / span0 * Bins), 0, Bins - 1)] += weight;
-                        histogram[Bins + Math.Clamp((int)((value1 - low1) / span1 * Bins), 0, Bins - 1)] += weight;
-                        histogram[Bins * 2 + Math.Clamp((int)((value2 - low2) / span2 * Bins), 0, Bins - 1)] += weight;
-                    }
-
-                    weightSum += weight;
                 }
 
                 Weight = weightSum;
@@ -333,6 +394,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
                         Cumulate(channel);
                     }
                 }
+            }
+
+            private void EnsureColumnCells(int width)
+            {
+                if (_columnCellWidth == width)
+                    return;
+
+                if (_columnCell.Length < width)
+                    _columnCell = new int[width];
+                for (var x = 0; x < width; x++)
+                    _columnCell[x] = Math.Min(x * GridSize / width, GridSize - 1);
+                _columnCellWidth = width;
             }
 
             public double Cumulative(int channel, double value)

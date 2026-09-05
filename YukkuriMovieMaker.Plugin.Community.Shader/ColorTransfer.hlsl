@@ -2,6 +2,7 @@ Texture2D InputTexture : register(t0);
 SamplerState InputSampler : register(s0);
 
 #define LUT_SIZE 128
+#define GRID_SIZE 16
 #define GAMUT_ITERATIONS 10
 
 cbuffer constants : register(b0)
@@ -10,7 +11,14 @@ cbuffer constants : register(b0)
     float lightnessAmount : packoffset(c0.w);
     float3 domainScale : packoffset(c1.x);
     float colorAmount : packoffset(c1.w);
-    float4 transferLut[LUT_SIZE] : packoffset(c2);
+    float4 itemToSceneX : packoffset(c2);
+    float4 itemToSceneY : packoffset(c3);
+    float4 itemToSceneW : packoffset(c4);
+    float4 sceneToGrid : packoffset(c5);
+    float positionAmount : packoffset(c6.x);
+    float3 constantsPad : packoffset(c6.y);
+    float4 transferLut[LUT_SIZE] : packoffset(c7);
+    float4 localDelta[GRID_SIZE * GRID_SIZE] : packoffset(c135);
 };
 
 float3 SrgbToLinear(float3 c)
@@ -76,6 +84,34 @@ float3 SampleTransfer(float3 lab)
     return lerp(low, high, weight);
 }
 
+float3 SampleLocalDelta(float2 uv)
+{
+    float2 position = saturate(uv) * (float)(GRID_SIZE - 1);
+    float2 lowIndex = floor(position);
+    float2 weight = position - lowIndex;
+
+    int2 i0 = (int2)lowIndex;
+    int2 i1 = min(i0 + 1, GRID_SIZE - 1);
+
+    float3 topLeft = localDelta[i0.y * GRID_SIZE + i0.x].xyz;
+    float3 topRight = localDelta[i0.y * GRID_SIZE + i1.x].xyz;
+    float3 bottomLeft = localDelta[i1.y * GRID_SIZE + i0.x].xyz;
+    float3 bottomRight = localDelta[i1.y * GRID_SIZE + i1.x].xyz;
+
+    return lerp(lerp(topLeft, topRight, weight.x), lerp(bottomLeft, bottomRight, weight.x), weight.y);
+}
+
+float3 LocalDeltaAt(float2 itemPosition)
+{
+    float3 homogeneous = float3(itemPosition, 1.0f);
+    float w = dot(itemToSceneW.xyz, homogeneous);
+    if (!(w > 1e-6f))
+        return float3(0.0f, 0.0f, 0.0f);
+
+    float2 scenePoint = float2(dot(itemToSceneX.xyz, homogeneous), dot(itemToSceneY.xyz, homogeneous)) / w;
+    return SampleLocalDelta(scenePoint * sceneToGrid.xy + sceneToGrid.zw);
+}
+
 bool IsInGamut(float3 linearRgb)
 {
     return all(linearRgb >= -1e-4f) && all(linearRgb <= 1.0f + 1e-4f);
@@ -119,10 +155,15 @@ float4 main(
     float3 lab = LinearToOklab(SrgbToLinear(straightSrgb));
     float3 mapped = SampleTransfer(lab);
 
+    float3 delta = float3(0.0f, 0.0f, 0.0f);
+    [branch]
+    if (positionAmount > 0.0f)
+        delta = LocalDeltaAt(posScene.xy) * positionAmount;
+
     float3 transferred = float3(
-        lerp(lab.x, mapped.x, lightnessAmount),
-        lerp(lab.y, mapped.y, colorAmount),
-        lerp(lab.z, mapped.z, colorAmount));
+        lerp(lab.x, mapped.x, lightnessAmount) + lightnessAmount * delta.x,
+        lerp(lab.y, mapped.y, colorAmount) + colorAmount * delta.y,
+        lerp(lab.z, mapped.z, colorAmount) + colorAmount * delta.z);
 
     float3 result = saturate(LinearToSrgb(ToGamut(transferred)));
     return float4(result * src.a, src.a);

@@ -46,6 +46,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
         private int[] _referencePixels = [];
         private int _sourceCount;
         private int _referenceCount;
+        private int _referenceWidth;
+        private int _referenceHeight;
 
         private string _branchName = string.Empty;
         private int _branchNameIndex = -1;
@@ -53,8 +55,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
         private bool _isFirst = true;
         private bool _hasTransfer;
         private Parameters _parameters;
+        private Mapping _mapping;
         private float _lightnessAmount = -1f;
         private float _colorAmount = -1f;
+        private float _positionAmount = -1f;
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
@@ -64,7 +68,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             if (_referenceDepth > 0 && ReferenceEquals(_referenceOwner, _item))
             {
                 _hasTransfer = false;
-                ApplyAmounts(0f, 0f);
+                ApplyAmounts(0f, 0f, 0f);
                 return effectDescription.DrawDescription with { Opacity = 0.0 };
             }
 
@@ -80,6 +84,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             var lightnessAmount = (float)(_item.LightnessAmount.GetValue(frame, length, fps) / 100.0);
             var colorAmount = (float)(_item.ColorAmount.GetValue(frame, length, fps) / 100.0);
             var maximumGain = _item.MaximumGain;
+            var positionAmount = (float)(_item.PositionAmount.GetValue(frame, length, fps) / 100.0);
             var sampleSize = Math.Clamp(_item.SampleSize, MinimumSampleSize, MaximumSampleSize);
 
             var parameters = new Parameters(
@@ -98,9 +103,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             else
                 _hasTransfer = false;
 
+            ApplyMapping(effectDescription);
             ApplyAmounts(
                 _hasTransfer ? lightnessAmount : 0f,
-                _hasTransfer ? colorAmount : 0f);
+                _hasTransfer ? colorAmount : 0f,
+                _hasTransfer && reference == ColorTransferReference.Scene ? positionAmount : 0f);
 
             _parameters = parameters;
             _isFirst = false;
@@ -144,6 +151,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             if (!_analyzer.Analyze(
                 _sourcePixels.AsSpan(0, _sourceCount),
                 _referencePixels.AsSpan(0, _referenceCount),
+                _referenceWidth,
+                _referenceHeight,
                 parameters.Mode,
                 parameters.MaximumGain))
             {
@@ -154,6 +163,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             _effect!.DomainMinimum = _analyzer.DomainMinimum;
             _effect.DomainScale = _analyzer.DomainScale;
             _effect.TransferLut = _analyzer.LutBytes;
+            _effect.LocalDelta = _analyzer.LocalDeltaBytes;
             _hasTransfer = true;
         }
 
@@ -274,6 +284,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             if (!TryMeasure(sourceBounds, sampleSize, out var sourcePlacement)
                 || !TryMeasure(referenceBounds, sampleSize, out var referencePlacement))
                 return false;
+
+            _referenceWidth = referencePlacement.Width;
+            _referenceHeight = referencePlacement.Height;
 
             EnsureBitmaps(dc, sampleSize);
 
@@ -428,7 +441,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             _bitmapSize = sampleSize;
         }
 
-        private void ApplyAmounts(float lightnessAmount, float colorAmount)
+        private void ApplyAmounts(float lightnessAmount, float colorAmount, float positionAmount)
         {
             if (_effect is null)
                 return;
@@ -443,6 +456,66 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
                 _effect.ColorAmount = colorAmount;
                 _colorAmount = colorAmount;
             }
+            if (_positionAmount != positionAmount)
+            {
+                _effect.PositionAmount = positionAmount;
+                _positionAmount = positionAmount;
+            }
+        }
+
+        private void ApplyMapping(EffectDescription effectDescription)
+        {
+            if (_effect is null)
+                return;
+
+            var mapping = BuildMapping(
+                effectDescription.DrawDescription,
+                effectDescription.ScreenSize.Width,
+                effectDescription.ScreenSize.Height);
+
+            if (!_isFirst && _mapping == mapping)
+                return;
+
+            _effect.ItemToSceneX = mapping.RowX;
+            _effect.ItemToSceneY = mapping.RowY;
+            _effect.ItemToSceneW = mapping.RowW;
+            _effect.SceneToGrid = mapping.SceneToGrid;
+            _mapping = mapping;
+        }
+
+        private static Mapping BuildMapping(DrawDescription drawDescription, int screenWidth, int screenHeight)
+        {
+            var plane = (drawDescription.Invert
+                ? Matrix3x2.CreateScale(-1f, 1f, drawDescription.CenterPoint)
+                : Matrix3x2.Identity) * Matrix3x2.CreateScale(drawDescription.Zoom);
+
+            var space = Matrix4x4.CreateRotationZ(MathF.PI * drawDescription.Rotation.Z / 180f)
+                * Matrix4x4.CreateRotationY(MathF.PI * -drawDescription.Rotation.Y / 180f)
+                * Matrix4x4.CreateRotationX(MathF.PI * -drawDescription.Rotation.X / 180f)
+                * Matrix4x4.CreateTranslation(drawDescription.Draw)
+                * drawDescription.Camera
+                * new Matrix4x4(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, -0.001f, 0f, 0f, 0f, 1f);
+
+            var width = screenWidth > 0 ? screenWidth : 1;
+            var height = screenHeight > 0 ? screenHeight : 1;
+
+            return new Mapping(
+                new Vector4(
+                    plane.M11 * space.M11 + plane.M12 * space.M21,
+                    plane.M21 * space.M11 + plane.M22 * space.M21,
+                    plane.M31 * space.M11 + plane.M32 * space.M21 + space.M41,
+                    0f),
+                new Vector4(
+                    plane.M11 * space.M12 + plane.M12 * space.M22,
+                    plane.M21 * space.M12 + plane.M22 * space.M22,
+                    plane.M31 * space.M12 + plane.M32 * space.M22 + space.M42,
+                    0f),
+                new Vector4(
+                    plane.M11 * space.M14 + plane.M12 * space.M24,
+                    plane.M21 * space.M14 + plane.M22 * space.M24,
+                    plane.M31 * space.M14 + plane.M32 * space.M24 + space.M44,
+                    0f),
+                new Vector4(1f / width, 1f / height, 0.5f, 0.5f));
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
@@ -474,7 +547,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             _hasTransfer = false;
             _lightnessAmount = -1f;
             _colorAmount = -1f;
+            _positionAmount = -1f;
         }
+
+        private readonly record struct Mapping(
+            Vector4 RowX,
+            Vector4 RowY,
+            Vector4 RowW,
+            Vector4 SceneToGrid);
 
         private readonly record struct Placement(
             float Left,
