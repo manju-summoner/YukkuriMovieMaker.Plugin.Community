@@ -1340,7 +1340,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-        void ApplyItems(List<DirectoryInfo> dirsInfo, List<FileInfo> filesInfo)
+        void ApplyItems(List<DirectoryInfo> dirsInfo, List<FileInfo> filesInfo, HashSet<string> selectedPaths)
         {
             var oldItemsMap = Items.ToDictionary(x => x.Path, StringComparer.OrdinalIgnoreCase);
             var newItemsList = new List<IExplorerItemViewModel>(dirsInfo.Count + filesInfo.Count);
@@ -1366,7 +1366,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 }
                 else
                 {
-                    newItemsList.Add(new ExplorerDirectoryItemViewModel(d.FullName, d.LastWriteTime));
+                    newItemsList.Add(new ExplorerDirectoryItemViewModel(d.FullName, d.LastWriteTime)
+                    {
+                        IsSelected = selectedPaths.Contains(d.FullName)
+                    });
                 }
             }
 
@@ -1391,7 +1394,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 }
                 else
                 {
-                    newItemsList.Add(new ExplorerFileItemViewModel(f.FullName, f.LastWriteTime));
+                    newItemsList.Add(new ExplorerFileItemViewModel(f.FullName, f.LastWriteTime)
+                    {
+                        IsSelected = selectedPaths.Contains(f.FullName)
+                    });
                 }
             }
 
@@ -1458,6 +1464,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             requestedRecursiveSearchText = recursiveSearch ? searchText : null;
             IsSearching = recursiveSearch;
 
+            var selectedPaths = new HashSet<string>(Items.Where(x => x.IsSelected).Select(x => x.Path), StringComparer.OrdinalIgnoreCase);
+
             (List<(DirectoryInfo dir, bool hasChild)> sidebarDirs, List<DirectoryInfo> dirs, List<FileInfo> files)? result;
             try
             {
@@ -1481,7 +1489,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                         void ReportProgress(List<DirectoryInfo> foundDirs, List<FileInfo> foundFiles) => Application.Current.Dispatcher.Invoke(() =>
                         {
                             if (!token.IsCancellationRequested && Location == currentLocation)
-                                ApplyItems(foundDirs, foundFiles);
+                                ApplyItems(foundDirs, foundFiles, selectedPaths);
                         });
 
                         if (!TryCollectMatchesRecursively(di, options, searchText, listDirs, f, ReportProgress, token))
@@ -1514,7 +1522,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
             var (sidebarDirs, dirsInfo, filesInfo) = result.Value;
 
-            ApplyItems(dirsInfo, filesInfo);
+            ApplyItems(dirsInfo, filesInfo, selectedPaths);
 
             if (pendingRenamePath != null)
             {
