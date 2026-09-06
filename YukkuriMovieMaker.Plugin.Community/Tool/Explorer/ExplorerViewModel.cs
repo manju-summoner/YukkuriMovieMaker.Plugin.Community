@@ -1276,7 +1276,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-        static bool TryCollectFilesRecursively(DirectoryInfo root, EnumerationOptions options, string searchText, List<FileInfo> files, Action<List<FileInfo>> onProgress, CancellationToken token)
+        static bool TryCollectMatchesRecursively(DirectoryInfo root, EnumerationOptions options, string searchText, List<DirectoryInfo> directories, List<FileInfo> files, Action<List<DirectoryInfo>, List<FileInfo>> onProgress, CancellationToken token)
         {
             var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { GetDirectoryIdentity(root) };
             var stack = new Stack<DirectoryInfo>();
@@ -1298,10 +1298,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                             return false;
                         if (ExplorerFilter.IsNameMatch(file.Name, searchText))
                             files.Add(file);
-                        if (reportedCount < files.Count && ProgressInterval <= progressWatch.ElapsedMilliseconds)
+                        if (reportedCount < directories.Count + files.Count && ProgressInterval <= progressWatch.ElapsedMilliseconds)
                         {
-                            reportedCount = files.Count;
-                            onProgress([.. files]);
+                            reportedCount = directories.Count + files.Count;
+                            onProgress([.. directories], [.. files]);
                             progressWatch.Restart();
                         }
                     }
@@ -1314,8 +1314,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     {
                         if (token.IsCancellationRequested)
                             return false;
-                        if (visited.Add(GetDirectoryIdentity(dir)))
-                            stack.Push(dir);
+                        if (!visited.Add(GetDirectoryIdentity(dir)))
+                            continue;
+                        stack.Push(dir);
+                        if (ExplorerFilter.IsNameMatch(dir.Name, searchText))
+                            directories.Add(dir);
                     }
                 }
                 catch { }
@@ -1337,14 +1340,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-        void ApplyItems(List<(DirectoryInfo dir, bool hasChild)> dirsInfo, List<FileInfo> filesInfo)
+        void ApplyItems(List<DirectoryInfo> dirsInfo, List<FileInfo> filesInfo)
         {
             var oldItemsMap = Items.ToDictionary(x => x.Path, StringComparer.OrdinalIgnoreCase);
             var newItemsList = new List<IExplorerItemViewModel>(dirsInfo.Count + filesInfo.Count);
 
-            foreach (var item in dirsInfo)
+            foreach (var d in dirsInfo)
             {
-                var d = item.dir;
                 if (oldItemsMap.TryGetValue(d.FullName, out var oldItem) && oldItem is ExplorerDirectoryItemViewModel oldDir)
                 {
                     if (oldDir.LastWriteTime == d.LastWriteTime)
@@ -1456,7 +1458,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             requestedRecursiveSearchText = recursiveSearch ? searchText : null;
             IsSearching = recursiveSearch;
 
-            (List<(DirectoryInfo dir, bool hasChild)> dirs, List<FileInfo> files)? result;
+            (List<(DirectoryInfo dir, bool hasChild)> sidebarDirs, List<DirectoryInfo> dirs, List<FileInfo> files)? result;
             try
             {
                 result = await Task.Run(() =>
@@ -1472,20 +1474,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                         d.Add((dir, hasChild));
                     }
 
+                    var listDirs = new List<DirectoryInfo>();
                     var f = new List<FileInfo>();
                     if (recursiveSearch)
                     {
-                        void ReportProgress(List<FileInfo> found) => Application.Current.Dispatcher.Invoke(() =>
+                        void ReportProgress(List<DirectoryInfo> foundDirs, List<FileInfo> foundFiles) => Application.Current.Dispatcher.Invoke(() =>
                         {
                             if (!token.IsCancellationRequested && Location == currentLocation)
-                                ApplyItems(d, found);
+                                ApplyItems(foundDirs, foundFiles);
                         });
 
-                        if (!TryCollectFilesRecursively(di, options, searchText, f, ReportProgress, token))
+                        if (!TryCollectMatchesRecursively(di, options, searchText, listDirs, f, ReportProgress, token))
                             return null;
                     }
                     else
                     {
+                        foreach (var (dir, _) in d)
+                            listDirs.Add(dir);
                         foreach (var file in di.EnumerateFiles("*", options))
                         {
                             if (token.IsCancellationRequested)
@@ -1493,7 +1498,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                             f.Add(file);
                         }
                     }
-                    return ((List<(DirectoryInfo dir, bool hasChild)> dirs, List<FileInfo> files)?)(d, f);
+                    return ((List<(DirectoryInfo dir, bool hasChild)> sidebarDirs, List<DirectoryInfo> dirs, List<FileInfo> files)?)(d, listDirs, f);
                 });
             }
             finally
@@ -1507,7 +1512,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
             if (Location != currentLocation) return;
 
-            var (dirsInfo, filesInfo) = result.Value;
+            var (sidebarDirs, dirsInfo, filesInfo) = result.Value;
 
             ApplyItems(dirsInfo, filesInfo);
 
@@ -1533,11 +1538,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 {
                     if (currentSidebarItem.IsExpanded)
                     {
-                        SyncSidebarChildren(currentSidebarItem, dirsInfo);
+                        SyncSidebarChildren(currentSidebarItem, sidebarDirs);
                     }
                     else
                     {
-                        currentSidebarItem.SetHasDummyChild(dirsInfo.Count > 0);
+                        currentSidebarItem.SetHasDummyChild(sidebarDirs.Count > 0);
                     }
                 }
             });
