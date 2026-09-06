@@ -28,6 +28,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         DateTime LastWriteTime { get; }
         ImageSource? Icon { get; }
         ImageSource? Thumbnail { get; }
+        Geometry? Waveform { get; }
+        string? DurationText { get; }
         bool SelectsNameOnlyOnRename { get; }
         ICommand ClearCacheCommand { get; }
     }

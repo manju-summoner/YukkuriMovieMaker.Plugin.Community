@@ -13,8 +13,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
     {
         string path;
         int iconSize = 24, thumbnailSize = 300;
-        CancellationTokenSource? loadIconCts, loadThumbnailCts;
+        CancellationTokenSource? loadIconCts, loadThumbnailCts, loadAudioPreviewCts;
         ImageSource? icon, thumbnail;
+        AudioPreview? audioPreview;
+        bool isAudio;
 
         public string Path => path;
         public string Name { get; private set; }
@@ -62,6 +64,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
+        public Geometry? Waveform
+        {
+            get
+            {
+                StartLoadAudioPreview();
+                return audioPreview?.Waveform;
+            }
+        }
+
+        public string? DurationText
+        {
+            get
+            {
+                StartLoadAudioPreview();
+                if (audioPreview is null)
+                    return null;
+                var duration = audioPreview.Duration;
+                return duration.TotalHours >= 1
+                    ? duration.ToString(@"h\:mm\:ss")
+                    : duration.ToString(@"m\:ss\.f");
+            }
+        }
+
         public bool IsSelected { get; set => Set(ref field, value); } = false;
         public bool IsRenaming { get; set => Set(ref field, value); } = false;
         public string RenameText { get; set => Set(ref field, value); } = string.Empty;
@@ -73,10 +98,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             Name = System.IO.Path.GetFileName(path) ?? path;
             LastWriteTime = lastWriteTime;
             Extension = (System.IO.Path.GetExtension(path) ?? string.Empty).TrimStart('.').ToLowerInvariant();
+            isAudio = AudioPreviewService.IsSupported(path);
             ClearCacheCommand = new ActionCommand(_ => true, _ =>
             {
                 ClearIcon();
                 ClearThumbnail();
+                ClearAudioPreview();
             });
         }
 
@@ -85,15 +112,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             path = newPath;
             Name = System.IO.Path.GetFileName(newPath) ?? newPath;
             Extension = (System.IO.Path.GetExtension(newPath) ?? string.Empty).TrimStart('.').ToLowerInvariant();
+            isAudio = AudioPreviewService.IsSupported(newPath);
             CancelLoadIcon();
             CancelLoadThumbnail();
+            CancelLoadAudioPreview();
             icon = null;
             thumbnail = null;
+            audioPreview = null;
             OnPropertyChanged(nameof(Path));
             OnPropertyChanged(nameof(Name));
             OnPropertyChanged(nameof(Extension));
             OnPropertyChanged(nameof(Icon));
             OnPropertyChanged(nameof(Thumbnail));
+            OnPropertyChanged(nameof(Waveform));
+            OnPropertyChanged(nameof(DurationText));
+        }
+
+        void StartLoadAudioPreview()
+        {
+            if (!isAudio || audioPreview != null || loadAudioPreviewCts != null)
+                return;
+
+            var capturedPath = path;
+            loadAudioPreviewCts = new CancellationTokenSource();
+            _ = LoadAudioPreviewAsync(capturedPath, loadAudioPreviewCts.Token);
         }
 
         async Task LoadIconAsync(string capturedPath, int capturedSize, CancellationToken token)
@@ -184,6 +226,38 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
+        async Task LoadAudioPreviewAsync(string capturedPath, CancellationToken token)
+        {
+            var myCts = loadAudioPreviewCts;
+            try
+            {
+                var result = await AudioPreviewService.LoadAsync(capturedPath, token);
+
+                if (result != null && !token.IsCancellationRequested)
+                {
+                    audioPreview = result;
+                    OnPropertyChanged(nameof(Waveform));
+                    OnPropertyChanged(nameof(DurationText));
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception e)
+            {
+                Log.Default.Write("ExplorerFileItemViewModel.AudioPreview", e);
+            }
+            finally
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (ReferenceEquals(loadAudioPreviewCts, myCts))
+                    {
+                        loadAudioPreviewCts = null;
+                        myCts?.Dispose();
+                    }
+                });
+            }
+        }
+
         public void SetImageSize(int iconSize, int thumbnailSize)
         {
             if (this.iconSize != iconSize)
@@ -218,6 +292,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             cts?.Dispose();
         }
 
+        void CancelLoadAudioPreview()
+        {
+            var cts = loadAudioPreviewCts;
+            loadAudioPreviewCts = null;
+            cts?.Cancel();
+            cts?.Dispose();
+        }
+
         void ClearIcon()
         {
             CancelLoadIcon();
@@ -232,10 +314,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             OnPropertyChanged(nameof(Thumbnail));
         }
 
+        void ClearAudioPreview()
+        {
+            CancelLoadAudioPreview();
+            audioPreview = null;
+            OnPropertyChanged(nameof(Waveform));
+            OnPropertyChanged(nameof(DurationText));
+        }
+
         public void CancelLoad()
         {
             CancelLoadIcon();
             CancelLoadThumbnail();
+            CancelLoadAudioPreview();
         }
 
         public void Dispose() => CancelLoad();
