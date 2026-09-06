@@ -70,7 +70,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 return;
             }
 
-            item.PreviewStart = AudioPreviewService.GetWindowStart(position);
+            item.PreviewPosition = position;
 
             if (item.AudioPreview is not AudioPreview preview || preview.Length <= TimeSpan.Zero)
             {

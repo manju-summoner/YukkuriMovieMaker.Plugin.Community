@@ -47,6 +47,8 @@ WrapListView,,一覧,Wrap List View,换行列表视图,換行列表檢視,목록
 ThumbnailView,,サムネイル,Thumbnail View,缩略图视图,縮圖檢視,썸네일 뷰,Vista de miniaturas,عرض الصور المصغرة,Tampilan Thumbnail,
 IncreaseViewSizeMenuHeader,,ビューを拡大,Increase View Size,放大视图,放大檢視,뷰 크기 확대,Aumentar tamaño de vista,تكبير العرض,Perbesar Ukuran Tampilan,
 DecreaseViewSizeMenuHeader,,ビューを縮小,Decrease View Size,缩小视图,縮小檢視,뷰 크기 축소,Disminuir tamaño de vista,تصغير العرض,Perkecil Ukuran Tampilan,
+IncreaseWaveformLengthMenuHeader,,波形の範囲を広げる,Widen waveform range,扩大波形范围,擴大波形範圍,파형 범위 넓히기,Ampliar el rango de forma de onda,توسيع نطاق الموجة,Perlebar rentang gelombang,
+DecreaseWaveformLengthMenuHeader,,波形の範囲を狭める,Narrow waveform range,缩小波形范围,縮小波形範圍,파형 범위 좁히기,Reducir el rango de forma de onda,تضييق نطاق الموجة,Persempit rentang gelombang,
 AutoPlay,,自動再生,Auto Play,自动播放,自動播放,자동 재생,Reproducción automática,التشغيل التلقائي,Putar Otomatis,
 OmittedFolders,,省略されたフォルダ,Omitted Folders,省略的文件夹,省略的資料夾,생략된 폴더,Carpetas omitidas,المجلدات المحذوفة,Folder yang Dihilangkan,
 DriveList,,ドライブ一覧,Drive List,驱动器列表,磁碟機清單,드라이브 목록,Lista de unidades,قائمة محركات الأقراص,Daftar Drive,

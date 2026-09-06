@@ -1,4 +1,4 @@
-using Microsoft.Xaml.Behaviors;
+﻿using Microsoft.Xaml.Behaviors;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -45,6 +45,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         public ActionCommand CreateNewViewCommand { get; }
         public ActionCommand IncreaseLayoutSizeCommand { get; }
         public ActionCommand DecreaseLayoutSizeCommand { get; }
+        public ActionCommand IncreaseWaveformLengthCommand { get; }
+        public ActionCommand DecreaseWaveformLengthCommand { get; }
         public ActionCommand CopyCommand { get; }
         public ActionCommand CutCommand { get; }
         public ActionCommand PasteCommand { get; }
@@ -80,6 +82,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             CreateNewViewCommand,
             IncreaseLayoutSizeCommand,
             DecreaseLayoutSizeCommand,
+            IncreaseWaveformLengthCommand,
+            DecreaseWaveformLengthCommand,
             CopyCommand,
             CutCommand,
             PasteCommand,
@@ -127,6 +131,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         public ExplorerSortKey SortKey { get; set => Set(ref field, value, nameof(SortKey), nameof(IsSortByName), nameof(IsSortByLastWriteTime), nameof(IsSortByExtension)); } = ExplorerSortKey.Name;
         public ExplorerSortOrder SortOrder { get; set => Set(ref field, value, nameof(SortOrder), nameof(IsSortAscending), nameof(IsSortDescending)); } = ExplorerSortOrder.Ascending;
+
+        public TimeSpan WaveformLength { get; private set => Set(ref field, value); } = AudioPreviewService.DefaultWindowLength;
 
         public bool IsSortByName => SortKey == ExplorerSortKey.Name;
         public bool IsSortByLastWriteTime => SortKey == ExplorerSortKey.LastWriteTime;
@@ -232,7 +238,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     if (x is not string path || string.IsNullOrEmpty(path)) return;
                     var toolState = new ToolState()
                     {
-                        SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible })
+                        SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible, WaveformLength = WaveformLength })
                     };
                     CreateNewToolViewRequested?.Invoke(this, new CreateNewToolViewRequestedEventArgs(toolState));
                 });
@@ -245,7 +251,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     {
                         var toolState = new ToolState()
                         {
-                            SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible })
+                            SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible, WaveformLength = WaveformLength })
                         };
                         CreateNewToolViewRequested?.Invoke(this, new CreateNewToolViewRequestedEventArgs(toolState));
                     }
@@ -264,6 +270,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     Layout.DecreaseLayoutSize();
                     RaiseCommandExecutable();
                 });
+            IncreaseWaveformLengthCommand = new ActionCommand(
+                _ => GetWaveformLengthIndex() < AudioPreviewService.SupportedWindowLengths.Length - 1,
+                _ => SetWaveformLength(GetWaveformLengthIndex() + 1));
+            DecreaseWaveformLengthCommand = new ActionCommand(
+                _ => 0 < GetWaveformLengthIndex(),
+                _ => SetWaveformLength(GetWaveformLengthIndex() - 1));
 
             CopyCommand = new ActionCommand(p => GetActiveSelectedPaths(p).Length > 0, p => ShellClipboard.CopyFiles(GetActiveSelectedPaths(p)));
             CutCommand = new ActionCommand(p => GetActiveSelectedPaths(p).Length > 0, p => ShellClipboard.CutFiles(GetActiveSelectedPaths(p)));
@@ -1086,6 +1098,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 RequestRefresh();
         }
 
+        int GetWaveformLengthIndex()
+        {
+            var index = Array.IndexOf(AudioPreviewService.SupportedWindowLengths, WaveformLength);
+            return index < 0 ? Array.IndexOf(AudioPreviewService.SupportedWindowLengths, AudioPreviewService.DefaultWindowLength) : index;
+        }
+
+        void SetWaveformLength(int index)
+        {
+            WaveformLength = AudioPreviewService.SupportedWindowLengths[Math.Clamp(index, 0, AudioPreviewService.SupportedWindowLengths.Length - 1)];
+            UpdateItemsWaveformLength();
+            RaiseCommandExecutable();
+        }
+
+        private void UpdateItemsWaveformLength()
+        {
+            foreach (var item in Items)
+                item.SetWaveformLength(WaveformLength);
+        }
+
         private void UpdateItemsImageSize()
         {
             var dpiScale = Math.Max(lastDpiScale.DpiScaleX, lastDpiScale.DpiScaleY);
@@ -1434,6 +1465,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     item.PropertyChanged += ItemViewModel_PropertyChanged;
                 }
                 item.SetImageSize((int)(Layout.IconSize * dpiScale), (int)(300 * dpiScale));
+                item.SetWaveformLength(WaveformLength);
             }
 
             BeginSelectionChange();
@@ -1742,13 +1774,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             SortOrder = state.SortOrder;
             SidebarWidth = state.SidebarWidth;
             IsSidebarVisible = state.IsSidebarVisible;
+            WaveformLength = state.WaveformLength;
             RequestRefresh();
             UpdateFilteredItems();
         }
 
         public ToolState SaveState() => new()
         {
-            SavedState = Json.Json.GetJsonText(new ExplorerState(Location, Layout.Clone(), Filter) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible })
+            SavedState = Json.Json.GetJsonText(new ExplorerState(Location, Layout.Clone(), Filter) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible, WaveformLength = WaveformLength })
         };
 
         static double NormalizeSidebarWidth(double value)

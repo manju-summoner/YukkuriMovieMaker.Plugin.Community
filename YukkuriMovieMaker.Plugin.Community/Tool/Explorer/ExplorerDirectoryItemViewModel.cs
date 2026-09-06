@@ -44,8 +44,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         public ImageSource? Thumbnail => null;
         public bool IsAudio => false;
-        public TimeSpan PreviewStart { get => TimeSpan.Zero; set { } }
+        public TimeSpan PreviewPosition { get => TimeSpan.Zero; set { } }
         public AudioPreview? AudioPreview => null;
+        public void SetWaveformLength(TimeSpan length) { }
         public bool IsSelected { get; set => Set(ref field, value); } = false;
         public bool IsRenaming { get; set => Set(ref field, value); } = false;
         public string RenameText { get; set => Set(ref field, value); } = string.Empty;

@@ -21,8 +21,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         const int Height = 48;
         const int ReadFrames = 16384;
 
-        static readonly TimeSpan WindowLength = TimeSpan.FromSeconds(30);
         static readonly SemaphoreSlim gate = new(Math.Clamp(Environment.ProcessorCount / 4, 2, 4));
+
+        public static TimeSpan[] SupportedWindowLengths { get; } =
+        [
+            TimeSpan.FromSeconds(5),
+            TimeSpan.FromSeconds(10),
+            TimeSpan.FromSeconds(15),
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(60),
+            TimeSpan.FromSeconds(120),
+        ];
+
+        public static TimeSpan DefaultWindowLength { get; } = TimeSpan.FromSeconds(30);
 
         public static bool IsSupported(string path)
         {
@@ -36,20 +47,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-        public static TimeSpan GetWindowStart(TimeSpan position)
+        public static TimeSpan GetWindowStart(TimeSpan position, TimeSpan windowLength)
         {
-            if (position <= TimeSpan.Zero)
+            if (position <= TimeSpan.Zero || windowLength <= TimeSpan.Zero)
                 return TimeSpan.Zero;
-            return TimeSpan.FromTicks(position.Ticks / WindowLength.Ticks * WindowLength.Ticks);
+            return TimeSpan.FromTicks(position.Ticks / windowLength.Ticks * windowLength.Ticks);
         }
 
-        public static async Task<AudioPreview?> LoadAsync(string path, TimeSpan start, CancellationToken token)
+        public static async Task<AudioPreview?> LoadAsync(string path, TimeSpan start, TimeSpan windowLength, CancellationToken token)
         {
             await gate.WaitAsync(token);
             try
             {
                 token.ThrowIfCancellationRequested();
-                return await Task.Run(() => Load(path, start, token), token);
+                return await Task.Run(() => Load(path, start, windowLength, token), token);
             }
             finally
             {
@@ -57,7 +68,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-        static AudioPreview? Load(string path, TimeSpan start, CancellationToken token)
+        static AudioPreview? Load(string path, TimeSpan start, TimeSpan windowLength, CancellationToken token)
         {
             using var source = AudioFileSourceFactory.Create(path, 0);
             if (source is null)
@@ -71,8 +82,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 start = TimeSpan.Zero;
 
             var length = duration - start;
-            if (length > WindowLength)
-                length = WindowLength;
+            if (length > windowLength)
+                length = windowLength;
 
             var totalFrames = (long)(length.TotalSeconds * source.Hz);
             if (totalFrames <= 0)
