@@ -6,12 +6,14 @@
              xmlns:viewModel="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Node.Editor.ViewModel"
              mc:Ignorable="d"
              d:DesignHeight="10" d:DesignWidth="10"
-             d:DataContext="{d:DesignInstance viewModel:PortViewModel}">
+             d:DataContext="{d:DesignInstance viewModel:PortViewModel}"
+             Background="Transparent"
+             MouseLeftButtonDown="OnMouseLeftButtonDown"
+             MouseLeftButtonUp="OnMouseLeftButtonUp">
     <Grid>
         <Ellipse Width="10"
                  Height="10"
                  Fill="{Binding Color}"
-                 MouseLeftButtonDown="OnMouseLeftButtonDown"
-                 MouseLeftButtonUp="OnMouseLeftButtonUp" />
+                 IsHitTestVisible="False" />
     </Grid>
 </UserControl>

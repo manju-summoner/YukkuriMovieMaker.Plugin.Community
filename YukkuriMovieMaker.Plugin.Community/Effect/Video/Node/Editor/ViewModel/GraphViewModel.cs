@@ -379,7 +379,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
         if (!additive)
             ClearSelection();
 
-        foreach (var node in Nodes)
+        foreach (var node in Nodes.ToList())
         {
             var nodeRect = new Rect(node.X * Zoom + PanX, node.Y * Zoom + PanY, node.Width * Zoom, node.Height * Zoom);
 
@@ -395,7 +395,7 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
         if (!additive)
             ClearSelection();
 
-        foreach (var node in Nodes)
+        foreach (var node in Nodes.ToList())
         {
             var center = TransformToScreen(new Point(
                 node.X + node.Width / 2,
@@ -430,11 +430,15 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
 
     public void AddToSelection(NodeViewModel node)
     {
-        if (SelectedNodes.Contains(node))
-            return;
+        if (!SelectedNodes.Contains(node))
+        {
+            SelectedNodes.Add(node);
+            node.IsSelected = true;
+        }
 
-        SelectedNodes.Add(node);
-        node.IsSelected = true;
+        var index = Nodes.IndexOf(node);
+        if (index >= 0 && index != Nodes.Count - 1)
+            Nodes.Move(index, Nodes.Count - 1);
     }
 
     public void SelectSingle(NodeViewModel node)
@@ -502,6 +506,12 @@ public sealed class GraphViewModel : INotifyPropertyChanged, IDisposable
                 nodeVm.NodeLogic.GetType() != typeof(ArgumentsNode) && nodeVm.NodeLogic.GetType() != typeof(ReturnNode))
             .Select(n => n.Id)
             .ToHashSet();
+
+        if (selectedIds.Count == 0)
+        {
+            clipboard = null;
+            return;
+        }
 
         GraphSnapshot fullSnapshot;
         lock (_graph.GraphLock)

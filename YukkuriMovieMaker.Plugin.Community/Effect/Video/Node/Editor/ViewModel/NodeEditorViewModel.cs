@@ -38,7 +38,10 @@ public sealed class NodeEditorViewModel : INotifyPropertyChanged
         CutCommand = new RelayCommand(Cut, () => SelectedTab?.GraphViewModel.SelectedNodes.Count > 0);
         PasteCommand = new RelayCommand(Paste, () => _clipboard != null);
         DeleteSelectedCommand =
-            new RelayCommand(DeleteSelected, () => SelectedTab?.GraphViewModel.SelectedNodes.Count > 0);
+            new RelayCommand(DeleteSelected, () =>
+                SelectedTab?.GraphViewModel.SelectedNodes.Any(n =>
+                    n.NodeLogic.GetType() != typeof(ArgumentsNode) && n.NodeLogic.GetType() != typeof(ReturnNode))
+                == true);
     }
 
     public ObservableCollection<TabViewModel> Tabs { get; }

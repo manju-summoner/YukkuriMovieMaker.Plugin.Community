@@ -21,6 +21,7 @@ public partial class GraphView
 
     private ConnectionAdorner? _connectionAdorner;
     private NotifyCollectionChangedEventHandler? _connectionsChangedHandler;
+    private bool _ctrlRightPanning;
 
     private bool _isPanning;
     private bool _isSelecting;
@@ -28,6 +29,7 @@ public partial class GraphView
     private SelectionAdornerBase? _selectionAdorner;
     private Point _selectionStart;
     private ObservableCollection<ConnectionViewModel>? _subscribedConnections;
+    private bool _suppressNextContextMenu;
 
     public GraphView()
     {
@@ -149,6 +151,11 @@ public partial class GraphView
         _connectionsChangedHandler = null;
     }
 
+    private static bool IsAdditiveSelectionModifier()
+    {
+        return Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+    }
+
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (DataContext is not GraphViewModel vm) return;
@@ -158,7 +165,7 @@ public partial class GraphView
         _isSelecting = true;
         _selectionStart = e.GetPosition(this);
 
-        if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+        if (!IsAdditiveSelectionModifier())
             vm.ClearSelection();
         if (Mode is GraphControlMode.RectSelection && _selectionAdorner is RectSelectionAdorner rectSelectionAdorner)
             rectSelectionAdorner.Update(_selectionStart, _selectionStart);
@@ -231,7 +238,7 @@ public partial class GraphView
 
         if (_isSelecting)
         {
-            var add = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
+            var add = IsAdditiveSelectionModifier();
             var mode = Mode;
             var selectionAdorner = _selectionAdorner;
 
@@ -256,6 +263,7 @@ public partial class GraphView
     private void OnLostMouseCapture(object sender, MouseEventArgs e)
     {
         _isPanning = false;
+        _ctrlRightPanning = false;
 
         if (!_isSelecting) return;
 
@@ -263,7 +271,7 @@ public partial class GraphView
 
         if (DataContext is not GraphViewModel vm) return;
 
-        var add = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
+        var add = IsAdditiveSelectionModifier();
         var selectionAdorner = _selectionAdorner;
 
         switch (Mode)
@@ -308,6 +316,17 @@ public partial class GraphView
             case MouseButton.Right:
             {
                 if (DataContext is not GraphViewModel vm) return;
+
+                if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+                {
+                    _isPanning = true;
+                    _ctrlRightPanning = true;
+                    _panStart = e.GetPosition(RootGrid);
+                    CaptureMouse();
+                    e.Handled = true;
+                    return;
+                }
+
                 var screen = e.GetPosition(this);
                 var canvas = vm.TransformToCanvas(screen);
                 vm.PendingContextPoint = canvas;
@@ -327,6 +346,16 @@ public partial class GraphView
 
     private void OnMouseUp(object sender, MouseButtonEventArgs e)
     {
+        if (e.ChangedButton == MouseButton.Right && _ctrlRightPanning)
+        {
+            _isPanning = false;
+            _ctrlRightPanning = false;
+            _suppressNextContextMenu = true;
+            ReleaseMouseCapture();
+            e.Handled = true;
+            return;
+        }
+
         if (e.ChangedButton != MouseButton.Middle) return;
 
         if (_isPanning)
@@ -349,6 +378,13 @@ public partial class GraphView
 
     private void OnContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
+        if (_suppressNextContextMenu)
+        {
+            _suppressNextContextMenu = false;
+            e.Handled = true;
+            return;
+        }
+
         if (DataContext is GraphViewModel vm)
         {
             var pos = Mouse.GetPosition(this);

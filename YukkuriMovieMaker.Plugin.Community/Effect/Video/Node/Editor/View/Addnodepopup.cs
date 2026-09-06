@@ -22,21 +22,31 @@ public sealed class AddNodePopup : Popup
 
     public AddNodePopup(Dictionary<string, List<NodeTypeInfo>> nodeCategories, Action<Type> onNodeSelected)
     {
+        Style = null;
+
         _nodeCategories = nodeCategories;
         _onNodeSelected = onNodeSelected;
 
-        _searchBox = new TextBox { MinWidth = 220, Margin = new Thickness(6, 4, 6, 4) };
+        _searchBox = new TextBox
+        {
+            Style = null,
+            MinWidth = 220,
+            Margin = new Thickness(6, 4, 6, 4),
+            Background = SystemColors.WindowBrush,
+            Foreground = SystemColors.WindowTextBrush
+        };
         _searchBox.TextChanged += (_, _) => Rebuild();
 
-        _itemsHost = new StackPanel();
+        _itemsHost = new StackPanel { Style = null };
         var scroll = new ScrollViewer
         {
+            Style = null,
             MaxHeight = 480,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             Content = _itemsHost
         };
 
-        var root = new StackPanel();
+        var root = new StackPanel { Style = null };
         root.Children.Add(_searchBox);
         root.Children.Add(scroll);
 
@@ -46,7 +56,10 @@ public sealed class AddNodePopup : Popup
         PlacementTarget = Application.Current?.MainWindow;
         Child = new Border
         {
+            Style = null,
             BorderThickness = new Thickness(1),
+            BorderBrush = SystemColors.ActiveBorderBrush,
+            Background = SystemColors.MenuBrush,
             Child = root
         };
 
@@ -150,18 +163,23 @@ public sealed class AddNodePopup : Popup
                 if (openChildRow == row) return;
                 CloseChild();
 
-                var childHost = new StackPanel();
+                var childHost = new StackPanel { Style = null };
                 var childPopup = new Popup
                 {
+                    Style = null,
                     AllowsTransparency = false,
                     StaysOpen = true,
                     Placement = PlacementMode.Right,
                     PlacementTarget = row,
                     Child = new Border
                     {
+                        Style = null,
                         BorderThickness = new Thickness(1),
+                        BorderBrush = SystemColors.ActiveBorderBrush, // 親Popupと合わせるために追加を推奨
+                        Background = SystemColors.MenuBrush, // 親Popupと合わせるために追加を推奨
                         Child = new ScrollViewer
                         {
+                            Style = null,
                             MaxHeight = 480,
                             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
                             Content = childHost
@@ -230,6 +248,7 @@ public sealed class AddNodePopup : Popup
         if (!found)
             host.Children.Add(new TextBlock
             {
+                Style = null,
                 Text = TextNode.NoMatchingResults,
                 Foreground = SystemColors.GrayTextBrush,
                 Margin = new Thickness(8, 4, 4, 4)
@@ -238,45 +257,80 @@ public sealed class AddNodePopup : Popup
 
     private static Border CreateRow(string text, bool hasArrow)
     {
-        var grid = new Grid();
+        var grid = new Grid { Style = null };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-        var label = new TextBlock { Text = text, Margin = new Thickness(8, 3, 8, 3) };
+        var label = new TextBlock
+        {
+            Style = null,
+            Text = text, Margin = new Thickness(8, 3, 8, 3), Foreground = SystemColors.WindowTextBrush
+        };
         Grid.SetColumn(label, 0);
         grid.Children.Add(label);
 
         if (hasArrow)
         {
-            var arrow = new TextBlock { Text = "▶", FontSize = 9, Margin = new Thickness(0, 3, 6, 3) };
+            var arrow = new TextBlock
+            {
+                Style = null,
+                Text = "▶", FontSize = 9, Margin = new Thickness(0, 3, 6, 3),
+                Foreground = SystemColors.WindowTextBrush
+            };
             Grid.SetColumn(arrow, 1);
             grid.Children.Add(arrow);
         }
 
-        var row = new Border { Background = Brushes.Transparent, Child = grid };
-        row.MouseEnter += (_, _) => row.Background = SystemColors.HighlightBrush;
-        row.MouseLeave += (_, _) => row.Background = Brushes.Transparent;
+        var row = new Border { Style = null, Background = Brushes.Transparent, Child = grid };
+        row.MouseEnter += (_, _) =>
+        {
+            row.Background = SystemColors.HighlightBrush;
+            label.Foreground = SystemColors.HighlightTextBrush;
+            if (hasArrow && grid.Children.Count > 1 && grid.Children[1] is TextBlock arrowBlock)
+                arrowBlock.Foreground = SystemColors.HighlightTextBrush;
+        };
+        row.MouseLeave += (_, _) =>
+        {
+            row.Background = Brushes.Transparent;
+            label.Foreground = SystemColors.WindowTextBrush;
+            if (hasArrow && grid.Children.Count > 1 && grid.Children[1] is TextBlock arrowBlock)
+                arrowBlock.Foreground = SystemColors.WindowTextBrush;
+        };
         return row;
     }
 
     private Border CreateLeafRow(NodeTypeInfo nodeInfo, string header)
     {
-        var grid = new Grid();
+        var grid = new Grid { Style = null };
         var icon = new Rectangle
         {
+            Style = null,
             Width = 5,
             Height = 12,
             HorizontalAlignment = HorizontalAlignment.Left,
             Margin = new Thickness(8, 3, 0, 3),
             Fill = ColorToBrushConverter.Convert(nodeInfo.Color)
         };
-        var label = new TextBlock { Text = header, Margin = new Thickness(18, 3, 8, 3) };
+        var label = new TextBlock
+        {
+            Style = null,
+            Text = header, Margin = new Thickness(18, 3, 8, 3), Foreground = SystemColors.WindowTextBrush
+        };
         grid.Children.Add(icon);
         grid.Children.Add(label);
 
-        var row = new Border { Background = Brushes.Transparent, ToolTip = nodeInfo.Description, Child = grid };
-        row.MouseEnter += (_, _) => row.Background = SystemColors.HighlightBrush;
-        row.MouseLeave += (_, _) => row.Background = Brushes.Transparent;
+        var row = new Border
+            { Style = null, Background = Brushes.Transparent, ToolTip = nodeInfo.Description, Child = grid };
+        row.MouseEnter += (_, _) =>
+        {
+            row.Background = SystemColors.HighlightBrush;
+            label.Foreground = SystemColors.HighlightTextBrush;
+        };
+        row.MouseLeave += (_, _) =>
+        {
+            row.Background = Brushes.Transparent;
+            label.Foreground = SystemColors.WindowTextBrush;
+        };
         row.MouseLeftButtonUp += (_, _) =>
         {
             _onNodeSelected(nodeInfo.Type);

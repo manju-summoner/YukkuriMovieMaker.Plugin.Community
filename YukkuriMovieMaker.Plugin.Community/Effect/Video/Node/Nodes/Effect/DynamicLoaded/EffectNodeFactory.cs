@@ -193,6 +193,13 @@ public enum PortType
 
 public static class EffectPortCollector
 {
+    internal static string ResolveResourceString(string? key, Type? resourceType)
+    {
+        if (string.IsNullOrEmpty(key)) return "";
+        if (resourceType is null) return key;
+        return resourceType.GetProperty(key)?.GetValue(null)?.ToString() ?? key;
+    }
+
     public static (List<PortDefinition>, List<(PortDefinition, PropertyInfo, object)>) Collect(object root)
     {
         List<PortDefinition> staticResult = [];
@@ -256,7 +263,7 @@ public static class EffectPortCollector
                 Min = anim != null ? (float)anim.MinValue : float.NaN,
                 Max = anim != null ? (float)anim.MaxValue : float.NaN,
                 Digits = slider?.StringFormat != null ? ParseDigits(slider.StringFormat) : 2,
-                Unit = slider?.UnitText ?? ""
+                Unit = ResolveResourceString(slider?.UnitText, resourceType)
             };
         }
 

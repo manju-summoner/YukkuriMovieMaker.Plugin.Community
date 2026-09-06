@@ -14,6 +14,7 @@
              MouseLeftButtonDown="OnMouseLeftButtonDown"
              MouseMove="OnMouseMove"
              MouseLeftButtonUp="OnMouseLeftButtonUp"
+             MouseRightButtonDown="OnMouseRightButtonDown"
              ToolTip="{Binding Description}">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -159,7 +160,8 @@
                         <!-- ボタン -->
                         <Button Content="{x:Static loc:TextUi.OpenSubGraphButton}"
                                 Command="{Binding OpenSubGraphCommand}"
-                                HorizontalAlignment="Left" />
+                                HorizontalAlignment="Left"
+                                Style="{StaticResource NodeEditorButtonStyle}" />
                     </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

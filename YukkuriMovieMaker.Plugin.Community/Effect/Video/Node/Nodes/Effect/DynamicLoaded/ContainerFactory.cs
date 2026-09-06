@@ -151,7 +151,7 @@ public class ContainerFactory
                 Min = slider != null ? (float)slider.DefaultMin : float.NaN,
                 Max = slider != null ? (float)slider.DefaultMax : float.NaN,
                 Digits = slider?.StringFormat != null ? ParseDigits(slider.StringFormat) : 2,
-                Unit = slider?.UnitText ?? ""
+                Unit = EffectPortCollector.ResolveResourceString(slider?.UnitText, resourceType)
             };
         }
 

@@ -83,7 +83,7 @@ public partial class NodeView
         }
         else if (vm != null && graphVm != null)
         {
-            if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+            if ((Keyboard.Modifiers & (ModifierKeys.Shift | ModifierKeys.Control)) != 0)
             {
                 if (graphVm.SelectedNodes.Contains(vm))
                 {
@@ -102,6 +102,16 @@ public partial class NodeView
         }
 
         e.Handled = true;
+    }
+
+    private void OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) return;
+        if (DataContext is not NodeViewModel vm) return;
+        if (FindParent<GraphView>(this)?.DataContext is not GraphViewModel graphVm) return;
+
+        if (!graphVm.SelectedNodes.Contains(vm))
+            graphVm.SelectSingle(vm);
     }
 
     private void OnLostMouseCapture(object sender, MouseEventArgs e)
