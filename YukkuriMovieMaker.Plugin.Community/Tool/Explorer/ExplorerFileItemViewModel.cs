@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +15,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         int iconSize = 24, thumbnailSize = 300;
         CancellationTokenSource? loadIconCts, loadThumbnailCts;
         ImageSource? icon, thumbnail;
+        ExplorerAudioPreviewViewModel? audio;
+        TimeSpan waveformLength = AudioPreviewService.DefaultWindowLength;
+        bool? isAudio;
 
         public string Path => path;
         public string Name { get; private set; }
@@ -62,6 +65,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
+        public ExplorerAudioPreviewViewModel? Audio
+        {
+            get
+            {
+                isAudio ??= AudioPreviewService.IsSupported(path);
+                if (!isAudio.Value)
+                    return null;
+                return audio ??= new ExplorerAudioPreviewViewModel(path, waveformLength);
+            }
+        }
+
         public bool IsSelected { get; set => Set(ref field, value); } = false;
         public bool IsRenaming { get; set => Set(ref field, value); } = false;
         public string RenameText { get; set => Set(ref field, value); } = string.Empty;
@@ -77,6 +91,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             {
                 ClearIcon();
                 ClearThumbnail();
+                audio?.Clear();
             });
         }
 
@@ -85,8 +100,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             path = newPath;
             Name = System.IO.Path.GetFileName(newPath) ?? newPath;
             Extension = (System.IO.Path.GetExtension(newPath) ?? string.Empty).TrimStart('.').ToLowerInvariant();
+            isAudio = null;
             CancelLoadIcon();
             CancelLoadThumbnail();
+            audio?.Cancel();
+            audio = null;
             icon = null;
             thumbnail = null;
             OnPropertyChanged(nameof(Path));
@@ -94,6 +112,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             OnPropertyChanged(nameof(Extension));
             OnPropertyChanged(nameof(Icon));
             OnPropertyChanged(nameof(Thumbnail));
+            OnPropertyChanged(nameof(Audio));
+        }
+
+        public void SetWaveformLength(TimeSpan length)
+        {
+            if (waveformLength == length || length <= TimeSpan.Zero)
+                return;
+            waveformLength = length;
+            audio?.SetWindowLength(length);
         }
 
         async Task LoadIconAsync(string capturedPath, int capturedSize, CancellationToken token)
@@ -236,6 +263,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         {
             CancelLoadIcon();
             CancelLoadThumbnail();
+            audio?.Cancel();
         }
 
         public void Dispose() => CancelLoad();
