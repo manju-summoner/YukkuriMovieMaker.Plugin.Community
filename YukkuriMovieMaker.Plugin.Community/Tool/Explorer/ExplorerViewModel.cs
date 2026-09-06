@@ -156,7 +156,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         readonly CancellationTokenSource disposeCts = new();
         volatile bool isLoading = false;
         const int ProgressInterval = 200;
-        string? lastRecursiveSearchText;
+        string? requestedRecursiveSearchText;
         string? pendingRenamePath;
 
         DpiScale lastDpiScale = new(1, 1);
@@ -1098,7 +1098,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         private void Filter_FilterChanged(object? sender, EventArgs e)
         {
             UpdateFilteredItems();
-            if (Filter.IsRecursiveSearch ? Filter.SearchText != lastRecursiveSearchText : lastRecursiveSearchText != null)
+            if (Filter.IsRecursiveSearch ? Filter.SearchText != requestedRecursiveSearchText : requestedRecursiveSearchText != null)
                 RequestRefresh();
         }
 
@@ -1453,6 +1453,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
             var recursiveSearch = Filter.IsRecursiveSearch;
             var searchText = Filter.SearchText;
+            requestedRecursiveSearchText = recursiveSearch ? searchText : null;
             IsSearching = recursiveSearch;
 
             (List<(DirectoryInfo dir, bool hasChild)> dirs, List<FileInfo> files)? result;
@@ -1505,8 +1506,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 return;
 
             if (Location != currentLocation) return;
-
-            lastRecursiveSearchText = recursiveSearch ? searchText : null;
 
             var (dirsInfo, filesInfo) = result.Value;
 
