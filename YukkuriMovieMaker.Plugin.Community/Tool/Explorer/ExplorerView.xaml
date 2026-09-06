@@ -880,25 +880,32 @@
             </Border>
 
             <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Cursor="SizeWE" Visibility="{Binding IsSidebarVisible,Converter={StaticResource BooleanToVisibilityConverter}}"/>
-            <ListBox Grid.Column="2"
-                     SelectedValue="{Binding ReadOnlyLastSelectedValue, Mode=OneWayToSource}"
-                     ItemsSource="{Binding FilteredItems}"
-                     VirtualizingPanel.IsVirtualizing="True" 
-                     VirtualizingPanel.ScrollUnit="Pixel"
-                     VirtualizingPanel.CacheLength="5"
-                     ScrollViewer.CanContentScroll="True"
-                     Style="{StaticResource FileListBoxStyle}"
-                     ItemContainerStyle="{StaticResource FileListBoxItemStyle}"
-                     SelectionMode="Extended">
-                <i:Interaction.Triggers>
-                    <pt:PreviewMouseWheelEventTrigger DeltaMode="Up" ModifierKeys="Ctrl" Handled="True">
-                        <i:InvokeCommandAction Command="{Binding IncreaseLayoutSizeCommand}"/>
-                    </pt:PreviewMouseWheelEventTrigger>
-                    <pt:PreviewMouseWheelEventTrigger DeltaMode="Down" ModifierKeys="Ctrl" Handled="True">
-                        <i:InvokeCommandAction Command="{Binding DecreaseLayoutSizeCommand}"/>
-                    </pt:PreviewMouseWheelEventTrigger>
-                </i:Interaction.Triggers>
-            </ListBox>
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="{x:Static local:Texts.Searching}" Margin="6,3" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" Visibility="{Binding IsSearching, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <ListBox Grid.Row="1"
+                         SelectedValue="{Binding ReadOnlyLastSelectedValue, Mode=OneWayToSource}"
+                         ItemsSource="{Binding FilteredItems}"
+                         VirtualizingPanel.IsVirtualizing="True" 
+                         VirtualizingPanel.ScrollUnit="Pixel"
+                         VirtualizingPanel.CacheLength="5"
+                         ScrollViewer.CanContentScroll="True"
+                         Style="{StaticResource FileListBoxStyle}"
+                         ItemContainerStyle="{StaticResource FileListBoxItemStyle}"
+                         SelectionMode="Extended">
+                    <i:Interaction.Triggers>
+                        <pt:PreviewMouseWheelEventTrigger DeltaMode="Up" ModifierKeys="Ctrl" Handled="True">
+                            <i:InvokeCommandAction Command="{Binding IncreaseLayoutSizeCommand}"/>
+                        </pt:PreviewMouseWheelEventTrigger>
+                        <pt:PreviewMouseWheelEventTrigger DeltaMode="Down" ModifierKeys="Ctrl" Handled="True">
+                            <i:InvokeCommandAction Command="{Binding DecreaseLayoutSizeCommand}"/>
+                        </pt:PreviewMouseWheelEventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>

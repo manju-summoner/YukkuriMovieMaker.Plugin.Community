@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xaml.Behaviors;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -134,6 +135,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         public TimeSpan WaveformLength { get; private set => Set(ref field, value); } = AudioPreviewService.DefaultWindowLength;
 
+        public bool IsSearching { get; private set => Set(ref field, value); } = false;
+
         public bool IsSortByName => SortKey == ExplorerSortKey.Name;
         public bool IsSortByLastWriteTime => SortKey == ExplorerSortKey.LastWriteTime;
         public bool IsSortByExtension => SortKey == ExplorerSortKey.Extension;
@@ -152,6 +155,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         CancellationTokenSource? sidebarSyncCts;
         readonly CancellationTokenSource disposeCts = new();
         volatile bool isLoading = false;
+        const int ProgressInterval = 200;
         string? lastRecursiveSearchText;
         string? pendingRenamePath;
 
@@ -1272,10 +1276,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-        static bool TryCollectFilesRecursively(DirectoryInfo root, EnumerationOptions options, string searchText, List<FileInfo> files, CancellationToken token)
+        static bool TryCollectFilesRecursively(DirectoryInfo root, EnumerationOptions options, string searchText, List<FileInfo> files, Action<List<FileInfo>> onProgress, CancellationToken token)
         {
             var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { GetDirectoryIdentity(root) };
             var stack = new Stack<DirectoryInfo>();
+            var progressWatch = Stopwatch.StartNew();
+            var reportedCount = 0;
             stack.Push(root);
 
             while (stack.Count > 0)
@@ -1292,6 +1298,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                             return false;
                         if (ExplorerFilter.IsNameMatch(file.Name, searchText))
                             files.Add(file);
+                        if (reportedCount < files.Count && ProgressInterval <= progressWatch.ElapsedMilliseconds)
+                        {
+                            reportedCount = files.Count;
+                            onProgress([.. files]);
+                            progressWatch.Restart();
+                        }
                     }
                 }
                 catch { }
@@ -1325,70 +1337,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-        async Task RefreshCoreAsync(CancellationToken token)
+        void ApplyItems(List<(DirectoryInfo dir, bool hasChild)> dirsInfo, List<FileInfo> filesInfo)
         {
-            var currentLocation = Location;
-            if (watcher != null && !string.Equals(watcher.Path, currentLocation, StringComparison.OrdinalIgnoreCase))
-            {
-                StopFileSystemWatcher();
-            }
-
-            await InitializeDrivesAsync();
-            Application.Current.Dispatcher.Invoke(() => StartSidebarSync(currentLocation, token));
-
-            if (!TryCheckFileSystemAccess(currentLocation, true)) return;
-
-            var options = new EnumerationOptions()
-            {
-                IgnoreInaccessible = true,
-                RecurseSubdirectories = false,
-                ReturnSpecialDirectories = false,
-                AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
-            };
-
-            var recursiveSearch = Filter.IsRecursiveSearch;
-            var searchText = Filter.SearchText;
-
-            var result = await Task.Run(() =>
-            {
-                var di = new DirectoryInfo(currentLocation);
-                var d = new List<(DirectoryInfo dir, bool hasChild)>();
-                foreach (var dir in di.EnumerateDirectories("*", options))
-                {
-                    if (token.IsCancellationRequested)
-                        return null;
-                    bool hasChild = false;
-                    try { hasChild = dir.EnumerateDirectories("*", options).Any(); } catch { }
-                    d.Add((dir, hasChild));
-                }
-
-                var f = new List<FileInfo>();
-                if (recursiveSearch)
-                {
-                    if (!TryCollectFilesRecursively(di, options, searchText, f, token))
-                        return null;
-                }
-                else
-                {
-                    foreach (var file in di.EnumerateFiles("*", options))
-                    {
-                        if (token.IsCancellationRequested)
-                            return null;
-                        f.Add(file);
-                    }
-                }
-                return ((List<(DirectoryInfo dir, bool hasChild)> dirs, List<FileInfo> files)?)(d, f);
-            });
-
-            if (result is null || token.IsCancellationRequested)
-                return;
-
-            if (Location != currentLocation) return;
-
-            lastRecursiveSearchText = recursiveSearch ? searchText : null;
-
-            var (dirsInfo, filesInfo) = result.Value;
-
             var oldItemsMap = Items.ToDictionary(x => x.Path, StringComparer.OrdinalIgnoreCase);
             var newItemsList = new List<IExplorerItemViewModel>(dirsInfo.Count + filesInfo.Count);
 
@@ -1443,18 +1393,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 }
             }
 
-            if (pendingRenamePath != null)
-            {
-                var target = newItemsList.FirstOrDefault(x => string.Equals(x.Path, pendingRenamePath, StringComparison.OrdinalIgnoreCase));
-                if (target != null)
-                {
-                    target.IsRenaming = true;
-                    target.RenameText = target.Name;
-                    target.IsSelected = true;
-                }
-                pendingRenamePath = null;
-            }
-
             var dpiScale = Math.Max(lastDpiScale.DpiScaleX, lastDpiScale.DpiScaleY);
             if (dpiScale <= 0) dpiScale = 1.0;
 
@@ -1484,10 +1422,109 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 removed.Dispose();
             }
 
+            UpdateFilteredItems();
+        }
+
+        async Task RefreshCoreAsync(CancellationToken token)
+        {
+            var currentLocation = Location;
+            if (watcher != null && !string.Equals(watcher.Path, currentLocation, StringComparison.OrdinalIgnoreCase))
+            {
+                StopFileSystemWatcher();
+            }
+
+            await InitializeDrivesAsync();
+            Application.Current.Dispatcher.Invoke(() => StartSidebarSync(currentLocation, token));
+
+            if (!TryCheckFileSystemAccess(currentLocation, true))
+            {
+                IsSearching = false;
+                return;
+            }
+
+            var options = new EnumerationOptions()
+            {
+                IgnoreInaccessible = true,
+                RecurseSubdirectories = false,
+                ReturnSpecialDirectories = false,
+                AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
+            };
+
+            var recursiveSearch = Filter.IsRecursiveSearch;
+            var searchText = Filter.SearchText;
+            IsSearching = recursiveSearch;
+
+            (List<(DirectoryInfo dir, bool hasChild)> dirs, List<FileInfo> files)? result;
+            try
+            {
+                result = await Task.Run(() =>
+                {
+                    var di = new DirectoryInfo(currentLocation);
+                    var d = new List<(DirectoryInfo dir, bool hasChild)>();
+                    foreach (var dir in di.EnumerateDirectories("*", options))
+                    {
+                        if (token.IsCancellationRequested)
+                            return null;
+                        bool hasChild = false;
+                        try { hasChild = dir.EnumerateDirectories("*", options).Any(); } catch { }
+                        d.Add((dir, hasChild));
+                    }
+
+                    var f = new List<FileInfo>();
+                    if (recursiveSearch)
+                    {
+                        void ReportProgress(List<FileInfo> found) => Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            if (!token.IsCancellationRequested && Location == currentLocation)
+                                ApplyItems(d, found);
+                        });
+
+                        if (!TryCollectFilesRecursively(di, options, searchText, f, ReportProgress, token))
+                            return null;
+                    }
+                    else
+                    {
+                        foreach (var file in di.EnumerateFiles("*", options))
+                        {
+                            if (token.IsCancellationRequested)
+                                return null;
+                            f.Add(file);
+                        }
+                    }
+                    return ((List<(DirectoryInfo dir, bool hasChild)> dirs, List<FileInfo> files)?)(d, f);
+                });
+            }
+            finally
+            {
+                if (!token.IsCancellationRequested)
+                    IsSearching = false;
+            }
+
+            if (result is null || token.IsCancellationRequested)
+                return;
+
+            if (Location != currentLocation) return;
+
+            lastRecursiveSearchText = recursiveSearch ? searchText : null;
+
+            var (dirsInfo, filesInfo) = result.Value;
+
+            ApplyItems(dirsInfo, filesInfo);
+
+            if (pendingRenamePath != null)
+            {
+                var target = Items.FirstOrDefault(x => string.Equals(x.Path, pendingRenamePath, StringComparison.OrdinalIgnoreCase));
+                if (target != null)
+                {
+                    target.IsRenaming = true;
+                    target.RenameText = target.Name;
+                    target.IsSelected = true;
+                }
+                pendingRenamePath = null;
+            }
+
             Application.Current.Dispatcher.Invoke(() =>
             {
-                UpdateFilteredItems();
-
                 var currentSidebarItem = SidebarItems.FirstOrDefault(x =>
                     string.Equals(x.Path.TrimEnd(Path.DirectorySeparatorChar),
                                   currentLocation.TrimEnd(Path.DirectorySeparatorChar),
