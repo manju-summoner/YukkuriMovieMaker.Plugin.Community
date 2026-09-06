@@ -49,7 +49,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 if (!IsDirectoryVisible)
                     return false;
             }
-            else
+            else if (IsFilteredByExtension)
             {
                 var type = TryGetFileType(item.Path);
                 var ext = item.Extension;
