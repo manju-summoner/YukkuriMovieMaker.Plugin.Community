@@ -702,8 +702,8 @@
                         <MenuItem Header="{x:Static local:Texts.IncreaseViewSizeMenuHeader}" Command="{Binding DataContext.IncreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyPlus}}"/>
                         <MenuItem Header="{x:Static local:Texts.DecreaseViewSizeMenuHeader}" Command="{Binding DataContext.DecreaseLayoutSizeCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.MagnifyMinus}}"/>
                         <Separator/>
-                        <MenuItem Header="{x:Static local:Texts.IncreaseWaveformLengthMenuHeader}" Command="{Binding DataContext.IncreaseWaveformLengthCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                        <MenuItem Header="{x:Static local:Texts.DecreaseWaveformLengthMenuHeader}" Command="{Binding DataContext.DecreaseWaveformLengthCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                        <MenuItem Header="{x:Static local:Texts.IncreaseWaveformLengthMenuHeader}" Command="{Binding DataContext.IncreaseWaveformLengthCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.ArrowExpandHorizontal}}"/>
+                        <MenuItem Header="{x:Static local:Texts.DecreaseWaveformLengthMenuHeader}" Command="{Binding DataContext.DecreaseWaveformLengthCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Icon="{DynamicResource {x:Static icons:IconKeys.ArrowCollapseHorizontal}}"/>
                         <Separator/>
                         <MenuItem Header="{x:Static local:Texts.Sidebar}" IsCheckable="True" IsChecked="{Binding IsSidebarVisible,Mode=TwoWay}"/>
                         <MenuItem Header="{x:Static local:Texts.AutoPlay}" IsCheckable="True" IsChecked="{Binding Source={x:Static local:ExplorerSettings.Default},Path=IsAutoPlay,Mode=TwoWay}"/>
