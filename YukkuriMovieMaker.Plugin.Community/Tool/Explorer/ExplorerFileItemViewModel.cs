@@ -64,6 +64,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
+        public bool IsAudio => isAudio ??= AudioPreviewService.IsSupported(path);
+
         public Geometry? Waveform
         {
             get
@@ -123,17 +125,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             OnPropertyChanged(nameof(Extension));
             OnPropertyChanged(nameof(Icon));
             OnPropertyChanged(nameof(Thumbnail));
+            OnPropertyChanged(nameof(IsAudio));
             OnPropertyChanged(nameof(Waveform));
             OnPropertyChanged(nameof(DurationText));
         }
 
         void StartLoadAudioPreview()
         {
-            if (audioPreview != null || loadAudioPreviewCts != null)
-                return;
-
-            isAudio ??= AudioPreviewService.IsSupported(path);
-            if (!isAudio.Value)
+            if (audioPreview != null || loadAudioPreviewCts != null || !IsAudio)
                 return;
 
             var capturedPath = path;

@@ -66,6 +66,19 @@
                                                                 </EventTrigger>
                                                             </MediaElement.Triggers>
                                                         </MediaElement>
+                                                        <Image MaxWidth="300" MaxHeight="300">
+                                                            <Image.Style>
+                                                                <Style TargetType="Image">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsAudio}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                            <Setter Property="Source" Value="{Binding Thumbnail}"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Image.Style>
+                                                        </Image>
                                                         <StackPanel Style="{StaticResource WaveformPanelStyle}">
                                                             <Grid Height="48">
                                                                 <Path Data="{Binding Waveform}"
