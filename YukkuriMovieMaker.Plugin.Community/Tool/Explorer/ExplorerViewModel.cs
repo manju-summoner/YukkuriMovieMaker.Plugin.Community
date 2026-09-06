@@ -146,6 +146,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         CancellationTokenSource? sidebarSyncCts;
         readonly CancellationTokenSource disposeCts = new();
         volatile bool isLoading = false;
+        string? lastRecursiveSearchText;
         string? pendingRenamePath;
 
         DpiScale lastDpiScale = new(1, 1);
@@ -1078,7 +1079,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 FavoriteUrls.Add(new AddressBarSuggestion(fav.Name, fav.Url, fav.Url, AddressBarSuggestionSource.External));
         }
 
-        private void Filter_FilterChanged(object? sender, EventArgs e) => UpdateFilteredItems();
+        private void Filter_FilterChanged(object? sender, EventArgs e)
+        {
+            UpdateFilteredItems();
+            if (Filter.IsRecursiveSearch ? Filter.SearchText != lastRecursiveSearchText : lastRecursiveSearchText != null)
+                RequestRefresh();
+        }
 
         private void UpdateItemsImageSize()
         {
@@ -1256,6 +1262,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
             };
 
+            var recursiveSearch = Filter.IsRecursiveSearch;
+            var searchText = Filter.SearchText;
+            var fileOptions = recursiveSearch
+                ? new EnumerationOptions()
+                {
+                    IgnoreInaccessible = true,
+                    RecurseSubdirectories = true,
+                    ReturnSpecialDirectories = false,
+                    AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
+                }
+                : options;
+
             var result = await Task.Run(() =>
             {
                 var di = new DirectoryInfo(currentLocation);
@@ -1270,10 +1288,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 }
 
                 var f = new List<FileInfo>();
-                foreach (var file in di.EnumerateFiles("*", options))
+                foreach (var file in di.EnumerateFiles("*", fileOptions))
                 {
                     if (token.IsCancellationRequested)
                         return null;
+                    if (recursiveSearch && !ExplorerFilter.IsNameMatch(file.Name, searchText))
+                        continue;
                     f.Add(file);
                 }
                 return ((List<(DirectoryInfo dir, bool hasChild)> dirs, List<FileInfo> files)?)(d, f);
@@ -1283,6 +1303,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 return;
 
             if (Location != currentLocation) return;
+
+            lastRecursiveSearchText = recursiveSearch ? searchText : null;
 
             var (dirsInfo, filesInfo) = result.Value;
 

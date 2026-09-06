@@ -533,7 +533,7 @@
             </c:SplitButton>
             <Button Grid.Column="6" Content="{DynamicResource {x:Static icons:IconKeys.Plus}}" Command="{Binding CreateNewViewFromPathCommand}" CommandParameter="{Binding Location}" ToolTip="{x:Static local:Texts.OpenNewTabMenuHeader}" Style="{StaticResource ToolBarButtonStyle}"/>
 
-            <c:PopupButton Grid.Column="8" PopupWidth="300" PopupHeight="100" ResizeMode="None" Padding="3" Height="26" ToolTip="{x:Static local:Texts.Filter}">
+            <c:PopupButton Grid.Column="8" PopupWidth="300" PopupHeight="130" ResizeMode="None" Padding="3" Height="26" ToolTip="{x:Static local:Texts.Filter}">
                 <c:PopupButton.Style>
                     <Style TargetType="{x:Type c:PopupButton}">
                         <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.FilterOff}}"/>
@@ -563,6 +563,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <CheckBox Grid.Row="0" Grid.Column="0" Content="{x:Static local:Texts.Video}" IsChecked="{Binding Filter.IsVideoVisible,Mode=TwoWay}"/>
@@ -571,6 +572,7 @@
                         <CheckBox Grid.Row="0" Grid.Column="1" Content="{x:Static local:Texts.Text}" IsChecked="{Binding Filter.IsTextVisible,Mode=TwoWay}"/>
                         <CheckBox Grid.Row="1" Grid.Column="1" Content="{x:Static local:Texts.Folder}" IsChecked="{Binding Filter.IsDirectoryVisible,Mode=TwoWay}"/>
                         <CheckBox Grid.Row="2" Grid.Column="1" Content="{x:Static local:Texts.Other}" IsChecked="{Binding Filter.IsOtherVisible,Mode=TwoWay}"/>
+                        <CheckBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Content="{x:Static local:Texts.IncludeSubfolders}" IsChecked="{Binding Filter.IsRecursive,Mode=TwoWay}"/>
                     </Grid>
                 </c:PopupButton.PopupContent>
             </c:PopupButton>

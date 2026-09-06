@@ -27,6 +27,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         public bool IsDirectoryVisible { get; set => Set(ref field, value); } = true;
 
         public string SearchText { get; set => Set(ref field, value); } = string.Empty;
+        public bool IsRecursive { get; set => Set(ref field, value); } = false;
+
+        public bool IsRecursiveSearch => IsRecursive && !string.IsNullOrEmpty(SearchText);
 
         static readonly IReadOnlyList<(Predicate<FileType> TypeMatch, Predicate<string> ExtensionMatch, Func<ExplorerFilter, bool> IsVisible)> fileTypeRules =
         [
@@ -58,14 +61,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 }
             }
 
-            if (!string.IsNullOrEmpty(SearchText))
-            {
-                if (!item.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
-                    return false;
-            }
-
-            return true;
+            return IsNameMatch(item.Name, SearchText);
         }
+
+        public static bool IsNameMatch(string name, string searchText) =>
+            string.IsNullOrEmpty(searchText) || name.Contains(searchText, StringComparison.OrdinalIgnoreCase);
 
         public void CopyFrom(ExplorerFilter? other)
         {
@@ -78,6 +78,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             IsOtherVisible = other.IsOtherVisible;
             IsDirectoryVisible = other.IsDirectoryVisible;
             SearchText = other.SearchText;
+            IsRecursive = other.IsRecursive;
         }
 
         protected override bool Set<T>(ref T storage, T value, [CallerMemberName] string name = "", params string[] etcChangedPropertyNames)
@@ -88,6 +89,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 FilterChanged?.Invoke(this, EventArgs.Empty);
                 OnPropertyChanged(nameof(IsFiltered));
                 OnPropertyChanged(nameof(IsFilteredByExtension));
+                OnPropertyChanged(nameof(IsRecursiveSearch));
             }
             return result;
         }
