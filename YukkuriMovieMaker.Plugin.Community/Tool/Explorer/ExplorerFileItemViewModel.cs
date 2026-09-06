@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -66,26 +66,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         public bool IsAudio => isAudio ??= AudioPreviewService.IsSupported(path);
 
-        public Geometry? Waveform
+        public AudioPreview? AudioPreview
         {
             get
             {
                 StartLoadAudioPreview();
-                return audioPreview?.Waveform;
-            }
-        }
-
-        public string? DurationText
-        {
-            get
-            {
-                StartLoadAudioPreview();
-                if (audioPreview is null)
-                    return null;
-                var duration = audioPreview.Duration;
-                return duration.TotalHours >= 1
-                    ? duration.ToString(@"h\:mm\:ss")
-                    : duration.ToString(@"m\:ss\.f");
+                return audioPreview;
             }
         }
 
@@ -126,8 +112,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             OnPropertyChanged(nameof(Icon));
             OnPropertyChanged(nameof(Thumbnail));
             OnPropertyChanged(nameof(IsAudio));
-            OnPropertyChanged(nameof(Waveform));
-            OnPropertyChanged(nameof(DurationText));
+            OnPropertyChanged(nameof(AudioPreview));
         }
 
         void StartLoadAudioPreview()
@@ -238,8 +223,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 if (result != null && !token.IsCancellationRequested)
                 {
                     audioPreview = result;
-                    OnPropertyChanged(nameof(Waveform));
-                    OnPropertyChanged(nameof(DurationText));
+                    OnPropertyChanged(nameof(AudioPreview));
                 }
             }
             catch (OperationCanceledException) { }
@@ -320,8 +304,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         {
             CancelLoadAudioPreview();
             audioPreview = null;
-            OnPropertyChanged(nameof(Waveform));
-            OnPropertyChanged(nameof(DurationText));
+            OnPropertyChanged(nameof(AudioPreview));
         }
 
         public void CancelLoad()
