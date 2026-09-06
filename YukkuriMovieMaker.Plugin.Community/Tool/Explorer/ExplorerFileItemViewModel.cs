@@ -16,7 +16,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         CancellationTokenSource? loadIconCts, loadThumbnailCts, loadAudioPreviewCts;
         ImageSource? icon, thumbnail;
         AudioPreview? audioPreview;
-        bool isAudio;
+        bool? isAudio;
 
         public string Path => path;
         public string Name { get; private set; }
@@ -98,7 +98,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             Name = System.IO.Path.GetFileName(path) ?? path;
             LastWriteTime = lastWriteTime;
             Extension = (System.IO.Path.GetExtension(path) ?? string.Empty).TrimStart('.').ToLowerInvariant();
-            isAudio = AudioPreviewService.IsSupported(path);
             ClearCacheCommand = new ActionCommand(_ => true, _ =>
             {
                 ClearIcon();
@@ -112,7 +111,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             path = newPath;
             Name = System.IO.Path.GetFileName(newPath) ?? newPath;
             Extension = (System.IO.Path.GetExtension(newPath) ?? string.Empty).TrimStart('.').ToLowerInvariant();
-            isAudio = AudioPreviewService.IsSupported(newPath);
+            isAudio = null;
             CancelLoadIcon();
             CancelLoadThumbnail();
             CancelLoadAudioPreview();
@@ -130,7 +129,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         void StartLoadAudioPreview()
         {
-            if (!isAudio || audioPreview != null || loadAudioPreviewCts != null)
+            if (audioPreview != null || loadAudioPreviewCts != null)
+                return;
+
+            isAudio ??= AudioPreviewService.IsSupported(path);
+            if (!isAudio.Value)
                 return;
 
             var capturedPath = path;
