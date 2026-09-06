@@ -1,3 +1,4 @@
+using ComputeWeave;
 using System.Numerics;
 using Vortice;
 using Vortice.Direct2D1;
@@ -18,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
         private readonly IGraphicsDevicesAndContext devices;
         private readonly DirectionalColorKeyEffect item;
-        private readonly DirectionalColorKeyAnalyzer? analyzer = DirectionalColorKeyAnalyzer.TryCreate();
+        private readonly DirectionalColorKeyAnalyzer? analyzer;
 
         private DirectionalColorKeyCustomEffect? effect;
 
@@ -30,6 +31,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
         private int[]? sourceBuffer;
         private int bufferPixelCount;
+
+        private readonly ComputeExternalQueueScheduler? scheduler;
+        private readonly DirectionalColorKeyInteropProvider? interopProvider;
+        private readonly ComputeInteropDomain? interopDomain;
+        private readonly DirectionalColorKeyResourceSet? resourceSet;
+        private readonly DirectionalColorKeyInteropHost? interopHost;
+        private ExternalTextureLease<ExternalDirect3D11TextureView>? foregroundLease;
 
         private bool isFirst = true;
         private bool hasAnalysisCache;
@@ -52,13 +60,62 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         {
             this.devices = devices;
             this.item = item;
+
+            var scheduler = ComputeExternalQueueScheduler.Create();
+            interopProvider = DirectionalColorKeyInteropProvider.TryCreate(devices, scheduler, out var interopDevice);
+
+            analyzer = interopDevice is null
+                ? DirectionalColorKeyAnalyzer.TryCreate()
+                : DirectionalColorKeyAnalyzer.TryCreate(interopDevice);
+
             if (analyzer is not null)
                 disposer.Collect(analyzer);
+
+            if (interopProvider is null || interopDevice is null)
+            {
+                scheduler.Dispose();
+                return;
+            }
+
+            this.scheduler = scheduler;
+
+            try
+            {
+                interopDomain = interopDevice.RegisterExternalDomain(interopProvider);
+                resourceSet = DirectionalColorKeyResourceSet.Create(interopDevice, interopDomain);
+                interopHost = DirectionalColorKeyInteropHost.Create(interopDevice, 2);
+            }
+            catch
+            {
+                ReleaseInterop();
+
+                interopHost = null;
+                resourceSet = null;
+                interopDomain = null;
+                interopProvider = null;
+                this.scheduler = null;
+            }
+        }
+
+        private bool IsInteropAvailable => interopHost is not null && resourceSet is not null && interopProvider is not null;
+
+        private void ReleaseInterop()
+        {
+            foregroundLease?.Dispose();
+            foregroundLease = null;
+
+            interopHost?.Dispose();
+            interopHost?.WaitForDisposal();
+            resourceSet?.Dispose();
+            resourceSet?.WaitForDisposal();
+            interopDomain?.Dispose();
+            interopProvider?.Dispose();
+            scheduler?.Dispose();
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            // GPU（ComputeSharp）が利用できず解析器を生成できなかった場合はパススルーする。
+            // GPU（ComputeWeave）が利用できず解析器を生成できなかった場合はパススルーする。
             if (analyzer is null)
                 return null;
 
@@ -86,6 +143,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             effect?.SetInput(0, null, true);
             effect?.SetInput(1, null, true);
             hasAnalysisCache = false;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                {
+                    ClearEffectChain();
+                    ReleaseInterop();
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
 
         public override DrawDescription Update(EffectDescription effectDescription)
@@ -121,15 +194,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             int pixelCount = width * height;
 
+            bool sharedTexturesReplaced = false;
+            bool useInterop = IsInteropAvailable && TryEnsureInteropTextures(width, height, out sharedTexturesReplaced);
+
             bool sourcePossiblyChanged = isFirst
                 || !hasAnalysisCache
+                || sharedTexturesReplaced
                 || lastFrame != frame
                 || !lastBounds.Equals(bounds);
 
-            bool contentChanged = sourcePossiblyChanged && RenderSourceToBuffer(dc, bounds, width, height);
+            bool contentChanged = sourcePossiblyChanged && (useInterop
+                ? CaptureSourceThroughSharedTexture(bounds, width, height)
+                : RenderSourceToBuffer(dc, bounds, width, height));
 
             bool analysisDirty = isFirst
                 || !hasAnalysisCache
+                || sharedTexturesReplaced
                 || !lastBounds.Equals(bounds)
                 || contentChanged
                 || backgroundColor != currentBackground
@@ -159,7 +239,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 float foregroundLambda = ComputeForegroundLambda(backgroundLab, currentForeground);
 
                 analyzer.Analyze(
-                    sourceBuffer!.AsSpan(0, pixelCount),
+                    useInterop ? default : sourceBuffer!.AsSpan(0, pixelCount),
                     width,
                     height,
                     backgroundLab,
@@ -179,9 +259,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                     currentBackground.R / 255f,
                     currentBackground.G / 255f,
                     currentBackground.B / 255f);
-                var foregroundField = analyzer.BuildForegroundField(width, height, backgroundLab, backgroundSrgb);
-                UploadForegroundField(dc, foregroundField, width, height);
-                effect.SetInput(1, foregroundBitmap, true);
+                if (useInterop)
+                {
+                    WriteForegroundToSharedTexture(width, height, backgroundLab, backgroundSrgb);
+
+                    using var sharedForegroundBitmap = new ID2D1Bitmap1(foregroundLease!.DangerousGetView().AddRefBitmap());
+
+                    effect.SetInput(1, sharedForegroundBitmap, true);
+                }
+                else
+                {
+                    var foregroundField = analyzer.BuildForegroundField(width, height, backgroundLab, backgroundSrgb);
+                    UploadForegroundField(dc, foregroundField, width, height);
+                    effect.SetInput(1, foregroundBitmap, true);
+                }
 
                 hasAnalysisCache = true;
             }
@@ -242,6 +333,72 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             var center = analyzer.GetCenter(index);
             float lambda = analyzer.GetLambda(index);
             return new Vector4(center.X, center.Y, center.Z, lambda);
+        }
+
+        private bool TryEnsureInteropTextures(int width, int height, out bool changed)
+        {
+            changed = false;
+
+            if (!resourceSet!.TryEnsureSource(width, height, out bool sourceReplaced))
+                return false;
+
+            if (!resourceSet.TryEnsureForeground(width, height, out bool foregroundReplaced))
+                return false;
+
+            changed = sourceReplaced || foregroundReplaced;
+
+            if (foregroundReplaced)
+            {
+                foregroundLease?.Dispose();
+                foregroundLease = null;
+            }
+
+            return true;
+        }
+
+        // 入力を共有テクスチャへ直接描き、計算キューがそれを読む。CPUを経由しない。
+        private bool CaptureSourceThroughSharedTexture(RawRectF bounds, int width, int height)
+        {
+            var renderContext = interopProvider!.RenderContext;
+
+            using (var borrow = resourceSet!.BeginSourceExternalOperation())
+            {
+                var previousTarget = renderContext.Target;
+
+                using var sharedSourceBitmap = new ID2D1Bitmap1(borrow.DangerousGetView().AddRefBitmap());
+
+                renderContext.Target = sharedSourceBitmap;
+                renderContext.BeginDraw();
+                renderContext.Clear(null);
+                renderContext.DrawImage(
+                    input!,
+                    new Vector2(-bounds.Left, -bounds.Top),
+                    null,
+                    InterpolationMode.NearestNeighbor,
+                    CompositeMode.SourceCopy);
+                renderContext.EndDraw();
+                renderContext.Target = previousTarget;
+            }
+
+            interopHost!.CaptureSource(
+                resourceSet.GetSourceComputeBinding(),
+                analyzer!.PrepareSource(width, height),
+                width,
+                height).Wait();
+
+            return analyzer.DetectSourceChange();
+        }
+
+        // 前景は初期所有者が計算キューであるため、往復を1度通すまで外部側は貸与を取れない。
+        private void WriteForegroundToSharedTexture(int width, int height, Vector3 backgroundLab, Vector3 backgroundSrgb)
+        {
+            interopHost!.WriteForegroundField(
+                resourceSet!.GetForegroundComputeBinding(),
+                analyzer!.BuildForegroundFieldView(width, height, backgroundLab, backgroundSrgb),
+                width,
+                height).Wait();
+
+            foregroundLease ??= resourceSet.AcquireForegroundExternalViewLease();
         }
 
         private bool RenderSourceToBuffer(ID2D1DeviceContext dc, RawRectF bounds, int width, int height)

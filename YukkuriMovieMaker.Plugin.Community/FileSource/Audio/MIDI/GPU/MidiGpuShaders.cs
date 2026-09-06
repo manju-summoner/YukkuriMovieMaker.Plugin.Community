@@ -1,32 +1,36 @@
-using ComputeSharp;
+using ComputeWeave;
 
 namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.GPU;
 
 [ThreadGroupSize(DefaultThreadGroupSizes.X)]
 [GeneratedComputeShaderDescriptor]
-internal readonly partial struct LimiterShader(ReadWriteBuffer<float> buffer, float threshold) : IComputeShader
+internal readonly partial struct LimiterShader(ReadWriteBuffer<float> buffer, float threshold, int bufferLength) : IComputeShader
 {
     private readonly ReadWriteBuffer<float> buffer = buffer;
     private readonly float threshold = threshold;
+    private readonly int bufferLength = bufferLength;
 
     public void Execute()
     {
         int i = ThreadIds.X;
+        if (i >= bufferLength) return;
         buffer[i] = Hlsl.Clamp(buffer[i], -threshold, threshold);
     }
 }
 
 [ThreadGroupSize(DefaultThreadGroupSizes.X)]
 [GeneratedComputeShaderDescriptor]
-internal readonly partial struct CompressionShader(ReadWriteBuffer<float> buffer, float threshold, float ratio) : IComputeShader
+internal readonly partial struct CompressionShader(ReadWriteBuffer<float> buffer, float threshold, float ratio, int bufferLength) : IComputeShader
 {
     private readonly ReadWriteBuffer<float> buffer = buffer;
     private readonly float threshold = threshold;
     private readonly float ratio = ratio;
+    private readonly int bufferLength = bufferLength;
 
     public void Execute()
     {
         int i = ThreadIds.X;
+        if (i >= bufferLength) return;
         float sample = buffer[i];
         float absSample = Hlsl.Abs(sample);
         if (absSample > threshold)

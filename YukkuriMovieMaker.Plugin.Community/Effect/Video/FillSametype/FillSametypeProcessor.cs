@@ -1,3 +1,4 @@
+using ComputeWeave;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Vortice;
@@ -40,6 +41,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         ID2D1Bitmap1? finalMaskBitmap;
         int finalMaskWidth, finalMaskHeight;
 
+        readonly ComputeExternalQueueScheduler? scheduler;
+        readonly FillSametypeInteropProvider? interopProvider;
+        readonly ComputeInteropDomain? interopDomain;
+        readonly FillSametypeResourceSet? resourceSet;
+        readonly FillSametypeInteropHost? interopHost;
+        ExternalTextureLease<ExternalDirect3D11TextureView>? maskLease;
+
         ID2D1Bitmap1? candidateBitmap;
         ID2D1Bitmap1? candidateStagingBitmap;
         int candidateWidth, candidateHeight;
@@ -48,7 +56,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         ID2D1Bitmap1? seedStagingBitmap;
         readonly byte[] seedPixel = new byte[4];
 
-        readonly FillSametypePipeline pipeline = new();
+        readonly FillSametypePipeline pipeline;
         int[]? foregroundBuffer;
         int[]? maskBuffer;
         int bufferPixelCount;
@@ -71,7 +79,38 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
 
             transparentBrush = devices.DeviceContext.CreateSolidColorBrush(new Color4(0f, 0f, 0f, 0f));
             disposer.Collect(transparentBrush);
+
+            var interopScheduler = ComputeExternalQueueScheduler.Create();
+            interopProvider = FillSametypeInteropProvider.TryCreate(devices, interopScheduler, out var interopDevice);
+
+            pipeline = interopDevice is null ? new FillSametypePipeline() : new FillSametypePipeline(interopDevice);
             disposer.Collect(pipeline);
+
+            if (interopProvider is null || interopDevice is null)
+            {
+                interopScheduler.Dispose();
+            }
+            else
+            {
+                scheduler = interopScheduler;
+
+                try
+                {
+                    interopDomain = interopDevice.RegisterExternalDomain(interopProvider);
+                    resourceSet = FillSametypeResourceSet.Create(interopDevice, interopDomain);
+                    interopHost = FillSametypeInteropHost.Create(interopDevice, 2);
+                }
+                catch
+                {
+                    ReleaseInterop();
+
+                    interopHost = null;
+                    resourceSet = null;
+                    interopDomain = null;
+                    interopProvider = null;
+                    scheduler = null;
+                }
+            }
 
             colorMatchEffect = new FillSametypeCustomEffect(devices);
             if (!colorMatchEffect.IsEnabled)
@@ -129,6 +168,94 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
 
         protected override void setInput(ID2D1Image? input)
         {
+        }
+
+        bool IsInteropAvailable => interopHost is not null && resourceSet is not null;
+
+        void ReleaseInterop()
+        {
+            maskLease?.Dispose();
+            maskLease = null;
+
+            interopHost?.Dispose();
+            interopHost?.WaitForDisposal();
+            resourceSet?.Dispose();
+            resourceSet?.WaitForDisposal();
+            interopDomain?.Dispose();
+            interopProvider?.Dispose();
+            scheduler?.Dispose();
+        }
+
+        // 判定済みの前景を共有テクスチャへ直接描き、計算キューがそれを読む。CPUを経由しない。
+        void RenderForegroundToSharedTexture(RawRectF bounds, int width, int height)
+        {
+            var renderContext = interopProvider!.RenderContext;
+
+            using var borrow = resourceSet!.BeginSourceExternalOperation();
+
+            var previousTarget = renderContext.Target;
+
+            using var sourceBitmap = new ID2D1Bitmap1(borrow.DangerousGetView().AddRefBitmap());
+
+            renderContext.Target = sourceBitmap;
+            renderContext.BeginDraw();
+            renderContext.Clear(null);
+            renderContext.DrawImage(
+                colorMatchOutput!,
+                new Vector2(-bounds.Left, -bounds.Top),
+                null,
+                InterpolationMode.NearestNeighbor,
+                CompositeMode.SourceCopy);
+            renderContext.EndDraw();
+            renderContext.Target = previousTarget;
+        }
+
+        bool TryEnsureInteropSource(int width, int height)
+        {
+            return resourceSet!.TryEnsureSource(width, height, out _);
+        }
+
+        bool TryEnsureInteropMask(int width, int height, out bool changed)
+        {
+            if (!resourceSet!.TryEnsureMask(width, height, out changed))
+                return false;
+
+            if (changed)
+            {
+                maskLease?.Dispose();
+                maskLease = null;
+            }
+
+            return true;
+        }
+
+        // 生成したマスクを共有テクスチャへ直接書き、D2Dがそのまま読む。CPUを経由しない。
+        ID2D1Image? TransformSharedMask(RawRectF bounds)
+        {
+            maskLease ??= resourceSet!.AcquireMaskExternalViewLease();
+
+            if (finalMaskTransform is null || finalMaskTransformOutput is null)
+                return null;
+
+            using var maskBitmap = new ID2D1Bitmap1(maskLease.DangerousGetView().AddRefBitmap());
+
+            finalMaskTransform.TransformMatrix = Matrix3x2.CreateTranslation(bounds.Left, bounds.Top);
+            finalMaskTransform.SetInput(0, maskBitmap, true);
+
+            return finalMaskTransformOutput;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            try
+            {
+                if (disposing)
+                    ReleaseInterop();
+            }
+            finally
+            {
+                base.Dispose(disposing);
+            }
         }
 
         protected override void ClearEffectChain()
@@ -339,12 +466,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
                 || !ColorWithinTolerance(matchColor, lastMatchColor, toleranceRaw)
                 || !lastBounds.Equals(bounds);
 
+            bool maskReplaced = false;
+            bool useInterop = IsInteropAvailable && TryEnsureInteropMask(width, height, out maskReplaced);
+
+            if (maskReplaced)
+                pipeline.InvalidateMatchCache();
+
             int components;
             if (foregroundChanged)
             {
                 PrepareColorMatchEffect(matchColor, toleranceRaw);
-                var rendered = RenderForegroundToBuffer(dc, bounds, width, height);
-                components = pipeline.Analyze(rendered.AsSpan(0, pixelCount), width, height);
+
+                if (useInterop && TryEnsureInteropSource(width, height))
+                {
+                    RenderForegroundToSharedTexture(bounds, width, height);
+                    components = pipeline.AnalyzeShared(interopHost!, resourceSet!.GetSourceComputeBinding(), width, height);
+                }
+                else
+                {
+                    var rendered = RenderForegroundToBuffer(dc, bounds, width, height);
+                    components = pipeline.Analyze(rendered.AsSpan(0, pixelCount), width, height);
+                }
                 lastMatchColor = matchColor;
                 lastForegroundTolerance = toleranceRaw;
                 lastComponentCount = components;
@@ -356,13 +498,33 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             }
 
             int seedIndex = ResolveSeedIndex(seedX, seedY, width, height);
+
             if (components == 0 || seedIndex < 0)
             {
+                pipeline.InvalidateMatchCache();
+
+                if (useInterop)
+                {
+                    interopHost!.ClearMask(resourceSet!.GetMaskComputeBinding(), width, height).Wait();
+                    return TransformSharedMask(bounds);
+                }
+
                 Array.Clear(mask, 0, pixelCount);
                 EnsureFinalMaskBitmap(dc, width, height);
                 finalMaskBitmap!.CopyFromMemory<int>(mask, width * 4);
-                pipeline.InvalidateMatchCache();
                 return TransformFinalMask(bounds);
+            }
+
+            if (useInterop)
+            {
+                pipeline.GenerateMaskShared(
+                    interopHost!,
+                    resourceSet!.GetMaskComputeBinding(),
+                    seedIndex,
+                    (float)Math.Max(0, shapeThresholdRaw),
+                    invert);
+
+                return TransformSharedMask(bounds);
             }
 
             EnsureFinalMaskBitmap(dc, width, height);

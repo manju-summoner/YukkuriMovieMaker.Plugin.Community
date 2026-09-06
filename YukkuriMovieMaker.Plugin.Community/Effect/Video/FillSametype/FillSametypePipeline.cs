@@ -1,4 +1,5 @@
-using ComputeSharp;
+using ComputeWeave;
+using ComputeWeave.Descriptors;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype;
 
@@ -6,7 +7,6 @@ internal sealed class FillSametypePipeline : IDisposable
 {
     readonly GraphicsDevice device;
 
-    ReadOnlyBuffer<int>? labelBuffer;
     ReadOnlyBuffer<float>? centroidBuffer;
     ReadWriteBuffer<int>? histogramBuffer;
     ReadWriteBuffer<float>? featureBuffer;
@@ -30,22 +30,33 @@ internal sealed class FillSametypePipeline : IDisposable
     const int FeatureSize = AngleBins * RadialBins;
     const int MaximumComponents = 65536;
 
-    int[] labels = [];
-    int[] parent = [];
-    int[] rank = [];
-    int[] remap = [];
     double[] moments = [];
     float[] centroids = [];
     int momentCapacity;
 
     public FillSametypePipeline()
+        : this(GraphicsDevice.GetDefault())
     {
-        device = GraphicsDevice.GetDefault();
+    }
+
+    public FillSametypePipeline(GraphicsDevice device)
+    {
+        this.device = device;
     }
 
     public bool IsForeground(int index)
     {
-        return (uint)index < (uint)pixelCount && labels[index] >= 0;
+        return LabelAt(index) >= 0;
+    }
+
+    internal int LabelAt(int index)
+    {
+        if ((uint)index >= (uint)pixelCount || gpuLabelBuffer is null)
+            return -1;
+
+        gpuLabelBuffer.CopyTo(labelProbe, index, 0, 1);
+
+        return labelProbe[0];
     }
 
     public void InvalidateMatchCache()
@@ -56,25 +67,43 @@ internal sealed class FillSametypePipeline : IDisposable
         lastInvert = false;
     }
 
+    public int AnalyzeShared(
+        FillSametypeInteropHost interopHost,
+        ComputeResourceBinding<ReadWriteTexture2D<Bgra32, Float4>> source,
+        int width,
+        int height)
+    {
+        EnsureCapacity(width, height);
+        EnsureLabelResources();
+
+        interopHost.ExtractForeground(source, gpuForegroundBuffer!, width, height).Wait();
+
+        return AnalyzeFromLabels(LabelFromForeground(width, height), width, height);
+    }
+
     public int Analyze(ReadOnlySpan<int> foreground, int width, int height)
     {
         EnsureCapacity(width, height);
 
-        componentCount = Label(foreground, width, height);
+        return AnalyzeFromLabels(LabelOnGpu(foreground, width, height), width, height);
+    }
+
+    int AnalyzeFromLabels(int count, int width, int height)
+    {
+        componentCount = count;
         if (componentCount == 0)
             return 0;
 
         EnsureMomentCapacity(componentCount);
-        ComputeCentroids(width, height, componentCount);
+        ComputeCentroidsOnGpu(width, height, componentCount);
 
-        var labelGpu = EnsureLabelBuffer(pixelCount);
+        var labelGpu = gpuLabelBuffer!.AsReadOnly();
         var centroidGpu = EnsureCentroidBuffer(componentCount);
         var histogramGpu = EnsureHistogramBuffer(componentCount);
         var featureGpu = EnsureFeatureBuffer(componentCount);
         EnsureMatchFlagBuffer(componentCount);
         EnsureMaskBuffer(pixelCount);
 
-        labelGpu.CopyFrom(labels.AsSpan(0, pixelCount));
         centroidGpu.CopyFrom(centroids.AsSpan(0, componentCount * 2));
 
         int histogramLength = componentCount * FeatureSize;
@@ -93,10 +122,206 @@ internal sealed class FillSametypePipeline : IDisposable
         return componentCount;
     }
 
+    const int LabelBlockSize = LabelScanConstants.GroupSize;
+    const int MaximumLabelPasses = 64;
+
+    ReadWriteBuffer<int>? gpuForegroundBuffer;
+    ReadWriteBuffer<int>? gpuParentBuffer;
+    ReadWriteBuffer<int>? gpuRootIdBuffer;
+    ReadWriteBuffer<int>? gpuLabelBuffer;
+    ReadWriteBuffer<int>? gpuBlockCountBuffer;
+    ReadWriteBuffer<int>? gpuBlockOffsetBuffer;
+    ReadWriteBuffer<int>? gpuTotalBuffer;
+    ReadWriteBuffer<int>? gpuChunkOffsetBuffer;
+    ReadWriteBuffer<int>? gpuScalarBuffer;
+    readonly int[] gpuScalar = new int[1];
+    readonly int[] labelProbe = new int[1];
+
+    static int CeilDivide(int value, int divisor) => (value + divisor - 1) / divisor;
+
+    static int GroupAlignedX<T>(int value) where T : struct, IComputeShaderDescriptor<T>
+        => CeilDivide(value, T.ThreadsX) * T.ThreadsX;
+
+    static int GroupAlignedY<T>(int value) where T : struct, IComputeShaderDescriptor<T>
+        => CeilDivide(value, T.ThreadsY) * T.ThreadsY;
+
+    ReadWriteBuffer<int> EnsureExact(ref ReadWriteBuffer<int>? buffer, int count)
+    {
+        if (buffer is null || buffer.Length < count)
+        {
+            buffer?.Dispose();
+            buffer = device.AllocateReadWriteBuffer<int>(count);
+        }
+
+        return buffer;
+    }
+
+    // 連結成分のラベル付けをGPUで行う。根は成分の最小添字とし、根を添字順に数えて
+    // 番号を振るため、CPU実装の走査順の付番と一致する。
+    ReadWriteBuffer<uint>? gpuMomentBuffer;
+    uint[] momentReadback = [];
+
+    void ComputeCentroidsOnGpu(int width, int height, int componentCount)
+    {
+        int length = componentCount * MomentConstants.Stride;
+
+        if (gpuMomentBuffer is null || gpuMomentBuffer.Length < length)
+        {
+            gpuMomentBuffer?.Dispose();
+            gpuMomentBuffer = device.AllocateReadWriteBuffer<uint>(length);
+        }
+
+        if (momentReadback.Length < length)
+            momentReadback = new uint[length];
+
+        device.For(length, new ClearMomentShader(gpuMomentBuffer, length));
+        if (componentCount <= MomentConstants.LocalComponents)
+            device.For(GroupAlignedX<MomentAccumulateLocalShader>(width), GroupAlignedY<MomentAccumulateLocalShader>(height), new MomentAccumulateLocalShader(gpuLabelBuffer!, gpuMomentBuffer, componentCount, width, height));
+        else
+            device.For(width, height, new MomentAccumulateShader(gpuLabelBuffer!, gpuMomentBuffer, componentCount, width, height));
+
+        gpuMomentBuffer.CopyTo(momentReadback.AsSpan(0, length));
+
+        for (int c = 0; c < componentCount; c++)
+        {
+            int slot = c * MomentConstants.Stride;
+
+            double area = momentReadback[slot + MomentConstants.Area];
+            double sumX = (momentReadback[slot + MomentConstants.SumXCarry] * 4294967296d) + momentReadback[slot + MomentConstants.SumXLow];
+            double sumY = (momentReadback[slot + MomentConstants.SumYCarry] * 4294967296d) + momentReadback[slot + MomentConstants.SumYLow];
+
+            int b = c * MomentStride;
+            moments[b + 0] = area;
+            moments[b + 1] = sumX;
+            moments[b + 2] = sumY;
+
+            centroids[c * 2 + 0] = (float)(sumX / area);
+            centroids[c * 2 + 1] = (float)(sumY / area);
+        }
+    }
+
+    int LabelOnGpu(ReadOnlySpan<int> foreground, int width, int height)
+    {
+        EnsureCapacity(width, height);
+        EnsureLabelResources();
+
+        gpuForegroundBuffer!.CopyFrom(foreground[..pixelCount]);
+
+        return LabelFromForeground(width, height);
+    }
+
+    void EnsureLabelResources()
+    {
+        int blockCount = CeilDivide(pixelCount, LabelBlockSize);
+        int chunkCount = CeilDivide(blockCount, LabelBlockSize);
+
+        EnsureExact(ref gpuForegroundBuffer, pixelCount);
+        EnsureExact(ref gpuParentBuffer, pixelCount);
+        EnsureExact(ref gpuRootIdBuffer, pixelCount);
+        EnsureExact(ref gpuLabelBuffer, pixelCount);
+        EnsureExact(ref gpuBlockCountBuffer, blockCount);
+        EnsureExact(ref gpuBlockOffsetBuffer, blockCount);
+        EnsureExact(ref gpuTotalBuffer, chunkCount);
+        EnsureExact(ref gpuChunkOffsetBuffer, chunkCount);
+        EnsureExact(ref gpuScalarBuffer, 1);
+    }
+
+    int LabelFromForeground(int width, int height)
+    {
+
+        int blockCount = CeilDivide(pixelCount, LabelBlockSize);
+        int chunkCount = CeilDivide(blockCount, LabelBlockSize);
+
+        var foregroundGpu = gpuForegroundBuffer!;
+        var parentGpu = gpuParentBuffer!;
+        var rootIdGpu = gpuRootIdBuffer!;
+        var labelGpu = gpuLabelBuffer!;
+        var blockCountGpu = gpuBlockCountBuffer!;
+        var blockOffsetGpu = gpuBlockOffsetBuffer!;
+        var totalGpu = gpuTotalBuffer!;
+        var chunkOffsetGpu = gpuChunkOffsetBuffer!;
+        var scalarGpu = gpuScalarBuffer!;
+
+        device.For(width, height, new LabelInitShader(foregroundGpu, parentGpu, width, height));
+
+        for (int pass = 0; pass < MaximumLabelPasses; pass++)
+        {
+            gpuScalar[0] = 0;
+            scalarGpu.CopyFrom(gpuScalar.AsSpan(0, 1));
+
+            device.For(width, height, new LabelUnionShader(foregroundGpu, parentGpu, scalarGpu, width, height));
+            device.For(width, height, new LabelCompressShader(foregroundGpu, parentGpu, width, height));
+
+            scalarGpu.CopyTo(gpuScalar.AsSpan(0, 1));
+            if (gpuScalar[0] == 0)
+                break;
+        }
+
+        device.For(blockCount, new LabelBlockCountShader(parentGpu, blockCountGpu, pixelCount, blockCount));
+        device.For(chunkCount, new LabelBlockScanShader(blockCountGpu, blockOffsetGpu, totalGpu, blockCount, chunkCount));
+        device.For(1, new LabelChunkScanShader(totalGpu, chunkOffsetGpu, scalarGpu, chunkCount));
+        device.For(blockCount, new LabelNumberShader(parentGpu, blockOffsetGpu, chunkOffsetGpu, rootIdGpu, pixelCount, blockCount));
+        device.For(width, height, new LabelAssignShader(foregroundGpu, parentGpu, rootIdGpu, labelGpu, MaximumComponents, width, height));
+
+        scalarGpu.CopyTo(gpuScalar.AsSpan(0, 1));
+
+        return Math.Min(gpuScalar[0], MaximumComponents);
+    }
+
+    public bool GenerateMaskShared(
+        FillSametypeInteropHost interopHost,
+        ComputeResourceBinding<ReadWriteTexture2D<Bgra32, Float4>> destination,
+        int seedIndex,
+        float threshold,
+        bool invert)
+    {
+        if (componentCount == 0
+            || gpuLabelBuffer is null
+            || featureBuffer is null
+            || matchFlagBuffer is null)
+        {
+            interopHost.ClearMask(destination, width, height).Wait();
+            return true;
+        }
+
+        int seedComponent = LabelAt(seedIndex);
+        if (seedComponent < 0 || moments[seedComponent * MomentStride] < MinimumComponentArea)
+        {
+            interopHost.ClearMask(destination, width, height).Wait();
+            return true;
+        }
+
+        float similarityThreshold = 1f - Math.Clamp(threshold / 100f, 0f, 1f);
+
+        bool correlationChanged = seedComponent != lastSeedComponent
+            || similarityThreshold != lastSimilarityThreshold
+            || analysisGeneration != lastMatchGeneration;
+
+        bool maskChanged = correlationChanged || invert != lastInvert;
+
+        if (!maskChanged)
+            return false;
+
+        if (correlationChanged)
+        {
+            device.For(componentCount, new CorrelationMatchShader(
+                featureBuffer, matchFlagBuffer, seedComponent, AngleBins, RadialBins, similarityThreshold, componentCount));
+
+            lastSeedComponent = seedComponent;
+            lastSimilarityThreshold = similarityThreshold;
+            lastMatchGeneration = analysisGeneration;
+        }
+
+        lastInvert = invert;
+
+        interopHost.WriteMask(destination, gpuLabelBuffer.AsReadOnly(), matchFlagBuffer, invert ? 1 : 0, width, height).Wait();
+        return true;
+    }
+
     public bool GenerateMask(int seedIndex, float threshold, bool invert, Span<int> maskResult)
     {
         if (componentCount == 0
-            || labelBuffer is null
+            || gpuLabelBuffer is null
             || featureBuffer is null
             || matchFlagBuffer is null
             || maskBuffer is null)
@@ -105,7 +330,7 @@ internal sealed class FillSametypePipeline : IDisposable
             return true;
         }
 
-        int seedComponent = labels[seedIndex];
+        int seedComponent = LabelAt(seedIndex);
         if (seedComponent < 0 || moments[seedComponent * MomentStride] < MinimumComponentArea)
         {
             maskResult.Clear();
@@ -136,124 +361,10 @@ internal sealed class FillSametypePipeline : IDisposable
         lastInvert = invert;
 
         device.For(width, height, new MaskShader(
-            labelBuffer, matchFlagBuffer, maskBuffer, invert ? 1 : 0, width, height));
+            gpuLabelBuffer.AsReadOnly(), matchFlagBuffer, maskBuffer, invert ? 1 : 0, width, height));
 
         maskBuffer.CopyTo(maskResult);
         return true;
-    }
-
-    int Label(ReadOnlySpan<int> foreground, int width, int height)
-    {
-        Array.Fill(remap, -1, 0, pixelCount);
-
-        for (int i = 0; i < pixelCount; i++)
-        {
-            parent[i] = i;
-            rank[i] = 0;
-        }
-
-        for (int y = 0; y < height; y++)
-        {
-            int rowBase = y * width;
-            for (int x = 0; x < width; x++)
-            {
-                int index = rowBase + x;
-                if (foreground[index] == 0)
-                    continue;
-
-                if (x > 0 && foreground[index - 1] != 0)
-                    Union(index, index - 1);
-                if (y > 0 && foreground[index - width] != 0)
-                    Union(index, index - width);
-                if (y > 0 && x > 0 && foreground[index - width - 1] != 0)
-                    Union(index, index - width - 1);
-                if (y > 0 && x < width - 1 && foreground[index - width + 1] != 0)
-                    Union(index, index - width + 1);
-            }
-        }
-
-        int count = 0;
-        for (int i = 0; i < pixelCount; i++)
-        {
-            if (foreground[i] == 0)
-            {
-                labels[i] = -1;
-                continue;
-            }
-
-            int root = Find(i);
-            if (remap[root] < 0)
-            {
-                if (count >= MaximumComponents)
-                {
-                    labels[i] = -1;
-                    continue;
-                }
-                remap[root] = count++;
-            }
-            labels[i] = remap[root];
-        }
-
-        return count;
-    }
-
-    void Union(int a, int b)
-    {
-        int ra = Find(a);
-        int rb = Find(b);
-        if (ra == rb)
-            return;
-        if (rank[ra] < rank[rb])
-            parent[ra] = rb;
-        else if (rank[ra] > rank[rb])
-            parent[rb] = ra;
-        else
-        {
-            parent[rb] = ra;
-            rank[ra]++;
-        }
-    }
-
-    int Find(int x)
-    {
-        while (parent[x] != x)
-        {
-            parent[x] = parent[parent[x]];
-            x = parent[x];
-        }
-        return x;
-    }
-
-    void ComputeCentroids(int width, int height, int componentCount)
-    {
-        Array.Clear(moments, 0, componentCount * MomentStride);
-
-        var moment = moments;
-        var label = labels;
-
-        for (int y = 0; y < height; y++)
-        {
-            int rowBase = y * width;
-            for (int x = 0; x < width; x++)
-            {
-                int c = label[rowBase + x];
-                if (c < 0)
-                    continue;
-
-                int b = c * MomentStride;
-                moment[b + 0] += 1;
-                moment[b + 1] += x;
-                moment[b + 2] += y;
-            }
-        }
-
-        for (int c = 0; c < componentCount; c++)
-        {
-            int b = c * MomentStride;
-            double m00 = moment[b + 0];
-            centroids[c * 2 + 0] = (float)(moment[b + 1] / m00);
-            centroids[c * 2 + 1] = (float)(moment[b + 2] / m00);
-        }
     }
 
     void EnsureMomentCapacity(int count)
@@ -268,27 +379,13 @@ internal sealed class FillSametypePipeline : IDisposable
 
     void EnsureCapacity(int width, int height)
     {
-        if (this.width == width && this.height == height && labels.Length >= width * height)
+        if (this.width == width && this.height == height)
             return;
 
         this.width = width;
         this.height = height;
         pixelCount = width * height;
 
-        labels = new int[pixelCount];
-        parent = new int[pixelCount];
-        rank = new int[pixelCount];
-        remap = new int[pixelCount];
-    }
-
-    ReadOnlyBuffer<int> EnsureLabelBuffer(int count)
-    {
-        if (labelBuffer is null || labelBuffer.Length < count)
-        {
-            labelBuffer?.Dispose();
-            labelBuffer = device.AllocateReadOnlyBuffer<int>(count);
-        }
-        return labelBuffer;
     }
 
     ReadOnlyBuffer<float> EnsureCentroidBuffer(int componentCount)
@@ -349,15 +446,38 @@ internal sealed class FillSametypePipeline : IDisposable
         return (value + divisor - 1) / divisor;
     }
 
+    void DisposeLabelBuffers()
+    {
+        gpuForegroundBuffer?.Dispose();
+        gpuParentBuffer?.Dispose();
+        gpuRootIdBuffer?.Dispose();
+        gpuLabelBuffer?.Dispose();
+        gpuBlockCountBuffer?.Dispose();
+        gpuBlockOffsetBuffer?.Dispose();
+        gpuTotalBuffer?.Dispose();
+        gpuChunkOffsetBuffer?.Dispose();
+        gpuScalarBuffer?.Dispose();
+        gpuMomentBuffer?.Dispose();
+        gpuForegroundBuffer = null;
+        gpuParentBuffer = null;
+        gpuRootIdBuffer = null;
+        gpuLabelBuffer = null;
+        gpuBlockCountBuffer = null;
+        gpuBlockOffsetBuffer = null;
+        gpuTotalBuffer = null;
+        gpuChunkOffsetBuffer = null;
+        gpuScalarBuffer = null;
+        gpuMomentBuffer = null;
+    }
+
     public void Dispose()
     {
-        labelBuffer?.Dispose();
+        DisposeLabelBuffers();
         centroidBuffer?.Dispose();
         histogramBuffer?.Dispose();
         featureBuffer?.Dispose();
         matchFlagBuffer?.Dispose();
         maskBuffer?.Dispose();
-        labelBuffer = null;
         centroidBuffer = null;
         histogramBuffer = null;
         featureBuffer = null;

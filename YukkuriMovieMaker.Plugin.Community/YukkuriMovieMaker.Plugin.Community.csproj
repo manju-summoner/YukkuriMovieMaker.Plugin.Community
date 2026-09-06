@@ -92,10 +92,10 @@
     <PackageReference Include="Whisper.net.Runtime.OpenVino" Version="1.9.1" />
     <PackageReference Include="Whisper.net.Runtime.Vulkan" Version="1.9.1" />
     <PackageReference Include="YamlDotNet" Version="18.1.0" />
-	<PackageReference Include="System.Management" Version="10.0.11" />
-	<PackageReference Include="ComputeSharp" Version="3.2.0" />
-	<PackageReference Include="MeltySynth" Version="2.4.1" />
-	<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
+    <PackageReference Include="System.Management" Version="10.0.11" />
+    <PackageReference Include="ComputeWeave" Version="2.4.0" />
+    <PackageReference Include="MeltySynth" Version="2.4.1" />
+    <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
   </ItemGroup>
 
   <!--ビルド後、YMM4フォルダに関連ファイルをコピーする（Resources\bin\x64\vst3等のサブフォルダーも含む）-->
@@ -137,7 +137,7 @@
     <Content Include="Resources\License\GeneralUserGS.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-	<Content Include="Resources\License\ComputeSharp.txt">
+	<Content Include="Resources\License\ComputeWeave.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\License\MeltySynth.txt">

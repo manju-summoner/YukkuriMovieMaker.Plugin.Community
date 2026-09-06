@@ -1,4 +1,4 @@
-using ComputeSharp;
+using ComputeWeave;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey;
 
@@ -23,7 +23,7 @@ internal static class DirectionFieldConstants
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
 internal readonly partial struct DisplacementFieldShader(
-    ReadOnlyBuffer<int> bgra,
+    IReadOnlyBuffer<int> bgra,
     ReadWriteBuffer<float> colorLab,
     ReadWriteBuffer<float> directions,
     float backgroundL,
@@ -33,7 +33,7 @@ internal readonly partial struct DisplacementFieldShader(
     int width,
     int height) : IComputeShader
 {
-    private readonly ReadOnlyBuffer<int> bgra = bgra;
+    private readonly IReadOnlyBuffer<int> bgra = bgra;
     private readonly ReadWriteBuffer<float> colorLab = colorLab;
     private readonly ReadWriteBuffer<float> directions = directions;
     private readonly float backgroundL = backgroundL;
@@ -98,8 +98,8 @@ internal readonly partial struct DisplacementFieldShader(
 
         float len = Hlsl.Sqrt(dl * dl + da * da + db * db);
 
-        if (len < noiseThreshold || len <= 1e-6f)
-        {
+		if (len < noiseThreshold || len <= 1e-6f)
+		{
             directions[triple + 0] = 0f;
             directions[triple + 1] = 0f;
             directions[triple + 2] = 0f;
@@ -283,13 +283,13 @@ internal readonly partial struct DirectionSmoothShader(
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
 internal readonly partial struct ChangeSeedShader(
-    ReadOnlyBuffer<int> bgra,
+    IReadOnlyBuffer<int> bgra,
     ReadWriteBuffer<int> previousBgra,
     ReadWriteBuffer<int> seedMask,
     int width,
     int height) : IComputeShader
 {
-    private readonly ReadOnlyBuffer<int> bgra = bgra;
+    private readonly IReadOnlyBuffer<int> bgra = bgra;
     private readonly ReadWriteBuffer<int> previousBgra = previousBgra;
     private readonly ReadWriteBuffer<int> seedMask = seedMask;
     private readonly int width = width;
@@ -623,6 +623,52 @@ internal readonly partial struct CopyDirectionsShader(
     }
 }
 
+// packed byte から線形値への変換は256通りしかない。
+// 伝播ループが近傍ごとに同じ変換を繰り返さないよう、同一の式で表を一度だけ作る。
+[ThreadGroupSize(DefaultThreadGroupSizes.X)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct SrgbToLinearTableShader(
+    ReadWriteBuffer<float> table) : IComputeShader
+{
+    private readonly ReadWriteBuffer<float> table = table;
+
+    public void Execute()
+    {
+        int index = ThreadIds.X;
+        if (index >= 256)
+            return;
+
+        float srgb = index * (1f / 255f);
+
+        table[index] = srgb <= 0.04045f ? srgb / 12.92f : Hlsl.Pow((srgb + 0.055f) / 1.055f, 2.4f);
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct CopyPackedShader(
+    IReadOnlyBuffer<int> source,
+    ReadWriteBuffer<int> target,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly IReadOnlyBuffer<int> source = source;
+    private readonly ReadWriteBuffer<int> target = target;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int index = y * width + x;
+        target[index] = source[index];
+    }
+}
+
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
 internal readonly partial struct MaskCountShader(
@@ -680,42 +726,61 @@ internal readonly partial struct ClusterAssignAccumulateShader(
     private readonly int width = width;
     private readonly int height = height;
 
+    [GroupShared(ClusterAccumulateConstants.SlotCount)]
+    private static readonly int[] partialAccumulators = null!;
+
     public void Execute()
     {
+        int accumulatorLength = clusterCount * 3 + clusterCount;
+
+        for (int slot = GroupIds.Index; slot < accumulatorLength; slot += GroupSize.Count)
+            partialAccumulators[slot] = 0;
+
+        Hlsl.GroupMemoryBarrierWithGroupSync();
+
         int x = ThreadIds.X;
         int y = ThreadIds.Y;
-        if (x >= width || y >= height)
-            return;
 
-        int index = y * width + x;
-        int triple = index * 3;
-
-        float nl = directions[triple + 0];
-        float na = directions[triple + 1];
-        float nb = directions[triple + 2];
-
-        if (nl * nl + na * na + nb * nb < DirectionFieldConstants.ValidLengthSquaredThreshold)
-            return;
-
-        int best = 0;
-        float bestDot = -2f;
-
-        for (int c = 0; c < clusterCount; c++)
+        if (x < width && y < height)
         {
-            int cBase = c * 3;
-            float dot = nl * centers[cBase + 0] + na * centers[cBase + 1] + nb * centers[cBase + 2];
-            if (dot > bestDot)
+            int triple = (y * width + x) * 3;
+
+            float nl = directions[triple + 0];
+            float na = directions[triple + 1];
+            float nb = directions[triple + 2];
+
+            if (nl * nl + na * na + nb * nb >= DirectionFieldConstants.ValidLengthSquaredThreshold)
             {
-                bestDot = dot;
-                best = c;
+                int best = 0;
+                float bestDot = -2f;
+
+                for (int c = 0; c < clusterCount; c++)
+                {
+                    int cBase = c * 3;
+                    float dot = nl * centers[cBase + 0] + na * centers[cBase + 1] + nb * centers[cBase + 2];
+                    if (dot > bestDot)
+                    {
+                        bestDot = dot;
+                        best = c;
+                    }
+                }
+
+                int sumBase = best * 3;
+                Hlsl.InterlockedAdd(ref partialAccumulators[sumBase + 0], (int)Hlsl.Round(nl * fixedPointScale));
+                Hlsl.InterlockedAdd(ref partialAccumulators[sumBase + 1], (int)Hlsl.Round(na * fixedPointScale));
+                Hlsl.InterlockedAdd(ref partialAccumulators[sumBase + 2], (int)Hlsl.Round(nb * fixedPointScale));
+                Hlsl.InterlockedAdd(ref partialAccumulators[clusterCount * 3 + best], 1);
             }
         }
 
-        int sumBase = best * 3;
-        Hlsl.InterlockedAdd(ref accumulators[sumBase + 0], (int)Hlsl.Round(nl * fixedPointScale));
-        Hlsl.InterlockedAdd(ref accumulators[sumBase + 1], (int)Hlsl.Round(na * fixedPointScale));
-        Hlsl.InterlockedAdd(ref accumulators[sumBase + 2], (int)Hlsl.Round(nb * fixedPointScale));
-        Hlsl.InterlockedAdd(ref accumulators[clusterCount * 3 + best], 1);
+        Hlsl.GroupMemoryBarrierWithGroupSync();
+
+        for (int slot = GroupIds.Index; slot < accumulatorLength; slot += GroupSize.Count)
+        {
+            int value = partialAccumulators[slot];
+            if (value != 0)
+                Hlsl.InterlockedAdd(ref accumulators[slot], value);
+        }
     }
 }
 
@@ -801,10 +866,9 @@ internal readonly partial struct ProjectionHistogramShader(
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
 internal readonly partial struct ForegroundSeedShader(
-    ReadOnlyBuffer<int> bgra,
+    IReadOnlyBuffer<int> bgra,
     ReadWriteBuffer<float> colorLab,
     ReadWriteBuffer<int> foreground,
-    ReadWriteBuffer<int> valid,
     float backgroundL,
     float backgroundA,
     float backgroundB,
@@ -812,10 +876,9 @@ internal readonly partial struct ForegroundSeedShader(
     int width,
     int height) : IComputeShader
 {
-    private readonly ReadOnlyBuffer<int> bgra = bgra;
+    private readonly IReadOnlyBuffer<int> bgra = bgra;
     private readonly ReadWriteBuffer<float> colorLab = colorLab;
     private readonly ReadWriteBuffer<int> foreground = foreground;
-    private readonly ReadWriteBuffer<int> valid = valid;
     private readonly float backgroundL = backgroundL;
     private readonly float backgroundA = backgroundA;
     private readonly float backgroundB = backgroundB;
@@ -839,7 +902,6 @@ internal readonly partial struct ForegroundSeedShader(
         if (a == 0)
         {
             foreground[index] = 0;
-            valid[index] = 0;
             return;
         }
 
@@ -848,7 +910,6 @@ internal readonly partial struct ForegroundSeedShader(
         if (bgLenSq <= 1e-8f || referencePerp <= 1e-5f)
         {
             foreground[index] = 0;
-            valid[index] = 0;
             return;
         }
 
@@ -865,7 +926,6 @@ internal readonly partial struct ForegroundSeedShader(
         if (perp < referencePerp)
         {
             foreground[index] = 0;
-            valid[index] = 0;
             return;
         }
 
@@ -879,36 +939,19 @@ internal readonly partial struct ForegroundSeedShader(
         int bByte = (int)(bSrgb * 255f + 0.5f);
 
         foreground[index] = (0xFF << 24) | (rByte << 16) | (gByte << 8) | bByte;
-        valid[index] = 1;
     }
 }
 
 [ThreadGroupSize(DefaultThreadGroupSizes.XY)]
 [GeneratedComputeShaderDescriptor]
-internal readonly partial struct ForegroundPropagateShader(
-    ReadWriteBuffer<int> sourceForeground,
-    ReadWriteBuffer<int> sourceValid,
-    ReadOnlyBuffer<int> bgra,
-    ReadWriteBuffer<int> targetForeground,
-    ReadWriteBuffer<int> targetValid,
-    float backgroundR,
-    float backgroundG,
-    float backgroundB,
-    int reach,
-    float sigmaLineSq,
+internal readonly partial struct SharedTextureToBufferShader(
+    IReadWriteNormalizedTexture2D<float4> source,
+    ReadWriteBuffer<int> bgra,
     int width,
     int height) : IComputeShader
 {
-    private readonly ReadWriteBuffer<int> sourceForeground = sourceForeground;
-    private readonly ReadWriteBuffer<int> sourceValid = sourceValid;
-    private readonly ReadOnlyBuffer<int> bgra = bgra;
-    private readonly ReadWriteBuffer<int> targetForeground = targetForeground;
-    private readonly ReadWriteBuffer<int> targetValid = targetValid;
-    private readonly float backgroundR = backgroundR;
-    private readonly float backgroundG = backgroundG;
-    private readonly float backgroundB = backgroundB;
-    private readonly int reach = reach;
-    private readonly float sigmaLineSq = sigmaLineSq;
+    private readonly IReadWriteNormalizedTexture2D<float4> source = source;
+    private readonly ReadWriteBuffer<int> bgra = bgra;
     private readonly int width = width;
     private readonly int height = height;
 
@@ -919,7 +962,180 @@ internal readonly partial struct ForegroundPropagateShader(
         if (x >= width || y >= height)
             return;
 
+        float4 value = source[x, y];
+
+        int b = (int)(Hlsl.Saturate(value.Z) * 255f + 0.5f);
+        int g = (int)(Hlsl.Saturate(value.Y) * 255f + 0.5f);
+        int r = (int)(Hlsl.Saturate(value.X) * 255f + 0.5f);
+        int a = (int)(Hlsl.Saturate(value.W) * 255f + 0.5f);
+
+        bgra[y * width + x] = (a << 24) | (r << 16) | (g << 8) | b;
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct BufferToSharedTextureShader(
+    IReadOnlyBuffer<int> bgra,
+    IReadWriteNormalizedTexture2D<float4> destination,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly IReadOnlyBuffer<int> bgra = bgra;
+    private readonly IReadWriteNormalizedTexture2D<float4> destination = destination;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+        if (x >= width || y >= height)
+            return;
+
+        int packed = bgra[y * width + x];
+
+        destination[x, y] = new float4(
+            ((packed >> 16) & 0xFF) / 255f,
+            ((packed >> 8) & 0xFF) / 255f,
+            ((packed >> 0) & 0xFF) / 255f,
+            ((packed >> 24) & 0xFF) / 255f);
+    }
+}
+
+internal static class PremultipliedLinearConstants
+{
+    public const int AlphaCount = 256;
+    public const int ChannelCount = 256;
+    public const int TableLength = AlphaCount * ChannelCount;
+}
+
+internal static class ClusterAccumulateConstants
+{
+    public const int MaxClusters = 4;
+    public const int SlotCount = MaxClusters * 3 + MaxClusters;
+}
+
+internal static class ForegroundPropagateConstants
+{
+    public const int GroupSize = 8;
+    public const int Radius = 4;
+    public const int TileSize = GroupSize + Radius * 2;
+    public const int TileCount = TileSize * TileSize;
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.XY)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct ForegroundPropagateShader(
+    ReadWriteBuffer<int> sourceForeground,
+    IReadOnlyBuffer<int> bgra,
+    IReadOnlyBuffer<float> srgbToLinear,
+    IReadOnlyBuffer<float> premultipliedLinear,
+    ReadWriteBuffer<int> targetForeground,
+    float backgroundR,
+    float backgroundG,
+    float backgroundB,
+    float sigmaLineSq,
+    int width,
+    int height) : IComputeShader
+{
+    private readonly ReadWriteBuffer<int> sourceForeground = sourceForeground;
+    private readonly IReadOnlyBuffer<int> bgra = bgra;
+    private readonly IReadOnlyBuffer<float> srgbToLinear = srgbToLinear;
+    private readonly IReadOnlyBuffer<float> premultipliedLinear = premultipliedLinear;
+    private readonly ReadWriteBuffer<int> targetForeground = targetForeground;
+    private readonly float backgroundR = backgroundR;
+    private readonly float backgroundG = backgroundG;
+    private readonly float backgroundB = backgroundB;
+    private readonly float sigmaLineSq = sigmaLineSq;
+    private readonly int width = width;
+    private readonly int height = height;
+
+    [GroupShared(ForegroundPropagateConstants.TileCount)]
+    private static readonly int[] foregroundTile = null!;
+    [GroupShared(ForegroundPropagateConstants.TileCount * 3)]
+    private static readonly float[] deltaTile = null!;
+    [GroupShared(ForegroundPropagateConstants.TileCount)]
+    private static readonly float[] lengthTile = null!;
+    [GroupShared(ForegroundPropagateConstants.TileCount)]
+    private static readonly float[] purityTile = null!;
+    [GroupShared(1)]
+    private static readonly int[] tileHasCandidate = null!;
+
+    public void Execute()
+    {
+        int x = ThreadIds.X;
+        int y = ThreadIds.Y;
+
+        if (GroupIds.Index == 0)
+            tileHasCandidate[0] = 0;
+
+        Hlsl.GroupMemoryBarrierWithGroupSync();
+
+        float bgRl = backgroundR <= 0.04045f ? backgroundR / 12.92f : Hlsl.Pow((backgroundR + 0.055f) / 1.055f, 2.4f);
+        float bgGl = backgroundG <= 0.04045f ? backgroundG / 12.92f : Hlsl.Pow((backgroundG + 0.055f) / 1.055f, 2.4f);
+        float bgBl = backgroundB <= 0.04045f ? backgroundB / 12.92f : Hlsl.Pow((backgroundB + 0.055f) / 1.055f, 2.4f);
+        float bgLenSq = bgRl * bgRl + bgGl * bgGl + bgBl * bgBl;
+
+        int originX = x - GroupIds.X - ForegroundPropagateConstants.Radius;
+        int originY = y - GroupIds.Y - ForegroundPropagateConstants.Radius;
+
+        for (int slot = GroupIds.Index; slot < ForegroundPropagateConstants.TileCount; slot += GroupSize.Count)
+        {
+            int localY = slot / ForegroundPropagateConstants.TileSize;
+            int localX = slot - localY * ForegroundPropagateConstants.TileSize;
+            int sampleX = originX + localX;
+            int sampleY = originY + localY;
+            int tileTriple = slot * 3;
+
+            int sample = 0;
+            if (sampleX >= 0 && sampleX < width && sampleY >= 0 && sampleY < height)
+                sample = sourceForeground[sampleY * width + sampleX];
+
+            foregroundTile[slot] = sample;
+
+            if (sample != 0)
+                tileHasCandidate[0] = 1;
+
+            if (sample == 0)
+            {
+                deltaTile[tileTriple + 0] = 0f;
+                deltaTile[tileTriple + 1] = 0f;
+                deltaTile[tileTriple + 2] = 0f;
+                lengthTile[slot] = 0f;
+                purityTile[slot] = 0f;
+                continue;
+            }
+
+            float fr = srgbToLinear[(sample >> 16) & 0xFF];
+            float fg = srgbToLinear[(sample >> 8) & 0xFF];
+            float fb = srgbToLinear[(sample >> 0) & 0xFF];
+
+            float dr = fr - bgRl;
+            float dg = fg - bgGl;
+            float db = fb - bgBl;
+
+            deltaTile[tileTriple + 0] = dr;
+            deltaTile[tileTriple + 1] = dg;
+            deltaTile[tileTriple + 2] = db;
+            lengthTile[slot] = dr * dr + dg * dg + db * db;
+
+            float dotFB = fr * bgRl + fg * bgGl + fb * bgBl;
+            purityTile[slot] = fr * fr + fg * fg + fb * fb - (bgLenSq > 1e-8f ? dotFB * dotFB / bgLenSq : 0f);
+        }
+
+        Hlsl.GroupMemoryBarrierWithGroupSync();
+
+        if (x >= width || y >= height)
+            return;
+
         int index = y * width + x;
+
+        if (tileHasCandidate[0] == 0)
+        {
+            targetForeground[index] = 0;
+            return;
+        }
 
         int packed = bgra[index];
         int a = (packed >> 24) & 0xFF;
@@ -927,23 +1143,13 @@ internal readonly partial struct ForegroundPropagateShader(
         if (a == 0)
         {
             targetForeground[index] = 0;
-            targetValid[index] = 0;
             return;
         }
 
-        float bgRl = backgroundR <= 0.04045f ? backgroundR / 12.92f : Hlsl.Pow((backgroundR + 0.055f) / 1.055f, 2.4f);
-        float bgGl = backgroundG <= 0.04045f ? backgroundG / 12.92f : Hlsl.Pow((backgroundG + 0.055f) / 1.055f, 2.4f);
-        float bgBl = backgroundB <= 0.04045f ? backgroundB / 12.92f : Hlsl.Pow((backgroundB + 0.055f) / 1.055f, 2.4f);
-        float bgLenSq = bgRl * bgRl + bgGl * bgGl + bgBl * bgBl;
-
-        float invA = 1f / a;
-        float observedRs = Hlsl.Saturate(((packed >> 16) & 0xFF) * invA);
-        float observedGs = Hlsl.Saturate(((packed >> 8) & 0xFF) * invA);
-        float observedBs = Hlsl.Saturate(((packed >> 0) & 0xFF) * invA);
-
-        float observedR = observedRs <= 0.04045f ? observedRs / 12.92f : Hlsl.Pow((observedRs + 0.055f) / 1.055f, 2.4f);
-        float observedG = observedGs <= 0.04045f ? observedGs / 12.92f : Hlsl.Pow((observedGs + 0.055f) / 1.055f, 2.4f);
-        float observedB = observedBs <= 0.04045f ? observedBs / 12.92f : Hlsl.Pow((observedBs + 0.055f) / 1.055f, 2.4f);
+        int tableBase = a << 8;
+        float observedR = premultipliedLinear[tableBase + ((packed >> 16) & 0xFF)];
+        float observedG = premultipliedLinear[tableBase + ((packed >> 8) & 0xFF)];
+        float observedB = premultipliedLinear[tableBase + ((packed >> 0) & 0xFF)];
 
         float obr = observedR - bgRl;
         float obg = observedG - bgGl;
@@ -952,37 +1158,29 @@ internal readonly partial struct ForegroundPropagateShader(
         int bestForeground = 0;
         float bestPurity = -1f;
 
-        for (int dy = -reach; dy <= reach; dy++)
+        int centerLocalX = GroupIds.X + ForegroundPropagateConstants.Radius;
+        int centerLocalY = GroupIds.Y + ForegroundPropagateConstants.Radius;
+
+        for (int dy = -ForegroundPropagateConstants.Radius; dy <= ForegroundPropagateConstants.Radius; dy++)
         {
-            int sy = y + dy;
-            if (sy < 0 || sy >= height)
-                continue;
+            int localY = centerLocalY + dy;
 
-            for (int dx = -reach; dx <= reach; dx++)
+            for (int dx = -ForegroundPropagateConstants.Radius; dx <= ForegroundPropagateConstants.Radius; dx++)
             {
-                int sx = x + dx;
-                if (sx < 0 || sx >= width)
+                int slot = localY * ForegroundPropagateConstants.TileSize + centerLocalX + dx;
+
+                int f = foregroundTile[slot];
+                if (f == 0)
                     continue;
 
-                int sIndex = sy * width + sx;
-                if (sourceValid[sIndex] == 0)
-                    continue;
-
-                int f = sourceForeground[sIndex];
-                float frs = ((f >> 16) & 0xFF) * (1f / 255f);
-                float fgs = ((f >> 8) & 0xFF) * (1f / 255f);
-                float fbs = ((f >> 0) & 0xFF) * (1f / 255f);
-
-                float fr = frs <= 0.04045f ? frs / 12.92f : Hlsl.Pow((frs + 0.055f) / 1.055f, 2.4f);
-                float fg = fgs <= 0.04045f ? fgs / 12.92f : Hlsl.Pow((fgs + 0.055f) / 1.055f, 2.4f);
-                float fb = fbs <= 0.04045f ? fbs / 12.92f : Hlsl.Pow((fbs + 0.055f) / 1.055f, 2.4f);
-
-                float dr = fr - bgRl;
-                float dg = fg - bgGl;
-                float db = fb - bgBl;
-                float dlen2 = dr * dr + dg * dg + db * db;
+                float dlen2 = lengthTile[slot];
                 if (dlen2 < 1e-8f)
                     continue;
+
+                int tileTriple = slot * 3;
+                float dr = deltaTile[tileTriple + 0];
+                float dg = deltaTile[tileTriple + 1];
+                float db = deltaTile[tileTriple + 2];
 
                 float t = (obr * dr + obg * dg + obb * db) / dlen2;
                 float pr = obr - t * dr;
@@ -992,8 +1190,7 @@ internal readonly partial struct ForegroundPropagateShader(
                 if (distSq > sigmaLineSq * dlen2)
                     continue;
 
-                float dotFB = fr * bgRl + fg * bgGl + fb * bgBl;
-                float purity = fr * fr + fg * fg + fb * fb - (bgLenSq > 1e-8f ? dotFB * dotFB / bgLenSq : 0f);
+                float purity = purityTile[slot];
                 if (purity > bestPurity)
                 {
                     bestPurity = purity;
@@ -1005,11 +1202,38 @@ internal readonly partial struct ForegroundPropagateShader(
         if (bestPurity >= 0f)
         {
             targetForeground[index] = bestForeground;
-            targetValid[index] = 1;
             return;
         }
 
         targetForeground[index] = 0;
-        targetValid[index] = 0;
+    }
+}
+
+[ThreadGroupSize(DefaultThreadGroupSizes.X)]
+[GeneratedComputeShaderDescriptor]
+internal readonly partial struct PremultipliedLinearTableShader(
+    ReadWriteBuffer<float> table) : IComputeShader
+{
+    private readonly ReadWriteBuffer<float> table = table;
+
+    public void Execute()
+    {
+        int index = ThreadIds.X;
+        if (index >= PremultipliedLinearConstants.TableLength)
+            return;
+
+        int a = index >> 8;
+        int channel = index & 0xFF;
+
+        if (a == 0)
+        {
+            table[index] = 0f;
+            return;
+        }
+
+        float invA = 1f / a;
+        float straight = Hlsl.Saturate(channel * invA);
+
+        table[index] = straight <= 0.04045f ? straight / 12.92f : Hlsl.Pow((straight + 0.055f) / 1.055f, 2.4f);
     }
 }
