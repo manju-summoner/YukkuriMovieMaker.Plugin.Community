@@ -1241,6 +1241,57 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
+        static bool TryCollectFilesRecursively(DirectoryInfo root, EnumerationOptions options, string searchText, List<FileInfo> files, CancellationToken token)
+        {
+            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { GetDirectoryIdentity(root) };
+            var stack = new Stack<DirectoryInfo>();
+            stack.Push(root);
+
+            while (stack.Count > 0)
+            {
+                if (token.IsCancellationRequested)
+                    return false;
+
+                var current = stack.Pop();
+                try
+                {
+                    foreach (var file in current.EnumerateFiles("*", options))
+                    {
+                        if (token.IsCancellationRequested)
+                            return false;
+                        if (ExplorerFilter.IsNameMatch(file.Name, searchText))
+                            files.Add(file);
+                    }
+                }
+                catch { }
+
+                try
+                {
+                    foreach (var dir in current.EnumerateDirectories("*", options))
+                    {
+                        if (token.IsCancellationRequested)
+                            return false;
+                        if (visited.Add(GetDirectoryIdentity(dir)))
+                            stack.Push(dir);
+                    }
+                }
+                catch { }
+            }
+            return true;
+        }
+
+        static string GetDirectoryIdentity(DirectoryInfo dir)
+        {
+            try
+            {
+                return dir.LinkTarget is null ? dir.FullName : dir.ResolveLinkTarget(true)?.FullName ?? dir.FullName;
+            }
+            catch
+            {
+                return dir.FullName;
+            }
+        }
+
         async Task RefreshCoreAsync(CancellationToken token)
         {
             var currentLocation = Location;
@@ -1264,15 +1315,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
             var recursiveSearch = Filter.IsRecursiveSearch;
             var searchText = Filter.SearchText;
-            var fileOptions = recursiveSearch
-                ? new EnumerationOptions()
-                {
-                    IgnoreInaccessible = true,
-                    RecurseSubdirectories = true,
-                    ReturnSpecialDirectories = false,
-                    AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
-                }
-                : options;
 
             var result = await Task.Run(() =>
             {
@@ -1288,13 +1330,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 }
 
                 var f = new List<FileInfo>();
-                foreach (var file in di.EnumerateFiles("*", fileOptions))
+                if (recursiveSearch)
                 {
-                    if (token.IsCancellationRequested)
+                    if (!TryCollectFilesRecursively(di, options, searchText, f, token))
                         return null;
-                    if (recursiveSearch && !ExplorerFilter.IsNameMatch(file.Name, searchText))
-                        continue;
-                    f.Add(file);
+                }
+                else
+                {
+                    foreach (var file in di.EnumerateFiles("*", options))
+                    {
+                        if (token.IsCancellationRequested)
+                            return null;
+                        f.Add(file);
+                    }
                 }
                 return ((List<(DirectoryInfo dir, bool hasChild)> dirs, List<FileInfo> files)?)(d, f);
             });
