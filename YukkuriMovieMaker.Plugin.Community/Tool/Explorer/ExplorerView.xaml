@@ -27,10 +27,20 @@
                 <c:VirtualizingWrapPanel ItemWidth="{Binding Layout.ItemWidth}" ItemHeight="{Binding Layout.ItemHeight}" CacheRows="2" Margin="3"/>
             </ItemsPanelTemplate>
 
+            <Style x:Key="WaveformPanelStyle" TargetType="StackPanel">
+                <Setter Property="Width" Value="300"/>
+                <Setter Property="Margin" Value="0,2,0,2"/>
+                <Setter Property="Visibility" Value="Visible"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Waveform}" Value="{x:Null}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
             <DataTemplate x:Key="ToolTipTemplate">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
@@ -42,19 +52,36 @@
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate>
-                                                    <MediaElement Grid.Row="0" MaxWidth="300" MaxHeight="300" Volume="{Binding Source={x:Static ps:YMMSettings.Default},Path=Volume,Converter={pc:PercentToScaleConverter}}">
-                                                        <MediaElement.Triggers>
-                                                            <EventTrigger RoutedEvent="Loaded">
-                                                                <EventTrigger.Actions>
-                                                                    <BeginStoryboard>
-                                                                        <Storyboard>
-                                                                            <MediaTimeline Source="{Binding Path}" RepeatBehavior="Forever"/>
-                                                                        </Storyboard>
-                                                                    </BeginStoryboard>
-                                                                </EventTrigger.Actions>
-                                                            </EventTrigger>
-                                                        </MediaElement.Triggers>
-                                                    </MediaElement>
+                                                    <StackPanel>
+                                                        <MediaElement x:Name="preview" MaxWidth="300" MaxHeight="300" Volume="{Binding Source={x:Static ps:YMMSettings.Default},Path=Volume,Converter={pc:PercentToScaleConverter}}">
+                                                            <MediaElement.Triggers>
+                                                                <EventTrigger RoutedEvent="Loaded">
+                                                                    <EventTrigger.Actions>
+                                                                        <BeginStoryboard>
+                                                                            <Storyboard>
+                                                                                <MediaTimeline Source="{Binding Path}" RepeatBehavior="Forever"/>
+                                                                            </Storyboard>
+                                                                        </BeginStoryboard>
+                                                                    </EventTrigger.Actions>
+                                                                </EventTrigger>
+                                                            </MediaElement.Triggers>
+                                                        </MediaElement>
+                                                        <StackPanel Style="{StaticResource WaveformPanelStyle}">
+                                                            <Grid Height="48">
+                                                                <Path Data="{Binding Waveform}"
+                                                                      Stretch="Fill"
+                                                                      Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
+                                                                <Rectangle Width="2" HorizontalAlignment="Left" Fill="Red">
+                                                                    <i:Interaction.Behaviors>
+                                                                        <local:MediaPositionMarkerBehavior Media="{Binding ElementName=preview}"/>
+                                                                    </i:Interaction.Behaviors>
+                                                                </Rectangle>
+                                                            </Grid>
+                                                            <TextBlock Text="{Binding DurationText}"
+                                                                       HorizontalAlignment="Right"
+                                                                       Opacity="0.7"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -63,7 +90,19 @@
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate>
-                                                    <Image Grid.Row="0" Source="{Binding Thumbnail}" MaxWidth="300" MaxHeight="300"/>
+                                                    <StackPanel>
+                                                        <Image Source="{Binding Thumbnail}" MaxWidth="300" MaxHeight="300"/>
+                                                        <StackPanel Style="{StaticResource WaveformPanelStyle}">
+                                                            <Grid Height="48">
+                                                                <Path Data="{Binding Waveform}"
+                                                                      Stretch="Fill"
+                                                                      Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
+                                                            </Grid>
+                                                            <TextBlock Text="{Binding DurationText}"
+                                                                       HorizontalAlignment="Right"
+                                                                       Opacity="0.7"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -72,26 +111,7 @@
                             </Style>
                         </Control.Style>
                     </Control>
-                    <StackPanel Grid.Row="1" Width="300" Margin="0,2,0,2">
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Setter Property="Visibility" Value="Visible"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Waveform}" Value="{x:Null}">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        <Path Data="{Binding Waveform}"
-                              Stretch="Fill"
-                              Height="48"
-                              Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
-                        <TextBlock Text="{Binding DurationText}"
-                                   HorizontalAlignment="Right"
-                                   Opacity="0.7"/>
-                    </StackPanel>
-                    <TextBlock Grid.Row="2" Text="{Binding Path}" TextWrapping="Wrap" MaxWidth="300"/>
+                    <TextBlock Grid.Row="1" Text="{Binding Path}" TextWrapping="Wrap" MaxWidth="300"/>
                 </Grid>
             </DataTemplate>
             <DataTemplate x:Key="ListViewItemTemplate">
