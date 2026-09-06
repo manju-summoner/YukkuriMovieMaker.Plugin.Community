@@ -1,4 +1,5 @@
 using ComputeWeave;
+using ComputeWeave.Descriptors;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype;
 
@@ -138,6 +139,12 @@ internal sealed class FillSametypePipeline : IDisposable
 
     static int CeilDivide(int value, int divisor) => (value + divisor - 1) / divisor;
 
+    static int GroupAlignedX<T>(int value) where T : struct, IComputeShaderDescriptor<T>
+        => CeilDivide(value, T.ThreadsX) * T.ThreadsX;
+
+    static int GroupAlignedY<T>(int value) where T : struct, IComputeShaderDescriptor<T>
+        => CeilDivide(value, T.ThreadsY) * T.ThreadsY;
+
     ReadWriteBuffer<int> EnsureExact(ref ReadWriteBuffer<int>? buffer, int count)
     {
         if (buffer is null || buffer.Length < count)
@@ -169,7 +176,7 @@ internal sealed class FillSametypePipeline : IDisposable
 
         device.For(length, new ClearMomentShader(gpuMomentBuffer, length));
         if (componentCount <= MomentConstants.LocalComponents)
-            device.For(width, height, new MomentAccumulateLocalShader(gpuLabelBuffer!, gpuMomentBuffer, componentCount, width, height));
+            device.For(GroupAlignedX<MomentAccumulateLocalShader>(width), GroupAlignedY<MomentAccumulateLocalShader>(height), new MomentAccumulateLocalShader(gpuLabelBuffer!, gpuMomentBuffer, componentCount, width, height));
         else
             device.For(width, height, new MomentAccumulateShader(gpuLabelBuffer!, gpuMomentBuffer, componentCount, width, height));
 
