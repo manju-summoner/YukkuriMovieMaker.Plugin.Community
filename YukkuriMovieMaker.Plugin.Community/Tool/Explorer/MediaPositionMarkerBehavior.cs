@@ -62,7 +62,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             var marker = AssociatedObject;
 
             if (Media?.Clock?.CurrentTime is not TimeSpan position ||
-                marker.DataContext is not IExplorerItemViewModel item ||
+                (marker.DataContext as IExplorerItemViewModel)?.Audio is not ExplorerAudioPreviewViewModel audio ||
                 VisualTreeHelper.GetParent(marker) is not FrameworkElement container ||
                 container.ActualWidth <= 0)
             {
@@ -70,15 +70,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 return;
             }
 
-            item.PreviewPosition = position;
+            audio.Position = position;
 
-            if (item.AudioPreview is not AudioPreview preview || preview.Length <= TimeSpan.Zero)
+            if (audio.GetProgress() is not double progress)
             {
                 marker.Visibility = Visibility.Hidden;
                 return;
             }
 
-            var progress = Math.Clamp((position - preview.Start) / preview.Length, 0.0, 1.0);
             if (marker.RenderTransform is not TranslateTransform transform)
             {
                 transform = new TranslateTransform();

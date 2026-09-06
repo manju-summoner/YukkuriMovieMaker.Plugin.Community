@@ -28,9 +28,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         DateTime LastWriteTime { get; }
         ImageSource? Icon { get; }
         ImageSource? Thumbnail { get; }
-        bool IsAudio { get; }
-        TimeSpan PreviewPosition { get; set; }
-        AudioPreview? AudioPreview { get; }
+        ExplorerAudioPreviewViewModel? Audio { get; }
         void SetWaveformLength(TimeSpan length);
         bool SelectsNameOnlyOnRename { get; }
         ICommand ClearCacheCommand { get; }

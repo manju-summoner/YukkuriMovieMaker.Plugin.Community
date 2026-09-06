@@ -20,6 +20,7 @@
         <ResourceDictionary>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <local:DoubleToGridLengthConverter x:Key="DoubleToGridLengthConverter"/>
+            <local:NullToBoolConverter x:Key="NullToBoolConverter"/>
             <ItemsPanelTemplate x:Key="VirtualizedStackPanelItemsPanelTemplate">
                 <VirtualizingStackPanel IsItemsHost="True" Orientation="Vertical" Margin="3"/>
             </ItemsPanelTemplate>
@@ -32,7 +33,7 @@
                 <Setter Property="Margin" Value="0,2,0,2"/>
                 <Setter Property="Visibility" Value="Visible"/>
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding AudioPreview}" Value="{x:Null}">
+                    <DataTrigger Binding="{Binding Audio.Waveform}" Value="{x:Null}">
                         <Setter Property="Visibility" Value="Collapsed"/>
                     </DataTrigger>
                 </Style.Triggers>
@@ -71,7 +72,7 @@
                                                                 <Style TargetType="Image">
                                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                                     <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding IsAudio}" Value="True">
+                                                                        <DataTrigger Binding="{Binding Audio, Converter={StaticResource NullToBoolConverter}}" Value="True">
                                                                             <Setter Property="Visibility" Value="Visible"/>
                                                                             <Setter Property="Source" Value="{Binding Thumbnail}"/>
                                                                         </DataTrigger>
@@ -81,7 +82,7 @@
                                                         </Image>
                                                         <StackPanel Style="{StaticResource WaveformPanelStyle}">
                                                             <Grid Height="48">
-                                                                <Path Data="{Binding AudioPreview.Waveform}"
+                                                                <Path Data="{Binding Audio.Waveform}"
                                                                       HorizontalAlignment="Left"
                                                                       VerticalAlignment="Top"
                                                                       Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
@@ -91,7 +92,7 @@
                                                                     </i:Interaction.Behaviors>
                                                                 </Rectangle>
                                                             </Grid>
-                                                            <TextBlock Text="{Binding AudioPreview.DurationText}"
+                                                            <TextBlock Text="{Binding Audio.DurationText}"
                                                                        HorizontalAlignment="Right"
                                                                        Opacity="0.7"/>
                                                         </StackPanel>
@@ -108,12 +109,12 @@
                                                         <Image Source="{Binding Thumbnail}" MaxWidth="300" MaxHeight="300"/>
                                                         <StackPanel Style="{StaticResource WaveformPanelStyle}">
                                                             <Grid Height="48">
-                                                                <Path Data="{Binding AudioPreview.Waveform}"
+                                                                <Path Data="{Binding Audio.Waveform}"
                                                                       HorizontalAlignment="Left"
                                                                       VerticalAlignment="Top"
                                                                       Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
                                                             </Grid>
-                                                            <TextBlock Text="{Binding AudioPreview.DurationText}"
+                                                            <TextBlock Text="{Binding Audio.DurationText}"
                                                                        HorizontalAlignment="Right"
                                                                        Opacity="0.7"/>
                                                         </StackPanel>

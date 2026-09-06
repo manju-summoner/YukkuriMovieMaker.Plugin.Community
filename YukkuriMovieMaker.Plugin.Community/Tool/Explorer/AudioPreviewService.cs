@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -8,7 +8,7 @@ using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
-    public record AudioPreview(TimeSpan Duration, TimeSpan Start, TimeSpan Length, Geometry Waveform)
+    internal record AudioPreview(TimeSpan Duration, TimeSpan Start, TimeSpan Length, Geometry Waveform)
     {
         public string DurationText => Duration.TotalHours >= 1
             ? Duration.ToString(@"h\:mm\:ss")
