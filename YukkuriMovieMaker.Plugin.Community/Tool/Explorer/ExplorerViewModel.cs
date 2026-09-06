@@ -1284,7 +1284,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         {
             try
             {
-                return dir.LinkTarget is null ? dir.FullName : dir.ResolveLinkTarget(true)?.FullName ?? dir.FullName;
+                if ((dir.Attributes & FileAttributes.ReparsePoint) == 0)
+                    return dir.FullName;
+                return dir.ResolveLinkTarget(true)?.FullName ?? dir.FullName;
             }
             catch
             {
