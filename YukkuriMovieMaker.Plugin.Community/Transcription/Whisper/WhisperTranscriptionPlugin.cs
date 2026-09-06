@@ -3,6 +3,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 using Whisper.net;
+using Whisper.net.LibraryLoader;
+using Whisper.net.Logger;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Transcription.Whisper.Installers;
 using YukkuriMovieMaker.Plugin.Transcription;
@@ -24,6 +26,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
         public async IAsyncEnumerable<TranscriptionSegment> ProcessAsync(ITranscriptionProcessArgs args, [EnumeratorCancellation] CancellationToken token)
         {
             var progress = args.ProgressMessage;
+
+            //ネイティブ側の失敗原因は例外に乗らないため、whisper.cpp のログを処理中だけ購読して控えておく
+            var nativeLog = new WhisperNativeLogBuffer(message => Log.Default.Write($"Whisper: {message}"));
+            using var nativeLogRegistration = LogProvider.AddLogger(nativeLog.Append);
+
             await CheckRuntime(progress, token);
 
             // Whisperモデルのダウンロード
@@ -34,7 +41,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
 
             // Whisperの初期化
             progress.Report(-1, Texts.LoadingWhisperModelMessage);
-            using var factory = await CreateFactoryAsync(modelPath, token);
+            using var factory = await CreateFactoryAsync(modelPath, nativeLog, token);
             var whisperBuider =
                 factory
                 .CreateBuilder()
@@ -104,6 +111,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
                         var skippedTime = blockTime + TimeSpan.FromSeconds((double)r.Start / sampleRate);
                         Log.Default.Write($"Whisperによる音声区間の処理に失敗したためスキップしました。 time={skippedTime}", ex);
                     }
+                    catch (SEHException ex)
+                    {
+                        //ネイティブの C++ 例外は戻り値の失敗と違い、state の確保途中で投げられると解放も走らず
+                        //コンテキストの状態が不明になる。同じ processor で区間スキップを続けず中断する
+                        throw CreateNativeFailureException(nativeLog, ex);
+                    }
                 }
 
                 //ブロックの末尾にセグメントの末尾がある場合、セグメントの途中にブロックの切り替えが発生したと見なし、削除する
@@ -127,7 +140,33 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper
             }
         }
 
-        static async Task<WhisperFactory> CreateFactoryAsync(string filePath, CancellationToken token)
+        static async Task<WhisperFactory> CreateFactoryAsync(string filePath, WhisperNativeLogBuffer nativeLog, CancellationToken token)
+        {
+            try
+            {
+                return await LoadFactoryAsync(filePath, token);
+            }
+            catch (SEHException ex)
+            {
+                //モデル読み込みのネイティブ失敗も推論時と同じく、エラー報告ではなく案内にする
+                throw CreateNativeFailureException(nativeLog, ex);
+            }
+        }
+
+        /// <summary>
+        /// ネイティブ側で起きた失敗を、本体がエラー報告ダイアログではなく案内メッセージとして扱う例外に変換する。
+        /// SEHException 自体には原因の文字列が無いため、直前のネイティブログを案内とローカルログに添える。
+        /// </summary>
+        static NotSupportedException CreateNativeFailureException(WhisperNativeLogBuffer nativeLog, SEHException ex)
+        {
+            //どのランタイム（CPU / CUDA / Vulkan 等）を読み込んだかはプロセス内の初回にしかログへ流れないため、失敗時に改めて記録する
+            var runtime = RuntimeOptions.LoadedLibrary?.ToString() ?? "unknown";
+            var recentLines = nativeLog.GetRecentLines();
+            Log.Default.Write(string.Format(Texts.NativeFailureLogMessage, runtime, recentLines.Length > 0 ? recentLines : Texts.NoNativeLogMessage), ex);
+            return new NotSupportedException(nativeLog.CreateFailureMessage(Texts.NativeProcessingFailedMessage), ex);
+        }
+
+        static async Task<WhisperFactory> LoadFactoryAsync(string filePath, CancellationToken token)
         {
             //ファイルパスにマルチバイト文字が含まれているかどうかをチェック
             if (filePath.Any(c => c > 127))
