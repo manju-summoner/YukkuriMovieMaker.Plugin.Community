@@ -86,10 +86,10 @@
                         <Path Data="{Binding Waveform}"
                               Stretch="Fill"
                               Height="48"
-                              Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                              Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
                         <TextBlock Text="{Binding DurationText}"
                                    HorizontalAlignment="Right"
-                                   Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                   Opacity="0.7"/>
                     </StackPanel>
                     <TextBlock Grid.Row="2" Text="{Binding Path}" TextWrapping="Wrap" MaxWidth="300"/>
                 </Grid>
