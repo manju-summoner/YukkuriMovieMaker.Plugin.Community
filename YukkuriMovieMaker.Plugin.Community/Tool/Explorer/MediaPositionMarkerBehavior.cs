@@ -60,11 +60,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         private void CompositionTarget_Rendering(object? sender, EventArgs e)
         {
             var marker = AssociatedObject;
-            var media = Media;
 
-            if (media?.Clock?.CurrentTime is not TimeSpan position ||
-                !media.NaturalDuration.HasTimeSpan ||
-                media.NaturalDuration.TimeSpan <= TimeSpan.Zero ||
+            if (Media?.Clock?.CurrentTime is not TimeSpan position ||
+                marker.DataContext is not IExplorerItemViewModel item ||
                 VisualTreeHelper.GetParent(marker) is not FrameworkElement container ||
                 container.ActualWidth <= 0)
             {
@@ -72,7 +70,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 return;
             }
 
-            var progress = Math.Clamp(position / media.NaturalDuration.TimeSpan, 0.0, 1.0);
+            item.PreviewStart = AudioPreviewService.GetWindowStart(position);
+
+            if (item.AudioPreview is not AudioPreview preview || preview.Length <= TimeSpan.Zero)
+            {
+                marker.Visibility = Visibility.Hidden;
+                return;
+            }
+
+            var progress = Math.Clamp((position - preview.Start) / preview.Length, 0.0, 1.0);
             if (marker.RenderTransform is not TranslateTransform transform)
             {
                 transform = new TranslateTransform();

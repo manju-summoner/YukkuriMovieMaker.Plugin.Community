@@ -8,7 +8,7 @@ using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 {
-    public record AudioPreview(TimeSpan Duration, Geometry Peak, Geometry Rms)
+    public record AudioPreview(TimeSpan Duration, TimeSpan Start, TimeSpan Length, Geometry Waveform)
     {
         public string DurationText => Duration.TotalHours >= 1
             ? Duration.ToString(@"h\:mm\:ss")
@@ -19,11 +19,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
     {
         const int Columns = 300;
         const int Height = 48;
-        const int ScanFrames = 16384;
-        const int SampleFrames = 8192;
+        const int ReadFrames = 16384;
 
-        static readonly TimeSpan SampleThreshold = TimeSpan.FromMinutes(2);
-        static readonly SemaphoreSlim gate = new(Math.Max(2, Environment.ProcessorCount / 4));
+        static readonly TimeSpan WindowLength = TimeSpan.FromSeconds(30);
+        static readonly SemaphoreSlim gate = new(Math.Clamp(Environment.ProcessorCount / 4, 2, 4));
 
         public static bool IsSupported(string path)
         {
@@ -37,13 +36,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-        public static async Task<AudioPreview?> LoadAsync(string path, CancellationToken token)
+        public static TimeSpan GetWindowStart(TimeSpan position)
+        {
+            if (position <= TimeSpan.Zero)
+                return TimeSpan.Zero;
+            return TimeSpan.FromTicks(position.Ticks / WindowLength.Ticks * WindowLength.Ticks);
+        }
+
+        public static async Task<AudioPreview?> LoadAsync(string path, TimeSpan start, CancellationToken token)
         {
             await gate.WaitAsync(token);
             try
             {
                 token.ThrowIfCancellationRequested();
-                return await Task.Run(() => Load(path, token), token);
+                return await Task.Run(() => Load(path, start, token), token);
             }
             finally
             {
@@ -51,153 +57,96 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-        static AudioPreview? Load(string path, CancellationToken token)
+        static AudioPreview? Load(string path, TimeSpan start, CancellationToken token)
         {
             using var source = AudioFileSourceFactory.Create(path, 0);
             if (source is null)
                 return null;
 
             var duration = source.Duration;
-            var totalFrames = (long)(duration.TotalSeconds * source.Hz);
+            if (duration <= TimeSpan.Zero)
+                return null;
+
+            if (start < TimeSpan.Zero || start >= duration)
+                start = TimeSpan.Zero;
+
+            var length = duration - start;
+            if (length > WindowLength)
+                length = WindowLength;
+
+            var totalFrames = (long)(length.TotalSeconds * source.Hz);
             if (totalFrames <= 0)
                 return null;
 
-            var peaks = new float[Columns];
-            var rms = new float[Columns];
+            if (start > TimeSpan.Zero)
+                source.Seek(start);
 
-            if (duration > SampleThreshold)
-            {
-                Sample(source, duration, peaks, rms, token);
-                if (MaxOf(peaks) <= 0f)
-                {
-                    source.Seek(TimeSpan.Zero);
-                    Scan(source, totalFrames, peaks, rms, token);
-                }
-                else
-                {
-                    Smooth(peaks);
-                    Smooth(rms);
-                }
-            }
-            else
-            {
-                Scan(source, totalFrames, peaks, rms, token);
-            }
-
-            var max = MaxOf(peaks);
-            if (max <= 0f)
-                return null;
-
-            var scale = Height * 0.5 / max;
-            return new AudioPreview(duration, BuildGeometry(peaks, scale), BuildGeometry(rms, scale));
-        }
-
-        static void Scan(IAudioFileSource source, long totalFrames, float[] peaks, float[] rms, CancellationToken token)
-        {
-            var squareSums = new double[Columns];
-            var sampleCounts = new long[Columns];
-            var buffer = new float[ScanFrames * 2];
+            var minimums = new float[Columns];
+            var maximums = new float[Columns];
+            var isFilled = new bool[Columns];
+            var buffer = new float[ReadFrames * 2];
             var column = 0;
             var columnEndFrame = totalFrames / Columns;
             long frame = 0;
             int read;
-            while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
+
+            while (frame < totalFrames && (read = source.Read(buffer, 0, buffer.Length)) > 0)
             {
                 token.ThrowIfCancellationRequested();
-                for (var i = 0; i + 1 < read; i += 2)
+                for (var i = 0; i + 1 < read && frame < totalFrames; i += 2)
                 {
                     while (column < Columns - 1 && frame >= columnEndFrame)
                     {
                         column++;
                         columnEndFrame = totalFrames * (column + 1) / Columns;
                     }
-                    Accumulate(buffer[i], buffer[i + 1], column, peaks, squareSums, sampleCounts);
+                    isFilled[column] = true;
+                    Accumulate(buffer[i], column, minimums, maximums);
+                    Accumulate(buffer[i + 1], column, minimums, maximums);
                     frame++;
                 }
             }
-            Resolve(squareSums, sampleCounts, rms);
-        }
 
-        static void Sample(IAudioFileSource source, TimeSpan duration, float[] peaks, float[] rms, CancellationToken token)
-        {
-            var squareSums = new double[Columns];
-            var sampleCounts = new long[Columns];
-            var buffer = new float[SampleFrames * 2];
-            for (var column = 0; column < Columns; column++)
+            if (frame <= 0)
+                return null;
+
+            for (var i = 1; i < Columns; i++)
             {
-                token.ThrowIfCancellationRequested();
-                source.Seek(TimeSpan.FromSeconds(duration.TotalSeconds * column / Columns));
-
-                var filled = 0;
-                while (filled < buffer.Length)
-                {
-                    var read = source.Read(buffer, filled, buffer.Length - filled);
-                    if (read <= 0)
-                        break;
-                    filled += read;
-                }
-
-                for (var i = 0; i + 1 < filled; i += 2)
-                    Accumulate(buffer[i], buffer[i + 1], column, peaks, squareSums, sampleCounts);
+                if (isFilled[i])
+                    continue;
+                minimums[i] = minimums[i - 1];
+                maximums[i] = maximums[i - 1];
             }
-            Resolve(squareSums, sampleCounts, rms);
-        }
 
-        static void Accumulate(float left, float right, int column, float[] peaks, double[] squareSums, long[] sampleCounts)
-        {
-            var level = Math.Max(Math.Abs(left), Math.Abs(right));
-            if (level > peaks[column])
-                peaks[column] = level;
-            squareSums[column] += (double)left * left + (double)right * right;
-            sampleCounts[column] += 2;
-        }
-
-        static void Resolve(double[] squareSums, long[] sampleCounts, float[] rms)
-        {
-            for (var i = 0; i < Columns; i++)
-                rms[i] = sampleCounts[i] > 0 ? (float)Math.Sqrt(squareSums[i] / sampleCounts[i]) : 0f;
-        }
-
-        static void Smooth(float[] values)
-        {
-            var source = (float[])values.Clone();
-            for (var i = 0; i < Columns; i++)
-            {
-                var sum = source[i];
-                var count = 1;
-                if (i > 0)
-                {
-                    sum += source[i - 1];
-                    count++;
-                }
-                if (i < Columns - 1)
-                {
-                    sum += source[i + 1];
-                    count++;
-                }
-                values[i] = sum / count;
-            }
-        }
-
-        static float MaxOf(float[] values)
-        {
             var max = 0f;
-            foreach (var value in values)
-                max = Math.Max(max, value);
-            return max;
+            for (var i = 0; i < Columns; i++)
+                max = Math.Max(max, Math.Max(Math.Abs(minimums[i]), Math.Abs(maximums[i])));
+
+            var scale = max > 0f ? Height * 0.5 / max : 0.0;
+            return new AudioPreview(duration, start, length, BuildGeometry(minimums, maximums, scale));
         }
 
-        static Geometry BuildGeometry(float[] values, double scale)
+        static void Accumulate(float value, int column, float[] minimums, float[] maximums)
+        {
+            if (!float.IsNormal(value))
+                return;
+            if (value < minimums[column])
+                minimums[column] = value;
+            if (maximums[column] < value)
+                maximums[column] = value;
+        }
+
+        static Geometry BuildGeometry(float[] minimums, float[] maximums, double scale)
         {
             var center = Height * 0.5;
             var geometry = new StreamGeometry();
             using (var context = geometry.Open())
             {
-                context.BeginFigure(new Point(0, center - values[0] * scale), true, true);
+                context.BeginFigure(new Point(0, center - maximums[0] * scale), true, true);
                 for (var i = 1; i < Columns; i++)
-                    context.LineTo(new Point(i, center - values[i] * scale), true, false);
+                    context.LineTo(new Point(i, center - maximums[i] * scale), true, false);
                 for (var i = Columns - 1; i >= 0; i--)
-                    context.LineTo(new Point(i, center + values[i] * scale), true, false);
+                    context.LineTo(new Point(i, center - minimums[i] * scale), true, false);
             }
             geometry.Freeze();
             return geometry;

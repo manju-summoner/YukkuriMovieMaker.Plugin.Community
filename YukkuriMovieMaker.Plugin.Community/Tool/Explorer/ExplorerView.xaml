@@ -1,4 +1,4 @@
-<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Tool.Explorer.ExplorerView"
+﻿<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Tool.Explorer.ExplorerView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -81,12 +81,7 @@
                                                         </Image>
                                                         <StackPanel Style="{StaticResource WaveformPanelStyle}">
                                                             <Grid Height="48">
-                                                                <Path Data="{Binding AudioPreview.Peak}"
-                                                                      HorizontalAlignment="Left"
-                                                                      VerticalAlignment="Top"
-                                                                      Opacity="0.35"
-                                                                      Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
-                                                                <Path Data="{Binding AudioPreview.Rms}"
+                                                                <Path Data="{Binding AudioPreview.Waveform}"
                                                                       HorizontalAlignment="Left"
                                                                       VerticalAlignment="Top"
                                                                       Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
@@ -113,12 +108,7 @@
                                                         <Image Source="{Binding Thumbnail}" MaxWidth="300" MaxHeight="300"/>
                                                         <StackPanel Style="{StaticResource WaveformPanelStyle}">
                                                             <Grid Height="48">
-                                                                <Path Data="{Binding AudioPreview.Peak}"
-                                                                      HorizontalAlignment="Left"
-                                                                      VerticalAlignment="Top"
-                                                                      Opacity="0.35"
-                                                                      Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
-                                                                <Path Data="{Binding AudioPreview.Rms}"
+                                                                <Path Data="{Binding AudioPreview.Waveform}"
                                                                       HorizontalAlignment="Left"
                                                                       VerticalAlignment="Top"
                                                                       Fill="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
