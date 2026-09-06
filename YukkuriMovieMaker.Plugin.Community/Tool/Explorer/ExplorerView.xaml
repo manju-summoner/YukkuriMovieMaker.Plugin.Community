@@ -541,6 +541,9 @@
                             <DataTrigger Binding="{Binding Filter.IsFilteredByExtension}" Value="True">
                                 <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Filter}}"/>
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding Filter.IsRecursive}" Value="True">
+                                <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Filter}}"/>
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </c:PopupButton.Style>
