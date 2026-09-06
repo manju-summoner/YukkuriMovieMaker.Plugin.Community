@@ -1396,9 +1396,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             var dpiScale = Math.Max(lastDpiScale.DpiScaleX, lastDpiScale.DpiScaleY);
             if (dpiScale <= 0) dpiScale = 1.0;
 
+            var subscribedItems = new HashSet<IExplorerItemViewModel>(Items);
             foreach (var item in newItemsList)
             {
-                if (!Items.Contains(item))
+                if (!subscribedItems.Contains(item))
                 {
                     item.PropertyChanged += ItemViewModel_PropertyChanged;
                 }
