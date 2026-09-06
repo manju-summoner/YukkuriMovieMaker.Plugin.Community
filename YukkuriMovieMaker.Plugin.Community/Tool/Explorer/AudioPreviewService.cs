@@ -78,8 +78,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             if (duration <= TimeSpan.Zero)
                 return null;
 
-            if (start < TimeSpan.Zero || start >= duration)
+            if (start < TimeSpan.Zero)
                 start = TimeSpan.Zero;
+            else if (start >= duration)
+                start = GetWindowStart(duration - TimeSpan.FromTicks(1), windowLength);
 
             var length = duration - start;
             if (length > windowLength)
