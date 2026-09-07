@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
@@ -36,6 +37,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             }
         }
         bool isScanning;
+        // 前回の保存結果の読み込みと再スキャンが交錯したとき、古い方の結果で一覧を上書きしないための世代番号
+        long pluginListVersion;
 
         public string ScanStatusText => IsScanning
             ? Texts.Vst3SettingsScanningMessage
@@ -107,7 +110,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             }
             else
             {
-                _ = RescanAsync();
+                // 設定画面を開いただけではスキャンしない。前回の保存結果を表示し、更新は再スキャンボタンで行う。
+                // スキャン中は同じロックの解放を待つため、UIスレッドを塞がないようバックグラウンドで読む
+                _ = LoadKnownPluginsAsync();
             }
         }
 
@@ -131,16 +136,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
         {
             if (IsScanning)
                 return;
+            var version = Interlocked.Increment(ref pluginListVersion);
             IsScanning = true;
             try
             {
-                var plugins = await Task.Run(() => Vst3PluginScanner.GetEffectPlugins(refresh: true));
+                var plugins = await Task.Run(() =>
+                {
+                    Vst3PluginScanner.GetEffectPlugins(refresh: true);
+                    // 再走査が失敗した場合の不完了な一覧で表示を空にせず、完了した結果か保存結果を表示する
+                    return Vst3PluginScanner.GetKnownPlugins();
+                });
                 // 継続がUIスレッド外で再開されてもコレクション更新が失敗しないようにする
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    Plugins.Clear();
-                    foreach (var plugin in plugins)
-                        Plugins.Add(plugin);
+                    if (version == Interlocked.Read(ref pluginListVersion))
+                        ReplacePlugins(plugins);
                 });
             }
             catch (Exception e)
@@ -151,6 +161,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
             {
                 IsScanning = false;
             }
+        }
+
+        async Task LoadKnownPluginsAsync()
+        {
+            var version = Interlocked.Increment(ref pluginListVersion);
+            try
+            {
+                var plugins = await Task.Run(Vst3PluginScanner.GetKnownPlugins);
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    if (version == Interlocked.Read(ref pluginListVersion))
+                        ReplacePlugins(plugins);
+                });
+            }
+            catch (Exception e)
+            {
+                Log.Default.Write("VST3プラグイン一覧の読み込みに失敗しました。", e);
+            }
+        }
+
+        void ReplacePlugins(IReadOnlyList<Vst3EffectPluginInfo> plugins)
+        {
+            Plugins.Clear();
+            foreach (var plugin in plugins)
+                Plugins.Add(plugin);
+            OnPropertyChanged(nameof(ScanStatusText));
         }
     }
 }
