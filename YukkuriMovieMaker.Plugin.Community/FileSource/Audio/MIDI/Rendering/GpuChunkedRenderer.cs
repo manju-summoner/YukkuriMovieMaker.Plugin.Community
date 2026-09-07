@@ -7,7 +7,7 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
 {
     private readonly IMidiRenderer _baseRenderer;
     private readonly MidiPluginSettings _settings;
-    private readonly GpuAudioProcessor _gpuProcessor;
+    private readonly IAudioEffectProcessor _effectProcessor;
     private readonly int _chunkSizeStereo;
     private readonly int _historySamples;
     
@@ -20,7 +20,7 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
     {
         _baseRenderer = baseRenderer;
         _settings = settings;
-        _gpuProcessor = new GpuAudioProcessor(settings.Effects, settings.Audio.SampleRate);
+        _effectProcessor = new AudioEffectProcessor(settings.Effects, settings.Audio.SampleRate);
         _chunkSizeStereo = settings.Audio.SampleRate * 2;
 
         int hist = 0;
@@ -94,7 +94,7 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
 
             var processedChunk = new float[read];
             
-            if (_gpuProcessor.IsAvailable && _settings.Performance.EnableGpuAcceleration)
+            if (_settings.Performance.EnableGpuAcceleration)
             {
                 if (_historySamples > 0)
                 {
@@ -111,7 +111,7 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
 
                     if (_settings.Effects.EnableEffects)
                     {
-                        _gpuProcessor.TryApplyEffects(
+                        _effectProcessor.ApplyEffects(
                             workBuffer.AsSpan(),
                             _settings.Effects.EnableLimiter ? _settings.Effects.LimiterThreshold : 0f,
                             _settings.Effects.EnableCompression,
@@ -126,7 +126,7 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
                     rawChunk.CopyTo(processedChunk, 0);
                     if (_settings.Effects.EnableEffects)
                     {
-                        _gpuProcessor.TryApplyEffects(
+                        _effectProcessor.ApplyEffects(
                             processedChunk.AsSpan(),
                             _settings.Effects.EnableLimiter ? _settings.Effects.LimiterThreshold : 0f,
                             _settings.Effects.EnableCompression,
@@ -166,7 +166,7 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
     {
         if (_disposed) return;
         _disposed = true;
-        _gpuProcessor.Dispose();
+        _effectProcessor.Dispose();
         _baseRenderer.Dispose();
         _processedChunks.Clear();
         _rawChunks.Clear();
