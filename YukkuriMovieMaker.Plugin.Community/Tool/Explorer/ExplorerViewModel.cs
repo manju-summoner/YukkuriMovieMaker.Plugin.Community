@@ -11,7 +11,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Shell;
@@ -492,10 +491,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                         return;
                     }
 
-                    ICommand? addFileCommand = Settings.CommandSettings.Default[Settings.CommandType.AddFileItem];
                     var paths = new[] { resolved };
-                    if (addFileCommand?.CanExecute(paths) == true)
-                        addFileCommand.Execute(paths);
+                    if (Settings.CommandSettings.Default.CanExecute(Settings.Commands.AddFileItem, paths))
+                        Settings.CommandSettings.Default.Execute(Settings.Commands.AddFileItem, paths);
                 });
             CreateNewFolderCommand = new ActionCommand(
                 p =>
