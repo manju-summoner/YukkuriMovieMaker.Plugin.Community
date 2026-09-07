@@ -240,7 +240,7 @@ public static class BrushNodeTypeBuilder
             PortType.Enum => typeof(int),
             PortType.Bool => typeof(bool),
             PortType.Color => typeof(Color),
-            PortType.Brush => typeof(float),
+            PortType.Brush => typeof(BrushWrapper),
             PortType.Text => typeof(string),
             PortType.Unknown => def.UnknownClrType ?? typeof(float),
             _ => typeof(float)
@@ -268,8 +268,7 @@ public static class BrushNodeTypeBuilder
                 Attr.PortColor(pb, nameof(Colors.Gold));
                 break;
             case PortType.Brush:
-                Attr.NumberControl(pb, def.Min, def.Max, def.Digits, def.Unit, 0f);
-                Attr.PortColor(pb, nameof(Colors.DarkOrange));
+                Attr.PortColor(pb, nameof(Colors.LawnGreen));
                 break;
             case PortType.Text:
                 Attr.TextControl(pb, (string?)def.DefaultValue ?? "");
@@ -849,6 +848,8 @@ public static class BrushNodeCalculator
                 raw is float f ? f : raw != null ? Convert.ToSingle(raw) : (object)0f,
             PortType.Color =>
                 raw ?? Colors.White,
+            PortType.Brush =>
+                ConvertBrush(raw),
             _ => raw
         };
     }
@@ -865,5 +866,13 @@ public static class BrushNodeCalculator
         {
             return raw;
         }
+    }
+
+    private static IBrushParameter? ConvertBrush(object? raw)
+    {
+        if (raw is not BrushWrapper wrapper)
+            return null;
+
+        return wrapper.Brush == null ? null : NodeBrushFactory.Create(wrapper);
     }
 }

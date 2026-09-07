@@ -116,16 +116,37 @@ public sealed class NodeEffect : VideoEffectBase
     {
         foreach (var node in graph.Nodes.Values)
         {
-            foreach (var prop in node.GetType().GetProperties())
-            {
-                if (!IsFileSelectorProperty(prop)) continue;
-                if (!node.Inputs.TryGetValue(prop.Name, out var port)) continue;
-                if (port.LocalValue is string { Length: > 0 } path)
-                    yield return (port, path);
-            }
+            foreach (var entry in EnumerateFilePathPorts(node))
+                yield return entry;
 
             foreach (var entry in node.SubGraphs.Values.SelectMany(EnumerateFilePathPorts))
                 yield return entry;
+        }
+    }
+
+    private static IEnumerable<(InputPort Port, string Path)> EnumerateFilePathPorts(NodeLogic node)
+    {
+        foreach (var prop in node.GetType().GetProperties())
+        {
+            if (IsFileSelectorProperty(prop))
+            {
+                if (node.Inputs.TryGetValue(prop.Name, out var port) &&
+                    port.LocalValue is string { Length: > 0 } path)
+                    yield return (port, path);
+                continue;
+            }
+
+            if (!typeof(InputsContainer).IsAssignableFrom(prop.PropertyType)) continue;
+            if (prop.GetValue(node) is not InputsContainer container) continue;
+
+            foreach (var subProp in container.GetType().GetProperties())
+            {
+                if (!IsFileSelectorProperty(subProp)) continue;
+                var key = $"{prop.Name}.{subProp.Name}";
+                if (!node.Inputs.TryGetValue(key, out var port)) continue;
+                if (port.LocalValue is string { Length: > 0 } path)
+                    yield return (port, path);
+            }
         }
     }
 

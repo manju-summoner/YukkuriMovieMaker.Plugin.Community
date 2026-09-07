@@ -146,8 +146,8 @@ public static class EffectNodeFactory
                 return cached;
         }
 
-        var effectType = PluginLoader.VideoEffects.FirstOrDefault(t =>
-            (t.AssemblyQualifiedName ?? t.FullName ?? t.Name) == effectName);
+        var effectType = PluginLoader.VideoEffects.FirstOrDefault(t => MatchesEffectName(t, effectName)) ??
+                         PluginLoader.VideoEffects.FirstOrDefault(t => MatchesEffectNameLoosely(t, effectName));
         if (effectType == null) return null;
 
         try
@@ -158,6 +158,38 @@ public static class EffectNodeFactory
         {
             return null;
         }
+    }
+
+    private static bool MatchesEffectName(Type candidate, string storedName)
+    {
+        return (candidate.AssemblyQualifiedName ?? candidate.FullName ?? candidate.Name) == storedName;
+    }
+
+    private static bool MatchesEffectNameLoosely(Type candidate, string storedName)
+    {
+        var (storedTypeName, storedAssemblyName) = SplitAssemblyQualifiedName(storedName);
+        if (storedTypeName == null) return false;
+
+        var candidateTypeName = candidate.FullName ?? candidate.Name;
+        if (candidateTypeName != storedTypeName) return false;
+
+        if (storedAssemblyName == null) return true;
+
+        var candidateAssemblyName = candidate.Assembly.GetName().Name;
+        return string.Equals(candidateAssemblyName, storedAssemblyName, StringComparison.Ordinal);
+    }
+
+    private static (string? TypeName, string? AssemblyName) SplitAssemblyQualifiedName(string assemblyQualifiedName)
+    {
+        // 形式: "Namespace.Type, AssemblyName, Version=..., Culture=..., PublicKeyToken=..."
+        var firstComma = assemblyQualifiedName.IndexOf(',');
+        if (firstComma < 0) return (assemblyQualifiedName, null);
+
+        var typeName = assemblyQualifiedName[..firstComma].Trim();
+        var rest = assemblyQualifiedName[(firstComma + 1)..];
+        var secondComma = rest.IndexOf(',');
+        var assemblyName = (secondComma >= 0 ? rest[..secondComma] : rest).Trim();
+        return (typeName, assemblyName);
     }
 }
 
