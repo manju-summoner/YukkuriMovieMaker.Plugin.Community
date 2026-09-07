@@ -1,17 +1,20 @@
-using ComputeSharp;
+using System.Runtime.InteropServices;
+using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Plugin.Community.Commons.Compute;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype;
 
 internal sealed class FillSametypePipeline : IDisposable
 {
-    readonly GraphicsDevice device;
+    readonly ComputeShaderDevice device;
+    readonly ComputeConstantBuffer constants;
 
-    ReadOnlyBuffer<int>? labelBuffer;
-    ReadOnlyBuffer<float>? centroidBuffer;
-    ReadWriteBuffer<int>? histogramBuffer;
-    ReadWriteBuffer<float>? featureBuffer;
-    ReadWriteBuffer<int>? matchFlagBuffer;
-    ReadWriteBuffer<int>? maskBuffer;
+    ComputeBuffer<int>? labelBuffer;
+    ComputeBuffer<float>? centroidBuffer;
+    ComputeBuffer<int>? histogramBuffer;
+    ComputeBuffer<float>? featureBuffer;
+    ComputeBuffer<int>? matchFlagBuffer;
+    ComputeBuffer<int>? maskBuffer;
 
     int width;
     int height;
@@ -38,10 +41,13 @@ internal sealed class FillSametypePipeline : IDisposable
     float[] centroids = [];
     int momentCapacity;
 
-    public FillSametypePipeline()
+    public FillSametypePipeline(IGraphicsDevicesAndContext devices)
     {
-        device = GraphicsDevice.GetDefault();
+        device = new ComputeShaderDevice(devices);
+        constants = new ComputeConstantBuffer(device, 32);
     }
+
+    public bool IsSupported => device.IsSupported;
 
     public bool IsForeground(int index)
     {
@@ -74,19 +80,30 @@ internal sealed class FillSametypePipeline : IDisposable
         EnsureMatchFlagBuffer(componentCount);
         EnsureMaskBuffer(pixelCount);
 
-        labelGpu.CopyFrom(labels.AsSpan(0, pixelCount));
-        centroidGpu.CopyFrom(centroids.AsSpan(0, componentCount * 2));
+        labelGpu.Upload(labels.AsSpan(0, pixelCount));
+        centroidGpu.Upload(centroids.AsSpan(0, componentCount * 2));
 
         int histogramLength = componentCount * FeatureSize;
-        device.For(width, CeilDiv(histogramLength, width), new ClearBufferShader(histogramGpu, width, histogramLength));
-
         float maxRadius = (float)Math.Sqrt((double)width * width + (double)height * height);
         float logRadiusScale = RadialBins / (float)Math.Log(maxRadius);
 
-        device.For(width, height, new LogPolarHistogramShader(
-            labelGpu, centroidGpu, histogramGpu, AngleBins, RadialBins, logRadiusScale, width, height));
+        using (device.Enter())
+        {
+            constants.Update(new ClearConstants(width, histogramLength));
+            device.Dispatch("FillSametypeClearCS", constants.Buffer, [], [histogramGpu.Uav],
+                ComputeShaderDevice.GroupCount(width, 8),
+                ComputeShaderDevice.GroupCount(CeilDiv(histogramLength, width), 8));
 
-        device.For(componentCount, new NormalizeHistogramShader(histogramGpu, featureGpu, FeatureSize, componentCount));
+            constants.Update(new HistogramConstants(AngleBins, RadialBins, logRadiusScale, width, height));
+            device.Dispatch("FillSametypeHistogramCS", constants.Buffer, [labelGpu.Srv, centroidGpu.Srv], [histogramGpu.Uav],
+                ComputeShaderDevice.GroupCount(width, 8),
+                ComputeShaderDevice.GroupCount(height, 8));
+
+            constants.Update(new NormalizeConstants(FeatureSize, componentCount));
+            device.Dispatch("FillSametypeNormalizeCS", constants.Buffer, [], [histogramGpu.Uav, featureGpu.Uav],
+                ComputeShaderDevice.GroupCount(componentCount, 64),
+                1);
+        }
 
         analysisGeneration++;
 
@@ -123,22 +140,30 @@ internal sealed class FillSametypePipeline : IDisposable
         if (!maskChanged)
             return false;
 
-        if (correlationChanged)
+        using (device.Enter())
         {
-            device.For(componentCount, new CorrelationMatchShader(
-                featureBuffer, matchFlagBuffer, seedComponent, AngleBins, RadialBins, similarityThreshold, componentCount));
+            if (correlationChanged)
+            {
+                constants.Update(new CorrelationConstants(seedComponent, AngleBins, RadialBins, similarityThreshold, componentCount));
+                device.Dispatch("FillSametypeCorrelationCS", constants.Buffer, [], [featureBuffer.Uav, matchFlagBuffer.Uav],
+                    ComputeShaderDevice.GroupCount(componentCount, 64),
+                    1);
 
-            lastSeedComponent = seedComponent;
-            lastSimilarityThreshold = similarityThreshold;
-            lastMatchGeneration = analysisGeneration;
+                lastSeedComponent = seedComponent;
+                lastSimilarityThreshold = similarityThreshold;
+                lastMatchGeneration = analysisGeneration;
+            }
+
+            lastInvert = invert;
+
+            constants.Update(new MaskConstants(invert ? 1 : 0, width, height));
+            device.Dispatch("FillSametypeMaskCS", constants.Buffer, [labelBuffer.Srv], [matchFlagBuffer.Uav, maskBuffer.Uav],
+                ComputeShaderDevice.GroupCount(width, 8),
+                ComputeShaderDevice.GroupCount(height, 8));
+
+            maskBuffer.Readback(maskResult);
         }
 
-        lastInvert = invert;
-
-        device.For(width, height, new MaskShader(
-            labelBuffer, matchFlagBuffer, maskBuffer, invert ? 1 : 0, width, height));
-
-        maskBuffer.CopyTo(maskResult);
         return true;
     }
 
@@ -281,65 +306,65 @@ internal sealed class FillSametypePipeline : IDisposable
         remap = new int[pixelCount];
     }
 
-    ReadOnlyBuffer<int> EnsureLabelBuffer(int count)
+    ComputeBuffer<int> EnsureLabelBuffer(int count)
     {
         if (labelBuffer is null || labelBuffer.Length < count)
         {
             labelBuffer?.Dispose();
-            labelBuffer = device.AllocateReadOnlyBuffer<int>(count);
+            labelBuffer = new ComputeBuffer<int>(device, count, false);
         }
         return labelBuffer;
     }
 
-    ReadOnlyBuffer<float> EnsureCentroidBuffer(int componentCount)
+    ComputeBuffer<float> EnsureCentroidBuffer(int componentCount)
     {
         int count = componentCount * 2;
         if (centroidBuffer is null || centroidBuffer.Length < count)
         {
             centroidBuffer?.Dispose();
-            centroidBuffer = device.AllocateReadOnlyBuffer<float>(count);
+            centroidBuffer = new ComputeBuffer<float>(device, count, false);
         }
         return centroidBuffer;
     }
 
-    ReadWriteBuffer<int> EnsureHistogramBuffer(int componentCount)
+    ComputeBuffer<int> EnsureHistogramBuffer(int componentCount)
     {
         int count = componentCount * FeatureSize;
         if (histogramBuffer is null || histogramBuffer.Length < count)
         {
             histogramBuffer?.Dispose();
-            histogramBuffer = device.AllocateReadWriteBuffer<int>(count);
+            histogramBuffer = new ComputeBuffer<int>(device, count, true);
         }
         return histogramBuffer;
     }
 
-    ReadWriteBuffer<float> EnsureFeatureBuffer(int componentCount)
+    ComputeBuffer<float> EnsureFeatureBuffer(int componentCount)
     {
         int count = componentCount * FeatureSize;
         if (featureBuffer is null || featureBuffer.Length < count)
         {
             featureBuffer?.Dispose();
-            featureBuffer = device.AllocateReadWriteBuffer<float>(count);
+            featureBuffer = new ComputeBuffer<float>(device, count, true);
         }
         return featureBuffer;
     }
 
-    ReadWriteBuffer<int> EnsureMatchFlagBuffer(int count)
+    ComputeBuffer<int> EnsureMatchFlagBuffer(int count)
     {
         if (matchFlagBuffer is null || matchFlagBuffer.Length < count)
         {
             matchFlagBuffer?.Dispose();
-            matchFlagBuffer = device.AllocateReadWriteBuffer<int>(count);
+            matchFlagBuffer = new ComputeBuffer<int>(device, count, true);
         }
         return matchFlagBuffer;
     }
 
-    ReadWriteBuffer<int> EnsureMaskBuffer(int count)
+    ComputeBuffer<int> EnsureMaskBuffer(int count)
     {
         if (maskBuffer is null || maskBuffer.Length < count)
         {
             maskBuffer?.Dispose();
-            maskBuffer = device.AllocateReadWriteBuffer<int>(count);
+            maskBuffer = new ComputeBuffer<int>(device, count, true);
         }
         return maskBuffer;
     }
@@ -351,6 +376,7 @@ internal sealed class FillSametypePipeline : IDisposable
 
     public void Dispose()
     {
+        constants.Dispose();
         labelBuffer?.Dispose();
         centroidBuffer?.Dispose();
         histogramBuffer?.Dispose();
@@ -363,5 +389,21 @@ internal sealed class FillSametypePipeline : IDisposable
         featureBuffer = null;
         matchFlagBuffer = null;
         maskBuffer = null;
+        device.Dispose();
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    readonly record struct ClearConstants(int GridWidth, int BufferLength);
+
+    [StructLayout(LayoutKind.Sequential)]
+    readonly record struct HistogramConstants(int AngleBins, int RadialBins, float LogRadiusScale, int Width, int Height);
+
+    [StructLayout(LayoutKind.Sequential)]
+    readonly record struct NormalizeConstants(int FeatureSize, int ComponentCount);
+
+    [StructLayout(LayoutKind.Sequential)]
+    readonly record struct CorrelationConstants(int SeedComponent, int AngleBins, int RadialBins, float Threshold, int ComponentCount);
+
+    [StructLayout(LayoutKind.Sequential)]
+    readonly record struct MaskConstants(int Invert, int Width, int Height);
 }

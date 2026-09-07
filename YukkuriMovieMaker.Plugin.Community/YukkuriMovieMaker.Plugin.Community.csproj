@@ -203,6 +203,11 @@
 	  <Resource Include="$(ShaderDirPath)NtscDecode.cso" Link="Resources\Shader\NtscDecode.cso" />
 	  <Resource Include="$(ShaderDirPath)NtscRestore.cso" Link="Resources\Shader\NtscRestore.cso" />
 	  <Resource Include="$(ShaderDirPath)PixelSortCS.cso" Link="Resources\Shader\PixelSortCS.cso" />
+	  <Resource Include="$(ShaderDirPath)FillSametypeClearCS.cso" Link="Resources\Shader\FillSametypeClearCS.cso" />
+	  <Resource Include="$(ShaderDirPath)FillSametypeHistogramCS.cso" Link="Resources\Shader\FillSametypeHistogramCS.cso" />
+	  <Resource Include="$(ShaderDirPath)FillSametypeNormalizeCS.cso" Link="Resources\Shader\FillSametypeNormalizeCS.cso" />
+	  <Resource Include="$(ShaderDirPath)FillSametypeCorrelationCS.cso" Link="Resources\Shader\FillSametypeCorrelationCS.cso" />
+	  <Resource Include="$(ShaderDirPath)FillSametypeMaskCS.cso" Link="Resources\Shader\FillSametypeMaskCS.cso" />
 	  <Resource Include="$(ShaderDirPath)LensFlare.cso" Link="Resources\Shader\LensFlare.cso" />
 	  <Resource Include="$(ShaderDirPath)FillSamegroundShader.cso" Link="Resources\Shader\FillSamegroundShader.cso" />
 	  <Resource Include="$(ShaderDirPath)PuppetDeformation.cso" Link="Resources\Shader\PuppetDeformation.cso" />

@@ -153,6 +153,21 @@
     <FxCompile Include="PixelSortCS.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="FillSametypeClearCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="FillSametypeHistogramCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="FillSametypeNormalizeCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="FillSametypeCorrelationCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="FillSametypeMaskCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="LensFlare.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>

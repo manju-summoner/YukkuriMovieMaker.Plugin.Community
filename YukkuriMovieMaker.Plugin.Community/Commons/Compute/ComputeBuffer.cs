@@ -115,10 +115,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
         public ID3D11Buffer Buffer { get; }
 
-        public ComputeConstantBuffer(ComputeShaderDevice device, int floatCount)
+        public ComputeConstantBuffer(ComputeShaderDevice device, int byteCount)
         {
             this.device = device;
-            byteSize = (floatCount * sizeof(float) + 15) / 16 * 16;
+            byteSize = (byteCount + 15) / 16 * 16;
             Buffer = device.Device.CreateBuffer(new BufferDescription(
                 byteSize,
                 BindFlags.ConstantBuffer,
@@ -128,14 +128,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
                 0), (SubresourceData?)null);
         }
 
-        public unsafe void Update(ReadOnlySpan<float> values)
+        public unsafe void Update<TValue>(in TValue value) where TValue : unmanaged
         {
             var mapped = device.Context.Map(Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
             try
             {
                 var destination = new Span<byte>((void*)mapped.DataPointer, byteSize);
                 destination.Clear();
-                MemoryMarshal.AsBytes(values).CopyTo(destination);
+                MemoryMarshal.Write(destination, in value);
             }
             finally
             {

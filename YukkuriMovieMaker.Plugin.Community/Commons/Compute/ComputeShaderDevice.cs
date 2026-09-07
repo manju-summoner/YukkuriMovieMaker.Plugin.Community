@@ -8,6 +8,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 {
     internal sealed class ComputeShaderDevice : IDisposable
     {
+        static readonly ID3D11ShaderResourceView?[] EmptySrvs = new ID3D11ShaderResourceView?[8];
+        static readonly ID3D11UnorderedAccessView?[] EmptyUavs = new ID3D11UnorderedAccessView?[8];
+
         readonly DisposeCollector disposer = new();
         readonly Dictionary<string, ID3D11ComputeShader> shaders = [];
         readonly ID3D11Multithread multithread;
@@ -36,6 +39,30 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             shaders[name] = shader;
             return shader;
         }
+
+        public void Dispatch(
+            string shaderName,
+            ID3D11Buffer constants,
+            ID3D11ShaderResourceView?[] resources,
+            ID3D11UnorderedAccessView?[] targets,
+            int groupsX,
+            int groupsY)
+        {
+            Context.CSSetShader(GetShader(shaderName));
+            Context.CSSetConstantBuffer(0, constants);
+            if (resources.Length > 0)
+                Context.CSSetShaderResources(0, resources.Length, resources!);
+            Context.CSSetUnorderedAccessViews(0, targets.Length, targets!);
+
+            Context.Dispatch(groupsX, groupsY, 1);
+
+            if (resources.Length > 0)
+                Context.CSSetShaderResources(0, resources.Length, EmptySrvs!);
+            Context.CSSetUnorderedAccessViews(0, targets.Length, EmptyUavs!);
+            Context.CSSetShader(null);
+        }
+
+        public static int GroupCount(int extent, int threads) => (extent + threads - 1) / threads;
 
         public Scope Enter() => new(multithread);
 
