@@ -492,8 +492,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     }
 
                     var paths = new[] { resolved };
-                    if (Settings.CommandSettings.Default.CanExecute(Settings.Commands.AddFileItem, paths))
-                        Settings.CommandSettings.Default.Execute(Settings.Commands.AddFileItem, paths);
+                    if (Settings.CommandRegistry.CanExecute(Settings.Commands.AddFileItem, paths))
+                        Settings.CommandRegistry.Execute(Settings.Commands.AddFileItem, paths);
                 });
             CreateNewFolderCommand = new ActionCommand(
                 p =>
