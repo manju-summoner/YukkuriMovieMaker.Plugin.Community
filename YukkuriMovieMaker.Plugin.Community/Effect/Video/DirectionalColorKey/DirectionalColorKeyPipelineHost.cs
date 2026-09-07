@@ -1,5 +1,4 @@
 using ComputeWeave;
-using ComputeWeave.Descriptors;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 {
@@ -70,7 +69,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             context.For(width, height, new ChangeSeedShader(bgra, previousBgra, seedMask, width, height));
             context.Barrier(seedMask);
 
-            context.For(GroupAlignedX<MaskCountShader>(width), GroupAlignedY<MaskCountShader>(height), new MaskCountShader(seedMask, count, width, height));
+            context.For(ThreadGroupAlignment.AlignX<MaskCountShader>(width), ThreadGroupAlignment.AlignY<MaskCountShader>(height), new MaskCountShader(seedMask, count, width, height));
             context.Barrier(count);
         }
 
@@ -92,7 +91,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             for (int iteration = 0; iteration < iterations; iteration++)
             {
-                context.For(GroupAlignedX<DirectionSmoothShader>(width), GroupAlignedY<DirectionSmoothShader>(height), new DirectionSmoothShader(source, colorLab, target, sigmaColorSquared, width, height));
+                context.For(ThreadGroupAlignment.AlignX<DirectionSmoothShader>(width), ThreadGroupAlignment.AlignY<DirectionSmoothShader>(height), new DirectionSmoothShader(source, colorLab, target, sigmaColorSquared, width, height));
                 context.Barrier(target);
 
                 (source, target) = (target, source);
@@ -134,7 +133,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             for (int iteration = 0; iteration < iterations; iteration++)
             {
-                context.For(GroupAlignedX<RegionDirectionSmoothShader>(width), GroupAlignedY<RegionDirectionSmoothShader>(height), new RegionDirectionSmoothShader(
+                context.For(ThreadGroupAlignment.AlignX<RegionDirectionSmoothShader>(width), ThreadGroupAlignment.AlignY<RegionDirectionSmoothShader>(height), new RegionDirectionSmoothShader(
                     source, colorLab, target, computeMask, sigmaColorSquared, width, height));
                 context.Barrier(target);
 
@@ -177,7 +176,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         {
             _ = device;
 
-            context.For(GroupAlignedX<ClusterAssignAccumulateShader>(width), GroupAlignedY<ClusterAssignAccumulateShader>(height), new ClusterAssignAccumulateShader(
+            context.For(ThreadGroupAlignment.AlignX<ClusterAssignAccumulateShader>(width), ThreadGroupAlignment.AlignY<ClusterAssignAccumulateShader>(height), new ClusterAssignAccumulateShader(
                 directions, centers, accumulators, clusterCount, fixedPointScale, width, height));
             context.Barrier(accumulators);
         }
@@ -241,7 +240,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             for (int iteration = 0; iteration < iterations; iteration++)
             {
-                context.For(GroupAlignedX<ForegroundPropagateShader>(width), GroupAlignedY<ForegroundPropagateShader>(height), new ForegroundPropagateShader(
+                context.For(ThreadGroupAlignment.AlignX<ForegroundPropagateShader>(width), ThreadGroupAlignment.AlignY<ForegroundPropagateShader>(height), new ForegroundPropagateShader(
                     source, bgra, srgbToLinear, premultipliedLinear, target,
                     backgroundSrgbR, backgroundSrgbG, backgroundSrgbB,
                     sigmaLineSquared, width, height));
@@ -250,11 +249,5 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 (source, target) = (target, source);
             }
         }
-
-        private static int GroupAlignedX<T>(int value) where T : struct, IComputeShaderDescriptor<T>
-            => (value + T.ThreadsX - 1) / T.ThreadsX * T.ThreadsX;
-
-        private static int GroupAlignedY<T>(int value) where T : struct, IComputeShaderDescriptor<T>
-            => (value + T.ThreadsY - 1) / T.ThreadsY * T.ThreadsY;
     }
 }
