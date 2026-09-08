@@ -77,19 +77,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         // cs_5_0 に対応しない環境では null を返し、呼び出し側でパススルーさせる。
         public static DirectionalColorKeyAnalyzer? TryCreate(IGraphicsDevicesAndContext devices)
         {
-            try
-            {
-                var analyzer = new DirectionalColorKeyAnalyzer(devices);
-                if (analyzer.device.IsSupported)
-                    return analyzer;
+            var analyzer = new DirectionalColorKeyAnalyzer(devices);
+            if (analyzer.device.IsSupported)
+                return analyzer;
 
-                analyzer.Dispose();
-                return null;
-            }
-            catch
-            {
-                return null;
-            }
+            analyzer.Dispose();
+            return null;
         }
 
         public int ClusterCount => clusterCount;

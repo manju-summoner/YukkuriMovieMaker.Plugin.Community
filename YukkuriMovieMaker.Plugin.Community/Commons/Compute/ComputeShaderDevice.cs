@@ -135,7 +135,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
         static byte[] GetBytecode(string name)
         {
-            using (bytecodeLock.EnterScope())
+            lock (bytecodeLock)
             {
                 if (bytecodes.TryGetValue(name, out var cached))
                     return cached;
