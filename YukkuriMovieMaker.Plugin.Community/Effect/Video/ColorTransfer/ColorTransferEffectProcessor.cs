@@ -37,6 +37,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
         private ID2D1Bitmap1? _stagingBitmap;
         private int _bitmapSize;
 
+        private ID2D1Bitmap1? _transparentBitmap;
+        private bool _isInputHidden;
+
         private ITimelineSource? _sceneSource;
         private Guid _sceneSourceId;
 
@@ -69,6 +72,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
 
             if (ColorTransferReferenceScope.IsOwner(_item))
             {
+                //参照シーンの描画中は自分自身を参照から除く。
+                //Opacity だけに頼ると後段の絶対指定の不透明度エフェクトに上書きされるので、出力画像そのものを透明にする。
+                //ここに来るのは参照シーン側に作られたプロセッサだけで、その Update は常に owner のスコープ内で呼ばれるため、隠したあとに戻す経路はない
+                HideInput();
                 _hasTransfer = false;
                 ApplyAmounts(0f, 0f, 0f);
                 return effectDescription.DrawDescription with { Opacity = 0.0 };
@@ -661,11 +668,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
 
         protected override void setInput(ID2D1Image? input)
         {
-            _effect?.SetInput(0, input, true);
+            //自分を隠している間は透明画像を差し替えない。本体は前段の出力画像が変わったフレームだけ SetInput を呼ぶので、
+            //ここで素通しすると入れ子描画のそのフレームだけ自分自身が参照に写り込む
+            if (!_isInputHidden)
+                _effect?.SetInput(0, input, true);
+        }
+
+        private void HideInput()
+        {
+            if (_isInputHidden || _effect is null)
+                return;
+
+            if (_transparentBitmap is null)
+            {
+                _transparentBitmap = _devices.DeviceContext.CreateEmptyBitmap(options: BitmapOptions.None);
+                disposer.Collect(_transparentBitmap);
+            }
+            _effect.SetInput(0, _transparentBitmap, true);
+            _isInputHidden = true;
         }
 
         protected override void ClearEffectChain()
         {
+            _isInputHidden = false;
             _effect?.SetInput(0, null, true);
             ReleaseSceneSource();
             ReleaseFileSource();
