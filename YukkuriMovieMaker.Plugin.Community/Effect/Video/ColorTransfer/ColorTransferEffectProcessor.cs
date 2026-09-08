@@ -9,6 +9,7 @@ using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
+using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.FileSource;
 using PixelFormat = Vortice.DCommon.PixelFormat;
 
@@ -39,7 +40,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
         private ITimelineSource? _sceneSource;
         private Guid _sceneSourceId;
 
-        private ID2D1Bitmap? _fileBitmap;
+        private IImageFileSource? _fileImage;
         private IVideoFileSource? _fileSource;
         private string _filePath = string.Empty;
 
@@ -232,9 +233,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             }
 
             ID2D1Image? image;
-            if (_fileBitmap is not null)
+            if (_fileImage is not null)
             {
-                image = _fileBitmap;
+                image = _fileImage.Output;
             }
             else if (_fileSource is not null)
             {
@@ -252,43 +253,47 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
 
         private void LoadFile(string path)
         {
-            foreach (var plugin in PluginLoader.ImageFileSourcePlugins)
+            //キャッシュの参照とデバイスコンテキストの所有はファクトリに任せる。
+            //先に試すソースは拡張子の分類（再生開始位置のUIやリソース一覧と同じ判定）で決める。
+            //常に動画を先にすると image1.png のような連番静止画が連番動画として開かれて時間経過で別の画像を参照し、
+            //常に画像を先にするとアニメーションGIFが先頭フレームで固定される
+            var isVideoExtension = (Settings.FileSettings.Default.FileExtensions.GetFileType(path) & Settings.FileType.動画) != 0;
+            if (isVideoExtension)
             {
-                try
-                {
-                    var bitmap = plugin.CreateBitmap(_devices, path);
-                    if (bitmap is null)
-                        continue;
-                    disposer.Collect(bitmap);
-                    _fileBitmap = bitmap;
-                    return;
-                }
-                catch
-                {
-                }
+                if (!TryLoadVideo(path))
+                    TryLoadImage(path);
             }
+            else
+            {
+                if (!TryLoadImage(path))
+                    TryLoadVideo(path);
+            }
+        }
 
-            foreach (var plugin in PluginLoader.VideoFileSourcePlugins)
-            {
-                try
-                {
-                    var source = plugin.CreateVideoFileSource(_devices, path);
-                    if (source is null)
-                        continue;
-                    disposer.Collect(source);
-                    _fileSource = source;
-                    return;
-                }
-                catch
-                {
-                }
-            }
+        private bool TryLoadVideo(string path)
+        {
+            var video = VideoFileSourceFactory.Create(_devices, path);
+            if (video is null)
+                return false;
+            disposer.Collect(video);
+            _fileSource = video;
+            return true;
+        }
+
+        private bool TryLoadImage(string path)
+        {
+            var image = ImageFileSourceFactory.Create(_devices, path);
+            if (image is null)
+                return false;
+            disposer.Collect(image);
+            _fileImage = image;
+            return true;
         }
 
         private void ReleaseFileSource()
         {
-            if (_fileBitmap is not null)
-                disposer.RemoveAndDispose(ref _fileBitmap);
+            if (_fileImage is not null)
+                disposer.RemoveAndDispose(ref _fileImage);
             if (_fileSource is not null)
                 disposer.RemoveAndDispose(ref _fileSource);
             _filePath = string.Empty;
