@@ -283,7 +283,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             }
         }
 
-        // 型付き UAV 書き込みは必須機能ではないため、非対応環境は CPU 転送へ落とす。
+        // 面へ直接書けない環境では従来どおり CPU 転送へ落とす。
         private void EnsureForegroundTarget(ID2D1DeviceContext dc, int width, int height)
         {
             if ((foregroundSurface is not null || foregroundBitmap is not null)

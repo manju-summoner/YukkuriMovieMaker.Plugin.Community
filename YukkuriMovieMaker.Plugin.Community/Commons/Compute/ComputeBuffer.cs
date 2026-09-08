@@ -56,7 +56,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             }
         }
 
-        // Default に WriteDiscard は使えないため、用途で送り方を分ける。
+        // WriteDiscard は Dynamic 専用のため、Default へは部分更新で送る。
+        // https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ne-d3d11-d3d11_map
+        // ("The resource must have been created with write access and dynamic usage")
         public unsafe void Upload(ReadOnlySpan<T> source)
         {
             var count = Math.Min(source.Length, Length);
@@ -92,7 +94,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             }
         }
 
-        // 確保済みの容量は使用量より大きいことがある。消す範囲を絞るためビューを分ける。
+        // 確保は使用量を上回ることがあるため、使用量ぶんのビューで消す。
         public void Clear(int count)
         {
             using var scope = device.Enter();
@@ -117,7 +119,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
         public void CopyFrom(ComputeBuffer<T> source)
         {
-            // D3D11 は大きさの違う複写を黙って捨てる。
+            // CopyResource は同じ大きさを要求するが戻り値が無く、違反しても呼び出し側は気付けない。
+            // https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-copyresource
+            // ("Must have identical dimensions (including width, height, depth, and size as appropriate)")
             if (source.Length != Length)
                 throw new ArgumentException("複写元と複写先の要素数が違います。", nameof(source));
 

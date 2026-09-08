@@ -28,7 +28,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
         public ID3D11DeviceContext Context { get; }
         public bool IsSupported { get; }
 
-        // 型付き UAV 書き込みは D3D11 の必須機能ではないため、対応の有無を持っておく。
+        // UAV に使えるかは形式とデバイスごとに決まるため、構築時に一度だけ調べる。
+        // https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ne-d3d11-d3d11_format_support
+        // ("Which resources are supported for a given format and given device")
         public bool SupportsWritableSurface { get; }
 
         public ComputeShaderDevice(IGraphicsDevicesAndContext devices)
@@ -36,6 +38,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             Device = devices.D3D.Device;
             Context = devices.D3D.DeviceContext;
             multithread = devices.D3D.Multithread;
+            // cs_5_0（シェーダーモデル 5.0）は機能レベル 11_0 から。
+            // https://learn.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-devices-downlevel-intro
             IsSupported = Device.FeatureLevel >= FeatureLevel.Level_11_0;
             SupportsWritableSurface = Device.CheckFormatSupport(Format.B8G8R8A8_UNorm)
                 .HasFlag(FormatSupport.TypedUnorderedAccessView);
@@ -114,7 +118,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
             Context.Dispatch(groupsX, groupsY, 1);
 
-            // 同じテクスチャを D2D が扱うため、束縛を残さない。
+            // 同じ面を入力と出力へ同時に束縛するとランタイムが入力を外す。D2D へ渡す前に解く。
+            // https://learn.microsoft.com/en-us/windows/win32/direct3d11/hazard-tracking-versus-tile-pool-resources
+            // ("If such a case is encountered, the runtime unbinds the input")
             Array.Clear(resourceSlots);
             Array.Clear(targetSlots);
             if (resourceCount > 0)
