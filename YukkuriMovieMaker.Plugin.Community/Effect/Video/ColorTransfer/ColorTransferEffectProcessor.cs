@@ -374,6 +374,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
                 ? WrapTime(scene.Duration.Time, position)
                 : ClampTime(scene.Duration.Time, position);
 
+            //シーン側は時刻を最近接丸めでフレーム番号へ戻すため、末尾フレームの後半は Duration.Frame へ切り上がって何も描かれない。
+            //本体のシーンアイテムと同じく最終有効フレームの時刻を上限にする
+            if (scene.Duration.Frame > 0)
+            {
+                var lastFrameTime = YukkuriMovieMaker.Commons.FrameTime.FrameToTime(scene.Duration.Frame - 1, scene.FPS);
+                if (lastFrameTime < time)
+                    time = lastFrameTime;
+            }
+
             using (ColorTransferReferenceScope.Enter(_item))
                 _sceneSource.Update(time, effectDescription.Usage);
 
