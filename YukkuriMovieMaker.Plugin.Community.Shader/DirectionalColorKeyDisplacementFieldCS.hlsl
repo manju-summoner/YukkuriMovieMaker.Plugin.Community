@@ -1,6 +1,4 @@
-#define __GroupSize__get_X 8
-#define __GroupSize__get_Y 8
-#define __GroupSize__get_Z 1
+#include "DirectionalColorKeyCS.hlsli"
 
 cbuffer _ : register(b0)
 {
@@ -21,13 +19,13 @@ RWStructuredBuffer<float> colorLab : register(u0);
 
 RWStructuredBuffer<float> directions : register(u1);
 
-[numthreads(__GroupSize__get_X, __GroupSize__get_Y, __GroupSize__get_Z)]
-void main(uint3 ThreadIds : SV_DispatchThreadID)
+[numthreads(GROUP_X, GROUP_Y, GROUP_Z)]
+void main(uint3 dispatchThreadId : SV_DispatchThreadID)
 {
-    if (ThreadIds.x < __x && ThreadIds.y < __y && ThreadIds.z < __z)
+    if (dispatchThreadId.x < __x && dispatchThreadId.y < __y && dispatchThreadId.z < __z)
     {
-        int x = ThreadIds.x;
-        int y = ThreadIds.y;
+        int x = dispatchThreadId.x;
+        int y = dispatchThreadId.y;
         if (x >= width || y >= height)
             return;
         int index = y * width + x;

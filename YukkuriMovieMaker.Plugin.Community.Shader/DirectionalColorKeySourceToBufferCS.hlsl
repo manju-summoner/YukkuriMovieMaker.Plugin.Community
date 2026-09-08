@@ -1,3 +1,5 @@
+#include "DirectionalColorKeyCS.hlsli"
+
 cbuffer Constants : register(b0)
 {
     int width;
@@ -9,7 +11,7 @@ Texture2D<float4> source : register(t0);
 RWStructuredBuffer<int> target : register(u0);
 RWStructuredBuffer<int> changeCount : register(u1);
 
-[numthreads(8, 8, 1)]
+[numthreads(GROUP_X, GROUP_Y, GROUP_Z)]
 void main(uint3 threadId : SV_DispatchThreadID)
 {
     int x = (int)threadId.x;

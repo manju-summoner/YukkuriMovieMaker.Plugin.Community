@@ -1,12 +1,4 @@
-#define __GroupSize__get_X 8
-#define __GroupSize__get_Y 8
-#define __GroupSize__get_Z 1
-#define __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius 4
-#define __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__SpaceTableCount 81
-#define __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__SpaceTableStride 9
-#define __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileCount 256
-#define __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileSize 16
-#define __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionFieldConstants__ValidLengthSquaredThreshold 0.25
+#include "DirectionalColorKeyCS.hlsli"
 
 cbuffer _ : register(b0)
 {
@@ -24,33 +16,33 @@ RWStructuredBuffer<float> colorLab : register(u1);
 
 RWStructuredBuffer<float> targetDirections : register(u2);
 
-groupshared float directionTile [768];
+groupshared float directionTile [SMOOTH_TILE_COUNT * 3];
 
-groupshared float colorTile [768];
+groupshared float colorTile [SMOOTH_TILE_COUNT * 3];
 
-groupshared float spaceTable [81];
+groupshared float spaceTable [SMOOTH_SPACE_TABLE_COUNT];
 
-[numthreads(__GroupSize__get_X, __GroupSize__get_Y, __GroupSize__get_Z)]
-void main(uint3 ThreadIds : SV_DispatchThreadID, uint3 GroupIds : SV_GroupThreadID, uint __GroupIds__get_Index : SV_GroupIndex)
+[numthreads(GROUP_X, GROUP_Y, GROUP_Z)]
+void main(uint3 dispatchThreadId : SV_DispatchThreadID, uint3 groupThreadId : SV_GroupThreadID, uint groupIndex : SV_GroupIndex)
 {
-    int x = ThreadIds.x;
-    int y = ThreadIds.y;
-    float twoSigmaSpaceSq = 2.0 * __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius * __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius;
-    for (uint slot = __GroupIds__get_Index; slot < __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__SpaceTableCount; slot += __GroupSize__get_X * __GroupSize__get_Y * __GroupSize__get_Z)
+    int x = dispatchThreadId.x;
+    int y = dispatchThreadId.y;
+    float twoSigmaSpaceSq = 2.0 * SMOOTH_RADIUS * SMOOTH_RADIUS;
+    for (uint slot = groupIndex; slot < SMOOTH_SPACE_TABLE_COUNT; slot += GROUP_THREADS)
     {
-        int ty = slot / __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__SpaceTableStride;
-        int tx = slot - ty * __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__SpaceTableStride;
-        int offX = tx - __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius;
-        int offY = ty - __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius;
+        int ty = slot / SMOOTH_SPACE_TABLE_STRIDE;
+        int tx = slot - ty * SMOOTH_SPACE_TABLE_STRIDE;
+        int offX = tx - SMOOTH_RADIUS;
+        int offY = ty - SMOOTH_RADIUS;
         spaceTable[slot] = exp(-(offX * offX + offY * offY) / max(twoSigmaSpaceSq, 1E-06));
     }
 
-    int originX = x - GroupIds.x - __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius;
-    int originY = y - GroupIds.y - __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius;
-    for (uint tileSlot = __GroupIds__get_Index; tileSlot < __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileCount; tileSlot += __GroupSize__get_X * __GroupSize__get_Y * __GroupSize__get_Z)
+    int originX = x - groupThreadId.x - SMOOTH_RADIUS;
+    int originY = y - groupThreadId.y - SMOOTH_RADIUS;
+    for (uint tileSlot = groupIndex; tileSlot < SMOOTH_TILE_COUNT; tileSlot += GROUP_THREADS)
     {
-        int localY = tileSlot / __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileSize;
-        int localX = tileSlot - localY * __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileSize;
+        int localY = tileSlot / SMOOTH_TILE_SIZE;
+        int localX = tileSlot - localY * SMOOTH_TILE_SIZE;
         int sampleX = originX + localX;
         int sampleY = originY + localY;
         int tileTriple = tileSlot * 3;
@@ -77,14 +69,14 @@ void main(uint3 ThreadIds : SV_DispatchThreadID, uint3 GroupIds : SV_GroupThread
     GroupMemoryBarrierWithGroupSync();
     if (x >= width || y >= height)
         return;
-    int centerLocalX = GroupIds.x + __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius;
-    int centerLocalY = GroupIds.y + __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius;
-    int centerTile = (centerLocalY * __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileSize + centerLocalX) * 3;
+    int centerLocalX = groupThreadId.x + SMOOTH_RADIUS;
+    int centerLocalY = groupThreadId.y + SMOOTH_RADIUS;
+    int centerTile = (centerLocalY * SMOOTH_TILE_SIZE + centerLocalX) * 3;
     int triple = (y * width + x) * 3;
     float nl = directionTile[centerTile + 0];
     float na = directionTile[centerTile + 1];
     float nb = directionTile[centerTile + 2];
-    if (nl * nl + na * na + nb * nb < __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionFieldConstants__ValidLengthSquaredThreshold)
+    if (nl * nl + na * na + nb * nb < VALID_LENGTH_SQUARED_THRESHOLD)
     {
         targetDirections[triple + 0] = 0.0;
         targetDirections[triple + 1] = 0.0;
@@ -99,26 +91,26 @@ void main(uint3 ThreadIds : SV_DispatchThreadID, uint3 GroupIds : SV_GroupThread
     float sumA = 0.0;
     float sumB = 0.0;
     float sumW = 0.0;
-    for (int dy = -__YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius; dy <= __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius; dy++)
+    for (int dy = -SMOOTH_RADIUS; dy <= SMOOTH_RADIUS; dy++)
     {
         int sy = y + dy;
         if (sy < 0 || sy >= height)
             continue;
-        for (int dx = -__YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius; dx <= __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius; dx++)
+        for (int dx = -SMOOTH_RADIUS; dx <= SMOOTH_RADIUS; dx++)
         {
             int sx = x + dx;
             if (sx < 0 || sx >= width)
                 continue;
-            int sTile = ((centerLocalY + dy) * __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileSize + (centerLocalX + dx)) * 3;
+            int sTile = ((centerLocalY + dy) * SMOOTH_TILE_SIZE + (centerLocalX + dx)) * 3;
             float ml = directionTile[sTile + 0];
             float ma = directionTile[sTile + 1];
             float mb = directionTile[sTile + 2];
-            if (ml * ml + ma * ma + mb * mb < __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionFieldConstants__ValidLengthSquaredThreshold)
+            if (ml * ml + ma * ma + mb * mb < VALID_LENGTH_SQUARED_THRESHOLD)
                 continue;
             float __reserved__dot = nl * ml + na * ma + nb * mb;
             if (__reserved__dot <= 0.0)
                 continue;
-            float wSpace = spaceTable[(dy + __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius) * __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__SpaceTableStride + (dx + __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius)];
+            float wSpace = spaceTable[(dy + SMOOTH_RADIUS) * SMOOTH_SPACE_TABLE_STRIDE + (dx + SMOOTH_RADIUS)];
             float dcl = cl - colorTile[sTile + 0];
             float dca = ca - colorTile[sTile + 1];
             float dcb = cb - colorTile[sTile + 2];

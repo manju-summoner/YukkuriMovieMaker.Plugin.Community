@@ -1,7 +1,4 @@
-#define __GroupSize__get_X 8
-#define __GroupSize__get_Y 8
-#define __GroupSize__get_Z 1
-#define __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionFieldConstants__ValidLengthSquaredThreshold 0.25
+#include "DirectionalColorKeyCS.hlsli"
 
 cbuffer _ : register(b0)
 {
@@ -20,13 +17,13 @@ StructuredBuffer<float> centers : register(t0);
 
 RWStructuredBuffer<int> accumulators : register(u1);
 
-[numthreads(__GroupSize__get_X, __GroupSize__get_Y, __GroupSize__get_Z)]
-void main(uint3 ThreadIds : SV_DispatchThreadID)
+[numthreads(GROUP_X, GROUP_Y, GROUP_Z)]
+void main(uint3 dispatchThreadId : SV_DispatchThreadID)
 {
-    if (ThreadIds.x < __x && ThreadIds.y < __y && ThreadIds.z < __z)
+    if (dispatchThreadId.x < __x && dispatchThreadId.y < __y && dispatchThreadId.z < __z)
     {
-        int x = ThreadIds.x;
-        int y = ThreadIds.y;
+        int x = dispatchThreadId.x;
+        int y = dispatchThreadId.y;
         if (x >= width || y >= height)
             return;
         int index = y * width + x;
@@ -34,7 +31,7 @@ void main(uint3 ThreadIds : SV_DispatchThreadID)
         float nl = directions[triple + 0];
         float na = directions[triple + 1];
         float nb = directions[triple + 2];
-        if (nl * nl + na * na + nb * nb < __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionFieldConstants__ValidLengthSquaredThreshold)
+        if (nl * nl + na * na + nb * nb < VALID_LENGTH_SQUARED_THRESHOLD)
             return;
         int best = 0;
         float bestDot = -2.0;
