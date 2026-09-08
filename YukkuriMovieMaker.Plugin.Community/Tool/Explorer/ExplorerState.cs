@@ -6,5 +6,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         public ExplorerSortOrder SortOrder { get; init; } = ExplorerSortOrder.Ascending;
         public double SidebarWidth { get; init; } = 150;
         public bool IsSidebarVisible { get; init; } = false;
+        public TimeSpan WaveformLength { get; init; } = AudioPreviewService.DefaultWindowLength;
     }
 }
