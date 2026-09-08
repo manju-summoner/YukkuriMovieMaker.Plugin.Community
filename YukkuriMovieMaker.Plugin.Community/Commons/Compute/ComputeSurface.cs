@@ -63,9 +63,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             disposer.Collect(Bitmap);
         }
 
-        public static bool IsWritableFormatSupported(ComputeShaderDevice device)
-            => device.Device.CheckFormatSupport(Format.B8G8R8A8_UNorm).HasFlag(FormatSupport.TypedUnorderedAccessView);
-
         public void Dispose()
         {
             if (disposed)

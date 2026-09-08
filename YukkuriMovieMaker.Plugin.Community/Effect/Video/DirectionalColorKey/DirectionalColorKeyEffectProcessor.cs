@@ -252,8 +252,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             return new Vector4(center.X, center.Y, center.Z, lambda);
         }
 
-        // 入力を D2D で共有テクスチャへ描き、そのままコンピュートシェーダーで読む。
-        // 画素が CPU へ渡ることはなく、変化画素数だけを 1 要素読み戻す。
         private bool RenderSource(ID2D1DeviceContext dc, RawRectF bounds, int width, int height)
         {
             bool reused = EnsureSourceSurface(dc, width, height) && hasSourceContent;
@@ -285,8 +283,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             }
         }
 
-        // 型付き UAV 書き込みに対応する環境では D2D ビットマップと同じテクスチャへ直接書く。
-        // 対応しない環境では従来どおり CPU 経由で転送する。
+        // 型付き UAV 書き込みは必須機能ではないため、非対応環境は CPU 転送へ落とす。
         private void EnsureForegroundTarget(ID2D1DeviceContext dc, int width, int height)
         {
             if ((foregroundSurface is not null || foregroundBitmap is not null)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Vortice.DXGI;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using YukkuriMovieMaker.Commons;
@@ -12,8 +13,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
         const int MaxResources = 2;
         const int MaxTargets = 4;
 
-        // シェーダーのバイト列はプロセス内で共有する。実体はエフェクトの個体ごとに持つため、
-        // 個体を破棄しても他へ影響せず、パックリソースの読み出しは名前ごとに一度で済む。
+        // バイト列だけ共有し、実体は個体ごとに持って寿命を分ける。
         static readonly Lock bytecodeLock = new();
         static readonly Dictionary<string, byte[]> bytecodes = [];
 
@@ -28,12 +28,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
         public ID3D11DeviceContext Context { get; }
         public bool IsSupported { get; }
 
+        // 型付き UAV 書き込みは D3D11 の必須機能ではないため、対応の有無を持っておく。
+        public bool SupportsWritableSurface { get; }
+
         public ComputeShaderDevice(IGraphicsDevicesAndContext devices)
         {
             Device = devices.D3D.Device;
             Context = devices.D3D.DeviceContext;
             multithread = devices.D3D.Multithread;
             IsSupported = Device.FeatureLevel >= FeatureLevel.Level_11_0;
+            SupportsWritableSurface = Device.CheckFormatSupport(Format.B8G8R8A8_UNorm)
+                .HasFlag(FormatSupport.TypedUnorderedAccessView);
         }
 
         public static int GroupCount(int extent, int threads) => (extent + threads - 1) / threads;
@@ -49,7 +54,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             ID3D11UnorderedAccessView? target1 = null,
             ID3D11UnorderedAccessView? target2 = null,
             ID3D11UnorderedAccessView? target3 = null)
-            => Run(shaderName, constants, groupsX, groupsY, 0, target0, target1, target2, target3);
+            => Run(shaderName, constants, groupsX, groupsY, null, null, target0, target1, target2, target3);
 
         public void Dispatch(
             string shaderName,
@@ -61,10 +66,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             ID3D11UnorderedAccessView? target1 = null,
             ID3D11UnorderedAccessView? target2 = null,
             ID3D11UnorderedAccessView? target3 = null)
-        {
-            resourceSlots[0] = resource0;
-            Run(shaderName, constants, groupsX, groupsY, 1, target0, target1, target2, target3);
-        }
+            => Run(shaderName, constants, groupsX, groupsY, resource0, null, target0, target1, target2, target3);
 
         public void Dispatch(
             string shaderName,
@@ -77,31 +79,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             ID3D11UnorderedAccessView? target1 = null,
             ID3D11UnorderedAccessView? target2 = null,
             ID3D11UnorderedAccessView? target3 = null)
-        {
-            resourceSlots[0] = resource0;
-            resourceSlots[1] = resource1;
-            Run(shaderName, constants, groupsX, groupsY, 2, target0, target1, target2, target3);
-        }
+            => Run(shaderName, constants, groupsX, groupsY, resource0, resource1, target0, target1, target2, target3);
 
         void Run(
             string shaderName,
             ID3D11Buffer constants,
             int groupsX,
             int groupsY,
-            int resourceCount,
+            ID3D11ShaderResourceView? resource0,
+            ID3D11ShaderResourceView? resource1,
             ID3D11UnorderedAccessView target0,
             ID3D11UnorderedAccessView? target1,
             ID3D11UnorderedAccessView? target2,
             ID3D11UnorderedAccessView? target3)
         {
+            var resourceCount = resource1 is not null ? 2 : resource0 is not null ? 1 : 0;
+            var targetCount = target3 is not null ? 4 : target2 is not null ? 3 : target1 is not null ? 2 : 1;
+
+            // 控えの配列は個体で共有するため、書き換えは錠の内側だけで行う。
+            using var scope = Enter();
+
+            resourceSlots[0] = resource0;
+            resourceSlots[1] = resource1;
             targetSlots[0] = target0;
             targetSlots[1] = target1;
             targetSlots[2] = target2;
             targetSlots[3] = target3;
-
-            var targetCount = target3 is not null ? 4 : target2 is not null ? 3 : target1 is not null ? 2 : 1;
-
-            using var scope = Enter();
 
             Context.CSSetShader(GetShader(shaderName));
             Context.CSSetConstantBuffer(0, constants);
@@ -111,7 +114,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
             Context.Dispatch(groupsX, groupsY, 1);
 
-            // 同じテクスチャを D2D が読み書きするため、束縛は必ずここで解く。
+            // 同じテクスチャを D2D が扱うため、束縛を残さない。
             Array.Clear(resourceSlots);
             Array.Clear(targetSlots);
             if (resourceCount > 0)

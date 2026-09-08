@@ -2,8 +2,8 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Vortice.DXGI;
-using Vortice.Mathematics;
 using Vortice.Direct3D11;
+using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using MapFlags = Vortice.Direct3D11.MapFlags;
 
@@ -13,10 +13,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
     {
         readonly DisposeCollector disposer = new();
         readonly ComputeShaderDevice device;
-        readonly int stride = Unsafe.SizeOf<T>();
-        ID3D11Buffer? staging;
         readonly ID3D11UnorderedAccessView? uav;
+        readonly int stride = Unsafe.SizeOf<T>();
         readonly bool writable;
+        ID3D11Buffer? staging;
         bool disposed;
 
         public int Length { get; }
@@ -42,18 +42,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             Buffer = device.Device.CreateBuffer(description, (SubresourceData?)null);
             disposer.Collect(Buffer);
 
-            Srv = device.Device.CreateShaderResourceView(Buffer, new ShaderResourceViewDescription(Buffer, Format.Unknown, 0, length));
+            Srv = device.Device.CreateShaderResourceView(
+                Buffer, new ShaderResourceViewDescription(Buffer, Format.Unknown, 0, length));
             disposer.Collect(Srv);
 
             if (writable)
             {
-                uav = device.Device.CreateUnorderedAccessView(Buffer, new UnorderedAccessViewDescription(Buffer, Format.Unknown, 0, length));
+                uav = device.Device.CreateUnorderedAccessView(
+                    Buffer, new UnorderedAccessViewDescription(Buffer, Format.Unknown, 0, length));
                 disposer.Collect(uav);
             }
         }
 
-        // 書き込み不可の領域は Dynamic なので破棄写経で、書き込み可能な領域は Default なので
-        // 部分更新で送る。Default に対する WriteDiscard は D3D11 が受け付けない。
+        // Default に WriteDiscard は使えないため、用途で送り方を分ける。
         public unsafe void Upload(ReadOnlySpan<T> source)
         {
             var count = Math.Min(source.Length, Length);
@@ -98,7 +99,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
         public void CopyFrom(ComputeBuffer<T> source)
         {
-            // D3D11 は大きさの違う複写を黙って捨てるため、ここで気付けるようにする。
+            // D3D11 は大きさの違う複写を黙って捨てる。
             if (source.Length != Length)
                 throw new ArgumentException("複写元と複写先の要素数が違います。", nameof(source));
 

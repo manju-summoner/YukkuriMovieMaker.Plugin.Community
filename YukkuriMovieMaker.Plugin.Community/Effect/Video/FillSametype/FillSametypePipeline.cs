@@ -35,6 +35,7 @@ internal sealed class FillSametypePipeline : IDisposable
     const int MaximumComponents = 65536;
 
     int[] labels = [];
+    int[] maskReadback = [];
     int[] parent = [];
     int[] rank = [];
     int[] remap = [];
@@ -50,24 +51,34 @@ internal sealed class FillSametypePipeline : IDisposable
 
     public bool IsSupported => device.IsSupported;
 
-    public bool SupportsWritableSurface => ComputeSurface.IsWritableFormatSupported(device);
+    public bool SupportsWritableSurface => device.SupportsWritableSurface;
 
     public ComputeSurface CreateSurface(ID2D1DeviceContext dc, int width, int height, bool writable)
         => new(device, dc, width, height, writable);
 
-    void ClearMask(Span<int> maskResult, ComputeSurface? target)
+    public void ClearMask(ComputeSurface? target)
     {
-        if (target is not null)
-            ClearSurface(target);
-        else
-            maskResult.Clear();
-    }
+        if (target is null)
+        {
+            Array.Clear(EnsureMaskReadback(), 0, pixelCount);
+            return;
+        }
 
-    public void ClearSurface(ComputeSurface target)
-    {
         using var scope = device.Enter();
 
         device.Context.ClearUnorderedAccessView(target.Uav, new System.Numerics.Vector4(0f, 0f, 0f, 0f));
+    }
+
+    public void CopyMaskTo(ID2D1Bitmap1 bitmap, int width)
+        => bitmap.CopyFromMemory<int>(EnsureMaskReadback(), width * sizeof(int));
+
+    // 面へ直接書ける環境では使わないため、必要になるまで確保しない。
+    int[] EnsureMaskReadback()
+    {
+        if (maskReadback.Length < pixelCount)
+            maskReadback = new int[pixelCount];
+
+        return maskReadback;
     }
 
     public bool IsForeground(int index)
@@ -117,8 +128,8 @@ internal sealed class FillSametypePipeline : IDisposable
                 labelGpu.Srv, centroidGpu.Srv, histogramGpu.Uav);
 
             constants.Update(new NormalizeConstants(FeatureSize, componentCount));
-            device.Dispatch("FillSametypeNormalizeCS", constants.Buffer, ComputeShaderDevice.GroupCount(componentCount, 64),
-                1,
+            device.Dispatch("FillSametypeNormalizeCS", constants.Buffer,
+                ComputeShaderDevice.GroupCount(componentCount, 64), 1,
                 histogramGpu.Uav, featureGpu.Uav);
         }
 
@@ -127,7 +138,7 @@ internal sealed class FillSametypePipeline : IDisposable
         return componentCount;
     }
 
-    public bool GenerateMask(int seedIndex, float threshold, bool invert, Span<int> maskResult, ComputeSurface? target)
+    public bool GenerateMask(int seedIndex, float threshold, bool invert, ComputeSurface? target)
     {
         if (componentCount == 0
             || labelBuffer is null
@@ -135,14 +146,14 @@ internal sealed class FillSametypePipeline : IDisposable
             || matchFlagBuffer is null
             || maskBuffer is null)
         {
-            ClearMask(maskResult, target);
+            ClearMask(target);
             return true;
         }
 
         int seedComponent = labels[seedIndex];
         if (seedComponent < 0 || moments[seedComponent * MomentStride] < MinimumComponentArea)
         {
-            ClearMask(maskResult, target);
+            ClearMask(target);
             return true;
         }
 
@@ -161,9 +172,10 @@ internal sealed class FillSametypePipeline : IDisposable
         {
             if (correlationChanged)
             {
-                constants.Update(new CorrelationConstants(seedComponent, AngleBins, RadialBins, similarityThreshold, componentCount));
-                device.Dispatch("FillSametypeCorrelationCS", constants.Buffer, ComputeShaderDevice.GroupCount(componentCount, 64),
-                    1,
+                constants.Update(new CorrelationConstants(
+                    seedComponent, AngleBins, RadialBins, similarityThreshold, componentCount));
+                device.Dispatch("FillSametypeCorrelationCS", constants.Buffer,
+                    ComputeShaderDevice.GroupCount(componentCount, 64), 1,
                     featureBuffer.Uav, matchFlagBuffer.Uav);
 
                 lastSeedComponent = seedComponent;
@@ -187,7 +199,7 @@ internal sealed class FillSametypePipeline : IDisposable
             }
             else
             {
-                maskBuffer.Readback(maskResult);
+                maskBuffer.Readback(EnsureMaskReadback().AsSpan(0, pixelCount));
             }
         }
 
@@ -419,13 +431,15 @@ internal sealed class FillSametypePipeline : IDisposable
     readonly record struct SurfaceConstants(int Width, int Height);
 
     [StructLayout(LayoutKind.Sequential)]
-    readonly record struct HistogramConstants(int AngleBins, int RadialBins, float LogRadiusScale, int Width, int Height);
+    readonly record struct HistogramConstants(
+        int AngleBins, int RadialBins, float LogRadiusScale, int Width, int Height);
 
     [StructLayout(LayoutKind.Sequential)]
     readonly record struct NormalizeConstants(int FeatureSize, int ComponentCount);
 
     [StructLayout(LayoutKind.Sequential)]
-    readonly record struct CorrelationConstants(int SeedComponent, int AngleBins, int RadialBins, float Threshold, int ComponentCount);
+    readonly record struct CorrelationConstants(
+        int SeedComponent, int AngleBins, int RadialBins, float Threshold, int ComponentCount);
 
     [StructLayout(LayoutKind.Sequential)]
     readonly record struct MaskConstants(int Invert, int Width, int Height);

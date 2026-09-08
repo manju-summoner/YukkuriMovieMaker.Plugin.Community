@@ -52,9 +52,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
 
         readonly FillSametypePipeline pipeline;
         int[]? foregroundBuffer;
-        int[]? maskBuffer;
         int bufferPixelCount;
-        int maskPixelCount;
 
         bool isFirst = true;
         Type? brushType;
@@ -152,7 +150,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             if (IsPassThroughEffect || outputEffect is null || input is null)
                 return effectDescription.DrawDescription;
 
-            // cs_5_0 に対応しない環境では解析できないため、入力をそのまま通す。
             if (!pipeline.IsSupported || colorMatchEffect is null || colorMatchOutput is null || alphaMaskEffect is null || opacityEffect is null)
             {
                 outputEffect.SetInput(0, input, true);
@@ -362,16 +359,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             if (components == 0 || seedIndex < 0)
             {
                 EnsureFinalMaskBitmap(dc, width, height);
-                if (finalMaskSurface is not null)
-                {
-                    pipeline.ClearSurface(finalMaskSurface);
-                }
-                else
-                {
-                    var cleared = EnsureMaskBuffer(pixelCount);
-                    Array.Clear(cleared, 0, pixelCount);
-                    finalMaskBitmap!.CopyFromMemory<int>(cleared, width * 4);
-                }
+                pipeline.ClearMask(finalMaskSurface);
+                if (finalMaskSurface is null)
+                    pipeline.CopyMaskTo(finalMaskBitmap!, width);
                 pipeline.InvalidateMatchCache();
                 return TransformFinalMask(bounds);
             }
@@ -382,14 +372,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
                 seedIndex,
                 (float)Math.Max(0, shapeThresholdRaw),
                 invert,
-                finalMaskSurface is null ? EnsureMaskBuffer(pixelCount).AsSpan(0, pixelCount) : default,
                 finalMaskSurface);
 
             if (!maskChanged)
                 return TransformFinalMask(bounds);
 
             if (finalMaskSurface is null)
-                finalMaskBitmap!.CopyFromMemory<int>(maskBuffer!, width * 4);
+                pipeline.CopyMaskTo(finalMaskBitmap!, width);
 
             return TransformFinalMask(bounds);
         }
@@ -540,7 +529,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             disposer.RemoveAndDispose(ref finalMaskSurface);
             disposer.RemoveAndDispose(ref finalMaskBitmap);
 
-            // 型付き UAV 書き込みに対応する環境では、マスクを D2D ビットマップと同じテクスチャへ直接書く。
+            // 型付き UAV 書き込みは必須機能ではないため、非対応環境は CPU 転送へ落とす。
             if (pipeline.SupportsWritableSurface)
             {
                 finalMaskSurface = pipeline.CreateSurface(dc, width, height, true);
@@ -617,16 +606,5 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             return foregroundBuffer!;
         }
 
-        // マスクを面へ直接書ける環境ではこの配列を使わないため、必要になるまで確保しない。
-        int[] EnsureMaskBuffer(int pixelCount)
-        {
-            if (maskPixelCount < pixelCount)
-            {
-                maskBuffer = new int[pixelCount];
-                maskPixelCount = pixelCount;
-            }
-
-            return maskBuffer!;
-        }
     }
 }
