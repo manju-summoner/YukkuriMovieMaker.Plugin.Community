@@ -1,5 +1,4 @@
 using System;
-using Vortice.DCommon;
 using Vortice.DXGI;
 using Vortice.Direct2D1;
 using Vortice.Direct3D11;
@@ -15,8 +14,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
         readonly ID3D11UnorderedAccessView? uav;
         bool disposed;
 
-        public int Width { get; }
-        public int Height { get; }
         public ID2D1Bitmap1 Bitmap { get; }
         public ID3D11ShaderResourceView Srv { get; }
         public ID3D11UnorderedAccessView Uav
@@ -24,9 +21,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
         public ComputeSurface(ComputeShaderDevice device, ID2D1DeviceContext dc, int width, int height, bool writable)
         {
-            Width = width;
-            Height = height;
-
             var bindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource;
             if (writable)
                 bindFlags |= BindFlags.UnorderedAccess;
