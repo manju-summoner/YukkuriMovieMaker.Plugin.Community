@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using YukkuriMovieMaker.Commons;
@@ -13,8 +15,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         public event EventHandler? BeginEdit;
         public event EventHandler? EndEdit;
 
-        //ジョイント/ピン選択中のプロパティエディタの高さ。選択解除時に同じ高さを確保する
-        double reservedEditorHeight;
+        //ジョイント/ピン選択中のプロパティエディタの高さ。選択解除時に同じ高さを確保する。
+        //ピンとボーンでは編集項目の数が違い高さが一致しないため、モードごとに分けて覚える
+        readonly Dictionary<PuppetDeformationEditMode, double> reservedEditorHeights = [];
 
         public PuppetPinListEditor()
         {
@@ -42,7 +45,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PuppetDeformationListEditorViewModel.SelectedTarget)
+            //モードだけ切り替わって選択の有無が変わらない（両モードとも未選択）ときはSelectedTargetが通知されないため、EditModeでも更新する
+            if ((e.PropertyName == nameof(PuppetDeformationListEditorViewModel.SelectedTarget)
+                || e.PropertyName == nameof(PuppetDeformationListEditorViewModel.EditMode))
                 && sender is PuppetDeformationListEditorViewModel vm)
             {
                 UpdateEditorAreaReservation(vm);
@@ -57,14 +62,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 && editorArea.MinHeight == 0
                 && e.NewSize.Height > 0)
             {
-                reservedEditorHeight = e.NewSize.Height;
+                reservedEditorHeights[vm.EditMode] = e.NewSize.Height;
             }
         }
 
         void UpdateEditorAreaReservation(PuppetDeformationListEditorViewModel vm)
         {
-            //未選択時は直前の選択時と同じ高さを確保し、外側ScrollViewerのスクロール位置ズレを防ぐ
-            editorArea.MinHeight = vm.HasNoSelection ? reservedEditorHeight : 0;
+            //未選択時は同じモードで直前に選択していたときと同じ高さを確保し、外側ScrollViewerのスクロール位置ズレを防ぐ
+            editorArea.MinHeight = vm.HasNoSelection ? GetReservedEditorHeight(vm.EditMode) : 0;
+        }
+
+        double GetReservedEditorHeight(PuppetDeformationEditMode mode)
+        {
+            if (reservedEditorHeights.TryGetValue(mode, out var height))
+                return height;
+            //そのモードでまだ一度も選択していないときは、他のモードの高さで代用する
+            return reservedEditorHeights.Values.DefaultIfEmpty(0).Max();
         }
 
         void OnBeginEdit(object? sender, EventArgs e) => BeginEdit?.Invoke(this, EventArgs.Empty);
