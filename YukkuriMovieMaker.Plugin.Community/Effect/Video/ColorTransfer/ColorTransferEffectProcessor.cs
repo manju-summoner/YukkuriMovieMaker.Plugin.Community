@@ -618,7 +618,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
                 * Matrix4x4.CreateRotationY(MathF.PI * -drawDescription.Rotation.Y / 180f)
                 * Matrix4x4.CreateRotationX(MathF.PI * -drawDescription.Rotation.X / 180f)
                 * Matrix4x4.CreateTranslation(drawDescription.Draw)
-                * drawDescription.Camera
+                * ColorTransferCameraFinalizer.Apply(drawDescription)
                 * new Matrix4x4(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, -0.001f, 0f, 0f, 0f, 1f);
 
             var width = screenWidth > 0 ? screenWidth : 1;
