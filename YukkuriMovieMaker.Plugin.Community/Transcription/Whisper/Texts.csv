@@ -47,3 +47,14 @@ Cambia a un modelo de menos de 2 GB o mueve YMM4 a una ruta que no contenga cara
 عليك إما التبديل إلى نموذج بحجم أقل من ‎2‎ جيجابايت، أو نقل YMM4 إلى مسار لا يحتوي على أحرف متعددة البايت.","Karena YMM4 berada di jalur yang mengandung karakter multibyte, YMM4 tidak dapat memuat model dengan ukuran file melebihi 2 GB.
 Silakan beralih ke model berukuran di bawah 2 GB atau pindahkan YMM4 ke jalur yang tidak berisi karakter multibyte.",
 VoiceActivityDetection,,発話区間検出,Voice Activity Detection,语音检测,語音檢測,음성 감지,Detección de actividad de voz,كشف نشاط الصوت,Deteksi Aktivitas Suara,
+NativeProcessingFailedMessage,,お使いの環境では文字起こしの処理を実行できませんでした。GPUのドライバーやランタイムの更新、または別のモデルへの変更をお試しください。,"Transcription could not be performed in your environment. Try updating your GPU driver or runtime, or switching to a different model.",无法在您的环境中执行语音转文字处理。请尝试更新GPU驱动程序或运行时，或改用其他模型。,無法在您的環境中執行語音轉文字處理。請嘗試更新GPU驅動程式或執行階段，或改用其他模型。,사용 중인 환경에서는 문자 변환 처리를 실행할 수 없습니다. GPU 드라이버나 런타임을 업데이트하거나 다른 모델로 변경해 보세요.,"No se pudo ejecutar la transcripción en su entorno. Pruebe a actualizar el controlador o el entorno de ejecución de la GPU, o cambie a otro modelo.",تعذر تنفيذ معالجة التفريغ النصي في بيئتك. جرّب تحديث برنامج تشغيل GPU أو بيئة التشغيل، أو التبديل إلى نموذج آخر.,"Transkripsi tidak dapat dijalankan di lingkungan Anda. Coba perbarui driver atau runtime GPU, atau beralih ke model lain.",
+NativeFailureLogMessage,0: runtime 1: recent log,"Whisperのネイティブ処理で例外が発生しました。runtime={0} 直近のネイティブログ:
+{1}","An exception occurred in Whisper native processing. runtime={0} Recent native log:
+{1}","Whisper 本地处理发生异常。runtime={0} 最近的本地日志:
+{1}","Whisper 原生處理發生例外。runtime={0} 最近的原生記錄:
+{1}","Whisper 네이티브 처리에서 예외가 발생했습니다. runtime={0} 최근 네이티브 로그:
+{1}","Se produjo una excepción en el procesamiento nativo de Whisper. runtime={0} Registro nativo reciente:
+{1}","حدث استثناء في المعالجة الأصلية لـ Whisper. runtime={0} أحدث سجل أصلي:
+{1}","Terjadi pengecualian pada pemrosesan native Whisper. runtime={0} Log native terbaru:
+{1}",
+NoNativeLogMessage,,（なし）,(none),（无）,（無）,(없음),(ninguno),(لا يوجد),(tidak ada),
