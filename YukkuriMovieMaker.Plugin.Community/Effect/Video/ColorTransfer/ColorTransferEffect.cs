@@ -6,6 +6,7 @@ using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.ItemEditor.CustomVisibilityAttributes;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Effects;
+using YukkuriMovieMaker.Project;
 using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
@@ -104,6 +105,33 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
         private IAnimatable[]? _animatables;
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription) => [];
+
+        public override IEnumerable<string> GetFiles()
+        {
+            foreach (var file in base.GetFiles())
+                yield return file;
+            if (!string.IsNullOrEmpty(FilePath))
+                yield return FilePath;
+        }
+
+        public override void ReplaceFile(string from, string to)
+        {
+            base.ReplaceFile(from, to);
+            if (FilePath == from)
+                FilePath = to;
+        }
+
+        public override IEnumerable<TimelineResource> GetResources()
+        {
+            foreach (var resource in base.GetResources())
+                yield return resource;
+
+            var resourceType = (FileSettings.Default.FileExtensions.GetFileType(FilePath) & FileType.動画) != 0
+                ? TimelineResourceType.Video
+                : TimelineResourceType.Image;
+            if (TimelineResource.TryParseFromPath(FilePath, resourceType, out var fileResource))
+                yield return fileResource;
+        }
 
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
             => new ColorTransferEffectProcessor(devices, this);
