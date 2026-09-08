@@ -97,6 +97,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
         // 確保は使用量を上回ることがあるため、使用量ぶんのビューで消す。
         public void Clear(int count)
         {
+            if (count <= 0)
+                return;
+
             using var scope = device.Enter();
 
             device.Context.ClearUnorderedAccessView(
