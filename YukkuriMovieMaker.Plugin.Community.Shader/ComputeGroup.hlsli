@@ -1,0 +1,6 @@
+#define GROUP_X 8
+#define GROUP_Y 8
+#define GROUP_Z 1
+#define GROUP_THREADS (GROUP_X * GROUP_Y * GROUP_Z)
+
+#define LINEAR_GROUP_THREADS 64

@@ -1,3 +1,5 @@
+#include "ComputeGroup.hlsli"
+
 cbuffer Constants : register(b0)
 {
     int invert;
@@ -11,7 +13,7 @@ StructuredBuffer<int> matchFlags : register(t1);
 
 RWStructuredBuffer<int> mask : register(u0);
 
-[numthreads(8, 8, 1)]
+[numthreads(GROUP_X, GROUP_Y, GROUP_Z)]
 void main(uint3 threadId : SV_DispatchThreadID)
 {
     int x = (int)threadId.x;

@@ -1,4 +1,4 @@
-#include "DirectionalColorKeyCS.hlsli"
+#include "ComputeGroup.hlsli"
 
 cbuffer Constants : register(b0)
 {

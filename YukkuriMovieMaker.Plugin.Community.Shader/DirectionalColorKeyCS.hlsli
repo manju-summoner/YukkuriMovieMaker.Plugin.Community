@@ -1,7 +1,4 @@
-#define GROUP_X 8
-#define GROUP_Y 8
-#define GROUP_Z 1
-#define GROUP_THREADS (GROUP_X * GROUP_Y * GROUP_Z)
+#include "ComputeGroup.hlsli"
 
 #define VALID_LENGTH_SQUARED_THRESHOLD 0.25
 

@@ -296,6 +296,9 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ComputeGroup.hlsli">
+      <Filter>ヘッダー ファイル</Filter>
+    </None>
     <None Include="DirectionalColorKeyCS.hlsli">
       <Filter>ヘッダー ファイル</Filter>
     </None>

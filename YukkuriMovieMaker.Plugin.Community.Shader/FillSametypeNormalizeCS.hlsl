@@ -1,3 +1,5 @@
+#include "ComputeGroup.hlsli"
+
 cbuffer Constants : register(b0)
 {
     int featureSize;
@@ -8,7 +10,7 @@ StructuredBuffer<int> histogram : register(t0);
 
 RWStructuredBuffer<float> features : register(u0);
 
-[numthreads(64, 1, 1)]
+[numthreads(LINEAR_GROUP_THREADS, 1, 1)]
 void main(uint3 threadId : SV_DispatchThreadID)
 {
     int component = (int)threadId.x;

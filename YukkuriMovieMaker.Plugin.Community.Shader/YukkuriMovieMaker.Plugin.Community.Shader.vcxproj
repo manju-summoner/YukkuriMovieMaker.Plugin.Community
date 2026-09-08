@@ -735,6 +735,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ComputeGroup.hlsli" />
     <None Include="DirectionalColorKeyCS.hlsli" />
     <None Include="Hash.hlsli" />
   </ItemGroup>
