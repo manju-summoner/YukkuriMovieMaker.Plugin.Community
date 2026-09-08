@@ -53,6 +53,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             if (count <= 0)
                 return;
 
+            using var scope = device.Enter();
+
             var mapped = device.Context.Map(Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
             try
             {
@@ -70,6 +72,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             var count = Math.Min(destination.Length, Length);
             if (count <= 0)
                 return;
+
+            using var scope = device.Enter();
 
             if (staging is null)
             {
@@ -130,6 +134,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
         public unsafe void Update<TValue>(in TValue value) where TValue : unmanaged
         {
+            using var scope = device.Enter();
+
             var mapped = device.Context.Map(Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
             try
             {

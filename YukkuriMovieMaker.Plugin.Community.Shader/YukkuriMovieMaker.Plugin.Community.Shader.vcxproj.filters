@@ -153,6 +153,45 @@
     <FxCompile Include="PixelSortCS.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="DirectionalColorKeyAdoptRegionCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalColorKeyChangeSeedCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalColorKeyClusterAssignAccumulateCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalColorKeyCopyDirectionsCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalColorKeyDilateHorizontalCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalColorKeyDilateVerticalCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalColorKeyDirectionSmoothCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalColorKeyDisplacementFieldCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalColorKeyForegroundPropagateCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalColorKeyForegroundSeedCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalColorKeyMaskCountCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalColorKeyProjectionHistogramCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="DirectionalColorKeyRegionDirectionSmoothCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="FillSametypeClearCS.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>

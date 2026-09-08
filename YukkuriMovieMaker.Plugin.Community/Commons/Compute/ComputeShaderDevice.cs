@@ -48,6 +48,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             int groupsX,
             int groupsY)
         {
+            using var scope = Enter();
+
             Context.CSSetShader(GetShader(shaderName));
             Context.CSSetConstantBuffer(0, constants);
             if (resources.Length > 0)

@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
         private readonly IGraphicsDevicesAndContext devices;
         private readonly DirectionalColorKeyEffect item;
-        private readonly DirectionalColorKeyAnalyzer? analyzer = DirectionalColorKeyAnalyzer.TryCreate();
+        private readonly DirectionalColorKeyAnalyzer? analyzer;
 
         private DirectionalColorKeyCustomEffect? effect;
 
@@ -52,13 +52,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         {
             this.devices = devices;
             this.item = item;
+            analyzer = DirectionalColorKeyAnalyzer.TryCreate(devices);
             if (analyzer is not null)
                 disposer.Collect(analyzer);
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            // GPU（ComputeSharp）が利用できず解析器を生成できなかった場合はパススルーする。
+            // cs_5_0 に対応せず解析器を生成できなかった場合はパススルーする。
             if (analyzer is null)
                 return null;
 

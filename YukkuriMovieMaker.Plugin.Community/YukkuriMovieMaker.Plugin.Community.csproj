@@ -137,7 +137,7 @@
     <Content Include="Resources\License\GeneralUserGS.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-	<Content Include="Resources\License\ComputeSharp.txt">
+    <Content Include="Resources\License\ComputeSharp.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\License\MeltySynth.txt">
@@ -203,6 +203,19 @@
 	  <Resource Include="$(ShaderDirPath)NtscDecode.cso" Link="Resources\Shader\NtscDecode.cso" />
 	  <Resource Include="$(ShaderDirPath)NtscRestore.cso" Link="Resources\Shader\NtscRestore.cso" />
 	  <Resource Include="$(ShaderDirPath)PixelSortCS.cso" Link="Resources\Shader\PixelSortCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyAdoptRegionCS.cso" Link="Resources\Shader\DirectionalColorKeyAdoptRegionCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyChangeSeedCS.cso" Link="Resources\Shader\DirectionalColorKeyChangeSeedCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyClusterAssignAccumulateCS.cso" Link="Resources\Shader\DirectionalColorKeyClusterAssignAccumulateCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyCopyDirectionsCS.cso" Link="Resources\Shader\DirectionalColorKeyCopyDirectionsCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyDilateHorizontalCS.cso" Link="Resources\Shader\DirectionalColorKeyDilateHorizontalCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyDilateVerticalCS.cso" Link="Resources\Shader\DirectionalColorKeyDilateVerticalCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyDirectionSmoothCS.cso" Link="Resources\Shader\DirectionalColorKeyDirectionSmoothCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyDisplacementFieldCS.cso" Link="Resources\Shader\DirectionalColorKeyDisplacementFieldCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyForegroundPropagateCS.cso" Link="Resources\Shader\DirectionalColorKeyForegroundPropagateCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyForegroundSeedCS.cso" Link="Resources\Shader\DirectionalColorKeyForegroundSeedCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyMaskCountCS.cso" Link="Resources\Shader\DirectionalColorKeyMaskCountCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyProjectionHistogramCS.cso" Link="Resources\Shader\DirectionalColorKeyProjectionHistogramCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyRegionDirectionSmoothCS.cso" Link="Resources\Shader\DirectionalColorKeyRegionDirectionSmoothCS.cso" />
 	  <Resource Include="$(ShaderDirPath)FillSametypeClearCS.cso" Link="Resources\Shader\FillSametypeClearCS.cso" />
 	  <Resource Include="$(ShaderDirPath)FillSametypeHistogramCS.cso" Link="Resources\Shader\FillSametypeHistogramCS.cso" />
 	  <Resource Include="$(ShaderDirPath)FillSametypeNormalizeCS.cso" Link="Resources\Shader\FillSametypeNormalizeCS.cso" />
