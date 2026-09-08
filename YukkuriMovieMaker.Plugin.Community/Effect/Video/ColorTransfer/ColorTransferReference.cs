@@ -1,0 +1,19 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
+{
+    public enum ColorTransferReference
+    {
+        [Display(Name = nameof(Texts.ColorTransferReferenceTimeline), Description = nameof(Texts.ColorTransferReferenceTimelineDescription), ResourceType = typeof(Texts))]
+        Timeline = 8,
+
+        [Display(Name = nameof(Texts.ColorTransferReferenceScene), Description = nameof(Texts.ColorTransferReferenceSceneDescription), ResourceType = typeof(Texts))]
+        Scene = 1,
+
+        [Display(Name = nameof(Texts.ColorTransferReferenceFile), Description = nameof(Texts.ColorTransferReferenceFileDescription), ResourceType = typeof(Texts))]
+        File = 2,
+
+        [Display(Name = nameof(Texts.ColorTransferReferenceBranch), Description = nameof(Texts.ColorTransferReferenceBranchDescription), ResourceType = typeof(Texts))]
+        Branch = 4,
+    }
+}
