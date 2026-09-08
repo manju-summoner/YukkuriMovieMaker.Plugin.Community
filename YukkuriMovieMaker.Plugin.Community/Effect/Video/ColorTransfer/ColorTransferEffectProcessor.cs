@@ -489,7 +489,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             {
                 dc.Transform = Matrix3x2.CreateScale(placement.ScaleX, placement.ScaleY)
                     * Matrix3x2.CreateTranslation(-placement.Left * placement.ScaleX, -placement.Top * placement.ScaleY + rowOffset);
-                dc.DrawImage(image, null, null, InterpolationMode.NearestNeighbor, CompositeMode.SourceCopy);
+                //最近傍だと縮小率ぶんの画素を読み飛ばして点抽出になり、動画では統計がフレームごとに揺れてLUTがちらつく
+                dc.DrawImage(image, null, null, InterpolationMode.MultiSampleLinear, CompositeMode.SourceCopy);
             }
             finally
             {
