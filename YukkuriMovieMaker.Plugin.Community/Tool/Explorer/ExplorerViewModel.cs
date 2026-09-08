@@ -1278,65 +1278,104 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         static bool TryCollectMatchesRecursively(DirectoryInfo root, EnumerationOptions options, string searchText, List<DirectoryInfo> directories, List<FileInfo> files, Action<List<DirectoryInfo>, List<FileInfo>> onProgress, CancellationToken token)
         {
-            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { GetDirectoryIdentity(root) };
-            var stack = new Stack<DirectoryInfo>();
+            //identity は「同じ実体を二度辿らない」ための識別子。リンク配下のフォルダはリンク経由のパスではなく
+            //解決先を基準にした識別子を持たせ、別のリンクから同じ実体に到達しても重複しないようにする
+            var rootIdentity = GetDirectoryIdentity(root);
+            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { rootIdentity };
+            var stack = new Stack<(DirectoryInfo dir, string identity)>();
+            var links = new List<(DirectoryInfo dir, string identity)>();
             var progressWatch = Stopwatch.StartNew();
             var reportedCount = 0;
-            stack.Push(root);
+            stack.Push((root, rootIdentity));
 
-            while (stack.Count > 0)
+            while (true)
             {
-                if (token.IsCancellationRequested)
-                    return false;
-
-                var current = stack.Pop();
-                try
+                while (stack.Count > 0)
                 {
-                    foreach (var file in current.EnumerateFiles("*", options))
+                    if (token.IsCancellationRequested)
+                        return false;
+
+                    var (current, currentIdentity) = stack.Pop();
+                    try
                     {
-                        if (token.IsCancellationRequested)
-                            return false;
-                        if (ExplorerFilter.IsNameMatch(file.Name, searchText))
-                            files.Add(file);
-                        if (reportedCount < directories.Count + files.Count && ProgressInterval <= progressWatch.ElapsedMilliseconds)
+                        foreach (var file in current.EnumerateFiles("*", options))
                         {
-                            reportedCount = directories.Count + files.Count;
-                            onProgress([.. directories], [.. files]);
-                            progressWatch.Restart();
+                            if (token.IsCancellationRequested)
+                                return false;
+                            if (ExplorerFilter.IsNameMatch(file.Name, searchText))
+                                files.Add(file);
+                            if (reportedCount < directories.Count + files.Count && ProgressInterval <= progressWatch.ElapsedMilliseconds)
+                            {
+                                reportedCount = directories.Count + files.Count;
+                                onProgress([.. directories], [.. files]);
+                                progressWatch.Restart();
+                            }
                         }
                     }
-                }
-                catch { }
+                    catch { }
 
-                try
-                {
-                    foreach (var dir in current.EnumerateDirectories("*", options))
+                    try
                     {
-                        if (token.IsCancellationRequested)
-                            return false;
-                        if (!visited.Add(GetDirectoryIdentity(dir)))
-                            continue;
-                        stack.Push(dir);
-                        if (ExplorerFilter.IsNameMatch(dir.Name, searchText))
-                            directories.Add(dir);
+                        foreach (var dir in current.EnumerateDirectories("*", options))
+                        {
+                            if (token.IsCancellationRequested)
+                                return false;
+                            //フォルダ自身の一致判定は循環防止の対象外。訪問済みの実体を指すリンクも、通常の検索と同じく結果に含める
+                            if (ExplorerFilter.IsNameMatch(dir.Name, searchText))
+                                directories.Add(dir);
+                            if ((dir.Attributes & FileAttributes.ReparsePoint) != 0)
+                            {
+                                links.Add((dir, GetDirectoryIdentity(dir)));
+                                continue;
+                            }
+                            var identity = Path.Combine(currentIdentity, dir.Name);
+                            if (!visited.Add(identity))
+                                continue;
+                            stack.Push((dir, identity));
+                        }
                     }
+                    catch { }
                 }
-                catch { }
+
+                if (links.Count == 0)
+                    return true;
+
+                //リンクは実体側の走査が済んでから辿る。木の中を指すリンクが実体より先に列挙されても、
+                //実体側を優先して辿り、リンク側のパスで中身を重複表示しないようにするため。
+                //実体側が列挙対象外（隠し属性など）で辿られなかったリンクだけがここで辿られる
+                foreach (var link in links)
+                {
+                    if (visited.Add(link.identity))
+                        stack.Push(link);
+                }
+                links.Clear();
             }
-            return true;
+        }
+
+        static bool IsSameOrDescendantPath(string path, string root)
+        {
+            var trimmedRoot = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var trimmedPath = path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            if (string.Equals(trimmedPath, trimmedRoot, StringComparison.OrdinalIgnoreCase))
+                return true;
+            if (trimmedPath.Length <= trimmedRoot.Length || !trimmedPath.StartsWith(trimmedRoot, StringComparison.OrdinalIgnoreCase))
+                return false;
+            var separator = trimmedPath[trimmedRoot.Length];
+            return separator == Path.DirectorySeparatorChar || separator == Path.AltDirectorySeparatorChar;
         }
 
         static string GetDirectoryIdentity(DirectoryInfo dir)
         {
+            //走査ルートは末尾に区切り文字が付いたまま渡されることがあるので、解決先との比較のために揃える
             try
             {
                 if ((dir.Attributes & FileAttributes.ReparsePoint) == 0)
-                    return dir.FullName;
-                return dir.ResolveLinkTarget(true)?.FullName ?? dir.FullName;
+                    return Path.TrimEndingDirectorySeparator(dir.FullName);
+                return Path.TrimEndingDirectorySeparator(dir.ResolveLinkTarget(true)?.FullName ?? dir.FullName);
             }
             catch
             {
-                return dir.FullName;
+                return Path.TrimEndingDirectorySeparator(dir.FullName);
             }
         }
 
