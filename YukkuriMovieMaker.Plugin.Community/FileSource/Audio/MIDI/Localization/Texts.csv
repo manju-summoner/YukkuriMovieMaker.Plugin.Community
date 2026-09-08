@@ -7,7 +7,6 @@ MasterVolume,,マスター音量,Master Volume,主音量,主音量,마스터 볼
 PerformanceSettings,,パフォーマンス設定,Performance Settings,性能设置,效能設定,성능 설정,Configuración de rendimiento,إعدادات الأداء,Pengaturan Performa,
 RenderingMode,,レンダリングモード,Rendering Mode,渲染模式,渲染模式,렌더링 모드,Modo de renderizado,وضع التقديم,Mode Rendering,
 MaxPolyphony,,最大和音数,Max Polyphony,最大复音数,最大複音數,최대 화음 수,Polifonía máxima,الحد الأقصى للتعدد الصوتي,Polifoni Maksimal,
-EnableChunkedProcessing,,チャンク処理,Chunked Processing,分块处理,分塊處理,청크 처리,Procesamiento por bloques,المعالجة بالمقاطع,Pemrosesan Bertahap,
 SoundFontSettings,,サウンドフォント設定,SoundFont Settings,音色库设置,音色庫設定,사운드폰트 설정,Configuración de SoundFont,إعدادات SoundFont,Pengaturan SoundFont,
 EnableSoundFont,,サウンドフォントを使用,Use SoundFont,使用音色库,使用音色庫,사운드폰트 사용,Usar SoundFont,استخدام SoundFont,Gunakan SoundFont,
 FallbackToSynthesis,,シンセシスにフォールバック,Fallback to Synthesis,回退到合成,退回到合成,합성으로 폴백,Recurrir a síntesis,الرجوع إلى التوليف,Fallback ke Sintesis,

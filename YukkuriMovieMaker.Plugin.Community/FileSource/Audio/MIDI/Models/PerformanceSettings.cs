@@ -11,8 +11,6 @@ public class PerformanceSettings : INotifyPropertyChanged
     private int _maxPolyphony = 256;
     public int MaxPolyphony { get => _maxPolyphony; set => SetField(ref _maxPolyphony, value); }
 
-    private bool _enableChunkedProcessing = true;
-    public bool EnableChunkedProcessing { get => _enableChunkedProcessing; set => SetField(ref _enableChunkedProcessing, value); }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

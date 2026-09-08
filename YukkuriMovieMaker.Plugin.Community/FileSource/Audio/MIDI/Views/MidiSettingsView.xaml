@@ -53,11 +53,6 @@
                                          StringFormat="F0" Unit="" Width="200"
                                          HorizontalAlignment="Right" VerticalAlignment="Center"/>
                     </Grid>
-                    <Grid Margin="0,2">
-                        <Label Content="{x:Static loc:Texts.EnableChunkedProcessing}" VerticalAlignment="Center"/>
-                        <c:ToggleSlider Value="{Binding Performance.EnableChunkedProcessing, Mode=TwoWay}"
-                                        HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    </Grid>
                 </StackPanel>
             </Expander>
 

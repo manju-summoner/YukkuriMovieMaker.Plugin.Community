@@ -6,7 +6,6 @@ namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Rendering;
 internal sealed class ChunkedRenderer : IMidiRenderer
 {
     private readonly IMidiRenderer _baseRenderer;
-    private readonly MidiPluginSettings _settings;
     private readonly AudioEffectProcessor _effectProcessor;
     private readonly int _chunkSizeStereo;
     private readonly int _historySamples;
@@ -19,16 +18,12 @@ internal sealed class ChunkedRenderer : IMidiRenderer
     public ChunkedRenderer(IMidiRenderer baseRenderer, MidiPluginSettings settings)
     {
         _baseRenderer = baseRenderer;
-        _settings = settings;
         _effectProcessor = new AudioEffectProcessor(settings.Effects, settings.Audio.SampleRate);
         _chunkSizeStereo = settings.Audio.SampleRate * 2;
 
-        int hist = 0;
-        if (settings.Effects.EnableEffects && settings.Effects.EnableReverb)
-        {
-            hist = (int)(settings.Effects.ReverbDecay * settings.Audio.SampleRate) * 2;
-        }
-        _historySamples = hist;
+        _historySamples = settings.Effects.EnableReverb
+            ? (int)(settings.Effects.ReverbDecay * settings.Audio.SampleRate) * 2
+            : 0;
     }
 
     public int Read(Span<float> buffer, long stereoPosition)
@@ -94,40 +89,25 @@ internal sealed class ChunkedRenderer : IMidiRenderer
 
             var processedChunk = new float[read];
             
-            if (_settings.Performance.EnableChunkedProcessing)
+            if (_historySamples > 0)
             {
-                if (_historySamples > 0)
+                var workBuffer = new float[_historySamples + read];
+                if (_rawChunks.TryGetValue(chunkIndex - 1, out var prevRaw))
                 {
-                    var workBuffer = new float[_historySamples + read];
-                    if (_rawChunks.TryGetValue(chunkIndex - 1, out var prevRaw))
-                    {
-                        int copyLen = Math.Min(_historySamples, prevRaw.Length);
-                        int srcOffset = prevRaw.Length - copyLen;
-                        int dstOffset = _historySamples - copyLen;
-                        prevRaw.AsSpan(srcOffset, copyLen).CopyTo(workBuffer.AsSpan(dstOffset, copyLen));
-                    }
-                    
-                    rawChunk.CopyTo(workBuffer, _historySamples);
-
-                    if (_settings.Effects.EnableEffects)
-                    {
-                        _effectProcessor.ApplyEffects(workBuffer.AsSpan());
-                    }
-
-                    workBuffer.AsSpan(_historySamples, read).CopyTo(processedChunk);
+                    int copyLen = Math.Min(_historySamples, prevRaw.Length);
+                    int srcOffset = prevRaw.Length - copyLen;
+                    int dstOffset = _historySamples - copyLen;
+                    prevRaw.AsSpan(srcOffset, copyLen).CopyTo(workBuffer.AsSpan(dstOffset, copyLen));
                 }
-                else
-                {
-                    rawChunk.CopyTo(processedChunk, 0);
-                    if (_settings.Effects.EnableEffects)
-                    {
-                        _effectProcessor.ApplyEffects(processedChunk.AsSpan());
-                    }
-                }
+
+                rawChunk.CopyTo(workBuffer, _historySamples);
+                _effectProcessor.ApplyEffects(workBuffer.AsSpan());
+                workBuffer.AsSpan(_historySamples, read).CopyTo(processedChunk);
             }
             else
             {
                 rawChunk.CopyTo(processedChunk, 0);
+                _effectProcessor.ApplyEffects(processedChunk.AsSpan());
             }
 
             _processedChunks[chunkIndex] = processedChunk;
