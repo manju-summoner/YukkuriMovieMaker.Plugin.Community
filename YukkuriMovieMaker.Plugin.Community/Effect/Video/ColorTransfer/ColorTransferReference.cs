@@ -4,6 +4,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
 {
     public enum ColorTransferReference
     {
+        [Display(Name = nameof(Texts.ColorTransferReferenceTimeline), Description = nameof(Texts.ColorTransferReferenceTimelineDescription), ResourceType = typeof(Texts))]
+        Timeline = 8,
+
         [Display(Name = nameof(Texts.ColorTransferReferenceScene), Description = nameof(Texts.ColorTransferReferenceSceneDescription), ResourceType = typeof(Texts))]
         Scene = 1,
 

@@ -176,10 +176,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
 
         private ID2D1Image? ResolveReference(EffectDescription effectDescription, in Parameters parameters, out RawRectF bounds)
         {
+            if (parameters.Reference == ColorTransferReference.Timeline)
+            {
+                ReleaseFileSource();
+                //自分の画面はタイムラインの現在時刻を読み、末尾で折り返さない
+                return ResolveScene(
+                    effectDescription,
+                    effectDescription.SceneId,
+                    effectDescription.TimelinePosition.Time + parameters.TimeOffset,
+                    wrap: false,
+                    out bounds);
+            }
+
             if (parameters.Reference == ColorTransferReference.Scene)
             {
                 ReleaseFileSource();
-                return ResolveScene(effectDescription, parameters, out bounds);
+                //シーンアイテムやシーンブラシと同じく、アイテムの先頭から再生してシーンの長さで折り返す
+                return ResolveScene(
+                    effectDescription,
+                    parameters.SceneId,
+                    effectDescription.ItemPosition.Time + parameters.TimeOffset,
+                    wrap: true,
+                    out bounds);
             }
 
             ReleaseSceneSource();
@@ -220,7 +238,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             }
             else if (_fileSource is not null)
             {
-                _fileSource.Update(ClampTime(_fileSource.Duration, effectDescription.TimelinePosition.Time + parameters.TimeOffset));
+                _fileSource.Update(ClampTime(_fileSource.Duration, effectDescription.ItemPosition.Time + parameters.TimeOffset));
                 image = _fileSource.Output;
             }
             else
@@ -282,10 +300,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             return position < TimeSpan.Zero ? TimeSpan.Zero : (position > last ? last : position);
         }
 
-        private ID2D1Image? ResolveScene(EffectDescription effectDescription, in Parameters parameters, out RawRectF bounds)
+        private static TimeSpan WrapTime(TimeSpan duration, TimeSpan position)
+        {
+            if (duration <= TimeSpan.Zero)
+                return TimeSpan.Zero;
+            var ticks = position.Ticks % duration.Ticks;
+            if (ticks < 0)
+                ticks += duration.Ticks;
+            return TimeSpan.FromTicks(ticks);
+        }
+
+        private ID2D1Image? ResolveScene(EffectDescription effectDescription, Guid sceneId, TimeSpan position, bool wrap, out RawRectF bounds)
         {
             bounds = default;
-            var sceneId = parameters.SceneId;
             if (sceneId == Guid.Empty)
             {
                 ReleaseSceneSource();
@@ -331,7 +358,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
                 _sceneSourceId = sceneId;
             }
 
-            var time = ClampTime(scene.Duration.Time, effectDescription.TimelinePosition.Time + parameters.TimeOffset);
+            var time = wrap
+                ? WrapTime(scene.Duration.Time, position)
+                : ClampTime(scene.Duration.Time, position);
 
             using (ColorTransferReferenceScope.Enter(_item))
                 _sceneSource.Update(time, effectDescription.Usage);

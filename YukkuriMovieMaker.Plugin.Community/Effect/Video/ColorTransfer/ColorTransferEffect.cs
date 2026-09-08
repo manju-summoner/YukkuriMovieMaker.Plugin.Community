@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
         [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferReference), Description = nameof(Texts.ColorTransferReferenceDescription), Order = 0, ResourceType = typeof(Texts))]
         [EnumComboBox]
         public ColorTransferReference Reference { get => _reference; set => Set(ref _reference, value, nameof(Reference), nameof(IsTimeOffsetAvailable)); }
-        private ColorTransferReference _reference = ColorTransferReference.Scene;
+        private ColorTransferReference _reference = ColorTransferReference.Timeline;
 
         [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferScene), Description = nameof(Texts.ColorTransferSceneDescription), Order = 1, ResourceType = typeof(Texts))]
         [SceneComboBox]
@@ -35,7 +35,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
         [Newtonsoft.Json.JsonIgnore]
         public bool IsTimeOffsetAvailable => _reference switch
         {
-            ColorTransferReference.Scene => true,
+            ColorTransferReference.Timeline or ColorTransferReference.Scene => true,
             ColorTransferReference.File => (FileSettings.Default.FileExtensions.GetFileType(_filePath) & FileType.動画) != 0,
             _ => false,
         };
@@ -75,7 +75,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
 
         [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferPositionAmount), Description = nameof(Texts.ColorTransferPositionAmountDescription), Order = 8, ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0, 100)]
-        [ShowPropertyEditorWhen(nameof(Reference), ColorTransferReference.Scene | ColorTransferReference.File)]
+        [ShowPropertyEditorWhen(nameof(Reference), ColorTransferReference.Timeline | ColorTransferReference.Scene | ColorTransferReference.File)]
         public Animation PositionAmount { get; } = new Animation(0, 0, 100);
 
         [Display(GroupName = nameof(Texts.ColorTransferDetailGroup), Name = nameof(Texts.ColorTransferMaximumGain), Description = nameof(Texts.ColorTransferMaximumGainDescription), Order = 10, ResourceType = typeof(Texts))]
