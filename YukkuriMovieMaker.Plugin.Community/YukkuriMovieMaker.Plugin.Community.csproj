@@ -199,6 +199,8 @@
 	  <Resource Include="$(ShaderDirPath)NtscDecode.cso" Link="Resources\Shader\NtscDecode.cso" />
 	  <Resource Include="$(ShaderDirPath)NtscRestore.cso" Link="Resources\Shader\NtscRestore.cso" />
 	  <Resource Include="$(ShaderDirPath)PixelSortCS.cso" Link="Resources\Shader\PixelSortCS.cso" />
+	  <Resource Include="$(ShaderDirPath)DirectionalColorKeySourceToBufferCS.cso" Link="Resources\Shader\DirectionalColorKeySourceToBufferCS.cso" />
+	  <Resource Include="$(ShaderDirPath)PackedBufferToSurfaceCS.cso" Link="Resources\Shader\PackedBufferToSurfaceCS.cso" />
 	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyAdoptRegionCS.cso" Link="Resources\Shader\DirectionalColorKeyAdoptRegionCS.cso" />
 	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyChangeSeedCS.cso" Link="Resources\Shader\DirectionalColorKeyChangeSeedCS.cso" />
 	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyClusterAssignAccumulateCS.cso" Link="Resources\Shader\DirectionalColorKeyClusterAssignAccumulateCS.cso" />

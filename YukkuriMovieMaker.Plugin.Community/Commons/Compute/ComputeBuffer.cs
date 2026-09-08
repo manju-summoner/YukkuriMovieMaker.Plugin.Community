@@ -67,6 +67,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             }
         }
 
+        public void CopyFrom(ComputeBuffer<T> source)
+        {
+            using var scope = device.Enter();
+
+            device.Context.CopyResource(Buffer, source.Buffer);
+        }
+
         public unsafe void Readback(Span<T> destination)
         {
             var count = Math.Min(destination.Length, Length);

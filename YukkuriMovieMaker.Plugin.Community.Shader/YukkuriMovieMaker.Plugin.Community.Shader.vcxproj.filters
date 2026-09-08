@@ -153,6 +153,12 @@
     <FxCompile Include="PixelSortCS.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="DirectionalColorKeySourceToBufferCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="PackedBufferToSurfaceCS.hlsl">
+      <Filter>ソース ファイル</Filter>
+    </FxCompile>
     <FxCompile Include="DirectionalColorKeyAdoptRegionCS.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>

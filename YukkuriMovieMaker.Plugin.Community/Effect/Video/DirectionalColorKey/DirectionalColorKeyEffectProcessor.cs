@@ -6,6 +6,7 @@ using Vortice.DXGI;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Plugin.Community.Commons.Compute;
 using YukkuriMovieMaker.Player.Video.Effects;
 using Color = System.Windows.Media.Color;
 using PixelFormat = Vortice.DCommon.PixelFormat;
@@ -22,14 +23,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
         private DirectionalColorKeyCustomEffect? effect;
 
-        private ID2D1Bitmap1? sourceBitmap;
-        private ID2D1Bitmap1? sourceStagingBitmap;
+        private ComputeSurface? sourceSurface;
+        private ComputeSurface? foregroundSurface;
         private ID2D1Bitmap1? foregroundBitmap;
         private int sourceWidth, sourceHeight;
         private int foregroundWidth, foregroundHeight;
-
-        private int[]? sourceBuffer;
-        private int bufferPixelCount;
+        private bool hasSourceContent;
 
         private bool isFirst = true;
         private bool hasAnalysisCache;
@@ -127,7 +126,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 || lastFrame != frame
                 || !lastBounds.Equals(bounds);
 
-            bool contentChanged = sourcePossiblyChanged && RenderSourceToBuffer(dc, bounds, width, height);
+            bool contentChanged = sourcePossiblyChanged && RenderSource(dc, bounds, width, height);
 
             bool analysisDirty = isFirst
                 || !hasAnalysisCache
@@ -160,7 +159,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 float foregroundLambda = ComputeForegroundLambda(backgroundLab, currentForeground);
 
                 analyzer.Analyze(
-                    sourceBuffer!.AsSpan(0, pixelCount),
                     width,
                     height,
                     backgroundLab,
@@ -180,9 +178,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                     currentBackground.R / 255f,
                     currentBackground.G / 255f,
                     currentBackground.B / 255f);
-                var foregroundField = analyzer.BuildForegroundField(width, height, backgroundLab, backgroundSrgb);
-                UploadForegroundField(dc, foregroundField, width, height);
-                effect.SetInput(1, foregroundBitmap, true);
+                EnsureForegroundTarget(dc, width, height);
+                if (foregroundSurface is not null)
+                {
+                    analyzer.BuildForegroundField(foregroundSurface, width, height, backgroundLab, backgroundSrgb);
+                    effect.SetInput(1, foregroundSurface.Bitmap, true);
+                }
+                else
+                {
+                    var foregroundField = analyzer.BuildForegroundField(width, height, backgroundLab, backgroundSrgb);
+                    UploadForegroundField(foregroundField, width);
+                    effect.SetInput(1, foregroundBitmap, true);
+                }
 
                 hasAnalysisCache = true;
             }
@@ -245,15 +252,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             return new Vector4(center.X, center.Y, center.Z, lambda);
         }
 
-        private bool RenderSourceToBuffer(ID2D1DeviceContext dc, RawRectF bounds, int width, int height)
+        // 入力を D2D で共有テクスチャへ描き、そのままコンピュートシェーダーで読む。
+        // 画素が CPU へ渡ることはなく、変化画素数だけを 1 要素読み戻す。
+        private bool RenderSource(ID2D1DeviceContext dc, RawRectF bounds, int width, int height)
         {
-            EnsureSourceBitmaps(dc, width, height);
-            int pixelCount = width * height;
-            bool reused = sourceBuffer is not null && bufferPixelCount >= pixelCount;
-            var buffer = EnsureBuffer(pixelCount);
+            bool reused = EnsureSourceSurface(dc, width, height) && hasSourceContent;
 
             var previousTarget = dc.Target;
-            dc.Target = sourceBitmap;
+            dc.Target = sourceSurface!.Bitmap;
             dc.BeginDraw();
             dc.Clear(null);
             dc.DrawImage(
@@ -265,107 +271,66 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             dc.EndDraw();
             dc.Target = previousTarget;
 
-            sourceStagingBitmap!.CopyFromBitmap(sourceBitmap!);
-            var mapped = sourceStagingBitmap.Map(MapOptions.Read);
-            bool changed = !reused;
-            try
-            {
-                unsafe
-                {
-                    byte* basePtr = (byte*)mapped.Bits;
-                    for (int row = 0; row < height; row++)
-                    {
-                        var sourceRow = new ReadOnlySpan<int>(basePtr + (nint)row * mapped.Pitch, width);
-                        var destRow = buffer.AsSpan(row * width, width);
-
-                        if (changed)
-                        {
-                            sourceRow.CopyTo(destRow);
-                        }
-                        else if (!sourceRow.SequenceEqual(destRow))
-                        {
-                            changed = true;
-                            sourceRow.CopyTo(destRow);
-                        }
-                    }
-                }
-            }
-            finally
-            {
-                sourceStagingBitmap.Unmap();
-            }
-
-            return changed;
+            int changed = analyzer!.UpdateSource(sourceSurface, width, height, reused);
+            hasSourceContent = true;
+            return !reused || changed != 0;
         }
 
-        private unsafe void UploadForegroundField(ID2D1DeviceContext dc, ReadOnlySpan<int> field, int width, int height)
-        {
-            EnsureForegroundBitmap(dc, width, height);
 
+        private unsafe void UploadForegroundField(ReadOnlySpan<int> field, int width)
+        {
             fixed (int* src = field)
             {
                 foregroundBitmap!.CopyFromMemory((nint)src, width * sizeof(int));
             }
         }
 
-        private void EnsureForegroundBitmap(ID2D1DeviceContext dc, int width, int height)
+        // 型付き UAV 書き込みに対応する環境では D2D ビットマップと同じテクスチャへ直接書く。
+        // 対応しない環境では従来どおり CPU 経由で転送する。
+        private void EnsureForegroundTarget(ID2D1DeviceContext dc, int width, int height)
         {
-            if (foregroundBitmap is not null
+            if ((foregroundSurface is not null || foregroundBitmap is not null)
                 && foregroundWidth == width
                 && foregroundHeight == height)
                 return;
 
+            disposer.RemoveAndDispose(ref foregroundSurface);
             disposer.RemoveAndDispose(ref foregroundBitmap);
 
-            var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied);
-            var size = new SizeI(width, height);
-
-            foregroundBitmap = dc.CreateBitmap(
-                size,
-                new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.None));
-            disposer.Collect(foregroundBitmap);
+            if (analyzer!.SupportsWritableSurface)
+            {
+                foregroundSurface = analyzer.CreateSurface(dc, width, height, true);
+                disposer.Collect(foregroundSurface);
+            }
+            else
+            {
+                var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied);
+                foregroundBitmap = dc.CreateBitmap(
+                    new SizeI(width, height),
+                    new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.None));
+                disposer.Collect(foregroundBitmap);
+            }
 
             foregroundWidth = width;
             foregroundHeight = height;
         }
 
-        private void EnsureSourceBitmaps(ID2D1DeviceContext dc, int width, int height)
+        private bool EnsureSourceSurface(ID2D1DeviceContext dc, int width, int height)
         {
-            if (sourceBitmap is not null
-                && sourceStagingBitmap is not null
-                && sourceWidth == width
-                && sourceHeight == height)
-                return;
+            if (sourceSurface is not null && sourceWidth == width && sourceHeight == height)
+                return true;
 
-            disposer.RemoveAndDispose(ref sourceBitmap);
-            disposer.RemoveAndDispose(ref sourceStagingBitmap);
-
-            var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied);
-            var size = new SizeI(width, height);
-
-            sourceBitmap = dc.CreateBitmap(
-                size,
-                new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.Target));
-            disposer.Collect(sourceBitmap);
-
-            sourceStagingBitmap = dc.CreateBitmap(
-                size,
-                new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.CpuRead | BitmapOptions.CannotDraw));
-            disposer.Collect(sourceStagingBitmap);
+            disposer.RemoveAndDispose(ref sourceSurface);
+            sourceSurface = analyzer!.CreateSurface(dc, width, height, false);
+            disposer.Collect(sourceSurface);
 
             sourceWidth = width;
             sourceHeight = height;
+            hasSourceContent = false;
+            return false;
         }
 
-        private int[] EnsureBuffer(int pixelCount)
-        {
-            if (bufferPixelCount < pixelCount || sourceBuffer is null)
-            {
-                sourceBuffer = new int[pixelCount];
-                bufferPixelCount = pixelCount;
-            }
-            return sourceBuffer;
-        }
+
 
         private float ComputeForegroundLambda(Vector3 backgroundLab, Color foreground)
         {
