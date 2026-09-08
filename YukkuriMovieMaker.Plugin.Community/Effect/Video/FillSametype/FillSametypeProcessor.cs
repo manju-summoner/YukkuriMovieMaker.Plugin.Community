@@ -40,6 +40,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
 
         ID2D1Bitmap1? finalMaskBitmap;
         ComputeSurface? finalMaskSurface;
+        ID2D1Bitmap1? FinalMask => finalMaskSurface?.Bitmap ?? finalMaskBitmap;
         int finalMaskWidth, finalMaskHeight;
 
         ID2D1Bitmap1? candidateBitmap;
@@ -401,11 +402,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
 
         ID2D1Image? TransformFinalMask(RawRectF bounds)
         {
-            if (finalMaskTransform is null || finalMaskTransformOutput is null || finalMaskBitmap is null)
-                return finalMaskBitmap;
+            var mask = FinalMask;
+            if (finalMaskTransform is null || finalMaskTransformOutput is null || mask is null)
+                return mask;
 
             finalMaskTransform.TransformMatrix = Matrix3x2.CreateTranslation(bounds.Left, bounds.Top);
-            finalMaskTransform.SetInput(0, finalMaskBitmap, true);
+            finalMaskTransform.SetInput(0, mask, true);
             return finalMaskTransformOutput;
         }
 
@@ -520,11 +522,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
 
         void EnsureFinalMaskBitmap(ID2D1DeviceContext dc, int width, int height)
         {
-            if (finalMaskBitmap is not null && finalMaskWidth == width && finalMaskHeight == height)
+            if (FinalMask is not null && finalMaskWidth == width && finalMaskHeight == height)
                 return;
-
-            if (finalMaskSurface is not null)
-                finalMaskBitmap = null;
 
             disposer.RemoveAndDispose(ref finalMaskSurface);
             disposer.RemoveAndDispose(ref finalMaskBitmap);
@@ -533,7 +532,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             {
                 finalMaskSurface = pipeline.CreateSurface(dc, width, height, true);
                 disposer.Collect(finalMaskSurface);
-                finalMaskBitmap = finalMaskSurface.Bitmap;
             }
             else
             {
