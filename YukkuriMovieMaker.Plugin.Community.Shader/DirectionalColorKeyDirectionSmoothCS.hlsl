@@ -36,7 +36,7 @@ void Execute(uint3 ThreadIds : SV_DispatchThreadID, uint3 GroupIds : SV_GroupThr
     int x = ThreadIds.x;
     int y = ThreadIds.y;
     float twoSigmaSpaceSq = 2.0 * __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius * __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius;
-    for (int slot = __GroupIds__get_Index; slot < __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__SpaceTableCount; slot += __GroupSize__get_X * __GroupSize__get_Y * __GroupSize__get_Z)
+    for (uint slot = __GroupIds__get_Index; slot < __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__SpaceTableCount; slot += __GroupSize__get_X * __GroupSize__get_Y * __GroupSize__get_Z)
     {
         int ty = slot / __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__SpaceTableStride;
         int tx = slot - ty * __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__SpaceTableStride;
@@ -47,13 +47,13 @@ void Execute(uint3 ThreadIds : SV_DispatchThreadID, uint3 GroupIds : SV_GroupThr
 
     int originX = x - GroupIds.x - __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius;
     int originY = y - GroupIds.y - __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__Radius;
-    for (int slot = __GroupIds__get_Index; slot < __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileCount; slot += __GroupSize__get_X * __GroupSize__get_Y * __GroupSize__get_Z)
+    for (uint tileSlot = __GroupIds__get_Index; tileSlot < __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileCount; tileSlot += __GroupSize__get_X * __GroupSize__get_Y * __GroupSize__get_Z)
     {
-        int localY = slot / __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileSize;
-        int localX = slot - localY * __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileSize;
+        int localY = tileSlot / __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileSize;
+        int localX = tileSlot - localY * __YukkuriMovieMaker_Plugin_Community_Effect_Video_DirectionalColorKey_DirectionSmoothConstants__TileSize;
         int sampleX = originX + localX;
         int sampleY = originY + localY;
-        int tileTriple = slot * 3;
+        int tileTriple = tileSlot * 3;
         if (sampleX < 0 || sampleX >= width || sampleY < 0 || sampleY >= height)
         {
             directionTile[tileTriple + 0] = 0.0;

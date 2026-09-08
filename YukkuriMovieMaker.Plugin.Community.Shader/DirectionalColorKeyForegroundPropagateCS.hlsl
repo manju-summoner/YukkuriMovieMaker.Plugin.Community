@@ -1,3 +1,5 @@
+// pow の底は sRGB が 0.04045 を超える枝でのみ評価され、必ず正になる。
+#pragma warning(disable: 3571)
 #define __GroupSize__get_X 8
 #define __GroupSize__get_Y 8
 #define __GroupSize__get_Z 1
