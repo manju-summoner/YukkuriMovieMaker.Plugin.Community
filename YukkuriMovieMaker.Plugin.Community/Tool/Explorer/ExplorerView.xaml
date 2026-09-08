@@ -21,6 +21,7 @@
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <local:DoubleToGridLengthConverter x:Key="DoubleToGridLengthConverter"/>
             <local:NullToBoolConverter x:Key="NullToBoolConverter"/>
+            <local:IsExplorerItemConverter x:Key="IsExplorerItemConverter"/>
             <ItemsPanelTemplate x:Key="VirtualizedStackPanelItemsPanelTemplate">
                 <VirtualizingStackPanel IsItemsHost="True" Orientation="Vertical" Margin="3"/>
             </ItemsPanelTemplate>
@@ -122,6 +123,13 @@
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
+                                    </DataTrigger>
+                                    <!-- 一覧の差し替えで項目が切り離されると ToolTip の Content は項目でなくなり、配下の Path バインディングは値を運ばない。
+                                         そのまま MediaElement が Loaded を迎えると MediaTimeline の Source が null で例外になるので、
+                                         Content が項目でないときはテンプレートを外す。DataContext 経由だと切り離し時に評価されないため ToolTip.Content を直接見る。
+                                         後勝ちなので上の 2 つより後ろに置く -->
+                                    <DataTrigger Binding="{Binding Content, RelativeSource={RelativeSource AncestorType=ToolTip}, Converter={StaticResource IsExplorerItemConverter}}" Value="False">
+                                        <Setter Property="Template" Value="{x:Null}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
