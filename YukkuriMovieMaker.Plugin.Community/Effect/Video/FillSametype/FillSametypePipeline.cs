@@ -121,13 +121,13 @@ internal sealed class FillSametypePipeline : IDisposable
             histogramGpu.Clear(componentCount * FeatureSize);
 
             constants.Update(new HistogramConstants(AngleBins, RadialBins, logRadiusScale, width, height));
-            device.Dispatch("FillSametypeHistogramCS", constants.Buffer, ComputeShaderDevice.GroupCount(width, 8),
-                ComputeShaderDevice.GroupCount(height, 8),
+            device.Dispatch("FillSametypeHistogramCS", constants.Buffer, ComputeShaderDevice.PixelGroups(width),
+                ComputeShaderDevice.PixelGroups(height),
                 labelGpu.Srv, centroidGpu.Srv, histogramGpu.Uav);
 
             constants.Update(new NormalizeConstants(FeatureSize, componentCount));
             device.Dispatch("FillSametypeNormalizeCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(componentCount, 64), 1,
+                ComputeShaderDevice.LinearGroups(componentCount), 1,
                 histogramGpu.Srv, featureGpu.Uav);
         }
 
@@ -173,7 +173,7 @@ internal sealed class FillSametypePipeline : IDisposable
                 constants.Update(new CorrelationConstants(
                     seedComponent, AngleBins, RadialBins, similarityThreshold, componentCount));
                 device.Dispatch("FillSametypeCorrelationCS", constants.Buffer,
-                    ComputeShaderDevice.GroupCount(componentCount, 64), 1,
+                    ComputeShaderDevice.LinearGroups(componentCount), 1,
                     featureBuffer.Srv, matchFlagBuffer.Uav);
 
                 lastSeedComponent = seedComponent;
@@ -184,15 +184,15 @@ internal sealed class FillSametypePipeline : IDisposable
             lastInvert = invert;
 
             constants.Update(new MaskConstants(invert ? 1 : 0, width, height));
-            device.Dispatch("FillSametypeMaskCS", constants.Buffer, ComputeShaderDevice.GroupCount(width, 8),
-                ComputeShaderDevice.GroupCount(height, 8),
+            device.Dispatch("FillSametypeMaskCS", constants.Buffer, ComputeShaderDevice.PixelGroups(width),
+                ComputeShaderDevice.PixelGroups(height),
                 labelBuffer.Srv, matchFlagBuffer.Srv, maskBuffer.Uav);
 
             if (target is not null)
             {
                 constants.Update(new SurfaceConstants(width, height));
-                device.Dispatch("PackedBufferToSurfaceCS", constants.Buffer, ComputeShaderDevice.GroupCount(width, 8),
-                    ComputeShaderDevice.GroupCount(height, 8),
+                device.Dispatch("PackedBufferToSurfaceCS", constants.Buffer, ComputeShaderDevice.PixelGroups(width),
+                    ComputeShaderDevice.PixelGroups(height),
                     maskBuffer.Srv, target.Uav);
             }
             else

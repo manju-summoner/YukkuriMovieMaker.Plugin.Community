@@ -45,7 +45,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
                 .HasFlag(FormatSupport.TypedUnorderedAccessView);
         }
 
-        public static int GroupCount(int extent, int threads) => (extent + threads - 1) / threads;
+        // ComputeGroup.hlsli の GROUP_X / GROUP_Y / LINEAR_GROUP_THREADS に一致させる。
+        public const int PixelGroupSize = 8;
+        public const int LinearGroupSize = 64;
+
+        public static int PixelGroups(int extent) => GroupCount(extent, PixelGroupSize);
+
+        public static int LinearGroups(int count) => GroupCount(count, LinearGroupSize);
+
+        static int GroupCount(int extent, int threads) => (extent + threads - 1) / threads;
 
         public Scope Enter() => new(multithread);
 

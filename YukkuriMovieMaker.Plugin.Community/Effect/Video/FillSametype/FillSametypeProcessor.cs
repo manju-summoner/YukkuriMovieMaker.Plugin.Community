@@ -529,7 +529,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             disposer.RemoveAndDispose(ref finalMaskSurface);
             disposer.RemoveAndDispose(ref finalMaskBitmap);
 
-            // 面へ直接書けない環境では従来どおり CPU 転送へ落とす。
             if (pipeline.SupportsWritableSurface)
             {
                 finalMaskSurface = pipeline.CreateSurface(dc, width, height, true);

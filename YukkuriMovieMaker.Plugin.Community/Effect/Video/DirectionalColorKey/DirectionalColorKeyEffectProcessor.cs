@@ -284,7 +284,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             }
         }
 
-        // 面へ直接書けない環境では従来どおり CPU 転送へ落とす。
         private void EnsureForegroundTarget(ID2D1DeviceContext dc, int width, int height)
         {
             if ((foregroundSurface is not null || foregroundBitmap is not null)

@@ -74,7 +74,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             constants = new ComputeConstantBuffer(device, 64);
         }
 
-        // cs_5_0 に対応しない環境では null を返し、呼び出し側でパススルーさせる。
         public static DirectionalColorKeyAnalyzer? TryCreate(IGraphicsDevicesAndContext devices)
         {
             var analyzer = new DirectionalColorKeyAnalyzer(devices);
@@ -103,7 +102,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             constants.Update(new SourceToBufferConstants(width, height, compare ? 1 : 0));
             device.Dispatch("DirectionalColorKeySourceToBufferCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 source.Srv, bgraGpu.Uav, countGpu.Uav);
 
             if (!compare)
@@ -155,7 +154,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             constants.Update(new DisplacementFieldConstants(
                 backgroundLab.X, backgroundLab.Y, backgroundLab.Z, noiseThreshold, width, height));
             device.Dispatch("DirectionalColorKeyDisplacementFieldCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 bgraGpu.Srv, colorLabGpu.Uav, directionGpu.Uav);
 
             float sigmaColorSq = 2f * sigmaColor * sigmaColor;
@@ -179,7 +178,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 {
                     constants.Update(new DirectionSmoothConstantsBuffer(sigmaColorSq, width, height));
                     device.Dispatch("DirectionalColorKeyDirectionSmoothCS", constants.Buffer,
-                        ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                        ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                         smoothSource.Srv, colorLabGpu.Srv, smoothTarget.Uav);
                     (smoothSource, smoothTarget) = (smoothTarget, smoothSource);
                 }
@@ -189,7 +188,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             constants.Update(new SizeConstants(width, height));
             device.Dispatch("DirectionalColorKeyCopyDirectionsCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 smoothedDirections.Srv, EnsurePreviousResultBuffer().Uav);
             EnsurePreviousBgraBuffer().CopyFrom(bgraGpu);
             hasPreviousResult = true;
@@ -213,7 +212,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
                 constants.Update(new ClusterAssignConstants(clusterCount, FixedPointScale, width, height));
                 device.Dispatch("DirectionalColorKeyClusterAssignAccumulateCS", constants.Buffer,
-                    ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                    ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                     smoothedDirections.Srv, centerGpu.Srv, accumGpu.Uav);
 
                 accumGpu.Readback(accumulators.AsSpan(0, accumLength));
@@ -254,7 +253,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             constants.Update(new SizeConstants(width, height));
             device.Dispatch("PackedBufferToSurfaceCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 field.Srv, target.Uav);
         }
 
@@ -274,7 +273,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             constants.Update(new ForegroundSeedConstants(
                 backgroundLab.X, backgroundLab.Y, backgroundLab.Z, referencePerp, width, height));
             device.Dispatch("DirectionalColorKeyForegroundSeedCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 bgraGpu.Srv, colorLabGpu.Srv, foregroundSource.Uav, validSource.Uav);
 
             for (int iteration = 0; iteration < PropagateIterations; iteration++)
@@ -283,7 +282,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                     backgroundSrgb.X, backgroundSrgb.Y, backgroundSrgb.Z, PropagateReach,
                     LineSigmaSquared, width, height));
                 device.Dispatch("DirectionalColorKeyForegroundPropagateCS", constants.Buffer,
-                    ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                    ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                     foregroundSource.Srv, validSource.Srv, bgraGpu.Srv, foregroundTarget.Uav, validTarget.Uav);
 
                 (foregroundSource, foregroundTarget) = (foregroundTarget, foregroundSource);
@@ -363,13 +362,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             constants.Update(new SizeConstants(width, height));
             device.Dispatch("DirectionalColorKeyChangeSeedCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 bgraGpu.Srv, previousBgraGpu.Srv, seedScratch.Uav);
 
             countGpu.Clear(1);
             constants.Update(new SizeConstants(width, height));
             device.Dispatch("DirectionalColorKeyMaskCountCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 seedScratch.Srv, countGpu.Uav);
             countGpu.Readback(counts.AsSpan(0, 1));
 
@@ -381,20 +380,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             constants.Update(new DilateConstants(AdoptReach, width, height));
             device.Dispatch("DirectionalColorKeyDilateHorizontalCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 seedScratch.Srv, dilateScratch.Uav);
             constants.Update(new DilateConstants(AdoptReach, width, height));
             device.Dispatch("DirectionalColorKeyDilateVerticalCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 dilateScratch.Srv, adoptMask.Uav);
 
             constants.Update(new DilateConstants(GuardReach, width, height));
             device.Dispatch("DirectionalColorKeyDilateHorizontalCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 adoptMask.Srv, dilateScratch.Uav);
             constants.Update(new DilateConstants(GuardReach, width, height));
             device.Dispatch("DirectionalColorKeyDilateVerticalCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 dilateScratch.Srv, computeMask.Uav);
 
             var smoothSource = rawDirections;
@@ -404,14 +403,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             {
                 constants.Update(new DirectionSmoothConstantsBuffer(sigmaColorSq, width, height));
                 device.Dispatch("DirectionalColorKeyRegionDirectionSmoothCS", constants.Buffer,
-                    ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                    ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                     smoothSource.Srv, colorLabGpu.Srv, computeMask.Srv, smoothTarget.Uav);
                 (smoothSource, smoothTarget) = (smoothTarget, smoothSource);
             }
 
             constants.Update(new SizeConstants(width, height));
             device.Dispatch("DirectionalColorKeyAdoptRegionCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 EnsurePreviousResultBuffer().Srv, adoptMask.Srv, smoothSource.Uav);
 
             smoothedDirections = smoothSource;
@@ -523,7 +522,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 backgroundLab.X, backgroundLab.Y, backgroundLab.Z, clusterCount, ProjectionBins,
                 projectionScale, width, height));
             device.Dispatch("DirectionalColorKeyProjectionHistogramCS", constants.Buffer,
-                ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
                 colorLabGpu.Srv, directionGpu.Srv, centerGpu.Srv, histogramGpu.Uav);
 
             histogramGpu.Readback(histogram.AsSpan(0, clusterCount * ProjectionBins));

@@ -1,9 +1,11 @@
+using YukkuriMovieMaker.Plugin.Community.Commons.Compute;
+
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey;
 
+// 値は DirectionalColorKeyCS.hlsli の SMOOTH_ 定義に一致させる。
 internal static class DirectionSmoothConstants
 {
-    // シェーダーの [numthreads(8, 8, 1)] に対応する固定値。
-    public const int GroupSize = 8;
+    public const int GroupSize = ComputeShaderDevice.PixelGroupSize;
     public const int Radius = 4;
     public const int TileSize = GroupSize + Radius * 2;
     public const int TileCount = TileSize * TileSize;

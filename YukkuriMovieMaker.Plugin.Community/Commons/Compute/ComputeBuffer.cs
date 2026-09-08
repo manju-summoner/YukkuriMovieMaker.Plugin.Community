@@ -25,7 +25,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
         public ID3D11Buffer Buffer { get; }
         public ID3D11ShaderResourceView Srv { get; }
         public ID3D11UnorderedAccessView Uav
-            => uav ?? throw new InvalidOperationException("書き込み不可の領域に順不同アクセスビューはありません。");
+            => uav ?? throw new InvalidOperationException("書き込み用に作られていない領域には UAV がありません。");
 
         public ComputeBuffer(ComputeShaderDevice device, int length, bool writable)
         {

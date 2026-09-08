@@ -19,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
         public ID2D1Bitmap1 Bitmap { get; }
         public ID3D11ShaderResourceView Srv { get; }
         public ID3D11UnorderedAccessView Uav
-            => uav ?? throw new InvalidOperationException("書き込み不可の面に順不同アクセスビューはありません。");
+            => uav ?? throw new InvalidOperationException("書き込み用に作られていない面には UAV がありません。");
 
         public ComputeSurface(ComputeShaderDevice device, ID2D1DeviceContext dc, int width, int height, bool writable)
         {
