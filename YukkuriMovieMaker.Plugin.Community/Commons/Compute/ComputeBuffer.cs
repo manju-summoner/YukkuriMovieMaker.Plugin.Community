@@ -95,11 +95,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
         // 確保済みの容量は使用量より大きいことがある。消す範囲を絞るためビューを分ける。
         public void Clear(int count)
         {
-            var view = count >= Length ? Uav : PartialUav(count);
-
             using var scope = device.Enter();
 
-            device.Context.ClearUnorderedAccessView(view, new Int4(0, 0, 0, 0));
+            device.Context.ClearUnorderedAccessView(
+                count >= Length ? Uav : PartialUav(count), new Int4(0, 0, 0, 0));
         }
 
         ID3D11UnorderedAccessView PartialUav(int count)
