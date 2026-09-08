@@ -157,6 +157,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         volatile bool isLoading = false;
         const int ProgressInterval = 200;
         string? requestedRecursiveSearchText;
+        int deferredWatcherRefresh;
+        int watcherFaulted;
         string? pendingRenamePath;
 
         DpiScale lastDpiScale = new(1, 1);
@@ -1214,12 +1216,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         void RequestRefresh() => refreshDebouncer.Signal(null);
 
+        /// <summary>
+        /// 場所や監視範囲がこれから作る一覧と合わない watcher は、一覧を作る前に止める。
+        /// 再帰検索を解除した直後にサブフォルダまで見る watcher が残っていると、そのイベントで非再帰の一覧の作成が取り消され続けるため
+        /// </summary>
+        void StopFileSystemWatcherIfMismatched(string location, bool includeSubdirectories)
+        {
+            if (watcher is null) return;
+            if (!string.Equals(watcher.Path, location, StringComparison.OrdinalIgnoreCase) || watcher.IncludeSubdirectories != includeSubdirectories)
+                StopFileSystemWatcher();
+        }
+
         void StopFileSystemWatcher()
         {
             if (watcher is null) return;
             watcher.Created -= Watcher_Callback;
             watcher.Deleted -= Watcher_Callback;
             watcher.Renamed -= Watcher_Callback;
+            watcher.Error -= Watcher_Error;
             watcher.EnableRaisingEvents = false;
             watcher.Dispose();
             watcher = null;
@@ -1266,6 +1280,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 finally
                 {
                     isLoading = false;
+                    //例外で走査の完了処理まで届かなかったとき、IsSearching が立ったままだと監視イベントの保留が解けない。
+                    //自分が最新の更新のときだけ完了させる（取り消された古い更新が後続の状態を倒さないように）
+                    if (ReferenceEquals(refreshCts, newCts) && IsSearching)
+                        FinishSearching();
                     RaiseCommandExecutable();
                 }
             }
@@ -1493,17 +1511,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         async Task RefreshCoreAsync(CancellationToken token)
         {
             var currentLocation = Location;
-            if (watcher != null && !string.Equals(watcher.Path, currentLocation, StringComparison.OrdinalIgnoreCase))
-            {
-                StopFileSystemWatcher();
-            }
+            StopFileSystemWatcherIfMismatched(currentLocation, Filter.IsRecursiveSearch);
 
             await InitializeDrivesAsync();
+            //取り消された更新がここで再開すると、後続の更新が終えた IsSearching を立て直して監視イベントの保留が解けなくなる
+            if (token.IsCancellationRequested)
+                return;
             Application.Current.Dispatcher.Invoke(() => StartSidebarSync(currentLocation, token));
 
             if (!TryCheckFileSystemAccess(currentLocation, true))
             {
-                IsSearching = false;
+                FinishSearching();
                 return;
             }
 
@@ -1519,6 +1537,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             var searchText = Filter.SearchText;
             requestedRecursiveSearchText = recursiveSearch ? searchText : null;
             IsSearching = recursiveSearch;
+            //再帰走査中の変更を取りこぼさないよう、監視は走査の前に始める（走査中に届いたイベントは完了後にまとめて反映される）。
+            //非再帰の一覧は走査中のイベントで即やり直しになるので、従来どおり一覧が出てから監視を始める
+            if (recursiveSearch)
+                EnsureFileSystemWatcher(currentLocation, true);
 
             var selectedPaths = new HashSet<string>(Items.Where(x => x.IsSelected).Select(x => x.Path), StringComparer.OrdinalIgnoreCase);
 
@@ -1569,7 +1591,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             finally
             {
                 if (!token.IsCancellationRequested)
-                    IsSearching = false;
+                    FinishSearching();
             }
 
             if (result is null || token.IsCancellationRequested)
@@ -1612,26 +1634,68 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 }
             });
 
-            if (watcher == null)
+            EnsureFileSystemWatcher(currentLocation, recursiveSearch);
+        }
+
+        void EnsureFileSystemWatcher(string location, bool includeSubdirectories)
+        {
+            //再帰検索の結果にはサブフォルダ内のファイルが並ぶので、その増減も監視しないと削除・追加が一覧に反映されない。
+            //監視範囲が現在の検索モードと合わない watcher と、監視対象の消失などの致命的なエラーで自分からイベント送出を止めた watcher は作り直す
+            if (Interlocked.Exchange(ref watcherFaulted, 0) == 1)
+                StopFileSystemWatcher();
+            else
+                StopFileSystemWatcherIfMismatched(location, includeSubdirectories);
+
+            if (watcher != null) return;
+
+            try
             {
-                try
+                watcher = new FileSystemWatcher(location)
                 {
-                    watcher = new FileSystemWatcher(currentLocation)
-                    {
-                        NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName
-                    };
-                    watcher.Created += Watcher_Callback;
-                    watcher.Deleted += Watcher_Callback;
-                    watcher.Renamed += Watcher_Callback;
-                    watcher.EnableRaisingEvents = true;
-                }
-                catch (Exception e)
-                {
-                    Log.Default.Write("WatcherException", e);
-                    watcher?.Dispose();
-                    watcher = null;
-                }
+                    NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName,
+                    IncludeSubdirectories = includeSubdirectories,
+                };
+                watcher.Created += Watcher_Callback;
+                watcher.Deleted += Watcher_Callback;
+                watcher.Renamed += Watcher_Callback;
+                watcher.Error += Watcher_Error;
+                watcher.EnableRaisingEvents = true;
             }
+            catch (Exception e)
+            {
+                Log.Default.Write("WatcherException", e);
+                watcher?.Dispose();
+                watcher = null;
+            }
+        }
+
+        /// <summary>
+        /// 再帰走査の完了処理。更新要求は即時に走って直前の走査を取り消すため、監視範囲がサブフォルダまで広がった状態で
+        /// イベントごとに更新すると、書き込みが続く木では走査が完了しなくなる。走査中に届いた監視イベントはここで1回にまとめて反映する
+        /// </summary>
+        void FinishSearching()
+        {
+            IsSearching = false;
+            if (Interlocked.Exchange(ref deferredWatcherRefresh, 0) == 1)
+                RequestRefresh();
+        }
+
+        void RequestRefreshFromWatcher()
+        {
+            Interlocked.Exchange(ref deferredWatcherRefresh, 1);
+            if (IsSearching) return;
+            if (Interlocked.Exchange(ref deferredWatcherRefresh, 0) == 1)
+                RequestRefresh();
+        }
+
+        //取りこぼしたイベントは個別に取り戻せないので、一覧を作り直して実体に合わせる。
+        //watcher 自身の Dispose は UI スレッドで行うため、ここでは印だけ付けて次の更新で作り直させる
+        private void Watcher_Error(object sender, ErrorEventArgs e)
+        {
+            //バッファ溢れでは watcher は監視を続けるので作り直さない（作り直す間のイベントを余計に落とさないため）
+            if (e.GetException() is not InternalBufferOverflowException)
+                Interlocked.Exchange(ref watcherFaulted, 1);
+            RequestRefreshFromWatcher();
         }
 
         /// <summary>
@@ -1756,7 +1820,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
 
             if (e.ChangeType is WatcherChangeTypes.Created or WatcherChangeTypes.Deleted or WatcherChangeTypes.Renamed)
-                refreshDebouncer.Signal(null);
+                RequestRefreshFromWatcher();
         }
 
         void RemoveSidebarItemsByPath(string removedPath)
