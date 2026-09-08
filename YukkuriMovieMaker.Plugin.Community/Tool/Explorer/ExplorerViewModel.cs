@@ -1379,7 +1379,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-        void ApplyItems(List<DirectoryInfo> dirsInfo, List<FileInfo> filesInfo, HashSet<string> selectedPaths)
+        /// <param name="retainedRoot">
+        /// 途中結果を適用するときの走査対象フォルダ。この配下にあってまだ再発見されていない既存項目は残す
+        /// （一覧が一度空に戻る・破棄と再生成でアイコンを読み直すのを避ける）。
+        /// 配下にない項目は場所を移動する前の残りなので取り除く。null なら最終結果として見つからなかった項目をすべて取り除く
+        /// </param>
+        void ApplyItems(List<DirectoryInfo> dirsInfo, List<FileInfo> filesInfo, HashSet<string> selectedPaths, string? retainedRoot)
         {
             var oldItemsMap = Items.ToDictionary(x => x.Path, StringComparer.OrdinalIgnoreCase);
             var newItemsList = new List<IExplorerItemViewModel>(dirsInfo.Count + filesInfo.Count);
@@ -1437,6 +1442,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     {
                         IsSelected = selectedPaths.Contains(f.FullName)
                     });
+                }
+            }
+
+            if (retainedRoot != null)
+            {
+                //更新日時が変わって作り直した項目の旧インスタンスは oldItemsMap に残っている。これを残すと同じパスが二重になるので、
+                //今回見つかっていないパスだけを残す
+                var foundPaths = new HashSet<string>(newItemsList.Select(x => x.Path), StringComparer.OrdinalIgnoreCase);
+                foreach (var (path, item) in oldItemsMap.Where(x => !foundPaths.Contains(x.Key) && IsSameOrDescendantPath(x.Key, retainedRoot)).ToList())
+                {
+                    newItemsList.Add(item);
+                    oldItemsMap.Remove(path);
                 }
             }
 
@@ -1528,7 +1545,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                         void ReportProgress(List<DirectoryInfo> foundDirs, List<FileInfo> foundFiles) => Application.Current.Dispatcher.Invoke(() =>
                         {
                             if (!token.IsCancellationRequested && Location == currentLocation)
-                                ApplyItems(foundDirs, foundFiles, selectedPaths);
+                                //Location は入力のまま（区切り文字が / のことがある）なので、項目のパスと同じ正規化済みのパスで比較する
+                                ApplyItems(foundDirs, foundFiles, selectedPaths, di.FullName);
                         });
 
                         if (!TryCollectMatchesRecursively(di, options, searchText, listDirs, f, ReportProgress, token))
@@ -1561,7 +1579,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
             var (sidebarDirs, dirsInfo, filesInfo) = result.Value;
 
-            ApplyItems(dirsInfo, filesInfo, selectedPaths);
+            ApplyItems(dirsInfo, filesInfo, selectedPaths, null);
 
             if (pendingRenamePath != null)
             {
