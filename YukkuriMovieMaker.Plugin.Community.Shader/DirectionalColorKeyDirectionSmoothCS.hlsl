@@ -1,17 +1,17 @@
 #include "DirectionalColorKeyCS.hlsli"
 
-cbuffer _ : register(b0)
+cbuffer Constants : register(b0)
 {
     float sigmaColorSq;
     int width;
     int height;
 }
 
-RWStructuredBuffer<float> sourceDirections : register(u0);
+StructuredBuffer<float> sourceDirections : register(t0);
 
-RWStructuredBuffer<float> colorLab : register(u1);
+StructuredBuffer<float> colorLab : register(t1);
 
-RWStructuredBuffer<float> targetDirections : register(u2);
+RWStructuredBuffer<float> targetDirections : register(u0);
 
 groupshared float directionTile [SMOOTH_TILE_COUNT * 3];
 

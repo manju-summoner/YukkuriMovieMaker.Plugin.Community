@@ -1,14 +1,14 @@
 #include "DirectionalColorKeyCS.hlsli"
 
-cbuffer _ : register(b0)
+cbuffer Constants : register(b0)
 {
     int width;
     int height;
 }
 
-RWStructuredBuffer<int> mask : register(u0);
+StructuredBuffer<int> mask : register(t0);
 
-RWStructuredBuffer<int> count : register(u1);
+RWStructuredBuffer<int> count : register(u0);
 
 groupshared int partialCounts [GROUP_THREADS];
 

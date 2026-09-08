@@ -2,7 +2,7 @@
 #pragma warning(disable: 3571)
 #include "DirectionalColorKeyCS.hlsli"
 
-cbuffer _ : register(b0)
+cbuffer Constants : register(b0)
 {
     float backgroundR;
     float backgroundG;
@@ -13,15 +13,15 @@ cbuffer _ : register(b0)
     int height;
 }
 
-RWStructuredBuffer<int> sourceForeground : register(u0);
+StructuredBuffer<int> sourceForeground : register(t0);
 
-RWStructuredBuffer<int> sourceValid : register(u1);
+StructuredBuffer<int> sourceValid : register(t1);
 
-StructuredBuffer<int> bgra : register(t0);
+StructuredBuffer<int> bgra : register(t2);
 
-RWStructuredBuffer<int> targetForeground : register(u2);
+RWStructuredBuffer<int> targetForeground : register(u0);
 
-RWStructuredBuffer<int> targetValid : register(u3);
+RWStructuredBuffer<int> targetValid : register(u1);
 
 [numthreads(GROUP_X, GROUP_Y, GROUP_Z)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID)

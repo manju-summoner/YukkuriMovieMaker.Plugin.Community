@@ -8,7 +8,9 @@ cbuffer Constants : register(b0)
 };
 
 StructuredBuffer<int> labels : register(t0);
+
 StructuredBuffer<float> centroids : register(t1);
+
 RWStructuredBuffer<int> histogram : register(u0);
 
 [numthreads(8, 8, 1)]

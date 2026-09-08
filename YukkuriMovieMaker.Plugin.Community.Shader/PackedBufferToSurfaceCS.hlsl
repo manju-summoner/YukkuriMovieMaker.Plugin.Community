@@ -7,6 +7,7 @@ cbuffer Constants : register(b0)
 };
 
 StructuredBuffer<int> source : register(t0);
+
 RWTexture2D<float4> target : register(u0);
 
 [numthreads(GROUP_X, GROUP_Y, GROUP_Z)]

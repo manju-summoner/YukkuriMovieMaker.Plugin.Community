@@ -8,7 +8,9 @@ cbuffer Constants : register(b0)
 };
 
 Texture2D<float4> source : register(t0);
+
 RWStructuredBuffer<int> target : register(u0);
+
 RWStructuredBuffer<int> changeCount : register(u1);
 
 [numthreads(GROUP_X, GROUP_Y, GROUP_Z)]

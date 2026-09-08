@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Commons.Compute;
@@ -130,7 +130,7 @@ internal sealed class FillSametypePipeline : IDisposable
             constants.Update(new NormalizeConstants(FeatureSize, componentCount));
             device.Dispatch("FillSametypeNormalizeCS", constants.Buffer,
                 ComputeShaderDevice.GroupCount(componentCount, 64), 1,
-                histogramGpu.Uav, featureGpu.Uav);
+                histogramGpu.Srv, featureGpu.Uav);
         }
 
         analysisGeneration++;
@@ -176,7 +176,7 @@ internal sealed class FillSametypePipeline : IDisposable
                     seedComponent, AngleBins, RadialBins, similarityThreshold, componentCount));
                 device.Dispatch("FillSametypeCorrelationCS", constants.Buffer,
                     ComputeShaderDevice.GroupCount(componentCount, 64), 1,
-                    featureBuffer.Uav, matchFlagBuffer.Uav);
+                    featureBuffer.Srv, matchFlagBuffer.Uav);
 
                 lastSeedComponent = seedComponent;
                 lastSimilarityThreshold = similarityThreshold;
@@ -188,7 +188,7 @@ internal sealed class FillSametypePipeline : IDisposable
             constants.Update(new MaskConstants(invert ? 1 : 0, width, height));
             device.Dispatch("FillSametypeMaskCS", constants.Buffer, ComputeShaderDevice.GroupCount(width, 8),
                 ComputeShaderDevice.GroupCount(height, 8),
-                labelBuffer.Srv, matchFlagBuffer.Uav, maskBuffer.Uav);
+                labelBuffer.Srv, matchFlagBuffer.Srv, maskBuffer.Uav);
 
             if (target is not null)
             {

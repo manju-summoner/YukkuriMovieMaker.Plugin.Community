@@ -1,6 +1,6 @@
 #include "DirectionalColorKeyCS.hlsli"
 
-cbuffer _ : register(b0)
+cbuffer Constants : register(b0)
 {
     float backgroundL;
     float backgroundA;
@@ -12,13 +12,13 @@ cbuffer _ : register(b0)
     int height;
 }
 
-RWStructuredBuffer<float> colorLab : register(u0);
+StructuredBuffer<float> colorLab : register(t0);
 
-RWStructuredBuffer<float> directions : register(u1);
+StructuredBuffer<float> directions : register(t1);
 
-StructuredBuffer<float> centers : register(t0);
+StructuredBuffer<float> centers : register(t2);
 
-RWStructuredBuffer<int> histogram : register(u2);
+RWStructuredBuffer<int> histogram : register(u0);
 
 [numthreads(GROUP_X, GROUP_Y, GROUP_Z)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID)

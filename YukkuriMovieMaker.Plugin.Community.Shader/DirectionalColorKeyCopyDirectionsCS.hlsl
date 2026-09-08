@@ -1,14 +1,14 @@
 #include "DirectionalColorKeyCS.hlsli"
 
-cbuffer _ : register(b0)
+cbuffer Constants : register(b0)
 {
     int width;
     int height;
 }
 
-RWStructuredBuffer<float> source : register(u0);
+StructuredBuffer<float> source : register(t0);
 
-RWStructuredBuffer<float> target : register(u1);
+RWStructuredBuffer<float> target : register(u0);
 
 [numthreads(GROUP_X, GROUP_Y, GROUP_Z)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID)

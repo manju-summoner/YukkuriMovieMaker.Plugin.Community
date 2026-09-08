@@ -6,8 +6,10 @@ cbuffer Constants : register(b0)
 };
 
 StructuredBuffer<int> labels : register(t0);
-RWStructuredBuffer<int> matchFlags : register(u0);
-RWStructuredBuffer<int> mask : register(u1);
+
+StructuredBuffer<int> matchFlags : register(t1);
+
+RWStructuredBuffer<int> mask : register(u0);
 
 [numthreads(8, 8, 1)]
 void main(uint3 threadId : SV_DispatchThreadID)

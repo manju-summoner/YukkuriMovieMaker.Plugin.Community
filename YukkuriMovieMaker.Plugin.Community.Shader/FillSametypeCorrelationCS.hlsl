@@ -7,8 +7,9 @@ cbuffer Constants : register(b0)
     int componentCount;
 };
 
-RWStructuredBuffer<float> features : register(u0);
-RWStructuredBuffer<int> matchFlags : register(u1);
+StructuredBuffer<float> features : register(t0);
+
+RWStructuredBuffer<int> matchFlags : register(u0);
 
 [numthreads(64, 1, 1)]
 void main(uint3 threadId : SV_DispatchThreadID)

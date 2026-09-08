@@ -4,8 +4,9 @@ cbuffer Constants : register(b0)
     int componentCount;
 };
 
-RWStructuredBuffer<int> histogram : register(u0);
-RWStructuredBuffer<float> features : register(u1);
+StructuredBuffer<int> histogram : register(t0);
+
+RWStructuredBuffer<float> features : register(u0);
 
 [numthreads(64, 1, 1)]
 void main(uint3 threadId : SV_DispatchThreadID)

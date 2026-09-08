@@ -1,6 +1,6 @@
 #include "DirectionalColorKeyCS.hlsli"
 
-cbuffer _ : register(b0)
+cbuffer Constants : register(b0)
 {
     int width;
     int height;
@@ -8,9 +8,9 @@ cbuffer _ : register(b0)
 
 StructuredBuffer<int> bgra : register(t0);
 
-RWStructuredBuffer<int> previousBgra : register(u0);
+StructuredBuffer<int> previousBgra : register(t1);
 
-RWStructuredBuffer<int> seedMask : register(u1);
+RWStructuredBuffer<int> seedMask : register(u0);
 
 [numthreads(GROUP_X, GROUP_Y, GROUP_Z)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID)

@@ -1,6 +1,6 @@
 #include "DirectionalColorKeyCS.hlsli"
 
-cbuffer _ : register(b0)
+cbuffer Constants : register(b0)
 {
     float backgroundL;
     float backgroundA;

@@ -1,6 +1,6 @@
 #include "DirectionalColorKeyCS.hlsli"
 
-cbuffer _ : register(b0)
+cbuffer Constants : register(b0)
 {
     int clusterCount;
     float fixedPointScale;
@@ -8,11 +8,11 @@ cbuffer _ : register(b0)
     int height;
 }
 
-RWStructuredBuffer<float> directions : register(u0);
+StructuredBuffer<float> directions : register(t0);
 
-StructuredBuffer<float> centers : register(t0);
+StructuredBuffer<float> centers : register(t1);
 
-RWStructuredBuffer<int> accumulators : register(u1);
+RWStructuredBuffer<int> accumulators : register(u0);
 
 [numthreads(GROUP_X, GROUP_Y, GROUP_Z)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID)
