@@ -31,7 +31,7 @@ groupshared float colorTile [768];
 groupshared float spaceTable [81];
 
 [numthreads(__GroupSize__get_X, __GroupSize__get_Y, __GroupSize__get_Z)]
-void Execute(uint3 ThreadIds : SV_DispatchThreadID, uint3 GroupIds : SV_GroupThreadID, uint __GroupIds__get_Index : SV_GroupIndex)
+void main(uint3 ThreadIds : SV_DispatchThreadID, uint3 GroupIds : SV_GroupThreadID, uint __GroupIds__get_Index : SV_GroupIndex)
 {
     int x = ThreadIds.x;
     int y = ThreadIds.y;

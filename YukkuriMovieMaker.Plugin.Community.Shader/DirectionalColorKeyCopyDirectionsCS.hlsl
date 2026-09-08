@@ -16,7 +16,7 @@ RWStructuredBuffer<float> source : register(u0);
 RWStructuredBuffer<float> target : register(u1);
 
 [numthreads(__GroupSize__get_X, __GroupSize__get_Y, __GroupSize__get_Z)]
-void Execute(uint3 ThreadIds : SV_DispatchThreadID)
+void main(uint3 ThreadIds : SV_DispatchThreadID)
 {
     if (ThreadIds.x < __x && ThreadIds.y < __y && ThreadIds.z < __z)
     {

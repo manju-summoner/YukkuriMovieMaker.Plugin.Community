@@ -18,7 +18,7 @@ RWStructuredBuffer<int> count : register(u1);
 groupshared int partialCounts [64];
 
 [numthreads(__GroupSize__get_X, __GroupSize__get_Y, __GroupSize__get_Z)]
-void Execute(uint3 ThreadIds : SV_DispatchThreadID, uint __GroupIds__get_Index : SV_GroupIndex)
+void main(uint3 ThreadIds : SV_DispatchThreadID, uint __GroupIds__get_Index : SV_GroupIndex)
 {
     int x = ThreadIds.x;
     int y = ThreadIds.y;

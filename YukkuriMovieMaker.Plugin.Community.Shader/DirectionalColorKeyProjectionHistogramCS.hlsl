@@ -27,7 +27,7 @@ StructuredBuffer<float> centers : register(t0);
 RWStructuredBuffer<int> histogram : register(u2);
 
 [numthreads(__GroupSize__get_X, __GroupSize__get_Y, __GroupSize__get_Z)]
-void Execute(uint3 ThreadIds : SV_DispatchThreadID)
+void main(uint3 ThreadIds : SV_DispatchThreadID)
 {
     if (ThreadIds.x < __x && ThreadIds.y < __y && ThreadIds.z < __z)
     {
