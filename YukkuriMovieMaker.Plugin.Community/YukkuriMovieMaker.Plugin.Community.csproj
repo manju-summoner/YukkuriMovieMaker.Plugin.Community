@@ -214,7 +214,6 @@
 	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyMaskCountCS.cso" Link="Resources\Shader\DirectionalColorKeyMaskCountCS.cso" />
 	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyProjectionHistogramCS.cso" Link="Resources\Shader\DirectionalColorKeyProjectionHistogramCS.cso" />
 	  <Resource Include="$(ShaderDirPath)DirectionalColorKeyRegionDirectionSmoothCS.cso" Link="Resources\Shader\DirectionalColorKeyRegionDirectionSmoothCS.cso" />
-	  <Resource Include="$(ShaderDirPath)FillSametypeClearCS.cso" Link="Resources\Shader\FillSametypeClearCS.cso" />
 	  <Resource Include="$(ShaderDirPath)FillSametypeHistogramCS.cso" Link="Resources\Shader\FillSametypeHistogramCS.cso" />
 	  <Resource Include="$(ShaderDirPath)FillSametypeNormalizeCS.cso" Link="Resources\Shader\FillSametypeNormalizeCS.cso" />
 	  <Resource Include="$(ShaderDirPath)FillSametypeCorrelationCS.cso" Link="Resources\Shader\FillSametypeCorrelationCS.cso" />

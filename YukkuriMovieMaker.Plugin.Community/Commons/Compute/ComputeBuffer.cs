@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Vortice.DXGI;
+using Vortice.Mathematics;
 using Vortice.Direct3D11;
 using YukkuriMovieMaker.Commons;
 using MapFlags = Vortice.Direct3D11.MapFlags;
@@ -14,16 +15,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
         readonly ComputeShaderDevice device;
         readonly int stride = Unsafe.SizeOf<T>();
         ID3D11Buffer? staging;
+        readonly ID3D11UnorderedAccessView? uav;
+        readonly bool writable;
         bool disposed;
 
         public int Length { get; }
         public ID3D11Buffer Buffer { get; }
         public ID3D11ShaderResourceView Srv { get; }
-        public ID3D11UnorderedAccessView? Uav { get; }
+        public ID3D11UnorderedAccessView Uav
+            => uav ?? throw new InvalidOperationException("書き込み不可の領域に順不同アクセスビューはありません。");
 
         public ComputeBuffer(ComputeShaderDevice device, int length, bool writable)
         {
             this.device = device;
+            this.writable = writable;
             Length = length;
 
             var description = new BufferDescription(
@@ -42,11 +47,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
             if (writable)
             {
-                Uav = device.Device.CreateUnorderedAccessView(Buffer, new UnorderedAccessViewDescription(Buffer, Format.Unknown, 0, length));
-                disposer.Collect(Uav);
+                uav = device.Device.CreateUnorderedAccessView(Buffer, new UnorderedAccessViewDescription(Buffer, Format.Unknown, 0, length));
+                disposer.Collect(uav);
             }
         }
 
+        // 書き込み不可の領域は Dynamic なので破棄写経で、書き込み可能な領域は Default なので
+        // 部分更新で送る。Default に対する WriteDiscard は D3D11 が受け付けない。
         public unsafe void Upload(ReadOnlySpan<T> source)
         {
             var count = Math.Min(source.Length, Length);
@@ -55,20 +62,46 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
             using var scope = device.Enter();
 
-            var mapped = device.Context.Map(Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
-            try
+            if (!writable)
             {
-                var destination = new Span<T>((void*)mapped.DataPointer, Length);
-                source[..count].CopyTo(destination);
+                var mapped = device.Context.Map(Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
+                try
+                {
+                    var destination = new Span<T>((void*)mapped.DataPointer, Length);
+                    source[..count].CopyTo(destination);
+                }
+                finally
+                {
+                    device.Context.Unmap(Buffer, 0);
+                }
+                return;
             }
-            finally
+
+            fixed (T* pointer = source)
             {
-                device.Context.Unmap(Buffer, 0);
+                device.Context.UpdateSubresource(
+                    Buffer,
+                    0,
+                    new Box(0, 0, 0, stride * count, 1, 1),
+                    (nint)pointer,
+                    0,
+                    0);
             }
+        }
+
+        public void Clear()
+        {
+            using var scope = device.Enter();
+
+            device.Context.ClearUnorderedAccessView(Uav, new Int4(0, 0, 0, 0));
         }
 
         public void CopyFrom(ComputeBuffer<T> source)
         {
+            // D3D11 は大きさの違う複写を黙って捨てるため、ここで気付けるようにする。
+            if (source.Length != Length)
+                throw new ArgumentException("複写元と複写先の要素数が違います。", nameof(source));
+
             using var scope = device.Enter();
 
             device.Context.CopyResource(Buffer, source.Buffer);

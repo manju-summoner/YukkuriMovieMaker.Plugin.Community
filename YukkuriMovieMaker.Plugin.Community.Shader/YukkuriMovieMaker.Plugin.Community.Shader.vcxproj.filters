@@ -198,9 +198,6 @@
     <FxCompile Include="DirectionalColorKeyRegionDirectionSmoothCS.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>
-    <FxCompile Include="FillSametypeClearCS.hlsl">
-      <Filter>ソース ファイル</Filter>
-    </FxCompile>
     <FxCompile Include="FillSametypeHistogramCS.hlsl">
       <Filter>ソース ファイル</Filter>
     </FxCompile>

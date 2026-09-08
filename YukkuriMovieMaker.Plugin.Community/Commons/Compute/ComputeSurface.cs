@@ -12,13 +12,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
     internal sealed class ComputeSurface : IDisposable
     {
         readonly DisposeCollector disposer = new();
+        readonly ID3D11UnorderedAccessView? uav;
         bool disposed;
 
         public int Width { get; }
         public int Height { get; }
         public ID2D1Bitmap1 Bitmap { get; }
         public ID3D11ShaderResourceView Srv { get; }
-        public ID3D11UnorderedAccessView? Uav { get; }
+        public ID3D11UnorderedAccessView Uav
+            => uav ?? throw new InvalidOperationException("書き込み不可の面に順不同アクセスビューはありません。");
 
         public ComputeSurface(ComputeShaderDevice device, ID2D1DeviceContext dc, int width, int height, bool writable)
         {
@@ -48,8 +50,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
             if (writable)
             {
-                Uav = device.Device.CreateUnorderedAccessView(texture, null);
-                disposer.Collect(Uav);
+                uav = device.Device.CreateUnorderedAccessView(texture, null);
+                disposer.Collect(uav);
             }
 
             using var surface = texture.QueryInterface<IDXGISurface>();

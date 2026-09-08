@@ -55,6 +55,14 @@ internal sealed class FillSametypePipeline : IDisposable
     public ComputeSurface CreateSurface(ID2D1DeviceContext dc, int width, int height, bool writable)
         => new(device, dc, width, height, writable);
 
+    void ClearMask(Span<int> maskResult, ComputeSurface? target)
+    {
+        if (target is not null)
+            ClearSurface(target);
+        else
+            maskResult.Clear();
+    }
+
     public void ClearSurface(ComputeSurface target)
     {
         using var scope = device.Enter();
@@ -96,26 +104,22 @@ internal sealed class FillSametypePipeline : IDisposable
         labelGpu.Upload(labels.AsSpan(0, pixelCount));
         centroidGpu.Upload(centroids.AsSpan(0, componentCount * 2));
 
-        int histogramLength = componentCount * FeatureSize;
         float maxRadius = (float)Math.Sqrt((double)width * width + (double)height * height);
         float logRadiusScale = RadialBins / (float)Math.Log(maxRadius);
 
         using (device.Enter())
         {
-            constants.Update(new ClearConstants(width, histogramLength));
-            device.Dispatch("FillSametypeClearCS", constants.Buffer, [], [histogramGpu.Uav],
-                ComputeShaderDevice.GroupCount(width, 8),
-                ComputeShaderDevice.GroupCount(CeilDiv(histogramLength, width), 8));
+            histogramGpu.Clear();
 
             constants.Update(new HistogramConstants(AngleBins, RadialBins, logRadiusScale, width, height));
-            device.Dispatch("FillSametypeHistogramCS", constants.Buffer, [labelGpu.Srv, centroidGpu.Srv], [histogramGpu.Uav],
-                ComputeShaderDevice.GroupCount(width, 8),
-                ComputeShaderDevice.GroupCount(height, 8));
+            device.Dispatch("FillSametypeHistogramCS", constants.Buffer, ComputeShaderDevice.GroupCount(width, 8),
+                ComputeShaderDevice.GroupCount(height, 8),
+                labelGpu.Srv, centroidGpu.Srv, histogramGpu.Uav);
 
             constants.Update(new NormalizeConstants(FeatureSize, componentCount));
-            device.Dispatch("FillSametypeNormalizeCS", constants.Buffer, [], [histogramGpu.Uav, featureGpu.Uav],
-                ComputeShaderDevice.GroupCount(componentCount, 64),
-                1);
+            device.Dispatch("FillSametypeNormalizeCS", constants.Buffer, ComputeShaderDevice.GroupCount(componentCount, 64),
+                1,
+                histogramGpu.Uav, featureGpu.Uav);
         }
 
         analysisGeneration++;
@@ -131,14 +135,14 @@ internal sealed class FillSametypePipeline : IDisposable
             || matchFlagBuffer is null
             || maskBuffer is null)
         {
-            maskResult.Clear();
+            ClearMask(maskResult, target);
             return true;
         }
 
         int seedComponent = labels[seedIndex];
         if (seedComponent < 0 || moments[seedComponent * MomentStride] < MinimumComponentArea)
         {
-            maskResult.Clear();
+            ClearMask(maskResult, target);
             return true;
         }
 
@@ -158,9 +162,9 @@ internal sealed class FillSametypePipeline : IDisposable
             if (correlationChanged)
             {
                 constants.Update(new CorrelationConstants(seedComponent, AngleBins, RadialBins, similarityThreshold, componentCount));
-                device.Dispatch("FillSametypeCorrelationCS", constants.Buffer, [], [featureBuffer.Uav, matchFlagBuffer.Uav],
-                    ComputeShaderDevice.GroupCount(componentCount, 64),
-                    1);
+                device.Dispatch("FillSametypeCorrelationCS", constants.Buffer, ComputeShaderDevice.GroupCount(componentCount, 64),
+                    1,
+                    featureBuffer.Uav, matchFlagBuffer.Uav);
 
                 lastSeedComponent = seedComponent;
                 lastSimilarityThreshold = similarityThreshold;
@@ -170,16 +174,16 @@ internal sealed class FillSametypePipeline : IDisposable
             lastInvert = invert;
 
             constants.Update(new MaskConstants(invert ? 1 : 0, width, height));
-            device.Dispatch("FillSametypeMaskCS", constants.Buffer, [labelBuffer.Srv], [matchFlagBuffer.Uav, maskBuffer.Uav],
-                ComputeShaderDevice.GroupCount(width, 8),
-                ComputeShaderDevice.GroupCount(height, 8));
+            device.Dispatch("FillSametypeMaskCS", constants.Buffer, ComputeShaderDevice.GroupCount(width, 8),
+                ComputeShaderDevice.GroupCount(height, 8),
+                labelBuffer.Srv, matchFlagBuffer.Uav, maskBuffer.Uav);
 
             if (target is not null)
             {
                 constants.Update(new SurfaceConstants(width, height));
-                device.Dispatch("PackedBufferToSurfaceCS", constants.Buffer, [maskBuffer.Srv], [target.Uav],
-                    ComputeShaderDevice.GroupCount(width, 8),
-                    ComputeShaderDevice.GroupCount(height, 8));
+                device.Dispatch("PackedBufferToSurfaceCS", constants.Buffer, ComputeShaderDevice.GroupCount(width, 8),
+                    ComputeShaderDevice.GroupCount(height, 8),
+                    maskBuffer.Srv, target.Uav);
             }
             else
             {
@@ -392,10 +396,6 @@ internal sealed class FillSametypePipeline : IDisposable
         return maskBuffer;
     }
 
-    static int CeilDiv(int value, int divisor)
-    {
-        return (value + divisor - 1) / divisor;
-    }
 
     public void Dispose()
     {
@@ -417,9 +417,6 @@ internal sealed class FillSametypePipeline : IDisposable
 
     [StructLayout(LayoutKind.Sequential)]
     readonly record struct SurfaceConstants(int Width, int Height);
-
-    [StructLayout(LayoutKind.Sequential)]
-    readonly record struct ClearConstants(int GridWidth, int BufferLength);
 
     [StructLayout(LayoutKind.Sequential)]
     readonly record struct HistogramConstants(int AngleBins, int RadialBins, float LogRadiusScale, int Width, int Height);

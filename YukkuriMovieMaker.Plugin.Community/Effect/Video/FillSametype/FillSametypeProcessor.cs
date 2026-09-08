@@ -54,6 +54,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         int[]? foregroundBuffer;
         int[]? maskBuffer;
         int bufferPixelCount;
+        int maskPixelCount;
 
         bool isFirst = true;
         Type? brushType;
@@ -151,7 +152,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             if (IsPassThroughEffect || outputEffect is null || input is null)
                 return effectDescription.DrawDescription;
 
-            if (colorMatchEffect is null || colorMatchOutput is null || alphaMaskEffect is null || opacityEffect is null)
+            // cs_5_0 に対応しない環境では解析できないため、入力をそのまま通す。
+            if (!pipeline.IsSupported || colorMatchEffect is null || colorMatchOutput is null || alphaMaskEffect is null || opacityEffect is null)
             {
                 outputEffect.SetInput(0, input, true);
                 return effectDescription.DrawDescription;
@@ -332,8 +334,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             int frame)
         {
             int pixelCount = width * height;
-            var mask = EnsureBuffers(pixelCount).Mask;
-
             Vector4 matchColor = ReadSeedColor(dc, bounds, width, height, x, y, out int seedX, out int seedY);
 
             bool foregroundChanged = isFirst
@@ -368,8 +368,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
                 }
                 else
                 {
-                    Array.Clear(mask, 0, pixelCount);
-                    finalMaskBitmap!.CopyFromMemory<int>(mask, width * 4);
+                    var cleared = EnsureMaskBuffer(pixelCount);
+                    Array.Clear(cleared, 0, pixelCount);
+                    finalMaskBitmap!.CopyFromMemory<int>(cleared, width * 4);
                 }
                 pipeline.InvalidateMatchCache();
                 return TransformFinalMask(bounds);
@@ -381,14 +382,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
                 seedIndex,
                 (float)Math.Max(0, shapeThresholdRaw),
                 invert,
-                mask.AsSpan(0, pixelCount),
+                finalMaskSurface is null ? EnsureMaskBuffer(pixelCount).AsSpan(0, pixelCount) : default,
                 finalMaskSurface);
 
             if (!maskChanged)
                 return TransformFinalMask(bounds);
 
             if (finalMaskSurface is null)
-                finalMaskBitmap!.CopyFromMemory<int>(mask, width * 4);
+                finalMaskBitmap!.CopyFromMemory<int>(maskBuffer!, width * 4);
 
             return TransformFinalMask(bounds);
         }
@@ -496,7 +497,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         int[] RenderForegroundToBuffer(ID2D1DeviceContext dc, RawRectF bounds, int width, int height)
         {
             EnsureCandidateBitmaps(dc, width, height);
-            var foreground = EnsureBuffers(width * height).Foreground;
+            var foreground = EnsureForegroundBuffer(width * height);
 
             var previousTarget = dc.Target;
             dc.Target = candidateBitmap;
@@ -605,16 +606,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             disposer.Collect(seedStagingBitmap);
         }
 
-        (int[] Foreground, int[] Mask) EnsureBuffers(int pixelCount)
+        int[] EnsureForegroundBuffer(int pixelCount)
         {
             if (bufferPixelCount < pixelCount)
             {
                 foregroundBuffer = new int[pixelCount];
-                maskBuffer = new int[pixelCount];
                 bufferPixelCount = pixelCount;
             }
 
-            return (foregroundBuffer!, maskBuffer!);
+            return foregroundBuffer!;
+        }
+
+        // マスクを面へ直接書ける環境ではこの配列を使わないため、必要になるまで確保しない。
+        int[] EnsureMaskBuffer(int pixelCount)
+        {
+            if (maskPixelCount < pixelCount)
+            {
+                maskBuffer = new int[pixelCount];
+                maskPixelCount = pixelCount;
+            }
+
+            return maskBuffer!;
         }
     }
 }
