@@ -7,7 +7,7 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
 {
     private readonly IMidiRenderer _baseRenderer;
     private readonly MidiPluginSettings _settings;
-    private readonly IAudioEffectProcessor _effectProcessor;
+    private readonly AudioEffectProcessor _effectProcessor;
     private readonly int _chunkSizeStereo;
     private readonly int _historySamples;
     
@@ -166,7 +166,6 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
     {
         if (_disposed) return;
         _disposed = true;
-        _effectProcessor.Dispose();
         _baseRenderer.Dispose();
         _processedChunks.Clear();
         _rawChunks.Clear();

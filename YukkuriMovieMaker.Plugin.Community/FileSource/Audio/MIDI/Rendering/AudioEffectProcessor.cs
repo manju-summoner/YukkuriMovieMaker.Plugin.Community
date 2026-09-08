@@ -1,10 +1,9 @@
 using System.Numerics;
-using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Interfaces;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Models;
 
 namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Rendering;
 
-internal sealed class AudioEffectProcessor(EffectsSettings effects, int sampleRate) : IAudioEffectProcessor
+internal sealed class AudioEffectProcessor(EffectsSettings effects, int sampleRate)
 {
     private const float ReverbDecayGain = 0.4f;
 
@@ -35,13 +34,13 @@ internal sealed class AudioEffectProcessor(EffectsSettings effects, int sampleRa
         if (Vector.IsHardwareAccelerated && buffer.Length >= Vector<float>.Count)
         {
             var thresholds = new Vector<float>(threshold);
-            var inverseRatio = new Vector<float>(1f / ratio);
+            var ratios = new Vector<float>(ratio);
 
             for (; index <= buffer.Length - Vector<float>.Count; index += Vector<float>.Count)
             {
                 var samples = new Vector<float>(buffer[index..]);
                 var magnitudes = Vector.Abs(samples);
-                var compressed = thresholds + (magnitudes - thresholds) * inverseRatio;
+                var compressed = thresholds + (magnitudes - thresholds) / ratios;
                 var scaled = samples / magnitudes * compressed;
                 Vector.ConditionalSelect(Vector.GreaterThan(magnitudes, thresholds), scaled, samples).CopyTo(buffer[index..]);
             }
@@ -82,9 +81,5 @@ internal sealed class AudioEffectProcessor(EffectsSettings effects, int sampleRa
 
         for (var index = buffer.Length - 1; index >= delaySamples; index--)
             buffer[index] += buffer[index - delaySamples] * ReverbDecayGain;
-    }
-
-    public void Dispose()
-    {
     }
 }
