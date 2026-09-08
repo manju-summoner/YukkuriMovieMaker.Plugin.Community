@@ -16,7 +16,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
         readonly ID3D11UnorderedAccessView? uav;
         readonly int stride = Unsafe.SizeOf<T>();
         readonly bool writable;
+        ID3D11UnorderedAccessView? partialUav;
         ID3D11Buffer? staging;
+        int partialCount = -1;
         bool disposed;
 
         public int Length { get; }
@@ -90,11 +92,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             }
         }
 
-        public void Clear()
+        // 確保済みの容量は使用量より大きいことがある。消す範囲を絞るためビューを分ける。
+        public void Clear(int count)
         {
+            var view = count >= Length ? Uav : PartialUav(count);
+
             using var scope = device.Enter();
 
-            device.Context.ClearUnorderedAccessView(Uav, new Int4(0, 0, 0, 0));
+            device.Context.ClearUnorderedAccessView(view, new Int4(0, 0, 0, 0));
+        }
+
+        ID3D11UnorderedAccessView PartialUav(int count)
+        {
+            if (partialCount != count)
+            {
+                disposer.RemoveAndDispose(ref partialUav);
+                partialUav = device.Device.CreateUnorderedAccessView(
+                    Buffer, new UnorderedAccessViewDescription(Buffer, Format.Unknown, 0, count));
+                disposer.Collect(partialUav);
+                partialCount = count;
+            }
+
+            return partialUav!;
         }
 
         public void CopyFrom(ComputeBuffer<T> source)

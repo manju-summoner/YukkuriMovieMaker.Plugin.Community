@@ -106,7 +106,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             var bgraGpu = EnsureBgraBuffer();
             var countGpu = EnsureCountBuffer();
-            countGpu.Clear();
+            countGpu.Clear(1);
 
             constants.Update(new SourceToBufferConstants(width, height, compare ? 1 : 0));
             device.Dispatch("DirectionalColorKeySourceToBufferCS", constants.Buffer,
@@ -217,7 +217,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             for (int iteration = 0; iteration < LloydIterations; iteration++)
             {
                 centerGpu.Upload(centers.AsSpan(0, clusterCount * 3));
-                accumGpu.Clear();
+                accumGpu.Clear(accumLength);
 
                 constants.Update(new ClusterAssignConstants(
                     width, height, 1, clusterCount, FixedPointScale, width, height));
@@ -375,7 +375,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
                 bgraGpu.Srv, previousBgraGpu.Uav, seedScratch.Uav);
 
-            countGpu.Clear();
+            countGpu.Clear(1);
             constants.Update(new SizeConstants(width, height, 1, width, height));
             device.Dispatch("DirectionalColorKeyMaskCountCS", constants.Buffer,
                 ComputeShaderDevice.GroupCount(width, 8), ComputeShaderDevice.GroupCount(height, 8),
@@ -524,7 +524,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             var histogramGpu = EnsureHistogramBuffer();
 
             centerGpu.Upload(centers.AsSpan(0, clusterCount * 3));
-            histogramGpu.Clear();
+            histogramGpu.Clear(clusterCount * ProjectionBins);
 
             float projectionScale = ProjectionBins / ProjectionHistogramRange;
 

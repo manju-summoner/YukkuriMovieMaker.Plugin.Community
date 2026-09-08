@@ -120,7 +120,7 @@ internal sealed class FillSametypePipeline : IDisposable
 
         using (device.Enter())
         {
-            histogramGpu.Clear();
+            histogramGpu.Clear(componentCount * FeatureSize);
 
             constants.Update(new HistogramConstants(AngleBins, RadialBins, logRadiusScale, width, height));
             device.Dispatch("FillSametypeHistogramCS", constants.Buffer, ComputeShaderDevice.GroupCount(width, 8),
