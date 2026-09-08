@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using Vortice;
 using Vortice.Direct2D1;
 using Vortice.DCommon;
@@ -19,7 +19,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
         private readonly IGraphicsDevicesAndContext devices;
         private readonly DirectionalColorKeyEffect item;
-        private readonly DirectionalColorKeyAnalyzer? analyzer;
+        private DirectionalColorKeyAnalyzer? analyzer;
 
         private DirectionalColorKeyCustomEffect? effect;
 
@@ -51,16 +51,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         {
             this.devices = devices;
             this.item = item;
-            analyzer = DirectionalColorKeyAnalyzer.TryCreate(devices);
-            if (analyzer is not null)
-                disposer.Collect(analyzer);
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
+            // 基底の構築子から呼ばれるため、構築子の本体より先に解析器を用意する。
+            analyzer = DirectionalColorKeyAnalyzer.TryCreate(devices);
+
             // cs_5_0 に対応せず解析器を生成できなかった場合はパススルーする。
             if (analyzer is null)
                 return null;
+            disposer.Collect(analyzer);
 
             effect = new DirectionalColorKeyCustomEffect(devices);
             if (!effect.IsEnabled)
