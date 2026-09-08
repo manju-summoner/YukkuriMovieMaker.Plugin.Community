@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Vortice.DXGI;
-using Vortice.Direct3D;
+using Vortice.Direct2D1;
 using Vortice.Direct3D11;
 using YukkuriMovieMaker.Commons;
 
@@ -21,7 +21,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
         readonly Dictionary<string, ID3D11ComputeShader> shaders = [];
         readonly ID3D11ShaderResourceView?[] resourceSlots = new ID3D11ShaderResourceView?[MaxResources];
         readonly ID3D11UnorderedAccessView?[] targetSlots = new ID3D11UnorderedAccessView?[MaxTargets];
-        readonly ID3D11Multithread multithread;
+        readonly ID2D1Multithread multithread;
         bool disposed;
 
         public ID3D11Device Device { get; }
@@ -37,12 +37,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
         {
             Device = devices.D3D.Device;
             Context = devices.D3D.DeviceContext;
-            multithread = devices.D3D.Multithread;
             // cs_5_0（シェーダーモデル 5.0）は機能レベル 11_0 から。
             // https://learn.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-devices-downlevel-intro
-            IsSupported = Device.FeatureLevel >= FeatureLevel.Level_11_0;
+            IsSupported = Device.FeatureLevel >= Vortice.Direct3D.FeatureLevel.Level_11_0;
             SupportsWritableSurface = Device.CheckFormatSupport(Format.B8G8R8A8_UNorm)
                 .HasFlag(FormatSupport.TypedUnorderedAccessView);
+
+            // D2D は自分の描画呼び出しの並びを D2D ファクトリのクリティカルセクションで守り、
+            // 下位の D3D デバイスのロックは呼び出しごとにしか取らない。D2D 管理外の生 D3D 呼び出しを
+            // 他スレッドの D2D 描画と直列化するには、D3D 側ではなく D2D 側のロックを取る必要がある。
+            // https://learn.microsoft.com/en-us/windows/win32/Direct2D/multi-threaded-direct2d-apps
+            multithread = devices.D2D.Factory.QueryInterface<ID2D1Multithread>();
+            disposer.Collect(multithread);
         }
 
         // ComputeGroup.hlsli の GROUP_X / GROUP_Y / LINEAR_GROUP_THREADS に一致させる。
@@ -104,11 +110,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             var resourceCount = resource2 is not null ? 3 : resource1 is not null ? 2 : 1;
             var targetCount = target1 is not null ? 2 : 1;
 
+            // 実体の用意は失敗しうるうえ、初回はリソースの読み込みを伴う。
+            // 控えを書く前、かつ D2D 描画を止める錠の外で済ませる。
+            var shader = GetShader(shaderName);
+
             // 控えの配列は個体で共有するため、書き換えは錠の内側だけで行う。
             using var scope = Enter();
-
-            // 実体の用意は失敗しうる。控えを書く前に済ませて、途中で抜けても残さない。
-            var shader = GetShader(shaderName);
 
             resourceSlots[0] = resource0;
             resourceSlots[1] = resource1;
@@ -169,9 +176,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
         internal readonly struct Scope : IDisposable
         {
-            readonly ID3D11Multithread multithread;
+            readonly ID2D1Multithread multithread;
 
-            public Scope(ID3D11Multithread multithread)
+            public Scope(ID2D1Multithread multithread)
             {
                 this.multithread = multithread;
                 multithread.Enter();
