@@ -8,6 +8,7 @@ using Vortice.DXGI;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Plugin.Community.Commons.Compute;
 using YukkuriMovieMaker.Player.Video.Effects;
 using YukkuriMovieMaker.Plugin.Brush;
 using YukkuriMovieMaker.Player;
@@ -38,6 +39,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         ID2D1Image? finalMaskTransformOutput;
 
         ID2D1Bitmap1? finalMaskBitmap;
+        ComputeSurface? finalMaskSurface;
         int finalMaskWidth, finalMaskHeight;
 
         ID2D1Bitmap1? candidateBitmap;
@@ -359,9 +361,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             int seedIndex = ResolveSeedIndex(seedX, seedY, width, height);
             if (components == 0 || seedIndex < 0)
             {
-                Array.Clear(mask, 0, pixelCount);
                 EnsureFinalMaskBitmap(dc, width, height);
-                finalMaskBitmap!.CopyFromMemory<int>(mask, width * 4);
+                if (finalMaskSurface is not null)
+                {
+                    pipeline.ClearSurface(finalMaskSurface);
+                }
+                else
+                {
+                    Array.Clear(mask, 0, pixelCount);
+                    finalMaskBitmap!.CopyFromMemory<int>(mask, width * 4);
+                }
                 pipeline.InvalidateMatchCache();
                 return TransformFinalMask(bounds);
             }
@@ -372,12 +381,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
                 seedIndex,
                 (float)Math.Max(0, shapeThresholdRaw),
                 invert,
-                mask.AsSpan(0, pixelCount));
+                mask.AsSpan(0, pixelCount),
+                finalMaskSurface);
 
             if (!maskChanged)
                 return TransformFinalMask(bounds);
 
-            finalMaskBitmap!.CopyFromMemory<int>(mask, width * 4);
+            if (finalMaskSurface is null)
+                finalMaskBitmap!.CopyFromMemory<int>(mask, width * 4);
+
             return TransformFinalMask(bounds);
         }
 
@@ -521,12 +533,27 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             if (finalMaskBitmap is not null && finalMaskWidth == width && finalMaskHeight == height)
                 return;
 
+            if (finalMaskSurface is not null)
+                finalMaskBitmap = null;
+
+            disposer.RemoveAndDispose(ref finalMaskSurface);
             disposer.RemoveAndDispose(ref finalMaskBitmap);
-            var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied);
-            finalMaskBitmap = dc.CreateBitmap(
-                new SizeI(width, height),
-                new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.None));
-            disposer.Collect(finalMaskBitmap);
+
+            // 型付き UAV 書き込みに対応する環境では、マスクを D2D ビットマップと同じテクスチャへ直接書く。
+            if (pipeline.SupportsWritableSurface)
+            {
+                finalMaskSurface = pipeline.CreateSurface(dc, width, height, true);
+                disposer.Collect(finalMaskSurface);
+                finalMaskBitmap = finalMaskSurface.Bitmap;
+            }
+            else
+            {
+                var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied);
+                finalMaskBitmap = dc.CreateBitmap(
+                    new SizeI(width, height),
+                    new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.None));
+                disposer.Collect(finalMaskBitmap);
+            }
             finalMaskWidth = width;
             finalMaskHeight = height;
         }

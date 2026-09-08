@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Plugin.Community.Commons.Compute;
 
@@ -48,6 +49,18 @@ internal sealed class FillSametypePipeline : IDisposable
     }
 
     public bool IsSupported => device.IsSupported;
+
+    public bool SupportsWritableSurface => ComputeSurface.IsWritableFormatSupported(device);
+
+    public ComputeSurface CreateSurface(ID2D1DeviceContext dc, int width, int height, bool writable)
+        => new(device, dc, width, height, writable);
+
+    public void ClearSurface(ComputeSurface target)
+    {
+        using var scope = device.Enter();
+
+        device.Context.ClearUnorderedAccessView(target.Uav, new System.Numerics.Vector4(0f, 0f, 0f, 0f));
+    }
 
     public bool IsForeground(int index)
     {
@@ -110,7 +123,7 @@ internal sealed class FillSametypePipeline : IDisposable
         return componentCount;
     }
 
-    public bool GenerateMask(int seedIndex, float threshold, bool invert, Span<int> maskResult)
+    public bool GenerateMask(int seedIndex, float threshold, bool invert, Span<int> maskResult, ComputeSurface? target)
     {
         if (componentCount == 0
             || labelBuffer is null
@@ -161,7 +174,17 @@ internal sealed class FillSametypePipeline : IDisposable
                 ComputeShaderDevice.GroupCount(width, 8),
                 ComputeShaderDevice.GroupCount(height, 8));
 
-            maskBuffer.Readback(maskResult);
+            if (target is not null)
+            {
+                constants.Update(new SurfaceConstants(width, height));
+                device.Dispatch("PackedBufferToSurfaceCS", constants.Buffer, [maskBuffer.Srv], [target.Uav],
+                    ComputeShaderDevice.GroupCount(width, 8),
+                    ComputeShaderDevice.GroupCount(height, 8));
+            }
+            else
+            {
+                maskBuffer.Readback(maskResult);
+            }
         }
 
         return true;
@@ -391,6 +414,9 @@ internal sealed class FillSametypePipeline : IDisposable
         maskBuffer = null;
         device.Dispose();
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    readonly record struct SurfaceConstants(int Width, int Height);
 
     [StructLayout(LayoutKind.Sequential)]
     readonly record struct ClearConstants(int GridWidth, int BufferLength);
