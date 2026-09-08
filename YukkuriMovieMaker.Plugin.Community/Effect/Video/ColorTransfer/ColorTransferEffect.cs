@@ -18,7 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
 
         [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferReference), Description = nameof(Texts.ColorTransferReferenceDescription), Order = 0, ResourceType = typeof(Texts))]
         [EnumComboBox]
-        public ColorTransferReference Reference { get => _reference; set => Set(ref _reference, value, nameof(Reference), nameof(IsTimeOffsetAvailable)); }
+        public ColorTransferReference Reference { get => _reference; set => Set(ref _reference, value); }
         private ColorTransferReference _reference = ColorTransferReference.Timeline;
 
         [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferScene), Description = nameof(Texts.ColorTransferSceneDescription), Order = 1, ResourceType = typeof(Texts))]
@@ -30,22 +30,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
         [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferFilePath), Description = nameof(Texts.ColorTransferFilePathDescription), Order = 2, ResourceType = typeof(Texts))]
         [FileSelector(FileGroupType.Texture, ShowThumbnail = true)]
         [ShowPropertyEditorWhen(nameof(Reference), ColorTransferReference.File)]
-        public string FilePath { get => _filePath; set => Set(ref _filePath, value ?? string.Empty, nameof(FilePath), nameof(IsTimeOffsetAvailable)); }
+        public string FilePath { get => _filePath; set => Set(ref _filePath, value ?? string.Empty); }
         private string _filePath = string.Empty;
-
-        [Newtonsoft.Json.JsonIgnore]
-        public bool IsTimeOffsetAvailable => _reference switch
-        {
-            ColorTransferReference.Timeline or ColorTransferReference.Scene => true,
-            ColorTransferReference.File => (FileSettings.Default.FileExtensions.GetFileType(_filePath) & FileType.動画) != 0,
-            _ => false,
-        };
 
         [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferTimeOffset), Description = nameof(Texts.ColorTransferTimeOffsetDescription), Order = 3, ResourceType = typeof(Texts))]
         [TimeSpanRange]
         [TimeSpanDefaultValue]
         [TimeSpanEditor]
-        [ShowPropertyEditorWhen(nameof(IsTimeOffsetAvailable), true)]
+        [ColorTransferTimeOffsetVisible]
         public TimeSpan TimeOffset { get => _timeOffset; set => Set(ref _timeOffset, value); }
         private TimeSpan _timeOffset = TimeSpan.Zero;
 
@@ -126,7 +118,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             foreach (var resource in base.GetResources())
                 yield return resource;
 
-            var resourceType = (FileSettings.Default.FileExtensions.GetFileType(FilePath) & FileType.動画) != 0
+            var resourceType = ColorTransferFileKind.IsVideo(FilePath)
                 ? TimelineResourceType.Video
                 : TimelineResourceType.Image;
             if (TimelineResource.TryParseFromPath(FilePath, resourceType, out var fileResource))

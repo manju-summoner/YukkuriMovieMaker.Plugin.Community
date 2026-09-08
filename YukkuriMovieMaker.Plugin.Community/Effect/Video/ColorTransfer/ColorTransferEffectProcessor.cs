@@ -264,8 +264,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.ColorTransfer
             //先に試すソースは拡張子の分類（再生開始位置のUIやリソース一覧と同じ判定）で決める。
             //常に動画を先にすると image1.png のような連番静止画が連番動画として開かれて時間経過で別の画像を参照し、
             //常に画像を先にするとアニメーションGIFが先頭フレームで固定される
-            var isVideoExtension = (Settings.FileSettings.Default.FileExtensions.GetFileType(path) & Settings.FileType.動画) != 0;
-            if (isVideoExtension)
+            if (ColorTransferFileKind.IsVideo(path))
             {
                 if (!TryLoadVideo(path))
                     TryLoadImage(path);
