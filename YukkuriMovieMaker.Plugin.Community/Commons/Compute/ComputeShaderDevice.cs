@@ -107,13 +107,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
             // 控えの配列は個体で共有するため、書き換えは錠の内側だけで行う。
             using var scope = Enter();
 
+            // 実体の用意は失敗しうる。控えを書く前に済ませて、途中で抜けても残さない。
+            var shader = GetShader(shaderName);
+
             resourceSlots[0] = resource0;
             resourceSlots[1] = resource1;
             resourceSlots[2] = resource2;
             targetSlots[0] = target0;
             targetSlots[1] = target1;
 
-            Context.CSSetShader(GetShader(shaderName));
+            Context.CSSetShader(shader);
             Context.CSSetConstantBuffer(0, constants);
             Context.CSSetShaderResources(0, resourceCount, resourceSlots!);
             Context.CSSetUnorderedAccessViews(0, targetCount, targetSlots!);
