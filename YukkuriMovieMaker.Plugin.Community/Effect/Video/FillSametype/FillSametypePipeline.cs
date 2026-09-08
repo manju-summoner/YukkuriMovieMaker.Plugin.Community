@@ -64,9 +64,7 @@ internal sealed class FillSametypePipeline : IDisposable
             return;
         }
 
-        using var scope = device.Enter();
-
-        device.Context.ClearUnorderedAccessView(target.Uav, new System.Numerics.Vector4(0f, 0f, 0f, 0f));
+        target.Clear();
     }
 
     public void CopyMaskTo(ID2D1Bitmap1 bitmap, int width)

@@ -2,6 +2,7 @@ using System;
 using Vortice.DXGI;
 using Vortice.Direct2D1;
 using Vortice.Direct3D11;
+using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using AlphaMode = Vortice.DCommon.AlphaMode;
 using PixelFormat = Vortice.DCommon.PixelFormat;
@@ -11,6 +12,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
     internal sealed class ComputeSurface : IDisposable
     {
         readonly DisposeCollector disposer = new();
+        readonly ComputeShaderDevice device;
         readonly ID3D11UnorderedAccessView? uav;
         bool disposed;
 
@@ -21,6 +23,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
 
         public ComputeSurface(ComputeShaderDevice device, ID2D1DeviceContext dc, int width, int height, bool writable)
         {
+            this.device = device;
             var bindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource;
             if (writable)
                 bindFlags |= BindFlags.UnorderedAccess;
@@ -55,6 +58,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons.Compute
                 96f,
                 BitmapOptions.Target));
             disposer.Collect(Bitmap);
+        }
+
+        public void Clear()
+        {
+            using var scope = device.Enter();
+
+            device.Context.ClearUnorderedAccessView(Uav, new Color4(0f, 0f, 0f, 0f));
         }
 
         public void Dispose()
