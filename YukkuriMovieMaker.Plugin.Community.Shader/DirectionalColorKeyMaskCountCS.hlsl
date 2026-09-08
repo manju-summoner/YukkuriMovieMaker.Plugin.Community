@@ -2,9 +2,6 @@
 
 cbuffer _ : register(b0)
 {
-    uint __x;
-    uint __y;
-    uint __z;
     int width;
     int height;
 }

@@ -2,9 +2,6 @@
 
 cbuffer _ : register(b0)
 {
-    uint __x;
-    uint __y;
-    uint __z;
     int reach;
     int width;
     int height;
@@ -17,26 +14,23 @@ RWStructuredBuffer<int> target : register(u1);
 [numthreads(GROUP_X, GROUP_Y, GROUP_Z)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID)
 {
-    if (dispatchThreadId.x < __x && dispatchThreadId.y < __y && dispatchThreadId.z < __z)
+    int x = dispatchThreadId.x;
+    int y = dispatchThreadId.y;
+    if (x >= width || y >= height)
+        return;
+    int row = y * width;
+    int value = 0;
+    for (int dx = -reach; dx <= reach; dx++)
     {
-        int x = dispatchThreadId.x;
-        int y = dispatchThreadId.y;
-        if (x >= width || y >= height)
-            return;
-        int row = y * width;
-        int value = 0;
-        for (int dx = -reach; dx <= reach; dx++)
+        int sx = x + dx;
+        if (sx < 0 || sx >= width)
+            continue;
+        if (source[row + sx] != 0)
         {
-            int sx = x + dx;
-            if (sx < 0 || sx >= width)
-                continue;
-            if (source[row + sx] != 0)
-            {
-                value = 1;
-                break;
-            }
+            value = 1;
+            break;
         }
-
-        target[row + x] = value;
     }
+
+    target[row + x] = value;
 }

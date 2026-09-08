@@ -2,9 +2,6 @@
 
 cbuffer _ : register(b0)
 {
-    uint __x;
-    uint __y;
-    uint __z;
     int width;
     int height;
 }
@@ -18,13 +15,10 @@ RWStructuredBuffer<int> seedMask : register(u1);
 [numthreads(GROUP_X, GROUP_Y, GROUP_Z)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID)
 {
-    if (dispatchThreadId.x < __x && dispatchThreadId.y < __y && dispatchThreadId.z < __z)
-    {
-        int x = dispatchThreadId.x;
-        int y = dispatchThreadId.y;
-        if (x >= width || y >= height)
-            return;
-        int index = y * width + x;
-        seedMask[index] = bgra[index] != previousBgra[index] ? 1 : 0;
-    }
+    int x = dispatchThreadId.x;
+    int y = dispatchThreadId.y;
+    if (x >= width || y >= height)
+        return;
+    int index = y * width + x;
+    seedMask[index] = bgra[index] != previousBgra[index] ? 1 : 0;
 }
