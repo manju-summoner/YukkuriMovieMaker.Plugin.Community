@@ -3,7 +3,7 @@ using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Interfaces;
 
 namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Rendering;
 
-internal sealed class GpuChunkedRenderer : IMidiRenderer
+internal sealed class ChunkedRenderer : IMidiRenderer
 {
     private readonly IMidiRenderer _baseRenderer;
     private readonly MidiPluginSettings _settings;
@@ -16,7 +16,7 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
     private readonly Lock _renderLock = new();
     private bool _disposed;
 
-    public GpuChunkedRenderer(IMidiRenderer baseRenderer, MidiPluginSettings settings)
+    public ChunkedRenderer(IMidiRenderer baseRenderer, MidiPluginSettings settings)
     {
         _baseRenderer = baseRenderer;
         _settings = settings;
@@ -94,7 +94,7 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
 
             var processedChunk = new float[read];
             
-            if (_settings.Performance.EnableGpuAcceleration)
+            if (_settings.Performance.EnableChunkedProcessing)
             {
                 if (_historySamples > 0)
                 {
