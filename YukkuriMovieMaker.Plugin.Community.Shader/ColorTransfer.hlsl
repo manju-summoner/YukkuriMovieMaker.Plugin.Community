@@ -72,16 +72,22 @@ float3 OklabToLinear(float3 lab)
 
 float3 SampleTransfer(float3 lab)
 {
-    float3 position = saturate((lab - domainMin) * domainScale) * (float)(LUT_SIZE - 1);
-    float3 lowIndex = floor(position);
-    float3 weight = position - lowIndex;
+    float3 position = (lab - domainMin) * domainScale * (float)(LUT_SIZE - 1);
+    float3 clamped = clamp(position, 0.0f, (float)(LUT_SIZE - 1));
+    float3 lowIndex = min(floor(clamped), (float)(LUT_SIZE - 2));
+    float3 weight = clamped - lowIndex;
 
     int3 i0 = (int3)lowIndex;
-    int3 i1 = min(i0 + 1, LUT_SIZE - 1);
+    int3 i1 = i0 + 1;
 
     float3 low = float3(transferLut[i0.x].x, transferLut[i0.y].y, transferLut[i0.z].z);
     float3 high = float3(transferLut[i1.x].x, transferLut[i1.y].y, transferLut[i1.z].z);
-    return lerp(low, high, weight);
+
+    // The LUT domain comes from the min/max of the downscaled analysis image, so colors that the
+    // analysis missed (thin bright lines etc.) fall outside it. Clamping them to the end points
+    // flattens their tones, so extrapolate linearly with the slope of the end segment instead.
+    float3 outside = position - clamped;
+    return low + (high - low) * (weight + outside);
 }
 
 float3 SampleLocalDelta(float2 uv)
