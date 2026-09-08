@@ -10,21 +10,19 @@ internal sealed class AudioEffectProcessor(EffectsSettings effects, int sampleRa
     private readonly EffectsSettings _effects = effects;
     private readonly int _sampleRate = sampleRate;
 
-    public bool ApplyEffects(Span<float> buffer, float limiterThreshold, bool enableCompression, float compressionThreshold, float compressionRatio)
+    public void ApplyEffects(Span<float> buffer)
     {
         if (buffer.IsEmpty)
-            return false;
+            return;
 
-        if (enableCompression)
-            Compress(buffer, compressionThreshold, compressionRatio);
+        if (_effects.EnableCompression)
+            Compress(buffer, _effects.CompressionThreshold, _effects.CompressionRatio);
 
-        if (limiterThreshold > 0f)
-            Limit(buffer, limiterThreshold);
+        if (_effects.EnableLimiter && _effects.LimiterThreshold > 0f)
+            Limit(buffer, _effects.LimiterThreshold);
 
         if (_effects.EnableReverb)
             Reverb(buffer, (int)(_effects.ReverbDecay * _sampleRate) * 2);
-
-        return true;
     }
 
     private static void Compress(Span<float> buffer, float threshold, float ratio)

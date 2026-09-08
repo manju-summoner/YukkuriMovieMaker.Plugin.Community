@@ -111,12 +111,7 @@ internal sealed class ChunkedRenderer : IMidiRenderer
 
                     if (_settings.Effects.EnableEffects)
                     {
-                        _effectProcessor.ApplyEffects(
-                            workBuffer.AsSpan(),
-                            _settings.Effects.EnableLimiter ? _settings.Effects.LimiterThreshold : 0f,
-                            _settings.Effects.EnableCompression,
-                            _settings.Effects.CompressionThreshold,
-                            _settings.Effects.CompressionRatio);
+                        _effectProcessor.ApplyEffects(workBuffer.AsSpan());
                     }
 
                     workBuffer.AsSpan(_historySamples, read).CopyTo(processedChunk);
@@ -126,12 +121,7 @@ internal sealed class ChunkedRenderer : IMidiRenderer
                     rawChunk.CopyTo(processedChunk, 0);
                     if (_settings.Effects.EnableEffects)
                     {
-                        _effectProcessor.ApplyEffects(
-                            processedChunk.AsSpan(),
-                            _settings.Effects.EnableLimiter ? _settings.Effects.LimiterThreshold : 0f,
-                            _settings.Effects.EnableCompression,
-                            _settings.Effects.CompressionThreshold,
-                            _settings.Effects.CompressionRatio);
+                        _effectProcessor.ApplyEffects(processedChunk.AsSpan());
                     }
                 }
             }
