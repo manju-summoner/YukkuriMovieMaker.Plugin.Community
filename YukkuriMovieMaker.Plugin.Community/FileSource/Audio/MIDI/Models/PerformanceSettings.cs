@@ -11,7 +11,6 @@ public class PerformanceSettings : INotifyPropertyChanged
     private int _maxPolyphony = 256;
     public int MaxPolyphony { get => _maxPolyphony; set => SetField(ref _maxPolyphony, value); }
 
-
     public event PropertyChangedEventHandler? PropertyChanged;
 
     protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

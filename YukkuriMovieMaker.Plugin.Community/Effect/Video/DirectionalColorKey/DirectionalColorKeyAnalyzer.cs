@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
