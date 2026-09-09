@@ -11,9 +11,6 @@ public class PerformanceSettings : INotifyPropertyChanged
     private int _maxPolyphony = 256;
     public int MaxPolyphony { get => _maxPolyphony; set => SetField(ref _maxPolyphony, value); }
 
-    private bool _enableGpuAcceleration = true;
-    public bool EnableGpuAcceleration { get => _enableGpuAcceleration; set => SetField(ref _enableGpuAcceleration, value); }
-
     public event PropertyChangedEventHandler? PropertyChanged;
 
     protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

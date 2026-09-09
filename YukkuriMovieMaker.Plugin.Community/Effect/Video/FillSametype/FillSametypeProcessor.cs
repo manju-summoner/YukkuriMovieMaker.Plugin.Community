@@ -8,6 +8,7 @@ using Vortice.DXGI;
 using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Plugin.Community.Commons.Compute;
 using YukkuriMovieMaker.Player.Video.Effects;
 using YukkuriMovieMaker.Plugin.Brush;
 using YukkuriMovieMaker.Player;
@@ -38,6 +39,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         ID2D1Image? finalMaskTransformOutput;
 
         ID2D1Bitmap1? finalMaskBitmap;
+        ComputeSurface? finalMaskSurface;
+        ID2D1Bitmap1? FinalMask => finalMaskSurface?.Bitmap ?? finalMaskBitmap;
         int finalMaskWidth, finalMaskHeight;
 
         ID2D1Bitmap1? candidateBitmap;
@@ -48,9 +51,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         ID2D1Bitmap1? seedStagingBitmap;
         readonly byte[] seedPixel = new byte[4];
 
-        readonly FillSametypePipeline pipeline = new();
+        readonly FillSametypePipeline pipeline;
         int[]? foregroundBuffer;
-        int[]? maskBuffer;
         int bufferPixelCount;
 
         bool isFirst = true;
@@ -68,6 +70,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         {
             this.devices = devices;
             this.item = item;
+            pipeline = new FillSametypePipeline(devices);
 
             transparentBrush = devices.DeviceContext.CreateSolidColorBrush(new Color4(0f, 0f, 0f, 0f));
             disposer.Collect(transparentBrush);
@@ -148,7 +151,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             if (IsPassThroughEffect || outputEffect is null || input is null)
                 return effectDescription.DrawDescription;
 
-            if (colorMatchEffect is null || colorMatchOutput is null || alphaMaskEffect is null || opacityEffect is null)
+            if (!pipeline.IsSupported || colorMatchEffect is null || colorMatchOutput is null || alphaMaskEffect is null || opacityEffect is null)
             {
                 outputEffect.SetInput(0, input, true);
                 return effectDescription.DrawDescription;
@@ -329,8 +332,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             int frame)
         {
             int pixelCount = width * height;
-            var mask = EnsureBuffers(pixelCount).Mask;
-
             Vector4 matchColor = ReadSeedColor(dc, bounds, width, height, x, y, out int seedX, out int seedY);
 
             bool foregroundChanged = isFirst
@@ -358,9 +359,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             int seedIndex = ResolveSeedIndex(seedX, seedY, width, height);
             if (components == 0 || seedIndex < 0)
             {
-                Array.Clear(mask, 0, pixelCount);
                 EnsureFinalMaskBitmap(dc, width, height);
-                finalMaskBitmap!.CopyFromMemory<int>(mask, width * 4);
+                pipeline.ClearMask(finalMaskSurface);
+                if (finalMaskSurface is null)
+                    pipeline.CopyMaskTo(finalMaskBitmap!, width);
                 pipeline.InvalidateMatchCache();
                 return TransformFinalMask(bounds);
             }
@@ -371,12 +373,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
                 seedIndex,
                 (float)Math.Max(0, shapeThresholdRaw),
                 invert,
-                mask.AsSpan(0, pixelCount));
+                finalMaskSurface);
 
             if (!maskChanged)
                 return TransformFinalMask(bounds);
 
-            finalMaskBitmap!.CopyFromMemory<int>(mask, width * 4);
+            if (finalMaskSurface is null)
+                pipeline.CopyMaskTo(finalMaskBitmap!, width);
+
             return TransformFinalMask(bounds);
         }
 
@@ -398,11 +402,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
 
         ID2D1Image? TransformFinalMask(RawRectF bounds)
         {
-            if (finalMaskTransform is null || finalMaskTransformOutput is null || finalMaskBitmap is null)
-                return finalMaskBitmap;
+            var mask = FinalMask;
+            if (finalMaskTransform is null || finalMaskTransformOutput is null || mask is null)
+                return mask;
 
             finalMaskTransform.TransformMatrix = Matrix3x2.CreateTranslation(bounds.Left, bounds.Top);
-            finalMaskTransform.SetInput(0, finalMaskBitmap, true);
+            finalMaskTransform.SetInput(0, mask, true);
             return finalMaskTransformOutput;
         }
 
@@ -483,7 +488,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
         int[] RenderForegroundToBuffer(ID2D1DeviceContext dc, RawRectF bounds, int width, int height)
         {
             EnsureCandidateBitmaps(dc, width, height);
-            var foreground = EnsureBuffers(width * height).Foreground;
+            var foreground = EnsureForegroundBuffer(width * height);
 
             var previousTarget = dc.Target;
             dc.Target = candidateBitmap;
@@ -517,15 +522,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
 
         void EnsureFinalMaskBitmap(ID2D1DeviceContext dc, int width, int height)
         {
-            if (finalMaskBitmap is not null && finalMaskWidth == width && finalMaskHeight == height)
+            if (FinalMask is not null && finalMaskWidth == width && finalMaskHeight == height)
                 return;
 
+            disposer.RemoveAndDispose(ref finalMaskSurface);
             disposer.RemoveAndDispose(ref finalMaskBitmap);
-            var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied);
-            finalMaskBitmap = dc.CreateBitmap(
-                new SizeI(width, height),
-                new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.None));
-            disposer.Collect(finalMaskBitmap);
+
+            if (pipeline.SupportsWritableSurface)
+            {
+                finalMaskSurface = pipeline.CreateSurface(dc, width, height, true);
+                disposer.Collect(finalMaskSurface);
+            }
+            else
+            {
+                var pixelFormat = new PixelFormat(Format.B8G8R8A8_UNorm, Vortice.DCommon.AlphaMode.Premultiplied);
+                finalMaskBitmap = dc.CreateBitmap(
+                    new SizeI(width, height),
+                    new BitmapProperties1(pixelFormat, 96f, 96f, BitmapOptions.None));
+                disposer.Collect(finalMaskBitmap);
+            }
             finalMaskWidth = width;
             finalMaskHeight = height;
         }
@@ -577,16 +592,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.FillSametype
             disposer.Collect(seedStagingBitmap);
         }
 
-        (int[] Foreground, int[] Mask) EnsureBuffers(int pixelCount)
+        int[] EnsureForegroundBuffer(int pixelCount)
         {
             if (bufferPixelCount < pixelCount)
             {
                 foregroundBuffer = new int[pixelCount];
-                maskBuffer = new int[pixelCount];
                 bufferPixelCount = pixelCount;
             }
 
-            return (foregroundBuffer!, maskBuffer!);
+            return foregroundBuffer!;
         }
+
     }
 }

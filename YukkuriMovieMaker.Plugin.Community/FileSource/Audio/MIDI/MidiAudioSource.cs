@@ -58,10 +58,7 @@ public sealed class MidiAudioSource : IAudioFileSource
         var sfProvider = new SoundFontResolverService(settings.SoundFont);
         var baseRenderer = CreateBaseRenderer(filePath, settings, sfProvider);
 
-        if (settings.Performance.EnableGpuAcceleration)
-            return new GpuChunkedRenderer(baseRenderer, settings);
-
-        return baseRenderer;
+        return new ChunkedRenderer(baseRenderer, settings);
     }
 
     private static IMidiRenderer CreateBaseRenderer(string filePath, MidiPluginSettings settings, SoundFontResolverService sfProvider)

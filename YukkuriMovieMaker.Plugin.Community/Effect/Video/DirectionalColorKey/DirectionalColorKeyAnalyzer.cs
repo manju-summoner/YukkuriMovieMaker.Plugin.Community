@@ -1,30 +1,34 @@
 using System.Numerics;
-using ComputeSharp;
+using System.Runtime.InteropServices;
+using Vortice.Direct2D1;
+using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Plugin.Community.Commons.Compute;
 
 namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 {
     internal sealed class DirectionalColorKeyAnalyzer : IDisposable
     {
-        private readonly GraphicsDevice device;
+        private readonly ComputeShaderDevice device;
+        private readonly ComputeConstantBuffer constants;
 
-        private ReadOnlyBuffer<int>? bgraBuffer;
-        private ReadWriteBuffer<int>? previousBgraBuffer;
-        private ReadWriteBuffer<float>? colorLabBuffer;
-        private ReadWriteBuffer<float>? directionBufferA;
-        private ReadWriteBuffer<float>? directionBufferB;
-        private ReadWriteBuffer<float>? previousResultBuffer;
-        private ReadWriteBuffer<int>? maskBufferA;
-        private ReadWriteBuffer<int>? maskBufferB;
-        private ReadWriteBuffer<int>? adoptMaskBuffer;
-        private ReadWriteBuffer<int>? computeMaskBuffer;
-        private ReadOnlyBuffer<float>? centerBuffer;
-        private ReadWriteBuffer<int>? accumBuffer;
-        private ReadWriteBuffer<int>? countBuffer;
-        private ReadWriteBuffer<int>? histogramBuffer;
-        private ReadWriteBuffer<int>? foregroundBufferA;
-        private ReadWriteBuffer<int>? foregroundBufferB;
-        private ReadWriteBuffer<int>? validBufferA;
-        private ReadWriteBuffer<int>? validBufferB;
+        private ComputeBuffer<int>? bgraBuffer;
+        private ComputeBuffer<int>? previousBgraBuffer;
+        private ComputeBuffer<float>? colorLabBuffer;
+        private ComputeBuffer<float>? directionBufferA;
+        private ComputeBuffer<float>? directionBufferB;
+        private ComputeBuffer<float>? previousResultBuffer;
+        private ComputeBuffer<int>? maskBufferA;
+        private ComputeBuffer<int>? maskBufferB;
+        private ComputeBuffer<int>? adoptMaskBuffer;
+        private ComputeBuffer<int>? computeMaskBuffer;
+        private ComputeBuffer<float>? centerBuffer;
+        private ComputeBuffer<int>? accumBuffer;
+        private ComputeBuffer<int>? countBuffer;
+        private ComputeBuffer<int>? histogramBuffer;
+        private ComputeBuffer<int>? foregroundBufferA;
+        private ComputeBuffer<int>? foregroundBufferB;
+        private ComputeBuffer<int>? validBufferA;
+        private ComputeBuffer<int>? validBufferB;
         private int[]? foregroundReadback;
 
         private int width;
@@ -53,9 +57,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private readonly int[] histogram = new int[MaxClusters * ProjectionBins];
         private readonly float[] lambdas = new float[MaxClusters];
         private readonly float[] prevLambdas = new float[MaxClusters];
-        private readonly int[] zeroAccumulators = new int[MaxClusters * 3 + MaxClusters];
-        private readonly int[] zeroCounts = new int[MaxClusters];
-        private readonly int[] zeroHistogram = new int[MaxClusters * ProjectionBins];
 
         private int clusterCount = 1;
         private bool hasWarmStart;
@@ -67,26 +68,49 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         private int lastBackgroundLabYBits;
         private int lastBackgroundLabZBits;
 
-        private DirectionalColorKeyAnalyzer(GraphicsDevice device)
+        private DirectionalColorKeyAnalyzer(IGraphicsDevicesAndContext devices)
         {
-            this.device = device;
+            device = new ComputeShaderDevice(devices);
+            constants = new ComputeConstantBuffer(device, 64);
         }
 
-        // ComputeSharp の既定デバイスを取得できない環境（GPU 非対応など）では例外になるため、
-        // 生成に失敗したときは null を返し、呼び出し側でエフェクトをパススルーさせる。
-        public static DirectionalColorKeyAnalyzer? TryCreate()
+        public static DirectionalColorKeyAnalyzer? TryCreate(IGraphicsDevicesAndContext devices)
         {
-            try
-            {
-                return new DirectionalColorKeyAnalyzer(GraphicsDevice.GetDefault());
-            }
-            catch
-            {
-                return null;
-            }
+            var analyzer = new DirectionalColorKeyAnalyzer(devices);
+            if (analyzer.device.IsSupported)
+                return analyzer;
+
+            analyzer.Dispose();
+            return null;
         }
 
         public int ClusterCount => clusterCount;
+
+        public bool SupportsWritableSurface => device.SupportsWritableSurface;
+
+        public ComputeSurface CreateSurface(ID2D1DeviceContext dc, int width, int height, bool writable)
+            => new(device, dc, width, height, writable);
+
+        // compare が真のとき、前フレームとの変化画素数を返す。
+        public int UpdateSource(ComputeSurface source, int width, int height, bool compare)
+        {
+            EnsureCapacity(width, height);
+
+            var bgraGpu = EnsureBgraBuffer();
+            var countGpu = EnsureCountBuffer();
+            countGpu.Clear(1);
+
+            constants.Update(new SourceToBufferConstants(width, height, compare ? 1 : 0));
+            device.Dispatch("DirectionalColorKeySourceToBufferCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                source.Srv, bgraGpu.Uav, countGpu.Uav);
+
+            if (!compare)
+                return pixelCount;
+
+            countGpu.Readback(counts.AsSpan(0, 1));
+            return counts[0];
+        }
 
         public Vector3 GetCenter(int cluster)
             => new(centers[cluster * 3 + 0], centers[cluster * 3 + 1], centers[cluster * 3 + 2]);
@@ -94,7 +118,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         public float GetLambda(int cluster) => lambdas[cluster];
 
         public void Analyze(
-            ReadOnlySpan<int> bgra,
             int width,
             int height,
             Vector3 backgroundLab,
@@ -128,12 +151,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             var directionGpu = EnsureDirectionBufferA();
             var directionScratch = EnsureDirectionBufferB();
 
-            bgraGpu.CopyFrom(bgra[..pixelCount]);
-
-            device.For(width, height, new DisplacementFieldShader(
-                bgraGpu, colorLabGpu, directionGpu,
-                backgroundLab.X, backgroundLab.Y, backgroundLab.Z,
-                noiseThreshold, width, height));
+            constants.Update(new DisplacementFieldConstants(
+                backgroundLab.X, backgroundLab.Y, backgroundLab.Z, noiseThreshold, width, height));
+            device.Dispatch("DirectionalColorKeyDisplacementFieldCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                bgraGpu.Srv, colorLabGpu.Uav, directionGpu.Uav);
 
             float sigmaColorSq = 2f * sigmaColor * sigmaColor;
 
@@ -144,27 +166,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 && backgroundLabYBits == lastBackgroundLabYBits
                 && backgroundLabZBits == lastBackgroundLabZBits;
 
-            ReadWriteBuffer<float> smoothedDirections;
+            ComputeBuffer<float> smoothedDirections;
 
             if (!canReuse || !TryRunIncrementalSmooth(
-                bgra, directionGpu, directionScratch, colorLabGpu, sigmaColorSq, out smoothedDirections))
+                directionGpu, directionScratch, colorLabGpu, sigmaColorSq, out smoothedDirections))
             {
                 var smoothSource = directionGpu;
                 var smoothTarget = directionScratch;
 
                 for (int iteration = 0; iteration < SmoothIterations; iteration++)
                 {
-                    device.For(width, height, new DirectionSmoothShader(
-                        smoothSource, colorLabGpu, smoothTarget, sigmaColorSq, width, height));
+                    constants.Update(new DirectionSmoothConstantsBuffer(sigmaColorSq, width, height));
+                    device.Dispatch("DirectionalColorKeyDirectionSmoothCS", constants.Buffer,
+                        ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                        smoothSource.Srv, colorLabGpu.Srv, smoothTarget.Uav);
                     (smoothSource, smoothTarget) = (smoothTarget, smoothSource);
                 }
 
                 smoothedDirections = smoothSource;
             }
 
-            device.For(width, height, new CopyDirectionsShader(
-                smoothedDirections, EnsurePreviousResultBuffer(), width, height));
-            EnsurePreviousBgraBuffer().CopyFrom(bgra[..pixelCount]);
+            constants.Update(new SizeConstants(width, height));
+            device.Dispatch("DirectionalColorKeyCopyDirectionsCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                smoothedDirections.Srv, EnsurePreviousResultBuffer().Uav);
+            EnsurePreviousBgraBuffer().CopyFrom(bgraGpu);
             hasPreviousResult = true;
             lastNoiseThresholdBits = noiseThresholdBits;
             lastSigmaColorBits = sigmaColorBits;
@@ -181,13 +207,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
             for (int iteration = 0; iteration < LloydIterations; iteration++)
             {
-                centerGpu.CopyFrom(centers.AsSpan(0, clusterCount * 3));
-                accumGpu.CopyFrom(zeroAccumulators.AsSpan(0, accumLength));
+                centerGpu.Upload(centers.AsSpan(0, clusterCount * 3));
+                accumGpu.Clear(accumLength);
 
-                device.For(width, height, new ClusterAssignAccumulateShader(
-                    smoothedDirections, centerGpu, accumGpu, clusterCount, FixedPointScale, width, height));
+                constants.Update(new ClusterAssignConstants(clusterCount, FixedPointScale, width, height));
+                device.Dispatch("DirectionalColorKeyClusterAssignAccumulateCS", constants.Buffer,
+                    ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                    smoothedDirections.Srv, centerGpu.Srv, accumGpu.Uav);
 
-                accumGpu.CopyTo(accumulators.AsSpan(0, accumLength));
+                accumGpu.Readback(accumulators.AsSpan(0, accumLength));
 
                 bool converged = UpdateCenters(whiteDirection);
                 if (converged)
@@ -209,11 +237,29 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
 
         public ReadOnlySpan<int> BuildForegroundField(int width, int height, Vector3 backgroundLab, Vector3 backgroundSrgb)
         {
-            EnsureCapacity(width, height);
+            var field = RunForegroundField(width, height, backgroundLab, backgroundSrgb);
 
             foregroundReadback ??= new int[pixelCount];
             if (foregroundReadback.Length < pixelCount)
                 foregroundReadback = new int[pixelCount];
+
+            field.Readback(foregroundReadback.AsSpan(0, pixelCount));
+            return foregroundReadback.AsSpan(0, pixelCount);
+        }
+
+        public void BuildForegroundField(ComputeSurface target, int width, int height, Vector3 backgroundLab, Vector3 backgroundSrgb)
+        {
+            var field = RunForegroundField(width, height, backgroundLab, backgroundSrgb);
+
+            constants.Update(new SizeConstants(width, height));
+            device.Dispatch("PackedBufferToSurfaceCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                field.Srv, target.Uav);
+        }
+
+        private ComputeBuffer<int> RunForegroundField(int width, int height, Vector3 backgroundLab, Vector3 backgroundSrgb)
+        {
+            EnsureCapacity(width, height);
 
             float referencePerp = ComputeReferencePerp(backgroundLab);
 
@@ -224,25 +270,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             var foregroundTarget = EnsureForegroundBufferB();
             var validTarget = EnsureValidBufferB();
 
-            device.For(width, height, new ForegroundSeedShader(
-                bgraGpu, colorLabGpu, foregroundSource, validSource,
-                backgroundLab.X, backgroundLab.Y, backgroundLab.Z,
-                referencePerp, width, height));
+            constants.Update(new ForegroundSeedConstants(
+                backgroundLab.X, backgroundLab.Y, backgroundLab.Z, referencePerp, width, height));
+            device.Dispatch("DirectionalColorKeyForegroundSeedCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                bgraGpu.Srv, colorLabGpu.Srv, foregroundSource.Uav, validSource.Uav);
 
             for (int iteration = 0; iteration < PropagateIterations; iteration++)
             {
-                device.For(width, height, new ForegroundPropagateShader(
-                    foregroundSource, validSource, bgraGpu,
-                    foregroundTarget, validTarget,
-                    backgroundSrgb.X, backgroundSrgb.Y, backgroundSrgb.Z,
-                    PropagateReach, LineSigmaSquared, width, height));
+                constants.Update(new ForegroundPropagateConstants(
+                    backgroundSrgb.X, backgroundSrgb.Y, backgroundSrgb.Z, PropagateReach,
+                    LineSigmaSquared, width, height));
+                device.Dispatch("DirectionalColorKeyForegroundPropagateCS", constants.Buffer,
+                    ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                    foregroundSource.Srv, validSource.Srv, bgraGpu.Srv, foregroundTarget.Uav, validTarget.Uav);
 
                 (foregroundSource, foregroundTarget) = (foregroundTarget, foregroundSource);
                 (validSource, validTarget) = (validTarget, validSource);
             }
 
-            foregroundSource.CopyTo(foregroundReadback.AsSpan(0, pixelCount));
-            return foregroundReadback.AsSpan(0, pixelCount);
+            return foregroundSource;
         }
 
         private static float ComputeReferencePerp(Vector3 backgroundLab)
@@ -258,53 +305,52 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             return perp.Length();
         }
 
-        private ReadWriteBuffer<int> EnsureForegroundBufferA()
+        private ComputeBuffer<int> EnsureForegroundBufferA()
         {
             if (foregroundBufferA is null || foregroundBufferA.Length < pixelCount)
             {
                 foregroundBufferA?.Dispose();
-                foregroundBufferA = device.AllocateReadWriteBuffer<int>(pixelCount);
+                foregroundBufferA = new ComputeBuffer<int>(device, pixelCount, true);
             }
             return foregroundBufferA;
         }
 
-        private ReadWriteBuffer<int> EnsureForegroundBufferB()
+        private ComputeBuffer<int> EnsureForegroundBufferB()
         {
             if (foregroundBufferB is null || foregroundBufferB.Length < pixelCount)
             {
                 foregroundBufferB?.Dispose();
-                foregroundBufferB = device.AllocateReadWriteBuffer<int>(pixelCount);
+                foregroundBufferB = new ComputeBuffer<int>(device, pixelCount, true);
             }
             return foregroundBufferB;
         }
 
-        private ReadWriteBuffer<int> EnsureValidBufferA()
+        private ComputeBuffer<int> EnsureValidBufferA()
         {
             if (validBufferA is null || validBufferA.Length < pixelCount)
             {
                 validBufferA?.Dispose();
-                validBufferA = device.AllocateReadWriteBuffer<int>(pixelCount);
+                validBufferA = new ComputeBuffer<int>(device, pixelCount, true);
             }
             return validBufferA;
         }
 
-        private ReadWriteBuffer<int> EnsureValidBufferB()
+        private ComputeBuffer<int> EnsureValidBufferB()
         {
             if (validBufferB is null || validBufferB.Length < pixelCount)
             {
                 validBufferB?.Dispose();
-                validBufferB = device.AllocateReadWriteBuffer<int>(pixelCount);
+                validBufferB = new ComputeBuffer<int>(device, pixelCount, true);
             }
             return validBufferB;
         }
 
         private bool TryRunIncrementalSmooth(
-            ReadOnlySpan<int> bgra,
-            ReadWriteBuffer<float> rawDirections,
-            ReadWriteBuffer<float> scratchDirections,
-            ReadWriteBuffer<float> colorLabGpu,
+            ComputeBuffer<float> rawDirections,
+            ComputeBuffer<float> scratchDirections,
+            ComputeBuffer<float> colorLabGpu,
             float sigmaColorSq,
-            out ReadWriteBuffer<float> smoothedDirections)
+            out ComputeBuffer<float> smoothedDirections)
         {
             var bgraGpu = EnsureBgraBuffer();
             var previousBgraGpu = EnsurePreviousBgraBuffer();
@@ -314,12 +360,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             var computeMask = EnsureComputeMaskBuffer();
             var countGpu = EnsureCountBuffer();
 
-            device.For(width, height, new ChangeSeedShader(
-                bgraGpu, previousBgraGpu, seedScratch, width, height));
+            constants.Update(new SizeConstants(width, height));
+            device.Dispatch("DirectionalColorKeyChangeSeedCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                bgraGpu.Srv, previousBgraGpu.Srv, seedScratch.Uav);
 
-            countGpu.CopyFrom(zeroCounts.AsSpan(0, 1));
-            device.For(width, height, new MaskCountShader(seedScratch, countGpu, width, height));
-            countGpu.CopyTo(counts.AsSpan(0, 1));
+            countGpu.Clear(1);
+            constants.Update(new SizeConstants(width, height));
+            device.Dispatch("DirectionalColorKeyMaskCountCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                seedScratch.Srv, countGpu.Uav);
+            countGpu.Readback(counts.AsSpan(0, 1));
 
             if (counts[0] > (int)(pixelCount * IncrementalChangeCeiling))
             {
@@ -327,24 +378,40 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
                 return false;
             }
 
-            device.For(width, height, new DilateHorizontalShader(seedScratch, dilateScratch, AdoptReach, width, height));
-            device.For(width, height, new DilateVerticalShader(dilateScratch, adoptMask, AdoptReach, width, height));
+            constants.Update(new DilateConstants(AdoptReach, width, height));
+            device.Dispatch("DirectionalColorKeyDilateHorizontalCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                seedScratch.Srv, dilateScratch.Uav);
+            constants.Update(new DilateConstants(AdoptReach, width, height));
+            device.Dispatch("DirectionalColorKeyDilateVerticalCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                dilateScratch.Srv, adoptMask.Uav);
 
-            device.For(width, height, new DilateHorizontalShader(adoptMask, dilateScratch, GuardReach, width, height));
-            device.For(width, height, new DilateVerticalShader(dilateScratch, computeMask, GuardReach, width, height));
+            constants.Update(new DilateConstants(GuardReach, width, height));
+            device.Dispatch("DirectionalColorKeyDilateHorizontalCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                adoptMask.Srv, dilateScratch.Uav);
+            constants.Update(new DilateConstants(GuardReach, width, height));
+            device.Dispatch("DirectionalColorKeyDilateVerticalCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                dilateScratch.Srv, computeMask.Uav);
 
             var smoothSource = rawDirections;
             var smoothTarget = scratchDirections;
 
             for (int iteration = 0; iteration < SmoothIterations; iteration++)
             {
-                device.For(width, height, new RegionDirectionSmoothShader(
-                    smoothSource, colorLabGpu, smoothTarget, computeMask, sigmaColorSq, width, height));
+                constants.Update(new DirectionSmoothConstantsBuffer(sigmaColorSq, width, height));
+                device.Dispatch("DirectionalColorKeyRegionDirectionSmoothCS", constants.Buffer,
+                    ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                    smoothSource.Srv, colorLabGpu.Srv, computeMask.Srv, smoothTarget.Uav);
                 (smoothSource, smoothTarget) = (smoothTarget, smoothSource);
             }
 
-            device.For(width, height, new AdoptRegionShader(
-                smoothSource, EnsurePreviousResultBuffer(), adoptMask, width, height));
+            constants.Update(new SizeConstants(width, height));
+            device.Dispatch("DirectionalColorKeyAdoptRegionCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                EnsurePreviousResultBuffer().Srv, adoptMask.Srv, smoothSource.Uav);
 
             smoothedDirections = smoothSource;
             return true;
@@ -421,8 +488,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
         }
 
         private void ComputeLambdas(
-            ReadWriteBuffer<float> colorLabGpu,
-            ReadWriteBuffer<float> directionGpu,
+            ComputeBuffer<float> colorLabGpu,
+            ComputeBuffer<float> directionGpu,
             Vector3 backgroundLab,
             DirectionalColorKeyScaleMode scaleMode,
             float opaquePercentile,
@@ -446,17 +513,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             var centerGpu = EnsureCenterBuffer();
             var histogramGpu = EnsureHistogramBuffer();
 
-            centerGpu.CopyFrom(centers.AsSpan(0, clusterCount * 3));
-            histogramGpu.CopyFrom(zeroHistogram.AsSpan(0, clusterCount * ProjectionBins));
+            centerGpu.Upload(centers.AsSpan(0, clusterCount * 3));
+            histogramGpu.Clear(clusterCount * ProjectionBins);
 
             float projectionScale = ProjectionBins / ProjectionHistogramRange;
 
-            device.For(width, height, new ProjectionHistogramShader(
-                colorLabGpu, directionGpu, centerGpu, histogramGpu,
-                backgroundLab.X, backgroundLab.Y, backgroundLab.Z,
-                clusterCount, ProjectionBins, projectionScale, width, height));
+            constants.Update(new ProjectionHistogramConstants(
+                backgroundLab.X, backgroundLab.Y, backgroundLab.Z, clusterCount, ProjectionBins,
+                projectionScale, width, height));
+            device.Dispatch("DirectionalColorKeyProjectionHistogramCS", constants.Buffer,
+                ComputeShaderDevice.PixelGroups(width), ComputeShaderDevice.PixelGroups(height),
+                colorLabGpu.Srv, directionGpu.Srv, centerGpu.Srv, histogramGpu.Uav);
 
-            histogramGpu.CopyTo(histogram.AsSpan(0, clusterCount * ProjectionBins));
+            histogramGpu.Readback(histogram.AsSpan(0, clusterCount * ProjectionBins));
 
             float fraction = Math.Clamp(opaquePercentile, 0f, 1f);
 
@@ -517,127 +586,127 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             DisposeFrameBuffers();
         }
 
-        private ReadOnlyBuffer<int> EnsureBgraBuffer()
+        private ComputeBuffer<int> EnsureBgraBuffer()
         {
             if (bgraBuffer is null || bgraBuffer.Length < pixelCount)
             {
                 bgraBuffer?.Dispose();
-                bgraBuffer = device.AllocateReadOnlyBuffer<int>(pixelCount);
+                bgraBuffer = new ComputeBuffer<int>(device, pixelCount, true);
             }
             return bgraBuffer;
         }
 
-        private ReadWriteBuffer<int> EnsurePreviousBgraBuffer()
+        private ComputeBuffer<int> EnsurePreviousBgraBuffer()
         {
             if (previousBgraBuffer is null || previousBgraBuffer.Length < pixelCount)
             {
                 previousBgraBuffer?.Dispose();
-                previousBgraBuffer = device.AllocateReadWriteBuffer<int>(pixelCount);
+                previousBgraBuffer = new ComputeBuffer<int>(device, pixelCount, true);
             }
             return previousBgraBuffer;
         }
 
-        private ReadWriteBuffer<float> EnsurePreviousResultBuffer()
+        private ComputeBuffer<float> EnsurePreviousResultBuffer()
         {
             if (previousResultBuffer is null || previousResultBuffer.Length < pixelCount * 3)
             {
                 previousResultBuffer?.Dispose();
-                previousResultBuffer = device.AllocateReadWriteBuffer<float>(pixelCount * 3);
+                previousResultBuffer = new ComputeBuffer<float>(device, pixelCount * 3, true);
             }
             return previousResultBuffer;
         }
 
-        private ReadWriteBuffer<int> EnsureMaskBufferA()
+        private ComputeBuffer<int> EnsureMaskBufferA()
         {
             if (maskBufferA is null || maskBufferA.Length < pixelCount)
             {
                 maskBufferA?.Dispose();
-                maskBufferA = device.AllocateReadWriteBuffer<int>(pixelCount);
+                maskBufferA = new ComputeBuffer<int>(device, pixelCount, true);
             }
             return maskBufferA;
         }
 
-        private ReadWriteBuffer<int> EnsureMaskBufferB()
+        private ComputeBuffer<int> EnsureMaskBufferB()
         {
             if (maskBufferB is null || maskBufferB.Length < pixelCount)
             {
                 maskBufferB?.Dispose();
-                maskBufferB = device.AllocateReadWriteBuffer<int>(pixelCount);
+                maskBufferB = new ComputeBuffer<int>(device, pixelCount, true);
             }
             return maskBufferB;
         }
 
-        private ReadWriteBuffer<int> EnsureAdoptMaskBuffer()
+        private ComputeBuffer<int> EnsureAdoptMaskBuffer()
         {
             if (adoptMaskBuffer is null || adoptMaskBuffer.Length < pixelCount)
             {
                 adoptMaskBuffer?.Dispose();
-                adoptMaskBuffer = device.AllocateReadWriteBuffer<int>(pixelCount);
+                adoptMaskBuffer = new ComputeBuffer<int>(device, pixelCount, true);
             }
             return adoptMaskBuffer;
         }
 
-        private ReadWriteBuffer<int> EnsureComputeMaskBuffer()
+        private ComputeBuffer<int> EnsureComputeMaskBuffer()
         {
             if (computeMaskBuffer is null || computeMaskBuffer.Length < pixelCount)
             {
                 computeMaskBuffer?.Dispose();
-                computeMaskBuffer = device.AllocateReadWriteBuffer<int>(pixelCount);
+                computeMaskBuffer = new ComputeBuffer<int>(device, pixelCount, true);
             }
             return computeMaskBuffer;
         }
 
-        private ReadWriteBuffer<float> EnsureColorLabBuffer()
+        private ComputeBuffer<float> EnsureColorLabBuffer()
         {
             if (colorLabBuffer is null || colorLabBuffer.Length < pixelCount * 3)
             {
                 colorLabBuffer?.Dispose();
-                colorLabBuffer = device.AllocateReadWriteBuffer<float>(pixelCount * 3);
+                colorLabBuffer = new ComputeBuffer<float>(device, pixelCount * 3, true);
             }
             return colorLabBuffer;
         }
 
-        private ReadWriteBuffer<float> EnsureDirectionBufferA()
+        private ComputeBuffer<float> EnsureDirectionBufferA()
         {
             if (directionBufferA is null || directionBufferA.Length < pixelCount * 3)
             {
                 directionBufferA?.Dispose();
-                directionBufferA = device.AllocateReadWriteBuffer<float>(pixelCount * 3);
+                directionBufferA = new ComputeBuffer<float>(device, pixelCount * 3, true);
             }
             return directionBufferA;
         }
 
-        private ReadWriteBuffer<float> EnsureDirectionBufferB()
+        private ComputeBuffer<float> EnsureDirectionBufferB()
         {
             if (directionBufferB is null || directionBufferB.Length < pixelCount * 3)
             {
                 directionBufferB?.Dispose();
-                directionBufferB = device.AllocateReadWriteBuffer<float>(pixelCount * 3);
+                directionBufferB = new ComputeBuffer<float>(device, pixelCount * 3, true);
             }
             return directionBufferB;
         }
 
-        private ReadOnlyBuffer<float> EnsureCenterBuffer()
+        private ComputeBuffer<float> EnsureCenterBuffer()
         {
-            centerBuffer ??= device.AllocateReadOnlyBuffer<float>(MaxClusters * 3);
+            centerBuffer ??= new ComputeBuffer<float>(device, MaxClusters * 3, false);
             return centerBuffer;
         }
 
-        private ReadWriteBuffer<int> EnsureAccumBuffer()
+        private ComputeBuffer<int> EnsureAccumBuffer()
         {
-            accumBuffer ??= device.AllocateReadWriteBuffer<int>(MaxClusters * 3 + MaxClusters);
+            accumBuffer ??= new ComputeBuffer<int>(device, MaxClusters * 3 + MaxClusters, true);
             return accumBuffer;
         }
 
-        private ReadWriteBuffer<int> EnsureCountBuffer()
+        private ComputeBuffer<int> EnsureCountBuffer()
         {
-            countBuffer ??= device.AllocateReadWriteBuffer<int>(MaxClusters);
+            countBuffer ??= new ComputeBuffer<int>(device, MaxClusters, true);
             return countBuffer;
         }
 
-        private ReadWriteBuffer<int> EnsureHistogramBuffer()
+        private ComputeBuffer<int> EnsureHistogramBuffer()
         {
-            histogramBuffer ??= device.AllocateReadWriteBuffer<int>(MaxClusters * ProjectionBins);
+            histogramBuffer ??= new ComputeBuffer<int>(device, MaxClusters * ProjectionBins, true);
             return histogramBuffer;
         }
 
@@ -684,6 +753,43 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.DirectionalColorKey
             accumBuffer = null;
             countBuffer = null;
             histogramBuffer = null;
+            constants.Dispose();
+            device.Dispose();
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private readonly record struct SourceToBufferConstants(int Width, int Height, int Compare);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private readonly record struct SizeConstants(int Width, int Height);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private readonly record struct DilateConstants(int Reach, int Width, int Height);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private readonly record struct DirectionSmoothConstantsBuffer(float SigmaColorSq, int Width, int Height);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private readonly record struct DisplacementFieldConstants(
+            float BackgroundL, float BackgroundA, float BackgroundB,
+            float NoiseThreshold, int Width, int Height);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private readonly record struct ClusterAssignConstants(int ClusterCount, float FixedPointScale, int Width, int Height);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private readonly record struct ProjectionHistogramConstants(
+            float BackgroundL, float BackgroundA, float BackgroundB,
+            int ClusterCount, int BinsPerCluster, float ProjectionScale, int Width, int Height);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private readonly record struct ForegroundSeedConstants(
+            float BackgroundL, float BackgroundA, float BackgroundB,
+            float ReferencePerp, int Width, int Height);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private readonly record struct ForegroundPropagateConstants(
+            float BackgroundR, float BackgroundG, float BackgroundB,
+            int Reach, float SigmaLineSq, int Width, int Height);
     }
 }

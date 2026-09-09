@@ -1,13 +1,14 @@
 using System.Collections.Concurrent;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Interfaces;
+using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Models;
 
 namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Rendering;
 
-internal sealed class GpuChunkedRenderer : IMidiRenderer
+internal sealed class ChunkedRenderer : IMidiRenderer
 {
     private readonly IMidiRenderer _baseRenderer;
-    private readonly MidiPluginSettings _settings;
-    private readonly GpuAudioProcessor _gpuProcessor;
+    private readonly EffectsSettings _effects;
+    private readonly AudioEffectProcessor _effectProcessor;
     private readonly int _chunkSizeStereo;
     private readonly int _historySamples;
     
@@ -16,24 +17,25 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
     private readonly Lock _renderLock = new();
     private bool _disposed;
 
-    public GpuChunkedRenderer(IMidiRenderer baseRenderer, MidiPluginSettings settings)
+    public ChunkedRenderer(IMidiRenderer baseRenderer, MidiPluginSettings settings)
     {
         _baseRenderer = baseRenderer;
-        _settings = settings;
-        _gpuProcessor = new GpuAudioProcessor(settings.Effects, settings.Audio.SampleRate);
+        _effects = settings.Effects;
+        _effectProcessor = new AudioEffectProcessor(settings.Effects, settings.Audio.SampleRate);
         _chunkSizeStereo = settings.Audio.SampleRate * 2;
 
-        int hist = 0;
-        if (settings.Effects.EnableEffects && settings.Effects.EnableReverb)
-        {
-            hist = (int)(settings.Effects.ReverbDecay * settings.Audio.SampleRate) * 2;
-        }
-        _historySamples = hist;
+        _historySamples = settings.Effects.EnableReverb
+            ? (int)(settings.Effects.ReverbDecay * settings.Audio.SampleRate) * 2
+            : 0;
     }
 
     public int Read(Span<float> buffer, long stereoPosition)
     {
         if (_disposed) return 0;
+
+        // 効果の有無は再生中に切り替わる。生成時ではなく読み出しのたびに見る。
+        if (!_effects.EnableEffects)
+            return _baseRenderer.Read(buffer, stereoPosition);
 
         int samplesRead = 0;
         while (samplesRead < buffer.Length)
@@ -94,50 +96,25 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
 
             var processedChunk = new float[read];
             
-            if (_gpuProcessor.IsAvailable && _settings.Performance.EnableGpuAcceleration)
+            if (_historySamples > 0)
             {
-                if (_historySamples > 0)
+                var workBuffer = new float[_historySamples + read];
+                if (_rawChunks.TryGetValue(chunkIndex - 1, out var prevRaw))
                 {
-                    var workBuffer = new float[_historySamples + read];
-                    if (_rawChunks.TryGetValue(chunkIndex - 1, out var prevRaw))
-                    {
-                        int copyLen = Math.Min(_historySamples, prevRaw.Length);
-                        int srcOffset = prevRaw.Length - copyLen;
-                        int dstOffset = _historySamples - copyLen;
-                        prevRaw.AsSpan(srcOffset, copyLen).CopyTo(workBuffer.AsSpan(dstOffset, copyLen));
-                    }
-                    
-                    rawChunk.CopyTo(workBuffer, _historySamples);
-
-                    if (_settings.Effects.EnableEffects)
-                    {
-                        _gpuProcessor.TryApplyEffects(
-                            workBuffer.AsSpan(),
-                            _settings.Effects.EnableLimiter ? _settings.Effects.LimiterThreshold : 0f,
-                            _settings.Effects.EnableCompression,
-                            _settings.Effects.CompressionThreshold,
-                            _settings.Effects.CompressionRatio);
-                    }
-
-                    workBuffer.AsSpan(_historySamples, read).CopyTo(processedChunk);
+                    int copyLen = Math.Min(_historySamples, prevRaw.Length);
+                    int srcOffset = prevRaw.Length - copyLen;
+                    int dstOffset = _historySamples - copyLen;
+                    prevRaw.AsSpan(srcOffset, copyLen).CopyTo(workBuffer.AsSpan(dstOffset, copyLen));
                 }
-                else
-                {
-                    rawChunk.CopyTo(processedChunk, 0);
-                    if (_settings.Effects.EnableEffects)
-                    {
-                        _gpuProcessor.TryApplyEffects(
-                            processedChunk.AsSpan(),
-                            _settings.Effects.EnableLimiter ? _settings.Effects.LimiterThreshold : 0f,
-                            _settings.Effects.EnableCompression,
-                            _settings.Effects.CompressionThreshold,
-                            _settings.Effects.CompressionRatio);
-                    }
-                }
+
+                rawChunk.CopyTo(workBuffer, _historySamples);
+                _effectProcessor.ApplyEffects(workBuffer.AsSpan());
+                workBuffer.AsSpan(_historySamples, read).CopyTo(processedChunk);
             }
             else
             {
                 rawChunk.CopyTo(processedChunk, 0);
+                _effectProcessor.ApplyEffects(processedChunk.AsSpan());
             }
 
             _processedChunks[chunkIndex] = processedChunk;
@@ -166,7 +143,6 @@ internal sealed class GpuChunkedRenderer : IMidiRenderer
     {
         if (_disposed) return;
         _disposed = true;
-        _gpuProcessor.Dispose();
         _baseRenderer.Dispose();
         _processedChunks.Clear();
         _rawChunks.Clear();
