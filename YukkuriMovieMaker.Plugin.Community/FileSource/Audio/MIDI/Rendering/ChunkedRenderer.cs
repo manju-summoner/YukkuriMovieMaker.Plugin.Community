@@ -1,11 +1,13 @@
 using System.Collections.Concurrent;
 using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Interfaces;
+using YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Models;
 
 namespace YukkuriMovieMaker.Plugin.Community.FileSource.Audio.MIDI.Rendering;
 
 internal sealed class ChunkedRenderer : IMidiRenderer
 {
     private readonly IMidiRenderer _baseRenderer;
+    private readonly EffectsSettings _effects;
     private readonly AudioEffectProcessor _effectProcessor;
     private readonly int _chunkSizeStereo;
     private readonly int _historySamples;
@@ -18,6 +20,7 @@ internal sealed class ChunkedRenderer : IMidiRenderer
     public ChunkedRenderer(IMidiRenderer baseRenderer, MidiPluginSettings settings)
     {
         _baseRenderer = baseRenderer;
+        _effects = settings.Effects;
         _effectProcessor = new AudioEffectProcessor(settings.Effects, settings.Audio.SampleRate);
         _chunkSizeStereo = settings.Audio.SampleRate * 2;
 
@@ -29,6 +32,10 @@ internal sealed class ChunkedRenderer : IMidiRenderer
     public int Read(Span<float> buffer, long stereoPosition)
     {
         if (_disposed) return 0;
+
+        // 効果の有無は再生中に切り替わる。生成時ではなく読み出しのたびに見る。
+        if (!_effects.EnableEffects)
+            return _baseRenderer.Read(buffer, stereoPosition);
 
         int samplesRead = 0;
         while (samplesRead < buffer.Length)
