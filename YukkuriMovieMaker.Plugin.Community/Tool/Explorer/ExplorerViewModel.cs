@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
@@ -45,6 +46,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         public ActionCommand CreateNewViewCommand { get; }
         public ActionCommand IncreaseLayoutSizeCommand { get; }
         public ActionCommand DecreaseLayoutSizeCommand { get; }
+        public ActionCommand IncreaseWaveformLengthCommand { get; }
+        public ActionCommand DecreaseWaveformLengthCommand { get; }
         public ActionCommand CopyCommand { get; }
         public ActionCommand CutCommand { get; }
         public ActionCommand PasteCommand { get; }
@@ -80,6 +83,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             CreateNewViewCommand,
             IncreaseLayoutSizeCommand,
             DecreaseLayoutSizeCommand,
+            IncreaseWaveformLengthCommand,
+            DecreaseWaveformLengthCommand,
             CopyCommand,
             CutCommand,
             PasteCommand,
@@ -128,6 +133,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         public ExplorerSortKey SortKey { get; set => Set(ref field, value, nameof(SortKey), nameof(IsSortByName), nameof(IsSortByLastWriteTime), nameof(IsSortByExtension)); } = ExplorerSortKey.Name;
         public ExplorerSortOrder SortOrder { get; set => Set(ref field, value, nameof(SortOrder), nameof(IsSortAscending), nameof(IsSortDescending)); } = ExplorerSortOrder.Ascending;
 
+        public TimeSpan WaveformLength { get; private set => Set(ref field, value); } = AudioPreviewService.DefaultWindowLength;
+
+        public bool IsSearching { get; private set => Set(ref field, value); } = false;
+
         public bool IsSortByName => SortKey == ExplorerSortKey.Name;
         public bool IsSortByLastWriteTime => SortKey == ExplorerSortKey.LastWriteTime;
         public bool IsSortByExtension => SortKey == ExplorerSortKey.Extension;
@@ -146,6 +155,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
         CancellationTokenSource? sidebarSyncCts;
         readonly CancellationTokenSource disposeCts = new();
         volatile bool isLoading = false;
+        const int ProgressInterval = 200;
+        string? requestedRecursiveSearchText;
+        int deferredWatcherRefresh;
+        int watcherFaulted;
         string? pendingRenamePath;
 
         DpiScale lastDpiScale = new(1, 1);
@@ -231,7 +244,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     if (x is not string path || string.IsNullOrEmpty(path)) return;
                     var toolState = new ToolState()
                     {
-                        SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible })
+                        SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible, WaveformLength = WaveformLength })
                     };
                     CreateNewToolViewRequested?.Invoke(this, new CreateNewToolViewRequestedEventArgs(toolState));
                 });
@@ -244,7 +257,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     {
                         var toolState = new ToolState()
                         {
-                            SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible })
+                            SavedState = Json.Json.GetJsonText(new ExplorerState(path, Layout.Clone(), new ExplorerFilter()) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible, WaveformLength = WaveformLength })
                         };
                         CreateNewToolViewRequested?.Invoke(this, new CreateNewToolViewRequestedEventArgs(toolState));
                     }
@@ -263,6 +276,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                     Layout.DecreaseLayoutSize();
                     RaiseCommandExecutable();
                 });
+            IncreaseWaveformLengthCommand = new ActionCommand(
+                _ => GetWaveformLengthIndex() < AudioPreviewService.SupportedWindowLengths.Length - 1,
+                _ => SetWaveformLength(GetWaveformLengthIndex() + 1));
+            DecreaseWaveformLengthCommand = new ActionCommand(
+                _ => 0 < GetWaveformLengthIndex(),
+                _ => SetWaveformLength(GetWaveformLengthIndex() - 1));
 
             CopyCommand = new ActionCommand(p => GetActiveSelectedPaths(p).Length > 0, p => ShellClipboard.CopyFiles(GetActiveSelectedPaths(p)));
             CutCommand = new ActionCommand(p => GetActiveSelectedPaths(p).Length > 0, p => ShellClipboard.CutFiles(GetActiveSelectedPaths(p)));
@@ -1078,7 +1097,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 FavoriteUrls.Add(new AddressBarSuggestion(fav.Name, fav.Url, fav.Url, AddressBarSuggestionSource.External));
         }
 
-        private void Filter_FilterChanged(object? sender, EventArgs e) => UpdateFilteredItems();
+        private void Filter_FilterChanged(object? sender, EventArgs e)
+        {
+            UpdateFilteredItems();
+            if (Filter.IsRecursiveSearch ? Filter.SearchText != requestedRecursiveSearchText : requestedRecursiveSearchText != null)
+                RequestRefresh();
+        }
+
+        int GetWaveformLengthIndex()
+        {
+            var index = Array.IndexOf(AudioPreviewService.SupportedWindowLengths, WaveformLength);
+            return index < 0 ? Array.IndexOf(AudioPreviewService.SupportedWindowLengths, AudioPreviewService.DefaultWindowLength) : index;
+        }
+
+        void SetWaveformLength(int index)
+        {
+            WaveformLength = AudioPreviewService.SupportedWindowLengths[Math.Clamp(index, 0, AudioPreviewService.SupportedWindowLengths.Length - 1)];
+            UpdateItemsWaveformLength();
+            RaiseCommandExecutable();
+        }
+
+        private void UpdateItemsWaveformLength()
+        {
+            foreach (var item in Items)
+                item.SetWaveformLength(WaveformLength);
+        }
 
         private void UpdateItemsImageSize()
         {
@@ -1173,12 +1216,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
 
         void RequestRefresh() => refreshDebouncer.Signal(null);
 
+        /// <summary>
+        /// 場所や監視範囲がこれから作る一覧と合わない watcher は、一覧を作る前に止める。
+        /// 再帰検索を解除した直後にサブフォルダまで見る watcher が残っていると、そのイベントで非再帰の一覧の作成が取り消され続けるため
+        /// </summary>
+        void StopFileSystemWatcherIfMismatched(string location, bool includeSubdirectories)
+        {
+            if (watcher is null) return;
+            if (!string.Equals(watcher.Path, location, StringComparison.OrdinalIgnoreCase) || watcher.IncludeSubdirectories != includeSubdirectories)
+                StopFileSystemWatcher();
+        }
+
         void StopFileSystemWatcher()
         {
             if (watcher is null) return;
             watcher.Created -= Watcher_Callback;
             watcher.Deleted -= Watcher_Callback;
             watcher.Renamed -= Watcher_Callback;
+            watcher.Error -= Watcher_Error;
             watcher.EnableRaisingEvents = false;
             watcher.Dispose();
             watcher = null;
@@ -1225,6 +1280,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 finally
                 {
                     isLoading = false;
+                    //例外で走査の完了処理まで届かなかったとき、IsSearching が立ったままだと監視イベントの保留が解けない。
+                    //自分が最新の更新のときだけ完了させる（取り消された古い更新が後続の状態を倒さないように）
+                    if (ReferenceEquals(refreshCts, newCts) && IsSearching)
+                        FinishSearching();
                     RaiseCommandExecutable();
                 }
             }
@@ -1235,63 +1294,121 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
         }
 
-        async Task RefreshCoreAsync(CancellationToken token)
+        static bool TryCollectMatchesRecursively(DirectoryInfo root, EnumerationOptions options, string searchText, List<DirectoryInfo> directories, List<FileInfo> files, Action<List<DirectoryInfo>, List<FileInfo>> onProgress, CancellationToken token)
         {
-            var currentLocation = Location;
-            if (watcher != null && !string.Equals(watcher.Path, currentLocation, StringComparison.OrdinalIgnoreCase))
+            //identity は「同じ実体を二度辿らない」ための識別子。リンク配下のフォルダはリンク経由のパスではなく
+            //解決先を基準にした識別子を持たせ、別のリンクから同じ実体に到達しても重複しないようにする
+            var rootIdentity = GetDirectoryIdentity(root);
+            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { rootIdentity };
+            var stack = new Stack<(DirectoryInfo dir, string identity)>();
+            var links = new List<(DirectoryInfo dir, string identity)>();
+            var progressWatch = Stopwatch.StartNew();
+            var reportedCount = 0;
+            stack.Push((root, rootIdentity));
+
+            while (true)
             {
-                StopFileSystemWatcher();
+                while (stack.Count > 0)
+                {
+                    if (token.IsCancellationRequested)
+                        return false;
+
+                    var (current, currentIdentity) = stack.Pop();
+                    try
+                    {
+                        foreach (var file in current.EnumerateFiles("*", options))
+                        {
+                            if (token.IsCancellationRequested)
+                                return false;
+                            if (ExplorerFilter.IsNameMatch(file.Name, searchText))
+                                files.Add(file);
+                            if (reportedCount < directories.Count + files.Count && ProgressInterval <= progressWatch.ElapsedMilliseconds)
+                            {
+                                reportedCount = directories.Count + files.Count;
+                                onProgress([.. directories], [.. files]);
+                                progressWatch.Restart();
+                            }
+                        }
+                    }
+                    catch { }
+
+                    try
+                    {
+                        foreach (var dir in current.EnumerateDirectories("*", options))
+                        {
+                            if (token.IsCancellationRequested)
+                                return false;
+                            //フォルダ自身の一致判定は循環防止の対象外。訪問済みの実体を指すリンクも、通常の検索と同じく結果に含める
+                            if (ExplorerFilter.IsNameMatch(dir.Name, searchText))
+                                directories.Add(dir);
+                            if ((dir.Attributes & FileAttributes.ReparsePoint) != 0)
+                            {
+                                links.Add((dir, GetDirectoryIdentity(dir)));
+                                continue;
+                            }
+                            var identity = Path.Combine(currentIdentity, dir.Name);
+                            if (!visited.Add(identity))
+                                continue;
+                            stack.Push((dir, identity));
+                        }
+                    }
+                    catch { }
+                }
+
+                if (links.Count == 0)
+                    return true;
+
+                //リンクは実体側の走査が済んでから辿る。木の中を指すリンクが実体より先に列挙されても、
+                //実体側を優先して辿り、リンク側のパスで中身を重複表示しないようにするため。
+                //実体側が列挙対象外（隠し属性など）で辿られなかったリンクだけがここで辿られる
+                foreach (var link in links)
+                {
+                    if (visited.Add(link.identity))
+                        stack.Push(link);
+                }
+                links.Clear();
             }
+        }
 
-            await InitializeDrivesAsync();
-            Application.Current.Dispatcher.Invoke(() => StartSidebarSync(currentLocation, token));
+        static bool IsSameOrDescendantPath(string path, string root)
+        {
+            var trimmedRoot = root.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var trimmedPath = path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            if (string.Equals(trimmedPath, trimmedRoot, StringComparison.OrdinalIgnoreCase))
+                return true;
+            if (trimmedPath.Length <= trimmedRoot.Length || !trimmedPath.StartsWith(trimmedRoot, StringComparison.OrdinalIgnoreCase))
+                return false;
+            var separator = trimmedPath[trimmedRoot.Length];
+            return separator == Path.DirectorySeparatorChar || separator == Path.AltDirectorySeparatorChar;
+        }
 
-            if (!TryCheckFileSystemAccess(currentLocation, true)) return;
-
-            var options = new EnumerationOptions()
+        static string GetDirectoryIdentity(DirectoryInfo dir)
+        {
+            //走査ルートは末尾に区切り文字が付いたまま渡されることがあるので、解決先との比較のために揃える
+            try
             {
-                IgnoreInaccessible = true,
-                RecurseSubdirectories = false,
-                ReturnSpecialDirectories = false,
-                AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
-            };
-
-            var result = await Task.Run(() =>
+                if ((dir.Attributes & FileAttributes.ReparsePoint) == 0)
+                    return Path.TrimEndingDirectorySeparator(dir.FullName);
+                return Path.TrimEndingDirectorySeparator(dir.ResolveLinkTarget(true)?.FullName ?? dir.FullName);
+            }
+            catch
             {
-                var di = new DirectoryInfo(currentLocation);
-                var d = new List<(DirectoryInfo dir, bool hasChild)>();
-                foreach (var dir in di.EnumerateDirectories("*", options))
-                {
-                    if (token.IsCancellationRequested)
-                        return null;
-                    bool hasChild = false;
-                    try { hasChild = dir.EnumerateDirectories("*", options).Any(); } catch { }
-                    d.Add((dir, hasChild));
-                }
+                return Path.TrimEndingDirectorySeparator(dir.FullName);
+            }
+        }
 
-                var f = new List<FileInfo>();
-                foreach (var file in di.EnumerateFiles("*", options))
-                {
-                    if (token.IsCancellationRequested)
-                        return null;
-                    f.Add(file);
-                }
-                return ((List<(DirectoryInfo dir, bool hasChild)> dirs, List<FileInfo> files)?)(d, f);
-            });
-
-            if (result is null || token.IsCancellationRequested)
-                return;
-
-            if (Location != currentLocation) return;
-
-            var (dirsInfo, filesInfo) = result.Value;
-
+        /// <param name="retainedRoot">
+        /// 途中結果を適用するときの走査対象フォルダ。この配下にあってまだ再発見されていない既存項目は残す
+        /// （一覧が一度空に戻る・破棄と再生成でアイコンを読み直すのを避ける）。
+        /// 配下にない項目は場所を移動する前の残りなので取り除く。null なら最終結果として見つからなかった項目をすべて取り除く
+        /// </param>
+        void ApplyItems(List<DirectoryInfo> dirsInfo, List<FileInfo> filesInfo, HashSet<string> selectedPaths, string? retainedRoot)
+        {
             var oldItemsMap = Items.ToDictionary(x => x.Path, StringComparer.OrdinalIgnoreCase);
             var newItemsList = new List<IExplorerItemViewModel>(dirsInfo.Count + filesInfo.Count);
 
-            foreach (var item in dirsInfo)
+            foreach (var d in dirsInfo)
             {
-                var d = item.dir;
                 if (oldItemsMap.TryGetValue(d.FullName, out var oldItem) && oldItem is ExplorerDirectoryItemViewModel oldDir)
                 {
                     if (oldDir.LastWriteTime == d.LastWriteTime)
@@ -1311,7 +1428,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 }
                 else
                 {
-                    newItemsList.Add(new ExplorerDirectoryItemViewModel(d.FullName, d.LastWriteTime));
+                    newItemsList.Add(new ExplorerDirectoryItemViewModel(d.FullName, d.LastWriteTime)
+                    {
+                        IsSelected = selectedPaths.Contains(d.FullName)
+                    });
                 }
             }
 
@@ -1336,32 +1456,37 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 }
                 else
                 {
-                    newItemsList.Add(new ExplorerFileItemViewModel(f.FullName, f.LastWriteTime));
+                    newItemsList.Add(new ExplorerFileItemViewModel(f.FullName, f.LastWriteTime)
+                    {
+                        IsSelected = selectedPaths.Contains(f.FullName)
+                    });
                 }
             }
 
-            if (pendingRenamePath != null)
+            if (retainedRoot != null)
             {
-                var target = newItemsList.FirstOrDefault(x => string.Equals(x.Path, pendingRenamePath, StringComparison.OrdinalIgnoreCase));
-                if (target != null)
+                //更新日時が変わって作り直した項目の旧インスタンスは oldItemsMap に残っている。これを残すと同じパスが二重になるので、
+                //今回見つかっていないパスだけを残す
+                var foundPaths = new HashSet<string>(newItemsList.Select(x => x.Path), StringComparer.OrdinalIgnoreCase);
+                foreach (var (path, item) in oldItemsMap.Where(x => !foundPaths.Contains(x.Key) && IsSameOrDescendantPath(x.Key, retainedRoot)).ToList())
                 {
-                    target.IsRenaming = true;
-                    target.RenameText = target.Name;
-                    target.IsSelected = true;
+                    newItemsList.Add(item);
+                    oldItemsMap.Remove(path);
                 }
-                pendingRenamePath = null;
             }
 
             var dpiScale = Math.Max(lastDpiScale.DpiScaleX, lastDpiScale.DpiScaleY);
             if (dpiScale <= 0) dpiScale = 1.0;
 
+            var subscribedItems = new HashSet<IExplorerItemViewModel>(Items);
             foreach (var item in newItemsList)
             {
-                if (!Items.Contains(item))
+                if (!subscribedItems.Contains(item))
                 {
                     item.PropertyChanged += ItemViewModel_PropertyChanged;
                 }
                 item.SetImageSize((int)(Layout.IconSize * dpiScale), (int)(300 * dpiScale));
+                item.SetWaveformLength(WaveformLength);
             }
 
             BeginSelectionChange();
@@ -1380,10 +1505,118 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 removed.Dispose();
             }
 
+            UpdateFilteredItems();
+        }
+
+        async Task RefreshCoreAsync(CancellationToken token)
+        {
+            var currentLocation = Location;
+            StopFileSystemWatcherIfMismatched(currentLocation, Filter.IsRecursiveSearch);
+
+            await InitializeDrivesAsync();
+            //取り消された更新がここで再開すると、後続の更新が終えた IsSearching を立て直して監視イベントの保留が解けなくなる
+            if (token.IsCancellationRequested)
+                return;
+            Application.Current.Dispatcher.Invoke(() => StartSidebarSync(currentLocation, token));
+
+            if (!TryCheckFileSystemAccess(currentLocation, true))
+            {
+                FinishSearching();
+                return;
+            }
+
+            var options = new EnumerationOptions()
+            {
+                IgnoreInaccessible = true,
+                RecurseSubdirectories = false,
+                ReturnSpecialDirectories = false,
+                AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
+            };
+
+            var recursiveSearch = Filter.IsRecursiveSearch;
+            var searchText = Filter.SearchText;
+            requestedRecursiveSearchText = recursiveSearch ? searchText : null;
+            IsSearching = recursiveSearch;
+            //再帰走査中の変更を取りこぼさないよう、監視は走査の前に始める（走査中に届いたイベントは完了後にまとめて反映される）。
+            //非再帰の一覧は走査中のイベントで即やり直しになるので、従来どおり一覧が出てから監視を始める
+            if (recursiveSearch)
+                EnsureFileSystemWatcher(currentLocation, true);
+
+            var selectedPaths = new HashSet<string>(Items.Where(x => x.IsSelected).Select(x => x.Path), StringComparer.OrdinalIgnoreCase);
+
+            (List<(DirectoryInfo dir, bool hasChild)> sidebarDirs, List<DirectoryInfo> dirs, List<FileInfo> files)? result;
+            try
+            {
+                result = await Task.Run(() =>
+                {
+                    var di = new DirectoryInfo(currentLocation);
+                    var d = new List<(DirectoryInfo dir, bool hasChild)>();
+                    foreach (var dir in di.EnumerateDirectories("*", options))
+                    {
+                        if (token.IsCancellationRequested)
+                            return null;
+                        bool hasChild = false;
+                        try { hasChild = dir.EnumerateDirectories("*", options).Any(); } catch { }
+                        d.Add((dir, hasChild));
+                    }
+
+                    var listDirs = new List<DirectoryInfo>();
+                    var f = new List<FileInfo>();
+                    if (recursiveSearch)
+                    {
+                        void ReportProgress(List<DirectoryInfo> foundDirs, List<FileInfo> foundFiles) => Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            if (!token.IsCancellationRequested && Location == currentLocation)
+                                //Location は入力のまま（区切り文字が / のことがある）なので、項目のパスと同じ正規化済みのパスで比較する
+                                ApplyItems(foundDirs, foundFiles, selectedPaths, di.FullName);
+                        });
+
+                        if (!TryCollectMatchesRecursively(di, options, searchText, listDirs, f, ReportProgress, token))
+                            return null;
+                    }
+                    else
+                    {
+                        foreach (var (dir, _) in d)
+                            listDirs.Add(dir);
+                        foreach (var file in di.EnumerateFiles("*", options))
+                        {
+                            if (token.IsCancellationRequested)
+                                return null;
+                            f.Add(file);
+                        }
+                    }
+                    return ((List<(DirectoryInfo dir, bool hasChild)> sidebarDirs, List<DirectoryInfo> dirs, List<FileInfo> files)?)(d, listDirs, f);
+                });
+            }
+            finally
+            {
+                if (!token.IsCancellationRequested)
+                    FinishSearching();
+            }
+
+            if (result is null || token.IsCancellationRequested)
+                return;
+
+            if (Location != currentLocation) return;
+
+            var (sidebarDirs, dirsInfo, filesInfo) = result.Value;
+
+            ApplyItems(dirsInfo, filesInfo, selectedPaths, null);
+
+            if (pendingRenamePath != null)
+            {
+                var target = Items.FirstOrDefault(x => string.Equals(x.Path, pendingRenamePath, StringComparison.OrdinalIgnoreCase));
+                if (target != null)
+                {
+                    target.IsRenaming = true;
+                    target.RenameText = target.Name;
+                    target.IsSelected = true;
+                }
+                pendingRenamePath = null;
+            }
+
             Application.Current.Dispatcher.Invoke(() =>
             {
-                UpdateFilteredItems();
-
                 var currentSidebarItem = SidebarItems.FirstOrDefault(x =>
                     string.Equals(x.Path.TrimEnd(Path.DirectorySeparatorChar),
                                   currentLocation.TrimEnd(Path.DirectorySeparatorChar),
@@ -1392,35 +1625,77 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
                 {
                     if (currentSidebarItem.IsExpanded)
                     {
-                        SyncSidebarChildren(currentSidebarItem, dirsInfo);
+                        SyncSidebarChildren(currentSidebarItem, sidebarDirs);
                     }
                     else
                     {
-                        currentSidebarItem.SetHasDummyChild(dirsInfo.Count > 0);
+                        currentSidebarItem.SetHasDummyChild(sidebarDirs.Count > 0);
                     }
                 }
             });
 
-            if (watcher == null)
+            EnsureFileSystemWatcher(currentLocation, recursiveSearch);
+        }
+
+        void EnsureFileSystemWatcher(string location, bool includeSubdirectories)
+        {
+            //再帰検索の結果にはサブフォルダ内のファイルが並ぶので、その増減も監視しないと削除・追加が一覧に反映されない。
+            //監視範囲が現在の検索モードと合わない watcher と、監視対象の消失などの致命的なエラーで自分からイベント送出を止めた watcher は作り直す
+            if (Interlocked.Exchange(ref watcherFaulted, 0) == 1)
+                StopFileSystemWatcher();
+            else
+                StopFileSystemWatcherIfMismatched(location, includeSubdirectories);
+
+            if (watcher != null) return;
+
+            try
             {
-                try
+                watcher = new FileSystemWatcher(location)
                 {
-                    watcher = new FileSystemWatcher(currentLocation)
-                    {
-                        NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName
-                    };
-                    watcher.Created += Watcher_Callback;
-                    watcher.Deleted += Watcher_Callback;
-                    watcher.Renamed += Watcher_Callback;
-                    watcher.EnableRaisingEvents = true;
-                }
-                catch (Exception e)
-                {
-                    Log.Default.Write("WatcherException", e);
-                    watcher?.Dispose();
-                    watcher = null;
-                }
+                    NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName,
+                    IncludeSubdirectories = includeSubdirectories,
+                };
+                watcher.Created += Watcher_Callback;
+                watcher.Deleted += Watcher_Callback;
+                watcher.Renamed += Watcher_Callback;
+                watcher.Error += Watcher_Error;
+                watcher.EnableRaisingEvents = true;
             }
+            catch (Exception e)
+            {
+                Log.Default.Write("WatcherException", e);
+                watcher?.Dispose();
+                watcher = null;
+            }
+        }
+
+        /// <summary>
+        /// 再帰走査の完了処理。更新要求は即時に走って直前の走査を取り消すため、監視範囲がサブフォルダまで広がった状態で
+        /// イベントごとに更新すると、書き込みが続く木では走査が完了しなくなる。走査中に届いた監視イベントはここで1回にまとめて反映する
+        /// </summary>
+        void FinishSearching()
+        {
+            IsSearching = false;
+            if (Interlocked.Exchange(ref deferredWatcherRefresh, 0) == 1)
+                RequestRefresh();
+        }
+
+        void RequestRefreshFromWatcher()
+        {
+            Interlocked.Exchange(ref deferredWatcherRefresh, 1);
+            if (IsSearching) return;
+            if (Interlocked.Exchange(ref deferredWatcherRefresh, 0) == 1)
+                RequestRefresh();
+        }
+
+        //取りこぼしたイベントは個別に取り戻せないので、一覧を作り直して実体に合わせる。
+        //watcher 自身の Dispose は UI スレッドで行うため、ここでは印だけ付けて次の更新で作り直させる
+        private void Watcher_Error(object sender, ErrorEventArgs e)
+        {
+            //バッファ溢れでは watcher は監視を続けるので作り直さない（作り直す間のイベントを余計に落とさないため）
+            if (e.GetException() is not InternalBufferOverflowException)
+                Interlocked.Exchange(ref watcherFaulted, 1);
+            RequestRefreshFromWatcher();
         }
 
         /// <summary>
@@ -1545,7 +1820,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             }
 
             if (e.ChangeType is WatcherChangeTypes.Created or WatcherChangeTypes.Deleted or WatcherChangeTypes.Renamed)
-                refreshDebouncer.Signal(null);
+                RequestRefreshFromWatcher();
         }
 
         void RemoveSidebarItemsByPath(string removedPath)
@@ -1670,13 +1945,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.Explorer
             SortOrder = state.SortOrder;
             SidebarWidth = state.SidebarWidth;
             IsSidebarVisible = state.IsSidebarVisible;
+            WaveformLength = state.WaveformLength;
             RequestRefresh();
             UpdateFilteredItems();
         }
 
         public ToolState SaveState() => new()
         {
-            SavedState = Json.Json.GetJsonText(new ExplorerState(Location, Layout.Clone(), Filter) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible })
+            SavedState = Json.Json.GetJsonText(new ExplorerState(Location, Layout.Clone(), Filter) { SortKey = SortKey, SortOrder = SortOrder, SidebarWidth = SidebarWidth, IsSidebarVisible = IsSidebarVisible, WaveformLength = WaveformLength })
         };
 
         static double NormalizeSidebarWidth(double value)
