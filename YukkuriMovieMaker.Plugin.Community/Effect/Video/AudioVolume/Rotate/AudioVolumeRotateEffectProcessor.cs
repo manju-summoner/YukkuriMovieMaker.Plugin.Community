@@ -54,12 +54,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AudioVolume.Rotate
                 matrix2D = Matrix3x2.CreateScale(zoom);
                 matrix3D = Matrix4x4.CreateRotationZ(z / 180f * MathF.PI) 
                     * Matrix4x4.CreateRotationY(-y / 180f * MathF.PI) 
-                    * Matrix4x4.CreateRotationX(-x / 180f * MathF.PI) 
-                    * new Matrix4x4(
-                        1f, 0f, 0f, 0f,
-                        0f, 1f, 0f, 0f,
-                        0f, 0f, 1f, -0.001f,
-                        0f, 0f, 0f, 1f);
+                    * Matrix4x4.CreateRotationX(-x / 180f * MathF.PI)
+                    * CameraFinalizer.BasePerspectiveMatrix;
             }
 
             if (isFirst || this.matrix2D != matrix2D)

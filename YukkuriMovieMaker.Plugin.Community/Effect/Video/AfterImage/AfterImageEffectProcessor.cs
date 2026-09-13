@@ -62,7 +62,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AfterImage
             
             var screenSize = desc.ScreenSize;
 
-            var dd = desc.DrawDescription;
+            //カメラを自前で焼き込むので、本体の描画と同じく視野角・ビルボードを確定してから使う
+            var dd = CameraFinalizer.Apply(desc.DrawDescription);
             var draw = dd.Draw;
             var centerPoint = dd.CenterPoint;
             var zoom = dd.Zoom;
@@ -88,7 +89,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AfterImage
                 && this.invert == invert
                 && this.strength == strength
                 && this.mode == mode)
-                return CreateResultDrawDescription(desc);
+                return CreateResultDrawDescription(dd);
 
             if (isFirst || frame == 0 || frame <= this.frame || this.screenSize != screenSize || feedbackBitmap is null || feedbackTmpBitmap is null)
             {
@@ -119,11 +120,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AfterImage
                     * Matrix4x4.CreateRotationX(MathF.PI * -rotation.X / 180f)
                     * Matrix4x4.CreateTranslation(draw)
                     * camera
-                    * new Matrix4x4(
-                        1, 0, 0, 0,
-                        0, 1, 0, 0,
-                        0, 0, 1, -1 / 1000f,
-                        0, 0, 0, 1);
+                    * CameraFinalizer.BasePerspectiveMatrix;
             }
             if (isFirst || this.screenSize != screenSize)
                 centeringEffect.TransformMatrix = Matrix3x2.CreateTranslation(screenSize.Width / 2f, screenSize.Height / 2f);
@@ -170,12 +167,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.AfterImage
             this.strength = strength;
             this.mode = mode;
 
-            return CreateResultDrawDescription(desc);
+            return CreateResultDrawDescription(dd);
         }
 
-        static DrawDescription CreateResultDrawDescription(EffectDescription desc)
+        static DrawDescription CreateResultDrawDescription(DrawDescription finalized)
         {
-            return desc.DrawDescription with
+            return finalized with
             {
                 Draw = new Vector3(),
                 Zoom = new Vector2(1.0f, 1.0f),

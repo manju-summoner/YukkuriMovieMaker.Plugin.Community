@@ -79,13 +79,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.MotionBlur
 
         /// <summary>
         /// アイテムの描画変換（DrawingEffectが適用する変換）を2Dアフィン変換に近似する。
-        /// 3D回転（X/Y）とカメラは無視し、Z移動は遠近除算（w = 1 - z/1000）による一様スケールとして反映する。
+        /// 3D回転（X/Y）とカメラは無視し、Z移動は基準の視距離での遠近除算（w = 1 - z/1000）による一様スケールとして反映する。
+        /// 前段の視野角指定はカメラに畳み込まれるものとして扱い、ここでは反映しない。
         /// 左右反転はDrawingEffectと同様にズームより前に適用する。
         /// ズームが0等で変換が成立しない場合はnullを返す。
         /// </summary>
         internal static Matrix3x2? CreateTransform(DrawDescription desc)
         {
-            var w = 1 - desc.Draw.Z / 1000f;
+            var w = 1 - desc.Draw.Z / CameraFinalizer.BasePerspectiveDistance;
             if (w < 0.001f)
                 return null;
             return
