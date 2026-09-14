@@ -93,3 +93,4 @@ Emoji_Humming,,鼻歌,Humming,哼歌,哼歌,콧노래,Tarareo,همهمة,Bersena
 Emoji_Muffled,,口を塞がれて,Muffled,被捂住嘴,被摀住嘴,입이 막혀서,Amortiguado,مكتوم,Teredam,
 Emoji_Relieved,,安堵・満足,Relieved / Contented,安心・满足,安心・滿足,안도・만족,Aliviado,مرتاح,Lega,
 Emoji_Questioning,,疑問の声,Questioning,疑问的声音,疑問的聲音,의문의 소리,Cuestionando,صوت استفهام,Suara bertanya,
+PlaybackFailed,0:error,音声の再生に失敗しました。イヤホンやスピーカーが接続されているか確認してください。（{0}）,Failed to play audio. Check that your earphones or speakers are connected. ({0}),音频播放失败。请确认耳机或扬声器已连接。（{0}）,音訊播放失敗。請確認耳機或喇叭已連接。（{0}）,음성 재생에 실패했습니다. 이어폰이나 스피커가 연결되어 있는지 확인하세요. ({0}),Error al reproducir el audio. Compruebe que los auriculares o altavoces estén conectados. ({0}),فشل تشغيل الصوت. تأكد من توصيل سماعات الأذن أو مكبرات الصوت. ({0}),Gagal memutar audio. Pastikan earphone atau speaker terhubung. ({0}),

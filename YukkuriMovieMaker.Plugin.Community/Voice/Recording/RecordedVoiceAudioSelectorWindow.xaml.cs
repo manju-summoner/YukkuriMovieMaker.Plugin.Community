@@ -8,6 +8,7 @@ using System.Windows.Input;
 using Forms = System.Windows.Forms;
 using NAudio.Wave;
 using YukkuriMovieMaker.Player.Audio;
+using YukkuriMovieMaker.Plugin.Community.Commons;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Models;
 using YukkuriMovieMaker.Plugin.Community.Tool.Recording.Services;
@@ -372,12 +373,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.Recording
                 // WaveOut.VolumeはwaveOutSetVolumeを直接呼ぶため、Init()前に設定すると
                 // ハンドルではなくデバイス番号0への操作と解釈され、
                 // YMM4自体の音量（OSの音量ミキサーのYMM4）が変わってしまっていた。
-                player = new AudioPlayer(reader) { Volume = GetYmmVolume() };
-                // StreamEndedはAudioPlayerを構築したスレッドのSynchronizationContextへPostされる。
-                // contextが無いと再生スレッド上で同期実行され、経路によってはハンドラからのDispose()が
-                // 自スレッドのJoinになりうるため、AudioPlayerの構築とPlay()はUIスレッドから行うこと。
-                player.StreamEnded += OnStreamEnded;
-                player.Play();
+                try
+                {
+                    player = new AudioPlayer(reader) { Volume = GetYmmVolume() };
+                    // StreamEndedはAudioPlayerを構築したスレッドのSynchronizationContextへPostされる。
+                    // contextが無いと再生スレッド上で同期実行され、経路によってはハンドラからのDispose()が
+                    // 自スレッドのJoinになりうるため、AudioPlayerの構築とPlay()はUIスレッドから行うこと。
+                    player.StreamEnded += OnStreamEnded;
+                    player.Play();
+                }
+                catch (Exception ex)
+                {
+                    // ファイル側の失敗は黙って選択を続けられるようにするが、再生デバイスを開けない失敗は
+                    // 利用者側で対処できるため知らせる。ダイアログ表示中にIsPlaying（player != null）が
+                    // 真のまま選択変更から再生し直されないよう、後始末してから知らせる。後始末が失敗しても通知は必ず出す
+                    try { StopPlayback(); } catch { }
+                    PlaybackFailureNotifier.Notify(string.Format(ToolTexts.PlaybackFailed, ex.Message), Texts.RecordedAudioSelectorTitle, this);
+                    throw;
+                }
                 Raise(nameof(IsPlaying));
             }
             catch

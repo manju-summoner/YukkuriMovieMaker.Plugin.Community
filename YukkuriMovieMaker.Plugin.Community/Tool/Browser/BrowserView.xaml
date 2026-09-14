@@ -147,7 +147,7 @@
                             <DataTrigger Binding="{Binding IsFavorite}" Value="True">
                                 <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Star}}"/>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding  FavoriteDirectoryViewModel.Items.Count}" Value="0">
+                            <DataTrigger Binding="{Binding  FavoriteDirectoryViewModel.Items.Length}" Value="0">
                                 <Setter Property="IsDropDownButtonVisible" Value="False"/>
                             </DataTrigger>
                         </Style.Triggers>

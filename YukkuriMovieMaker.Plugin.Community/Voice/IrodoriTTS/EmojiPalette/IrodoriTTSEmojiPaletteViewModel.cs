@@ -6,6 +6,7 @@ using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Audio;
 using YukkuriMovieMaker.Player.Audio.Effects;
+using YukkuriMovieMaker.Plugin.Community.Commons;
 using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.IrodoriTTS.EmojiPalette;
@@ -176,9 +177,21 @@ internal class IrodoriTTSEmojiPaletteViewModel : Bindable
                 stream = info?.CreateItemAudioSource(new ItemAudioSourceCreationParameter(AudioEffectSelection.None) { RangeMode = ItemAudioSourceRangeMode.FullContentRange });
                 if (stream is null)
                     return;
-                player = new AudioPlayer(stream) { Volume = YMMSettings.Default.Volume / 100d };
-                player.StreamEnded += Player_StreamEnded;
-                player.Play();
+                try
+                {
+                    player = new AudioPlayer(stream) { Volume = YMMSettings.Default.Volume / 100d };
+                    player.StreamEnded += Player_StreamEnded;
+                    player.Play();
+                }
+                catch (Exception ex)
+                {
+                    //再生デバイスを開けない等の失敗は音声生成の失敗と違って利用者側で対処できるため、ログだけでなく知らせる。
+                    //ダイアログ表示中に半端な再生状態が残らないよう後始末してから知らせる（ログは外側の catch が書く）。
+                    //後始末が失敗しても通知は必ず出す
+                    try { StopPlayback(); } catch (Exception cleanupEx) { Log.Default.Write("Irodori-TTS emoji palette playback cleanup failed", cleanupEx); }
+                    PlaybackFailureNotifier.Notify(string.Format(Texts.PlaybackFailed, ex.Message), "Irodori-TTS");
+                    throw;
+                }
                 IsPlaying = true;
             }
             finally
