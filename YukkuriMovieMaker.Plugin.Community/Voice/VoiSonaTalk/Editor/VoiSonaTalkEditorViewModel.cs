@@ -10,6 +10,7 @@ using System.Xml.Linq;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Audio;
 using YukkuriMovieMaker.Player.Audio.Effects;
+using YukkuriMovieMaker.Plugin.Community.Commons;
 using YukkuriMovieMaker.Settings;
 
 namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
@@ -90,9 +91,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.VoiSonaTalk.Editor
                     stream.Seek(GetPlaybackStartTime(startWord));
                     // オブジェクト初期化子だとVolumeの評価が例外を投げたとき構築済みプレイヤーがフィールドに入らず失われるため、先に評価する
                     var volume = YMMSettings.Default.Volume / 100d;
-                    player = new AudioPlayer(stream) { Volume = volume };
-                    player.StreamEnded += Player_StreamEnded;
-                    player.Play();
+                    try
+                    {
+                        player = new AudioPlayer(stream) { Volume = volume };
+                        player.StreamEnded += Player_StreamEnded;
+                        player.Play();
+                    }
+                    catch (Exception ex)
+                    {
+                        //再生デバイスを開けない等の失敗は利用者側で対処できるため、ログだけでなく知らせる。
+                        //ダイアログ表示中に半端な再生状態が残らないよう後始末してから知らせる（ログは外側の catch が書く）
+                        StopPlayback();
+                        PlaybackFailureNotifier.Notify(string.Format(Texts.PlaybackFailed, ex.Message), "VoiSona Talk");
+                        throw;
+                    }
                     IsPlaying = true;
                     SetWordPlaybackStatus(VoiSonaTalkEditorPlayButtonStatus.Playing);
                 }

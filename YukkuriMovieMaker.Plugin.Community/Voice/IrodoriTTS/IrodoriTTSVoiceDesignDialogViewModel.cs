@@ -117,10 +117,21 @@ internal class IrodoriTTSVoiceDesignDialogViewModel : Bindable
         try
         {
             audioFileReader = new AudioFileReader(generatedAudioPath);
-            audioPlayer = new AudioPlayer(audioFileReader) { Volume = YMMSettings.Default.Volume / 100d };
-            audioPlayer.StreamEnded += Player_StreamEnded;
-            audioPlayer.Play();
+            try
+            {
+                audioPlayer = new AudioPlayer(audioFileReader) { Volume = YMMSettings.Default.Volume / 100d };
+                audioPlayer.StreamEnded += Player_StreamEnded;
+                audioPlayer.Play();
+            }
+            catch (Exception ex)
+            {
+                //再生デバイスを開けない等の失敗は利用者側で対処できるため、生成失敗と同じ欄で知らせる（ログと後始末は外側の catch）
+                ErrorText = string.Format(Texts.PlaybackFailed, ex.Message);
+                throw;
+            }
             IsPlaying = true;
+            //前回の再生失敗の表示は、再生できた時点で消す
+            ErrorText = string.Empty;
         }
         catch (Exception ex)
         {

@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Audio;
+using YukkuriMovieMaker.Plugin.Community.Commons;
 using YukkuriMovieMaker.Plugin.Voice;
 using YukkuriMovieMaker.Settings;
 
@@ -129,9 +130,20 @@ internal class IrodoriTTSSettingsViewModel : Bindable
             }
 
             audioFileReader = new AudioFileReader(previewRefVoice.RefFilePath!);
-            audioPlayer = new AudioPlayer(audioFileReader) { Volume = YMMSettings.Default.Volume / 100d };
-            audioPlayer.StreamEnded += Player_StreamEnded;
-            audioPlayer.Play();
+            try
+            {
+                audioPlayer = new AudioPlayer(audioFileReader) { Volume = YMMSettings.Default.Volume / 100d };
+                audioPlayer.StreamEnded += Player_StreamEnded;
+                audioPlayer.Play();
+            }
+            catch (Exception ex)
+            {
+                //再生デバイスを開けない等の失敗は利用者側で対処できるため、後始末してから知らせる（ログは外側の catch が書く）。
+                //後始末が失敗しても通知は必ず出す
+                try { StopPlayback(); } catch (Exception cleanupEx) { Log.Default.Write("Irodori-TTS ref voice preview cleanup failed", cleanupEx); }
+                PlaybackFailureNotifier.Notify(string.Format(Texts.PlaybackFailed, ex.Message), "Irodori-TTS");
+                throw;
+            }
             IsPlaying = true;
         }
         catch (Exception ex)
