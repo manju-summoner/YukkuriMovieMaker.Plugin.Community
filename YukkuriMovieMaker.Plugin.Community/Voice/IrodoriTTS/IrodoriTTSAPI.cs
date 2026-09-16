@@ -48,7 +48,7 @@ internal static class IrodoriTTSAPI
     const string V2VoiceDesignCheckpoint = "Aratako/Irodori-TTS-500M-v2-VoiceDesign";
     const string V3TTSCheckpoint = "Aratako/Irodori-TTS-500M-v3";
     const string V3VoiceDesignCheckpoint = "Aratako/Irodori-TTS-600M-v3-VoiceDesign";
-    const string V4Checkpoint = "Aratako/Irodori-TTS-v4-Small";
+    const string V4Checkpoint = "Aratako/Irodori-TTS-v4.1-Small";
     const string DefaultDevice = "cuda";
     const string DefaultPrecision = "fp32";
 
