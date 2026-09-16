@@ -93,9 +93,10 @@
             </TextBlock>
         </Grid>
 
-        <Label Grid.Row="3" Grid.Column="0" Content="{x:Static local:Texts.NumStepsName}" VerticalContentAlignment="Center"/>
+        <Label Grid.Row="3" Grid.Column="0" Content="{x:Static local:Texts.NumStepsName}" VerticalContentAlignment="Center"
+               ToolTip="{x:Static local:Texts.NumStepsDesc}"/>
         <c:TextBoxSlider Grid.Row="3" Grid.Column="1"
-                         Value="{Binding NumSteps}" Min="1" Max="120" DefaultMin="1" DefaultMax="120"
+                         Value="{Binding NumSteps}" Min="0" Max="120" DefaultMin="0" DefaultMax="120"
                          Unit="" Width="200" HorizontalAlignment="Right"/>
 
         <Label Grid.Row="4" Grid.Column="0" Content="{x:Static local:Texts.Seed}" VerticalContentAlignment="Center"/>

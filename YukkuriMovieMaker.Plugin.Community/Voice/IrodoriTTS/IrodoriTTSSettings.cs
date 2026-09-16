@@ -19,7 +19,7 @@ internal class IrodoriTTSSettings : SettingsBase<IrodoriTTSSettings>
     public string LastCaption { get; set => Set(ref field, value); } = string.Empty;
     public string LastSpeechText { get; set => Set(ref field, value); } = string.Empty;
     public string LastSeed { get; set => Set(ref field, value); } = string.Empty;
-    public double LastNumSteps { get; set => Set(ref field, value); } = 40;
+    public double LastNumSteps { get; set => Set(ref field, value); } = IrodoriTTSAPI.AutoNumSteps;
     public string LastVoiceDesignCheckpoint { get; set => Set(ref field, value); } = string.Empty;
 
     public override void Initialize() { }

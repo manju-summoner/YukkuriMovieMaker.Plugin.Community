@@ -32,12 +32,15 @@ internal enum IrodoriTTSApiFormat
 /// （チェックポイント・デバイス）。デバイスはサーバーの実行環境依存
 /// （CPU版torchでは選択肢が cpu のみになり、cuda を送ると弾かれる）のため、サーバー既定を優先する。
 /// 精度は既定が環境依存（choices の先頭）で、採用すると既存ユーザーの合成結果が変わりうるため fp32 固定を維持する。
+/// NumStepsAcceptsBlank は num_steps が gr.Textbox（空欄＝モデルに応じた既定ステップ数）のサーバーで true。
+/// gr.Slider のサーバーに空文字を送ると int() で弾かれるため、送り分けに使う。
 /// </summary>
 internal readonly record struct IrodoriTTSApiInfo(
     IrodoriTTSApiFormat Format,
     string? DefaultCheckpoint = null,
     string? ModelDevice = null,
-    string? CodecDevice = null);
+    string? CodecDevice = null,
+    bool NumStepsAcceptsBlank = false);
 
 internal static class IrodoriTTSAPI
 {
@@ -48,6 +51,15 @@ internal static class IrodoriTTSAPI
     const string V4Checkpoint = "Aratako/Irodori-TTS-v4-Small";
     const string DefaultDevice = "cuda";
     const string DefaultPrecision = "fp32";
+
+    /// <summary>ステップ数の「自動」を表す値。サーバーにモデルに応じた既定ステップ数を選ばせる</summary>
+    internal const int AutoNumSteps = 0;
+
+    /// <summary>
+    /// 空欄を受け付けないサーバー（num_steps が gr.Slider の世代）で「自動」のときに送るステップ数。
+    /// それらの世代のスライダー既定値と同じで、RF サンプラーの既定に一致する
+    /// </summary>
+    internal const int LegacyDefaultNumSteps = 40;
 
     static readonly TimeSpan detectTimeout = TimeSpan.FromSeconds(10);
 
@@ -181,8 +193,9 @@ internal static class IrodoriTTSAPI
         {
             Log.Default.Write($"Irodori-TTS API format detection failed. Using last known format ({cached.Format}).", lastError!);
             // 同一URLでTTS/VoiceDesignアプリを切り替える構成（YMM4管理モード）では、
-            // キャッシュ済みの既定チェックポイントが別アプリのものである可能性があるため世代とデバイス系のみ引き継ぐ
-            return cached with { DefaultCheckpoint = null };
+            // キャッシュ済みの既定チェックポイントが別アプリのものである可能性があるため世代とデバイス系のみ引き継ぐ。
+            // num_steps の空欄可否も引き継がない（サーバーを別版に差し替えた直後に空文字を Slider へ送らないため。整数はどの版でも通る）
+            return cached with { DefaultCheckpoint = null, NumStepsAcceptsBlank = false };
         }
         Log.Default.Write("Irodori-TTS API format detection failed. Fallback to v4 format.", lastError!);
         return new(IrodoriTTSApiFormat.V4);
@@ -214,6 +227,11 @@ internal static class IrodoriTTSAPI
             ? DetectFormatFromParameterShape(paramObjects)
             : DetectFormatFromParameterNames(names, paramObjects);
 
+        // num_steps は世代ではなくスクリプトの版で Slider → Textbox に変わったため、コンポーネント型で個別に見る。
+        // 名前が信頼できないときは位置で当てるより整数を送るほうが安全（どの世代でも整数は通る）
+        var numStepsAcceptsBlank = !usePosition && paramObjects.Any(p =>
+            p["parameter_name"]?.ToString() == "num_steps" && HasComponent(p, "Textbox"));
+
         // 空欄時に使う、サーバーが宣言している既定値
         // （gr.Textbox / gr.Dropdown の value= が /info の parameter_default にそのまま載る。
         //   チェックポイントはローカル運用も含めWeb UIの既定と一致し、
@@ -224,7 +242,19 @@ internal static class IrodoriTTSAPI
             format,
             DefaultCheckpoint: GetServerDefault(paramObjects, "checkpoint", 0, usePosition),
             ModelDevice: GetServerDefault(paramObjects, "model_device", 1, usePosition),
-            CodecDevice: GetServerDefault(paramObjects, "codec_device", 3, usePosition));
+            CodecDevice: GetServerDefault(paramObjects, "codec_device", 3, usePosition),
+            NumStepsAcceptsBlank: numStepsAcceptsBlank);
+    }
+
+    /// <summary>
+    /// num_steps に送る値を決める。「自動」は空欄を受け付けるサーバーにだけ空文字で送り、
+    /// それ以外のサーバーには従来のスライダー既定値を整数で送る。
+    /// </summary>
+    internal static JToken ResolveNumSteps(IrodoriTTSApiInfo info, int numSteps)
+    {
+        if (numSteps != AutoNumSteps)
+            return numSteps;
+        return info.NumStepsAcceptsBlank ? string.Empty : LegacyDefaultNumSteps;
     }
 
     static string? GetServerDefault(JObject[] paramObjects, string parameterName, int position, bool usePosition)
@@ -353,7 +383,7 @@ internal static class IrodoriTTSAPI
                 false,                     // enable_watermark (hidden State component)
                 text,                      // text
                 uploadedAudio,             // uploaded_audio (ref-wav)
-                numSteps,                  // num_steps
+                ResolveNumSteps(info, numSteps), // num_steps
                 1,                         // num_candidates
                 "",                        // seed_raw (empty = random)
                 "independent",             // cfg_guidance_mode
@@ -395,7 +425,7 @@ internal static class IrodoriTTSAPI
             refAudio,                  // uploaded_audio (ref-wav)
             JValue.CreateNull(),       // uploaded_speaker_embedding
             "",                        // speaker_embedding_path_raw
-            numSteps,                  // num_steps
+            ResolveNumSteps(info, numSteps), // num_steps
             1,                         // num_candidates
             "",                        // seed_raw (empty = random)
             "",                        // seconds_raw（空欄 = 自動）
@@ -468,7 +498,7 @@ internal static class IrodoriTTSAPI
                 false,                     // enable_watermark (hidden State component)
                 text,                      // text
                 caption,                   // caption
-                numSteps,                  // num_steps
+                ResolveNumSteps(info, numSteps), // num_steps
                 1,                         // num_candidates
                 seed,                      // seed_raw
                 "independent",             // cfg_guidance_mode
@@ -505,7 +535,7 @@ internal static class IrodoriTTSAPI
             text,                      // text
             caption,                   // caption
             JValue.CreateNull(),       // ref_wav / ref_wavs（VoiceDesignでは参照音声なし）
-            numSteps,                  // num_steps
+            ResolveNumSteps(info, numSteps), // num_steps
             1,                         // num_candidates
             seed,                      // seed_raw
             "",                        // seconds_raw（空欄 = 自動）

@@ -17,7 +17,7 @@ internal class IrodoriTTSVoiceDesignDialogViewModel : Bindable
     public string Caption { get; set { if (Set(ref field, value)) UpdateCommands(); } } = string.Empty;
     public string SpeechText { get; set { if (Set(ref field, value)) UpdateCommands(); } } = string.Empty;
     public string Seed { get; set => Set(ref field, value); } = string.Empty;
-    public double NumSteps { get; set => Set(ref field, value); } = 40;
+    public double NumSteps { get; set => Set(ref field, value); } = IrodoriTTSAPI.AutoNumSteps;
     public string Checkpoint { get; set => Set(ref field, value); } = string.Empty;
 
     // 状態

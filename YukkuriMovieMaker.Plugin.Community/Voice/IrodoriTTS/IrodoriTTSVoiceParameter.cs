@@ -9,10 +9,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.IrodoriTTS;
 internal class IrodoriTTSVoiceParameter : VoiceParameterBase
 {
     [Display(Name = nameof(Texts.NumStepsName), Description = nameof(Texts.NumStepsDesc), ResourceType = typeof(Texts))]
-    [TextBoxSlider("F0", "", 1, 120)]
-    [Range(1, 120)]
-    [DefaultValue(40)]
-    public int NumSteps { get; set => Set(ref field, value); } = 40;
+    [TextBoxSlider("F0", "", 0, 120)]
+    [Range(0, 120)]
+    [DefaultValue(IrodoriTTSAPI.AutoNumSteps)]
+    public int NumSteps { get; set => Set(ref field, value); } = IrodoriTTSAPI.AutoNumSteps;
 
     [Display(Name = nameof(Texts.CfgScaleTextName), Description = nameof(Texts.CfgScaleTextDesc), ResourceType = typeof(Texts))]
     [TextBoxSlider("F1", "", 0, 10)]
