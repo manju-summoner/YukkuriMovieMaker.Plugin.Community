@@ -260,6 +260,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.Vst3
                     hasPendingState ? pendingComponentState : item.ComponentState,
                     hasPendingState ? pendingControllerState : item.ControllerState);
                 newPlugin.Setup(Input!.Hz, MaxBlockFrames);
+                // 状態復元・セットアップ中の構成変更通知は、この直後に取得するレイテンシへ反映済みのため捨てる。
+                // サンプルレート確定時に毎回レイテンシ変更を通知するプラグインでは、残すと読み出しのたびに作り直し続ける
+                newPlugin.ConsumeRestartFlags();
                 parameterSubscription.ReplayLatest();
                 parameterSubscription.ApplyTo(newPlugin);
             }
