@@ -48,7 +48,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
                 var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent";
 
 
-                var content = new StringContent(CreateJson(model, text, prompt), Encoding.UTF8, "application/json");
+                var content = new StringContent(CreateJson(model, voice, text, prompt), Encoding.UTF8, "application/json");
                 var request = new HttpRequestMessage(HttpMethod.Post, url);
                 request.Headers.Add("x-goog-api-key", GeminiTTSSettings.Default.ApiKey);
                 request.Content = content;
@@ -169,8 +169,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
             writer.Write(audioBytes);
         }
 
-        string CreateJson(string model, string text, string prompt)
+        internal static string CreateJson(string model, string voice, string text, string prompt)
         {
+            if (GeminiTTSModel.GetModel(model)?.UsesSpeechMetadata is true)
+                return CreateSpeechMetadataJson(model, voice, text, prompt);
+
             var json = new
             {
                 model,
@@ -207,6 +210,47 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
             };
 
             return Json.Json.GetJsonText(json, new() { TypeNameHandling = Newtonsoft.Json.TypeNameHandling.None });
+        }
+
+        //https://ai.google.dev/gemini-api/docs/generate-content/speech-generation
+        static string CreateSpeechMetadataJson(string model, string voice, string text, string prompt)
+        {
+            var json = new
+            {
+                model,
+                contents = new[]
+                {
+                    new
+                    {
+                        role = "user",
+                        parts = new[]
+                        {
+                            new
+                            {
+                                text,
+                                speech_metadata = string.IsNullOrWhiteSpace(prompt) ? null : new { style = prompt },
+                            },
+                        }
+                    }
+                },
+                generationConfig = new
+                {
+                    responseModalities = new[] { "AUDIO" },
+                    speechConfig = new
+                    {
+                        voiceConfig = new
+                        {
+                            voice,
+                        },
+                    },
+                }
+            };
+
+            return Json.Json.GetJsonText(json, new()
+            {
+                TypeNameHandling = Newtonsoft.Json.TypeNameHandling.None,
+                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+            });
         }
 
         public IVoiceParameter CreateVoiceParameter() => new GeminiTTSVoiceParameter();
