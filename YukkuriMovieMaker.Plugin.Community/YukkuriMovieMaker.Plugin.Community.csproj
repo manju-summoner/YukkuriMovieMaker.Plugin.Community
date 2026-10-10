@@ -7,6 +7,9 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>Debug;Release;ReleaseLite;DebugLite</Configurations>
+    <!--VS（MSBuild.exe）は既定で衛星アセンブリを al.exe で作るが、al.exe は長いパスに対応しておらず、
+        リソース名が長いこのプロジェクトは深いフォルダ（git worktree など）で AL1065 になる。dotnet build と同じく csc で作る-->
+    <GenerateSatelliteAssembliesForCore>true</GenerateSatelliteAssembliesForCore>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='ReleaseLite'">
     <DefineConstants>$(DefineConstants);RELEASE;LITE</DefineConstants>
