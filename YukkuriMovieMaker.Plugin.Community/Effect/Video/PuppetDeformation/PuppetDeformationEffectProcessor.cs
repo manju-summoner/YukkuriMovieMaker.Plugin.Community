@@ -51,6 +51,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         Vector2 arapMeshCenter;
         //メッシュが入力のアルファに沿っているか（falseは大きすぎて読み戻せず、範囲全体を覆うメッシュにしたもの）
         bool arapMeshFollowsAlpha;
+        //メッシュを構築したときの入力が完全に透明だったか。範囲全体を覆うグリッドになるため、後から現れた中身がはみ出しとして検知されない
+        bool arapMeshBuiltFromEmptyAlpha;
         ArapMeshEscapeDetector? arapEscapeDetector;
         ArapDeformer? arapDeformer;
         ArapDeformer? solvedDeformer;
@@ -370,7 +372,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
                 //画像全体が平行移動した場合（入力の範囲と一緒に中身が動く）は、メッシュを今の入力中央へ置き直せば覆えることが多い。
                 //作り直すより軽く、部位の分け方も変わらない
-                if (canDetectEscape && arapMeshFollowsAlpha && arapMeshCenter != inputCenter
+                if (canDetectEscape && arapMeshFollowsAlpha && !arapMeshBuiltFromEmptyAlpha && arapMeshCenter != inputCenter
                     && !arapEscapeDetector!.HasContentOutsideMesh(input!, inputBounds, arapMesh, Vector2.Zero))
                 {
                     arapMeshCenter = inputCenter;
@@ -379,7 +381,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             }
 
             //透明領域で隔てられた部位を独立して変形できるよう、アルファ輪郭に沿ったメッシュを構築する（構築できない場合はグリッド＋三角形間引きへフォールバック）
-            var mesh = BuildArapMesh(width, height);
+            var (mesh, alphaEmpty) = BuildArapMesh(width, height);
             //覆えていない場所の記録で例外が出たときに、新しいメッシュだけが残って頂点が更新されない状態にしないよう、記録してから差し替える
             if (canDetectEscape)
                 arapEscapeDetector!.AcceptUncovered(input!, inputBounds, mesh, Vector2.Zero);
@@ -388,6 +390,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             arapMesh = mesh;
             arapMeshCenter = inputCenter;
             arapMeshFollowsAlpha = canDetectEscape;
+            arapMeshBuiltFromEmptyAlpha = alphaEmpty;
             arapDeformer = null;
             deformedPositions = new Vector2[mesh.VertexCount];
             return true;
@@ -406,6 +409,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             //読み戻せる大きさに戻ったら、部位を分けたメッシュにするため一度作り直す
             if (!arapMeshFollowsAlpha)
                 return true;
+
+            //透明な入力から作ったメッシュは範囲全体を覆うため、はみ出しの検知では中身が現れたことが分からない。
+            //不透明な画素が現れたら部位を分けたメッシュにするため作り直す（透明な間は作り直さない）
+            if (arapMeshBuiltFromEmptyAlpha)
+                return arapEscapeDetector!.HasOpaqueContent(input!, inputBounds);
 
             return arapEscapeDetector!.HasContentOutsideMesh(input!, inputBounds, arapMesh!, arapMeshCenter - inputCenter);
         }
@@ -517,8 +525,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         /// 画像サイズに応じたARAPメッシュを構築する。
         /// アルファ輪郭に沿ったメッシュを優先し、構築できない場合（読み戻し不可・
         /// 病的な輪郭・三角形予算超過など）は従来のグリッド＋完全透明三角形の間引きへフォールバックする。
+        /// AlphaEmptyは、アルファを読み戻せたが不透明な画素が無く、範囲全体を覆うグリッドになったときにtrue。
         /// </summary>
-        IArapMesh BuildArapMesh(float width, float height)
+        (IArapMesh Mesh, bool AlphaEmpty) BuildArapMesh(float width, float height)
         {
             var alpha = TryReadbackAlphaMask(width, height);
             if (alpha is var (opaque, w, h))
@@ -527,16 +536,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     opaque, w, h, width, height,
                     PuppetDeformationArapCustomEffect.MaxTriangles, ArapMinSpacing);
                 if (contourMesh is not null)
-                    return contourMesh;
+                    return (contourMesh, false);
             }
 
             var grid = ArapGridMesh.Create(width, height, PuppetDeformationArapCustomEffect.MaxTriangles, ArapMinSpacing);
             if (alpha is var (opaque2, w2, h2))
             {
+                if (Array.IndexOf(opaque2, true) < 0)
+                    return (grid, true);
                 var keep = BuildAlphaTriangleMask(grid, opaque2, w2, h2, width, height);
                 grid = grid.WithTriangleMask(keep);
             }
-            return grid;
+            return (grid, false);
         }
 
         /// <summary>

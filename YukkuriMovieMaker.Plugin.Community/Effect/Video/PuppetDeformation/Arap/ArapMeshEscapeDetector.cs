@@ -175,32 +175,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     coverageUnion.SetInput(1, placed, true);
                 }
 
-                var downscale = ComputeDownscale(inputBounds);
-                var (cellLeft, cellTop, size) = GetCellRange(inputBounds, downscale);
-                if (size.Width <= 0 || size.Height <= 0)
-                    return false;
-                EnsureReadbackBitmaps(size);
-                Scan(input, inputBounds, mesh, meshToInputLocal, downscale, cellLeft, cellTop, size, gpuBitmap!, cpuBitmap!);
-
-                var map = cpuBitmap!.Map(MapOptions.Read);
-                try
-                {
-                    var ptr = (byte*)map.Bits;
-                    for (var y = 0; y < size.Height; y++)
-                    {
-                        var row = ptr + (long)y * map.Pitch;
-                        for (var x = 0; x < size.Width; x++)
-                        {
-                            if (row[x] != 0)
-                                return true;
-                        }
-                    }
-                    return false;
-                }
-                finally
-                {
-                    cpuBitmap.Unmap();
-                }
+                return ScanDownscaled(input, inputBounds, mesh, meshToInputLocal);
             }
             finally
             {
@@ -210,6 +185,44 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     coverageUnion.InputCount = 1;
                 }
                 acceptedPlacement.SetInput(0, null, true);
+            }
+        }
+
+        /// <summary>
+        /// 入力に不透明な画素が1つでもあればtrueを返す。完全に透明な入力から作ったメッシュは範囲全体を覆うため、
+        /// 中身が現れたことをはみ出しでは検知できない。その間の毎フレームの判定を、はみ出しの判定と同じ縮小した読み戻しで済ませる
+        /// </summary>
+        public bool HasOpaqueContent(ID2D1Image input, Vortice.RawRectF inputBounds)
+            => ScanDownscaled(input, inputBounds, null, Vector2.Zero);
+
+        /// <param name="mesh">被覆を引くメッシュ。nullなら入力をそのまま調べる</param>
+        unsafe bool ScanDownscaled(ID2D1Image input, Vortice.RawRectF inputBounds, IArapMesh? mesh, Vector2 meshToInputLocal)
+        {
+            var downscale = ComputeDownscale(inputBounds);
+            var (cellLeft, cellTop, size) = GetCellRange(inputBounds, downscale);
+            if (size.Width <= 0 || size.Height <= 0)
+                return false;
+            EnsureReadbackBitmaps(size);
+            Scan(input, inputBounds, mesh, meshToInputLocal, downscale, cellLeft, cellTop, size, gpuBitmap!, cpuBitmap!);
+
+            var map = cpuBitmap!.Map(MapOptions.Read);
+            try
+            {
+                var ptr = (byte*)map.Bits;
+                for (var y = 0; y < size.Height; y++)
+                {
+                    var row = ptr + (long)y * map.Pitch;
+                    for (var x = 0; x < size.Width; x++)
+                    {
+                        if (row[x] != 0)
+                            return true;
+                    }
+                }
+                return false;
+            }
+            finally
+            {
+                cpuBitmap.Unmap();
             }
         }
 
@@ -235,18 +248,25 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         }
 
         /// <summary>
-        /// 入力のうち被覆に含まれない画素を、downscale角のセルに縮小してcpuの左上(size分)へ読み戻す。
+        /// 入力のうち被覆に含まれない画素を、downscale角のセルに縮小してcpuの左上(size分)へ読み戻す。meshがnullなら被覆を引かない。
         /// </summary>
-        void Scan(ID2D1Image input, Vortice.RawRectF inputBounds, IArapMesh mesh, Vector2 meshToInputLocal, int downscale, int cellLeft, int cellTop, SizeI size, ID2D1Bitmap1 gpu, ID2D1Bitmap1 cpu)
+        void Scan(ID2D1Image input, Vortice.RawRectF inputBounds, IArapMesh? mesh, Vector2 meshToInputLocal, int downscale, int cellLeft, int cellTop, SizeI size, ID2D1Bitmap1 gpu, ID2D1Bitmap1 cpu)
         {
-            UpdateCoverage(mesh, meshToInputLocal);
-            coverageSource.Rectangle = new Vector4(inputBounds.Left, inputBounds.Top, inputBounds.Right, inputBounds.Bottom);
             //縮小時は各画素がセル中央の1点しか見ないため、セル内のどこにある残りも中央へ届く幅まで膨張させる
             var dilateSize = downscale == 1 ? 1 : downscale * 2 + 1;
             dilate.Width = dilateSize;
             dilate.Height = dilateSize;
 
-            subtract.SetInput(0, input, true);
+            if (mesh is null)
+            {
+                dilate.SetInput(0, input, true);
+            }
+            else
+            {
+                UpdateCoverage(mesh, meshToInputLocal);
+                coverageSource.Rectangle = new Vector4(inputBounds.Left, inputBounds.Top, inputBounds.Right, inputBounds.Bottom);
+                subtract.SetInput(0, input, true);
+            }
             var previousTarget = deviceContext.Target;
             var previousTransform = deviceContext.Transform;
             try
@@ -266,7 +286,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 deviceContext.Transform = previousTransform;
                 deviceContext.Target = previousTarget;
                 previousTarget?.Dispose();
-                subtract.SetInput(0, null, true);
+                if (mesh is null)
+                {
+                    using var subtractOutput = subtract.Output;
+                    dilate.SetInput(0, subtractOutput, true);
+                }
+                else
+                {
+                    subtract.SetInput(0, null, true);
+                }
             }
 
             cpu.CopyFromBitmap(new Int2(0, 0), gpu, new Vortice.RawRect(0, 0, size.Width, size.Height));
