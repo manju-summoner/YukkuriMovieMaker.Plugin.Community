@@ -42,7 +42,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
                 var resJson = JObject.Parse(resJsonText);
                 var status = resJson?["detail"]?["status"]?.Value<string>();
                 var message = resJson?["detail"]?["message"]?.Value<string>();
-                throw new ElevenLabsException(status, message);
+                throw new ElevenLabsException(status, message, ElevenLabsDefaultVoices.Find(voiceId) is { } expiring ? string.Format(Texts.DefaultVoiceExpirationError, expiring.Name, expiring.ReplacementName) : null);
             }
             response.EnsureSuccessStatusCode();
 
@@ -52,5 +52,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
         }
     }
 
-    public class ElevenLabsException(string? status, string? message) : Exception($"[{status ?? "null"}] {message ?? "null"}");
+    public class ElevenLabsException : Exception
+    {
+        public ElevenLabsException(string? status, string? message) : base(FormatMessage(status, message, null)) { }
+
+        /// <param name="hint">API のエラーに添える、YMM4 側で分かる原因（期限切れになったデフォルトのボイスなど）</param>
+        public ElevenLabsException(string? status, string? message, string? hint) : base(FormatMessage(status, message, hint)) { }
+
+        static string FormatMessage(string? status, string? message, string? hint)
+        {
+            var text = $"[{status ?? "null"}] {message ?? "null"}";
+            return string.IsNullOrEmpty(hint) ? text : text + Environment.NewLine + hint;
+        }
+    }
 }

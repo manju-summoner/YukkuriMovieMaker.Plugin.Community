@@ -23,5 +23,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
         {
             InitializeComponent();
         }
+
+        void AddFromElevenLabsButton_Click(object sender, RoutedEventArgs e)
+        {
+            //入力中の行があると、選択画面が表に足す行と DataGrid の新しい行の追加が重なるので、先に確定しておく
+            dataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+            var window = new ElevenLabsVoicePickerWindow { Owner = Window.GetWindow(this) };
+            window.ShowDialog();
+        }
     }
 }

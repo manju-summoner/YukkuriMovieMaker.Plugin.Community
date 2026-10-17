@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,7 +23,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
         public string? TTSModel { get => ttsModel; set => Set(ref ttsModel, value); }
         string? ttsModel = null;
 
-        public List<ElevenLabsVoice> Voices { get; } = [];
+        /// <summary>
+        /// 話者一覧に出す声。手入力の行と、ボイス一覧 API から選んで足した行が混ざる。
+        /// 選んで足した行を設定画面の表にすぐ出すため、変更を通知するコレクションにしている
+        /// </summary>
+        public ObservableCollection<ElevenLabsVoice> Voices { get; } = [];
 
         public override void Initialize()
         {
