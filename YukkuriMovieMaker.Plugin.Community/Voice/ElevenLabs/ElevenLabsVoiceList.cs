@@ -78,34 +78,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
             {
                 var message = TryGetErrorMessage(text);
                 //API の英語のメッセージはログで原因を追えるように内側の例外に残す
-                if (GetPermissionErrorMessage(text) is { } permissionMessage)
+                if (ElevenLabsPermissionError.GetMessage(text) is { } permissionMessage)
                     throw new Exception(permissionMessage, message is null ? null : new Exception(message));
                 if (!string.IsNullOrEmpty(message))
                     throw new Exception(message);
                 response.EnsureSuccessStatusCode();
             }
             return text;
-        }
-
-        /// <summary>
-        /// 権限を絞った API キーで一覧を取ると、401 で status が missing_permissions、message に足りない権限（voices_read）が返る。
-        /// API の英語のメッセージでは ElevenLabs のどの設定を直せばよいか分からないので、設定画面の項目名で案内する
-        /// </summary>
-        public static string? GetPermissionErrorMessage(string responseText)
-        {
-            JObject? detail;
-            try
-            {
-                detail = JObject.Parse(responseText)["detail"] as JObject;
-            }
-            catch (Newtonsoft.Json.JsonException)
-            {
-                return null;
-            }
-
-            return GetString(detail, "status") == "missing_permissions" && GetString(detail, "message").Contains("voices_read", StringComparison.Ordinal)
-                ? Texts.MissingVoicesReadPermission
-                : null;
         }
 
         /// <summary>
