@@ -142,8 +142,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
             };
 
         /// <summary>
-        /// 声を選ぶ画面に並べる声。期限切れになるデフォルトのボイスは新しく選ばせないので除く。
-        /// 自分の声 → Voice Library → デフォルトの順に、それぞれ名前の順で並べる
+        /// 声を選ぶ画面に並べる声。自作 → ライブラリ → デフォルトの順に、それぞれ名前の順で並べる。
+        /// 期限切れになるデフォルトのボイスも、使えるうちは除かない。使えなくなれば一覧 API から返らなくなるため
         /// </summary>
         public static List<ElevenLabsVoiceInfo> CreateCatalog(IEnumerable<ElevenLabsVoiceInfo> voices)
         {
@@ -151,7 +151,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
             return
             [
                 .. voices
-                .Where(v => !ElevenLabsDefaultVoices.IsExpiring(v.VoiceId) && seen.Add(v.VoiceId))
+                .Where(v => seen.Add(v.VoiceId))
                 .OrderBy(v => v.Kind)
                 .ThenBy(v => v.SpeakerName, StringComparer.CurrentCultureIgnoreCase)
                 .ThenBy(v => v.VoiceId, StringComparer.Ordinal),

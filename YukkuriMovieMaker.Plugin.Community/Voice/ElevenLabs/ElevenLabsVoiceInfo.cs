@@ -29,7 +29,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
         public string Description { get; init; } = string.Empty;
 
         /// <summary>
-        /// is_owner が返らないときは、デフォルト（premade）以外を自分の声とみなす
+        /// is_owner が返らないときは、デフォルト（premade）以外を自作とみなす
         /// </summary>
         public ElevenLabsVoiceKind Kind =>
             Category == "premade" ? ElevenLabsVoiceKind.Default
