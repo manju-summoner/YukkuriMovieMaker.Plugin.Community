@@ -6,7 +6,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.PiperPlus.Resource;
 
 internal static class PiperBinaryResource
 {
-    public const string Version = "v1.13.0";
+    public const string Version = "v2.0.2";
 
     const string ExecutableName = "PiperPlus.Cli.exe";
     const string RepoOwner = "ayutaz";
