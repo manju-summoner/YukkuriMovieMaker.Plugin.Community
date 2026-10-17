@@ -66,7 +66,7 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry, IVoiceResou
         return null;
     }
 
-    void RunPiper(
+    internal ProcessStartInfo CreateStartInfo(
         string text,
         PiperPlusVoiceParameter param,
         string filePath)
@@ -117,6 +117,20 @@ internal sealed class PiperPlusVoiceSpeaker(PiperSpeakerEntry entry, IVoiceResou
         startInfo.Environment["TEMP"] = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);
         startInfo.Environment["TMP"] = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);
 
+        //辞書は YMM4 がエンジンと一緒に導入したものを使わせる。CLI が自分でダウンロードを始めると、
+        //進捗が出ないまま合成の打ち切り時間に達して失敗し、次回も最初からやり直しになる
+        startInfo.Environment["OPENJTALK_DICTIONARY_PATH"] = PiperPlusPaths.DictionaryDirectory;
+        startInfo.Environment["PIPER_PLUS_AUTO_DOWNLOAD_DICT"] = "0";
+
+        return startInfo;
+    }
+
+    void RunPiper(
+        string text,
+        PiperPlusVoiceParameter param,
+        string filePath)
+    {
+        var startInfo = CreateStartInfo(text, param, filePath);
         var stderrBuilder = new StringBuilder();
 
         using var process = new Process { StartInfo = startInfo };

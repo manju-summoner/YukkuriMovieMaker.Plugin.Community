@@ -1,4 +1,5 @@
 using System.IO;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using YukkuriMovieMaker.Commons;
 
@@ -15,33 +16,52 @@ internal static class PiperBinaryResource
 
     static readonly SemaphoreSlim InstallGate = new(1, 1);
 
-    static string InstalledVersionFilePath =>
-        Path.Combine(PiperPlusPaths.BinaryDirectory, InstalledVersionFileName);
+    public static string? InstalledVersion => GetInstalledVersion(PiperPlusPaths.BinaryDirectory);
 
-    public static string? InstalledVersion
+    static string? GetInstalledVersion(string binaryDirectory)
     {
-        get
+        var path = Path.Combine(binaryDirectory, InstalledVersionFileName);
+        if (!File.Exists(path))
+            return null;
+        try
         {
-            var path = InstalledVersionFilePath;
-            if (!File.Exists(path))
-                return null;
-            try
-            {
-                return File.ReadAllText(path).Trim();
-            }
-            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-            {
-                return null;
-            }
+            return File.ReadAllText(path).Trim();
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            return null;
         }
     }
 
     public static string ExecutablePath => Path.Combine(PiperPlusPaths.BinaryDirectory, ExecutableName);
 
-    public static bool IsReady => InstalledVersion == Version && File.Exists(ExecutablePath);
+    public static bool IsReady => IsReadyIn(PiperPlusPaths.BinaryDirectory, Version);
 
-    public static async Task InstallAsync(
+    internal static bool IsReadyIn(string binaryDirectory, string version) =>
+        IsBinaryReadyIn(binaryDirectory, version)
+        && OpenJTalkDictionaryResource.IsValid(PiperPlusPaths.GetDictionaryDirectory(binaryDirectory));
+
+    static bool IsBinaryReadyIn(string binaryDirectory, string version) =>
+        GetInstalledVersion(binaryDirectory) == version
+        && File.Exists(Path.Combine(binaryDirectory, ExecutableName));
+
+    public static Task InstallAsync(
         string version,
+        ProgressMessage? progress = null,
+        CancellationToken cancellationToken = default)
+        => InstallAsync(
+            version,
+            PiperPlusPaths.BinaryDirectory,
+            HttpClientFactory.Client,
+            OpenJTalkDictionaryResource.Source,
+            progress,
+            cancellationToken);
+
+    internal static async Task InstallAsync(
+        string version,
+        string binaryDirectory,
+        HttpClient client,
+        OpenJTalkDictionarySource dictionarySource,
         ProgressMessage? progress = null,
         CancellationToken cancellationToken = default)
     {
@@ -55,10 +75,30 @@ internal static class PiperBinaryResource
         await InstallGate.WaitAsync(cancellationToken);
         try
         {
-            if (InstalledVersion == version && IsReady)
+            //辞書の段階だけ失敗した後の再試行や、辞書フォルダが欠けたときに、導入済みのバイナリを取り直させない
+            var needsBinary = !IsBinaryReadyIn(binaryDirectory, version);
+            var dictionaryDirectory = PiperPlusPaths.GetDictionaryDirectory(binaryDirectory);
+            var needsDictionary = !OpenJTalkDictionaryResource.IsValid(dictionaryDirectory);
+            if (!needsBinary && !needsDictionary)
                 return;
 
-            await InstallCoreAsync(version, assetName, progress, cancellationToken);
+            //バイナリと辞書はどちらも約23MBなので、両方必要なときは進捗を半分ずつ割り当てる
+            var binaryEndFraction = (needsBinary, needsDictionary) switch
+            {
+                (true, true) => 0.5,
+                (true, false) => 1.0,
+                _ => 0.0,
+            };
+
+            if (needsBinary)
+                await InstallBinaryAsync(version, assetName, binaryDirectory, client,
+                    0.0, binaryEndFraction, progress, cancellationToken);
+
+            if (needsDictionary)
+                await OpenJTalkDictionaryResource.InstallAsync(client, dictionarySource, dictionaryDirectory,
+                    binaryEndFraction, 1.0, progress, cancellationToken);
+
+            progress?.Report(1.0, Texts.BinaryReady);
         }
         finally
         {
@@ -77,13 +117,16 @@ internal static class PiperBinaryResource
         return assetName.Length > 0;
     }
 
-    static async Task InstallCoreAsync(
+    static async Task InstallBinaryAsync(
         string version,
         string assetName,
+        string targetDir,
+        HttpClient client,
+        double startFraction,
+        double endFraction,
         ProgressMessage? progress,
         CancellationToken cancellationToken)
     {
-        var targetDir = PiperPlusPaths.BinaryDirectory;
         var tempDir = targetDir + ".tmp";
 
         if (Directory.Exists(tempDir))
@@ -93,9 +136,9 @@ internal static class PiperBinaryResource
 
         try
         {
-            await DownloadAndExtractAsync(version, assetName, tempDir, progress, cancellationToken);
+            await DownloadAndExtractAsync(version, assetName, tempDir, client,
+                startFraction, endFraction, progress, cancellationToken);
             CommitInstall(version, targetDir, tempDir);
-            progress?.Report(1.0, Texts.BinaryReady);
         }
         catch
         {
@@ -114,19 +157,22 @@ internal static class PiperBinaryResource
         string version,
         string assetName,
         string tempDir,
+        HttpClient client,
+        double startFraction,
+        double endFraction,
         ProgressMessage? progress,
         CancellationToken cancellationToken)
     {
         var zipPath = Path.Combine(tempDir, assetName);
         var downloadUrl = $"https://github.com/{RepoOwner}/{RepoName}/releases/download/{version}/{assetName}";
-        var client = HttpClientFactory.Client;
+        var extractStartFraction = startFraction + (endFraction - startFraction) * 0.9;
 
         await ProgressiveIo.DownloadFileAsync(client, downloadUrl, zipPath,
-            startFraction: 0.0, endFraction: 0.9,
+            startFraction, extractStartFraction,
             Texts.DownloadingBinary, progress, cancellationToken);
 
         await ProgressiveIo.ExtractZipAsync(zipPath, tempDir,
-            startFraction: 0.9, endFraction: 1.0,
+            extractStartFraction, endFraction,
             Texts.ExtractingBinary, progress, cancellationToken);
 
         File.Delete(zipPath);
@@ -154,7 +200,7 @@ internal static class PiperBinaryResource
                 throw new FileNotFoundException(
                     $"Piper Plus CLI executable not found after install in '{targetDir}'.");
 
-            File.WriteAllText(InstalledVersionFilePath, version);
+            File.WriteAllText(Path.Combine(targetDir, InstalledVersionFileName), version);
             try { Directory.Delete(tempDir, recursive: true); } catch { }
 
         }
