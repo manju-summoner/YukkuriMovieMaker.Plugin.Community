@@ -42,8 +42,5 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
         /// </summary>
         public static ElevenLabsExpiringVoice? Find(string? voiceId) =>
             voiceId is not null && byId.TryGetValue(voiceId, out var voice) ? voice : null;
-
-        public static string? GetWarning(string? voiceId) =>
-            Find(voiceId) is { } voice ? string.Format(Texts.DefaultVoiceExpirationWarning, voice.Name, voice.ReplacementName) : null;
     }
 }

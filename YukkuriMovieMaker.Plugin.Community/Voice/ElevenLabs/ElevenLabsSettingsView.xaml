@@ -41,13 +41,6 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="{x:Static local:Texts.SpeakerName}" Binding="{Binding Name}" Width="*"/>
                         <DataGridTextColumn Header="{x:Static local:Texts.ID}" Binding="{Binding Id}" Width="*"/>
-                        <DataGridTemplateColumn Header="{x:Static local:Texts.Warning}" Width="*" IsReadOnly="True">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding ExpirationWarning, Mode=OneWay}" ToolTip="{Binding ExpirationWarning, Mode=OneWay}" Foreground="Red" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
                 <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
