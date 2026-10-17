@@ -8,13 +8,13 @@ using YukkuriMovieMaker.Plugin.Voice;
 namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
 {
     //https://ai.google.dev/gemini-api/docs/speech-generation
-    internal class GeminiTTSVoiceSpeaker(string voice) : IVoiceSpeaker
+    internal class GeminiTTSVoiceSpeaker(string voice, string? speakerName = null) : IVoiceSpeaker
     {
         static readonly SemaphoreSlim semaphore = new(1);
         static DateTime lastRequest = DateTime.MinValue;
         public string EngineName => API;
 
-        public string SpeakerName => voice;
+        public string SpeakerName => speakerName ?? voice;
 
         public string API => "GeminiTTS";
 
@@ -38,13 +38,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
             if(parameter is not GeminiTTSVoiceParameter geminiTTSParameter)
                 geminiTTSParameter = new GeminiTTSVoiceParameter();
 
+            var model = GeminiTTSSettings.Default.Model;
+            ValidateVoiceForModel(model, voice);
+
             await semaphore.WaitAsync();
             try
             {
                 await WaitRateLimitAsync();
                 var prompt = geminiTTSParameter.Prompt;
 
-                var model = GeminiTTSSettings.Default.Model;
                 var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent";
 
 
@@ -58,8 +60,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
                 if (response.StatusCode is not System.Net.HttpStatusCode.OK)
                 {
                     var errorText = await response.Content.ReadAsStringAsync();
-                    var error = JObject.Parse(errorText);
-                    var message = error["error"]?["message"]?.Value<string>();
+                    var message = CreateErrorMessage(response.StatusCode, voice, GeminiTTSVoiceList.TryGetErrorMessage(errorText));
                     if (!string.IsNullOrEmpty(message))
                         throw new Exception(message);
                 }
@@ -167,6 +168,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
             writer.Write(Encoding.ASCII.GetBytes("data"));
             writer.Write(dataChunkSize);
             writer.Write(audioBytes);
+        }
+
+        /// <summary>
+        /// 3.8 より前のモデルはプリセットの声しか使えず、それ以外の声は分かりにくい API エラーになるので、送る前に止める
+        /// </summary>
+        internal static void ValidateVoiceForModel(string model, string voice)
+        {
+            if (GeminiTTSModel.GetModel(model)?.UsesSpeechMetadata is true || GeminiTTSVoiceList.IsPreset(voice))
+                return;
+            throw new Exception(string.Format(Texts.VoiceRequiresGemini38, voice, model));
+        }
+
+        /// <summary>
+        /// 選んだ声が Google 側で削除されると 404 になる（ボイスは最後に使ってから1年で自動削除される）
+        /// </summary>
+        internal static string? CreateErrorMessage(System.Net.HttpStatusCode statusCode, string voice, string? apiMessage)
+        {
+            if (statusCode is System.Net.HttpStatusCode.NotFound && !GeminiTTSVoiceList.IsPreset(voice))
+                return string.Format(Texts.VoiceNotFound, voice) + (string.IsNullOrEmpty(apiMessage) ? string.Empty : Environment.NewLine + apiMessage);
+            return apiMessage;
         }
 
         internal static string CreateJson(string model, string voice, string text, string prompt)

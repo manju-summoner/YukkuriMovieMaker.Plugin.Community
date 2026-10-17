@@ -24,5 +24,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
         {
             InitializeComponent();
         }
+
+        void AddVoicesButton_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new GeminiTTSVoicePickerWindow { Owner = Window.GetWindow(this) };
+            window.ShowDialog();
+        }
+
+        void DeleteVoicesButton_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var voice in voicesDataGrid.SelectedItems.OfType<GeminiTTSVoiceInfo>().ToList())
+                GeminiTTSSettings.Default.Voices.Remove(voice);
+        }
     }
 }

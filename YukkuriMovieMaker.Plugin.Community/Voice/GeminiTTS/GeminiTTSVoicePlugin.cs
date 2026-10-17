@@ -11,7 +11,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
 {
     internal class GeminiTTSVoicePlugin : IVoicePlugin
     {
-        public IEnumerable<IVoiceSpeaker> Voices => !string.IsNullOrWhiteSpace(GeminiTTSSettings.Default.ApiKey) ? GeminiTTSVoices.Voices.Select(v => new GeminiTTSVoiceSpeaker(v)) : [];
+        public IEnumerable<IVoiceSpeaker> Voices => !string.IsNullOrWhiteSpace(GeminiTTSSettings.Default.ApiKey) ? GeminiTTSVoiceList.CreateSpeakerList(GeminiTTSSettings.Default.Voices).Select(v => new GeminiTTSVoiceSpeaker(v.Id, v.Name)) : [];
 
         public bool CanUpdateVoices => false;
 

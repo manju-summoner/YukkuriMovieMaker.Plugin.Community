@@ -8,7 +8,12 @@
              xmlns:s="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Expander Header="GeminiTTS" IsExpanded="True">
+    <Grid>
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+    <Expander Grid.Row="0" Header="GeminiTTS" IsExpanded="True">
         <StackPanel>
             <Grid>
                 <Label Content="{x:Static local:Texts.APIKey}"/>
@@ -29,4 +34,24 @@
             </Grid>
         </StackPanel>
     </Expander>
+    <Expander Grid.Row="1" Header="{x:Static local:Texts.SpeakerList}" IsExpanded="True">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="26"/>
+            </Grid.RowDefinitions>
+            <DataGrid x:Name="voicesDataGrid" ItemsSource="{Binding Source={x:Static local:GeminiTTSSettings.Default},Path=Voices}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" SelectionMode="Extended" HeadersVisibility="Column">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{x:Static local:Texts.VoiceName}" Binding="{Binding SpeakerName, Mode=OneWay}" Width="*"/>
+                    <DataGridTextColumn Header="{x:Static local:Texts.Language}" Binding="{Binding LanguageCode, Mode=OneWay}"/>
+                    <DataGridTextColumn Header="{x:Static local:Texts.VoiceID}" Binding="{Binding Id, Mode=OneWay}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="{x:Static local:Texts.AddVoices}" Width="100" Click="AddVoicesButton_Click"/>
+                <Button Content="{x:Static local:Texts.Delete}" Width="100" Click="DeleteVoicesButton_Click"/>
+            </StackPanel>
+        </Grid>
+    </Expander>
+    </Grid>
 </UserControl>
