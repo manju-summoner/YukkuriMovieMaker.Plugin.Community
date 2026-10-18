@@ -46,7 +46,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
 
         //ARAP用キャッシュ
         IArapMesh? arapMesh;
+        //メッシュ構築時の入力中央（アイテム座標）。メッシュ・ソルバーはこれを原点とする座標で持ち、
+        //入力の範囲が変わってもメッシュを作り直さず中身に対して固定しておく
+        Vector2 arapMeshCenter;
+        //メッシュが入力のアルファに沿っているか（falseは大きすぎて読み戻せず、範囲全体を覆うメッシュにしたもの）
+        bool arapMeshFollowsAlpha;
+        //メッシュを構築したときの入力が完全に透明だったか。範囲全体を覆うグリッドになるため、後から現れた中身がはみ出しとして検知されない
+        bool arapMeshBuiltFromEmptyAlpha;
+        ArapMeshEscapeDetector? arapEscapeDetector;
         ArapDeformer? arapDeformer;
+        ArapDeformer? solvedDeformer;
+        Vector2[]? solvedTargets;
         Vector2[]? arapRests;
         Vector2[]? arapRestCandidates;
         Vector2[]? deformedPositions;
@@ -54,6 +64,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         bool useArapWiring;
 
 #if DEBUG
+        internal IArapMesh? ArapMeshForTest => arapMesh;
+
         //デバッグ用メッシュ表示: 最終出力にワイヤーフレームのコマンドリストを合成する
         D2DEffects.Composite? debugMeshComposite;
         ID2D1CommandList? debugMeshCommandList;
@@ -195,13 +207,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 || this.boneCount != boneCount
                 || !BoneSamplesMatchBuffer(boneSamples, boneIndexById);
 
-            if (gpuDirty)
+            //入力の中身の変化はgpuDirtyに現れないため、ARAP時はメッシュの外へのはみ出しを毎フレーム確かめる
+            var arapMeshChanged = useArap && EnsureArapMesh(inputBounds, imageWidth, imageHeight, inputCenter);
+
+            if (gpuDirty || arapMeshChanged)
             {
                 if (useArap)
                 {
                     FillPinDataBuffer(gpuSamples);
-                    UpdateArapEffect(gpuSamples, apply, imageWidth, imageHeight);
-
+                    UpdateArapEffect(gpuSamples, apply, inputCenter);
                 }
                 else
                 {
@@ -240,7 +254,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             SetWiring(useArap);
 
 #if DEBUG
-            UpdateDebugMeshOverlay(useArap && item.ShowDebugMesh, gpuDirty, inputCenter);
+            UpdateDebugMeshOverlay(useArap && item.ShowDebugMesh, gpuDirty || arapMeshChanged, arapMeshCenter);
 #endif
 
             isFirst = false;
@@ -344,26 +358,79 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             Array.Clear(pinDataBuffer, samples.Count * 4, (maxPins - samples.Count) * 4);
         }
 
-        void UpdateArapEffect(List<PinSample> samples, bool apply, float width, float height)
+        /// <summary>
+        /// ARAPメッシュが無いか、入力の不透明な画素がメッシュの外へはみ出していればメッシュを置き直すか作り直す。メッシュが変わった場合はtrueを返す。
+        /// 作り直すと変形の解が変わって跳ねるため、入力の範囲が変わっただけでは作り直さない。
+        /// </summary>
+        bool EnsureArapMesh(Vortice.RawRectF inputBounds, float width, float height, Vector2 inputCenter)
         {
-            if (arapEffect is null)
-                return;
-
-            //メッシュは画像サイズに依存する。透明領域で隔てられた部位を独立して変形できるよう、
-            //アルファ輪郭に沿ったメッシュを構築する（構築できない場合はグリッド＋三角形間引きへフォールバック）。
-            //アルファは再構築時点の入力から取得する（動画では以後のアルファ変化に追従しない）
-            if (arapMesh is null || !ArapMeshSizeNearlyEqual(arapMesh, width, height))
+            var canDetectEscape = CanDetectArapMeshEscape(width, height);
+            if (arapMesh is not null)
             {
-                arapMesh = BuildArapMesh(width, height);
-                arapDeformer = null;
-                deformedPositions = new Vector2[arapMesh.VertexCount];
+                if (!ArapMeshNeedsRebuild(inputBounds, width, height, inputCenter, canDetectEscape))
+                    return false;
+
+                //画像全体が平行移動した場合（入力の範囲と一緒に中身が動く）は、メッシュを今の入力中央へ置き直せば覆えることが多い。
+                //作り直すより軽く、部位の分け方も変わらない
+                if (canDetectEscape && arapMeshFollowsAlpha && !arapMeshBuiltFromEmptyAlpha && arapMeshCenter != inputCenter
+                    && !arapEscapeDetector!.HasContentOutsideMesh(input!, inputBounds, arapMesh, Vector2.Zero))
+                {
+                    arapMeshCenter = inputCenter;
+                    return true;
+                }
             }
 
+            //透明領域で隔てられた部位を独立して変形できるよう、アルファ輪郭に沿ったメッシュを構築する（構築できない場合はグリッド＋三角形間引きへフォールバック）
+            var (mesh, alphaEmpty) = BuildArapMesh(width, height);
+            //覆えていない場所の記録で例外が出たときに、新しいメッシュだけが残って頂点が更新されない状態にしないよう、記録してから差し替える
+            if (canDetectEscape)
+                arapEscapeDetector!.AcceptUncovered(input!, inputBounds, mesh, Vector2.Zero);
+            else
+                arapEscapeDetector?.ClearAccepted();
+            arapMesh = mesh;
+            arapMeshCenter = inputCenter;
+            arapMeshFollowsAlpha = canDetectEscape;
+            arapMeshBuiltFromEmptyAlpha = alphaEmpty;
+            arapDeformer = null;
+            deformedPositions = new Vector2[mesh.VertexCount];
+            return true;
+        }
+
+        //アルファを読み戻せない大きさの入力では、メッシュはアルファに沿わず構築時の入力の範囲全体を覆う
+        bool CanDetectArapMeshEscape(float width, float height)
+            => arapEscapeDetector is not null && input is not null && width <= ArapAlphaReadbackMaxSize && height <= ArapAlphaReadbackMaxSize;
+
+        bool ArapMeshNeedsRebuild(Vortice.RawRectF inputBounds, float width, float height, Vector2 inputCenter, bool canDetectEscape)
+        {
+            //範囲全体を覆うメッシュは、範囲がずれると覆いきれなくなるため、範囲が変わったときに作り直す
+            if (!canDetectEscape)
+                return !ArapMeshSizeNearlyEqual(arapMesh!, width, height) || arapMeshCenter != inputCenter;
+
+            //読み戻せる大きさに戻ったら、部位を分けたメッシュにするため一度作り直す
+            if (!arapMeshFollowsAlpha)
+                return true;
+
+            //透明な入力から作ったメッシュは範囲全体を覆うため、はみ出しの検知では中身が現れたことが分からない。
+            //不透明な画素が現れたら部位を分けたメッシュにするため作り直す（透明な間は作り直さない）
+            if (arapMeshBuiltFromEmptyAlpha)
+                return arapEscapeDetector!.HasOpaqueContent(input!, inputBounds);
+
+            return arapEscapeDetector!.HasContentOutsideMesh(input!, inputBounds, arapMesh!, arapMeshCenter - inputCenter);
+        }
+
+        void UpdateArapEffect(List<PinSample> samples, bool apply, Vector2 inputCenter)
+        {
+            if (arapEffect is null || arapMesh is null)
+                return;
+
+            //拘束点は入力中央が原点、メッシュ・ソルバーはメッシュ構築時の入力中央が原点。
+            //入力の範囲が変わってもメッシュ上の拘束位置が動かないので、ピンのアタッチ位置の再分解も起きない
+            var inputToMesh = inputCenter - arapMeshCenter;
             arapRestCandidates = arapRestCandidates is { Length: var length } && length == samples.Count
                 ? arapRestCandidates
                 : new Vector2[samples.Count];
             for (var i = 0; i < samples.Count; i++)
-                arapRestCandidates[i] = samples[i].Rest;
+                arapRestCandidates[i] = samples[i].Rest + inputToMesh;
 
             //ピンの所属三角形・重心座標・支持拘束はrest依存なので、大きく動いた場合は再分解が必要。
             //一方、0.5px未満の移動では前回のアタッチ位置を再利用し、アニメーション時の毎フレーム分解を避ける。
@@ -389,10 +456,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     var displacement = apply ? samples[i].Current - samples[i].Rest : Vector2.Zero;
                     targets[i] = arapRests![i] + displacement;
                 }
-                arapDeformer.Solve(targets, ArapIterations, deformedPositions!);
+                //メッシュ座標の拘束位置が前回と同じなら解も同じ。入力の範囲が動くだけのフレームで解き直さない
+                if (!ReferenceEquals(solvedDeformer, arapDeformer) || solvedTargets is null || !targets.AsSpan().SequenceEqual(solvedTargets))
+                {
+                    arapDeformer.Solve(targets, ArapIterations, deformedPositions!);
+                    solvedDeformer = arapDeformer;
+                    solvedTargets = targets;
+                }
             }
 
-            //三角形リストへ展開して頂点データを書き込み、変形後のAABBを求める
+            //三角形リストへ展開して頂点データを書き込み、変形後のAABBを求める。
+            //エフェクトは現在の入力中央を原点とするため、メッシュ座標から戻して渡す
             var deformed = deformedPositions!;
             var triangleIndices = arapMesh.TriangleIndices;
             var vertexByteCount = triangleIndices.Length * PuppetDeformationArapCustomEffect.VertexStride;
@@ -402,17 +476,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             var o = 0;
             foreach (var v in triangleIndices)
             {
-                vertexFloats[o++] = deformed[v].X;
-                vertexFloats[o++] = deformed[v].Y;
-                vertexFloats[o++] = rests[v].X;
-                vertexFloats[o++] = rests[v].Y;
+                var d = deformed[v] - inputToMesh;
+                var r = rests[v] - inputToMesh;
+                vertexFloats[o++] = d.X;
+                vertexFloats[o++] = d.Y;
+                vertexFloats[o++] = r.X;
+                vertexFloats[o++] = r.Y;
             }
 
             //AABBは描画に使う頂点（残存三角形の頂点）のみから求める
             float minX = float.MaxValue, minY = float.MaxValue, maxX = float.MinValue, maxY = float.MinValue;
             foreach (var v in triangleIndices)
             {
-                var p = deformed[v];
+                var p = deformed[v] - inputToMesh;
                 if (p.X < minX) minX = p.X;
                 if (p.Y < minY) minY = p.Y;
                 if (p.X > maxX) maxX = p.X;
@@ -449,8 +525,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         /// 画像サイズに応じたARAPメッシュを構築する。
         /// アルファ輪郭に沿ったメッシュを優先し、構築できない場合（読み戻し不可・
         /// 病的な輪郭・三角形予算超過など）は従来のグリッド＋完全透明三角形の間引きへフォールバックする。
+        /// AlphaEmptyは、アルファを読み戻せたが不透明な画素が無く、範囲全体を覆うグリッドになったときにtrue。
         /// </summary>
-        IArapMesh BuildArapMesh(float width, float height)
+        (IArapMesh Mesh, bool AlphaEmpty) BuildArapMesh(float width, float height)
         {
             var alpha = TryReadbackAlphaMask(width, height);
             if (alpha is var (opaque, w, h))
@@ -459,16 +536,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                     opaque, w, h, width, height,
                     PuppetDeformationArapCustomEffect.MaxTriangles, ArapMinSpacing);
                 if (contourMesh is not null)
-                    return contourMesh;
+                    return (contourMesh, false);
             }
 
             var grid = ArapGridMesh.Create(width, height, PuppetDeformationArapCustomEffect.MaxTriangles, ArapMinSpacing);
             if (alpha is var (opaque2, w2, h2))
             {
+                if (Array.IndexOf(opaque2, true) < 0)
+                    return (grid, true);
                 var keep = BuildAlphaTriangleMask(grid, opaque2, w2, h2, width, height);
                 grid = grid.WithTriangleMask(keep);
             }
-            return grid;
+            return (grid, false);
         }
 
         /// <summary>
@@ -584,7 +663,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
         /// メッシュ分割状況のワイヤーフレームを出力に合成する（デバッグ用）。
         /// 変形後の頂点位置で描くため、ピンを動かした際のメッシュの追従も確認できる。
         /// </summary>
-        void UpdateDebugMeshOverlay(bool show, bool meshUpdated, Vector2 inputCenter)
+        void UpdateDebugMeshOverlay(bool show, bool meshUpdated, Vector2 meshCenter)
         {
             if (debugMeshComposite is null || deviceContext is null)
                 return;
@@ -595,10 +674,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 return;
             }
 
-            if (debugMeshVisible && !meshUpdated && debugMeshCenter == inputCenter)
+            if (debugMeshVisible && !meshUpdated && debugMeshCenter == meshCenter)
                 return;
 
-            //ワイヤーフレームはメッシュと同じ中央原点座標で描き、入力画像のシーン座標へオフセットする
+            //ワイヤーフレームはメッシュ座標で描き、メッシュ構築時の入力中央でシーン座標へオフセットする
             var commandList = deviceContext.CreateCommandList();
             var previousTarget = deviceContext.Target;
             try
@@ -617,7 +696,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                         var key = a < b ? ((long)a << 32) | (uint)b : ((long)b << 32) | (uint)a;
                         if (!drawn.Add(key))
                             return;
-                        deviceContext.DrawLine(deformed[a] + inputCenter, deformed[b] + inputCenter, brush, 1f);
+                        deviceContext.DrawLine(deformed[a] + meshCenter, deformed[b] + meshCenter, brush, 1f);
                     }
                     for (var t = 0; t < indices.Length; t += 3)
                     {
@@ -640,7 +719,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             debugMeshCommandList?.Dispose();
             debugMeshCommandList = commandList;
             debugMeshVisible = true;
-            debugMeshCenter = inputCenter;
+            debugMeshCenter = meshCenter;
         }
 
         void HideDebugMeshOverlay()
@@ -985,6 +1064,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
             else
             {
                 disposer.Collect(arapEffect);
+                arapEscapeDetector = new ArapMeshEscapeDetector(devices);
+                disposer.Collect(arapEscapeDetector);
             }
 
             //アルゴリズム切替時も返却するID2D1Imageを固定するための軽量な終端。
@@ -1044,9 +1125,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation
                 deviceContext = null;
                 effect = null;
                 arapEffect = null;
+                arapEscapeDetector = null;
                 terminal = null;
                 arapMesh = null;
                 arapDeformer = null;
+                solvedDeformer = null;
+                solvedTargets = null;
                 arapRests = null;
                 arapRestCandidates = null;
                 deformedPositions = null;
