@@ -37,7 +37,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
             try
             {
                 var api = new ElevenLabsAPI();
-                var model = string.IsNullOrWhiteSpace(ElevenLabsSettings.Default.TTSModel) ? ElevenLabsTTSModels.Models.First() : ElevenLabsSettings.Default.TTSModel;
+                var model = ElevenLabsTTSModels.Resolve(ElevenLabsSettings.Default.TTSModel);
                 await api.TextToSpeechAsync(model, voice.Id, text, elevenLabsParameter, filePath);
             }
             finally
