@@ -6,6 +6,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.InstantLoopAudioEffect
     {
         const int Channels = 2;
 
+        readonly List<float> loopBuffer = [];
+        long loopBufferPosition;
+
         public override int Hz => Input?.Hz ?? 0;
         public override long Duration => Input?.Duration ?? 0;
 
@@ -13,6 +16,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.InstantLoopAudioEffect
         {
             if (Input is null) return;
 
+            loopBuffer.Clear();
             var info = Resolve(outputPos / Channels);
             if (!info.IsGap)
                 Input.Seek(info.SourceFrame * Channels);
@@ -54,11 +58,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.InstantLoopAudioEffect
                 }
                 else
                 {
-                    long expectedInputPos = info.SourceFrame * Channels;
-                    if (Input.Position != expectedInputPos)
-                        Input.Seek(expectedInputPos);
-
-                    int readCount = Input.Read(buffer, offset + written, chunkFloats);
+                    long inputPosition = info.SourceFrame * Channels;
+                    int readCount = info.IsLoop
+                        ? ReadLoop(inputPosition, buffer, offset + written, chunkFloats)
+                        : ReadInput(inputPosition, buffer, offset + written, chunkFloats);
                     if (readCount <= 0)
                     {
                         //ソース終端に達した場合もこのチャンク分だけ無音化して続行する
@@ -73,7 +76,41 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Audio.InstantLoopAudioEffect
 
             return written;
         }
-        readonly record struct FrameInfo(long SourceFrame, bool IsGap, long FramesUntilBoundary);
+
+        int ReadInput(long position, float[] buffer, int offset, int count)
+        {
+            if (Input!.Position != position)
+                Input.Seek(position);
+
+            return Input.Read(buffer, offset, count);
+        }
+
+        int ReadLoop(long position, float[] buffer, int offset, int count)
+        {
+            if (position < loopBufferPosition || loopBufferPosition + loopBuffer.Count < position)
+            {
+                loopBuffer.Clear();
+                loopBufferPosition = position;
+            }
+
+            int bufferOffset = (int)(position - loopBufferPosition);
+            int cachedCount = Math.Min(count, loopBuffer.Count - bufferOffset);
+            loopBuffer.CopyTo(bufferOffset, buffer, offset, cachedCount);
+            if (cachedCount == count)
+                return count;
+
+            int readCount = ReadInput(position + cachedCount, buffer, offset + cachedCount, count - cachedCount);
+            if (readCount <= 0)
+                return cachedCount;
+
+            loopBuffer.AddRange(buffer.AsSpan(offset + cachedCount, readCount));
+            return cachedCount + readCount;
+        }
+
+        readonly record struct FrameInfo(long SourceFrame, bool IsGap, long FramesUntilBoundary)
+        {
+            public bool IsLoop => FramesUntilBoundary != long.MaxValue;
+        }
 
         FrameInfo Resolve(long currentFrame)
         {
