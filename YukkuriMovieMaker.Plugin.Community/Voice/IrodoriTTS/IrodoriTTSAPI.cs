@@ -123,10 +123,12 @@ internal static class IrodoriTTSAPI
         // 合成フロー（info判別・参照音声アップロード・合成要求POST・SSE読取・結果ダウンロード）を
         // 同一クライアントで送り、Cookie（スティッキーセッション等）を共有する。
         // HttpClient.TimeoutはResponseHeadersReadでもストリーム読取に効くため無制限にし、各工程を個別のCTSで制御する。
-        return new HttpClient(handler)
+        var client = new HttpClient(handler)
         {
             Timeout = Timeout.InfiniteTimeSpan,
         };
+        client.DefaultRequestHeaders.UserAgent.ParseAdd($"YukkuriMovieMaker v{AppVersion.Current}");
+        return client;
     }
 
     // baseUrl（末尾スラッシュ除去済み）→ 最後に判別できたAPI情報。
