@@ -15,7 +15,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Commons
                 () =>
                 {
                     var request = new HttpRequestMessage(HttpMethod.Get, url);
-                    request.Headers.Add("User-Agent", $"YukkuriMovieMaker v{AppVersion.Current}");
                     return request;
                 },
                 filePath,

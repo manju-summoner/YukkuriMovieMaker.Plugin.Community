@@ -28,7 +28,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper.Installers
             var client = HttpClientFactory.Client;
 
             using var request = new HttpRequestMessage(HttpMethod.Get, versionListUrl);
-            request.Headers.Add("User-Agent", $"YukkuriMovieMaker v{AppVersion.Current}");
 
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
             response.EnsureSuccessStatusCode();
@@ -54,7 +53,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Transcription.Whisper.Installers
             var client = HttpClientFactory.Client;
 
             using var request = new HttpRequestMessage(HttpMethod.Get, manifestUrl);
-            request.Headers.Add("User-Agent", $"YukkuriMovieMaker v{AppVersion.Current}");
 
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
             response.EnsureSuccessStatusCode();

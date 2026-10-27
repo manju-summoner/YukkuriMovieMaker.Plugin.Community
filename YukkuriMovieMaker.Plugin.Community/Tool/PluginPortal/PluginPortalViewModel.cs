@@ -219,7 +219,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 
                 var client = HttpClientFactory.Client;
                 using var request = new HttpRequestMessage(HttpMethod.Get, latestRelease.BrowserDownloadUrl);
-                request.Headers.UserAgent.ParseAdd($"YukkuriMovieMaker v{AppVersion.Current}");
                 using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
 

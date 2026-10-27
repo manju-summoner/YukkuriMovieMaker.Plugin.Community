@@ -127,7 +127,7 @@ internal static class IrodoriTTSAPI
         {
             Timeout = Timeout.InfiniteTimeSpan,
         };
-        client.DefaultRequestHeaders.UserAgent.ParseAdd($"YukkuriMovieMaker v{AppVersion.Current}");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(HttpClientFactory.UserAgent);
         return client;
     }
 
