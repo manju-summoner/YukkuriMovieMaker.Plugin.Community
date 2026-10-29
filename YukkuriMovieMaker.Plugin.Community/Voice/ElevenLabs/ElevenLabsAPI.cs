@@ -30,7 +30,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
             {
                 text = speechText,
                 model_id = model,
-                voice_settings = parameter.CreateVoiceSettings(),
+                voice_settings = parameter.CreateVoiceSettings(model),
             };
             var jsonString = Json.Json.GetJsonText(json, new Newtonsoft.Json.JsonSerializerSettings());
             request.Content = new StringContent(jsonString, Encoding.UTF8, "application/json");

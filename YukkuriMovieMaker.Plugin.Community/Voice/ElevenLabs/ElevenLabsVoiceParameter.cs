@@ -18,6 +18,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
         [TextBoxSlider("F1", "%", 70,120)]
         [Range(70d, 120d)]
         [DefaultValue(100d)]
+        [ElevenLabsHiddenOnV4]
         public double Speed { get => speed; set => Set(ref speed, value); }
 
         [Display(Name = nameof(Texts.StabilityName), Description = nameof(Texts.StabilityDesc), ResourceType = typeof(Texts))]
@@ -36,22 +37,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
         [TextBoxSlider("F1", "%", 0, 100)]
         [Range(0d, 100d)]
         [DefaultValue(0d)]
+        [ElevenLabsHiddenOnV4]
         public double Style { get => style; set => Set(ref style, value); }
 
         [Display(Name = nameof(Texts.UseSpeakerBoostName), Description = nameof(Texts.UseSpeakerBoostDesc), ResourceType = typeof(Texts))]
         [ToggleSlider]
+        [ElevenLabsHiddenOnV4]
         public bool UseSpeakerBoost { get => useSpeakerBoost; set => Set(ref useSpeakerBoost, value); }
 
-        public object CreateVoiceSettings()
+        public Dictionary<string, object> CreateVoiceSettings(string model)
         {
-            return new
+            var settings = new Dictionary<string, object>
             {
-                stability = Stability / 100,
-                similarity_boost = SimilarityBoost / 100,
-                style = Style / 100,
-                use_speaker_boost = UseSpeakerBoost,
-                speed = Speed / 100,
+                ["stability"] = Stability / 100,
+                ["similarity_boost"] = SimilarityBoost / 100,
             };
+            if (!ElevenLabsTTSModels.IsV4(model))
+            {
+                settings["style"] = Style / 100;
+                settings["use_speaker_boost"] = UseSpeakerBoost;
+                settings["speed"] = Speed / 100;
+            }
+            return settings;
         }
     }
 }

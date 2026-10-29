@@ -24,7 +24,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.AivisCloudAPI
 
         [Display(Name = nameof(Texts.Speed), Description = nameof(Texts.Speed), ResourceType = typeof(Texts))]
         [Range(50d, 200d)]
-        [DefaultValue(50d)]
+        [DefaultValue(100d)]
         [TextBoxSlider("F1", "%", 50, 100)]
         public double Speed { get => speed; set => Set(ref speed, value); }
 
