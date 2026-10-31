@@ -4,8 +4,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
 
     /// <summary>
     /// 2026-12-31 で使えなくなる ElevenLabs のデフォルトのボイスと、ElevenLabs が案内する置き換え先。
-    /// 一覧 API の応答には期限切れになる声と置き換え先を見分ける項目が無いので、voice_id で判定する。
-    /// 手入力で登録された声も API を呼ばずに判定できる。
+    /// ElevenLabs のボイス一覧 API の応答には期限切れになる声と置き換え先を見分ける項目が無いので、voice_id で判定する。
     /// 出典: https://elevenlabs.io/docs/help-center/product/voices/my-voices/what-are-default-voices
     /// （表の各リンク先の default-voices?search= / voice-library?search= に voice_id がある。2026-10-18 取得）
     /// 置き換え先は Voice Library の声で、自分のボイスに保存するまで一覧 API には出ず、無料プランでは API で使えない。

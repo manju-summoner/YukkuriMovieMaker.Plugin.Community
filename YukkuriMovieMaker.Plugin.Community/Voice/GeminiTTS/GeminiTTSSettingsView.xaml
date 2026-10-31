@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS"
              xmlns:c="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
              xmlns:s="clr-namespace:YukkuriMovieMaker.Settings;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:commons="clr-namespace:YukkuriMovieMaker.Commons;assembly=YukkuriMovieMaker.Plugin"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
@@ -40,17 +41,13 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="26"/>
             </Grid.RowDefinitions>
-            <DataGrid x:Name="voicesDataGrid" ItemsSource="{Binding Source={x:Static local:GeminiTTSSettings.Default},Path=Voices}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" IsReadOnly="True" SelectionMode="Extended" HeadersVisibility="Column">
+            <DataGrid x:Name="voicesDataGrid" ItemsSource="{Binding Source={x:Static local:GeminiTTSSettings.Default},Path=Voices}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" SelectionMode="Extended" HeadersVisibility="Column" commons:DataGridHelper.CommitOnUnload="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="{x:Static local:Texts.VoiceName}" Binding="{Binding SpeakerName, Mode=OneWay}" Width="*"/>
-                    <DataGridTextColumn Header="{x:Static local:Texts.Language}" Binding="{Binding LanguageCode, Mode=OneWay}"/>
-                    <DataGridTextColumn Header="{x:Static local:Texts.VoiceID}" Binding="{Binding Id, Mode=OneWay}" Width="*"/>
+                    <DataGridTextColumn Header="{x:Static local:Texts.VoiceName}" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="{x:Static local:Texts.VoiceID}" Binding="{Binding Id}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
-            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="{x:Static local:Texts.AddVoices}" Width="100" Click="AddVoicesButton_Click"/>
-                <Button Content="{x:Static local:Texts.Delete}" Width="100" Click="DeleteVoicesButton_Click"/>
-            </StackPanel>
+            <Button Grid.Row="1" Content="{x:Static local:Texts.Delete}" Width="100" HorizontalAlignment="Right" Click="DeleteVoicesButton_Click"/>
         </Grid>
     </Expander>
     </Grid>

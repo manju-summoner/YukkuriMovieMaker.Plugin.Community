@@ -60,7 +60,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
                 if (response.StatusCode is not System.Net.HttpStatusCode.OK)
                 {
                     var errorText = await response.Content.ReadAsStringAsync();
-                    var message = CreateErrorMessage(response.StatusCode, voice, GeminiTTSVoiceList.TryGetErrorMessage(errorText));
+                    var message = CreateErrorMessage(response.StatusCode, voice, TryGetErrorMessage(errorText));
                     if (!string.IsNullOrEmpty(message))
                         throw new Exception(message);
                 }
@@ -175,19 +175,31 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
         /// </summary>
         internal static void ValidateVoiceForModel(string model, string voice)
         {
-            if (GeminiTTSModel.GetModel(model)?.UsesSpeechMetadata is true || GeminiTTSVoiceList.IsPreset(voice))
+            if (GeminiTTSModel.GetModel(model)?.UsesSpeechMetadata is true || GeminiTTSVoices.IsPreset(voice))
                 return;
             throw new Exception(string.Format(Texts.VoiceRequiresGemini38, voice, model));
         }
 
         /// <summary>
-        /// 選んだ声が Google 側で削除されると 404 になる（ボイスは最後に使ってから1年で自動削除される）
+        /// 話者一覧に入力した声が Google 側で削除されると 404 になる（ボイスは最後に使ってから1年で自動削除される）
         /// </summary>
         internal static string? CreateErrorMessage(System.Net.HttpStatusCode statusCode, string voice, string? apiMessage)
         {
-            if (statusCode is System.Net.HttpStatusCode.NotFound && !GeminiTTSVoiceList.IsPreset(voice))
+            if (statusCode is System.Net.HttpStatusCode.NotFound && !GeminiTTSVoices.IsPreset(voice))
                 return string.Format(Texts.VoiceNotFound, voice) + (string.IsNullOrEmpty(apiMessage) ? string.Empty : Environment.NewLine + apiMessage);
             return apiMessage;
+        }
+
+        static string? TryGetErrorMessage(string responseText)
+        {
+            try
+            {
+                return JObject.Parse(responseText)["error"]?["message"]?.Value<string>();
+            }
+            catch (Newtonsoft.Json.JsonException)
+            {
+                return null;
+            }
         }
 
         internal static string CreateJson(string model, string voice, string text, string prompt)

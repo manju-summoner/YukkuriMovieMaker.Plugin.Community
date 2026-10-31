@@ -24,8 +24,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
         string? ttsModel = null;
 
         /// <summary>
-        /// 話者一覧に出す声。手入力の行と、ボイス一覧 API から選んで足した行が混ざる。
-        /// 選んで足した行を設定画面の表にすぐ出すため、変更を通知するコレクションにしている
+        /// 話者一覧に出す声。削除ボタンで消した行を設定画面の表からすぐ消すため、変更を通知するコレクションにしている
         /// </summary>
         public ObservableCollection<ElevenLabsVoice> Voices { get; } = [];
 

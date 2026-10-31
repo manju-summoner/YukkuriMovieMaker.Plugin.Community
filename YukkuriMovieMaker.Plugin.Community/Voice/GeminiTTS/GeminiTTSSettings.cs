@@ -28,9 +28,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.GeminiTTS
         public int Tier { get => tier; set => Set(ref tier, value); }
 
         /// <summary>
-        /// ボイス一覧 API から選んだ声。プリセット30種は含めない（常に話者一覧に出る）
+        /// 手で入力した声。プリセット30種は入力しなくても常に話者一覧に出る。
+        /// 削除ボタンで消した行を設定画面の表からすぐ消すため、変更を通知するコレクションにしている
         /// </summary>
-        public ObservableCollection<GeminiTTSVoiceInfo> Voices { get; } = [];
+        public ObservableCollection<GeminiTTSVoice> Voices { get; } = [];
 
 
         public override void Initialize()

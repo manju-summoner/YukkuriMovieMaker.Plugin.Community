@@ -43,10 +43,7 @@
                         <DataGridTextColumn Header="{x:Static local:Texts.ID}" Binding="{Binding Id}" Width="*"/>
                     </DataGrid.Columns>
                 </DataGrid>
-                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Width="150" Height="26" Content="{x:Static local:Texts.AddFromElevenLabs}" Click="AddFromElevenLabsButton_Click"/>
-                    <Button Width="100" Height="26" Content="{x:Static local:Texts.Delete}" Command="{Binding Source={x:Static local:ElevenLabsSettingsViewCommands.DeleteVoice}}" CommandParameter="{Binding ElementName=dataGrid,Path=SelectedValue}"/>
-                </StackPanel>
+                <Button Grid.Row="1" Width="100" Height="26" HorizontalAlignment="Right" Content="{x:Static local:Texts.Delete}" Command="{Binding Source={x:Static local:ElevenLabsSettingsViewCommands.DeleteVoice}}" CommandParameter="{Binding ElementName=dataGrid,Path=SelectedValue}"/>
             </Grid>
         </Expander>
     </Grid>
