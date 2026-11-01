@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
+namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen.Rendering
 {
 
     class ResourceItem<TKey, TValue>(TKey key, TValue value) : IDisposable where TValue : IDisposable

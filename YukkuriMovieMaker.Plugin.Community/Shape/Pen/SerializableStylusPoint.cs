@@ -4,6 +4,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
 {
     internal record SerializableStylusPoint(double X, double Y, float PressureFactor)
     {
+        public const float NeutralPressure = 0.5f;
+
         public SerializableStylusPoint() : this(0, 0, 0)
         {
 

@@ -1,0 +1,38 @@
+<Window x:Class="YukkuriMovieMaker.Plugin.Community.Shape.Pen.Views.PenEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Shape.Pen"
+        xmlns:views="clr-namespace:YukkuriMovieMaker.Plugin.Community.Shape.Pen.Views"
+        xmlns:vm="clr-namespace:YukkuriMovieMaker.Plugin.Community.Shape.Pen.ViewModels"
+        mc:Ignorable="d"
+        Title="{x:Static local:Texts.PenToolWindowTitle}" Height="640" Width="1000"
+        MinHeight="420" MinWidth="618"
+        WindowStartupLocation="CenterOwner"
+        d:DataContext="{d:DesignInstance Type={x:Type vm:PenEditorViewModel}}">
+    <Window.Style>
+        <Style TargetType="{x:Type Window}" BasedOn="{StaticResource {x:Type Window}}"/>
+    </Window.Style>
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Ctrl" Key="Z" Command="{Binding UndoCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="Y" Command="{Binding RedoCommand}"/>
+        <KeyBinding Modifiers="Ctrl+Shift" Key="Z" Command="{Binding RedoCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="A" Command="{Binding SelectAllCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="X" Command="{Binding CutSelectionCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="C" Command="{Binding CopySelectionCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="V" Command="{Binding PasteCommand}"/>
+        <KeyBinding Modifiers="Ctrl" Key="D" Command="{Binding DuplicateSelectionCommand}"/>
+        <KeyBinding Modifiers="Ctrl+Shift" Key="J" Command="{Binding SelectionToNewLayerCommand}"/>
+        <KeyBinding Key="Delete" Command="{Binding DeleteSelectionCommand}"/>
+        <KeyBinding Key="Escape" Command="{Binding ClearSelectionCommand}"/>
+    </Window.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="26"/>
+        </Grid.RowDefinitions>
+        <views:PenEditorView Grid.Row="0"/>
+        <Button Grid.Row="1" Content="{x:Static local:Texts.Close}" Width="100" HorizontalAlignment="Right" Click="Button_Click"/>
+    </Grid>
+</Window>

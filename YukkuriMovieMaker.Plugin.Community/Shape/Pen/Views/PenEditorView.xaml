@@ -1,0 +1,958 @@
+<UserControl x:Class="YukkuriMovieMaker.Plugin.Community.Shape.Pen.Views.PenEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:YukkuriMovieMaker.Plugin.Community.Shape.Pen"
+             xmlns:views="clr-namespace:YukkuriMovieMaker.Plugin.Community.Shape.Pen.Views"
+             xmlns:vm="clr-namespace:YukkuriMovieMaker.Plugin.Community.Shape.Pen.ViewModels"
+             xmlns:controls="clr-namespace:YukkuriMovieMaker.Controls;assembly=YukkuriMovieMaker.Controls"
+             xmlns:icons="clr-namespace:YukkuriMovieMaker.Resources.Icons;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:project="clr-namespace:YukkuriMovieMaker.Project;assembly=YukkuriMovieMaker.Plugin"
+             xmlns:focus="clr-namespace:YukkuriMovieMaker.Plugin.Community.Effect.Video.Container"
+             mc:Ignorable="d"
+             d:DesignHeight="640" d:DesignWidth="1000"
+             d:DataContext="{d:DesignInstance Type={x:Type vm:PenEditorViewModel}}">
+    <Grid>
+        <Grid.Resources>
+            <ContextMenu x:Key="CanvasContextMenu" DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}" d:DataContext="{d:DesignInstance Type={x:Type vm:PenEditorViewModel}}">
+                <MenuItem Header="{x:Static local:Texts.SelectAll}" InputGestureText="Ctrl+A" Command="{Binding SelectAllCommand}"
+                              Icon="{DynamicResource {x:Static icons:IconKeys.SelectAll}}"/>
+                <MenuItem Header="{x:Static local:Texts.ClearSelection}" InputGestureText="Esc" Command="{Binding ClearSelectionCommand}"
+                              Icon="{DynamicResource {x:Static icons:IconKeys.SelectOff}}"/>
+                <Separator/>
+                <MenuItem Header="{x:Static local:Texts.Cut}" InputGestureText="Ctrl+X" Command="{Binding CutSelectionCommand}"
+                              Icon="{DynamicResource {x:Static icons:IconKeys.ContentCut}}"/>
+                <MenuItem Header="{x:Static local:Texts.Copy}" InputGestureText="Ctrl+C" Command="{Binding CopySelectionCommand}"
+                              Icon="{DynamicResource {x:Static icons:IconKeys.ContentCopy}}"/>
+                <MenuItem Header="{x:Static local:Texts.Paste}" InputGestureText="Ctrl+V" Command="{Binding PasteCommand}"
+                              Icon="{DynamicResource {x:Static icons:IconKeys.ContentPaste}}"/>
+                <MenuItem Header="{x:Static local:Texts.DuplicateSelection}" InputGestureText="Ctrl+D" Command="{Binding DuplicateSelectionCommand}"
+                              Icon="{DynamicResource {x:Static icons:IconKeys.ContentDuplicate}}"/>
+                <MenuItem Header="{x:Static local:Texts.SelectionToNewLayer}" InputGestureText="Ctrl+Shift+J" Command="{Binding SelectionToNewLayerCommand}"
+                              Icon="{DynamicResource {x:Static icons:IconKeys.LayersPlus}}"/>
+                <Separator/>
+                <MenuItem Header="{x:Static local:Texts.FlipHorizontal}" Command="{Binding FlipSelectionHorizontalCommand}"
+                              Icon="{DynamicResource {x:Static icons:IconKeys.FlipHorizontal}}"/>
+                <MenuItem Header="{x:Static local:Texts.FlipVertical}" Command="{Binding FlipSelectionVerticalCommand}"
+                              Icon="{DynamicResource {x:Static icons:IconKeys.FlipVertical}}"/>
+                <Separator/>
+                <MenuItem Header="{x:Static local:Texts.ApplyColor}" Command="{Binding ApplySelectionColorCommand}"
+                              Icon="{DynamicResource {x:Static icons:IconKeys.Palette}}"/>
+                <MenuItem Header="{x:Static local:Texts.ApplyThickness}" Command="{Binding ApplySelectionThicknessCommand}"
+                              Icon="{DynamicResource {x:Static icons:IconKeys.FormatLineWeight}}"/>
+                <Separator/>
+                <MenuItem Header="{x:Static local:Texts.DeleteSelection}" InputGestureText="Delete" Command="{Binding DeleteSelectionCommand}"
+                              Icon="{DynamicResource {x:Static icons:IconKeys.TrashCanOutline}}"/>
+            </ContextMenu>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="canvasColumn" MinWidth="200"/>
+            <ColumnDefinition x:Name="splitterColumn" Width="6"/>
+            <ColumnDefinition x:Name="layerColumn" Width="300" MinWidth="{x:Static local:PenSettings.MinLayerPanelWidth}"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition x:Name="toolbarRow" Height="26"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Grid.ColumnSpan="3">
+            <Grid.Resources>
+                <Style x:Key="ToolButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                    <Setter Property="Padding" Value="4"/>
+                    <Setter Property="Focusable" Value="False"/>
+                </Style>
+                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                    <Setter Property="Padding" Value="4"/>
+                    <Setter Property="Focusable" Value="False"/>
+                </Style>
+                <ContextMenu x:Key="PenContextMenu" DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}" d:DataContext="{d:DesignInstance Type={x:Type vm:PenEditorViewModel}}" Placement="Bottom">
+                    <MenuItem Header="{x:Static local:Texts.Pressure}" Command="{Binding TogglePenPressure}" IsChecked="{Binding Source={x:Static local:PenSettings.Default},Path=PenStyle.IsPressure}"/>
+                    <MenuItem Header="{x:Static local:Texts.Stabilization}">
+                        <MenuItem Header="{x:Static local:Texts.LevelNone}" Command="{Binding SetPenStabilizationCommand}" CommandParameter="{x:Static local:PenStabilization.None}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PenStyle.Stabilization}" Value="None">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelLow}" Command="{Binding SetPenStabilizationCommand}" CommandParameter="{x:Static local:PenStabilization.Low}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PenStyle.Stabilization}" Value="Low">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelMedium}" Command="{Binding SetPenStabilizationCommand}" CommandParameter="{x:Static local:PenStabilization.Medium}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PenStyle.Stabilization}" Value="Medium">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelHigh}" Command="{Binding SetPenStabilizationCommand}" CommandParameter="{x:Static local:PenStabilization.High}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PenStyle.Stabilization}" Value="High">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="{x:Static local:Texts.Taper}">
+                        <MenuItem Header="{x:Static local:Texts.LevelNone}" Command="{Binding SetPenTaperCommand}" CommandParameter="{x:Static local:PenTaper.None}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PenStyle.Taper}" Value="None">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelLow}" Command="{Binding SetPenTaperCommand}" CommandParameter="{x:Static local:PenTaper.Low}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PenStyle.Taper}" Value="Low">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelMedium}" Command="{Binding SetPenTaperCommand}" CommandParameter="{x:Static local:PenTaper.Medium}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PenStyle.Taper}" Value="Medium">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelHigh}" Command="{Binding SetPenTaperCommand}" CommandParameter="{x:Static local:PenTaper.High}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PenStyle.Taper}" Value="High">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                    </MenuItem>
+                </ContextMenu>
+                <ContextMenu x:Key="PencilContextMenu" DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}" d:DataContext="{d:DesignInstance Type={x:Type vm:PenEditorViewModel}}" Placement="Bottom">
+                    <MenuItem Header="{x:Static local:Texts.Pressure}" Command="{Binding TogglePencilPressure}" IsChecked="{Binding Source={x:Static local:PenSettings.Default},Path=PencilStyle.IsPressure}"/>
+                    <MenuItem Header="{x:Static local:Texts.Stabilization}">
+                        <MenuItem Header="{x:Static local:Texts.LevelNone}" Command="{Binding SetPencilStabilizationCommand}" CommandParameter="{x:Static local:PenStabilization.None}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PencilStyle.Stabilization}" Value="None">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelLow}" Command="{Binding SetPencilStabilizationCommand}" CommandParameter="{x:Static local:PenStabilization.Low}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PencilStyle.Stabilization}" Value="Low">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelMedium}" Command="{Binding SetPencilStabilizationCommand}" CommandParameter="{x:Static local:PenStabilization.Medium}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PencilStyle.Stabilization}" Value="Medium">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelHigh}" Command="{Binding SetPencilStabilizationCommand}" CommandParameter="{x:Static local:PenStabilization.High}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PencilStyle.Stabilization}" Value="High">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="{x:Static local:Texts.Taper}">
+                        <MenuItem Header="{x:Static local:Texts.LevelNone}" Command="{Binding SetPencilTaperCommand}" CommandParameter="{x:Static local:PenTaper.None}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PencilStyle.Taper}" Value="None">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelLow}" Command="{Binding SetPencilTaperCommand}" CommandParameter="{x:Static local:PenTaper.Low}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PencilStyle.Taper}" Value="Low">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelMedium}" Command="{Binding SetPencilTaperCommand}" CommandParameter="{x:Static local:PenTaper.Medium}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PencilStyle.Taper}" Value="Medium">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelHigh}" Command="{Binding SetPencilTaperCommand}" CommandParameter="{x:Static local:PenTaper.High}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=PencilStyle.Taper}" Value="High">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                    </MenuItem>
+                </ContextMenu>
+                <ContextMenu x:Key="HighlighterContextMenu" DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}" d:DataContext="{d:DesignInstance Type={x:Type vm:PenEditorViewModel}}" Placement="Bottom">
+                    <MenuItem Header="{x:Static local:Texts.Pressure}" Command="{Binding ToggleHighlighterPressure}" IsChecked="{Binding Source={x:Static local:PenSettings.Default},Path=HighlighterStyle.IsPressure}"/>
+                    <MenuItem Header="{x:Static local:Texts.Stabilization}">
+                        <MenuItem Header="{x:Static local:Texts.LevelNone}" Command="{Binding SetHighlighterStabilizationCommand}" CommandParameter="{x:Static local:PenStabilization.None}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=HighlighterStyle.Stabilization}" Value="None">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelLow}" Command="{Binding SetHighlighterStabilizationCommand}" CommandParameter="{x:Static local:PenStabilization.Low}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=HighlighterStyle.Stabilization}" Value="Low">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelMedium}" Command="{Binding SetHighlighterStabilizationCommand}" CommandParameter="{x:Static local:PenStabilization.Medium}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=HighlighterStyle.Stabilization}" Value="Medium">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelHigh}" Command="{Binding SetHighlighterStabilizationCommand}" CommandParameter="{x:Static local:PenStabilization.High}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=HighlighterStyle.Stabilization}" Value="High">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="{x:Static local:Texts.Taper}">
+                        <MenuItem Header="{x:Static local:Texts.LevelNone}" Command="{Binding SetHighlighterTaperCommand}" CommandParameter="{x:Static local:PenTaper.None}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=HighlighterStyle.Taper}" Value="None">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelLow}" Command="{Binding SetHighlighterTaperCommand}" CommandParameter="{x:Static local:PenTaper.Low}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=HighlighterStyle.Taper}" Value="Low">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelMedium}" Command="{Binding SetHighlighterTaperCommand}" CommandParameter="{x:Static local:PenTaper.Medium}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=HighlighterStyle.Taper}" Value="Medium">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelHigh}" Command="{Binding SetHighlighterTaperCommand}" CommandParameter="{x:Static local:PenTaper.High}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=HighlighterStyle.Taper}" Value="High">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                    </MenuItem>
+                </ContextMenu>
+                <ContextMenu x:Key="FillContextMenu" DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}" d:DataContext="{d:DesignInstance Type={x:Type vm:PenEditorViewModel}}" Placement="Bottom">
+                    <MenuItem Header="{x:Static local:Texts.FillTolerance}">
+                        <MenuItem Header="{x:Static local:Texts.LevelNone}" Command="{Binding SetFillToleranceCommand}" CommandParameter="{x:Static local:PenFillTolerance.None}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=FillStyle.Tolerance}" Value="None">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelLow}" Command="{Binding SetFillToleranceCommand}" CommandParameter="{x:Static local:PenFillTolerance.Low}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=FillStyle.Tolerance}" Value="Low">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelMedium}" Command="{Binding SetFillToleranceCommand}" CommandParameter="{x:Static local:PenFillTolerance.Medium}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=FillStyle.Tolerance}" Value="Medium">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                        <MenuItem Header="{x:Static local:Texts.LevelHigh}" Command="{Binding SetFillToleranceCommand}" CommandParameter="{x:Static local:PenFillTolerance.High}">
+                            <MenuItem.Style>
+                                <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="IsChecked" Value="False"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=FillStyle.Tolerance}" Value="High">
+                                            <Setter Property="IsChecked" Value="True"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </MenuItem.Style>
+                        </MenuItem>
+                    </MenuItem>
+                </ContextMenu>
+                <ContextMenu x:Key="SelectionContextMenu" DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}" d:DataContext="{d:DesignInstance Type={x:Type vm:PenEditorViewModel}}" Placement="Bottom">
+                    <MenuItem Header="{x:Static local:Texts.SelectByLasso}" Command="{Binding SelectByLassoCommand}">
+                        <MenuItem.Style>
+                            <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                <Setter Property="IsChecked" Value="False"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=SelectionKind}" Value="Lasso">
+                                        <Setter Property="IsChecked" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
+                    <MenuItem Header="{x:Static local:Texts.SelectByRectangle}" Command="{Binding SelectByRectangleCommand}">
+                        <MenuItem.Style>
+                            <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                <Setter Property="IsChecked" Value="False"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=SelectionKind}" Value="Rectangle">
+                                        <Setter Property="IsChecked" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
+                </ContextMenu>
+                <ContextMenu x:Key="EraserContextMenu" DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}" d:DataContext="{d:DesignInstance Type={x:Type vm:PenEditorViewModel}}" Placement="Bottom">
+                    <MenuItem Header="{x:Static local:Texts.EraserByPoint}" Command="{Binding SelectEraserByPointCommand}">
+                        <MenuItem.Style>
+                            <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                <Setter Property="IsChecked" Value="False"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=EraserStyle.Mode}" Value="Point">
+                                        <Setter Property="IsChecked" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
+                    <MenuItem Header="{x:Static local:Texts.EraserByStroke}" Command="{Binding SelectEraserByStrokeCommand}">
+                        <MenuItem.Style>
+                            <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                <Setter Property="IsChecked" Value="False"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static local:PenSettings.Default},Path=EraserStyle.Mode}" Value="Line">
+                                        <Setter Property="IsChecked" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </MenuItem.Style>
+                    </MenuItem>
+                </ContextMenu>
+            </Grid.Resources>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition Width="12"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition MinWidth="26"/>
+                <ColumnDefinition MaxWidth="100" MinWidth="26"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="26"/>
+                <ColumnDefinition Width="26"/>
+                <ColumnDefinition Width="26"/>
+            </Grid.ColumnDefinitions>
+            <ToggleButton Grid.Column="0" Command="{Binding SelectPenCommand}" ContextMenu="{StaticResource PenContextMenu}"
+                          Content="{DynamicResource {x:Static icons:IconKeys.Pen}}">
+                <ToggleButton.ToolTip>
+                    <ToolTip Content="{x:Static local:Texts.BallPen}" ContentStringFormat="{}{0} (1)"/>
+                </ToggleButton.ToolTip>
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource ToolButtonStyle}">
+                        <Setter Property="IsChecked" Value="False"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Mode}" Value="Pen">
+                                <Setter Property="IsChecked" Value="True"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+            <controls:DropDownButton Content="▼" Grid.Column="1" Padding="0" FontSize="5" Focusable="False" ContextMenu="{StaticResource PenContextMenu}">
+                <controls:DropDownButton.Style>
+                    <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                </controls:DropDownButton.Style>
+            </controls:DropDownButton>
+            <ToggleButton Grid.Column="2" Command="{Binding SelectPencilCommand}" ContextMenu="{StaticResource PencilContextMenu}"
+                          Content="{DynamicResource {x:Static icons:IconKeys.LeadPencil}}">
+                <ToggleButton.ToolTip>
+                    <ToolTip Content="{x:Static local:Texts.Pencil}" ContentStringFormat="{}{0} (2)"/>
+                </ToggleButton.ToolTip>
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource ToolButtonStyle}">
+                        <Setter Property="IsChecked" Value="False"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Mode}" Value="Pencil">
+                                <Setter Property="IsChecked" Value="True"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+            <controls:DropDownButton Content="▼" Grid.Column="3" Padding="0" FontSize="5" Focusable="False" ContextMenu="{StaticResource PencilContextMenu}">
+                <controls:DropDownButton.Style>
+                    <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                </controls:DropDownButton.Style>
+            </controls:DropDownButton>
+            <ToggleButton Grid.Column="4" Command="{Binding SelectHighlighterCommand}" ContextMenu="{StaticResource HighlighterContextMenu}"
+                          Content="{DynamicResource {x:Static icons:IconKeys.Marker}}">
+                <ToggleButton.ToolTip>
+                    <ToolTip Content="{x:Static local:Texts.Highlighter}" ContentStringFormat="{}{0} (3)"/>
+                </ToggleButton.ToolTip>
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource ToolButtonStyle}">
+                        <Setter Property="IsChecked" Value="False"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Mode}" Value="Highlighter">
+                                <Setter Property="IsChecked" Value="True"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+            <controls:DropDownButton Content="▼" Grid.Column="5" Padding="0" FontSize="5" Focusable="False" ContextMenu="{StaticResource HighlighterContextMenu}">
+                <controls:DropDownButton.Style>
+                    <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                </controls:DropDownButton.Style>
+            </controls:DropDownButton>
+            <ToggleButton Grid.Column="6" Command="{Binding SelectEraserCommand}" ContextMenu="{StaticResource EraserContextMenu}"
+                          Content="{DynamicResource {x:Static icons:IconKeys.Eraser}}">
+                <ToggleButton.ToolTip>
+                    <ToolTip Content="{x:Static local:Texts.Eraser}" ContentStringFormat="{}{0} (4)"/>
+                </ToggleButton.ToolTip>
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource ToolButtonStyle}">
+                        <Setter Property="IsChecked" Value="False"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Mode}" Value="Eraser">
+                                <Setter Property="IsChecked" Value="True"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+            <controls:DropDownButton Content="▼" Grid.Column="7" Padding="0" FontSize="5" Focusable="False" ContextMenu="{StaticResource EraserContextMenu}">
+                <controls:DropDownButton.Style>
+                    <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                </controls:DropDownButton.Style>
+            </controls:DropDownButton>
+            <ToggleButton Grid.Column="8" Command="{Binding SelectFillCommand}" ContextMenu="{StaticResource FillContextMenu}"
+                          Content="{DynamicResource {x:Static icons:IconKeys.FormatColorFill}}">
+                <ToggleButton.ToolTip>
+                    <ToolTip Content="{x:Static local:Texts.Fill}" ContentStringFormat="{}{0} (5)"/>
+                </ToggleButton.ToolTip>
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource ToolButtonStyle}">
+                        <Setter Property="IsChecked" Value="False"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Mode}" Value="Fill">
+                                <Setter Property="IsChecked" Value="True"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+            <controls:DropDownButton Content="▼" Grid.Column="9" Padding="0" FontSize="5" Focusable="False" ContextMenu="{StaticResource FillContextMenu}">
+                <controls:DropDownButton.Style>
+                    <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                </controls:DropDownButton.Style>
+            </controls:DropDownButton>
+            <ToggleButton Grid.Column="10" Command="{Binding SelectSelectionCommand}" ContextMenu="{StaticResource SelectionContextMenu}"
+                          Content="{DynamicResource {x:Static icons:IconKeys.Lasso}}">
+                <ToggleButton.ToolTip>
+                    <ToolTip Content="{x:Static local:Texts.Select}" ContentStringFormat="{}{0} (6)"/>
+                </ToggleButton.ToolTip>
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource ToolButtonStyle}">
+                        <Setter Property="IsChecked" Value="False"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Mode}" Value="Select">
+                                <Setter Property="IsChecked" Value="True"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+            <controls:DropDownButton Content="▼" Grid.Column="11" Padding="0" FontSize="5" Focusable="False" ContextMenu="{StaticResource SelectionContextMenu}">
+                <controls:DropDownButton.Style>
+                    <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                </controls:DropDownButton.Style>
+            </controls:DropDownButton>
+            <ToggleButton Grid.Column="12" Command="{Binding SelectOrderCommand}"
+                          Content="{DynamicResource {x:Static icons:IconKeys.OrderNumericAscending}}">
+                <ToggleButton.ToolTip>
+                    <ToolTip Content="{x:Static local:Texts.Order}" ContentStringFormat="{}{0} (7)"/>
+                </ToggleButton.ToolTip>
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource ToolButtonStyle}">
+                        <Setter Property="IsChecked" Value="False"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Mode}" Value="Order">
+                                <Setter Property="IsChecked" Value="True"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+            <RepeatButton Grid.Column="13" Padding="4" Focusable="False" Command="{Binding UndoCommand}"
+                          Content="{DynamicResource {x:Static icons:IconKeys.Undo}}"
+                          ToolTip="{x:Static local:Texts.Undo}"/>
+            <RepeatButton Grid.Column="14" Padding="4" Focusable="False" Command="{Binding RedoCommand}"
+                          Content="{DynamicResource {x:Static icons:IconKeys.Redo}}"
+                          ToolTip="{x:Static local:Texts.Redo}"/>
+            <controls:ColorPicker Grid.Column="15" Value="{Binding StrokeColor,Mode=TwoWay}"
+                                  ToolTip="{x:Static local:Texts.StrokeColor}">
+                <controls:ColorPicker.Style>
+                    <Style TargetType="controls:ColorPicker" BasedOn="{StaticResource {x:Type controls:ColorPicker}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Mode}" Value="Eraser">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Mode}" Value="Order">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </controls:ColorPicker.Style>
+            </controls:ColorPicker>
+            <controls:TextBoxSlider Grid.Column="16" Value="{Binding StrokeThickness,Mode=TwoWay}"
+                                    Min="0.1" Max="1024" DefaultMin="0.1" DefaultMax="10"
+                                    ToolTip="{x:Static local:Texts.Thickness}">
+                <controls:TextBoxSlider.Style>
+                    <Style TargetType="controls:TextBoxSlider" BasedOn="{StaticResource {x:Type controls:TextBoxSlider}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Mode}" Value="Fill">
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Mode}" Value="Order">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </controls:TextBoxSlider.Style>
+            </controls:TextBoxSlider>
+            <controls:TextBoxSlider Grid.Column="16" Value="{Binding PreviewLength,Mode=TwoWay}"
+                                    Min="0" Max="100" DefaultMin="0" DefaultMax="100" Unit="%" StringFormat="F1"
+                                    ToolTip="{x:Static local:Texts.OrderPreview}">
+                <controls:TextBoxSlider.Style>
+                    <Style TargetType="controls:TextBoxSlider" BasedOn="{StaticResource {x:Type controls:TextBoxSlider}}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Mode}" Value="Order">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </controls:TextBoxSlider.Style>
+            </controls:TextBoxSlider>
+            <Button Grid.Column="17" Command="{Binding ImportIsfCommand}"
+                    Content="{DynamicResource {x:Static icons:IconKeys.Import}}"
+                    ToolTip="{x:Static local:Texts.Import}"/>
+            <controls:DropDownButton Grid.Column="18" Padding="4" Focusable="False"
+                                     Content="{DynamicResource {x:Static icons:IconKeys.Export}}"
+                                     ToolTip="{x:Static local:Texts.Export}">
+                <controls:DropDownButton.Style>
+                    <Style TargetType="controls:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                </controls:DropDownButton.Style>
+                <controls:DropDownButton.ContextMenu>
+                    <ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self},Path=PlacementTarget.DataContext}" d:DataContext="{d:DesignInstance Type={x:Type vm:PenEditorViewModel}}">
+                        <MenuItem Header="{x:Static local:Texts.SaveImage}" Command="{Binding SaveImageCommand}"/>
+                        <MenuItem Header="{x:Static local:Texts.ExportAsIsf}" Command="{Binding ExportIsfCommand}"/>
+                    </ContextMenu>
+                </controls:DropDownButton.ContextMenu>
+            </controls:DropDownButton>
+            <Button Grid.Column="19" Click="OnFitToScreenClick"
+                    Content="{DynamicResource {x:Static icons:IconKeys.FitToScreen}}"
+                    ToolTip="{x:Static local:Texts.FitToScreen}"/>
+        </Grid>
+        <views:PenEditorCanvas x:Name="canvas" Grid.Row="1" Grid.Column="0" ContextMenu="{StaticResource CanvasContextMenu}"
+                               Image="{Binding BackgroundImage}"
+                               DocumentImage="{Binding DocumentImage}"
+                               CanvasWidth="{Binding CanvasWidth}"
+                               CanvasHeight="{Binding CanvasHeight}"
+                               WetInkColor="{Binding WetInkColor}"
+                               IsWetInkOverlay="{Binding IsWetInkOverlay}"
+                               WetInkThickness="{Binding WetInkThickness}"
+                               WetInkUsesPressure="{Binding WetInkUsesPressure}"
+                               IgnoresPressure="{Binding IgnoresPressure}"
+                               TaperLength="{Binding TaperLength}"
+                               StabilizationStrength="{Binding StabilizationStrength}"
+                               IsEditable="{Binding IsLayerEditable}"
+                               IsRectangleSelection="{Binding IsRectangleSelection}"
+                               IsFillMode="{Binding IsFillMode}"
+                               IsSelectionMode="{Binding IsSelectionMode}"
+                               IsOrderMode="{Binding IsOrderMode}"
+                               OrderBadges="{Binding OrderBadges}"
+                               SelectionBounds="{Binding SelectionBounds}">
+            <views:PenEditorCanvas.Style>
+                <Style TargetType="views:PenEditorCanvas">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsLayerEditable}" Value="False">
+                            <Setter Property="ToolTip" Value="{x:Static local:Texts.LayerNotEditable}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </views:PenEditorCanvas.Style>
+        </views:PenEditorCanvas>
+        <GridSplitter Grid.Row="1" Grid.Column="1" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Cursor="SizeWE"/>
+        <Grid x:Name="layerPanel" Grid.Row="1" Grid.Column="2">
+            <Grid.Resources>
+                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                    <Setter Property="Padding" Value="4"/>
+                </Style>
+                <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+                <DrawingBrush x:Key="ThumbnailBackgroundBrush" TileMode="Tile" Viewport="0,0,8,8" ViewportUnits="Absolute" Stretch="None">
+                    <DrawingBrush.Drawing>
+                        <DrawingGroup>
+                            <GeometryDrawing Brush="#FF404040">
+                                <GeometryDrawing.Geometry>
+                                    <RectangleGeometry Rect="0,0,8,8"/>
+                                </GeometryDrawing.Geometry>
+                            </GeometryDrawing>
+                            <GeometryDrawing Brush="#FF505050">
+                                <GeometryDrawing.Geometry>
+                                    <GeometryGroup>
+                                        <RectangleGeometry Rect="0,0,4,4"/>
+                                        <RectangleGeometry Rect="4,4,4,4"/>
+                                    </GeometryGroup>
+                                </GeometryDrawing.Geometry>
+                            </GeometryDrawing>
+                        </DrawingGroup>
+                    </DrawingBrush.Drawing>
+                </DrawingBrush>
+            </Grid.Resources>
+            <Grid.RowDefinitions>
+                <RowDefinition x:Name="buttonRow" Height="52"/>
+                <RowDefinition MinHeight="{x:Static local:PenSettings.MinLayerListHeight}"/>
+                <RowDefinition x:Name="propertiesSplitterRow" Height="6"/>
+                <RowDefinition x:Name="propertiesRow" Height="220" MinHeight="{x:Static local:PenSettings.MinLayerPropertiesHeight}"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="26"/>
+                    <RowDefinition Height="26"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition MinWidth="26"/>
+                        <ColumnDefinition MinWidth="26"/>
+                        <ColumnDefinition MinWidth="26"/>
+                        <ColumnDefinition MinWidth="26"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Command="{Binding AddLayerCommand}"
+                            Content="{DynamicResource {x:Static icons:IconKeys.LayersPlus}}"
+                            ToolTip="{x:Static local:Texts.AddLayer}"/>
+                    <Button Grid.Column="1" Command="{Binding AddFolderCommand}"
+                            Content="{DynamicResource {x:Static icons:IconKeys.FolderPlus}}"
+                            ToolTip="{x:Static local:Texts.AddFolder}"/>
+                    <Button Grid.Column="2" Command="{Binding DuplicateLayerCommand}"
+                            Content="{DynamicResource {x:Static icons:IconKeys.ContentDuplicate}}"
+                            ToolTip="{x:Static local:Texts.DuplicateLayer}"/>
+                    <Button Grid.Column="3" Command="{Binding DeleteLayerCommand}"
+                            Content="{DynamicResource {x:Static icons:IconKeys.TrashCanOutline}}"
+                            ToolTip="{x:Static local:Texts.DeleteLayer}"/>
+                </Grid>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition MinWidth="26"/>
+                        <ColumnDefinition MinWidth="26"/>
+                        <ColumnDefinition MinWidth="26"/>
+                        <ColumnDefinition MinWidth="26"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Command="{Binding MoveLayerUpCommand}"
+                            Content="{DynamicResource {x:Static icons:IconKeys.ArrowUp}}"
+                            ToolTip="{x:Static local:Texts.MoveLayerUp}"/>
+                    <Button Grid.Column="1" Command="{Binding MoveLayerDownCommand}"
+                            Content="{DynamicResource {x:Static icons:IconKeys.ArrowDown}}"
+                            ToolTip="{x:Static local:Texts.MoveLayerDown}"/>
+                    <Button Grid.Column="2" Command="{Binding MoveIntoFolderCommand}"
+                            Content="{DynamicResource {x:Static icons:IconKeys.FormatIndentIncrease}}"
+                            ToolTip="{x:Static local:Texts.MoveIntoFolder}"/>
+                    <Button Grid.Column="3" Command="{Binding MoveOutOfFolderCommand}"
+                            Content="{DynamicResource {x:Static icons:IconKeys.FormatIndentDecrease}}"
+                            ToolTip="{x:Static local:Texts.MoveOutOfFolder}"/>
+                </Grid>
+            </Grid>
+            <ListBox Grid.Row="1" ItemsSource="{Binding DisplayLayers}"
+                     SelectedItem="{Binding ActiveLayer, Mode=TwoWay}"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     HorizontalContentAlignment="Stretch">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:PenLayer}">
+                        <Grid Height="26" Background="Transparent" MouseLeftButtonDown="OnLayerRowMouseLeftButtonDown"
+                              PreviewMouseRightButtonDown="OnLayerRowRightButtonDown"
+                              Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ListBox}}">
+                            <Grid.ContextMenu>
+                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}" d:DataContext="{d:DesignInstance Type={x:Type vm:PenEditorViewModel}}">
+                                    <MenuItem Header="{x:Static local:Texts.MergeLayer}" Command="{Binding MergeLayerCommand}"
+                                              Icon="{DynamicResource {x:Static icons:IconKeys.Merge}}"/>
+                                    <MenuItem Header="{x:Static local:Texts.DuplicateLayer}" Command="{Binding DuplicateLayerCommand}"
+                                              Icon="{DynamicResource {x:Static icons:IconKeys.ContentDuplicate}}"/>
+                                    <MenuItem Header="{x:Static local:Texts.DeleteLayer}" Command="{Binding DeleteLayerCommand}"
+                                              Icon="{DynamicResource {x:Static icons:IconKeys.TrashCanOutline}}"/>
+                                </ContextMenu>
+                            </Grid.ContextMenu>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="44"/>
+                                <ColumnDefinition Width="26"/>
+                                <ColumnDefinition Width="26"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Width="{Binding IndentWidth}"/>
+                            <Button Grid.Column="1" Padding="0" FontSize="9"
+                                    Visibility="{Binding IsFolder, Converter={StaticResource BoolToVisibility}}"
+                                    Command="{Binding DataContext.ToggleExpandCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    CommandParameter="{Binding}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                        <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.ChevronRight}}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.ChevronDown}}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                            <Border Grid.Column="2">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{StaticResource ThumbnailBackgroundBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsFolder}" Value="True">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid>
+                                    <Image Source="{Binding Thumbnail}" Stretch="None"/>
+                                    <ContentControl HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    Content="{DynamicResource {x:Static icons:IconKeys.Folder}}"
+                                                    Visibility="{Binding IsFolder, Converter={StaticResource BoolToVisibility}}"/>
+                                </Grid>
+                            </Border>
+                            <ToggleButton Grid.Column="3" Padding="2" IsChecked="{Binding IsVisible}"
+                                          ToolTip="{x:Static local:Texts.LayerVisible}">
+                                <ToggleButton.Style>
+                                    <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                                        <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.EyeOffOutline}}"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Eye}}"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+                            <ToggleButton Grid.Column="4" Padding="2" IsChecked="{Binding IsLocked}"
+                                          ToolTip="{x:Static local:Texts.LayerLocked}">
+                                <ToggleButton.Style>
+                                    <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                                        <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.LockOpenVariantOutline}}"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Lock}}"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+                            <Grid Grid.Column="5">
+                                <TextBlock Padding="4,0,0,0" VerticalAlignment="Center"
+                                           Text="{Binding Name}" TextTrimming="CharacterEllipsis">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBox Padding="4,0,0,0" VerticalAlignment="Center" BorderThickness="0"
+                                         focus:FocusExtension.IsFocused="{Binding IsRenaming}"
+                                         Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}"
+                                         LostKeyboardFocus="OnRenameLostKeyboardFocus"
+                                         KeyDown="OnRenameKeyDown">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRenaming}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <GridSplitter Grid.Row="2" Height="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ResizeDirection="Rows" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Cursor="SizeNS"/>
+            <controls:PropertiesEditor Grid.Row="3" x:Name="layerProperties"
+                                       Target="{Binding ActiveLayer}" IsScrollViewerEnabled="True"/>
+        </Grid>
+    </Grid>
+</UserControl>

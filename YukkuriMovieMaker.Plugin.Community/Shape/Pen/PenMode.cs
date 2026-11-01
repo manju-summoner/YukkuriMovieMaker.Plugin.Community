@@ -6,5 +6,8 @@
         Highlighter,
         Eraser,
         Select,
+        Fill,
+        Order,
+        Pencil,
     }
 }

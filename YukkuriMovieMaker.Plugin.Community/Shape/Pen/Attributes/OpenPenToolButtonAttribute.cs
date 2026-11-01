@@ -6,8 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using YukkuriMovieMaker.Commons;
+using YukkuriMovieMaker.Plugin.Community.Shape.Pen.Views;
 
-namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen
+namespace YukkuriMovieMaker.Plugin.Community.Shape.Pen.Attributes
 {
     internal class OpenPenToolButtonAttribute : PropertyEditorAttribute2
     {
