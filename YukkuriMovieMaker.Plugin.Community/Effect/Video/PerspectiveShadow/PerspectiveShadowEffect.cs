@@ -38,6 +38,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
         [AnimationSlider("F1", "px", -1000d, 1000d)]
         public Animation GroundY { get; } = new Animation(0, YMM4Constants.VerySmallValue, YMM4Constants.VeryLargeValue);
 
+        [Display(GroupName = nameof(Texts.PerspectiveShadowGroupWall), Name = nameof(Texts.PerspectiveShadowWallEnabledName), Description = nameof(Texts.PerspectiveShadowWallEnabledDesc), ResourceType = typeof(Texts))]
+        [ToggleSlider]
+        public bool WallEnabled
+        {
+            get => _wallEnabled;
+            set => Set(ref _wallEnabled, value);
+        }
+        private bool _wallEnabled;
+
+        [Display(GroupName = nameof(Texts.PerspectiveShadowGroupWall), Name = nameof(Texts.PerspectiveShadowWallDistanceName), Description = nameof(Texts.PerspectiveShadowWallDistanceDesc), ResourceType = typeof(Texts))]
+        [AnimationSlider("F1", "px", 0d, 1000d)]
+        [WallDistanceVisible]
+        public Animation WallDistance { get; } = new Animation(300, 0d, YMM4Constants.VeryLargeValue);
+
         [Display(GroupName = nameof(Texts.PerspectiveShadowGroupAppearance), Name = nameof(Texts.PerspectiveShadowOpacityName), Description = nameof(Texts.PerspectiveShadowOpacityDesc), ResourceType = typeof(Texts))]
         [AnimationSlider("F1", "%", 0d, 100d)]
         public Animation Opacity { get; } = new Animation(75, 0d, 100d);
@@ -83,6 +97,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
             LightY,
             LightHeight,
             GroundY,
+            WallDistance,
             Opacity,
             Falloff,
             BlurRadius,

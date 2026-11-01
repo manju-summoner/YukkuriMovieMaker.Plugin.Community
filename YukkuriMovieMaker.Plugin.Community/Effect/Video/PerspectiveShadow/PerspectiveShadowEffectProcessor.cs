@@ -10,10 +10,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
     internal sealed class PerspectiveShadowEffectProcessor(IGraphicsDevicesAndContext devices, PerspectiveShadowEffect item)
         : VideoEffectProcessorBase(devices)
     {
+        private readonly IGraphicsDevicesAndContext _devices = devices;
         private PerspectiveShadowCustomEffect? effect;
 
         private bool isFirst = true;
-        private double lightX, lightY, lightHeight, groundY;
+        private double lightX, lightY, lightHeight, groundY, wallDistance;
         private double opacity, falloff;
         private double blurRadius, spread, alphaThreshold;
         private Color shadowColor;
@@ -31,6 +32,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
             var lightY = item.LightY.GetValue(frame, length, fps);
             var lightHeight = item.LightHeight.GetValue(frame, length, fps);
             var groundY = item.GroundY.GetValue(frame, length, fps);
+            var wallDistance = item.WallEnabled ? item.WallDistance.GetValue(frame, length, fps) : 0d;
             var opacity = item.Opacity.GetValue(frame, length, fps);
             var falloff = item.Falloff.GetValue(frame, length, fps);
             var blurRadius = item.BlurRadius.GetValue(frame, length, fps);
@@ -43,6 +45,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
                 || this.lightY != lightY
                 || this.lightHeight != lightHeight
                 || this.groundY != groundY
+                || this.wallDistance != wallDistance
                 || this.opacity != opacity
                 || this.falloff != falloff
                 || this.blurRadius != blurRadius
@@ -54,6 +57,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
                 effect.LightY = (float)lightY;
                 effect.LightHeight = (float)lightHeight;
                 effect.GroundY = (float)groundY;
+                effect.WallDistance = (float)wallDistance;
                 effect.Opacity = (float)opacity / 100f;
                 effect.Falloff = (float)falloff / 100f;
                 effect.BlurRadius = (float)blurRadius;
@@ -71,6 +75,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
             this.lightY = lightY;
             this.lightHeight = lightHeight;
             this.groundY = groundY;
+            this.wallDistance = wallDistance;
             this.opacity = opacity;
             this.falloff = falloff;
             this.blurRadius = blurRadius;
@@ -91,7 +96,22 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
                 ]);
 
             var desc = effectDescription.DrawDescription;
-            return desc with { Controllers = [..desc.Controllers, controller] };
+            if (wallDistance <= 0 || input is null)
+                return desc with { Controllers = [..desc.Controllers, controller] };
+
+            var bounds = _devices.DeviceContext.GetImageLocalBounds(input);
+            var wallY = (float)(bounds.Bottom + groundY - wallDistance);
+            Action<ControlPointDragEventArgs> dragWall = arg => item.WallDistance.AddToEachValues(-arg.Delta.Y);
+            var wallController = new VideoEffectController(
+                item,
+                [
+                    new ControllerPoint(new(bounds.Left, wallY, 0f), dragWall),
+                    new ControllerPoint(new(bounds.Right, wallY, 0f), dragWall)
+                ])
+            {
+                Connection = VideoControllerPointConnection.Line
+            };
+            return desc with { Controllers = [..desc.Controllers, controller, wallController] };
         }
 
         protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)

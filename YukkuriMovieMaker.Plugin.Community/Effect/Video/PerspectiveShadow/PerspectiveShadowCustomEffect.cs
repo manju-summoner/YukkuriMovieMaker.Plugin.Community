@@ -61,6 +61,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
             set => SetValue((int)EffectImpl.Properties.AlphaThreshold, value);
             get => GetFloatValue((int)EffectImpl.Properties.AlphaThreshold);
         }
+        public float WallDistance
+        {
+            set => SetValue((int)EffectImpl.Properties.WallDistance, value);
+            get => GetFloatValue((int)EffectImpl.Properties.WallDistance);
+        }
 
         [CustomEffect(1)]
         private sealed class EffectImpl : D2D1CustomShaderEffectImplBase<EffectImpl>
@@ -71,6 +76,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
             private ConstantBuffer _cb;
             private float _groundYOffset;
             private float _resolvedGroundY;
+            private float _wallDistance;
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.LightX)]
             public float LightX { get => _cb.LightX; set { _cb.LightX = value; UpdateConstants(); } }
@@ -101,6 +107,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
 
             [CustomEffectProperty(PropertyType.Float, (int)Properties.AlphaThreshold)]
             public float AlphaThreshold { get => _cb.AlphaThreshold; set { _cb.AlphaThreshold = Math.Clamp(value, 0f, 1f); UpdateConstants(); } }
+
+            [CustomEffectProperty(PropertyType.Float, (int)Properties.WallDistance)]
+            public float WallDistance { get => _wallDistance; set { _wallDistance = Math.Max(value, 0f); UpdateConstants(); } }
 
             public EffectImpl() : base(ShaderResourceUri.Get("PerspectiveShadow"))
             {
@@ -139,6 +148,35 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
                 return new Vector2(Sx, Sy);
             }
 
+            private float WallFactor()
+            {
+                float denom = _resolvedGroundY - _cb.LightY;
+                if (MathF.Abs(denom) < Epsilon)
+                    return 0f;
+                return (_cb.WallY - _cb.LightY) / denom;
+            }
+
+            private Vector2 ProjectToWall(Vector2 Q, float tw)
+            {
+                float H = _cb.LightHeight;
+                float h = Math.Max(0f, _resolvedGroundY - Q.Y);
+                float wallHeight = H - (H - h) * tw;
+                float Sx = _cb.LightX + (Q.X - _cb.LightX) * tw;
+                float Sy = _cb.WallY - wallHeight;
+                return new Vector2(Sx, Sy);
+            }
+
+            private void ExpandBoundsFromProjection(Vector2 Q, Vector2 S, ref float minX, ref float minY, ref float maxX, ref float maxY, ref float maxDynBlur)
+            {
+                float shadowDist = Vector2.Distance(S, Q);
+                maxDynBlur = Math.Max(maxDynBlur, ComputeDynamicBlur(shadowDist));
+
+                minX = Math.Min(minX, S.X);
+                minY = Math.Min(minY, S.Y);
+                maxX = Math.Max(maxX, S.X);
+                maxY = Math.Max(maxY, S.Y);
+            }
+
             public override void MapInputRectsToOutputRect(
                 RawRect[] inputRects,
                 RawRect[] inputOpaqueSubRects,
@@ -155,15 +193,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
 
                 _resolvedGroundY = inputRect.Bottom + _groundYOffset;
                 _cb.GroundY = _resolvedGroundY;
+                _cb.WallY = _resolvedGroundY - _wallDistance;
                 UpdateConstants();
 
-                var corners = new[]
-                {
-                    new Vector2(inputRect.Left, inputRect.Top),
-                    new Vector2(inputRect.Right, inputRect.Top),
-                    new Vector2(inputRect.Left, inputRect.Bottom),
-                    new Vector2(inputRect.Right, inputRect.Bottom),
-                };
+                float wallFactor = WallFactor();
+                float splitY = inputRect.Top;
+                if (wallFactor > 1f)
+                    splitY = Math.Clamp(_resolvedGroundY - _cb.LightHeight * (1f - 1f / wallFactor), inputRect.Top, inputRect.Bottom);
 
                 float minX = inputRect.Left;
                 float minY = inputRect.Top;
@@ -171,25 +207,39 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
                 float maxY = inputRect.Bottom;
                 float maxDynBlur = 0f;
 
-                foreach (var c in corners)
+                if (splitY < inputRect.Bottom)
                 {
-                    var S = ProjectToGround(c);
-                    float shadowDist = Vector2.Distance(S, c);
-                    maxDynBlur = Math.Max(maxDynBlur, ComputeDynamicBlur(shadowDist));
+                    ReadOnlySpan<Vector2> floorCorners =
+                    [
+                        new(inputRect.Left, splitY),
+                        new(inputRect.Right, splitY),
+                        new(inputRect.Left, inputRect.Bottom),
+                        new(inputRect.Right, inputRect.Bottom),
+                    ];
+                    foreach (var c in floorCorners)
+                        ExpandBoundsFromProjection(c, ProjectToGround(c), ref minX, ref minY, ref maxX, ref maxY, ref maxDynBlur);
+                }
 
-                    minX = Math.Min(minX, S.X);
-                    minY = Math.Min(minY, S.Y);
-                    maxX = Math.Max(maxX, S.X);
-                    maxY = Math.Max(maxY, S.Y);
+                if (splitY > inputRect.Top)
+                {
+                    ReadOnlySpan<Vector2> wallCorners =
+                    [
+                        new(inputRect.Left, inputRect.Top),
+                        new(inputRect.Right, inputRect.Top),
+                        new(inputRect.Left, splitY),
+                        new(inputRect.Right, splitY),
+                    ];
+                    foreach (var c in wallCorners)
+                        ExpandBoundsFromProjection(c, ProjectToWall(c, wallFactor), ref minX, ref minY, ref maxX, ref maxY, ref maxDynBlur);
                 }
 
                 int blurMargin = (int)Math.Ceiling(maxDynBlur) + 2;
 
                 outputRect = new RawRect(
-                    Math.Max((int)Math.Floor(minX) - blurMargin, inputRect.Left - MaxOutputExpand),
-                    Math.Max((int)Math.Floor(minY) - blurMargin, inputRect.Top - MaxOutputExpand),
-                    Math.Min((int)Math.Ceiling(maxX) + blurMargin, inputRect.Right + MaxOutputExpand),
-                    Math.Min((int)Math.Ceiling(maxY) + blurMargin, inputRect.Bottom + MaxOutputExpand)
+                    (int)Math.Max(MathF.Floor(minX) - blurMargin, inputRect.Left - MaxOutputExpand),
+                    (int)Math.Max(MathF.Floor(minY) - blurMargin, inputRect.Top - MaxOutputExpand),
+                    (int)Math.Min(MathF.Ceiling(maxX) + blurMargin, inputRect.Right + MaxOutputExpand),
+                    (int)Math.Min(MathF.Ceiling(maxY) + blurMargin, inputRect.Bottom + MaxOutputExpand)
                 );
                 outputOpaqueSubRect = default;
             }
@@ -216,9 +266,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
                 return new Vector2(Px, Py);
             }
 
+            private Vector2 UnprojectFromWall(Vector2 S, out bool valid)
+            {
+                valid = false;
+                float tw = WallFactor();
+                if (tw <= 1f || S.Y >= _cb.WallY)
+                    return Vector2.Zero;
+
+                float invT = 1f / tw;
+                float Px = _cb.LightX + (S.X - _cb.LightX) * invT;
+                float Py = _resolvedGroundY - _cb.LightHeight * (1f - invT) - (_cb.WallY - S.Y) * invT;
+
+                valid = true;
+                return new Vector2(Px, Py);
+            }
+
+            private Vector2 Unproject(Vector2 S, out bool valid)
+            {
+                var Q = UnprojectFromWall(S, out valid);
+                if (valid)
+                    return Q;
+                return UnprojectFromShadow(S, out valid);
+            }
+
             private void ExpandBoundsFromUnprojection(Vector2 point, ref float minX, ref float minY, ref float maxX, ref float maxY)
             {
-                var Q = UnprojectFromShadow(point, out bool valid);
+                var Q = Unproject(point, out bool valid);
                 if (!valid)
                     return;
 
@@ -289,7 +362,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
                 public Vector4 ShadowColor;
 
                 public float AlphaThreshold;
-                public float Pad0;
+                public float WallY;
                 public float Pad1;
                 public float Pad2;
             }
@@ -306,6 +379,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PerspectiveShadow
                 Spread = 7,
                 ShadowColor = 8,
                 AlphaThreshold = 9,
+                WallDistance = 10,
             }
         }
     }

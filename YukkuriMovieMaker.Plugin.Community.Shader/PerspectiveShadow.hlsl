@@ -16,7 +16,7 @@ cbuffer Constants : register(b0)
 	float4 shadowColor   : packoffset(c2);
 
 	float alphaThreshold : packoffset(c3.x);
-	float pad0           : packoffset(c3.y);
+	float wallY          : packoffset(c3.y);
 	float pad1           : packoffset(c3.z);
 	float pad2           : packoffset(c3.w);
 };
@@ -53,6 +53,37 @@ float2 UnprojectFromShadow(float2 S, out bool valid)
 	return float2(Px, Py);
 }
 
+float WallFactor()
+{
+	float denom = groundY - lightY;
+	if (abs(denom) < EPSILON)
+		return 0.0f;
+	return (wallY - lightY) / denom;
+}
+
+float2 UnprojectFromWall(float2 S, out bool valid)
+{
+	valid = false;
+	float tw = WallFactor();
+	if (tw <= 1.0f || S.y >= wallY)
+		return float2(0.0f, 0.0f);
+
+	float invT = 1.0f / tw;
+	float Px = lightX + (S.x - lightX) * invT;
+	float Py = groundY - lightHeight * (1.0f - invT) - (wallY - S.y) * invT;
+
+	valid = true;
+	return float2(Px, Py);
+}
+
+float2 Unproject(float2 S, out bool valid)
+{
+	float2 Q = UnprojectFromWall(S, valid);
+	if (valid)
+		return Q;
+	return UnprojectFromShadow(S, valid);
+}
+
 float4 SampleInput(float2 uv)
 {
 	if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f)
@@ -82,7 +113,7 @@ float4 main(
 	float4 original = SampleInput(baseUV);
 
 	bool valid;
-	float2 Q = UnprojectFromShadow(P, valid);
+	float2 Q = Unproject(P, valid);
 
 	float4 shadow = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
