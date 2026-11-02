@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -39,7 +41,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
             if(!response.IsSuccessStatusCode)
             {
                 var resJsonText = await response.Content.ReadAsStringAsync();
-                throw CreateTextToSpeechError(resJsonText, voiceId);
+                throw CreateTextToSpeechError(resJsonText, voiceId, response.StatusCode);
             }
             response.EnsureSuccessStatusCode();
 
@@ -52,16 +54,46 @@ namespace YukkuriMovieMaker.Plugin.Community.Voice.ElevenLabs
         /// 読み上げに失敗したときの例外。API キーの権限不足なら直し方の案内だけを出す（どの声でも失敗するので、声についての案内より先に直す必要がある）。
         /// それ以外は API のエラーに、期限切れになるデフォルトのボイスならその理由を添える
         /// </summary>
-        internal static ElevenLabsException CreateTextToSpeechError(string responseText, string voiceId)
+        internal static ElevenLabsException CreateTextToSpeechError(string responseText, string voiceId, HttpStatusCode statusCode)
         {
-            var resJson = JObject.Parse(responseText);
-            var status = resJson?["detail"]?["status"]?.Value<string>();
-            var message = resJson?["detail"]?["message"]?.Value<string>();
+            var (status, message) = ParseError(responseText);
+            status ??= ((int)statusCode).ToString(CultureInfo.InvariantCulture);
+            message ??= statusCode.ToString();
             //API の英語のメッセージはログで原因を追えるように内側の例外に残す
             if (ElevenLabsPermissionError.GetMessage(responseText) is { } permissionMessage)
                 return new ElevenLabsException(permissionMessage, new ElevenLabsException(status, message));
             return new ElevenLabsException(status, message, ElevenLabsDefaultVoices.Find(voiceId) is { } expiring ? string.Format(Texts.DefaultVoiceExpirationError, expiring.Name, expiring.ReplacementName) : null);
         }
+
+        /// <summary>
+        /// detail はオブジェクト（status と message）・文字列・配列（入力の検証エラー）のどれかで返る。
+        /// ゲートウェイが返すエラーなどでは本文が JSON でないこともある
+        /// </summary>
+        static (string? Status, string? Message) ParseError(string responseText)
+        {
+            JToken? detail;
+            try
+            {
+                detail = (JToken.Parse(responseText) as JObject)?["detail"];
+            }
+            catch (Newtonsoft.Json.JsonException)
+            {
+                return (null, null);
+            }
+
+            return detail switch
+            {
+                JObject obj => (GetString(obj, "status"), GetString(obj, "message")),
+                JValue { Type: JTokenType.String } value => (null, NullIfEmpty((string?)value)),
+                JArray array => (null, NullIfEmpty(string.Join(Environment.NewLine, array.OfType<JObject>().Select(x => GetString(x, "msg")).OfType<string>()))),
+                _ => (null, null),
+            };
+        }
+
+        static string? GetString(JObject obj, string name) =>
+            obj[name] is JValue { Type: JTokenType.String } value ? NullIfEmpty((string?)value) : null;
+
+        static string? NullIfEmpty(string? text) => string.IsNullOrEmpty(text) ? null : text;
     }
 
     public class ElevenLabsException : Exception
