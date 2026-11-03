@@ -34,6 +34,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         const float MinConstraintLength = 1f;
         //yバケット順で保証できなかった場合の帯幅上限（超えたら再試行→フォールバック）
         const int MaxSolverBandwidth = 512;
+        //これより面積（の2倍, px²）が小さい三角形は退化として除く。重なった頂点やほぼ一直線に並んだ頂点の三角形を拾い、1px未満の辺の三角形は残す大きさ
+        const float DegenerateTriangleDoubleArea = 1e-4f;
 
         /// <summary>
         /// アルファマスクから輪郭メッシュを構築する。構築できない場合はnull。
@@ -84,9 +86,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
         {
             usedSpacing = spacingFloor;
             //1. 輪郭をDouglas-Peuckerで簡略化する
-            var simplified = new List<(List<Vector2> Points, int Label, double SignedArea)>(field.Loops.Count);
+            var simplified = new List<(List<Vector2> Points, int Label, double SignedArea, AlphaContourField.Loop Source)>(field.Loops.Count);
             foreach (var loop in field.Loops)
-                simplified.Add((SimplifyClosedLoop(loop.Points, epsilon), loop.Label, loop.SignedArea));
+                simplified.Add((SimplifyClosedLoop(loop.Points, epsilon), loop.Label, loop.SignedArea, loop));
 
             //2. 輪郭点数から内部点間隔を決める（境界帯に約3点/輪郭点分の三角形を予約）
             var boundaryPointCount = simplified.Sum(l => l.Points.Count);
@@ -100,11 +102,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
 
             //3. 小さな穴は捨てる（メッシュで覆っても透明テクセルは透明に描かれるため視覚的に無損失）。
             //   小さな島（外周）は描画から消えてしまうため保持する。
-            //   捨てた穴はラベル格子上で埋めておき、分類の高速パス（ラベル参照）でも内側扱いになるようにする
+            //   捨てた穴はラベル格子上で埋めておき、分類の高速パス（ラベル参照）でも内側扱いになるようにする。
+            //   ただし島を含む穴は捨てない。穴の輪郭だけを捨てると偶奇判定で島の内側が外と判定されて島が消え、
+            //   島と囲む部位を結ぶ三角形が穴の周りの不透明な画素を覆ったまま除去されて欠ける
+            var smallHoleArea = spacing * spacing * 0.5;
+            var islandSamples = CollectSmallIslandSamples(simplified, smallHoleArea);
             for (var i = simplified.Count - 1; i >= 0; i--)
             {
-                var (points, label, signedArea) = simplified[i];
-                if (signedArea >= 0 || -signedArea >= spacing * spacing * 0.5)
+                var (points, label, signedArea, source) = simplified[i];
+                if (signedArea >= 0 || -signedArea >= smallHoleArea || ContainsIsland(source.Points, islandSamples))
                     continue;
                 FillSmallHole(field, points, label);
                 simplified.RemoveAt(i);
@@ -113,28 +119,35 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                 return null;
 
             //4. 辺長を制限しつつ制約点・制約セグメントを作る。
-            //   対角接触で複数ループが共有する角は同一頂点に統合する（ラベルが異なる場合はワイルドカード0）
+            //   対角接触で複数ループが共有する角は同一頂点に統合する（ラベルが異なる場合はワイルドカード0）。
+            //   共有した角で接する部位の組は、手順8で部位の繋がりとして扱うために記録する
             var pointMap = new Dictionary<(float, float), int>();
             var rawPoints = new List<Vector2>();
             var pointLabels = new List<int>();
+            var pointFirstLabels = new List<int>();
+            var cornerSharedLabels = new List<(int A, int B)>();
             var segments = new List<(int A, int B)>();
 
             int AddConstraintPoint(Vector2 p, int label)
             {
                 if (pointMap.TryGetValue((p.X, p.Y), out var existing))
                 {
-                    if (pointLabels[existing] != label)
+                    if (pointFirstLabels[existing] != label)
+                    {
                         pointLabels[existing] = 0;
+                        cornerSharedLabels.Add((pointFirstLabels[existing], label));
+                    }
                     return existing;
                 }
                 var index = rawPoints.Count;
                 pointMap[(p.X, p.Y)] = index;
                 rawPoints.Add(p);
                 pointLabels.Add(label);
+                pointFirstLabels.Add(label);
                 return index;
             }
 
-            foreach (var (points, label, _) in simplified)
+            foreach (var (points, label, _, _) in simplified)
             {
                 var subdivided = SubdivideLoop(points, maxEdge);
                 var indices = new int[subdivided.Count];
@@ -204,7 +217,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     var pb = triangulator.GetPoint(b);
                     if (Vector2.Distance(pa, pb) < MinConstraintLength)
                     {
-                        //これ以上分割しない（1px未満の制約違反は容認。跨ぎ三角形はラベル規則が除去する）
+                        //これ以上分割しない（1px未満の制約違反は容認。跨ぎ三角形の扱いは手順8のラベル規則で決める）
                         next.Add((a, b));
                         continue;
                     }
@@ -230,8 +243,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             //   重心の内外判定は、境界から十分離れた重心なら距離場＋ラベル参照で即決し（大半がこちら）、
             //   境界すれすれの重心だけ制約ポリゴンとの偶奇判定で精密に行う
             //   （簡略化ポリゴンとピクセル境界のずれ ≦ ε による縁の誤判定を防ぐため）。
-            //   加えて、異なる部位のラベルを跨ぐ三角形は無条件に除去する
-            //   （細い隙間を跨いだ微小三角形による部位の溶接を防ぐ）
+            //   加えて、大きな部位（小さな島以外）を2つ以上跨ぐ三角形と、大きな部位を含む別々のまとまりを新たに繋ぐ三角形は除去する
+            //   （細い隙間を跨いだ三角形や、隙間の中の島を経由した部位の溶接を防ぐ）。
+            //   小さな島と部位を繋ぐ三角形を除去しないのは、1px未満で分割を打ち切った輪郭の辺の近くで、輪郭に斜めに接する小さな島の頂点と
+            //   部位の内部点を結ぶ大きな三角形ができ、除去すると部位の不透明な部分が欠けるため。
+            //   島は内部点の間隔の目安の面積より小さく、独立して動かす意味が薄いので、1つの部位に繋がってよい
+            var labelGroups = new LabelGroups(FindSmallComponents(field, smallHoleArea), cornerSharedLabels);
             var polygonSegments = new List<(Vector2 A, Vector2 B)>(constraintSegments.Count);
             foreach (var (a, b) in constraintSegments)
                 polygonSegments.Add((triangulator.GetPoint(a), triangulator.GetPoint(b)));
@@ -242,9 +259,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             var kept = new List<(int A, int B, int C)>();
             foreach (var (a, b, c) in triangulator.GetTriangles())
             {
-                if (SpansDifferentLabels(vertexLabels[a], vertexLabels[b], vertexLabels[c]))
+                //面積がほぼ0の三角形は何も覆わず、点の所属三角形の探索で重心座標が退化するので残さない
+                var pa = triangulator.GetPoint(a);
+                var pb = triangulator.GetPoint(b);
+                var pc = triangulator.GetPoint(c);
+                if (MathF.Abs((pb.X - pa.X) * (pc.Y - pa.Y) - (pb.Y - pa.Y) * (pc.X - pa.X)) < DegenerateTriangleDoubleArea)
                     continue;
-                var centroid = (triangulator.GetPoint(a) + triangulator.GetPoint(b) + triangulator.GetPoint(c)) / 3f;
+                var centroid = (pa + pb + pc) / 3f;
                 var px = Math.Clamp((int)MathF.Floor(centroid.X), 0, field.Width - 1);
                 var py = Math.Clamp((int)MathF.Floor(centroid.Y), 0, field.Height - 1);
                 var pixel = py * field.Width + px;
@@ -253,7 +274,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     inside = field.Labels[pixel] != 0;
                 else
                     inside = IsInsidePolygons(centroid, polygonSegments);
-                if (!inside)
+                //外側の三角形で部位を繋いだ扱いにしないよう、内外判定の後に繋ぐ
+                if (!inside || !labelGroups.TryJoin(vertexLabels[a], vertexLabels[b], vertexLabels[c]))
                     continue;
                 kept.Add((a, b, c));
             }
@@ -309,13 +331,112 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
             return new ArapContourMesh(width, height, restPositions, triangleIndices, bandwidth, spacing * coordinateScale);
         }
 
-        static bool SpansDifferentLabels(int la, int lb, int lc)
+        /// <summary>
+        /// 面積がsmallHoleArea未満の部位（小さな島）のラベルを返す。
+        /// 膨張で角の斜め外側に1画素だけの外周ができるなど、大きな部位が小さな外周を持つことがあるため、
+        /// 外周を1本でも大きく持つラベルは小さな島に含めない
+        /// </summary>
+        static HashSet<int> FindSmallComponents(AlphaContourField field, double smallHoleArea)
         {
-            //0はワイルドカード（共有角・不明）として無視する
-            var first = la != 0 ? la : lb != 0 ? lb : lc;
-            if (first == 0)
-                return false;
-            return (la != 0 && la != first) || (lb != 0 && lb != first) || (lc != 0 && lc != first);
+            var small = new HashSet<int>();
+            var large = new HashSet<int>();
+            foreach (var loop in field.Loops)
+            {
+                if (loop.SignedArea <= 0)
+                    continue;
+                if (loop.SignedArea < smallHoleArea)
+                    small.Add(loop.Label);
+                else
+                    large.Add(loop.Label);
+            }
+            small.ExceptWith(large);
+            return small;
+        }
+
+        /// <summary>
+        /// 三角形で繋いだ部位のまとまりを記録し、大きな部位（小さな島以外）を含むまとまりどうしを新たに繋ぐ三角形を拒む。
+        /// メッシュ上の繋がりは頂点の共有で決まるため、共有した角（ワイルドカード0の頂点）で接する部位の組は最初に繋いでおく。
+        /// 角で接する大きな部位どうしは従来どおり角の頂点で繋がっているので、同じまとまりとして扱う
+        /// </summary>
+        sealed class LabelGroups
+        {
+            readonly HashSet<int> smallComponents;
+            readonly Dictionary<int, int> parent = [];
+            //まとまりの根 → まとまりに大きな部位が含まれるか
+            readonly Dictionary<int, bool> hasLarge = [];
+
+            public LabelGroups(HashSet<int> smallComponents, List<(int A, int B)> cornerSharedLabels)
+            {
+                this.smallComponents = smallComponents;
+                foreach (var (a, b) in cornerSharedLabels)
+                {
+                    var ra = Find(a);
+                    var rb = Find(b);
+                    if (ra == rb)
+                        continue;
+                    parent[rb] = ra;
+                    hasLarge[ra] |= hasLarge[rb];
+                }
+            }
+
+            /// <summary>
+            /// 三角形の頂点のラベル（0はワイルドカード（共有角・不明））を1つのまとまりに繋ぐ。
+            /// 三角形が大きな部位を2つ以上跨ぐ場合と、大きな部位を含む別々のまとまりを繋ぐ場合は、何も変えずにfalseを返す
+            /// </summary>
+            public bool TryJoin(int la, int lb, int lc)
+            {
+                var first = la != 0 ? la : lb != 0 ? lb : lc;
+                if ((la == 0 || la == first) && (lb == 0 || lb == first) && (lc == 0 || lc == first))
+                    return true;
+
+                var large = 0;
+                foreach (var label in (ReadOnlySpan<int>)[la, lb, lc])
+                {
+                    if (label == 0 || smallComponents.Contains(label))
+                        continue;
+                    if (large == 0)
+                        large = label;
+                    else if (label != large)
+                        return false;
+                }
+
+                Span<int> roots = [la != 0 ? Find(la) : 0, lb != 0 ? Find(lb) : 0, lc != 0 ? Find(lc) : 0];
+                var largeRoot = 0;
+                foreach (var root in roots)
+                {
+                    if (root == 0 || !hasLarge[root] || root == largeRoot)
+                        continue;
+                    if (largeRoot != 0)
+                        return false;
+                    largeRoot = root;
+                }
+
+                var joined = largeRoot != 0 ? largeRoot : roots[0] != 0 ? roots[0] : roots[1] != 0 ? roots[1] : roots[2];
+                foreach (var root in roots)
+                {
+                    if (root != 0 && root != joined)
+                        parent[root] = joined;
+                }
+                return true;
+            }
+
+            int Find(int label)
+            {
+                if (!parent.TryGetValue(label, out var p))
+                {
+                    parent[label] = label;
+                    hasLarge[label] = !smallComponents.Contains(label);
+                    return label;
+                }
+                while (p != label)
+                {
+                    var grand = parent[p];
+                    parent[label] = grand;
+                    label = p;
+                    p = grand;
+                }
+                return label;
+            }
         }
 
         /// <summary>
@@ -512,6 +633,93 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.PuppetDeformation.Arap
                     }
                 }
             }
+        }
+
+        const int IslandCellSize = 32;
+
+        /// <summary>
+        /// 小さな穴の中にありうる島（面積がsmallHoleArea未満の外周）の判定点を、判定点のセルごとに集める。
+        /// 穴の中の島は穴より面積が小さいので、面積で候補を絞る
+        /// </summary>
+        static Dictionary<(int, int), List<Vector2>> CollectSmallIslandSamples(
+            List<(List<Vector2> Points, int Label, double SignedArea, AlphaContourField.Loop Source)> loops,
+            double smallHoleArea)
+        {
+            var samples = new Dictionary<(int, int), List<Vector2>>();
+            foreach (var (_, _, signedArea, source) in loops)
+            {
+                if (signedArea <= 0 || signedArea >= smallHoleArea || source.Points.Count < 2)
+                    continue;
+                var sample = SampleBesideFirstEdge(source.Points);
+                var key = ((int)MathF.Floor(sample.X / IslandCellSize), (int)MathF.Floor(sample.Y / IslandCellSize));
+                if (!samples.TryGetValue(key, out var list))
+                    samples[key] = list = [];
+                list.Add(sample);
+            }
+            return samples;
+        }
+
+        /// <summary>穴の輪郭（元の階段状の点列）の内側に島の判定点があればtrueを返す</summary>
+        static bool ContainsIsland(List<Vector2> hole, Dictionary<(int, int), List<Vector2>> islandSamples)
+        {
+            if (islandSamples.Count == 0)
+                return false;
+            var (minX, minY, maxX, maxY) = Bounds(hole);
+            for (var cy = (int)MathF.Floor(minY / IslandCellSize); cy <= (int)MathF.Floor(maxY / IslandCellSize); cy++)
+            {
+                for (var cx = (int)MathF.Floor(minX / IslandCellSize); cx <= (int)MathF.Floor(maxX / IslandCellSize); cx++)
+                {
+                    if (!islandSamples.TryGetValue((cx, cy), out var list))
+                        continue;
+                    foreach (var sample in list)
+                    {
+                        if (sample.X > minX && sample.X < maxX && sample.Y > minY && sample.Y < maxY && IsInsideLoop(sample, hole))
+                            return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 輪郭の最初の辺に接する画素の中心を返す。輪郭どうしは辺を共有しないため、
+        /// この点は輪郭と同じ側にあり、ピクセル角座標の輪郭に対する内外判定で縮退しない
+        /// </summary>
+        static Vector2 SampleBesideFirstEdge(List<Vector2> points)
+        {
+            var a = points[0];
+            var b = points[1];
+            var direction = new Vector2(MathF.Sign(b.X - a.X), MathF.Sign(b.Y - a.Y));
+            return a + direction * 0.5f + new Vector2(-direction.Y, direction.X) * 0.5f;
+        }
+
+        static (float MinX, float MinY, float MaxX, float MaxY) Bounds(List<Vector2> points)
+        {
+            float minX = float.MaxValue, minY = float.MaxValue, maxX = float.MinValue, maxY = float.MinValue;
+            foreach (var p in points)
+            {
+                minX = MathF.Min(minX, p.X);
+                minY = MathF.Min(minY, p.Y);
+                maxX = MathF.Max(maxX, p.X);
+                maxY = MathF.Max(maxY, p.Y);
+            }
+            return (minX, minY, maxX, maxY);
+        }
+
+        /// <summary>閉じた点列に対する偶奇規則の内外判定（+x方向レイキャスト）</summary>
+        static bool IsInsideLoop(Vector2 p, List<Vector2> points)
+        {
+            var crossings = 0;
+            for (var i = 0; i < points.Count; i++)
+            {
+                var a = points[i];
+                var b = points[(i + 1) % points.Count];
+                if ((a.Y <= p.Y) == (b.Y <= p.Y))
+                    continue;
+                if (a.X + (p.Y - a.Y) / (b.Y - a.Y) * (b.X - a.X) > p.X)
+                    crossings++;
+            }
+            return (crossings & 1) == 1;
         }
 
         /// <summary>偶奇規則による内外判定（+x方向レイキャスト）</summary>
