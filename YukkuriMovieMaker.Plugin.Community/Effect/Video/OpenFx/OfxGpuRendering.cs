@@ -1744,8 +1744,9 @@ RGBA_DONE:
             get
             {
                 // 軽量プローブだがstatic lockで整合読み取りする。OpenCL描画は元々このlockで全体直列化されており、新たな直列化ではない。
+                // 別のbackendの失敗通知で常駐contextの世代が解放された兄弟は、解放済みと同じくCPU経路へ回す。
                 lock (openClLock)
-                    return context != 0 && queue != 0 && !isReleased;
+                    return !IsReleasedOrUninitialized() && IsResidentContextCurrent();
             }
         }
         public nint CommandQueue => queue;
@@ -2112,8 +2113,10 @@ RGBA_DONE:
         {
             lock (openClLock)
             {
-                if (!IsAvailable)
+                if (IsReleasedOrUninitialized())
                     throw new OpenClException(OpenClDriver.DeviceNotFound, "OpenCL backend", "利用できません。");
+                // IsAvailableを経ない呼び出しや、確認後に別スレッドが世代を解放した場合も、
+                // 世代の不一致をバックエンド失敗（OpenClUnavailableException）として扱わせる。
                 EnsureCurrentResidentContext();
                 var previous = currentBackend;
                 currentBackend = this;
@@ -2381,16 +2384,22 @@ RGBA_DONE:
             throw new OpenClUnavailableException("OpenCL共有変換資源は無効化されています。新しい描画グラフで再構築してください。");
         }
 
+        // openClLock内から呼び出す。
+        bool IsReleasedOrUninitialized()
+            => context == 0 || queue == 0 || isReleased;
+
+        // openClLock内から呼び出す。
+        bool IsResidentContextCurrent()
+            => residentContextGeneration != 0
+                && residentContexts.TryGetValue(contextKey, out var resident)
+                && resident.Context == context
+                && residentContextGenerations.TryGetValue(contextKey, out var generation)
+                && generation == residentContextGeneration;
+
         void EnsureCurrentResidentContext()
         {
-            if (residentContextGeneration == 0
-                || !residentContexts.TryGetValue(contextKey, out var resident)
-                || resident.Context != context
-                || !residentContextGenerations.TryGetValue(contextKey, out var generation)
-                || generation != residentContextGeneration)
-            {
+            if (!IsResidentContextCurrent())
                 throw new OpenClUnavailableException("OpenCL常駐contextは無効化されています。新しい描画グラフで再構築してください。");
-            }
         }
 
         void InvalidateResidentContextAfterBackendFailure()
