@@ -30,6 +30,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         [DllImport(LibraryName, EntryPoint = "cuDevicePrimaryCtxRelease_v2", CallingConvention = CallingConvention.Winapi)]
         static extern int cuDevicePrimaryCtxRelease(int device);
 
+        [DllImport(LibraryName, CallingConvention = CallingConvention.Winapi)]
+        static extern int cuDevicePrimaryCtxGetState(int device, out uint flags, out int active);
+
         [DllImport(LibraryName, EntryPoint = "cuCtxPushCurrent_v2", CallingConvention = CallingConvention.Winapi)]
         static extern int cuCtxPushCurrent(nint context);
 
@@ -145,6 +148,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
         public static void ReleasePrimaryContext(int device)
             => Check(cuDevicePrimaryCtxRelease(device), nameof(cuDevicePrimaryCtxRelease));
+
+        public static bool IsPrimaryContextActive(int device)
+        {
+            Check(cuDevicePrimaryCtxGetState(device, out _, out var active), nameof(cuDevicePrimaryCtxGetState));
+            return active != 0;
+        }
 
         public static void PushContext(nint context)
             => Check(cuCtxPushCurrent(context), nameof(cuCtxPushCurrent));

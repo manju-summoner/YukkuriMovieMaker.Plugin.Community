@@ -1055,8 +1055,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                         interop.ReleaseD3D11Resources();
                     return;
                 }
-                if (hasGpuBackendFailed && gpuBackend is not null)
+                // 別のインスタンスのバックエンド失敗で共有contextの世代を解放されたバックエンドも、
+                // 自身の失敗と同じく作り直す。
+                if (gpuBackend is not null && (hasGpuBackendFailed || !gpuBackend.IsAvailable))
                 {
+                    // 世代を解放されたバックエンドのGPU画像は、作り直したバックエンドへ使い回せない。
+                    ReleaseGpuImages();
                     gpuBackend.ReleaseDeviceResources();
                     gpuBackend.Dispose();
                     Volatile.Write(ref gpuBackend, null);

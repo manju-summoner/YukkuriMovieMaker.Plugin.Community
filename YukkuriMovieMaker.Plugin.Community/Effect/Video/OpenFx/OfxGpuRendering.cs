@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using SharpGen.Runtime;
@@ -208,6 +209,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         static readonly Dictionary<int, nint> residentPrimaryContexts = [];
         static readonly Dictionary<int, long> residentPrimaryContextGenerations = [];
         static readonly Dictionary<int, SharedConversionResources> sharedConversionResources = [];
+        // 世代 → device。解放後もcontextが生き残った世代だけを持つ。
+        static readonly Dictionary<long, int> survivingPrimaryContextGenerations = [];
         static long nextResidentPrimaryContextGeneration;
 
         int device;
@@ -259,7 +262,18 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 #endif
 
         public OfxGpuRenderKind Kind => OfxGpuRenderKind.Cuda;
-        public bool IsAvailable => context != 0 && !isReleased;
+        public bool IsAvailable
+        {
+            get
+            {
+                // 解放済みのbackendは、別スレッドのGPU描画が終わるのを待たずに判定する。
+                if (context == 0 || isReleased)
+                    return false;
+                // 別のbackendのTDR処理で世代が解放された兄弟は、解放済みと同じくCPU経路へ回す。
+                lock (cudaLock)
+                    return context != 0 && !isReleased && IsResidentContextCurrent();
+            }
+        }
         public nint CommandQueue => stream;
         public bool IsD3D11InteropAvailable
         {
@@ -490,6 +504,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             {
                 if (context == 0 || isReleased)
                     return;
+                if (!CanReleaseInstanceHandles())
+                {
+                    // CUDA側の登録はcontextと一緒に破棄済みなので、COM参照だけを返す。
+                    if (registeredD3D11Resources.Remove(d3d11Resource, out var registered))
+                        Marshal.Release(registered.D3D11Resource);
+                    return;
+                }
                 try
                 {
                     CudaDriver.PushContext(context);
@@ -518,7 +539,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             {
                 if (registeredD3D11Resources.Count == 0)
                     return;
-                if (context == 0 || isReleased)
+                if (context == 0 || isReleased || !CanReleaseInstanceHandles())
                 {
                     ReleaseCachedD3D11ComReferences();
                     return;
@@ -559,6 +580,21 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 isReleased = true;
                 if (context == 0)
                 {
+                    ReleaseCachedD3D11ComReferences();
+                    return;
+                }
+                if (!CanReleaseInstanceHandles())
+                {
+                    // stream・D3D11登録・共有変換資源はcontextと一緒に破棄済み。
+                    // 破棄済みhandleをドライバーへ渡すとアクセス違反になるため、host側の参照だけを回収する。
+                    if (conversionResources is not null)
+                    {
+                        ReleaseSharedConversionResources(device, conversionResources);
+                        conversionResources = null;
+                    }
+                    context = 0;
+                    stream = 0;
+                    isD3D11InteropAvailable = false;
                     ReleaseCachedD3D11ComReferences();
                     return;
                 }
@@ -711,6 +747,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                     // TDR時に残り得る量は、その時点で生存していた画像プール分を上限とする。
                     return;
                 }
+                if (!CanReleaseInstanceHandles())
+                {
+                    // 別のbackendのTDR処理でcontextごと解放済み。
+                    return;
+                }
                 try
                 {
                     CudaDriver.PushContext(context);
@@ -764,9 +805,26 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
 
         void EnsureAvailable()
         {
-            if (!IsAvailable)
+            if (context == 0 || isReleased)
                 throw new InvalidOperationException("CUDAバックエンドは既に解放されています。");
+            // IsAvailableの確認後に別スレッドが世代を解放した場合も、バックエンド失敗として扱わせる。
+            if (!IsResidentContextCurrent())
+                throw new CudaUnavailableException("CUDA常駐contextは無効化されています。新しい描画グラフで再構築してください。");
         }
+
+        // cudaLock内から呼び出す。primary contextは常駐cacheだけがretainしているため、
+        // 別のbackendのTDR処理が世代を解放するとcontextと全backendのstream・D3D11登録が破棄される。
+        // 再retainしたprimary contextは同じhandle値になりpushが成功してしまうので、世代で判定する。
+        bool IsResidentContextCurrent()
+            => residentContextGeneration != 0
+                && residentPrimaryContextGenerations.TryGetValue(device, out var generation)
+                && generation == residentContextGeneration;
+
+        // cudaLock内から呼び出す。世代が解放されてもcontextが生き残っていれば、instance固有のhandleは
+        // 有効なので通常どおり解放する。描画に使わせるかはIsResidentContextCurrentで判定する。
+        bool CanReleaseInstanceHandles()
+            => IsResidentContextCurrent()
+                || survivingPrimaryContextGenerations.ContainsKey(residentContextGeneration);
 
         void ExecuteInterop(nint d3d11Resource, Action<nint> operation, bool requiresD3D11Completion = false)
         {
@@ -1109,6 +1167,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 generation = residentPrimaryContextGenerations[device];
                 return residentContext;
             }
+            // 常駐cacheがretainしていない間に別の利用者がreleaseしてcontextが破棄されていると、
+            // ここでretainする新しいcontextは古い世代と同じhandle値になる。retainする前に判定する。
+            ForgetSurvivingPrimaryContextGenerationsIfInactive(device);
             residentContext = CudaDriver.RetainPrimaryContext(device);
             generation = ++nextResidentPrimaryContextGeneration;
 #if DEBUG
@@ -1130,7 +1191,52 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             }
             residentPrimaryContexts.Remove(device);
             residentPrimaryContextGenerations.Remove(device);
-            CudaDriver.ReleasePrimaryContext(device);
+            // CUDA Runtime APIを使うプラグイン等が別にretainしていると、このreleaseではcontextが破棄されず、
+            // 古い世代の兄弟のstream・メモリ・D3D11登録は有効なまま残る。再retain後は同じhandle値の
+            // 新しいcontextと区別できないため、生き残ったかどうかはrelease直後にだけ判定できる。
+            // release自体が失敗した場合も、参照数が減ったかは状態を照会して判断する。
+            Exception? releaseException = null;
+            try
+            {
+                CudaDriver.ReleasePrimaryContext(device);
+            }
+            catch (Exception e)
+            {
+                releaseException = e;
+            }
+            bool isActive;
+            try
+            {
+                isActive = CudaDriver.IsPrimaryContextActive(device);
+            }
+            catch
+            {
+                // 生き残ったか分からない世代のhandleは、漏れても破棄済みとして扱う。
+                ForgetSurvivingPrimaryContextGenerations(device);
+                throw;
+            }
+            if (isActive)
+                survivingPrimaryContextGenerations[expectedGeneration] = device;
+            else
+                ForgetSurvivingPrimaryContextGenerations(device);
+            if (releaseException is not null)
+                ExceptionDispatchInfo.Throw(releaseException);
+        }
+
+        // cudaLock内から呼び出す。contextが破棄されると、生き残っていた過去の世代の資源も一緒に破棄されている。
+        static void ForgetSurvivingPrimaryContextGenerationsIfInactive(int device)
+        {
+            if (!CudaDriver.IsPrimaryContextActive(device))
+                ForgetSurvivingPrimaryContextGenerations(device);
+        }
+
+        static void ForgetSurvivingPrimaryContextGenerations(int device)
+        {
+            foreach (var pair in survivingPrimaryContextGenerations.ToArray())
+            {
+                if (pair.Value == device)
+                    survivingPrimaryContextGenerations.Remove(pair.Key);
+            }
         }
 
         static void InvalidateResidentConversionResources(int device, nint context)
@@ -1195,6 +1301,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 residentPrimaryContexts.Clear();
                 residentPrimaryContextGenerations.Clear();
                 sharedConversionResources.Clear();
+                // 終了処理の後に破棄される兄弟は、contextが生き残ったか確かめずに資源を手放す。
+                survivingPrimaryContextGenerations.Clear();
             }
         }
 
