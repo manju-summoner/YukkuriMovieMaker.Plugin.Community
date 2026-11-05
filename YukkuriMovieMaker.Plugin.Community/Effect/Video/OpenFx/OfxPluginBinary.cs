@@ -148,11 +148,19 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             Identifier = identifier;
         }
 
+#if DEBUG
+        /// <summary>プラグインへ送ったアクションをテストで数えるためのフック（action, handle）</summary>
+        internal static event Action<string, nint>? ActionCalledForTest;
+
+#endif
         /// <summary>
         /// mainEntry を呼ぶ。action はUTF8へ変換して渡す。
         /// </summary>
         public int CallAction(string action, nint handle, nint inArgs, nint outArgs)
         {
+#if DEBUG
+            ActionCalledForTest?.Invoke(action, handle);
+#endif
             var actionUtf8 = Marshal.StringToCoTaskMemUTF8(action);
             try
             {

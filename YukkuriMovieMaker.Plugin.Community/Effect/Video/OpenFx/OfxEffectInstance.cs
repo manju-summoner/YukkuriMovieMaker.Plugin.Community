@@ -71,6 +71,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
         GpuAttemptSnapshot? preparedDirectRenderSnapshot;
         const int MaxConsecutivePluginGpuFailures = 3;
         const int MaxConsecutivePluginGpuFailuresAcrossParameters = 10;
+        int consecutiveGpuBackendRecoveries;
+        const int MaxConsecutiveGpuBackendRecoveries = 2;
+        // 作り直しのために古いバックエンドを解放し、新しいバックエンドをまだ作れていない。
+        bool isGpuBackendRecreationPending;
+        long lastCountedGpuBackendRecoveryRenderSerial = -1;
 
         public OfxPropertySet Props { get; }
         public OfxParamSet ParamSet { get; } = new();
@@ -280,7 +285,32 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             UpdateGpuSettingState();
             EnsureGpuBackend();
             createInstanceUsedGpuContext = IsGpuBackendSupported(gpuBackend, Props);
-            var status = CallInstanceAction(OfxConstants.ActionCreateInstance, 0, 0, createInstanceUsedGpuContext);
+            int status;
+            int? gpuCreateInstanceStatus = null;
+            try
+            {
+                status = createInstanceUsedGpuContext
+                    ? gpuBackend!.ExecuteWithContext(() =>
+                    {
+                        gpuCreateInstanceStatus = plugin.CallAction(OfxConstants.ActionCreateInstance, Handle, 0, 0);
+                        return gpuCreateInstanceStatus.Value;
+                    })
+                    : plugin.CallAction(OfxConstants.ActionCreateInstance, Handle, 0, 0);
+            }
+            catch (Exception e) when (createInstanceUsedGpuContext && IsBackendException(e) && IsCpuRenderSupported())
+            {
+                // 作り直したバックエンドのcontextが使えない場合などは、描画と同じくバックエンドの失敗として
+                // CPU経路へ切り替える。作り直しの回数が残っていれば、次の描画の入口でもう一度作り直す。
+                gpuBackend!.OnBackendFailed();
+                lock (gpuBackendLock)
+                    hasGpuBackendFailed = true;
+                LogGpuFailureOnce(GetFallbackStatus(e), e);
+                // createInstanceが成功した後のcontextの復元で失敗した場合は、プラグイン側のインスタンスができている。
+                if (gpuCreateInstanceStatus is OfxStatus.OK or OfxStatus.ReplyDefault)
+                    DestroyPluginInstanceWithoutGpuContext("CPU経路への切り替え");
+                createInstanceUsedGpuContext = false;
+                status = plugin.CallAction(OfxConstants.ActionCreateInstance, Handle, 0, 0);
+            }
             if (status is not OfxStatus.OK and not OfxStatus.ReplyDefault)
                 throw new InvalidOperationException($"kOfxActionCreateInstance が失敗しました。plugin={plugin.Identifier} status={status}");
             isCreated = true;
@@ -543,6 +573,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             var fallback = new OfxRectI { x1 = 0, y1 = 0, x2 = Width, y2 = Height };
             ClampSpan(ref fallback.x1, ref fallback.x2, Width, maxOutputSize);
             ClampSpan(ref fallback.y1, ref fallback.y2, Height, maxOutputSize);
+            RecoverGpuBackendIfInvalidated();
             Create();
             // パラメータ変更から内部状態を更新するプラグインがあるため、RoDの問い合わせより先に通知する
             NotifyChangedParams(time);
@@ -619,6 +650,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             // （RoD拡張側は透明余白が増えるだけで視覚的に等価なので許容する）
             if (renderWindow.x1 > 0 || renderWindow.y1 > 0 || renderWindow.x2 < Width || renderWindow.y2 < Height)
                 return null;
+            RecoverGpuBackendIfInvalidated();
             Create();
             // パラメータ変更から内部状態を更新するプラグインがあるため、問い合わせより先に通知する
             NotifyChangedParams(time);
@@ -780,6 +812,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
             OfxRectI renderWindow)
         {
             var snapshot = CaptureGpuAttemptSnapshot(time, renderWindow);
+            // 下で取り出したバックエンドを使い終わるまで作り直さないよう、取り出す前に済ませる。
+            RecoverGpuBackendIfInvalidated();
             if (!CanUseGpuBackend(snapshot)
                 || gpuBackend is not IOfxD3D11InteropBackend { IsD3D11InteropAvailable: true } interop)
                 return false;
@@ -793,6 +827,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 NotifyChangedParams(time);
                 renderSerial++;
                 preparedDirectRenderSnapshot = snapshot;
+                if (hasGpuBackendFailed || !IsGpuBackendSupported(gpuBackend, Props))
+                {
+                    // createInstanceがバックエンドの失敗でCPU経路へ切り替わった。取り出したバックエンドは使わず、
+                    // 準備済みの状態で呼び出し元のCPU経路へ回す。
+                    preservePreparedSnapshotForCpuFallback = true;
+                    return false;
+                }
 
                 var gpuInputs = new (OfxClipInstance Clip, OfxImage Image)[inputs.Length];
                 for (var i = 0; i < inputs.Length; i++)
@@ -1034,7 +1075,102 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 consecutivePluginGpuFailures = 0;
                 consecutivePluginGpuFailuresAcrossParameters = 0;
                 hasAbandonedGpuRendering = false;
+                consecutiveGpuBackendRecoveries = 0;
             }
+        }
+
+        /// <summary>
+        /// 使えなくなったバックエンドを、プラグインのインスタンスごと作り直す。
+        /// 別のインスタンスのバックエンド失敗で共有contextの世代を解放された場合と、自身のバックエンド失敗の場合が対象。
+        /// 自身の失敗は、GPU描画が成功するまでに続けて作り直すのを <see cref="MaxConsecutiveGpuBackendRecoveries"/> 回までにする。
+        /// 共有contextの世代の解放は他のインスタンスの失敗で起き、その回数はそちらで抑えるので数えない。
+        /// プラグインのアクションの外で、GPU画像やバックエンドを使い始める前の描画の入口から呼び出す。
+        /// </summary>
+        void RecoverGpuBackendIfInvalidated()
+        {
+            // 「GPUレンダリングを使用する」の切り替えで作り直しの回数を戻してから判定する。
+            UpdateGpuSettingState();
+            if (gpuBackendFactory is null || !OpenFxSettings.Default.UseGpuRendering)
+                return;
+            var backend = Volatile.Read(ref gpuBackend);
+            string reason;
+            lock (gpuBackendLock)
+            {
+                if (hasAbandonedGpuRendering)
+                    return;
+                // 1フレームにはRoD・恒等判定・描画の入口があるので、数える作り直しはフレームごとに1回にする。
+                // renderSerialは描画の入口で進むため、次のフレームのRoDで値が変わる。D3D11直接描画が失敗した
+                // フレームの続くCPU描画は、準備済みの状態を使うPrepareCpuRenderの早期returnでここへ来ない。
+                var isCountedThisFrame = lastCountedGpuBackendRecoveryRenderSerial == renderSerial;
+                if (backend is null)
+                {
+                    // 作り直しでバックエンドを作れなかった場合だけ、自身の失敗と同じ回数の範囲で次の描画でもう一度作る。
+                    // 最初の生成の失敗（GPUが無い等）は繰り返さない。
+                    if (!isGpuBackendRecreationPending
+                        || !hasAttemptedGpuBackendCreation
+                        || isCountedThisFrame
+                        || consecutiveGpuBackendRecoveries >= MaxConsecutiveGpuBackendRecoveries)
+                        return;
+                    consecutiveGpuBackendRecoveries++;
+                    lastCountedGpuBackendRecoveryRenderSerial = renderSerial;
+                    // インスタンスは作り直さない。GPU contextなしで作ったインスタンスで、後から作ったバックエンドの
+                    // GPU描画を行うのは、GPU設定のOFF→ONで遅延生成する場合と同じ。
+                    hasAttemptedGpuBackendCreation = false;
+                    OfxHostLog.Info($"OpenFX GPUバックエンドをもう一度作ります。plugin={plugin.Identifier}");
+                    return;
+                }
+                if (hasGpuBackendFailed)
+                {
+                    if (isCountedThisFrame || consecutiveGpuBackendRecoveries >= MaxConsecutiveGpuBackendRecoveries)
+                        return;
+                    consecutiveGpuBackendRecoveries++;
+                    lastCountedGpuBackendRecoveryRenderSerial = renderSerial;
+                    reason = "failed";
+                }
+                else if (!backend.IsAvailable)
+                {
+                    reason = "invalidated";
+                }
+                else
+                {
+                    return;
+                }
+            }
+            OfxHostLog.Info($"OpenFX GPUバックエンドを作り直します。plugin={plugin.Identifier} reason={reason}");
+            // プラグインは古いcontextで用意したGPU資源（CUDA module等）をインスタンスに持つため、
+            // バックエンドだけを作り直すと新しいcontextで古いhandleを使わせることになる。
+            if (isCreated)
+            {
+                isCreated = false;
+                DestroyPluginInstanceWithoutGpuContext("GPUバックエンドの作り直し");
+            }
+            // 古いバックエンドのGPU画像は、作り直したバックエンドへ使い回せない。バックエンドの解放より先に解放する。
+            ReleaseGpuImages();
+            lock (gpuBackendLock)
+            {
+                backend.ReleaseDeviceResources();
+                backend.Dispose();
+                Volatile.Write(ref gpuBackend, null);
+                hasGpuBackendFailed = false;
+                hasAttemptedGpuBackendCreation = false;
+                isGpuBackendRecreationPending = true;
+            }
+        }
+
+        // 使えなくなったバックエンドのcontextでは呼ばない。続けて同じhandleでcreateInstanceできるよう、インスタンスデータを戻す。
+        void DestroyPluginInstanceWithoutGpuContext(string reason)
+        {
+            try
+            {
+                var status = plugin.CallAction(OfxConstants.ActionDestroyInstance, Handle, 0, 0);
+                if (status is not OfxStatus.OK and not OfxStatus.ReplyDefault)
+                    OfxHostLog.Info($"{reason}で kOfxActionDestroyInstance が失敗しました。plugin={plugin.Identifier} status={status}");
+            }
+            catch (Exception e)
+            {
+                OfxHostLog.Info($"{reason}で kOfxActionDestroyInstance の実行中に例外が発生しました。plugin={plugin.Identifier} error={e.Message}");
+            }
+            Props.SetPointer(OfxConstants.PropInstanceData, 0);
         }
 
         void UpdateGpuSettingState()
@@ -1055,17 +1191,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                         interop.ReleaseD3D11Resources();
                     return;
                 }
-                // 別のインスタンスのバックエンド失敗で共有contextの世代を解放されたバックエンドも、
-                // 自身の失敗と同じく作り直す。
-                if (gpuBackend is not null && (hasGpuBackendFailed || !gpuBackend.IsAvailable))
-                {
-                    // 世代を解放されたバックエンドのGPU画像は、作り直したバックエンドへ使い回せない。
-                    ReleaseGpuImages();
-                    gpuBackend.ReleaseDeviceResources();
-                    gpuBackend.Dispose();
-                    Volatile.Write(ref gpuBackend, null);
-                    hasGpuBackendFailed = false;
-                }
+                // 使えなくなったバックエンドは、ResetPluginGpuFailuresで作り直しの回数を戻した上で、
+                // 次の描画の入口でRecoverGpuBackendIfInvalidatedがプラグインのインスタンスごと作り直す。
                 if (gpuBackend is null)
                     hasAttemptedGpuBackendCreation = false;
             }
@@ -1100,6 +1227,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 {
                     Volatile.Write(ref gpuBackend, created);
                     hasGpuBackendFailed = false;
+                    isGpuBackendRecreationPending = false;
                     return;
                 }
                 created.ReleaseDeviceResources();
@@ -1208,6 +1336,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Effect.Video.OpenFx
                 return;
             }
             preparedDirectRenderSnapshot = null;
+            RecoverGpuBackendIfInvalidated();
             Create();
             NotifyChangedParams(time);
             // プール画像は内容がレンダリング毎に変わるため、画像の同一性を表す識別子も毎回更新する。
