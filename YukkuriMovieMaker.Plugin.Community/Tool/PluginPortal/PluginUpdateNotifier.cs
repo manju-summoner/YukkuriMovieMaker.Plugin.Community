@@ -48,7 +48,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                 return notices;
 
             var alreadyNotified = PluginPortalSettings.Default.NotifiedVersions.ToHashSet();
-            return notices.Where(notice => !alreadyNotified.Contains(notice.NotificationKey)).ToArray();
+            return [.. notices.Where(notice => !alreadyNotified.Contains(notice.NotificationKey))];
         }
 
         private static bool TryShowNotification(IReadOnlyList<PluginUpdateNotice> notices, IReadOnlyList<PluginUpdateNotice> targets)

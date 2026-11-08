@@ -1,4 +1,5 @@
-﻿using YukkuriMovieMaker.Plugin.Update;
+﻿using System.Diagnostics;
+using YukkuriMovieMaker.Plugin.Update;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
 {
@@ -29,11 +30,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
             }
         }
 
-        public static Task<PluginVersion?> GetLatestVersionAsync(IPluginUpdater updater)
+        public static async Task<PluginVersion?> GetLatestVersionAsync(IPluginUpdater updater)
+        {
+            try
+            {
+                return await GetOrStartLatestVersionTask(updater);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to check plugin update ({updater.PluginUrl}): {ex.Message}");
+                return null;
+            }
+        }
+
+        private static Task<PluginVersion?> GetOrStartLatestVersionTask(IPluginUpdater updater)
         {
             lock (gate)
             {
-                if (!latestVersionTasks.TryGetValue(updater.PluginUrl, out var task) || task is { IsCompleted: true, Result: null })
+                if (!latestVersionTasks.TryGetValue(updater.PluginUrl, out var task) || task.IsFaulted || task.IsCanceled)
                 {
                     task = Task.Run(() => PluginUpdateChecker.GetLatestVersionAsync(updater));
                     latestVersionTasks[updater.PluginUrl] = task;

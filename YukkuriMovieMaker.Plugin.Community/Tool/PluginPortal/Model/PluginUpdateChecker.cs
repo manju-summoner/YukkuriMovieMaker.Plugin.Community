@@ -65,18 +65,17 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
             var hasGitHubUpdater = installedUpdaters.Any(u => TryParseGitHubRepository(u.PluginUrl, out _, out _));
             var latestReleases = GetLatestReleases(hasGitHubUpdater ? await PluginPortalDataCache.GetReleasesAsync() : []);
 
+            var targets = installedUpdaters.Where(u => u.CurrentVersion is not null).ToArray();
+            var latestVersions = await Task.WhenAll(targets.Select(installed =>
+                TryParseGitHubRepository(installed.PluginUrl, out var owner, out var repo)
+                    ? Task.FromResult(GetLatestVersion(latestReleases, ToRepositoryKey(owner, repo)))
+                    : PluginPortalDataCache.GetLatestVersionAsync(installed.Updater)));
+
             var notices = new List<PluginUpdateNotice>();
-            foreach (var installed in installedUpdaters)
+            foreach (var (installed, latestVersion) in targets.Zip(latestVersions))
             {
-                if (installed.CurrentVersion is null)
-                    continue;
-
-                var latestVersion = TryParseGitHubRepository(installed.PluginUrl, out var owner, out var repo)
-                    ? GetLatestVersion(latestReleases, ToRepositoryKey(owner, repo))
-                    : await PluginPortalDataCache.GetLatestVersionAsync(installed.Updater);
-
-                if (latestVersion is not null && latestVersion.CompareTo(installed.CurrentVersion) > 0)
-                    notices.Add(new PluginUpdateNotice(installed.Name, installed.PluginUrl, installed.CurrentVersion, latestVersion));
+                if (installed.CurrentVersion is { } currentVersion && latestVersion is not null && latestVersion.CompareTo(currentVersion) > 0)
+                    notices.Add(new PluginUpdateNotice(installed.Name, installed.PluginUrl, currentVersion, latestVersion));
             }
             return notices;
         }
@@ -97,19 +96,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
 
         public static async Task<PluginVersion?> GetLatestVersionAsync(IPluginUpdater updater)
         {
-            try
-            {
-                var updates = await updater.GetUpdatesAsync();
-                return updates
-                    .Where(u => !u.IsPrerelease)
-                    .Select(u => u.Version)
-                    .Max();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Failed to check plugin update ({updater.PluginUrl}): {ex.Message}");
-                return null;
-            }
+            var updates = await updater.GetUpdatesAsync();
+            return updates
+                .Where(u => !u.IsPrerelease)
+                .Select(u => u.Version)
+                .Max();
         }
 
         private static List<InstalledUpdater> GetInstalledUpdaters()
@@ -183,8 +174,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
             if (!match.Success)
                 return false;
 
+            var repositoryName = match.Groups[2].Value;
+            if (repositoryName.EndsWith(".git", StringComparison.OrdinalIgnoreCase))
+                repositoryName = repositoryName[..^4];
+            if (repositoryName.Length == 0)
+                return false;
+
             owner = match.Groups[1].Value;
-            repo = match.Groups[2].Value;
+            repo = repositoryName;
             return true;
         }
 
@@ -223,7 +220,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
             return text.TrimEnd('/');
         }
 
-        [GeneratedRegex(@"github\.com/([^/]+)/([^/]+)")]
+        [GeneratedRegex(@"github\.com/([^/?#\s]+)/([^/?#\s]+)", RegexOptions.IgnoreCase)]
         private static partial Regex GitHubRepositoryUrlRegex();
 
         [GeneratedRegex(@"\d+(\.\d+){1,3}(-[^\s]+)?")]
