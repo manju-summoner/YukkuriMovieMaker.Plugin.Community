@@ -11,6 +11,25 @@
         <Expander Header="{x:Static local:Texts.PluginPortal}" IsExpanded="True">
             <StackPanel>
                 <Grid>
+                    <Label Content="{x:Static local:Texts.IsCheckUpdatesOnStartup}"/>
+                    <c:ToggleSlider Value="{Binding Source={x:Static local:PluginPortalSettings.Default},Path=IsCheckUpdatesOnStartup}" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Source={x:Static local:PluginPortalSettings.Default}, Path=IsCheckUpdatesOnStartup}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <Label Content="{x:Static local:Texts.IsNotifyEveryStartup}"/>
+                    <c:ToggleSlider Value="{Binding Source={x:Static local:PluginPortalSettings.Default},Path=IsNotifyEveryStartup}" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid>
                     <Label Content="{x:Static local:Texts.IsCleanYmmeFile}"/>
                     <c:ToggleSlider Value="{Binding Source={x:Static local:PluginPortalSettings.Default},Path=IsCleanYmmeFile}" HorizontalAlignment="Right"/>
                 </Grid>

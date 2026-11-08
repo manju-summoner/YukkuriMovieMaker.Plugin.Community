@@ -16,11 +16,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
         public ICommand InstallCommand { get; }
         public ICommand CancelCommand { get; }
 
-        private readonly Action<bool?, IEnumerable<string>> _closeAction;
+        private readonly Action<bool?, IEnumerable<string>> closeAction;
 
         public PluginSelectionViewModel(IEnumerable<string> filePaths, Action<bool?, IEnumerable<string>> closeAction)
         {
-            _closeAction = closeAction;
+            this.closeAction = closeAction;
             PluginFiles = new ObservableCollection<SelectablePluginFile>(
                 filePaths.Select(path => new SelectablePluginFile(path))
             );
@@ -33,12 +33,12 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                         .Where(f => f.IsSelected)
                         .Select(f => f.FilePath)
                         .ToList();
-                    _closeAction(true, selectedFiles);
+                    closeAction(true, selectedFiles);
                 });
 
             CancelCommand = new ActionCommand(
                 _ => true,
-                _ => _closeAction(false, []));
+                _ => closeAction(false, []));
 
             DeleteCommand = new ActionCommand(
                 parameter => parameter is IList list && list.Count > 0,

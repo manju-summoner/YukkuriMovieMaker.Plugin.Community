@@ -9,6 +9,9 @@
         Title="{x:Static local:Texts.PluginsToInstall}"
         Height="300" Width="450"
         d:DataContext="{d:DesignInstance Type=local:PluginSelectionViewModel}">
+    <Window.Style>
+        <Style TargetType="{x:Type Window}" BasedOn="{StaticResource {x:Type Window}}"/>
+    </Window.Style>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

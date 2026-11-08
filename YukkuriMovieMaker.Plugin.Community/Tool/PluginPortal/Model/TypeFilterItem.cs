@@ -5,13 +5,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
 {
     public class TypeFilterItem(PluginType type, int count) : Bindable, IFilterItem
     {
-        private bool _isChecked = true;
+        private bool isChecked = true;
         public string Name { get; } = $"{EnumEx.GetDisplayName(type)} ({count})";
         
         public bool IsChecked
         {
-            get => _isChecked;
-            set => Set(ref _isChecked, value);
+            get => isChecked;
+            set => Set(ref isChecked, value);
         }
 
         public FilterType FilterType { get; } = FilterType.Any;

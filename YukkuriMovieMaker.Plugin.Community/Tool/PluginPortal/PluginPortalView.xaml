@@ -11,6 +11,10 @@
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance Type={x:Type local:PluginPortalViewModel}}"
              >
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <local:UpdateBadgeVisibilityConverter x:Key="UpdateBadgeVisibilityConverter"/>
+    </UserControl.Resources>
     <Grid Margin="0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
@@ -79,6 +83,15 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <DockPanel LastChildFill="True">
+                            <Border DockPanel.Dock="Left" Width="4" Margin="0,0,5,0"
+                                    Background="{DynamicResource {x:Static SystemColors.HotTrackBrushKey}}">
+                                <Border.Visibility>
+                                    <MultiBinding Converter="{StaticResource UpdateBadgeVisibilityConverter}">
+                                        <Binding/>
+                                        <Binding Path="DataContext.UpdateStatuses" RelativeSource="{RelativeSource AncestorType=ListBox}"/>
+                                    </MultiBinding>
+                                </Border.Visibility>
+                            </Border>
                             <TextBlock Text="{Binding Name}"/>
                         </DockPanel>
                     </DataTemplate>
@@ -131,23 +144,36 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static local:Texts.Author}" FontWeight="SemiBold" Margin="0,0,10,8" HorizontalAlignment="Right"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Static local:Texts.Author}" FontWeight="SemiBold" Margin="0,0,20,8"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedPlugin.Author}" Margin="0,0,0,8"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static local:Texts.Type}" FontWeight="SemiBold" Margin="0,0,10,8" HorizontalAlignment="Right"/>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedPlugin.Type}" Margin="0,0,0,8"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Static local:Texts.Type}" FontWeight="SemiBold" Margin="0,0,20,8"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedPluginTypeText}" Margin="0,0,0,8"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static local:Texts.Date}" FontWeight="SemiBold" Margin="0,0,10,8" HorizontalAlignment="Right"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{x:Static local:Texts.Date}" FontWeight="SemiBold" Margin="0,0,20,8"/>
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedPlugin.Date, StringFormat='yyyy/MM/dd'}" Margin="0,0,0,8"/>
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static local:Texts.URL}" FontWeight="SemiBold" Margin="0,0,10,8" HorizontalAlignment="Right"/>
-                        <TextBlock Grid.Row="3" Grid.Column="1">
-                        <Hyperlink Command="{Binding Source={x:Static s:CommandSettings.Default},Path=[OpenUri]}" CommandParameter="{Binding SelectedPlugin.Url}">
-                            <TextBlock Text="{Binding SelectedPlugin.Url}" />
-                        </Hyperlink>
-                    </TextBlock>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{x:Static local:Texts.URL}" FontWeight="SemiBold" Margin="0,0,20,8"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,0,0,8" TextTrimming="CharacterEllipsis">
+                            <Hyperlink Command="{Binding Source={x:Static s:CommandSettings.Default},Path=[OpenUri]}" CommandParameter="{Binding SelectedPlugin.Url}">
+                                <Run Text="{Binding SelectedPlugin.Url, Mode=OneWay}"/>
+                            </Hyperlink>
+                        </TextBlock>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="{x:Static local:Texts.CurrentVersion}" FontWeight="SemiBold" Margin="0,0,20,8"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedPluginStatus.InstalledVersionText, TargetNullValue='-', FallbackValue='-'}" Margin="0,0,0,8"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="{x:Static local:Texts.LatestVersion}" FontWeight="SemiBold" Margin="0,0,20,8"/>
+                        <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBlock Text="{Binding SelectedPluginStatus.LatestVersionText, TargetNullValue='-', FallbackValue='-'}"/>
+                            <TextBlock Text="{x:Static local:Texts.UpdateAvailable}" Margin="10,0,0,0"
+                                       Foreground="{DynamicResource {x:Static SystemColors.HotTrackBrushKey}}"
+                                       Visibility="{Binding SelectedPluginStatus.HasUpdate, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"/>
+                        </StackPanel>
                     </Grid>
 
                     <TextBlock Grid.Row="2" Text="{x:Static local:Texts.Description}" FontWeight="Bold" Margin="0,20,0,5"/>
@@ -159,7 +185,11 @@
 
             <StackPanel Grid.Row="1">
                 <TextBlock Text="{Binding StatusMessage}" Margin="10,0"/>
-                <Button Content="{x:Static local:Texts.DownloadFromGitHub}" Command="{Binding DownloadCommand}" Height="25" />
+                <Button Content="{x:Static local:Texts.DownloadFromGitHub}" Command="{Binding DownloadCommand}" Height="25"
+                        Visibility="{Binding IsSelectedPluginOnGitHub, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Content="{x:Static local:Texts.OpenWebsite}" Height="25"
+                        Command="{Binding Source={x:Static s:CommandSettings.Default},Path=[OpenUri]}" CommandParameter="{Binding SelectedPluginPageUrl}"
+                        Visibility="{Binding IsSelectedPluginOnOtherSite, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             </StackPanel>
         </Grid>
     </Grid>

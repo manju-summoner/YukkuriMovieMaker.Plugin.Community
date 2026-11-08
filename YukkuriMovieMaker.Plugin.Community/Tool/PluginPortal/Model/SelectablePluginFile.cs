@@ -8,7 +8,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
         public string FilePath { get; } = filePath;
         public string FileName { get; } = Path.GetFileName(filePath);
 
-        public bool IsSelected { get => _isSelected; set => Set(ref _isSelected, value); }
-        private bool _isSelected = true;
+        public bool IsSelected { get => isSelected; set => Set(ref isSelected, value); }
+        private bool isSelected = true;
     }
 }
