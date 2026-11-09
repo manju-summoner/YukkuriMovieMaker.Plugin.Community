@@ -52,7 +52,9 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                 if (Set(ref updateStatuses, value))
                 {
                     updateAvailableFilter?.Count = value.Values.Count(s => s.HasUpdate);
+                    ((ActionCommand)DownloadCommand).RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(SelectedPluginStatus));
+                    OnPropertyChanged(nameof(IsSelectedPluginOnGitHub));
                     OnPropertyChanged(nameof(IsSelectedPluginOnOtherSite));
                     OnPropertyChanged(nameof(SelectedPluginPageUrl));
                 }
@@ -70,7 +72,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             SelectedPlugin is null ? null : UpdateStatuses.GetValueOrDefault(SelectedPlugin);
 
         public bool IsSelectedPluginOnGitHub =>
-            PluginUpdateChecker.FindGitHubRepositoryUrl(SelectedPlugin) is not null;
+            PluginUpdateChecker.IsDistributedOnGitHub(SelectedPlugin, SelectedPluginStatus);
 
         public bool IsSelectedPluginOnOtherSite =>
             SelectedPlugin is not null && !IsSelectedPluginOnGitHub && !string.IsNullOrEmpty(SelectedPluginPageUrl);

@@ -7,14 +7,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
 {
     internal static partial class PluginUpdateChecker
     {
-        private sealed record InstalledUpdater(string Name, IPluginUpdater Updater, string PluginUrl, PluginVersion? CurrentVersion);
+        internal sealed record InstalledUpdater(string Name, IPluginUpdater Updater, string PluginUrl, PluginVersion? CurrentVersion);
 
         public static Dictionary<PluginCatalogItem, PluginUpdateStatus> CheckWithReleaseList(
             IEnumerable<PluginCatalogItem> catalog,
             IEnumerable<GitHubReleasesPluginSummary> releases,
+            out List<(PluginCatalogItem Plugin, IPluginUpdater Updater)> otherSiteUpdaters) =>
+            CheckWithReleaseList(catalog, releases, GetInstalledUpdaters(), out otherSiteUpdaters);
+
+        internal static Dictionary<PluginCatalogItem, PluginUpdateStatus> CheckWithReleaseList(
+            IEnumerable<PluginCatalogItem> catalog,
+            IEnumerable<GitHubReleasesPluginSummary> releases,
+            IReadOnlyList<InstalledUpdater> installedUpdaters,
             out List<(PluginCatalogItem Plugin, IPluginUpdater Updater)> otherSiteUpdaters)
         {
-            var installedUpdaters = GetInstalledUpdaters();
             var latestReleases = GetLatestReleases(releases);
 
             var statuses = new Dictionary<PluginCatalogItem, PluginUpdateStatus>();
@@ -28,42 +34,44 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
                     .Where(url => url.Length > 0)
                     .ToHashSet();
 
-                var gitHubUrl = FindGitHubRepositoryUrl(plugin);
-                if (gitHubUrl is not null)
+                (string Owner, string Repo)? repository =
+                    TryParseGitHubRepository(FindGitHubRepositoryUrl(plugin), out var owner, out var repo)
+                        ? ToRepositoryKey(owner, repo)
+                        : null;
+
+                var installed = installedUpdaters.FirstOrDefault(u =>
+                    pluginUrls.Contains(NormalizeUrl(u.PluginUrl))
+                    || (repository is not null
+                        && TryParseGitHubRepository(u.PluginUrl, out var updaterOwner, out var updaterRepo)
+                        && ToRepositoryKey(updaterOwner, updaterRepo) == repository));
+
+                //カタログにGitHubのリンクがあっても、Updaterが外部サイトを指していればそちらで配布されている
+                if (installed is not null && !TryParseGitHubRepository(installed.PluginUrl, out _, out _))
                 {
-                    if (!TryParseGitHubRepository(gitHubUrl, out var owner, out var repo))
-                        continue;
-
-                    var repository = ToRepositoryKey(owner, repo);
-                    var installed = installedUpdaters.FirstOrDefault(u =>
-                        pluginUrls.Contains(NormalizeUrl(u.PluginUrl))
-                        || (TryParseGitHubRepository(u.PluginUrl, out var updaterOwner, out var updaterRepo)
-                            && ToRepositoryKey(updaterOwner, updaterRepo) == repository));
-
-                    statuses[plugin] = new PluginUpdateStatus(installed?.CurrentVersion, GetLatestVersion(latestReleases, repository), null);
-                }
-                else
-                {
-                    var installed = installedUpdaters.FirstOrDefault(u => pluginUrls.Contains(NormalizeUrl(u.PluginUrl)));
-                    if (installed is null)
-                        continue;
-
                     statuses[plugin] = new PluginUpdateStatus(installed.CurrentVersion, null, installed.PluginUrl);
                     otherSiteUpdaters.Add((plugin, installed.Updater));
+                }
+                else if (repository is { } gitHubRepository)
+                {
+                    statuses[plugin] = new PluginUpdateStatus(installed?.CurrentVersion, GetLatestVersion(latestReleases, gitHubRepository), null);
                 }
             }
 
             return statuses;
         }
 
-        public static async Task<IReadOnlyList<PluginUpdateNotice>> CheckInstalledPluginsAsync()
+        public static Task<IReadOnlyList<PluginUpdateNotice>> CheckInstalledPluginsAsync() =>
+            CheckInstalledPluginsAsync(GetInstalledUpdaters(), PluginPortalDataCache.GetReleasesAsync);
+
+        internal static async Task<IReadOnlyList<PluginUpdateNotice>> CheckInstalledPluginsAsync(
+            IReadOnlyList<InstalledUpdater> installedUpdaters,
+            Func<Task<GitHubReleasesPluginSummary[]>> getReleasesAsync)
         {
-            var installedUpdaters = GetInstalledUpdaters();
             if (installedUpdaters.Count == 0)
                 return [];
 
             var hasGitHubUpdater = installedUpdaters.Any(u => TryParseGitHubRepository(u.PluginUrl, out _, out _));
-            var latestReleases = GetLatestReleases(hasGitHubUpdater ? await PluginPortalDataCache.GetReleasesAsync() : []);
+            var latestReleases = GetLatestReleases(hasGitHubUpdater ? await GetReleasesOrEmptyAsync(getReleasesAsync) : []);
 
             var targets = installedUpdaters.Where(u => u.CurrentVersion is not null).ToArray();
             var latestVersions = await Task.WhenAll(targets.Select(installed =>
@@ -78,6 +86,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
                     notices.Add(new PluginUpdateNotice(installed.Name, installed.PluginUrl, currentVersion, latestVersion));
             }
             return notices;
+        }
+
+        //GitHubの一覧を取れなくても、外部サイトで配布されているプラグインの確認は続ける
+        private static async Task<GitHubReleasesPluginSummary[]> GetReleasesOrEmptyAsync(Func<Task<GitHubReleasesPluginSummary[]>> getReleasesAsync)
+        {
+            try
+            {
+                return await getReleasesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to get GitHub releases: {ex.Message}");
+                return [];
+            }
         }
 
         private static Dictionary<(string Owner, string Repo), GitHubReleasesPluginSummary> GetLatestReleases(IEnumerable<GitHubReleasesPluginSummary> releases) =>
@@ -147,18 +169,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
         {
             if (plugin is null) return null;
 
-            if (plugin.Url is not null && plugin.Url.Contains("github.com"))
-            {
-                return plugin.Url;
-            }
-
-            if (plugin.Links is not null)
-            {
-                return plugin.Links.FirstOrDefault(link => link?.Contains("github.com") ?? false);
-            }
-
-            return null;
+            return new[] { plugin.Url }
+                .Concat(plugin.Links ?? [])
+                .FirstOrDefault(url => TryParseGitHubRepository(url, out _, out _));
         }
+
+        //インストール済みのUpdaterが外部サイトを指していれば、カタログにGitHubのリンクがあってもそちらで配布されている
+        public static bool IsDistributedOnGitHub(PluginCatalogItem? plugin, PluginUpdateStatus? status) =>
+            status?.PageUrl is null && FindGitHubRepositoryUrl(plugin) is not null;
 
         public static bool TryParseGitHubRepository(
             string? url,
@@ -167,20 +185,24 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
         {
             owner = null;
             repo = null;
-            if (string.IsNullOrEmpty(url))
+            if (string.IsNullOrWhiteSpace(url) || !Uri.TryCreate(url.Trim(), UriKind.Absolute, out var uri))
+                return false;
+            if (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp)
+                return false;
+            if (uri.Host is not ("github.com" or "www.github.com"))
                 return false;
 
-            var match = GitHubRepositoryUrlRegex().Match(url);
-            if (!match.Success)
+            var segments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (segments.Length < 2)
                 return false;
 
-            var repositoryName = match.Groups[2].Value;
+            var repositoryName = segments[1];
             if (repositoryName.EndsWith(".git", StringComparison.OrdinalIgnoreCase))
                 repositoryName = repositoryName[..^4];
             if (repositoryName.Length == 0)
                 return false;
 
-            owner = match.Groups[1].Value;
+            owner = segments[0];
             repo = repositoryName;
             return true;
         }
@@ -219,9 +241,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
                 text = text[4..];
             return text.TrimEnd('/');
         }
-
-        [GeneratedRegex(@"github\.com/([^/?#\s]+)/([^/?#\s]+)", RegexOptions.IgnoreCase)]
-        private static partial Regex GitHubRepositoryUrlRegex();
 
         [GeneratedRegex(@"\d+(\.\d+){1,3}(-[^\s]+)?")]
         private static partial Regex VersionRegex();
