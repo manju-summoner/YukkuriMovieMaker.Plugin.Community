@@ -7,7 +7,6 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
         public PluginPortalView()
         {
             InitializeComponent();
-            DataContext = new PluginPortalViewModel();
         }
     }
 }
