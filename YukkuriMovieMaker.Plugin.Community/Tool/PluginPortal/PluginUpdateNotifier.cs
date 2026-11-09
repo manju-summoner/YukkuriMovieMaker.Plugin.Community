@@ -76,12 +76,23 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             return [.. notices.Where(notice => !alreadyNotified.Contains(notice.NotificationKey))];
         }
 
+        //配布元の一時的な失敗で今回の確認に出てこなかったプラグインの記録を消すと、次に取得できたときに再通知してしまうため残す
+        internal static string[] MergeNotifiedVersions(IEnumerable<string> notifiedVersions, IReadOnlyList<PluginUpdateNotice> notices)
+        {
+            var checkedPrefixes = notices.Select(notice => notice.PluginUrl + "|").ToArray();
+            return
+            [
+                .. notifiedVersions.Where(key => !checkedPrefixes.Any(prefix => key.StartsWith(prefix, StringComparison.Ordinal))),
+                .. notices.Select(notice => notice.NotificationKey),
+            ];
+        }
+
         private static void ShowNotification(IReadOnlyList<PluginUpdateNotice> notices, IReadOnlyList<PluginUpdateNotice> targets)
         {
             if (FindMainWindow() is not { } mainWindow)
                 return;
 
-            PluginPortalSettings.Default.NotifiedVersions = [.. notices.Select(notice => notice.NotificationKey)];
+            PluginPortalSettings.Default.NotifiedVersions = MergeNotifiedVersions(PluginPortalSettings.Default.NotifiedVersions, notices);
             PluginPortalSettings.Default.Save();
 
             if (new PluginUpdateNotificationWindow(targets, mainWindow).ShowDialog() == true)
