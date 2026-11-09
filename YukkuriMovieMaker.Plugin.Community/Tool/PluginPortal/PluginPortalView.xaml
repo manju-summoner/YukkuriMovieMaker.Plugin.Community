@@ -29,7 +29,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0">
+            <Grid Grid.Row="0" Height="26">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -58,9 +58,16 @@
                     </TextBlock>
                 </Grid>
 
-                <c:DropDownButton Grid.Column="1" Content="{DynamicResource {x:Static icons:IconKeys.Menu}}" Padding="2" Width="20">
+                <c:DropDownButton Grid.Column="1" Padding="3" Width="26">
                     <c:DropDownButton.Style>
-                        <Style TargetType="c:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}"/>
+                        <Style TargetType="c:DropDownButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                            <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.FilterOff}}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsFiltered}" Value="True">
+                                    <Setter Property="Content" Value="{DynamicResource {x:Static icons:IconKeys.Filter}}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
                     </c:DropDownButton.Style>
                     <c:DropDownButton.ContextMenu>
                         <ContextMenu ItemsSource="{Binding TypeFilters}">

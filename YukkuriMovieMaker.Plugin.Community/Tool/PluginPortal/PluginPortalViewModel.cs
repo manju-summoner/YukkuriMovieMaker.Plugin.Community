@@ -24,6 +24,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
         public ObservableCollection<PluginCatalogItem> Plugins { get; } = [];
         public ObservableCollection<IFilterItem> TypeFilters { get; } = [];
 
+        public bool IsFiltered => TypeFilters.OfType<TypeFilterItem>().Any(f => !f.IsChecked) || updateAvailableFilter?.IsChecked == true;
+
         public PluginCatalogItem? SelectedPlugin
         {
             get => selectedPlugin;
@@ -161,9 +163,10 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                     isEnabledFilter.PropertyChanged += FilterItem_PropertyChanged;
                     TypeFilters.Add(isEnabledFilter);
 
-                    updateAvailableFilter = new UpdateAvailableFilterItem(p => UpdateStatuses.GetValueOrDefault(p)?.HasUpdate ?? false);
+                    updateAvailableFilter = new UpdateAvailableFilterItem(HasUpdate);
                     updateAvailableFilter.PropertyChanged += FilterItem_PropertyChanged;
                     TypeFilters.Add(updateAvailableFilter);
+                    OnPropertyChanged(nameof(IsFiltered));
 
                     UpdateStatuses = statuses;
 
@@ -197,8 +200,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
         private void FilterItem_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(TypeFilterItem.IsChecked))
+            {
+                OnPropertyChanged(nameof(IsFiltered));
                 ApplyFilter();
+            }
         }
+
+        private bool HasUpdate(PluginCatalogItem plugin) => UpdateStatuses.GetValueOrDefault(plugin)?.HasUpdate ?? false;
 
         private void ApplyFilter()
         {
@@ -215,7 +223,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                         return true;
                     var targets = new[] { p.Name, p.Author, p.Description };
                     return targets.OfType<string>().Any(text => text.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
-                });
+                })
+                .OrderByDescending(HasUpdate);
 
             Plugins.Clear();
             foreach (var plugin in filteredPlugins)
