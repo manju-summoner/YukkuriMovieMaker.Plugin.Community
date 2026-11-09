@@ -19,28 +19,53 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                 if (!PluginLoader.UserPlugins.Any() || !PluginPortalSettings.Default.IsCheckUpdatesOnStartup)
                     return;
 
-                var notices = await PluginUpdateChecker.CheckInstalledPluginsAsync();
-                var targets = GetNotificationTargets(notices);
-                if (targets.Count == 0)
-                    return;
-
                 var application = Application.Current;
                 if (application is null)
                     return;
 
-                var limit = DateTime.UtcNow + mainWindowWaitLimit;
-                while (DateTime.UtcNow < limit)
-                {
-                    if (await application.Dispatcher.InvokeAsync(() => TryShowNotification(notices, targets)))
-                        return;
-                    await Task.Delay(mainWindowPollInterval);
-                }
+                await CheckAndNotifyAsync(
+                    () => WaitForMainWindowAsync(application),
+                    PluginUpdateChecker.CheckInstalledPluginsAsync,
+                    (notices, targets) => application.Dispatcher.InvokeAsync(() => ShowNotification(notices, targets)).Task);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Failed to check plugin updates on startup: {ex.Message}");
             }
         }
+
+        //プラグインはCLIエンコードなどメイン画面を出さないプロセスでも読み込まれるため、メイン画面が出てから通信する
+        internal static async Task CheckAndNotifyAsync(
+            Func<Task<bool>> waitForMainWindowAsync,
+            Func<Task<IReadOnlyList<PluginUpdateNotice>>> checkAsync,
+            Func<IReadOnlyList<PluginUpdateNotice>, IReadOnlyList<PluginUpdateNotice>, Task> showAsync)
+        {
+            if (!await waitForMainWindowAsync())
+                return;
+
+            var notices = await checkAsync();
+            var targets = GetNotificationTargets(notices);
+            if (targets.Count == 0)
+                return;
+
+            await showAsync(notices, targets);
+        }
+
+        private static async Task<bool> WaitForMainWindowAsync(Application application)
+        {
+            var limit = DateTime.UtcNow + mainWindowWaitLimit;
+            while (DateTime.UtcNow < limit)
+            {
+                if (await application.Dispatcher.InvokeAsync(() => FindMainWindow() is not null))
+                    return true;
+                await Task.Delay(mainWindowPollInterval);
+            }
+            return false;
+        }
+
+        //Application.MainWindowは最初に作られたウィンドウになるため、起動中の更新通知などのダイアログを指すことがある
+        private static Window? FindMainWindow() =>
+            ZOrderedWindowEnumerable.CreateMainWindows().FirstOrDefault(window => window is { IsVisible: true, IsLoaded: true });
 
         private static IReadOnlyList<PluginUpdateNotice> GetNotificationTargets(IReadOnlyList<PluginUpdateNotice> notices)
         {
@@ -51,18 +76,16 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             return [.. notices.Where(notice => !alreadyNotified.Contains(notice.NotificationKey))];
         }
 
-        private static bool TryShowNotification(IReadOnlyList<PluginUpdateNotice> notices, IReadOnlyList<PluginUpdateNotice> targets)
+        private static void ShowNotification(IReadOnlyList<PluginUpdateNotice> notices, IReadOnlyList<PluginUpdateNotice> targets)
         {
-            if (Application.Current?.MainWindow is not { IsVisible: true, IsLoaded: true } mainWindow)
-                return false;
+            if (FindMainWindow() is not { } mainWindow)
+                return;
 
             PluginPortalSettings.Default.NotifiedVersions = [.. notices.Select(notice => notice.NotificationKey)];
             PluginPortalSettings.Default.Save();
 
             if (new PluginUpdateNotificationWindow(targets, mainWindow).ShowDialog() == true)
                 Settings.CommandRegistry.Execute(Settings.Commands.OpenToolWindow, new OpenToolWindowCommandArgs(typeof(PluginPortalViewModel)), mainWindow);
-
-            return true;
         }
     }
 }
