@@ -11,23 +11,28 @@
     <Window.Style>
         <Style TargetType="{x:Type Window}" BasedOn="{StaticResource {x:Type Window}}"/>
     </Window.Style>
-    <StackPanel>
-        <TextBlock Text="{x:Static local:Texts.PluginUpdatesAvailable}" FontWeight="Bold" Margin="12,12,12,8"/>
-        <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto" Margin="12,0">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="26"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="{x:Static local:Texts.PluginUpdatesAvailable}" Margin="3"/>
+        <ScrollViewer Grid.Row="1" MaxHeight="200" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="3,0,3,3">
             <ItemsControl x:Name="updatesList">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <DockPanel Margin="0,0,0,4">
+                        <DockPanel>
                             <TextBlock DockPanel.Dock="Right" Text="{Binding VersionText}" Margin="10,0,0,0"/>
-                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}"/>
                         </DockPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Height="25" Margin="0,12,0,0">
-            <Button Content="{x:Static local:Texts.OpenPluginPortal}" Padding="10,0" IsDefault="True" Click="OpenPluginPortal_Click"/>
-            <Button Content="{x:Static local:Texts.Close}" Padding="10,0" IsCancel="True"/>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="{x:Static local:Texts.OpenPluginPortal}" MinWidth="100" Padding="10,0" IsDefault="True" Click="OpenPluginPortal_Click"/>
+            <Button Content="{x:Static local:Texts.Close}" Width="100" IsCancel="True"/>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </Window>
