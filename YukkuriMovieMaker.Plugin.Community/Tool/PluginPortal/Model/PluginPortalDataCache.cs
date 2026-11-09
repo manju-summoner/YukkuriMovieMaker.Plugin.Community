@@ -6,7 +6,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
     internal static class PluginPortalDataCache
     {
         private static readonly Lock gate = new();
-        private static readonly Dictionary<string, Task<PluginVersion?>> latestVersionTasks = [];
+        private static readonly Dictionary<string, Task<PluginUpdateChecker.LatestUpdate?>> latestUpdateTasks = [];
         private static Task<PluginCatalog>? catalogTask;
         private static Task<GitHubReleasesPluginSummary[]>? releasesTask;
 
@@ -30,11 +30,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
             }
         }
 
-        public static async Task<PluginVersion?> GetLatestVersionAsync(IPluginUpdater updater)
+        public static async Task<PluginVersion?> GetLatestVersionAsync(IPluginUpdater updater) =>
+            (await GetLatestUpdateAsync(updater))?.Version;
+
+        public static async Task<PluginUpdateChecker.LatestUpdate?> GetLatestUpdateAsync(IPluginUpdater updater)
         {
             try
             {
-                return await GetOrStartLatestVersionTask(updater);
+                return await GetOrStartLatestUpdateTask(updater);
             }
             catch (Exception ex)
             {
@@ -43,14 +46,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
             }
         }
 
-        private static Task<PluginVersion?> GetOrStartLatestVersionTask(IPluginUpdater updater)
+        private static Task<PluginUpdateChecker.LatestUpdate?> GetOrStartLatestUpdateTask(IPluginUpdater updater)
         {
             lock (gate)
             {
-                if (!latestVersionTasks.TryGetValue(updater.PluginUrl, out var task) || task.IsFaulted || task.IsCanceled)
+                if (!latestUpdateTasks.TryGetValue(updater.PluginUrl, out var task) || task.IsFaulted || task.IsCanceled)
                 {
-                    task = Task.Run(() => PluginUpdateChecker.GetLatestVersionAsync(updater));
-                    latestVersionTasks[updater.PluginUrl] = task;
+                    task = Task.Run(() => PluginUpdateChecker.GetLatestUpdateAsync(updater));
+                    latestUpdateTasks[updater.PluginUrl] = task;
                 }
                 return task;
             }

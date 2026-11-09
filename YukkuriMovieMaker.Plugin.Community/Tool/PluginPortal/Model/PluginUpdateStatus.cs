@@ -2,7 +2,13 @@
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
 {
-    internal sealed record PluginUpdateStatus(PluginVersion? InstalledVersion, PluginVersion? LatestVersion, string? PageUrl)
+    internal sealed record PluginUpdateStatus(
+        PluginVersion? InstalledVersion,
+        PluginVersion? LatestVersion,
+        string? PageUrl,
+        bool HasGitHubRelease = false,
+        IPluginUpdateInfo? DownloadableUpdate = null,
+        bool IsLatestUpdateChecked = false)
     {
         public bool HasUpdate =>
             InstalledVersion is not null

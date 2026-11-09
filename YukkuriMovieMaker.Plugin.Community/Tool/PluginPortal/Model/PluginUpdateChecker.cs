@@ -9,6 +9,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
     {
         internal sealed record InstalledUpdater(string Name, IPluginUpdater Updater, string PluginUrl, PluginVersion? CurrentVersion);
 
+        internal sealed record LatestUpdate(PluginVersion Version, IPluginUpdateInfo? DownloadableUpdate);
+
         public static Dictionary<PluginCatalogItem, PluginUpdateStatus> CheckWithReleaseList(
             IEnumerable<PluginCatalogItem> catalog,
             IEnumerable<GitHubReleasesPluginSummary> releases,
@@ -48,7 +50,11 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
                 //カタログにGitHubのリンクがあっても、Updaterが外部サイトを指していればそちらで配布されている
                 if (installed is not null && !TryParseGitHubRepository(installed.PluginUrl, out _, out _))
                 {
-                    statuses[plugin] = new PluginUpdateStatus(installed.CurrentVersion, null, installed.PluginUrl);
+                    statuses[plugin] = new PluginUpdateStatus(
+                        installed.CurrentVersion,
+                        null,
+                        installed.PluginUrl,
+                        HasGitHubRelease: repository is { } releasedRepository && latestReleases.ContainsKey(releasedRepository));
                     otherSiteUpdaters.Add((plugin, installed.Updater));
                 }
                 else if (repository is { } gitHubRepository)
@@ -116,13 +122,28 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
         private static (string Owner, string Repo) ToRepositoryKey(string owner, string repo) =>
             (owner.ToLowerInvariant(), repo.ToLowerInvariant());
 
-        public static async Task<PluginVersion?> GetLatestVersionAsync(IPluginUpdater updater)
+        //プラグインのUpdaterのメンバーは例外を投げうるため、ダウンロードできるかもここで読んでおく
+        public static async Task<LatestUpdate?> GetLatestUpdateAsync(IPluginUpdater updater)
         {
             var updates = await updater.GetUpdatesAsync();
-            return updates
+            var latest = updates
                 .Where(u => !u.IsPrerelease)
-                .Select(u => u.Version)
-                .Max();
+                .MaxBy(u => u.Version);
+            return latest is null ? null : new LatestUpdate(latest.Version, CanDownload(latest) ? latest : null);
+        }
+
+        //CanDownloadはこのポータルで初めて読まれるため、未実装で例外を投げるプラグインがあっても最新のバージョンの確認は続ける
+        private static bool CanDownload(IPluginUpdateInfo update)
+        {
+            try
+            {
+                return update.CanDownload;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to check whether the plugin update can be downloaded ({update.Version}): {ex.Message}");
+                return false;
+            }
         }
 
         private static List<InstalledUpdater> GetInstalledUpdaters()
@@ -174,9 +195,20 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
                 .FirstOrDefault(url => TryParseGitHubRepository(url, out _, out _));
         }
 
-        //インストール済みのUpdaterが外部サイトを指していれば、カタログにGitHubのリンクがあってもそちらで配布されている
-        public static bool IsDistributedOnGitHub(PluginCatalogItem? plugin, PluginUpdateStatus? status) =>
-            status?.PageUrl is null && FindGitHubRepositoryUrl(plugin) is not null;
+        public static PluginUpdateStatus WithLatestUpdate(PluginUpdateStatus status, LatestUpdate? latestUpdate) =>
+            status with
+            {
+                LatestVersion = latestUpdate?.Version,
+                DownloadableUpdate = latestUpdate?.DownloadableUpdate,
+                IsLatestUpdateChecked = true,
+            };
+
+        //インストール済みの外部サイトのUpdaterでダウンロードできればそれを使い、できなければGitHubのリリースで公開されているときだけGitHubから取る。
+        //Updaterの確認が終わる前にGitHubから取らせないよう、確認が終わるまではGitHubのボタンを出さない
+        public static bool CanDownloadFromGitHub(PluginCatalogItem? plugin, PluginUpdateStatus? status) =>
+            status?.DownloadableUpdate is null
+            && FindGitHubRepositoryUrl(plugin) is not null
+            && (status?.PageUrl is null || (status.IsLatestUpdateChecked && status.HasGitHubRelease));
 
         public static bool TryParseGitHubRepository(
             string? url,

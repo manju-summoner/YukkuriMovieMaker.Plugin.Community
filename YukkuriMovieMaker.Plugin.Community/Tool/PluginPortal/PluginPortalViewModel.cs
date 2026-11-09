@@ -36,6 +36,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                     ((ActionCommand)DownloadCommand).RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(SelectedPluginTypeText));
                     OnPropertyChanged(nameof(SelectedPluginStatus));
+                    OnPropertyChanged(nameof(IsSelectedPluginDownloadableFromUpdater));
                     OnPropertyChanged(nameof(IsSelectedPluginOnGitHub));
                     OnPropertyChanged(nameof(IsSelectedPluginOnOtherSite));
                     OnPropertyChanged(nameof(SelectedPluginPageUrl));
@@ -56,6 +57,7 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                     updateAvailableFilter?.Count = value.Values.Count(s => s.HasUpdate);
                     ((ActionCommand)DownloadCommand).RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(SelectedPluginStatus));
+                    OnPropertyChanged(nameof(IsSelectedPluginDownloadableFromUpdater));
                     OnPropertyChanged(nameof(IsSelectedPluginOnGitHub));
                     OnPropertyChanged(nameof(IsSelectedPluginOnOtherSite));
                     OnPropertyChanged(nameof(SelectedPluginPageUrl));
@@ -73,11 +75,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
         public PluginUpdateStatus? SelectedPluginStatus =>
             SelectedPlugin is null ? null : UpdateStatuses.GetValueOrDefault(SelectedPlugin);
 
+        public bool IsSelectedPluginDownloadableFromUpdater =>
+            SelectedPluginStatus?.DownloadableUpdate is not null;
+
         public bool IsSelectedPluginOnGitHub =>
-            PluginUpdateChecker.IsDistributedOnGitHub(SelectedPlugin, SelectedPluginStatus);
+            PluginUpdateChecker.CanDownloadFromGitHub(SelectedPlugin, SelectedPluginStatus);
 
         public bool IsSelectedPluginOnOtherSite =>
-            SelectedPlugin is not null && !IsSelectedPluginOnGitHub && !string.IsNullOrEmpty(SelectedPluginPageUrl);
+            SelectedPlugin is not null && !IsSelectedPluginDownloadableFromUpdater && !IsSelectedPluginOnGitHub && !string.IsNullOrEmpty(SelectedPluginPageUrl);
 
         public string? SelectedPluginPageUrl =>
             SelectedPluginStatus?.PageUrl ?? SelectedPlugin?.Url;
@@ -121,8 +126,14 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             Task.Run(LoadPluginsAsync);
 
             DownloadCommand = new ActionCommand(
-                _ => IsSelectedPluginOnGitHub,
-                async _ => await DownloadPluginAsync());
+                _ => IsSelectedPluginDownloadableFromUpdater || IsSelectedPluginOnGitHub,
+                async _ =>
+                {
+                    if (SelectedPluginStatus?.DownloadableUpdate is { } update)
+                        await DownloadFromUpdaterAsync(update);
+                    else
+                        await DownloadPluginAsync();
+                });
 
             InstallLocalCommand = new ActionCommand(
                 _ => IsInstallReady,
@@ -176,15 +187,15 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
                 if (otherSiteUpdaters.Count > 0)
                 {
                     var results = await Task.WhenAll(otherSiteUpdaters.Select(async x =>
-                        (x.Plugin, LatestVersion: await PluginPortalDataCache.GetLatestVersionAsync(x.Updater))));
+                        (x.Plugin, LatestUpdate: await PluginPortalDataCache.GetLatestUpdateAsync(x.Updater))));
 
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         var updated = new Dictionary<PluginCatalogItem, PluginUpdateStatus>(UpdateStatuses);
-                        foreach (var (plugin, latestVersion) in results)
+                        foreach (var (plugin, latestUpdate) in results)
                         {
                             if (updated.TryGetValue(plugin, out var status))
-                                updated[plugin] = status with { LatestVersion = latestVersion };
+                                updated[plugin] = PluginUpdateChecker.WithLatestUpdate(status, latestUpdate);
                         }
                         UpdateStatuses = updated;
                         ApplyFilter();
@@ -239,6 +250,45 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
             else
             {
                 SelectedPlugin = Plugins.FirstOrDefault();
+            }
+        }
+
+        private async Task DownloadFromUpdaterAsync(IPluginUpdateInfo update)
+        {
+            //Updaterは保存先へ直接書き込むことがあり、途中で失敗した不完全なファイルをインストールの対象に残さないため、別のフォルダーに落としてから移す
+            var downloadDir = Path.Combine(AppDirectories.TemporaryDirectory, "plugin-downloads", Guid.NewGuid().ToString("N"));
+            try
+            {
+                StatusMessage = string.Format(Texts.DownloadingFile, update.DisplayName);
+                Directory.CreateDirectory(downloadDir);
+                var downloadedPath = await Task.Run(() => update.DownloadAsync(downloadDir, new ProgressMessage(), CancellationToken.None));
+                if (string.IsNullOrEmpty(downloadedPath)
+                    || !File.Exists(downloadedPath)
+                    || !string.Equals(Path.GetDirectoryName(Path.GetFullPath(downloadedPath)), Path.GetFullPath(downloadDir), StringComparison.OrdinalIgnoreCase)
+                    || !string.Equals(Path.GetExtension(downloadedPath), ".ymme", StringComparison.OrdinalIgnoreCase))
+                {
+                    StatusMessage = Texts.NoYmmeFileFoundInTheLatestRelease;
+                    return;
+                }
+                var fileName = Path.GetFileName(downloadedPath);
+                File.Move(downloadedPath, Path.Combine(tempPluginsDir, fileName), true);
+                UpdateInstallReadyState();
+                StatusMessage = string.Format(Texts.DownloadCompleted, fileName);
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = string.Format(Texts.ErrorMessage, ex.Message);
+            }
+            finally
+            {
+                try
+                {
+                    Directory.Delete(downloadDir, true);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Failed to delete plugin download directory: {ex.Message}");
+                }
             }
         }
 

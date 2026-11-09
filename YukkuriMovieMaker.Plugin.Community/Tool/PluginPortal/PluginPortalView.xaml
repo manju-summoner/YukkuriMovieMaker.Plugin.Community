@@ -192,6 +192,8 @@
 
             <StackPanel Grid.Row="1">
                 <TextBlock Text="{Binding StatusMessage}" Margin="10,0"/>
+                <Button Content="{x:Static local:Texts.Download}" Command="{Binding DownloadCommand}" Height="25"
+                        Visibility="{Binding IsSelectedPluginDownloadableFromUpdater, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                 <Button Content="{x:Static local:Texts.DownloadFromGitHub}" Command="{Binding DownloadCommand}" Height="25"
                         Visibility="{Binding IsSelectedPluginOnGitHub, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                 <Button Content="{x:Static local:Texts.OpenWebsite}" Height="25"
