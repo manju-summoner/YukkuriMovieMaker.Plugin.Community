@@ -229,6 +229,13 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
                 return string.Empty;
 
             var text = url.Trim().ToLowerInvariant();
+
+            //BOOTHの商品ページは https://<ショップ>.booth.pm/items/<ID> と https://booth.pm/ja/items/<ID> のどちらでも書けるため、商品のIDで突き合わせる
+            if (Uri.TryCreate(text, UriKind.Absolute, out var uri)
+                && (uri.Host == "booth.pm" || uri.Host.EndsWith(".booth.pm", StringComparison.Ordinal))
+                && BoothItemPathRegex().Match(uri.AbsolutePath) is { Success: true } boothItem)
+                return $"booth.pm/items/{boothItem.Groups[1].Value}";
+
             foreach (var scheme in new[] { "https://", "http://" })
             {
                 if (text.StartsWith(scheme, StringComparison.Ordinal))
@@ -244,5 +251,8 @@ namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal.Model
 
         [GeneratedRegex(@"\d+(\.\d+){1,3}(-[^\s]+)?")]
         private static partial Regex VersionRegex();
+
+        [GeneratedRegex(@"^/(?:[^/]+/)?items/(\d+)/?$")]
+        private static partial Regex BoothItemPathRegex();
     }
 }
