@@ -9,6 +9,15 @@ IsEnabled,,配布終了,Discontinued,已停止分发,已停止發佈,배포 종�
 DownloadFromGitHub,,GitHubからダウンロード,Download from GitHub,从GitHub下载,從GitHub下載,GitHub에서 다운로드,Descargar desde GitHub,التنزيل من GitHub,Unduh dari GitHub,
 Search,,検索,Search,搜索,搜尋,검색,Buscar,بحث,Cari,
 InstallDownloaded,,ダウンロード済みをインストール,Install Downloaded,安装已下载,安裝已下載,다운로드한 항목 설치,Instalar descargado,تثبيت الذي تم تنزيله,Pasang yang sudah Diunduh,
+CurrentVersion,,現在のバージョン,Current version,当前版本,目前版本,현재 버전,Versión actual,الإصدار الحالي,Versi saat ini,
+LatestVersion,,最新のバージョン,Latest version,最新版本,最新版本,최신 버전,Última versión,أحدث إصدار,Versi terbaru,
+UpdateAvailable,,更新あり,Update available,有可用更新,有可用更新,업데이트 있음,Actualización disponible,يتوفر تحديث,Pembaruan tersedia,
+OpenWebsite,,配布ページを開く,Open website,打开发布页面,打開發佈頁面,배포 페이지 열기,Abrir página de distribución,فتح صفحة التوزيع,Buka halaman distribusi,
+IsCheckUpdatesOnStartup,,起動時にプラグインの更新を確認する,Check for plugin updates on startup,启动时检查插件更新,啟動時檢查外掛程式更新,시작 시 플러그인 업데이트 확인,Buscar actualizaciones de complementos al iniciar,التحقق من تحديثات الإضافات عند بدء التشغيل,Periksa pembaruan plugin saat memulai,
+IsNotifyEveryStartup,,同じバージョンの更新も起動のたびに通知する,Notify about the same update on every startup,每次启动时都通知相同版本的更新,每次啟動時都通知相同版本的更新,같은 버전의 업데이트도 시작할 때마다 알림,Notificar la misma actualización en cada inicio,الإشعار بالتحديث نفسه عند كل بدء تشغيل,Beri tahu pembaruan yang sama setiap kali memulai,
+PluginUpdatesAvailable,,プラグインの更新があります,Plugin updates are available,有可用的插件更新,有可用的外掛程式更新,플러그인 업데이트가 있습니다,Hay actualizaciones de complementos disponibles,تتوفر تحديثات للإضافات,Pembaruan plugin tersedia,
+OpenPluginPortal,,プラグインポータルを開く,Open Plugin Portal,打开插件门户站,開啟插件入口,플러그인 포털 열기,Abrir Portal de complementos,فتح بوابة الإضافات,Buka Portal Plugin,
+Close,,閉じる,Close,关闭,關閉,닫기,Cerrar,إغلاق,Tutup,
 
 InvalidGitHubURL,,無効なGitHub URLです。,Invalid GitHub URL,无效的GitHub URL,無效的GitHub URL,잘못된 GitHub URL,URL de GitHub no válido,رابط GitHub غير صالح,URL GitHub tidak valid,
 FetchingLatestRelease,,最新のリリースを取得中...,Fetching latest release...,最新版本获取中……,正在取得最新版本...,최신 릴리스 가져오는 중...,Obteniendo la última versión...,جاري جلب الإصدار الأخير...,Mengambil rilis terbaru...,
@@ -34,3 +43,4 @@ Cancel,,キャンセル,Cancel,取消,取消,취소,Cancelar,إلغاء,Batalkan
 
 IsCleanYmmeFile,,インストール後に .ymme を削除する,Delete .ymme file after installation,安装后删除 .ymme 文件,.ymme 檔案安裝後刪除,설치 후 .ymme 파일 삭제,Eliminar archivo .ymme después de la instalación,حذف ملف .ymme بعد التثبيت,Hapus file .ymme setelah instalasi,
 YmmeFilePath,,.ymme の保存先,.ymme file path,.ymme文件保存位置,.ymme 檔案路徑,.ymme 파일 경로,Ruta del archivo .ymme,مسار ملف .ymme,Jalur berkas .ymme,
+Download,,ダウンロード,Download,下载,下載,다운로드,Descargar,تنزيل,Unduh,

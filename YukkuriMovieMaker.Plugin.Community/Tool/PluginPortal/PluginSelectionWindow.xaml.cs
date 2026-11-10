@@ -4,9 +4,6 @@ using YukkuriMovieMaker.Commons;
 
 namespace YukkuriMovieMaker.Plugin.Community.Tool.PluginPortal
 {
-    /// <summary>
-    /// PluginSelectionWindow.xaml の相互作用ロジック
-    /// </summary>
     public partial class PluginSelectionWindow : Window
     {
         public IEnumerable<string> SelectedFiles { get; private set; } = [];
