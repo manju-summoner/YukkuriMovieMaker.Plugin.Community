@@ -10,6 +10,9 @@
         mc:Ignorable="d"
         Title="{x:Static local:Texts.PenToolWindowTitle}" Height="450" Width="800"
         d:DataContext="{d:DesignInstance Type={x:Type local:PenToolViewModel}}">
+    <Window.Style>
+        <Style TargetType="Window" BasedOn="{StaticResource {x:Type Window}}"/>
+    </Window.Style>
     <Window.InputBindings>
         <KeyBinding Modifiers="Ctrl" Key="Z" Command="{Binding UndoCommand}"/>
         <KeyBinding Modifiers="Ctrl" Key="Y" Command="{Binding RedoCommand}"/>
